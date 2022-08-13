@@ -1,0 +1,4 @@
+{
+	"extends": "@luke-ui-internal/tsconfig/base.json",
+	"include": ["."]
+}

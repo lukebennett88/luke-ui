@@ -1,0 +1,5 @@
+{
+	"extends": "@luke-ui-internal/tsconfig/react-library.json",
+	"include": ["."],
+	"exclude": ["dist", "build", "node_modules"]
+}

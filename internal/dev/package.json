@@ -1,0 +1,14 @@
+{
+	"name": "@luke-ui-internal/dev",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {},
+	"dependencies": {},
+	"devDependencies": {
+		"@luke-ui-internal/tsconfig": "workspace:*",
+		"tsup": "^6.2.1"
+	},
+	"peerDependencies": {
+		"tsup": "^6.2.1"
+	}
+}

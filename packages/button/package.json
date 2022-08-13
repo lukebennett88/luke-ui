@@ -1,0 +1,33 @@
+{
+	"name": "@luke-ui/button",
+	"version": "0.0.0",
+	"license": "MIT",
+	"sideEffects": false,
+	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist/**"
+	],
+	"scripts": {
+		"build": "tsup",
+		"clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+		"dev": "tsup --watch --dts --external react",
+		"lint": "TIMING=1 eslint src"
+	},
+	"devDependencies": {
+		"@luke-ui-internal/dev": "workspace:*",
+		"@luke-ui-internal/tsconfig": "workspace:*",
+		"@types/react": "^17.0.47",
+		"@types/react-dom": "^17.0.11",
+		"react": "^17.0.2",
+		"typescript": "^4.5.3"
+	},
+	"peerDependencies": {
+		"react": "^16.8.0 || 17.x",
+		"react-dom": "^16.8.0 || 17.x"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
