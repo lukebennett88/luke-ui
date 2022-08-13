@@ -3,10 +3,9 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {},
-	"dependencies": {},
 	"devDependencies": {
 		"@luke-ui-internal/tsconfig": "workspace:*",
-		"tsup": "^6.2.1"
+		"tsup": "^6.2.2"
 	},
 	"peerDependencies": {
 		"tsup": "^6.2.1"
