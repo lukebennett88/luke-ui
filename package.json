@@ -4,13 +4,17 @@
 	"private": true,
 	"scripts": {
 		"build": "turbo run build",
+		"build:docs": "turbo run build --filter=docs",
 		"build:packages": "turbo run build --filter=@luke-ui/*",
+		"changeset": "changeset",
 		"clean": "git clean -fXd",
-		"new:package": "plop --plopfile scripts/plopfile.mjs",
 		"dev": "turbo run dev --parallel",
 		"format": "prettier --write \"**/*.{js,json,md,mjs,ts,tsx}\"",
 		"fresh": "pnpm run clean && pnpm install",
-		"lint": "turbo run lint"
+		"lint": "turbo run lint",
+		"new:package": "plop --plopfile scripts/plopfile.mjs",
+		"release": "turbo run build --filter=docs^... && changeset publish",
+		"version:packages": "changeset version"
 	},
 	"prettier": {
 		"quoteProps": "consistent",
@@ -19,6 +23,7 @@
 		"useTabs": true
 	},
 	"dependencies": {
+		"@changesets/cli": "^2.24.2",
 		"@types/eslint": "^8.4.5",
 		"eslint": "^8.21.0",
 		"eslint-config-luke-ui": "workspace:*",
