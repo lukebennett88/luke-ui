@@ -1,0 +1,32 @@
+/// <reference types="vitest-axe/extend-expect" />
+/// <reference types="vitest-dom/extend-expect" />
+
+import { cleanup, render } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { axe } from 'vitest-axe';
+
+import type { {{componentName}}Props } from '../src';
+import { {{componentName}} } from '../src';
+
+afterEach(cleanup);
+
+describe('{{componentName}}', () => {
+	it('Should not have ARIA violations after render', async () => {
+		vi.useRealTimers();
+		const { container } = render{{componentName}}();
+		const results = await axe(container);
+		expect(results).toHaveNoViolations();
+	});
+});
+
+////////////////////////////////////////////////////////////////////////////////
+
+/** Helpers */
+
+function Test{{componentName}}(props?: any) {
+	return <{{componentName}} {...props} />;
+}
+
+function render{{componentName}}(props?: Partial<{{componentName}}Props>) {
+	return render(<Test{{componentName}} {...props} />);
+}
