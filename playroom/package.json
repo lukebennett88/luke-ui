@@ -1,0 +1,21 @@
+{
+	"name": "playroom",
+	"version": "0.0.0",
+	"private": true,
+	"license": "MIT",
+	"scripts": {
+		"build": "playroom build",
+		"clean": "rm -rf .turbo && rm -rf node_modules && rm -rf ../docs/public/playroom",
+		"dev": "playroom start",
+		"lint": "TIMING=1 eslint src"
+	},
+	"dependencies": {
+		"@luke-ui/button": "workspace:*"
+	},
+	"devDependencies": {
+		"@luke-ui-internal/tsconfig": "workspace:*",
+		"playroom": "^0.28.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
+	}
+}

@@ -12,5 +12,6 @@
 /packages/*/dist
 build
 coverage
+docs/public/playroom
 node_modules
 out

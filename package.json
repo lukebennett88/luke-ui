@@ -25,6 +25,7 @@
 	},
 	"dependencies": {
 		"@changesets/cli": "^2.24.2",
+		"@testing-library/dom": "^8.17.1",
 		"@testing-library/react": "^13.3.0",
 		"@testing-library/user-event": "^14.4.3",
 		"@types/eslint": "^8.4.5",
@@ -46,10 +47,10 @@
 	},
 	"packageManager": "pnpm@7.8.0",
 	"engines": {
-		"node": ">=18.0.0",
+		"node": ">=16.0.0",
 		"npm": ">=8.0.0"
 	},
 	"volta": {
-		"node": "18.7.0"
+		"node": "16.16.0"
 	}
 }
