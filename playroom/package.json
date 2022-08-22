@@ -5,9 +5,12 @@
 	"license": "MIT",
 	"scripts": {
 		"build": "playroom build",
+		"check:lint": "TIMING=1 pnpm eslint",
+		"check:types": "tsc --noEmit",
 		"clean": "rm -rf .turbo && rm -rf node_modules && rm -rf ../docs/public/playroom",
 		"dev": "playroom start",
-		"lint": "TIMING=1 eslint src"
+		"eslint": "eslint src",
+		"lint": "TIMING=1 pnpm eslint --fix"
 	},
 	"dependencies": {
 		"@luke-ui/button": "workspace:*"

@@ -12,7 +12,8 @@
 /packages/*/dist
 build
 coverage
-docs/public/playroom
 docs/public/ladle
+docs/public/playroom
 node_modules
 out
+tsconfig.tsbuildinfo

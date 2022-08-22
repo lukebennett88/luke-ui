@@ -2,7 +2,11 @@
 	"name": "@luke-ui-internal/dev",
 	"version": "0.0.1",
 	"private": true,
-	"scripts": {},
+	"scripts": {
+		"check:lint": "TIMING=1 eslint .",
+		"check:types": "tsc --noEmit",
+		"lint": "TIMING=1 eslint . --fix"
+	},
 	"devDependencies": {
 		"@luke-ui-internal/tsconfig": "workspace:*",
 		"tsup": "^6.2.2"

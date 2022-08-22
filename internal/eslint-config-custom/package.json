@@ -5,9 +5,14 @@
 	"sideEffects": false,
 	"type": "commonjs",
 	"main": "index.js",
+	"scripts": {
+		"check:lint": "TIMING=1 pnpm eslint",
+		"eslint": "eslint .",
+		"lint": "TIMING=1 pnpm eslint --fix"
+	},
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.33.0",
-		"@typescript-eslint/parser": "^5.33.0",
+		"@typescript-eslint/eslint-plugin": "^5.33.1",
+		"@typescript-eslint/parser": "^5.33.1",
 		"eslint": "^8.22.0",
 		"eslint-config-next": "^12.2.5",
 		"eslint-config-prettier": "^8.5.0",

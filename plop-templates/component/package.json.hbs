@@ -11,14 +11,17 @@
 	],
 	"scripts": {
 		"build": "tsup",
+		"check:lint": "TIMING=1 pnpm eslint",
+		"check:types": "tsc --noEmit",
 		"clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
 		"dev": "tsup --watch --dts --external react",
-		"lint": "TIMING=1 eslint src"
+		"eslint": "eslint src",
+		"lint": "TIMING=1 pnpm eslint --fix"
 	},
 	"devDependencies": {
 		"@luke-ui-internal/dev": "workspace:*",
 		"@luke-ui-internal/tsconfig": "workspace:*",
-		"@types/node": "^18.7.3",
+		"@types/node": "^16.11.52",
 		"@types/react": "^18.0.17",
 		"@types/react-dom": "^18.0.6",
 		"react": "^18.2.0",

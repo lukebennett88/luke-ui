@@ -1,12 +1,4 @@
 {
 	"extends": "@luke-ui-internal/tsconfig/react-library.json",
-	"compilerOptions": {
-		"baseUrl": "./",
-		"jsx": "react",
-		"paths": {
-			"degen/*": ["../components/src/*"]
-		},
-		"types": ["@types/webpack-env"]
-	},
 	"include": ["src"]
 }
