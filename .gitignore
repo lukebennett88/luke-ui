@@ -13,5 +13,6 @@
 build
 coverage
 docs/public/playroom
+docs/public/ladle
 node_modules
 out

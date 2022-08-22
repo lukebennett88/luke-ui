@@ -1,0 +1,20 @@
+{
+	"name": "ladle",
+	"version": "0.0.0",
+	"private": true,
+	"license": "MIT",
+	"scripts": {
+		"dev": "ladle serve --port 4123",
+		"build": "ladle build",
+		"preview": "ladle preview"
+	},
+	"dependencies": {
+		"@ladle/react": "^2.1.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0"
+	},
+	"devDependencies": {
+		"@types/react": "^18.0.17",
+		"@types/react-dom": "^18.0.6"
+	}
+}

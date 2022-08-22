@@ -1,5 +1,6 @@
 packages:
   - 'docs'
+  - 'ladle'
   - 'playroom'
   - 'internal/*'
   - 'packages/*'

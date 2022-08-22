@@ -1,0 +1,12 @@
+import type { Story } from '@ladle/react';
+
+import type { {{componentName}}Props } from '../src';
+import { {{componentName}} } from '../src';
+
+export const Controls: Story<{{componentName}}Props> = (props) => {
+	return <{{componentName}} {...props} />;
+};
+
+Controls.args = {
+	children: 'Hello world',
+} as {{componentName}}Props;
