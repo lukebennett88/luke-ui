@@ -7,5 +7,9 @@
 	"access": "public",
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",
-	"ignore": ["docs"]
+	"ignore": [
+		"@luke-ui-internal/docs",
+		"@luke-ui-internal/playroom",
+		"@luke-ui-internal/ladle"
+	]
 }

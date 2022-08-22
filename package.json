@@ -7,15 +7,15 @@
 		"build:docs": "turbo run build --filter=docs",
 		"build:packages": "turbo run build --filter=@luke-ui/*",
 		"changeset": "changeset",
+		"ci:publish": "turbo run build --filter=docs^... && changeset publish",
+		"ci:version": "changeset version",
 		"clean": "git clean -fXd",
 		"dev": "turbo run dev --parallel",
 		"format": "prettier --write \"**/*.{js,json,md,mjs,ts,tsx}\"",
 		"fresh": "pnpm run clean && pnpm install",
 		"lint": "turbo run lint",
 		"new:package": "plop --plopfile scripts/plopfile.mjs",
-		"release": "turbo run build --filter=docs^... && changeset publish",
-		"test": "vitest",
-		"version:packages": "changeset version"
+		"test": "vitest"
 	},
 	"prettier": {
 		"quoteProps": "consistent",
