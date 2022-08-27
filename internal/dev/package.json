@@ -9,7 +9,7 @@
 	},
 	"devDependencies": {
 		"@luke-ui-internal/tsconfig": "workspace:*",
-		"tsup": "^6.2.2"
+		"tsup": "^6.2.3"
 	},
 	"peerDependencies": {
 		"tsup": "^6.2.2"
