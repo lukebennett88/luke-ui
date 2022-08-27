@@ -106,7 +106,8 @@ module.exports = {
 	},
 	overrides: [
 		{
-			files: ['**/*.{ts,tsx}'],
+			files: ['*.ts', '*.tsx'],
+			extends: ['plugin:@typescript-eslint/recommended'],
 			rules: {
 				// TypeScript already checks for the following things and they cause conflicts
 				'import/no-unresolved': OFF,
