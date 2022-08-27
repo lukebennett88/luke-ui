@@ -36,12 +36,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Create release pull request or publish to npm
-        uses: changesets/action@v1
-        with:
-          version: pnpm ci:version
-          # This expects you to have a script called release which does a build for your packages and calls changeset publish
-          publish: pnpm ci:publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # - name: Create release pull request or publish to npm
+      #   uses: changesets/action@v1
+      #   with:
+      #     version: pnpm ci:version
+      #     # This expects you to have a script called release which does a build for your packages and calls changeset publish
+      #     publish: pnpm ci:publish
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
