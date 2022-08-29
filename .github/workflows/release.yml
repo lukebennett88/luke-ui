@@ -5,43 +5,37 @@ on:
     branches:
       - main
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
-
-env:
-  CI: true
-  PNPM_CACHE_FOLDER: .pnpm-store
-
 jobs:
-  version:
-    name: Release
-    timeout-minutes: 15
+  release:
+    name: Publish & Deploy
     runs-on: ubuntu-latest
+    env:
+      CI: true
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 7.9.5
+
+      - name: Checkout Repo
+        uses: actions/checkout@main
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup node.js 16.x
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@main
         with:
-          node-version: 16.x
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
 
-      - name: install pnpm
-        run: npm i pnpm@latest -g
-
-      - name: Setup pnpm config
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pnpm install
 
-      # - name: Create release pull request or publish to npm
-      #   uses: changesets/action@v1
-      #   with:
-      #     version: pnpm ci:version
-      #     # This expects you to have a script called release which does a build for your packages and calls changeset publish
-      #     publish: pnpm ci:publish
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create release PR or publish to npm
+        uses: changesets/action@c2918239208f2162b9d27a87f491375c51592434
+        with:
+          version: pnpm run ci:version
+          publish: pnpm ci:release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
