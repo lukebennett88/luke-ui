@@ -35,7 +35,7 @@ jobs:
         uses: changesets/action@c2918239208f2162b9d27a87f491375c51592434
         with:
           version: pnpm run ci:version
-          publish: pnpm ci:release
+          publish: pnpm ci:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
