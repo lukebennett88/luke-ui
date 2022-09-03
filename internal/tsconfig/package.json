@@ -2,10 +2,8 @@
 	"name": "@luke-ui-internal/tsconfig",
 	"version": "0.0.1",
 	"private": true,
-	"main": "index.js",
-	"files": [
-		"base.json",
-		"nextjs.json",
-		"react-library.json"
-	]
+	"license": "MIT",
+	"publishConfig": {
+		"access": "public"
+	}
 }
