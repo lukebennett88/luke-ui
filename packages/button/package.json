@@ -1,13 +1,21 @@
 {
 	"name": "@luke-ui/button",
 	"version": "0.0.1",
+	"homepage": "https://github.com/owner/project#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukebennett88/luke-ui.git",
+		"directory": "packages/button"
+	},
 	"license": "MIT",
 	"sideEffects": false,
-	"main": "./dist/index.js",
-	"module": "./dist/index.mjs",
-	"types": "./dist/index.d.ts",
+	"main": "index.js",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
 	"files": [
-		"dist/**"
+		"dist",
+		"CHANGELOG.md",
+		"README.md"
 	],
 	"scripts": {
 		"build": "tsup",

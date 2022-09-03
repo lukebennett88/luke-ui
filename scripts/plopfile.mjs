@@ -1,15 +1,6 @@
 export default function newPackage(plop) {
-	const currentYear = new Date(Date.now()).getUTCFullYear();
-	plop.setHelper('currentYear', () => currentYear);
-
-	plop.setHelper('replace', function (match, replacement, options) {
-		const string = options.fn(this);
-		return string.replace(match, replacement);
-	});
-
-	plop.setHelper('includes', function (array, string) {
-		return array.includes(string);
-	});
+	plop.setHelper('repository', 'https://github.com/lukebennett88');
+	plop.setHelper('website', 'https://luke-ui.vercel.app');
 
 	// controller generator
 	plop.setGenerator('component', {
@@ -18,14 +9,14 @@ export default function newPackage(plop) {
 			{
 				type: 'input',
 				name: 'packageName',
-				message: 'package name, all lowercase (e.g. textfield)',
+				message: 'package name, all lowercase (e.g. button)',
 				validate: (answer) => answer.length > 0,
 			},
 			{
 				type: 'input',
 				name: 'componentName',
 				message:
-					'component name, please use appropriate uppercase (e.g. TextField)',
+					'component name, please use appropriate uppercase (e.g. Button)',
 				validate: (answer) => answer.length > 0,
 			},
 		],
