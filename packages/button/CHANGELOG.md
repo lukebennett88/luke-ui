@@ -1,5 +1,11 @@
 # @luke-ui/button
 
+## 0.1.1
+
+### Patch Changes
+
+- [`d97d5a8`](https://github.com/lukebennett88/luke-ui/commit/d97d5a8334247c7ae12b8dfe7c996f1bbbd0ef63) Thanks [@lukebennett88](https://github.com/lukebennett88)! - Update homepage field in package.json
+
 ## 0.1.0
 
 ### Minor Changes
