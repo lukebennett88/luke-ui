@@ -5,3 +5,4 @@ internal/*/dist
 node_modules
 packages/*/dist
 plop-templates
+pnpm-lock.yaml
