@@ -12,7 +12,8 @@
 	"updateInternalDependencies": "patch",
 	"ignore": [
 		"@luke-ui-internal/docs",
+		"@luke-ui-internal/ladle",
 		"@luke-ui-internal/playroom",
-		"@luke-ui-internal/ladle"
+		"@luke-ui-internal/tsconfig"
 	]
 }
