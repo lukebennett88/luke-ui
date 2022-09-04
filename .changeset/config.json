@@ -11,6 +11,7 @@
 	"baseBranch": "main",
 	"updateInternalDependencies": "patch",
 	"ignore": [
+		"@luke-ui-internal/dev",
 		"@luke-ui-internal/docs",
 		"@luke-ui-internal/ladle",
 		"@luke-ui-internal/playroom",
