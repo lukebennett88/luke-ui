@@ -1,11 +1,11 @@
 {
-	"name": "@luke-ui/button",
-	"version": "0.1.2",
-	"homepage": "https://github.com/lukebennett88/luke-ui#readme",
+	"name": "@luke-ui-internal/docs",
+	"version": "0.0.0",
+	"homepage": "https://github.com/lukebennett88#readme",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/lukebennett88/luke-ui.git",
-		"directory": "packages/button"
+		"url": "git+https://github.com/lukebennett88.git",
+		"directory": "packages/docs"
 	},
 	"license": "MIT",
 	"author": "Luke Bennett <hello@lukebennett.com.au>",
@@ -29,12 +29,9 @@
 		"eslint": "eslint src",
 		"lint": "TIMING=1 pnpm eslint --fix"
 	},
-	"dependencies": {
-		"@react-aria/button": "^3.6.1"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"@luke-ui-internal/dev": "workspace:*",
-		"@luke-ui-internal/docs": "workspace:*",
 		"@luke-ui-internal/tsconfig": "workspace:*",
 		"@types/node": "^16.11.52",
 		"@types/react": "^18.0.18",

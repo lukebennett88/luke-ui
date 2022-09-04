@@ -1,5 +1,5 @@
 {
-	"name": "@luke-ui-internal/docs",
+	"name": "luke-ui-docs",
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"@luke-ui/button": "workspace:*",
+		"emery": "^1.4.1",
 		"next": "^12.2.5",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
