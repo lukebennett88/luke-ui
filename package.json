@@ -26,6 +26,7 @@
 		"validate": "npm-run-all --parallel check:*"
 	},
 	"prettier": {
+		"proseWrap": "always",
 		"quoteProps": "consistent",
 		"singleQuote": true,
 		"tabWidth": 2,
