@@ -1,8 +1,14 @@
 {
 	"name": "@luke-ui-internal/tsconfig",
 	"version": "0.0.1",
-	"private": true,
+	"homepage": "https://github.com/lukebennett88/luke-ui#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukebennett88/luke-ui.git",
+		"directory": "internal/tsconfig"
+	},
 	"license": "MIT",
+	"author": "Luke Bennett <hello@lukebennett.com.au>",
 	"publishConfig": {
 		"access": "public"
 	}

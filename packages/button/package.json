@@ -8,13 +8,16 @@
 		"directory": "packages/button"
 	},
 	"license": "MIT",
+	"author": "Luke Bennett <hello@lukebennett.com.au>",
 	"sideEffects": false,
 	"main": "index.js",
 	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",
 	"files": [
-		"dist",
 		"CHANGELOG.md",
+		"dist",
+		"index.js",
+		"LICENSE",
 		"README.md"
 	],
 	"scripts": {
