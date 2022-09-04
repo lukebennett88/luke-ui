@@ -12,6 +12,7 @@ importers:
       '@testing-library/user-event': ^14.4.3
       '@types/eslint': ^8.4.6
       '@vitejs/plugin-react': ^2.0.1
+      chalk: ^5.0.1
       eslint: ^8.23.0
       eslint-config-luke-ui: workspace:*
       happy-dom: ^6.0.4
@@ -36,6 +37,7 @@ importers:
       '@testing-library/user-event': 14.4.3_wl4iynrlixafokvgqnhzlvigei
       '@types/eslint': 8.4.6
       '@vitejs/plugin-react': 2.0.1_vite@3.0.9
+      chalk: 5.0.1
       eslint: 8.23.0
       eslint-config-luke-ui: link:internal/eslint-config-luke-ui
       happy-dom: 6.0.4

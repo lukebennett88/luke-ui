@@ -2,6 +2,14 @@
 	"name": "@luke-ui-internal/dev",
 	"version": "0.0.1",
 	"private": true,
+	"homepage": "https://github.com/lukebennett88/luke-ui#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukebennett88/luke-ui.git",
+		"directory": "internal/dev"
+	},
+	"license": "MIT",
+	"author": "Luke Bennett <hello@lukebennett.com.au>",
 	"scripts": {
 		"check:lint": "TIMING=1 eslint .",
 		"check:types": "tsc --noEmit",

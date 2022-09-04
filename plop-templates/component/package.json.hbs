@@ -8,13 +8,16 @@
 		"directory": "packages/{{packageName}}"
 	},
 	"license": "MIT",
+	"author": "{{authorName}} <{{authorEmail}}>",
 	"sideEffects": false,
 	"main": "index.js",
 	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",
 	"files": [
-		"dist",
 		"CHANGELOG.md",
+		"dist",
+		"index.js",
+		"LICENSE",
 		"README.md"
 	],
 	"scripts": {
@@ -34,6 +37,7 @@
 		"@types/react": "^18.0.18",
 		"@types/react-dom": "^18.0.6",
 		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
 		"typescript": "^4.8.2"
 	},
 	"peerDependencies": {

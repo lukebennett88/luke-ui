@@ -5,9 +5,6 @@ type TsupConfig = ReturnType<typeof defineConfig>;
 
 const packageInfo = getPackageInfo(__dirname);
 
-const tsupConfig: TsupConfig = getTsupConfig('src/index.ts', {
-	packageName: packageInfo.name,
-	packageVersion: packageInfo.version,
-});
+const tsupConfig: TsupConfig = getTsupConfig('src/index.ts', packageInfo);
 
 export default tsupConfig;

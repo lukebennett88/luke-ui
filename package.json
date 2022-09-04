@@ -2,6 +2,7 @@
 	"name": "luke-ui",
 	"version": "0.0.0",
 	"private": true,
+	"author": "Luke Bennett <hello@lukebennett.com.au>",
 	"scripts": {
 		"build": "turbo run build",
 		"build:docs": "turbo run build --filter=@luke-ui-internal/docs",
@@ -26,6 +27,7 @@
 		"validate": "npm-run-all --parallel check:*"
 	},
 	"prettier": {
+		"proseWrap": "always",
 		"quoteProps": "consistent",
 		"singleQuote": true,
 		"tabWidth": 2,
@@ -40,6 +42,7 @@
 		"@testing-library/user-event": "^14.4.3",
 		"@types/eslint": "^8.4.6",
 		"@vitejs/plugin-react": "^2.0.1",
+		"chalk": "^5.0.1",
 		"eslint": "^8.23.0",
 		"eslint-config-luke-ui": "workspace:*",
 		"happy-dom": "^6.0.4",

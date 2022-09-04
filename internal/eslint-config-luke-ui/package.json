@@ -1,10 +1,22 @@
 {
 	"name": "eslint-config-luke-ui",
 	"version": "0.0.1",
+	"homepage": "https://github.com/lukebennett88/luke-ui#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukebennett88/luke-ui.git",
+		"directory": "internal/eslint-config-luke-ui"
+	},
 	"license": "MIT",
+	"author": "Luke Bennett <hello@lukebennett.com.au>",
 	"sideEffects": false,
 	"type": "commonjs",
 	"main": "index.js",
+	"files": [
+		"CHANGELOG.md",
+		"index.js",
+		"LICENSE"
+	],
 	"scripts": {
 		"check:lint": "TIMING=1 pnpm eslint",
 		"eslint": "eslint .",
