@@ -4,6 +4,7 @@ importers:
 
   .:
     specifiers:
+      '@changesets/changelog-github': ^0.4.6
       '@changesets/cli': ^2.24.4
       '@ladle/react': ^2.4.2
       '@testing-library/dom': ^8.17.1
@@ -27,6 +28,7 @@ importers:
       vitest-axe: ^0.0.7
       vitest-dom: ^0.0.4
     dependencies:
+      '@changesets/changelog-github': 0.4.6
       '@changesets/cli': 2.24.4
       '@ladle/react': 2.4.2_biqbaboplfbrettd7655fr4n2y
       '@testing-library/dom': 8.17.1
@@ -2521,6 +2523,16 @@ packages:
       '@changesets/types': 5.1.0
     dev: false
 
+  /@changesets/changelog-github/0.4.6:
+    resolution: {integrity: sha512-ahR/+o3OPodzfG9kucEMU/tEtBgwy6QoJiWi1sDBPme8n3WjT6pBlbhqNYpWAJKilomwfjBGY0MTUTs6r9d1RQ==}
+    dependencies:
+      '@changesets/get-github-info': 0.5.1
+      '@changesets/types': 5.1.0
+      dotenv: 8.6.0
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
   /@changesets/cli/2.24.4:
     resolution: {integrity: sha512-87JSwMv38zS3QW3062jXZYLsCNRtA08wa7vt3VnMmkGLfUMn2TTSfD+eSGVnKPJ/ycDCvAcCDnrv/B+gSX5KVA==}
     hasBin: true
@@ -2586,6 +2598,15 @@ packages:
       chalk: 2.4.2
       fs-extra: 7.0.1
       semver: 5.7.1
+    dev: false
+
+  /@changesets/get-github-info/0.5.1:
+    resolution: {integrity: sha512-w2yl3AuG+hFuEEmT6j1zDlg7GQLM/J2UxTmk0uJBMdRqHni4zXGe/vUlPfLom5KfX3cRfHc0hzGvloDPjWFNZw==}
+    dependencies:
+      dataloader: 1.4.0
+      node-fetch: 2.6.7
+    transitivePeerDependencies:
+      - encoding
     dev: false
 
   /@changesets/get-release-plan/3.0.14:
@@ -4862,6 +4883,10 @@ packages:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
     dev: true
 
+  /dataloader/1.4.0:
+    resolution: {integrity: sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==}
+    dev: false
+
   /debug/2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     peerDependencies:
@@ -5099,6 +5124,11 @@ packages:
     dependencies:
       no-case: 3.0.4
       tslib: 2.4.0
+
+  /dotenv/8.6.0:
+    resolution: {integrity: sha512-IrPdXQsk2BbzvCBGBOTmmSH5SodmqZNt4ERAZDmW4CT+tL8VtvinqywuANaFu4bOMWki16nqf0e4oC0QIaDr/g==}
+    engines: {node: '>=10'}
+    dev: false
 
   /eastasianwidth/0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
