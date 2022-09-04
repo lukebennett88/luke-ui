@@ -1,5 +1,27 @@
 # @luke-ui/button
 
+## 0.1.2
+
+### Patch Changes
+
+- [#8](https://github.com/lukebennett88/luke-ui/pull/8)
+  [`98819fa`](https://github.com/lukebennett88/luke-ui/commit/98819fa5aabbe7f689a67e61ac8321257e431b33)
+  Thanks [@lukebennett88](https://github.com/lukebennett88)! - Add react-dom to
+  devDependencies
+
+- [#8](https://github.com/lukebennett88/luke-ui/pull/8)
+  [`98819fa`](https://github.com/lukebennett88/luke-ui/commit/98819fa5aabbe7f689a67e61ac8321257e431b33)
+  Thanks [@lukebennett88](https://github.com/lukebennett88)! - Update author and
+  files fields in package.json
+
+- [#8](https://github.com/lukebennett88/luke-ui/pull/8)
+  [`98819fa`](https://github.com/lukebennett88/luke-ui/commit/98819fa5aabbe7f689a67e61ac8321257e431b33)
+  Thanks [@lukebennett88](https://github.com/lukebennett88)! - Format index file
+
+- [#8](https://github.com/lukebennett88/luke-ui/pull/8)
+  [`98819fa`](https://github.com/lukebennett88/luke-ui/commit/98819fa5aabbe7f689a67e61ac8321257e431b33)
+  Thanks [@lukebennett88](https://github.com/lukebennett88)! - Update licensing
+
 ## 0.1.1
 
 ### Patch Changes
