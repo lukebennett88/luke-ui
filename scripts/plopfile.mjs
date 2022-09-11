@@ -6,6 +6,7 @@ export default function newPackage(
 ) {
 	plop.setHelper('authorName', () => 'Luke Bennett');
 	plop.setHelper('authorEmail', () => 'hello@lukebennett.com.au');
+	plop.setHelper('packageScope', () => '@luke-ui');
 	plop.setHelper('repository', () => 'https://github.com/lukebennett88');
 	plop.setHelper('website', () => 'https://luke-ui.vercel.app');
 	plop.setHelper('year', () => new Date().getFullYear());
@@ -28,31 +29,56 @@ export default function newPackage(
 			},
 		],
 
-		actions: (data) => {
-			const componentName = data?.componentName;
-			if (!componentName) {
-				throw new Error('You must provide a component name');
-			}
+		actions: (answers) => {
+			const actions = [];
+			if (!answers) return actions;
 
-			const packageName = data?.componentName.toLowerCase();
-			if (!packageName) {
-				throw new Error('You must provide a package name');
-			}
+			const { componentName, packageName } = answers;
 
-			const actions = [
-				{
-					type: 'addMany',
-					templateFiles: '../plop-templates/component/**',
-					base: '../plop-templates/component/',
-					destination: `../packages/${packageName}`,
-					data: { componentName, packageName },
-				},
-			];
+			actions.push({
+				type: 'addMany',
+				templateFiles: '../plop-templates/component/**',
+				base: '../plop-templates/component/',
+				destination: `../packages/${packageName}`,
+				data: { componentName, packageName },
+			});
 
-			console.log(
+			actions.push({
+				type: 'modify',
+				path: '../playroom/src/components.ts',
+				pattern: /\n/,
+				template: "\nexport * from '{{ packageScope }}/{{ packageName }}';\n",
+			});
+
+			actions.push({
+				type: 'modify',
+				path: '../playroom/package.json',
+				pattern: /"dependencies": {/,
+				template:
+					'"dependencies": {\n"{{ packageScope }}/{{ packageName }}": "workspace:*",\n',
+			});
+
+			actions.push({
+				type: 'modify',
+				path: '../docs/package.json',
+				pattern: /"dependencies": {/,
+				template:
+					'"dependencies": {\n"{{ packageScope }}/{{ packageName }}": "workspace:*",\n',
+			});
+
+			actions.push(
 				chalk.yellowBright.bold(
-					'\n\nPlease rename LICENSE.hbs to LICENSE manually in newly created package.\n'
-				)
+					'Please run the following to rename your license file:\n'
+				) +
+					chalk(
+						`mv packages/${packageName}/LICENSE.hbs packages/${packageName}/LICENSE`
+					)
+			);
+
+			actions.push(
+				chalk.greenBright.bold(
+					'Please run the following script to set up the new package:\n'
+				) + chalk('pnpm run groom')
 			);
 
 			return actions;
