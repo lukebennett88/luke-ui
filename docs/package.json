@@ -12,18 +12,18 @@
 	},
 	"dependencies": {
 		"@luke-ui/button": "workspace:*",
-		"next": "^12.2.5",
+		"next": "^12.3.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.18.13",
+		"@babel/core": "^7.19.0",
 		"@luke-ui-internal/tsconfig": "workspace:*",
 		"@types/node": "^16.11.52",
-		"@types/react": "^18.0.18",
+		"@types/react": "^18.0.19",
 		"eslint": "^8.23.0",
 		"eslint-config-luke-ui": "workspace:*",
 		"next-transpile-modules": "^9.0.0",
-		"typescript": "^4.8.2"
+		"typescript": "^4.8.3"
 	}
 }
