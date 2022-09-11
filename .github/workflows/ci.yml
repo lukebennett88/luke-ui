@@ -34,6 +34,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build
+        run: pnpm run build
+
       # - name: Check formatting
       #   run: pnpm run check:format
 
@@ -42,6 +45,3 @@ jobs:
 
       - name: Check types
         run: pnpm run check:types
-
-      - name: Build
-        run: pnpm run build
