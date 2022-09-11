@@ -34,8 +34,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Check formatting
-        run: pnpm run check:format
+      # - name: Check formatting
+      #   run: pnpm run check:format
 
       - name: Check for linting errors
         run: pnpm run check:lint
