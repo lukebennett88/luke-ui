@@ -7,7 +7,10 @@ export default function newPackage(
 	plop.setHelper('authorName', () => 'Luke Bennett');
 	plop.setHelper('authorEmail', () => 'hello@lukebennett.com.au');
 	plop.setHelper('packageScope', () => '@luke-ui');
-	plop.setHelper('repository', () => 'https://github.com/lukebennett88');
+	plop.setHelper(
+		'repository',
+		() => 'https://github.com/lukebennett88/luke-ui'
+	);
 	plop.setHelper('website', () => 'https://luke-ui.vercel.app');
 	plop.setHelper('year', () => new Date().getFullYear());
 
