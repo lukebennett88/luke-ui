@@ -1,12 +1,13 @@
-import nextTranspileModules from 'next-transpile-modules';
+/**
+ * @template {import('next').NextConfig} T
+ * @param {T} config - A generic parameter that flows through to the return type
+ * @constraint {{import('next').NextConfig}}
+ */
+function defineNextConfig(config) {
+	return config;
+}
 
-const withTM = nextTranspileModules([
-	// array of package names
-	'@luke-ui/button',
-]);
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+export default defineNextConfig({
 	reactStrictMode: true,
-};
-
-export default withTM(nextConfig);
+	swcMinify: true,
+});
