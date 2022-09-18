@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const fs = require('node:fs');
 const path = require('node:path');
 const { defineConfig } = require('tsup');
@@ -25,7 +26,6 @@ function getTsupConfig(
 		// cjs.prod.js
 		{
 			define: { __DEV__: 'false' },
-			// @ts-ignore
 			drop: ['console'],
 			entry,
 			external,
