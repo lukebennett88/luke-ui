@@ -13,7 +13,8 @@
 		"lint": "TIMING=1 pnpm eslint --fix"
 	},
 	"dependencies": {
-		"@luke-ui/button": "workspace:*"
+		"@luke-ui/button": "workspace:*",
+		"@luke-ui/theme": "workspace:*"
 	},
 	"devDependencies": {
 		"@luke-ui-internal/tsconfig": "workspace:*",
