@@ -40,6 +40,7 @@
 	"dependencies": {
 		"@changesets/changelog-github": "^0.4.6",
 		"@changesets/cli": "^2.24.4",
+		"@ladle/react": "^2.4.3",
 		"@testing-library/dom": "^8.18.0",
 		"@testing-library/react": "^13.4.0",
 		"@testing-library/user-event": "^14.4.3",
