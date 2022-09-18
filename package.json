@@ -16,6 +16,8 @@
 		"ci:version": "changeset version",
 		"clean": "git clean -fXd",
 		"dev": "turbo run dev --parallel",
+		"dev:docs": "turbo run dev --filter=@luke-ui-internal/docs",
+		"dev:docs:packages": "run-p dev:packages dev:docs",
 		"dev:packages": "turbo run dev --parallel --filter=@luke-ui/*",
 		"format": "pnpm prettier . --cache --write \"**/*.{js,json,md,mjs,ts,tsx}\"",
 		"fresh": "pnpm run clean && pnpm install",
@@ -25,7 +27,7 @@
 		"new:package": "plop --plopfile scripts/plopfile.mjs",
 		"test": "pnpm run validate && pnpm run test:unit run",
 		"test:unit": "vitest",
-		"validate": "npm-run-all --parallel check:*"
+		"validate": "run-s check:*"
 	},
 	"prettier": {
 		"plugins": [
