@@ -122,6 +122,7 @@ module.exports = {
 				'**/build/**/*',
 				'**/test-fixtures.*',
 				'**/tests/**/*',
+				'**/tsup.config.*',
 			],
 			rules: {
 				// Allow importing from packages that aren't listed in package.json for

@@ -1,0 +1,53 @@
+{
+	"name": "@luke-ui/styles",
+	"version": "0.0.0",
+	"homepage": "https://github.com/lukebennett88/luke-ui#readme",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/lukebennett88/luke-ui.git",
+		"directory": "packages/styles"
+	},
+	"license": "MIT",
+	"author": "Luke Bennett <hello@lukebennett.com.au>",
+	"sideEffects": true,
+	"main": "index.js",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"files": [
+		"CHANGELOG.md",
+		"dist",
+		"index.js",
+		"LICENSE",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsup",
+		"check:lint": "TIMING=1 pnpm eslint",
+		"check:types": "tsc --noEmit",
+		"clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+		"dev": "tsup --watch --dts --external react",
+		"eslint": "eslint src",
+		"lint": "TIMING=1 pnpm eslint --fix"
+	},
+	"dependencies": {
+		"@vanilla-extract/css": "^1.9.0",
+		"@vanilla-extract/sprinkles": "^1.5.0"
+	},
+	"devDependencies": {
+		"@luke-ui-internal/dev": "workspace:*",
+		"@luke-ui-internal/tsconfig": "workspace:*",
+		"@types/node": "^16.11.52",
+		"@types/react": "^18.0.18",
+		"@types/react-dom": "^18.0.6",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"typescript": "^4.8.2"
+	},
+	"peerDependencies": {
+		"react": "^16.8.0 || 17.x || 18.x",
+		"react-dom": "^16.8.0 || 17.x || 18.x"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

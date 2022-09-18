@@ -1,10 +1,20 @@
 import { Button } from '@luke-ui/button';
 
+import { Box } from '../components/box';
+
 export default function Docs() {
 	return (
-		<div>
-			<h1>Docs</h1>
+		<Box
+			display="flex"
+			flexDirection="column"
+			gap="medium"
+			background="lightBlue"
+			color="darkGray"
+			alignItems="flex-start"
+			padding="large"
+		>
+			<Box as="h1">Docs</Box>
 			<Button>Boop</Button>
-		</div>
+		</Box>
 	);
 }
