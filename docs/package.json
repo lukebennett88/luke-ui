@@ -12,6 +12,8 @@
 	},
 	"dependencies": {
 		"@luke-ui/button": "workspace:*",
+		"@luke-ui/styles": "workspace:*",
+		"clsx": "^1.2.1",
 		"next": "^12.3.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0"
