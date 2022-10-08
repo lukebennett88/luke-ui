@@ -17,6 +17,7 @@ module.exports = {
 		react: { version: 'detect' },
 	},
 	rules: {
+		'@typescript-eslint/ban-types': OFF,
 		'@typescript-eslint/consistent-type-imports': WARN,
 		'@typescript-eslint/no-unused-vars': [
 			ERROR,
