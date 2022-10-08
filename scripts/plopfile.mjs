@@ -1,5 +1,3 @@
-import chalk from 'chalk';
-
 export default function newPackage(
 	/** @type {import('plop').NodePlopAPI} */
 	plop
@@ -34,54 +32,40 @@ export default function newPackage(
 
 		actions: (answers) => {
 			const actions = [];
-			if (!answers) return actions;
+			if (!answers) {
+				return actions;
+			}
 
 			const { componentName, packageName } = answers;
 
-			actions.push({
-				type: 'addMany',
-				templateFiles: '../plop-templates/component/**',
-				base: '../plop-templates/component/',
-				destination: `../packages/${packageName}`,
-				data: { componentName, packageName },
-			});
-
-			actions.push({
-				type: 'modify',
-				path: '../playroom/src/components.ts',
-				pattern: /\n/,
-				template: "\nexport * from '{{ packageScope }}/{{ packageName }}';\n",
-			});
-
-			actions.push({
-				type: 'modify',
-				path: '../playroom/package.json',
-				pattern: /"dependencies": {/,
-				template:
-					'"dependencies": {\n"{{ packageScope }}/{{ packageName }}": "workspace:*",\n',
-			});
-
-			actions.push({
-				type: 'modify',
-				path: '../docs/package.json',
-				pattern: /"dependencies": {/,
-				template:
-					'"dependencies": {\n"{{ packageScope }}/{{ packageName }}": "workspace:*",\n',
-			});
-
 			actions.push(
-				chalk.yellowBright.bold(
-					'Please run the following to rename your license file:\n'
-				) +
-					chalk(
-						`mv packages/${packageName}/LICENSE.hbs packages/${packageName}/LICENSE`
-					)
-			);
-
-			actions.push(
-				chalk.greenBright.bold(
-					'Please run the following script to set up the new package:\n'
-				) + chalk('pnpm run groom')
+				{
+					type: 'addMany',
+					templateFiles: '../plop-templates/component/**',
+					base: '../plop-templates/component/',
+					destination: `../packages/${packageName}`,
+					data: { componentName, packageName },
+				},
+				{
+					type: 'modify',
+					path: '../playroom/src/components.ts',
+					pattern: /\n/,
+					template: "\nexport * from '{{ packageScope }}/{{ packageName }}';\n",
+				},
+				{
+					type: 'modify',
+					path: '../playroom/package.json',
+					pattern: /"dependencies": {/,
+					template:
+						'"dependencies": {\n"{{ packageScope }}/{{ packageName }}": "workspace:*",\n',
+				},
+				{
+					type: 'modify',
+					path: '../docs/package.json',
+					pattern: /"dependencies": {/,
+					template:
+						'"dependencies": {\n"{{ packageScope }}/{{ packageName }}": "workspace:*",\n',
+				}
 			);
 
 			return actions;

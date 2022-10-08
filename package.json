@@ -24,7 +24,7 @@
 		"groom": "pnpm install && pnpm run format && pnpm run lint && pnpm run build:packages",
 		"preinstall": "npx only-allow pnpm",
 		"lint": "turbo run lint",
-		"new:package": "plop --plopfile scripts/plopfile.mjs",
+		"new:package": "plop --plopfile scripts/plopfile.mjs && pnpm run groom",
 		"test": "pnpm run validate && pnpm run test:unit run",
 		"test:unit": "vitest",
 		"validate": "run-s check:*"
@@ -48,7 +48,6 @@
 		"@testing-library/user-event": "^14.4.3",
 		"@types/eslint": "^8.4.6",
 		"@vitejs/plugin-react": "^2.1.0",
-		"chalk": "^5.1.0",
 		"eslint": "^8.25.0",
 		"eslint-config-luke-ui": "workspace:*",
 		"jsdom": "^20.0.1",
