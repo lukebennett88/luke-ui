@@ -5,29 +5,35 @@
 	"author": "Luke Bennett <hello@lukebennett.com.au>",
 	"scripts": {
 		"build": "turbo run build",
-		"build:docs": "turbo run build --filter=@luke-ui-internal/docs",
-		"build:packages": "turbo run build --filter=@luke-ui/*",
+		"build:docs": "turbo run build --filter=./docs",
+		"build:ladle": "turbo run build --filter=./ladle",
+		"build:packages": "turbo run build --parallel --filter=./packages/*",
+		"build:playroom": "turbo run build --filter=./playroom",
 		"changeset": "changeset",
+		"check": "npm-run-all --sequential check:*",
 		"check:clean": "git clean -nXd",
 		"check:format": "pnpm prettier . --cache --check",
 		"check:lint": "turbo run check:lint",
 		"check:types": "turbo run check:types",
-		"ci:publish": "turbo run build --filter=docs^... && changeset publish",
+		"ci:publish": "turbo run build --filter=./docs^... && changeset publish",
 		"ci:version": "changeset version",
 		"clean": "git clean -fXd",
 		"dev": "turbo run dev --parallel",
-		"dev:docs": "turbo run dev --filter=@luke-ui-internal/docs",
-		"dev:docs:packages": "run-p dev:packages dev:docs",
-		"dev:packages": "turbo run dev --parallel --filter=@luke-ui/*",
-		"format": "pretty-quick",
+		"dev:docs": "turbo run dev --filter=./docs",
+		"dev:ladle": "turbo run dev --filter=./ladle",
+		"dev:packages": "turbo run dev --parallel --filter=./packages/*",
+		"dev:playroom": "turbo run dev --filter=./playroom",
+		"fix": "npm-run-all --sequential fix:*",
+		"fix:format": "pnpm prettier . --cache --write",
+		"fix:lint": "turbo run lint",
+		"fix:manypkg": "manypkg fix",
 		"fresh": "pnpm run clean && pnpm install",
 		"groom": "pnpm install && pnpm run format && pnpm run lint && pnpm run build:packages",
 		"preinstall": "npx only-allow pnpm",
-		"lint": "turbo run lint",
+		"postinstall": "npx @manypkg/cli check",
 		"new:package": "plop --plopfile scripts/plopfile.mjs && pnpm run groom",
-		"test": "pnpm run validate && pnpm run test:unit run",
-		"test:unit": "vitest",
-		"validate": "run-s check:*"
+		"test": "pnpm run check && pnpm run test:unit run",
+		"test:unit": "vitest"
 	},
 	"prettier": {
 		"plugins": [
@@ -43,6 +49,7 @@
 		"@changesets/changelog-github": "^0.4.7",
 		"@changesets/cli": "^2.25.0",
 		"@ladle/react": "^2.4.3",
+		"@manypkg/cli": "^0.19.2",
 		"@testing-library/dom": "^8.18.1",
 		"@testing-library/react": "^13.4.0",
 		"@testing-library/user-event": "^14.4.3",
@@ -57,7 +64,6 @@
 		"pnpm": "^7.13.2",
 		"prettier": "^2.7.1",
 		"prettier-plugin-packagejson": "^2.2.18",
-		"pretty-quick": "^3.1.3",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"tsup": "^6.2.3",
@@ -75,5 +81,12 @@
 	},
 	"volta": {
 		"node": "16.16.0"
+	},
+	"manypkg": {
+		"defaultBranch": "main",
+		"ignoredRules": [
+			"manypkg doesn't understand what \"workspace:*\" means so we're ignoring this rule for now",
+			"INTERNAL_MISMATCH"
+		]
 	}
 }
