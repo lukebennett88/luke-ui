@@ -17,7 +17,7 @@
 		"check:types": "turbo run check:types",
 		"ci:publish": "turbo run build --filter=./docs^... && changeset publish",
 		"ci:version": "changeset version",
-		"clean": "git clean -fXd",
+		"clean": "git clean -xdf",
 		"dev": "turbo run dev --parallel",
 		"dev:docs": "turbo run dev --filter=./docs",
 		"dev:ladle": "turbo run dev --filter=./ladle",
