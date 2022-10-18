@@ -1,5 +1,13 @@
 # @luke-ui/button
 
+## 0.1.3
+
+### Patch Changes
+
+- [#14](https://github.com/lukebennett88/luke-ui/pull/14)
+  [`f1715f3`](https://github.com/lukebennett88/luke-ui/commit/f1715f3b3d4aea0b589e3d4576e68d3df7a07fd1)
+  Thanks [@lukebennett88](https://github.com/lukebennett88)! - Update packages
+
 ## 0.1.2
 
 ### Patch Changes
