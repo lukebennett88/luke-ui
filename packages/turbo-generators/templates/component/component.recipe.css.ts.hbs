@@ -1,0 +1,39 @@
+import type { RecipeVariants } from '@vanilla-extract/recipes';
+import { recipeInLayer } from '../styles/layered-style.css.js';
+import { vars } from '../styles/vars.css.js';
+import { tokenKeys, tokens } from '../tokens.js';
+
+const colorKeys = tokenKeys(tokens.foregroundColor);
+
+const colorVariants = Object.fromEntries(
+	colorKeys.map((key) => [key, { color: vars.color[key] }]),
+);
+
+export const {{camelCase name}} = recipeInLayer('recipes', {
+	base: {
+		display: 'inline-flex',
+		fontFamily: vars.font.family.body,
+		fontWeight: vars.font.weight.medium,
+		lineHeight: vars.font.lineHeight.loose,
+	},
+	defaultVariants: {
+		color: 'neutralBold',
+		size: 'medium',
+	},
+	variants: {
+		color: colorVariants,
+		size: {
+			small: {
+				fontSize: vars.font.size.small,
+			},
+			medium: {
+				fontSize: vars.font.size.standard,
+			},
+			large: {
+				fontSize: vars.font.size.large,
+			},
+		},
+	},
+});
+
+export type {{pascalCase name}}Variants = RecipeVariants<typeof {{camelCase name}}>;

@@ -1,0 +1,43 @@
+{
+	"name": "design-system",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "turbo run build",
+		"build:docs": "turbo run build --filter=docs",
+		"build:packages": "turbo run build --filter=./packages/**",
+		"build:storybook": "turbo run build:storybook --filter=@luke-ui/react",
+		"changeset": "changeset",
+		"check": "turbo run check && pnpm run check:unused",
+		"check:format": "pnpm exec oxfmt -c .oxfmtrc.root.json --check . && turbo run check:format",
+		"check:lint": "turbo run check:lint",
+		"check:types": "turbo run check:types",
+		"check:unused": "turbo run generate --filter=@luke-ui/react --filter=docs && knip",
+		"clean": "turbo run clean && rm -rf node_modules",
+		"dev": "turbo run dev dev:storybook",
+		"dev:docs": "turbo run dev --filter=docs",
+		"dev:packages": "turbo run dev --filter=./packages/**",
+		"dev:storybook": "turbo run dev dev:storybook --filter=@luke-ui/react",
+		"fix": "pnpm run fix:format-root && turbo run fix && pnpm run fix:unused",
+		"fix:format": "pnpm run fix:format-root && turbo run fix:format",
+		"fix:format-root": "pnpm exec oxfmt -c .oxfmtrc.root.json .",
+		"fix:lint": "turbo run fix:lint",
+		"fix:unsafe": "turbo run fix:unsafe",
+		"fix:unused": "turbo run generate --filter=@luke-ui/react --filter=docs && knip --fix",
+		"generate:component": "pnpm --filter=@luke-ui/turbo-generators run generate:component",
+		"release": "turbo run build --filter=docs^... && changeset publish",
+		"test:storybook": "turbo run test --filter=@luke-ui/react",
+		"test:storybook:ui": "pnpm --filter @luke-ui/react run test:ui",
+		"test:storybook:watch": "pnpm --filter @luke-ui/react run test:watch",
+		"version-packages": "changeset version"
+	},
+	"devDependencies": {
+		"@changesets/cli": "^2.29.8",
+		"@turbo/gen": "^2.8.11",
+		"knip": "^5.85.0",
+		"oxfmt": "^0.34.0",
+		"oxlint": "^1.50.0",
+		"turbo": "^2.8.12"
+	},
+	"packageManager": "pnpm@10.30.3+sha512.c961d1e0a2d8e354ecaa5166b822516668b7f44cb5bd95122d590dd81922f606f5473b6d23ec4a5be05e7fcd18e8488d47d978bbe981872f1145d06e9a740017"
+}

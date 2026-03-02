@@ -1,0 +1,15 @@
+{
+	"name": "@luke-ui/turbo-generators",
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"check:format": "pnpm exec oxfmt --check .",
+		"check:lint": "pnpm exec oxlint .",
+		"fix:format": "pnpm exec oxfmt .",
+		"fix:lint": "pnpm exec oxlint . --fix",
+		"generate:component": "tsx scripts/generate-component.ts"
+	},
+	"devDependencies": {
+		"tsx": "catalog:"
+	}
+}

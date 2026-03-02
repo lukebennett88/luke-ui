@@ -1,0 +1,30 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"categories": { "correctness": "deny", "perf": "deny" },
+	"ignorePatterns": [
+		"node_modules",
+		".source",
+		"**/dist/**",
+		"**/storybook-static/**",
+		"**/routeTree.gen.ts"
+	],
+	"plugins": ["import", "jsx-a11y", "react", "typescript", "vitest"],
+	"rules": {
+		"@typescript-eslint/array-type": ["error", { "default": "generic" }],
+		"@typescript-eslint/consistent-type-exports": [
+			"error",
+			{ "fixMixedExportsWithInlineTypeSpecifier": false }
+		],
+		"@typescript-eslint/consistent-type-imports": [
+			"error",
+			{ "prefer": "type-imports", "fixStyle": "separate-type-imports" }
+		],
+		"curly": "off",
+		"import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+		"import/no-duplicates": "error",
+		"no-console": "warn",
+		"no-unused-vars": "error",
+		"react/no-array-index-key": "off",
+		"sort-imports": "off"
+	}
+}

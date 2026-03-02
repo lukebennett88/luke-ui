@@ -1,0 +1,16 @@
+.cache
+.DS_Store
+.nitro
+.output
+.source
+.tanstack
+.vercel
+/api/
+/blob-report/
+/build/
+/playwright-report/
+/playwright/.cache/
+/public/build
+/server/build
+/test-results/
+node_modules

@@ -1,0 +1,67 @@
+---
+title: Getting Started
+description: Install the package and render your first component.
+---
+
+## Install
+
+For external consumers:
+
+```bash
+pnpm add @luke-ui/react
+```
+
+For this monorepo, use workspace dependencies (for example `"@luke-ui/react": "workspace:*"`).
+
+## Use a Component
+
+Apply the Luke UI theme classes once near the top of your app so components resolve design token CSS variables and scoped reset rules.
+
+```tsx
+import lukeUiStyles from '@luke-ui/react/stylesheet.css?url';
+import { themeRootClassName } from '@luke-ui/react/theme';
+import { Text } from '@luke-ui/react/typography';
+
+export function App() {
+	return (
+		<>
+			<link rel="stylesheet" href={lukeUiStyles} />
+			<div className={themeRootClassName}>
+				<Text>Hello world</Text>
+			</div>
+		</>
+	);
+}
+```
+
+## Use a Component (Minimal)
+
+```tsx
+import lukeUiStyles from '@luke-ui/react/stylesheet.css?url';
+import { Text } from '@luke-ui/react/typography';
+
+export function Example() {
+	return (
+		<>
+			<link rel="stylesheet" href={lukeUiStyles} />
+			<Text>Hello world</Text>
+		</>
+	);
+}
+```
+
+## Manual Root Class (Advanced)
+
+```tsx
+import { themeRootClassName } from '@luke-ui/react/theme';
+
+<div className={themeRootClassName} />;
+```
+
+## Next Steps
+
+- Read the [Text](/docs/components/typography/text) docs.
+- Read the [Link](/docs/components/actions/link) docs.
+- Read the [Button](/docs/components/actions/button) docs.
+- Read the [Icon](/docs/components/visuals/icon) docs.
+- Read the [Loading Spinner](/docs/components/feedback/loading-spinner) docs.

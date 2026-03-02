@@ -1,0 +1,54 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+  # Optional Turborepo Remote Cache:
+  # TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  # TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup tooling with mise
+        uses: jdx/mise-action@v3
+        with:
+          install: true
+          cache: true
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Run checks
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            export TURBO_SCM_BASE="${{ github.event.pull_request.base.sha }}"
+            export TURBO_SCM_HEAD="${{ github.event.pull_request.head.sha }}"
+            corepack pnpm exec turbo run check:format check:lint check:types --affected
+            corepack pnpm run check:unused
+          else
+            corepack pnpm run check:format
+            corepack pnpm run check:lint
+            corepack pnpm run check:types
+            corepack pnpm run check:unused
+          fi

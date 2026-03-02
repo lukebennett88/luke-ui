@@ -1,0 +1,51 @@
+{
+	"$schema": "../../node_modules/oxfmt/configuration_schema.json",
+	"arrowParens": "always",
+	"bracketSameLine": false,
+	"bracketSpacing": true,
+	"experimentalSortImports": {
+		"customGroups": [
+			{ "elementNamePattern": ["http://**", "https://**"], "groupName": "url" },
+			{ "elementNamePattern": ["*:*"], "groupName": "protocol" }
+		],
+		"groups": [
+			["side_effect_style", "side_effect"],
+			"url",
+			"protocol",
+			["builtin", "external", "type-builtin", "type-external"],
+			["subpath", "internal", "type-subpath", "type-internal"],
+			[
+				"parent",
+				"sibling",
+				"index",
+				"type-parent",
+				"type-sibling",
+				"type-index"
+			],
+			"unknown"
+		],
+		"ignoreCase": false,
+		"internalPattern": ["@/", "#", "~"],
+		"newlinesBetween": false,
+		"sortSideEffects": true
+	},
+	"ignorePatterns": [
+		".source",
+		"**/*.hbs",
+		"**/.generated/entries.*",
+		"**/.generated/icon-data.*",
+		"**/dist/**",
+		"**/routeTree.gen.ts",
+		"**/storybook-static/**",
+		"node_modules"
+	],
+	"jsxSingleQuote": false,
+	"printWidth": 80,
+	"quoteProps": "as-needed",
+	"semi": true,
+	"singleAttributePerLine": false,
+	"singleQuote": true,
+	"tabWidth": 2,
+	"trailingComma": "all",
+	"useTabs": true
+}

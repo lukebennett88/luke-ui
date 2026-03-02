@@ -1,0 +1,43 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Release workflow disabled
+        run: echo "Skipping release job until NPM_TOKEN is configured."
+
+      # - name: Checkout Repo
+      #   uses: actions/checkout@v6
+
+      # - name: Setup Tooling with mise
+      #   uses: jdx/mise-action@v3
+
+      # - name: Enable Corepack
+      #   run: corepack enable
+
+      # - name: Install Dependencies
+      #   run: corepack pnpm install --frozen-lockfile
+
+      # - name: Create Release Pull Request or Publish to npm
+      #   id: changesets
+      #   uses: changesets/action@v1
+      #   with:
+      #     # This expects you to have a script called release which does a build for your packages and calls changeset publish
+      #     publish: corepack pnpm release
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # - name: Send a Slack notification if a publish happens
+      #   if: steps.changesets.outputs.published == 'true'
+      #   # You can do something when a publish happens.
+      #   run: my-slack-bot send-notification --message "A new version of ${GITHUB_REPOSITORY} was published!"

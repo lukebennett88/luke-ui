@@ -1,0 +1,22 @@
+import type { ComponentProps, JSX } from 'react';
+import type { DistributiveOmit } from '../../../types.js';
+import { cx } from '../../../utils.js';
+import * as styles from '../../../recipes/{{kebabCase name}}.css.js';
+
+interface {{pascalCase name}}VariantProps
+	extends NonNullable<styles.{{pascalCase name}}Variants> {}
+
+export interface {{pascalCase name}}Props
+	extends DistributiveOmit<ComponentProps<'div'>, 'color'>,
+	{{pascalCase name}}VariantProps {}
+
+export function {{pascalCase name}}(props: {{pascalCase name}}Props): JSX.Element {
+	const { className, color, size, ...divProps } = props;
+
+	return (
+		<div
+			{...divProps}
+			className={cx(styles.{{camelCase name}}({ color, size }), className)}
+		/>
+	);
+}

@@ -1,0 +1,72 @@
+{
+	"$schema": "https://v2-8-10.turborepo.dev/schema.json",
+	"tasks": {
+		"//#check:unused": {
+			"cache": true
+		},
+		"//#fix:unused": {
+			"cache": false
+		},
+		"build": {
+			"dependsOn": ["^build", "generate"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": ["dist/**", ".output/**", ".source/**"]
+		},
+		"build:storybook": {
+			"dependsOn": ["generate"],
+			"outputs": ["storybook-static/**"]
+		},
+		"check": {
+			"dependsOn": ["generate"]
+		},
+		"check:format": {},
+		"check:lint": {},
+		"check:types": {
+			"dependsOn": ["^build"]
+		},
+		"clean": {
+			"cache": false
+		},
+		"generate": {
+			"dependsOn": ["^generate"],
+			"outputs": [
+				".generated/**",
+				"dist/spritesheet.svg",
+				"src/routeTree.gen.ts"
+			]
+		},
+		"dev": {
+			"cache": false,
+			"dependsOn": ["^build"],
+			"persistent": true
+		},
+		"dev:storybook": {
+			"cache": false,
+			"persistent": true
+		},
+		"fix": {
+			"cache": false
+		},
+		"fix:format": {
+			"cache": false
+		},
+		"fix:lint": {
+			"cache": false
+		},
+		"fix:unsafe": {
+			"cache": false
+		},
+		"test": {
+			"dependsOn": ["^build", "generate"],
+			"outputs": []
+		},
+		"test:ui": {
+			"cache": false,
+			"persistent": true
+		},
+		"test:watch": {
+			"cache": false,
+			"persistent": true
+		}
+	}
+}

@@ -1,0 +1,20 @@
+import type { {{pascalCase name}}Props } from '@luke-ui/react/{{kebabCase group}}';
+import { {{pascalCase name}} } from '@luke-ui/react/{{kebabCase group}}';
+import { expect } from 'storybook/test';
+import preview from '../../../.storybook/preview.js';
+
+const meta = preview.meta({
+	component: {{pascalCase name}},
+	title: '{{displayName group}}/{{pascalCase name}}',
+});
+
+const baseArgs = {
+	children: '{{pascalCase name}}',
+} satisfies Partial<{{pascalCase name}}Props>;
+
+export const Default = meta.story({
+	args: baseArgs,
+	play: async ({ canvas }) => {
+		await expect(canvas.getByText('{{pascalCase name}}')).toBeInTheDocument();
+	},
+});
