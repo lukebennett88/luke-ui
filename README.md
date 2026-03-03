@@ -28,6 +28,11 @@ React design system using `vanilla-extract`.
 - Use `pnpm changeset` for versions.
 - Run `pnpm check` before committing.
 
+## CI Setup
+
+- Argos + Storybook GitHub setup: `docs/ARGOS_SETUP.md`
+- Visual regression test command: `pnpm run test:visual`
+
 ## TODO
 
 Components to build:

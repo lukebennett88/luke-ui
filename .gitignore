@@ -16,3 +16,4 @@ packages/@luke-ui/react/.generated/
 public/dist/
 server/dist/
 storybook-static/
+packages/@luke-ui/react/screenshots/
