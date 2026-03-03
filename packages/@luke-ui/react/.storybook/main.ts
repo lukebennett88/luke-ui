@@ -20,6 +20,14 @@ const devAliases = Object.entries(devEntries)
 
 const exportSpecifiers = devAliases.map((alias) => alias.find);
 
+function normalizeStorybookBasePath(basePath: string | undefined) {
+	if (!basePath) return '/';
+	const trimmed = basePath.trim();
+	if (!trimmed) return '/';
+	const prefixed = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+	return prefixed.endsWith('/') ? prefixed : `${prefixed}/`;
+}
+
 export default defineMain({
 	addons: [
 		getAbsolutePath('@storybook/addon-a11y'),
@@ -38,6 +46,7 @@ export default defineMain({
 	viteFinal: (config) => {
 		config.plugins ??= [];
 		config.plugins.push(vanillaExtractPlugin());
+		config.base = normalizeStorybookBasePath(process.env.STORYBOOK_BASE_PATH);
 
 		config.resolve ??= {};
 		config.resolve.alias = [
