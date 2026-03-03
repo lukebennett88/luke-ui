@@ -30,7 +30,7 @@ const base = styleInLayer('recipes', {
 		},
 		'&:disabled': {
 			backgroundColor: vars.backgroundColor.disabled,
-			borderColor: vars.borderColor.neutralDisabled,
+			borderColor: vars.backgroundColor.disabled,
 			color: vars.foregroundColor.disabled,
 		},
 	},
