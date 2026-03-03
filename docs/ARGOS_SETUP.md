@@ -20,6 +20,11 @@ This repository uses Argos visual testing through Storybook Vitest integration.
     `pnpm run test:visual`.
   - For fork PRs (no repository secrets), tests still run but Argos upload is
     skipped automatically.
+  - `deploy-pages` passes `STORYBOOK_BASE_PATH` from
+    `actions/configure-pages@v5` to Storybook build.
+- Turbo config: `turbo.json`
+  - `build:storybook` task includes `STORYBOOK_BASE_PATH` in its `env` list so
+    the variable is available during the build.
 - Vitest config: `packages/@luke-ui/react/vitest.config.ts`
   - Argos plugin reads `process.env.ARGOS_TOKEN`.
 - Root script: `package.json`
