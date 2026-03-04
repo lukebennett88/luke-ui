@@ -9,16 +9,23 @@ import { cx } from '../../../utils.js';
 
 interface TextInputVariantProps extends NonNullable<styles.TextInputVariants> {}
 
+/** Allowed `size` values for `TextInput`. */
 export type TextInputSize = NonNullable<TextInputVariantProps['size']>;
 
+/** Props for the primitive text input. */
 export interface TextInputProps
 	extends Omit<RacInputProps, 'className' | 'size'>, TextInputVariantProps {
+	/** Element shown at the end of the control. */
 	adornmentEnd?: ReactNode;
+	/** Element shown at the start of the control. */
 	adornmentStart?: ReactNode;
+	/** Class name for the outer group wrapper. */
 	className?: RacGroupProps['className'];
+	/** Class name for the inner input element. */
 	inputClassName?: RacInputProps['className'];
 }
 
+/** Styled text input with optional start/end adornments. */
 export function TextInput(props: TextInputProps): JSX.Element {
 	const {
 		adornmentEnd,

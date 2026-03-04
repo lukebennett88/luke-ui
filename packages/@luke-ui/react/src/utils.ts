@@ -1,3 +1,4 @@
+/** Joins class names and skips empty values. */
 export function cx(...parts: Array<string | undefined | null | false>): string {
 	let result = '';
 	for (const part of parts) {
@@ -8,10 +9,12 @@ export function cx(...parts: Array<string | undefined | null | false>): string {
 	return result;
 }
 
+/** Converts a pixel value to rem. */
 export function pxToRem(px: number, base: number = 16): string {
 	return `${px / base}rem`;
 }
 
+/** Typed key-value pair from an object. */
 export type ObjectEntry<T> = { [K in keyof T]-?: [K, T[K]] }[keyof T];
 
 /**

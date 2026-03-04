@@ -8,8 +8,10 @@ import { IconSizeProvider } from '../../../visuals/icon/primitives/icon-size-con
 
 interface ButtonVariantProps extends NonNullable<styles.ButtonVariants> {}
 
+/** Props for the primitive button. */
 export interface ButtonProps extends RacButtonProps, ButtonVariantProps {}
 
+/** Base button with styles and icon sizing context. */
 export function Button(props: ButtonProps): JSX.Element {
 	const {
 		children,

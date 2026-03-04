@@ -6,8 +6,10 @@ import { cx } from '../../../utils.js';
 
 interface LinkVariantProps extends NonNullable<styles.LinkVariants> {}
 
+/** Props for the primitive link. */
 export interface LinkProps extends RacLinkProps, LinkVariantProps {}
 
+/** Styled link. */
 export function Link(props: LinkProps): JSX.Element {
 	const { isStandalone, tone, ...restProps } = props;
 

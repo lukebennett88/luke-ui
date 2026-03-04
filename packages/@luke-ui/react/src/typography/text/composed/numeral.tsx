@@ -3,19 +3,31 @@ import type { TextProps } from '../primitives/text.js';
 import { Text } from '../primitives/text.js';
 import { useIsWithinHeading } from './heading-context.js';
 
+/** Number format style used by `Numeral`. */
 export type NumeralFormat = 'decimal' | 'percent' | 'currency' | 'unit';
+/** Compact number display mode. */
 export type NumeralAbbreviation = boolean | 'long';
+/** Fixed precision or `[min, max]` precision range. */
 export type NumeralPrecision = number | readonly [number, number];
 
+/** Props for `Numeral`. */
 export interface NumeralProps extends Omit<TextProps, 'children' | 'textAlign' | 'variant'> {
+	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;
 	textAlign?: TextProps['textAlign'];
+	/** Currency code such as `USD`. */
 	currency?: string;
+	/** Number format style. Inferred from `currency`/`unit` when omitted. */
 	format?: NumeralFormat;
+	/** Extra options passed to `Intl.NumberFormat`. */
 	formatOptions?: Intl.NumberFormatOptions;
+	/** Locale used for formatting. Defaults to locale context. */
 	locale?: Intl.LocalesArgument;
+	/** Precision as fixed digits or `[min, max]` digits. */
 	precision?: NumeralPrecision;
+	/** Unit name when `format` is `unit`, e.g. `kilometer`. */
 	unit?: NonNullable<Intl.NumberFormatOptions['unit']>;
+	/** Number to format. */
 	value: number;
 	variant?: Extract<
 		TextProps['variant'],
@@ -65,6 +77,10 @@ function validateProps(props: NumeralProps) {
 	}
 }
 
+/**
+ * Formats a number and renders it with `Text`.
+ * @throws When `currency` and `unit` are both provided or precision is invalid.
+ */
 export function Numeral(props: NumeralProps) {
 	validateProps(props);
 	const { locale: localeFromContext } = useLocale();

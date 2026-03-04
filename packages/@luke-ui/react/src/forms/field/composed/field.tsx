@@ -8,14 +8,20 @@ import { Field as PrimitiveField } from '../primitives/field.js';
 
 type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
 
+/** Props for the composed `Field`. */
 export interface FieldProps extends Omit<PrimitiveFieldProps, 'children'> {
 	children: ReactNode;
+	/** Optional helper text shown below the input. */
 	description?: ReactNode;
+	/** Error content passed to `FieldError`. */
 	errorMessage?: FieldErrorProps['children'];
+	/** Label content shown above the input. */
 	label?: ReactNode;
+	/** Label necessity style. Defaults to `'icon'`. */
 	necessityIndicator?: FieldNecessityIndicator;
 }
 
+/** Composes label, control slot, description, and error text. */
 export function Field(props: FieldProps): JSX.Element {
 	const {
 		children,

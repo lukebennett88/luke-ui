@@ -12,16 +12,21 @@ import { cx } from '../../../utils.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
 
+/** Props for `LoadingSpinner`. */
 export type LoadingSpinnerProps = DistributiveOmit<
 	ComponentProps<'div'>,
 	'aria-valuemax' | 'aria-valuemin' | 'aria-valuenow' | 'color' | 'role'
 > &
 	LoadingSpinnerVariantProps & {
+		/** Max value for determinate mode. Defaults to `100`. */
 		maxValue?: number;
+		/** Min value for determinate mode. Defaults to `0`. */
 		minValue?: number;
+		/** Current value. Omit for indeterminate mode. */
 		value?: number;
 	};
 
+/** Progress spinner for determinate or indeterminate loading state. */
 export function LoadingSpinner(props: LoadingSpinnerProps) {
 	const {
 		'aria-label': ariaLabel = 'pending',

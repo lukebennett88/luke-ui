@@ -8,6 +8,7 @@ import { Button as PrimitiveButton } from '../primitives/button.js';
 
 export type { ButtonProps };
 
+/** Button with composed label and pending spinner styles. */
 export function Button(props: ButtonProps): JSX.Element {
 	const { children, isPending, size = 'medium', ...restProps } = props;
 

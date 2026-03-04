@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
+/** Allowed heading levels for Luke UI headings. */
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 const MIN_LEVEL = 1;
 const DEFAULT_LEVEL = 2;
@@ -24,6 +25,7 @@ const clampLevel = (n: number): HeadingLevel => Math.max(MIN_LEVEL, Math.min(6, 
 const HeadingLevelContext = createContext<HeadingLevel | undefined>(undefined);
 const WithinHeadingContext = createContext(false);
 
+/** Values returned when resolving heading level from context. */
 export type HeadingLevelsRenderProps = {
 	element: `h${HeadingLevel}`;
 	level: HeadingLevel;
@@ -45,10 +47,11 @@ export const useHeadingLevel = (
 	};
 };
 
+/** Returns true when rendered inside a `Heading`. */
 export const useIsWithinHeading = () => useContext(WithinHeadingContext);
 
 type HeadingLevelsProps = {
-	/** Base level at the root. Omit to auto-increment from parent. */
+	/** Base level override. Defaults to inherited level + 1. */
 	base?: HeadingLevel;
 	children: ReactNode | ((props: HeadingLevelsRenderProps) => ReactNode);
 };
@@ -110,6 +113,7 @@ type HeadingPresenceProviderProps = {
 	children: ReactNode;
 };
 
+/** Marks a subtree as being inside a heading. */
 export function HeadingPresenceProvider({ children }: HeadingPresenceProviderProps) {
 	return <WithinHeadingContext.Provider value={true}>{children}</WithinHeadingContext.Provider>;
 }

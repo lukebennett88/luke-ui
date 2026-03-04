@@ -10,18 +10,29 @@ import type { FieldNecessityIndicator } from '../../field/primitives/field-label
 import type { TextInputSize } from '../../text-input/primitives/text-input.js';
 import { TextInput } from '../../text-input/primitives/text-input.js';
 
+/** Props for the composed text field. */
 export interface TextFieldProps extends Omit<RacTextFieldProps, 'children' | 'size'> {
+	/** Element shown after the input value. */
 	adornmentEnd?: ReactNode;
+	/** Element shown before the input value. */
 	adornmentStart?: ReactNode;
+	/** Helper text shown below the control. */
 	description?: ReactNode;
+	/** Error content passed to `FieldError`. */
 	errorMessage?: FieldErrorProps['children'];
+	/** Class name forwarded to the inner input element. */
 	inputClassName?: RacInputProps['className'];
+	/** Label content shown above the input. */
 	label?: ReactNode;
+	/** Label necessity style. */
 	necessityIndicator?: FieldNecessityIndicator;
+	/** Placeholder text for the input. */
 	placeholder?: string;
+	/** Control size. Defaults to `'medium'`. */
 	size?: TextInputSize;
 }
 
+/** Composes `TextInput` with label, description, and error slots. */
 export function TextField(props: TextFieldProps): JSX.Element {
 	const {
 		adornmentEnd,

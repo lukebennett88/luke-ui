@@ -13,11 +13,14 @@ export { iconNames, iconViewBoxes };
 
 const IconSpritesheetContext = createContext<string | null>(null);
 
+/** Props for `IconSpritesheetProvider`. */
 export interface IconSpritesheetProviderProps {
+	/** URL to the generated sprite sheet file. */
 	href: string;
 	children: ReactNode;
 }
 
+/** Provides the icon spritesheet URL for `Icon`. */
 export function IconSpritesheetProvider({
 	children,
 	href,
@@ -35,22 +38,31 @@ function useIconSpritesheetHref(): string {
 	return href;
 }
 
+/** Props for the built-in `Icon` component. */
 export type IconProps = Pick<
 	SVGAttributes<SVGSVGElement>,
 	'aria-hidden' | 'className' | 'id' | 'style' | 'viewBox'
 > & {
+	/** Icon name from the generated icon set. */
 	name: (typeof iconNames)[number];
+	/** Accessible label. When set, the icon is announced as an image. */
 	title?: string;
+	/** Token size override. Defaults to icon context or `'medium'`. */
 	size?: IconSizeToken;
 };
 
+/** Props used by `createIcon` for custom icon components. */
 export type CustomIconProps = DistributiveOmit<IconProps, 'name'>;
 
+/** Options for `createIcon`. */
 export interface CreateIconOptions<TProps extends CustomIconProps = CustomIconProps> {
+	/** SVG path content or a render function that returns path content. */
 	path: ReactNode | ((props: TProps) => ReactNode);
+	/** Static or dynamic viewBox value. */
 	viewBox?: string | ((props: TProps) => string | undefined);
 }
 
+/** Creates a custom icon component with Luke UI icon styling. */
 export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 	path,
 	viewBox: defaultViewBox = ICON_VIEWBOX,
@@ -95,6 +107,7 @@ const SpritesheetIcon = createIcon<SpritesheetIconProps>({
 	viewBox: ({ name }) => iconViewBoxes[name],
 });
 
+/** Renders an icon from the shared sprite sheet. */
 export function Icon(props: IconProps): JSX.Element {
 	const spritesheetHref = useIconSpritesheetHref();
 	return <SpritesheetIcon {...props} spritesheetHref={spritesheetHref} />;

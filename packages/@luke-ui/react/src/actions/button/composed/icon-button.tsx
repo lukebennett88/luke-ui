@@ -7,10 +7,13 @@ import { Icon } from '../../../visuals/icon/primitives/icon.js';
 import type { ButtonProps } from '../primitives/button.js';
 import { Button } from '../primitives/button.js';
 
+/** Props for `IconButton`. */
 export interface IconButtonProps extends ButtonProps {
+	/** Icon name from the generated icon set. */
 	icon: IconName;
 }
 
+/** Button that renders only an icon. */
 export function IconButton(props: IconButtonProps): JSX.Element {
 	const { icon, size = 'medium', ...buttonProps } = props;
 
