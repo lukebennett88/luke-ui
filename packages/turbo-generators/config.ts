@@ -224,7 +224,7 @@ function addComponentToStylesIndex(answers: GeneratorAnswers): string {
 		),
 	);
 	imports.sort((a, b) => a.localeCompare(b));
-	writeFileSync(STYLES_PRIMITIVES_PATH, imports.join('\n') + '\n');
+	writeFileSync(STYLES_PRIMITIVES_PATH, `${imports.join('\n')}\n`);
 	return `Added ${componentDir} CSS to styles primitives barrel`;
 }
 

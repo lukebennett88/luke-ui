@@ -1,0 +1,83 @@
+import type { RecipeVariants } from '@vanilla-extract/recipes';
+import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { vars } from '../styles/vars.css.js';
+
+const dataDisabledSelector = '[data-disabled="true"]';
+const dataRequiredSelector = '[data-required="true"]';
+
+export const field = styleInLayer('recipes', {
+	display: 'flex',
+	flexDirection: 'column',
+	gap: vars.space.xxsmall,
+	minInlineSize: 0,
+});
+
+export const fieldLabel = recipeInLayer('recipes', {
+	base: {
+		color: vars.foregroundColor.primary,
+		fontSize: vars.font.size.small,
+		fontWeight: vars.font.weight.medium,
+		lineHeight: vars.font.lineHeight.tight,
+		minInlineSize: 0,
+
+		selectors: {
+			[`${dataDisabledSelector} &`]: {
+				color: vars.foregroundColor.disabled,
+			},
+		},
+	},
+	defaultVariants: {
+		necessityIndicator: 'icon',
+	},
+	variants: {
+		necessityIndicator: {
+			icon: {
+				selectors: {
+					[`${dataRequiredSelector} &::after`]: {
+						color: vars.foregroundColor.critical,
+						content: '"*"',
+						marginInlineStart: vars.space.xxsmall,
+					},
+				},
+			},
+			label: {
+				selectors: {
+					[`${dataRequiredSelector} &::after`]: {
+						color: vars.foregroundColor.secondary,
+						content: '"(required)"',
+						fontWeight: vars.font.weight.regular,
+						marginInlineStart: vars.space.xxsmall,
+					},
+				},
+			},
+		},
+	},
+});
+
+export type FieldLabelVariants = RecipeVariants<typeof fieldLabel>;
+
+export const fieldDescription = styleInLayer('recipes', {
+	color: vars.foregroundColor.secondary,
+	fontSize: vars.font.size.small,
+	lineHeight: vars.font.lineHeight.tight,
+	minInlineSize: 0,
+
+	selectors: {
+		[`${dataDisabledSelector} &`]: {
+			color: vars.foregroundColor.disabled,
+		},
+	},
+});
+
+export const fieldError = styleInLayer('recipes', {
+	color: vars.foregroundColor.critical,
+	fontSize: vars.font.size.small,
+	lineHeight: vars.font.lineHeight.tight,
+	minInlineSize: 0,
+
+	selectors: {
+		[`${dataDisabledSelector} &`]: {
+			color: vars.foregroundColor.disabled,
+		},
+	},
+});

@@ -26,10 +26,10 @@
 		"fix:unused": "turbo run generate --filter=@luke-ui/react --filter=docs && knip --fix",
 		"generate:component": "pnpm --filter=@luke-ui/turbo-generators run generate:component",
 		"release": "turbo run build --filter=docs^... && changeset publish",
-		"test:visual": "pnpm --filter @luke-ui/react run test:visual",
 		"test:storybook": "turbo run test --filter=@luke-ui/react",
 		"test:storybook:ui": "pnpm --filter @luke-ui/react run test:ui",
 		"test:storybook:watch": "pnpm --filter @luke-ui/react run test:watch",
+		"test:visual": "pnpm --filter @luke-ui/react run test:visual",
 		"version-packages": "changeset version"
 	},
 	"devDependencies": {

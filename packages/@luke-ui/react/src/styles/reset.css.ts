@@ -66,7 +66,7 @@ globalStyleInLayer('reset', `${root} :where(input, textarea, select)`, {
 	margin: 0,
 });
 
-globalStyleInLayer('reset', `${root} :where(:disabled, [data-disabled])`, {
+globalStyleInLayer('reset', `${root} :where(:disabled, [data-disabled="true"])`, {
 	cursor: 'not-allowed',
 });
 

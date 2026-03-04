@@ -1,4 +1,10 @@
 import { vars } from '@luke-ui/react/theme';
+import type {
+	ColorTokenValue,
+	CubicBezierTokenValue,
+	DimensionTokenValue,
+	DurationTokenValue,
+} from '@luke-ui/react/tokens';
 import {
 	colorToCssString,
 	cubicBezierToString,
@@ -6,12 +12,6 @@ import {
 	durationToString,
 	tokenKeys,
 	tokens,
-} from '@luke-ui/react/tokens';
-import type {
-	ColorTokenValue,
-	CubicBezierTokenValue,
-	DimensionTokenValue,
-	DurationTokenValue,
 } from '@luke-ui/react/tokens';
 import { Text } from '@luke-ui/react/typography';
 import { Heading } from '@luke-ui/react/typography/composed';
