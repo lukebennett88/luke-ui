@@ -32,18 +32,30 @@ const spin = keyframes({
 	to: { transform: 'rotate(360deg)' },
 });
 
-export const spinnerIndeterminate = styleInLayer('recipes', {
-	animationDuration: vars.motion.duration.slow,
-	animationIterationCount: 'infinite',
-	animationName: spin,
-	animationTimingFunction: vars.motion.easing.linear,
+export const spinnerState = recipeInLayer('recipes', {
+	defaultVariants: {
+		mode: 'determinate',
+	},
+	variants: {
+		mode: {
+			determinate: {},
+			indeterminate: {
+				animationDuration: vars.motion.duration.slow,
+				animationIterationCount: 'infinite',
+				animationName: spin,
+				animationTimingFunction: vars.motion.easing.linear,
+			},
+		},
+	},
 });
 
-export const svg = styleInLayer('recipes', {
-	blockSize: '100%',
-	display: 'block',
-	inlineSize: '100%',
-	transform: 'rotate(-90deg)',
+export const svg = recipeInLayer('recipes', {
+	base: {
+		blockSize: '100%',
+		display: 'block',
+		inlineSize: '100%',
+		transform: 'rotate(-90deg)',
+	},
 });
 
 const rubberBand = keyframes({
@@ -52,19 +64,26 @@ const rubberBand = keyframes({
 	'100%': { strokeDasharray: '2 100', strokeDashoffset: -100 },
 });
 
-export const indicator = styleInLayer('recipes', {
-	strokeDasharray: '100 100',
-});
-
-export const indicatorIndeterminate = styleInLayer('recipes', {
-	animationDuration: vars.motion.duration.slower,
-	animationIterationCount: 'infinite',
-	animationName: rubberBand,
-	animationTimingFunction: vars.motion.easing.emphasized,
-});
-
-export const indicatorDeterminate = styleInLayer('recipes', {
-	transitionDuration: vars.motion.duration.quick,
-	transitionProperty: 'stroke-dashoffset',
-	transitionTimingFunction: vars.motion.easing.exit,
+export const indicator = recipeInLayer('recipes', {
+	base: {
+		strokeDasharray: '100 100',
+	},
+	defaultVariants: {
+		mode: 'determinate',
+	},
+	variants: {
+		mode: {
+			determinate: {
+				transitionDuration: vars.motion.duration.quick,
+				transitionProperty: 'stroke-dashoffset',
+				transitionTimingFunction: vars.motion.easing.exit,
+			},
+			indeterminate: {
+				animationDuration: vars.motion.duration.slower,
+				animationIterationCount: 'infinite',
+				animationName: rubberBand,
+				animationTimingFunction: vars.motion.easing.emphasized,
+			},
+		},
+	},
 });

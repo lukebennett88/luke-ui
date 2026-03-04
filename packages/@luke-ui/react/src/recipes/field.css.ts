@@ -1,15 +1,17 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
 
 const dataDisabledSelector = '[data-disabled="true"]';
 const dataRequiredSelector = '[data-required="true"]';
 
-export const field = styleInLayer('recipes', {
-	display: 'flex',
-	flexDirection: 'column',
-	gap: vars.space.xxsmall,
-	minInlineSize: 0,
+export const field = recipeInLayer('recipes', {
+	base: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: vars.space.xxsmall,
+		minInlineSize: 0,
+	},
 });
 
 export const fieldLabel = recipeInLayer('recipes', {
@@ -56,28 +58,31 @@ export const fieldLabel = recipeInLayer('recipes', {
 
 export type FieldLabelVariants = RecipeVariants<typeof fieldLabel>;
 
-export const fieldDescription = styleInLayer('recipes', {
-	color: vars.foregroundColor.secondary,
-	fontSize: vars.font.size.small,
-	lineHeight: vars.font.lineHeight.tight,
-	minInlineSize: 0,
+export const fieldMessage = recipeInLayer('recipes', {
+	base: {
+		fontSize: vars.font.size.small,
+		lineHeight: vars.font.lineHeight.tight,
+		minInlineSize: 0,
 
-	selectors: {
-		[`${dataDisabledSelector} &`]: {
-			color: vars.foregroundColor.disabled,
+		selectors: {
+			[`${dataDisabledSelector} &`]: {
+				color: vars.foregroundColor.disabled,
+			},
+		},
+	},
+	defaultVariants: {
+		tone: 'description',
+	},
+	variants: {
+		tone: {
+			description: {
+				color: vars.foregroundColor.secondary,
+			},
+			error: {
+				color: vars.foregroundColor.critical,
+			},
 		},
 	},
 });
 
-export const fieldError = styleInLayer('recipes', {
-	color: vars.foregroundColor.critical,
-	fontSize: vars.font.size.small,
-	lineHeight: vars.font.lineHeight.tight,
-	minInlineSize: 0,
-
-	selectors: {
-		[`${dataDisabledSelector} &`]: {
-			color: vars.foregroundColor.disabled,
-		},
-	},
-});
+export type FieldMessageVariants = RecipeVariants<typeof fieldMessage>;

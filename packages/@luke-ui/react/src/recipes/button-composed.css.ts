@@ -1,11 +1,14 @@
-import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import type { RecipeVariants } from '@vanilla-extract/recipes';
+import { recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
 
-export const buttonContent = styleInLayer('recipes', {
-	alignItems: 'center',
-	display: 'inline-flex',
-	minInlineSize: 0,
-	position: 'relative',
+export const buttonContent = recipeInLayer('recipes', {
+	base: {
+		alignItems: 'center',
+		display: 'inline-flex',
+		minInlineSize: 0,
+		position: 'relative',
+	},
 });
 
 export const buttonLabel = recipeInLayer('recipes', {
@@ -28,10 +31,14 @@ export const buttonLabel = recipeInLayer('recipes', {
 	},
 });
 
-export const spinnerOverlay = styleInLayer('recipes', {
-	alignItems: 'center',
-	display: 'flex',
-	inset: 0,
-	justifyContent: 'center',
-	position: 'absolute',
+export type ButtonLabelVariants = RecipeVariants<typeof buttonLabel>;
+
+export const spinnerOverlay = recipeInLayer('recipes', {
+	base: {
+		alignItems: 'center',
+		display: 'flex',
+		inset: 0,
+		justifyContent: 'center',
+		position: 'absolute',
+	},
 });

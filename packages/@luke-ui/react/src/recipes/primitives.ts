@@ -1,6 +1,6 @@
 export type { ButtonVariants } from './button.css.js';
 export { button } from './button.css.js';
-export { field, fieldDescription, fieldError, fieldLabel } from './field.css.js';
+export { field, fieldLabel, fieldMessage } from './field.css.js';
 export type { IconVariants } from './icon.css.js';
 export { icon, iconSizeVariants } from './icon.css.js';
 export type { IconButtonVariants } from './icon-button.css.js';

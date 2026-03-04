@@ -6,8 +6,15 @@ import { cx } from '../../../utils.js';
 
 interface LinkVariantProps extends NonNullable<styles.LinkVariants> {}
 
+interface LinkStyleProps {
+	/** Hides underline until hover. */
+	isStandalone?: LinkVariantProps['isStandalone'];
+	/** Sets the link tone. */
+	tone?: LinkVariantProps['tone'];
+}
+
 /** Props for the primitive link. */
-export interface LinkProps extends RacLinkProps, LinkVariantProps {}
+export interface LinkProps extends Omit<RacLinkProps, keyof LinkStyleProps>, LinkStyleProps {}
 
 /** Styled link. */
 export function Link(props: LinkProps): JSX.Element {

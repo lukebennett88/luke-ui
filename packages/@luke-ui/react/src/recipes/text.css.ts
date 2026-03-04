@@ -50,15 +50,17 @@ const lineClampSingleLine = {
 } satisfies ComplexStyleRule;
 const lineClampMultiLine = (lines: number) =>
 	({
-		display: '-webkit-box',
-		minInlineSize: 0,
-		overflow: 'hidden',
 		WebkitBoxOrient: 'vertical',
 		WebkitLineClamp: lines,
+		display: '-webkit-box',
+		lineClamp: lines,
+		minInlineSize: 0,
+		overflow: 'hidden',
 	}) satisfies ComplexStyleRule;
 
 const lineClampVariants = {
-	none: lineClampNone,
+	false: lineClampNone,
+	true: lineClampSingleLine,
 	1: lineClampSingleLine,
 	2: lineClampMultiLine(2),
 	3: lineClampMultiLine(3),
@@ -183,10 +185,11 @@ export const text = recipeInLayer('recipes', {
 		fontSize: 'standard',
 		fontWeight: 'regular',
 		lineHeight: 'loose',
+		shouldInheritFont: false,
 		shouldDisableTrim: false,
 		textDecoration: 'none',
 		textTransform: 'none',
-		lineClamp: 'none',
+		lineClamp: false,
 		variant: 'unset',
 		isVisuallyHidden: false,
 	},
@@ -196,6 +199,12 @@ export const text = recipeInLayer('recipes', {
 		fontSize: fontSizeVariants,
 		fontWeight: fontWeightVariants,
 		lineHeight: lineHeightVariants,
+		shouldInheritFont: {
+			false: {},
+			true: {
+				font: 'inherit',
+			},
+		},
 		shouldDisableTrim: {
 			false: {},
 			true: {},

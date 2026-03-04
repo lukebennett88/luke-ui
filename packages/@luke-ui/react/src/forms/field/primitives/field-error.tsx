@@ -4,8 +4,11 @@ import { composeRenderProps, FieldError as RacFieldError } from 'react-aria-comp
 import * as styles from '../../../recipes/field.css.js';
 import { cx } from '../../../utils.js';
 
+interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVariants> {}
+
 /** Props for `FieldError`. */
-export interface FieldErrorProps extends RacFieldErrorProps {}
+export interface FieldErrorProps
+	extends RacFieldErrorProps, Omit<FieldMessageVariantProps, 'tone'> {}
 
 /** Styled validation message for a field. */
 export function FieldError(props: FieldErrorProps): JSX.Element {
@@ -13,7 +16,7 @@ export function FieldError(props: FieldErrorProps): JSX.Element {
 		<RacFieldError
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return cx(styles.fieldError, className);
+				return cx(styles.fieldMessage({ tone: 'error' }), className);
 			})}
 		/>
 	);

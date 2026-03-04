@@ -1,35 +1,41 @@
 import { Text as RacText } from 'react-aria-components';
 import * as styles from '../../../recipes/text.css.js';
-import type { FontSizeToken, LineHeightToken } from '../../../tokens.js';
 import { cx } from '../../../utils.js';
 
-type TextLineClampNumber = Exclude<styles.TextLineClampVariant, 'none'>;
+interface TextVariantProps extends NonNullable<styles.TextVariants> {}
+
+interface TextStyleProps {
+	/** Sets text color. */
+	color?: TextVariantProps['color'];
+	/** Sets the font family. */
+	fontFamily?: TextVariantProps['fontFamily'];
+	/** Sets the font size. */
+	fontSize?: TextVariantProps['fontSize'];
+	/** Sets the font weight. */
+	fontWeight?: TextVariantProps['fontWeight'];
+	/** Sets the line height. */
+	lineHeight?: TextVariantProps['lineHeight'];
+	/** Makes text inherit font styles. */
+	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
+	/** Turns off cap-height trim. */
+	shouldDisableTrim?: TextVariantProps['shouldDisableTrim'];
+	/** Sets text alignment. */
+	textAlign?: TextVariantProps['textAlign'];
+	/** Sets text decoration. */
+	textDecoration?: TextVariantProps['textDecoration'];
+	/** Sets text transform. */
+	textTransform?: TextVariantProps['textTransform'];
+	/** Clamps text lines. */
+	lineClamp?: TextVariantProps['lineClamp'];
+	/** Sets numeric glyph style. */
+	variant?: TextVariantProps['variant'];
+	/** Hides text visually. */
+	isVisuallyHidden?: TextVariantProps['isVisuallyHidden'];
+}
 
 /** Props for the primitive text component. */
-export type TextProps = React.ComponentProps<typeof RacText> & {
-	color?: styles.TextColor;
-	fontFamily?: styles.TextFontFamily;
-	fontSize?: FontSizeToken;
-	fontWeight?: styles.TextFontWeight;
-	lineHeight?: LineHeightToken;
-	/** Controls trim behavior. Defaults to true when `lineClamp` is set. */
-	shouldDisableTrim?: boolean;
-	textAlign?: styles.TextAlign;
-	textDecoration?: styles.TextDecoration;
-	textTransform?: styles.TextTransform;
-	/** `true` clamps to one line. A number clamps to that many lines. */
-	lineClamp?: boolean | TextLineClampNumber;
-	variant?: styles.TextVariant;
-	isVisuallyHidden?: boolean | undefined;
-};
-
-function resolveLineClampVariant(
-	lineClamp: boolean | TextLineClampNumber | undefined,
-): styles.TextLineClampVariant {
-	if (lineClamp === undefined || lineClamp === false) return 'none';
-	if (lineClamp === true) return 1;
-	return lineClamp;
-}
+export type TextProps = Omit<React.ComponentProps<typeof RacText>, keyof TextStyleProps> &
+	TextStyleProps;
 
 /** Styled text component with token-based typography controls. */
 export function Text(props: TextProps) {
@@ -43,6 +49,7 @@ export function Text(props: TextProps) {
 		isVisuallyHidden,
 		lineClamp,
 		lineHeight,
+		shouldInheritFont,
 		shouldDisableTrim,
 		textAlign,
 		textDecoration,
@@ -52,7 +59,6 @@ export function Text(props: TextProps) {
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
 	const resolvedShouldDisableTrim = shouldDisableTrim ?? hasLineClamp;
-	const lineClampVariant = resolveLineClampVariant(lineClamp);
 
 	return (
 		<RacText
@@ -64,11 +70,12 @@ export function Text(props: TextProps) {
 					fontSize,
 					fontWeight,
 					lineHeight,
+					shouldInheritFont,
 					shouldDisableTrim: resolvedShouldDisableTrim,
 					textAlign,
 					textDecoration,
 					textTransform,
-					lineClamp: lineClampVariant,
+					lineClamp,
 					variant,
 					isVisuallyHidden,
 				}),

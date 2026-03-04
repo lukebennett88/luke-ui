@@ -96,7 +96,6 @@ export function Numeral(props: NumeralProps) {
 		locale,
 		precision,
 		shouldDisableTrim,
-		style,
 		unit,
 		value,
 		variant = 'tabular-nums',
@@ -145,26 +144,18 @@ export function Numeral(props: NumeralProps) {
 	const content = new Intl.NumberFormat(resolvedLocale, numeralFormatOptions).format(value);
 	const resolvedShouldDisableTrim = shouldDisableTrim ?? isWithinHeading;
 	const resolvedColor = color ?? (isWithinHeading ? 'inherit' : undefined);
-	const resolvedStyle =
-		isWithinHeading && typeof style === 'object' && style !== null
-			? { font: 'inherit', ...style }
-			: isWithinHeading
-				? { font: 'inherit' }
-				: style;
 	const colorProps: Pick<TextProps, 'color'> | {} =
 		resolvedColor === undefined ? {} : { color: resolvedColor };
-	const styleProps: Pick<TextProps, 'style'> | {} =
-		resolvedStyle === undefined ? {} : { style: resolvedStyle };
 
 	return (
 		<Text
 			{...textProps}
 			elementType={elementType}
+			shouldInheritFont={isWithinHeading}
 			shouldDisableTrim={resolvedShouldDisableTrim}
 			textAlign={textAlign}
 			variant={variant}
 			{...colorProps}
-			{...styleProps}
 		>
 			{content}
 		</Text>

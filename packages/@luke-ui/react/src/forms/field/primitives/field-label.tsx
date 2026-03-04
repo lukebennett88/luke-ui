@@ -4,14 +4,19 @@ import { Label as RacLabel } from 'react-aria-components';
 import * as styles from '../../../recipes/field.css.js';
 import { cx } from '../../../utils.js';
 
-/** Style for how required or optional state is shown in labels. */
-export type FieldNecessityIndicator = 'icon' | 'label';
+interface FieldLabelVariantProps extends NonNullable<styles.FieldLabelVariants> {}
 
-/** Props for `FieldLabel`. */
-export interface FieldLabelProps extends RacLabelProps {
-	/** How to show required/optional state. Defaults to `'icon'`. */
+/** Allowed `necessityIndicator` values for `FieldLabel`. */
+export type FieldNecessityIndicator = NonNullable<FieldLabelVariantProps['necessityIndicator']>;
+
+interface FieldLabelStyleProps {
+	/** Shows how required fields are marked. */
 	necessityIndicator?: FieldNecessityIndicator;
 }
+
+/** Props for `FieldLabel`. */
+export interface FieldLabelProps
+	extends Omit<RacLabelProps, keyof FieldLabelStyleProps>, FieldLabelStyleProps {}
 
 /** Styled label for form fields. */
 export function FieldLabel(props: FieldLabelProps): JSX.Element {

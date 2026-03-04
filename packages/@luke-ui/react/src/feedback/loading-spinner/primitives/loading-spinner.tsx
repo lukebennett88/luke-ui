@@ -12,12 +12,19 @@ import { cx } from '../../../utils.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
 
+interface LoadingSpinnerStyleProps {
+	/** Sets the spinner color. */
+	color?: LoadingSpinnerVariantProps['color'];
+	/** Sets the spinner size. */
+	size?: LoadingSpinnerVariantProps['size'];
+}
+
 /** Props for `LoadingSpinner`. */
 export type LoadingSpinnerProps = DistributiveOmit<
 	ComponentProps<'div'>,
 	'aria-valuemax' | 'aria-valuemin' | 'aria-valuenow' | 'color' | 'role'
 > &
-	LoadingSpinnerVariantProps & {
+	LoadingSpinnerStyleProps & {
 		/** Max value for determinate mode. Defaults to `100`. */
 		maxValue?: number;
 		/** Min value for determinate mode. Defaults to `0`. */
@@ -47,6 +54,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 	const clampedValue = hasValue ? clamp(value, normalizedMin, normalizedMax) : 0;
 	const progress = ((clampedValue - normalizedMin) / clampedRange) * 100;
 	const dashOffset = 100 - progress;
+	const mode = hasValue ? 'determinate' : 'indeterminate';
 
 	return (
 		<div
@@ -55,20 +63,13 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 			aria-valuemax={maxValue}
 			aria-valuemin={minValue}
 			aria-valuenow={hasValue ? clampedValue : undefined}
-			className={cx(
-				styles.spinner({ color, size }),
-				!hasValue && styles.spinnerIndeterminate,
-				className,
-			)}
+			className={cx(styles.spinner({ color, size }), styles.spinnerState({ mode }), className)}
 			role="progressbar"
 			style={style}
 		>
-			<svg aria-hidden="true" className={styles.svg} fill="none" viewBox={ICON_VIEWBOX}>
+			<svg aria-hidden="true" className={styles.svg()} fill="none" viewBox={ICON_VIEWBOX}>
 				<circle
-					className={cx(
-						styles.indicator,
-						hasValue ? styles.indicatorDeterminate : styles.indicatorIndeterminate,
-					)}
+					className={styles.indicator({ mode })}
 					cx={ICON_VIEWBOX_SIZE / 2}
 					cy={ICON_VIEWBOX_SIZE / 2}
 					fill="none"

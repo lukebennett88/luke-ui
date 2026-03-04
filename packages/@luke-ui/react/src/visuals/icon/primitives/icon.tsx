@@ -3,7 +3,6 @@ import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../../../.generated/icon-data.js';
 import { ICON_VIEWBOX } from '../../../lib/icon.js';
 import * as styles from '../../../recipes/icon.css.js';
-import type { IconSizeToken } from '../../../tokens.js';
 import type { DistributiveOmit } from '../../../types.js';
 import { cx } from '../../../utils.js';
 import { useIconSizeContext } from './icon-size-context.js';
@@ -12,6 +11,13 @@ export type { IconName } from '../../../../.generated/icon-data.js';
 export { iconNames, iconViewBoxes };
 
 const IconSpritesheetContext = createContext<string | null>(null);
+
+interface IconVariantProps extends NonNullable<styles.IconVariants> {}
+
+interface IconStyleProps {
+	/** Sets the icon size. */
+	size?: IconVariantProps['size'];
+}
 
 /** Props for `IconSpritesheetProvider`. */
 export interface IconSpritesheetProviderProps {
@@ -42,14 +48,13 @@ function useIconSpritesheetHref(): string {
 export type IconProps = Pick<
 	SVGAttributes<SVGSVGElement>,
 	'aria-hidden' | 'className' | 'id' | 'style' | 'viewBox'
-> & {
-	/** Icon name from the generated icon set. */
-	name: (typeof iconNames)[number];
-	/** Accessible label. When set, the icon is announced as an image. */
-	title?: string;
-	/** Token size override. Defaults to icon context or `'medium'`. */
-	size?: IconSizeToken;
-};
+> &
+	IconStyleProps & {
+		/** Icon name from the generated icon set. */
+		name: (typeof iconNames)[number];
+		/** Accessible label. When set, the icon is announced as an image. */
+		title?: string;
+	};
 
 /** Props used by `createIcon` for custom icon components. */
 export type CustomIconProps = DistributiveOmit<IconProps, 'name'>;
