@@ -34,9 +34,7 @@ const baseArgs = {
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole('img', { name: 'Celebration' }),
-		).toBeInTheDocument();
+		await expect(canvas.getByRole('img', { name: 'Celebration' })).toBeInTheDocument();
 	},
 	render: (props) => (
 		<div style={rowStyle}>

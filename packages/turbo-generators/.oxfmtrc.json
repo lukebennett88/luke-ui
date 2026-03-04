@@ -14,14 +14,7 @@
 			"protocol",
 			["builtin", "external", "type-builtin", "type-external"],
 			["subpath", "internal", "type-subpath", "type-internal"],
-			[
-				"parent",
-				"sibling",
-				"index",
-				"type-parent",
-				"type-sibling",
-				"type-index"
-			],
+			["parent", "sibling", "index", "type-parent", "type-sibling", "type-index"],
 			"unknown"
 		],
 		"ignoreCase": false,
@@ -40,7 +33,7 @@
 		"node_modules"
 	],
 	"jsxSingleQuote": false,
-	"printWidth": 80,
+	"printWidth": 100,
 	"quoteProps": "as-needed",
 	"semi": true,
 	"singleAttributePerLine": false,

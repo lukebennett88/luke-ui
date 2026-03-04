@@ -16,18 +16,14 @@ const stackStyle = {
 	maxInlineSize: '40rem',
 } as const satisfies CSSProperties;
 
-const levels = [1, 2, 3, 4, 5, 6] as const satisfies Array<
-	NonNullable<HeadingProps['level']>
->;
+const levels = [1, 2, 3, 4, 5, 6] as const satisfies Array<NonNullable<HeadingProps['level']>>;
 
 /**
  * Use `level` to define heading hierarchy and default heading size.
  */
 export const Level = meta.story({
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole('heading', { name: /Level 1/ }),
-		).toBeInTheDocument();
+		await expect(canvas.getByRole('heading', { name: /Level 1/ })).toBeInTheDocument();
 	},
 	render: (props) => (
 		<div style={stackStyle}>
@@ -90,9 +86,7 @@ export const Truncate = meta.story({
 	},
 	render: (props) => (
 		<div style={{ inlineSize: '20rem' }}>
-			<Heading {...props}>
-				A flat-file CMS stores content in files rather than a database.
-			</Heading>
+			<Heading {...props}>A flat-file CMS stores content in files rather than a database.</Heading>
 		</div>
 	),
 });

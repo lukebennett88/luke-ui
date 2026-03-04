@@ -8,10 +8,7 @@ interface GetTypographyInput {
 	lineHeight: LineHeightToken;
 }
 
-export function getTypographyClass(
-	input: GetTypographyInput,
-	debugId?: string,
-) {
+export function getTypographyClass(input: GetTypographyInput, debugId?: string) {
 	const fontSize = dimensionToPxNumber(tokens.fontSize[input.fontSize].$value);
 	const lineHeight = tokens.lineHeight[input.lineHeight].$value;
 

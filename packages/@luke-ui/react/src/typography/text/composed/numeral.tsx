@@ -7,10 +7,7 @@ export type NumeralFormat = 'decimal' | 'percent' | 'currency' | 'unit';
 export type NumeralAbbreviation = boolean | 'long';
 export type NumeralPrecision = number | readonly [number, number];
 
-export interface NumeralProps extends Omit<
-	TextProps,
-	'children' | 'textAlign' | 'variant'
-> {
+export interface NumeralProps extends Omit<TextProps, 'children' | 'textAlign' | 'variant'> {
 	abbreviate?: NumeralAbbreviation;
 	textAlign?: TextProps['textAlign'];
 	currency?: string;
@@ -37,15 +34,11 @@ function validateProps(props: NumeralProps) {
 	const hasUnit = unit ?? formatOptions?.unit;
 
 	if (hasCurrency && hasUnit) {
-		throw new Error(
-			'Numeral cannot format both `currency` and `unit` at once.',
-		);
+		throw new Error('Numeral cannot format both `currency` and `unit` at once.');
 	}
 
 	if (format === 'currency' && hasCurrency === undefined) {
-		throw new Error(
-			'Numeral with format="currency" requires a `currency` code.',
-		);
+		throw new Error('Numeral with format="currency" requires a `currency` code.');
 	}
 
 	if (format === 'unit' && hasUnit === undefined) {
@@ -58,9 +51,7 @@ function validateProps(props: NumeralProps) {
 
 	if (typeof precision === 'number') {
 		if (!isValidPrecisionValue(precision)) {
-			throw new Error(
-				'Numeral `precision` must be a non-negative integer or tuple.',
-			);
+			throw new Error('Numeral `precision` must be a non-negative integer or tuple.');
 		}
 		return;
 	}
@@ -70,9 +61,7 @@ function validateProps(props: NumeralProps) {
 		!isValidPrecisionValue(precision[1]) ||
 		precision[0] > precision[1]
 	) {
-		throw new Error(
-			'Numeral `precision` tuple must be [min, max] non-negative integers.',
-		);
+		throw new Error('Numeral `precision` tuple must be [min, max] non-negative integers.');
 	}
 }
 
@@ -99,8 +88,7 @@ export function Numeral(props: NumeralProps) {
 	} = props;
 	const resolvedLocale = locale ?? localeFromContext;
 
-	const resolvedFormat =
-		format ?? (currency ? 'currency' : unit ? 'unit' : 'decimal');
+	const resolvedFormat = format ?? (currency ? 'currency' : unit ? 'unit' : 'decimal');
 
 	const numeralFormatOptions: Intl.NumberFormatOptions = {
 		...formatOptions,
@@ -109,9 +97,7 @@ export function Numeral(props: NumeralProps) {
 	if (resolvedFormat === 'currency') {
 		const resolvedCurrency = currency ?? formatOptions?.currency;
 		if (resolvedCurrency === undefined) {
-			throw new Error(
-				'Numeral with format="currency" requires a `currency` code.',
-			);
+			throw new Error('Numeral with format="currency" requires a `currency` code.');
 		}
 		numeralFormatOptions.currency = resolvedCurrency;
 	}
@@ -126,8 +112,7 @@ export function Numeral(props: NumeralProps) {
 	}
 
 	if (abbreviate) {
-		numeralFormatOptions.compactDisplay =
-			abbreviate === 'long' ? 'long' : 'short';
+		numeralFormatOptions.compactDisplay = abbreviate === 'long' ? 'long' : 'short';
 		numeralFormatOptions.notation = 'compact';
 	}
 
@@ -141,10 +126,7 @@ export function Numeral(props: NumeralProps) {
 		}
 	}
 
-	const content = new Intl.NumberFormat(
-		resolvedLocale,
-		numeralFormatOptions,
-	).format(value);
+	const content = new Intl.NumberFormat(resolvedLocale, numeralFormatOptions).format(value);
 	const resolvedShouldDisableTrim = shouldDisableTrim ?? isWithinHeading;
 	const resolvedColor = color ?? (isWithinHeading ? 'inherit' : undefined);
 	const resolvedStyle =

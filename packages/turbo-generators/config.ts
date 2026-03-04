@@ -3,12 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { PlopTypes } from '@turbo/gen';
 
-const COMPONENT_GROUPS = [
-	'actions',
-	'feedback',
-	'typography',
-	'visuals',
-] as const;
+const COMPONENT_GROUPS = ['actions', 'feedback', 'typography', 'visuals'] as const;
 
 type GeneratorAnswers = {
 	group?: string;
@@ -56,9 +51,7 @@ function toCamelCase(value: string): string {
 	}
 	return parts
 		.map((part, index) => {
-			return index === 0
-				? part
-				: (part[0]?.toUpperCase() ?? '') + part.slice(1);
+			return index === 0 ? part : (part[0]?.toUpperCase() ?? '') + part.slice(1);
 		})
 		.join('');
 }
@@ -83,11 +76,7 @@ function resolveComponentDir(answers: GeneratorAnswers): string {
 function addComponentToDocsMeta(answers: GeneratorAnswers): string {
 	const group = resolveGroup(answers);
 	const componentDir = resolveComponentDir(answers);
-	const groupDir = join(
-		process.cwd(),
-		'apps/docs/content/docs/components',
-		group,
-	);
+	const groupDir = join(process.cwd(), 'apps/docs/content/docs/components', group);
 	const groupMetaPath = join(groupDir, 'meta.json');
 
 	mkdirSync(groupDir, { recursive: true });
@@ -108,10 +97,7 @@ function addComponentToDocsMeta(answers: GeneratorAnswers): string {
 	meta.pages = [...pages, componentDir].sort();
 	writeFileSync(groupMetaPath, `${JSON.stringify(meta, null, '\t')}\n`);
 
-	const parentMetaPath = join(
-		process.cwd(),
-		'apps/docs/content/docs/components/meta.json',
-	);
+	const parentMetaPath = join(process.cwd(), 'apps/docs/content/docs/components/meta.json');
 	const parentContent = readFileSync(parentMetaPath, 'utf8');
 	const parentMeta = JSON.parse(parentContent) as {
 		pages?: Array<string>;
@@ -120,10 +106,7 @@ function addComponentToDocsMeta(answers: GeneratorAnswers): string {
 	const parentPages = Array.isArray(parentMeta.pages) ? parentMeta.pages : [];
 	if (!parentPages.includes(group)) {
 		parentMeta.pages = [...parentPages, group].sort();
-		writeFileSync(
-			parentMetaPath,
-			`${JSON.stringify(parentMeta, null, '\t')}\n`,
-		);
+		writeFileSync(parentMetaPath, `${JSON.stringify(parentMeta, null, '\t')}\n`);
 	}
 
 	return `Added ${componentDir} to docs components ${group} meta`;
@@ -154,10 +137,7 @@ function addComponentToDocsIndex(answers: GeneratorAnswers): string {
 function addComponentToGettingStarted(answers: GeneratorAnswers): string {
 	const group = resolveGroup(answers);
 	const componentDir = resolveComponentDir(answers);
-	const filePath = join(
-		process.cwd(),
-		'apps/docs/content/docs/getting-started.mdx',
-	);
+	const filePath = join(process.cwd(), 'apps/docs/content/docs/getting-started.mdx');
 	const displayName = toDisplayName(componentDir);
 	const nextStepLine = `- Read the [${displayName}](/docs/components/${group}/${componentDir}) docs.`;
 
@@ -167,9 +147,7 @@ function addComponentToGettingStarted(answers: GeneratorAnswers): string {
 	}
 
 	const lines = content.split('\n');
-	const nextStepsIndex = lines.findIndex(
-		(line) => line.trim() === '## Next Steps',
-	);
+	const nextStepsIndex = lines.findIndex((line) => line.trim() === '## Next Steps');
 
 	if (nextStepsIndex === -1) {
 		const appended = `${content.trimEnd()}\n\n## Next Steps\n\n${nextStepLine}\n`;
@@ -263,10 +241,7 @@ function addComponentToRecipesBarrel(answers: GeneratorAnswers): string {
 	const firstImportIndex = content.search(/^import\s/m);
 	if (firstImportIndex === -1) {
 		const separator = content.endsWith('\n') ? '' : '\n';
-		writeFileSync(
-			RECIPES_PRIMITIVES_PATH,
-			`${content}${separator}${exportLine}\n`,
-		);
+		writeFileSync(RECIPES_PRIMITIVES_PATH, `${content}${separator}${exportLine}\n`);
 		return `Added ${componentDir} to recipes barrel`;
 	}
 	const updated = `${content.slice(0, firstImportIndex)}${exportLine}\n${content.slice(firstImportIndex)}`;

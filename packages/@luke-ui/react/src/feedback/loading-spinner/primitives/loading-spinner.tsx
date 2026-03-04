@@ -39,9 +39,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 	const normalizedMin = Math.min(minValue, maxValue);
 	const normalizedMax = Math.max(minValue, maxValue);
 	const clampedRange = Math.max(normalizedMax - normalizedMin, 1);
-	const clampedValue = hasValue
-		? clamp(value, normalizedMin, normalizedMax)
-		: 0;
+	const clampedValue = hasValue ? clamp(value, normalizedMin, normalizedMax) : 0;
 	const progress = ((clampedValue - normalizedMin) / clampedRange) * 100;
 	const dashOffset = 100 - progress;
 
@@ -60,18 +58,11 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 			role="progressbar"
 			style={style}
 		>
-			<svg
-				aria-hidden="true"
-				className={styles.svg}
-				fill="none"
-				viewBox={ICON_VIEWBOX}
-			>
+			<svg aria-hidden="true" className={styles.svg} fill="none" viewBox={ICON_VIEWBOX}>
 				<circle
 					className={cx(
 						styles.indicator,
-						hasValue
-							? styles.indicatorDeterminate
-							: styles.indicatorIndeterminate,
+						hasValue ? styles.indicatorDeterminate : styles.indicatorIndeterminate,
 					)}
 					cx={ICON_VIEWBOX_SIZE / 2}
 					cy={ICON_VIEWBOX_SIZE / 2}

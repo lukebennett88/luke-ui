@@ -1,9 +1,9 @@
 type StylePrimitive = string | number;
 
-export function createVariants<
-	Key extends string,
-	Style extends Record<string, StylePrimitive>,
->(keys: ReadonlyArray<Key>, getStyle: (key: Key) => Style): Record<Key, Style> {
+export function createVariants<Key extends string, Style extends Record<string, StylePrimitive>>(
+	keys: ReadonlyArray<Key>,
+	getStyle: (key: Key) => Style,
+): Record<Key, Style> {
 	const styles = {} as Record<Key, Style>;
 	for (const key of keys) {
 		styles[key] = getStyle(key);
@@ -11,10 +11,7 @@ export function createVariants<
 	return styles;
 }
 
-export function createPropertyVariants<
-	Key extends string,
-	Property extends string,
->(
+export function createPropertyVariants<Key extends string, Property extends string>(
 	keys: ReadonlyArray<Key>,
 	property: Property,
 	values: Record<Key, string>,

@@ -27,9 +27,7 @@ const rowStyle = {
 export const Default = meta.story({
 	args: { children: 'Primitive button' },
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole('button', { name: 'Primitive button' }),
-		).toBeInTheDocument();
+		await expect(canvas.getByRole('button', { name: 'Primitive button' })).toBeInTheDocument();
 	},
 });
 

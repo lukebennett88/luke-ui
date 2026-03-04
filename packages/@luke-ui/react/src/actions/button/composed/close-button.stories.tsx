@@ -18,9 +18,7 @@ const flexWrapStyle = {
 
 export const Default = meta.story({
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole('button', { name: 'Close' }),
-		).toBeInTheDocument();
+		await expect(canvas.getByRole('button', { name: 'Close' })).toBeInTheDocument();
 	},
 });
 

@@ -62,9 +62,7 @@ export const Currency = meta.story({
  */
 export const Units = meta.story({
 	args: baseArgs,
-	render: (props) => (
-		<Numeral {...props} unit="kilometer-per-hour" value={98} />
-	),
+	render: (props) => <Numeral {...props} unit="kilometer-per-hour" value={98} />,
 });
 
 /**
@@ -103,20 +101,16 @@ export const Composition = meta.story({
 	render: (props) => (
 		<div style={stackStyle}>
 			<Heading level={2}>
-				Acme Corporation shares hit{' '}
-				<Numeral {...props} abbreviate value={1_456_789} /> today
+				Acme Corporation shares hit <Numeral {...props} abbreviate value={1_456_789} /> today
 			</Heading>
 			<Text>
-				We asked investors which private company&apos;s stock they would most
-				like to own. More than{' '}
-				<Numeral {...props} format="percent" value={0.80123} /> of respondents
-				picked Acme Corp.
+				We asked investors which private company&apos;s stock they would most like to own. More than{' '}
+				<Numeral {...props} format="percent" value={0.80123} /> of respondents picked Acme Corp.
 			</Text>
 			<Text>
-				Hooli, Acme&apos;s parent component, went public earlier in the year.
-				The median commitment was{' '}
-				<Numeral {...props} currency="AUD" precision={0} value={1_000} /> though
-				the average was significantly higher.
+				Hooli, Acme&apos;s parent component, went public earlier in the year. The median commitment
+				was <Numeral {...props} currency="AUD" precision={0} value={1_000} /> though the average was
+				significantly higher.
 			</Text>
 		</div>
 	),
@@ -130,19 +124,16 @@ export const Locale = meta.story({
 	render: () => (
 		<div style={stackStyle}>
 			<Heading level={2}>
-				Acme Corporation shares hit <Numeral value={1_456_789} abbreviate />{' '}
-				today
+				Acme Corporation shares hit <Numeral value={1_456_789} abbreviate /> today
 			</Heading>
 			<Text>
-				We asked investors which private company’s stock they would most like to
-				own. More than <Numeral value={0.80123} format="percent" /> of
-				respondents picked Acme Corp.
+				We asked investors which private company’s stock they would most like to own. More than{' '}
+				<Numeral value={0.80123} format="percent" /> of respondents picked Acme Corp.
 			</Text>
 			<Text>
-				Hooli, Acme’s parent component, went public earlier in the year. The
-				median commitment was{' '}
-				<Numeral value={1_000} currency="AUD" precision={0} /> though the
-				average was significantly higher.
+				Hooli, Acme’s parent component, went public earlier in the year. The median commitment was{' '}
+				<Numeral value={1_000} currency="AUD" precision={0} /> though the average was significantly
+				higher.
 			</Text>
 		</div>
 	),

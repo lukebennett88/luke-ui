@@ -55,10 +55,7 @@ export default defineMain({
 		];
 
 		config.optimizeDeps ??= {};
-		config.optimizeDeps.exclude = [
-			...(config.optimizeDeps.exclude ?? []),
-			...exportSpecifiers,
-		];
+		config.optimizeDeps.exclude = [...(config.optimizeDeps.exclude ?? []), ...exportSpecifiers];
 
 		return config;
 	},

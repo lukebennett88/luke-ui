@@ -2,10 +2,7 @@ import type { DistributiveOmit } from '../../../types.js';
 import type { TextProps } from '../primitives/text.js';
 import { Text } from '../primitives/text.js';
 
-export interface EmojiProps extends DistributiveOmit<
-	TextProps,
-	'children' | 'elementType'
-> {
+export interface EmojiProps extends DistributiveOmit<TextProps, 'children' | 'elementType'> {
 	emoji: string;
 	label: string;
 }

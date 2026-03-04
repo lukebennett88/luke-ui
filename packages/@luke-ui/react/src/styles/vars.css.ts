@@ -19,9 +19,7 @@ type TokenGroup = {
 
 type TokenGroupKey<T extends TokenGroup> = Exclude<keyof T, '$type'>;
 
-function toContract<T extends TokenGroup>(
-	group: T,
-): Record<TokenGroupKey<T>, null> {
+function toContract<T extends TokenGroup>(group: T): Record<TokenGroupKey<T>, null> {
 	const contract = {} as Record<TokenGroupKey<T>, null>;
 	for (const key of tokenKeys(group)) {
 		contract[key] = null;
@@ -49,15 +47,10 @@ function toCssValue(type: string, value: unknown): string {
 	return String(value);
 }
 
-function toStringValues<T extends TokenGroup>(
-	group: T,
-): Record<TokenGroupKey<T>, string> {
+function toStringValues<T extends TokenGroup>(group: T): Record<TokenGroupKey<T>, string> {
 	const values = {} as Record<TokenGroupKey<T>, string>;
 	for (const key of tokenKeys(group)) {
-		values[key] = toCssValue(
-			group.$type,
-			(group[key] as { $value: unknown }).$value,
-		);
+		values[key] = toCssValue(group.$type, (group[key] as { $value: unknown }).$value);
 	}
 	return values;
 }

@@ -4,13 +4,9 @@ import { vars } from './vars.css.js';
 
 const root = classSelector(lukeUiClassNames.resetRoot);
 
-globalStyleInLayer(
-	'reset',
-	`${root}, ${root} *, ${root} *::before, ${root} *::after`,
-	{
-		boxSizing: 'border-box',
-	},
-);
+globalStyleInLayer('reset', `${root}, ${root} *, ${root} *::before, ${root} *::after`, {
+	boxSizing: 'border-box',
+});
 
 globalStyleInLayer('reset', `${root} :where(blockquote, dl, dd, figure, p)`, {
 	margin: 0,

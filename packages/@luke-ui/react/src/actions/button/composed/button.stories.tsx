@@ -15,12 +15,7 @@ const baseArgs = {
 	children: 'Button',
 } satisfies Partial<ButtonProps>;
 
-const tones: Array<NonNullable<ButtonProps['tone']>> = [
-	'primary',
-	'critical',
-	'ghost',
-	'neutral',
-];
+const tones: Array<NonNullable<ButtonProps['tone']>> = ['primary', 'critical', 'ghost', 'neutral'];
 
 const sizes: Array<NonNullable<ButtonProps['size']>> = ['small', 'medium'];
 
@@ -62,9 +57,7 @@ const truncationContainerStyle = {
 export const Tone = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole('button', { name: 'primary' }),
-		).toBeInTheDocument();
+		await expect(canvas.getByRole('button', { name: 'primary' })).toBeInTheDocument();
 	},
 	render: (props) => (
 		<div style={rowStyle}>

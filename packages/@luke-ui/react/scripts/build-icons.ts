@@ -11,10 +11,7 @@ const OUTPUT_DIR = path.resolve(process.cwd(), 'dist');
 const GENERATED_DIR = path.resolve(process.cwd(), '.generated');
 const ICON_DATA_TS_PATH = path.resolve(GENERATED_DIR, 'icon-data.ts');
 
-async function writeIfChanged(
-	filepath: string,
-	content: string,
-): Promise<boolean> {
+async function writeIfChanged(filepath: string, content: string): Promise<boolean> {
 	try {
 		const current = await fs.promises.readFile(filepath, 'utf8');
 		if (current === content) return false;
@@ -64,9 +61,7 @@ async function main() {
 			}
 
 			if (seenIconNames.has(iconName)) {
-				process.stdout.write(
-					`Skipping "${file}": duplicate icon id "${iconName}"\n`,
-				);
+				process.stdout.write(`Skipping "${file}": duplicate icon id "${iconName}"\n`);
 				continue;
 			}
 
@@ -124,19 +119,14 @@ ${iconNames.map((n) => `\t'${n}': '${viewBoxes[n]}'`).join(',\n')}
 
 	const changed = spriteChanged || iconDataChanged;
 	if (changed) {
-		process.stdout.write(
-			`Generated spritesheet with ${iconNames.length} icons\n`,
-		);
+		process.stdout.write(`Generated spritesheet with ${iconNames.length} icons\n`);
 	} else {
-		process.stdout.write(
-			`Spritesheet up to date (${iconNames.length} icons)\n`,
-		);
+		process.stdout.write(`Spritesheet up to date (${iconNames.length} icons)\n`);
 	}
 }
 
 main().catch((err) => {
-	const message =
-		err instanceof Error ? (err.stack ?? err.message) : String(err);
+	const message = err instanceof Error ? (err.stack ?? err.message) : String(err);
 	process.stderr.write(`Failed to build icons: ${message}\n`);
 	process.exit(1);
 });

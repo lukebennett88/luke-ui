@@ -8,9 +8,7 @@ import { defineConfig } from 'vitest/config';
 import { devEntries } from './.generated/entries.js';
 
 const dirname =
-	typeof __dirname !== 'undefined'
-		? __dirname
-		: path.dirname(fileURLToPath(import.meta.url));
+	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.join(dirname, '.storybook');
 
 const packageRoot = path.resolve(dirname);

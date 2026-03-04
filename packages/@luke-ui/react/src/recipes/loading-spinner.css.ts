@@ -7,9 +7,7 @@ import { iconSizeVariants } from './icon.css.js';
 
 const colorKeys = tokenKeys(tokens.foregroundColor);
 
-const colorVariants = Object.fromEntries(
-	colorKeys.map((key) => [key, { color: vars.color[key] }]),
-);
+const colorVariants = Object.fromEntries(colorKeys.map((key) => [key, { color: vars.color[key] }]));
 
 const base = styleInLayer('recipes', {
 	color: 'currentColor',

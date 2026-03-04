@@ -6,8 +6,7 @@ const MIN_LEVEL = 1;
 const DEFAULT_LEVEL = 2;
 
 /** Clamp a number to the valid heading range. */
-const clampLevel = (n: number): HeadingLevel =>
-	Math.max(MIN_LEVEL, Math.min(6, n)) as HeadingLevel;
+const clampLevel = (n: number): HeadingLevel => Math.max(MIN_LEVEL, Math.min(6, n)) as HeadingLevel;
 
 /**
  * Context for heading levels (1–6).
@@ -111,12 +110,6 @@ type HeadingPresenceProviderProps = {
 	children: ReactNode;
 };
 
-export function HeadingPresenceProvider({
-	children,
-}: HeadingPresenceProviderProps) {
-	return (
-		<WithinHeadingContext.Provider value={true}>
-			{children}
-		</WithinHeadingContext.Provider>
-	);
+export function HeadingPresenceProvider({ children }: HeadingPresenceProviderProps) {
+	return <WithinHeadingContext.Provider value={true}>{children}</WithinHeadingContext.Provider>;
 }

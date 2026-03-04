@@ -3,8 +3,6 @@ export const lukeUiClassNames = {
 	themeRoot: 'luke-ui-theme',
 } as const;
 
-export function classSelector<TClassName extends string>(
-	className: TClassName,
-): `.${TClassName}` {
+export function classSelector<TClassName extends string>(className: TClassName): `.${TClassName}` {
 	return `.${className}`;
 }

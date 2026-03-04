@@ -26,16 +26,11 @@ const stackStyle = {
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole('progressbar', { name: 'pending' }),
-		).toBeInTheDocument();
+		await expect(canvas.getByRole('progressbar', { name: 'pending' })).toBeInTheDocument();
 	},
 });
 
-const sizes: Array<NonNullable<LoadingSpinnerProps['size']>> = [
-	'small',
-	'medium',
-];
+const sizes: Array<NonNullable<LoadingSpinnerProps['size']>> = ['small', 'medium'];
 
 /**
  * Size adjusts the spinner footprint for compact and standard layouts.

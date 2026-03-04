@@ -22,11 +22,7 @@ export function IconSpritesheetProvider({
 	children,
 	href,
 }: IconSpritesheetProviderProps): JSX.Element {
-	return (
-		<IconSpritesheetContext.Provider value={href}>
-			{children}
-		</IconSpritesheetContext.Provider>
-	);
+	return <IconSpritesheetContext.Provider value={href}>{children}</IconSpritesheetContext.Provider>;
 }
 
 function useIconSpritesheetHref(): string {
@@ -50,9 +46,7 @@ export type IconProps = Pick<
 
 export type CustomIconProps = DistributiveOmit<IconProps, 'name'>;
 
-export interface CreateIconOptions<
-	TProps extends CustomIconProps = CustomIconProps,
-> {
+export interface CreateIconOptions<TProps extends CustomIconProps = CustomIconProps> {
 	path: ReactNode | ((props: TProps) => ReactNode);
 	viewBox?: string | ((props: TProps) => string | undefined);
 }
@@ -62,22 +56,11 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 	viewBox: defaultViewBox = ICON_VIEWBOX,
 }: CreateIconOptions<TProps>): (props: TProps) => JSX.Element {
 	return function Icon(props: TProps): JSX.Element {
-		const {
-			'aria-hidden': ariaHiddenProp,
-			className,
-			id,
-			size,
-			style,
-			title,
-			viewBox,
-		} = props;
+		const { 'aria-hidden': ariaHiddenProp, className, id, size, style, title, viewBox } = props;
 		const ariaHidden = ariaHiddenProp ?? !title;
 		const role = ariaHidden ? undefined : 'img';
 		const resolvedViewBox =
-			viewBox ??
-			(typeof defaultViewBox === 'function'
-				? defaultViewBox(props)
-				: defaultViewBox);
+			viewBox ?? (typeof defaultViewBox === 'function' ? defaultViewBox(props) : defaultViewBox);
 		const resolvedPath = typeof path === 'function' ? path(props) : path;
 		const contextSize = useIconSizeContext();
 		const resolvedSize = size ?? contextSize ?? 'medium';
@@ -108,9 +91,7 @@ type SpritesheetIconProps = IconProps & {
 };
 
 const SpritesheetIcon = createIcon<SpritesheetIconProps>({
-	path: ({ name, spritesheetHref }) => (
-		<use href={`${spritesheetHref}#${name}`} />
-	),
+	path: ({ name, spritesheetHref }) => <use href={`${spritesheetHref}#${name}`} />,
 	viewBox: ({ name }) => iconViewBoxes[name],
 });
 

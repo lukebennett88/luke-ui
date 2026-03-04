@@ -30,11 +30,7 @@
 		},
 		"generate": {
 			"dependsOn": ["^generate"],
-			"outputs": [
-				".generated/**",
-				"dist/spritesheet.svg",
-				"src/routeTree.gen.ts"
-			]
+			"outputs": [".generated/**", "dist/spritesheet.svg", "src/routeTree.gen.ts"]
 		},
 		"dev": {
 			"cache": false,

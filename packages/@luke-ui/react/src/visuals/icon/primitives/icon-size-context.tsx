@@ -9,13 +9,8 @@ interface IconSizeProviderProps {
 	size: IconSizeToken;
 }
 
-export function IconSizeProvider({
-	children,
-	size,
-}: IconSizeProviderProps): JSX.Element {
-	return (
-		<IconSizeContext.Provider value={size}>{children}</IconSizeContext.Provider>
-	);
+export function IconSizeProvider({ children, size }: IconSizeProviderProps): JSX.Element {
+	return <IconSizeContext.Provider value={size}>{children}</IconSizeContext.Provider>;
 }
 
 export function useIconSizeContext(): IconSizeToken | null {

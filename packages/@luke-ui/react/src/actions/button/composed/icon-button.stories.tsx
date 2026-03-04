@@ -25,9 +25,7 @@ const flexWrapStyle = {
 export const Default = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Add' },
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole('button', { name: 'Add' }),
-		).toBeInTheDocument();
+		await expect(canvas.getByRole('button', { name: 'Add' })).toBeInTheDocument();
 	},
 });
 

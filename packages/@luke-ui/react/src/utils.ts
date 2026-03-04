@@ -47,8 +47,6 @@ export function typedKeys<T extends object>(value: T) {
  * const rebuilt2 = typedObjectFromEntries(typedEntries(obj));
  * //    ^? { name: string, age: number }
  */
-export function typedObjectFromEntries<T extends object>(
-	entries: Array<ObjectEntry<T>>,
-) {
+export function typedObjectFromEntries<T extends object>(entries: Array<ObjectEntry<T>>) {
 	return Object.fromEntries(entries) as T;
 }

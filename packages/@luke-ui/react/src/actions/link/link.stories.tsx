@@ -35,9 +35,7 @@ const darkPanelStyle = {
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole('link', { name: 'Link' }),
-		).toBeInTheDocument();
+		await expect(canvas.getByRole('link', { name: 'Link' })).toBeInTheDocument();
 	},
 });
 
@@ -78,8 +76,7 @@ export const Standalone = meta.story({
 				Standalone link
 			</Link>
 			<p>
-				When part of a sentence, use the default{' '}
-				<Link {...props}>inline link</Link> style.
+				When part of a sentence, use the default <Link {...props}>inline link</Link> style.
 			</p>
 		</div>
 	),

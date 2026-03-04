@@ -35,44 +35,26 @@ const baseArgs = {
 	lineHeight: 'loose',
 } as const satisfies Pick<TextProps, 'children' | 'fontSize' | 'lineHeight'>;
 
-const colors = [
-	...tokenKeys(tokens.foregroundColor),
-	'inherit',
-] satisfies Array<TextProps['color']>;
-
-const fontFamilies = tokenKeys(tokens.fontFamily) satisfies Array<
-	TextProps['fontFamily']
+const colors = [...tokenKeys(tokens.foregroundColor), 'inherit'] satisfies Array<
+	TextProps['color']
 >;
 
-const fontSizes = tokenKeys(tokens.fontSize) satisfies Array<
-	TextProps['fontSize']
->;
+const fontFamilies = tokenKeys(tokens.fontFamily) satisfies Array<TextProps['fontFamily']>;
+
+const fontSizes = tokenKeys(tokens.fontSize) satisfies Array<TextProps['fontSize']>;
 
 const headingFontSizes = fontSizes.filter((fontSize) =>
-	['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'large', 'xlarge', 'xxlarge'].includes(
-		fontSize,
-	),
+	['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'large', 'xlarge', 'xxlarge'].includes(fontSize),
 );
 
-const fontWeights = [
-	...tokenKeys(tokens.fontWeight),
-	'inherit',
-] satisfies Array<TextProps['fontWeight']>;
-
-const lineHeights = tokenKeys(tokens.lineHeight) satisfies Array<
-	TextProps['lineHeight']
+const fontWeights = [...tokenKeys(tokens.fontWeight), 'inherit'] satisfies Array<
+	TextProps['fontWeight']
 >;
 
+const lineHeights = tokenKeys(tokens.lineHeight) satisfies Array<TextProps['lineHeight']>;
+
 export type LineClampOption = NonNullable<TextProps['lineClamp']>;
-const lineClampOptions: ReadonlyArray<LineClampOption> = [
-	false,
-	true,
-	1,
-	2,
-	3,
-	4,
-	5,
-];
+const lineClampOptions: ReadonlyArray<LineClampOption> = [false, true, 1, 2, 3, 4, 5];
 
 /**
  * `Text` is the base typography primitive for paragraph and inline copy.
@@ -91,13 +73,7 @@ export const FontSize = meta.story({
 	render: (props) => (
 		<div style={stackContainerStyle}>
 			{fontSizes.map((fontSize) => (
-				<Text
-					fontSize={fontSize}
-					key={fontSize}
-					lineHeight="tight"
-					style={panelStyle}
-					{...props}
-				>
+				<Text fontSize={fontSize} key={fontSize} lineHeight="tight" style={panelStyle} {...props}>
 					{fontSize}: {storyText}
 				</Text>
 			))}
@@ -161,12 +137,7 @@ export const LineHeight = meta.story({
 	render: (props) => (
 		<div style={stackContainerStyle}>
 			{lineHeights.map((lineHeight) => (
-				<Text
-					key={lineHeight}
-					lineHeight={lineHeight}
-					style={panelStyle}
-					{...props}
-				>
+				<Text key={lineHeight} lineHeight={lineHeight} style={panelStyle} {...props}>
 					{lineHeight}: {loremIpsum}
 				</Text>
 			))}

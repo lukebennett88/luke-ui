@@ -13,5 +13,4 @@ export const ICON_VIEWBOX = `0 0 ${ICON_VIEWBOX_SIZE} ${ICON_VIEWBOX_SIZE}`;
 export const SPINNER_STROKE_WIDTH = 2;
 
 /** Radius inset by half stroke so the stroke's outer edge aligns with icon content (19px). */
-export const SPINNER_CIRCLE_RADIUS =
-	(ICON_CONTENT_SIZE - SPINNER_STROKE_WIDTH) / 2;
+export const SPINNER_CIRCLE_RADIUS = (ICON_CONTENT_SIZE - SPINNER_STROKE_WIDTH) / 2;

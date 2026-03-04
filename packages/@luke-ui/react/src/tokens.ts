@@ -28,10 +28,7 @@ export type DesignToken<TValue> = {
 	$value: TValue;
 };
 
-export type DesignTokenGroup<
-	TType extends string,
-	TValues extends Record<string, unknown>,
-> = {
+export type DesignTokenGroup<TType extends string, TValues extends Record<string, unknown>> = {
 	$type: TType;
 } & {
 	[Key in keyof TValues]: DesignToken<TValues[Key]>;
@@ -42,10 +39,10 @@ export type TokenName<TGroup extends { $type: string }> = Extract<
 	string
 >;
 
-function toTokenGroup<
-	TType extends string,
-	TValues extends Record<string, unknown>,
->(type: TType, values: TValues): DesignTokenGroup<TType, TValues> {
+function toTokenGroup<TType extends string, TValues extends Record<string, unknown>>(
+	type: TType,
+	values: TValues,
+): DesignTokenGroup<TType, TValues> {
 	const group = { $type: type } as DesignTokenGroup<TType, TValues>;
 
 	for (const key in values) {
@@ -65,19 +62,11 @@ export function tokenKeys<TGroup extends { $type: string }>(
 	);
 }
 
-export function dimensionToRemString(
-	value: DimensionTokenValue,
-	base: number = 16,
-): string {
-	return value.unit === 'rem'
-		? `${value.value}rem`
-		: pxToRem(value.value, base);
+export function dimensionToRemString(value: DimensionTokenValue, base: number = 16): string {
+	return value.unit === 'rem' ? `${value.value}rem` : pxToRem(value.value, base);
 }
 
-export function dimensionToPxNumber(
-	value: DimensionTokenValue,
-	base: number = 16,
-): number {
+export function dimensionToPxNumber(value: DimensionTokenValue, base: number = 16): number {
 	return value.unit === 'px' ? value.value : value.value * base;
 }
 
@@ -98,27 +87,16 @@ function formatNumber(value: number): string {
 	return `${normalized}`;
 }
 
-const functionLikeColorSpaces = new Set([
-	'hsl',
-	'hwb',
-	'lab',
-	'lch',
-	'oklab',
-	'oklch',
-]);
+const functionLikeColorSpaces = new Set(['hsl', 'hwb', 'lab', 'lch', 'oklab', 'oklch']);
 
 export function colorToCssString(value: ColorTokenValue): string {
 	if (value.components.length === 0) {
 		throw new Error(`Color token "${value.colorSpace}" has no components`);
 	}
 
-	const components = value.components.map((component) =>
-		formatNumber(component),
-	);
+	const components = value.components.map((component) => formatNumber(component));
 	const alphaSuffix =
-		value.alpha === undefined || value.alpha === 1
-			? ''
-			: ` / ${formatNumber(value.alpha)}`;
+		value.alpha === undefined || value.alpha === 1 ? '' : ` / ${formatNumber(value.alpha)}`;
 
 	if (functionLikeColorSpaces.has(value.colorSpace)) {
 		return `${value.colorSpace}(${components.join(' ')}${alphaSuffix})`;

@@ -16,10 +16,7 @@ const extraEntries: Record<string, string> = {
 	utils: 'src/utils.ts',
 };
 
-async function writeIfChanged(
-	filePath: string,
-	content: string,
-): Promise<boolean> {
+async function writeIfChanged(filePath: string, content: string): Promise<boolean> {
 	try {
 		const current = await fs.readFile(filePath, 'utf8');
 		if (current === content) return false;
@@ -59,9 +56,7 @@ async function collectGroupEntries(): Promise<Record<string, string>> {
 				if (hasPrimitives) {
 					entries.push([
 						groupName,
-						path
-							.relative(PACKAGE_ROOT, primitivesPath)
-							.replaceAll(path.sep, '/'),
+						path.relative(PACKAGE_ROOT, primitivesPath).replaceAll(path.sep, '/'),
 					]);
 				}
 				if (hasComposed) {
@@ -78,18 +73,14 @@ async function collectGroupEntries(): Promise<Record<string, string>> {
 	return Object.fromEntries(groupEntries);
 }
 
-async function assertEntryFilesExist(
-	entries: Record<string, string>,
-): Promise<void> {
+async function assertEntryFilesExist(entries: Record<string, string>): Promise<void> {
 	await Promise.all(
 		Object.entries(entries).map(async ([subpath, relativePath]) => {
 			const absolutePath = path.resolve(PACKAGE_ROOT, relativePath);
 			try {
 				await fs.access(absolutePath);
 			} catch {
-				throw new Error(
-					`Entry "${subpath}" points to missing file: ${relativePath}`,
-				);
+				throw new Error(`Entry "${subpath}" points to missing file: ${relativePath}`);
 			}
 		}),
 	);
@@ -133,19 +124,14 @@ async function main() {
 	const tsChanged = await writeIfChanged(OUTPUT_TS, createTsModule(entries));
 
 	if (tsChanged) {
-		process.stdout.write(
-			`Generated entries (${Object.keys(entries).length})\n`,
-		);
+		process.stdout.write(`Generated entries (${Object.keys(entries).length})\n`);
 	} else {
-		process.stdout.write(
-			`Entries up to date (${Object.keys(entries).length})\n`,
-		);
+		process.stdout.write(`Entries up to date (${Object.keys(entries).length})\n`);
 	}
 }
 
 main().catch((err) => {
-	const errorMessage =
-		err instanceof Error ? (err.stack ?? err.message) : String(err);
+	const errorMessage = err instanceof Error ? (err.stack ?? err.message) : String(err);
 	process.stderr.write(`Failed to generate entries: ${errorMessage}\n`);
 	process.exit(1);
 });

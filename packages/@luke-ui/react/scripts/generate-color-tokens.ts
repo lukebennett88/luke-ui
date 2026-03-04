@@ -14,9 +14,9 @@ const paletteThemePrimary = {
 	100: '#e9f3fb',
 	200: '#d4e7f7',
 	300: '#a9cfef',
-	400: '#185281',
-	500: '#194c73',
-	600: '#1a3f60',
+	400: '#2888d7',
+	500: '#185281',
+	600: '#103656',
 } as const;
 
 const paletteThemeAccent = {
@@ -76,11 +76,11 @@ const foregroundColorValues = {
 } as const;
 
 const themeColorValues = {
-	buttonBackgroundColor: paletteThemePrimary['400'],
-	buttonBackgroundColorHover: paletteThemePrimary['500'],
+	buttonBackgroundColor: paletteThemePrimary['500'],
+	buttonBackgroundColorHover: paletteThemePrimary['600'],
 	buttonBackgroundColorActive: paletteThemePrimary['600'],
-	buttonBorderColor: paletteThemePrimary['400'],
-	buttonBorderColorHover: paletteThemePrimary['500'],
+	buttonBorderColor: paletteThemePrimary['500'],
+	buttonBorderColorHover: paletteThemePrimary['600'],
 	buttonBorderColorActive: paletteThemePrimary['600'],
 	buttonColor: paletteThemePrimary['100'],
 	focusRingColor: paletteThemePrimary['300'],
@@ -138,9 +138,7 @@ function toColorTokenValue(inputColor: string): GeneratedColorTokenValue {
 
 	const components = parsedColor.coords.map((component, index) => {
 		if (component === null) {
-			throw new Error(
-				`Color token "${inputColor}" has a missing component at index ${index}`,
-			);
+			throw new Error(`Color token "${inputColor}" has a missing component at index ${index}`);
 		}
 
 		return roundNumber(component);
@@ -159,10 +157,7 @@ function toGeneratedConst(name: string, value: unknown): string {
 
 const generatedGroups = Object.entries(colorGroups).map(([name, values]) => {
 	const transformed = Object.fromEntries(
-		Object.entries(values).map(([key, inputColor]) => [
-			key,
-			toColorTokenValue(inputColor),
-		]),
+		Object.entries(values).map(([key, inputColor]) => [key, toColorTokenValue(inputColor)]),
 	);
 
 	return toGeneratedConst(name, transformed);

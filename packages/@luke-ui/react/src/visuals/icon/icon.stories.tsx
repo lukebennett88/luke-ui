@@ -17,12 +17,7 @@ const baseArgs = {
 	title: 'add',
 } as const satisfies Partial<IconProps>;
 
-const iconSizes: Array<NonNullable<IconProps['size']>> = [
-	'xsmall',
-	'small',
-	'medium',
-	'large',
-];
+const iconSizes: Array<NonNullable<IconProps['size']>> = ['xsmall', 'small', 'medium', 'large'];
 const colors = tokenKeys(tokens.foregroundColor);
 
 const wrapStyle = {

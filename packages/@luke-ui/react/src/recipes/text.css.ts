@@ -19,21 +19,10 @@ const fontSizeKeys = tokenKeys(tokens.fontSize);
 const fontWeightKeys = tokenKeys(tokens.fontWeight);
 const lineHeightKeys = tokenKeys(tokens.lineHeight);
 
-const textDecorationKeys = [
-	'none',
-	'underline',
-	'line-through',
-	'inherit',
-] as const;
+const textDecorationKeys = ['none', 'underline', 'line-through', 'inherit'] as const;
 export type TextDecoration = (typeof textDecorationKeys)[number];
 
-const textTransformKeys = [
-	'none',
-	'capitalize',
-	'uppercase',
-	'lowercase',
-	'inherit',
-] as const;
+const textTransformKeys = ['none', 'capitalize', 'uppercase', 'lowercase', 'inherit'] as const;
 export type TextTransform = (typeof textTransformKeys)[number];
 
 const textAlignKeys = ['start', 'center', 'end'] as const;
@@ -87,11 +76,10 @@ const base = styleInLayer('recipes', {
 });
 
 const colorVariants: Record<TextColor, { color: TextColor }> = (() => {
-	const variants = createPropertyVariants(
-		colorKeys,
-		'color',
-		vars.color,
-	) as Record<TextColor, { color: TextColor }>;
+	const variants = createPropertyVariants(colorKeys, 'color', vars.color) as Record<
+		TextColor,
+		{ color: TextColor }
+	>;
 	variants.inherit = { color: 'inherit' };
 	return variants;
 })();
@@ -102,28 +90,22 @@ const fontFamilyVariants = createPropertyVariants(
 	vars.fontFamily,
 ) as Record<TextFontFamily, { fontFamily: TextFontFamily }>;
 
-const fontWeightVariants: Record<
-	TextFontWeight,
-	{ fontWeight: TextFontWeight }
-> = (() => {
-	const variants = createPropertyVariants(
-		fontWeightKeys,
-		'fontWeight',
-		vars.fontWeight,
-	) as Record<TextFontWeight, { fontWeight: TextFontWeight }>;
+const fontWeightVariants: Record<TextFontWeight, { fontWeight: TextFontWeight }> = (() => {
+	const variants = createPropertyVariants(fontWeightKeys, 'fontWeight', vars.fontWeight) as Record<
+		TextFontWeight,
+		{ fontWeight: TextFontWeight }
+	>;
 	variants.inherit = { fontWeight: 'inherit' };
 	return variants;
 })();
 
-const textDecorationVariants = createVariants(
-	textDecorationKeys,
-	(textDecoration) => ({ textDecoration }),
-);
+const textDecorationVariants = createVariants(textDecorationKeys, (textDecoration) => ({
+	textDecoration,
+}));
 
-const textTransformVariants = createVariants(
-	textTransformKeys,
-	(textTransform) => ({ textTransform }),
-);
+const textTransformVariants = createVariants(textTransformKeys, (textTransform) => ({
+	textTransform,
+}));
 
 const textAlignVariants = {
 	start: { textAlign: 'start' },
@@ -135,13 +117,15 @@ const textVariantVariants = createVariants(textVariantKeys, (variant) => ({
 	fontVariantNumeric: variant === 'unset' ? 'normal' : variant,
 }));
 
-const fontSizeVariants = Object.fromEntries(
-	fontSizeKeys.map((key) => [key, {}]),
-) as Record<FontSizeToken, {}>;
+const fontSizeVariants = Object.fromEntries(fontSizeKeys.map((key) => [key, {}])) as Record<
+	FontSizeToken,
+	{}
+>;
 
-const lineHeightVariants = Object.fromEntries(
-	lineHeightKeys.map((key) => [key, {}]),
-) as Record<LineHeightToken, {}>;
+const lineHeightVariants = Object.fromEntries(lineHeightKeys.map((key) => [key, {}])) as Record<
+	LineHeightToken,
+	{}
+>;
 
 const typographyCompoundVariants = (() => {
 	const variants: Array<{

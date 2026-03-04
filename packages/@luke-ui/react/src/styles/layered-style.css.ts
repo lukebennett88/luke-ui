@@ -1,8 +1,5 @@
 import type { GlobalStyleRule, StyleRule } from '@vanilla-extract/css';
-import {
-	globalStyle as vanillaGlobalStyle,
-	style as vanillaStyle,
-} from '@vanilla-extract/css';
+import { globalStyle as vanillaGlobalStyle, style as vanillaStyle } from '@vanilla-extract/css';
 import { recipe as vanillaRecipe } from '@vanilla-extract/recipes';
 import type { DistributiveOmit } from '../types.js';
 import type { LayerName } from './layers.css.js';
@@ -15,9 +12,7 @@ type RecipeVariantDefinitions = Record<string, RecipeStyleRule>;
 type RecipeVariantGroups = Record<string, RecipeVariantDefinitions>;
 type BooleanMap<T> = T extends 'true' | 'false' ? boolean : T;
 type RecipeVariantSelection<Variants extends RecipeVariantGroups> = {
-	[VariantGroup in keyof Variants]?:
-		| BooleanMap<keyof Variants[VariantGroup]>
-		| undefined;
+	[VariantGroup in keyof Variants]?: BooleanMap<keyof Variants[VariantGroup]> | undefined;
 };
 type RecipeCompoundVariant<Variants extends RecipeVariantGroups> = {
 	variants: RecipeVariantSelection<Variants>;
@@ -38,10 +33,7 @@ function withLayer(layer: LayerName, rule: LayeredStyleRule): StyleRule {
 	};
 }
 
-function withLayerGlobal(
-	layer: LayerName,
-	rule: LayeredGlobalStyleRule,
-): GlobalStyleRule {
+function withLayerGlobal(layer: LayerName, rule: LayeredGlobalStyleRule): GlobalStyleRule {
 	return {
 		'@layer': {
 			[layers[layer]]: rule,
@@ -49,13 +41,8 @@ function withLayerGlobal(
 	};
 }
 
-function withLayerIfStyleRule(
-	layer: LayerName,
-	styleRule: RecipeStyleRule,
-): RecipeStyleRule {
-	return typeof styleRule === 'string'
-		? styleRule
-		: withLayer(layer, styleRule);
+function withLayerIfStyleRule(layer: LayerName, styleRule: RecipeStyleRule): RecipeStyleRule {
+	return typeof styleRule === 'string' ? styleRule : withLayer(layer, styleRule);
 }
 
 export function globalStyleInLayer(
@@ -66,11 +53,7 @@ export function globalStyleInLayer(
 	vanillaGlobalStyle(selector, withLayerGlobal(layer, rule));
 }
 
-export function styleInLayer(
-	layer: LayerName,
-	rule: LayeredStyleRule,
-	debugId?: string,
-): string {
+export function styleInLayer(layer: LayerName, rule: LayeredStyleRule, debugId?: string): string {
 	return vanillaStyle(withLayer(layer, rule), debugId);
 }
 
@@ -83,19 +66,15 @@ export function recipeInLayer<Variants extends RecipeVariantGroups>(
 		options.variants === undefined
 			? undefined
 			: (Object.fromEntries(
-					Object.entries(options.variants).map(
-						([variantName, variantValues]) => [
-							variantName,
-							Object.fromEntries(
-								Object.entries(variantValues).map(
-									([variantValue, styleRule]) => [
-										variantValue,
-										withLayerIfStyleRule(layer, styleRule),
-									],
-								),
-							),
-						],
-					),
+					Object.entries(options.variants).map(([variantName, variantValues]) => [
+						variantName,
+						Object.fromEntries(
+							Object.entries(variantValues).map(([variantValue, styleRule]) => [
+								variantValue,
+								withLayerIfStyleRule(layer, styleRule),
+							]),
+						),
+					]),
 				) as Variants);
 
 	const layeredCompoundVariants =
@@ -109,9 +88,7 @@ export function recipeInLayer<Variants extends RecipeVariantGroups>(
 	return vanillaRecipe<Variants>(
 		{
 			...options,
-			...(options.base === undefined
-				? {}
-				: { base: withLayerIfStyleRule(layer, options.base) }),
+			...(options.base === undefined ? {} : { base: withLayerIfStyleRule(layer, options.base) }),
 			...(layeredVariants === undefined ? {} : { variants: layeredVariants }),
 			...(layeredCompoundVariants === undefined
 				? {}

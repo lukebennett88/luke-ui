@@ -1,12 +1,7 @@
 import lukeUiStyles from '@luke-ui/react/stylesheet.css?url';
 import { themeRootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
-import {
-	createRootRoute,
-	HeadContent,
-	Outlet,
-	Scripts,
-} from '@tanstack/react-router';
+import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type * as React from 'react';
 import SearchDialog from '../components/search';
