@@ -132,8 +132,8 @@ export const AllIcons = meta.story({
 				<li key={name} style={iconItemStyle}>
 					<Button
 						tone="neutral"
-						onPress={() => {
-							navigator.clipboard.writeText(name);
+						onPress={async () => {
+							await navigator.clipboard.writeText(name);
 						}}
 						style={iconButtonStyle}
 					>
