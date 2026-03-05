@@ -3,16 +3,29 @@
 	"arrowParens": "always",
 	"bracketSameLine": false,
 	"bracketSpacing": true,
-	"experimentalSortImports": {
+	"ignorePatterns": [
+		".source",
+		"**/.generated/entries.*",
+		"**/.generated/icon-data.*",
+		"**/*.hbs",
+		"**/dist/**",
+		"**/routeTree.gen.ts",
+		"**/storybook-static/**",
+		"node_modules"
+	],
+	"jsxSingleQuote": false,
+	"overrides": [
+		{ "files": ["**/*.css.ts"], "options": { "sortImports": { "sortSideEffects": false } } }
+	],
+	"printWidth": 100,
+	"quoteProps": "as-needed",
+	"semi": true,
+	"singleAttributePerLine": false,
+	"singleQuote": true,
+	"sortImports": {
 		"customGroups": [
-			{
-				"elementNamePattern": ["http://**", "https://**"],
-				"groupName": "url"
-			},
-			{
-				"elementNamePattern": ["*:*"],
-				"groupName": "protocol"
-			}
+			{ "elementNamePattern": ["http://**", "https://**"], "groupName": "url" },
+			{ "elementNamePattern": ["*:*"], "groupName": "protocol" }
 		],
 		"groups": [
 			["side_effect_style", "side_effect"],
@@ -28,25 +41,6 @@
 		"newlinesBetween": false,
 		"sortSideEffects": true
 	},
-	"ignorePatterns": [
-		".source",
-		"**/.generated/entries.*",
-		"**/.generated/icon-data.*",
-		"**/*.hbs",
-		"**/dist/**",
-		"**/routeTree.gen.ts",
-		"**/storybook-static/**",
-		"node_modules",
-		"packages/@luke-ui/react/src/styles/index.css.ts",
-		"packages/@luke-ui/react/src/styles/primitives.css.ts",
-		"packages/@luke-ui/react/src/styles/composed.css.ts"
-	],
-	"jsxSingleQuote": false,
-	"printWidth": 100,
-	"quoteProps": "as-needed",
-	"semi": true,
-	"singleAttributePerLine": false,
-	"singleQuote": true,
 	"tabWidth": 2,
 	"trailingComma": "all",
 	"useTabs": true

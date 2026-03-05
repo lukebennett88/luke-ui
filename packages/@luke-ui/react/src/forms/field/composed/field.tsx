@@ -1,7 +1,7 @@
 import type { ComponentProps, JSX, ReactNode } from 'react';
 import { FieldDescription } from '../primitives/field-description.js';
-import { FieldError } from '../primitives/field-error.js';
 import type { FieldErrorProps } from '../primitives/field-error.js';
+import { FieldError } from '../primitives/field-error.js';
 import type { FieldNecessityIndicator } from '../primitives/field-label.js';
 import { FieldLabel } from '../primitives/field-label.js';
 import { Field as PrimitiveField } from '../primitives/field.js';
