@@ -8,6 +8,7 @@ React design system using `vanilla-extract`.
 - `pnpm dev` - Start dev
 - `pnpm build` - Build all
 - `pnpm check` - Lint, format, types
+- `pnpm test` - Run all tests (Storybook + visual regression)
 
 ## Stack
 
@@ -31,7 +32,7 @@ React design system using `vanilla-extract`.
 ## CI Setup
 
 - Argos + Storybook GitHub setup: `docs/ARGOS_SETUP.md`
-- Visual regression test command: `pnpm run test:visual`
+- Visual regression test command: `pnpm test`
 
 ## TODO
 

@@ -42,7 +42,7 @@ jobs:
         run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
       - name: Run Storybook visual tests
-        run: corepack pnpm run test:visual
+        run: corepack pnpm test
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
 

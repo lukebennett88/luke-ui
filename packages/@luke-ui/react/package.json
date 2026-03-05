@@ -58,10 +58,9 @@
 		"generate:entries": "pnpm run generate:icons && tsx scripts/generate-entries.ts && pnpm exec tsc -p scripts/tsconfig.generated.json",
 		"generate:icons": "tsx scripts/build-icons.ts",
 		"pretest": "pnpm run generate:entries && pnpm run generate:color-tokens",
-		"test": "vitest run --project=storybook",
+		"test": "tsx scripts/test-visual.ts",
 		"pretest:ui": "pnpm run generate:entries && pnpm run generate:color-tokens",
 		"test:ui": "vitest --project=storybook --ui",
-		"test:visual": "tsx scripts/test-visual.ts",
 		"pretest:watch": "pnpm run generate:entries && pnpm run generate:color-tokens",
 		"test:watch": "vitest --project=storybook"
 	},

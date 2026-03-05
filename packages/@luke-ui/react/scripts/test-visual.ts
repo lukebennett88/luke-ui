@@ -50,7 +50,7 @@ if (env.ARGOS_TOKEN) {
 	env.ARGOS_UPLOAD = '1';
 }
 
-const result = spawnSync('pnpm', ['run', 'test'], {
+const result = spawnSync('pnpm', ['exec', 'vitest', 'run', '--project=storybook'], {
 	cwd: packageRoot,
 	env,
 	stdio: 'inherit',

@@ -17,7 +17,7 @@ This repository uses Argos visual testing through Storybook Vitest integration.
 
 - Workflow: `.github/workflows/storybook.yml`
   - `visual-tests` job injects `ARGOS_TOKEN` into root script
-    `pnpm run test:visual`.
+    `pnpm test`.
   - For fork PRs (no repository secrets), tests still run but Argos upload is
     skipped automatically.
   - `deploy-pages` passes `STORYBOOK_BASE_PATH` from
@@ -28,10 +28,9 @@ This repository uses Argos visual testing through Storybook Vitest integration.
 - Vitest config: `packages/@luke-ui/react/vitest.config.ts`
   - Argos plugin reads `process.env.ARGOS_TOKEN`.
 - Root script: `package.json`
-  - `test:visual` delegates to `@luke-ui/react` workspace script
-    `test:visual`.
+  - `test` delegates to `@luke-ui/react` workspace script `test`.
 - Workspace script: `packages/@luke-ui/react/package.json`
-  - `test:visual` runs `tsx scripts/test-visual.ts`.
+  - `test` runs `tsx scripts/test-visual.ts`.
   - The script uses existing `ARGOS_TOKEN` if set; otherwise it loads local
     package `.env.local` (when present), enables `ARGOS_UPLOAD=1` only when
     `ARGOS_TOKEN` is available, then runs the Storybook Vitest suite.
@@ -51,8 +50,9 @@ Use `packages/@luke-ui/react/.env.local` for local runs.
 
 1. Set `ARGOS_TOKEN` in `packages/@luke-ui/react/.env.local`.
 2. Run:
-   - `corepack pnpm run test:visual`
-   - This command enables upload automatically when `ARGOS_TOKEN` is present.
+   - `corepack pnpm test`
+   - This command runs the Storybook Vitest suite and enables Argos upload
+     automatically when `ARGOS_TOKEN` is present.
 
 ## Security Notes
 
