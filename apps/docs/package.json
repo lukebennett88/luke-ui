@@ -50,7 +50,7 @@
 		"@vanilla-extract/vite-plugin": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
 		"nitro": "npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e",
-		"serve": "^14.2.5",
+		"serve": "^14.2.6",
 		"srvx": "^0.11.8",
 		"tailwindcss": "^4.2.1",
 		"typescript": "^5.9.3",

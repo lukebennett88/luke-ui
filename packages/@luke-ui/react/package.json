@@ -67,10 +67,10 @@
 	"dependencies": {
 		"@capsizecss/metrics": "^3.6.2",
 		"@capsizecss/vanilla-extract": "^2.0.4",
-		"@react-aria/utils": "^3.33.0",
+		"@react-aria/utils": "^3.33.1",
 		"@vanilla-extract/css": "^1.18.0",
 		"@vanilla-extract/recipes": "^0.5.7",
-		"react-aria-components": "^1.15.1"
+		"react-aria-components": "^1.16.0"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18.2",
@@ -91,9 +91,9 @@
 		"@vitest/ui": "4.0.18",
 		"babel-plugin-react-compiler": "^1.0.0",
 		"colorjs.io": "^0.6.1",
-		"node-html-parser": "^7.0.2",
+		"node-html-parser": "^7.1.0",
 		"playwright": "^1.58.2",
-		"publint": "^0.3.17",
+		"publint": "^0.3.18",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"storybook": "catalog:",
