@@ -21,7 +21,9 @@
 			"dependsOn": ["generate"]
 		},
 		"check:format": {},
-		"check:lint": {},
+		"check:lint": {
+			"dependsOn": ["generate"]
+		},
 		"check:types": {
 			"dependsOn": ["^build"]
 		},
