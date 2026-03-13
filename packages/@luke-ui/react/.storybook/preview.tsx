@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 import '@luke-ui/react/stylesheet.css';
+import addonPerformancePanel from '@github-ui/storybook-addon-performance-panel';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeRootClassName } from '@luke-ui/react/theme';
 import { IconSpritesheetProvider } from '@luke-ui/react/visuals';
@@ -9,7 +10,7 @@ import addonDocs from '@storybook/addon-docs';
 import { definePreview } from '@storybook/react-vite';
 
 export default definePreview({
-	addons: [addonA11y(), addonDocs()],
+	addons: [addonA11y(), addonDocs(), addonPerformancePanel()],
 	decorators: [
 		(Story) => (
 			<IconSpritesheetProvider href={spriteSheetHref}>

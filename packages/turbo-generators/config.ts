@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { PlopTypes } from '@turbo/gen';
 
-const COMPONENT_GROUPS = ['actions', 'feedback', 'typography', 'visuals'] as const;
+const COMPONENT_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
 type GeneratorAnswers = {
 	group?: string;

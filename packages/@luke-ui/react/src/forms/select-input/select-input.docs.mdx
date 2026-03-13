@@ -1,0 +1,39 @@
+`SelectInput` provides low-level, Spectrum-style combobox primitives built on React Aria Components.
+
+## Import
+
+```ts
+import {
+	SelectInput,
+	SelectInputGroup,
+	SelectInputText,
+	SelectTrigger,
+	SelectPopover,
+	SelectListBox,
+	SelectItem,
+	SelectSection,
+} from '@luke-ui/react/forms';
+```
+
+## Usage
+
+```tsx
+<SelectInput aria-label="Country" defaultItems={countries}>
+	<SelectInputGroup>
+		<SelectInputText placeholder="Select a country..." />
+		<SelectTrigger aria-label="Toggle options">
+			<Icon name="chevronDown" />
+		</SelectTrigger>
+	</SelectInputGroup>
+	<SelectPopover>
+		<SelectListBox>{(item) => <SelectItem>{item.label}</SelectItem>}</SelectListBox>
+	</SelectPopover>
+</SelectInput>
+```
+
+## API Notes
+
+- Spectrum-first prop naming is used (`value`, `defaultValue`, `onChange`, `inputValue`, `onInputChange`).
+- This v1 primitive is single-select only.
+- Grouped options are composed with `SelectSection`.
+- Async options are controlled externally (for example via `useAsyncList` or your own loading state), then passed via `items`.

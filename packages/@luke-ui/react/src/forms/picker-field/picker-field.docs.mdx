@@ -1,0 +1,35 @@
+`PickerField` is the composed non-searchable field built from `PickerInput` primitives.
+
+## Import
+
+```ts
+import { PickerField } from '@luke-ui/react/forms/composed';
+import { SelectItem, SelectSection } from '@luke-ui/react/forms';
+```
+
+## Usage
+
+```tsx
+<PickerField label="Country" name="country" placeholder="Select a country..." items={countries}>
+	{(item) => <SelectItem>{item.label}</SelectItem>}
+</PickerField>
+```
+
+## Grouped Options
+
+```tsx
+<PickerField label="Country" name="country">
+	<SelectSection title="Northern hemisphere">
+		<SelectItem id="ca">Canada</SelectItem>
+	</SelectSection>
+	<SelectSection title="Southern hemisphere">
+		<SelectItem id="au">Australia</SelectItem>
+	</SelectSection>
+</PickerField>
+```
+
+## API Shape
+
+- Root props follow React Aria `Select` naming.
+- Composed convenience props: `label`, `description`, `errorMessage`, `necessityIndicator`, `size`, `placeholder`.
+- Single-select only in v1.

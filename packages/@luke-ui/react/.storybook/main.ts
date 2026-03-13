@@ -30,6 +30,7 @@ function normalizeStorybookBasePath(basePath: string | undefined) {
 
 export default defineMain({
 	addons: [
+		getAbsolutePath('@github-ui/storybook-addon-performance-panel'),
 		getAbsolutePath('@storybook/addon-a11y'),
 		getAbsolutePath('@storybook/addon-docs'),
 		getAbsolutePath('@storybook/addon-vitest'),

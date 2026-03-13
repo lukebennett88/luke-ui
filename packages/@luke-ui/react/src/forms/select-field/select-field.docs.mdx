@@ -1,0 +1,41 @@
+`SelectField` is the composed searchable field built from `SelectInput` primitives.
+
+## Import
+
+```ts
+import { SelectField } from '@luke-ui/react/forms/composed';
+import { SelectItem, SelectSection } from '@luke-ui/react/forms';
+```
+
+## Usage
+
+```tsx
+<SelectField
+	label="Country"
+	name="country"
+	placeholder="Select a country..."
+	defaultItems={countries}
+>
+	{(item) => <SelectItem>{item.label}</SelectItem>}
+</SelectField>
+```
+
+## Grouped Options
+
+```tsx
+<SelectField label="Country" name="country">
+	<SelectSection title="Northern hemisphere">
+		<SelectItem id="ca">Canada</SelectItem>
+	</SelectSection>
+	<SelectSection title="Southern hemisphere">
+		<SelectItem id="au">Australia</SelectItem>
+	</SelectSection>
+</SelectField>
+```
+
+## API Shape
+
+- Root props follow React Aria `ComboBox` naming.
+- Composed convenience props: `label`, `description`, `errorMessage`, `necessityIndicator`, `size`, `placeholder`.
+- Single-select only in v1.
+- Async options are externally controlled and passed via `items`.

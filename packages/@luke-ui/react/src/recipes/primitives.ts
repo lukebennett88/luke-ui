@@ -9,6 +9,17 @@ export type { LinkVariants } from './link.css.js';
 export { link } from './link.css.js';
 export type { LoadingSpinnerVariants } from './loading-spinner.css.js';
 export { spinner as loadingSpinner } from './loading-spinner.css.js';
+export type { SelectInputVariants } from './select-input.css.js';
+export {
+	SelectInputGroup,
+	selectInputText,
+	selectItem,
+	selectListBox,
+	selectPopover,
+	selectSection,
+	selectTrigger,
+	selectValue,
+} from './select-input.css.js';
 export type {
 	TextAlign,
 	TextColor,
