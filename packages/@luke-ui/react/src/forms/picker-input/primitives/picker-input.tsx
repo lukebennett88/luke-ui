@@ -16,7 +16,7 @@ export function PickerInput<T extends object>(props: PickerInputProps<T>): JSX.E
 		<RacSelect
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return cx(styles.selectRoot, className);
+				return cx(styles.selectInputRoot, className);
 			})}
 		/>
 	);

@@ -6,6 +6,7 @@ const transitionProperty = 'color, background-color, border-color';
 
 const disabledState =
 	'[data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(button:disabled), :has([data-disabled="true"])';
+const descendantDisabledState = '[data-disabled="true"], [aria-disabled="true"]';
 const focusWithinState = '[data-focus-within="true"], [data-focused="true"], :focus-within';
 const hoverState = '[data-hovered="true"], :hover';
 const invalidState =
@@ -18,15 +19,16 @@ const controlHoverSelector = `&:where(${hoverState}):not(:where(${disabledState}
 const controlInvalidSelector = `&:where(${invalidState})`;
 const controlInvalidFocusWithinSelector = `&:where(${invalidState}):where(${focusWithinState})`;
 const controlReadOnlySelector = `&:where(${readOnlyState})`;
+const descendantDisabledSelector = `:where(${descendantDisabledState}) &`;
 
-export const selectRoot = styleInLayer('recipes', {
+export const selectInputRoot = styleInLayer('recipes', {
 	display: 'flex',
 	flexDirection: 'column',
 	inlineSize: '100%',
 	minInlineSize: 0,
 });
 
-export const SelectInputGroup = recipeInLayer('recipes', {
+export const selectInputGroup = recipeInLayer('recipes', {
 	base: {
 		alignItems: 'center',
 		backgroundColor: vars.backgroundColor.input,
@@ -47,7 +49,7 @@ export const SelectInputGroup = recipeInLayer('recipes', {
 		selectors: {
 			[controlDisabledSelector]: {
 				backgroundColor: vars.backgroundColor.inputDisabled,
-				borderColor: vars.backgroundColor.inputDisabled,
+				borderColor: vars.border.default,
 				color: vars.foregroundColor.disabled,
 				cursor: 'not-allowed',
 			},
@@ -160,14 +162,22 @@ export const selectTrigger = recipeInLayer('recipes', {
 		lineHeight: vars.font.lineHeight.tight,
 		minInlineSize: 0,
 		outline: 'none',
+		position: 'relative',
 
 		selectors: {
 			'&:not(:first-child)': {
 				backgroundColor: vars.backgroundColor.subtle,
-				borderInlineStartColor: vars.border.input,
-				borderInlineStartStyle: 'solid',
-				borderInlineStartWidth: vars.borderWidth.thin,
 				inlineSize: 'auto',
+			},
+			'&:not(:first-child)::before': {
+				backgroundColor: vars.border.input,
+				blockSize: '24px',
+				content: '',
+				inlineSize: vars.borderWidth.thin,
+				insetBlockStart: '50%',
+				insetInlineStart: 0,
+				position: 'absolute',
+				transform: 'translateY(-50%)',
 			},
 			'&:where(:first-child)': {
 				backgroundColor: 'transparent',
@@ -176,6 +186,17 @@ export const selectTrigger = recipeInLayer('recipes', {
 			'&:where([data-disabled="true"], :disabled)': {
 				color: vars.foregroundColor.disabled,
 				cursor: 'not-allowed',
+			},
+			[descendantDisabledSelector]: {
+				backgroundColor: 'transparent',
+				color: vars.border.input,
+			},
+			'&:not(:first-child):where([data-disabled="true"], :disabled)': {
+				backgroundColor: 'transparent',
+				color: vars.border.input,
+			},
+			'&:not(:first-child):where([data-disabled="true"], :disabled)::before': {
+				backgroundColor: vars.border.default,
 			},
 		},
 	},
@@ -332,4 +353,4 @@ export const selectItem = recipeInLayer('recipes', {
 	},
 });
 
-export type SelectInputVariants = RecipeVariants<typeof SelectInputGroup>;
+export type SelectInputVariants = RecipeVariants<typeof selectInputGroup>;

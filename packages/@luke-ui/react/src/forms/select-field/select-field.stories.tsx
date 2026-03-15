@@ -1,7 +1,9 @@
+import { Button } from '@luke-ui/react/actions/composed';
 import { SelectItem, SelectSection } from '@luke-ui/react/forms';
 import { SelectField } from '@luke-ui/react/forms/composed';
 import type { CSSProperties, JSX } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import type { Key } from 'react-aria-components';
 import { Form } from 'react-aria-components';
 import { expect, userEvent, within } from 'storybook/test';
 import preview from '../../../.storybook/preview.js';
@@ -67,7 +69,7 @@ function AsyncItemsExample(): JSX.Element {
 }
 
 /**
- * Composed `SelectField` wires label, description, and validation messaging.
+ * Use the SelectField component when the user needs to choose one option from a large group of options.
  */
 export const Default = meta.story({
 	play: async ({ canvasElement }) => {
@@ -98,9 +100,59 @@ export const Default = meta.story({
 });
 
 /**
- * Size, disabled, and read-only states are forwarded to the underlying controls.
+ * Uncontrolled mode uses `defaultSelectedKey` and `defaultItems`.
+ * The component manages its own state internally.
  */
-export const States = meta.story({
+export const Uncontrolled = meta.story({
+	render: function Render() {
+		return (
+			<SelectField
+				defaultItems={countryItems}
+				defaultSelectedKey="ca"
+				label="Uncontrolled Select"
+				name="uncontrolled"
+				placeholder="Select a country..."
+			>
+				{(item) => <SelectItem>{item.label}</SelectItem>}
+			</SelectField>
+		);
+	},
+});
+
+/**
+ * Controlled mode uses `selectedKey`, `onSelectionChange`, and `items`.
+ * The parent component manages the state.
+ */
+export const Controlled = meta.story({
+	render: function Render() {
+		const [selectedKey, setSelectedKey] = useState<Key | null>('us');
+		const [inputValue, setInputValue] = useState('');
+
+		return (
+			<div style={stackStyle}>
+				<SelectField
+					inputValue={inputValue}
+					items={countryItems}
+					label="Controlled Select"
+					name="controlled"
+					onInputChange={setInputValue}
+					onSelectionChange={setSelectedKey}
+					placeholder="Select a country..."
+					selectedKey={selectedKey}
+				>
+					{(item) => <SelectItem>{item.label}</SelectItem>}
+				</SelectField>
+				<p>Selected: {selectedKey ?? 'None'}</p>
+			</div>
+		);
+	},
+});
+
+/**
+ * The input supports two sizes: small and medium (default).
+ * Prefer using size consistently with other form controls.
+ */
+export const Size = meta.story({
 	render: () => (
 		<div style={stackStyle}>
 			<SelectField
@@ -114,21 +166,9 @@ export const States = meta.story({
 			</SelectField>
 			<SelectField
 				defaultItems={countryItems}
-				description="Temporarily unavailable"
-				isDisabled
-				label="Disabled"
-				name="disabled"
-				placeholder="Disabled"
-			>
-				{(item) => <SelectItem>{item.label}</SelectItem>}
-			</SelectField>
-			<SelectField
-				defaultItems={countryItems}
-				description="Value cannot be edited"
-				isReadOnly
-				label="Read-only"
-				name="readonly"
-				placeholder="Read-only"
+				label="Medium (default)"
+				name="medium"
+				placeholder="Medium"
 			>
 				{(item) => <SelectItem>{item.label}</SelectItem>}
 			</SelectField>
@@ -137,11 +177,30 @@ export const States = meta.story({
 });
 
 /**
- * Grouped options are rendered with `SelectSection`.
+ * Disabling the select input can be done via the disabled prop.
+ */
+export const Disabled = meta.story({
+	render: () => (
+		<SelectField
+			defaultItems={countryItems}
+			description="Temporarily unavailable"
+			isDisabled
+			label="Country"
+			name="disabled"
+			placeholder="Select a country..."
+		>
+			{(item) => <SelectItem>{item.label}</SelectItem>}
+		</SelectField>
+	),
+});
+
+/**
+ * Groups are used to separate items into appropriate sections.
+ * A divider is also included between each section.
  */
 export const Groups = meta.story({
 	render: () => (
-		<SelectField label="Grouped countries" name="grouped" placeholder="Select a country...">
+		<SelectField label="Country" name="grouped" placeholder="Select a country...">
 			<SelectSection id="north" title="Northern hemisphere">
 				<SelectItem id="ca">Canada</SelectItem>
 				<SelectItem id="us">United States</SelectItem>
@@ -156,14 +215,34 @@ export const Groups = meta.story({
 });
 
 /**
- * Async items are externally controlled and passed into `items`.
+ * The SelectField can take both static and dynamic lists of items.
+ * For example, you can pass items from an HTTP request and the select input will handle loading states while it awaits the async items.
  */
 export const AsyncItems = meta.story({
 	render: () => <AsyncItemsExample />,
 });
 
 /**
- * Error messaging appears through the composed field wrapper.
+ * Disabled keys prevent selection of specific options.
+ * Disabled items cannot be selected, focused, or interacted with.
+ */
+export const DisabledKeys = meta.story({
+	render: () => (
+		<SelectField
+			defaultItems={countryItems}
+			description="Canada and Sweden are disabled"
+			disabledKeys={['ca', 'se']}
+			label="Country"
+			name="disabled-keys"
+			placeholder="Select a country..."
+		>
+			{(item) => <SelectItem>{item.label}</SelectItem>}
+		</SelectField>
+	),
+});
+
+/**
+ * Invalid required fields use native validation by default and block form submission.
  */
 export const Validation = meta.story({
 	play: async ({ canvasElement }) => {
@@ -183,7 +262,30 @@ export const Validation = meta.story({
 				>
 					{(item) => <SelectItem>{item.label}</SelectItem>}
 				</SelectField>
-				<button type="submit">Submit</button>
+				<Button type="submit">Submit</Button>
+			</div>
+		</Form>
+	),
+});
+
+/**
+ * Use `validationBehavior="aria"` to mark the field invalid for assistive technologies without blocking form submission.
+ */
+export const AriaValidation = meta.story({
+	render: () => (
+		<Form validationBehavior="native">
+			<div style={stackStyle}>
+				<SelectField
+					isRequired
+					label="Required Field"
+					name="required"
+					defaultItems={countryItems}
+					placeholder="Select a country..."
+					validationBehavior="aria"
+				>
+					{(item: CountryItem) => <SelectItem>{item.label}</SelectItem>}
+				</SelectField>
+				<Button type="submit">Submit</Button>
 			</div>
 		</Form>
 	),

@@ -1,10 +1,10 @@
 import type { JSX, ReactNode } from 'react';
+import type { Key } from 'react-aria-components';
 import { Icon } from '../../../visuals/icon/primitives/icon.js';
 import { Field } from '../../field/composed/field.js';
 import type { FieldErrorProps } from '../../field/primitives/field-error.js';
 import type { FieldNecessityIndicator } from '../../field/primitives/field-label.js';
 import type {
-	SelectInputProps,
 	SelectInputSize,
 	SelectListBoxProps,
 } from '../../select-input/primitives/select-input.js';
@@ -17,33 +17,96 @@ import {
 	SelectTrigger,
 } from '../../select-input/primitives/select-input.js';
 
-/** Props for composed `SelectField` (combobox pattern). */
-export interface SelectFieldProps<T extends object> extends Omit<
-	SelectInputProps<T>,
-	'children' | 'items'
-> {
+/** Props for composed `SelectField` (searchable single-select). */
+export interface SelectFieldProps<T extends object> {
+	/** Item content for the listbox (render prop or static children). */
+	children: SelectListBoxProps<T>['children'];
+
+	/** Items passed to the inner listbox for controlled mode. */
+	items?: SelectListBoxProps<T>['items'];
+
+	/** Initial items for uncontrolled mode. */
+	defaultItems?: SelectListBoxProps<T>['items'];
+
+	/** Controlled selected key. Pass `null` for no selection. */
+	selectedKey?: Key | null;
+
+	/** The initial selected key (uncontrolled). */
+	defaultSelectedKey?: Key | null;
+
+	/** Called when the selection changes. */
+	onSelectionChange?: (key: Key | null) => void;
+
+	/** Input value (controlled). */
+	inputValue?: string;
+
+	/** The initial input value (uncontrolled). */
+	defaultInputValue?: string;
+
+	/** Called when the input value changes. */
+	onInputChange?: (value: string) => void;
+
+	/** Whether the popover is open (controlled). */
+	isOpen?: boolean;
+
+	/** The initial open state (uncontrolled). */
+	defaultOpen?: boolean;
+
+	/** Called when the open state changes. */
+	onOpenChange?: (isOpen: boolean) => void;
+
+	/** Item keys that are disabled and cannot be selected, focused, or interacted with. */
+	disabledKeys?: Iterable<Key>;
+
+	/** Whether the input is disabled. */
+	isDisabled?: boolean;
+
+	/** Whether the input is read-only. */
+	isReadOnly?: boolean;
+
+	/** Whether user input is required before form submission. */
+	isRequired?: boolean;
+
+	/** Whether the input value is invalid. */
+	isInvalid?: boolean;
+
+	/** The name of the input, used when submitting an HTML form. */
+	name?: string;
+
+	/** Whether the input should receive focus on mount. */
+	autoFocus?: boolean;
+
+	/**
+	 * Validation mode. Use `'native'` to block submit on invalid fields, or `'aria'` to expose
+	 * invalid state to assistive tech without blocking submit.
+	 * @default 'native'
+	 */
+	validationBehavior?: 'native' | 'aria';
+
 	/** Helper text shown below the control. */
 	description?: ReactNode;
+
 	/** Error content passed to `FieldError`. */
 	errorMessage?: FieldErrorProps['children'];
-	/** Items passed to the inner listbox. */
-	items?: SelectListBoxProps<T>['items'];
+
 	/** Label content shown above the control. */
 	label?: ReactNode;
-	/** Item content for the listbox. */
-	children: SelectListBoxProps<T>['children'];
-	/** Label necessity style. */
+
+	/** Label necessity style. @default 'icon' */
 	necessityIndicator?: FieldNecessityIndicator;
+
 	/** Placeholder text shown in the input. */
 	placeholder?: string;
-	/** Control size. Defaults to `'medium'`. */
+
+	/** Control size. @default 'medium' */
 	size?: SelectInputSize;
 }
 
-/** Composed field for searchable single-select combobox usage. */
+/** Composes `SelectInput` with label, description, and error slots. */
 export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.Element {
 	const {
 		children,
+		defaultItems,
 		description,
 		errorMessage,
 		items,
@@ -53,10 +116,11 @@ export function SelectField<T extends object>(props: SelectFieldProps<T>): JSX.E
 		size = 'medium',
 		...selectInputProps
 	} = props;
+
 	const iconSize = size === 'small' ? 'xsmall' : 'small';
 
 	return (
-		<SelectInput<T> {...selectInputProps}>
+		<SelectInput<T> {...selectInputProps} defaultItems={defaultItems} items={items}>
 			<Field
 				description={description}
 				errorMessage={errorMessage}

@@ -49,7 +49,7 @@ export function SelectInput<T extends object>(props: SelectInputProps<T>): JSX.E
 		<RacComboBox
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return cx(styles.selectRoot, className);
+				return cx(styles.selectInputRoot, className);
 			})}
 		/>
 	);
@@ -69,7 +69,7 @@ export function SelectInputGroup(props: SelectInputGroupProps): JSX.Element {
 		<RacGroup
 			{...groupProps}
 			className={composeRenderProps(groupProps.className, (className) => {
-				return cx(styles.SelectInputGroup({ size }), className);
+				return cx(styles.selectInputGroup({ size }), className);
 			})}
 		/>
 	);
