@@ -33,9 +33,9 @@
 		"@tanstack/react-start": "1.159.0",
 		"@tanstack/start-static-server-functions": "1.159.1",
 		"fumadocs-core": "16.6.0",
-		"fumadocs-mdx": "14.2.7",
+		"fumadocs-mdx": "catalog:",
 		"fumadocs-ui": "16.6.0",
-		"lucide-react": "^0.575.0",
+		"lucide-react": "^0.577.0",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"vite": "catalog:"
@@ -51,7 +51,7 @@
 		"@vitejs/plugin-react": "catalog:",
 		"nitro": "npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e",
 		"serve": "^14.2.6",
-		"srvx": "^0.11.8",
+		"srvx": "^0.11.9",
 		"tailwindcss": "^4.2.1",
 		"typescript": "^5.9.3",
 		"vite-tsconfig-paths": "^6.1.1"
