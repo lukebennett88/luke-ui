@@ -20,7 +20,7 @@ export default defineConfig((options) => ({
 		profile: 'esm-only',
 	},
 	deps: {
-		neverBundle: ['react', 'react-dom', /^react\//],
+		neverBundle: Object.keys(packageJson.peerDependencies),
 	},
 	dts: true,
 	entry: entries,
@@ -35,7 +35,6 @@ export default defineConfig((options) => ({
 			};
 		},
 	},
-	external: Object.keys(packageJson.peerDependencies),
 	format: ['esm'],
 	outputOptions: {
 		assetFileNames: '[name][extname]',

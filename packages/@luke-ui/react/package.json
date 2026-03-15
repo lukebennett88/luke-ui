@@ -21,8 +21,8 @@
 		"./utils": "./dist/utils.js",
 		"./visuals": "./dist/visuals.js",
 		"./package.json": "./package.json",
-		"./spritesheet.svg": "./dist/spritesheet.svg",
-		"./stylesheet.css": "./dist/stylesheet.css"
+		"./stylesheet.css": "./dist/stylesheet.css",
+		"./spritesheet.svg": "./dist/spritesheet.svg"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -75,7 +75,7 @@
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18.2",
 		"@argos-ci/storybook": "catalog:",
-		"@rollup/plugin-babel": "^6.1.0",
+		"@rollup/plugin-babel": "^7.0.0",
 		"@storybook/addon-a11y": "catalog:",
 		"@storybook/addon-docs": "catalog:",
 		"@storybook/addon-vitest": "catalog:",
@@ -86,8 +86,8 @@
 		"@vanilla-extract/rollup-plugin": "^1.5.1",
 		"@vanilla-extract/vite-plugin": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
-		"@vitest/browser-playwright": "^4.0.18",
-		"@vitest/coverage-v8": "^4.0.18",
+		"@vitest/browser-playwright": "^4.1.0",
+		"@vitest/coverage-v8": "^4.1.0",
 		"@vitest/ui": "4.0.18",
 		"babel-plugin-react-compiler": "^1.0.0",
 		"colorjs.io": "^0.6.1",
@@ -97,11 +97,11 @@
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"storybook": "catalog:",
-		"tsdown": "^0.20.3",
+		"tsdown": "^0.21.2",
 		"tsx": "catalog:",
 		"typescript": "^5.9.3",
 		"vite": "catalog:",
-		"vitest": "^4.0.18"
+		"vitest": "^4.1.0"
 	},
 	"peerDependencies": {
 		"react": "catalog:",
