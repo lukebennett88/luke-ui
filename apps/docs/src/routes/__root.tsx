@@ -9,9 +9,7 @@ import appCss from '../styles/app.css?url';
 export const Route = createRootRoute({
 	component: RootComponent,
 	head: () => ({
-		links: [
-			{ href: appCss, rel: 'stylesheet' },
-		],
+		links: [{ href: appCss, rel: 'stylesheet' }],
 		meta: [
 			{
 				charSet: 'utf-8',
