@@ -75,6 +75,7 @@
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18.2",
 		"@argos-ci/storybook": "catalog:",
+		"@github-ui/storybook-addon-performance-panel": "catalog:",
 		"@rollup/plugin-babel": "^7.0.0",
 		"@storybook/addon-a11y": "catalog:",
 		"@storybook/addon-docs": "catalog:",

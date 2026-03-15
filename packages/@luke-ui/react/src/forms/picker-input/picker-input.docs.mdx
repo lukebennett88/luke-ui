@@ -1,0 +1,40 @@
+`PickerInput` provides low-level, Spectrum-style non-searchable picker primitives built on React Aria Components.
+
+## Import
+
+```ts
+import {
+	PickerInput,
+	SelectInputGroup,
+	SelectTrigger,
+	SelectValue,
+	SelectPopover,
+	SelectListBox,
+	SelectItem,
+	SelectSection,
+} from '@luke-ui/react/forms';
+```
+
+## Usage
+
+```tsx
+<PickerInput aria-label="Country" placeholder="Select a country...">
+	<SelectInputGroup>
+		<SelectTrigger>
+			<SelectValue />
+			<Icon name="chevronDown" />
+		</SelectTrigger>
+	</SelectInputGroup>
+	<SelectPopover>
+		<SelectListBox items={countries}>
+			{(item) => <SelectItem>{item.label}</SelectItem>}
+		</SelectListBox>
+	</SelectPopover>
+</PickerInput>
+```
+
+## API Notes
+
+- Spectrum-first prop naming is used (`value`, `defaultValue`, `onChange`).
+- This v1 primitive is single-select only.
+- Grouped options are composed with `SelectSection`.
