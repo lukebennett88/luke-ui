@@ -1,4 +1,3 @@
-import lukeUiStyles from '@luke-ui/react/stylesheet.css?url';
 import { themeRootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
@@ -11,7 +10,6 @@ export const Route = createRootRoute({
 	component: RootComponent,
 	head: () => ({
 		links: [
-			{ href: lukeUiStyles, rel: 'stylesheet' },
 			{ href: appCss, rel: 'stylesheet' },
 		],
 		meta: [
