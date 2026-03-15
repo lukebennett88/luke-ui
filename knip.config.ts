@@ -24,7 +24,7 @@ export default {
 		},
 		'packages/@luke-ui/react': {
 			entry: ['src/**/*.stories.tsx', 'src/**/*.docs.mdx'],
-			ignoreDependencies: ['@vitest/coverage-v8', 'babel-plugin-react-compiler'],
+			ignoreDependencies: ['@vitest/coverage-v8'],
 			project: ['src/**/*.{ts,tsx,mdx}'],
 		},
 	},
