@@ -2,8 +2,8 @@ import type { JSX, ReactNode } from 'react';
 import type {
 	InputProps as RacInputProps,
 	TextFieldProps as RacTextFieldProps,
-} from 'react-aria-components';
-import { TextField as RacTextField } from 'react-aria-components';
+} from 'react-aria-components/TextField';
+import { TextField as RacTextField } from 'react-aria-components/TextField';
 import { Field } from '../../field/composed/field.js';
 import type { FieldErrorProps } from '../../field/primitives/field-error.js';
 import type { FieldNecessityIndicator } from '../../field/primitives/field-label.js';

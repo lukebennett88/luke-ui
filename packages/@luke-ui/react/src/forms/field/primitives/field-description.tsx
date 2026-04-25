@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import type { TextProps as RacTextProps } from 'react-aria-components';
-import { Text as RacText } from 'react-aria-components';
+import type { TextProps as RacTextProps } from 'react-aria-components/Text';
+import { Text as RacText } from 'react-aria-components/Text';
 import * as styles from '../../../recipes/field.css.js';
 import { cx } from '../../../utils.js';
 

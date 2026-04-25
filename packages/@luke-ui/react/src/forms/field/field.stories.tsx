@@ -1,6 +1,8 @@
 import { Field } from '@luke-ui/react/forms/composed';
 import type { CSSProperties } from 'react';
-import { Form, Input, TextField } from 'react-aria-components';
+import { Form } from 'react-aria-components/Form';
+import { Input } from 'react-aria-components/Input';
+import { TextField } from 'react-aria-components/TextField';
 import { expect, userEvent, within } from 'storybook/test';
 import preview from '../../../.storybook/preview.js';
 

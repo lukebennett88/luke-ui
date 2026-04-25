@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { composeRenderProps } from 'react-aria-components';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../../recipes/icon-button.css.js';
 import { cx } from '../../../utils.js';
 import type { IconName } from '../../../visuals/icon/primitives/icon.js';

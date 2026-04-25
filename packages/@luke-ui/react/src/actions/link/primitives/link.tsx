@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
-import type { LinkProps as RacLinkProps } from 'react-aria-components';
-import { composeRenderProps, Link as RacLink } from 'react-aria-components';
+import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
+import { Link as RacLink } from 'react-aria-components/Link';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../../recipes/link.css.js';
 import { cx } from '../../../utils.js';
 

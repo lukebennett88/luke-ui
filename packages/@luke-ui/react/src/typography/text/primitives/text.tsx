@@ -1,4 +1,4 @@
-import { Text as RacText } from 'react-aria-components';
+import { Text as RacText } from 'react-aria-components/Text';
 import * as styles from '../../../recipes/text.css.js';
 import { cx } from '../../../utils.js';
 

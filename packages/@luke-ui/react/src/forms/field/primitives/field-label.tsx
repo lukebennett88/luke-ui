@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import type { LabelProps as RacLabelProps } from 'react-aria-components';
-import { Label as RacLabel } from 'react-aria-components';
+import type { LabelProps as RacLabelProps } from 'react-aria-components/Label';
+import { Label as RacLabel } from 'react-aria-components/Label';
 import * as styles from '../../../recipes/field.css.js';
 import { cx } from '../../../utils.js';
 

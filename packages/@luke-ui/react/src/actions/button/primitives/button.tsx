@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
-import type { ButtonProps as RacButtonProps } from 'react-aria-components';
-import { composeRenderProps, Button as RacButton } from 'react-aria-components';
+import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
+import { Button as RacButton } from 'react-aria-components/Button';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { BUTTON_ICON_SIZE } from '../../../lib/button.js';
 import * as styles from '../../../recipes/button.css.js';
 import { cx } from '../../../utils.js';

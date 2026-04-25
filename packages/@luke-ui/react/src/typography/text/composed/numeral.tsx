@@ -1,4 +1,4 @@
-import { useLocale } from 'react-aria-components';
+import { useLocale } from 'react-aria-components/I18nProvider';
 import type { TextProps } from '../primitives/text.js';
 import { Text } from '../primitives/text.js';
 import { useIsWithinHeading } from './heading-context.js';

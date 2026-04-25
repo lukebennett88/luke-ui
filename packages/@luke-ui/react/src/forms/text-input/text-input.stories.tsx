@@ -1,7 +1,7 @@
 import { TextInput } from '@luke-ui/react/forms';
 import { Field } from '@luke-ui/react/forms/composed';
 import type { CSSProperties } from 'react';
-import { TextField as RacTextField } from 'react-aria-components';
+import { TextField as RacTextField } from 'react-aria-components/TextField';
 import { expect } from 'storybook/test';
 import preview from '../../../.storybook/preview.js';
 

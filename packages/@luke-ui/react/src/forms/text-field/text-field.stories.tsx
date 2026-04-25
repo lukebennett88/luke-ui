@@ -1,7 +1,7 @@
 import { TextField } from '@luke-ui/react/forms/composed';
 import { Icon } from '@luke-ui/react/visuals';
 import type { CSSProperties } from 'react';
-import { Form } from 'react-aria-components';
+import { Form } from 'react-aria-components/Form';
 import { expect, userEvent, within } from 'storybook/test';
 import preview from '../../../.storybook/preview.js';
 
