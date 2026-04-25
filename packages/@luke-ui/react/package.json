@@ -65,12 +65,12 @@
 		"test:watch": "vitest --project=storybook"
 	},
 	"dependencies": {
-		"@capsizecss/metrics": "^3.6.2",
+		"@capsizecss/metrics": "^3.7.0",
 		"@capsizecss/vanilla-extract": "^2.0.4",
-		"@react-aria/utils": "^3.33.1",
-		"@vanilla-extract/css": "^1.18.0",
+		"@react-aria/utils": "^3.34.0",
+		"@vanilla-extract/css": "^1.20.1",
 		"@vanilla-extract/recipes": "^0.5.7",
-		"react-aria-components": "^1.16.0"
+		"react-aria-components": "^1.17.0"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18.2",
@@ -83,7 +83,7 @@
 		"@types/node": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
-		"@vanilla-extract/rollup-plugin": "^1.5.1",
+		"@vanilla-extract/rollup-plugin": "^1.5.3",
 		"@vanilla-extract/vite-plugin": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
@@ -92,14 +92,14 @@
 		"babel-plugin-react-compiler": "^1.0.0",
 		"colorjs.io": "^0.6.1",
 		"node-html-parser": "^7.1.0",
-		"playwright": "^1.58.2",
+		"playwright": "^1.59.1",
 		"publint": "^0.3.18",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"storybook": "catalog:",
-		"tsdown": "^0.21.2",
+		"tsdown": "^0.21.10",
 		"tsx": "catalog:",
-		"typescript": "^5.9.3",
+		"typescript": "^6.0.3",
 		"vite": "catalog:",
 		"vitest": "catalog:"
 	},

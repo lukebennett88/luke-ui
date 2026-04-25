@@ -35,13 +35,13 @@
 		"fumadocs-core": "16.6.0",
 		"fumadocs-mdx": "catalog:",
 		"fumadocs-ui": "16.6.0",
-		"lucide-react": "^0.577.0",
+		"lucide-react": "^1.11.0",
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"vite": "catalog:"
 	},
 	"devDependencies": {
-		"@tailwindcss/vite": "^4.2.1",
+		"@tailwindcss/vite": "^4.2.4",
 		"@tanstack/router-cli": "1.158.4",
 		"@types/mdx": "^2.0.13",
 		"@types/node": "catalog:",
@@ -51,9 +51,9 @@
 		"@vitejs/plugin-react": "catalog:",
 		"nitro": "npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e",
 		"serve": "^14.2.6",
-		"srvx": "^0.11.9",
-		"tailwindcss": "^4.2.1",
-		"typescript": "^5.9.3",
+		"srvx": "^0.11.15",
+		"tailwindcss": "^4.2.4",
+		"typescript": "^6.0.3",
 		"vite-tsconfig-paths": "^6.1.1"
 	}
 }
