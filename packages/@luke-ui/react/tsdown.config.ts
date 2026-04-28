@@ -4,35 +4,37 @@ import { babel } from '@rollup/plugin-babel';
 import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'tsdown';
-import { entries } from './.generated/entries.js';
 import packageJson from './package.json' with { type: 'json' };
 
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
 export default defineConfig((options) => ({
 	attw: {
-		entrypoints: [
-			...Object.keys(entries)
-				.filter((k) => k !== 'styles')
-				.map((k) => `./${k}`),
-			'./package.json',
-		],
 		profile: 'esm-only',
+		// Exclude static asset exports — attw checks JS type resolution, but CSS/SVG
+		// files don't need type definitions. Excluding them avoids false-positive
+		// 'no-resolution' errors while keeping the rule active for actual JS exports.
+		excludeEntrypoints: ['./stylesheet.css', './spritesheet.svg'],
 	},
 	deps: {
 		neverBundle: Object.keys(packageJson.peerDependencies),
 	},
 	dts: true,
-	entry: entries,
+	entry: {
+		'*': [
+			'src/*/index.tsx',
+			'src/*/index.ts',
+			'!src/style-helpers/index.ts',
+			'!src/types/index.ts',
+			'!src/typography/index.ts',
+		],
+		'button/primitive': 'src/button/primitive.tsx',
+		'field/primitive': 'src/field/primitive.tsx',
+	},
 	exports: {
-		customExports: (exportsField) => {
-			// Remove internal-only entries from public exports
-			const { './styles': _, ...publicExports } = exportsField;
-			return {
-				...publicExports,
-				'./spritesheet.svg': './dist/spritesheet.svg',
-				'./stylesheet.css': './dist/stylesheet.css',
-			};
+		customExports: {
+			'./stylesheet.css': './dist/stylesheet.css',
+			'./spritesheet.svg': './dist/spritesheet.svg',
 		},
 	},
 	format: ['esm'],
@@ -41,7 +43,9 @@ export default defineConfig((options) => ({
 	},
 	hooks: {
 		'build:before': async () => {
-			execSync('pnpm run generate', { stdio: 'inherit' });
+			execSync('pnpm run generate:icons && pnpm run generate:color-tokens', {
+				stdio: 'inherit',
+			});
 		},
 	},
 	platform: 'neutral',
@@ -69,5 +73,4 @@ export default defineConfig((options) => ({
 	],
 	publint: true,
 	sourcemap: true,
-	...options,
 }));

@@ -1,0 +1,62 @@
+`TextField` is an opinionated composed field for single-line text input.
+
+## Import
+
+```ts
+import { TextField } from '@luke-ui/react/text-field';
+```
+
+## Usage
+
+```tsx
+<TextField
+	name="email"
+	label="Email"
+	description="We'll only use this for account updates."
+	placeholder="name@example.com"
+/>
+```
+
+## API Shape
+
+This component follows Spectrum-style top-level props and forwards React Aria
+`TextField` props directly.
+
+- Root props like `name`, `isRequired`, `isInvalid`, `validationBehavior`, and
+  `className` are passed to React Aria `TextField`.
+- Input chrome props `size`, `placeholder`, `adornmentStart`, `adornmentEnd`,
+  and `inputClassName` are passed to internal `TextInput`.
+
+## Forms Integration
+
+```tsx
+import { Form } from 'react-aria-components';
+
+<Form validationErrors={{ username: 'This username is not available.' }}>
+	<TextField
+		name="username"
+		label="Username"
+		errorMessage={(validation) => validation.validationErrors.join(' ')}
+	/>
+</Form>;
+```
+
+## Composed `TextField` Props
+
+| Prop                 | Type                                            | Default    | Notes                                                   |
+| -------------------- | ----------------------------------------------- | ---------- | ------------------------------------------------------- |
+| `label`              | `ReactNode`                                     | -          | Label content.                                          |
+| `description`        | `ReactNode`                                     | -          | Help text rendered in `slot="description"`.             |
+| `errorMessage`       | `ComponentProps<typeof FieldError>['children']` | -          | Static or render-function error content.                |
+| `necessityIndicator` | `'icon' \| 'label'`                             | `'icon'`   | Required indicator style when parent field is required. |
+| `size`               | `'small' \| 'medium'`                           | `'medium'` | Input size variant.                                     |
+| `placeholder`        | `string`                                        | -          | Forwarded to internal input.                            |
+| `adornmentStart`     | `ReactNode`                                     | -          | Leading non-editable adornment content.                 |
+| `adornmentEnd`       | `ReactNode`                                     | -          | Trailing non-editable adornment content.                |
+| `inputClassName`     | `InputProps['className']`                       | -          | Class name for the internal input element.              |
+| `...rest`            | `TextFieldProps` (RAC)                          | -          | Forwarded to React Aria `TextField`.                    |
+
+## Size Conflict Rule
+
+The HTML numeric input `size` attribute is intentionally omitted from this
+component API. `size` is reserved for the design-system variant.

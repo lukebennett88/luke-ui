@@ -1,5 +1,5 @@
 import { createTheme, createThemeContract } from '@vanilla-extract/css';
-import type { ColorTokenValue } from '../tokens.js';
+import type { ColorTokenValue } from '../tokens/index.js';
 import {
 	colorToCssString,
 	cubicBezierToString,
@@ -7,7 +7,7 @@ import {
 	durationToString,
 	tokenKeys,
 	tokens,
-} from '../tokens.js';
+} from '../tokens/index.js';
 import { classSelector, lukeUiClassNames } from './class-names.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 import { layers } from './layers.css.js';

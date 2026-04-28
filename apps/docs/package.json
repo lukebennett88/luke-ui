@@ -13,7 +13,7 @@
 		"precheck:types": "pnpm run generate",
 		"check:types": "fumadocs-mdx && tsc --noEmit",
 		"clean": "rm -rf .source .tanstack .turbo .output dist src/routeTree.gen.ts",
-		"dev": "pnpm run generate && rm -rf node_modules/.vite && vite dev",
+		"dev": "pnpm run generate && vite dev",
 		"fix": "pnpm run fix:format && pnpm run fix:lint",
 		"fix:format": "pnpm exec oxfmt -c ../../.oxfmtrc.json .",
 		"fix:lint": "pnpm exec oxlint . --type-aware --fix",

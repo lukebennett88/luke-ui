@@ -295,6 +295,9 @@ importers:
 
   packages/turbo-generators:
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.6.0
       tsx:
         specifier: 'catalog:'
         version: 4.21.0

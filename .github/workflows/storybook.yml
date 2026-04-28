@@ -41,6 +41,9 @@ jobs:
       - name: Install Playwright Chromium
         run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
+      - name: Build package
+        run: corepack pnpm --filter @luke-ui/react run build
+
       - name: Run Storybook visual tests
         run: corepack pnpm test
         env:
@@ -77,6 +80,9 @@ jobs:
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
+
+      - name: Build package
+        run: corepack pnpm --filter @luke-ui/react run build
 
       - name: Build Storybook
         run: corepack pnpm run build:storybook

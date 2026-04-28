@@ -1,0 +1,142 @@
+`Text` is the base typography component in `@luke-ui/react`. It wraps `react-aria-components` text primitives and applies your design tokens for typography and text presentation.
+
+## Import
+
+```ts
+import { Text } from '@luke-ui/react/text';
+```
+
+`Text` expects the Luke UI theme class to be applied at app/root level. See [Getting Started](/docs/getting-started).
+
+## Usage
+
+```tsx
+<Text>The quick brown fox jumps over the lazy dog.</Text>
+```
+
+```tsx
+<Text fontSize="h2" lineHeight="tight">
+	Heading-like text
+</Text>
+```
+
+```tsx
+<Text color="critical" fontFamily="mono" fontWeight="bold">
+	Alert-like inline text
+</Text>
+```
+
+```tsx
+<Text textTransform="uppercase" textDecoration="underline">
+	Emphasized text
+</Text>
+```
+
+```tsx
+<Text shouldDisableTrim>Untrimmed text spacing</Text>
+```
+
+```tsx
+<Text textAlign="end" variant="tabular-nums">
+	12121.21
+</Text>
+```
+
+```tsx
+<Text lineClamp={2}>Long content that should be line clamped.</Text>
+```
+
+```tsx
+<Text lineClamp>Long content truncated to one line.</Text>
+```
+
+## Composed typography
+
+```ts
+import { Emoji, Heading, Numeral } from '@luke-ui/react/heading';
+```
+
+```tsx
+<Heading level={2}>Section title</Heading>
+```
+
+```tsx
+<Emoji emoji="🎉" label="Celebration" />
+```
+
+```tsx
+<Numeral value={90_909.09} />
+```
+
+```tsx
+<Numeral value={3_500} format="percent" />
+<Numeral value={98.7654} currency="AUD" />
+<Numeral value={98} unit="kilometer-per-hour" />
+```
+
+```tsx
+<Numeral value={12_345} abbreviate />
+<Numeral value={1_234.5678} precision={[0, 2]} />
+```
+
+## `Numeral` props
+
+| Prop            | Type                                                                    | Default          | Notes                                        |
+| --------------- | ----------------------------------------------------------------------- | ---------------- | -------------------------------------------- |
+| `abbreviate`    | `boolean \| 'long'`                                                     | `false`          | Enables compact notation.                    |
+| `currency`      | `string`                                                                | -                | ISO 4217 code (e.g. `AUD`, `USD`, `EUR`).    |
+| `format`        | `'decimal' \| 'percent' \| 'currency' \| 'unit'`                        | Derived          | Derives from `currency`/`unit` when omitted. |
+| `formatOptions` | `Intl.NumberFormatOptions`                                              | -                | Additional formatting overrides.             |
+| `locale`        | `Intl.LocalesArgument`                                                  | Runtime locale   | Locale passed to `Intl.NumberFormat`.        |
+| `precision`     | `number \| [number, number]`                                            | Locale default   | Sets fixed or min/max fraction digits.       |
+| `textAlign`     | `TextProps['textAlign']`                                                | `'end'`          | Right-align by default for numeric columns.  |
+| `unit`          | `Intl.NumberFormatOptions['unit']`                                      | -                | Unit identifier (e.g. `kilometer-per-hour`). |
+| `value`         | `number`                                                                | -                | Numeric value to format.                     |
+| `variant`       | `'diagonal-fractions' \| 'ordinal' \| 'slashed-zero' \| 'tabular-nums'` | `'tabular-nums'` | Numeric glyph rendering mode.                |
+
+## Props
+
+| Prop                | Type                                                                               | Default         | Notes                                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------- |
+| `children`          | `ReactNode`                                                                        | -               | Text content.                                                                               |
+| `className`         | `string`                                                                           | -               | Appended to generated classes.                                                              |
+| `color`             | `ForegroundColorToken \| 'inherit'`                                                | `'neutralBold'` | Uses `tokens.foregroundColor`.                                                              |
+| `fontFamily`        | `FontFamilyToken`                                                                  | `'sans'`        | Uses `tokens.fontFamily`.                                                                   |
+| `fontSize`          | `FontSizeToken`                                                                    | `'standard'`    | Uses `tokens.fontSize`.                                                                     |
+| `fontWeight`        | `FontWeightToken \| 'inherit'`                                                     | `'regular'`     | Uses `tokens.fontWeight`.                                                                   |
+| `isVisuallyHidden`  | `boolean`                                                                          | `false`         | Accessible, but visually hidden.                                                            |
+| `lineClamp`         | `boolean \| 1 \| 2 \| 3 \| 4 \| 5`                                                 | -               | `true` clamps to 1 line, `false`/omit disables clamping, numeric values clamp to 1–5 lines. |
+| `lineHeight`        | `LineHeightToken`                                                                  | `'loose'`       | Uses `tokens.lineHeight`.                                                                   |
+| `shouldDisableTrim` | `boolean`                                                                          | `false`         | Disables Capsize trim when `true`.                                                          |
+| `textAlign`         | `'start' \| 'center' \| 'end'`                                                     | `'start'`       | Text alignment.                                                                             |
+| `textDecoration`    | `'none' \| 'underline' \| 'line-through' \| 'inherit'`                             | `'none'`        | Maps to CSS `text-decoration`.                                                              |
+| `textTransform`     | `'none' \| 'capitalize' \| 'uppercase' \| 'lowercase' \| 'inherit'`                | `'none'`        | Maps to CSS `text-transform`.                                                               |
+| `variant`           | `'unset' \| 'diagonal-fractions' \| 'ordinal' \| 'slashed-zero' \| 'tabular-nums'` | `'unset'`       | Maps to `font-variant-numeric`.                                                             |
+
+## `color` tokens
+
+`neutralSubtle`, `neutralBold`, `neutralDisabled`, `neutralBoldInverted`, `positive`, `informative`, `caution`, `critical`, `inherit`
+
+## `fontFamily` tokens
+
+`sans`, `mono`
+
+## `fontSize` tokens
+
+`xxsmall`, `xsmall`, `small`, `standard`, `medium`, `large`, `xlarge`, `xxlarge`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`
+
+## `lineHeight` tokens
+
+`nospace`, `tight`, `loose`
+
+## `fontWeight` tokens
+
+`regular`, `medium`, `bold`, `inherit`
+
+## `textDecoration` values
+
+`none`, `underline`, `line-through`, `inherit`
+
+## `textTransform` values
+
+`none`, `capitalize`, `uppercase`, `lowercase`, `inherit`

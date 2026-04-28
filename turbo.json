@@ -13,7 +13,7 @@
 			"outputs": ["dist/**", ".output/**", ".source/**"]
 		},
 		"build:storybook": {
-			"dependsOn": ["generate"],
+			"dependsOn": ["build", "generate"],
 			"env": ["STORYBOOK_BASE_PATH"],
 			"outputs": ["storybook-static/**"]
 		},

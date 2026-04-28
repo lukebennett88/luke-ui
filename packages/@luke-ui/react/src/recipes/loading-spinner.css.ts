@@ -2,7 +2,7 @@ import { keyframes } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
-import { tokenKeys, tokens } from '../tokens.js';
+import { tokenKeys, tokens } from '../tokens/index.js';
 import { iconSizeVariants } from './icon.css.js';
 
 const colorKeys = tokenKeys(tokens.foregroundColor);

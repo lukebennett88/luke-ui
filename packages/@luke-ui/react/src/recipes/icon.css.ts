@@ -23,6 +23,10 @@ export const iconSizeVariants = {
 } as const;
 
 export const icon = recipeInLayer('recipes', {
+	base: {
+		display: 'inline-flex',
+		flexShrink: 0,
+	},
 	defaultVariants: {
 		size: 'medium',
 	},

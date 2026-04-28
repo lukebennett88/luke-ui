@@ -1,4 +1,4 @@
-import type { FontSizeToken, IconSizeToken } from '../tokens.js';
+import type { FontSizeToken, IconSizeToken } from '../tokens/index.js';
 
 /** Button size → icon/spinner size so icons align with control size. */
 export const BUTTON_ICON_SIZE = {

@@ -1,9 +1,9 @@
 /// <reference types="vite/client" />
 
 import '@luke-ui/react/stylesheet.css';
+import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeRootClassName } from '@luke-ui/react/theme';
-import { IconSpritesheetProvider } from '@luke-ui/react/visuals';
 import addonA11y from '@storybook/addon-a11y';
 import addonDocs from '@storybook/addon-docs';
 import { definePreview } from '@storybook/react-vite';

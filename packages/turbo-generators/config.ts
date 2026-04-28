@@ -7,7 +7,6 @@ const COMPONENT_GROUPS = ['actions', 'feedback', 'typography', 'visuals'] as con
 
 type GeneratorAnswers = {
 	group?: string;
-	includeComposed?: boolean;
 	name?: string;
 };
 
@@ -168,35 +167,6 @@ function addComponentToGettingStarted(answers: GeneratorAnswers): string {
 	return `Added Getting Started next step for ${componentDir}`;
 }
 
-function addComponentToGroupBarrel(answers: GeneratorAnswers): string {
-	const group = resolveGroup(answers);
-	const componentDir = resolveComponentDir(answers);
-	const pascalName = toDisplayName(componentDir).replaceAll(' ', '');
-	const reactRoot = join(process.cwd(), 'packages/@luke-ui/react/src', group);
-
-	const primitivesPath = join(reactRoot, 'primitives.ts');
-	let primitives = readFileSync(primitivesPath, 'utf8');
-	const primitiveExport = `export { ${pascalName}, type ${pascalName}Props } from './${componentDir}/primitives/${componentDir}.js';\n`;
-	if (!primitives.includes(`from './${componentDir}/primitives/`)) {
-		primitives = `${primitives.trimEnd()}\n${primitiveExport}`;
-		writeFileSync(primitivesPath, primitives);
-	}
-
-	if (answers.includeComposed) {
-		const composedPath = join(reactRoot, 'composed.ts');
-		if (existsSync(composedPath)) {
-			let composed = readFileSync(composedPath, 'utf8');
-			const composedExport = `export type { ${pascalName}Props } from './${componentDir}/composed/${componentDir}.js';\nexport { ${pascalName} } from './${componentDir}/composed/${componentDir}.js';\n`;
-			if (!composed.includes(`from './${componentDir}/composed/`)) {
-				composed = `${composed.trimEnd()}\n${composedExport}`;
-				writeFileSync(composedPath, composed);
-			}
-		}
-	}
-
-	return `Added ${componentDir} to ${group} barrel(s)`;
-}
-
 const STYLES_PRIMITIVES_PATH = join(
 	process.cwd(),
 	'packages/@luke-ui/react/src/styles/primitives.css.ts',
@@ -277,12 +247,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				message: 'Component name (PascalCase or kebab-case):',
 				validate: validateComponentName,
 			},
-			{
-				type: 'confirm',
-				name: 'includeComposed',
-				message: 'Generate composed export module?',
-				default: false,
-			},
 		],
 		actions: [
 			{
@@ -310,20 +274,9 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				path: '{{ turbo.paths.root }}/apps/docs/content/docs/components/{{kebabCase group}}/{{kebabCase name}}.mdx',
 				templateFile: 'templates/component/component.docs-page.mdx.hbs',
 			},
-			{
-				type: 'add',
-				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase group}}/{{kebabCase name}}/composed/{{kebabCase name}}.ts',
-				templateFile: 'templates/component/component.composed.ts.hbs',
-				skip: (answers: GeneratorAnswers) => {
-					return answers.includeComposed === true
-						? false
-						: 'Skipping composed module: includeComposed=false';
-				},
-			},
 			addComponentToDocsMeta,
 			addComponentToDocsIndex,
 			addComponentToGettingStarted,
-			addComponentToGroupBarrel,
 			addComponentToRecipesBarrel,
 			addComponentToStylesIndex,
 			syncTsdownExports,

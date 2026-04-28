@@ -10,6 +10,7 @@
 		"generate:component": "tsx scripts/generate-component.ts"
 	},
 	"devDependencies": {
+		"@types/node": "catalog:",
 		"tsx": "catalog:"
 	}
 }
