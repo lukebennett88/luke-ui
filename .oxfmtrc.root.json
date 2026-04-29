@@ -29,6 +29,7 @@
 		"**/.generated/icon-data.*",
 		"**/dist/**",
 		"**/routeTree.gen.ts",
+		"**/screenshots/**",
 		"**/storybook-static/**",
 		"apps",
 		"node_modules",

@@ -5,5 +5,6 @@ import '../recipes/icon-button.css.js';
 import '../recipes/icon.css.js';
 import '../recipes/link.css.js';
 import '../recipes/loading-spinner.css.js';
+import '../recipes/combobox.css.js';
 import '../recipes/text-input.css.js';
 import '../recipes/text.css.js';

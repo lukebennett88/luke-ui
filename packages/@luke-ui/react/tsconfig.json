@@ -24,5 +24,6 @@
 		"tsdown.config.ts",
 		"vitest.config.ts",
 		"vitest.shims.d.ts"
-	]
+	],
+	"exclude": ["src/**/*.stories.tsx", ".storybook"]
 }

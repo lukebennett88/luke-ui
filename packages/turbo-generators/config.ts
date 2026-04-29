@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { PlopTypes } from '@turbo/gen';
 
-const COMPONENT_GROUPS = ['actions', 'feedback', 'typography', 'visuals'] as const;
+const DOCS_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
 type GeneratorAnswers = {
 	group?: string;
@@ -171,12 +171,9 @@ const STYLES_PRIMITIVES_PATH = join(
 	process.cwd(),
 	'packages/@luke-ui/react/src/styles/primitives.css.ts',
 );
-const RECIPES_PRIMITIVES_PATH = join(
-	process.cwd(),
-	'packages/@luke-ui/react/src/recipes/primitives.ts',
-);
+const RECIPES_INDEX_PATH = join(process.cwd(), 'packages/@luke-ui/react/src/recipes/index.ts');
 
-/** Append new component primitives CSS import to primitives.css.ts and sort. */
+/** Append new component CSS import to styles/primitives.css.ts and sort. */
 function addComponentToStylesIndex(answers: GeneratorAnswers): string {
 	const componentDir = resolveComponentDir(answers);
 	const newImport = `import '../recipes/${componentDir}.css.js';`;
@@ -198,25 +195,27 @@ function addComponentToStylesIndex(answers: GeneratorAnswers): string {
 	return `Added ${componentDir} CSS to styles primitives barrel`;
 }
 
-function addComponentToRecipesBarrel(answers: GeneratorAnswers): string {
+function addComponentToRecipesIndex(answers: GeneratorAnswers): string {
 	const componentDir = resolveComponentDir(answers);
 	const pascalName = toDisplayName(componentDir).replaceAll(' ', '');
 	const camelName = toCamelCase(componentDir);
 
-	const exportLine = `export { ${camelName}, type ${pascalName}Variants } from './${componentDir}.css.js';`;
-	const content = readFileSync(RECIPES_PRIMITIVES_PATH, 'utf8');
-	if (content.includes(exportLine)) {
-		return `Recipes barrel already contains ${componentDir}`;
+	const typeExport = `export type { ${pascalName}Variants } from './${componentDir}.css.js';`;
+	const valueExport = `export { ${camelName} } from './${componentDir}.css.js';`;
+	const content = readFileSync(RECIPES_INDEX_PATH, 'utf8');
+	if (content.includes(typeExport)) {
+		return `Recipes index already contains ${componentDir}`;
 	}
-	const firstImportIndex = content.search(/^import\s/m);
-	if (firstImportIndex === -1) {
+	const firstExportIndex = content.search(/^export\s/m);
+	if (firstExportIndex === -1) {
 		const separator = content.endsWith('\n') ? '' : '\n';
-		writeFileSync(RECIPES_PRIMITIVES_PATH, `${content}${separator}${exportLine}\n`);
-		return `Added ${componentDir} to recipes barrel`;
+		writeFileSync(RECIPES_INDEX_PATH, `${content}${separator}${typeExport}\n${valueExport}\n`);
+		return `Added ${componentDir} to recipes index`;
 	}
-	const updated = `${content.slice(0, firstImportIndex)}${exportLine}\n${content.slice(firstImportIndex)}`;
-	writeFileSync(RECIPES_PRIMITIVES_PATH, updated);
-	return `Added ${componentDir} to recipes barrel`;
+	const newBlock = `${typeExport}\n${valueExport}\n`;
+	const updated = `${content.slice(0, firstExportIndex)}${newBlock}${content.slice(firstExportIndex)}`;
+	writeFileSync(RECIPES_INDEX_PATH, updated);
+	return `Added ${componentDir} to recipes index`;
 }
 
 function syncTsdownExports(): string {
@@ -239,7 +238,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				type: 'list',
 				name: 'group',
 				message: 'Component group:',
-				choices: [...COMPONENT_GROUPS],
+				choices: [...DOCS_GROUPS],
 			},
 			{
 				type: 'input',
@@ -251,7 +250,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 		actions: [
 			{
 				type: 'add',
-				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase group}}/{{kebabCase name}}/primitives/{{kebabCase name}}.tsx',
+				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase name}}/index.tsx',
 				templateFile: 'templates/component/component.tsx.hbs',
 			},
 			{
@@ -261,12 +260,12 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 			},
 			{
 				type: 'add',
-				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase group}}/{{kebabCase name}}/{{kebabCase name}}.stories.tsx',
+				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase name}}.stories.tsx',
 				templateFile: 'templates/component/component.stories.tsx.hbs',
 			},
 			{
 				type: 'add',
-				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase group}}/{{kebabCase name}}/{{kebabCase name}}.docs.mdx',
+				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase name}}.docs.mdx',
 				templateFile: 'templates/component/component.docs.mdx.hbs',
 			},
 			{
@@ -277,7 +276,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 			addComponentToDocsMeta,
 			addComponentToDocsIndex,
 			addComponentToGettingStarted,
-			addComponentToRecipesBarrel,
+			addComponentToRecipesIndex,
 			addComponentToStylesIndex,
 			syncTsdownExports,
 			() => {
