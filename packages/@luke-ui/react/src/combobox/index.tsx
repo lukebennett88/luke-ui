@@ -1,9 +1,9 @@
 import type { JSX, ReactNode } from 'react';
 import { useCallback, useContext } from 'react';
+import { Collection } from 'react-aria-components/Collection';
 import type {
 	ButtonProps as RacButtonProps,
 	ComboBoxProps as RacComboBoxProps,
-	GroupProps as RacGroupProps,
 	InputProps as RacInputProps,
 	Key,
 	ListBoxItemProps as RacListBoxItemProps,
@@ -11,24 +11,24 @@ import type {
 	ListBoxProps as RacListBoxProps,
 	ListBoxSectionProps as RacListBoxSectionProps,
 	PopoverProps as RacPopoverProps,
-} from 'react-aria-components';
+} from 'react-aria-components/ComboBox';
 import {
-	Collection,
 	ComboBoxStateContext,
-	composeRenderProps,
 	Button as RacButton,
 	ComboBox as RacComboBox,
-	Group as RacGroup,
-	Header as RacHeader,
 	Input as RacInput,
 	ListBox as RacListBox,
-	ListBoxContext,
 	ListBoxItem as RacListBoxItem,
 	ListBoxLoadMoreItem as RacListBoxLoadMoreItem,
 	ListBoxSection as RacListBoxSection,
 	Popover as RacPopover,
-	useSlottedContext,
-} from 'react-aria-components';
+} from 'react-aria-components/ComboBox';
+import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
+import { Group as RacGroup } from 'react-aria-components/Group';
+import { Header as RacHeader } from 'react-aria-components/Header';
+import { ListBoxContext } from 'react-aria-components/ListBox';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { useSlottedContext } from 'react-aria-components/slots';
 import * as styles from '../recipes/combobox.css.js';
 import { themeRootClassName } from '../theme/index.js';
 import type { DistributiveOmit } from '../types/index.js';

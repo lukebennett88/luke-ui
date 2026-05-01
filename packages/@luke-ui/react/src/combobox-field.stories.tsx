@@ -3,8 +3,9 @@ import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
-import type { Key } from 'react-aria-components';
-import { Form, useAsyncList } from 'react-aria-components';
+import type { Key } from 'react-aria-components/Breadcrumbs';
+import { Form } from 'react-aria-components/Form';
+import { useAsyncList } from 'react-aria-components/useAsyncList';
 import { expect, userEvent, within } from 'storybook/test';
 import preview from '../.storybook/preview.js';
 

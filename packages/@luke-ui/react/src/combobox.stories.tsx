@@ -14,8 +14,8 @@ import { Icon } from '@luke-ui/react/icon';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
-import type { Key } from 'react-aria-components';
-import { useAsyncList } from 'react-aria-components';
+import type { Key } from 'react-aria-components/Breadcrumbs';
+import { useAsyncList } from 'react-aria-components/useAsyncList';
 import { expect, userEvent, within } from 'storybook/test';
 import preview from '../.storybook/preview.js';
 
