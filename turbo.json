@@ -20,7 +20,9 @@
 		"check": {
 			"dependsOn": ["generate", "^build"]
 		},
-		"check:format": {},
+		"check:format": {
+			"dependsOn": ["generate"]
+		},
 		"check:lint": {
 			"dependsOn": ["generate"]
 		},
@@ -44,7 +46,8 @@
 			"persistent": true
 		},
 		"fix": {
-			"cache": false
+			"cache": false,
+			"dependsOn": ["generate"]
 		},
 		"fix:format": {
 			"cache": false
