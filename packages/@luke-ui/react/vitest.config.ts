@@ -15,7 +15,9 @@ export default defineConfig({
 			{
 				extends: true,
 				plugins: [
+					// Required for .css.ts processing in Vitest browser mode.
 					vanillaExtractPlugin(),
+					// Runs tests for stories defined in Storybook config.
 					storybookTest({ configDir }),
 					argosVitestPlugin({
 						uploadToArgos: process.env.ARGOS_UPLOAD === '1',

@@ -11,6 +11,8 @@
 		"./button": "./dist/button/index.js",
 		"./button/primitive": "./dist/button/primitive.js",
 		"./close-button": "./dist/close-button/index.js",
+		"./combobox": "./dist/combobox/index.js",
+		"./combobox-field": "./dist/combobox-field/index.js",
 		"./emoji": "./dist/emoji/index.js",
 		"./field": "./dist/field/index.js",
 		"./field-description": "./dist/field-description/index.js",
