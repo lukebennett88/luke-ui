@@ -1,12 +1,35 @@
-import { execSync } from 'node:child_process';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { babel } from '@rollup/plugin-babel';
 import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
+import { readdir, rm } from 'node:fs/promises';
 import { defineConfig } from 'tsdown';
 import packageJson from './package.json' with { type: 'json' };
 
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
+const distDir = fileURLToPath(new URL('dist/', import.meta.url));
+const preservedDistFiles = new Set(['spritesheet.svg']);
+
+async function cleanDistExceptPreservedFiles() {
+	let entries: Array<string>;
+
+	try {
+		entries = await readdir(distDir);
+	} catch (error) {
+		if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+			return;
+		}
+
+		throw error;
+	}
+
+	await Promise.all(
+		entries
+			.filter((entry) => !preservedDistFiles.has(entry))
+			.map((entry) => rm(join(distDir, entry), { force: true, recursive: true })),
+	);
+}
 
 export default defineConfig((options) => ({
 	attw: {
@@ -19,6 +42,7 @@ export default defineConfig((options) => ({
 	deps: {
 		neverBundle: Object.keys(packageJson.peerDependencies),
 	},
+	clean: false,
 	dts: true,
 	entry: {
 		'*': [
@@ -38,15 +62,11 @@ export default defineConfig((options) => ({
 		},
 	},
 	format: ['esm'],
+	hooks: {
+		'build:prepare': cleanDistExceptPreservedFiles,
+	},
 	outputOptions: {
 		assetFileNames: '[name][extname]',
-	},
-	hooks: {
-		'build:before': async () => {
-			execSync('pnpm run generate:icons && pnpm run generate:color-tokens', {
-				stdio: 'inherit',
-			});
-		},
 	},
 	platform: 'neutral',
 	plugins: [

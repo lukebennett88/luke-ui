@@ -1,11 +1,24 @@
 {
 	"$schema": "https://v2-8-10.turborepo.dev/schema.json",
 	"tasks": {
-		"//#check:unused": {
+		"//#check:format-root": {
 			"cache": true
 		},
-		"//#fix:unused": {
+		"//#check:unused": {
+			"cache": true,
+			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
+		},
+		"//#fix:format-root": {
 			"cache": false
+		},
+		"//#fix:unused": {
+			"cache": false,
+			"dependsOn": [
+				"//#fix:format-root"
+			]
+		},
+		"@luke-ui/react#check:types": {
+			"dependsOn": ["generate", "build", "^build"]
 		},
 		"build": {
 			"dependsOn": ["^build", "generate"],
@@ -18,7 +31,7 @@
 			"outputs": ["storybook-static/**"]
 		},
 		"check": {
-			"dependsOn": ["generate", "^build"]
+			"dependsOn": ["check:format", "check:lint", "check:types"]
 		},
 		"check:format": {
 			"dependsOn": ["generate"]
@@ -27,7 +40,7 @@
 			"dependsOn": ["generate"]
 		},
 		"check:types": {
-			"dependsOn": ["^build"]
+			"dependsOn": ["generate", "^build"]
 		},
 		"clean": {
 			"cache": false
@@ -38,25 +51,29 @@
 		},
 		"dev": {
 			"cache": false,
-			"dependsOn": ["^build"],
+			"dependsOn": ["generate", "^build"],
 			"persistent": true
 		},
 		"dev:storybook": {
 			"cache": false,
+			"dependsOn": ["generate"],
 			"persistent": true
 		},
 		"fix": {
 			"cache": false,
-			"dependsOn": ["generate"]
+			"dependsOn": ["fix:format", "fix:lint"]
 		},
 		"fix:format": {
-			"cache": false
+			"cache": false,
+			"dependsOn": ["generate"]
 		},
 		"fix:lint": {
-			"cache": false
+			"cache": false,
+			"dependsOn": ["generate"]
 		},
 		"fix:unsafe": {
-			"cache": false
+			"cache": false,
+			"dependsOn": ["generate"]
 		},
 		"test": {
 			"dependsOn": ["^build", "generate"],
@@ -64,10 +81,12 @@
 		},
 		"test:ui": {
 			"cache": false,
+			"dependsOn": ["generate"],
 			"persistent": true
 		},
 		"test:watch": {
 			"cache": false,
+			"dependsOn": ["generate"],
 			"persistent": true
 		}
 	}
