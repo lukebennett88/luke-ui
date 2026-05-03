@@ -13,12 +13,10 @@
 		},
 		"//#fix:unused": {
 			"cache": false,
-			"dependsOn": [
-				"//#fix:format-root"
-			]
+			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
 		},
 		"@luke-ui/react#check:types": {
-			"dependsOn": ["generate", "build", "^build"]
+			"dependsOn": ["build", "^build"]
 		},
 		"build": {
 			"dependsOn": ["^build", "generate"],
