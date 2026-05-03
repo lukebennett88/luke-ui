@@ -44,6 +44,7 @@ export type TextFontWeight = FontWeightToken | 'inherit';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
 const lineClampSingleLine = {
+	display: 'block',
 	minInlineSize: 0,
 	overflowX: 'clip',
 	textOverflow: 'ellipsis',
