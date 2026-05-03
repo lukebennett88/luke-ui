@@ -5,13 +5,19 @@ import type { PlopTypes } from '@turbo/gen';
 
 const DOCS_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
+const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
+const CAMEL_BOUNDARY_RE = /([a-z0-9])([A-Z])/g;
+const NON_ALPHANUM_RE = /[^A-Za-z0-9-]/g;
+const TRAILING_WHITESPACE_RE = /\s+$/;
+const TRAILING_NEWLINES_RE = /\n*$/;
+
 type GeneratorAnswers = {
 	group?: string;
 	name?: string;
 };
 
 function validateComponentName(value: unknown): true | string {
-	if (!value || typeof value !== 'string') {
+	if (typeof value !== 'string') {
 		return 'Component name is required.';
 	}
 
@@ -20,7 +26,7 @@ function validateComponentName(value: unknown): true | string {
 		return 'Component name is required.';
 	}
 
-	if (!/^[A-Za-z][A-Za-z0-9-]*$/.test(trimmed)) {
+	if (!COMPONENT_NAME_RE.test(trimmed)) {
 		return 'Use letters/numbers/hyphens. Start with a letter.';
 	}
 
@@ -30,29 +36,46 @@ function validateComponentName(value: unknown): true | string {
 function toKebabCase(value: string): string {
 	return value
 		.trim()
-		.replaceAll(/([a-z0-9])([A-Z])/g, '$1-$2')
-		.replaceAll(/[^A-Za-z0-9-]/g, '-')
+		.replaceAll(CAMEL_BOUNDARY_RE, '$1-$2')
+		.replaceAll(NON_ALPHANUM_RE, '-')
 		.toLowerCase();
 }
 
 function toDisplayName(value: string): string {
-	return toKebabCase(value)
-		.split('-')
-		.filter(Boolean)
-		.map((part) => part[0]?.toUpperCase() + part.slice(1))
-		.join(' ');
+	const kebab = toKebabCase(value);
+	let result = '';
+	let capitalize = true;
+
+	for (let i = 0; i < kebab.length; i += 1) {
+		const ch = kebab.charAt(i);
+		if (ch === '-') {
+			result += ' ';
+			capitalize = true;
+		} else {
+			result += capitalize ? ch.toUpperCase() : ch;
+			capitalize = false;
+		}
+	}
+
+	return result;
 }
 
 function toCamelCase(value: string): string {
-	const parts = toKebabCase(value).split('-').filter(Boolean);
-	if (parts.length === 0) {
-		return '';
+	const kebab = toKebabCase(value);
+	let result = '';
+	let capitalize = false;
+
+	for (let i = 0; i < kebab.length; i += 1) {
+		const ch = kebab.charAt(i);
+		if (ch === '-') {
+			capitalize = true;
+		} else {
+			result += capitalize ? ch.toUpperCase() : ch;
+			capitalize = false;
+		}
 	}
-	return parts
-		.map((part, index) => {
-			return index === 0 ? part : (part[0]?.toUpperCase() ?? '') + part.slice(1);
-		})
-		.join('');
+
+	return result;
 }
 
 function resolveGroup(answers: GeneratorAnswers): string {
@@ -72,10 +95,20 @@ function resolveComponentDir(answers: GeneratorAnswers): string {
 	return toKebabCase(name);
 }
 
+const DOCS_COMPONENTS_DIR = join(process.cwd(), 'apps/docs/content/docs/components');
+const DOCS_CONTENT_DIR = join(process.cwd(), 'apps/docs/content/docs');
+const DOCS_INDEX_PATH = join(DOCS_CONTENT_DIR, 'index.mdx');
+const GETTING_STARTED_PATH = join(DOCS_CONTENT_DIR, 'getting-started.mdx');
+const RECIPES_LAYERS_PATH = join(
+	process.cwd(),
+	'packages/@luke-ui/react/src/recipes/layers.css.ts',
+);
+const RECIPES_INDEX_PATH = join(process.cwd(), 'packages/@luke-ui/react/src/recipes/index.ts');
+
 function addComponentToDocsMeta(answers: GeneratorAnswers): string {
 	const group = resolveGroup(answers);
 	const componentDir = resolveComponentDir(answers);
-	const groupDir = join(process.cwd(), 'apps/docs/content/docs/components', group);
+	const groupDir = join(DOCS_COMPONENTS_DIR, group);
 	const groupMetaPath = join(groupDir, 'meta.json');
 
 	mkdirSync(groupDir, { recursive: true });
@@ -93,10 +126,12 @@ function addComponentToDocsMeta(answers: GeneratorAnswers): string {
 		return `Docs meta already contains ${componentDir}`;
 	}
 
-	meta.pages = [...pages, componentDir].sort();
+	pages.push(componentDir);
+	pages.sort();
+	meta.pages = pages;
 	writeFileSync(groupMetaPath, `${JSON.stringify(meta, null, '\t')}\n`);
 
-	const parentMetaPath = join(process.cwd(), 'apps/docs/content/docs/components/meta.json');
+	const parentMetaPath = join(DOCS_CONTENT_DIR, 'meta.json');
 	const parentContent = readFileSync(parentMetaPath, 'utf8');
 	const parentMeta = JSON.parse(parentContent) as {
 		pages?: Array<string>;
@@ -104,7 +139,9 @@ function addComponentToDocsMeta(answers: GeneratorAnswers): string {
 	};
 	const parentPages = Array.isArray(parentMeta.pages) ? parentMeta.pages : [];
 	if (!parentPages.includes(group)) {
-		parentMeta.pages = [...parentPages, group].sort();
+		parentPages.push(group);
+		parentPages.sort();
+		parentMeta.pages = parentPages;
 		writeFileSync(parentMetaPath, `${JSON.stringify(parentMeta, null, '\t')}\n`);
 	}
 
@@ -114,85 +151,95 @@ function addComponentToDocsMeta(answers: GeneratorAnswers): string {
 function addComponentToDocsIndex(answers: GeneratorAnswers): string {
 	const group = resolveGroup(answers);
 	const componentDir = resolveComponentDir(answers);
-	const filePath = join(process.cwd(), 'apps/docs/content/docs/index.mdx');
 	const href = `/docs/components/${group}/${componentDir}`;
 	const cardLine = `\t<Card title="${toDisplayName(componentDir)} component" href="${href}" />`;
 
-	const content = readFileSync(filePath, 'utf8');
+	const content = readFileSync(DOCS_INDEX_PATH, 'utf8');
 	if (content.includes(`href="${href}"`)) {
 		return `Docs index already links ${componentDir}`;
 	}
 
 	const marker = '</Cards>';
 	if (!content.includes(marker)) {
-		throw new Error(`Could not find "${marker}" in ${filePath}`);
+		throw new Error(`Could not find "${marker}" in ${DOCS_INDEX_PATH}`);
 	}
 
 	const updatedContent = content.replace(marker, `${cardLine}\n${marker}`);
-	writeFileSync(filePath, updatedContent);
+	writeFileSync(DOCS_INDEX_PATH, updatedContent);
 	return `Added docs index card for ${componentDir}`;
 }
 
 function addComponentToGettingStarted(answers: GeneratorAnswers): string {
 	const group = resolveGroup(answers);
 	const componentDir = resolveComponentDir(answers);
-	const filePath = join(process.cwd(), 'apps/docs/content/docs/getting-started.mdx');
 	const displayName = toDisplayName(componentDir);
 	const nextStepLine = `- Read the [${displayName}](/docs/components/${group}/${componentDir}) docs.`;
 
-	const content = readFileSync(filePath, 'utf8');
+	const content = readFileSync(GETTING_STARTED_PATH, 'utf8');
 	if (content.includes(nextStepLine)) {
 		return `Getting Started already links ${componentDir}`;
 	}
 
 	const lines = content.split('\n');
-	const nextStepsIndex = lines.findIndex((line) => line.trim() === '## Next Steps');
+	let nextStepsIndex = -1;
+	for (let i = 0; i < lines.length; i += 1) {
+		if (lines[i]?.trim() === '## Next Steps') {
+			nextStepsIndex = i;
+			break;
+		}
+	}
 
 	if (nextStepsIndex === -1) {
-		const appended = `${content.trimEnd()}\n\n## Next Steps\n\n${nextStepLine}\n`;
-		writeFileSync(filePath, appended);
+		const appended = `${content.replace(TRAILING_WHITESPACE_RE, '')}\n\n## Next Steps\n\n${nextStepLine}\n`;
+		writeFileSync(GETTING_STARTED_PATH, appended);
 		return `Added Next Steps section with ${componentDir}`;
 	}
 
 	let insertAt = lines.length;
 	for (let i = nextStepsIndex + 1; i < lines.length; i += 1) {
-		if (lines[i]?.startsWith('## ')) {
+		const line = lines[i];
+		if (line && line.charAt(0) === '#' && line.charAt(1) === '#' && line.charAt(2) === ' ') {
 			insertAt = i;
 			break;
 		}
 	}
 
 	lines.splice(insertAt, 0, nextStepLine);
-	writeFileSync(filePath, `${lines.join('\n').replace(/\n*$/, '\n')}`);
+	writeFileSync(GETTING_STARTED_PATH, `${lines.join('\n').replace(TRAILING_NEWLINES_RE, '\n')}`);
 	return `Added Getting Started next step for ${componentDir}`;
 }
 
-const STYLES_PRIMITIVES_PATH = join(
-	process.cwd(),
-	'packages/@luke-ui/react/src/styles/primitives.css.ts',
-);
-const RECIPES_INDEX_PATH = join(process.cwd(), 'packages/@luke-ui/react/src/recipes/index.ts');
-
-/** Append new component CSS import to styles/primitives.css.ts and sort. */
+/** Append new component CSS import to recipes/layers.css.ts and sort. */
 function addComponentToStylesIndex(answers: GeneratorAnswers): string {
 	const componentDir = resolveComponentDir(answers);
-	const newImport = `import '../recipes/${componentDir}.css.js';`;
-	const content = readFileSync(STYLES_PRIMITIVES_PATH, 'utf8');
+	const newImport = `import './${componentDir}.css.js';`;
+	const content = readFileSync(RECIPES_LAYERS_PATH, 'utf8');
 	if (content.includes(newImport)) {
-		return `Styles primitives barrel already contains ${componentDir} CSS`;
+		return `Recipes layers already contains ${componentDir} CSS`;
 	}
-	const imports = Array.from(
-		new Set(
-			content
-				.split('\n')
-				.map((line) => line.trim())
-				.filter(Boolean)
-				.concat(newImport),
-		),
-	);
+
+	const seen = new Set<string>();
+	const imports: Array<string> = [];
+	let start = 0;
+
+	for (let i = 0; i <= content.length; i += 1) {
+		if (i === content.length || content.charAt(i) === '\n') {
+			const line = content.slice(start, i).trim();
+			if (line && !seen.has(line)) {
+				seen.add(line);
+				imports.push(line);
+			}
+			start = i + 1;
+		}
+	}
+
+	if (!seen.has(newImport)) {
+		imports.push(newImport);
+	}
+
 	imports.sort((a, b) => a.localeCompare(b));
-	writeFileSync(STYLES_PRIMITIVES_PATH, `${imports.join('\n')}\n`);
-	return `Added ${componentDir} CSS to styles primitives barrel`;
+	writeFileSync(RECIPES_LAYERS_PATH, `${imports.join('\n')}\n`);
+	return `Added ${componentDir} CSS to recipes layers`;
 }
 
 function addComponentToRecipesIndex(answers: GeneratorAnswers): string {
@@ -206,9 +253,27 @@ function addComponentToRecipesIndex(answers: GeneratorAnswers): string {
 	if (content.includes(typeExport)) {
 		return `Recipes index already contains ${componentDir}`;
 	}
-	const firstExportIndex = content.search(/^export\s/m);
+
+	let firstExportIndex = -1;
+	for (let i = 0; i < content.length - 6; i += 1) {
+		if (
+			content.charAt(i) === 'e' &&
+			content.charAt(i + 1) === 'x' &&
+			content.charAt(i + 2) === 'p' &&
+			content.charAt(i + 3) === 'o' &&
+			content.charAt(i + 4) === 'r' &&
+			content.charAt(i + 5) === 't' &&
+			content.charAt(i + 6) === ' '
+		) {
+			if (i === 0 || content.charAt(i - 1) === '\n') {
+				firstExportIndex = i;
+				break;
+			}
+		}
+	}
+
 	if (firstExportIndex === -1) {
-		const separator = content.endsWith('\n') ? '' : '\n';
+		const separator = content.charAt(content.length - 1) === '\n' ? '' : '\n';
 		writeFileSync(RECIPES_INDEX_PATH, `${content}${separator}${typeExport}\n${valueExport}\n`);
 		return `Added ${componentDir} to recipes index`;
 	}

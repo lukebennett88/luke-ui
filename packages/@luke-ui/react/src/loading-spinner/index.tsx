@@ -1,13 +1,13 @@
 import { clamp } from '@react-aria/utils';
 import type { ComponentProps } from 'react';
+import * as styles from '../recipes/loading-spinner.css.js';
 import {
 	ICON_VIEWBOX,
 	ICON_VIEWBOX_SIZE,
 	SPINNER_CIRCLE_RADIUS,
 	SPINNER_STROKE_WIDTH,
-} from '../lib/icon.js';
-import * as styles from '../recipes/loading-spinner.css.js';
-import type { DistributiveOmit } from '../types/index.js';
+} from '../sizing/icon-sizing.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { cx } from '../utils/index.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}

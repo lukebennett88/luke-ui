@@ -1,8 +1,9 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { createPropertyVariants, createVariants } from '../style-helpers/index.js';
+import { createPropertyVariants, createVariants } from '../style-helpers/create-variants.js';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
+import { tokenKeys } from '../tokens/groups.js';
 import type {
 	FontFamilyToken,
 	FontSizeToken,
@@ -10,8 +11,8 @@ import type {
 	ForegroundColorToken,
 	LineHeightToken,
 } from '../tokens/index.js';
-import { tokenKeys, tokens } from '../tokens/index.js';
-import { getTypographyClass } from '../typography/index.js';
+import { tokens } from '../tokens/index.js';
+import { getTypographyClass } from '../typography/get-typography-class.js';
 
 const colorKeys = tokenKeys(tokens.foregroundColor);
 const fontFamilyKeys = tokenKeys(tokens.fontFamily);

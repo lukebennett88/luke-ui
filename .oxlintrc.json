@@ -9,6 +9,7 @@
 		"**/routeTree.gen.ts"
 	],
 	"plugins": ["import", "jsx-a11y", "react", "typescript", "vitest"],
+	"jsPlugins": [{ "name": "react-hooks-js", "specifier": "eslint-plugin-react-hooks" }],
 	"rules": {
 		"@typescript-eslint/array-type": ["error", { "default": "generic" }],
 		"@typescript-eslint/consistent-type-exports": [
@@ -29,6 +30,22 @@
 		"no-console": "warn",
 		"no-unused-vars": "error",
 		"react/no-array-index-key": "off",
+		"react/exhaustive-deps": "warn",
+		"react/rules-of-hooks": "error",
+		"react-hooks-js/config": "error",
+		"react-hooks-js/error-boundaries": "error",
+		"react-hooks-js/gating": "error",
+		"react-hooks-js/globals": "error",
+		"react-hooks-js/immutability": "error",
+		"react-hooks-js/preserve-manual-memoization": "error",
+		"react-hooks-js/purity": "error",
+		"react-hooks-js/refs": "error",
+		"react-hooks-js/set-state-in-effect": "error",
+		"react-hooks-js/set-state-in-render": "error",
+		"react-hooks-js/static-components": "error",
+		"react-hooks-js/unsupported-syntax": "warn",
+		"react-hooks-js/use-memo": "error",
+		"react-hooks-js/incompatible-library": "warn",
 		"sort-imports": "off"
 	}
 }

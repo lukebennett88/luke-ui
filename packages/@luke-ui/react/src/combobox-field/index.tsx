@@ -1,27 +1,22 @@
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import type {
-	ComboboxInputProps,
-	ComboboxListBoxProps,
-	ComboboxLoadMoreItemProps,
-	ComboboxPopoverProps,
-	ComboboxSize,
-} from '../combobox/index.js';
-import {
-	ComboboxControl,
-	ComboboxEmptyState,
-	ComboboxInput,
-	ComboboxListBox,
-	ComboboxLoadMoreItem,
-	ComboboxPopover,
-	ComboboxTextInput,
-	ComboboxTrigger,
-} from '../combobox/index.js';
-import type { FieldErrorProps } from '../field-error/index.js';
-import type { FieldNecessityIndicator } from '../field-label/index.js';
+import { ComboboxControl } from '../combobox/control.js';
+import { ComboboxEmptyState } from '../combobox/empty-state.js';
+import { ComboboxTextInput } from '../combobox/input.js';
+import { ComboboxLoadMoreItem } from '../combobox/item.js';
+import type { ComboboxLoadMoreItemProps } from '../combobox/item.js';
+import { ComboboxListBox } from '../combobox/listbox.js';
+import type { ComboboxListBoxProps } from '../combobox/listbox.js';
+import { ComboboxPopover } from '../combobox/popover.js';
+import type { ComboboxPopoverProps } from '../combobox/popover.js';
+import { ComboboxInput } from '../combobox/root.js';
+import type { ComboboxInputProps, ComboboxSize } from '../combobox/root.js';
+import { ComboboxTrigger } from '../combobox/trigger.js';
+import type { FieldErrorProps } from '../field/error.js';
 import { Field } from '../field/index.js';
+import type { FieldNecessityIndicator } from '../field/label.js';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
-import type { DistributiveOmit } from '../types/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 
 type ComboboxLoadingState = 'error' | 'filtering' | 'idle' | 'loading' | 'loadingMore' | 'sorting';
 

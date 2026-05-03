@@ -1,13 +1,13 @@
 import { createTheme, createThemeContract } from '@vanilla-extract/css';
-import type { ColorTokenValue } from '../tokens/index.js';
 import {
 	colorToCssString,
 	cubicBezierToString,
 	dimensionToRemString,
 	durationToString,
-	tokenKeys,
-	tokens,
-} from '../tokens/index.js';
+} from '../tokens/converters.js';
+import { tokenKeys } from '../tokens/groups.js';
+import type { ColorTokenValue } from '../tokens/index.js';
+import { tokens } from '../tokens/index.js';
 import { classSelector, lukeUiClassNames } from './class-names.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 import { layers } from './layers.css.js';
