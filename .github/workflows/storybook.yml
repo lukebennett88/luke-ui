@@ -42,7 +42,7 @@ jobs:
         run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
       - name: Build package
-        run: corepack pnpm --filter @luke-ui/react run build
+        run: corepack pnpm build:packages
 
       - name: Run Storybook visual tests
         run: corepack pnpm test
@@ -82,10 +82,10 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Build package
-        run: corepack pnpm --filter @luke-ui/react run build
+        run: corepack pnpm build:packages
 
       - name: Build Storybook
-        run: corepack pnpm run build:storybook
+        run: corepack pnpm build:storybook
         env:
           STORYBOOK_BASE_PATH: ${{ steps.pages.outputs.base_path }}
 

@@ -14,11 +14,6 @@ export default {
 				'src/routes/**/*.tsx',
 				'src/styles/app.css',
 			],
-			ignoreDependencies: [
-				'@tanstack/react-router-devtools',
-				'@vanilla-extract/vite-plugin',
-				'srvx',
-			],
 			project: ['src/**/*.{ts,tsx}'],
 		},
 		'packages/@luke-ui/react': {
