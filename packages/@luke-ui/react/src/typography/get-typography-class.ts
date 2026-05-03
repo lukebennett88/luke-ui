@@ -1,7 +1,8 @@
 import fontMetrics from '@capsizecss/metrics/appleSystem';
 import { createTextStyle } from '@capsizecss/vanilla-extract';
+import { dimensionToPxNumber } from '../tokens/converters.js';
 import type { FontSizeToken, LineHeightToken } from '../tokens/index.js';
-import { dimensionToPxNumber, tokens } from '../tokens/index.js';
+import { tokens } from '../tokens/index.js';
 
 interface GetTypographyInput {
 	fontSize: FontSizeToken;

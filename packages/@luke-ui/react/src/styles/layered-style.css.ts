@@ -1,7 +1,7 @@
 import type { GlobalStyleRule, StyleRule } from '@vanilla-extract/css';
 import { globalStyle as vanillaGlobalStyle, style as vanillaStyle } from '@vanilla-extract/css';
 import { recipe as vanillaRecipe } from '@vanilla-extract/recipes';
-import type { DistributiveOmit } from '../types/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { LayerName } from './layers.css.js';
 import { layers } from './layers.css.js';
 

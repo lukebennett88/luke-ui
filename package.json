@@ -33,6 +33,7 @@
 	"devDependencies": {
 		"@changesets/cli": "^2.31.0",
 		"@turbo/gen": "^2.9.6",
+		"eslint-plugin-react-hooks": "^7.1.1",
 		"knip": "^6.6.3",
 		"oxfmt": "^0.46.0",
 		"oxlint": "^1.61.0",

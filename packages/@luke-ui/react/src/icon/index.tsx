@@ -2,9 +2,9 @@ import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../.generated/icon-data.js';
 import { useIconSizeContext } from '../icon-size-context/index.js';
-import { ICON_VIEWBOX } from '../lib/icon.js';
 import * as styles from '../recipes/icon.css.js';
-import type { DistributiveOmit } from '../types/index.js';
+import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { cx } from '../utils/index.js';
 
 export type { IconName } from '../../.generated/icon-data.js';

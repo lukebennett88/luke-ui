@@ -4,9 +4,9 @@ import type {
 	TextFieldProps as RacTextFieldProps,
 } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
-import type { FieldErrorProps } from '../field-error/index.js';
-import type { FieldNecessityIndicator } from '../field-label/index.js';
+import type { FieldErrorProps } from '../field/error.js';
 import { Field } from '../field/index.js';
+import type { FieldNecessityIndicator } from '../field/label.js';
 import type { TextInputSize } from '../text-input/index.js';
 import { TextInput } from '../text-input/index.js';
 

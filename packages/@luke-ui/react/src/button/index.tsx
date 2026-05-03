@@ -1,10 +1,10 @@
 import type { JSX } from 'react';
 import type { ButtonProps as PrimitiveButtonProps } from '../button/primitive.js';
 import { Button as PrimitiveButton } from '../button/primitive.js';
-import { BUTTON_FONT_SIZE, BUTTON_ICON_SIZE } from '../lib/button.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.css.js';
 import type * as primitiveStyles from '../recipes/button.css.js';
+import { BUTTON_FONT_SIZE, BUTTON_ICON_SIZE } from '../sizing/button-sizing.js';
 import { Text } from '../text/index.js';
 
 interface ComposedButtonVariantProps extends NonNullable<styles.ButtonLabelVariants> {}
