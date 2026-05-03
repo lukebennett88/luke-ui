@@ -77,12 +77,26 @@ function validateProps(props: NumeralProps) {
 	}
 }
 
+const numeralFormatCache = new Map<string, Intl.NumberFormat>();
+
+function getCachedNumberFormat(locale: Intl.LocalesArgument, options: Intl.NumberFormatOptions) {
+	const key = `${locale}:${JSON.stringify(options)}`;
+	let cached = numeralFormatCache.get(key);
+	if (!cached) {
+		cached = new Intl.NumberFormat(locale, options);
+		numeralFormatCache.set(key, cached);
+	}
+	return cached;
+}
+
 /**
  * Formats a number and renders it with `Text`.
  * @throws When `currency` and `unit` are both provided or precision is invalid.
  */
 export function Numeral(props: NumeralProps) {
-	validateProps(props);
+	if (process.env.NODE_ENV !== 'production') {
+		validateProps(props);
+	}
 	const { locale: localeFromContext } = useLocale();
 	const isWithinHeading = useIsWithinHeading();
 	const {
@@ -141,7 +155,7 @@ export function Numeral(props: NumeralProps) {
 		}
 	}
 
-	const content = new Intl.NumberFormat(resolvedLocale, numeralFormatOptions).format(value);
+	const content = getCachedNumberFormat(resolvedLocale, numeralFormatOptions).format(value);
 	const resolvedShouldDisableTrim = shouldDisableTrim ?? isWithinHeading;
 	const resolvedColor = color ?? (isWithinHeading ? 'inherit' : undefined);
 	const colorProps: Pick<TextProps, 'color'> | {} =
