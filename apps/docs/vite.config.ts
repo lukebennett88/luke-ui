@@ -4,18 +4,18 @@ import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
 import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
-import tsConfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig(async () => ({
 	optimizeDeps: {
 		exclude: ['@luke-ui/react'],
 	},
+	resolve: {
+		external: ['ts-morph'],
+		tsconfigPaths: true,
+	},
 	plugins: [
 		mdx(await import('./source.config')),
 		tailwindcss(),
-		tsConfigPaths({
-			projects: ['./tsconfig.json'],
-		}),
 		tanstackStart({
 			pages: [{ path: '/docs' }, { path: '/api/search' }],
 
@@ -29,7 +29,6 @@ export default defineConfig(async () => ({
 			},
 		}),
 		react(),
-		// Please see https://tanstack.com/start/latest/docs/framework/react/guide/hosting#nitro for guides on hosting
 		nitro(),
 	],
 	server: {

@@ -3,7 +3,10 @@ title: Text
 description: Typography component for rendering body copy and headings with token-driven sizing.
 ---
 
-import TextDocs from '../../../../../../packages/@luke-ui/react/src/text.docs.mdx';
+import { storyClient } from '../../../../src/stories/text.story.client';
+import TextDocs from '../../../../../../packages/@luke-ui/react/src/text/text.docs.mdx';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+<storyClient.WithControl />
 
 <TextDocs components={defaultMdxComponents} />

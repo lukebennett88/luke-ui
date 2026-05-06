@@ -80,7 +80,7 @@ function validateProps(props: NumeralProps) {
 const numeralFormatCache = new Map<string, Intl.NumberFormat>();
 
 function getCachedNumberFormat(locale: Intl.LocalesArgument, options: Intl.NumberFormatOptions) {
-	const key = `${locale}:${JSON.stringify(options)}`;
+	const key = `${String(locale)}:${JSON.stringify(options)}`;
 	let cached = numeralFormatCache.get(key);
 	if (!cached) {
 		cached = new Intl.NumberFormat(locale, options);
