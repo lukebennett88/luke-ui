@@ -50,50 +50,6 @@ import { Text } from '@luke-ui/react/text';
 <Text lineClamp>Long content truncated to one line.</Text>
 ```
 
-## Composed typography
-
-```ts
-import { Emoji, Heading, Numeral } from '@luke-ui/react/heading';
-```
-
-```tsx
-<Heading level={2}>Section title</Heading>
-```
-
-```tsx
-<Emoji emoji="🎉" label="Celebration" />
-```
-
-```tsx
-<Numeral value={90_909.09} />
-```
-
-```tsx
-<Numeral value={3_500} format="percent" />
-<Numeral value={98.7654} currency="AUD" />
-<Numeral value={98} unit="kilometer-per-hour" />
-```
-
-```tsx
-<Numeral value={12_345} abbreviate />
-<Numeral value={1_234.5678} precision={[0, 2]} />
-```
-
-## `Numeral` props
-
-| Prop            | Type                                                                    | Default          | Notes                                        |
-| --------------- | ----------------------------------------------------------------------- | ---------------- | -------------------------------------------- |
-| `abbreviate`    | `boolean \| 'long'`                                                     | `false`          | Enables compact notation.                    |
-| `currency`      | `string`                                                                | -                | ISO 4217 code (e.g. `AUD`, `USD`, `EUR`).    |
-| `format`        | `'decimal' \| 'percent' \| 'currency' \| 'unit'`                        | Derived          | Derives from `currency`/`unit` when omitted. |
-| `formatOptions` | `Intl.NumberFormatOptions`                                              | -                | Additional formatting overrides.             |
-| `locale`        | `Intl.LocalesArgument`                                                  | Runtime locale   | Locale passed to `Intl.NumberFormat`.        |
-| `precision`     | `number \| [number, number]`                                            | Locale default   | Sets fixed or min/max fraction digits.       |
-| `textAlign`     | `TextProps['textAlign']`                                                | `'end'`          | Right-align by default for numeric columns.  |
-| `unit`          | `Intl.NumberFormatOptions['unit']`                                      | -                | Unit identifier (e.g. `kilometer-per-hour`). |
-| `value`         | `number`                                                                | -                | Numeric value to format.                     |
-| `variant`       | `'diagonal-fractions' \| 'ordinal' \| 'slashed-zero' \| 'tabular-nums'` | `'tabular-nums'` | Numeric glyph rendering mode.                |
-
 ## Props
 
 | Prop                | Type                                                                               | Default         | Notes                                                                                       |

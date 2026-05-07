@@ -1,10 +1,10 @@
-`ComboboxField` is the composed searchable field built from `ComboboxInput` primitives.
+`ComboboxField` is the composed searchable single-select field.
 
 ## Import
 
 ```ts
 import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox';
+import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox-field/primitive';
 ```
 
 ## Usage
@@ -33,13 +33,86 @@ import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox';
 </ComboboxField>
 ```
 
+## Required fields
+
+```tsx
+<ComboboxField isRequired label="Country" name="country" necessityIndicator="icon">
+	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+</ComboboxField>
+```
+
+## Validation
+
+```tsx
+import { Form } from 'react-aria-components';
+
+<Form validationErrors={{ country: 'Please select a country.' }}>
+	<ComboboxField
+		name="country"
+		label="Country"
+		errorMessage={(validation) => validation.validationErrors.join(' ')}
+	>
+		{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+	</ComboboxField>
+</Form>;
+```
+
+## Async options
+
+Pass `loadingState` to activate built-in loading and empty states. Options are
+controlled externally via `items`.
+
+```tsx
+<ComboboxField
+	label="Country"
+	name="country"
+	items={results}
+	loadingState={status}
+	onInputChange={setQuery}
+>
+	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+</ComboboxField>
+```
+
+## Infinite scroll
+
+Use `onLoadMore` for automatic sentinel-based loading, or `loadMoreItem` for
+full control.
+
+```tsx
+<ComboboxField
+	label="Country"
+	name="country"
+	items={results}
+	loadingState={status}
+	onLoadMore={fetchNextPage}
+>
+	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+</ComboboxField>
+```
+
 ## API Shape
 
 - Root props follow React Aria `ComboBox` naming.
 - Composed convenience props: `label`, `description`, `errorMessage`, `necessityIndicator`, `size`, `placeholder`.
 - `children` renders dynamic items from `items` or `defaultItems`.
-- Composed props such as `loadingState`, `onLoadMore`, `menuWidth`, and `popoverProps` are supported directly on `ComboboxField`.
-- `listBoxProps` and `loadMoreItem` remain available as lower-level escape hatches.
+- `listBoxProps` and `loadMoreItem` are lower-level escape hatches.
 - Single-select only in v1.
-- Async options are externally controlled and passed via `items`.
-- Infinite scroll can be composed with `onLoadMore`, or customized fully with `loadMoreItem`.
+
+## Primitive kit
+
+The individual `Combobox*` building blocks used to assemble `ComboboxField` are
+available for library authors who need a custom combobox layout.
+
+```ts
+import {
+	ComboboxInput,
+	ComboboxControl,
+	ComboboxTextInput,
+	ComboboxTrigger,
+	ComboboxPopover,
+	ComboboxListBox,
+	ComboboxItem,
+	ComboboxSection,
+} from '@luke-ui/react/combobox-field/primitive';
+```
