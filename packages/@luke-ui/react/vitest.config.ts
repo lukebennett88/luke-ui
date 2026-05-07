@@ -10,6 +10,9 @@ const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.join(dirname, '.storybook');
 export default defineConfig({
+	optimizeDeps: {
+		include: ['@vanilla-extract/recipes/createRuntimeFn'],
+	},
 	test: {
 		projects: [
 			{

@@ -50,6 +50,9 @@ function storySourcePathPlugin(): Plugin {
 }
 
 export default defineConfig(async () => ({
+	// Allow overriding the base URL for deployments to sub-paths (e.g. GitHub Pages).
+	// Set VITE_BASE_URL to the base path with a trailing slash, e.g. /luke-ui/
+	base: process.env.VITE_BASE_URL ?? '/',
 	// Tell TanStack Start's plugin where the client output lives so it bakes the
 	// correct TSS_CLIENT_OUTPUT_DIR into the server bundle. Nitro's
 	// configEnvironment hook sets the resolved client env outDir to
