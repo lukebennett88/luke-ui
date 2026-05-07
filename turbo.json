@@ -20,6 +20,7 @@
 		},
 		"build": {
 			"dependsOn": ["^build", "generate"],
+			"env": ["VITE_BASE_URL"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["dist/**", ".output/**", ".source/**"]
 		},

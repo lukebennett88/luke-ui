@@ -1,1 +1,4 @@
-{ "title": "Typography", "pages": ["text"] }
+{
+	"title": "Typography",
+	"pages": ["emoji", "heading", "numeral", "text"]
+}

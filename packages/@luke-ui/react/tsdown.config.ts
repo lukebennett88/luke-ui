@@ -45,15 +45,7 @@ export default defineConfig((options) => ({
 	clean: false,
 	dts: true,
 	entry: {
-		'*': [
-			'src/*/index.tsx',
-			'src/*/index.ts',
-			'!src/style-helpers/index.ts',
-			'!src/types/index.ts',
-			'!src/typography/index.ts',
-		],
-		'button/primitive': 'src/button/primitive.tsx',
-		'field/primitive': 'src/field/primitive.tsx',
+		'*': ['src/*/index.tsx', 'src/*/index.ts', 'src/*/primitive/index.tsx'],
 	},
 	exports: {
 		customExports: {

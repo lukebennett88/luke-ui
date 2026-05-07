@@ -15,6 +15,7 @@ export default {
 				'src/styles/app.css',
 			],
 			project: ['src/**/*.{ts,tsx}'],
+			ignoreDependencies: ['ts-morph'],
 		},
 		'packages/@luke-ui/react': {
 			entry: [

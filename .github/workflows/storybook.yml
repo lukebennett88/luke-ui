@@ -87,12 +87,38 @@ jobs:
       - name: Build Storybook
         run: corepack pnpm build:storybook
         env:
-          STORYBOOK_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          STORYBOOK_BASE_PATH: ${{ steps.pages.outputs.base_path }}/storybook
+
+      - name: Build docs
+        run: corepack pnpm build:docs
+        env:
+          VITE_BASE_URL: ${{ steps.pages.outputs.base_path }}/
+
+      - name: Assemble Pages artifact
+        run: |
+          BASE_PATH="${{ steps.pages.outputs.base_path }}"
+          # Strip the leading slash to get the subdirectory name (e.g. /luke-ui → luke-ui).
+          # The docs prerendering outputs HTML under .output/public/<subdir>/ when basePath
+          # is set, so we copy from there and let GitHub Pages handle the /luke-ui/ prefix.
+          STRIPPED="${BASE_PATH#/}"
+          mkdir -p dist
+          if [ -n "$STRIPPED" ] && [ -d "apps/docs/.output/public/${STRIPPED}" ]; then
+            cp -r "apps/docs/.output/public/${STRIPPED}/." dist/
+          else
+            # Fallback for root deployments (user/org Pages or custom domain)
+            cp -r apps/docs/.output/public/. dist/
+          fi
+          # Assets are output at .output/public/assets/ regardless of basePath
+          [ -d apps/docs/.output/public/assets ] && cp -r apps/docs/.output/public/assets dist/
+          [ -d apps/docs/.output/public/__tsr ]  && cp -r apps/docs/.output/public/__tsr dist/
+          [ -d apps/docs/.output/public/api ]    && cp -r apps/docs/.output/public/api dist/
+          # Storybook lives at /storybook/ within the Pages site
+          cp -r packages/@luke-ui/react/storybook-static dist/storybook
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: packages/@luke-ui/react/storybook-static
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment

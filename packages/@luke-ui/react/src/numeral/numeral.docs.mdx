@@ -1,0 +1,82 @@
+`Numeral` formats a number and renders it with `Text`. Formatting is done via
+`Intl.NumberFormat` and respects the locale from React Aria's `I18nProvider`.
+
+## Import
+
+```ts
+import { Numeral } from '@luke-ui/react/numeral';
+```
+
+## Usage
+
+```tsx
+<Numeral value={12_345.67} />
+```
+
+## Formats
+
+`format` is derived from `currency` and `unit` when omitted. Pass it explicitly
+for `'percent'` or `'decimal'` without a currency or unit.
+
+```tsx
+<Numeral value={3_500} format="percent" />
+```
+
+```tsx
+<Numeral value={98.76} currency="AUD" />
+```
+
+```tsx
+<Numeral value={98} unit="kilometer-per-hour" />
+```
+
+```tsx
+<Numeral value={12_345} format="decimal" />
+```
+
+## Compact notation
+
+```tsx
+<Numeral value={12_345} abbreviate />
+```
+
+```tsx
+<Numeral value={12_345} abbreviate="long" />
+```
+
+## Precision
+
+Pass a number for fixed fraction digits, or a `[min, max]` tuple for a range.
+
+```tsx
+<Numeral value={98.7654} precision={2} />
+```
+
+```tsx
+<Numeral value={1_234.5678} precision={[0, 2]} />
+```
+
+## Constraints
+
+`Numeral` throws in development when:
+
+- `currency` and `unit` are both provided.
+- `format="currency"` is used without a `currency` code.
+- `format="unit"` is used without a `unit` value.
+- `precision` is not a non-negative integer or valid `[min, max]` tuple.
+
+## Props
+
+| Prop            | Type                                                                    | Default          | Notes                                                          |
+| --------------- | ----------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------- |
+| `value`         | `number`                                                                | -                | Required. Number to format.                                    |
+| `abbreviate`    | `boolean \| 'long'`                                                     | `false`          | Compact notation. `true` = short (`1.2K`), `'long'` = long.    |
+| `currency`      | `string`                                                                | -                | ISO 4217 code (`AUD`, `USD`, `EUR`). Sets `format="currency"`. |
+| `format`        | `'decimal' \| 'percent' \| 'currency' \| 'unit'`                        | Derived          | Derived from `currency`/`unit` when omitted.                   |
+| `formatOptions` | `Intl.NumberFormatOptions`                                              | -                | Additional overrides forwarded to `Intl.NumberFormat`.         |
+| `locale`        | `Intl.LocalesArgument`                                                  | Runtime locale   | Overrides locale from `I18nProvider` context.                  |
+| `precision`     | `number \| [number, number]`                                            | Locale default   | Fixed fraction digits or `[min, max]` range.                   |
+| `textAlign`     | `TextProps['textAlign']`                                                | `'end'`          | Right-aligned by default for numeric columns.                  |
+| `unit`          | `Intl.NumberFormatOptions['unit']`                                      | -                | Unit identifier (`kilometer`, `liter`). Sets `format="unit"`.  |
+| `variant`       | `'diagonal-fractions' \| 'ordinal' \| 'slashed-zero' \| 'tabular-nums'` | `'tabular-nums'` | Numeric glyph rendering mode.                                  |
+| `...rest`       | `TextProps`                                                             | -                | Forwarded to underlying `Text` (except `children`).            |

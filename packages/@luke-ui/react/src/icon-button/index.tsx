@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import type { ButtonProps as PrimitiveButtonProps } from '../button/primitive.js';
-import { Button } from '../button/primitive.js';
+import type { ButtonProps as PrimitiveButtonProps } from '../button/primitive/index.js';
+import { Button } from '../button/primitive/index.js';
 import type { IconName } from '../icon/index.js';
 import { Icon } from '../icon/index.js';
 import * as styles from '../recipes/icon-button.css.js';
