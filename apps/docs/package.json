@@ -5,7 +5,6 @@
 	"sideEffects": false,
 	"scripts": {
 		"build": "vite build",
-		"postbuild": "cp -r .output/dist/client/__tsr .output/public/__tsr",
 		"check:format": "pnpm exec oxfmt -c ../../.oxfmtrc.json --check .",
 		"check:lint": "pnpm exec oxlint . --type-aware",
 		"check:types": "fumadocs-mdx && tsc --noEmit",

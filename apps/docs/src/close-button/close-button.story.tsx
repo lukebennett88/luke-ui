@@ -1,15 +1,10 @@
 import type { CloseButton } from '@luke-ui/react/close-button';
-import { defineStory } from '../lib/story';
-import { reorderProps } from '../lib/story-utils';
+import { defineComponentStory } from '../lib/define-component-story';
 
-export const story = defineStory<typeof CloseButton>(
+export const story = defineComponentStory<typeof CloseButton>(
 	new URL('./close-button.story.tsx', import.meta.url),
 	{
-		args: {
-			initial: {},
-			controls: {
-				transform: reorderProps(['tone', 'size', 'isDisabled']),
-			},
-		},
+		initial: {},
+		priorities: ['tone', 'size', 'isDisabled'],
 	},
 );

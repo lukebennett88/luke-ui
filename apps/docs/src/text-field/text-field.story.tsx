@@ -1,25 +1,10 @@
 import type { TextField } from '@luke-ui/react/text-field';
-import { defineStory } from '../lib/story';
-import { reorderProps } from '../lib/story-utils';
+import { defineComponentStory } from '../lib/define-component-story';
 
-export const story = defineStory<typeof TextField>(
+export const story = defineComponentStory<typeof TextField>(
 	new URL('./text-field.story.tsx', import.meta.url),
 	{
-		args: {
-			initial: {
-				name: 'email',
-				label: 'Email',
-			},
-			controls: {
-				transform: reorderProps([
-					'name',
-					'label',
-					'description',
-					'placeholder',
-					'size',
-					'isRequired',
-				]),
-			},
-		},
+		initial: { name: 'email', label: 'Email' },
+		priorities: ['name', 'label', 'description', 'placeholder', 'size', 'isRequired'],
 	},
 );

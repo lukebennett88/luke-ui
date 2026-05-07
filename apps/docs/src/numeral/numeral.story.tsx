@@ -1,14 +1,10 @@
 import type { Numeral } from '@luke-ui/react/numeral';
-import { defineStory } from '../lib/story';
-import { reorderProps } from '../lib/story-utils';
+import { defineComponentStory } from '../lib/define-component-story';
 
-export const story = defineStory<typeof Numeral>(new URL('./numeral.story.tsx', import.meta.url), {
-	args: {
-		initial: {
-			value: 12345.67,
-		},
-		controls: {
-			transform: reorderProps(['value', 'format', 'currency', 'precision', 'abbreviate']),
-		},
+export const story = defineComponentStory<typeof Numeral>(
+	new URL('./numeral.story.tsx', import.meta.url),
+	{
+		initial: { value: 12345.67 },
+		priorities: ['value', 'format', 'currency', 'precision', 'abbreviate'],
 	},
-});
+);

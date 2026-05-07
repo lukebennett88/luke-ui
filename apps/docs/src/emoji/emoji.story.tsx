@@ -1,15 +1,10 @@
 import type { Emoji } from '@luke-ui/react/emoji';
-import { defineStory } from '../lib/story';
-import { reorderProps } from '../lib/story-utils';
+import { defineComponentStory } from '../lib/define-component-story';
 
-export const story = defineStory<typeof Emoji>(new URL('./emoji.story.tsx', import.meta.url), {
-	args: {
-		initial: {
-			emoji: '🎉',
-			label: 'Celebration',
-		},
-		controls: {
-			transform: reorderProps(['emoji', 'label']),
-		},
+export const story = defineComponentStory<typeof Emoji>(
+	new URL('./emoji.story.tsx', import.meta.url),
+	{
+		initial: { emoji: '🎉', label: 'Celebration' },
+		priorities: ['emoji', 'label'],
 	},
-});
+);

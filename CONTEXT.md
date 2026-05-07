@@ -14,8 +14,8 @@ A component that combines two or more atoms or primitives into an opinionated, r
 _Examples_: `Button`, `IconButton`, `CloseButton`, `TextField`, `ComboboxField`.
 
 **Primitive**:
-A building block whose audience is library authors assembling the next composed component, not app devs. May be a single file (`text-input`) or a kit of parts (`combobox/*`, `field/primitive` + `field/label` + `field/description` + `field/error`).
-_Examples_: `TextInput`, `ComboboxInput` and friends, `button/primitive`, `field/primitive`, the composed-but-internal `Field`.
+A building block whose audience is library authors assembling the next composed component, not app devs. May be a single file (e.g. `text-field/primitive`) or a kit of parts (e.g. `combobox-field/primitive`, `field/primitive`).
+_Examples_: `TextInput` (via `text-field/primitive`), the `Combobox*` kit (via `combobox-field/primitive`), `button/primitive`, `field/primitive`, the composed-but-internal `Field`.
 _Avoid_: "base", "raw" — use **Primitive**.
 
 ## Relationships
@@ -39,8 +39,3 @@ _Avoid_: "base", "raw" — use **Primitive**.
 
 - [ADR-0001](docs/adr/0001-component-tier-taxonomy.md) — Three-tier taxonomy and docs rule
 - [ADR-0002](docs/adr/0002-primitive-package-path-convention.md) — Primitive kits exported at `[composed]/primitive`
-
-## Flagged ambiguities
-
-- Source JSDoc currently calls `Text`, `TextInput`, and `button/primitive.tsx` all "primitive". Resolved: `Text` is an **Atom**; `TextInput` and `button/primitive.tsx` are **Primitives**. JSDoc to be aligned during refactor.
-- `docs/CONVENTIONS.md` mentions only "primitives/ (base) and composed/ (opinionated)". Resolved: the taxonomy is three-way (atom / composed / primitive); CONVENTIONS.md to be updated.

@@ -1,17 +1,10 @@
 import type { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import { defineStory } from '../lib/story';
-import { reorderProps } from '../lib/story-utils';
+import { defineComponentStory } from '../lib/define-component-story';
 
-export const story = defineStory<typeof LoadingSpinner>(
+export const story = defineComponentStory<typeof LoadingSpinner>(
 	new URL('./loading-spinner.story.tsx', import.meta.url),
 	{
-		args: {
-			initial: {
-				'aria-label': 'Loading',
-			},
-			controls: {
-				transform: reorderProps(['aria-label', 'size']),
-			},
-		},
+		initial: { 'aria-label': 'Loading' },
+		priorities: ['aria-label', 'size'],
 	},
 );

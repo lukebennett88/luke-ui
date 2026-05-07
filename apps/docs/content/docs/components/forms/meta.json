@@ -1,1 +1,4 @@
-{ "title": "Forms", "pages": ["combobox-field", "text-field"] }
+{
+	"title": "Forms",
+	"pages": ["combobox-field", "text-field"]
+}
