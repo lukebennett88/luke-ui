@@ -10,9 +10,12 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layo
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import browserCollections from '../../../.source/browser';
+import { PageActions } from '../../components/page-actions';
 import { baseOptions } from '../../lib/layout.shared';
 import { source } from '../../lib/source';
 import { getStoryPayloads } from '../../lib/story';
+
+const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
 
 const storyModules = import.meta.glob<{ story: Story }>('../../*/*.story.tsx', { eager: true });
 const clientStoryModules = import.meta.glob<{ storyClient: StoryClient }>(
@@ -50,7 +53,14 @@ const loader = createServerFn({
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
 
+		// Index pages (page.slugs === []) map to /llms.mdx/docs/index.md so that
+		// every prerendered file lives under /llms.mdx/docs/<segment>.md and the
+		// route's required `.md` suffix matches.
+		const markdownSlug = page.slugs.length > 0 ? page.slugs.join('/') : 'index';
+
 		return {
+			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
+			markdownUrl: `/llms.mdx/docs/${markdownSlug}.md`,
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			storyPayloads: await getStoryPayloads(stories),
@@ -62,13 +72,17 @@ const clientLoader = browserCollections.docs.createClientLoader({
 		{ toc, frontmatter, default: MDX },
 		props: {
 			className?: string;
+			githubUrl: string;
+			markdownUrl: string;
 		},
 	) {
+		const { githubUrl, markdownUrl, ...pageProps } = props;
 		return (
-			<DocsPage toc={toc} {...props}>
+			<DocsPage toc={toc} {...pageProps}>
 				<DocsTitle>{frontmatter.title}</DocsTitle>
 				<DocsDescription>{frontmatter.description}</DocsDescription>
 				<DocsBody>
+					<PageActions githubUrl={githubUrl} markdownUrl={markdownUrl} />
 					<MDX
 						components={{
 							...defaultMdxComponents,
@@ -92,6 +106,8 @@ function Page() {
 				<Suspense>
 					{clientLoader.useContent(data.path, {
 						className: '',
+						githubUrl: data.githubUrl,
+						markdownUrl: data.markdownUrl,
 					})}
 				</Suspense>
 			</StoryPayloadProvider>

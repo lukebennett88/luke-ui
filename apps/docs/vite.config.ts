@@ -85,7 +85,7 @@ export default defineConfig(async () => ({
 				enabled: true,
 				crawlLinks: true,
 			},
-			pages: [{ path: '/api/search' }],
+			pages: [{ path: '/api/search' }, { path: '/llms.txt' }, { path: '/llms-full.txt' }],
 		}),
 		react(),
 		nitro(),
