@@ -7,10 +7,7 @@ export type ComboboxFieldStoryProps<T extends object> = Pick<
 	'label' | 'name' | 'placeholder' | 'description' | 'isRequired' | 'isDisabled' | 'size'
 >;
 
-export const story = defineComponentStory<FC<ComboboxFieldStoryProps<any>>>(
-	new URL('./combobox-field.story.tsx', import.meta.url),
-	{
-		initial: { label: 'Country', name: 'country', placeholder: 'Select a country...' },
-		priorities: ['name', 'label', 'placeholder', 'description', 'isRequired'],
-	},
-);
+export const story = defineComponentStory<FC<ComboboxFieldStoryProps<any>>>(import.meta.url, {
+	initial: { label: 'Country', name: 'country', placeholder: 'Select a country...' },
+	priorities: ['name', 'label', 'placeholder', 'description', 'isRequired'],
+});

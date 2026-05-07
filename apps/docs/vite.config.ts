@@ -1,4 +1,3 @@
-import path from 'node:path';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import react from '@vitejs/plugin-react';
@@ -7,44 +6,39 @@ import { nitro } from 'nitro/vite';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
-// Rewrites import.meta.url references in story-related files to absolute source
-// paths so getStoryPayloads (ts-morph analysis) works when the preview server
-// runs from the compiled .output/server directory during static prerendering.
+// Freezes `import.meta.url` to the source file URL in story files and lib/story.ts.
+// At runtime the preview server runs from the compiled .output/server directory,
+// but ts-morph (via getStoryPayloads) and lib/story.ts's appRoot calculation need
+// the original source paths.
 function storySourcePathPlugin(): Plugin {
 	return {
 		name: 'story-source-path',
 		enforce: 'pre',
-		transform(code: string, id: string): string | null {
+		transform(code, id) {
 			const cleanId = id.split('?')[0] ?? '';
+			if (!cleanId.endsWith('.story.tsx') && !cleanId.endsWith('/lib/story.ts')) return null;
+			if (!code.includes('import.meta.url')) return null;
+			const sourceUrl = `file://${cleanId.replace(/\\/g, '/')}`;
+			return code.replace(/\bimport\.meta\.url\b/g, JSON.stringify(sourceUrl));
+		},
+	};
+}
 
-			// Story files: replace new URL('./foo.story.tsx', import.meta.url)
-			if (cleanId.endsWith('.story.tsx')) {
-				let replaced = false;
-				const result = code.replace(
-					/new URL\(\s*(['"])(\.\.?\/[^'"]+\.story\.tsx)\1\s*,\s*import\.meta\.url\s*\)/g,
-					(_, _quote, relativePath: string) => {
-						replaced = true;
-						const absolutePath = path.resolve(path.dirname(cleanId), relativePath);
-						return JSON.stringify(absolutePath);
-					},
-				);
-				if (!replaced) {
-					throw new Error(
-						`[story-source-path] ${cleanId} has no 'new URL("./name.story.tsx", import.meta.url)' literal. ` +
-							`This call is required so ts-morph can resolve the source file during prerendering.`,
-					);
-				}
-				return result;
-			}
-
-			// lib/story.ts: freeze import.meta.url to the source file URL so
-			// the derived appRoot (tsconfig + cache paths) is always correct.
-			if (cleanId.endsWith('/lib/story.ts')) {
-				const sourceUrl = `file://${cleanId.replace(/\\/g, '/')}`;
-				return code.replace(/import\.meta\.url/g, JSON.stringify(sourceUrl));
-			}
-
-			return null;
+// staticFunctionMiddleware hardcodes `/__tsr/staticServerFnCache/...` for the
+// client fetch URL with no base-path support. When deployed under a sub-path
+// (e.g. GitHub Pages /luke-ui/), the client requests /__tsr/... and 404s.
+// This patches only the client fetch so the on-disk layout stays unchanged.
+function staticFunctionBasePathPlugin(): Plugin {
+	return {
+		name: 'static-function-base-path',
+		transform(code, id) {
+			if (!id.includes('start-static-server-functions')) return null;
+			if (!id.endsWith('staticFunctionMiddleware.js')) return null;
+			if (!code.includes('fetch(url,')) return null;
+			return code.replace(
+				'fetch(url,',
+				"fetch(import.meta.env.BASE_URL.replace(/\\/$/, '') + url,",
+			);
 		},
 	};
 }
@@ -83,6 +77,7 @@ export default defineConfig(async () => ({
 	},
 	plugins: [
 		storySourcePathPlugin(),
+		staticFunctionBasePathPlugin(),
 		mdx(await import('./source.config')),
 		tailwindcss(),
 		tanstackStart({
