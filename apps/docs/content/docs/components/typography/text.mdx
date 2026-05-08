@@ -4,9 +4,8 @@ description: Typography component for rendering body copy and headings with toke
 ---
 
 import { storyClient } from '../../../../src/text/text.story.client';
-import TextDocs from '../../../../../../packages/@luke-ui/react/src/text/text.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<TextDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="text" slugMap={packageDocSlugMap} />

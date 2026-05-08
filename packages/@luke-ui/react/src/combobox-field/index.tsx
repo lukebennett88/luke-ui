@@ -1,4 +1,5 @@
 import type { CSSProperties, JSX, ReactNode } from 'react';
+import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import type { FieldErrorProps } from '../field/primitive/error.js';
 import { Field } from '../field/primitive/index.js';
 import type { FieldNecessityIndicator } from '../field/primitive/label.js';
@@ -20,11 +21,22 @@ import { ComboboxTrigger } from './primitive/trigger.js';
 
 type ComboboxLoadingState = 'error' | 'filtering' | 'idle' | 'loading' | 'loadingMore' | 'sorting';
 
-/** Props for composed `ComboboxField` (searchable single-select). */
-export interface ComboboxFieldProps<T extends object> extends DistributiveOmit<
-	ComboboxInputProps<T>,
-	'children'
-> {
+interface ComboboxFieldRedeclaredRACProps {
+	/** Whether the combobox is disabled. */
+	isDisabled?: RacComboBoxProps<object>['isDisabled'];
+	/** Whether the combobox is read-only. */
+	isReadOnly?: RacComboBoxProps<object>['isReadOnly'];
+}
+
+/**
+ * Props for composed `ComboboxField` (searchable single-select).
+ *
+ * @tier composed
+ */
+export interface ComboboxFieldProps<T extends object>
+	extends
+		DistributiveOmit<ComboboxInputProps<T>, 'children' | keyof ComboboxFieldRedeclaredRACProps>,
+		ComboboxFieldRedeclaredRACProps {
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 

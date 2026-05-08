@@ -15,7 +15,10 @@ const IconSpritesheetContext = createContext<string | null>(null);
 interface IconVariantProps extends NonNullable<styles.IconVariants> {}
 
 interface IconStyleProps {
-	/** Sets the icon size. */
+	/**
+	 * Sets the icon size.
+	 * @default 'medium'
+	 */
 	size?: IconVariantProps['size'];
 }
 
@@ -44,7 +47,11 @@ function useIconSpritesheetHref(): string {
 	return href;
 }
 
-/** Props for the built-in `Icon` component. */
+/**
+ * Props for the built-in `Icon` component.
+ *
+ * @tier atom
+ */
 export type IconProps = Pick<
 	SVGAttributes<SVGSVGElement>,
 	'aria-hidden' | 'className' | 'id' | 'style' | 'viewBox'

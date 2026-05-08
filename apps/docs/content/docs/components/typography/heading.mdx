@@ -4,9 +4,8 @@ description: Auto-leveling semantic heading with token-based typography.
 ---
 
 import { storyClient } from '../../../../src/heading/heading.story.client';
-import HeadingDocs from '../../../../../../packages/@luke-ui/react/src/heading/heading.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<HeadingDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="heading" slugMap={packageDocSlugMap} />

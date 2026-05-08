@@ -4,9 +4,8 @@ description: Button component with size and tone variants.
 ---
 
 import { storyClient } from '../../../../src/button/button.story.client';
-import ButtonDocs from '../../../../../../packages/@luke-ui/react/src/button/button.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<ButtonDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="button" slugMap={packageDocSlugMap} />

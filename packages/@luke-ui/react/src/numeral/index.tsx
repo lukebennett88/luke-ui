@@ -10,10 +10,18 @@ export type NumeralAbbreviation = boolean | 'long';
 /** Fixed precision or `[min, max]` precision range. */
 export type NumeralPrecision = number | readonly [number, number];
 
-/** Props for `Numeral`. */
+/**
+ * Props for `Numeral`.
+ *
+ * @tier atom
+ */
 export interface NumeralProps extends Omit<TextProps, 'children' | 'textAlign' | 'variant'> {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;
+	/**
+	 * Text alignment.
+	 * @default 'end'
+	 */
 	textAlign?: TextProps['textAlign'];
 	/** Currency code such as `USD`. */
 	currency?: string;
@@ -29,6 +37,10 @@ export interface NumeralProps extends Omit<TextProps, 'children' | 'textAlign' |
 	unit?: NonNullable<Intl.NumberFormatOptions['unit']>;
 	/** Number to format. */
 	value: number;
+	/**
+	 * Numeric glyph rendering mode.
+	 * @default 'tabular-nums'
+	 */
 	variant?: Extract<
 		TextProps['variant'],
 		'diagonal-fractions' | 'ordinal' | 'slashed-zero' | 'tabular-nums'

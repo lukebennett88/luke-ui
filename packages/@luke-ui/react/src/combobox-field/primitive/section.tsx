@@ -6,6 +6,11 @@ import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
 
+/**
+ * Props for a combobox section grouping.
+ *
+ * @tier primitive
+ */
 export interface ComboboxSectionProps<T extends object> extends DistributiveOmit<
 	RacListBoxSectionProps<T>,
 	'className'

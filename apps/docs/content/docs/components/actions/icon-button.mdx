@@ -4,9 +4,8 @@ description: Button that renders only an icon.
 ---
 
 import { storyClient } from '../../../../src/icon-button/icon-button.story.client';
-import IconButtonDocs from '../../../../../../packages/@luke-ui/react/src/icon-button/icon-button.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<IconButtonDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="icon-button" slugMap={packageDocSlugMap} />

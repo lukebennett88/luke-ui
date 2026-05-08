@@ -2,7 +2,11 @@ import type { JSX } from 'react';
 import type { IconButtonProps } from '../icon-button/index.js';
 import { IconButton } from '../icon-button/index.js';
 
-/** Props for `CloseButton`. */
+/**
+ * Props for `CloseButton`.
+ *
+ * @tier composed
+ */
 export interface CloseButtonProps extends Omit<IconButtonProps, 'children' | 'icon'> {}
 
 /** Icon button preset for close actions. */

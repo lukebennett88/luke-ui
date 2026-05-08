@@ -4,9 +4,8 @@ description: SVG icon component powered by the generated spritesheet.
 ---
 
 import { storyClient } from '../../../../src/icon/icon.story.client';
-import IconDocs from '../../../../../../packages/@luke-ui/react/src/icon/icon.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<IconDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="icon" slugMap={packageDocSlugMap} />

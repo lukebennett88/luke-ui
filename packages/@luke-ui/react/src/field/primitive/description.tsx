@@ -6,7 +6,11 @@ import { cx } from '../../utils/index.js';
 
 interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVariants> {}
 
-/** Props for `FieldDescription`. */
+/**
+ * Props for `FieldDescription`.
+ *
+ * @tier primitive
+ */
 export interface FieldDescriptionProps
 	extends Omit<RacTextProps, 'slot'>, Omit<FieldMessageVariantProps, 'tone'> {}
 

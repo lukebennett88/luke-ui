@@ -4,9 +4,8 @@ description: Locale-aware number formatting with Intl.NumberFormat.
 ---
 
 import { storyClient } from '../../../../src/numeral/numeral.story.client';
-import NumeralDocs from '../../../../../../packages/@luke-ui/react/src/numeral/numeral.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<NumeralDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="numeral" slugMap={packageDocSlugMap} />
