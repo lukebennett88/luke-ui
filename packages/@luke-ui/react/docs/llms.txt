@@ -1,0 +1,40 @@
+# @luke-ui/react
+
+> A React design system built on react-aria-components and vanilla-extract.
+
+## Components
+
+- [Button](./button.md): Composed button. Wraps children in a `Text` for ellipsis truncation; shows a spinner when `isPending`.
+- [Close Button](./close-button.md): Icon button preset for close actions.
+- [Combobox Field](./combobox-field.md): Composes `ComboboxInput` with label, description, and error slots.
+- [Emoji](./emoji.md): Text wrapper for accessible emoji output.
+- [Heading](./heading.md): Heading component with automatic level composition.
+- [Heading Context](./heading-context.md): Marks a subtree as being inside a heading.
+- [Icon](./icon.md): Provides the icon spritesheet URL for `Icon`.
+- [Icon Button](./icon-button.md): Button that renders only an icon.
+- [Icon Size Context](./icon-size-context.md): Provides a default icon size to nested icon components.
+- [Link](./link.md): Styled link.
+- [Loading Spinner](./loading-spinner.md): Progress spinner for determinate or indeterminate loading state.
+- [Numeral](./numeral.md): Formats a number and renders it with `Text`.
+- [Text](./text.md): Styled text component with token-based typography controls.
+- [Text Field](./text-field.md): Composes `TextInput` with label, description, and error slots.
+
+## Foundations
+
+- [Recipes](./recipes.md)
+- [Theme](./theme.md)
+- [Tokens](./tokens.md)
+- [Utils](./utils.md)
+
+## Library authors
+
+- [Button (primitive)](./button-primitive.md): Primitive button. See `ButtonProps`.
+- [Combobox Field (primitive)](./combobox-field-primitive.md)
+- [Field (primitive)](./field-primitive.md)
+- [Text Field (primitive)](./text-field-primitive.md): Styled text input with optional start/end adornments.
+
+## Assets
+
+- `package.json` — package manifest export, used by tooling — no docs.
+- `stylesheet.css` — required side-effect import: `import '@luke-ui/react/stylesheet.css'`
+- `spritesheet.svg` — sprite sheet referenced by the `Icon` atom; bundlers resolve this automatically.

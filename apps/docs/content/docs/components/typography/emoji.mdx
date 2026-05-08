@@ -4,9 +4,8 @@ description: Accessible emoji rendering with screen reader label.
 ---
 
 import { storyClient } from '../../../../src/emoji/emoji.story.client';
-import EmojiDocs from '../../../../../../packages/@luke-ui/react/src/emoji/emoji.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<EmojiDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="emoji" slugMap={packageDocSlugMap} />

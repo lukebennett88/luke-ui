@@ -1,13 +1,3 @@
-`Emoji` renders an accessible emoji using `Text` with `role="img"`.
-
-## Import
-
-```ts
-import { Emoji } from '@luke-ui/react/emoji';
-```
-
-## Usage
-
 ```tsx
 <Emoji emoji="🎉" label="Celebration" />
 ```

@@ -14,8 +14,23 @@ interface LinkStyleProps {
 	tone?: LinkVariantProps['tone'];
 }
 
-/** Props for the primitive link. */
-export interface LinkProps extends Omit<RacLinkProps, keyof LinkStyleProps>, LinkStyleProps {}
+interface LinkRedeclaredRACProps {
+	/** Whether the link is disabled. Disabled links can't be focused or activated. */
+	isDisabled?: RacLinkProps['isDisabled'];
+	/** URL the link points to. */
+	href?: RacLinkProps['href'];
+}
+
+/**
+ * Props for the primitive link.
+ *
+ * @tier atom
+ */
+export interface LinkProps
+	extends
+		Omit<RacLinkProps, keyof LinkStyleProps | keyof LinkRedeclaredRACProps>,
+		LinkStyleProps,
+		LinkRedeclaredRACProps {}
 
 /** Styled link. */
 export function Link(props: LinkProps): JSX.Element {

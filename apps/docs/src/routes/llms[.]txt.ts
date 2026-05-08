@@ -1,18 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { source } from '../lib/source';
+import packageJson from '../../../../packages/@luke-ui/react/package.json' with { type: 'json' };
+import { discoverExports } from '../../../../packages/@luke-ui/react/scripts/lib/discover-exports.js';
+import { renderIndex } from '../../../../packages/@luke-ui/react/scripts/lib/render-index.js';
 
 export const Route = createFileRoute('/llms.txt')({
 	server: {
 		handlers: {
 			GET: () => {
-				const lines = ['# Luke UI Docs', '', '> Documentation for the @luke-ui/react package.', ''];
-
-				for (const page of source.getPages()) {
-					const description = page.data.description ? `: ${page.data.description}` : '';
-					lines.push(`- [${page.data.title}](${page.url})${description}`);
-				}
-
-				return new Response(`${lines.join('\n')}\n`, {
+				const entries = discoverExports(packageJson.exports);
+				const txt = renderIndex({
+					packageName: packageJson.name,
+					pitch: 'A React design system built on react-aria-components and vanilla-extract.',
+					entries,
+					includeLibraryAuthors: false,
+				});
+				return new Response(txt, {
 					headers: { 'Content-Type': 'text/plain; charset=utf-8' },
 				});
 			},

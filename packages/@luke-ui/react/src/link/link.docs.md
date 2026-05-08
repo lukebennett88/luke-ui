@@ -1,15 +1,5 @@
-`Link` is a themed anchor primitive in `@luke-ui/react`.
-
-## Import
-
-```ts
-import { Link } from '@luke-ui/react/link';
-```
-
 `Link` expects the Luke UI theme class to be applied at app/root level. See
 [Getting Started](/docs/getting-started).
-
-## Usage
 
 ```tsx
 <Link href="/help">Help center</Link>
@@ -50,14 +40,3 @@ paragraph (default: `isStandalone={false}`).
 
 - `isStandalone={true}`: no underline until hover.
 - `isStandalone={false}`: underlined inline link style.
-
-## Props
-
-`Link` supports all props from
-[`react-aria-components` `Link`](https://react-spectrum.adobe.com/react-aria/Link.html)
-in addition to:
-
-| Prop           | Type                                 | Default   | Notes                                            |
-| -------------- | ------------------------------------ | --------- | ------------------------------------------------ |
-| `isStandalone` | `boolean`                            | `false`   | If `true`, underline appears on hover only.      |
-| `tone`         | `'brand' \| 'neutral' \| 'inverted'` | `'brand'` | Visual tone. Use `inverted` on dark backgrounds. |

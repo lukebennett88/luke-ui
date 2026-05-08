@@ -1,14 +1,3 @@
-`ComboboxField` is the composed searchable single-select field.
-
-## Import
-
-```ts
-import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox-field/primitive';
-```
-
-## Usage
-
 ```tsx
 <ComboboxField
 	label="Country"

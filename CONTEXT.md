@@ -27,15 +27,23 @@ _Avoid_: "base", "raw" — use **Primitive**.
 
 ## Docs rule
 
-> Document what an app developer drops into their UI. Don't document what only exists to build the next component.
+Two doc surfaces, two audiences:
 
-| Tier      | Docs page? |
-| --------- | ---------- |
-| Atom      | yes        |
-| Composed  | yes        |
-| Primitive | no         |
+- **Hosted docs** (`apps/docs`) — for app developers. Document what an app developer drops into their UI.
+- **Package docs** (shipped on npm under `packages/@luke-ui/react/docs/`) — for anyone reading the package off npm, including library authors and coding agents. Document every public export path because each one is reachable through `package.json#exports`.
+
+| Tier      | Hosted docs?      | Package docs?          |
+| --------- | ----------------- | ---------------------- |
+| Atom      | yes (primary nav) | yes (primary index)    |
+| Composed  | yes (primary nav) | yes (primary index)    |
+| Primitive | no                | yes (specialist index) |
+
+**Specialist, not noise.** Primitive pages exist in the package docs so library authors and agents can find them, but they are listed in a separate, de-emphasised "Library authors / advanced" section of `README.md` and `llms.txt` — never mixed into the primary index alongside atoms and composed components. The goal is reachability without crowding the main path.
+
+Don't document what isn't part of the public API.
 
 ## Decisions
 
 - [ADR-0001](docs/adr/0001-component-tier-taxonomy.md) — Three-tier taxonomy and docs rule
 - [ADR-0002](docs/adr/0002-primitive-package-path-convention.md) — Primitive kits exported at `[composed]/primitive`
+- [ADR-0003](docs/adr/0003-package-docs-surface.md) — Package docs are a separate AI-native surface

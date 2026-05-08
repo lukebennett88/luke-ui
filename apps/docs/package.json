@@ -33,7 +33,11 @@
 		"lucide-react": "^1.11.0",
 		"react": "catalog:",
 		"react-dom": "catalog:",
+		"rehype-react": "^8.0.0",
+		"remark-parse": "^11.0.0",
+		"remark-rehype": "^11.1.2",
 		"ts-morph": "^28.0.0",
+		"unified": "^11.0.5",
 		"vite": "catalog:"
 	},
 	"devDependencies": {
@@ -47,6 +51,7 @@
 		"nitro": "npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e",
 		"serve": "^14.2.6",
 		"tailwindcss": "^4.2.4",
-		"typescript": "^6.0.3"
+		"typescript": "^6.0.3",
+		"vitest": "catalog:"
 	}
 }

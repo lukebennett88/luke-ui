@@ -1,4 +1,6 @@
-`CloseButton` is an `IconButton` preset for close/dismiss actions.
+# Close Button
+
+> Icon button preset for close actions.
 
 ## Import
 
@@ -14,3 +16,8 @@ import { CloseButton } from '@luke-ui/react/close-button';
 
 `CloseButton` renders a close icon with `aria-label="Close"` and `tone="ghost"`
 by default. All `IconButton` props except `icon` are forwarded.
+
+## Props
+
+| Prop | Type | Default | Description |
+| ---- | ---- | ------- | ----------- |

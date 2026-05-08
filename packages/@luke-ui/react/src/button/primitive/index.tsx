@@ -10,19 +10,30 @@ import { cx } from '../../utils/index.js';
 interface ButtonVariantProps extends NonNullable<styles.ButtonVariants> {}
 
 interface ButtonStyleProps {
-	/** Makes the button full width. */
+	/**
+	 * Whether the button takes up the full inline size of its container.
+	 * @default false
+	 */
 	isBlock?: ButtonVariantProps['isBlock'];
-	/** Sets the button size. */
+	/**
+	 * Sets the button size.
+	 * @default 'medium'
+	 */
 	size?: ButtonVariantProps['size'];
-	/** Sets the button tone. */
+	/** Visual tone. Controls colour scheme. */
 	tone?: ButtonVariantProps['tone'];
 }
 
-/** Props for the primitive button. */
+/**
+ * Primitive button — a bare `<button>` styled with size, tone, and block variants.
+ * Library-author audience: use this when you need full control over children layout.
+ *
+ * @tier primitive
+ */
 export interface ButtonProps
 	extends Omit<RacButtonProps, keyof ButtonStyleProps>, ButtonStyleProps {}
 
-/** Base button with styles and icon sizing context. */
+/** Primitive button. See `ButtonProps`. */
 export function Button(props: ButtonProps): JSX.Element {
 	const {
 		children,

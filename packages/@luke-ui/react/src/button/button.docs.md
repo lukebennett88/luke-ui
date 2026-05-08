@@ -1,15 +1,5 @@
-`Button` is the primary interactive button component in `@luke-ui/react`.
-
-## Import
-
-```ts
-import { Button } from '@luke-ui/react/button';
-```
-
 `Button` expects the Luke UI theme class to be applied at app/root level. See
 [Getting Started](/docs/getting-started).
-
-## Usage
 
 ```tsx
 <Button>Save</Button>
@@ -43,15 +33,3 @@ import { Button } from '@luke-ui/react/button/primitive';
 
 The primitive renders a single `<button>` element with no internal wrapper. Its
 children are direct flex items, so you manage layout yourself.
-
-## Props
-
-`Button` supports all props from
-[`react-aria-components` `Button`](https://react-spectrum.adobe.com/react-aria/Button.html)
-in addition to:
-
-| Prop      | Type                                              | Default     | Notes                      |
-| --------- | ------------------------------------------------- | ----------- | -------------------------- |
-| `size`    | `'small' \| 'medium'`                             | `'medium'`  | Control size and padding.  |
-| `tone`    | `'primary' \| 'critical' \| 'ghost' \| 'neutral'` | `'primary'` | Visual appearance variant. |
-| `isBlock` | `boolean`                                         | `false`     | Fill parent inline size.   |

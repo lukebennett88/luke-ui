@@ -4,9 +4,8 @@ description: Spinner component for indeterminate and determinate progress.
 ---
 
 import { storyClient } from '../../../../src/loading-spinner/loading-spinner.story.client';
-import LoadingSpinnerDocs from '../../../../../../packages/@luke-ui/react/src/loading-spinner/loading-spinner.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<LoadingSpinnerDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="loading-spinner" slugMap={packageDocSlugMap} />

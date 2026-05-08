@@ -38,6 +38,13 @@ export default defineConfig({
 					name: 'storybook',
 				},
 			},
+			{
+				test: {
+					environment: 'node',
+					include: ['scripts/**/__tests__/**/*.test.ts'],
+					name: 'scripts',
+				},
+			},
 		],
 	},
 });

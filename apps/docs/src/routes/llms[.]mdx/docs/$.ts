@@ -1,5 +1,7 @@
+import { packageDocs } from 'virtual:package-docs';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { getLLMText } from '../../../lib/get-llm-text';
+import { packageDocSlugMap } from '../../../lib/package-doc-slug-map';
 import { source } from '../../../lib/source';
 
 export const Route = createFileRoute('/llms.mdx/docs/$')({
@@ -13,6 +15,15 @@ export const Route = createFileRoute('/llms.mdx/docs/$')({
 				const splat = params._splat ?? '';
 				if (!splat.endsWith('.md')) throw notFound();
 				const segments = splat.slice(0, -3).split('/').filter(Boolean);
+				const lastSegment = segments.at(-1) ?? '';
+				if (packageDocSlugMap.has(lastSegment)) {
+					const markdown = packageDocs[lastSegment];
+					if (!markdown) throw notFound();
+					return new Response(markdown, {
+						headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+					});
+				}
+
 				const slugs = segments.length === 1 && segments[0] === 'index' ? [] : segments;
 
 				const page = source.getPage(slugs);

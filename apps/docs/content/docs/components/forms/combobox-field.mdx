@@ -4,9 +4,8 @@ description: Documentation for the Combobox Field component.
 ---
 
 import { storyClient } from '../../../../src/combobox-field/combobox-field.story.client';
-import ComboboxFieldDocs from '../../../../../../packages/@luke-ui/react/src/combobox-field/combobox-field.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<ComboboxFieldDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="combobox-field" slugMap={packageDocSlugMap} />

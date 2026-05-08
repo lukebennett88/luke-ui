@@ -10,6 +10,11 @@ interface ComboboxVariantProps extends NonNullable<styles.ComboboxVariants> {}
 
 export type ComboboxSize = NonNullable<ComboboxVariantProps['size']>;
 
+/**
+ * Props for the primitive combobox root.
+ *
+ * @tier primitive
+ */
 export interface ComboboxInputProps<T extends object> extends DistributiveOmit<
 	RacComboBoxProps<T, 'single'>,
 	| 'defaultSelectedKey'

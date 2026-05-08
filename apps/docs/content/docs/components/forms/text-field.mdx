@@ -4,9 +4,8 @@ description: Composed single-line text input with label and validation.
 ---
 
 import { storyClient } from '../../../../src/text-field/text-field.story.client';
-import TextFieldDocs from '../../../../../../packages/@luke-ui/react/src/text-field/text-field.docs.mdx';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { RenderPackageDoc } from '../../../../src/components/render-markdown';
+import { packageDocSlugMap } from '../../../../src/lib/package-doc-slug-map';
 
 <storyClient.WithControl />
-
-<TextFieldDocs components={defaultMdxComponents} />
+<RenderPackageDoc slug="text-field" slugMap={packageDocSlugMap} />

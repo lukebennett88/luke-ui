@@ -3,6 +3,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
 import { nitro } from 'nitro/vite';
+import { readdir, readFile } from 'node:fs/promises';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 
@@ -43,6 +44,31 @@ function staticFunctionBasePathPlugin(): Plugin {
 	};
 }
 
+const packageDocsModuleId = 'virtual:package-docs';
+const resolvedPackageDocsModuleId = `\0${packageDocsModuleId}`;
+
+function packageDocsPlugin(): Plugin {
+	return {
+		name: 'package-docs',
+		enforce: 'pre',
+		resolveId(id) {
+			return id === packageDocsModuleId ? resolvedPackageDocsModuleId : null;
+		},
+		async load(id) {
+			if (id !== resolvedPackageDocsModuleId) return null;
+			const docsDir = new URL('../../packages/@luke-ui/react/docs/', import.meta.url);
+			const filenames = (await readdir(docsDir)).filter((filename) => filename.endsWith('.md'));
+			const entries = await Promise.all(
+				filenames.map(async (filename) => [
+					filename.slice(0, -'.md'.length),
+					await readFile(new URL(filename, docsDir), 'utf8'),
+				]),
+			);
+			return `export const packageDocs = ${JSON.stringify(Object.fromEntries(entries))};`;
+		},
+	};
+}
+
 export default defineConfig(async () => ({
 	// Allow overriding the base URL for deployments to sub-paths (e.g. GitHub Pages).
 	// Set VITE_BASE_URL to the base path with a trailing slash, e.g. /luke-ui/
@@ -78,6 +104,7 @@ export default defineConfig(async () => ({
 	plugins: [
 		storySourcePathPlugin(),
 		staticFunctionBasePathPlugin(),
+		packageDocsPlugin(),
 		mdx(await import('./source.config')),
 		tailwindcss(),
 		tanstackStart({

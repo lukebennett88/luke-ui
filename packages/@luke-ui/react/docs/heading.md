@@ -1,4 +1,6 @@
-`Heading` renders a semantic heading element with automatic level management.
+# Heading
+
+> Heading component with automatic level composition.
 
 ## Import
 
@@ -58,7 +60,6 @@ level). By default it applies `fontWeight="bold"` and `lineHeight="tight"`.
 
 ## Props
 
-| Prop      | Type                         | Default | Notes                                          |
-| --------- | ---------------------------- | ------- | ---------------------------------------------- |
-| `level`   | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | Context | Overrides context level for this heading only. |
-| `...rest` | `TextProps`                  | -       | All `Text` props forwarded except `fontSize`.  |
+| Prop    | Type           | Default | Description                                                 |
+| ------- | -------------- | ------- | ----------------------------------------------------------- |
+| `level` | `HeadingLevel` | —       | Heading level override. Inherits from context when omitted. |
