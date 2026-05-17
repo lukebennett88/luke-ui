@@ -48,15 +48,15 @@ export const fontSizeValues = {
 	small: { unit: 'px', value: 14 },
 	standard: { unit: 'px', value: 16 },
 	medium: { unit: 'px', value: 20 },
-	large: { unit: 'px', value: 40 },
-	xlarge: { unit: 'px', value: 48 },
-	xxlarge: { unit: 'px', value: 55 },
-	h1: { unit: 'px', value: 36 },
-	h2: { unit: 'px', value: 28 },
-	h3: { unit: 'px', value: 24 },
+	large: { unit: 'px', value: 25 },
+	xlarge: { unit: 'px', value: 31 },
+	xxlarge: { unit: 'px', value: 39 },
+	h1: { unit: 'px', value: 39 },
+	h2: { unit: 'px', value: 31 },
+	h3: { unit: 'px', value: 25 },
 	h4: { unit: 'px', value: 20 },
-	h5: { unit: 'px', value: 18 },
-	h6: { unit: 'px', value: 16 },
+	h5: { unit: 'px', value: 16 },
+	h6: { unit: 'px', value: 14 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
 export const fontWeightValues = {
