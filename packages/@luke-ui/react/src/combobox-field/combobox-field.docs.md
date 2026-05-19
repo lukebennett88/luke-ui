@@ -1,14 +1,3 @@
-`ComboboxField` is the composed searchable single-select field.
-
-## Import
-
-```ts
-import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox-field/primitive';
-```
-
-## Usage
-
 ```tsx
 <ComboboxField
 	label="Country"
@@ -59,8 +48,8 @@ import { Form } from 'react-aria-components';
 
 ## Async options
 
-Pass `loadingState` to activate built-in loading and empty states. Options are
-controlled externally via `items`.
+Pass `loadingState` for built-in loading and empty states. Control options
+externally via `items`.
 
 ```tsx
 <ComboboxField

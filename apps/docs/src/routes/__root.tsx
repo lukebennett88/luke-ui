@@ -1,10 +1,13 @@
 import { themeRootClassName } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
+import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
-import type * as React from 'react';
-import SearchDialog from '../components/search';
+import type { ReactNode } from 'react';
+import { lazy, Suspense } from 'react';
 import appCss from '../styles/app.css?url';
+
+const SearchDialog = lazy(() => import('../components/search'));
 
 export const Route = createRootRoute({
 	component: RootComponent,
@@ -33,14 +36,22 @@ function RootComponent() {
 	);
 }
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+function LazySearchDialog(props: SharedProps) {
+	return (
+		<Suspense fallback={null}>
+			<SearchDialog {...props} />
+		</Suspense>
+	);
+}
+
+function RootDocument({ children }: { children: ReactNode }) {
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head>
 				<HeadContent />
 			</head>
 			<body className={cx(themeRootClassName, 'flex min-h-screen flex-col')}>
-				<RootProvider search={{ SearchDialog }}>{children}</RootProvider>
+				<RootProvider search={{ SearchDialog: LazySearchDialog }}>{children}</RootProvider>
 				<Scripts />
 			</body>
 		</html>

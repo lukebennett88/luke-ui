@@ -7,7 +7,11 @@ import { cx } from '../../utils/index.js';
 
 interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVariants> {}
 
-/** Props for `FieldError`. */
+/**
+ * Props for `FieldError`.
+ *
+ * @tier primitive
+ */
 export interface FieldErrorProps
 	extends RacFieldErrorProps, Omit<FieldMessageVariantProps, 'tone'> {}
 

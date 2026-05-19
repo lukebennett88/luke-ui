@@ -12,7 +12,11 @@ export type { FieldDescriptionProps, FieldErrorProps, FieldLabelProps, FieldNece
 
 type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
 
-/** Props for the composed `Field`. */
+/**
+ * Props for the composed `Field`.
+ *
+ * @tier primitive
+ */
 export interface FieldProps extends Omit<PrimitiveFieldProps, 'children'> {
 	children: ReactNode;
 	/** Optional helper text shown below the input. */

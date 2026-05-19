@@ -2,6 +2,12 @@
 	"name": "@luke-ui/react",
 	"version": "0.0.0",
 	"license": "MIT",
+	"files": [
+		"dist",
+		"docs",
+		"README.md",
+		"LICENSE"
+	],
 	"type": "module",
 	"sideEffects": [
 		"**/*.css.ts",
@@ -38,24 +44,26 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "pnpm run build:tsdown",
+		"build": "pnpm run generate && pnpm run build:tsdown",
 		"build:storybook": "storybook build",
 		"build:tsdown": "tsdown --config-loader unrun",
+		"check:docs": "pnpm run generate:docs",
 		"check:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json --check .",
 		"check:lint": "pnpm exec oxlint . --type-aware",
 		"check:types": "pnpm run check:types:storybook && pnpm run check:types:browser && pnpm run check:types:node",
 		"check:types:browser": "tsc --noEmit -p tsconfig.json",
 		"check:types:node": "tsc --noEmit -p scripts/tsconfig.json",
 		"check:types:storybook": "tsc --noEmit -p tsconfig.storybook.json",
-		"clean": "rm -rf .turbo .generated dist storybook-static",
+		"clean": "rm -rf .turbo .generated dist docs storybook-static",
 		"dev": "pnpm run dev:tsdown",
 		"dev:storybook": "rm -rf node_modules/.cache/storybook node_modules/.vite-storybook && storybook dev -p 6006",
 		"dev:tsdown": "tsdown --watch --config-loader unrun",
 		"fix:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json .",
 		"fix:lint": "pnpm exec oxlint . --type-aware --fix",
 		"fix:unsafe": "pnpm exec oxlint . --type-aware --fix-dangerously",
-		"generate": "pnpm run generate:icons && pnpm run generate:color-tokens",
+		"generate": "pnpm run generate:icons && pnpm run generate:color-tokens && pnpm run generate:docs",
 		"generate:color-tokens": "node scripts/generate-color-tokens.ts && pnpm exec oxfmt -c ../../../.oxfmtrc.json .generated/color-tokens.generated.ts",
+		"generate:docs": "tsx scripts/generate-docs.ts && pnpm exec oxfmt -c ../../../.oxfmtrc.json docs/ dist/docs/",
 		"generate:icons": "tsx scripts/build-icons.ts",
 		"test": "tsx scripts/test-visual.ts",
 		"test:ui": "vitest --project=storybook --ui",
@@ -67,11 +75,12 @@
 		"@react-aria/utils": "^3.34.0",
 		"@vanilla-extract/css": "^1.20.1",
 		"@vanilla-extract/recipes": "^0.5.7",
-		"react-aria-components": "^1.17.0"
+		"react-aria-components": "catalog:"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "^0.18.2",
 		"@argos-ci/storybook": "catalog:",
+		"@luke-ui/docs-tools": "workspace:*",
 		"@rollup/plugin-babel": "^7.0.0",
 		"@storybook/addon-a11y": "catalog:",
 		"@storybook/addon-docs": "catalog:",

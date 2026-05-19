@@ -9,7 +9,7 @@ import packageJson from './package.json' with { type: 'json' };
 
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
-const preservedDistFiles = new Set(['spritesheet.svg']);
+const preservedDistFiles = new Set(['spritesheet.svg', 'docs']);
 
 async function cleanDistExceptPreservedFiles() {
 	let entries: Array<string>;
@@ -25,9 +25,10 @@ async function cleanDistExceptPreservedFiles() {
 	}
 
 	await Promise.all(
-		entries
-			.filter((entry) => !preservedDistFiles.has(entry))
-			.map((entry) => rm(join(distDir, entry), { force: true, recursive: true })),
+		entries.flatMap((entry) => {
+			if (preservedDistFiles.has(entry)) return [];
+			return [rm(join(distDir, entry), { force: true, recursive: true })];
+		}),
 	);
 }
 

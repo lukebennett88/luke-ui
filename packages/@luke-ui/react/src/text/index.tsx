@@ -5,35 +5,75 @@ import { cx } from '../utils/index.js';
 interface TextVariantProps extends NonNullable<styles.TextVariants> {}
 
 interface TextStyleProps {
-	/** Sets text color. */
+	/**
+	 * Sets text color.
+	 * @default 'neutralBold'
+	 */
 	color?: TextVariantProps['color'];
-	/** Sets the font family. */
+	/**
+	 * Sets the font family.
+	 * @default 'sans'
+	 */
 	fontFamily?: TextVariantProps['fontFamily'];
-	/** Sets the font size. */
+	/**
+	 * Sets the font size.
+	 * @default 'standard'
+	 */
 	fontSize?: TextVariantProps['fontSize'];
-	/** Sets the font weight. */
+	/**
+	 * Sets the font weight.
+	 * @default 'regular'
+	 */
 	fontWeight?: TextVariantProps['fontWeight'];
-	/** Sets the line height. */
+	/**
+	 * Sets the line height.
+	 * @default 'loose'
+	 */
 	lineHeight?: TextVariantProps['lineHeight'];
-	/** Makes text inherit font styles. */
+	/**
+	 * Makes text inherit font styles.
+	 * @default false
+	 */
 	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
-	/** Turns off cap-height trim. */
+	/**
+	 * Turns off cap-height trim.
+	 * @default false
+	 */
 	shouldDisableTrim?: TextVariantProps['shouldDisableTrim'];
-	/** Sets text alignment. */
+	/**
+	 * Sets text alignment.
+	 * @default 'start'
+	 */
 	textAlign?: TextVariantProps['textAlign'];
-	/** Sets text decoration. */
+	/**
+	 * Sets text decoration.
+	 * @default 'none'
+	 */
 	textDecoration?: TextVariantProps['textDecoration'];
-	/** Sets text transform. */
+	/**
+	 * Sets text transform.
+	 * @default 'none'
+	 */
 	textTransform?: TextVariantProps['textTransform'];
-	/** Clamps text lines. */
+	/** Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5. */
 	lineClamp?: TextVariantProps['lineClamp'];
-	/** Sets numeric glyph style. */
+	/**
+	 * Sets numeric glyph style.
+	 * @default 'unset'
+	 */
 	variant?: TextVariantProps['variant'];
-	/** Hides text visually. */
+	/**
+	 * Hides text visually while keeping it accessible.
+	 * @default false
+	 */
 	isVisuallyHidden?: TextVariantProps['isVisuallyHidden'];
 }
 
-/** Props for the primitive text component. */
+/**
+ * Props for the primitive text component.
+ *
+ * @tier atom
+ */
 export type TextProps = Omit<React.ComponentProps<typeof RacText>, keyof TextStyleProps> &
 	TextStyleProps;
 

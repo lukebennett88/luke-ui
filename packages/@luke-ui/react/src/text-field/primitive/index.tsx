@@ -10,14 +10,21 @@ import { cx } from '../../utils/index.js';
 interface TextInputVariantProps extends NonNullable<styles.TextInputVariants> {}
 
 interface TextInputStyleProps {
-	/** Sets the input size. */
+	/**
+	 * Sets the input size.
+	 * @default 'medium'
+	 */
 	size?: TextInputVariantProps['size'];
 }
 
 /** Allowed `size` values for `TextInput`. */
 export type TextInputSize = NonNullable<TextInputVariantProps['size']>;
 
-/** Props for the primitive text input. */
+/**
+ * Props for the primitive text input.
+ *
+ * @tier primitive
+ */
 export interface TextInputProps
 	extends Omit<RacInputProps, 'className' | keyof TextInputStyleProps>, TextInputStyleProps {
 	/** Element shown at the end of the control. */

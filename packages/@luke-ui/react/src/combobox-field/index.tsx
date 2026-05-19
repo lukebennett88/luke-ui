@@ -1,4 +1,5 @@
 import type { CSSProperties, JSX, ReactNode } from 'react';
+import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import type { FieldErrorProps } from '../field/primitive/error.js';
 import { Field } from '../field/primitive/index.js';
 import type { FieldNecessityIndicator } from '../field/primitive/label.js';
@@ -8,23 +9,34 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { ComboboxControl } from './primitive/control.js';
 import { ComboboxEmptyState } from './primitive/empty-state.js';
 import { ComboboxTextInput } from './primitive/input.js';
-import { ComboboxLoadMoreItem } from './primitive/item.js';
 import type { ComboboxLoadMoreItemProps } from './primitive/item.js';
-import { ComboboxListBox } from './primitive/listbox.js';
+import { ComboboxLoadMoreItem } from './primitive/item.js';
 import type { ComboboxListBoxProps } from './primitive/listbox.js';
-import { ComboboxPopover } from './primitive/popover.js';
+import { ComboboxListBox } from './primitive/listbox.js';
 import type { ComboboxPopoverProps } from './primitive/popover.js';
-import { ComboboxInput } from './primitive/root.js';
+import { ComboboxPopover } from './primitive/popover.js';
 import type { ComboboxInputProps, ComboboxSize } from './primitive/root.js';
+import { ComboboxInput } from './primitive/root.js';
 import { ComboboxTrigger } from './primitive/trigger.js';
 
 type ComboboxLoadingState = 'error' | 'filtering' | 'idle' | 'loading' | 'loadingMore' | 'sorting';
 
-/** Props for composed `ComboboxField` (searchable single-select). */
-export interface ComboboxFieldProps<T extends object> extends DistributiveOmit<
-	ComboboxInputProps<T>,
-	'children'
-> {
+interface ComboboxFieldRedeclaredRACProps {
+	/** Whether the combobox is disabled. */
+	isDisabled?: RacComboBoxProps<object>['isDisabled'];
+	/** Whether the combobox is read-only. */
+	isReadOnly?: RacComboBoxProps<object>['isReadOnly'];
+}
+
+/**
+ * Props for composed `ComboboxField` (searchable single-select).
+ *
+ * @tier composed
+ */
+export interface ComboboxFieldProps<T extends object>
+	extends
+		DistributiveOmit<ComboboxInputProps<T>, 'children' | keyof ComboboxFieldRedeclaredRACProps>,
+		ComboboxFieldRedeclaredRACProps {
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 
@@ -125,14 +137,21 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 						renderEmptyState={
 							listBoxProps?.renderEmptyState ??
 							(isAsync
-								? () =>
-										loadingState === 'loading' || loadingState === 'filtering' ? (
-											<ComboboxEmptyState>
-												<LoadingSpinner aria-label="Loading options..." size="medium" />
-											</ComboboxEmptyState>
-										) : (
-											<ComboboxEmptyState>No results</ComboboxEmptyState>
-										)
+								? () => {
+										switch (loadingState) {
+											case 'loading':
+											case 'filtering': {
+												return (
+													<ComboboxEmptyState>
+														<LoadingSpinner aria-label="Loading options..." size="medium" />
+													</ComboboxEmptyState>
+												);
+											}
+											default: {
+												return <ComboboxEmptyState>No results</ComboboxEmptyState>;
+											}
+										}
+									}
 								: undefined)
 						}
 					>

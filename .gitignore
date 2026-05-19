@@ -10,6 +10,7 @@ apps/docs/src/routeTree.gen.ts
 dist/
 node_modules/
 packages/@luke-ui/react/.generated/
+packages/@luke-ui/react/docs/
 packages/@luke-ui/react/public/icons/
 packages/@luke-ui/react/screenshots/
 packages/@luke-ui/react/spritesheet.svg

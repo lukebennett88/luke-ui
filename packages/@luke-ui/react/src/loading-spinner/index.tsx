@@ -19,15 +19,25 @@ interface LoadingSpinnerStyleProps {
 	size?: LoadingSpinnerVariantProps['size'];
 }
 
-/** Props for `LoadingSpinner`. */
+/**
+ * Props for `LoadingSpinner`.
+ *
+ * @tier atom
+ */
 export type LoadingSpinnerProps = DistributiveOmit<
 	ComponentProps<'div'>,
 	'aria-valuemax' | 'aria-valuemin' | 'aria-valuenow' | 'color' | 'role'
 > &
 	LoadingSpinnerStyleProps & {
-		/** Max value for determinate mode. Defaults to `100`. */
+		/**
+		 * Max value for determinate mode.
+		 * @default 100
+		 */
 		maxValue?: number;
-		/** Min value for determinate mode. Defaults to `0`. */
+		/**
+		 * Min value for determinate mode.
+		 * @default 0
+		 */
 		minValue?: number;
 		/** Current value. Omit for indeterminate mode. */
 		value?: number;

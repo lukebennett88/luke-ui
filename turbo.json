@@ -30,7 +30,10 @@
 			"outputs": ["storybook-static/**"]
 		},
 		"check": {
-			"dependsOn": ["check:format", "check:lint", "check:types"]
+			"dependsOn": ["check:format", "check:lint", "check:types", "check:docs"]
+		},
+		"check:docs": {
+			"dependsOn": ["^generate"]
 		},
 		"check:format": {
 			"dependsOn": ["generate"]
@@ -46,7 +49,23 @@
 		},
 		"generate": {
 			"dependsOn": ["^generate"],
-			"outputs": [".generated/**", "dist/spritesheet.svg", "src/routeTree.gen.ts"]
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"!docs/**",
+				"!dist/**",
+				"!.generated/**",
+				"!storybook-static/**",
+				"!**/*.test.ts",
+				"!**/*.test.tsx",
+				"!**/*.stories.tsx"
+			],
+			"outputs": [
+				".generated/**",
+				"dist/spritesheet.svg",
+				"dist/docs/**",
+				"src/routeTree.gen.ts",
+				"docs/**"
+			]
 		},
 		"dev": {
 			"cache": false,

@@ -14,7 +14,11 @@ interface FieldLabelStyleProps {
 	necessityIndicator?: FieldNecessityIndicator;
 }
 
-/** Props for `FieldLabel`. */
+/**
+ * Props for `FieldLabel`.
+ *
+ * @tier primitive
+ */
 export interface FieldLabelProps
 	extends Omit<RacLabelProps, keyof FieldLabelStyleProps>, FieldLabelStyleProps {}
 

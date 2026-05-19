@@ -16,6 +16,11 @@ interface ComboboxStyleProps {
 	size?: 'small' | 'medium';
 }
 
+/**
+ * Props for a combobox list item.
+ *
+ * @tier primitive
+ */
 export interface ComboboxItemProps<T extends object>
 	extends DistributiveOmit<RacListBoxItemProps<T>, 'className'>, ComboboxStyleProps {
 	className?: RacListBoxItemProps<T>['className'];
@@ -34,6 +39,11 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 	);
 }
 
+/**
+ * Props for the combobox load-more sentinel item.
+ *
+ * @tier primitive
+ */
 export interface ComboboxLoadMoreItemProps
 	extends DistributiveOmit<RacListBoxLoadMoreItemProps, 'className'>, ComboboxStyleProps {
 	className?: RacListBoxLoadMoreItemProps['className'];

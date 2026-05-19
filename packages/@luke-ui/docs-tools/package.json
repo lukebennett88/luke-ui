@@ -1,0 +1,30 @@
+{
+	"name": "@luke-ui/docs-tools",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./discover-exports": "./src/discover-exports.ts",
+		"./parse-types": "./src/parse-types.ts",
+		"./render-index": "./src/render-index.ts",
+		"./render-page": "./src/render-page.ts",
+		"./render-llms-full": "./src/render-llms-full.ts"
+	},
+	"scripts": {
+		"check:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json --check .",
+		"check:lint": "pnpm exec oxlint . --type-aware",
+		"check:types": "tsc --noEmit -p tsconfig.json",
+		"fix:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json .",
+		"fix:lint": "pnpm exec oxlint . --type-aware --fix",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"ts-morph": "catalog:"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"react-aria-components": "catalog:",
+		"typescript": "^6.0.3",
+		"vitest": "catalog:"
+	}
+}

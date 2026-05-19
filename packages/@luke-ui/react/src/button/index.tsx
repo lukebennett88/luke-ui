@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.css.js';
 import type * as primitiveStyles from '../recipes/button.css.js';
@@ -12,17 +13,52 @@ interface ComposedButtonVariantProps extends NonNullable<styles.ButtonLabelVaria
 interface PrimitiveButtonVariantProps extends NonNullable<primitiveStyles.ButtonVariants> {}
 
 interface ButtonStyleProps {
-	/** Shows pending button styles. */
-	isPending?: ComposedButtonVariantProps['isPending'];
-	/** Sets the button size. */
+	/**
+	 * Visual tone. Controls colour scheme.
+	 * @default 'primary'
+	 */
+	tone?: PrimitiveButtonVariantProps['tone'];
+	/**
+	 * Sets the button size.
+	 * @default 'medium'
+	 */
 	size?: PrimitiveButtonVariantProps['size'];
+	/**
+	 * Shows pending button styles. When true, a spinner overlays the label.
+	 * @default false
+	 */
+	isPending?: ComposedButtonVariantProps['isPending'];
+	/**
+	 * Whether the button takes up the full inline size of its container.
+	 * @default false
+	 */
+	isBlock?: PrimitiveButtonVariantProps['isBlock'];
 }
 
-/** Props for the composed `Button`. */
-export interface ButtonProps
-	extends Omit<PrimitiveButtonProps, keyof ButtonStyleProps>, ButtonStyleProps {}
+interface ButtonRedeclaredRACProps {
+	/**
+	 * Whether the button is disabled. Disabled buttons can't be focused or pressed.
+	 * @default false
+	 */
+	isDisabled?: RacButtonProps['isDisabled'];
+	/** Press handler. Called on click, Enter, or Space. */
+	onPress?: RacButtonProps['onPress'];
+	/** HTML button type. */
+	type?: RacButtonProps['type'];
+}
 
-/** Button with composed label and pending spinner styles. */
+/**
+ * Composed button with size, tone, pending, and block variants.
+ *
+ * @tier composed
+ */
+export interface ButtonProps
+	extends
+		Omit<PrimitiveButtonProps, keyof ButtonStyleProps | keyof ButtonRedeclaredRACProps>,
+		ButtonStyleProps,
+		ButtonRedeclaredRACProps {}
+
+/** Composed button. Wraps children in a `Text` for ellipsis truncation; shows a spinner when `isPending`. */
 export function Button(props: ButtonProps): JSX.Element {
 	const { children, isPending, size = 'medium', ...restProps } = props;
 

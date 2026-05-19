@@ -6,7 +6,11 @@ import * as styles from '../../recipes/combobox.css.js';
 import { themeRootClassName } from '../../theme/index.js';
 import { cx } from '../../utils/index.js';
 
-/** Props for the styled combobox popover. */
+/**
+ * Props for the styled combobox popover.
+ *
+ * @tier primitive
+ */
 export interface ComboboxPopoverProps extends Omit<RacPopoverProps, 'UNSTABLE_portalContainer'> {}
 
 /** Popover surface used for listbox content. */

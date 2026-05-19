@@ -24,7 +24,7 @@ Components follow a three-tier taxonomy (see `CONTEXT.md` for full definitions):
 
 - **Atom** — single conceptual unit used directly by app devs (`Text`, `Link`, `Icon`, `Heading`, `Numeral`, `Emoji`, `LoadingSpinner`). Gets a doc page.
 - **Composed** — combines atoms/primitives into a ready-to-drop-in pattern (`Button`, `IconButton`, `CloseButton`, `TextField`, `ComboboxField`). Gets a doc page.
-- **Primitive** — building block for library authors only; never doc'd publicly. May be a single file (e.g. `text-input`) or a multi-file kit (e.g. `combobox/*`, `field/*`).
+- **Primitive** — building block for library authors only; documented in package docs but not in hosted docs. May be a single file (e.g. `text-input`) or a multi-file kit (e.g. `combobox/*`, `field/*`).
 
 ## Package paths
 
