@@ -6,7 +6,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import browserCollections from '../../../.source/browser';
@@ -53,14 +53,9 @@ const loader = createServerFn({
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
 
-		// Index pages (page.slugs === []) map to /llms.mdx/docs/index.md so that
-		// every prerendered file lives under /llms.mdx/docs/<segment>.md and the
-		// route's required `.md` suffix matches.
-		const markdownSlug = page.slugs.length > 0 ? page.slugs.join('/') : 'index';
-
 		return {
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
-			markdownUrl: `/llms.mdx/docs/${markdownSlug}.md`,
+			markdownUrl: `${page.url}.md`,
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			storyPayloads: await getStoryPayloads(stories),
@@ -80,14 +75,10 @@ const clientLoader = browserCollections.docs.createClientLoader({
 		return (
 			<DocsPage toc={toc} {...pageProps}>
 				<DocsTitle>{frontmatter.title}</DocsTitle>
-				<DocsDescription>{frontmatter.description}</DocsDescription>
 				<DocsBody>
+					{frontmatter.description ? <blockquote>{frontmatter.description}</blockquote> : null}
 					<PageActions githubUrl={githubUrl} markdownUrl={markdownUrl} />
-					<MDX
-						components={{
-							...defaultMdxComponents,
-						}}
-					/>
+					<MDX components={defaultMdxComponents} />
 				</DocsBody>
 			</DocsPage>
 		);
@@ -99,10 +90,7 @@ function Page() {
 
 	return (
 		<DocsLayout {...baseOptions()} tree={data.pageTree}>
-			<StoryPayloadProvider
-				payloads={data.storyPayloads}
-				clients={clientStories as { [K in keyof typeof data.storyPayloads]: StoryClient }}
-			>
+			<StoryPayloadProvider payloads={data.storyPayloads} clients={clientStories}>
 				<Suspense>
 					{clientLoader.useContent(data.path, {
 						className: '',

@@ -1,13 +1,3 @@
-`CloseButton` is an `IconButton` preset for close/dismiss actions.
-
-## Import
-
-```ts
-import { CloseButton } from '@luke-ui/react/close-button';
-```
-
-## Usage
-
 ```tsx
 <CloseButton onPress={onClose} />
 ```

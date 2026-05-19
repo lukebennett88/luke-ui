@@ -13,7 +13,11 @@ interface ComboboxStyleProps {
 	size?: ComboboxVariantProps['size'];
 }
 
-/** Props for the styled combobox control group. */
+/**
+ * Props for the styled combobox control group.
+ *
+ * @tier primitive
+ */
 export interface ComboboxControlProps
 	extends DistributiveOmit<RacGroupProps, 'className'>, ComboboxStyleProps {
 	className?: RacGroupProps['className'];

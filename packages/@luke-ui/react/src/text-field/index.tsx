@@ -10,8 +10,30 @@ import type { FieldNecessityIndicator } from '../field/primitive/label.js';
 import type { TextInputSize } from './primitive/index.js';
 import { TextInput } from './primitive/index.js';
 
-/** Props for the composed text field. */
-export interface TextFieldProps extends Omit<RacTextFieldProps, 'children' | 'size'> {
+interface TextFieldRedeclaredRACProps {
+	/** Whether the field is disabled. */
+	isDisabled?: RacTextFieldProps['isDisabled'];
+	/** Whether the field is read-only. */
+	isReadOnly?: RacTextFieldProps['isReadOnly'];
+	/** Whether the field has a validation error. */
+	isInvalid?: RacTextFieldProps['isInvalid'];
+	/** Controlled input value. */
+	value?: RacTextFieldProps['value'];
+	/** Initial value (uncontrolled). */
+	defaultValue?: RacTextFieldProps['defaultValue'];
+	/** Called when the value changes. */
+	onChange?: RacTextFieldProps['onChange'];
+}
+
+/**
+ * Props for the composed text field.
+ *
+ * @tier composed
+ */
+export interface TextFieldProps
+	extends
+		Omit<RacTextFieldProps, 'children' | 'size' | keyof TextFieldRedeclaredRACProps>,
+		TextFieldRedeclaredRACProps {
 	/** Element shown after the input value. */
 	adornmentEnd?: ReactNode;
 	/** Element shown before the input value. */

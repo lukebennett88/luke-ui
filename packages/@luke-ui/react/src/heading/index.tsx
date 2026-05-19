@@ -8,7 +8,11 @@ export type { HeadingLevel } from '../heading-context/index.js';
 /** Valid heading tag name for Luke UI headings. */
 export type HeadingTag = `h${HeadingLevel}`;
 
-/** Props for `Heading`. */
+/**
+ * Props for `Heading`.
+ *
+ * @tier atom
+ */
 export interface HeadingProps extends DistributiveOmit<TextProps, 'fontSize'> {
 	/** Heading level override. Inherits from context when omitted. */
 	level?: HeadingLevel;

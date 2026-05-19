@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import type { ComboBoxProps as RacComboBoxProps, Key } from 'react-aria-components/ComboBox';
+import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
@@ -10,6 +10,11 @@ interface ComboboxVariantProps extends NonNullable<styles.ComboboxVariants> {}
 
 export type ComboboxSize = NonNullable<ComboboxVariantProps['size']>;
 
+/**
+ * Props for the primitive combobox root.
+ *
+ * @tier primitive
+ */
 export interface ComboboxInputProps<T extends object> extends DistributiveOmit<
 	RacComboBoxProps<T, 'single'>,
 	| 'defaultSelectedKey'

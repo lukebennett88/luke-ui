@@ -13,7 +13,11 @@ interface ComboboxStyleProps {
 	size?: ComboboxVariantProps['size'];
 }
 
-/** Props for the styled combobox text input. */
+/**
+ * Props for the styled combobox text input.
+ *
+ * @tier primitive
+ */
 export interface ComboboxTextInputProps
 	extends
 		DistributiveOmit<RacInputProps, 'className' | keyof ComboboxStyleProps>,

@@ -1,4 +1,4 @@
-import type { DimensionTokenValue, DurationTokenValue, CubicBezierTokenValue } from './index.js';
+import type { CubicBezierTokenValue, DimensionTokenValue, DurationTokenValue } from './index.js';
 
 export const breakpointValues = {
 	xsmall: { unit: 'px', value: 0 },

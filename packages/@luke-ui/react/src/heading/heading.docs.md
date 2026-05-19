@@ -1,13 +1,3 @@
-`Heading` renders a semantic heading element with automatic level management.
-
-## Import
-
-```ts
-import { Heading } from '@luke-ui/react/heading';
-```
-
-## Usage
-
 ```tsx
 <Heading>Section title</Heading>
 ```
@@ -55,10 +45,3 @@ level). By default it applies `fontWeight="bold"` and `lineHeight="tight"`.
 	Light-weight heading
 </Heading>
 ```
-
-## Props
-
-| Prop      | Type                         | Default | Notes                                          |
-| --------- | ---------------------------- | ------- | ---------------------------------------------- |
-| `level`   | `1 \| 2 \| 3 \| 4 \| 5 \| 6` | Context | Overrides context level for this heading only. |
-| `...rest` | `TextProps`                  | -       | All `Text` props forwarded except `fontSize`.  |

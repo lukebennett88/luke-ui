@@ -12,7 +12,11 @@ interface ComboboxStyleProps {
 	size?: ComboboxVariantProps['size'];
 }
 
-/** Props for the combobox trigger button. */
+/**
+ * Props for the combobox trigger button.
+ *
+ * @tier primitive
+ */
 export interface ComboboxTriggerProps
 	extends DistributiveOmit<RacButtonProps, 'className'>, ComboboxStyleProps {
 	className?: RacButtonProps['className'];

@@ -9,7 +9,11 @@ import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
 
-/** Props for the styled listbox. */
+/**
+ * Props for the styled listbox.
+ *
+ * @tier primitive
+ */
 export interface ComboboxListBoxProps<T extends object> extends DistributiveOmit<
 	RacListBoxProps<T>,
 	'dependencies' | 'items'
