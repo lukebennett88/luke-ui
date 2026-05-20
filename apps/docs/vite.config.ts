@@ -92,12 +92,12 @@ function packageDocsPlugin(): Plugin {
 		},
 		async load(loadId) {
 			if (loadId !== resolved) return null;
-			const filenames = (await readdir(packageDocsDir)).filter((n) => n.endsWith('.md'));
+			const filenames = (await readdir(packageDocsDir)).filter((n) => n.endsWith('.mdx'));
 			const entries = await Promise.all(
 				filenames.map(
 					async (filename) =>
 						[
-							filename.slice(0, -'.md'.length),
+							filename.slice(0, -'.mdx'.length),
 							await readFile(join(packageDocsDir, filename), 'utf8'),
 						] as const,
 				),
@@ -107,7 +107,7 @@ function packageDocsPlugin(): Plugin {
 		configureServer(server) {
 			server.watcher.add(packageDocsDir);
 			const handle = (filePath: string) => {
-				if (!filePath.endsWith('.md') || !filePath.startsWith(packageDocsDir)) return;
+				if (!filePath.endsWith('.mdx') || !filePath.startsWith(packageDocsDir)) return;
 				const mod = server.moduleGraph.getModuleById(resolved);
 				if (mod) {
 					server.moduleGraph.invalidateModule(mod);
@@ -300,7 +300,7 @@ export default defineConfig(async () => {
 				prerender: {
 					enabled: true,
 					crawlLinks: true,
-					filter: (page) => !page.path.endsWith('.mdx'),
+					filter: (page) => !page.path.endsWith('.mdx') && !page.path.endsWith('.md'),
 				},
 				pages: [
 					{ path: '/api/search' },
