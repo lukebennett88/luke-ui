@@ -5,6 +5,9 @@
 .source
 .tanstack
 .vercel
+.void
+.wrangler
+*.tsbuildinfo
 /api/
 /blob-report/
 /build/
@@ -13,4 +16,5 @@
 /public/build
 /server/build
 /test-results/
+dist
 node_modules
