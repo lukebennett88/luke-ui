@@ -1,4 +1,5 @@
 {
+	"extends": "./.void/tsconfig.json",
 	"include": ["**/*.ts", "**/*.tsx"],
 	"compilerOptions": {
 		"allowJs": true,
@@ -16,7 +17,7 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"target": "esnext",
-		"types": ["vite/client"],
+		"types": ["vite/client", "void/env"],
 		"verbatimModuleSyntax": true
 	}
 }

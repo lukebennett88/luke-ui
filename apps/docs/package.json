@@ -9,6 +9,7 @@
 		"check:lint": "pnpm exec oxlint . --type-aware",
 		"check:types": "fumadocs-mdx && tsc --noEmit",
 		"clean": "rm -rf .source .tanstack .turbo .output dist src/routeTree.gen.ts",
+		"deploy": "npx void deploy --dir .output/public --spa",
 		"dev": "vite dev",
 		"fix:format": "pnpm exec oxfmt -c ../../.oxfmtrc.json .",
 		"fix:lint": "pnpm exec oxlint . --type-aware --fix",
@@ -48,6 +49,7 @@
 		"nitro": "npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e",
 		"serve": "^14.2.6",
 		"tailwindcss": "^4.2.4",
-		"typescript": "^6.0.3"
+		"typescript": "^6.0.3",
+		"void": "0.7.13"
 	}
 }
