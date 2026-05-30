@@ -19,7 +19,7 @@ const base = styleInLayer('recipes', {
 	minInlineSize: 0,
 	textDecoration: 'none',
 	transition:
-		'color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events',
+		'color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events',
 	transitionTimingFunction: vars.motion.easing.standard,
 	transitionDuration: vars.motion.duration.fast,
 	whiteSpace: 'nowrap',
@@ -32,6 +32,23 @@ const base = styleInLayer('recipes', {
 			backgroundColor: vars.backgroundColor.disabled,
 			borderColor: vars.backgroundColor.disabled,
 			color: vars.foregroundColor.disabled,
+		},
+	},
+
+	'@media': {
+		'(forced-colors: active)': {
+			borderColor: 'ButtonText',
+			selectors: {
+				'&:enabled:hover': {
+					backgroundColor: 'Highlight',
+					borderColor: 'Highlight',
+					color: 'HighlightText',
+				},
+				'&:disabled': {
+					borderColor: 'GrayText',
+					color: 'GrayText',
+				},
+			},
 		},
 	},
 });

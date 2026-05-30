@@ -34,6 +34,8 @@ export type { TextFontWeight } from '../recipes/text.css.js';
 export type { TextLineClampVariant } from '../recipes/text.css.js';
 /** Text transform variant values. */
 export type { TextTransform } from '../recipes/text.css.js';
+/** Text wrap variant values. */
+export type { TextWrap } from '../recipes/text.css.js';
 /** Text style-variant values. */
 export type { TextVariant } from '../recipes/text.css.js';
 /** Aggregate variant type for the `Text` recipe. */

@@ -67,6 +67,11 @@ interface TextStyleProps {
 	 * @default false
 	 */
 	isVisuallyHidden?: TextVariantProps['isVisuallyHidden'];
+	/**
+	 * Sets text wrapping behavior.
+	 * @default 'unset'
+	 */
+	textWrap?: TextVariantProps['textWrap'];
 }
 
 /**
@@ -94,6 +99,7 @@ export function Text(props: TextProps) {
 		textAlign,
 		textDecoration,
 		textTransform,
+		textWrap,
 		variant,
 		...racProps
 	} = props;
@@ -115,6 +121,7 @@ export function Text(props: TextProps) {
 					textAlign,
 					textDecoration,
 					textTransform,
+					textWrap,
 					lineClamp,
 					variant,
 					isVisuallyHidden,

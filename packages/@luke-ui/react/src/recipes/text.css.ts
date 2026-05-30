@@ -38,6 +38,9 @@ const textVariantKeys = [
 ] as const;
 export type TextVariant = (typeof textVariantKeys)[number];
 
+const textWrapKeys = ['unset', 'balance', 'pretty'] as const;
+export type TextWrap = (typeof textWrapKeys)[number];
+
 export type TextColor = ForegroundColorToken | 'inherit';
 export type TextFontFamily = FontFamilyToken;
 export type TextFontWeight = FontWeightToken | 'inherit';
@@ -121,6 +124,10 @@ const textVariantVariants = createVariants(textVariantKeys, (variant) => ({
 	fontVariantNumeric: variant === 'unset' ? 'normal' : variant,
 }));
 
+const textWrapVariants = createVariants(textWrapKeys, (textWrap) => ({
+	textWrap: textWrap === 'unset' ? 'wrap' : textWrap,
+}));
+
 const fontSizeVariants = Object.fromEntries(fontSizeKeys.map((key) => [key, {}])) as Record<
 	FontSizeToken,
 	{}
@@ -194,6 +201,7 @@ export const text = recipeInLayer('recipes', {
 		lineClamp: false,
 		variant: 'unset',
 		isVisuallyHidden: false,
+		textWrap: 'unset',
 	},
 	variants: {
 		color: colorVariants,
@@ -223,6 +231,7 @@ export const text = recipeInLayer('recipes', {
 				transform: 'scale(0)',
 			},
 		},
+		textWrap: textWrapVariants,
 	},
 });
 

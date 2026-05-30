@@ -145,6 +145,7 @@ export const vars = {
 const themeRootSelector = classSelector(lukeUiClassNames.themeRoot);
 
 globalStyleInLayer('theme', themeRootSelector, {
+	accentColor: vars.themeColor.paletteThemePrimary500,
 	colorScheme: 'light',
 	color: vars.foregroundColor.primary,
 	fontFamily: vars.font.family.body,

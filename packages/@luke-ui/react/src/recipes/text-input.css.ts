@@ -53,7 +53,7 @@ export const textInputGroup = recipeInLayer('recipes', {
 			},
 			[groupFocusWithinSelector]: {
 				borderColor: vars.themeColor.paletteThemePrimary500,
-				outlineColor: vars.themeColor.paletteThemePrimary200,
+				outlineColor: vars.themeColor.focusRingColor,
 				outlineOffset: 0,
 				outlineStyle: 'solid',
 				outlineWidth: '3px',
@@ -64,13 +64,34 @@ export const textInputGroup = recipeInLayer('recipes', {
 			},
 			[groupInvalidFocusWithinSelector]: {
 				borderColor: vars.border.critical,
-				outlineColor: vars.themeColor.paletteThemePrimary200,
+				outlineColor: vars.themeColor.focusRingColor,
 				outlineOffset: 0,
 				outlineStyle: 'solid',
 				outlineWidth: '3px',
 			},
 			[groupReadOnlySelector]: {
 				backgroundColor: vars.backgroundColor.subtle,
+			},
+		},
+
+		'@media': {
+			'(forced-colors: active)': {
+				selectors: {
+					[groupFocusWithinSelector]: {
+						outlineColor: 'Highlight',
+					},
+					[groupInvalidSelector]: {
+						borderColor: 'ButtonText',
+					},
+					[groupInvalidFocusWithinSelector]: {
+						borderColor: 'ButtonText',
+						outlineColor: 'Highlight',
+					},
+					[groupDisabledSelector]: {
+						borderColor: 'GrayText',
+						color: 'GrayText',
+					},
+				},
 			},
 		},
 	},

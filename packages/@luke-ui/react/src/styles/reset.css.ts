@@ -75,4 +75,19 @@ globalStyleInLayer('reset', `${root} :where(:focus-visible)`, {
 	outlineOffset: vars.borderWidth.thick,
 	outlineStyle: 'solid',
 	outlineWidth: vars.borderWidth.thick,
+
+	'@media': {
+		'(forced-colors: active)': {
+			outlineColor: 'Highlight',
+		},
+	},
+});
+
+globalStyleInLayer('reset', `${root}, ${root} *, ${root} *::before, ${root} *::after`, {
+	'@media': {
+		'(prefers-reduced-motion: reduce)': {
+			animation: 'none',
+			transition: 'none',
+		},
+	},
 });
