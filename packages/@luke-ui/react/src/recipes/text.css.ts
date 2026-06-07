@@ -1,8 +1,10 @@
+import fontMetrics from '@capsizecss/metrics/appleSystem';
+import { createTextStyle } from '@capsizecss/vanilla-extract';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { createPropertyVariants, createVariants } from '../style-helpers/create-variants.js';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
+import { dimensionToPxNumber } from '../tokens/converters.js';
 import { tokenKeys } from '../tokens/groups.js';
 import type {
 	FontFamilyToken,
@@ -12,7 +14,48 @@ import type {
 	LineHeightToken,
 } from '../tokens/index.js';
 import { tokens } from '../tokens/index.js';
-import { getTypographyClass } from '../typography/get-typography-class.js';
+
+type StylePrimitive = string | number;
+
+function createVariants<Key extends string, Style extends Record<string, StylePrimitive>>(
+	keys: ReadonlyArray<Key>,
+	getStyle: (key: Key) => Style,
+): Record<Key, Style> {
+	const styles = {} as Record<Key, Style>;
+	for (const key of keys) {
+		styles[key] = getStyle(key);
+	}
+	return styles;
+}
+
+function createPropertyVariants<Key extends string, Property extends string>(
+	keys: ReadonlyArray<Key>,
+	property: Property,
+	values: Record<Key, string>,
+): Record<Key, Record<Property, string>> {
+	return createVariants(keys, (key) => ({
+		[property]: values[key],
+	})) as Record<Key, Record<Property, string>>;
+}
+
+interface GetTypographyInput {
+	fontSize: FontSizeToken;
+	lineHeight: LineHeightToken;
+}
+
+function getTypographyClass(input: GetTypographyInput, debugId?: string) {
+	const fontSize = dimensionToPxNumber(tokens.fontSize[input.fontSize].$value);
+	const lineHeight = tokens.lineHeight[input.lineHeight].$value;
+
+	return createTextStyle(
+		{
+			fontMetrics,
+			fontSize,
+			leading: fontSize * lineHeight,
+		},
+		debugId,
+	);
+}
 
 const colorKeys = tokenKeys(tokens.foregroundColor);
 const fontFamilyKeys = tokenKeys(tokens.fontFamily);
