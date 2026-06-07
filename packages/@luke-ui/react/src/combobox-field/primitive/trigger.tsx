@@ -5,6 +5,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
+import { useComboboxSize } from './size-context.js';
 
 interface ComboboxVariantProps extends NonNullable<styles.ComboboxVariants> {}
 
@@ -24,7 +25,8 @@ export interface ComboboxTriggerProps
 
 /** Trigger button used by combobox pattern. */
 export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
-	const { size = 'medium', ...buttonProps } = props;
+	const { size: sizeProp, ...buttonProps } = props;
+	const size = useComboboxSize(sizeProp);
 
 	return (
 		<RacButton
