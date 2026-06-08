@@ -52,11 +52,11 @@ export interface ComboboxFieldProps<T extends object>
 	/** Props forwarded to the inner listbox. */
 	listBoxProps?: DistributiveOmit<ComboboxListBoxProps<T>, 'children' | 'items' | 'loadMoreItem'>;
 
-	/** Optional content appended after the main collection, e.g. a load-more sentinel. */
-	loadMoreItem?: ComboboxListBoxProps<T>['loadMoreItem'];
-
 	/** Async loading state used for built-in loading and empty states. */
 	loadingState?: ComboboxLoadingState;
+
+	/** Optional content appended after the main collection, e.g. a load-more sentinel. */
+	loadMoreItem?: ComboboxListBoxProps<T>['loadMoreItem'];
 
 	/** Width applied to the popover menu. */
 	menuWidth?: CSSProperties['width'];

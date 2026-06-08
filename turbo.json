@@ -1,6 +1,9 @@
 {
 	"$schema": "https://v2-8-10.turborepo.dev/schema.json",
 	"tasks": {
+		"@luke-ui/react#check:types": {
+			"dependsOn": ["build", "^build"]
+		},
 		"//#check:format-root": {
 			"cache": true
 		},
@@ -14,9 +17,6 @@
 		"//#fix:unused": {
 			"cache": false,
 			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
-		},
-		"@luke-ui/react#check:types": {
-			"dependsOn": ["build", "^build"]
 		},
 		"build": {
 			"dependsOn": ["^build", "generate"],
@@ -47,26 +47,6 @@
 		"clean": {
 			"cache": false
 		},
-		"generate": {
-			"dependsOn": ["^generate"],
-			"inputs": [
-				"$TURBO_DEFAULT$",
-				"!docs/**",
-				"!dist/**",
-				"!.generated/**",
-				"!storybook-static/**",
-				"!**/*.test.ts",
-				"!**/*.test.tsx",
-				"!**/*.stories.tsx"
-			],
-			"outputs": [
-				".generated/**",
-				"dist/spritesheet.svg",
-				"dist/docs/**",
-				"src/routeTree.gen.ts",
-				"docs/**"
-			]
-		},
 		"dev": {
 			"cache": false,
 			"dependsOn": ["generate", "^build"],
@@ -92,6 +72,26 @@
 		"fix:unsafe": {
 			"cache": false,
 			"dependsOn": ["generate"]
+		},
+		"generate": {
+			"dependsOn": ["^generate"],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"!docs/**",
+				"!dist/**",
+				"!.generated/**",
+				"!storybook-static/**",
+				"!**/*.test.ts",
+				"!**/*.test.tsx",
+				"!**/*.stories.tsx"
+			],
+			"outputs": [
+				".generated/**",
+				"dist/spritesheet.svg",
+				"dist/docs/**",
+				"src/routeTree.gen.ts",
+				"docs/**"
+			]
 		},
 		"test": {
 			"dependsOn": ["^build", "generate"],

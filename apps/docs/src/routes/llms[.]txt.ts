@@ -23,9 +23,9 @@ export const Route = createFileRoute('/llms.txt')({
 				});
 
 				const txt = renderIndex({
-					packageName: packageJson.name,
 					entries: entriesWithHref,
 					includeLibraryAuthors: false,
+					packageName: packageJson.name,
 				});
 				return new Response(txt, {
 					headers: { 'Content-Type': 'text/plain; charset=utf-8' },

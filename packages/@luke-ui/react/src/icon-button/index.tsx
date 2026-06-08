@@ -62,7 +62,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			})}
 			size={size}
 		>
-			<Icon name={icon} aria-hidden />
+			<Icon aria-hidden name={icon} />
 		</Button>
 	);
 }

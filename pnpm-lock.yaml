@@ -6,6 +6,21 @@ settings:
 
 catalogs:
   default:
+    '@argos-ci/storybook':
+      specifier: ^5.3.2
+      version: 5.3.2
+    '@storybook/addon-a11y':
+      specifier: ^10.3.5
+      version: 10.3.5
+    '@storybook/addon-docs':
+      specifier: ^10.3.5
+      version: 10.3.5
+    '@storybook/addon-vitest':
+      specifier: ^10.3.5
+      version: 10.3.5
+    '@storybook/react-vite':
+      specifier: ^10.3.5
+      version: 10.3.5
     '@types/node':
       specifier: ^25.6.0
       version: 25.6.0
@@ -15,21 +30,51 @@ catalogs:
     '@types/react-dom':
       specifier: ^19.2.3
       version: 19.2.3
+    '@vanilla-extract/vite-plugin':
+      specifier: ^5.2.2
+      version: 5.2.2
     '@vitejs/plugin-react':
       specifier: ^6.0.1
       version: 6.0.1
+    '@vitest/browser-playwright':
+      specifier: ^4.1.5
+      version: 4.1.5
+    '@vitest/coverage-v8':
+      specifier: ^4.1.5
+      version: 4.1.5
+    '@vitest/ui':
+      specifier: ^4.1.5
+      version: 4.1.5
     fumadocs-mdx:
       specifier: 14.2.10
       version: 14.2.10
+    oxlint-tsgolint:
+      specifier: ^0.22.0
+      version: 0.22.0
     react:
       specifier: ^19.2.5
       version: 19.2.5
+    react-aria-components:
+      specifier: ^1.17.0
+      version: 1.17.0
     react-dom:
       specifier: ^19.2.5
       version: 19.2.5
+    storybook:
+      specifier: ^10.3.5
+      version: 10.3.5
+    ts-morph:
+      specifier: ^28.0.0
+      version: 28.0.0
+    tsx:
+      specifier: ^4.21.0
+      version: 4.21.0
     vite:
       specifier: ^8.0.10
       version: 8.0.10
+    vitest:
+      specifier: ^4.1.5
+      version: 4.1.5
 
 overrides:
   undici: ^7.24.3
@@ -164,6 +209,25 @@ importers:
         specifier: 'catalog:'
         version: 4.1.5(@types/node@25.6.0)(@vitest/browser-playwright@4.1.5)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(vite@8.0.10(@types/node@25.6.0)(esbuild@0.28.0)(jiti@2.6.1)(tsx@4.21.0)(yaml@2.8.2))
 
+  packages/@luke-ui/rainbow-sprinkles:
+    dependencies:
+      '@vanilla-extract/css':
+        specifier: ^1.20.1
+        version: 1.20.1
+      '@vanilla-extract/dynamic':
+        specifier: ^2.1.2
+        version: 2.1.5
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 25.6.0
+      csstype:
+        specifier: ^3.2.3
+        version: 3.2.3
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+
   packages/@luke-ui/react:
     dependencies:
       '@capsizecss/metrics':
@@ -172,6 +236,9 @@ importers:
       '@capsizecss/vanilla-extract':
         specifier: ^2.0.4
         version: 2.0.4(@vanilla-extract/css@1.20.1)
+      '@luke-ui/rainbow-sprinkles':
+        specifier: workspace:*
+        version: link:../rainbow-sprinkles
       '@react-aria/utils':
         specifier: ^3.34.0
         version: 3.34.0(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -3396,6 +3463,9 @@ packages:
   '@vanilla-extract/css@1.20.1':
     resolution: {integrity: sha512-5I9RNo5uZW9tsBnqrWzJqELegOqTHBrZyDFnES0gR9gJJHBB9dom1N0bwITM9tKwBcfKrTX4a6DHVeQdJ2ubQA==}
 
+  '@vanilla-extract/dynamic@2.1.5':
+    resolution: {integrity: sha512-QGIFGb1qyXQkbzx6X6i3+3LMc/iv/ZMBttMBL+Wm/DetQd36KsKsFg5CtH3qy+1hCA/5w93mEIIAiL4fkM8ycw==}
+
   '@vanilla-extract/integration@8.0.10':
     resolution: {integrity: sha512-01IB5gbrgTe8IIrtfRXXTmACl5D8Enzqp2cKbCWaMKXmnoilXXVCPbJoA96q88PXkNDXsXepCxUugMvEmL3c7A==}
 
@@ -4394,9 +4464,6 @@ packages:
     resolution: {integrity: sha512-ts6Wi+2j3jQjqi70w5AlN8DFnkSwC+MqmxEzdEALB2qXZYV3X/b1CTfgPLGJNMeAWxdPfU8FO1ms3NUfaHCPYg==}
     engines: {node: '>=10'}
 
-  get-tsconfig@4.13.6:
-    resolution: {integrity: sha512-shZT/QMiSHc/YBLxxOkMtgSid5HFoauqCE3/exfsEcwg1WkeqjG+V40yBbBrsD+jW2HDXcs28xOfcbm2jI8Ddw==}
-
   get-tsconfig@4.14.0:
     resolution: {integrity: sha512-yTb+8DXzDREzgvYmh6s9vHsSVCHeC0G3PI5bEXNBHtmshPnO+S5O7qgLEOn0I5QvMy6kpZN8K1NKGyilLb93wA==}
 
@@ -5349,10 +5416,6 @@ packages:
 
   postcss@8.5.10:
     resolution: {integrity: sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ==}
-    engines: {node: ^10 || ^12 || >=14}
-
-  postcss@8.5.8:
-    resolution: {integrity: sha512-OW/rX8O/jXnm82Ey1k44pObPtdblfiuWnrd8X7GJ7emImCOstunGbXUpp7HdBrFQX6rJzn3sPT397Wp5aCwCHg==}
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.2.1:
@@ -9059,6 +9122,10 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
 
+  '@vanilla-extract/dynamic@2.1.5':
+    dependencies:
+      '@vanilla-extract/private': 1.0.9
+
   '@vanilla-extract/integration@8.0.10':
     dependencies:
       '@babel/core': 7.29.0
@@ -10159,10 +10226,6 @@ snapshots:
   get-nonce@1.0.1: {}
 
   get-stream@6.0.1: {}
-
-  get-tsconfig@4.13.6:
-    dependencies:
-      resolve-pkg-maps: 1.0.0
 
   get-tsconfig@4.14.0:
     dependencies:
@@ -11507,12 +11570,6 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.8:
-    dependencies:
-      nanoid: 3.3.11
-      picocolors: 1.1.1
-      source-map-js: 1.2.1
-
   prelude-ls@1.2.1: {}
 
   prettier@2.8.8: {}
@@ -12189,7 +12246,7 @@ snapshots:
   tsx@4.21.0:
     dependencies:
       esbuild: 0.27.3
-      get-tsconfig: 4.13.6
+      get-tsconfig: 4.14.0
     optionalDependencies:
       fsevents: 2.3.3
 
@@ -12372,7 +12429,7 @@ snapshots:
       esbuild: 0.27.3
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
-      postcss: 8.5.8
+      postcss: 8.5.10
       rollup: 4.59.0
       tinyglobby: 0.2.16
     optionalDependencies:

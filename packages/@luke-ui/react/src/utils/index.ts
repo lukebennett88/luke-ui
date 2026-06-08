@@ -9,6 +9,51 @@ export function cx(...parts: Array<string | undefined | null | false>): string {
 	return result;
 }
 
+type Merged<A, B> = {
+	[K in keyof A | keyof B]: K extends 'className'
+		? string
+		: K extends 'style'
+			? Record<string, unknown>
+			: K extends keyof B
+				? B[K]
+				: K extends keyof A
+					? A[K]
+					: never;
+};
+
+type MergeableProps = {
+	className?: unknown;
+	style?: unknown;
+};
+
+/**
+ * Merges two prop objects, concatenating `className` with `cx` and shallowly
+ * merging `style` objects (later props win). All other properties are overwritten
+ * by the later object. Useful for combining component props with `createSprinkles()` output.
+ */
+export function mergeProps<A extends object, B extends object>(a: A, b: B): Merged<A, B> {
+	const result = { ...a } as Record<string, unknown>;
+	const aProps = a as MergeableProps;
+	const bProps = b as MergeableProps;
+
+	result.className = cx(
+		typeof aProps.className === 'string' && aProps.className,
+		typeof bProps.className === 'string' && bProps.className,
+	);
+	result.style = {
+		...(typeof aProps.style === 'object' && aProps.style !== null ? aProps.style : {}),
+		...(typeof bProps.style === 'object' && bProps.style !== null ? bProps.style : {}),
+	};
+
+	for (const key in b) {
+		if (key !== 'className' && key !== 'style') {
+			result[key] = b[key as keyof B];
+		}
+	}
+
+	return result as Merged<A, B>;
+}
+
 /** Converts a pixel value to rem. */
 export function pxToRem(px: number, base: number = 16): string {
 	return `${px / base}rem`;

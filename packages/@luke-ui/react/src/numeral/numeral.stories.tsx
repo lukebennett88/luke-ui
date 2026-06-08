@@ -126,15 +126,15 @@ export const Locale = meta.story({
 	render: () => (
 		<div style={stackStyle}>
 			<Heading level={2}>
-				Acme Corporation shares hit <Numeral value={1_456_789} abbreviate /> today
+				Acme Corporation shares hit <Numeral abbreviate value={1_456_789} /> today
 			</Heading>
 			<Text>
 				We asked investors which private company’s stock they would most like to own. More than{' '}
-				<Numeral value={0.80123} format="percent" /> of respondents picked Acme Corp.
+				<Numeral format="percent" value={0.80123} /> of respondents picked Acme Corp.
 			</Text>
 			<Text>
 				Hooli, Acme’s parent component, went public earlier in the year. The median commitment was{' '}
-				<Numeral value={1_000} currency="AUD" precision={0} /> though the average was significantly
+				<Numeral currency="AUD" precision={0} value={1_000} /> though the average was significantly
 				higher.
 			</Text>
 		</div>

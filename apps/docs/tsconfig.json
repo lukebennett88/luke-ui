@@ -1,5 +1,4 @@
 {
-	"include": ["**/*.ts", "**/*.tsx"],
 	"compilerOptions": {
 		"allowJs": true,
 		"forceConsistentCasingInFileNames": true,
@@ -18,5 +17,6 @@
 		"target": "esnext",
 		"types": ["vite/client"],
 		"verbatimModuleSyntax": true
-	}
+	},
+	"include": ["**/*.ts", "**/*.tsx"]
 }

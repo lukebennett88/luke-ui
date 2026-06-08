@@ -26,20 +26,27 @@ interface TextStyleProps {
 	 */
 	fontWeight?: TextVariantProps['fontWeight'];
 	/**
+	 * Hides text visually while keeping it accessible.
+	 * @default false
+	 */
+	isVisuallyHidden?: TextVariantProps['isVisuallyHidden'];
+	/** Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5. */
+	lineClamp?: TextVariantProps['lineClamp'];
+	/**
 	 * Sets the line height.
 	 * @default 'loose'
 	 */
 	lineHeight?: TextVariantProps['lineHeight'];
 	/**
-	 * Makes text inherit font styles.
-	 * @default false
-	 */
-	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
-	/**
 	 * Turns off cap-height trim.
 	 * @default false
 	 */
 	shouldDisableTrim?: TextVariantProps['shouldDisableTrim'];
+	/**
+	 * Makes text inherit font styles.
+	 * @default false
+	 */
+	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
 	/**
 	 * Sets text alignment.
 	 * @default 'start'
@@ -55,23 +62,16 @@ interface TextStyleProps {
 	 * @default 'none'
 	 */
 	textTransform?: TextVariantProps['textTransform'];
-	/** Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5. */
-	lineClamp?: TextVariantProps['lineClamp'];
-	/**
-	 * Sets numeric glyph style.
-	 * @default 'unset'
-	 */
-	variant?: TextVariantProps['variant'];
-	/**
-	 * Hides text visually while keeping it accessible.
-	 * @default false
-	 */
-	isVisuallyHidden?: TextVariantProps['isVisuallyHidden'];
 	/**
 	 * Sets text wrapping behavior.
 	 * @default 'unset'
 	 */
 	textWrap?: TextVariantProps['textWrap'];
+	/**
+	 * Sets numeric glyph style.
+	 * @default 'unset'
+	 */
+	variant?: TextVariantProps['variant'];
 }
 
 /**
@@ -115,16 +115,16 @@ export function Text(props: TextProps) {
 					fontFamily,
 					fontSize,
 					fontWeight,
+					isVisuallyHidden,
+					lineClamp,
 					lineHeight,
-					shouldInheritFont,
 					shouldDisableTrim: resolvedShouldDisableTrim,
+					shouldInheritFont,
 					textAlign,
 					textDecoration,
 					textTransform,
 					textWrap,
-					lineClamp,
 					variant,
-					isVisuallyHidden,
 				}),
 				className,
 			)}

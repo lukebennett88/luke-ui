@@ -1,14 +1,14 @@
 import type { ComponentProps, JSX, ReactNode } from 'react';
-import { FieldDescription } from './description.js';
 import type { FieldDescriptionProps } from './description.js';
+import { FieldDescription } from './description.js';
 import type { FieldErrorProps } from './error.js';
 import { FieldError } from './error.js';
-import { FieldLabel } from './label.js';
 import type { FieldLabelProps, FieldNecessityIndicator } from './label.js';
+import { FieldLabel } from './label.js';
 import { Field as PrimitiveField } from './root.js';
 
-export { FieldDescription, FieldError, FieldLabel };
 export type { FieldDescriptionProps, FieldErrorProps, FieldLabelProps, FieldNecessityIndicator };
+export { FieldDescription, FieldError, FieldLabel };
 
 type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
 

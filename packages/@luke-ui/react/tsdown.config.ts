@@ -34,24 +34,24 @@ async function cleanDistExceptPreservedFiles() {
 
 export default defineConfig((options) => ({
 	attw: {
-		profile: 'esm-only',
 		// Exclude static asset exports — attw checks JS type resolution, but CSS/SVG
 		// files don't need type definitions. Excluding them avoids false-positive
 		// 'no-resolution' errors while keeping the rule active for actual JS exports.
 		excludeEntrypoints: ['./stylesheet.css', './spritesheet.svg'],
+		profile: 'esm-only',
 	},
+	clean: false,
 	deps: {
 		neverBundle: Object.keys(packageJson.peerDependencies),
 	},
-	clean: false,
 	dts: true,
 	entry: {
 		'*': ['src/*/index.tsx', 'src/*/index.ts', 'src/*/primitive/index.tsx'],
 	},
 	exports: {
 		customExports: {
-			'./stylesheet.css': './dist/stylesheet.css',
 			'./spritesheet.svg': './dist/spritesheet.svg',
+			'./stylesheet.css': './dist/stylesheet.css',
 		},
 	},
 	format: ['esm'],

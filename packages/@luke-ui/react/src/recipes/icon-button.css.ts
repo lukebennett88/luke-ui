@@ -9,11 +9,11 @@ export const iconButtonReset = styleInLayer('utilities', {
 export const iconButton = recipeInLayer('recipes', {
 	variants: {
 		size: {
-			small: {
-				inlineSize: vars.controlSize.small,
-			},
 			medium: {
 				inlineSize: vars.controlSize.medium,
+			},
+			small: {
+				inlineSize: vars.controlSize.small,
 			},
 		},
 	},

@@ -3,10 +3,6 @@ import type { KnipConfig } from 'knip';
 export default {
 	ignore: ['.claude/worktrees/**', '.worktrees/**'],
 	workspaces: {
-		'packages/turbo-generators': {
-			entry: ['config.ts'],
-			project: ['**/*.ts'],
-		},
 		'apps/docs': {
 			entry: [
 				'source.config.ts',
@@ -16,8 +12,12 @@ export default {
 				'src/styles/app.css',
 				'content/**/*.mdx',
 			],
-			project: ['src/**/*.{ts,tsx}'],
 			ignoreDependencies: ['ts-morph'],
+			project: ['src/**/*.{ts,tsx}'],
+		},
+		'packages/@luke-ui/docs-tools': {
+			entry: ['src/**/__tests__/**/*.test.ts'],
+			project: ['src/**/*.ts'],
 		},
 		'packages/@luke-ui/react': {
 			entry: [
@@ -33,9 +33,9 @@ export default {
 			],
 			project: ['src/**/*.{ts,tsx}'],
 		},
-		'packages/@luke-ui/docs-tools': {
-			entry: ['src/**/__tests__/**/*.test.ts'],
-			project: ['src/**/*.ts'],
+		'packages/turbo-generators': {
+			entry: ['config.ts'],
+			project: ['**/*.ts'],
 		},
 	},
 } satisfies KnipConfig;

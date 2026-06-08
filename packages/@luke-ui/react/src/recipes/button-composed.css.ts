@@ -12,6 +12,12 @@ export const buttonContent = recipeInLayer('recipes', {
 });
 
 export const buttonLabel = recipeInLayer('recipes', {
+	base: {
+		alignItems: 'center',
+		display: 'inline-flex',
+		gap: vars.space.xsmall,
+		minInlineSize: 0,
+	},
 	defaultVariants: {
 		isPending: false,
 	},
@@ -22,12 +28,6 @@ export const buttonLabel = recipeInLayer('recipes', {
 				opacity: 0,
 			},
 		},
-	},
-	base: {
-		alignItems: 'center',
-		display: 'inline-flex',
-		gap: vars.space.xsmall,
-		minInlineSize: 0,
 	},
 });
 

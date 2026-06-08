@@ -11,18 +11,18 @@ import type { TextInputSize } from './primitive/index.js';
 import { TextInput } from './primitive/index.js';
 
 interface TextFieldRedeclaredRACProps {
-	/** Whether the field is disabled. */
-	isDisabled?: RacTextFieldProps['isDisabled'];
-	/** Whether the field is read-only. */
-	isReadOnly?: RacTextFieldProps['isReadOnly'];
-	/** Whether the field has a validation error. */
-	isInvalid?: RacTextFieldProps['isInvalid'];
-	/** Controlled input value. */
-	value?: RacTextFieldProps['value'];
 	/** Initial value (uncontrolled). */
 	defaultValue?: RacTextFieldProps['defaultValue'];
+	/** Whether the field is disabled. */
+	isDisabled?: RacTextFieldProps['isDisabled'];
+	/** Whether the field has a validation error. */
+	isInvalid?: RacTextFieldProps['isInvalid'];
+	/** Whether the field is read-only. */
+	isReadOnly?: RacTextFieldProps['isReadOnly'];
 	/** Called when the value changes. */
 	onChange?: RacTextFieldProps['onChange'];
+	/** Controlled input value. */
+	value?: RacTextFieldProps['value'];
 }
 
 /**

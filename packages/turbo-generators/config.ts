@@ -118,7 +118,7 @@ function addComponentToDocsMeta(answers: GeneratorAnswers): string {
 		const content = readFileSync(groupMetaPath, 'utf8');
 		meta = JSON.parse(content) as { pages?: Array<string>; title?: string };
 	} else {
-		meta = { title: toDisplayName(group), pages: [] };
+		meta = { pages: [], title: toDisplayName(group) };
 	}
 
 	const pages = Array.isArray(meta.pages) ? meta.pages : [];
@@ -297,46 +297,31 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 	});
 
 	plop.setGenerator('component', {
-		description: 'Scaffold a new component in @luke-ui/react',
-		prompts: [
-			{
-				type: 'list',
-				name: 'group',
-				message: 'Component group:',
-				choices: [...DOCS_GROUPS],
-			},
-			{
-				type: 'input',
-				name: 'name',
-				message: 'Component name (PascalCase or kebab-case):',
-				validate: validateComponentName,
-			},
-		],
 		actions: [
 			{
-				type: 'add',
 				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase name}}/index.tsx',
 				templateFile: 'templates/component/component.tsx.hbs',
+				type: 'add',
 			},
 			{
-				type: 'add',
 				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/recipes/{{kebabCase name}}.css.ts',
 				templateFile: 'templates/component/component.recipe.css.ts.hbs',
+				type: 'add',
 			},
 			{
-				type: 'add',
 				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase name}}.stories.tsx',
 				templateFile: 'templates/component/component.stories.tsx.hbs',
+				type: 'add',
 			},
 			{
-				type: 'add',
 				path: '{{ turbo.paths.root }}/packages/@luke-ui/react/src/{{kebabCase name}}.docs.mdx',
 				templateFile: 'templates/component/component.docs.mdx.hbs',
+				type: 'add',
 			},
 			{
-				type: 'add',
 				path: '{{ turbo.paths.root }}/apps/docs/content/docs/components/{{kebabCase group}}/{{kebabCase name}}.mdx',
 				templateFile: 'templates/component/component.docs-page.mdx.hbs',
+				type: 'add',
 			},
 			addComponentToDocsMeta,
 			addComponentToDocsIndex,
@@ -346,6 +331,21 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 			syncTsdownExports,
 			() => {
 				return 'Done. @luke-ui/react exports were refreshed via tsdown.';
+			},
+		],
+		description: 'Scaffold a new component in @luke-ui/react',
+		prompts: [
+			{
+				choices: [...DOCS_GROUPS],
+				message: 'Component group:',
+				name: 'group',
+				type: 'list',
+			},
+			{
+				message: 'Component name (PascalCase or kebab-case):',
+				name: 'name',
+				type: 'input',
+				validate: validateComponentName,
 			},
 		],
 	});

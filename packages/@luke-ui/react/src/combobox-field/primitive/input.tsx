@@ -40,10 +40,10 @@ export function ComboboxTextInput(props: ComboboxTextInputProps): JSX.Element {
 	return (
 		<RacInput
 			{...inputProps}
-			onClick={handleClick}
 			className={composeRenderProps(inputProps.className, (className) => {
 				return cx(styles.comboboxTextInput({ size }), className);
 			})}
+			onClick={handleClick}
 		/>
 	);
 }

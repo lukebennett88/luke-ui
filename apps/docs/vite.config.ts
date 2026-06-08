@@ -19,8 +19,8 @@ import { mapPublicToInternal, toInternal, toPublic } from './src/lib/markdown-ur
 // the original source paths.
 function storySourcePathPlugin(): Plugin {
 	return {
-		name: 'story-source-path',
 		enforce: 'pre',
+		name: 'story-source-path',
 		transform(code, id) {
 			const cleanId = id.split('?')[0] ?? '';
 			if (!cleanId.endsWith('.story.tsx') && !cleanId.endsWith('/lib/story.ts')) return null;
@@ -52,14 +52,6 @@ function staticFunctionBasePathPlugin(): Plugin {
 
 function markdownRewritePlugin(): Plugin {
 	return {
-		name: 'markdown-rewrite',
-		configureServer(server) {
-			server.middlewares.use((req, _res, next) => {
-				const rewritten = mapPublicToInternal(req.url);
-				if (rewritten) req.url = rewritten;
-				next();
-			});
-		},
 		configurePreviewServer(server) {
 			server.middlewares.use((req, _res, next) => {
 				const rewritten = mapPublicToInternal(req.url);
@@ -67,6 +59,14 @@ function markdownRewritePlugin(): Plugin {
 				next();
 			});
 		},
+		configureServer(server) {
+			server.middlewares.use((req, _res, next) => {
+				const rewritten = mapPublicToInternal(req.url);
+				if (rewritten) req.url = rewritten;
+				next();
+			});
+		},
+		name: 'markdown-rewrite',
 	};
 }
 
@@ -85,11 +85,21 @@ function packageDocsPlugin(): Plugin {
 	const id = 'virtual:package-docs';
 	const resolved = `\0${id}`;
 	return {
-		name: 'package-docs',
-		enforce: 'pre',
-		resolveId(source) {
-			return source === id ? resolved : null;
+		configureServer(server) {
+			server.watcher.add(packageDocsDir);
+			const handle = (filePath: string) => {
+				if (!filePath.endsWith('.mdx') || !filePath.startsWith(packageDocsDir)) return;
+				const mod = server.moduleGraph.getModuleById(resolved);
+				if (mod) {
+					server.moduleGraph.invalidateModule(mod);
+					server.ws.send({ type: 'full-reload' });
+				}
+			};
+			server.watcher.on('add', handle);
+			server.watcher.on('change', handle);
+			server.watcher.on('unlink', handle);
 		},
+		enforce: 'pre',
 		async load(loadId) {
 			if (loadId !== resolved) return null;
 			const filenames = (await readdir(packageDocsDir)).filter((n) => n.endsWith('.mdx'));
@@ -104,19 +114,9 @@ function packageDocsPlugin(): Plugin {
 			);
 			return `export const packageDocs = ${JSON.stringify(Object.fromEntries(entries))};`;
 		},
-		configureServer(server) {
-			server.watcher.add(packageDocsDir);
-			const handle = (filePath: string) => {
-				if (!filePath.endsWith('.mdx') || !filePath.startsWith(packageDocsDir)) return;
-				const mod = server.moduleGraph.getModuleById(resolved);
-				if (mod) {
-					server.moduleGraph.invalidateModule(mod);
-					server.ws.send({ type: 'full-reload' });
-				}
-			};
-			server.watcher.on('add', handle);
-			server.watcher.on('change', handle);
-			server.watcher.on('unlink', handle);
+		name: 'package-docs',
+		resolveId(source) {
+			return source === id ? resolved : null;
 		},
 	};
 }
@@ -193,8 +193,8 @@ function packageSourceWatcherPlugin(): Plugin {
 		logger.info('[package-docs] regenerating @luke-ui/react docs...');
 		const child = spawn('pnpm', ['--filter', '@luke-ui/react', 'generate:docs'], {
 			cwd: packageRootDir,
-			stdio: ['ignore', 'pipe', 'pipe'],
 			shell: false,
+			stdio: ['ignore', 'pipe', 'pipe'],
 		});
 		inFlight = child;
 
@@ -234,13 +234,12 @@ function packageSourceWatcherPlugin(): Plugin {
 	}
 
 	return {
-		name: 'package-source-watcher',
 		apply: 'serve',
 		configureServer(server) {
 			server.watcher.add(packageSrcDir);
 			const logger = {
-				info: (msg: string) => server.config.logger.info(msg, { timestamp: true }),
 				error: (msg: string) => server.config.logger.error(msg, { timestamp: true }),
+				info: (msg: string) => server.config.logger.info(msg, { timestamp: true }),
 			};
 			const handleChange = (filePath: string) => {
 				if (!shouldTrigger(filePath)) return;
@@ -250,6 +249,7 @@ function packageSourceWatcherPlugin(): Plugin {
 			server.watcher.on('change', handleChange);
 			server.watcher.on('unlink', handleChange);
 		},
+		name: 'package-source-watcher',
 	};
 }
 
@@ -284,10 +284,6 @@ export default defineConfig(async () => {
 		optimizeDeps: {
 			exclude: ['@luke-ui/react'],
 		},
-		resolve: {
-			external: ['ts-morph'],
-			tsconfigPaths: true,
-		},
 		plugins: [
 			storySourcePathPlugin(),
 			staticFunctionBasePathPlugin(),
@@ -297,21 +293,25 @@ export default defineConfig(async () => {
 			mdx(await import('./source.config')),
 			tailwindcss(),
 			tanstackStart({
-				prerender: {
-					enabled: true,
-					crawlLinks: true,
-					filter: (page) => !page.path.endsWith('.mdx') && !page.path.endsWith('.md'),
-				},
 				pages: [
 					{ path: '/api/search' },
 					{ path: '/llms.txt' },
 					{ path: '/llms-full.txt' },
 					...markdownPrerenderPages,
 				],
+				prerender: {
+					crawlLinks: true,
+					enabled: true,
+					filter: (page) => !page.path.endsWith('.mdx') && !page.path.endsWith('.md'),
+				},
 			}),
 			react(),
 			nitro(),
 		],
+		resolve: {
+			external: ['ts-morph'],
+			tsconfigPaths: true,
+		},
 		server: {
 			port: 3000,
 		},

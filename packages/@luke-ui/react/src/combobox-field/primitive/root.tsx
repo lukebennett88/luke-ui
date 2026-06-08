@@ -26,23 +26,22 @@ export interface ComboboxInputProps<T extends object> extends DistributiveOmit<
 	| 'selectionMode'
 	| 'value'
 > {
-	/** The currently selected key (controlled). Pass `null` for no selection. */
-	value?: Key | null;
-
 	/** The initially selected key (uncontrolled). */
 	defaultValue?: Key | null;
-
-	/** Called when the selected value changes. */
-	onChange?: (value: Key | null) => void;
-
-	/** Called when the open state changes. */
-	onOpenChange?: (isOpen: boolean) => void;
 
 	/**
 	 * The interaction required to display the ComboBox menu.
 	 * @default 'focus'
 	 */
 	menuTrigger?: 'focus' | 'input' | 'manual';
+
+	/** Called when the selected value changes. */
+	onChange?: (value: Key | null) => void;
+
+	/** Called when the open state changes. */
+	onOpenChange?: (isOpen: boolean) => void;
+	/** The currently selected key (controlled). Pass `null` for no selection. */
+	value?: Key | null;
 }
 
 export function ComboboxInput<T extends object>(props: ComboboxInputProps<T>): JSX.Element {
@@ -51,10 +50,10 @@ export function ComboboxInput<T extends object>(props: ComboboxInputProps<T>): J
 	return (
 		<RacComboBox
 			{...comboboxProps}
-			menuTrigger={menuTrigger}
 			className={composeRenderProps(className, (renderedClassName) => {
 				return cx(styles.comboboxRoot, renderedClassName);
 			})}
+			menuTrigger={menuTrigger}
 		/>
 	);
 }

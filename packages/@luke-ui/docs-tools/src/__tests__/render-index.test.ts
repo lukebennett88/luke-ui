@@ -4,38 +4,38 @@ import { renderIndex } from '../render-index.js';
 
 const sampleEntries: Array<DiscoveredExport & { description?: string }> = [
 	{
-		path: './button',
-		target: '',
-		slug: 'button',
-		shape: 'component',
-		pageKind: 'component',
-		tier: 'composed',
 		description: 'Composed button.',
-	},
-	{
-		path: './button/primitive',
-		target: '',
-		slug: 'button-primitive',
-		shape: 'component',
 		pageKind: 'component',
-		tier: 'primitive',
+		path: './button',
+		shape: 'component',
+		slug: 'button',
+		target: '',
+		tier: 'composed',
+	},
+	{
 		description: 'Bare button.',
+		pageKind: 'component',
+		path: './button/primitive',
+		shape: 'component',
+		slug: 'button-primitive',
+		target: '',
+		tier: 'primitive',
 	},
 	{
-		path: './tokens',
-		target: '',
-		slug: 'tokens',
-		shape: 'barrel',
-		pageKind: 'barrel',
-		tier: 'n/a',
 		description: 'Design tokens.',
+		pageKind: 'barrel',
+		path: './tokens',
+		shape: 'barrel',
+		slug: 'tokens',
+		target: '',
+		tier: 'n/a',
 	},
 	{
-		path: './stylesheet.css',
-		target: '',
-		slug: 'stylesheet',
-		shape: 'asset',
 		pageKind: 'asset',
+		path: './stylesheet.css',
+		shape: 'asset',
+		slug: 'stylesheet',
+		target: '',
 		tier: 'n/a',
 	},
 ];
@@ -43,18 +43,18 @@ const sampleEntries: Array<DiscoveredExport & { description?: string }> = [
 describe('renderIndex', () => {
 	it('lists composed components in the primary section', () => {
 		const out = renderIndex({
-			packageName: '@luke-ui/react',
 			entries: sampleEntries,
 			includeLibraryAuthors: false,
+			packageName: '@luke-ui/react',
 		});
 		expect(out).toMatch(/- \[Button\]\(\.\/button\.md\)/);
 	});
 
 	it('omits primitives when includeLibraryAuthors is false', () => {
 		const out = renderIndex({
-			packageName: '@luke-ui/react',
 			entries: sampleEntries,
 			includeLibraryAuthors: false,
+			packageName: '@luke-ui/react',
 		});
 		expect(out).not.toMatch(/Button \(primitive\)/);
 		expect(out).not.toMatch(/## Library authors/);
@@ -62,9 +62,9 @@ describe('renderIndex', () => {
 
 	it('includes primitives in a Library authors section when flag is true', () => {
 		const out = renderIndex({
-			packageName: '@luke-ui/react',
 			entries: sampleEntries,
 			includeLibraryAuthors: true,
+			packageName: '@luke-ui/react',
 		});
 		expect(out).toMatch(/## Library authors/);
 		expect(out).toMatch(/- \[Button \(primitive\)\]\(\.\/button-primitive\.md\)/);
@@ -72,9 +72,9 @@ describe('renderIndex', () => {
 
 	it('lists assets inline (no link) under Assets section', () => {
 		const out = renderIndex({
-			packageName: '@luke-ui/react',
 			entries: sampleEntries,
 			includeLibraryAuthors: true,
+			packageName: '@luke-ui/react',
 		});
 		expect(out).toMatch(/## Assets/);
 		expect(out).toMatch(/stylesheet\.css.*import '@luke-ui\/react\/stylesheet\.css'/);
@@ -82,13 +82,13 @@ describe('renderIndex', () => {
 
 	it('uses entry href when provided', () => {
 		const out = renderIndex({
-			packageName: '@luke-ui/react',
 			entries: sampleEntries.map((entry) =>
 				entry.slug === 'button'
 					? Object.assign(entry, { href: './llms.mdx/docs/components/actions/button.md' })
 					: entry,
 			),
 			includeLibraryAuthors: false,
+			packageName: '@luke-ui/react',
 		});
 		expect(out).toMatch(/\[Button\]\(\.\/llms\.mdx\/docs\/components\/actions\/button\.md\)/);
 		expect(out).toMatch(/\[Tokens\]\(\.\/tokens\.md\)/);

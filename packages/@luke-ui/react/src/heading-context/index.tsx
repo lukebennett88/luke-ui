@@ -42,8 +42,8 @@ export const useHeadingLevel = (
 ): HeadingLevelsRenderProps => {
 	const level = useContext(HeadingLevelContext) ?? fallback;
 	return {
-		level,
 		element: `h${level}`,
+		level,
 	};
 };
 
@@ -98,8 +98,8 @@ export const HeadingLevels = ({ base, children }: HeadingLevelsProps) => {
 	})();
 
 	const renderProps: HeadingLevelsRenderProps = {
-		level: value,
 		element: `h${value}`,
+		level: value,
 	};
 
 	return (

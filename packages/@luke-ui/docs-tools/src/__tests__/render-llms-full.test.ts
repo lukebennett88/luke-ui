@@ -9,23 +9,23 @@ describe('sortLlmsFullEntries', () => {
 		const entries: Array<LlmsFullEntry> = [
 			// Deliberately mixed and non-alphabetic insertion order.
 			{
-				slug: 'combobox-field-primitive',
-				shape: 'component',
-				tier: 'primitive',
 				md: md('combobox-field-primitive'),
-			},
-			{ slug: 'tokens', shape: 'barrel', tier: 'n/a', md: md('tokens') },
-			{ slug: 'button', shape: 'component', tier: 'composed', md: md('button') },
-			{ slug: 'icon', shape: 'component', tier: 'atom', md: md('icon') },
-			{
-				slug: 'button-primitive',
 				shape: 'component',
+				slug: 'combobox-field-primitive',
 				tier: 'primitive',
-				md: md('button-primitive'),
 			},
-			{ slug: 'recipes', shape: 'barrel', tier: 'n/a', md: md('recipes') },
-			{ slug: 'avatar', shape: 'component', tier: 'composed', md: md('avatar') },
-			{ slug: 'emoji', shape: 'component', tier: 'atom', md: md('emoji') },
+			{ md: md('tokens'), shape: 'barrel', slug: 'tokens', tier: 'n/a' },
+			{ md: md('button'), shape: 'component', slug: 'button', tier: 'composed' },
+			{ md: md('icon'), shape: 'component', slug: 'icon', tier: 'atom' },
+			{
+				md: md('button-primitive'),
+				shape: 'component',
+				slug: 'button-primitive',
+				tier: 'primitive',
+			},
+			{ md: md('recipes'), shape: 'barrel', slug: 'recipes', tier: 'n/a' },
+			{ md: md('avatar'), shape: 'component', slug: 'avatar', tier: 'composed' },
+			{ md: md('emoji'), shape: 'component', slug: 'emoji', tier: 'atom' },
 		];
 		const sorted = sortLlmsFullEntries(entries).map((e) => e.slug);
 		expect(sorted).toEqual([
@@ -46,10 +46,10 @@ describe('sortLlmsFullEntries', () => {
 
 	it('drops entries that do not belong to a bucket (assets, unknown tiers)', () => {
 		const entries: Array<LlmsFullEntry> = [
-			{ slug: 'stylesheet', shape: 'asset', tier: 'n/a', md: md('stylesheet') },
-			{ slug: 'button', shape: 'component', tier: 'composed', md: md('button') },
+			{ md: md('stylesheet'), shape: 'asset', slug: 'stylesheet', tier: 'n/a' },
+			{ md: md('button'), shape: 'component', slug: 'button', tier: 'composed' },
 			// component with tier 'n/a' should not slip through as composed.
-			{ slug: 'mystery', shape: 'component', tier: 'n/a', md: md('mystery') },
+			{ md: md('mystery'), shape: 'component', slug: 'mystery', tier: 'n/a' },
 		];
 		const sorted = sortLlmsFullEntries(entries).map((e) => e.slug);
 		expect(sorted).toEqual(['button']);
@@ -57,8 +57,8 @@ describe('sortLlmsFullEntries', () => {
 
 	it('treats atoms before composed regardless of slug ordering', () => {
 		const entries: Array<LlmsFullEntry> = [
-			{ slug: 'aardvark', shape: 'component', tier: 'composed', md: md('aardvark') },
-			{ slug: 'zebra', shape: 'component', tier: 'atom', md: md('zebra') },
+			{ md: md('aardvark'), shape: 'component', slug: 'aardvark', tier: 'composed' },
+			{ md: md('zebra'), shape: 'component', slug: 'zebra', tier: 'atom' },
 		];
 		const sorted = sortLlmsFullEntries(entries).map((e) => e.slug);
 		expect(sorted).toEqual(['zebra', 'aardvark']);
@@ -67,12 +67,12 @@ describe('sortLlmsFullEntries', () => {
 	it('places barrels before primitives even when primitive slugs sort earlier', () => {
 		const entries: Array<LlmsFullEntry> = [
 			{
-				slug: 'aardvark-primitive',
-				shape: 'component',
-				tier: 'primitive',
 				md: md('aardvark-primitive'),
+				shape: 'component',
+				slug: 'aardvark-primitive',
+				tier: 'primitive',
 			},
-			{ slug: 'tokens', shape: 'barrel', tier: 'n/a', md: md('tokens') },
+			{ md: md('tokens'), shape: 'barrel', slug: 'tokens', tier: 'n/a' },
 		];
 		const sorted = sortLlmsFullEntries(entries).map((e) => e.slug);
 		expect(sorted).toEqual(['tokens', 'aardvark-primitive']);
@@ -80,8 +80,8 @@ describe('sortLlmsFullEntries', () => {
 
 	it('does not mutate the input array', () => {
 		const entries: Array<LlmsFullEntry> = [
-			{ slug: 'b', shape: 'component', tier: 'composed', md: md('b') },
-			{ slug: 'a', shape: 'component', tier: 'composed', md: md('a') },
+			{ md: md('b'), shape: 'component', slug: 'b', tier: 'composed' },
+			{ md: md('a'), shape: 'component', slug: 'a', tier: 'composed' },
 		];
 		const snapshot = entries.map((e) => e.slug);
 		sortLlmsFullEntries(entries);
@@ -94,23 +94,23 @@ describe('renderLlmsFull', () => {
 		// Insertion order is intentionally jumbled.
 		const entries: Array<LlmsFullEntry> = [
 			{
-				slug: 'combobox-field-primitive',
-				shape: 'component',
-				tier: 'primitive',
 				md: md('combobox-field-primitive'),
-			},
-			{ slug: 'tokens', shape: 'barrel', tier: 'n/a', md: md('tokens') },
-			{ slug: 'button', shape: 'component', tier: 'composed', md: md('button') },
-			{ slug: 'icon', shape: 'component', tier: 'atom', md: md('icon') },
-			{
-				slug: 'button-primitive',
 				shape: 'component',
+				slug: 'combobox-field-primitive',
 				tier: 'primitive',
-				md: md('button-primitive'),
 			},
-			{ slug: 'recipes', shape: 'barrel', tier: 'n/a', md: md('recipes') },
-			{ slug: 'avatar', shape: 'component', tier: 'composed', md: md('avatar') },
-			{ slug: 'emoji', shape: 'component', tier: 'atom', md: md('emoji') },
+			{ md: md('tokens'), shape: 'barrel', slug: 'tokens', tier: 'n/a' },
+			{ md: md('button'), shape: 'component', slug: 'button', tier: 'composed' },
+			{ md: md('icon'), shape: 'component', slug: 'icon', tier: 'atom' },
+			{
+				md: md('button-primitive'),
+				shape: 'component',
+				slug: 'button-primitive',
+				tier: 'primitive',
+			},
+			{ md: md('recipes'), shape: 'barrel', slug: 'recipes', tier: 'n/a' },
+			{ md: md('avatar'), shape: 'component', slug: 'avatar', tier: 'composed' },
+			{ md: md('emoji'), shape: 'component', slug: 'emoji', tier: 'atom' },
 		];
 
 		const output = renderLlmsFull(entries);
@@ -136,7 +136,7 @@ describe('renderLlmsFull', () => {
 
 	it('emits only the header when no entries fall into a bucket', () => {
 		const output = renderLlmsFull([
-			{ slug: 'stylesheet', shape: 'asset', tier: 'n/a', md: md('stylesheet') },
+			{ md: md('stylesheet'), shape: 'asset', slug: 'stylesheet', tier: 'n/a' },
 		]);
 		expect(output).toMatch(/^# Luke UI — full documentation/);
 		expect(output).not.toContain('---');

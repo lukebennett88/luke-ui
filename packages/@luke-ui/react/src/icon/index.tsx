@@ -24,9 +24,9 @@ interface IconStyleProps {
 
 /** Props for `IconSpritesheetProvider`. */
 export interface IconSpritesheetProviderProps {
+	children: ReactNode;
 	/** URL to the generated sprite sheet file. */
 	href: string;
-	children: ReactNode;
 }
 
 /** Provides the icon spritesheet URL for `Icon`. */
