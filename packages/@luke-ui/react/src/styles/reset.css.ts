@@ -71,15 +71,16 @@ globalStyleInLayer('reset', `${root} :where(:disabled, [data-disabled="true"])`,
 });
 
 globalStyleInLayer('reset', `${root} :where(:focus-visible)`, {
+	outlineColor: vars.themeColor.focusRingColor,
+	outlineOffset: vars.borderWidth.thick,
+	outlineStyle: 'solid',
+	outlineWidth: vars.borderWidth.thick,
+
 	'@media': {
 		'(forced-colors: active)': {
 			outlineColor: 'Highlight',
 		},
 	},
-	outlineColor: vars.themeColor.focusRingColor,
-	outlineOffset: vars.borderWidth.thick,
-	outlineStyle: 'solid',
-	outlineWidth: vars.borderWidth.thick,
 });
 
 globalStyleInLayer('reset', `${root}, ${root} *, ${root} *::before, ${root} *::after`, {

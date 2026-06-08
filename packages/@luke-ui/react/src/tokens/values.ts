@@ -1,86 +1,86 @@
 import type { CubicBezierTokenValue, DimensionTokenValue, DurationTokenValue } from './index.js';
 
 export const breakpointValues = {
-	large: { unit: 'px', value: 1024 },
-	medium: { unit: 'px', value: 768 },
-	small: { unit: 'px', value: 640 },
-	xlarge: { unit: 'px', value: 1280 },
 	xsmall: { unit: 'px', value: 0 },
+	small: { unit: 'px', value: 640 },
+	medium: { unit: 'px', value: 768 },
+	large: { unit: 'px', value: 1024 },
+	xlarge: { unit: 'px', value: 1280 },
 	xxlarge: { unit: 'px', value: 1536 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
 export const borderRadiusValues = {
-	full: { unit: 'px', value: 9999 },
-	large: { unit: 'px', value: 8 },
-	medium: { unit: 'px', value: 4 },
 	none: { unit: 'px', value: 0 },
 	small: { unit: 'px', value: 2 },
+	medium: { unit: 'px', value: 4 },
+	large: { unit: 'px', value: 8 },
 	xlarge: { unit: 'px', value: 16 },
+	full: { unit: 'px', value: 9999 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
 export const borderWidthValues = {
-	thick: { unit: 'px', value: 2 },
 	thin: { unit: 'px', value: 1 },
+	thick: { unit: 'px', value: 2 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
 export const boxShadowValues = {
-	large: '0px 4px 16px rgba(0, 0, 0, 0.2)',
-	medium: '0px 2px 8px rgba(0, 0, 0, 0.2)',
 	none: 'none',
-	small: '0px 2px 4px rgba(0, 0, 0, 0.2)',
-	xlarge: '-8px 8px 32px rgba(0, 0, 0, 0.2)',
 	xsmall: '0px 1px 2px rgba(0, 0, 0, 0.2)',
+	small: '0px 2px 4px rgba(0, 0, 0, 0.2)',
+	medium: '0px 2px 8px rgba(0, 0, 0, 0.2)',
+	large: '0px 4px 16px rgba(0, 0, 0, 0.2)',
+	xlarge: '-8px 8px 32px rgba(0, 0, 0, 0.2)',
 } as const;
 
 export const controlSizeValues = {
-	medium: { unit: 'px', value: 40 },
 	small: { unit: 'px', value: 32 },
+	medium: { unit: 'px', value: 40 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
 export const fontFamilyValues = {
-	mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
 	sans: "ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
+	mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
 } as const;
 
 export const fontSizeValues = {
+	xxsmall: { unit: 'px', value: 10 },
+	xsmall: { unit: 'px', value: 12 },
+	small: { unit: 'px', value: 14 },
+	standard: { unit: 'px', value: 16 },
+	medium: { unit: 'px', value: 20 },
+	large: { unit: 'px', value: 40 },
+	xlarge: { unit: 'px', value: 48 },
+	xxlarge: { unit: 'px', value: 55 },
 	h1: { unit: 'px', value: 36 },
 	h2: { unit: 'px', value: 28 },
 	h3: { unit: 'px', value: 24 },
 	h4: { unit: 'px', value: 20 },
 	h5: { unit: 'px', value: 18 },
 	h6: { unit: 'px', value: 16 },
-	large: { unit: 'px', value: 40 },
-	medium: { unit: 'px', value: 20 },
-	small: { unit: 'px', value: 14 },
-	standard: { unit: 'px', value: 16 },
-	xlarge: { unit: 'px', value: 48 },
-	xsmall: { unit: 'px', value: 12 },
-	xxlarge: { unit: 'px', value: 55 },
-	xxsmall: { unit: 'px', value: 10 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
 export const fontWeightValues = {
-	bold: 700,
-	medium: 500,
 	regular: 400,
+	medium: 500,
+	bold: 700,
 } as const;
 
 export const iconSizeValues = {
-	large: { unit: 'px', value: 32 },
-	medium: { unit: 'px', value: 24 },
-	small: { unit: 'px', value: 20 },
 	xsmall: { unit: 'px', value: 16 },
+	small: { unit: 'px', value: 20 },
+	medium: { unit: 'px', value: 24 },
+	large: { unit: 'px', value: 32 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
 export const lineHeightValues = {
-	loose: 1.5,
 	nospace: 1,
 	tight: 1.25,
+	loose: 1.5,
 } as const;
 
 export const motionDurationValues = {
-	fast: { unit: 'ms', value: 150 },
 	quick: { unit: 'ms', value: 120 },
+	fast: { unit: 'ms', value: 150 },
 	slow: { unit: 's', value: 1.2 },
 	slower: { unit: 's', value: 2 },
 } as const satisfies Record<string, DurationTokenValue>;
@@ -93,12 +93,12 @@ export const motionEasingValues = {
 } as const satisfies Record<string, CubicBezierTokenValue>;
 
 export const spaceValues = {
-	large: { unit: 'px', value: 24 },
-	medium: { unit: 'px', value: 16 },
 	none: { unit: 'px', value: 0 },
-	small: { unit: 'px', value: 12 },
-	xlarge: { unit: 'px', value: 32 },
-	xsmall: { unit: 'px', value: 8 },
-	xxlarge: { unit: 'px', value: 40 },
 	xxsmall: { unit: 'px', value: 4 },
+	xsmall: { unit: 'px', value: 8 },
+	small: { unit: 'px', value: 12 },
+	medium: { unit: 'px', value: 16 },
+	large: { unit: 'px', value: 24 },
+	xlarge: { unit: 'px', value: 32 },
+	xxlarge: { unit: 'px', value: 40 },
 } as const satisfies Record<string, DimensionTokenValue>;

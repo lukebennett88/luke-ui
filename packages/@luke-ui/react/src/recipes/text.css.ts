@@ -55,22 +55,22 @@ const lineClampSingleLine = {
 } satisfies ComplexStyleRule;
 const lineClampMultiLine = (lines: number) =>
 	({
+		WebkitBoxOrient: 'vertical',
+		WebkitLineClamp: lines,
 		display: '-webkit-box',
 		lineClamp: lines,
 		minInlineSize: 0,
 		overflow: 'hidden',
-		WebkitBoxOrient: 'vertical',
-		WebkitLineClamp: lines,
 	}) satisfies ComplexStyleRule;
 
 const lineClampVariants = {
+	false: lineClampNone,
+	true: lineClampSingleLine,
 	1: lineClampSingleLine,
 	2: lineClampMultiLine(2),
 	3: lineClampMultiLine(3),
 	4: lineClampMultiLine(4),
 	5: lineClampMultiLine(5),
-	false: lineClampNone,
-	true: lineClampSingleLine,
 } as const;
 
 export type TextLineClampVariant = keyof typeof lineClampVariants;
@@ -115,9 +115,9 @@ const textTransformVariants = createVariants(textTransformKeys, (textTransform) 
 }));
 
 const textAlignVariants = {
+	start: { textAlign: 'start' },
 	center: { textAlign: 'center' },
 	end: { textAlign: 'end' },
-	start: { textAlign: 'start' },
 } as const;
 
 const textVariantVariants = createVariants(textVariantKeys, (variant) => ({
