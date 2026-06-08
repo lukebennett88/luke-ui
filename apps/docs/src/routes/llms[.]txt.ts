@@ -1,4 +1,4 @@
-import { discoverExports } from '@luke-ui/docs-tools/discover-exports';
+import { packageDocsCatalog } from 'virtual:package-docs';
 import { renderIndex } from '@luke-ui/docs-tools/render-index';
 import { createFileRoute } from '@tanstack/react-router';
 import packageJson from '../../../../packages/@luke-ui/react/package.json' with { type: 'json' };
@@ -9,17 +9,17 @@ export const Route = createFileRoute('/llms.txt')({
 	server: {
 		handlers: {
 			GET: () => {
-				const entries = discoverExports(packageJson.exports);
 				const pageHrefBySlug = new Map(
 					source.getPages().map((page) => [page.slugs.at(-1), `.${page.url}.md`]),
 				);
-				const entriesWithHref = entries.map((entry) => {
-					return Object.assign(entry, {
+				const entriesWithHref = packageDocsCatalog.map((entry) => {
+					return {
+						...entry,
 						href:
 							entry.shape === 'barrel'
 								? `.${toPublic(entry.slug)}`
 								: (pageHrefBySlug.get(entry.slug) ?? `./${entry.slug}.md`),
-					});
+					};
 				});
 
 				const txt = renderIndex({

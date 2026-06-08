@@ -1,12 +1,7 @@
-import type { ExportShape, ExportTier } from './discover-exports.js';
+import type { PackageDocsCatalogMetadata } from './package-docs-catalog.js';
 
-export interface LlmsFullEntry {
+export interface LlmsFullEntry extends Pick<PackageDocsCatalogMetadata, 'slug' | 'shape' | 'tier'> {
 	md: string;
-	shape: ExportShape;
-	/** The slug used for the generated .md filename, e.g. 'button' or 'button-primitive'. */
-	slug: string;
-	/** Effective tier for the entry, including any JSDoc `@tier` overrides. */
-	tier: ExportTier;
 }
 
 /**

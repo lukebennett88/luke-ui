@@ -1,8 +1,6 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { discoverExports } from '@luke-ui/docs-tools/discover-exports';
-import { parseBarrel, parseComponent } from '@luke-ui/docs-tools/parse-types';
-import type { IndexEntry } from '@luke-ui/docs-tools/render-index';
+import { resolvePackageDocsCatalog } from '@luke-ui/docs-tools/package-docs-catalog';
 import { renderIndex } from '@luke-ui/docs-tools/render-index';
 import { renderLlmsFull } from '@luke-ui/docs-tools/render-llms-full';
 import { renderPage } from '@luke-ui/docs-tools/render-page';
@@ -12,45 +10,27 @@ import packageJson from '../package.json' with { type: 'json' };
 const packageRoot = fileURLToPath(new URL('../', import.meta.url));
 const docsDir = join(packageRoot, 'docs');
 
-const discovered = discoverExports(packageJson.exports, { packageRoot });
-const descriptionByPath = new Map<string, string>();
-const tierByPath = new Map<string, (typeof discovered)[number]['tier']>();
+const catalog = resolvePackageDocsCatalog({
+	packageRoot,
+	exportsField: packageJson.exports,
+});
 
 await mkdir(docsDir, { recursive: true });
 
 const pages = await Promise.all(
-	discovered.map(async (entry) => {
+	catalog.map(async (entry) => {
 		if (entry.pageKind === 'asset') return;
-		if (!entry.sourcePath) return;
 
-		if (entry.pageKind === 'barrel') {
-			const parsed = parseBarrel(entry.sourcePath);
-			if (parsed.description) descriptionByPath.set(entry.path, parsed.description);
-			const md = renderPage({
-				description: parsed.description,
-				exports: parsed.exports,
-				importPath: `${packageJson.name}${entry.path.replace(/^\./, '')}`,
-				kind: 'barrel',
-				slug: entry.slug,
-				tier: entry.tier,
-			});
-			return { md, shape: entry.shape, slug: entry.slug, tier: entry.tier };
-		}
-
-		const parsed = parseComponent(entry.sourcePath);
-		if (parsed.description) descriptionByPath.set(entry.path, parsed.description);
-		const tier = parsed.tier ?? entry.tier;
-		if (parsed.tier) tierByPath.set(entry.path, parsed.tier);
-		const proseMarkdown = await readProse(packageRoot, entry).catch(() => undefined);
+		const proseMarkdown =
+			entry.pageKind === 'component'
+				? await readProse(packageRoot, entry).catch(() => undefined)
+				: undefined;
 		const md = renderPage({
+			entry,
 			importPath: `${packageJson.name}${entry.path.replace(/^\./, '')}`,
-			kind: 'component',
-			parsed,
 			proseMarkdown,
-			slug: entry.slug,
-			tier,
 		});
-		return { md, shape: entry.shape, slug: entry.slug, tier };
+		return { slug: entry.slug, shape: entry.shape, tier: entry.tier, md };
 	}),
 );
 
@@ -60,17 +40,10 @@ await Promise.all(
 	),
 );
 
-const entriesWithDescriptions: Array<IndexEntry> = discovered.map((entry) => {
-	return Object.assign({}, entry, {
-		description: descriptionByPath.get(entry.path),
-		tier: tierByPath.get(entry.path) ?? entry.tier,
-	});
-});
-
 const llmsTxt = renderIndex({
-	entries: entriesWithDescriptions,
-	includeLibraryAuthors: true,
 	packageName: packageJson.name,
+	entries: catalog,
+	includeLibraryAuthors: true,
 });
 
 await writeFile(join(docsDir, 'llms.txt'), llmsTxt, 'utf8');

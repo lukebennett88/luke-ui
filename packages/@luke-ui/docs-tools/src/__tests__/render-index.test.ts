@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { DiscoveredExport } from '../discover-exports.js';
+import type { PackageDocsCatalogMetadata } from '../package-docs-catalog.js';
 import { renderIndex } from '../render-index.js';
 
-const sampleEntries: Array<DiscoveredExport & { description?: string }> = [
+const sampleEntries: Array<PackageDocsCatalogMetadata> = [
 	{
 		description: 'Composed button.',
 		pageKind: 'component',
@@ -11,6 +11,7 @@ const sampleEntries: Array<DiscoveredExport & { description?: string }> = [
 		slug: 'button',
 		target: '',
 		tier: 'composed',
+		title: 'Button',
 	},
 	{
 		description: 'Bare button.',
@@ -20,6 +21,7 @@ const sampleEntries: Array<DiscoveredExport & { description?: string }> = [
 		slug: 'button-primitive',
 		target: '',
 		tier: 'primitive',
+		title: 'Button (primitive)',
 	},
 	{
 		description: 'Design tokens.',
@@ -29,18 +31,32 @@ const sampleEntries: Array<DiscoveredExport & { description?: string }> = [
 		slug: 'tokens',
 		target: '',
 		tier: 'n/a',
+		title: 'Tokens',
 	},
 	{
+		description: '',
 		pageKind: 'asset',
 		path: './stylesheet.css',
 		shape: 'asset',
 		slug: 'stylesheet',
 		target: '',
 		tier: 'n/a',
+		title: 'Stylesheet',
 	},
 ];
 
 describe('renderIndex', () => {
+	it('uses resolved catalog titles directly', () => {
+		const out = renderIndex({
+			entries: sampleEntries.map((entry) =>
+				entry.slug === 'button' ? { ...entry, title: 'Resolved Button' } : entry,
+			),
+			includeLibraryAuthors: false,
+			packageName: '@luke-ui/react',
+		});
+		expect(out).toMatch(/- \[Resolved Button\]\(\.\/button\.md\)/);
+	});
+
 	it('lists composed components in the primary section', () => {
 		const out = renderIndex({
 			entries: sampleEntries,
@@ -84,7 +100,7 @@ describe('renderIndex', () => {
 		const out = renderIndex({
 			entries: sampleEntries.map((entry) =>
 				entry.slug === 'button'
-					? Object.assign(entry, { href: './llms.mdx/docs/components/actions/button.md' })
+					? { ...entry, href: './llms.mdx/docs/components/actions/button.md' }
 					: entry,
 			),
 			includeLibraryAuthors: false,
