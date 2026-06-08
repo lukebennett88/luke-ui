@@ -10,11 +10,11 @@ import { Node, Project, SyntaxKind } from 'ts-morph';
 import type { ExportTier } from './discover-exports.js';
 
 export interface ParsedProp {
-	name: string;
-	type: string;
-	optional: boolean;
 	default?: string;
 	description: string;
+	name: string;
+	optional: boolean;
+	type: string;
 }
 
 export interface ParsedExtends {
@@ -24,15 +24,15 @@ export interface ParsedExtends {
 }
 
 export interface ParsedComponent {
-	description: string;
-	tier?: ExportTier;
 	/** Name of the exported function (e.g. `'TextInput'`), if one was found. */
 	componentName?: string;
+	description: string;
 	propsInterface?: {
 		name: string;
 		extends: Array<ParsedExtends>;
 		members: Array<ParsedProp>;
 	};
+	tier?: ExportTier;
 }
 
 type PropsDeclaration = InterfaceDeclaration | TypeAliasDeclaration;
@@ -47,9 +47,9 @@ interface PropsLookup {
  */
 function createProject(): Project {
 	return new Project({
-		tsConfigFilePath: undefined,
-		skipAddingFilesFromTsConfig: true,
 		compilerOptions: { allowJs: false, jsx: 4 /* React */ },
+		skipAddingFilesFromTsConfig: true,
+		tsConfigFilePath: undefined,
 	});
 }
 
@@ -89,7 +89,7 @@ export function parseComponent(sourcePath: string): ParsedComponent {
 	const propsInterface = findPropsDeclaration(propsLookup, componentName);
 
 	if (!propsInterface) {
-		return { description, componentName };
+		return { componentName, description };
 	}
 
 	const tier = readTierTag(propsInterface);
@@ -99,14 +99,14 @@ export function parseComponent(sourcePath: string): ParsedComponent {
 	const members = collectMembers(propsInterface);
 
 	return {
-		description,
-		tier,
 		componentName,
+		description,
 		propsInterface: {
-			name: propsInterface.getName(),
 			extends: extendsList,
 			members,
+			name: propsInterface.getName(),
 		},
+		tier,
 	};
 }
 
@@ -376,7 +376,7 @@ function collectMembersFromDeclaration(
 	out: Array<ParsedProp>,
 	names: Set<string>,
 ): void {
-	const key = decl.getSourceFile().getFilePath() + ':' + decl.getName();
+	const key = `${decl.getSourceFile().getFilePath()}:${decl.getName()}`;
 	if (seen.has(key)) return;
 	seen.add(key);
 
@@ -475,7 +475,7 @@ function appendPropNamesFromDeclaration(
 	out: Set<string>,
 	seen: Set<string>,
 ): void {
-	const key = decl.getSourceFile().getFilePath() + ':' + decl.getName();
+	const key = `${decl.getSourceFile().getFilePath()}:${decl.getName()}`;
 	if (seen.has(key)) return;
 	seen.add(key);
 
@@ -509,11 +509,11 @@ function toParsedProp(prop: PropertySignature): ParsedProp {
 		}
 	}
 	return {
-		name: prop.getName(),
-		type: resolvePropType(prop),
-		optional: prop.hasQuestionToken(),
 		default: defaultValue,
 		description,
+		name: prop.getName(),
+		optional: prop.hasQuestionToken(),
+		type: resolvePropType(prop),
 	};
 }
 
@@ -545,8 +545,8 @@ function stripImportPaths(type: string): string {
 // ---------------------------------------------------------------------------
 
 export interface ParsedBarrelExport {
-	name: string;
 	description: string;
+	name: string;
 	type?: string;
 }
 
@@ -594,13 +594,13 @@ export function parseBarrel(sourcePath: string): ParsedBarrel {
 		if (kind === SyntaxKind.InterfaceDeclaration || kind === SyntaxKind.TypeAliasDeclaration) {
 			if (isCompanionTypeExport(name, desc)) continue;
 			// Standalone type alias with a description (e.g. ComboboxSize) — include it briefly.
-			exports.push({ name, description: desc, type: getTypeSignature(firstDecl, name) });
+			exports.push({ description: desc, name, type: getTypeSignature(firstDecl, name) });
 			continue;
 		}
 
 		// Runtime export (function, class, arrow function, etc.)
 		const type = getTypeSignature(firstDecl, name);
-		exports.push({ name, description: desc, type });
+		exports.push({ description: desc, name, type });
 	}
 
 	// Sort alphabetically for stable output.
@@ -639,7 +639,7 @@ function buildReExportDescriptionMap(sourceFile: SourceFile): Map<string, string
 		if (ranges.length === 0) continue;
 		// The last leading range is the one immediately before the declaration.
 		const lastRange = ranges[ranges.length - 1];
-		if (!lastRange || !lastRange.getText().startsWith('/**')) continue;
+		if (!lastRange?.getText().startsWith('/**')) continue;
 		const desc = stripJsDocMarkers(lastRange.getText());
 		if (!desc) continue;
 		// Apply this description to every named export specifier in this declaration.
@@ -672,7 +672,7 @@ function readFileLevelJsDoc(sourceFile: SourceFile): string {
 	// If only 1 range, it belongs to the statement itself (no file-level doc).
 	if (ranges.length < 2) return '';
 	const jsDocRange = ranges[0];
-	if (!jsDocRange || !jsDocRange.getText().startsWith('/**')) return '';
+	if (!jsDocRange?.getText().startsWith('/**')) return '';
 	// Strip /** ... */ markers and leading * on each line.
 	return stripJsDocMarkers(jsDocRange.getText());
 }

@@ -21,25 +21,27 @@ export type { LoadingSpinnerVariants } from '../recipes/loading-spinner.css.js';
 /** Vanilla-extract recipe for the `LoadingSpinner` primitive's styles. */
 export { spinner as loadingSpinner } from '../recipes/loading-spinner.css.js';
 /** Text alignment variant values. */
-export type { TextAlign } from '../recipes/text.css.js';
 /** Text color variant values. */
-export type { TextColor } from '../recipes/text.css.js';
 /** Text decoration variant values. */
-export type { TextDecoration } from '../recipes/text.css.js';
 /** Text font-family variant values. */
-export type { TextFontFamily } from '../recipes/text.css.js';
 /** Text font-weight variant values. */
-export type { TextFontWeight } from '../recipes/text.css.js';
 /** Text line-clamp variant values. */
-export type { TextLineClampVariant } from '../recipes/text.css.js';
 /** Text transform variant values. */
-export type { TextTransform } from '../recipes/text.css.js';
 /** Text wrap variant values. */
-export type { TextWrap } from '../recipes/text.css.js';
 /** Text style-variant values. */
-export type { TextVariant } from '../recipes/text.css.js';
 /** Aggregate variant type for the `Text` recipe. */
-export type { TextVariants } from '../recipes/text.css.js';
+export type {
+	TextAlign,
+	TextColor,
+	TextDecoration,
+	TextFontFamily,
+	TextFontWeight,
+	TextLineClampVariant,
+	TextTransform,
+	TextVariant,
+	TextVariants,
+	TextWrap,
+} from '../recipes/text.css.js';
 /** Vanilla-extract recipe for the `Text` primitive's styles. */
 export { text } from '../recipes/text.css.js';
 /** Variant type for the `TextInput` recipe. */

@@ -20,7 +20,9 @@ const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps
 const storyModules = import.meta.glob<{ story: Story }>('../../*/*.story.tsx', { eager: true });
 const clientStoryModules = import.meta.glob<{ storyClient: StoryClient }>(
 	'../../*/*.story.client.tsx',
-	{ eager: true },
+	{
+		eager: true,
+	},
 );
 
 const dirName = (globPath: string) => globPath.split('/').at(-2)!;
@@ -90,7 +92,7 @@ function Page() {
 
 	return (
 		<DocsLayout {...baseOptions()} tree={data.pageTree}>
-			<StoryPayloadProvider payloads={data.storyPayloads} clients={clientStories}>
+			<StoryPayloadProvider clients={clientStories} payloads={data.storyPayloads}>
 				<Suspense>
 					{clientLoader.useContent(data.path, {
 						className: '',

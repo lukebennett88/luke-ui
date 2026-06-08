@@ -24,7 +24,7 @@ const child = spawn(
 		'packages/turbo-generators/config.ts',
 		...process.argv.slice(2),
 	],
-	{ env, stdio: 'inherit', cwd: root },
+	{ cwd: root, env, stdio: 'inherit' },
 );
 
 child.on('error', () => process.exit(1));

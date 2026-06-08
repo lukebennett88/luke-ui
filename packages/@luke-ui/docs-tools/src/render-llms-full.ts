@@ -1,12 +1,12 @@
 import type { ExportShape, ExportTier } from './discover-exports.js';
 
 export interface LlmsFullEntry {
+	md: string;
+	shape: ExportShape;
 	/** The slug used for the generated .md filename, e.g. 'button' or 'button-primitive'. */
 	slug: string;
-	shape: ExportShape;
 	/** Effective tier for the entry, including any JSDoc `@tier` overrides. */
 	tier: ExportTier;
-	md: string;
 }
 
 /**
@@ -38,8 +38,8 @@ export function renderLlmsFull(entries: Array<LlmsFullEntry>): string {
 export function sortLlmsFullEntries<T extends LlmsFullEntry>(entries: Array<T>): Array<T> {
 	const buckets: Record<LlmsFullBucket, Array<T>> = {
 		atom: [],
-		composed: [],
 		barrel: [],
+		composed: [],
 		primitive: [],
 	};
 	for (const entry of entries) {

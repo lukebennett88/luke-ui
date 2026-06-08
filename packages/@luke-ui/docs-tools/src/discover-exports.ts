@@ -6,31 +6,31 @@ export type ExportPageKind = 'component' | 'barrel' | 'asset';
 export type ExportTier = 'atom' | 'composed' | 'primitive' | 'n/a';
 
 export interface DiscoveredExport {
+	pageKind: ExportPageKind;
 	/** The export specifier from package.json#exports, e.g. './button'. */
 	path: string;
-	/** The dist target path (right-hand side of #exports). */
-	target: string;
+	shape: ExportShape;
 	/** The slug used for the generated .md filename, e.g. 'button' or 'button-primitive'. */
 	slug: string;
-	shape: ExportShape;
-	pageKind: ExportPageKind;
-	tier: ExportTier;
 	/** Absolute path to the source `index.tsx` for components/barrels; undefined for assets. */
 	sourcePath?: string;
+	/** The dist target path (right-hand side of #exports). */
+	target: string;
+	tier: ExportTier;
 }
 
 export interface DiscoverExportsOptions {
-	packageRoot?: string;
-	/**
-	 * Export specifiers to classify as `barrel` (multi-export foundations).
-	 * Defaults to {@link DEFAULT_BARREL_PATHS}, which is coupled to `@luke-ui/react`.
-	 */
-	barrelPaths?: Iterable<string>;
 	/**
 	 * Export specifiers to classify as `asset` (no docs page).
 	 * Defaults to {@link DEFAULT_ASSET_PATHS}, which is coupled to `@luke-ui/react`.
 	 */
 	assetPaths?: Iterable<string>;
+	/**
+	 * Export specifiers to classify as `barrel` (multi-export foundations).
+	 * Defaults to {@link DEFAULT_BARREL_PATHS}, which is coupled to `@luke-ui/react`.
+	 */
+	barrelPaths?: Iterable<string>;
+	packageRoot?: string;
 }
 
 /**
@@ -82,12 +82,12 @@ export function discoverExports(
 		}
 		const sourcePath =
 			shape === 'asset' ? undefined : sourceFromExport(options.packageRoot, target);
-		const pageKind = pageKindFor({ shape, tier, sourcePath });
+		const pageKind = pageKindFor({ shape, sourcePath, tier });
 		const slug = path
 			.replace(LEADING_DOT_SLASH, '')
 			.replace(SLASH, '-')
 			.replace(FILE_EXTENSION, '');
-		result.push({ path, target, slug, shape, pageKind, tier, sourcePath });
+		result.push({ pageKind, path, shape, slug, sourcePath, target, tier });
 	}
 	return result;
 }

@@ -23,8 +23,8 @@ const colors = tokenKeys(tokens.foregroundColor);
 
 const wrapStyle = {
 	display: 'grid',
-	gridTemplateColumns: 'repeat(auto-fill, minmax(11rem, 1fr))',
 	gap: '1rem',
+	gridTemplateColumns: 'repeat(auto-fill, minmax(11rem, 1fr))',
 } as const satisfies CSSProperties;
 
 const iconItemStyle = {
@@ -98,19 +98,19 @@ export const CreateYourOwnIcon = meta.story({
 	render: () => (
 		<div style={wrapStyle}>
 			<div style={iconItemStyle}>
-				<HeartIcon title="Favorite" size="xsmall" />
+				<HeartIcon size="xsmall" title="Favorite" />
 				<span>xsmall</span>
 			</div>
 			<div style={iconItemStyle}>
-				<HeartIcon title="Favorite" size="small" />
+				<HeartIcon size="small" title="Favorite" />
 				<span>small</span>
 			</div>
 			<div style={iconItemStyle}>
-				<HeartIcon title="Favorite" size="medium" />
+				<HeartIcon size="medium" title="Favorite" />
 				<span>medium</span>
 			</div>
 			<div style={iconItemStyle}>
-				<HeartIcon title="Favorite" size="large" />
+				<HeartIcon size="large" title="Favorite" />
 				<span>large</span>
 			</div>
 		</div>
@@ -127,11 +127,11 @@ export const AllIcons = meta.story({
 			{iconNames.map((name) => (
 				<li key={name} style={iconItemStyle}>
 					<Button
-						tone="neutral"
 						onPress={async () => {
 							await navigator.clipboard.writeText(name);
 						}}
 						style={iconButtonStyle}
+						tone="neutral"
 					>
 						<Icon {...props} name={name} title={name} />
 						{name}

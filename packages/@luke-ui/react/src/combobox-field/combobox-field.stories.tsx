@@ -65,8 +65,8 @@ export const Default = meta.story({
 	render: function Render() {
 		return (
 			<ComboboxField
-				description="Select where the user is located."
 				defaultItems={countryItems}
+				description="Select where the user is located."
 				label="Country"
 				name="country"
 				placeholder="Select a country..."
@@ -113,8 +113,8 @@ export const Controlled = meta.story({
 					items={countryItems}
 					label="Controlled Combobox"
 					name="controlled"
-					onInputChange={setInputValue}
 					onChange={setValue}
+					onInputChange={setInputValue}
 					placeholder="Select a country..."
 					value={value}
 				>
@@ -229,13 +229,13 @@ export const AsyncFiltering = meta.story({
 			<div style={stackStyle}>
 				<ComboboxField
 					items={list.items}
-					loadingState={list.loadingState}
-					onInputChange={(text) => list.setFilterText(text)}
-					value={value}
-					onChange={setValue}
 					label="Pick a Pokemon"
+					loadingState={list.loadingState}
 					name="pokemon"
+					onChange={setValue}
+					onInputChange={(text) => list.setFilterText(text)}
 					placeholder="Search for a Pokemon..."
+					value={value}
 				>
 					{(item) => <ComboboxItem id={item.name}>{item.name}</ComboboxItem>}
 				</ComboboxField>
@@ -263,8 +263,8 @@ export const AsyncInfiniteScroll = meta.story({
 				const json = await res.json();
 
 				return {
-					items: json.results,
 					cursor: json.next,
+					items: json.results,
 				};
 			},
 		});

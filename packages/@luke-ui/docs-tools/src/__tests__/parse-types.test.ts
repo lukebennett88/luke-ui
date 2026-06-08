@@ -28,11 +28,11 @@ describe('parseComponent', () => {
 		const parsed = parseComponent(fixturePath);
 		const sizeProp = parsed.propsInterface?.members.find((p) => p.name === 'size');
 		expect(sizeProp).toMatchObject({
-			name: 'size',
-			type: "'small' | 'medium'",
-			optional: true,
 			default: "'medium'",
 			description: expect.stringContaining('Controls the button size'),
+			name: 'size',
+			optional: true,
+			type: "'small' | 'medium'",
 		});
 	});
 
@@ -50,14 +50,14 @@ describe('parseComponent', () => {
 		expect(parsed.propsInterface?.members).toEqual(
 			expect.arrayContaining([
 				expect.objectContaining({
-					name: 'size',
 					default: "'medium'",
 					description: 'Sets the visual size.',
+					name: 'size',
 				}),
 				expect.objectContaining({
+					description: 'Accessible label.',
 					name: 'label',
 					optional: false,
-					description: 'Accessible label.',
 				}),
 			]),
 		);
@@ -68,13 +68,13 @@ describe('parseComponent', () => {
 		expect(parsed.propsInterface?.name).toBe('WrapperProps');
 		expect(parsed.propsInterface?.members.map((prop) => prop.name)).toEqual(['size', 'onPress']);
 		expect(parsed.propsInterface?.members[0]).toMatchObject({
-			name: 'size',
 			default: "'wrapper'",
 			description: 'Wrapper size.',
+			name: 'size',
 		});
 		expect(parsed.propsInterface?.members[1]).toMatchObject({
-			name: 'onPress',
 			description: 'Wrapper press handler.',
+			name: 'onPress',
 		});
 	});
 });

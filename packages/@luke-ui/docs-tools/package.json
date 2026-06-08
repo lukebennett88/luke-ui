@@ -7,8 +7,8 @@
 		"./discover-exports": "./src/discover-exports.ts",
 		"./parse-types": "./src/parse-types.ts",
 		"./render-index": "./src/render-index.ts",
-		"./render-page": "./src/render-page.ts",
-		"./render-llms-full": "./src/render-llms-full.ts"
+		"./render-llms-full": "./src/render-llms-full.ts",
+		"./render-page": "./src/render-page.ts"
 	},
 	"scripts": {
 		"check:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json --check .",

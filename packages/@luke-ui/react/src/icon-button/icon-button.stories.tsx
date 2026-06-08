@@ -60,7 +60,7 @@ export const AllIcons = meta.story({
 	render: (props) => (
 		<div style={flexWrapStyle}>
 			{iconNames.map((iconName) => (
-				<IconButton {...props} key={iconName} icon={iconName} />
+				<IconButton {...props} icon={iconName} key={iconName} />
 			))}
 		</div>
 	),

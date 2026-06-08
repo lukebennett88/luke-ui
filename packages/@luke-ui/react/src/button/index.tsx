@@ -14,25 +14,25 @@ interface PrimitiveButtonVariantProps extends NonNullable<primitiveStyles.Button
 
 interface ButtonStyleProps {
 	/**
-	 * Visual tone. Controls colour scheme.
-	 * @default 'primary'
+	 * Whether the button takes up the full inline size of its container.
+	 * @default false
 	 */
-	tone?: PrimitiveButtonVariantProps['tone'];
-	/**
-	 * Sets the button size.
-	 * @default 'medium'
-	 */
-	size?: PrimitiveButtonVariantProps['size'];
+	isBlock?: PrimitiveButtonVariantProps['isBlock'];
 	/**
 	 * Shows pending button styles. When true, a spinner overlays the label.
 	 * @default false
 	 */
 	isPending?: ComposedButtonVariantProps['isPending'];
 	/**
-	 * Whether the button takes up the full inline size of its container.
-	 * @default false
+	 * Sets the button size.
+	 * @default 'medium'
 	 */
-	isBlock?: PrimitiveButtonVariantProps['isBlock'];
+	size?: PrimitiveButtonVariantProps['size'];
+	/**
+	 * Visual tone. Controls colour scheme.
+	 * @default 'primary'
+	 */
+	tone?: PrimitiveButtonVariantProps['tone'];
 }
 
 interface ButtonRedeclaredRACProps {
@@ -67,7 +67,7 @@ export function Button(props: ButtonProps): JSX.Element {
 			{(renderProps) => (
 				<span className={styles.buttonContent()}>
 					{isPending && (
-						<span className={styles.spinnerOverlay()} aria-hidden>
+						<span aria-hidden className={styles.spinnerOverlay()}>
 							<LoadingSpinner aria-hidden size={BUTTON_ICON_SIZE[size]} />
 						</span>
 					)}
@@ -76,9 +76,9 @@ export function Button(props: ButtonProps): JSX.Element {
 						color="inherit"
 						fontSize={BUTTON_FONT_SIZE[size]}
 						fontWeight="inherit"
+						lineClamp={1}
 						lineHeight="nospace"
 						shouldDisableTrim
-						lineClamp={1}
 					>
 						{typeof children === 'function' ? children(renderProps) : children}
 					</Text>

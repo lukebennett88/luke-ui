@@ -5,22 +5,22 @@ import { slugToTitle } from './title.js';
 const RAC_DOCS_BASE = 'https://react-spectrum.adobe.com/react-aria';
 
 interface RenderComponentPageInput {
-	kind: 'component';
-	slug: string;
 	importPath: string;
-	tier: ExportTier;
+	kind: 'component';
 	parsed: ParsedComponent;
 	/** Authored Markdown prose for the Usage section. Undefined for primitives. */
 	proseMarkdown: string | undefined;
+	slug: string;
+	tier: ExportTier;
 }
 
 interface RenderBarrelPageInput {
-	kind: 'barrel';
-	slug: string;
-	importPath: string;
-	tier: ExportTier;
 	description?: string;
 	exports: Array<ParsedBarrelExport>;
+	importPath: string;
+	kind: 'barrel';
+	slug: string;
+	tier: ExportTier;
 }
 
 export type RenderPageInput = RenderComponentPageInput | RenderBarrelPageInput;

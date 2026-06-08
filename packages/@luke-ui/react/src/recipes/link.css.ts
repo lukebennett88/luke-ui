@@ -22,12 +22,12 @@ export const link = recipeInLayer('recipes', {
 		isStandalone: {
 			false: {},
 			true: {
-				textDecoration: 'none',
 				selectors: {
 					'&:enabled:hover': {
 						textDecoration: 'underline',
 					},
 				},
+				textDecoration: 'none',
 			},
 		},
 		tone: {
@@ -39,6 +39,9 @@ export const link = recipeInLayer('recipes', {
 					},
 				},
 			},
+			inverted: {
+				color: vars.foregroundColor.inverse,
+			},
 			neutral: {
 				color: vars.foregroundColor.secondary,
 				selectors: {
@@ -46,9 +49,6 @@ export const link = recipeInLayer('recipes', {
 						color: vars.foregroundColor.primary,
 					},
 				},
-			},
-			inverted: {
-				color: vars.foregroundColor.inverse,
 			},
 		},
 	},

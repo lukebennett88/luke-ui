@@ -42,9 +42,6 @@ export const comboboxControl = recipeInLayer('recipes', {
 		inlineSize: '100%',
 		minInlineSize: 0,
 		overflow: 'hidden',
-		transitionDuration: vars.motion.duration.fast,
-		transitionProperty,
-		transitionTimingFunction: vars.motion.easing.standard,
 
 		selectors: {
 			[controlDisabledSelector]: {
@@ -78,19 +75,22 @@ export const comboboxControl = recipeInLayer('recipes', {
 				backgroundColor: vars.backgroundColor.subtle,
 			},
 		},
+		transitionDuration: vars.motion.duration.fast,
+		transitionProperty,
+		transitionTimingFunction: vars.motion.easing.standard,
 	},
 	defaultVariants: {
 		size: 'medium',
 	},
 	variants: {
 		size: {
-			small: {
-				fontSize: vars.font.size.small,
-				minBlockSize: vars.controlSize.small,
-			},
 			medium: {
 				fontSize: vars.font.size.standard,
 				minBlockSize: vars.controlSize.medium,
+			},
+			small: {
+				fontSize: vars.font.size.small,
+				minBlockSize: vars.controlSize.small,
 			},
 		},
 	},
@@ -129,15 +129,15 @@ export const comboboxTextInput = recipeInLayer('recipes', {
 	},
 	variants: {
 		size: {
-			small: {
-				blockSize: vars.controlSize.small,
-				paddingInlineEnd: vars.space.xsmall,
-				paddingInlineStart: vars.space.xsmall,
-			},
 			medium: {
 				blockSize: vars.controlSize.medium,
 				paddingInlineEnd: vars.space.small,
 				paddingInlineStart: vars.space.small,
+			},
+			small: {
+				blockSize: vars.controlSize.small,
+				paddingInlineEnd: vars.space.xsmall,
+				paddingInlineStart: vars.space.xsmall,
 			},
 		},
 	},
@@ -205,15 +205,15 @@ export const comboboxTrigger = recipeInLayer('recipes', {
 	},
 	variants: {
 		size: {
-			small: {
-				blockSize: vars.controlSize.small,
-				paddingInlineEnd: vars.space.xsmall,
-				paddingInlineStart: vars.space.xsmall,
-			},
 			medium: {
 				blockSize: vars.controlSize.medium,
 				paddingInlineEnd: vars.space.small,
 				paddingInlineStart: vars.space.small,
+			},
+			small: {
+				blockSize: vars.controlSize.small,
+				paddingInlineEnd: vars.space.xsmall,
+				paddingInlineStart: vars.space.xsmall,
 			},
 		},
 	},
@@ -257,15 +257,15 @@ export const comboboxLoadMoreItem = recipeInLayer('recipes', {
 	},
 	variants: {
 		size: {
-			small: {
-				minBlockSize: vars.controlSize.small,
-				paddingBlock: vars.space.xxsmall,
-				paddingInline: vars.space.xsmall,
-			},
 			medium: {
 				minBlockSize: vars.controlSize.medium,
 				paddingBlock: vars.space.xsmall,
 				paddingInline: vars.space.small,
+			},
+			small: {
+				minBlockSize: vars.controlSize.small,
+				paddingBlock: vars.space.xxsmall,
+				paddingInline: vars.space.xsmall,
 			},
 		},
 	},
@@ -273,10 +273,10 @@ export const comboboxLoadMoreItem = recipeInLayer('recipes', {
 
 export const comboboxSection = recipeInLayer('recipes', {
 	base: {
-		paddingBlock: vars.space.xsmall,
 		display: 'flex',
 		flexDirection: 'column',
 		gap: vars.space.xxsmall,
+		paddingBlock: vars.space.xsmall,
 
 		selectors: {
 			'& + &': {
@@ -330,18 +330,18 @@ export const comboboxItem = recipeInLayer('recipes', {
 				color: vars.foregroundColor.disabled,
 				cursor: 'not-allowed',
 			},
+			'&[data-focus-visible="true"]': {
+				outlineColor: vars.themeColor.paletteThemePrimary200,
+				outlineOffset: 0,
+				outlineStyle: 'solid',
+				outlineWidth: '3px',
+			},
 			'&[data-focused="true"]:not([data-disabled="true"])': {
 				backgroundColor: vars.backgroundColor.hover,
 			},
 			'&[data-selected="true"]:not([data-disabled="true"])': {
 				backgroundColor: vars.backgroundColor.subtle,
 				fontWeight: vars.font.weight.medium,
-			},
-			'&[data-focus-visible="true"]': {
-				outlineColor: vars.themeColor.paletteThemePrimary200,
-				outlineOffset: 0,
-				outlineStyle: 'solid',
-				outlineWidth: '3px',
 			},
 		},
 	},
@@ -350,14 +350,14 @@ export const comboboxItem = recipeInLayer('recipes', {
 	},
 	variants: {
 		size: {
-			small: {
-				fontSize: vars.font.size.small,
-				paddingBlock: vars.space.xsmall,
-				paddingInline: vars.space.small,
-			},
 			medium: {
 				fontSize: vars.font.size.small,
 				paddingBlock: vars.space.small,
+				paddingInline: vars.space.small,
+			},
+			small: {
+				fontSize: vars.font.size.small,
+				paddingBlock: vars.space.xsmall,
 				paddingInline: vars.space.small,
 			},
 		},

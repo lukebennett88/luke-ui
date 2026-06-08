@@ -11,8 +11,8 @@ export function defineComponentStory<C extends FC<any>>(
 ) {
 	return defineStory<C>(url, {
 		args: {
-			initial: options.initial,
 			controls: { transform: reorderProps(options.priorities) },
+			initial: options.initial,
 		},
 	});
 }

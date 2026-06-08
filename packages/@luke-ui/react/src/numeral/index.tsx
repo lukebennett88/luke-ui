@@ -18,11 +18,6 @@ export type NumeralPrecision = number | readonly [number, number];
 export interface NumeralProps extends Omit<TextProps, 'children' | 'textAlign' | 'variant'> {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;
-	/**
-	 * Text alignment. Right-aligned by default for numeric columns.
-	 * @default 'end'
-	 */
-	textAlign?: TextProps['textAlign'];
 	/** Currency code such as `USD`. */
 	currency?: string;
 	/** Number format style. Inferred from `currency`/`unit` when omitted. */
@@ -33,6 +28,11 @@ export interface NumeralProps extends Omit<TextProps, 'children' | 'textAlign' |
 	locale?: Intl.LocalesArgument;
 	/** Precision as fixed digits or `[min, max]` digits. */
 	precision?: NumeralPrecision;
+	/**
+	 * Text alignment. Right-aligned by default for numeric columns.
+	 * @default 'end'
+	 */
+	textAlign?: TextProps['textAlign'];
 	/** Unit name when `format` is `unit`, e.g. `kilometer`. */
 	unit?: NonNullable<Intl.NumberFormatOptions['unit']>;
 	/** Number to format. */
@@ -177,8 +177,8 @@ export function Numeral(props: NumeralProps) {
 		<Text
 			{...textProps}
 			elementType={elementType}
-			shouldInheritFont={isWithinHeading}
 			shouldDisableTrim={resolvedShouldDisableTrim}
+			shouldInheritFont={isWithinHeading}
 			textAlign={textAlign}
 			variant={variant}
 			{...colorProps}

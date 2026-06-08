@@ -86,8 +86,8 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 					pathLength={100}
 					r={SPINNER_CIRCLE_RADIUS}
 					stroke="currentColor"
-					strokeWidth={SPINNER_STROKE_WIDTH}
 					strokeDashoffset={hasValue ? dashOffset : undefined}
+					strokeWidth={SPINNER_STROKE_WIDTH}
 				/>
 			</svg>
 		</div>

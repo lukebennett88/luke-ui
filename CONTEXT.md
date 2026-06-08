@@ -47,3 +47,4 @@ Don't document what isn't part of the public API.
 - [ADR-0001](docs/adr/0001-component-tier-taxonomy.md) — Three-tier taxonomy and docs rule
 - [ADR-0002](docs/adr/0002-primitive-package-path-convention.md) — Primitive kits exported at `[composed]/primitive`
 - [ADR-0003](docs/adr/0003-package-docs-surface.md) — Package docs are a separate AI-native surface
+- [ADR-0004](docs/adr/0004-styling-utilities-public-api.md) — Styling utilities as public API

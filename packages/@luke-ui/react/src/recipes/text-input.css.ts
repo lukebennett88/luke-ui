@@ -24,6 +24,26 @@ const descendantDisabledSelector = `:where(${descendantDisabledState}) &`;
 
 export const textInputGroup = recipeInLayer('recipes', {
 	base: {
+		'@media': {
+			'(forced-colors: active)': {
+				selectors: {
+					[groupFocusWithinSelector]: {
+						outlineColor: 'Highlight',
+					},
+					[groupInvalidSelector]: {
+						borderColor: 'ButtonText',
+					},
+					[groupInvalidFocusWithinSelector]: {
+						borderColor: 'ButtonText',
+						outlineColor: 'Highlight',
+					},
+					[groupDisabledSelector]: {
+						borderColor: 'GrayText',
+						color: 'GrayText',
+					},
+				},
+			},
+		},
 		alignItems: 'center',
 		backgroundColor: vars.backgroundColor.input,
 		borderColor: vars.border.input,
@@ -37,9 +57,6 @@ export const textInputGroup = recipeInLayer('recipes', {
 		inlineSize: '100%',
 		minInlineSize: 0,
 		overflow: 'hidden',
-		transitionDuration: vars.motion.duration.fast,
-		transitionProperty,
-		transitionTimingFunction: vars.motion.easing.standard,
 
 		selectors: {
 			[groupDisabledSelector]: {
@@ -73,40 +90,22 @@ export const textInputGroup = recipeInLayer('recipes', {
 				backgroundColor: vars.backgroundColor.subtle,
 			},
 		},
-
-		'@media': {
-			'(forced-colors: active)': {
-				selectors: {
-					[groupFocusWithinSelector]: {
-						outlineColor: 'Highlight',
-					},
-					[groupInvalidSelector]: {
-						borderColor: 'ButtonText',
-					},
-					[groupInvalidFocusWithinSelector]: {
-						borderColor: 'ButtonText',
-						outlineColor: 'Highlight',
-					},
-					[groupDisabledSelector]: {
-						borderColor: 'GrayText',
-						color: 'GrayText',
-					},
-				},
-			},
-		},
+		transitionDuration: vars.motion.duration.fast,
+		transitionProperty,
+		transitionTimingFunction: vars.motion.easing.standard,
 	},
 	defaultVariants: {
 		size: 'medium',
 	},
 	variants: {
 		size: {
-			small: {
-				fontSize: vars.font.size.small,
-				blockSize: vars.controlSize.small,
-			},
 			medium: {
-				fontSize: vars.font.size.standard,
 				blockSize: vars.controlSize.medium,
+				fontSize: vars.font.size.standard,
+			},
+			small: {
+				blockSize: vars.controlSize.small,
+				fontSize: vars.font.size.small,
 			},
 		},
 	},
@@ -150,15 +149,15 @@ export const textInputControl = recipeInLayer('recipes', {
 	},
 	variants: {
 		size: {
-			small: {
-				blockSize: vars.controlSize.small,
-				paddingInlineEnd: vars.space.xsmall,
-				paddingInlineStart: vars.space.xsmall,
-			},
 			medium: {
 				blockSize: vars.controlSize.medium,
 				paddingInlineEnd: vars.space.small,
 				paddingInlineStart: vars.space.small,
+			},
+			small: {
+				blockSize: vars.controlSize.small,
+				paddingInlineEnd: vars.space.xsmall,
+				paddingInlineStart: vars.space.xsmall,
 			},
 		},
 	},
@@ -167,13 +166,13 @@ export const textInputControl = recipeInLayer('recipes', {
 export const textInputAdornmentStart = recipeInLayer('recipes', {
 	base: {
 		alignItems: 'center',
+		borderInlineEndColor: vars.border.input,
+		borderInlineEndStyle: 'solid',
+		borderInlineEndWidth: vars.borderWidth.thin,
 		color: vars.foregroundColor.secondary,
 		display: 'inline-flex',
 		flexShrink: 0,
 		lineHeight: vars.font.lineHeight.nospace,
-		borderInlineEndColor: vars.border.input,
-		borderInlineEndStyle: 'solid',
-		borderInlineEndWidth: vars.borderWidth.thin,
 
 		selectors: {
 			[descendantDisabledSelector]: {
@@ -187,13 +186,13 @@ export const textInputAdornmentStart = recipeInLayer('recipes', {
 	},
 	variants: {
 		size: {
-			small: {
-				paddingInlineEnd: vars.space.xsmall,
-				paddingInlineStart: vars.space.xsmall,
-			},
 			medium: {
 				paddingInlineEnd: vars.space.small,
 				paddingInlineStart: vars.space.small,
+			},
+			small: {
+				paddingInlineEnd: vars.space.xsmall,
+				paddingInlineStart: vars.space.xsmall,
 			},
 		},
 	},
@@ -203,13 +202,13 @@ export const textInputAdornmentEnd = recipeInLayer('recipes', {
 	base: {
 		alignItems: 'center',
 		backgroundColor: vars.backgroundColor.subtle,
+		borderInlineStartColor: vars.border.input,
+		borderInlineStartStyle: 'solid',
+		borderInlineStartWidth: vars.borderWidth.thin,
 		color: vars.foregroundColor.secondary,
 		display: 'inline-flex',
 		flexShrink: 0,
 		lineHeight: vars.font.lineHeight.nospace,
-		borderInlineStartColor: vars.border.input,
-		borderInlineStartStyle: 'solid',
-		borderInlineStartWidth: vars.borderWidth.thin,
 
 		selectors: {
 			[descendantDisabledSelector]: {
@@ -223,13 +222,13 @@ export const textInputAdornmentEnd = recipeInLayer('recipes', {
 	},
 	variants: {
 		size: {
-			small: {
-				paddingInlineEnd: vars.space.xsmall,
-				paddingInlineStart: vars.space.xsmall,
-			},
 			medium: {
 				paddingInlineEnd: vars.space.small,
 				paddingInlineStart: vars.space.small,
+			},
+			small: {
+				paddingInlineEnd: vars.space.xsmall,
+				paddingInlineStart: vars.space.xsmall,
 			},
 		},
 	},

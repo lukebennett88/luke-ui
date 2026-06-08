@@ -15,9 +15,9 @@ export const docs = defineDocs({
 // Safe because no hosted MDX file authors an inline `# H1` or leading
 // blockquote — titles and descriptions always come from frontmatter.
 interface MdastNode {
-	type?: string;
-	depth?: number;
 	children?: Array<MdastNode>;
+	depth?: number;
+	type?: string;
 }
 
 function stripIncludedHeader() {

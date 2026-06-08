@@ -7,16 +7,16 @@ export interface IndexEntry extends DiscoveredExport {
 }
 
 export interface RenderIndexInput {
-	packageName: string;
 	entries: Array<IndexEntry>;
 	includeLibraryAuthors: boolean;
+	packageName: string;
 }
 
 const ASSET_NOTES: Record<string, string> = {
-	'./stylesheet.css': "required side-effect import: `import '@luke-ui/react/stylesheet.css'`",
+	'./package.json': 'package manifest export, used by tooling — no docs.',
 	'./spritesheet.svg':
 		'sprite sheet referenced by the `Icon` atom; bundlers resolve this automatically.',
-	'./package.json': 'package manifest export, used by tooling — no docs.',
+	'./stylesheet.css': "required side-effect import: `import '@luke-ui/react/stylesheet.css'`",
 };
 
 export function renderIndex(input: RenderIndexInput): string {

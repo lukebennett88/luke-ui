@@ -15,13 +15,13 @@ interface LinkStyleProps {
 }
 
 interface LinkRedeclaredRACProps {
+	/** URL the link points to. */
+	href?: RacLinkProps['href'];
 	/**
 	 * Whether the link is disabled. Disabled links can't be focused or activated.
 	 * @default false
 	 */
 	isDisabled?: RacLinkProps['isDisabled'];
-	/** URL the link points to. */
-	href?: RacLinkProps['href'];
 }
 
 /**

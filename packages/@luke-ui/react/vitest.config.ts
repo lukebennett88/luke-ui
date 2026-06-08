@@ -23,9 +23,9 @@ export default defineConfig({
 					// Runs tests for stories defined in Storybook config.
 					storybookTest({ configDir }),
 					argosVitestPlugin({
-						uploadToArgos: process.env.ARGOS_UPLOAD === '1',
-						token: process.env.ARGOS_TOKEN,
 						buildName: 'storybook',
+						token: process.env.ARGOS_TOKEN,
+						uploadToArgos: process.env.ARGOS_UPLOAD === '1',
 					}),
 				],
 				test: {

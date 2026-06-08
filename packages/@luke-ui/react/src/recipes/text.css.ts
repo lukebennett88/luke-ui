@@ -55,22 +55,22 @@ const lineClampSingleLine = {
 } satisfies ComplexStyleRule;
 const lineClampMultiLine = (lines: number) =>
 	({
-		WebkitBoxOrient: 'vertical',
-		WebkitLineClamp: lines,
 		display: '-webkit-box',
 		lineClamp: lines,
 		minInlineSize: 0,
 		overflow: 'hidden',
+		WebkitBoxOrient: 'vertical',
+		WebkitLineClamp: lines,
 	}) satisfies ComplexStyleRule;
 
 const lineClampVariants = {
-	false: lineClampNone,
-	true: lineClampSingleLine,
 	1: lineClampSingleLine,
 	2: lineClampMultiLine(2),
 	3: lineClampMultiLine(3),
 	4: lineClampMultiLine(4),
 	5: lineClampMultiLine(5),
+	false: lineClampNone,
+	true: lineClampSingleLine,
 } as const;
 
 export type TextLineClampVariant = keyof typeof lineClampVariants;
@@ -115,18 +115,20 @@ const textTransformVariants = createVariants(textTransformKeys, (textTransform) 
 }));
 
 const textAlignVariants = {
-	start: { textAlign: 'start' },
 	center: { textAlign: 'center' },
 	end: { textAlign: 'end' },
+	start: { textAlign: 'start' },
 } as const;
 
 const textVariantVariants = createVariants(textVariantKeys, (variant) => ({
 	fontVariantNumeric: variant === 'unset' ? 'normal' : variant,
 }));
 
-const textWrapVariants = createVariants(textWrapKeys, (textWrap) => ({
-	textWrap: textWrap === 'unset' ? 'wrap' : textWrap,
-}));
+const textWrapVariants = {
+	balance: { textWrap: 'balance' },
+	pretty: { textWrap: 'pretty' },
+	unset: {},
+} as const;
 
 const fontSizeVariants = Object.fromEntries(fontSizeKeys.map((key) => [key, {}])) as Record<
 	FontSizeToken,
@@ -188,42 +190,26 @@ export const text = recipeInLayer('recipes', {
 	base,
 	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
-		textAlign: 'start',
 		color: 'neutralBold',
 		fontFamily: 'sans',
 		fontSize: 'standard',
 		fontWeight: 'regular',
+		isVisuallyHidden: false,
+		lineClamp: false,
 		lineHeight: 'loose',
-		shouldInheritFont: false,
 		shouldDisableTrim: false,
+		shouldInheritFont: false,
+		textAlign: 'start',
 		textDecoration: 'none',
 		textTransform: 'none',
-		lineClamp: false,
-		variant: 'unset',
-		isVisuallyHidden: false,
 		textWrap: 'unset',
+		variant: 'unset',
 	},
 	variants: {
 		color: colorVariants,
 		fontFamily: fontFamilyVariants,
 		fontSize: fontSizeVariants,
 		fontWeight: fontWeightVariants,
-		lineHeight: lineHeightVariants,
-		shouldInheritFont: {
-			false: {},
-			true: {
-				font: 'inherit',
-			},
-		},
-		shouldDisableTrim: {
-			false: {},
-			true: {},
-		},
-		lineClamp: lineClampVariants,
-		textAlign: textAlignVariants,
-		textDecoration: textDecorationVariants,
-		textTransform: textTransformVariants,
-		variant: textVariantVariants,
 		isVisuallyHidden: {
 			false: {},
 			true: {
@@ -231,7 +217,23 @@ export const text = recipeInLayer('recipes', {
 				transform: 'scale(0)',
 			},
 		},
+		lineClamp: lineClampVariants,
+		lineHeight: lineHeightVariants,
+		shouldDisableTrim: {
+			false: {},
+			true: {},
+		},
+		shouldInheritFont: {
+			false: {},
+			true: {
+				font: 'inherit',
+			},
+		},
+		textAlign: textAlignVariants,
+		textDecoration: textDecorationVariants,
+		textTransform: textTransformVariants,
 		textWrap: textWrapVariants,
+		variant: textVariantVariants,
 	},
 });
 

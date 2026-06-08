@@ -3,8 +3,8 @@ import { CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon } from 'lucide-react'
 import { useState } from 'react';
 
 interface PageActionsProps {
-	markdownUrl: string;
 	githubUrl: string;
+	markdownUrl: string;
 }
 
 export function PageActions({ markdownUrl, githubUrl }: PageActionsProps) {

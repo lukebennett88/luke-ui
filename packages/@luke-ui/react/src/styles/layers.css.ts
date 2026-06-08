@@ -9,9 +9,9 @@ import { globalLayer } from '@vanilla-extract/css';
  * - **utilities** — One-off overrides; highest-priority layer for escape hatches.
  */
 export const layers = {
+	recipes: globalLayer('recipes'),
 	reset: globalLayer('reset'),
 	theme: globalLayer('theme'),
-	recipes: globalLayer('recipes'),
 	utilities: globalLayer('utilities'),
 } as const;
 

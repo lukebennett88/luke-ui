@@ -1,5 +1,4 @@
 {
-	"editor.defaultFormatter": "oxc.oxc-vscode",
 	"[css]": {
 		"editor.defaultFormatter": "oxc.oxc-vscode"
 	},
@@ -28,6 +27,7 @@
 		"source.fixAll.oxc": "explicit",
 		"source.organizeImports.oxc": "explicit"
 	},
+	"editor.defaultFormatter": "oxc.oxc-vscode",
 	"editor.formatOnSave": true,
 	"files.readonlyInclude": {
 		"**/routeTree.gen.ts": true

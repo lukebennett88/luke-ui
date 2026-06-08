@@ -27,14 +27,14 @@ const pages = await Promise.all(
 			const parsed = parseBarrel(entry.sourcePath);
 			if (parsed.description) descriptionByPath.set(entry.path, parsed.description);
 			const md = renderPage({
-				kind: 'barrel',
-				slug: entry.slug,
-				importPath: `${packageJson.name}${entry.path.replace(/^\./, '')}`,
-				tier: entry.tier,
 				description: parsed.description,
 				exports: parsed.exports,
+				importPath: `${packageJson.name}${entry.path.replace(/^\./, '')}`,
+				kind: 'barrel',
+				slug: entry.slug,
+				tier: entry.tier,
 			});
-			return { slug: entry.slug, shape: entry.shape, tier: entry.tier, md };
+			return { md, shape: entry.shape, slug: entry.slug, tier: entry.tier };
 		}
 
 		const parsed = parseComponent(entry.sourcePath);
@@ -43,14 +43,14 @@ const pages = await Promise.all(
 		if (parsed.tier) tierByPath.set(entry.path, parsed.tier);
 		const proseMarkdown = await readProse(packageRoot, entry).catch(() => undefined);
 		const md = renderPage({
-			kind: 'component',
-			slug: entry.slug,
 			importPath: `${packageJson.name}${entry.path.replace(/^\./, '')}`,
-			tier,
+			kind: 'component',
 			parsed,
 			proseMarkdown,
+			slug: entry.slug,
+			tier,
 		});
-		return { slug: entry.slug, shape: entry.shape, tier, md };
+		return { md, shape: entry.shape, slug: entry.slug, tier };
 	}),
 );
 
@@ -62,15 +62,15 @@ await Promise.all(
 
 const entriesWithDescriptions: Array<IndexEntry> = discovered.map((entry) => {
 	return Object.assign({}, entry, {
-		tier: tierByPath.get(entry.path) ?? entry.tier,
 		description: descriptionByPath.get(entry.path),
+		tier: tierByPath.get(entry.path) ?? entry.tier,
 	});
 });
 
 const llmsTxt = renderIndex({
-	packageName: packageJson.name,
 	entries: entriesWithDescriptions,
 	includeLibraryAuthors: true,
+	packageName: packageJson.name,
 });
 
 await writeFile(join(docsDir, 'llms.txt'), llmsTxt, 'utf8');

@@ -1,10 +1,10 @@
 interface InnerProps {
-	/** Inner size. @default 'inner' */
-	size?: 'small' | 'medium';
 	/** Hidden implementation prop. */
 	icon: string;
 	/** Inner press handler. */
 	onPress?: () => void;
+	/** Inner size. @default 'inner' */
+	size?: 'small' | 'medium';
 }
 
 interface WrapperStyleProps {

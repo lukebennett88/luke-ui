@@ -140,9 +140,9 @@ const sectionStyle = css({
 
 const tableWrapStyle = css({
 	borderColor: vars.border.default,
+	borderRadius: vars.borderRadius.medium,
 	borderStyle: 'solid',
 	borderWidth: 1,
-	borderRadius: vars.borderRadius.medium,
 	inlineSize: '100%',
 	maxInlineSize: '100%',
 	overflow: 'auto',
@@ -205,9 +205,9 @@ const descriptionStyle = css({
 const previewSwatchStyle = css({
 	blockSize: '1.5rem',
 	borderColor: vars.border.default,
+	borderRadius: vars.borderRadius.small,
 	borderStyle: 'solid',
 	borderWidth: 1,
-	borderRadius: vars.borderRadius.small,
 	display: 'inline-block',
 	inlineSize: '4rem',
 });
@@ -235,9 +235,9 @@ const mutedPreviewStyle = css({
 const docsPageStyle = css({
 	backgroundColor: vars.backgroundColor.default,
 	borderColor: vars.border.default,
+	borderRadius: vars.borderRadius.large,
 	borderStyle: 'solid',
 	borderWidth: 1,
-	borderRadius: vars.borderRadius.large,
 	display: 'flex',
 	flexDirection: 'column',
 	gap: vars.space.large,
@@ -261,9 +261,9 @@ const tokenSectionStyle = css({
 const tokenTableWrapStyle = css({
 	backgroundColor: vars.backgroundColor.default,
 	borderColor: vars.border.default,
+	borderRadius: vars.borderRadius.medium,
 	borderStyle: 'solid',
 	borderWidth: 1,
-	borderRadius: vars.borderRadius.medium,
 	overflow: 'auto',
 });
 
@@ -330,9 +330,9 @@ const tokenValueStyle = css({
 const exampleBarStyle = css({
 	blockSize: '2.75rem',
 	borderColor: vars.border.default,
+	borderRadius: vars.borderRadius.small,
 	borderStyle: 'solid',
 	borderWidth: 1,
-	borderRadius: vars.borderRadius.small,
 	inlineSize: '14rem',
 	maxInlineSize: '100%',
 });
@@ -355,9 +355,9 @@ const motionRailStyle = css({
 	backgroundColor: vars.backgroundColor.inputDisabled,
 	blockSize: '1.25rem',
 	borderColor: vars.border.default,
+	borderRadius: vars.borderRadius.full,
 	borderStyle: 'solid',
 	borderWidth: 1,
-	borderRadius: vars.borderRadius.full,
 	inlineSize: '100%',
 	position: 'relative',
 });
@@ -680,8 +680,8 @@ function RenderExamplePreview({ mode, row }: { mode: ExampleMode; row: ExampleRo
 				<div
 					style={{
 						...exampleBarStyle,
-						display: 'flex',
 						alignItems: 'center',
+						display: 'flex',
 						paddingInline: vars.space.xsmall,
 					}}
 				>
@@ -874,7 +874,7 @@ function TokenTypeStory({
 				<Heading elementType="h1" fontWeight="bold" lineHeight="tight">
 					{title}
 				</Heading>
-				<Text elementType="p" color="neutralSubtle" fontSize="medium" lineHeight="loose">
+				<Text color="neutralSubtle" elementType="p" fontSize="medium" lineHeight="loose">
 					{description}
 				</Text>
 			</section>

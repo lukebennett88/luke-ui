@@ -58,9 +58,9 @@ describe('discoverExports', () => {
 
 	it('classifies stylesheet/spritesheet/package.json as asset', () => {
 		const exports = {
-			'./stylesheet.css': './dist/stylesheet.css',
-			'./spritesheet.svg': './dist/spritesheet.svg',
 			'./package.json': './package.json',
+			'./spritesheet.svg': './dist/spritesheet.svg',
+			'./stylesheet.css': './dist/stylesheet.css',
 		};
 		const result = discoverExports(exports);
 		expect(result.every((e) => e.shape === 'asset')).toBe(true);
