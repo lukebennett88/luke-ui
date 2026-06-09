@@ -27,7 +27,7 @@
 		"fix:unused": "knip --fix",
 		"generate:component": "pnpm --filter=@luke-ui/turbo-generators run generate:component",
 		"release": "turbo run build --filter=docs^... && changeset publish",
-		"test": "turbo run test --filter=@luke-ui/react",
+		"test": "turbo run test",
 		"version-packages": "changeset version"
 	},
 	"devDependencies": {

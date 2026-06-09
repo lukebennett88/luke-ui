@@ -1,7 +1,11 @@
 import { spawn } from 'node:child_process';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { discoverExports } from '@luke-ui/docs-tools/discover-exports';
+import type {
+	PackageDocsCatalogEntry,
+	PackageDocsCatalogMetadata,
+} from '@luke-ui/docs-tools/package-docs-catalog';
+import { resolvePackageDocsCatalog } from '@luke-ui/docs-tools/package-docs-catalog';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import react from '@vitejs/plugin-react';
@@ -54,14 +58,14 @@ function markdownRewritePlugin(): Plugin {
 	return {
 		configurePreviewServer(server) {
 			server.middlewares.use((req, _res, next) => {
-				const rewritten = mapPublicToInternal(req.url);
+				const rewritten = mapPublicToInternal(req.url, server.config.base);
 				if (rewritten) req.url = rewritten;
 				next();
 			});
 		},
 		configureServer(server) {
 			server.middlewares.use((req, _res, next) => {
-				const rewritten = mapPublicToInternal(req.url);
+				const rewritten = mapPublicToInternal(req.url, server.config.base);
 				if (rewritten) req.url = rewritten;
 				next();
 			});
@@ -77,18 +81,47 @@ const packageDocsDir = fileURLToPath(
 	new URL('../../packages/@luke-ui/react/docs/', import.meta.url),
 );
 
-// Expose generated package docs as `virtual:package-docs`. The `/llms.mdx/$`
-// route serves these to AI agents fetching `.mdx` URLs. We can't read them via
+// Expose generated package docs as `virtual:package-docs`. The `/markdown/$`
+// routes serve these to AI agents fetching public `.md` URLs. We can't read them via
 // `import.meta.glob` because `fumadocs-mdx/vite` compiles any `.md`/`.mdx` it
 // sees into a React component, even with the `?raw` query.
-function packageDocsPlugin(): Plugin {
+function packageDocsPlugin(catalog: Array<PackageDocsCatalogEntry>): Plugin {
 	const id = 'virtual:package-docs';
 	const resolved = `\0${id}`;
+	const metadata: Array<PackageDocsCatalogMetadata> = catalog.map((entry) => ({
+		path: entry.path,
+		target: entry.target,
+		slug: entry.slug,
+		shape: entry.shape,
+		pageKind: entry.pageKind,
+		tier: entry.tier,
+		title: entry.title,
+		description: entry.description,
+	}));
 	return {
+		enforce: 'pre',
+		async load(loadId) {
+			if (loadId !== resolved) return null;
+			const entries = await Promise.all(
+				catalog
+					.filter((entry) => entry.pageKind !== 'asset')
+					.map(
+						async (entry) =>
+							[
+								entry.slug,
+								await readFile(join(packageDocsDir, `${entry.slug}.md`), 'utf8'),
+							] as const,
+					),
+			);
+			return [
+				`export const packageDocsCatalog = ${JSON.stringify(metadata)};`,
+				`export const packageDocs = ${JSON.stringify(Object.fromEntries(entries))};`,
+			].join('\n');
+		},
 		configureServer(server) {
 			server.watcher.add(packageDocsDir);
 			const handle = (filePath: string) => {
-				if (!filePath.endsWith('.mdx') || !filePath.startsWith(packageDocsDir)) return;
+				if (!filePath.endsWith('.md') || !filePath.startsWith(packageDocsDir)) return;
 				const mod = server.moduleGraph.getModuleById(resolved);
 				if (mod) {
 					server.moduleGraph.invalidateModule(mod);
@@ -99,21 +132,6 @@ function packageDocsPlugin(): Plugin {
 			server.watcher.on('change', handle);
 			server.watcher.on('unlink', handle);
 		},
-		enforce: 'pre',
-		async load(loadId) {
-			if (loadId !== resolved) return null;
-			const filenames = (await readdir(packageDocsDir)).filter((n) => n.endsWith('.mdx'));
-			const entries = await Promise.all(
-				filenames.map(
-					async (filename) =>
-						[
-							filename.slice(0, -'.mdx'.length),
-							await readFile(join(packageDocsDir, filename), 'utf8'),
-						] as const,
-				),
-			);
-			return `export const packageDocs = ${JSON.stringify(Object.fromEntries(entries))};`;
-		},
 		name: 'package-docs',
 		resolveId(source) {
 			return source === id ? resolved : null;
@@ -121,9 +139,9 @@ function packageDocsPlugin(): Plugin {
 	};
 }
 
-async function getMarkdownPrerenderPages(): Promise<
-	Array<{ path: string; prerender: { outputPath: string } }>
-> {
+async function getMarkdownPrerenderPages(
+	catalog: Array<PackageDocsCatalogEntry>,
+): Promise<Array<{ path: string; prerender: { outputPath: string } }>> {
 	const contentPages = (await findMdxFiles(contentDocsDir)).map((filePath) => {
 		const publicPath = getPublicMarkdownPath(filePath);
 		const internalPath = toInternal(publicPath);
@@ -133,7 +151,7 @@ async function getMarkdownPrerenderPages(): Promise<
 			prerender: { outputPath: publicPath },
 		};
 	});
-	const packagePages = discoverExports(packageJson.exports).flatMap((entry) => {
+	const packagePages = catalog.flatMap((entry) => {
 		if (entry.shape !== 'barrel') return [];
 		return [
 			{
@@ -254,7 +272,11 @@ function packageSourceWatcherPlugin(): Plugin {
 }
 
 export default defineConfig(async () => {
-	const markdownPrerenderPages = await getMarkdownPrerenderPages();
+	const packageDocsCatalog = resolvePackageDocsCatalog({
+		packageRoot: packageRootDir,
+		exportsField: packageJson.exports,
+	});
+	const markdownPrerenderPages = await getMarkdownPrerenderPages(packageDocsCatalog);
 
 	return {
 		// Allow overriding the base URL for deployments to sub-paths (e.g. GitHub Pages).
@@ -288,7 +310,7 @@ export default defineConfig(async () => {
 			storySourcePathPlugin(),
 			staticFunctionBasePathPlugin(),
 			markdownRewritePlugin(),
-			packageDocsPlugin(),
+			packageDocsPlugin(packageDocsCatalog),
 			packageSourceWatcherPlugin(),
 			mdx(await import('./source.config')),
 			tailwindcss(),

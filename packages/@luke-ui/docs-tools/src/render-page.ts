@@ -1,48 +1,30 @@
-import type { ExportTier } from './discover-exports.js';
-import type { ParsedBarrelExport, ParsedComponent } from './parse-types.js';
-import { slugToTitle } from './title.js';
+import type { PackageDocsBarrelEntry, PackageDocsComponentEntry } from './package-docs-catalog.js';
 
 const RAC_DOCS_BASE = 'https://react-spectrum.adobe.com/react-aria';
 
-interface RenderComponentPageInput {
+interface RenderPageInput {
+	entry: PackageDocsComponentEntry | PackageDocsBarrelEntry;
 	importPath: string;
-	kind: 'component';
-	parsed: ParsedComponent;
 	/** Authored Markdown prose for the Usage section. Undefined for primitives. */
 	proseMarkdown: string | undefined;
-	slug: string;
-	tier: ExportTier;
 }
-
-interface RenderBarrelPageInput {
-	description?: string;
-	exports: Array<ParsedBarrelExport>;
-	importPath: string;
-	kind: 'barrel';
-	slug: string;
-	tier: ExportTier;
-}
-
-export type RenderPageInput = RenderComponentPageInput | RenderBarrelPageInput;
-
 export function renderPage(input: RenderPageInput): string {
 	const lines = renderHeader(input);
-	if (input.kind === 'component') {
-		renderComponentBody(lines, input);
+	if (input.entry.pageKind === 'component') {
+		renderComponentBody(lines, input.entry, input.proseMarkdown);
 	} else {
-		renderBarrelBody(lines, input);
+		renderBarrelBody(lines, input.entry);
 	}
 	return lines.join('\n');
 }
 
 function renderHeader(input: RenderPageInput): Array<string> {
 	const lines: Array<string> = [];
-	const description = input.kind === 'component' ? input.parsed.description : input.description;
 
-	lines.push(`# ${slugToTitle(input.slug, input.tier)}`);
+	lines.push(`# ${input.entry.title}`);
 	lines.push('');
-	if (description) {
-		lines.push(`> ${description.replace(/\n/g, ' ')}`);
+	if (input.entry.description) {
+		lines.push(`> ${input.entry.description.replace(/\n/g, ' ')}`);
 		lines.push('');
 	}
 
@@ -57,19 +39,23 @@ function renderHeader(input: RenderPageInput): Array<string> {
 }
 
 function importStatement(input: RenderPageInput): string {
-	if (input.kind === 'barrel') {
-		const importNames = input.exports.map((e) =>
+	if (input.entry.pageKind === 'barrel') {
+		const importNames = input.entry.parsed.exports.map((e) =>
 			e.type?.startsWith('type ') ? `type ${e.name}` : e.name,
 		);
 		return `import { ${importNames.join(', ')} } from '${input.importPath}';`;
 	}
 
-	const importIdent = input.parsed.componentName ?? exportIdentifier(input.slug);
+	const importIdent = input.entry.parsed.componentName ?? exportIdentifier(input.entry.slug);
 	return `import { ${importIdent} } from '${input.importPath}';`;
 }
 
-function renderComponentBody(lines: Array<string>, input: RenderComponentPageInput): void {
-	const { tier, parsed, proseMarkdown } = input;
+function renderComponentBody(
+	lines: Array<string>,
+	entry: PackageDocsComponentEntry,
+	proseMarkdown: string | undefined,
+): void {
+	const { tier, parsed } = entry;
 
 	if (tier !== 'primitive' && proseMarkdown) {
 		lines.push('## Usage');
@@ -102,11 +88,11 @@ function renderComponentBody(lines: Array<string>, input: RenderComponentPageInp
 	}
 }
 
-function renderBarrelBody(lines: Array<string>, input: RenderBarrelPageInput): void {
+function renderBarrelBody(lines: Array<string>, entry: PackageDocsBarrelEntry): void {
 	lines.push('## Exports');
 	lines.push('');
 
-	for (const e of input.exports) {
+	for (const e of entry.parsed.exports) {
 		lines.push(`### \`${e.name}\``);
 		lines.push('');
 		if (e.type) {

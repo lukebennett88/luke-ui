@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import type { LlmsFullEntry } from '../render-llms-full.js';
+import type { PackageDocsCatalogMetadata } from '../package-docs-catalog.js';
 import { renderLlmsFull, sortLlmsFullEntries } from '../render-llms-full.js';
+
+type LlmsFullFixture = Pick<PackageDocsCatalogMetadata, 'slug' | 'shape' | 'tier'> & {
+	md: string;
+};
 
 const md = (slug: string): string => `# ${slug}\nbody-${slug}`;
 
 describe('sortLlmsFullEntries', () => {
 	it('orders atoms → composed → barrels → primitives, each alphabetical by slug', () => {
-		const entries: Array<LlmsFullEntry> = [
+		const entries: Array<LlmsFullFixture> = [
 			// Deliberately mixed and non-alphabetic insertion order.
 			{
 				md: md('combobox-field-primitive'),
@@ -45,9 +49,9 @@ describe('sortLlmsFullEntries', () => {
 	});
 
 	it('drops entries that do not belong to a bucket (assets, unknown tiers)', () => {
-		const entries: Array<LlmsFullEntry> = [
-			{ md: md('stylesheet'), shape: 'asset', slug: 'stylesheet', tier: 'n/a' },
-			{ md: md('button'), shape: 'component', slug: 'button', tier: 'composed' },
+		const entries: Array<LlmsFullFixture> = [
+			{ slug: 'stylesheet', shape: 'asset', tier: 'n/a', md: md('stylesheet') },
+			{ slug: 'button', shape: 'component', tier: 'composed', md: md('button') },
 			// component with tier 'n/a' should not slip through as composed.
 			{ md: md('mystery'), shape: 'component', slug: 'mystery', tier: 'n/a' },
 		];
@@ -56,16 +60,16 @@ describe('sortLlmsFullEntries', () => {
 	});
 
 	it('treats atoms before composed regardless of slug ordering', () => {
-		const entries: Array<LlmsFullEntry> = [
-			{ md: md('aardvark'), shape: 'component', slug: 'aardvark', tier: 'composed' },
-			{ md: md('zebra'), shape: 'component', slug: 'zebra', tier: 'atom' },
+		const entries: Array<LlmsFullFixture> = [
+			{ slug: 'aardvark', shape: 'component', tier: 'composed', md: md('aardvark') },
+			{ slug: 'zebra', shape: 'component', tier: 'atom', md: md('zebra') },
 		];
 		const sorted = sortLlmsFullEntries(entries).map((e) => e.slug);
 		expect(sorted).toEqual(['zebra', 'aardvark']);
 	});
 
 	it('places barrels before primitives even when primitive slugs sort earlier', () => {
-		const entries: Array<LlmsFullEntry> = [
+		const entries: Array<LlmsFullFixture> = [
 			{
 				md: md('aardvark-primitive'),
 				shape: 'component',
@@ -79,9 +83,9 @@ describe('sortLlmsFullEntries', () => {
 	});
 
 	it('does not mutate the input array', () => {
-		const entries: Array<LlmsFullEntry> = [
-			{ md: md('b'), shape: 'component', slug: 'b', tier: 'composed' },
-			{ md: md('a'), shape: 'component', slug: 'a', tier: 'composed' },
+		const entries: Array<LlmsFullFixture> = [
+			{ slug: 'b', shape: 'component', tier: 'composed', md: md('b') },
+			{ slug: 'a', shape: 'component', tier: 'composed', md: md('a') },
 		];
 		const snapshot = entries.map((e) => e.slug);
 		sortLlmsFullEntries(entries);
@@ -92,7 +96,7 @@ describe('sortLlmsFullEntries', () => {
 describe('renderLlmsFull', () => {
 	it('concatenates markdown in canonical (atom → composed → barrel → primitive) order', () => {
 		// Insertion order is intentionally jumbled.
-		const entries: Array<LlmsFullEntry> = [
+		const entries: Array<LlmsFullFixture> = [
 			{
 				md: md('combobox-field-primitive'),
 				shape: 'component',

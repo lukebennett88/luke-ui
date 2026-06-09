@@ -1,8 +1,6 @@
-import type { DiscoveredExport } from './discover-exports.js';
-import { slugToTitle } from './title.js';
+import type { PackageDocsCatalogMetadata } from './package-docs-catalog.js';
 
-export interface IndexEntry extends DiscoveredExport {
-	description?: string;
+export interface IndexEntry extends PackageDocsCatalogMetadata {
 	href?: string;
 }
 
@@ -85,7 +83,6 @@ export function renderIndex(input: RenderIndexInput): string {
 
 function formatLink(e: IndexEntry): string {
 	const desc = e.description ? `: ${e.description}` : '';
-	const title = slugToTitle(e.slug, e.tier);
 	const href = e.href ?? `./${e.slug}.md`;
-	return `- [${title}](${href})${desc}`;
+	return `- [${e.title}](${href})${desc}`;
 }

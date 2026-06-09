@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { PackageDocsBarrelEntry, PackageDocsComponentEntry } from '../package-docs-catalog.js';
 import type { ParsedComponent } from '../parse-types.js';
 import { renderPage } from '../render-page.js';
 
@@ -20,189 +21,154 @@ const sampleParsed: ParsedComponent = {
 	tier: 'composed',
 };
 
-describe('renderPage component body', () => {
-	it('emits H1 from the export slug, titlecased', () => {
-		const page = renderPage({
-			importPath: '@luke-ui/react/button',
-			kind: 'component',
-			parsed: sampleParsed,
-			proseMarkdown: '<authored usage>',
-			slug: 'button',
-			tier: 'composed',
-		});
-		expect(page).toMatch(/^# Button\n/);
-	});
+function componentEntry(
+	overrides: Partial<PackageDocsComponentEntry> = {},
+): PackageDocsComponentEntry {
+	return {
+		path: './button',
+		target: './dist/button/index.js',
+		slug: 'button',
+		shape: 'component',
+		pageKind: 'component',
+		tier: 'composed',
+		title: 'Button',
+		description: 'Sample composed button.',
+		sourcePath: '/src/button/index.tsx',
+		parsed: sampleParsed,
+		...overrides,
+	};
+}
 
-	it('inserts the description as a blockquote', () => {
-		const page = renderPage({
-			importPath: '@luke-ui/react/button',
-			kind: 'component',
-			parsed: sampleParsed,
-			proseMarkdown: '<authored usage>',
-			slug: 'button',
-			tier: 'composed',
+function renderComponent(
+	entryOverrides: Partial<PackageDocsComponentEntry> = {},
+	proseMarkdown = '',
+): string {
+	return renderPage({
+		entry: componentEntry(entryOverrides),
+		importPath: '@luke-ui/react/button',
+		proseMarkdown,
+	});
+}
+
+const sampleExports = [
+	{
+		name: 'WidgetControl',
+		description: 'The main control.',
+		type: 'function WidgetControl(props: WidgetControlProps): JSX.Element',
+	},
+	{ name: 'WidgetItem', description: 'A single item.', type: undefined },
+];
+
+function barrelEntry(overrides: Partial<PackageDocsBarrelEntry> = {}): PackageDocsBarrelEntry {
+	return {
+		path: './combobox-field/primitive',
+		target: './dist/combobox-field/primitive/index.js',
+		slug: 'combobox-field-primitive',
+		shape: 'component',
+		pageKind: 'barrel',
+		tier: 'primitive',
+		title: 'Combobox Field (primitive)',
+		description: '',
+		sourcePath: '/src/combobox-field/primitive/index.tsx',
+		parsed: { description: '', exports: sampleExports },
+		...overrides,
+	};
+}
+
+function renderBarrel(entryOverrides: Partial<PackageDocsBarrelEntry> = {}): string {
+	return renderPage({
+		entry: barrelEntry(entryOverrides),
+		importPath: '@luke-ui/react/combobox-field/primitive',
+		proseMarkdown: undefined,
+	});
+}
+
+describe('renderPage component body', () => {
+	it('uses resolved catalog metadata for the header', () => {
+		const page = renderComponent({
+			title: 'Resolved Button',
+			description: 'Resolved description.',
 		});
-		expect(page).toContain('> Sample composed button.');
+		expect(page).toMatch(/^# Resolved Button\n/);
+		expect(page).toContain('> Resolved description.');
 	});
 
 	it('renders the import block', () => {
-		const page = renderPage({
-			importPath: '@luke-ui/react/button',
-			kind: 'component',
-			parsed: sampleParsed,
-			proseMarkdown: '',
-			slug: 'button',
-			tier: 'composed',
-		});
-		expect(page).toContain("import { Button } from '@luke-ui/react/button';");
+		expect(renderComponent()).toContain("import { Button } from '@luke-ui/react/button';");
 	});
 
 	it('uses parsed.componentName for the import identifier when the export is renamed', () => {
 		const page = renderPage({
+			entry: componentEntry({
+				path: './text-field/primitive',
+				slug: 'text-field-primitive',
+				tier: 'primitive',
+				title: 'Text Field (primitive)',
+				parsed: { ...sampleParsed, componentName: 'TextInput' },
+			}),
 			importPath: '@luke-ui/react/text-field/primitive',
-			kind: 'component',
-			parsed: { ...sampleParsed, componentName: 'TextInput' },
 			proseMarkdown: undefined,
-			slug: 'text-field-primitive',
-			tier: 'primitive',
 		});
 		expect(page).toContain("import { TextInput } from '@luke-ui/react/text-field/primitive';");
 	});
 
 	it('renders the props table with own props only', () => {
-		const page = renderPage({
-			importPath: '@luke-ui/react/button',
-			kind: 'component',
-			parsed: sampleParsed,
-			proseMarkdown: '',
-			slug: 'button',
-			tier: 'composed',
-		});
-		expect(page).toMatch(
+		expect(renderComponent()).toMatch(
 			/\| `size` \| `'small' \\\| 'medium'` \| `'medium'` \| Sets the size\. \|/,
 		);
 	});
 
 	it('emits an extends pointer for external types', () => {
-		const page = renderPage({
-			importPath: '@luke-ui/react/button',
-			kind: 'component',
-			parsed: sampleParsed,
-			proseMarkdown: '',
-			slug: 'button',
-			tier: 'composed',
-		});
-		expect(page).toContain('Extends [`react-aria-components` `ButtonProps`]');
+		expect(renderComponent()).toContain('Extends [`react-aria-components` `ButtonProps`]');
 	});
 
 	it('omits Usage section for primitives', () => {
-		const page = renderPage({
-			importPath: '@luke-ui/react/button/primitive',
-			kind: 'component',
-			parsed: sampleParsed,
-			proseMarkdown: undefined,
-			slug: 'button-primitive',
-			tier: 'primitive',
-		});
-		expect(page).not.toContain('## Usage');
-	});
-
-	it('renders a (primitive) suffix on the title for primitive tier', () => {
-		const page = renderPage({
-			importPath: '@luke-ui/react/button/primitive',
-			kind: 'component',
-			parsed: sampleParsed,
-			proseMarkdown: undefined,
-			slug: 'button-primitive',
-			tier: 'primitive',
-		});
-		expect(page).toMatch(/^# Button \(primitive\)\n/);
+		expect(
+			renderComponent({ tier: 'primitive', title: 'Button (primitive)' }, '<authored usage>'),
+		).not.toContain('## Usage');
 	});
 });
 
 describe('renderPage barrel body', () => {
-	const sampleExports = [
-		{
-			description: 'The main control.',
-			name: 'WidgetControl',
-			type: 'function WidgetControl(props: WidgetControlProps): JSX.Element',
-		},
-		{ description: 'A single item.', name: 'WidgetItem', type: undefined },
-	];
-
-	it('emits an H1 with the slug title', () => {
-		const page = renderPage({
-			exports: sampleExports,
-			importPath: '@luke-ui/react/combobox-field/primitive',
-			kind: 'barrel',
-			slug: 'combobox-field-primitive',
-			tier: 'primitive',
-		});
-		expect(page).toMatch(/^# Combobox Field \(primitive\)\n/);
+	it('uses the resolved title', () => {
+		expect(renderBarrel()).toMatch(/^# Combobox Field \(primitive\)\n/);
 	});
 
 	it('renders an Import block listing all exports', () => {
-		const page = renderPage({
-			exports: sampleExports,
-			importPath: '@luke-ui/react/combobox-field/primitive',
-			kind: 'barrel',
-			slug: 'combobox-field-primitive',
-			tier: 'primitive',
-		});
-		expect(page).toContain(
+		expect(renderBarrel()).toContain(
 			"import { WidgetControl, WidgetItem } from '@luke-ui/react/combobox-field/primitive';",
 		);
 	});
 
 	it('marks type-only exports in the import block', () => {
-		const page = renderPage({
-			exports: [
-				{ description: 'Allowed levels.', name: 'HeadingLevel', type: 'type HeadingLevel = 1' },
-				{ description: 'Provider.', name: 'HeadingLevels', type: undefined },
-			],
-			importPath: '@luke-ui/react/heading-context',
-			kind: 'barrel',
-			slug: 'heading-context',
-			tier: 'n/a',
+		const page = renderBarrel({
+			parsed: {
+				description: '',
+				exports: [
+					{
+						name: 'HeadingLevel',
+						description: 'Allowed levels.',
+						type: 'type HeadingLevel = 1',
+					},
+					{ name: 'HeadingLevels', description: 'Provider.', type: undefined },
+				],
+			},
 		});
-		expect(page).toContain(
-			"import { type HeadingLevel, HeadingLevels } from '@luke-ui/react/heading-context';",
-		);
+		expect(page).toContain('import { type HeadingLevel, HeadingLevels }');
 	});
 
-	it('renders an ## Exports section with each export as an H3', () => {
-		const page = renderPage({
-			exports: sampleExports,
-			importPath: '@luke-ui/react/combobox-field/primitive',
-			kind: 'barrel',
-			slug: 'combobox-field-primitive',
-			tier: 'primitive',
-		});
+	it('renders each export with descriptions and type signatures', () => {
+		const page = renderBarrel();
 		expect(page).toContain('## Exports');
 		expect(page).toContain('### `WidgetControl`');
 		expect(page).toContain('### `WidgetItem`');
-	});
-
-	it('renders description as blockquote when provided', () => {
-		const page = renderPage({
-			description: 'A barrel of field primitives.',
-			exports: sampleExports,
-			importPath: '@luke-ui/react/field/primitive',
-			kind: 'barrel',
-			slug: 'field-primitive',
-			tier: 'primitive',
-		});
-		expect(page).toContain('> A barrel of field primitives.');
-	});
-
-	it('renders type signature in a code fence when present', () => {
-		const page = renderPage({
-			exports: sampleExports,
-			importPath: '@luke-ui/react/combobox-field/primitive',
-			kind: 'barrel',
-			slug: 'combobox-field-primitive',
-			tier: 'primitive',
-		});
+		expect(page).toContain('The main control.');
 		expect(page).toContain('function WidgetControl(props: WidgetControlProps): JSX.Element');
+	});
+
+	it('renders the resolved description as a blockquote', () => {
+		expect(renderBarrel({ description: 'A barrel of field primitives.' })).toContain(
+			'> A barrel of field primitives.',
+		);
 	});
 });
