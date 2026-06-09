@@ -105,3 +105,10 @@ import {
 	ComboboxSection,
 } from '@luke-ui/react/combobox-field/primitive';
 ```
+
+### Size propagation
+
+When you set `size` on `ComboboxInput`, it is automatically inherited by
+`ComboboxControl`, `ComboboxTextInput`, `ComboboxTrigger`, `ComboboxItem`, and
+`ComboboxLoadMoreItem`. You can override the inherited size on any individual
+child by passing an explicit `size` prop to that component.

@@ -5,6 +5,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
+import { ComboboxSizeProvider } from './size-context.js';
 
 interface ComboboxVariantProps extends NonNullable<styles.ComboboxVariants> {}
 
@@ -40,20 +41,25 @@ export interface ComboboxInputProps<T extends object> extends DistributiveOmit<
 
 	/** Called when the open state changes. */
 	onOpenChange?: (isOpen: boolean) => void;
+
+	/** Control size. @default 'medium' */
+	size?: ComboboxSize;
 	/** The currently selected key (controlled). Pass `null` for no selection. */
 	value?: Key | null;
 }
 
 export function ComboboxInput<T extends object>(props: ComboboxInputProps<T>): JSX.Element {
-	const { className, menuTrigger = 'focus', ...comboboxProps } = props;
+	const { className, menuTrigger = 'focus', size = 'medium', ...comboboxProps } = props;
 
 	return (
-		<RacComboBox
-			{...comboboxProps}
-			className={composeRenderProps(className, (renderedClassName) => {
-				return cx(styles.comboboxRoot, renderedClassName);
-			})}
-			menuTrigger={menuTrigger}
-		/>
+		<ComboboxSizeProvider size={size}>
+			<RacComboBox
+				{...comboboxProps}
+				className={composeRenderProps(className, (renderedClassName) => {
+					return cx(styles.comboboxRoot, renderedClassName);
+				})}
+				menuTrigger={menuTrigger}
+			/>
+		</ComboboxSizeProvider>
 	);
 }

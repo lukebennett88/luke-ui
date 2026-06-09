@@ -11,6 +11,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
+import { useComboboxSize } from './size-context.js';
 
 interface ComboboxStyleProps {
 	size?: 'small' | 'medium';
@@ -27,7 +28,8 @@ export interface ComboboxItemProps<T extends object>
 }
 
 export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX.Element {
-	const { size = 'medium', ...itemProps } = props;
+	const { size: sizeProp, ...itemProps } = props;
+	const size = useComboboxSize(sizeProp);
 
 	return (
 		<RacListBoxItem
@@ -50,7 +52,8 @@ export interface ComboboxLoadMoreItemProps
 }
 
 export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Element {
-	const { size = 'medium', ...loadMoreItemProps } = props;
+	const { size: sizeProp, ...loadMoreItemProps } = props;
+	const size = useComboboxSize(sizeProp);
 
 	return (
 		<RacListBoxLoadMoreItem

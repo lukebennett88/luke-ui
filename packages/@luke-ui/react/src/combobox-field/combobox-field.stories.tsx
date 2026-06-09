@@ -126,25 +126,69 @@ export const Controlled = meta.story({
 	},
 });
 
+const sizeStoryItems: Array<CountryItem> = [...countryItems, { id: 'override', label: 'Override' }];
+
 /**
  * The input supports two sizes: small and medium (default).
  * Prefer using size consistently with other form controls.
  */
 export const Size = meta.story({
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const page = within(document.body);
+
+		const smallInput = canvas.getByRole('combobox', { name: 'Small' });
+		const mediumInput = canvas.getByRole('combobox', { name: 'Medium (default)' });
+		const smallControl = smallInput.closest('[role="group"]')!;
+		const mediumControl = mediumInput.closest('[role="group"]')!;
+
+		// Verify controls have different computed block sizes
+		await expect(window.getComputedStyle(smallControl).minHeight).not.toBe(
+			window.getComputedStyle(mediumControl).minHeight,
+		);
+
+		// Open small combobox and check first option padding
+		await userEvent.click(smallInput);
+		const smallOptions = page.getAllByRole('option');
+		await expect(smallOptions.length).toBeGreaterThan(0);
+		const smallFirstOption = smallOptions[0]!;
+		const smallOptionPadding = window.getComputedStyle(smallFirstOption).paddingBlock;
+
+		// Close small and open medium
+		await userEvent.keyboard('{Escape}');
+		await userEvent.click(mediumInput);
+		const mediumOptions = page.getAllByRole('option');
+		await expect(mediumOptions.length).toBeGreaterThan(0);
+		const mediumFirstOption = mediumOptions[0]!;
+		const mediumOptionPadding = window.getComputedStyle(mediumFirstOption).paddingBlock;
+
+		await expect(smallOptionPadding).not.toBe(mediumOptionPadding);
+
+		// Close medium and open small again to check override
+		await userEvent.keyboard('{Escape}');
+		await userEvent.click(smallInput);
+		const overrideOption = page.getByRole('option', { name: 'Override' });
+		const overridePadding = window.getComputedStyle(overrideOption).paddingBlock;
+		await expect(overridePadding).toBe(mediumOptionPadding);
+	},
 	render: function Render() {
 		return (
 			<div style={stackStyle}>
 				<ComboboxField
-					defaultItems={countryItems}
+					defaultItems={sizeStoryItems}
 					label="Small"
 					name="small"
 					placeholder="Small"
 					size="small"
 				>
-					{(item) => <ComboboxItem size="small">{item.label}</ComboboxItem>}
+					{(item) => (
+						<ComboboxItem size={item.id === 'override' ? 'medium' : undefined}>
+							{item.label}
+						</ComboboxItem>
+					)}
 				</ComboboxField>
 				<ComboboxField
-					defaultItems={countryItems}
+					defaultItems={sizeStoryItems}
 					label="Medium (default)"
 					name="medium"
 					placeholder="Medium"

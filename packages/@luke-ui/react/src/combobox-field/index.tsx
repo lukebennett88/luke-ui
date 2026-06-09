@@ -99,16 +99,16 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	const isAsync = loadingState != null;
 
 	return (
-		<ComboboxInput<T> {...comboboxInputProps}>
+		<ComboboxInput<T> size={size} {...comboboxInputProps}>
 			<Field
 				description={description}
 				errorMessage={errorMessage}
 				label={label}
 				necessityIndicator={necessityIndicator}
 			>
-				<ComboboxControl size={size}>
-					<ComboboxTextInput placeholder={placeholder} size={size} />
-					<ComboboxTrigger aria-label="Toggle options" size={size}>
+				<ComboboxControl>
+					<ComboboxTextInput placeholder={placeholder} />
+					<ComboboxTrigger aria-label="Toggle options">
 						<Icon aria-hidden name="chevronDown" size={size === 'small' ? 'xsmall' : 'small'} />
 					</ComboboxTrigger>
 				</ComboboxControl>
