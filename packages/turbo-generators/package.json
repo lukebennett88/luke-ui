@@ -3,9 +3,9 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"check:format": "pnpm exec oxfmt --check .",
+		"check:format": "pnpm exec oxfmt --check . '!templates/**'",
 		"check:lint": "pnpm exec oxlint . --type-aware",
-		"fix:format": "pnpm exec oxfmt .",
+		"fix:format": "pnpm exec oxfmt . '!templates/**'",
 		"fix:lint": "pnpm exec oxlint . --type-aware --fix",
 		"generate:component": "tsx scripts/generate-component.ts"
 	},
