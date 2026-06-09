@@ -13,13 +13,12 @@ export const Route = createFileRoute('/llms.txt')({
 					source.getPages().map((page) => [page.slugs.at(-1), `.${page.url}.md`]),
 				);
 				const entriesWithHref = packageDocsCatalog.map((entry) => {
-					return {
-						...entry,
+					return Object.assign({}, entry, {
 						href:
 							entry.shape === 'barrel'
 								? `.${toPublic(entry.slug)}`
 								: (pageHrefBySlug.get(entry.slug) ?? `./${entry.slug}.md`),
-					};
+					});
 				});
 
 				const txt = renderIndex({

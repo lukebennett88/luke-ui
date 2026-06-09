@@ -99,14 +99,12 @@ describe('renderIndex', () => {
 	it('uses entry href when provided', () => {
 		const out = renderIndex({
 			entries: sampleEntries.map((entry) =>
-				entry.slug === 'button'
-					? { ...entry, href: './llms.mdx/docs/components/actions/button.md' }
-					: entry,
+				entry.slug === 'button' ? { ...entry, href: './docs/components/actions/button.md' } : entry,
 			),
 			includeLibraryAuthors: false,
 			packageName: '@luke-ui/react',
 		});
-		expect(out).toMatch(/\[Button\]\(\.\/llms\.mdx\/docs\/components\/actions\/button\.md\)/);
+		expect(out).toMatch(/\[Button\]\(\.\/docs\/components\/actions\/button\.md\)/);
 		expect(out).toMatch(/\[Tokens\]\(\.\/tokens\.md\)/);
 	});
 });

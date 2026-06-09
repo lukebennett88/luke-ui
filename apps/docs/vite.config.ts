@@ -58,14 +58,14 @@ function markdownRewritePlugin(): Plugin {
 	return {
 		configurePreviewServer(server) {
 			server.middlewares.use((req, _res, next) => {
-				const rewritten = mapPublicToInternal(req.url);
+				const rewritten = mapPublicToInternal(req.url, server.config.base);
 				if (rewritten) req.url = rewritten;
 				next();
 			});
 		},
 		configureServer(server) {
 			server.middlewares.use((req, _res, next) => {
-				const rewritten = mapPublicToInternal(req.url);
+				const rewritten = mapPublicToInternal(req.url, server.config.base);
 				if (rewritten) req.url = rewritten;
 				next();
 			});
@@ -81,8 +81,8 @@ const packageDocsDir = fileURLToPath(
 	new URL('../../packages/@luke-ui/react/docs/', import.meta.url),
 );
 
-// Expose generated package docs as `virtual:package-docs`. The `/llms.mdx/$`
-// route serves these to AI agents fetching `.mdx` URLs. We can't read them via
+// Expose generated package docs as `virtual:package-docs`. The `/markdown/$`
+// routes serve these to AI agents fetching public `.md` URLs. We can't read them via
 // `import.meta.glob` because `fumadocs-mdx/vite` compiles any `.md`/`.mdx` it
 // sees into a React component, even with the `?raw` query.
 function packageDocsPlugin(catalog: Array<PackageDocsCatalogEntry>): Plugin {

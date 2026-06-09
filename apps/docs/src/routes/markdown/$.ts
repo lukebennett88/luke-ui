@@ -4,8 +4,8 @@ import { getLLMText } from '../../lib/get-llm-text';
 import { internalSegmentsToSourceSlugs } from '../../lib/markdown-url';
 import { source } from '../../lib/source';
 
-// Internal route used to prerender the public Markdown files.
-export const Route = createFileRoute('/llms.mdx/$')({
+// Internal route used to serve and prerender the public Markdown files.
+export const Route = createFileRoute('/markdown/$')({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {

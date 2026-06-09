@@ -12,6 +12,7 @@ import { Suspense } from 'react';
 import browserCollections from '../../../.source/browser';
 import { PageActions } from '../../components/page-actions';
 import { baseOptions } from '../../lib/layout.shared';
+import { withBasePath } from '../../lib/markdown-url';
 import { source } from '../../lib/source';
 import { getStoryPayloads } from '../../lib/story';
 
@@ -57,7 +58,7 @@ const loader = createServerFn({
 
 		return {
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
-			markdownUrl: `${page.url}.md`,
+			markdownUrl: withBasePath(`${page.url}.md`, import.meta.env.BASE_URL),
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			storyPayloads: await getStoryPayloads(stories),
