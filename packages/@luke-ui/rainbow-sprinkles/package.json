@@ -16,12 +16,12 @@
 		"fix:lint": "pnpm exec oxlint . --type-aware --fix"
 	},
 	"dependencies": {
-		"@vanilla-extract/css": "^1.20.1",
-		"@vanilla-extract/dynamic": "^2.1.2"
+		"@vanilla-extract/css": "catalog:",
+		"@vanilla-extract/dynamic": "catalog:"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",
-		"csstype": "^3.2.3",
-		"typescript": "^6.0.3"
+		"csstype": "catalog:",
+		"typescript": "catalog:"
 	}
 }

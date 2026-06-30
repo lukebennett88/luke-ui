@@ -27,6 +27,7 @@
 		"jsdoc/check-property-names": "error",
 		"jsdoc/check-tag-names": "error",
 		"jsdoc/empty-tags": "error",
+		"jsx-a11y/prefer-tag-over-role": "off",
 		"no-console": "warn",
 		"no-unused-vars": "error",
 		"react-hooks-js/config": "error",

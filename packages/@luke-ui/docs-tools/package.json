@@ -26,7 +26,7 @@
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"react-aria-components": "catalog:",
-		"typescript": "^6.0.3",
+		"typescript": "catalog:",
 		"vitest": "catalog:"
 	}
 }
