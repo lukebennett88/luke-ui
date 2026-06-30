@@ -12,8 +12,8 @@ import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
 import { nitro } from 'nitro/vite';
 import { readdir, readFile } from 'node:fs/promises';
-import type { Plugin } from 'vite';
-import { defineConfig } from 'vite';
+import { defineConfig, lazyPlugins } from 'vite-plus';
+import type { Plugin } from 'vite-plus';
 import packageJson from '../../packages/@luke-ui/react/package.json' with { type: 'json' };
 import { mapPublicToInternal, toInternal, toPublic } from './src/lib/markdown-url';
 
@@ -306,7 +306,7 @@ export default defineConfig(async () => {
 		optimizeDeps: {
 			exclude: ['@luke-ui/react'],
 		},
-		plugins: [
+		plugins: lazyPlugins(async () => [
 			storySourcePathPlugin(),
 			staticFunctionBasePathPlugin(),
 			markdownRewritePlugin(),
@@ -329,7 +329,7 @@ export default defineConfig(async () => {
 			}),
 			react(),
 			nitro(),
-		],
+		]),
 		resolve: {
 			external: ['ts-morph'],
 			tsconfigPaths: true,

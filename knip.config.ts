@@ -1,7 +1,7 @@
 import type { KnipConfig } from 'knip';
 
 export default {
-	ignore: ['.claude/worktrees/**', '.worktrees/**'],
+	ignoreDependencies: ['eslint-plugin-react-hooks'],
 	workspaces: {
 		'apps/docs': {
 			entry: [

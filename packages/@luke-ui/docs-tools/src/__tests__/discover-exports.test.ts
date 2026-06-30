@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { discoverExports } from '../discover-exports.js';
 
 const packageRoot = fileURLToPath(new URL('./fixtures/sample-package/', import.meta.url));

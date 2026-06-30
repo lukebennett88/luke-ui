@@ -22,7 +22,7 @@
 	"include": [
 		"src/**/*.ts",
 		"src/**/*.tsx",
-		"tsdown.config.ts",
+		"vite.config.ts",
 		"vitest.config.ts",
 		"vitest.shims.d.ts"
 	]

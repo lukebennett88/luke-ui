@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { parseBarrel, parseComponent } from '../parse-types.js';
 
 const fixturePath = fileURLToPath(new URL('./fixtures/sample-component.ts', import.meta.url));

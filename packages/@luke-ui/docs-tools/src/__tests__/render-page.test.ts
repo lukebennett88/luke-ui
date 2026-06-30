@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import type { PackageDocsBarrelEntry, PackageDocsComponentEntry } from '../package-docs-catalog.js';
 import type { ParsedComponent } from '../parse-types.js';
 import { renderPage } from '../render-page.js';

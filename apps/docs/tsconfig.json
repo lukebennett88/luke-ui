@@ -15,7 +15,7 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"target": "esnext",
-		"types": ["vite/client"],
+		"types": ["vite-plus/client"],
 		"verbatimModuleSyntax": true
 	},
 	"include": ["**/*.ts", "**/*.tsx"]
