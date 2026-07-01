@@ -1,5 +1,6 @@
 import { clamp } from '@react-aria/utils';
 import type { ComponentProps } from 'react';
+import { useIconSizeContext } from '../icon-size-context/index.js';
 import * as styles from '../recipes/loading-spinner.css.js';
 import {
 	ICON_VIEWBOX,
@@ -57,6 +58,9 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 		...divProps
 	} = props;
 
+	const contextSize = useIconSizeContext();
+	const resolvedSize = size ?? contextSize ?? 'medium';
+
 	const hasValue = value !== undefined && value !== null;
 	const normalizedMin = Math.min(minValue, maxValue);
 	const normalizedMax = Math.max(minValue, maxValue);
@@ -73,7 +77,11 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 			aria-valuemax={maxValue}
 			aria-valuemin={minValue}
 			aria-valuenow={hasValue ? clampedValue : undefined}
-			className={cx(styles.spinner({ color, size }), styles.spinnerState({ mode }), className)}
+			className={cx(
+				styles.spinner({ color, size: resolvedSize }),
+				styles.spinnerState({ mode }),
+				className,
+			)}
 			role="progressbar"
 			style={style}
 		>
