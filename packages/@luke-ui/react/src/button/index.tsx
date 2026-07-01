@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.css.js';
@@ -14,6 +14,10 @@ interface PrimitiveButtonVariantProps extends NonNullable<primitiveStyles.Button
 
 interface ButtonStyleProps {
 	/**
+	 * Icon shown after the label.
+	 */
+	endIcon?: ReactNode;
+	/**
 	 * Whether the button takes up the full inline size of its container.
 	 * @default false
 	 */
@@ -28,6 +32,10 @@ interface ButtonStyleProps {
 	 * @default 'medium'
 	 */
 	size?: PrimitiveButtonVariantProps['size'];
+	/**
+	 * Icon shown before the label.
+	 */
+	startIcon?: ReactNode;
 	/**
 	 * Visual tone. Controls colour scheme.
 	 * @default 'primary'
@@ -58,9 +66,10 @@ export interface ButtonProps
 		ButtonStyleProps,
 		ButtonRedeclaredRACProps {}
 
-/** Composed button. Wraps children in a `Text` for ellipsis truncation; shows a spinner when `isPending`. */
+/** Composed button. Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`. */
 export function Button(props: ButtonProps): JSX.Element {
-	const { children, isPending, size = 'medium', ...restProps } = props;
+	const { children, endIcon, isPending, size = 'medium', startIcon, ...restProps } = props;
+	const iconSize = BUTTON_ICON_SIZE[size];
 
 	return (
 		<PrimitiveButton {...restProps} isPending={isPending} size={size}>
@@ -68,20 +77,23 @@ export function Button(props: ButtonProps): JSX.Element {
 				<span className={styles.buttonContent()}>
 					{isPending && (
 						<span aria-hidden className={styles.spinnerOverlay()}>
-							<LoadingSpinner aria-hidden size={BUTTON_ICON_SIZE[size]} />
+							<LoadingSpinner aria-hidden size={iconSize} />
 						</span>
 					)}
-					<Text
-						className={styles.buttonLabel({ isPending })}
-						color="inherit"
-						fontSize={BUTTON_FONT_SIZE[size]}
-						fontWeight="inherit"
-						lineClamp={1}
-						lineHeight="nospace"
-						shouldDisableTrim
-					>
-						{typeof children === 'function' ? children(renderProps) : children}
-					</Text>
+					<span className={styles.buttonLabel({ isPending })}>
+						{startIcon}
+						<Text
+							color="inherit"
+							fontSize={BUTTON_FONT_SIZE[size]}
+							fontWeight="inherit"
+							lineClamp={1}
+							lineHeight="nospace"
+							shouldDisableTrim
+						>
+							{typeof children === 'function' ? children(renderProps) : children}
+						</Text>
+						{endIcon}
+					</span>
 				</span>
 			)}
 		</PrimitiveButton>
