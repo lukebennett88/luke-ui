@@ -42,7 +42,7 @@
 			"dependsOn": ["generate"]
 		},
 		"check:lint": {
-			"dependsOn": ["generate"]
+			"dependsOn": ["generate", "^build"]
 		},
 		"check:types": {
 			"dependsOn": ["generate", "^build"]
