@@ -19,6 +19,7 @@
 		"dev:docs": "turbo run dev --filter=docs",
 		"dev:packages": "turbo run dev --filter=./packages/**",
 		"dev:storybook": "turbo run dev dev:storybook --filter=@luke-ui/react",
+		"deploy:storybook:argos": "argos deploy packages/@luke-ui/react/storybook-static",
 		"fix": "turbo run fix:format-root fix fix:unused",
 		"fix:format": "turbo run fix:format-root fix:format",
 		"fix:format-root": "pnpm exec oxfmt -c .oxfmtrc.root.json .",
@@ -31,6 +32,7 @@
 		"version-packages": "changeset version"
 	},
 	"devDependencies": {
+		"@argos-ci/cli": "catalog:",
 		"@changesets/cli": "catalog:",
 		"@turbo/gen": "catalog:",
 		"eslint-plugin-react-hooks": "catalog:",
