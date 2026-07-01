@@ -18,6 +18,18 @@ export default defineConfig({
 			{
 				extends: true,
 				plugins: [
+					// Required for .css.ts processing in unit tests.
+					vanillaExtractPlugin(),
+				],
+				test: {
+					environment: 'node',
+					include: ['src/**/__tests__/**/*.test.ts'],
+					name: 'unit',
+				},
+			},
+			{
+				extends: true,
+				plugins: [
 					// Required for .css.ts processing in Vitest browser mode.
 					vanillaExtractPlugin(),
 					// Runs tests for stories defined in Storybook config.

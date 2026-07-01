@@ -66,7 +66,8 @@
 		"generate:color-tokens": "node scripts/generate-color-tokens.ts && pnpm exec oxfmt -c ../../../.oxfmtrc.json .generated/color-tokens.generated.ts",
 		"generate:docs": "tsx scripts/generate-docs.ts && pnpm exec oxfmt -c ../../../.oxfmtrc.json docs/ dist/docs/",
 		"generate:icons": "tsx scripts/build-icons.ts",
-		"test": "tsx scripts/test-visual.ts",
+		"test": "pnpm run test:unit && tsx scripts/test-visual.ts",
+		"test:unit": "vitest run --project=unit",
 		"test:ui": "vitest --project=storybook --ui",
 		"test:watch": "vitest --project=storybook"
 	},
