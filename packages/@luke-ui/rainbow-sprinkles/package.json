@@ -9,11 +9,11 @@
 		"./package.json": "./package.json"
 	},
 	"scripts": {
-		"check:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json --check .",
-		"check:lint": "pnpm exec oxlint . --type-aware",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
 		"check:types": "tsc --noEmit -p tsconfig.json",
-		"fix:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json .",
-		"fix:lint": "pnpm exec oxlint . --type-aware --fix"
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix"
 	},
 	"dependencies": {
 		"@vanilla-extract/css": "catalog:",

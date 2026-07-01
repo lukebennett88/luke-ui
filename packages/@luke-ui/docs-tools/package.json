@@ -13,20 +13,21 @@
 		"./title": "./src/title.ts"
 	},
 	"scripts": {
-		"check:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json --check .",
-		"check:lint": "pnpm exec oxlint . --type-aware",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
 		"check:types": "tsc --noEmit -p tsconfig.json",
-		"fix:format": "pnpm exec oxfmt -c ../../../.oxfmtrc.json .",
-		"fix:lint": "pnpm exec oxlint . --type-aware --fix",
-		"test": "vitest run"
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix",
+		"test": "vp test run"
 	},
 	"dependencies": {
 		"ts-morph": "catalog:"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",
+		"@types/react": "catalog:",
 		"react-aria-components": "catalog:",
 		"typescript": "catalog:",
-		"vitest": "catalog:"
+		"vite-plus": "catalog:"
 	}
 }

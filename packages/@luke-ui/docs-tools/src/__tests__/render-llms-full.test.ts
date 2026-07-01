@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import type { PackageDocsCatalogMetadata } from '../package-docs-catalog.js';
 import { renderLlmsFull, sortLlmsFullEntries } from '../render-llms-full.js';
 

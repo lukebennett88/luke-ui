@@ -4,22 +4,22 @@
 	"type": "module",
 	"sideEffects": false,
 	"scripts": {
-		"build": "vite build",
-		"check:format": "pnpm exec oxfmt -c ../../.oxfmtrc.json --check .",
-		"check:lint": "pnpm exec oxlint . --type-aware",
+		"build": "vp build",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
 		"check:types": "fumadocs-mdx && tsc --noEmit",
 		"clean": "rm -rf .source .tanstack .turbo .output dist src/routeTree.gen.ts",
-		"dev": "vite dev",
-		"fix:format": "pnpm exec oxfmt -c ../../.oxfmtrc.json .",
-		"fix:lint": "pnpm exec oxlint . --type-aware --fix",
-		"fix:unsafe": "pnpm exec oxlint . --type-aware --fix-dangerously",
+		"dev": "vp dev",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix",
+		"fix:unsafe": "vp lint . --type-aware --fix-dangerously",
 		"generate": "pnpm run routes:generate",
 		"postinstall": "fumadocs-mdx",
-		"preview": "vite preview",
+		"preview": "vp preview",
 		"routes:generate": "tsr generate",
 		"routes:watch": "tsr watch",
 		"start": "serve .output/public",
-		"test": "vitest run --config vitest.config.ts"
+		"test": "vp test run --config vitest.config.ts"
 	},
 	"dependencies": {
 		"@fumadocs/story": "catalog:",
@@ -46,10 +46,13 @@
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
+		"@vitest/browser-playwright": "catalog:",
 		"nitro": "catalog:",
+		"playwright": "*",
 		"serve": "catalog:",
 		"tailwindcss": "catalog:",
 		"typescript": "catalog:",
+		"vite-plus": "catalog:",
 		"vitest": "catalog:"
 	}
 }
