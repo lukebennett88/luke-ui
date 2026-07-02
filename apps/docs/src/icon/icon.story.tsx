@@ -1,7 +1,23 @@
-import type { Icon } from '@luke-ui/react/icon';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { IconProps } from '@luke-ui/react/icon';
+import { Icon } from '@luke-ui/react/icon';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof Icon>(import.meta.url, {
-	initial: { name: 'add', title: 'Add' },
-	priorities: ['name', 'size', 'title'],
+const { defineStory } = defineStoryFactory();
+
+type IconStoryProps = Pick<IconProps, 'name' | 'size' | 'title'>;
+
+function IconPlayground(props: IconStoryProps) {
+	return (
+		<StoryWrapper>
+			<Icon {...props} />
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: IconPlayground,
+	args: {
+		initial: { name: 'add', title: 'Add' },
+	},
 });

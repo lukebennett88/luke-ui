@@ -1,13 +1,38 @@
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
 import type { ComboboxFieldProps } from '@luke-ui/react/combobox-field';
-import type { FC } from 'react';
-import { defineComponentStory } from '../lib/define-component-story';
+import { ComboboxField } from '@luke-ui/react/combobox-field';
+import { ComboboxItem } from '@luke-ui/react/combobox-field/primitive';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export type ComboboxFieldStoryProps<T extends object> = Pick<
-	ComboboxFieldProps<T>,
+const { defineStory } = defineStoryFactory();
+
+type Item = { id: string; label: string };
+
+const items: Array<Item> = [
+	{ id: 'au', label: 'Australia' },
+	{ id: 'ca', label: 'Canada' },
+	{ id: 'nz', label: 'New Zealand' },
+	{ id: 'us', label: 'United States' },
+];
+
+type ComboboxFieldStoryProps = Pick<
+	ComboboxFieldProps<Item>,
 	'label' | 'name' | 'placeholder' | 'description' | 'isRequired' | 'isDisabled' | 'size'
 >;
 
-export const story = defineComponentStory<FC<ComboboxFieldStoryProps<any>>>(import.meta.url, {
-	initial: { label: 'Country', name: 'country', placeholder: 'Select a country...' },
-	priorities: ['name', 'label', 'placeholder', 'description', 'isRequired'],
+function ComboboxFieldPlayground(props: ComboboxFieldStoryProps) {
+	return (
+		<StoryWrapper>
+			<ComboboxField defaultItems={items} {...props}>
+				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+			</ComboboxField>
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: ComboboxFieldPlayground,
+	args: {
+		initial: { label: 'Country', name: 'country', placeholder: 'Select a country...' },
+	},
 });

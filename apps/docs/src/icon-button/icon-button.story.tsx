@@ -1,7 +1,26 @@
-import type { IconButton } from '@luke-ui/react/icon-button';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { IconButtonProps } from '@luke-ui/react/icon-button';
+import { IconButton } from '@luke-ui/react/icon-button';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof IconButton>(import.meta.url, {
-	initial: { 'aria-label': 'Add', icon: 'add' },
-	priorities: ['icon', 'aria-label', 'tone', 'size', 'isDisabled'],
+const { defineStory } = defineStoryFactory();
+
+type IconButtonStoryProps = Pick<
+	IconButtonProps,
+	'icon' | 'aria-label' | 'tone' | 'size' | 'isDisabled'
+>;
+
+function IconButtonPlayground(props: IconButtonStoryProps) {
+	return (
+		<StoryWrapper>
+			<IconButton {...props} />
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: IconButtonPlayground,
+	args: {
+		initial: { 'aria-label': 'Add', icon: 'add' },
+	},
 });

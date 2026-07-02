@@ -6,6 +6,13 @@
 <Heading level={2}>Explicit h2</Heading>
 ```
 
+## Best Practices
+
+| Guidance | Practices                                                                                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Do       | Rely on automatic leveling for nested sections instead of hardcoding `level`.                                                                                |
+| Don't    | Skip heading levels (e.g. an h2 followed directly by an h4) — screen reader users navigate by heading level, and a skipped level reads as a missing section. |
+
 ## Automatic leveling
 
 `Heading` reads its level from `HeadingLevels` context and increments

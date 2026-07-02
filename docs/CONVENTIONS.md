@@ -57,3 +57,36 @@ stubs.
 
 Managed by `tsdown` entry globs. Do not hand-edit `package.json#exports`. Create files in paths the
 package build already discovers.
+
+## Docs
+
+`.docs.md` structure and section order are defined in
+[ADR-0006](adr/0006-docs-md-structure-standard.md). Docs are read by both humans and coding agents —
+write for clarity, not just brevity. Don't compress a sentence to the point it's hard to parse, and
+don't add content whose only value is illustrating a point from one particular editing session.
+`CONTEXT.md` stays a terse index that links to ADRs; if a section there starts restating an ADR's
+content in full, that content belongs in the ADR only.
+
+## Fumadocs stories
+
+Each component's interactive demo on the hosted docs site is a single file,
+`apps/docs/src/<component>/<component>.story.tsx`, built on `@fumadocs/story/vite/client` (registered
+as a Vite plugin in `apps/docs/vite.config.ts`). It defines a narrow `<Component>StoryProps` type —
+`Pick<<Component>Props, 'a' | 'b' | ...>` — listing only the props a control can meaningfully show:
+drop event handlers, refs, and other escape hatches (`className`, `style`, `onPress`, obscure ARIA
+props). `Pick` orders the resulting controls by the order keys are listed in the pick, not by their
+declaration order in `<Component>Props` — `@fumadocs/story` reads properties off the resolved type via
+`ts-morph`, which preserves the pick's key order — so list the keys in the order they should appear in
+the panel. A small `<Component>Playground` wrapper renders the real component inside the shared
+`StoryWrapper` (from `../lib/story-wrapper`) and is passed directly to
+`defineStory({ Component, args: { initial } })`. A generic component (e.g. `ComboboxField<T>`) fixes
+`T` to one concrete sample type in its Playground rather than staying generic — see
+`combobox-field.story.tsx`.
+
+Order the picked props to match the `.docs.md` feature-section order, and keep every prop with its own
+`##` feature section represented here — when you add a feature section to `.docs.md`, add the prop to
+the story's `Pick` in the same pass. `initial` values stay short and legible, same bar as `.docs.md`
+code examples — no lorem ipsum.
+
+`.mdx` pages import the story directly — `import { story } from '.../<component>.story'` and
+`<story.WithControl />` — there is no separate client file to wire up.

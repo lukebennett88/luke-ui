@@ -1,10 +1,33 @@
-import type { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { LoadingSkeletonProps } from '@luke-ui/react/loading-skeleton';
+import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
+import { Text } from '@luke-ui/react/text';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof LoadingSkeleton>(import.meta.url, {
-	initial: {
-		children:
-			'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quisquam illum enim quo impedit obcaecati, facere, quod iusto harum officia accusantium facilis. Asperiores repudiandae, amet veniam deserunt exercitationem dolorum corrupti officia?',
+const { defineStory } = defineStoryFactory();
+
+type LoadingSkeletonStoryProps = Pick<
+	LoadingSkeletonProps,
+	'children' | 'isLoading' | 'as' | 'borderRadius'
+>;
+
+function LoadingSkeletonPlayground(props: LoadingSkeletonStoryProps) {
+	return (
+		<StoryWrapper>
+			<div style={{ maxWidth: '30ch' }}>
+				<Text>
+					<LoadingSkeleton {...props} />
+				</Text>
+			</div>
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: LoadingSkeletonPlayground,
+	args: {
+		initial: {
+			children: 'A short paragraph of placeholder copy that wraps across two lines.',
+		},
 	},
-	priorities: ['children', 'isLoading', 'as', 'borderRadius'],
 });

@@ -18,7 +18,6 @@ describe('createComponentPlan', () => {
 		});
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/feedback/status-badge.mdx',
-			'apps/docs/src/status-badge/status-badge.story.client.tsx',
 			'apps/docs/src/status-badge/status-badge.story.tsx',
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
 			'packages/@luke-ui/react/src/status-badge/index.tsx',

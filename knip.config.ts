@@ -10,6 +10,7 @@ export default {
 				'src/routes/**/*.ts',
 				'src/routes/**/*.tsx',
 				'src/styles/app.css',
+				'src/**/*.story.tsx',
 				'content/**/*.mdx',
 			],
 			ignoreDependencies: ['ts-morph'],

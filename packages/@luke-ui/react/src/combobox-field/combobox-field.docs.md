@@ -9,18 +9,19 @@
 </ComboboxField>
 ```
 
-## Grouped Options
+## Best Practices
 
-```tsx
-<ComboboxField label="Country" name="country">
-	<ComboboxSection title="Northern hemisphere">
-		<ComboboxItem id="ca">Canada</ComboboxItem>
-	</ComboboxSection>
-	<ComboboxSection title="Southern hemisphere">
-		<ComboboxItem id="au">Australia</ComboboxItem>
-	</ComboboxSection>
-</ComboboxField>
-```
+| Guidance | Practices                                                                                           |
+| -------- | --------------------------------------------------------------------------------------------------- |
+| Do       | Use `defaultItems` for a static list and `items` + `loadingState` when options load asynchronously. |
+| Don't    | Reach for `ComboboxField` for multi-select — it's single-select only in v1.                         |
+
+## API Shape
+
+- Root props follow React Aria `ComboBox` naming.
+- Composed convenience props: `label`, `description`, `errorMessage`, `necessityIndicator`, `size`, `placeholder`.
+- `children` renders dynamic items from `items` or `defaultItems`.
+- `listBoxProps` and `loadMoreItem` are lower-level escape hatches.
 
 ## Required fields
 
@@ -44,6 +45,19 @@ import { Form } from 'react-aria-components';
 		{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 	</ComboboxField>
 </Form>;
+```
+
+## Grouped Options
+
+```tsx
+<ComboboxField label="Country" name="country">
+	<ComboboxSection title="Northern hemisphere">
+		<ComboboxItem id="ca">Canada</ComboboxItem>
+	</ComboboxSection>
+	<ComboboxSection title="Southern hemisphere">
+		<ComboboxItem id="au">Australia</ComboboxItem>
+	</ComboboxSection>
+</ComboboxField>
 ```
 
 ## Async options
@@ -79,14 +93,6 @@ full control.
 	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 </ComboboxField>
 ```
-
-## API Shape
-
-- Root props follow React Aria `ComboBox` naming.
-- Composed convenience props: `label`, `description`, `errorMessage`, `necessityIndicator`, `size`, `placeholder`.
-- `children` renders dynamic items from `items` or `defaultItems`.
-- `listBoxProps` and `loadMoreItem` are lower-level escape hatches.
-- Single-select only in v1.
 
 ## Primitive kit
 

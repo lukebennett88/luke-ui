@@ -7,12 +7,12 @@
 />
 ```
 
-When visual context already communicates purpose, omit `label` and provide an
-accessible name with `aria-label` or `aria-labelledby` on the field itself.
+## Best Practices
 
-```tsx
-<TextField aria-label="Search" name="search" placeholder="Search" />
-```
+| Guidance | Practices                                                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Do       | Use `label` for every field where possible — it's picked up by more assistive tech and autofill heuristics than `aria-label` alone. |
+| Don't    | Rely on `placeholder` as a label substitute — it disappears once the user types and often fails color-contrast requirements.        |
 
 ## Required fields
 
@@ -75,3 +75,21 @@ is intentionally omitted; `size` is reserved for the design-system variant.
 | ---------- | --------------------- |
 | `'small'`  | Compact input height. |
 | `'medium'` | Default input height. |
+
+## Accessibility
+
+When visual context already communicates purpose, omit `label` and provide an
+accessible name with `aria-label` or `aria-labelledby` on the field itself.
+
+```tsx
+<TextField aria-label="Search" name="search" placeholder="Search" />
+```
+
+## Primitive TextInput
+
+A lower-level `TextInput` primitive is available when you need the input
+without the label, description, or error slots that `Field` provides.
+
+```ts
+import { TextInput } from '@luke-ui/react/text-field/primitive';
+```

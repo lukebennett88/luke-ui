@@ -1,7 +1,26 @@
-import type { Heading } from '@luke-ui/react/heading';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { HeadingProps } from '@luke-ui/react/heading';
+import { Heading } from '@luke-ui/react/heading';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof Heading>(import.meta.url, {
-	initial: { children: 'Heading text' },
-	priorities: ['children', 'level', 'color', 'fontWeight'],
+const { defineStory } = defineStoryFactory();
+
+type HeadingStoryProps = Pick<
+	HeadingProps,
+	'children' | 'elementType' | 'level' | 'color' | 'fontWeight'
+>;
+
+function HeadingPlayground(props: HeadingStoryProps) {
+	return (
+		<StoryWrapper>
+			<Heading {...props} />
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: HeadingPlayground,
+	args: {
+		initial: { children: 'Heading text' },
+	},
 });

@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import story from '@fumadocs/story/vite';
 import type {
 	PackageDocsCatalogEntry,
 	PackageDocsCatalogMetadata,
@@ -16,24 +17,6 @@ import { defineConfig, lazyPlugins } from 'vite-plus';
 import type { Plugin } from 'vite-plus';
 import packageJson from '../../packages/@luke-ui/react/package.json' with { type: 'json' };
 import { mapPublicToInternal, toInternal, toPublic } from './src/lib/markdown-url';
-
-// Freezes `import.meta.url` to the source file URL in story files and lib/story.ts.
-// At runtime the preview server runs from the compiled .output/server directory,
-// but ts-morph (via getStoryPayloads) and lib/story.ts's appRoot calculation need
-// the original source paths.
-function storySourcePathPlugin(): Plugin {
-	return {
-		enforce: 'pre',
-		name: 'story-source-path',
-		transform(code, id) {
-			const cleanId = id.split('?')[0] ?? '';
-			if (!cleanId.endsWith('.story.tsx') && !cleanId.endsWith('/lib/story.ts')) return null;
-			if (!code.includes('import.meta.url')) return null;
-			const sourceUrl = `file://${cleanId.replace(/\\/g, '/')}`;
-			return code.replace(/\bimport\.meta\.url\b/g, JSON.stringify(sourceUrl));
-		},
-	};
-}
 
 // staticFunctionMiddleware hardcodes `/__tsr/staticServerFnCache/...` for the
 // client fetch URL with no base-path support. When deployed under a sub-path
@@ -307,12 +290,12 @@ export default defineConfig(async () => {
 			exclude: ['@luke-ui/react'],
 		},
 		plugins: lazyPlugins(async () => [
-			storySourcePathPlugin(),
 			staticFunctionBasePathPlugin(),
 			markdownRewritePlugin(),
 			packageDocsPlugin(packageDocsCatalog),
 			packageSourceWatcherPlugin(),
 			mdx(await import('./source.config')),
+			story({ tsconfigPath: fileURLToPath(new URL('./tsconfig.json', import.meta.url)) }),
 			tailwindcss(),
 			tanstackStart({
 				pages: [

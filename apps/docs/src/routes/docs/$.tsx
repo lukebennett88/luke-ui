@@ -1,6 +1,3 @@
-import type { Story } from '@fumadocs/story';
-import type { StoryClient } from '@fumadocs/story/client';
-import { StoryPayloadProvider } from '@fumadocs/story/client';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
@@ -14,27 +11,8 @@ import { PageActions } from '../../components/page-actions';
 import { baseOptions } from '../../lib/layout.shared';
 import { withBasePath } from '../../lib/markdown-url';
 import { source } from '../../lib/source';
-import { getStoryPayloads } from '../../lib/story';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
-
-const storyModules = import.meta.glob<{ story: Story }>('../../*/*.story.tsx', { eager: true });
-const clientStoryModules = import.meta.glob<{ storyClient: StoryClient }>(
-	'../../*/*.story.client.tsx',
-	{
-		eager: true,
-	},
-);
-
-const dirName = (globPath: string) => globPath.split('/').at(-2)!;
-
-const stories: Record<string, Story> = Object.fromEntries(
-	Object.entries(storyModules).map(([p, mod]) => [dirName(p), mod.story]),
-);
-
-const clientStories: Record<string, StoryClient> = Object.fromEntries(
-	Object.entries(clientStoryModules).map(([p, mod]) => [dirName(p), mod.storyClient]),
-);
 
 export const Route = createFileRoute('/docs/$')({
 	component: Page,
@@ -61,7 +39,6 @@ const loader = createServerFn({
 			markdownUrl: withBasePath(`${page.url}.md`, import.meta.env.BASE_URL),
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
-			storyPayloads: await getStoryPayloads(stories),
 		};
 	});
 
@@ -93,15 +70,13 @@ function Page() {
 
 	return (
 		<DocsLayout {...baseOptions()} tree={data.pageTree}>
-			<StoryPayloadProvider clients={clientStories} payloads={data.storyPayloads}>
-				<Suspense>
-					{clientLoader.useContent(data.path, {
-						className: '',
-						githubUrl: data.githubUrl,
-						markdownUrl: data.markdownUrl,
-					})}
-				</Suspense>
-			</StoryPayloadProvider>
+			<Suspense>
+				{clientLoader.useContent(data.path, {
+					className: '',
+					githubUrl: data.githubUrl,
+					markdownUrl: data.markdownUrl,
+				})}
+			</Suspense>
 		</DocsLayout>
 	);
 }

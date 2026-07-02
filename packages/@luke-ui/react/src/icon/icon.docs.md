@@ -1,3 +1,20 @@
+`Icon` requires an `IconSpritesheetProvider` ancestor. See Setup below.
+
+```tsx
+<Icon name="add" title="Add" size="xsmall" />
+```
+
+```tsx
+<Icon name="close" aria-hidden size="medium" />
+```
+
+## Best Practices
+
+| Guidance | Practices                                                                                            |
+| -------- | ---------------------------------------------------------------------------------------------------- |
+| Do       | Pass `title` when the icon conveys meaning with no adjacent text (e.g. a standalone status icon).    |
+| Don't    | Pass both `aria-hidden` and `title` — a titled icon should be exposed to assistive tech, not hidden. |
+
 ## Setup
 
 `Icon` requires one setup step: wrap your app with `IconSpritesheetProvider`.
@@ -39,18 +56,6 @@ pnpm --dir packages/@luke-ui/react run generate:icons
 - sprite URL comes from `IconSpritesheetProvider`
 - `viewBox` defaults to the generated viewBox for that icon
 - icon fill color follows `currentColor`
-- if `title` is provided, the icon is exposed to assistive tech (`role="img"`)
-- if `title` is omitted, `aria-hidden` defaults to `true`
-
-## Usage
-
-```tsx
-<Icon name="add" title="Add" size="xsmall" />
-```
-
-```tsx
-<Icon name="close" aria-hidden size="medium" />
-```
 
 ```tsx
 <Icon name="add" className="myIcon" style={{ color: 'tomato' }} />
@@ -72,3 +77,8 @@ const HeartIcon = createIcon({
 
 <HeartIcon title="Favorite" size="small" />;
 ```
+
+## Accessibility
+
+If `title` is provided, the icon is exposed to assistive tech (`role="img"`).
+If `title` is omitted, `aria-hidden` defaults to `true`.

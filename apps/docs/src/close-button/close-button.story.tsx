@@ -1,7 +1,23 @@
-import type { CloseButton } from '@luke-ui/react/close-button';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { CloseButtonProps } from '@luke-ui/react/close-button';
+import { CloseButton } from '@luke-ui/react/close-button';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof CloseButton>(import.meta.url, {
-	initial: {},
-	priorities: ['tone', 'size', 'isDisabled'],
+const { defineStory } = defineStoryFactory();
+
+type CloseButtonStoryProps = Pick<CloseButtonProps, 'tone' | 'size' | 'isDisabled'>;
+
+function CloseButtonPlayground(props: CloseButtonStoryProps) {
+	return (
+		<StoryWrapper>
+			<CloseButton {...props} />
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: CloseButtonPlayground,
+	args: {
+		initial: {},
+	},
 });

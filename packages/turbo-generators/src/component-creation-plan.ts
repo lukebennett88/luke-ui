@@ -69,10 +69,6 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `apps/docs/src/${name}/${name}.story.tsx`,
 		},
 		{
-			contents: renderHostedStoryClient({ name, pascalName }),
-			path: `apps/docs/src/${name}/${name}.story.client.tsx`,
-		},
-		{
 			contents: renderHostedDocsPage({ displayName, name }),
 			path: `apps/docs/content/docs/components/${docsGroup}/${name}.mdx`,
 		},
@@ -194,11 +190,20 @@ function renderPackageDocs(input: {
 }): string {
 	return `\`${input.pascalName}\` from \`${input.packagePath}\`.
 
-## Usage
-
 \`\`\`tsx
 <${input.pascalName}>Label</${input.pascalName}>
 \`\`\`
+
+## Best Practices
+
+| Guidance | Practices |
+| -------- | --------- |
+| _Do/Don't_ | _Add a row per practice worth calling out. Rows don't need to pair up. Delete this section if there's no useful guidance to give._ |
+
+## Accessibility
+
+_Describe accessibility considerations (e.g. required aria-label, keyboard behavior, screen reader
+announcements). Delete this section if there's nothing beyond default semantics._
 `;
 }
 
@@ -229,24 +234,32 @@ export const Default = meta.story({
 }
 
 function renderHostedStory(input: { name: string; pascalName: string }): string {
-	return `import type { ${input.pascalName} } from '@luke-ui/react/${input.name}';
-import { defineComponentStory } from '../lib/define-component-story';
+	return `import type { ${input.pascalName}Props } from '@luke-ui/react/${input.name}';
+import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof ${input.pascalName}>(import.meta.url, {
-\tinitial: {
-\t\tchildren: '${input.pascalName}',
-\t},
-\tpriorities: ['children'],
-});
-`;
+const { defineStory } = defineStoryFactory();
+
+// Add more prop names here as the component grows, in the order they should appear
+// in the controls panel. Only include props a control can meaningfully render —
+// drop event handlers, refs, and other escape hatches.
+type ${input.pascalName}StoryProps = Pick<${input.pascalName}Props, 'children'>;
+
+function ${input.pascalName}Playground(props: ${input.pascalName}StoryProps) {
+\treturn (
+\t\t<StoryWrapper>
+\t\t\t<${input.pascalName} {...props} />
+\t\t</StoryWrapper>
+\t);
 }
 
-function renderHostedStoryClient(input: { name: string; pascalName: string }): string {
-	return `import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
-import { createWrappedStoryClient } from '../lib/story-wrapper';
-import type { story } from './${input.name}.story';
-
-export const storyClient = createWrappedStoryClient<typeof story>(${input.pascalName});
+export const story = defineStory({
+\tComponent: ${input.pascalName}Playground,
+\targs: {
+\t\tinitial: { children: '${input.pascalName}' },
+\t},
+});
 `;
 }
 
@@ -256,9 +269,9 @@ title: ${input.displayName}
 description: ${input.displayName} component.
 ---
 
-import { storyClient } from '../../../../src/${input.name}/${input.name}.story.client';
+import { story } from '../../../../src/${input.name}/${input.name}.story';
 
-<storyClient.WithControl />
+<story.WithControl />
 
 <include>../../../../../../packages/@luke-ui/react/docs/${input.name}.md</include>
 `;

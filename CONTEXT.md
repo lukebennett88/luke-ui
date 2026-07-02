@@ -33,6 +33,15 @@ when needed, and export refresh.
 - The composed `Field` is a **Primitive** by audience even though it composes other components — it
   exists to be wrapped by `*Field` components, not used directly by app devs.
 
+## Docs prose structure
+
+Every `.docs.md` file follows the same section order: Usage lead-in, Best Practices table, Feature
+sections (ordered by importance to a typical consumer, not alphabetically), Accessibility, then
+cross-reference sections last. All prose is authored in the package
+(`src/<component>/<component>.docs.md`); `apps/docs` MDX files are wiring only — frontmatter, an
+interactive demo, and an `<include>` of the generated package doc. Full rationale in
+[ADR-0006](docs/adr/0006-docs-md-structure-standard.md).
+
 ## Docs rule
 
 Two doc surfaces, two audiences:
@@ -63,3 +72,5 @@ Don't document what isn't part of the public API.
   `[composed]/primitive`
 - [ADR-0003](docs/adr/0003-package-docs-surface.md) — Package docs are a separate AI-native surface
 - [ADR-0004](docs/adr/0004-styling-utilities-public-api.md) — Styling utilities as public API
+- [ADR-0006](docs/adr/0006-docs-md-structure-standard.md) — Standard structure for `.docs.md` prose
+  files

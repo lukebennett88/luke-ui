@@ -1,7 +1,23 @@
-import type { Link } from '@luke-ui/react/link';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { LinkProps } from '@luke-ui/react/link';
+import { Link } from '@luke-ui/react/link';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof Link>(import.meta.url, {
-	initial: { children: 'Link', href: '#' },
-	priorities: ['children', 'href', 'tone', 'isStandalone'],
+const { defineStory } = defineStoryFactory();
+
+type LinkStoryProps = Pick<LinkProps, 'children' | 'href' | 'tone' | 'isStandalone' | 'isDisabled'>;
+
+function LinkPlayground(props: LinkStoryProps) {
+	return (
+		<StoryWrapper>
+			<Link {...props} />
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: LinkPlayground,
+	args: {
+		initial: { children: 'Link', href: '#' },
+	},
 });

@@ -1,7 +1,23 @@
-import type { Emoji } from '@luke-ui/react/emoji';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { EmojiProps } from '@luke-ui/react/emoji';
+import { Emoji } from '@luke-ui/react/emoji';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof Emoji>(import.meta.url, {
-	initial: { emoji: '🎉', label: 'Celebration' },
-	priorities: ['emoji', 'label'],
+const { defineStory } = defineStoryFactory();
+
+type EmojiStoryProps = Pick<EmojiProps, 'emoji' | 'label'>;
+
+function EmojiPlayground(props: EmojiStoryProps) {
+	return (
+		<StoryWrapper>
+			<Emoji {...props} />
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: EmojiPlayground,
+	args: {
+		initial: { emoji: '🎉', label: 'Celebration' },
+	},
 });

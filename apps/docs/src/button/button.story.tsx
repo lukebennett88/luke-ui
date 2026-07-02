@@ -1,7 +1,26 @@
-import type { Button } from '@luke-ui/react/button';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { ButtonProps } from '@luke-ui/react/button';
+import { Button } from '@luke-ui/react/button';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof Button>(import.meta.url, {
-	initial: { children: 'Button' },
-	priorities: ['children', 'tone', 'size', 'isBlock', 'isDisabled', 'isPending'],
+const { defineStory } = defineStoryFactory();
+
+type ButtonStoryProps = Pick<
+	ButtonProps,
+	'children' | 'tone' | 'size' | 'isBlock' | 'isDisabled' | 'isPending'
+>;
+
+function ButtonPlayground(props: ButtonStoryProps) {
+	return (
+		<StoryWrapper>
+			<Button {...props} />
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: ButtonPlayground,
+	args: {
+		initial: { children: 'Button' },
+	},
 });

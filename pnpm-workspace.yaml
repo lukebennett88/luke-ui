@@ -14,7 +14,7 @@ catalog:
   '@capsizecss/metrics': ^4.1.0
   '@capsizecss/vanilla-extract': ^2.0.4
   '@changesets/cli': ^2.31.0
-  '@fumadocs/story': 0.0.14
+  '@fumadocs/story': ^1.1.2
   '@orama/orama': ^3.1.18
   '@react-aria/utils': ^3.34.1
   '@rollup/plugin-babel': ^7.1.0
@@ -23,10 +23,10 @@ catalog:
   '@storybook/addon-vitest': ^10.4.6
   '@storybook/react-vite': ^10.4.6
   '@tailwindcss/vite': ^4.3.1
-  '@tanstack/react-router': 1.158.4
-  '@tanstack/react-start': 1.159.0
-  '@tanstack/router-cli': 1.158.4
-  '@tanstack/start-static-server-functions': 1.159.1
+  '@tanstack/react-router': ^1.158.4
+  '@tanstack/react-start': ^1.159.0
+  '@tanstack/router-cli': ^1.158.4
+  '@tanstack/start-static-server-functions': ^1.159.1
   '@turbo/gen': ^2.10.0
   '@types/mdx': ^2.0.14
   '@types/node': ^26.0.1
@@ -46,9 +46,9 @@ catalog:
   colorjs.io: ^0.6.1
   csstype: ^3.2.3
   eslint-plugin-react-hooks: ^7.1.1
-  fumadocs-core: 16.6.0
-  fumadocs-mdx: 14.2.10
-  fumadocs-ui: 16.6.0
+  fumadocs-core: ^16.10.7
+  fumadocs-mdx: ^14.2.10
+  fumadocs-ui: ^16.10.7
   knip: ^6.23.0
   lucide-react: ^1.22.0
   nitro: npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e
@@ -66,7 +66,7 @@ catalog:
   turbo: ^2.10.0
   typescript: ^6.0.3
   vite: npm:@voidzero-dev/vite-plus-core@latest
-  vitest: 4.1.9
+  vitest: ^4.1.9
   vite-plus: ^0.2.1
 
 catalogMode: prefer

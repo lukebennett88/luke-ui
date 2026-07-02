@@ -1,5 +1,4 @@
 `LoadingSkeleton` expects the Luke UI theme class at the app or root level. See
-
 [Getting Started](/docs/getting-started).
 
 Use it when loading content should keep the same footprint as the loaded state. Text renders as an
@@ -16,6 +15,13 @@ inline skeleton. Elements keep their layout while a skeleton surface is painted 
 ```
 
 All mounted skeletons use the same pulse timing, even when they mount at different times.
+
+## Best Practices
+
+| Guidance | Practices                                                                                                             |
+| -------- | --------------------------------------------------------------------------------------------------------------------- |
+| Do       | Wrap the real content so the skeleton matches its final size exactly.                                                 |
+| Don't    | Use `LoadingSkeleton` for content whose final size is unknown — a size mismatch causes layout shift when it resolves. |
 
 ## Loading state
 
@@ -52,11 +58,6 @@ element.
 </ul>
 ```
 
-## Accessibility
-
-While loading, the skeleton is hidden from assistive technology and cannot be focused or clicked. It
-sets `aria-hidden`, `inert`, `tabIndex={-1}`, and disables pointer events.
-
 ## LoadingSkeletonProvider
 
 Use `LoadingSkeletonProvider` when one loading state controls a group of skeletons. The provider
@@ -91,3 +92,8 @@ avatar.
 	<div style={{ borderRadius: '9999px', height: '3rem', width: '3rem' }} />
 </LoadingSkeleton>
 ```
+
+## Accessibility
+
+While loading, the skeleton is hidden from assistive technology and cannot be focused or clicked. It
+sets `aria-hidden`, `inert`, `tabIndex={-1}`, and disables pointer events.

@@ -1,7 +1,26 @@
-import type { Numeral } from '@luke-ui/react/numeral';
-import { defineComponentStory } from '../lib/define-component-story';
+import { defineStoryFactory } from '@fumadocs/story/vite/client';
+import type { NumeralProps } from '@luke-ui/react/numeral';
+import { Numeral } from '@luke-ui/react/numeral';
+import { StoryWrapper } from '../lib/story-wrapper';
 
-export const story = defineComponentStory<typeof Numeral>(import.meta.url, {
-	initial: { value: 12345.67 },
-	priorities: ['value', 'format', 'currency', 'precision', 'abbreviate'],
+const { defineStory } = defineStoryFactory();
+
+type NumeralStoryProps = Pick<
+	NumeralProps,
+	'value' | 'format' | 'currency' | 'unit' | 'precision' | 'abbreviate'
+>;
+
+function NumeralPlayground(props: NumeralStoryProps) {
+	return (
+		<StoryWrapper>
+			<Numeral {...props} />
+		</StoryWrapper>
+	);
+}
+
+export const story = defineStory({
+	Component: NumeralPlayground,
+	args: {
+		initial: { value: 12345.67 },
+	},
 });

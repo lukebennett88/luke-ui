@@ -2,12 +2,27 @@
 <IconButton icon="add" aria-label="Add item" />
 ```
 
+## Best Practices
+
+| Guidance | Practices                                                                       |
+| -------- | ------------------------------------------------------------------------------- |
+| Do       | Name the action in `aria-label`, not the icon ("Delete row", not "Trash icon"). |
+| Do       | Use `tone="critical"` for destructive icon actions like delete.                 |
+
+## Tone
+
 ```tsx
 <IconButton icon="close" aria-label="Close" tone="ghost" />
 ```
 
 ```tsx
-<IconButton icon="delete" aria-label="Delete" tone="critical" size="small" />
+<IconButton icon="delete" aria-label="Delete" tone="critical" />
+```
+
+## Size
+
+```tsx
+<IconButton icon="delete" aria-label="Delete" size="small" />
 ```
 
 ## Accessibility

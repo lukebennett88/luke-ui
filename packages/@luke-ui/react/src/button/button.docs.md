@@ -5,20 +5,82 @@
 <Button>Save</Button>
 ```
 
+## Best Practices
+
+| Guidance | Practices                                                                                                            |
+| -------- | -------------------------------------------------------------------------------------------------------------------- |
+| Do       | Use one `tone="primary"` button per view for the main action. Use `neutral` or `ghost` for everything else.          |
+| Do       | Write a label that describes the action ("Save changes", "Delete account"), not a vague label like "OK" or "Submit". |
+| Do       | Set `isPending` for actions that take time, like saving or submitting, so the user knows it's working.               |
+| Don't    | Use `Button` for navigation. If it only takes the user to another page, use `Link` instead.                          |
+
+## Tone
+
+Four tones: `primary` (default), `neutral`, `critical`, and `ghost`.
+
+```tsx
+<Button tone="neutral">Cancel</Button>
+```
+
 ```tsx
 <Button tone="critical">Delete</Button>
 ```
 
 ```tsx
-<Button tone="ghost">Cancel</Button>
+<Button tone="ghost">Dismiss</Button>
 ```
+
+## Size
+
+Two sizes: `medium` (default) and `small`.
 
 ```tsx
-<Button isDisabled>Disabled</Button>
+<Button size="small">Save</Button>
 ```
 
-The composed `Button` wraps children in a `Text` element, so long labels
-truncate with an ellipsis automatically. It also shows a `LoadingSpinner` when
+## Icons
+
+Use `startIcon` and `endIcon` to place an icon before or after the label. Icon
+size is inherited from the button's own `size`, so no `size` prop is needed on
+the icon itself.
+
+```tsx
+import { Icon } from '@luke-ui/react/icon';
+
+<Button startIcon={<Icon name="add" aria-hidden />}>Add item</Button>;
+```
+
+## Disabled
+
+Disabled buttons can't be focused or pressed.
+
+```tsx
+<Button isDisabled>Save</Button>
+```
+
+## Pending
+
+Set `isPending` while an action is in flight. A spinner overlays the label and
+the button becomes non-interactive.
+
+```tsx
+<Button isPending>Saving</Button>
+```
+
+## Full width
+
+Set `isBlock` to make the button fill the inline size of its container.
+
+```tsx
+<Button isBlock>Save</Button>
+```
+
+## Accessibility
+
+`Button` wraps its children in `Text`, so it always has a visible accessible
+name — no `aria-label` is needed. The `isPending` spinner is `aria-hidden` and
+does not announce a busy state to screen readers; if the pending state needs to
+be conveyed audibly, change the label text itself (e.g. "Saving…") while
 `isPending` is set.
 
 ## Primitive Button
