@@ -53,7 +53,7 @@ See Token reference below for every valid `color`, `fontFamily`, `fontSize`,
 ## Alignment and numeric glyphs
 
 ```tsx
-<Text textAlign="end" variant="tabular-nums">
+<Text textAlign="end" fontVariantNumeric="tabular-nums">
 	12121.21
 </Text>
 ```

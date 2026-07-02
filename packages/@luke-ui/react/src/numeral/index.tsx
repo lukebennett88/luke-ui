@@ -15,7 +15,8 @@ export type NumeralPrecision = number | readonly [number, number];
  *
  * @tier atom
  */
-export interface NumeralProps extends Omit<TextProps, 'children' | 'textAlign' | 'variant'> {
+export interface NumeralProps
+	extends Omit<TextProps, 'children' | 'textAlign' | 'fontVariantNumeric'> {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;
 	/** Currency code such as `USD`. */
@@ -42,7 +43,7 @@ export interface NumeralProps extends Omit<TextProps, 'children' | 'textAlign' |
 	 * @default 'tabular-nums'
 	 */
 	variant?: Extract<
-		TextProps['variant'],
+		TextProps['fontVariantNumeric'],
 		'diagonal-fractions' | 'ordinal' | 'slashed-zero' | 'tabular-nums'
 	>;
 }
@@ -180,7 +181,7 @@ export function Numeral(props: NumeralProps) {
 			shouldDisableTrim={resolvedShouldDisableTrim}
 			shouldInheritFont={isWithinHeading}
 			textAlign={textAlign}
-			variant={variant}
+			fontVariantNumeric={variant}
 			{...colorProps}
 		>
 			{content}

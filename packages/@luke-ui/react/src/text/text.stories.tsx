@@ -353,16 +353,16 @@ export const LineClamp = meta.story({
 /**
  * Numeric variants enable glyph behavior for fractions, ordinals, and tabular numbers.
  */
-export const Variant = meta.story({
+export const FontVariantNumeric = meta.story({
 	render: (props) => (
 		<div style={stackContainerStyle}>
-			<Text {...props} variant="diagonal-fractions">
+			<Text {...props} fontVariantNumeric="diagonal-fractions">
 				1/2 3/4 5/6
 			</Text>
-			<Text {...props} variant="ordinal">
+			<Text {...props} fontVariantNumeric="ordinal">
 				1st 2nd 3rd 4th
 			</Text>
-			<Text {...props} variant="slashed-zero">
+			<Text {...props} fontVariantNumeric="slashed-zero">
 				012 OQR
 			</Text>
 		</div>

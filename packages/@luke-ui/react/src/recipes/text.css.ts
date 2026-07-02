@@ -72,14 +72,14 @@ export type TextTransform = (typeof textTransformKeys)[number];
 const textAlignKeys = ['start', 'center', 'end'] as const;
 export type TextAlign = (typeof textAlignKeys)[number];
 
-const textVariantKeys = [
+const fontVariantNumericKeys = [
 	'unset',
 	'diagonal-fractions',
 	'ordinal',
 	'slashed-zero',
 	'tabular-nums',
 ] as const;
-export type TextVariant = (typeof textVariantKeys)[number];
+export type TextFontVariantNumeric = (typeof fontVariantNumericKeys)[number];
 
 const textWrapKeys = ['unset', 'balance', 'pretty'] as const;
 export type TextWrap = (typeof textWrapKeys)[number];
@@ -163,8 +163,8 @@ const textAlignVariants = {
 	end: { textAlign: 'end' },
 } as const;
 
-const textVariantVariants = createVariants(textVariantKeys, (variant) => ({
-	fontVariantNumeric: variant === 'unset' ? 'normal' : variant,
+const fontVariantNumericVariants = createVariants(fontVariantNumericKeys, (fontVariantNumeric) => ({
+	fontVariantNumeric: fontVariantNumeric === 'unset' ? 'normal' : fontVariantNumeric,
 }));
 
 const textWrapVariants = {
@@ -246,12 +246,13 @@ export const text = recipeInLayer('recipes', {
 		textDecoration: 'none',
 		textTransform: 'none',
 		textWrap: 'unset',
-		variant: 'unset',
+		fontVariantNumeric: 'unset',
 	},
 	variants: {
 		color: colorVariants,
 		fontFamily: fontFamilyVariants,
 		fontSize: fontSizeVariants,
+		fontVariantNumeric: fontVariantNumericVariants,
 		fontWeight: fontWeightVariants,
 		isVisuallyHidden: {
 			false: {},
@@ -276,7 +277,6 @@ export const text = recipeInLayer('recipes', {
 		textDecoration: textDecorationVariants,
 		textTransform: textTransformVariants,
 		textWrap: textWrapVariants,
-		variant: textVariantVariants,
 	},
 });
 

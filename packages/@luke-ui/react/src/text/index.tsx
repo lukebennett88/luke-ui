@@ -21,6 +21,11 @@ interface TextStyleProps {
 	 */
 	fontSize?: TextVariantProps['fontSize'];
 	/**
+	 * Sets numeric glyph style.
+	 * @default 'unset'
+	 */
+	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
+	/**
 	 * Sets the font weight.
 	 * @default 'regular'
 	 */
@@ -67,11 +72,6 @@ interface TextStyleProps {
 	 * @default 'unset'
 	 */
 	textWrap?: TextVariantProps['textWrap'];
-	/**
-	 * Sets numeric glyph style.
-	 * @default 'unset'
-	 */
-	variant?: TextVariantProps['variant'];
 }
 
 /**
@@ -90,6 +90,7 @@ export function Text(props: TextProps) {
 		color,
 		fontFamily,
 		fontSize,
+		fontVariantNumeric,
 		fontWeight,
 		isVisuallyHidden,
 		lineClamp,
@@ -100,7 +101,6 @@ export function Text(props: TextProps) {
 		textDecoration,
 		textTransform,
 		textWrap,
-		variant,
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
@@ -114,6 +114,7 @@ export function Text(props: TextProps) {
 					color,
 					fontFamily,
 					fontSize,
+					fontVariantNumeric,
 					fontWeight,
 					isVisuallyHidden,
 					lineClamp,
@@ -124,7 +125,6 @@ export function Text(props: TextProps) {
 					textDecoration,
 					textTransform,
 					textWrap,
-					variant,
 				}),
 				className,
 			)}
