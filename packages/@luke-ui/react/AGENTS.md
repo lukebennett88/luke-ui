@@ -1,7 +1,9 @@
 # @luke-ui/react Agent Guide
 
-- Do not hand-edit `.generated/entries.ts` or `package.json` exports; entries are generated, tsdown updates exports at build.
-- When adding a component, use `pnpm generate:component` from repo root (not manual file creation) so the group barrel, styles index, and docs are updated correctly.
+- Do not hand-edit `.generated/entries.ts` or `package.json` exports; entries are generated, tsdown
+  updates exports at build.
+- When adding a component, use `pnpm generate:component` from repo root (not manual file creation)
+  so the group barrel, styles index, and docs are updated correctly.
 - Stories (`*.stories.tsx`) are the tests; there are no separate `*.test.tsx` files.
 - React Compiler is enabled — do not use `useCallback` or `useMemo`; the compiler auto-memoizes.
 
@@ -16,9 +18,12 @@ Each component directory contains:
 
 ## Component Taxonomy
 
-Components follow a three-tier system (Atom/Composed/Primitive). See `docs/CONVENTIONS.md` for definitions.
+Components follow a three-tier system (Atom/Composed/Primitive). See `docs/CONVENTIONS.md` for
+definitions.
 
-**Important:** Primitives (exports from `*/primitive/`) are building blocks for library authors. They are not promoted in beginner app-developer navigation, but they are part of the public API and should have enough generated documentation for power users and agents.
+**Important:** Primitives (exports from `*/primitive/`) are building blocks for library authors.
+They are not promoted in beginner app-developer navigation, but they are part of the public API and
+should have enough generated documentation for power users and agents.
 
 ## Documentation Generation
 
@@ -26,27 +31,39 @@ JSDoc and TypeScript types drive generated docs under `docs/`. When adding or mo
 
 - Function-level JSDoc on the exported component describes what it is for an app developer.
 - The exported `Props` interface carries an `@tier` JSDoc tag (`atom`, `composed`, or `primitive`).
-- Each prop has JSDoc and, where defaults exist in the React component destructure, an `@default` tag.
-- For atom and composed components, re-declare important props inherited from `react-aria-components` on the package's own interface with full JSDoc so they appear in the generated own-props table. Use the type passthrough pattern: `isDisabled?: RACButtonProps['isDisabled']`. Do not re-declare every RAC prop; only include load-bearing props an app developer will reach for.
+- Each prop has JSDoc and, where defaults exist in the React component destructure, an `@default`
+  tag.
+- For atom and composed components, re-declare important props inherited from
+  `react-aria-components` on the package's own interface with full JSDoc so they appear in the
+  generated own-props table. Use the type passthrough pattern:
+  `isDisabled?: RACButtonProps['isDisabled']`. Do not re-declare every RAC prop; only include
+  load-bearing props an app developer will reach for.
 - The long tail of inherited props is covered by the generated extends pointer.
 
-Co-located prose (`*.docs.md`) explains usage judgement. The generator splices it into the rendered page. Do not put props tables, import blocks, or component descriptions in `*.docs.md`; those are generated.
+Co-located prose (`*.docs.md`) explains usage judgement. The generator splices it into the rendered
+page. Do not put props tables, import blocks, or component descriptions in `*.docs.md`; those are
+generated.
 
-Run `pnpm --filter @luke-ui/react generate:docs` to regenerate `docs/`. CI validates the generator stays healthy via `pnpm --filter @luke-ui/react check:docs` (a smoke test, not a stale-file check — the generated output is ignored).
+Run `pnpm --filter @luke-ui/react generate:docs` to regenerate `docs/`. CI validates the generator
+stays healthy via `pnpm --filter @luke-ui/react check:docs` (a smoke test, not a stale-file check —
+the generated output is ignored).
 
 ### Dev-loop
 
 During `pnpm dev` (or `turbo dev`) the docs app does two things:
 
 1. Watches generated `docs/*.md` and hot-reloads the page when those files change.
-2. Watches `src/**/*.{ts,tsx,docs.md}` in this package and re-runs `generate:docs` on change (debounced ~300ms).
+2. Watches `src/**/*.{ts,tsx,docs.md}` in this package and re-runs `generate:docs` on change
+   (debounced ~300ms).
 
 So the in-dev loop for both prose edits and JSDoc edits is the same:
 
-1. Edit a `[component].docs.md`, an `index.tsx` JSDoc tag (`@default`, `@tier`, prop descriptions), or a prop type.
+1. Edit a `[component].docs.md`, an `index.tsx` JSDoc tag (`@default`, `@tier`, prop descriptions),
+   or a prop type.
 2. Save — the generator re-runs, `docs/*.md` updates, the page reloads.
 
-If the generator fails (e.g. mid-edit syntax error) the dev server logs the error and keeps running; the next successful save regenerates.
+If the generator fails (e.g. mid-edit syntax error) the dev server logs the error and keeps running;
+the next successful save regenerates.
 
 For one-off CLI runs:
 

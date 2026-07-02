@@ -16,6 +16,12 @@ export { iconButton } from '../recipes/icon-button.css.js';
 export type { LinkVariants } from '../recipes/link.css.js';
 /** Vanilla-extract recipe for the `Link` primitive's styles. */
 export { link } from '../recipes/link.css.js';
+/** Vanilla-extract class, animation name, and radius-override custom property for the `LoadingSkeleton` component's styles. */
+export {
+	loadingSkeleton,
+	skeletonAnimationName,
+	skeletonBorderRadiusVar,
+} from '../recipes/loading-skeleton.css.js';
 /** Variant type for the `LoadingSpinner` recipe. */
 export type { LoadingSpinnerVariants } from '../recipes/loading-spinner.css.js';
 /** Vanilla-extract recipe for the `LoadingSpinner` primitive's styles. */

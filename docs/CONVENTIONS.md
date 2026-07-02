@@ -22,19 +22,29 @@ Wrap `react-aria-components`. Use `composeRenderProps` for styling.
 
 Components follow a three-tier taxonomy (see `CONTEXT.md` for full definitions):
 
-- **Atom** — single conceptual unit used directly by app devs (`Text`, `Link`, `Icon`, `Heading`, `Numeral`, `Emoji`, `LoadingSpinner`). Gets a doc page.
-- **Composed** — combines atoms/primitives into a ready-to-drop-in pattern (`Button`, `IconButton`, `CloseButton`, `TextField`, `ComboboxField`). Gets a doc page.
-- **Primitive** — building block for library authors only; documented in package docs but not in hosted docs. May be a single file (e.g. `text-input`) or a multi-file kit (e.g. `combobox/*`, `field/*`).
+- **Atom** — single conceptual unit used directly by app devs (`Text`, `Link`, `Icon`, `Heading`,
+  `Numeral`, `Emoji`, `LoadingSpinner`). Gets a doc page.
+- **Composed** — combines atoms/primitives into a ready-to-drop-in pattern (`Button`, `IconButton`,
+  `CloseButton`, `TextField`, `ComboboxField`). Gets a doc page.
+- **Primitive** — building block for library authors only; documented in package docs but not in
+  hosted docs. May be a single file (e.g. `text-input`) or a multi-file kit (e.g. `combobox/*`,
+  `field/*`).
 
 ## Package paths
 
-Composed components are exported at their bare name (`@luke-ui/react/button`).
-Primitive kits that underpin a composed component are exported at
-`[composed]/primitive` (`@luke-ui/react/text-field/primitive`,
-`@luke-ui/react/combobox-field/primitive`, `@luke-ui/react/field/primitive`).
-The `button/primitive` path follows the same pattern.
+Composed components are exported at their bare name (`@luke-ui/react/button`). Primitive kits that
+underpin a composed component are exported at `[composed]/primitive`
+(`@luke-ui/react/text-field/primitive`, `@luke-ui/react/combobox-field/primitive`,
+`@luke-ui/react/field/primitive`). The `button/primitive` path follows the same pattern.
+
+## Testing
+
+Tests colocate with the source file they cover; no `__tests__` directories except for suites that
+don't map to a single file (e.g. e2e). Never add DOM shims (happy-dom, jsdom) — DOM-dependent tests
+run in a real browser (`*.browser.test.{ts,tsx}`, see `vitest.config.ts`), preferring real APIs over
+stubs.
 
 ## Exports
 
-Managed by `tsdown` entry globs. Do not hand-edit `package.json#exports`.
-Create files in paths the package build already discovers.
+Managed by `tsdown` entry globs. Do not hand-edit `package.json#exports`. Create files in paths the
+package build already discovers.

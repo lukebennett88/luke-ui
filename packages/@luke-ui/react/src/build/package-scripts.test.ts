@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
 
-const packageJsonPath = fileURLToPath(new URL('../../../package.json', import.meta.url));
-const turboJsonPath = fileURLToPath(new URL('../../../../../../turbo.json', import.meta.url));
+const packageJsonPath = fileURLToPath(new URL('../../package.json', import.meta.url));
+const turboJsonPath = fileURLToPath(new URL('../../../../../turbo.json', import.meta.url));
 const packageJsonSchema = z.object({
 	scripts: z.record(z.string(), z.string()),
 });
