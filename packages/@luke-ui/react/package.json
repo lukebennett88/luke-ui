@@ -45,7 +45,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "pnpm run generate && pnpm run build:tsdown",
+		"build": "pnpm run build:tsdown",
 		"build:storybook": "storybook build",
 		"build:tsdown": "vp pack",
 		"check:docs": "pnpm run generate:docs",
@@ -62,7 +62,8 @@
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
 		"fix:unsafe": "vp lint . --type-aware --fix-dangerously",
-		"generate": "pnpm run generate:icons && pnpm run generate:color-tokens && pnpm run generate:docs",
+		"generate": "pnpm run generate:assets",
+		"generate:assets": "pnpm run generate:icons && pnpm run generate:color-tokens",
 		"generate:color-tokens": "node scripts/generate-color-tokens.ts && vp fmt .generated/color-tokens.generated.ts --write",
 		"generate:docs": "tsx scripts/generate-docs.ts && vp fmt docs/ dist/docs/ --write",
 		"generate:icons": "tsx scripts/build-icons.ts",
@@ -110,7 +111,8 @@
 		"typescript": "catalog:",
 		"vite": "catalog:",
 		"vite-plus": "catalog:",
-		"vitest": "catalog:"
+		"vitest": "catalog:",
+		"zod": "catalog:"
 	},
 	"peerDependencies": {
 		"react": "catalog:",

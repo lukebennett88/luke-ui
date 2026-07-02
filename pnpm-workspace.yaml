@@ -38,6 +38,7 @@ catalog:
   '@vanilla-extract/rollup-plugin': ^1.5.3
   '@vanilla-extract/vite-plugin': ^5.2.3
   '@vitejs/plugin-react': ^6.0.3
+  zod: ^4.4.3
   '@vitest/browser-playwright': ^4.1.9
   '@vitest/coverage-v8': ^4.1.9
   '@vitest/ui': ^4.1.9
