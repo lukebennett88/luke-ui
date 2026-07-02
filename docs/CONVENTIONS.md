@@ -16,6 +16,15 @@ Managed by `oxfmt`. Tabs, 2 width, 80 width, single quotes (TS), double quotes (
 - **CSS**: `*.css.ts`
 - **Stories**: `*.stories.tsx`
 
+## Testing
+
+Use the smallest test surface that proves the behavior.
+
+- **Unit tests**: pure logic, generators, scripts, docs tooling, package metadata, and non-React utilities. Put these in `src/**/__tests__/**/*.test.ts`.
+- **Storybook play tests**: React component behavior that belongs in a real story. For `@luke-ui/react` components, stories are the component tests; do not add separate `*.test.tsx` component tests unless Storybook cannot exercise the behavior cleanly.
+- **Storybook visual tests**: public UI states and visual variants worth reviewing for regressions.
+- **Browser Vitest tests**: non-component DOM logic that needs real browser APIs and does not fit a story.
+
 ## Component Pattern
 
 Wrap `react-aria-components`. Use `composeRenderProps` for styling.

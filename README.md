@@ -8,7 +8,7 @@ React design system using `vanilla-extract`.
 - `pnpm dev` - Start dev
 - `pnpm build` - Build all
 - `pnpm check` - Lint, format, types
-- `pnpm test` - Run all tests (Storybook + visual regression)
+- `pnpm test` - Run all tests (unit, Storybook, visual regression)
 
 ## Stack
 
