@@ -119,13 +119,11 @@ export const IconContent = meta.story({
 	render: (props) => (
 		<div style={stackStyle}>
 			<div style={rowStyle}>
-				<Button {...props}>
-					<Icon name="add" />
+				<Button {...props} startIcon={<Icon name="add" />}>
 					Start icon
 				</Button>
-				<Button {...props}>
+				<Button {...props} endIcon={<Icon name="add" />}>
 					End icon
-					<Icon name="add" />
 				</Button>
 			</div>
 		</div>
