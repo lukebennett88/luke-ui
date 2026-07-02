@@ -2,8 +2,8 @@
 
 ## Setup
 
-Static CSS foundation. Users import `@luke-ui/react/stylesheet.css`.
-Apply `themeRootClassName` (from `@luke-ui/react/theme`) to host element.
+Static CSS foundation. Users import `@luke-ui/react/stylesheet.css`. Apply `themeRootClassName`
+(from `@luke-ui/react/theme`) to host element.
 
 ## Structure
 
@@ -14,7 +14,9 @@ Apply `themeRootClassName` (from `@luke-ui/react/theme`) to host element.
 
 ## CSS Cascade Layers
 
-All styles are placed in [cascade layers](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Cascade_layers) to guarantee a predictable override order regardless of source order or specificity.
+All styles are placed in
+[cascade layers](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Cascade_layers)
+to guarantee a predictable override order regardless of source order or specificity.
 
 | Layer       | Purpose                                                      |
 | ----------- | ------------------------------------------------------------ |
@@ -23,7 +25,18 @@ All styles are placed in [cascade layers](https://developer.mozilla.org/en-US/do
 | `recipes`   | Component styles (variants, compound variants)               |
 | `utilities` | One-off overrides; highest-priority escape hatch             |
 
-Use `styleInLayer` / `recipeInLayer` / `globalStyleInLayer` from `styles/layered-style.css.ts`. These helpers prevent accidentally writing styles outside a layer.
+Use `styleInLayer` / `recipeInLayer` / `globalStyleInLayer` from `styles/layered-style.css.ts`.
+These helpers prevent accidentally writing styles outside a layer.
+
+Overrides that must beat component recipes go in the `utilities` layer, not `!important`. The
+exception is styles that must also beat consumers' un-layered and inline styles — layers can't do
+that. `LoadingSkeleton` uses `!important` (within the `utilities` layer) for exactly this: it forces
+placeholder styles onto arbitrary wrapped children.
+
+**Reduced-motion gotcha**: the global `prefers-reduced-motion` rule lives in the `reset` layer — the
+lowest — so it cannot disable animations declared in `recipes` or `utilities`. Handle reduced motion
+per animated recipe with an `@media (prefers-reduced-motion: reduce)` override (see
+`recipes/loading-skeleton.css.ts`).
 
 ## Recipes API
 
@@ -35,14 +48,12 @@ import { button, link } from '@luke-ui/react/recipes';
 
 ## Styling Utilities
 
-Styling utilities are public API, exported from `@luke-ui/react/styles`. They
-provide token-aware, type-safe layout and styling helpers for cases where
-component props are too narrow.
+Styling utilities are public API, exported from `@luke-ui/react/styles`. They provide token-aware,
+type-safe layout and styling helpers for cases where component props are too narrow.
 
-The current implementation is vendored `rainbow-sprinkles` in
-`@luke-ui/rainbow-sprinkles`. It places all generated classes in the
-`utilities` cascade layer and supports responsive conditions and pseudo-state
-conditions out of the box.
+The current implementation is vendored `rainbow-sprinkles` in `@luke-ui/rainbow-sprinkles`. It
+places all generated classes in the `utilities` cascade layer and supports responsive conditions and
+pseudo-state conditions out of the box.
 
 ### `createSprinkles()` — layout utility
 
@@ -64,14 +75,14 @@ return (
 );
 ```
 
-Token-backed properties use the design-token scale (e.g. `padding: 'large'`).
-Enum-like properties use CSS-native values (e.g. `display: 'flex'`). Numeric
-flex properties use string primitives (`flexGrow: '1'`).
+Token-backed properties use the design-token scale (e.g. `padding: 'large'`). Enum-like properties
+use CSS-native values (e.g. `display: 'flex'`). Numeric flex properties use string primitives
+(`flexGrow: '1'`).
 
 ### Responsive values
 
-Use object notation keyed by breakpoint names. Values cascade from smaller to
-larger breakpoints, so only overrides need to be specified:
+Use object notation keyed by breakpoint names. Values cascade from smaller to larger breakpoints, so
+only overrides need to be specified:
 
 ```tsx
 const responsive = createSprinkles({
@@ -94,10 +105,9 @@ const interactive = createSprinkles({
 
 ### React Aria Components `render` prop
 
-When you need to style the underlying DOM element directly, combine `createSprinkles` with
-RAC's `render` prop. Use `mergeProps` from `@luke-ui/react/utils` to merge the
-provided DOM props with `createSprinkles()` output so `className` and `style` are
-concatenated correctly:
+When you need to style the underlying DOM element directly, combine `createSprinkles` with RAC's
+`render` prop. Use `mergeProps` from `@luke-ui/react/utils` to merge the provided DOM props with
+`createSprinkles()` output so `className` and `style` are concatenated correctly:
 
 ```tsx
 import { mergeProps } from '@luke-ui/react/utils';
@@ -117,8 +127,7 @@ const buttonBox = createSprinkles({ padding: 'medium' });
 
 ### Shorthands
 
-`px` and `py` expand to both inline or block padding sides. `p` expands to all
-four sides:
+`px` and `py` expand to both inline or block padding sides. `p` expands to all four sides:
 
 ```tsx
 const padded = createSprinkles({ px: 'large', py: 'small' });
@@ -130,24 +139,25 @@ The v1 surface covers:
 
 - **Layout**: `display`, `flexDirection`, `justifyContent`, `alignItems`
 - **Flex item**: `flexGrow`, `flexShrink`, `flexBasis`
-- **Sizing**: `inlineSize`, `blockSize`, `minInlineSize`, `minBlockSize`,
-  `maxInlineSize`, `maxBlockSize`
+- **Sizing**: `inlineSize`, `blockSize`, `minInlineSize`, `minBlockSize`, `maxInlineSize`,
+  `maxBlockSize`
 - **Gaps**: `gap`, `rowGap`, `columnGap`
-- **Padding**: `padding`, `paddingInline`, `paddingBlock`,
-  `paddingInlineStart`, `paddingInlineEnd`, `paddingBlockStart`, `paddingBlockEnd`
+- **Padding**: `padding`, `paddingInline`, `paddingBlock`, `paddingInlineStart`, `paddingInlineEnd`,
+  `paddingBlockStart`, `paddingBlockEnd`
 - **Overflow**: `overflow`, `overflowX`, `overflowY`, `textOverflow`
 - **Pseudo-state**: `backgroundColor` (hover, focus-visible)
 - **Shorthands**: `p`, `px`, `py`
 
-Margin utilities are excluded from the initial surface. CSS-native values are
-used throughout (e.g. `flex-start` rather than `start`).
+Margin utilities are excluded from the initial surface. CSS-native values are used throughout (e.g.
+`flex-start` rather than `start`).
 
-Keep `@luke-ui/react/styles` as a separate export path from `@luke-ui/react/recipes`.
-Recipes are for component-specific styles; styles are for general layout utilities.
+Keep `@luke-ui/react/styles` as a separate export path from `@luke-ui/react/recipes`. Recipes are
+for component-specific styles; styles are for general layout utilities.
 
 ## Implementation
 
-- Use only CSS logical properties (e.g. `margin-inline-start`, `block-size`, `inset-inline`), not physical (`margin-left`, `height`, `left`/`right`).
+- Use only CSS logical properties (e.g. `margin-inline-start`, `block-size`, `inset-inline`), not
+  physical (`margin-left`, `height`, `left`/`right`).
 - Align variant names with public props (`size`, `tone`).
 - Boolean props use `is*` or `should*`.
 

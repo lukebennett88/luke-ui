@@ -27,6 +27,7 @@
 		"./icon-button": "./dist/icon-button/index.js",
 		"./icon-size-context": "./dist/icon-size-context/index.js",
 		"./link": "./dist/link/index.js",
+		"./loading-skeleton": "./dist/loading-skeleton/index.js",
 		"./loading-spinner": "./dist/loading-spinner/index.js",
 		"./numeral": "./dist/numeral/index.js",
 		"./recipes": "./dist/recipes/index.js",
@@ -67,7 +68,8 @@
 		"generate:color-tokens": "node scripts/generate-color-tokens.ts && vp fmt .generated/color-tokens.generated.ts --write",
 		"generate:docs": "tsx scripts/generate-docs.ts && vp fmt docs/ dist/docs/ --write",
 		"generate:icons": "tsx scripts/build-icons.ts",
-		"test": "pnpm run test:unit && tsx scripts/test-visual.ts",
+		"test": "pnpm run test:unit && pnpm run test:browser && tsx scripts/test-visual.ts",
+		"test:browser": "vp test run --project=browser",
 		"test:unit": "vp test run --project=unit",
 		"test:ui": "vp test --project=storybook --ui",
 		"test:watch": "vp test --project=storybook"
