@@ -36,4 +36,5 @@ The `button/primitive` path follows the same pattern.
 
 ## Exports
 
-Managed by `tsdown`. Do not hand-edit `.generated/entries.ts`; it is generated. `package.json#exports` is updated automatically at build.
+Managed by `tsdown` entry globs. Do not hand-edit `package.json#exports`.
+Create files in paths the package build already discovers.

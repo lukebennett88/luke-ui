@@ -4,8 +4,15 @@
 		"@luke-ui/react#check:lint": {
 			"dependsOn": ["build", "generate"]
 		},
+		"@luke-ui/react#check:docs": {
+			"dependsOn": ["build"]
+		},
 		"@luke-ui/react#check:types": {
 			"dependsOn": ["build", "^build"]
+		},
+		"@luke-ui/react#generate:docs": {
+			"dependsOn": ["build"],
+			"outputs": ["docs/**", "dist/docs/**"]
 		},
 		"//#check:format-root": {
 			"cache": true
@@ -53,6 +60,16 @@
 		"dev": {
 			"cache": false,
 			"dependsOn": ["generate", "^build"],
+			"persistent": true
+		},
+		"docs#build": {
+			"dependsOn": ["generate", "^build", "@luke-ui/react#generate:docs"],
+			"env": ["VITE_BASE_URL"],
+			"outputs": [".output/**", ".source/**"]
+		},
+		"docs#dev": {
+			"cache": false,
+			"dependsOn": ["generate", "^build", "@luke-ui/react#generate:docs"],
 			"persistent": true
 		},
 		"dev:storybook": {

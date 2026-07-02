@@ -18,6 +18,8 @@ A building block whose audience is library authors assembling the next composed 
 _Examples_: `TextInput` (via `text-field/primitive`), the `Combobox*` kit (via `combobox-field/primitive`), `button/primitive`, `field/primitive`, the composed-but-internal `Field`.
 _Avoid_: "base", "raw" — use **Primitive**.
 
+**Component creation**: the act of adding a new Atom or Composed component and every public surface needed for it to exist consistently. It includes source, stories, package docs, hosted docs, recipes when needed, and export refresh.
+
 ## Relationships
 
 - A **Composed** component is built from one or more **Atoms** and/or **Primitives**.

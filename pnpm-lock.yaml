@@ -177,6 +177,9 @@ catalogs:
     vite-plus:
       specifier: ^0.2.1
       version: 0.2.1
+    zod:
+      specifier: ^4.4.3
+      version: 4.4.3
 
 overrides:
   vite: npm:@voidzero-dev/vite-plus-core@latest
@@ -457,6 +460,9 @@ importers:
       vitest:
         specifier: 4.1.9
         version: 4.1.9(@types/node@26.0.1)(@vitest/browser-playwright@4.1.9)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(@voidzero-dev/vite-plus-core@0.2.1(@arethetypeswrong/core@0.18.4)(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.37)(yaml@2.9.0))
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
 
   packages/turbo-generators:
     devDependencies:
@@ -466,6 +472,9 @@ importers:
       tsx:
         specifier: 'catalog:'
         version: 4.22.4
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
 
 packages:
 

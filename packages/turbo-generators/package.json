@@ -7,10 +7,12 @@
 		"check:lint": "vp lint . --type-aware",
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
-		"generate:component": "tsx scripts/generate-component.ts"
+		"generate:component": "tsx scripts/generate-component.ts",
+		"test": "vp test run"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",
-		"tsx": "catalog:"
+		"tsx": "catalog:",
+		"zod": "catalog:"
 	}
 }
