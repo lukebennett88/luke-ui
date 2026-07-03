@@ -9,6 +9,7 @@ import {
 	SPINNER_STROKE_WIDTH,
 } from '../sizing/icon-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
+import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { cx } from '../utils/index.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
@@ -69,6 +70,9 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 	const progress = ((clampedValue - normalizedMin) / clampedRange) * 100;
 	const dashOffset = 100 - progress;
 	const mode = hasValue ? 'determinate' : 'indeterminate';
+
+	useSynchronizeAnimations(mode === 'indeterminate' ? styles.spinAnimationName : null);
+	useSynchronizeAnimations(mode === 'indeterminate' ? styles.rubberBandAnimationName : null);
 
 	return (
 		<div

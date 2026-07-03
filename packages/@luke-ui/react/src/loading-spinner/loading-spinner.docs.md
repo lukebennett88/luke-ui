@@ -5,6 +5,9 @@ See [Getting Started](/docs/getting-started).
 <LoadingSpinner aria-label="Loading" />
 ```
 
+All mounted indeterminate spinners rotate and pulse in sync, even when they mount at different
+times.
+
 ## Progress mode
 
 Omit `value` for indeterminate progress. Pass `value` for determinate.

@@ -13,7 +13,11 @@ export {
 	skeletonBorderRadiusVar,
 } from '../recipes/loading-skeleton.css.js';
 export type { LoadingSpinnerVariants } from '../recipes/loading-spinner.css.js';
-export { spinner as loadingSpinner } from '../recipes/loading-spinner.css.js';
+export {
+	rubberBandAnimationName,
+	spinAnimationName,
+	spinner as loadingSpinner,
+} from '../recipes/loading-spinner.css.js';
 export type {
 	TextAlign,
 	TextColor,

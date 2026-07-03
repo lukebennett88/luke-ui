@@ -31,7 +31,8 @@ export const spinner = recipeInLayer('recipes', {
 /** Variant type for the `LoadingSpinner` recipe. */
 export type LoadingSpinnerVariants = RecipeVariants<typeof spinner>;
 
-const spin = keyframes({
+/** Generated name of the spinner's rotation animation. Pass to `useSynchronizeAnimations` so every mounted spinner rotates in lockstep. */
+export const spinAnimationName = keyframes({
 	to: { transform: 'rotate(360deg)' },
 });
 
@@ -45,7 +46,7 @@ export const spinnerState = recipeInLayer('recipes', {
 			indeterminate: {
 				animationDuration: vars.motion.duration.slow,
 				animationIterationCount: 'infinite',
-				animationName: spin,
+				animationName: spinAnimationName,
 				animationTimingFunction: vars.motion.easing.linear,
 			},
 		},
@@ -61,7 +62,8 @@ export const svg = recipeInLayer('recipes', {
 	},
 });
 
-const rubberBand = keyframes({
+/** Generated name of the spinner indicator's rubber-band animation. Pass to `useSynchronizeAnimations` so every mounted spinner pulses in lockstep. */
+export const rubberBandAnimationName = keyframes({
 	'0%': { strokeDasharray: '2 100' },
 	'50%': { strokeDasharray: '65 100', strokeDashoffset: -20 },
 	'100%': { strokeDasharray: '2 100', strokeDashoffset: -100 },
@@ -84,7 +86,7 @@ export const indicator = recipeInLayer('recipes', {
 			indeterminate: {
 				animationDuration: vars.motion.duration.slower,
 				animationIterationCount: 'infinite',
-				animationName: rubberBand,
+				animationName: rubberBandAnimationName,
 				animationTimingFunction: vars.motion.easing.emphasized,
 			},
 		},

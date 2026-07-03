@@ -1,8 +1,8 @@
 import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import * as styles from '../recipes/loading-skeleton.css.js';
+import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { cx } from '../utils/index.js';
-import { useSynchronizeAnimations } from './use-synchronize-animations.js';
 
 const LoadingSkeletonContext = createContext<boolean | null>(null);
 

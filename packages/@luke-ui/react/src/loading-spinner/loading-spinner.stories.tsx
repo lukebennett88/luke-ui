@@ -1,8 +1,10 @@
 import type { LoadingSpinnerProps } from '@luke-ui/react/loading-spinner';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { spinAnimationName } from '@luke-ui/react/recipes';
 import { tokenKeys, tokens } from '@luke-ui/react/tokens';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
+import { useState } from 'react';
+import { expect, userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -15,9 +17,15 @@ const baseArgs = {
 	'aria-label': 'pending',
 } as const satisfies Partial<LoadingSpinnerProps>;
 
-const stackStyle = {
+const flexRowStyle = {
+	display: 'flex',
+	gap: '1rem',
+} as const satisfies CSSProperties;
+
+const flexStackStyle = {
 	alignItems: 'center',
 	display: 'flex',
+	flexDirection: 'column',
 	gap: '1rem',
 } as const satisfies CSSProperties;
 
@@ -39,7 +47,7 @@ const sizes: Array<NonNullable<LoadingSpinnerProps['size']>> = ['small', 'medium
 export const Size = meta.story({
 	args: baseArgs,
 	render: (props) => (
-		<div style={stackStyle}>
+		<div style={flexRowStyle}>
 			{sizes.map((size) => (
 				<LoadingSpinner key={size} size={size} {...props} />
 			))}
@@ -55,10 +63,55 @@ const colors = tokenKeys(tokens.foregroundColor);
 export const Color = meta.story({
 	args: baseArgs,
 	render: (props) => (
-		<div style={stackStyle}>
+		<div style={flexRowStyle}>
 			{colors.map((color) => (
 				<LoadingSpinner color={color} key={color} {...props} />
 			))}
 		</div>
 	),
 });
+
+/**
+ * All mounted indeterminate spinners rotate in sync, even when they mount at different times.
+ */
+export const Synchronized = meta.story({
+	args: baseArgs,
+	play: async ({ canvas, canvasElement }) => {
+		const [first] = findSpinAnimations(canvasElement);
+		if (!first) throw new Error('Expected a spin CSS animation.');
+		first.currentTime = 400;
+
+		await userEvent.click(canvas.getByRole('button', { name: 'Mount another spinner' }));
+		await new Promise(requestAnimationFrame);
+
+		const [, second] = findSpinAnimations(canvasElement);
+		await expect(second?.currentTime).toBe(400);
+	},
+	render: (props) => <StaggeredSpinners {...props} />,
+});
+
+function StaggeredSpinners(props: LoadingSpinnerProps) {
+	const [spinnerCount, setSpinnerCount] = useState(1);
+
+	return (
+		<div style={flexStackStyle}>
+			<div style={flexRowStyle}>
+				{Array.from({ length: spinnerCount }, (_, index) => (
+					<LoadingSpinner key={index} {...props} />
+				))}
+			</div>
+			<button onClick={() => setSpinnerCount((count) => count + 1)} type="button">
+				Mount another spinner
+			</button>
+		</div>
+	);
+}
+
+function findSpinAnimations(root: Element): Array<CSSAnimation> {
+	return root
+		.getAnimations({ subtree: true })
+		.filter(
+			(animation): animation is CSSAnimation =>
+				animation instanceof CSSAnimation && animation.animationName === spinAnimationName,
+		);
+}
