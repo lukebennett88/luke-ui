@@ -36,7 +36,8 @@
 		"react": "catalog:",
 		"react-dom": "catalog:",
 		"ts-morph": "catalog:",
-		"vite": "catalog:"
+		"vite": "catalog:",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@tailwindcss/vite": "catalog:",

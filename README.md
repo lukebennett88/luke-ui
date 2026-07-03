@@ -67,7 +67,7 @@ Components to build:
 
 - [ ] Badge
 - [ ] EmptyState
-- [ ] LoadingSkeleton
+- [x] LoadingSkeleton
 - [ ] Notice
 - [ ] ShowMore
 - [ ] Toast

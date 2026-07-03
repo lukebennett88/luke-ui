@@ -6,6 +6,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
+import * as z from 'zod';
 import browserCollections from '../../../.source/browser';
 import { PageActions } from '../../components/page-actions';
 import { baseOptions } from '../../lib/layout.shared';
@@ -28,7 +29,7 @@ export const Route = createFileRoute('/docs/$')({
 const loader = createServerFn({
 	method: 'GET',
 })
-	.inputValidator((slugs: Array<string>) => slugs)
+	.inputValidator((slugs) => z.array(z.string()).parse(slugs))
 	// staticFunctionMiddleware breaks Vite HMR in dev — only apply in prod build.
 	.middleware(import.meta.env.PROD ? [staticFunctionMiddleware] : [])
 	.handler(async ({ data: slugs }) => {

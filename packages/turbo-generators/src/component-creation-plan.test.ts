@@ -92,4 +92,21 @@ describe('createComponentPlan', () => {
 			'apps/docs/content/docs/components/actions/meta.json',
 		]);
 	});
+
+	it('omits cx from components without styling', () => {
+		const plan = createComponentPlan({
+			docsGroup: 'feedback',
+			name: 'PlainBadge',
+			styling: 'none',
+			tier: 'atom',
+		});
+
+		const source = plan.files.find((file) =>
+			file.path.endsWith('/plain-badge/index.tsx'),
+		)?.contents;
+
+		expect(source).not.toContain("import { cx } from '../utils/index.js';");
+		expect(source).not.toContain('cx(');
+		expect(source).toContain('className={className}');
+	});
 });

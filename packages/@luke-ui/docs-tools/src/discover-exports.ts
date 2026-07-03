@@ -41,6 +41,7 @@ export const DEFAULT_BARREL_PATHS: ReadonlyArray<string> = [
 	'./heading-context',
 	'./icon-size-context',
 	'./recipes',
+	'./styles',
 	'./theme',
 	'./tokens',
 	'./utils',
