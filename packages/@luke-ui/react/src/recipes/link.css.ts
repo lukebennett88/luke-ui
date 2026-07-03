@@ -12,6 +12,7 @@ const base = styleInLayer('recipes', {
 	transitionTimingFunction: vars.motion.easing.standard,
 });
 
+/** Vanilla-extract recipe for the `Link` primitive's styles. */
 export const link = recipeInLayer('recipes', {
 	base,
 	defaultVariants: {
@@ -54,4 +55,5 @@ export const link = recipeInLayer('recipes', {
 	},
 });
 
+/** Variant type for the `Link` recipe. */
 export type LinkVariants = RecipeVariants<typeof link>;

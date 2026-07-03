@@ -19,8 +19,8 @@ function ButtonPlayground(props: ButtonStoryProps) {
 }
 
 export const story = defineStory({
-	Component: ButtonPlayground,
 	args: {
 		initial: { children: 'Button' },
 	},
+	Component: ButtonPlayground,
 });

@@ -50,6 +50,7 @@ const pulse = {
 	},
 } as const satisfies StyleRule;
 
+/** Vanilla-extract class for the `LoadingSkeleton` component's styles. */
 export const loadingSkeleton = styleInLayer('utilities', {
 	selectors: {
 		// Inline mode: the element itself is the skeleton (used when wrapping text).

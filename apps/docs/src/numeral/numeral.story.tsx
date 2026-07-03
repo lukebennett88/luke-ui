@@ -19,8 +19,8 @@ function NumeralPlayground(props: NumeralStoryProps) {
 }
 
 export const story = defineStory({
-	Component: NumeralPlayground,
 	args: {
 		initial: { value: 12345.67 },
 	},
+	Component: NumeralPlayground,
 });

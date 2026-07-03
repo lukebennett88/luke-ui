@@ -11,8 +11,8 @@ const packageRoot = fileURLToPath(new URL('../', import.meta.url));
 const docsDir = join(packageRoot, 'docs');
 
 const catalog = resolvePackageDocsCatalog({
-	packageRoot,
 	exportsField: packageJson.exports,
+	packageRoot,
 });
 
 await mkdir(docsDir, { recursive: true });
@@ -30,7 +30,7 @@ const pages = await Promise.all(
 			importPath: `${packageJson.name}${entry.path.replace(/^\./, '')}`,
 			proseMarkdown,
 		});
-		return { slug: entry.slug, shape: entry.shape, tier: entry.tier, md };
+		return { md, shape: entry.shape, slug: entry.slug, tier: entry.tier };
 	}),
 );
 
@@ -41,9 +41,9 @@ await Promise.all(
 );
 
 const llmsTxt = renderIndex({
-	packageName: packageJson.name,
 	entries: catalog,
 	includeLibraryAuthors: true,
+	packageName: packageJson.name,
 });
 
 await writeFile(join(docsDir, 'llms.txt'), llmsTxt, 'utf8');

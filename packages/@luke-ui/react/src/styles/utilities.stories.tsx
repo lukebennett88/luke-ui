@@ -73,9 +73,9 @@ export const Responsive = meta.story({
 	render: () => {
 		const responsive = createSprinkles({
 			display: 'flex',
-			flexDirection: { xsmall: 'column', medium: 'row' },
-			gap: { xsmall: 'small', medium: 'large' },
-			padding: { xsmall: 'small', large: 'xlarge' },
+			flexDirection: { medium: 'row', xsmall: 'column' },
+			gap: { medium: 'large', xsmall: 'small' },
+			padding: { large: 'xlarge', xsmall: 'small' },
 		});
 		return (
 			<div {...mergeProps({ style: panelStyle }, responsive)}>
@@ -107,8 +107,8 @@ export const Responsive = meta.story({
 export const PseudoStates = meta.story({
 	render: () => {
 		const interactive = createSprinkles({
+			backgroundColor: { default: 'neutral', focusVisible: 'input', hover: 'neutralHover' },
 			padding: 'medium',
-			backgroundColor: { default: 'neutral', hover: 'neutralHover', focusVisible: 'input' },
 		});
 		return (
 			<div style={stackStyle}>
@@ -128,8 +128,8 @@ export const PseudoStates = meta.story({
 export const WithRenderProp = meta.story({
 	render: () => {
 		const buttonBox = createSprinkles({
-			padding: 'medium',
 			backgroundColor: { default: 'neutral', hover: 'neutralHover' },
+			padding: 'medium',
 		});
 		return (
 			<Button

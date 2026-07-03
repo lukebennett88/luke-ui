@@ -16,8 +16,8 @@ function LinkPlayground(props: LinkStoryProps) {
 }
 
 export const story = defineStory({
-	Component: LinkPlayground,
 	args: {
 		initial: { children: 'Link', href: '#' },
 	},
+	Component: LinkPlayground,
 });

@@ -70,8 +70,8 @@
 		"generate:icons": "tsx scripts/build-icons.ts",
 		"test": "pnpm run test:unit && pnpm run test:browser && tsx scripts/test-visual.ts",
 		"test:browser": "vp test run --project=browser",
-		"test:unit": "vp test run --project=unit",
 		"test:ui": "vp test --project=storybook --ui",
+		"test:unit": "vp test run --project=unit",
 		"test:watch": "vp test --project=storybook"
 	},
 	"dependencies": {

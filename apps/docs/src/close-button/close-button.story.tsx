@@ -16,8 +16,8 @@ function CloseButtonPlayground(props: CloseButtonStoryProps) {
 }
 
 export const story = defineStory({
-	Component: CloseButtonPlayground,
 	args: {
 		initial: {},
 	},
+	Component: CloseButtonPlayground,
 });

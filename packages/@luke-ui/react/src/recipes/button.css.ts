@@ -52,6 +52,7 @@ const base = styleInLayer('recipes', {
 	whiteSpace: 'nowrap',
 });
 
+/** Vanilla-extract recipe for the `Button` primitive's button styles. */
 export const button = recipeInLayer('recipes', {
 	base,
 	defaultVariants: {
@@ -141,4 +142,5 @@ export const button = recipeInLayer('recipes', {
 	},
 });
 
+/** Variant type for the `Button` recipe. */
 export type ButtonVariants = RecipeVariants<typeof button>;

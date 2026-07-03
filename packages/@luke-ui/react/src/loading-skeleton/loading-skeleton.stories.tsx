@@ -50,6 +50,9 @@ export const WrappingComponent = meta.story({
 
 /** Wrap text directly so each line gets its own skeleton shape. */
 export const MultilineText = meta.story({
+	play: async ({ canvasElement }) => {
+		await expect(canvasElement.querySelector('span[aria-hidden]')).toBeInTheDocument();
+	},
 	render: () => (
 		<div style={{ maxInlineSize: '16rem' } as const satisfies CSSProperties}>
 			<LoadingSkeleton>
@@ -57,30 +60,22 @@ export const MultilineText = meta.story({
 			</LoadingSkeleton>
 		</div>
 	),
-	play: async ({ canvasElement }) => {
-		await expect(canvasElement.querySelector('span[aria-hidden]')).toBeInTheDocument();
-	},
 });
 
 /** Use `as` when parent markup needs an element other than `span`. */
 export const ElementType = meta.story({
+	play: async ({ canvasElement }) => {
+		await expect(canvasElement.querySelector('li[aria-hidden]')).toBeInTheDocument();
+	},
 	render: () => (
 		<ul>
 			<LoadingSkeleton as="li">List item placeholder</LoadingSkeleton>
 		</ul>
 	),
-	play: async ({ canvasElement }) => {
-		await expect(canvasElement.querySelector('li[aria-hidden]')).toBeInTheDocument();
-	},
 });
 
 /** Use `borderRadius` when the visible control is rounded below the direct child. */
 export const BorderRadius = meta.story({
-	render: () => (
-		<LoadingSkeleton borderRadius="0.25rem">
-			<TextField label="Email" name="email" />
-		</LoadingSkeleton>
-	),
 	play: async ({ canvasElement }) => {
 		const skeletonSurface = requireElement(canvasElement, '[aria-hidden] > *');
 
@@ -91,6 +86,11 @@ export const BorderRadius = meta.story({
 		await expect(skeletonOverlayStyles.opacity).toBe('1');
 		await expect(getBrightnessFilterValue(skeletonOverlayStyles.filter)).toBeLessThanOrEqual(0.9);
 	},
+	render: () => (
+		<LoadingSkeleton borderRadius="0.25rem">
+			<TextField label="Email" name="email" />
+		</LoadingSkeleton>
+	),
 });
 
 /** Wrap fixed-size elements for placeholders such as avatars or media blocks. */
@@ -109,18 +109,21 @@ export const CustomDimensions = meta.story({
 
 /** Pass `isLoading={false}` to render children unchanged. */
 export const Loaded = meta.story({
+	play: async ({ canvas }) => {
+		await expect(canvas.getByRole('button', { name: 'Submit' })).toBeEnabled();
+	},
 	render: () => (
 		<LoadingSkeleton isLoading={false}>
 			<Button>Submit</Button>
 		</LoadingSkeleton>
 	),
-	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('button', { name: 'Submit' })).toBeEnabled();
-	},
 });
 
 /** The provider controls descendant skeletons and overrides local `isLoading` props. */
 export const Provider = meta.story({
+	play: async ({ canvasElement }) => {
+		await expect(canvasElement.querySelectorAll('[aria-hidden]')).toHaveLength(3);
+	},
 	render: () => (
 		<LoadingSkeletonProvider isLoading>
 			<div style={stackStyle}>
@@ -134,9 +137,6 @@ export const Provider = meta.story({
 			</div>
 		</LoadingSkeletonProvider>
 	),
-	play: async ({ canvasElement }) => {
-		await expect(canvasElement.querySelectorAll('[aria-hidden]')).toHaveLength(3);
-	},
 });
 
 async function advanceSkeletonPulseToFadePoint(element: Element) {

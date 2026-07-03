@@ -68,19 +68,14 @@ export default defineConfig({
 				specifier: 'vite-plus/oxlint-plugin',
 			},
 		],
+		options: {
+			typeAware: true,
+			typeCheck: true,
+		},
 		plugins: ['import', 'jsx-a11y', 'react', 'typescript', 'vitest'],
 		rules: {
 			curly: 'off',
 			'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-			'typescript/array-type': ['error', { default: 'generic' }],
-			'typescript/consistent-type-exports': [
-				'error',
-				{ fixMixedExportsWithInlineTypeSpecifier: false },
-			],
-			'typescript/consistent-type-imports': [
-				'error',
-				{ fixStyle: 'separate-type-imports', prefer: 'type-imports' },
-			],
 			'import/no-duplicates': 'error',
 			'jsdoc/check-access': 'error',
 			'jsdoc/check-property-names': 'error',
@@ -107,11 +102,16 @@ export default defineConfig({
 			'react/no-array-index-key': 'off',
 			'react/rules-of-hooks': 'error',
 			'sort-imports': 'off',
+			'typescript/array-type': ['error', { default: 'generic' }],
+			'typescript/consistent-type-exports': [
+				'error',
+				{ fixMixedExportsWithInlineTypeSpecifier: false },
+			],
+			'typescript/consistent-type-imports': [
+				'error',
+				{ fixStyle: 'separate-type-imports', prefer: 'type-imports' },
+			],
 			'vite-plus/prefer-vite-plus-imports': 'error',
-		},
-		options: {
-			typeAware: true,
-			typeCheck: true,
 		},
 	},
 });

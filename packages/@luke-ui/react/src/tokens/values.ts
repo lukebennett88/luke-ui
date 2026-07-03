@@ -1,5 +1,6 @@
 import type { CubicBezierTokenValue, DimensionTokenValue, DurationTokenValue } from './index.js';
 
+/** Token values for responsive breakpoints. */
 export const breakpointValues = {
 	xsmall: { unit: 'px', value: 0 },
 	small: { unit: 'px', value: 640 },
@@ -9,6 +10,7 @@ export const breakpointValues = {
 	xxlarge: { unit: 'px', value: 1536 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
+/** Token values for border radius. */
 export const borderRadiusValues = {
 	none: { unit: 'px', value: 0 },
 	small: { unit: 'px', value: 2 },
@@ -18,11 +20,13 @@ export const borderRadiusValues = {
 	full: { unit: 'px', value: 9999 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
+/** Token values for border width. */
 export const borderWidthValues = {
 	thin: { unit: 'px', value: 1 },
 	thick: { unit: 'px', value: 2 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
+/** Token values for box shadow. */
 export const boxShadowValues = {
 	none: 'none',
 	xsmall: '0px 1px 2px rgba(0, 0, 0, 0.2)',
@@ -32,16 +36,19 @@ export const boxShadowValues = {
 	xlarge: '-8px 8px 32px rgba(0, 0, 0, 0.2)',
 } as const;
 
+/** Token values for control (interactive element) sizes. */
 export const controlSizeValues = {
 	small: { unit: 'px', value: 32 },
 	medium: { unit: 'px', value: 40 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
+/** Token values for font family. */
 export const fontFamilyValues = {
 	sans: "ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
 	mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
 } as const;
 
+/** Token values for font size. */
 export const fontSizeValues = {
 	xxsmall: { unit: 'px', value: 10 },
 	xsmall: { unit: 'px', value: 12 },
@@ -59,12 +66,14 @@ export const fontSizeValues = {
 	h6: { unit: 'px', value: 14 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
+/** Token values for font weight. */
 export const fontWeightValues = {
 	regular: 400,
 	medium: 500,
 	bold: 700,
 } as const;
 
+/** Token values for icon size. */
 export const iconSizeValues = {
 	xsmall: { unit: 'px', value: 16 },
 	small: { unit: 'px', value: 20 },
@@ -72,12 +81,14 @@ export const iconSizeValues = {
 	large: { unit: 'px', value: 32 },
 } as const satisfies Record<string, DimensionTokenValue>;
 
+/** Token values for line height. */
 export const lineHeightValues = {
 	nospace: 1,
 	tight: 1.25,
 	loose: 1.5,
 } as const;
 
+/** Token values for motion (animation) duration. */
 export const motionDurationValues = {
 	quick: { unit: 'ms', value: 120 },
 	fast: { unit: 'ms', value: 150 },
@@ -85,6 +96,7 @@ export const motionDurationValues = {
 	slower: { unit: 's', value: 2 },
 } as const satisfies Record<string, DurationTokenValue>;
 
+/** Token values for motion easing curves. */
 export const motionEasingValues = {
 	emphasized: [0.42, 0, 0.58, 1],
 	exit: [0, 0, 0.58, 1],
@@ -92,6 +104,7 @@ export const motionEasingValues = {
 	standard: [0.4, 0, 0.2, 1],
 } as const satisfies Record<string, CubicBezierTokenValue>;
 
+/** Token values for spacing. */
 export const spaceValues = {
 	none: { unit: 'px', value: 0 },
 	xxsmall: { unit: 'px', value: 4 },

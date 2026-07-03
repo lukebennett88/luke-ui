@@ -40,7 +40,7 @@ async function readJson(path: string, title: string): Promise<Record<string, unk
 		return docsMetaSchema.parse(json);
 	} catch (err) {
 		if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
-			return { title, pages: [] };
+			return { pages: [], title };
 		}
 		throw err;
 	}

@@ -19,8 +19,8 @@ function TextFieldPlayground(props: TextFieldStoryProps) {
 }
 
 export const story = defineStory({
-	Component: TextFieldPlayground,
 	args: {
 		initial: { label: 'Email', name: 'email' },
 	},
+	Component: TextFieldPlayground,
 });

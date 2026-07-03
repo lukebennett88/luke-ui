@@ -6,6 +6,7 @@ export const iconButtonReset = styleInLayer('utilities', {
 	paddingInline: 0,
 });
 
+/** Vanilla-extract recipe for the `IconButton` primitive's styles. */
 export const iconButton = recipeInLayer('recipes', {
 	variants: {
 		size: {
@@ -19,4 +20,5 @@ export const iconButton = recipeInLayer('recipes', {
 	},
 });
 
+/** Variant type for the `IconButton` recipe. */
 export type IconButtonVariants = RecipeVariants<typeof iconButton>;

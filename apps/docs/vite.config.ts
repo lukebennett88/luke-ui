@@ -13,8 +13,8 @@ import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
 import { nitro } from 'nitro/vite';
 import { readdir, readFile } from 'node:fs/promises';
-import { defineConfig, lazyPlugins } from 'vite-plus';
 import type { Plugin } from 'vite-plus';
+import { defineConfig, lazyPlugins } from 'vite-plus';
 import packageJson from '../../packages/@luke-ui/react/package.json' with { type: 'json' };
 import { mapPublicToInternal, toInternal, toPublic } from './src/lib/markdown-url';
 
@@ -72,16 +72,30 @@ function packageDocsPlugin(catalog: Array<PackageDocsCatalogEntry>): Plugin {
 	const id = 'virtual:package-docs';
 	const resolved = `\0${id}`;
 	const metadata: Array<PackageDocsCatalogMetadata> = catalog.map((entry) => ({
-		path: entry.path,
-		target: entry.target,
-		slug: entry.slug,
-		shape: entry.shape,
+		description: entry.description,
 		pageKind: entry.pageKind,
+		path: entry.path,
+		shape: entry.shape,
+		slug: entry.slug,
+		target: entry.target,
 		tier: entry.tier,
 		title: entry.title,
-		description: entry.description,
 	}));
 	return {
+		configureServer(server) {
+			server.watcher.add(packageDocsDir);
+			const handle = (filePath: string) => {
+				if (!filePath.endsWith('.md') || !filePath.startsWith(packageDocsDir)) return;
+				const mod = server.moduleGraph.getModuleById(resolved);
+				if (mod) {
+					server.moduleGraph.invalidateModule(mod);
+					server.ws.send({ type: 'full-reload' });
+				}
+			};
+			server.watcher.on('add', handle);
+			server.watcher.on('change', handle);
+			server.watcher.on('unlink', handle);
+		},
 		enforce: 'pre',
 		async load(loadId) {
 			if (loadId !== resolved) return null;
@@ -100,20 +114,6 @@ function packageDocsPlugin(catalog: Array<PackageDocsCatalogEntry>): Plugin {
 				`export const packageDocsCatalog = ${JSON.stringify(metadata)};`,
 				`export const packageDocs = ${JSON.stringify(Object.fromEntries(entries))};`,
 			].join('\n');
-		},
-		configureServer(server) {
-			server.watcher.add(packageDocsDir);
-			const handle = (filePath: string) => {
-				if (!filePath.endsWith('.md') || !filePath.startsWith(packageDocsDir)) return;
-				const mod = server.moduleGraph.getModuleById(resolved);
-				if (mod) {
-					server.moduleGraph.invalidateModule(mod);
-					server.ws.send({ type: 'full-reload' });
-				}
-			};
-			server.watcher.on('add', handle);
-			server.watcher.on('change', handle);
-			server.watcher.on('unlink', handle);
 		},
 		name: 'package-docs',
 		resolveId(source) {
@@ -256,8 +256,8 @@ function packageSourceWatcherPlugin(): Plugin {
 
 export default defineConfig(async () => {
 	const packageDocsCatalog = resolvePackageDocsCatalog({
-		packageRoot: packageRootDir,
 		exportsField: packageJson.exports,
+		packageRoot: packageRootDir,
 	});
 	const markdownPrerenderPages = await getMarkdownPrerenderPages(packageDocsCatalog);
 

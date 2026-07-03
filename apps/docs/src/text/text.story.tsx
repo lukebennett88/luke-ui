@@ -13,13 +13,13 @@ type TextStoryProps = Pick<
 	| 'lineHeight'
 	| 'color'
 	| 'fontFamily'
+	| 'fontVariantNumeric'
 	| 'fontWeight'
 	| 'textTransform'
 	| 'textDecoration'
 	| 'lineClamp'
 	| 'shouldDisableTrim'
 	| 'textAlign'
-	| 'variant'
 >;
 
 function TextPlayground(props: TextStoryProps) {
@@ -31,10 +31,10 @@ function TextPlayground(props: TextStoryProps) {
 }
 
 export const story = defineStory({
-	Component: TextPlayground,
 	args: {
 		initial: {
 			children: 'The quick brown fox jumps over the lazy dog.',
 		},
 	},
+	Component: TextPlayground,
 });

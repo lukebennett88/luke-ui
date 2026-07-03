@@ -1,5 +1,6 @@
 import type { DesignTokenGroup, TokenName } from './index.js';
 
+/** Constructs a typed `DesignTokenGroup` from a type string and a values record. */
 export function toTokenGroup<TType extends string, TValues extends Record<string, unknown>>(
 	type: TType,
 	values: TValues,
@@ -15,6 +16,7 @@ export function toTokenGroup<TType extends string, TValues extends Record<string
 	return group;
 }
 
+/** Returns the token names from a `DesignTokenGroup`, excluding the `$type` key. */
 export function tokenKeys<TGroup extends { $type: string }>(
 	group: TGroup,
 ): Array<TokenName<TGroup>> {

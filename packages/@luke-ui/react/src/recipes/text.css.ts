@@ -64,12 +64,15 @@ const fontWeightKeys = tokenKeys(tokens.fontWeight);
 const lineHeightKeys = tokenKeys(tokens.lineHeight);
 
 const textDecorationKeys = ['none', 'underline', 'line-through', 'inherit'] as const;
+/** Text decoration variant values. */
 export type TextDecoration = (typeof textDecorationKeys)[number];
 
 const textTransformKeys = ['none', 'capitalize', 'uppercase', 'lowercase', 'inherit'] as const;
+/** Text transform variant values. */
 export type TextTransform = (typeof textTransformKeys)[number];
 
 const textAlignKeys = ['start', 'center', 'end'] as const;
+/** Text alignment variant values. */
 export type TextAlign = (typeof textAlignKeys)[number];
 
 const fontVariantNumericKeys = [
@@ -79,13 +82,18 @@ const fontVariantNumericKeys = [
 	'slashed-zero',
 	'tabular-nums',
 ] as const;
+/** Numeric glyph variant values. */
 export type TextFontVariantNumeric = (typeof fontVariantNumericKeys)[number];
 
 const textWrapKeys = ['unset', 'balance', 'pretty'] as const;
+/** Text wrap variant values. */
 export type TextWrap = (typeof textWrapKeys)[number];
 
+/** Text color variant values. */
 export type TextColor = ForegroundColorToken | 'inherit';
+/** Text font-family variant values. */
 export type TextFontFamily = FontFamilyToken;
+/** Text font-weight variant values. */
 export type TextFontWeight = FontWeightToken | 'inherit';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
@@ -116,6 +124,7 @@ const lineClampVariants = {
 	5: lineClampMultiLine(5),
 } as const;
 
+/** Text line-clamp variant values. */
 export type TextLineClampVariant = keyof typeof lineClampVariants;
 
 const base = styleInLayer('recipes', {
@@ -229,6 +238,7 @@ const typographyCompoundVariants = (() => {
 	return variants;
 })();
 
+/** Vanilla-extract recipe for the `Text` primitive's styles. */
 export const text = recipeInLayer('recipes', {
 	base,
 	compoundVariants: typographyCompoundVariants,
@@ -280,4 +290,5 @@ export const text = recipeInLayer('recipes', {
 	},
 });
 
+/** Aggregate variant type for the `Text` recipe. */
 export type TextVariants = RecipeVariants<typeof text>;

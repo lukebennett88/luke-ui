@@ -22,6 +22,7 @@ export const iconSizeVariants = {
 	},
 } as const;
 
+/** Vanilla-extract recipe for the `Icon` primitive's styles. */
 export const icon = recipeInLayer('recipes', {
 	base: {
 		display: 'inline-flex',
@@ -35,4 +36,5 @@ export const icon = recipeInLayer('recipes', {
 	},
 });
 
+/** Variant type for the `Icon` recipe. */
 export type IconVariants = RecipeVariants<typeof icon>;

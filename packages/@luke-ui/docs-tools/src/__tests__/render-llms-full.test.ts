@@ -50,8 +50,8 @@ describe('sortLlmsFullEntries', () => {
 
 	it('drops entries that do not belong to a bucket (assets, unknown tiers)', () => {
 		const entries: Array<LlmsFullFixture> = [
-			{ slug: 'stylesheet', shape: 'asset', tier: 'n/a', md: md('stylesheet') },
-			{ slug: 'button', shape: 'component', tier: 'composed', md: md('button') },
+			{ md: md('stylesheet'), shape: 'asset', slug: 'stylesheet', tier: 'n/a' },
+			{ md: md('button'), shape: 'component', slug: 'button', tier: 'composed' },
 			// component with tier 'n/a' should not slip through as composed.
 			{ md: md('mystery'), shape: 'component', slug: 'mystery', tier: 'n/a' },
 		];
@@ -61,8 +61,8 @@ describe('sortLlmsFullEntries', () => {
 
 	it('treats atoms before composed regardless of slug ordering', () => {
 		const entries: Array<LlmsFullFixture> = [
-			{ slug: 'aardvark', shape: 'component', tier: 'composed', md: md('aardvark') },
-			{ slug: 'zebra', shape: 'component', tier: 'atom', md: md('zebra') },
+			{ md: md('aardvark'), shape: 'component', slug: 'aardvark', tier: 'composed' },
+			{ md: md('zebra'), shape: 'component', slug: 'zebra', tier: 'atom' },
 		];
 		const sorted = sortLlmsFullEntries(entries).map((e) => e.slug);
 		expect(sorted).toEqual(['zebra', 'aardvark']);
@@ -84,8 +84,8 @@ describe('sortLlmsFullEntries', () => {
 
 	it('does not mutate the input array', () => {
 		const entries: Array<LlmsFullFixture> = [
-			{ slug: 'b', shape: 'component', tier: 'composed', md: md('b') },
-			{ slug: 'a', shape: 'component', tier: 'composed', md: md('a') },
+			{ md: md('b'), shape: 'component', slug: 'b', tier: 'composed' },
+			{ md: md('a'), shape: 'component', slug: 'a', tier: 'composed' },
 		];
 		const snapshot = entries.map((e) => e.slug);
 		sortLlmsFullEntries(entries);

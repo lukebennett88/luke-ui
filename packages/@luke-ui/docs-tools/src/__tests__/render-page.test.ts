@@ -25,16 +25,16 @@ function componentEntry(
 	overrides: Partial<PackageDocsComponentEntry> = {},
 ): PackageDocsComponentEntry {
 	return {
-		path: './button',
-		target: './dist/button/index.js',
-		slug: 'button',
-		shape: 'component',
+		description: 'Sample composed button.',
 		pageKind: 'component',
+		parsed: sampleParsed,
+		path: './button',
+		shape: 'component',
+		slug: 'button',
+		sourcePath: '/src/button/index.tsx',
+		target: './dist/button/index.js',
 		tier: 'composed',
 		title: 'Button',
-		description: 'Sample composed button.',
-		sourcePath: '/src/button/index.tsx',
-		parsed: sampleParsed,
 		...overrides,
 	};
 }
@@ -52,25 +52,25 @@ function renderComponent(
 
 const sampleExports = [
 	{
-		name: 'WidgetControl',
 		description: 'The main control.',
+		name: 'WidgetControl',
 		type: 'function WidgetControl(props: WidgetControlProps): JSX.Element',
 	},
-	{ name: 'WidgetItem', description: 'A single item.', type: undefined },
+	{ description: 'A single item.', name: 'WidgetItem', type: undefined },
 ];
 
 function barrelEntry(overrides: Partial<PackageDocsBarrelEntry> = {}): PackageDocsBarrelEntry {
 	return {
-		path: './combobox-field/primitive',
-		target: './dist/combobox-field/primitive/index.js',
-		slug: 'combobox-field-primitive',
-		shape: 'component',
+		description: '',
 		pageKind: 'barrel',
+		parsed: { description: '', exports: sampleExports },
+		path: './combobox-field/primitive',
+		shape: 'component',
+		slug: 'combobox-field-primitive',
+		sourcePath: '/src/combobox-field/primitive/index.tsx',
+		target: './dist/combobox-field/primitive/index.js',
 		tier: 'primitive',
 		title: 'Combobox Field (primitive)',
-		description: '',
-		sourcePath: '/src/combobox-field/primitive/index.tsx',
-		parsed: { description: '', exports: sampleExports },
 		...overrides,
 	};
 }
@@ -86,8 +86,8 @@ function renderBarrel(entryOverrides: Partial<PackageDocsBarrelEntry> = {}): str
 describe('renderPage component body', () => {
 	it('uses resolved catalog metadata for the header', () => {
 		const page = renderComponent({
-			title: 'Resolved Button',
 			description: 'Resolved description.',
+			title: 'Resolved Button',
 		});
 		expect(page).toMatch(/^# Resolved Button\n/);
 		expect(page).toContain('> Resolved description.');
@@ -100,11 +100,11 @@ describe('renderPage component body', () => {
 	it('uses parsed.componentName for the import identifier when the export is renamed', () => {
 		const page = renderPage({
 			entry: componentEntry({
+				parsed: { ...sampleParsed, componentName: 'TextInput' },
 				path: './text-field/primitive',
 				slug: 'text-field-primitive',
 				tier: 'primitive',
 				title: 'Text Field (primitive)',
-				parsed: { ...sampleParsed, componentName: 'TextInput' },
 			}),
 			importPath: '@luke-ui/react/text-field/primitive',
 			proseMarkdown: undefined,
@@ -146,11 +146,11 @@ describe('renderPage barrel body', () => {
 				description: '',
 				exports: [
 					{
-						name: 'HeadingLevel',
 						description: 'Allowed levels.',
+						name: 'HeadingLevel',
 						type: 'type HeadingLevel = 1',
 					},
-					{ name: 'HeadingLevels', description: 'Provider.', type: undefined },
+					{ description: 'Provider.', name: 'HeadingLevels', type: undefined },
 				],
 			},
 		});

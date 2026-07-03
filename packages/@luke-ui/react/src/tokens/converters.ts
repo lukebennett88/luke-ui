@@ -6,6 +6,7 @@ import type {
 	DurationTokenValue,
 } from './index.js';
 
+/** Converts a `DimensionTokenValue` to a rem string. */
 export function dimensionToRemString(value: DimensionTokenValue, base: number = 16): string {
 	return value.unit === 'rem' ? `${value.value}rem` : pxToRem(value.value, base);
 }
@@ -14,16 +15,19 @@ export function dimensionToPxNumber(value: DimensionTokenValue, base: number = 1
 	return value.unit === 'px' ? value.value : value.value * base;
 }
 
+/** Converts a `DurationTokenValue` to a CSS time string. */
 export function durationToString(value: DurationTokenValue): string {
 	return `${value.value}${value.unit}`;
 }
 
+/** Converts a `CubicBezierTokenValue` to a `cubic-bezier(...)` CSS string. */
 export function cubicBezierToString(value: CubicBezierTokenValue): string {
 	return `cubic-bezier(${value[0]}, ${value[1]}, ${value[2]}, ${value[3]})`;
 }
 
 const functionLikeColorSpaces = new Set(['hsl', 'hwb', 'lab', 'lch', 'oklab', 'oklch']);
 
+/** Converts a `ColorTokenValue` to a CSS color string. */
 export function colorToCssString(value: ColorTokenValue): string {
 	if (value.components.length === 0) {
 		throw new Error(`Color token "${value.colorSpace}" has no components`);

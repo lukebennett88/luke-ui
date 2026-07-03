@@ -19,8 +19,8 @@ function IconButtonPlayground(props: IconButtonStoryProps) {
 }
 
 export const story = defineStory({
-	Component: IconButtonPlayground,
 	args: {
 		initial: { 'aria-label': 'Add', icon: 'add' },
 	},
+	Component: IconButtonPlayground,
 });

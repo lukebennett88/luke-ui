@@ -22,6 +22,7 @@ const groupInvalidFocusWithinSelector = `&:where(${invalidState}):where(${focusW
 const groupReadOnlySelector = `&:where(${readOnlyState})`;
 const descendantDisabledSelector = `:where(${descendantDisabledState}) &`;
 
+/** Vanilla-extract recipe for the `TextInput` group styles. */
 export const textInputGroup = recipeInLayer('recipes', {
 	base: {
 		'@media': {
@@ -111,6 +112,7 @@ export const textInputGroup = recipeInLayer('recipes', {
 	},
 });
 
+/** Vanilla-extract recipe for the `TextInput` control styles. */
 export const textInputControl = recipeInLayer('recipes', {
 	base: {
 		appearance: 'none',
@@ -163,6 +165,7 @@ export const textInputControl = recipeInLayer('recipes', {
 	},
 });
 
+/** Vanilla-extract recipe for the `TextInput` start-adornment styles. */
 export const textInputAdornmentStart = recipeInLayer('recipes', {
 	base: {
 		alignItems: 'center',
@@ -198,6 +201,7 @@ export const textInputAdornmentStart = recipeInLayer('recipes', {
 	},
 });
 
+/** Vanilla-extract recipe for the `TextInput` end-adornment styles. */
 export const textInputAdornmentEnd = recipeInLayer('recipes', {
 	base: {
 		alignItems: 'center',
@@ -234,4 +238,5 @@ export const textInputAdornmentEnd = recipeInLayer('recipes', {
 	},
 });
 
+/** Variant type for the `TextInput` recipe. */
 export type TextInputVariants = RecipeVariants<typeof textInputGroup>;

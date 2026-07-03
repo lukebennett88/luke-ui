@@ -1,6 +1,6 @@
-export { defineSprinkles } from './define-sprinkles.js';
-export { defineProperties } from './define-properties.js';
 export type { SprinklesFn } from './create-runtime-fn.js';
+export { defineProperties } from './define-properties.js';
+export { defineSprinkles } from './define-sprinkles.js';
 export type {
 	ConfigConditions,
 	ConfigDynamicProperties,

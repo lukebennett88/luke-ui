@@ -16,6 +16,7 @@ const base = styleInLayer('recipes', {
 	flexShrink: 0,
 });
 
+/** Vanilla-extract recipe for the `LoadingSpinner` primitive's styles. */
 export const spinner = recipeInLayer('recipes', {
 	base,
 	defaultVariants: {
@@ -27,6 +28,7 @@ export const spinner = recipeInLayer('recipes', {
 	},
 });
 
+/** Variant type for the `LoadingSpinner` recipe. */
 export type LoadingSpinnerVariants = RecipeVariants<typeof spinner>;
 
 const spin = keyframes({

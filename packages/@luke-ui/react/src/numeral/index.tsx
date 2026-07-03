@@ -15,8 +15,10 @@ export type NumeralPrecision = number | readonly [number, number];
  *
  * @tier atom
  */
-export interface NumeralProps
-	extends Omit<TextProps, 'children' | 'textAlign' | 'fontVariantNumeric'> {
+export interface NumeralProps extends Omit<
+	TextProps,
+	'children' | 'textAlign' | 'fontVariantNumeric'
+> {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;
 	/** Currency code such as `USD`. */
@@ -178,10 +180,10 @@ export function Numeral(props: NumeralProps) {
 		<Text
 			{...textProps}
 			elementType={elementType}
+			fontVariantNumeric={variant}
 			shouldDisableTrim={resolvedShouldDisableTrim}
 			shouldInheritFont={isWithinHeading}
 			textAlign={textAlign}
-			fontVariantNumeric={variant}
 			{...colorProps}
 		>
 			{content}

@@ -8,8 +8,8 @@
 		"./package-docs-catalog": "./src/package-docs-catalog.ts",
 		"./parse-types": "./src/parse-types.ts",
 		"./render-index": "./src/render-index.ts",
-		"./render-page": "./src/render-page.ts",
 		"./render-llms-full": "./src/render-llms-full.ts",
+		"./render-page": "./src/render-page.ts",
 		"./title": "./src/title.ts"
 	},
 	"scripts": {

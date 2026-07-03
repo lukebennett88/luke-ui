@@ -19,8 +19,8 @@ function LoadingSpinnerPlayground(props: LoadingSpinnerStoryProps) {
 }
 
 export const story = defineStory({
-	Component: LoadingSpinnerPlayground,
 	args: {
 		initial: { 'aria-label': 'Loading' },
 	},
+	Component: LoadingSpinnerPlayground,
 });

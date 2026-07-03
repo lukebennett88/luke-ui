@@ -16,8 +16,8 @@ function IconPlayground(props: IconStoryProps) {
 }
 
 export const story = defineStory({
-	Component: IconPlayground,
 	args: {
 		initial: { name: 'add', title: 'Add' },
 	},
+	Component: IconPlayground,
 });

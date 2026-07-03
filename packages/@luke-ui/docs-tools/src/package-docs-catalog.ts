@@ -11,32 +11,32 @@ import { parseBarrel, parseComponent } from '@luke-ui/docs-tools/parse-types';
 import { slugToTitle } from '@luke-ui/docs-tools/title';
 
 interface PackageDocsCatalogEntryBase {
-	path: string;
-	target: string;
-	slug: string;
-	shape: ExportShape;
+	description: string;
 	pageKind: ExportPageKind;
+	path: string;
+	shape: ExportShape;
+	slug: string;
+	target: string;
 	tier: ExportTier;
 	title: string;
-	description: string;
 }
 
 export interface PackageDocsAssetEntry extends PackageDocsCatalogEntryBase {
-	shape: 'asset';
 	pageKind: 'asset';
+	shape: 'asset';
 	tier: 'n/a';
 }
 
 export interface PackageDocsComponentEntry extends PackageDocsCatalogEntryBase {
 	pageKind: 'component';
-	sourcePath: string;
 	parsed: ParsedComponent;
+	sourcePath: string;
 }
 
 export interface PackageDocsBarrelEntry extends PackageDocsCatalogEntryBase {
 	pageKind: 'barrel';
-	sourcePath: string;
 	parsed: ParsedBarrel;
+	sourcePath: string;
 }
 
 export type PackageDocsCatalogEntry =
@@ -67,14 +67,14 @@ export function resolvePackageDocsCatalog(
 function resolveEntry(entry: DiscoveredExport): PackageDocsCatalogEntry {
 	if (entry.pageKind === 'asset') {
 		return {
-			path: entry.path,
-			target: entry.target,
-			slug: entry.slug,
-			shape: 'asset',
+			description: '',
 			pageKind: 'asset',
+			path: entry.path,
+			shape: 'asset',
+			slug: entry.slug,
+			target: entry.target,
 			tier: 'n/a',
 			title: slugToTitle(entry.slug, entry.tier),
-			description: '',
 		};
 	}
 
@@ -88,11 +88,11 @@ function resolveEntry(entry: DiscoveredExport): PackageDocsCatalogEntry {
 		const parsed = parseBarrel(entry.sourcePath);
 		return {
 			...entry,
+			description: parsed.description,
 			pageKind: 'barrel',
+			parsed,
 			sourcePath: entry.sourcePath,
 			title: slugToTitle(entry.slug, entry.tier),
-			description: parsed.description,
-			parsed,
 		};
 	}
 
@@ -100,11 +100,11 @@ function resolveEntry(entry: DiscoveredExport): PackageDocsCatalogEntry {
 	const tier = parsed.tier ?? entry.tier;
 	return {
 		...entry,
+		description: parsed.description,
 		pageKind: 'component',
+		parsed,
 		sourcePath: entry.sourcePath,
 		tier,
 		title: slugToTitle(entry.slug, tier),
-		description: parsed.description,
-		parsed,
 	};
 }

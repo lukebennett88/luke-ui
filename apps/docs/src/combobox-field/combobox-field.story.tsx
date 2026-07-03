@@ -31,8 +31,8 @@ function ComboboxFieldPlayground(props: ComboboxFieldStoryProps) {
 }
 
 export const story = defineStory({
-	Component: ComboboxFieldPlayground,
 	args: {
 		initial: { label: 'Country', name: 'country', placeholder: 'Select a country...' },
 	},
+	Component: ComboboxFieldPlayground,
 });

@@ -16,8 +16,8 @@ function EmojiPlayground(props: EmojiStoryProps) {
 }
 
 export const story = defineStory({
-	Component: EmojiPlayground,
 	args: {
 		initial: { emoji: '🎉', label: 'Celebration' },
 	},
+	Component: EmojiPlayground,
 });

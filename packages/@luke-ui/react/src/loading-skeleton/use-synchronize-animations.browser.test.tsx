@@ -1,5 +1,5 @@
-import { act } from 'react';
 import type { ReactNode } from 'react';
+import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, expect, test, vi } from 'vite-plus/test';
@@ -126,20 +126,23 @@ test('leaves animations with other names untouched', () => {
 
 	flushFrames();
 
-	expect(other!.currentTime).toBe(999);
+	expect(other?.currentTime).toBe(999);
 });
 
 test('ignores script-created animations', () => {
 	mount(<PulsingBox name="pulse-a" />);
+	const [container] = containers;
+	if (!container) throw new Error('mount() did not register a container');
 	// An element.animate() Animation is not a CSSAnimation, so the hook must never retime it.
-	const scripted = containers[0]!.animate([{ opacity: 1 }, { opacity: 0.5 }], {
+	const scripted = container.animate([{ opacity: 1 }, { opacity: 0.5 }], {
 		duration: 1000,
 		iterations: Number.POSITIVE_INFINITY,
 	});
 	scripted.pause();
 	scripted.currentTime = 50;
 	const [css] = cssAnimationsNamed('pulse-a');
-	css!.currentTime = 400;
+	if (!css) throw new Error('expected a pulse-a CSSAnimation');
+	css.currentTime = 400;
 
 	flushFrames();
 
@@ -164,7 +167,7 @@ test('batches same-frame mounts into a single getAnimations pass', () => {
 	flushFrames();
 
 	expect(getAnimations).toHaveBeenCalledTimes(1);
-	expect(second!.currentTime).toBe(400);
+	expect(second?.currentTime).toBe(400);
 });
 
 test('schedules no work for a falsy animation name', () => {
@@ -183,7 +186,7 @@ test('schedules no work for a falsy animation name', () => {
 
 	expect(requestFrame).not.toHaveBeenCalled();
 	expect(getAnimations).not.toHaveBeenCalled();
-	expect(animation!.currentTime).toBe(400);
+	expect(animation?.currentTime).toBe(400);
 });
 
 test('mounts without throwing in browsers missing the Web Animations API', () => {

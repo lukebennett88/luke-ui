@@ -5,6 +5,7 @@ import { vars } from '../styles/vars.css.js';
 const dataDisabledSelector = '[data-disabled="true"]';
 const dataRequiredSelector = '[data-required="true"]';
 
+/** Vanilla-extract recipe for the `Field` primitive's layout styles. */
 export const field = recipeInLayer('recipes', {
 	base: {
 		display: 'flex',
@@ -14,6 +15,7 @@ export const field = recipeInLayer('recipes', {
 	},
 });
 
+/** Vanilla-extract recipe for the `Field` primitive's label styles. */
 export const fieldLabel = recipeInLayer('recipes', {
 	base: {
 		color: vars.foregroundColor.primary,
@@ -58,6 +60,7 @@ export const fieldLabel = recipeInLayer('recipes', {
 
 export type FieldLabelVariants = RecipeVariants<typeof fieldLabel>;
 
+/** Vanilla-extract recipe for the `Field` primitive's message styles. */
 export const fieldMessage = recipeInLayer('recipes', {
 	base: {
 		fontSize: vars.font.size.small,

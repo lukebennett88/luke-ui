@@ -19,8 +19,8 @@ function HeadingPlayground(props: HeadingStoryProps) {
 }
 
 export const story = defineStory({
-	Component: HeadingPlayground,
 	args: {
 		initial: { children: 'Heading text' },
 	},
+	Component: HeadingPlayground,
 });

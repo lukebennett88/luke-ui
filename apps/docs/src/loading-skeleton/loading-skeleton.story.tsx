@@ -24,10 +24,10 @@ function LoadingSkeletonPlayground(props: LoadingSkeletonStoryProps) {
 }
 
 export const story = defineStory({
-	Component: LoadingSkeletonPlayground,
 	args: {
 		initial: {
 			children: 'A short paragraph of placeholder copy that wraps across two lines.',
 		},
 	},
+	Component: LoadingSkeletonPlayground,
 });
