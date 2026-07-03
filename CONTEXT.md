@@ -11,8 +11,8 @@ devs use it directly. _Examples_: `Text`, `Link`, `Icon`, `LoadingSpinner`, `Hea
 `Numeral`. _Avoid_: calling these "primitives" in source comments — that name is reserved.
 
 **Composed**: A component that combines two or more atoms or primitives into an opinionated,
-ready-to-drop-in unit aimed at app devs. _Examples_: `Button`, `IconButton`, `CloseButton`,
-`TextField`, `ComboboxField`.
+ready-to-drop-in unit aimed at app devs. _Examples_: `Button`, `IconButton`, `TextField`,
+`ComboboxField`.
 
 **Primitive**: A building block whose audience is library authors assembling the next composed
 component, not app devs. May be a single file (e.g. `text-field/primitive`) or a kit of parts (e.g.

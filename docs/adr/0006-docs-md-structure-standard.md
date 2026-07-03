@@ -26,8 +26,8 @@ all while every other component used one `##` per feature, and nothing flagged i
    do not sort alphabetically and do not default to the order props happen to be declared in the
    TypeScript interface.
 4. **`## Accessibility`** — scaffolded by default for every new component. Delete it if the component
-   has nothing beyond default semantics to call out (e.g. `close-button.docs.md` has none because
-   `CloseButton` hard-codes its `aria-label`).
+   has nothing beyond default semantics to call out (e.g. `text.docs.md` has none because `Text`
+   renders plain text with default semantics).
 5. **Cross-reference sections, always last** —
    - `## Primitive {Name}` when a composed component has a same-subpath single-component primitive
      counterpart, where `{Name}` is the primitive's own exported name (e.g. `## Primitive Button` in

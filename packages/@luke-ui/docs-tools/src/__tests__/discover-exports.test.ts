@@ -8,7 +8,7 @@ describe('discoverExports', () => {
 	it('classifies component-shaped exports as component shape', () => {
 		const exports = {
 			'./button': './dist/button/index.js',
-			'./close-button': './dist/close-button/index.js',
+			'./icon-button': './dist/icon-button/index.js',
 		};
 		const result = discoverExports(exports);
 		expect(result.find((e) => e.path === './button')?.shape).toBe('component');
