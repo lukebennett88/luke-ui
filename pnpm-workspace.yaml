@@ -10,7 +10,7 @@ packages:
 catalog:
   '@arethetypeswrong/core': ^0.18.4
   '@argos-ci/cli': ^6.0.0
-  '@argos-ci/storybook': ^6.0.12
+  '@argos-ci/storybook': ^6.0.13
   '@capsizecss/metrics': ^4.1.0
   '@capsizecss/vanilla-extract': ^2.0.4
   '@changesets/cli': ^2.31.0
@@ -22,17 +22,17 @@ catalog:
   '@storybook/addon-docs': ^10.4.6
   '@storybook/addon-vitest': ^10.4.6
   '@storybook/react-vite': ^10.4.6
-  '@tailwindcss/vite': ^4.3.1
-  '@tanstack/react-router': ^1.158.4
-  '@tanstack/react-start': ^1.159.0
-  '@tanstack/router-cli': ^1.158.4
-  '@tanstack/start-static-server-functions': ^1.159.1
-  '@turbo/gen': ^2.10.0
+  '@tailwindcss/vite': ^4.3.2
+  '@tanstack/react-router': ^1.170.16
+  '@tanstack/react-start': ^1.168.26
+  '@tanstack/router-cli': ^1.167.17
+  '@tanstack/start-static-server-functions': ^1.167.17
+  '@turbo/gen': ^2.10.1
   '@types/mdx': ^2.0.14
   '@types/node': ^26.0.1
   '@types/react': ^19.2.17
   '@types/react-dom': ^19.2.3
-  '@vanilla-extract/css': ^1.21.0
+  '@vanilla-extract/css': ^1.21.1
   '@vanilla-extract/dynamic': ^2.1.5
   '@vanilla-extract/recipes': ^0.5.7
   '@vanilla-extract/rollup-plugin': ^1.5.3
@@ -47,12 +47,12 @@ catalog:
   csstype: ^3.2.3
   eslint-plugin-react-hooks: ^7.1.1
   fumadocs-core: ^16.10.7
-  fumadocs-mdx: ^14.2.10
+  fumadocs-mdx: ^15.0.13
   fumadocs-ui: ^16.10.7
   knip: ^6.23.0
   lucide-react: ^1.22.0
   nitro: npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e
-  node-html-parser: ^8.0.3
+  node-html-parser: ^8.0.4
   playwright: ^1.61.1
   publint: ^0.3.21
   react: ^19.2.7
@@ -60,10 +60,10 @@ catalog:
   react-dom: ^19.2.7
   serve: ^14.2.6
   storybook: ^10.4.6
-  tailwindcss: ^4.3.1
+  tailwindcss: ^4.3.2
   ts-morph: ^28.0.0
   tsx: ^4.22.4
-  turbo: ^2.10.0
+  turbo: ^2.10.1
   typescript: ^6.0.3
   vite: npm:@voidzero-dev/vite-plus-core@latest
   vitest: ^4.1.9
