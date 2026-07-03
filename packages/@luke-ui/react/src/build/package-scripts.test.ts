@@ -38,18 +38,24 @@ describe('package scripts', () => {
 		expect(turboJson.tasks['docs#dev']?.dependsOn).toContain('@luke-ui/react#generate:docs');
 	});
 
-	it('removes stale generated package docs before writing current pages', async () => {
-		await mkdir(docsDir, { recursive: true });
-		await writeFile(staleDocsPath, '# stale page\n', 'utf8');
+	// Runs the real generate-docs script in a subprocess, which needs well over
+	// the default 5s test timeout.
+	it(
+		'removes stale generated package docs before writing current pages',
+		{ timeout: 60_000 },
+		async () => {
+			await mkdir(docsDir, { recursive: true });
+			await writeFile(staleDocsPath, '# stale page\n', 'utf8');
 
-		try {
-			await execFileAsync('pnpm', ['exec', 'tsx', 'scripts/generate-docs.ts'], {
-				cwd: packageRoot,
-			});
+			try {
+				await execFileAsync('pnpm', ['exec', 'tsx', 'scripts/generate-docs.ts'], {
+					cwd: packageRoot,
+				});
 
-			await expect(access(staleDocsPath)).rejects.toMatchObject({ code: 'ENOENT' });
-		} finally {
-			await rm(staleDocsPath, { force: true });
-		}
-	});
+				await expect(access(staleDocsPath)).rejects.toMatchObject({ code: 'ENOENT' });
+			} finally {
+				await rm(staleDocsPath, { force: true });
+			}
+		},
+	);
 });
