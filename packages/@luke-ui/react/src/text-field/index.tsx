@@ -4,6 +4,7 @@ import type {
 	TextFieldProps as RacTextFieldProps,
 } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
+import { composeField } from '../field/compose-field.js';
 import type { FieldErrorProps } from '../field/primitive/error.js';
 import { Field } from '../field/primitive/index.js';
 import type { FieldNecessityIndicator } from '../field/primitive/label.js';
@@ -56,27 +57,19 @@ export interface TextFieldProps
 
 /** Composes `TextInput` with label, description, and error slots. */
 export function TextField(props: TextFieldProps): JSX.Element {
+	const [fieldSlotProps, restProps] = composeField(props);
 	const {
 		adornmentEnd,
 		adornmentStart,
-		description,
-		errorMessage,
 		inputClassName,
-		label,
-		necessityIndicator,
 		placeholder,
 		size = 'medium',
 		...textFieldProps
-	} = props;
+	} = restProps;
 
 	return (
 		<RacTextField {...textFieldProps}>
-			<Field
-				description={description}
-				errorMessage={errorMessage}
-				label={label}
-				necessityIndicator={necessityIndicator}
-			>
+			<Field {...fieldSlotProps}>
 				<TextInput
 					adornmentEnd={adornmentEnd}
 					adornmentStart={adornmentStart}
