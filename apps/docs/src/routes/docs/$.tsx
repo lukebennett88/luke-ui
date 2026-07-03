@@ -60,7 +60,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 				<DocsTitle>{frontmatter.title}</DocsTitle>
 				<DocsBody>
 					{frontmatter.description ? <blockquote>{frontmatter.description}</blockquote> : null}
-					<PageActions githubUrl={githubUrl} markdownUrl={markdownUrl} storybookUrl={storybookUrl} />
+					<PageActions
+						githubUrl={githubUrl}
+						markdownUrl={markdownUrl}
+						storybookUrl={storybookUrl}
+					/>
 					<MDX components={defaultMdxComponents} />
 				</DocsBody>
 			</DocsPage>
