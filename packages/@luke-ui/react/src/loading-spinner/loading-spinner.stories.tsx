@@ -79,13 +79,21 @@ export const Synchronized = meta.story({
 	play: async ({ canvas, canvasElement }) => {
 		const [first] = findSpinAnimations(canvasElement);
 		if (!first) throw new Error('Expected a spin CSS animation.');
+		// Pause so currentTime holds at 400 instead of drifting while we wait for the sync to run.
+		first.pause();
 		first.currentTime = 400;
 
 		await userEvent.click(canvas.getByRole('button', { name: 'Mount another spinner' }));
-		await new Promise(requestAnimationFrame);
 
 		const [, second] = findSpinAnimations(canvasElement);
-		await expect(second?.currentTime).toBe(400);
+		if (!second) throw new Error('Expected a second spin CSS animation.');
+		// Pause before the sync runs so its result can't drift away from 400 while we wait below,
+		// no matter how many frames a loaded CI runner takes to get to it.
+		second.pause();
+
+		await new Promise(requestAnimationFrame);
+		await new Promise(requestAnimationFrame);
+		await expect(second.currentTime).toBe(400);
 	},
 	render: (props) => <StaggeredSpinners {...props} />,
 });
