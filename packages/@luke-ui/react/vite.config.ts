@@ -10,6 +10,7 @@ import packageJson from './package.json' with { type: 'json' };
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
 const preservedDistFiles = new Set(['spritesheet.svg', 'docs']);
+const assetExports = ['./stylesheet.css', './spritesheet.svg'];
 
 async function cleanDistExceptPreservedFiles() {
 	let entries: Array<string>;
@@ -36,7 +37,7 @@ export default defineConfig({
 	pack: {
 		attw: {
 			// Exclude static asset exports. CSS/SVG files do not need type definitions.
-			excludeEntrypoints: ['./stylesheet.css', './spritesheet.svg'],
+			excludeEntrypoints: assetExports,
 			profile: 'esm-only',
 		},
 		clean: false,
@@ -48,10 +49,9 @@ export default defineConfig({
 			'*': ['src/*/index.tsx', 'src/*/index.ts', 'src/*/primitive/index.tsx'],
 		},
 		exports: {
-			customExports: {
-				'./spritesheet.svg': './dist/spritesheet.svg',
-				'./stylesheet.css': './dist/stylesheet.css',
-			},
+			customExports: Object.fromEntries(
+				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
+			),
 		},
 		format: ['esm'],
 		hooks: {

@@ -1,3 +1,9 @@
+/**
+ * `resolvePackageDocsCatalog` is the package interface catalog: the single place
+ * that resolves `package.json#exports` into classified, source-backed entries
+ * (tier, shape, description). Other tooling that needs export/tier/shape data
+ * should consume this rather than re-deriving it from `package.json` directly.
+ */
 import { existsSync } from 'node:fs';
 import type {
 	DiscoveredExport,
