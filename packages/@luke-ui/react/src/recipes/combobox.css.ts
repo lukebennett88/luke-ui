@@ -277,7 +277,7 @@ export const comboboxItem = recipeInLayer('recipes', {
 				cursor: 'not-allowed',
 			},
 			'&[data-focus-visible="true"]': {
-				outlineColor: vars.themeColor.paletteThemePrimary200,
+				outlineColor: vars.themeColor.focusRingColor,
 				outlineOffset: 0,
 				outlineStyle: 'solid',
 				outlineWidth: '3px',

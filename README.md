@@ -36,6 +36,9 @@ React design system using `vanilla-extract`.
 
 ## TODO
 
+- Revise tokens
+- Make docs more visual
+
 Components to build:
 
 ### Core

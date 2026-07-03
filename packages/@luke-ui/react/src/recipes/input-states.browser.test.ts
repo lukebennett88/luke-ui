@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { themeClass, vars } from '../styles/vars.css.js';
-import { comboboxControl } from './combobox.css.js';
+import { comboboxControl, comboboxItem } from './combobox.css.js';
 import { textInputAdornmentStart, textInputGroup } from './text-input.css.js';
 
 let wrappers: Array<HTMLElement> = [];
@@ -87,4 +87,13 @@ test('text input and combobox share the same focus ring color', () => {
 
 	expect(groupOutline).toBe(resolveColor(vars.themeColor.focusRingColor));
 	expect(controlOutline).toBe(groupOutline);
+});
+
+test('combobox items share the control focus ring color', () => {
+	const item = document.createElement('li');
+	item.className = comboboxItem({ size: 'medium' });
+	item.setAttribute('data-focus-visible', 'true');
+	mount(item);
+
+	expect(getComputedStyle(item).outlineColor).toBe(resolveColor(vars.themeColor.focusRingColor));
 });
