@@ -1,99 +1,13 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
-
-const transitionProperty = 'color, background-color, border-color';
-
-const disabledState =
-	'[data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])';
-/** Only explicit disabled attrs; avoids :has() matching an ancestor that contains any disabled input on the page. */
-const descendantDisabledState = '[data-disabled="true"], [aria-disabled="true"]';
-const focusWithinState = '[data-focus-within="true"], :focus-within';
-const hoverState = '[data-hovered="true"], :hover';
-const invalidState =
-	'[data-invalid="true"], [aria-invalid="true"], :has(:invalid), :has(input[aria-invalid="true"])';
-const readOnlyState = '[data-readonly="true"], :has(:read-only)';
-
-const groupDisabledSelector = `&:where(${disabledState})`;
-const groupHoverSelector = `&:where(${hoverState}):not(:where(${disabledState})):not(:where(${focusWithinState}))`;
-const groupFocusWithinSelector = `&:where(${focusWithinState})`;
-const groupInvalidSelector = `&:where(${invalidState})`;
-const groupInvalidFocusWithinSelector = `&:where(${invalidState}):where(${focusWithinState})`;
-const groupReadOnlySelector = `&:where(${readOnlyState})`;
-const descendantDisabledSelector = `:where(${descendantDisabledState}) &`;
+import { descendantDisabledSelector, inputChromeStyles, inputStates } from './input-states.css.js';
 
 /** Vanilla-extract recipe for the `TextInput` group styles. */
 export const textInputGroup = recipeInLayer('recipes', {
 	base: {
-		'@media': {
-			'(forced-colors: active)': {
-				selectors: {
-					[groupFocusWithinSelector]: {
-						outlineColor: 'Highlight',
-					},
-					[groupInvalidSelector]: {
-						borderColor: 'ButtonText',
-					},
-					[groupInvalidFocusWithinSelector]: {
-						borderColor: 'ButtonText',
-						outlineColor: 'Highlight',
-					},
-					[groupDisabledSelector]: {
-						borderColor: 'GrayText',
-						color: 'GrayText',
-					},
-				},
-			},
-		},
-		alignItems: 'center',
-		backgroundColor: vars.backgroundColor.input,
-		borderColor: vars.border.input,
-		borderRadius: vars.borderRadius.medium,
-		borderStyle: 'solid',
-		borderWidth: vars.borderWidth.thin,
-		color: vars.themeColor.inputColor,
+		...inputChromeStyles(inputStates),
 		cursor: 'text',
-		display: 'inline-flex',
-		fontFamily: vars.font.family.body,
-		inlineSize: '100%',
-		minInlineSize: 0,
-		overflow: 'hidden',
-
-		selectors: {
-			[groupDisabledSelector]: {
-				backgroundColor: vars.backgroundColor.inputDisabled,
-				borderColor: vars.backgroundColor.inputDisabled,
-				color: vars.foregroundColor.disabled,
-				cursor: 'not-allowed',
-			},
-			[groupHoverSelector]: {
-				borderColor: vars.themeColor.paletteThemePrimary400,
-			},
-			[groupFocusWithinSelector]: {
-				borderColor: vars.themeColor.paletteThemePrimary500,
-				outlineColor: vars.themeColor.focusRingColor,
-				outlineOffset: 0,
-				outlineStyle: 'solid',
-				outlineWidth: '3px',
-			},
-			[groupInvalidSelector]: {
-				borderColor: vars.border.critical,
-				outlineStyle: 'none',
-			},
-			[groupInvalidFocusWithinSelector]: {
-				borderColor: vars.border.critical,
-				outlineColor: vars.themeColor.focusRingColor,
-				outlineOffset: 0,
-				outlineStyle: 'solid',
-				outlineWidth: '3px',
-			},
-			[groupReadOnlySelector]: {
-				backgroundColor: vars.backgroundColor.subtle,
-			},
-		},
-		transitionDuration: vars.motion.duration.fast,
-		transitionProperty,
-		transitionTimingFunction: vars.motion.easing.standard,
 	},
 	defaultVariants: {
 		size: 'medium',

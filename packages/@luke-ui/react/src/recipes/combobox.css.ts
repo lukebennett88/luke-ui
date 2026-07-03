@@ -1,25 +1,18 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
+import { descendantDisabledSelector, inputChromeStyles, inputStates } from './input-states.css.js';
 
-const transitionProperty = 'color, background-color, border-color';
-
-const disabledState =
-	'[data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(button:disabled), :has([data-disabled="true"])';
-const descendantDisabledState = '[data-disabled="true"], [aria-disabled="true"]';
-const focusWithinState = '[data-focus-within="true"], [data-focused="true"], :focus-within';
-const hoverState = '[data-hovered="true"], :hover';
-const invalidState =
-	'[data-invalid="true"], [aria-invalid="true"], :has(:invalid), :has(input[aria-invalid="true"]), :has([data-invalid="true"]), :has([aria-invalid="true"])';
-const readOnlyState = '[data-readonly="true"], :has(:read-only)';
-
-const controlDisabledSelector = `&:where(${disabledState})`;
-const controlFocusWithinSelector = `&:where(${focusWithinState})`;
-const controlHoverSelector = `&:where(${hoverState}):not(:where(${disabledState})):not(:where(${focusWithinState}))`;
-const controlInvalidSelector = `&:where(${invalidState})`;
-const controlInvalidFocusWithinSelector = `&:where(${invalidState}):where(${focusWithinState})`;
-const controlReadOnlySelector = `&:where(${readOnlyState})`;
-const descendantDisabledSelector = `:where(${descendantDisabledState}) &`;
+/**
+ * The combobox control is a group wrapping an input and a trigger button, and
+ * unlike a text field's group it does not receive RAC's field data attributes
+ * itself — so state detection extends the defaults to also watch descendants.
+ */
+const comboboxStates = {
+	...inputStates,
+	disabled: `${inputStates.disabled}, :has(button:disabled), :has([data-disabled="true"])`,
+	invalid: `${inputStates.invalid}, :has([data-invalid="true"]), :has([aria-invalid="true"])`,
+};
 
 export const comboboxRoot = styleInLayer('recipes', {
 	display: 'flex',
@@ -29,56 +22,9 @@ export const comboboxRoot = styleInLayer('recipes', {
 });
 
 export const comboboxControl = recipeInLayer('recipes', {
-	base: {
-		alignItems: 'center',
-		backgroundColor: vars.backgroundColor.input,
-		borderColor: vars.border.input,
-		borderRadius: vars.borderRadius.medium,
-		borderStyle: 'solid',
-		borderWidth: vars.borderWidth.thin,
-		color: vars.themeColor.inputColor,
-		display: 'inline-flex',
-		fontFamily: vars.font.family.body,
-		inlineSize: '100%',
-		minInlineSize: 0,
-		overflow: 'hidden',
-
-		selectors: {
-			[controlDisabledSelector]: {
-				backgroundColor: vars.backgroundColor.inputDisabled,
-				borderColor: vars.border.default,
-				color: vars.foregroundColor.disabled,
-				cursor: 'not-allowed',
-			},
-			[controlHoverSelector]: {
-				borderColor: vars.themeColor.paletteThemePrimary400,
-			},
-			[controlFocusWithinSelector]: {
-				borderColor: vars.themeColor.paletteThemePrimary500,
-				outlineColor: vars.themeColor.paletteThemePrimary200,
-				outlineOffset: 0,
-				outlineStyle: 'solid',
-				outlineWidth: '3px',
-			},
-			[controlInvalidSelector]: {
-				borderColor: vars.border.critical,
-				outlineStyle: 'none',
-			},
-			[controlInvalidFocusWithinSelector]: {
-				borderColor: vars.border.critical,
-				outlineColor: vars.themeColor.paletteThemePrimary200,
-				outlineOffset: 0,
-				outlineStyle: 'solid',
-				outlineWidth: '3px',
-			},
-			[controlReadOnlySelector]: {
-				backgroundColor: vars.backgroundColor.subtle,
-			},
-		},
-		transitionDuration: vars.motion.duration.fast,
-		transitionProperty,
-		transitionTimingFunction: vars.motion.easing.standard,
-	},
+	// Unlike the text input's borderless disabled look, the disabled combobox
+	// control keeps a visible border.
+	base: inputChromeStyles(comboboxStates, { disabledBorderColor: vars.border.default }),
 	defaultVariants: {
 		size: 'medium',
 	},
