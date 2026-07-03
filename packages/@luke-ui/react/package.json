@@ -16,7 +16,6 @@
 	"exports": {
 		"./button": "./dist/button/index.js",
 		"./button/primitive": "./dist/button/primitive/index.js",
-		"./close-button": "./dist/close-button/index.js",
 		"./combobox-field": "./dist/combobox-field/index.js",
 		"./combobox-field/primitive": "./dist/combobox-field/primitive/index.js",
 		"./emoji": "./dist/emoji/index.js",

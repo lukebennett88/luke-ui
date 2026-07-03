@@ -92,7 +92,6 @@ Components to build:
 - [ ] ActionsDropdown
 - [ ] BulkActionBar
 - [x] Button
-- [x] CloseButton
 - [x] IconButton
 
 ### Forms
