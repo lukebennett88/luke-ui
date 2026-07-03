@@ -21,11 +21,6 @@ export interface DiscoveredExport {
 
 export interface DiscoverExportsOptions {
 	/**
-	 * Export specifiers to classify as `asset` (no docs page).
-	 * Defaults to {@link DEFAULT_ASSET_PATHS}, which is coupled to `@luke-ui/react`.
-	 */
-	assetPaths?: Iterable<string>;
-	/**
 	 * Export specifiers to classify as `barrel` (multi-export foundations).
 	 * Defaults to {@link DEFAULT_BARREL_PATHS}, which is coupled to `@luke-ui/react`.
 	 */
@@ -34,7 +29,10 @@ export interface DiscoverExportsOptions {
 }
 
 /**
- * Default barrel paths, coupled to `@luke-ui/react`'s public API.
+ * Default barrel paths, per the component tier taxonomy (ADR-0001) and the
+ * styling utilities public API (ADR-0004). These are foundations with more
+ * than one runtime export, so they can't be told apart from a single-export
+ * component mechanically — the list has to be maintained by hand.
  * Other consumers of `discoverExports` should pass their own via {@link DiscoverExportsOptions.barrelPaths}.
  */
 export const DEFAULT_BARREL_PATHS: ReadonlyArray<string> = [
@@ -47,31 +45,21 @@ export const DEFAULT_BARREL_PATHS: ReadonlyArray<string> = [
 	'./utils',
 ];
 
-/**
- * Default asset paths, coupled to `@luke-ui/react`'s public API.
- * Other consumers of `discoverExports` should pass their own via {@link DiscoverExportsOptions.assetPaths}.
- */
-export const DEFAULT_ASSET_PATHS: ReadonlyArray<string> = [
-	'./stylesheet.css',
-	'./spritesheet.svg',
-	'./package.json',
-];
-
 const LEADING_DOT_SLASH = /^\.\//;
 const SLASH = /\//g;
 const FILE_EXTENSION = /\.[^.]+$/;
+const JS_TARGET = /\.js$/;
 
 export function discoverExports(
 	exportsField: Record<string, string>,
 	options: DiscoverExportsOptions = {},
 ): Array<DiscoveredExport> {
 	const barrelPaths = new Set(options.barrelPaths ?? DEFAULT_BARREL_PATHS);
-	const assetPaths = new Set(options.assetPaths ?? DEFAULT_ASSET_PATHS);
 	const result: Array<DiscoveredExport> = [];
 	for (const [path, target] of Object.entries(exportsField)) {
 		let shape: ExportShape;
 		let tier: ExportTier;
-		if (assetPaths.has(path)) {
+		if (!JS_TARGET.test(target)) {
 			shape = 'asset';
 			tier = 'n/a';
 		} else if (barrelPaths.has(path)) {
