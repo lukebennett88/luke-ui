@@ -1,27 +1,26 @@
 import type { PlopTypes } from '@turbo/gen';
+import * as z from 'zod';
 import { applyComponentCreationPlan } from './src/apply-component-creation-plan.js';
-import type {
-	ComponentStyling,
-	ComponentTier,
-	CreateComponentInput,
-} from './src/component-creation-plan.js';
+import type { CreateComponentInput } from './src/component-creation-plan.js';
 import { createComponentPlan } from './src/component-creation-plan.js';
 
 const DOCS_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
+const COMPONENT_TIERS = ['atom', 'composed'] as const;
+const COMPONENT_STYLING = ['none', 'recipe'] as const;
 
-interface ComponentAnswers {
-	docsGroup?: string;
-	name?: string;
-	styling?: ComponentStyling;
-	tier?: ComponentTier;
-}
+const componentAnswersSchema = z.object({
+	docsGroup: z.enum(DOCS_GROUPS),
+	name: z.string().min(1),
+	styling: z.enum(COMPONENT_STYLING),
+	tier: z.enum(COMPONENT_TIERS),
+});
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
 	plop.setGenerator('component', {
 		actions: [
 			async (answers) => {
-				const input = toComponentInput(answers as ComponentAnswers);
+				const input = parseComponentAnswers(answers);
 				const plan = createComponentPlan(input);
 				await applyComponentCreationPlan(process.cwd(), plan);
 				return `Created ${plan.expected.packageExportPath}`;
@@ -63,25 +62,8 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 	});
 }
 
-function toComponentInput(answers: ComponentAnswers): CreateComponentInput {
-	if (!answers.name) {
-		throw new Error('Component name required.');
-	}
-	if (!answers.tier) {
-		throw new Error('Component tier required.');
-	}
-	if (!answers.docsGroup) {
-		throw new Error('Docs group required.');
-	}
-	if (!answers.styling) {
-		throw new Error('Styling required.');
-	}
-	return {
-		docsGroup: answers.docsGroup,
-		name: answers.name,
-		styling: answers.styling,
-		tier: answers.tier,
-	};
+export function parseComponentAnswers(answers: unknown): CreateComponentInput {
+	return componentAnswersSchema.parse(answers);
 }
 
 function validateComponentName(value: unknown): true | string {

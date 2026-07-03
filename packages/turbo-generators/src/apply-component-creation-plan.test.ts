@@ -2,7 +2,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
-import { z } from 'zod';
+import * as z from 'zod';
 import { applyComponentCreationPlan } from './apply-component-creation-plan.js';
 import type { ComponentCreationPlan } from './component-creation-plan.js';
 

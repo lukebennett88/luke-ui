@@ -56,6 +56,17 @@ describe('discoverExports', () => {
 		expect(result.every((e) => e.pageKind === 'barrel')).toBe(true);
 	});
 
+	it('classifies styles as foundation barrel API', () => {
+		const exports = { './styles': './dist/styles/index.js' };
+
+		const result = discoverExports(exports);
+
+		expect(result.find((e) => e.path === './styles')).toMatchObject({
+			pageKind: 'barrel',
+			shape: 'barrel',
+		});
+	});
+
 	it('classifies stylesheet/spritesheet/package.json as asset', () => {
 		const exports = {
 			'./package.json': './package.json',

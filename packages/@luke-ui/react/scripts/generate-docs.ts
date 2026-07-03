@@ -4,7 +4,7 @@ import { resolvePackageDocsCatalog } from '@luke-ui/docs-tools/package-docs-cata
 import { renderIndex } from '@luke-ui/docs-tools/render-index';
 import { renderLlmsFull } from '@luke-ui/docs-tools/render-llms-full';
 import { renderPage } from '@luke-ui/docs-tools/render-page';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import packageJson from '../package.json' with { type: 'json' };
 
 const packageRoot = fileURLToPath(new URL('../', import.meta.url));
@@ -16,6 +16,7 @@ const catalog = resolvePackageDocsCatalog({
 });
 
 await mkdir(docsDir, { recursive: true });
+await removeGeneratedMarkdown(docsDir);
 
 const pages = await Promise.all(
 	catalog.map(async (entry) => {
@@ -50,6 +51,7 @@ await writeFile(join(docsDir, 'llms.txt'), llmsTxt, 'utf8');
 
 const distDocsDir = join(packageRoot, 'dist', 'docs');
 await mkdir(distDocsDir, { recursive: true });
+await removeGeneratedMarkdown(distDocsDir);
 const llmsFull = renderLlmsFull(pages.filter((page) => page != null));
 await writeFile(join(distDocsDir, 'llms-full.md'), llmsFull, 'utf8');
 
@@ -63,4 +65,14 @@ async function readProse(root: string, entry: { path: string }): Promise<string 
 	const dirSlug = entry.path.replace(/^\.\//, '');
 	const prosePath = join(root, 'src', dirSlug, `${dirSlug}.docs.md`);
 	return readFile(prosePath, 'utf8');
+}
+
+async function removeGeneratedMarkdown(dir: string): Promise<void> {
+	const files = await readdir(dir);
+
+	await Promise.all(
+		files
+			.filter((file) => file.endsWith('.md'))
+			.map((file) => rm(join(dir, file), { force: true })),
+	);
 }

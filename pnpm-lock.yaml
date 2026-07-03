@@ -258,6 +258,9 @@ importers:
       vite:
         specifier: npm:@voidzero-dev/vite-plus-core@latest
         version: '@voidzero-dev/vite-plus-core@0.2.1(@arethetypeswrong/core@0.18.4)(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.37)(yaml@2.9.0)'
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
     devDependencies:
       '@tailwindcss/vite':
         specifier: 'catalog:'
@@ -472,6 +475,9 @@ importers:
       tsx:
         specifier: 'catalog:'
         version: 4.22.4
+      vite-plus:
+        specifier: 'catalog:'
+        version: 0.2.1(@arethetypeswrong/core@0.18.4)(@types/node@26.0.1)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.37)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))(yaml@2.9.0)
       zod:
         specifier: 'catalog:'
         version: 4.4.3

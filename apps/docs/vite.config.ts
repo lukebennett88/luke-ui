@@ -15,6 +15,7 @@ import { nitro } from 'nitro/vite';
 import { readdir, readFile } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import * as z from 'zod';
 import packageJson from '../../packages/@luke-ui/react/package.json' with { type: 'json' };
 import { mapPublicToInternal, toInternal, toPublic } from './src/lib/markdown-url';
 
@@ -68,24 +69,32 @@ const packageDocsDir = fileURLToPath(
 // routes serve these to AI agents fetching public `.md` URLs. We can't read them via
 // `import.meta.glob` because `fumadocs-mdx/vite` compiles any `.md`/`.mdx` it
 // sees into a React component, even with the `?raw` query.
-function packageDocsPlugin(catalog: Array<PackageDocsCatalogEntry>): Plugin {
+const packageJsonPath = join(packageRootDir, 'package.json');
+const packageJsonSchema = z.object({
+	exports: z.record(z.string(), z.string()),
+});
+
+async function readPackageDocsCatalog(): Promise<Array<PackageDocsCatalogEntry>> {
+	const currentPackageJson = packageJsonSchema.parse(
+		JSON.parse(await readFile(packageJsonPath, 'utf8')),
+	);
+	return resolvePackageDocsCatalog({
+		exportsField: currentPackageJson.exports,
+		packageRoot: packageRootDir,
+	});
+}
+
+function packageDocsPlugin(): Plugin {
 	const id = 'virtual:package-docs';
 	const resolved = `\0${id}`;
-	const metadata: Array<PackageDocsCatalogMetadata> = catalog.map((entry) => ({
-		description: entry.description,
-		pageKind: entry.pageKind,
-		path: entry.path,
-		shape: entry.shape,
-		slug: entry.slug,
-		target: entry.target,
-		tier: entry.tier,
-		title: entry.title,
-	}));
 	return {
 		configureServer(server) {
 			server.watcher.add(packageDocsDir);
+			server.watcher.add(packageJsonPath);
 			const handle = (filePath: string) => {
-				if (!filePath.endsWith('.md') || !filePath.startsWith(packageDocsDir)) return;
+				const isPackageDoc = filePath.endsWith('.md') && filePath.startsWith(packageDocsDir);
+				const isPackageJson = filePath === packageJsonPath;
+				if (!isPackageDoc && !isPackageJson) return;
 				const mod = server.moduleGraph.getModuleById(resolved);
 				if (mod) {
 					server.moduleGraph.invalidateModule(mod);
@@ -99,6 +108,17 @@ function packageDocsPlugin(catalog: Array<PackageDocsCatalogEntry>): Plugin {
 		enforce: 'pre',
 		async load(loadId) {
 			if (loadId !== resolved) return null;
+			const catalog = await readPackageDocsCatalog();
+			const metadata: Array<PackageDocsCatalogMetadata> = catalog.map((entry) => ({
+				description: entry.description,
+				pageKind: entry.pageKind,
+				path: entry.path,
+				shape: entry.shape,
+				slug: entry.slug,
+				target: entry.target,
+				tier: entry.tier,
+				title: entry.title,
+			}));
 			const entries = await Promise.all(
 				catalog
 					.filter((entry) => entry.pageKind !== 'asset')
@@ -179,6 +199,7 @@ function packageSourceWatcherPlugin(): Plugin {
 	let pendingRun = false;
 
 	function shouldTrigger(filePath: string): boolean {
+		if (filePath === packageJsonPath) return true;
 		if (!filePath.startsWith(packageSrcDir)) return false;
 		return filePath.endsWith('.tsx') || filePath.endsWith('.ts') || filePath.endsWith('.docs.md');
 	}
@@ -238,6 +259,7 @@ function packageSourceWatcherPlugin(): Plugin {
 		apply: 'serve',
 		configureServer(server) {
 			server.watcher.add(packageSrcDir);
+			server.watcher.add(packageJsonPath);
 			const logger = {
 				error: (msg: string) => server.config.logger.error(msg, { timestamp: true }),
 				info: (msg: string) => server.config.logger.info(msg, { timestamp: true }),
@@ -296,7 +318,7 @@ export default defineConfig(async () => {
 		plugins: lazyPlugins(async () => [
 			staticFunctionBasePathPlugin(),
 			markdownRewritePlugin(),
-			packageDocsPlugin(packageDocsCatalog),
+			packageDocsPlugin(),
 			packageSourceWatcherPlugin(),
 			mdx(await import('./source.config')),
 			story({ tsconfigPath: fileURLToPath(new URL('./tsconfig.json', import.meta.url)) }),

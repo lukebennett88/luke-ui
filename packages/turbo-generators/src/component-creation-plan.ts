@@ -1,5 +1,5 @@
-export type ComponentTier = 'atom' | 'composed';
-export type ComponentStyling = 'none' | 'recipe';
+type ComponentTier = 'atom' | 'composed';
+type ComponentStyling = 'none' | 'recipe';
 
 export interface CreateComponentInput {
 	docsGroup: string;
@@ -156,6 +156,7 @@ function renderComponentSource(input: {
 	styling: ComponentStyling;
 	tier: ComponentTier;
 }): string {
+	const cxImport = input.styling === 'recipe' ? "import { cx } from '../utils/index.js';\n" : '';
 	const styleImport =
 		input.styling === 'recipe'
 			? `import * as styles from '../recipes/${input.name}.css.js';\n`
@@ -167,8 +168,7 @@ function renderComponentSource(input: {
 			: ' className={className}';
 
 	return `import type { ComponentProps, JSX } from 'react';
-import { cx } from '../utils/index.js';
-${styleImport}
+${cxImport}${styleImport}
 /** Props for \`${input.pascalName}\`.
  *
  * @tier ${input.tier}

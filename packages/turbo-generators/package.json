@@ -13,6 +13,7 @@
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"tsx": "catalog:",
+		"vite-plus": "catalog:",
 		"zod": "catalog:"
 	}
 }

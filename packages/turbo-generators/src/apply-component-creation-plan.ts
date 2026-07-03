@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { z } from 'zod';
+import * as z from 'zod';
 import type {
 	ComponentCreationPlan,
 	JsonArrayAddSortedEdit,
