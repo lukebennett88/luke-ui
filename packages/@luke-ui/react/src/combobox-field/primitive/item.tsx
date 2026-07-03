@@ -8,7 +8,10 @@ import {
 	ListBoxLoadMoreItem as RacListBoxLoadMoreItem,
 } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { IconSizeProvider } from '../../icon-size-context/index.js';
+import { Icon } from '../../icon/index.js';
 import * as styles from '../../recipes/combobox.css.js';
+import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
 import { useComboboxSize } from './size-context.js';
@@ -32,12 +35,28 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 	const size = useComboboxSize(sizeProp);
 
 	return (
-		<RacListBoxItem
-			{...itemProps}
-			className={composeRenderProps(itemProps.className, (className) => {
-				return cx(styles.comboboxItem({ size }), className);
-			})}
-		/>
+		<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
+			<RacListBoxItem
+				// The children wrapper below is a render function, which disables RAC's
+				// own string-children textValue inference — so re-derive it here.
+				textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
+				{...itemProps}
+				className={composeRenderProps(itemProps.className, (className) => {
+					return cx(styles.comboboxItem({ size }), className);
+				})}
+			>
+				{composeRenderProps(itemProps.children, (children, { isSelected }) => {
+					return (
+						<>
+							{children}
+							{isSelected ? (
+								<Icon aria-hidden className={styles.comboboxItemCheck} name="check" />
+							) : null}
+						</>
+					);
+				})}
+			</RacListBoxItem>
+		</IconSizeProvider>
 	);
 }
 

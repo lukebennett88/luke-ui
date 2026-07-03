@@ -30,6 +30,10 @@ export default defineConfig({
 			},
 			{
 				extends: true,
+				plugins: [
+					// Required for .css.ts processing in Vitest browser mode.
+					vanillaExtractPlugin(),
+				],
 				test: {
 					browser: {
 						enabled: true,

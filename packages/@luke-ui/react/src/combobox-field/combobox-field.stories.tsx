@@ -98,6 +98,46 @@ export const Uncontrolled = meta.story({
 });
 
 /**
+ * The selected option shows a checkmark in the listbox, and the control shows
+ * a clear button while a selection is present.
+ */
+export const ClearSelection = meta.story({
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const page = within(document.body);
+		const combobox = canvas.getByRole('combobox', { name: 'Country' });
+
+		// A selection is present, so the clear button renders.
+		const clearButton = canvas.getByRole('button', { name: 'Clear selection' });
+		await expect(combobox).toHaveValue('Canada');
+
+		// The selected option is marked with a checkmark.
+		await userEvent.click(combobox);
+		const selected = page.getByRole('option', { name: 'Canada' });
+		await expect(selected).toHaveAttribute('aria-selected', 'true');
+		await expect(selected.querySelector('svg')).not.toBeNull();
+
+		// Clearing resets the value and removes the clear button.
+		await userEvent.click(clearButton);
+		await expect(combobox).toHaveValue('');
+		await expect(canvas.queryByRole('button', { name: 'Clear selection' })).not.toBeInTheDocument();
+	},
+	render: function Render() {
+		return (
+			<ComboboxField
+				defaultItems={countryItems}
+				defaultValue="ca"
+				label="Country"
+				name="country"
+				placeholder="Select a country..."
+			>
+				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+			</ComboboxField>
+		);
+	},
+});
+
+/**
  * Controlled mode uses `value`, `onChange`, and `items`.
  * The parent component manages the state.
  */

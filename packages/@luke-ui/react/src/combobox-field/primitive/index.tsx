@@ -1,3 +1,5 @@
+export type { ComboboxClearButtonProps } from './clear-button.js';
+export { ComboboxClearButton } from './clear-button.js';
 export type { ComboboxControlProps } from './control.js';
 export { ComboboxControl } from './control.js';
 export type { ComboboxEmptyStateProps } from './empty-state.js';

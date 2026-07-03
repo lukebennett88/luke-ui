@@ -19,9 +19,22 @@
 ## API Shape
 
 - Root props follow React Aria `ComboBox` naming.
-- Composed convenience props: `label`, `description`, `errorMessage`, `necessityIndicator`, `size`, `placeholder`.
+- Composed convenience props: `label`, `description`, `errorMessage`, `necessityIndicator`, `size`,
+  `placeholder`.
 - `children` renders dynamic items from `items` or `defaultItems`.
 - `listBoxProps` and `loadMoreItem` are lower-level escape hatches.
+
+## Selection indicators
+
+The selected option shows a checkmark in the listbox, and while a selection is present the control
+shows a clear button before the trigger. Pressing it clears the selection and the input text. The
+clear button is omitted when the field is disabled or read-only.
+
+```tsx
+<ComboboxField defaultValue="ca" defaultItems={countries} label="Country" name="country">
+	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+</ComboboxField>
+```
 
 ## Required fields
 
@@ -62,8 +75,7 @@ import { Form } from 'react-aria-components';
 
 ## Async options
 
-Pass `loadingState` for built-in loading and empty states. Control options
-externally via `items`.
+Pass `loadingState` for built-in loading and empty states. Control options externally via `items`.
 
 ```tsx
 <ComboboxField
@@ -79,8 +91,7 @@ externally via `items`.
 
 ## Infinite scroll
 
-Use `onLoadMore` for automatic sentinel-based loading, or `loadMoreItem` for
-full control.
+Use `onLoadMore` for automatic sentinel-based loading, or `loadMoreItem` for full control.
 
 ```tsx
 <ComboboxField
@@ -96,14 +107,15 @@ full control.
 
 ## Primitive kit
 
-The individual `Combobox*` building blocks used to assemble `ComboboxField` are
-available for library authors who need a custom combobox layout.
+The individual `Combobox*` building blocks used to assemble `ComboboxField` are available for
+library authors who need a custom combobox layout.
 
 ```ts
 import {
 	ComboboxInput,
 	ComboboxControl,
 	ComboboxTextInput,
+	ComboboxClearButton,
 	ComboboxTrigger,
 	ComboboxPopover,
 	ComboboxListBox,
@@ -114,7 +126,7 @@ import {
 
 ### Size propagation
 
-When you set `size` on `ComboboxInput`, it is automatically inherited by
-`ComboboxControl`, `ComboboxTextInput`, `ComboboxTrigger`, `ComboboxItem`, and
-`ComboboxLoadMoreItem`. You can override the inherited size on any individual
-child by passing an explicit `size` prop to that component.
+When you set `size` on `ComboboxInput`, it is automatically inherited by `ComboboxControl`,
+`ComboboxTextInput`, `ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`, and
+`ComboboxLoadMoreItem`. You can override the inherited size on any individual child by passing an
+explicit `size` prop to that component.
