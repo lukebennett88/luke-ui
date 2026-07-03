@@ -1,16 +1,28 @@
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon } from 'lucide-react';
+import { BookOpenIcon, CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface PageActionsProps {
 	githubUrl: string;
 	markdownUrl: string;
+	storybookUrl: string | null;
 }
 
-export function PageActions({ markdownUrl, githubUrl }: PageActionsProps) {
+export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageActionsProps) {
 	return (
 		<div className="not-prose flex flex-row items-center gap-2 border-fd-border border-b pt-2 pb-6">
 			<CopyMarkdownButton markdownUrl={markdownUrl} />
+			{storybookUrl ? (
+				<a
+					className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+					href={storybookUrl}
+					rel="noreferrer"
+					target="_blank"
+				>
+					<BookOpenIcon className="size-4" />
+					View in Storybook
+				</a>
+			) : null}
 			<a
 				className={buttonVariants({ size: 'sm', variant: 'secondary' })}
 				href={markdownUrl}
