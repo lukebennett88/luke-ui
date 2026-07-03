@@ -45,10 +45,12 @@ jobs:
             export TURBO_SCM_BASE="${{ github.event.pull_request.base.sha }}"
             export TURBO_SCM_HEAD="${{ github.event.pull_request.head.sha }}"
             corepack pnpm exec turbo run check:format check:lint check:types --affected
-            corepack pnpm run check:unused
+            # Run knip via turbo so //#check:unused's generate dependencies run first;
+            # bare `pnpm run check:unused` fails on PRs where --affected generated nothing.
+            corepack pnpm exec turbo run check:unused
           else
             corepack pnpm run check:format
             corepack pnpm run check:lint
             corepack pnpm run check:types
-            corepack pnpm run check:unused
+            corepack pnpm exec turbo run check:unused
           fi
