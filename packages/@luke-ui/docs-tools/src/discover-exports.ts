@@ -29,10 +29,9 @@ export interface DiscoverExportsOptions {
 }
 
 /**
- * Default barrel paths, per the component tier taxonomy (ADR-0001) and the
- * styling utilities public API (ADR-0004). These are foundations with more
- * than one runtime export, so they can't be told apart from a single-export
- * component mechanically — the list has to be maintained by hand.
+ * Default barrel paths. Some of these (e.g. `./styles`) have only one runtime
+ * export, so barrel vs. component can't be told apart mechanically and this
+ * list has to be maintained by hand.
  * Other consumers of `discoverExports` should pass their own via {@link DiscoverExportsOptions.barrelPaths}.
  */
 export const DEFAULT_BARREL_PATHS: ReadonlyArray<string> = [
