@@ -112,7 +112,7 @@ export const comboboxTrigger = recipeInLayer('recipes', {
 
 		selectors: {
 			'&:not(:first-child)': {
-				backgroundColor: vars.backgroundColor.subtle,
+				backgroundColor: 'transparent',
 				inlineSize: 'auto',
 			},
 			'&:not(:first-child)::before': {
@@ -163,6 +163,50 @@ export const comboboxTrigger = recipeInLayer('recipes', {
 			},
 		},
 	},
+});
+
+export const comboboxClearButton = recipeInLayer('recipes', {
+	base: {
+		alignItems: 'center',
+		appearance: 'none',
+		backgroundColor: 'transparent',
+		border: 'none',
+		color: vars.foregroundColor.secondary,
+		cursor: 'pointer',
+		display: 'inline-flex',
+		flexShrink: 0,
+		justifyContent: 'center',
+
+		selectors: {
+			'&:where([data-hovered="true"], :hover)': {
+				color: vars.foregroundColor.primary,
+			},
+			'&:where([data-disabled="true"], :disabled)': {
+				color: vars.foregroundColor.disabled,
+				cursor: 'not-allowed',
+			},
+		},
+	},
+	defaultVariants: {
+		size: 'medium',
+	},
+	variants: {
+		size: {
+			medium: {
+				blockSize: vars.controlSize.medium,
+				paddingInline: vars.space.xsmall,
+			},
+			small: {
+				blockSize: vars.controlSize.small,
+				paddingInline: vars.space.xxsmall,
+			},
+		},
+	},
+});
+
+export const comboboxItemCheck = styleInLayer('recipes', {
+	flexShrink: 0,
+	marginInlineStart: 'auto',
 });
 
 export const comboboxPopover = recipeInLayer('recipes', {
@@ -270,17 +314,25 @@ export const comboboxItem = recipeInLayer('recipes', {
 		lineHeight: vars.font.lineHeight.tight,
 		minInlineSize: 0,
 		outline: 'none',
+		'@media': {
+			'(forced-colors: active)': {
+				selectors: {
+					// Forced colors strips background highlights, so the active option
+					// gets a ring there — it's the only possible indicator.
+					'&[data-focus-visible="true"]': {
+						outlineColor: 'Highlight',
+						outlineOffset: '-2px',
+						outlineStyle: 'solid',
+						outlineWidth: '2px',
+					},
+				},
+			},
+		},
 
 		selectors: {
 			'&[data-disabled="true"]': {
 				color: vars.foregroundColor.disabled,
 				cursor: 'not-allowed',
-			},
-			'&[data-focus-visible="true"]': {
-				outlineColor: vars.themeColor.focusRingColor,
-				outlineOffset: 0,
-				outlineStyle: 'solid',
-				outlineWidth: '3px',
 			},
 			'&[data-focused="true"]:not([data-disabled="true"])': {
 				backgroundColor: vars.backgroundColor.hover,
@@ -288,6 +340,13 @@ export const comboboxItem = recipeInLayer('recipes', {
 			'&[data-selected="true"]:not([data-disabled="true"])': {
 				backgroundColor: vars.backgroundColor.subtle,
 				fontWeight: vars.font.weight.medium,
+			},
+			// DOM focus stays on the input (aria-activedescendant), which shows the
+			// only focus ring; the keyboard-active option is indicated by a
+			// background one step stronger than hover, not a second ring. Declared
+			// after the focused/selected backgrounds so it wins on the same option.
+			'&[data-focus-visible="true"]:not([data-disabled="true"])': {
+				backgroundColor: vars.backgroundColor.pressed,
 			},
 		},
 	},

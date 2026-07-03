@@ -89,11 +89,18 @@ test('text input and combobox share the same focus ring color', () => {
 	expect(controlOutline).toBe(groupOutline);
 });
 
-test('combobox items share the control focus ring color', () => {
+test('keyboard-focused combobox items are indicated by background, not a second ring', () => {
 	const item = document.createElement('li');
 	item.className = comboboxItem({ size: 'medium' });
+	// RAC marks the keyboard-active option with both attributes.
+	item.setAttribute('data-focused', 'true');
 	item.setAttribute('data-focus-visible', 'true');
 	mount(item);
 
-	expect(getComputedStyle(item).outlineColor).toBe(resolveColor(vars.themeColor.focusRingColor));
+	const style = getComputedStyle(item);
+	expect(style.outlineStyle).toBe('none');
+	expect(style.backgroundColor).toBe(resolveColor(vars.backgroundColor.pressed));
+	// The keyboard indicator carries the whole job without a ring, so it must
+	// stay distinguishable from a plain hover highlight.
+	expect(style.backgroundColor).not.toBe(resolveColor(vars.backgroundColor.hover));
 });

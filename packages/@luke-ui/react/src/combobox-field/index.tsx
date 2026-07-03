@@ -7,6 +7,7 @@ import type { FieldNecessityIndicator } from '../field/primitive/label.js';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
+import { ComboboxClearButton } from './primitive/clear-button.js';
 import { ComboboxControl } from './primitive/control.js';
 import { ComboboxEmptyState } from './primitive/empty-state.js';
 import { ComboboxTextInput } from './primitive/input.js';
@@ -95,14 +96,21 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	} = restProps;
 
 	const isAsync = loadingState != null;
+	const isInteractive =
+		comboboxInputProps.isDisabled !== true && comboboxInputProps.isReadOnly !== true;
 
 	return (
 		<ComboboxInput<T> size={size} {...comboboxInputProps}>
 			<Field {...fieldSlotProps}>
 				<ComboboxControl>
 					<ComboboxTextInput placeholder={placeholder} />
+					{isInteractive ? (
+						<ComboboxClearButton aria-label="Clear selection">
+							<Icon aria-hidden name="close" />
+						</ComboboxClearButton>
+					) : null}
 					<ComboboxTrigger aria-label="Toggle options">
-						<Icon aria-hidden name="chevronDown" size={size === 'small' ? 'xsmall' : 'small'} />
+						<Icon aria-hidden name="chevronDown" />
 					</ComboboxTrigger>
 				</ComboboxControl>
 				<ComboboxPopover
