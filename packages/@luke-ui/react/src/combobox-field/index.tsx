@@ -1,5 +1,6 @@
 import type { CSSProperties, JSX, ReactNode } from 'react';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
+import { composeField } from '../field/compose-field.js';
 import type { FieldErrorProps } from '../field/primitive/error.js';
 import { Field } from '../field/primitive/index.js';
 import type { FieldNecessityIndicator } from '../field/primitive/label.js';
@@ -79,33 +80,25 @@ export interface ComboboxFieldProps<T extends object>
 
 /** Composes `ComboboxInput` with label, description, and error slots. */
 export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): JSX.Element {
+	const [fieldSlotProps, restProps] = composeField(props);
 	const {
 		children,
-		description,
-		errorMessage,
-		label,
 		listBoxProps,
 		loadMoreItem,
 		loadingState,
 		menuWidth,
-		necessityIndicator,
 		onLoadMore,
 		placeholder,
 		popoverProps,
 		size = 'medium',
 		...comboboxInputProps
-	} = props;
+	} = restProps;
 
 	const isAsync = loadingState != null;
 
 	return (
 		<ComboboxInput<T> size={size} {...comboboxInputProps}>
-			<Field
-				description={description}
-				errorMessage={errorMessage}
-				label={label}
-				necessityIndicator={necessityIndicator}
-			>
+			<Field {...fieldSlotProps}>
 				<ComboboxControl>
 					<ComboboxTextInput placeholder={placeholder} />
 					<ComboboxTrigger aria-label="Toggle options">
