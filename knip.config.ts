@@ -17,7 +17,7 @@ export default {
 			project: ['src/**/*.{ts,tsx}'],
 		},
 		'packages/@luke-ui/docs-tools': {
-			entry: ['src/**/__tests__/**/*.test.ts'],
+			entry: ['src/**/*.test.ts'],
 			project: ['src/**/*.ts'],
 		},
 		'packages/@luke-ui/react': {

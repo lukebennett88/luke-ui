@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
-import type { PackageDocsCatalogMetadata } from '../package-docs-catalog.js';
-import { renderLlmsFull, sortLlmsFullEntries } from '../render-llms-full.js';
+import type { PackageDocsCatalogMetadata } from './package-docs-catalog.js';
+import { renderLlmsFull, sortLlmsFullEntries } from './render-llms-full.js';
 
 type LlmsFullFixture = Pick<PackageDocsCatalogMetadata, 'slug' | 'shape' | 'tier'> & {
 	md: string;
