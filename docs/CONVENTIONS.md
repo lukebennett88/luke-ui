@@ -18,12 +18,10 @@ Managed by `oxfmt`. Tabs, 2 width, 80 width, single quotes (TS), double quotes (
 
 ## Testing
 
-Use the smallest test surface that proves the behavior.
-
-- **Unit tests**: pure logic, generators, scripts, docs tooling, package metadata, and non-React utilities. Put these in `src/**/__tests__/**/*.test.ts`.
-- **Storybook play tests**: React component behavior that belongs in a real story. For `@luke-ui/react` components, stories are the component tests; do not add separate `*.test.tsx` component tests unless Storybook cannot exercise the behavior cleanly.
-- **Storybook visual tests**: public UI states and visual variants worth reviewing for regressions.
-- **Browser Vitest tests**: non-component DOM logic that needs real browser APIs and does not fit a story.
+See [TESTING.md](TESTING.md) for choosing a test type, placement, and how to write tests. The short
+version: use the smallest test surface that proves the behavior, colocate tests with the source
+they cover, test behavior through public APIs and role-based queries, and start bugfixes with a
+failing test.
 
 ## Component Pattern
 
@@ -45,13 +43,6 @@ Composed components are exported at their bare name (`@luke-ui/react/button`). P
 underpin a composed component are exported at `[composed]/primitive`
 (`@luke-ui/react/text-field/primitive`, `@luke-ui/react/combobox-field/primitive`,
 `@luke-ui/react/field/primitive`). The `button/primitive` path follows the same pattern.
-
-## Testing
-
-Tests colocate with the source file they cover; no `__tests__` directories except for suites that
-don't map to a single file (e.g. e2e). Never add DOM shims (happy-dom, jsdom) — DOM-dependent tests
-run in a real browser (`*.browser.test.{ts,tsx}`, see `vitest.config.ts`), preferring real APIs over
-stubs.
 
 ## Exports
 

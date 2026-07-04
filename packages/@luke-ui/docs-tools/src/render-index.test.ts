@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
-import type { PackageDocsCatalogMetadata } from '../package-docs-catalog.js';
-import { renderIndex } from '../render-index.js';
+import type { PackageDocsCatalogMetadata } from './package-docs-catalog.js';
+import { renderIndex } from './render-index.js';
 
 const sampleEntries: Array<PackageDocsCatalogMetadata> = [
 	{

@@ -2,8 +2,8 @@
 
 - Use `catalog:` in `package.json` for dependency versions (catalog in `pnpm-workspace.yaml`). Do
   not add raw versions.
-- See [docs/CONVENTIONS.md](docs/CONVENTIONS.md), [docs/STYLING.md](docs/STYLING.md) for conventions
-  and styling.
+- See [docs/CONVENTIONS.md](docs/CONVENTIONS.md), [docs/STYLING.md](docs/STYLING.md), and
+  [docs/TESTING.md](docs/TESTING.md) for conventions, styling, and testing.
 - Run tasks through turbo from the repo root (`pnpm run check`, `pnpm run build`, …). Running
   package-local scripts directly skips turbo's `generate` dependencies, so generated files
   (`.generated/`, `routeTree.gen.ts`, spritesheet) may be missing.

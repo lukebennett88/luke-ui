@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
-import { resolvePackageDocsCatalog } from '../package-docs-catalog.js';
+import { resolvePackageDocsCatalog } from './package-docs-catalog.js';
 
 const packageRoot = fileURLToPath(new URL('./fixtures/sample-package/', import.meta.url));
 
