@@ -1,35 +1,35 @@
 # Luke UI 5
 
-Luke UI is a React design system built with `react-aria-components` and `vanilla-extract`.
+React design system using `vanilla-extract`.
 
 ## Setup
 
 - `pnpm install`
-- `pnpm dev`: start the docs app.
-- `pnpm build`: build all packages and apps.
-- `pnpm check`: run lint, format, and type checks.
-- `pnpm test`: run unit, Storybook, and visual regression tests.
+- `pnpm dev` - Start dev
+- `pnpm build` - Build all
+- `pnpm check` - Lint, format, types
+- `pnpm test` - Run all tests (unit, Storybook, visual regression)
 
 ## Stack
 
 - **Monorepo**: pnpm + Turbo
-- **React**: built on `react-aria-components`
-- **Styling**: `vanilla-extract` static CSS
+- **React**: `react-aria-components` base
+- **Styling**: `vanilla-extract` (static CSS)
 - **Lint/Format**: `oxlint` + `oxfmt`
 
-## UI package (`@luke-ui/react`)
+## UI Package (`@luke-ui/react`)
 
 - Tokens: `src/tokens.ts`
 - Theme: `src/theme/`
 - Styles: `src/styles/`
-- Build: `tsdown` writes `dist/stylesheet.css`
+- Build: `tsdown` -> `dist/stylesheet.css`
 
 ## Contributing
 
-- Use `pnpm changeset` for version changes.
+- Use `pnpm changeset` for versions.
 - Run `pnpm check` before committing.
 
-## CI setup
+## CI Setup
 
 - Argos + Storybook GitHub setup: `docs/ARGOS_SETUP.md`
 - Visual regression test command: `pnpm test`
@@ -37,7 +37,12 @@ Luke UI is a React design system built with `react-aria-components` and `vanilla
 ## TODO
 
 - Revise tokens
+- Review visual styles (move away from being an EDS clone)
 - Make docs more visual
+- Review how we do stories
+  - Kitchen sink stories for Argos
+  - Include states in Argos snapshots (focus, open menus etc)
+  - Other examples are for consumers and quick reference
 
 Components to build:
 
@@ -53,20 +58,20 @@ Components to build:
 - [ ] SkipTo
 - [ ] VisuallyHidden
 
-### Media visuals
+### Media and visuals
 
 - [ ] Avatar
 - [x] Icon
 - [ ] Illustration
 
-### Typography content
+### Typography and content
 
 - [x] Emoji
 - [x] Heading
 - [x] Numeral
 - [x] Text
 
-### Feedback status indicators
+### Feedback and status indicators
 
 - [ ] Badge
 - [ ] EmptyState
@@ -76,7 +81,7 @@ Components to build:
 - [ ] Toast
 - [x] LoadingSpinner
 
-### Layout structure
+### Layout and structure
 
 - [ ] Breadcrumbs
 - [ ] Card
