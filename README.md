@@ -31,7 +31,7 @@ React design system using `vanilla-extract`.
 
 ## CI Setup
 
-- Argos + Storybook GitHub setup: `docs/ARGOS_SETUP.md`
+- Chromatic + Storybook GitHub setup: `docs/CHROMATIC_SETUP.md`
 - Visual regression test command: `pnpm test`
 
 ## TODO
@@ -40,8 +40,8 @@ React design system using `vanilla-extract`.
 - Review visual styles (move away from being an EDS clone)
 - Make docs more visual
 - Review how we do stories
-  - Kitchen sink stories for Argos
-  - Include states in Argos snapshots (focus, open menus etc)
+  - Kitchen sink stories for Chromatic
+  - Include states in Chromatic snapshots (focus, open menus etc)
   - Other examples are for consumers and quick reference
 
 Components to build:

@@ -9,11 +9,10 @@ packages:
 
 catalog:
   '@arethetypeswrong/core': ^0.18.4
-  '@argos-ci/cli': ^6.0.0
-  '@argos-ci/storybook': ^6.0.13
   '@capsizecss/metrics': ^4.1.0
   '@capsizecss/vanilla-extract': ^2.0.4
   '@changesets/cli': ^2.31.0
+  '@chromatic-com/storybook': ^5.2.1
   '@fumadocs/story': ^1.1.2
   '@orama/orama': ^3.1.18
   '@react-aria/utils': ^3.34.1
@@ -43,6 +42,7 @@ catalog:
   '@vitest/coverage-v8': ^4.1.9
   '@vitest/ui': ^4.1.9
   babel-plugin-react-compiler: ^1.0.0
+  chromatic: ^18.0.1
   colorjs.io: ^0.6.1
   csstype: ^3.2.3
   eslint-plugin-react-hooks: ^7.1.1

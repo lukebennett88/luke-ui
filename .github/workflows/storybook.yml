@@ -44,18 +44,16 @@ jobs:
       - name: Build package
         run: corepack pnpm build:packages
 
-      - name: Run Storybook visual tests
+      - name: Run Storybook tests
         run: corepack pnpm --filter @luke-ui/react test
-        env:
-          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
 
-      - name: Build Storybook for Argos
-        run: corepack pnpm build:storybook
-
-      - name: Deploy Storybook to Argos
-        run: corepack pnpm deploy:storybook:argos
-        env:
-          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+      - name: Publish to Chromatic
+        uses: chromaui/action@v1
+        with:
+          workingDir: packages/@luke-ui/react
+          buildScriptName: build:storybook
+          exitZeroOnChanges: true
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
 
   deploy-pages:
     name: deploy-pages

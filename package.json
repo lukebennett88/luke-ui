@@ -14,8 +14,8 @@
 		"check:lint": "turbo run check:lint",
 		"check:types": "turbo run check:types",
 		"check:unused": "knip",
+		"chromatic": "chromatic --exit-zero-on-changes --storybook-build-dir=packages/@luke-ui/react/storybook-static",
 		"clean": "turbo run clean && rm -rf node_modules",
-		"deploy:storybook:argos": "argos deploy packages/@luke-ui/react/storybook-static",
 		"dev": "turbo run dev dev:storybook",
 		"dev:docs": "turbo run dev --filter=docs",
 		"dev:packages": "turbo run dev --filter=./packages/**",
@@ -32,9 +32,9 @@
 		"version-packages": "changeset version"
 	},
 	"devDependencies": {
-		"@argos-ci/cli": "catalog:",
 		"@changesets/cli": "catalog:",
 		"@turbo/gen": "catalog:",
+		"chromatic": "catalog:",
 		"eslint-plugin-react-hooks": "catalog:",
 		"knip": "catalog:",
 		"turbo": "catalog:",

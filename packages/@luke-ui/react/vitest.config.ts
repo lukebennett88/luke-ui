@@ -1,6 +1,5 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { argosVitestPlugin } from '@argos-ci/storybook/vitest-plugin';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite-plus';
@@ -52,11 +51,6 @@ export default defineConfig({
 					vanillaExtractPlugin(),
 					// Runs tests for stories defined in Storybook config.
 					storybookTest({ configDir }),
-					argosVitestPlugin({
-						buildName: 'storybook',
-						token: process.env.ARGOS_TOKEN,
-						uploadToArgos: process.env.ARGOS_UPLOAD === '1',
-					}),
 				],
 				test: {
 					browser: {

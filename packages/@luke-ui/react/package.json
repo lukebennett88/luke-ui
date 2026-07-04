@@ -67,8 +67,9 @@
 		"generate:color-tokens": "node scripts/generate-color-tokens.ts && vp fmt .generated/color-tokens.generated.ts --write",
 		"generate:docs": "tsx scripts/generate-docs.ts && vp fmt docs/ dist/docs/ --write",
 		"generate:icons": "tsx scripts/build-icons.ts",
-		"test": "pnpm run test:unit && pnpm run test:browser && tsx scripts/test-visual.ts",
+		"test": "pnpm run test:unit && pnpm run test:browser && pnpm run test:storybook",
 		"test:browser": "vp test run --project=browser",
+		"test:storybook": "vp test run --project=storybook",
 		"test:ui": "vp test --project=storybook --ui",
 		"test:unit": "vp test run --project=unit",
 		"test:watch": "vp test --project=storybook"
@@ -84,7 +85,7 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
-		"@argos-ci/storybook": "catalog:",
+		"@chromatic-com/storybook": "catalog:",
 		"@luke-ui/docs-tools": "workspace:*",
 		"@rollup/plugin-babel": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
