@@ -146,34 +146,6 @@ export const WithRenderProp = meta.story({
 });
 
 /**
- * Shorthands expand to multiple properties. `px` sets both inline padding
- * sides; `py` sets both block padding sides.
- */
-export const Shorthands = meta.story({
-	render: () => {
-		const padding = createSprinkles({ px: 'large', py: 'small' });
-		return (
-			<div style={stackStyle}>
-				<div
-					{...mergeProps(
-						{
-							style: {
-								borderColor: vars.border.default,
-								borderStyle: 'dashed',
-								borderWidth: 1,
-							},
-						},
-						padding,
-					)}
-				>
-					Large horizontal padding, small vertical padding
-				</div>
-			</div>
-		);
-	},
-});
-
-/**
  * Overflow and sizing utilities control content clipping and element
  * dimensions. Use `textOverflow: 'ellipsis'` with `inlineSize` constraints
  * for truncation patterns.

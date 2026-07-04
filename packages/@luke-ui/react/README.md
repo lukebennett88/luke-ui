@@ -1,6 +1,6 @@
 # @luke-ui/react
 
-A React design system built on `react-aria-components` and `vanilla-extract`.
+Luke UI is a React design system built on `react-aria-components` and `vanilla-extract`.
 
 ## Install
 
@@ -10,7 +10,7 @@ pnpm add @luke-ui/react
 
 ## Setup
 
-Apply the theme class at your app root and import the stylesheet:
+Import the stylesheet and apply the theme class at your app root.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
@@ -23,15 +23,19 @@ export function App() {
 
 ## Components and docs
 
-This package ships per-export documentation under `docs/`. The full index is in [`docs/llms.txt`](./docs/llms.txt) — readable by humans and by AI agents.
+This package ships per-export documentation under `docs/`. The full index is in
+[`docs/llms.txt`](./docs/llms.txt), which is readable by humans and AI agents.
 
-Components fall into a [three-tier taxonomy](https://github.com/lukebennett88/luke-ui/blob/main/docs/adr/0001-component-tier-taxonomy.md):
+Components follow the
+[three-tier taxonomy](https://github.com/lukebennett88/luke-ui/blob/main/docs/adr/0001-component-tier-taxonomy.md):
 
-- **Atoms** — single units (`Text`, `Icon`, `Heading`, …)
-- **Composed** — opinionated combinations (`Button`, `TextField`, …)
-- **Primitives** — building blocks for library authors (`button/primitive`, `field/primitive`, …)
+- **Atoms**: single units such as `Text`, `Icon`, and `Heading`
+- **Composed**: opinionated combinations such as `Button` and `TextField`
+- **Primitives**: building blocks for library authors, such as `button/primitive` and
+  `field/primitive`
 
-Atoms and composed components are app-developer-facing. Primitives are documented under `docs/` for library authors but excluded from the primary index.
+Atoms and composed components are app-developer-facing. Primitives are documented under `docs/` for
+library authors, but excluded from the primary index.
 
 ## License
 

@@ -1,22 +1,22 @@
-`Button` expects the Luke UI theme class to be applied at app/root level. See
+`Button` expects the Luke UI theme class at the app or root level. See
 [Getting Started](/docs/getting-started).
 
 ```tsx
 <Button>Save</Button>
 ```
 
-## Best Practices
+## Best practices
 
-| Guidance | Practices                                                                                                            |
-| -------- | -------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use one `tone="primary"` button per view for the main action. Use `neutral` or `ghost` for everything else.          |
-| Do       | Write a label that describes the action ("Save changes", "Delete account"), not a vague label like "OK" or "Submit". |
-| Do       | Set `isPending` for actions that take time, like saving or submitting, so the user knows it's working.               |
-| Don't    | Use `Button` for navigation. If it only takes the user to another page, use `Link` instead.                          |
+| Guidance | Practices                                                                                                      |
+| -------- | -------------------------------------------------------------------------------------------------------------- |
+| Do       | Use one `tone="primary"` button for the main action in a view. Use `neutral` or `ghost` for secondary actions. |
+| Do       | Write a label that names the action, such as "Save changes" or "Delete account". Avoid vague labels like "OK". |
+| Do       | Set `isPending` while an action is in flight so the user can see that work is still happening.                 |
+| Don't    | Use `Button` for navigation. If the control only moves the user to another page, use `Link`.                   |
 
 ## Tone
 
-Four tones: `primary` (default), `neutral`, `critical`, and `ghost`.
+`Button` has four tones: `primary` (default), `neutral`, `critical`, and `ghost`.
 
 ```tsx
 <Button tone="neutral">Cancel</Button>
@@ -32,7 +32,7 @@ Four tones: `primary` (default), `neutral`, `critical`, and `ghost`.
 
 ## Size
 
-Two sizes: `medium` (default) and `small`.
+`Button` has two sizes: `medium` (default) and `small`.
 
 ```tsx
 <Button size="small">Save</Button>
@@ -40,9 +40,8 @@ Two sizes: `medium` (default) and `small`.
 
 ## Icons
 
-Use `startIcon` and `endIcon` to place an icon before or after the label. Icon
-size is inherited from the button's own `size`, so no `size` prop is needed on
-the icon itself.
+Use `startIcon` and `endIcon` to place an icon before or after the label. The icon inherits the
+button size, so the icon does not need its own `size` prop.
 
 ```tsx
 import { Icon } from '@luke-ui/react/icon';
@@ -52,7 +51,7 @@ import { Icon } from '@luke-ui/react/icon';
 
 ## Disabled
 
-Disabled buttons can't be focused or pressed.
+Disabled buttons cannot be focused or pressed.
 
 ```tsx
 <Button isDisabled>Save</Button>
@@ -60,8 +59,8 @@ Disabled buttons can't be focused or pressed.
 
 ## Pending
 
-Set `isPending` while an action is in flight. A spinner overlays the label and
-the button becomes non-interactive.
+Set `isPending` while an action is in flight. A spinner overlays the label and the button becomes
+non-interactive.
 
 ```tsx
 <Button isPending>Saving</Button>
@@ -77,20 +76,21 @@ Set `isBlock` to make the button fill the inline size of its container.
 
 ## Accessibility
 
-`Button` wraps its children in `Text`, so it always has a visible accessible
-name — no `aria-label` is needed. The `isPending` spinner is `aria-hidden` and
-does not announce a busy state to screen readers; if the pending state needs to
-be conveyed audibly, change the label text itself (e.g. "Saving…") while
-`isPending` is set.
+`Button` wraps its children in `Text`, so visible text usually provides the accessible name. You
+normally do not need `aria-label`.
+
+The pending spinner is `aria-hidden` and does not announce busy state to screen readers. If screen
+reader users need to hear the pending state, change the label text itself, for example to "Saving",
+while `isPending` is set.
 
 ## Primitive Button
 
-A lower-level `Button` primitive is available when you need full control over
-children: custom loading states, render-prop children, or non-standard content.
+The lower-level `Button` primitive is available when you need full control over children, such as
+custom loading states, render-prop children, or non-standard content.
 
 ```ts
 import { Button } from '@luke-ui/react/button/primitive';
 ```
 
-The primitive renders a single `<button>` element with no internal wrapper. Its
-children are direct flex items, so you manage layout yourself.
+The primitive renders a single `<button>` element with no internal wrapper. Its children are direct
+flex items, so you manage layout yourself.

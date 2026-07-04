@@ -50,11 +50,6 @@ const responsiveProperties = defineProperties({
 		paddingInlineStart: spaceScale,
 		rowGap: spaceScale,
 	},
-	shorthands: {
-		p: ['padding'],
-		px: ['paddingInlineStart', 'paddingInlineEnd'],
-		py: ['paddingBlockStart', 'paddingBlockEnd'],
-	},
 	staticProperties: {
 		alignItems: ['flex-start', 'center', 'flex-end', 'baseline', 'stretch'],
 		blockSize: ['auto', '100%', 'fit-content', 'min-content', 'max-content'],

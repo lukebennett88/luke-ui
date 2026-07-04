@@ -1,81 +1,76 @@
 # Testing
 
-How to choose, place, and write tests in this repo.
+This guide explains how to choose, place, and write tests in this repo.
 
-## Choosing a test type
+## Choosing test type
 
-Use the smallest test surface that proves the behavior.
+Use the smallest test surface that proves the behaviour.
 
-- **Unit tests** (`*.test.ts`): pure logic, generators, scripts, docs tooling, package metadata,
-  and non-React utilities.
-- **Storybook play tests**: React component behavior that belongs in a real story. For
-  `@luke-ui/react` components, stories are the component tests; do not add separate `*.test.tsx`
-  component tests unless Storybook cannot exercise the behavior cleanly.
+- **Unit tests** (`*.test.ts`): pure logic, generators, scripts, docs tooling, package metadata, and
+  non-React utilities.
+- **Storybook play tests**: React component behaviour that belongs in a real story. For
+  `@luke-ui/react` components, stories are component tests. Do not add separate `*.test.tsx`
+  component tests unless Storybook cannot exercise the behaviour cleanly.
 - **Storybook visual tests**: public UI states and visual variants worth reviewing for regressions.
 - **Browser Vitest tests** (`*.browser.test.{ts,tsx}`): non-component DOM logic that needs real
-  browser APIs and does not fit a story — including style-contract tests for CSS recipes (see
-  below).
+  browser APIs and does not fit a story, including CSS recipe style-contract tests.
 
 ## Placement
 
-Tests colocate with the source file they cover (`foo.test.ts` beside `foo.ts`); no `__tests__`
-directories except for suites that don't map to a single file (e.g. e2e). Never add DOM shims
-(happy-dom, jsdom) — DOM-dependent tests run in a real browser (see `vitest.config.ts`), preferring
-real APIs over stubs.
+Colocate tests with the source file they cover, for example `foo.test.ts` beside `foo.ts`.
+
+Do not add `__tests__` directories unless the suite does not map to one source file.
+
+Do not add DOM shims such as happy-dom or jsdom. DOM-dependent tests run in a real browser through
+`vitest.config.ts`, using real browser APIs instead of stubs.
 
 ## Write the test first
 
-For bugfixes, always start with a failing test that reproduces the bug, and watch it fail for the
-right reason before touching the fix. The test is what proves the fix and keeps the bug from
-returning.
+For bug fixes, start with a failing test that reproduces the bug. Watch it fail for the right reason
+before changing the implementation. That test proves the fix and keeps the bug from returning.
 
-For features, prefer writing the test first when the behavior is specifiable up front. Exploratory
-UI work may need the component sketched before a story or play test makes sense — that's fine, but
-the tests land in the same change as the behavior they cover.
+For features, prefer a test first when the behaviour can be specified up front. Exploratory UI work
+may need a sketched component before a story play test makes sense. That is fine, but the test
+should land in the same change as the behaviour it covers.
 
-## Test behavior, not implementation
+## Test behaviour, not implementation
 
-A test should survive any refactor that preserves behavior. Exercise the code the way its consumers
-do — through the public API for modules, through roles and interactions for components — and assert
-the outcome a consumer can observe.
+Tests should survive refactors that preserve behaviour. Exercise code the way consumers do: through
+public API modules, roles, and user interactions. Assert outcomes the consumer can observe.
 
-Never assert on internals: private functions, call counts of the repo's own modules, generated
-class names, or the text of CSS selectors. If a test can only be written by reaching into
-internals, that's a signal the module's interface is missing something, not that the test needs a
-back door.
+Do not assert internals such as private functions, call counts inside repo modules, generated class
+names, or CSS selector text. If a test only works by reaching into internals, the module interface
+is probably missing something.
 
-Mock only at true system boundaries (network, clock, external processes), and prefer real
-implementations everywhere else — the same philosophy as running DOM tests in a real browser.
-Filesystem-dependent tests use temp directories and the real `fs` rather than mocks.
+Mock only true system boundaries such as network, clock, or external processes. Prefer real
+implementations everywhere else. Filesystem-dependent tests should use temp directories and real
+`fs`, not mocks.
 
-## Behavior tests: queries and interactions
+## Behaviour tests
 
-Behavior tests — play functions and anything else simulating a user — find elements the way
-assistive technology does:
+Behaviour tests include Storybook play functions and any test that simulates a user.
 
-- Query by **role with accessible name** (`getByRole('combobox', { name: 'Country' })`), falling
-  back to label or visible text when no role fits.
-- **No test IDs, no CSS selectors.** This is a component library: if an element can't be found by
-  role or accessible name, assistive-technology users can't find it either. Fix the component, not
-  the test.
-- Interact through **`userEvent` only** (click, keyboard, tab). Never `fireEvent`, manual event
-  dispatch, or mutating attributes/state to fake an interaction the user would perform.
+- Query by role and accessible name, for example `getByRole('combobox', { name: 'Country' })`. Fall
+  back to label or visible text only when no role fits.
+- Do not use test IDs or CSS selectors. In a component library, if an element cannot be found by
+  role or accessible name, assistive-technology users probably cannot find it either. Fix the
+  component, not the test.
+- Interact through `userEvent` only. Do not use `fireEvent`, manual event dispatch, or attribute and
+  state mutation to fake interactions.
 
 ## Declarative over imperative
 
-State what the behavior is; don't narrate a journey.
+State the behaviour under test. Do not narrate every step in the journey.
 
-- **Name and assert one behavior at a time.** Each test (or `step()`, below) states a single
-  behavior — "selecting an option closes the popover" — and asserts that outcome. Don't add
-  checkpoint assertions after every interaction; steps exist only to reach the state being
-  asserted.
-- **Set up state with props, not interactions.** Start from the state under test
-  (`defaultValue`, `isReadOnly`) instead of scripting clicks to arrive there. Interactions appear
-  only when the interaction itself is the behavior under test.
-- **Map behaviors to `step()`, not to new stories.** Keep one story per meaningful state or props
-  combination; inside its play function, group each behavior in a named `step()` from
-  `storybook/test`. Steps report individually without adding sidebar entries or visual-test
-  snapshots of identical-looking states.
+- Name and assert one behaviour at a time. Each test or `step()` should name a single behaviour,
+  such as "selecting an option closes the popover". Use setup interactions only to reach the state
+  being asserted.
+- Set up state with props rather than interactions when possible, for example `defaultValue` or
+  `isReadOnly`. Use interactions only when the interaction itself is the behaviour under test.
+- Map behaviours to `step()`, not to extra stories. Keep one story per meaningful state-prop
+  combination. Inside the play function, group behaviours with named `step()` calls from
+  `storybook/test`. Steps report individually without adding duplicate sidebar entries or visual
+  snapshots.
 
 ```ts
 play: async ({ canvasElement, step }) => {
@@ -85,23 +80,25 @@ play: async ({ canvasElement, step }) => {
 	await step('selecting an option closes the popover and fills the input', async () => {
 		await userEvent.click(combobox);
 		await userEvent.click(within(document.body).getByRole('option', { name: 'Australia' }));
+
 		await expect(combobox).toHaveValue('Australia');
 		await expect(combobox).toHaveAttribute('aria-expanded', 'false');
 	});
-},
+};
 ```
 
 ## Style-contract tests for CSS recipes
 
-Recipes (`src/recipes/*.css.ts`) have no roles or user interactions — their contract is "given a
-DOM structure in a given state, the element computes these styles". Tests for them are the one
-place raw DOM construction and `querySelector` are appropriate: there is no user to impersonate.
+Recipes in `src/recipes/*.css.ts` have no roles or user interactions. Their contract is: given this
+DOM structure in this state, the element computes these styles.
 
-- Assert **computed styles** (via `getComputedStyle`, resolving tokens to concrete values) — the
-  outcome a user sees. Never assert generated class names or selector strings; those are the
-  implementation.
-- Build the DOM the recipe documents (e.g. a control containing an input and a trigger button),
-  not incidental markup that happens to pass.
-- Every state a recipe test covers must also exist as a story on at least one consuming component,
-  so the recipe is exercised against real component markup in visual tests. If the story is
-  missing, add it in the same change.
+For recipe tests, raw DOM construction and `querySelector` are appropriate because there is no user
+to impersonate.
+
+- Assert computed styles with `getComputedStyle`, resolving tokens to concrete values. Assert the
+  outcome the user sees.
+- Do not assert generated class names or selector strings.
+- Build DOM recipe documents, such as a control containing an input and trigger button. Do not rely
+  on incidental markup that happens to pass.
+- Every recipe state covered by a test must also exist in a story on at least one consuming
+  component. If the story is missing, add it in the same change.

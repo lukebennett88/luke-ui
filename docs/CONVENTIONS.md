@@ -2,82 +2,102 @@
 
 ## TypeScript
 
-Strict mode. Use `import type`. Explicit `.js` extensions for local imports.
+Use strict TypeScript. Import types with `import type`. Local imports include the explicit `.js`
+extension.
 
 ## Formatting
 
-Managed by `oxfmt`. Tabs, 2 width, 80 width, single quotes (TS), double quotes (JSX).
+`oxfmt` owns formatting. The repo uses tabs with width 2, 100-column wrapping, single quotes in
+TypeScript, and double quotes in JSX.
 
 ## Naming
 
-- **Components**: `PascalCase` (`Button.tsx`)
-- **Props**: `PascalCaseProps` (`ButtonProps`)
-- **Files**: `kebab-case` (`icon-button.tsx`)
+- **Components**: `PascalCase`, for example `Button.tsx`
+- **Props**: `PascalCaseProps`, for example `ButtonProps`
+- **Files**: `kebab-case`, for example `icon-button.tsx`
 - **CSS**: `*.css.ts`
 - **Stories**: `*.stories.tsx`
 
 ## Testing
 
-See [TESTING.md](TESTING.md) for choosing a test type, placement, and how to write tests. The short
-version: use the smallest test surface that proves the behavior, colocate tests with the source
-they cover, test behavior through public APIs and role-based queries, and start bugfixes with a
-failing test.
+See [TESTING.md](TESTING.md) for test type, placement, and writing rules.
+
+Short version:
+
+- Use the smallest test surface that proves the behaviour.
+- Colocate tests with the source they cover.
+- Test through public APIs and role-based queries.
+- Start bug fixes with a failing test that reproduces the bug.
 
 ## Component Pattern
 
-Wrap `react-aria-components`. Use `composeRenderProps` for styling.
+Components wrap `react-aria-components` and use `composeRenderProps` for styling.
 
-Components follow a three-tier taxonomy (see `CONTEXT.md` for full definitions):
+Components follow the three-tier taxonomy from [CONTEXT.md](../CONTEXT.md):
 
-- **Atom** — single conceptual unit used directly by app devs (`Text`, `Link`, `Icon`, `Heading`,
-  `Numeral`, `Emoji`, `LoadingSpinner`). Gets a doc page.
-- **Composed** — combines atoms/primitives into a ready-to-drop-in pattern (`Button`, `IconButton`,
-  `TextField`, `ComboboxField`). Gets a doc page.
-- **Primitive** — building block for library authors only; documented in package docs but not in
-  hosted docs. May be a single file (e.g. `text-input`) or a multi-file kit (e.g. `combobox/*`,
-  `field/*`).
+- **Atom**: a single conceptual unit used directly by app developers, such as `Text`, `Link`,
+  `Icon`, `Heading`, `Numeral`, `Emoji`, or `LoadingSpinner`. Atoms get hosted docs pages.
+- **Composed**: an app-developer-facing pattern built from atoms or primitives, such as `Button`,
+  `IconButton`, `TextField`, or `ComboboxField`. Composed components get hosted docs pages.
+- **Primitive**: a building block for library authors. Primitives are documented in package docs,
+  but not in hosted docs. A primitive may be a single file or a multi-file kit.
 
 ## Package paths
 
-Composed components are exported at their bare name (`@luke-ui/react/button`). Primitive kits that
-underpin a composed component are exported at `[composed]/primitive`
-(`@luke-ui/react/text-field/primitive`, `@luke-ui/react/combobox-field/primitive`,
-`@luke-ui/react/field/primitive`). The `button/primitive` path follows the same pattern.
+Composed components export at their bare package path, such as `@luke-ui/react/button`.
+
+Primitive kits that support a composed component export at `[composed]/primitive`, for example:
+
+- `@luke-ui/react/text-field/primitive`
+- `@luke-ui/react/combobox-field/primitive`
+- `@luke-ui/react/field/primitive`
+- `@luke-ui/react/button/primitive`
 
 ## Exports
 
-Managed by `tsdown` entry globs. Do not hand-edit `package.json#exports`. Create files in paths the
-package build already discovers.
+`tsdown` entry globs manage package exports. Do not hand-edit `package.json#exports`. Create files
+in paths the package build already discovers.
 
 ## Docs
 
-`.docs.md` structure and section order are defined in
-[ADR-0006](adr/0006-docs-md-structure-standard.md). Docs are read by both humans and coding agents —
-write for clarity, not just brevity. Don't compress a sentence to the point it's hard to parse, and
-don't add content whose only value is illustrating a point from one particular editing session.
-`CONTEXT.md` stays a terse index that links to ADRs; if a section there starts restating an ADR's
-content in full, that content belongs in the ADR only.
+`.docs.md` files follow the structure in [ADR-0006](adr/0006-docs-md-structure-standard.md). Humans
+and coding agents both read these docs, so optimise for clarity, not only brevity.
+
+Headings use sentence case: capitalise only the first word and proper nouns.
+
+Do not compress a sentence until the point is hard to parse. Do not add content whose only value is
+explaining one editing session.
+
+`CONTEXT.md` stays a terse index that links to ADRs. If a section starts restating an ADR in full,
+the content belongs in the ADR instead.
 
 ## Fumadocs stories
 
-Each component's interactive demo on the hosted docs site is a single file,
-`apps/docs/src/<component>/<component>.story.tsx`, built on `@fumadocs/story/vite/client` (registered
-as a Vite plugin in `apps/docs/vite.config.ts`). It defines a narrow `<Component>StoryProps` type —
-`Pick<<Component>Props, 'a' | 'b' | ...>` — listing only the props a control can meaningfully show:
-drop event handlers, refs, and other escape hatches (`className`, `style`, `onPress`, obscure ARIA
-props). `Pick` orders the resulting controls by the order keys are listed in the pick, not by their
-declaration order in `<Component>Props` — `@fumadocs/story` reads properties off the resolved type via
-`ts-morph`, which preserves the pick's key order — so list the keys in the order they should appear in
-the panel. A small `<Component>Playground` wrapper renders the real component inside the shared
-`StoryWrapper` (from `../lib/story-wrapper`) and is passed directly to
-`defineStory({ Component, args: { initial } })`. A generic component (e.g. `ComboboxField<T>`) fixes
-`T` to one concrete sample type in its Playground rather than staying generic — see
+Each component's interactive hosted-docs demo lives in one file:
+`apps/docs/src/<component>/<component>.story.tsx`.
+
+The story uses `@fumadocs/story/vite/client`, which is registered as a Vite plugin in
+`apps/docs/vite.config.ts`.
+
+Define a narrow `<Component>StoryProps` type with `Pick<<Component>Props, 'a' | 'b'>`. Include only
+props that make useful hosted controls. Drop event handlers, refs, escape hatches such as
+`className` and `style`, and obscure ARIA props.
+
+Control order follows the key order inside `Pick`, not the declaration order in `<Component>Props`.
+`@fumadocs/story` reads the resolved type with `ts-morph` and preserves the pick order, so list keys
+in the order they should appear in the panel.
+
+Render the real component through a small `<Component>Playground` wrapper inside the shared
+`StoryWrapper` from `../lib/story-wrapper`. Pass it directly to
+`defineStory({ Component, args: { initial } })`.
+
+Generic components should fix the generic to one concrete sample type inside the playground. See
 `combobox-field.story.tsx`.
 
-Order the picked props to match the `.docs.md` feature-section order, and keep every prop with its own
-`##` feature section represented here — when you add a feature section to `.docs.md`, add the prop to
-the story's `Pick` in the same pass. `initial` values stay short and legible, same bar as `.docs.md`
-code examples — no lorem ipsum.
+Keep story props aligned with `.docs.md` feature sections. If you add a feature section for a prop,
+add that prop to the story `Pick` in the same change.
 
-`.mdx` pages import the story directly — `import { story } from '.../<component>.story'` and
-`<story.WithControl />` — there is no separate client file to wire up.
+Initial values should be short and legible, like the `.docs.md` examples. Do not use lorem ipsum.
+
+Hosted `.mdx` files are wiring only: frontmatter, an interactive demo, and an `<include>` for
+generated package docs. Do not add hand-authored component prose there.

@@ -1,3 +1,6 @@
+Use `TextField` for a single text input with label, description, validation, and optional adornments
+built in.
+
 ```tsx
 <TextField
 	name="email"
@@ -7,18 +10,17 @@
 />
 ```
 
-## Best Practices
+## Best practices
 
-| Guidance | Practices                                                                                                                           |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use `label` for every field where possible — it's picked up by more assistive tech and autofill heuristics than `aria-label` alone. |
-| Don't    | Rely on `placeholder` as a label substitute — it disappears once the user types and often fails color-contrast requirements.        |
+| Guidance | Practices                                                                                                                   |
+| -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Do       | Use `label` for every field where possible. It works better with assistive technology and autofill than `aria-label` alone. |
+| Don't    | Use `placeholder` as a label substitute. It disappears after typing and often fails colour contrast requirements.           |
 
 ## Required fields
 
-Use `isRequired` and `necessityIndicator` to communicate mandatory fields.
-`'icon'` renders a visual required marker; `'label'` appends "(required)" to the
-label text.
+Use `isRequired` and `necessityIndicator` to communicate mandatory fields. `'icon'` renders a visual
+required marker. `'label'` appends "(required)" to the label text.
 
 ```tsx
 <TextField isRequired name="firstName" label="First name" necessityIndicator="icon" />
@@ -30,10 +32,13 @@ label text.
 
 ## Validation
 
+Pass field-level validation through React Aria `Form`. Use `errorMessage` to render the validation
+message.
+
 ```tsx
 import { Form } from 'react-aria-components';
 
-<Form validationErrors={{ username: 'This username is not available.' }}>
+<Form validationErrors={{ username: 'Username is not available.' }}>
 	<TextField
 		name="username"
 		label="Username"
@@ -44,9 +49,9 @@ import { Form } from 'react-aria-components';
 
 ## Adornments
 
-Use `adornmentStart` and `adornmentEnd` to place non-editable content inside
-the input chrome. Adornments accept any `ReactNode`; you are responsible for
-semantics if adornments are interactive.
+Use `adornmentStart` and `adornmentEnd` to place non-editable content inside the input chrome.
+Adornments accept any `ReactNode`. If an adornment is interactive, you are responsible for its
+semantics.
 
 ```tsx
 import { Icon } from '@luke-ui/react/icon';
@@ -68,8 +73,8 @@ import { Icon } from '@luke-ui/react/icon';
 
 ## Size
 
-`size` controls height and typography. The HTML numeric `<input size>` attribute
-is intentionally omitted; `size` is reserved for the design-system variant.
+`size` controls height and typography. The HTML numeric `<input size>` attribute is intentionally
+omitted because `size` is reserved for the design-system variant.
 
 | Value      | Description           |
 | ---------- | --------------------- |
@@ -78,8 +83,8 @@ is intentionally omitted; `size` is reserved for the design-system variant.
 
 ## Accessibility
 
-When visual context already communicates purpose, omit `label` and provide an
-accessible name with `aria-label` or `aria-labelledby` on the field itself.
+When visual context already communicates purpose, you may omit `label` and provide an accessible
+name with `aria-label` or `aria-labelledby` on the field.
 
 ```tsx
 <TextField aria-label="Search" name="search" placeholder="Search" />
@@ -87,8 +92,8 @@ accessible name with `aria-label` or `aria-labelledby` on the field itself.
 
 ## Primitive TextInput
 
-A lower-level `TextInput` primitive is available when you need the input
-without the label, description, or error slots that `Field` provides.
+The lower-level `TextInput` primitive is available when you need the input without the label,
+description, or error slots that `Field` provides.
 
 ```ts
 import { TextInput } from '@luke-ui/react/text-field/primitive';

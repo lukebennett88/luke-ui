@@ -29,7 +29,7 @@ export const Route = createFileRoute('/docs/$')({
 const loader = createServerFn({
 	method: 'GET',
 })
-	.inputValidator((slugs) => z.array(z.string()).parse(slugs))
+	.validator((slugs) => z.array(z.string()).parse(slugs))
 	// staticFunctionMiddleware breaks Vite HMR in dev — only apply in prod build.
 	.middleware(import.meta.env.PROD ? [staticFunctionMiddleware] : [])
 	.handler(async ({ data: slugs }) => {

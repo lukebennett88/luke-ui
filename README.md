@@ -1,35 +1,35 @@
 # Luke UI 5
 
-React design system using `vanilla-extract`.
+Luke UI is a React design system built with `react-aria-components` and `vanilla-extract`.
 
 ## Setup
 
 - `pnpm install`
-- `pnpm dev` - Start dev
-- `pnpm build` - Build all
-- `pnpm check` - Lint, format, types
-- `pnpm test` - Run all tests (unit, Storybook, visual regression)
+- `pnpm dev`: start the docs app.
+- `pnpm build`: build all packages and apps.
+- `pnpm check`: run lint, format, and type checks.
+- `pnpm test`: run unit, Storybook, and visual regression tests.
 
 ## Stack
 
 - **Monorepo**: pnpm + Turbo
-- **React**: `react-aria-components` base
-- **Styling**: `vanilla-extract` (static CSS)
+- **React**: built on `react-aria-components`
+- **Styling**: `vanilla-extract` static CSS
 - **Lint/Format**: `oxlint` + `oxfmt`
 
-## UI Package (`@luke-ui/react`)
+## UI package (`@luke-ui/react`)
 
 - Tokens: `src/tokens.ts`
 - Theme: `src/theme/`
 - Styles: `src/styles/`
-- Build: `tsdown` -> `dist/stylesheet.css`
+- Build: `tsdown` writes `dist/stylesheet.css`
 
 ## Contributing
 
-- Use `pnpm changeset` for versions.
+- Use `pnpm changeset` for version changes.
 - Run `pnpm check` before committing.
 
-## CI Setup
+## CI setup
 
 - Argos + Storybook GitHub setup: `docs/ARGOS_SETUP.md`
 - Visual regression test command: `pnpm test`
@@ -53,20 +53,20 @@ Components to build:
 - [ ] SkipTo
 - [ ] VisuallyHidden
 
-### Media and visuals
+### Media visuals
 
 - [ ] Avatar
 - [x] Icon
 - [ ] Illustration
 
-### Typography and content
+### Typography content
 
 - [x] Emoji
 - [x] Heading
 - [x] Numeral
 - [x] Text
 
-### Feedback and status indicators
+### Feedback status indicators
 
 - [ ] Badge
 - [ ] EmptyState
@@ -76,7 +76,7 @@ Components to build:
 - [ ] Toast
 - [x] LoadingSpinner
 
-### Layout and structure
+### Layout structure
 
 - [ ] Breadcrumbs
 - [ ] Card

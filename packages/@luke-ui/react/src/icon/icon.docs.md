@@ -1,4 +1,5 @@
-`Icon` requires an `IconSpritesheetProvider` ancestor. See Setup below.
+`Icon` renders a symbol from the Luke UI spritesheet. It requires an `IconSpritesheetProvider`
+ancestor. See Setup below.
 
 ```tsx
 <Icon name="add" title="Add" size="xsmall" />
@@ -8,21 +9,19 @@
 <Icon name="close" aria-hidden size="medium" />
 ```
 
-## Best Practices
+## Best practices
 
-| Guidance | Practices                                                                                            |
-| -------- | ---------------------------------------------------------------------------------------------------- |
-| Do       | Pass `title` when the icon conveys meaning with no adjacent text (e.g. a standalone status icon).    |
-| Don't    | Pass both `aria-hidden` and `title` — a titled icon should be exposed to assistive tech, not hidden. |
+| Guidance | Practices                                                                                                 |
+| -------- | --------------------------------------------------------------------------------------------------------- |
+| Do       | Pass `title` when the icon conveys meaning without adjacent text, such as a standalone status icon.       |
+| Don't    | Pass both `aria-hidden` and `title`. A titled icon should be exposed to assistive technology, not hidden. |
 
 ## Setup
 
-`Icon` requires one setup step: wrap your app with `IconSpritesheetProvider`.
+Wrap your app with `IconSpritesheetProvider`.
 
-- Source asset: `@luke-ui/react/spritesheet.svg` (exports `./dist/spritesheet.svg`)
+- Source asset: `@luke-ui/react/spritesheet.svg`, exported from `./dist/spritesheet.svg`
 - Runtime lookup: `<configured-sprite-href>#<icon-name>`
-
-Example:
 
 ```tsx
 <IconSpritesheetProvider href="/assets/spritesheet.svg">
@@ -30,7 +29,7 @@ Example:
 </IconSpritesheetProvider>
 ```
 
-Vite / Storybook setup (recommended):
+Vite and Storybook should import the spritesheet as a URL.
 
 ```ts
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
@@ -40,22 +39,24 @@ import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 </IconSpritesheetProvider>;
 ```
 
-`no-inline` avoids `data:` URLs, which can break `<use href="...#icon-id">` rendering.
+The `no-inline` query avoids `data:` URLs, which can break `<use href="...#icon-id">` rendering.
 
-When developing `@luke-ui/react`, icons are generated from `packages/@luke-ui/react/icons/*.svg` into `packages/@luke-ui/react/dist/spritesheet.svg`.
+When developing `@luke-ui/react`, generate icons from `packages/@luke-ui/react/icons/*.svg` into
+`packages/@luke-ui/react/dist/spritesheet.svg`.
 
 ```bash
 pnpm --dir packages/@luke-ui/react run generate:icons
 ```
 
-## How It Works
+## How it works
 
-`Icon` renders an `<svg>` that references a symbol in the generated spritesheet using `<use href="..." />`.
+`Icon` renders an `<svg>` that references a symbol in the generated spritesheet with
+`<use href="..." />`.
 
-- `name` picks the symbol id
-- sprite URL comes from `IconSpritesheetProvider`
-- `viewBox` defaults to the generated viewBox for that icon
-- icon fill color follows `currentColor`
+- `name` chooses the symbol id.
+- The sprite URL comes from `IconSpritesheetProvider`.
+- `viewBox` defaults to the generated icon viewBox.
+- Icon fill follows `currentColor`.
 
 ```tsx
 <Icon name="add" className="myIcon" style={{ color: 'tomato' }} />
@@ -63,8 +64,7 @@ pnpm --dir packages/@luke-ui/react run generate:icons
 
 ## Create your own icon
 
-When you need a one-off icon that is not in the generated spritesheet, use
-`createIcon`.
+Use `createIcon` for a one-off icon that is not in the generated spritesheet.
 
 ```tsx
 import { createIcon } from '@luke-ui/react/icon';
@@ -80,5 +80,5 @@ const HeartIcon = createIcon({
 
 ## Accessibility
 
-If `title` is provided, the icon is exposed to assistive tech (`role="img"`).
-If `title` is omitted, `aria-hidden` defaults to `true`.
+If `title` is provided, the icon is exposed to assistive technology with `role="img"`. If `title` is
+omitted, `aria-hidden` defaults to `true`.

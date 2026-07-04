@@ -1,3 +1,6 @@
+Use `ComboboxField` for a single-select combobox with label, description, error, popover, listbox,
+and optional async loading built in.
+
 ```tsx
 <ComboboxField
 	label="Country"
@@ -9,26 +12,27 @@
 </ComboboxField>
 ```
 
-## Best Practices
+## Best practices
 
-| Guidance | Practices                                                                                           |
-| -------- | --------------------------------------------------------------------------------------------------- |
-| Do       | Use `defaultItems` for a static list and `items` + `loadingState` when options load asynchronously. |
-| Don't    | Reach for `ComboboxField` for multi-select — it's single-select only in v1.                         |
+| Guidance | Practices                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------- |
+| Do       | Use `defaultItems` for a static list. Use `items` with `loadingState` when options load asynchronously. |
+| Don't    | Use `ComboboxField` for multi-select. It is single-select only in v1.                                   |
 
-## API Shape
+## API shape
 
 - Root props follow React Aria `ComboBox` naming.
-- Composed convenience props: `label`, `description`, `errorMessage`, `necessityIndicator`, `size`,
-  `placeholder`.
-- `children` renders dynamic items from `items` or `defaultItems`.
+- Composed convenience props include `label`, `description`, `errorMessage`, `necessityIndicator`,
+  `size`, and `placeholder`.
+- `children` renders items from `items` or `defaultItems`.
 - `listBoxProps` and `loadMoreItem` are lower-level escape hatches.
 
 ## Selection indicators
 
-The selected option shows a checkmark in the listbox, and while a selection is present the control
-shows a clear button before the trigger. Pressing it clears the selection and the input text. The
-clear button is omitted when the field is disabled or read-only.
+The selected option shows a checkmark in the listbox. When the control has a selection, it shows a
+clear button before the trigger. Pressing the clear button clears the selection and input text.
+
+The clear button is omitted when the field is disabled or read-only.
 
 ```tsx
 <ComboboxField defaultValue="ca" defaultItems={countries} label="Country" name="country">
@@ -38,6 +42,8 @@ clear button is omitted when the field is disabled or read-only.
 
 ## Required fields
 
+Use `isRequired` with `necessityIndicator` to show that the field is mandatory.
+
 ```tsx
 <ComboboxField isRequired label="Country" name="country" necessityIndicator="icon">
 	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
@@ -45,6 +51,9 @@ clear button is omitted when the field is disabled or read-only.
 ```
 
 ## Validation
+
+Pass field-level validation through React Aria `Form`. Use `errorMessage` to render the validation
+message.
 
 ```tsx
 import { Form } from 'react-aria-components';
@@ -60,7 +69,9 @@ import { Form } from 'react-aria-components';
 </Form>;
 ```
 
-## Grouped Options
+## Grouped options
+
+Use `ComboboxSection` to group related options inside the listbox.
 
 ```tsx
 <ComboboxField label="Country" name="country">
@@ -75,7 +86,8 @@ import { Form } from 'react-aria-components';
 
 ## Async options
 
-Pass `loadingState` for built-in loading and empty states. Control options externally via `items`.
+Pass `loadingState` for built-in loading and empty states. Control the option collection with
+`items`.
 
 ```tsx
 <ComboboxField
@@ -91,7 +103,8 @@ Pass `loadingState` for built-in loading and empty states. Control options exter
 
 ## Infinite scroll
 
-Use `onLoadMore` for automatic sentinel-based loading, or `loadMoreItem` for full control.
+Use `onLoadMore` for automatic sentinel-based loading, or `loadMoreItem` when you need full control
+over the load-more row.
 
 ```tsx
 <ComboboxField
@@ -107,8 +120,8 @@ Use `onLoadMore` for automatic sentinel-based loading, or `loadMoreItem` for ful
 
 ## Primitive kit
 
-The individual `Combobox*` building blocks used to assemble `ComboboxField` are available for
-library authors who need a custom combobox layout.
+The individual `Combobox*` building blocks are available for library authors who need a custom
+combobox layout.
 
 ```ts
 import {
@@ -126,7 +139,8 @@ import {
 
 ### Size propagation
 
-When you set `size` on `ComboboxInput`, it is automatically inherited by `ComboboxControl`,
-`ComboboxTextInput`, `ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`, and
-`ComboboxLoadMoreItem`. You can override the inherited size on any individual child by passing an
-explicit `size` prop to that component.
+When you set `size` on `ComboboxInput`, it is inherited by `ComboboxControl`, `ComboboxTextInput`,
+`ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`, and `ComboboxLoadMoreItem`.
+
+You can override the inherited size on an individual child by passing that child an explicit `size`
+prop.

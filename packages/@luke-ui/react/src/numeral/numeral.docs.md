@@ -1,5 +1,5 @@
-Formatting is done via `Intl.NumberFormat` and respects the locale from React
-Aria's `I18nProvider`.
+`Numeral` formats numbers with `Intl.NumberFormat`. It respects locale from React Aria's
+`I18nProvider`.
 
 ```tsx
 <Numeral value={12_345.67} />
@@ -7,8 +7,8 @@ Aria's `I18nProvider`.
 
 ## Formats
 
-`format` is derived from `currency` and `unit` when omitted. Pass it explicitly
-for `'percent'` or `'decimal'` without a currency or unit.
+`Numeral` infers `format` from `currency` or `unit` when omitted. Pass `format` explicitly for
+`'percent'` or `'decimal'`, or when you want to be direct about currency and unit formatting.
 
 ```tsx
 <Numeral value={3_500} format="percent" />
@@ -27,6 +27,8 @@ for `'percent'` or `'decimal'` without a currency or unit.
 ```
 
 ## Compact notation
+
+Use `abbreviate` for compact notation.
 
 ```tsx
 <Numeral value={12_345} abbreviate />
@@ -52,7 +54,7 @@ Pass a number for fixed fraction digits, or a `[min, max]` tuple for a range.
 
 `Numeral` throws in development when:
 
-- `currency` and `unit` are both provided.
+- both `currency` and `unit` are provided.
 - `format="currency"` is used without a `currency` code.
 - `format="unit"` is used without a `unit` value.
 - `precision` is not a non-negative integer or valid `[min, max]` tuple.

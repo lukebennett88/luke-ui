@@ -1,20 +1,20 @@
-`Link` expects the Luke UI theme class to be applied at app/root level. See
+`Link` expects the Luke UI theme class at the app or root level. See
 [Getting Started](/docs/getting-started).
 
 ```tsx
 <Link href="/help">Help center</Link>
 ```
 
-## Best Practices
+## Best practices
 
-| Guidance | Practices                                                                                                                                     |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use `tone="inverted"` only on dark backgrounds — elsewhere it's hard to read.                                                                 |
-| Do       | Use `isStandalone` for links that aren't part of a sentence (card links, nav items); leave it `false` for inline links within paragraph text. |
+| Guidance | Practices                                                                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Do       | Use `tone="inverted"` only on dark backgrounds. On light backgrounds, it is hard to read.                                          |
+| Do       | Use `isStandalone` for links that are not part of a sentence, such as card links and nav items. Leave it `false` for inline links. |
 
 ## Tone
 
-Three tones: `brand` (default), `neutral`, and `inverted`.
+`Link` has three tones: `brand` (default), `neutral`, and `inverted`.
 
 ```tsx
 <Link href="/docs/accessibility" tone="neutral">
@@ -30,13 +30,11 @@ Three tones: `brand` (default), `neutral`, and `inverted`.
 </div>
 ```
 
-- For a more subtle link, use `neutral`.
-- On a dark background, use `inverted`.
+Use `neutral` for a more subtle link. Use `inverted` on dark backgrounds.
 
 ## Standalone
 
-A `Link` can be used on its own as `isStandalone` or inline within a sentence or
-paragraph (default: `isStandalone={false}`).
+Use `isStandalone` when a link stands on its own. Leave it `false` for links inside paragraph text.
 
 ```tsx
 <Link href="/terms" isStandalone>
@@ -57,10 +55,10 @@ paragraph (default: `isStandalone={false}`).
 
 ## Accessibility
 
-Screen readers announce a disabled link as unavailable but not why — put the
-reason in nearby visible text rather than relying on the disabled state alone.
+Screen readers announce a disabled link as unavailable, but not why. Put the reason in nearby
+visible text instead of relying on disabled state alone.
 
 ## When to use vs Button
 
-Use `Link` to navigate to a new URL or route. Use `Button` for in-page actions
-like saving, submitting, or opening a dialog.
+Use `Link` to navigate to a new URL or route. Use `Button` for in-page actions, such as saving,
+submitting, or opening a dialog.

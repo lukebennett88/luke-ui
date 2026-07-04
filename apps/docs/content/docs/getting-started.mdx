@@ -1,21 +1,30 @@
 ---
 title: Getting Started
-description: Install the package and render your first component.
+description: Install Luke UI and render your first component.
 ---
 
 ## Install
 
-For external consumers:
+External consumers install the package from the registry.
 
 ```bash
 pnpm add @luke-ui/react
 ```
 
-For this monorepo, use workspace dependencies (for example `"@luke-ui/react": "workspace:*"`).
+Inside this monorepo, use a workspace dependency instead.
 
-## Use a Component
+```json
+{
+	"dependencies": {
+		"@luke-ui/react": "workspace:*"
+	}
+}
+```
 
-Apply the Luke UI theme classes once near the top of your app so components resolve design token CSS variables and scoped reset rules.
+## Render a component
+
+Apply the Luke UI theme class near the top of your app. Components use it to resolve design-token
+CSS variables and scoped reset rules.
 
 ```tsx
 import lukeUiStyles from '@luke-ui/react/stylesheet.css?url';
@@ -34,7 +43,9 @@ export function App() {
 }
 ```
 
-## Use a Component (Minimal)
+## Minimal example
+
+For small demos, import the stylesheet and render a component directly.
 
 ```tsx
 import lukeUiStyles from '@luke-ui/react/stylesheet.css?url';
@@ -50,7 +61,9 @@ export function Example() {
 }
 ```
 
-## Manual Root Class (Advanced)
+## Manual root class
+
+Use `themeRootClassName` when you need to attach the theme class yourself.
 
 ```tsx
 import { themeRootClassName } from '@luke-ui/react/theme';
@@ -58,11 +71,11 @@ import { themeRootClassName } from '@luke-ui/react/theme';
 <div className={themeRootClassName} />;
 ```
 
-## Next Steps
+## Next steps
 
-- Read the [Button](/docs/components/actions/button) docs.
-- Read the [Link](/docs/components/actions/link) docs.
-- Read the [Loading Spinner](/docs/components/feedback/loading-spinner) docs.
-- Read the [Combobox Field](/docs/components/forms/combobox-field) docs.
-- Read the [Text](/docs/components/typography/text) docs.
-- Read the [Icon](/docs/components/visuals/icon) docs.
+- Read [Button](/docs/components/actions/button).
+- Read [Link](/docs/components/actions/link).
+- Read [Loading Spinner](/docs/components/feedback/loading-spinner).
+- Read [Combobox Field](/docs/components/forms/combobox-field).
+- Read [Text](/docs/components/typography/text).
+- Read [Icon](/docs/components/visuals/icon).

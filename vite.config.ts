@@ -19,6 +19,7 @@ export default defineConfig({
 		jsxSingleQuote: false,
 		overrides: [{ files: ['**/*.css.ts'], options: { sortImports: { sortSideEffects: false } } }],
 		printWidth: 100,
+		proseWrap: 'always',
 		quoteProps: 'as-needed',
 		semi: true,
 		singleAttributePerLine: false,

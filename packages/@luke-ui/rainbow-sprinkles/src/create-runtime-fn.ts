@@ -4,7 +4,6 @@ import type {
 	DynamicConditionalProperty,
 	DynamicProperty,
 	RuntimeFnReturn,
-	ShorthandProperty,
 	SprinkleProperties,
 	SprinklesProps,
 	StaticConditionalProperty,
@@ -112,10 +111,6 @@ function handleEntry(
 	cache: Map<string, string>,
 	condition?: string,
 ): string {
-	if ('mappings' in propertyConfig) {
-		return '';
-	}
-
 	const propName = (propertyConfig as DynamicProperty).name;
 	const staticScale = (propertyConfig as StaticProperty).staticScale as
 		| ReadonlyArray<string>
@@ -197,9 +192,6 @@ function assignVars(
 	propValue: unknown,
 	cache: Map<string, string | false>,
 ): void {
-	if ('mappings' in propertyConfig) {
-		return;
-	}
 	if (!hasDynamic(propertyConfig)) {
 		return;
 	}
@@ -271,7 +263,6 @@ export function createRuntimeFn<Configs extends ReadonlyArray<DefinePropertiesRe
 	) as SprinkleProperties;
 	const properties = Object.keys(cssConfig);
 	const propertiesSet = new Set(properties);
-	const shorthandNames = properties.filter((property) => 'mappings' in cssConfig[property]!);
 
 	type PropertyCache = {
 		class: Map<string, string>;
@@ -284,34 +275,16 @@ export function createRuntimeFn<Configs extends ReadonlyArray<DefinePropertiesRe
 		const style: Record<string, string> = {};
 		const className: Array<string> = [];
 		const otherProps: Record<string, unknown> = {};
-		const shorthands: Record<string, unknown> = {};
-		const nonShorthands = { ...props };
-		let hasShorthands = false;
 
-		for (const shorthand of shorthandNames) {
-			const value = props[shorthand];
-			if (value != null) {
-				const sprinkle = cssConfig[shorthand]! as ShorthandProperty;
-				hasShorthands = true;
-				for (const propMapping of sprinkle.mappings) {
-					shorthands[propMapping] = value;
-					if (nonShorthands[propMapping] == null) {
-						delete nonShorthands[propMapping];
-					}
-				}
-			}
-		}
-
-		const finalProps = hasShorthands ? { ...shorthands, ...nonShorthands } : props;
-		const finalPropsKeys = Object.keys(finalProps);
-		for (const property of finalPropsKeys) {
+		const propsKeys = Object.keys(props);
+		for (const property of propsKeys) {
 			if (!propertiesSet.has(property)) {
 				otherProps[property] = props[property];
 				continue;
 			}
 			const propertyConfig = cssConfig[property];
-			const propValue = finalProps[property];
-			if (!propertyConfig || 'mappings' in propertyConfig) {
+			const propValue = props[property];
+			if (!propertyConfig) {
 				continue;
 			}
 			let classCache: Map<string, string> | undefined;

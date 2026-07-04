@@ -6,7 +6,6 @@ import type {
 	ConfigStaticProperties,
 	DefinePropertiesReturn,
 	MakeConfig,
-	ShorthandProperty,
 	SprinkleProperties,
 } from './types.js';
 
@@ -140,32 +139,22 @@ type DefinePropertiesOptions = CommonOptions & {
 	defaultCondition?: string;
 	dynamicProperties?: ConfigDynamicProperties;
 	staticProperties?: ConfigStaticProperties;
-	shorthands?: Record<string, ReadonlyArray<string>>;
 };
 
 export function defineProperties<
 	const Dyn extends ConfigDynamicProperties | undefined = undefined,
 	const Stat extends ConfigStaticProperties | undefined = undefined,
 	const Cond extends ConfigConditions | undefined = undefined,
-	const Short extends Record<string, ReadonlyArray<string>> | undefined = undefined,
 >(options: {
 	'@layer'?: string;
 	conditions?: Cond;
 	defaultCondition?: string;
 	dynamicProperties?: Dyn;
 	staticProperties?: Stat;
-	shorthands?: Short;
-}): DefinePropertiesReturn<MakeConfig<Dyn, Stat, Cond, Short>>;
+}): DefinePropertiesReturn<MakeConfig<Dyn, Stat, Cond>>;
 export function defineProperties(options: DefinePropertiesOptions): DefinePropertiesReturn {
-	const { conditions, dynamicProperties, staticProperties, shorthands, defaultCondition } = options;
-	const config: SprinkleProperties = shorthands
-		? Object.fromEntries(
-				Object.entries(shorthands).map(([prop, mappings]) => [
-					prop,
-					{ mappings } as ShorthandProperty,
-				]),
-			)
-		: {};
+	const { conditions, dynamicProperties, staticProperties, defaultCondition } = options;
+	const config: SprinkleProperties = {};
 
 	if (dynamicProperties) {
 		for (const dynamicProp of Object.keys(dynamicProperties)) {

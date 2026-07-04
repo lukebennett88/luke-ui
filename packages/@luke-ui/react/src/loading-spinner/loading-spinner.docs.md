@@ -1,5 +1,5 @@
-`LoadingSpinner` expects the Luke UI theme class to be applied at app/root level.
-See [Getting Started](/docs/getting-started).
+`LoadingSpinner` expects the Luke UI theme class at the app or root level. See
+[Getting Started](/docs/getting-started).
 
 ```tsx
 <LoadingSpinner aria-label="Loading" />
@@ -10,7 +10,7 @@ times.
 
 ## Progress mode
 
-Omit `value` for indeterminate progress. Pass `value` for determinate.
+Omit `value` for indeterminate progress. Pass `value` for determinate progress.
 
 ```tsx
 <LoadingSpinner aria-label="Loading profile" value={66} />
@@ -30,5 +30,5 @@ Omit `value` for indeterminate progress. Pass `value` for determinate.
 
 ## Accessibility
 
-`aria-label` defaults to `"pending"` when omitted. Override it with what's
-loading (e.g. "Loading profile") for a clearer announcement.
+`aria-label` defaults to `"pending"` when omitted. Override it with what is loading, such as
+"Loading profile", for a clearer announcement.

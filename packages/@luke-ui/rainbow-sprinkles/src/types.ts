@@ -138,10 +138,6 @@ export type StaticDynamicConditionalProperty = {
 	dynamicScale: true;
 };
 
-export type ShorthandProperty<Mappings extends ReadonlyArray<string> = ReadonlyArray<string>> = {
-	mappings: Mappings;
-};
-
 export type SprinkleProperties = {
 	[k: string]:
 		| DynamicProperty
@@ -153,8 +149,7 @@ export type SprinkleProperties = {
 		| StaticConditionalProperty
 		| StaticConditionalPropertyArray
 		| StaticDynamicConditionalPropertyArray
-		| StaticDynamicConditionalProperty
-		| ShorthandProperty;
+		| StaticDynamicConditionalProperty;
 };
 
 // Mapped config types produced by defineProperties, preserving literal scale key types.
@@ -219,7 +214,6 @@ export type MakeConfig<
 	Dyn extends ConfigDynamicProperties | undefined,
 	Stat extends ConfigStaticProperties | undefined,
 	Cond extends ConfigConditions | undefined,
-	Short extends Record<string, ReadonlyArray<string>> | undefined,
 > = (Dyn extends ConfigDynamicProperties
 	? {
 			[K in keyof Dyn & string]: DynamicConfigEntry<
@@ -237,9 +231,6 @@ export type MakeConfig<
 					Cond extends undefined ? false : true
 				>;
 			}
-		: Record<never, never>) &
-	(Short extends Record<string, ReadonlyArray<string>>
-		? { [K in keyof Short & string]: ShorthandProperty<Short[K]> }
 		: Record<never, never>);
 
 export type DefinePropertiesReturn<Config = SprinkleProperties> = {
@@ -300,9 +291,7 @@ type ChildSprinkle<Sprinkle> = Sprinkle extends StaticDynamicConditionalProperty
 												: never;
 
 type ChildSprinkles<Sprinkles extends Record<string, unknown>> = {
-	[Prop in keyof Sprinkles]?: Sprinkles[Prop] extends ShorthandProperty
-		? ChildSprinkle<Sprinkles[Sprinkles[Prop]['mappings'][number]]>
-		: ChildSprinkle<Sprinkles[Prop]>;
+	[Prop in keyof Sprinkles]?: ChildSprinkle<Sprinkles[Prop]>;
 };
 
 export type SprinklesProps<Args extends ReadonlyArray<unknown>> = Args extends [infer L, ...infer R]

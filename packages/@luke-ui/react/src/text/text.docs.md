@@ -1,15 +1,18 @@
-`Text` expects the Luke UI theme class to be applied at app/root level. See [Getting Started](/docs/getting-started).
+`Text` expects the Luke UI theme class at the app or root level. See
+[Getting Started](/docs/getting-started).
+
+Use `Text` for styled text that should not create heading semantics.
 
 ```tsx
 <Text>The quick brown fox jumps over the lazy dog.</Text>
 ```
 
-## Best Practices
+## Best practices
 
-| Guidance | Practices                                                                                                           |
-| -------- | ------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use `fontSize` tokens (e.g. `'h2'`) instead of arbitrary values, so text stays consistent with the rest of the app. |
-| Don't    | Use `Text` for section headings — use `Heading`, which manages semantic level automatically.                        |
+| Guidance | Practices                                                                                                   |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| Do       | Use `fontSize` tokens, such as `'h2'`, instead of arbitrary values so text stays consistent across the app. |
+| Don't    | Use `Text` for section headings. Use `Heading`, which manages semantic level automatically.                 |
 
 ## Typography
 
@@ -25,8 +28,8 @@
 </Text>
 ```
 
-See Token reference below for every valid `color`, `fontFamily`, `fontSize`,
-`lineHeight`, and `fontWeight` value.
+See the token reference below for valid `color`, `fontFamily`, `fontSize`, `lineHeight`, and
+`fontWeight` values.
 
 ## Text transform and decoration
 
@@ -62,7 +65,8 @@ See Token reference below for every valid `color`, `fontFamily`, `fontSize`,
 
 ### `color` tokens
 
-`neutralSubtle`, `neutralBold`, `neutralDisabled`, `neutralBoldInverted`, `positive`, `informative`, `caution`, `critical`, `inherit`
+`neutralSubtle`, `neutralBold`, `neutralDisabled`, `neutralBoldInverted`, `positive`, `informative`,
+`caution`, `critical`, `inherit`
 
 ### `fontFamily` tokens
 
@@ -70,7 +74,8 @@ See Token reference below for every valid `color`, `fontFamily`, `fontSize`,
 
 ### `fontSize` tokens
 
-`xxsmall`, `xsmall`, `small`, `standard`, `medium`, `large`, `xlarge`, `xxlarge`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`
+`xxsmall`, `xsmall`, `small`, `standard`, `medium`, `large`, `xlarge`, `xxlarge`, `h1`, `h2`, `h3`,
+`h4`, `h5`, `h6`
 
 ### `lineHeight` tokens
 
@@ -90,7 +95,7 @@ See Token reference below for every valid `color`, `fontFamily`, `fontSize`,
 
 ## When to use vs Heading
 
-Use `Heading` for actual section headings — it manages semantic level and
-nesting automatically. Use `Text` with a heading-sized `fontSize` token when
-the content looks like a heading but isn't semantically one (e.g. a large
-stat number).
+Use `Heading` for actual section headings because it manages semantic level nesting automatically.
+
+Use `Text` with a heading-sized `fontSize` token when content should look like a heading but is not
+semantically one, such as a large stat number.

@@ -1,8 +1,20 @@
 # Component creation uses a plan module
 
-Component creation is modeled as a module whose interface returns a plan for the files and checks needed to add an Atom or Composed component. Turbo/Plop remains an adapter that applies the plan, rather than the place where component creation rules live. This keeps the interface test surface on Luke UI's component creation rules, while the adapter stays thin and replaceable.
+Component creation is modelled as a module that returns a plan for the files and checks needed to
+add an Atom or Composed component.
 
-## Considered Options
+Turbo and Plop stay as the adapter that applies the plan. They are not where the component creation
+rules live.
 
-- **Keep all logic in the Turbo generator**: rejected because it makes Plop the test surface and spreads Atom, Composed, docs, story, recipe, and export-placement rules through one shallow script.
-- **Create files directly without a plan**: rejected because it makes dry-run tests and fixture assertions harder, and it hides the exact public surfaces a component creation input should produce.
+## Decision
+
+Keep Luke UI's component creation rules in a testable plan module. The adapter can stay thin and
+replaceable.
+
+## Rejected options
+
+- **Keep all logic in the Turbo generator**: rejected because it makes Plop the test surface and
+  spreads Atom, Composed, docs, story, recipe, and export rules through one shallow script.
+- **Create files directly without a plan**: rejected because it makes dry-run tests and fixture
+  assertions harder. It also hides the exact public surfaces a component creation input should
+  produce.

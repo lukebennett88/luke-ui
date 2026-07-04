@@ -2,7 +2,7 @@
 [Getting Started](/docs/getting-started).
 
 Use it when loading content should keep the same footprint as the loaded state. Text renders as an
-inline skeleton. Elements keep their layout while a skeleton surface is painted over them.
+inline skeleton. Elements keep their layout while the skeleton surface is painted over them.
 
 ```tsx
 <LoadingSkeleton isLoading={isLoading}>{user?.name ?? 'Placeholder name'}</LoadingSkeleton>
@@ -16,16 +16,16 @@ inline skeleton. Elements keep their layout while a skeleton surface is painted 
 
 All mounted skeletons use the same pulse timing, even when they mount at different times.
 
-## Best Practices
+## Best practices
 
-| Guidance | Practices                                                                                                             |
-| -------- | --------------------------------------------------------------------------------------------------------------------- |
-| Do       | Wrap the real content so the skeleton matches its final size exactly.                                                 |
-| Don't    | Use `LoadingSkeleton` for content whose final size is unknown — a size mismatch causes layout shift when it resolves. |
+| Guidance | Practices                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------- |
+| Do       | Wrap real content so the skeleton matches the final size exactly.                                                   |
+| Don't    | Use `LoadingSkeleton` for content whose final size is unknown. Size mismatch causes layout shift when loading ends. |
 
 ## Loading state
 
-`isLoading` defaults to `true`. Pass `isLoading={false}` when the content is ready.
+`isLoading` defaults to `true`. Pass `isLoading={false}` when content is ready.
 
 ```tsx
 <LoadingSkeleton isLoading={false}>
@@ -35,7 +35,7 @@ All mounted skeletons use the same pulse timing, even when they mount at differe
 
 ## Multi-line text
 
-Wrap text directly when copy spans more than one line. Each line gets its own skeleton shape.
+Wrap text directly when the copy spans more than one line. Each line gets its own skeleton shape.
 
 ```tsx
 <div style={{ maxInlineSize: '16rem' }}>
@@ -61,7 +61,7 @@ element.
 ## LoadingSkeletonProvider
 
 Use `LoadingSkeletonProvider` when one loading state controls a group of skeletons. The provider
-value overrides each descendant `isLoading` prop.
+value overrides descendant `isLoading` props.
 
 ```tsx
 <LoadingSkeletonProvider isLoading={isLoading}>
@@ -95,5 +95,6 @@ avatar.
 
 ## Accessibility
 
-While loading, the skeleton is hidden from assistive technology and cannot be focused or clicked. It
-sets `aria-hidden`, `inert`, `tabIndex={-1}`, and disables pointer events.
+While loading, skeleton content is hidden from assistive technology and cannot be focused or
+clicked. `LoadingSkeleton` sets `aria-hidden`, `inert`, `tabIndex={-1}`, and disables pointer
+events.

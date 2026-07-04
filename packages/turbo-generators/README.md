@@ -4,13 +4,11 @@ Custom generators for `turbo generate`.
 
 ## Generators
 
-- `component`: Scaffolds Atom and Composed `@luke-ui/react` components,
-  package docs prose, Storybook stories, hosted docs wrappers, hosted docs
-  controls, and structural docs navigation.
+- `component`: Scaffolds Atom or Composed `@luke-ui/react` components, package docs prose, Storybook
+  stories, hosted docs wrappers, hosted docs controls, and structural docs navigation.
 
-The component generator asks for name, tier, docs group, and styling. Primitive
-creation is intentionally excluded until it can be modeled with a parent
-Composed component.
+The component generator asks for name, tier, docs group, and styling. Primitive creation is
+intentionally excluded until it can be modelled through its parent Composed component.
 
 ## Usage
 
