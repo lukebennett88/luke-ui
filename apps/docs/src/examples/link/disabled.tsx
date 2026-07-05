@@ -8,7 +8,7 @@ export const meta = {
 
 export default function Disabled(): JSX.Element {
 	return (
-		<Link href="#" isDisabled>
+		<Link href="/archived" isDisabled>
 			Archived report
 		</Link>
 	);

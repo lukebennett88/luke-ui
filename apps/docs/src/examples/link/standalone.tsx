@@ -3,7 +3,7 @@ import type { JSX } from 'react';
 
 export const meta = {
 	title: 'Link — Standalone',
-	description: 'Use `isStandalone` for links that stand on their own, or inline links in prose.',
+	description: 'Use isStandalone for links that stand on their own, or inline links in prose.',
 };
 
 export default function Standalone(): JSX.Element {

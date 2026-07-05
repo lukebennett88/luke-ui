@@ -19,13 +19,10 @@ import { Example } from '../../../../src/components/example-block';
 | Do       | Use `tone="inverted"` only on dark backgrounds. On light backgrounds, it is hard to read.                                          |
 | Do       | Use `isStandalone` for links that are not part of a sentence, such as card links and nav items. Leave it `false` for inline links. |
 
-## Props
-
-<auto-type-table path="packages/@luke-ui/react/src/link/index.tsx" name="LinkProps" />
-
 ## Tone
 
-`Link` has three tones: `brand` (default), `neutral`, and `inverted`.
+`Link` has three tones: `brand` (default), `neutral`, and `inverted`. Use `neutral` for a more
+subtle link. Use `inverted` on dark backgrounds.
 
 <Example component="link" name="tones" />
 
@@ -51,3 +48,7 @@ visible text instead of relying on disabled state alone.
 
 Use `Link` to navigate to a new URL or route. Use `Button` for in-page actions, such as saving,
 submitting, or opening a dialog.
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/link/index.tsx" name="LinkProps" />
