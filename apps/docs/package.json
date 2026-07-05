@@ -22,7 +22,6 @@
 		"test": "vp test run --config vitest.config.ts"
 	},
 	"dependencies": {
-		"@fumadocs/story": "catalog:",
 		"@luke-ui/docs-tools": "workspace:*",
 		"@luke-ui/react": "workspace:*",
 		"@orama/orama": "catalog:",

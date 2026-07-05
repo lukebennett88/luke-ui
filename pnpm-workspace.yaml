@@ -12,7 +12,6 @@ catalog:
   '@capsizecss/metrics': ^4.1.0
   '@capsizecss/vanilla-extract': ^2.0.4
   '@changesets/cli': ^2.31.0
-  '@fumadocs/story': ^1.1.2
   '@orama/orama': ^3.1.18
   '@react-aria/utils': ^3.34.1
   '@rollup/plugin-babel': ^7.1.0

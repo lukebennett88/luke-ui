@@ -1,7 +1,6 @@
 import { spawn } from 'node:child_process';
 import { join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import story from '@fumadocs/story/vite';
 import type {
 	PackageDocsCatalogEntry,
 	PackageDocsCatalogMetadata,
@@ -321,7 +320,6 @@ export default defineConfig(async () => {
 			packageDocsPlugin(),
 			packageSourceWatcherPlugin(),
 			mdx(await import('./source.config')),
-			story({ tsconfigPath: fileURLToPath(new URL('./tsconfig.json', import.meta.url)) }),
 			tailwindcss(),
 			tanstackStart({
 				pages: [
