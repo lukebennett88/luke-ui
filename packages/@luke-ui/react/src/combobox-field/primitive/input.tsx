@@ -6,13 +6,8 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
+import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-
-interface ComboboxVariantProps extends NonNullable<styles.ComboboxVariants> {}
-
-interface ComboboxStyleProps {
-	size?: ComboboxVariantProps['size'];
-}
 
 /**
  * Props for the styled combobox text input.
@@ -20,10 +15,9 @@ interface ComboboxStyleProps {
  * @tier primitive
  */
 export interface ComboboxTextInputProps
-	extends
-		DistributiveOmit<RacInputProps, 'className' | keyof ComboboxStyleProps>,
-		ComboboxStyleProps {
+	extends DistributiveOmit<RacInputProps, 'className' | 'size'> {
 	className?: RacInputProps['className'];
+	size?: ComboboxSize;
 }
 
 /** Text input used within `ComboboxControl` for combobox behavior. */
