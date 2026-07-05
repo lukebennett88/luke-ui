@@ -13,7 +13,6 @@
 
 A component directory contains:
 
-- `[component].docs.md`: authored usage guidance consumed by the docs generator
 - `[component].stories.tsx`: Storybook stories that also serve as tests
 - `index.tsx`: component implementation
 - `primitive/`: optional primitive exports
@@ -27,9 +26,9 @@ Primitives exported from `*/primitive/` are building blocks for library authors.
 promoted in beginner app-developer navigation, but they are public API and should have enough
 generated documentation for power users and agents.
 
-## Documentation generation
+## Documentation
 
-JSDoc and TypeScript types drive generated docs under `docs/`.
+JSDoc and TypeScript types drive the docs app.
 
 When adding or modifying a component:
 
@@ -43,32 +42,4 @@ When adding or modifying a component:
   `isDisabled?: RACButtonProps['isDisabled']`.
 - Do not re-declare every React Aria Components prop. Re-declare only props an app developer is
   likely to reach for.
-- Long-tail inherited props are covered by the generated "Extends" pointer.
-
-## Generated docs
-
-Generated docs are ignored by Git. After changing JSDoc or `.docs.md` prose, run:
-
-```sh
-pnpm --filter @luke-ui/react generate:docs
-```
-
-Use `pnpm --filter @luke-ui/react check:docs` as a smoke test that the generator is healthy. It is
-not a stale-file check because generated output is ignored.
-
-## Dev loop
-
-During `pnpm dev` or `turbo dev`, the docs app does two things:
-
-1. Watches generated `docs/*.md` files and hot-reloads pages when they change.
-2. Watches `src/**/*.{ts,tsx,docs.md}` in the package and re-runs `generate:docs` on change,
-   debounced by about 300ms.
-
-The loop is the same for prose and JSDoc edits:
-
-1. Edit `[component].docs.md`, `index.tsx` JSDoc, or prop types.
-2. Save.
-3. The generator re-runs, `docs/*.md` updates, and the page reloads.
-
-If the generator fails during a mid-edit syntax error, the dev server logs the error and keeps
-running. The next successful save regenerates the docs.
+- Long-tail inherited props are covered by the docs app's "Extends" pointer.

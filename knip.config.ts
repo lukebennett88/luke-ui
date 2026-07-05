@@ -9,15 +9,11 @@ export default {
 				'src/router.tsx',
 				'src/routes/**/*.ts',
 				'src/routes/**/*.tsx',
+				'src/examples/**/*.tsx',
 				'src/styles/app.css',
 				'content/**/*.mdx',
 			],
-			ignoreDependencies: ['ts-morph'],
 			project: ['src/**/*.{ts,tsx}'],
-		},
-		'packages/@luke-ui/docs-tools': {
-			entry: ['src/**/*.test.ts'],
-			project: ['src/**/*.ts'],
 		},
 		'packages/@luke-ui/react': {
 			entry: [

@@ -1,18 +1,11 @@
 {
 	"$schema": "https://v2-8-10.turborepo.dev/schema.json",
 	"tasks": {
-		"@luke-ui/react#check:docs": {
-			"dependsOn": ["build"]
-		},
 		"@luke-ui/react#check:lint": {
 			"dependsOn": ["build", "generate"]
 		},
 		"@luke-ui/react#check:types": {
 			"dependsOn": ["build", "^build"]
-		},
-		"@luke-ui/react#generate:docs": {
-			"dependsOn": ["build"],
-			"outputs": ["docs/**", "dist/docs/**"]
 		},
 		"//#check:format-root": {
 			"cache": true
@@ -40,10 +33,7 @@
 			"outputs": ["storybook-static/**"]
 		},
 		"check": {
-			"dependsOn": ["check:format", "check:lint", "check:types", "check:docs"]
-		},
-		"check:docs": {
-			"dependsOn": ["^generate"]
+			"dependsOn": ["check:format", "check:lint", "check:types"]
 		},
 		"check:format": {
 			"dependsOn": ["generate"]
@@ -68,13 +58,13 @@
 			"persistent": true
 		},
 		"docs#build": {
-			"dependsOn": ["generate", "^build", "@luke-ui/react#generate:docs"],
+			"dependsOn": ["generate", "^build"],
 			"env": ["VITE_BASE_URL"],
 			"outputs": [".output/**", ".source/**"]
 		},
 		"docs#dev": {
 			"cache": false,
-			"dependsOn": ["generate", "^build", "@luke-ui/react#generate:docs"],
+			"dependsOn": ["generate", "^build"],
 			"persistent": true
 		},
 		"fix": {
@@ -97,7 +87,6 @@
 			"dependsOn": ["^generate"],
 			"inputs": [
 				"$TURBO_DEFAULT$",
-				"!docs/**",
 				"!dist/**",
 				"!.generated/**",
 				"!storybook-static/**",
@@ -108,9 +97,7 @@
 			"outputs": [
 				".generated/**",
 				"dist/spritesheet.svg",
-				"dist/docs/**",
-				"src/routeTree.gen.ts",
-				"docs/**"
+				"src/routeTree.gen.ts"
 			]
 		},
 		"test": {

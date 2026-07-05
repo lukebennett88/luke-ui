@@ -156,9 +156,6 @@ catalogs:
     tailwindcss:
       specifier: ^4.3.2
       version: 4.3.2
-    ts-morph:
-      specifier: ^28.0.0
-      version: 28.0.0
     tsx:
       specifier: ^4.22.4
       version: 4.22.4
@@ -204,9 +201,6 @@ importers:
 
   apps/docs:
     dependencies:
-      '@luke-ui/docs-tools':
-        specifier: workspace:*
-        version: link:../../packages/@luke-ui/docs-tools
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../../packages/@luke-ui/react
@@ -243,9 +237,6 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.2.7(react@19.2.7)
-      ts-morph:
-        specifier: 'catalog:'
-        version: 28.0.0
       vite:
         specifier: npm:@voidzero-dev/vite-plus-core@0.2.2
         version: '@voidzero-dev/vite-plus-core@0.2.2(@arethetypeswrong/core@0.18.4)(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.37)(yaml@2.9.0)'
@@ -299,28 +290,6 @@ importers:
         specifier: 4.1.9
         version: 4.1.9(@types/node@26.0.1)(@vitest/browser-playwright@4.1.9)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(@voidzero-dev/vite-plus-core@0.2.2(@arethetypeswrong/core@0.18.4)(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.37)(yaml@2.9.0))
 
-  packages/@luke-ui/docs-tools:
-    dependencies:
-      ts-morph:
-        specifier: 'catalog:'
-        version: 28.0.0
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.0.1
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.17
-      react-aria-components:
-        specifier: 'catalog:'
-        version: 1.19.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
-      vite-plus:
-        specifier: 'catalog:'
-        version: 0.2.2(@arethetypeswrong/core@0.18.4)(@types/node@26.0.1)(@vitest/browser-playwright@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.37)(vite@8.1.3(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))(yaml@2.9.0)
-
   packages/@luke-ui/rainbow-sprinkles:
     dependencies:
       '@vanilla-extract/css':
@@ -367,9 +336,6 @@ importers:
       '@arethetypeswrong/core':
         specifier: 'catalog:'
         version: 0.18.4
-      '@luke-ui/docs-tools':
-        specifier: workspace:*
-        version: link:../docs-tools
       '@rollup/plugin-babel':
         specifier: 'catalog:'
         version: 7.1.0(@babel/core@7.29.7)(@types/babel__core@7.20.5)(rollup@4.59.0)
@@ -451,9 +417,6 @@ importers:
       vitest:
         specifier: 4.1.9
         version: 4.1.9(@types/node@26.0.1)(@vitest/browser-playwright@4.1.9)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(@voidzero-dev/vite-plus-core@0.2.2(@arethetypeswrong/core@0.18.4)(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.37)(yaml@2.9.0))
-      zod:
-        specifier: 'catalog:'
-        version: 4.4.3
 
   packages/turbo-generators:
     dependencies:

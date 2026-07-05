@@ -4,7 +4,6 @@
 	"license": "MIT",
 	"files": [
 		"dist",
-		"docs",
 		"README.md",
 		"LICENSE"
 	],
@@ -48,14 +47,13 @@
 		"build": "pnpm run build:tsdown",
 		"build:storybook": "storybook build",
 		"build:tsdown": "vp pack",
-		"check:docs": "pnpm run generate:docs",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "pnpm run check:types:storybook && pnpm run check:types:browser && pnpm run check:types:node",
 		"check:types:browser": "tsc --noEmit -p tsconfig.json",
 		"check:types:node": "tsc --noEmit -p scripts/tsconfig.json",
 		"check:types:storybook": "tsc --noEmit -p tsconfig.storybook.json",
-		"clean": "rm -rf .turbo .generated dist docs storybook-static",
+		"clean": "rm -rf .turbo .generated dist storybook-static",
 		"dev": "pnpm run dev:tsdown",
 		"dev:storybook": "rm -rf node_modules/.cache/storybook node_modules/.vite-storybook && storybook dev -p 6006",
 		"dev:tsdown": "vp pack --watch",
@@ -65,7 +63,6 @@
 		"generate": "pnpm run generate:assets",
 		"generate:assets": "pnpm run generate:icons && pnpm run generate:color-tokens",
 		"generate:color-tokens": "node scripts/generate-color-tokens.ts && vp fmt .generated/color-tokens.generated.ts --write",
-		"generate:docs": "tsx scripts/generate-docs.ts && vp fmt docs/ dist/docs/ --write",
 		"generate:icons": "tsx scripts/build-icons.ts",
 		"test": "pnpm run test:unit && pnpm run test:browser && pnpm run test:storybook && pnpm run test:visual",
 		"test:browser": "vp test run --project=browser",
@@ -86,7 +83,6 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
-		"@luke-ui/docs-tools": "workspace:*",
 		"@rollup/plugin-babel": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
 		"@storybook/addon-docs": "catalog:",
@@ -113,8 +109,7 @@
 		"typescript": "catalog:",
 		"vite": "catalog:",
 		"vite-plus": "catalog:",
-		"vitest": "catalog:",
-		"zod": "catalog:"
+		"vitest": "catalog:"
 	},
 	"peerDependencies": {
 		"react": "catalog:",

@@ -121,7 +121,6 @@ export default defineConfig(async () => {
 			}),
 		]),
 		resolve: {
-			external: ['ts-morph'],
 			tsconfigPaths: true,
 		},
 		server: {
