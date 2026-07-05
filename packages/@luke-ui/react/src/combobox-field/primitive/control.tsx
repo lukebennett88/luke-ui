@@ -13,8 +13,7 @@ import { useComboboxSize } from './size-context.js';
  *
  * @tier primitive
  */
-export interface ComboboxControlProps
-	extends DistributiveOmit<RacGroupProps, 'className'> {
+export interface ComboboxControlProps extends DistributiveOmit<RacGroupProps, 'className'> {
 	className?: RacGroupProps['className'];
 	size?: ComboboxSize;
 }

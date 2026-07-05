@@ -16,8 +16,10 @@ import { useComboboxSize } from './size-context.js';
  *
  * @tier primitive
  */
-export interface ComboboxClearButtonProps
-	extends DistributiveOmit<RacButtonProps, 'className' | 'slot'> {
+export interface ComboboxClearButtonProps extends DistributiveOmit<
+	RacButtonProps,
+	'className' | 'slot'
+> {
 	className?: RacButtonProps['className'];
 	size?: ComboboxSize;
 }

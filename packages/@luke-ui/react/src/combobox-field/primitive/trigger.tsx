@@ -15,8 +15,7 @@ import { useComboboxSize } from './size-context.js';
  *
  * @tier primitive
  */
-export interface ComboboxTriggerProps
-	extends DistributiveOmit<RacButtonProps, 'className'> {
+export interface ComboboxTriggerProps extends DistributiveOmit<RacButtonProps, 'className'> {
 	className?: RacButtonProps['className'];
 	size?: ComboboxSize;
 }
