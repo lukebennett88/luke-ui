@@ -3,6 +3,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -18,7 +19,7 @@ import { getStorybookStoryUrl } from '../../lib/storybook';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
 
-const mdxComponents = { ...defaultMdxComponents, AutoTypeTable, Example };
+const mdxComponents = { ...defaultMdxComponents, AutoTypeTable, TypeTable, Example };
 
 export const Route = createFileRoute('/docs/$')({
 	component: Page,
@@ -40,9 +41,11 @@ const loader = createServerFn({
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
 
+		const markdownPath = page.path.replace(/\.mdx$/, '.md');
+
 		return {
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
-			markdownUrl: withBasePath(`${page.url}.md`, import.meta.env.BASE_URL),
+			markdownUrl: withBasePath(`/docs/${markdownPath}`, import.meta.env.BASE_URL),
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			storybookUrl: getStorybookStoryUrl(page.path, import.meta.env.BASE_URL),

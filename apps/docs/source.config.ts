@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 import {
 	remarkAutoTypeTable,
@@ -14,12 +15,17 @@ export const docs = defineDocs({
 	},
 });
 
+const repoRoot = fileURLToPath(new URL('../..', import.meta.url));
+
 const generator = createGenerator({
 	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
 });
 
 export default defineConfig({
 	mdxOptions: {
-		remarkPlugins: (v) => [...v, [remarkAutoTypeTable, { generator }]],
+		remarkPlugins: (v) => [
+			...v,
+			[remarkAutoTypeTable, { generator, options: { basePath: repoRoot } }],
+		],
 	},
 });
