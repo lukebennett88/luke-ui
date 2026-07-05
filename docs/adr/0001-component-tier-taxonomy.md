@@ -1,7 +1,9 @@
 # Component tier taxonomy: Atom, Composed, Primitive
 
 > **Note:** The docs location detail is superseded by [ADR-0007](0007-docs-moved-to-hosted-app.md).
-> Primitives are now documented in the hosted docs app under a "Library authors" section.
+> Primitives are mentioned in prose on their parent component's hosted docs page (see, for example,
+> the "Primitive kit" section of the Combobox Field docs), but do not yet have their own generated
+> API reference.
 
 Luke UI classifies components into three tiers: **Atom**, **Composed**, and **Primitive**. The tier
 decides whether the component appears in hosted docs and how it is described in source and hosted

@@ -61,7 +61,7 @@ in paths the package build already discovers.
 
 ## Docs
 
-Component docs pages follow the structure in [ADR-0006](../docs/adr/0006-docs-md-structure-standard.md) (now superseded by ADR-0007; the section ordering still applies). Humans
+Component docs pages follow the structure in [ADR-0006](../docs/adr/0006-docs-md-structure-standard.md). ADR-0007 supersedes that ADR, but the section ordering still applies. Humans
 and coding agents both read these docs, so optimise for clarity, not only brevity.
 
 Headings use sentence case: capitalise only the first word and proper nouns.
