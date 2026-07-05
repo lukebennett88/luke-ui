@@ -9,7 +9,7 @@ export default {
 				'src/router.tsx',
 				'src/routes/**/*.ts',
 				'src/routes/**/*.tsx',
-				'src/examples/**/*.tsx',
+				'src/examples/**/*',
 				'src/styles/app.css',
 				'content/**/*.mdx',
 			],
