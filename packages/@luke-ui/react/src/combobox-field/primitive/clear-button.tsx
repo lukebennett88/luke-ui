@@ -8,22 +8,20 @@ import * as styles from '../../recipes/combobox.css.js';
 import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
+import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-
-interface ComboboxVariantProps extends NonNullable<styles.ComboboxVariants> {}
-
-interface ComboboxStyleProps {
-	size?: ComboboxVariantProps['size'];
-}
 
 /**
  * Props for the combobox clear button.
  *
  * @tier primitive
  */
-export interface ComboboxClearButtonProps
-	extends DistributiveOmit<RacButtonProps, 'className' | 'slot'>, ComboboxStyleProps {
+export interface ComboboxClearButtonProps extends DistributiveOmit<
+	RacButtonProps,
+	'className' | 'slot'
+> {
 	className?: RacButtonProps['className'];
+	size?: ComboboxSize;
 }
 
 /** Clears the combobox selection. Renders nothing while no option is selected. */
