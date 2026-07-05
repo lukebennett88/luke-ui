@@ -23,8 +23,13 @@ export function App() {
 
 ## Components and docs
 
-This package ships per-export documentation under `docs/`. The full index is in
-[`docs/llms.txt`](./docs/llms.txt), which is readable by humans and AI agents.
+Full component documentation, interactive examples, and API reference are at
+[lukebennett88.github.io/luke-ui/docs](https://lukebennett88.github.io/luke-ui/docs).
+
+AI agents can fetch documentation at:
+- [llms.txt](https://lukebennett88.github.io/luke-ui/llms.txt) — component index
+- [llms-full.txt](https://lukebennett88.github.io/luke-ui/llms-full.txt) — full docs
+- Append `.md` to any docs URL for per-page markdown
 
 Components follow the
 [three-tier taxonomy](https://github.com/lukebennett88/luke-ui/blob/main/docs/adr/0001-component-tier-taxonomy.md):
