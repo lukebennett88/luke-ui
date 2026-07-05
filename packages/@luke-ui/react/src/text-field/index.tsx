@@ -7,23 +7,9 @@ import { TextField as RacTextField } from 'react-aria-components/TextField';
 import { composeField } from '../field/compose-field.js';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { Field } from '../field/primitive/index.js';
+import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { TextInputSize } from './primitive/index.js';
 import { TextInput } from './primitive/index.js';
-
-interface TextFieldRedeclaredRACProps {
-	/** Initial value (uncontrolled). */
-	defaultValue?: RacTextFieldProps['defaultValue'];
-	/** Whether the field is disabled. */
-	isDisabled?: RacTextFieldProps['isDisabled'];
-	/** Whether the field has a validation error. */
-	isInvalid?: RacTextFieldProps['isInvalid'];
-	/** Whether the field is read-only. */
-	isReadOnly?: RacTextFieldProps['isReadOnly'];
-	/** Called when the value changes. */
-	onChange?: RacTextFieldProps['onChange'];
-	/** Controlled input value. */
-	value?: RacTextFieldProps['value'];
-}
 
 /**
  * Props for the composed text field.
@@ -32,8 +18,8 @@ interface TextFieldRedeclaredRACProps {
  */
 export interface TextFieldProps
 	extends
-		Omit<RacTextFieldProps, 'children' | 'size' | keyof TextFieldRedeclaredRACProps>,
-		TextFieldRedeclaredRACProps,
+		Omit<RacTextFieldProps, 'children' | 'size' | keyof DocumentedInputProps>,
+		DocumentedInputProps,
 		FieldSlotProps {
 	/** Element shown after the input value. */
 	adornmentEnd?: ReactNode;
