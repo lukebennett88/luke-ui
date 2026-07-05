@@ -3,8 +3,41 @@ title: Numeral
 description: Locale-aware number formatting powered by Intl.NumberFormat.
 ---
 
-import { story } from '../../../../src/numeral/numeral.story';
+import { Example } from '../../../../src/components/example-block';
 
-<story.WithControl />
+`Numeral` formats numbers with `Intl.NumberFormat`. It respects locale from React Aria's
+`I18nProvider`.
 
-<include>../../../../../../packages/@luke-ui/react/docs/numeral.md</include>
+<Example component="numeral" name="basic" />
+
+## Formats
+
+`Numeral` infers `format` from `currency` or `unit` when omitted. Pass `format` explicitly for
+`'percent'` or `'decimal'`, or when you want to be direct about currency and unit formatting.
+
+<Example component="numeral" name="formats" />
+
+## Compact notation
+
+Use `abbreviate` for compact notation.
+
+<Example component="numeral" name="compact" />
+
+## Precision
+
+Pass a number for fixed fraction digits, or a `[min, max]` tuple for a range.
+
+<Example component="numeral" name="precision" />
+
+## Constraints
+
+`Numeral` throws in development when:
+
+- both `currency` and `unit` are provided.
+- `format="currency"` is used without a `currency` code.
+- `format="unit"` is used without a `unit` value.
+- `precision` is not a non-negative integer or valid `[min, max]` tuple.
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/numeral/index.tsx" name="NumeralProps" />
