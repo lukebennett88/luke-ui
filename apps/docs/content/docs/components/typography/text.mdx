@@ -3,8 +3,82 @@ title: Text
 description: Styled text with token-driven typography controls.
 ---
 
-import { story } from '../../../../src/text/text.story';
+import { Example } from '../../../../src/components/example-block';
 
-<story.WithControl />
+`Text` expects the Luke UI theme class at the app or root level. See
+[Getting Started](/docs/getting-started).
 
-<include>../../../../../../packages/@luke-ui/react/docs/text.md</include>
+Use `Text` for styled text that should not create heading semantics.
+
+```tsx
+<Text>The quick brown fox jumps over the lazy dog.</Text>
+```
+
+## Best practices
+
+| Guidance | Practices                                                                                                   |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| Do       | Use `fontSize` tokens, such as `'h2'`, instead of arbitrary values so text stays consistent across the app. |
+| Don't    | Use `Text` for section headings. Use `Heading`, which manages semantic level automatically.                 |
+
+## Typography
+
+<Example component="text" name="typography" />
+
+See the token reference below for valid `color`, `fontFamily`, `fontSize`, `lineHeight`, and
+`fontWeight` values.
+
+## Text transform and decoration
+
+<Example component="text" name="transform" />
+
+## Truncation
+
+<Example component="text" name="truncation" />
+
+## Alignment and numeric glyphs
+
+<Example component="text" name="alignment" />
+
+## Token reference
+
+### `color` tokens
+
+`neutralSubtle`, `neutralBold`, `neutralDisabled`, `neutralBoldInverted`, `positive`, `informative`,
+`caution`, `critical`, `inherit`
+
+### `fontFamily` tokens
+
+`sans`, `mono`
+
+### `fontSize` tokens
+
+`xxsmall`, `xsmall`, `small`, `standard`, `medium`, `large`, `xlarge`, `xxlarge`, `h1`, `h2`, `h3`,
+`h4`, `h5`, `h6`
+
+### `lineHeight` tokens
+
+`nospace`, `tight`, `loose`
+
+### `fontWeight` tokens
+
+`regular`, `medium`, `bold`, `inherit`
+
+### `textDecoration` values
+
+`none`, `underline`, `line-through`, `inherit`
+
+### `textTransform` values
+
+`none`, `capitalize`, `uppercase`, `lowercase`, `inherit`
+
+## When to use vs Heading
+
+Use `Heading` for actual section headings because it manages semantic level nesting automatically.
+
+Use `Text` with a heading-sized `fontSize` token when content should look like a heading but is not
+semantically one, such as a large stat number.
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/text/index.tsx" name="TextProps" />
