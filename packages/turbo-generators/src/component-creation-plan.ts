@@ -136,13 +136,11 @@ function toKebabCase(value: string): string {
 }
 
 function toDisplayName(value: string): string {
-	const parts = toKebabCase(value).split('-');
-	let result = '';
-	for (const part of parts) {
-		if (!part) continue;
-		result = result ? `${result} ${part.charAt(0).toUpperCase()}${part.slice(1)}` : `${part.charAt(0).toUpperCase()}${part.slice(1)}`;
-	}
-	return result;
+	return toKebabCase(value)
+		.split('-')
+		.filter(Boolean)
+		.map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+		.join(' ');
 }
 
 function toCamelCase(value: string): string {

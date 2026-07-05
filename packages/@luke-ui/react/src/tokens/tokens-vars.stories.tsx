@@ -1,19 +1,13 @@
 import { Heading } from '@luke-ui/react/heading';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import type {
-	ColorTokenValue,
-	CubicBezierTokenValue,
-	DimensionTokenValue,
-	DurationTokenValue,
-} from '@luke-ui/react/tokens';
+import type { ColorTokenValue } from '@luke-ui/react/tokens';
 import {
 	colorToCssString,
-	cubicBezierToString,
-	dimensionToRemString,
-	durationToString,
+	isColorTokenValue,
 	tokenKeys,
 	tokens,
+	toCssValue,
 } from '@luke-ui/react/tokens';
 import ColorJs from 'colorjs.io';
 import type { CSSProperties } from 'react';
@@ -387,17 +381,6 @@ function formatRawValue(value: unknown): string {
 	return JSON.stringify(value);
 }
 
-function toCssValue(type: string, value: unknown): string {
-	const converters: Record<string, (v: unknown) => string> = {
-		color: (v) => colorToCssString(v as ColorTokenValue),
-		cubicBezier: (v) => cubicBezierToString(v as CubicBezierTokenValue),
-		dimension: (v) => dimensionToRemString(v as DimensionTokenValue),
-		duration: (v) => durationToString(v as DurationTokenValue),
-	};
-
-	return converters[type]?.(value) ?? String(value);
-}
-
 function colorToDisplayValue(value: ColorTokenValue): string {
 	if (value.colorSpace === 'srgb' && value.alpha === undefined) {
 		try {
@@ -456,10 +439,12 @@ function getColorRows(groupName: string, group: StoryTokenGroup): Array<ExampleR
 	}
 
 	return getRows(groupName, group, (value) => {
-		const colorValue = value as ColorTokenValue;
+		if (!isColorTokenValue(value)) {
+			return { cssValue: String(value), displayValue: String(value) };
+		}
 		return {
-			cssValue: colorToCssString(colorValue),
-			displayValue: colorToDisplayValue(colorValue),
+			cssValue: colorToCssString(value),
+			displayValue: colorToDisplayValue(value),
 		};
 	});
 }
@@ -804,7 +789,9 @@ function TokensVarsReference() {
 									<td style={cellStyle}>{row.type}</td>
 									<td style={cellStyle}>{row.value}</td>
 									<td style={cellStyle}>{row.cssValue}</td>
-									<td style={cellStyle}><TokenPreview row={row} /></td>
+									<td style={cellStyle}>
+										<TokenPreview row={row} />
+									</td>
 								</tr>
 							))}
 						</tbody>
@@ -835,7 +822,9 @@ function TokensVarsReference() {
 								<tr key={row.path}>
 									<td style={cellStyle}>{row.path}</td>
 									<td style={cellStyle}>{row.cssVar}</td>
-									<td style={cellStyle}><VarPreview row={row} /></td>
+									<td style={cellStyle}>
+										<VarPreview row={row} />
+									</td>
 								</tr>
 							))}
 						</tbody>

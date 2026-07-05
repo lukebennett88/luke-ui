@@ -20,6 +20,38 @@ function mapValues<T extends Record<string, unknown>, R>(
 	return result;
 }
 
+type ConditionValue = {
+	'@media'?: string;
+	'@supports'?: string;
+	'@container'?: string;
+	selector?: string;
+};
+
+/**
+ * Wrap a base style object in each active condition (media query, supports,
+ * container, or selector) declared on the condition. Conditions nest in
+ * declaration order, matching vanilla-extract's layered style rule shape.
+ */
+function wrapConditionStyle(
+	base: Record<string, unknown>,
+	condition: ConditionValue,
+): Record<string, unknown> {
+	let styleValue: Record<string, unknown> = base;
+	if (condition['@media']) {
+		styleValue = { '@media': { [condition['@media']]: styleValue } };
+	}
+	if (condition['@supports']) {
+		styleValue = { '@supports': { [condition['@supports']]: styleValue } };
+	}
+	if (condition['@container']) {
+		styleValue = { '@container': { [condition['@container']]: styleValue } };
+	}
+	if (condition.selector) {
+		styleValue = { selectors: { [condition.selector]: styleValue } };
+	}
+	return styleValue;
+}
+
 function createStyles(
 	property: string,
 	scale: Record<string, string> | true,
@@ -33,7 +65,7 @@ function createStyles(
 	name: string;
 } {
 	if (!conditions) {
-		const cssVar = createVar(property)!;
+		const cssVar = createVar(property);
 		const styleValue = { [property]: cssVar };
 		const className = style(
 			options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue,
@@ -46,31 +78,21 @@ function createStyles(
 			vars: { default: cssVar },
 		};
 	}
-	const vars = mapValues(
-		conditions,
-		(_, conditionName) => createVar(`${property}-${conditionName}`)!,
+	const vars = mapValues(conditions, (_, conditionName) =>
+		createVar(`${property}-${conditionName}`),
 	);
 	const classes = mapValues(conditions, (conditionValue, conditionName) => {
-		const styleValue: Record<string, unknown> = (() => {
-			const base = { [property]: vars[conditionName] };
-			if (conditionValue['@media']) return { '@media': { [conditionValue['@media']]: base } };
-			if (conditionValue['@supports'])
-				return { '@supports': { [conditionValue['@supports']]: base } };
-			if (conditionValue['@container'])
-				return { '@container': { [conditionValue['@container']]: base } };
-			if (conditionValue.selector) return { selectors: { [conditionValue.selector]: base } };
-			return base;
-		})();
+		const styleValue = wrapConditionStyle({ [property]: vars[conditionName] }, conditionValue);
 		return style(
 			options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue,
 			`${property}-${conditionName}`,
 		);
 	});
 	return {
-		dynamic: { conditions: classes, default: classes[defaultCondition]! },
+		dynamic: { conditions: classes, default: classes[defaultCondition] ?? '' },
 		dynamicScale: scale,
 		name: property,
-		vars: { conditions: vars, default: vars[defaultCondition]! },
+		vars: { conditions: vars, default: vars[defaultCondition] ?? '' },
 	};
 }
 
@@ -102,18 +124,7 @@ function createStaticStyles(
 			};
 		}
 		const classes = mapValues(conditions, (conditionValue, conditionName) => {
-			const conditionalStyleValue: Record<string, unknown> = (() => {
-				const base: Record<string, unknown> = { [property]: scaleValue };
-				if (conditionValue['@media'])
-					return { '@media': { [conditionValue['@media']]: base } };
-				if (conditionValue['@supports'])
-					return { '@supports': { [conditionValue['@supports']]: base } };
-				if (conditionValue['@container'])
-					return { '@container': { [conditionValue['@container']]: base } };
-				if (conditionValue.selector)
-					return { selectors: { [conditionValue.selector]: base } };
-				return base;
-			})();
+			const conditionalStyleValue = wrapConditionStyle({ [property]: scaleValue }, conditionValue);
 			return style(
 				options['@layer']
 					? { '@layer': { [options['@layer']]: conditionalStyleValue } }
@@ -121,7 +132,7 @@ function createStaticStyles(
 				`${property}-${scaleKey}-${conditionName}`,
 			);
 		});
-		return { conditions: classes, default: classes[defaultCondition]! };
+		return { conditions: classes, default: classes[defaultCondition] ?? '' };
 	});
 	return { name: property, staticScale: scale, values };
 }
@@ -146,43 +157,34 @@ export function defineProperties<
 }): DefinePropertiesReturn<MakeConfig<Dyn, Stat, Cond>>;
 export function defineProperties(options: DefinePropertiesOptions): DefinePropertiesReturn {
 	const { conditions, dynamicProperties, staticProperties, defaultCondition } = options;
+	const config: SprinkleProperties = {};
 
-	const dynamicConfig =
-		dynamicProperties &&
-		Object.fromEntries(
-			Object.keys(dynamicProperties).map((dynamicProp) => [
+	if (dynamicProperties) {
+		for (const [dynamicProp, scale] of Object.entries(dynamicProperties)) {
+			config[dynamicProp] = createStyles(
 				dynamicProp,
-				createStyles(
-					dynamicProp,
-					// biome-ignore lint/suspicious/noExplicitAny: dynamic property access
-					(dynamicProperties as Record<string, unknown>)[dynamicProp] as
-						| Record<string, string>
-						| true,
-					conditions,
-					defaultCondition ?? '',
-					{ '@layer': options['@layer'] },
-				),
-			]),
-		);
+				// biome-ignore lint/suspicious/noExplicitAny: CSS property scales are dynamic
+				scale as Record<string, string> | true,
+				conditions,
+				defaultCondition ?? '',
+				{ '@layer': options['@layer'] },
+			);
+		}
+	}
 
-	const staticConfig =
-		staticProperties &&
-		Object.fromEntries(
-			Object.keys(staticProperties).map((staticProp) => [
+	if (staticProperties) {
+		for (const [staticProp, scale] of Object.entries(staticProperties)) {
+			const staticStyle = createStaticStyles(
 				staticProp,
-				createStaticStyles(
-					staticProp,
-					// biome-ignore lint/suspicious/noExplicitAny: dynamic property access
-					(staticProperties as Record<string, unknown>)[staticProp] as
-						| ReadonlyArray<string>
-						| Record<string, string>,
-					conditions,
-					defaultCondition ?? '',
-					{ '@layer': options['@layer'] },
-				),
-			]),
-		);
+				// biome-ignore lint/suspicious/noExplicitAny: CSS property scales are dynamic
+				scale as ReadonlyArray<string> | Record<string, string>,
+				conditions,
+				defaultCondition ?? '',
+				{ '@layer': options['@layer'] },
+			);
+			config[staticProp] = Object.assign({}, config[staticProp], staticStyle);
+		}
+	}
 
-	const config: SprinkleProperties = { ...dynamicConfig, ...staticConfig } as SprinkleProperties;
 	return { config };
 }

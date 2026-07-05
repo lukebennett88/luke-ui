@@ -52,3 +52,63 @@ function formatNumber(value: number): string {
 	const normalized = Object.is(value, -0) ? 0 : value;
 	return `${normalized}`;
 }
+
+export function isColorTokenValue(v: unknown): v is ColorTokenValue {
+	return (
+		typeof v === 'object' &&
+		v !== null &&
+		'colorSpace' in v &&
+		typeof v.colorSpace === 'string' &&
+		'components' in v &&
+		Array.isArray(v.components)
+	);
+}
+
+function isCubicBezierTokenValue(v: unknown): v is CubicBezierTokenValue {
+	return Array.isArray(v) && v.length === 4 && v.every((n) => typeof n === 'number');
+}
+
+function isDimensionTokenValue(v: unknown): v is DimensionTokenValue {
+	return (
+		typeof v === 'object' &&
+		v !== null &&
+		'unit' in v &&
+		(v.unit === 'px' || v.unit === 'rem') &&
+		'value' in v &&
+		typeof v.value === 'number'
+	);
+}
+
+function isDurationTokenValue(v: unknown): v is DurationTokenValue {
+	return (
+		typeof v === 'object' &&
+		v !== null &&
+		'unit' in v &&
+		(v.unit === 'ms' || v.unit === 's') &&
+		'value' in v &&
+		typeof v.value === 'number'
+	);
+}
+
+/**
+ * Convert a token value to its CSS string form, dispatching on the token's
+ * `$type`. Values whose shape does not match the declared type fall back to
+ * `String(value)` so a malformed token never crashes the build.
+ */
+export function toCssValue(type: string, value: unknown): string {
+	switch (type) {
+		case 'color':
+			if (isColorTokenValue(value)) return colorToCssString(value);
+			break;
+		case 'cubicBezier':
+			if (isCubicBezierTokenValue(value)) return cubicBezierToString(value);
+			break;
+		case 'dimension':
+			if (isDimensionTokenValue(value)) return dimensionToRemString(value);
+			break;
+		case 'duration':
+			if (isDurationTokenValue(value)) return durationToString(value);
+			break;
+	}
+	return String(value);
+}

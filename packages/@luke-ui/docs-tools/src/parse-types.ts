@@ -1,5 +1,6 @@
 import type {
 	ExpressionWithTypeArguments,
+	FunctionDeclaration,
 	InterfaceDeclaration,
 	PropertySignature,
 	SourceFile,
@@ -64,15 +65,22 @@ export function parseComponent(sourcePath: string): ParsedComponent {
 	const propsLookup = createPropsLookup(sourceFile);
 
 	const exportedFns = sourceFile.getFunctions();
-	const exportedFn =
-		exportedFns.find(
-			(fn) =>
-				fn?.isExported() &&
-				fn.getName() &&
-				propsLookup.byName.get(`${fn.getName()}Props`) &&
-				readTierTag(propsLookup.byName.get(`${fn.getName()}Props`)!) !== undefined,
-		) ??
-		exportedFns.find((fn) => fn?.isExported() && fn.getJsDocs().length > 0);
+	let exportedFn: FunctionDeclaration | undefined;
+	let documentedExportedFn: FunctionDeclaration | undefined;
+	for (const fn of exportedFns) {
+		if (!fn.isExported()) continue;
+		if (documentedExportedFn === undefined && fn.getJsDocs().length > 0) {
+			documentedExportedFn = fn;
+		}
+		const name = fn.getName();
+		if (!name) continue;
+		const props = propsLookup.byName.get(`${name}Props`);
+		if (props && readTierTag(props) !== undefined) {
+			exportedFn = fn;
+			break;
+		}
+	}
+	exportedFn ??= documentedExportedFn;
 
 	const description = exportedFn?.getJsDocs()[0]?.getDescription().trim() ?? '';
 	const componentName = exportedFn?.getName();
@@ -203,34 +211,34 @@ function readExtends(decl: InterfaceDeclaration): Array<ParsedExtends> {
 		const symbol = expr.getSymbol();
 		const declarations = symbol?.getDeclarations() ?? [];
 
-	if (declarations.length === 0) {
-		// No declarations — check type arguments for external references
-		const resolved = resolveExternalFromTypeArgs(heritage);
-		if (resolved) {
-			result.push({ from: 'external', module: resolved.module, typeName: resolved.typeName });
-		} else {
-			result.push({ from: 'external', typeName });
+		if (declarations.length === 0) {
+			// No declarations — check type arguments for external references
+			const resolved = resolveExternalFromTypeArgs(heritage);
+			if (resolved) {
+				result.push({ from: 'external', module: resolved.module, typeName: resolved.typeName });
+			} else {
+				result.push({ from: 'external', typeName });
+			}
+			continue;
 		}
-		continue;
-	}
 
-	const firstDecl = declarations[0];
-	const sourceFilePath = firstDecl?.getSourceFile().getFilePath() ?? '';
+		const firstDecl = declarations[0];
+		const sourceFilePath = firstDecl?.getSourceFile().getFilePath() ?? '';
 
-	if (sourceFilePath.includes('/node_modules/') && !isTsBuiltinPath(sourceFilePath)) {
-		result.push({ from: 'external', module: moduleFromPath(sourceFilePath), typeName });
-		continue;
-	}
-
-	if (isTsBuiltinPath(sourceFilePath)) {
-		const resolved = resolveExternalFromTypeArgs(heritage);
-		if (resolved) {
-			result.push({ from: 'external', module: resolved.module, typeName: resolved.typeName });
+		if (sourceFilePath.includes('/node_modules/') && !isTsBuiltinPath(sourceFilePath)) {
+			result.push({ from: 'external', module: moduleFromPath(sourceFilePath), typeName });
+			continue;
 		}
-		continue;
-	}
 
-	result.push({ from: 'package', typeName });
+		if (isTsBuiltinPath(sourceFilePath)) {
+			const resolved = resolveExternalFromTypeArgs(heritage);
+			if (resolved) {
+				result.push({ from: 'external', module: resolved.module, typeName: resolved.typeName });
+			}
+			continue;
+		}
+
+		result.push({ from: 'package', typeName });
 	}
 	return result;
 }
@@ -484,9 +492,10 @@ function appendPropNamesFromDeclaration(
 function toParsedProp(prop: PropertySignature): ParsedProp {
 	const jsDoc = prop.getJsDocs()[0];
 	const description = jsDoc?.getDescription().trim() ?? '';
-	const defaultValue = (jsDoc?.getTags() ?? []).find(
-		(tag) => tag.getTagName() === 'default',
-	)?.getCommentText()?.trim();
+	const defaultValue = (jsDoc?.getTags() ?? [])
+		.find((tag) => tag.getTagName() === 'default')
+		?.getCommentText()
+		?.trim();
 	return {
 		default: defaultValue,
 		description,

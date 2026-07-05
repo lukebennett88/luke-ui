@@ -1,12 +1,6 @@
 import { createTheme, createThemeContract } from '@vanilla-extract/css';
-import {
-	colorToCssString,
-	cubicBezierToString,
-	dimensionToRemString,
-	durationToString,
-} from '../tokens/converters.js';
+import { toCssValue } from '../tokens/converters.js';
 import { tokenKeys } from '../tokens/groups.js';
-import type { ColorTokenValue } from '../tokens/index.js';
 import { tokens } from '../tokens/index.js';
 import { classSelector, lukeUiClassNames } from './class-names.js';
 import { globalStyleInLayer } from './layered-style.css.js';
@@ -27,21 +21,13 @@ function toContract<T extends TokenGroup>(group: T): Record<TokenGroupKey<T>, nu
 	return contract;
 }
 
-function toCssValue(type: string, value: unknown): string {
-	const converters: Record<string, (v: unknown) => string> = {
-		color: (v) => colorToCssString(v as ColorTokenValue),
-		cubicBezier: (v) => cubicBezierToString(v as [number, number, number, number]),
-		dimension: (v) => dimensionToRemString(v as { unit: 'px' | 'rem'; value: number }),
-		duration: (v) => durationToString(v as { unit: 'ms' | 's'; value: number }),
-	};
-
-	return converters[type]?.(value) ?? String(value);
-}
-
 function toStringValues<T extends TokenGroup>(group: T): Record<TokenGroupKey<T>, string> {
 	const values = {} as Record<TokenGroupKey<T>, string>;
 	for (const key of tokenKeys(group)) {
-		values[key] = toCssValue(group.$type, (group[key] as { $value: unknown }).$value);
+		const entry = group[key];
+		if (entry && typeof entry === 'object' && '$value' in entry) {
+			values[key] = toCssValue(group.$type, entry.$value);
+		}
 	}
 	return values;
 }
