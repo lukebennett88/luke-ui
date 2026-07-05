@@ -50,7 +50,7 @@ export const useHeadingLevel = (
 /** Returns true when rendered inside a `Heading`. */
 export const useIsWithinHeading = () => useContext(WithinHeadingContext);
 
-type HeadingLevelsProps = {
+export type HeadingLevelsProps = {
 	/** Base level override. Defaults to inherited level + 1. */
 	base?: HeadingLevel;
 	children: ReactNode | ((props: HeadingLevelsRenderProps) => ReactNode);

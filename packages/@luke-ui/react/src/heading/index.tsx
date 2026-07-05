@@ -1,4 +1,4 @@
-import type { HeadingLevel } from '../heading-context/index.js';
+import type { HeadingLevel, HeadingLevelsProps } from '../heading-context/index.js';
 import { HeadingLevels, HeadingPresenceProvider } from '../heading-context/index.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
@@ -21,7 +21,7 @@ export interface HeadingProps extends DistributiveOmit<TextProps, 'fontSize'> {
 /** Heading component with automatic level composition. */
 export function Heading(props: HeadingProps) {
 	const { elementType, level, ...textProps } = props;
-	const baseProps = level === undefined ? {} : ({ base: level } as const);
+	const baseProps: Pick<HeadingLevelsProps, 'base'> = level === undefined ? {} : { base: level };
 
 	return (
 		<HeadingLevels {...baseProps}>

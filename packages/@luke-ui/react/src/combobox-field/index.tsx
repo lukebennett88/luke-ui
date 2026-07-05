@@ -85,7 +85,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	const {
 		children,
 		listBoxProps,
-		loadMoreItem,
+		loadMoreItem: loadMoreItemProp,
 		loadingState,
 		menuWidth,
 		onLoadMore,
@@ -95,9 +95,33 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		...comboboxInputProps
 	} = restProps;
 
-	const isAsync = loadingState != null;
-	const isInteractive =
+	const isAsync: boolean = loadingState != null;
+	const isInteractive: boolean =
 		comboboxInputProps.isDisabled !== true && comboboxInputProps.isReadOnly !== true;
+
+	const loadMoreItem: ComboboxListBoxProps<T>['loadMoreItem'] = (() => {
+		if (loadMoreItemProp != null) return loadMoreItemProp;
+		if (onLoadMore == null) return null;
+
+		return (
+			<ComboboxLoadMoreItem isLoading={loadingState === 'loadingMore'} onLoadMore={onLoadMore}>
+				<LoadingSpinner aria-label="Loading more options..." size="small" />
+			</ComboboxLoadMoreItem>
+		);
+	})();
+
+	const resolvedEmptyState: ComboboxListBoxProps<T>['renderEmptyState'] = (() => {
+		if (listBoxProps?.renderEmptyState != null) return listBoxProps.renderEmptyState;
+		if (!isAsync) return undefined;
+
+		return () => <ComboboxEmptyStateContent loadingState={loadingState} />;
+	})();
+
+	const resolvedStyle: ComboboxPopoverProps['style'] = (() => {
+		if (menuWidth === undefined) return popoverProps?.style;
+
+		return Object.assign({}, popoverProps?.style, { width: menuWidth });
+	})();
 
 	return (
 		<ComboboxInput<T> size={size} {...comboboxInputProps}>
@@ -113,48 +137,11 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 						<Icon aria-hidden name="chevronDown" />
 					</ComboboxTrigger>
 				</ComboboxControl>
-				<ComboboxPopover
-					offset={4}
-					{...popoverProps}
-					style={
-						menuWidth === undefined
-							? popoverProps?.style
-							: Object.assign({}, popoverProps?.style, { width: menuWidth })
-					}
-				>
+				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
 					<ComboboxListBox<T>
 						{...listBoxProps}
-						loadMoreItem={
-							loadMoreItem ??
-							(onLoadMore == null ? null : (
-								<ComboboxLoadMoreItem
-									isLoading={loadingState === 'loadingMore'}
-									onLoadMore={onLoadMore}
-								>
-									<LoadingSpinner aria-label="Loading more options..." size="small" />
-								</ComboboxLoadMoreItem>
-							))
-						}
-						renderEmptyState={
-							listBoxProps?.renderEmptyState ??
-							(isAsync
-								? () => {
-										switch (loadingState) {
-											case 'loading':
-											case 'filtering': {
-												return (
-													<ComboboxEmptyState>
-														<LoadingSpinner aria-label="Loading options..." size="medium" />
-													</ComboboxEmptyState>
-												);
-											}
-											default: {
-												return <ComboboxEmptyState>No results</ComboboxEmptyState>;
-											}
-										}
-									}
-								: undefined)
-						}
+						loadMoreItem={loadMoreItem}
+						renderEmptyState={resolvedEmptyState}
 					>
 						{children}
 					</ComboboxListBox>
@@ -162,4 +149,20 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 			</Field>
 		</ComboboxInput>
 	);
+}
+
+function ComboboxEmptyStateContent({
+	loadingState,
+}: {
+	loadingState: ComboboxLoadingState | undefined;
+}) {
+	if (loadingState === 'loading' || loadingState === 'filtering') {
+		return (
+			<ComboboxEmptyState>
+				<LoadingSpinner aria-label="Loading options..." size="medium" />
+			</ComboboxEmptyState>
+		);
+	}
+
+	return <ComboboxEmptyState>No results</ComboboxEmptyState>;
 }

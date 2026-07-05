@@ -23,6 +23,11 @@ export interface NumeralProps extends Omit<
 	abbreviate?: NumeralAbbreviation;
 	/** Currency code such as `USD`. */
 	currency?: string;
+	/**
+	 * Numeric glyph rendering mode.
+	 * @default 'tabular-nums'
+	 */
+	fontVariantNumeric?: TextProps['fontVariantNumeric'];
 	/** Number format style. Inferred from `currency`/`unit` when omitted. */
 	format?: NumeralFormat;
 	/** Extra options passed to `Intl.NumberFormat`. */
@@ -40,56 +45,113 @@ export interface NumeralProps extends Omit<
 	unit?: NonNullable<Intl.NumberFormatOptions['unit']>;
 	/** Number to format. */
 	value: number;
-	/**
-	 * Numeric glyph rendering mode.
-	 * @default 'tabular-nums'
-	 */
-	variant?: Extract<
-		TextProps['fontVariantNumeric'],
-		'diagonal-fractions' | 'ordinal' | 'slashed-zero' | 'tabular-nums'
-	>;
 }
 
-function isValidPrecisionValue(value: number) {
-	return Number.isInteger(value) && value >= 0;
+/** Formats a number and renders it with `Text`. */
+export function Numeral(props: NumeralProps) {
+	const { locale: localeFromContext } = useLocale();
+	const isWithinHeading = useIsWithinHeading();
+	const {
+		abbreviate,
+		color,
+		textAlign = 'end',
+		currency,
+		elementType = 'span',
+		fontVariantNumeric = 'tabular-nums',
+		format,
+		formatOptions,
+		locale,
+		precision,
+		shouldDisableTrim,
+		unit,
+		value,
+		...textProps
+	} = props;
+	const resolvedLocale = locale ?? localeFromContext;
+
+	const resolvedFormat: NumeralFormat = (() => {
+		if (format != null) return format;
+		if (currency) return 'currency';
+		if (unit) return 'unit';
+
+		return 'decimal';
+	})();
+
+	const numeralFormatOptions = resolveNumeralFormatOptions({
+		abbreviate,
+		currency,
+		format: resolvedFormat,
+		formatOptions,
+		precision,
+		unit,
+	});
+
+	const content = getCachedNumberFormat(resolvedLocale, numeralFormatOptions).format(value);
+	const resolvedShouldDisableTrim = shouldDisableTrim ?? isWithinHeading;
+	const resolvedColor = color ?? (isWithinHeading ? 'inherit' : undefined);
+	const colorProps: Pick<TextProps, 'color'> =
+		resolvedColor === undefined ? {} : { color: resolvedColor };
+
+	return (
+		<Text
+			{...textProps}
+			elementType={elementType}
+			fontVariantNumeric={fontVariantNumeric}
+			shouldDisableTrim={resolvedShouldDisableTrim}
+			shouldInheritFont={isWithinHeading}
+			textAlign={textAlign}
+			{...colorProps}
+		>
+			{content}
+		</Text>
+	);
 }
 
-function validateProps(props: NumeralProps) {
-	const { currency, format, formatOptions, precision, unit } = props;
+function resolvePrecisionRange(precision: NumeralPrecision): readonly [number, number] {
+	if (typeof precision === 'number') return [precision, precision];
 
-	const hasCurrency = currency ?? formatOptions?.currency;
-	const hasUnit = unit ?? formatOptions?.unit;
+	return precision;
+}
 
-	if (hasCurrency && hasUnit) {
-		throw new Error('Numeral cannot format both `currency` and `unit` at once.');
-	}
+function resolveNumeralFormatOptions({
+	abbreviate,
+	currency,
+	format,
+	formatOptions,
+	precision,
+	unit,
+}: Pick<NumeralProps, 'abbreviate' | 'currency' | 'formatOptions' | 'precision' | 'unit'> & {
+	format: NumeralFormat;
+}): Intl.NumberFormatOptions {
+	const options: Intl.NumberFormatOptions = { ...formatOptions, style: format };
 
-	if (format === 'currency' && hasCurrency === undefined) {
-		throw new Error('Numeral with format="currency" requires a `currency` code.');
-	}
-
-	if (format === 'unit' && hasUnit === undefined) {
-		throw new Error('Numeral with format="unit" requires a `unit` value.');
-	}
-
-	if (precision === undefined) {
-		return;
-	}
-
-	if (typeof precision === 'number') {
-		if (!isValidPrecisionValue(precision)) {
-			throw new Error('Numeral `precision` must be a non-negative integer or tuple.');
+	if (format === 'currency') {
+		if (currency === undefined) {
+			throw new Error('Numeral with format="currency" requires a `currency` code.');
 		}
-		return;
+		options.currency = currency;
 	}
 
-	if (
-		!isValidPrecisionValue(precision[0]) ||
-		!isValidPrecisionValue(precision[1]) ||
-		precision[0] > precision[1]
-	) {
-		throw new Error('Numeral `precision` tuple must be [min, max] non-negative integers.');
+	if (format === 'unit') {
+		if (unit === undefined) {
+			throw new Error('Numeral with format="unit" requires a `unit` value.');
+		}
+		options.unit = unit;
+		options.unitDisplay = formatOptions?.unitDisplay ?? 'narrow';
 	}
+
+	if (abbreviate) {
+		options.compactDisplay = abbreviate === 'long' ? 'long' : 'short';
+		options.notation = 'compact';
+	}
+
+	if (precision !== undefined) {
+		const [minimumFractionDigits, maximumFractionDigits] = resolvePrecisionRange(precision);
+		options.minimumFractionDigits = minimumFractionDigits;
+		options.maximumFractionDigits = maximumFractionDigits;
+	}
+
+	return options;
 }
 
 const numeralFormatCache = new Map<string, Intl.NumberFormat>();
@@ -102,91 +164,4 @@ function getCachedNumberFormat(locale: Intl.LocalesArgument, options: Intl.Numbe
 		numeralFormatCache.set(key, cached);
 	}
 	return cached;
-}
-
-/**
- * Formats a number and renders it with `Text`.
- * @throws When `currency` and `unit` are both provided or precision is invalid.
- */
-export function Numeral(props: NumeralProps) {
-	if (process.env.NODE_ENV !== 'production') {
-		validateProps(props);
-	}
-	const { locale: localeFromContext } = useLocale();
-	const isWithinHeading = useIsWithinHeading();
-	const {
-		abbreviate,
-		color,
-		textAlign = 'end',
-		currency,
-		elementType = 'span',
-		format,
-		formatOptions,
-		locale,
-		precision,
-		shouldDisableTrim,
-		unit,
-		value,
-		variant = 'tabular-nums',
-		...textProps
-	} = props;
-	const resolvedLocale = locale ?? localeFromContext;
-
-	const resolvedFormat = format ?? (currency ? 'currency' : unit ? 'unit' : 'decimal');
-
-	const numeralFormatOptions: Intl.NumberFormatOptions = {
-		...formatOptions,
-		style: resolvedFormat,
-	};
-	if (resolvedFormat === 'currency') {
-		const resolvedCurrency = currency ?? formatOptions?.currency;
-		if (resolvedCurrency === undefined) {
-			throw new Error('Numeral with format="currency" requires a `currency` code.');
-		}
-		numeralFormatOptions.currency = resolvedCurrency;
-	}
-
-	if (resolvedFormat === 'unit') {
-		const resolvedUnit = unit ?? formatOptions?.unit;
-		if (resolvedUnit === undefined) {
-			throw new Error('Numeral with format="unit" requires a `unit` value.');
-		}
-		numeralFormatOptions.unit = resolvedUnit;
-		numeralFormatOptions.unitDisplay = formatOptions?.unitDisplay ?? 'narrow';
-	}
-
-	if (abbreviate) {
-		numeralFormatOptions.compactDisplay = abbreviate === 'long' ? 'long' : 'short';
-		numeralFormatOptions.notation = 'compact';
-	}
-
-	if (precision !== undefined) {
-		if (typeof precision === 'number') {
-			numeralFormatOptions.minimumFractionDigits = precision;
-			numeralFormatOptions.maximumFractionDigits = precision;
-		} else {
-			numeralFormatOptions.minimumFractionDigits = precision[0];
-			numeralFormatOptions.maximumFractionDigits = precision[1];
-		}
-	}
-
-	const content = getCachedNumberFormat(resolvedLocale, numeralFormatOptions).format(value);
-	const resolvedShouldDisableTrim = shouldDisableTrim ?? isWithinHeading;
-	const resolvedColor = color ?? (isWithinHeading ? 'inherit' : undefined);
-	const colorProps: Pick<TextProps, 'color'> | {} =
-		resolvedColor === undefined ? {} : { color: resolvedColor };
-
-	return (
-		<Text
-			{...textProps}
-			elementType={elementType}
-			fontVariantNumeric={variant}
-			shouldDisableTrim={resolvedShouldDisableTrim}
-			shouldInheritFont={isWithinHeading}
-			textAlign={textAlign}
-			{...colorProps}
-		>
-			{content}
-		</Text>
-	);
 }
