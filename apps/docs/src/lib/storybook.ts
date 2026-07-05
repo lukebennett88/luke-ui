@@ -1,8 +1,12 @@
-import { withBasePath } from './markdown-url';
-
 const STORYBOOK_DEV_URL = 'http://localhost:6006';
 
 const COMPONENT_DOC_PATH = /^components\/([^/]+)\/([^/]+)\.mdx$/;
+
+function withBasePath(publicPath: string, basePath: string): string {
+	if (basePath === '/' || basePath === '') return publicPath;
+	const normalizedBase = basePath.endsWith('/') ? basePath : `${basePath}/`;
+	return `${normalizedBase}${publicPath.replace(/^\//, '')}`;
+}
 
 export function getStorybookBaseUrl(basePath: string): string {
 	if (import.meta.env.DEV) return STORYBOOK_DEV_URL;

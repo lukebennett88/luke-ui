@@ -13,7 +13,6 @@ import browserCollections from '../../../.source/browser';
 import { Example } from '../../components/example-block';
 import { PageActions } from '../../components/page-actions';
 import { baseOptions } from '../../lib/layout.shared';
-import { withBasePath } from '../../lib/markdown-url';
 import { source } from '../../lib/source';
 import { getStorybookStoryUrl } from '../../lib/storybook';
 
@@ -41,11 +40,9 @@ const loader = createServerFn({
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
 
-		const markdownPath = page.path.replace(/\.mdx$/, '.md');
-
 		return {
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
-			markdownUrl: withBasePath(`/docs/${markdownPath}`, import.meta.env.BASE_URL),
+			markdownUrl: `${page.url === '/docs' ? '/docs/index' : page.url}.md`,
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			storybookUrl: getStorybookStoryUrl(page.path, import.meta.env.BASE_URL),
