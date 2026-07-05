@@ -1,10 +1,10 @@
 import type { JSX, ReactNode } from 'react';
-import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.css.js';
 import type * as primitiveStyles from '../recipes/button.css.js';
 import { BUTTON_FONT_SIZE } from '../sizing/button-sizing.js';
 import { Text } from '../text/index.js';
+import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
 import { Button as PrimitiveButton } from './primitive/index.js';
 
@@ -43,18 +43,6 @@ interface ButtonStyleProps {
 	tone?: PrimitiveButtonVariantProps['tone'];
 }
 
-interface ButtonRedeclaredRACProps {
-	/**
-	 * Whether the button is disabled. Disabled buttons can't be focused or pressed.
-	 * @default false
-	 */
-	isDisabled?: RacButtonProps['isDisabled'];
-	/** Press handler. Called on click, Enter, or Space. */
-	onPress?: RacButtonProps['onPress'];
-	/** HTML button type. */
-	type?: RacButtonProps['type'];
-}
-
 /**
  * Composed button with size, tone, pending, and block variants.
  *
@@ -62,9 +50,9 @@ interface ButtonRedeclaredRACProps {
  */
 export interface ButtonProps
 	extends
-		Omit<PrimitiveButtonProps, keyof ButtonStyleProps | keyof ButtonRedeclaredRACProps>,
+		Omit<PrimitiveButtonProps, keyof ButtonStyleProps | keyof DocumentedPressProps>,
 		ButtonStyleProps,
-		ButtonRedeclaredRACProps {}
+		DocumentedPressProps {}
 
 /** Composed button. Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`. */
 export function Button(props: ButtonProps): JSX.Element {

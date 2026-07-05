@@ -1,11 +1,11 @@
 import type { JSX } from 'react';
-import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { ButtonProps as PrimitiveButtonProps } from '../button/primitive/index.js';
 import { Button } from '../button/primitive/index.js';
 import type { IconName } from '../icon/index.js';
 import { Icon } from '../icon/index.js';
 import * as styles from '../recipes/icon-button.css.js';
+import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import { cx } from '../utils/index.js';
 
 interface IconButtonVariantProps extends NonNullable<styles.IconButtonVariants> {}
@@ -18,18 +18,6 @@ interface IconButtonStyleProps {
 	size?: IconButtonVariantProps['size'];
 }
 
-interface IconButtonRedeclaredRACProps {
-	/**
-	 * Whether the button is disabled. Disabled buttons can't be focused or pressed.
-	 * @default false
-	 */
-	isDisabled?: RacButtonProps['isDisabled'];
-	/** Press handler. Called on click, Enter, or Space. */
-	onPress?: RacButtonProps['onPress'];
-	/** HTML button type. */
-	type?: RacButtonProps['type'];
-}
-
 /**
  * Props for `IconButton`.
  *
@@ -37,9 +25,9 @@ interface IconButtonRedeclaredRACProps {
  */
 export interface IconButtonProps
 	extends
-		Omit<PrimitiveButtonProps, keyof IconButtonStyleProps | keyof IconButtonRedeclaredRACProps>,
+		Omit<PrimitiveButtonProps, keyof IconButtonStyleProps | keyof DocumentedPressProps>,
 		IconButtonStyleProps,
-		IconButtonRedeclaredRACProps {
+		DocumentedPressProps {
 	/** Icon name from the generated icon set. */
 	icon: IconName;
 }
