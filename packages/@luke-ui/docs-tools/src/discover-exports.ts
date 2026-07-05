@@ -56,18 +56,14 @@ export function discoverExports(
 	const barrelPaths = new Set(options.barrelPaths ?? DEFAULT_BARREL_PATHS);
 	const result: Array<DiscoveredExport> = [];
 	for (const [path, target] of Object.entries(exportsField)) {
-		let shape: ExportShape;
-		let tier: ExportTier;
-		if (!JS_TARGET.test(target)) {
-			shape = 'asset';
-			tier = 'n/a';
-		} else if (barrelPaths.has(path)) {
-			shape = 'barrel';
-			tier = 'n/a';
-		} else {
-			shape = 'component';
-			tier = path.endsWith('/primitive') ? 'primitive' : 'composed';
-		}
+		const { shape, tier } = ((): { shape: ExportShape; tier: ExportTier } => {
+			if (!JS_TARGET.test(target)) return { shape: 'asset', tier: 'n/a' };
+			if (barrelPaths.has(path)) return { shape: 'barrel', tier: 'n/a' };
+			return {
+				shape: 'component',
+				tier: path.endsWith('/primitive') ? 'primitive' : 'composed',
+			};
+		})();
 		const sourcePath =
 			shape === 'asset' ? undefined : sourceFromExport(options.packageRoot, target);
 		const pageKind = pageKindFor({ shape, sourcePath, tier });

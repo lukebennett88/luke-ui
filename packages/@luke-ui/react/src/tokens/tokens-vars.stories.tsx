@@ -1,19 +1,13 @@
 import { Heading } from '@luke-ui/react/heading';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import type {
-	ColorTokenValue,
-	CubicBezierTokenValue,
-	DimensionTokenValue,
-	DurationTokenValue,
-} from '@luke-ui/react/tokens';
+import type { ColorTokenValue } from '@luke-ui/react/tokens';
 import {
 	colorToCssString,
-	cubicBezierToString,
-	dimensionToRemString,
-	durationToString,
+	isColorTokenValue,
 	tokenKeys,
 	tokens,
+	toCssValue,
 } from '@luke-ui/react/tokens';
 import ColorJs from 'colorjs.io';
 import type { CSSProperties } from 'react';
@@ -387,26 +381,6 @@ function formatRawValue(value: unknown): string {
 	return JSON.stringify(value);
 }
 
-function toCssValue(type: string, value: unknown): string {
-	if (type === 'color') {
-		return colorToCssString(value as ColorTokenValue);
-	}
-
-	if (type === 'cubicBezier') {
-		return cubicBezierToString(value as CubicBezierTokenValue);
-	}
-
-	if (type === 'dimension') {
-		return dimensionToRemString(value as DimensionTokenValue);
-	}
-
-	if (type === 'duration') {
-		return durationToString(value as DurationTokenValue);
-	}
-
-	return String(value);
-}
-
 function colorToDisplayValue(value: ColorTokenValue): string {
 	if (value.colorSpace === 'srgb' && value.alpha === undefined) {
 		try {
@@ -465,10 +439,12 @@ function getColorRows(groupName: string, group: StoryTokenGroup): Array<ExampleR
 	}
 
 	return getRows(groupName, group, (value) => {
-		const colorValue = value as ColorTokenValue;
+		if (!isColorTokenValue(value)) {
+			return { cssValue: String(value), displayValue: String(value) };
+		}
 		return {
-			cssValue: colorToCssString(colorValue),
-			displayValue: colorToDisplayValue(colorValue),
+			cssValue: colorToCssString(value),
+			displayValue: colorToDisplayValue(value),
 		};
 	});
 }
@@ -536,7 +512,7 @@ function getVarRows(node: unknown, path: Array<string> = []): Array<VarRow> {
 	return Object.entries(node).flatMap(([key, value]) => getVarRows(value, [...path, key]));
 }
 
-function renderTokenPreview(row: TokenRow) {
+function TokenPreview({ row }: { row: TokenRow }) {
 	if (row.type === 'color') {
 		return <span style={{ ...previewSwatchStyle, backgroundColor: row.cssValue }} />;
 	}
@@ -570,7 +546,7 @@ function renderTokenPreview(row: TokenRow) {
 	return <span style={mutedPreviewStyle}>-</span>;
 }
 
-function renderVarPreview(row: VarRow) {
+function VarPreview({ row }: { row: VarRow }) {
 	if (row.path.includes('foregroundColor')) {
 		return <span style={{ ...previewTextStyle, color: row.cssVar }}>Aa</span>;
 	}
@@ -813,7 +789,9 @@ function TokensVarsReference() {
 									<td style={cellStyle}>{row.type}</td>
 									<td style={cellStyle}>{row.value}</td>
 									<td style={cellStyle}>{row.cssValue}</td>
-									<td style={cellStyle}>{renderTokenPreview(row)}</td>
+									<td style={cellStyle}>
+										<TokenPreview row={row} />
+									</td>
 								</tr>
 							))}
 						</tbody>
@@ -844,7 +822,9 @@ function TokensVarsReference() {
 								<tr key={row.path}>
 									<td style={cellStyle}>{row.path}</td>
 									<td style={cellStyle}>{row.cssVar}</td>
-									<td style={cellStyle}>{renderVarPreview(row)}</td>
+									<td style={cellStyle}>
+										<VarPreview row={row} />
+									</td>
 								</tr>
 							))}
 						</tbody>

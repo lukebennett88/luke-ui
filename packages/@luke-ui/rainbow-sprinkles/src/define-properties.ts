@@ -20,6 +20,38 @@ function mapValues<T extends Record<string, unknown>, R>(
 	return result;
 }
 
+type ConditionValue = {
+	'@media'?: string;
+	'@supports'?: string;
+	'@container'?: string;
+	selector?: string;
+};
+
+/**
+ * Wrap a base style object in each active condition (media query, supports,
+ * container, or selector) declared on the condition. Conditions nest in
+ * declaration order, matching vanilla-extract's layered style rule shape.
+ */
+function wrapConditionStyle(
+	base: Record<string, unknown>,
+	condition: ConditionValue,
+): Record<string, unknown> {
+	let styleValue: Record<string, unknown> = base;
+	if (condition['@media']) {
+		styleValue = { '@media': { [condition['@media']]: styleValue } };
+	}
+	if (condition['@supports']) {
+		styleValue = { '@supports': { [condition['@supports']]: styleValue } };
+	}
+	if (condition['@container']) {
+		styleValue = { '@container': { [condition['@container']]: styleValue } };
+	}
+	if (condition.selector) {
+		styleValue = { selectors: { [condition.selector]: styleValue } };
+	}
+	return styleValue;
+}
+
 function createStyles(
 	property: string,
 	scale: Record<string, string> | true,
@@ -33,7 +65,7 @@ function createStyles(
 	name: string;
 } {
 	if (!conditions) {
-		const cssVar = createVar(property)!;
+		const cssVar = createVar(property);
 		const styleValue = { [property]: cssVar };
 		const className = style(
 			options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue,
@@ -46,34 +78,21 @@ function createStyles(
 			vars: { default: cssVar },
 		};
 	}
-	const vars = mapValues(
-		conditions,
-		(_, conditionName) => createVar(`${property}-${conditionName}`)!,
+	const vars = mapValues(conditions, (_, conditionName) =>
+		createVar(`${property}-${conditionName}`),
 	);
 	const classes = mapValues(conditions, (conditionValue, conditionName) => {
-		let styleValue: Record<string, unknown> = { [property]: vars[conditionName] };
-		if (conditionValue['@media']) {
-			styleValue = { '@media': { [conditionValue['@media']]: styleValue } };
-		}
-		if (conditionValue['@supports']) {
-			styleValue = { '@supports': { [conditionValue['@supports']]: styleValue } };
-		}
-		if (conditionValue['@container']) {
-			styleValue = { '@container': { [conditionValue['@container']]: styleValue } };
-		}
-		if (conditionValue.selector) {
-			styleValue = { selectors: { [conditionValue.selector]: styleValue } };
-		}
+		const styleValue = wrapConditionStyle({ [property]: vars[conditionName] }, conditionValue);
 		return style(
 			options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue,
 			`${property}-${conditionName}`,
 		);
 	});
 	return {
-		dynamic: { conditions: classes, default: classes[defaultCondition]! },
+		dynamic: { conditions: classes, default: classes[defaultCondition] ?? '' },
 		dynamicScale: scale,
 		name: property,
-		vars: { conditions: vars, default: vars[defaultCondition]! },
+		vars: { conditions: vars, default: vars[defaultCondition] ?? '' },
 	};
 }
 
@@ -105,23 +124,7 @@ function createStaticStyles(
 			};
 		}
 		const classes = mapValues(conditions, (conditionValue, conditionName) => {
-			let conditionalStyleValue: Record<string, unknown> = { [property]: scaleValue };
-			if (conditionValue['@media']) {
-				conditionalStyleValue = { '@media': { [conditionValue['@media']]: conditionalStyleValue } };
-			}
-			if (conditionValue['@supports']) {
-				conditionalStyleValue = {
-					'@supports': { [conditionValue['@supports']]: conditionalStyleValue },
-				};
-			}
-			if (conditionValue['@container']) {
-				conditionalStyleValue = {
-					'@container': { [conditionValue['@container']]: conditionalStyleValue },
-				};
-			}
-			if (conditionValue.selector) {
-				conditionalStyleValue = { selectors: { [conditionValue.selector]: conditionalStyleValue } };
-			}
+			const conditionalStyleValue = wrapConditionStyle({ [property]: scaleValue }, conditionValue);
 			return style(
 				options['@layer']
 					? { '@layer': { [options['@layer']]: conditionalStyleValue } }
@@ -129,7 +132,7 @@ function createStaticStyles(
 				`${property}-${scaleKey}-${conditionName}`,
 			);
 		});
-		return { conditions: classes, default: classes[defaultCondition]! };
+		return { conditions: classes, default: classes[defaultCondition] ?? '' };
 	});
 	return { name: property, staticScale: scale, values };
 }
@@ -157,13 +160,11 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 	const config: SprinkleProperties = {};
 
 	if (dynamicProperties) {
-		for (const dynamicProp of Object.keys(dynamicProperties)) {
+		for (const [dynamicProp, scale] of Object.entries(dynamicProperties)) {
 			config[dynamicProp] = createStyles(
 				dynamicProp,
-				// biome-ignore lint/suspicious/noExplicitAny: dynamic property access
-				(dynamicProperties as Record<string, unknown>)[dynamicProp] as
-					| Record<string, string>
-					| true,
+				// biome-ignore lint/suspicious/noExplicitAny: CSS property scales are dynamic
+				scale as Record<string, string> | true,
 				conditions,
 				defaultCondition ?? '',
 				{ '@layer': options['@layer'] },
@@ -172,13 +173,11 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 	}
 
 	if (staticProperties) {
-		for (const staticProp of Object.keys(staticProperties)) {
+		for (const [staticProp, scale] of Object.entries(staticProperties)) {
 			const staticStyle = createStaticStyles(
 				staticProp,
-				// biome-ignore lint/suspicious/noExplicitAny: dynamic property access
-				(staticProperties as Record<string, unknown>)[staticProp] as
-					| ReadonlyArray<string>
-					| Record<string, string>,
+				// biome-ignore lint/suspicious/noExplicitAny: CSS property scales are dynamic
+				scale as ReadonlyArray<string> | Record<string, string>,
 				conditions,
 				defaultCondition ?? '',
 				{ '@layer': options['@layer'] },
@@ -186,5 +185,6 @@ export function defineProperties(options: DefinePropertiesOptions): DefineProper
 			config[staticProp] = Object.assign({}, config[staticProp], staticStyle);
 		}
 	}
+
 	return { config };
 }

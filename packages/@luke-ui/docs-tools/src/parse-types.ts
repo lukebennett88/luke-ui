@@ -1,5 +1,6 @@
 import type {
 	ExpressionWithTypeArguments,
+	FunctionDeclaration,
 	InterfaceDeclaration,
 	PropertySignature,
 	SourceFile,
@@ -64,17 +65,15 @@ export function parseComponent(sourcePath: string): ParsedComponent {
 	const propsLookup = createPropsLookup(sourceFile);
 
 	const exportedFns = sourceFile.getFunctions();
-	let exportedFn;
-	let documentedExportedFn;
-	for (let i = 0; i < exportedFns.length; i++) {
-		const fn = exportedFns[i];
-		if (!fn?.isExported()) continue;
-
-		documentedExportedFn ??= fn.getJsDocs().length > 0 ? fn : undefined;
-
+	let exportedFn: FunctionDeclaration | undefined;
+	let documentedExportedFn: FunctionDeclaration | undefined;
+	for (const fn of exportedFns) {
+		if (!fn.isExported()) continue;
+		if (documentedExportedFn === undefined && fn.getJsDocs().length > 0) {
+			documentedExportedFn = fn;
+		}
 		const name = fn.getName();
 		if (!name) continue;
-
 		const props = propsLookup.byName.get(`${name}Props`);
 		if (props && readTierTag(props) !== undefined) {
 			exportedFn = fn;
@@ -151,12 +150,7 @@ function readTierTag(decl: PropsDeclaration): ExportTier | undefined {
 		for (const tag of jsDoc.getTags()) {
 			if (tag.getTagName() === 'tier') {
 				const value = tag.getCommentText()?.trim().toLowerCase();
-				switch (value) {
-					case 'atom':
-					case 'composed':
-					case 'primitive':
-						return value;
-				}
+				if (value === 'atom' || value === 'composed' || value === 'primitive') return value;
 			}
 		}
 	}
@@ -217,38 +211,34 @@ function readExtends(decl: InterfaceDeclaration): Array<ParsedExtends> {
 		const symbol = expr.getSymbol();
 		const declarations = symbol?.getDeclarations() ?? [];
 
-		if (declarations.length > 0) {
-			const firstDecl = declarations[0];
-			const sourceFilePath = firstDecl?.getSourceFile().getFilePath() ?? '';
-
-			if (sourceFilePath.includes('/node_modules/') && !isTsBuiltinPath(sourceFilePath)) {
-				// Direct external reference (e.g. SomeExternalInterface)
-				result.push({ from: 'external', module: moduleFromPath(sourceFilePath), typeName });
-				continue;
+		if (declarations.length === 0) {
+			// No declarations — check type arguments for external references
+			const resolved = resolveExternalFromTypeArgs(heritage);
+			if (resolved) {
+				result.push({ from: 'external', module: resolved.module, typeName: resolved.typeName });
+			} else {
+				result.push({ from: 'external', typeName });
 			}
-
-			if (isTsBuiltinPath(sourceFilePath)) {
-				// TypeScript utility type (Omit, Pick, etc.) — look at type args for the real external dep
-				const resolved = resolveExternalFromTypeArgs(heritage);
-				if (resolved) {
-					result.push({ from: 'external', module: resolved.module, typeName: resolved.typeName });
-				}
-				// Skip if the utility type only wraps local types
-				continue;
-			}
-
-			// Local package type
-			result.push({ from: 'package', typeName });
 			continue;
 		}
 
-		// No declarations — check type arguments for external references
-		const resolved = resolveExternalFromTypeArgs(heritage);
-		if (resolved) {
-			result.push({ from: 'external', module: resolved.module, typeName: resolved.typeName });
-		} else {
-			result.push({ from: 'external', typeName });
+		const firstDecl = declarations[0];
+		const sourceFilePath = firstDecl?.getSourceFile().getFilePath() ?? '';
+
+		if (sourceFilePath.includes('/node_modules/') && !isTsBuiltinPath(sourceFilePath)) {
+			result.push({ from: 'external', module: moduleFromPath(sourceFilePath), typeName });
+			continue;
 		}
+
+		if (isTsBuiltinPath(sourceFilePath)) {
+			const resolved = resolveExternalFromTypeArgs(heritage);
+			if (resolved) {
+				result.push({ from: 'external', module: resolved.module, typeName: resolved.typeName });
+			}
+			continue;
+		}
+
+		result.push({ from: 'package', typeName });
 	}
 	return result;
 }
@@ -502,12 +492,10 @@ function appendPropNamesFromDeclaration(
 function toParsedProp(prop: PropertySignature): ParsedProp {
 	const jsDoc = prop.getJsDocs()[0];
 	const description = jsDoc?.getDescription().trim() ?? '';
-	let defaultValue: string | undefined;
-	for (const tag of jsDoc?.getTags() ?? []) {
-		if (tag.getTagName() === 'default') {
-			defaultValue = tag.getCommentText()?.trim();
-		}
-	}
+	const defaultValue = (jsDoc?.getTags() ?? [])
+		.find((tag) => tag.getTagName() === 'default')
+		?.getCommentText()
+		?.trim();
 	return {
 		default: defaultValue,
 		description,

@@ -287,19 +287,13 @@ export function createRuntimeFn<Configs extends ReadonlyArray<DefinePropertiesRe
 			if (!propertyConfig) {
 				continue;
 			}
-			let classCache: Map<string, string> | undefined;
-			let styleCache: Map<string, string | false> | undefined;
-			const c = cache.get(property);
-			if (c) {
-				classCache = c.class;
-				styleCache = c.style;
-			} else {
-				classCache = new Map();
-				styleCache = new Map();
-				cache.set(property, { class: classCache, style: styleCache });
+			let propertyCache = cache.get(property);
+			if (!propertyCache) {
+				propertyCache = { class: new Map(), style: new Map() };
+				cache.set(property, propertyCache);
 			}
-			className.push(assignClasses(propertyConfig, propValue, classCache));
-			assignVars(style, propertyConfig, propValue, styleCache);
+			className.push(assignClasses(propertyConfig, propValue, propertyCache.class));
+			assignVars(style, propertyConfig, propValue, propertyCache.style);
 		}
 		return {
 			...otherProps,

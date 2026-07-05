@@ -67,6 +67,8 @@ export {
 	cubicBezierToString,
 	dimensionToRemString,
 	durationToString,
+	isColorTokenValue,
+	toCssValue,
 } from './converters.js';
 export { tokenKeys, toTokenGroup } from './groups.js';
 export type { Breakpoint } from './media-queries.js';
