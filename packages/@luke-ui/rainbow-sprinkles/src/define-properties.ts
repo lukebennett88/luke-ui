@@ -51,19 +51,16 @@ function createStyles(
 		(_, conditionName) => createVar(`${property}-${conditionName}`)!,
 	);
 	const classes = mapValues(conditions, (conditionValue, conditionName) => {
-		let styleValue: Record<string, unknown> = { [property]: vars[conditionName] };
-		if (conditionValue['@media']) {
-			styleValue = { '@media': { [conditionValue['@media']]: styleValue } };
-		}
-		if (conditionValue['@supports']) {
-			styleValue = { '@supports': { [conditionValue['@supports']]: styleValue } };
-		}
-		if (conditionValue['@container']) {
-			styleValue = { '@container': { [conditionValue['@container']]: styleValue } };
-		}
-		if (conditionValue.selector) {
-			styleValue = { selectors: { [conditionValue.selector]: styleValue } };
-		}
+		const styleValue: Record<string, unknown> = (() => {
+			const base = { [property]: vars[conditionName] };
+			if (conditionValue['@media']) return { '@media': { [conditionValue['@media']]: base } };
+			if (conditionValue['@supports'])
+				return { '@supports': { [conditionValue['@supports']]: base } };
+			if (conditionValue['@container'])
+				return { '@container': { [conditionValue['@container']]: base } };
+			if (conditionValue.selector) return { selectors: { [conditionValue.selector]: base } };
+			return base;
+		})();
 		return style(
 			options['@layer'] ? { '@layer': { [options['@layer']]: styleValue } } : styleValue,
 			`${property}-${conditionName}`,
@@ -105,23 +102,18 @@ function createStaticStyles(
 			};
 		}
 		const classes = mapValues(conditions, (conditionValue, conditionName) => {
-			let conditionalStyleValue: Record<string, unknown> = { [property]: scaleValue };
-			if (conditionValue['@media']) {
-				conditionalStyleValue = { '@media': { [conditionValue['@media']]: conditionalStyleValue } };
-			}
-			if (conditionValue['@supports']) {
-				conditionalStyleValue = {
-					'@supports': { [conditionValue['@supports']]: conditionalStyleValue },
-				};
-			}
-			if (conditionValue['@container']) {
-				conditionalStyleValue = {
-					'@container': { [conditionValue['@container']]: conditionalStyleValue },
-				};
-			}
-			if (conditionValue.selector) {
-				conditionalStyleValue = { selectors: { [conditionValue.selector]: conditionalStyleValue } };
-			}
+			const conditionalStyleValue: Record<string, unknown> = (() => {
+				const base: Record<string, unknown> = { [property]: scaleValue };
+				if (conditionValue['@media'])
+					return { '@media': { [conditionValue['@media']]: base } };
+				if (conditionValue['@supports'])
+					return { '@supports': { [conditionValue['@supports']]: base } };
+				if (conditionValue['@container'])
+					return { '@container': { [conditionValue['@container']]: base } };
+				if (conditionValue.selector)
+					return { selectors: { [conditionValue.selector]: base } };
+				return base;
+			})();
 			return style(
 				options['@layer']
 					? { '@layer': { [options['@layer']]: conditionalStyleValue } }
@@ -154,37 +146,43 @@ export function defineProperties<
 }): DefinePropertiesReturn<MakeConfig<Dyn, Stat, Cond>>;
 export function defineProperties(options: DefinePropertiesOptions): DefinePropertiesReturn {
 	const { conditions, dynamicProperties, staticProperties, defaultCondition } = options;
-	const config: SprinkleProperties = {};
 
-	if (dynamicProperties) {
-		for (const dynamicProp of Object.keys(dynamicProperties)) {
-			config[dynamicProp] = createStyles(
+	const dynamicConfig =
+		dynamicProperties &&
+		Object.fromEntries(
+			Object.keys(dynamicProperties).map((dynamicProp) => [
 				dynamicProp,
-				// biome-ignore lint/suspicious/noExplicitAny: dynamic property access
-				(dynamicProperties as Record<string, unknown>)[dynamicProp] as
-					| Record<string, string>
-					| true,
-				conditions,
-				defaultCondition ?? '',
-				{ '@layer': options['@layer'] },
-			);
-		}
-	}
+				createStyles(
+					dynamicProp,
+					// biome-ignore lint/suspicious/noExplicitAny: dynamic property access
+					(dynamicProperties as Record<string, unknown>)[dynamicProp] as
+						| Record<string, string>
+						| true,
+					conditions,
+					defaultCondition ?? '',
+					{ '@layer': options['@layer'] },
+				),
+			]),
+		);
 
-	if (staticProperties) {
-		for (const staticProp of Object.keys(staticProperties)) {
-			const staticStyle = createStaticStyles(
+	const staticConfig =
+		staticProperties &&
+		Object.fromEntries(
+			Object.keys(staticProperties).map((staticProp) => [
 				staticProp,
-				// biome-ignore lint/suspicious/noExplicitAny: dynamic property access
-				(staticProperties as Record<string, unknown>)[staticProp] as
-					| ReadonlyArray<string>
-					| Record<string, string>,
-				conditions,
-				defaultCondition ?? '',
-				{ '@layer': options['@layer'] },
-			);
-			config[staticProp] = Object.assign({}, config[staticProp], staticStyle);
-		}
-	}
+				createStaticStyles(
+					staticProp,
+					// biome-ignore lint/suspicious/noExplicitAny: dynamic property access
+					(staticProperties as Record<string, unknown>)[staticProp] as
+						| ReadonlyArray<string>
+						| Record<string, string>,
+					conditions,
+					defaultCondition ?? '',
+					{ '@layer': options['@layer'] },
+				),
+			]),
+		);
+
+	const config: SprinkleProperties = { ...dynamicConfig, ...staticConfig } as SprinkleProperties;
 	return { config };
 }

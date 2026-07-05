@@ -388,23 +388,14 @@ function formatRawValue(value: unknown): string {
 }
 
 function toCssValue(type: string, value: unknown): string {
-	if (type === 'color') {
-		return colorToCssString(value as ColorTokenValue);
-	}
+	const converters: Record<string, (v: unknown) => string> = {
+		color: (v) => colorToCssString(v as ColorTokenValue),
+		cubicBezier: (v) => cubicBezierToString(v as CubicBezierTokenValue),
+		dimension: (v) => dimensionToRemString(v as DimensionTokenValue),
+		duration: (v) => durationToString(v as DurationTokenValue),
+	};
 
-	if (type === 'cubicBezier') {
-		return cubicBezierToString(value as CubicBezierTokenValue);
-	}
-
-	if (type === 'dimension') {
-		return dimensionToRemString(value as DimensionTokenValue);
-	}
-
-	if (type === 'duration') {
-		return durationToString(value as DurationTokenValue);
-	}
-
-	return String(value);
+	return converters[type]?.(value) ?? String(value);
 }
 
 function colorToDisplayValue(value: ColorTokenValue): string {
@@ -536,7 +527,7 @@ function getVarRows(node: unknown, path: Array<string> = []): Array<VarRow> {
 	return Object.entries(node).flatMap(([key, value]) => getVarRows(value, [...path, key]));
 }
 
-function renderTokenPreview(row: TokenRow) {
+function TokenPreview({ row }: { row: TokenRow }) {
 	if (row.type === 'color') {
 		return <span style={{ ...previewSwatchStyle, backgroundColor: row.cssValue }} />;
 	}
@@ -570,7 +561,7 @@ function renderTokenPreview(row: TokenRow) {
 	return <span style={mutedPreviewStyle}>-</span>;
 }
 
-function renderVarPreview(row: VarRow) {
+function VarPreview({ row }: { row: VarRow }) {
 	if (row.path.includes('foregroundColor')) {
 		return <span style={{ ...previewTextStyle, color: row.cssVar }}>Aa</span>;
 	}
@@ -813,7 +804,7 @@ function TokensVarsReference() {
 									<td style={cellStyle}>{row.type}</td>
 									<td style={cellStyle}>{row.value}</td>
 									<td style={cellStyle}>{row.cssValue}</td>
-									<td style={cellStyle}>{renderTokenPreview(row)}</td>
+									<td style={cellStyle}><TokenPreview row={row} /></td>
 								</tr>
 							))}
 						</tbody>
@@ -844,7 +835,7 @@ function TokensVarsReference() {
 								<tr key={row.path}>
 									<td style={cellStyle}>{row.path}</td>
 									<td style={cellStyle}>{row.cssVar}</td>
-									<td style={cellStyle}>{renderVarPreview(row)}</td>
+									<td style={cellStyle}><VarPreview row={row} /></td>
 								</tr>
 							))}
 						</tbody>

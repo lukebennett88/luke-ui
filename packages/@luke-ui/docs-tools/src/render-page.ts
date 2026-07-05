@@ -12,9 +12,9 @@ export function renderPage(input: RenderPageInput): string {
 	const lines = renderHeader(input);
 	if (input.entry.pageKind === 'component') {
 		renderComponentBody(lines, input.entry, input.proseMarkdown);
-	} else {
-		renderBarrelBody(lines, input.entry);
+		return lines.join('\n');
 	}
+	renderBarrelBody(lines, input.entry);
 	return lines.join('\n');
 }
 

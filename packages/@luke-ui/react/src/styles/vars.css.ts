@@ -28,23 +28,14 @@ function toContract<T extends TokenGroup>(group: T): Record<TokenGroupKey<T>, nu
 }
 
 function toCssValue(type: string, value: unknown): string {
-	if (type === 'color') {
-		return colorToCssString(value as ColorTokenValue);
-	}
+	const converters: Record<string, (v: unknown) => string> = {
+		color: (v) => colorToCssString(v as ColorTokenValue),
+		cubicBezier: (v) => cubicBezierToString(v as [number, number, number, number]),
+		dimension: (v) => dimensionToRemString(v as { unit: 'px' | 'rem'; value: number }),
+		duration: (v) => durationToString(v as { unit: 'ms' | 's'; value: number }),
+	};
 
-	if (type === 'cubicBezier') {
-		return cubicBezierToString(value as [number, number, number, number]);
-	}
-
-	if (type === 'dimension') {
-		return dimensionToRemString(value as { unit: 'px' | 'rem'; value: number });
-	}
-
-	if (type === 'duration') {
-		return durationToString(value as { unit: 'ms' | 's'; value: number });
-	}
-
-	return String(value);
+	return converters[type]?.(value) ?? String(value);
 }
 
 function toStringValues<T extends TokenGroup>(group: T): Record<TokenGroupKey<T>, string> {

@@ -37,16 +37,6 @@ export function IconSpritesheetProvider({
 	return <IconSpritesheetContext.Provider value={href}>{children}</IconSpritesheetContext.Provider>;
 }
 
-function useIconSpritesheetHref(): string {
-	const href = useContext(IconSpritesheetContext);
-	if (!href) {
-		throw new Error(
-			'IconSpritesheetProvider is required. Wrap your app with <IconSpritesheetProvider href="...">.',
-		);
-	}
-	return href;
-}
-
 /**
  * Props for the built-in `Icon` component.
  *
@@ -109,6 +99,22 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 	};
 }
 
+/** Renders an icon from the shared sprite sheet. */
+export function Icon(props: IconProps): JSX.Element {
+	const spritesheetHref = useIconSpritesheetHref();
+	return <SpritesheetIcon {...props} spritesheetHref={spritesheetHref} />;
+}
+
+function useIconSpritesheetHref(): string {
+	const href = useContext(IconSpritesheetContext);
+	if (!href) {
+		throw new Error(
+			'IconSpritesheetProvider is required. Wrap your app with <IconSpritesheetProvider href="...">.',
+		);
+	}
+	return href;
+}
+
 type SpritesheetIconProps = IconProps & {
 	spritesheetHref: string;
 	name: (typeof iconNames)[number];
@@ -118,9 +124,3 @@ const SpritesheetIcon = createIcon<SpritesheetIconProps>({
 	path: ({ name, spritesheetHref }) => <use href={`${spritesheetHref}#${name}`} />,
 	viewBox: ({ name }) => iconViewBoxes[name],
 });
-
-/** Renders an icon from the shared sprite sheet. */
-export function Icon(props: IconProps): JSX.Element {
-	const spritesheetHref = useIconSpritesheetHref();
-	return <SpritesheetIcon {...props} spritesheetHref={spritesheetHref} />;
-}
