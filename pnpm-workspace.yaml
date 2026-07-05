@@ -46,6 +46,7 @@ catalog:
   eslint-plugin-react-hooks: ^7.1.1
   fumadocs-core: ^16.10.7
   fumadocs-mdx: ^15.0.13
+  fumadocs-typescript: ^5.2.7
   fumadocs-ui: ^16.10.7
   knip: ^6.23.0
   lucide-react: ^1.22.0
