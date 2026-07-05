@@ -42,7 +42,7 @@ jobs:
         run: corepack pnpm build:packages
 
       - name: Update visual baselines
-        run: corepack pnpm --filter @luke-ui/react run test:visual -- -u
+        run: corepack pnpm --filter @luke-ui/react exec vp test run --project=visual --update
 
       - name: Commit push updated baselines
         run: |
@@ -56,7 +56,7 @@ jobs:
             git push
             # Pushes made by GITHUB_TOKEN do not re-trigger other
             # workflows, so open PR's checks will not re-run automatically.
-            # Re-run the failed checks on the PR (or push any commit) to pick up
+            # Re-run failed checks on the PR (or push any commit) to pick up
             # the new baselines.
             echo "::notice::Baselines updated. Re-run PR checks to validate them."
           fi
