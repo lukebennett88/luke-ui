@@ -24,7 +24,7 @@ definitions.
 
 Primitives exported from `*/primitive/` are building blocks for library authors. They are not
 promoted in beginner app-developer navigation, but they are public API and should have enough
-generated documentation for power users and agents.
+documentation in the hosted docs app for power users and agents.
 
 ## Documentation
 

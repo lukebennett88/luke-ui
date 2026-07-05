@@ -27,6 +27,7 @@ Full component documentation, interactive examples, and API reference are at
 [lukebennett88.github.io/luke-ui/docs](https://lukebennett88.github.io/luke-ui/docs).
 
 AI agents can fetch documentation at:
+
 - [llms.txt](https://lukebennett88.github.io/luke-ui/llms.txt) — component index
 - [llms-full.txt](https://lukebennett88.github.io/luke-ui/llms-full.txt) — full docs
 - Append `.md` to any docs URL for per-page markdown

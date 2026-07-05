@@ -39,8 +39,9 @@ Components follow the three-tier taxonomy from [CONTEXT.md](../CONTEXT.md):
   `Icon`, `Heading`, `Numeral`, `Emoji`, or `LoadingSpinner`. Atoms get hosted docs pages.
 - **Composed**: an app-developer-facing pattern built from atoms or primitives, such as `Button`,
   `IconButton`, `TextField`, or `ComboboxField`. Composed components get hosted docs pages.
-- **Primitive**: a building block for library authors. Primitives are documented in package docs,
-  but not in hosted docs. A primitive may be a single file or a multi-file kit.
+- **Primitive**: a building block for library authors. Primitives are documented in the hosted docs
+  app under a de-emphasised "Library authors" section, but not in the primary navigation. A
+  primitive may be a single file or a multi-file kit.
 
 ## Package paths
 
@@ -60,7 +61,7 @@ in paths the package build already discovers.
 
 ## Docs
 
-`.docs.md` files follow the structure in [ADR-0006](adr/0006-docs-md-structure-standard.md). Humans
+Component docs pages follow the structure in [ADR-0007](adr/0007-docs-moved-to-hosted-app.md). Humans
 and coding agents both read these docs, so optimise for clarity, not only brevity.
 
 Headings use sentence case: capitalise only the first word and proper nouns.
@@ -75,9 +76,9 @@ the content belongs in the ADR instead.
 
 Docs must stay factually accurate: no doc should state something false about the code — a path,
 command, script, export, type, code snippet, or cross-reference that has since changed or been
-removed. This covers everything a human writes (comments, JSDoc, `.docs.md` prose, `README.md`,
-`docs/*.md`), not generated output; when generated docs are wrong, fix the authored source, not the
-generated file.
+removed. This covers everything a human writes (comments, JSDoc, MDX prose in `apps/docs/content/docs/`,
+`README.md`, `docs/*.md`), not generated output; when generated docs are wrong, fix the authored
+source, not the generated file.
 
 - Update or delete the docs that describe code in the same change as the code. Most rot is a doc
   that outlived the change that should have touched it.
@@ -89,33 +90,24 @@ generated file.
 - Reference stable things. Don't pin prose to volatile details like line numbers, generated class
   names, or exact command output; reference the durable path, command, or heading instead.
 
-## Fumadocs stories
+## Fumadocs examples
 
-Each component's interactive hosted-docs demo lives in one file:
-`apps/docs/src/<component>/<component>.story.tsx`.
+Each component's interactive hosted-docs demo lives in example modules under
+`apps/docs/src/examples/<component>/`. An example module exports `meta` with a title and
+description, and a default component that renders the example.
 
-The story uses `@fumadocs/story/vite/client`, which is registered as a Vite plugin in
-`apps/docs/vite.config.ts`.
+Use the `<Example>` component in an MDX page:
 
-Define a narrow `<Component>StoryProps` type with `Pick<<Component>Props, 'a' | 'b'>`. Include only
-props that make useful hosted controls. Drop event handlers, refs, escape hatches such as
-`className` and `style`, and obscure ARIA props.
+```tsx
+<Example component="button" name="tones" />
+```
 
-Control order follows the key order inside `Pick`, not the declaration order in `<Component>Props`.
-`@fumadocs/story` reads the resolved type with `ts-morph` and preserves the pick order, so list keys
-in the order they should appear in the panel.
+`<Example>` renders a live preview and a "Code" tab with the example source.
 
-Render the real component through a small `<Component>Playground` wrapper inside the shared
-`StoryWrapper` from `../lib/story-wrapper`. Pass it directly to
-`defineStory({ Component, args: { initial } })`.
+Keep example content aligned with the MDX feature sections. If you add a feature section for a prop
+or pattern, add or update an example in the same change.
 
-Generic components should fix the generic to one concrete sample type inside the playground. See
-`combobox-field.story.tsx`.
+Initial values should be short and legible. Do not use lorem ipsum.
 
-Keep story props aligned with `.docs.md` feature sections. If you add a feature section for a prop,
-add that prop to the story `Pick` in the same change.
-
-Initial values should be short and legible, like the `.docs.md` examples. Do not use lorem ipsum.
-
-Hosted `.mdx` files are wiring only: frontmatter, an interactive demo, and an `<include>` for
-generated package docs. Do not add hand-authored component prose there.
+Hosted `.mdx` files contain the component prose, frontmatter, `<Example>` components, and an
+`<auto-type-table>` for the API reference. Do not add generated package docs.
