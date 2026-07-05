@@ -23,13 +23,14 @@ type ExampleTuple = [ExampleModule, string];
 
 type ExampleResult = { data: ExampleTuple; ok: true } | { error: Error; ok: false };
 
-const _modules = import.meta.glob<ExampleModule>('../../examples/*/*.tsx', {
+const _modules = import.meta.glob<ExampleModule>('../examples/*/*.tsx', {
 	eager: false,
 	import: '*',
 });
 
-const _sources = import.meta.glob<string>('../../examples/*/*.tsx?raw', {
+const _sources = import.meta.glob<string>('../examples/*/*.tsx', {
 	eager: false,
+	query: '?raw',
 	import: 'default',
 });
 
@@ -39,16 +40,11 @@ function findExample(
 	component: string,
 	name: string,
 ): [() => Promise<ExampleModule>, () => Promise<string>] | null {
-	const moduleKey = Object.keys(_modules).find((key) => {
-		const match = key.match(/\/examples\/([^/]+)\/(.+)\.tsx$/);
-		return match?.[1] === component && match?.[2] === name;
-	});
-	const sourceKey = Object.keys(_sources).find((key) => {
-		const match = key.match(/\/examples\/([^/]+)\/(.+)\.tsx\?raw$/);
-		return match?.[1] === component && match?.[2] === name;
-	});
-	if (!moduleKey || !sourceKey) return null;
-	return [_modules[moduleKey]!, _sources[sourceKey]!];
+	const key = `../examples/${component}/${name}.tsx`;
+	const loadModule = _modules[key];
+	const loadSource = _sources[key];
+	if (!loadModule || !loadSource) return null;
+	return [loadModule, loadSource];
 }
 
 function loadExample(component: string, name: string): Promise<ExampleResult> {

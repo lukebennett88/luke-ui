@@ -14,7 +14,7 @@ import { Example } from '../../components/example-block';
 import { PageActions } from '../../components/page-actions';
 import { baseOptions } from '../../lib/layout.shared';
 import { source } from '../../lib/source';
-import { getStorybookStoryUrl } from '../../lib/storybook';
+import { getStorybookStoryUrl, withBasePath } from '../../lib/storybook';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
 
@@ -40,9 +40,11 @@ const loader = createServerFn({
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
 
+		const markdownPath = `${page.url === '/docs' ? '/docs/index' : page.url}.md`;
+
 		return {
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
-			markdownUrl: `${page.url === '/docs' ? '/docs/index' : page.url}.md`,
+			markdownUrl: withBasePath(markdownPath, import.meta.env.BASE_URL),
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			storybookUrl: getStorybookStoryUrl(page.path, import.meta.env.BASE_URL),
