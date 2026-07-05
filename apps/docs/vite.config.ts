@@ -328,6 +328,7 @@ export default defineConfig(async () => {
 					{ path: '/api/search' },
 					{ path: '/llms.txt' },
 					{ path: '/llms-full.txt' },
+					{ path: '/docs/{$}.md' },
 					...markdownPrerenderPages,
 				],
 				prerender: {
