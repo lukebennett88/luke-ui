@@ -10,6 +10,9 @@
 		"generate:component": "tsx scripts/generate-component.ts",
 		"test": "vp test run"
 	},
+	"dependencies": {
+		"@luke-ui/docs-tools": "workspace:*"
+	},
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"tsx": "catalog:",

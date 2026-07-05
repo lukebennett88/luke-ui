@@ -1,4 +1,5 @@
 import type { PackageDocsCatalogMetadata } from './package-docs-catalog.js';
+import { tierBucket } from './package-docs-catalog.js';
 
 export interface IndexEntry extends PackageDocsCatalogMetadata {
 	href?: string;
@@ -29,16 +30,19 @@ export function renderIndex(input: RenderIndexInput): string {
 	const assets: Array<IndexEntry> = [];
 
 	for (const e of entries) {
-		if (e.shape === 'component') {
-			if (e.tier === 'primitive') {
+		switch (tierBucket(e)) {
+			case 'primitive':
 				primitives.push(e);
-			} else {
+				break;
+			case 'barrel':
+				barrels.push(e);
+				break;
+			case 'asset':
+				assets.push(e);
+				break;
+			default:
 				primary.push(e);
-			}
-		} else if (e.shape === 'barrel') {
-			barrels.push(e);
-		} else if (e.shape === 'asset') {
-			assets.push(e);
+				break;
 		}
 	}
 

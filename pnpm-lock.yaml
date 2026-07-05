@@ -456,6 +456,10 @@ importers:
         version: 4.4.3
 
   packages/turbo-generators:
+    dependencies:
+      '@luke-ui/docs-tools':
+        specifier: workspace:*
+        version: link:../@luke-ui/docs-tools
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
