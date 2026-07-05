@@ -38,7 +38,8 @@ generated exports.
 ## Hosted docs shape
 
 Each component docs page at `apps/docs/content/docs/components/<group>/<component>.mdx` follows the
-section order from [ADR-0007](docs/adr/0007-docs-moved-to-hosted-app.md):
+section order from [ADR-0006](docs/adr/0006-docs-md-structure-standard.md) (now superseded by
+ADR-0007; the section ordering still applies):
 
 - Usage lead-in with no explicit `## Usage` heading.
 - `## Best Practices` table.
