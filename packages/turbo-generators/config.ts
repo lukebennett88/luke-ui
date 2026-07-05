@@ -1,16 +1,15 @@
+import { DOC_GROUPS } from '@luke-ui/docs-tools/package-docs-catalog';
 import type { PlopTypes } from '@turbo/gen';
 import * as z from 'zod';
 import { applyComponentCreationPlan } from './src/apply-component-creation-plan.js';
 import type { CreateComponentInput } from './src/component-creation-plan.js';
 import { createComponentPlan } from './src/component-creation-plan.js';
-
-const DOCS_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
 const COMPONENT_TIERS = ['atom', 'composed'] as const;
 const COMPONENT_STYLING = ['none', 'recipe'] as const;
 
 const componentAnswersSchema = z.object({
-	docsGroup: z.enum(DOCS_GROUPS),
+	docsGroup: z.enum(DOC_GROUPS),
 	name: z.string().min(1),
 	styling: z.enum(COMPONENT_STYLING),
 	tier: z.enum(COMPONENT_TIERS),
@@ -44,7 +43,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				type: 'list',
 			},
 			{
-				choices: [...DOCS_GROUPS],
+				choices: [...DOC_GROUPS],
 				message: 'Docs group:',
 				name: 'docsGroup',
 				type: 'list',

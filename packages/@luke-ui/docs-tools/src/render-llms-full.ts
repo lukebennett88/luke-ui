@@ -1,4 +1,5 @@
 import type { PackageDocsCatalogMetadata } from './package-docs-catalog.js';
+import { tierBucket } from './package-docs-catalog.js';
 
 export interface LlmsFullEntry extends Pick<PackageDocsCatalogMetadata, 'slug' | 'shape' | 'tier'> {
 	md: string;
@@ -31,33 +32,19 @@ export function renderLlmsFull(entries: Array<LlmsFullEntry>): string {
  * Entries that don't classify into a bucket are dropped.
  */
 export function sortLlmsFullEntries<T extends LlmsFullEntry>(entries: Array<T>): Array<T> {
-	const buckets: Record<LlmsFullBucket, Array<T>> = {
-		atom: [],
-		barrel: [],
-		composed: [],
-		primitive: [],
-	};
+	const buckets: Record<string, Array<T>> = {};
 	for (const entry of entries) {
-		const bucket = bucketFor(entry);
-		if (bucket) buckets[bucket].push(entry);
+		if (entry.shape !== 'component' && entry.shape !== 'barrel') continue;
+		if (entry.shape === 'component' && !entry.tier) continue;
+
+		const bucket = tierBucket(entry);
+		(buckets[bucket] ??= []).push(entry);
 	}
 	const bySlug = (a: T, b: T) => a.slug.localeCompare(b.slug);
 	return [
-		...buckets.atom.sort(bySlug),
-		...buckets.composed.sort(bySlug),
-		...buckets.barrel.sort(bySlug),
-		...buckets.primitive.sort(bySlug),
+		...(buckets.atom ?? []).sort(bySlug),
+		...(buckets.composed ?? []).sort(bySlug),
+		...(buckets.barrel ?? []).sort(bySlug),
+		...(buckets.primitive ?? []).sort(bySlug),
 	];
-}
-
-type LlmsFullBucket = 'atom' | 'composed' | 'barrel' | 'primitive';
-
-function bucketFor(entry: LlmsFullEntry): LlmsFullBucket | undefined {
-	if (entry.shape === 'barrel') return 'barrel';
-	if (entry.shape !== 'component') return;
-
-	if (entry.tier === 'atom') return 'atom';
-	if (entry.tier === 'primitive') return 'primitive';
-	if (entry.tier === 'composed') return 'composed';
-	return;
 }

@@ -50,6 +50,18 @@ export type PackageDocsCatalogEntry =
 	| PackageDocsComponentEntry
 	| PackageDocsBarrelEntry;
 
+export const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
+export type DocGroup = (typeof DOC_GROUPS)[number];
+
+export type TierBucket = 'atom' | 'composed' | 'primitive' | 'barrel' | 'asset';
+
+export function tierBucket(entry: { shape: string; tier: string }): TierBucket {
+	if (entry.shape === 'asset' || entry.shape === 'barrel') return entry.shape;
+	if (entry.tier === 'atom') return 'atom';
+	if (entry.tier === 'primitive') return 'primitive';
+	return 'composed';
+}
+
 export type PackageDocsCatalogMetadata = Pick<
 	PackageDocsCatalogEntry,
 	'path' | 'target' | 'slug' | 'shape' | 'pageKind' | 'tier' | 'title' | 'description'
@@ -103,7 +115,13 @@ function resolveEntry(entry: DiscoveredExport): PackageDocsCatalogEntry {
 	}
 
 	const parsed = parseComponent(entry.sourcePath);
-	const tier = parsed.tier ?? entry.tier;
+	if (!parsed.tier) {
+		throw new Error(
+			`Export "${entry.path}" is missing a @tier JSDoc tag. ` +
+				`Add /** @tier atom */ or /** @tier composed */ to its props interface.`,
+		);
+	}
+	const tier = parsed.tier;
 	return {
 		...entry,
 		description: parsed.description,
