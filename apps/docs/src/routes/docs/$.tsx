@@ -2,12 +2,14 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../../.source/browser';
+import { Example } from '../../components/example-block';
 import { PageActions } from '../../components/page-actions';
 import { baseOptions } from '../../lib/layout.shared';
 import { withBasePath } from '../../lib/markdown-url';
@@ -15,6 +17,8 @@ import { source } from '../../lib/source';
 import { getStorybookStoryUrl } from '../../lib/storybook';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
+
+const mdxComponents = { ...defaultMdxComponents, AutoTypeTable, Example };
 
 export const Route = createFileRoute('/docs/$')({
 	component: Page,
@@ -66,7 +70,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
 						markdownUrl={markdownUrl}
 						storybookUrl={storybookUrl}
 					/>
-					<MDX components={defaultMdxComponents} />
+					<MDX components={mdxComponents} />
 				</DocsBody>
 			</DocsPage>
 		);
