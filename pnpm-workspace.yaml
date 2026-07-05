@@ -9,8 +9,6 @@ packages:
 
 catalog:
   '@arethetypeswrong/core': ^0.18.4
-  '@argos-ci/cli': ^6.0.0
-  '@argos-ci/storybook': ^6.0.13
   '@capsizecss/metrics': ^4.1.0
   '@capsizecss/vanilla-extract': ^2.0.4
   '@changesets/cli': ^2.31.0
@@ -39,9 +37,9 @@ catalog:
   '@vanilla-extract/vite-plugin': ^5.2.3
   '@vitejs/plugin-react': ^6.0.3
   zod: ^4.4.3
-  '@vitest/browser-playwright': ^4.1.9
-  '@vitest/coverage-v8': ^4.1.9
-  '@vitest/ui': ^4.1.9
+  '@vitest/browser-playwright': 4.1.9
+  '@vitest/coverage-v8': 4.1.9
+  '@vitest/ui': 4.1.9
   babel-plugin-react-compiler: ^1.0.0
   colorjs.io: ^0.6.1
   csstype: ^3.2.3
@@ -65,9 +63,9 @@ catalog:
   tsx: ^4.22.4
   turbo: ^2.10.1
   typescript: ^6.0.3
-  vite: npm:@voidzero-dev/vite-plus-core@latest
-  vitest: ^4.1.9
-  vite-plus: ^0.2.1
+  vite: npm:@voidzero-dev/vite-plus-core@0.2.2
+  vitest: 4.1.9
+  vite-plus: 0.2.2
 
 catalogMode: prefer
 

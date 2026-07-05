@@ -3,8 +3,10 @@
 .source/
 .tanstack/
 .turbo/
+.vitest-attachments/
 *.local
 *.log
+**/__screenshots__/**
 apps/docs/.story/
 apps/docs/src/routeTree.gen.ts
 dist/
@@ -19,4 +21,7 @@ packages/@luke-ui/react/src/generated/icons.tsx
 public/dist/
 server/dist/
 storybook-static/
-.worktrees/
+
+!**/__screenshots__/
+!**/__screenshots__/**/
+!**/__screenshots__/**/*-linux.png

@@ -46,16 +46,15 @@ jobs:
 
       - name: Run Storybook visual tests
         run: corepack pnpm --filter @luke-ui/react test
-        env:
-          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
 
-      - name: Build Storybook for Argos
-        run: corepack pnpm build:storybook
-
-      - name: Deploy Storybook to Argos
-        run: corepack pnpm deploy:storybook:argos
-        env:
-          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN }}
+      - name: Upload visual diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: packages/@luke-ui/react/**/__screenshots__/**
+          if-no-files-found: ignore
+          retention-days: 7
 
   deploy-pages:
     name: deploy-pages
@@ -105,22 +104,24 @@ jobs:
       - name: Assemble Pages artifact
         run: |
           BASE_PATH="${{ steps.pages.outputs.base_path }}"
-          # Strip the leading slash to get the subdirectory name (e.g. /luke-ui → luke-ui).
-          # The docs prerendering outputs HTML under .output/public/<subdir>/ when basePath
-          # is set, so we copy from there and let GitHub Pages handle the /luke-ui/ prefix.
+          # Strip leading slash to get subdirectory name (e.g. /luke-ui -> luke-ui).
+          # Docs prerendering outputs HTML under .output/public/<subdir>/ when basePath
+          # is set, so we copy from there and let GitHub Pages handle /luke-ui/ prefix.
           STRIPPED="${BASE_PATH#/}"
           mkdir -p dist
           if [ -n "$STRIPPED" ] && [ -d "apps/docs/.output/public/${STRIPPED}" ]; then
             cp -r "apps/docs/.output/public/${STRIPPED}/." dist/
           else
-            # Fallback for root deployments (user/org Pages or custom domain)
+            # Fallback for root deployments (user/org Pages or custom domain).
             cp -r apps/docs/.output/public/. dist/
           fi
-          # Assets are output at .output/public/assets/ regardless of basePath
+
+          # Assets are output at .output/public/assets/ regardless of basePath.
           [ -d apps/docs/.output/public/assets ] && cp -r apps/docs/.output/public/assets dist/
-          [ -d apps/docs/.output/public/__tsr ]  && cp -r apps/docs/.output/public/__tsr dist/
-          [ -d apps/docs/.output/public/api ]    && cp -r apps/docs/.output/public/api dist/
-          # Storybook lives at /storybook/ within the Pages site
+          [ -d apps/docs/.output/public/__tsr ] && cp -r apps/docs/.output/public/__tsr dist/
+          [ -d apps/docs/.output/public/api ] && cp -r apps/docs/.output/public/api dist/
+
+          # Storybook lives at /storybook/ within the Pages site.
           cp -r packages/@luke-ui/react/storybook-static dist/storybook
 
       - name: Upload Pages artifact

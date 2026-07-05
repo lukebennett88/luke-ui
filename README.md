@@ -31,8 +31,8 @@ React design system using `vanilla-extract`.
 
 ## CI Setup
 
-- Argos + Storybook GitHub setup: `docs/ARGOS_SETUP.md`
-- Visual regression test command: `pnpm test`
+- Test command: `pnpm test`
+- Visual regression testing: `docs/VISUAL_TESTING.md`
 
 ## TODO
 
@@ -40,8 +40,8 @@ React design system using `vanilla-extract`.
 - Review visual styles (move away from being an EDS clone)
 - Make docs more visual
 - Review how we do stories
-  - Kitchen sink stories for Argos
-  - Include states in Argos snapshots (focus, open menus etc)
+  - Kitchen sink stories for broader test coverage
+  - Include more component states in stories (focus, open menus etc)
   - Other examples are for consumers and quick reference
 
 Components to build:

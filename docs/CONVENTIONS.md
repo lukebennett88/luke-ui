@@ -71,6 +71,24 @@ explaining one editing session.
 `CONTEXT.md` stays a terse index that links to ADRs. If a section starts restating an ADR in full,
 the content belongs in the ADR instead.
 
+### Keeping docs current
+
+Docs must stay factually accurate: no doc should state something false about the code — a path,
+command, script, export, type, code snippet, or cross-reference that has since changed or been
+removed. This covers everything a human writes (comments, JSDoc, `.docs.md` prose, `README.md`,
+`docs/*.md`), not generated output; when generated docs are wrong, fix the authored source, not the
+generated file.
+
+- Update or delete the docs that describe code in the same change as the code. Most rot is a doc
+  that outlived the change that should have touched it.
+- When you move, rename, or remove a file, script, `pnpm run` command, export, or symbol, search the
+  docs for references and fix or delete them.
+- Prefer generated or derived content over hand-maintained duplication. Before adding a list or
+  table that mirrors the code or file tree, don't — point at the source of truth instead. If such a
+  list must exist, update it whenever you add or remove what it enumerates.
+- Reference stable things. Don't pin prose to volatile details like line numbers, generated class
+  names, or exact command output; reference the durable path, command, or heading instead.
+
 ## Fumadocs stories
 
 Each component's interactive hosted-docs demo lives in one file:
