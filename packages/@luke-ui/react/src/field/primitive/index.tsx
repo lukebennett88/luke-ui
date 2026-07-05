@@ -1,4 +1,5 @@
 import type { ComponentProps, JSX, ReactNode } from 'react';
+import type { FieldSlotProps } from '../compose-field.js';
 import type { FieldDescriptionProps } from './description.js';
 import { FieldDescription } from './description.js';
 import type { FieldErrorProps } from './error.js';
@@ -17,16 +18,8 @@ type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
  *
  * @tier primitive
  */
-export interface FieldProps extends Omit<PrimitiveFieldProps, 'children'> {
+export interface FieldProps extends Omit<PrimitiveFieldProps, 'children'>, FieldSlotProps {
 	children: ReactNode;
-	/** Optional helper text shown below the input. */
-	description?: ReactNode;
-	/** Error content passed to `FieldError`. */
-	errorMessage?: FieldErrorProps['children'];
-	/** Label content shown above the input. */
-	label?: ReactNode;
-	/** Label necessity style. Defaults to `'icon'`. */
-	necessityIndicator?: FieldNecessityIndicator;
 }
 
 /** Composes label, control slot, description, and error text. */

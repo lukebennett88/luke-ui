@@ -9,7 +9,7 @@ export interface FieldSlotProps {
 	errorMessage?: FieldErrorProps['children'];
 	/** Label content shown above the control. */
 	label?: ReactNode;
-	/** Label necessity style. */
+	/** Label necessity style. @default 'icon' */
 	necessityIndicator?: FieldNecessityIndicator;
 }
 

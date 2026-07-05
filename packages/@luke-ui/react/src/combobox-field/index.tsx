@@ -1,9 +1,8 @@
-import type { CSSProperties, JSX, ReactNode } from 'react';
+import type { CSSProperties, JSX } from 'react';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { composeField } from '../field/compose-field.js';
-import type { FieldErrorProps } from '../field/primitive/error.js';
+import type { FieldSlotProps } from '../field/compose-field.js';
 import { Field } from '../field/primitive/index.js';
-import type { FieldNecessityIndicator } from '../field/primitive/label.js';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -38,18 +37,10 @@ interface ComboboxFieldRedeclaredRACProps {
 export interface ComboboxFieldProps<T extends object>
 	extends
 		DistributiveOmit<ComboboxInputProps<T>, 'children' | keyof ComboboxFieldRedeclaredRACProps>,
-		ComboboxFieldRedeclaredRACProps {
+		ComboboxFieldRedeclaredRACProps,
+		FieldSlotProps {
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
-
-	/** Helper text shown below the control. */
-	description?: ReactNode;
-
-	/** Error content passed to `FieldError`. */
-	errorMessage?: FieldErrorProps['children'];
-
-	/** Label content shown above the control. */
-	label?: ReactNode;
 
 	/** Props forwarded to the inner listbox. */
 	listBoxProps?: DistributiveOmit<ComboboxListBoxProps<T>, 'children' | 'items' | 'loadMoreItem'>;
@@ -62,9 +53,6 @@ export interface ComboboxFieldProps<T extends object>
 
 	/** Width applied to the popover menu. */
 	menuWidth?: CSSProperties['width'];
-
-	/** Label necessity style. @default 'icon' */
-	necessityIndicator?: FieldNecessityIndicator;
 
 	/** Called when the listbox reaches its load-more sentinel. */
 	onLoadMore?: ComboboxLoadMoreItemProps['onLoadMore'];
