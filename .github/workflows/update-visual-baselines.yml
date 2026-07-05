@@ -1,0 +1,62 @@
+name: Update Visual Baselines
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+
+jobs:
+  update-baselines:
+    name: update-baselines
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Setup tooling with mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
+          cache: true
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+
+      - name: Build package
+        run: corepack pnpm build:packages
+
+      - name: Update visual baselines
+        run: corepack pnpm --filter @luke-ui/react run test:visual -- -u
+
+      - name: Commit push updated baselines
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "packages/@luke-ui/react/**/__screenshots__/**/*-linux.png"
+          if git diff --staged --quiet; then
+            echo "No baseline changes to commit."
+          else
+            git commit -m "Update visual regression baselines"
+            git push
+            # Pushes made by GITHUB_TOKEN do not re-trigger other
+            # workflows, so open PR's checks will not re-run automatically.
+            # Re-run the failed checks on the PR (or push any commit) to pick up
+            # the new baselines.
+            echo "::notice::Baselines updated. Re-run PR checks to validate them."
+          fi

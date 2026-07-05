@@ -9,3 +9,6 @@
   missing.
 - Scaffold components non-interactively:
   `pnpm run generate:component --args <name> <atom|composed> <docs-group> <recipe|none>`.
+- When you change code, update or delete the docs that describe it in the same change — comments,
+  JSDoc, `.docs.md`, `README.md`, and `docs/*.md`. See
+  [docs/CONVENTIONS.md](docs/CONVENTIONS.md#keeping-docs-current).

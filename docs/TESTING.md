@@ -11,7 +11,8 @@ Use the smallest test surface that proves the behaviour.
 - **Storybook play tests**: React component behaviour that belongs in a real story. For
   `@luke-ui/react` components, stories are component tests. Do not add separate `*.test.tsx`
   component tests unless Storybook cannot exercise the behaviour cleanly.
-- **Storybook visual tests**: public UI states and visual variants worth reviewing for regressions.
+- **Visual regression tests** (`*.visual.test.tsx`): pixel snapshots of public UI states and
+  variants worth reviewing for regressions. See [Visual regression tests](#visual-regression-tests).
 - **Browser Vitest tests** (`*.browser.test.{ts,tsx}`): non-component DOM logic that needs real
   browser APIs and does not fit a story, including CSS recipe style-contract tests.
 
@@ -86,6 +87,48 @@ play: async ({ canvasElement, step }) => {
 	});
 };
 ```
+
+## Visual regression tests
+
+Visual tests capture a screenshot of a rendered component and compare it against a committed
+baseline image. They catch unintended visual changes (spacing, colour, focus rings, open menus) that
+behaviour assertions miss. They run in the `visual` Vitest project via `pnpm run test:visual`.
+
+Place them in `*.visual.test.tsx` beside the component. Render with the shared `renderVisual`
+helper, which wraps the subtree in the theme root and icon spritesheet provider and returns a
+locator:
+
+```tsx
+import { afterEach, expect, test } from 'vite-plus/test';
+import { page, userEvent } from 'vite-plus/test/context';
+import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
+import { Button } from './index.js';
+
+afterEach(() => {
+	cleanupVisual();
+});
+
+test('keyboard focus ring', async () => {
+	const locator = renderVisual(<Button tone="primary">Focus me</Button>);
+	// Tab so the browser applies `:focus-visible`; a programmatic `.focus()` would not.
+	await userEvent.tab();
+	await expect.element(locator).toMatchScreenshot('button-focus-visible');
+});
+```
+
+- **Capture states, not just static variants.** Drive focus, open menus, and pressed states with
+  `userEvent`, then screenshot. This is the main reason to reach for a visual test over a story.
+- **Overlays render in a portal** appended to `document.body`, outside the rendered container. To
+  capture an open menu, screenshot the overlay locator (for example `page.getByRole('listbox')`)
+  rather than the container.
+- **Frame tightly.** Render a small kitchen-sink grid of the states under test, not a whole page, so
+  a diff points at the component that changed.
+- **Baselines are committed per OS.** Only Linux baselines (`*-chromium-linux.png`, generated in CI)
+  are tracked in git; screenshots you generate locally on macOS are gitignored. Regenerate baselines
+  through the **Update Visual Baselines** GitHub Actions workflow, then review the changed PNGs in
+  the pull request diff before merging. Do not commit local baselines.
+- **The first run of a new test "fails".** Creating a missing baseline is reported as a failure by
+  design; run it again (or regenerate in CI) and it passes against the new reference.
 
 ## Style-contract tests for CSS recipes
 
