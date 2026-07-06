@@ -58,14 +58,27 @@
 			"persistent": true
 		},
 		"docs#build": {
-			"dependsOn": ["generate", "^build"],
+			"dependsOn": ["docs#generate", "^build"],
 			"env": ["VITE_BASE_URL"],
 			"outputs": [".output/**", ".source/**"]
 		},
+		"docs#check:format": {
+			"dependsOn": ["docs#generate"]
+		},
+		"docs#check:lint": {
+			"dependsOn": ["docs#generate", "^build"]
+		},
+		"docs#check:types": {
+			"dependsOn": ["docs#generate", "^build"]
+		},
 		"docs#dev": {
 			"cache": false,
-			"dependsOn": ["generate", "^build"],
+			"dependsOn": ["docs#generate", "^build"],
 			"persistent": true
+		},
+		"docs#generate": {
+			"outputs": ["src/routeTree.gen.ts"],
+			"cache": true
 		},
 		"fix": {
 			"cache": false,
