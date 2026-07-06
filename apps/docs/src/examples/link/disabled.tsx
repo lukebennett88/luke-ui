@@ -1,7 +1,6 @@
 import { Link } from '@luke-ui/react/link';
-import type { JSX } from 'react';
 
-export default function Disabled(): JSX.Element {
+export default function Disabled() {
 	return (
 		<Link href="/archived" isDisabled>
 			Archived report

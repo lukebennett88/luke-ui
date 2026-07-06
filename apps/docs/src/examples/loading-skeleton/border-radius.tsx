@@ -1,9 +1,8 @@
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { TextField } from '@luke-ui/react/text-field';
-import type { JSX } from 'react';
 import { useState } from 'react';
 
-export default function BorderRadius(): JSX.Element {
+export default function BorderRadius() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (

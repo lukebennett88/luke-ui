@@ -1,7 +1,6 @@
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import type { JSX } from 'react';
 
-export default function Progress(): JSX.Element {
+export default function Progress() {
 	return (
 		<div style={{ alignItems: 'center', display: 'flex', gap: '1rem' }}>
 			<LoadingSpinner aria-label="Loading" />

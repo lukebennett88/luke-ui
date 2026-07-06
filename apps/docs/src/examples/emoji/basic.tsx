@@ -1,11 +1,10 @@
 import { Emoji } from '@luke-ui/react/emoji';
-import type { JSX } from 'react';
 
-export default function Basic(): JSX.Element {
+export default function Basic() {
 	return (
 		<div style={{ alignItems: 'center', display: 'flex', gap: '1rem' }}>
 			<Emoji emoji="🎉" label="Celebration" />
-			<Emoji emoji="🚀" label="Rocket" fontSize="large" />
+			<Emoji emoji="🚀" fontSize="large" label="Rocket" />
 		</div>
 	);
 }

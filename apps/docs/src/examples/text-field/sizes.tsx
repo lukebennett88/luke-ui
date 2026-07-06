@@ -1,11 +1,10 @@
 import { TextField } from '@luke-ui/react/text-field';
-import type { JSX } from 'react';
 
-export default function Sizes(): JSX.Element {
+export default function Sizes() {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>
-			<TextField name="small" label="Small" size="small" placeholder="Small input" />
-			<TextField name="medium" label="Medium" size="medium" placeholder="Medium input" />
+			<TextField label="Small" name="small" placeholder="Small input" size="small" />
+			<TextField label="Medium" name="medium" placeholder="Medium input" size="medium" />
 		</div>
 	);
 }

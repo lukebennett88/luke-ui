@@ -1,11 +1,10 @@
 import { TextField } from '@luke-ui/react/text-field';
-import type { JSX } from 'react';
 
-export default function Required(): JSX.Element {
+export default function Required() {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>
-			<TextField isRequired name="firstName" label="First name" necessityIndicator="icon" />
-			<TextField isRequired name="lastName" label="Last name" necessityIndicator="label" />
+			<TextField isRequired label="First name" name="firstName" necessityIndicator="icon" />
+			<TextField isRequired label="Last name" name="lastName" necessityIndicator="label" />
 		</div>
 	);
 }

@@ -1,11 +1,10 @@
 import { IconButton } from '@luke-ui/react/icon-button';
-import type { JSX } from 'react';
 
-export default function Tone(): JSX.Element {
+export default function Tone() {
 	return (
 		<div style={{ display: 'flex', gap: '1rem' }}>
-			<IconButton icon="close" aria-label="Close" tone="ghost" />
-			<IconButton icon="delete" aria-label="Delete" tone="critical" />
+			<IconButton aria-label="Close" icon="close" tone="ghost" />
+			<IconButton aria-label="Delete" icon="delete" tone="critical" />
 		</div>
 	);
 }

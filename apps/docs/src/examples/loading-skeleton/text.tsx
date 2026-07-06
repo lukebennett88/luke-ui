@@ -1,8 +1,7 @@
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
-import type { JSX } from 'react';
 import { useState } from 'react';
 
-export default function TextSkeleton(): JSX.Element {
+export default function TextSkeleton() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (

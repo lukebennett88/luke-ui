@@ -1,6 +1,5 @@
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/combobox-field/primitive';
-import type { JSX } from 'react';
 
 type Country = { id: string; label: string };
 
@@ -11,13 +10,13 @@ const countries: Array<Country> = [
 	{ id: 'us', label: 'United States' },
 ];
 
-export default function Basic(): JSX.Element {
+export default function Basic() {
 	return (
 		<ComboboxField
+			defaultItems={countries}
 			label="Country"
 			name="country"
 			placeholder="Select a country..."
-			defaultItems={countries}
 		>
 			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 		</ComboboxField>

@@ -1,9 +1,8 @@
 import { Text } from '@luke-ui/react/text';
-import type { JSX } from 'react';
 
-export default function Transform(): JSX.Element {
+export default function Transform() {
 	return (
-		<Text textTransform="uppercase" textDecoration="underline">
+		<Text textDecoration="underline" textTransform="uppercase">
 			Emphasized text
 		</Text>
 	);

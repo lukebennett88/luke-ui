@@ -1,14 +1,13 @@
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { CodeIcon } from 'lucide-react';
-import { Suspense, use, useId, useState } from 'react';
 import type { ComponentType, JSX } from 'react';
+import { Suspense, use, useId, useState } from 'react';
 import { StoryWrapper } from '../lib/story-wrapper';
 
 type ExampleProps = {
-	component: string;
+	src: string;
 	description: string;
-	name: string;
 	title: string;
 };
 
@@ -27,7 +26,10 @@ const _modules = import.meta.glob<ComponentType>('../examples/*/*.tsx', {
 	import: 'default',
 });
 
-function ExampleContent({ component, name, title }: ExampleProps): JSX.Element {
+function ExampleContent({ src, title }: ExampleProps): JSX.Element {
+	const slashIndex = src.indexOf('/');
+	const component = src.slice(0, slashIndex);
+	const name = src.slice(slashIndex + 1);
 	const result = use(loadExample(component, name));
 	const [showCode, setShowCode] = useState(false);
 	const codeId = useId();
@@ -75,8 +77,8 @@ function ExampleContent({ component, name, title }: ExampleProps): JSX.Element {
 
 const _sources = import.meta.glob<string>('../examples/*/*.tsx', {
 	eager: false,
-	query: '?raw',
 	import: 'default',
+	query: '?raw',
 });
 
 type ExampleTuple = [ComponentType, string];
@@ -114,8 +116,8 @@ function loadExample(component: string, name: string): Promise<ExampleResult> {
 	const match = findExample(component, name);
 	if (!match) {
 		const promise = Promise.resolve({
-			ok: false,
 			error: new Error(`Example not found: ${component}/${name}`),
+			ok: false,
 		} satisfies ExampleResult);
 		exampleCache.set(key, promise);
 		return promise;
@@ -125,14 +127,14 @@ function loadExample(component: string, name: string): Promise<ExampleResult> {
 	const promise = Promise.all([loadModule(), loadSource()])
 		.then(
 			([loadedComponent, loadedSource]): ExampleResult => ({
-				ok: true,
 				data: [loadedComponent, loadedSource],
+				ok: true,
 			}),
 		)
 		.catch(
 			(err): ExampleResult => ({
-				ok: false,
 				error: err instanceof Error ? err : new Error(String(err)),
+				ok: false,
 			}),
 		);
 

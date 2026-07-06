@@ -1,9 +1,8 @@
 import { Text } from '@luke-ui/react/text';
-import type { JSX } from 'react';
 
-export default function Alignment(): JSX.Element {
+export default function Alignment() {
 	return (
-		<Text textAlign="end" fontVariantNumeric="tabular-nums" style={{ display: 'block' }}>
+		<Text fontVariantNumeric="tabular-nums" style={{ display: 'block' }} textAlign="end">
 			12121.21
 		</Text>
 	);

@@ -1,12 +1,11 @@
 import { TextField } from '@luke-ui/react/text-field';
-import type { JSX } from 'react';
 
-export default function Basic(): JSX.Element {
+export default function Basic() {
 	return (
 		<TextField
-			name="email"
-			label="Email"
 			description="We'll only use this for account updates."
+			label="Email"
+			name="email"
 			placeholder="name@example.com"
 		/>
 	);

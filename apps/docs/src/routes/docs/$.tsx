@@ -18,7 +18,7 @@ import { getStorybookStoryUrl, withBasePath } from '../../lib/storybook';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
 
-const mdxComponents = { ...defaultMdxComponents, AutoTypeTable, TypeTable, ExampleBlock };
+const mdxComponents = { ...defaultMdxComponents, AutoTypeTable, ExampleBlock, TypeTable };
 
 export const Route = createFileRoute('/docs/$')({
 	component: Page,

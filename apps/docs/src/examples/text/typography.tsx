@@ -1,7 +1,6 @@
 import { Text } from '@luke-ui/react/text';
-import type { JSX } from 'react';
 
-export default function Typography(): JSX.Element {
+export default function Typography() {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 			<Text fontSize="h2" lineHeight="tight">

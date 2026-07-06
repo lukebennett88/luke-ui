@@ -54,6 +54,7 @@
 		"serve": "catalog:",
 		"tailwindcss": "catalog:",
 		"typescript": "catalog:",
+		"unist-util-visit": "catalog:",
 		"vite-plus": "catalog:",
 		"vitest": "catalog:"
 	}

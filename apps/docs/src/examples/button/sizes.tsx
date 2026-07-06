@@ -1,7 +1,6 @@
 import { Button } from '@luke-ui/react/button';
-import type { JSX } from 'react';
 
-export default function Sizes(): JSX.Element {
+export default function Sizes() {
 	return (
 		<div style={{ alignItems: 'center', display: 'flex', gap: '1rem' }}>
 			<Button size="small">Small</Button>

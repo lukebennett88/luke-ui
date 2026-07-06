@@ -1,13 +1,12 @@
 import { Numeral } from '@luke-ui/react/numeral';
-import type { JSX } from 'react';
 
-export default function Formats(): JSX.Element {
+export default function Formats() {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-			<Numeral value={3_500} format="percent" />
-			<Numeral value={98.76} currency="AUD" />
-			<Numeral value={98} unit="kilometer-per-hour" />
-			<Numeral value={12_345} format="decimal" />
+			<Numeral format="percent" value={3_500} />
+			<Numeral currency="AUD" value={98.76} />
+			<Numeral unit="kilometer-per-hour" value={98} />
+			<Numeral format="decimal" value={12_345} />
 		</div>
 	);
 }

@@ -1,17 +1,16 @@
 import { Icon } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
-import type { JSX } from 'react';
 
-export default function Adornments(): JSX.Element {
+export default function Adornments() {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>
 			<TextField
-				name="search"
+				adornmentStart={<Icon aria-hidden name="search" size="small" />}
 				label="Search"
-				adornmentStart={<Icon name="search" aria-hidden size="small" />}
+				name="search"
 			/>
-			<TextField name="url" label="URL" adornmentStart="https://" />
-			<TextField name="price" label="Price" adornmentEnd="AUD" />
+			<TextField adornmentStart="https://" label="URL" name="url" />
+			<TextField adornmentEnd="AUD" label="Price" name="price" />
 		</div>
 	);
 }

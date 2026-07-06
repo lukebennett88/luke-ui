@@ -1,6 +1,5 @@
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/combobox-field/primitive';
-import type { JSX } from 'react';
 
 const items = [
 	{ id: 'au', label: 'Australia' },
@@ -9,14 +8,14 @@ const items = [
 	{ id: 'us', label: 'United States' },
 ];
 
-export default function Required(): JSX.Element {
+export default function Required() {
 	return (
 		<ComboboxField
+			defaultItems={items}
 			isRequired
 			label="Country"
 			name="country"
 			necessityIndicator="icon"
-			defaultItems={items}
 		>
 			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 		</ComboboxField>

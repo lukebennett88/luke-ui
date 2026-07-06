@@ -1,7 +1,6 @@
 import { Link } from '@luke-ui/react/link';
-import type { JSX } from 'react';
 
-export default function Standalone(): JSX.Element {
+export default function Standalone() {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 			<Link href="#" isStandalone>

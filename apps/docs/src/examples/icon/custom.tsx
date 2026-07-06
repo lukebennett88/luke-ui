@@ -1,5 +1,4 @@
 import { createIcon } from '@luke-ui/react/icon';
-import type { JSX } from 'react';
 
 const HeartIcon = createIcon({
 	path: (
@@ -7,6 +6,6 @@ const HeartIcon = createIcon({
 	),
 });
 
-export default function Custom(): JSX.Element {
-	return <HeartIcon title="Favorite" size="small" />;
+export default function Custom() {
+	return <HeartIcon size="small" title="Favorite" />;
 }

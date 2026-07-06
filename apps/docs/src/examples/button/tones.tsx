@@ -1,7 +1,6 @@
 import { Button } from '@luke-ui/react/button';
-import type { JSX } from 'react';
 
-export default function Tones(): JSX.Element {
+export default function Tones() {
 	return (
 		<div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
 			<Button tone="primary">Primary</Button>

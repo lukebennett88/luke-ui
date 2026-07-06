@@ -1,11 +1,10 @@
 import { IconButton } from '@luke-ui/react/icon-button';
-import type { JSX } from 'react';
 
-export default function Size(): JSX.Element {
+export default function Size() {
 	return (
-		<div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-			<IconButton icon="delete" aria-label="Delete" size="small" />
-			<IconButton icon="delete" aria-label="Delete" />
+		<div style={{ alignItems: 'center', display: 'flex', gap: '1rem' }}>
+			<IconButton aria-label="Delete" icon="delete" size="small" />
+			<IconButton aria-label="Delete" icon="delete" />
 		</div>
 	);
 }

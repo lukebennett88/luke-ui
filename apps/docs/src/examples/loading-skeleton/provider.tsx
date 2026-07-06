@@ -1,10 +1,9 @@
 import { Button } from '@luke-ui/react/button';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
 import { Text } from '@luke-ui/react/text';
-import type { JSX } from 'react';
 import { useState } from 'react';
 
-export default function ProviderSkeleton(): JSX.Element {
+export default function ProviderSkeleton() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (

@@ -1,8 +1,7 @@
 import { Heading } from '@luke-ui/react/heading';
 import { HeadingLevels } from '@luke-ui/react/heading-context';
-import type { JSX } from 'react';
 
-export default function AutomaticLeveling(): JSX.Element {
+export default function AutomaticLeveling() {
 	return (
 		<HeadingLevels base={1}>
 			<Heading>h1</Heading>

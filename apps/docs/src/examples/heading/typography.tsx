@@ -1,13 +1,12 @@
 import { Heading } from '@luke-ui/react/heading';
-import type { JSX } from 'react';
 
-export default function Typography(): JSX.Element {
+export default function Typography() {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-			<Heading level={3} color="informative">
+			<Heading color="informative" level={3}>
 				Informative heading
 			</Heading>
-			<Heading level={4} fontWeight="regular">
+			<Heading fontWeight="regular" level={4}>
 				Light-weight heading
 			</Heading>
 		</div>

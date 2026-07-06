@@ -1,10 +1,11 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config';
 import {
-	remarkAutoTypeTable,
-	createGenerator,
 	createFileSystemGeneratorCache,
+	createGenerator,
+	remarkAutoTypeTable,
 } from 'fumadocs-typescript';
+import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 
 export const docs = defineDocs({
 	dir: 'content/docs',
@@ -26,6 +27,7 @@ export default defineConfig({
 		remarkPlugins: (v) => [
 			...v,
 			[remarkAutoTypeTable, { generator, options: { basePath: repoRoot } }],
+			remarkValidateExamples,
 		],
 	},
 });
