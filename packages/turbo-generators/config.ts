@@ -1,4 +1,3 @@
-import { DOC_GROUPS } from '@luke-ui/docs-tools/package-docs-catalog';
 import type { PlopTypes } from '@turbo/gen';
 import * as z from 'zod';
 import { applyComponentCreationPlan } from './src/apply-component-creation-plan.js';
@@ -7,6 +6,8 @@ import { createComponentPlan } from './src/component-creation-plan.js';
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
 const COMPONENT_TIERS = ['atom', 'composed'] as const;
 const COMPONENT_STYLING = ['none', 'recipe'] as const;
+// Mirrors apps/docs/content/docs/components/*/meta.json — the pages listed there.
+const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
 const componentAnswersSchema = z.object({
 	docsGroup: z.enum(DOC_GROUPS),

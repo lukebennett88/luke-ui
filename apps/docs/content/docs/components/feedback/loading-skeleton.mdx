@@ -3,8 +3,98 @@ title: Loading Skeleton
 description: Loading placeholder that keeps the same footprint as the final content.
 ---
 
-import { story } from '../../../../src/loading-skeleton/loading-skeleton.story';
+`LoadingSkeleton` expects the Luke UI theme class at the app or root level. See
+[Getting Started](/docs/getting-started).
 
-<story.WithControl />
+Use it when loading content should keep the same footprint as the loaded state. Text renders as an
+inline skeleton. Elements keep their layout while the skeleton surface is painted over them.
 
-<include>../../../../../../packages/@luke-ui/react/docs/loading-skeleton.md</include>
+<ExampleBlock
+	component="loading-skeleton"
+	name="text"
+	title="Loading Skeleton — Text"
+	description="Inline skeleton that mirrors the wrapped text size."
+/>
+
+All mounted skeletons use the same pulse timing, even when they mount at different times.
+
+## Best practices
+
+| Guidance | Practices                                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------------------------- |
+| Do       | Wrap real content so the skeleton matches the final size exactly.                                                   |
+| Don't    | Use `LoadingSkeleton` for content whose final size is unknown. Size mismatch causes layout shift when loading ends. |
+
+## Loading state
+
+`isLoading` defaults to `true`. Pass `isLoading={false}` when content is ready.
+
+```tsx
+<LoadingSkeleton isLoading={false}>
+	<Button>Submit</Button>
+</LoadingSkeleton>
+```
+
+## Multi-line text
+
+Wrap text directly when the copy spans more than one line. Each line gets its own skeleton shape.
+
+## Element type
+
+`LoadingSkeleton` renders a `span` by default. Use `as` when the surrounding markup needs another
+element.
+
+<ExampleBlock
+	component="loading-skeleton"
+	name="element"
+	title="Loading Skeleton — Element"
+	description="Render the skeleton as a different element to match the surrounding markup."
+/>
+
+## LoadingSkeletonProvider
+
+Use `LoadingSkeletonProvider` when one loading state controls a group of skeletons. The provider
+value overrides descendant `isLoading` props.
+
+<ExampleBlock
+	component="loading-skeleton"
+	name="provider"
+	title="Loading Skeleton — Provider"
+	description="One loading state controls a group of skeletons."
+/>
+
+## Border radius
+
+Use `borderRadius` when the wrapped child has no radius, but the visible control inside it does.
+
+<ExampleBlock
+	component="loading-skeleton"
+	name="border-radius"
+	title="Loading Skeleton — Border radius"
+	description="Override the skeleton corner radius for wrapped controls."
+/>
+
+## Custom dimensions
+
+Wrap an element with explicit dimensions when you need a placeholder for a fixed shape, such as an
+avatar.
+
+<ExampleBlock
+	component="loading-skeleton"
+	name="custom-dimensions"
+	title="Loading Skeleton — Custom dimensions"
+	description="Wrap an element with explicit dimensions for a fixed-shape placeholder."
+/>
+
+## Accessibility
+
+While loading, skeleton content is hidden from assistive technology and cannot be focused or
+clicked. `LoadingSkeleton` sets `aria-hidden`, `inert`, `tabIndex={-1}`, and disables pointer
+events.
+
+## Props
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/loading-skeleton/index.tsx"
+	name="LoadingSkeletonProps"
+/>

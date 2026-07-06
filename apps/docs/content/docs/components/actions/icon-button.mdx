@@ -3,8 +3,54 @@ title: Icon Button
 description: Compact icon-only action button with an accessible label.
 ---
 
-import { story } from '../../../../src/icon-button/icon-button.story';
+Use `IconButton` for compact actions where an icon can carry the visible UI. Always provide an
+accessible label.
 
-<story.WithControl />
+```tsx
+<IconButton icon="add" aria-label="Add item" />
+```
 
-<include>../../../../../../packages/@luke-ui/react/docs/icon-button.md</include>
+## Best practices
+
+| Guidance | Practices                                                                    |
+| -------- | ---------------------------------------------------------------------------- |
+| Do       | Name the action in `aria-label`, such as "Delete row". Do not name the icon. |
+| Do       | Use `tone="critical"` for destructive icon actions such as delete.           |
+
+## Tone
+
+<ExampleBlock
+	component="icon-button"
+	name="tones"
+	title="Icon Button — Tone"
+	description="Ghost and critical tones for icon-only actions."
+/>
+
+## Size
+
+<ExampleBlock
+	component="icon-button"
+	name="size"
+	title="Icon Button — Size"
+	description="A small icon button for tighter spaces."
+/>
+
+## Accessibility
+
+`IconButton` has no visible text label. Always provide `aria-label` or `aria-labelledby`. Without
+one, screen readers have no way to announce the button's purpose.
+
+```tsx
+<IconButton icon="search" aria-label="Search orders" />
+```
+
+## When to use vs Button
+
+Use `IconButton` when the icon alone communicates the action and space is tight, such as in
+toolbars, table row actions, or close buttons.
+
+Use `Button` when you need a visible text label. Labels are clearer for unfamiliar users.
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/icon-button/index.tsx" name="IconButtonProps" />

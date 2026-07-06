@@ -3,8 +3,100 @@ title: Text Field
 description: Single-line text input with label, validation, and adornments.
 ---
 
-import { story } from '../../../../src/text-field/text-field.story';
+Use `TextField` for a single text input with label, description, validation, and optional adornments
+built in.
 
-<story.WithControl />
+<ExampleBlock
+	component="text-field"
+	name="basic"
+	title="Text Field — Basic"
+	description="Single-line text input with label and description."
+/>
 
-<include>../../../../../../packages/@luke-ui/react/docs/text-field.md</include>
+## Best practices
+
+| Guidance | Practices                                                                                                                   |
+| -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Do       | Use `label` for every field where possible. It works better with assistive technology and autofill than `aria-label` alone. |
+| Don't    | Use `placeholder` as a label substitute. It disappears after typing and often fails colour contrast requirements.           |
+
+## Required fields
+
+Use `isRequired` and `necessityIndicator` to communicate mandatory fields. `'icon'` renders a visual
+required marker. `'label'` appends "(required)" to the label text.
+
+<ExampleBlock
+	component="text-field"
+	name="required"
+	title="Text Field — Required"
+	description="Icon and label necessity indicators for mandatory fields."
+/>
+
+## Validation
+
+Pass field-level validation through React Aria `Form`. Use `errorMessage` to render the validation
+message.
+
+```tsx
+import { Form } from 'react-aria-components';
+
+<Form validationErrors={{ username: 'Username is not available.' }}>
+	<TextField
+		name="username"
+		label="Username"
+		errorMessage={(validation) => validation.validationErrors.join(' ')}
+	/>
+</Form>;
+```
+
+## Adornments
+
+Use `adornmentStart` and `adornmentEnd` to place non-editable content inside the input chrome.
+Adornments accept any `ReactNode`. If an adornment is interactive, you are responsible for its
+semantics.
+
+<ExampleBlock
+	component="text-field"
+	name="adornments"
+	title="Text Field — Adornments"
+	description="Start and end adornments inside the input chrome."
+/>
+
+## Size
+
+`size` controls height and typography. The HTML numeric `<input size>` attribute is intentionally
+omitted because `size` is reserved for the design-system variant.
+
+| Value      | Description           |
+| ---------- | --------------------- |
+| `'small'`  | Compact input height. |
+| `'medium'` | Default input height. |
+
+<ExampleBlock
+	component="text-field"
+	name="sizes"
+	title="Text Field — Sizes"
+	description="Small and medium input heights."
+/>
+
+## Accessibility
+
+When visual context already communicates purpose, you may omit `label` and provide an accessible
+name with `aria-label` or `aria-labelledby` on the field.
+
+```tsx
+<TextField aria-label="Search" name="search" placeholder="Search" />
+```
+
+## Primitive TextInput
+
+The lower-level `TextInput` primitive is available when you need the input without the label,
+description, or error slots that `Field` provides.
+
+```ts
+import { TextInput } from '@luke-ui/react/text-field/primitive';
+```
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/text-field/index.tsx" name="TextFieldProps" />

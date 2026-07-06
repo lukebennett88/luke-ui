@@ -23,22 +23,23 @@ kit of parts (e.g. `combobox-field/primitive`, `field/primitive`). _Examples_: `
 **Primitive**.
 
 **Component creation**: The act of adding the public surface a new Atom or Composed component needs
-to exist consistently. That includes source, stories, package docs, hosted docs, recipes when
-needed, and generated exports.
+to exist consistently. That includes source, stories, hosted docs, recipes when needed, and
+generated exports.
 
 ## Relationships
 
 - A **Composed** component is built from one or more **Atoms** or **Primitives**.
-- A **Primitive** is documented in package docs so library authors and agents can find it. It is
-  omitted from the hosted docs primary navigation and index.
+- A **Primitive** is documented in the hosted docs app so library authors and agents can find it. It
+  is omitted from the hosted docs primary navigation and index.
 - The composed `Field` is a **Primitive** by audience, even though it composes other components. It
   exists for library authors building `TextField`, `ComboboxField`, and similar components.
-- An **Atom** or **Composed** component gets a hosted docs page and a primary package-doc entry.
+- An **Atom** or **Composed** component gets a hosted docs page.
 
-## Package docs shape
+## Hosted docs shape
 
-Each `src/<component>/<component>.docs.md` follows the section order from
-[ADR-0006](docs/adr/0006-docs-md-structure-standard.md):
+Each component docs page at `apps/docs/content/docs/components/<group>/<component>.mdx` follows the
+section order from [ADR-0006](docs/adr/0006-docs-md-structure-standard.md) (now superseded by
+ADR-0007; the section ordering still applies):
 
 - Usage lead-in with no explicit `## Usage` heading.
 - `## Best Practices` table.
@@ -46,31 +47,27 @@ Each `src/<component>/<component>.docs.md` follows the section order from
 - `## Accessibility` when the component has a user-facing accessibility contract.
 - Cross-reference sections last.
 
-All prose is authored in the package (`src/<component>/<component>.docs.md`). `apps/docs` MDX files
-only wire the page together with frontmatter, an interactive demo, and an `<include>` for the
-generated package doc. Full rationale is in [ADR-0006](docs/adr/0006-docs-md-structure-standard.md).
+All prose is authored in the hosted docs app (`apps/docs/content/docs/`). The package no longer
+ships generated docs on npm. Full rationale is in
+[ADR-0007](docs/adr/0007-docs-moved-to-hosted-app.md).
 
 ## Docs rule
 
-Two doc surfaces serve two audiences:
+The **hosted docs app** (`apps/docs`) is the primary docs surface. It serves both app developers and
+library authors. The package README links to it.
 
-- **Hosted docs** (`apps/docs`): for app developers. They document components an app developer can
-  drop into a UI.
-- **Package docs** (shipped on npm under `packages/@luke-ui/react/docs/`): for anyone reading the
-  package off npm, including library authors and coding agents. They document every public export
-  path because each one is reachable through `package.json#exports`.
+| Tier      | Hosted docs?      | Notes                                            |
+| --------- | ----------------- | ------------------------------------------------ |
+| Atom      | yes (primary nav) | App-developer-facing                             |
+| Composed  | yes (primary nav) | App-developer-facing                             |
+| Primitive | yes (specialist)  | Listed in a "Library authors / advanced" section |
 
-| Tier      | Hosted docs?      | Package docs?          |
-| --------- | ----------------- | ---------------------- |
-| Atom      | yes (primary nav) | yes (primary index)    |
-| Composed  | yes (primary nav) | yes (primary index)    |
-| Primitive | no                | yes (specialist index) |
+**Specialist, not noise.** Primitive pages exist in the hosted docs so library authors and agents
+can find them. They are listed in a separate, de-emphasised "Library authors / advanced" section,
+never mixed into the primary index alongside atoms and composed components. The goal is reachability
+without crowding the main path. Do not document anything that is not part of the public API.
 
-**Specialist, not noise.** Primitive pages exist in package docs so library authors and agents can
-find them. They are listed in a separate, de-emphasised "Library authors / advanced" section in
-`README.md` and `llms.txt`, never mixed into the primary index alongside atoms and composed
-components. The goal is reachability without crowding the main path. Do not document anything that
-is not part of the public API.
+Package docs are no longer shipped on npm.
 
 ## Decisions
 
@@ -78,6 +75,8 @@ is not part of the public API.
 - [ADR-0002](docs/adr/0002-primitive-package-path-convention.md): Primitive kits are exported at
   `[composed]/primitive`
 - [ADR-0003](docs/adr/0003-package-docs-surface.md): Package docs are a separate AI-native surface
+  (superseded by ADR-0007)
 - [ADR-0004](docs/adr/0004-styling-utilities-public-api.md): Styling utilities public API
 - [ADR-0006](docs/adr/0006-docs-md-structure-standard.md): Standard structure for `.docs.md` prose
-  files
+  files (superseded by ADR-0007)
+- [ADR-0007](docs/adr/0007-docs-moved-to-hosted-app.md): Docs moved to the hosted docs app

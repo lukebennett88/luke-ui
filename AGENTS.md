@@ -10,5 +10,12 @@
 - Scaffold components non-interactively:
   `pnpm run generate:component --args <name> <atom|composed> <docs-group> <recipe|none>`.
 - When you change code, update or delete the docs that describe it in the same change — comments,
-  JSDoc, `.docs.md`, `README.md`, and `docs/*.md`. See
+  JSDoc, MDX files in `apps/docs/content/docs/`, `README.md`, and `docs/*.md`. See
   [docs/CONVENTIONS.md](docs/CONVENTIONS.md#keeping-docs-current).
+
+## Dev loop
+
+- Run `pnpm run check` from the repo root to verify changes before committing.
+- Component prose now lives in MDX files in `apps/docs/content/docs/`, not `.docs.md` files in the
+  package. Update the relevant MDX page in the same change as the component code.
+- Do not add or edit `.docs.md` files in `packages/@luke-ui/react/src/`.

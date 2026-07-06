@@ -2,19 +2,23 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
+import { AutoTypeTable } from 'fumadocs-typescript/ui';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../../.source/browser';
+import { ExampleBlock } from '../../components/example-block';
 import { PageActions } from '../../components/page-actions';
 import { baseOptions } from '../../lib/layout.shared';
-import { withBasePath } from '../../lib/markdown-url';
 import { source } from '../../lib/source';
-import { getStorybookStoryUrl } from '../../lib/storybook';
+import { getStorybookStoryUrl, withBasePath } from '../../lib/storybook';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
+
+const mdxComponents = { ...defaultMdxComponents, AutoTypeTable, TypeTable, ExampleBlock };
 
 export const Route = createFileRoute('/docs/$')({
 	component: Page,
@@ -36,9 +40,11 @@ const loader = createServerFn({
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
 
+		const markdownPath = `${page.url === '/docs' ? '/docs/index' : page.url}.md`;
+
 		return {
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
-			markdownUrl: withBasePath(`${page.url}.md`, import.meta.env.BASE_URL),
+			markdownUrl: withBasePath(markdownPath, import.meta.env.BASE_URL),
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			storybookUrl: getStorybookStoryUrl(page.path, import.meta.env.BASE_URL),
@@ -66,7 +72,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
 						markdownUrl={markdownUrl}
 						storybookUrl={storybookUrl}
 					/>
-					<MDX components={defaultMdxComponents} />
+					<MDX components={mdxComponents} />
 				</DocsBody>
 			</DocsPage>
 		);

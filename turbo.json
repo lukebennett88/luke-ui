@@ -1,18 +1,11 @@
 {
 	"$schema": "https://v2-8-10.turborepo.dev/schema.json",
 	"tasks": {
-		"@luke-ui/react#check:docs": {
-			"dependsOn": ["build"]
-		},
 		"@luke-ui/react#check:lint": {
 			"dependsOn": ["build", "generate"]
 		},
 		"@luke-ui/react#check:types": {
 			"dependsOn": ["build", "^build"]
-		},
-		"@luke-ui/react#generate:docs": {
-			"dependsOn": ["build"],
-			"outputs": ["docs/**", "dist/docs/**"]
 		},
 		"//#check:format-root": {
 			"cache": true
@@ -40,10 +33,7 @@
 			"outputs": ["storybook-static/**"]
 		},
 		"check": {
-			"dependsOn": ["check:format", "check:lint", "check:types", "check:docs"]
-		},
-		"check:docs": {
-			"dependsOn": ["^generate"]
+			"dependsOn": ["check:format", "check:lint", "check:types"]
 		},
 		"check:format": {
 			"dependsOn": ["generate"]
@@ -68,14 +58,27 @@
 			"persistent": true
 		},
 		"docs#build": {
-			"dependsOn": ["generate", "^build", "@luke-ui/react#generate:docs"],
+			"dependsOn": ["docs#generate", "^build"],
 			"env": ["VITE_BASE_URL"],
 			"outputs": [".output/**", ".source/**"]
 		},
+		"docs#check:format": {
+			"dependsOn": ["docs#generate"]
+		},
+		"docs#check:lint": {
+			"dependsOn": ["docs#generate", "^build"]
+		},
+		"docs#check:types": {
+			"dependsOn": ["docs#generate", "^build"]
+		},
 		"docs#dev": {
 			"cache": false,
-			"dependsOn": ["generate", "^build", "@luke-ui/react#generate:docs"],
+			"dependsOn": ["docs#generate", "^build"],
 			"persistent": true
+		},
+		"docs#generate": {
+			"outputs": ["src/routeTree.gen.ts"],
+			"cache": true
 		},
 		"fix": {
 			"cache": false,
@@ -97,7 +100,6 @@
 			"dependsOn": ["^generate"],
 			"inputs": [
 				"$TURBO_DEFAULT$",
-				"!docs/**",
 				"!dist/**",
 				"!.generated/**",
 				"!storybook-static/**",
@@ -105,13 +107,7 @@
 				"!**/*.test.tsx",
 				"!**/*.stories.tsx"
 			],
-			"outputs": [
-				".generated/**",
-				"dist/spritesheet.svg",
-				"dist/docs/**",
-				"src/routeTree.gen.ts",
-				"docs/**"
-			]
+			"outputs": [".generated/**", "dist/spritesheet.svg", "src/routeTree.gen.ts"]
 		},
 		"test": {
 			"dependsOn": ["^build", "generate"],

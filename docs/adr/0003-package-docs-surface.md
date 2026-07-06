@@ -1,5 +1,8 @@
 # Package docs are a separate AI-native surface
 
+> **Superseded by [ADR-0007](0007-docs-moved-to-hosted-app.md).** Package docs are no longer shipped
+> on npm. The hosted docs app is the primary docs surface.
+
 `@luke-ui/react` ships per-export documentation under `packages/@luke-ui/react/docs/`. Those docs
 are generated from JSDoc, TypeScript types, and authored prose. They are separate from the hosted
 Fumadocs site in `apps/docs`.

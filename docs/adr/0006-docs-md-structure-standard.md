@@ -1,5 +1,8 @@
 # Standard structure for `.docs.md` prose files
 
+> **Superseded by [ADR-0007](0007-docs-moved-to-hosted-app.md).** Component prose now lives in
+> `apps/docs/content/docs/**/*.mdx`. `.docs.md` files are no longer used.
+
 Every `src/<component>/<component>.docs.md` file follows the same section order. Readers can then
 predict where to find usage, props, accessibility notes, and cross-references regardless of which
 component they are reading.

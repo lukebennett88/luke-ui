@@ -3,8 +3,65 @@ title: Link
 description: Link component for inline and standalone navigation.
 ---
 
-import { story } from '../../../../src/link/link.story';
+`Link` expects the Luke UI theme class at the app or root level. See
+[Getting Started](/docs/getting-started).
 
-<story.WithControl />
+```tsx
+<Link href="/help">Help center</Link>
+```
 
-<include>../../../../../../packages/@luke-ui/react/docs/link.md</include>
+## Best practices
+
+| Guidance | Practices                                                                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Do       | Use `tone="inverted"` only on dark backgrounds. On light backgrounds, it is hard to read.                                          |
+| Do       | Use `isStandalone` for links that are not part of a sentence, such as card links and nav items. Leave it `false` for inline links. |
+
+## Tone
+
+`Link` has three tones: `brand` (default), `neutral`, and `inverted`. Use `neutral` for a more
+subtle link. Use `inverted` on dark backgrounds.
+
+<ExampleBlock
+	component="link"
+	name="tones"
+	title="Link — Tones"
+	description="Brand, neutral, and inverted tones for different backgrounds."
+/>
+
+## Standalone
+
+Use `isStandalone` when a link stands on its own. Leave it `false` for links inside paragraph text.
+
+- `isStandalone={true}`: no underline until hover.
+- `isStandalone={false}`: underlined inline link style.
+
+<ExampleBlock
+	component="link"
+	name="standalone"
+	title="Link — Standalone"
+	description="Use isStandalone for links that stand on their own, or inline links in prose."
+/>
+
+## Disabled
+
+<ExampleBlock
+	component="link"
+	name="disabled"
+	title="Link — Disabled"
+	description="A disabled link cannot be focused or activated."
+/>
+
+## Accessibility
+
+Screen readers announce a disabled link as unavailable, but not why. Put the reason in nearby
+visible text instead of relying on disabled state alone.
+
+## When to use vs Button
+
+Use `Link` to navigate to a new URL or route. Use `Button` for in-page actions, such as saving,
+submitting, or opening a dialog.
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/link/index.tsx" name="LinkProps" />
