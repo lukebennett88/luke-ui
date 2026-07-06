@@ -3,11 +3,6 @@ import { TextField } from '@luke-ui/react/text-field';
 import type { JSX } from 'react';
 import { useState } from 'react';
 
-export const meta = {
-	title: 'Loading Skeleton — Border radius',
-	description: 'Override the skeleton corner radius for wrapped controls.',
-};
-
 export default function BorderRadius(): JSX.Element {
 	const [isLoading, setIsLoading] = useState(true);
 

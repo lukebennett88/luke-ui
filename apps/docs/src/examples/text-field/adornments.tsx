@@ -2,11 +2,6 @@ import { Icon } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
 import type { JSX } from 'react';
 
-export const meta = {
-	title: 'Text Field — Adornments',
-	description: 'Start and end adornments inside the input chrome.',
-};
-
 export default function Adornments(): JSX.Element {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>

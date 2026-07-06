@@ -11,11 +11,6 @@ const countries: Array<Country> = [
 	{ id: 'us', label: 'United States' },
 ];
 
-export const meta = {
-	title: 'Combobox Field — Basic',
-	description: 'Single-select combobox with a static list of options.',
-};
-
 export default function Basic(): JSX.Element {
 	return (
 		<ComboboxField

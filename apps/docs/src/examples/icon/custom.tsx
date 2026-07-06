@@ -7,11 +7,6 @@ const HeartIcon = createIcon({
 	),
 });
 
-export const meta = {
-	title: 'Icon — Custom',
-	description: 'Create a one-off icon that is not in the generated spritesheet.',
-};
-
 export default function Custom(): JSX.Element {
 	return <HeartIcon title="Favorite" size="small" />;
 }

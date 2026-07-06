@@ -1,31 +1,24 @@
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { Suspense, use } from 'react';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { CodeIcon } from 'lucide-react';
+import { Suspense, use, useId, useState } from 'react';
 import type { ComponentType, JSX } from 'react';
 import { StoryWrapper } from '../lib/story-wrapper';
 
-type ExampleMeta = {
+type ExampleProps = {
+	component: string;
 	description: string;
+	name: string;
 	title: string;
 };
 
-type ExampleModule = {
-	default: ComponentType;
-	meta: ExampleMeta;
-};
-
-type ExampleProps = {
-	component: string;
-	name: string;
-};
-
-type ExampleTuple = [ExampleModule, string];
+type ExampleTuple = [ComponentType, string];
 
 type ExampleResult = { data: ExampleTuple; ok: true } | { error: Error; ok: false };
 
-const _modules = import.meta.glob<ExampleModule>('../examples/*/*.tsx', {
+const _modules = import.meta.glob<ComponentType>('../examples/*/*.tsx', {
 	eager: false,
-	import: '*',
+	import: 'default',
 });
 
 const _sources = import.meta.glob<string>('../examples/*/*.tsx', {
@@ -39,7 +32,7 @@ const exampleCache = new Map<string, Promise<ExampleResult>>();
 function findExample(
 	component: string,
 	name: string,
-): [() => Promise<ExampleModule>, () => Promise<string>] | null {
+): [() => Promise<ComponentType>, () => Promise<string>] | null {
 	const key = `../examples/${component}/${name}.tsx`;
 	const loadModule = _modules[key];
 	const loadSource = _sources[key];
@@ -63,9 +56,9 @@ function loadExample(component: string, name: string): Promise<ExampleResult> {
 		const [loadModule, loadSource] = match;
 		promise = Promise.all([loadModule(), loadSource()])
 			.then(
-				([loadedModule, loadedSource]): ExampleResult => ({
+				([loadedComponent, loadedSource]): ExampleResult => ({
 					ok: true,
-					data: [loadedModule, loadedSource],
+					data: [loadedComponent, loadedSource],
 				}),
 			)
 			.catch(
@@ -79,8 +72,10 @@ function loadExample(component: string, name: string): Promise<ExampleResult> {
 	return promise;
 }
 
-function ExampleContent({ component, name }: ExampleProps): JSX.Element {
+function ExampleContent({ component, name, title }: ExampleProps): JSX.Element {
 	const result = use(loadExample(component, name));
+	const [showCode, setShowCode] = useState(false);
+	const codeId = useId();
 
 	if (!result.ok) {
 		return (
@@ -90,20 +85,36 @@ function ExampleContent({ component, name }: ExampleProps): JSX.Element {
 		);
 	}
 
-	const [module, source] = result.data;
-	const PreviewComponent = module.default;
+	const [PreviewComponent, source] = result.data;
 
 	return (
-		<Tabs defaultIndex={0} items={['Preview', 'Code']} label={module.meta.title}>
-			<Tab>
-				<StoryWrapper>
-					<PreviewComponent />
-				</StoryWrapper>
-			</Tab>
-			<Tab>
-				<DynamicCodeBlock code={source} lang="tsx" />
-			</Tab>
-		</Tabs>
+		<div className="not-prose overflow-hidden rounded-lg border border-fd-border">
+			<div className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
+				<span className="text-fd-muted-foreground text-sm">{title}</span>
+				<button
+					aria-controls={codeId}
+					aria-expanded={showCode}
+					className={buttonVariants({ size: 'sm', variant: 'ghost' })}
+					onClick={() => setShowCode((previous) => !previous)}
+					type="button"
+				>
+					<CodeIcon className="size-4" />
+					{showCode ? 'Hide code' : 'Show code'}
+				</button>
+			</div>
+			<StoryWrapper>
+				<PreviewComponent />
+			</StoryWrapper>
+			{showCode ? (
+				<div id={codeId}>
+					<DynamicCodeBlock
+						code={source}
+						codeblock={{ className: 'my-0 rounded-none border-x-0 border-b-0 shadow-none' }}
+						lang="tsx"
+					/>
+				</div>
+			) : null}
+		</div>
 	);
 }
 

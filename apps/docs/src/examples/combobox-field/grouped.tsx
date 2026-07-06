@@ -2,11 +2,6 @@ import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox-field/primitive';
 import type { JSX } from 'react';
 
-export const meta = {
-	title: 'Combobox Field — Grouped options',
-	description: 'Group related options inside the listbox with ComboboxSection.',
-};
-
 export default function Grouped(): JSX.Element {
 	return (
 		<ComboboxField label="Country" name="country">

@@ -1,11 +1,6 @@
 import { TextField } from '@luke-ui/react/text-field';
 import type { JSX } from 'react';
 
-export const meta = {
-	title: 'Text Field — Sizes',
-	description: 'Small and medium input heights.',
-};
-
 export default function Sizes(): JSX.Element {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>

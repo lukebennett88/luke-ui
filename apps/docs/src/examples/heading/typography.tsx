@@ -1,11 +1,6 @@
 import { Heading } from '@luke-ui/react/heading';
 import type { JSX } from 'react';
 
-export const meta = {
-	title: 'Heading — Typography',
-	description: 'Heading color and font weight can be customized with Text props.',
-};
-
 export default function Typography(): JSX.Element {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

@@ -1,11 +1,6 @@
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { JSX } from 'react';
 
-export const meta = {
-	title: 'Icon Button — Tone',
-	description: 'Ghost and critical tones for icon-only actions.',
-};
-
 export default function Tone(): JSX.Element {
 	return (
 		<div style={{ display: 'flex', gap: '1rem' }}>

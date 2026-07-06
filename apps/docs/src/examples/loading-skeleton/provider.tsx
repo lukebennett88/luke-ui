@@ -4,11 +4,6 @@ import { Text } from '@luke-ui/react/text';
 import type { JSX } from 'react';
 import { useState } from 'react';
 
-export const meta = {
-	title: 'Loading Skeleton — Provider',
-	description: 'One loading state controls a group of skeletons.',
-};
-
 export default function ProviderSkeleton(): JSX.Element {
 	const [isLoading, setIsLoading] = useState(true);
 

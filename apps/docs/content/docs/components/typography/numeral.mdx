@@ -6,26 +6,46 @@ description: Locale-aware number formatting powered by Intl.NumberFormat.
 `Numeral` formats numbers with `Intl.NumberFormat`. It respects locale from React Aria's
 `I18nProvider`.
 
-<Example component="numeral" name="basic" />
+<Example
+	component="numeral"
+	name="basic"
+	title="Numeral — Basic"
+	description="Default locale-aware decimal formatting."
+/>
 
 ## Formats
 
 `Numeral` infers `format` from `currency` or `unit` when omitted. Pass `format` explicitly for
 `'percent'` or `'decimal'`, or when you want to be direct about currency and unit formatting.
 
-<Example component="numeral" name="formats" />
+<Example
+	component="numeral"
+	name="formats"
+	title="Numeral — Formats"
+	description="Percent, currency, unit, and decimal number formats."
+/>
 
 ## Compact notation
 
 Use `abbreviate` for compact notation.
 
-<Example component="numeral" name="compact" />
+<Example
+	component="numeral"
+	name="compact"
+	title="Numeral — Compact notation"
+	description="Short and long compact notation for large numbers."
+/>
 
 ## Precision
 
 Pass a number for fixed fraction digits, or a `[min, max]` tuple for a range.
 
-<Example component="numeral" name="precision" />
+<Example
+	component="numeral"
+	name="precision"
+	title="Numeral — Precision"
+	description="Fixed fraction digits or a minimum and maximum range."
+/>
 
 ## Constraints
 

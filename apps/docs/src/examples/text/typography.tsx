@@ -1,11 +1,6 @@
 import { Text } from '@luke-ui/react/text';
 import type { JSX } from 'react';
 
-export const meta = {
-	title: 'Text — Typography',
-	description: 'Use font size, color, font family, and weight tokens to style text.',
-};
-
 export default function Typography(): JSX.Element {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

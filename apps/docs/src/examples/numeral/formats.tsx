@@ -1,11 +1,6 @@
 import { Numeral } from '@luke-ui/react/numeral';
 import type { JSX } from 'react';
 
-export const meta = {
-	title: 'Numeral — Formats',
-	description: 'Percent, currency, unit, and decimal number formats.',
-};
-
 export default function Formats(): JSX.Element {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

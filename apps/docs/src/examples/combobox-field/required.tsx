@@ -9,11 +9,6 @@ const items = [
 	{ id: 'us', label: 'United States' },
 ];
 
-export const meta = {
-	title: 'Combobox Field — Required',
-	description: 'Required combobox with a necessity indicator.',
-};
-
 export default function Required(): JSX.Element {
 	return (
 		<ComboboxField

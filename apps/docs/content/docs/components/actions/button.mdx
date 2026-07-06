@@ -19,21 +19,27 @@ description: Action button with tone, size, icon, pending, and disabled states.
 | Do       | Set `isPending` while an action is in flight so the user can see that work is still happening.                 |
 | Don't    | Use `Button` for navigation. If the control only moves the user to another page, use `Link`.                   |
 
-## Props
-
-<auto-type-table path="packages/@luke-ui/react/src/button/index.tsx" name="ButtonProps" />
-
 ## Tone
 
 `Button` has four tones: `primary` (default), `neutral`, `critical`, and `ghost`.
 
-<Example component="button" name="tones" />
+<Example
+	component="button"
+	name="tones"
+	title="Button — Tones"
+	description="Primary, critical, ghost, and neutral tones for different emphasis levels."
+/>
 
 ## Size
 
 `Button` has two sizes: `medium` (default) and `small`.
 
-<Example component="button" name="sizes" />
+<Example
+	component="button"
+	name="sizes"
+	title="Button — Sizes"
+	description="Small and medium buttons side by side. Use small in dense UIs, medium for most cases."
+/>
 
 ## Icons
 
@@ -59,7 +65,12 @@ Disabled buttons cannot be focused or pressed.
 Set `isPending` while an action is in flight. A spinner overlays the label and the button becomes
 non-interactive.
 
-<Example component="button" name="pending" />
+<Example
+	component="button"
+	name="pending"
+	title="Button — Pending"
+	description="Show a pending state with `isPending` while an async action is in progress."
+/>
 
 ## Full width
 
@@ -89,3 +100,7 @@ import { Button } from '@luke-ui/react/button/primitive';
 
 The primitive renders a single `<button>` element with no internal wrapper. Its children are direct
 flex items, so you manage layout yourself.
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/button/index.tsx" name="ButtonProps" />

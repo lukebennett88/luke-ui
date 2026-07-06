@@ -2,11 +2,6 @@ import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import type { JSX } from 'react';
 import { useState } from 'react';
 
-export const meta = {
-	title: 'Loading Skeleton — Text',
-	description: 'Inline skeleton that mirrors the wrapped text size.',
-};
-
 export default function TextSkeleton(): JSX.Element {
 	const [isLoading, setIsLoading] = useState(true);
 

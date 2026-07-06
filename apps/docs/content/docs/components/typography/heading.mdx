@@ -26,7 +26,12 @@ can pass `level` directly.
 `Heading` reads its level from `HeadingLevels` context. Set `base` on the root context. Each nested
 `HeadingLevels` advances the next heading level.
 
-<Example component="heading" name="automatic-leveling" />
+<Example
+	component="heading"
+	name="automatic-leveling"
+	title="Heading — Automatic leveling"
+	description="Heading levels are inferred from nested HeadingLevels context."
+/>
 
 The `level` prop overrides context for one heading without changing the nesting depth for siblings
 or children.
@@ -36,7 +41,12 @@ or children.
 `Heading` accepts all `Text` props except `fontSize`, which is controlled by the heading level. By
 default it applies `fontWeight="bold"` and `lineHeight="tight"`.
 
-<Example component="heading" name="typography" />
+<Example
+	component="heading"
+	name="typography"
+	title="Heading — Typography"
+	description="Heading color and font weight can be customized with Text props."
+/>
 
 ## Props
 

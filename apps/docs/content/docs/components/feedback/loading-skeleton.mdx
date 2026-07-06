@@ -9,7 +9,12 @@ description: Loading placeholder that keeps the same footprint as the final cont
 Use it when loading content should keep the same footprint as the loaded state. Text renders as an
 inline skeleton. Elements keep their layout while the skeleton surface is painted over them.
 
-<Example component="loading-skeleton" name="text" />
+<Example
+	component="loading-skeleton"
+	name="text"
+	title="Loading Skeleton — Text"
+	description="Inline skeleton that mirrors the wrapped text size."
+/>
 
 All mounted skeletons use the same pulse timing, even when they mount at different times.
 
@@ -39,27 +44,47 @@ Wrap text directly when the copy spans more than one line. Each line gets its ow
 `LoadingSkeleton` renders a `span` by default. Use `as` when the surrounding markup needs another
 element.
 
-<Example component="loading-skeleton" name="element" />
+<Example
+	component="loading-skeleton"
+	name="element"
+	title="Loading Skeleton — Element"
+	description="Render the skeleton as a different element to match the surrounding markup."
+/>
 
 ## LoadingSkeletonProvider
 
 Use `LoadingSkeletonProvider` when one loading state controls a group of skeletons. The provider
 value overrides descendant `isLoading` props.
 
-<Example component="loading-skeleton" name="provider" />
+<Example
+	component="loading-skeleton"
+	name="provider"
+	title="Loading Skeleton — Provider"
+	description="One loading state controls a group of skeletons."
+/>
 
 ## Border radius
 
 Use `borderRadius` when the wrapped child has no radius, but the visible control inside it does.
 
-<Example component="loading-skeleton" name="border-radius" />
+<Example
+	component="loading-skeleton"
+	name="border-radius"
+	title="Loading Skeleton — Border radius"
+	description="Override the skeleton corner radius for wrapped controls."
+/>
 
 ## Custom dimensions
 
 Wrap an element with explicit dimensions when you need a placeholder for a fixed shape, such as an
 avatar.
 
-<Example component="loading-skeleton" name="custom-dimensions" />
+<Example
+	component="loading-skeleton"
+	name="custom-dimensions"
+	title="Loading Skeleton — Custom dimensions"
+	description="Wrap an element with explicit dimensions for a fixed-shape placeholder."
+/>
 
 ## Accessibility
 
