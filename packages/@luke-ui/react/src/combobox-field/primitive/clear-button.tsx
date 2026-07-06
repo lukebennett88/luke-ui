@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import { useContext } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/ComboBox';
-import { Button as RacButton, ComboBoxStateContext } from 'react-aria-components/ComboBox';
+import { ComboBoxStateContext, Button as RacButton } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon-size-context/index.js';
 import * as styles from '../../recipes/combobox.css.js';

@@ -77,8 +77,8 @@
 			"persistent": true
 		},
 		"docs#generate": {
-			"outputs": ["src/routeTree.gen.ts"],
-			"cache": true
+			"cache": true,
+			"outputs": ["src/routeTree.gen.ts"]
 		},
 		"fix": {
 			"cache": false,

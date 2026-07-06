@@ -4,8 +4,8 @@ import type {
 	TextFieldProps as RacTextFieldProps,
 } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
-import { composeField } from '../field/compose-field.js';
 import type { FieldSlotProps } from '../field/compose-field.js';
+import { composeField } from '../field/compose-field.js';
 import { Field } from '../field/primitive/index.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { TextInputSize } from './primitive/index.js';

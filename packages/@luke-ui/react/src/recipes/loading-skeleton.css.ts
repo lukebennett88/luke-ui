@@ -1,5 +1,5 @@
-import { keyframes } from '@vanilla-extract/css';
 import type { StyleRule } from '@vanilla-extract/css';
+import { keyframes } from '@vanilla-extract/css';
 import { globalStyleInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
 

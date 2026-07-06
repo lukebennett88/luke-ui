@@ -1,7 +1,7 @@
 import type { CSSProperties, JSX } from 'react';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
-import { composeField } from '../field/compose-field.js';
 import type { FieldSlotProps } from '../field/compose-field.js';
+import { composeField } from '../field/compose-field.js';
 import { Field } from '../field/primitive/index.js';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';

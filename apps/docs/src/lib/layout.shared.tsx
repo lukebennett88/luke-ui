@@ -3,15 +3,15 @@ import { getStorybookBaseUrl } from './storybook';
 
 export function baseOptions(): BaseLayoutProps {
 	return {
+		links: [
+			{
+				external: true,
+				text: 'Storybook',
+				url: `${getStorybookBaseUrl(import.meta.env.BASE_URL)}/`,
+			},
+		],
 		nav: {
 			title: 'Luke UI',
 		},
-		links: [
-			{
-				text: 'Storybook',
-				url: `${getStorybookBaseUrl(import.meta.env.BASE_URL)}/`,
-				external: true,
-			},
-		],
 	};
 }
