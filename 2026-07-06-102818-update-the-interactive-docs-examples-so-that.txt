@@ -1,0 +1,1103 @@
+╭─── Claude Code v2.1.201 ─────────────────────────────────────────────────────╮
+│                                           │ Tips for getting started         │
+│             Welcome back Luke!            │ Run /init to create a CLAUDE.md… │
+│                                           │ ──────────────────────────────── │
+│                  ▐▛███▜▌                  │ What's new                       │
+│                 ▝▜█████▛▘                 │ Claude Sonnet 5 sessions no lon… │
+│                   ▘▘ ▝▝                   │ Changed `AskUserQuestion` dialo… │
+│                                           │ Changed the "default" permissio… │
+│    Sonnet 5 · Claude Team · Thinkmill     │ /release-notes for more          │
+│   ~/…/luke-ui/docs-interactive-examples   │                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+❯ Update the interactive docs examples so that:                                 
+  - Props tables are always the last item in the list                           
+  - Instead of tabs in the examples, the code button triggers a disclosure to   
+  show the code _below_ the example.                                            
+
+⏺ I'll start by exploring the current structure of the interactive examples to
+  understand how props tables and code tabs are implemented.
+
+⏺ Explore(Explore interactive examples structure)
+  ⎿  Backgrounded agent (↓ to manage · ctrl+o to expand)
+
+⏺ I'll wait for the exploration agent to finish before making changes.
+
+⏺ Bash(true)
+  ⎿  (No output)
+
+⏺ Exploring the codebase now — I'll report back once I have a clear picture of
+  how examples and props tables are structured.
+
+⏺ Bash(sleep 1)
+  ⎿  (No output)
+
+⏺ I'm waiting for the background exploration agent to complete — I'll continue
+  as soon as it reports back.
+
+✻ Cooked for 17s
+
+⏺ Agent "Explore interactive examples structure" finished · 1m 6s
+
+  Searched for 2 patterns, read 5 files, listed 1 directory (ctrl+o to expand)
+
+⏺ Now let me check lucide-react is already a dependency and see the
+  DynamicCodeBlock usage patterns.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Good, lucide-react is available. Now let's rewrite the example-block.tsx
+  component to use a disclosure pattern instead of tabs.
+
+⏺ Update(apps/docs/src/components/example-block.tsx)
+  ⎿  Added 3 lines, removed 2 lines
+      1  import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic
+         -codeblock';
+      2 -import { Tab, Tabs } from 'fumadocs-ui/components/tabs';        
+      3 -import { Suspense, use } from 'react';                          
+      2 +import { buttonVariants } from 'fumadocs-ui/components/ui/button
+        +';                                                              
+      3 +import { CodeIcon } from 'lucide-react';                        
+      4 +import { Suspense, use, useId, useState } from 'react';         
+      5  import type { ComponentType, JSX } from 'react';
+      6  import { StoryWrapper } from '../lib/story-wrapper';
+      7  
+
+⏺ Update(apps/docs/src/components/example-block.tsx)
+  ⎿  Added 25 lines, removed 10 lines
+      82  
+      83  function ExampleContent({ component, name }: ExampleProps): JSX
+          .Element {
+      84    const result = use(loadExample(component, name));
+      85 +  const [showCode, setShowCode] = useState(false);             
+      86 +  const codeId = useId();                                      
+      87  
+      88    if (!result.ok) {
+      89      return (
+     ...
+       97    const PreviewComponent = module.default;
+       98  
+       99    return (
+       98 -    <Tabs defaultIndex={0} items={['Preview', 'Code']} label={
+          -module.meta.title}>                                           
+       99 -      <Tab>                                                   
+      100 -        <StoryWrapper>                                        
+      101 -          <PreviewComponent />                                
+      102 -        </StoryWrapper>                                       
+      103 -      </Tab>                                                  
+      104 -      <Tab>                                                   
+      105 -        <DynamicCodeBlock code={source} lang="tsx" />         
+      106 -      </Tab>                                                  
+      107 -    </Tabs>                                                   
+      100 +    <div className="not-prose overflow-hidden rounded-lg borde
+          +r border-fd-border">                                          
+      101 +      <div className="flex items-center justify-between gap-2 
+          +border-fd-border border-b bg-fd-card px-4 py-2">              
+      102 +        <span className="text-fd-muted-foreground text-sm">{mo
+          +dule.meta.title}</span>                                       
+      103 +        <button                                               
+      104 +          aria-controls={codeId}                              
+      105 +          aria-expanded={showCode}                            
+      106 +          className={buttonVariants({ size: 'sm', variant: 'gh
+          +ost' })}                                                      
+      107 +          onClick={() => setShowCode((previous) => !previous)}
+      108 +          type="button"                                       
+      109 +        >                                                     
+      110 +          <CodeIcon className="size-4" />                     
+      111 +          {showCode ? 'Hide code' : 'Show code'}              
+      112 +        </button>                                             
+      113 +      </div>                                                  
+      114 +      <StoryWrapper>                                          
+      115 +        <PreviewComponent />                                  
+      116 +      </StoryWrapper>                                         
+      117 +      {showCode ? (                                           
+      118 +        <div className="border-fd-border border-t" id={codeId}
+          +>                                                             
+      119 +          <DynamicCodeBlock code={source} lang="tsx" />       
+      120 +        </div>                                                
+      121 +      ) : null}                                               
+      122 +    </div>                                                    
+      123    );
+      124  }
+      125  
+
+⏺ Now let's handle the props table ordering. Let's check all component MDX files
+  to see where "Props" sections currently sit.
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/
+      docs/content/docs/components && for f in $(find . -name '*.mdx'); do echo
+      "=== $f ===";…)
+  ⎿  === ./forms/text-field.mdx ===
+     11:## Best practices
+     18:## Required fields
+     … +90 lines (ctrl+o to expand)
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Now I'll move the "## Props" section to the end, matching the pattern used in
+  every other component doc.
+
+⏺ Update(apps/docs/content/docs/components/actions/button.mdx)
+  ⎿  Removed 4 lines
+      19  | Do       | Set `isPending` while an action is in flight so th
+          e user can see that work is still happening.                 |
+      20  | Don't    | Use `Button` for navigation. If the control only m
+          oves the user to another page, use `Link`.                   |
+      21  
+      22 -## Props                                                       
+      23 -                                                               
+      24 -<auto-type-table path="packages/@luke-ui/react/src/button/index
+         -.tsx" name="ButtonProps" />                                    
+      25 -                                                               
+      22  ## Tone
+      23  
+      24  `Button` has four tones: `primary` (default), `neutral`, `criti
+          cal`, and `ghost`.
+⏺ Update(apps/docs/content/docs/components/actions/button.mdx)
+  ⎿  Added 4 lines
+      85  
+      86  The primitive renders a single `<button>` element with no inter
+          nal wrapper. Its children are direct
+      87  flex items, so you manage layout yourself.
+      88 +                                                               
+      89 +## Props                                                       
+      90 +                                                               
+      91 +<auto-type-table path="packages/@luke-ui/react/src/button/index
+         +.tsx" name="ButtonProps" />                                    
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/
+      docs/content && grep -rln "auto-type-table\|<TypeTable" . )
+  ⎿  ./docs/components/forms/text-field.mdx
+     ./docs/components/forms/combobox-field.mdx
+     ./docs/components/feedback/loading-skeleton.mdx
+     … +9 lines (ctrl+o to expand)
+
+⏺ All others already had Props last. Now let's verify the build/typecheck passes
+  for the changed component file.
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples &&
+      cat apps/docs/src/components/example-block.tsx)
+  ⎿  import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeb
+     lock';
+     import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+     … +131 lines (ctrl+o to expand)
+
+⏺ Now let's typecheck and lint the docs app to make sure everything compiles.
+
+⏺ Bash(cd
+      /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/docs
+      && pnpm exec tsc --noEmit -p . 2>&1 | tail -50)
+  ⎿  TypeScript: No errors found
+
+⏺ Typecheck passes. Now let's verify the change visually by running the dev
+  server and checking a component page in the browser.
+
+⏺ Bash((pnpm dev > /tmp/docs-dev.log 2>&1 &) ; sleep 5; cat /tmp/docs-dev.log)
+  ⎿  $ vp dev
+     [MDX] generated files in 6.072291999999948ms
+     10:00:20 am [vite+] (client) Re-optimizing dependencies because vite c
+     … +6 lines (ctrl+o to expand)
+
+⏺ Dev server is up. Let me use the browser automation skill to visually verify
+  the button docs page.
+
+⏺ Skill(agent-browser)
+  ⎿  Successfully loaded skill · 2 tools allowed
+
+⏺ Bash(agent-browser skills get core)
+  ⎿  ---
+     name: core
+     description: Core agent-browser usage guide. Read this before running
+     … +466 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser open http://localhost:3000/docs/components/actions/button
+      && agent-browser wait --load networkidle)
+  ⎿  [agent-browser] launched browser
+     ✓ Luke UI Docs
+       http://localhost:3000/docs/components/actions/button
+     ✓ Done
+
+⏺ Bash(agent-browser snapshot -i -c)
+  ⎿  - link "Luke UI" [ref=e31]
+     - button "Collapse Sidebar" [ref=e32]
+     - button "Search ⌘ K" [ref=e33]
+     … +211 lines (ctrl+o to expand)
+
+⏺ Both changes are confirmed working: Props is now the last section, and each
+  example shows a "Show code" disclosure button instead of tabs. Let's click one
+  to confirm the toggle works.
+
+⏺ Bash(agent-browser click @e10 && agent-browser snapshot -i -s "body" | grep
+      -A3 "Tone Copy")
+  ⎿  ✓ Done
+     - heading "Tone Copy Anchor Link" [level=2, ref=e9]
+       - link "Tone" [ref=e39]
+     … +7 lines (ctrl+o to expand)
+
+⏺ The toggle works — button expands, label changes to "Hide code", and
+  aria-expanded flips to true. Let me take a screenshot to confirm the code
+  block renders visually below the preview.
+
+⏺ Bash(agent-browser screenshot
+      /private/tmp/claude-501/-Users-luke-Code-lukebennett88-luke-ui-docs-intera
+      ctive-examples/f892a54d-2ca6-43a2-a31a-6fc664d03996/scratchpa…)
+  ⎿  ✓ Screenshot saved to /private/tmp/claude-501/-Users-luke-Code-lukeben
+     nett88-luke-ui-docs-interactive-examples/f892a54d-2ca6-43a2-a31a-6fc66
+     4d03996/scratchpad/tone-example.png
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ This looks great — the header shows the example title, "Hide code" button on
+  the right, preview above, and code disclosed below with a divider. Let's close
+  the browser and stop the dev server.
+
+⏺ Bash(agent-browser close --all; pkill -f "vp dev" 2>/dev/null; pkill -f "vite"
+      2>/dev/null; true)
+  ⎿  ✓ Closed session: default
+
+⏺ Both changes are implemented and verified in the browser:
+
+  1. Props table ordering — button.mdx had ## Props right after "Best
+  practices"; every other component doc already put it last. Moved it to the end
+  of button.mdx to match.
+  2. Disclosure instead of tabs — apps/docs/src/components/example-block.tsx no
+  longer uses fumadocs' Tabs/Tab. It now renders the preview directly with a
+  "Show code"/"Hide code" button (using the existing buttonVariants styling and
+  proper aria-expanded/aria-controls wiring) that toggles the DynamicCodeBlock
+  below the preview.
+
+  Typecheck passes and I confirmed both behaviors visually in the browser on the
+  Button docs page.
+
+✻ Baked for 3m 32s
+
+❯ Design could use some tweaking:                                               
+  [Image #2]                                                                    
+  ⎿  [Image #2]
+  ⎿  ⧉ Selected 1 lines from src/components/example-block.tsx in Visual Studio 
+     Code
+  Searched for 3 patterns, read 3 files (ctrl+o to expand)
+
+❯ Examples also show the meta from the code. Meta should be passed directly to  
+  <Example /> in MDX instead                                                    
+
+⏺ I'll address both issues: the double-border/shadow visual glitch on the code
+  block, and moving meta out of example source files into <Example /> props. Let
+  me first survey all the example files and their meta values.
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/
+      docs/src/examples && grep -rn "^export const meta" -A4 . )
+  ⎿  ./heading/automatic-leveling.tsx:5:export const meta = {
+     ./heading/automatic-leveling.tsx-6-        title: 'Heading — Automatic
+     levelin
+     g',
+     … +182 lines (ctrl+o to expand)
+
+⏺ Bash(cd
+      /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/docs
+      && grep -rn "meta.description\|meta\.title" src/ ; grep -rln "<Example "
+      content/)
+  ⎿  src/components/example-block.tsx:102:                              <span cl
+     reground text-sm">{module.meta.title}</span>
+     content/docs/components/forms/text-field.mdx
+     … +11 lines (ctrl+o to expand)
+
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/
+      docs/content/docs/components && grep -rn "<Example" . )
+  ⎿  ./forms/text-field.mdx:9:<Example component="text-field" name="basic"
+     />
+     ./forms/text-field.mdx:23:<Example component="text-field" name="requir
+     … +39 lines (ctrl+o to expand)
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/
+      docs/src/examples && find . -name '*.tsx' | wc -l; find . -name '*.tsx' |
+      sort
+      echo "--…)
+  ⎿  37
+     ./button/pending.tsx
+     ./button/sizes.tsx
+     … +37 lines (ctrl+o to expand)
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Write(/private/tmp/claude-501/-Users-luke-Code-lukebennett88-luke-ui-docs-inte
+       ractive-examples/f892a54d-2ca6-43a2-a31a-6fc664d03996/scratchpad/move-met
+       a.mjs)
+  ⎿  Wrote 64 lines (ctrl+o to expand)
+
+⏺ Bash(node /private/tmp/claude-501/-Users-luke-Code-lukebennett88-luke-ui-docs-
+      interactive-examples/f892a54d-2ca6-43a2-a31a-6fc664d03996/scratchpad/move-
+      meta.mjs)
+  ⎿  Processed 37 example files and 12 mdx files.
+     Meta entries: 37
+
+⏺ Script ran successfully. Let's verify one example file and check for
+  formatting issues, then run Prettier/Biome to normalize formatting.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Clean. Now let's check the button.mdx where the <Example> line has gotten long
+  — but that's fine, Prettier will handle formatting. Let's update
+  example-block.tsx to accept title/description as props, and also fix the
+  code-block double-border/shadow issue found earlier.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Bash(cd
+      /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/docs
+      && node -e "
+      const { cn } = require('cnfast');…)
+  ⎿  Error: Exit code 1
+     node:internal/modules/cjs/loader:1520
+       throw err;
+       ^
+
+     Error: Cannot find module 'cnfast'
+     Require stack:
+     - /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/doc
+     s/[eval]
+         at Module._resolveFilename (node:internal/modules/cjs/loader:1517:15)
+         at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)
+     … +15 lines (ctrl+o to expand)
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Bash(cd
+      /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/docs
+      && node --input-type=module -e "
+      import { cn } from 'cnfast';…)
+  ⎿  Error: Exit code 1
+     node:internal/modules/package_json_reader:301
+       throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);
+             ^
+
+     Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'cnfast' imported from 
+     /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/docs/
+     [eval1]
+         at Object.getPackageJSONURL 
+     (node:internal/modules/package_json_reader:301:9)
+         at packageResolve (node:internal/modules/esm/resolve:768:81)
+         at moduleResolve (node:internal/modules/esm/resolve:859:18)
+         at defaultResolve (node:internal/modules/esm/resolve:992:11)
+     … +10 lines (ctrl+o to expand)
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Bash(node -e "console.log(require('fs').readFileSync('/Users/luke/Code/lukeben
+      nett88/luke-ui/docs-interactive-examples/node_modules/.pnpm/cnfast@0.0.8/n
+      ode_modules/c…)  ⎿  # cnfast
+
+     [![version](https://img.shields.io/npm/v/cnfast?style=flat&colorA=0000
+     … +76 lines (ctrl+o to expand)
+
+⏺ Now let's update example-block.tsx: pull title/description from props instead
+  of the loaded module, simplify the glob typing, and fix the
+  double-border/shadow visual glitch on the code block.
+
+⏺ Update(apps/docs/src/components/example-block.tsx)
+  ⎿  Added 6 lines, removed 14 lines
+       5  import type { ComponentType, JSX } from 'react';
+       6  import { StoryWrapper } from '../lib/story-wrapper';
+       7  
+       8 -type ExampleMeta = {                                           
+       9 -  description: string;                                         
+      10 -  title: string;                                               
+      11 -};                                                             
+      12 -                                                               
+      13 -type ExampleModule = {                                         
+      14 -  default: ComponentType;                                      
+      15 -  meta: ExampleMeta;                                           
+      16 -};                                                             
+      17 -                                                               
+       8  type ExampleProps = {
+       9    component: string;
+      10 +  description: string;                                         
+      11    name: string;
+      12 +  title: string;                                               
+      13  };
+      14  
+      23 -type ExampleTuple = [ExampleModule, string];                   
+      15 +type ExampleTuple = [ComponentType, string];                   
+      16  
+      17  type ExampleResult = { data: ExampleTuple; ok: true } | { error
+          : Error; ok: false };
+      18  
+      27 -const _modules = import.meta.glob<ExampleModule>('../examples/*
+         -/*.tsx', {                                                     
+      19 +const _modules = import.meta.glob<ComponentType>('../examples/*
+         +/*.tsx', {                                                     
+      20    eager: false,
+      29 -  import: '*',                                                 
+      21 +  import: 'default',                                           
+      22  });
+      23  
+      24  const _sources = import.meta.glob<string>('../examples/*/*.tsx'
+          , {
+     ...
+      32  function findExample(
+      33    component: string,
+      34    name: string,
+      43 -): [() => Promise<ExampleModule>, () => Promise<string>] | null
+         - {                                                             
+      35 +): [() => Promise<ComponentType>, () => Promise<string>] | null
+         + {                                                             
+      36    const key = `../examples/${component}/${name}.tsx`;
+      37    const loadModule = _modules[key];
+      38    const loadSource = _sources[key];
+
+⏺ Update(apps/docs/src/components/example-block.tsx)
+  ⎿  Added 2 lines, removed 2 lines
+      56      const [loadModule, loadSource] = match;
+      57      promise = Promise.all([loadModule(), loadSource()])
+      58        .then(
+      59 -        ([loadedModule, loadedSource]): ExampleResult => ({    
+      59 +        ([loadedComponent, loadedSource]): ExampleResult => ({ 
+      60            ok: true,
+      61 -          data: [loadedModule, loadedSource],                  
+      61 +          data: [loadedComponent, loadedSource],               
+      62          }),
+      63        )
+      64        .catch(
+
+⏺ Now update ExampleContent and the Example wrapper to use title/description
+  props, and fix the code block's nested border/shadow.
+
+⏺ Update(apps/docs/src/components/example-block.tsx)
+  ⎿  Added 9 lines, removed 6 lines
+      72    return promise;
+      73  }
+      74  
+      75 -function ExampleContent({ component, name }: ExampleProps): JSX
+         -.Element {                                                     
+      75 +function ExampleContent({ component, name, title }: ExampleProp
+         +s): JSX.Element {                                              
+      76    const result = use(loadExample(component, name));
+      77    const [showCode, setShowCode] = useState(false);
+      78    const codeId = useId();
+     ...
+      85      );
+      86    }
+      87  
+      88 -  const [module, source] = result.data;                        
+      89 -  const PreviewComponent = module.default;                     
+      88 +  const [PreviewComponent, source] = result.data;              
+      89  
+      90    return (
+      91      <div className="not-prose overflow-hidden rounded-lg border
+           border-fd-border">
+      92        <div className="flex items-center justify-between gap-2 b
+          order-fd-border border-b bg-fd-card px-4 py-2">
+      94 -        <span className="text-fd-muted-foreground text-sm">{mod
+         -ule.meta.title}</span>                                         
+      93 +        <span className="text-fd-muted-foreground text-sm">{tit
+         +le}</span>                                                     
+      94          <button
+      95            aria-controls={codeId}
+      96            aria-expanded={showCode}
+     ...
+      106          <PreviewComponent />
+      107        </StoryWrapper>
+      108        {showCode ? (
+      110 -        <div className="border-fd-border border-t" id={codeId}
+          ->                                                             
+      111 -          <DynamicCodeBlock code={source} lang="tsx" />       
+      109 +        <div id={codeId}>                                     
+      110 +          <DynamicCodeBlock                                   
+      111 +            code={source}                                     
+      112 +            codeblock={{ className: 'my-0 rounded-none border-
+          +x-0 border-b-0 shadow-none' }}                                
+      113 +            lang="tsx"                                        
+      114 +          />                                                  
+      115          </div>
+      116        ) : null}
+      117      </div>
+
+⏺ Bash(cd
+      /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/docs
+      && pnpm exec tsc --noEmit -p . 2>&1 | tail -50)
+  ⎿  TypeScript: No errors found
+
+⏺ Typecheck passes. Now let's start the dev server and visually verify both the
+  new disclosure styling and that the code no longer shows the meta export.
+
+⏺ Bash((pnpm dev > /tmp/docs-dev.log 2>&1 &) ; sleep 5; cat /tmp/docs-dev.log)
+  ⎿  $ vp dev
+     [MDX] generated files in 5.061999999999898ms
+     … +4 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser open http://localhost:3000/docs/components/actions/button
+      && agent-browser wait --load networkidle)
+  ⎿  [agent-browser] launched browser
+     ✓ Luke UI Docs
+       http://localhost:3000/docs/components/actions/button
+     ✓ Done
+
+⏺ Bash(agent-browser find text "Show code" click --first 2>/dev/null;
+      agent-browser find role button click --name "Show code" 2>&1 | head -5)
+  ⎿  ✓ Done
+
+⏺ Bash(agent-browser screenshot
+      /private/tmp/claude-501/-Users-luke-Code-lukebennett88-luke-ui-docs-intera
+      ctive-examples/f892a54d-2ca6-43a2-a31a-6fc664d03996/scratchpa…)
+  ⎿  ✓ Screenshot saved to /private/tmp/claude-501/-Users-luke-Code-lukeben
+     nett88-luke-ui-docs-interactive-examples/f892a54d-2ca6-43a2-a31a-6fc66
+     4d03996/scratchpad/tone-fixed.png
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Both fixes confirmed: the code block seam is now clean (single top border, no
+  double shadow/rounding), and the code source no longer includes the export 
+  const meta boilerplate — the title "Button — Tones" now comes purely from the
+  <Example> props. Let's check the MDX source to confirm the props were injected
+  correctly.
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Now let's run the project's formatter to clean up line lengths on the long
+  <Example> tags and check the example files are properly formatted.
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples &&
+      cat package.json | grep -A3 '"format"\|"lint"')
+  ⎿  No matches found
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples &&
+      cat package.json)
+  ⎿  {
+        "name": "design-system",
+        "private": true,
+     … +40 lines (ctrl+o to expand)
+
+⏺ vp fmt is the formatter. Let's run the fix across the whole repo (it should be
+  safe/reversible and scoped to formatting only).
+
+⏺ Bash(pnpm fix:format-root 2>&1 | tail -60)
+  ⎿  $ vp fmt . --write
+     Finished in 364ms on 243 files using 15 threads.
+
+⏺ Bash(git status --short | head -60)
+  ⎿   M CONTEXT.md
+     MM apps/docs/content/docs/components/actions/button.mdx
+      M apps/docs/content/docs/components/actions/icon-button.mdx
+     … +52 lines (ctrl+o to expand)
+
+⏺ Bash(git diff CONTEXT.md turbo.json docs/CONVENTIONS.md
+      docs/adr/0007-docs-moved-to-hosted-app.md)
+  ⎿  CONTEXT.md                                | 16 ++++++++--------
+      docs/CONVENTIONS.md                       | 12 +++++++-----
+      docs/adr/0007-docs-moved-to-hosted-app.md | 10 +++++-----
+     … +95 lines (ctrl+o to expand)
+⏺ These are pre-existing formatting drift unrelated to my task. I'll revert them
+  and only keep formatting for the files I actually touched.
+
+⏺ Bash(git checkout -- CONTEXT.md docs/CONVENTIONS.md
+      docs/adr/0007-docs-moved-to-hosted-app.md turbo.json && git status --short
+      | head -60)
+  ⎿  MM apps/docs/content/docs/components/actions/button.mdx
+      M apps/docs/content/docs/components/actions/icon-button.mdx
+      M apps/docs/content/docs/components/actions/link.mdx
+     … +48 lines (ctrl+o to expand)
+
+⏺ Good, that's back to only the files I actually touched. Let's check the
+  button.mdx diff to confirm the Example lines were formatted (wrapped) nicely.
+
+⏺ Bash(git diff apps/docs/content/docs/components/actions/button.mdx)
+  ⎿  .../docs/content/docs/components/actions/button.mdx | 21 +++++++++++++
+     +++++---
+      1 file changed, 18 insertions(+), 3 deletions(-)
+     … +38 lines (ctrl+o to expand)
+
+⏺ That formatted nicely into multi-line attributes. Let's spot-check one example
+  file's diff for clean formatting after meta removal.
+
+⏺ Bash(git diff apps/docs/src/examples/loading-skeleton/provider.tsx
+      apps/docs/src/examples/combobox-field/basic.tsx)
+  ⎿  apps/docs/src/examples/combobox-field/basic.tsx      | 5 -----
+      apps/docs/src/examples/loading-skeleton/provider.tsx | 5 -----
+      2 files changed, 10 deletions(-)
+     … +27 lines (ctrl+o to expand)
+
+⏺ Clean removals. Now let's typecheck again after the formatter pass, then
+  re-verify visually.
+
+⏺ Bash(cd
+      /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/docs
+      && pnpm exec tsc --noEmit -p . 2>&1 | tail -50)
+  ⎿  TypeScript: No errors found
+
+⏺ Bash(agent-browser open http://localhost:3000/docs/components/actions/button
+      && agent-browser wait --load networkidle && agent-browser find role button
+      click --name…)
+  ⎿  ✓ Luke UI Docs
+       http://localhost:3000/docs/components/actions/button
+     ✓ Done
+     ✓ Done
+
+⏺ Bash(agent-browser screenshot
+      /private/tmp/claude-501/-Users-luke-Code-lukebennett88-luke-ui-docs-intera
+      ctive-examples/f892a54d-2ca6-43a2-a31a-6fc664d03996/scratchpa…)
+  ⎿  ✓ Screenshot saved to /private/tmp/claude-501/-Users-luke-Code-lukeben
+     nett88-luke-ui-docs-interactive-examples/f892a54d-2ca6-43a2-a31a-6fc66
+     4d03996/scratchpad/final-check.png
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Everything renders correctly after formatting — clean seam on the code block,
+  and the source no longer includes export const meta. Let's close the browser
+  and stop the dev server.
+
+⏺ Bash(agent-browser close --all; pkill -f "vp dev" 2>/dev/null; pkill -f "vite"
+      2>/dev/null; true)
+  ⎿  ✓ Closed session: default
+
+⏺ Let's do a final review of the full diff on example-block.tsx to make sure
+  everything is coherent.
+
+⏺ Bash(git diff apps/docs/src/components/example-block.tsx)
+  ⎿  Error: Exit code 128
+     fatal: ambiguous argument 'apps/docs/src/components/example-block.tsx': 
+     unknown revision or path not in the working tree.
+     Use '--' to separate paths from revisions, like this:
+     'git <command> [<revision>...] -- [<file>...]'
+
+⏺ Bash(pwd && git rev-parse --show-toplevel)
+  ⎿  /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/
+     docs
+     /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples &&
+      git diff apps/docs/src/components/example-block.tsx)
+  ⎿  apps/docs/src/components/example-block.tsx | 41 +++++++++++++---------
+     --------
+      1 file changed, 18 insertions(+), 23 deletions(-)
+     … +82 lines (ctrl+o to expand)
+
+⏺ This looks clean and correct. Both requested changes plus the follow-up tweaks
+  are now in place. Summary of everything done this session:
+
+  1. Props tables last: Moved ## Props to the end of button.mdx (every other
+  component doc already had it last).
+  2. Tabs → disclosure: example-block.tsx now renders the preview directly with
+  a "Show code"/"Hide code" button that toggles the code block below it (proper
+  aria-expanded/aria-controls wiring).
+  3. Fixed visual glitch: the code block had its own nested border/rounded
+  corners/shadow from fumadocs' CodeBlock, creating a "card-in-a-card" look —
+  overridden via the codeblock prop so it sits flush with a single top border.
+  4. Moved meta out of example source: all 37 example files no longer export
+  meta; their title/description are now passed as props directly on <Example />
+  in the MDX files, so the disclosed code no longer shows that boilerplate.
+
+  Verified via tsc --noEmit (no errors) and live in the browser (button docs
+  page: correct section order, working disclosure toggle, clean styling, and
+  clean example source).
+
+✻ Brewed for 6m 36s
+
+❯ Client side navigations are broken                                            
+
+⏺ Bash(git status --short)
+  ⎿  (No output)
+
+⏺ Bash(pwd; git status --short)  ⎿  /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples
+
+⏺ Bash(git log --oneline -5; git diff HEAD~1 --stat 2>/dev/null | tail -5; git
+      branch --show-current)
+  ⎿  355935d Update how examples are written and displayed
+     522aef6 Correct ADR claims and tidy prose from the docs migration
+     1446346 Remove redundant Example import from component MDX pages
+     … +8 lines (ctrl+o to expand)
+
+⏺ Bash(git show --stat HEAD | head -20; echo "---"; git log -1 --format="%H
+      %ci")
+  ⎿  commit 355935dca4d093b7a15b0d97efc1aad506310b28
+     Author: Luke Bennett <hello@lukebennett.com.au>
+     Date:   Mon Jul 6 10:09:33 2026 +1000
+     … +19 lines (ctrl+o to expand)
+
+⏺ Skill(systematic-debugging)
+  ⎿  Successfully loaded skill
+
+⏺ Bash(cd
+      /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/apps/docs
+      && (pnpm dev > /tmp/docs-dev2.log 2>&1 &) ; sleep 5; cat
+      /tmp/docs-dev2.log)
+  ⎿  $ vp dev
+     [MDX] generated files in 5.3777919999999995ms
+     10:14:56 am [vite+] (client) Re-optimizing dependencies because vite c
+     … +6 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser open --enable react-devtools
+      http://localhost:3000/docs/components/actions/button 2>&1; agent-browser
+      wait --load networkidle)
+  ⎿  ✓ Luke UI Docs
+       http://localhost:3000/docs/components/actions/button
+     ✓ Done
+
+⏺ Bash(agent-browser network requests 2>&1 | tail -5; echo "---console---";
+      agent-browser eval "window.__consoleErrors || 'no capture'" 2>&1)
+  ⎿  [21724.1334] GET http://localhost:3000/node_modules/.vite/deps/useObje
+     ctRef-CJLhZ40B.js?v=1312a428 (Script) 200
+     [21724.1335] GET http://localhost:3000/node_modules/.vite/deps/getNonc
+     … +31 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser --help 2>&1 | grep -i console; agent-browser console --help
+      2>&1 | head -20)
+  ⎿    console [--clear]          View console logs
+     agent-browser console - View console logs
+     … +14 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser console --clear; agent-browser find role link click --name
+      "Icon Button"; sleep 1; agent-browser get url; agent-browser console)
+  ⎿  ✓ Console log cleared
+     ✗ Element not found. Verify the selector is correct and the element ex
+     ists in the DOM.
+     http://localhost:3000/docs/components/actions/button
+
+⏺ Bash(agent-browser snapshot -i -c | head -40)
+  ⎿  - link "Luke UI" [ref=e31]
+     - button "Collapse Sidebar" [ref=e32]
+     - button "Search ⌘ K" [ref=e33]
+     … +37 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser click @e213; sleep 1; agent-browser get url; echo
+      "---console---"; agent-browser console)
+  ⎿  ✓ Done
+     http://localhost:3000/docs/components/actions/icon-button
+     ---console---
+
+⏺ Bash(agent-browser eval "window.__navTest = 'still-here'; window.__navTest" )
+  ⎿  "still-here"
+
+⏺ Bash(agent-browser find role link click --name "Link" --exact; sleep 1;
+      agent-browser get url; agent-browser eval "window.__navTest")
+  ⎿  ✗ Element not found. Verify the selector is correct and the element ex
+     ists in the DOM.
+     http://localhost:3000/docs/components/actions/icon-button
+     "still-here"
+
+⏺ Bash(agent-browser snapshot -i -c | grep -i "link \"")
+  ⎿  - link "Luke UI" [ref=e23]
+     - link "Storybook" [ref=e165]
+     - link "Design System" [ref=e166]
+     … +23 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser click @e182; sleep 1; agent-browser get url; agent-browser
+      eval "window.__navTest"; echo "---console---"; agent-browser console)
+  ⎿  ✓ Done
+     http://localhost:3000/docs/components/actions/link
+     null
+     … +23 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser eval "location.reload(); 'reloading'" ; sleep 2;
+      agent-browser get url)  ⎿  "reloading"
+     http://localhost:3000/docs/components/actions/link
+
+⏺ Bash(agent-browser console --clear; agent-browser open
+      http://localhost:3000/docs/components/actions/link; agent-browser wait
+      --load networkidle; agent-browser conso…)
+  ⎿  ✓ Console log cleared
+     ✓ Luke UI Docs
+       http://localhost:3000/docs/components/actions/link
+     … +3 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser open http://localhost:3000/docs/components/actions/button;
+      agent-browser wait --load networkidle; agent-browser console --clear;
+      agent-browser fin…)
+  ⎿  ✓ Luke UI Docs
+       http://localhost:3000/docs/components/actions/button
+     ✓ Done
+     … +3 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser snapshot -i -c | grep -E '^\- link "Link"')
+  ⎿  - link "Link" [ref=e214]
+
+⏺ Bash(agent-browser click @e214; sleep 1; agent-browser get url; agent-browser
+      console)
+  ⎿  ✓ Done
+     http://localhost:3000/docs/components/actions/link
+
+⏺ Bash(agent-browser snapshot -i -c | head -30)
+  ⎿  - link "Luke UI" [ref=e25]
+     - button "Collapse Sidebar" [ref=e26]
+     - button "Search ⌘ K" [ref=e27]
+     … +27 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser open http://localhost:3000/docs/components/actions/button;
+      agent-browser wait --load networkidle; agent-browser console --clear
+      agent-browser find…)
+  ⎿  ✓ Luke UI Docs
+       http://localhost:3000/docs/components/actions/button
+     ✓ Done
+     … +7 lines (ctrl+o to expand)
+
+⏺ Bash(agent-browser snapshot -i -c | grep -n '"Icon Button"')
+  ⎿  10:- link "Icon Button" [ref=e213]
+
+⏺ Bash(agent-browser click @e213; sleep 1; agent-browser get url)
+  ⎿  ✓ Done
+     http://localhost:3000/docs/components/actions/icon-button
+
+⏺ Bash(agent-browser console --clear; agent-browser snapshot -i -c | grep -n
+      '"Link"')
+  ⎿  ✓ Console log cleared
+     11:- link "Link" [ref=e182]
+
+⏺ Bash(agent-browser click @e182; sleep 1; agent-browser get url; agent-browser
+      console)
+  ⎿  ✓ Done
+     http://localhost:3000/docs/components/actions/link
+
+⏺ Bash(pkill -f "vp dev" 2>/dev/null; pkill -f "vite" 2>/dev/null; sleep 1
+      rm -rf /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/ap
+      ps/docs/node_modul…)
+  ⎿  $ vp dev
+     [MDX] generated files in 5.308291000000054ms
+     … +60 lines (ctrl+o to expand)
+
+⏺ This is a real bug, and it's a classic Vite dev-server dependency-optimization
+  race, not something related to the code I edited earlier. Let me confirm the
+  exact mechanism before touching anything.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/packa
+      ges/@luke-ui/react/src && grep -rohE "from
+      ['\"]react-aria-components[^'\"]*['\"]" . |…)
+  ⎿  from 'react-aria-components/Breadcrumbs'
+     from 'react-aria-components/Button'
+     from 'react-aria-components/Collection'
+     … +19 lines (ctrl+o to expand)
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/packa
+      ges/@luke-ui/react && grep -rl "createRuntimeFn" src | head; grep -rohE
+      "from ['\"]@van…)
+  ⎿  from '@vanilla-extract/recipes'
+     from '@vanilla-extract/recipes'
+     from '@vanilla-extract/recipes'
+     … +8 lines (ctrl+o to expand)
+⏺ Update(apps/docs/vite.config.ts)
+  ⎿  Added 29 lines
+       93        },
+       94      },
+       95      optimizeDeps: {
+       96 +      // @luke-ui/react is a workspace package excluded from p
+          +re-bundling so its                                            
+       97 +      // source hot-reloads directly. Its runtime npm dependen
+          +cies are listed                                               
+       98 +      // explicitly here so Vite discovers them at cold start 
+          +instead of lazily                                             
+       99 +      // when a doc page first renders a component that needs 
+          +them — a lazy                                                 
+      100 +      // discovery mid-navigation forces a dependency re-optim
+          +ize + full reload,                                            
+      101 +      // which corrupts the in-flight React render with an "In
+          +valid hook call".                                             
+      102        exclude: ['@luke-ui/react'],
+      103 +      include: [                                              
+      104 +        '@react-aria/utils',                                  
+      105 +        '@vanilla-extract/recipes',                           
+      106 +        '@vanilla-extract/recipes/createRuntimeFn',           
+      107 +        'react-aria-components/Breadcrumbs',                  
+      108 +        'react-aria-components/Button',                       
+      109 +        'react-aria-components/Collection',                   
+      110 +        'react-aria-components/ComboBox',                     
+      111 +        'react-aria-components/composeRenderProps',           
+      112 +        'react-aria-components/FieldError',                   
+      113 +        'react-aria-components/Form',                         
+      114 +        'react-aria-components/Group',                        
+      115 +        'react-aria-components/Header',                       
+      116 +        'react-aria-components/I18nProvider',                 
+      117 +        'react-aria-components/Input',                        
+      118 +        'react-aria-components/Label',                        
+      119 +        'react-aria-components/Link',                         
+      120 +        'react-aria-components/ListBox',                      
+      121 +        'react-aria-components/slots',                        
+      122 +        'react-aria-components/Text',                         
+      123 +        'react-aria-components/TextField',                    
+      124 +        'react-aria-components/useAsyncList',                 
+      125 +      ],                                                      
+      126      },
+      127      plugins: lazyPlugins(async () => [
+      128        staticFunctionBasePathPlugin(),
+
+⏺ Now let's do a clean restart and verify the fix by navigating through every
+  component page in sequence — the exact scenario that broke before.
+
+⏺ Bash(pkill -f "vp dev" 2>/dev/null; pkill -f "vite" 2>/dev/null; sleep 1
+      rm -rf /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/ap
+      ps/docs/node_modul…)
+  ⎿  $ vp dev
+     [MDX] generated files in 5.236083000000008ms
+     Failed to resolve dependency: @react-aria/utils, present in client 'op
+     … +91 lines (ctrl+o to expand)
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Bash(cd /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples &&
+      git log --oneline -- apps/docs/vite.config.ts | head -20)
+  ⎿  f6e5a2c Delete @luke-ui/docs-tools package and docs generation pipelin
+     e
+     3955766 Remove package-docs vite plugins and virtual modules
+     … +16 lines (ctrl+o to expand)
+
+⏺ Bash(git log -p --follow -- apps/docs/vite.config.ts | grep -B5 -A5
+      "exclude.*luke-ui/react" | head -60)
+  ⎿  (No output)
+
+⏺ Bash(git log -p --all -- apps/docs/vite.config.ts | grep -n "optimizeDeps" )
+  ⎿  No matches found
+
+⏺ Bash(git log --all --oneline -S"optimizeDeps" -- apps/docs/vite.config.ts)
+  ⎿  32fe2c6 Init
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+⏺ Bash(find /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples
+      -name "vitest.config.ts" -not -path "*/node_modules/*" | xargs -I{} sh -c
+      'echo "=== {} ==…)
+  ⎿  === /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/a
+     pps/docs/vitest.config.ts ===
+     import { defineConfig } from 'vite-plus';
+     … +110 lines (ctrl+o to expand)
+
+  Searched for 2 patterns (ctrl+o to expand)
+
+⏺ All three are in the shared catalog. Let's add them as direct dependencies of
+  apps/docs using the catalog: protocol, matching the existing convention.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Update(apps/docs/package.json)
+  ⎿  Added 3 lines
+      24    "dependencies": {
+      25      "@luke-ui/react": "workspace:*",
+      26      "@orama/orama": "catalog:",
+      27 +    "@react-aria/utils": "catalog:",                           
+      28      "@tanstack/react-router": "catalog:",
+      29      "@tanstack/react-start": "catalog:",
+      30      "@tanstack/start-static-server-functions": "catalog:",
+      31 +    "@vanilla-extract/recipes": "catalog:",                    
+      32      "fumadocs-core": "catalog:",
+      33      "fumadocs-mdx": "catalog:",
+      34      "fumadocs-typescript": "catalog:",
+      35      "fumadocs-ui": "catalog:",
+      36      "lucide-react": "catalog:",
+      37      "react": "catalog:",
+      38 +    "react-aria-components": "catalog:",                       
+      39      "react-dom": "catalog:",
+      40      "vite": "catalog:",
+      41      "zod": "catalog:"
+
+⏺ Now let's install to link these new dependencies.
+
+⏺ Bash(pkill -f "vp dev" 2>/dev/null; pkill -f "vite" 2>/dev/null; sleep 1
+      pnpm install 2>&1 | tail -30)
+  ⎿  Scope: all 5 workspace projects
+     ✓ Lockfile passes supply-chain policies (verified 10m ago)
+     /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/packa
+     … +12 lines (ctrl+o to expand)
+
+⏺ Bash(grep -n "docs-tools" /Users/luke/Code/lukebennett88/luke-ui/docs-interact
+      ive-examples/packages/turbo-generators/package.json
+      git log --oneline -1 -- packages/tu…)
+  ⎿  14:                "@luke-ui/docs-tools": "workspace:*"
+     d30041b Route tier and group taxonomy through package-docs catalog (#6
+     7)
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+⏺ Bash(pnpm install --filter=docs 2>&1 | tail -30)
+  ⎿  (No output)
+
+  Searched for 1 pattern, listed 1 directory (ctrl+o to expand)
+
+⏺ Bash(pnpm install --filter=docs --reporter=append-only 2>&1 | tail -50)
+  ⎿  (No output)
+
+⏺ Bash(which pnpm; type pnpm; cat ~/.claude/settings.json 2>/dev/null | grep -i
+      -A3 "pnpm\|rtk" | head -40)
+  ⎿  /Users/luke/.local/share/mise/installs/node/24/bin/pnpm
+     pnpm is /Users/luke/.local/share/mise/installs/node/24/bin/pnpm
+                 "command": "rtk hook claude"
+     … +3 lines (ctrl+o to expand)
+
+⏺ Bash(pnpm install --filter='!@luke-ui/turbo-generators' 2>&1 | tail -60)
+  ⎿  (No output)
+
+⏺ Bash(pnpm --version; echo "---"; pnpm ls --depth -1 2>&1 | head -5)
+  ⎿  11.9.0
+     ---
+     design-system /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-
+     … +8 lines (ctrl+o to expand)
+
+⏺ Bash(pnpm install --filter='!@luke-ui/turbo-generators' --no-frozen-lockfile >
+      /tmp/pnpm-install.log 2>&1; echo "EXIT:$?"; wc -l /tmp/pnpm-install.log;
+      cat /tmp/pnpm…)
+  ⎿  EXIT:1
+            9 /tmp/pnpm-install.log
+     Scope: 4 of 5 workspace projects
+     … +14 lines (ctrl+o to expand)
+
+  Searched for 2 patterns (ctrl+o to expand)
+
+⏺ Before going further, let me try a less invasive path — pnpm add scoped to
+  just the docs package — to see if it avoids the full-workspace lockfile
+  validation that's currently broken.
+
+⏺ Bash(pnpm --filter docs add react-aria-components@catalog:
+      @react-aria/utils@catalog: @vanilla-extract/recipes@catalog: 2>&1 | tail
+      -40)
+  ⎿  ✓ Lockfile passes supply-chain policies (verified 12m ago)
+     /Users/luke/Code/lukebennett88/luke-ui/docs-interactive-examples/packa
+     ges/turbo-generators:
+     … +11 lines (ctrl+o to expand)
+
+⏺ Same blocker either way. This is a genuine, pre-existing, unrelated repo issue
+  that's now blocking me. Let me flag it and check how the user wants to
+  proceed.
+  ⎿  Invalid tool parameters
+
+⏺ User answered Claude's questions:
+  ⎿  · I found the root cause of the broken client-side navigations: 
+     apps/docs/vite.config.ts excludes @luke-ui/react from Vite's dependency 
+     pre-bundling but never tells Vite about its runtime deps 
+     (react-aria-components, @react-aria/utils, @vanilla-extract/recipes). When 
+     a user's first navigation to a page hits a component using one of these for
+     the first time in a dev session, Vite discovers the missing dep 
+     mid-navigation, forces a re-optimize + full reload, and the in-flight React
+     render corrupts with an "Invalid hook call" error. The fix requires adding
+     these as direct dependencies of apps/docs (matching the existing pattern 
+     already used in packages/@luke-ui/react/vitest.config.ts) — but pnpm 
+     install is currently broken workspace-wide: 
+     packages/turbo-generators/package.json depends on "@luke-ui/docs-tools", a 
+     package that was deleted in an earlier commit (f6e5a2c) without cleaning up
+     this reference, and its config.ts still imports a now-nonexistent 
+     DOC_GROUPS export from it. This is unrelated to my task but blocks me from 
+     running pnpm install at all. How should I proceed? → Fix turbo-generators 
+     too (Recommended)
+  ⎿  Found 5 new diagnostic issues in 2 files (ctrl+o to expand)
+
+  Read 1 file, listed 1 directory (ctrl+o to expand)
+
+⏺ Update(packages/turbo-generators/config.ts)
+  ⎿  Added 2 lines, removed 1 line
+      1 -import { DOC_GROUPS } from '@luke-ui/docs-tools/package-docs-cat
+        -alog';                                                          
+      1  import type { PlopTypes } from '@turbo/gen';
+      2  import * as z from 'zod';
+      3  import { applyComponentCreationPlan } from './src/apply-componen
+         t-creation-plan.js';
+     ...
+       6  const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
+       7  const COMPONENT_TIERS = ['atom', 'composed'] as const;
+       8  const COMPONENT_STYLING = ['none', 'recipe'] as const;
+       9 +// Mirrors apps/docs/content/docs/components/*/meta.json — the 
+         +pages listed there.                                            
+      10 +const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography
+         +', 'visuals'] as const;                                        
+      11  
+      12  const componentAnswersSchema = z.object({
+      13    docsGroup: z.enum(DOC_GROUPS),  ⎿  You've hit your weekly limit · resets Jul 8 at 9pm (Australia/Sydney)
+     /usage-credits to request more usage from your admin.
+
+✻ Churned for 10m 19s

@@ -93,7 +93,36 @@ export default defineConfig(async () => {
 			},
 		},
 		optimizeDeps: {
+			// @luke-ui/react is a workspace package excluded from pre-bundling so its
+			// source hot-reloads directly. Its runtime npm dependencies are listed
+			// explicitly here so Vite discovers them at cold start instead of lazily
+			// when a doc page first renders a component that needs them — a lazy
+			// discovery mid-navigation forces a dependency re-optimize + full reload,
+			// which corrupts the in-flight React render with an "Invalid hook call".
 			exclude: ['@luke-ui/react'],
+			include: [
+				'@react-aria/utils',
+				'@vanilla-extract/recipes',
+				'@vanilla-extract/recipes/createRuntimeFn',
+				'react-aria-components/Breadcrumbs',
+				'react-aria-components/Button',
+				'react-aria-components/Collection',
+				'react-aria-components/ComboBox',
+				'react-aria-components/composeRenderProps',
+				'react-aria-components/FieldError',
+				'react-aria-components/Form',
+				'react-aria-components/Group',
+				'react-aria-components/Header',
+				'react-aria-components/I18nProvider',
+				'react-aria-components/Input',
+				'react-aria-components/Label',
+				'react-aria-components/Link',
+				'react-aria-components/ListBox',
+				'react-aria-components/slots',
+				'react-aria-components/Text',
+				'react-aria-components/TextField',
+				'react-aria-components/useAsyncList',
+			],
 		},
 		plugins: lazyPlugins(async () => [
 			staticFunctionBasePathPlugin(),
