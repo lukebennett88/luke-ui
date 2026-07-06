@@ -4,9 +4,9 @@ Component documentation has moved out of `@luke-ui/react` and into the hosted do
 `apps/docs`. The hosted docs app is now the primary docs surface. The package README links to it,
 and package docs are no longer shipped on npm.
 
-This supersedes [ADR-0003](0003-package-docs-surface.md), which established a separate
-package-docs surface, and [ADR-0006](0006-docs-md-structure-standard.md), which standardised the
-`.docs.md` prose format.
+This supersedes [ADR-0003](0003-package-docs-surface.md), which established a separate package-docs
+surface, and [ADR-0006](0006-docs-md-structure-standard.md), which standardised the `.docs.md` prose
+format.
 
 ## Decision
 
@@ -14,8 +14,8 @@ package-docs surface, and [ADR-0006](0006-docs-md-structure-standard.md), which 
 - Component MDX pages are the authoritative docs for app developers and library authors.
 - API reference tables are generated from TypeScript types with `fumadocs-typescript`'s
   `remarkAutoTypeTable` plugin.
-- Interactive examples live in `apps/docs/src/examples/<component>/` and render through the `<Example>`
-  component.
+- Interactive examples live in `apps/docs/src/examples/<component>/` and render through the
+  `<Example>` component.
 - `llms.txt`, `llms-full.txt`, and `.md` per-page routes are provided by Fumadocs built-ins.
 - The `@luke-ui/react` package README links to the hosted docs.
 - The package no longer ships generated docs under `packages/@luke-ui/react/docs/` or includes them

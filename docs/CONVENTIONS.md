@@ -61,8 +61,10 @@ in paths the package build already discovers.
 
 ## Docs
 
-Component docs pages follow the structure in [ADR-0006](../docs/adr/0006-docs-md-structure-standard.md). ADR-0007 supersedes that ADR, but the section ordering still applies. Humans
-and coding agents both read these docs, so optimise for clarity, not only brevity.
+Component docs pages follow the structure in
+[ADR-0006](../docs/adr/0006-docs-md-structure-standard.md). ADR-0007 supersedes that ADR, but the
+section ordering still applies. Humans and coding agents both read these docs, so optimise for
+clarity, not only brevity.
 
 Headings use sentence case: capitalise only the first word and proper nouns.
 
@@ -76,9 +78,9 @@ the content belongs in the ADR instead.
 
 Docs must stay factually accurate: no doc should state something false about the code — a path,
 command, script, export, type, code snippet, or cross-reference that has since changed or been
-removed. This covers everything a human writes (comments, JSDoc, MDX prose in `apps/docs/content/docs/`,
-`README.md`, `docs/*.md`), not generated output; when generated docs are wrong, fix the authored
-source, not the generated file.
+removed. This covers everything a human writes (comments, JSDoc, MDX prose in
+`apps/docs/content/docs/`, `README.md`, `docs/*.md`), not generated output; when generated docs are
+wrong, fix the authored source, not the generated file.
 
 - Update or delete the docs that describe code in the same change as the code. Most rot is a doc
   that outlived the change that should have touched it.

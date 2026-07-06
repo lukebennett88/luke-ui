@@ -29,8 +29,8 @@ generated exports.
 ## Relationships
 
 - A **Composed** component is built from one or more **Atoms** or **Primitives**.
-- A **Primitive** is documented in the hosted docs app so library authors and agents can find it.
-  It is omitted from the hosted docs primary navigation and index.
+- A **Primitive** is documented in the hosted docs app so library authors and agents can find it. It
+  is omitted from the hosted docs primary navigation and index.
 - The composed `Field` is a **Primitive** by audience, even though it composes other components. It
   exists for library authors building `TextField`, `ComboboxField`, and similar components.
 - An **Atom** or **Composed** component gets a hosted docs page.
@@ -48,12 +48,13 @@ ADR-0007; the section ordering still applies):
 - Cross-reference sections last.
 
 All prose is authored in the hosted docs app (`apps/docs/content/docs/`). The package no longer
-ships generated docs on npm. Full rationale is in [ADR-0007](docs/adr/0007-docs-moved-to-hosted-app.md).
+ships generated docs on npm. Full rationale is in
+[ADR-0007](docs/adr/0007-docs-moved-to-hosted-app.md).
 
 ## Docs rule
 
-The **hosted docs app** (`apps/docs`) is the primary docs surface. It serves both app developers
-and library authors. The package README links to it.
+The **hosted docs app** (`apps/docs`) is the primary docs surface. It serves both app developers and
+library authors. The package README links to it.
 
 | Tier      | Hosted docs?      | Notes                                            |
 | --------- | ----------------- | ------------------------------------------------ |
@@ -63,9 +64,8 @@ and library authors. The package README links to it.
 
 **Specialist, not noise.** Primitive pages exist in the hosted docs so library authors and agents
 can find them. They are listed in a separate, de-emphasised "Library authors / advanced" section,
-never mixed into the primary index alongside atoms and composed components. The goal is
-reachability without crowding the main path. Do not document anything that is not part of the
-public API.
+never mixed into the primary index alongside atoms and composed components. The goal is reachability
+without crowding the main path. Do not document anything that is not part of the public API.
 
 Package docs are no longer shipped on npm.
 

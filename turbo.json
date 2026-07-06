@@ -94,11 +94,7 @@
 				"!**/*.test.tsx",
 				"!**/*.stories.tsx"
 			],
-			"outputs": [
-				".generated/**",
-				"dist/spritesheet.svg",
-				"src/routeTree.gen.ts"
-			]
+			"outputs": [".generated/**", "dist/spritesheet.svg", "src/routeTree.gen.ts"]
 		},
 		"test": {
 			"dependsOn": ["^build", "generate"],
