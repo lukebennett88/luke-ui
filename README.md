@@ -1,133 +1,48 @@
-# Luke UI 5
+# Luke UI
 
-React design system using `vanilla-extract`.
+React design system built with `react-aria-components` and `vanilla-extract`.
 
 ## Setup
 
-- `pnpm install`
-- `pnpm dev` - Start dev
-- `pnpm build` - Build all
-- `pnpm check` - Lint, format, types
-- `pnpm test` - Run all tests (unit, Storybook, visual regression)
+```sh
+pnpm install
+pnpm dev
+```
+
+Useful repo commands:
+
+- `pnpm run check`: lint, format, and typecheck.
+- `pnpm run build`: build all packages and apps.
+- `pnpm run test`: run unit, Storybook, and visual regression tests.
 
 ## Stack
 
-- **Monorepo**: pnpm + Turbo
-- **React**: `react-aria-components` base
-- **Styling**: `vanilla-extract` (static CSS)
-- **Lint/Format**: `oxlint` + `oxfmt`
+- Monorepo: pnpm and Turbo.
+- React: `react-aria-components`.
+- Styling: `vanilla-extract` static CSS.
+- Lint and format: `oxlint` and `oxfmt`.
 
-## UI Package (`@luke-ui/react`)
+## Package
 
-- Tokens: `src/tokens.ts`
-- Theme: `src/theme/`
-- Styles: `src/styles/`
-- Build: `tsdown` -> `dist/stylesheet.css`
+`@luke-ui/react` contains the public React package.
+
+- Tokens: `packages/@luke-ui/react/src/tokens.ts`.
+- Theme: `packages/@luke-ui/react/src/theme/`.
+- Styles: `packages/@luke-ui/react/src/styles/`.
+- Build output: `packages/@luke-ui/react/dist/stylesheet.css`.
+
+## Docs
+
+- [Conventions](docs/CONVENTIONS.md): repo-wide coding conventions.
+- [Components](docs/COMPONENTS.md): component tiers, package paths, and generator rules.
+- [Documentation](docs/DOCUMENTATION.md): hosted docs ownership, MDX structure, examples, and API
+  reference.
+- [Styling](docs/STYLING.md): cascade layers, recipes, and styling utilities.
+- [Testing](docs/TESTING.md): test type, placement, and writing rules.
+- [Visual testing](docs/VISUAL_TESTING.md): visual regression workflow.
 
 ## Contributing
 
-- Use `pnpm changeset` for versions.
-- Run `pnpm check` before committing.
+Run `pnpm run check` before committing.
 
-## CI Setup
-
-- Test command: `pnpm test`
-- Visual regression testing: `docs/VISUAL_TESTING.md`
-
-## TODO
-
-- Revise tokens
-- Review visual styles (move away from being an EDS clone)
-- Make docs more visual
-- Review how we do stories
-  - Kitchen sink stories for broader test coverage
-  - Include more component states in stories (focus, open menus etc)
-  - Other examples are for consumers and quick reference
-
-Components to build:
-
-### Core
-
-- [ ] LinkContextProvider
-- [ ] ThemeContext
-- [ ] ThemeProvider
-
-### Accessibility
-
-- [ ] LiveRegion
-- [ ] SkipTo
-- [ ] VisuallyHidden
-
-### Media and visuals
-
-- [ ] Avatar
-- [x] Icon
-- [ ] Illustration
-
-### Typography and content
-
-- [x] Emoji
-- [x] Heading
-- [x] Numeral
-- [x] Text
-
-### Feedback and status indicators
-
-- [ ] Badge
-- [ ] EmptyState
-- [x] LoadingSkeleton
-- [ ] Notice
-- [ ] ShowMore
-- [ ] Toast
-- [x] LoadingSpinner
-
-### Layout and structure
-
-- [ ] Breadcrumbs
-- [ ] Card
-- [ ] Divider
-- [ ] PageHeader
-- [ ] Pagination
-- [ ] ScrollWrap
-- [ ] Table
-- [ ] Tabs
-- [ ] Tag
-- [x] Link
-
-### Actions
-
-- [ ] ActionGroup
-- [ ] ActionsDropdown
-- [ ] BulkActionBar
-- [x] Button
-- [x] IconButton
-
-### Forms
-
-- [ ] AddressInput
-- [ ] AllFiltersButton
-- [ ] Checkbox
-- [ ] DateDropdown
-- [ ] DateInput
-- [ ] Field
-- [ ] Fieldset
-- [ ] FileInput
-- [ ] FilterBar
-- [ ] PhoneInput
-- [ ] Radio
-- [ ] RichTextEditor
-- [ ] SearchInput
-- [ ] SelectDropdown
-- [ ] SelectInput
-- [ ] TextAreaInput
-- [ ] TextInput
-- [ ] Toggle
-
-### Overlays
-
-- [ ] Accordion
-- [ ] Blanket
-- [ ] Menu
-- [ ] Modal
-- [ ] Popover
-- [ ] Tooltip
+Use `pnpm changeset` when a change needs a package version entry.

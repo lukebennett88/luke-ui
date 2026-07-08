@@ -1,0 +1,35 @@
+---
+title: TextInput primitive
+description: Lower-level text input primitive with optional adornments.
+---
+
+Use `TextInput` when you need the styled input control without the label, description, and error
+slots from [`TextField`](/docs/components/forms/text-field).
+
+```tsx
+import { TextInput } from '@luke-ui/react/text-field/primitive';
+
+<TextInput aria-label="Search" placeholder="Search" />;
+```
+
+## Adornments
+
+Use `adornmentStart` and `adornmentEnd` for non-editable content inside the input chrome.
+
+```tsx
+<TextInput aria-label="Amount" adornmentStart="$" inputMode="decimal" />
+```
+
+Adornments accept any `ReactNode`. If an adornment is interactive, you are responsible for its
+semantics and focus behaviour.
+
+## Styling hooks
+
+Pass `className` to style the outer group wrapper. Pass `inputClassName` to style the input element.
+
+## Props
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/text-field/primitive/index.tsx"
+	name="TextInputProps"
+/>

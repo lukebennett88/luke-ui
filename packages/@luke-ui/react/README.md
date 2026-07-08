@@ -28,20 +28,19 @@ Full component documentation, interactive examples, and API reference are at
 
 AI agents can fetch documentation at:
 
-- [llms.txt](https://lukebennett88.github.io/luke-ui/llms.txt) — component index
-- [llms-full.txt](https://lukebennett88.github.io/luke-ui/llms-full.txt) — full docs
-- Append `.md` to any docs URL for per-page markdown
+- [llms.txt](https://lukebennett88.github.io/luke-ui/llms.txt): component index.
+- [llms-full.txt](https://lukebennett88.github.io/luke-ui/llms-full.txt): full docs.
+- Any docs URL with `.md` appended: per-page Markdown.
 
-Components follow the
-[three-tier taxonomy](https://github.com/lukebennett88/luke-ui/blob/main/docs/adr/0001-component-tier-taxonomy.md):
+Components follow three tiers:
 
-- **Atoms**: single units such as `Text`, `Icon`, and `Heading`
-- **Composed**: opinionated combinations such as `Button` and `TextField`
-- **Primitives**: building blocks for library authors, such as `button/primitive` and
-  `field/primitive`
+- Atoms: single units such as `Text`, `Icon`, and `Heading`.
+- Composed components: opinionated combinations such as `Button` and `TextField`.
+- Primitives: lower-level public APIs for library authors, such as `button/primitive` and
+  `field/primitive`.
 
-Atoms and composed components are app-developer-facing. Primitives are documented under `docs/` for
-library authors, but excluded from the primary index.
+Atoms and composed components are app-developer-facing. Primitives are documented in hosted docs for
+library authors, separate from the primary component path.
 
 ## License
 

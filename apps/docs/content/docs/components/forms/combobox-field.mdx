@@ -113,32 +113,10 @@ over the load-more row.
 </ComboboxField>
 ```
 
-## Primitive kit
+## Primitive
 
-The individual `Combobox*` building blocks are available for library authors who need a custom
-combobox layout.
-
-```ts
-import {
-	ComboboxInput,
-	ComboboxControl,
-	ComboboxTextInput,
-	ComboboxClearButton,
-	ComboboxTrigger,
-	ComboboxPopover,
-	ComboboxListBox,
-	ComboboxItem,
-	ComboboxSection,
-} from '@luke-ui/react/combobox-field/primitive';
-```
-
-### Size propagation
-
-When you set `size` on `ComboboxInput`, it is inherited by `ComboboxControl`, `ComboboxTextInput`,
-`ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`, and `ComboboxLoadMoreItem`.
-
-You can override the inherited size on an individual child by passing that child an explicit `size`
-prop.
+Use the [combobox primitives](/docs/components/primitives/combobox) when you need a custom combobox
+layout.
 
 ## Props
 

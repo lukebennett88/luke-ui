@@ -1,0 +1,62 @@
+---
+title: Field primitive
+description: Shared field anatomy for labels, descriptions, and validation messages.
+---
+
+Use field primitives when you are building a composed field component that needs Luke UI label,
+description, and error styling.
+
+```tsx
+import { Field, FieldLabel, FieldDescription, FieldError } from '@luke-ui/react/field/primitive';
+```
+
+## Anatomy
+
+`Field` composes the common field structure: label, control slot, description, and validation
+message.
+
+Use `FieldLabel`, `FieldDescription`, and `FieldError` directly when a composed component needs a
+custom layout.
+
+```tsx
+<Field label="Email" description="Use your work email.">
+	<input />
+</Field>
+```
+
+## Necessity indicators
+
+`FieldLabel` accepts `necessityIndicator`. Use it to choose how required fields are shown.
+
+```tsx
+<Field label="Email" necessityIndicator="label">
+	<input required />
+</Field>
+```
+
+## Props
+
+### Field
+
+<auto-type-table path="packages/@luke-ui/react/src/field/primitive/index.tsx" name="FieldProps" />
+
+### FieldLabel
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/field/primitive/label.tsx"
+	name="FieldLabelProps"
+/>
+
+### FieldDescription
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/field/primitive/description.tsx"
+	name="FieldDescriptionProps"
+/>
+
+### FieldError
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/field/primitive/error.tsx"
+	name="FieldErrorProps"
+/>

@@ -1,0 +1,128 @@
+---
+title: Combobox primitives
+description: Lower-level combobox parts for custom single-select combobox layouts.
+---
+
+Use combobox primitives when [`ComboboxField`](/docs/components/forms/combobox-field) is too
+opinionated and you need to arrange the control, popover, listbox, items, or loading row yourself.
+
+```tsx
+import {
+	ComboboxInput,
+	ComboboxControl,
+	ComboboxTextInput,
+	ComboboxTrigger,
+	ComboboxPopover,
+	ComboboxListBox,
+	ComboboxItem,
+} from '@luke-ui/react/combobox-field/primitive';
+```
+
+## Anatomy
+
+`ComboboxInput` owns the React Aria `ComboBox` state. Render the control, popover, listbox, and
+items inside it.
+
+```tsx
+<ComboboxInput defaultItems={countries} aria-label="Country">
+	<ComboboxControl>
+		<ComboboxTextInput />
+		<ComboboxTrigger />
+	</ComboboxControl>
+	<ComboboxPopover>
+		<ComboboxListBox>{(item) => <ComboboxItem>{item.label}</ComboboxItem>}</ComboboxListBox>
+	</ComboboxPopover>
+</ComboboxInput>
+```
+
+## Size propagation
+
+Set `size` on `ComboboxInput` to pass it to child primitives. You can override inherited size on an
+individual child by passing that child its own `size` prop.
+
+The inherited size applies to `ComboboxControl`, `ComboboxTextInput`, `ComboboxClearButton`,
+`ComboboxTrigger`, `ComboboxItem`, and `ComboboxLoadMoreItem`.
+
+## Loading and empty states
+
+Use `ComboboxLoadMoreItem` for infinite loading sentinels and `ComboboxEmptyState` for empty
+results.
+
+## Props
+
+### ComboboxInput
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/root.tsx"
+	name="ComboboxInputProps"
+/>
+
+### ComboboxControl
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/control.tsx"
+	name="ComboboxControlProps"
+/>
+
+### ComboboxTextInput
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/input.tsx"
+	name="ComboboxTextInputProps"
+/>
+
+### ComboboxClearButton
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/clear-button.tsx"
+	name="ComboboxClearButtonProps"
+/>
+
+### ComboboxTrigger
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/trigger.tsx"
+	name="ComboboxTriggerProps"
+/>
+
+### ComboboxPopover
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/popover.tsx"
+	name="ComboboxPopoverProps"
+/>
+
+### ComboboxListBox
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/listbox.tsx"
+	name="ComboboxListBoxProps"
+/>
+
+### ComboboxItem
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/item.tsx"
+	name="ComboboxItemProps"
+/>
+
+### ComboboxLoadMoreItem
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/item.tsx"
+	name="ComboboxLoadMoreItemProps"
+/>
+
+### ComboboxSection
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/section.tsx"
+	name="ComboboxSectionProps"
+/>
+
+### ComboboxEmptyState
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/combobox-field/primitive/empty-state.tsx"
+	name="ComboboxEmptyStateProps"
+/>

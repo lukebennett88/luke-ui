@@ -2,44 +2,44 @@
 
 ## Setup
 
-Luke UI ships a static CSS foundation. Consumers import `@luke-ui/react/stylesheet.css` and apply
-`themeRootClassName` from `@luke-ui/react/theme` to the host element.
+Luke UI ships static CSS. Consumers import `@luke-ui/react/stylesheet.css` and apply
+`themeRootClassName` from `@luke-ui/react/theme` near the app root.
 
 ## Structure
 
-- `tokens.ts`: token source of truth.
+- `tokens.ts`: design token source.
 - `styles/vars.css.ts`: theme variables.
 - `styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
-- `recipes/`: component recipes exported through `@luke-ui/react/recipes`.
+- `recipes/`: component recipes exported from `@luke-ui/react/recipes`.
+- `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 
-## CSS cascade layers
+## Cascade layers
 
-All styles live in
-[cascade layers](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Cascade_layers)
-so override order does not depend on source order or specificity.
+All styles live in CSS cascade layers so override order does not depend on source order or
+specificity.
 
-| Layer       | Purpose                                            |
-| ----------- | -------------------------------------------------- |
-| `reset`     | Browser defaults such as box sizing and margins    |
-| `theme`     | Design token custom properties and base typography |
-| `recipes`   | Component styles, variants, and compound variants  |
-| `utilities` | One-off overrides and layout escape hatches        |
+| Layer       | Purpose                                             |
+| ----------- | --------------------------------------------------- |
+| `reset`     | Browser defaults, box sizing, and margins.          |
+| `theme`     | Design token custom properties and base typography. |
+| `recipes`   | Component styles, variants, and compound variants.  |
+| `utilities` | One-off layout and override escape hatches.         |
 
 Use `styleInLayer`, `recipeInLayer`, and `globalStyleInLayer` from `styles/layered-style.css.ts`.
 These helpers keep styles inside a named layer.
 
-Overrides that must beat component recipes belong in the `utilities` layer, not in `!important`.
+Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
+when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
 
-The exception is styles that must also beat consumers' un-layered or inline styles. Layers cannot
-beat those. `LoadingSkeleton` uses `!important` inside the `utilities` layer for this reason: it
-must force placeholder styles onto arbitrary wrapped children.
+`LoadingSkeleton` uses `!important` inside the `utilities` layer because it must force placeholder
+styles onto arbitrary wrapped children.
 
-Reduced motion needs recipe-level handling. The global `prefers-reduced-motion` rule lives in the
-`reset` layer, so it cannot disable animations declared in `recipes` or `utilities`. Animated
+Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
+in the `reset` layer, so it cannot disable animations declared in `recipes` or `utilities`. Animated
 recipes should add their own `@media (prefers-reduced-motion: reduce)` override. See
-`recipes/loading-skeleton.css.ts`.
+`recipes/loading-skeleton.css.ts` for an example.
 
-## Recipes API
+## Recipes
 
 Recipes are public and can be imported from `@luke-ui/react/recipes`.
 
@@ -47,16 +47,27 @@ Recipes are public and can be imported from `@luke-ui/react/recipes`.
 import { button, link } from '@luke-ui/react/recipes';
 ```
 
+Recipes are component-specific. Keep them separate from general layout utilities.
+
 ## Styling utilities
 
-Styling utilities are public API, exported from `@luke-ui/react/styles`. They provide token-aware,
+Styling utilities are public and exported from `@luke-ui/react/styles`. They provide token-aware,
 type-safe layout helpers for cases where component props are too narrow.
 
-The current implementation vendors `rainbow-sprinkles` in `@luke-ui/rainbow-sprinkles`. It places
-generated classes in the `utilities` layer and supports responsive values plus `hover` and
-`focus-visible` conditions.
+Luke UI uses Rainbow Sprinkles for this API. Rainbow Sprinkles emits dynamic CSS custom properties
+at runtime instead of generating a static class for every token and value pair. That keeps the CSS
+bundle smaller as the token scale grows.
 
-### `createSprinkles()` layout utility
+The tradeoff is that some values are applied through inline `style`, which raises specificity. That
+is acceptable because styling utilities are already the highest-priority escape hatch.
+
+Do not add a polymorphic `Box` component. React Aria Components' `render` prop covers the same need
+without adding another component API.
+
+Do not add style props to every component. Component props should stay focused on component-specific
+variants and behaviour.
+
+## `createSprinkles()`
 
 `createSprinkles(props)` returns `{ className, style }`. Spread both onto the element.
 
@@ -78,9 +89,9 @@ return (
 
 Token-backed properties use the design-token scale, for example `padding: 'large'`. Enum-like
 properties use CSS-native values, for example `display: 'flex'`. Numeric flex properties use string
-primitives, for example `flexGrow: '1'`.
+values, for example `flexGrow: '1'`.
 
-### Responsive values
+## Responsive values
 
 Use object notation keyed by breakpoint names. Values cascade from smaller to larger breakpoints, so
 only overrides need to be specified.
@@ -93,7 +104,7 @@ const responsive = createSprinkles({
 });
 ```
 
-### Pseudo-state conditions
+## Pseudo-state conditions
 
 Use condition objects for `hover` and `focus-visible` states.
 
@@ -108,7 +119,7 @@ const interactive = createSprinkles({
 });
 ```
 
-### React Aria Components `render` prop
+## React Aria `render` prop
 
 When you need to style the underlying DOM element directly, combine `createSprinkles` with React
 Aria Components' `render` prop. Use `mergeProps` from `@luke-ui/react/utils` so `className` and
@@ -130,33 +141,29 @@ const buttonBox = createSprinkles({ padding: 'medium' });
 </Button>;
 ```
 
-### Available properties
+## Utility surface
 
 The v1 surface covers:
 
-- **Layout**: `display`, `flexDirection`, `justifyContent`, `alignItems`
-- **Flex item**: `flexGrow`, `flexShrink`, `flexBasis`
-- **Sizing**: `inlineSize`, `blockSize`, `minInlineSize`, `minBlockSize`, `maxInlineSize`,
-  `maxBlockSize`
-- **Gaps**: `gap`, `rowGap`, `columnGap`
-- **Padding**: `padding`, `paddingInline`, `paddingBlock`, `paddingInlineStart`, `paddingInlineEnd`,
-  `paddingBlockStart`, `paddingBlockEnd`
-- **Overflow**: `overflow`, `overflowX`, `overflowY`, `textOverflow`
-- **Pseudo-state**: `backgroundColor` with `hover` and `focus-visible`
+- Layout: `display`, `flexDirection`, `justifyContent`, `alignItems`.
+- Flex item: `flexGrow`, `flexShrink`, `flexBasis`.
+- Sizing: `inlineSize`, `blockSize`, `minInlineSize`, `minBlockSize`, `maxInlineSize`,
+  `maxBlockSize`.
+- Gaps: `gap`, `rowGap`, `columnGap`.
+- Padding: `padding`, `paddingInline`, `paddingBlock`, `paddingInlineStart`, `paddingInlineEnd`,
+  `paddingBlockStart`, `paddingBlockEnd`.
+- Overflow: `overflow`, `overflowX`, `overflowY`, `textOverflow`.
+- Pseudo-state colour: `backgroundColor` with `hover` and `focus-visible`.
 
-Margin utilities are excluded from the initial surface.
+Margin utilities are not part of the initial surface.
 
-Use CSS-native values throughout, for example `flex-start` instead of `start`. Keep
-`@luke-ui/react/styles` separate from `@luke-ui/react/recipes`. Recipes are component-specific
-styles. Styles are general layout utilities.
+Use CSS-native values throughout, for example `flex-start` instead of `start`.
 
-## Implementation
+Styling utilities do not yet read runtime theme context.
 
-- Use CSS logical properties such as `margin-inline-start`, `block-size`, and `inset-inline`. Do not
-  use physical properties such as `margin-left`, `height`, `left`, or `right`.
+## Implementation rules
+
+- Use CSS logical properties such as `margin-inline-start`, `block-size`, and `inset-inline`.
+- Do not use physical properties such as `margin-left`, `height`, `left`, or `right`.
 - Align variant names with public props, such as `size` and `tone`.
 - Boolean props use `is*` or `should*`.
-
-## Limitations
-
-Styling utilities do not yet have runtime theme context.

@@ -1,0 +1,32 @@
+---
+title: Button primitive
+description: Lower-level button primitive for custom button composition.
+---
+
+Use the button primitive when you need Luke UI button styling without the composed `Button` children
+wrapper, icon props, or pending-label behaviour.
+
+```tsx
+import { Button } from '@luke-ui/react/button/primitive';
+
+<Button tone="primary">Save</Button>;
+```
+
+## When to use
+
+Use `@luke-ui/react/button/primitive` when you need full control over children layout, render-prop
+children, custom loading states, or non-standard button content.
+
+Use [`Button`](/docs/components/actions/button) for most app actions.
+
+## Behaviour
+
+The primitive renders a single `<button>` element by default. It applies Luke UI size, tone, and
+block styles, then renders children directly.
+
+`isPending` disables the button, but it does not add a spinner or hide the label. Build that UI in
+children when you use the primitive.
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/button/primitive/index.tsx" name="ButtonProps" />
