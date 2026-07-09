@@ -5,6 +5,9 @@ export default {
 	workspaces: {
 		'apps/docs': {
 			entry: [
+				'scripts/**/*.ts',
+				// Compiled to an inline-able IIFE by the `pack` config in vite.config.ts.
+				'src/components/playground/editor-skeleton-script.ts',
 				'source.config.ts',
 				'src/router.tsx',
 				'src/routes/**/*.ts',

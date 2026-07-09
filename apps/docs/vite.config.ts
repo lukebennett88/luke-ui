@@ -92,6 +92,21 @@ export default defineConfig(async () => {
 				},
 			},
 		},
+		// `vp pack` compiles the pre-hydration skeleton script to an inline-able
+		// IIFE artifact; it runs as part of `docs#generate`, not `vp build`.
+		pack: {
+			clean: false,
+			dts: false,
+			// Emitted as src/generated/editor-skeleton-script.iife.js — the `.iife`
+			// suffix is fixed by tsdown for this format.
+			entry: ['src/components/playground/editor-skeleton-script.ts'],
+			format: 'iife' as const,
+			// The artifact is inlined into every playground HTML response, so
+			// strip the source's documentation comments.
+			minify: true,
+			outDir: 'src/generated',
+			platform: 'browser' as const,
+		},
 		optimizeDeps: {
 			// @luke-ui/react is a workspace package excluded from pre-bundling so its
 			// source hot-reloads directly. Its runtime npm dependencies are listed
@@ -101,9 +116,12 @@ export default defineConfig(async () => {
 			// which corrupts the in-flight React render with an "Invalid hook call".
 			exclude: ['@luke-ui/react'],
 			include: [
+				'@monaco-editor/react',
 				'@react-aria/utils',
 				'@vanilla-extract/recipes',
 				'@vanilla-extract/recipes/createRuntimeFn',
+				'lz-string',
+				'monaco-editor',
 				'react-aria-components/Breadcrumbs',
 				'react-aria-components/Button',
 				'react-aria-components/Collection',
@@ -122,6 +140,7 @@ export default defineConfig(async () => {
 				'react-aria-components/Text',
 				'react-aria-components/TextField',
 				'react-aria-components/useAsyncList',
+				'sucrase',
 			],
 		},
 		plugins: lazyPlugins(async () => [
@@ -133,6 +152,9 @@ export default defineConfig(async () => {
 					{ path: '/api/search' },
 					{ path: '/llms.txt' },
 					{ path: '/llms-full.txt' },
+					// The preview page is loaded via an iframe src, which the link
+					// crawler does not follow, so it must be prerendered explicitly.
+					{ path: '/playground/preview' },
 					...markdownPrerenderPages,
 				],
 				prerender: {

@@ -5,6 +5,10 @@ export function baseOptions(): BaseLayoutProps {
 	return {
 		links: [
 			{
+				text: 'Playground',
+				url: '/playground',
+			},
+			{
 				external: true,
 				text: 'Storybook',
 				url: `${getStorybookBaseUrl(import.meta.env.BASE_URL)}/`,

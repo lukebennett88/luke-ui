@@ -1,8 +1,10 @@
+import { Link } from '@tanstack/react-router';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { CodeIcon } from 'lucide-react';
+import { CodeIcon, SquareArrowOutUpRightIcon } from 'lucide-react';
 import type { ComponentType, JSX } from 'react';
 import { Suspense, use, useId, useState } from 'react';
+import { encodeCodeHash } from '../lib/playground-hash';
 import { StoryWrapper } from '../lib/story-wrapper';
 
 type ExampleProps = {
@@ -48,16 +50,27 @@ function ExampleContent({ src, title }: ExampleProps): JSX.Element {
 		<div className="not-prose overflow-hidden rounded-lg border border-fd-border">
 			<div className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
 				<span className="text-fd-muted-foreground text-sm">{title}</span>
-				<button
-					aria-controls={codeId}
-					aria-expanded={showCode}
-					className={buttonVariants({ size: 'sm', variant: 'ghost' })}
-					onClick={() => setShowCode((previous) => !previous)}
-					type="button"
-				>
-					<CodeIcon className="size-4" />
-					{showCode ? 'Hide code' : 'Show code'}
-				</button>
+				<div className="flex items-center gap-1">
+					<Link
+						className={buttonVariants({ size: 'sm', variant: 'ghost' })}
+						hash={encodeCodeHash(source.trim())}
+						target="_blank"
+						to="/playground"
+					>
+						<SquareArrowOutUpRightIcon className="size-4" />
+						Open in playground
+					</Link>
+					<button
+						aria-controls={codeId}
+						aria-expanded={showCode}
+						className={buttonVariants({ size: 'sm', variant: 'ghost' })}
+						onClick={() => setShowCode((previous) => !previous)}
+						type="button"
+					>
+						<CodeIcon className="size-4" />
+						{showCode ? 'Hide code' : 'Show code'}
+					</button>
+				</div>
 			</div>
 			<StoryWrapper>
 				<PreviewComponent />

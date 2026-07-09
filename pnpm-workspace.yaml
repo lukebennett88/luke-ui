@@ -11,6 +11,7 @@ catalog:
   '@arethetypeswrong/core': ^0.18.4
   '@capsizecss/metrics': ^4.1.0
   '@capsizecss/vanilla-extract': ^2.0.4
+  '@catppuccin/palette': ^1.8.0
   '@changesets/cli': ^2.31.0
   '@orama/orama': ^3.1.18
   '@react-aria/utils': ^3.34.1
@@ -49,6 +50,9 @@ catalog:
   fumadocs-typescript: ^5.2.7
   knip: ^6.23.0
   lucide-react: ^1.22.0
+  lz-string: ^1.5.0
+  '@monaco-editor/react': ^4.7.0
+  monaco-editor: ^0.55.1
   nitro: npm:nitro-nightly@3.0.1-20260128-211656-ae83c97e
   node-html-parser: ^8.0.4
   playwright: ^1.61.1
@@ -56,8 +60,11 @@ catalog:
   react: ^19.2.7
   react-aria-components: ^1.19.0
   react-dom: ^19.2.7
+  react-error-boundary: ^6.1.0
   serve: ^14.2.6
+  spin-doctor: ^0.0.1
   storybook: ^10.4.6
+  sucrase: ^3.35.0
   tailwindcss: ^4.3.2
   tsx: ^4.22.4
   turbo: ^2.10.1

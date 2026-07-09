@@ -8,6 +8,7 @@
 *.log
 **/__screenshots__/**
 apps/docs/.story/
+apps/docs/src/generated/
 apps/docs/src/routeTree.gen.ts
 dist/
 node_modules/

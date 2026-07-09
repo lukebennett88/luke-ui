@@ -10,6 +10,21 @@ extension.
 `oxfmt` owns formatting. The repo uses tabs, 100-column wrapping, single quotes in TypeScript, and
 double quotes in JSX.
 
+## Linting
+
+`oxlint` owns linting (via `vp lint`). To suppress a rule, explain why in a plain comment, then put
+`// oxlint-disable-next-line <plugin>/<rule>` directly above the offending line — the directive
+applies to the literal next line, so it cannot sit inside a multi-line comment.
+
+## Reuse
+
+Prefer utilities the repo already ships over hand-rolling: `cx` from `@luke-ui/react/utils` for
+class names, `zod` schemas for validating untrusted data (URL state, `postMessage` payloads, results
+from JSON.parse), and `react-error-boundary` in the docs app for error boundaries.
+
+Author sample or template code as real `.tsx` files imported with `?raw` so it stays typechecked,
+not as inline string constants.
+
 ## Naming
 
 - Components: `PascalCase`, for example `Button.tsx`.
