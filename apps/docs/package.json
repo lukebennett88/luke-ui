@@ -60,7 +60,7 @@
 		"@vitejs/plugin-react": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
 		"nitro": "catalog:",
-		"playwright": "*",
+		"playwright": "catalog:",
 		"serve": "catalog:",
 		"tailwindcss": "catalog:",
 		"typescript": "catalog:",

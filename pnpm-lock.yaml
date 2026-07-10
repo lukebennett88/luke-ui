@@ -148,7 +148,7 @@ catalogs:
       specifier: ^8.0.4
       version: 8.0.4
     playwright:
-      specifier: ^1.61.1
+      specifier: '*'
       version: 1.61.1
     publint:
       specifier: ^0.3.21
@@ -338,7 +338,7 @@ importers:
         specifier: 'catalog:'
         version: nitro-nightly@3.0.1-20260128-211656-ae83c97e(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@voidzero-dev/vite-plus-core@0.2.2(@arethetypeswrong/core@0.18.4)(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.22.4)(typescript@6.0.3)(unrun@0.2.37)(yaml@2.9.0))(chokidar@5.0.0)(lru-cache@11.5.1)(rolldown@1.1.3)(rollup@4.59.0)
       playwright:
-        specifier: '*'
+        specifier: 'catalog:'
         version: 1.61.1
       serve:
         specifier: 'catalog:'

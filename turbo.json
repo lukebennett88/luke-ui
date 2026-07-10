@@ -7,6 +7,9 @@
 		"@luke-ui/react#check:types": {
 			"dependsOn": ["build", "^build"]
 		},
+		"@luke-ui/react#fix:lint": {
+			"dependsOn": ["build", "generate"]
+		},
 		"//#check:format-root": {
 			"cache": true
 		},
