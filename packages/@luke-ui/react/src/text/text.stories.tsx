@@ -93,9 +93,9 @@ const fontFamilies = tokenKeys(tokens.fontFamily) satisfies Array<TextProps['fon
 
 const fontSizes = tokenKeys(tokens.fontSize) satisfies Array<TextProps['fontSize']>;
 
-const headingFontSizes = fontSizes.filter((fontSize) =>
-	['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'large', 'xlarge', 'xxlarge'].includes(fontSize),
-);
+const headingFontSizes = fontSizes.filter((fontSize) => {
+	return ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'large', 'xlarge', 'xxlarge'].includes(fontSize);
+});
 
 const fontWeights = [...tokenKeys(tokens.fontWeight), 'inherit'] satisfies Array<
 	TextProps['fontWeight']

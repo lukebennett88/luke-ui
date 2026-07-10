@@ -78,9 +78,9 @@ function createStyles(
 			vars: { default: cssVar },
 		};
 	}
-	const vars = mapValues(conditions, (_, conditionName) =>
-		createVar(`${property}-${conditionName}`),
-	);
+	const vars = mapValues(conditions, (_, conditionName) => {
+		return createVar(`${property}-${conditionName}`);
+	});
 	const classes = mapValues(conditions, (conditionValue, conditionName) => {
 		const styleValue = wrapConditionStyle({ [property]: vars[conditionName] }, conditionValue);
 		return style(

@@ -27,8 +27,9 @@ export function remarkValidateExamples() {
 			if (node.name !== 'ExampleBlock') return;
 
 			const srcAttr = node.attributes.find(
-				(attr: MdxJsxAttribute | { type: 'mdxJsxExpressionAttribute'; value: string }) =>
-					attr.type === 'mdxJsxAttribute' && attr.name === 'src',
+				(attr: MdxJsxAttribute | { type: 'mdxJsxExpressionAttribute'; value: string }) => {
+					return attr.type === 'mdxJsxAttribute' && attr.name === 'src';
+				},
 			) as MdxJsxAttribute | undefined;
 
 			if (!srcAttr || typeof srcAttr.value !== 'string') {

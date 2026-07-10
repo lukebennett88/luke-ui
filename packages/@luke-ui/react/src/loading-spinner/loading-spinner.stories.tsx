@@ -116,10 +116,7 @@ function StaggeredSpinners(props: LoadingSpinnerProps) {
 }
 
 function findSpinAnimations(root: Element): Array<CSSAnimation> {
-	return root
-		.getAnimations({ subtree: true })
-		.filter(
-			(animation): animation is CSSAnimation =>
-				animation instanceof CSSAnimation && animation.animationName === spinAnimationName,
-		);
+	return root.getAnimations({ subtree: true }).filter((animation): animation is CSSAnimation => {
+		return animation instanceof CSSAnimation && animation.animationName === spinAnimationName;
+	});
 }

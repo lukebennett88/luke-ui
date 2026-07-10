@@ -19,9 +19,9 @@ let frameCallbacks: Array<FrameRequestCallback> = [];
 let roots: Array<Root> = [];
 let containers: Array<HTMLElement> = [];
 
-const requestFrame = vi.fn<(callback: FrameRequestCallback) => number>((callback) =>
-	frameCallbacks.push(callback),
-);
+const requestFrame = vi.fn<(callback: FrameRequestCallback) => number>((callback) => {
+	return frameCallbacks.push(callback);
+});
 
 function flushFrames() {
 	while (frameCallbacks.length > 0) {
@@ -62,10 +62,9 @@ function PulsingBox({ name }: { name: string | null }) {
 function cssAnimationsNamed(name: string): Array<CSSAnimation> {
 	return document.body
 		.getAnimations({ subtree: true })
-		.filter(
-			(animation): animation is CSSAnimation =>
-				animation instanceof CSSAnimation && animation.animationName === name,
-		);
+		.filter((animation): animation is CSSAnimation => {
+			return animation instanceof CSSAnimation && animation.animationName === name;
+		});
 }
 
 beforeEach(() => {

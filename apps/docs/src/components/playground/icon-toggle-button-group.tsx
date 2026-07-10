@@ -51,12 +51,12 @@ export function IconToggleButtonGroup<Value extends string>({
 			{options.map(({ Icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
 					aria-label={optionLabel}
-					className={({ isSelected }) =>
-						cx(
+					className={({ isSelected }) => {
+						return cx(
 							'flex size-8 cursor-pointer items-center justify-center rounded-full text-fd-muted-foreground transition-colors data-hovered:bg-fd-accent data-hovered:text-fd-accent-foreground data-pressed:bg-fd-accent',
 							isSelected && 'bg-fd-background text-fd-foreground shadow-sm',
-						)
-					}
+						);
+					}}
 					id={optionValue}
 					key={optionValue}
 				>

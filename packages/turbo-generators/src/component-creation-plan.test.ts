@@ -65,14 +65,14 @@ describe('createComponentPlan', () => {
 	});
 
 	it('rejects invalid component names before file writes', () => {
-		expect(() =>
-			createComponentPlan({
+		expect(() => {
+			return createComponentPlan({
 				docsGroup: 'forms',
 				name: '../Bad',
 				styling: 'none',
 				tier: 'atom',
-			}),
-		).toThrow('Use letters/numbers/hyphens. Start with a letter.');
+			});
+		}).toThrow('Use letters/numbers/hyphens. Start with a letter.');
 	});
 
 	it('keeps editorial docs surfaces out of the plan', () => {
@@ -101,9 +101,9 @@ describe('createComponentPlan', () => {
 			tier: 'atom',
 		});
 
-		const source = plan.files.find((file) =>
-			file.path.endsWith('/plain-badge/index.tsx'),
-		)?.contents;
+		const source = plan.files.find((file) => {
+			return file.path.endsWith('/plain-badge/index.tsx');
+		})?.contents;
 
 		expect(source).not.toContain("import { cx } from '../utils/index.js';");
 		expect(source).not.toContain('cx(');

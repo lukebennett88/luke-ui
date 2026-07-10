@@ -20,13 +20,13 @@ const sizes = variantValuesFor<typeof Button, 'size'>()(['small', 'medium']);
 test('tones across sizes', async () => {
 	const locator = renderVisual(
 		<Grid columns={tones.length}>
-			{sizes.flatMap((size) =>
-				tones.map((tone) => (
+			{sizes.flatMap((size) => {
+				return tones.map((tone) => (
 					<Button key={`${size}-${tone}`} size={size} tone={tone}>
 						{tone}
 					</Button>
-				)),
-			)}
+				));
+			})}
 		</Grid>,
 	);
 

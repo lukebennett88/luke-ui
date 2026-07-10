@@ -104,15 +104,16 @@ const lineClampSingleLine = {
 	textOverflow: 'ellipsis',
 	whiteSpace: 'nowrap',
 } satisfies ComplexStyleRule;
-const lineClampMultiLine = (lines: number) =>
-	({
+const lineClampMultiLine = (lines: number) => {
+	return {
 		WebkitBoxOrient: 'vertical',
 		WebkitLineClamp: lines,
 		display: '-webkit-box',
 		lineClamp: lines,
 		minInlineSize: 0,
 		overflow: 'hidden',
-	}) satisfies ComplexStyleRule;
+	} satisfies ComplexStyleRule;
+};
 
 const lineClampVariants = {
 	false: lineClampNone,
