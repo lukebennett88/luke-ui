@@ -24,7 +24,7 @@ export default function PreviewRunner() {
 				const UserComponent = compileComponent(code);
 				runId += 1;
 				setRun({ runId, UserComponent });
-				postToParent({ type: 'luke-playground:success' });
+				postToParent({ type: 'playground:success' });
 			} catch (error) {
 				reportError(error);
 			}
@@ -38,7 +38,7 @@ export default function PreviewRunner() {
 		window.addEventListener('message', onMessage);
 		const initialCode = decodeCodeHash(window.location.hash);
 		if (initialCode) runCode(initialCode);
-		postToParent({ type: 'luke-playground:ready' });
+		postToParent({ type: 'playground:ready' });
 		return () => window.removeEventListener('message', onMessage);
 	}, []);
 
@@ -99,5 +99,5 @@ function postToParent(message: PlaygroundPreviewMessage): void {
 
 function reportError(error: unknown): void {
 	const message = error instanceof Error ? error.message : String(error);
-	postToParent({ message, type: 'luke-playground:error' });
+	postToParent({ message, type: 'playground:error' });
 }
