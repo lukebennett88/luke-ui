@@ -5,8 +5,6 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, beforeEach, expect, test, vi } from 'vite-plus/test';
 import { useSynchronizeAnimations } from './use-synchronize-animations.js';
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
 const keyframesSheet = document.createElement('style');
 keyframesSheet.textContent = `
 @keyframes pulse-a { to { opacity: 0.5; } }

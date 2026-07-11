@@ -2,16 +2,7 @@ import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute, Link } from '@tanstack/react-router';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Maximize2Icon, Minimize2Icon } from 'lucide-react';
-import {
-	lazy,
-	Suspense,
-	useCallback,
-	useEffect,
-	useReducer,
-	useRef,
-	useState,
-	useSyncExternalStore,
-} from 'react';
+import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
 import {
@@ -20,6 +11,7 @@ import {
 	LoadingPill,
 } from '../../components/playground/editor-skeleton';
 import { ThemeToggle } from '../../components/playground/theme-toggle';
+import { useIsDesktop } from '../../components/playground/use-is-desktop';
 import type { ViewportWidth } from '../../components/playground/viewport-toggle';
 import { ViewportToggle } from '../../components/playground/viewport-toggle';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
@@ -292,30 +284,4 @@ function usePreviewStatus() {
 		previewReadyRef,
 		showPreviewLoading,
 	};
-}
-
-const DESKTOP_MEDIA_QUERY = '(min-width: 768px)';
-
-function useIsDesktop() {
-	return useSyncExternalStore(
-		subscribeToDesktopMediaQuery,
-		getIsDesktopSnapshot,
-		getIsDesktopServerSnapshot,
-	);
-}
-
-function subscribeToDesktopMediaQuery(onStoreChange: () => void) {
-	const mediaQueryList = window.matchMedia(DESKTOP_MEDIA_QUERY);
-	mediaQueryList.addEventListener('change', onStoreChange);
-	return () => {
-		mediaQueryList.removeEventListener('change', onStoreChange);
-	};
-}
-
-function getIsDesktopSnapshot() {
-	return window.matchMedia(DESKTOP_MEDIA_QUERY).matches;
-}
-
-function getIsDesktopServerSnapshot() {
-	return true;
 }
