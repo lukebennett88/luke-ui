@@ -113,6 +113,23 @@ over the load-more row.
 </ComboboxField>
 ```
 
+## Mobile tray
+
+Below the `small` breakpoint (640px) the popover renders as a bottom tray instead of a positioned
+popover, following
+[Adobe Spectrum's combobox pattern](https://react-aria.adobe.com/blog/building-a-combobox). The tray
+spans the full viewport width, slides up from the bottom edge on open and back down on close, and
+keeps clear of the on-screen keyboard using the
+[Visual Viewport API](https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API). A scrim
+dims the page behind the tray, and a grab-handle affordance marks its top edge. In browsers that
+support `calc-size()`, the tray keeps a usable minimum height even when the viewport is cramped,
+while still hugging shorter lists instead of leaving empty space.
+
+## Accessibility
+
+The tray's slide transition (and the desktop popover's fade) is disabled for users who request
+`prefers-reduced-motion: reduce`.
+
 ## Primitive
 
 Use the [combobox primitives](/docs/components/primitives/combobox) when you need a custom combobox

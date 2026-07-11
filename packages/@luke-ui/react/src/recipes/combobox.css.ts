@@ -1,7 +1,19 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../styles/vars.css.js';
+import { dimensionToRemString } from '../tokens/converters.js';
+import { breakpointValues } from '../tokens/values.js';
 import { descendantDisabledSelector, inputChromeStyles, inputStates } from './input-states.css.js';
+
+/** Custom property mirroring `visualViewport.height`, set by `useVisualViewportVars`. */
+export const comboboxTrayViewportHeightVar = '--luke-ui-visual-viewport-height';
+
+/** Custom property mirroring the on-screen keyboard's height, set by `useVisualViewportVars`. */
+export const comboboxTrayKeyboardInsetVar = '--luke-ui-keyboard-inset';
+
+// Below this width the popover renders as a bottom tray instead of a positioned popover, matching
+// Adobe Spectrum's combobox pattern (https://react-aria.adobe.com/blog/building-a-combobox).
+const trayMediaQuery = `(width < ${dimensionToRemString(breakpointValues.small)})`;
 
 /**
  * The combobox control is a group wrapping an input and a trigger button, and
@@ -214,22 +226,116 @@ export const comboboxPopover = recipeInLayer('recipes', {
 		backgroundColor: vars.backgroundColor.default,
 		borderRadius: vars.borderRadius.large,
 		boxShadow: vars.boxShadow.medium,
+		display: 'flex',
+		flexDirection: 'column',
 		inlineSize: 'var(--trigger-width)',
 		minInlineSize: 'var(--trigger-width)',
 		overflow: 'hidden',
+		// A subtle fade for the desktop popover; the tray media query below swaps this for a
+		// slide. RAC keeps the element mounted during data-entering/data-exiting so the
+		// transition has time to run.
+		transition: [
+			`opacity ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+			`translate ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+			`box-shadow ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+		].join(', '),
+
+		selectors: {
+			'&[data-entering]': {
+				opacity: 0,
+			},
+			'&[data-exiting]': {
+				opacity: 0,
+			},
+		},
+
+		'@media': {
+			[trayMediaQuery]: {
+				borderBlockStart: `${vars.borderWidth.thin} solid ${vars.border.default}`,
+				borderEndEndRadius: 0,
+				borderEndStartRadius: 0,
+				borderStartEndRadius: vars.borderRadius.xlarge,
+				borderStartStartRadius: vars.borderRadius.xlarge,
+				boxShadow: `${vars.boxShadow.large}, 0 0 0 100vmax rgba(0, 0, 0, 0.2)`,
+				// RAC's `menuWidth`-driven inline `width` style, and the base recipe's own
+				// `var(--trigger-width)`, both need to lose to the full-width tray.
+				inlineSize: 'auto !important' as 'auto',
+				// RAC positions the popover with inline styles (`position`, `top`, `left`,
+				// `max-height`); cascade layers can't out-rank inline styles, only `!important`
+				// can — and these logical properties still beat RAC's physical ones.
+				insetBlockEnd: `var(${comboboxTrayKeyboardInsetVar}, 0px) !important`,
+				insetBlockStart: 'auto !important' as 'auto',
+				insetInline: '0 !important',
+				maxBlockSize: `calc(var(${comboboxTrayViewportHeightVar}, 100dvh) - ${vars.space.xxlarge}) !important`,
+				minInlineSize: 'auto !important' as 'auto',
+				// iPhone home indicator safe area.
+				paddingBlockEnd: 'env(safe-area-inset-bottom, 0px)',
+				position: 'fixed !important' as 'fixed',
+
+				selectors: {
+					'&::before': {
+						alignSelf: 'center',
+						backgroundColor: vars.border.default,
+						blockSize: '4px',
+						borderRadius: vars.borderRadius.full,
+						content: '',
+						flexShrink: 0,
+						inlineSize: '36px',
+						marginBlockEnd: vars.space.xxsmall,
+						marginBlockStart: vars.space.xsmall,
+					},
+					'&[data-entering]': {
+						boxShadow: `${vars.boxShadow.large}, 0 0 0 100vmax transparent`,
+						opacity: 1,
+						translate: '0 100%',
+					},
+					'&[data-exiting]': {
+						boxShadow: `${vars.boxShadow.large}, 0 0 0 100vmax transparent`,
+						opacity: 1,
+						translate: '0 100%',
+					},
+				},
+			},
+			// The global reduced-motion reset lives in the `reset` layer, so it can't beat this
+			// recipe's transition. Declared after the tray query so it also disables the slide,
+			// not just the desktop fade — exit is instant instead of animating.
+			'(prefers-reduced-motion: reduce)': {
+				transition: 'none',
+			},
+		},
+
+		// Prevents the popover/tray being squeezed unusably small when React Aria's inline
+		// `max-height` gets tiny in cramped viewports, without adding empty space for short
+		// lists: at least 12em when content is taller, exactly content height when shorter.
+		// `min-block-size` beats even an inline `max-height` per CSS min/max resolution, so no
+		// `!important` needed. `calc-size()` is Chromium-only, hence the `@supports` gate — other
+		// browsers keep today's fixed-height behavior. https://jakearchibald.com/2026/goldilocks-select-height/
+		'@supports': {
+			'(min-block-size: calc-size(fit-content, size))': {
+				minBlockSize: 'calc-size(fit-content, min(size, 12em))',
+			},
+		},
 	},
 });
 
 export const comboboxListBox = recipeInLayer('recipes', {
 	base: {
 		boxSizing: 'border-box',
+		flex: 1,
 		inlineSize: '100%',
 		listStyle: 'none',
 		margin: 0,
 		maxBlockSize: '18.75rem',
+		minBlockSize: 0,
 		outline: 'none',
 		overflow: 'auto',
 		padding: vars.space.xsmall,
+
+		'@media': {
+			[trayMediaQuery]: {
+				maxBlockSize: 'none',
+			},
+		},
 	},
 });
 
