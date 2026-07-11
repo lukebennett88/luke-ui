@@ -46,6 +46,7 @@ export default defineConfig({
 					},
 					include: ['src/**/*.browser.test.{ts,tsx}'],
 					name: 'browser',
+					setupFiles: ['./src/test-utils/browser-setup.ts'],
 				},
 			},
 			{
