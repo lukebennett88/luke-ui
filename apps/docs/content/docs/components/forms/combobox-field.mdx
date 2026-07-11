@@ -120,7 +120,10 @@ popover, following
 [Adobe Spectrum's combobox pattern](https://react-aria.adobe.com/blog/building-a-combobox). The tray
 spans the full viewport width, slides up from the bottom edge on open and back down on close, and
 keeps clear of the on-screen keyboard using the
-[Visual Viewport API](https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API).
+[Visual Viewport API](https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API). A scrim
+dims the page behind the tray, and a grab-handle affordance marks its top edge. In browsers that
+support `calc-size()`, the tray keeps a usable minimum height even when the viewport is cramped,
+while still hugging shorter lists instead of leaving empty space.
 
 ## Accessibility
 

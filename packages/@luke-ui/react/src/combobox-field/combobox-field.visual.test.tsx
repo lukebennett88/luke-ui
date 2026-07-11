@@ -95,6 +95,40 @@ test('mobile tray', async () => {
 	}
 });
 
+// Guards the calc-size `fit-content` goldilocks behavior: a short, 2-item tray must hug its
+// content height, not stretch to fill the 12em minimum reserved for taller lists.
+test('mobile tray short list', async () => {
+	renderVisual(
+		<Stack>
+			<ComboboxField
+				defaultItems={countryItems.slice(0, 2)}
+				description="Select where the user is located."
+				label="Country"
+				name="country"
+				placeholder="Select a country..."
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</Stack>,
+	);
+
+	await page.viewport(390, 700);
+	try {
+		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
+
+		// Below the `small` breakpoint the popover renders as a bottom tray; screenshot
+		// document.body (the popover portals there) to capture it pinned to the viewport edge.
+		await expect
+			.element(page.elementLocator(document.body))
+			.toMatchScreenshot('combobox-field-tray-short');
+	} finally {
+		// Restore the viewport fixed by the visual project config (vitest.config.ts) so later
+		// tests in this file/run aren't affected.
+		await page.viewport(1024, 800);
+	}
+});
+
 test('sizes', async () => {
 	const locator = renderVisual(
 		<Stack>

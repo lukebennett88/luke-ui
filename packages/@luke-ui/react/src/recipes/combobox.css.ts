@@ -226,13 +226,15 @@ export const comboboxPopover = recipeInLayer('recipes', {
 		backgroundColor: vars.backgroundColor.default,
 		borderRadius: vars.borderRadius.large,
 		boxShadow: vars.boxShadow.medium,
+		display: 'flex',
+		flexDirection: 'column',
 		inlineSize: 'var(--trigger-width)',
 		minInlineSize: 'var(--trigger-width)',
 		overflow: 'hidden',
 		// A subtle fade for the desktop popover; the tray media query below swaps this for a
 		// slide. RAC keeps the element mounted during data-entering/data-exiting so the
 		// transition has time to run.
-		transition: `opacity ${vars.motion.duration.fast} ${vars.motion.easing.standard}, translate ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+		transition: `opacity ${vars.motion.duration.fast} ${vars.motion.easing.standard}, translate ${vars.motion.duration.fast} ${vars.motion.easing.standard}, box-shadow ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
 
 		selectors: {
 			'&[data-entering]': {
@@ -250,9 +252,7 @@ export const comboboxPopover = recipeInLayer('recipes', {
 				borderEndStartRadius: 0,
 				borderStartEndRadius: vars.borderRadius.xlarge,
 				borderStartStartRadius: vars.borderRadius.xlarge,
-				boxShadow: vars.boxShadow.large,
-				display: 'flex',
-				flexDirection: 'column',
+				boxShadow: `${vars.boxShadow.large}, 0 0 0 100vmax rgba(0, 0, 0, 0.2)`,
 				// RAC's `menuWidth`-driven inline `width` style, and the base recipe's own
 				// `var(--trigger-width)`, both need to lose to the full-width tray.
 				inlineSize: 'auto !important' as 'auto',
@@ -269,11 +269,24 @@ export const comboboxPopover = recipeInLayer('recipes', {
 				position: 'fixed !important' as 'fixed',
 
 				selectors: {
+					'&::before': {
+						alignSelf: 'center',
+						backgroundColor: vars.border.default,
+						blockSize: '4px',
+						borderRadius: vars.borderRadius.full,
+						content: '',
+						flexShrink: 0,
+						inlineSize: '36px',
+						marginBlockEnd: vars.space.xxsmall,
+						marginBlockStart: vars.space.xsmall,
+					},
 					'&[data-entering]': {
+						boxShadow: `${vars.boxShadow.large}, 0 0 0 100vmax transparent`,
 						opacity: 1,
 						translate: '0 100%',
 					},
 					'&[data-exiting]': {
+						boxShadow: `${vars.boxShadow.large}, 0 0 0 100vmax transparent`,
 						opacity: 1,
 						translate: '0 100%',
 					},
@@ -286,25 +299,37 @@ export const comboboxPopover = recipeInLayer('recipes', {
 				transition: 'none',
 			},
 		},
+
+		// Prevents the popover/tray being squeezed unusably small when React Aria's inline
+		// `max-height` gets tiny in cramped viewports, without adding empty space for short
+		// lists: at least 12em when content is taller, exactly content height when shorter.
+		// `min-block-size` beats even an inline `max-height` per CSS min/max resolution, so no
+		// `!important` needed. `calc-size()` is Chromium-only, hence the `@supports` gate — other
+		// browsers keep today's fixed-height behavior. https://jakearchibald.com/2026/goldilocks-select-height/
+		'@supports': {
+			'(min-block-size: calc-size(fit-content, size))': {
+				minBlockSize: 'calc-size(fit-content, min(size, 12em))',
+			},
+		},
 	},
 });
 
 export const comboboxListBox = recipeInLayer('recipes', {
 	base: {
 		boxSizing: 'border-box',
+		flex: 1,
 		inlineSize: '100%',
 		listStyle: 'none',
 		margin: 0,
 		maxBlockSize: '18.75rem',
+		minBlockSize: 0,
 		outline: 'none',
 		overflow: 'auto',
 		padding: vars.space.xsmall,
 
 		'@media': {
 			[trayMediaQuery]: {
-				flex: 1,
 				maxBlockSize: 'none',
-				minBlockSize: 0,
 			},
 		},
 	},
