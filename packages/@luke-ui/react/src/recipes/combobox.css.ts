@@ -234,7 +234,11 @@ export const comboboxPopover = recipeInLayer('recipes', {
 		// A subtle fade for the desktop popover; the tray media query below swaps this for a
 		// slide. RAC keeps the element mounted during data-entering/data-exiting so the
 		// transition has time to run.
-		transition: `opacity ${vars.motion.duration.fast} ${vars.motion.easing.standard}, translate ${vars.motion.duration.fast} ${vars.motion.easing.standard}, box-shadow ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+		transition: [
+			`opacity ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+			`translate ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+			`box-shadow ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+		].join(', '),
 
 		selectors: {
 			'&[data-entering]': {

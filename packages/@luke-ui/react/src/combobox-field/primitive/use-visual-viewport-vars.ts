@@ -4,19 +4,11 @@ import {
 	comboboxTrayViewportHeightVar,
 } from '../../recipes/combobox.css.js';
 
-/**
- * Mirrors the browser's Visual Viewport onto CSS custom properties set on `element`, so the mobile
- * combobox tray (see `recipes/combobox.css.ts`) can size itself against the space actually visible
- * above an on-screen keyboard instead of the full layout viewport. Modeled on the approach described
- * in Adobe Spectrum's combobox write-up (https://react-aria.adobe.com/blog/building-a-combobox).
- *
- * No-ops during SSR, when `element` is `null` (the popover isn't mounted while closed), and in
- * browsers without `visualViewport` support.
- */
+/** Sets the visible viewport height and keyboard inset on the mobile tray. */
 export function useVisualViewportVars(element: HTMLElement | null): void {
 	useEffect(() => {
 		if (element === null) return;
-		if (typeof window === 'undefined' || window.visualViewport == null) return;
+		if (window.visualViewport == null) return;
 
 		// Reassigned into locals so TypeScript keeps them narrowed to non-null inside `update`,
 		// a nested function declaration whose narrowing TS can't otherwise carry over.
@@ -33,6 +25,8 @@ export function useVisualViewportVars(element: HTMLElement | null): void {
 		}
 
 		update();
+		// VisualViewport is not an Element, so ResizeObserver cannot observe it. Scroll also reports
+		// changes to offsetTop that do not resize the viewport.
 		visualViewport.addEventListener('resize', update);
 		visualViewport.addEventListener('scroll', update);
 

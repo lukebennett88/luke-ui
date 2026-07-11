@@ -1,3 +1,4 @@
+import { mergeRefs } from '@react-aria/utils';
 import type { JSX, Ref } from 'react';
 import { useState } from 'react';
 import type { PopoverProps as RacPopoverProps } from 'react-aria-components/ComboBox';
@@ -21,9 +22,6 @@ export interface ComboboxPopoverProps extends Omit<RacPopoverProps, 'UNSTABLE_po
 /** Popover surface used for listbox content. */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { ref, ...restProps } = props;
-	// Captured so `useVisualViewportVars` can write CSS custom properties directly onto the
-	// popover element for the mobile tray. The popover only mounts while open, so the hook's
-	// listeners are naturally scoped to open state.
 	const [element, setElement] = useState<HTMLElement | null>(null);
 	useVisualViewportVars(element);
 
@@ -33,14 +31,7 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 			className={composeRenderProps(restProps.className, (className) => {
 				return cx(themeRootClassName, styles.comboboxPopover(), className);
 			})}
-			ref={(node: HTMLElement | null) => {
-				setElement(node);
-				if (typeof ref === 'function') {
-					ref(node);
-				} else if (ref != null) {
-					ref.current = node;
-				}
-			}}
+			ref={mergeRefs(ref, (node: HTMLElement | null) => setElement(node))}
 		/>
 	);
 }
