@@ -3,7 +3,6 @@ import type { NumeralProps } from '@luke-ui/react/numeral';
 import { Numeral } from '@luke-ui/react/numeral';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -33,9 +32,6 @@ const baseArgs = {
  */
 export const Default = meta.story({
 	args: baseArgs,
-	play: async ({ canvas }) => {
-		await expect(canvas.getByText('120,000')).toBeInTheDocument();
-	},
 });
 
 /**

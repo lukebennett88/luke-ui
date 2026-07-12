@@ -3,7 +3,6 @@ import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -57,9 +56,6 @@ const truncationContainerStyle = {
  */
 export const Tone = meta.story({
 	args: baseArgs,
-	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('button', { name: 'primary' })).toBeInTheDocument();
-	},
 	render: (props) => (
 		<div style={rowStyle}>
 			{tones.map((tone) => (

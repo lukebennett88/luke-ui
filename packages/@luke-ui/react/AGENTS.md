@@ -5,7 +5,8 @@
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
   files by hand. The generator updates group barrels, the styles index, and docs wiring.
 - Stories (`*.stories.tsx`) are the component tests. Do not add separate `*.test.tsx` component
-  tests unless Storybook cannot exercise the behaviour.
+  tests unless Storybook cannot exercise the behaviour. Follow the story authoring and play-function
+  guidance in `docs/TESTING.md#writing-stories`.
 - React Compiler is enabled. Do not use `useCallback` or `useMemo` unless there is a specific reason
   the compiler cannot handle.
 

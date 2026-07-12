@@ -46,6 +46,15 @@ describe('createComponentPlan', () => {
 		expect(
 			plan.files.find((file) => file.path.endsWith('/recipes/status-badge.css.ts'))?.contents,
 		).not.toContain('StatusBadgeVariants');
+
+		const story = plan.files.find((file) => {
+			return file.path.endsWith('/status-badge/status-badge.stories.tsx');
+		})?.contents;
+
+		expect(story).toContain('/** TODO: Explain when a consumer should use this component. */');
+		expect(story).toContain("children: 'StatusBadge'");
+		expect(story).not.toContain('render:');
+		expect(story).not.toContain('play:');
 	});
 
 	it('plans a composed component without recipe files', () => {

@@ -290,11 +290,6 @@ interface Pokemon {
  * Async filtering forwards the listbox loading UI through listBoxProps.
  */
 export const AsyncFiltering = meta.story({
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(canvas.getByRole('combobox', { name: 'Pick a Pokemon' })).toBeInTheDocument();
-		await expect(canvas.getByRole('button', { name: /Toggle options/ })).toBeInTheDocument();
-	},
 	render: function AsyncFilteringExample() {
 		const [value, setValue] = useState<Key | null>(null);
 
@@ -333,11 +328,6 @@ export const AsyncFiltering = meta.story({
  * Infinite scroll composes a load-more row after the item renderer.
  */
 export const AsyncInfiniteScroll = meta.story({
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(canvas.getByRole('combobox', { name: 'Browse Pokemon' })).toBeInTheDocument();
-		await expect(canvas.getByRole('button', { name: /Toggle options/ })).toBeInTheDocument();
-	},
 	render: function AsyncInfiniteScrollExample() {
 		const [value, setValue] = useState<Key | null>(null);
 
