@@ -22,7 +22,7 @@ const mounted: Array<{ container: HTMLElement; root: Root }> = [];
 /**
  * Renders `node` inside the same theme root and icon spritesheet provider the
  * app (and Storybook) wrap components with, then returns a Vitest locator for
- * the mounted subtree ready to pass to `toMatchScreenshot`.
+ * the mounted subtree ready to pass to `captureVisual`.
  */
 export function renderVisual(node: ReactNode) {
 	const container = document.body.appendChild(document.createElement('div'));
@@ -35,6 +35,15 @@ export function renderVisual(node: ReactNode) {
 	});
 
 	return page.elementLocator(container);
+}
+
+/** Captures a named scene into the revision output selected by the visual runner. */
+export async function captureVisual(locator: Locator, id: string) {
+	if (!/^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
+		throw new Error(`Visual capture IDs must use a component namespace: ${id}`);
+	}
+	const viewport = `${window.innerWidth}x${window.innerHeight}`;
+	await expect.element(locator).toMatchScreenshot(`${id}__viewport-${viewport}`);
 }
 
 /** Unmounts everything rendered by `renderVisual`. Registered globally in `visual-setup.ts`. */
@@ -125,7 +134,7 @@ export function Grid({ children, columns }: { children: ReactNode; columns: numb
 /**
  * Moves keyboard focus to `target` by tabbing, so the browser applies
  * `:focus-visible` (which a programmatic `.focus()` would not), and asserts focus
- * landed. Follow with `toMatchScreenshot` on the scene to capture the focus ring.
+ * landed. Follow with `captureVisual` on the scene to capture the focus ring.
  */
 export async function focusViaKeyboard(target: Locator) {
 	await userEvent.tab();

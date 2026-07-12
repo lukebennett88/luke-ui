@@ -1,6 +1,11 @@
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { focusViaKeyboard, renderVisual, Stack } from '../test-utils/render-visual.js';
+import {
+	captureVisual,
+	focusViaKeyboard,
+	renderVisual,
+	Stack,
+} from '../test-utils/render-visual.js';
 import { TextField } from './index.js';
 
 test('sizes', async () => {
@@ -23,7 +28,7 @@ test('sizes', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('text-field-sizes');
+	await captureVisual(locator, 'text-field/sizes');
 });
 
 test('states: default, disabled, read-only, invalid', async () => {
@@ -42,7 +47,7 @@ test('states: default, disabled, read-only, invalid', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('text-field-states');
+	await captureVisual(locator, 'text-field/states');
 });
 
 test('adornments', async () => {
@@ -53,7 +58,7 @@ test('adornments', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('text-field-adornments');
+	await captureVisual(locator, 'text-field/adornments');
 });
 
 test('keyboard focus ring', async () => {
@@ -64,5 +69,5 @@ test('keyboard focus ring', async () => {
 	);
 
 	await focusViaKeyboard(page.getByRole('textbox', { name: 'Focus me' }));
-	await expect.element(scene).toMatchScreenshot('text-field-focus');
+	await captureVisual(scene, 'text-field/focus');
 });

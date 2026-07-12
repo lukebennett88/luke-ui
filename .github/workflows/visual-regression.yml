@@ -1,0 +1,63 @@
+name: Visual regression
+
+on:
+  pull_request:
+    paths:
+      - 'packages/@luke-ui/react/**'
+      - 'packages/@luke-ui/rainbow-sprinkles/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'mise.toml'
+      - '.github/workflows/visual-regression.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: visual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.summary.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: jdx/mise-action@v4
+        with:
+          install: true
+          cache: true
+      - run: corepack enable
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+      - uses: actions/cache@v5
+        with:
+          path: .artifacts/visual-regression/cache
+          key:
+            visual-main-${{ runner.os }}-${{ runner.arch }}-${{ github.event.pull_request.base.sha
+            || github.event.before }}-${{ hashFiles('pnpm-lock.yaml',
+            'packages/@luke-ui/react/vitest.config.ts') }}
+      - name: Compare visual captures
+        run: corepack pnpm test:visual
+        env:
+          VISUAL_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+      - id: summary
+        run:
+          echo "changed=$(jq '.counts.changed' .artifacts/visual-regression/report/summary.json)" >>
+          "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-report
+          path: .artifacts/visual-regression/report
+          retention-days: 14
+
+  review:
+    if: needs.compare.outputs.changed != '0'
+    needs: compare
+    runs-on: ubuntu-latest
+    environment: visual-review
+    steps:
+      - run: echo 'Visual changes approved for this commit.'

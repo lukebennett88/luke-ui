@@ -15,8 +15,8 @@ env:
   TURBO_TELEMETRY_DISABLED: '1'
 
 jobs:
-  visual-tests:
-    name: visual-tests
+  component-tests:
+    name: component-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,22 +44,16 @@ jobs:
       - name: Build package
         run: corepack pnpm build:packages
 
-      - name: Run Storybook visual tests
-        run: corepack pnpm --filter @luke-ui/react test
-
-      - name: Upload visual diffs on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: visual-diffs
-          path: packages/@luke-ui/react/**/__screenshots__/**
-          if-no-files-found: ignore
-          retention-days: 7
+      - name: Run component tests
+        run:
+          corepack pnpm --filter @luke-ui/react run test:unit && corepack pnpm --filter
+          @luke-ui/react run test:browser && corepack pnpm --filter @luke-ui/react run
+          test:storybook
 
   deploy-pages:
     name: deploy-pages
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: visual-tests
+    needs: component-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read

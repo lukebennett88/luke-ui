@@ -113,29 +113,26 @@ play: async ({ canvasElement, step }) => {
 
 ## Visual regression tests
 
-Visual tests capture a screenshot of a rendered component and compare it against a committed
-baseline image. They catch unintended visual changes (spacing, colour, focus rings, open menus) that
-behaviour assertions miss. They run in the `visual` Vitest project via `pnpm run test:visual`.
+Visual tests capture a rendered component in the current checkout and compare it with the local
+`origin/main` ref captured on the same device. They catch unintended visual changes (spacing,
+colour, focus rings, open menus) that behaviour assertions miss. They run via `pnpm run test:visual`
+and as part of the aggregate `pnpm test` development flow.
 
 Place them in `*.visual.test.tsx` beside the component. Render with the shared `renderVisual`
 helper, which wraps the subtree in the theme root and icon spritesheet provider and returns a
 locator:
 
 ```tsx
-import { afterEach, expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
+import { captureVisual, renderVisual } from '../test-utils/render-visual.js';
 import { Button } from './index.js';
-
-afterEach(() => {
-	cleanupVisual();
-});
 
 test('keyboard focus ring', async () => {
 	const locator = renderVisual(<Button tone="primary">Focus me</Button>);
 	// Tab so the browser applies `:focus-visible`; a programmatic `.focus()` would not.
 	await userEvent.tab();
-	await expect.element(locator).toMatchScreenshot('button-focus-visible');
+	await captureVisual(locator, 'button/focus-visible');
 });
 ```
 
@@ -146,12 +143,15 @@ test('keyboard focus ring', async () => {
   rather than the container.
 - **Frame tightly.** Render a small kitchen-sink grid of the states under test, not a whole page, so
   a diff points at the component that changed.
-- **Baselines are committed per OS.** Only Linux baselines (`*-chromium-linux.png`, generated in CI)
-  are tracked in git; screenshots you generate locally on macOS are gitignored. Regenerate baselines
-  through the **Update Visual Baselines** GitHub Actions workflow, then review the changed PNGs in
-  the pull request diff before merging. Do not commit local baselines.
-- **The first run of a new test "fails".** Creating a missing baseline is reported as a failure by
-  design; run it again (or regenerate in CI) and it passes against the new reference.
+- **Use explicit, globally unique IDs.** Namespace every capture by component, for example
+  `button/focus-visible`. Duplicate IDs fail before capture. Moving a test file does not change its
+  identity.
+- **Added and removed captures are informational.** Matching IDs with pixel differences require CI
+  review; inventory changes are still visible in the report but do not block.
+- **Keep responsive coverage explicit.** The default viewport is 1024 by 800. Change the viewport in
+  a test only when the component has a responsive state worth capturing, then restore it.
+
+The full workflow and report are documented in [`VISUAL_TESTING.md`](./VISUAL_TESTING.md).
 
 ## Style-contract tests for CSS recipes
 

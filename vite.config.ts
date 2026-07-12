@@ -85,6 +85,7 @@ export default defineConfig({
 			'jsx-a11y/prefer-tag-over-role': 'off',
 			'no-console': 'warn',
 			'no-unused-vars': 'error',
+			'vitest/expect-expect': ['error', { assertFunctionNames: ['captureVisual', 'expect'] }],
 			'react-hooks-js/config': 'error',
 			'react-hooks-js/error-boundaries': 'error',
 			'react-hooks-js/gating': 'error',

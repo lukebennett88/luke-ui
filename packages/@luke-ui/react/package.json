@@ -69,7 +69,9 @@
 		"test:storybook": "vp test run --project=storybook",
 		"test:ui": "vp test --project=storybook --ui",
 		"test:unit": "vp test run --project=unit",
-		"test:visual": "vp test run --project=visual",
+		"test:visual": "tsx scripts/visual-regression.ts",
+		"test:visual:capture": "vp test run --project=visual --update",
+		"test:visual:report": "tsx scripts/open-visual-report.ts",
 		"test:watch": "vp test --project=storybook"
 	},
 	"dependencies": {
@@ -89,6 +91,7 @@
 		"@storybook/addon-vitest": "catalog:",
 		"@storybook/react-vite": "catalog:",
 		"@types/node": "catalog:",
+		"@types/pngjs": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
 		"@vanilla-extract/rollup-plugin": "catalog:",
@@ -100,7 +103,9 @@
 		"babel-plugin-react-compiler": "catalog:",
 		"colorjs.io": "catalog:",
 		"node-html-parser": "catalog:",
+		"pixelmatch": "catalog:",
 		"playwright": "catalog:",
+		"pngjs": "catalog:",
 		"publint": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",

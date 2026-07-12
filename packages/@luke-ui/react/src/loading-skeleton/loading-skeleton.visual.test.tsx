@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { Button } from '../button/index.js';
-import { renderVisual, Stack } from '../test-utils/render-visual.js';
+import { captureVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
 import { TextField } from '../text-field/index.js';
 import { LoadingSkeleton } from './index.js';
 
@@ -23,7 +23,7 @@ test('text and component placeholders', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('loading-skeleton-placeholders');
+	await captureVisual(locator, 'loading-skeleton/placeholders');
 });
 
 test('loaded content', async () => {
@@ -35,5 +35,5 @@ test('loaded content', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('loading-skeleton-loaded');
+	await captureVisual(locator, 'loading-skeleton/loaded');
 });

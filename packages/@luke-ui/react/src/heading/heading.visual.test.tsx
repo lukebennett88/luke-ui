@@ -1,5 +1,10 @@
-import { expect, test } from 'vite-plus/test';
-import { renderVisual, Stack, variantValuesFor } from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import {
+	captureVisual,
+	renderVisual,
+	Stack,
+	variantValuesFor,
+} from '../test-utils/render-visual.js';
 import { Heading } from './index.js';
 
 const levels = variantValuesFor<typeof Heading, 'level'>()([1, 2, 3, 4, 5, 6]);
@@ -15,7 +20,7 @@ test('levels', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('heading-levels');
+	await captureVisual(locator, 'heading/levels');
 });
 
 test('truncated heading', async () => {
@@ -27,5 +32,5 @@ test('truncated heading', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('heading-truncated');
+	await captureVisual(locator, 'heading/truncated');
 });

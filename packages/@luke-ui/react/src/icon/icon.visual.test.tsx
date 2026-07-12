@@ -1,6 +1,11 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
-import { renderVisual, Stack, variantValuesFor } from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import {
+	captureVisual,
+	renderVisual,
+	Stack,
+	variantValuesFor,
+} from '../test-utils/render-visual.js';
 import { Icon } from './index.js';
 
 const rowStyle = {
@@ -34,5 +39,5 @@ test('sizes and glyphs', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('icon-sizes-glyphs');
+	await captureVisual(locator, 'icon/sizes-glyphs');
 });

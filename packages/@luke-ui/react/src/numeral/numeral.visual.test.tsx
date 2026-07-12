@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
-import { renderVisual, Stack } from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import { captureVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
 import { Numeral } from './index.js';
 
 const rowStyle = {
@@ -27,5 +27,5 @@ test('formats and alignment', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('numeral-formats-alignment');
+	await captureVisual(locator, 'numeral/formats-alignment');
 });

@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
-import { renderVisual, Stack } from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import { captureVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
 import { Text } from './index.js';
 
 const rowStyle = {
@@ -30,7 +30,7 @@ test('typography variants', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('text-typography-variants');
+	await captureVisual(locator, 'text/typography-variants');
 });
 
 test('line clamp and transforms', async () => {
@@ -45,5 +45,5 @@ test('line clamp and transforms', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('text-line-clamp-transforms');
+	await captureVisual(locator, 'text/line-clamp-transforms');
 });
