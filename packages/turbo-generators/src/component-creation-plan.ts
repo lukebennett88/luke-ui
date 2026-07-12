@@ -213,7 +213,6 @@ function renderPackageStory(input: {
 	pascalName: string;
 }): string {
 	return `import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
-import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -222,12 +221,10 @@ const meta = preview.meta({
 \ttitle: '${toDisplayName(input.docsGroup)}/${input.pascalName}',
 });
 
+/** TODO: Explain when a consumer should use this component. */
 export const Default = meta.story({
 \targs: {
 \t\tchildren: '${input.pascalName}',
-\t},
-\tplay: async ({ canvas }) => {
-\t\tawait expect(canvas.getByText('${input.pascalName}')).toBeInTheDocument();
 \t},
 });
 `;

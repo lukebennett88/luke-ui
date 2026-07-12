@@ -25,6 +25,29 @@ Do not add `__tests__` directories unless the suite does not map to one source f
 Do not add DOM shims such as happy-dom or jsdom. DOM-dependent tests run in a real browser through
 `vitest.config.ts`, using real browser APIs instead of stubs.
 
+## Writing stories
+
+Stories are both consumer examples and component tests. Each story should earn its place by showing
+a materially distinct state or behaviour, not one point in a Cartesian product of props. Do not add
+multiple stories that render the same state with small variations.
+
+- Make `Default` a useful prop sandbox. Put representative values in `args` so controls can change
+  the component without editing the story.
+- Prefer `args` to `render`. Add `render` only when the example needs composition, local state,
+  hooks, or a matrix of related variants.
+- Show related visual variants together in a small matrix, such as every size or tone. A matrix is
+  easier to compare and avoids duplicate sidebar entries.
+- Keep controls usable. Forward story args through custom renders and use `argTypes` only to improve
+  or constrain controls. Do not hide ordinary consumer props to make a story implementation easier.
+- Add JSDoc that explains why a consumer would use the state or API. Do not merely restate the story
+  name or describe what is visibly rendered. Replace the generator's JSDoc TODO with this
+  consumer-value guidance before the story is complete.
+
+A `play` function should prove behaviour, a CSS contract, or an accessibility contract that could
+regress. Interactions, focus management, computed styles, and semantic state are useful assertions.
+Semantic role and accessible-name assertions are useful when they protect an accessibility contract.
+Presence-only smoke assertions for ordinary initial content add little value.
+
 ## Write the test first
 
 For bug fixes, start with a failing test that reproduces the bug. Watch it fail for the right reason
