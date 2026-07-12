@@ -44,3 +44,13 @@ test('rejects duplicate explicit capture IDs', async () => {
 		'Duplicate visual capture ID button/default',
 	);
 });
+
+test('accepts multiline calls with trailing commas', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-ids-'));
+	await writeFile(
+		path.join(root, 'one.visual.test.tsx'),
+		"captureVisual(\n\tpage.elementLocator(document.body),\n\t'button/multiline',\n)",
+	);
+	const owners = await validateCaptureIds(root);
+	expect([...owners.keys()]).toEqual(['button/multiline']);
+});

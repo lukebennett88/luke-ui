@@ -29,7 +29,7 @@ export async function validateCaptureIds(sourceRoot: string) {
 				else if (entry.name.endsWith('.visual.test.tsx')) {
 					const source = await readFile(file, 'utf8');
 					const calls = [...source.matchAll(/captureVisual\(/g)];
-					const matches = [...source.matchAll(/captureVisual\([\s\S]*?,\s*'([^']+)'\s*\)/g)];
+					const matches = [...source.matchAll(/captureVisual\([\s\S]*?,\s*'([^']+)'\s*,?\s*\)/g)];
 					if (calls.length !== matches.length) {
 						throw new Error(`Visual capture IDs must be string literals: ${file}`);
 					}
