@@ -1,6 +1,11 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
-import { renderVisual, Stack, variantValuesFor } from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import {
+	captureVisual,
+	renderVisual,
+	Stack,
+	variantValuesFor,
+} from '../test-utils/render-visual.js';
 import { LoadingSpinner } from './index.js';
 
 const rowStyle = {
@@ -36,5 +41,5 @@ test('sizes colors and modes', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('loading-spinner-sizes-colors-modes');
+	await captureVisual(locator, 'loading-spinner/sizes-colors-modes');
 });

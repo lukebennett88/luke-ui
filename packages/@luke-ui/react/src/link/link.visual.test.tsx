@@ -1,7 +1,12 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { focusViaKeyboard, renderVisual, Stack } from '../test-utils/render-visual.js';
+import {
+	captureVisual,
+	focusViaKeyboard,
+	renderVisual,
+	Stack,
+} from '../test-utils/render-visual.js';
 import { Link } from './index.js';
 
 const darkPanelStyle = {
@@ -33,7 +38,7 @@ test('tones and states', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('link-tones-states');
+	await captureVisual(locator, 'link/tones-states');
 });
 
 test('keyboard focus ring', async () => {
@@ -44,5 +49,5 @@ test('keyboard focus ring', async () => {
 	);
 
 	await focusViaKeyboard(page.getByRole('link', { name: 'Focus link' }));
-	await expect.element(scene).toMatchScreenshot('link-focus-visible');
+	await captureVisual(scene, 'link/focus-visible');
 });

@@ -1,7 +1,8 @@
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { Icon } from '../icon/index.js';
 import {
+	captureVisual,
 	focusViaKeyboard,
 	Grid,
 	renderVisual,
@@ -30,7 +31,7 @@ test('tones across sizes', async () => {
 		</Grid>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('button-tones');
+	await captureVisual(locator, 'button/tones');
 });
 
 test('states: disabled, pending, with icons', async () => {
@@ -49,7 +50,7 @@ test('states: disabled, pending, with icons', async () => {
 		</Grid>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('button-states');
+	await captureVisual(locator, 'button/states');
 });
 
 test('keyboard focus ring', async () => {
@@ -60,5 +61,5 @@ test('keyboard focus ring', async () => {
 	);
 
 	await focusViaKeyboard(page.getByRole('button', { name: 'Focus me' }));
-	await expect.element(scene).toMatchScreenshot('button-focus-visible');
+	await captureVisual(scene, 'button/focus-visible');
 });

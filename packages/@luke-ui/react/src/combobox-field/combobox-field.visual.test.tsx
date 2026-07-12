@@ -1,6 +1,6 @@
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { renderVisual, Stack } from '../test-utils/render-visual.js';
+import { captureVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
 import { ComboboxField } from './index.js';
 import { ComboboxItem } from './primitive/index.js';
 
@@ -34,7 +34,7 @@ test('default closed combobox', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('combobox-field-default');
+	await captureVisual(locator, 'combobox-field/default');
 });
 
 test('open menu', async () => {
@@ -60,7 +60,7 @@ test('open menu', async () => {
 	// whole viewport (fixed by the visual project config) rather than the listbox
 	// alone. This captures the popover's alignment to the trigger and its layering,
 	// not just the listbox's own styling.
-	await expect.element(page.elementLocator(document.body)).toMatchScreenshot('combobox-field-open');
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/open');
 });
 
 test('mobile tray', async () => {
@@ -85,9 +85,7 @@ test('mobile tray', async () => {
 
 		// Below the `small` breakpoint the popover renders as a bottom tray; screenshot
 		// document.body (the popover portals there) to capture it pinned to the viewport edge.
-		await expect
-			.element(page.elementLocator(document.body))
-			.toMatchScreenshot('combobox-field-tray');
+		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
 	} finally {
 		// Restore the viewport fixed by the visual project config (vitest.config.ts) so later
 		// tests in this file/run aren't affected.
@@ -119,9 +117,7 @@ test('mobile tray short list', async () => {
 
 		// Below the `small` breakpoint the popover renders as a bottom tray; screenshot
 		// document.body (the popover portals there) to capture it pinned to the viewport edge.
-		await expect
-			.element(page.elementLocator(document.body))
-			.toMatchScreenshot('combobox-field-tray-short');
+		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-short');
 	} finally {
 		// Restore the viewport fixed by the visual project config (vitest.config.ts) so later
 		// tests in this file/run aren't affected.
@@ -153,5 +149,5 @@ test('sizes', async () => {
 		</Stack>,
 	);
 
-	await expect.element(locator).toMatchScreenshot('combobox-field-sizes');
+	await captureVisual(locator, 'combobox-field/sizes');
 });

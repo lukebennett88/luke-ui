@@ -4,9 +4,10 @@
 .tanstack/
 .turbo/
 .vitest-attachments/
+.artifacts/
+.visual-captures/
 *.local
 *.log
-**/__screenshots__/**
 apps/docs/.story/
 apps/docs/src/generated/
 apps/docs/src/routeTree.gen.ts
@@ -22,7 +23,3 @@ packages/@luke-ui/react/src/generated/icons.tsx
 public/dist/
 server/dist/
 storybook-static/
-
-!**/__screenshots__/
-!**/__screenshots__/**/
-!**/__screenshots__/**/*-linux.png

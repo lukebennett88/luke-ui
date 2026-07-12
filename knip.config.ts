@@ -1,6 +1,7 @@
 import type { KnipConfig } from 'knip';
 
 export default {
+	ignoreBinaries: ['open', 'xdg-open'],
 	ignoreDependencies: ['eslint-plugin-react-hooks'],
 	workspaces: {
 		'apps/docs': {
