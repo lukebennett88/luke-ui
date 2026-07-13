@@ -1,4 +1,6 @@
+import '@luke-ui/react/themes/machined-edge.css';
 import { themeRootClassName } from '@luke-ui/react/theme';
+import { machinedEdgeThemeClassName } from '@luke-ui/react/themes';
 import { cx } from '@luke-ui/react/utils';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
@@ -50,7 +52,9 @@ function RootDocument({ children }: { children: ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body className={cx(themeRootClassName, 'flex min-h-screen flex-col')}>
+			<body
+				className={cx(themeRootClassName, machinedEdgeThemeClassName, 'flex min-h-screen flex-col')}
+			>
 				<RootProvider search={{ SearchDialog: LazySearchDialog }}>{children}</RootProvider>
 				<Scripts />
 			</body>
