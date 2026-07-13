@@ -33,6 +33,11 @@ The semantic contract includes composite `font.100` through `font.900` steps. Ea
 font size, line height, and letter spacing so components cannot combine unrelated values. Icon sizes
 carry forward the `xsmall`, `small`, `medium`, and `large` scale at 16px, 20px, 24px, and 32px.
 
+Each colour mode authors the final composite `box-shadow` for `depth.recessed`, `depth.resting`,
+`depth.raised`, `depth.floating`, and `depth.overlay`. Components select a semantic depth and do not
+branch on the theme identity. This keeps reflected light, lower edges, and exterior shadows visible
+in the foundation instead of deriving them from strength multipliers and hidden formulas.
+
 Use `deriveConcentricRadius(innerRadius, gap)` for rounded elements nested inside another rounded
 surface. It returns a CSS `calc()` value for the outer radius, so both inputs can be semantic theme
 variables instead of theme-specific numbers.

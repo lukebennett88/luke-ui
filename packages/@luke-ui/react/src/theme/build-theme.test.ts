@@ -124,6 +124,16 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-icon-size-xsmall: 16px');
 		expect(css).toContain('--luke-icon-size-large: 32px');
 	});
+
+	it('emits the authored semantic depth values without synthesising material layers', () => {
+		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(
+			machinedEdgeFoundation.light.depth.resting,
+		);
+		expect(extractValue(blocks.mediaDark, '--luke-depth-raised')).toBe(
+			machinedEdgeFoundation.dark.depth.raised,
+		);
+		expect(machinedEdgeFoundation.light.depth.resting).not.toContain('inset 0 0');
+	});
 });
 
 describe('concentric corners', () => {
@@ -145,11 +155,11 @@ describe('buildTheme defaults', () => {
 		const explicitFoundation: ThemeFoundation = {
 			dark: {
 				color: { ...minimalFoundation.dark.color, ...defaultSourceColors.dark },
-				material: minimalFoundation.dark.material,
+				depth: minimalFoundation.dark.depth,
 			},
 			light: {
 				color: { ...minimalFoundation.light.color, ...defaultSourceColors.light },
-				material: minimalFoundation.light.material,
+				depth: minimalFoundation.light.depth,
 			},
 			name: 'minimal-check',
 			radius: { ...defaultRadius },
@@ -161,6 +171,34 @@ describe('buildTheme defaults', () => {
 			expect(css).toContain(`${varName}: `);
 		}
 		expect(css).toContain('--luke-color-border-focus: oklch(');
+	});
+});
+
+describe('buildTheme foundation validation', () => {
+	it('rejects empty or stylesheet-breaking depth values', () => {
+		const emptyDepth: ThemeFoundation = {
+			...machinedEdgeFoundation,
+			light: {
+				...machinedEdgeFoundation.light,
+				depth: { ...machinedEdgeFoundation.light.depth, resting: ' ' },
+			},
+			name: 'empty-depth',
+		};
+		const unsafeDepth: ThemeFoundation = {
+			...machinedEdgeFoundation,
+			dark: {
+				...machinedEdgeFoundation.dark,
+				depth: { ...machinedEdgeFoundation.dark.depth, overlay: 'none; color: red' },
+			},
+			name: 'unsafe-depth',
+		};
+
+		expect(() => buildTheme(emptyDepth)).toThrow(
+			'light.depth.resting: must be a non-empty CSS box-shadow value',
+		);
+		expect(() => buildTheme(unsafeDepth)).toThrow(
+			'dark.depth.overlay: must be a non-empty CSS box-shadow value',
+		);
 	});
 });
 
