@@ -263,13 +263,18 @@ export const comboboxPopover = recipeInLayer('recipes', {
 				// RAC positions the popover with inline styles (`position`, `top`, `left`,
 				// `max-height`); cascade layers can't out-rank inline styles, only `!important`
 				// can — and these logical properties still beat RAC's physical ones.
-				insetBlockEnd: `var(${comboboxTrayKeyboardInsetVar}, 0px) !important`,
+				insetBlockEnd: '0 !important',
 				insetBlockStart: 'auto !important' as 'auto',
 				insetInline: '0 !important',
+				// The visual viewport height minus a top gap keeps the tray from filling the
+				// entire screen; the keyboard inset and safe-area padding below lift content
+				// above the keyboard so interactive options are always reachable.
 				maxBlockSize: `calc(var(${comboboxTrayViewportHeightVar}, 100dvh) - ${vars.space.xxlarge}) !important`,
 				minInlineSize: 'auto !important' as 'auto',
-				// iPhone home indicator safe area.
-				paddingBlockEnd: 'env(safe-area-inset-bottom, 0px)',
+				// The tray always extends to the physical bottom of the viewport. The keyboard
+				// inset or home-indicator safe area becomes padding that lifts interactive
+				// content above the on-screen keyboard — whichever is larger wins.
+				paddingBlockEnd: `max(var(${comboboxTrayKeyboardInsetVar}, 0px), env(safe-area-inset-bottom, 0px))`,
 				position: 'fixed !important' as 'fixed',
 
 				selectors: {

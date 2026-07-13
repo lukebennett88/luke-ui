@@ -21,10 +21,7 @@ import {
 ## Anatomy
 
 `ComboboxInput` owns the React Aria `ComboBox` state. Render the control, popover, listbox, and
-items inside it. Below the `small` breakpoint `ComboboxPopover` renders as a full-width bottom tray
-instead of a positioned popover; see
-[Mobile tray](/docs/components/forms/combobox-field#mobile-tray) on the `ComboboxField` page for
-details.
+items inside it. `ComboboxPopover` positions the listbox relative to the control.
 
 ```tsx
 <ComboboxInput defaultItems={countries} aria-label="Country">

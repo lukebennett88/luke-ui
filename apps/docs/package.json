@@ -9,7 +9,7 @@
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "fumadocs-mdx && tsc --noEmit",
 		"clean": "rm -rf .source .tanstack .turbo .output dist src/routeTree.gen.ts",
-		"dev": "vp dev",
+		"dev": "vp dev --host",
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
 		"fix:unsafe": "vp lint . --type-aware --fix-dangerously",
