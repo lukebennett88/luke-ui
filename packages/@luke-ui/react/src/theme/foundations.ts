@@ -88,7 +88,7 @@ export const machinedEdgeFoundation: ThemeFoundation = {
 
 /**
  * Foundation for ELMO, the materially minimal bundled theme. Its light mode approximates the flat,
- * hairline-bordered Luke UI look with the blue `#0160ae`-family accent; its dark mode is net-new.
+ * hairline-bordered Luke UI look with the blue `#185281`-family accent; its dark mode is net-new.
  */
 export const elmoFoundation: ThemeFoundation = {
 	dark: {
@@ -134,7 +134,7 @@ export const elmoFoundation: ThemeFoundation = {
 			].join(', '),
 		},
 		color: {
-			accent: '#0160ae',
+			accent: '#185281',
 			danger: '#c0262e',
 			info: '#1d39c4',
 			neutral: '#ffffff',
