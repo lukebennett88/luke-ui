@@ -136,6 +136,8 @@ describe('buildTheme output', () => {
 			for (const mode of ['light', 'dark'] as const) {
 				expect(foundation[mode].depth.resting).not.toContain('inset');
 				expect(foundation[mode].depth.raised).not.toContain('inset');
+				expect(foundation[mode].depth.resting.split(', ')).toHaveLength(2);
+				expect(foundation[mode].depth.raised.split(', ')).toHaveLength(2);
 				expect(foundation[mode].depth.recessed).toBe('none');
 			}
 		}
