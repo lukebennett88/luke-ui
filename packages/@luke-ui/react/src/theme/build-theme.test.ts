@@ -1,0 +1,333 @@
+import { describe, expect, it } from 'vite-plus/test';
+import { elmoThemeClassName, machinedEdgeThemeClassName } from '../themes/index.js';
+import { buildTheme, ThemeContrastError, themeClassName } from './build-theme.js';
+import { contrastRatio, parseColor } from './color.js';
+import { flattenThemeContract } from './contract.js';
+import type { ThemeFoundation } from './foundation.js';
+import {
+	defaultFontWeights,
+	defaultRadius,
+	defaultSourceColors,
+	deriveConcentricRadius,
+} from './foundation.js';
+import { elmoFoundation, machinedEdgeFoundation } from './foundations.js';
+
+const pairs = flattenThemeContract();
+const isModePath = (path: string) => path.startsWith('color.') || path.startsWith('depth.');
+const modeVarNames = pairs.filter(([path]) => isModePath(path)).map(([, varName]) => varName);
+const identityVarNames = pairs.filter(([path]) => !isModePath(path)).map(([, varName]) => varName);
+
+/**
+ * Splits the generated stylesheet into its five rule blocks: identity, base light, media-query
+ * dark, explicit light, and explicit dark.
+ */
+function splitBlocks(css: string) {
+	const blocks = css.split('\n\n').filter((block) => block.trim() !== '');
+	if (blocks.length !== 5) throw new Error(`expected 5 rule blocks, found ${blocks.length}`);
+	const [identity, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
+	if (
+		identity === undefined ||
+		baseLight === undefined ||
+		mediaDark === undefined ||
+		explicitLight === undefined ||
+		explicitDark === undefined
+	) {
+		throw new Error('expected every generated theme rule block to be defined');
+	}
+	return { baseLight, explicitDark, explicitLight, identity, mediaDark };
+}
+
+function countOccurrences(text: string, needle: string): number {
+	return text.split(needle).length - 1;
+}
+
+function extractValue(block: string, varName: string): string {
+	const match = new RegExp(`${varName}: ([^;]+);`).exec(block);
+	if (match === null || match[1] === undefined) {
+		throw new Error(`missing ${varName} in block`);
+	}
+	return match[1];
+}
+
+describe('buildTheme output', () => {
+	const css = buildTheme(machinedEdgeFoundation);
+	const blocks = splitBlocks(css);
+
+	it('emits the identity class, colour schemes, and all mode scoping rules', () => {
+		expect(css).toContain('.luke-ui-theme-machined-edge {');
+		expect(css).toContain('@media (prefers-color-scheme: dark) {');
+		expect(blocks.baseLight).toContain('color-scheme: light;');
+		expect(blocks.mediaDark).toContain('color-scheme: dark;');
+		for (const mode of ['light', 'dark']) {
+			expect(css).toContain(`.luke-ui-theme-machined-edge[data-color-mode='${mode}'],`);
+			expect(css).toContain(`.luke-ui-theme-machined-edge [data-color-mode='${mode}'],`);
+			expect(css).toContain(`[data-color-mode='${mode}'] .luke-ui-theme-machined-edge {`);
+		}
+	});
+
+	it('declares every identity variable exactly once in the identity block', () => {
+		const counts = identityVarNames.map((varName) => [
+			varName,
+			countOccurrences(blocks.identity, `${varName}: `),
+		]);
+		expect(counts).toEqual(identityVarNames.map((varName) => [varName, 1]));
+		const modeCounts = modeVarNames.map((varName) =>
+			countOccurrences(blocks.identity, `${varName}: `),
+		);
+		expect(modeCounts).toEqual(modeVarNames.map(() => 0));
+	});
+
+	it('declares every colour and depth variable exactly once per mode block', () => {
+		const modeBlocks = [
+			blocks.baseLight,
+			blocks.mediaDark,
+			blocks.explicitLight,
+			blocks.explicitDark,
+		];
+		for (const block of modeBlocks) {
+			const counts = modeVarNames.map((varName) => [
+				varName,
+				countOccurrences(block, `${varName}: `),
+			]);
+			expect(counts).toEqual(modeVarNames.map((varName) => [varName, 1]));
+			const identityCounts = identityVarNames.map((varName) =>
+				countOccurrences(block, `${varName}: `),
+			);
+			expect(identityCounts).toEqual(identityVarNames.map(() => 0));
+		}
+	});
+
+	it('emits every colour value in OKLCH', () => {
+		const colorVarNames = pairs
+			.filter(([path]) => path.startsWith('color.'))
+			.map(([, varName]) => varName);
+		for (const block of [blocks.baseLight, blocks.mediaDark]) {
+			const nonOklch = colorVarNames.filter(
+				(varName) => !extractValue(block, varName).startsWith('oklch('),
+			);
+			expect(nonOklch).toEqual([]);
+		}
+	});
+
+	it('uses the stable kebab-case variable names', () => {
+		expect(css).toContain('--luke-color-intent-danger-surface-solid-hover');
+		expect(css).toContain('--luke-color-surface-disabled');
+		expect(css).toContain('--luke-color-intent-accent-text-hover');
+		expect(css).toContain('--luke-depth-raised');
+		expect(css).toContain('--luke-space-100:');
+		expect(css).toContain('--luke-control-size-small');
+		expect(css).toContain('--luke-motion-easing-standard');
+		expect(css).toContain('--luke-font-weight-body');
+		expect(css).toContain('--luke-font-100-font-size: 12px');
+		expect(css).toContain('--luke-font-300-line-height: 24px');
+		expect(css).toContain('--luke-font-900-letter-spacing: -0.025em');
+		expect(css).toContain('--luke-icon-size-xsmall: 16px');
+		expect(css).toContain('--luke-icon-size-large: 32px');
+	});
+});
+
+describe('concentric corners', () => {
+	it('derives the outer radius from semantic inner-radius and gap values', () => {
+		expect(deriveConcentricRadius('var(--luke-radius-control)', 'var(--luke-space-200)')).toBe(
+			'calc(var(--luke-radius-control) + var(--luke-space-200))',
+		);
+	});
+});
+
+describe('buildTheme defaults', () => {
+	const minimalFoundation: ThemeFoundation = {
+		dark: machinedEdgeFoundation.dark,
+		light: machinedEdgeFoundation.light,
+		name: 'minimal-check',
+	};
+
+	it('fills omitted optional fields with the documented defaults', () => {
+		const explicitFoundation: ThemeFoundation = {
+			dark: {
+				color: { ...minimalFoundation.dark.color, ...defaultSourceColors.dark },
+				material: minimalFoundation.dark.material,
+			},
+			light: {
+				color: { ...minimalFoundation.light.color, ...defaultSourceColors.light },
+				material: minimalFoundation.light.material,
+			},
+			name: 'minimal-check',
+			radius: { ...defaultRadius },
+			typography: { fontFamily: 'inter', fontWeight: { ...defaultFontWeights } },
+		};
+		const css = buildTheme(minimalFoundation);
+		expect(css).toBe(buildTheme(explicitFoundation));
+		for (const varName of modeVarNames) {
+			expect(css).toContain(`${varName}: `);
+		}
+		expect(css).toContain('--luke-color-border-focus: oklch(');
+	});
+});
+
+describe('buildTheme independent modes', () => {
+	it('derives each mode from its own sources rather than inverting light', () => {
+		const greenPurpleFoundation: ThemeFoundation = {
+			dark: {
+				...machinedEdgeFoundation.dark,
+				color: { ...machinedEdgeFoundation.dark.color, accent: 'oklch(0.75 0.12 300)' },
+			},
+			light: {
+				...machinedEdgeFoundation.light,
+				color: { ...machinedEdgeFoundation.light.color, accent: 'oklch(0.5 0.13 150)' },
+			},
+			name: 'green-purple',
+		};
+		const blocks = splitBlocks(buildTheme(greenPurpleFoundation));
+		const solidVar = '--luke-color-intent-accent-surface-solid';
+		const lightSolid = parseColor(extractValue(blocks.baseLight, solidVar));
+		const darkSolid = parseColor(extractValue(blocks.mediaDark, solidVar));
+		expect(lightSolid.h).toBeCloseTo(150, 0);
+		expect(darkSolid.h).toBeCloseTo(300, 0);
+		expect(extractValue(blocks.baseLight, solidVar)).not.toBe(
+			extractValue(blocks.mediaDark, solidVar),
+		);
+	});
+});
+
+describe('buildTheme contrast failures', () => {
+	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
+		const caught = (() => {
+			try {
+				buildTheme(foundation);
+				return null;
+			} catch (error) {
+				return error;
+			}
+		})();
+		if (caught instanceof ThemeContrastError) return caught;
+		throw new Error('expected buildTheme to throw ThemeContrastError');
+	}
+
+	it('rejects a low-contrast focus colour, naming mode, pair, and required ratio', () => {
+		const error = buildFailures({
+			...machinedEdgeFoundation,
+			light: {
+				...machinedEdgeFoundation.light,
+				color: { ...machinedEdgeFoundation.light.color, focus: '#c5d9ff' },
+			},
+			name: 'bad-focus',
+		});
+		const failure = error.failures.find(
+			(candidate) =>
+				candidate.foreground === 'color.border.focus' &&
+				candidate.background === 'color.surface.canvas',
+		);
+		expect(failure).toBeDefined();
+		expect(failure?.mode).toBe('light');
+		expect(failure?.required).toBe(3);
+		expect(failure?.ratio).toBeLessThan(3);
+		expect(error.message).toMatch(
+			/light: color\.border\.focus on color\.surface\.canvas — \d+\.\d\d:1 < 3:1/,
+		);
+	});
+
+	it('rejects a light dark-mode neutral through the text lightness windows', () => {
+		const error = buildFailures({
+			...machinedEdgeFoundation,
+			dark: {
+				...machinedEdgeFoundation.dark,
+				color: { ...machinedEdgeFoundation.dark.color, neutral: '#9a9a9a' },
+			},
+			name: 'bad-dark-neutral',
+		});
+		const failure = error.failures.find(
+			(candidate) =>
+				candidate.mode === 'dark' &&
+				candidate.foreground === 'color.text.primary' &&
+				candidate.background.startsWith('color.surface.'),
+		);
+		expect(failure).toBeDefined();
+		expect(failure?.required).toBe(4.5);
+		expect(error.message).toContain('dark: color.text.primary on color.surface.canvas');
+	});
+
+	it('rejects a mid-lightness accent that no onSolid colour can sit on', () => {
+		const error = buildFailures({
+			...machinedEdgeFoundation,
+			light: {
+				...machinedEdgeFoundation.light,
+				color: { ...machinedEdgeFoundation.light.color, accent: '#7a7a7a' },
+			},
+			name: 'bad-accent',
+		});
+		const onSolidFailures = error.failures.filter(
+			(candidate) => candidate.foreground === 'color.intent.accent.onSolid',
+		);
+		expect(onSolidFailures.length).toBeGreaterThan(0);
+		expect(onSolidFailures[0]?.background).toMatch(/^color\.intent\.accent\.surface\.solid/);
+		expect(error.message).toContain('light: color.intent.accent.onSolid');
+	});
+
+	it('aggregates every failing pair into one error', () => {
+		const error = buildFailures({
+			...machinedEdgeFoundation,
+			light: {
+				...machinedEdgeFoundation.light,
+				color: {
+					...machinedEdgeFoundation.light.color,
+					accent: '#7a7a7a',
+					focus: '#c5d9ff',
+				},
+			},
+			name: 'bad-both',
+		});
+		const foregrounds = new Set(error.failures.map((failure) => failure.foreground));
+		expect(foregrounds.has('color.border.focus')).toBe(true);
+		expect(foregrounds.has('color.intent.accent.onSolid')).toBe(true);
+		expect(error.failures.length).toBeGreaterThan(2);
+		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
+	});
+});
+
+describe('bundled themes meet WCAG 2.2 AA', () => {
+	const surfaceVarNames = [
+		'--luke-color-surface-canvas',
+		'--luke-color-surface-resting',
+		'--luke-color-surface-recessed',
+		'--luke-color-surface-floating',
+		'--luke-color-surface-overlay',
+	];
+
+	for (const foundation of [machinedEdgeFoundation, elmoFoundation]) {
+		it(`${foundation.name} passes recomputed text and border contrast in both modes`, () => {
+			const blocks = splitBlocks(buildTheme(foundation));
+			for (const block of [blocks.baseLight, blocks.mediaDark]) {
+				const textPrimary = parseColor(extractValue(block, '--luke-color-text-primary'));
+				const borderControl = parseColor(extractValue(block, '--luke-color-border-control'));
+				const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
+				for (const varName of surfaceVarNames) {
+					const surface = parseColor(extractValue(block, varName));
+					expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
+				}
+				expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
+			}
+		});
+	}
+});
+
+describe('bundled theme identity', () => {
+	it('exports class-name constants that match the emitted identity classes', () => {
+		expect(machinedEdgeThemeClassName).toBe('luke-ui-theme-machined-edge');
+		expect(elmoThemeClassName).toBe('luke-ui-theme-elmo');
+		expect(buildTheme(machinedEdgeFoundation)).toContain(`.${machinedEdgeThemeClassName} {`);
+		expect(buildTheme(elmoFoundation)).toContain(`.${elmoThemeClassName} {`);
+	});
+
+	it('keeps the bundled themes isolated from each other', () => {
+		expect(buildTheme(elmoFoundation)).not.toContain(machinedEdgeThemeClassName);
+		expect(buildTheme(machinedEdgeFoundation)).not.toContain(elmoThemeClassName);
+	});
+
+	it('rejects theme names that are not kebab-case', () => {
+		expect(() => themeClassName('Machined Edge')).toThrow(/kebab-case/);
+		expect(() => themeClassName('-leading')).toThrow(/kebab-case/);
+		expect(() => themeClassName('double--hyphen')).toThrow(/kebab-case/);
+		expect(() => themeClassName('9lives')).toThrow(/kebab-case/);
+		expect(themeClassName('machined-edge')).toBe('luke-ui-theme-machined-edge');
+	});
+});

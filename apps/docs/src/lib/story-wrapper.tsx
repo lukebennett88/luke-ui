@@ -1,6 +1,5 @@
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
 
 type StoryWrapperProps = { children: ReactNode };
@@ -10,8 +9,9 @@ export function StoryWrapper({ children }: StoryWrapperProps) {
 		<div
 			style={{
 				alignItems: 'center',
-				backgroundColor: vars.backgroundColor.default,
-				color: vars.foregroundColor.primary,
+				// Interim plain values; docs theming is rewired against the new theme contract in #96.
+				backgroundColor: '#fff',
+				color: '#212121',
 				display: 'flex',
 				justifyContent: 'center',
 				minBlockSize: '6rem',

@@ -1,6 +1,5 @@
 import { Heading } from '@luke-ui/react/heading';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
 import type { ColorTokenValue } from '@luke-ui/react/tokens';
 import {
 	colorToCssString,
@@ -13,6 +12,7 @@ import ColorJs from 'colorjs.io';
 import type { CSSProperties } from 'react';
 import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
+import { vars } from '../theme.css.js';
 
 type StoryTokenGroup = {
 	$type: string;

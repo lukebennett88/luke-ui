@@ -1,9 +1,9 @@
 import { Button } from '@luke-ui/react/button';
 import { createSprinkles } from '@luke-ui/react/styles';
-import { vars } from '@luke-ui/react/theme';
 import { mergeProps } from '@luke-ui/react/utils';
 import type { CSSProperties } from 'react';
 import preview from '../../.storybook/preview.js';
+import { vars } from '../theme.css.js';
 
 const meta = preview.meta({
 	title: 'Foundation/Utilities',

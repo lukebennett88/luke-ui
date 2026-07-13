@@ -9,8 +9,13 @@ import packageJson from './package.json' with { type: 'json' };
 
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
-const preservedDistFiles = new Set(['spritesheet.svg', 'docs']);
-const assetExports = ['./stylesheet.css', './spritesheet.svg'];
+const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
+const assetExports = [
+	'./stylesheet.css',
+	'./spritesheet.svg',
+	'./themes/machined-edge.css',
+	'./themes/elmo.css',
+];
 
 async function cleanDistExceptPreservedFiles() {
 	let entries: Array<string>;
