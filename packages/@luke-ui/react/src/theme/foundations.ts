@@ -6,6 +6,14 @@ import type { ThemeFoundation } from './foundation.js';
  */
 export const machinedEdgeFoundation: ThemeFoundation = {
 	dark: {
+		actionControlFinish: {
+			raised:
+				'radial-gradient(80% 70% at 50% 0%, rgb(255 255 255 / 0.18) 0%, transparent 100%), radial-gradient(70% 45% at 50% 110%, rgb(255 255 255 / 0.1) 0%, transparent 70%)',
+			recessed:
+				'radial-gradient(80% 70% at 50% 0%, rgb(255 255 255 / 0.08) 0%, transparent 100%), radial-gradient(70% 45% at 50% 110%, rgb(255 255 255 / 0.04) 0%, transparent 70%)',
+			resting:
+				'radial-gradient(80% 70% at 50% 0%, rgb(255 255 255 / 0.14) 0%, transparent 100%), radial-gradient(70% 45% at 50% 110%, rgb(255 255 255 / 0.07) 0%, transparent 70%)',
+		},
 		color: {
 			accent: 'oklch(0.75 0.1 200)',
 			neutral: 'oklch(0.25 0.015 210)',
@@ -31,6 +39,14 @@ export const machinedEdgeFoundation: ThemeFoundation = {
 		},
 	},
 	light: {
+		actionControlFinish: {
+			raised:
+				'radial-gradient(80% 70% at 50% 0%, rgb(255 255 255 / 0.3) 0%, transparent 100%), radial-gradient(70% 45% at 50% 110%, rgb(255 255 255 / 0.16) 0%, transparent 70%)',
+			recessed:
+				'radial-gradient(80% 70% at 50% 0%, rgb(255 255 255 / 0.12) 0%, transparent 100%), radial-gradient(70% 45% at 50% 110%, rgb(255 255 255 / 0.06) 0%, transparent 70%)',
+			resting:
+				'radial-gradient(80% 70% at 50% 0%, rgb(255 255 255 / 0.24) 0%, transparent 100%), radial-gradient(70% 45% at 50% 110%, rgb(255 255 255 / 0.12) 0%, transparent 70%)',
+		},
 		color: {
 			accent: 'oklch(0.52 0.11 200)',
 			neutral: 'oklch(0.975 0.008 210)',
@@ -58,6 +74,13 @@ export const machinedEdgeFoundation: ThemeFoundation = {
  */
 export const elmoFoundation: ThemeFoundation = {
 	dark: {
+		actionControlFinish: {
+			raised:
+				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.1) 0%, transparent 100%), radial-gradient(80% 50% at 50% 110%, rgb(255 255 255 / 0.05) 0%, transparent 70%)',
+			recessed: 'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.04) 0%, transparent 100%)',
+			resting:
+				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.07) 0%, transparent 100%), radial-gradient(80% 50% at 50% 110%, rgb(255 255 255 / 0.03) 0%, transparent 70%)',
+		},
 		color: {
 			accent: 'oklch(0.7 0.11 250)',
 			neutral: 'oklch(0.22 0.01 250)',
@@ -77,6 +100,13 @@ export const elmoFoundation: ThemeFoundation = {
 		},
 	},
 	light: {
+		actionControlFinish: {
+			raised:
+				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.2) 0%, transparent 100%), radial-gradient(80% 50% at 50% 110%, rgb(255 255 255 / 0.1) 0%, transparent 70%)',
+			recessed: 'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.08) 0%, transparent 100%)',
+			resting:
+				'radial-gradient(90% 75% at 50% 0%, rgb(255 255 255 / 0.16) 0%, transparent 100%), radial-gradient(80% 50% at 50% 110%, rgb(255 255 255 / 0.07) 0%, transparent 70%)',
+		},
 		color: {
 			accent: '#0160ae',
 			danger: '#c0262e',

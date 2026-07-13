@@ -13,7 +13,8 @@ import {
 import { elmoFoundation, machinedEdgeFoundation } from './foundations.js';
 
 const pairs = flattenThemeContract();
-const isModePath = (path: string) => path.startsWith('color.') || path.startsWith('depth.');
+const isModePath = (path: string) =>
+	path.startsWith('actionControlFinish.') || path.startsWith('color.') || path.startsWith('depth.');
 const modeVarNames = pairs.filter(([path]) => isModePath(path)).map(([, varName]) => varName);
 const identityVarNames = pairs.filter(([path]) => !isModePath(path)).map(([, varName]) => varName);
 
@@ -114,6 +115,7 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-color-surface-disabled');
 		expect(css).toContain('--luke-color-intent-accent-text-hover');
 		expect(css).toContain('--luke-depth-raised');
+		expect(css).toContain('--luke-action-control-finish-resting');
 		expect(css).toContain('--luke-space-100:');
 		expect(css).toContain('--luke-control-size-small');
 		expect(css).toContain('--luke-motion-easing-standard');
@@ -162,10 +164,12 @@ describe('buildTheme defaults', () => {
 	it('fills omitted optional fields with the documented defaults', () => {
 		const explicitFoundation: ThemeFoundation = {
 			dark: {
+				actionControlFinish: minimalFoundation.dark.actionControlFinish,
 				color: { ...minimalFoundation.dark.color, ...defaultSourceColors.dark },
 				depth: minimalFoundation.dark.depth,
 			},
 			light: {
+				actionControlFinish: minimalFoundation.light.actionControlFinish,
 				color: { ...minimalFoundation.light.color, ...defaultSourceColors.light },
 				depth: minimalFoundation.light.depth,
 			},

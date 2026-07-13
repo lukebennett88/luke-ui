@@ -92,6 +92,7 @@ export const themeContractTree = {
 		},
 	},
 	depth: { recessed: null, resting: null, raised: null, floating: null, overlay: null },
+	actionControlFinish: { recessed: null, resting: null, raised: null },
 	font: {
 		100: { fontSize: null, letterSpacing: null, lineHeight: null },
 		200: { fontSize: null, letterSpacing: null, lineHeight: null },

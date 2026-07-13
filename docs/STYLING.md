@@ -35,8 +35,13 @@ carry forward the `xsmall`, `small`, `medium`, and `large` scale at 16px, 20px, 
 
 Each colour mode authors the final composite `box-shadow` for `depth.recessed`, `depth.resting`,
 `depth.raised`, `depth.floating`, and `depth.overlay`. Components select a semantic depth and do not
-branch on the theme identity. This keeps reflected light, lower edges, and exterior shadows visible
-in the foundation instead of deriving them from strength multipliers and hidden formulas.
+branch on the theme identity. This keeps lower edges and exterior shadows visible in the foundation
+instead of deriving them from strength multipliers and hidden formulas.
+
+Each mode also authors final `background-image` values for `actionControlFinish.resting`,
+`actionControlFinish.raised`, and `actionControlFinish.recessed`. Button and IconButton layer this
+face lighting over their semantic surface colour. Ghost controls and forced-colours rendering do not
+use the authored finish.
 
 Use `deriveConcentricRadius(innerRadius, gap)` for rounded elements nested inside another rounded
 surface. It returns a CSS `calc()` value for the outer radius, so both inputs can be semantic theme

@@ -77,12 +77,24 @@ export interface ThemeFoundation {
 	};
 }
 
-/** The per-mode authored inputs: source colours and final depth treatments. */
+/** The per-mode authored inputs: source colours, action-control finish, and depth treatments. */
 export interface ThemeModeFoundation {
+	/** Final `background-image` values for the shared Button and IconButton face finish. */
+	actionControlFinish: ActionControlFinishFoundation;
 	/** Source colours the semantic colour contract is generated from. */
 	color: ThemeSourceColors;
 	/** Final composite `box-shadow` values for the semantic depth ladder. */
 	depth: ThemeDepthFoundation;
+}
+
+/** Authored action-control face lighting for one colour mode. */
+export interface ActionControlFinishFoundation {
+	/** Face lighting for a pressed control. */
+	recessed: string;
+	/** Face lighting for a resting control. */
+	resting: string;
+	/** Face lighting for a hovered control. */
+	raised: string;
 }
 
 /**

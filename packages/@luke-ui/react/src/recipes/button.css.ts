@@ -6,6 +6,7 @@ const base = styleInLayer('recipes', {
 	'@media': {
 		'(forced-colors: active)': {
 			backgroundColor: 'ButtonFace',
+			backgroundImage: 'none',
 			borderColor: 'ButtonText',
 			boxShadow: 'none',
 			color: 'ButtonText',
@@ -184,14 +185,20 @@ function appearance(tone: Tone, variant: 'solid' | 'subtle', surface: Surface, c
 	return [
 		{
 			style: {
+				'@media': {
+					'(forced-colors: active)': { backgroundImage: 'none' },
+				},
 				backgroundColor: surface[prefix],
+				backgroundImage: vars.actionControlFinish.resting,
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundColor: surface[`${prefix}Hover`],
+						backgroundImage: vars.actionControlFinish.raised,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundColor: surface[`${prefix}Pressed`],
+						backgroundImage: vars.actionControlFinish.recessed,
 					},
 				},
 			},
@@ -205,6 +212,7 @@ function ghostAppearance(tone: Tone, color: string) {
 	return {
 		style: {
 			backgroundColor: 'transparent',
+			backgroundImage: 'none',
 			borderColor: 'transparent',
 			boxShadow: 'none',
 			color,

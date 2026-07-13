@@ -203,6 +203,9 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	for (const [name, value] of Object.entries(modeFoundation.depth)) {
 		values[`depth.${name}`] = value;
 	}
+	for (const [name, value] of Object.entries(modeFoundation.actionControlFinish)) {
+		values[`actionControlFinish.${name}`] = value;
+	}
 	return { failures, values };
 }
 
@@ -553,6 +556,13 @@ function validateFoundation(foundation: ThemeFoundation): void {
 				issues.push(`${mode}.depth.${name}: must be a non-empty CSS box-shadow value`);
 			}
 		}
+		for (const [name, value] of Object.entries(modeFoundation.actionControlFinish)) {
+			if (value.trim() === '' || /[;{}]/.test(value)) {
+				issues.push(
+					`${mode}.actionControlFinish.${name}: must be a non-empty CSS background-image value`,
+				);
+			}
+		}
 	}
 	const fontFamily = foundation.typography?.fontFamily;
 	if (fontFamily !== undefined && !(fontFamily in themeFontFamilyStacks)) {
@@ -589,7 +599,10 @@ function assembleStylesheet(
 ): string {
 	const selector = `.${themeClassName(foundation.name)}`;
 	const pairs = flattenThemeContract();
-	const isModePath = (path: string) => path.startsWith('color.') || path.startsWith('depth.');
+	const isModePath = (path: string) =>
+		path.startsWith('actionControlFinish.') ||
+		path.startsWith('color.') ||
+		path.startsWith('depth.');
 	const identityPairs = pairs.filter(([path]) => !isModePath(path));
 	const modePairs = pairs.filter(([path]) => isModePath(path));
 

@@ -33,11 +33,16 @@ test('small and medium share the control geometry contract', () => {
 
 test('hover raises and press recesses without scale', () => {
 	const control = mountButton();
+	const restingFinish = getComputedStyle(control).backgroundImage;
+	expect(restingFinish).not.toBe('none');
 	control.dataset.hovered = 'true';
+	const raisedFinish = getComputedStyle(control).backgroundImage;
+	expect(raisedFinish).not.toBe(restingFinish);
 	expect(getComputedStyle(control).transform).toBe('matrix(1, 0, 0, 1, 0, -1)');
 
 	delete control.dataset.hovered;
 	control.dataset.pressed = 'true';
+	expect(getComputedStyle(control).backgroundImage).not.toBe(restingFinish);
 	const pressedTransform = getComputedStyle(control).transform;
 	expect(pressedTransform).toBe('matrix(1, 0, 0, 1, 0, 1)');
 	expect(pressedTransform.startsWith('matrix(1, 0, 0, 1')).toBe(true);
@@ -51,8 +56,22 @@ test('disabled preserves resting material and ignores interaction', () => {
 	disabled.dataset.pressed = 'true';
 
 	expect(getComputedStyle(disabled).boxShadow).toBe(getComputedStyle(resting).boxShadow);
+	expect(getComputedStyle(disabled).backgroundImage).toBe(
+		getComputedStyle(resting).backgroundImage,
+	);
 	expect(getComputedStyle(disabled).opacity).toBe('0.55');
 	expect(getComputedStyle(disabled).transform).toBe('matrix(1, 0, 0, 1, 0, 0)');
+});
+
+test('pending keeps the resting finish and ghost has no authored finish', () => {
+	const resting = mountButton();
+	const pending = mountButton();
+	pending.dataset.pending = 'true';
+	pending.dataset.hovered = 'true';
+	const ghost = mountButton({ variant: 'ghost' });
+
+	expect(getComputedStyle(pending).backgroundImage).toBe(getComputedStyle(resting).backgroundImage);
+	expect(getComputedStyle(ghost).backgroundImage).toBe('none');
 });
 
 test('focus uses the independent semantic ring', () => {
