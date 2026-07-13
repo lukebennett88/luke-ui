@@ -16,6 +16,8 @@ test('defaults to accent solid with medium geometry', () => {
 	const style = getComputedStyle(control);
 
 	expect(style.blockSize).toBe('40px');
+	expect(style.borderColor).toBe('rgba(0, 0, 0, 0)');
+	expect(style.borderWidth).toBe('1px');
 	expect(style.minBlockSize).toBe('24px');
 	expect(style.minInlineSize).toBe('24px');
 	expect(style.transform).toBe('matrix(1, 0, 0, 1, 0, 0)');

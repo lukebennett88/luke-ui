@@ -39,6 +39,7 @@ const base = styleInLayer('recipes', {
 	},
 	alignItems: 'center',
 	appearance: 'none',
+	borderColor: 'transparent',
 	borderRadius: vars.radius.control,
 	borderStyle: 'solid',
 	borderWidth: '1px',
@@ -180,12 +181,10 @@ type Surface = {
 
 function appearance(tone: Tone, variant: 'solid' | 'subtle', surface: Surface, color: string) {
 	const prefix = variant === 'solid' ? 'solid' : 'subtle';
-	const borderColor = getBorderColor(tone, variant, surface[prefix]);
 	return [
 		{
 			style: {
 				backgroundColor: surface[prefix],
-				borderColor,
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
@@ -199,13 +198,6 @@ function appearance(tone: Tone, variant: 'solid' | 'subtle', surface: Surface, c
 			variants: { tone, variant },
 		},
 	];
-}
-
-function getBorderColor(tone: Tone, variant: 'solid' | 'subtle', solidSurface: string) {
-	if (variant === 'solid') return solidSurface;
-	if (tone === 'neutral') return vars.color.border.control;
-
-	return vars.color.intent[tone].border;
 }
 
 function ghostAppearance(tone: Tone, color: string) {
