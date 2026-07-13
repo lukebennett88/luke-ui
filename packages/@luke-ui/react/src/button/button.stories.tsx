@@ -2,6 +2,7 @@ import type { ButtonProps } from '@luke-ui/react/button';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import type { CSSProperties } from 'react';
+import { expect, fn, userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { vars } from '../theme.css.js';
 
@@ -15,7 +16,8 @@ const baseArgs = {
 	children: 'Button',
 } satisfies Partial<ButtonProps>;
 
-const tones: Array<NonNullable<ButtonProps['tone']>> = ['primary', 'critical', 'ghost', 'neutral'];
+const tones: Array<NonNullable<ButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
+const appearances: Array<NonNullable<ButtonProps['appearance']>> = ['solid', 'subtle', 'ghost'];
 
 const sizes: Array<NonNullable<ButtonProps['size']>> = ['small', 'medium'];
 
@@ -51,17 +53,20 @@ const truncationContainerStyle = {
 } as const satisfies CSSProperties;
 
 /**
- * Button tone communicates emphasis. Use `primary` for default actions and
- * `critical`, `ghost`, or `neutral` for alternate intent.
+ * Tone communicates intent. Appearance controls the action's visual emphasis.
  */
-export const Tone = meta.story({
+export const ToneAndAppearance = meta.story({
 	args: baseArgs,
 	render: (props) => (
-		<div style={rowStyle}>
+		<div style={stackStyle}>
 			{tones.map((tone) => (
-				<Button key={tone} tone={tone} {...props}>
-					{tone}
-				</Button>
+				<div key={tone} style={rowStyle}>
+					{appearances.map((appearance) => (
+						<Button appearance={appearance} key={appearance} tone={tone} {...props}>
+							{tone} {appearance}
+						</Button>
+					))}
+				</div>
 			))}
 		</div>
 	),
@@ -131,7 +136,10 @@ export const IconContent = meta.story({
  * pending states are rendered directly.
  */
 export const States = meta.story({
-	args: baseArgs,
+	args: {
+		...baseArgs,
+		onPress: fn(),
+	},
 	render: (props) => (
 		<div style={rowStyle}>
 			<Button {...props}>Default</Button>
@@ -143,6 +151,26 @@ export const States = meta.story({
 			</Button>
 		</div>
 	),
+	play: async ({ args, canvas, step }) => {
+		const pending = canvas.getByRole('button', { name: 'Pending' });
+		const disabled = canvas.getByRole('button', { name: 'Disabled' });
+		const busyCue = canvas.getByRole('progressbar', { hidden: true });
+
+		await step('pending remains focusable, busy, and non-interactive', async () => {
+			await userEvent.tab();
+			await userEvent.tab();
+			await expect(pending).toHaveFocus();
+			await expect(pending).toHaveAttribute('aria-disabled', 'true');
+			await expect(getComputedStyle(busyCue).color).toBe(getComputedStyle(pending).outlineColor);
+			await userEvent.click(pending);
+			await expect(args.onPress).not.toHaveBeenCalled();
+		});
+
+		await step('pending uses the disabled visual treatment', async () => {
+			await expect(getComputedStyle(pending).opacity).toBe('0.55');
+			await expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(disabled).boxShadow);
+		});
+	},
 });
 
 /**
@@ -178,4 +206,13 @@ export const Truncation = meta.story({
 			<Button {...props} />
 		</div>
 	),
+	play: async ({ canvas }) => {
+		const label = canvas.getByText(
+			'This a really really really really long string of text that should truncate instead of wrapping',
+		);
+
+		await expect(getComputedStyle(label).textOverflow).toBe('ellipsis');
+		await expect(getComputedStyle(label).whiteSpace).toBe('nowrap');
+		await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
+	},
 });

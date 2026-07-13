@@ -34,8 +34,9 @@ export type { ThemeContrastFailure } from './build-theme.js';
 
 /** The typed theme-foundation contract accepted by `buildTheme`. */
 export type {
+	ActionControlFinishFoundation,
+	ThemeDepthFoundation,
 	ThemeFoundation,
-	ThemeMaterialProfile,
 	ThemeModeFoundation,
 	ThemeSourceColors,
 } from './foundation.js';

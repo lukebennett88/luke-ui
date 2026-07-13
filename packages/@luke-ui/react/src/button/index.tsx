@@ -2,17 +2,21 @@ import type { JSX, ReactNode } from 'react';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.css.js';
 import type * as primitiveStyles from '../recipes/button.css.js';
-import { BUTTON_FONT_SIZE } from '../sizing/button-sizing.js';
 import { Text } from '../text/index.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
 import { Button as PrimitiveButton } from './primitive/index.js';
 
-interface ComposedButtonVariantProps extends NonNullable<styles.ButtonLabelVariants> {}
+interface ComposedButtonRecipeProps extends NonNullable<styles.ButtonLabelVariants> {}
 
-interface PrimitiveButtonVariantProps extends NonNullable<primitiveStyles.ButtonVariants> {}
+interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonVariants> {}
 
 interface ButtonStyleProps {
+	/**
+	 * Visual emphasis.
+	 * @default 'solid'
+	 */
+	appearance?: PrimitiveButtonRecipeProps['appearance'];
 	/**
 	 * Icon shown after the label.
 	 */
@@ -21,30 +25,30 @@ interface ButtonStyleProps {
 	 * Whether the button takes up the full inline size of its container.
 	 * @default false
 	 */
-	isBlock?: PrimitiveButtonVariantProps['isBlock'];
+	isBlock?: PrimitiveButtonRecipeProps['isBlock'];
 	/**
 	 * Shows pending button styles. When true, a spinner overlays the label.
 	 * @default false
 	 */
-	isPending?: ComposedButtonVariantProps['isPending'];
+	isPending?: ComposedButtonRecipeProps['isPending'];
 	/**
 	 * Sets the button size.
 	 * @default 'medium'
 	 */
-	size?: PrimitiveButtonVariantProps['size'];
+	size?: PrimitiveButtonRecipeProps['size'];
 	/**
 	 * Icon shown before the label.
 	 */
 	startIcon?: ReactNode;
 	/**
 	 * Visual tone. Controls colour scheme.
-	 * @default 'primary'
+	 * @default 'neutral'
 	 */
-	tone?: PrimitiveButtonVariantProps['tone'];
+	tone?: PrimitiveButtonRecipeProps['tone'];
 }
 
 /**
- * Composed button with size, tone, pending, and block variants.
+ * Composed button with size, tone, appearance, pending, and block options.
  *
  * @tier composed
  */
@@ -69,14 +73,7 @@ export function Button(props: ButtonProps): JSX.Element {
 					)}
 					<span className={styles.buttonLabel({ isPending })}>
 						{startIcon}
-						<Text
-							color="inherit"
-							fontSize={BUTTON_FONT_SIZE[size]}
-							fontWeight="inherit"
-							lineClamp={1}
-							lineHeight="nospace"
-							shouldDisableTrim
-						>
+						<Text color="inherit" elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}
 						</Text>
 						{endIcon}

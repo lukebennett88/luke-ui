@@ -1,146 +1,236 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
-import { vars } from '../styles/vars.css.js';
+import { vars } from '../theme/contract.css.js';
 
 const base = styleInLayer('recipes', {
 	'@media': {
 		'(forced-colors: active)': {
+			backgroundColor: 'ButtonFace',
+			backgroundImage: 'none',
 			borderColor: 'ButtonText',
+			boxShadow: 'none',
+			color: 'ButtonText',
+			forcedColorAdjust: 'auto',
 			selectors: {
-				'&:disabled': {
+				'&[data-focus-visible="true"]': {
+					outlineColor: 'Highlight',
+				},
+				'&[data-disabled="true"]': {
 					borderColor: 'GrayText',
 					color: 'GrayText',
+					opacity: 1,
 				},
-				'&:enabled:hover': {
-					backgroundColor: 'Highlight',
-					borderColor: 'Highlight',
-					color: 'HighlightText',
+				'&[data-pending="true"]::after': {
+					borderColor: 'ButtonText',
+					borderInlineEndColor: 'transparent',
+				},
+				'&[data-pending="true"]': {
+					opacity: 1,
+				},
+			},
+			transform: 'none',
+		},
+		'(prefers-reduced-motion: reduce)': {
+			selectors: {
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					transform: 'none',
+				},
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					transform: 'none',
 				},
 			},
 		},
 	},
 	alignItems: 'center',
 	appearance: 'none',
-	backgroundColor: vars.backgroundColor.default,
-	borderColor: vars.border.default,
-	borderRadius: vars.borderRadius.medium,
+	borderColor: 'transparent',
+	borderRadius: vars.radius.control,
 	borderStyle: 'solid',
-	borderWidth: vars.borderWidth.thin,
+	borderWidth: '1px',
+	boxShadow: vars.depth.resting,
+	boxSizing: 'border-box',
+	cursor: 'pointer',
 	display: 'inline-flex',
-	fontFamily: vars.font.family.body,
-	fontWeight: vars.font.weight.medium,
-	gap: vars.space.xsmall,
+	fontFamily: vars.font.family,
+	fontWeight: vars.font.weight.label,
+	isolation: 'isolate',
 	justifyContent: 'center',
-	lineHeight: vars.font.lineHeight.nospace,
-	minInlineSize: 0,
-
-	selectors: {
-		'&:disabled': {
-			backgroundColor: vars.backgroundColor.disabled,
-			borderColor: vars.backgroundColor.disabled,
-			color: vars.foregroundColor.disabled,
-		},
-		'&:enabled:active': {
-			scale: 0.98,
-		},
-	},
+	letterSpacing: vars.font[200].letterSpacing,
+	lineHeight: vars.font[200].lineHeight,
+	minBlockSize: '24px',
+	minInlineSize: '24px',
+	outlineColor: 'transparent',
+	outlineOffset: '2px',
+	outlineStyle: 'solid',
+	outlineWidth: '2px',
+	position: 'relative',
 	textDecoration: 'none',
-	transition:
-		'color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events',
+	transform: 'translateY(0)',
 	transitionDuration: vars.motion.duration.fast,
+	transitionProperty: 'background-color, border-color, box-shadow, color, opacity, transform',
 	transitionTimingFunction: vars.motion.easing.standard,
 	whiteSpace: 'nowrap',
+	selectors: {
+		'&[data-disabled="true"]': {
+			cursor: 'not-allowed',
+			opacity: 0.55,
+		},
+		'&[data-focus-visible="true"]': {
+			outlineColor: vars.color.border.focus,
+		},
+		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+			boxShadow: vars.depth.raised,
+			transform: 'translateY(-1px)',
+		},
+		'&[data-pending="true"]': {
+			cursor: 'wait',
+			opacity: 0.55,
+		},
+		'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+			boxShadow: vars.depth.recessed,
+			transform: 'translateY(1px)',
+		},
+	},
 });
 
-/** Vanilla-extract recipe for the `Button` primitive's button styles. */
+/** Semantic appearance and material recipe shared by Button and IconButton. */
 export const button = recipeInLayer('recipes', {
 	base,
 	defaultVariants: {
+		appearance: 'solid',
 		isBlock: false,
 		size: 'medium',
-		tone: 'primary',
+		tone: 'neutral',
 	},
 	variants: {
+		appearance: {
+			ghost: {},
+			solid: {},
+			subtle: {},
+		},
 		isBlock: {
 			false: {},
-			true: {
-				inlineSize: '100%',
-			},
+			true: { inlineSize: '100%' },
 		},
 		size: {
 			medium: {
 				blockSize: vars.controlSize.medium,
-				fontSize: vars.font.size.standard,
-				paddingInline: vars.space.medium,
+				fontSize: vars.font[200].fontSize,
+				gap: vars.space[200],
+				paddingInline: vars.space[400],
 			},
 			small: {
 				blockSize: vars.controlSize.small,
-				fontSize: vars.font.size.small,
-				paddingInline: vars.space.small,
+				fontSize: vars.font[100].fontSize,
+				gap: vars.space[100],
+				letterSpacing: vars.font[100].letterSpacing,
+				lineHeight: vars.font[100].lineHeight,
+				paddingInline: vars.space[300],
 			},
 		},
 		tone: {
-			critical: {
-				backgroundColor: vars.backgroundColor.criticalBold,
-				borderColor: vars.backgroundColor.criticalBold,
-				color: vars.themeColor.buttonColor,
+			accent: {},
+			danger: {},
+			neutral: {},
+		},
+	},
+	compoundVariants: [
+		...appearance(
+			'neutral',
+			'solid',
+			vars.color.intent.neutral.surface,
+			vars.color.intent.neutral.onSolid,
+		),
+		...appearance(
+			'accent',
+			'solid',
+			vars.color.intent.accent.surface,
+			vars.color.intent.accent.onSolid,
+		),
+		...appearance(
+			'danger',
+			'solid',
+			vars.color.intent.danger.surface,
+			vars.color.intent.danger.onSolid,
+		),
+		...appearance('neutral', 'subtle', vars.color.intent.neutral.surface, vars.color.text.primary),
+		...appearance(
+			'accent',
+			'subtle',
+			vars.color.intent.accent.surface,
+			vars.color.intent.accent.text,
+		),
+		...appearance(
+			'danger',
+			'subtle',
+			vars.color.intent.danger.surface,
+			vars.color.intent.danger.text,
+		),
+		ghostAppearance('neutral', vars.color.text.primary),
+		ghostAppearance('accent', vars.color.intent.accent.text),
+		ghostAppearance('danger', vars.color.intent.danger.text),
+	],
+});
+
+export type ButtonVariants = RecipeVariants<typeof button>;
+
+type Tone = 'neutral' | 'accent' | 'danger';
+type Surface = {
+	solid: string;
+	solidHover: string;
+	solidPressed: string;
+	subtle: string;
+	subtleHover: string;
+	subtlePressed: string;
+};
+
+function appearance(tone: Tone, appearance: 'solid' | 'subtle', surface: Surface, color: string) {
+	const prefix = appearance === 'solid' ? 'solid' : 'subtle';
+	return [
+		{
+			style: {
+				'@media': {
+					'(forced-colors: active)': { backgroundImage: 'none' },
+				},
+				backgroundColor: surface[prefix],
+				backgroundImage: vars.actionControlFinish.resting,
+				color,
 				selectors: {
-					'&:enabled:active': {
-						backgroundColor: vars.backgroundColor.criticalBoldPressed,
-						borderColor: vars.backgroundColor.criticalBoldPressed,
+					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+						backgroundColor: surface[`${prefix}Hover`],
+						backgroundImage: vars.actionControlFinish.raised,
 					},
-					'&:enabled:hover': {
-						backgroundColor: vars.backgroundColor.criticalBoldHover,
-						borderColor: vars.backgroundColor.criticalBoldHover,
+					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+						backgroundColor: surface[`${prefix}Pressed`],
+						backgroundImage: vars.actionControlFinish.recessed,
 					},
 				},
 			},
-			ghost: {
-				backgroundColor: 'transparent',
-				borderColor: 'transparent',
-				color: vars.foregroundColor.neutralBold,
-				selectors: {
-					'&:enabled:active': {
-						backgroundColor: vars.backgroundColor.neutralPressed,
-						borderColor: vars.backgroundColor.neutralPressed,
-					},
-					'&:enabled:hover': {
-						backgroundColor: vars.backgroundColor.neutralHover,
-						borderColor: vars.backgroundColor.neutralHover,
-					},
+			variants: { appearance, tone },
+		},
+	];
+}
+
+function ghostAppearance(tone: Tone, color: string) {
+	const surface = vars.color.intent[tone].surface;
+	return {
+		style: {
+			backgroundColor: 'transparent',
+			backgroundImage: 'none',
+			borderColor: 'transparent',
+			boxShadow: 'none',
+			color,
+			selectors: {
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: surface.subtleHover,
+					boxShadow: vars.depth.raised,
 				},
-			},
-			neutral: {
-				backgroundColor: vars.backgroundColor.default,
-				borderColor: vars.border.default,
-				color: vars.foregroundColor.primary,
-				selectors: {
-					'&:enabled:active': {
-						backgroundColor: vars.backgroundColor.pressed,
-					},
-					'&:enabled:hover': {
-						backgroundColor: vars.backgroundColor.hover,
-					},
-				},
-			},
-			primary: {
-				backgroundColor: vars.themeColor.buttonBackgroundColor,
-				borderColor: vars.themeColor.buttonBorderColor,
-				color: vars.themeColor.buttonColor,
-				selectors: {
-					'&:enabled:active': {
-						backgroundColor: vars.themeColor.buttonBackgroundColorActive,
-						borderColor: vars.themeColor.buttonBorderColorActive,
-					},
-					'&:enabled:hover': {
-						backgroundColor: vars.themeColor.buttonBackgroundColorHover,
-						borderColor: vars.themeColor.buttonBorderColorHover,
-					},
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: surface.subtlePressed,
+					boxShadow: vars.depth.recessed,
 				},
 			},
 		},
-	},
-});
-
-/** Variant type for the `Button` recipe. */
-export type ButtonVariants = RecipeVariants<typeof button>;
+		variants: { appearance: 'ghost' as const, tone },
+	};
+}

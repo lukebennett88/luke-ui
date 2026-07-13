@@ -13,7 +13,8 @@ import {
 import { elmoFoundation, machinedEdgeFoundation } from './foundations.js';
 
 const pairs = flattenThemeContract();
-const isModePath = (path: string) => path.startsWith('color.') || path.startsWith('depth.');
+const isModePath = (path: string) =>
+	path.startsWith('actionControlFinish.') || path.startsWith('color.') || path.startsWith('depth.');
 const modeVarNames = pairs.filter(([path]) => isModePath(path)).map(([, varName]) => varName);
 const identityVarNames = pairs.filter(([path]) => !isModePath(path)).map(([, varName]) => varName);
 
@@ -114,6 +115,7 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-color-surface-disabled');
 		expect(css).toContain('--luke-color-intent-accent-text-hover');
 		expect(css).toContain('--luke-depth-raised');
+		expect(css).toContain('--luke-action-control-finish-resting');
 		expect(css).toContain('--luke-space-100:');
 		expect(css).toContain('--luke-control-size-small');
 		expect(css).toContain('--luke-motion-easing-standard');
@@ -123,6 +125,47 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-font-900-letter-spacing: -0.025em');
 		expect(css).toContain('--luke-icon-size-xsmall: 16px');
 		expect(css).toContain('--luke-icon-size-large: 32px');
+	});
+
+	it('emits the authored semantic depth values without synthesising material layers', () => {
+		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(
+			machinedEdgeFoundation.light.depth.resting,
+		);
+		expect(extractValue(blocks.mediaDark, '--luke-depth-raised')).toBe(
+			machinedEdgeFoundation.dark.depth.raised,
+		);
+		for (const foundation of [machinedEdgeFoundation, elmoFoundation]) {
+			for (const mode of ['light', 'dark'] as const) {
+				expect(foundation[mode].depth.resting).not.toContain('inset');
+				expect(foundation[mode].depth.raised).not.toContain('inset');
+				expect(foundation[mode].depth.resting.split(', ')).toHaveLength(2);
+				expect(foundation[mode].depth.raised.split(', ')).toHaveLength(2);
+				expect(foundation[mode].depth.recessed).toBe('none');
+			}
+		}
+	});
+
+	it('keeps ELMO softer than Machined edge while retaining finish and state depth', () => {
+		const elmoBlocks = splitBlocks(buildTheme(elmoFoundation));
+		for (const [elmoBlock, machinedBlock] of [
+			[elmoBlocks.baseLight, blocks.baseLight],
+			[elmoBlocks.mediaDark, blocks.mediaDark],
+		] as const) {
+			const elmoResting = extractValue(elmoBlock, '--luke-depth-resting');
+			const elmoRaised = extractValue(elmoBlock, '--luke-depth-raised');
+			const elmoFinish = extractValue(elmoBlock, '--luke-action-control-finish-resting');
+
+			expect(extractValue(machinedBlock, '--luke-depth-resting')).toContain('0 2px 0');
+			expect(elmoResting).not.toContain('0 2px 0');
+			expect(elmoRaised).not.toContain('0 3px 0');
+			expect(elmoResting.split(', ')).toHaveLength(2);
+			expect(elmoRaised.split(', ')).toHaveLength(2);
+			expect(elmoRaised).not.toBe(elmoResting);
+			expect(elmoFinish).toContain('radial-gradient');
+			expect(elmoFinish).not.toBe(
+				extractValue(machinedBlock, '--luke-action-control-finish-resting'),
+			);
+		}
 	});
 });
 
@@ -144,12 +187,14 @@ describe('buildTheme defaults', () => {
 	it('fills omitted optional fields with the documented defaults', () => {
 		const explicitFoundation: ThemeFoundation = {
 			dark: {
+				actionControlFinish: minimalFoundation.dark.actionControlFinish,
 				color: { ...minimalFoundation.dark.color, ...defaultSourceColors.dark },
-				material: minimalFoundation.dark.material,
+				depth: minimalFoundation.dark.depth,
 			},
 			light: {
+				actionControlFinish: minimalFoundation.light.actionControlFinish,
 				color: { ...minimalFoundation.light.color, ...defaultSourceColors.light },
-				material: minimalFoundation.light.material,
+				depth: minimalFoundation.light.depth,
 			},
 			name: 'minimal-check',
 			radius: { ...defaultRadius },
@@ -161,6 +206,34 @@ describe('buildTheme defaults', () => {
 			expect(css).toContain(`${varName}: `);
 		}
 		expect(css).toContain('--luke-color-border-focus: oklch(');
+	});
+});
+
+describe('buildTheme foundation validation', () => {
+	it('rejects empty or stylesheet-breaking depth values', () => {
+		const emptyDepth: ThemeFoundation = {
+			...machinedEdgeFoundation,
+			light: {
+				...machinedEdgeFoundation.light,
+				depth: { ...machinedEdgeFoundation.light.depth, resting: ' ' },
+			},
+			name: 'empty-depth',
+		};
+		const unsafeDepth: ThemeFoundation = {
+			...machinedEdgeFoundation,
+			dark: {
+				...machinedEdgeFoundation.dark,
+				depth: { ...machinedEdgeFoundation.dark.depth, overlay: 'none; color: red' },
+			},
+			name: 'unsafe-depth',
+		};
+
+		expect(() => buildTheme(emptyDepth)).toThrow(
+			'light.depth.resting: must be a non-empty CSS box-shadow value',
+		);
+		expect(() => buildTheme(unsafeDepth)).toThrow(
+			'dark.depth.overlay: must be a non-empty CSS box-shadow value',
+		);
 	});
 });
 

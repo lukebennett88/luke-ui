@@ -1,10 +1,11 @@
-import { themeRootClassName } from '@luke-ui/react/theme';
-import { cx } from '@luke-ui/react/utils';
+import '@luke-ui/react/themes/elmo.css';
+import '@luke-ui/react/themes/machined-edge.css';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type { ReactNode } from 'react';
 import { lazy, Suspense } from 'react';
+import { DocsThemeRoot } from '../components/theme-controls';
 import appCss from '../styles/app.css?url';
 
 const SearchDialog = lazy(() => import('../components/search'));
@@ -50,8 +51,10 @@ function RootDocument({ children }: { children: ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body className={cx(themeRootClassName, 'flex min-h-screen flex-col')}>
-				<RootProvider search={{ SearchDialog: LazySearchDialog }}>{children}</RootProvider>
+			<body className="flex min-h-screen flex-col">
+				<RootProvider search={{ SearchDialog: LazySearchDialog }}>
+					<DocsThemeRoot>{children}</DocsThemeRoot>
+				</RootProvider>
 				<Scripts />
 			</body>
 		</html>

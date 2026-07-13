@@ -2,7 +2,7 @@ import { iconNames } from '@luke-ui/react/icon';
 import type { IconButtonProps } from '@luke-ui/react/icon-button';
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
+import { expect, fn, userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -13,9 +13,12 @@ const meta = preview.meta({
 
 const baseArgs = {
 	icon: 'add',
+	size: 'medium',
 } satisfies Partial<IconButtonProps>;
 
 const sizes: Array<NonNullable<IconButtonProps['size']>> = ['small', 'medium'];
+const tones: Array<NonNullable<IconButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
+const appearances: Array<NonNullable<IconButtonProps['appearance']>> = ['solid', 'subtle', 'ghost'];
 
 const flexWrapStyle = {
 	display: 'flex',
@@ -26,8 +29,44 @@ const flexWrapStyle = {
 export const Default = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Add' },
 	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('button', { name: 'Add' })).toBeInTheDocument();
+		const button = canvas.getByRole('button', { name: 'Add' });
+		const icon = button.getElementsByTagName('svg').item(0);
+		if (!icon) throw new Error('IconButton did not render an icon');
+
+		const buttonBounds = button.getBoundingClientRect();
+		const iconBounds = icon.getBoundingClientRect();
+
+		await expect(button).toBeInTheDocument();
+		await expect(getComputedStyle(button).blockSize).toBe('40px');
+		await expect(getComputedStyle(button).inlineSize).toBe('40px');
+		await expect(iconBounds.x + iconBounds.width / 2).toBeCloseTo(
+			buttonBounds.x + buttonBounds.width / 2,
+		);
+		await expect(iconBounds.y + iconBounds.height / 2).toBeCloseTo(
+			buttonBounds.y + buttonBounds.height / 2,
+		);
+		await userEvent.tab();
+		await expect(button).toHaveFocus();
 	},
+});
+
+export const Appearance = meta.story({
+	args: { ...baseArgs, 'aria-label': 'Action' },
+	render: (props) => (
+		<div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(3, max-content)' }}>
+			{tones.flatMap((tone) => {
+				return appearances.map((appearance) => (
+					<IconButton
+						{...props}
+						appearance={appearance}
+						aria-label={`${tone} ${appearance}`}
+						key={`${tone}-${appearance}`}
+						tone={tone}
+					/>
+				));
+			})}
+		</div>
+	),
 });
 
 export const Sizes = meta.story({
@@ -53,6 +92,42 @@ export const Disabled = meta.story({
 			))}
 		</div>
 	),
+});
+
+export const States = meta.story({
+	args: {
+		...baseArgs,
+		'aria-label': 'Action',
+		onPress: fn(),
+	},
+	render: (props) => (
+		<div style={flexWrapStyle}>
+			<IconButton {...props} aria-label="Default" />
+			<IconButton {...props} aria-label="Disabled" isDisabled />
+			<IconButton {...props} aria-label="Pending" isPending />
+		</div>
+	),
+	play: async ({ args, canvas, step }) => {
+		const disabled = canvas.getByRole('button', { name: 'Disabled' });
+		const pending = canvas.getByRole('button', { name: 'Pending' });
+
+		await step('pending remains focusable, busy, and non-interactive', async () => {
+			await userEvent.tab();
+			await userEvent.tab();
+			await expect(pending).toHaveFocus();
+			await expect(pending).toHaveAttribute('aria-disabled', 'true');
+			await expect(getComputedStyle(pending, '::after').borderTopColor).toBe(
+				getComputedStyle(pending).outlineColor,
+			);
+			await userEvent.click(pending);
+			await expect(args.onPress).not.toHaveBeenCalled();
+		});
+
+		await step('pending uses the disabled visual treatment', async () => {
+			await expect(getComputedStyle(pending).opacity).toBe('0.55');
+			await expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(disabled).boxShadow);
+		});
+	},
 });
 
 export const AllIcons = meta.story({

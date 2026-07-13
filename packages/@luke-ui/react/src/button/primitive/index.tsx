@@ -7,25 +7,33 @@ import * as styles from '../../recipes/button.css.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import { cx } from '../../utils/index.js';
 
-interface ButtonVariantProps extends NonNullable<styles.ButtonVariants> {}
+interface ButtonRecipeProps extends NonNullable<styles.ButtonVariants> {}
 
 interface ButtonStyleProps {
+	/**
+	 * Visual emphasis.
+	 * @default 'solid'
+	 */
+	appearance?: ButtonRecipeProps['appearance'];
 	/**
 	 * Whether the button takes up the full inline size of its container.
 	 * @default false
 	 */
-	isBlock?: ButtonVariantProps['isBlock'];
+	isBlock?: ButtonRecipeProps['isBlock'];
 	/**
 	 * Sets the button size.
 	 * @default 'medium'
 	 */
-	size?: ButtonVariantProps['size'];
-	/** Visual tone. Controls colour scheme. */
-	tone?: ButtonVariantProps['tone'];
+	size?: ButtonRecipeProps['size'];
+	/**
+	 * Visual tone. Controls colour scheme.
+	 * @default 'neutral'
+	 */
+	tone?: ButtonRecipeProps['tone'];
 }
 
 /**
- * Primitive button — a bare `<button>` styled with size, tone, and block variants.
+ * Primitive button — a bare `<button>` styled with size, tone, appearance, and block options.
  * Library-author audience: use this when you need full control over children layout.
  *
  * @tier primitive
@@ -36,12 +44,13 @@ export interface ButtonProps
 /** Primitive button. See `ButtonProps`. */
 export function Button(props: ButtonProps): JSX.Element {
 	const {
+		appearance = 'solid',
 		children,
 		isBlock = false,
 		isDisabled = false,
 		isPending = false,
 		size = 'medium',
-		tone,
+		tone = 'neutral',
 		...restProps
 	} = props;
 	const iconSize = BUTTON_ICON_SIZE[size];
@@ -51,9 +60,9 @@ export function Button(props: ButtonProps): JSX.Element {
 			<RacButton
 				{...restProps}
 				className={composeRenderProps(props.className, (className) => {
-					return cx(styles.button({ isBlock, size, tone }), className);
+					return cx(styles.button({ appearance, isBlock, size, tone }), className);
 				})}
-				isDisabled={isDisabled || isPending}
+				isDisabled={isDisabled}
 				isPending={isPending}
 			>
 				{children}

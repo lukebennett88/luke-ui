@@ -11,16 +11,21 @@ const THEMES = [
 type Theme = (typeof THEMES)[number]['value'];
 
 export function ThemeToggle() {
-	const { resolvedTheme, setTheme } = useTheme();
+	const { setTheme } = useTheme();
+	const theme = useHydratedTheme();
+
+	return <IconToggleButtonGroup label="Theme" onChange={setTheme} options={THEMES} value={theme} />;
+}
+
+export function useHydratedTheme(): Theme | null {
+	const { resolvedTheme } = useTheme();
 	const isMounted = useSyncExternalStore(
 		subscribeToHydration,
 		getHydratedSnapshot,
 		getServerSnapshot,
 	);
 
-	const theme = isMounted && isTheme(resolvedTheme) ? resolvedTheme : null;
-
-	return <IconToggleButtonGroup label="Theme" onChange={setTheme} options={THEMES} value={theme} />;
+	return isMounted && isTheme(resolvedTheme) ? resolvedTheme : null;
 }
 
 function isTheme(value: string | undefined): value is Theme {

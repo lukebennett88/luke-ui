@@ -1,9 +1,42 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
-import { vars } from '../styles/vars.css.js';
+import { vars } from '../theme/contract.css.js';
 
 export const iconButtonReset = styleInLayer('utilities', {
+	'@media': {
+		'(forced-colors: active)': {
+			selectors: {
+				'&[data-pending="true"]::after': {
+					borderColor: 'ButtonText',
+					borderInlineEndColor: 'transparent',
+				},
+			},
+		},
+	},
 	paddingInline: 0,
+	selectors: {
+		'&[data-pending="true"]::after': {
+			borderColor: vars.color.border.focus,
+			borderInlineEndColor: 'transparent',
+			borderRadius: vars.radius.full,
+			borderStyle: 'solid',
+			borderWidth: '2px',
+			blockSize: vars.iconSize.xsmall,
+			content: '',
+			inlineSize: vars.iconSize.xsmall,
+			position: 'absolute',
+		},
+	},
+});
+
+export const icon = recipeInLayer('recipes', {
+	defaultVariants: { isPending: false },
+	variants: {
+		isPending: {
+			false: {},
+			true: { opacity: 0 },
+		},
+	},
 });
 
 /** Vanilla-extract recipe for the `IconButton` primitive's styles. */

@@ -77,12 +77,24 @@ export interface ThemeFoundation {
 	};
 }
 
-/** The per-mode authored inputs: source colours and a material profile. */
+/** The per-mode authored inputs: source colours, action-control finish, and depth treatments. */
 export interface ThemeModeFoundation {
+	/** Final `background-image` values for the shared Button and IconButton face finish. */
+	actionControlFinish: ActionControlFinishFoundation;
 	/** Source colours the semantic colour contract is generated from. */
 	color: ThemeSourceColors;
-	/** The visible physical material properties the depth ladder is generated from. */
-	material: ThemeMaterialProfile;
+	/** Final composite `box-shadow` values for the semantic depth ladder. */
+	depth: ThemeDepthFoundation;
+}
+
+/** Authored action-control face lighting for one colour mode. */
+export interface ActionControlFinishFoundation {
+	/** Face lighting for a pressed control. */
+	recessed: string;
+	/** Face lighting for a resting control. */
+	resting: string;
+	/** Face lighting for a hovered control. */
+	raised: string;
 }
 
 /**
@@ -109,20 +121,18 @@ export interface ThemeSourceColors {
 	focus?: string;
 }
 
-/** Visible physical material properties for one mode. */
-export interface ThemeMaterialProfile {
-	/** Alpha of the top inner highlight line, 0 to 1. */
-	highlightStrength: number;
-	/** Alpha of the inset perimeter ring, 0 to 1. */
-	edgeStrength: number;
-	/** Colour of exterior and inset shadows. */
-	shadowColor: string;
-	/** Scale applied to exterior shadow alphas, 0 to 1. */
-	shadowStrength: number;
-	/** Blur character; scales shadow blur radii. */
-	blur: 'sharp' | 'soft';
-	/** Depth of the inset lower edge in pixels. */
-	lowerEdgeDepth: number;
+/** Authored composite `box-shadow` values for one colour mode. */
+export interface ThemeDepthFoundation {
+	/** Inset treatment for a pressed control or sunken surface. */
+	recessed: string;
+	/** Resting treatment for an interactive control or surface. */
+	resting: string;
+	/** Treatment for a hovered control or elevated surface. */
+	raised: string;
+	/** Treatment for a floating surface such as a menu. */
+	floating: string;
+	/** Treatment for a high-elevation surface such as a dialog. */
+	overlay: string;
 }
 
 /** Curated Capsize-compatible font stacks for each font-family choice. */

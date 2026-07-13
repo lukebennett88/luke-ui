@@ -1,12 +1,7 @@
 import type { Oklch } from './color.js';
 import { contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
-import type {
-	ThemeFoundation,
-	ThemeMaterialProfile,
-	ThemeModeFoundation,
-	ThemeSourceColors,
-} from './foundation.js';
+import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import {
 	defaultFontFamily,
 	defaultFontWeights,
@@ -205,7 +200,12 @@ function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	for (const [path, color] of Object.entries(colors)) {
 		values[path] = formatOklch(color);
 	}
-	Object.assign(values, buildDepthValues(modeFoundation.material));
+	for (const [name, value] of Object.entries(modeFoundation.depth)) {
+		values[`depth.${name}`] = value;
+	}
+	for (const [name, value] of Object.entries(modeFoundation.actionControlFinish)) {
+		values[`actionControlFinish.${name}`] = value;
+	}
 	return { failures, values };
 }
 
@@ -533,94 +533,6 @@ function validateContrast(
 	return failures;
 }
 
-function buildDepthValues(material: ThemeMaterialProfile): Record<string, string> {
-	const shadowColor = gamutMapOklch(parseColor(material.shadowColor));
-	const white: Oklch = { c: 0, h: 0, l: 1 };
-	const blurScale = material.blur === 'sharp' ? 0.75 : 1.5;
-
-	const highlight = shadowLayer({
-		alpha: material.highlightStrength,
-		color: white,
-		inset: true,
-		offsetY: 1,
-	});
-	const ring = shadowLayer({
-		alpha: material.edgeStrength,
-		color: shadowColor,
-		inset: true,
-		spread: 1,
-	});
-	const lowerEdge =
-		material.lowerEdgeDepth > 0
-			? shadowLayer({
-					alpha: material.edgeStrength,
-					color: shadowColor,
-					inset: true,
-					offsetY: -material.lowerEdgeDepth,
-				})
-			: null;
-	const exterior = (offsetY: number, blur: number, alphaBase: number) =>
-		shadowLayer({
-			alpha: alphaBase * material.shadowStrength,
-			blur: blur * blurScale,
-			color: shadowColor,
-			offsetY,
-		});
-	const innerTopShadow = shadowLayer({
-		alpha: 0.5 * material.shadowStrength,
-		blur: 2 * blurScale,
-		color: shadowColor,
-		inset: true,
-		offsetY: 1,
-	});
-
-	return {
-		'depth.recessed': composeShadow([innerTopShadow, ring]),
-		'depth.resting': composeShadow([highlight, ring, lowerEdge, exterior(1, 2, 0.35)]),
-		'depth.raised': composeShadow([
-			highlight,
-			ring,
-			lowerEdge,
-			exterior(2, 4, 0.5),
-			exterior(1, 2, 0.35),
-		]),
-		'depth.floating': composeShadow([ring, exterior(4, 12, 0.7), exterior(2, 4, 0.4)]),
-		'depth.overlay': composeShadow([ring, exterior(12, 32, 0.9), exterior(4, 12, 0.5)]),
-	};
-}
-
-interface ShadowLayer {
-	alpha: number;
-	blur?: number;
-	color: Oklch;
-	inset?: boolean;
-	offsetY?: number;
-	spread?: number;
-}
-
-function shadowLayer(layer: ShadowLayer): string | null {
-	if (layer.alpha <= 0) return null;
-	const parts = [
-		...(layer.inset === true ? ['inset'] : []),
-		'0',
-		pixels(layer.offsetY ?? 0),
-		pixels(layer.blur ?? 0),
-		...(layer.spread !== undefined ? [pixels(layer.spread)] : []),
-		formatOklch(layer.color, Math.min(layer.alpha, 1)),
-	];
-	return parts.join(' ');
-}
-
-function composeShadow(layers: Array<string | null>): string {
-	const present = layers.filter((layer) => layer !== null);
-	return present.length === 0 ? 'none' : present.join(', ');
-}
-
-function pixels(value: number): string {
-	if (value === 0) return '0';
-	return `${Number(value.toFixed(2)).toString()}px`;
-}
-
 function validateFoundation(foundation: ThemeFoundation): void {
 	const issues: Array<string> = [];
 	try {
@@ -639,20 +551,17 @@ function validateFoundation(foundation: ThemeFoundation): void {
 				issues.push(`${mode}.color.${field}: ${errorMessage(error)}`);
 			}
 		}
-		const material = modeFoundation.material;
-		for (const field of ['highlightStrength', 'edgeStrength', 'shadowStrength'] as const) {
-			const value = material[field];
-			if (!Number.isFinite(value) || value < 0 || value > 1) {
-				issues.push(`${mode}.material.${field}: must be a number between 0 and 1`);
+		for (const [name, value] of Object.entries(modeFoundation.depth)) {
+			if (value.trim() === '' || /[;{}]/.test(value)) {
+				issues.push(`${mode}.depth.${name}: must be a non-empty CSS box-shadow value`);
 			}
 		}
-		if (!Number.isFinite(material.lowerEdgeDepth) || material.lowerEdgeDepth < 0) {
-			issues.push(`${mode}.material.lowerEdgeDepth: must be a number of pixels, 0 or greater`);
-		}
-		try {
-			parseColor(material.shadowColor);
-		} catch (error) {
-			issues.push(`${mode}.material.shadowColor: ${errorMessage(error)}`);
+		for (const [name, value] of Object.entries(modeFoundation.actionControlFinish)) {
+			if (value.trim() === '' || /[;{}]/.test(value)) {
+				issues.push(
+					`${mode}.actionControlFinish.${name}: must be a non-empty CSS background-image value`,
+				);
+			}
 		}
 	}
 	const fontFamily = foundation.typography?.fontFamily;
@@ -690,7 +599,10 @@ function assembleStylesheet(
 ): string {
 	const selector = `.${themeClassName(foundation.name)}`;
 	const pairs = flattenThemeContract();
-	const isModePath = (path: string) => path.startsWith('color.') || path.startsWith('depth.');
+	const isModePath = (path: string) =>
+		path.startsWith('actionControlFinish.') ||
+		path.startsWith('color.') ||
+		path.startsWith('depth.');
 	const identityPairs = pairs.filter(([path]) => !isModePath(path));
 	const modePairs = pairs.filter(([path]) => isModePath(path));
 

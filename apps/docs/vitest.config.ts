@@ -2,6 +2,13 @@ import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
 
 export default defineConfig({
+	optimizeDeps: {
+		include: [
+			'next-themes',
+			'react-aria-components/ToggleButton',
+			'react-aria-components/ToggleButtonGroup',
+		],
+	},
 	test: {
 		passWithNoTests: true,
 		projects: [
