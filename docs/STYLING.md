@@ -3,7 +3,8 @@
 ## Setup
 
 Luke UI ships static CSS. Consumers import `@luke-ui/react/stylesheet.css` and apply
-`themeRootClassName` from `@luke-ui/react/theme` near the app root.
+`themeRootClassName` from `@luke-ui/react/theme` near the app root. Import one bundled theme
+stylesheet and apply its identity class to the same element. Neither step injects styles at runtime.
 
 ## Structure
 
@@ -46,7 +47,12 @@ Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Sett
 inside the subtree forces that mode, and nested scopes can override it. Every scope also sets native
 `color-scheme` so form controls and scrollbars agree.
 
-Components still consume the legacy tokens until #96 migrates them to the new contract.
+Components move to the semantic contract in the component-family migration slices.
+
+Luke UI's portalled Combobox popover carries the nearest identity class and explicit colour mode
+from its trigger. Portals created by an application must apply the same public class and attribute
+contract to their portal root. When no explicit mode exists, omit `data-color-mode` so the portalled
+surface continues to follow the system preference.
 
 ## Cascade layers
 
