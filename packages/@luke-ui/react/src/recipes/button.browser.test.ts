@@ -81,6 +81,7 @@ test('pending uses disabled-like resting material and ignores interaction styles
 	expect(getComputedStyle(pending).backgroundImage).toBe(getComputedStyle(resting).backgroundImage);
 	expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(resting).boxShadow);
 	expect(getComputedStyle(pending).opacity).toBe('0.55');
+	expect(getComputedStyle(pending).color).toBe(getComputedStyle(resting).color);
 	expect(getComputedStyle(pending).transform).toBe('matrix(1, 0, 0, 1, 0, 0)');
 	expect(getComputedStyle(ghost).backgroundImage).toBe('none');
 });

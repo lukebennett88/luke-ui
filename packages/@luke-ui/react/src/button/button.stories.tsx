@@ -154,12 +154,14 @@ export const States = meta.story({
 	play: async ({ args, canvas, step }) => {
 		const pending = canvas.getByRole('button', { name: 'Pending' });
 		const disabled = canvas.getByRole('button', { name: 'Disabled' });
+		const busyCue = canvas.getByRole('progressbar', { hidden: true });
 
 		await step('pending remains focusable, busy, and non-interactive', async () => {
 			await userEvent.tab();
 			await userEvent.tab();
 			await expect(pending).toHaveFocus();
 			await expect(pending).toHaveAttribute('aria-disabled', 'true');
+			await expect(getComputedStyle(busyCue).color).toBe(getComputedStyle(pending).outlineColor);
 			await userEvent.click(pending);
 			await expect(args.onPress).not.toHaveBeenCalled();
 		});

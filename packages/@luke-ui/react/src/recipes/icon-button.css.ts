@@ -3,10 +3,20 @@ import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 
 export const iconButtonReset = styleInLayer('utilities', {
+	'@media': {
+		'(forced-colors: active)': {
+			selectors: {
+				'&[data-pending="true"]::after': {
+					borderColor: 'ButtonText',
+					borderInlineEndColor: 'transparent',
+				},
+			},
+		},
+	},
 	paddingInline: 0,
 	selectors: {
 		'&[data-pending="true"]::after': {
-			borderColor: 'currentColor',
+			borderColor: vars.color.border.focus,
 			borderInlineEndColor: 'transparent',
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',
