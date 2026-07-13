@@ -20,6 +20,11 @@ export const iconButtonReset = styleInLayer('utilities', {
 });
 
 export const iconContent = recipeInLayer('recipes', {
+	base: {
+		alignItems: 'center',
+		display: 'inline-flex',
+		justifyContent: 'center',
+	},
 	defaultVariants: { isPending: false },
 	variants: {
 		isPending: {

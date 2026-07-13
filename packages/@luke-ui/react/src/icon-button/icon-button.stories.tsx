@@ -30,9 +30,21 @@ export const Default = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Add' },
 	play: async ({ canvas }) => {
 		const button = canvas.getByRole('button', { name: 'Add' });
+		const icon = button.getElementsByTagName('svg').item(0);
+		if (!icon) throw new Error('IconButton did not render an icon');
+
+		const buttonBounds = button.getBoundingClientRect();
+		const iconBounds = icon.getBoundingClientRect();
+
 		await expect(button).toBeInTheDocument();
 		await expect(getComputedStyle(button).blockSize).toBe('40px');
 		await expect(getComputedStyle(button).inlineSize).toBe('40px');
+		await expect(iconBounds.x + iconBounds.width / 2).toBeCloseTo(
+			buttonBounds.x + buttonBounds.width / 2,
+		);
+		await expect(iconBounds.y + iconBounds.height / 2).toBeCloseTo(
+			buttonBounds.y + buttonBounds.height / 2,
+		);
 		await userEvent.tab();
 		await expect(button).toHaveFocus();
 	},
