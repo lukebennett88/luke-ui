@@ -10,7 +10,8 @@
 	"type": "module",
 	"sideEffects": [
 		"**/*.css.ts",
-		"./dist/stylesheet.css"
+		"./dist/stylesheet.css",
+		"./dist/themes/*.css"
 	],
 	"exports": {
 		"./button": "./dist/button/index.js",
@@ -34,11 +35,14 @@
 		"./text-field": "./dist/text-field/index.js",
 		"./text-field/primitive": "./dist/text-field/primitive/index.js",
 		"./theme": "./dist/theme/index.js",
+		"./themes": "./dist/themes/index.js",
 		"./tokens": "./dist/tokens/index.js",
 		"./utils": "./dist/utils/index.js",
 		"./package.json": "./package.json",
 		"./stylesheet.css": "./dist/stylesheet.css",
-		"./spritesheet.svg": "./dist/spritesheet.svg"
+		"./spritesheet.svg": "./dist/spritesheet.svg",
+		"./themes/machined-edge.css": "./dist/themes/machined-edge.css",
+		"./themes/elmo.css": "./dist/themes/elmo.css"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -61,9 +65,10 @@
 		"fix:lint": "vp lint . --type-aware --fix",
 		"fix:unsafe": "vp lint . --type-aware --fix-dangerously",
 		"generate": "pnpm run generate:assets",
-		"generate:assets": "pnpm run generate:icons && pnpm run generate:color-tokens",
+		"generate:assets": "pnpm run generate:icons && pnpm run generate:color-tokens && pnpm run generate:themes",
 		"generate:color-tokens": "node scripts/generate-color-tokens.ts && vp fmt .generated/color-tokens.generated.ts --write",
 		"generate:icons": "tsx scripts/build-icons.ts",
+		"generate:themes": "tsx scripts/build-themes.ts",
 		"test": "pnpm run test:unit && pnpm run test:browser && pnpm run test:storybook && pnpm run test:visual",
 		"test:browser": "vp test run --project=browser",
 		"test:storybook": "vp test run --project=storybook",

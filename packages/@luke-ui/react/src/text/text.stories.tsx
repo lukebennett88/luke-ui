@@ -1,12 +1,12 @@
 import type { TextProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
 import { tokenKeys, tokens } from '@luke-ui/react/tokens';
 import { mergeProps } from '@luke-ui/react/utils';
 import type { CSSProperties } from 'react';
 import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { createSprinkles } from '../styles/index.js';
+import { vars } from '../theme.css.js';
 
 const meta = preview.meta({
 	component: Text,

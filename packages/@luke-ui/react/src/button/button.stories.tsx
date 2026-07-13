@@ -1,9 +1,9 @@
 import type { ButtonProps } from '@luke-ui/react/button';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
-import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import preview from '../../.storybook/preview.js';
+import { vars } from '../theme.css.js';
 
 const meta = preview.meta({
 	component: Button,
