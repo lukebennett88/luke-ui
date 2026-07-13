@@ -19,17 +19,9 @@ export const machinedEdgeFoundation: ThemeFoundation = {
 				'0 12px 32px oklch(0.05 0.01 220 / 0.5)',
 				'0 4px 12px oklch(0.05 0.01 220 / 0.28)',
 			].join(', '),
-			raised: [
-				'inset 0 2px 1px -1px oklch(1 0 0 / 0.18)',
-				'inset 0 -3px 1px -1px oklch(0.05 0.01 220 / 0.55)',
-				'0 3px 5px oklch(0.05 0.01 220 / 0.32)',
-			].join(', '),
-			recessed: 'inset 0 3px 4px -2px oklch(0.05 0.01 220 / 0.45)',
-			resting: [
-				'inset 0 2px 1px -1px oklch(1 0 0 / 0.18)',
-				'inset 0 -3px 1px -1px oklch(0.05 0.01 220 / 0.55)',
-				'0 2px 3px oklch(0.05 0.01 220 / 0.26)',
-			].join(', '),
+			raised: '0 3px 5px oklch(0.05 0.01 220 / 0.32)',
+			recessed: 'none',
+			resting: '0 2px 3px oklch(0.05 0.01 220 / 0.26)',
 		},
 	},
 	light: {
@@ -40,11 +32,9 @@ export const machinedEdgeFoundation: ThemeFoundation = {
 		depth: {
 			floating: '0 4px 12px oklch(0.3 0.03 220 / 0.16), 0 2px 4px oklch(0.3 0.03 220 / 0.1)',
 			overlay: '0 12px 32px oklch(0.3 0.03 220 / 0.2), 0 4px 12px oklch(0.3 0.03 220 / 0.12)',
-			raised:
-				'inset 0 2px 1px -1px oklch(1 0 0 / 0.65), inset 0 -3px 1px -1px oklch(0.3 0.03 220 / 0.32), 0 3px 5px oklch(0.3 0.03 220 / 0.2)',
-			recessed: 'inset 0 3px 4px -2px oklch(0.3 0.03 220 / 0.28)',
-			resting:
-				'inset 0 2px 1px -1px oklch(1 0 0 / 0.65), inset 0 -3px 1px -1px oklch(0.3 0.03 220 / 0.32), 0 2px 3px oklch(0.3 0.03 220 / 0.16)',
+			raised: '0 3px 5px oklch(0.3 0.03 220 / 0.2)',
+			recessed: 'none',
+			resting: '0 2px 3px oklch(0.3 0.03 220 / 0.16)',
 		},
 	},
 	name: 'machined-edge',
@@ -63,9 +53,9 @@ export const elmoFoundation: ThemeFoundation = {
 		depth: {
 			floating: '0 4px 14px oklch(0.12 0.01 250 / 0.25)',
 			overlay: '0 12px 36px oklch(0.12 0.01 250 / 0.32)',
-			raised: 'inset 0 2px 1px -1px oklch(1 0 0 / 0.08), 0 3px 7px oklch(0.12 0.01 250 / 0.22)',
-			recessed: 'inset 0 3px 5px -2px oklch(0.12 0.01 250 / 0.22)',
-			resting: 'inset 0 2px 1px -1px oklch(1 0 0 / 0.08), 0 2px 4px oklch(0.12 0.01 250 / 0.18)',
+			raised: '0 3px 7px oklch(0.12 0.01 250 / 0.22)',
+			recessed: 'none',
+			resting: '0 2px 4px oklch(0.12 0.01 250 / 0.18)',
 		},
 	},
 	light: {
@@ -80,9 +70,9 @@ export const elmoFoundation: ThemeFoundation = {
 		depth: {
 			floating: '0 4px 14px oklch(0.2 0.01 250 / 0.12)',
 			overlay: '0 12px 36px oklch(0.2 0.01 250 / 0.16)',
-			raised: 'inset 0 2px 1px -1px oklch(1 0 0 / 0.45), 0 3px 7px oklch(0.2 0.01 250 / 0.12)',
-			recessed: 'inset 0 3px 5px -2px oklch(0.2 0.01 250 / 0.14)',
-			resting: 'inset 0 2px 1px -1px oklch(1 0 0 / 0.45), 0 2px 4px oklch(0.2 0.01 250 / 0.08)',
+			raised: '0 3px 7px oklch(0.2 0.01 250 / 0.12)',
+			recessed: 'none',
+			resting: '0 2px 4px oklch(0.2 0.01 250 / 0.08)',
 		},
 	},
 	name: 'elmo',

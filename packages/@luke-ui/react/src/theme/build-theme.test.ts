@@ -132,7 +132,13 @@ describe('buildTheme output', () => {
 		expect(extractValue(blocks.mediaDark, '--luke-depth-raised')).toBe(
 			machinedEdgeFoundation.dark.depth.raised,
 		);
-		expect(machinedEdgeFoundation.light.depth.resting).not.toContain('inset 0 0');
+		for (const foundation of [machinedEdgeFoundation, elmoFoundation]) {
+			for (const mode of ['light', 'dark'] as const) {
+				expect(foundation[mode].depth.resting).not.toContain('inset');
+				expect(foundation[mode].depth.raised).not.toContain('inset');
+				expect(foundation[mode].depth.recessed).toBe('none');
+			}
+		}
 	});
 });
 
