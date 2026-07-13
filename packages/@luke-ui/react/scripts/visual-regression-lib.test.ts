@@ -54,3 +54,36 @@ test('accepts multiline calls with trailing commas', async () => {
 	const owners = await validateCaptureIds(root);
 	expect([...owners.keys()]).toEqual(['button/multiline']);
 });
+
+test('expands appearance capture IDs and rejects collisions with explicit captures', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-ids-'));
+	await writeFile(
+		path.join(root, 'matrix.visual.test.tsx'),
+		"captureVisualAppearance(scene, 'button/tones', appearance)",
+	);
+	await writeFile(
+		path.join(root, 'single.visual.test.tsx'),
+		"captureVisual(scene, 'button/tones-elmo-dark')",
+	);
+
+	await expect(validateCaptureIds(root)).rejects.toThrow(
+		'Duplicate visual capture ID button/tones-elmo-dark',
+	);
+});
+
+test('registers every independently named appearance capture', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-ids-'));
+	await writeFile(
+		path.join(root, 'matrix.visual.test.tsx'),
+		"captureVisualAppearance(scene, 'button/tones', appearance)",
+	);
+
+	const owners = await validateCaptureIds(root);
+
+	expect([...owners.keys()]).toEqual([
+		'button/tones-machined-edge-light',
+		'button/tones-machined-edge-dark',
+		'button/tones-elmo-light',
+		'button/tones-elmo-dark',
+	]);
+});

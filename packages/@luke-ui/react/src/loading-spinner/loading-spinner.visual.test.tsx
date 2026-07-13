@@ -1,11 +1,14 @@
-import type { CSSProperties } from 'react';
-import { test } from 'vite-plus/test';
+import type { CSSProperties, ReactNode } from 'react';
+import { expect, test } from 'vite-plus/test';
 import {
+	captureVisualAppearance,
 	captureVisual,
 	renderVisual,
 	Stack,
 	variantValuesFor,
+	visualAppearances,
 } from '../test-utils/render-visual.js';
+import { vars } from '../theme/index.js';
 import { LoadingSpinner } from './index.js';
 
 const rowStyle = {
@@ -43,3 +46,60 @@ test('sizes colors and modes', async () => {
 
 	await captureVisual(locator, 'loading-spinner/sizes-colors-modes');
 });
+
+test.each(visualAppearances)('theme matrix: $theme $mode', async (appearance) => {
+	const oppositeMode = appearance.mode === 'light' ? 'dark' : 'light';
+	const scene = renderVisual(
+		<div style={themeMatrixStyle}>
+			<ThemeMatrixScope label="Root scope">
+				<LoadingSpinner aria-label="Root theme" style={spinnerStyle} value={65} />
+			</ThemeMatrixScope>
+			<ThemeMatrixScope label="Opposite mode" mode={oppositeMode}>
+				<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} value={65} />
+			</ThemeMatrixScope>
+		</div>,
+		appearance,
+	);
+
+	await expect.element(scene).toHaveAttribute('data-color-mode', appearance.mode);
+	await captureVisualAppearance(scene, 'loading-spinner/theme-matrix', appearance);
+});
+
+const themeMatrixStyle = {
+	backgroundColor: vars.color.surface.canvas,
+	display: 'flex',
+	gap: '1rem',
+	padding: '1rem',
+} satisfies CSSProperties;
+
+const spinnerStyle = {
+	color: vars.color.intent.accent.text,
+} satisfies CSSProperties;
+
+function ThemeMatrixScope({
+	children,
+	label,
+	mode,
+}: {
+	children: ReactNode;
+	label: string;
+	mode?: 'light' | 'dark';
+}) {
+	return (
+		<div
+			data-color-mode={mode}
+			style={{
+				alignItems: 'center',
+				backgroundColor: vars.color.surface.resting,
+				border: `1px solid ${vars.color.border.decorative}`,
+				color: vars.color.text.primary,
+				display: 'flex',
+				gap: '0.5rem',
+				padding: '1rem',
+			}}
+		>
+			{children}
+			<span>{label}</span>
+		</div>
+	);
+}

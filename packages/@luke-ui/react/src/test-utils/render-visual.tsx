@@ -2,6 +2,8 @@
 
 // Loads the design-token stylesheet into the test document.
 import '../stylesheet.css.js';
+import '@luke-ui/react/themes/elmo.css';
+import '@luke-ui/react/themes/machined-edge.css';
 import type { ComponentProps, ComponentType, CSSProperties, ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -14,19 +16,36 @@ import { page, userEvent } from 'vite-plus/test/context';
 import spritesheetHref from '../../dist/spritesheet.svg?url';
 import { IconSpritesheetProvider } from '../icon/index.js';
 import { themeRootClassName } from '../theme/index.js';
+import { elmoThemeClassName, machinedEdgeThemeClassName } from '../themes/index.js';
+import { cx } from '../utils/index.js';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
+
+export type VisualAppearance = {
+	mode: 'light' | 'dark';
+	theme: 'machined-edge' | 'elmo';
+};
+
+export const visualAppearances = [
+	{ mode: 'light', theme: 'machined-edge' },
+	{ mode: 'dark', theme: 'machined-edge' },
+	{ mode: 'light', theme: 'elmo' },
+	{ mode: 'dark', theme: 'elmo' },
+] as const satisfies ReadonlyArray<VisualAppearance>;
+
+const defaultVisualAppearance: VisualAppearance = visualAppearances[0];
 
 /**
  * Renders `node` inside the same theme root and icon spritesheet provider the
  * app (and Storybook) wrap components with, then returns a Vitest locator for
  * the mounted subtree ready to pass to `captureVisual`.
  */
-export function renderVisual(node: ReactNode) {
+export function renderVisual(node: ReactNode, appearance = defaultVisualAppearance) {
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = themeRootClassName;
+	container.className = cx(themeRootClassName, getThemeClassName(appearance.theme));
+	container.dataset.colorMode = appearance.mode;
 	const root = createRoot(container);
 	mounted.push({ container, root });
 
@@ -37,6 +56,10 @@ export function renderVisual(node: ReactNode) {
 	return page.elementLocator(container);
 }
 
+function getThemeClassName(theme: VisualAppearance['theme']) {
+	return theme === 'machined-edge' ? machinedEdgeThemeClassName : elmoThemeClassName;
+}
+
 /** Captures a named scene into the revision output selected by the visual runner. */
 export async function captureVisual(locator: Locator, id: string) {
 	if (!/^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
@@ -44,6 +67,15 @@ export async function captureVisual(locator: Locator, id: string) {
 	}
 	const viewport = `${window.innerWidth}x${window.innerHeight}`;
 	await expect.element(locator).toMatchScreenshot(`${id}__viewport-${viewport}`);
+}
+
+/** Captures one look with a stable identity-and-mode suffix added to `id`. */
+export async function captureVisualAppearance(
+	locator: Locator,
+	id: string,
+	appearance: VisualAppearance,
+) {
+	await captureVisual(locator, `${id}-${appearance.theme}-${appearance.mode}`);
 }
 
 /** Unmounts everything rendered by `renderVisual`. Registered globally in `visual-setup.ts`. */
