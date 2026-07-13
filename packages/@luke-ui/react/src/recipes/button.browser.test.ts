@@ -11,11 +11,18 @@ afterEach(() => {
 	mounted = [];
 });
 
-test('defaults to accent solid with medium geometry', () => {
+test('defaults to neutral solid with medium geometry', () => {
 	const control = mountButton();
+	const neutralSolid = mountButton({ appearance: 'solid', tone: 'neutral' });
+	const accentSolid = mountButton({ appearance: 'solid', tone: 'accent' });
 	const style = getComputedStyle(control);
+	const neutralSolidStyle = getComputedStyle(neutralSolid);
 
 	expect(style.blockSize).toBe('40px');
+	expect(style.backgroundColor).toBe(neutralSolidStyle.backgroundColor);
+	expect(style.backgroundImage).toBe(neutralSolidStyle.backgroundImage);
+	expect(style.backgroundImage).not.toBe('none');
+	expect(style.backgroundColor).not.toBe(getComputedStyle(accentSolid).backgroundColor);
 	expect(style.borderColor).toBe('rgba(0, 0, 0, 0)');
 	expect(style.borderWidth).toBe('1px');
 	expect(style.minBlockSize).toBe('24px');
@@ -69,7 +76,7 @@ test('pending uses disabled-like resting material and ignores interaction styles
 	pending.dataset.pending = 'true';
 	pending.dataset.hovered = 'true';
 	pending.dataset.pressed = 'true';
-	const ghost = mountButton({ variant: 'ghost' });
+	const ghost = mountButton({ appearance: 'ghost' });
 
 	expect(getComputedStyle(pending).backgroundImage).toBe(getComputedStyle(resting).backgroundImage);
 	expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(resting).boxShadow);
@@ -89,12 +96,12 @@ test('focus uses the independent semantic ring', () => {
 	expect(style.boxShadow).not.toBe('none');
 });
 
-function mountButton(variants: Parameters<typeof button>[0] = {}) {
+function mountButton(options: Parameters<typeof button>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = `${themeRootClassName} ${machinedEdgeThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	const control = root.appendChild(document.createElement('button'));
-	control.className = button(variants);
+	control.className = button(options);
 	control.style.transition = 'none';
 	mounted.push(root);
 	return control;

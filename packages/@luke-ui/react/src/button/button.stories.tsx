@@ -17,7 +17,7 @@ const baseArgs = {
 } satisfies Partial<ButtonProps>;
 
 const tones: Array<NonNullable<ButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
-const variants: Array<NonNullable<ButtonProps['variant']>> = ['solid', 'subtle', 'ghost'];
+const appearances: Array<NonNullable<ButtonProps['appearance']>> = ['solid', 'subtle', 'ghost'];
 
 const sizes: Array<NonNullable<ButtonProps['size']>> = ['small', 'medium'];
 
@@ -53,17 +53,17 @@ const truncationContainerStyle = {
 } as const satisfies CSSProperties;
 
 /**
- * Tone communicates intent. Variant controls the action's visual emphasis.
+ * Tone communicates intent. Appearance controls the action's visual emphasis.
  */
-export const Tone = meta.story({
+export const ToneAndAppearance = meta.story({
 	args: baseArgs,
 	render: (props) => (
 		<div style={stackStyle}>
 			{tones.map((tone) => (
 				<div key={tone} style={rowStyle}>
-					{variants.map((variant) => (
-						<Button key={variant} tone={tone} variant={variant} {...props}>
-							{tone} {variant}
+					{appearances.map((appearance) => (
+						<Button appearance={appearance} key={appearance} tone={tone} {...props}>
+							{tone} {appearance}
 						</Button>
 					))}
 				</div>

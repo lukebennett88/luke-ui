@@ -13,17 +13,22 @@ import {
 import { Button } from './index.js';
 
 const tones = variantValuesFor<typeof Button, 'tone'>()(['neutral', 'accent', 'danger']);
-const variants = variantValuesFor<typeof Button, 'variant'>()(['solid', 'subtle', 'ghost']);
+const appearances = variantValuesFor<typeof Button, 'appearance'>()(['solid', 'subtle', 'ghost']);
 const sizes = variantValuesFor<typeof Button, 'size'>()(['small', 'medium']);
 
-test('tones across sizes', async () => {
+test('tones and appearances across sizes', async () => {
 	const locator = renderVisual(
-		<Grid columns={variants.length}>
+		<Grid columns={appearances.length}>
 			{sizes.flatMap((size) => {
 				return tones.flatMap((tone) =>
-					variants.map((variant) => (
-						<Button key={`${size}-${tone}-${variant}`} size={size} tone={tone} variant={variant}>
-							{tone} {variant}
+					appearances.map((appearance) => (
+						<Button
+							appearance={appearance}
+							key={`${size}-${tone}-${appearance}`}
+							size={size}
+							tone={tone}
+						>
+							{tone} {appearance}
 						</Button>
 					)),
 				);
@@ -64,8 +69,8 @@ test.each(visualAppearances)('action states: $theme $mode', async (appearance) =
 			<Button>Resting</Button>
 			<Button isDisabled>Disabled</Button>
 			<Button isPending>Pending</Button>
-			<Button variant="subtle">Subtle</Button>
-			<Button variant="ghost">Ghost</Button>
+			<Button appearance="subtle">Subtle</Button>
+			<Button appearance="ghost">Ghost</Button>
 		</Grid>,
 		appearance,
 	);

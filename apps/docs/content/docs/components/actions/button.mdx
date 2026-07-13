@@ -1,6 +1,6 @@
 ---
 title: Button
-description: Action button with semantic tone and variant options.
+description: Action button with semantic tone and appearance options.
 ---
 
 `Button` expects the Luke UI theme class at the app or root level. See
@@ -14,20 +14,20 @@ description: Action button with semantic tone and variant options.
 
 | Guidance | Practices                                                                                                      |
 | -------- | -------------------------------------------------------------------------------------------------------------- |
-| Do       | Use the default accent solid button for the main action. Use a subtle or ghost variant for secondary actions.  |
+| Do       | Use `tone="accent"` for the main action. Use a subtle or ghost appearance for secondary actions.               |
 | Do       | Write a label that names the action, such as "Save changes" or "Delete account". Avoid vague labels like "OK". |
 | Do       | Set `isPending` while an action is in flight so the user can see that work is still happening.                 |
 | Don't    | Use `Button` for navigation. If the control only moves the user to another page, use `Link`.                   |
 
-## Tone and variant
+## Tone and appearance
 
-Tone communicates intent: `neutral`, `accent` (default), or `danger`. Variant controls emphasis:
-`solid` (default), `subtle`, or `ghost`. Every tone supports every variant.
+Tone communicates intent: `neutral` (default), `accent`, or `danger`. Appearance controls emphasis:
+`solid` (default), `subtle`, or `ghost`. Every tone supports every appearance.
 
 <ExampleBlock
-	src="button/tones"
-	title="Button — Tones"
-	description="Each semantic tone in solid, subtle, and ghost variants."
+	src="button/tone-and-appearance"
+	title="Button — Tone and appearance"
+	description="Each semantic tone in solid, subtle, and ghost appearances."
 />
 
 ## Size

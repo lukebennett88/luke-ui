@@ -7,11 +7,16 @@ import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
 import { Button as PrimitiveButton } from './primitive/index.js';
 
-interface ComposedButtonVariantProps extends NonNullable<styles.ButtonLabelVariants> {}
+interface ComposedButtonRecipeProps extends NonNullable<styles.ButtonLabelVariants> {}
 
-interface PrimitiveButtonVariantProps extends NonNullable<primitiveStyles.ButtonVariants> {}
+interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonVariants> {}
 
 interface ButtonStyleProps {
+	/**
+	 * Visual emphasis.
+	 * @default 'solid'
+	 */
+	appearance?: PrimitiveButtonRecipeProps['appearance'];
 	/**
 	 * Icon shown after the label.
 	 */
@@ -20,32 +25,30 @@ interface ButtonStyleProps {
 	 * Whether the button takes up the full inline size of its container.
 	 * @default false
 	 */
-	isBlock?: PrimitiveButtonVariantProps['isBlock'];
+	isBlock?: PrimitiveButtonRecipeProps['isBlock'];
 	/**
 	 * Shows pending button styles. When true, a spinner overlays the label.
 	 * @default false
 	 */
-	isPending?: ComposedButtonVariantProps['isPending'];
+	isPending?: ComposedButtonRecipeProps['isPending'];
 	/**
 	 * Sets the button size.
 	 * @default 'medium'
 	 */
-	size?: PrimitiveButtonVariantProps['size'];
+	size?: PrimitiveButtonRecipeProps['size'];
 	/**
 	 * Icon shown before the label.
 	 */
 	startIcon?: ReactNode;
 	/**
 	 * Visual tone. Controls colour scheme.
-	 * @default 'accent'
+	 * @default 'neutral'
 	 */
-	tone?: PrimitiveButtonVariantProps['tone'];
-	/** Visual emphasis. @default 'solid' */
-	variant?: PrimitiveButtonVariantProps['variant'];
+	tone?: PrimitiveButtonRecipeProps['tone'];
 }
 
 /**
- * Composed button with size, tone, pending, and block variants.
+ * Composed button with size, tone, appearance, pending, and block options.
  *
  * @tier composed
  */

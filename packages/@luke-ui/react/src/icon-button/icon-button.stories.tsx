@@ -18,7 +18,7 @@ const baseArgs = {
 
 const sizes: Array<NonNullable<IconButtonProps['size']>> = ['small', 'medium'];
 const tones: Array<NonNullable<IconButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
-const variants: Array<NonNullable<IconButtonProps['variant']>> = ['solid', 'subtle', 'ghost'];
+const appearances: Array<NonNullable<IconButtonProps['appearance']>> = ['solid', 'subtle', 'ghost'];
 
 const flexWrapStyle = {
 	display: 'flex',
@@ -55,13 +55,13 @@ export const Appearance = meta.story({
 	render: (props) => (
 		<div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(3, max-content)' }}>
 			{tones.flatMap((tone) => {
-				return variants.map((variant) => (
+				return appearances.map((appearance) => (
 					<IconButton
 						{...props}
-						aria-label={`${tone} ${variant}`}
-						key={`${tone}-${variant}`}
+						appearance={appearance}
+						aria-label={`${tone} ${appearance}`}
+						key={`${tone}-${appearance}`}
 						tone={tone}
-						variant={variant}
 					/>
 				));
 			})}

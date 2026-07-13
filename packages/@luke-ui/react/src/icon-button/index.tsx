@@ -8,14 +8,14 @@ import * as styles from '../recipes/icon-button.css.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import { cx } from '../utils/index.js';
 
-interface IconButtonVariantProps extends NonNullable<styles.IconButtonVariants> {}
+interface IconButtonRecipeProps extends NonNullable<styles.IconButtonVariants> {}
 
 interface IconButtonStyleProps {
 	/**
 	 * Sets the button size.
 	 * @default 'medium'
 	 */
-	size?: IconButtonVariantProps['size'];
+	size?: IconButtonRecipeProps['size'];
 }
 
 /**

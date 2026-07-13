@@ -29,8 +29,8 @@ test.each(visualAppearances)('action states: $theme $mode', async (appearance) =
 			<IconButton aria-label="Resting" icon="add" />
 			<IconButton aria-label="Disabled" icon="delete" isDisabled />
 			<IconButton aria-label="Pending" icon="add" isPending />
-			<IconButton aria-label="Subtle" icon="add" variant="subtle" />
-			<IconButton aria-label="Ghost" icon="add" variant="ghost" />
+			<IconButton appearance="subtle" aria-label="Subtle" icon="add" />
+			<IconButton appearance="ghost" aria-label="Ghost" icon="add" />
 		</Grid>,
 		appearance,
 	);

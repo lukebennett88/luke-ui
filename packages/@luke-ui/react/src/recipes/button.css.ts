@@ -97,12 +97,17 @@ const base = styleInLayer('recipes', {
 export const button = recipeInLayer('recipes', {
 	base,
 	defaultVariants: {
+		appearance: 'solid',
 		isBlock: false,
 		size: 'medium',
-		tone: 'accent',
-		variant: 'solid',
+		tone: 'neutral',
 	},
 	variants: {
+		appearance: {
+			ghost: {},
+			solid: {},
+			subtle: {},
+		},
 		isBlock: {
 			false: {},
 			true: { inlineSize: '100%' },
@@ -127,11 +132,6 @@ export const button = recipeInLayer('recipes', {
 			accent: {},
 			danger: {},
 			neutral: {},
-		},
-		variant: {
-			ghost: {},
-			solid: {},
-			subtle: {},
 		},
 	},
 	compoundVariants: [
@@ -184,8 +184,8 @@ type Surface = {
 	subtlePressed: string;
 };
 
-function appearance(tone: Tone, variant: 'solid' | 'subtle', surface: Surface, color: string) {
-	const prefix = variant === 'solid' ? 'solid' : 'subtle';
+function appearance(tone: Tone, appearance: 'solid' | 'subtle', surface: Surface, color: string) {
+	const prefix = appearance === 'solid' ? 'solid' : 'subtle';
 	return [
 		{
 			style: {
@@ -206,7 +206,7 @@ function appearance(tone: Tone, variant: 'solid' | 'subtle', surface: Surface, c
 					},
 				},
 			},
-			variants: { tone, variant },
+			variants: { appearance, tone },
 		},
 	];
 }
@@ -231,6 +231,6 @@ function ghostAppearance(tone: Tone, color: string) {
 				},
 			},
 		},
-		variants: { tone, variant: 'ghost' as const },
+		variants: { appearance: 'ghost' as const, tone },
 	};
 }
