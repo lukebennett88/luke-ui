@@ -17,6 +17,13 @@ export type VisualResult = {
 	currentViewport?: string;
 };
 
+const appearanceSuffixes = [
+	'machined-edge-light',
+	'machined-edge-dark',
+	'elmo-light',
+	'elmo-dark',
+] as const;
+
 type CaptureFile = { file: string; viewport?: string };
 
 export async function validateCaptureIds(sourceRoot: string) {
@@ -33,14 +40,19 @@ export async function validateCaptureIds(sourceRoot: string) {
 					if (calls.length !== matches.length) {
 						throw new Error(`Visual capture IDs must be string literals: ${file}`);
 					}
-					for (const match of matches) {
-						const id = match[1];
-						if (!id || !/^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
-							throw new Error(`Visual capture ID must be namespaced: ${id}`);
+					for (const match of matches) registerCaptureId(match[1], file, owners);
+
+					const appearanceCalls = [...source.matchAll(/captureVisualAppearance\(/g)];
+					const appearanceMatches = [
+						...source.matchAll(/captureVisualAppearance\([\s\S]*?,\s*'([^']+)'\s*,/g),
+					];
+					if (appearanceCalls.length !== appearanceMatches.length) {
+						throw new Error(`Visual appearance capture IDs must be string literals: ${file}`);
+					}
+					for (const match of appearanceMatches) {
+						for (const suffix of appearanceSuffixes) {
+							registerCaptureId(`${match[1]}-${suffix}`, file, owners);
 						}
-						const owner = owners.get(id);
-						if (owner) throw new Error(`Duplicate visual capture ID ${id}: ${owner} and ${file}`);
-						owners.set(id, file);
 					}
 				}
 			}),
@@ -48,6 +60,15 @@ export async function validateCaptureIds(sourceRoot: string) {
 	}
 	await visit(sourceRoot);
 	return owners;
+}
+
+function registerCaptureId(id: string | undefined, file: string, owners: Map<string, string>) {
+	if (!id || !/^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
+		throw new Error(`Visual capture ID must be namespaced: ${id}`);
+	}
+	const owner = owners.get(id);
+	if (owner) throw new Error(`Duplicate visual capture ID ${id}: ${owner} and ${file}`);
+	owners.set(id, file);
 }
 
 async function listPngs(root: string) {

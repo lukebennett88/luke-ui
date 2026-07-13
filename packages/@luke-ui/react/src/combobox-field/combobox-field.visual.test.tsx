@@ -1,6 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { captureVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
+import { elmoThemeClassName } from '../themes/index.js';
 import { ComboboxField } from './index.js';
 import { ComboboxItem } from './primitive/index.js';
 
@@ -61,6 +62,30 @@ test('open menu', async () => {
 	// alone. This captures the popover's alignment to the trigger and its layering,
 	// not just the listbox's own styling.
 	await captureVisual(page.elementLocator(document.body), 'combobox-field/open');
+});
+
+test('open menu carries the selected theme and mode through its portal', async () => {
+	renderVisual(
+		<Stack>
+			<ComboboxField
+				defaultItems={countryItems}
+				label="Themed country"
+				name="themed-country"
+				placeholder="Select a country..."
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</Stack>,
+		{ mode: 'dark', theme: 'elmo' },
+	);
+
+	await userEvent.click(page.getByRole('combobox', { name: 'Themed country' }));
+	const listbox = page.getByRole('listbox');
+	const portal = listbox.element().closest('[data-color-mode]');
+
+	expect(portal).toHaveClass(elmoThemeClassName);
+	expect(portal).toHaveAttribute('data-color-mode', 'dark');
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/open-elmo-dark');
 });
 
 test('mobile tray', async () => {

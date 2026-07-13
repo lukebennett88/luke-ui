@@ -49,3 +49,44 @@ tradeoff is that each comparison renders two revisions; the disposable base cach
 work.
 
 See [`TESTING.md`](./TESTING.md#visual-regression-tests) for how to write a visual test.
+
+## Test every theme and mode
+
+Migrated components use the shared appearance matrix for Machined edge and ELMO in explicit light
+and dark modes. Pass each appearance to `renderVisual`, then capture it with
+`captureVisualAppearance`:
+
+```tsx
+import { test } from 'vite-plus/test';
+import {
+	captureVisualAppearance,
+	renderVisual,
+	visualAppearances,
+} from '../test-utils/render-visual.js';
+
+test.each(visualAppearances)('theme matrix: $theme $mode', async (appearance) => {
+	const scene = renderVisual(<Button>Continue</Button>, appearance);
+
+	await captureVisualAppearance(scene, 'button/theme-matrix', appearance);
+});
+```
+
+The helper appends the selected appearance to the literal base ID. The example creates these stable
+capture IDs:
+
+- `button/theme-matrix-machined-edge-light`
+- `button/theme-matrix-machined-edge-dark`
+- `button/theme-matrix-elmo-light`
+- `button/theme-matrix-elmo-dark`
+
+Use one literal base ID for the matrix. The visual runner expands it during duplicate-ID validation,
+so each look remains independently reviewable without repeating theme setup. Existing tests that
+call `renderVisual(node)` continue to render in Machined edge light.
+
+Theme identity and colour mode stay separate. To cover nested mode, put `data-color-mode="dark"` or
+`data-color-mode="light"` on a descendant inside the rendered scene. Do not add a nested theme
+identity because identity classes are not nestable.
+
+For a portalled surface, render the real component with the selected appearance, open it through
+`userEvent`, and capture the portal or `document.body`. The component carries the identity class and
+explicit colour mode from its trigger. Do not copy theme classes onto a test-only portal wrapper.
