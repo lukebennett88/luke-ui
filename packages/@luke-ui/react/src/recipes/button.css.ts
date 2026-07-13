@@ -24,6 +24,9 @@ const base = styleInLayer('recipes', {
 					borderColor: 'ButtonText',
 					borderInlineEndColor: 'transparent',
 				},
+				'&[data-pending="true"]': {
+					opacity: 1,
+				},
 			},
 			transform: 'none',
 		},
@@ -81,6 +84,7 @@ const base = styleInLayer('recipes', {
 		},
 		'&[data-pending="true"]': {
 			cursor: 'wait',
+			opacity: 0.55,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 			boxShadow: vars.depth.recessed,

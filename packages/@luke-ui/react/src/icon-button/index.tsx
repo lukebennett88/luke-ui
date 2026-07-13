@@ -51,9 +51,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			isPending={isPending}
 			size={size}
 		>
-			<span className={styles.iconContent({ isPending })}>
-				<Icon aria-hidden name={icon} />
-			</span>
+			<Icon aria-hidden className={styles.icon({ isPending })} name={icon} />
 		</Button>
 	);
 }

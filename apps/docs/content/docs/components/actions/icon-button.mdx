@@ -17,14 +17,14 @@ accessible label.
 | Do       | Name the action in `aria-label`, such as "Delete row". Do not name the icon. |
 | Do       | Use `tone="danger"` for destructive icon actions such as delete.             |
 
-## Appearance
+## Tone and variant
 
 `IconButton` shares Button's appearance API. Tone can be `neutral`, `accent` (default), or `danger`.
 Variant can be `solid` (default), `subtle`, or `ghost`.
 
 <ExampleBlock
 	src="icon-button/tones"
-	title="Icon Button — Tone"
+	title="Icon Button — Tone and variant"
 	description="Semantic tones and emphasis variants for icon-only actions."
 />
 
@@ -35,6 +35,11 @@ Variant can be `solid` (default), `subtle`, or `ghost`.
 	title="Icon Button — Size"
 	description="A small icon button for tighter spaces."
 />
+
+## Pending
+
+Set `isPending` while an action is in flight. The button remains focusable but cannot be pressed
+again. It uses the disabled visual treatment and replaces the icon with a busy cue.
 
 ## Accessibility
 

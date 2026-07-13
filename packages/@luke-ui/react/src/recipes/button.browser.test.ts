@@ -63,14 +63,18 @@ test('disabled preserves resting material and ignores interaction', () => {
 	expect(getComputedStyle(disabled).transform).toBe('matrix(1, 0, 0, 1, 0, 0)');
 });
 
-test('pending keeps the resting finish and ghost has no authored finish', () => {
+test('pending uses disabled-like resting material and ignores interaction styles', () => {
 	const resting = mountButton();
 	const pending = mountButton();
 	pending.dataset.pending = 'true';
 	pending.dataset.hovered = 'true';
+	pending.dataset.pressed = 'true';
 	const ghost = mountButton({ variant: 'ghost' });
 
 	expect(getComputedStyle(pending).backgroundImage).toBe(getComputedStyle(resting).backgroundImage);
+	expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(resting).boxShadow);
+	expect(getComputedStyle(pending).opacity).toBe('0.55');
+	expect(getComputedStyle(pending).transform).toBe('matrix(1, 0, 0, 1, 0, 0)');
 	expect(getComputedStyle(ghost).backgroundImage).toBe('none');
 });
 

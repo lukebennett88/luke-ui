@@ -42,11 +42,3 @@ export const spinnerOverlay = recipeInLayer('recipes', {
 		position: 'absolute',
 	},
 });
-
-export const labelText = recipeInLayer('recipes', {
-	base: {
-		overflow: 'hidden',
-		textOverflow: 'ellipsis',
-		whiteSpace: 'nowrap',
-	},
-});

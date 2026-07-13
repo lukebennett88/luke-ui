@@ -1,4 +1,5 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { ThemeControls } from '../components/theme-controls';
 import { getStorybookBaseUrl } from './storybook';
 
 export function baseOptions(): BaseLayoutProps {
@@ -15,7 +16,11 @@ export function baseOptions(): BaseLayoutProps {
 			},
 		],
 		nav: {
+			children: <ThemeControls />,
 			title: 'Luke UI',
+		},
+		themeSwitch: {
+			enabled: false,
 		},
 	};
 }

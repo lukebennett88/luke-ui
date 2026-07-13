@@ -1,12 +1,15 @@
+import '@luke-ui/react/themes/elmo.css';
 import '@luke-ui/react/themes/machined-edge.css';
 import { themeRootClassName } from '@luke-ui/react/theme';
-import { machinedEdgeThemeClassName } from '@luke-ui/react/themes';
+import { elmoThemeClassName, machinedEdgeThemeClassName } from '@luke-ui/react/themes';
 import { cx } from '@luke-ui/react/utils';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type { ReactNode } from 'react';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
+import type { ColorMode, ThemeName } from '../components/theme-controls';
+import { ThemeSettingsProvider } from '../components/theme-controls';
 import appCss from '../styles/app.css?url';
 
 const SearchDialog = lazy(() => import('../components/search'));
@@ -47,15 +50,25 @@ function LazySearchDialog(props: SharedProps) {
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
+	const [colorMode, setColorMode] = useState<ColorMode>('light');
+	const [theme, setTheme] = useState<ThemeName>('machined-edge');
+	const themeClassName =
+		theme === 'machined-edge' ? machinedEdgeThemeClassName : elmoThemeClassName;
+
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html className={colorMode === 'dark' ? 'dark' : undefined} lang="en">
 			<head>
 				<HeadContent />
 			</head>
 			<body
-				className={cx(themeRootClassName, machinedEdgeThemeClassName, 'flex min-h-screen flex-col')}
+				className={cx(themeRootClassName, themeClassName, 'flex min-h-screen flex-col')}
+				data-color-mode={colorMode}
 			>
-				<RootProvider search={{ SearchDialog: LazySearchDialog }}>{children}</RootProvider>
+				<ThemeSettingsProvider value={{ colorMode, setColorMode, setTheme, theme }}>
+					<RootProvider search={{ SearchDialog: LazySearchDialog }} theme={{ enabled: false }}>
+						{children}
+					</RootProvider>
+				</ThemeSettingsProvider>
 				<Scripts />
 			</body>
 		</html>

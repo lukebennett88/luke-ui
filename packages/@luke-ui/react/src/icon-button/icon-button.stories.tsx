@@ -2,7 +2,7 @@ import { iconNames } from '@luke-ui/react/icon';
 import type { IconButtonProps } from '@luke-ui/react/icon-button';
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { CSSProperties } from 'react';
-import { expect, userEvent } from 'storybook/test';
+import { expect, fn, userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -92,6 +92,39 @@ export const Disabled = meta.story({
 			))}
 		</div>
 	),
+});
+
+export const States = meta.story({
+	args: {
+		...baseArgs,
+		'aria-label': 'Action',
+		onPress: fn(),
+	},
+	render: (props) => (
+		<div style={flexWrapStyle}>
+			<IconButton {...props} aria-label="Default" />
+			<IconButton {...props} aria-label="Disabled" isDisabled />
+			<IconButton {...props} aria-label="Pending" isPending />
+		</div>
+	),
+	play: async ({ args, canvas, step }) => {
+		const disabled = canvas.getByRole('button', { name: 'Disabled' });
+		const pending = canvas.getByRole('button', { name: 'Pending' });
+
+		await step('pending remains focusable, busy, and non-interactive', async () => {
+			await userEvent.tab();
+			await userEvent.tab();
+			await expect(pending).toHaveFocus();
+			await expect(pending).toHaveAttribute('aria-disabled', 'true');
+			await userEvent.click(pending);
+			await expect(args.onPress).not.toHaveBeenCalled();
+		});
+
+		await step('pending uses the disabled visual treatment', async () => {
+			await expect(getComputedStyle(pending).opacity).toBe('0.55');
+			await expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(disabled).boxShadow);
+		});
+	},
 });
 
 export const AllIcons = meta.story({

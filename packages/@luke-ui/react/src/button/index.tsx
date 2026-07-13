@@ -2,6 +2,7 @@ import type { JSX, ReactNode } from 'react';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.css.js';
 import type * as primitiveStyles from '../recipes/button.css.js';
+import { Text } from '../text/index.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
 import { Button as PrimitiveButton } from './primitive/index.js';
@@ -69,9 +70,9 @@ export function Button(props: ButtonProps): JSX.Element {
 					)}
 					<span className={styles.buttonLabel({ isPending })}>
 						{startIcon}
-						<span className={styles.labelText()}>
+						<Text color="inherit" elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}
-						</span>
+						</Text>
 						{endIcon}
 					</span>
 				</span>

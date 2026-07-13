@@ -2,7 +2,7 @@ import type { ButtonProps } from '@luke-ui/react/button';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import type { CSSProperties } from 'react';
-import { expect, userEvent } from 'storybook/test';
+import { expect, fn, userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { vars } from '../theme.css.js';
 
@@ -136,7 +136,10 @@ export const IconContent = meta.story({
  * pending states are rendered directly.
  */
 export const States = meta.story({
-	args: baseArgs,
+	args: {
+		...baseArgs,
+		onPress: fn(),
+	},
 	render: (props) => (
 		<div style={rowStyle}>
 			<Button {...props}>Default</Button>
@@ -148,14 +151,22 @@ export const States = meta.story({
 			</Button>
 		</div>
 	),
-	play: async ({ canvas, step }) => {
+	play: async ({ args, canvas, step }) => {
 		const pending = canvas.getByRole('button', { name: 'Pending' });
+		const disabled = canvas.getByRole('button', { name: 'Disabled' });
 
-		await step('pending remains focusable and busy', async () => {
+		await step('pending remains focusable, busy, and non-interactive', async () => {
 			await userEvent.tab();
 			await userEvent.tab();
 			await expect(pending).toHaveFocus();
 			await expect(pending).toHaveAttribute('aria-disabled', 'true');
+			await userEvent.click(pending);
+			await expect(args.onPress).not.toHaveBeenCalled();
+		});
+
+		await step('pending uses the disabled visual treatment', async () => {
+			await expect(getComputedStyle(pending).opacity).toBe('0.55');
+			await expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(disabled).boxShadow);
 		});
 	},
 });
@@ -193,4 +204,13 @@ export const Truncation = meta.story({
 			<Button {...props} />
 		</div>
 	),
+	play: async ({ canvas }) => {
+		const label = canvas.getByText(
+			'This a really really really really long string of text that should truncate instead of wrapping',
+		);
+
+		await expect(getComputedStyle(label).textOverflow).toBe('ellipsis');
+		await expect(getComputedStyle(label).whiteSpace).toBe('nowrap');
+		await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
+	},
 });
