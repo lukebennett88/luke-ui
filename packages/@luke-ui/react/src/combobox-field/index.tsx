@@ -1,4 +1,5 @@
 import type { CSSProperties, JSX } from 'react';
+import { useRef } from 'react';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { composeField } from '../field/compose-field.js';
@@ -69,6 +70,7 @@ export interface ComboboxFieldProps<T extends object>
 
 /** Composes `ComboboxInput` with label, description, and error slots. */
 export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): JSX.Element {
+	const themeSourceRef = useRef<HTMLDivElement>(null);
 	const [fieldSlotProps, restProps] = composeField(props);
 	const {
 		children,
@@ -112,7 +114,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	})();
 
 	return (
-		<ComboboxInput<T> size={size} {...comboboxInputProps}>
+		<ComboboxInput<T> ref={themeSourceRef} size={size} {...comboboxInputProps}>
 			<Field {...fieldSlotProps}>
 				<ComboboxControl>
 					<ComboboxTextInput placeholder={placeholder} />
@@ -125,7 +127,12 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 						<Icon aria-hidden name="chevronDown" />
 					</ComboboxTrigger>
 				</ComboboxControl>
-				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
+				<ComboboxPopover
+					offset={4}
+					{...popoverProps}
+					style={resolvedStyle}
+					triggerRef={themeSourceRef}
+				>
 					<ComboboxListBox<T>
 						{...listBoxProps}
 						loadMoreItem={loadMoreItem}

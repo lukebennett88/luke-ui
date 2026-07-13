@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, Ref } from 'react';
 import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -27,6 +27,9 @@ export interface ComboboxInputProps<T extends object> extends DistributiveOmit<
 	| 'selectionMode'
 	| 'value'
 > {
+	/** Forwarded to the combobox root element. */
+	ref?: Ref<HTMLDivElement>;
+
 	/** The initially selected key (uncontrolled). */
 	defaultValue?: Key | null;
 
@@ -49,7 +52,7 @@ export interface ComboboxInputProps<T extends object> extends DistributiveOmit<
 }
 
 export function ComboboxInput<T extends object>(props: ComboboxInputProps<T>): JSX.Element {
-	const { className, menuTrigger = 'focus', size = 'medium', ...comboboxProps } = props;
+	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
 
 	return (
 		<ComboboxSizeProvider size={size}>
@@ -59,6 +62,7 @@ export function ComboboxInput<T extends object>(props: ComboboxInputProps<T>): J
 					return cx(styles.comboboxRoot, renderedClassName);
 				})}
 				menuTrigger={menuTrigger}
+				ref={ref}
 			/>
 		</ComboboxSizeProvider>
 	);

@@ -19,7 +19,10 @@ export interface ComboboxPopoverProps extends Omit<RacPopoverProps, 'UNSTABLE_po
 	ref?: Ref<HTMLElement>;
 }
 
-/** Popover surface used for listbox content. */
+/**
+ * Popover surface used for listbox content. The portal preserves the theme identity and explicit
+ * colour mode active at its trigger.
+ */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { ref, ...restProps } = props;
 	const [element, setElement] = useState<HTMLElement | null>(null);
@@ -31,7 +34,39 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 			className={composeRenderProps(restProps.className, (className) => {
 				return cx(themeRootClassName, styles.comboboxPopover(), className);
 			})}
-			ref={mergeRefs(ref, (node: HTMLElement | null) => setElement(node))}
+			ref={mergeRefs(ref, (node: HTMLElement | null) => {
+				setElement(node);
+				if (node === null) return;
+
+				const themeSource = props.triggerRef?.current ?? document.activeElement;
+				if (!(themeSource instanceof Element)) return;
+
+				carryThemeScope(themeSource, node);
+			})}
 		/>
 	);
+}
+
+function carryThemeScope(source: Element, portal: HTMLElement) {
+	const identityClassName = findThemeIdentity(source);
+	if (identityClassName !== undefined) portal.classList.add(identityClassName);
+
+	const modeRoot = source.closest<HTMLElement>('[data-color-mode]');
+	const mode = modeRoot?.dataset.colorMode;
+	if (mode === 'light' || mode === 'dark') portal.dataset.colorMode = mode;
+}
+
+function findThemeIdentity(source: Element) {
+	let identityClassName: string | undefined;
+	let ancestor: Element | null = source;
+
+	while (ancestor !== null) {
+		for (const className of ancestor.classList) {
+			// Keep the outer identity because nested identities are not supported.
+			if (className.startsWith('luke-ui-theme-')) identityClassName = className;
+		}
+		ancestor = ancestor.parentElement;
+	}
+
+	return identityClassName;
 }
