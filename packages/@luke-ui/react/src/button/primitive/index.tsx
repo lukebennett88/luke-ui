@@ -22,6 +22,8 @@ interface ButtonStyleProps {
 	size?: ButtonVariantProps['size'];
 	/** Visual tone. Controls colour scheme. */
 	tone?: ButtonVariantProps['tone'];
+	/** Visual emphasis. */
+	variant?: ButtonVariantProps['variant'];
 }
 
 /**
@@ -41,7 +43,8 @@ export function Button(props: ButtonProps): JSX.Element {
 		isDisabled = false,
 		isPending = false,
 		size = 'medium',
-		tone,
+		tone = 'accent',
+		variant = 'solid',
 		...restProps
 	} = props;
 	const iconSize = BUTTON_ICON_SIZE[size];
@@ -51,9 +54,9 @@ export function Button(props: ButtonProps): JSX.Element {
 			<RacButton
 				{...restProps}
 				className={composeRenderProps(props.className, (className) => {
-					return cx(styles.button({ isBlock, size, tone }), className);
+					return cx(styles.button({ isBlock, size, tone, variant }), className);
 				})}
-				isDisabled={isDisabled || isPending}
+				isDisabled={isDisabled}
 				isPending={isPending}
 			>
 				{children}

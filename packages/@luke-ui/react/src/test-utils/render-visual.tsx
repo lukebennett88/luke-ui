@@ -103,7 +103,7 @@ export type PropOptions<
  * pattern.
  *
  * @example
- * const tones = variantValuesFor<typeof Button, 'tone'>()(['primary', 'critical', 'ghost', 'neutral']);
+ * const tones = variantValuesFor<typeof Button, 'tone'>()(['neutral', 'accent', 'danger']);
  */
 export function variantValuesFor<
 	Component extends ComponentType<any>,

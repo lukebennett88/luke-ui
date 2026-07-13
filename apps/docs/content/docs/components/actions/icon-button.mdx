@@ -15,14 +15,17 @@ accessible label.
 | Guidance | Practices                                                                    |
 | -------- | ---------------------------------------------------------------------------- |
 | Do       | Name the action in `aria-label`, such as "Delete row". Do not name the icon. |
-| Do       | Use `tone="critical"` for destructive icon actions such as delete.           |
+| Do       | Use `tone="danger"` for destructive icon actions such as delete.             |
 
-## Tone
+## Appearance
+
+`IconButton` shares Button's appearance API. Tone can be `neutral`, `accent` (default), or `danger`.
+Variant can be `solid` (default), `subtle`, or `ghost`.
 
 <ExampleBlock
 	src="icon-button/tones"
 	title="Icon Button — Tone"
-	description="Ghost and critical tones for icon-only actions."
+	description="Semantic tones and emphasis variants for icon-only actions."
 />
 
 ## Size

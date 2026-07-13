@@ -9,7 +9,9 @@ wrapper, icon props, or pending-label behaviour.
 ```tsx
 import { Button } from '@luke-ui/react/button/primitive';
 
-<Button tone="primary">Save</Button>;
+<Button tone="accent" variant="solid">
+	Save
+</Button>;
 ```
 
 ## When to use
@@ -21,11 +23,11 @@ Use [`Button`](/docs/components/actions/button) for most app actions.
 
 ## Behaviour
 
-The primitive renders a single `<button>` element by default. It applies Luke UI size, tone, and
-block styles, then renders children directly.
+The primitive renders a single `<button>` element by default. It applies Luke UI size, tone,
+variant, and block styles, then renders children directly.
 
-`isPending` disables the button, but it does not add a spinner or hide the label. Build that UI in
-children when you use the primitive.
+`isPending` keeps the button focusable while preventing another press. It does not add a spinner or
+hide the label. Build that cue in children when you use the primitive.
 
 ## Props
 

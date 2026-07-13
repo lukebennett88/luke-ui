@@ -2,6 +2,7 @@ import type { ButtonProps } from '@luke-ui/react/button';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import type { CSSProperties } from 'react';
+import { expect, userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { vars } from '../theme.css.js';
 
@@ -15,7 +16,8 @@ const baseArgs = {
 	children: 'Button',
 } satisfies Partial<ButtonProps>;
 
-const tones: Array<NonNullable<ButtonProps['tone']>> = ['primary', 'critical', 'ghost', 'neutral'];
+const tones: Array<NonNullable<ButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
+const variants: Array<NonNullable<ButtonProps['variant']>> = ['solid', 'subtle', 'ghost'];
 
 const sizes: Array<NonNullable<ButtonProps['size']>> = ['small', 'medium'];
 
@@ -51,17 +53,20 @@ const truncationContainerStyle = {
 } as const satisfies CSSProperties;
 
 /**
- * Button tone communicates emphasis. Use `primary` for default actions and
- * `critical`, `ghost`, or `neutral` for alternate intent.
+ * Tone communicates intent. Variant controls the action's visual emphasis.
  */
 export const Tone = meta.story({
 	args: baseArgs,
 	render: (props) => (
-		<div style={rowStyle}>
+		<div style={stackStyle}>
 			{tones.map((tone) => (
-				<Button key={tone} tone={tone} {...props}>
-					{tone}
-				</Button>
+				<div key={tone} style={rowStyle}>
+					{variants.map((variant) => (
+						<Button key={variant} tone={tone} variant={variant} {...props}>
+							{tone} {variant}
+						</Button>
+					))}
+				</div>
 			))}
 		</div>
 	),
@@ -143,6 +148,16 @@ export const States = meta.story({
 			</Button>
 		</div>
 	),
+	play: async ({ canvas, step }) => {
+		const pending = canvas.getByRole('button', { name: 'Pending' });
+
+		await step('pending remains focusable and busy', async () => {
+			await userEvent.tab();
+			await userEvent.tab();
+			await expect(pending).toHaveFocus();
+			await expect(pending).toHaveAttribute('aria-disabled', 'true');
+		});
+	},
 });
 
 /**

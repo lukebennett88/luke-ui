@@ -34,7 +34,7 @@ export interface IconButtonProps
 
 /** Button that renders only an icon. */
 export function IconButton(props: IconButtonProps): JSX.Element {
-	const { icon, size = 'medium', ...buttonProps } = props;
+	const { icon, isPending = false, size = 'medium', ...buttonProps } = props;
 
 	return (
 		<Button
@@ -48,9 +48,12 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 					value,
 				);
 			})}
+			isPending={isPending}
 			size={size}
 		>
-			<Icon aria-hidden name={icon} />
+			<span className={styles.iconContent({ isPending })}>
+				<Icon aria-hidden name={icon} />
+			</span>
 		</Button>
 	);
 }

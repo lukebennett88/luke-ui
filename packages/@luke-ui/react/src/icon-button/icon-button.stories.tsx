@@ -2,7 +2,7 @@ import { iconNames } from '@luke-ui/react/icon';
 import type { IconButtonProps } from '@luke-ui/react/icon-button';
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
+import { expect, userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -13,9 +13,12 @@ const meta = preview.meta({
 
 const baseArgs = {
 	icon: 'add',
+	size: 'medium',
 } satisfies Partial<IconButtonProps>;
 
 const sizes: Array<NonNullable<IconButtonProps['size']>> = ['small', 'medium'];
+const tones: Array<NonNullable<IconButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
+const variants: Array<NonNullable<IconButtonProps['variant']>> = ['solid', 'subtle', 'ghost'];
 
 const flexWrapStyle = {
 	display: 'flex',
@@ -26,8 +29,32 @@ const flexWrapStyle = {
 export const Default = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Add' },
 	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('button', { name: 'Add' })).toBeInTheDocument();
+		const button = canvas.getByRole('button', { name: 'Add' });
+		await expect(button).toBeInTheDocument();
+		await expect(getComputedStyle(button).blockSize).toBe('40px');
+		await expect(getComputedStyle(button).inlineSize).toBe('40px');
+		await userEvent.tab();
+		await expect(button).toHaveFocus();
 	},
+});
+
+export const Appearance = meta.story({
+	args: { ...baseArgs, 'aria-label': 'Action' },
+	render: (props) => (
+		<div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(3, max-content)' }}>
+			{tones.flatMap((tone) => {
+				return variants.map((variant) => (
+					<IconButton
+						{...props}
+						aria-label={`${tone} ${variant}`}
+						key={`${tone}-${variant}`}
+						tone={tone}
+						variant={variant}
+					/>
+				));
+			})}
+		</div>
+	),
 });
 
 export const Sizes = meta.story({
