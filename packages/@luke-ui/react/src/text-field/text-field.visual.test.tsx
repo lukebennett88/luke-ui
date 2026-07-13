@@ -1,10 +1,12 @@
-import { test } from 'vite-plus/test';
-import { page } from 'vite-plus/test/context';
+import { expect, test } from 'vite-plus/test';
+import { page, userEvent } from 'vite-plus/test/context';
 import {
 	captureVisual,
+	captureVisualAppearance,
 	focusViaKeyboard,
 	renderVisual,
 	Stack,
+	visualAppearances,
 } from '../test-utils/render-visual.js';
 import { TextField } from './index.js';
 
@@ -70,4 +72,60 @@ test('keyboard focus ring', async () => {
 
 	await focusViaKeyboard(page.getByRole('textbox', { name: 'Focus me' }));
 	await captureVisual(scene, 'text-field/focus');
+});
+
+test.each(visualAppearances)('material states: $theme $mode', async (appearance) => {
+	const scene = renderVisual(
+		<Stack>
+			<TextField label="Default" name="default" placeholder="Type here" />
+			<TextField defaultValue="Unavailable" isDisabled label="Disabled" name="disabled" />
+			<TextField defaultValue="Read only" isReadOnly label="Read-only" name="readonly" />
+			<TextField
+				defaultValue="nope"
+				errorMessage="Please enter a valid email."
+				isInvalid
+				label="Invalid"
+				name="invalid"
+			/>
+		</Stack>,
+		appearance,
+	);
+	await expect.element(page.getByLabelText('Default')).toBeVisible();
+
+	await captureVisualAppearance(scene, 'text-field/material-states', appearance);
+});
+
+test.each(visualAppearances)('interactive states: $theme $mode', async (appearance) => {
+	const scene = renderVisual(
+		<TextField label="Focus me" name="focus" placeholder="Type here" />,
+		appearance,
+	);
+	const input = page.getByRole('textbox', { name: 'Focus me' });
+	await expect.element(input).toBeVisible();
+
+	await captureVisualAppearance(scene, 'text-field/resting', appearance);
+	await userEvent.hover(input);
+	await captureVisualAppearance(scene, 'text-field/hover', appearance);
+	await userEvent.unhover(input);
+	await focusViaKeyboard(input);
+	await captureVisualAppearance(scene, 'text-field/focus-visible', appearance);
+});
+
+test.each(visualAppearances)('invalid interactive states: $theme $mode', async (appearance) => {
+	const scene = renderVisual(
+		<TextField
+			defaultValue="nope"
+			errorMessage="Please enter a valid email."
+			isInvalid
+			label="Invalid"
+			name="invalid"
+		/>,
+		appearance,
+	);
+	const input = page.getByRole('textbox', { name: 'Invalid' });
+	await expect.element(input).toBeVisible();
+
+	await captureVisualAppearance(scene, 'text-field/invalid', appearance);
+	await focusViaKeyboard(input);
+	await captureVisualAppearance(scene, 'text-field/invalid-focus', appearance);
 });

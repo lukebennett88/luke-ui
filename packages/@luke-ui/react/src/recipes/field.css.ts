@@ -1,6 +1,6 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer } from '../styles/layered-style.css.js';
-import { vars } from '../styles/vars.css.js';
+import { vars } from '../theme/contract.css.js';
 
 const dataDisabledSelector = '[data-disabled="true"]';
 const dataRequiredSelector = '[data-required="true"]';
@@ -10,7 +10,7 @@ export const field = recipeInLayer('recipes', {
 	base: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: vars.space.xxsmall,
+		gap: vars.space[100],
 		minInlineSize: 0,
 	},
 });
@@ -18,15 +18,16 @@ export const field = recipeInLayer('recipes', {
 /** Vanilla-extract recipe for the `Field` primitive's label styles. */
 export const fieldLabel = recipeInLayer('recipes', {
 	base: {
-		color: vars.foregroundColor.primary,
-		fontSize: vars.font.size.small,
-		fontWeight: vars.font.weight.medium,
-		lineHeight: vars.font.lineHeight.tight,
+		color: vars.color.text.primary,
+		fontSize: vars.font[200].fontSize,
+		fontWeight: vars.font.weight.label,
+		letterSpacing: vars.font[200].letterSpacing,
+		lineHeight: vars.font[200].lineHeight,
 		minInlineSize: 0,
 
 		selectors: {
 			[`${dataDisabledSelector} &`]: {
-				color: vars.foregroundColor.disabled,
+				color: vars.color.textDisabled,
 			},
 		},
 	},
@@ -38,19 +39,19 @@ export const fieldLabel = recipeInLayer('recipes', {
 			icon: {
 				selectors: {
 					[`${dataRequiredSelector} &::after`]: {
-						color: vars.foregroundColor.critical,
+						color: vars.color.intent.danger.text,
 						content: '"*"',
-						marginInlineStart: vars.space.xxsmall,
+						marginInlineStart: vars.space[100],
 					},
 				},
 			},
 			label: {
 				selectors: {
 					[`${dataRequiredSelector} &::after`]: {
-						color: vars.foregroundColor.secondary,
+						color: vars.color.text.secondary,
 						content: '"(required)"',
-						fontWeight: vars.font.weight.regular,
-						marginInlineStart: vars.space.xxsmall,
+						fontWeight: vars.font.weight.body,
+						marginInlineStart: vars.space[100],
 					},
 				},
 			},
@@ -63,13 +64,14 @@ export type FieldLabelVariants = RecipeVariants<typeof fieldLabel>;
 /** Vanilla-extract recipe for the `Field` primitive's message styles. */
 export const fieldMessage = recipeInLayer('recipes', {
 	base: {
-		fontSize: vars.font.size.small,
-		lineHeight: vars.font.lineHeight.tight,
+		fontSize: vars.font[200].fontSize,
+		letterSpacing: vars.font[200].letterSpacing,
+		lineHeight: vars.font[200].lineHeight,
 		minInlineSize: 0,
 
 		selectors: {
 			[`${dataDisabledSelector} &`]: {
-				color: vars.foregroundColor.disabled,
+				color: vars.color.textDisabled,
 			},
 		},
 	},
@@ -79,10 +81,10 @@ export const fieldMessage = recipeInLayer('recipes', {
 	variants: {
 		tone: {
 			description: {
-				color: vars.foregroundColor.secondary,
+				color: vars.color.text.secondary,
 			},
 			error: {
-				color: vars.foregroundColor.critical,
+				color: vars.color.intent.danger.text,
 			},
 		},
 	},

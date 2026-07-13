@@ -122,9 +122,23 @@ export const ServerValidation = meta.story({
 });
 
 /**
- * Disabled and read-only states are forwarded to the field container.
+ * Disabled and read-only states are forwarded to the field container. Unlike
+ * disabled, a read-only field stays focusable and in the tab order — its
+ * value is still relevant to assistive technology and copy/paste, it just
+ * can't be edited.
  */
 export const DisabledAndReadOnly = meta.story({
+	play: async ({ canvas }) => {
+		const disabledInput = canvas.getByLabelText('Disabled');
+		const readOnlyInput = canvas.getByLabelText('Read-only');
+
+		await expect(disabledInput).toBeDisabled();
+		await expect(readOnlyInput).not.toBeDisabled();
+		await expect(readOnlyInput).toHaveAttribute('readonly');
+
+		await userEvent.click(readOnlyInput);
+		await expect(readOnlyInput).toHaveFocus();
+	},
 	render: () => (
 		<div style={stackStyle}>
 			<TextField
