@@ -144,6 +144,29 @@ describe('buildTheme output', () => {
 			}
 		}
 	});
+
+	it('keeps ELMO softer than Machined edge while retaining finish and state depth', () => {
+		const elmoBlocks = splitBlocks(buildTheme(elmoFoundation));
+		for (const [elmoBlock, machinedBlock] of [
+			[elmoBlocks.baseLight, blocks.baseLight],
+			[elmoBlocks.mediaDark, blocks.mediaDark],
+		] as const) {
+			const elmoResting = extractValue(elmoBlock, '--luke-depth-resting');
+			const elmoRaised = extractValue(elmoBlock, '--luke-depth-raised');
+			const elmoFinish = extractValue(elmoBlock, '--luke-action-control-finish-resting');
+
+			expect(extractValue(machinedBlock, '--luke-depth-resting')).toContain('0 2px 0');
+			expect(elmoResting).not.toContain('0 2px 0');
+			expect(elmoRaised).not.toContain('0 3px 0');
+			expect(elmoResting.split(', ')).toHaveLength(2);
+			expect(elmoRaised.split(', ')).toHaveLength(2);
+			expect(elmoRaised).not.toBe(elmoResting);
+			expect(elmoFinish).toContain('radial-gradient');
+			expect(elmoFinish).not.toBe(
+				extractValue(machinedBlock, '--luke-action-control-finish-resting'),
+			);
+		}
+	});
 });
 
 describe('concentric corners', () => {

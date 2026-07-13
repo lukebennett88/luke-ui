@@ -1,42 +1,51 @@
-import type { ChangeEvent, PropsWithChildren } from 'react';
-import { createContext, useContext } from 'react';
+import { themeRootClassName } from '@luke-ui/react/theme';
+import { elmoThemeClassName, machinedEdgeThemeClassName } from '@luke-ui/react/themes';
+import { cx } from '@luke-ui/react/utils';
+import type { ChangeEvent, ComponentProps, PropsWithChildren } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
+import { ThemeToggle, useHydratedTheme } from './playground/theme-toggle';
 
-export type ColorMode = 'dark' | 'light';
 export type ThemeName = 'elmo' | 'machined-edge';
 
 interface ThemeSettings {
-	colorMode: ColorMode;
-	setColorMode: (colorMode: ColorMode) => void;
 	setTheme: (theme: ThemeName) => void;
 	theme: ThemeName;
 }
 
 const ThemeSettingsContext = createContext<ThemeSettings | null>(null);
 
-export function ThemeSettingsProvider({
-	children,
-	value,
-}: PropsWithChildren<{ value: ThemeSettings }>) {
-	return <ThemeSettingsContext.Provider value={value}>{children}</ThemeSettingsContext.Provider>;
+export function DocsThemeRoot({ children }: PropsWithChildren) {
+	const colorMode = useHydratedTheme();
+	const [theme, setTheme] = useState<ThemeName>('machined-edge');
+	const themeClassName =
+		theme === 'machined-edge' ? machinedEdgeThemeClassName : elmoThemeClassName;
+	const settings = useMemo(() => ({ setTheme, theme }), [theme]);
+
+	return (
+		<ThemeSettingsContext.Provider value={settings}>
+			<div
+				className={cx(themeRootClassName, themeClassName, 'flex min-h-screen flex-1 flex-col')}
+				data-color-mode={colorMode ?? undefined}
+			>
+				{children}
+			</div>
+		</ThemeSettingsContext.Provider>
+	);
 }
 
-export function ThemeControls() {
-	const { colorMode, setColorMode, setTheme, theme } = useThemeSettings();
+export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
+	const { setTheme, theme } = useThemeSettings();
 
 	function handleThemeChange(event: ChangeEvent<HTMLSelectElement>) {
 		setTheme(event.target.value === 'elmo' ? 'elmo' : 'machined-edge');
 	}
 
-	function handleColorModeChange(event: ChangeEvent<HTMLSelectElement>) {
-		setColorMode(event.target.value === 'dark' ? 'dark' : 'light');
-	}
-
 	return (
-		<div className="flex items-center gap-1">
+		<div {...props} className={cx('flex items-center gap-1', className)}>
 			<label>
-				<span className="sr-only">Theme</span>
+				<span className="sr-only">Theme profile</span>
 				<select
-					aria-label="Theme"
+					aria-label="Theme profile"
 					className="h-8 rounded-md border border-fd-border bg-fd-background px-2 text-fd-foreground text-xs"
 					onChange={handleThemeChange}
 					value={theme}
@@ -45,24 +54,13 @@ export function ThemeControls() {
 					<option value="elmo">ELMO</option>
 				</select>
 			</label>
-			<label>
-				<span className="sr-only">Color mode</span>
-				<select
-					aria-label="Color mode"
-					className="h-8 rounded-md border border-fd-border bg-fd-background px-2 text-fd-foreground text-xs"
-					onChange={handleColorModeChange}
-					value={colorMode}
-				>
-					<option value="light">Light</option>
-					<option value="dark">Dark</option>
-				</select>
-			</label>
+			<ThemeToggle />
 		</div>
 	);
 }
 
 function useThemeSettings() {
 	const settings = useContext(ThemeSettingsContext);
-	if (!settings) throw new Error('ThemeControls must be rendered inside ThemeSettingsProvider');
+	if (!settings) throw new Error('ThemeControls must be rendered inside DocsThemeRoot');
 	return settings;
 }

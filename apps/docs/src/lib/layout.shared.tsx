@@ -16,11 +16,10 @@ export function baseOptions(): BaseLayoutProps {
 			},
 		],
 		nav: {
-			children: <ThemeControls />,
 			title: 'Luke UI',
 		},
-		themeSwitch: {
-			enabled: false,
+		slots: {
+			themeSwitch: ThemeControls,
 		},
 	};
 }
