@@ -1,6 +1,5 @@
 import type { TextProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
-import { tokenKeys, tokens } from '@luke-ui/react/tokens';
 import { mergeProps } from '@luke-ui/react/utils';
 import type { CSSProperties } from 'react';
 import { expect } from 'storybook/test';
@@ -62,7 +61,6 @@ function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 			{...mergeProps(textProps, row)}
 			aria-label={identifier}
 			elementType="div"
-			fontFamily="mono"
 			shouldDisableTrim
 			title={identifier}
 		>
@@ -81,27 +79,24 @@ function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 
 const baseArgs = {
 	children: storyText,
-	fontSize: 'standard',
-	lineHeight: 'loose',
-} as const satisfies Pick<TextProps, 'children' | 'fontSize' | 'lineHeight'>;
+	size: 300,
+} as const satisfies Pick<TextProps, 'children' | 'size'>;
 
-const colors = [...tokenKeys(tokens.foregroundColor), 'inherit'] satisfies Array<
-	TextProps['color']
+const colors = [
+	'primary',
+	'secondary',
+	'accent',
+	'info',
+	'success',
+	'warning',
+	'danger',
+] as const satisfies ReadonlyArray<NonNullable<TextProps['color']>>;
+const sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900] as const satisfies ReadonlyArray<
+	NonNullable<TextProps['size']>
 >;
-
-const fontFamilies = tokenKeys(tokens.fontFamily) satisfies Array<TextProps['fontFamily']>;
-
-const fontSizes = tokenKeys(tokens.fontSize) satisfies Array<TextProps['fontSize']>;
-
-const headingFontSizes = fontSizes.filter((fontSize) => {
-	return ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'large', 'xlarge', 'xxlarge'].includes(fontSize);
-});
-
-const fontWeights = [...tokenKeys(tokens.fontWeight), 'inherit'] satisfies Array<
-	TextProps['fontWeight']
+const weights = ['body', 'label', 'heading', 'emphasis'] as const satisfies ReadonlyArray<
+	NonNullable<TextProps['fontWeight']>
 >;
-
-const lineHeights = tokenKeys(tokens.lineHeight) satisfies Array<TextProps['lineHeight']>;
 
 export type LineClampOption = NonNullable<TextProps['lineClamp']>;
 const lineClampOptions: ReadonlyArray<LineClampOption> = [false, true, 1, 2, 3, 4, 5];
@@ -112,19 +107,31 @@ const lineClampOptions: ReadonlyArray<LineClampOption> = [false, true, 1, 2, 3, 
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
-		await expect(canvas.getByText(/quick brown/)).toBeInTheDocument();
+		const element = canvas.getByText(/quick brown/);
+		const style = getComputedStyle(element);
+		await expect(style.fontSize).toBe('16px');
+		await expect(style.lineHeight).toBe('24px');
+		await expect(style.fontWeight).toBe('400');
 	},
 });
 
 /**
- * Font size controls text scale for body copy and compact text treatment.
+ * Each size step applies font size, line height, letter spacing, and trim as one treatment.
  */
-export const FontSize = meta.story({
+export const Size = meta.story({
+	play: async ({ canvas }) => {
+		const small = getComputedStyle(canvas.getByText(/^100:/));
+		const display = getComputedStyle(canvas.getByText(/^900:/));
+		await expect(small.fontSize).toBe('12px');
+		await expect(small.lineHeight).toBe('16px');
+		await expect(display.fontSize).toBe('60px');
+		await expect(display.lineHeight).toBe('60px');
+	},
 	render: (props) => (
 		<div style={stackContainerStyle}>
-			{fontSizes.map((fontSize) => (
-				<Text fontSize={fontSize} key={fontSize} lineHeight="tight" style={panelStyle} {...props}>
-					{fontSize}: {storyText}
+			{sizes.map((size) => (
+				<Text key={size} size={size} style={panelStyle} {...props}>
+					{size}: {storyText}
 				</Text>
 			))}
 		</div>
@@ -132,31 +139,12 @@ export const FontSize = meta.story({
 });
 
 /**
- * Larger size tokens are best for heading-like emphasis.
+ * Weight roles let each theme control body, labels, headings, and emphasis coherently.
  */
-export const LargerFontSize = meta.story({
-	args: {
-		...baseArgs,
-		lineHeight: 'tight',
-	} satisfies Pick<TextProps, 'children' | 'fontSize' | 'lineHeight'>,
+export const Weight = meta.story({
 	render: (props) => (
 		<div style={stackContainerStyle}>
-			{headingFontSizes.map((fontSize) => (
-				<Text {...props} fontSize={fontSize} key={fontSize}>
-					{fontSize}: {storyText}
-				</Text>
-			))}
-		</div>
-	),
-});
-
-/**
- * Font weight supports regular, medium, bold, and inherited styles.
- */
-export const FontWeight = meta.story({
-	render: (props) => (
-		<div style={stackContainerStyle}>
-			{fontWeights.map((fontWeight) => (
+			{weights.map((fontWeight) => (
 				<Text fontWeight={fontWeight} key={fontWeight} {...props}>
 					{fontWeight}: {storyText}
 				</Text>
@@ -166,37 +154,7 @@ export const FontWeight = meta.story({
 });
 
 /**
- * Font family tokens allow switching between sans and mono text styles.
- */
-export const FontFamily = meta.story({
-	render: (props) => (
-		<div style={stackContainerStyle}>
-			{fontFamilies.map((fontFamily) => (
-				<Text fontFamily={fontFamily} key={fontFamily} {...props}>
-					{fontFamily}: {storyText}
-				</Text>
-			))}
-		</div>
-	),
-});
-
-/**
- * Line height controls rhythm and readability for short and long text.
- */
-export const LineHeight = meta.story({
-	render: (props) => (
-		<div style={stackContainerStyle}>
-			{lineHeights.map((lineHeight) => (
-				<Text key={lineHeight} lineHeight={lineHeight} style={panelStyle} {...props}>
-					{lineHeight}: {loremIpsum}
-				</Text>
-			))}
-		</div>
-	),
-});
-
-/**
- * Color maps to the design-system foreground tokens plus `inherit`.
+ * Use semantic colors to communicate hierarchy, status, and emphasis consistently across themes.
  */
 export const Color = meta.story({
 	render: (props) => (
@@ -217,7 +175,7 @@ export const EmptyText = meta.story({
 	args: {
 		...baseArgs,
 		children: '',
-	} satisfies Pick<TextProps, 'children' | 'fontSize' | 'lineHeight'>,
+	} satisfies Pick<TextProps, 'children' | 'size'>,
 	render: (props) => <Text {...props} />,
 });
 
@@ -304,14 +262,14 @@ export const MiddleTruncation = meta.story({
 		});
 		return (
 			<div {...container}>
-				<Text {...props} fontWeight="medium">
+				<Text {...props} fontWeight="label">
 					End truncation
 				</Text>
-				<Text {...props} fontFamily="mono" lineClamp title={importantIdentifier}>
+				<Text {...props} lineClamp title={importantIdentifier}>
 					{importantIdentifier}
 				</Text>
 
-				<Text {...props} fontWeight="medium">
+				<Text {...props} fontWeight="label">
 					Middle truncation
 				</Text>
 				<MiddleTruncatedIdentifier
@@ -374,7 +332,7 @@ export const FontVariantNumeric = meta.story({
  */
 export const VisuallyHidden = meta.story({
 	render: (props) => (
-		<Text {...props} color="critical">
+		<Text {...props} color="danger">
 			<Text isVisuallyHidden>Danger: </Text>
 			This action is not reversible.
 		</Text>

@@ -37,13 +37,14 @@ or children.
 
 ## Typography
 
-`Heading` accepts all `Text` props except `fontSize`, which is controlled by the heading level. By
-default it applies `fontWeight="bold"` and `lineHeight="tight"`.
+By default, `Heading` maps h1 through h6 to sizes 800 through 300 and applies
+`fontWeight="heading"`. Pass `size` to override the visual scale without changing the semantic
+level. Size 900 is available for display headings.
 
 <ExampleBlock
 	src="heading/typography"
 	title="Heading — Typography"
-	description="Heading color and font weight can be customized with Text props."
+	description="Heading color and visual size can be customized without changing its semantic level."
 />
 
 ## Props

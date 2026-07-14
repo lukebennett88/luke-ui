@@ -1,67 +1,28 @@
-import fontMetrics from '@capsizecss/metrics/appleSystem';
 import { createTextStyle } from '@capsizecss/vanilla-extract';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
-import { vars } from '../styles/vars.css.js';
-import { dimensionToPxNumber } from '../tokens/converters.js';
-import { tokenKeys } from '../tokens/groups.js';
-import type {
-	FontFamilyToken,
-	FontSizeToken,
-	FontWeightToken,
-	ForegroundColorToken,
-	LineHeightToken,
-} from '../tokens/index.js';
-import { tokens } from '../tokens/index.js';
+import { styleInLayer, recipeInLayer } from '../styles/layered-style.css.js';
+import { vars } from '../theme/contract.css.js';
 
-type StylePrimitive = string | number;
+const sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
+/** Composite typography size steps. */
+export type TextSize = (typeof sizes)[number];
 
-function createVariants<Key extends string, Style extends Record<string, StylePrimitive>>(
-	keys: ReadonlyArray<Key>,
-	getStyle: (key: Key) => Style,
-): Record<Key, Style> {
-	const styles = {} as Record<Key, Style>;
-	for (const key of keys) {
-		styles[key] = getStyle(key);
-	}
-	return styles;
-}
-
-function createPropertyVariants<Key extends string, Property extends string>(
-	keys: ReadonlyArray<Key>,
-	property: Property,
-	values: Record<Key, string>,
-): Record<Key, Record<Property, string>> {
-	return createVariants(keys, (key) => ({
-		[property]: values[key],
-	})) as Record<Key, Record<Property, string>>;
-}
-
-interface GetTypographyInput {
-	fontSize: FontSizeToken;
-	lineHeight: LineHeightToken;
-}
-
-function getTypographyClass(input: GetTypographyInput, debugId?: string) {
-	const fontSize = dimensionToPxNumber(tokens.fontSize[input.fontSize].$value);
-	const lineHeight = tokens.lineHeight[input.lineHeight].$value;
-
-	return createTextStyle(
-		{
-			fontMetrics,
-			fontSize,
-			leading: fontSize * lineHeight,
-		},
-		debugId,
-	);
-}
-
-const colorKeys = tokenKeys(tokens.foregroundColor);
-const fontFamilyKeys = tokenKeys(tokens.fontFamily);
-const fontSizeKeys = tokenKeys(tokens.fontSize);
-const fontWeightKeys = tokenKeys(tokens.fontWeight);
-const lineHeightKeys = tokenKeys(tokens.lineHeight);
+/** Semantic text colors. */
+export type TextColor =
+	| 'primary'
+	| 'secondary'
+	| 'accent'
+	| 'info'
+	| 'success'
+	| 'warning'
+	| 'danger';
+/** Semantic font-weight roles. */
+export type TextFontWeight = 'body' | 'label' | 'heading' | 'emphasis';
+/** Logical text alignment values. */
+export type TextAlign = 'start' | 'center' | 'end';
+/** Text wrapping values. */
+export type TextWrap = 'unset' | 'balance' | 'pretty';
 
 const textDecorationKeys = ['none', 'underline', 'line-through', 'inherit'] as const;
 /** Text decoration variant values. */
@@ -70,10 +31,6 @@ export type TextDecoration = (typeof textDecorationKeys)[number];
 const textTransformKeys = ['none', 'capitalize', 'uppercase', 'lowercase', 'inherit'] as const;
 /** Text transform variant values. */
 export type TextTransform = (typeof textTransformKeys)[number];
-
-const textAlignKeys = ['start', 'center', 'end'] as const;
-/** Text alignment variant values. */
-export type TextAlign = (typeof textAlignKeys)[number];
 
 const fontVariantNumericKeys = [
 	'unset',
@@ -84,17 +41,6 @@ const fontVariantNumericKeys = [
 ] as const;
 /** Numeric glyph variant values. */
 export type TextFontVariantNumeric = (typeof fontVariantNumericKeys)[number];
-
-const textWrapKeys = ['unset', 'balance', 'pretty'] as const;
-/** Text wrap variant values. */
-export type TextWrap = (typeof textWrapKeys)[number];
-
-/** Text color variant values. */
-export type TextColor = ForegroundColorToken | 'inherit';
-/** Text font-family variant values. */
-export type TextFontFamily = FontFamilyToken;
-/** Text font-weight variant values. */
-export type TextFontWeight = FontWeightToken | 'inherit';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
 const lineClampSingleLine = {
@@ -129,165 +75,120 @@ const lineClampVariants = {
 export type TextLineClampVariant = keyof typeof lineClampVariants;
 
 const base = styleInLayer('recipes', {
-	color: vars.color.neutralBold,
-	fontFamily: vars.fontFamily.sans,
+	color: vars.color.text.primary,
+	fontFamily: vars.font.family,
 	minInlineSize: 0,
 	overflowWrap: 'break-word',
 });
 
-const colorVariants: Record<TextColor, { color: TextColor }> = (() => {
-	const variants = createPropertyVariants(colorKeys, 'color', vars.color) as Record<
-		TextColor,
-		{ color: TextColor }
-	>;
-	variants.inherit = { color: 'inherit' };
-	return variants;
-})();
-
-const fontFamilyVariants = createPropertyVariants(
-	fontFamilyKeys,
-	'fontFamily',
-	vars.fontFamily,
-) as Record<TextFontFamily, { fontFamily: TextFontFamily }>;
-
-const fontWeightVariants: Record<TextFontWeight, { fontWeight: TextFontWeight }> = (() => {
-	const variants = createPropertyVariants(fontWeightKeys, 'fontWeight', vars.fontWeight) as Record<
-		TextFontWeight,
-		{ fontWeight: TextFontWeight }
-	>;
-	variants.inherit = { fontWeight: 'inherit' };
-	return variants;
-})();
-
-const textDecorationVariants = createVariants(textDecorationKeys, (textDecoration) => ({
-	textDecoration,
-}));
-
-const textTransformVariants = createVariants(textTransformKeys, (textTransform) => ({
-	textTransform,
-}));
-
-const textAlignVariants = {
-	start: { textAlign: 'start' },
-	center: { textAlign: 'center' },
-	end: { textAlign: 'end' },
+const colorVariants = {
+	accent: { color: vars.color.intent.accent.text },
+	danger: { color: vars.color.intent.danger.text },
+	info: { color: vars.color.intent.info.text },
+	primary: { color: vars.color.text.primary },
+	secondary: { color: vars.color.text.secondary },
+	success: { color: vars.color.intent.success.text },
+	warning: { color: vars.color.intent.warning.text },
 } as const;
 
-const fontVariantNumericVariants = createVariants(fontVariantNumericKeys, (fontVariantNumeric) => ({
-	fontVariantNumeric: fontVariantNumeric === 'unset' ? 'normal' : fontVariantNumeric,
-}));
-
-const textWrapVariants = {
-	balance: { textWrap: 'balance' },
-	pretty: { textWrap: 'pretty' },
-	unset: {},
+const weightVariants = {
+	body: { fontWeight: vars.font.weight.body },
+	emphasis: { fontWeight: vars.font.weight.emphasis },
+	heading: { fontWeight: vars.font.weight.heading },
+	label: { fontWeight: vars.font.weight.label },
 } as const;
 
-const fontSizeVariants = Object.fromEntries(fontSizeKeys.map((key) => [key, {}])) as Record<
-	FontSizeToken,
-	{}
->;
+const sizeVariants = Object.fromEntries(
+	sizes.map((size) => [
+		size,
+		{
+			fontSize: vars.font[size].fontSize,
+			letterSpacing: vars.font[size].letterSpacing,
+			lineHeight: vars.font[size].lineHeight,
+		},
+	]),
+) as Record<TextSize, { fontSize: string; letterSpacing: string; lineHeight: string }>;
 
-const lineHeightVariants = Object.fromEntries(lineHeightKeys.map((key) => [key, {}])) as Record<
-	LineHeightToken,
-	{}
->;
-
-const typographyCompoundVariants = (() => {
-	const variants: Array<{
-		variants: {
-			fontSize: FontSizeToken;
-			lineHeight: LineHeightToken;
-			shouldDisableTrim: boolean;
-		};
-		style:
-			| string
-			| {
-					fontSize: string;
-					lineHeight: string;
-			  };
-	}> = [];
-
-	for (const fontSize of fontSizeKeys) {
-		for (const lineHeight of lineHeightKeys) {
-			variants.push({
-				style: getTypographyClass(
-					{ fontSize, lineHeight },
-					`text_typography_${fontSize}_${lineHeight}`,
-				),
-				variants: {
-					fontSize,
-					lineHeight,
-					shouldDisableTrim: false,
-				},
-			});
-
-			variants.push({
-				style: {
-					fontSize: vars.fontSize[fontSize],
-					lineHeight: vars.lineHeight[lineHeight],
-				},
-				variants: {
-					fontSize,
-					lineHeight,
-					shouldDisableTrim: true,
-				},
-			});
-		}
-	}
-
-	return variants;
-})();
+const typographyCompoundVariants = sizes.map((size) => {
+	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
+	return {
+		style: createTextStyle(
+			{ baselineTrim, capHeightTrim, fontSize, lineHeight },
+			`text_typography_${size}`,
+		),
+		variants: { shouldDisableTrim: false, size },
+	};
+});
 
 /** Vanilla-extract recipe for the `Text` primitive's styles. */
 export const text = recipeInLayer('recipes', {
 	base,
 	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
-		color: 'neutralBold',
-		fontFamily: 'sans',
-		fontSize: 'standard',
-		fontWeight: 'regular',
+		fontVariantNumeric: 'unset',
 		isVisuallyHidden: false,
 		lineClamp: false,
-		lineHeight: 'loose',
 		shouldDisableTrim: false,
 		shouldInheritFont: false,
+		size: 300,
 		textAlign: 'start',
 		textDecoration: 'none',
 		textTransform: 'none',
 		textWrap: 'unset',
-		fontVariantNumeric: 'unset',
+		fontWeight: 'body',
 	},
 	variants: {
-		color: colorVariants,
-		fontFamily: fontFamilyVariants,
-		fontSize: fontSizeVariants,
-		fontVariantNumeric: fontVariantNumericVariants,
-		fontWeight: fontWeightVariants,
+		fontVariantNumeric: {
+			'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
+			ordinal: { fontVariantNumeric: 'ordinal' },
+			'slashed-zero': { fontVariantNumeric: 'slashed-zero' },
+			'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
+			unset: { fontVariantNumeric: 'normal' },
+		},
 		isVisuallyHidden: {
 			false: {},
-			true: {
-				position: 'absolute',
-				transform: 'scale(0)',
-			},
+			true: { position: 'absolute', transform: 'scale(0)' },
 		},
 		lineClamp: lineClampVariants,
-		lineHeight: lineHeightVariants,
-		shouldDisableTrim: {
-			false: {},
-			true: {},
+		shouldDisableTrim: { false: {}, true: {} },
+		size: sizeVariants,
+		textAlign: {
+			center: { textAlign: 'center' },
+			end: { textAlign: 'end' },
+			start: { textAlign: 'start' },
 		},
+		textDecoration: {
+			inherit: { textDecoration: 'inherit' },
+			'line-through': { textDecoration: 'line-through' },
+			none: { textDecoration: 'none' },
+			underline: { textDecoration: 'underline' },
+		},
+		textTransform: {
+			capitalize: { textTransform: 'capitalize' },
+			inherit: { textTransform: 'inherit' },
+			lowercase: { textTransform: 'lowercase' },
+			none: { textTransform: 'none' },
+			uppercase: { textTransform: 'uppercase' },
+		},
+		textWrap: {
+			balance: { textWrap: 'balance' },
+			pretty: { textWrap: 'pretty' },
+			unset: {},
+		},
+		fontWeight: weightVariants,
 		shouldInheritFont: {
 			false: {},
 			true: {
-				font: 'inherit',
+				color: 'inherit',
+				fontFamily: 'inherit',
+				fontSize: 'inherit',
+				fontStyle: 'inherit',
+				fontWeight: 'inherit',
+				letterSpacing: 'inherit',
+				lineHeight: 'inherit',
 			},
 		},
-		textAlign: textAlignVariants,
-		textDecoration: textDecorationVariants,
-		textTransform: textTransformVariants,
-		textWrap: textWrapVariants,
+		color: colorVariants,
 	},
 });
 

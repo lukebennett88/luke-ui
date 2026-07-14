@@ -1,6 +1,11 @@
 import type { CSSProperties } from 'react';
-import { test } from 'vite-plus/test';
-import { captureVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
+import { expect, test } from 'vite-plus/test';
+import {
+	captureVisualAppearance,
+	renderVisual,
+	Stack,
+	visualAppearances,
+} from '../test-utils/render-visual.js';
 import { Numeral } from './index.js';
 
 const rowStyle = {
@@ -8,7 +13,7 @@ const rowStyle = {
 	gap: '1.5rem',
 } satisfies CSSProperties;
 
-test('formats and alignment', async () => {
+test.each(visualAppearances)('formats and typography: $theme $mode', async (appearance) => {
 	const locator = renderVisual(
 		<Stack>
 			<div style={rowStyle}>
@@ -22,10 +27,18 @@ test('formats and alignment', async () => {
 				<Numeral unit="kilometer-per-hour" value={98} />
 			</div>
 			<div style={{ inlineSize: '10rem' } satisfies CSSProperties}>
-				<Numeral textAlign="end" value={12_345.67} />
+				<Numeral
+					color="accent"
+					fontWeight="emphasis"
+					size={600}
+					textAlign="end"
+					value={12_345.67}
+				/>
 			</div>
 		</Stack>,
+		appearance,
 	);
+	await expect.element(locator).toBeVisible();
 
-	await captureVisual(locator, 'numeral/formats-alignment');
+	await captureVisualAppearance(locator, 'numeral/formats-typography', appearance);
 });

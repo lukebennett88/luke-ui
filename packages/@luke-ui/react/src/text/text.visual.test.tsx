@@ -1,36 +1,58 @@
 import type { CSSProperties } from 'react';
-import { test } from 'vite-plus/test';
-import { captureVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
+import { expect, test } from 'vite-plus/test';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	renderVisual,
+	Stack,
+	visualAppearances,
+} from '../test-utils/render-visual.js';
 import { Text } from './index.js';
 
 const rowStyle = {
 	alignItems: 'baseline',
 	display: 'flex',
+	flexWrap: 'wrap',
 	gap: '1rem',
 } satisfies CSSProperties;
 
-test('typography variants', async () => {
+test.each(visualAppearances)('composite typography: $theme $mode', async (appearance) => {
 	const locator = renderVisual(
 		<Stack width="40rem">
 			<div style={rowStyle}>
-				<Text fontSize="small">Small text</Text>
-				<Text fontSize="standard">Standard text</Text>
-				<Text fontSize="large">Large text</Text>
+				<Text size={100}>100</Text>
+				<Text size={200}>200</Text>
+				<Text size={300}>300</Text>
+				<Text size={400}>400</Text>
+				<Text size={500}>500</Text>
+				<Text size={600}>600</Text>
+				<Text size={700}>700</Text>
+				<Text size={800}>800</Text>
+				<Text size={900}>900</Text>
 			</div>
 			<div style={rowStyle}>
-				<Text fontWeight="regular">Regular</Text>
-				<Text fontWeight="medium">Medium</Text>
-				<Text fontWeight="bold">Bold</Text>
+				<Text fontWeight="body">Body</Text>
+				<Text fontWeight="label">Label</Text>
+				<Text fontWeight="heading">Heading</Text>
+				<Text fontWeight="emphasis">Emphasis</Text>
 			</div>
 			<div style={rowStyle}>
-				<Text color="neutralSubtle">Subtle</Text>
-				<Text color="informative">Informative</Text>
-				<Text color="critical">Critical</Text>
+				<Text color="primary">Primary</Text>
+				<Text color="secondary">Secondary</Text>
+				<Text color="accent">Accent</Text>
+				<Text color="info">Info</Text>
+				<Text color="success">Success</Text>
+				<Text color="warning">Warning</Text>
+				<Text color="danger">Danger</Text>
 			</div>
+			<Text>Trimmed by default</Text>
+			<Text shouldDisableTrim>Trim disabled</Text>
 		</Stack>,
+		appearance,
 	);
+	await expect.element(locator).toBeVisible();
 
-	await captureVisual(locator, 'text/typography-variants');
+	await captureVisualAppearance(locator, 'text/composite-typography', appearance);
 });
 
 test('line clamp and transforms', async () => {

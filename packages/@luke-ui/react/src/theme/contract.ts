@@ -1,3 +1,11 @@
+const compositeFontStep = {
+	baselineTrim: null,
+	capHeightTrim: null,
+	fontSize: null,
+	letterSpacing: null,
+	lineHeight: null,
+};
+
 /**
  * The semantic token tree shared by the vanilla-extract contract and `buildTheme`, so typed paths
  * and emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one
@@ -94,15 +102,15 @@ export const themeContractTree = {
 	depth: { recessed: null, resting: null, raised: null, floating: null, overlay: null },
 	actionControlFinish: { recessed: null, resting: null, raised: null },
 	font: {
-		100: { fontSize: null, letterSpacing: null, lineHeight: null },
-		200: { fontSize: null, letterSpacing: null, lineHeight: null },
-		300: { fontSize: null, letterSpacing: null, lineHeight: null },
-		400: { fontSize: null, letterSpacing: null, lineHeight: null },
-		500: { fontSize: null, letterSpacing: null, lineHeight: null },
-		600: { fontSize: null, letterSpacing: null, lineHeight: null },
-		700: { fontSize: null, letterSpacing: null, lineHeight: null },
-		800: { fontSize: null, letterSpacing: null, lineHeight: null },
-		900: { fontSize: null, letterSpacing: null, lineHeight: null },
+		100: { ...compositeFontStep },
+		200: { ...compositeFontStep },
+		300: { ...compositeFontStep },
+		400: { ...compositeFontStep },
+		500: { ...compositeFontStep },
+		600: { ...compositeFontStep },
+		700: { ...compositeFontStep },
+		800: { ...compositeFontStep },
+		900: { ...compositeFontStep },
 		family: null,
 		weight: { body: null, label: null, heading: null, emphasis: null },
 	},

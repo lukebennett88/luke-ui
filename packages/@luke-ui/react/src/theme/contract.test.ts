@@ -38,6 +38,8 @@ describe('theme contract', () => {
 
 	it('exposes composite font steps and the carried-forward icon-size scale', () => {
 		expect(vars.font[100]).toEqual({
+			baselineTrim: 'var(--luke-font-100-baseline-trim)',
+			capHeightTrim: 'var(--luke-font-100-cap-height-trim)',
 			fontSize: 'var(--luke-font-100-font-size)',
 			letterSpacing: 'var(--luke-font-100-letter-spacing)',
 			lineHeight: 'var(--luke-font-100-line-height)',

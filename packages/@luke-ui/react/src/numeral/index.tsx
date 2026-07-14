@@ -47,7 +47,7 @@ export interface NumeralProps extends Omit<
 	value: number;
 }
 
-/** Formats a number and renders it with `Text`. */
+/** Formats a number and renders it with the same typography props as `Text`. */
 export function Numeral(props: NumeralProps) {
 	const { locale: localeFromContext } = useLocale();
 	const isWithinHeading = useIsWithinHeading();
@@ -88,9 +88,6 @@ export function Numeral(props: NumeralProps) {
 
 	const content = getCachedNumberFormat(resolvedLocale, numeralFormatOptions).format(value);
 	const resolvedShouldDisableTrim = shouldDisableTrim ?? isWithinHeading;
-	const resolvedColor = color ?? (isWithinHeading ? 'inherit' : undefined);
-	const colorProps: Pick<TextProps, 'color'> =
-		resolvedColor === undefined ? {} : { color: resolvedColor };
 
 	return (
 		<Text
@@ -100,7 +97,7 @@ export function Numeral(props: NumeralProps) {
 			shouldDisableTrim={resolvedShouldDisableTrim}
 			shouldInheritFont={isWithinHeading}
 			textAlign={textAlign}
-			{...colorProps}
+			{...(color === undefined ? {} : { color })}
 		>
 			{content}
 		</Text>

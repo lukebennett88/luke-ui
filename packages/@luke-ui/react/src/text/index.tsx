@@ -7,29 +7,14 @@ interface TextVariantProps extends NonNullable<styles.TextVariants> {}
 interface TextStyleProps {
 	/**
 	 * Sets text color.
-	 * @default 'neutralBold'
+	 * @default 'primary'
 	 */
 	color?: TextVariantProps['color'];
-	/**
-	 * Sets the font family.
-	 * @default 'sans'
-	 */
-	fontFamily?: TextVariantProps['fontFamily'];
-	/**
-	 * Sets the font size.
-	 * @default 'standard'
-	 */
-	fontSize?: TextVariantProps['fontSize'];
 	/**
 	 * Sets numeric glyph style.
 	 * @default 'unset'
 	 */
 	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
-	/**
-	 * Sets the font weight.
-	 * @default 'regular'
-	 */
-	fontWeight?: TextVariantProps['fontWeight'];
 	/**
 	 * Hides text visually while keeping it accessible.
 	 * @default false
@@ -38,20 +23,20 @@ interface TextStyleProps {
 	/** Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5. */
 	lineClamp?: TextVariantProps['lineClamp'];
 	/**
-	 * Sets the line height.
-	 * @default 'loose'
-	 */
-	lineHeight?: TextVariantProps['lineHeight'];
-	/**
-	 * Turns off cap-height trim.
+	 * Turns off cap-height trim. Trimming is disabled automatically when `lineClamp` is set.
 	 * @default false
 	 */
 	shouldDisableTrim?: TextVariantProps['shouldDisableTrim'];
 	/**
-	 * Makes text inherit font styles.
+	 * Makes text inherit its surrounding font and color styles.
 	 * @default false
 	 */
 	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
+	/**
+	 * Sets the composite font size, line height, and letter spacing step.
+	 * @default 300
+	 */
+	size?: TextVariantProps['size'];
 	/**
 	 * Sets text alignment.
 	 * @default 'start'
@@ -72,6 +57,11 @@ interface TextStyleProps {
 	 * @default 'unset'
 	 */
 	textWrap?: TextVariantProps['textWrap'];
+	/**
+	 * Sets the semantic font-weight role.
+	 * @default 'body'
+	 */
+	fontWeight?: TextVariantProps['fontWeight'];
 }
 
 /**
@@ -82,21 +72,19 @@ interface TextStyleProps {
 export type TextProps = Omit<React.ComponentProps<typeof RacText>, keyof TextStyleProps> &
 	TextStyleProps;
 
-/** Styled text component with token-based typography controls. */
+/** Styled text with composite typography and semantic content-color controls. */
 export function Text(props: TextProps) {
 	const {
 		children,
 		className,
 		color,
-		fontFamily,
-		fontSize,
-		fontVariantNumeric,
 		fontWeight,
+		fontVariantNumeric,
 		isVisuallyHidden,
 		lineClamp,
-		lineHeight,
 		shouldInheritFont,
 		shouldDisableTrim,
+		size,
 		textAlign,
 		textDecoration,
 		textTransform,
@@ -112,15 +100,13 @@ export function Text(props: TextProps) {
 			className={cx(
 				styles.text({
 					color,
-					fontFamily,
-					fontSize,
-					fontVariantNumeric,
 					fontWeight,
+					fontVariantNumeric,
 					isVisuallyHidden,
 					lineClamp,
-					lineHeight,
 					shouldDisableTrim: resolvedShouldDisableTrim,
 					shouldInheritFont,
+					size,
 					textAlign,
 					textDecoration,
 					textTransform,

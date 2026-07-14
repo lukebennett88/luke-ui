@@ -30,8 +30,10 @@ and throws a `ThemeContrastError` naming each failing mode and token pair when a
 misses WCAG 2.2 AA contrast.
 
 The semantic contract includes composite `font.100` through `font.900` steps. Each step groups its
-font size, line height, and letter spacing so components cannot combine unrelated values. Icon sizes
-carry forward the `xsmall`, `small`, `medium`, and `large` scale at 16px, 20px, 24px, and 32px.
+font size, line height, letter spacing, and per-font Capsize trims so components cannot combine
+unrelated values. `buildTheme` computes those trim values from the curated Inter, Apple System, or
+DM Sans font metrics. Icon sizes carry forward the `xsmall`, `small`, `medium`, and `large` scale at
+16px, 20px, 24px, and 32px.
 
 Each colour mode authors the final composite `box-shadow` for `depth.recessed`, `depth.resting`,
 `depth.raised`, `depth.floating`, and `depth.overlay`. Components select a semantic depth and do not

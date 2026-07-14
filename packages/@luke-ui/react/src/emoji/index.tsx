@@ -14,12 +14,12 @@ export interface EmojiProps extends DistributiveOmit<TextProps, 'children' | 'el
 	label: string;
 }
 
-/** Text wrapper for accessible emoji output. */
+/** Accessible emoji output with the same typography props as `Text`. */
 export function Emoji(props: EmojiProps) {
 	const { emoji, label, ...textProps } = props;
 
 	return (
-		<Text {...textProps} aria-label={label} lineHeight="nospace" role="img">
+		<Text {...textProps} aria-label={label} role="img">
 			{emoji}
 		</Text>
 	);

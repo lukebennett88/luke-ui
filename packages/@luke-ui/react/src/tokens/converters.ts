@@ -11,10 +11,6 @@ export function dimensionToRemString(value: DimensionTokenValue, base: number = 
 	return value.unit === 'rem' ? `${value.value}rem` : pxToRem(value.value, base);
 }
 
-export function dimensionToPxNumber(value: DimensionTokenValue, base: number = 16): number {
-	return value.unit === 'px' ? value.value : value.value * base;
-}
-
 /** Converts a `DurationTokenValue` to a CSS time string. */
 export function durationToString(value: DurationTokenValue): string {
 	return `${value.value}${value.unit}`;

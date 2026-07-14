@@ -4,7 +4,7 @@ export default function Basic() {
 	return (
 		<div style={{ alignItems: 'center', display: 'flex', gap: '1rem' }}>
 			<Emoji emoji="🎉" label="Celebration" />
-			<Emoji emoji="🚀" fontSize="large" label="Rocket" />
+			<Emoji emoji="🚀" label="Rocket" size={500} />
 		</div>
 	);
 }
