@@ -154,7 +154,7 @@ export const elmoFoundation: ThemeFoundation = {
 				'0 2px 6px oklch(0.2 0.01 250 / 0.05)',
 				'0 1px 3px oklch(0.2 0.01 250 / 0.035)',
 			].join(', '),
-			recessed: 'inset 0 1px 2px oklch(0.2 0.01 250 / 0.06)',
+			recessed: 'none',
 			resting: [
 				'0 1px 3px oklch(0.2 0.01 250 / 0.04)',
 				'0 1px 2px oklch(0.2 0.01 250 / 0.02)',
@@ -162,4 +162,5 @@ export const elmoFoundation: ThemeFoundation = {
 		},
 	},
 	name: 'elmo',
+	radius: { control: 4 },
 };

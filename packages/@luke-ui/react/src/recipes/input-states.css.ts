@@ -1,5 +1,7 @@
 import type { StyleRule } from '@vanilla-extract/css';
+import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../styles/vars.css.js';
+import { vars as themeVars } from '../theme/contract.css.js';
 
 /**
  * State definitions shared by field control recipes (the `TextInput` group,
@@ -107,10 +109,7 @@ export function inputChromeStyles(
 			},
 			[selectors.focusWithin]: {
 				borderColor: vars.themeColor.paletteThemePrimary500,
-				outlineColor: vars.themeColor.focusRingColor,
-				outlineOffset: 0,
-				outlineStyle: 'solid',
-				outlineWidth: '3px',
+				...focusRing(themeVars.color.border.focus),
 			},
 			[selectors.invalid]: {
 				borderColor: vars.border.critical,
@@ -118,10 +117,7 @@ export function inputChromeStyles(
 			},
 			[selectors.invalidFocusWithin]: {
 				borderColor: vars.border.critical,
-				outlineColor: vars.themeColor.focusRingColor,
-				outlineOffset: 0,
-				outlineStyle: 'solid',
-				outlineWidth: '3px',
+				...focusRing(themeVars.color.border.focus),
 			},
 			[selectors.readOnly]: {
 				backgroundColor: vars.backgroundColor.subtle,

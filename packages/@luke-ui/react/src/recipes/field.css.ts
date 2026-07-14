@@ -19,10 +19,8 @@ export const field = recipeInLayer('recipes', {
 export const fieldLabel = recipeInLayer('recipes', {
 	base: {
 		color: vars.color.text.primary,
-		fontSize: vars.font[200].fontSize,
+		...vars.font[200],
 		fontWeight: vars.font.weight.label,
-		letterSpacing: vars.font[200].letterSpacing,
-		lineHeight: vars.font[200].lineHeight,
 		minInlineSize: 0,
 
 		selectors: {
@@ -64,9 +62,7 @@ export type FieldLabelVariants = RecipeVariants<typeof fieldLabel>;
 /** Vanilla-extract recipe for the `Field` primitive's message styles. */
 export const fieldMessage = recipeInLayer('recipes', {
 	base: {
-		fontSize: vars.font[200].fontSize,
-		letterSpacing: vars.font[200].letterSpacing,
-		lineHeight: vars.font[200].lineHeight,
+		...vars.font[200],
 		minInlineSize: 0,
 
 		selectors: {

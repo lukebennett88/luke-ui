@@ -192,7 +192,7 @@ const LIGHTNESS_WINDOWS: Record<ColorMode, LightnessWindows> = {
 // surfaces separate more strongly, without exposing generated palette steps.
 const SURFACE_LIGHTNESS_DELTAS = {
 	dark: { floating: 0.07, overlay: 0.09, recessed: -0.025, resting: 0.04 },
-	light: { floating: 0.012, overlay: 0.015, recessed: -0.01, resting: 0.012 },
+	light: { floating: 0.012, overlay: 0.015, recessed: 0, resting: 0.012 },
 } as const satisfies Record<
 	ColorMode,
 	Record<'floating' | 'overlay' | 'recessed' | 'resting', number>

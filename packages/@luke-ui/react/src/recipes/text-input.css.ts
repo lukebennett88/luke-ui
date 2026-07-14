@@ -1,4 +1,5 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
+import { focusRing } from '../styles/focus-ring.js';
 import { recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import { descendantDisabledSelector, inputStates } from './input-states.css.js';
@@ -16,13 +17,6 @@ const invalid = `&:where(${inputStates.invalid})${notDisabled}`;
 const invalidFocusWithin = `&:where(${inputStates.invalid}):where(${inputStates.focusWithin})${notDisabled}`;
 const readOnly = `&:where(${inputStates.readOnly})${notDisabled}`;
 const readOnlyFocusWithin = `&:where(${inputStates.readOnly}):where(${inputStates.focusWithin})${notDisabled}`;
-
-const focusRing = {
-	outlineColor: vars.color.border.focus,
-	outlineOffset: '2px',
-	outlineStyle: 'solid',
-	outlineWidth: '2px',
-} as const;
 
 /** Vanilla-extract recipe for the `TextInput` group's tactile well chrome. */
 export const textInputGroup = recipeInLayer('recipes', {
@@ -80,7 +74,7 @@ export const textInputGroup = recipeInLayer('recipes', {
 			},
 			[focusWithin]: {
 				borderColor: vars.color.intent.accent.border,
-				...focusRing,
+				...focusRing(vars.color.border.focus),
 			},
 			[hover]: {
 				borderColor: vars.color.intent.accent.border,
@@ -90,7 +84,7 @@ export const textInputGroup = recipeInLayer('recipes', {
 			},
 			[invalidFocusWithin]: {
 				borderColor: vars.color.intent.danger.border,
-				...focusRing,
+				...focusRing(vars.color.border.focus),
 			},
 			[readOnly]: {
 				backgroundColor: vars.color.surface.canvas,
@@ -98,7 +92,7 @@ export const textInputGroup = recipeInLayer('recipes', {
 				boxShadow: 'none',
 			},
 			[readOnlyFocusWithin]: {
-				...focusRing,
+				...focusRing(vars.color.border.focus),
 			},
 		},
 	},
@@ -185,7 +179,6 @@ export const textInputAdornmentStart = recipeInLayer('recipes', {
 		color: vars.color.text.secondary,
 		display: 'inline-flex',
 		flexShrink: 0,
-		lineHeight: 'inherit',
 
 		selectors: {
 			[descendantDisabledSelector]: {
@@ -199,10 +192,12 @@ export const textInputAdornmentStart = recipeInLayer('recipes', {
 	variants: {
 		size: {
 			medium: {
+				lineHeight: vars.font[300].lineHeight,
 				paddingInlineEnd: vars.space[300],
 				paddingInlineStart: vars.space[300],
 			},
 			small: {
+				lineHeight: vars.font[200].lineHeight,
 				paddingInlineEnd: vars.space[200],
 				paddingInlineStart: vars.space[200],
 			},
@@ -220,7 +215,6 @@ export const textInputAdornmentEnd = recipeInLayer('recipes', {
 		color: vars.color.text.secondary,
 		display: 'inline-flex',
 		flexShrink: 0,
-		lineHeight: 'inherit',
 
 		selectors: {
 			[descendantDisabledSelector]: {
@@ -234,10 +228,12 @@ export const textInputAdornmentEnd = recipeInLayer('recipes', {
 	variants: {
 		size: {
 			medium: {
+				lineHeight: vars.font[300].lineHeight,
 				paddingInlineEnd: vars.space[300],
 				paddingInlineStart: vars.space[300],
 			},
 			small: {
+				lineHeight: vars.font[200].lineHeight,
 				paddingInlineEnd: vars.space[200],
 				paddingInlineStart: vars.space[200],
 			},

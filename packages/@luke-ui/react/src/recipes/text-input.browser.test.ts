@@ -12,20 +12,6 @@ afterEach(() => {
 	mounted = [];
 });
 
-test('the well uses the recessed surface, depth, and control radius', () => {
-	const { group, root } = mountGroup();
-	const probe = root.appendChild(document.createElement('div'));
-	probe.style.backgroundColor = 'var(--luke-color-surface-recessed)';
-	probe.style.boxShadow = 'var(--luke-depth-recessed)';
-	const style = getComputedStyle(group);
-
-	expect(style.backgroundColor).toBe(getComputedStyle(probe).backgroundColor);
-	expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-	expect(style.boxShadow).toBe(getComputedStyle(probe).boxShadow);
-	expect(style.boxShadow).not.toBe('none');
-	expect(style.borderRadius).toBe(getComputedStyle(root).getPropertyValue('--luke-radius-control'));
-});
-
 test('small and medium share the control geometry contract', () => {
 	const { group: small } = mountGroup({ size: 'small' });
 	const { group: medium } = mountGroup({ size: 'medium' });
@@ -120,10 +106,8 @@ test('read-only flattens into canvas surface with a decorative border and ignore
 	readOnlyHover.dataset.readonly = 'true';
 	readOnlyHover.dataset.hovered = 'true';
 
-	const restingBackground = getComputedStyle(resting).backgroundColor;
 	const readOnlyStyle = getComputedStyle(readOnly);
 
-	expect(readOnlyStyle.backgroundColor).not.toBe(restingBackground);
 	expect(readOnlyStyle.borderColor).not.toBe(getComputedStyle(resting).borderColor);
 	expect(readOnlyStyle.boxShadow).toBe('none');
 	expect(getComputedStyle(readOnlyHover).borderColor).toBe(readOnlyStyle.borderColor);

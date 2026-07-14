@@ -1,4 +1,5 @@
 import { classSelector, lukeUiClassNames } from './class-names.js';
+import { focusRing } from './focus-ring.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 import { vars } from './vars.css.js';
 
@@ -71,10 +72,7 @@ globalStyleInLayer('reset', `${root} :where(:disabled, [data-disabled="true"])`,
 });
 
 globalStyleInLayer('reset', `${root} :where(:focus-visible)`, {
-	outlineColor: vars.themeColor.focusRingColor,
-	outlineOffset: vars.borderWidth.thick,
-	outlineStyle: 'solid',
-	outlineWidth: vars.borderWidth.thick,
+	...focusRing(vars.themeColor.focusRingColor),
 
 	'@media': {
 		'(forced-colors: active)': {

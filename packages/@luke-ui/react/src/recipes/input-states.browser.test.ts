@@ -1,5 +1,9 @@
+import '@luke-ui/react/themes/machined-edge.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { themeClass, vars } from '../styles/vars.css.js';
+import { themeRootClassName } from '../theme/index.js';
+import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { cx } from '../utils/index.js';
 import { comboboxControl, comboboxItem } from './combobox.css.js';
 
 let wrappers: Array<HTMLElement> = [];
@@ -7,7 +11,7 @@ let wrappers: Array<HTMLElement> = [];
 function mount(control: HTMLElement): HTMLElement {
 	// Token vars only resolve inside the theme class.
 	const wrapper = document.body.appendChild(document.createElement('div'));
-	wrapper.className = themeClass;
+	wrapper.className = cx(themeClass, themeRootClassName, machinedEdgeThemeClassName);
 	wrappers.push(wrapper);
 	wrapper.append(control);
 	return control;
@@ -61,10 +65,17 @@ test('disabled beats read-only on a combobox control', () => {
 	expect(style.borderColor).toBe(resolveColor(vars.border.default));
 });
 
-// `TextInput`'s focus ring moved to the new semantic theme contract in #99;
-// Combobox still authors its own ring from the old token system until it
-// migrates (#100), so the two are no longer guaranteed to share a color. See
-// `recipes/text-input.browser.test.ts` for the migrated focus-ring contract.
+test('focus-within shows the shared visible ring', () => {
+	const control = comboboxControlElement();
+	control.dataset.focusWithin = 'true';
+	mount(control);
+
+	const style = getComputedStyle(control);
+	expect(style.outlineStyle).toBe('solid');
+	expect(style.outlineWidth).toBe('2px');
+	expect(style.outlineOffset).toBe('2px');
+	expect(style.outlineColor).not.toBe('rgba(0, 0, 0, 0)');
+});
 
 test('keyboard-focused combobox items are indicated by background, not a second ring', () => {
 	const item = document.createElement('li');

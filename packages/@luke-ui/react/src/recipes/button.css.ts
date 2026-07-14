@@ -1,4 +1,5 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
+import { focusRing } from '../styles/focus-ring.js';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 
@@ -76,7 +77,7 @@ const base = styleInLayer('recipes', {
 			opacity: 0.55,
 		},
 		'&[data-focus-visible="true"]': {
-			outlineColor: vars.color.border.focus,
+			...focusRing(vars.color.border.focus),
 		},
 		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 			boxShadow: vars.depth.raised,

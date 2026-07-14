@@ -131,7 +131,7 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-icon-size-large: 32px');
 	});
 
-	it('emits the authored semantic depth values without synthesising material layers', () => {
+	it('emits authored semantic depth while keeping only ELMO light flat', () => {
 		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(
 			machinedEdgeFoundation.light.depth.resting,
 		);
@@ -144,30 +144,41 @@ describe('buildTheme output', () => {
 				expect(foundation[mode].depth.raised).not.toContain('inset');
 				expect(foundation[mode].depth.resting.split(', ')).toHaveLength(2);
 				expect(foundation[mode].depth.raised.split(', ')).toHaveLength(2);
-				const recessedLayers = foundation[mode].depth.recessed.split(', ');
-				expect(foundation[mode].depth.recessed).not.toBe('none');
-				expect(recessedLayers.every((layer) => layer.startsWith('inset '))).toBe(true);
 			}
+		}
+		expect(elmoFoundation.light.depth.recessed).toBe('none');
+		for (const recessed of [
+			machinedEdgeFoundation.light.depth.recessed,
+			machinedEdgeFoundation.dark.depth.recessed,
+			elmoFoundation.dark.depth.recessed,
+		]) {
+			expect(recessed).not.toBe('none');
+			expect(recessed.split(', ').every((layer) => layer.startsWith('inset '))).toBe(true);
 		}
 	});
 
 	it('keeps ELMO softer than Machined edge while retaining finish and state depth', () => {
 		const elmoBlocks = splitBlocks(buildTheme(elmoFoundation));
+		expect(extractValue(elmoBlocks.identity, '--luke-radius-control')).toBe('4px');
+		expect(extractValue(elmoBlocks.baseLight, '--luke-depth-recessed')).toBe('none');
+		expect(extractValue(blocks.baseLight, '--luke-depth-recessed').split(', ')).toHaveLength(2);
+
+		const elmoDarkRecessed = extractValue(elmoBlocks.mediaDark, '--luke-depth-recessed');
+		const machinedDarkRecessed = extractValue(blocks.mediaDark, '--luke-depth-recessed');
+		expect(elmoDarkRecessed.split(', ')).toHaveLength(1);
+		expect(machinedDarkRecessed.split(', ')).toHaveLength(2);
+		expect(Math.max(...extractShadowOpacities(machinedDarkRecessed))).toBeGreaterThan(
+			Math.max(...extractShadowOpacities(elmoDarkRecessed)),
+		);
+
 		for (const [elmoBlock, machinedBlock] of [
 			[elmoBlocks.baseLight, blocks.baseLight],
 			[elmoBlocks.mediaDark, blocks.mediaDark],
 		] as const) {
-			const elmoRecessed = extractValue(elmoBlock, '--luke-depth-recessed');
-			const machinedRecessed = extractValue(machinedBlock, '--luke-depth-recessed');
 			const elmoResting = extractValue(elmoBlock, '--luke-depth-resting');
 			const elmoRaised = extractValue(elmoBlock, '--luke-depth-raised');
 			const elmoFinish = extractValue(elmoBlock, '--luke-action-control-finish-resting');
 
-			expect(machinedRecessed.split(', ')).toHaveLength(2);
-			expect(elmoRecessed.split(', ')).toHaveLength(1);
-			expect(Math.max(...extractShadowOpacities(machinedRecessed))).toBeGreaterThan(
-				Math.max(...extractShadowOpacities(elmoRecessed)),
-			);
 			expect(extractValue(machinedBlock, '--luke-depth-resting')).toContain('0 2px 0');
 			expect(elmoResting).not.toContain('0 2px 0');
 			expect(elmoRaised).not.toContain('0 3px 0');
@@ -394,7 +405,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			}
 		});
 
-		it(`${foundation.name} keeps light recessed surfaces near canvas and dark wells distinct`, () => {
+		it(`${foundation.name} keeps light recessed surfaces at canvas and dark wells distinct`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			const lightCanvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
 			const lightRecessed = parseColor(
@@ -405,8 +416,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 				extractValue(blocks.mediaDark, '--luke-color-surface-recessed'),
 			);
 
-			expect(lightCanvas.l - lightRecessed.l).toBeGreaterThan(0);
-			expect(lightCanvas.l - lightRecessed.l).toBeLessThanOrEqual(0.015);
+			expect(lightRecessed).toEqual(lightCanvas);
 			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
 		});
 
@@ -434,6 +444,15 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			}
 		});
 	}
+
+	it('keeps the Machined edge light recessed surface near white at canvas lightness', () => {
+		const blocks = splitBlocks(buildTheme(machinedEdgeFoundation));
+		const canvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
+		const recessed = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-recessed'));
+
+		expect(recessed.l).toBeGreaterThan(0.97);
+		expect(recessed.l).toBe(canvas.l);
+	});
 });
 
 describe('bundled theme identity', () => {
