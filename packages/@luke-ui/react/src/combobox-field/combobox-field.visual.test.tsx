@@ -122,6 +122,9 @@ test.each(visualAppearances)('interactive states: $theme $mode', async (appearan
 	await userEvent.tab();
 	await expect.element(clear).toHaveFocus();
 	await captureVisualAppearance(scene, 'combobox-field/clear-focus-visible', appearance);
+	trigger.element().dataset.pressed = 'true';
+	await captureVisualAppearance(scene, 'combobox-field/trigger-pressed', appearance);
+	delete trigger.element().dataset.pressed;
 });
 
 test.each(visualAppearances)('open option interactions: $theme $mode', async (appearance) => {

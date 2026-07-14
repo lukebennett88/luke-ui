@@ -1,4 +1,4 @@
-import type { JSX, Ref } from 'react';
+import type { JSX } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -15,14 +15,12 @@ import { useComboboxSize } from './size-context.js';
  */
 export interface ComboboxControlProps extends DistributiveOmit<RacGroupProps, 'className'> {
 	className?: RacGroupProps['className'];
-	/** Forwarded to the control group element. */
-	ref?: Ref<HTMLDivElement>;
 	size?: ComboboxSize;
 }
 
 /** Control wrapper for combobox text input + trigger content. */
 export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
-	const { ref, size: sizeProp, ...groupProps } = props;
+	const { size: sizeProp, ...groupProps } = props;
 	const size = useComboboxSize(sizeProp);
 
 	return (
@@ -31,7 +29,6 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 			className={composeRenderProps(groupProps.className, (className) => {
 				return cx(styles.comboboxControl({ size }), className);
 			})}
-			ref={ref}
 		/>
 	);
 }

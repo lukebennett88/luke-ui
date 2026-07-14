@@ -34,7 +34,7 @@ Primitives that support a composed component export from `[composed]/primitive`:
 ```ts
 import { TextInput } from '@luke-ui/react/text-field/primitive';
 import { Field, FieldLabel } from '@luke-ui/react/field/primitive';
-import { ComboboxInput } from '@luke-ui/react/combobox-field/primitive';
+import { ComboboxRoot } from '@luke-ui/react/combobox-field/primitive';
 ```
 
 Do not add top-level primitive paths such as `@luke-ui/react/field` or `@luke-ui/react/text-input`.
