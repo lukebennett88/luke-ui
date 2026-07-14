@@ -51,6 +51,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
+		"@netlify/vite-plugin-tanstack-start": "catalog:",
 		"@tailwindcss/vite": "catalog:",
 		"@tanstack/router-cli": "catalog:",
 		"@types/mdx": "catalog:",
@@ -59,7 +60,6 @@
 		"@types/react-dom": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
-		"nitro": "catalog:",
 		"playwright": "catalog:",
 		"serve": "catalog:",
 		"tailwindcss": "catalog:",
