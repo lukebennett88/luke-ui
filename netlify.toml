@@ -1,5 +1,5 @@
 [build]
-  base = "."
-  command = "pnpm exec turbo run build --filter docs"
-  publish = "apps/docs/dist/client"
-  functions = "apps/docs/.netlify/v1/functions"
+base = "."
+command = "pnpm exec turbo run build --filter docs"
+publish = "apps/docs/dist/client"
+functions = "apps/docs/.netlify/v1/functions"
