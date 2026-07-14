@@ -116,9 +116,25 @@ test('options keep hover, keyboard focus, selected, and disabled states distinct
 	const { root } = mountControl();
 	const resting = mountItem(root);
 	const hovered = mountItem(root, { hovered: 'true' });
-	const keyboardFocused = mountItem(root, { focusVisible: 'true', focused: 'true' });
+	const focused = mountItem(root, { focused: 'true' });
+	const hoveredAndFocused = mountItem(root, { focused: 'true', hovered: 'true' });
+	const keyboardFocused = mountItem(root, {
+		focusVisible: 'true',
+		focused: 'true',
+		hovered: 'true',
+	});
 	const selected = mountItem(root, { selected: 'true' });
 	const disabled = mountItem(root, { disabled: 'true', focused: 'true' });
+
+	expect(getComputedStyle(focused).backgroundColor).toBe(
+		resolveColor(root, '--luke-color-intent-neutral-surface-subtle'),
+	);
+	expect(getComputedStyle(hoveredAndFocused).backgroundColor).toBe(
+		resolveColor(root, '--luke-color-intent-neutral-surface-subtle-hover'),
+	);
+	expect(getComputedStyle(keyboardFocused).backgroundColor).toBe(
+		resolveColor(root, '--luke-color-intent-accent-surface-subtle-hover'),
+	);
 
 	const interactiveBackgrounds = [resting, hovered, keyboardFocused, selected].map((item) => {
 		return getComputedStyle(item).backgroundColor;

@@ -459,11 +459,11 @@ export const comboboxItem = recipeInLayer('recipes', {
 				cursor: 'not-allowed',
 				opacity: 0.55,
 			},
-			'&[data-hovered="true"]:not([data-disabled="true"])': {
-				backgroundColor: vars.color.intent.neutral.surface.subtleHover,
-			},
 			'&[data-focused="true"]:not([data-disabled="true"])': {
 				backgroundColor: vars.color.intent.neutral.surface.subtle,
+			},
+			'&[data-hovered="true"]:not([data-disabled="true"])': {
+				backgroundColor: vars.color.intent.neutral.surface.subtleHover,
 			},
 			'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 				backgroundColor: vars.color.intent.accent.surface.subtleHover,
