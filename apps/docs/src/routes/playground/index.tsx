@@ -143,7 +143,10 @@ function Playground() {
 					</button>
 				</div>
 			</header>
-			<Group className="min-h-0 flex-1" orientation={isDesktop ? 'horizontal' : 'vertical'}>
+			<Group
+				className="min-h-0 flex-1 flex-col! md:flex-row!"
+				orientation={isDesktop ? 'horizontal' : 'vertical'}
+			>
 				{/* Pane backgrounds match the Catppuccin Latte/Mocha `editor.background` values in monaco-setup.ts. */}
 				<Panel
 					className="min-h-0 bg-[#eff1f5] dark:bg-[#1e1e2e]"
@@ -170,12 +173,7 @@ function Playground() {
 				</Panel>
 				<Separator
 					aria-label="Resize editor and preview panels"
-					className={cx(
-						"relative z-10 shrink-0 bg-fd-border before:absolute before:content-[''] after:absolute after:rounded-full after:bg-fd-border after:transition-colors after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/60 data-[separator=focus]:after:bg-fd-muted-foreground/60 data-[separator=hover]:after:bg-fd-muted-foreground/50",
-						isDesktop
-							? 'w-px cursor-col-resize before:inset-y-0 before:-inset-x-2 after:h-8 after:w-0.5 after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%]'
-							: 'h-px cursor-row-resize before:-inset-y-2 before:inset-x-0 after:h-0.5 after:w-8 after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%]',
-					)}
+					className="relative z-10 shrink-0 block-px inline-auto cursor-row-resize bg-fd-border before:absolute before:-inset-y-2 before:inset-x-0 before:content-[''] after:absolute after:block-0.5 after:inline-8 after:rounded-full after:bg-fd-border after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/60 data-[separator=focus]:after:bg-fd-muted-foreground/60 data-[separator=hover]:after:bg-fd-muted-foreground/50 md:block-auto md:inline-px md:cursor-col-resize md:before:inset-y-0 md:before:-inset-x-2 md:after:block-8 md:after:inline-0.5"
 				/>
 				<Panel
 					className={cx(

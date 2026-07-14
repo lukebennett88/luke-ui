@@ -59,14 +59,14 @@ test('server snapshot renders the mobile layout, matching a static prerender', (
 	expect(html).toBe('vertical');
 });
 
-test('hydrating on a desktop-width viewport shows no flash, then corrects to horizontal', async () => {
+test('hydrating on a desktop-width viewport starts with the server orientation, then corrects it', async () => {
 	const serverHtml = renderToStaticMarkup(<Host />);
 	stubMatchMedia(true);
 
 	const container = hydrate(serverHtml);
 
-	// The very first hydrated paint must match the server snapshot (mobile),
-	// even though the real viewport is desktop-width — no flash of the wrong layout.
+	// The first hydrated value must match the server snapshot. Responsive CSS
+	// supplies the visible desktop layout until this hook corrects the behaviour.
 	expect(container.textContent).toBe('vertical');
 
 	// Flush the effect that re-checks the real `matchMedia` result.

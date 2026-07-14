@@ -1,7 +1,9 @@
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
 
 export default defineConfig({
+	plugins: [tailwindcss()],
 	optimizeDeps: {
 		include: [
 			'next-themes',
