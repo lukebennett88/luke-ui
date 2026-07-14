@@ -1,7 +1,6 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { themeClass, vars } from '../styles/vars.css.js';
 import { comboboxControl, comboboxItem } from './combobox.css.js';
-import { textInputAdornmentStart, textInputGroup } from './text-input.css.js';
 
 let wrappers: Array<HTMLElement> = [];
 
@@ -43,17 +42,6 @@ test('a resting combobox control is not styled as read-only by its trigger butto
 	expect(getComputedStyle(control).backgroundColor).toBe(resolveColor(vars.backgroundColor.input));
 });
 
-test('a resting text input group is not styled as read-only by its adornment', () => {
-	const group = document.createElement('div');
-	group.className = textInputGroup({ size: 'medium' });
-	const adornment = document.createElement('span');
-	adornment.className = textInputAdornmentStart({ size: 'medium' });
-	group.append(adornment, document.createElement('input'));
-	mount(group);
-
-	expect(getComputedStyle(group).backgroundColor).toBe(resolveColor(vars.backgroundColor.input));
-});
-
 test('a combobox control with a read-only input gets the read-only treatment', () => {
 	const control = comboboxControlElement();
 	control.querySelector('input')?.setAttribute('readonly', '');
@@ -73,21 +61,10 @@ test('disabled beats read-only on a combobox control', () => {
 	expect(style.borderColor).toBe(resolveColor(vars.border.default));
 });
 
-test('text input and combobox share the same focus ring color', () => {
-	const group = document.createElement('div');
-	group.className = textInputGroup({ size: 'medium' });
-	group.append(document.createElement('input'));
-	mount(group);
-	const control = mount(comboboxControlElement());
-
-	group.querySelector('input')?.focus();
-	const groupOutline = getComputedStyle(group).outlineColor;
-	control.querySelector('input')?.focus();
-	const controlOutline = getComputedStyle(control).outlineColor;
-
-	expect(groupOutline).toBe(resolveColor(vars.themeColor.focusRingColor));
-	expect(controlOutline).toBe(groupOutline);
-});
+// `TextInput`'s focus ring moved to the new semantic theme contract in #99;
+// Combobox still authors its own ring from the old token system until it
+// migrates (#100), so the two are no longer guaranteed to share a color. See
+// `recipes/text-input.browser.test.ts` for the migrated focus-ring contract.
 
 test('keyboard-focused combobox items are indicated by background, not a second ring', () => {
 	const item = document.createElement('li');

@@ -50,6 +50,10 @@ function extractValue(block: string, varName: string): string {
 	return match[1];
 }
 
+function extractShadowOpacities(shadow: string): Array<number> {
+	return [...shadow.matchAll(/\/ ([\d.]+)\)/g)].map((match) => Number(match[1]));
+}
+
 describe('buildTheme output', () => {
 	const css = buildTheme(machinedEdgeFoundation);
 	const blocks = splitBlocks(css);
@@ -140,7 +144,9 @@ describe('buildTheme output', () => {
 				expect(foundation[mode].depth.raised).not.toContain('inset');
 				expect(foundation[mode].depth.resting.split(', ')).toHaveLength(2);
 				expect(foundation[mode].depth.raised.split(', ')).toHaveLength(2);
-				expect(foundation[mode].depth.recessed).toBe('none');
+				const recessedLayers = foundation[mode].depth.recessed.split(', ');
+				expect(foundation[mode].depth.recessed).not.toBe('none');
+				expect(recessedLayers.every((layer) => layer.startsWith('inset '))).toBe(true);
 			}
 		}
 	});
@@ -151,10 +157,17 @@ describe('buildTheme output', () => {
 			[elmoBlocks.baseLight, blocks.baseLight],
 			[elmoBlocks.mediaDark, blocks.mediaDark],
 		] as const) {
+			const elmoRecessed = extractValue(elmoBlock, '--luke-depth-recessed');
+			const machinedRecessed = extractValue(machinedBlock, '--luke-depth-recessed');
 			const elmoResting = extractValue(elmoBlock, '--luke-depth-resting');
 			const elmoRaised = extractValue(elmoBlock, '--luke-depth-raised');
 			const elmoFinish = extractValue(elmoBlock, '--luke-action-control-finish-resting');
 
+			expect(machinedRecessed.split(', ')).toHaveLength(2);
+			expect(elmoRecessed.split(', ')).toHaveLength(1);
+			expect(Math.max(...extractShadowOpacities(machinedRecessed))).toBeGreaterThan(
+				Math.max(...extractShadowOpacities(elmoRecessed)),
+			);
 			expect(extractValue(machinedBlock, '--luke-depth-resting')).toContain('0 2px 0');
 			expect(elmoResting).not.toContain('0 2px 0');
 			expect(elmoRaised).not.toContain('0 3px 0');
@@ -378,6 +391,46 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 					expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
 				}
 				expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
+			}
+		});
+
+		it(`${foundation.name} keeps light recessed surfaces near canvas and dark wells distinct`, () => {
+			const blocks = splitBlocks(buildTheme(foundation));
+			const lightCanvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
+			const lightRecessed = parseColor(
+				extractValue(blocks.baseLight, '--luke-color-surface-recessed'),
+			);
+			const darkCanvas = parseColor(extractValue(blocks.mediaDark, '--luke-color-surface-canvas'));
+			const darkRecessed = parseColor(
+				extractValue(blocks.mediaDark, '--luke-color-surface-recessed'),
+			);
+
+			expect(lightCanvas.l - lightRecessed.l).toBeGreaterThan(0);
+			expect(lightCanvas.l - lightRecessed.l).toBeLessThanOrEqual(0.015);
+			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
+		});
+
+		it(`${foundation.name} generates the least-contrasting passing control borders`, () => {
+			const blocks = splitBlocks(buildTheme(foundation));
+			for (const block of [blocks.baseLight, blocks.mediaDark]) {
+				const surfaces = ['canvas', 'resting', 'recessed'].map((surface) =>
+					parseColor(extractValue(block, `--luke-color-surface-${surface}`)),
+				);
+				const borderVarNames = [
+					'--luke-color-border-control',
+					...['accent', 'info', 'success', 'warning', 'danger'].map(
+						(intent) => `--luke-color-intent-${intent}-border`,
+					),
+				];
+
+				for (const varName of borderVarNames) {
+					const border = parseColor(extractValue(block, varName));
+					const minimumContrast = Math.min(
+						...surfaces.map((surface) => contrastRatio(border, surface)),
+					);
+					expect(minimumContrast).toBeGreaterThanOrEqual(3);
+					expect(minimumContrast).toBeLessThan(3.15);
+				}
 			}
 		});
 	}
