@@ -9,9 +9,9 @@ import { cx } from '../utils/index.js';
 interface LinkVariantProps extends NonNullable<styles.LinkVariants> {}
 
 interface LinkStyleProps {
-	/** Hides underline until hover. */
+	/** Hides the underline until hover or press and provides a structural 24px target. */
 	isStandalone?: LinkVariantProps['isStandalone'];
-	/** Sets the link tone. */
+	/** Sets the link tone. @default 'accent' */
 	tone?: LinkVariantProps['tone'];
 }
 
