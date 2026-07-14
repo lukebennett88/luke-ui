@@ -401,11 +401,16 @@ function buildSubtleTrio(
 ): { subtle: Oklch; subtleHover: Oklch; subtlePressed: Oklch } {
 	const isLight = mode === 'light';
 	const chroma = Math.min(0.35 * source.c, 0.06);
-	const at = (delta: number) =>
-		gamutMapOklch({ c: chroma, h: source.h, l: clampUnit(canvas.l + delta) });
+	const at = (delta: number) => {
+		return gamutMapOklch({
+			l: clampUnit(canvas.l + delta),
+			c: chroma,
+			h: source.h,
+		});
+	};
 	return isLight
 		? { subtle: at(-0.045), subtleHover: at(-0.07), subtlePressed: at(-0.1) }
-		: { subtle: at(0.06), subtleHover: at(0.09), subtlePressed: at(0.12) };
+		: { subtle: at(0.1), subtleHover: at(0.16), subtlePressed: at(0.2) };
 }
 
 function chooseOnSolid(hue: number, solids: Array<Oklch>): Oklch {

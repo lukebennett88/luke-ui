@@ -11,7 +11,9 @@ test('renders every bundled identity and explicit colour mode independently', ()
 			appearance.theme === 'machined-edge' ? machinedEdgeThemeClassName : elmoThemeClassName,
 		);
 		expect(root).toHaveAttribute('data-color-mode', appearance.mode);
-		expect(getComputedStyle(root).colorScheme).toBe(appearance.mode);
+		const styles = getComputedStyle(root);
+		expect(styles.colorScheme).toBe(appearance.mode);
+		expect(styles.backgroundColor).toBe(styles.getPropertyValue('--luke-color-surface-canvas'));
 
 		cleanupVisual();
 	}

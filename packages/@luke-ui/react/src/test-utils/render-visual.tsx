@@ -15,7 +15,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 // both `build` and `test` depend on, so it is always present when tests run.
 import spritesheetHref from '../../dist/spritesheet.svg?url';
 import { IconSpritesheetProvider } from '../icon/index.js';
-import { themeRootClassName } from '../theme/index.js';
+import { themeRootClassName, vars } from '../theme/index.js';
 import { elmoThemeClassName, machinedEdgeThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
 
@@ -46,6 +46,7 @@ export function renderVisual(node: ReactNode, appearance = defaultVisualAppearan
 	const container = document.body.appendChild(document.createElement('div'));
 	container.className = cx(themeRootClassName, getThemeClassName(appearance.theme));
 	container.dataset.colorMode = appearance.mode;
+	container.style.backgroundColor = vars.color.surface.canvas;
 	const root = createRoot(container);
 	mounted.push({ container, root });
 
