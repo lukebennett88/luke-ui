@@ -24,7 +24,16 @@ const levels = [1, 2, 3, 4, 5, 6] as const satisfies Array<NonNullable<HeadingPr
  */
 export const Level = meta.story({
 	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('heading', { name: /Level 1/ })).toBeInTheDocument();
+		const expectedSizes = ['35px', '28px', '24px', '20px', '18px', '16px'];
+		await Promise.all(
+			levels.map(async (level, index) => {
+				const heading = canvas.getByRole('heading', { name: `Level ${level} heading` });
+				const style = getComputedStyle(heading);
+				await expect(heading.tagName).toBe(`H${level}`);
+				await expect(style.fontSize).toBe(expectedSizes[index]);
+				await expect(style.fontWeight).toBe('600');
+			}),
+		);
 	},
 	render: (props) => (
 		<div style={stackStyle}>
@@ -58,20 +67,26 @@ export const ElementType = meta.story({
 });
 
 /**
- * Override visual heading size with `elementType` while preserving semantic level.
+ * Override visual heading size with `size` while preserving semantic level.
  */
-export const OverridingFontStyles = meta.story({
+export const SizeOverride = meta.story({
 	args: {
 		level: 2,
+	},
+	play: async ({ canvas }) => {
+		const display = canvas.getByRole('heading', { name: /display size 900/ });
+		await expect(display.tagName).toBe('H2');
+		await expect(getComputedStyle(display).fontSize).toBe('60px');
+		await expect(getComputedStyle(display).fontWeight).toBe('600');
 	},
 	render: (props) => (
 		<div style={stackStyle}>
 			<Heading {...props}>Level 2 semantic and visual</Heading>
-			<Heading {...props} elementType="h4">
-				Level 2 semantic, h4 visual style
+			<Heading {...props} size="500">
+				Level 2 semantic, size 500
 			</Heading>
-			<Heading {...props} elementType="h1">
-				Level 2 semantic, h1 visual style
+			<Heading {...props} size="900">
+				Level 2 semantic, display size 900
 			</Heading>
 		</div>
 	),

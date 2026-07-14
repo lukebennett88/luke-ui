@@ -1,27 +1,36 @@
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import {
 	captureVisual,
+	captureVisualAppearance,
 	renderVisual,
 	Stack,
 	variantValuesFor,
+	visualAppearances,
 } from '../test-utils/render-visual.js';
 import { Heading } from './index.js';
 
 const levels = variantValuesFor<typeof Heading, 'level'>()([1, 2, 3, 4, 5, 6]);
 
-test('levels', async () => {
-	const locator = renderVisual(
-		<Stack width="40rem">
-			{levels.map((level) => (
-				<Heading key={level} level={level}>
-					Level {level} heading
+for (const appearance of visualAppearances) {
+	test(`levels: ${appearance.theme} ${appearance.mode}`, async () => {
+		const locator = renderVisual(
+			<Stack width="40rem">
+				{levels.map((level) => (
+					<Heading key={level} level={level}>
+						Level {level} heading
+					</Heading>
+				))}
+				<Heading level={1} size="900">
+					Display heading
 				</Heading>
-			))}
-		</Stack>,
-	);
+			</Stack>,
+			appearance,
+		);
+		await expect.element(locator).toBeVisible();
 
-	await captureVisual(locator, 'heading/levels');
-});
+		await captureVisualAppearance(locator, 'heading/levels', appearance);
+	});
+}
 
 test('truncated heading', async () => {
 	const locator = renderVisual(

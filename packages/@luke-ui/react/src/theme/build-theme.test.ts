@@ -231,6 +231,21 @@ describe('buildTheme defaults', () => {
 		}
 		expect(css).toContain('--luke-color-border-focus: oklch(');
 	});
+
+	it('emits Capsize trim values for each curated font family', () => {
+		const trimValues = (fontFamily: 'inter' | 'apple-system' | 'dm-sans') => {
+			const css = buildTheme({ ...minimalFoundation, typography: { fontFamily } });
+			const identity = splitBlocks(css).identity;
+			return {
+				baseline: extractValue(identity, '--luke-font-300-baseline-trim'),
+				capHeight: extractValue(identity, '--luke-font-300-cap-height-trim'),
+			};
+		};
+
+		const values = [trimValues('inter'), trimValues('apple-system'), trimValues('dm-sans')];
+		expect(new Set(values.map(({ baseline }) => baseline)).size).toBe(3);
+		expect(new Set(values.map(({ capHeight }) => capHeight)).size).toBe(3);
+	});
 });
 
 describe('buildTheme foundation validation', () => {

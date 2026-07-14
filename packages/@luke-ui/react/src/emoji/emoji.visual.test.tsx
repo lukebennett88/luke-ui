@@ -1,10 +1,11 @@
 import type { CSSProperties } from 'react';
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import {
-	captureVisual,
+	captureVisualAppearance,
 	renderVisual,
 	Stack,
 	variantValuesFor,
+	visualAppearances,
 } from '../test-utils/render-visual.js';
 import { Emoji } from './index.js';
 
@@ -14,23 +15,27 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-const fontSizes = variantValuesFor<typeof Emoji, 'fontSize'>()(['small', 'standard', 'large']);
+const sizes = variantValuesFor<typeof Emoji, 'size'>()(['100', '300', '500', '700', '900']);
 
-test('sizes and colors', async () => {
-	const locator = renderVisual(
-		<Stack>
-			<div style={rowStyle}>
-				{fontSizes.map((fontSize) => (
-					<Emoji emoji="🚀" fontSize={fontSize} key={fontSize} label={`Rocket ${fontSize}`} />
-				))}
-			</div>
-			<div style={rowStyle}>
-				<Emoji color="neutralBold" emoji="✅" label="Done" />
-				<Emoji color="informative" emoji="💡" label="Idea" />
-				<Emoji color="critical" emoji="⚠️" label="Warning" />
-			</div>
-		</Stack>,
-	);
+for (const appearance of visualAppearances) {
+	test(`sizes and colours: ${appearance.theme} ${appearance.mode}`, async () => {
+		const locator = renderVisual(
+			<Stack>
+				<div style={rowStyle}>
+					{sizes.map((size) => (
+						<Emoji emoji="🚀" key={size} label={`Rocket ${size}`} size={size} />
+					))}
+				</div>
+				<div style={rowStyle}>
+					<Emoji color="primary" emoji="✅" label="Done" />
+					<Emoji color="info" emoji="💡" label="Idea" />
+					<Emoji color="danger" emoji="⚠️" label="Warning" />
+				</div>
+			</Stack>,
+			appearance,
+		);
+		await expect.element(locator).toBeVisible();
 
-	await captureVisual(locator, 'emoji/sizes-colors');
-});
+		await captureVisualAppearance(locator, 'emoji/sizes-colors', appearance);
+	});
+}

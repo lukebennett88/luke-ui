@@ -35,7 +35,9 @@ const baseArgs = {
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('img', { name: 'Celebration' })).toBeInTheDocument();
+		const emoji = canvas.getByRole('img', { name: 'Celebration' });
+		await expect(emoji.textContent).toBe('🎉');
+		await expect(getComputedStyle(emoji).fontSize).toBe('16px');
 	},
 	render: (props) => (
 		<div style={rowStyle}>
@@ -50,12 +52,21 @@ export const Default = meta.story({
  */
 export const Size = meta.story({
 	args: baseArgs,
+	play: async ({ canvas }) => {
+		const rockets = canvas.getAllByRole('img', { name: 'Rocket' });
+		await expect(rockets.map((emoji) => getComputedStyle(emoji).fontSize)).toEqual([
+			'60px',
+			'24px',
+			'16px',
+			'12px',
+		]);
+	},
 	render: (props) => (
 		<div style={stackStyle}>
-			<Emoji {...props} emoji="🚀" fontSize="h3" label="Rocket" />
-			<Emoji {...props} emoji="🚀" fontSize="h5" label="Rocket" />
-			<Emoji {...props} emoji="🚀" fontSize="standard" label="Rocket" />
-			<Emoji {...props} emoji="🚀" fontSize="small" label="Rocket" />
+			<Emoji {...props} emoji="🚀" label="Rocket" size="900" />
+			<Emoji {...props} emoji="🚀" label="Rocket" size="600" />
+			<Emoji {...props} emoji="🚀" label="Rocket" size="300" />
+			<Emoji {...props} emoji="🚀" label="Rocket" size="100" />
 		</div>
 	),
 });

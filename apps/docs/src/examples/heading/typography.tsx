@@ -3,11 +3,11 @@ import { Heading } from '@luke-ui/react/heading';
 export default function Typography() {
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-			<Heading color="informative" level={3}>
+			<Heading color="info" level={3}>
 				Informative heading
 			</Heading>
-			<Heading fontWeight="regular" level={4}>
-				Light-weight heading
+			<Heading level={4} size="900">
+				Display-sized heading
 			</Heading>
 		</div>
 	);

@@ -1,3 +1,7 @@
+import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
+import dMSansMetrics from '@capsizecss/metrics/dMSans';
+import interMetrics from '@capsizecss/metrics/inter';
+import { precomputeValues } from '@capsizecss/vanilla-extract';
 import type { Oklch } from './color.js';
 import { contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
@@ -13,11 +17,11 @@ import {
 /**
  * Compiles a theme foundation into a complete static stylesheet.
  *
- * Pure and Node-compatible: no vanilla-extract, no DOM, and deterministic output. Returns
- * stylesheet text containing the theme identity class plus both colour-mode blocks, selected by
- * `data-color-mode` with `prefers-color-scheme` as the fallback. Throws {@link ThemeContrastError}
- * naming the mode and token pair when any generated pair misses WCAG 2.2 AA (4.5:1 for text pairs,
- * 3:1 for non-text UI pairs). Colours are computed and emitted in OKLCH.
+ * Pure and Node-compatible: no DOM and deterministic output. Returns stylesheet text containing
+ * the theme identity class plus both colour-mode blocks, selected by `data-color-mode` with
+ * `prefers-color-scheme` as the fallback. Throws {@link ThemeContrastError} naming the mode and
+ * token pair when any generated pair misses WCAG 2.2 AA (4.5:1 for text pairs, 3:1 for non-text UI
+ * pairs). Colours are computed and emitted in OKLCH.
  */
 export function buildTheme(foundation: ThemeFoundation): string {
 	validateFoundation(foundation);
@@ -151,6 +155,12 @@ const FONT_VALUES = {
 	'font.900.fontSize': '60px',
 	'font.900.letterSpacing': '-0.025em',
 	'font.900.lineHeight': '60px',
+} as const;
+
+const FONT_METRICS = {
+	'apple-system': appleSystemMetrics,
+	'dm-sans': dMSansMetrics,
+	inter: interMetrics,
 } as const;
 
 const ICON_SIZE_VALUES = {
@@ -667,6 +677,7 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 		'controlSize.medium': '40px',
 		'controlSize.small': '32px',
 		...FONT_VALUES,
+		...buildCapsizeValues(fontFamily),
 		'font.family': themeFontFamilyStacks[fontFamily],
 		'font.weight.body': String(fontWeight?.body ?? defaultFontWeights.body),
 		'font.weight.emphasis': String(fontWeight?.emphasis ?? defaultFontWeights.emphasis),
@@ -682,6 +693,22 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 	};
 	for (const [step, value] of Object.entries(SPACE_VALUES)) {
 		values[`space.${step}`] = value;
+	}
+	return values;
+}
+
+function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): Record<string, string> {
+	const values: Record<string, string> = {};
+	for (const step of [100, 200, 300, 400, 500, 600, 700, 800, 900] as const) {
+		const fontSize = Number.parseFloat(FONT_VALUES[`font.${step}.fontSize`]);
+		const leading = Number.parseFloat(FONT_VALUES[`font.${step}.lineHeight`]);
+		const { baselineTrim, capHeightTrim } = precomputeValues({
+			fontMetrics: FONT_METRICS[fontFamily],
+			fontSize,
+			leading,
+		});
+		values[`font.${step}.baselineTrim`] = baselineTrim;
+		values[`font.${step}.capHeightTrim`] = capHeightTrim;
 	}
 	return values;
 }

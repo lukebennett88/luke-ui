@@ -73,7 +73,7 @@ export function Button(props: ButtonProps): JSX.Element {
 					)}
 					<span className={styles.buttonLabel({ isPending })}>
 						{startIcon}
-						<Text color="inherit" elementType="span" lineClamp shouldInheritFont>
+						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}
 						</Text>
 						{endIcon}
