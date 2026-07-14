@@ -1,15 +1,48 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
+import { focusRing } from '../styles/focus-ring.js';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
-import { vars } from '../styles/vars.css.js';
+import { vars } from '../theme/contract.css.js';
 
 const base = styleInLayer('recipes', {
-	color: vars.themeColor.linkColor,
+	'@media': {
+		'(forced-colors: active)': {
+			color: 'LinkText',
+			forcedColorAdjust: 'auto',
+			selectors: {
+				'&[data-disabled="true"]': {
+					color: 'GrayText',
+					opacity: 1,
+				},
+				'&[data-focus-visible="true"]': {
+					outlineColor: 'Highlight',
+				},
+			},
+		},
+		'(prefers-reduced-motion: reduce)': {
+			transition: 'none',
+		},
+	},
+	color: vars.color.intent.accent.text,
+	cursor: 'pointer',
 	font: 'inherit',
+	outlineColor: 'transparent',
+	outlineOffset: '2px',
+	outlineStyle: 'solid',
+	outlineWidth: '2px',
 	textDecoration: 'underline',
 	textDecorationColor: 'currentColor',
 	transitionDuration: vars.motion.duration.fast,
 	transitionProperty: 'color, text-decoration-color',
 	transitionTimingFunction: vars.motion.easing.standard,
+	selectors: {
+		'&[data-disabled="true"]': {
+			cursor: 'not-allowed',
+			opacity: 0.55,
+		},
+		'&[data-focus-visible="true"]': {
+			...focusRing(vars.color.border.focus),
+		},
+	},
 });
 
 /** Vanilla-extract recipe for the `Link` primitive's styles. */
@@ -17,14 +50,21 @@ export const link = recipeInLayer('recipes', {
 	base,
 	defaultVariants: {
 		isStandalone: false,
-		tone: 'brand',
+		tone: 'accent',
 	},
 	variants: {
 		isStandalone: {
 			false: {},
 			true: {
+				alignItems: 'center',
+				display: 'inline-flex',
+				minBlockSize: '24px',
+				minInlineSize: '24px',
 				selectors: {
-					'&:enabled:hover': {
+					'&[data-hovered="true"]:not([data-disabled="true"])': {
+						textDecoration: 'underline',
+					},
+					'&[data-pressed="true"]:not([data-disabled="true"])': {
 						textDecoration: 'underline',
 					},
 				},
@@ -32,22 +72,25 @@ export const link = recipeInLayer('recipes', {
 			},
 		},
 		tone: {
-			brand: {
-				color: vars.themeColor.linkColor,
+			accent: {
+				color: vars.color.intent.accent.text,
 				selectors: {
-					'&:enabled:hover': {
-						color: vars.themeColor.linkColorHover,
+					'&[data-hovered="true"]:not([data-disabled="true"])': {
+						color: vars.color.intent.accent.textHover,
+					},
+					'&[data-pressed="true"]:not([data-disabled="true"])': {
+						color: vars.color.intent.accent.textHover,
 					},
 				},
 			},
-			inverted: {
-				color: vars.foregroundColor.inverse,
-			},
 			neutral: {
-				color: vars.foregroundColor.secondary,
+				color: vars.color.text.secondary,
 				selectors: {
-					'&:enabled:hover': {
-						color: vars.foregroundColor.primary,
+					'&[data-hovered="true"]:not([data-disabled="true"])': {
+						color: vars.color.text.primary,
+					},
+					'&[data-pressed="true"]:not([data-disabled="true"])': {
+						color: vars.color.text.primary,
 					},
 				},
 			},

@@ -14,26 +14,28 @@ description: Link component for inline and standalone navigation.
 
 | Guidance | Practices                                                                                                                          |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use `tone="inverted"` only on dark backgrounds. On light backgrounds, it is hard to read.                                          |
+| Do       | Use the default `accent` tone for links that should draw attention.                                                                |
 | Do       | Use `isStandalone` for links that are not part of a sentence, such as card links and nav items. Leave it `false` for inline links. |
 
 ## Tone
 
-`Link` has three tones: `brand` (default), `neutral`, and `inverted`. Use `neutral` for a more
-subtle link. Use `inverted` on dark backgrounds.
+`Link` has two tones: `accent` (default) and `neutral`. Use `neutral` when the surrounding content
+should have more emphasis.
 
 <ExampleBlock
 	src="link/tones"
 	title="Link — Tones"
-	description="Brand, neutral, and inverted tones for different backgrounds."
+	description="Accent and neutral tones for different levels of emphasis."
 />
 
 ## Standalone
 
 Use `isStandalone` when a link stands on its own. Leave it `false` for links inside paragraph text.
 
-- `isStandalone={true}`: no underline until hover.
-- `isStandalone={false}`: underlined inline link style.
+- `isStandalone={true}`: no underline until hover or press and a structural target of at least 24 ×
+  24 CSS pixels.
+- `isStandalone={false}`: underlined inline link style that retains the target-size exception for
+  links within prose.
 
 <ExampleBlock
 	src="link/standalone"
