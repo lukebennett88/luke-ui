@@ -2,21 +2,14 @@ import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { focusRing } from '../styles/focus-ring.js';
 import { recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
-import { descendantDisabledSelector, inputStates } from './input-states.css.js';
+import {
+	composeInputStateSelectors,
+	descendantDisabledSelector,
+	inputStates,
+} from './input-states.css.js';
 
-// The well's own selector composition. Mirrors the "defaults" shape that
-// `input-states.css.ts` also composes internally, but stays independent of
-// its old-token style values: `Combobox` has not migrated to the new
-// semantic contract yet (see the linked "Migrate Combobox" issue), and this
-// slice must not change its rendered output.
-const notDisabled = `:not(:where(${inputStates.disabled}))`;
-const disabled = `&:where(${inputStates.disabled})`;
-const focusWithin = `&:where(${inputStates.focusWithin})${notDisabled}`;
-const hover = `&:where(${inputStates.hover})${notDisabled}:not(:where(${inputStates.focusWithin})):not(:where(${inputStates.readOnly}))`;
-const invalid = `&:where(${inputStates.invalid})${notDisabled}`;
-const invalidFocusWithin = `&:where(${inputStates.invalid}):where(${inputStates.focusWithin})${notDisabled}`;
-const readOnly = `&:where(${inputStates.readOnly})${notDisabled}`;
-const readOnlyFocusWithin = `&:where(${inputStates.readOnly}):where(${inputStates.focusWithin})${notDisabled}`;
+const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
+	composeInputStateSelectors(inputStates);
 
 /** Vanilla-extract recipe for the `TextInput` group's tactile well chrome. */
 export const textInputGroup = recipeInLayer('recipes', {

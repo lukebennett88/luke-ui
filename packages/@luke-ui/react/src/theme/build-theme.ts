@@ -188,15 +188,14 @@ const LIGHTNESS_WINDOWS: Record<ColorMode, LightnessWindows> = {
 	},
 };
 
-// Surface roles encode usage directly: wells stay close to the light canvas while detached
-// surfaces separate more strongly, without exposing generated palette steps.
+// Surface roles encode usage directly: light wells use neutral white, dark wells sit below the
+// canvas, and detached surfaces separate more strongly without exposing generated palette steps.
+const LIGHT_RECESSED_SURFACE = { c: 0, h: 0, l: 1 } as const satisfies Oklch;
+const DARK_RECESSED_SURFACE_LIGHTNESS_DELTA = -0.025;
 const SURFACE_LIGHTNESS_DELTAS = {
-	dark: { floating: 0.07, overlay: 0.09, recessed: -0.025, resting: 0.04 },
-	light: { floating: 0.012, overlay: 0.015, recessed: 0, resting: 0.012 },
-} as const satisfies Record<
-	ColorMode,
-	Record<'floating' | 'overlay' | 'recessed' | 'resting', number>
->;
+	dark: { floating: 0.07, overlay: 0.09, resting: 0.04 },
+	light: { floating: 0.012, overlay: 0.015, resting: 0.012 },
+} as const satisfies Record<ColorMode, Record<'floating' | 'overlay' | 'resting', number>>;
 
 interface ModeValues {
 	failures: Array<ThemeContrastFailure>;
@@ -236,7 +235,7 @@ function buildModeColors(
 		canvas,
 		floating: surfaceAt(surfaceDeltas.floating),
 		overlay: surfaceAt(surfaceDeltas.overlay),
-		recessed: surfaceAt(surfaceDeltas.recessed),
+		recessed: isLight ? LIGHT_RECESSED_SURFACE : surfaceAt(DARK_RECESSED_SURFACE_LIGHTNESS_DELTA),
 		resting: surfaceAt(surfaceDeltas.resting),
 	};
 	const allSurfaces = [

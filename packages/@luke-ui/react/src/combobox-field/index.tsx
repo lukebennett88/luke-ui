@@ -70,7 +70,7 @@ export interface ComboboxFieldProps<T extends object>
 
 /** Composes `ComboboxInput` with label, description, and error slots. */
 export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): JSX.Element {
-	const themeSourceRef = useRef<HTMLDivElement>(null);
+	const controlRef = useRef<HTMLDivElement>(null);
 	const [fieldSlotProps, restProps] = composeField(props);
 	const {
 		children,
@@ -114,9 +114,9 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	})();
 
 	return (
-		<ComboboxInput<T> ref={themeSourceRef} size={size} {...comboboxInputProps}>
+		<ComboboxInput<T> size={size} {...comboboxInputProps}>
 			<Field {...fieldSlotProps}>
-				<ComboboxControl>
+				<ComboboxControl ref={controlRef}>
 					<ComboboxTextInput placeholder={placeholder} />
 					{isInteractive ? (
 						<ComboboxClearButton aria-label="Clear selection">
@@ -127,12 +127,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 						<Icon aria-hidden name="chevronDown" />
 					</ComboboxTrigger>
 				</ComboboxControl>
-				<ComboboxPopover
-					offset={4}
-					{...popoverProps}
-					style={resolvedStyle}
-					triggerRef={themeSourceRef}
-				>
+				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle} triggerRef={controlRef}>
 					<ComboboxListBox<T>
 						{...listBoxProps}
 						loadMoreItem={loadMoreItem}

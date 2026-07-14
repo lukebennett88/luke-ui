@@ -405,9 +405,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			}
 		});
 
-		it(`${foundation.name} keeps light recessed surfaces at canvas and dark wells distinct`, () => {
+		it(`${foundation.name} keeps light recessed surfaces neutral white and dark wells distinct`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
-			const lightCanvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
 			const lightRecessed = parseColor(
 				extractValue(blocks.baseLight, '--luke-color-surface-recessed'),
 			);
@@ -416,7 +415,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 				extractValue(blocks.mediaDark, '--luke-color-surface-recessed'),
 			);
 
-			expect(lightRecessed).toEqual(lightCanvas);
+			expect(lightRecessed).toEqual({ c: 0, h: 0, l: 1 });
 			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
 		});
 
@@ -444,15 +443,6 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			}
 		});
 	}
-
-	it('keeps the Machined edge light recessed surface near white at canvas lightness', () => {
-		const blocks = splitBlocks(buildTheme(machinedEdgeFoundation));
-		const canvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
-		const recessed = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-recessed'));
-
-		expect(recessed.l).toBeGreaterThan(0.97);
-		expect(recessed.l).toBe(canvas.l);
-	});
 });
 
 describe('bundled theme identity', () => {
