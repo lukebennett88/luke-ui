@@ -180,13 +180,23 @@ const LIGHTNESS_WINDOWS: Record<ColorMode, LightnessWindows> = {
 		textSecondary: [0.68, 0.88],
 	},
 	light: {
-		borderControl: [0.35, 0.62],
-		intentBorder: [0.38, 0.62],
+		borderControl: [0.35, 0.8],
+		intentBorder: [0.38, 0.8],
 		intentText: [0.25, 0.56],
 		textPrimary: [0.1, 0.35],
 		textSecondary: [0.3, 0.52],
 	},
 };
+
+// Surface roles encode usage directly: wells stay close to the light canvas while detached
+// surfaces separate more strongly, without exposing generated palette steps.
+const SURFACE_LIGHTNESS_DELTAS = {
+	dark: { floating: 0.07, overlay: 0.09, recessed: -0.025, resting: 0.04 },
+	light: { floating: 0.012, overlay: 0.015, recessed: -0.01, resting: 0.012 },
+} as const satisfies Record<
+	ColorMode,
+	Record<'floating' | 'overlay' | 'recessed' | 'resting', number>
+>;
 
 interface ModeValues {
 	failures: Array<ThemeContrastFailure>;
@@ -221,21 +231,14 @@ function buildModeColors(
 
 	const canvas = gamutMapOklch({ ...neutral, c: Math.min(neutral.c, 0.015) });
 	const surfaceAt = (delta: number) => gamutMapOklch({ ...canvas, l: clampUnit(canvas.l + delta) });
-	const surfaces = isLight
-		? {
-				canvas,
-				floating: surfaceAt(0.012),
-				overlay: surfaceAt(0.015),
-				recessed: surfaceAt(-0.035),
-				resting: surfaceAt(0.012),
-			}
-		: {
-				canvas,
-				floating: surfaceAt(0.07),
-				overlay: surfaceAt(0.09),
-				recessed: surfaceAt(-0.025),
-				resting: surfaceAt(0.04),
-			};
+	const surfaceDeltas = SURFACE_LIGHTNESS_DELTAS[mode];
+	const surfaces = {
+		canvas,
+		floating: surfaceAt(surfaceDeltas.floating),
+		overlay: surfaceAt(surfaceDeltas.overlay),
+		recessed: surfaceAt(surfaceDeltas.recessed),
+		resting: surfaceAt(surfaceDeltas.resting),
+	};
 	const allSurfaces = [
 		surfaces.canvas,
 		surfaces.resting,
@@ -277,7 +280,7 @@ function buildModeColors(
 		hue: neutral.h,
 		mode,
 		ratio: UI_RATIO,
-		startLightness: midpoint(windows.borderControl),
+		startLightness: lowContrastLightness(mode, windows.borderControl),
 		window: windows.borderControl,
 	});
 	colors['color.border.decorative'] = gamutMapOklch({
@@ -376,7 +379,7 @@ function buildIntentKit(
 		hue: source.h,
 		mode,
 		ratio: UI_RATIO,
-		startLightness: source.l,
+		startLightness: lowContrastLightness(mode, windows.intentBorder),
 		window: windows.intentBorder,
 	});
 	return {
@@ -452,6 +455,10 @@ function solveLightness(request: LightnessSolveRequest): Oklch {
 		}
 	}
 	return makeColor(passing);
+}
+
+function lowContrastLightness(mode: ColorMode, window: [number, number]): number {
+	return mode === 'light' ? window[1] : window[0];
 }
 
 function minimumRatio(foreground: Oklch, backgrounds: Array<Oklch>): number {

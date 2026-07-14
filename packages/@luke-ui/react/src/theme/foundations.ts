@@ -37,7 +37,10 @@ export const machinedEdgeFoundation: ThemeFoundation = {
 				'0 3px 0 oklch(0.05 0.01 220 / 0.55)',
 				'0 5px 8px -2px oklch(0.05 0.01 220 / 0.32)',
 			].join(', '),
-			recessed: 'none',
+			recessed: [
+				'inset 0 2px 4px oklch(0.05 0.01 220 / 0.45)',
+				'inset 0 -1px 0 oklch(0.8 0.01 220 / 0.12)',
+			].join(', '),
 			resting: [
 				'0 2px 0 oklch(0.05 0.01 220 / 0.5)',
 				'0 3px 5px -1px oklch(0.05 0.01 220 / 0.26)',
@@ -76,7 +79,10 @@ export const machinedEdgeFoundation: ThemeFoundation = {
 				'0 3px 0 oklch(0.3 0.03 220 / 0.3)',
 				'0 5px 8px -2px oklch(0.3 0.03 220 / 0.2)',
 			].join(', '),
-			recessed: 'none',
+			recessed: [
+				'inset 0 2px 3px oklch(0.3 0.03 220 / 0.18)',
+				'inset 0 -1px 0 oklch(0.98 0.03 220 / 0.65)',
+			].join(', '),
 			resting: [
 				'0 2px 0 oklch(0.3 0.03 220 / 0.28)',
 				'0 3px 5px -1px oklch(0.3 0.03 220 / 0.16)',
@@ -114,7 +120,7 @@ export const elmoFoundation: ThemeFoundation = {
 				'0 2px 6px oklch(0.12 0.01 250 / 0.18)',
 				'0 1px 3px oklch(0.12 0.01 250 / 0.12)',
 			].join(', '),
-			recessed: 'none',
+			recessed: 'inset 0 1px 2px oklch(0.12 0.01 250 / 0.22)',
 			resting: [
 				'0 1px 3px oklch(0.12 0.01 250 / 0.12)',
 				'0 1px 2px oklch(0.12 0.01 250 / 0.06)',
@@ -148,7 +154,7 @@ export const elmoFoundation: ThemeFoundation = {
 				'0 2px 6px oklch(0.2 0.01 250 / 0.05)',
 				'0 1px 3px oklch(0.2 0.01 250 / 0.035)',
 			].join(', '),
-			recessed: 'none',
+			recessed: 'inset 0 1px 2px oklch(0.2 0.01 250 / 0.06)',
 			resting: [
 				'0 1px 3px oklch(0.2 0.01 250 / 0.04)',
 				'0 1px 2px oklch(0.2 0.01 250 / 0.02)',

@@ -95,6 +95,7 @@ export const textInputGroup = recipeInLayer('recipes', {
 			[readOnly]: {
 				backgroundColor: vars.color.surface.canvas,
 				borderColor: vars.color.border.decorative,
+				boxShadow: 'none',
 			},
 			[readOnlyFocusWithin]: {
 				...focusRing,

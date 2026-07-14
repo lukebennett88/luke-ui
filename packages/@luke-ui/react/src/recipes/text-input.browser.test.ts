@@ -2,6 +2,7 @@ import '@luke-ui/react/themes/machined-edge.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';
 import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { cx } from '../utils/index.js';
 import { textInputAdornmentStart, textInputGroup } from './text-input.css.js';
 
 let mounted: Array<HTMLElement> = [];
@@ -11,14 +12,17 @@ afterEach(() => {
 	mounted = [];
 });
 
-test('the well uses the recessed surface and control radius', () => {
+test('the well uses the recessed surface, depth, and control radius', () => {
 	const { group, root } = mountGroup();
 	const probe = root.appendChild(document.createElement('div'));
 	probe.style.backgroundColor = 'var(--luke-color-surface-recessed)';
+	probe.style.boxShadow = 'var(--luke-depth-recessed)';
 	const style = getComputedStyle(group);
 
 	expect(style.backgroundColor).toBe(getComputedStyle(probe).backgroundColor);
 	expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+	expect(style.boxShadow).toBe(getComputedStyle(probe).boxShadow);
+	expect(style.boxShadow).not.toBe('none');
 	expect(style.borderRadius).toBe(getComputedStyle(root).getPropertyValue('--luke-radius-control'));
 });
 
@@ -121,6 +125,7 @@ test('read-only flattens into canvas surface with a decorative border and ignore
 
 	expect(readOnlyStyle.backgroundColor).not.toBe(restingBackground);
 	expect(readOnlyStyle.borderColor).not.toBe(getComputedStyle(resting).borderColor);
+	expect(readOnlyStyle.boxShadow).toBe('none');
 	expect(getComputedStyle(readOnlyHover).borderColor).toBe(readOnlyStyle.borderColor);
 });
 
@@ -153,7 +158,7 @@ test('adornment divider uses the control border color and disabled text color fo
 
 function mountGroup(options: Parameters<typeof textInputGroup>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${machinedEdgeThemeClassName}`;
+	root.className = cx(themeRootClassName, machinedEdgeThemeClassName);
 	root.dataset.colorMode = 'light';
 	const group = root.appendChild(document.createElement('div'));
 	group.className = textInputGroup(options);
