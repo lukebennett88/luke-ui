@@ -1,4 +1,4 @@
-import '@luke-ui/react/stylesheet.css';
+import '../styles/app.css';
 import '@luke-ui/react/themes/elmo.css';
 import '@luke-ui/react/themes/machined-edge.css';
 import { ThemeProvider } from 'next-themes';
@@ -57,6 +57,25 @@ test('bridges dark mode into the Luke UI root and example canvas', async () => {
 
 	await expect.poll(() => themeRoot.dataset.colorMode).toBe('dark');
 	expect(getComputedStyle(exampleCanvas).backgroundColor).not.toBe(lightBackground);
+});
+
+test('keeps inherited docs shell text readable in dark mode', async () => {
+	renderTheme(
+		<>
+			<ThemeControls />
+			<span>Unstyled shell text</span>
+			<span data-foreground-probe style={{ color: 'var(--color-fd-foreground)' }} />
+		</>,
+	);
+
+	await userEvent.click(getDarkModeButton(), { force: true });
+	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
+
+	const shellText = page.getByText('Unstyled shell text').element();
+	const foregroundProbe = container?.querySelector<HTMLElement>('[data-foreground-probe]');
+	if (!foregroundProbe) throw new Error('Expected a docs foreground probe');
+
+	expect(getComputedStyle(shellText).color).toBe(getComputedStyle(foregroundProbe).color);
 });
 
 test('omits the colour mode until hydration completes', async () => {

@@ -1,8 +1,8 @@
 import type { ThemeFoundation } from './foundation.js';
 
 /**
- * Foundation for Machined edge, the default bundled theme: teal accent, cool low-chroma tinted
- * light surfaces, lighter chromatic dark surfaces, and a compact tactile material.
+ * Foundation for Machined edge, the default bundled theme: teal accent, neutral near-white light
+ * surfaces, lighter chromatic dark surfaces, and a compact tactile material.
  */
 export const machinedEdgeFoundation: ThemeFoundation = {
 	dark: {
@@ -64,7 +64,7 @@ export const machinedEdgeFoundation: ThemeFoundation = {
 		},
 		color: {
 			accent: 'oklch(0.52 0.11 200)',
-			neutral: 'oklch(0.975 0.008 210)',
+			neutral: 'oklch(0.985 0 0)',
 		},
 		depth: {
 			floating: [

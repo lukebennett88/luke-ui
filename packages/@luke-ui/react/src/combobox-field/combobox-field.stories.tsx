@@ -39,40 +39,54 @@ const stackStyle = {
  * Use the ComboboxField component when the user needs to choose one option from a large group of options.
  */
 export const Default = meta.story({
-	play: async ({ canvasElement }) => {
+	play: async ({ canvasElement, step }) => {
 		const canvas = within(canvasElement);
 		const page = within(document.body);
 		const combobox = canvas.getByRole('combobox', { name: 'Country' });
+		const control = canvas.getByRole('group');
 
-		// Verify the combobox renders with expected structure.
-		await expect(combobox).toBeInTheDocument();
-		await expect(combobox).toHaveAttribute('aria-expanded', 'false');
-		await expect(combobox).toHaveAttribute('placeholder', 'Select a country...');
+		await step('the keyboard opens the options and moves active focus', async () => {
+			await userEvent.tab();
+			await expect(combobox).toHaveFocus();
+			await userEvent.keyboard('{ArrowDown}');
+			await expect(combobox).toHaveAttribute('aria-expanded', 'true');
+			await expect(page.getByRole('option', { name: 'Australia' })).toHaveAttribute(
+				'data-focused',
+				'true',
+			);
+		});
 
-		// Verify trigger button renders.
-		await expect(canvas.getByRole('button', { name: /Toggle options/ })).toBeInTheDocument();
+		await step('the popover aligns with the control well', async () => {
+			const controlRect = control.getBoundingClientRect();
+			const listboxRect = page.getByRole('listbox').getBoundingClientRect();
+			const listboxGap = listboxRect.top - controlRect.bottom;
+			await expect(listboxGap).toBeGreaterThanOrEqual(4);
+			await expect(listboxGap).toBeLessThanOrEqual(6);
+			const inlineStartInset = listboxRect.left - controlRect.left;
+			await expect(inlineStartInset).toBeGreaterThanOrEqual(1);
+			await expect(inlineStartInset).toBeLessThanOrEqual(13);
+			await expect(Math.abs(listboxRect.width + 2 - controlRect.width)).toBeLessThanOrEqual(1);
+		});
 
-		// Clicking the input opens the popover.
-		await userEvent.click(combobox);
-		await expect(combobox).toHaveAttribute('aria-expanded', 'true');
-		await expect(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
-
-		// Selecting an item closes the popover.
-		await userEvent.click(page.getByRole('option', { name: 'Australia' }));
-		await expect(combobox).toHaveValue('Australia');
-		await expect(combobox).toHaveAttribute('aria-expanded', 'false');
+		await step('selecting an option closes the popover and fills the input', async () => {
+			await userEvent.click(page.getByRole('option', { name: 'Australia' }));
+			await expect(combobox).toHaveValue('Australia');
+			await expect(combobox).toHaveAttribute('aria-expanded', 'false');
+		});
 	},
 	render: function Render() {
 		return (
-			<ComboboxField
-				defaultItems={countryItems}
-				description="Select where the user is located."
-				label="Country"
-				name="country"
-				placeholder="Select a country..."
-			>
-				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-			</ComboboxField>
+			<div style={stackStyle}>
+				<ComboboxField
+					defaultItems={countryItems}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+				</ComboboxField>
+			</div>
 		);
 	},
 });
@@ -183,8 +197,8 @@ export const Size = meta.story({
 		const mediumControl = mediumInput.closest('[role="group"]')!;
 
 		// Verify controls have different computed block sizes
-		await expect(window.getComputedStyle(smallControl).minHeight).not.toBe(
-			window.getComputedStyle(mediumControl).minHeight,
+		await expect(window.getComputedStyle(smallControl).blockSize).not.toBe(
+			window.getComputedStyle(mediumControl).blockSize,
 		);
 
 		// Open small combobox and check first option padding
@@ -253,6 +267,34 @@ export const Disabled = meta.story({
 				label="Country"
 				name="disabled"
 				placeholder="Select a country..."
+			>
+				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+			</ComboboxField>
+		);
+	},
+});
+
+/**
+ * Read-only comboboxes preserve their selected value without exposing interactive actions.
+ */
+export const ReadOnly = meta.story({
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const combobox = canvas.getByRole('combobox', { name: 'Country' });
+
+		await expect(combobox).toHaveValue('Canada');
+		await expect(combobox).toHaveAttribute('readonly');
+		await expect(canvas.queryByRole('button', { name: 'Clear selection' })).not.toBeInTheDocument();
+	},
+	render: function Render() {
+		return (
+			<ComboboxField
+				defaultItems={countryItems}
+				defaultValue="ca"
+				description="The saved country cannot be changed."
+				isReadOnly
+				label="Country"
+				name="readonly"
 			>
 				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 			</ComboboxField>

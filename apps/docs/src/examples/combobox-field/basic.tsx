@@ -12,13 +12,15 @@ const countries: Array<Country> = [
 
 export default function Basic() {
 	return (
-		<ComboboxField
-			defaultItems={countries}
-			label="Country"
-			name="country"
-			placeholder="Select a country..."
-		>
-			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-		</ComboboxField>
+		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>
+			<ComboboxField
+				defaultItems={countries}
+				label="Country"
+				name="country"
+				placeholder="Select a country..."
+			>
+				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+			</ComboboxField>
+		</div>
 	);
 }

@@ -24,7 +24,11 @@ export function DocsThemeRoot({ children }: PropsWithChildren) {
 	return (
 		<ThemeSettingsContext.Provider value={settings}>
 			<div
-				className={cx(themeRootClassName, themeClassName, 'flex min-h-screen flex-1 flex-col')}
+				className={cx(
+					themeRootClassName,
+					themeClassName,
+					'flex min-h-screen flex-1 flex-col text-fd-foreground',
+				)}
 				data-color-mode={colorMode ?? undefined}
 			>
 				{children}

@@ -16,7 +16,7 @@ export type ComboboxSize = NonNullable<ComboboxVariantProps['size']>;
  *
  * @tier primitive
  */
-export interface ComboboxInputProps<T extends object> extends DistributiveOmit<
+export interface ComboboxRootProps<T extends object> extends DistributiveOmit<
 	RacComboBoxProps<T, 'single'>,
 	| 'defaultSelectedKey'
 	| 'defaultValue'
@@ -51,7 +51,7 @@ export interface ComboboxInputProps<T extends object> extends DistributiveOmit<
 	value?: Key | null;
 }
 
-export function ComboboxInput<T extends object>(props: ComboboxInputProps<T>): JSX.Element {
+export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
 	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
 
 	return (

@@ -405,7 +405,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			}
 		});
 
-		it(`${foundation.name} keeps light recessed surfaces at canvas and dark wells distinct`, () => {
+		it(`${foundation.name} keeps light canvas neutral, recessed surfaces white, and dark wells distinct`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			const lightCanvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
 			const lightRecessed = parseColor(
@@ -416,8 +416,22 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 				extractValue(blocks.mediaDark, '--luke-color-surface-recessed'),
 			);
 
-			expect(lightRecessed).toEqual(lightCanvas);
+			expect(lightCanvas.c).toBe(0);
+			expect(lightRecessed).toEqual({ c: 0, h: 0, l: 1 });
 			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
+		});
+
+		it(`${foundation.name} keeps dark subtle hover states distinct and legible`, () => {
+			const { mediaDark } = splitBlocks(buildTheme(foundation));
+			const floating = parseColor(extractValue(mediaDark, '--luke-color-surface-floating'));
+			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
+			for (const intent of ['neutral', 'accent']) {
+				const subtleHover = parseColor(
+					extractValue(mediaDark, `--luke-color-intent-${intent}-surface-subtle-hover`),
+				);
+				expect(contrastRatio(subtleHover, floating)).toBeGreaterThanOrEqual(1.4);
+				expect(contrastRatio(textPrimary, subtleHover)).toBeGreaterThanOrEqual(4.5);
+			}
 		});
 
 		it(`${foundation.name} generates the least-contrasting passing control borders`, () => {
@@ -444,15 +458,6 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			}
 		});
 	}
-
-	it('keeps the Machined edge light recessed surface near white at canvas lightness', () => {
-		const blocks = splitBlocks(buildTheme(machinedEdgeFoundation));
-		const canvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
-		const recessed = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-recessed'));
-
-		expect(recessed.l).toBeGreaterThan(0.97);
-		expect(recessed.l).toBe(canvas.l);
-	});
 });
 
 describe('bundled theme identity', () => {

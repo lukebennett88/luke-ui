@@ -1,5 +1,4 @@
 import type { CSSProperties, JSX } from 'react';
-import { useRef } from 'react';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { composeField } from '../field/compose-field.js';
@@ -17,8 +16,8 @@ import type { ComboboxListBoxProps } from './primitive/listbox.js';
 import { ComboboxListBox } from './primitive/listbox.js';
 import type { ComboboxPopoverProps } from './primitive/popover.js';
 import { ComboboxPopover } from './primitive/popover.js';
-import type { ComboboxInputProps, ComboboxSize } from './primitive/root.js';
-import { ComboboxInput } from './primitive/root.js';
+import type { ComboboxRootProps, ComboboxSize } from './primitive/root.js';
+import { ComboboxRoot } from './primitive/root.js';
 import { ComboboxTrigger } from './primitive/trigger.js';
 
 type ComboboxLoadingState = 'error' | 'filtering' | 'idle' | 'loading' | 'loadingMore' | 'sorting';
@@ -37,7 +36,7 @@ interface ComboboxFieldRedeclaredRACProps {
  */
 export interface ComboboxFieldProps<T extends object>
 	extends
-		DistributiveOmit<ComboboxInputProps<T>, 'children' | keyof ComboboxFieldRedeclaredRACProps>,
+		DistributiveOmit<ComboboxRootProps<T>, 'children' | keyof ComboboxFieldRedeclaredRACProps>,
 		ComboboxFieldRedeclaredRACProps,
 		FieldSlotProps {
 	/** Item content for the listbox (render prop or static children). */
@@ -68,9 +67,8 @@ export interface ComboboxFieldProps<T extends object>
 	size?: ComboboxSize;
 }
 
-/** Composes `ComboboxInput` with label, description, and error slots. */
+/** Composes `ComboboxRoot` with label, description, and error slots. */
 export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): JSX.Element {
-	const themeSourceRef = useRef<HTMLDivElement>(null);
 	const [fieldSlotProps, restProps] = composeField(props);
 	const {
 		children,
@@ -82,12 +80,12 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		placeholder,
 		popoverProps,
 		size = 'medium',
-		...comboboxInputProps
+		...comboboxRootProps
 	} = restProps;
 
 	const isAsync: boolean = loadingState != null;
 	const isInteractive: boolean =
-		comboboxInputProps.isDisabled !== true && comboboxInputProps.isReadOnly !== true;
+		comboboxRootProps.isDisabled !== true && comboboxRootProps.isReadOnly !== true;
 
 	const loadMoreItem: ComboboxListBoxProps<T>['loadMoreItem'] = (() => {
 		if (loadMoreItemProp != null) return loadMoreItemProp;
@@ -114,7 +112,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	})();
 
 	return (
-		<ComboboxInput<T> ref={themeSourceRef} size={size} {...comboboxInputProps}>
+		<ComboboxRoot<T> size={size} {...comboboxRootProps}>
 			<Field {...fieldSlotProps}>
 				<ComboboxControl>
 					<ComboboxTextInput placeholder={placeholder} />
@@ -127,12 +125,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 						<Icon aria-hidden name="chevronDown" />
 					</ComboboxTrigger>
 				</ComboboxControl>
-				<ComboboxPopover
-					offset={4}
-					{...popoverProps}
-					style={resolvedStyle}
-					triggerRef={themeSourceRef}
-				>
+				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
 					<ComboboxListBox<T>
 						{...listBoxProps}
 						loadMoreItem={loadMoreItem}
@@ -142,7 +135,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 					</ComboboxListBox>
 				</ComboboxPopover>
 			</Field>
-		</ComboboxInput>
+		</ComboboxRoot>
 	);
 }
 
