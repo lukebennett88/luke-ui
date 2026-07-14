@@ -82,10 +82,10 @@ export const SizeOverride = meta.story({
 	render: (props) => (
 		<div style={stackStyle}>
 			<Heading {...props}>Level 2 semantic and visual</Heading>
-			<Heading {...props} size={500}>
+			<Heading {...props} size="500">
 				Level 2 semantic, size 500
 			</Heading>
-			<Heading {...props} size={900}>
+			<Heading {...props} size="900">
 				Level 2 semantic, display size 900
 			</Heading>
 		</div>

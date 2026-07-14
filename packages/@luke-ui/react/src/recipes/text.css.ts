@@ -4,11 +4,11 @@ import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { styleInLayer, recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 
-const sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
-/** Composite typography size steps. */
+const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
+/** Typography size steps. */
 export type TextSize = (typeof sizes)[number];
 
-/** Semantic text colors. */
+/** Semantic text colours. */
 export type TextColor =
 	| 'primary'
 	| 'secondary'
@@ -109,7 +109,7 @@ const sizeVariants = Object.fromEntries(
 	]),
 ) as Record<TextSize, { fontSize: string; letterSpacing: string; lineHeight: string }>;
 
-const typographyCompoundVariants = sizes.map((size) => {
+const sizeStepCompoundVariants = sizes.map((size) => {
 	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
 	return {
 		style: createTextStyle(
@@ -123,14 +123,14 @@ const typographyCompoundVariants = sizes.map((size) => {
 /** Vanilla-extract recipe for the `Text` primitive's styles. */
 export const text = recipeInLayer('recipes', {
 	base,
-	compoundVariants: typographyCompoundVariants,
+	compoundVariants: sizeStepCompoundVariants,
 	defaultVariants: {
 		fontVariantNumeric: 'unset',
 		isVisuallyHidden: false,
 		lineClamp: false,
 		shouldDisableTrim: false,
 		shouldInheritFont: false,
-		size: 300,
+		size: '300',
 		textAlign: 'start',
 		textDecoration: 'none',
 		textTransform: 'none',

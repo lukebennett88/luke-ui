@@ -79,7 +79,7 @@ function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 
 const baseArgs = {
 	children: storyText,
-	size: 300,
+	size: '300',
 } as const satisfies Pick<TextProps, 'children' | 'size'>;
 
 const colors = [
@@ -91,9 +91,17 @@ const colors = [
 	'warning',
 	'danger',
 ] as const satisfies ReadonlyArray<NonNullable<TextProps['color']>>;
-const sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900] as const satisfies ReadonlyArray<
-	NonNullable<TextProps['size']>
->;
+const sizes = [
+	'100',
+	'200',
+	'300',
+	'400',
+	'500',
+	'600',
+	'700',
+	'800',
+	'900',
+] as const satisfies ReadonlyArray<NonNullable<TextProps['size']>>;
 const weights = ['body', 'label', 'heading', 'emphasis'] as const satisfies ReadonlyArray<
 	NonNullable<TextProps['fontWeight']>
 >;
@@ -154,7 +162,7 @@ export const Weight = meta.story({
 });
 
 /**
- * Use semantic colors to communicate hierarchy, status, and emphasis consistently across themes.
+ * Use semantic colours to communicate hierarchy, status, and emphasis consistently across themes.
  */
 export const Color = meta.story({
 	render: (props) => (

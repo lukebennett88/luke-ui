@@ -17,7 +17,14 @@ export interface HeadingProps extends TextProps {
 	level?: HeadingLevel;
 }
 
-const sizeByLevel = { 1: 800, 2: 700, 3: 600, 4: 500, 5: 400, 6: 300 } as const;
+const sizeByLevel = {
+	1: '800',
+	2: '700',
+	3: '600',
+	4: '500',
+	5: '400',
+	6: '300',
+} as const;
 
 /** Semantic heading with automatic level composition and level-based typography. */
 export function Heading(props: HeadingProps) {

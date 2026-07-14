@@ -6,7 +6,7 @@ interface TextVariantProps extends NonNullable<styles.TextVariants> {}
 
 interface TextStyleProps {
 	/**
-	 * Sets text color.
+	 * Sets text colour.
 	 * @default 'primary'
 	 */
 	color?: TextVariantProps['color'];
@@ -15,6 +15,11 @@ interface TextStyleProps {
 	 * @default 'unset'
 	 */
 	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
+	/**
+	 * Sets the semantic font-weight role.
+	 * @default 'body'
+	 */
+	fontWeight?: TextVariantProps['fontWeight'];
 	/**
 	 * Hides text visually while keeping it accessible.
 	 * @default false
@@ -28,13 +33,13 @@ interface TextStyleProps {
 	 */
 	shouldDisableTrim?: TextVariantProps['shouldDisableTrim'];
 	/**
-	 * Makes text inherit its surrounding font and color styles.
+	 * Makes text inherit its surrounding font and colour styles.
 	 * @default false
 	 */
 	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
 	/**
-	 * Sets the composite font size, line height, and letter spacing step.
-	 * @default 300
+	 * Sets the font size, line height, letter spacing, and trim as one step.
+	 * @default '300'
 	 */
 	size?: TextVariantProps['size'];
 	/**
@@ -57,11 +62,6 @@ interface TextStyleProps {
 	 * @default 'unset'
 	 */
 	textWrap?: TextVariantProps['textWrap'];
-	/**
-	 * Sets the semantic font-weight role.
-	 * @default 'body'
-	 */
-	fontWeight?: TextVariantProps['fontWeight'];
 }
 
 /**
@@ -72,18 +72,18 @@ interface TextStyleProps {
 export type TextProps = Omit<React.ComponentProps<typeof RacText>, keyof TextStyleProps> &
 	TextStyleProps;
 
-/** Styled text with composite typography and semantic content-color controls. */
+/** Styled text with a coordinated type scale and semantic colour controls. */
 export function Text(props: TextProps) {
 	const {
 		children,
 		className,
 		color,
-		fontWeight,
 		fontVariantNumeric,
+		fontWeight,
 		isVisuallyHidden,
 		lineClamp,
-		shouldInheritFont,
 		shouldDisableTrim,
+		shouldInheritFont,
 		size,
 		textAlign,
 		textDecoration,
@@ -100,8 +100,8 @@ export function Text(props: TextProps) {
 			className={cx(
 				styles.text({
 					color,
-					fontWeight,
 					fontVariantNumeric,
+					fontWeight,
 					isVisuallyHidden,
 					lineClamp,
 					shouldDisableTrim: resolvedShouldDisableTrim,

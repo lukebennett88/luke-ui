@@ -16,44 +16,46 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-test.each(visualAppearances)('composite typography: $theme $mode', async (appearance) => {
-	const locator = renderVisual(
-		<Stack width="40rem">
-			<div style={rowStyle}>
-				<Text size={100}>100</Text>
-				<Text size={200}>200</Text>
-				<Text size={300}>300</Text>
-				<Text size={400}>400</Text>
-				<Text size={500}>500</Text>
-				<Text size={600}>600</Text>
-				<Text size={700}>700</Text>
-				<Text size={800}>800</Text>
-				<Text size={900}>900</Text>
-			</div>
-			<div style={rowStyle}>
-				<Text fontWeight="body">Body</Text>
-				<Text fontWeight="label">Label</Text>
-				<Text fontWeight="heading">Heading</Text>
-				<Text fontWeight="emphasis">Emphasis</Text>
-			</div>
-			<div style={rowStyle}>
-				<Text color="primary">Primary</Text>
-				<Text color="secondary">Secondary</Text>
-				<Text color="accent">Accent</Text>
-				<Text color="info">Info</Text>
-				<Text color="success">Success</Text>
-				<Text color="warning">Warning</Text>
-				<Text color="danger">Danger</Text>
-			</div>
-			<Text>Trimmed by default</Text>
-			<Text shouldDisableTrim>Trim disabled</Text>
-		</Stack>,
-		appearance,
-	);
-	await expect.element(locator).toBeVisible();
+for (const appearance of visualAppearances) {
+	test(`type scale: ${appearance.theme} ${appearance.mode}`, async () => {
+		const locator = renderVisual(
+			<Stack width="40rem">
+				<div style={rowStyle}>
+					<Text size="100">100</Text>
+					<Text size="200">200</Text>
+					<Text size="300">300</Text>
+					<Text size="400">400</Text>
+					<Text size="500">500</Text>
+					<Text size="600">600</Text>
+					<Text size="700">700</Text>
+					<Text size="800">800</Text>
+					<Text size="900">900</Text>
+				</div>
+				<div style={rowStyle}>
+					<Text fontWeight="body">Body</Text>
+					<Text fontWeight="label">Label</Text>
+					<Text fontWeight="heading">Heading</Text>
+					<Text fontWeight="emphasis">Emphasis</Text>
+				</div>
+				<div style={rowStyle}>
+					<Text color="primary">Primary</Text>
+					<Text color="secondary">Secondary</Text>
+					<Text color="accent">Accent</Text>
+					<Text color="info">Info</Text>
+					<Text color="success">Success</Text>
+					<Text color="warning">Warning</Text>
+					<Text color="danger">Danger</Text>
+				</div>
+				<Text>Trimmed by default</Text>
+				<Text shouldDisableTrim>Trim disabled</Text>
+			</Stack>,
+			appearance,
+		);
+		await expect.element(locator).toBeVisible();
 
-	await captureVisualAppearance(locator, 'text/composite-typography', appearance);
-});
+		await captureVisualAppearance(locator, 'text/type-scale', appearance);
+	});
+}
 
 test('line clamp and transforms', async () => {
 	const locator = renderVisual(

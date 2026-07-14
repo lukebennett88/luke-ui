@@ -6,7 +6,7 @@ export default function Typography() {
 			<Heading color="info" level={3}>
 				Informative heading
 			</Heading>
-			<Heading level={4} size={900}>
+			<Heading level={4} size="900">
 				Display-sized heading
 			</Heading>
 		</div>

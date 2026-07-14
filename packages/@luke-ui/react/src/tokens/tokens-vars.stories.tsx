@@ -852,7 +852,7 @@ function TokenTypeStory({
 		<div style={docsPageStyle}>
 			<section style={sectionStyle}>
 				<Heading elementType="h1">{title}</Heading>
-				<Text color="secondary" elementType="p" size={400}>
+				<Text color="secondary" elementType="p" size="400">
 					{description}
 				</Text>
 			</section>

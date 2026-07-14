@@ -1,6 +1,6 @@
 ---
 title: Text
-description: Styled text with composite typography and semantic color roles.
+description: Styled text with a coordinated type scale and semantic colour roles.
 ---
 
 `Text` expects the Luke UI theme class at the app or root level. See
@@ -14,17 +14,17 @@ Use `Text` for styled text that should not create heading semantics.
 
 ## Best practices
 
-| Guidance | Practices                                                                                       |
-| -------- | ----------------------------------------------------------------------------------------------- |
-| Do       | Choose one composite `size` step so font size, line height, spacing, and trim stay coordinated. |
-| Don't    | Use `Text` for section headings. Use `Heading`, which manages semantic level automatically.     |
+| Guidance | Practices                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------- |
+| Do       | Choose one `size` step so font size, line height, spacing, and trim stay coordinated.       |
+| Don't    | Use `Text` for section headings. Use `Heading`, which manages semantic level automatically. |
 
 ## Typography
 
 <ExampleBlock
 	src="text/typography"
 	title="Text — Typography"
-	description="Use composite size steps, semantic colors, and font-weight roles to style text."
+	description="Use size steps, semantic colours, and font-weight roles to style text."
 />
 
 The active theme supplies the curated font family and the weights behind each role. `Text` trims the
@@ -63,9 +63,9 @@ participate in an untrimmed layout; line clamping disables trim automatically.
 
 ### `size` steps
 
-`100`, `200`, `300`, `400`, `500`, `600`, `700`, `800`, `900`
+`'100'`, `'200'`, `'300'`, `'400'`, `'500'`, `'600'`, `'700'`, `'800'`, `'900'`
 
-`300` is the default. Each step combines font size, line height, letter spacing, and Capsize trim.
+`'300'` is the default. Each step combines font size, line height, letter spacing, and Capsize trim.
 
 ### `fontWeight` roles
 

@@ -15,9 +15,9 @@ afterEach(() => {
 	styles = [];
 });
 
-test('defaults to size 300, body weight, and primary color', () => {
+test("defaults to size '300', body weight, and primary colour", () => {
 	const defaultText = mountText();
-	const explicitText = mountText({ color: 'primary', fontWeight: 'body', size: 300 });
+	const explicitText = mountText({ color: 'primary', fontWeight: 'body', size: '300' });
 	const style = getComputedStyle(defaultText);
 	const explicitStyle = getComputedStyle(explicitText);
 
@@ -29,14 +29,14 @@ test('defaults to size 300, body weight, and primary color', () => {
 });
 
 test('size composes font size, line height, and letter spacing', () => {
-	const style = getComputedStyle(mountText({ size: 600 }));
+	const style = getComputedStyle(mountText({ size: '600' }));
 
 	expect(style.fontSize).toBe('24px');
 	expect(style.lineHeight).toBe('30px');
 	expect(style.letterSpacing).toBe('-0.15px');
 });
 
-test('semantic color and weight roles resolve through the active theme', () => {
+test('semantic colour and weight roles resolve through the active theme', () => {
 	const primary = getComputedStyle(mountText());
 	const dangerEmphasis = getComputedStyle(mountText({ color: 'danger', fontWeight: 'emphasis' }));
 
@@ -68,7 +68,7 @@ test('font inheritance also preserves surrounding currentColor', () => {
 	expect(style.fontWeight).toBe('500');
 });
 
-test('an explicit semantic color overrides inherited currentColor', () => {
+test('an explicit semantic colour overrides inherited currentColor', () => {
 	const root = mountRoot();
 	root.style.color = 'rgb(1, 2, 3)';
 	const element = root.appendChild(document.createElement('span'));
@@ -90,9 +90,9 @@ test('an explicit numeric variant survives font inheritance', () => {
 	expect(getComputedStyle(element).fontVariantNumeric).toContain('tabular-nums');
 });
 
-test('all composite steps use the generated Capsize trims for every curated font', () => {
+test('all size steps use the generated Capsize trims for every curated font', () => {
 	const families = ['inter', 'apple-system', 'dm-sans'] as const;
-	const sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
+	const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
 	const representativeTrims = new Set<string>();
 
 	for (const fontFamily of families) {
@@ -128,7 +128,7 @@ test('all composite steps use the generated Capsize trims for every curated font
 				2,
 			);
 
-			if (size === 300) representativeTrims.add(`${capHeightTrim}:${baselineTrim}`);
+			if (size === '300') representativeTrims.add(`${capHeightTrim}:${baselineTrim}`);
 		}
 	}
 
