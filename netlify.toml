@@ -1,5 +1,5 @@
 [build]
 base = "."
-command = "pnpm exec turbo run build --filter docs"
+command = "pnpm run build:docs && pnpm run build:storybook && rm -rf apps/docs/dist/client/storybook && cp -R packages/@luke-ui/react/storybook-static apps/docs/dist/client/storybook"
 publish = "apps/docs/dist/client"
 functions = "apps/docs/.netlify/v1/functions"
