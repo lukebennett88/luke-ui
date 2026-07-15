@@ -4,6 +4,10 @@ import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import { iconSizeVariants } from './icon.css.js';
 
+const rotationDuration = '1.2s';
+const rubberBandDuration = '2s';
+const rubberBandEasing = 'cubic-bezier(0.42, 0, 0.58, 1)';
+
 const colorVariants = {
 	accent: { color: vars.color.intent.accent.text },
 	danger: { color: vars.color.intent.danger.text },
@@ -52,10 +56,10 @@ export const spinnerState = recipeInLayer('recipes', {
 					'(forced-colors: active)': { animationName: 'none' },
 					'(prefers-reduced-motion: reduce)': { animationName: 'none' },
 				},
-				animationDuration: vars.motion.duration.ambient,
+				animationDuration: rotationDuration,
 				animationIterationCount: 'infinite',
 				animationName: spinAnimationName,
-				animationTimingFunction: vars.motion.easing.standard,
+				animationTimingFunction: 'linear',
 			},
 		},
 	},
@@ -104,10 +108,10 @@ export const indicator = recipeInLayer('recipes', {
 						strokeDashoffset: 0,
 					},
 				},
-				animationDuration: vars.motion.duration.ambient,
+				animationDuration: rubberBandDuration,
 				animationIterationCount: 'infinite',
 				animationName: rubberBandAnimationName,
-				animationTimingFunction: vars.motion.easing.standard,
+				animationTimingFunction: rubberBandEasing,
 			},
 		},
 	},

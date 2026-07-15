@@ -7,8 +7,11 @@ import { vars } from '../theme/contract.css.js';
  * @internal
  */
 export const skeletonAnimationName = keyframes({
-	from: { filter: 'brightness(1)' },
-	to: { filter: 'brightness(0.88)' },
+	'0%': { filter: 'brightness(1)' },
+	'10%': { filter: 'brightness(1)' },
+	'50%': { filter: 'brightness(0.88)' },
+	'60%': { filter: 'brightness(0.88)' },
+	'100%': { filter: 'brightness(1)' },
 });
 
 /** @internal */
@@ -41,8 +44,7 @@ const forcedColorsSurface = {
 // Not `!important`: reduced-motion overrides (below) and animation syncing must stay able to adjust it.
 const pulse = {
 	animationDelay: '0.5s',
-	animationDirection: 'alternate',
-	animationDuration: vars.motion.duration.ambient,
+	animationDuration: '2s',
 	animationIterationCount: 'infinite',
 	animationName: skeletonAnimationName,
 	animationTimingFunction: vars.motion.easing.standard,
