@@ -45,17 +45,19 @@ test('sizes and glyphs', async () => {
 	await captureVisual(locator, 'icon/sizes-glyphs');
 });
 
-test.each(visualAppearances)('semantic content inheritance: $theme $mode', async (appearance) => {
-	const scene = renderVisual(
-		<div style={{ color: vars.color.intent.accent.text }}>
-			<Icon name="checkCircle" title="Inherited accent" />
-		</div>,
-		appearance,
-	);
-	const icon = scene.getByRole('img', { name: 'Inherited accent' });
-	const parent = icon.element().parentElement;
-	if (!parent) throw new Error('Expected icon parent.');
+for (const appearance of visualAppearances) {
+	test(`semantic content inheritance: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<div style={{ color: vars.color.intent.accent.text }}>
+				<Icon name="checkCircle" title="Inherited accent" />
+			</div>,
+			appearance,
+		);
+		const icon = scene.getByRole('img', { name: 'Inherited accent' });
+		const parent = icon.element().parentElement;
+		if (!parent) throw new Error('Expected icon parent.');
 
-	expect(getComputedStyle(icon.element()).color).toBe(getComputedStyle(parent).color);
-	await captureVisualAppearance(scene, 'icon/content-inheritance', appearance);
-});
+		expect(getComputedStyle(icon.element()).color).toBe(getComputedStyle(parent).color);
+		await captureVisualAppearance(scene, 'icon/content-inheritance', appearance);
+	});
+}

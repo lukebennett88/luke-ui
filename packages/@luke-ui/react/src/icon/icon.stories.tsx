@@ -1,6 +1,7 @@
 import { Button } from '@luke-ui/react/button';
 import type { IconProps } from '@luke-ui/react/icon';
 import { createIcon, Icon, iconNames } from '@luke-ui/react/icon';
+import type { TextProps } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import { expect } from 'storybook/test';
@@ -23,7 +24,7 @@ const colors = {
 	danger: vars.color.intent.danger.text,
 	primary: vars.color.text.primary,
 	secondary: vars.color.text.secondary,
-} as const;
+} as const satisfies Partial<Record<NonNullable<TextProps['color']>, string>>;
 
 const wrapStyle = {
 	display: 'grid',

@@ -1,5 +1,5 @@
 import type { StyleRule } from '@vanilla-extract/css';
-import { keyframes } from '@vanilla-extract/css';
+import { fallbackVar, keyframes } from '@vanilla-extract/css';
 import { globalStyleInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 
@@ -65,7 +65,7 @@ export const loadingSkeleton = styleInLayer('utilities', {
 		'&[data-skeleton-inline]': {
 			...surface,
 			...pulse,
-			borderRadius: `var(${skeletonRadiusVar}, ${vars.radius.detail})`,
+			borderRadius: fallbackVar(`var(${skeletonRadiusVar})`, vars.radius.detail),
 		},
 		// Block mode: the wrapper is invisible; skeleton styles apply to its direct children.
 		'&:not([data-skeleton-inline])': {
