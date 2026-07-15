@@ -3,7 +3,9 @@ import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.css.js';
 import type * as primitiveStyles from '../recipes/button.css.js';
 import { Text } from '../text/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
+import type { Prettify } from '../types/prettify.js';
 import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
 import { Button as PrimitiveButton } from './primitive/index.js';
 
@@ -47,16 +49,19 @@ interface ButtonStyleProps {
 	tone?: PrimitiveButtonRecipeProps['tone'];
 }
 
+type _ButtonOmit = DistributiveOmit<
+	PrimitiveButtonProps,
+	'appearance' | 'isBlock' | 'isPending' | 'size' | 'tone' | keyof DocumentedPressProps
+>;
+
+interface _ButtonProps extends _ButtonOmit, ButtonStyleProps, DocumentedPressProps {}
+
 /**
  * Composed button with size, tone, appearance, pending, and block options.
  *
  * @tier composed
  */
-export interface ButtonProps
-	extends
-		Omit<PrimitiveButtonProps, keyof ButtonStyleProps | keyof DocumentedPressProps>,
-		ButtonStyleProps,
-		DocumentedPressProps {}
+export type ButtonProps = Prettify<_ButtonProps>;
 
 /** Composed button. Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`. */
 export function Button(props: ButtonProps): JSX.Element {

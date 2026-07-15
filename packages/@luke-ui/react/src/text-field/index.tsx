@@ -7,20 +7,15 @@ import { TextField as RacTextField } from 'react-aria-components/TextField';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { composeField } from '../field/compose-field.js';
 import { Field } from '../field/primitive/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
+import type { Prettify } from '../types/prettify.js';
 import type { TextInputSize } from './primitive/index.js';
 import { TextInput } from './primitive/index.js';
 
-/**
- * Props for the composed text field.
- *
- * @tier composed
- */
-export interface TextFieldProps
-	extends
-		Omit<RacTextFieldProps, 'children' | 'size' | keyof DocumentedInputProps>,
-		DocumentedInputProps,
-		FieldSlotProps {
+type _TextFieldOmit = DistributiveOmit<RacTextFieldProps, 'children' | keyof DocumentedInputProps>;
+
+interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
 	/** Element shown after the input value. */
 	adornmentEnd?: ReactNode;
 	/** Element shown before the input value. */
@@ -32,6 +27,13 @@ export interface TextFieldProps
 	/** Control size. Defaults to `'medium'`. */
 	size?: TextInputSize;
 }
+
+/**
+ * Props for the composed text field.
+ *
+ * @tier composed
+ */
+export type TextFieldProps = Prettify<_TextFieldProps>;
 
 /** Composes `TextInput` with label, description, and error slots. */
 export function TextField(props: TextFieldProps): JSX.Element {

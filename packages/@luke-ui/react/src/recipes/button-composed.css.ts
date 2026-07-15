@@ -1,7 +1,6 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer } from '../styles/layered-style.css.js';
-import { vars } from '../styles/vars.css.js';
-import { vars as themeVars } from '../theme/contract.css.js';
+import { vars } from '../theme/contract.css.js';
 
 export const buttonContent = recipeInLayer('recipes', {
 	base: {
@@ -16,7 +15,7 @@ export const buttonLabel = recipeInLayer('recipes', {
 	base: {
 		alignItems: 'center',
 		display: 'inline-flex',
-		gap: vars.space.xsmall,
+		gap: vars.space[200],
 		minInlineSize: 0,
 	},
 	defaultVariants: {
@@ -42,7 +41,7 @@ export const spinnerOverlay = recipeInLayer('recipes', {
 			},
 		},
 		alignItems: 'center',
-		color: themeVars.color.border.focus,
+		color: vars.color.border.focus,
 		display: 'flex',
 		inset: 0,
 		justifyContent: 'center',

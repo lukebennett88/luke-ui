@@ -2,6 +2,7 @@ import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import * as styles from '../recipes/loading-skeleton.css.js';
 import { vars } from '../theme/contract.css.js';
+import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { cx } from '../utils/index.js';
 
@@ -22,12 +23,7 @@ export function LoadingSkeletonProvider(props: LoadingSkeletonProviderProps): JS
 	);
 }
 
-/**
- * Props for `LoadingSkeleton`.
- *
- * @tier atom
- */
-export interface LoadingSkeletonProps extends ComponentProps<'span'> {
+interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	/**
 	 * Element rendered while loading.
 	 * @default 'span'
@@ -44,6 +40,13 @@ export interface LoadingSkeletonProps extends ComponentProps<'span'> {
 	 */
 	isLoading?: boolean;
 }
+
+/**
+ * Props for `LoadingSkeleton`.
+ *
+ * @tier atom
+ */
+export type LoadingSkeletonProps = Prettify<_LoadingSkeletonProps>;
 
 /**
  * Placeholder that mirrors the layout of loading content. Wrap text for an inline skeleton sized to the text, or

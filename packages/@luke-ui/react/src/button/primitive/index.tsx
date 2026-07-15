@@ -5,6 +5,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon-size-context/index.js';
 import * as styles from '../../recipes/button.css.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
 interface ButtonRecipeProps extends NonNullable<styles.ButtonVariants> {}
@@ -32,14 +33,15 @@ interface ButtonStyleProps {
 	tone?: ButtonRecipeProps['tone'];
 }
 
+interface _ButtonProps extends RacButtonProps, ButtonStyleProps {}
+
 /**
  * Primitive button — a bare `<button>` styled with size, tone, appearance, and block options.
  * Library-author audience: use this when you need full control over children layout.
  *
  * @tier primitive
  */
-export interface ButtonProps
-	extends Omit<RacButtonProps, keyof ButtonStyleProps>, ButtonStyleProps {}
+export type ButtonProps = Prettify<_ButtonProps>;
 
 /** Primitive button. See `ButtonProps`. */
 export function Button(props: ButtonProps): JSX.Element {

@@ -5,6 +5,8 @@ import type { InputProps as RacInputProps } from 'react-aria-components/Input';
 import { Input as RacInput } from 'react-aria-components/Input';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/text-input.css.js';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
 interface TextInputVariantProps extends NonNullable<styles.TextInputVariants> {}
@@ -20,13 +22,8 @@ interface TextInputStyleProps {
 /** Allowed `size` values for `TextInput`. */
 export type TextInputSize = NonNullable<TextInputVariantProps['size']>;
 
-/**
- * Props for the primitive text input.
- *
- * @tier primitive
- */
-export interface TextInputProps
-	extends Omit<RacInputProps, 'className' | keyof TextInputStyleProps>, TextInputStyleProps {
+type _TextInputOmit = DistributiveOmit<RacInputProps, 'className' | keyof TextInputStyleProps>;
+interface _TextInputProps extends _TextInputOmit, TextInputStyleProps {
 	/** Element shown at the end of the control. */
 	adornmentEnd?: ReactNode;
 	/** Element shown at the start of the control. */
@@ -36,6 +33,13 @@ export interface TextInputProps
 	/** Class name for the inner input element. */
 	inputClassName?: RacInputProps['className'];
 }
+
+/**
+ * Props for the primitive text input.
+ *
+ * @tier primitive
+ */
+export type TextInputProps = Prettify<_TextInputProps>;
 
 /** Styled text input with optional start/end adornments. */
 export function TextInput(props: TextInputProps): JSX.Element {

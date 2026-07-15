@@ -14,6 +14,7 @@
 		"./dist/themes/*.css"
 	],
 	"exports": {
+		"./box": "./dist/box/index.js",
 		"./button": "./dist/button/index.js",
 		"./button/primitive": "./dist/button/primitive/index.js",
 		"./combobox-field": "./dist/combobox-field/index.js",
@@ -36,7 +37,6 @@
 		"./text-field/primitive": "./dist/text-field/primitive/index.js",
 		"./theme": "./dist/theme/index.js",
 		"./themes": "./dist/themes/index.js",
-		"./tokens": "./dist/tokens/index.js",
 		"./utils": "./dist/utils/index.js",
 		"./package.json": "./package.json",
 		"./stylesheet.css": "./dist/stylesheet.css",
@@ -65,8 +65,7 @@
 		"fix:lint": "vp lint . --type-aware --fix",
 		"fix:unsafe": "vp lint . --type-aware --fix-dangerously",
 		"generate": "pnpm run generate:assets",
-		"generate:assets": "pnpm run generate:icons && pnpm run generate:color-tokens && pnpm run generate:themes",
-		"generate:color-tokens": "node scripts/generate-color-tokens.ts && vp fmt .generated/color-tokens.generated.ts --write",
+		"generate:assets": "pnpm run generate:icons && pnpm run generate:themes",
 		"generate:icons": "tsx scripts/build-icons.ts",
 		"generate:themes": "tsx scripts/build-themes.ts",
 		"test": "pnpm run test:unit && pnpm run test:browser && pnpm run test:storybook && pnpm run test:visual",
@@ -106,7 +105,6 @@
 		"@vitest/coverage-v8": "catalog:",
 		"@vitest/ui": "catalog:",
 		"babel-plugin-react-compiler": "catalog:",
-		"colorjs.io": "catalog:",
 		"node-html-parser": "catalog:",
 		"pixelmatch": "catalog:",
 		"playwright": "catalog:",

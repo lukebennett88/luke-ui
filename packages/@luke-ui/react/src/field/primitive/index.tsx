@@ -1,4 +1,6 @@
 import type { ComponentProps, JSX, ReactNode } from 'react';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
 import type { FieldSlotProps } from '../compose-field.js';
 import type { FieldDescriptionProps } from './description.js';
 import { FieldDescription } from './description.js';
@@ -13,14 +15,17 @@ export { FieldDescription, FieldError, FieldLabel };
 
 type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
 
+type _FieldOmit = DistributiveOmit<PrimitiveFieldProps, 'children'>;
+interface _FieldProps extends _FieldOmit, FieldSlotProps {
+	children: ReactNode;
+}
+
 /**
  * Props for the composed `Field`.
  *
  * @tier primitive
  */
-export interface FieldProps extends Omit<PrimitiveFieldProps, 'children'>, FieldSlotProps {
-	children: ReactNode;
-}
+export type FieldProps = Prettify<_FieldProps>;
 
 /** Composes label, control slot, description, and error text. */
 export function Field(props: FieldProps): JSX.Element {

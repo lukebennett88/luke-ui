@@ -8,9 +8,8 @@ stylesheet and apply its identity class to the same element. Neither step inject
 
 ## Structure
 
-- `tokens.ts`: design token source.
-- `styles/vars.css.ts`: theme variables.
 - `styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
+- `styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
 - `recipes/`: component recipes exported from `@luke-ui/react/recipes`.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree and its `--luke-*` variable naming.
@@ -114,8 +113,9 @@ bundle smaller as the token scale grows.
 The tradeoff is that some values are applied through inline `style`, which raises specificity. That
 is acceptable because styling utilities are already the highest-priority escape hatch.
 
-Do not add a polymorphic `Box` component. React Aria Components' `render` prop covers the same need
-without adding another component API.
+`Box` from `@luke-ui/react/box` applies the same utilities to a `div`. Its `render` prop can use a
+compatible custom `div` component while preserving the generated class, style, ref, and DOM props.
+It does not provide `as` or `asChild` polymorphism.
 
 Do not add style props to every component. Component props should stay focused on component-specific
 variants and behaviour.
@@ -129,8 +129,8 @@ import { createSprinkles } from '@luke-ui/react/styles';
 
 const layout = createSprinkles({
 	display: 'flex',
-	gap: 'medium',
-	padding: 'large',
+	gap: '400',
+	padding: '600',
 });
 
 return (
@@ -140,9 +140,10 @@ return (
 );
 ```
 
-Token-backed properties use the design-token scale, for example `padding: 'large'`. Enum-like
-properties use CSS-native values, for example `display: 'flex'`. Numeric flex properties use string
-values, for example `flexGrow: '1'`.
+Spacing and gap properties use `0` or the semantic space steps `100`, `200`, `300`, `400`, `600`,
+`800`, `1000`, `1200`, and `1600`. Margin also accepts `auto`. Enum-like properties use CSS-native
+values, for example `display: 'flex'`. Sizing, inset, flex-basis, order, and grid-placement values
+accept their CSS property values.
 
 ## Responsive values
 
@@ -153,24 +154,12 @@ only overrides need to be specified.
 const responsive = createSprinkles({
 	display: 'flex',
 	flexDirection: { xsmall: 'column', medium: 'row' },
-	gap: { xsmall: 'small', medium: 'large' },
+	gap: { xsmall: '300', medium: '600' },
 });
 ```
 
-## Pseudo-state conditions
-
-Use condition objects for `hover` and `focus-visible` states.
-
-```tsx
-const interactive = createSprinkles({
-	padding: 'medium',
-	backgroundColor: {
-		default: 'neutral',
-		hover: 'neutralHover',
-		focusVisible: 'input',
-	},
-});
-```
+The retained breakpoints are `xsmall` (base), `small` (640px), `medium` (768px), `large` (1024px),
+`xlarge` (1280px), and `xxlarge` (1536px).
 
 ## React Aria `render` prop
 
@@ -181,7 +170,7 @@ Aria Components' `render` prop. Use `mergeProps` from `@luke-ui/react/utils` so 
 ```tsx
 import { mergeProps } from '@luke-ui/react/utils';
 
-const buttonBox = createSprinkles({ padding: 'medium' });
+const buttonBox = createSprinkles({ padding: '400' });
 
 <Button
 	render={(props) => (
@@ -198,21 +187,37 @@ const buttonBox = createSprinkles({ padding: 'medium' });
 
 The v1 surface covers:
 
-- Layout: `display`, `flexDirection`, `justifyContent`, `alignItems`.
-- Flex item: `flexGrow`, `flexShrink`, `flexBasis`.
+- Layout: `display`.
+- Spacing: logical `margin*` and `padding*` properties.
 - Sizing: `inlineSize`, `blockSize`, `minInlineSize`, `minBlockSize`, `maxInlineSize`,
   `maxBlockSize`.
+- Positioning: `position` and logical `inset*` properties.
 - Gaps: `gap`, `rowGap`, `columnGap`.
-- Padding: `padding`, `paddingInline`, `paddingBlock`, `paddingInlineStart`, `paddingInlineEnd`,
-  `paddingBlockStart`, `paddingBlockEnd`.
-- Overflow: `overflow`, `overflowX`, `overflowY`, `textOverflow`.
-- Pseudo-state colour: `backgroundColor` with `hover` and `focus-visible`.
-
-Margin utilities are not part of the initial surface.
+- Overflow: `overflow`, `overflowX`, `overflowY`.
+- Flex: `flex`, `flexBasis`, `flexDirection`, `flexGrow`, `flexShrink`, `flexWrap`, `order`,
+  `alignContent`, `alignItems`, `alignSelf`, and `justifyContent`.
+- Grid children: `gridArea`, `gridColumn*`, `gridRow*`, `justifySelf`, and `placeSelf`.
 
 Use CSS-native values throughout, for example `flex-start` instead of `start`.
 
-Styling utilities do not yet read runtime theme context.
+Semantic colour, typography, and pseudo-state properties are deliberately excluded. Use component
+APIs where possible. Sanctioned custom styling uses the public typed `vars` from
+`@luke-ui/react/theme`, which resolve to stable `--luke-*` variables.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+return (
+	<div
+		style={{
+			backgroundColor: vars.color.surface.recessed,
+			color: vars.color.text.primary,
+		}}
+	>
+		Custom content
+	</div>
+);
+```
 
 ## Implementation rules
 

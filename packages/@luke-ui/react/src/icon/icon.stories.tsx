@@ -61,7 +61,7 @@ export const Default = meta.story({
 });
 
 /**
- * Size maps to the icon size tokens: `xsmall`, `small`, `medium`, and `large`.
+ * Size uses the semantic icon steps `xsmall`, `small`, `medium`, and `large`.
  */
 export const Sizes = meta.story({
 	args: baseArgs,

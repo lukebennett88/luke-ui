@@ -3,23 +3,17 @@ import { createSprinkles } from '@luke-ui/react/styles';
 import { mergeProps } from '@luke-ui/react/utils';
 import type { CSSProperties } from 'react';
 import preview from '../../.storybook/preview.js';
-import { vars } from '../theme.css.js';
+import { vars } from '../theme/index.js';
 
 const meta = preview.meta({
 	title: 'Foundation/Utilities',
 });
 
 const panelStyle = {
-	borderColor: vars.border.default,
+	borderColor: vars.color.border.decorative,
 	borderStyle: 'dashed',
 	borderWidth: 1,
 	padding: '1rem',
-} as const satisfies CSSProperties;
-
-const stackStyle = {
-	display: 'flex',
-	flexDirection: 'column',
-	gap: '1rem',
 } as const satisfies CSSProperties;
 
 /**
@@ -31,29 +25,29 @@ export const Layout = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: 'medium',
-			padding: 'large',
+			gap: '400',
+			padding: '600',
 		});
 		const row = createSprinkles({
 			alignItems: 'center',
 			display: 'flex',
-			gap: 'small',
+			gap: '300',
 		});
 		return (
 			<div {...mergeProps({ style: panelStyle }, container)}>
 				<div {...row}>
 					<div
 						{...mergeProps(
-							{ style: { background: vars.backgroundColor.neutral } },
-							createSprinkles({ inlineSize: '100%', minInlineSize: '0', padding: 'medium' }),
+							{ style: { background: vars.color.surface.resting } },
+							createSprinkles({ inlineSize: '100%', minInlineSize: '0', padding: '400' }),
 						)}
 					>
 						Row item 1
 					</div>
 					<div
 						{...mergeProps(
-							{ style: { background: vars.backgroundColor.neutral } },
-							createSprinkles({ flexGrow: '1', padding: 'medium' }),
+							{ style: { background: vars.color.surface.resting } },
+							createSprinkles({ flexGrow: '1', padding: '400' }),
 						)}
 					>
 						Row item 2 (grows)
@@ -74,14 +68,14 @@ export const Responsive = meta.story({
 		const responsive = createSprinkles({
 			display: 'flex',
 			flexDirection: { medium: 'row', xsmall: 'column' },
-			gap: { medium: 'large', xsmall: 'small' },
-			padding: { large: 'xlarge', xsmall: 'small' },
+			gap: { medium: '600', xsmall: '300' },
+			padding: { large: '800', xsmall: '300' },
 		});
 		return (
 			<div {...mergeProps({ style: panelStyle }, responsive)}>
 				<div
 					style={{
-						background: vars.backgroundColor.neutral,
+						background: vars.color.surface.resting,
 						padding: '1rem',
 					}}
 				>
@@ -89,32 +83,12 @@ export const Responsive = meta.story({
 				</div>
 				<div
 					style={{
-						background: vars.backgroundColor.neutral,
+						background: vars.color.surface.resting,
 						padding: '1rem',
 					}}
 				>
 					Second item
 				</div>
-			</div>
-		);
-	},
-});
-
-/**
- * Pseudo-state conditions apply styles on hover or focus-visible. Use
- * `backgroundColor` with a condition object.
- */
-export const PseudoStates = meta.story({
-	render: () => {
-		const interactive = createSprinkles({
-			backgroundColor: { default: 'neutral', focusVisible: 'input', hover: 'neutralHover' },
-			padding: 'medium',
-		});
-		return (
-			<div style={stackStyle}>
-				<button {...mergeProps({ type: 'button' }, interactive)}>
-					Hover or focus this button to see backgroundColor change
-				</button>
 			</div>
 		);
 	},
@@ -128,13 +102,15 @@ export const PseudoStates = meta.story({
 export const WithRenderProp = meta.story({
 	render: () => {
 		const buttonBox = createSprinkles({
-			backgroundColor: { default: 'neutral', hover: 'neutralHover' },
-			padding: 'medium',
+			padding: '400',
+		});
+		const customStyle = mergeProps(buttonBox, {
+			style: { backgroundColor: vars.color.intent.accent.surface.solid },
 		});
 		return (
 			<Button
 				render={(props) => (
-					<button {...mergeProps(props, buttonBox)} type="button">
+					<button {...mergeProps(props, customStyle)} type="button">
 						Button with createSprinkles utilities
 					</button>
 				)}
@@ -146,9 +122,8 @@ export const WithRenderProp = meta.story({
 });
 
 /**
- * Overflow and sizing utilities control content clipping and element
- * dimensions. Use `textOverflow: 'ellipsis'` with `inlineSize` constraints
- * for truncation patterns.
+ * Sprinkles controls the layout and overflow needed for truncation. Consumer styles provide the
+ * single-line text behaviour that is deliberately outside the layout utility surface.
  */
 export const OverflowAndSizing = meta.story({
 	render: () => {
@@ -157,12 +132,14 @@ export const OverflowAndSizing = meta.story({
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',
-			overflowX: 'clip',
-			textOverflow: 'ellipsis',
+			overflowX: 'hidden',
+		});
+		const truncateText = mergeProps(truncate, {
+			style: { textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
 		});
 		return (
-			<div style={stackStyle}>
-				<div {...truncate}>
+			<div>
+				<div {...truncateText}>
 					This text is truncated with an ellipsis when it exceeds the max-inline-size of 20rem.
 					Lorem ipsum dolor sit amet.
 				</div>

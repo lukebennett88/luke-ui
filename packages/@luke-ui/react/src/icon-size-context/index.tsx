@@ -1,13 +1,13 @@
 import type { JSX, ReactNode } from 'react';
 import { createContext, useContext } from 'react';
-import type { IconSizeToken } from '../tokens/index.js';
+import type { IconSize } from '../types/icon-size.js';
 
-const IconSizeContext = createContext<IconSizeToken | null>(null);
+const IconSizeContext = createContext<IconSize | null>(null);
 
 /** Props for `IconSizeProvider`. */
 interface IconSizeProviderProps {
 	children: ReactNode;
-	size: IconSizeToken;
+	size: IconSize;
 }
 
 /** Provides a default icon size to nested icon components. */
@@ -16,6 +16,6 @@ export function IconSizeProvider({ children, size }: IconSizeProviderProps): JSX
 }
 
 /** Reads the icon size from context, if provided. */
-export function useIconSizeContext(): IconSizeToken | null {
+export function useIconSizeContext(): IconSize | null {
 	return useContext(IconSizeContext);
 }

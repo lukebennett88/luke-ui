@@ -5,6 +5,7 @@ import { useIconSizeContext } from '../icon-size-context/index.js';
 import * as styles from '../recipes/icon.css.js';
 import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
 
 export type { IconName } from '../../.generated/icon-data.js';
@@ -37,21 +38,22 @@ export function IconSpritesheetProvider({
 	return <IconSpritesheetContext.Provider value={href}>{children}</IconSpritesheetContext.Provider>;
 }
 
+interface _IconProps
+	extends
+		Pick<SVGAttributes<SVGSVGElement>, 'aria-hidden' | 'className' | 'id' | 'style' | 'viewBox'>,
+		IconStyleProps {
+	/** Icon name from the generated icon set. */
+	name: (typeof iconNames)[number];
+	/** Accessible label. When set, the icon is announced as an image. */
+	title?: string;
+}
+
 /**
  * Props for the built-in `Icon` component.
  *
  * @tier atom
  */
-export type IconProps = Pick<
-	SVGAttributes<SVGSVGElement>,
-	'aria-hidden' | 'className' | 'id' | 'style' | 'viewBox'
-> &
-	IconStyleProps & {
-		/** Icon name from the generated icon set. */
-		name: (typeof iconNames)[number];
-		/** Accessible label. When set, the icon is announced as an image. */
-		title?: string;
-	};
+export type IconProps = Prettify<_IconProps>;
 
 /** Props used by `createIcon` for custom icon components. */
 export type CustomIconProps = DistributiveOmit<IconProps, 'name'>;
@@ -115,10 +117,10 @@ function useIconSpritesheetHref(): string {
 	return href;
 }
 
-type SpritesheetIconProps = IconProps & {
+interface SpritesheetIconProps extends IconProps {
 	spritesheetHref: string;
 	name: (typeof iconNames)[number];
-};
+}
 
 const SpritesheetIcon = createIcon<SpritesheetIconProps>({
 	path: ({ name, spritesheetHref }) => <use href={`${spritesheetHref}#${name}`} />,

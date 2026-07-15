@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { FieldErrorProps } from './primitive/error.js';
 import type { FieldNecessityIndicator } from './primitive/label.js';
 
@@ -13,11 +14,17 @@ export interface FieldSlotProps {
 	necessityIndicator?: FieldNecessityIndicator;
 }
 
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+type FieldSlotKeys<T extends FieldSlotProps> = Extract<keyof FieldSlotProps, KeysOfUnion<T>>;
+
 /** Splits the `Field` slot props (label/description/errorMessage/necessityIndicator) off a Composed field's props. */
 export function composeField<T extends FieldSlotProps>(
 	props: T,
-): [FieldSlotProps, Omit<T, keyof FieldSlotProps>] {
+): [FieldSlotProps, DistributiveOmit<T, FieldSlotKeys<T>>] {
 	const { description, errorMessage, label, necessityIndicator, ...restProps } = props;
 
-	return [{ description, errorMessage, label, necessityIndicator }, restProps];
+	return [
+		{ description, errorMessage, label, necessityIndicator },
+		restProps as unknown as DistributiveOmit<T, FieldSlotKeys<T>>,
+	];
 }

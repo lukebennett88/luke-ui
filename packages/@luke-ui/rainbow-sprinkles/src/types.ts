@@ -259,10 +259,7 @@ type ChildSprinkle<Sprinkle> = Sprinkle extends StaticDynamicConditionalProperty
 		: Sprinkle extends DynamicConditionalProperty
 			? Sprinkle['dynamicScale'] extends boolean
 				? ValueOrConditionObject<PropertyCssValue<Sprinkle['name']>, Sprinkle['vars']>
-				: ValueOrConditionObject<
-						PropertyCssValue<Sprinkle['name']> | (keyof Sprinkle['dynamicScale'] & string),
-						Sprinkle['vars']
-					>
+				: ValueOrConditionObject<keyof Sprinkle['dynamicScale'] & string, Sprinkle['vars']>
 			: Sprinkle extends StaticDynamicConditionalPropertyArray
 				? ValueOrConditionObject<Sprinkle['staticScale'][number], Sprinkle['dynamic']>
 				: Sprinkle extends StaticDynamicConditionalProperty
@@ -279,11 +276,9 @@ type ChildSprinkle<Sprinkle> = Sprinkle extends StaticDynamicConditionalProperty
 								: Sprinkle extends StaticDynamicPropertyArray
 									? PropertyCssValue<Sprinkle['name']>
 									: Sprinkle extends DynamicProperty
-										?
-												| PropertyCssValue<Sprinkle['name']>
-												| (Sprinkle['dynamicScale'] extends boolean
-														? never
-														: keyof Sprinkle['dynamicScale'] & string)
+										? Sprinkle['dynamicScale'] extends boolean
+											? PropertyCssValue<Sprinkle['name']>
+											: keyof Sprinkle['dynamicScale'] & string
 										: Sprinkle extends StaticProperty
 											? keyof Sprinkle['staticScale'] & string
 											: Sprinkle extends StaticPropertyArray

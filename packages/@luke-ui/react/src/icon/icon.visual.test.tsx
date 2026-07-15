@@ -21,7 +21,7 @@ const sizes = variantValuesFor<typeof Icon, 'size'>()(['xsmall', 'small', 'mediu
 const names = variantValuesFor<typeof Icon, 'name'>()([
 	'add',
 	'checkCircle',
-	'critical',
+	'closeCircle',
 	'externalLink',
 	'search',
 ]);

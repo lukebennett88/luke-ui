@@ -5,7 +5,8 @@ import type { CSSProperties } from 'react';
 import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { createSprinkles } from '../styles/index.js';
-import { vars } from '../theme.css.js';
+import { vars } from '../theme/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 
 const meta = preview.meta({
 	component: Text,
@@ -14,7 +15,7 @@ const meta = preview.meta({
 });
 
 const panelStyle = {
-	borderColor: vars.border.default,
+	borderColor: vars.color.border.decorative,
 	borderStyle: 'dashed',
 	borderWidth: 1,
 	maxInlineSize: '40rem',
@@ -33,10 +34,12 @@ const loremIpsum =
 const importantIdentifier = 'budget-allocation-review-cycle-2026-06-05-eu-west-1-BA-109284';
 const importantIdentifierSuffix = '-BA-109284';
 
-type MiddleTruncatedIdentifierProps = Omit<TextProps, 'children'> & {
+type MiddleTruncatedIdentifierOmit = DistributiveOmit<TextProps, 'children'>;
+
+interface MiddleTruncatedIdentifierProps extends MiddleTruncatedIdentifierOmit {
 	identifier: string;
 	suffix: string;
-};
+}
 
 function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 	const { identifier, suffix, ...textProps } = props;
@@ -52,7 +55,6 @@ function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 		flexGrow: '1',
 		flexShrink: '1',
 		minInlineSize: '0',
-		textOverflow: 'clip',
 	});
 	const fixed = createSprinkles({ flexBasis: 'auto', flexGrow: '0', flexShrink: '0' });
 
@@ -233,7 +235,7 @@ export const Truncate = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: 'medium',
+			gap: '400',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',
@@ -263,7 +265,7 @@ export const MiddleTruncation = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: 'medium',
+			gap: '400',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',
@@ -299,7 +301,7 @@ export const LineClamp = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: 'medium',
+			gap: '400',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',

@@ -13,8 +13,13 @@ import {
 import { elmoFoundation, machinedEdgeFoundation } from './foundations.js';
 
 const pairs = flattenThemeContract();
-const isModePath = (path: string) =>
-	path.startsWith('actionControlFinish.') || path.startsWith('color.') || path.startsWith('depth.');
+const isModePath = (path: string) => {
+	return (
+		path.startsWith('actionControlFinish.') ||
+		path.startsWith('color.') ||
+		path.startsWith('depth.')
+	);
+};
 const modeVarNames = pairs.filter(([path]) => isModePath(path)).map(([, varName]) => varName);
 const identityVarNames = pairs.filter(([path]) => !isModePath(path)).map(([, varName]) => varName);
 
@@ -71,14 +76,13 @@ describe('buildTheme output', () => {
 	});
 
 	it('declares every identity variable exactly once in the identity block', () => {
-		const counts = identityVarNames.map((varName) => [
-			varName,
-			countOccurrences(blocks.identity, `${varName}: `),
-		]);
+		const counts = identityVarNames.map((varName) => {
+			return [varName, countOccurrences(blocks.identity, `${varName}: `)];
+		});
 		expect(counts).toEqual(identityVarNames.map((varName) => [varName, 1]));
-		const modeCounts = modeVarNames.map((varName) =>
-			countOccurrences(blocks.identity, `${varName}: `),
-		);
+		const modeCounts = modeVarNames.map((varName) => {
+			return countOccurrences(blocks.identity, `${varName}: `);
+		});
 		expect(modeCounts).toEqual(modeVarNames.map(() => 0));
 	});
 
@@ -95,9 +99,9 @@ describe('buildTheme output', () => {
 				countOccurrences(block, `${varName}: `),
 			]);
 			expect(counts).toEqual(modeVarNames.map((varName) => [varName, 1]));
-			const identityCounts = identityVarNames.map((varName) =>
-				countOccurrences(block, `${varName}: `),
-			);
+			const identityCounts = identityVarNames.map((varName) => {
+				return countOccurrences(block, `${varName}: `);
+			});
 			expect(identityCounts).toEqual(identityVarNames.map(() => 0));
 		}
 	});
@@ -325,11 +329,12 @@ describe('buildTheme contrast failures', () => {
 			},
 			name: 'bad-focus',
 		});
-		const failure = error.failures.find(
-			(candidate) =>
+		const failure = error.failures.find((candidate) => {
+			return (
 				candidate.foreground === 'color.border.focus' &&
-				candidate.background === 'color.surface.canvas',
-		);
+				candidate.background === 'color.surface.canvas'
+			);
+		});
 		expect(failure).toBeDefined();
 		expect(failure?.mode).toBe('light');
 		expect(failure?.required).toBe(3);
@@ -348,12 +353,13 @@ describe('buildTheme contrast failures', () => {
 			},
 			name: 'bad-dark-neutral',
 		});
-		const failure = error.failures.find(
-			(candidate) =>
+		const failure = error.failures.find((candidate) => {
+			return (
 				candidate.mode === 'dark' &&
 				candidate.foreground === 'color.text.primary' &&
-				candidate.background.startsWith('color.surface.'),
-		);
+				candidate.background.startsWith('color.surface.')
+			);
+		});
 		expect(failure).toBeDefined();
 		expect(failure?.required).toBe(4.5);
 		expect(error.message).toContain('dark: color.text.primary on color.surface.canvas');
@@ -453,9 +459,9 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		it(`${foundation.name} generates the least-contrasting passing control borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const surfaces = ['canvas', 'resting', 'recessed'].map((surface) =>
-					parseColor(extractValue(block, `--luke-color-surface-${surface}`)),
-				);
+				const surfaces = ['canvas', 'resting', 'recessed'].map((surface) => {
+					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
+				});
 				const borderVarNames = [
 					'--luke-color-border-control',
 					...['accent', 'info', 'success', 'warning', 'danger'].map(

@@ -1,5 +1,7 @@
 import { Text as RacText } from 'react-aria-components/Text';
 import * as styles from '../recipes/text.css.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
 
 interface TextVariantProps extends NonNullable<styles.TextVariants> {}
@@ -64,13 +66,15 @@ interface TextStyleProps {
 	textWrap?: TextVariantProps['textWrap'];
 }
 
+type _TextOmit = DistributiveOmit<React.ComponentProps<typeof RacText>, 'color'>;
+interface _TextProps extends _TextOmit, TextStyleProps {}
+
 /**
  * Props for the primitive text component.
  *
  * @tier atom
  */
-export type TextProps = Omit<React.ComponentProps<typeof RacText>, keyof TextStyleProps> &
-	TextStyleProps;
+export type TextProps = Prettify<_TextProps>;
 
 /** Styled text with a coordinated type scale and semantic colour controls. */
 export function Text(props: TextProps) {
