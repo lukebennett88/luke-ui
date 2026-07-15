@@ -38,16 +38,6 @@ const iconItemStyle = {
 	gap: '0.5rem',
 } as const satisfies CSSProperties;
 
-const iconButtonStyle = {
-	blockSize: 'auto',
-	display: 'flex',
-	flexDirection: 'column',
-	gap: '1rem',
-	inlineSize: '100%',
-	paddingBlock: '2rem',
-	paddingInline: '1rem',
-} as const satisfies CSSProperties;
-
 const HeartIcon = createIcon({
 	path: (
 		<path d="M12 21a1 1 0 0 1-.7-.3L5 14.5a5 5 0 1 1 7-6 5 5 0 1 1 7 6l-6.3 6.2a1 1 0 0 1-.7.3Z" />
@@ -132,13 +122,14 @@ export const AllIcons = meta.story({
 			{iconNames.map((name) => (
 				<li key={name} style={iconItemStyle}>
 					<Button
+						appearance="subtle"
+						isBlock
 						onPress={async () => {
 							await navigator.clipboard.writeText(name);
 						}}
-						style={iconButtonStyle}
+						startIcon={<Icon {...props} name={name} title={name} />}
 						tone="neutral"
 					>
-						<Icon {...props} name={name} title={name} />
 						{name}
 					</Button>
 				</li>
