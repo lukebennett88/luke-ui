@@ -33,14 +33,17 @@ of the supported Capsize-compatible fonts and its four weight roles, plus the `d
 
 ## Compile the stylesheet
 
-Run `buildTheme` in a build script and write its returned CSS to an application-owned stylesheet.
+Define a `ThemeFoundation` in the application, then run the public `buildTheme` API in a build
+script that writes its returned CSS to an application-owned stylesheet. Import that stylesheet
+through the application's bundler or framework. A custom theme does not need to be added to
+`@luke-ui/react` or wait for a Luke UI release. The two theme stylesheets included with Luke UI are
+defaults, not a registry of supported themes.
 
 <SourceCodeBlock src="theming/author-theme" />
 
-Load the generated stylesheet through your bundler or framework, then apply `themeRootClassName`
-with `themeClassName('product')`. The framework-neutral example below accepts its generated
-stylesheet URL explicitly. Select colour mode with the same `data-color-mode` contract used by
-bundled themes.
+Apply `themeRootClassName` with `themeClassName('product')`. The framework-neutral example below
+accepts its generated stylesheet URL explicitly. Select colour mode with the same `data-color-mode`
+contract used by bundled themes.
 
 <SourceCodeBlock src="theming/custom-theme-app" />
 
