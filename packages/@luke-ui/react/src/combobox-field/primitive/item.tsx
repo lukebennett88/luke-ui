@@ -18,10 +18,9 @@ import { cx } from '../../utils/index.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 
-interface _ComboboxItemProps<T extends object> extends DistributiveOmit<
-	RacListBoxItemProps<T>,
-	'className'
-> {
+type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
+
+interface _ComboboxItemProps<T extends object> extends _ComboboxItemOmit<T> {
 	className?: RacListBoxItemProps<T>['className'];
 	size?: ComboboxSize;
 }

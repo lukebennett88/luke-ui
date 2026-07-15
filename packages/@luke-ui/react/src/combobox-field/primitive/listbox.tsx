@@ -10,10 +10,12 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
-interface _ComboboxListBoxProps<T extends object> extends DistributiveOmit<
+type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	RacListBoxProps<T>,
 	'dependencies' | 'items'
-> {
+>;
+
+interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T> {
 	/** Item content for the listbox (render prop or static children). */
 	children?: RacListBoxProps<T>['children'];
 	/** Values that should invalidate the dynamic item cache. */

@@ -112,6 +112,13 @@ function resolvePrecisionRange(precision: NumeralPrecision): readonly [number, n
 	return precision;
 }
 
+interface ResolveNumeralFormatOptionsProps extends Pick<
+	NumeralProps,
+	'abbreviate' | 'currency' | 'formatOptions' | 'precision' | 'unit'
+> {
+	format: NumeralFormat;
+}
+
 function resolveNumeralFormatOptions({
 	abbreviate,
 	currency,
@@ -119,9 +126,7 @@ function resolveNumeralFormatOptions({
 	formatOptions,
 	precision,
 	unit,
-}: Pick<NumeralProps, 'abbreviate' | 'currency' | 'formatOptions' | 'precision' | 'unit'> & {
-	format: NumeralFormat;
-}): Intl.NumberFormatOptions {
+}: ResolveNumeralFormatOptionsProps): Intl.NumberFormatOptions {
 	const options: Intl.NumberFormatOptions = { ...formatOptions, style: format };
 
 	if (format === 'currency') {

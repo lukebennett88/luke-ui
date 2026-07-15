@@ -66,7 +66,7 @@ interface TextStyleProps {
 	textWrap?: TextVariantProps['textWrap'];
 }
 
-type _TextOmit = DistributiveOmit<React.ComponentProps<typeof RacText>, keyof TextStyleProps>;
+type _TextOmit = DistributiveOmit<React.ComponentProps<typeof RacText>, 'color'>;
 interface _TextProps extends _TextOmit, TextStyleProps {}
 
 /**

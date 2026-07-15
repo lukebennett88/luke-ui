@@ -13,10 +13,7 @@ import type { Prettify } from '../types/prettify.js';
 import type { TextInputSize } from './primitive/index.js';
 import { TextInput } from './primitive/index.js';
 
-type _TextFieldOmit = DistributiveOmit<
-	RacTextFieldProps,
-	'children' | 'size' | keyof DocumentedInputProps
->;
+type _TextFieldOmit = DistributiveOmit<RacTextFieldProps, 'children' | keyof DocumentedInputProps>;
 
 interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
 	/** Element shown after the input value. */

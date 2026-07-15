@@ -117,10 +117,10 @@ function useIconSpritesheetHref(): string {
 	return href;
 }
 
-type SpritesheetIconProps = IconProps & {
+interface SpritesheetIconProps extends IconProps {
 	spritesheetHref: string;
 	name: (typeof iconNames)[number];
-};
+}
 
 const SpritesheetIcon = createIcon<SpritesheetIconProps>({
 	path: ({ name, spritesheetHref }) => <use href={`${spritesheetHref}#${name}`} />,

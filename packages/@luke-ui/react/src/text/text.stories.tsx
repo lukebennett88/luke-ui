@@ -34,10 +34,12 @@ const loremIpsum =
 const importantIdentifier = 'budget-allocation-review-cycle-2026-06-05-eu-west-1-BA-109284';
 const importantIdentifierSuffix = '-BA-109284';
 
-type MiddleTruncatedIdentifierProps = DistributiveOmit<TextProps, 'children'> & {
+type MiddleTruncatedIdentifierOmit = DistributiveOmit<TextProps, 'children'>;
+
+interface MiddleTruncatedIdentifierProps extends MiddleTruncatedIdentifierOmit {
 	identifier: string;
 	suffix: string;
-};
+}
 
 function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 	const { identifier, suffix, ...textProps } = props;

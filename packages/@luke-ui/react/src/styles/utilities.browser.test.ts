@@ -89,5 +89,8 @@ function mount(props: { className?: string; style?: Record<string, unknown> }): 
 	mounted.push(element);
 	element.className = `${machinedEdgeThemeClassName} ${props.className ?? ''}`;
 	Object.assign(element.style, props.style);
+	for (const [property, value] of Object.entries(props.style ?? {})) {
+		if (property.startsWith('--')) element.style.setProperty(property, String(value));
+	}
 	return element;
 }

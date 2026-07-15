@@ -12,7 +12,7 @@ interface ComboboxVariantProps extends NonNullable<styles.ComboboxVariants> {}
 
 export type ComboboxSize = NonNullable<ComboboxVariantProps['size']>;
 
-interface _ComboboxRootProps<T extends object> extends DistributiveOmit<
+type _ComboboxRootOmit<T extends object> = DistributiveOmit<
 	RacComboBoxProps<T, 'single'>,
 	| 'defaultSelectedKey'
 	| 'defaultValue'
@@ -22,7 +22,9 @@ interface _ComboboxRootProps<T extends object> extends DistributiveOmit<
 	| 'selectedKey'
 	| 'selectionMode'
 	| 'value'
-> {
+>;
+
+interface _ComboboxRootProps<T extends object> extends _ComboboxRootOmit<T> {
 	/** Forwarded to the combobox root element. */
 	ref?: Ref<HTMLDivElement>;
 

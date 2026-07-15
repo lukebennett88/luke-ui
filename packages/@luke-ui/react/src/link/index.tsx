@@ -17,7 +17,7 @@ interface LinkStyleProps {
 	tone?: LinkVariantProps['tone'];
 }
 
-type _LinkOmit = DistributiveOmit<RacLinkProps, keyof LinkStyleProps | keyof DocumentedLinkProps>;
+type _LinkOmit = DistributiveOmit<RacLinkProps, keyof DocumentedLinkProps>;
 
 interface _LinkProps extends _LinkOmit, LinkStyleProps, DocumentedLinkProps {}
 

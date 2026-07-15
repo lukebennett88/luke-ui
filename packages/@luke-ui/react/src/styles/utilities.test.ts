@@ -55,6 +55,20 @@ const removedPseudoState = {
 	color: { hover: 'danger' },
 } satisfies SprinklesProps;
 
+const invalidSpaceValue = {
+	// @ts-expect-error Spacing accepts only semantic space steps.
+	padding: '1rem',
+} satisfies SprinklesProps;
+
+const invalidResponsiveSpaceValue = {
+	padding: {
+		// @ts-expect-error Responsive spacing accepts only semantic space steps.
+		small: '1rem',
+	},
+} satisfies SprinklesProps;
+
 void removedColor;
 void removedTypography;
 void removedPseudoState;
+void invalidSpaceValue;
+void invalidResponsiveSpaceValue;

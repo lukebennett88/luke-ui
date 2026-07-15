@@ -14,14 +14,17 @@ export interface FieldSlotProps {
 	necessityIndicator?: FieldNecessityIndicator;
 }
 
+type KeysOfUnion<T> = T extends T ? keyof T : never;
+type FieldSlotKeys<T extends FieldSlotProps> = Extract<keyof FieldSlotProps, KeysOfUnion<T>>;
+
 /** Splits the `Field` slot props (label/description/errorMessage/necessityIndicator) off a Composed field's props. */
 export function composeField<T extends FieldSlotProps>(
 	props: T,
-): [FieldSlotProps, DistributiveOmit<T, keyof FieldSlotProps>] {
+): [FieldSlotProps, DistributiveOmit<T, FieldSlotKeys<T>>] {
 	const { description, errorMessage, label, necessityIndicator, ...restProps } = props;
 
 	return [
 		{ description, errorMessage, label, necessityIndicator },
-		restProps as unknown as DistributiveOmit<T, keyof FieldSlotProps>,
+		restProps as unknown as DistributiveOmit<T, FieldSlotKeys<T>>,
 	];
 }

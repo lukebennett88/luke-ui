@@ -7,8 +7,7 @@ import { mergeProps } from '../utils/index.js';
 
 type BoxRender = (props: ComponentPropsWithRef<'div'>, renderProps: undefined) => ReactElement;
 
-type _BoxOmit = DistributiveOmit<ComponentPropsWithRef<'div'>, keyof SprinklesProps | 'render'>;
-interface _BoxProps extends _BoxOmit, SprinklesProps {
+interface _BoxProps extends ComponentPropsWithRef<'div'>, SprinklesProps {
 	/** Renders a compatible custom `div` while carrying Box's DOM props and generated styles. */
 	render?: BoxRender;
 }
@@ -31,7 +30,7 @@ export function Box(props: BoxProps): JSX.Element {
 }
 
 function splitProps(
-	props: Omit<BoxProps, 'className' | 'render' | 'style'>,
+	props: DistributiveOmit<BoxProps, 'className' | 'render' | 'style'>,
 ): [SprinklesProps, ComponentPropsWithRef<'div'>] {
 	const sprinklesProps: Record<string, unknown> = {};
 	const elementProps: Record<string, unknown> = {};

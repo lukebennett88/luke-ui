@@ -30,11 +30,13 @@ interface ComboboxFieldRedeclaredRACProps {
 	isReadOnly?: RacComboBoxProps<object>['isReadOnly'];
 }
 
+type _ComboboxFieldOmit<T extends object> = DistributiveOmit<
+	ComboboxRootProps<T>,
+	'children' | keyof ComboboxFieldRedeclaredRACProps
+>;
+
 interface _ComboboxFieldProps<T extends object>
-	extends
-		DistributiveOmit<ComboboxRootProps<T>, 'children' | keyof ComboboxFieldRedeclaredRACProps>,
-		ComboboxFieldRedeclaredRACProps,
-		FieldSlotProps {
+	extends _ComboboxFieldOmit<T>, ComboboxFieldRedeclaredRACProps, FieldSlotProps {
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 

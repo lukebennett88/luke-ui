@@ -7,10 +7,12 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
-interface _ComboboxSectionProps<T extends object> extends DistributiveOmit<
+type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
 	RacListBoxSectionProps<T>,
 	'className'
-> {
+>;
+
+interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T> {
 	className?: RacListBoxSectionProps<T>['className'];
 	title?: ReactNode;
 }

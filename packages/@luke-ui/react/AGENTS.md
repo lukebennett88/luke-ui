@@ -20,10 +20,13 @@ A component directory contains:
 
 ## Exported prop types
 
-Define exported component props with `interface extends Omit<...>` and wrap with `Prettify`:
+Define exported component props with an interface extending a named `DistributiveOmit` alias, then
+wrap it with `Prettify`:
 
 ```ts
-interface _ComponentProps extends Omit<SourceType, OmittedKeys>, StyleProps {
+type _ComponentOmit = DistributiveOmit<SourceType, OmittedKeys>;
+
+interface _ComponentProps extends _ComponentOmit, StyleProps {
 	/** Documented prop. */
 	myProp?: string;
 }
@@ -37,12 +40,11 @@ Rules:
   clearly in IDE tooltips and extend naturally.
 - Wrap the exported type with `Prettify` from `../types/prettify.js` so consumers see a flat,
   readable type in their IDE.
-- Use built-in `Omit` in the `extends` clause (not `DistributiveOmit`). These are non-union types —
-  both behave identically and `interface extends` doesn't accept conditional types.
+- Use `DistributiveOmit` from `../types/distributive-omit.js` for prop omission. Its strict key
+  constraint validates and autocompletes omitted keys, so misspelled or obsolete keys cannot pass
+  silently. Define a named alias because interfaces cannot extend conditional types directly.
 - Name the internal interface `_ComponentProps` (underscore prefix) and export the Prettified
   version as `ComponentProps`.
-- Use `DistributiveOmit` from `../types/distributive-omit.js` only where `T` is generic and could be
-  a union (e.g. utility functions, not component prop types).
 
 ## Component taxonomy
 

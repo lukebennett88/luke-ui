@@ -10,13 +10,39 @@ interface ColorSample {
 
 interface IntentSample {
 	label: string;
-	onSolid: string;
+	roles: Array<IntentRoleSample>;
+	surfaces: Array<ColorSample>;
+}
+
+interface IntentRoleSample extends ColorSample {
+	background?: string;
+	preview: 'border' | 'onSolid' | 'text';
+}
+
+interface IntentRoleProps {
+	intentLabel: string;
+	sample: IntentRoleSample;
+}
+
+interface IntentSurfaceVars {
 	solid: string;
+	solidHover: string;
+	solidPressed: string;
 	subtle: string;
-	text: string;
+	subtleHover: string;
+	subtlePressed: string;
+}
+
+interface MotionSample {
+	accessibleLabel: string;
+	duration: string;
+	easing: string;
+	label: string;
 }
 
 interface FontSample {
+	baselineTrim: string;
+	capHeightTrim: string;
 	fontSize: string;
 	label: string;
 	letterSpacing: string;
@@ -24,6 +50,8 @@ interface FontSample {
 }
 
 interface FontStep {
+	baselineTrim: string;
+	capHeightTrim: string;
 	fontSize: string;
 	letterSpacing: string;
 	lineHeight: string;
@@ -49,50 +77,90 @@ const surfaceSamples: Array<ColorSample> = [
 	{ label: 'Resting', value: vars.color.surface.resting },
 	{ label: 'Floating', value: vars.color.surface.floating },
 	{ label: 'Overlay', value: vars.color.surface.overlay },
+	{ label: 'Disabled', value: vars.color.surfaceDisabled },
+	{ label: 'Loading skeleton', value: vars.color.loadingSkeleton },
+];
+
+const textSamples: Array<ColorSample> = [
+	{ label: 'Primary', value: vars.color.text.primary },
+	{ label: 'Secondary', value: vars.color.text.secondary },
+	{ label: 'Disabled', value: vars.color.textDisabled },
+];
+
+const borderSamples: Array<ColorSample> = [
+	{ label: 'Decorative', value: vars.color.border.decorative },
+	{ label: 'Control', value: vars.color.border.control },
+	{ label: 'Focus', value: vars.color.border.focus },
+	{ label: 'Disabled', value: vars.color.borderDisabled },
 ];
 
 const intentSamples: Array<IntentSample> = [
 	{
 		label: 'Neutral',
-		onSolid: vars.color.intent.neutral.onSolid,
-		solid: vars.color.intent.neutral.surface.solid,
-		subtle: vars.color.intent.neutral.surface.subtle,
-		text: vars.color.text.primary,
+		roles: [
+			{
+				background: vars.color.intent.neutral.surface.solid,
+				label: 'On solid',
+				preview: 'onSolid',
+				value: vars.color.intent.neutral.onSolid,
+			},
+		],
+		surfaces: intentSurfaceSamples(vars.color.intent.neutral.surface),
 	},
 	{
 		label: 'Accent',
-		onSolid: vars.color.intent.accent.onSolid,
-		solid: vars.color.intent.accent.surface.solid,
-		subtle: vars.color.intent.accent.surface.subtle,
-		text: vars.color.intent.accent.text,
+		roles: [
+			{ label: 'Border', preview: 'border', value: vars.color.intent.accent.border },
+			{ label: 'Text', preview: 'text', value: vars.color.intent.accent.text },
+			{ label: 'Text hover', preview: 'text', value: vars.color.intent.accent.textHover },
+			{
+				background: vars.color.intent.accent.surface.solid,
+				label: 'On solid',
+				preview: 'onSolid',
+				value: vars.color.intent.accent.onSolid,
+			},
+		],
+		surfaces: intentSurfaceSamples(vars.color.intent.accent.surface),
 	},
 	{
 		label: 'Info',
-		onSolid: vars.color.intent.info.onSolid,
-		solid: vars.color.intent.info.surface.solid,
-		subtle: vars.color.intent.info.surface.subtle,
-		text: vars.color.intent.info.text,
+		roles: intentRoles(
+			vars.color.intent.info.border,
+			vars.color.intent.info.text,
+			vars.color.intent.info.onSolid,
+			vars.color.intent.info.surface.solid,
+		),
+		surfaces: intentSurfaceSamples(vars.color.intent.info.surface),
 	},
 	{
 		label: 'Success',
-		onSolid: vars.color.intent.success.onSolid,
-		solid: vars.color.intent.success.surface.solid,
-		subtle: vars.color.intent.success.surface.subtle,
-		text: vars.color.intent.success.text,
+		roles: intentRoles(
+			vars.color.intent.success.border,
+			vars.color.intent.success.text,
+			vars.color.intent.success.onSolid,
+			vars.color.intent.success.surface.solid,
+		),
+		surfaces: intentSurfaceSamples(vars.color.intent.success.surface),
 	},
 	{
 		label: 'Warning',
-		onSolid: vars.color.intent.warning.onSolid,
-		solid: vars.color.intent.warning.surface.solid,
-		subtle: vars.color.intent.warning.surface.subtle,
-		text: vars.color.intent.warning.text,
+		roles: intentRoles(
+			vars.color.intent.warning.border,
+			vars.color.intent.warning.text,
+			vars.color.intent.warning.onSolid,
+			vars.color.intent.warning.surface.solid,
+		),
+		surfaces: intentSurfaceSamples(vars.color.intent.warning.surface),
 	},
 	{
 		label: 'Danger',
-		onSolid: vars.color.intent.danger.onSolid,
-		solid: vars.color.intent.danger.surface.solid,
-		subtle: vars.color.intent.danger.surface.subtle,
-		text: vars.color.intent.danger.text,
+		roles: intentRoles(
+			vars.color.intent.danger.border,
+			vars.color.intent.danger.text,
+			vars.color.intent.danger.onSolid,
+			vars.color.intent.danger.surface.solid,
+		),
+		surfaces: intentSurfaceSamples(vars.color.intent.danger.surface),
 	},
 ];
 
@@ -120,6 +188,13 @@ const fontSamples: Array<FontSample> = [
 	fontSample('700', vars.font[700]),
 	fontSample('800', vars.font[800]),
 	fontSample('900', vars.font[900]),
+];
+
+const fontWeightSamples: Array<ValueSample> = [
+	{ label: 'Body', value: vars.font.weight.body },
+	{ label: 'Label', value: vars.font.weight.label },
+	{ label: 'Heading', value: vars.font.weight.heading },
+	{ label: 'Emphasis', value: vars.font.weight.emphasis },
 ];
 
 const spaceSamples: Array<ValueSample> = [
@@ -151,11 +226,31 @@ const sizeSamples: Array<ValueSample> = [
 	{ label: 'Icon large', value: vars.iconSize.large },
 ];
 
-const motionSamples: Array<ValueSample> = [
-	{ label: 'Fast / standard', value: vars.motion.duration.fast },
-	{ label: 'Medium / enter', value: vars.motion.duration.medium },
-	{ label: 'Slow / exit', value: vars.motion.duration.slow },
-	{ label: 'Ambient / standard', value: vars.motion.duration.ambient },
+const motionSamples: Array<MotionSample> = [
+	{
+		accessibleLabel: 'Fast standard motion sample',
+		duration: vars.motion.duration.fast,
+		easing: vars.motion.easing.standard,
+		label: 'Fast / standard',
+	},
+	{
+		accessibleLabel: 'Medium enter motion sample',
+		duration: vars.motion.duration.medium,
+		easing: vars.motion.easing.enter,
+		label: 'Medium / enter',
+	},
+	{
+		accessibleLabel: 'Slow exit motion sample',
+		duration: vars.motion.duration.slow,
+		easing: vars.motion.easing.exit,
+		label: 'Slow / exit',
+	},
+	{
+		accessibleLabel: 'Ambient standard motion sample',
+		duration: vars.motion.duration.ambient,
+		easing: vars.motion.easing.standard,
+		label: 'Ambient / standard',
+	},
 ];
 
 const meta = preview.meta({
@@ -209,38 +304,61 @@ const sampleCardStyle = {
 
 /**
  * Visual reference for the active theme's public semantic variables. Change the theme and colour
- * mode in the Storybook toolbar to compare the complete styling contract.
+ * mode in the Storybook toolbar to compare representative semantic values.
  */
 export const Reference = meta.story({
 	play: async ({ canvas }) => {
-		const accentSubtle = canvas.getByTestId('intent-accent-subtle');
-		const accentSolid = canvas.getByTestId('intent-accent-solid');
+		const accentSubtle = canvas.getByRole('img', { name: 'Accent subtle colour sample' });
+		const accentSubtleHover = canvas.getByRole('img', {
+			name: 'Accent subtle hover colour sample',
+		});
+		const accentSubtlePressed = canvas.getByRole('img', {
+			name: 'Accent subtle pressed colour sample',
+		});
 		await expect(getComputedStyle(accentSubtle).backgroundColor).not.toBe(
-			getComputedStyle(accentSolid).backgroundColor,
+			getComputedStyle(accentSubtleHover).backgroundColor,
+		);
+		await expect(getComputedStyle(accentSubtleHover).backgroundColor).not.toBe(
+			getComputedStyle(accentSubtlePressed).backgroundColor,
 		);
 
-		const depthOverlay = canvas.getByTestId('depth-overlay');
+		const primaryText = canvas.getByRole('img', { name: 'Primary text colour sample' });
+		const disabledText = canvas.getByRole('img', { name: 'Disabled text colour sample' });
+		await expect(getComputedStyle(primaryText).color).not.toBe(
+			getComputedStyle(disabledText).color,
+		);
+
+		const controlBorder = canvas.getByRole('img', { name: 'Control border colour sample' });
+		const focusBorder = canvas.getByRole('img', { name: 'Focus border colour sample' });
+		await expect(getComputedStyle(controlBorder).borderColor).not.toBe(
+			getComputedStyle(focusBorder).borderColor,
+		);
+
+		const depthOverlay = canvas.getByRole('img', { name: 'Overlay depth sample' });
 		await expect(getComputedStyle(depthOverlay).boxShadow).not.toBe('none');
 
-		const font100 = canvas.getByTestId('font-100');
-		const font900 = canvas.getByTestId('font-900');
+		const font100 = canvas.getByText('100 — Sphinx of black quartz, judge my vow.');
+		const font900 = canvas.getByText('900 — Sphinx of black quartz, judge my vow.');
 		await expect(Number.parseFloat(getComputedStyle(font900).fontSize)).toBeGreaterThan(
 			Number.parseFloat(getComputedStyle(font100).fontSize),
 		);
-
-		const space100 = canvas.getByTestId('space-100');
-		const space1600 = canvas.getByTestId('space-1600');
+		const bodyWeight = canvas.getByText('Body weight');
+		const emphasisWeight = canvas.getByText('Emphasis weight');
+		await expect(Number(getComputedStyle(emphasisWeight).fontWeight)).toBeGreaterThan(
+			Number(getComputedStyle(bodyWeight).fontWeight),
+		);
+		const space100 = canvas.getByRole('img', { name: 'Space 100 sample' });
+		const space1600 = canvas.getByRole('img', { name: 'Space 1600 sample' });
 		await expect(space1600.getBoundingClientRect().width).toBeGreaterThan(
 			space100.getBoundingClientRect().width,
 		);
 
-		const mediumControl = canvas.getByTestId('size-control-medium');
+		const mediumControl = canvas.getByRole('img', { name: 'Control medium size sample' });
 		await expect(getComputedStyle(mediumControl).blockSize).toBe('40px');
 
-		const mediumMotion = canvas.getByTestId('motion-medium-enter');
+		const mediumMotion = canvas.getByRole('img', { name: 'Medium enter motion sample' });
 		await expect(getComputedStyle(mediumMotion).transitionDuration).toBe('0.2s');
 	},
-	render: () => <ThemeTokens />,
 });
 
 function ThemeTokens() {
@@ -264,35 +382,72 @@ function ThemeTokens() {
 				</div>
 			</TokenSection>
 
-			<TokenSection title="Intent colours">
+			<TokenSection title="Text colours">
 				<div style={gridStyle}>
+					{textSamples.map((sample) => (
+						<div key={sample.label} style={sampleCardStyle}>
+							<span
+								aria-label={`${sample.label} text colour sample`}
+								role="img"
+								style={{ color: sample.value, fontWeight: vars.font.weight.emphasis }}
+							>
+								{sample.label} text
+							</span>
+							<TokenValue value={sample.value} />
+						</div>
+					))}
+				</div>
+			</TokenSection>
+
+			<TokenSection title="Border colours">
+				<div style={gridStyle}>
+					{borderSamples.map((sample) => (
+						<div key={sample.label} style={sampleCardStyle}>
+							<span
+								aria-label={`${sample.label} border colour sample`}
+								role="img"
+								style={{
+									blockSize: vars.controlSize.medium,
+									borderColor: sample.value,
+									borderRadius: vars.radius.control,
+									borderStyle: 'solid',
+									borderWidth: 3,
+								}}
+							/>
+							<span style={labelStyle}>{sample.label}</span>
+							<TokenValue value={sample.value} />
+						</div>
+					))}
+				</div>
+			</TokenSection>
+
+			<TokenSection title="Intent colours">
+				<div style={sectionStyle}>
 					{intentSamples.map((sample) => {
-						const id = sample.label.toLowerCase();
 						return (
-							<div key={sample.label} style={{ ...sampleCardStyle, padding: 0 }}>
-								<div
-									data-testid={`intent-${id}-subtle`}
-									style={{
-										backgroundColor: sample.subtle,
-										borderRadius: `${vars.radius.surface} ${vars.radius.surface} 0 0`,
-										color: sample.text,
-										padding: vars.space[400],
-									}}
-								>
-									{sample.label} subtle
+							<article key={sample.label} style={sectionStyle}>
+								<h3 style={{ margin: 0 }}>{sample.label}</h3>
+								<div style={gridStyle}>
+									{sample.surfaces.map((surface) => (
+										<div
+											aria-label={`${sample.label} ${surface.label.toLowerCase()} colour sample`}
+											key={surface.label}
+											role="img"
+											style={{ ...sampleCardStyle, backgroundColor: surface.value }}
+										>
+											<span
+												style={labelStyle}
+											>{`${sample.label} ${surface.label.toLowerCase()}`}</span>
+											<TokenValue value={surface.value} />
+										</div>
+									))}
 								</div>
-								<div
-									data-testid={`intent-${id}-solid`}
-									style={{
-										backgroundColor: sample.solid,
-										borderRadius: `0 0 ${vars.radius.surface} ${vars.radius.surface}`,
-										color: sample.onSolid,
-										padding: vars.space[400],
-									}}
-								>
-									{sample.label} solid
+								<div style={gridStyle}>
+									{sample.roles.map((role) => (
+										<IntentRole intentLabel={sample.label} key={role.label} sample={role} />
+									))}
 								</div>
-							</div>
+							</article>
 						);
 					})}
 				</div>
@@ -302,8 +457,9 @@ function ThemeTokens() {
 				<div style={gridStyle}>
 					{depthSamples.map((sample) => (
 						<div
-							data-testid={`depth-${sample.label.toLowerCase()}`}
+							aria-label={`${sample.label} depth sample`}
 							key={sample.label}
+							role="img"
 							style={{ ...sampleCardStyle, boxShadow: sample.value }}
 						>
 							<span style={labelStyle}>{sample.label}</span>
@@ -323,19 +479,43 @@ function ThemeTokens() {
 			</TokenSection>
 
 			<TokenSection title="Typography">
+				<div style={gridStyle}>
+					<div style={sampleCardStyle}>
+						<span
+							aria-label="Font family sample"
+							role="img"
+							style={{ fontFamily: vars.font.family, fontSize: vars.font[500].fontSize }}
+						>
+							Sphinx of black quartz
+						</span>
+						<TokenValue value={vars.font.family} />
+					</div>
+					{fontWeightSamples.map((sample) => (
+						<div key={sample.label} style={sampleCardStyle}>
+							<span style={{ fontWeight: sample.value }}>{`${sample.label} weight`}</span>
+							<TokenValue value={sample.value} />
+						</div>
+					))}
+				</div>
 				<div style={sectionStyle}>
 					{fontSamples.map((sample) => (
-						<div
-							data-testid={`font-${sample.label}`}
-							key={sample.label}
-							style={{
-								fontFamily: vars.font.family,
-								fontSize: sample.fontSize,
-								letterSpacing: sample.letterSpacing,
-								lineHeight: sample.lineHeight,
-							}}
-						>
-							{sample.label} — Sphinx of black quartz, judge my vow.
+						<div key={sample.label} style={sampleCardStyle}>
+							<div
+								style={{
+									fontFamily: vars.font.family,
+									fontSize: sample.fontSize,
+									letterSpacing: sample.letterSpacing,
+									lineHeight: sample.lineHeight,
+								}}
+							>
+								{sample.label} — Sphinx of black quartz, judge my vow.
+							</div>
+							<TokenValue
+								value={`fontSize ${sample.fontSize}; lineHeight ${sample.lineHeight}; letterSpacing ${sample.letterSpacing}`}
+							/>
+							<TokenValue
+								value={`baselineTrim ${sample.baselineTrim}; capHeightTrim ${sample.capHeightTrim}`}
+							/>
 						</div>
 					))}
 				</div>
@@ -350,7 +530,8 @@ function ThemeTokens() {
 						>
 							<code style={{ inlineSize: '3rem' }}>{sample.label}</code>
 							<span
-								data-testid={`space-${sample.label}`}
+								aria-label={`Space ${sample.label} sample`}
+								role="img"
 								style={{
 									backgroundColor: vars.color.intent.accent.surface.solid,
 									blockSize: vars.space[300],
@@ -377,12 +558,12 @@ function ThemeTokens() {
 			<TokenSection title="Control and icon sizes">
 				<div style={gridStyle}>
 					{sizeSamples.map((sample) => {
-						const id = sample.label.toLowerCase().replace(' ', '-');
 						return (
 							<div key={sample.label} style={sampleCardStyle}>
 								<span style={labelStyle}>{sample.label}</span>
 								<span
-									data-testid={`size-${id}`}
+									aria-label={`${sample.label} size sample`}
+									role="img"
 									style={{
 										backgroundColor: vars.color.intent.accent.surface.solid,
 										blockSize: sample.value,
@@ -399,40 +580,33 @@ function ThemeTokens() {
 
 			<TokenSection title="Motion">
 				<div style={gridStyle}>
-					{motionSamples.map((sample) => {
-						const easing = sample.label.includes('enter')
-							? vars.motion.easing.enter
-							: sample.label.includes('exit')
-								? vars.motion.easing.exit
-								: vars.motion.easing.standard;
-						const id = sample.label.toLowerCase().replaceAll(' / ', '-');
-						return (
-							<div key={sample.label} style={sampleCardStyle}>
-								<span style={labelStyle}>{sample.label}</span>
+					{motionSamples.map((sample) => (
+						<div key={sample.label} style={sampleCardStyle}>
+							<span style={labelStyle}>{sample.label}</span>
+							<div
+								aria-label={sample.accessibleLabel}
+								role="img"
+								style={{
+									backgroundColor: vars.color.surface.recessed,
+									borderRadius: vars.radius.full,
+									padding: vars.space[100],
+									transitionDuration: sample.duration,
+									transitionProperty: 'transform',
+									transitionTimingFunction: sample.easing,
+								}}
+							>
 								<div
-									data-testid={`motion-${id}`}
 									style={{
-										backgroundColor: vars.color.surface.recessed,
+										backgroundColor: vars.color.intent.accent.surface.solid,
+										blockSize: vars.iconSize.xsmall,
 										borderRadius: vars.radius.full,
-										padding: vars.space[100],
-										transitionDuration: sample.value,
-										transitionProperty: 'transform',
-										transitionTimingFunction: easing,
+										inlineSize: vars.iconSize.xsmall,
 									}}
-								>
-									<div
-										style={{
-											backgroundColor: vars.color.intent.accent.surface.solid,
-											blockSize: vars.iconSize.xsmall,
-											borderRadius: vars.radius.full,
-											inlineSize: vars.iconSize.xsmall,
-										}}
-									/>
-								</div>
-								<TokenValue value={`${sample.value} ${easing}`} />
+								/>
 							</div>
-						);
-					})}
+							<TokenValue value={`${sample.duration} ${sample.easing}`} />
+						</div>
+					))}
 				</div>
 			</TokenSection>
 		</main>
@@ -454,9 +628,70 @@ function TokenValue({ value }: TokenValueProps) {
 
 function fontSample(label: string, step: FontStep): FontSample {
 	return {
+		baselineTrim: step.baselineTrim,
+		capHeightTrim: step.capHeightTrim,
 		fontSize: step.fontSize,
 		label,
 		letterSpacing: step.letterSpacing,
 		lineHeight: step.lineHeight,
 	};
+}
+
+function intentSurfaceSamples(surface: IntentSurfaceVars): Array<ColorSample> {
+	return [
+		{ label: 'Subtle', value: surface.subtle },
+		{ label: 'Subtle hover', value: surface.subtleHover },
+		{ label: 'Subtle pressed', value: surface.subtlePressed },
+		{ label: 'Solid', value: surface.solid },
+		{ label: 'Solid hover', value: surface.solidHover },
+		{ label: 'Solid pressed', value: surface.solidPressed },
+	];
+}
+
+function intentRoles(
+	border: string,
+	text: string,
+	onSolid: string,
+	solid: string,
+): Array<IntentRoleSample> {
+	return [
+		{ label: 'Border', preview: 'border', value: border },
+		{ label: 'Text', preview: 'text', value: text },
+		{ background: solid, label: 'On solid', preview: 'onSolid', value: onSolid },
+	];
+}
+
+function IntentRole({ intentLabel, sample }: IntentRoleProps) {
+	if (sample.preview === 'border') {
+		return (
+			<div style={sampleCardStyle}>
+				<span
+					aria-label={`${intentLabel} intent border sample`}
+					role="img"
+					style={{
+						blockSize: vars.controlSize.medium,
+						borderColor: sample.value,
+						borderRadius: vars.radius.control,
+						borderStyle: 'solid',
+						borderWidth: 3,
+					}}
+				/>
+				<span style={labelStyle}>{`${intentLabel} ${sample.label.toLowerCase()}`}</span>
+				<TokenValue value={sample.value} />
+			</div>
+		);
+	}
+
+	return (
+		<div style={{ ...sampleCardStyle, backgroundColor: sample.background }}>
+			<span
+				aria-label={`${intentLabel} intent ${sample.label.toLowerCase()} sample`}
+				role="img"
+				style={{ color: sample.value, fontWeight: vars.font.weight.emphasis }}
+			>
+				{`${intentLabel} ${sample.label.toLowerCase()}`}
+			</span>
+			<TokenValue value={sample.value} />
+		</div>
+	);
 }
