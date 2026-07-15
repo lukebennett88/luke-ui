@@ -18,11 +18,10 @@ import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/machined-edge.css';
 import { themeRootClassName } from '@luke-ui/react/theme';
 import { machinedEdgeThemeClassName } from '@luke-ui/react/themes';
+import { cx } from '@luke-ui/react/utils';
 
 export function App() {
-	return (
-		<div className={`${themeRootClassName} ${machinedEdgeThemeClassName}`}>{/* your app */}</div>
-	);
+	return <div className={cx(themeRootClassName, machinedEdgeThemeClassName)}>{/* your app */}</div>;
 }
 ```
 

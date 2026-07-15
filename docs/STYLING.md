@@ -204,6 +204,21 @@ Semantic colour, typography, and pseudo-state properties are deliberately exclud
 APIs where possible. Sanctioned custom styling uses the public typed `vars` from
 `@luke-ui/react/theme`, which resolve to stable `--luke-*` variables.
 
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+return (
+	<div
+		style={{
+			backgroundColor: vars.color.surface.recessed,
+			color: vars.color.text.primary,
+		}}
+	>
+		Custom content
+	</div>
+);
+```
+
 ## Implementation rules
 
 - Use CSS logical properties such as `margin-inline-start`, `block-size`, and `inset-inline`.

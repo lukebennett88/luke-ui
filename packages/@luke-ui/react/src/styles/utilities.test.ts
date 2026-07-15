@@ -33,15 +33,21 @@ const responsiveLayout = {
 } as const satisfies SprinklesProps;
 
 test('types the responsive layout-only surface', () => {
-	expectTypeOf(responsiveLayout).toMatchTypeOf<SprinklesProps>();
+	expectTypeOf(responsiveLayout).toExtend<SprinklesProps>();
 	expect(createSprinkles.properties).toContain('display');
 	expect(createSprinkles.properties).toContain('gridColumn');
+	expect(createSprinkles.properties).not.toContain('color');
 	expect(createSprinkles.properties).not.toContain('backgroundColor');
 	expect(createSprinkles.properties).not.toContain('fontSize');
 });
 
 const removedColor = {
-	// @ts-expect-error Semantic colour is not part of Sprinkles.
+	// @ts-expect-error Direct colour is not part of Sprinkles.
+	color: 'danger',
+} satisfies SprinklesProps;
+
+const removedBackgroundColor = {
+	// @ts-expect-error Direct background colour is not part of Sprinkles.
 	backgroundColor: 'neutral',
 } satisfies SprinklesProps;
 
@@ -68,6 +74,7 @@ const invalidResponsiveSpaceValue = {
 } satisfies SprinklesProps;
 
 void removedColor;
+void removedBackgroundColor;
 void removedTypography;
 void removedPseudoState;
 void invalidSpaceValue;

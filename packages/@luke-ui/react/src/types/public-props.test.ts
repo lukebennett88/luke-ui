@@ -30,9 +30,9 @@ const textProps = {
 // Type assertions are compile-time only.
 // oxlint-disable-next-line vitest/expect-expect
 test('preserves React Aria render props and native DOM props', () => {
-	expectTypeOf(buttonProps).toMatchTypeOf<PrimitiveButtonProps>();
-	expectTypeOf(linkProps).toMatchTypeOf<LinkProps>();
-	expectTypeOf(textProps).toMatchTypeOf<TextProps>();
+	expectTypeOf(buttonProps).toExtend<PrimitiveButtonProps>();
+	expectTypeOf(linkProps).toExtend<LinkProps>();
+	expectTypeOf(textProps).toExtend<TextProps>();
 });
 
 // Type assertions are compile-time only.

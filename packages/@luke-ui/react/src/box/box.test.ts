@@ -19,8 +19,8 @@ const boxProps = {
 // Type assertions are compile-time only.
 // oxlint-disable-next-line vitest/expect-expect
 test('preserves native DOM, render, and responsive layout props', () => {
-	expectTypeOf(boxProps).toMatchTypeOf<BoxProps>();
-	expectTypeOf(boxProps.render).toMatchTypeOf<BoxProps['render']>();
+	expectTypeOf(boxProps).toExtend<BoxProps>();
+	expectTypeOf(boxProps.render).toExtend<BoxProps['render']>();
 	expectTypeOf(boxProps.display).toEqualTypeOf<{
 		medium: 'flex';
 		xsmall: 'block';
