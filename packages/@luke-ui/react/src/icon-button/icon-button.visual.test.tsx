@@ -3,6 +3,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 import {
 	captureVisual,
 	captureVisualAppearance,
+	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
 	renderVisual,
@@ -66,4 +67,36 @@ test('keyboard focus ring', async () => {
 
 	await focusViaKeyboard(page.getByRole('button', { name: 'Focus add' }));
 	await captureVisual(scene, 'icon-button/focus-visible');
+});
+
+test('forced-colors states', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const scene = renderVisual(
+			<Grid columns={3}>
+				<IconButton aria-label="Action" icon="add" />
+				<IconButton aria-label="Disabled" icon="delete" isDisabled />
+				<IconButton aria-label="Pending" icon="add" isPending />
+			</Grid>,
+		);
+		const action = page.getByRole('button', { name: 'Action' });
+		const disabled = page.getByRole('button', { name: 'Disabled' });
+		const pending = page.getByRole('button', { name: 'Pending' });
+
+		await expect.element(disabled).toHaveStyle({ opacity: '1' });
+		await expect.element(pending).toHaveStyle({ opacity: '1' });
+		await captureVisual(scene, 'icon-button/forced-colors-resting');
+		await userEvent.hover(action);
+		await captureVisual(scene, 'icon-button/forced-colors-hover');
+		await userEvent.unhover(action);
+		await focusViaKeyboard(action);
+		await captureVisual(scene, 'icon-button/forced-colors-focus-visible');
+		await userEvent.keyboard('{Space>}');
+		await expect.element(action).toHaveAttribute('data-pressed', 'true');
+		await captureVisual(scene, 'icon-button/forced-colors-pressed');
+		await userEvent.keyboard('{/Space}');
+	} finally {
+		await emulateForcedColors('none');
+	}
 });

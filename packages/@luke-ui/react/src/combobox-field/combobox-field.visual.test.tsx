@@ -1,8 +1,11 @@
 import { expect, test } from 'vite-plus/test';
+import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import {
+	captureVisual,
 	captureVisualAppearance,
+	emulateForcedColors,
 	focusViaKeyboard,
 	renderVisual,
 	Stack,
@@ -118,13 +121,117 @@ test.each(visualAppearances)('interactive states: $theme $mode', async (appearan
 	await captureVisualAppearance(scene, 'combobox-field/trigger-hover', appearance);
 	await userEvent.unhover(trigger);
 	await focusViaKeyboard(input);
-	await captureVisualAppearance(scene, 'combobox-field/focus-visible', appearance);
+	await captureVisualAppearance(
+		refreshVisualScene(scene),
+		'combobox-field/focus-visible',
+		appearance,
+	);
 	await userEvent.tab();
 	await expect.element(clear).toHaveFocus();
-	await captureVisualAppearance(scene, 'combobox-field/clear-focus-visible', appearance);
-	trigger.element().dataset.pressed = 'true';
-	await captureVisualAppearance(scene, 'combobox-field/trigger-pressed', appearance);
-	delete trigger.element().dataset.pressed;
+	await captureVisualAppearance(
+		refreshVisualScene(scene),
+		'combobox-field/clear-focus-visible',
+		appearance,
+	);
+	await userEvent.keyboard('{Space>}');
+	await expect.element(clear).toHaveAttribute('data-pressed', 'true');
+	await captureVisualAppearance(
+		refreshVisualScene(scene),
+		'combobox-field/clear-pressed',
+		appearance,
+	);
+	await userEvent.keyboard('{/Space}');
+});
+
+test('forced-colors states', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const scene = renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					disabledKeys={['se']}
+					label="Interactive"
+					name="interactive"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					isDisabled
+					label="Disabled"
+					name="disabled"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					isReadOnly
+					label="Read-only"
+					name="readonly"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={countryItems}
+					errorMessage="Choose a valid country."
+					isInvalid
+					label="Invalid"
+					name="invalid"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+		);
+		const input = page.getByRole('combobox', { name: 'Interactive' });
+		const control = input.element().closest<HTMLElement>('[role="group"]');
+		if (control == null) throw new Error('Expected the interactive combobox control group.');
+		const controlLocator = page.elementLocator(control);
+		const clear = controlLocator.getByRole('button', { name: 'Clear selection' });
+		const trigger = controlLocator.getByRole('button', { name: 'Toggle options' });
+
+		await expect.element(page.getByRole('combobox', { name: 'Disabled' })).toBeDisabled();
+		await expect
+			.element(page.getByRole('combobox', { name: 'Read-only' }))
+			.toHaveAttribute('readonly');
+		await expect
+			.element(page.getByRole('combobox', { name: 'Invalid' }))
+			.toHaveAttribute('aria-invalid', 'true');
+		await captureVisual(scene, 'combobox-field/forced-colors-resting-states');
+		await userEvent.hover(trigger);
+		await expect.element(trigger).toHaveAttribute('data-hovered', 'true');
+		await captureVisual(refreshVisualScene(scene), 'combobox-field/forced-colors-trigger-hover');
+		await userEvent.unhover(trigger);
+		await focusViaKeyboard(input);
+		await captureVisual(refreshVisualScene(scene), 'combobox-field/forced-colors-focus-visible');
+		await userEvent.keyboard('{ArrowDown}{Home}');
+		const focusedOption = page.getByRole('option', { name: 'Australia' });
+		await expect.element(focusedOption).toHaveAttribute('data-focused', 'true');
+		await expect
+			.element(page.getByRole('option', { name: 'Canada' }))
+			.toHaveAttribute('aria-selected', 'true');
+		await expect
+			.element(page.getByRole('option', { name: 'Sweden' }))
+			.toHaveAttribute('aria-disabled', 'true');
+		await captureVisual(
+			page.elementLocator(document.body),
+			'combobox-field/forced-colors-open-options',
+		);
+		await userEvent.keyboard('{Escape}');
+		await expect.element(input).toHaveAttribute('aria-expanded', 'false');
+		await userEvent.tab();
+		await expect.element(clear).toHaveFocus();
+		await userEvent.keyboard('{Space>}');
+		await expect.element(clear).toHaveAttribute('data-pressed', 'true');
+		await captureVisual(refreshVisualScene(scene), 'combobox-field/forced-colors-clear-pressed');
+		await userEvent.keyboard('{/Space}');
+	} finally {
+		await emulateForcedColors('none');
+	}
 });
 
 test.each(visualAppearances)('open option interactions: $theme $mode', async (appearance) => {
@@ -348,3 +455,7 @@ test.each(visualAppearances)('sizes: $theme $mode', async (appearance) => {
 
 	await captureVisualAppearance(locator, 'combobox-field/sizes', appearance);
 });
+
+function refreshVisualScene(scene: Locator) {
+	return page.elementLocator(scene.element());
+}

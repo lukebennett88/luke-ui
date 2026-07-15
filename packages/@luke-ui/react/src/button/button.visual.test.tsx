@@ -4,6 +4,7 @@ import { Icon } from '../icon/index.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
+	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
 	renderVisual,
@@ -95,4 +96,36 @@ test.each(visualAppearances)('interactive states: $theme $mode', async (appearan
 	await userEvent.keyboard('{Space>}');
 	await captureVisualAppearance(scene, 'button/pressed', appearance);
 	await userEvent.keyboard('{/Space}');
+});
+
+test('forced-colors states', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const scene = renderVisual(
+			<Grid columns={3}>
+				<Button>Action</Button>
+				<Button isDisabled>Disabled</Button>
+				<Button isPending>Pending</Button>
+			</Grid>,
+		);
+		const action = page.getByRole('button', { name: 'Action' });
+		const disabled = page.getByRole('button', { name: 'Disabled' });
+		const pending = page.getByRole('button', { name: 'Pending' });
+
+		await expect.element(disabled).toHaveStyle({ opacity: '1' });
+		await expect.element(pending).toHaveStyle({ opacity: '1' });
+		await captureVisual(scene, 'button/forced-colors-resting');
+		await userEvent.hover(action);
+		await captureVisual(scene, 'button/forced-colors-hover');
+		await userEvent.unhover(action);
+		await focusViaKeyboard(action);
+		await captureVisual(scene, 'button/forced-colors-focus-visible');
+		await userEvent.keyboard('{Space>}');
+		await expect.element(action).toHaveAttribute('data-pressed', 'true');
+		await captureVisual(scene, 'button/forced-colors-pressed');
+		await userEvent.keyboard('{/Space}');
+	} finally {
+		await emulateForcedColors('none');
+	}
 });

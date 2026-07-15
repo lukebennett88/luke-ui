@@ -10,7 +10,7 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { expect } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
-import { page, userEvent } from 'vite-plus/test/context';
+import { cdp, page, userEvent } from 'vite-plus/test/context';
 // The generated spritesheet is emitted to `dist/` by the `generate` task, which
 // both `build` and `test` depend on, so it is always present when tests run.
 import spritesheetHref from '../../dist/spritesheet.svg?url';
@@ -77,6 +77,13 @@ export async function captureVisualAppearance(
 	appearance: VisualAppearance,
 ) {
 	await captureVisual(locator, `${id}-${appearance.theme}-${appearance.mode}`);
+}
+
+/** Emulates Chromium forced colours for a visual scene. */
+export async function emulateForcedColors(value: 'active' | 'none') {
+	await cdp().send('Emulation.setEmulatedMedia', {
+		features: [{ name: 'forced-colors', value }],
+	});
 }
 
 /** Unmounts everything rendered by `renderVisual`. Registered globally in `visual-setup.ts`. */

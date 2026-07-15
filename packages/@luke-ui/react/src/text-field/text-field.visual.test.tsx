@@ -3,6 +3,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 import {
 	captureVisual,
 	captureVisualAppearance,
+	emulateForcedColors,
 	focusViaKeyboard,
 	renderVisual,
 	Stack,
@@ -128,4 +129,42 @@ test.each(visualAppearances)('invalid interactive states: $theme $mode', async (
 	await captureVisualAppearance(scene, 'text-field/invalid', appearance);
 	await focusViaKeyboard(input);
 	await captureVisualAppearance(scene, 'text-field/invalid-focus', appearance);
+});
+
+test('forced-colors states', async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const scene = renderVisual(
+			<Stack>
+				<TextField label="Interactive" name="interactive" placeholder="Type here" />
+				<TextField defaultValue="Unavailable" isDisabled label="Disabled" name="disabled" />
+				<TextField defaultValue="Read only" isReadOnly label="Read-only" name="readonly" />
+				<TextField
+					defaultValue="nope"
+					errorMessage="Please enter a valid email."
+					isInvalid
+					label="Invalid"
+					name="invalid"
+				/>
+			</Stack>,
+		);
+		const input = page.getByRole('textbox', { name: 'Interactive' });
+
+		await expect.element(page.getByRole('textbox', { name: 'Disabled' })).toBeDisabled();
+		await expect
+			.element(page.getByRole('textbox', { name: 'Read-only' }))
+			.toHaveAttribute('readonly');
+		await expect
+			.element(page.getByRole('textbox', { name: 'Invalid' }))
+			.toHaveAttribute('aria-invalid', 'true');
+		await captureVisual(scene, 'text-field/forced-colors-resting-states');
+		await userEvent.hover(input);
+		await captureVisual(scene, 'text-field/forced-colors-hover');
+		await userEvent.unhover(input);
+		await focusViaKeyboard(input);
+		await captureVisual(scene, 'text-field/forced-colors-focus-visible');
+	} finally {
+		await emulateForcedColors('none');
+	}
 });
