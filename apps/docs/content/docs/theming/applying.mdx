@@ -17,7 +17,7 @@ Apply `themeRootClassName` and the matching identity class near the application 
 <SourceCodeBlock src="theming/apply-theme" />
 
 The bundled identity constants are `machinedEdgeThemeClassName` and `elmoThemeClassName`. Theme
-identity is not nestable; choose one identity for an application or independent subtree.
+identity is not nestable. Choose one identity for an application or independent subtree.
 
 ## Select a colour mode
 
@@ -36,8 +36,8 @@ therefore use the same light or dark mode as Luke UI.
 
 Portalled content leaves its DOM ancestry, so copy the active identity class and explicit
 `data-color-mode` value to the portal root. When the source follows the system preference, omit the
-attribute on the portal root as well. Luke UI's Combobox does this automatically; application-owned
-portals must preserve the same public class-and-attribute contract.
+attribute on the portal root as well. Luke UI's Combobox copies these values automatically.
+Application-owned portals must preserve the same public class-and-attribute contract.
 
 ## Server rendering and the first paint
 
@@ -46,7 +46,7 @@ system-controlled, omit `data-color-mode` so CSS can choose the correct mode bef
 
 If a stored client preference can differ from the server default, run a small blocking bootstrap
 script before the themed UI is painted. It should read the stored preference and set the root class
-or `data-color-mode` before hydration. Do not wait for a React effect: that paints the wrong mode
-first. Theme libraries such as `next-themes` can provide this bootstrap when configured to write the
-same attribute contract. Keep the server fallback and hydrated value deterministic to avoid
-hydration warnings.
+or `data-color-mode` before hydration. A React effect runs too late and paints the wrong mode first.
+Theme libraries such as `next-themes` can provide this bootstrap when configured to write the same
+attribute contract. Keep the server fallback and hydrated value consistent to avoid hydration
+warnings.

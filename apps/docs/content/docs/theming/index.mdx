@@ -12,17 +12,17 @@ Luke UI includes two theme identities:
 - **Machined edge** is the default, compact tactile theme.
 - **ELMO** is a flatter, lower-depth alternative.
 
-A theme controls the semantic colours, typography, radius, material, and depth foundations that
-components share. Luke UI continues to own component structure, states, and behaviour. Custom
-selectors, internal palettes, theme-defined component variants, and component slots are not part of
-the supported theming contract; use public semantic CSS variables for sanctioned local styling.
+A theme defines the semantic colours, typography, radius, material, and depth foundations shared by
+components. Luke UI defines component structure, states, and behaviour. Custom selectors, internal
+palettes, theme-defined component variants, and component slots are not part of the supported
+theming contract. Use public semantic CSS variables for local styling.
 
-Use the controls in the documentation header to preview any combination. The choices persist
-independently and apply to hosted examples and the playground. Storybook has the same two axes in
-its toolbar.
+Use the controls in the documentation header to preview any combination. Each choice is stored
+separately and applies to hosted examples and the playground. Storybook provides separate theme
+identity and colour-mode controls in its toolbar.
 
-Colour mode is nestable. A page can use one mode while a subtree forces the opposite mode. Theme
-identity is applied once at the application or subtree root and is not nestable.
+Colour mode is nestable. A page can use one mode while a subtree forces the opposite mode. Apply one
+theme identity at each independent themed root. Nested theme identities are not supported.
 
 ## Next steps
 
