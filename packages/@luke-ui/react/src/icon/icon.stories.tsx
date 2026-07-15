@@ -50,7 +50,13 @@ const HeartIcon = createIcon({
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('img', { name: 'add' })).toBeInTheDocument();
+		const icon = canvas.getByRole('img', { name: 'add' });
+		const iconStyles = getComputedStyle(icon);
+		const bodyStyles = getComputedStyle(document.body);
+		const primaryColor = bodyStyles.getPropertyValue('--luke-color-text-primary');
+
+		await expect(iconStyles.color).toBe(primaryColor);
+		await expect(bodyStyles.color).toBe(primaryColor);
 	},
 });
 
