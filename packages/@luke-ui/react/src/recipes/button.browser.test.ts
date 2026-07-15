@@ -1,12 +1,14 @@
 import '@luke-ui/react/themes/machined-edge.css';
 import { afterEach, expect, test } from 'vite-plus/test';
+import { cdp } from 'vite-plus/test/context';
 import { themeRootClassName } from '../theme/index.js';
 import { machinedEdgeThemeClassName } from '../themes/index.js';
 import { button } from './button.css.js';
 
 let mounted: Array<HTMLElement> = [];
 
-afterEach(() => {
+afterEach(async () => {
+	await setEmulatedMedia();
 	for (const element of mounted) element.remove();
 	mounted = [];
 });
@@ -97,6 +99,18 @@ test('focus uses the independent semantic ring', () => {
 	expect(style.boxShadow).not.toBe('none');
 });
 
+test('reduced motion removes hover and press travel', async () => {
+	await setEmulatedMedia('prefers-reduced-motion', 'reduce');
+	const control = mountButton();
+
+	control.dataset.hovered = 'true';
+	expect(getComputedStyle(control).transform).toBe('none');
+
+	delete control.dataset.hovered;
+	control.dataset.pressed = 'true';
+	expect(getComputedStyle(control).transform).toBe('none');
+});
+
 function mountButton(options: Parameters<typeof button>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = `${themeRootClassName} ${machinedEdgeThemeClassName}`;
@@ -106,4 +120,10 @@ function mountButton(options: Parameters<typeof button>[0] = {}) {
 	control.style.transition = 'none';
 	mounted.push(root);
 	return control;
+}
+
+async function setEmulatedMedia(name?: string, value?: string) {
+	await cdp().send('Emulation.setEmulatedMedia', {
+		features: name === undefined || value === undefined ? [] : [{ name, value }],
+	});
 }

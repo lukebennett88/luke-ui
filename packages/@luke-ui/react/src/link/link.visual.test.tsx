@@ -1,8 +1,9 @@
 import { expect, test } from 'vite-plus/test';
-import { cdp, page, userEvent } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
 import {
 	captureVisual,
 	captureVisualAppearance,
+	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
 	renderVisual,
@@ -132,9 +133,3 @@ test('forced-colors navigation states', async () => {
 		await emulateForcedColors('none');
 	}
 });
-
-async function emulateForcedColors(value: 'active' | 'none') {
-	await cdp().send('Emulation.setEmulatedMedia', {
-		features: [{ name: 'forced-colors', value }],
-	});
-}

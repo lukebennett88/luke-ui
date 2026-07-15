@@ -160,6 +160,20 @@ const comboboxActionStyles = {
 			selectors: {
 				'&[data-disabled="true"]': { color: 'GrayText', opacity: 1 },
 				'&[data-focus-visible="true"]': { outlineColor: 'Highlight' },
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([aria-disabled="true"])': {
+					backgroundColor: 'Highlight',
+					boxShadow: 'none',
+					color: 'HighlightText',
+					outlineColor: 'Highlight',
+					transform: 'none',
+				},
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([aria-disabled="true"])': {
+					backgroundColor: 'Highlight',
+					boxShadow: 'none',
+					color: 'HighlightText',
+					outlineColor: 'Highlight',
+					transform: 'none',
+				},
 			},
 		},
 		'(prefers-reduced-motion: reduce)': { transform: 'none', transition: 'none' },

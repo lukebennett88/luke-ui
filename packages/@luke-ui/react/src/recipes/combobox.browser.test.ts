@@ -183,6 +183,17 @@ test('forced colors remove authored depth and preserve system state colors', asy
 	const action = root.appendChild(document.createElement('button'));
 	action.className = comboboxTrigger({ size: 'medium' });
 	expect(getComputedStyle(action).boxShadow).toBe('none');
+	action.dataset.hovered = 'true';
+	const hoveredActionStyle = getComputedStyle(action);
+	expect(hoveredActionStyle.boxShadow).toBe('none');
+	expect(hoveredActionStyle.outlineColor).toBe(resolveSystemColor(root, 'Highlight'));
+	expect(hoveredActionStyle.transform).toBe('none');
+	delete action.dataset.hovered;
+	action.dataset.pressed = 'true';
+	const pressedActionStyle = getComputedStyle(action);
+	expect(pressedActionStyle.boxShadow).toBe('none');
+	expect(pressedActionStyle.outlineColor).toBe(resolveSystemColor(root, 'Highlight'));
+	expect(pressedActionStyle.transform).toBe('none');
 
 	const popover = root.appendChild(document.createElement('div'));
 	popover.className = comboboxPopover();
