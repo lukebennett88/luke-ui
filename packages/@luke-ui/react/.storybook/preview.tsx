@@ -29,7 +29,13 @@ export default definePreview({
 					<div
 						className={`${themeRootClassName} ${themeClassName}`}
 						data-color-mode={colorMode}
-						style={{ backgroundColor: vars.color.surface.canvas }}
+						style={{
+							backgroundColor: vars.color.surface.canvas,
+							boxSizing: 'border-box',
+							inlineSize: '100%',
+							minBlockSize: isStoryView ? '100vh' : undefined,
+							padding: vars.space[800],
+						}}
 					>
 						<Story />
 					</div>
@@ -78,6 +84,7 @@ export default definePreview({
 				date: /Date$/i,
 			},
 		},
+		layout: 'fullscreen',
 	},
 });
 
