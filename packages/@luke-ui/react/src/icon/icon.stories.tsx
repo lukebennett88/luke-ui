@@ -1,11 +1,11 @@
 import { Button } from '@luke-ui/react/button';
 import type { IconProps } from '@luke-ui/react/icon';
 import { createIcon, Icon, iconNames } from '@luke-ui/react/icon';
-import { tokenKeys, tokens } from '@luke-ui/react/tokens';
+import type { TextProps } from '@luke-ui/react/text';
+import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
-import { vars } from '../theme.css.js';
 
 const meta = preview.meta({
 	component: Icon,
@@ -19,7 +19,12 @@ const baseArgs = {
 } as const satisfies Partial<IconProps>;
 
 const iconSizes: Array<NonNullable<IconProps['size']>> = ['xsmall', 'small', 'medium', 'large'];
-const colors = tokenKeys(tokens.foregroundColor);
+const colors = {
+	accent: vars.color.intent.accent.text,
+	danger: vars.color.intent.danger.text,
+	primary: vars.color.text.primary,
+	secondary: vars.color.text.secondary,
+} as const satisfies Partial<Record<NonNullable<TextProps['color']>, string>>;
 
 const wrapStyle = {
 	display: 'grid',
@@ -31,16 +36,6 @@ const iconItemStyle = {
 	alignItems: 'center',
 	display: 'flex',
 	gap: '0.5rem',
-} as const satisfies CSSProperties;
-
-const iconButtonStyle = {
-	blockSize: 'auto',
-	display: 'flex',
-	flexDirection: 'column',
-	gap: '1rem',
-	inlineSize: '100%',
-	paddingBlock: '2rem',
-	paddingInline: '1rem',
 } as const satisfies CSSProperties;
 
 const HeartIcon = createIcon({
@@ -55,7 +50,13 @@ const HeartIcon = createIcon({
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('img', { name: 'add' })).toBeInTheDocument();
+		const icon = canvas.getByRole('img', { name: 'add' });
+		const iconStyles = getComputedStyle(icon);
+		const bodyStyles = getComputedStyle(document.body);
+		const primaryColor = bodyStyles.getPropertyValue('--luke-color-text-primary');
+
+		await expect(iconStyles.color).toBe(primaryColor);
+		await expect(bodyStyles.color).toBe(primaryColor);
 	},
 });
 
@@ -74,16 +75,16 @@ export const Sizes = meta.story({
 });
 
 /**
- * Icon color follows `currentColor`, so any foreground token can be applied.
+ * Icon color follows the semantic content color inherited from its parent.
  */
 export const Color = meta.story({
 	args: baseArgs,
 	render: (props) => (
 		<div style={wrapStyle}>
-			{colors.map((color) => (
-				<div key={color} style={iconItemStyle}>
-					<Icon {...props} style={{ color: vars.color[color] }} />
-					<span>{color}</span>
+			{Object.entries(colors).map(([name, color]) => (
+				<div key={name} style={{ ...iconItemStyle, color }}>
+					<Icon {...props} />
+					<span>{name}</span>
 				</div>
 			))}
 		</div>
@@ -127,13 +128,14 @@ export const AllIcons = meta.story({
 			{iconNames.map((name) => (
 				<li key={name} style={iconItemStyle}>
 					<Button
+						appearance="subtle"
+						isBlock
 						onPress={async () => {
 							await navigator.clipboard.writeText(name);
 						}}
-						style={iconButtonStyle}
+						startIcon={<Icon {...props} name={name} title={name} />}
 						tone="neutral"
 					>
-						<Icon {...props} name={name} title={name} />
 						{name}
 					</Button>
 				</li>

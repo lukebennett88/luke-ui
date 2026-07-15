@@ -29,7 +29,14 @@ export default definePreview({
 					<div
 						className={`${themeRootClassName} ${themeClassName}`}
 						data-color-mode={colorMode}
-						style={{ backgroundColor: vars.color.surface.canvas }}
+						style={{
+							backgroundColor: vars.color.surface.canvas,
+							boxSizing: 'border-box',
+							color: vars.color.text.primary,
+							inlineSize: '100%',
+							minBlockSize: isStoryView ? '100vh' : undefined,
+							padding: vars.space[800],
+						}}
 					>
 						<Story />
 					</div>
@@ -78,6 +85,7 @@ export default definePreview({
 				date: /Date$/i,
 			},
 		},
+		layout: 'fullscreen',
 	},
 });
 
@@ -95,10 +103,12 @@ function StoryCanvasTheme({
 		const hadThemeClass = body.classList.contains(themeClassName);
 		const previousColorMode = body.getAttribute('data-color-mode');
 		const previousBackgroundColor = body.style.backgroundColor;
+		const previousColor = body.style.color;
 
 		body.classList.add(themeClassName);
 		body.dataset.colorMode = colorMode;
 		body.style.backgroundColor = vars.color.surface.canvas;
+		body.style.color = vars.color.text.primary;
 
 		return () => {
 			if (!hadThemeClass) body.classList.remove(themeClassName);
@@ -108,6 +118,7 @@ function StoryCanvasTheme({
 				body.dataset.colorMode = previousColorMode;
 			}
 			body.style.backgroundColor = previousBackgroundColor;
+			body.style.color = previousColor;
 		};
 	}, [colorMode, themeClassName]);
 

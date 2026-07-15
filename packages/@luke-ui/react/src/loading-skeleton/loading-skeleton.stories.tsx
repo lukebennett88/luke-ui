@@ -1,6 +1,5 @@
 import { Button } from '@luke-ui/react/button';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
-import { skeletonAnimationName } from '@luke-ui/react/recipes';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import type { CSSProperties } from 'react';
@@ -36,6 +35,33 @@ export const Default = meta.story({
 
 		await expect(skeleton).toHaveAttribute('aria-hidden', 'true');
 		await expect(skeleton).toHaveAttribute('tabIndex', '-1');
+		await expect(getComputedStyle(skeleton).color).toBe('rgba(0, 0, 0, 0)');
+
+		const [animation] = requireSkeletonAnimations(skeleton);
+		if (!animation?.effect) throw new Error('Expected skeleton animation effect.');
+
+		await expect(animation.effect.getTiming()).toMatchObject({
+			direction: 'normal',
+			duration: 2000,
+		});
+
+		try {
+			await expect(await samplePulseBrightness(skeleton, animation, 50)).toBe(1);
+			await expect(await samplePulseBrightness(skeleton, animation, 150)).toBe(1);
+
+			const outwardBrightness = await samplePulseBrightness(skeleton, animation, 600);
+			await expect(outwardBrightness).toBeGreaterThan(0.88);
+			await expect(outwardBrightness).toBeLessThan(1);
+
+			await expect(await samplePulseBrightness(skeleton, animation, 1050)).toBe(0.88);
+			await expect(await samplePulseBrightness(skeleton, animation, 1150)).toBe(0.88);
+
+			const returnBrightness = await samplePulseBrightness(skeleton, animation, 1600);
+			await expect(returnBrightness).toBeGreaterThan(0.88);
+			await expect(returnBrightness).toBeLessThan(1);
+		} finally {
+			animation.play();
+		}
 	},
 });
 
@@ -74,20 +100,23 @@ export const ElementType = meta.story({
 	),
 });
 
-/** Use `borderRadius` when the visible control is rounded below the direct child. */
-export const BorderRadius = meta.story({
+/** Use `radius` when the visible control is rounded below the direct child. */
+export const Radius = meta.story({
 	play: async ({ canvasElement }) => {
 		const skeletonSurface = requireElement(canvasElement, '[aria-hidden] > *');
 
 		await advanceSkeletonPulseToFadePoint(skeletonSurface);
 
 		const skeletonOverlayStyles = getComputedStyle(skeletonSurface, '::after');
+		const expectedRadius =
+			getComputedStyle(canvasElement).getPropertyValue('--luke-radius-control');
 
 		await expect(skeletonOverlayStyles.opacity).toBe('1');
+		await expect(skeletonOverlayStyles.borderRadius).toBe(expectedRadius);
 		await expect(getBrightnessFilterValue(skeletonOverlayStyles.filter)).toBeLessThanOrEqual(0.9);
 	},
 	render: () => (
-		<LoadingSkeleton borderRadius="0.25rem">
+		<LoadingSkeleton radius="control">
 			<TextField label="Email" name="email" />
 		</LoadingSkeleton>
 	),
@@ -146,10 +175,22 @@ async function advanceSkeletonPulseToFadePoint(element: Element) {
 		const timing = animation.effect?.getTiming();
 
 		animation.pause();
-		animation.currentTime = Number(timing?.delay ?? 0) + Number(timing?.duration ?? 0);
+		animation.currentTime = Number(timing?.delay ?? 0) + Number(timing?.duration ?? 0) * 0.5;
 	}
 
 	await new Promise(requestAnimationFrame);
+}
+
+async function samplePulseBrightness(
+	element: Element,
+	animation: CSSAnimation,
+	activeTime: number,
+) {
+	const timing = animation.effect?.getTiming();
+	animation.pause();
+	animation.currentTime = Number(timing?.delay ?? 0) + activeTime;
+	await new Promise(requestAnimationFrame);
+	return getBrightnessFilterValue(getComputedStyle(element).filter);
 }
 
 function getBrightnessFilterValue(filter: string) {
@@ -173,9 +214,15 @@ function requireElement(parent: ParentNode, selector: string) {
 }
 
 function requireSkeletonAnimations(element: Element) {
-	const animations = element.getAnimations({ subtree: true }).filter((candidate) => {
-		return candidate instanceof CSSAnimation && candidate.animationName === skeletonAnimationName;
-	});
+	const animations = element
+		.getAnimations({ subtree: true })
+		.filter((candidate): candidate is CSSAnimation => {
+			return (
+				candidate instanceof CSSAnimation &&
+				candidate.effect instanceof KeyframeEffect &&
+				candidate.effect.target === element
+			);
+		});
 
 	if (animations.length === 0) {
 		throw new Error('Expected skeleton CSS animation.');

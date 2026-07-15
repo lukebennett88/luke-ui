@@ -7,7 +7,7 @@ export default function BorderRadius() {
 
 	return (
 		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>
-			<LoadingSkeleton borderRadius="0.25rem" isLoading={isLoading}>
+			<LoadingSkeleton isLoading={isLoading} radius="control">
 				<TextField label="Email" name="email" />
 			</LoadingSkeleton>
 			<label style={{ alignItems: 'center', display: 'flex', gap: '0.5rem' }}>

@@ -116,6 +116,7 @@ describe('buildTheme output', () => {
 
 	it('uses the stable kebab-case variable names', () => {
 		expect(css).toContain('--luke-color-intent-danger-surface-solid-hover');
+		expect(css).toContain('--luke-color-loading-skeleton');
 		expect(css).toContain('--luke-color-surface-disabled');
 		expect(css).toContain('--luke-color-intent-accent-text-hover');
 		expect(css).toContain('--luke-depth-raised');
@@ -470,6 +471,19 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 					expect(minimumContrast).toBeGreaterThanOrEqual(3);
 					expect(minimumContrast).toBeLessThan(3.15);
 				}
+			}
+		});
+	}
+});
+
+describe('bundled loading skeleton surfaces', () => {
+	for (const foundation of [machinedEdgeFoundation, elmoFoundation]) {
+		it(`${foundation.name} keeps loading skeletons distinct from the canvas in both modes`, () => {
+			const blocks = splitBlocks(buildTheme(foundation));
+			for (const block of [blocks.baseLight, blocks.mediaDark]) {
+				const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
+				const skeleton = parseColor(extractValue(block, '--luke-color-loading-skeleton'));
+				expect(contrastRatio(skeleton, canvas)).toBeGreaterThanOrEqual(1.4);
 			}
 		});
 	}

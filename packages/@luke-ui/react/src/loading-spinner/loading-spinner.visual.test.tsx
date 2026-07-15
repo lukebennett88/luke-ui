@@ -18,11 +18,7 @@ const rowStyle = {
 } satisfies CSSProperties;
 
 const sizes = variantValuesFor<typeof LoadingSpinner, 'size'>()(['small', 'medium', 'large']);
-const colors = variantValuesFor<typeof LoadingSpinner, 'color'>()([
-	'neutralBold',
-	'informative',
-	'critical',
-]);
+const colors = variantValuesFor<typeof LoadingSpinner, 'color'>()(['primary', 'info', 'danger']);
 
 test('sizes colors and modes', async () => {
 	const locator = renderVisual(
@@ -52,7 +48,7 @@ test.each(visualAppearances)('theme matrix: $theme $mode', async (appearance) =>
 	const scene = renderVisual(
 		<div style={themeMatrixStyle}>
 			<ThemeMatrixScope label="Root scope">
-				<LoadingSpinner aria-label="Root theme" style={spinnerStyle} value={65} />
+				<LoadingSpinner aria-label="Root theme pending" style={spinnerStyle} />
 			</ThemeMatrixScope>
 			<ThemeMatrixScope label="Opposite mode" mode={oppositeMode}>
 				<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} value={65} />

@@ -1,6 +1,7 @@
 import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import * as styles from '../recipes/loading-skeleton.css.js';
+import { vars } from '../theme/contract.css.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { cx } from '../utils/index.js';
 
@@ -33,10 +34,10 @@ export interface LoadingSkeletonProps extends ComponentProps<'span'> {
 	 */
 	as?: ElementType;
 	/**
-	 * Overrides the corner radius of the skeleton overlay. Use when the wrapped child has no radius of its own but
-	 * a visual descendant does (e.g. wrapping a `TextField`).
+	 * Sets the semantic corner radius of the skeleton overlay. Use when the wrapped child has no
+	 * radius of its own but a visual descendant does (e.g. wrapping a `TextField`).
 	 */
-	borderRadius?: string;
+	radius?: keyof typeof vars.radius;
 	/**
 	 * Whether the skeleton is shown in place of `children`. Overridden by a `LoadingSkeletonProvider` ancestor.
 	 * @default true
@@ -51,10 +52,10 @@ export interface LoadingSkeletonProps extends ComponentProps<'span'> {
 export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	const {
 		as: Component = 'span',
-		borderRadius,
 		children,
 		className,
 		isLoading: isLoadingProp,
+		radius,
 		style,
 		...spanProps
 	} = props;
@@ -76,7 +77,7 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 			className={cx(styles.loadingSkeleton, className)}
 			data-skeleton-inline={isInline ? '' : undefined}
 			inert
-			style={borderRadius ? { ...style, [styles.skeletonBorderRadiusVar]: borderRadius } : style}
+			style={radius ? { ...style, [styles.skeletonRadiusVar]: vars.radius[radius] } : style}
 			tabIndex={-1}
 		>
 			{children}

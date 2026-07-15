@@ -15,6 +15,7 @@ export const themeContractTree = {
 	color: {
 		surface: { canvas: null, resting: null, recessed: null, floating: null, overlay: null },
 		surfaceDisabled: null,
+		loadingSkeleton: null,
 		text: { primary: null, secondary: null },
 		textDisabled: null,
 		border: { decorative: null, control: null, focus: null },

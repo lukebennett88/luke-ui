@@ -15,7 +15,7 @@ import { cx } from '../utils/index.js';
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
 
 interface LoadingSpinnerStyleProps {
-	/** Sets the spinner color. */
+	/** Sets a semantic content color. Omit to inherit the surrounding content color. */
 	color?: LoadingSpinnerVariantProps['color'];
 	/** Sets the spinner size. */
 	size?: LoadingSpinnerVariantProps['size'];
