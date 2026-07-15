@@ -78,11 +78,12 @@ export default defineConfig({
 						enabled: true,
 						expect: {
 							toMatchScreenshot: {
-								resolveScreenshotPath: ({ arg, ext, root }) =>
-									path.join(
+								resolveScreenshotPath: ({ arg, ext, root }) => {
+									return path.join(
 										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
 										`${arg}${ext}`,
-									),
+									);
+								},
 								comparatorName: 'pixelmatch',
 								comparatorOptions: {
 									// Baselines are captured on the same OS/browser as CI, and

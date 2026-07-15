@@ -20,8 +20,8 @@ test('tones and appearances across sizes', async () => {
 	const locator = renderVisual(
 		<Grid columns={appearances.length}>
 			{sizes.flatMap((size) => {
-				return tones.flatMap((tone) =>
-					appearances.map((appearance) => (
+				return tones.flatMap((tone) => {
+					return appearances.map((appearance) => (
 						<Button
 							appearance={appearance}
 							key={`${size}-${tone}-${appearance}`}
@@ -30,8 +30,8 @@ test('tones and appearances across sizes', async () => {
 						>
 							{tone} {appearance}
 						</Button>
-					)),
-				);
+					));
+				});
 			})}
 		</Grid>,
 	);

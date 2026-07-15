@@ -216,10 +216,9 @@ function renderDocument(
 	metadata: { base: string; current: string; platform: string },
 ) {
 	const statusButtons = Object.entries(counts)
-		.map(
-			([status, count]) =>
-				`<button onclick="document.body.dataset.filter='${status}'">${status} (${count})</button>`,
-		)
+		.map(([status, count]) => {
+			return `<button onclick="document.body.dataset.filter='${status}'">${status} (${count})</button>`;
+		})
 		.join('');
 	const namespaces = [...new Set(results.map((result) => getNamespace(result.id)))].sort();
 	const namespaceOptions = namespaces
