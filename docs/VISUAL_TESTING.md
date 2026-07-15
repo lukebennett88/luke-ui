@@ -52,9 +52,8 @@ See [`TESTING.md`](./TESTING.md#visual-regression-tests) for how to write a visu
 
 ## Test every theme and mode
 
-Migrated components use the shared appearance matrix for Machined edge and ELMO in explicit light
-and dark modes. Pass each appearance to `renderVisual`, then capture it with
-`captureVisualAppearance`:
+Migrated components use the shared appearance matrix for Tactile and Paper in explicit light and
+dark modes. Pass each appearance to `renderVisual`, then capture it with `captureVisualAppearance`:
 
 ```tsx
 import { test } from 'vite-plus/test';
@@ -74,14 +73,14 @@ test.each(visualAppearances)('theme matrix: $theme $mode', async (appearance) =>
 The helper appends the selected appearance to the literal base ID. The example creates these stable
 capture IDs:
 
-- `button/theme-matrix-machined-edge-light`
-- `button/theme-matrix-machined-edge-dark`
-- `button/theme-matrix-elmo-light`
-- `button/theme-matrix-elmo-dark`
+- `button/theme-matrix-tactile-light`
+- `button/theme-matrix-tactile-dark`
+- `button/theme-matrix-paper-light`
+- `button/theme-matrix-paper-dark`
 
 Use one literal base ID for the matrix. The visual runner expands it during duplicate-ID validation,
 so each look remains independently reviewable without repeating theme setup. Existing tests that
-call `renderVisual(node)` continue to render in Machined edge light.
+call `renderVisual(node)` continue to render in Tactile light.
 
 Theme identity and colour mode stay separate. To cover nested mode, put `data-color-mode="dark"` or
 `data-color-mode="light"` on a descendant inside the rendered scene. Do not add a nested theme

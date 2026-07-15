@@ -4,9 +4,9 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { buildTheme } from '../src/theme/build-theme.js';
-import { elmoFoundation, machinedEdgeFoundation } from '../src/theme/foundations.js';
+import { paperFoundation, tactileFoundation } from '../src/theme/foundations.js';
 
-const foundations = [machinedEdgeFoundation, elmoFoundation];
+const foundations = [tactileFoundation, paperFoundation];
 
 async function main() {
 	await Promise.all(

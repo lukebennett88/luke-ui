@@ -13,8 +13,8 @@ const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
 const assetExports = [
 	'./stylesheet.css',
 	'./spritesheet.svg',
-	'./themes/machined-edge.css',
-	'./themes/elmo.css',
+	'./themes/tactile.css',
+	'./themes/paper.css',
 ];
 
 async function cleanDistExceptPreservedFiles() {

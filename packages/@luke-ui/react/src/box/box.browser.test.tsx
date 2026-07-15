@@ -1,4 +1,4 @@
-import '../../dist/themes/machined-edge.css';
+import '../../dist/themes/tactile.css';
 import '../stylesheet.css.js';
 import { act, createRef } from 'react';
 import type { Root } from 'react-dom/client';
@@ -6,7 +6,7 @@ import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { themeRootClassName } from '../theme/index.js';
-import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { tactileThemeClassName } from '../themes/index.js';
 import { Box } from './index.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
@@ -22,7 +22,7 @@ afterEach(async () => {
 
 test('renders a responsive layout at the retained breakpoints', async () => {
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = `${themeRootClassName} ${machinedEdgeThemeClassName}`;
+	container.className = `${themeRootClassName} ${tactileThemeClassName}`;
 	const root = createRoot(container);
 	mounted.push({ container, root });
 

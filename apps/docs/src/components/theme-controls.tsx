@@ -1,11 +1,11 @@
 import { themeRootClassName } from '@luke-ui/react/theme';
-import { elmoThemeClassName, machinedEdgeThemeClassName } from '@luke-ui/react/themes';
+import { paperThemeClassName, tactileThemeClassName } from '@luke-ui/react/themes';
 import { cx } from '@luke-ui/react/utils';
 import type { ChangeEvent, ComponentProps, PropsWithChildren } from 'react';
 import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
 import { ColorModeToggle, useHydratedColorMode } from './playground/color-mode-toggle.js';
 
-export type ThemeIdentity = 'elmo' | 'machined-edge';
+export type ThemeIdentity = 'paper' | 'tactile';
 
 const THEME_IDENTITY_STORAGE_KEY = 'luke-ui-docs-theme';
 const THEME_IDENTITY_CHANGE_EVENT = 'luke-ui-docs-theme-change';
@@ -21,7 +21,7 @@ export function DocsThemeRoot({ children }: PropsWithChildren) {
 	const colorMode = useHydratedColorMode();
 	const themeIdentity = useThemeIdentity();
 	const themeIdentityClassName =
-		themeIdentity === 'machined-edge' ? machinedEdgeThemeClassName : elmoThemeClassName;
+		themeIdentity === 'tactile' ? tactileThemeClassName : paperThemeClassName;
 	const settings = useMemo(() => ({ setThemeIdentity, themeIdentity }), [themeIdentity]);
 
 	return (
@@ -44,7 +44,7 @@ export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
 	const { setThemeIdentity, themeIdentity } = useDocsThemeIdentity();
 
 	function handleThemeChange(event: ChangeEvent<HTMLSelectElement>) {
-		setThemeIdentity(event.target.value === 'elmo' ? 'elmo' : 'machined-edge');
+		setThemeIdentity(event.target.value === 'paper' ? 'paper' : 'tactile');
 	}
 
 	return (
@@ -57,8 +57,8 @@ export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
 					onChange={handleThemeChange}
 					value={themeIdentity}
 				>
-					<option value="machined-edge">Machined edge</option>
-					<option value="elmo">ELMO</option>
+					<option value="tactile">Tactile</option>
+					<option value="paper">Paper</option>
 				</select>
 			</label>
 			<ColorModeToggle />
@@ -90,11 +90,11 @@ function subscribeToThemeIdentity(onStoreChange: () => void) {
 }
 
 function getThemeIdentity(): ThemeIdentity {
-	return localStorage.getItem(THEME_IDENTITY_STORAGE_KEY) === 'elmo' ? 'elmo' : 'machined-edge';
+	return localStorage.getItem(THEME_IDENTITY_STORAGE_KEY) === 'paper' ? 'paper' : 'tactile';
 }
 
 function getServerThemeIdentity(): ThemeIdentity {
-	return 'machined-edge';
+	return 'tactile';
 }
 
 function setThemeIdentity(themeIdentity: ThemeIdentity) {

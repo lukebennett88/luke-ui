@@ -41,8 +41,8 @@
 		"./package.json": "./package.json",
 		"./stylesheet.css": "./dist/stylesheet.css",
 		"./spritesheet.svg": "./dist/spritesheet.svg",
-		"./themes/machined-edge.css": "./dist/themes/machined-edge.css",
-		"./themes/elmo.css": "./dist/themes/elmo.css"
+		"./themes/tactile.css": "./dist/themes/tactile.css",
+		"./themes/paper.css": "./dist/themes/paper.css"
 	},
 	"publishConfig": {
 		"access": "public"

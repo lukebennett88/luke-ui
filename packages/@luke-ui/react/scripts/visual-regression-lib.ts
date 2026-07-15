@@ -17,12 +17,7 @@ export type VisualResult = {
 	currentViewport?: string;
 };
 
-const appearanceSuffixes = [
-	'machined-edge-light',
-	'machined-edge-dark',
-	'elmo-light',
-	'elmo-dark',
-] as const;
+const appearanceSuffixes = ['tactile-light', 'tactile-dark', 'paper-light', 'paper-dark'] as const;
 
 type CaptureFile = { file: string; viewport?: string };
 

@@ -8,7 +8,7 @@ description: Load Luke UI styles and apply theme identity and colour mode correc
 Import the shared component stylesheet and exactly one theme stylesheet. Importing one bundled theme
 does not pull in the other.
 
-Use `@luke-ui/react/themes/elmo.css` instead when ELMO is the application theme.
+Use `@luke-ui/react/themes/paper.css` instead when Paper is the application theme.
 
 ## Apply theme identity
 
@@ -16,8 +16,8 @@ Apply `themeRootClassName` and the matching identity class near the application 
 
 <SourceCodeBlock src="theming/apply-theme" />
 
-The bundled identity constants are `machinedEdgeThemeClassName` and `elmoThemeClassName`. Theme
-identity is not nestable. Choose one identity for an application or independent subtree.
+The bundled identity constants are `tactileThemeClassName` and `paperThemeClassName`. Theme identity
+is not nestable. Choose one identity for an application or independent subtree.
 
 ## Select a colour mode
 

@@ -2,8 +2,8 @@
 
 // Loads the design-token stylesheet into the test document.
 import '../stylesheet.css.js';
-import '@luke-ui/react/themes/elmo.css';
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/paper.css';
+import '@luke-ui/react/themes/tactile.css';
 import type { ComponentProps, ComponentType, CSSProperties, ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -16,7 +16,7 @@ import { cdp, page, userEvent } from 'vite-plus/test/context';
 import spritesheetHref from '../../dist/spritesheet.svg?url';
 import { IconSpritesheetProvider } from '../icon/index.js';
 import { themeRootClassName, vars } from '../theme/index.js';
-import { elmoThemeClassName, machinedEdgeThemeClassName } from '../themes/index.js';
+import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -25,14 +25,14 @@ const mounted: Array<{ container: HTMLElement; root: Root }> = [];
 
 export type VisualAppearance = {
 	mode: 'light' | 'dark';
-	theme: 'machined-edge' | 'elmo';
+	theme: 'tactile' | 'paper';
 };
 
 export const visualAppearances = [
-	{ mode: 'light', theme: 'machined-edge' },
-	{ mode: 'dark', theme: 'machined-edge' },
-	{ mode: 'light', theme: 'elmo' },
-	{ mode: 'dark', theme: 'elmo' },
+	{ mode: 'light', theme: 'tactile' },
+	{ mode: 'dark', theme: 'tactile' },
+	{ mode: 'light', theme: 'paper' },
+	{ mode: 'dark', theme: 'paper' },
 ] as const satisfies ReadonlyArray<VisualAppearance>;
 
 const defaultVisualAppearance: VisualAppearance = visualAppearances[0];
@@ -58,7 +58,7 @@ export function renderVisual(node: ReactNode, appearance = defaultVisualAppearan
 }
 
 function getThemeClassName(theme: VisualAppearance['theme']) {
-	return theme === 'machined-edge' ? machinedEdgeThemeClassName : elmoThemeClassName;
+	return theme === 'tactile' ? tactileThemeClassName : paperThemeClassName;
 }
 
 /** Captures a named scene into the revision output selected by the visual runner. */

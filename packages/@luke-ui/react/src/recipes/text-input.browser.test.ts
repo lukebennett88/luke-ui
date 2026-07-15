@@ -1,7 +1,7 @@
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';
-import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
 import { textInputAdornmentStart, textInputGroup } from './text-input.css.js';
 
@@ -142,7 +142,7 @@ test('adornment divider uses the control border color and disabled text color fo
 
 function mountGroup(options: Parameters<typeof textInputGroup>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = cx(themeRootClassName, machinedEdgeThemeClassName);
+	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	const group = root.appendChild(document.createElement('div'));
 	group.className = textInputGroup(options);

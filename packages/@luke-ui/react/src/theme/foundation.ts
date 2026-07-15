@@ -9,7 +9,7 @@
  */
 export interface ThemeFoundation {
 	/**
-	 * Kebab-case theme identity, for example `'machined-edge'`. The theme's identity class is
+	 * Kebab-case theme identity, for example `'tactile'`. The theme's identity class is
 	 * `luke-ui-theme-${name}`.
 	 */
 	name: string;

@@ -1,4 +1,4 @@
-import '../../dist/themes/machined-edge.css';
+import '../../dist/themes/tactile.css';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
@@ -8,7 +8,7 @@ import { Button } from '../button/index.js';
 import { ComboboxField } from '../combobox-field/index.js';
 import { ComboboxItem } from '../combobox-field/primitive/index.js';
 import { IconSpritesheetProvider } from '../icon/index.js';
-import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { tactileThemeClassName } from '../themes/index.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
 const scopes: Array<HTMLElement> = [];
@@ -110,7 +110,7 @@ test('preserves identity and an opposite nested mode on a portalled combobox', a
 function renderScope(mode?: 'light' | 'dark') {
 	const scope = document.body.appendChild(document.createElement('div'));
 	scopes.push(scope);
-	scope.className = machinedEdgeThemeClassName;
+	scope.className = tactileThemeClassName;
 	scope.style.backgroundColor = 'var(--luke-color-surface-canvas)';
 	if (mode !== undefined) scope.dataset.colorMode = mode;
 

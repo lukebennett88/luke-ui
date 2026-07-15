@@ -1,8 +1,8 @@
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { themeRootClassName } from '../theme/index.js';
-import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { tactileThemeClassName } from '../themes/index.js';
 import { button } from './button.css.js';
 
 let mounted: Array<HTMLElement> = [];
@@ -113,7 +113,7 @@ test('reduced motion removes hover and press travel', async () => {
 
 function mountButton(options: Parameters<typeof button>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${machinedEdgeThemeClassName}`;
+	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	const control = root.appendChild(document.createElement('button'));
 	control.className = button(options);

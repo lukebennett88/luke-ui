@@ -1,10 +1,10 @@
 import type { ThemeFoundation } from './foundation.js';
 
 /**
- * Foundation for Machined edge, the default bundled theme: teal accent, neutral near-white light
+ * Foundation for Tactile, the default bundled theme: teal accent, neutral near-white light
  * surfaces, lighter chromatic dark surfaces, and a compact tactile material.
  */
-export const machinedEdgeFoundation: ThemeFoundation = {
+export const tactileFoundation: ThemeFoundation = {
 	dark: {
 		actionControlFinish: {
 			raised: [
@@ -89,14 +89,14 @@ export const machinedEdgeFoundation: ThemeFoundation = {
 			].join(', '),
 		},
 	},
-	name: 'machined-edge',
+	name: 'tactile',
 };
 
 /**
- * Foundation for ELMO, the materially minimal bundled theme. Its light mode approximates the flat,
+ * Foundation for Paper, the materially minimal bundled theme. Its light mode approximates the flat,
  * hairline-bordered Luke UI look with the blue `#185281`-family accent; its dark mode is net-new.
  */
-export const elmoFoundation: ThemeFoundation = {
+export const paperFoundation: ThemeFoundation = {
 	dark: {
 		actionControlFinish: {
 			raised: [
@@ -161,6 +161,6 @@ export const elmoFoundation: ThemeFoundation = {
 			].join(', '),
 		},
 	},
-	name: 'elmo',
+	name: 'paper',
 	radius: { control: 4 },
 };
