@@ -2,20 +2,23 @@ import type { HeadingLevel, HeadingLevelsProps } from '../heading-context/index.
 import { HeadingLevels, HeadingPresenceProvider } from '../heading-context/index.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
+import type { Prettify } from '../types/prettify.js';
 
 export type { HeadingLevel } from '../heading-context/index.js';
 /** Valid heading tag name for Luke UI headings. */
 export type HeadingTag = `h${HeadingLevel}`;
+
+interface _HeadingProps extends TextProps {
+	/** Heading level override. Inherits from context when omitted. */
+	level?: HeadingLevel;
+}
 
 /**
  * Props for `Heading`.
  *
  * @tier atom
  */
-export interface HeadingProps extends TextProps {
-	/** Heading level override. Inherits from context when omitted. */
-	level?: HeadingLevel;
-}
+export type HeadingProps = Prettify<_HeadingProps>;
 
 const sizeByLevel = {
 	1: '800',

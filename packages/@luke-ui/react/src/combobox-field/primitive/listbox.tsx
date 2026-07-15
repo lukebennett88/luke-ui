@@ -7,14 +7,10 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
-/**
- * Props for the styled listbox.
- *
- * @tier primitive
- */
-export interface ComboboxListBoxProps<T extends object> extends DistributiveOmit<
+interface _ComboboxListBoxProps<T extends object> extends DistributiveOmit<
 	RacListBoxProps<T>,
 	'dependencies' | 'items'
 > {
@@ -27,6 +23,13 @@ export interface ComboboxListBoxProps<T extends object> extends DistributiveOmit
 	/** Optional content appended after the main collection, e.g. a load-more sentinel. */
 	loadMoreItem?: ReactNode;
 }
+
+/**
+ * Props for the styled listbox.
+ *
+ * @tier primitive
+ */
+export type ComboboxListBoxProps<T extends object> = Prettify<_ComboboxListBoxProps<T>>;
 
 /** Styled listbox for combobox options. */
 export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>): JSX.Element {

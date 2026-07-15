@@ -7,21 +7,22 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
 import { themeRootClassName } from '../../theme/index.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 import { useVisualViewportVars } from './use-visual-viewport-vars.js';
+
+type _ComboboxPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;
+interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
+	/** Forwarded to the popover's DOM element. */
+	ref?: Ref<HTMLElement>;
+}
 
 /**
  * Props for the styled combobox popover.
  *
  * @tier primitive
  */
-export interface ComboboxPopoverProps extends DistributiveOmit<
-	RacPopoverProps,
-	'UNSTABLE_portalContainer'
-> {
-	/** Forwarded to the popover's DOM element. */
-	ref?: Ref<HTMLElement>;
-}
+export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 
 /**
  * Popover surface used for listbox content. The portal preserves the theme identity and explicit

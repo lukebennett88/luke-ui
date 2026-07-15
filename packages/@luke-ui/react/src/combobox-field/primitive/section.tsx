@@ -4,20 +4,23 @@ import { ListBoxSection as RacListBoxSection } from 'react-aria-components/Combo
 import { Header as RacHeader } from 'react-aria-components/Header';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
-/**
- * Props for a combobox section grouping.
- *
- * @tier primitive
- */
-export interface ComboboxSectionProps<T extends object> extends DistributiveOmit<
+interface _ComboboxSectionProps<T extends object> extends DistributiveOmit<
 	RacListBoxSectionProps<T>,
 	'className'
 > {
 	className?: RacListBoxSectionProps<T>['className'];
 	title?: ReactNode;
 }
+
+/**
+ * Props for a combobox section grouping.
+ *
+ * @tier primitive
+ */
+export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionProps<T>>;
 
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
 	const { children, className, title, ...sectionProps } = props;

@@ -6,6 +6,7 @@ import { Field } from '../field/primitive/index.js';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { Prettify } from '../types/prettify.js';
 import { ComboboxClearButton } from './primitive/clear-button.js';
 import { ComboboxControl } from './primitive/control.js';
 import { ComboboxEmptyState } from './primitive/empty-state.js';
@@ -29,12 +30,7 @@ interface ComboboxFieldRedeclaredRACProps {
 	isReadOnly?: RacComboBoxProps<object>['isReadOnly'];
 }
 
-/**
- * Props for composed `ComboboxField` (searchable single-select).
- *
- * @tier composed
- */
-export interface ComboboxFieldProps<T extends object>
+interface _ComboboxFieldProps<T extends object>
 	extends
 		DistributiveOmit<ComboboxRootProps<T>, 'children' | keyof ComboboxFieldRedeclaredRACProps>,
 		ComboboxFieldRedeclaredRACProps,
@@ -66,6 +62,13 @@ export interface ComboboxFieldProps<T extends object>
 	/** Control size. @default 'medium' */
 	size?: ComboboxSize;
 }
+
+/**
+ * Props for composed `ComboboxField` (searchable single-select).
+ *
+ * @tier composed
+ */
+export type ComboboxFieldProps<T extends object> = Prettify<_ComboboxFieldProps<T>>;
 
 /** Composes `ComboboxRoot` with label, description, and error slots. */
 export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): JSX.Element {

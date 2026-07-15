@@ -6,19 +6,23 @@ import { IconSizeProvider } from '../../icon-size-context/index.js';
 import * as styles from '../../recipes/combobox.css.js';
 import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
+
+type _ComboboxTriggerOmit = DistributiveOmit<RacButtonProps, 'className'>;
+interface _ComboboxTriggerProps extends _ComboboxTriggerOmit {
+	className?: RacButtonProps['className'];
+	size?: ComboboxSize;
+}
 
 /**
  * Props for the combobox trigger button.
  *
  * @tier primitive
  */
-export interface ComboboxTriggerProps extends DistributiveOmit<RacButtonProps, 'className'> {
-	className?: RacButtonProps['className'];
-	size?: ComboboxSize;
-}
+export type ComboboxTriggerProps = Prettify<_ComboboxTriggerProps>;
 
 /** Trigger button used by combobox pattern. */
 export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {

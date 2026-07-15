@@ -6,6 +6,7 @@ import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { createSprinkles } from '../styles/index.js';
 import { vars } from '../theme/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 
 const meta = preview.meta({
 	component: Text,
@@ -33,7 +34,7 @@ const loremIpsum =
 const importantIdentifier = 'budget-allocation-review-cycle-2026-06-05-eu-west-1-BA-109284';
 const importantIdentifierSuffix = '-BA-109284';
 
-type MiddleTruncatedIdentifierProps = Omit<TextProps, 'children'> & {
+type MiddleTruncatedIdentifierProps = DistributiveOmit<TextProps, 'children'> & {
 	identifier: string;
 	suffix: string;
 };

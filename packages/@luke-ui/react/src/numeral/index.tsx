@@ -3,6 +3,7 @@ import { useIsWithinHeading } from '../heading-context/index.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { Prettify } from '../types/prettify.js';
 
 /** Number format style used by `Numeral`. */
 export type NumeralFormat = 'decimal' | 'percent' | 'currency' | 'unit';
@@ -11,15 +12,8 @@ export type NumeralAbbreviation = boolean | 'long';
 /** Fixed precision or `[min, max]` precision range. */
 export type NumeralPrecision = number | readonly [number, number];
 
-/**
- * Props for `Numeral`.
- *
- * @tier atom
- */
-export interface NumeralProps extends DistributiveOmit<
-	TextProps,
-	'children' | 'textAlign' | 'fontVariantNumeric'
-> {
+type _NumeralOmit = DistributiveOmit<TextProps, 'children' | 'textAlign' | 'fontVariantNumeric'>;
+interface _NumeralProps extends _NumeralOmit {
 	/** Enables compact notation (`1.2K`, `1.2 thousand`). */
 	abbreviate?: NumeralAbbreviation;
 	/** Currency code such as `USD`. */
@@ -47,6 +41,13 @@ export interface NumeralProps extends DistributiveOmit<
 	/** Number to format. */
 	value: number;
 }
+
+/**
+ * Props for `Numeral`.
+ *
+ * @tier atom
+ */
+export type NumeralProps = Prettify<_NumeralProps>;
 
 /** Formats a number and renders it with the same typography props as `Text`. */
 export function Numeral(props: NumeralProps) {

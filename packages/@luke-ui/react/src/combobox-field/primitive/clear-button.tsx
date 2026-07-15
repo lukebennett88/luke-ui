@@ -7,22 +7,23 @@ import { IconSizeProvider } from '../../icon-size-context/index.js';
 import * as styles from '../../recipes/combobox.css.js';
 import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
+
+type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'slot'>;
+interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {
+	className?: RacButtonProps['className'];
+	size?: ComboboxSize;
+}
 
 /**
  * Props for the combobox clear button.
  *
  * @tier primitive
  */
-export interface ComboboxClearButtonProps extends DistributiveOmit<
-	RacButtonProps,
-	'className' | 'slot'
-> {
-	className?: RacButtonProps['className'];
-	size?: ComboboxSize;
-}
+export type ComboboxClearButtonProps = Prettify<_ComboboxClearButtonProps>;
 
 /** Clears the combobox selection. Renders nothing while no option is selected. */
 export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Element | null {

@@ -13,22 +13,25 @@ import { Icon } from '../../icon/index.js';
 import * as styles from '../../recipes/combobox.css.js';
 import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 
-/**
- * Props for a combobox list item.
- *
- * @tier primitive
- */
-export interface ComboboxItemProps<T extends object> extends DistributiveOmit<
+interface _ComboboxItemProps<T extends object> extends DistributiveOmit<
 	RacListBoxItemProps<T>,
 	'className'
 > {
 	className?: RacListBoxItemProps<T>['className'];
 	size?: ComboboxSize;
 }
+
+/**
+ * Props for a combobox list item.
+ *
+ * @tier primitive
+ */
+export type ComboboxItemProps<T extends object> = Prettify<_ComboboxItemProps<T>>;
 
 export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX.Element {
 	const { size: sizeProp, ...itemProps } = props;
@@ -60,18 +63,18 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 	);
 }
 
+type _ComboboxLoadMoreItemOmit = DistributiveOmit<RacListBoxLoadMoreItemProps, 'className'>;
+interface _ComboboxLoadMoreItemProps extends _ComboboxLoadMoreItemOmit {
+	className?: RacListBoxLoadMoreItemProps['className'];
+	size?: ComboboxSize;
+}
+
 /**
  * Props for the combobox load-more sentinel item.
  *
  * @tier primitive
  */
-export interface ComboboxLoadMoreItemProps extends DistributiveOmit<
-	RacListBoxLoadMoreItemProps,
-	'className'
-> {
-	className?: RacListBoxLoadMoreItemProps['className'];
-	size?: ComboboxSize;
-}
+export type ComboboxLoadMoreItemProps = Prettify<_ComboboxLoadMoreItemProps>;
 
 export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Element {
 	const { size: sizeProp, ...loadMoreItemProps } = props;

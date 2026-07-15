@@ -18,6 +18,32 @@ A component directory contains:
 - `index.tsx`: component implementation
 - `primitive/`: optional primitive exports
 
+## Exported prop types
+
+Define exported component props with `interface extends Omit<...>` and wrap with `Prettify`:
+
+```ts
+interface _ComponentProps extends Omit<SourceType, OmittedKeys>, StyleProps {
+	/** Documented prop. */
+	myProp?: string;
+}
+
+export type ComponentProps = Prettify<_ComponentProps>;
+```
+
+Rules:
+
+- Use `interface extends` — avoid type intersections (`&`) for prop types. Interfaces display
+  clearly in IDE tooltips and extend naturally.
+- Wrap the exported type with `Prettify` from `../types/prettify.js` so consumers see a flat,
+  readable type in their IDE.
+- Use built-in `Omit` in the `extends` clause (not `DistributiveOmit`). These are non-union types —
+  both behave identically and `interface extends` doesn't accept conditional types.
+- Name the internal interface `_ComponentProps` (underscore prefix) and export the Prettified
+  version as `ComponentProps`.
+- Use `DistributiveOmit` from `../types/distributive-omit.js` only where `T` is generic and could be
+  a union (e.g. utility functions, not component prop types).
+
 ## Component taxonomy
 
 Components follow the Atom, Composed, and Primitive taxonomy. See `docs/CONVENTIONS.md` for

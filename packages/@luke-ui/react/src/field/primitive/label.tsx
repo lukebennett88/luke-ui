@@ -2,6 +2,7 @@ import type { JSX } from 'react';
 import type { LabelProps as RacLabelProps } from 'react-aria-components/Label';
 import { Label as RacLabel } from 'react-aria-components/Label';
 import * as styles from '../../recipes/field.css.js';
+import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
 interface FieldLabelVariantProps extends NonNullable<styles.FieldLabelVariants> {}
@@ -14,13 +15,14 @@ interface FieldLabelStyleProps {
 	necessityIndicator?: FieldNecessityIndicator;
 }
 
+interface _FieldLabelProps extends RacLabelProps, FieldLabelStyleProps {}
+
 /**
  * Props for `FieldLabel`.
  *
  * @tier primitive
  */
-export interface FieldLabelProps
-	extends Omit<RacLabelProps, keyof FieldLabelStyleProps>, FieldLabelStyleProps {}
+export type FieldLabelProps = Prettify<_FieldLabelProps>;
 
 /** Styled label for form fields. */
 export function FieldLabel(props: FieldLabelProps): JSX.Element {
