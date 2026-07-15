@@ -12,13 +12,20 @@ import * as z from 'zod';
 import browserCollections from '../../../.source/browser';
 import { ExampleBlock } from '../../components/example-block';
 import { PageActions } from '../../components/page-actions';
+import { SourceCodeBlock } from '../../components/source-code-block';
 import { baseOptions } from '../../lib/layout.shared';
 import { source } from '../../lib/source';
 import { getStorybookStoryUrl, withBasePath } from '../../lib/storybook';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
 
-const mdxComponents = { ...defaultMdxComponents, AutoTypeTable, ExampleBlock, TypeTable };
+const mdxComponents = {
+	...defaultMdxComponents,
+	AutoTypeTable,
+	ExampleBlock,
+	SourceCodeBlock,
+	TypeTable,
+};
 
 export const Route = createFileRoute('/docs/$')({
 	component: Page,

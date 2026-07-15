@@ -1,0 +1,28 @@
+---
+title: Token reference
+description: Generated reference for Luke UI's public semantic CSS variables.
+---
+
+`vars` is the typed public semantic-token contract. Each typed path maps to one stable global CSS
+custom property by kebab-casing its segments under the `--luke-` prefix. For example,
+`vars.color.intent.danger.surface.solidHover` resolves to
+`var(--luke-color-intent-danger-surface-solid-hover)`.
+
+The table below is generated from the public TypeScript declaration and its JSDoc rather than a
+separate handwritten token list.
+
+<auto-type-table
+	path="apps/docs/src/generated/token-reference.generated.ts"
+	name="ThemeTokenReference"
+/>
+
+## Custom styling
+
+Use a public semantic variable when a component API or layout utility is not the right fit. This is
+the supported custom-styling boundary; do not depend on private generated palette steps.
+
+<ExampleBlock
+	src="theming/semantic-variables"
+	title="Semantic variables"
+	description="A consumer-authored surface using only the public semantic contract."
+/>

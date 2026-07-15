@@ -1,0 +1,31 @@
+---
+title: Theming overview
+description: Choose a Luke UI theme identity and colour mode independently.
+---
+
+Luke UI separates **theme identity** from **colour mode**. Theme identity chooses the visual
+language. Colour mode chooses light, dark, or the system preference. The two settings are
+independent, so either bundled theme works in either mode.
+
+Luke UI includes two theme identities:
+
+- **Machined edge** is the default, compact tactile theme.
+- **ELMO** is a flatter, lower-depth alternative.
+
+A theme controls the semantic colours, typography, radius, material, and depth foundations that
+components share. Luke UI continues to own component structure, states, and behaviour. Custom
+selectors, internal palettes, theme-defined component variants, and component slots are not part of
+the supported theming contract; use public semantic CSS variables for sanctioned local styling.
+
+Use the controls in the documentation header to preview any combination. The choices persist
+independently and apply to hosted examples and the playground. Storybook has the same two axes in
+its toolbar.
+
+Colour mode is nestable. A page can use one mode while a subtree forces the opposite mode. Theme
+identity is applied once at the application or subtree root and is not nestable.
+
+## Next steps
+
+- [Apply a bundled theme](/docs/theming/applying).
+- [Author a theme](/docs/theming/authoring).
+- [Browse the semantic token reference](/docs/theming/token-reference).

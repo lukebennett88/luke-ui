@@ -5,6 +5,17 @@ const codeMessageSchema = z.object({
 	code: z.string(),
 });
 
+const appearanceMessageSchema = z.object({
+	type: z.literal('playground:appearance'),
+	colorMode: z.enum(['light', 'dark', 'system']),
+	themeIdentity: z.enum(['machined-edge', 'elmo']),
+});
+
+const parentMessageSchema = z.discriminatedUnion('type', [
+	codeMessageSchema,
+	appearanceMessageSchema,
+]);
+
 const previewMessageSchema = z.discriminatedUnion('type', [
 	z.object({ type: z.literal('playground:ready') }),
 	z.object({ type: z.literal('playground:success') }),
@@ -12,10 +23,12 @@ const previewMessageSchema = z.discriminatedUnion('type', [
 ]);
 
 export type PlaygroundCodeMessage = z.infer<typeof codeMessageSchema>;
+export type PlaygroundAppearanceMessage = z.infer<typeof appearanceMessageSchema>;
+export type PlaygroundParentMessage = z.infer<typeof parentMessageSchema>;
 export type PlaygroundPreviewMessage = z.infer<typeof previewMessageSchema>;
 
-export function isPlaygroundCodeMessage(data: unknown): data is PlaygroundCodeMessage {
-	return codeMessageSchema.safeParse(data).success;
+export function isPlaygroundParentMessage(data: unknown): data is PlaygroundParentMessage {
+	return parentMessageSchema.safeParse(data).success;
 }
 
 export function isPlaygroundPreviewMessage(data: unknown): data is PlaygroundPreviewMessage {

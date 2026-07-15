@@ -5,18 +5,22 @@ import { Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
+import { useHydratedColorModeSelection } from '../../components/playground/color-mode-toggle.js';
 import {
 	EditorSkeleton,
 	EditorSkeletonShapeScript,
 	LoadingPill,
 } from '../../components/playground/editor-skeleton';
-import { ThemeToggle } from '../../components/playground/theme-toggle';
 import { useIsDesktop } from '../../components/playground/use-is-desktop';
 import type { ViewportWidth } from '../../components/playground/viewport-toggle';
 import { ViewportToggle } from '../../components/playground/viewport-toggle';
+import { ThemeControls, useDocsThemeIdentity } from '../../components/theme-controls';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
 import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
-import type { PlaygroundCodeMessage } from '../../lib/playground-protocol';
+import type {
+	PlaygroundAppearanceMessage,
+	PlaygroundCodeMessage,
+} from '../../lib/playground-protocol';
 import { isPlaygroundPreviewMessage } from '../../lib/playground-protocol';
 import { withBasePath } from '../../lib/storybook';
 
@@ -32,6 +36,8 @@ export const Route = createFileRoute('/playground/')({
 });
 
 function Playground() {
+	const { themeIdentity } = useDocsThemeIdentity();
+	const colorMode = useHydratedColorModeSelection();
 	const [initialCode] = useState(() => {
 		if (typeof window === 'undefined') return rawDefaultCode;
 		return decodeCodeHash(window.location.hash) ?? rawDefaultCode;
@@ -57,6 +63,16 @@ function Playground() {
 		},
 		[previewReadyRef],
 	);
+	const postAppearance = useCallback(() => {
+		const contentWindow = iframeRef.current?.contentWindow;
+		if (!contentWindow || colorMode === null) return;
+		const message: PlaygroundAppearanceMessage = {
+			colorMode,
+			themeIdentity,
+			type: 'playground:appearance',
+		};
+		contentWindow.postMessage(message, window.location.origin);
+	}, [colorMode, themeIdentity]);
 
 	useEffect(() => {
 		const onMessage = (event: MessageEvent) => {
@@ -68,6 +84,7 @@ function Playground() {
 			previewReadyRef.current = true;
 			markReady();
 			if (event.data.type === 'playground:ready') {
+				postAppearance();
 				postCode(codeRef.current);
 				return;
 			}
@@ -94,7 +111,11 @@ function Playground() {
 		// previewReadyRef, postCode, markError, markReady, and markSuccess are all
 		// referentially stable (ref + useCallback/dispatch-based), so this still
 		// only runs once per mount despite listing them.
-	}, [previewReadyRef, postCode, markError, markReady, markSuccess]);
+	}, [previewReadyRef, postAppearance, postCode, markError, markReady, markSuccess]);
+
+	useEffect(() => {
+		postAppearance();
+	}, [postAppearance]);
 
 	useEffect(() => {
 		if (!isPreviewFullscreen) return;
@@ -118,7 +139,7 @@ function Playground() {
 
 	return (
 		<div className="flex h-dvh flex-col">
-			<header className="flex items-center justify-between gap-4 border-fd-border border-b px-4 py-2">
+			<header className="flex flex-wrap items-center justify-between gap-4 border-fd-border border-b px-4 py-2">
 				<div className="flex items-baseline gap-4">
 					<span className="font-medium text-sm">Luke UI Playground</span>
 					<Link
@@ -129,8 +150,8 @@ function Playground() {
 						Docs
 					</Link>
 				</div>
-				<div className="flex items-center gap-2">
-					<ThemeToggle />
+				<div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
+					<ThemeControls />
 					<ViewportToggle onChange={setViewportWidth} value={viewportWidth} />
 					<button
 						aria-label="Fullscreen preview"
