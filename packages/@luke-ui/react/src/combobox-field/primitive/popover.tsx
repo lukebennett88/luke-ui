@@ -6,6 +6,7 @@ import { Popover as RacPopover } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
 import { themeRootClassName } from '../../theme/index.js';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
 import { useVisualViewportVars } from './use-visual-viewport-vars.js';
 
@@ -14,7 +15,10 @@ import { useVisualViewportVars } from './use-visual-viewport-vars.js';
  *
  * @tier primitive
  */
-export interface ComboboxPopoverProps extends Omit<RacPopoverProps, 'UNSTABLE_portalContainer'> {
+export interface ComboboxPopoverProps extends DistributiveOmit<
+	RacPopoverProps,
+	'UNSTABLE_portalContainer'
+> {
 	/** Forwarded to the popover's DOM element. */
 	ref?: Ref<HTMLElement>;
 }

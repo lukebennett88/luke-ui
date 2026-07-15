@@ -1,4 +1,5 @@
 import type { ComponentProps, JSX, ReactNode } from 'react';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { FieldSlotProps } from '../compose-field.js';
 import type { FieldDescriptionProps } from './description.js';
 import { FieldDescription } from './description.js';
@@ -18,7 +19,8 @@ type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
  *
  * @tier primitive
  */
-export interface FieldProps extends Omit<PrimitiveFieldProps, 'children'>, FieldSlotProps {
+export interface FieldProps
+	extends DistributiveOmit<PrimitiveFieldProps, 'children'>, FieldSlotProps {
 	children: ReactNode;
 }
 

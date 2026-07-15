@@ -3,6 +3,7 @@ import type { FieldErrorProps as RacFieldErrorProps } from 'react-aria-component
 import { FieldError as RacFieldError } from 'react-aria-components/FieldError';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/field.css.js';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
 
 interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVariants> {}
@@ -13,7 +14,7 @@ interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVarian
  * @tier primitive
  */
 export interface FieldErrorProps
-	extends RacFieldErrorProps, Omit<FieldMessageVariantProps, 'tone'> {}
+	extends RacFieldErrorProps, DistributiveOmit<FieldMessageVariantProps, 'tone'> {}
 
 /** Styled validation message for a field. */
 export function FieldError(props: FieldErrorProps): JSX.Element {

@@ -2,6 +2,7 @@ import { useLocale } from 'react-aria-components/I18nProvider';
 import { useIsWithinHeading } from '../heading-context/index.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 
 /** Number format style used by `Numeral`. */
 export type NumeralFormat = 'decimal' | 'percent' | 'currency' | 'unit';
@@ -15,7 +16,7 @@ export type NumeralPrecision = number | readonly [number, number];
  *
  * @tier atom
  */
-export interface NumeralProps extends Omit<
+export interface NumeralProps extends DistributiveOmit<
 	TextProps,
 	'children' | 'textAlign' | 'fontVariantNumeric'
 > {

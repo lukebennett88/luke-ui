@@ -5,6 +5,7 @@ import type { InputProps as RacInputProps } from 'react-aria-components/Input';
 import { Input as RacInput } from 'react-aria-components/Input';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/text-input.css.js';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import { cx } from '../../utils/index.js';
 
 interface TextInputVariantProps extends NonNullable<styles.TextInputVariants> {}
@@ -26,7 +27,9 @@ export type TextInputSize = NonNullable<TextInputVariantProps['size']>;
  * @tier primitive
  */
 export interface TextInputProps
-	extends Omit<RacInputProps, 'className' | keyof TextInputStyleProps>, TextInputStyleProps {
+	extends
+		DistributiveOmit<RacInputProps, 'className' | keyof TextInputStyleProps>,
+		TextInputStyleProps {
 	/** Element shown at the end of the control. */
 	adornmentEnd?: ReactNode;
 	/** Element shown at the start of the control. */
