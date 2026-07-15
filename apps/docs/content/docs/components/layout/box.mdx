@@ -1,0 +1,37 @@
+---
+title: Box
+description: Responsive layout container backed by Luke UI Sprinkles.
+---
+
+`Box` is a `div` by default. Use its responsive layout, spacing, sizing, positioning, overflow,
+flex, and grid-child props to build layout without adding styling props to other components.
+
+<ExampleBlock
+	src="box/responsive-layout"
+	title="Box — Responsive layout"
+	description="A stack that becomes a row at the medium breakpoint."
+/>
+
+Spacing props use `0` or the semantic space steps `100`, `200`, `300`, `400`, `600`, `800`, `1000`,
+`1200`, and `1600`. Responsive objects use the `xsmall`, `small`, `medium`, `large`, `xlarge`, and
+`xxlarge` breakpoints.
+
+## Custom div component
+
+Use `render` with a compatible custom `div` component, such as a motion or presentational wrapper.
+Spread the provided props onto the actual `div` so the generated class, inline variables, ref,
+accessibility attributes, and event handlers are preserved. The callback does not change Box's DOM
+element contract to another element type.
+
+```tsx
+<Box padding="400" render={(props) => <MotionDiv {...props} />}>
+	Account summary
+</Box>
+```
+
+Semantic colour and typography are deliberately not Box props. Use component APIs or public semantic
+variables from `@luke-ui/react/theme` for sanctioned custom styling.
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/box/index.tsx" name="BoxProps" />

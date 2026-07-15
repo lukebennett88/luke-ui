@@ -2,7 +2,7 @@ export type { ButtonVariants } from '../recipes/button.css.js';
 export { button } from '../recipes/button.css.js';
 export { field, fieldLabel, fieldMessage } from '../recipes/field.css.js';
 export type { IconVariants } from '../recipes/icon.css.js';
-export { icon, iconSizeVariants } from '../recipes/icon.css.js';
+export { icon } from '../recipes/icon.css.js';
 export type { IconButtonVariants } from '../recipes/icon-button.css.js';
 export { iconButton } from '../recipes/icon-button.css.js';
 export type { LinkVariants } from '../recipes/link.css.js';

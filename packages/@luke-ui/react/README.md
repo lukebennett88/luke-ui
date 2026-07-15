@@ -10,14 +10,19 @@ pnpm add @luke-ui/react
 
 ## Setup
 
-Import the stylesheet and apply the theme class at your app root.
+Import the component stylesheet and one bundled theme stylesheet. Apply the theme root and identity
+classes to the same element.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
+import '@luke-ui/react/themes/machined-edge.css';
 import { themeRootClassName } from '@luke-ui/react/theme';
+import { machinedEdgeThemeClassName } from '@luke-ui/react/themes';
 
 export function App() {
-	return <div className={themeRootClassName}>{/* your app */}</div>;
+	return (
+		<div className={`${themeRootClassName} ${machinedEdgeThemeClassName}`}>{/* your app */}</div>
+	);
 }
 ```
 

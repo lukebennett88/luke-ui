@@ -27,7 +27,6 @@ export default {
 				'src/stylesheet.css.ts',
 				'src/styles/index.css.ts',
 				'src/theme/index.tsx',
-				'src/tokens/index.ts',
 				'src/utils/index.ts',
 				'scripts/**/*.ts',
 			],

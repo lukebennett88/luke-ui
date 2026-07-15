@@ -5,7 +5,7 @@ import type { CSSProperties } from 'react';
 import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { createSprinkles } from '../styles/index.js';
-import { vars } from '../theme.css.js';
+import { vars } from '../theme/index.js';
 
 const meta = preview.meta({
 	component: Text,
@@ -14,7 +14,7 @@ const meta = preview.meta({
 });
 
 const panelStyle = {
-	borderColor: vars.border.default,
+	borderColor: vars.color.border.decorative,
 	borderStyle: 'dashed',
 	borderWidth: 1,
 	maxInlineSize: '40rem',
@@ -52,7 +52,6 @@ function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 		flexGrow: '1',
 		flexShrink: '1',
 		minInlineSize: '0',
-		textOverflow: 'clip',
 	});
 	const fixed = createSprinkles({ flexBasis: 'auto', flexGrow: '0', flexShrink: '0' });
 
@@ -233,7 +232,7 @@ export const Truncate = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: 'medium',
+			gap: '400',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',
@@ -263,7 +262,7 @@ export const MiddleTruncation = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: 'medium',
+			gap: '400',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',
@@ -299,7 +298,7 @@ export const LineClamp = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: 'medium',
+			gap: '400',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',

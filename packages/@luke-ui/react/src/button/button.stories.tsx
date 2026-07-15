@@ -4,7 +4,7 @@ import { Icon } from '@luke-ui/react/icon';
 import type { CSSProperties } from 'react';
 import { expect, fn, userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
-import { vars } from '../theme.css.js';
+import { vars } from '../theme/index.js';
 
 const meta = preview.meta({
 	component: Button,
@@ -43,7 +43,7 @@ const blockContainerStyle = {
 } as const satisfies CSSProperties;
 
 const truncationContainerStyle = {
-	borderColor: vars.border.default,
+	borderColor: vars.color.border.decorative,
 	borderStyle: 'dashed',
 	borderWidth: 1,
 	inlineSize: '100%',

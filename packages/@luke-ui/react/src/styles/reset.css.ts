@@ -1,7 +1,7 @@
+import { vars } from '../theme/contract.css.js';
 import { classSelector, lukeUiClassNames } from './class-names.js';
 import { focusRing } from './focus-ring.js';
 import { globalStyleInLayer } from './layered-style.css.js';
-import { vars } from './vars.css.js';
 
 const root = classSelector(lukeUiClassNames.resetRoot);
 
@@ -72,7 +72,7 @@ globalStyleInLayer('reset', `${root} :where(:disabled, [data-disabled="true"])`,
 });
 
 globalStyleInLayer('reset', `${root} :where(:focus-visible)`, {
-	...focusRing(vars.themeColor.focusRingColor),
+	...focusRing(vars.color.border.focus),
 
 	'@media': {
 		'(forced-colors: active)': {

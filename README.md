@@ -26,8 +26,7 @@ Useful repo commands:
 
 `@luke-ui/react` contains the public React package.
 
-- Tokens: `packages/@luke-ui/react/src/tokens.ts`.
-- Theme: `packages/@luke-ui/react/src/theme/`.
+- Theme contract and compiler: `packages/@luke-ui/react/src/theme/`.
 - Styles: `packages/@luke-ui/react/src/styles/`.
 - Build output: `packages/@luke-ui/react/dist/stylesheet.css`.
 

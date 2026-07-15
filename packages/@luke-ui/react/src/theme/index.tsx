@@ -1,16 +1,8 @@
 import { lukeUiClassNames } from '../styles/class-names.js';
-import { themeClass } from '../theme.css.js';
 import { cx } from '../utils/index.js';
 
-/** The vanilla-extract CSS class that applies the design-token theme to its subtree. */
-export { themeClass } from '../theme.css.js';
-
-/** Convenience class name combining the theme, theme-root, and CSS-reset root classes. Apply to your app's root element. */
-export const themeRootClassName = cx(
-	themeClass,
-	lukeUiClassNames.themeRoot,
-	lukeUiClassNames.resetRoot,
-);
+/** Convenience class name combining the theme-root and CSS-reset classes. */
+export const themeRootClassName = cx(lukeUiClassNames.themeRoot, lukeUiClassNames.resetRoot);
 
 /**
  * Typed access to the semantic theme custom properties. Each path resolves to a stable global
