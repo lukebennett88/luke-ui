@@ -1,7 +1,13 @@
 import type { CSSProperties } from 'react';
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { Button } from '../button/index.js';
-import { captureVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	renderVisual,
+	Stack,
+	visualAppearances,
+} from '../test-utils/render-visual.js';
 import { TextField } from '../text-field/index.js';
 import { LoadingSkeleton } from './index.js';
 
@@ -17,7 +23,7 @@ test('text and component placeholders', async () => {
 			<LoadingSkeleton>
 				<Button>Submit</Button>
 			</LoadingSkeleton>
-			<LoadingSkeleton borderRadius="4px">
+			<LoadingSkeleton radius="control">
 				<TextField label="Email" name="email" placeholder="Email address" />
 			</LoadingSkeleton>
 		</Stack>,
@@ -37,3 +43,34 @@ test('loaded content', async () => {
 
 	await captureVisual(locator, 'loading-skeleton/loaded');
 });
+
+test.each(visualAppearances)('flattens tactile descendants: $theme $mode', async (appearance) => {
+	const scene = renderVisual(
+		<LoadingSkeleton radius="surface">
+			<div>
+				<Button>Nested action</Button>
+				<TextField label="Email" name="email" />
+			</div>
+		</LoadingSkeleton>,
+		appearance,
+	);
+	const button = requireElement(scene.element(), 'button');
+	const field = requireElement(scene.element(), 'input');
+
+	for (const descendant of [button, field]) {
+		const style = getComputedStyle(descendant);
+		expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+		expect(style.backgroundImage).toBe('none');
+		expect(style.borderStyle).toBe('none');
+		expect(style.boxShadow).toBe('none');
+		expect(style.color).toBe('rgba(0, 0, 0, 0)');
+	}
+
+	await captureVisualAppearance(scene, 'loading-skeleton/descendant-suppression', appearance);
+});
+
+function requireElement(parent: ParentNode, selector: string) {
+	const element = parent.querySelector(selector);
+	if (!element) throw new Error(`Expected element matching "${selector}".`);
+	return element;
+}

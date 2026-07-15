@@ -1,11 +1,14 @@
 import type { CSSProperties } from 'react';
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import {
 	captureVisual,
+	captureVisualAppearance,
 	renderVisual,
 	Stack,
 	variantValuesFor,
+	visualAppearances,
 } from '../test-utils/render-visual.js';
+import { vars } from '../theme/index.js';
 import { Icon } from './index.js';
 
 const rowStyle = {
@@ -40,4 +43,19 @@ test('sizes and glyphs', async () => {
 	);
 
 	await captureVisual(locator, 'icon/sizes-glyphs');
+});
+
+test.each(visualAppearances)('semantic content inheritance: $theme $mode', async (appearance) => {
+	const scene = renderVisual(
+		<div style={{ color: vars.color.intent.accent.text }}>
+			<Icon name="checkCircle" title="Inherited accent" />
+		</div>,
+		appearance,
+	);
+	const icon = scene.getByRole('img', { name: 'Inherited accent' });
+	const parent = icon.element().parentElement;
+	if (!parent) throw new Error('Expected icon parent.');
+
+	expect(getComputedStyle(icon.element()).color).toBe(getComputedStyle(parent).color);
+	await captureVisualAppearance(scene, 'icon/content-inheritance', appearance);
 });

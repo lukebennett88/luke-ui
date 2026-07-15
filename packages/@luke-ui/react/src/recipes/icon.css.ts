@@ -1,6 +1,6 @@
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer } from '../styles/layered-style.css.js';
-import { vars } from '../styles/vars.css.js';
+import { vars } from '../theme/contract.css.js';
 
 /** Shared size dimensions for Icon and LoadingSpinner (icon-aligned sizing). */
 export const iconSizeVariants = {

@@ -1,7 +1,6 @@
 import type { LoadingSpinnerProps } from '@luke-ui/react/loading-spinner';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import { spinAnimationName } from '@luke-ui/react/recipes';
-import { tokenKeys, tokens } from '@luke-ui/react/tokens';
+import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
 import { expect, userEvent } from 'storybook/test';
@@ -39,6 +38,22 @@ export const Default = meta.story({
 	},
 });
 
+/** Use a value when progress can be measured against a known range. */
+export const Determinate = meta.story({
+	args: {
+		'aria-label': 'Uploading',
+		maxValue: 200,
+		minValue: 100,
+		value: 175,
+	},
+	play: async ({ canvas }) => {
+		await expect(canvas.getByRole('progressbar', { name: 'Uploading' })).toHaveAttribute(
+			'aria-valuenow',
+			'175',
+		);
+	},
+});
+
 const sizes: Array<NonNullable<LoadingSpinnerProps['size']>> = ['small', 'medium'];
 
 /**
@@ -55,17 +70,27 @@ export const Size = meta.story({
 	),
 });
 
-const colors = tokenKeys(tokens.foregroundColor);
+const colors = ['primary', 'secondary', 'accent', 'info', 'success', 'warning', 'danger'] as const;
 
 /**
- * Spinner color can use any design-system foreground color token.
+ * Spinner color can use semantic content roles, or inherit its parent's color when omitted.
  */
 export const Color = meta.story({
 	args: baseArgs,
+	play: async ({ canvas }) => {
+		const inherited = canvas.getByRole('progressbar', { name: 'Inherited accent' });
+		const parent = inherited.parentElement;
+		if (!parent) throw new Error('Expected spinner parent.');
+
+		await expect(getComputedStyle(inherited).color).toBe(getComputedStyle(parent).color);
+	},
 	render: (props) => (
 		<div style={flexRowStyle}>
+			<div style={{ color: vars.color.intent.accent.text }}>
+				<LoadingSpinner {...props} aria-label="Inherited accent" />
+			</div>
 			{colors.map((color) => (
-				<LoadingSpinner color={color} key={color} {...props} />
+				<LoadingSpinner {...props} aria-label={color} color={color} key={color} />
 			))}
 		</div>
 	),
@@ -117,6 +142,11 @@ function StaggeredSpinners(props: LoadingSpinnerProps) {
 
 function findSpinAnimations(root: Element): Array<CSSAnimation> {
 	return root.getAnimations({ subtree: true }).filter((animation): animation is CSSAnimation => {
-		return animation instanceof CSSAnimation && animation.animationName === spinAnimationName;
+		return (
+			animation instanceof CSSAnimation &&
+			animation.effect instanceof KeyframeEffect &&
+			animation.effect.target instanceof HTMLElement &&
+			animation.effect.target.getAttribute('role') === 'progressbar'
+		);
 	});
 }

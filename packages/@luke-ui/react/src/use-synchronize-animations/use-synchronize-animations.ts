@@ -7,8 +7,8 @@ const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffec
  * Synchronises the CSS animation identified by `animationName` across every element currently playing it, so they
  * all pulse in lockstep rather than each starting from their own offset.
  *
- * Pass the animation name string (e.g. `skeletonAnimationName`), or a falsy value to skip syncing (e.g. when the
- * animated element isn't rendered).
+ * Pass an animation name string, or a falsy value to skip syncing when the animated element isn't
+ * rendered.
  */
 export function useSynchronizeAnimations(animationName: string | null | undefined): void {
 	useIsomorphicLayoutEffect(() => {

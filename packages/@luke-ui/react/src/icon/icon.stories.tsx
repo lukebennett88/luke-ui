@@ -1,11 +1,10 @@
 import { Button } from '@luke-ui/react/button';
 import type { IconProps } from '@luke-ui/react/icon';
 import { createIcon, Icon, iconNames } from '@luke-ui/react/icon';
-import { tokenKeys, tokens } from '@luke-ui/react/tokens';
+import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
-import { vars } from '../theme.css.js';
 
 const meta = preview.meta({
 	component: Icon,
@@ -19,7 +18,12 @@ const baseArgs = {
 } as const satisfies Partial<IconProps>;
 
 const iconSizes: Array<NonNullable<IconProps['size']>> = ['xsmall', 'small', 'medium', 'large'];
-const colors = tokenKeys(tokens.foregroundColor);
+const colors = {
+	accent: vars.color.intent.accent.text,
+	danger: vars.color.intent.danger.text,
+	primary: vars.color.text.primary,
+	secondary: vars.color.text.secondary,
+} as const;
 
 const wrapStyle = {
 	display: 'grid',
@@ -74,16 +78,16 @@ export const Sizes = meta.story({
 });
 
 /**
- * Icon color follows `currentColor`, so any foreground token can be applied.
+ * Icon color follows the semantic content color inherited from its parent.
  */
 export const Color = meta.story({
 	args: baseArgs,
 	render: (props) => (
 		<div style={wrapStyle}>
-			{colors.map((color) => (
-				<div key={color} style={iconItemStyle}>
-					<Icon {...props} style={{ color: vars.color[color] }} />
-					<span>{color}</span>
+			{Object.entries(colors).map(([name, color]) => (
+				<div key={name} style={{ ...iconItemStyle, color }}>
+					<Icon {...props} />
+					<span>{name}</span>
 				</div>
 			))}
 		</div>

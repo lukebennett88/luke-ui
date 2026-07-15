@@ -1,6 +1,5 @@
 import { Button } from '@luke-ui/react/button';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
-import { skeletonAnimationName } from '@luke-ui/react/recipes';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import type { CSSProperties } from 'react';
@@ -74,20 +73,23 @@ export const ElementType = meta.story({
 	),
 });
 
-/** Use `borderRadius` when the visible control is rounded below the direct child. */
-export const BorderRadius = meta.story({
+/** Use `radius` when the visible control is rounded below the direct child. */
+export const Radius = meta.story({
 	play: async ({ canvasElement }) => {
 		const skeletonSurface = requireElement(canvasElement, '[aria-hidden] > *');
 
 		await advanceSkeletonPulseToFadePoint(skeletonSurface);
 
 		const skeletonOverlayStyles = getComputedStyle(skeletonSurface, '::after');
+		const expectedRadius =
+			getComputedStyle(canvasElement).getPropertyValue('--luke-radius-control');
 
 		await expect(skeletonOverlayStyles.opacity).toBe('1');
+		await expect(skeletonOverlayStyles.borderRadius).toBe(expectedRadius);
 		await expect(getBrightnessFilterValue(skeletonOverlayStyles.filter)).toBeLessThanOrEqual(0.9);
 	},
 	render: () => (
-		<LoadingSkeleton borderRadius="0.25rem">
+		<LoadingSkeleton radius="control">
 			<TextField label="Email" name="email" />
 		</LoadingSkeleton>
 	),
@@ -174,7 +176,11 @@ function requireElement(parent: ParentNode, selector: string) {
 
 function requireSkeletonAnimations(element: Element) {
 	const animations = element.getAnimations({ subtree: true }).filter((candidate) => {
-		return candidate instanceof CSSAnimation && candidate.animationName === skeletonAnimationName;
+		return (
+			candidate instanceof CSSAnimation &&
+			candidate.effect instanceof KeyframeEffect &&
+			candidate.effect.target === element
+		);
 	});
 
 	if (animations.length === 0) {

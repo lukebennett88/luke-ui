@@ -1,14 +1,18 @@
 import { keyframes } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
-import { vars } from '../styles/vars.css.js';
-import { tokenKeys } from '../tokens/groups.js';
-import { tokens } from '../tokens/index.js';
+import { vars } from '../theme/contract.css.js';
 import { iconSizeVariants } from './icon.css.js';
 
-const colorKeys = tokenKeys(tokens.foregroundColor);
-
-const colorVariants = Object.fromEntries(colorKeys.map((key) => [key, { color: vars.color[key] }]));
+const colorVariants = {
+	accent: { color: vars.color.intent.accent.text },
+	danger: { color: vars.color.intent.danger.text },
+	info: { color: vars.color.intent.info.text },
+	primary: { color: vars.color.text.primary },
+	secondary: { color: vars.color.text.secondary },
+	success: { color: vars.color.intent.success.text },
+	warning: { color: vars.color.intent.warning.text },
+} as const;
 
 const base = styleInLayer('recipes', {
 	color: 'currentColor',
@@ -31,7 +35,7 @@ export const spinner = recipeInLayer('recipes', {
 /** Variant type for the `LoadingSpinner` recipe. */
 export type LoadingSpinnerVariants = RecipeVariants<typeof spinner>;
 
-/** Generated name of the spinner's rotation animation. Pass to `useSynchronizeAnimations` so every mounted spinner rotates in lockstep. */
+/** @internal */
 export const spinAnimationName = keyframes({
 	to: { transform: 'rotate(360deg)' },
 });
@@ -44,10 +48,14 @@ export const spinnerState = recipeInLayer('recipes', {
 		mode: {
 			determinate: {},
 			indeterminate: {
-				animationDuration: vars.motion.duration.slow,
+				'@media': {
+					'(forced-colors: active)': { animationName: 'none' },
+					'(prefers-reduced-motion: reduce)': { animationName: 'none' },
+				},
+				animationDuration: vars.motion.duration.ambient,
 				animationIterationCount: 'infinite',
 				animationName: spinAnimationName,
-				animationTimingFunction: vars.motion.easing.linear,
+				animationTimingFunction: vars.motion.easing.standard,
 			},
 		},
 	},
@@ -62,7 +70,7 @@ export const svg = recipeInLayer('recipes', {
 	},
 });
 
-/** Generated name of the spinner indicator's rubber-band animation. Pass to `useSynchronizeAnimations` so every mounted spinner pulses in lockstep. */
+/** @internal */
 export const rubberBandAnimationName = keyframes({
 	'0%': { strokeDasharray: '2 100' },
 	'50%': { strokeDasharray: '65 100', strokeDashoffset: -20 },
@@ -79,15 +87,27 @@ export const indicator = recipeInLayer('recipes', {
 	variants: {
 		mode: {
 			determinate: {
-				transitionDuration: vars.motion.duration.quick,
+				transitionDuration: vars.motion.duration.fast,
 				transitionProperty: 'stroke-dashoffset',
 				transitionTimingFunction: vars.motion.easing.exit,
 			},
 			indeterminate: {
-				animationDuration: vars.motion.duration.slower,
+				'@media': {
+					'(forced-colors: active)': {
+						animationName: 'none',
+						strokeDasharray: '25 100',
+						strokeDashoffset: 0,
+					},
+					'(prefers-reduced-motion: reduce)': {
+						animationName: 'none',
+						strokeDasharray: '25 100',
+						strokeDashoffset: 0,
+					},
+				},
+				animationDuration: vars.motion.duration.ambient,
 				animationIterationCount: 'infinite',
 				animationName: rubberBandAnimationName,
-				animationTimingFunction: vars.motion.easing.emphasized,
+				animationTimingFunction: vars.motion.easing.standard,
 			},
 		},
 	},
