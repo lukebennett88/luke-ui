@@ -52,7 +52,10 @@ function RootDocument({ children }: { children: ReactNode }) {
 				<HeadContent />
 			</head>
 			<body className="flex min-h-screen flex-col">
-				<RootProvider search={{ SearchDialog: LazySearchDialog }}>
+				<RootProvider
+					search={{ SearchDialog: LazySearchDialog }}
+					theme={{ attribute: ['class', 'data-color-mode'] }}
+				>
 					<DocsThemeRoot>{children}</DocsThemeRoot>
 				</RootProvider>
 				<Scripts />

@@ -2,46 +2,49 @@ import { themeRootClassName } from '@luke-ui/react/theme';
 import { elmoThemeClassName, machinedEdgeThemeClassName } from '@luke-ui/react/themes';
 import { cx } from '@luke-ui/react/utils';
 import type { ChangeEvent, ComponentProps, PropsWithChildren } from 'react';
-import { createContext, useContext, useMemo, useState } from 'react';
-import { ThemeToggle, useHydratedTheme } from './playground/theme-toggle';
+import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
+import { ColorModeToggle, useHydratedColorMode } from './playground/color-mode-toggle.js';
 
-export type ThemeName = 'elmo' | 'machined-edge';
+export type ThemeIdentity = 'elmo' | 'machined-edge';
 
-interface ThemeSettings {
-	setTheme: (theme: ThemeName) => void;
-	theme: ThemeName;
+const THEME_IDENTITY_STORAGE_KEY = 'luke-ui-docs-theme';
+const THEME_IDENTITY_CHANGE_EVENT = 'luke-ui-docs-theme-change';
+
+interface ThemeIdentitySettings {
+	setThemeIdentity: (themeIdentity: ThemeIdentity) => void;
+	themeIdentity: ThemeIdentity;
 }
 
-const ThemeSettingsContext = createContext<ThemeSettings | null>(null);
+const ThemeIdentitySettingsContext = createContext<ThemeIdentitySettings | null>(null);
 
 export function DocsThemeRoot({ children }: PropsWithChildren) {
-	const colorMode = useHydratedTheme();
-	const [theme, setTheme] = useState<ThemeName>('machined-edge');
-	const themeClassName =
-		theme === 'machined-edge' ? machinedEdgeThemeClassName : elmoThemeClassName;
-	const settings = useMemo(() => ({ setTheme, theme }), [theme]);
+	const colorMode = useHydratedColorMode();
+	const themeIdentity = useThemeIdentity();
+	const themeIdentityClassName =
+		themeIdentity === 'machined-edge' ? machinedEdgeThemeClassName : elmoThemeClassName;
+	const settings = useMemo(() => ({ setThemeIdentity, themeIdentity }), [themeIdentity]);
 
 	return (
-		<ThemeSettingsContext.Provider value={settings}>
+		<ThemeIdentitySettingsContext.Provider value={settings}>
 			<div
 				className={cx(
 					themeRootClassName,
-					themeClassName,
+					themeIdentityClassName,
 					'flex min-h-screen flex-1 flex-col text-fd-foreground',
 				)}
 				data-color-mode={colorMode ?? undefined}
 			>
 				{children}
 			</div>
-		</ThemeSettingsContext.Provider>
+		</ThemeIdentitySettingsContext.Provider>
 	);
 }
 
 export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
-	const { setTheme, theme } = useThemeSettings();
+	const { setThemeIdentity, themeIdentity } = useDocsThemeIdentity();
 
 	function handleThemeChange(event: ChangeEvent<HTMLSelectElement>) {
-		setTheme(event.target.value === 'elmo' ? 'elmo' : 'machined-edge');
+		setThemeIdentity(event.target.value === 'elmo' ? 'elmo' : 'machined-edge');
 	}
 
 	return (
@@ -52,19 +55,49 @@ export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
 					aria-label="Theme profile"
 					className="h-8 rounded-md border border-fd-border bg-fd-background px-2 text-fd-foreground text-xs"
 					onChange={handleThemeChange}
-					value={theme}
+					value={themeIdentity}
 				>
 					<option value="machined-edge">Machined edge</option>
 					<option value="elmo">ELMO</option>
 				</select>
 			</label>
-			<ThemeToggle />
+			<ColorModeToggle />
 		</div>
 	);
 }
 
-function useThemeSettings() {
-	const settings = useContext(ThemeSettingsContext);
+export function useDocsThemeIdentity() {
+	const settings = useContext(ThemeIdentitySettingsContext);
 	if (!settings) throw new Error('ThemeControls must be rendered inside DocsThemeRoot');
 	return settings;
+}
+
+function useThemeIdentity(): ThemeIdentity {
+	return useSyncExternalStore(subscribeToThemeIdentity, getThemeIdentity, getServerThemeIdentity);
+}
+
+function subscribeToThemeIdentity(onStoreChange: () => void) {
+	const handleStorage = (event: StorageEvent) => {
+		if (event.key === THEME_IDENTITY_STORAGE_KEY) onStoreChange();
+	};
+
+	window.addEventListener('storage', handleStorage);
+	window.addEventListener(THEME_IDENTITY_CHANGE_EVENT, onStoreChange);
+	return () => {
+		window.removeEventListener('storage', handleStorage);
+		window.removeEventListener(THEME_IDENTITY_CHANGE_EVENT, onStoreChange);
+	};
+}
+
+function getThemeIdentity(): ThemeIdentity {
+	return localStorage.getItem(THEME_IDENTITY_STORAGE_KEY) === 'elmo' ? 'elmo' : 'machined-edge';
+}
+
+function getServerThemeIdentity(): ThemeIdentity {
+	return 'machined-edge';
+}
+
+function setThemeIdentity(themeIdentity: ThemeIdentity) {
+	localStorage.setItem(THEME_IDENTITY_STORAGE_KEY, themeIdentity);
+	window.dispatchEvent(new Event(THEME_IDENTITY_CHANGE_EVENT));
 }

@@ -1,0 +1,55 @@
+---
+title: Authoring a theme
+description: Compile a typed Luke UI foundation into a static theme stylesheet.
+---
+
+`buildTheme` compiles a typed foundation into the complete semantic token contract. The function is
+pure, runs in Node, and produces static CSS containing the identity class and both colour modes.
+
+## Foundation fields
+
+A `ThemeFoundation` requires:
+
+- a kebab-case `name`
+- independent `light` and `dark` mode foundations
+- `color.neutral` and `color.accent` source colours for each mode
+- final `actionControlFinish.recessed`, `resting`, and `raised` background images for each mode
+- final `depth.recessed`, `resting`, `raised`, `floating`, and `overlay` box shadows for each mode
+
+Each mode may also provide `info`, `success`, `warning`, `danger`, and `focus` source colours. Luke
+UI uses accessible mode-specific defaults when they are omitted. Shared optional fields select one
+of the supported Capsize-compatible fonts and its four weight roles, plus the `detail`, `control`,
+`surface`, and `overlay` radii. Applications must load files for non-system fonts.
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/theme/foundation.ts"
+	name="ThemeFoundation"
+/>
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/theme/foundation.ts"
+	name="ThemeModeFoundation"
+/>
+
+## Compile the stylesheet
+
+Define a `ThemeFoundation` in the application, then run the public `buildTheme` API in a build
+script that writes its returned CSS to an application-owned stylesheet. Import that stylesheet
+through the application's bundler or framework. A custom theme does not need to be added to
+`@luke-ui/react` or wait for a Luke UI release. The two theme stylesheets included with Luke UI are
+defaults, not a registry of supported themes.
+
+<SourceCodeBlock src="theming/author-theme" />
+
+Apply `themeRootClassName` with `themeClassName('product')`. The framework-neutral example below
+accepts its generated stylesheet URL explicitly. Select colour mode with the same `data-color-mode`
+contract used by bundled themes.
+
+<SourceCodeBlock src="theming/custom-theme-app" />
+
+## Contrast validation
+
+Generation validates the sRGB-gamut-mapped result against WCAG 2.2 AA. Text pairs must reach 4.5:1.
+Non-text UI pairs must reach 3:1. When a generated pair fails, `buildTheme` throws a
+`ThemeContrastError`. Its message and `failures` array name every failing colour mode and token
+pair, so the build should stop rather than publish an invalid stylesheet.

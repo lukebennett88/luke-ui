@@ -1,0 +1,52 @@
+---
+title: Applying a theme
+description: Load Luke UI styles and apply theme identity and colour mode correctly.
+---
+
+## Load the CSS entrypoints
+
+Import the shared component stylesheet and exactly one theme stylesheet. Importing one bundled theme
+does not pull in the other.
+
+Use `@luke-ui/react/themes/elmo.css` instead when ELMO is the application theme.
+
+## Apply theme identity
+
+Apply `themeRootClassName` and the matching identity class near the application root.
+
+<SourceCodeBlock src="theming/apply-theme" />
+
+The bundled identity constants are `machinedEdgeThemeClassName` and `elmoThemeClassName`. Theme
+identity is not nestable. Choose one identity for an application or independent subtree.
+
+## Select a colour mode
+
+Set `data-color-mode="light"` or `data-color-mode="dark"` on the theme root to force a mode. Omit
+the attribute to follow `prefers-color-scheme`.
+
+Colour-mode scopes are nestable. A nested scope can force the opposite mode without changing theme
+identity.
+
+<SourceCodeBlock src="theming/nested-color-mode" />
+
+Every explicit scope sets the native `color-scheme` property. Browser controls and scrollbars
+therefore use the same light or dark mode as Luke UI.
+
+## Portals
+
+Portalled content leaves its DOM ancestry, so copy the active identity class and explicit
+`data-color-mode` value to the portal root. When the source follows the system preference, omit the
+attribute on the portal root as well. Luke UI's Combobox copies these values automatically.
+Application-owned portals must preserve the same public class-and-attribute contract.
+
+## Server rendering and the first paint
+
+Render the identity classes and any known explicit colour mode in the server HTML. When the mode is
+system-controlled, omit `data-color-mode` so CSS can choose the correct mode before JavaScript runs.
+
+If a stored client preference can differ from the server default, run a small blocking bootstrap
+script before the themed UI is painted. It should read the stored preference and set the root class
+or `data-color-mode` before hydration. A React effect runs too late and paints the wrong mode first.
+Theme libraries such as `next-themes` can provide this bootstrap when configured to write the same
+attribute contract. Keep the server fallback and hydrated value consistent to avoid hydration
+warnings.

@@ -12,13 +12,27 @@ const fontStep = {
  * stable `--luke-*` custom property.
  */
 export const themeContractTree = {
+	/** Semantic colours for surfaces, content, borders, loading, and six named intents. */
 	color: {
-		surface: { canvas: null, resting: null, recessed: null, floating: null, overlay: null },
+		surface: {
+			canvas: null,
+			resting: null,
+			recessed: null,
+			floating: null,
+			overlay: null,
+		},
 		surfaceDisabled: null,
 		loadingSkeleton: null,
-		text: { primary: null, secondary: null },
+		text: {
+			primary: null,
+			secondary: null,
+		},
 		textDisabled: null,
-		border: { decorative: null, control: null, focus: null },
+		border: {
+			decorative: null,
+			control: null,
+			focus: null,
+		},
 		borderDisabled: null,
 		intent: {
 			neutral: {
@@ -100,22 +114,66 @@ export const themeContractTree = {
 			},
 		},
 	},
-	depth: { recessed: null, resting: null, raised: null, floating: null, overlay: null },
-	actionControlFinish: { recessed: null, resting: null, raised: null },
-	font: {
-		100: { ...fontStep },
-		200: { ...fontStep },
-		300: { ...fontStep },
-		400: { ...fontStep },
-		500: { ...fontStep },
-		600: { ...fontStep },
-		700: { ...fontStep },
-		800: { ...fontStep },
-		900: { ...fontStep },
-		family: null,
-		weight: { body: null, label: null, heading: null, emphasis: null },
+	/** Composite box-shadow values for the shared depth ladder. */
+	depth: {
+		recessed: null,
+		resting: null,
+		raised: null,
+		floating: null,
+		overlay: null,
 	},
-	radius: { detail: null, control: null, surface: null, overlay: null, full: null },
+	/** Final background images for the shared Button and IconButton face finish. */
+	actionControlFinish: {
+		recessed: null,
+		resting: null,
+		raised: null,
+	},
+	/** Composite type steps, font family, and theme-controlled weight roles. */
+	font: {
+		100: {
+			...fontStep,
+		},
+		200: {
+			...fontStep,
+		},
+		300: {
+			...fontStep,
+		},
+		400: {
+			...fontStep,
+		},
+		500: {
+			...fontStep,
+		},
+		600: {
+			...fontStep,
+		},
+		700: {
+			...fontStep,
+		},
+		800: {
+			...fontStep,
+		},
+		900: {
+			...fontStep,
+		},
+		family: null,
+		weight: {
+			body: null,
+			label: null,
+			heading: null,
+			emphasis: null,
+		},
+	},
+	/** Corner radii for details, controls, surfaces, overlays, and full rounding. */
+	radius: {
+		detail: null,
+		control: null,
+		surface: null,
+		overlay: null,
+		full: null,
+	},
+	/** The semantic spacing scale used by components and layout utilities. */
 	space: {
 		100: null,
 		200: null,
@@ -127,11 +185,31 @@ export const themeContractTree = {
 		1200: null,
 		1600: null,
 	},
-	controlSize: { small: null, medium: null },
-	iconSize: { xsmall: null, small: null, medium: null, large: null },
+	/** Structural block sizes for small and medium controls. */
+	controlSize: {
+		small: null,
+		medium: null,
+	},
+	/** Inline and block sizes for the four public icon sizes. */
+	iconSize: {
+		xsmall: null,
+		small: null,
+		medium: null,
+		large: null,
+	},
+	/** Luke UI-owned durations and easing curves for interaction motion. */
 	motion: {
-		duration: { fast: null, medium: null, slow: null, ambient: null },
-		easing: { standard: null, enter: null, exit: null },
+		duration: {
+			fast: null,
+			medium: null,
+			slow: null,
+			ambient: null,
+		},
+		easing: {
+			standard: null,
+			enter: null,
+			exit: null,
+		},
 	},
 };
 

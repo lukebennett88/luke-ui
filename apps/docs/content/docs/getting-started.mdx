@@ -21,55 +21,19 @@ Inside this monorepo, use a workspace dependency instead.
 }
 ```
 
+## Choose a theme
+
+Import the shared stylesheet and one bundled theme. Machined edge is the default tactile theme. ELMO
+is the flatter alternative.
+
+See [Theming overview](/docs/theming) to compare the bundled themes and colour modes.
+
 ## Render a component
 
-Apply the Luke UI theme class near the top of your app. Components use it to resolve design-token
-CSS variables and scoped reset rules.
+Apply the Luke UI root class and the chosen theme identity class near the top of your app.
+Components use them to resolve semantic CSS variables and scoped reset rules.
 
-```tsx
-import lukeUiStyles from '@luke-ui/react/stylesheet.css?url';
-import { themeRootClassName } from '@luke-ui/react/theme';
-import { Text } from '@luke-ui/react/text';
-
-export function App() {
-	return (
-		<>
-			<link rel="stylesheet" href={lukeUiStyles} />
-			<div className={themeRootClassName}>
-				<Text>Hello world</Text>
-			</div>
-		</>
-	);
-}
-```
-
-## Minimal example
-
-For small demos, import the stylesheet and render a component directly.
-
-```tsx
-import lukeUiStyles from '@luke-ui/react/stylesheet.css?url';
-import { Text } from '@luke-ui/react/text';
-
-export function Example() {
-	return (
-		<>
-			<link rel="stylesheet" href={lukeUiStyles} />
-			<Text>Hello world</Text>
-		</>
-	);
-}
-```
-
-## Manual root class
-
-Use `themeRootClassName` when you need to attach the theme class yourself.
-
-```tsx
-import { themeRootClassName } from '@luke-ui/react/theme';
-
-<div className={themeRootClassName} />;
-```
+<SourceCodeBlock src="theming/getting-started" />
 
 ## Next steps
 
@@ -79,3 +43,4 @@ import { themeRootClassName } from '@luke-ui/react/theme';
 - Read [Combobox Field](/docs/components/forms/combobox-field).
 - Read [Text](/docs/components/typography/text).
 - Read [Icon](/docs/components/visuals/icon).
+- Read [Applying a theme](/docs/theming/applying).
