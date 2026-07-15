@@ -89,8 +89,11 @@ type ColorMode = 'light' | 'dark';
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const TEXT_RATIO = 4.5;
 const UI_RATIO = 3;
-// Solve slightly past the required ratio so 4-decimal OKLCH emission cannot round a passing pair
-// below the WCAG threshold.
+// Skeletons are decorative, so this is a perceptual distinction target rather than a WCAG
+// requirement. Dark mode needs more headroom because the brightness pulse moves toward the canvas.
+const LOADING_SKELETON_RATIOS = { dark: 1.75, light: 1.4 } as const;
+// Solve slightly past the requested ratio so 4-decimal OKLCH emission cannot round a passing pair
+// below its target.
 const RATIO_HEADROOM = 0.05;
 
 const INTENT_NAMES = ['neutral', 'accent', 'info', 'success', 'warning', 'danger'] as const;
@@ -264,6 +267,15 @@ function buildModeColors(
 		'color.surface.floating': surfaces.floating,
 		'color.surface.overlay': surfaces.overlay,
 	};
+	colors['color.loadingSkeleton'] = solveLightness({
+		backgrounds: [canvas],
+		chroma: Math.min(neutral.c, 0.01),
+		hue: neutral.h,
+		mode,
+		ratio: LOADING_SKELETON_RATIOS[mode],
+		startLightness: canvas.l,
+		window: isLight ? [0, canvas.l] : [canvas.l, 1],
+	});
 
 	colors['color.text.primary'] = solveLightness({
 		backgrounds: allSurfaces,

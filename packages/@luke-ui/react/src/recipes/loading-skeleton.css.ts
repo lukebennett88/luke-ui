@@ -23,7 +23,7 @@ export const skeletonRadiusVar = '--luke-loading-skeleton-radius';
 // admit the `!important` suffix in their type.
 const surface = {
 	backgroundClip: 'border-box !important',
-	backgroundColor: `${vars.color.surfaceDisabled} !important`,
+	backgroundColor: `${vars.color.loadingSkeleton} !important`,
 	backgroundImage: 'none !important',
 	border: 'none !important',
 	// Text spanning multiple lines keeps its radius on every line fragment.
