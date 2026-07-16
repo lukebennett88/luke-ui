@@ -82,7 +82,7 @@ export type HeadingLevelsProps = {
  * // Using render prop to access level and element
  * <HeadingLevels base={2}>
  *   {({ level, element }) => (
- *     <Heading as={element} level={level}>
+ *     <Heading elementType={element} level={level}>
  *       Dynamic Heading
  *     </Heading>
  *   )}

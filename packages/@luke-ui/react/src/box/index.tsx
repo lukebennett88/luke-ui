@@ -1,15 +1,14 @@
-import type { ComponentPropsWithRef, JSX, ReactElement } from 'react';
+import type { ComponentPropsWithRef, JSX } from 'react';
 import type { SprinklesProps } from '../styles/index.js';
 import { createSprinkles } from '../styles/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
+import type { RenderProp } from '../types/render-prop.js';
 import { mergeProps } from '../utils/index.js';
-
-type BoxRender = (props: ComponentPropsWithRef<'div'>, renderProps: undefined) => ReactElement;
 
 interface _BoxProps extends ComponentPropsWithRef<'div'>, SprinklesProps {
 	/** Renders a compatible custom `div` while carrying Box's DOM props and generated styles. */
-	render?: BoxRender;
+	render?: RenderProp<'div'>;
 }
 
 /**

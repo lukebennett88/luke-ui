@@ -28,7 +28,7 @@ interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	 * Element rendered while loading.
 	 * @default 'span'
 	 */
-	as?: ElementType;
+	elementType?: ElementType;
 	/**
 	 * Sets the semantic corner radius of the skeleton overlay. Use when the wrapped child has no
 	 * radius of its own but a visual descendant does (e.g. wrapping a `TextField`).
@@ -54,7 +54,7 @@ export type LoadingSkeletonProps = Prettify<_LoadingSkeletonProps>;
  */
 export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	const {
-		as: Component = 'span',
+		elementType: Component = 'span',
 		children,
 		className,
 		isLoading: isLoadingProp,
