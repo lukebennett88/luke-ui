@@ -88,14 +88,14 @@ export const MultilineText = meta.story({
 	),
 });
 
-/** Use `as` when parent markup needs an element other than `span`. */
+/** Use `elementType` when parent markup needs an element other than `span`. */
 export const ElementType = meta.story({
 	play: async ({ canvasElement }) => {
 		await expect(canvasElement.querySelector('li[aria-hidden]')).toBeInTheDocument();
 	},
 	render: () => (
 		<ul>
-			<LoadingSkeleton as="li">List item placeholder</LoadingSkeleton>
+			<LoadingSkeleton elementType="li">List item placeholder</LoadingSkeleton>
 		</ul>
 	),
 });

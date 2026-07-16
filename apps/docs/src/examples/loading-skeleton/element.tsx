@@ -9,7 +9,7 @@ export default function ElementSkeleton() {
 			style={{ alignItems: 'flex-start', display: 'flex', flexDirection: 'column', gap: '1rem' }}
 		>
 			<ul>
-				<LoadingSkeleton as="li" isLoading={isLoading}>
+				<LoadingSkeleton elementType="li" isLoading={isLoading}>
 					List item placeholder
 				</LoadingSkeleton>
 			</ul>
