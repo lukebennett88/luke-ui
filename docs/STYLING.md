@@ -17,7 +17,7 @@ stylesheet and apply its identity class to the same element. Neither step inject
 - `theme/foundation.ts`: the typed theme-foundation input and curated defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/build-theme.ts`: `buildTheme(foundation)`, `themeClassName`, and contrast validation.
-- `theme/foundations.ts`: foundations for the bundled Machined edge and ELMO themes.
+- `theme/foundations.ts`: foundations for the bundled Tactile and Paper themes.
 - `themes/`: bundled theme class-name constants exported from `@luke-ui/react/themes`.
 - `scripts/build-themes.ts`: writes the bundled theme stylesheets to `dist/themes/`.
 
@@ -48,9 +48,9 @@ Use `deriveConcentricRadius(innerRadius, gap)` for rounded elements nested insid
 surface. It returns a CSS `calc()` value for the outer radius, so both inputs can be semantic theme
 variables instead of theme-specific numbers.
 
-The bundled themes ship precompiled. Import `@luke-ui/react/themes/machined-edge.css` or
-`@luke-ui/react/themes/elmo.css` and apply the matching `machinedEdgeThemeClassName` or
-`elmoThemeClassName` constant from `@luke-ui/react/themes` to `<html>` or a subtree root. Importing
+The bundled themes ship precompiled. Import `@luke-ui/react/themes/tactile.css` or
+`@luke-ui/react/themes/paper.css` and apply the matching `tactileThemeClassName` or
+`paperThemeClassName` constant from `@luke-ui/react/themes` to `<html>` or a subtree root. Importing
 one theme never pulls in the other.
 
 Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Setting

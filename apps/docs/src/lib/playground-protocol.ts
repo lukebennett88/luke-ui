@@ -8,7 +8,7 @@ const codeMessageSchema = z.object({
 const appearanceMessageSchema = z.object({
 	type: z.literal('playground:appearance'),
 	colorMode: z.enum(['light', 'dark', 'system']),
-	themeIdentity: z.enum(['machined-edge', 'elmo']),
+	themeIdentity: z.enum(['tactile', 'paper']),
 });
 
 const parentMessageSchema = z.discriminatedUnion('type', [

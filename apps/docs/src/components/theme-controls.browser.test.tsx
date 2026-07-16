@@ -1,7 +1,7 @@
 import '../styles/app.css';
-import '@luke-ui/react/themes/elmo.css';
-import '@luke-ui/react/themes/machined-edge.css';
-import { elmoThemeClassName } from '@luke-ui/react/themes';
+import '@luke-ui/react/themes/paper.css';
+import '@luke-ui/react/themes/tactile.css';
+import { paperThemeClassName } from '@luke-ui/react/themes';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
@@ -40,23 +40,23 @@ test('persists theme identity and colour mode independently', async () => {
 	const darkMode = page.getByRole('radio', { name: 'Dark theme' });
 	const themeRoot = getThemeRoot();
 
-	await userEvent.selectOptions(profile, 'elmo');
+	await userEvent.selectOptions(profile, 'paper');
 
-	expect(profile).toHaveValue('elmo');
-	expect(themeRoot).toHaveClass(elmoThemeClassName);
+	expect(profile).toHaveValue('paper');
+	expect(themeRoot).toHaveClass(paperThemeClassName);
 	expect(themeRoot.dataset.colorMode).toBe('light');
 
 	await userEvent.click(darkMode, { force: true });
 
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
-	expect(themeRoot).toHaveClass(elmoThemeClassName);
+	expect(themeRoot).toHaveClass(paperThemeClassName);
 
 	unmountTheme();
 	renderTheme(<ThemeControls />);
 
-	expect(page.getByRole('combobox', { name: 'Theme profile' })).toHaveValue('elmo');
+	expect(page.getByRole('combobox', { name: 'Theme profile' })).toHaveValue('paper');
 	expect(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
-	expect(getThemeRoot()).toHaveClass(elmoThemeClassName);
+	expect(getThemeRoot()).toHaveClass(paperThemeClassName);
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
 });
 

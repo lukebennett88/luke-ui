@@ -1,12 +1,12 @@
 /// <reference types="vite/client" />
 
-import '../dist/themes/elmo.css';
-import '../dist/themes/machined-edge.css';
+import '../dist/themes/paper.css';
+import '../dist/themes/tactile.css';
 import '@luke-ui/react/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeRootClassName, vars } from '@luke-ui/react/theme';
-import { elmoThemeClassName, machinedEdgeThemeClassName } from '@luke-ui/react/themes';
+import { paperThemeClassName, tactileThemeClassName } from '@luke-ui/react/themes';
 import addonA11y from '@storybook/addon-a11y';
 import addonDocs from '@storybook/addon-docs';
 import { definePreview } from '@storybook/react-vite';
@@ -17,7 +17,7 @@ export default definePreview({
 	decorators: [
 		(Story, { globals, viewMode }) => {
 			const themeClassName =
-				globals.theme === 'elmo' ? elmoThemeClassName : machinedEdgeThemeClassName;
+				globals.theme === 'paper' ? paperThemeClassName : tactileThemeClassName;
 			const colorMode = globals.colorMode === 'dark' ? 'dark' : 'light';
 			const isStoryView = viewMode === 'story';
 
@@ -62,15 +62,15 @@ export default definePreview({
 				dynamicTitle: true,
 				icon: 'paintbrush',
 				items: [
-					{ title: 'Machined edge', value: 'machined-edge' },
-					{ title: 'ELMO', value: 'elmo' },
+					{ title: 'Tactile', value: 'tactile' },
+					{ title: 'Paper', value: 'paper' },
 				],
 			},
 		},
 	},
 	initialGlobals: {
 		colorMode: 'light',
-		theme: 'machined-edge',
+		theme: 'tactile',
 	},
 	parameters: {
 		a11y: {

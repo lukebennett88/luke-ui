@@ -1,7 +1,7 @@
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';
-import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { tactileThemeClassName } from '../themes/index.js';
 import { link } from './link.css.js';
 
 let mounted: Array<HTMLElement> = [];
@@ -83,7 +83,7 @@ test('focus-visible shows the complete independent semantic ring', () => {
 
 function mountLink(options: Parameters<typeof link>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${machinedEdgeThemeClassName}`;
+	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	const anchor = root.appendChild(document.createElement('a'));
 	anchor.className = link(options);

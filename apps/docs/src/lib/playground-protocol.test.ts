@@ -5,7 +5,7 @@ test('accepts a complete playground appearance update', () => {
 	expect(
 		isPlaygroundParentMessage({
 			colorMode: 'system',
-			themeIdentity: 'elmo',
+			themeIdentity: 'paper',
 			type: 'playground:appearance',
 		}),
 	).toBe(true);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { elmoThemeClassName, machinedEdgeThemeClassName } from '../themes/index.js';
+import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { buildTheme, ThemeContrastError, themeClassName } from './build-theme.js';
 import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
@@ -10,7 +10,7 @@ import {
 	defaultSourceColors,
 	deriveConcentricRadius,
 } from './foundation.js';
-import { elmoFoundation, machinedEdgeFoundation } from './foundations.js';
+import { paperFoundation, tactileFoundation } from './foundations.js';
 
 const pairs = flattenThemeContract();
 const isModePath = (path: string) => {
@@ -60,18 +60,18 @@ function extractShadowOpacities(shadow: string): Array<number> {
 }
 
 describe('buildTheme output', () => {
-	const css = buildTheme(machinedEdgeFoundation);
+	const css = buildTheme(tactileFoundation);
 	const blocks = splitBlocks(css);
 
 	it('emits the identity class, colour schemes, and all mode scoping rules', () => {
-		expect(css).toContain('.luke-ui-theme-machined-edge {');
+		expect(css).toContain('.luke-ui-theme-tactile {');
 		expect(css).toContain('@media (prefers-color-scheme: dark) {');
 		expect(blocks.baseLight).toContain('color-scheme: light;');
 		expect(blocks.mediaDark).toContain('color-scheme: dark;');
 		for (const mode of ['light', 'dark']) {
-			expect(css).toContain(`.luke-ui-theme-machined-edge[data-color-mode='${mode}'],`);
-			expect(css).toContain(`.luke-ui-theme-machined-edge [data-color-mode='${mode}'],`);
-			expect(css).toContain(`[data-color-mode='${mode}'] .luke-ui-theme-machined-edge {`);
+			expect(css).toContain(`.luke-ui-theme-tactile[data-color-mode='${mode}'],`);
+			expect(css).toContain(`.luke-ui-theme-tactile [data-color-mode='${mode}'],`);
+			expect(css).toContain(`[data-color-mode='${mode}'] .luke-ui-theme-tactile {`);
 		}
 	});
 
@@ -136,14 +136,14 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-icon-size-large: 32px');
 	});
 
-	it('emits authored semantic depth while keeping only ELMO light flat', () => {
+	it('emits authored semantic depth while keeping only Paper light flat', () => {
 		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(
-			machinedEdgeFoundation.light.depth.resting,
+			tactileFoundation.light.depth.resting,
 		);
 		expect(extractValue(blocks.mediaDark, '--luke-depth-raised')).toBe(
-			machinedEdgeFoundation.dark.depth.raised,
+			tactileFoundation.dark.depth.raised,
 		);
-		for (const foundation of [machinedEdgeFoundation, elmoFoundation]) {
+		for (const foundation of [tactileFoundation, paperFoundation]) {
 			for (const mode of ['light', 'dark'] as const) {
 				expect(foundation[mode].depth.resting).not.toContain('inset');
 				expect(foundation[mode].depth.raised).not.toContain('inset');
@@ -151,48 +151,48 @@ describe('buildTheme output', () => {
 				expect(foundation[mode].depth.raised.split(', ')).toHaveLength(2);
 			}
 		}
-		expect(elmoFoundation.light.depth.recessed).toBe('none');
+		expect(paperFoundation.light.depth.recessed).toBe('none');
 		for (const recessed of [
-			machinedEdgeFoundation.light.depth.recessed,
-			machinedEdgeFoundation.dark.depth.recessed,
-			elmoFoundation.dark.depth.recessed,
+			tactileFoundation.light.depth.recessed,
+			tactileFoundation.dark.depth.recessed,
+			paperFoundation.dark.depth.recessed,
 		]) {
 			expect(recessed).not.toBe('none');
 			expect(recessed.split(', ').every((layer) => layer.startsWith('inset '))).toBe(true);
 		}
 	});
 
-	it('keeps ELMO softer than Machined edge while retaining finish and state depth', () => {
-		const elmoBlocks = splitBlocks(buildTheme(elmoFoundation));
-		expect(extractValue(elmoBlocks.identity, '--luke-radius-control')).toBe('4px');
-		expect(extractValue(elmoBlocks.baseLight, '--luke-depth-recessed')).toBe('none');
+	it('keeps Paper softer than Tactile while retaining finish and state depth', () => {
+		const paperBlocks = splitBlocks(buildTheme(paperFoundation));
+		expect(extractValue(paperBlocks.identity, '--luke-radius-control')).toBe('4px');
+		expect(extractValue(paperBlocks.baseLight, '--luke-depth-recessed')).toBe('none');
 		expect(extractValue(blocks.baseLight, '--luke-depth-recessed').split(', ')).toHaveLength(2);
 
-		const elmoDarkRecessed = extractValue(elmoBlocks.mediaDark, '--luke-depth-recessed');
-		const machinedDarkRecessed = extractValue(blocks.mediaDark, '--luke-depth-recessed');
-		expect(elmoDarkRecessed.split(', ')).toHaveLength(1);
-		expect(machinedDarkRecessed.split(', ')).toHaveLength(2);
-		expect(Math.max(...extractShadowOpacities(machinedDarkRecessed))).toBeGreaterThan(
-			Math.max(...extractShadowOpacities(elmoDarkRecessed)),
+		const paperDarkRecessed = extractValue(paperBlocks.mediaDark, '--luke-depth-recessed');
+		const tactileDarkRecessed = extractValue(blocks.mediaDark, '--luke-depth-recessed');
+		expect(paperDarkRecessed.split(', ')).toHaveLength(1);
+		expect(tactileDarkRecessed.split(', ')).toHaveLength(2);
+		expect(Math.max(...extractShadowOpacities(tactileDarkRecessed))).toBeGreaterThan(
+			Math.max(...extractShadowOpacities(paperDarkRecessed)),
 		);
 
-		for (const [elmoBlock, machinedBlock] of [
-			[elmoBlocks.baseLight, blocks.baseLight],
-			[elmoBlocks.mediaDark, blocks.mediaDark],
+		for (const [paperBlock, tactileBlock] of [
+			[paperBlocks.baseLight, blocks.baseLight],
+			[paperBlocks.mediaDark, blocks.mediaDark],
 		] as const) {
-			const elmoResting = extractValue(elmoBlock, '--luke-depth-resting');
-			const elmoRaised = extractValue(elmoBlock, '--luke-depth-raised');
-			const elmoFinish = extractValue(elmoBlock, '--luke-action-control-finish-resting');
+			const paperResting = extractValue(paperBlock, '--luke-depth-resting');
+			const paperRaised = extractValue(paperBlock, '--luke-depth-raised');
+			const paperFinish = extractValue(paperBlock, '--luke-action-control-finish-resting');
 
-			expect(extractValue(machinedBlock, '--luke-depth-resting')).toContain('0 2px 0');
-			expect(elmoResting).not.toContain('0 2px 0');
-			expect(elmoRaised).not.toContain('0 3px 0');
-			expect(elmoResting.split(', ')).toHaveLength(2);
-			expect(elmoRaised.split(', ')).toHaveLength(2);
-			expect(elmoRaised).not.toBe(elmoResting);
-			expect(elmoFinish).toContain('radial-gradient');
-			expect(elmoFinish).not.toBe(
-				extractValue(machinedBlock, '--luke-action-control-finish-resting'),
+			expect(extractValue(tactileBlock, '--luke-depth-resting')).toContain('0 2px 0');
+			expect(paperResting).not.toContain('0 2px 0');
+			expect(paperRaised).not.toContain('0 3px 0');
+			expect(paperResting.split(', ')).toHaveLength(2);
+			expect(paperRaised.split(', ')).toHaveLength(2);
+			expect(paperRaised).not.toBe(paperResting);
+			expect(paperFinish).toContain('radial-gradient');
+			expect(paperFinish).not.toBe(
+				extractValue(tactileBlock, '--luke-action-control-finish-resting'),
 			);
 		}
 	});
@@ -208,8 +208,8 @@ describe('concentric corners', () => {
 
 describe('buildTheme defaults', () => {
 	const minimalFoundation: ThemeFoundation = {
-		dark: machinedEdgeFoundation.dark,
-		light: machinedEdgeFoundation.light,
+		dark: tactileFoundation.dark,
+		light: tactileFoundation.light,
 		name: 'minimal-check',
 	};
 
@@ -256,18 +256,18 @@ describe('buildTheme defaults', () => {
 describe('buildTheme foundation validation', () => {
 	it('rejects empty or stylesheet-breaking depth values', () => {
 		const emptyDepth: ThemeFoundation = {
-			...machinedEdgeFoundation,
+			...tactileFoundation,
 			light: {
-				...machinedEdgeFoundation.light,
-				depth: { ...machinedEdgeFoundation.light.depth, resting: ' ' },
+				...tactileFoundation.light,
+				depth: { ...tactileFoundation.light.depth, resting: ' ' },
 			},
 			name: 'empty-depth',
 		};
 		const unsafeDepth: ThemeFoundation = {
-			...machinedEdgeFoundation,
+			...tactileFoundation,
 			dark: {
-				...machinedEdgeFoundation.dark,
-				depth: { ...machinedEdgeFoundation.dark.depth, overlay: 'none; color: red' },
+				...tactileFoundation.dark,
+				depth: { ...tactileFoundation.dark.depth, overlay: 'none; color: red' },
 			},
 			name: 'unsafe-depth',
 		};
@@ -285,12 +285,12 @@ describe('buildTheme independent modes', () => {
 	it('derives each mode from its own sources rather than inverting light', () => {
 		const greenPurpleFoundation: ThemeFoundation = {
 			dark: {
-				...machinedEdgeFoundation.dark,
-				color: { ...machinedEdgeFoundation.dark.color, accent: 'oklch(0.75 0.12 300)' },
+				...tactileFoundation.dark,
+				color: { ...tactileFoundation.dark.color, accent: 'oklch(0.75 0.12 300)' },
 			},
 			light: {
-				...machinedEdgeFoundation.light,
-				color: { ...machinedEdgeFoundation.light.color, accent: 'oklch(0.5 0.13 150)' },
+				...tactileFoundation.light,
+				color: { ...tactileFoundation.light.color, accent: 'oklch(0.5 0.13 150)' },
 			},
 			name: 'green-purple',
 		};
@@ -322,10 +322,10 @@ describe('buildTheme contrast failures', () => {
 
 	it('rejects a low-contrast focus colour, naming mode, pair, and required ratio', () => {
 		const error = buildFailures({
-			...machinedEdgeFoundation,
+			...tactileFoundation,
 			light: {
-				...machinedEdgeFoundation.light,
-				color: { ...machinedEdgeFoundation.light.color, focus: '#c5d9ff' },
+				...tactileFoundation.light,
+				color: { ...tactileFoundation.light.color, focus: '#c5d9ff' },
 			},
 			name: 'bad-focus',
 		});
@@ -346,10 +346,10 @@ describe('buildTheme contrast failures', () => {
 
 	it('rejects a light dark-mode neutral through the text lightness windows', () => {
 		const error = buildFailures({
-			...machinedEdgeFoundation,
+			...tactileFoundation,
 			dark: {
-				...machinedEdgeFoundation.dark,
-				color: { ...machinedEdgeFoundation.dark.color, neutral: '#9a9a9a' },
+				...tactileFoundation.dark,
+				color: { ...tactileFoundation.dark.color, neutral: '#9a9a9a' },
 			},
 			name: 'bad-dark-neutral',
 		});
@@ -367,10 +367,10 @@ describe('buildTheme contrast failures', () => {
 
 	it('rejects a mid-lightness accent that no onSolid colour can sit on', () => {
 		const error = buildFailures({
-			...machinedEdgeFoundation,
+			...tactileFoundation,
 			light: {
-				...machinedEdgeFoundation.light,
-				color: { ...machinedEdgeFoundation.light.color, accent: '#7a7a7a' },
+				...tactileFoundation.light,
+				color: { ...tactileFoundation.light.color, accent: '#7a7a7a' },
 			},
 			name: 'bad-accent',
 		});
@@ -384,11 +384,11 @@ describe('buildTheme contrast failures', () => {
 
 	it('aggregates every failing pair into one error', () => {
 		const error = buildFailures({
-			...machinedEdgeFoundation,
+			...tactileFoundation,
 			light: {
-				...machinedEdgeFoundation.light,
+				...tactileFoundation.light,
 				color: {
-					...machinedEdgeFoundation.light.color,
+					...tactileFoundation.light.color,
 					accent: '#7a7a7a',
 					focus: '#c5d9ff',
 				},
@@ -412,7 +412,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		'--luke-color-surface-overlay',
 	];
 
-	for (const foundation of [machinedEdgeFoundation, elmoFoundation]) {
+	for (const foundation of [tactileFoundation, paperFoundation]) {
 		it(`${foundation.name} passes recomputed text and border contrast in both modes`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
@@ -483,7 +483,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 });
 
 describe('bundled loading skeleton surfaces', () => {
-	for (const foundation of [machinedEdgeFoundation, elmoFoundation]) {
+	for (const foundation of [tactileFoundation, paperFoundation]) {
 		it(`${foundation.name} keeps loading skeletons distinct from the canvas in both modes`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
@@ -497,22 +497,22 @@ describe('bundled loading skeleton surfaces', () => {
 
 describe('bundled theme identity', () => {
 	it('exports class-name constants that match the emitted identity classes', () => {
-		expect(machinedEdgeThemeClassName).toBe('luke-ui-theme-machined-edge');
-		expect(elmoThemeClassName).toBe('luke-ui-theme-elmo');
-		expect(buildTheme(machinedEdgeFoundation)).toContain(`.${machinedEdgeThemeClassName} {`);
-		expect(buildTheme(elmoFoundation)).toContain(`.${elmoThemeClassName} {`);
+		expect(tactileThemeClassName).toBe('luke-ui-theme-tactile');
+		expect(paperThemeClassName).toBe('luke-ui-theme-paper');
+		expect(buildTheme(tactileFoundation)).toContain(`.${tactileThemeClassName} {`);
+		expect(buildTheme(paperFoundation)).toContain(`.${paperThemeClassName} {`);
 	});
 
 	it('keeps the bundled themes isolated from each other', () => {
-		expect(buildTheme(elmoFoundation)).not.toContain(machinedEdgeThemeClassName);
-		expect(buildTheme(machinedEdgeFoundation)).not.toContain(elmoThemeClassName);
+		expect(buildTheme(paperFoundation)).not.toContain(tactileThemeClassName);
+		expect(buildTheme(tactileFoundation)).not.toContain(paperThemeClassName);
 	});
 
 	it('rejects theme names that are not kebab-case', () => {
-		expect(() => themeClassName('Machined Edge')).toThrow(/kebab-case/);
+		expect(() => themeClassName('Tactile')).toThrow(/kebab-case/);
 		expect(() => themeClassName('-leading')).toThrow(/kebab-case/);
 		expect(() => themeClassName('double--hyphen')).toThrow(/kebab-case/);
 		expect(() => themeClassName('9lives')).toThrow(/kebab-case/);
-		expect(themeClassName('machined-edge')).toBe('luke-ui-theme-machined-edge');
+		expect(themeClassName('tactile')).toBe('luke-ui-theme-tactile');
 	});
 });

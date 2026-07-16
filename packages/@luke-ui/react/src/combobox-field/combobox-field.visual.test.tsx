@@ -11,7 +11,7 @@ import {
 	Stack,
 	visualAppearances,
 } from '../test-utils/render-visual.js';
-import { elmoThemeClassName, machinedEdgeThemeClassName } from '../themes/index.js';
+import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { ComboboxField } from './index.js';
 import { ComboboxItem, ComboboxLoadMoreItem } from './primitive/index.js';
 
@@ -331,7 +331,7 @@ test.each(visualAppearances)(
 		const portal = listbox.element().closest('[data-color-mode]');
 
 		expect(portal).toHaveClass(
-			appearance.theme === 'elmo' ? elmoThemeClassName : machinedEdgeThemeClassName,
+			appearance.theme === 'paper' ? paperThemeClassName : tactileThemeClassName,
 		);
 		expect(portal).toHaveAttribute('data-color-mode', nestedMode);
 		await captureVisualAppearance(

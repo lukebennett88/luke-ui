@@ -15,13 +15,13 @@ classes to the same element.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/tactile.css';
 import { themeRootClassName } from '@luke-ui/react/theme';
-import { machinedEdgeThemeClassName } from '@luke-ui/react/themes';
+import { tactileThemeClassName } from '@luke-ui/react/themes';
 import { cx } from '@luke-ui/react/utils';
 
 export function App() {
-	return <div className={cx(themeRootClassName, machinedEdgeThemeClassName)}>{/* your app */}</div>;
+	return <div className={cx(themeRootClassName, tactileThemeClassName)}>{/* your app */}</div>;
 }
 ```
 

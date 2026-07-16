@@ -63,11 +63,11 @@ test('expands appearance capture IDs and rejects collisions with explicit captur
 	);
 	await writeFile(
 		path.join(root, 'single.visual.test.tsx'),
-		"captureVisual(scene, 'button/tones-elmo-dark')",
+		"captureVisual(scene, 'button/tones-paper-dark')",
 	);
 
 	await expect(validateCaptureIds(root)).rejects.toThrow(
-		'Duplicate visual capture ID button/tones-elmo-dark',
+		'Duplicate visual capture ID button/tones-paper-dark',
 	);
 });
 
@@ -81,9 +81,9 @@ test('registers every independently named appearance capture', async () => {
 	const owners = await validateCaptureIds(root);
 
 	expect([...owners.keys()]).toEqual([
-		'button/tones-machined-edge-light',
-		'button/tones-machined-edge-dark',
-		'button/tones-elmo-light',
-		'button/tones-elmo-dark',
+		'button/tones-tactile-light',
+		'button/tones-tactile-dark',
+		'button/tones-paper-light',
+		'button/tones-paper-dark',
 	]);
 });

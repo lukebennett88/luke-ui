@@ -1,8 +1,8 @@
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { themeRootClassName } from '../theme/index.js';
-import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
 import {
 	comboboxClearButton,
@@ -231,7 +231,7 @@ test('reduced motion makes control, action, option, and popover state changes im
 
 function mountControl() {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = cx(themeRootClassName, machinedEdgeThemeClassName);
+	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	wrappers.push(root);
 	const control = root.appendChild(document.createElement('div'));

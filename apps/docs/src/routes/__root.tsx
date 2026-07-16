@@ -1,5 +1,5 @@
-import '@luke-ui/react/themes/elmo.css';
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/paper.css';
+import '@luke-ui/react/themes/tactile.css';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';

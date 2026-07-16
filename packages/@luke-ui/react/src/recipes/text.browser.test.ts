@@ -1,8 +1,8 @@
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { machinedEdgeFoundation } from '../theme/foundations.js';
+import { tactileFoundation } from '../theme/foundations.js';
 import { buildTheme, themeClassName, themeRootClassName } from '../theme/index.js';
-import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { tactileThemeClassName } from '../themes/index.js';
 import { text } from './text.css.js';
 
 let mounted: Array<HTMLElement> = [];
@@ -142,7 +142,7 @@ function mountText(options: Parameters<typeof text>[0] = {}) {
 	return element;
 }
 
-function mountRoot(themeClass = machinedEdgeThemeClassName) {
+function mountRoot(themeClass = tactileThemeClassName) {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = `${themeRootClassName} ${themeClass}`;
 	root.dataset.colorMode = 'light';
@@ -154,7 +154,7 @@ function installTheme(fontFamily: 'inter' | 'apple-system' | 'dm-sans') {
 	const name = `capsize-${fontFamily}`;
 	const style = document.head.appendChild(document.createElement('style'));
 	style.textContent = buildTheme({
-		...machinedEdgeFoundation,
+		...tactileFoundation,
 		name,
 		typography: { fontFamily },
 	});

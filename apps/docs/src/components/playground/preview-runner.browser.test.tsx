@@ -1,7 +1,7 @@
 import '../../styles/app.css';
-import '@luke-ui/react/themes/elmo.css';
-import '@luke-ui/react/themes/machined-edge.css';
-import { elmoThemeClassName } from '@luke-ui/react/themes';
+import '@luke-ui/react/themes/paper.css';
+import '@luke-ui/react/themes/tactile.css';
+import { paperThemeClassName } from '@luke-ui/react/themes';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -38,7 +38,7 @@ test('applies appearance messages to the playground preview root', async () => {
 
 	await act(async () => {
 		window.postMessage(
-			{ colorMode: 'dark', themeIdentity: 'elmo', type: 'playground:appearance' },
+			{ colorMode: 'dark', themeIdentity: 'paper', type: 'playground:appearance' },
 			window.location.origin,
 		);
 		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -47,5 +47,5 @@ test('applies appearance messages to the playground preview root', async () => {
 	const themeRoot = container.querySelector<HTMLElement>('[data-color-mode]');
 	if (!themeRoot) throw new Error('Expected a playground theme root');
 	await expect.poll(() => themeRoot.dataset.colorMode).toBe('dark');
-	expect(themeRoot).toHaveClass(elmoThemeClassName);
+	expect(themeRoot).toHaveClass(paperThemeClassName);
 });

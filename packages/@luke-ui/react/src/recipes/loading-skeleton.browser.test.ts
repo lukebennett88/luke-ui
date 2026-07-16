@@ -1,17 +1,17 @@
-import '@luke-ui/react/themes/elmo.css';
-import '@luke-ui/react/themes/machined-edge.css';
+import '@luke-ui/react/themes/paper.css';
+import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { contrastRatio, parseColor } from '../theme/color.js';
 import { themeRootClassName } from '../theme/index.js';
-import { elmoThemeClassName, machinedEdgeThemeClassName } from '../themes/index.js';
+import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { loadingSkeleton } from './loading-skeleton.css.js';
 
 let root: HTMLElement | undefined;
 
 const themeCases = [
-	{ className: machinedEdgeThemeClassName, name: 'Machined edge' },
-	{ className: elmoThemeClassName, name: 'ELMO' },
+	{ className: tactileThemeClassName, name: 'Tactile' },
+	{ className: paperThemeClassName, name: 'Paper' },
 ] as const;
 
 afterEach(async () => {
@@ -55,7 +55,7 @@ for (const theme of themeCases) {
 }
 
 function mountInlineSkeleton(
-	themeClassName = machinedEdgeThemeClassName,
+	themeClassName = tactileThemeClassName,
 	mode: 'light' | 'dark' = 'light',
 ) {
 	root = document.body.appendChild(document.createElement('div'));

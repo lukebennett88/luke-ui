@@ -1,8 +1,8 @@
-import '../../dist/themes/machined-edge.css';
+import '../../dist/themes/tactile.css';
 import '../stylesheet.css.js';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { machinedEdgeThemeClassName } from '../themes/index.js';
+import { tactileThemeClassName } from '../themes/index.js';
 import { mergeProps } from '../utils/index.js';
 import { createSprinkles } from './index.js';
 
@@ -87,7 +87,7 @@ test('returns class and style output that merges with consumer props', () => {
 function mount(props: { className?: string; style?: Record<string, unknown> }): HTMLElement {
 	const element = document.body.appendChild(document.createElement('div'));
 	mounted.push(element);
-	element.className = `${machinedEdgeThemeClassName} ${props.className ?? ''}`;
+	element.className = `${tactileThemeClassName} ${props.className ?? ''}`;
 	Object.assign(element.style, props.style);
 	for (const [property, value] of Object.entries(props.style ?? {})) {
 		if (property.startsWith('--')) element.style.setProperty(property, String(value));
