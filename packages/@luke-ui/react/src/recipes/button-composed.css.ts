@@ -41,7 +41,6 @@ export const spinnerOverlay = recipeInLayer('recipes', {
 			},
 		},
 		alignItems: 'center',
-		color: vars.color.border.focus,
 		display: 'flex',
 		inset: 0,
 		justifyContent: 'center',
