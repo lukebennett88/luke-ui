@@ -18,8 +18,9 @@ Use the role that describes the surface's relationship to surrounding content.
 | `floating` | A menu, popover, or other detached surface.       |
 | `overlay`  | A dialog, sheet, or other high-elevation surface. |
 
-Use a component's API before setting depth yourself. Components select their own appropriate states.
-Use `vars.depth` when building a custom surface that needs to belong to the same elevation system.
+Use a component's API before setting depth yourself. Components already apply the right depth for
+each of their states. Use `vars.depth` when building a custom surface that needs to belong to the
+same elevation system.
 
 <ExampleBlock
 	src="overview/depth"
@@ -29,8 +30,8 @@ Use `vars.depth` when building a custom surface that needs to belong to the same
 
 ## Use semantic depth
 
-Pair depth with a semantic surface role. A menu might use `surface.floating` and `depth.floating`; a
-dialog might use `surface.overlay` and `depth.overlay`. Do not copy a resolved shadow value into
+Pair depth with a semantic surface role. A menu might use `surface.floating` with `depth.floating`,
+and a dialog `surface.overlay` with `depth.overlay`. Do not copy a resolved shadow value into
 application CSS, because it will not adapt to a custom identity or colour mode.
 
 ```tsx
