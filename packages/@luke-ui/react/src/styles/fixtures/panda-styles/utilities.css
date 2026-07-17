@@ -1,0 +1,3 @@
+@layer utilities {
+.box-fixture { padding: var(--spacing-100); }
+}

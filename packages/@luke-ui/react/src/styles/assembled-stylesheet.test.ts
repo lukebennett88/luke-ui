@@ -1,10 +1,11 @@
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 import { assembleStylesheet } from '../../scripts/assemble-stylesheet.js';
 
-// Reads Panda's split output from disk, so `pnpm run generate:panda` must have
-// run first (the turbo/test graphs depend on `generate`).
 describe('assembled stylesheet', () => {
-	const css = assembleStylesheet();
+	const css = assembleStylesheet({
+		pandaStylesDir: fileURLToPath(new URL('./fixtures/panda-styles', import.meta.url)),
+	});
 
 	it('starts with the canonical combined layer-order declaration', () => {
 		expect(css.split('\n')[0]).toBe('@layer reset, base, tokens, recipes, box, utilities;');
@@ -14,6 +15,10 @@ describe('assembled stylesheet', () => {
 		expect(css).toContain('@layer box {');
 		const boxBlock = css.slice(css.indexOf('@layer box {'));
 		expect(boxBlock).toContain('var(--spacing-');
+	});
+
+	it('re-layers the isolated source recipe output as recipes', () => {
+		expect(css).toContain('@layer recipes {\n.recipe-fixture { color: blue; }\n}');
 	});
 
 	it('leaves no @layer utilities block from the renamed box source', () => {

@@ -55,10 +55,13 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 	// of truth. Renders exactly: @layer reset, base, tokens, recipes, box, utilities;
 	sections.push(`@layer ${lukeLayerOrder.join(', ')};`);
 
-	// Panda recipes (empty until recipes are defined, but wired for the future).
+	// Source-authored Panda recipes are extracted in their own run. Panda uses
+	// its utilities slot for that output, but this file contains recipes only,
+	// so it is safe to re-layer narrowly as recipes.
 	const recipesPath = `${stylesDir}/recipes.css`;
 	if (existsSync(recipesPath)) {
-		sections.push(readFileSync(recipesPath, 'utf8').trim());
+		const recipes = readFileSync(recipesPath, 'utf8').trim();
+		sections.push(recipes.replace(/@layer\s+utilities\b/, '@layer recipes'));
 	}
 
 	// Panda utilities == the box slice. Re-wrap `@layer utilities` -> `@layer box`.

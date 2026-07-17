@@ -1,4 +1,5 @@
 import { defineConfig } from '@pandacss/dev';
+import presetBase from '@pandacss/preset-base';
 import { lukeLayerOrder } from './src/styles/layer-order.js';
 import { buildPandaTokens } from './src/theme/panda-tokens.js';
 
@@ -40,9 +41,13 @@ export default defineConfig({
 
 	// Harmless for the spike; nothing here is actually scanned during cssgen.
 	include: ['src/**/*.{ts,tsx}'],
-	exclude: [],
+	// Source-authored recipes are extracted by panda.recipes.config.ts into an
+	// isolated file. Keep them out of this Box-only run so utilities.css remains
+	// safe to re-layer as box in the assembled stylesheet.
+	exclude: ['src/recipes/button.ts', 'src/recipes/text-input.ts'],
 
 	outdir: 'styled-system',
+	cssVarRoot: '.luke-ui-theme',
 
 	layers,
 
@@ -68,32 +73,9 @@ export default defineConfig({
 		},
 	},
 
-	// Minimal Box-utility definitions. In ejected mode there are NO built-in
-	// utilities, so these are required for `padding: "md"` to resolve to a
-	// spacing token var rather than emit the literal string "md".
-	utilities: {
-		display: {
-			className: 'display',
-			values: { block: 'block', flex: 'flex' },
-			transform(value) {
-				return { display: value };
-			},
-		},
-		padding: {
-			className: 'padding',
-			values: 'spacing',
-			transform(value) {
-				return { padding: value };
-			},
-		},
-		margin: {
-			className: 'margin',
-			values: 'spacing',
-			transform(value) {
-				return { margin: value };
-			},
-		},
-	},
+	// Bring in Panda's property utilities only. Conditions remain the two Luke
+	// definitions above, so Panda does not own colour-mode or state semantics.
+	utilities: presetBase.utilities,
 
 	staticCss: {
 		recipes: '*',

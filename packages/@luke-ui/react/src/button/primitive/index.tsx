@@ -3,7 +3,7 @@ import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button
 import { Button as RacButton } from 'react-aria-components/Button';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon-size-context/index.js';
-import * as styles from '../../recipes/button.css.js';
+import * as styles from '../../recipes/button.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';

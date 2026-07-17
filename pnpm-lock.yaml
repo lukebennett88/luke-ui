@@ -33,6 +33,9 @@ catalogs:
     '@pandacss/dev':
       specifier: ^1.11.4
       version: 1.11.4
+    '@pandacss/preset-base':
+      specifier: ^1.11.4
+      version: 1.11.4
     '@react-aria/utils':
       specifier: ^3.34.1
       version: 3.34.1
@@ -411,6 +414,9 @@ importers:
       '@pandacss/dev':
         specifier: 'catalog:'
         version: 1.11.4(typescript@6.0.3)
+      '@pandacss/preset-base':
+        specifier: 'catalog:'
+        version: 1.11.4
       '@rollup/plugin-babel':
         specifier: 'catalog:'
         version: 7.1.0(@babel/core@7.29.7)(@types/babel__core@7.20.5)(rollup@4.59.0)

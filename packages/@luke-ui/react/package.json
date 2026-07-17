@@ -68,7 +68,7 @@
 		"generate:assembled": "tsx scripts/assemble-stylesheet.ts",
 		"generate:assets": "pnpm run generate:icons && pnpm run generate:themes",
 		"generate:icons": "tsx scripts/build-icons.ts",
-		"generate:panda": "panda codegen && panda cssgen --splitting",
+		"generate:panda": "panda codegen && panda cssgen --splitting && panda cssgen --config panda.recipes.config.ts --outfile styled-system/styles/recipes.css",
 		"generate:themes": "tsx scripts/build-themes.ts",
 		"generate:token-map": "tsx scripts/build-token-map.ts",
 		"prepack": "pnpm run generate",
@@ -95,6 +95,7 @@
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
 		"@pandacss/dev": "catalog:",
+		"@pandacss/preset-base": "catalog:",
 		"@rollup/plugin-babel": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
 		"@storybook/addon-docs": "catalog:",

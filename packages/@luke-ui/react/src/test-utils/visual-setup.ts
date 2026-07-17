@@ -1,3 +1,4 @@
+import '../../styled-system/assembled.css';
 import { afterEach } from 'vite-plus/test';
 import { cleanupVisual } from './render-visual.js';
 
