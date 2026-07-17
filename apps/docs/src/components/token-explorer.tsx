@@ -91,7 +91,7 @@ const groups: Array<TokenGroup> = [
 		],
 	},
 	{
-		description: 'Choose the spacing step that expresses the relationship between elements.',
+		description: 'Choose the spacing step that matches the separation between elements.',
 		id: 'spacing',
 		label: 'Spacing',
 		rows: ([100, 200, 300, 400, 600, 800, 1000, 1200, 1600] as const).map((size) =>
@@ -133,15 +133,7 @@ export function TokenExplorer() {
 
 	return (
 		<section className="not-prose grid gap-4 rounded-lg border border-fd-border bg-fd-card p-4">
-			<div className="flex flex-wrap items-end justify-between gap-3">
-				<div>
-					<h2 className="m-0 font-semibold text-fd-foreground text-lg">
-						Explore semantic variables
-					</h2>
-					<p className="mb-0 mt-1 text-fd-muted-foreground text-sm">
-						The previews use the identity and colour mode selected for these docs.
-					</p>
-				</div>
+			<div className="flex flex-wrap justify-end gap-3">
 				<label className="grid gap-1 text-fd-foreground text-sm">
 					<span>Purpose</span>
 					<select
