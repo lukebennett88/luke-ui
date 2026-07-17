@@ -23,18 +23,20 @@ Choose tokens by purpose. A card might use `surface.resting`, `radius.surface`, 
 A warning message might use the warning intent's subtle surface and text. Avoid carrying resolved
 colour values into application CSS.
 
-## Tokens
+## Explore semantic variables
 
-This table is generated from the public TypeScript declaration and JSDoc, so it stays aligned with
-the code that produces each theme.
+The explorer uses the active docs identity and colour mode. Pick a purpose to see the variables a
+custom element can use and their visible effect.
 
-<auto-type-table
-	path="apps/docs/src/generated/token-reference.generated.ts"
-	name="ThemeTokenReference"
-/>
+<TokenExplorer />
+
+The explorer contains semantic variables for custom UI. Generated palette values, component recipe
+selectors, and theme-foundation inputs are implementation details, not application styling APIs.
 
 ## Next steps
 
-Read [Colour](/overview/color) for the semantic colour model. Read
+Read [Colour](/overview/color) for surfaces, content, and intent. Read
+[Typography](/overview/typography) for the type scale and [Layout](/overview/layout) for spacing.
+[Theme](/overview/theme) explains radii and depth as part of an identity. Read
 [Authoring a theme](/theming/authoring) to generate the complete contract for a product-owned
 identity.
