@@ -1,26 +1,28 @@
+import { Box } from '@luke-ui/react/box';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/combobox-field/primitive';
 
-type Country = { id: string; label: string };
+type Fruit = { id: string; label: string };
 
-const countries: Array<Country> = [
-	{ id: 'au', label: 'Australia' },
-	{ id: 'ca', label: 'Canada' },
-	{ id: 'nz', label: 'New Zealand' },
-	{ id: 'us', label: 'United States' },
+const fruits: Array<Fruit> = [
+	{ id: 'apple', label: 'Apple' },
+	{ id: 'orange', label: 'Orange' },
+	{ id: 'banana', label: 'Banana' },
+	{ id: 'grape', label: 'Grape' },
 ];
 
 export default function Basic() {
 	return (
-		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>
+		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
 			<ComboboxField
-				defaultItems={countries}
-				label="Country"
-				name="country"
-				placeholder="Select a country..."
+				defaultItems={fruits}
+				defaultValue="apple"
+				label="Favourite fruit"
+				name="fruit"
+				placeholder="Choose a fruit"
 			>
 				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 			</ComboboxField>
-		</div>
+		</Box>
 	);
 }

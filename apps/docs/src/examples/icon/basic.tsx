@@ -1,10 +1,14 @@
+import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
+import { Text } from '@luke-ui/react/text';
 
 export default function Basic() {
 	return (
-		<div style={{ alignItems: 'center', display: 'flex', gap: '1rem' }}>
-			<Icon name="add" size="xsmall" title="Add" />
-			<Icon aria-hidden name="close" size="medium" />
-		</div>
+		<Box alignItems="center" display="flex" gap="400">
+			<Icon name="info" size="small" title="Information" />
+			<Text>
+				<Icon aria-hidden name="arrowRight" size="small" /> Continue
+			</Text>
+		</Box>
 	);
 }

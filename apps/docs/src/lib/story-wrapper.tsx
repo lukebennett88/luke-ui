@@ -1,24 +1,34 @@
+import { Box } from '@luke-ui/react/box';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
 
-type StoryWrapperProps = { children: ReactNode };
+const modeToBoxProps = {
+	'full-bleed': {},
+	inset: {
+		alignItems: 'center',
+		display: 'flex',
+		justifyContent: 'center',
+		minBlockSize: '6rem',
+		padding: '800',
+		style: {
+			backgroundColor: vars.color.surface.canvas,
+			color: vars.color.text.primary,
+		},
+	},
+} as const satisfies Record<'inset' | 'full-bleed', React.ComponentProps<typeof Box>>;
 
-export function StoryWrapper({ children }: StoryWrapperProps) {
+type StoryWrapperProps = {
+	children: ReactNode;
+	mode?: 'inset' | 'full-bleed';
+};
+
+export function StoryWrapper({ children, mode = 'inset' }: StoryWrapperProps) {
+	const boxProps = modeToBoxProps[mode];
 	return (
-		<div
-			style={{
-				alignItems: 'center',
-				backgroundColor: vars.color.surface.canvas,
-				color: vars.color.text.primary,
-				display: 'flex',
-				justifyContent: 'center',
-				minBlockSize: '6rem',
-				padding: '2rem',
-			}}
-		>
+		<Box {...boxProps}>
 			<IconSpritesheetProvider href={spriteSheetHref}>{children}</IconSpritesheetProvider>
-		</div>
+		</Box>
 	);
 }

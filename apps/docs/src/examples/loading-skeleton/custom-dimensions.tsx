@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { useState } from 'react';
 
@@ -5,20 +6,23 @@ export default function CustomDimensions() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<div
-			style={{ alignItems: 'flex-start', display: 'flex', flexDirection: 'column', gap: '1rem' }}
-		>
+		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
 			<LoadingSkeleton isLoading={isLoading}>
-				<div style={{ borderRadius: '9999px', height: '3rem', width: '3rem' }} />
+				<Box blockSize="3rem" inlineSize="3rem" style={{ borderRadius: '9999px' }} />
 			</LoadingSkeleton>
-			<label style={{ alignItems: 'center', display: 'flex', gap: '0.5rem' }}>
-				<input
-					checked={isLoading}
-					onChange={(event) => setIsLoading(event.target.checked)}
-					type="checkbox"
-				/>
-				Loading
+			<LoadingSkeleton isLoading={isLoading}>
+				<Box blockSize="3rem" inlineSize="12rem" style={{ borderRadius: '0.5rem' }} />
+			</LoadingSkeleton>
+			<label>
+				<Box alignItems="center" display="flex" gap="200">
+					<input
+						checked={isLoading}
+						onChange={(event) => setIsLoading(event.target.checked)}
+						type="checkbox"
+					/>
+					Show placeholders
+				</Box>
 			</label>
-		</div>
+		</Box>
 	);
 }

@@ -1,16 +1,18 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 
-export default function ToneAndAppearance() {
+export default function Appearance() {
 	return (
-		<div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-			<Button>Neutral solid</Button>
-			<Button appearance="subtle" tone="neutral">
-				Neutral subtle
+		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
+			<Button appearance="solid" tone="accent">
+				Save changes
 			</Button>
-			<Button tone="danger">Danger solid</Button>
+			<Button appearance="subtle" tone="accent">
+				Save changes
+			</Button>
 			<Button appearance="ghost" tone="accent">
-				Accent ghost
+				Save changes
 			</Button>
-		</div>
+		</Box>
 	);
 }

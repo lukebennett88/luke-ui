@@ -1,17 +1,77 @@
 ---
 title: Design System
-description: Documentation for the Luke UI React package.
+description: Components, themes, and layout utilities for React applications.
 ---
 
-Use these docs to learn the foundations, components, and usage patterns in `@luke-ui/react`.
+Luke UI is a React component library for application interfaces. It includes static CSS, two bundled
+themes, and layout utilities that use the same semantic token contract as the components.
+
+## Start building
+
+Install the package, load the shared CSS and one theme, then add the theme classes near the root of
+your application. [Getting started](/overview/getting-started) has the complete setup.
 
 <Cards>
-	<Card href="/docs/getting-started" title="Getting Started" />
-	<Card href="/docs/components/actions/button" title="Button component" />
-	<Card href="/docs/components/actions/link" title="Link component" />
-	<Card href="/docs/components/feedback/loading-spinner" title="Loading Spinner component" />
-	<Card href="/docs/components/forms/combobox-field" title="Combobox Field component" />
-	<Card href="/docs/components/typography/text" title="Text component" />
-	<Card href="/docs/components/visuals/icon" title="Icon component" />
-	<Card href="/docs/components/primitives/button" title="Primitives" />
+	<Card href="/overview/getting-started" title="Getting started">
+		Install Luke UI, load a theme, and render your first component.
+	</Card>
+	<Card href="/overview/styling" title="Styling">
+		Use component APIs, recipes, layout utilities, and semantic variables in the right place.
+	</Card>
+	<Card href="/overview/layout" title="Layout">
+		Build responsive structure with Box and Sprinkles.
+	</Card>
 </Cards>
+
+## Theme your application
+
+Tactile and Paper each provide light and dark modes. The active theme supplies the colours, type,
+spacing, radii, and depth behind every component.
+
+<Cards>
+	<Card href="/overview/theme" title="Theme">
+		Learn what an identity owns and when to author your own.
+	</Card>
+	<Card href="/overview/color" title="Colour">
+		Use semantic surfaces and intent roles instead of palette values.
+	</Card>
+	<Card href="/overview/color-mode" title="Colour modes">
+		Follow the system setting or force light and dark scopes.
+	</Card>
+	<Card href="/overview/typography" title="Typography">
+		Use the type scale through Text, Heading, Numeral, and Emoji.
+	</Card>
+</Cards>
+
+## Explore components
+
+Import atoms and composed components from their own package paths, such as `@luke-ui/react/button`
+and `@luke-ui/react/text`.
+
+<Cards>
+	<Card href="/components/actions/button" title="Actions">
+		Buttons, links, and controls for user actions.
+	</Card>
+	<Card href="/components/forms/combobox-field" title="Forms">
+		Fields and inputs for collecting information.
+	</Card>
+	<Card href="/components/typography/text" title="Typography">
+		Text, headings, numerals, and emoji using one type scale.
+	</Card>
+	<Card href="/components/visuals/icon" title="Visuals">
+		Icons and visual building blocks.
+	</Card>
+	<Card href="/components/feedback/loading-spinner" title="Feedback">
+		Loading states and system feedback.
+	</Card>
+	<Card href="/components/layout/box" title="Layout">
+		Box and token-aware layout utilities.
+	</Card>
+</Cards>
+
+## Build custom components
+
+Most applications can start with the components above. [Primitives](/components/primitives/button)
+are public lower-level APIs for library authors and custom composed components. Use the public
+[token reference](/theming/token-reference) to style a custom element without depending on component
+internals.

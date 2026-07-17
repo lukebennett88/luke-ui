@@ -1,21 +1,23 @@
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/combobox-field/primitive';
 
-const items = [
-	{ id: 'au', label: 'Australia' },
-	{ id: 'ca', label: 'Canada' },
-	{ id: 'nz', label: 'New Zealand' },
-	{ id: 'us', label: 'United States' },
+const countries = [
+	{ id: 'australia', label: 'Australia' },
+	{ id: 'canada', label: 'Canada' },
+	{ id: 'new-zealand', label: 'New Zealand' },
+	{ id: 'united-states', label: 'United States' },
 ];
 
 export default function Required() {
 	return (
 		<ComboboxField
-			defaultItems={items}
+			defaultItems={countries}
+			description="Choose the country where you work."
 			isRequired
-			label="Country"
-			name="country"
+			label="Work location"
+			name="workLocation"
 			necessityIndicator="icon"
+			placeholder="Choose a country"
 		>
 			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 		</ComboboxField>

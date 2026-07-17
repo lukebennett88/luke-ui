@@ -1,10 +1,11 @@
 ---
 title: TextInput primitive
-description: Lower-level text input primitive with optional adornments.
+description: Styled text input control with optional content at either end.
 ---
 
-Use `TextInput` when you need the styled input control without the label, description, and error
-slots from [`TextField`](/docs/components/forms/text-field).
+Use `TextInput` to build a custom text field when you need the styled input without label,
+description, or error slots. For most application forms, use
+[`TextField`](/components/forms/text-field).
 
 ```tsx
 import { TextInput } from '@luke-ui/react/text-field/primitive';
@@ -12,20 +13,33 @@ import { TextInput } from '@luke-ui/react/text-field/primitive';
 <TextInput aria-label="Search" placeholder="Search" />;
 ```
 
+## Size
+
+`medium` is the default. Use `small` when the input belongs in a compact control group. Match the
+size of nearby fields and actions.
+
 ## Adornments
 
-Use `adornmentStart` and `adornmentEnd` for non-editable content inside the input chrome.
+Use `adornmentStart` and `adornmentEnd` for content inside the input, such as a currency symbol,
+unit, or decorative icon.
 
 ```tsx
 <TextInput aria-label="Amount" adornmentStart="$" inputMode="decimal" />
 ```
 
-Adornments accept any `ReactNode`. If an adornment is interactive, you are responsible for its
-semantics and focus behaviour.
+Adornments accept any React node. Give interactive adornments an accessible name, keyboard
+behaviour, and a considered focus order.
 
-## Styling hooks
+## Styling and composition
 
-Pass `className` to style the outer group wrapper. Pass `inputClassName` to style the input element.
+`className` applies to the outer group. `inputClassName` applies to the input element. Use these
+hooks when composing the primitive with other controls. Give a standalone `TextInput` an accessible
+name with `aria-label` or a connected label.
+
+## TextField composition
+
+`TextField` combines `TextInput` with the field primitive and React Aria text-field behaviour. Use
+the primitive only when you need a different composed structure or control arrangement.
 
 ## Props
 

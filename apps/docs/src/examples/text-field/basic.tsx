@@ -3,10 +3,10 @@ import { TextField } from '@luke-ui/react/text-field';
 export default function Basic() {
 	return (
 		<TextField
-			description="We'll only use this for account updates."
-			label="Email"
-			name="email"
-			placeholder="name@example.com"
+			description="Use the address you check most often."
+			label="Email address"
+			name="emailAddress"
+			placeholder="you@example.com"
 		/>
 	);
 }

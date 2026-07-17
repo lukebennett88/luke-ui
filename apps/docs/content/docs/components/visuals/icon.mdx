@@ -3,8 +3,8 @@ title: Icon
 description: SVG icon component backed by the generated spritesheet.
 ---
 
-`Icon` renders a symbol from the Luke UI spritesheet. It requires an `IconSpritesheetProvider`
-ancestor. See Setup below.
+`Icon` renders a symbol from the generated Luke UI spritesheet. It needs an
+`IconSpritesheetProvider` ancestor so it can resolve the spritesheet URL.
 
 <ExampleBlock
 	src="icon/basic"
@@ -12,16 +12,9 @@ ancestor. See Setup below.
 	description="Standalone and decorative icons from the spritesheet."
 />
 
-## Best practices
+## Set up the spritesheet
 
-| Guidance | Practices                                                                                                 |
-| -------- | --------------------------------------------------------------------------------------------------------- |
-| Do       | Pass `title` when the icon conveys meaning without adjacent text, such as a standalone status icon.       |
-| Don't    | Pass both `aria-hidden` and `title`. A titled icon should be exposed to assistive technology, not hidden. |
-
-## Setup
-
-Wrap your app with `IconSpritesheetProvider`.
+Wrap your app with `IconSpritesheetProvider`. Pass the URL of the generated spritesheet asset.
 
 - Source asset: `@luke-ui/react/spritesheet.svg`, exported from `./dist/spritesheet.svg`
 - Runtime lookup: `<configured-sprite-href>#<icon-name>`
@@ -44,17 +37,18 @@ import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 
 The `no-inline` query avoids `data:` URLs, which can break `<use href="...#icon-id">` rendering.
 
-When developing `@luke-ui/react`, generate icons from `packages/@luke-ui/react/icons/*.svg` into
-`packages/@luke-ui/react/dist/spritesheet.svg`.
+When developing `@luke-ui/react`, generate the spritesheet from
+`packages/@luke-ui/react/icons/*.svg`.
 
 ```bash
 pnpm --dir packages/@luke-ui/react run generate:icons
 ```
 
-## How it works
+## Use an icon
 
 `Icon` renders an `<svg>` that references a symbol in the generated spritesheet with
-`<use href="..." />`.
+`<use href="..." />`. `name` is restricted to the generated icon set. Use `size` to choose `xsmall`,
+`small`, `medium`, or `large`.
 
 - `name` chooses the symbol id.
 - The sprite URL comes from `IconSpritesheetProvider`.
@@ -65,9 +59,10 @@ pnpm --dir packages/@luke-ui/react run generate:icons
 <Icon name="add" className="myIcon" style={{ color: 'tomato' }} />
 ```
 
-## Create your own icon
+## Create a custom icon
 
-Use `createIcon` for a one-off icon that is not in the generated spritesheet.
+Use `createIcon` for a one-off icon that is not in the generated spritesheet. It returns a component
+with the same sizing and accessibility behaviour as `Icon`.
 
 <ExampleBlock
 	src="icon/custom"
@@ -77,8 +72,16 @@ Use `createIcon` for a one-off icon that is not in the generated spritesheet.
 
 ## Accessibility
 
-If `title` is provided, the icon is exposed to assistive technology with `role="img"`. If `title` is
-omitted, `aria-hidden` defaults to `true`.
+Pass `title` when an icon conveys meaning without adjacent text, such as a standalone status icon.
+The icon is then exposed to assistive technology with `role="img"`.
+
+When `title` is omitted, `aria-hidden` defaults to `true`. Do not pass both `aria-hidden` and
+`title` because a titled icon should not be hidden from assistive technology.
+
+## Related components
+
+Use [Emoji](/components/typography/emoji) when the visual content is an emoji that needs an
+accessible label.
 
 ## Props
 

@@ -1,14 +1,18 @@
+import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
 
 export default function Typography() {
 	return (
-		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-			<Heading color="info" level={3}>
-				Informative heading
+		<Box display="flex" flexDirection="column" gap="300">
+			<Heading level={2} size="900">
+				The quick brown fox jumps over the lazy dog
 			</Heading>
-			<Heading level={4} size="900">
-				Display-sized heading
+			<Heading level={2} size="700">
+				The quick brown fox jumps over the lazy dog
 			</Heading>
-		</div>
+			<Heading color="info" level={2} size="500">
+				The quick brown fox jumps over the lazy dog
+			</Heading>
+		</Box>
 	);
 }

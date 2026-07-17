@@ -145,7 +145,7 @@ function Playground() {
 					<Link
 						className="text-fd-muted-foreground text-sm underline-offset-4 hover:underline"
 						params={{ _splat: '' }}
-						to="/docs/$"
+						to="/$"
 					>
 						Docs
 					</Link>

@@ -1,0 +1,73 @@
+---
+title: Layout
+description: Build responsive structure with Box and token-aware layout utilities.
+---
+
+Use `Box` or `createSprinkles` for layout. They keep structure, spacing, sizing, positioning,
+overflow, flex, and grid-child rules separate from a component's content and behaviour.
+
+## Box
+
+`Box` is a `div` with the supported Sprinkles properties. Use it to space child content, constrain
+its size, place an item in a flex or grid layout, or hide content at a breakpoint.
+
+```tsx
+import { Box } from '@luke-ui/react/box';
+
+<Box maxInlineSize="42rem" padding="600">
+	{children}
+</Box>;
+```
+
+Use a normal `div` when no layout properties are needed. Box is a layout tool, not a replacement for
+every element.
+
+## Responsive values
+
+Every Sprinkles property accepts a direct value or an object keyed by breakpoint. Values cascade
+from `xsmall`, so specify only the points where the layout changes.
+
+```tsx
+<Box
+	display="flex"
+	flexDirection={{ xsmall: 'column', medium: 'row' }}
+	gap={{ xsmall: '300', medium: '600' }}
+>
+	{children}
+</Box>
+```
+
+The available breakpoints are `xsmall` (base), `small` (640px), `medium` (768px), `large` (1024px),
+`xlarge` (1280px), and `xxlarge` (1536px).
+
+<ExampleBlock
+	src="box/responsive-layout"
+	title="Responsive layout"
+	description="Resize the preview to see the content stack on small screens and align in a row from medium."
+/>
+
+## Spacing and sizing
+
+Padding, gap, and margin use the theme spacing steps: `0`, `100`, `200`, `300`, `400`, `600`, `800`,
+`1000`, `1200`, and `1600`. Margin also accepts `auto`. Sizing and grid-placement properties accept
+their CSS values.
+
+Use logical properties such as `paddingInline`, `marginBlockStart`, and `maxInlineSize`. They work
+in both writing directions without a second layout rule.
+
+## Use visual styles elsewhere
+
+Sprinkles excludes semantic colour, typography, and interaction states. Choose a component API for
+those concerns. When a custom element needs a visual token, use `vars` from `@luke-ui/react/theme`
+rather than a palette value or component selector.
+
+## Continue learning
+
+<Cards>
+	<Card href="/components/layout/box" title="Box">
+		See the Box example, props, and custom div rendering contract.
+	</Card>
+	<Card href="/overview/styling" title="Styling">
+		Learn where layout utilities sit beside components and recipes.
+	</Card>
+</Cards>

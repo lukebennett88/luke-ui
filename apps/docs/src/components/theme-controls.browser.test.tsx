@@ -96,6 +96,20 @@ test('bridges dark mode into the Luke UI root and example canvas', async () => {
 	expect(getComputedStyle(exampleCanvas).backgroundColor).not.toBe(lightBackground);
 });
 
+test('leaves full-bleed story surfaces unframed', () => {
+	renderTheme(
+		<StoryWrapper mode="full-bleed">
+			<span>Full-bleed example content</span>
+		</StoryWrapper>,
+	);
+
+	const exampleContent = page.getByText('Full-bleed example content').element();
+	const storyRoot = exampleContent.parentElement;
+	if (!storyRoot) throw new Error('Expected a full-bleed story root');
+
+	expect(storyRoot).not.toHaveAttribute('style');
+});
+
 test('keeps inherited docs shell text readable in dark mode', async () => {
 	renderTheme(
 		<>

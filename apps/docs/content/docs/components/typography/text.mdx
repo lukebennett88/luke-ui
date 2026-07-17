@@ -3,88 +3,88 @@ title: Text
 description: Styled text with a coordinated type scale and semantic colour roles.
 ---
 
-`Text` expects the Luke UI theme class at the app or root level. See
-[Getting Started](/docs/getting-started).
-
-Use `Text` for styled text that should not create heading semantics.
+`Text` applies Luke UI typography without adding heading semantics. It needs a Luke UI theme root;
+see [Getting started](/overview/getting-started).
 
 ```tsx
 <Text>The quick brown fox jumps over the lazy dog.</Text>
 ```
 
-## Best practices
+## Element type
 
-| Guidance | Practices                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------- |
-| Do       | Choose one `size` step so font size, line height, spacing, and trim stay coordinated.       |
-| Don't    | Use `Text` for section headings. Use `Heading`, which manages semantic level automatically. |
+`Text` renders React Aria's `Text` component, which uses a `span` by default. Set `elementType` to
+choose a semantic element without changing the type treatment.
 
-## Typography
+```tsx
+<Text elementType="p">A paragraph of supporting copy.</Text>
+
+<Text elementType="label">Email address</Text>
+```
+
+## Size
+
+Use `size` to set font size, line height, letter spacing, and Capsize trim as one coordinated step.
+`'300'` is the default. Sizes `'200'` through `'400'` work well for running text. Smaller steps suit
+compact UI labels, while larger steps are useful for display text that is not a semantic heading.
 
 <ExampleBlock
 	src="text/typography"
-	title="Text — Typography"
-	description="Use size steps, semantic colours, and font-weight roles to style text."
+	title="Text — Size, weight and colour"
+	description="Use coordinated size steps, semantic colour roles, and font-weight roles."
 />
 
-The active theme supplies the curated font family and the weights behind each role. `Text` trims the
-space above capitals and below the baseline by default. Set `shouldDisableTrim` when the text must
-participate in an untrimmed layout; line clamping disables trim automatically.
-
-## Text transform and decoration
-
-<ExampleBlock
-	src="text/transform"
-	title="Text — Transform and decoration"
-	description="Apply text transform and decoration to emphasize content."
-/>
-
-## Truncation
-
-<ExampleBlock
-	src="text/truncation"
-	title="Text — Truncation"
-	description="Clamp lines, truncate to one line, or disable cap-height trim."
-/>
+The active theme supplies the font family and values behind each `fontWeight` role. Use `body` for
+copy, `label` for controls, `heading` for prominent non-heading text, and `emphasis` when text needs
+more weight.
 
 ## Alignment and numeric glyphs
+
+Set `textAlign` when the layout needs a different inline alignment. Use `fontVariantNumeric` for
+numeric content, such as `tabular-nums` in a column of values.
 
 <ExampleBlock
 	src="text/alignment"
 	title="Text — Alignment and numeric glyphs"
-	description="Align text and set numeric glyph styles such as tabular numerals."
+	description="Align text and use tabular figures where numbers need to line up."
 />
 
-## Token reference
+## Trimming and truncation
 
-### `color` tokens
+Text trims space above capitals and below the baseline by default. That makes vertical spacing more
+predictable in cards and other bounded layouts. Set `shouldDisableTrim` only when the untrimmed line
+box is required. Trimming is disabled automatically when `lineClamp` is set.
 
-`primary`, `secondary`, `accent`, `info`, `success`, `warning`, `danger`
+Use `lineClamp` to constrain text to one line or up to five lines. Overflow is truncated with an
+ellipsis.
 
-### `size` steps
+<ExampleBlock
+	src="text/truncation"
+	title="Text — Trimming and truncation"
+	description="Clamp text when the layout has a fixed amount of space."
+/>
 
-`'100'`, `'200'`, `'300'`, `'400'`, `'500'`, `'600'`, `'700'`, `'800'`, `'900'`
+## Transform and decoration
 
-`'300'` is the default. Each step combines font size, line height, letter spacing, and Capsize trim.
+Use `textTransform` and `textDecoration` when the content calls for them. These props affect the
+rendered text only, so avoid using uppercase styling as a substitute for a clear label.
 
-### `fontWeight` roles
+<ExampleBlock
+	src="text/transform"
+	title="Text — Transform and decoration"
+	description="Apply text transformation and decoration when the content needs it."
+/>
 
-`body`, `label`, `heading`, `emphasis`
+## When to use Text or Heading
 
-### `textDecoration` values
+Use `Heading` for a section heading. It manages heading levels automatically.
 
-`none`, `underline`, `line-through`, `inherit`
+Use `Text` with a larger `size` and `heading` or `emphasis` `fontWeight` when content should look
+prominent without becoming a heading, such as a large status value.
 
-### `textTransform` values
+## Related components
 
-`none`, `capitalize`, `uppercase`, `lowercase`, `inherit`
-
-## When to use vs Heading
-
-Use `Heading` for actual section headings because it manages semantic level nesting automatically.
-
-Use `Text` with a larger `size` and the `heading` or `emphasis` `fontWeight` role when content
-should look prominent but is not semantically a heading, such as a large stat number.
+Use [Numeral](/components/typography/numeral) to format locale-aware numbers and
+[Emoji](/components/typography/emoji) for an emoji with a reliable accessible label.
 
 ## Props
 

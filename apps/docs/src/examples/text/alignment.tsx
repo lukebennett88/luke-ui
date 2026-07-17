@@ -1,9 +1,21 @@
+import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
 
 export default function Alignment() {
 	return (
-		<Text fontVariantNumeric="tabular-nums" style={{ display: 'block' }} textAlign="end">
-			12121.21
-		</Text>
+		<Box display="flex" flexDirection="column" gap="200">
+			<Text elementType="div" textAlign="start">
+				Start aligned
+			</Text>
+			<Text elementType="div" textAlign="center">
+				Centre aligned
+			</Text>
+			<Text elementType="div" textAlign="end">
+				End aligned
+			</Text>
+			<Text elementType="div" fontVariantNumeric="tabular-nums" textAlign="end">
+				12,121.21
+			</Text>
+		</Box>
 	);
 }

@@ -1,10 +1,11 @@
 ---
 title: Box
-description: Responsive layout container backed by Luke UI Sprinkles.
+description: A div with responsive Luke UI layout properties.
 ---
 
-`Box` is a `div` by default. Use its responsive layout, spacing, sizing, positioning, overflow,
-flex, and grid-child props to build layout without adding styling props to other components.
+`Box` is a `div` that accepts Luke UI Sprinkles properties. Use it to place content in a layout, add
+token spacing, constrain an element's size, or control a flex or grid child. Use a normal `div` when
+no supported layout property is needed.
 
 <ExampleBlock
 	src="box/responsive-layout"
@@ -12,16 +13,50 @@ flex, and grid-child props to build layout without adding styling props to other
 	description="A stack that becomes a row at the medium breakpoint."
 />
 
-Spacing props use `0` or the semantic space steps `100`, `200`, `300`, `400`, `600`, `800`, `1000`,
-`1200`, and `1600`. Responsive objects use the `xsmall`, `small`, `medium`, `large`, `xlarge`, and
-`xxlarge` breakpoints.
+## Layout properties
 
-## Custom div component
+Box supports display, logical margin and padding, inline and block sizing, positioning, overflow,
+gap, flex, and grid-child properties. It does not set grid container properties. Keep grid-template
+rules in the application CSS or a component that owns that layout.
 
-Use `render` with a compatible custom `div` component, such as a motion or presentational wrapper.
-Spread the provided props onto the actual `div` so the generated class, inline variables, ref,
-accessibility attributes, and event handlers are preserved. The callback does not change Box's DOM
-element contract to another element type.
+Use logical properties such as `paddingInline`, `marginBlockStart`, and `maxInlineSize`. They adapt
+to the writing direction without left and right variants.
+
+```tsx
+<Box display="flex" alignItems="center" gap="300" maxInlineSize="42rem" paddingInline="600">
+	{children}
+</Box>
+```
+
+## Responsive values
+
+Pass a direct value when it does not change. Use an object keyed by breakpoint when it does. Values
+cascade upward from `xsmall`, so only specify the changes.
+
+```tsx
+<Box
+	display="flex"
+	flexDirection={{ xsmall: 'column', medium: 'row' }}
+	gap={{ xsmall: '200', medium: '600' }}
+>
+	{children}
+</Box>
+```
+
+The breakpoints are `xsmall` (base), `small` (640px), `medium` (768px), `large` (1024px), `xlarge`
+(1280px), and `xxlarge` (1536px).
+
+## Spacing values
+
+Padding, gap, and margin accept `0` and the semantic steps `100`, `200`, `300`, `400`, `600`, `800`,
+`1000`, `1200`, and `1600`. Margin also accepts `auto`. Sizing, inset, flex-basis, order, and
+grid-placement properties accept their CSS values.
+
+## Render a custom div
+
+Use `render` for a compatible custom `div`, such as a motion wrapper. Spread the supplied props on
+the final element so it receives Box's class name, inline style, ref, accessibility attributes, and
+event handlers. `render` does not make Box polymorphic. It must return a `div`.
 
 ```tsx
 <Box padding="400" render={(props) => <MotionDiv {...props} />}>
@@ -29,8 +64,21 @@ element contract to another element type.
 </Box>
 ```
 
-Semantic colour and typography are deliberately not Box props. Use component APIs or public semantic
-variables from `@luke-ui/react/theme` for sanctioned custom styling.
+## Visual styles
+
+Box only covers layout. Use a component API for visual states and typography. When a custom element
+needs a colour, radius, or depth value, use the public variables from `@luke-ui/react/theme`.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+<Box
+	padding="600"
+	style={{ backgroundColor: vars.color.surface.recessed, borderRadius: vars.radius.surface }}
+>
+	Account summary
+</Box>;
+```
 
 ## Props
 

@@ -1,0 +1,71 @@
+---
+title: Typography
+description: Use the active theme's type scale through semantic typography components.
+---
+
+The active theme owns the type scale. Each step combines font size, line height, letter spacing, and
+Capsize trims. Use the typography components to keep those values together.
+
+## Base components
+
+Use `Text` for body copy and other non-heading content. Use `Heading` for document and section
+headings. Heading manages semantic levels and selects a matching type step by default.
+
+```tsx
+import { Heading } from '@luke-ui/react/heading';
+import { Text } from '@luke-ui/react/text';
+
+<>
+	<Heading>Account settings</Heading>
+	<Text size="400">Choose how this account appears to other people.</Text>
+</>;
+```
+
+Use `Numeral` for locale-aware values. It inherits the type scale while formatting currencies,
+percentages, units, and compact values. Use `Emoji` when an emoji needs a reliable accessible label.
+
+## Type scale
+
+Text and Heading use the steps `100` through `900`. A `size` changes the whole type treatment,
+rather than a font size alone.
+
+```tsx
+<Text size="600" fontWeight="heading">
+	Quarterly revenue
+</Text>
+```
+
+Text defaults to `300`. Heading selects a size from its level, and accepts `size` when the visual
+hierarchy needs a deliberate override.
+
+## Weight and colour
+
+Themes define the `body`, `label`, `heading`, and `emphasis` weight roles. Use the role that
+describes the content, instead of a literal numeric weight. Text also accepts semantic `color`
+values such as `primary`, `secondary`, `accent`, `info`, `success`, `warning`, and `danger`.
+
+```tsx
+<Text color="secondary" fontWeight="label" size="200">
+	Last updated 12 minutes ago
+</Text>
+```
+
+Applications load any font files required by a custom theme. The theme then assigns that typeface to
+the shared scale and weight roles.
+
+## Continue learning
+
+<Cards>
+	<Card href="/components/typography/text" title="Text">
+		Style body content with semantic colours and coordinated type steps.
+	</Card>
+	<Card href="/components/typography/heading" title="Heading">
+		Create semantic headings with automatic level management.
+	</Card>
+	<Card href="/components/typography/numeral" title="Numeral">
+		Format locale-aware numbers consistently.
+	</Card>
+	<Card href="/components/typography/emoji" title="Emoji">
+		Give meaningful emoji an accessible label.
+	</Card>
+</Cards>

@@ -1,138 +1,110 @@
 ---
 title: Combobox Field
-description: Single-select combobox field with label, validation, and async options.
+description: Searchable single-select field with label, validation, and option list.
 ---
 
-Use `ComboboxField` for a single-select combobox with label, description, error, popover, listbox,
-and optional async loading built in.
+Use `ComboboxField` when people need to search for or choose one option from a list. It combines an
+input, label, description, validation message, popover, and listbox.
 
 <ExampleBlock
 	src="combobox-field/basic"
 	title="Combobox Field — Basic"
-	description="Single-select combobox with a static list of options."
+	description="A single-select field with a static option list."
 />
 
-## Best practices
+## Items and selection
 
-| Guidance | Practices                                                                                               |
-| -------- | ------------------------------------------------------------------------------------------------------- |
-| Do       | Use `defaultItems` for a static list. Use `items` with `loadingState` when options load asynchronously. |
-| Don't    | Use `ComboboxField` for multi-select. It is single-select only in v1.                                   |
+Use `defaultItems` for a static collection. Use `items` with `loadingState` when results load or
+filter asynchronously. `ComboboxField` supports one selected value. Use another component for
+multiple selection.
 
-## API shape
+## Select and clear an option
 
-- Root props follow React Aria `ComboBox` naming.
-- Composed convenience props include `label`, `description`, `errorMessage`, `necessityIndicator`,
-  `size`, and `placeholder`.
-- `children` renders items from `items` or `defaultItems`.
-- `listBoxProps` and `loadMoreItem` are lower-level escape hatches.
-
-## Selection indicators
-
-The selected option shows a checkmark in the listbox. When the control has a selection, it shows a
-clear button before the trigger. Pressing the clear button clears the selection and input text.
-
-The clear button is omitted when the field is disabled or read-only.
+Pass static children or a render function to create options. The listbox marks the selected option.
+When there is a selection, the field shows a clear button before the trigger. Clearing removes the
+selection and input text. The clear button is unavailable for disabled and read-only fields.
 
 ```tsx
-<ComboboxField defaultValue="ca" defaultItems={countries} label="Country" name="country">
+<ComboboxField defaultItems={countries} defaultValue="ca" label="Country" name="country">
 	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 </ComboboxField>
 ```
 
 ## Required fields
 
-Use `isRequired` with `necessityIndicator` to show that the field is mandatory.
+Set `isRequired` to make a selection mandatory. Use `necessityIndicator` to choose how it appears
+beside the label.
 
 <ExampleBlock
 	src="combobox-field/required"
 	title="Combobox Field — Required"
-	description="Required combobox with a necessity indicator."
+	description="A required combobox with a visible necessity indicator."
 />
 
 ## Validation
 
-Pass field-level validation through React Aria `Form`. Use `errorMessage` to render the validation
-message.
+Use `errorMessage` to render a validation message. Pass server errors through React Aria `Form`.
 
 ```tsx
 import { Form } from 'react-aria-components';
 
 <Form validationErrors={{ country: 'Please select a country.' }}>
 	<ComboboxField
-		name="country"
-		label="Country"
 		errorMessage={(validation) => validation.validationErrors.join(' ')}
+		label="Country"
+		name="country"
 	>
 		{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 	</ComboboxField>
 </Form>;
 ```
 
-## Grouped options
+## Groups
 
-Use `ComboboxSection` to group related options inside the listbox.
+Use `ComboboxSection` to group related static options.
 
 <ExampleBlock
 	src="combobox-field/grouped"
 	title="Combobox Field — Grouped options"
-	description="Group related options inside the listbox with ComboboxSection."
+	description="Related options in labelled listbox sections."
 />
 
-## Async options
+## Async results
 
-Pass `loadingState` for built-in loading and empty states. Control the option collection with
-`items`.
+Pass `items` and `loadingState` when results load or filter asynchronously. If the list is empty
+while loading or filtering, the field shows a loading indicator. An empty completed result shows “No
+results”.
 
 ```tsx
 <ComboboxField
-	label="Country"
-	name="country"
 	items={results}
+	label="Country"
 	loadingState={status}
+	name="country"
 	onInputChange={setQuery}
 >
 	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 </ComboboxField>
 ```
 
-## Infinite scroll
+Pass `onLoadMore` for incremental results. It adds the built-in load-more row and spinner. Use
+`loadMoreItem` when that row needs custom content. `listBoxProps` and `popoverProps` configure the
+underlying listbox and popover. `menuWidth` sets the popover width.
 
-Use `onLoadMore` for automatic sentinel-based loading, or `loadMoreItem` when you need full control
-over the load-more row.
+## Mobile behaviour
 
-```tsx
-<ComboboxField
-	label="Country"
-	name="country"
-	items={results}
-	loadingState={status}
-	onLoadMore={fetchNextPage}
->
-	{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-</ComboboxField>
-```
-
-## Mobile tray
-
-Below the `small` breakpoint (640px) the popover renders as a bottom tray instead of a positioned
-popover, following
-[Adobe Spectrum's combobox pattern](https://react-aria.adobe.com/blog/building-a-combobox). The tray
-spans the full viewport width, slides up from the bottom edge on open and back down on close, and
-keeps clear of the on-screen keyboard using the
-[Visual Viewport API](https://developer.mozilla.org/en-US/docs/Web/API/Visual_Viewport_API). A scrim
-dims the page behind the tray, and a grab-handle affordance marks its top edge. In browsers that
-support `calc-size()`, the tray keeps a usable minimum height even when the viewport is cramped,
-while still hugging shorter lists instead of leaving empty space.
+Below the `small` breakpoint (640px), options appear in a bottom tray instead of a positioned
+popover. The tray follows the visual viewport so it stays above the on-screen keyboard. The tray
+motion and desktop popover fade respect reduced-motion preferences.
 
 ## Accessibility
 
-The tray's slide transition (and the desktop popover's fade) is disabled for users who request
-`prefers-reduced-motion: reduce`.
+Provide a visible `label` where possible. The field passes React Aria combobox interactions and form
+semantics to its input, trigger, listbox, and validation message.
 
 ## Primitive
 
-Use the [combobox primitives](/docs/components/primitives/combobox) when you need a custom combobox
+Use the [combobox primitives](/components/primitives/combobox) when you need a custom combobox
 layout.
 
 ## Props

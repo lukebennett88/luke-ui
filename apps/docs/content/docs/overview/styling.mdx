@@ -1,0 +1,79 @@
+---
+title: Styling
+description: Use Luke UI components, layout utilities, recipes, and semantic variables together.
+---
+
+Luke UI ships static CSS. It does not inject styles at runtime and does not add a general `css` or
+`sx` prop. Import the shared stylesheet and a theme stylesheet once, then use component props for
+the variations each component supports.
+
+## What you get
+
+Components are intentionally opinionated. Their public props cover supported variants, states, and
+behaviour. The active theme provides the semantic colours, typography, spacing, radii, and depth
+that make those components work together.
+
+Luke UI also exports the public `vars` token contract. Use it for a custom element that needs to
+belong to the active theme.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+<aside
+	style={{
+		backgroundColor: vars.color.surface.floating,
+		borderRadius: vars.radius.surface,
+		boxShadow: vars.depth.floating,
+		color: vars.color.text.primary,
+	}}
+/>;
+```
+
+The token contract is public. Component selectors, generated palette values, and theme
+implementation details are not.
+
+## Override components carefully
+
+Start with the component API. If the required presentation is outside that API, compose a custom
+component from the relevant primitives and public variables rather than overriding internal
+selectors. This keeps a component reliable when its recipe changes.
+
+Recipes from `@luke-ui/react/recipes` are available for custom compositions. They are
+component-specific, so use them only when you are building on that component's documented structure.
+
+## Use layout utilities for layout
+
+`Box` and `createSprinkles` from `@luke-ui/react/styles` handle responsive structure, spacing,
+sizing, positioning, overflow, flex, and grid-child properties. They do not set semantic colour,
+typography, or pseudo states.
+
+```tsx
+import { Box } from '@luke-ui/react/box';
+
+<Box display="flex" flexDirection={{ xsmall: 'column', medium: 'row' }} gap="400">
+	{children}
+</Box>;
+```
+
+## CSS layers
+
+Luke UI orders its styles in four cascade layers: `reset`, `theme`, `recipes`, and `utilities`. The
+order stays stable regardless of stylesheet import order. Utilities are the highest Luke UI layer
+because they are the supported layout escape hatch.
+
+CSS outside a layer follows the normal cascade. Avoid using it to reach into component internals.
+Use a component prop, a recipe, or a public semantic variable instead.
+
+## Continue learning
+
+<Cards>
+	<Card href="/overview/layout" title="Layout">
+		Use Box and Sprinkles for responsive structure.
+	</Card>
+	<Card href="/overview/color" title="Colour">
+		Choose semantic surfaces and intent roles for custom UI.
+	</Card>
+	<Card href="/theming/token-reference" title="Token reference">
+		Browse every public semantic CSS variable.
+	</Card>
+</Cards>
