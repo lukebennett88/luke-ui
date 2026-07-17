@@ -47,11 +47,7 @@ describe('panda tokens', () => {
 		for (const [path] of flattenThemeContract()) {
 			const segments = path.split('.');
 			const classification = classifyLeaf(segments);
-			if (isRawPath(segments)) {
-				expect(classification, path).toBeNull();
-			} else {
-				expect(classification, path).not.toBeNull();
-			}
+			expect(classification === null).toBe(isRawPath(segments));
 		}
 	});
 
@@ -61,10 +57,7 @@ describe('panda tokens', () => {
 			const classification = classifyLeaf(path.split('.'));
 			if (classification === null) continue;
 			const shorthands = seen.get(classification.category) ?? new Set<string>();
-			expect(
-				shorthands.has(classification.shorthand),
-				`${classification.category}.${classification.shorthand}`,
-			).toBe(false);
+			expect(shorthands.has(classification.shorthand)).toBe(false);
 			shorthands.add(classification.shorthand);
 			seen.set(classification.category, shorthands);
 		}

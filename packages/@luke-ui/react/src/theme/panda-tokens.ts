@@ -1,4 +1,5 @@
-import { flattenThemeContract, themeContractTree } from './contract.js';
+import { flattenThemeContract } from './contract.js';
+import type { themeContractTree } from './contract.js';
 
 /**
  * A single category rule. `prefix` is matched against a leaf path's leading segments; the
