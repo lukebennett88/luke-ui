@@ -1,16 +1,12 @@
+import { Icon } from '@luke-ui/react/icon';
+import type { IconName } from '@luke-ui/react/icon';
 import { cx } from '@luke-ui/react/utils';
-import type { ComponentType } from 'react';
 import type { Selection } from 'react-aria-components/GridList';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
 
-type IconComponent = ComponentType<{
-	'aria-hidden'?: boolean;
-	className?: string;
-}>;
-
 type IconToggleItem<Value extends string> = {
-	Icon: IconComponent;
+	icon: IconName;
 	label: string;
 	value: Value;
 };
@@ -48,7 +44,7 @@ export function IconToggleButtonGroup<Value extends string>({
 			selectedKeys={value === null ? [] : [value]}
 			selectionMode="single"
 		>
-			{options.map(({ Icon, label: optionLabel, value: optionValue }) => (
+			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
 					aria-label={optionLabel}
 					className={({ isSelected }) => {
@@ -60,7 +56,7 @@ export function IconToggleButtonGroup<Value extends string>({
 					id={optionValue}
 					key={optionValue}
 				>
-					<Icon aria-hidden className="size-4" />
+					<Icon aria-hidden className="size-4" name={icon} />
 				</ToggleButton>
 			))}
 		</ToggleButtonGroup>

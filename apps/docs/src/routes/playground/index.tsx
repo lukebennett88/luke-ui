@@ -1,7 +1,7 @@
+import { Icon } from '@luke-ui/react/icon';
 import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute, Link } from '@tanstack/react-router';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { Maximize2Icon, Minimize2Icon } from 'lucide-react';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
@@ -160,7 +160,7 @@ function Playground() {
 						title="Fullscreen preview"
 						type="button"
 					>
-						<Maximize2Icon className="size-4" />
+						<Icon aria-hidden className="size-4" name="expand" />
 					</button>
 				</div>
 			</header>
@@ -218,7 +218,7 @@ function Playground() {
 							title="Exit fullscreen preview"
 							type="button"
 						>
-							<Minimize2Icon className="size-4" />
+							<Icon aria-hidden className="size-4" name="minimize" />
 						</button>
 					) : null}
 					{error === null ? null : (

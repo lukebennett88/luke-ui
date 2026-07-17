@@ -1,8 +1,8 @@
 import { Box } from '@luke-ui/react/box';
+import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@tanstack/react-router';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { CodeIcon, SquareArrowOutUpRightIcon } from 'lucide-react';
 import type { ComponentType, JSX } from 'react';
 import { Suspense, use, useId, useState } from 'react';
 import { encodeCodeHash } from '../lib/playground-hash';
@@ -59,7 +59,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 						target="_blank"
 						to="/playground"
 					>
-						<SquareArrowOutUpRightIcon className="size-4" />
+						<Icon aria-hidden className="size-4" name="externalLink" />
 						Open in playground
 					</Link>
 					<button
@@ -69,7 +69,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 						onClick={() => setShowCode((previous) => !previous)}
 						type="button"
 					>
-						<CodeIcon className="size-4" />
+						<Icon aria-hidden className="size-4" name="codeBlock" />
 						{showCode ? 'Hide code' : 'Show code'}
 					</button>
 				</Box>

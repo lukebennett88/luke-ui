@@ -1,9 +1,8 @@
-import { MonitorIcon, SmartphoneIcon } from 'lucide-react';
 import { IconToggleButtonGroup } from './icon-toggle-button-group';
 
 const VIEWPORTS = [
-	{ Icon: MonitorIcon, label: 'Desktop', value: '100%' },
-	{ Icon: SmartphoneIcon, label: 'Mobile', value: '375px' },
+	{ icon: 'monitor', label: 'Desktop', value: '100%' },
+	{ icon: 'mobilePhone', label: 'Mobile', value: '375px' },
 ] as const;
 
 export type ViewportWidth = (typeof VIEWPORTS)[number]['value'];

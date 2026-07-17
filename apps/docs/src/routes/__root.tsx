@@ -1,5 +1,7 @@
 import '@luke-ui/react/themes/paper.css';
 import '@luke-ui/react/themes/tactile.css';
+import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
@@ -56,7 +58,9 @@ function RootDocument({ children }: { children: ReactNode }) {
 					search={{ SearchDialog: LazySearchDialog }}
 					theme={{ attribute: ['class', 'data-color-mode'] }}
 				>
-					<DocsThemeRoot>{children}</DocsThemeRoot>
+					<IconSpritesheetProvider href={spriteSheetHref}>
+						<DocsThemeRoot>{children}</DocsThemeRoot>
+					</IconSpritesheetProvider>
 				</RootProvider>
 				<Scripts />
 			</body>
