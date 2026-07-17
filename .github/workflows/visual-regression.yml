@@ -33,17 +33,8 @@ jobs:
       - run: corepack enable
       - run: corepack pnpm install --frozen-lockfile
       - run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
-      - uses: actions/cache@v5
-        with:
-          path: .artifacts/visual-regression/cache
-          key:
-            visual-main-${{ runner.os }}-${{ runner.arch }}-${{ github.event.pull_request.base.sha
-            || github.event.before }}-${{ hashFiles('pnpm-lock.yaml',
-            'packages/@luke-ui/react/vitest.config.ts') }}
       - name: Compare visual captures
         run: corepack pnpm test:visual
-        env:
-          VISUAL_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
       - id: summary
         run:
           echo "changed=$(jq '.counts.changed' .artifacts/visual-regression/report/summary.json)" >>

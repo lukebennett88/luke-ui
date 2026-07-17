@@ -75,6 +75,7 @@
 		"test:ui": "vp test --project=storybook --ui",
 		"test:unit": "vp test run --project=unit",
 		"test:visual": "tsx scripts/visual-regression.ts",
+		"test:visual:freeze": "tsx scripts/visual-regression.ts --update-goldens",
 		"test:visual:capture": "vp test run --project=visual --update",
 		"test:visual:report": "tsx scripts/open-visual-report.ts",
 		"test:watch": "vp test --project=storybook"
