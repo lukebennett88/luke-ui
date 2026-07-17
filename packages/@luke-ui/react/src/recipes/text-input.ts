@@ -1,9 +1,9 @@
 import { sva } from '../../styled-system/css/index.mjs';
+import { token } from '../../styled-system/tokens/index.mjs';
 import type {
 	RecipeVariantProps,
 	SlotRecipeRuntimeFn,
 } from '../../styled-system/types/recipe.d.ts';
-import { token } from '../../styled-system/tokens/index.mjs';
 
 type TextInputSlots = 'group' | 'control' | 'adornmentStart' | 'adornmentEnd';
 type TextInputVariantRecord = {

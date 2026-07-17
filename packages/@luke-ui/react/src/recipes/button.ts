@@ -1,9 +1,6 @@
 import { cva } from '../../styled-system/css/index.mjs';
-import type {
-	RecipeRuntimeFn,
-	RecipeVariantProps,
-} from '../../styled-system/types/recipe.d.ts';
 import { token } from '../../styled-system/tokens/index.mjs';
+import type { RecipeRuntimeFn, RecipeVariantProps } from '../../styled-system/types/recipe.d.ts';
 
 type ButtonVariantRecord = {
 	appearance: { ghost: {}; solid: {}; subtle: {} };

@@ -1,3 +1,5 @@
 @layer utilities {
-.recipe-fixture { color: blue; }
+	.recipe-fixture {
+		color: blue;
+	}
 }
