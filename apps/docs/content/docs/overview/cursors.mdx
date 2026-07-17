@@ -1,0 +1,49 @@
+---
+title: Cursors
+description: Understand browser-default cursors and Luke UI's interaction conventions.
+---
+
+Cursors reinforce what an element can do. Luke UI keeps browser defaults where they already describe
+the interaction, then adds a small set of explicit cursors for library controls.
+
+## Browser defaults
+
+Text inputs and text areas use the browser's `text` cursor because people can place a caret and edit
+their value. Static content keeps the browser default. Luke UI does not add cursors for visual
+hierarchy, tone, or layout.
+
+## Luke UI conventions
+
+| Interaction                  | Cursor        | Where it applies                                         |
+| ---------------------------- | ------------- | -------------------------------------------------------- |
+| Activate an action or link   | `pointer`     | Button, IconButton, Link, and combobox action controls   |
+| Edit text                    | `text`        | TextField and editable Combobox controls                 |
+| Cannot interact              | `not-allowed` | Disabled controls, including disabled inputs and actions |
+| Wait for an action to finish | `wait`        | A Button or IconButton with `isPending`                  |
+
+Use a component's disabled or pending API instead of setting its cursor yourself. The API also
+communicates the state to assistive technology and prevents unsuitable interaction.
+
+## Resize affordances
+
+Luke UI does not expose a resizable component or cursor token. The docs playground has a resizable
+editor and preview separator: it uses `row-resize` when the panes are stacked on narrow screens and
+`col-resize` when they sit side by side from the medium breakpoint. The separator has a larger hit
+area and a visible handle, so the cursor confirms an affordance that is already visible.
+
+When you build a resize control, match the cursor to the direction of movement. Do not use a resize
+cursor on a static divider.
+
+## Continue learning
+
+<Cards>
+	<Card href="/components/actions/button" title="Button">
+		Use pending and disabled states for actions.
+	</Card>
+	<Card href="/components/forms/text-field" title="TextField">
+		Build editable fields with the supplied input behaviour.
+	</Card>
+	<Card href="/playground" title="Playground">
+		Resize the editor and preview panes to see the responsive separator.
+	</Card>
+</Cards>

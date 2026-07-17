@@ -1,4 +1,13 @@
 {
 	"title": "Overview",
-	"pages": ["getting-started", "styling", "layout", "theme", "color", "color-mode", "typography"]
+	"pages": [
+		"getting-started",
+		"styling",
+		"cursors",
+		"layout",
+		"theme",
+		"color",
+		"color-mode",
+		"typography"
+	]
 }
