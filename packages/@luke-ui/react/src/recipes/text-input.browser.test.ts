@@ -126,7 +126,7 @@ test('read-only still shows the focus ring since read-only fields remain focusab
 test('adornment divider uses the control border color and disabled text color follows the group', () => {
 	const { group, root } = mountGroup();
 	const adornment = group.appendChild(document.createElement('span'));
-	adornment.className = textInput({ size: 'medium' }).adornmentStart!;
+	adornment.className = textInput({ size: 'medium' }).adornmentStart;
 
 	const controlBorderProbe = root.appendChild(document.createElement('div'));
 	controlBorderProbe.style.borderColor = 'var(--luke-color-border-control)';
@@ -145,7 +145,7 @@ function mountGroup(options: Parameters<typeof textInput>[0] = {}) {
 	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	const group = root.appendChild(document.createElement('div'));
-	group.className = textInput(options).group!;
+	group.className = textInput(options).group;
 	group.style.transition = 'none';
 	mounted.push(root);
 	return { group, root };

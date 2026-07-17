@@ -1,5 +1,7 @@
 import { defineConfig } from '@pandacss/dev';
 import presetBase from '@pandacss/preset-base';
+import { buttonRecipe } from './src/recipes/button.recipe.js';
+import { textInputRecipe } from './src/recipes/text-input.recipe.js';
 import { lukeLayerOrder } from './src/styles/layer-order.js';
 import { buildPandaTokens } from './src/theme/panda-tokens.js';
 
@@ -41,13 +43,33 @@ export default defineConfig({
 
 	// Harmless for the spike; nothing here is actually scanned during cssgen.
 	include: ['src/**/*.{ts,tsx}'],
-	// Source-authored recipes are extracted by panda.recipes.config.ts into an
-	// isolated file. Keep them out of this Box-only run so utilities.css remains
-	// safe to re-layer as box in the assembled stylesheet.
-	exclude: ['src/recipes/button.ts', 'src/recipes/text-input.ts'],
+	exclude: [],
 
 	outdir: 'styled-system',
+	// Emit .d.mts beside each generated .mjs so explicit `.mjs` import
+	// specifiers resolve to real declarations under `module: preserve`.
+	forceConsistentTypeExtension: true,
 	cssVarRoot: '.luke-ui-theme',
+
+	hooks: {
+		// The generated recipe declarations import ConditionalValue from the
+		// types barrel (types/index.d.mts), whose side-effect import of
+		// global.d.mts reaches @pandacss/dev and, through its config types,
+		// pkg-types/typescript — none of which can land in the published dts
+		// bundle. ConditionalValue really lives in the self-contained
+		// types/conditions.d.mts, so retarget that one import at codegen time.
+		'codegen:prepare': ({ artifacts }) => {
+			const barrelImport = "import type { ConditionalValue } from '../types/index.d.mts';";
+			const directImport = "import type { ConditionalValue } from '../types/conditions.d.mts';";
+			for (const artifact of artifacts) {
+				for (const content of artifact.files) {
+					if (!content.code || !content.file.endsWith('.d.mts')) continue;
+					content.code = content.code.replaceAll(barrelImport, directImport);
+				}
+			}
+			return artifacts;
+		},
+	},
 
 	layers,
 
@@ -61,6 +83,8 @@ export default defineConfig({
 	// The alias layer plus the T2 box-slice placeholder spacing, kept so the box
 	// `utilities`/`staticCss` below still resolve (transitional; removed later).
 	theme: {
+		recipes: { button: buttonRecipe },
+		slotRecipes: { textInput: textInputRecipe },
 		tokens: {
 			...aliasTokens,
 			spacing: {

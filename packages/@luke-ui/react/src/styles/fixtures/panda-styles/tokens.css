@@ -1,0 +1,5 @@
+@layer tokens {
+	.token-fixture {
+		--colors-fixture: var(--luke-fixture);
+	}
+}

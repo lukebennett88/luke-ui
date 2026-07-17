@@ -17,8 +17,14 @@ describe('assembled stylesheet', () => {
 		expect(boxBlock).toContain('var(--spacing-');
 	});
 
-	it('re-layers the isolated source recipe output as recipes', () => {
+	it('includes the config recipe output inside @layer recipes', () => {
 		expect(css).toMatch(/@layer recipes\s*\{[\s\S]*?\.recipe-fixture\s*\{\s*color:\s*blue;\s*\}/);
+	});
+
+	it('includes the token alias bridge inside @layer tokens', () => {
+		expect(css).toMatch(
+			/@layer tokens\s*\{[\s\S]*?\.token-fixture\s*\{\s*--colors-fixture:\s*var\(--luke-fixture\);\s*\}/,
+		);
 	});
 
 	it('leaves no @layer utilities block from the renamed box source', () => {
