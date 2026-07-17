@@ -70,24 +70,75 @@ export default function IntentColoursExample() {
 				))}
 			</Box>
 			<Box
-				padding="400"
-				role="status"
+				display="grid"
+				gap="300"
 				style={{
-					backgroundColor: selectedIntent.surface,
-					border: `1px solid ${selectedIntent.border}`,
-					borderRadius: vars.radius.surface,
-					color: selectedIntent.text,
+					gridTemplateColumns: 'repeat(auto-fit, minmax(16rem, 1fr))',
 				}}
 			>
-				<Text elementType="strong" fontWeight="emphasis">
-					{selectedIntent.label}
-				</Text>
-				<Text elementType="p">{selectedIntent.description}</Text>
+				<StatusCard intent={selectedIntent} mode="light" />
+				<StatusCard intent={selectedIntent} mode="dark" />
 			</Box>
 			<Text color="secondary" elementType="p" size="200">
-				The surface and text use semantic intent roles, so they adapt to the active theme instead
-				and colour mode.
+				The canvas and card use neutral surface roles. The status uses an intent role, so both adapt
+				to the active colour mode.
 			</Text>
+		</Box>
+	);
+}
+
+function StatusCard({
+	intent,
+	mode,
+}: {
+	intent: (typeof intents)[Intent];
+	mode: 'dark' | 'light';
+}) {
+	return (
+		<Box
+			aria-label={`Project status in ${mode} mode`}
+			data-color-mode={mode}
+			padding="400"
+			style={{
+				backgroundColor: vars.color.surface.canvas,
+				borderRadius: vars.radius.surface,
+				color: vars.color.text.primary,
+			}}
+		>
+			<Box
+				padding="400"
+				style={{
+					backgroundColor: vars.color.surface.resting,
+					border: `1px solid ${vars.color.border.decorative}`,
+					borderRadius: vars.radius.surface,
+					boxShadow: vars.depth.resting,
+				}}
+			>
+				<Box alignItems="center" display="flex" gap="200" justifyContent="space-between">
+					<Text elementType="strong" fontWeight="emphasis">
+						Website launch
+					</Text>
+					<Text color="secondary" elementType="span" size="200">
+						{mode} mode
+					</Text>
+				</Box>
+				<Box
+					marginBlockStart="400"
+					padding="300"
+					role="status"
+					style={{
+						backgroundColor: intent.surface,
+						border: `1px solid ${intent.border}`,
+						borderRadius: vars.radius.control,
+						color: intent.text,
+					}}
+				>
+					<Text elementType="strong" fontWeight="emphasis">
+						{intent.label}
+					</Text>
+					<Text elementType="p">{intent.description}</Text>
+				</Box>
+			</Box>
 		</Box>
 	);
 }
