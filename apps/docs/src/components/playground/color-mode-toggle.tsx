@@ -1,12 +1,11 @@
-import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
 import { IconToggleButtonGroup } from './icon-toggle-button-group.js';
 
 const COLOR_MODES = [
-	{ Icon: SunIcon, label: 'Light theme', value: 'light' },
-	{ Icon: MoonIcon, label: 'Dark theme', value: 'dark' },
-	{ Icon: MonitorIcon, label: 'System theme', value: 'system' },
+	{ icon: 'sun', label: 'Light theme', value: 'light' },
+	{ icon: 'moon', label: 'Dark theme', value: 'dark' },
+	{ icon: 'monitor', label: 'System theme', value: 'system' },
 ] as const;
 
 type ColorMode = (typeof COLOR_MODES)[number]['value'];

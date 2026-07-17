@@ -1,5 +1,5 @@
+import { Icon } from '@luke-ui/react/icon';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { BookOpenIcon, CheckIcon, CopyIcon, ExternalLinkIcon, PencilIcon } from 'lucide-react';
 import { useState } from 'react';
 
 interface PageActionsProps {
@@ -19,7 +19,7 @@ export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageAction
 					rel="noreferrer"
 					target="_blank"
 				>
-					<BookOpenIcon className="size-4" />
+					<Icon aria-hidden className="size-4" name="bookOpen" />
 					View in Storybook
 				</a>
 			) : null}
@@ -29,7 +29,7 @@ export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageAction
 				rel="noreferrer"
 				target="_blank"
 			>
-				<ExternalLinkIcon className="size-4" />
+				<Icon aria-hidden className="size-4" name="externalLink" />
 				View as Markdown
 			</a>
 			<a
@@ -38,7 +38,7 @@ export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageAction
 				rel="noreferrer"
 				target="_blank"
 			>
-				<PencilIcon className="size-4" />
+				<Icon aria-hidden className="size-4" name="edit" />
 				Edit on GitHub
 			</a>
 		</div>
@@ -66,7 +66,11 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 			onClick={onCopy}
 			type="button"
 		>
-			{copied ? <CheckIcon className="size-4" /> : <CopyIcon className="size-4" />}
+			{copied ? (
+				<Icon aria-hidden className="size-4" name="check" />
+			) : (
+				<Icon aria-hidden className="size-4" name="copy" />
+			)}
 			{copied ? 'Copied' : 'Copy Markdown'}
 		</button>
 	);
