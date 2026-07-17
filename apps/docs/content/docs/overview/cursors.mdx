@@ -9,8 +9,8 @@ the interaction, then adds a small set of explicit cursors for library controls.
 ## Browser defaults
 
 Text inputs and text areas use the browser's `text` cursor because people can place a caret and edit
-their value. Static content keeps the browser default. Luke UI does not add cursors for visual
-hierarchy, tone, or layout.
+their value. Static content keeps the browser default. Luke UI sets a cursor only when it describes
+the interaction.
 
 ## Luke UI conventions
 
@@ -22,7 +22,7 @@ hierarchy, tone, or layout.
 | Wait for an action to finish | `wait`        | A Button or IconButton with `isPending`                  |
 
 Use a component's disabled or pending API instead of setting its cursor yourself. The API also
-communicates the state to assistive technology and prevents unsuitable interaction.
+communicates the state to assistive technology and blocks the interaction itself.
 
 ## Resize affordances
 
