@@ -296,9 +296,7 @@ test.each(visualAppearances)('open selection states: $theme $mode', async (appea
 	await expect
 		.element(page.getByRole('option', { name: 'Sweden' }))
 		.toHaveAttribute('aria-disabled', 'true');
-	await expect
-		.element(page.getByRole('progressbar', { name: 'Loading more options...' }))
-		.toBeVisible();
+	await expect.element(page.getByRole('status', { name: 'Loading more options...' })).toBeVisible();
 	await captureVisualAppearance(
 		page.elementLocator(document.body),
 		'combobox-field/open-selected-disabled-loading',

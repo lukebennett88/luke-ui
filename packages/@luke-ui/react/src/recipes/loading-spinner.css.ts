@@ -18,7 +18,19 @@ const colorVariants = {
 	warning: { color: vars.color.intent.warning.text },
 } as const;
 
+const spinAnimationName = keyframes({
+	to: { transform: 'rotate(360deg)' },
+});
+
 const base = styleInLayer('recipes', {
+	'@media': {
+		'(forced-colors: active)': { animationName: 'none' },
+		'(prefers-reduced-motion: reduce)': { animationName: 'none' },
+	},
+	animationDuration: rotationDuration,
+	animationIterationCount: 'infinite',
+	animationName: spinAnimationName,
+	animationTimingFunction: 'linear',
 	color: 'currentColor',
 	display: 'inline-flex',
 	flexShrink: 0,
@@ -39,32 +51,6 @@ export const spinner = recipeInLayer('recipes', {
 /** Variant type for the `LoadingSpinner` recipe. */
 export type LoadingSpinnerVariants = RecipeVariants<typeof spinner>;
 
-/** @internal */
-export const spinAnimationName = keyframes({
-	to: { transform: 'rotate(360deg)' },
-});
-
-export const spinnerState = recipeInLayer('recipes', {
-	defaultVariants: {
-		mode: 'determinate',
-	},
-	variants: {
-		mode: {
-			determinate: {},
-			indeterminate: {
-				'@media': {
-					'(forced-colors: active)': { animationName: 'none' },
-					'(prefers-reduced-motion: reduce)': { animationName: 'none' },
-				},
-				animationDuration: rotationDuration,
-				animationIterationCount: 'infinite',
-				animationName: spinAnimationName,
-				animationTimingFunction: 'linear',
-			},
-		},
-	},
-});
-
 export const svg = recipeInLayer('recipes', {
 	base: {
 		blockSize: '100%',
@@ -74,8 +60,7 @@ export const svg = recipeInLayer('recipes', {
 	},
 });
 
-/** @internal */
-export const rubberBandAnimationName = keyframes({
+const rubberBandAnimationName = keyframes({
 	'0%': { strokeDasharray: '2 100' },
 	'50%': { strokeDasharray: '65 100', strokeDashoffset: -20 },
 	'100%': { strokeDasharray: '2 100', strokeDashoffset: -100 },
@@ -83,36 +68,42 @@ export const rubberBandAnimationName = keyframes({
 
 export const indicator = recipeInLayer('recipes', {
 	base: {
-		strokeDasharray: '100 100',
-	},
-	defaultVariants: {
-		mode: 'determinate',
-	},
-	variants: {
-		mode: {
-			determinate: {
-				transitionDuration: vars.motion.duration.fast,
-				transitionProperty: 'stroke-dashoffset',
-				transitionTimingFunction: vars.motion.easing.exit,
+		'@media': {
+			'(forced-colors: active)': {
+				animationName: 'none',
+				strokeDasharray: '25 100',
+				strokeDashoffset: 0,
 			},
-			indeterminate: {
-				'@media': {
-					'(forced-colors: active)': {
-						animationName: 'none',
-						strokeDasharray: '25 100',
-						strokeDashoffset: 0,
-					},
-					'(prefers-reduced-motion: reduce)': {
-						animationName: 'none',
-						strokeDasharray: '25 100',
-						strokeDashoffset: 0,
-					},
-				},
-				animationDuration: rubberBandDuration,
-				animationIterationCount: 'infinite',
-				animationName: rubberBandAnimationName,
-				animationTimingFunction: rubberBandEasing,
+			'(prefers-reduced-motion: reduce)': {
+				animationName: 'none',
+				strokeDasharray: '25 100',
+				strokeDashoffset: 0,
 			},
 		},
+		animationDuration: rubberBandDuration,
+		animationIterationCount: 'infinite',
+		animationName: rubberBandAnimationName,
+		animationTimingFunction: rubberBandEasing,
+		strokeDasharray: '100 100',
 	},
+});
+
+export const childrenWrapper = styleInLayer('recipes', {
+	alignItems: 'center',
+	display: 'inline-flex',
+	justifyContent: 'center',
+	position: 'relative',
+});
+
+export const hiddenChildren = styleInLayer('recipes', {
+	display: 'contents',
+	visibility: 'hidden',
+});
+
+export const spinnerOverlay = styleInLayer('recipes', {
+	alignItems: 'center',
+	display: 'flex',
+	inset: 0,
+	justifyContent: 'center',
+	position: 'absolute',
 });
