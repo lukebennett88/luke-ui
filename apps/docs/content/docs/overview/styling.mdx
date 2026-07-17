@@ -53,7 +53,7 @@ import { Button } from '@luke-ui/react/button/primitive';
 ### Build custom UI with public recipes and variables
 
 Recipes from `@luke-ui/react/recipes` are public, component-specific styling APIs. Use one when a
-custom composition follows that recipe's documented element contract; do not copy or target its
+custom composition follows that recipe's documented element contract. Do not copy or target its
 generated selectors.
 
 ```tsx
@@ -86,7 +86,7 @@ contract.
 ### Change the visual foundation with a custom theme
 
 Use a [custom theme](/theming/authoring) when a product needs a different identity, typeface, or
-semantic colour system. `buildTheme` produces a static stylesheet for the full semantic contract; it
+semantic colour system. `buildTheme` produces a static stylesheet for the full semantic contract. It
 is not a per-component override tool.
 
 ## Set up static styles
@@ -131,7 +131,7 @@ Luke UI's static CSS uses four cascade layers, ordered from lowest to highest pr
 `theme`, `recipes`, and `utilities`. That internal order is stable regardless of stylesheet import
 order. The reset normalises only the subtree carrying `themeRootClassName`.
 
-Declare your application's layer order before importing its stylesheets when it uses layers too.
+If your application also uses cascade layers, declare its layer order before importing stylesheets.
 
 ```css
 @layer reset, theme, base, recipes, components, utilities;
