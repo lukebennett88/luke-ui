@@ -1,0 +1,64 @@
+---
+title: Principles
+description: Choose components, primitives, tokens, and responsive boundaries consistently.
+---
+
+Luke UI gives applications a stable set of semantics, behaviour, and theme values. Start with the
+highest-level public API that expresses the job, then move lower only when the product needs to own
+the structure.
+
+## Use semantic components
+
+Choose a component for the meaning and behaviour it provides, not only its appearance. A Button
+performs an action; a Link navigates. A composed field carries its label, validation, and input
+relationships together.
+
+Prefer the component's public props for its supported variants and states. Build custom UI only when
+the required structure is outside that API.
+
+## Use primitives for custom composition
+
+Composed components are the default for application UI. Primitives are public lower-level APIs for
+custom composed controls and library code. They keep Luke UI styling and accessible behaviour while
+leaving the child layout and additional structure to the consumer.
+
+When using a primitive, preserve the semantic relationships it expects: accessible names, labels,
+descriptions, validation messages, keyboard behaviour, and focus order.
+
+## Use public theme variables
+
+Use `vars` from `@luke-ui/react/theme` when custom UI needs a visual value. The semantic contract
+adapts to the active identity and colour mode. Component selectors, generated palette values, and
+theme implementation details are not public APIs.
+
+## Keep accessible behaviour intact
+
+Do not trade semantics or keyboard behaviour for a visual treatment. Use visible labels where
+possible, make icon-only controls understandable, and let the component own its supported disabled,
+pending, validation, and focus behaviour.
+
+## Make layout and themes responsive by scope
+
+Use Box or `createSprinkles` responsive values for layout changes. Theme identity belongs on a
+themed root; `data-color-mode` can scope an intentional light or dark boundary inside it. Let an
+unspecified colour mode follow the system preference rather than copying raw colour values into a
+breakpoint or mode-specific rule.
+
+## Apply the principles
+
+The following pages put these choices beside the API that needs them:
+
+<Cards>
+	<Card href="/overview/styling" title="Styling choices">
+		Decide between component props, custom composition, and layout utilities.
+	</Card>
+	<Card href="/components/actions/button" title="Actions">
+		Choose the correct control for an action or a destination.
+	</Card>
+	<Card href="/components/primitives/field" title="Field primitives">
+		Know when a custom field needs lower-level composition.
+	</Card>
+	<Card href="/theming/token-reference" title="Token reference">
+		Use semantic variables rather than raw visual values.
+	</Card>
+</Cards>

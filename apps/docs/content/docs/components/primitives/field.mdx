@@ -7,6 +7,11 @@ Use the field primitives to build a custom field with Luke UI labels, descriptio
 messages. Application code should usually use a composed field such as
 [`TextField`](/components/forms/text-field) or [`ComboboxField`](/components/forms/combobox-field).
 
+| Do                                                                                                      | Don't                                                                                        |
+| ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Use a composed field when its input, slots, and layout match the product need.                          | Recreate a standard text or combobox field from primitives for a minor visual variation.     |
+| Use field primitives when a custom control needs a different structure while retaining field semantics. | Use a primitive without connecting its label, description, error, and control relationships. |
+
 ```tsx
 import { Field, FieldDescription, FieldError, FieldLabel } from '@luke-ui/react/field/primitive';
 ```

@@ -21,6 +21,11 @@ accessible name.
 When a nearby heading already names the field, omit `label` and use `aria-label` or
 `aria-labelledby` instead.
 
+| Do                                                                                                 | Don't                                                             |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Use a visible label that describes the value the field collects.                                   | Use a placeholder as the only label.                              |
+| Connect an intentionally unlabelled field to a nearby name with `aria-label` or `aria-labelledby`. | Remove the accessible name when changing a field's visual layout. |
+
 ```tsx
 <TextField aria-label="Search" name="search" placeholder="Search" />
 ```

@@ -11,6 +11,11 @@ Use these variables when a component API or layout utility cannot express a cust
 adapt to the active identity and colour mode. Generated palette values, component selectors, and
 other implementation details are not part of the public styling API.
 
+| Do                                                                               | Don't                                                                             |
+| -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Choose a variable by its semantic purpose, such as `vars.color.surface.resting`. | Copy a resolved colour, shadow, or radius value into application CSS.             |
+| Use public `vars` when a custom element needs to follow the active theme.        | Depend on a component selector or generated palette value to imitate a component. |
+
 ## Use semantic variables
 
 <ExampleBlock
