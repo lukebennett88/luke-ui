@@ -10,7 +10,7 @@ the structure.
 ## Use semantic components
 
 Choose a component for the meaning and behaviour it provides, not only its appearance. A Button
-performs an action; a Link navigates. A composed field carries its label, validation, and input
+performs an action. A Link navigates. A composed field carries its label, validation, and input
 relationships together.
 
 Prefer the component's public props for its supported variants and states. Build custom UI only when
@@ -34,13 +34,13 @@ theme implementation details are not public APIs.
 ## Keep accessible behaviour intact
 
 Do not trade semantics or keyboard behaviour for a visual treatment. Use visible labels where
-possible, make icon-only controls understandable, and let the component own its supported disabled,
-pending, validation, and focus behaviour.
+possible, give icon-only controls an accessible name, and let the component own its supported
+disabled, pending, validation, and focus behaviour.
 
-## Make layout and themes responsive by scope
+## Scope layout and theme changes
 
 Use Box or `createSprinkles` responsive values for layout changes. Theme identity belongs on a
-themed root; `data-color-mode` can scope an intentional light or dark boundary inside it. Let an
+themed root, and `data-color-mode` can scope an intentional light or dark boundary inside it. Let an
 unspecified colour mode follow the system preference rather than copying raw colour values into a
 breakpoint or mode-specific rule.
 
