@@ -22,8 +22,8 @@ Each condition is a minimum width. A value at `medium` continues to apply at `la
 
 ## Use responsive values
 
-`Box` and `createSprinkles` accept a direct value or an object keyed by breakpoint names. Use a
-direct value when it does not change. Use an object when one layout property changes across
+`Box` and `createSprinkles` accept a direct value or an object keyed by breakpoint names. Pass a
+direct value when the property never changes, and an object when it changes at one or more
 viewports.
 
 ```tsx
@@ -40,7 +40,7 @@ import { Box } from '@luke-ui/react/box';
 
 Use `xsmall` for the base value when the property needs a value at every viewport. Omit unchanged
 breakpoints so the previous value cascades forward. Use responsive values for layout, spacing,
-sizing, positioning, overflow, flex, and grid-child properties—not component appearance or
+sizing, positioning, overflow, flex, and grid-child properties, not component appearance or
 interaction state.
 
 <ExampleBlock
@@ -53,7 +53,7 @@ interaction state.
 
 Choose the first viewport where the content needs more room, rather than treating breakpoint names
 as device categories. A two-column summary can become a row at `medium` because its content fits
-there; another layout may need to wait until `large`.
+there. Another layout may need to wait until `large`.
 
-Use [Layout](/overview/layout) for the available Sprinkles properties and
+See [Layout](/overview/layout) for the available Sprinkles properties and
 [Box](/components/layout/box) for the responsive layout component API.
