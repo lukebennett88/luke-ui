@@ -12,6 +12,7 @@ type Identity = 'paper' | 'tactile';
 export default function IdentityAndModeExample() {
 	const [colorMode, setColorMode] = useState<ColorMode>('light');
 	const [identity, setIdentity] = useState<Identity>('tactile');
+	const [previewColorMode, setPreviewColorMode] = useState<ColorMode>('dark');
 	const identityClassName = identity === 'tactile' ? tactileThemeClassName : paperThemeClassName;
 
 	return (
@@ -28,7 +29,7 @@ export default function IdentityAndModeExample() {
 		>
 			<Box display="grid" gap="200">
 				<Text elementType="strong" fontWeight="emphasis">
-					Identity
+					Boundary identity
 				</Text>
 				<Box aria-label="Theme identity" display="flex" flexWrap="wrap" gap="200" role="group">
 					{(['tactile', 'paper'] as const).map((option) => (
@@ -46,7 +47,7 @@ export default function IdentityAndModeExample() {
 			</Box>
 			<Box display="grid" gap="200">
 				<Text elementType="strong" fontWeight="emphasis">
-					Colour mode
+					Boundary colour mode
 				</Text>
 				<Box aria-label="Colour mode" display="flex" flexWrap="wrap" gap="200" role="group">
 					{(['light', 'dark'] as const).map((option) => (
@@ -64,6 +65,7 @@ export default function IdentityAndModeExample() {
 			</Box>
 			<Box
 				padding="600"
+				render={(props) => <section {...props} />}
 				style={{
 					backgroundColor: vars.color.surface.resting,
 					border: `1px solid ${vars.color.border.decorative}`,
@@ -75,7 +77,7 @@ export default function IdentityAndModeExample() {
 				<Box alignItems="center" display="flex" gap="300" justifyContent="space-between">
 					<Box display="grid" gap="100">
 						<Text elementType="strong" fontWeight="emphasis">
-							Product updates
+							Boundary content
 						</Text>
 						<Text color="secondary" elementType="span" size="200">
 							{identity === 'tactile' ? 'Tactile material' : 'Paper material'} in {colorMode} mode
@@ -87,9 +89,50 @@ export default function IdentityAndModeExample() {
 				</Box>
 				<Box marginBlockStart="400">
 					<Text elementType="p">
-						A new release is ready for review. The same components respond to this local theme
-						boundary.
+						The same components respond to the identity and colour mode of this local boundary.
 					</Text>
+				</Box>
+				<Box
+					data-color-mode={previewColorMode}
+					marginBlockStart="400"
+					padding="400"
+					style={{
+						backgroundColor: vars.color.surface.recessed,
+						border: `1px solid ${vars.color.border.decorative}`,
+						borderRadius: vars.radius.control,
+						color: vars.color.text.primary,
+					}}
+				>
+					<Box
+						alignItems="center"
+						display="flex"
+						flexWrap="wrap"
+						gap="300"
+						justifyContent="space-between"
+					>
+						<Box display="grid" gap="100">
+							<Text elementType="strong" fontWeight="emphasis">
+								Nested preview
+							</Text>
+							<Text color="secondary" elementType="span" size="200">
+								Overrides the boundary with {previewColorMode} mode
+							</Text>
+						</Box>
+						<Box aria-label="Nested preview colour mode" display="flex" gap="200" role="group">
+							{(['light', 'dark'] as const).map((option) => (
+								<Button
+									appearance={previewColorMode === option ? 'solid' : 'subtle'}
+									aria-pressed={previewColorMode === option}
+									key={option}
+									onPress={() => setPreviewColorMode(option)}
+									size="small"
+									tone="accent"
+								>
+									{option === 'light' ? 'Light' : 'Dark'}
+								</Button>
+							))}
+						</Box>
+					</Box>
 				</Box>
 			</Box>
 		</Box>

@@ -1,10 +1,36 @@
 ---
-title: Theming overview
-description: Apply a bundled identity, choose a colour mode, or author a static theme.
+title: Theme system
+description: Understand theme roots, identities, colour modes, and themed boundaries.
 ---
 
-Luke UI themes are static stylesheets. An identity defines the visual foundation. A colour mode
-selects its light or dark values. Components keep the same API in every combination.
+Luke UI themes are static stylesheets. A theme root establishes a themed boundary, an identity
+provides its visual foundation, and a colour mode selects its light or dark values. Components keep
+the same API in every combination.
+
+## How a themed boundary works
+
+A theme root carries `themeRootClassName` and one identity class. Its descendants inherit the
+identity's semantic tokens. Add `data-color-mode` to select a mode for the root or a smaller scope
+inside it.
+
+1. The theme root supplies the Luke UI reset and base theme styles.
+2. The identity supplies semantic colour, typography, spacing, radii, material, and depth.
+3. A colour mode selects the identity's light or dark token values.
+
+The setup guide shows the CSS imports and root markup. This guide explains how to arrange those
+parts once they are available.
+
+<Cards>
+	<Card href="/theming/applying" title="Set up a theme root">
+		Load Luke UI and an identity stylesheet, then apply the root classes.
+	</Card>
+	<Card href="/theming/authoring" title="Author an identity">
+		Compile a product-owned foundation when the bundled identities do not fit.
+	</Card>
+	<Card href="/theming/token-reference" title="Use public tokens">
+		Build custom UI with the stable semantic token contract.
+	</Card>
+</Cards>
 
 ## Choose an identity
 
@@ -13,10 +39,8 @@ Luke UI ships with two bundled identities:
 - Tactile is the default. It uses stronger depth and a compact material treatment.
 - Paper is flatter, with lighter borders and depth.
 
-Apply the matching CSS file and identity class at the same themed root as `themeRootClassName`. The
-identity supplies semantic colour, typography, spacing, radii, material, and depth to its subtree.
-
-<SourceCodeBlock src="theming/apply-theme" />
+Apply the matching CSS file and identity class at the same themed root as `themeRootClassName`. See
+[Applying a theme](/theming/applying) for the exact imports and root markup.
 
 Use one identity for an application or independent themed subtree. Identity classes are not
 nestable, so a child scope cannot switch from Tactile to Paper without becoming a separate themed
@@ -28,23 +52,24 @@ Each identity provides light and dark values. Omit `data-color-mode` to follow
 `prefers-color-scheme`, or set it to `light` or `dark` to force a mode. Modes can nest within an
 identity, which is useful for previews and intentional light-on-dark or dark-on-light boundaries.
 
-```tsx
-<main data-color-mode="dark">
-	<App />
-	<section data-color-mode="light">
-		<Preview />
-	</section>
-</main>
-```
-
-See [Colour modes](/overview/color-mode) for server-rendering and portal behaviour.
-
 <ExampleBlock
 	src="theming/identity-and-mode"
-	title="Identity and colour mode"
-	description="Try the two bundled identities and both colour modes in an isolated theme boundary."
+	title="Local theme boundaries"
+	description="Change an isolated boundary's identity and mode, then override its nested preview."
 	mode="full-bleed"
 />
+
+An explicit mode also sets native `color-scheme`, so form controls and scrollbars match the Luke UI
+content. See [Colour modes](/overview/color-mode) for server-rendering guidance.
+
+## Keep the theme through portals
+
+Application-owned portals render outside the themed DOM branch, so they cannot inherit its tokens.
+Copy the nearest theme identity class and explicit colour-mode attribute to the portal root. When
+the source follows the system setting, omit `data-color-mode` from the portal root too.
+
+Luke UI's Combobox already does this for its popover. See [Applying a theme](/theming/applying) for
+the complete portal contract.
 
 ## Theme values and component variants
 
@@ -61,20 +86,10 @@ the theme supplies the final colours, finish, and depth.
 Use a component API before custom CSS. For a custom element, use the public `vars` token contract.
 Do not depend on a component's selectors, generated palette values, or theme implementation details.
 
-## Author a theme
+## Author a custom identity
 
 When neither bundled identity fits a product, define a typed `ThemeFoundation` and compile it with
 `buildTheme`. The generated stylesheet contains the full semantic contract for both colour modes and
 validates contrast before it is written.
 
-<Cards>
-	<Card href="/theming/applying" title="Apply a bundled theme">
-		Load the CSS, set the root classes, and preserve them through portals.
-	</Card>
-	<Card href="/theming/authoring" title="Author a theme">
-		Compile a product-owned stylesheet from a typed foundation.
-	</Card>
-	<Card href="/theming/token-reference" title="Token reference">
-		Browse the public semantic CSS variables for custom UI.
-	</Card>
-</Cards>
+Read [Authoring a theme](/theming/authoring) for the foundation API and build step.
