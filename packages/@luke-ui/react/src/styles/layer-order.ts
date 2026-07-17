@@ -14,5 +14,3 @@
  * - **utilities** — One-off overrides; highest-priority escape hatch.
  */
 export const lukeLayerOrder = ['reset', 'base', 'tokens', 'recipes', 'box', 'utilities'] as const;
-
-export type LukeLayerName = (typeof lukeLayerOrder)[number];

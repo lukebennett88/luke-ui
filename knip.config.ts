@@ -20,6 +20,9 @@ export default {
 			project: ['src/**/*.{ts,tsx}'],
 		},
 		'packages/@luke-ui/react': {
+			// Knip's Panda plugin expects `postcss` listed for panda.config.ts, but we
+			// use Panda's standalone codegen/cssgen CLI, not the postcss plugin.
+			ignoreDependencies: ['postcss'],
 			entry: [
 				'src/**/*.stories.tsx',
 				'src/**/index.tsx',
