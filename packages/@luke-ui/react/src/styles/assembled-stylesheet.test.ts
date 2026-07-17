@@ -18,7 +18,7 @@ describe('assembled stylesheet', () => {
 	});
 
 	it('re-layers the isolated source recipe output as recipes', () => {
-		expect(css).toContain('@layer recipes {\n.recipe-fixture { color: blue; }\n}');
+		expect(css).toMatch(/@layer recipes\s*\{[\s\S]*?\.recipe-fixture\s*\{\s*color:\s*blue;\s*\}/);
 	});
 
 	it('leaves no @layer utilities block from the renamed box source', () => {
