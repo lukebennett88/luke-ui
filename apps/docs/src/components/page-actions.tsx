@@ -66,11 +66,7 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 			onClick={onCopy}
 			type="button"
 		>
-			{copied ? (
-				<Icon aria-hidden className="size-4" name="check" />
-			) : (
-				<Icon aria-hidden className="size-4" name="copy" />
-			)}
+			<Icon aria-hidden className="size-4" name={copied ? "check" : "copy"} />
 			{copied ? 'Copied' : 'Copy Markdown'}
 		</button>
 	);
