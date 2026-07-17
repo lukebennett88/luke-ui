@@ -1,8 +1,8 @@
 # Visual regression testing
 
-Visual tests compare the current checkout with the latest `origin/main` on the same machine and in
-the same Chromium installation. The repository does not store screenshots, baseline manifests, or
-Git LFS objects.
+Visual tests compare the current checkout against a committed set of frozen "golden" screenshots,
+captured once on the `ve-final` tag. Screenshots are committed under
+`packages/@luke-ui/react/visual-goldens/`.
 
 ## Run the comparison
 
@@ -10,19 +10,31 @@ Git LFS objects.
 pnpm run test:visual
 ```
 
-The command captures the local `origin/main` ref in a disposable Git worktree, then captures the
-current working tree, including uncommitted changes. Fetch before running when you need the latest
-remote commit. Set `VISUAL_BASE_REF` to use another local ref, such as `upstream/main` in a fork.
-The command compares matching capture IDs and writes a self-contained report to
-`.artifacts/visual-regression/report/index.html`.
-
-The first run installs and builds the comparison worktree. Later runs reuse its ignored cache while
-the base SHA, platform, architecture, browser, lockfile, and visual configuration remain unchanged.
-Delete `.artifacts/visual-regression` at any time to start clean.
+The command builds the packages, captures the current working tree, including uncommitted changes,
+and compares it against the committed frozen goldens. There is no worktree checkout and no
+`VISUAL_BASE_REF`/`VISUAL_BASE_SHA` to configure. The command compares matching capture IDs and
+writes a self-contained report to `.artifacts/visual-regression/report/index.html`.
 
 Local pixel differences are advisory: the command reports them but succeeds so intentional visual
 work does not make the development loop permanently red. Capture failures, duplicate IDs, and other
 infrastructure errors still fail.
+
+## Re-baseline the goldens
+
+The committed goldens are platform-specific and must match the CI runner, so they are captured on
+Linux by the **Freeze visual goldens** workflow, not on a contributor's machine. After an intentional
+visual change:
+
+1. Trigger the **Freeze visual goldens** workflow (Actions → Freeze visual goldens → Run workflow) on
+   your branch.
+2. Download the `visual-goldens` artifact it produces.
+3. Replace `packages/@luke-ui/react/visual-goldens/` with the artifact contents and commit it
+   alongside your change, reviewing the PNG diffs in the pull request.
+
+`pnpm --filter @luke-ui/react test:visual:freeze` runs the same capture locally; use it to preview a
+change, but do not commit macOS-captured goldens — they will not match the Linux CI runner. The
+manifest records the platform, architecture, and a config+lockfile signature, so environment or
+config drift against the recorded goldens surfaces as a warning.
 
 ## Read the report
 
@@ -33,20 +45,20 @@ the filters, overlay slider, and main, current, and diff images to review each r
 
 ## CI review
 
-Pull requests that can affect rendered components run the same comparison on Linux. CI uploads the
-report as the `visual-regression-report` artifact. Added and removed captures do not require
-approval. Before enabling this workflow, a repository administrator must create the `visual-review`
-environment in GitHub settings and add a required reviewer. Self-review may remain enabled. Without
-that protection rule, GitHub runs the review job immediately and visual approval is not enforced.
-Once configured, matched visual changes pause the review job and tie approval to that workflow run
-and commit.
+Pull requests that can affect rendered components run the same comparison against the committed
+goldens on Linux. CI uploads the report as the `visual-regression-report` artifact. Added and removed
+captures do not require approval. Before enabling this workflow, a repository administrator must
+create the `visual-review` environment in GitHub settings and add a required reviewer. Self-review
+may remain enabled. Without that protection rule, GitHub runs the review job immediately and visual
+approval is not enforced. Once configured, matched visual changes pause the review job and tie
+approval to that workflow run and commit.
 
-## Why screenshots are not committed
+## Why the goldens are a frozen, committed set
 
-Rendering both revisions on the same device avoids platform-specific baselines and the usual
-macOS-to-Linux update loop. It also keeps forks simple and avoids binary repository growth. The
-tradeoff is that each comparison renders two revisions; the disposable base cache limits repeated
-work.
+This is a stopgap for the Vanilla Extract → Panda migration. Once the VE rollup plugin is removed
+from `vitest.config.ts` (ticket T6), the old `*.css.ts` files can no longer be compiled, so rebuilding
+a live Vanilla Extract baseline becomes impossible. A committed set captured once on the `ve-final`
+tag keeps the parity gate stable across that removal and makes diffs reviewable directly in the PR.
 
 See [`TESTING.md`](./TESTING.md#visual-regression-tests) for how to write a visual test.
 
