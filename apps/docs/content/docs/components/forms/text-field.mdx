@@ -1,93 +1,85 @@
 ---
 title: Text Field
-description: Single-line text input with label, validation, and adornments.
+description: Captures a single line of text with a label, validation, and optional adornments.
 ---
 
-Use `TextField` for a single text input with label, description, validation, and optional adornments
-built in.
+Use `TextField` to collect a single line of text. It combines an input with a label, description,
+and validation message.
 
 <ExampleBlock
 	src="text-field/basic"
 	title="Text Field — Basic"
-	description="Single-line text input with label and description."
+	description="A labelled email field with supporting text."
 />
 
-## Best practices
+## Labels and placeholders
 
-| Guidance | Practices                                                                                                                   |
-| -------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use `label` for every field where possible. It works better with assistive technology and autofill than `aria-label` alone. |
-| Don't    | Use `placeholder` as a label substitute. It disappears after typing and often fails colour contrast requirements.           |
+Give the field a visible `label` where possible. Use `placeholder` for an example value or input
+format, not as the label. A placeholder disappears while the person types and is not a reliable
+accessible name.
+
+When a nearby heading already names the field, omit `label` and use `aria-label` or
+`aria-labelledby` instead.
+
+```tsx
+<TextField aria-label="Search" name="search" placeholder="Search" />
+```
 
 ## Required fields
 
-Use `isRequired` and `necessityIndicator` to communicate mandatory fields. `'icon'` renders a visual
-required marker. `'label'` appends "(required)" to the label text.
+Set `isRequired` for required fields. `necessityIndicator="icon"` adds a visual marker.
+`necessityIndicator="label"` appends “(required)” to the label.
 
 <ExampleBlock
 	src="text-field/required"
 	title="Text Field — Required"
-	description="Icon and label necessity indicators for mandatory fields."
+	description="Required fields with icon and label indicators."
 />
 
 ## Validation
 
-Pass field-level validation through React Aria `Form`. Use `errorMessage` to render the validation
-message.
+Use `errorMessage` to render a validation message. For client validation, use React Aria validation
+props. For server validation, pass errors through React Aria `Form`.
 
 ```tsx
 import { Form } from 'react-aria-components';
 
 <Form validationErrors={{ username: 'Username is not available.' }}>
 	<TextField
-		name="username"
-		label="Username"
 		errorMessage={(validation) => validation.validationErrors.join(' ')}
+		label="Username"
+		name="username"
 	/>
 </Form>;
 ```
 
 ## Adornments
 
-Use `adornmentStart` and `adornmentEnd` to place non-editable content inside the input chrome.
-Adornments accept any `ReactNode`. If an adornment is interactive, you are responsible for its
-semantics.
+Use `adornmentStart` and `adornmentEnd` for content inside the input, such as a search icon,
+currency code, or URL prefix. Both accept any `ReactNode`. Give interactive adornments an accessible
+name and keyboard behaviour.
 
 <ExampleBlock
 	src="text-field/adornments"
 	title="Text Field — Adornments"
-	description="Start and end adornments inside the input chrome."
+	description="Icons and text before or after the input value."
 />
 
 ## Size
 
-`size` controls height and typography. The HTML numeric `<input size>` attribute is intentionally
-omitted because `size` is reserved for the design-system variant.
-
-| Value      | Description           |
-| ---------- | --------------------- |
-| `'small'`  | Compact input height. |
-| `'medium'` | Default input height. |
+Use `size` to set the input height and typography. Use `small` in compact layouts. `medium` is the
+default. The HTML numeric `size` attribute is unavailable because `size` is the Luke UI variant.
 
 <ExampleBlock
 	src="text-field/sizes"
 	title="Text Field — Sizes"
-	description="Small and medium input heights."
+	description="Small and medium text fields."
 />
-
-## Accessibility
-
-When visual context already communicates purpose, you may omit `label` and provide an accessible
-name with `aria-label` or `aria-labelledby` on the field.
-
-```tsx
-<TextField aria-label="Search" name="search" placeholder="Search" />
-```
 
 ## Primitive
 
-Use the [TextInput primitive](/docs/components/primitives/text-input) when you need the input
-without the label, description, and error slots that `TextField` provides.
+Use the [TextInput primitive](/components/primitives/text-input) when you need an input without the
+label, description, and error slots.
 
 ## Props
 

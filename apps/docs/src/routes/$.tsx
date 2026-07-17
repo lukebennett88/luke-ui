@@ -9,13 +9,13 @@ import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
-import browserCollections from '../../../.source/browser';
-import { ExampleBlock } from '../../components/example-block';
-import { PageActions } from '../../components/page-actions';
-import { SourceCodeBlock } from '../../components/source-code-block';
-import { baseOptions } from '../../lib/layout.shared';
-import { source } from '../../lib/source';
-import { getStorybookStoryUrl, withBasePath } from '../../lib/storybook';
+import browserCollections from '../../.source/browser';
+import { ExampleBlock } from '../components/example-block';
+import { PageActions } from '../components/page-actions';
+import { SourceCodeBlock } from '../components/source-code-block';
+import { baseOptions } from '../lib/layout.shared';
+import { source } from '../lib/source';
+import { getStorybookStoryUrl, withBasePath } from '../lib/storybook';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
 
@@ -27,7 +27,7 @@ const mdxComponents = {
 	TypeTable,
 };
 
-export const Route = createFileRoute('/docs/$')({
+export const Route = createFileRoute('/$')({
 	component: Page,
 	loader: async ({ params }) => {
 		const slugs = params._splat?.split('/') ?? [];
@@ -47,7 +47,7 @@ const loader = createServerFn({
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
 
-		const markdownPath = `${page.url === '/docs' ? '/docs/index' : page.url}.md`;
+		const markdownPath = `${page.url === '/' ? '/index' : page.url}.md`;
 
 		return {
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,

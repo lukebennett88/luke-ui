@@ -3,12 +3,14 @@ import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox-field/pri
 
 export default function Grouped() {
 	return (
-		<ComboboxField label="Country" name="country">
-			<ComboboxSection title="Northern hemisphere">
-				<ComboboxItem id="ca">Canada</ComboboxItem>
+		<ComboboxField defaultValue="apple" label="Produce" name="produce" placeholder="Choose produce">
+			<ComboboxSection title="Fruit">
+				<ComboboxItem id="apple">Apple</ComboboxItem>
+				<ComboboxItem id="orange">Orange</ComboboxItem>
 			</ComboboxSection>
-			<ComboboxSection title="Southern hemisphere">
-				<ComboboxItem id="au">Australia</ComboboxItem>
+			<ComboboxSection title="Vegetables">
+				<ComboboxItem id="carrot">Carrot</ComboboxItem>
+				<ComboboxItem id="potato">Potato</ComboboxItem>
 			</ComboboxSection>
 		</ComboboxField>
 	);

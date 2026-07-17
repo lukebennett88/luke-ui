@@ -1,38 +1,46 @@
 ---
 title: Field primitive
-description: Shared field anatomy for labels, descriptions, and validation messages.
+description: Shared label, description, and validation parts for custom fields.
 ---
 
-Use field primitives when you are building a composed field component that needs Luke UI label,
-description, and error styling.
+Use the field primitives to build a custom field with Luke UI labels, descriptions, and validation
+messages. Application code should usually use a composed field such as
+[`TextField`](/components/forms/text-field) or [`ComboboxField`](/components/forms/combobox-field).
 
 ```tsx
-import { Field, FieldLabel, FieldDescription, FieldError } from '@luke-ui/react/field/primitive';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@luke-ui/react/field/primitive';
 ```
 
 ## Anatomy
 
-`Field` composes the common field structure: label, control slot, description, and validation
-message.
-
-Use `FieldLabel`, `FieldDescription`, and `FieldError` directly when a composed component needs a
-custom layout.
+`Field` arranges a label, your control, an optional description, and a validation message. Pass
+`label`, `description`, and `errorMessage` to use its standard slots.
 
 ```tsx
-<Field label="Email" description="Use your work email.">
+<Field description="Use your work email." label="Email">
 	<input />
 </Field>
 ```
 
-## Necessity indicators
+For a custom structure, use `FieldLabel`, `FieldDescription`, and `FieldError` with the field
+control. Keep their relationship to the control intact so React Aria can expose the label,
+description, and error semantics.
 
-`FieldLabel` accepts `necessityIndicator`. Use it to choose how required fields are shown.
+## Required fields
+
+`necessityIndicator` controls how `FieldLabel` marks a required field. Its default is `icon`. Use
+the supported values from the API table when a different required-field convention is needed.
 
 ```tsx
 <Field label="Email" necessityIndicator="label">
 	<input required />
 </Field>
 ```
+
+## Validation messages
+
+Use `errorMessage` for validation feedback. `FieldError` is styled for the field error slot and
+works with the validation state from the surrounding React Aria form control.
 
 ## Props
 

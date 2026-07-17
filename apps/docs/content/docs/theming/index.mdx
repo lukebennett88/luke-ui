@@ -1,31 +1,80 @@
 ---
 title: Theming overview
-description: Choose a Luke UI theme identity and colour mode independently.
+description: Apply a bundled identity, choose a colour mode, or author a static theme.
 ---
 
-Luke UI separates **theme identity** from **colour mode**. Theme identity chooses the visual
-language. Colour mode chooses light, dark, or the system preference. The two settings are
-independent, so either bundled theme works in either mode.
+Luke UI themes are static stylesheets. An identity defines the visual foundation. A colour mode
+selects its light or dark values. Components keep the same API in every combination.
 
-Luke UI includes two theme identities:
+## Choose an identity
 
-- **Tactile** is the default, compact tactile theme.
-- **Paper** is a flatter, lower-depth alternative.
+Luke UI ships with two bundled identities:
 
-A theme defines the semantic colours, typography, radius, material, and depth foundations shared by
-components. Luke UI defines component structure, states, and behaviour. Custom selectors, internal
-palettes, theme-defined component variants, and component slots are not part of the supported
-theming contract. Use public semantic CSS variables for local styling.
+- Tactile is the default. It uses stronger depth and a compact material treatment.
+- Paper is flatter, with lighter borders and depth.
 
-Use the controls in the documentation header to preview any combination. Each choice is stored
-separately and applies to hosted examples and the playground. Storybook provides separate theme
-identity and colour-mode controls in its toolbar.
+Apply the matching CSS file and identity class at the same themed root as `themeRootClassName`. The
+identity supplies semantic colour, typography, spacing, radii, material, and depth to its subtree.
 
-Colour mode is nestable. A page can use one mode while a subtree forces the opposite mode. Apply one
-theme identity at each independent themed root. Nested theme identities are not supported.
+<SourceCodeBlock src="theming/apply-theme" />
 
-## Next steps
+Use one identity for an application or independent themed subtree. Identity classes are not
+nestable, so a child scope cannot switch from Tactile to Paper without becoming a separate themed
+boundary.
 
-- [Apply a bundled theme](/docs/theming/applying).
-- [Author a theme](/docs/theming/authoring).
-- [Browse the semantic token reference](/docs/theming/token-reference).
+## Choose a colour mode
+
+Each identity provides light and dark values. Omit `data-color-mode` to follow
+`prefers-color-scheme`, or set it to `light` or `dark` to force a mode. Modes can nest within an
+identity, which is useful for previews and intentional light-on-dark or dark-on-light boundaries.
+
+```tsx
+<main data-color-mode="dark">
+	<App />
+	<section data-color-mode="light">
+		<Preview />
+	</section>
+</main>
+```
+
+See [Colour modes](/overview/color-mode) for server-rendering and portal behaviour.
+
+<ExampleBlock
+	src="theming/identity-and-mode"
+	title="Identity and colour mode"
+	description="Try the two bundled identities and both colour modes in an isolated theme boundary."
+	mode="full-bleed"
+/>
+
+## Theme values and component variants
+
+Themes supply the values behind a component. Components expose the safe choices that use those
+values. For example, Button uses `tone` and `appearance` to communicate intent and hierarchy, while
+the theme supplies the final colours, finish, and depth.
+
+```tsx
+<Button appearance="solid" tone="accent">
+	Save changes
+</Button>
+```
+
+Use a component API before custom CSS. For a custom element, use the public `vars` token contract.
+Do not depend on a component's selectors, generated palette values, or theme implementation details.
+
+## Author a theme
+
+When neither bundled identity fits a product, define a typed `ThemeFoundation` and compile it with
+`buildTheme`. The generated stylesheet contains the full semantic contract for both colour modes and
+validates contrast before it is written.
+
+<Cards>
+	<Card href="/theming/applying" title="Apply a bundled theme">
+		Load the CSS, set the root classes, and preserve them through portals.
+	</Card>
+	<Card href="/theming/authoring" title="Author a theme">
+		Compile a product-owned stylesheet from a typed foundation.
+	</Card>
+	<Card href="/theming/token-reference" title="Token reference">
+		Browse the public semantic CSS variables for custom UI.
+	</Card>
+</Cards>

@@ -3,49 +3,49 @@ title: Heading
 description: Semantic heading with automatic level management.
 ---
 
-Use `Heading` for section headings. It can infer heading level from `HeadingLevels` context, or you
-can pass `level` directly.
+`Heading` renders a semantic section heading. It reads its level from `HeadingLevels` context, or
+you can set `level` directly.
 
 ```tsx
 <Heading>Section title</Heading>
 ```
 
+## Heading level
+
+Set `base` on the root `HeadingLevels`. Each nested `HeadingLevels` advances the next heading level.
+This keeps the document outline aligned with the component structure.
+
+<ExampleBlock
+	src="heading/automatic-leveling"
+	title="Heading — Automatic levels"
+	description="Nested HeadingLevels contexts advance each heading level."
+/>
+
+Use `level` to override the context for one heading. It does not change the level for siblings or
+children.
+
 ```tsx
 <Heading level={2}>Explicit h2</Heading>
 ```
 
-## Best practices
+Do not skip levels, such as an h2 followed by an h4. Screen reader users navigate a page by heading
+level.
 
-| Guidance | Practices                                                                                                     |
-| -------- | ------------------------------------------------------------------------------------------------------------- |
-| Do       | Prefer automatic leveling for nested sections instead of hardcoding every `level`.                            |
-| Don't    | Skip heading levels, such as an h2 followed directly by an h4. Screen reader users navigate by heading level. |
+## Size and weight
 
-## Automatic leveling
-
-`Heading` reads its level from `HeadingLevels` context. Set `base` on the root context. Each nested
-`HeadingLevels` advances the next heading level.
-
-<ExampleBlock
-	src="heading/automatic-leveling"
-	title="Heading — Automatic leveling"
-	description="Heading levels are inferred from nested HeadingLevels context."
-/>
-
-The `level` prop overrides context for one heading without changing the nesting depth for siblings
-or children.
-
-## Typography
-
-By default, `Heading` maps h1 through h6 to size steps `'800'` through `'300'` and applies
-`fontWeight="heading"`. Pass any `size` step to override the visual scale without changing the
-semantic level. Use `'900'` for display headings.
+By default, `Heading` maps h1 through h6 to size steps `'800'` through `'300'` and uses the
+`heading` font-weight role. Set `size` to change visual scale without changing the semantic level.
+Use `'900'` for display headings.
 
 <ExampleBlock
 	src="heading/typography"
-	title="Heading — Typography"
-	description="Heading colour and visual size can be customised without changing its semantic level."
+	title="Heading — Size and colour"
+	description="Change visual size and colour without changing the semantic heading level."
 />
+
+## Related components
+
+Use [Text](/components/typography/text) for prominent content that is not a section heading.
 
 ## Props
 

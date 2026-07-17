@@ -49,7 +49,7 @@ async function getMarkdownPrerenderPages(): Promise<Array<{ path: string }>> {
 	return files.map((filePath) => {
 		const relativePath = relative(contentDocsDir, filePath).split(sep).join('/');
 		const withoutExtension = relativePath.slice(0, -'.mdx'.length);
-		return { path: `/docs/${withoutExtension}.md` };
+		return { path: `/${withoutExtension}.md` };
 	});
 }
 

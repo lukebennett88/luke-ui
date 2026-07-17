@@ -1,52 +1,57 @@
 ---
 title: Applying a theme
-description: Load Luke UI styles and apply theme identity and colour mode correctly.
+description: Load Luke UI CSS and apply a theme identity and colour mode.
 ---
 
-## Load the CSS entrypoints
+A themed subtree needs the shared Luke UI stylesheet, one identity stylesheet, and a root carrying
+both theme classes. All three are static. Luke UI does not inject styles at runtime.
 
-Import the shared component stylesheet and exactly one theme stylesheet. Importing one bundled theme
-does not pull in the other.
+## Import the stylesheets
 
-Use `@luke-ui/react/themes/paper.css` instead when Paper is the application theme.
+Import `@luke-ui/react/stylesheet.css` and the stylesheet for the identity your application uses.
+The example below uses Tactile. Use `@luke-ui/react/themes/paper.css` with `paperThemeClassName` for
+Paper. Importing one bundled identity does not load the other.
 
-## Apply theme identity
+## Apply the root classes
 
-Apply `themeRootClassName` and the matching identity class near the application root.
+Apply `themeRootClassName` and the matching identity class to the same element near the application
+root. `themeRootClassName` includes the reset and base theme class. The identity class supplies the
+semantic values.
 
 <SourceCodeBlock src="theming/apply-theme" />
 
-The bundled identity constants are `tactileThemeClassName` and `paperThemeClassName`. Theme identity
-is not nestable. Choose one identity for an application or independent subtree.
+Theme identities do not nest. Use one identity for an application or independent themed subtree.
 
 ## Select a colour mode
 
-Set `data-color-mode="light"` or `data-color-mode="dark"` on the theme root to force a mode. Omit
-the attribute to follow `prefers-color-scheme`.
+Set `data-color-mode="light"` or `data-color-mode="dark"` on the root to force a mode. Leave the
+attribute off to follow `prefers-color-scheme`.
 
-Colour-mode scopes are nestable. A nested scope can force the opposite mode without changing theme
-identity.
+Colour-mode scopes can nest. A child can force the opposite mode without changing the identity.
 
 <SourceCodeBlock src="theming/nested-color-mode" />
 
-Every explicit scope sets the native `color-scheme` property. Browser controls and scrollbars
-therefore use the same light or dark mode as Luke UI.
+An explicit mode also sets the native `color-scheme` property, so browser controls and scrollbars
+match the Luke UI content.
 
-## Portals
+## Preserve the theme in portals
 
-Portalled content leaves its DOM ancestry, so copy the active identity class and explicit
-`data-color-mode` value to the portal root. When the source follows the system preference, omit the
-attribute on the portal root as well. Luke UI's Combobox copies these values automatically.
-Application-owned portals must preserve the same public class-and-attribute contract.
+Application-owned portals render outside the themed DOM branch. Give the portal root the active
+identity class and the explicit `data-color-mode` value, if there is one. If the source follows the
+system setting, leave the attribute off the portal root too.
 
-## Server rendering and the first paint
+Luke UI's Combobox copies this contract to its popover. Other application-owned portals need to do
+the same.
 
-Render the identity classes and any known explicit colour mode in the server HTML. When the mode is
-system-controlled, omit `data-color-mode` so CSS can choose the correct mode before JavaScript runs.
+## Avoid a colour-mode flash
 
-If a stored client preference can differ from the server default, run a small blocking bootstrap
-script before the themed UI is painted. It should read the stored preference and set the root class
-or `data-color-mode` before hydration. A React effect runs too late and paints the wrong mode first.
-Theme libraries such as `next-themes` can provide this bootstrap when configured to write the same
-attribute contract. Keep the server fallback and hydrated value consistent to avoid hydration
-warnings.
+Render the root classes and any known explicit mode in the server HTML. CSS can then select the
+correct system mode before JavaScript runs. If a stored client preference may differ from the server
+value, set the attribute before themed UI paints. A React effect runs after the first paint.
+
+Keep the server fallback and hydrated value consistent to avoid a hydration warning.
+
+## Next steps
+
+Read [Authoring a theme](/theming/authoring) to create a product-owned stylesheet. Use the
+[token reference](/theming/token-reference) when a custom element needs public semantic values.

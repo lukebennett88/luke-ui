@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Link } from '@tanstack/react-router';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
@@ -7,16 +8,17 @@ import { Suspense, use, useId, useState } from 'react';
 import { encodeCodeHash } from '../lib/playground-hash';
 import { StoryWrapper } from '../lib/story-wrapper';
 
-type ExampleProps = {
+type ExampleBlockProps = {
 	src: string;
 	description: string;
 	title: string;
+	mode?: 'inset' | 'full-bleed';
 };
 
-export function ExampleBlock(props: ExampleProps): JSX.Element {
+export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
 	return (
 		<Suspense
-			fallback={<div className="rounded-lg border border-fd-border p-4">Loading example…</div>}
+			fallback={<Box className="rounded-lg border border-fd-border p-4">Loading example…</Box>}
 		>
 			<ExampleContent {...props} />
 		</Suspense>
@@ -28,7 +30,7 @@ const _modules = import.meta.glob<ComponentType>('../examples/*/*.tsx', {
 	import: 'default',
 });
 
-function ExampleContent({ src, title }: ExampleProps): JSX.Element {
+function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 	const slashIndex = src.indexOf('/');
 	const component = src.slice(0, slashIndex);
 	const name = src.slice(slashIndex + 1);
@@ -38,19 +40,19 @@ function ExampleContent({ src, title }: ExampleProps): JSX.Element {
 
 	if (!result.ok) {
 		return (
-			<div className="rounded-lg border border-fd-destructive p-4 text-fd-destructive">
+			<Box className="rounded-lg border border-fd-destructive p-4 text-fd-destructive">
 				Failed to load example {component}/{name}: {result.error.message}
-			</div>
+			</Box>
 		);
 	}
 
 	const [PreviewComponent, source] = result.data;
 
 	return (
-		<div className="not-prose overflow-hidden rounded-lg border border-fd-border">
-			<div className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
+		<Box className="not-prose overflow-hidden rounded-lg border border-fd-border">
+			<Box className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
 				<span className="text-fd-muted-foreground text-sm">{title}</span>
-				<div className="flex items-center gap-1">
+				<Box className="flex items-center gap-1">
 					<Link
 						className={buttonVariants({ size: 'sm', variant: 'ghost' })}
 						hash={encodeCodeHash(source.trim())}
@@ -70,21 +72,21 @@ function ExampleContent({ src, title }: ExampleProps): JSX.Element {
 						<CodeIcon className="size-4" />
 						{showCode ? 'Hide code' : 'Show code'}
 					</button>
-				</div>
-			</div>
-			<StoryWrapper>
+				</Box>
+			</Box>
+			<StoryWrapper mode={mode}>
 				<PreviewComponent />
 			</StoryWrapper>
 			{showCode ? (
-				<div id={codeId}>
+				<Box id={codeId}>
 					<DynamicCodeBlock
 						code={source.trim()}
 						codeblock={{ className: 'my-0 rounded-none border-x-0 border-b-0 shadow-none' }}
 						lang="tsx"
 					/>
-				</div>
+				</Box>
 			) : null}
-		</div>
+		</Box>
 	);
 }
 

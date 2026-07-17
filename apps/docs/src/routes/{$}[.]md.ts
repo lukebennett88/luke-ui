@@ -1,13 +1,13 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
-import { getLLMText } from '../../lib/get-llm-text';
-import { source } from '../../lib/source';
+import { getLLMText } from '../lib/get-llm-text';
+import { source } from '../lib/source';
 
-export const Route = createFileRoute('/docs/{$}.md')({
+export const Route = createFileRoute('/{$}.md')({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
 				const slugs = (params._splat ?? '').split('/').filter(Boolean);
-				const page = source.getPage(slugs);
+				const page = source.getPage(slugs.length === 1 && slugs[0] === 'index' ? [] : slugs);
 				if (!page) throw notFound();
 
 				return new Response(await getLLMText(page), {

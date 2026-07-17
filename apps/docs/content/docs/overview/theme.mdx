@@ -1,0 +1,74 @@
+---
+title: Theme
+description: Understand what a Luke UI theme supplies and how it affects components.
+---
+
+A Luke UI theme is a static stylesheet that supplies the semantic values used throughout the
+library. It gives components a visual identity without changing their APIs or behaviour.
+
+## Anatomy of a theme
+
+Each identity includes a light and dark mode. It supplies semantic colours, typography, spacing,
+radii, material, and depth. Components select those values through the shared contract instead of
+making their own palette or shadow decisions.
+
+Luke UI includes two identities:
+
+- Tactile is the default. It uses stronger depth and a more compact material treatment.
+- Paper is flatter, with lighter borders and depth.
+
+Apply one identity to an application or independent themed subtree. Identity classes do not nest.
+Choose the identity for that scope, then use nested colour modes when a child needs a different
+light or dark appearance.
+
+## Component variants
+
+Themes define the visual system. Components define the choices people can make within it. For
+example, Button controls its own tone, appearance, size, pending state, and accessible behaviour.
+The theme supplies the semantic values behind those choices.
+
+```tsx
+import { Button } from '@luke-ui/react/button';
+
+<Button appearance="solid" tone="accent">
+	Save changes
+</Button>;
+```
+
+Use component props to create hierarchy and communicate importance. Use a custom theme when the
+product needs different global colours, type, radii, or depth.
+
+## Build custom UI with tokens
+
+The active theme exposes a typed, public `vars` contract. Use it when you need a custom element that
+sits beside Luke UI components.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+<div
+	style={{
+		backgroundColor: vars.color.surface.resting,
+		borderRadius: vars.radius.surface,
+		boxShadow: vars.depth.resting,
+		padding: vars.space[600],
+	}}
+/>;
+```
+
+The contract is stable across bundled and custom themes. Do not depend on a theme's source colours,
+generated palette, or component recipe selectors.
+
+## Continue learning
+
+<Cards>
+	<Card href="/theming" title="Theming overview">
+		Compare identity, colour mode, custom themes, and public tokens.
+	</Card>
+	<Card href="/overview/color" title="Colour">
+		Learn the semantic roles behind surfaces, content, and intents.
+	</Card>
+	<Card href="/overview/typography" title="Typography">
+		Use the type scale supplied by the active theme.
+	</Card>
+</Cards>

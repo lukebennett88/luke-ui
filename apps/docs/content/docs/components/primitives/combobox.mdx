@@ -1,36 +1,35 @@
 ---
 title: Combobox primitives
-description: Lower-level combobox parts for custom single-select combobox layouts.
+description: Lower-level parts for composing a searchable single-select combobox.
 ---
 
-Use combobox primitives when [`ComboboxField`](/docs/components/forms/combobox-field) is too
-opinionated and you need to arrange the control, popover, listbox, items, or loading row yourself.
+Use these primitives when [`ComboboxField`](/components/forms/combobox-field) does not fit your
+layout or loading UI. They expose the control, popover, listbox, and option parts used by the
+composed field. Application code should usually use `ComboboxField`.
 
 ```tsx
 import {
-	ComboboxRoot,
 	ComboboxControl,
+	ComboboxItem,
+	ComboboxListBox,
+	ComboboxPopover,
+	ComboboxRoot,
 	ComboboxTextInput,
 	ComboboxTrigger,
-	ComboboxPopover,
-	ComboboxListBox,
-	ComboboxItem,
 } from '@luke-ui/react/combobox-field/primitive';
 ```
 
 ## Anatomy
 
-`ComboboxRoot` owns the React Aria `ComboBox` state. Render the control, popover, listbox, and items
-inside it. Below the `small` breakpoint `ComboboxPopover` renders as a full-width bottom tray
-instead of a positioned popover; see
-[Mobile tray](/docs/components/forms/combobox-field#mobile-tray) on the `ComboboxField` page for
-details.
+`ComboboxRoot` owns the searchable single-select state. Put the control and popover inside it. Put
+the text input and trigger in `ComboboxControl`, then put the listbox and its items in
+`ComboboxPopover`.
 
 ```tsx
 <ComboboxRoot defaultItems={countries} aria-label="Country">
 	<ComboboxControl>
 		<ComboboxTextInput />
-		<ComboboxTrigger />
+		<ComboboxTrigger aria-label="Toggle options" />
 	</ComboboxControl>
 	<ComboboxPopover>
 		<ComboboxListBox>{(item) => <ComboboxItem>{item.label}</ComboboxItem>}</ComboboxListBox>
@@ -38,18 +37,37 @@ details.
 </ComboboxRoot>
 ```
 
-## Size propagation
+## Control and options
 
-Set `size` on `ComboboxRoot` to pass it to child primitives. You can override inherited size on an
-individual child by passing that child its own `size` prop.
+`ComboboxTextInput` opens the menu when clicked and supplies the editable combobox input.
+`ComboboxTrigger` toggles the option menu. `ComboboxClearButton` renders only when the root has a
+selection and clears both the selection and input value.
 
-The inherited size applies to `ComboboxControl`, `ComboboxTextInput`, `ComboboxClearButton`,
-`ComboboxTrigger`, `ComboboxItem`, and `ComboboxLoadMoreItem`.
+Use `ComboboxItem` for options. It adds a checkmark for the selected option. `ComboboxSection`
+groups related options and can render a heading. `ComboboxListBox` accepts static children or a
+render function with `items`. Its `loadMoreItem` slot appends content after the main collection.
 
-## Loading and empty states
+## Size
 
-Use `ComboboxLoadMoreItem` for infinite loading sentinels and `ComboboxEmptyState` for empty
-results.
+Set `size` on `ComboboxRoot` to give the control and option primitives a shared size. Individual
+`ComboboxControl`, `ComboboxTextInput`, `ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`,
+and `ComboboxLoadMoreItem` components can override that size when needed.
+
+## Loading and empty results
+
+Use `ComboboxLoadMoreItem` as the listbox's load-more sentinel. Use `ComboboxEmptyState` for custom
+empty content, including a loading message or spinner. `ComboboxField` supplies common loading and
+empty-state handling when its built-in composition is enough.
+
+## Popover and accessibility
+
+`ComboboxPopover` preserves the active Luke UI theme identity and explicit colour mode when it
+portals the listbox. Below the `small` breakpoint, it becomes a full-width bottom tray instead of a
+positioned popover.
+
+Give `ComboboxRoot` an accessible name with `aria-label` or a connected label. Keep the
+root/control/input/listbox structure so React Aria's combobox semantics and keyboard behaviour
+remain intact.
 
 ## Props
 

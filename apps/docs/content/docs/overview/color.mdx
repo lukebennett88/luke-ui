@@ -1,0 +1,71 @@
+---
+title: Colour
+description: Use semantic surfaces, content roles, and intents instead of palette values.
+---
+
+Luke UI names colours by their job. A theme maps those roles to values for each identity and colour
+mode, so a component can remain consistent without knowing the underlying palette.
+
+## Surfaces and content
+
+Surface roles describe where an element sits in the interface. Use `canvas` for the page, `recessed`
+for an inset area, `resting` for ordinary content, `floating` for elevated UI, and `overlay` for
+modal backdrops. Text uses `primary` and `secondary` roles. Borders distinguish decorative, control,
+and focus uses.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+<section
+	style={{
+		backgroundColor: vars.color.surface.resting,
+		borderColor: vars.color.border.decorative,
+		color: vars.color.text.primary,
+	}}
+/>;
+```
+
+Choose the role that describes the element's purpose. Do not copy a resolved colour into application
+CSS, because it will not adapt when the identity or colour mode changes.
+
+## Intent colours
+
+Intent roles cover `neutral`, `accent`, `info`, `success`, `warning`, and `danger`. Each intent has
+subtle and solid surfaces, along with the matching text, border, and on-solid values where needed.
+Components choose these values for their own states. Custom UI can use the same public roles.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+<div
+	style={{
+		backgroundColor: vars.color.intent.warning.surface.subtle,
+		color: vars.color.intent.warning.text,
+	}}
+>
+	Payment details need review.
+</div>;
+```
+
+<ExampleBlock
+	src="overview/intent-colours"
+	title="Intent colours"
+	description="Select a semantic intent to see the matching surface and text roles."
+/>
+
+## Disabled and loading states
+
+Use the component's disabled or loading API when it has one. Those states account for interaction
+and accessibility as well as colour. The public `textDisabled`, `surfaceDisabled`, and
+`loadingSkeleton` roles are available when you are building an equivalent custom element.
+
+## Continue learning
+
+<Cards>
+	<Card href="/overview/color-mode" title="Colour modes">
+		Follow the system preference or force a mode for a subtree.
+	</Card>
+	<Card href="/theming/token-reference" title="Token reference">
+		Browse the full public semantic-colour contract.
+	</Card>
+</Cards>

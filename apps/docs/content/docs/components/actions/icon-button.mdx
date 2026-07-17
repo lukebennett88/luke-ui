@@ -1,61 +1,56 @@
 ---
 title: Icon Button
-description: Compact icon-only action button with an accessible label.
+description: A compact icon-only control for an action.
 ---
 
-Use `IconButton` for compact actions where an icon can carry the visible UI. Always provide an
-accessible label.
+`IconButton` triggers a familiar compact action, such as closing a panel, deleting a row, or adding
+an item. Give every icon button an accessible name because it has no visible label.
 
 ```tsx
-<IconButton icon="add" aria-label="Add item" />
+import { IconButton } from '@luke-ui/react/icon-button';
+
+<IconButton aria-label="Add item" icon="add" />;
 ```
 
-## Best practices
+## Accessibility
 
-| Guidance | Practices                                                                    |
-| -------- | ---------------------------------------------------------------------------- |
-| Do       | Name the action in `aria-label`, such as "Delete row". Do not name the icon. |
-| Do       | Use `tone="danger"` for destructive icon actions such as delete.             |
+Provide `aria-label` or `aria-labelledby` for every icon button. Name the action, not the icon.
 
-## Tone and appearance
+```tsx
+<IconButton aria-label="Search orders" icon="search" />
+```
 
-`IconButton` shares Button's appearance API. Tone can be `neutral` (default), `accent`, or `danger`.
-Appearance can be `solid` (default), `subtle`, or `ghost`.
+Use a labelled [`Button`](/components/actions/button) when the icon is unfamiliar or visible text
+would make the action clearer.
+
+## Appearance
+
+`IconButton` uses the same `tone` and `appearance` options as
+[`Button`](/components/actions/button). Use `danger` for a destructive action. Choose `subtle` or
+`ghost` when a secondary control needs less emphasis.
 
 <ExampleBlock
 	src="icon-button/tone-and-appearance"
-	title="Icon Button — Tone and appearance"
-	description="Semantic tones and appearances for icon-only actions."
+	title="Icon Button — Appearance"
+	description="Choose appearance for emphasis and tone for intent."
 />
 
 ## Size
 
+`medium` is the default. Use `small` for compact toolbars and dense row actions. Keep controls in a
+group at the same size.
+
 <ExampleBlock
 	src="icon-button/size"
 	title="Icon Button — Size"
-	description="A small icon button for tighter spaces."
+	description="Small and medium icon buttons for compact and default layouts."
 />
 
-## Pending
+## Pending and disabled states
 
-Set `isPending` while an action is in flight. The button remains focusable but cannot be pressed
-again. It uses the disabled visual treatment and replaces the icon with a busy cue.
-
-## Accessibility
-
-`IconButton` has no visible text label. Always provide `aria-label` or `aria-labelledby`. Without
-one, screen readers have no way to announce the button's purpose.
-
-```tsx
-<IconButton icon="search" aria-label="Search orders" />
-```
-
-## When to use vs Button
-
-Use `IconButton` when the icon alone communicates the action and space is tight, such as in
-toolbars, table row actions, or close buttons.
-
-Use `Button` when you need a visible text label. Labels are clearer for unfamiliar users.
+Set `isPending` while an action is running. The control remains focusable, ignores further presses,
+and replaces its icon with a busy cue. Set `isDisabled` when the action is unavailable. Disabled
+controls cannot receive focus or be pressed.
 
 ## Props
 

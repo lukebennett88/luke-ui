@@ -3,9 +3,8 @@ title: Numeral
 description: Locale-aware number formatting powered by Intl.NumberFormat.
 ---
 
-`Numeral` formats numbers with `Intl.NumberFormat`. It respects locale from React Aria's
-`I18nProvider` and accepts Text typography props such as the `size` scale, semantic `color` values,
-`fontWeight`, trim, alignment, and numeric glyph variants.
+`Numeral` formats a number with `Intl.NumberFormat`. It reads the active locale from React Aria's
+`I18nProvider` and accepts the relevant typography props from `Text`.
 
 <ExampleBlock
 	src="numeral/basic"
@@ -13,10 +12,11 @@ description: Locale-aware number formatting powered by Intl.NumberFormat.
 	description="Default locale-aware decimal formatting."
 />
 
-## Formats
+## Format
 
-`Numeral` infers `format` from `currency` or `unit` when omitted. Pass `format` explicitly for
-`'percent'` or `'decimal'`, or when you want to be direct about currency and unit formatting.
+`Numeral` uses decimal formatting by default. It infers currency or unit formatting when `currency`
+or `unit` is present. Set `format` to `'percent'` or `'decimal'`, or when you want to make currency
+and unit formatting explicit in the component call.
 
 <ExampleBlock
 	src="numeral/formats"
@@ -26,7 +26,8 @@ description: Locale-aware number formatting powered by Intl.NumberFormat.
 
 ## Compact notation
 
-Use `abbreviate` for compact notation.
+Set `abbreviate` for compact notation such as `12K`. Pass `"long"` for a long display such as
+`12 thousand`.
 
 <ExampleBlock
 	src="numeral/compact"
@@ -36,7 +37,8 @@ Use `abbreviate` for compact notation.
 
 ## Precision
 
-Pass a number for fixed fraction digits, or a `[min, max]` tuple for a range.
+Pass a number for fixed fraction digits or a `[min, max]` tuple for a range. Use `formatOptions` for
+other `Intl.NumberFormat` options.
 
 <ExampleBlock
 	src="numeral/precision"
@@ -44,14 +46,25 @@ Pass a number for fixed fraction digits, or a `[min, max]` tuple for a range.
 	description="Fixed fraction digits or a minimum and maximum range."
 />
 
-## Constraints
+## Formatting rules
 
-`Numeral` throws in development when:
+`Numeral` throws when:
 
 - both `currency` and `unit` are provided.
 - `format="currency"` is used without a `currency` code.
 - `format="unit"` is used without a `unit` value.
 - `precision` is not a non-negative integer or valid `[min, max]` tuple.
+
+## Typography and alignment
+
+Numerals use tabular figures and end alignment by default, so values remain readable in a column.
+Set `fontVariantNumeric`, `textAlign`, or inherited `Text` typography props when the context needs a
+different treatment.
+
+## Related components
+
+Use [Text](/components/typography/text) for non-numeric content and
+[Heading](/components/typography/heading) for section titles.
 
 ## Props
 

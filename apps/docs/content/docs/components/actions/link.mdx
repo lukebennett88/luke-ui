@@ -1,65 +1,57 @@
 ---
 title: Link
-description: Link component for inline and standalone navigation.
+description: A styled link for inline and standalone navigation.
 ---
 
-`Link` expects the Luke UI theme class at the app or root level. See
-[Getting Started](/docs/getting-started).
+`Link` navigates to another URL or route. Use [`Button`](/components/actions/button) for an action
+such as saving, submitting, or opening a dialog.
 
 ```tsx
-<Link href="/help">Help center</Link>
+import { Link } from '@luke-ui/react/link';
+
+<Link href="/help">Help centre</Link>;
 ```
-
-## Best practices
-
-| Guidance | Practices                                                                                                                          |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use the default `accent` tone for links that should draw attention.                                                                |
-| Do       | Use `isStandalone` for links that are not part of a sentence, such as card links and nav items. Leave it `false` for inline links. |
 
 ## Tone
 
-`Link` has two tones: `accent` (default) and `neutral`. Use `neutral` when the surrounding content
-should have more emphasis.
+`accent` is the default tone and draws attention to the destination. Use `neutral` when a link sits
+within content that needs more visual emphasis.
 
 <ExampleBlock
 	src="link/tones"
 	title="Link — Tones"
-	description="Accent and neutral tones for different levels of emphasis."
+	description="Accent is the default. Neutral recedes within surrounding content."
 />
 
-## Standalone
+## Inline and standalone links
 
-Use `isStandalone` when a link stands on its own. Leave it `false` for links inside paragraph text.
+Use the default link inside a sentence. Its underline remains visible so people can recognise it in
+running text.
 
-- `isStandalone={true}`: no underline until hover or press and a structural target of at least 24 ×
-  24 CSS pixels.
-- `isStandalone={false}`: underlined inline link style that retains the target-size exception for
-  links within prose.
+Set `isStandalone` for a link outside prose, such as a card link or navigation item. Standalone
+links show their underline on hover or press and have a 24 × 24 CSS-pixel structural target.
 
 <ExampleBlock
 	src="link/standalone"
-	title="Link — Standalone"
-	description="Use isStandalone for links that stand on their own, or inline links in prose."
+	title="Link — Inline and standalone"
+	description="Keep links in prose inline; use standalone treatment for a separate action."
 />
 
-## Disabled
+## Disabled links
+
+Set `isDisabled` only when a destination is temporarily unavailable. A disabled link cannot receive
+focus or be activated. Explain why nearby when someone needs that information.
 
 <ExampleBlock
 	src="link/disabled"
 	title="Link — Disabled"
-	description="A disabled link cannot be focused or activated."
+	description="Disabled links remain visible but cannot be activated."
 />
 
 ## Accessibility
 
-Screen readers announce a disabled link as unavailable, but not why. Put the reason in nearby
-visible text instead of relying on disabled state alone.
-
-## When to use vs Button
-
-Use `Link` to navigate to a new URL or route. Use `Button` for in-page actions, such as saving,
-submitting, or opening a dialog.
+Write link text that names the destination and makes sense outside its surrounding sentence. Avoid
+generic labels such as “Click here”.
 
 ## Props
 

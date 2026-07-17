@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
 import { Text } from '@luke-ui/react/text';
@@ -7,23 +8,28 @@ export default function ProviderSkeleton() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxInlineSize: '20rem' }}>
+		<Box display="grid" gap="400" maxInlineSize="20rem">
 			<LoadingSkeletonProvider isLoading={isLoading}>
-				<Text>
+				<Text size="500">
 					<LoadingSkeleton isLoading={false}>Ada Lovelace</LoadingSkeleton>
+				</Text>
+				<Text color="secondary">
+					<LoadingSkeleton isLoading={false}>Product designer</LoadingSkeleton>
 				</Text>
 				<LoadingSkeleton isLoading={false}>
 					<Button>Edit profile</Button>
 				</LoadingSkeleton>
 			</LoadingSkeletonProvider>
-			<label style={{ alignItems: 'center', display: 'flex', gap: '0.5rem' }}>
-				<input
-					checked={isLoading}
-					onChange={(event) => setIsLoading(event.target.checked)}
-					type="checkbox"
-				/>
-				Loading
+			<label>
+				<Box alignItems="center" display="flex" gap="200">
+					<input
+						checked={isLoading}
+						onChange={(event) => setIsLoading(event.target.checked)}
+						type="checkbox"
+					/>
+					Show profile placeholders
+				</Box>
 			</label>
-		</div>
+		</Box>
 	);
 }

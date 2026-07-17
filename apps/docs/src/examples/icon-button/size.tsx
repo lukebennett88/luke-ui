@@ -1,10 +1,11 @@
+import { Box } from '@luke-ui/react/box';
 import { IconButton } from '@luke-ui/react/icon-button';
 
 export default function Size() {
 	return (
-		<div style={{ alignItems: 'center', display: 'flex', gap: '1rem' }}>
-			<IconButton aria-label="Delete" icon="delete" size="small" />
-			<IconButton aria-label="Delete" icon="delete" />
-		</div>
+		<Box alignItems="center" display="flex" gap="400">
+			<IconButton appearance="subtle" aria-label="Search" icon="search" size="small" />
+			<IconButton appearance="subtle" aria-label="Search" icon="search" />
+		</Box>
 	);
 }

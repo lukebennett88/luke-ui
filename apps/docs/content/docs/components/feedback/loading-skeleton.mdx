@@ -1,91 +1,81 @@
 ---
 title: Loading Skeleton
-description: Loading placeholder that keeps the same footprint as the final content.
+description: Replaces content with a placeholder that keeps its shape while it loads.
 ---
 
-`LoadingSkeleton` expects the Luke UI theme class at the app or root level. See
-[Getting Started](/docs/getting-started).
-
-Use it when loading content should keep the same footprint as the loaded state. Text renders as an
-inline skeleton. Elements keep their layout while the skeleton surface is painted over them.
+Use `LoadingSkeleton` when content is loading but its layout is known. Wrap the content that will
+appear so the placeholder occupies the same space.
 
 <ExampleBlock
 	src="loading-skeleton/text"
 	title="Loading Skeleton — Text"
-	description="Inline skeleton that mirrors the wrapped text size."
+	description="A text placeholder that follows the wrapped copy."
 />
 
-All mounted skeletons use the same pulse timing, even when they mount at different times.
+## With text
 
-## Best practices
+Wrap text itself, rather than its parent. The placeholder then follows each line of text. If you
+wrap the parent element, the skeleton covers the whole block instead.
 
-| Guidance | Practices                                                                                                           |
-| -------- | ------------------------------------------------------------------------------------------------------------------- |
-| Do       | Wrap real content so the skeleton matches the final size exactly.                                                   |
-| Don't    | Use `LoadingSkeleton` for content whose final size is unknown. Size mismatch causes layout shift when loading ends. |
+This matters most for copy that wraps across several lines. `LoadingSkeleton` renders non-element
+children inline, so it follows the text without changing the line layout.
 
-## Loading state
+## With components
 
-`isLoading` defaults to `true`. Pass `isLoading={false}` when content is ready.
-
-```tsx
-<LoadingSkeleton isLoading={false}>
-	<Button>Submit</Button>
-</LoadingSkeleton>
-```
-
-## Multi-line text
-
-Wrap text directly when the copy spans more than one line. Each line gets its own skeleton shape.
-
-## Element type
-
-`LoadingSkeleton` renders a `span` by default. Use `elementType` when the surrounding markup needs
-another element.
-
-<ExampleBlock
-	src="loading-skeleton/element"
-	title="Loading Skeleton — Element"
-	description="Render the skeleton as a different element to match the surrounding markup."
-/>
-
-## LoadingSkeletonProvider
-
-Use `LoadingSkeletonProvider` when one loading state controls a group of skeletons. The provider
-value overrides descendant `isLoading` props.
-
-<ExampleBlock
-	src="loading-skeleton/provider"
-	title="Loading Skeleton — Provider"
-	description="One loading state controls a group of skeletons."
-/>
-
-## Border radius
-
-Use `borderRadius` when the wrapped child has no radius, but the visible control inside it does.
-
-<ExampleBlock
-	src="loading-skeleton/border-radius"
-	title="Loading Skeleton — Border radius"
-	description="Override the skeleton corner radius for wrapped controls."
-/>
-
-## Custom dimensions
-
-Wrap an element with explicit dimensions when you need a placeholder for a fixed shape, such as an
-avatar.
+Wrap an element to keep its dimensions while the skeleton covers it. Use this for controls, avatars,
+and other content with a fixed shape.
 
 <ExampleBlock
 	src="loading-skeleton/custom-dimensions"
-	title="Loading Skeleton — Custom dimensions"
-	description="Wrap an element with explicit dimensions for a fixed-shape placeholder."
+	title="Loading Skeleton — Fixed dimensions"
+	description="A circular placeholder keeps the avatar's space while it loads."
+/>
+
+Set `radius` when the direct child has square corners but a visible descendant is rounded. This is
+useful when a `TextField` is the child because its input control is rounded inside the field
+wrapper.
+
+<ExampleBlock
+	src="loading-skeleton/border-radius"
+	title="Loading Skeleton — Control radius"
+	description="The skeleton uses the same radius as the TextField control."
+/>
+
+## Loading state
+
+`isLoading` is `true` by default. Set it to `false` when the content is ready. The component then
+returns its children without a wrapper.
+
+```tsx
+<LoadingSkeleton isLoading={isLoading}>
+	<Button>Save changes</Button>
+</LoadingSkeleton>
+```
+
+Use `LoadingSkeletonProvider` when one loading state controls a section. Its value overrides
+`isLoading` on every descendant skeleton, so a section changes together.
+
+<ExampleBlock
+	src="loading-skeleton/provider"
+	title="Loading Skeleton — Shared state"
+	description="A provider controls the placeholders in one content section."
+/>
+
+## Element type
+
+`LoadingSkeleton` renders a `span` by default. Set `elementType` when the parent requires another
+element, such as an `li` inside a list.
+
+<ExampleBlock
+	src="loading-skeleton/element"
+	title="Loading Skeleton — List item"
+	description="A skeleton rendered as a list item."
 />
 
 ## Accessibility
 
-While loading, skeleton content is hidden from assistive technology and cannot be focused or
-clicked. `LoadingSkeleton` sets `aria-hidden`, `inert`, `tabIndex={-1}`, and disables pointer
-events.
+While loading, the content is hidden from assistive technology, removed from the tab order, and
+cannot receive pointer input. It becomes available again when `isLoading` is `false`.
 
 ## Props
 

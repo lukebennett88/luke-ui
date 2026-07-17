@@ -3,7 +3,7 @@ import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { docs } from '../../.source/server';
 
 export const source = loader({
-	baseUrl: '/docs',
+	baseUrl: '/',
 	plugins: [lucideIconsPlugin()],
 	source: docs.toFumadocsSource(),
 });

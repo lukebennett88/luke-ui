@@ -3,7 +3,8 @@ title: Emoji
 description: Emoji rendering with a reliable screen reader label.
 ---
 
-Use `Emoji` when an emoji needs a reliable accessible label.
+`Emoji` renders an emoji with a reliable accessible name. It accepts the same typography props as
+`Text`.
 
 <ExampleBlock
 	src="emoji/basic"
@@ -11,20 +12,24 @@ Use `Emoji` when an emoji needs a reliable accessible label.
 	description="Emoji with accessible label and typography controls."
 />
 
-`Emoji` accepts all `Text` props except `children` and `elementType`, so it inherits typography
-props such as the `size` scale, semantic `color` values, and `fontWeight` roles.
+## Typography
 
-## Best practices
-
-| Guidance | Practices                                                                                                  |
-| -------- | ---------------------------------------------------------------------------------------------------------- |
-| Do       | Write a `label` that describes the emoji's meaning in context, such as "Celebration".                      |
-| Don't    | Repeat text that already appears in the surrounding sentence. That creates duplicate screen reader output. |
+`Emoji` accepts every `Text` prop except `children` and `elementType`, including `size`, semantic
+`color`, and `fontWeight`.
 
 ## Accessibility
 
-Both `emoji` and `label` are required. Screen readers announce the label instead of the raw emoji
-character, which is not announced consistently across platforms.
+Both `emoji` and `label` are required. Screen readers announce the label instead of the raw emoji,
+which is not announced consistently across platforms.
+
+Write a label that describes the emoji's meaning in context, such as "Celebration". Do not repeat
+text that is already in the surrounding sentence, because that creates duplicate screen reader
+output.
+
+## Related components
+
+Use [Text](/components/typography/text) when the content is text, and
+[Icon](/components/visuals/icon) for interface symbols from Luke UI's icon set.
 
 ## Props
 

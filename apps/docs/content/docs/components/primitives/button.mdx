@@ -1,10 +1,11 @@
 ---
 title: Button primitive
-description: Lower-level button primitive for custom button composition.
+description: Lower-level button styles and behaviour for custom composed controls.
 ---
 
-Use the button primitive when you need Luke UI button styling without the composed `Button` children
-wrapper, icon props, or pending-label behaviour.
+Use the button primitive to build a custom button pattern. It provides Luke UI button styles and
+React Aria button behaviour, while leaving child layout and loading treatment to you. For ordinary
+application actions, use [`Button`](/components/actions/button).
 
 ```tsx
 import { Button } from '@luke-ui/react/button/primitive';
@@ -14,21 +15,30 @@ import { Button } from '@luke-ui/react/button/primitive';
 </Button>;
 ```
 
-## When to use
+## Composition
 
-Use `@luke-ui/react/button/primitive` when you need full control over children layout, render-prop
-children, custom loading states, or non-standard button content.
+Use the primitive when a composed control needs custom children, render-prop children, or its own
+loading layout. The composed `Button` adds a truncating label, start and end icon slots, and a
+pending spinner. The primitive does not.
 
-Use [`Button`](/docs/components/actions/button) for most app actions.
+## Appearance and size
 
-## Behaviour
+Use `tone` and `appearance` to set visual emphasis. Use `size` to match nearby controls. Set
+`isBlock` when the button should take up its container's inline size. The primitive renders a native
+`<button>` by default and accepts the React Aria button API.
 
-The primitive renders a single `<button>` element by default. It applies Luke UI size, tone,
-appearance, and block styles, then renders children directly.
+## Pending
 
-`isPending` keeps the button focusable while preventing another press and applies the disabled
-visual treatment. It does not add a spinner or hide the label. Build that cue in children when you
-use the primitive.
+Set `isPending` to prevent another press while keeping the control focusable and applying the muted
+pending treatment. The primitive does not add a spinner or replace its children, so add a clear busy
+cue in your custom content. Set `isDisabled` when the action cannot receive focus or respond to
+presses.
+
+## Accessibility
+
+Give the button an accessible name through its visible text or an appropriate ARIA label. Keep the
+name stable when possible. If a custom pending treatment changes the action's meaning, update the
+name to reflect that state.
 
 ## Props
 

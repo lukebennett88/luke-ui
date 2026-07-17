@@ -1,0 +1,90 @@
+---
+title: Getting started
+description: Install Luke UI, apply a bundled theme, and render a component.
+---
+
+Luke UI is a React component library with static CSS and bundled themes. This guide uses Tactile,
+then shows the first component inside a themed root.
+
+## Installation
+
+### 1. Install Luke UI
+
+Install the package in your application.
+
+```bash
+pnpm add @luke-ui/react
+```
+
+Within this monorepo, use a workspace dependency instead.
+
+```json
+{
+	"dependencies": {
+		"@luke-ui/react": "workspace:*"
+	}
+}
+```
+
+### 2. Import the CSS
+
+Import the shared stylesheet and the stylesheet for one identity at your application root. This
+example uses Tactile. To use Paper, import `@luke-ui/react/themes/paper.css` instead.
+
+### 3. Add the theme root
+
+Apply `themeRootClassName` and the matching identity class to the same element. The theme root
+provides the reset, base typography, and semantic variables for its children.
+
+<SourceCodeBlock src="theming/getting-started" />
+
+### 4. Use components
+
+Import each component from its package path. The setup above renders `Text`; `Button` comes from
+`@luke-ui/react/button`.
+
+```tsx
+import { Button } from '@luke-ui/react/button';
+import { Text } from '@luke-ui/react/text';
+
+export function Welcome() {
+	return (
+		<>
+			<Text>Welcome to Luke UI.</Text>
+			<Button>Continue</Button>
+		</>
+	);
+}
+```
+
+## Change the theme
+
+Tactile is the default bundled identity. Paper uses the same component APIs with a flatter visual
+treatment. Switch the CSS import and class together.
+
+```tsx
+import '@luke-ui/react/themes/paper.css';
+import { paperThemeClassName } from '@luke-ui/react/themes';
+
+<div className={cx(themeRootClassName, paperThemeClassName)}>{children}</div>;
+```
+
+Set `data-color-mode="light"` or `data-color-mode="dark"` on a themed element when the application
+must use a specific mode. Without it, Luke UI follows the system preference.
+
+## Continue learning
+
+<Cards>
+	<Card href="/overview/styling" title="Styling">
+		Learn how component APIs, recipes, utilities, and tokens fit together.
+	</Card>
+	<Card href="/overview/layout" title="Layout">
+		Build responsive structure with Box and Sprinkles.
+	</Card>
+	<Card href="/overview/theme" title="Theme">
+		Understand identities, modes, and custom foundations.
+	</Card>
+	<Card href="/components/actions/button" title="Components">
+		Browse the components available to application developers.
+	</Card>
+</Cards>
