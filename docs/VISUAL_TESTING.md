@@ -22,19 +22,18 @@ infrastructure errors still fail.
 ## Re-baseline the goldens
 
 The committed goldens are platform-specific and must match the CI runner, so they are captured on
-Linux by the **Freeze visual goldens** workflow, not on a contributor's machine. After an intentional
-visual change:
+Linux by the **Freeze visual goldens** workflow, not on a contributor's machine. After an
+intentional visual change:
 
-1. Trigger the **Freeze visual goldens** workflow (Actions → Freeze visual goldens → Run workflow) on
-   your branch.
+1. Run the **Freeze visual goldens** workflow against your branch from the Actions tab.
 2. Download the `visual-goldens` artifact it produces.
 3. Replace `packages/@luke-ui/react/visual-goldens/` with the artifact contents and commit it
    alongside your change, reviewing the PNG diffs in the pull request.
 
-`pnpm --filter @luke-ui/react test:visual:freeze` runs the same capture locally; use it to preview a
-change, but do not commit macOS-captured goldens — they will not match the Linux CI runner. The
-manifest records the platform, architecture, and a config+lockfile signature, so environment or
-config drift against the recorded goldens surfaces as a warning.
+`pnpm --filter @luke-ui/react test:visual:freeze` runs the same capture locally. Use it to preview a
+change, but do not commit macOS-captured goldens, because they will not match the Linux CI runner.
+The manifest records the platform, architecture, and a config and lockfile signature, so environment
+or config drift against the recorded goldens surfaces as a warning.
 
 ## Read the report
 
@@ -46,19 +45,20 @@ the filters, overlay slider, and main, current, and diff images to review each r
 ## CI review
 
 Pull requests that can affect rendered components run the same comparison against the committed
-goldens on Linux. CI uploads the report as the `visual-regression-report` artifact. Added and removed
-captures do not require approval. Before enabling this workflow, a repository administrator must
-create the `visual-review` environment in GitHub settings and add a required reviewer. Self-review
-may remain enabled. Without that protection rule, GitHub runs the review job immediately and visual
-approval is not enforced. Once configured, matched visual changes pause the review job and tie
-approval to that workflow run and commit.
+goldens on Linux. CI uploads the report as the `visual-regression-report` artifact. Added and
+removed captures do not require approval. Before enabling this workflow, a repository administrator
+must create the `visual-review` environment in GitHub settings and add a required reviewer.
+Self-review may remain enabled. Without that protection rule, GitHub runs the review job immediately
+and visual approval is not enforced. Once configured, matched visual changes pause the review job
+and tie approval to that workflow run and commit.
 
 ## Why the goldens are a frozen, committed set
 
-This is a stopgap for the Vanilla Extract → Panda migration. Once the VE rollup plugin is removed
-from `vitest.config.ts` (ticket T6), the old `*.css.ts` files can no longer be compiled, so rebuilding
-a live Vanilla Extract baseline becomes impossible. A committed set captured once on the `ve-final`
-tag keeps the parity gate stable across that removal and makes diffs reviewable directly in the PR.
+This is a stopgap for the Vanilla Extract to Panda migration. Once the VE rollup plugin is removed
+from `vitest.config.ts` (ticket T6), the old `*.css.ts` files can no longer be compiled, so
+rebuilding a live Vanilla Extract baseline becomes impossible. A committed set captured once on the
+`ve-final` tag keeps the parity gate stable across that removal and makes diffs reviewable directly
+in the PR.
 
 See [`TESTING.md`](./TESTING.md#visual-regression-tests) for how to write a visual test.
 

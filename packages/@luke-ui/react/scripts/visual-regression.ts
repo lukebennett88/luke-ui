@@ -80,7 +80,8 @@ async function updateGoldens() {
 		platform: platform(),
 		signature: await signature(),
 	};
-	await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+	// Tab-indented to match the repo formatter, so a CI re-freeze stays clean.
+	await writeFile(manifestPath, `${JSON.stringify(manifest, null, '\t')}\n`);
 	// oxlint-disable-next-line no-console
 	console.log(
 		`Froze ${manifest.captureCount} visual goldens from ${manifest.capturedFromRef} into ${path.relative(repoRoot, goldenCaptures)}`,
