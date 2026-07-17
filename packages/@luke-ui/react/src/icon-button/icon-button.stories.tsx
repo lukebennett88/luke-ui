@@ -74,10 +74,19 @@ export const Sizes = meta.story({
 	render: (props) => (
 		<div style={flexWrapStyle}>
 			{sizes.map((size) => (
-				<IconButton key={size} size={size} {...props} />
+				<IconButton {...props} aria-label={size} key={size} size={size} />
 			))}
 		</div>
 	),
+	play: async ({ canvas }) => {
+		const small = canvas.getByRole('button', { name: 'small' });
+		const medium = canvas.getByRole('button', { name: 'medium' });
+
+		await expect(getComputedStyle(small).blockSize).toBe('32px');
+		await expect(getComputedStyle(small).inlineSize).toBe('32px');
+		await expect(getComputedStyle(medium).blockSize).toBe('40px');
+		await expect(getComputedStyle(medium).inlineSize).toBe('40px');
+	},
 });
 
 export const Disabled = meta.story({
@@ -88,7 +97,7 @@ export const Disabled = meta.story({
 	render: (props) => (
 		<div style={flexWrapStyle}>
 			{sizes.map((size) => (
-				<IconButton key={size} size={size} {...props} />
+				<IconButton {...props} aria-label={size} key={size} size={size} />
 			))}
 		</div>
 	),
