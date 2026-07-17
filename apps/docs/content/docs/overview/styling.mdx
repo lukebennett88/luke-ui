@@ -1,20 +1,70 @@
 ---
 title: Styling
-description: Use Luke UI components, layout utilities, recipes, and semantic variables together.
+description:
+  Choose component APIs, primitives, recipes, variables, or themes without overriding internals.
 ---
 
 Luke UI ships static CSS. It does not inject styles at runtime and does not add a general `css` or
 `sx` prop. Import the shared stylesheet and a theme stylesheet once, then use component props for
 the variations each component supports.
 
-## What you get
+## Choose a styling approach
+
+Work from the most specific public API to the broadest one.
+
+1. Use a component's props for its supported appearance, size, state, and behaviour.
+2. Use a documented primitive when you need a different component structure.
+3. Build custom UI with public recipes and semantic variables when the component is not provided.
+4. Author a custom theme when the product needs a different visual foundation everywhere.
+
+Do not override component recipe selectors or implementation-state attributes such as
+`data-hovered`, `data-pressed`, or `data-focus-visible`. They are not supported styling hooks and
+can change without a migration path.
+
+### Start with component props
 
 Components are intentionally opinionated. Their public props cover supported variants, states, and
-behaviour. The active theme provides the semantic colours, typography, spacing, radii, and depth
-that make those components work together.
+behaviour, while the active theme provides the semantic colours, typography, spacing, radii, and
+depth that make those components work together.
 
-Luke UI also exports the public `vars` token contract. Use it for a custom element that needs to
-belong to the active theme.
+```tsx
+import { Button } from '@luke-ui/react/button';
+
+<Button appearance="subtle" size="small" tone="accent">
+	Save changes
+</Button>;
+```
+
+### Compose from primitives
+
+Use a documented primitive when component props do not provide the structure you need. Primitives
+keep the accessibility and visual contract for a component family while leaving its children and
+composition to your application.
+
+```tsx
+import { Button } from '@luke-ui/react/button/primitive';
+
+<Button appearance="solid" tone="accent">
+	<span>Save changes</span>
+	<span aria-hidden>⌘S</span>
+</Button>;
+```
+
+### Build custom UI with public recipes and variables
+
+Recipes from `@luke-ui/react/recipes` are public, component-specific styling APIs. Use one when a
+custom composition follows that recipe's documented element contract; do not copy or target its
+generated selectors.
+
+```tsx
+import { button } from '@luke-ui/react/recipes';
+
+<button className={button({ appearance: 'solid', size: 'medium', tone: 'accent' })} type="button">
+	Save changes
+</button>;
+```
+
+The public `vars` token contract lets an application-owned element follow the active theme.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
@@ -30,16 +80,32 @@ import { vars } from '@luke-ui/react/theme';
 ```
 
 The token contract is public. Component selectors, generated palette values, and theme
-implementation details are not.
+implementation details are not. See the [token reference](/theming/token-reference) for the full
+contract.
 
-## Override components carefully
+### Change the visual foundation with a custom theme
 
-Start with the component API. If the required presentation is outside that API, compose a custom
-component from the relevant primitives and public variables rather than overriding internal
-selectors. This keeps a component reliable when its recipe changes.
+Use a [custom theme](/theming/authoring) when a product needs a different identity, typeface, or
+semantic colour system. `buildTheme` produces a static stylesheet for the full semantic contract; it
+is not a per-component override tool.
 
-Recipes from `@luke-ui/react/recipes` are available for custom compositions. They are
-component-specific, so use them only when you are building on that component's documented structure.
+## Set up static styles
+
+Import `@luke-ui/react/stylesheet.css` and one bundled theme stylesheet at the application entry
+point. Apply `themeRootClassName` and the matching identity class to the same application or subtree
+root. The reset is scoped to that root, so it does not reset unrelated application content.
+
+```tsx
+import '@luke-ui/react/stylesheet.css';
+import '@luke-ui/react/themes/tactile.css';
+import { themeRootClassName } from '@luke-ui/react/theme';
+import { tactileThemeClassName } from '@luke-ui/react/themes';
+import { cx } from '@luke-ui/react/utils';
+
+<div className={cx(themeRootClassName, tactileThemeClassName)}>{children}</div>;
+```
+
+Read [Applying a theme](/theming/applying) for colour modes, portals, and other theme setup details.
 
 ## Use layout utilities for layout
 
@@ -55,14 +121,41 @@ import { Box } from '@luke-ui/react/box';
 </Box>;
 ```
 
-## CSS layers
+`Box` is useful for layout around components. Use `createSprinkles` when another application-owned
+element needs the same responsive layout properties. Neither API sets semantic colour, typography,
+or interaction states.
 
-Luke UI orders its styles in four cascade layers: `reset`, `theme`, `recipes`, and `utilities`. The
-order stays stable regardless of stylesheet import order. Utilities are the highest Luke UI layer
-because they are the supported layout escape hatch.
+## Use application CSS alongside Luke UI
 
-CSS outside a layer follows the normal cascade. Avoid using it to reach into component internals.
-Use a component prop, a recipe, or a public semantic variable instead.
+Luke UI's static CSS uses four cascade layers, ordered from lowest to highest priority: `reset`,
+`theme`, `recipes`, and `utilities`. That internal order is stable regardless of stylesheet import
+order. The reset normalises only the subtree carrying `themeRootClassName`.
+
+Declare your application's layer order before importing its stylesheets when it uses layers too.
+
+```css
+@layer reset, theme, base, recipes, components, utilities;
+
+@import '@luke-ui/react/stylesheet.css';
+@import 'tailwindcss';
+```
+
+Tailwind utilities, CSS Modules, and application CSS work well for application-owned layout and
+custom elements. Put Tailwind classes on surrounding elements or `Box`, and use CSS Modules or
+application styles with public semantic variables for custom UI. Unlayered application CSS sits
+outside Luke UI's layers, so do not use it to reach into a component's internal DOM.
+
+```tsx
+import { Box } from '@luke-ui/react/box';
+
+<Box className="mx-auto" maxInlineSize="64rem" paddingInline="400">
+	{children}
+</Box>;
+```
+
+When a CSS Module or application stylesheet needs a token, use the stable `--luke-*` variable listed
+in the [token reference](/theming/token-reference). Do not couple application CSS to undocumented
+selectors or implementation attributes.
 
 ## Continue learning
 
@@ -75,5 +168,8 @@ Use a component prop, a recipe, or a public semantic variable instead.
 	</Card>
 	<Card href="/theming/token-reference" title="Token reference">
 		Browse every public semantic CSS variable.
+	</Card>
+	<Card href="/theming/authoring" title="Author a theme">
+		Create a product-owned visual foundation when the bundled identities do not fit.
 	</Card>
 </Cards>
