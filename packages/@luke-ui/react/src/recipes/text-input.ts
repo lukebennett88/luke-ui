@@ -1,11 +1,20 @@
 import { sva } from '../../styled-system/css/index.mjs';
-import type { RecipeVariantProps, SlotRecipeCreatorFn } from '../../styled-system/types/recipe.d.ts';
+import type {
+	RecipeVariantProps,
+	SlotRecipeRuntimeFn,
+} from '../../styled-system/types/recipe.d.ts';
 import { token } from '../../styled-system/tokens/index.mjs';
 
-const typedSva = sva as unknown as SlotRecipeCreatorFn;
+type TextInputSlots = 'group' | 'control' | 'adornmentStart' | 'adornmentEnd';
+type TextInputVariantRecord = {
+	size: {
+		medium: Record<TextInputSlots, {}>;
+		small: Record<TextInputSlots, {}>;
+	};
+};
 
 /** Tactile well chrome and private parts for TextInput. */
-export const textInput = typedSva({
+export const textInput = sva({
 	slots: ['group', 'control', 'adornmentStart', 'adornmentEnd'],
 	base: {
 		group: {
@@ -190,7 +199,7 @@ export const textInput = typedSva({
 			},
 		},
 	},
-});
+}) as unknown as SlotRecipeRuntimeFn<TextInputSlots, TextInputVariantRecord>;
 
 export type TextInputVariants = RecipeVariantProps<typeof textInput>;
 

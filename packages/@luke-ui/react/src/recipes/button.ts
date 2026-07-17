@@ -1,11 +1,19 @@
 import { cva } from '../../styled-system/css/index.mjs';
-import type { RecipeCreatorFn, RecipeVariantProps } from '../../styled-system/types/recipe.d.ts';
+import type {
+	RecipeRuntimeFn,
+	RecipeVariantProps,
+} from '../../styled-system/types/recipe.d.ts';
 import { token } from '../../styled-system/tokens/index.mjs';
 
-const typedCva = cva as unknown as RecipeCreatorFn;
+type ButtonVariantRecord = {
+	appearance: { ghost: {}; solid: {}; subtle: {} };
+	isBlock: { false: {}; true: {} };
+	size: { medium: {}; small: {} };
+	tone: { accent: {}; danger: {}; neutral: {} };
+};
 
 /** Semantic appearance and material recipe shared by Button and IconButton. */
-export const button = typedCva({
+export const button = cva({
 	base: {
 		'@media (forced-colors: active)': {
 			backgroundColor: 'ButtonFace',
@@ -266,6 +274,6 @@ export const button = typedCva({
 			},
 		},
 	],
-});
+}) as unknown as RecipeRuntimeFn<ButtonVariantRecord>;
 
 export type ButtonVariants = RecipeVariantProps<typeof button>;
