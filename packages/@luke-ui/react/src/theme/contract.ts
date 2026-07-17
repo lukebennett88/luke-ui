@@ -227,7 +227,7 @@ export function flattenThemeContract(): Array<[path: string, varName: string]> {
  * Kebab-cases one camelCase path segment, for example `solidHover` becomes `solid-hover`. Joining
  * kebab-cased segments with `-` under the `luke-` prefix yields the CSS variable name.
  */
-export function kebabCaseSegment(segment: string): string {
+function kebabCaseSegment(segment: string): string {
 	return segment.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 }
 

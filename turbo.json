@@ -108,6 +108,7 @@
 				"!.generated/**",
 				"!storybook-static/**",
 				"!styled-system/**",
+				"!src/theme/token-map.json",
 				"!**/*.test.ts",
 				"!**/*.test.tsx",
 				"!**/*.stories.tsx"
@@ -117,6 +118,7 @@
 				"dist/spritesheet.svg",
 				"dist/themes/**",
 				"src/routeTree.gen.ts",
+				"src/theme/token-map.json",
 				"styled-system/**"
 			]
 		},
