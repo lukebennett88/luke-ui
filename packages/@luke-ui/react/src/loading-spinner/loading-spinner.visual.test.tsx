@@ -44,7 +44,7 @@ test('sizes and colors', async () => {
 						Save
 					</button>
 				</LoadingSpinner>
-				<LoadingSpinner aria-label="loaded fixed size button" loading={false}>
+				<LoadingSpinner aria-label="loaded fixed size button" isLoading={false}>
 					<button style={fixedChildStyle} type="button">
 						Save
 					</button>

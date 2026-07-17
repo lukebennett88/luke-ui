@@ -9,6 +9,7 @@ import {
 } from '../sizing/icon-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
+import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { cx } from '../utils/index.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
@@ -29,7 +30,7 @@ interface _LoadingSpinnerProps extends _LoadingSpinnerOmit, LoadingSpinnerStyleP
 	 * Whether the spinner is shown in place of `children`.
 	 * @default true
 	 */
-	loading?: boolean;
+	isLoading?: boolean;
 }
 
 /**
@@ -46,7 +47,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 		children,
 		className,
 		color,
-		loading = true,
+		isLoading = true,
 		size,
 		style,
 		...spanProps
@@ -55,32 +56,20 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 	const contextSize = useIconSizeContext();
 	const resolvedSize = size ?? contextSize ?? 'medium';
 
-	if (!loading) return children;
+	if (!isLoading) return children;
 
 	const spinnerElement = (
-		<span
+		<SpinnerElement
 			{...spanProps}
 			aria-label={ariaLabel}
-			className={cx(styles.spinner({ color, size: resolvedSize }), className)}
-			role="status"
+			color={color}
+			size={resolvedSize}
+			className={className}
 			style={style}
-		>
-			<svg aria-hidden="true" className={styles.svg()} fill="none" viewBox={ICON_VIEWBOX}>
-				<circle
-					className={styles.indicator()}
-					cx={ICON_VIEWBOX_SIZE / 2}
-					cy={ICON_VIEWBOX_SIZE / 2}
-					fill="none"
-					pathLength={100}
-					r={SPINNER_CIRCLE_RADIUS}
-					stroke="currentColor"
-					strokeWidth={SPINNER_STROKE_WIDTH}
-				/>
-			</svg>
-		</span>
+		/>
 	);
 
-	if (children === undefined) return spinnerElement;
+	if (children == null) return spinnerElement;
 
 	return (
 		<span className={styles.childrenWrapper}>
@@ -88,6 +77,45 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 				{children}
 			</span>
 			<span className={styles.spinnerOverlay}>{spinnerElement}</span>
+		</span>
+	);
+}
+
+type SpinnerElementProps = DistributiveOmit<LoadingSpinnerProps, 'children' | 'isLoading'>;
+
+function SpinnerElement({
+	'aria-label': ariaLabel,
+	className,
+	color,
+	size,
+	style,
+	...spanProps
+}: SpinnerElementProps) {
+	useSynchronizeAnimations(styles.spinAnimationName);
+	useSynchronizeAnimations(styles.rubberBandAnimationName);
+
+	const viewBoxCenter = ICON_VIEWBOX_SIZE / 2;
+
+	return (
+		<span
+			{...spanProps}
+			aria-label={ariaLabel}
+			className={cx(styles.spinner({ color, size }), className)}
+			role="status"
+			style={style}
+		>
+			<svg aria-hidden="true" className={styles.svg()} fill="none" viewBox={ICON_VIEWBOX}>
+				<circle
+					className={styles.indicator()}
+					cx={viewBoxCenter}
+					cy={viewBoxCenter}
+					fill="none"
+					pathLength={100}
+					r={SPINNER_CIRCLE_RADIUS}
+					stroke="currentColor"
+					strokeWidth={SPINNER_STROKE_WIDTH}
+				/>
+			</svg>
 		</span>
 	);
 }

@@ -18,7 +18,10 @@ const colorVariants = {
 	warning: { color: vars.color.intent.warning.text },
 } as const;
 
-const spinAnimationName = keyframes({
+/**
+ * @internal
+ */
+export const spinAnimationName = keyframes({
 	to: { transform: 'rotate(360deg)' },
 });
 
@@ -60,7 +63,10 @@ export const svg = recipeInLayer('recipes', {
 	},
 });
 
-const rubberBandAnimationName = keyframes({
+/**
+ * @internal
+ */
+export const rubberBandAnimationName = keyframes({
 	'0%': { strokeDasharray: '2 100' },
 	'50%': { strokeDasharray: '65 100', strokeDashoffset: -20 },
 	'100%': { strokeDasharray: '2 100', strokeDashoffset: -100 },

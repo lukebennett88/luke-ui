@@ -8,7 +8,7 @@ export default function Children() {
 
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
-			<LoadingSpinner aria-label="Saving changes" loading={isLoading}>
+			<LoadingSpinner aria-label="Saving changes" isLoading={isLoading}>
 				<Button>Save changes</Button>
 			</LoadingSpinner>
 			<label>

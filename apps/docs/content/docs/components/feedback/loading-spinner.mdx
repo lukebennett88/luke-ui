@@ -14,9 +14,10 @@ show the spinner in place of that content until loading finishes.
 
 ## Loading children
 
-Pass `children` along with `loading` to show the spinner in place of that content. While `loading`
-is `true`, the spinner replaces the children but preserves their dimensions, and any interactive
-descendants become unavailable. When `loading` is `false`, the children render normally.
+Pass `children` along with `isLoading` to show the spinner in place of that content. While
+`isLoading` is `true`, the spinner replaces the children but preserves their dimensions, and any
+interactive descendants become unavailable. When `isLoading` is `false`, the children render
+normally.
 
 <ExampleBlock
 	src="loading-spinner/children"

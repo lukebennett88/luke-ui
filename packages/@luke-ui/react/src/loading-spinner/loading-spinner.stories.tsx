@@ -74,7 +74,7 @@ export const Color = meta.story({
 });
 
 /**
- * Wrap content in `LoadingSpinner` to show the spinner in its place while `loading` is `true`.
+ * Wrap content in `LoadingSpinner` to show the spinner in its place while `isLoading` is `true`.
  * Interactive descendants become unavailable until loading finishes.
  */
 export const Children = meta.story({
@@ -95,7 +95,7 @@ function ToggleableChildren() {
 
 	return (
 		<div style={flexStackStyle}>
-			<LoadingSpinner loading={loading}>
+			<LoadingSpinner isLoading={loading}>
 				<button type="button">Save</button>
 			</LoadingSpinner>
 			<button onClick={() => setLoading((current) => !current)} type="button">
