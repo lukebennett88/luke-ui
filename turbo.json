@@ -107,11 +107,18 @@
 				"!dist/**",
 				"!.generated/**",
 				"!storybook-static/**",
+				"!styled-system/**",
 				"!**/*.test.ts",
 				"!**/*.test.tsx",
 				"!**/*.stories.tsx"
 			],
-			"outputs": [".generated/**", "dist/spritesheet.svg", "dist/themes/**", "src/routeTree.gen.ts"]
+			"outputs": [
+				".generated/**",
+				"dist/spritesheet.svg",
+				"dist/themes/**",
+				"src/routeTree.gen.ts",
+				"styled-system/**"
+			]
 		},
 		"test": {
 			"dependsOn": ["^build", "generate"],

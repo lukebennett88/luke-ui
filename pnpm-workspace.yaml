@@ -54,6 +54,7 @@ catalog:
   '@changesets/cli': ^2.31.0
   '@monaco-editor/react': ^4.7.0
   '@orama/orama': ^3.1.18
+  '@pandacss/dev': ^1.11.4
   '@react-aria/utils': ^3.34.1
   '@rollup/plugin-babel': ^7.1.0
   '@storybook/addon-a11y': ^10.4.6
