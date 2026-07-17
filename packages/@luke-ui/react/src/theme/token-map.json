@@ -1,0 +1,914 @@
+{
+	"color.surface.canvas": {
+		"category": "colors",
+		"shorthand": "surface.canvas",
+		"token": "token('colors.surface.canvas')",
+		"reference": "var(--luke-color-surface-canvas)"
+	},
+	"color.surface.resting": {
+		"category": "colors",
+		"shorthand": "surface.resting",
+		"token": "token('colors.surface.resting')",
+		"reference": "var(--luke-color-surface-resting)"
+	},
+	"color.surface.recessed": {
+		"category": "colors",
+		"shorthand": "surface.recessed",
+		"token": "token('colors.surface.recessed')",
+		"reference": "var(--luke-color-surface-recessed)"
+	},
+	"color.surface.floating": {
+		"category": "colors",
+		"shorthand": "surface.floating",
+		"token": "token('colors.surface.floating')",
+		"reference": "var(--luke-color-surface-floating)"
+	},
+	"color.surface.overlay": {
+		"category": "colors",
+		"shorthand": "surface.overlay",
+		"token": "token('colors.surface.overlay')",
+		"reference": "var(--luke-color-surface-overlay)"
+	},
+	"color.surfaceDisabled": {
+		"category": "colors",
+		"shorthand": "surfaceDisabled",
+		"token": "token('colors.surfaceDisabled')",
+		"reference": "var(--luke-color-surface-disabled)"
+	},
+	"color.loadingSkeleton": {
+		"category": "colors",
+		"shorthand": "loadingSkeleton",
+		"token": "token('colors.loadingSkeleton')",
+		"reference": "var(--luke-color-loading-skeleton)"
+	},
+	"color.text.primary": {
+		"category": "colors",
+		"shorthand": "text.primary",
+		"token": "token('colors.text.primary')",
+		"reference": "var(--luke-color-text-primary)"
+	},
+	"color.text.secondary": {
+		"category": "colors",
+		"shorthand": "text.secondary",
+		"token": "token('colors.text.secondary')",
+		"reference": "var(--luke-color-text-secondary)"
+	},
+	"color.textDisabled": {
+		"category": "colors",
+		"shorthand": "textDisabled",
+		"token": "token('colors.textDisabled')",
+		"reference": "var(--luke-color-text-disabled)"
+	},
+	"color.border.decorative": {
+		"category": "colors",
+		"shorthand": "border.decorative",
+		"token": "token('colors.border.decorative')",
+		"reference": "var(--luke-color-border-decorative)"
+	},
+	"color.border.control": {
+		"category": "colors",
+		"shorthand": "border.control",
+		"token": "token('colors.border.control')",
+		"reference": "var(--luke-color-border-control)"
+	},
+	"color.border.focus": {
+		"category": "colors",
+		"shorthand": "border.focus",
+		"token": "token('colors.border.focus')",
+		"reference": "var(--luke-color-border-focus)"
+	},
+	"color.borderDisabled": {
+		"category": "colors",
+		"shorthand": "borderDisabled",
+		"token": "token('colors.borderDisabled')",
+		"reference": "var(--luke-color-border-disabled)"
+	},
+	"color.intent.neutral.surface.subtle": {
+		"category": "colors",
+		"shorthand": "intent.neutral.surface.subtle",
+		"token": "token('colors.intent.neutral.surface.subtle')",
+		"reference": "var(--luke-color-intent-neutral-surface-subtle)"
+	},
+	"color.intent.neutral.surface.subtleHover": {
+		"category": "colors",
+		"shorthand": "intent.neutral.surface.subtleHover",
+		"token": "token('colors.intent.neutral.surface.subtleHover')",
+		"reference": "var(--luke-color-intent-neutral-surface-subtle-hover)"
+	},
+	"color.intent.neutral.surface.subtlePressed": {
+		"category": "colors",
+		"shorthand": "intent.neutral.surface.subtlePressed",
+		"token": "token('colors.intent.neutral.surface.subtlePressed')",
+		"reference": "var(--luke-color-intent-neutral-surface-subtle-pressed)"
+	},
+	"color.intent.neutral.surface.solid": {
+		"category": "colors",
+		"shorthand": "intent.neutral.surface.solid",
+		"token": "token('colors.intent.neutral.surface.solid')",
+		"reference": "var(--luke-color-intent-neutral-surface-solid)"
+	},
+	"color.intent.neutral.surface.solidHover": {
+		"category": "colors",
+		"shorthand": "intent.neutral.surface.solidHover",
+		"token": "token('colors.intent.neutral.surface.solidHover')",
+		"reference": "var(--luke-color-intent-neutral-surface-solid-hover)"
+	},
+	"color.intent.neutral.surface.solidPressed": {
+		"category": "colors",
+		"shorthand": "intent.neutral.surface.solidPressed",
+		"token": "token('colors.intent.neutral.surface.solidPressed')",
+		"reference": "var(--luke-color-intent-neutral-surface-solid-pressed)"
+	},
+	"color.intent.neutral.onSolid": {
+		"category": "colors",
+		"shorthand": "intent.neutral.onSolid",
+		"token": "token('colors.intent.neutral.onSolid')",
+		"reference": "var(--luke-color-intent-neutral-on-solid)"
+	},
+	"color.intent.accent.surface.subtle": {
+		"category": "colors",
+		"shorthand": "intent.accent.surface.subtle",
+		"token": "token('colors.intent.accent.surface.subtle')",
+		"reference": "var(--luke-color-intent-accent-surface-subtle)"
+	},
+	"color.intent.accent.surface.subtleHover": {
+		"category": "colors",
+		"shorthand": "intent.accent.surface.subtleHover",
+		"token": "token('colors.intent.accent.surface.subtleHover')",
+		"reference": "var(--luke-color-intent-accent-surface-subtle-hover)"
+	},
+	"color.intent.accent.surface.subtlePressed": {
+		"category": "colors",
+		"shorthand": "intent.accent.surface.subtlePressed",
+		"token": "token('colors.intent.accent.surface.subtlePressed')",
+		"reference": "var(--luke-color-intent-accent-surface-subtle-pressed)"
+	},
+	"color.intent.accent.surface.solid": {
+		"category": "colors",
+		"shorthand": "intent.accent.surface.solid",
+		"token": "token('colors.intent.accent.surface.solid')",
+		"reference": "var(--luke-color-intent-accent-surface-solid)"
+	},
+	"color.intent.accent.surface.solidHover": {
+		"category": "colors",
+		"shorthand": "intent.accent.surface.solidHover",
+		"token": "token('colors.intent.accent.surface.solidHover')",
+		"reference": "var(--luke-color-intent-accent-surface-solid-hover)"
+	},
+	"color.intent.accent.surface.solidPressed": {
+		"category": "colors",
+		"shorthand": "intent.accent.surface.solidPressed",
+		"token": "token('colors.intent.accent.surface.solidPressed')",
+		"reference": "var(--luke-color-intent-accent-surface-solid-pressed)"
+	},
+	"color.intent.accent.border": {
+		"category": "colors",
+		"shorthand": "intent.accent.border",
+		"token": "token('colors.intent.accent.border')",
+		"reference": "var(--luke-color-intent-accent-border)"
+	},
+	"color.intent.accent.text": {
+		"category": "colors",
+		"shorthand": "intent.accent.text",
+		"token": "token('colors.intent.accent.text')",
+		"reference": "var(--luke-color-intent-accent-text)"
+	},
+	"color.intent.accent.textHover": {
+		"category": "colors",
+		"shorthand": "intent.accent.textHover",
+		"token": "token('colors.intent.accent.textHover')",
+		"reference": "var(--luke-color-intent-accent-text-hover)"
+	},
+	"color.intent.accent.onSolid": {
+		"category": "colors",
+		"shorthand": "intent.accent.onSolid",
+		"token": "token('colors.intent.accent.onSolid')",
+		"reference": "var(--luke-color-intent-accent-on-solid)"
+	},
+	"color.intent.info.surface.subtle": {
+		"category": "colors",
+		"shorthand": "intent.info.surface.subtle",
+		"token": "token('colors.intent.info.surface.subtle')",
+		"reference": "var(--luke-color-intent-info-surface-subtle)"
+	},
+	"color.intent.info.surface.subtleHover": {
+		"category": "colors",
+		"shorthand": "intent.info.surface.subtleHover",
+		"token": "token('colors.intent.info.surface.subtleHover')",
+		"reference": "var(--luke-color-intent-info-surface-subtle-hover)"
+	},
+	"color.intent.info.surface.subtlePressed": {
+		"category": "colors",
+		"shorthand": "intent.info.surface.subtlePressed",
+		"token": "token('colors.intent.info.surface.subtlePressed')",
+		"reference": "var(--luke-color-intent-info-surface-subtle-pressed)"
+	},
+	"color.intent.info.surface.solid": {
+		"category": "colors",
+		"shorthand": "intent.info.surface.solid",
+		"token": "token('colors.intent.info.surface.solid')",
+		"reference": "var(--luke-color-intent-info-surface-solid)"
+	},
+	"color.intent.info.surface.solidHover": {
+		"category": "colors",
+		"shorthand": "intent.info.surface.solidHover",
+		"token": "token('colors.intent.info.surface.solidHover')",
+		"reference": "var(--luke-color-intent-info-surface-solid-hover)"
+	},
+	"color.intent.info.surface.solidPressed": {
+		"category": "colors",
+		"shorthand": "intent.info.surface.solidPressed",
+		"token": "token('colors.intent.info.surface.solidPressed')",
+		"reference": "var(--luke-color-intent-info-surface-solid-pressed)"
+	},
+	"color.intent.info.border": {
+		"category": "colors",
+		"shorthand": "intent.info.border",
+		"token": "token('colors.intent.info.border')",
+		"reference": "var(--luke-color-intent-info-border)"
+	},
+	"color.intent.info.text": {
+		"category": "colors",
+		"shorthand": "intent.info.text",
+		"token": "token('colors.intent.info.text')",
+		"reference": "var(--luke-color-intent-info-text)"
+	},
+	"color.intent.info.onSolid": {
+		"category": "colors",
+		"shorthand": "intent.info.onSolid",
+		"token": "token('colors.intent.info.onSolid')",
+		"reference": "var(--luke-color-intent-info-on-solid)"
+	},
+	"color.intent.success.surface.subtle": {
+		"category": "colors",
+		"shorthand": "intent.success.surface.subtle",
+		"token": "token('colors.intent.success.surface.subtle')",
+		"reference": "var(--luke-color-intent-success-surface-subtle)"
+	},
+	"color.intent.success.surface.subtleHover": {
+		"category": "colors",
+		"shorthand": "intent.success.surface.subtleHover",
+		"token": "token('colors.intent.success.surface.subtleHover')",
+		"reference": "var(--luke-color-intent-success-surface-subtle-hover)"
+	},
+	"color.intent.success.surface.subtlePressed": {
+		"category": "colors",
+		"shorthand": "intent.success.surface.subtlePressed",
+		"token": "token('colors.intent.success.surface.subtlePressed')",
+		"reference": "var(--luke-color-intent-success-surface-subtle-pressed)"
+	},
+	"color.intent.success.surface.solid": {
+		"category": "colors",
+		"shorthand": "intent.success.surface.solid",
+		"token": "token('colors.intent.success.surface.solid')",
+		"reference": "var(--luke-color-intent-success-surface-solid)"
+	},
+	"color.intent.success.surface.solidHover": {
+		"category": "colors",
+		"shorthand": "intent.success.surface.solidHover",
+		"token": "token('colors.intent.success.surface.solidHover')",
+		"reference": "var(--luke-color-intent-success-surface-solid-hover)"
+	},
+	"color.intent.success.surface.solidPressed": {
+		"category": "colors",
+		"shorthand": "intent.success.surface.solidPressed",
+		"token": "token('colors.intent.success.surface.solidPressed')",
+		"reference": "var(--luke-color-intent-success-surface-solid-pressed)"
+	},
+	"color.intent.success.border": {
+		"category": "colors",
+		"shorthand": "intent.success.border",
+		"token": "token('colors.intent.success.border')",
+		"reference": "var(--luke-color-intent-success-border)"
+	},
+	"color.intent.success.text": {
+		"category": "colors",
+		"shorthand": "intent.success.text",
+		"token": "token('colors.intent.success.text')",
+		"reference": "var(--luke-color-intent-success-text)"
+	},
+	"color.intent.success.onSolid": {
+		"category": "colors",
+		"shorthand": "intent.success.onSolid",
+		"token": "token('colors.intent.success.onSolid')",
+		"reference": "var(--luke-color-intent-success-on-solid)"
+	},
+	"color.intent.warning.surface.subtle": {
+		"category": "colors",
+		"shorthand": "intent.warning.surface.subtle",
+		"token": "token('colors.intent.warning.surface.subtle')",
+		"reference": "var(--luke-color-intent-warning-surface-subtle)"
+	},
+	"color.intent.warning.surface.subtleHover": {
+		"category": "colors",
+		"shorthand": "intent.warning.surface.subtleHover",
+		"token": "token('colors.intent.warning.surface.subtleHover')",
+		"reference": "var(--luke-color-intent-warning-surface-subtle-hover)"
+	},
+	"color.intent.warning.surface.subtlePressed": {
+		"category": "colors",
+		"shorthand": "intent.warning.surface.subtlePressed",
+		"token": "token('colors.intent.warning.surface.subtlePressed')",
+		"reference": "var(--luke-color-intent-warning-surface-subtle-pressed)"
+	},
+	"color.intent.warning.surface.solid": {
+		"category": "colors",
+		"shorthand": "intent.warning.surface.solid",
+		"token": "token('colors.intent.warning.surface.solid')",
+		"reference": "var(--luke-color-intent-warning-surface-solid)"
+	},
+	"color.intent.warning.surface.solidHover": {
+		"category": "colors",
+		"shorthand": "intent.warning.surface.solidHover",
+		"token": "token('colors.intent.warning.surface.solidHover')",
+		"reference": "var(--luke-color-intent-warning-surface-solid-hover)"
+	},
+	"color.intent.warning.surface.solidPressed": {
+		"category": "colors",
+		"shorthand": "intent.warning.surface.solidPressed",
+		"token": "token('colors.intent.warning.surface.solidPressed')",
+		"reference": "var(--luke-color-intent-warning-surface-solid-pressed)"
+	},
+	"color.intent.warning.border": {
+		"category": "colors",
+		"shorthand": "intent.warning.border",
+		"token": "token('colors.intent.warning.border')",
+		"reference": "var(--luke-color-intent-warning-border)"
+	},
+	"color.intent.warning.text": {
+		"category": "colors",
+		"shorthand": "intent.warning.text",
+		"token": "token('colors.intent.warning.text')",
+		"reference": "var(--luke-color-intent-warning-text)"
+	},
+	"color.intent.warning.onSolid": {
+		"category": "colors",
+		"shorthand": "intent.warning.onSolid",
+		"token": "token('colors.intent.warning.onSolid')",
+		"reference": "var(--luke-color-intent-warning-on-solid)"
+	},
+	"color.intent.danger.surface.subtle": {
+		"category": "colors",
+		"shorthand": "intent.danger.surface.subtle",
+		"token": "token('colors.intent.danger.surface.subtle')",
+		"reference": "var(--luke-color-intent-danger-surface-subtle)"
+	},
+	"color.intent.danger.surface.subtleHover": {
+		"category": "colors",
+		"shorthand": "intent.danger.surface.subtleHover",
+		"token": "token('colors.intent.danger.surface.subtleHover')",
+		"reference": "var(--luke-color-intent-danger-surface-subtle-hover)"
+	},
+	"color.intent.danger.surface.subtlePressed": {
+		"category": "colors",
+		"shorthand": "intent.danger.surface.subtlePressed",
+		"token": "token('colors.intent.danger.surface.subtlePressed')",
+		"reference": "var(--luke-color-intent-danger-surface-subtle-pressed)"
+	},
+	"color.intent.danger.surface.solid": {
+		"category": "colors",
+		"shorthand": "intent.danger.surface.solid",
+		"token": "token('colors.intent.danger.surface.solid')",
+		"reference": "var(--luke-color-intent-danger-surface-solid)"
+	},
+	"color.intent.danger.surface.solidHover": {
+		"category": "colors",
+		"shorthand": "intent.danger.surface.solidHover",
+		"token": "token('colors.intent.danger.surface.solidHover')",
+		"reference": "var(--luke-color-intent-danger-surface-solid-hover)"
+	},
+	"color.intent.danger.surface.solidPressed": {
+		"category": "colors",
+		"shorthand": "intent.danger.surface.solidPressed",
+		"token": "token('colors.intent.danger.surface.solidPressed')",
+		"reference": "var(--luke-color-intent-danger-surface-solid-pressed)"
+	},
+	"color.intent.danger.border": {
+		"category": "colors",
+		"shorthand": "intent.danger.border",
+		"token": "token('colors.intent.danger.border')",
+		"reference": "var(--luke-color-intent-danger-border)"
+	},
+	"color.intent.danger.text": {
+		"category": "colors",
+		"shorthand": "intent.danger.text",
+		"token": "token('colors.intent.danger.text')",
+		"reference": "var(--luke-color-intent-danger-text)"
+	},
+	"color.intent.danger.onSolid": {
+		"category": "colors",
+		"shorthand": "intent.danger.onSolid",
+		"token": "token('colors.intent.danger.onSolid')",
+		"reference": "var(--luke-color-intent-danger-on-solid)"
+	},
+	"depth.recessed": {
+		"category": "shadows",
+		"shorthand": "recessed",
+		"token": "token('shadows.recessed')",
+		"reference": "var(--luke-depth-recessed)"
+	},
+	"depth.resting": {
+		"category": "shadows",
+		"shorthand": "resting",
+		"token": "token('shadows.resting')",
+		"reference": "var(--luke-depth-resting)"
+	},
+	"depth.raised": {
+		"category": "shadows",
+		"shorthand": "raised",
+		"token": "token('shadows.raised')",
+		"reference": "var(--luke-depth-raised)"
+	},
+	"depth.floating": {
+		"category": "shadows",
+		"shorthand": "floating",
+		"token": "token('shadows.floating')",
+		"reference": "var(--luke-depth-floating)"
+	},
+	"depth.overlay": {
+		"category": "shadows",
+		"shorthand": "overlay",
+		"token": "token('shadows.overlay')",
+		"reference": "var(--luke-depth-overlay)"
+	},
+	"actionControlFinish.recessed": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-action-control-finish-recessed)"
+	},
+	"actionControlFinish.resting": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-action-control-finish-resting)"
+	},
+	"actionControlFinish.raised": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-action-control-finish-raised)"
+	},
+	"font.100.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-100-baseline-trim)"
+	},
+	"font.100.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-100-cap-height-trim)"
+	},
+	"font.100.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-100-font-size)"
+	},
+	"font.100.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-100-letter-spacing)"
+	},
+	"font.100.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-100-line-height)"
+	},
+	"font.200.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-200-baseline-trim)"
+	},
+	"font.200.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-200-cap-height-trim)"
+	},
+	"font.200.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-200-font-size)"
+	},
+	"font.200.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-200-letter-spacing)"
+	},
+	"font.200.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-200-line-height)"
+	},
+	"font.300.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-300-baseline-trim)"
+	},
+	"font.300.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-300-cap-height-trim)"
+	},
+	"font.300.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-300-font-size)"
+	},
+	"font.300.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-300-letter-spacing)"
+	},
+	"font.300.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-300-line-height)"
+	},
+	"font.400.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-400-baseline-trim)"
+	},
+	"font.400.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-400-cap-height-trim)"
+	},
+	"font.400.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-400-font-size)"
+	},
+	"font.400.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-400-letter-spacing)"
+	},
+	"font.400.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-400-line-height)"
+	},
+	"font.500.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-500-baseline-trim)"
+	},
+	"font.500.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-500-cap-height-trim)"
+	},
+	"font.500.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-500-font-size)"
+	},
+	"font.500.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-500-letter-spacing)"
+	},
+	"font.500.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-500-line-height)"
+	},
+	"font.600.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-600-baseline-trim)"
+	},
+	"font.600.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-600-cap-height-trim)"
+	},
+	"font.600.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-600-font-size)"
+	},
+	"font.600.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-600-letter-spacing)"
+	},
+	"font.600.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-600-line-height)"
+	},
+	"font.700.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-700-baseline-trim)"
+	},
+	"font.700.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-700-cap-height-trim)"
+	},
+	"font.700.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-700-font-size)"
+	},
+	"font.700.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-700-letter-spacing)"
+	},
+	"font.700.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-700-line-height)"
+	},
+	"font.800.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-800-baseline-trim)"
+	},
+	"font.800.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-800-cap-height-trim)"
+	},
+	"font.800.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-800-font-size)"
+	},
+	"font.800.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-800-letter-spacing)"
+	},
+	"font.800.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-800-line-height)"
+	},
+	"font.900.baselineTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-900-baseline-trim)"
+	},
+	"font.900.capHeightTrim": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-900-cap-height-trim)"
+	},
+	"font.900.fontSize": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-900-font-size)"
+	},
+	"font.900.letterSpacing": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-900-letter-spacing)"
+	},
+	"font.900.lineHeight": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-900-line-height)"
+	},
+	"font.family": {
+		"category": null,
+		"shorthand": null,
+		"token": null,
+		"reference": "var(--luke-font-family)"
+	},
+	"font.weight.body": {
+		"category": "fontWeights",
+		"shorthand": "body",
+		"token": "token('fontWeights.body')",
+		"reference": "var(--luke-font-weight-body)"
+	},
+	"font.weight.label": {
+		"category": "fontWeights",
+		"shorthand": "label",
+		"token": "token('fontWeights.label')",
+		"reference": "var(--luke-font-weight-label)"
+	},
+	"font.weight.heading": {
+		"category": "fontWeights",
+		"shorthand": "heading",
+		"token": "token('fontWeights.heading')",
+		"reference": "var(--luke-font-weight-heading)"
+	},
+	"font.weight.emphasis": {
+		"category": "fontWeights",
+		"shorthand": "emphasis",
+		"token": "token('fontWeights.emphasis')",
+		"reference": "var(--luke-font-weight-emphasis)"
+	},
+	"radius.detail": {
+		"category": "radii",
+		"shorthand": "detail",
+		"token": "token('radii.detail')",
+		"reference": "var(--luke-radius-detail)"
+	},
+	"radius.control": {
+		"category": "radii",
+		"shorthand": "control",
+		"token": "token('radii.control')",
+		"reference": "var(--luke-radius-control)"
+	},
+	"radius.surface": {
+		"category": "radii",
+		"shorthand": "surface",
+		"token": "token('radii.surface')",
+		"reference": "var(--luke-radius-surface)"
+	},
+	"radius.overlay": {
+		"category": "radii",
+		"shorthand": "overlay",
+		"token": "token('radii.overlay')",
+		"reference": "var(--luke-radius-overlay)"
+	},
+	"radius.full": {
+		"category": "radii",
+		"shorthand": "full",
+		"token": "token('radii.full')",
+		"reference": "var(--luke-radius-full)"
+	},
+	"space.100": {
+		"category": "spacing",
+		"shorthand": "100",
+		"token": "token('spacing.100')",
+		"reference": "var(--luke-space-100)"
+	},
+	"space.200": {
+		"category": "spacing",
+		"shorthand": "200",
+		"token": "token('spacing.200')",
+		"reference": "var(--luke-space-200)"
+	},
+	"space.300": {
+		"category": "spacing",
+		"shorthand": "300",
+		"token": "token('spacing.300')",
+		"reference": "var(--luke-space-300)"
+	},
+	"space.400": {
+		"category": "spacing",
+		"shorthand": "400",
+		"token": "token('spacing.400')",
+		"reference": "var(--luke-space-400)"
+	},
+	"space.600": {
+		"category": "spacing",
+		"shorthand": "600",
+		"token": "token('spacing.600')",
+		"reference": "var(--luke-space-600)"
+	},
+	"space.800": {
+		"category": "spacing",
+		"shorthand": "800",
+		"token": "token('spacing.800')",
+		"reference": "var(--luke-space-800)"
+	},
+	"space.1000": {
+		"category": "spacing",
+		"shorthand": "1000",
+		"token": "token('spacing.1000')",
+		"reference": "var(--luke-space-1000)"
+	},
+	"space.1200": {
+		"category": "spacing",
+		"shorthand": "1200",
+		"token": "token('spacing.1200')",
+		"reference": "var(--luke-space-1200)"
+	},
+	"space.1600": {
+		"category": "spacing",
+		"shorthand": "1600",
+		"token": "token('spacing.1600')",
+		"reference": "var(--luke-space-1600)"
+	},
+	"controlSize.small": {
+		"category": "sizes",
+		"shorthand": "controlSize.small",
+		"token": "token('sizes.controlSize.small')",
+		"reference": "var(--luke-control-size-small)"
+	},
+	"controlSize.medium": {
+		"category": "sizes",
+		"shorthand": "controlSize.medium",
+		"token": "token('sizes.controlSize.medium')",
+		"reference": "var(--luke-control-size-medium)"
+	},
+	"iconSize.xsmall": {
+		"category": "sizes",
+		"shorthand": "iconSize.xsmall",
+		"token": "token('sizes.iconSize.xsmall')",
+		"reference": "var(--luke-icon-size-xsmall)"
+	},
+	"iconSize.small": {
+		"category": "sizes",
+		"shorthand": "iconSize.small",
+		"token": "token('sizes.iconSize.small')",
+		"reference": "var(--luke-icon-size-small)"
+	},
+	"iconSize.medium": {
+		"category": "sizes",
+		"shorthand": "iconSize.medium",
+		"token": "token('sizes.iconSize.medium')",
+		"reference": "var(--luke-icon-size-medium)"
+	},
+	"iconSize.large": {
+		"category": "sizes",
+		"shorthand": "iconSize.large",
+		"token": "token('sizes.iconSize.large')",
+		"reference": "var(--luke-icon-size-large)"
+	},
+	"motion.duration.fast": {
+		"category": "durations",
+		"shorthand": "fast",
+		"token": "token('durations.fast')",
+		"reference": "var(--luke-motion-duration-fast)"
+	},
+	"motion.duration.medium": {
+		"category": "durations",
+		"shorthand": "medium",
+		"token": "token('durations.medium')",
+		"reference": "var(--luke-motion-duration-medium)"
+	},
+	"motion.duration.slow": {
+		"category": "durations",
+		"shorthand": "slow",
+		"token": "token('durations.slow')",
+		"reference": "var(--luke-motion-duration-slow)"
+	},
+	"motion.duration.ambient": {
+		"category": "durations",
+		"shorthand": "ambient",
+		"token": "token('durations.ambient')",
+		"reference": "var(--luke-motion-duration-ambient)"
+	},
+	"motion.easing.standard": {
+		"category": "easings",
+		"shorthand": "standard",
+		"token": "token('easings.standard')",
+		"reference": "var(--luke-motion-easing-standard)"
+	},
+	"motion.easing.enter": {
+		"category": "easings",
+		"shorthand": "enter",
+		"token": "token('easings.enter')",
+		"reference": "var(--luke-motion-easing-enter)"
+	},
+	"motion.easing.exit": {
+		"category": "easings",
+		"shorthand": "exit",
+		"token": "token('easings.exit')",
+		"reference": "var(--luke-motion-easing-exit)"
+	}
+}

@@ -1,5 +1,6 @@
 import { defineConfig } from '@pandacss/dev';
 import { lukeLayerOrder } from './src/styles/layer-order.js';
+import { buildPandaTokens } from './src/theme/panda-tokens.js';
 
 // T2 ejected Panda config. Minimal box slice only; VE still owns
 // reset/base/tokens/global output. See scripts/assemble-stylesheet.ts.
@@ -27,6 +28,11 @@ const layers = {
 	utilities: expectedPandaLayers[4],
 };
 
+// The Panda `theme.tokens` alias layer: every semantic contract leaf as a
+// `var(--luke-*)` reference. `build-theme.ts` stays the only emitter of the
+// `--luke-*` values themselves.
+const aliasTokens = buildPandaTokens();
+
 export default defineConfig({
 	// Ejected mode: no bundled preset theme/utilities/conditions.
 	eject: true,
@@ -47,13 +53,17 @@ export default defineConfig({
 		focus: '&:is(:focus, [data-focus])',
 	},
 
-	// A few spacing tokens so the box-utility slice has real values to reference.
+	// The alias layer plus the T2 box-slice placeholder spacing, kept so the box
+	// `utilities`/`staticCss` below still resolve (transitional; removed later).
 	theme: {
 		tokens: {
+			...aliasTokens,
 			spacing: {
+				// T2 box-slice placeholders (transitional; removed in a later ticket).
 				none: { value: '0' },
 				sm: { value: '0.5rem' },
 				md: { value: '1rem' },
+				...aliasTokens.spacing,
 			},
 		},
 	},
