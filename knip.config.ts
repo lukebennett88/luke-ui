@@ -23,6 +23,10 @@ export default {
 			// Knip's Panda plugin expects `postcss` listed for panda.config.ts, but we
 			// use Panda's standalone codegen/cssgen CLI, not the postcss plugin.
 			ignoreDependencies: ['postcss'],
+			// This module exposes migration and codemod helpers via direct file imports.
+			ignoreIssues: {
+				'src/theme/panda-tokens.ts': ['exports', 'types'],
+			},
 			entry: [
 				'src/**/*.stories.tsx',
 				'src/**/index.tsx',
