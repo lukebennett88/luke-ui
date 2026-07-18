@@ -6,9 +6,12 @@ export default function DepthExample() {
 	return (
 		<Box
 			display="grid"
-			gap="600"
-			padding="600"
-			style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(8rem, 1fr))' }}
+			gap="300"
+			padding="400"
+			style={{
+				gridTemplateColumns: 'repeat(auto-fit, minmax(6rem, 1fr))',
+				inlineSize: '100%',
+			}}
 		>
 			{Object.entries(vars.depth).map(([name, depth]) => (
 				<Box display="grid" gap="200" key={name}>
@@ -16,6 +19,7 @@ export default function DepthExample() {
 						style={{
 							backgroundColor: vars.color.surface.resting,
 							blockSize: '5rem',
+							border: `1px solid ${vars.color.border.control}`,
 							borderRadius: vars.radius.surface,
 							boxShadow: depth,
 						}}
