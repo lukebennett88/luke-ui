@@ -6,27 +6,20 @@ description: Use semantic depth roles for surfaces, controls, menus, and dialogs
 Depth describes how a surface sits in the interface. The active theme supplies the final composite
 shadow for each role, so a custom surface adapts to the current identity and colour mode.
 
-## Depth roles
+## Depth scale
 
-Use the role that describes the surface's relationship to surrounding content.
+Luke UI exposes five depth roles. The scale below reads from `vars.depth`, so it always reflects the
+public theme contract for the active identity and colour mode.
 
-| Role       | Use for                                           |
-| ---------- | ------------------------------------------------- |
-| `recessed` | A pressed control or sunken surface.              |
-| `resting`  | An ordinary interactive control or surface.       |
-| `raised`   | A hovered control or an elevated surface.         |
-| `floating` | A menu, popover, or other detached surface.       |
-| `overlay`  | A dialog, sheet, or other high-elevation surface. |
+<ExampleBlock
+	src="overview/depth"
+	title="Depth scale"
+	description="Switch colour modes to compare the public depth roles in the active theme identity."
+/>
 
 Use a component's API before setting depth yourself. Components already apply the right depth for
 each of their states. Use `vars.depth` when building a custom surface that needs to belong to the
 same elevation system.
-
-<ExampleBlock
-	src="overview/depth"
-	title="Depth roles"
-	description="Switch colour modes and compare the depth ladder in the active theme identity."
-/>
 
 ## Use semantic depth
 

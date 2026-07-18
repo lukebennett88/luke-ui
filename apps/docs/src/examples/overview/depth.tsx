@@ -4,39 +4,6 @@ import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
 
-const depthRoles = [
-	{
-		description: 'Pressed controls and sunken areas',
-		depth: vars.depth.recessed,
-		label: 'Recessed',
-		surface: vars.color.surface.recessed,
-	},
-	{
-		description: 'Ordinary controls and surfaces',
-		depth: vars.depth.resting,
-		label: 'Resting',
-		surface: vars.color.surface.resting,
-	},
-	{
-		description: 'Hovered controls and elevated surfaces',
-		depth: vars.depth.raised,
-		label: 'Raised',
-		surface: vars.color.surface.resting,
-	},
-	{
-		description: 'Menus and popovers',
-		depth: vars.depth.floating,
-		label: 'Floating',
-		surface: vars.color.surface.floating,
-	},
-	{
-		description: 'Dialogs and sheets',
-		depth: vars.depth.overlay,
-		label: 'Overlay',
-		surface: vars.color.surface.overlay,
-	},
-] as const;
-
 type ColorMode = 'dark' | 'light';
 
 export default function DepthExample() {
@@ -69,23 +36,20 @@ export default function DepthExample() {
 					gridTemplateColumns: 'repeat(auto-fit, minmax(12rem, 1fr))',
 				}}
 			>
-				{depthRoles.map((role) => (
+				{Object.entries(vars.depth).map(([name, depth]) => (
 					<Box
-						key={role.label}
+						key={name}
 						padding="400"
 						style={{
-							backgroundColor: role.surface,
+							backgroundColor: vars.color.surface.resting,
 							border: `1px solid ${vars.color.border.decorative}`,
 							borderRadius: vars.radius.surface,
-							boxShadow: role.depth,
+							boxShadow: depth,
 							color: vars.color.text.primary,
 						}}
 					>
 						<Text elementType="strong" fontWeight="emphasis">
-							{role.label}
-						</Text>
-						<Text color="secondary" elementType="p" size="200">
-							{role.description}
+							{name}
 						</Text>
 					</Box>
 				))}
