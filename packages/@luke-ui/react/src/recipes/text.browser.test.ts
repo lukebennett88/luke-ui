@@ -3,7 +3,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { tactileFoundation } from '../theme/foundations.js';
 import { buildTheme, themeClassName, themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
-import { text } from './text.css.js';
+import { text } from './text.js';
 
 let mounted: Array<HTMLElement> = [];
 let styles: Array<HTMLStyleElement> = [];
@@ -13,6 +13,18 @@ afterEach(() => {
 	mounted = [];
 	for (const style of styles) style.remove();
 	styles = [];
+});
+
+test('clamps one line from a boolean and multiple lines from a number', () => {
+	const singleLine = getComputedStyle(mountText({ lineClamp: true }));
+	const multiLine = getComputedStyle(mountText({ lineClamp: 3 }));
+
+	expect(singleLine.display).toBe('block');
+	expect(singleLine.overflowX).toBe('clip');
+	expect(singleLine.textOverflow).toBe('ellipsis');
+	expect(singleLine.whiteSpace).toBe('nowrap');
+	expect(multiLine.webkitLineClamp).toBe('3');
+	expect(multiLine.overflow).toBe('hidden');
 });
 
 test("defaults to size '300', body weight, and primary colour", () => {

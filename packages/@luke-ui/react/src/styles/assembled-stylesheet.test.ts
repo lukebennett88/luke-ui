@@ -39,8 +39,9 @@ describe('assembled stylesheet (generated output)', () => {
 	const css = assembleStylesheet();
 	const recipesStart = css.indexOf('@layer recipes {');
 	const boxStart = css.indexOf('@layer box {');
+	const utilitiesStart = css.indexOf('@layer utilities {', boxStart);
 	const recipesBlock = css.slice(recipesStart, boxStart);
-	const boxBlock = css.slice(boxStart);
+	const boxBlock = css.slice(boxStart, utilitiesStart);
 
 	it('starts with the canonical combined layer-order declaration', () => {
 		expect(css.split('\n')[0]).toBe('@layer reset, base, tokens, recipes, box, utilities;');
@@ -56,11 +57,28 @@ describe('assembled stylesheet (generated output)', () => {
 		expect(recipesBlock).toContain('.button--size_medium');
 	});
 
+	it('keeps migrated recipe declarations inside @layer recipes', () => {
+		for (const declaration of [
+			'text-decoration-color: currentColor',
+			'block-size: var(--sizes-icon-size-medium)',
+			'font-size: var(--font-sizes-300)',
+		]) {
+			expect(recipesBlock).toContain(declaration);
+			expect(boxBlock).not.toContain(declaration);
+		}
+	});
+
 	it('keeps the recipe compound-variant atomics inside @layer box', () => {
 		// The solid/neutral compound variant is the only source of this
 		// declaration; its atomic class rides Panda's `utilities` output into
 		// `@layer box`. Assert on the declaration, not the derived class name.
 		const compoundDeclaration = 'background-color: var(--colors-intent-neutral-surface-solid)';
+		expect(boxBlock).toContain(compoundDeclaration);
+		expect(recipesBlock).not.toContain(compoundDeclaration);
+	});
+
+	it('keeps Capsize trim compound-variant atomics inside @layer box', () => {
+		const compoundDeclaration = 'margin-bottom: var(--luke-font-300-cap-height-trim)';
 		expect(boxBlock).toContain(compoundDeclaration);
 		expect(recipesBlock).not.toContain(compoundDeclaration);
 	});
