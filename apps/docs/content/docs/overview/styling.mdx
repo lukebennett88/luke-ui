@@ -38,6 +38,13 @@ Start with the component API. If the required presentation is outside that API, 
 component from the relevant primitives and public variables rather than overriding internal
 selectors. This keeps a component reliable when its recipe changes.
 
+| Guidance | Practices                                                                            |
+| -------- | ------------------------------------------------------------------------------------ |
+| Do       | Use `tone`, `appearance`, and other public component props for supported variations. |
+| Don't    | Add CSS that reaches into a component's generated classes or DOM structure.          |
+| Do       | Compose from a primitive and `vars` when the product needs a different structure.    |
+| Don't    | Add a one-off style override when the component API cannot express the structure.    |
+
 Recipes from `@luke-ui/react/recipes` are available for custom compositions. They are
 component-specific, so use them only when you are building on that component's documented structure.
 

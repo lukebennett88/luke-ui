@@ -20,6 +20,13 @@ Set the mode on a themed root to force it.
 An explicit mode also sets the native `color-scheme` property. Browser controls and scrollbars then
 match the Luke UI content.
 
+| Guidance | Practices                                                                            |
+| -------- | ------------------------------------------------------------------------------------ |
+| Do       | Set `data-color-mode` on a themed root or intentional nested boundary.               |
+| Don't    | Override individual colours when content needs a different light or dark appearance. |
+| Do       | Omit the attribute when the content should follow the system preference.             |
+| Don't    | Use a media query to recreate theme values in application CSS.                       |
+
 ## Nested modes
 
 Colour modes can nest within one theme identity. Use a nested mode for a preview, a dark page with a

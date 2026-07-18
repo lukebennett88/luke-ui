@@ -6,6 +6,13 @@ description: A labelled control for actions in an interface.
 `Button` triggers an action, such as saving a form, opening a dialog, or deleting an item. Use
 [`Link`](/components/actions/link) when the interaction takes someone to another URL or route.
 
+| Guidance | Practices                                                                       |
+| -------- | ------------------------------------------------------------------------------- |
+| Do       | Use Button to submit, save, open, dismiss, or otherwise change interface state. |
+| Don't    | Use Button for navigation just because it has a stronger visual treatment.      |
+| Do       | Use Link when activation changes the URL or route.                              |
+| Don't    | Make a Link perform an in-place action such as submitting a form.               |
+
 ```tsx
 import { Button } from '@luke-ui/react/button';
 
