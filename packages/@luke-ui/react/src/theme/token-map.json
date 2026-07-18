@@ -462,21 +462,21 @@
 		"reference": "var(--luke-font-100-cap-height-trim)"
 	},
 	"font.100.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "100",
+		"token": "token('fontSizes.100')",
 		"reference": "var(--luke-font-100-font-size)"
 	},
 	"font.100.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "100",
+		"token": "token('letterSpacings.100')",
 		"reference": "var(--luke-font-100-letter-spacing)"
 	},
 	"font.100.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "100",
+		"token": "token('lineHeights.100')",
 		"reference": "var(--luke-font-100-line-height)"
 	},
 	"font.200.baselineTrim": {
@@ -492,21 +492,21 @@
 		"reference": "var(--luke-font-200-cap-height-trim)"
 	},
 	"font.200.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "200",
+		"token": "token('fontSizes.200')",
 		"reference": "var(--luke-font-200-font-size)"
 	},
 	"font.200.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "200",
+		"token": "token('letterSpacings.200')",
 		"reference": "var(--luke-font-200-letter-spacing)"
 	},
 	"font.200.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "200",
+		"token": "token('lineHeights.200')",
 		"reference": "var(--luke-font-200-line-height)"
 	},
 	"font.300.baselineTrim": {
@@ -522,21 +522,21 @@
 		"reference": "var(--luke-font-300-cap-height-trim)"
 	},
 	"font.300.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "300",
+		"token": "token('fontSizes.300')",
 		"reference": "var(--luke-font-300-font-size)"
 	},
 	"font.300.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "300",
+		"token": "token('letterSpacings.300')",
 		"reference": "var(--luke-font-300-letter-spacing)"
 	},
 	"font.300.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "300",
+		"token": "token('lineHeights.300')",
 		"reference": "var(--luke-font-300-line-height)"
 	},
 	"font.400.baselineTrim": {
@@ -552,21 +552,21 @@
 		"reference": "var(--luke-font-400-cap-height-trim)"
 	},
 	"font.400.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "400",
+		"token": "token('fontSizes.400')",
 		"reference": "var(--luke-font-400-font-size)"
 	},
 	"font.400.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "400",
+		"token": "token('letterSpacings.400')",
 		"reference": "var(--luke-font-400-letter-spacing)"
 	},
 	"font.400.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "400",
+		"token": "token('lineHeights.400')",
 		"reference": "var(--luke-font-400-line-height)"
 	},
 	"font.500.baselineTrim": {
@@ -582,21 +582,21 @@
 		"reference": "var(--luke-font-500-cap-height-trim)"
 	},
 	"font.500.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "500",
+		"token": "token('fontSizes.500')",
 		"reference": "var(--luke-font-500-font-size)"
 	},
 	"font.500.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "500",
+		"token": "token('letterSpacings.500')",
 		"reference": "var(--luke-font-500-letter-spacing)"
 	},
 	"font.500.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "500",
+		"token": "token('lineHeights.500')",
 		"reference": "var(--luke-font-500-line-height)"
 	},
 	"font.600.baselineTrim": {
@@ -612,21 +612,21 @@
 		"reference": "var(--luke-font-600-cap-height-trim)"
 	},
 	"font.600.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "600",
+		"token": "token('fontSizes.600')",
 		"reference": "var(--luke-font-600-font-size)"
 	},
 	"font.600.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "600",
+		"token": "token('letterSpacings.600')",
 		"reference": "var(--luke-font-600-letter-spacing)"
 	},
 	"font.600.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "600",
+		"token": "token('lineHeights.600')",
 		"reference": "var(--luke-font-600-line-height)"
 	},
 	"font.700.baselineTrim": {
@@ -642,21 +642,21 @@
 		"reference": "var(--luke-font-700-cap-height-trim)"
 	},
 	"font.700.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "700",
+		"token": "token('fontSizes.700')",
 		"reference": "var(--luke-font-700-font-size)"
 	},
 	"font.700.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "700",
+		"token": "token('letterSpacings.700')",
 		"reference": "var(--luke-font-700-letter-spacing)"
 	},
 	"font.700.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "700",
+		"token": "token('lineHeights.700')",
 		"reference": "var(--luke-font-700-line-height)"
 	},
 	"font.800.baselineTrim": {
@@ -672,21 +672,21 @@
 		"reference": "var(--luke-font-800-cap-height-trim)"
 	},
 	"font.800.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "800",
+		"token": "token('fontSizes.800')",
 		"reference": "var(--luke-font-800-font-size)"
 	},
 	"font.800.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "800",
+		"token": "token('letterSpacings.800')",
 		"reference": "var(--luke-font-800-letter-spacing)"
 	},
 	"font.800.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "800",
+		"token": "token('lineHeights.800')",
 		"reference": "var(--luke-font-800-line-height)"
 	},
 	"font.900.baselineTrim": {
@@ -702,27 +702,27 @@
 		"reference": "var(--luke-font-900-cap-height-trim)"
 	},
 	"font.900.fontSize": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fontSizes",
+		"shorthand": "900",
+		"token": "token('fontSizes.900')",
 		"reference": "var(--luke-font-900-font-size)"
 	},
 	"font.900.letterSpacing": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "letterSpacings",
+		"shorthand": "900",
+		"token": "token('letterSpacings.900')",
 		"reference": "var(--luke-font-900-letter-spacing)"
 	},
 	"font.900.lineHeight": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "lineHeights",
+		"shorthand": "900",
+		"token": "token('lineHeights.900')",
 		"reference": "var(--luke-font-900-line-height)"
 	},
 	"font.family": {
-		"category": null,
-		"shorthand": null,
-		"token": null,
+		"category": "fonts",
+		"shorthand": "family",
+		"token": "token('fonts.family')",
 		"reference": "var(--luke-font-family)"
 	},
 	"font.weight.body": {
