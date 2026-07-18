@@ -5,6 +5,11 @@ import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
 
 type SpaceContractStep = `${keyof typeof vars.space}`;
+const compactGaps = [
+	{ step: '100', value: '4px' },
+	{ step: '300', value: '12px' },
+	{ step: '600', value: '24px' },
+] as const satisfies ReadonlyArray<{ step: SpaceContractStep; value: string }>;
 const steps = [
 	'100',
 	'200',
@@ -16,10 +21,10 @@ const steps = [
 	'1200',
 	'1600',
 ] as const satisfies ReadonlyArray<SpaceContractStep>;
-type SpaceStep = (typeof steps)[number];
+type CompactGap = (typeof compactGaps)[number];
 
 export default function SpacingExample() {
-	const [compactGap, setCompactGap] = useState<SpaceStep>('300');
+	const [compactGap, setCompactGap] = useState<CompactGap>(compactGaps[1]);
 
 	return (
 		<Box display="grid" gap="600">
@@ -46,25 +51,24 @@ export default function SpacingExample() {
 					</Box>
 				))}
 			</Box>
-			<Box aria-label="Compact gap" display="flex" flexWrap="wrap" gap="200" role="group">
-				{(['100', '300', '600'] as const).map((step) => (
+			<Box aria-label="Gap" display="flex" flexWrap="wrap" gap="200" role="group">
+				{compactGaps.map((gap) => (
 					<Button
-						appearance={compactGap === step ? 'solid' : 'subtle'}
-						aria-pressed={compactGap === step}
-						key={step}
-						onPress={() => setCompactGap(step)}
+						appearance={compactGap.step === gap.step ? 'solid' : 'subtle'}
+						aria-pressed={compactGap.step === gap.step}
+						key={gap.step}
+						onPress={() => setCompactGap(gap)}
 						size="small"
 						tone="accent"
 					>
-						Compact gap {step}
+						Gap {gap.step} ({gap.value})
 					</Button>
 				))}
 			</Box>
 			<Box
-				display="flex"
-				flexDirection={{ medium: 'row', xsmall: 'column' }}
-				gap={{ medium: '800', xsmall: compactGap }}
-				padding={{ medium: '600', xsmall: '300' }}
+				display="grid"
+				gap={compactGap.step}
+				padding="300"
 				style={{
 					backgroundColor: vars.color.surface.resting,
 					border: `1px solid ${vars.color.border.decorative}`,
@@ -72,8 +76,8 @@ export default function SpacingExample() {
 					boxShadow: vars.depth.resting,
 				}}
 			>
-				<ContentBlock title="Compact layout" />
-				<ContentBlock title="Medium and wider" />
+				<ContentBlock title={`Selected gap: ${compactGap.step} (${compactGap.value})`} />
+				<ContentBlock title="The same layout token separates these blocks." />
 			</Box>
 		</Box>
 	);
@@ -86,7 +90,7 @@ function ContentBlock({ title }: { title: string }) {
 				{title}
 			</Text>
 			<Text color="secondary" elementType="span" size="200">
-				The selected gap applies until medium, where the layout uses step 800.
+				Choose a gap to compare its actual size.
 			</Text>
 		</Box>
 	);
