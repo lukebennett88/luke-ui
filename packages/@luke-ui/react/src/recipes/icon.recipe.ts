@@ -1,13 +1,5 @@
 import { defineRecipe } from '@pandacss/dev';
-
-const iconSizeVariants = {
-	large: { blockSize: 'iconSize.large', inlineSize: 'iconSize.large' },
-	medium: { blockSize: 'iconSize.medium', inlineSize: 'iconSize.medium' },
-	small: { blockSize: 'iconSize.small', inlineSize: 'iconSize.small' },
-	xsmall: { blockSize: 'iconSize.xsmall', inlineSize: 'iconSize.xsmall' },
-};
-
-export type IconSize = keyof typeof iconSizeVariants;
+import { iconSizeVariants } from './icon.recipe-contract.js';
 
 export const iconRecipe = defineRecipe({
 	className: 'icon',

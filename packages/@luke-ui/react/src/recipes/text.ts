@@ -1,44 +1,75 @@
-// Runtime re-export of the generated text recipe. The recipe definition lives
-// in text.recipe.ts and is registered in panda.config.ts; variants added there
-// flow through the generated types with no edit here.
-import type { TextVariantProps } from '../../styled-system/recipes/text.mjs';
 import { text as pandaText } from '../../styled-system/recipes/text.mjs';
-
-// Codegen spells mixed boolean/number variant keys as string literals
-// ("false" | "true" | "1" | ...). The recipe runtime interpolates values into
-// class names, so the boolean/number spellings produce the same classes;
-// widen lineClamp back to the pre-migration public shape.
-type BooleanLineClampValues = { false: false; true: true };
-type WidenNumericLineClampValue<Value> = Value extends `${infer Numeric extends number}`
-	? Numeric
-	: Value;
-type WidenLineClampValue<Value> = Value extends keyof BooleanLineClampValues
-	? BooleanLineClampValues[Value]
-	: WidenNumericLineClampValue<Value>;
+import type {
+	TextAlignValue,
+	TextColorValue,
+	TextDecorationValue,
+	TextFontVariantNumericValue,
+	TextFontWeightValue,
+	TextLineClampValue,
+	TextSizeValue,
+	TextTransformValue,
+	TextWrapValue,
+} from './text.recipe-contract.js';
 
 /** Typography size steps. */
-export type TextSize = NonNullable<TextVariantProps['size']>;
+export type TextSize = TextSizeValue;
 /** Semantic text colours. */
-export type TextColor = NonNullable<TextVariantProps['color']>;
+export type TextColor = TextColorValue;
 /** Semantic font-weight roles. */
-export type TextFontWeight = NonNullable<TextVariantProps['fontWeight']>;
+export type TextFontWeight = TextFontWeightValue;
 /** Logical text alignment values. */
-export type TextAlign = NonNullable<TextVariantProps['textAlign']>;
+export type TextAlign = TextAlignValue;
 /** Text wrapping values. */
-export type TextWrap = NonNullable<TextVariantProps['textWrap']>;
+export type TextWrap = TextWrapValue;
 /** Text decoration variant values. */
-export type TextDecoration = NonNullable<TextVariantProps['textDecoration']>;
+export type TextDecoration = TextDecorationValue;
 /** Text transform variant values. */
-export type TextTransform = NonNullable<TextVariantProps['textTransform']>;
+export type TextTransform = TextTransformValue;
 /** Numeric glyph variant values. */
-export type TextFontVariantNumeric = NonNullable<TextVariantProps['fontVariantNumeric']>;
+export type TextFontVariantNumeric = TextFontVariantNumericValue;
 /** Text line-clamp variant values. */
-export type TextLineClampVariant = WidenLineClampValue<NonNullable<TextVariantProps['lineClamp']>>;
+export type TextLineClampVariant = TextLineClampValue;
 
 /** Aggregate variant type for the `Text` recipe. */
-export type TextVariants = Omit<TextVariantProps, 'lineClamp'> & {
+export interface TextVariants {
+	color?: TextColor;
+	fontVariantNumeric?: TextFontVariantNumeric;
+	fontWeight?: TextFontWeight;
+	isVisuallyHidden?: boolean;
 	lineClamp?: TextLineClampVariant;
-};
+	shouldDisableTrim?: boolean;
+	shouldInheritFont?: boolean;
+	size?: TextSize;
+	textAlign?: TextAlign;
+	textDecoration?: TextDecoration;
+	textTransform?: TextTransform;
+	textWrap?: TextWrap;
+}
 
 /** Class-name function for the `Text` recipe. */
-export const text = pandaText as unknown as (variants?: TextVariants) => string;
+export function text(variants: TextVariants = {}): string {
+	const { lineClamp, ...restVariants } = variants;
+
+	return pandaText({ ...restVariants, lineClamp: resolveLineClamp(lineClamp) });
+}
+
+function resolveLineClamp(lineClamp: TextLineClampVariant | undefined) {
+	switch (lineClamp) {
+		case undefined:
+			return undefined;
+		case false:
+			return 'false';
+		case true:
+			return 'true';
+		case 1:
+			return '1';
+		case 2:
+			return '2';
+		case 3:
+			return '3';
+		case 4:
+			return '4';
+		case 5:
+			return '5';
+	}
+}

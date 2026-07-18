@@ -1,39 +1,16 @@
 import { defineRecipe } from '@pandacss/dev';
 import { fontSizeSteps } from '../theme/contract.js';
-
-const lineClampNone = {};
-const lineClampSingleLine = {
-	display: 'block',
-	minInlineSize: 0,
-	overflowX: 'clip',
-	textOverflow: 'ellipsis',
-	whiteSpace: 'nowrap',
-};
-const lineClampMultiLine = (lines: number) => ({
-	WebkitBoxOrient: 'vertical',
-	WebkitLineClamp: lines,
-	display: '-webkit-box',
-	lineClamp: lines,
-	minInlineSize: 0,
-	overflow: 'hidden',
-});
-
-const lineClampVariants = {
-	false: lineClampNone,
-	true: lineClampSingleLine,
-	1: lineClampSingleLine,
-	2: lineClampMultiLine(2),
-	3: lineClampMultiLine(3),
-	4: lineClampMultiLine(4),
-	5: lineClampMultiLine(5),
-};
-
-const sizeVariants = Object.fromEntries(
-	fontSizeSteps.map((size) => [size, { fontSize: size, letterSpacing: size, lineHeight: size }]),
-) as Record<
-	(typeof fontSizeSteps)[number],
-	{ fontSize: string; letterSpacing: string; lineHeight: string }
->;
+import {
+	textAlignVariants,
+	textColorVariants,
+	textDecorationVariants,
+	textFontVariantNumericVariants,
+	textFontWeightVariants,
+	textLineClampVariants,
+	textSizeVariants,
+	textTransformVariants,
+	textWrapVariants,
+} from './text.recipe-contract.js';
 
 // These raw contract variables replicate Capsize's pseudo-element trims. They
 // are not Panda tokens, and their compound CSS intentionally lands in @layer box.
@@ -78,42 +55,16 @@ export const textRecipe = defineRecipe({
 		fontWeight: 'body',
 	},
 	variants: {
-		fontVariantNumeric: {
-			'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
-			ordinal: { fontVariantNumeric: 'ordinal' },
-			'slashed-zero': { fontVariantNumeric: 'slashed-zero' },
-			'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
-			unset: { fontVariantNumeric: 'normal' },
-		},
+		fontVariantNumeric: textFontVariantNumericVariants,
 		isVisuallyHidden: { false: {}, true: { position: 'absolute', transform: 'scale(0)' } },
-		lineClamp: lineClampVariants,
+		lineClamp: textLineClampVariants,
 		shouldDisableTrim: { false: {}, true: {} },
-		size: sizeVariants,
-		textAlign: {
-			center: { textAlign: 'center' },
-			end: { textAlign: 'end' },
-			start: { textAlign: 'start' },
-		},
-		textDecoration: {
-			inherit: { textDecoration: 'inherit' },
-			'line-through': { textDecoration: 'line-through' },
-			none: { textDecoration: 'none' },
-			underline: { textDecoration: 'underline' },
-		},
-		textTransform: {
-			capitalize: { textTransform: 'capitalize' },
-			inherit: { textTransform: 'inherit' },
-			lowercase: { textTransform: 'lowercase' },
-			none: { textTransform: 'none' },
-			uppercase: { textTransform: 'uppercase' },
-		},
-		textWrap: { balance: { textWrap: 'balance' }, pretty: { textWrap: 'pretty' }, unset: {} },
-		fontWeight: {
-			body: { fontWeight: 'body' },
-			emphasis: { fontWeight: 'emphasis' },
-			heading: { fontWeight: 'heading' },
-			label: { fontWeight: 'label' },
-		},
+		size: textSizeVariants,
+		textAlign: textAlignVariants,
+		textDecoration: textDecorationVariants,
+		textTransform: textTransformVariants,
+		textWrap: textWrapVariants,
+		fontWeight: textFontWeightVariants,
 		shouldInheritFont: {
 			false: {},
 			true: {
@@ -126,14 +77,6 @@ export const textRecipe = defineRecipe({
 				lineHeight: 'inherit',
 			},
 		},
-		color: {
-			accent: { color: 'intent.accent.text' },
-			danger: { color: 'intent.danger.text' },
-			info: { color: 'intent.info.text' },
-			primary: { color: 'text.primary' },
-			secondary: { color: 'text.secondary' },
-			success: { color: 'intent.success.text' },
-			warning: { color: 'intent.warning.text' },
-		},
+		color: textColorVariants,
 	},
 });

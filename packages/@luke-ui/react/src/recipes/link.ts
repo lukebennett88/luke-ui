@@ -1,5 +1,5 @@
 import { link as pandaLink } from '../../styled-system/recipes/link.mjs';
-import type { LinkTone } from './link.recipe.js';
+import type { LinkTone } from './link.recipe-contract.js';
 
 /** Public variants for the Link recipe. */
 export interface LinkVariants {
@@ -8,6 +8,4 @@ export interface LinkVariants {
 }
 
 /** Class-name function for the Link recipe. */
-export function link(variants?: LinkVariants): string {
-	return pandaLink(variants);
-}
+export const link: (variants?: LinkVariants) => string = pandaLink;

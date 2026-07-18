@@ -1,5 +1,5 @@
 import { icon as pandaIcon } from '../../styled-system/recipes/icon.mjs';
-import type { IconSize } from './icon.recipe.js';
+import type { IconSize } from './icon.recipe-contract.js';
 
 /** Public variants for the Icon recipe. */
 export interface IconVariants {
@@ -7,6 +7,4 @@ export interface IconVariants {
 }
 
 /** Class-name function for the Icon recipe. */
-export function icon(variants?: IconVariants): string {
-	return pandaIcon(variants);
-}
+export const icon: (variants?: IconVariants) => string = pandaIcon;
