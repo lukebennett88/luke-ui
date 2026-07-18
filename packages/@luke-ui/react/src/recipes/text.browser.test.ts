@@ -1,5 +1,6 @@
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
+import { fontSizeSteps } from '../theme/contract.js';
 import { tactileFoundation } from '../theme/foundations.js';
 import { buildTheme, themeClassName, themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
@@ -104,7 +105,6 @@ test('an explicit numeric variant survives font inheritance', () => {
 
 test('all size steps use the generated Capsize trims for every curated font', () => {
 	const families = ['inter', 'apple-system', 'dm-sans'] as const;
-	const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
 	const representativeTrims = new Set<string>();
 
 	for (const fontFamily of families) {
@@ -116,7 +116,7 @@ test('all size steps use the generated Capsize trims for every curated font', ()
 		);
 		expect(authoredFontFamily).toContain(curatedFamilyIdentity[fontFamily]);
 
-		for (const size of sizes) {
+		for (const size of fontSizeSteps) {
 			const element = root.appendChild(document.createElement('span'));
 			element.className = text({ size });
 			element.textContent = `${fontFamily} ${size}`;

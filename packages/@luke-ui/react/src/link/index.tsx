@@ -8,13 +8,11 @@ import type { DocumentedLinkProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
 
-interface LinkVariantProps extends NonNullable<styles.LinkVariants> {}
-
 interface LinkStyleProps {
 	/** Hides the underline until hover or press and provides a structural 24px target. */
-	isStandalone?: LinkVariantProps['isStandalone'];
+	isStandalone?: styles.LinkVariants['isStandalone'];
 	/** Sets the link tone. @default 'accent' */
-	tone?: LinkVariantProps['tone'];
+	tone?: styles.LinkVariants['tone'];
 }
 
 type _LinkOmit = DistributiveOmit<RacLinkProps, keyof DocumentedLinkProps>;

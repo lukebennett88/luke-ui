@@ -6,6 +6,25 @@ const fontStep = {
 	lineHeight: null,
 };
 
+/** The semantic typography scale shared by themes and text recipes. */
+export const fontSizeSteps = [
+	'100',
+	'200',
+	'300',
+	'400',
+	'500',
+	'600',
+	'700',
+	'800',
+	'900',
+] as const;
+
+export type FontSizeStep = (typeof fontSizeSteps)[number];
+
+const fontSteps = Object.fromEntries(
+	fontSizeSteps.map((step) => [step, { ...fontStep }]),
+) as Record<FontSizeStep, typeof fontStep>;
+
 /**
  * The semantic token tree shared by the vanilla-extract contract and `buildTheme`, so typed paths
  * and emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one
@@ -130,33 +149,7 @@ export const themeContractTree = {
 	},
 	/** Composite type steps, font family, and theme-controlled weight roles. */
 	font: {
-		100: {
-			...fontStep,
-		},
-		200: {
-			...fontStep,
-		},
-		300: {
-			...fontStep,
-		},
-		400: {
-			...fontStep,
-		},
-		500: {
-			...fontStep,
-		},
-		600: {
-			...fontStep,
-		},
-		700: {
-			...fontStep,
-		},
-		800: {
-			...fontStep,
-		},
-		900: {
-			...fontStep,
-		},
+		...fontSteps,
 		family: null,
 		weight: {
 			body: null,

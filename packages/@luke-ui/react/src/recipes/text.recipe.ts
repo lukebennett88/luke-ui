@@ -1,6 +1,5 @@
 import { defineRecipe } from '@pandacss/dev';
-
-const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
+import { fontSizeSteps } from '../theme/contract.js';
 
 const lineClampNone = {};
 const lineClampSingleLine = {
@@ -30,15 +29,15 @@ const lineClampVariants = {
 };
 
 const sizeVariants = Object.fromEntries(
-	sizes.map((size) => [size, { fontSize: size, letterSpacing: size, lineHeight: size }]),
+	fontSizeSteps.map((size) => [size, { fontSize: size, letterSpacing: size, lineHeight: size }]),
 ) as Record<
-	(typeof sizes)[number],
+	(typeof fontSizeSteps)[number],
 	{ fontSize: string; letterSpacing: string; lineHeight: string }
 >;
 
 // These raw contract variables replicate Capsize's pseudo-element trims. They
 // are not Panda tokens, and their compound CSS intentionally lands in @layer box.
-const sizeStepCompoundVariants = sizes.map((size) => ({
+const sizeStepCompoundVariants = fontSizeSteps.map((size) => ({
 	shouldDisableTrim: false,
 	size,
 	css: {

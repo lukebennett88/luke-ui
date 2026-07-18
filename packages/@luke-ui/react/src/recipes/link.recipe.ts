@@ -1,6 +1,25 @@
 import { defineRecipe } from '@pandacss/dev';
 import { focusRing } from '../styles/focus-ring.js';
 
+const linkToneVariants = {
+	accent: {
+		color: 'intent.accent.text',
+		'&[data-hovered="true"]:not([data-disabled="true"])': {
+			color: 'intent.accent.textHover',
+		},
+		'&[data-pressed="true"]:not([data-disabled="true"])': {
+			color: 'intent.accent.textHover',
+		},
+	},
+	neutral: {
+		color: 'text.secondary',
+		'&[data-hovered="true"]:not([data-disabled="true"])': { color: 'text.primary' },
+		'&[data-pressed="true"]:not([data-disabled="true"])': { color: 'text.primary' },
+	},
+};
+
+export type LinkTone = keyof typeof linkToneVariants;
+
 export const linkRecipe = defineRecipe({
 	className: 'link',
 	description: 'Semantic navigation styling for Link.',
@@ -45,21 +64,6 @@ export const linkRecipe = defineRecipe({
 				},
 			},
 		},
-		tone: {
-			accent: {
-				color: 'intent.accent.text',
-				'&[data-hovered="true"]:not([data-disabled="true"])': {
-					color: 'intent.accent.textHover',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"])': {
-					color: 'intent.accent.textHover',
-				},
-			},
-			neutral: {
-				color: 'text.secondary',
-				'&[data-hovered="true"]:not([data-disabled="true"])': { color: 'text.primary' },
-				'&[data-pressed="true"]:not([data-disabled="true"])': { color: 'text.primary' },
-			},
-		},
+		tone: linkToneVariants,
 	},
 });

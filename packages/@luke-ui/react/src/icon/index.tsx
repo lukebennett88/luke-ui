@@ -13,14 +13,12 @@ export { iconNames, iconViewBoxes };
 
 const IconSpritesheetContext = createContext<string | null>(null);
 
-interface IconVariantProps extends NonNullable<styles.IconVariants> {}
-
 interface IconStyleProps {
 	/**
 	 * Sets the icon size.
 	 * @default 'medium'
 	 */
-	size?: IconVariantProps['size'];
+	size?: styles.IconVariants['size'];
 }
 
 /** Props for `IconSpritesheetProvider`. */
