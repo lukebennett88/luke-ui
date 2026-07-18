@@ -1,5 +1,9 @@
 import { defineSlotRecipe } from '@pandacss/dev';
+import type { ColorToken } from '../../styled-system/tokens/index.mjs';
+import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import { focusRing } from '../styles/focus-ring.js';
+
+type TextInputSlot = 'adornmentEnd' | 'adornmentStart' | 'control' | 'group';
 
 const textInputSizeVariants = {
 	medium: {
@@ -43,7 +47,7 @@ const textInputSizeVariants = {
 			paddingInlineStart: '200',
 		},
 	},
-};
+} as const satisfies Record<'medium' | 'small', Record<TextInputSlot, SystemStyleObject>>;
 
 export const textInputRecipe = defineSlotRecipe({
 	className: 'text-input',
@@ -103,7 +107,7 @@ export const textInputRecipe = defineSlotRecipe({
 			'&:where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
 					borderColor: 'intent.accent.border',
-					...focusRing('border.focus'),
+					...focusRing('border.focus' satisfies ColorToken),
 				},
 			'&:where([data-hovered="true"], :hover):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within)):not(:where([data-readonly="true"], :has(input:read-only)))':
 				{
@@ -116,7 +120,7 @@ export const textInputRecipe = defineSlotRecipe({
 			'&:where([data-invalid="true"], [aria-invalid="true"], :has(:invalid), :has(input[aria-invalid="true"])):where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
 					borderColor: 'intent.danger.border',
-					...focusRing('border.focus'),
+					...focusRing('border.focus' satisfies ColorToken),
 				},
 			'&:where([data-readonly="true"], :has(input:read-only)):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
@@ -125,7 +129,7 @@ export const textInputRecipe = defineSlotRecipe({
 					boxShadow: 'none',
 				},
 			'&:where([data-readonly="true"], :has(input:read-only)):where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
-				focusRing('border.focus'),
+				focusRing('border.focus' satisfies ColorToken),
 		},
 		control: {
 			appearance: 'none',

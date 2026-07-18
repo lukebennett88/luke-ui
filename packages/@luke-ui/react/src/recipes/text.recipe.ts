@@ -1,23 +1,38 @@
 import { defineRecipe } from '@pandacss/dev';
+import type {
+	ColorToken,
+	FontSizeToken,
+	FontWeightToken,
+	LetterSpacingToken,
+	LineHeightToken,
+} from '../../styled-system/tokens/index.mjs';
+import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import type { FontSizeStep } from '../theme/contract.js';
 import { fontSizeSteps } from '../theme/contract.js';
 
-const lineClampNone = {};
+const lineClampNone = {} as const satisfies SystemStyleObject;
 const lineClampSingleLine = {
 	display: 'block',
 	minInlineSize: 0,
 	overflowX: 'clip',
 	textOverflow: 'ellipsis',
 	whiteSpace: 'nowrap',
-};
-const lineClampMultiLine = (lines: number) => ({
-	WebkitBoxOrient: 'vertical',
-	WebkitLineClamp: lines,
-	display: '-webkit-box',
-	'line-clamp': lines,
-	minInlineSize: 0,
-	overflow: 'hidden',
-});
+} as const satisfies SystemStyleObject;
+// The dashed `line-clamp` property is load-bearing: it makes Panda emit the
+// standard property alongside the `-webkit-*` prefixed ones, pinned by a
+// browser test. Neither it nor `WebkitBoxOrient` is part of Panda's generated
+// `SystemStyleObject` (it only recognises the properties it knows how to
+// shorthand/expand), so the intersection adds both back in rather than
+// dropping either.
+const lineClampMultiLine = (lines: number) =>
+	({
+		WebkitBoxOrient: 'vertical',
+		WebkitLineClamp: lines,
+		display: '-webkit-box',
+		'line-clamp': lines,
+		minInlineSize: 0,
+		overflow: 'hidden',
+	}) as const satisfies SystemStyleObject & { 'line-clamp': number; WebkitBoxOrient: 'vertical' };
 
 const textLineClampVariants = {
 	false: lineClampNone,
@@ -48,7 +63,11 @@ const sizeStepCompoundVariants = fontSizeSteps.map((size) => ({
 	},
 }));
 
-function fontSizeStep(size: FontSizeStep) {
+// Ties each step to all three generated font scales, so a step missing from
+// any one of them fails to compile.
+type FontStepToken = FontSizeStep & FontSizeToken & LetterSpacingToken & LineHeightToken;
+
+function fontSizeStep(size: FontStepToken) {
 	return { fontSize: size, letterSpacing: size, lineHeight: size };
 }
 
@@ -62,7 +81,7 @@ const sizeVariants = {
 	'700': fontSizeStep('700'),
 	'800': fontSizeStep('800'),
 	'900': fontSizeStep('900'),
-} satisfies Record<FontSizeStep, object>;
+} satisfies Record<FontSizeStep, SystemStyleObject>;
 
 const fontVariantNumericVariants = {
 	'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
@@ -70,20 +89,20 @@ const fontVariantNumericVariants = {
 	'slashed-zero': { fontVariantNumeric: 'slashed-zero' },
 	'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
 	unset: { fontVariantNumeric: 'normal' },
-};
+} as const satisfies Record<string, SystemStyleObject>;
 
 const textAlignVariants = {
 	center: { textAlign: 'center' },
 	end: { textAlign: 'end' },
 	start: { textAlign: 'start' },
-};
+} as const satisfies Record<string, SystemStyleObject>;
 
 const textDecorationVariants = {
 	inherit: { textDecoration: 'inherit' },
 	'line-through': { textDecoration: 'line-through' },
 	none: { textDecoration: 'none' },
 	underline: { textDecoration: 'underline' },
-};
+} as const satisfies Record<string, SystemStyleObject>;
 
 const textTransformVariants = {
 	capitalize: { textTransform: 'capitalize' },
@@ -91,20 +110,20 @@ const textTransformVariants = {
 	lowercase: { textTransform: 'lowercase' },
 	none: { textTransform: 'none' },
 	uppercase: { textTransform: 'uppercase' },
-};
+} as const satisfies Record<string, SystemStyleObject>;
 
 const textWrapVariants = {
 	balance: { textWrap: 'balance' },
 	pretty: { textWrap: 'pretty' },
 	unset: {},
-};
+} as const satisfies Record<string, SystemStyleObject>;
 
 const fontWeightVariants = {
 	body: { fontWeight: 'body' },
 	emphasis: { fontWeight: 'emphasis' },
 	heading: { fontWeight: 'heading' },
 	label: { fontWeight: 'label' },
-};
+} as const satisfies Record<string, { fontWeight: FontWeightToken }>;
 
 const colorVariants = {
 	accent: { color: 'intent.accent.text' },
@@ -114,7 +133,7 @@ const colorVariants = {
 	secondary: { color: 'text.secondary' },
 	success: { color: 'intent.success.text' },
 	warning: { color: 'intent.warning.text' },
-};
+} as const satisfies Record<string, { color: ColorToken }>;
 
 export const textRecipe = defineRecipe({
 	className: 'text',

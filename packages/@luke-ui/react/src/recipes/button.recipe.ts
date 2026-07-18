@@ -1,11 +1,12 @@
 import { defineRecipe } from '@pandacss/dev';
 import type { RecipeConfig } from '@pandacss/dev';
+import type { ColorToken } from '../../styled-system/tokens/index.mjs';
 import { focusRing } from '../styles/focus-ring.js';
 
 type ButtonTone = 'neutral' | 'accent' | 'danger';
 type ButtonSurface = Record<
 	'solid' | 'solidHover' | 'solidPressed' | 'subtle' | 'subtleHover' | 'subtlePressed',
-	string
+	ColorToken
 >;
 type ButtonCompoundVariant = NonNullable<RecipeConfig['compoundVariants']>[number];
 
@@ -106,7 +107,7 @@ export const buttonRecipe = defineRecipe({
 		transitionTimingFunction: 'standard',
 		whiteSpace: 'nowrap',
 		'&[data-disabled="true"]': { cursor: 'not-allowed', opacity: 0.55 },
-		'&[data-focus-visible="true"]': focusRing('border.focus'),
+		'&[data-focus-visible="true"]': focusRing('border.focus' satisfies ColorToken),
 		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 			boxShadow: 'raised',
 			transform: 'translateY(-1px)',
@@ -146,7 +147,7 @@ function appearance(
 	tone: ButtonTone,
 	appearance: 'solid' | 'subtle',
 	surface: ButtonSurface,
-	color: string,
+	color: ColorToken,
 ): ButtonCompoundVariant {
 	const prefix = appearance === 'solid' ? 'solid' : 'subtle';
 
@@ -173,7 +174,7 @@ function appearance(
 function ghostAppearance(
 	tone: ButtonTone,
 	surface: ButtonSurface,
-	color: string,
+	color: ColorToken,
 ): ButtonCompoundVariant {
 	return {
 		appearance: 'ghost',

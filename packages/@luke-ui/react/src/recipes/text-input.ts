@@ -4,16 +4,10 @@
 // no edit here.
 import type { TextInputVariantProps } from '../../styled-system/recipes/text-input.mjs';
 import { textInput } from '../../styled-system/recipes/text-input.mjs';
+import type { PlainVariants } from '../types/plain-variants.js';
 
-// Slot-recipe codegen wraps every variant value in `ConditionalValue`
-// (responsive arrays and condition objects). This recipe takes plain values
-// only, so strip the wrapper back off for the public type.
-export type TextInputVariants = {
-	[Key in keyof TextInputVariantProps]?: Extract<
-		TextInputVariantProps[Key],
-		string | number | boolean
-	>;
-};
+// See PlainVariants for why the generated variant props need unwrapping.
+export type TextInputVariants = PlainVariants<TextInputVariantProps>;
 
 // Per-slot class-name helpers: the generated function returns one classes-per-
 // slot record, but the public API (and TextInput itself) consumes one slot at

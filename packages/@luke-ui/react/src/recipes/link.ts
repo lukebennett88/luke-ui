@@ -2,12 +2,9 @@
 // lives in link.recipe.ts and is registered in panda.config.ts; variants
 // added there flow through the generated types with no edit here.
 import type { LinkVariantProps } from '../../styled-system/recipes/link.mjs';
+import type { PlainVariants } from '../types/plain-variants.js';
 
 export { link } from '../../styled-system/recipes/link.mjs';
 
-// Recipe codegen without compound variants wraps every variant value in
-// `ConditionalValue` (responsive arrays and condition objects). This recipe
-// takes plain values only, so strip the wrapper back off for the public type.
-export type LinkVariants = {
-	[Key in keyof LinkVariantProps]?: Extract<LinkVariantProps[Key], string | number | boolean>;
-};
+// See PlainVariants for why the generated variant props need unwrapping.
+export type LinkVariants = PlainVariants<LinkVariantProps>;

@@ -1,21 +1,11 @@
 import { defineRecipe } from '@pandacss/dev';
+import type { ColorToken } from '../../styled-system/tokens/index.mjs';
+import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import { focusRing } from '../styles/focus-ring.js';
 
 const linkToneVariants = {
-	accent: {
-		color: 'intent.accent.text',
-		'&[data-hovered="true"]:not([data-disabled="true"])': {
-			color: 'intent.accent.textHover',
-		},
-		'&[data-pressed="true"]:not([data-disabled="true"])': {
-			color: 'intent.accent.textHover',
-		},
-	},
-	neutral: {
-		color: 'text.secondary',
-		'&[data-hovered="true"]:not([data-disabled="true"])': { color: 'text.primary' },
-		'&[data-pressed="true"]:not([data-disabled="true"])': { color: 'text.primary' },
-	},
+	accent: toneVariant('intent.accent.text', 'intent.accent.textHover'),
+	neutral: toneVariant('text.secondary', 'text.primary'),
 };
 
 export const linkRecipe = defineRecipe({
@@ -42,7 +32,7 @@ export const linkRecipe = defineRecipe({
 		transitionProperty: 'color, text-decoration-color',
 		transitionTimingFunction: 'standard',
 		'&[data-disabled="true"]': { cursor: 'not-allowed', opacity: 0.55 },
-		'&[data-focus-visible="true"]': focusRing('border.focus'),
+		'&[data-focus-visible="true"]': focusRing('border.focus' satisfies ColorToken),
 	},
 	defaultVariants: { isStandalone: false, tone: 'accent' },
 	variants: {
@@ -65,3 +55,11 @@ export const linkRecipe = defineRecipe({
 		tone: linkToneVariants,
 	},
 });
+
+function toneVariant(resting: ColorToken, interaction: ColorToken) {
+	return {
+		color: resting,
+		'&[data-hovered="true"]:not([data-disabled="true"])': { color: interaction },
+		'&[data-pressed="true"]:not([data-disabled="true"])': { color: interaction },
+	} as const satisfies SystemStyleObject;
+}

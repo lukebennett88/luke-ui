@@ -2,12 +2,9 @@
 // lives in icon.recipe.ts and is registered in panda.config.ts; variants
 // added there flow through the generated types with no edit here.
 import type { IconVariantProps } from '../../styled-system/recipes/icon.mjs';
+import type { PlainVariants } from '../types/plain-variants.js';
 
 export { icon } from '../../styled-system/recipes/icon.mjs';
 
-// Recipe codegen without compound variants wraps every variant value in
-// `ConditionalValue` (responsive arrays and condition objects). This recipe
-// takes plain values only, so strip the wrapper back off for the public type.
-export type IconVariants = {
-	[Key in keyof IconVariantProps]?: Extract<IconVariantProps[Key], string | number | boolean>;
-};
+// See PlainVariants for why the generated variant props need unwrapping.
+export type IconVariants = PlainVariants<IconVariantProps>;
