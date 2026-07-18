@@ -1,0 +1,54 @@
+---
+title: Shadow
+description: Use semantic depth roles for surfaces, controls, menus, and dialogs.
+---
+
+Depth describes how a surface sits in the interface. The active theme supplies the final composite
+shadow for each role, so a custom surface adapts to the current identity and colour mode.
+
+## Depth scale
+
+Luke UI exposes five depth roles. The scale below reads from `vars.depth`, so it always reflects the
+public theme contract for the active identity and colour mode.
+
+<ExampleBlock
+	src="overview/depth"
+	title="Depth scale"
+	description="Each surface uses one public depth role from the active theme."
+/>
+
+Use a component's API before setting depth yourself. Components already apply the right depth for
+each of their states. Use `vars.depth` when building a custom surface that needs to belong to the
+same elevation system.
+
+## Use semantic depth
+
+Pair depth with a semantic surface role. A menu might use `surface.floating` with `depth.floating`,
+and a dialog `surface.overlay` with `depth.overlay`. Do not copy a resolved shadow value into
+application CSS, because it will not adapt to a custom identity or colour mode.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+<aside
+	style={{
+		backgroundColor: vars.color.surface.floating,
+		borderRadius: vars.radius.surface,
+		boxShadow: vars.depth.floating,
+	}}
+/>;
+```
+
+## Continue learning
+
+<Cards>
+	<Card href="/overview/theme" title="Theme">
+		Understand how identities and colour modes supply the depth values.
+	</Card>
+	<Card href="/overview/color" title="Colour">
+		Choose the semantic surface that belongs with each depth role.
+	</Card>
+	<Card href="/theming/token-reference" title="Token reference">
+		Browse the complete public token contract for custom UI.
+	</Card>
+</Cards>
