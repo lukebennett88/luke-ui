@@ -13,7 +13,7 @@ const lineClampMultiLine = (lines: number) => ({
 	WebkitBoxOrient: 'vertical',
 	WebkitLineClamp: lines,
 	display: '-webkit-box',
-	lineClamp: lines,
+	'line-clamp': lines,
 	minInlineSize: 0,
 	overflow: 'hidden',
 });
@@ -28,6 +28,7 @@ export const textLineClampVariants = {
 	5: lineClampMultiLine(5),
 };
 
+/** Text line-clamp variant values. */
 export type TextLineClampVariant = {
 	[Key in keyof typeof textLineClampVariants]: Key extends 'false'
 		? false
@@ -55,6 +56,7 @@ export const textLineClampKeys = new Map<TextLineClampVariant, TextLineClampKey>
 export const textSizeVariants = Object.fromEntries(
 	fontSizeSteps.map((size) => [size, { fontSize: size, letterSpacing: size, lineHeight: size }]),
 ) as Record<FontSizeStep, { fontSize: string; letterSpacing: string; lineHeight: string }>;
+/** Typography size steps. */
 export type TextSize = keyof typeof textSizeVariants;
 
 export const textFontVariantNumericVariants = {
@@ -64,6 +66,7 @@ export const textFontVariantNumericVariants = {
 	'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
 	unset: { fontVariantNumeric: 'normal' },
 };
+/** Numeric glyph variant values. */
 export type TextFontVariantNumeric = keyof typeof textFontVariantNumericVariants;
 
 export const textAlignVariants = {
@@ -71,6 +74,7 @@ export const textAlignVariants = {
 	end: { textAlign: 'end' },
 	start: { textAlign: 'start' },
 };
+/** Logical text alignment values. */
 export type TextAlign = keyof typeof textAlignVariants;
 
 export const textDecorationVariants = {
@@ -79,6 +83,7 @@ export const textDecorationVariants = {
 	none: { textDecoration: 'none' },
 	underline: { textDecoration: 'underline' },
 };
+/** Text decoration variant values. */
 export type TextDecoration = keyof typeof textDecorationVariants;
 
 export const textTransformVariants = {
@@ -88,6 +93,7 @@ export const textTransformVariants = {
 	none: { textTransform: 'none' },
 	uppercase: { textTransform: 'uppercase' },
 };
+/** Text transform variant values. */
 export type TextTransform = keyof typeof textTransformVariants;
 
 export const textWrapVariants = {
@@ -95,6 +101,7 @@ export const textWrapVariants = {
 	pretty: { textWrap: 'pretty' },
 	unset: {},
 };
+/** Text wrapping values. */
 export type TextWrap = keyof typeof textWrapVariants;
 
 export const textFontWeightVariants = {
@@ -103,6 +110,7 @@ export const textFontWeightVariants = {
 	heading: { fontWeight: 'heading' },
 	label: { fontWeight: 'label' },
 };
+/** Semantic font-weight roles. */
 export type TextFontWeight = keyof typeof textFontWeightVariants;
 
 export const textColorVariants = {
@@ -114,4 +122,5 @@ export const textColorVariants = {
 	success: { color: 'intent.success.text' },
 	warning: { color: 'intent.warning.text' },
 };
+/** Semantic text colours. */
 export type TextColor = keyof typeof textColorVariants;

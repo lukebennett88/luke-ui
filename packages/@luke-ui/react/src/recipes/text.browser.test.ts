@@ -1,5 +1,6 @@
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
+import textRecipeCss from '../../styled-system/styles/recipes/text.css?raw';
 import { fontSizeSteps } from '../theme/contract.js';
 import { tactileFoundation } from '../theme/foundations.js';
 import { buildTheme, themeClassName, themeRootClassName } from '../theme/index.js';
@@ -18,14 +19,22 @@ afterEach(() => {
 
 test('clamps one line from a boolean and multiple lines from a number', () => {
 	const singleLine = getComputedStyle(mountText({ lineClamp: true }));
-	const multiLine = getComputedStyle(mountText({ lineClamp: 3 }));
+	const multiLine = mountText({ lineClamp: 3 });
+	const multiLineStyle = getComputedStyle(multiLine);
 
 	expect(singleLine.display).toBe('block');
 	expect(singleLine.overflowX).toBe('clip');
 	expect(singleLine.textOverflow).toBe('ellipsis');
 	expect(singleLine.whiteSpace).toBe('nowrap');
-	expect(multiLine.webkitLineClamp).toBe('3');
-	expect(multiLine.overflow).toBe('hidden');
+	expect(multiLineStyle.webkitLineClamp).toBe('3');
+	expect(multiLineStyle.overflow).toBe('hidden');
+});
+
+test('emits standard and WebKit multi-line clamp declarations', () => {
+	for (const lines of [2, 3, 4, 5]) {
+		expect(textRecipeCss).toContain(`-webkit-line-clamp: ${lines};`);
+		expect(textRecipeCss).toContain(`line-clamp: ${lines};`);
+	}
 });
 
 test("defaults to size '300', body weight, and primary colour", () => {
