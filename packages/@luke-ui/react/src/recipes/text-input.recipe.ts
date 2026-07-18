@@ -1,6 +1,6 @@
 import { defineSlotRecipe } from '@pandacss/dev';
+import { focusRing } from '../styles/focus-ring.js';
 
-/** Tactile well chrome and private parts for TextInput. */
 export const textInputRecipe = defineSlotRecipe({
 	className: 'text-input',
 	description: 'Tactile well chrome and private parts for TextInput.',
@@ -37,11 +37,11 @@ export const textInputRecipe = defineSlotRecipe({
 			boxShadow: 'recessed',
 			cursor: 'text',
 			display: 'inline-flex',
-			fontFamily: 'var(--luke-font-family)',
+			fontFamily: 'family',
 			inlineSize: '100%',
 			isolation: 'isolate',
-			letterSpacing: 'var(--luke-font-300-letter-spacing)',
-			lineHeight: 'var(--luke-font-300-line-height)',
+			letterSpacing: '300',
+			lineHeight: '300',
 			minInlineSize: 0,
 			outlineColor: 'transparent',
 			outlineOffset: 0,
@@ -59,10 +59,7 @@ export const textInputRecipe = defineSlotRecipe({
 			'&:where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
 					borderColor: 'intent.accent.border',
-					outlineColor: '{colors.border.focus}',
-					outlineOffset: '2px',
-					outlineStyle: 'solid',
-					outlineWidth: '2px',
+					...focusRing('border.focus'),
 				},
 			'&:where([data-hovered="true"], :hover):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within)):not(:where([data-readonly="true"], :has(input:read-only)))':
 				{
@@ -75,10 +72,7 @@ export const textInputRecipe = defineSlotRecipe({
 			'&:where([data-invalid="true"], [aria-invalid="true"], :has(:invalid), :has(input[aria-invalid="true"])):where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
 					borderColor: 'intent.danger.border',
-					outlineColor: '{colors.border.focus}',
-					outlineOffset: '2px',
-					outlineStyle: 'solid',
-					outlineWidth: '2px',
+					...focusRing('border.focus'),
 				},
 			'&:where([data-readonly="true"], :has(input:read-only)):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
@@ -87,12 +81,7 @@ export const textInputRecipe = defineSlotRecipe({
 					boxShadow: 'none',
 				},
 			'&:where([data-readonly="true"], :has(input:read-only)):where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
-				{
-					outlineColor: '{colors.border.focus}',
-					outlineOffset: '2px',
-					outlineStyle: 'solid',
-					outlineWidth: '2px',
-				},
+				focusRing('border.focus'),
 		},
 		control: {
 			appearance: 'none',
@@ -146,19 +135,19 @@ export const textInputRecipe = defineSlotRecipe({
 	variants: {
 		size: {
 			medium: {
-				group: { blockSize: 'controlSize.medium', fontSize: 'var(--luke-font-300-font-size)' },
+				group: { blockSize: 'controlSize.medium', fontSize: '300' },
 				control: {
 					blockSize: 'controlSize.medium',
 					paddingInlineEnd: '300',
 					paddingInlineStart: '300',
 				},
 				adornmentStart: {
-					lineHeight: 'var(--luke-font-300-line-height)',
+					lineHeight: '300',
 					paddingInlineEnd: '300',
 					paddingInlineStart: '300',
 				},
 				adornmentEnd: {
-					lineHeight: 'var(--luke-font-300-line-height)',
+					lineHeight: '300',
 					paddingInlineEnd: '300',
 					paddingInlineStart: '300',
 				},
@@ -166,9 +155,9 @@ export const textInputRecipe = defineSlotRecipe({
 			small: {
 				group: {
 					blockSize: 'controlSize.small',
-					fontSize: 'var(--luke-font-200-font-size)',
-					letterSpacing: 'var(--luke-font-200-letter-spacing)',
-					lineHeight: 'var(--luke-font-200-line-height)',
+					fontSize: '200',
+					letterSpacing: '200',
+					lineHeight: '200',
 				},
 				control: {
 					blockSize: 'controlSize.small',
@@ -176,12 +165,12 @@ export const textInputRecipe = defineSlotRecipe({
 					paddingInlineStart: '200',
 				},
 				adornmentStart: {
-					lineHeight: 'var(--luke-font-200-line-height)',
+					lineHeight: '200',
 					paddingInlineEnd: '200',
 					paddingInlineStart: '200',
 				},
 				adornmentEnd: {
-					lineHeight: 'var(--luke-font-200-line-height)',
+					lineHeight: '200',
 					paddingInlineEnd: '200',
 					paddingInlineStart: '200',
 				},

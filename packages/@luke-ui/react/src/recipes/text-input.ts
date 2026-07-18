@@ -17,6 +17,9 @@ export type TextInputVariants = {
 	>;
 };
 
+// Per-slot class-name helpers: the generated function returns one classes-per-
+// slot record, but the public API (and TextInput itself) consumes one slot at
+// a time.
 export function textInputGroup(variants: TextInputVariants = {}): string {
 	return textInput(variants).group;
 }

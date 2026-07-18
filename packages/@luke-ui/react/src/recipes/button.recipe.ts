@@ -1,6 +1,6 @@
 import { defineRecipe } from '@pandacss/dev';
+import { focusRing } from '../styles/focus-ring.js';
 
-/** Semantic appearance and material recipe shared by Button and IconButton. */
 export const buttonRecipe = defineRecipe({
 	className: 'button',
 	description: 'Semantic appearance and material recipe shared by Button and IconButton.',
@@ -39,12 +39,12 @@ export const buttonRecipe = defineRecipe({
 		boxSizing: 'border-box',
 		cursor: 'pointer',
 		display: 'inline-flex',
-		fontFamily: 'var(--luke-font-family)',
+		fontFamily: 'family',
 		fontWeight: 'label',
 		isolation: 'isolate',
 		justifyContent: 'center',
-		letterSpacing: 'var(--luke-font-200-letter-spacing)',
-		lineHeight: 'var(--luke-font-200-line-height)',
+		letterSpacing: '200',
+		lineHeight: '200',
 		minBlockSize: '24px',
 		minInlineSize: '24px',
 		outlineColor: 'transparent',
@@ -59,12 +59,7 @@ export const buttonRecipe = defineRecipe({
 		transitionTimingFunction: 'standard',
 		whiteSpace: 'nowrap',
 		'&[data-disabled="true"]': { cursor: 'not-allowed', opacity: 0.55 },
-		'&[data-focus-visible="true"]': {
-			outlineColor: '{colors.border.focus}',
-			outlineOffset: '2px',
-			outlineStyle: 'solid',
-			outlineWidth: '2px',
-		},
+		'&[data-focus-visible="true"]': focusRing('border.focus'),
 		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 			boxShadow: 'raised',
 			transform: 'translateY(-1px)',
@@ -82,16 +77,16 @@ export const buttonRecipe = defineRecipe({
 		size: {
 			medium: {
 				blockSize: 'controlSize.medium',
-				fontSize: 'var(--luke-font-200-font-size)',
+				fontSize: '200',
 				gap: '200',
 				paddingInline: '400',
 			},
 			small: {
 				blockSize: 'controlSize.small',
-				fontSize: 'var(--luke-font-100-font-size)',
+				fontSize: '100',
 				gap: '100',
-				letterSpacing: 'var(--luke-font-100-letter-spacing)',
-				lineHeight: 'var(--luke-font-100-line-height)',
+				letterSpacing: '100',
+				lineHeight: '100',
 				paddingInline: '300',
 			},
 		},
