@@ -1,97 +1,48 @@
 import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
-import { themeRootClassName, vars } from '@luke-ui/react/theme';
-import { tactileThemeClassName } from '@luke-ui/react/themes';
-import { cx } from '@luke-ui/react/utils';
+import { vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
 
 const intents = [
-	{
-		backgroundColor: vars.color.intent.neutral.surface.subtle,
-		color: vars.color.text.primary,
-		label: 'Neutral',
-	},
-	{
-		backgroundColor: vars.color.intent.accent.surface.subtle,
-		color: vars.color.intent.accent.text,
-		label: 'Accent',
-	},
-	{
-		backgroundColor: vars.color.intent.info.surface.subtle,
-		color: vars.color.intent.info.text,
-		label: 'Info',
-	},
-	{
-		backgroundColor: vars.color.intent.success.surface.subtle,
-		color: vars.color.intent.success.text,
-		label: 'Success',
-	},
-	{
-		backgroundColor: vars.color.intent.warning.surface.subtle,
-		color: vars.color.intent.warning.text,
-		label: 'Warning',
-	},
-	{
-		backgroundColor: vars.color.intent.danger.surface.subtle,
-		color: vars.color.intent.danger.text,
-		label: 'Danger',
-	},
+	{ color: vars.color.intent.accent.surface.solid, label: 'Accent' },
+	{ color: vars.color.intent.success.surface.solid, label: 'Success' },
+	{ color: vars.color.intent.danger.surface.solid, label: 'Danger' },
 ];
 
 export default function IntentColoursExample() {
 	return (
-		<Box
-			className={cx(themeRootClassName, tactileThemeClassName)}
-			display="grid"
-			gap="300"
-			style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(16rem, 1fr))' }}
-		>
-			<ColourMode mode="light" />
-			<ColourMode mode="dark" />
-		</Box>
-	);
-}
-
-function ColourMode({ mode }: { mode: 'dark' | 'light' }) {
-	return (
-		<Box
-			data-color-mode={mode}
-			display="grid"
-			gap="400"
-			padding="400"
-			style={{
-				backgroundColor: vars.color.surface.canvas,
-				color: vars.color.text.primary,
-			}}
-		>
-			<Text elementType="strong" fontWeight="emphasis">
-				{mode === 'light' ? 'Light mode' : 'Dark mode'}
-			</Text>
-			<ColourGroup label="Surfaces">
-				<Sample backgroundColor={vars.color.surface.canvas} label="Canvas" />
-				<Sample backgroundColor={vars.color.surface.recessed} label="Recessed" />
-				<Sample backgroundColor={vars.color.surface.resting} label="Resting" />
-			</ColourGroup>
-			<ColourGroup label="Content">
-				<Text elementType="span">Primary text</Text>
-				<Text color="secondary" elementType="span">
-					Secondary text
-				</Text>
-			</ColourGroup>
-			<ColourGroup label="Intents">
-				<Box display="grid" gap="100" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+		<Box display="flex" flexWrap="wrap" gap="600">
+			<TokenGroup label="Surfaces">
+				<Box display="flex" gap="100">
+					<Swatch color={vars.color.surface.canvas} label="Canvas" />
+					<Swatch color={vars.color.surface.recessed} label="Recessed" />
+					<Swatch color={vars.color.surface.resting} label="Resting" />
+				</Box>
+			</TokenGroup>
+			<TokenGroup label="Content">
+				<Box display="grid" gap="100">
+					<Text elementType="span" fontWeight="label" size="200">
+						Primary text
+					</Text>
+					<Text color="secondary" elementType="span" fontWeight="label" size="200">
+						Secondary text
+					</Text>
+				</Box>
+			</TokenGroup>
+			<TokenGroup label="Intent">
+				<Box display="flex" gap="100">
 					{intents.map((intent) => (
-						<Sample key={intent.label} {...intent} />
+						<Swatch key={intent.label} color={intent.color} label={intent.label} />
 					))}
 				</Box>
-			</ColourGroup>
+			</TokenGroup>
 		</Box>
 	);
 }
 
-function ColourGroup({ children, label }: { children: ReactNode; label: string }) {
+function TokenGroup({ children, label }: { children: ReactNode; label: string }) {
 	return (
-		<Box display="grid" gap="100">
+		<Box display="grid" gap="200">
 			<Text color="secondary" elementType="span" fontWeight="label" size="100">
 				{label}
 			</Text>
@@ -100,25 +51,21 @@ function ColourGroup({ children, label }: { children: ReactNode; label: string }
 	);
 }
 
-function Sample({
-	backgroundColor,
-	color = vars.color.text.primary,
-	label,
-}: {
-	backgroundColor: string;
-	color?: string;
-	label: string;
-}) {
+function Swatch({ color, label }: { color: string; label: string }) {
 	return (
-		<Box
-			padding="200"
-			style={{
-				backgroundColor,
-				border: `1px solid ${vars.color.border.decorative}`,
-				color,
-			}}
-		>
-			<Text elementType="span" fontWeight="label" size="100">
+		<Box display="grid" gap="100" style={{ inlineSize: '4rem' }}>
+			<Box
+				aria-label={`${label} colour sample`}
+				role="img"
+				style={{
+					backgroundColor: color,
+					blockSize: '2rem',
+					border: `1px solid ${vars.color.border.decorative}`,
+					borderRadius: vars.radius.detail,
+					inlineSize: '2rem',
+				}}
+			/>
+			<Text color="secondary" elementType="span" size="100">
 				{label}
 			</Text>
 		</Box>
