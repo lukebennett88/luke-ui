@@ -5,8 +5,6 @@
 import type { TextInputVariantProps } from '../../styled-system/recipes/index.mjs';
 import { textInput } from '../../styled-system/recipes/index.mjs';
 
-export { textInput };
-
 // Slot-recipe codegen wraps every variant value in `ConditionalValue`
 // (responsive arrays and condition objects). This recipe takes plain values
 // only, so strip the wrapper back off for the public type.

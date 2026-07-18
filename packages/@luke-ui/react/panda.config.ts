@@ -55,7 +55,7 @@ export default defineConfig({
 		// The generated recipe declarations import ConditionalValue from the
 		// types barrel (types/index.d.mts), whose side-effect import of
 		// global.d.mts reaches @pandacss/dev and, through its config types,
-		// pkg-types/typescript — none of which can land in the published dts
+		// pkg-types/typescript, none of which can land in the published dts
 		// bundle. ConditionalValue really lives in the self-contained
 		// types/conditions.d.mts, so retarget that one import at codegen time.
 		'codegen:prepare': ({ artifacts }) => {

@@ -14,7 +14,7 @@
  * through atomic css() classes, so it lands in `utilities.css` next to the
  * Box slice and rides the rename into `@layer box`. That is cascade-correct
  * (box sits above recipes, so compounds still beat base/variant rules) but
- * means `utilities.css` is the Box slice PLUS recipe compound atomics; when
+ * means `utilities.css` is the Box slice plus recipe compound atomics; when
  * T4/T5 introduce real one-off utilities, box will still need its own
  * separation.
  *
@@ -31,8 +31,8 @@
  * `assembled-stylesheet.test.ts` pins this contract against the generated
  * output.
  *
- * VE still owns reset/base/global, so Panda's reset.css / global.css are
- * deliberately NOT included here. Panda's tokens.css IS included: it is the
+ * VE still owns reset/base/global, so Panda's reset.css and global.css are
+ * deliberately excluded here. Panda's tokens.css is included: it is the
  * Panda→Luke token alias bridge that recipe and box CSS depend on.
  */
 
@@ -83,21 +83,21 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 
 	// Config recipes: with `panda cssgen --splitting` this file holds only
 	// recipe rules already wrapped in `@layer recipes` (slot recipes use the
-	// `recipes.slots` sublayer) — either directly or as a barrel of `@import`
+	// `recipes.slots` sublayer), either directly or as a barrel of `@import`
 	// lines pointing at per-recipe files. Inline any imports so the assembled
 	// sheet stays a single file; no re-layering needed.
 	const recipesPath = `${stylesDir}/recipes.css`;
 	if (existsSync(recipesPath)) {
 		const recipes = readFileSync(recipesPath, 'utf8')
-			.replace(/@import\s+['"]([^'"]+)['"]\s*;?/g, (_match, specifier: string) =>
-				readFileSync(`${stylesDir}/${specifier}`, 'utf8').trim(),
-			)
+			.replace(/@import\s+['"]([^'"]+)['"]\s*;?/g, (_match, specifier: string) => {
+				return readFileSync(`${stylesDir}/${specifier}`, 'utf8').trim();
+			})
 			.trim();
 		sections.push(recipes);
 	}
 
 	// Panda utilities = the box slice plus recipe compound-variant atomics (see header).
-	// Re-wrap `@layer utilities` -> `@layer box`; compounds stay cascade-correct since box sits above recipes.
+	// Re-wrap the `@layer utilities` block as `@layer box`. Compounds stay cascade-correct there because box sits above recipes.
 	const utilitiesPath = `${stylesDir}/utilities.css`;
 	if (existsSync(utilitiesPath)) {
 		const utilities = readFileSync(utilitiesPath, 'utf8').trim();
@@ -106,7 +106,7 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 	}
 
 	// Optional VE preview: appended verbatim, purely to eyeball the combined
-	// result. Never required — the build owns the real VE stylesheet.
+	// result. Never required, because the build owns the real VE stylesheet.
 	if (options.includeVanillaExtract) {
 		if (existsSync(vePath)) {
 			sections.push(`/* --- vanilla-extract dist/stylesheet.css (preview) --- */`);

@@ -34,7 +34,7 @@ describe('assembled stylesheet', () => {
 
 // Pins the compound-atomics layer contract (see the header of
 // scripts/assemble-stylesheet.ts) against Panda's real generated output, so it
-// requires `pnpm generate` to have run first — as the turbo `test` task does.
+// requires `pnpm generate` to have run first, as the turbo `test` task does.
 describe('assembled stylesheet (generated output)', () => {
 	const css = assembleStylesheet();
 	const recipesStart = css.indexOf('@layer recipes {');
