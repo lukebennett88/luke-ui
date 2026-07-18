@@ -18,6 +18,19 @@
  * T4/T5 introduce real one-off utilities, box will still need its own
  * separation.
  *
+ * The full layer contract that trade-off implies:
+ *
+ * - `box` carries the Box slice plus recipe compound-variant atomics.
+ * - `utilities` sits above `box`, so consumer/blessed overrides always beat
+ *   both the Box slice and the compound atomics.
+ * - Disjointness rule: a recipe that composes and overrides another recipe
+ *   from within `@layer recipes` can never beat a compound-variant atomic in
+ *   `box`, so recipe-on-recipe override properties must stay disjoint from
+ *   the composed recipe's compound-variant properties.
+ *
+ * `assembled-stylesheet.test.ts` pins this contract against the generated
+ * output.
+ *
  * VE still owns reset/base/global, so Panda's reset.css / global.css are
  * deliberately NOT included here. Panda's tokens.css IS included: it is the
  * Panda→Luke token alias bridge that recipe and box CSS depend on.
