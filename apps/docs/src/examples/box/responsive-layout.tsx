@@ -6,27 +6,41 @@ export default function ResponsiveLayout() {
 	return (
 		<Box display="flex" flexDirection={{ medium: 'row', xsmall: 'column' }} gap="300">
 			<Box
+				alignItems="center"
+				display="flex"
+				justifyContent="center"
 				padding="400"
-				style={{ backgroundColor: vars.color.intent.accent.surface.solid, flex: 1 }}
-			>
-				<Text
-					elementType="span"
-					fontWeight="label"
-					style={{ color: vars.color.intent.accent.onSolid }}
-				>
-					Summary
-				</Text>
-			</Box>
-			<Box
-				padding="400"
-				style={{ backgroundColor: vars.color.intent.neutral.surface.solid, flex: 1 }}
+				style={{
+					backgroundColor: vars.color.intent.neutral.surface.solid,
+					flex: 1,
+					minBlockSize: '4rem',
+				}}
 			>
 				<Text
 					elementType="span"
 					fontWeight="label"
 					style={{ color: vars.color.intent.neutral.onSolid }}
 				>
-					Status
+					Item
+				</Text>
+			</Box>
+			<Box
+				alignItems="center"
+				display="flex"
+				justifyContent="center"
+				padding="400"
+				style={{
+					backgroundColor: vars.color.intent.neutral.surface.solid,
+					flex: 1,
+					minBlockSize: '4rem',
+				}}
+			>
+				<Text
+					elementType="span"
+					fontWeight="label"
+					style={{ color: vars.color.intent.neutral.onSolid }}
+				>
+					Item
 				</Text>
 			</Box>
 		</Box>
