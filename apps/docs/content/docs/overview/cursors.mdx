@@ -12,14 +12,15 @@ Text inputs and text areas use the browser's `text` cursor because people can pl
 their value. Static content keeps the browser default. Luke UI sets a cursor only when it describes
 the interaction.
 
-## Luke UI conventions
+## Component cursors
 
-| Interaction                  | Cursor        | Where it applies                                         |
-| ---------------------------- | ------------- | -------------------------------------------------------- |
-| Activate an action or link   | `pointer`     | Button, IconButton, Link, and combobox action controls   |
-| Edit text                    | `text`        | TextField and editable Combobox controls                 |
-| Cannot interact              | `not-allowed` | Disabled controls, including disabled inputs and actions |
-| Wait for an action to finish | `wait`        | A Button or IconButton with `isPending`                  |
+Hover the controls below to see the cursors applied by their real interaction states.
+
+<ExampleBlock
+	src="overview/cursor-states"
+	title="Component cursor states"
+	description="Luke UI components choose the cursor that matches their current behaviour."
+/>
 
 Use a component's disabled or pending API instead of setting its cursor yourself. The API also
 communicates the state to assistive technology and blocks the interaction itself.
