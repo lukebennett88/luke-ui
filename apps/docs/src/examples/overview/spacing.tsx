@@ -4,7 +4,18 @@ import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
 
-const steps = ['100', '200', '300', '400', '600', '800', '1000', '1200', '1600'] as const;
+type SpaceContractStep = `${keyof typeof vars.space}`;
+const steps = [
+	'100',
+	'200',
+	'300',
+	'400',
+	'600',
+	'800',
+	'1000',
+	'1200',
+	'1600',
+] as const satisfies ReadonlyArray<SpaceContractStep>;
 type SpaceStep = (typeof steps)[number];
 
 export default function SpacingExample() {
