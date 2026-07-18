@@ -4,35 +4,29 @@ import { vars } from '@luke-ui/react/theme';
 
 export default function ResponsiveLayout() {
 	return (
-		<Box
-			alignItems={{ medium: 'center', xsmall: 'flex-start' }}
-			display="flex"
-			flexDirection={{ medium: 'row', xsmall: 'column' }}
-			gap={{ medium: '800', xsmall: '400' }}
-			justifyContent="space-between"
-			padding={{ medium: '600', xsmall: '300' }}
-			style={{
-				backgroundColor: vars.color.surface.resting,
-				border: `1px solid ${vars.color.border.decorative}`,
-				borderRadius: vars.radius.surface,
-				boxShadow: vars.depth.resting,
-				color: vars.color.text.primary,
-			}}
-		>
-			<Box display="flex" flexDirection="column" gap="100">
-				<Text elementType="strong" fontWeight="emphasis">
-					Quarterly product update
-				</Text>
-				<Text color="secondary" elementType="span">
-					A summary for the team and stakeholders.
+		<Box display="flex" flexDirection={{ medium: 'row', xsmall: 'column' }} gap="300">
+			<Box
+				padding="400"
+				style={{ backgroundColor: vars.color.intent.accent.surface.solid, flex: 1 }}
+			>
+				<Text
+					elementType="span"
+					fontWeight="label"
+					style={{ color: vars.color.intent.accent.onSolid }}
+				>
+					Summary
 				</Text>
 			</Box>
-			<Box display="flex" flexDirection="column" gap="100">
-				<Text color="secondary" elementType="span">
-					Published
-				</Text>
-				<Text elementType="strong" fontWeight="emphasis">
-					24 July 2026
+			<Box
+				padding="400"
+				style={{ backgroundColor: vars.color.intent.neutral.surface.solid, flex: 1 }}
+			>
+				<Text
+					elementType="span"
+					fontWeight="label"
+					style={{ color: vars.color.intent.neutral.onSolid }}
+				>
+					Status
 				</Text>
 			</Box>
 		</Box>

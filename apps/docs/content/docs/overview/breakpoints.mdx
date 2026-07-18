@@ -1,0 +1,59 @@
+---
+title: Breakpoints
+description: Adapt Luke UI layouts from a small-screen base through larger viewports.
+---
+
+Luke UI layout utilities use mobile-first viewport conditions. Start with the smallest layout, then
+add a value only when the layout changes at a larger viewport.
+
+## Breakpoint conditions
+
+| Name      | Viewport condition  |
+| --------- | ------------------- |
+| `xsmall`  | Base, below `640px` |
+| `small`   | `640px` and wider   |
+| `medium`  | `768px` and wider   |
+| `large`   | `1024px` and wider  |
+| `xlarge`  | `1280px` and wider  |
+| `xxlarge` | `1536px` and wider  |
+
+Each condition is a minimum width. A value at `medium` continues to apply at `large`, `xlarge`, and
+`xxlarge` until a later value overrides it.
+
+## Use responsive values
+
+`Box` and `createSprinkles` accept a direct value or an object keyed by breakpoint names. Pass a
+direct value when the property never changes, and an object when it changes at one or more
+viewports.
+
+```tsx
+import { Box } from '@luke-ui/react/box';
+
+<Box
+	display="flex"
+	flexDirection={{ xsmall: 'column', medium: 'row' }}
+	gap={{ xsmall: '300', medium: '600' }}
+>
+	{children}
+</Box>;
+```
+
+Use `xsmall` for the base value when the property needs a value at every viewport. Omit unchanged
+breakpoints so the previous value cascades forward. Use responsive values for layout, spacing,
+sizing, positioning, overflow, flex, and grid-child properties, not component appearance or
+interaction state.
+
+<ExampleBlock
+	src="box/responsive-layout"
+	title="Responsive layout"
+	description="Resize the preview: the content stacks below medium, then aligns in a row from 768px."
+/>
+
+## Choose a breakpoint deliberately
+
+Choose the first viewport where the content needs more room, rather than treating breakpoint names
+as device categories. A two-column summary can become a row at `medium` because its content fits
+there. Another layout may need to wait until `large`.
+
+See [Layout](/overview/layout) for the available Sprinkles properties and
+[Box](/components/layout/box) for the responsive layout component API.
