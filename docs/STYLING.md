@@ -101,6 +101,20 @@ import { button, link } from '@luke-ui/react/recipes';
 
 Recipes are component-specific. Keep them separate from general layout utilities.
 
+## Panda config recipes (migration in progress)
+
+Components are moving from vanilla-extract recipes to Panda config recipes one at a time. A
+migrated recipe is a pair of files: `src/recipes/<name>.recipe.ts` holds the `defineRecipe` (or
+`defineSlotRecipe`) definition and is registered in `panda.config.ts`. This is the only file that may
+import `@pandacss/dev`.
+
+`src/recipes/<name>.ts` is the runtime module. It re-exports the generated class-name function from
+the per-recipe module `styled-system/recipes/<name>.mjs`, never the generated `styled-system/recipes/index.mjs`
+barrel, and derives its public variant types from the generated types so a variant added to the
+recipe definition needs no matching edit here. Both files together are what `@luke-ui/react/recipes`
+exports; the vanilla-extract `*.css.ts` recipes not yet migrated keep authoring their styles and
+types directly.
+
 ## Styling utilities
 
 Styling utilities are public and exported from `@luke-ui/react/styles`. They provide token-aware,
