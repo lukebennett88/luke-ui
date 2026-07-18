@@ -1,34 +1,28 @@
 import { text as pandaText } from '../../styled-system/recipes/text.mjs';
+import { textLineClampKeys } from './text.recipe-contract.js';
 import type {
-	TextAlignValue,
-	TextColorValue,
-	TextDecorationValue,
-	TextFontVariantNumericValue,
-	TextFontWeightValue,
-	TextLineClampValue,
-	TextSizeValue,
-	TextTransformValue,
-	TextWrapValue,
+	TextAlign,
+	TextColor,
+	TextDecoration,
+	TextFontVariantNumeric,
+	TextFontWeight,
+	TextLineClampVariant,
+	TextSize,
+	TextTransform,
+	TextWrap,
 } from './text.recipe-contract.js';
 
-/** Typography size steps. */
-export type TextSize = TextSizeValue;
-/** Semantic text colours. */
-export type TextColor = TextColorValue;
-/** Semantic font-weight roles. */
-export type TextFontWeight = TextFontWeightValue;
-/** Logical text alignment values. */
-export type TextAlign = TextAlignValue;
-/** Text wrapping values. */
-export type TextWrap = TextWrapValue;
-/** Text decoration variant values. */
-export type TextDecoration = TextDecorationValue;
-/** Text transform variant values. */
-export type TextTransform = TextTransformValue;
-/** Numeric glyph variant values. */
-export type TextFontVariantNumeric = TextFontVariantNumericValue;
-/** Text line-clamp variant values. */
-export type TextLineClampVariant = TextLineClampValue;
+export type {
+	TextAlign,
+	TextColor,
+	TextDecoration,
+	TextFontVariantNumeric,
+	TextFontWeight,
+	TextLineClampVariant,
+	TextSize,
+	TextTransform,
+	TextWrap,
+};
 
 /** Aggregate variant type for the `Text` recipe. */
 export interface TextVariants {
@@ -54,22 +48,5 @@ export function text(variants: TextVariants = {}): string {
 }
 
 function resolveLineClamp(lineClamp: TextLineClampVariant | undefined) {
-	switch (lineClamp) {
-		case undefined:
-			return undefined;
-		case false:
-			return 'false';
-		case true:
-			return 'true';
-		case 1:
-			return '1';
-		case 2:
-			return '2';
-		case 3:
-			return '3';
-		case 4:
-			return '4';
-		case 5:
-			return '5';
-	}
+	return lineClamp === undefined ? undefined : textLineClampKeys.get(lineClamp);
 }

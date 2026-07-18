@@ -8,4 +8,6 @@ export interface LinkVariants {
 }
 
 /** Class-name function for the Link recipe. */
-export const link: (variants?: LinkVariants) => string = pandaLink;
+export function link(variants?: LinkVariants): string {
+	return pandaLink(variants);
+}

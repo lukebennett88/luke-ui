@@ -28,7 +28,7 @@ export const textLineClampVariants = {
 	5: lineClampMultiLine(5),
 };
 
-export type TextLineClampValue = {
+export type TextLineClampVariant = {
 	[Key in keyof typeof textLineClampVariants]: Key extends 'false'
 		? false
 		: Key extends 'true'
@@ -38,10 +38,24 @@ export type TextLineClampValue = {
 				: never;
 }[keyof typeof textLineClampVariants];
 
+type TextLineClampKey =
+	| Exclude<keyof typeof textLineClampVariants, number>
+	| `${Extract<keyof typeof textLineClampVariants, number>}`;
+
+export const textLineClampKeys = new Map<TextLineClampVariant, TextLineClampKey>([
+	[false, 'false'],
+	[true, 'true'],
+	[1, '1'],
+	[2, '2'],
+	[3, '3'],
+	[4, '4'],
+	[5, '5'],
+]);
+
 export const textSizeVariants = Object.fromEntries(
 	fontSizeSteps.map((size) => [size, { fontSize: size, letterSpacing: size, lineHeight: size }]),
 ) as Record<FontSizeStep, { fontSize: string; letterSpacing: string; lineHeight: string }>;
-export type TextSizeValue = keyof typeof textSizeVariants;
+export type TextSize = keyof typeof textSizeVariants;
 
 export const textFontVariantNumericVariants = {
 	'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
@@ -50,14 +64,14 @@ export const textFontVariantNumericVariants = {
 	'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
 	unset: { fontVariantNumeric: 'normal' },
 };
-export type TextFontVariantNumericValue = keyof typeof textFontVariantNumericVariants;
+export type TextFontVariantNumeric = keyof typeof textFontVariantNumericVariants;
 
 export const textAlignVariants = {
 	center: { textAlign: 'center' },
 	end: { textAlign: 'end' },
 	start: { textAlign: 'start' },
 };
-export type TextAlignValue = keyof typeof textAlignVariants;
+export type TextAlign = keyof typeof textAlignVariants;
 
 export const textDecorationVariants = {
 	inherit: { textDecoration: 'inherit' },
@@ -65,7 +79,7 @@ export const textDecorationVariants = {
 	none: { textDecoration: 'none' },
 	underline: { textDecoration: 'underline' },
 };
-export type TextDecorationValue = keyof typeof textDecorationVariants;
+export type TextDecoration = keyof typeof textDecorationVariants;
 
 export const textTransformVariants = {
 	capitalize: { textTransform: 'capitalize' },
@@ -74,14 +88,14 @@ export const textTransformVariants = {
 	none: { textTransform: 'none' },
 	uppercase: { textTransform: 'uppercase' },
 };
-export type TextTransformValue = keyof typeof textTransformVariants;
+export type TextTransform = keyof typeof textTransformVariants;
 
 export const textWrapVariants = {
 	balance: { textWrap: 'balance' },
 	pretty: { textWrap: 'pretty' },
 	unset: {},
 };
-export type TextWrapValue = keyof typeof textWrapVariants;
+export type TextWrap = keyof typeof textWrapVariants;
 
 export const textFontWeightVariants = {
 	body: { fontWeight: 'body' },
@@ -89,7 +103,7 @@ export const textFontWeightVariants = {
 	heading: { fontWeight: 'heading' },
 	label: { fontWeight: 'label' },
 };
-export type TextFontWeightValue = keyof typeof textFontWeightVariants;
+export type TextFontWeight = keyof typeof textFontWeightVariants;
 
 export const textColorVariants = {
 	accent: { color: 'intent.accent.text' },
@@ -100,4 +114,4 @@ export const textColorVariants = {
 	success: { color: 'intent.success.text' },
 	warning: { color: 'intent.warning.text' },
 };
-export type TextColorValue = keyof typeof textColorVariants;
+export type TextColor = keyof typeof textColorVariants;
