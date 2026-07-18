@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef, JSX } from 'react';
-import type { SprinklesProps } from '../styles/index.js';
-import { createSprinkles } from '../styles/index.js';
+import type { SprinklesProps } from '../styles/utilities.css.js';
+import { createSprinkles } from '../styles/utilities.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import type { RenderProp } from '../types/render-prop.js';

@@ -6,7 +6,7 @@ import {
 } from '../recipes/combobox.css.js';
 import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
 import { ComboboxField } from './index.js';
-import { ComboboxItem } from './primitive/index.js';
+import { ComboboxItem } from './primitive/item.js';
 
 type CountryItem = {
 	id: string;
