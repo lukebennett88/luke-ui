@@ -110,7 +110,14 @@ function Sample({
 	label: string;
 }) {
 	return (
-		<Box padding="200" style={{ backgroundColor, color }}>
+		<Box
+			padding="200"
+			style={{
+				backgroundColor,
+				border: `1px solid ${vars.color.border.decorative}`,
+				color,
+			}}
+		>
 			<Text elementType="span" fontWeight="label" size="100">
 				{label}
 			</Text>
