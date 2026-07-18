@@ -8,15 +8,32 @@
  * we take Panda's `utilities` output (currently the sole box slice) and re-wrap
  * it as `@layer box`.
  *
- * IMPORTANT co-mingling caveat: `styled-system/styles/utilities.css` == the box
- * layer ONLY while the box slice is the sole Panda utility source. Once T4/T5
- * introduce real one-off utilities and recipe-driven utilities, they will land
- * in the SAME `@layer utilities` and this blanket rename would swallow them.
- * At that point box needs a dedicated Panda run (its own outdir) or a marker to
- * separate box classes from genuine utilities.
+ * Config recipe base/variant CSS emits into its own split file
+ * (`styles/recipes.css`) already wrapped in `@layer recipes`;
+ * compound-variant CSS is the exception. Panda resolves `compoundVariants`
+ * through atomic css() classes, so it lands in `utilities.css` next to the
+ * Box slice and rides the rename into `@layer box`. That is cascade-correct
+ * (box sits above recipes, so compounds still beat base/variant rules) but
+ * means `utilities.css` is the Box slice plus recipe compound atomics; when
+ * T4/T5 introduce real one-off utilities, box will still need its own
+ * separation.
  *
- * VE still owns reset/base/tokens/global, so Panda's reset.css / global.css /
- * tokens.css are deliberately NOT included here.
+ * The full layer contract that trade-off implies:
+ *
+ * - `box` carries the Box slice plus recipe compound-variant atomics.
+ * - `utilities` sits above `box`, so consumer/blessed overrides always beat
+ *   both the Box slice and the compound atomics.
+ * - Disjointness rule: a recipe that composes and overrides another recipe
+ *   from within `@layer recipes` can never beat a compound-variant atomic in
+ *   `box`, so recipe-on-recipe override properties must stay disjoint from
+ *   the composed recipe's compound-variant properties.
+ *
+ * `assembled-stylesheet.test.ts` pins this contract against the generated
+ * output.
+ *
+ * VE still owns reset/base/global, so Panda's reset.css and global.css are
+ * deliberately excluded here. Panda's tokens.css is included: it is the
+ * Panda→Luke token alias bridge that recipe and box CSS depend on.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -55,13 +72,32 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 	// of truth. Renders exactly: @layer reset, base, tokens, recipes, box, utilities;
 	sections.push(`@layer ${lukeLayerOrder.join(', ')};`);
 
-	// Panda recipes (empty until recipes are defined, but wired for the future).
-	const recipesPath = `${stylesDir}/recipes.css`;
-	if (existsSync(recipesPath)) {
-		sections.push(readFileSync(recipesPath, 'utf8').trim());
+	// The Panda→Luke token alias bridge: `@layer tokens` maps every `--colors-*`
+	// (etc.) Panda variable to its `var(--luke-*)` source. Recipe and box CSS
+	// resolve through these aliases; VE still owns the `--luke-*` values
+	// themselves.
+	const tokensPath = `${stylesDir}/tokens.css`;
+	if (existsSync(tokensPath)) {
+		sections.push(readFileSync(tokensPath, 'utf8').trim());
 	}
 
-	// Panda utilities == the box slice. Re-wrap `@layer utilities` -> `@layer box`.
+	// Config recipes: with `panda cssgen --splitting` this file holds only
+	// recipe rules already wrapped in `@layer recipes` (slot recipes use the
+	// `recipes.slots` sublayer), either directly or as a barrel of `@import`
+	// lines pointing at per-recipe files. Inline any imports so the assembled
+	// sheet stays a single file; no re-layering needed.
+	const recipesPath = `${stylesDir}/recipes.css`;
+	if (existsSync(recipesPath)) {
+		const recipes = readFileSync(recipesPath, 'utf8')
+			.replace(/@import\s+['"]([^'"]+)['"]\s*;?/g, (_match, specifier: string) => {
+				return readFileSync(`${stylesDir}/${specifier}`, 'utf8').trim();
+			})
+			.trim();
+		sections.push(recipes);
+	}
+
+	// Panda utilities = the box slice plus recipe compound-variant atomics (see header).
+	// Re-wrap the `@layer utilities` block as `@layer box`. Compounds stay cascade-correct there because box sits above recipes.
 	const utilitiesPath = `${stylesDir}/utilities.css`;
 	if (existsSync(utilitiesPath)) {
 		const utilities = readFileSync(utilitiesPath, 'utf8').trim();
@@ -70,7 +106,7 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 	}
 
 	// Optional VE preview: appended verbatim, purely to eyeball the combined
-	// result. Never required — the build owns the real VE stylesheet.
+	// result. Never required, because the build owns the real VE stylesheet.
 	if (options.includeVanillaExtract) {
 		if (existsSync(vePath)) {
 			sections.push(`/* --- vanilla-extract dist/stylesheet.css (preview) --- */`);

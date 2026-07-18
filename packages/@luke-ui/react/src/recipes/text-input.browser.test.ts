@@ -3,7 +3,8 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
-import { textInputAdornmentStart, textInputGroup } from './text-input.css.js';
+import type { TextInputVariants } from './text-input.js';
+import { textInputAdornmentStart, textInputGroup } from './text-input.js';
 
 let mounted: Array<HTMLElement> = [];
 
@@ -140,7 +141,7 @@ test('adornment divider uses the control border color and disabled text color fo
 	expect(getComputedStyle(adornment).color).toBe(getComputedStyle(disabledTextProbe).color);
 });
 
-function mountGroup(options: Parameters<typeof textInputGroup>[0] = {}) {
+function mountGroup(options: TextInputVariants = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';

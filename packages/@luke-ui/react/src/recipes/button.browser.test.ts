@@ -3,7 +3,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
-import { button } from './button.css.js';
+import { button } from './button.js';
 
 let mounted: Array<HTMLElement> = [];
 

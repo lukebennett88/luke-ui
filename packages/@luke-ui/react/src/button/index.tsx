@@ -1,7 +1,7 @@
 import type { JSX, ReactNode } from 'react';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.css.js';
-import type * as primitiveStyles from '../recipes/button.css.js';
+import type * as primitiveStyles from '../recipes/button.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';

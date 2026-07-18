@@ -5,18 +5,21 @@ import type { themeContractTree } from './contract.js';
  * A single category rule. `prefix` is matched against a leaf path's leading segments; the
  * longest matching prefix wins. `drop` is the number of leading segments stripped to form the
  * Panda shorthand, so `controlSize`/`iconSize` (drop 0) keep their source key and stay unique
- * within `sizes`.
+ * within `sizes`. When `leaf` is set the rule matches only leaf paths whose final segment
+ * equals it, and that segment is also stripped from the shorthand, so `font.200.fontSize`
+ * (drop 1, leaf `fontSize`) becomes `fontSizes.200`.
  */
 export interface CategoryRule {
 	readonly prefix: ReadonlyArray<string>;
+	readonly leaf?: string;
 	readonly category: string;
 	readonly drop: number;
 }
 
 /**
  * Maps contract leaves to Panda token categories by longest-matching-prefix. Every leaf matching
- * no rule is a raw pass-through (not a Panda token): `actionControlFinish.*`, the `font.100..900.*`
- * Capsize composites, and `font.family`.
+ * no rule is a raw pass-through (not a Panda token): `actionControlFinish.*` and the
+ * `font.100..900` Capsize trims (`baselineTrim`/`capHeightTrim`).
  */
 export const categoryRules: ReadonlyArray<CategoryRule> = [
 	{ prefix: ['color'], category: 'colors', drop: 1 },
@@ -27,7 +30,11 @@ export const categoryRules: ReadonlyArray<CategoryRule> = [
 	{ prefix: ['iconSize'], category: 'sizes', drop: 0 },
 	{ prefix: ['motion', 'duration'], category: 'durations', drop: 2 },
 	{ prefix: ['motion', 'easing'], category: 'easings', drop: 2 },
+	{ prefix: ['font', 'family'], category: 'fonts', drop: 1 },
 	{ prefix: ['font', 'weight'], category: 'fontWeights', drop: 2 },
+	{ prefix: ['font'], leaf: 'fontSize', category: 'fontSizes', drop: 1 },
+	{ prefix: ['font'], leaf: 'letterSpacing', category: 'letterSpacings', drop: 1 },
+	{ prefix: ['font'], leaf: 'lineHeight', category: 'lineHeights', drop: 1 },
 ];
 
 /** A matched leaf's Panda category plus its shorthand path within that category. */
@@ -46,11 +53,13 @@ export function classifyLeaf(segments: ReadonlyArray<string>): Classification | 
 		if (rule.prefix.length > segments.length) continue;
 		const matches = rule.prefix.every((segment, index) => segments[index] === segment);
 		if (!matches) continue;
+		if (rule.leaf !== undefined && segments[segments.length - 1] !== rule.leaf) continue;
 		if (best === null || rule.prefix.length > best.prefix.length) best = rule;
 	}
 	if (best === null) return null;
 
-	return { category: best.category, shorthand: segments.slice(best.drop).join('.') };
+	const shorthandEnd = best.leaf === undefined ? segments.length : segments.length - 1;
+	return { category: best.category, shorthand: segments.slice(best.drop, shorthandEnd).join('.') };
 }
 
 /** Walks `segments`, creating intermediate plain objects, then assigns `leaf` at the final key. */
@@ -119,7 +128,11 @@ export interface PandaAliasTokens {
 	sizes: PandaTokenGroup;
 	durations: PandaTokenGroup;
 	easings: PandaTokenGroup;
+	fonts: PandaTokenGroup;
 	fontWeights: PandaTokenGroup;
+	fontSizes: PandaTokenGroup;
+	letterSpacings: PandaTokenGroup;
+	lineHeights: PandaTokenGroup;
 }
 
 /**
@@ -135,7 +148,11 @@ export function buildPandaTokens(): PandaAliasTokens {
 		sizes: {},
 		durations: {},
 		easings: {},
+		fonts: {},
 		fontWeights: {},
+		fontSizes: {},
+		letterSpacings: {},
+		lineHeights: {},
 	};
 	for (const [path, varName] of flattenThemeContract()) {
 		const classification = classifyLeaf(path.split('.'));

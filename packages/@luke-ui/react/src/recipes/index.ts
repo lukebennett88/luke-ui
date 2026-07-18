@@ -1,5 +1,5 @@
-export type { ButtonVariants } from '../recipes/button.css.js';
-export { button } from '../recipes/button.css.js';
+export type { ButtonVariants } from '../recipes/button.js';
+export { button } from '../recipes/button.js';
 export { field, fieldLabel, fieldMessage } from '../recipes/field.css.js';
 export type { IconVariants } from '../recipes/icon.css.js';
 export { icon } from '../recipes/icon.css.js';
@@ -23,10 +23,10 @@ export type {
 	TextWrap,
 } from '../recipes/text.css.js';
 export { text } from '../recipes/text.css.js';
-export type { TextInputVariants } from '../recipes/text-input.css.js';
+export type { TextInputVariants } from '../recipes/text-input.js';
 export {
 	textInputAdornmentEnd,
 	textInputAdornmentStart,
 	textInputControl,
 	textInputGroup,
-} from '../recipes/text-input.css.js';
+} from '../recipes/text-input.js';
