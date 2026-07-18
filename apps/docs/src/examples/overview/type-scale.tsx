@@ -1,10 +1,21 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import type { TextSize } from '@luke-ui/react/recipes';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
 
-const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
+const sizes = [
+	'100',
+	'200',
+	'300',
+	'400',
+	'500',
+	'600',
+	'700',
+	'800',
+	'900',
+] as const satisfies ReadonlyArray<TextSize>;
 type TypeSize = (typeof sizes)[number];
 
 const guidance: Record<TypeSize, string> = {
