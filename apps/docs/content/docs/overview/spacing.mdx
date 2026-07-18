@@ -1,0 +1,46 @@
+---
+title: Spacing
+description: Use the semantic space scale for layout, padding, and gaps.
+---
+
+Luke UI uses one semantic space scale for margins, padding, and gaps. The same steps are available
+through Box, `createSprinkles`, and the public `vars.space` token contract.
+
+## Space scale
+
+Use the named step that matches the separation you need. Box, custom UI, and Luke UI components use
+the same variables.
+
+<ExampleBlock src="overview/spacing" title="Space scale" description="Every public space step." />
+
+Padding, gap, and margin accept `0`, plus `100`, `200`, `300`, `400`, `600`, `800`, `1000`, `1200`,
+and `1600`. Margin also accepts `auto`.
+
+## Responsive spacing
+
+Pass one value when the spacing does not change. When it does, start with the compact layout at
+`xsmall` and add only the breakpoint where the spacing changes. Values cascade upward, so there is
+no need to repeat the same value at every breakpoint.
+
+```tsx
+<Box gap={{ xsmall: '300', medium: '800' }} padding={{ xsmall: '300', medium: '600' }}>
+	{children}
+</Box>
+```
+
+Use logical properties such as `paddingInline` and `marginBlockStart`. They work in both writing
+directions without separate left and right rules.
+
+## Continue learning
+
+<Cards>
+	<Card href="/overview/layout" title="Layout">
+		Use Box and Sprinkles for responsive structure.
+	</Card>
+	<Card href="/components/layout/box" title="Box">
+		See every responsive layout property Box supports.
+	</Card>
+	<Card href="/theming/token-reference" title="Token reference">
+		Use public semantic variables in custom UI.
+	</Card>
+</Cards>
