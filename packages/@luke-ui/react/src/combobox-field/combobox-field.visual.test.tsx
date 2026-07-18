@@ -13,7 +13,7 @@ import {
 } from '../test-utils/render-visual.js';
 import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { ComboboxField } from './index.js';
-import { ComboboxItem, ComboboxLoadMoreItem } from './primitive/index.js';
+import { ComboboxItem, ComboboxLoadMoreItem } from './primitive/item.js';
 
 type CountryItem = {
 	id: string;

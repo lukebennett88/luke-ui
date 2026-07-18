@@ -6,7 +6,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { Button } from '../button/index.js';
 import { ComboboxField } from '../combobox-field/index.js';
-import { ComboboxItem } from '../combobox-field/primitive/index.js';
+import { ComboboxItem } from '../combobox-field/primitive/item.js';
 import { IconSpritesheetProvider } from '../icon/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 

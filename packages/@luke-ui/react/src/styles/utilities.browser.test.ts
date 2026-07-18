@@ -4,7 +4,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { tactileThemeClassName } from '../themes/index.js';
 import { mergeProps } from '../utils/index.js';
-import { createSprinkles } from './index.js';
+import { createSprinkles } from './utilities.css.js';
 
 const mounted: Array<HTMLElement> = [];
 
