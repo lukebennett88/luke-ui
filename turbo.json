@@ -36,10 +36,7 @@
 			"outputs": ["storybook-static/**"]
 		},
 		"check": {
-			"dependsOn": ["check:barrels", "check:format", "check:lint", "check:types"]
-		},
-		"check:barrels": {
-			"dependsOn": ["generate"]
+			"dependsOn": ["check:format", "check:lint", "check:types"]
 		},
 		"check:format": {
 			"dependsOn": ["generate"]

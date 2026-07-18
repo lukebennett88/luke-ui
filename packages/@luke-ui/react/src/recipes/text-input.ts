@@ -2,8 +2,8 @@
 // definition lives in text-input.recipe.ts and is registered in
 // panda.config.ts; variants added there flow through the generated types with
 // no edit here.
-import type { TextInputVariantProps } from '../../styled-system/recipes/index.mjs';
-import { textInput } from '../../styled-system/recipes/index.mjs';
+import type { TextInputVariantProps } from '../../styled-system/recipes/text-input.mjs';
+import { textInput } from '../../styled-system/recipes/text-input.mjs';
 
 // Slot-recipe codegen wraps every variant value in `ConditionalValue`
 // (responsive arrays and condition objects). This recipe takes plain values
