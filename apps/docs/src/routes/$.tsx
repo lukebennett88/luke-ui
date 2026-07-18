@@ -13,7 +13,6 @@ import browserCollections from '../../.source/browser';
 import { ExampleBlock } from '../components/example-block';
 import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
-import { TokenExplorer } from '../components/token-explorer';
 import { baseOptions } from '../lib/layout.shared';
 import { source } from '../lib/source';
 import { getStorybookStoryUrl, withBasePath } from '../lib/storybook';
@@ -25,7 +24,6 @@ const mdxComponents = {
 	AutoTypeTable,
 	ExampleBlock,
 	SourceCodeBlock,
-	TokenExplorer,
 	TypeTable,
 };
 
