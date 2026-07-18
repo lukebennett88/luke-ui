@@ -63,9 +63,7 @@ export default function TypeScaleExample() {
 					{selectedSize} — {guidance[selectedSize]}
 				</Text>
 				<Box marginBlockStart="300">
-					<Text fontWeight={selectedSize >= '500' ? 'heading' : 'body'} size={selectedSize}>
-						The quick brown fox
-					</Text>
+					<TypeSpecimen size={selectedSize}>The quick brown fox</TypeSpecimen>
 				</Box>
 			</Box>
 			<Box display="grid" gap="300">
@@ -80,12 +78,23 @@ export default function TypeScaleExample() {
 						>
 							{size}
 						</Text>
-						<Text fontWeight={size >= '500' ? 'heading' : 'body'} size={size}>
-							Ag 012
-						</Text>
+						<TypeSpecimen size={size}>Ag 012</TypeSpecimen>
 					</Box>
 				))}
 			</Box>
 		</Box>
+	);
+}
+
+function TypeSpecimen({ children, size }: { children: string; size: TypeSize }) {
+	return (
+		<Text
+			elementType="span"
+			fontWeight={Number(size) >= 500 ? 'heading' : 'body'}
+			size={size}
+			style={{ borderBlockEnd: `1px solid ${vars.color.border.decorative}` }}
+		>
+			{children}
+		</Text>
 	);
 }

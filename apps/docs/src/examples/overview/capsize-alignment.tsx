@@ -47,13 +47,28 @@ export default function CapsizeAlignmentExample() {
 					Baseline alignment
 				</Text>
 				<Box alignItems="baseline" display="flex" flexWrap="wrap" gap="300" marginBlockStart="300">
-					<Text color="secondary" size="200">
+					<Text
+						color="secondary"
+						elementType="span"
+						size="200"
+						style={{ borderBlockEnd: `1px solid ${vars.color.border.decorative}` }}
+					>
 						Supporting text
 					</Text>
-					<Text fontWeight="heading" size={size}>
+					<Text
+						elementType="span"
+						fontWeight="heading"
+						size={size}
+						style={{ borderBlockEnd: `1px solid ${vars.color.border.decorative}` }}
+					>
 						Ag 012
 					</Text>
-					<Text color="secondary" size="200">
+					<Text
+						color="secondary"
+						elementType="span"
+						size="200"
+						style={{ borderBlockEnd: `1px solid ${vars.color.border.decorative}` }}
+					>
 						shares this baseline
 					</Text>
 				</Box>
@@ -77,14 +92,20 @@ function TrimPanel({ isTrimmed, size }: { isTrimmed: boolean; size: TypeSize }) 
 				{isTrimmed ? 'Capsize trim enabled' : 'Trim disabled'}
 			</Text>
 			<Box marginBlock="600">
-				<Text fontWeight="heading" shouldDisableTrim={!isTrimmed} size={size}>
+				<Text
+					elementType="span"
+					fontWeight="heading"
+					shouldDisableTrim={!isTrimmed}
+					size={size}
+					style={{ borderBlockEnd: `1px solid ${vars.color.border.decorative}` }}
+				>
 					Ag 012
 				</Text>
 			</Box>
 			<Text color="secondary" elementType="p" size="200">
 				{isTrimmed
-					? 'The line box is trimmed to the cap height and baseline.'
-					: 'The font keeps its untrimmed line-box space.'}
+					? 'The rule follows the trimmed text edge.'
+					: 'The rule follows the font’s untrimmed line box.'}
 			</Text>
 		</Box>
 	);
