@@ -26,10 +26,15 @@ function resolvePath(node: unknown, path: string): unknown {
 	return value;
 }
 
-/** Whether a leaf path (top segment) is a raw pass-through per the tree: `actionControlFinish.*`, or under `font` but not `font.weight`. */
+/** Whether a leaf path is a raw pass-through per the tree: `actionControlFinish.*`, or a `font.100..900` Capsize trim. */
 function isRawPath(segments: Array<string>): boolean {
 	if (segments[0] === 'actionControlFinish') return true;
-	if (segments[0] === 'font' && segments[1] !== 'weight') return true;
+	if (
+		segments[0] === 'font' &&
+		(segments[2] === 'baselineTrim' || segments[2] === 'capHeightTrim')
+	) {
+		return true;
+	}
 
 	return false;
 }

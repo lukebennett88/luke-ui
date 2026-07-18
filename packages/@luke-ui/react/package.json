@@ -96,6 +96,7 @@
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
 		"@pandacss/dev": "catalog:",
+		"@pandacss/preset-base": "catalog:",
 		"@rollup/plugin-babel": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
 		"@storybook/addon-docs": "catalog:",

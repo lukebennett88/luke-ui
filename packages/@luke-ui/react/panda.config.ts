@@ -1,4 +1,7 @@
 import { defineConfig } from '@pandacss/dev';
+import presetBase from '@pandacss/preset-base';
+import { buttonRecipe } from './src/recipes/button.recipe.js';
+import { textInputRecipe } from './src/recipes/text-input.recipe.js';
 import { lukeLayerOrder } from './src/styles/layer-order.js';
 import { buildPandaTokens } from './src/theme/panda-tokens.js';
 
@@ -43,6 +46,30 @@ export default defineConfig({
 	exclude: [],
 
 	outdir: 'styled-system',
+	// Emit .d.mts beside each generated .mjs so explicit `.mjs` import
+	// specifiers resolve to real declarations under `module: preserve`.
+	forceConsistentTypeExtension: true,
+	cssVarRoot: '.luke-ui-theme',
+
+	hooks: {
+		// The generated recipe declarations import ConditionalValue from the
+		// types barrel (types/index.d.mts), whose side-effect import of
+		// global.d.mts reaches @pandacss/dev and, through its config types,
+		// pkg-types/typescript, none of which can land in the published dts
+		// bundle. ConditionalValue really lives in the self-contained
+		// types/conditions.d.mts, so retarget that one import at codegen time.
+		'codegen:prepare': ({ artifacts }) => {
+			const barrelImport = "import type { ConditionalValue } from '../types/index.d.mts';";
+			const directImport = "import type { ConditionalValue } from '../types/conditions.d.mts';";
+			for (const artifact of artifacts) {
+				for (const content of artifact.files) {
+					if (!content.code || !content.file.endsWith('.d.mts')) continue;
+					content.code = content.code.replaceAll(barrelImport, directImport);
+				}
+			}
+			return artifacts;
+		},
+	},
 
 	layers,
 
@@ -56,6 +83,8 @@ export default defineConfig({
 	// The alias layer plus the T2 box-slice placeholder spacing, kept so the box
 	// `utilities`/`staticCss` below still resolve (transitional; removed later).
 	theme: {
+		recipes: { button: buttonRecipe },
+		slotRecipes: { textInput: textInputRecipe },
 		tokens: {
 			...aliasTokens,
 			spacing: {
@@ -68,32 +97,9 @@ export default defineConfig({
 		},
 	},
 
-	// Minimal Box-utility definitions. In ejected mode there are NO built-in
-	// utilities, so these are required for `padding: "md"` to resolve to a
-	// spacing token var rather than emit the literal string "md".
-	utilities: {
-		display: {
-			className: 'display',
-			values: { block: 'block', flex: 'flex' },
-			transform(value) {
-				return { display: value };
-			},
-		},
-		padding: {
-			className: 'padding',
-			values: 'spacing',
-			transform(value) {
-				return { padding: value };
-			},
-		},
-		margin: {
-			className: 'margin',
-			values: 'spacing',
-			transform(value) {
-				return { margin: value };
-			},
-		},
-	},
+	// Bring in Panda's property utilities only. Conditions remain the two Luke
+	// definitions above, so Panda does not own colour-mode or state semantics.
+	utilities: presetBase.utilities,
 
 	staticCss: {
 		recipes: '*',

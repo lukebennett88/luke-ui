@@ -4,7 +4,7 @@ import { Group as RacGroup } from 'react-aria-components/Group';
 import type { InputProps as RacInputProps } from 'react-aria-components/Input';
 import { Input as RacInput } from 'react-aria-components/Input';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import * as styles from '../../recipes/text-input.css.js';
+import * as styles from '../../recipes/text-input.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
