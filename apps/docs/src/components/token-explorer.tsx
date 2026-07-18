@@ -1,6 +1,5 @@
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
-import { useState } from 'react';
 
 type TokenGroupId =
 	| 'content'
@@ -126,34 +125,23 @@ const groups: Array<TokenGroup> = [
 ];
 
 export function TokenExplorer() {
-	const [groupId, setGroupId] = useState<TokenGroupId>('surfaces');
-	const group = groups.find((item) => item.id === groupId) ?? groups[0];
-
-	if (!group) return null;
-
 	return (
-		<section className="not-prose grid gap-4 rounded-lg border border-fd-border bg-fd-card p-4">
-			<div className="flex flex-wrap justify-end gap-3">
-				<label className="grid gap-1 text-fd-foreground text-sm">
-					<span>Purpose</span>
-					<select
-						className="h-9 rounded-md border border-fd-border bg-fd-background px-2"
-						onChange={(event) => setGroupId(event.target.value as TokenGroupId)}
-						value={group.id}
-					>
-						{groups.map((item) => (
-							<option key={item.id} value={item.id}>
-								{item.label}
-							</option>
-						))}
-					</select>
-				</label>
-			</div>
-			<div>
+		<section className="not-prose grid gap-3 rounded-lg border border-fd-border bg-fd-card p-4">
+			{groups.map((group) => (
+				<TokenGroup group={group} key={group.id} />
+			))}
+		</section>
+	);
+}
+
+function TokenGroup({ group }: { group: TokenGroup }) {
+	return (
+		<details className="rounded-md border border-fd-border" open={group.id === 'surfaces'}>
+			<summary className="cursor-pointer p-3">
 				<h3 className="m-0 font-semibold text-fd-foreground">{group.label}</h3>
 				<p className="mb-0 mt-1 text-fd-muted-foreground text-sm">{group.description}</p>
-			</div>
-			<div className="overflow-x-auto rounded-md border border-fd-border">
+			</summary>
+			<div className="overflow-x-auto border-fd-border border-t">
 				<table className="w-full min-w-[40rem] border-collapse text-sm">
 					<thead className="bg-fd-muted">
 						<tr>
@@ -179,7 +167,7 @@ export function TokenExplorer() {
 					</tbody>
 				</table>
 			</div>
-		</section>
+		</details>
 	);
 }
 
