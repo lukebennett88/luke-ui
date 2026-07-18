@@ -1,144 +1,213 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
+import { themeRootClassName, vars } from '@luke-ui/react/theme';
+import { paperThemeClassName, tactileThemeClassName } from '@luke-ui/react/themes';
+import { cx } from '@luke-ui/react/utils';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 
-const intents = {
-	neutral: {
-		border: vars.color.border.decorative,
-		description: 'Draft changes have not been shared yet.',
-		label: 'Neutral',
-		surface: vars.color.intent.neutral.surface.subtle,
-		text: vars.color.text.primary,
-	},
-	accent: {
-		border: vars.color.intent.accent.border,
-		description: 'Changes are ready to publish.',
-		label: 'Accent',
-		surface: vars.color.intent.accent.surface.subtle,
-		text: vars.color.intent.accent.text,
-	},
-	success: {
-		border: vars.color.intent.success.border,
-		description: 'Your changes were published successfully.',
-		label: 'Success',
-		surface: vars.color.intent.success.surface.subtle,
-		text: vars.color.intent.success.text,
-	},
-	info: {
-		border: vars.color.intent.info.border,
-		description: 'A new version is available for your team.',
-		label: 'Info',
-		surface: vars.color.intent.info.surface.subtle,
-		text: vars.color.intent.info.text,
-	},
-	warning: {
-		border: vars.color.intent.warning.border,
-		description: 'Payment details need review before publishing.',
-		label: 'Warning',
-		surface: vars.color.intent.warning.surface.subtle,
-		text: vars.color.intent.warning.text,
-	},
-	danger: {
-		border: vars.color.intent.danger.border,
-		description: 'This action permanently removes the project.',
-		label: 'Danger',
-		surface: vars.color.intent.danger.surface.subtle,
-		text: vars.color.intent.danger.text,
-	},
-} as const;
+type ColorMode = 'dark' | 'light';
+type Identity = 'paper' | 'tactile';
 
-type Intent = keyof typeof intents;
+const intents = [
+	{ label: 'Neutral', name: 'neutral' },
+	{ label: 'Accent', name: 'accent' },
+	{ label: 'Success', name: 'success' },
+	{ label: 'Info', name: 'info' },
+	{ label: 'Warning', name: 'warning' },
+	{ label: 'Danger', name: 'danger' },
+] as const;
 
 export default function IntentColoursExample() {
-	const [intent, setIntent] = useState<Intent>('info');
-	const selectedIntent = intents[intent];
+	const [colorMode, setColorMode] = useState<ColorMode>('light');
+	const [identity, setIdentity] = useState<Identity>('tactile');
+	const identityClassName = identity === 'tactile' ? tactileThemeClassName : paperThemeClassName;
 
 	return (
 		<Box display="grid" gap="400">
-			<Box aria-label="Message intent" display="flex" flexWrap="wrap" gap="200" role="group">
-				{(Object.keys(intents) as Array<Intent>).map((option) => (
-					<Button
-						appearance={intent === option ? 'solid' : 'subtle'}
-						aria-pressed={intent === option}
-						key={option}
-						onPress={() => setIntent(option)}
-					>
-						{intents[option].label}
-					</Button>
-				))}
-			</Box>
+			<ThemeControls
+				colorMode={colorMode}
+				identity={identity}
+				onColorModeChange={setColorMode}
+				onIdentityChange={setIdentity}
+			/>
 			<Box
+				className={cx(themeRootClassName, identityClassName)}
+				data-color-mode={colorMode}
 				display="grid"
-				gap="300"
+				gap="400"
+				padding="600"
 				style={{
-					gridTemplateColumns: 'repeat(auto-fit, minmax(16rem, 1fr))',
+					backgroundColor: vars.color.surface.canvas,
+					border: `1px solid ${vars.color.border.decorative}`,
+					borderRadius: vars.radius.surface,
+					color: vars.color.text.primary,
 				}}
 			>
-				<StatusCard intent={selectedIntent} mode="light" />
-				<StatusCard intent={selectedIntent} mode="dark" />
+				<SurfaceLabel>Canvas surface</SurfaceLabel>
+				<Box
+					display="grid"
+					gap="400"
+					padding="400"
+					style={{
+						backgroundColor: vars.color.surface.recessed,
+						borderRadius: vars.radius.surface,
+					}}
+				>
+					<SurfaceLabel>Recessed surface</SurfaceLabel>
+					<Box
+						display="grid"
+						gap="400"
+						padding="400"
+						style={{
+							backgroundColor: vars.color.surface.resting,
+							border: `1px solid ${vars.color.border.decorative}`,
+							borderRadius: vars.radius.surface,
+							boxShadow: vars.depth.resting,
+						}}
+					>
+						<Box alignItems="center" display="flex" gap="300" justifyContent="space-between">
+							<Box display="grid" gap="100">
+								<SurfaceLabel>Resting surface</SurfaceLabel>
+								<Text elementType="strong" fontWeight="emphasis">
+									Content uses primary text
+								</Text>
+								<Text color="secondary" elementType="span" size="200">
+									Supporting content uses secondary text
+								</Text>
+							</Box>
+							<Button size="small" tone="accent">
+								Action
+							</Button>
+						</Box>
+						<Box
+							display="grid"
+							gap="200"
+							style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(8rem, 1fr))' }}
+						>
+							{intents.map((intent) => (
+								<IntentSample intent={intent.name} key={intent.name} label={intent.label} />
+							))}
+						</Box>
+					</Box>
+				</Box>
 			</Box>
 			<Text color="secondary" elementType="p" size="200">
-				The canvas and card use neutral surface roles. The status uses an intent role, so both adapt
-				to the active colour mode.
+				The role names stay the same while the active identity and colour mode supply their values.
 			</Text>
 		</Box>
 	);
 }
 
-function StatusCard({
-	intent,
-	mode,
+function ThemeControls({
+	colorMode,
+	identity,
+	onColorModeChange,
+	onIdentityChange,
 }: {
-	intent: (typeof intents)[Intent];
-	mode: 'dark' | 'light';
+	colorMode: ColorMode;
+	identity: Identity;
+	onColorModeChange: (colorMode: ColorMode) => void;
+	onIdentityChange: (identity: Identity) => void;
 }) {
 	return (
-		<Box
-			aria-label={`Project status in ${mode} mode`}
-			data-color-mode={mode}
-			padding="400"
-			style={{
-				backgroundColor: vars.color.surface.canvas,
-				borderRadius: vars.radius.surface,
-				color: vars.color.text.primary,
-			}}
-		>
-			<Box
-				padding="400"
-				style={{
-					backgroundColor: vars.color.surface.resting,
-					border: `1px solid ${vars.color.border.decorative}`,
-					borderRadius: vars.radius.surface,
-					boxShadow: vars.depth.resting,
-				}}
-			>
-				<Box alignItems="center" display="flex" gap="200" justifyContent="space-between">
-					<Text elementType="strong" fontWeight="emphasis">
-						Website launch
-					</Text>
-					<Text color="secondary" elementType="span" size="200">
-						{mode} mode
-					</Text>
-				</Box>
-				<Box
-					marginBlockStart="400"
-					padding="300"
-					role="status"
-					style={{
-						backgroundColor: intent.surface,
-						border: `1px solid ${intent.border}`,
-						borderRadius: vars.radius.control,
-						color: intent.text,
-					}}
-				>
-					<Text elementType="strong" fontWeight="emphasis">
-						{intent.label}
-					</Text>
-					<Text elementType="p">{intent.description}</Text>
-				</Box>
+		<Box display="grid" gap="300">
+			<ControlGroup label="Identity">
+				{(['tactile', 'paper'] as const).map((option) => (
+					<Button
+						appearance={identity === option ? 'solid' : 'subtle'}
+						aria-pressed={identity === option}
+						key={option}
+						onPress={() => onIdentityChange(option)}
+						size="small"
+						tone="accent"
+					>
+						{option === 'tactile' ? 'Tactile' : 'Paper'}
+					</Button>
+				))}
+			</ControlGroup>
+			<ControlGroup label="Colour mode">
+				{(['light', 'dark'] as const).map((option) => (
+					<Button
+						appearance={colorMode === option ? 'solid' : 'subtle'}
+						aria-pressed={colorMode === option}
+						key={option}
+						onPress={() => onColorModeChange(option)}
+						size="small"
+						tone="accent"
+					>
+						{option === 'light' ? 'Light' : 'Dark'}
+					</Button>
+				))}
+			</ControlGroup>
+		</Box>
+	);
+}
+
+function ControlGroup({ children, label }: { children: ReactNode; label: string }) {
+	return (
+		<Box alignItems="center" display="flex" flexWrap="wrap" gap="200">
+			<Text elementType="strong" fontWeight="emphasis" size="200" style={{ inlineSize: '6rem' }}>
+				{label}
+			</Text>
+			<Box aria-label={label} display="flex" flexWrap="wrap" gap="200" role="group">
+				{children}
 			</Box>
 		</Box>
+	);
+}
+
+function IntentSample({
+	intent,
+	label,
+}: {
+	intent: (typeof intents)[number]['name'];
+	label: string;
+}) {
+	if (intent === 'neutral') {
+		return (
+			<Box
+				paddingBlock="200"
+				paddingInline="300"
+				style={{
+					backgroundColor: vars.color.intent.neutral.surface.subtle,
+					border: `1px solid ${vars.color.border.decorative}`,
+					borderRadius: vars.radius.control,
+					color: vars.color.text.primary,
+				}}
+			>
+				<Text elementType="span" fontWeight="label" size="200">
+					{label}
+				</Text>
+			</Box>
+		);
+	}
+
+	const colors = vars.color.intent[intent];
+
+	return (
+		<Box
+			paddingBlock="200"
+			paddingInline="300"
+			style={{
+				backgroundColor: colors.surface.subtle,
+				border: `1px solid ${colors.border}`,
+				borderRadius: vars.radius.control,
+				color: colors.text,
+			}}
+		>
+			<Text elementType="span" fontWeight="label" size="200">
+				{label}
+			</Text>
+		</Box>
+	);
+}
+
+function SurfaceLabel({ children }: { children: ReactNode }) {
+	return (
+		<Text color="secondary" elementType="span" fontWeight="label" size="100">
+			{children}
+		</Text>
 	);
 }
