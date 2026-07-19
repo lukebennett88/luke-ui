@@ -7,6 +7,11 @@ import { fieldRecipe } from './src/recipes/field.recipe.js';
 import { iconButtonRecipe } from './src/recipes/icon-button.recipe.js';
 import { iconRecipe } from './src/recipes/icon.recipe.js';
 import { linkRecipe } from './src/recipes/link.recipe.js';
+import {
+	loadingSkeletonGlobalCss,
+	loadingSkeletonKeyframes,
+	loadingSkeletonRecipe,
+} from './src/recipes/loading-skeleton.recipe.js';
 import { loadingSpinnerRecipe } from './src/recipes/loading-spinner.recipe.js';
 import { textInputRecipe } from './src/recipes/text-input.recipe.js';
 import { textRecipe } from './src/recipes/text.recipe.js';
@@ -87,12 +92,20 @@ export default defineConfig({
 		hover: '&:is(:hover, [data-hover])',
 		focus: '&:is(:focus, [data-focus])',
 	},
+	globalCss: loadingSkeletonGlobalCss,
 
 	// The alias layer plus the T2 box-slice placeholder spacing, kept so the box
 	// `utilities`/`staticCss` below still resolve (transitional; removed later).
 	theme: {
-		recipes: { button: buttonRecipe, icon: iconRecipe, link: linkRecipe, text: textRecipe },
+		recipes: {
+			button: buttonRecipe,
+			icon: iconRecipe,
+			link: linkRecipe,
+			loadingSkeleton: loadingSkeletonRecipe,
+			text: textRecipe,
+		},
 		keyframes: {
+			...loadingSkeletonKeyframes,
 			spin: { to: { transform: 'rotate(360deg)' } },
 			rubberBand: {
 				'0%': { strokeDasharray: '2 100' },

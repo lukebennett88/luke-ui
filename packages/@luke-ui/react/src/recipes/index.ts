@@ -7,7 +7,7 @@ export type { IconButtonVariants } from '../recipes/icon-button.js';
 export { iconButton } from '../recipes/icon-button.js';
 export type { LinkVariants } from '../recipes/link.js';
 export { link } from '../recipes/link.js';
-export { loadingSkeleton } from '../recipes/loading-skeleton.css.js';
+export { loadingSkeleton } from '../recipes/loading-skeleton.js';
 export type { LoadingSpinnerVariants } from '../recipes/loading-spinner.js';
 export { loadingSpinner } from '../recipes/loading-spinner.js';
 export type {

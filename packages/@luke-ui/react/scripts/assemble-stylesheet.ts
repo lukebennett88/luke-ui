@@ -31,9 +31,10 @@
  * `assembled-stylesheet.test.ts` pins this contract against the generated
  * output.
  *
- * VE still owns reset/base/global, so Panda's reset.css and global.css are
- * deliberately excluded here. Panda's tokens.css is included: it is the
- * Panda→Luke token alias bridge that recipe and box CSS depend on.
+ * VE still owns reset/base styles, so Panda's reset.css is deliberately
+ * excluded. Panda global rules that explicitly target `@layer recipes` are
+ * included alongside config recipes. Panda's tokens.css is the Panda→Luke
+ * token alias bridge that recipe and box CSS depend on.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -96,6 +97,15 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 		sections.push(recipes);
 	}
 
+	// `globalCss` emits through Panda's base stylesheet even when a rule
+	// declares its own layer. Keep explicitly recipe-layered global rules at
+	// the top level so they retain the intended cascade position.
+	const globalPath = `${stylesDir}/global.css`;
+	if (existsSync(globalPath)) {
+		const recipeGlobals = extractLayer(readFileSync(globalPath, 'utf8'), 'recipes');
+		if (recipeGlobals) sections.push(recipeGlobals);
+	}
+
 	// Panda utilities = the box slice plus recipe compound-variant atomics (see header).
 	// Re-wrap the `@layer utilities` block as `@layer box`. Compounds stay cascade-correct there because box sits above recipes.
 	const utilitiesPath = `${stylesDir}/utilities.css`;
@@ -119,6 +129,22 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 	}
 
 	return `${sections.join('\n\n')}\n`;
+}
+
+function extractLayer(css: string, layer: string): string | undefined {
+	const start = css.indexOf(`@layer ${layer} {`);
+	if (start === -1) return undefined;
+
+	let depth = 0;
+	for (let index = start; index < css.length; index += 1) {
+		const character = css[index];
+		if (character === '{') depth += 1;
+		if (character !== '}' || depth === 0) continue;
+		depth -= 1;
+		if (depth === 0) return css.slice(start, index + 1).trim();
+	}
+
+	throw new Error(`Unclosed @layer ${layer} block in Panda global CSS.`);
 }
 
 function main(): void {

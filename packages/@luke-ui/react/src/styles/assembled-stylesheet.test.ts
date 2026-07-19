@@ -68,6 +68,12 @@ describe('assembled stylesheet (generated output)', () => {
 		}
 	});
 
+	it('keeps loading skeleton masking globals inside @layer recipes', () => {
+		const maskingDeclaration = 'overflow: hidden !important';
+		expect(recipesBlock).toContain(maskingDeclaration);
+		expect(boxBlock).not.toContain(maskingDeclaration);
+	});
+
 	it('keeps the recipe compound-variant atomics inside @layer box', () => {
 		// The solid/neutral compound variant is the only source of this
 		// declaration; its atomic class rides Panda's `utilities` output into
