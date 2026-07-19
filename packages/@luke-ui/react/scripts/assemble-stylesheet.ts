@@ -1,40 +1,21 @@
 #!/usr/bin/env tsx
 
 /**
- * Stylesheet assembler (T2).
+ * Stylesheet assembler.
  *
  * Combines Panda's ejected output into a single stylesheet whose cascade
  * layers match the canonical Luke UI order. Panda has no native `box` layer, so
- * we take Panda's `utilities` output (currently the sole box slice) and re-wrap
- * it as `@layer box`.
+ * its utilities output is re-wrapped as `@layer box`.
  *
  * Config recipe base/variant CSS emits into its own split file
  * (`styles/recipes.css`) already wrapped in `@layer recipes`;
  * compound-variant CSS is the exception. Panda resolves `compoundVariants`
  * through atomic css() classes, so it lands in `utilities.css` next to the
- * Box slice and rides the rename into `@layer box`. That is cascade-correct
- * (box sits above recipes, so compounds still beat base/variant rules) but
- * means `utilities.css` is the Box slice plus recipe compound atomics; when
- * T4/T5 introduce real one-off utilities, box will still need its own
- * separation.
+ * Box slice and rides the rename into `@layer box`. The `utilities` layer
+ * remains available for consumer overrides.
  *
- * The full layer contract that trade-off implies:
- *
- * - `box` carries the Box slice plus recipe compound-variant atomics.
- * - `utilities` sits above `box`, so consumer/blessed overrides always beat
- *   both the Box slice and the compound atomics.
- * - Disjointness rule: a recipe that composes and overrides another recipe
- *   from within `@layer recipes` can never beat a compound-variant atomic in
- *   `box`, so recipe-on-recipe override properties must stay disjoint from
- *   the composed recipe's compound-variant properties.
- *
- * `assembled-stylesheet.test.ts` pins this contract against the generated
- * output.
- *
- * VE still owns reset/base styles, so Panda's reset.css is deliberately
- * excluded. Panda global rules that explicitly target `@layer recipes` are
- * included alongside config recipes. Panda's tokens.css is the Panda→Luke
- * token alias bridge that recipe and box CSS depend on.
+ * Panda owns every section of the shipped stylesheet: reset and base global
+ * styles, token aliases, recipes, and the re-layered Box output.
  */
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
@@ -44,8 +25,7 @@ import { lukeLayerOrder } from '../src/styles/layer-order.js';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
 const pandaStylesDir = `${packageRoot}styled-system/styles`;
-const vanillaExtractStylesheet = `${packageRoot}dist/stylesheet.css`;
-const assembledOutput = `${packageRoot}styled-system/assembled.css`;
+const publicStylesheet = `${packageRoot}dist/stylesheet.css`;
 
 // T5 emits direct Box values as curated classes and responsive values through
 // property/breakpoint variables. Keep the integration sheet near T4's budget
@@ -54,16 +34,8 @@ const maximumPublicStylesheetRawBytes = 135_000;
 const maximumPublicStylesheetGzipBytes = 13_500;
 
 export interface AssembleOptions {
-	/**
-	 * Append VE's emitted stylesheet verbatim. Skipped silently when the build
-	 * artifact is absent so the assembler still succeeds from `generate` output
-	 * alone.
-	 */
-	includeVanillaExtract?: boolean;
 	/** Override the Panda split-CSS directory (defaults to package styled-system/styles). */
 	pandaStylesDir?: string;
-	/** Override the VE stylesheet path. */
-	vanillaExtractStylesheet?: string;
 }
 
 /**
@@ -72,18 +44,18 @@ export interface AssembleOptions {
  */
 export function assembleStylesheet(options: AssembleOptions = {}): string {
 	const stylesDir = options.pandaStylesDir ?? pandaStylesDir;
-	const vePath = options.vanillaExtractStylesheet ?? vanillaExtractStylesheet;
-
 	const sections: Array<string> = [];
 
 	// Line 1: the single combined layer-order declaration, from the shared source
 	// of truth. Renders exactly: @layer reset, base, tokens, recipes, box, utilities;
 	sections.push(`@layer ${lukeLayerOrder.join(', ')};`);
 
+	const globalPath = `${stylesDir}/global.css`;
+	if (existsSync(globalPath)) sections.push(readFileSync(globalPath, 'utf8').trim());
+
 	// The Panda→Luke token alias bridge: `@layer tokens` maps every `--colors-*`
 	// (etc.) Panda variable to its `var(--luke-*)` source. Recipe and box CSS
-	// resolve through these aliases; VE still owns the `--luke-*` values
-	// themselves.
+	// resolve through these aliases; generated theme stylesheets own the values.
 	const tokensPath = `${stylesDir}/tokens.css`;
 	if (existsSync(tokensPath)) {
 		sections.push(readFileSync(tokensPath, 'utf8').trim());
@@ -104,15 +76,6 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 		sections.push(recipes);
 	}
 
-	// `globalCss` emits through Panda's base stylesheet even when a rule
-	// declares its own layer. Keep explicitly recipe-layered global rules at
-	// the top level so they retain the intended cascade position.
-	const globalPath = `${stylesDir}/global.css`;
-	if (existsSync(globalPath)) {
-		const recipeGlobals = extractLayer(readFileSync(globalPath, 'utf8'), 'recipes');
-		if (recipeGlobals) sections.push(recipeGlobals);
-	}
-
 	// Panda utilities = the box slice plus recipe compound-variant atomics (see header).
 	// Re-wrap the `@layer utilities` block as `@layer box`. Compounds stay cascade-correct there because box sits above recipes.
 	const utilitiesPath = `${stylesDir}/utilities.css`;
@@ -122,43 +85,17 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 		sections.push(box);
 	}
 
-	// VE owns reset, theme, and the remaining unmigrated recipes. Append its
-	// emitted output after Panda's layer-order declaration so the public
-	// stylesheet contains each system exactly once without changing layer order.
-	if (options.includeVanillaExtract) {
-		if (existsSync(vePath)) {
-			sections.push(`/* --- vanilla-extract --- */`);
-			sections.push(readFileSync(vePath, 'utf8').trim());
-		} else {
-			sections.push(`/* vanilla-extract stylesheet not found; skipped */`);
-		}
-	}
-
 	return `${sections.join('\n\n')}\n`;
-}
-
-function extractLayer(css: string, layer: string): string | undefined {
-	const start = css.indexOf(`@layer ${layer} {`);
-	if (start === -1) return undefined;
-
-	let depth = 0;
-	for (let index = start; index < css.length; index += 1) {
-		const character = css[index];
-		if (character === '{') depth += 1;
-		if (character !== '}' || depth === 0) continue;
-		depth -= 1;
-		if (depth === 0) return css.slice(start, index + 1).trim();
-	}
-
-	throw new Error(`Unclosed @layer ${layer} block in Panda global CSS.`);
 }
 
 function main(): void {
 	const output = process.argv.find((argument) => argument.startsWith('--output='));
-	const outputPath = output ? `${packageRoot}${output.slice('--output='.length)}` : assembledOutput;
-	const css = assembleStylesheet({ includeVanillaExtract: Boolean(output) });
+	const outputPath = output
+		? `${packageRoot}${output.slice('--output='.length)}`
+		: publicStylesheet;
+	const css = assembleStylesheet();
 
-	if (output) assertPublicStylesheet(css);
+	assertPublicStylesheet(css);
 	writeFileSync(outputPath, css, 'utf8');
 	process.stdout.write(`Wrote ${outputPath.slice(packageRoot.length)} (${css.length} bytes)\n`);
 }
@@ -166,10 +103,11 @@ function main(): void {
 function assertPublicStylesheet(css: string): void {
 	const requiredSections = [
 		'@layer reset, base, tokens, recipes, box, utilities;',
+		'@layer reset {',
+		'@layer base {',
 		'@layer tokens {',
 		'@layer recipes {',
 		'@layer box {',
-		'/* --- vanilla-extract --- */',
 	];
 
 	for (const section of requiredSections) {

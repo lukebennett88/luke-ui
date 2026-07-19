@@ -127,15 +127,15 @@ or interaction states.
 
 ## Use application CSS alongside Luke UI
 
-Luke UI's static CSS uses five cascade layers, ordered from lowest to highest priority: `reset`,
-`theme`, `recipes`, `box`, and `utilities`. The order stays stable regardless of stylesheet import
-order. The `box` layer contains styles created by `Box` and `createSprinkles`. The reset normalises
-only the subtree carrying `themeRootClassName`.
+Luke UI orders its static CSS in six cascade layers, from lowest to highest priority: `reset`,
+`base`, `tokens`, `recipes`, `box`, and `utilities`. The order stays stable regardless of stylesheet
+import order. The `box` layer contains Luke UI's curated layout classes; the final `utilities` layer
+is consumer-owned for sanctioned overrides.
 
 If your application also uses cascade layers, declare its layer order before importing stylesheets.
 
 ```css
-@layer reset, theme, base, recipes, components, box, utilities;
+@layer reset, base, tokens, recipes, components, box, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';
@@ -157,6 +157,22 @@ import { Box } from '@luke-ui/react/box';
 When a CSS Module or application stylesheet needs a token, use the stable `--luke-*` variable listed
 in the [token reference](/theming/token-reference). Do not couple application CSS to undocumented
 selectors or implementation attributes.
+
+## Extend Panda deliberately
+
+The default floor is the prebuilt stylesheet, themes, components, recipes, and `vars`. Consumers
+that run Panda can opt into `@luke-ui/react/preset` for the shared layer order. Keep the starter as
+the first statement in global CSS and extend it with any consumer-owned layer names.
+
+```ts
+import { lukeLayerOrderStarter } from '@luke-ui/react/preset';
+
+console.log(lukeLayerOrderStarter);
+// @layer reset, base, tokens, recipes, box, utilities;
+```
+
+The preset does not replace the prebuilt stylesheet or theme CSS: import both before using its token
+aliases. It intentionally exports neither a prebuilt `css()` helper nor a separate token entrypoint.
 
 ## Continue learning
 

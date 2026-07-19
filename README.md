@@ -1,6 +1,6 @@
 # Luke UI
 
-React design system built with `react-aria-components` and `vanilla-extract`.
+React design system built with `react-aria-components` and Panda CSS.
 
 ## Setup
 
@@ -19,7 +19,7 @@ Useful repo commands:
 
 - Monorepo: pnpm and Turbo.
 - React: `react-aria-components`.
-- Styling: `vanilla-extract` static CSS.
+- Styling: Panda-generated static CSS.
 - Lint and format: `oxlint` and `oxfmt`.
 
 ## Package

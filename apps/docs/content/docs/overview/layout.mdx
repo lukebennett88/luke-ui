@@ -8,8 +8,8 @@ overflow, flex, and grid-child rules separate from a component's content and beh
 
 ## Box
 
-`Box` is a `div` with the supported Sprinkles properties. Use it to space child content, constrain
-its size, place an item in a flex or grid layout, or hide content at a breakpoint.
+`Box` is a `div` with the supported layout properties. Use it to space child content, constrain its
+size, place an item in a flex or grid layout, or hide content at a breakpoint.
 
 ```tsx
 import { Box } from '@luke-ui/react/box';
@@ -58,9 +58,9 @@ in both writing directions without a second layout rule.
 
 ## Use visual styles elsewhere
 
-Sprinkles excludes semantic colour, typography, and interaction states. Choose a component API for
-those concerns. When a custom element needs a visual token, use `vars` from `@luke-ui/react/theme`
-rather than a palette value or component selector.
+The layout utilities exclude semantic colour, typography, and interaction states. Choose a component
+API for those concerns. When a custom element needs a visual token, use `vars` from
+`@luke-ui/react/theme` rather than a palette value or component selector.
 
 ## Continue learning
 

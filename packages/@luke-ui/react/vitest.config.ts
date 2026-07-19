@@ -1,7 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
 
@@ -10,20 +9,12 @@ const dirname =
 const configDir = path.join(dirname, '.storybook');
 export default defineConfig({
 	optimizeDeps: {
-		include: [
-			'@vanilla-extract/recipes/createRuntimeFn',
-			'react-aria-components/I18nProvider',
-			'react-aria-components/Link',
-		],
+		include: ['react-aria-components/I18nProvider', 'react-aria-components/Link'],
 	},
 	test: {
 		projects: [
 			{
 				extends: true,
-				plugins: [
-					// Required for .css.ts processing in unit tests.
-					vanillaExtractPlugin(),
-				],
 				test: {
 					environment: 'node',
 					exclude: ['**/node_modules/**', '**/*.browser.test.*'],
@@ -33,10 +24,6 @@ export default defineConfig({
 			},
 			{
 				extends: true,
-				plugins: [
-					// Required for .css.ts processing in Vitest browser mode.
-					vanillaExtractPlugin(),
-				],
 				test: {
 					browser: {
 						enabled: true,
@@ -51,12 +38,7 @@ export default defineConfig({
 			},
 			{
 				extends: true,
-				plugins: [
-					// Required for .css.ts processing in Vitest browser mode.
-					vanillaExtractPlugin(),
-					// Runs tests for stories defined in Storybook config.
-					storybookTest({ configDir }),
-				],
+				plugins: [storybookTest({ configDir })],
 				test: {
 					browser: {
 						enabled: true,
@@ -69,10 +51,6 @@ export default defineConfig({
 			},
 			{
 				extends: true,
-				plugins: [
-					// Required for .css.ts processing in Vitest browser mode.
-					vanillaExtractPlugin(),
-				],
 				test: {
 					browser: {
 						enabled: true,

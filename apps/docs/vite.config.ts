@@ -117,8 +117,6 @@ export default defineConfig(async () => {
 			include: [
 				'@monaco-editor/react',
 				'@react-aria/utils',
-				'@vanilla-extract/recipes',
-				'@vanilla-extract/recipes/createRuntimeFn',
 				'lz-string',
 				'monaco-editor',
 				'react-aria-components/Breadcrumbs',

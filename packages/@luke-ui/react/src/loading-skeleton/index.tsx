@@ -1,7 +1,7 @@
 import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import * as styles from '../recipes/loading-skeleton.js';
-import { vars } from '../theme/contract.css.js';
+import { vars } from '../theme/panda-tokens.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { cx } from '../utils/index.js';

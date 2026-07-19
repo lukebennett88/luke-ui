@@ -26,7 +26,7 @@ const fontSteps = Object.fromEntries(
 ) as Record<FontSizeStep, typeof fontStep>;
 
 /**
- * The semantic token tree shared by the vanilla-extract contract and `buildTheme`, so typed paths
+ * The semantic token tree shared by Panda aliases and `buildTheme`, so typed paths
  * and emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one
  * stable `--luke-*` custom property.
  */

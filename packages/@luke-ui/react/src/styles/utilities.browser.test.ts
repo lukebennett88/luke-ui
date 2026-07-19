@@ -1,5 +1,5 @@
+import '../../dist/stylesheet.css';
 import '../../dist/themes/tactile.css';
-import '../stylesheet.css.js';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { themeRootClassName } from '../theme/index.js';

@@ -54,11 +54,9 @@ and tie approval to that workflow run and commit.
 
 ## Why the goldens are a frozen, committed set
 
-This is a stopgap for the Vanilla Extract to Panda migration. Once the VE rollup plugin is removed
-from `vitest.config.ts` (ticket T6), the old `*.css.ts` files can no longer be compiled, so
-rebuilding a live Vanilla Extract baseline becomes impossible. A committed set captured once on the
-`ve-final` tag keeps the parity gate stable across that removal and makes diffs reviewable directly
-in the PR.
+The committed goldens were captured once from the final Vanilla Extract revision. Panda's shipped
+stylesheet is compared against that frozen set, so the parity gate stays stable and diffs remain
+reviewable directly in the PR.
 
 See [`TESTING.md`](./TESTING.md#visual-regression-tests) for how to write a visual test.
 

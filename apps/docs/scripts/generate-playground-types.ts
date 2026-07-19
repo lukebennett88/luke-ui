@@ -106,18 +106,12 @@ files[virtualPath('@luke-ui/react', 'package.json')] = JSON.stringify({
 // Resolution starts from the package that actually depends on each one, so
 // pnpm's strict node_modules layout resolves the correct versions.
 const typesReactDir = resolvePackageDir(docsPackageJsonPath, '@types/react');
-const recipesDir = resolvePackageDir(docsPackageJsonPath, '@vanilla-extract/recipes');
 const racDir = resolvePackageDir(docsPackageJsonPath, 'react-aria-components');
 const racPackageJsonPath = join(racDir, 'package.json');
 const externalTypePackages: Array<[string, string]> = [
 	['@types/react', typesReactDir],
 	['@types/react-dom', resolvePackageDir(docsPackageJsonPath, '@types/react-dom')],
 	['csstype', resolvePackageDir(join(typesReactDir, 'package.json'), 'csstype')],
-	['@vanilla-extract/recipes', recipesDir],
-	[
-		'@vanilla-extract/css',
-		resolvePackageDir(join(recipesDir, 'package.json'), '@vanilla-extract/css'),
-	],
 	['react-aria-components', racDir],
 	['react-aria', resolvePackageDir(racPackageJsonPath, 'react-aria')],
 	['react-stately', resolvePackageDir(racPackageJsonPath, 'react-stately')],

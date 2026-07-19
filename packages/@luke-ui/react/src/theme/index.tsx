@@ -8,7 +8,7 @@ export const themeRootClassName = cx(lukeUiClassNames.themeRoot, lukeUiClassName
  * Typed access to the semantic theme custom properties. Each path resolves to a stable global
  * `--luke-*` variable reference, for example `vars.color.intent.danger.surface.solidHover`.
  */
-export { vars } from './contract.css.js';
+export { vars } from './panda-tokens.js';
 
 /**
  * `buildTheme(foundation)` compiles a typed theme foundation into complete stylesheet text: pure
