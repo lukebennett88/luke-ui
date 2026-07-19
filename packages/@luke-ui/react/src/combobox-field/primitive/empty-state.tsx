@@ -1,5 +1,5 @@
 import type { JSX, ReactNode } from 'react';
-import * as styles from '../../recipes/combobox.css.js';
+import * as styles from '../../recipes/combobox.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 

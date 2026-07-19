@@ -10,7 +10,7 @@ import {
 	comboboxItem,
 	comboboxPopover,
 	comboboxTrigger,
-} from './combobox.css.js';
+} from './combobox.js';
 
 let wrappers: Array<HTMLElement> = [];
 

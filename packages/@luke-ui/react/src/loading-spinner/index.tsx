@@ -1,7 +1,7 @@
 import { clamp } from '@react-aria/utils';
 import type { ComponentProps } from 'react';
 import { useIconSizeContext } from '../icon-size-context/index.js';
-import * as styles from '../recipes/loading-spinner.css.js';
+import * as styles from '../recipes/loading-spinner.js';
 import {
 	ICON_VIEWBOX,
 	ICON_VIEWBOX_SIZE,

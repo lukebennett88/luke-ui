@@ -3,7 +3,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 import {
 	comboboxTrayKeyboardInsetVar,
 	comboboxTrayViewportHeightVar,
-} from '../recipes/combobox.css.js';
+} from '../recipes/combobox.js';
 import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
 import { ComboboxField } from './index.js';
 import { ComboboxItem } from './primitive/item.js';

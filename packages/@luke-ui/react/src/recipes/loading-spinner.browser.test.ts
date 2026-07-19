@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
-import { indicator, spinnerState } from './loading-spinner.css.js';
+import { indicator, spinnerState } from './loading-spinner.js';
 
 const mounted: Array<Element> = [];
 

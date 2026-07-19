@@ -50,5 +50,8 @@ export type IconSizeToken<Size extends IconSize> = Extract<SizeToken, `iconSize.
 /** Control sizes, derived from the size tokens. */
 export type ControlSize = ControlSizeOf<SizeToken>;
 
+/** The exact size token for one control-size step. */
+export type ControlSizeToken<Size extends ControlSize> = Extract<SizeToken, `controlSize.${Size}`>;
+
 /** A typography step present in all three generated font scales. */
 export type FontStep = FontSizeStep & FontSizeToken & LetterSpacingToken & LineHeightToken;

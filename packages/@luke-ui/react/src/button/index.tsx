@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from 'react';
 import { LoadingSpinner } from '../loading-spinner/index.js';
-import * as styles from '../recipes/button-composed.css.js';
+import * as styles from '../recipes/button-composed.js';
 import type * as primitiveStyles from '../recipes/button.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';

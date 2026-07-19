@@ -1,7 +1,7 @@
 import type { JSX } from 'react';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
-import * as styles from '../../recipes/field.css.js';
+import * as styles from '../../recipes/field.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
