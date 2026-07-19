@@ -1,0 +1,101 @@
+---
+title: Composition and customisation
+description: Choose a Luke UI component, primitive, recipe, or token for custom interface patterns.
+---
+
+Start with Luke UI's primary component API when it matches the interaction and structure you need.
+It handles the intended behaviour, accessibility, and visual treatment together. Compose from public
+primitives only when that API does not fit.
+
+## Start with the primary API
+
+Atoms and composed components are Luke UI's primary API for application code. They avoid boilerplate
+by handling common complexity for you. Primitives are public too, but are the secondary API for
+custom composition. The `/primitive` path makes that lower-level audience visible.
+
+| Tier      | Audience        | Import path                            | Use it for                                                                 |
+| --------- | --------------- | -------------------------------------- | -------------------------------------------------------------------------- |
+| Atom      | App developers  | `@luke-ui/react/<component>`           | One complete unit, such as `Text`, `Link`, or `Icon`.                      |
+| Composed  | App developers  | `@luke-ui/react/<component>`           | A ready-to-use pattern, such as `Button`, `TextField`, or `ComboboxField`. |
+| Primitive | Library authors | `@luke-ui/react/<component>/primitive` | A custom composed component that needs lower-level behaviour or structure. |
+
+```tsx
+import { Button } from '@luke-ui/react/button';
+import { TextInput } from '@luke-ui/react/text-field/primitive';
+```
+
+Use a composed component for ordinary application UI. For example, `Button` includes its standard
+label, icon slots, and pending treatment. Use its primitive only when building a related composed
+component and you need to own its structure, such as a different child layout or loading treatment,
+while retaining Luke UI button behaviour and styling.
+
+Each primitive page documents the structure and accessibility responsibilities for that primitive.
+Keep those documented relationships intact when you compose one. Do not depend on React Aria
+contexts, slots, or Luke UI implementation details as an application API.
+
+## Build a custom composition
+
+Choose the primitive that owns the behaviour you need, then compose its documented public parts. For
+example, use the field primitive for a label, description, and control arrangement. Use the combobox
+primitives when `ComboboxField` does not fit your control, popover, or loading UI.
+
+<ExampleBlock
+	src="composition/amount-field"
+	title="Amount field"
+	description="Compose the Field and TextInput primitives without adding a new workflow."
+/>
+
+Give the custom component the same accessibility care as a composed component: preserve its
+documented structure, provide an accessible name, and keep keyboard and focus behaviour intact. Use
+an atom or normal React element for surrounding content when no primitive is needed.
+
+## Render a different DOM component
+
+The Button primitive exposes `render` when you need a small implementation detail that the primary
+API does not provide. Spread the supplied DOM props onto the expected `<button>` element type and
+return one DOM root. Custom wrappers must pass the supplied `ref` to that element.
+
+<ExampleBlock
+	src="composition/animated-button"
+	title="Animated button"
+	description="Use the Button primitive's render API to add a subtle press treatment."
+/>
+
+The second `render` argument contains interaction state such as `isPressed`.
+
+## Style the new pattern
+
+Use public recipes from `@luke-ui/react/recipes` when the custom composition follows that
+component's documented structure. Recipes are component-specific rather than a general styling
+system.
+
+```tsx
+import { button } from '@luke-ui/react/recipes';
+
+const className = button({ appearance: 'subtle', size: 'small' });
+
+<button className={className} type="button">
+	Save
+</button>;
+```
+
+Use public semantic variables from `@luke-ui/react/theme` for custom surfaces, typography, colour,
+radius, and depth. They follow the active theme and colour mode without coupling the component to
+selectors, generated palette values, or theme implementation details.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+<aside
+	style={{
+		backgroundColor: vars.color.surface.floating,
+		borderRadius: vars.radius.surface,
+		boxShadow: vars.depth.floating,
+		color: vars.color.text.primary,
+	}}
+/>;
+```
+
+Read [Styling](/overview/styling) for recipes, semantic variables, and layout utilities. Read the
+[primitive documentation](/components/primitives/button) before building a custom component from a
+specific primitive.

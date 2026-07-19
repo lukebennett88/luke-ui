@@ -3,6 +3,7 @@
 	"pages": [
 		"getting-started",
 		"styling",
+		"composition",
 		"layout",
 		"theme",
 		"color",
