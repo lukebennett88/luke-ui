@@ -1,0 +1,92 @@
+---
+title: Dialog
+description: A modal dialog for focused interactions that require the user's attention.
+---
+
+`Dialog` presents content in a focused overlay, blocking interaction with the page behind it. Use it
+for confirmations, forms, and other tasks that benefit from a dedicated layer.
+
+```tsx
+import { Dialog, DialogTrigger } from '@luke-ui/react/dialog';
+import { Button } from '@luke-ui/react/button';
+
+<DialogTrigger>
+	<Button>Open Dialog</Button>
+	<Dialog>Dialog content</Dialog>
+</DialogTrigger>;
+```
+
+## Anatomy
+
+A dialog is composed of several subcomponents that build on
+[React Aria Components](https://react-spectrum.adobe.com/react-aria-components.html).
+
+<ExampleBlock
+	src="dialog/default"
+	title="Dialog — Anatomy"
+	description="A dialog with header, description, and action buttons."
+/>
+
+## Close behaviour
+
+By default clicking outside the dialog or pressing <kbd>Escape</kbd> dismisses it. Set
+`isDismissable={false}` on `Dialog` to require an explicit action.
+
+The `Dialog` component renders a close button in the top-right corner by default. Set
+`showCloseButton={false}` to remove it.
+
+A text close button can be placed in the footer with `showCloseButton` on `DialogFooter`.
+
+```tsx
+<DialogTrigger>
+	<Button>Open Dialog</Button>
+	<Dialog>
+		<DialogTitle>Confirm</DialogTitle>
+		<DialogFooter showCloseButton>
+			<Button tone="accent">Confirm</Button>
+		</DialogFooter>
+	</Dialog>
+</DialogTrigger>
+```
+
+## Accessibility
+
+The dialog manages focus automatically: focus moves inside when opened and returns to the trigger
+when closed. The overlay receives `role="dialog"` and is labelled by the `DialogTitle` component.
+
+## Props
+
+### Dialog
+
+<auto-type-table path="packages/@luke-ui/react/src/dialog/index.tsx" name="DialogProps" />
+
+### DialogTrigger
+
+<auto-type-table path="packages/@luke-ui/react/src/dialog/index.tsx" name="DialogTriggerProps" />
+
+### DialogTitle
+
+<auto-type-table path="packages/@luke-ui/react/src/dialog/index.tsx" name="DialogTitleProps" />
+
+### DialogDescription
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/dialog/index.tsx"
+	name="DialogDescriptionProps"
+/>
+
+### DialogHeader
+
+<auto-type-table path="packages/@luke-ui/react/src/dialog/index.tsx" name="DialogHeaderProps" />
+
+### DialogFooter
+
+<auto-type-table path="packages/@luke-ui/react/src/dialog/index.tsx" name="DialogFooterProps" />
+
+### DialogClose
+
+<auto-type-table path="packages/@luke-ui/react/src/dialog/index.tsx" name="DialogCloseProps" />
+
+### DialogOverlay
+
+<auto-type-table path="packages/@luke-ui/react/src/dialog/index.tsx" name="DialogOverlayProps" />

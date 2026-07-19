@@ -19,6 +19,7 @@
 		"./button/primitive": "./dist/button/primitive/index.js",
 		"./combobox-field": "./dist/combobox-field/index.js",
 		"./combobox-field/primitive": "./dist/combobox-field/primitive/index.js",
+		"./dialog": "./dist/dialog/index.js",
 		"./emoji": "./dist/emoji/index.js",
 		"./field/primitive": "./dist/field/primitive/index.js",
 		"./heading": "./dist/heading/index.js",

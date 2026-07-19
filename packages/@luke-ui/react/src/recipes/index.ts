@@ -1,5 +1,25 @@
 export type { ButtonVariants } from '../recipes/button.css.js';
 export { button } from '../recipes/button.css.js';
+export type {
+	DialogCloseButtonVariants,
+	DialogContentVariants,
+	DialogDescriptionVariants,
+	DialogFooterVariants,
+	DialogHeaderVariants,
+	DialogOverlayVariants,
+	DialogTitleVariants,
+	DialogVariants,
+} from '../recipes/dialog.css.js';
+export {
+	dialog,
+	dialogCloseButton,
+	dialogContent,
+	dialogDescription,
+	dialogFooter,
+	dialogHeader,
+	dialogOverlay,
+	dialogTitle,
+} from '../recipes/dialog.css.js';
 export { field, fieldLabel, fieldMessage } from '../recipes/field.css.js';
 export type { IconVariants } from '../recipes/icon.css.js';
 export { icon } from '../recipes/icon.css.js';
