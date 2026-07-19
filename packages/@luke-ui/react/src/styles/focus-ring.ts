@@ -1,7 +1,7 @@
 /**
  * The shared focus outline block, keyed off one outline colour. Plain values only, so it is
- * usable from both vanilla-extract styles and Panda recipe definitions; pass whichever token
- * reference form the call site's styling system resolves.
+ * usable from Panda global styles and recipe definitions; pass the token reference the call site
+ * resolves.
  */
 export function focusRing(color: string) {
 	return {

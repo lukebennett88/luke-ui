@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
-// Loads the design-token stylesheet into the test document.
-import '../stylesheet.css.js';
+// Loads the shipped Panda stylesheet into the test document.
+import '../../dist/stylesheet.css';
 import '@luke-ui/react/themes/paper.css';
 import '@luke-ui/react/themes/tactile.css';
 import type { ComponentProps, ComponentType, CSSProperties, ReactNode } from 'react';

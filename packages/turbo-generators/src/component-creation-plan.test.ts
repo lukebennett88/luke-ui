@@ -21,7 +21,6 @@ describe('createComponentPlan', () => {
 			'apps/docs/src/status-badge/status-badge.story.tsx',
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
 			'packages/@luke-ui/react/src/status-badge/index.tsx',
-			'packages/@luke-ui/react/src/status-badge/status-badge.docs.md',
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
 		]);
 		expect(plan.jsonEdits).toEqual([
@@ -104,6 +103,7 @@ describe('createComponentPlan', () => {
 		expect(plan.files.map((file) => file.path)).not.toContain(
 			'apps/docs/content/docs/getting-started.mdx',
 		);
+		expect(plan.files.some((file) => file.path.endsWith('.docs.md'))).toBe(false);
 		expect(plan.jsonEdits.map((edit) => edit.path)).toEqual([
 			'apps/docs/content/docs/components/meta.json',
 			'apps/docs/content/docs/components/actions/meta.json',

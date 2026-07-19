@@ -57,10 +57,6 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `packages/@luke-ui/react/src/${name}/index.tsx`,
 		},
 		{
-			contents: renderPackageDocs({ name, packagePath, pascalName }),
-			path: `packages/@luke-ui/react/src/${name}/${name}.docs.md`,
-		},
-		{
 			contents: renderPackageStory({ docsGroup, name, pascalName }),
 			path: `packages/@luke-ui/react/src/${name}/${name}.stories.tsx`,
 		},
@@ -183,30 +179,6 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 `;
 }
 
-function renderPackageDocs(input: {
-	name: string;
-	packagePath: string;
-	pascalName: string;
-}): string {
-	return `\`${input.pascalName}\` from \`${input.packagePath}\`.
-
-\`\`\`tsx
-<${input.pascalName}>Label</${input.pascalName}>
-\`\`\`
-
-## Best Practices
-
-| Guidance | Practices |
-| -------- | --------- |
-| _Do/Don't_ | _Add a row per practice worth calling out. Rows don't need to pair up. Delete this section if there's no useful guidance to give._ |
-
-## Accessibility
-
-_Describe accessibility considerations (e.g. required aria-label, keyboard behavior, screen reader
-announcements). Delete this section if there's nothing beyond default semantics._
-`;
-}
-
 function renderPackageStory(input: {
 	docsGroup: string;
 	name: string;
@@ -270,7 +242,7 @@ import { story } from '../../../../src/${input.name}/${input.name}.story';
 
 <story.WithControl />
 
-<include>../../../../../../packages/@luke-ui/react/docs/${input.name}.md</include>
+<auto-type-table path="packages/@luke-ui/react/src/${input.name}/index.tsx" name="${input.displayName.replaceAll(' ', '')}Props" />
 `;
 }
 

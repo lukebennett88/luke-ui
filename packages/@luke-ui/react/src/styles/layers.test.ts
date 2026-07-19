@@ -1,8 +1,6 @@
-import { describe, expect, it } from 'vite-plus/test';
-import { layers } from './layers.css.js';
+import { expect, test } from 'vite-plus/test';
+import { lukeLayerOrder } from './layer-order.js';
 
-describe('layers', () => {
-	it('declares cascade layers from lowest to highest priority', () => {
-		expect(Object.keys(layers)).toEqual(['reset', 'theme', 'recipes', 'utilities']);
-	});
+test('declares cascade layers from lowest to highest priority', () => {
+	expect(lukeLayerOrder).toEqual(['reset', 'base', 'tokens', 'recipes', 'box', 'utilities']);
 });

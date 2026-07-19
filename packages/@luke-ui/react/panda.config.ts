@@ -16,6 +16,7 @@ import { loadingSpinnerRecipe } from './src/recipes/loading-spinner.recipe.js';
 import { textInputRecipe } from './src/recipes/text-input.recipe.js';
 import { textRecipe } from './src/recipes/text.recipe.js';
 import { responsiveBreakpoints } from './src/styles/breakpoints.js';
+import { globalStyles } from './src/styles/global-styles.js';
 import { lukeLayerOrder } from './src/styles/layer-order.js';
 import { buildPandaTokens, vars } from './src/theme/panda-tokens.js';
 
@@ -269,7 +270,7 @@ export default defineConfig({
 		xlarge: responsiveBreakpoints.xlarge.query,
 		xxlarge: responsiveBreakpoints.xxlarge.query,
 	},
-	globalCss: loadingSkeletonGlobalCss,
+	globalCss: { ...globalStyles, ...loadingSkeletonGlobalCss },
 
 	// The alias layer plus the T2 box-slice placeholder spacing, kept so the box
 	// `utilities`/`staticCss` below still resolve (transitional; removed later).

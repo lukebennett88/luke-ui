@@ -11,10 +11,8 @@ const repoRoot = path.resolve(packageRoot, '../../..');
 const artifacts = path.join(repoRoot, '.artifacts/visual-regression');
 
 // Frozen Vanilla Extract goldens, captured once on the `ve-final` tag (epic #144,
-// ticket #145). The migration compares the working tree against this committed set
-// instead of rebuilding a live baseline: once the VE rollup plugin is removed from
-// `vitest.config.ts` (ticket T6) the old `*.css.ts` can no longer be compiled to
-// reproduce it. Re-capture with `--update-goldens` after an intentional visual change.
+// ticket #145). The Panda stylesheet is compared with this committed set. Re-capture
+// only after an intentional visual change.
 const goldensRoot = path.join(packageRoot, 'visual-goldens');
 const goldenCaptures = path.join(goldensRoot, 'captures');
 const manifestPath = path.join(goldensRoot, 'manifest.json');

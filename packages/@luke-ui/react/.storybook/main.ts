@@ -1,7 +1,6 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineMain } from '@storybook/react-vite/node';
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 
 function getAbsolutePath(value: string) {
 	return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
@@ -30,7 +29,6 @@ export default defineMain({
 	// directly. Without this, Storybook reads the prebuilt `dist/` and won't pick
 	// up changes until the dev server is restarted.
 	viteFinal(config) {
-		config.plugins = [...(config.plugins ?? []), ...vanillaExtractPlugin()];
 		config.resolve ??= {};
 		const existingAliases = Array.isArray(config.resolve.alias) ? config.resolve.alias : [];
 		config.resolve.alias = [
@@ -40,7 +38,7 @@ export default defineMain({
 			},
 			{
 				find: /^@luke-ui\/react\/stylesheet\.css(\?.*)?$/,
-				replacement: `${resolve(srcDir, 'stylesheet.css.ts')}$1`,
+				replacement: `${resolve(distDir, 'stylesheet.css')}$1`,
 			},
 			{
 				find: /^@luke-ui\/react\/(.+?)(\?.*)?$/,

@@ -30,7 +30,7 @@ not as inline string constants.
 - Components: `PascalCase`, for example `Button.tsx`.
 - Props: `PascalCaseProps`, for example `ButtonProps`.
 - Files: `kebab-case`, for example `icon-button.tsx`.
-- CSS: `*.css.ts`.
+- Panda recipes: `*.recipe.ts`.
 - Panda recipes: `*.recipe.ts`.
 - Stories: `*.stories.tsx`.
 

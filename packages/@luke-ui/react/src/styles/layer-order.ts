@@ -6,8 +6,8 @@
  * the emitted `@layer …;` declaration can never drift between the two.
  *
  * - **reset** — Normalize browser defaults (box-sizing, margins, form elements).
- * - **base** — Base typographic/element defaults (the non-token half of VE's `theme`).
- * - **tokens** — Design-token custom properties (the token half of VE's `theme`).
+ * - **base** — Base typographic and element defaults.
+ * - **tokens** — Design-token aliases.
  * - **recipes** — Component styles (variants, compound variants).
  * - **box** — The Box component's style props. Not a native Panda layer; produced
  *   by re-wrapping Panda's `utilities` output in the assembler.

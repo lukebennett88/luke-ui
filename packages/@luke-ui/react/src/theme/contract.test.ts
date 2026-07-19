@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { vars } from './contract.css.js';
 import { fontSizeSteps, flattenThemeContract } from './contract.js';
+import { vars } from './panda-tokens.js';
 
 function countLeaves(node: unknown): number {
 	if (typeof node === 'string') return 1;

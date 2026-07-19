@@ -8,12 +8,12 @@ stylesheet and apply its identity class to the same element. Neither step inject
 
 ## Structure
 
-- `styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
-- `styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
+- `styles/global-styles.ts`: Panda global reset and base typography scoped to `.luke-ui-reset` and
+  `.luke-ui-theme`.
 - `recipes/`: component recipes exported from `@luke-ui/react/recipes`.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree and its `--luke-*` variable naming.
-- `theme/contract.css.ts`: the typed `vars` contract built with `createGlobalThemeContract`.
+- `theme/panda-tokens.ts`: the typed `vars` contract and Panda token aliases.
 - `theme/foundation.ts`: the typed theme-foundation input and curated defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/build-theme.ts`: `buildTheme(foundation)`, `themeClassName`, and contrast validation.
@@ -70,16 +70,18 @@ surface continues to follow the system preference.
 All styles live in CSS cascade layers so override order does not depend on source order or
 specificity.
 
-| Layer       | Purpose                                             |
-| ----------- | --------------------------------------------------- |
-| `reset`     | Browser defaults, box sizing, and margins.          |
-| `theme`     | Design token custom properties and base typography. |
-| `recipes`   | Component styles, variants, and compound variants.  |
-| `box`       | Curated layout classes used by Box and styles.      |
-| `utilities` | One-off layout and override escape hatches.         |
+| Layer       | Purpose                                                       |
+| ----------- | ------------------------------------------------------------- |
+| `reset`     | Scoped browser defaults, box sizing, margins, and focus ring. |
+| `base`      | Scoped base typography, text colour, and accent colour.       |
+| `tokens`    | Panda aliases that resolve to the active `--luke-*` contract. |
+| `recipes`   | Component styles, variants, compound variants, and globals.   |
+| `box`       | Curated layout classes used by Box and styles.                |
+| `utilities` | Consumer-owned one-off layout and override escape hatches.    |
 
-Vanilla Extract styles declare their layer directly with `@layer`. Panda config recipes emit into
-the `recipes` layer, and Panda global rules use `globalCss` with an inline `@layer` key.
+Panda config recipes emit into the `recipes` layer, and Panda global rules use `globalCss` with an
+inline `@layer` key. The assembled `stylesheet.css` begins with the canonical layer-order
+declaration.
 
 Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
@@ -102,10 +104,9 @@ import { button, link } from '@luke-ui/react/recipes';
 
 Recipes are component-specific. Keep them separate from general layout utilities.
 
-## Panda config recipes (migration in progress)
+## Panda config recipes
 
-Components are moving from vanilla-extract recipes to Panda config recipes one at a time. A migrated
-recipe is a pair of files: `src/recipes/<name>.recipe.ts` holds the `defineRecipe` (or
+Each recipe is a pair of files: `src/recipes/<name>.recipe.ts` holds the `defineRecipe` (or
 `defineSlotRecipe`) definition and is registered in `panda.config.ts`. This is the only file that
 may import `@pandacss/dev`.
 
@@ -113,8 +114,7 @@ may import `@pandacss/dev`.
 the per-recipe module `styled-system/recipes/<name>.mjs`, never the generated
 `styled-system/recipes/index.mjs` barrel, and derives its public variant types from the generated
 types so a variant added to the recipe definition needs no matching edit here. Both files together
-are what `@luke-ui/react/recipes` exports; the vanilla-extract `*.css.ts` recipes not yet migrated
-keep authoring their styles and types directly.
+are what `@luke-ui/react/recipes` exports.
 
 ### Type-safety rules for recipe definitions
 

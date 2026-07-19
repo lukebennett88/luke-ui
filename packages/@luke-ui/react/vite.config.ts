@@ -1,15 +1,13 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { babel } from '@rollup/plugin-babel';
-import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
 import { readdir, rm } from 'node:fs/promises';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
 
-const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
-const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
+const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'stylesheet.css', 'themes']);
 const assetExports = [
 	'./stylesheet.css',
 	'./spritesheet.svg',
@@ -67,11 +65,6 @@ export default defineConfig({
 		},
 		platform: 'neutral',
 		plugins: [
-			vanillaExtractPlugin({
-				cwd: workspaceRoot,
-				extract: { name: 'stylesheet.css', sourcemap: true },
-				identifiers: 'short',
-			}),
 			babel({
 				babelHelpers: 'bundled',
 				extensions: ['.js', '.jsx', '.ts', '.tsx'],

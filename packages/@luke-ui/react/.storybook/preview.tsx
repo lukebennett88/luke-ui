@@ -2,7 +2,6 @@
 
 import '../dist/themes/paper.css';
 import '../dist/themes/tactile.css';
-import '../styled-system/assembled.css';
 import '@luke-ui/react/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';

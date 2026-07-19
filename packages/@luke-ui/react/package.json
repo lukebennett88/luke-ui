@@ -9,7 +9,6 @@
 	],
 	"type": "module",
 	"sideEffects": [
-		"**/*.css.ts",
 		"./dist/stylesheet.css",
 		"./dist/themes/*.css"
 	],
@@ -30,6 +29,7 @@
 		"./loading-skeleton": "./dist/loading-skeleton/index.js",
 		"./loading-spinner": "./dist/loading-spinner/index.js",
 		"./numeral": "./dist/numeral/index.js",
+		"./preset": "./dist/preset/index.js",
 		"./recipes": "./dist/recipes/index.js",
 		"./styles": "./dist/styles/index.js",
 		"./text": "./dist/text/index.js",
@@ -48,7 +48,7 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "pnpm run build:tsdown && pnpm run build:stylesheet",
+		"build": "pnpm run build:stylesheet && pnpm run build:tsdown",
 		"build:stylesheet": "tsx scripts/assemble-stylesheet.ts --output=dist/stylesheet.css",
 		"build:storybook": "storybook build",
 		"build:tsdown": "vp pack",
@@ -66,7 +66,7 @@
 		"fix:lint": "vp lint . --type-aware --fix",
 		"fix:unsafe": "vp lint . --type-aware --fix-dangerously",
 		"generate": "pnpm run generate:token-map && pnpm run generate:assets && pnpm run generate:panda && pnpm run generate:assembled",
-		"generate:assembled": "tsx scripts/assemble-stylesheet.ts",
+		"generate:assembled": "tsx scripts/assemble-stylesheet.ts --output=dist/stylesheet.css",
 		"generate:assets": "pnpm run generate:icons && pnpm run generate:themes",
 		"generate:icons": "tsx scripts/build-icons.ts",
 		"generate:panda": "panda codegen && panda cssgen --splitting",
@@ -85,11 +85,9 @@
 		"test:watch": "vp test --project=storybook"
 	},
 	"dependencies": {
+		"@capsizecss/core": "catalog:",
 		"@capsizecss/metrics": "catalog:",
-		"@capsizecss/vanilla-extract": "catalog:",
 		"@react-aria/utils": "catalog:",
-		"@vanilla-extract/css": "catalog:",
-		"@vanilla-extract/recipes": "catalog:",
 		"react-aria-components": "catalog:"
 	},
 	"devDependencies": {
@@ -105,8 +103,6 @@
 		"@types/pngjs": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
-		"@vanilla-extract/rollup-plugin": "catalog:",
-		"@vanilla-extract/vite-plugin": "catalog:",
 		"@vitejs/plugin-react": "catalog:",
 		"@vitest/browser-playwright": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
