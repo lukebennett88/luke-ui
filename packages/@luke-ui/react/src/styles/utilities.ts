@@ -6,23 +6,14 @@ import type { Conditions } from '../../styled-system/types/conditions.d.mts';
 import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import { cx } from '../utils/index.js';
 
+type RemoveConditionPrefix<Condition extends string> = Condition extends `_${infer Name}`
+	? Name
+	: never;
+
 type Breakpoint = RemoveConditionPrefix<Exclude<keyof Conditions, 'base' | '_focus' | '_hover'>>;
 type Responsive<Value> = Value | Partial<Record<Breakpoint, Value>>;
 type Space = '0' | Exclude<SpacingToken, 'none' | 'sm' | 'md' | `-${string}`>;
 type DynamicValue = CSSProperties[keyof CSSProperties];
-
-const spaceValues = new Set<string>([
-	'0',
-	'100',
-	'200',
-	'300',
-	'400',
-	'600',
-	'800',
-	'1000',
-	'1200',
-	'1600',
-]);
 
 type StaticBoxProps = {
 	alignContent?: Responsive<
@@ -109,6 +100,65 @@ type DynamicBoxProps = {
 };
 
 export type SprinklesProps = StaticBoxProps & DynamicBoxProps;
+
+export function createSprinkles(props: Partial<SprinklesProps>): {
+	className: string;
+	style: Record<string, DynamicValue>;
+} {
+	const classes: Array<string> = [];
+	const style: Record<string, DynamicValue> = {};
+	const responsiveProps: Record<string, unknown> = {};
+	const staticProps: Record<string, unknown> = {};
+
+	for (const [property, value] of Object.entries(props)) {
+		if (isDynamicProperty(property) && (typeof value === 'number' || typeof value === 'string')) {
+			classes.push(dynamicClasses[property]);
+			style[`--box-${toKebabCase(property)}`] = value;
+			continue;
+		}
+
+		if (!isStaticProperty(property)) {
+			staticProps[property] = value;
+			continue;
+		}
+
+		if (isResponsiveValue(value)) {
+			for (const [breakpoint, responsiveValue] of Object.entries(value)) {
+				responsiveProps[toResponsiveBoxAlias(property, breakpoint)] = 'dynamic';
+				style[`--box-${toKebabCase(property)}-${breakpoint}`] = toResponsiveCssValue(
+					property,
+					responsiveValue,
+				);
+			}
+			continue;
+		}
+
+		staticProps[toBoxAlias(property)] = value;
+	}
+
+	return {
+		className: cx(
+			css(staticProps as SystemStyleObject),
+			css(responsiveProps as SystemStyleObject),
+			...classes,
+		),
+		style,
+	};
+}
+
+const spaceValues = new Set<string>([
+	'0',
+	'100',
+	'200',
+	'300',
+	'400',
+	'600',
+	'800',
+	'1000',
+	'1200',
+	'1600',
+]);
+
 // This manifest is the single source for the Box split boundary and is kept in
 // lockstep with the curated Panda staticCss surface.
 const boxPropertyManifest = [
@@ -198,35 +248,10 @@ const dynamicClasses = {
 	order: css({ boxOrder: 'dynamic' }),
 } as const;
 
-export function createSprinkles(props: Partial<SprinklesProps>): {
-	className: string;
-	style: Record<string, DynamicValue>;
-} {
-	const classes: Array<string> = [];
-	const style: Record<string, DynamicValue> = {};
-	const responsiveProps: SystemStyleObject = {};
-	const staticProps: SystemStyleObject = {};
+const UPPERCASE_LETTERS = /[A-Z]/g;
 
-	for (const [property, value] of Object.entries(props)) {
-		if (isDynamicProperty(property) && (typeof value === 'number' || typeof value === 'string')) {
-			classes.push(dynamicClasses[property]);
-			style[`--box-${property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`] = value;
-		} else if (isStaticProperty(property) && isResponsiveValue(value)) {
-			for (const [breakpoint, responsiveValue] of Object.entries(value)) {
-				Object.assign(responsiveProps, { [toResponsiveBoxAlias(property, breakpoint)]: 'dynamic' });
-				style[`--box-${toKebabCase(property)}-${breakpoint}`] = toResponsiveCssValue(
-					property,
-					responsiveValue,
-				);
-			}
-		} else if (isStaticProperty(property)) {
-			Object.assign(staticProps, { [toBoxAlias(property)]: value });
-		} else {
-			Object.assign(staticProps, { [property]: value });
-		}
-	}
-
-	return { className: cx(css(staticProps), css(responsiveProps), ...classes), style };
+function toKebabCase(value: string): string {
+	return value.replace(UPPERCASE_LETTERS, (letter) => `-${letter.toLowerCase()}`);
 }
 
 function isDynamicProperty(property: string): property is keyof typeof dynamicClasses {
@@ -245,12 +270,19 @@ function toResponsiveBoxAlias(property: keyof StaticBoxProps, breakpoint: string
 	return `${toBoxAlias(property)}${breakpoint.charAt(0).toUpperCase()}${breakpoint.slice(1)}`;
 }
 
-function toKebabCase(value: string): string {
-	return value.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
-}
-
 function isResponsiveValue(value: unknown): value is Record<string, DynamicValue> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isTokenBoundProperty(property: keyof StaticBoxProps): boolean {
+	if (property === 'columnGap' || property === 'gap' || property === 'rowGap') return true;
+	if (property.startsWith('margin') || property.startsWith('padding')) return true;
+
+	return false;
+}
+
+function isSpace(value: string): value is Space {
+	return spaceValues.has(value);
 }
 
 function toResponsiveCssValue(property: keyof StaticBoxProps, value: DynamicValue): DynamicValue {
@@ -259,21 +291,3 @@ function toResponsiveCssValue(property: keyof StaticBoxProps, value: DynamicValu
 
 	return token.var(`spacing.${value}`);
 }
-
-function isTokenBoundProperty(property: keyof StaticBoxProps): boolean {
-	return (
-		property === 'columnGap' ||
-		property === 'gap' ||
-		property.startsWith('margin') ||
-		property.startsWith('padding') ||
-		property === 'rowGap'
-	);
-}
-
-function isSpace(value: string): value is Space {
-	return spaceValues.has(value);
-}
-
-type RemoveConditionPrefix<Condition extends string> = Condition extends `_${infer Name}`
-	? Name
-	: never;

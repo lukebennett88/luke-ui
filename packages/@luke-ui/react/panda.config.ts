@@ -310,12 +310,12 @@ export default defineConfig({
 			},
 		},
 		slotRecipes: {
-			textInput: textInputRecipe,
+			buttonComposed: buttonComposedRecipe,
 			combobox: comboboxRecipe,
 			field: fieldRecipe,
-			loadingSpinner: loadingSpinnerRecipe,
-			buttonComposed: buttonComposedRecipe,
 			iconButton: iconButtonRecipe,
+			loadingSpinner: loadingSpinnerRecipe,
+			textInput: textInputRecipe,
 		},
 		tokens: {
 			...aliasTokens,
