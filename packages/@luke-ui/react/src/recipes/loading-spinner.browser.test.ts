@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
-import { indicator, spinnerState } from './loading-spinner.css.js';
+import { loadingSpinner } from './loading-spinner.js';
 
 const mounted: Array<Element> = [];
 
@@ -38,10 +38,11 @@ for (const [name, value] of [
 
 function mountSpinner() {
 	const spinner = document.body.appendChild(document.createElement('div'));
-	spinner.className = spinnerState({ mode: 'indeterminate' });
+	const loadingSpinnerStyles = loadingSpinner({ mode: 'indeterminate' });
+	spinner.className = loadingSpinnerStyles.state;
 	const svg = spinner.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'svg'));
 	const ring = svg.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'circle'));
-	ring.setAttribute('class', indicator({ mode: 'indeterminate' }));
+	ring.setAttribute('class', loadingSpinnerStyles.indicator);
 	mounted.push(spinner);
 	return { ring, spinner };
 }

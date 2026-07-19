@@ -10,7 +10,7 @@ import {
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon-size-context/index.js';
 import { Icon } from '../../icon/index.js';
-import * as styles from '../../recipes/combobox.css.js';
+import * as styles from '../../recipes/combobox.js';
 import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -35,6 +35,7 @@ export type ComboboxItemProps<T extends object> = Prettify<_ComboboxItemProps<T>
 export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX.Element {
 	const { size: sizeProp, ...itemProps } = props;
 	const size = useComboboxSize(sizeProp);
+	const comboboxStyles = styles.combobox({ size });
 
 	return (
 		<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
@@ -44,7 +45,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 				textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
 				{...itemProps}
 				className={composeRenderProps(itemProps.className, (className) => {
-					return cx(styles.comboboxItem({ size }), className);
+					return cx(comboboxStyles.item, className);
 				})}
 			>
 				{composeRenderProps(itemProps.children, (children, { isSelected }) => {
@@ -52,7 +53,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 						<>
 							{children}
 							{isSelected ? (
-								<Icon aria-hidden className={styles.comboboxItemCheck} name="check" />
+								<Icon aria-hidden className={comboboxStyles.itemCheck} name="check" />
 							) : null}
 						</>
 					);
@@ -78,11 +79,12 @@ export type ComboboxLoadMoreItemProps = Prettify<_ComboboxLoadMoreItemProps>;
 export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Element {
 	const { size: sizeProp, ...loadMoreItemProps } = props;
 	const size = useComboboxSize(sizeProp);
+	const comboboxStyles = styles.combobox({ size });
 
 	return (
 		<RacListBoxLoadMoreItem
 			{...loadMoreItemProps}
-			className={cx(styles.comboboxLoadMoreItem({ size }), loadMoreItemProps.className)}
+			className={cx(comboboxStyles.loadMoreItem, loadMoreItemProps.className)}
 		/>
 	);
 }

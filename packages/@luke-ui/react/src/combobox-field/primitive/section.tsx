@@ -2,7 +2,7 @@ import type { JSX, ReactNode } from 'react';
 import type { ListBoxSectionProps as RacListBoxSectionProps } from 'react-aria-components/ComboBox';
 import { ListBoxSection as RacListBoxSection } from 'react-aria-components/ComboBox';
 import { Header as RacHeader } from 'react-aria-components/Header';
-import * as styles from '../../recipes/combobox.css.js';
+import * as styles from '../../recipes/combobox.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
@@ -26,8 +26,9 @@ export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionPr
 
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
 	const { children, className, title, ...sectionProps } = props;
+	const comboboxStyles = styles.combobox();
 
-	const sectionClassName = cx(styles.comboboxSection(), className);
+	const sectionClassName = cx(comboboxStyles.section, className);
 
 	if (typeof children === 'function') {
 		return (
@@ -40,7 +41,7 @@ export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>
 	return (
 		<RacListBoxSection {...sectionProps} className={sectionClassName}>
 			{title != null ? (
-				<RacHeader className={styles.comboboxSectionHeading}>{title}</RacHeader>
+				<RacHeader className={comboboxStyles.sectionHeading}>{title}</RacHeader>
 			) : null}
 			{children}
 		</RacListBoxSection>

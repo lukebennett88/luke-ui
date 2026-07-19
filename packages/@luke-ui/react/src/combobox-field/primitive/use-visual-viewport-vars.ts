@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import {
 	comboboxTrayKeyboardInsetVar,
 	comboboxTrayViewportHeightVar,
-} from '../../recipes/combobox.css.js';
+} from '../../recipes/combobox-viewport-vars.js';
 
 /** Sets the visible viewport height and keyboard inset on the mobile tray. */
 export function useVisualViewportVars(element: HTMLElement | null): void {

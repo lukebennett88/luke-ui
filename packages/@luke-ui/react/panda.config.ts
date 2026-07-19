@@ -1,8 +1,13 @@
 import { defineConfig } from '@pandacss/dev';
 import presetBase from '@pandacss/preset-base';
+import { buttonComposedRecipe } from './src/recipes/button-composed.recipe.js';
 import { buttonRecipe } from './src/recipes/button.recipe.js';
+import { comboboxRecipe } from './src/recipes/combobox.recipe.js';
+import { fieldRecipe } from './src/recipes/field.recipe.js';
+import { iconButtonRecipe } from './src/recipes/icon-button.recipe.js';
 import { iconRecipe } from './src/recipes/icon.recipe.js';
 import { linkRecipe } from './src/recipes/link.recipe.js';
+import { loadingSpinnerRecipe } from './src/recipes/loading-spinner.recipe.js';
 import { textInputRecipe } from './src/recipes/text-input.recipe.js';
 import { textRecipe } from './src/recipes/text.recipe.js';
 import { lukeLayerOrder } from './src/styles/layer-order.js';
@@ -87,7 +92,22 @@ export default defineConfig({
 	// `utilities`/`staticCss` below still resolve (transitional; removed later).
 	theme: {
 		recipes: { button: buttonRecipe, icon: iconRecipe, link: linkRecipe, text: textRecipe },
-		slotRecipes: { textInput: textInputRecipe },
+		keyframes: {
+			spin: { to: { transform: 'rotate(360deg)' } },
+			rubberBand: {
+				'0%': { strokeDasharray: '2 100' },
+				'50%': { strokeDasharray: '65 100', strokeDashoffset: -20 },
+				'100%': { strokeDasharray: '2 100', strokeDashoffset: -100 },
+			},
+		},
+		slotRecipes: {
+			textInput: textInputRecipe,
+			combobox: comboboxRecipe,
+			field: fieldRecipe,
+			loadingSpinner: loadingSpinnerRecipe,
+			buttonComposed: buttonComposedRecipe,
+			iconButton: iconButtonRecipe,
+		},
 		tokens: {
 			...aliasTokens,
 			spacing: {

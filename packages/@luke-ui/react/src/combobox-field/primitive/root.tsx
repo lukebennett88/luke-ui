@@ -2,7 +2,7 @@ import type { JSX, Ref } from 'react';
 import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import * as styles from '../../recipes/combobox.css.js';
+import * as styles from '../../recipes/combobox.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
@@ -58,13 +58,14 @@ export type ComboboxRootProps<T extends object> = Prettify<_ComboboxRootProps<T>
 
 export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
 	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
+	const comboboxStyles = styles.combobox();
 
 	return (
 		<ComboboxSizeProvider size={size}>
 			<RacComboBox
 				{...comboboxProps}
 				className={composeRenderProps(className, (renderedClassName) => {
-					return cx(styles.comboboxRoot, renderedClassName);
+					return cx(comboboxStyles.root, renderedClassName);
 				})}
 				menuTrigger={menuTrigger}
 				ref={ref}
