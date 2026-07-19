@@ -115,6 +115,32 @@ types so a variant added to the recipe definition needs no matching edit here. B
 are what `@luke-ui/react/recipes` exports; the vanilla-extract `*.css.ts` recipes not yet migrated
 keep authoring their styles and types directly.
 
+### Type-safety rules for recipe definitions
+
+Recipe definitions are plain TypeScript evaluated at config load, so nothing validates them unless
+they are tied to the generated types. Every migrated recipe follows these rules:
+
+- No type assertions. Use `as const` and `satisfies` only; write explicit entries instead of
+  `Object.fromEntries(...) as Record<...>`.
+- Tie every standalone style object or helper with `as const satisfies SystemStyleObject` (from
+  `styled-system/types/system-types.d.mts`). This checks structure, not token spellings, because the
+  generated property types carry an `AnyString` escape hatch.
+- Tie token values to the generated per-category unions from `styled-system/tokens/index.mjs`
+  (`ColorToken`, `SizeToken`, `FontSizeToken`, `FontWeightToken`, ...) at the authoring site: helper
+  parameters, `Record` value types, or inline (`focusRing('border.focus' satisfies ColorToken)`).
+- Derive variant key unions from the token unions with a local template-literal extractor, for
+  example
+  ``type IntentToneOf<Token> = Token extends `intent.${infer Tone}.${string}` ? Tone : never``. When
+  a component exposes a deliberate subset, wrap it in `Extract<Derived, 'a' | 'b'>` so a renamed or
+  removed token surfaces as a missing or excess key on the variants table.
+- Where each key has exactly one valid token, pin the correspondence with a mapped `satisfies`; see
+  `iconSizeVariants` in `icon.recipe.ts` and `buttonSurfaces` in `button.recipe.ts`.
+- Keep extractors local to the recipe file that uses them; a duplicated one-line type alias beats a
+  shared indirection module.
+- Public runtime types always derive from codegen (`PlainVariants` from
+  `src/types/plain-variants.ts` for recipes without compound variants); never restate a variant
+  union by hand.
+
 ## Styling utilities
 
 Styling utilities are public and exported from `@luke-ui/react/styles`. They provide token-aware,
