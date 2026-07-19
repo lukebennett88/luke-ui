@@ -21,7 +21,6 @@ import { z } from 'zod';
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const docsPackageJsonPath = resolve(scriptDir, '../package.json');
 const reactPackageDir = resolve(scriptDir, '../../../packages/@luke-ui/react');
-const rainbowSprinklesDir = resolve(scriptDir, '../../../packages/@luke-ui/rainbow-sprinkles');
 const outputPath = resolve(scriptDir, '../src/generated/playground-types.generated.json');
 
 const files: Record<string, string> = {};
@@ -102,17 +101,6 @@ files[virtualPath('@luke-ui/react', 'package.json')] = JSON.stringify({
 	exports: reactPackageJson.exports,
 	name: reactPackageJson.name,
 });
-
-// @luke-ui/rainbow-sprinkles ships TypeScript sources, which Monaco consumes directly.
-walk(join(rainbowSprinklesDir, 'src'), (filePath) => {
-	if (!filePath.endsWith('.ts')) return;
-	addFile('@luke-ui/rainbow-sprinkles', rainbowSprinklesDir, filePath);
-});
-addFile(
-	'@luke-ui/rainbow-sprinkles',
-	rainbowSprinklesDir,
-	join(rainbowSprinklesDir, 'package.json'),
-);
 
 // External type dependencies reachable from @luke-ui/react's public types.
 // Resolution starts from the package that actually depends on each one, so

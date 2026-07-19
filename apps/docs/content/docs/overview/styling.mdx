@@ -44,7 +44,8 @@ component-specific, so use them only when you are building on that component's d
 ## Use layout utilities for layout
 
 `Box` and `createSprinkles` from `@luke-ui/react/styles` handle responsive structure, spacing,
-sizing, positioning, overflow, flex, and grid-child properties. They do not set semantic colour,
+positioning, overflow, flex, and grid-child properties. Arbitrary sizing, inset, flex, and grid
+values are direct-only escape hatches, not responsive values. They do not set semantic colour,
 typography, or pseudo states.
 
 ```tsx
@@ -57,9 +58,9 @@ import { Box } from '@luke-ui/react/box';
 
 ## CSS layers
 
-Luke UI orders its styles in four cascade layers: `reset`, `theme`, `recipes`, and `utilities`. The
-order stays stable regardless of stylesheet import order. Utilities are the highest Luke UI layer
-because they are the supported layout escape hatch.
+Luke UI orders its styles in five cascade layers: `reset`, `theme`, `recipes`, `box`, and
+`utilities`. The order stays stable regardless of stylesheet import order. `box` contains Luke UI's
+curated layout classes; the final `utilities` layer is consumer-owned for sanctioned overrides.
 
 CSS outside a layer follows the normal cascade. Avoid using it to reach into component internals.
 Use a component prop, a recipe, or a public semantic variable instead.

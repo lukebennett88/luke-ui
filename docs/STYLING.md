@@ -75,6 +75,7 @@ specificity.
 | `reset`     | Browser defaults, box sizing, and margins.          |
 | `theme`     | Design token custom properties and base typography. |
 | `recipes`   | Component styles, variants, and compound variants.  |
+| `box`       | Curated layout classes used by Box and styles.      |
 | `utilities` | One-off layout and override escape hatches.         |
 
 Vanilla Extract styles declare their layer directly with `@layer`. Panda config recipes emit into
@@ -146,12 +147,11 @@ they are tied to the generated types. Every migrated recipe follows these rules:
 Styling utilities are public and exported from `@luke-ui/react/styles`. They provide token-aware,
 type-safe layout helpers for cases where component props are too narrow.
 
-Luke UI uses Rainbow Sprinkles for this API. Rainbow Sprinkles emits dynamic CSS custom properties
-at runtime instead of generating a static class for every token and value pair. That keeps the CSS
-bundle smaller as the token scale grows.
-
-The tradeoff is that some values are applied through inline `style`, which raises specificity. That
-is acceptable because styling utilities are already the highest-priority escape hatch.
+Luke UI generates the curated layout classes in the `box` layer. Direct token and enum values
+resolve to curated classes. Responsive values set a scoped CSS custom property at each breakpoint,
+avoiding a class for every property, value, and breakpoint combination. The open sizing, inset,
+flex, and grid values retain a non-responsive CSS-custom-property escape for values that cannot be
+enumerated.
 
 `Box` from `@luke-ui/react/box` applies the same utilities to a `div`. Its `render` prop can use a
 compatible custom `div` component while preserving the generated class, style, ref, and DOM props.
@@ -183,7 +183,7 @@ return (
 Spacing and gap properties use `0` or the semantic space steps `100`, `200`, `300`, `400`, `600`,
 `800`, `1000`, `1200`, and `1600`. Margin also accepts `auto`. Enum-like properties use CSS-native
 values, for example `display: 'flex'`. Sizing, inset, flex-basis, order, and grid-placement values
-accept their CSS property values.
+accept their CSS property values, but are intentionally non-responsive.
 
 ## Responsive values
 

@@ -90,9 +90,6 @@ catalogs:
     '@vanilla-extract/css':
       specifier: ^1.21.1
       version: 1.21.1
-    '@vanilla-extract/dynamic':
-      specifier: ^2.1.5
-      version: 2.1.5
     '@vanilla-extract/recipes':
       specifier: ^0.5.7
       version: 0.5.7
@@ -117,9 +114,6 @@ catalogs:
     babel-plugin-react-compiler:
       specifier: ^1.0.0
       version: 1.0.0
-    csstype:
-      specifier: ^3.2.3
-      version: 3.2.3
     eslint-plugin-react-hooks:
       specifier: ^7.1.1
       version: 7.1.1
@@ -365,25 +359,6 @@ importers:
         specifier: 4.1.9
         version: 4.1.9(@opentelemetry/api@1.9.0)(@types/node@26.1.1)(@vitest/browser-playwright@4.1.9)(@vitest/browser-preview@4.1.9)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(@voidzero-dev/vite-plus-core@0.2.2(@arethetypeswrong/core@0.18.5)(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.23.1)(typescript@6.0.3)(unrun@0.2.37)(yaml@2.9.0))
 
-  packages/@luke-ui/rainbow-sprinkles:
-    dependencies:
-      '@vanilla-extract/css':
-        specifier: 'catalog:'
-        version: 1.21.1
-      '@vanilla-extract/dynamic':
-        specifier: 'catalog:'
-        version: 2.1.5
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.1.1
-      csstype:
-        specifier: 'catalog:'
-        version: 3.2.3
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
-
   packages/@luke-ui/react:
     dependencies:
       '@capsizecss/metrics':
@@ -392,9 +367,6 @@ importers:
       '@capsizecss/vanilla-extract':
         specifier: 'catalog:'
         version: 2.0.4(@vanilla-extract/css@1.21.1)
-      '@luke-ui/rainbow-sprinkles':
-        specifier: workspace:*
-        version: link:../rainbow-sprinkles
       '@react-aria/utils':
         specifier: 'catalog:'
         version: 3.34.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
