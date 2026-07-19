@@ -1,17 +1,15 @@
 import type { JSX, ReactNode } from 'react';
-import type { ButtonComposedVariantProps } from '../../styled-system/recipes/button-composed.mjs';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.js';
 import type * as primitiveStyles from '../recipes/button.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
-import type { PlainVariants } from '../types/plain-variants.js';
 import type { Prettify } from '../types/prettify.js';
 import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
 import { Button as PrimitiveButton } from './primitive/index.js';
 
-type ComposedButtonRecipeProps = PlainVariants<ButtonComposedVariantProps>;
+type ComposedButtonRecipeProps = NonNullable<styles.ButtonComposedVariants>;
 
 interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonVariants> {}
 
@@ -68,17 +66,18 @@ export type ButtonProps = Prettify<_ButtonProps>;
 /** Composed button. Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`. */
 export function Button(props: ButtonProps): JSX.Element {
 	const { children, endIcon, isPending, size = 'medium', startIcon, ...restProps } = props;
+	const buttonComposedStyles = styles.buttonComposed({ isPending });
 
 	return (
 		<PrimitiveButton {...restProps} isPending={isPending} size={size}>
 			{(renderProps) => (
-				<span className={styles.buttonContent()}>
+				<span className={buttonComposedStyles.content}>
 					{isPending && (
-						<span aria-hidden className={styles.spinnerOverlay()}>
+						<span aria-hidden className={buttonComposedStyles.spinnerOverlay}>
 							<LoadingSpinner aria-hidden />
 						</span>
 					)}
-					<span className={styles.buttonLabel({ isPending })}>
+					<span className={buttonComposedStyles.label}>
 						{startIcon}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}

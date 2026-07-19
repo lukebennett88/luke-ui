@@ -28,6 +28,7 @@ export function ComboboxTextInput(props: ComboboxTextInputProps): JSX.Element {
 	const { onClick, size: sizeProp, ...inputProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
+	const comboboxStyles = styles.combobox({ size });
 
 	const handleClick = (event: React.MouseEvent<HTMLInputElement>) => {
 		onClick?.(event);
@@ -40,7 +41,7 @@ export function ComboboxTextInput(props: ComboboxTextInputProps): JSX.Element {
 		<RacInput
 			{...inputProps}
 			className={composeRenderProps(inputProps.className, (className) => {
-				return cx(styles.comboboxTextInput({ size }), className);
+				return cx(comboboxStyles.textInput, className);
 			})}
 			onClick={handleClick}
 		/>

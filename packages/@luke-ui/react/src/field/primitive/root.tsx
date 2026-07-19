@@ -9,5 +9,5 @@ type FieldProps = ComponentProps<'div'>;
 export function Field(props: FieldProps): JSX.Element {
 	const { className, ...restProps } = props;
 
-	return <div {...restProps} className={cx(styles.fieldRoot(), className)} />;
+	return <div {...restProps} className={cx(styles.field().root, className)} />;
 }

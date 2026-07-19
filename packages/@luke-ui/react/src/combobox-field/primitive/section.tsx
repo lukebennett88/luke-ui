@@ -26,8 +26,9 @@ export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionPr
 
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
 	const { children, className, title, ...sectionProps } = props;
+	const comboboxStyles = styles.combobox();
 
-	const sectionClassName = cx(styles.comboboxSection(), className);
+	const sectionClassName = cx(comboboxStyles.section, className);
 
 	if (typeof children === 'function') {
 		return (
@@ -40,7 +41,7 @@ export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>
 	return (
 		<RacListBoxSection {...sectionProps} className={sectionClassName}>
 			{title != null ? (
-				<RacHeader className={styles.comboboxSectionHeading}>{title}</RacHeader>
+				<RacHeader className={comboboxStyles.sectionHeading}>{title}</RacHeader>
 			) : null}
 			{children}
 		</RacListBoxSection>

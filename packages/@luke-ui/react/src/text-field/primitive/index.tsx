@@ -51,24 +51,25 @@ export function TextInput(props: TextInputProps): JSX.Element {
 		size = 'medium',
 		...inputProps
 	} = props;
+	const textInputStyles = styles.textInput({ size });
 
 	return (
 		<RacGroup
 			className={composeRenderProps(className, (value) => {
-				return cx(styles.textInputGroup({ size }), value);
+				return cx(textInputStyles.group, value);
 			})}
 		>
 			{adornmentStart != null ? (
-				<span className={styles.textInputAdornmentStart({ size })}>{adornmentStart}</span>
+				<span className={textInputStyles.adornmentStart}>{adornmentStart}</span>
 			) : null}
 			<RacInput
 				{...inputProps}
 				className={composeRenderProps(inputClassName, (value) => {
-					return cx(styles.textInputControl({ size }), value);
+					return cx(textInputStyles.control, value);
 				})}
 			/>
 			{adornmentEnd != null ? (
-				<span className={styles.textInputAdornmentEnd({ size })}>{adornmentEnd}</span>
+				<span className={textInputStyles.adornmentEnd}>{adornmentEnd}</span>
 			) : null}
 		</RacGroup>
 	);

@@ -4,7 +4,7 @@ import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
 import type { TextInputVariants } from './text-input.js';
-import { textInputAdornmentStart, textInputGroup } from './text-input.js';
+import { textInput } from './text-input.js';
 
 let mounted: Array<HTMLElement> = [];
 
@@ -127,7 +127,7 @@ test('read-only still shows the focus ring since read-only fields remain focusab
 test('adornment divider uses the control border color and disabled text color follows the group', () => {
 	const { group, root } = mountGroup();
 	const adornment = group.appendChild(document.createElement('span'));
-	adornment.className = textInputAdornmentStart({ size: 'medium' });
+	adornment.className = textInput({ size: 'medium' }).adornmentStart;
 
 	const controlBorderProbe = root.appendChild(document.createElement('div'));
 	controlBorderProbe.style.borderColor = 'var(--luke-color-border-control)';
@@ -146,7 +146,7 @@ function mountGroup(options: TextInputVariants = {}) {
 	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	const group = root.appendChild(document.createElement('div'));
-	group.className = textInputGroup(options);
+	group.className = textInput(options).group;
 	group.style.transition = 'none';
 	mounted.push(root);
 	return { group, root };

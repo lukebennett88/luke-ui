@@ -6,7 +6,7 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
-interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVariants> {}
+interface FieldMessageVariantProps extends NonNullable<styles.FieldVariants> {}
 
 type _FieldDescriptionOmit1 = DistributiveOmit<RacTextProps, 'slot'>;
 type _FieldDescriptionOmit2 = DistributiveOmit<FieldMessageVariantProps, 'tone'>;
@@ -26,7 +26,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	return (
 		<RacText
 			{...restProps}
-			className={cx(styles.fieldMessage({ tone: 'description' }), className)}
+			className={cx(styles.field({ tone: 'description' }).message, className)}
 			slot="description"
 		/>
 	);

@@ -58,13 +58,14 @@ export type ComboboxRootProps<T extends object> = Prettify<_ComboboxRootProps<T>
 
 export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
 	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
+	const comboboxStyles = styles.combobox();
 
 	return (
 		<ComboboxSizeProvider size={size}>
 			<RacComboBox
 				{...comboboxProps}
 				className={composeRenderProps(className, (renderedClassName) => {
-					return cx(styles.comboboxRoot, renderedClassName);
+					return cx(comboboxStyles.root, renderedClassName);
 				})}
 				menuTrigger={menuTrigger}
 				ref={ref}

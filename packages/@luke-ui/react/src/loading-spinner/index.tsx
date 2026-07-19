@@ -74,6 +74,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 	const progress = ((clampedValue - normalizedMin) / clampedRange) * 100;
 	const dashOffset = 100 - progress;
 	const mode = hasValue ? 'determinate' : 'indeterminate';
+	const loadingSpinnerStyles = styles.loadingSpinner({ color, mode, size: resolvedSize });
 
 	useSynchronizeAnimations(mode === 'indeterminate' ? styles.spinAnimationName : null);
 	useSynchronizeAnimations(mode === 'indeterminate' ? styles.rubberBandAnimationName : null);
@@ -85,17 +86,18 @@ export function LoadingSpinner(props: LoadingSpinnerProps) {
 			aria-valuemax={maxValue}
 			aria-valuemin={minValue}
 			aria-valuenow={hasValue ? clampedValue : undefined}
-			className={cx(
-				styles.spinner({ color, size: resolvedSize }),
-				styles.spinnerState({ mode }),
-				className,
-			)}
+			className={cx(loadingSpinnerStyles.root, loadingSpinnerStyles.state, className)}
 			role="progressbar"
 			style={style}
 		>
-			<svg aria-hidden="true" className={styles.svg()} fill="none" viewBox={ICON_VIEWBOX}>
+			<svg
+				aria-hidden="true"
+				className={loadingSpinnerStyles.svg}
+				fill="none"
+				viewBox={ICON_VIEWBOX}
+			>
 				<circle
-					className={styles.indicator({ mode })}
+					className={loadingSpinnerStyles.indicator}
 					cx={ICON_VIEWBOX_SIZE / 2}
 					cy={ICON_VIEWBOX_SIZE / 2}
 					fill="none"

@@ -28,13 +28,14 @@ export type ComboboxTriggerProps = Prettify<_ComboboxTriggerProps>;
 export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 	const { size: sizeProp, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
+	const comboboxStyles = styles.combobox({ size });
 
 	return (
 		<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
 			<RacButton
 				{...buttonProps}
 				className={composeRenderProps(buttonProps.className, (className) => {
-					return cx(styles.comboboxTrigger({ size }), className);
+					return cx(comboboxStyles.trigger, className);
 				})}
 			/>
 		</IconSizeProvider>

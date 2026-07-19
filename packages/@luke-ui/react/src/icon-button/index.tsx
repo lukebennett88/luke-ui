@@ -37,22 +37,18 @@ export type IconButtonProps = Prettify<_IconButtonProps>;
 /** Button that renders only an icon. */
 export function IconButton(props: IconButtonProps): JSX.Element {
 	const { icon, isPending = false, size = 'medium', ...buttonProps } = props;
+	const iconButtonStyles = styles.iconButton({ isPending, size });
 
 	return (
 		<Button
 			{...buttonProps}
 			className={composeRenderProps(props.className, (value) => {
-				return cx(
-					styles.iconButtonRoot({
-						size,
-					}),
-					value,
-				);
+				return cx(iconButtonStyles.root, value);
 			})}
 			isPending={isPending}
 			size={size}
 		>
-			<Icon aria-hidden className={styles.iconButtonIcon({ isPending })} name={icon} />
+			<Icon aria-hidden className={iconButtonStyles.icon} name={icon} />
 		</Button>
 	);
 }

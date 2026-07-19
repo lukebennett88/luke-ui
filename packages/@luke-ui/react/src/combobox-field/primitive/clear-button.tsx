@@ -30,6 +30,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 	const { size: sizeProp, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
+	const comboboxStyles = styles.combobox({ size });
 	const hasValue = Array.isArray(state?.value) ? state.value.length > 0 : state?.value != null;
 
 	if (state == null || !hasValue) {
@@ -41,7 +42,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 			<RacButton
 				{...buttonProps}
 				className={composeRenderProps(buttonProps.className, (className) => {
-					return cx(styles.comboboxClearButton({ size }), className);
+					return cx(comboboxStyles.clearButton, className);
 				})}
 				onPress={(event) => {
 					state.setValue(Array.isArray(state.value) ? [] : null);

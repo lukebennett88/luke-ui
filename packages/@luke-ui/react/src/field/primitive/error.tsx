@@ -7,7 +7,7 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
 
-interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVariants> {}
+interface FieldMessageVariantProps extends NonNullable<styles.FieldVariants> {}
 
 type _FieldErrorOmit = DistributiveOmit<FieldMessageVariantProps, 'tone'>;
 interface _FieldErrorProps extends RacFieldErrorProps, _FieldErrorOmit {}
@@ -25,7 +25,7 @@ export function FieldError(props: FieldErrorProps): JSX.Element {
 		<RacFieldError
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return cx(styles.fieldMessage({ tone: 'error' }), className);
+				return cx(styles.field({ tone: 'error' }).message, className);
 			})}
 		/>
 	);

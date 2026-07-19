@@ -17,6 +17,7 @@ export type ComboboxEmptyStateProps = Prettify<_ComboboxEmptyStateProps>;
 
 export function ComboboxEmptyState(props: ComboboxEmptyStateProps): JSX.Element {
 	const { children, className } = props;
+	const comboboxStyles = styles.combobox();
 
-	return <div className={cx(styles.comboboxEmptyState(), className)}>{children}</div>;
+	return <div className={cx(comboboxStyles.emptyState, className)}>{children}</div>;
 }

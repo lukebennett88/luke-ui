@@ -31,13 +31,14 @@ export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { ref, ...restProps } = props;
 	const [element, setElement] = useState<HTMLElement | null>(null);
+	const comboboxStyles = styles.combobox();
 	useVisualViewportVars(element);
 
 	return (
 		<RacPopover
 			{...restProps}
 			className={composeRenderProps(restProps.className, (className) => {
-				return cx(themeRootClassName, styles.comboboxPopover(), className);
+				return cx(themeRootClassName, comboboxStyles.popover, className);
 			})}
 			ref={mergeRefs(ref, (node: HTMLElement | null) => {
 				setElement(node);
