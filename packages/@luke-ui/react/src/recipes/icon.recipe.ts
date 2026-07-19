@@ -1,10 +1,5 @@
 import { defineRecipe } from '@pandacss/dev';
-import type { SizeToken } from '../../styled-system/tokens/index.mjs';
-import type { IconSize } from '../types/icon-size.js';
-
-// Ties each size key to its own generated token: a typo'd or unregistered
-// token collapses the Extract to `never` and the entry fails to compile.
-type IconSizeToken<Size extends IconSize> = Extract<SizeToken, `iconSize.${Size}`>;
+import type { IconSize, IconSizeToken } from '../types/token-unions.js';
 
 const iconSizeVariants = {
 	large: { blockSize: 'iconSize.large', inlineSize: 'iconSize.large' },

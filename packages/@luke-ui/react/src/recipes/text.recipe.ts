@@ -1,14 +1,9 @@
 import { defineRecipe } from '@pandacss/dev';
-import type {
-	ColorToken,
-	FontSizeToken,
-	FontWeightToken,
-	LetterSpacingToken,
-	LineHeightToken,
-} from '../../styled-system/tokens/index.mjs';
+import type { FontWeightToken } from '../../styled-system/tokens/index.mjs';
 import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import type { FontSizeStep } from '../theme/contract.js';
 import { fontSizeSteps } from '../theme/contract.js';
+import type { FontStep, TextColorName, TextColorTokenFor } from '../types/token-unions.js';
 
 const lineClampNone = {} as const satisfies SystemStyleObject;
 const lineClampSingleLine = {
@@ -63,11 +58,7 @@ const sizeStepCompoundVariants = fontSizeSteps.map((size) => ({
 	},
 }));
 
-// Ties each step to all three generated font scales, so a step missing from
-// any one of them fails to compile.
-type FontStepToken = FontSizeStep & FontSizeToken & LetterSpacingToken & LineHeightToken;
-
-function fontSizeStep<Step extends FontStepToken>(size: Step) {
+function fontSizeStep<Step extends FontStep>(size: Step) {
 	return { fontSize: size, letterSpacing: size, lineHeight: size };
 }
 
@@ -127,13 +118,6 @@ const fontWeightVariants = {
 	label: { fontWeight: 'label' },
 } as const satisfies { [Weight in FontWeightToken]: { fontWeight: Weight } };
 
-// The colour variant names derive from the tokens: intent tones that carry a
-// `.text` leaf (accent, info, success, warning, danger) plus the `text.*`
-// leaves (primary, secondary).
-type IntentTextToneOf<Token> = Token extends `intent.${infer Tone}.text` ? Tone : never;
-type TextLeafOf<Token> = Token extends `text.${infer Leaf}` ? Leaf : never;
-type TextColorKey = IntentTextToneOf<ColorToken> | TextLeafOf<ColorToken>;
-
 const colorVariants = {
 	accent: { color: 'intent.accent.text' },
 	danger: { color: 'intent.danger.text' },
@@ -142,9 +126,7 @@ const colorVariants = {
 	secondary: { color: 'text.secondary' },
 	success: { color: 'intent.success.text' },
 	warning: { color: 'intent.warning.text' },
-} as const satisfies {
-	[Key in TextColorKey]: { color: Extract<ColorToken, `intent.${Key}.text` | `text.${Key}`> };
-};
+} as const satisfies { [Key in TextColorName]: { color: TextColorTokenFor<Key> } };
 
 export const textRecipe = defineRecipe({
 	className: 'text',

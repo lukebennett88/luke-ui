@@ -2,11 +2,10 @@ import { defineRecipe } from '@pandacss/dev';
 import type { ColorToken } from '../../styled-system/tokens/index.mjs';
 import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import { focusRing } from '../styles/focus-ring.js';
+import type { IntentTone } from '../types/token-unions.js';
 
-// Tone keys derive from the generated colour tokens (same pattern as
-// button.recipe.ts); Link deliberately exposes a subset of the intent tones.
-type IntentToneOf<Token> = Token extends `intent.${infer Tone}.${string}` ? Tone : never;
-type LinkTone = Extract<IntentToneOf<ColorToken>, 'accent' | 'neutral'>;
+// Link deliberately exposes a subset of the intent tones.
+type LinkTone = Extract<IntentTone, 'accent' | 'neutral'>;
 
 const linkToneVariants = {
 	accent: toneVariant('intent.accent.text', 'intent.accent.textHover'),
