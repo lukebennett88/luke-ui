@@ -155,8 +155,9 @@ The full workflow and report are documented in [`VISUAL_TESTING.md`](./VISUAL_TE
 
 ## Style-contract tests for CSS recipes
 
-Recipes in `src/recipes/*.css.ts` have no roles or user interactions. Their contract is: given this
-DOM structure in this state, the element computes these styles.
+Recipes in `src/recipes/` (Panda `*.recipe.ts` config recipes and the remaining vanilla-extract
+`*.css.ts` modules) have no roles or user interactions. Their contract is: given this DOM structure
+in this state, the element computes these styles.
 
 For recipe tests, raw DOM construction and `querySelector` are appropriate because there is no user
 to impersonate.

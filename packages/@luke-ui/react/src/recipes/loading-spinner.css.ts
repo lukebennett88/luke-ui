@@ -2,7 +2,6 @@ import { keyframes } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
-import { iconSizeVariants } from './icon.css.js';
 
 const rotationDuration = '1.2s';
 const rubberBandDuration = '2s';
@@ -16,6 +15,14 @@ const colorVariants = {
 	secondary: { color: vars.color.text.secondary },
 	success: { color: vars.color.intent.success.text },
 	warning: { color: vars.color.intent.warning.text },
+} as const;
+
+// Mirrors the icon recipe's size scale until LoadingSpinner migrates from VE.
+const iconSizeVariants = {
+	large: { blockSize: vars.iconSize.large, inlineSize: vars.iconSize.large },
+	medium: { blockSize: vars.iconSize.medium, inlineSize: vars.iconSize.medium },
+	small: { blockSize: vars.iconSize.small, inlineSize: vars.iconSize.small },
+	xsmall: { blockSize: vars.iconSize.xsmall, inlineSize: vars.iconSize.xsmall },
 } as const;
 
 const base = styleInLayer('recipes', {

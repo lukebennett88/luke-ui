@@ -1,5 +1,5 @@
 import { Text as RacText } from 'react-aria-components/Text';
-import * as styles from '../recipes/text.css.js';
+import * as styles from '../recipes/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';

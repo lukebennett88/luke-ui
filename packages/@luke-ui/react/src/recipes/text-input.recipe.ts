@@ -1,5 +1,54 @@
 import { defineSlotRecipe } from '@pandacss/dev';
+import type { ColorToken } from '../../styled-system/tokens/index.mjs';
+import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import { focusRing } from '../styles/focus-ring.js';
+import type { ControlSize } from '../types/token-unions.js';
+
+type TextInputSlot = 'adornmentEnd' | 'adornmentStart' | 'control' | 'group';
+
+const textInputSizeVariants = {
+	medium: {
+		group: { blockSize: 'controlSize.medium', fontSize: '300' },
+		control: {
+			blockSize: 'controlSize.medium',
+			paddingInlineEnd: '300',
+			paddingInlineStart: '300',
+		},
+		adornmentStart: {
+			lineHeight: '300',
+			paddingInlineEnd: '300',
+			paddingInlineStart: '300',
+		},
+		adornmentEnd: {
+			lineHeight: '300',
+			paddingInlineEnd: '300',
+			paddingInlineStart: '300',
+		},
+	},
+	small: {
+		group: {
+			blockSize: 'controlSize.small',
+			fontSize: '200',
+			letterSpacing: '200',
+			lineHeight: '200',
+		},
+		control: {
+			blockSize: 'controlSize.small',
+			paddingInlineEnd: '200',
+			paddingInlineStart: '200',
+		},
+		adornmentStart: {
+			lineHeight: '200',
+			paddingInlineEnd: '200',
+			paddingInlineStart: '200',
+		},
+		adornmentEnd: {
+			lineHeight: '200',
+			paddingInlineEnd: '200',
+			paddingInlineStart: '200',
+		},
+	},
+} as const satisfies Record<ControlSize, Record<TextInputSlot, SystemStyleObject>>;
 
 export const textInputRecipe = defineSlotRecipe({
 	className: 'text-input',
@@ -59,7 +108,7 @@ export const textInputRecipe = defineSlotRecipe({
 			'&:where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
 					borderColor: 'intent.accent.border',
-					...focusRing('border.focus'),
+					...focusRing('border.focus' satisfies ColorToken),
 				},
 			'&:where([data-hovered="true"], :hover):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within)):not(:where([data-readonly="true"], :has(input:read-only)))':
 				{
@@ -72,7 +121,7 @@ export const textInputRecipe = defineSlotRecipe({
 			'&:where([data-invalid="true"], [aria-invalid="true"], :has(:invalid), :has(input[aria-invalid="true"])):where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
 					borderColor: 'intent.danger.border',
-					...focusRing('border.focus'),
+					...focusRing('border.focus' satisfies ColorToken),
 				},
 			'&:where([data-readonly="true"], :has(input:read-only)):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
 				{
@@ -81,7 +130,7 @@ export const textInputRecipe = defineSlotRecipe({
 					boxShadow: 'none',
 				},
 			'&:where([data-readonly="true"], :has(input:read-only)):where([data-focus-within="true"], :focus-within):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
-				focusRing('border.focus'),
+				focusRing('border.focus' satisfies ColorToken),
 		},
 		control: {
 			appearance: 'none',
@@ -133,48 +182,6 @@ export const textInputRecipe = defineSlotRecipe({
 	},
 	defaultVariants: { size: 'medium' },
 	variants: {
-		size: {
-			medium: {
-				group: { blockSize: 'controlSize.medium', fontSize: '300' },
-				control: {
-					blockSize: 'controlSize.medium',
-					paddingInlineEnd: '300',
-					paddingInlineStart: '300',
-				},
-				adornmentStart: {
-					lineHeight: '300',
-					paddingInlineEnd: '300',
-					paddingInlineStart: '300',
-				},
-				adornmentEnd: {
-					lineHeight: '300',
-					paddingInlineEnd: '300',
-					paddingInlineStart: '300',
-				},
-			},
-			small: {
-				group: {
-					blockSize: 'controlSize.small',
-					fontSize: '200',
-					letterSpacing: '200',
-					lineHeight: '200',
-				},
-				control: {
-					blockSize: 'controlSize.small',
-					paddingInlineEnd: '200',
-					paddingInlineStart: '200',
-				},
-				adornmentStart: {
-					lineHeight: '200',
-					paddingInlineEnd: '200',
-					paddingInlineStart: '200',
-				},
-				adornmentEnd: {
-					lineHeight: '200',
-					paddingInlineEnd: '200',
-					paddingInlineStart: '200',
-				},
-			},
-		},
+		size: textInputSizeVariants,
 	},
 });

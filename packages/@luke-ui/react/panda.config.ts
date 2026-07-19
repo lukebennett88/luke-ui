@@ -1,7 +1,10 @@
 import { defineConfig } from '@pandacss/dev';
 import presetBase from '@pandacss/preset-base';
 import { buttonRecipe } from './src/recipes/button.recipe.js';
+import { iconRecipe } from './src/recipes/icon.recipe.js';
+import { linkRecipe } from './src/recipes/link.recipe.js';
 import { textInputRecipe } from './src/recipes/text-input.recipe.js';
+import { textRecipe } from './src/recipes/text.recipe.js';
 import { lukeLayerOrder } from './src/styles/layer-order.js';
 import { buildPandaTokens } from './src/theme/panda-tokens.js';
 
@@ -83,7 +86,7 @@ export default defineConfig({
 	// The alias layer plus the T2 box-slice placeholder spacing, kept so the box
 	// `utilities`/`staticCss` below still resolve (transitional; removed later).
 	theme: {
-		recipes: { button: buttonRecipe },
+		recipes: { button: buttonRecipe, icon: iconRecipe, link: linkRecipe, text: textRecipe },
 		slotRecipes: { textInput: textInputRecipe },
 		tokens: {
 			...aliasTokens,
