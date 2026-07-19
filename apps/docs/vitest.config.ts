@@ -19,7 +19,7 @@ export default defineConfig({
 				test: {
 					environment: 'node',
 					exclude: ['**/node_modules/**', '**/*.browser.test.*'],
-					include: ['src/**/*.test.ts'],
+					include: ['src/**/*.test.ts', 'vite-config.test.ts'],
 					name: 'unit',
 				},
 			},
