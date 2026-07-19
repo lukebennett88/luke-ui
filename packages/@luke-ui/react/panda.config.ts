@@ -20,8 +20,7 @@ import { globalStyles } from './src/styles/global-styles.js';
 import { lukeLayerOrder } from './src/styles/layer-order.js';
 import { buildPandaTokens, vars } from './src/theme/panda-tokens.js';
 
-// T2 ejected Panda config. Minimal box slice only; VE still owns
-// reset/base/tokens/global output. See scripts/assemble-stylesheet.ts.
+// Ejected Panda config for the public Luke UI stylesheet.
 
 // Panda exposes exactly 5 fixed layer slots and has NO native `box` layer, so
 // derive its `layers` object from the shared canonical order minus `box`. The
@@ -226,7 +225,7 @@ export default defineConfig({
 	eject: true,
 	presets: [],
 
-	// Harmless for the spike; nothing here is actually scanned during cssgen.
+	// Recipes are registered explicitly below; keep the source include for Panda tooling.
 	include: ['src/**/*.{ts,tsx}'],
 	exclude: [],
 
@@ -272,8 +271,8 @@ export default defineConfig({
 	},
 	globalCss: { ...globalStyles, ...loadingSkeletonGlobalCss },
 
-	// The alias layer plus the T2 box-slice placeholder spacing, kept so the box
-	// `utilities`/`staticCss` below still resolve (transitional; removed later).
+	// Panda aliases resolve to the public theme contract. Retain the spacing aliases
+	// used by the curated Box utility definitions below.
 	theme: {
 		recipes: {
 			button: buttonRecipe,
@@ -302,7 +301,7 @@ export default defineConfig({
 		tokens: {
 			...aliasTokens,
 			spacing: {
-				// T2 box-slice placeholders (transitional; removed in a later ticket).
+				// Panda utility aliases used by the curated Box surface.
 				none: { value: '0' },
 				sm: { value: '0.5rem' },
 				md: { value: '1rem' },

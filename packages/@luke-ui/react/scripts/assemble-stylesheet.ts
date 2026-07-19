@@ -1,35 +1,18 @@
 #!/usr/bin/env tsx
 
 /**
- * Stylesheet assembler (T2).
+ * Stylesheet assembler.
  *
  * Combines Panda's ejected output into a single stylesheet whose cascade
  * layers match the canonical Luke UI order. Panda has no native `box` layer, so
- * we take Panda's `utilities` output (currently the sole box slice) and re-wrap
- * it as `@layer box`.
+ * its utilities output is re-wrapped as `@layer box`.
  *
  * Config recipe base/variant CSS emits into its own split file
  * (`styles/recipes.css`) already wrapped in `@layer recipes`;
  * compound-variant CSS is the exception. Panda resolves `compoundVariants`
  * through atomic css() classes, so it lands in `utilities.css` next to the
- * Box slice and rides the rename into `@layer box`. That is cascade-correct
- * (box sits above recipes, so compounds still beat base/variant rules) but
- * means `utilities.css` is the Box slice plus recipe compound atomics; when
- * T4/T5 introduce real one-off utilities, box will still need its own
- * separation.
- *
- * The full layer contract that trade-off implies:
- *
- * - `box` carries the Box slice plus recipe compound-variant atomics.
- * - `utilities` sits above `box`, so consumer/blessed overrides always beat
- *   both the Box slice and the compound atomics.
- * - Disjointness rule: a recipe that composes and overrides another recipe
- *   from within `@layer recipes` can never beat a compound-variant atomic in
- *   `box`, so recipe-on-recipe override properties must stay disjoint from
- *   the composed recipe's compound-variant properties.
- *
- * `assembled-stylesheet.test.ts` pins this contract against the generated
- * output.
+ * Box slice and rides the rename into `@layer box`. The `utilities` layer
+ * remains available for consumer overrides.
  *
  * Panda owns every section of the shipped stylesheet: reset and base global
  * styles, token aliases, recipes, and the re-layered Box output.

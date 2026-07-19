@@ -156,8 +156,7 @@ The full workflow and report are documented in [`VISUAL_TESTING.md`](./VISUAL_TE
 ## Style-contract tests for CSS recipes
 
 Panda recipes in `src/recipes/*.recipe.ts` have no roles or user interactions. Their contract is:
-given this DOM structure
-in this state, the element computes these styles.
+given this DOM structure in this state, the element computes these styles.
 
 For recipe tests, raw DOM construction and `querySelector` are appropriate because there is no user
 to impersonate.
