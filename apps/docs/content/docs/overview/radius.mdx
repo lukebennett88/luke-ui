@@ -1,0 +1,64 @@
+---
+title: Radius
+description: Use semantic corner-radius roles that follow the active Luke UI theme.
+---
+
+Luke UI themes provide semantic radius roles for custom UI. Use the role that matches the element's
+job instead of choosing a fixed pixel value. The public variables adapt to the active theme.
+
+## Radius roles
+
+Luke UI exposes five radius roles, each matched to the kind of element it rounds.
+
+<ExampleBlock
+	src="overview/radius-roles"
+	title="Radius roles"
+	description="Each shape uses one public radius role from the active theme."
+/>
+
+## Use the active theme
+
+Import `vars` from `@luke-ui/react/theme` when a custom surface needs a radius. The value is a
+stable semantic CSS variable, not a theme-specific number.
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+<aside
+	style={{
+		backgroundColor: vars.color.surface.floating,
+		borderRadius: vars.radius.surface,
+		boxShadow: vars.depth.floating,
+	}}
+/>;
+```
+
+## Keep nested corners concentric
+
+When one rounded surface sits inside another, derive the wrapper's radius from the inner surface so
+the two corners stay concentric. Pass the space between their corners—usually the wrapper's
+padding—as the gap.
+
+<ExampleBlock
+	src="overview/concentric-radius"
+	title="Concentric corners"
+	description="The outer and inner corners use the same visible curve."
+/>
+
+```tsx
+import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
+
+const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space[200]);
+```
+
+Use `wrapperRadius` on the padded wrapper and `vars.radius.control` on the inner surface. Read
+[Theme](/overview/theme) for the public semantic variables available to custom UI.
+
+## Best practices
+
+| Guidance | Practice                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------- |
+| Do       | Choose the radius role that matches an element's job, such as `control` for an input or `surface` for a card. |
+| Do       | Derive a wrapper radius from the nested surface radius and the actual padding or gap between their corners.   |
+| Don't    | Apply a fixed pixel radius because it looks right in the current theme.                                       |
+| Don't    | Combine arbitrary radius values and spacing when nesting rounded surfaces.                                    |
