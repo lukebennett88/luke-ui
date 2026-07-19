@@ -156,8 +156,24 @@ export const defaultRadius = { control: 8, detail: 4, overlay: 16, surface: 12 }
  * Pass semantic variable references such as `vars.radius.control` and `vars.space[200]` so the
  * result follows the active theme.
  */
-export function deriveConcentricRadius(innerRadius: string, gap: string): string {
-	return `calc(${innerRadius} + ${gap})`;
+export function deriveConcentricRadius<InnerRadius extends string, Gap extends string>(
+	innerRadius: InnerRadius,
+	gap: Gap,
+) {
+	return `calc(${innerRadius} + ${gap})` as const;
+}
+
+/**
+ * Derives a concentric inner corner from an outer radius and the gap between the two edges,
+ * clamped at zero so a large gap never produces a negative radius. Pass semantic variable
+ * references such as `vars.radius.surface` and `vars.space[300]` so the result follows the
+ * active theme.
+ */
+export function deriveNestedRadius<OuterRadius extends string, Gap extends string>(
+	outerRadius: OuterRadius,
+	gap: Gap,
+) {
+	return `max(0px, calc(${outerRadius} - ${gap}))` as const;
 }
 
 /**

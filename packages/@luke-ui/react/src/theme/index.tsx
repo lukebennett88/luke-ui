@@ -35,3 +35,6 @@ export type {
 
 /** Derives a concentric outer corner from an inner radius plus the intervening gap. */
 export { deriveConcentricRadius } from './foundation.js';
+
+/** Derives a concentric inner corner from an outer radius plus the intervening gap. */
+export { deriveNestedRadius } from './foundation.js';

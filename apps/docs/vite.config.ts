@@ -137,9 +137,13 @@ export default defineConfig(async () => {
 					...markdownPrerenderPages,
 				],
 				prerender: {
+					// Serialize requests to the internal Vite preview server and retry a
+					// transient failure without omitting the iframe preview page.
+					concurrency: 1,
 					crawlLinks: true,
 					enabled: true,
 					filter: (page) => !page.path.startsWith(storybookPath),
+					retryCount: 2,
 				},
 			}),
 			react(),
