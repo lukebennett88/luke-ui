@@ -3,7 +3,7 @@
 /**
  * Stylesheet assembler (T2).
  *
- * Combines Panda's ejected output into a single preview stylesheet whose cascade
+ * Combines Panda's ejected output into a single stylesheet whose cascade
  * layers match the canonical Luke UI order. Panda has no native `box` layer, so
  * we take Panda's `utilities` output (currently the sole box slice) and re-wrap
  * it as `@layer box`.
@@ -39,6 +39,7 @@
 
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { gzipSync } from 'node:zlib';
 import { lukeLayerOrder } from '../src/styles/layer-order.js';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
@@ -46,11 +47,16 @@ const pandaStylesDir = `${packageRoot}styled-system/styles`;
 const vanillaExtractStylesheet = `${packageRoot}dist/stylesheet.css`;
 const assembledOutput = `${packageRoot}styled-system/assembled.css`;
 
+// Panda assembly brings the public stylesheet to about 87.2 kB raw / 9.8 kB gzip.
+// Retain modest headroom for future migrated recipes without masking large regressions.
+const maximumPublicStylesheetRawBytes = 92_000;
+const maximumPublicStylesheetGzipBytes = 10_500;
+
 export interface AssembleOptions {
 	/**
-	 * Append VE's shipped `dist/stylesheet.css` verbatim (preview only). Skipped
-	 * silently when the build artifact is absent so the assembler still succeeds
-	 * from `generate` output alone.
+	 * Append VE's emitted stylesheet verbatim. Skipped silently when the build
+	 * artifact is absent so the assembler still succeeds from `generate` output
+	 * alone.
 	 */
 	includeVanillaExtract?: boolean;
 	/** Override the Panda split-CSS directory (defaults to package styled-system/styles). */
@@ -115,16 +121,15 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 		sections.push(box);
 	}
 
-	// Optional VE preview: appended verbatim, purely to eyeball the combined
-	// result. Never required, because the build owns the real VE stylesheet.
+	// VE owns reset, theme, and the remaining unmigrated recipes. Append its
+	// emitted output after Panda's layer-order declaration so the public
+	// stylesheet contains each system exactly once without changing layer order.
 	if (options.includeVanillaExtract) {
 		if (existsSync(vePath)) {
-			sections.push(`/* --- vanilla-extract dist/stylesheet.css (preview) --- */`);
+			sections.push(`/* --- vanilla-extract --- */`);
 			sections.push(readFileSync(vePath, 'utf8').trim());
 		} else {
-			sections.push(
-				`/* vanilla-extract dist/stylesheet.css not found (build artifact); skipped */`,
-			);
+			sections.push(`/* vanilla-extract stylesheet not found; skipped */`);
 		}
 	}
 
@@ -148,9 +153,51 @@ function extractLayer(css: string, layer: string): string | undefined {
 }
 
 function main(): void {
-	const css = assembleStylesheet({ includeVanillaExtract: true });
-	writeFileSync(assembledOutput, css, 'utf8');
-	process.stdout.write(`Wrote styled-system/assembled.css (${css.length} bytes)\n`);
+	const output = process.argv.find((argument) => argument.startsWith('--output='));
+	const outputPath = output ? `${packageRoot}${output.slice('--output='.length)}` : assembledOutput;
+	const css = assembleStylesheet({ includeVanillaExtract: Boolean(output) });
+
+	if (output) assertPublicStylesheet(css);
+	writeFileSync(outputPath, css, 'utf8');
+	process.stdout.write(`Wrote ${outputPath.slice(packageRoot.length)} (${css.length} bytes)\n`);
+}
+
+function assertPublicStylesheet(css: string): void {
+	const requiredSections = [
+		'@layer reset, base, tokens, recipes, box, utilities;',
+		'@layer tokens {',
+		'@layer recipes {',
+		'@layer box {',
+		'/* --- vanilla-extract --- */',
+	];
+
+	for (const section of requiredSections) {
+		if (!css.includes(section)) throw new Error(`Public stylesheet is missing ${section}.`);
+	}
+
+	const maskingSelector = '.loading-skeleton:not([data-skeleton-inline]) > * {';
+	const maskingStart = css.indexOf(maskingSelector);
+	const maskingEnd = css.indexOf('}', maskingStart);
+	if (
+		maskingStart === -1 ||
+		!css.slice(maskingStart, maskingEnd).includes('overflow: hidden !important')
+	) {
+		throw new Error('Public stylesheet is missing loading skeleton block masking.');
+	}
+
+	const rawBytes = Buffer.byteLength(css);
+	if (rawBytes > maximumPublicStylesheetRawBytes) {
+		throw new Error(
+			`Public stylesheet is ${rawBytes} bytes; maximum is ${maximumPublicStylesheetRawBytes}.`,
+		);
+	}
+
+	const gzipBytes = gzipSync(css, { level: 9 }).byteLength;
+	if (gzipBytes > maximumPublicStylesheetGzipBytes) {
+		throw new Error(
+			`Public stylesheet is ${gzipBytes} gzip bytes; maximum is ${maximumPublicStylesheetGzipBytes}.`,
+		);
+	}
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
