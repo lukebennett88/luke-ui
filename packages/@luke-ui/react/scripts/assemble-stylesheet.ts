@@ -107,7 +107,9 @@ export function assembleStylesheet(options: AssembleOptions = {}): string {
 
 function main(): void {
 	const output = process.argv.find((argument) => argument.startsWith('--output='));
-	const outputPath = output ? `${packageRoot}${output.slice('--output='.length)}` : publicStylesheet;
+	const outputPath = output
+		? `${packageRoot}${output.slice('--output='.length)}`
+		: publicStylesheet;
 	const css = assembleStylesheet();
 
 	assertPublicStylesheet(css);
