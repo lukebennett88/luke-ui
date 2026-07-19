@@ -101,6 +101,46 @@ import { button, link } from '@luke-ui/react/recipes';
 
 Recipes are component-specific. Keep them separate from general layout utilities.
 
+## Panda config recipes (migration in progress)
+
+Components are moving from vanilla-extract recipes to Panda config recipes one at a time. A migrated
+recipe is a pair of files: `src/recipes/<name>.recipe.ts` holds the `defineRecipe` (or
+`defineSlotRecipe`) definition and is registered in `panda.config.ts`. This is the only file that
+may import `@pandacss/dev`.
+
+`src/recipes/<name>.ts` is the runtime module. It re-exports the generated class-name function from
+the per-recipe module `styled-system/recipes/<name>.mjs`, never the generated
+`styled-system/recipes/index.mjs` barrel, and derives its public variant types from the generated
+types so a variant added to the recipe definition needs no matching edit here. Both files together
+are what `@luke-ui/react/recipes` exports; the vanilla-extract `*.css.ts` recipes not yet migrated
+keep authoring their styles and types directly.
+
+### Type-safety rules for recipe definitions
+
+Recipe definitions are plain TypeScript evaluated at config load, so nothing validates them unless
+they are tied to the generated types. Every migrated recipe follows these rules:
+
+- No type assertions. Use `as const` and `satisfies` only; write explicit entries instead of
+  `Object.fromEntries(...) as Record<...>`.
+- Tie every standalone style object or helper with `as const satisfies SystemStyleObject` (from
+  `styled-system/types/system-types.d.mts`). This checks structure, not token spellings, because the
+  generated property types carry an `AnyString` escape hatch.
+- Tie token values to the generated per-category unions from `styled-system/tokens/index.mjs`
+  (`ColorToken`, `SizeToken`, `FontSizeToken`, `FontWeightToken`, ...) at the authoring site: helper
+  parameters, `Record` value types, or inline (`focusRing('border.focus' satisfies ColorToken)`).
+- Derive variant key unions from the token unions with a template-literal extractor defined in
+  `src/types/token-unions.ts`, for example
+  ``type IntentToneOf<Token> = Token extends `intent.${infer Tone}.${string}` ? Tone : never``. When
+  a component exposes a deliberate subset, wrap it in `Extract<Derived, 'a' | 'b'>` so a renamed or
+  removed token surfaces as a missing or excess key on the variants table.
+- Where each key has exactly one valid token, pin the correspondence with a mapped `satisfies`; see
+  `iconSizeVariants` in `icon.recipe.ts` and `buttonSurfaces` in `button.recipe.ts`.
+- Token-derived unions live in `src/types/token-unions.ts`; a recipe file declares only its
+  deliberate subset (`type ButtonTone = Extract<IntentTone, 'accent' | 'danger' | 'neutral'>`).
+- Public runtime types always derive from codegen (`PlainVariants` from
+  `src/types/plain-variants.ts` for recipes without compound variants); never restate a variant
+  union by hand.
+
 ## Styling utilities
 
 Styling utilities are public and exported from `@luke-ui/react/styles`. They provide token-aware,

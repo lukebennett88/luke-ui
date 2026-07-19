@@ -2,7 +2,7 @@ import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
-import { link } from './link.css.js';
+import { link } from './link.js';
 
 let mounted: Array<HTMLElement> = [];
 

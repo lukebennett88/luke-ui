@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from 'react';
 import { createContext, useContext } from 'react';
-import type { IconSize } from '../types/icon-size.js';
+import type { IconSize } from '../types/token-unions.js';
 
 const IconSizeContext = createContext<IconSize | null>(null);
 

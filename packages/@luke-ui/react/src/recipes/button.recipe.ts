@@ -1,5 +1,55 @@
 import { defineRecipe } from '@pandacss/dev';
+import type { RecipeConfig } from '@pandacss/dev';
+import type { ColorToken } from '../../styled-system/tokens/index.mjs';
 import { focusRing } from '../styles/focus-ring.js';
+import type { IntentSurfaces, IntentTone, SurfaceKey } from '../types/token-unions.js';
+
+// Button deliberately exposes a subset of the intent tones.
+type ButtonTone = Extract<IntentTone, 'accent' | 'danger' | 'neutral'>;
+
+type ButtonSurface = Record<SurfaceKey, ColorToken>;
+type ButtonCompoundVariant = NonNullable<RecipeConfig['compoundVariants']>[number];
+
+const buttonSurfaces = {
+	accent: {
+		solid: 'intent.accent.surface.solid',
+		solidHover: 'intent.accent.surface.solidHover',
+		solidPressed: 'intent.accent.surface.solidPressed',
+		subtle: 'intent.accent.surface.subtle',
+		subtleHover: 'intent.accent.surface.subtleHover',
+		subtlePressed: 'intent.accent.surface.subtlePressed',
+	},
+	danger: {
+		solid: 'intent.danger.surface.solid',
+		solidHover: 'intent.danger.surface.solidHover',
+		solidPressed: 'intent.danger.surface.solidPressed',
+		subtle: 'intent.danger.surface.subtle',
+		subtleHover: 'intent.danger.surface.subtleHover',
+		subtlePressed: 'intent.danger.surface.subtlePressed',
+	},
+	neutral: {
+		solid: 'intent.neutral.surface.solid',
+		solidHover: 'intent.neutral.surface.solidHover',
+		solidPressed: 'intent.neutral.surface.solidPressed',
+		subtle: 'intent.neutral.surface.subtle',
+		subtleHover: 'intent.neutral.surface.subtleHover',
+		subtlePressed: 'intent.neutral.surface.subtlePressed',
+	},
+} as const satisfies {
+	[Tone in ButtonTone]: IntentSurfaces<Tone>;
+};
+
+const buttonCompoundVariants = [
+	appearance('neutral', 'solid', buttonSurfaces.neutral, 'intent.neutral.onSolid'),
+	appearance('accent', 'solid', buttonSurfaces.accent, 'intent.accent.onSolid'),
+	appearance('danger', 'solid', buttonSurfaces.danger, 'intent.danger.onSolid'),
+	appearance('neutral', 'subtle', buttonSurfaces.neutral, 'text.primary'),
+	appearance('accent', 'subtle', buttonSurfaces.accent, 'intent.accent.text'),
+	appearance('danger', 'subtle', buttonSurfaces.danger, 'intent.danger.text'),
+	ghostAppearance('neutral', buttonSurfaces.neutral, 'text.primary'),
+	ghostAppearance('accent', buttonSurfaces.accent, 'intent.accent.text'),
+	ghostAppearance('danger', buttonSurfaces.danger, 'intent.danger.text'),
+] satisfies NonNullable<RecipeConfig['compoundVariants']>;
 
 export const buttonRecipe = defineRecipe({
 	className: 'button',
@@ -59,7 +109,7 @@ export const buttonRecipe = defineRecipe({
 		transitionTimingFunction: 'standard',
 		whiteSpace: 'nowrap',
 		'&[data-disabled="true"]': { cursor: 'not-allowed', opacity: 0.55 },
-		'&[data-focus-visible="true"]': focusRing('border.focus'),
+		'&[data-focus-visible="true"]': focusRing('border.focus' satisfies ColorToken),
 		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 			boxShadow: 'raised',
 			transform: 'translateY(-1px)',
@@ -92,171 +142,59 @@ export const buttonRecipe = defineRecipe({
 		},
 		tone: { accent: {}, danger: {}, neutral: {} },
 	},
-	compoundVariants: [
-		{
-			appearance: 'solid',
-			tone: 'neutral',
-			css: {
-				'@media (forced-colors: active)': { backgroundImage: 'none' },
-				backgroundColor: 'intent.neutral.surface.solid',
-				backgroundImage: 'var(--luke-action-control-finish-resting)',
-				color: 'intent.neutral.onSolid',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.neutral.surface.solidHover',
-					backgroundImage: 'var(--luke-action-control-finish-raised)',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.neutral.surface.solidPressed',
-					backgroundImage: 'var(--luke-action-control-finish-recessed)',
-				},
-			},
-		},
-		{
-			appearance: 'solid',
-			tone: 'accent',
-			css: {
-				'@media (forced-colors: active)': { backgroundImage: 'none' },
-				backgroundColor: 'intent.accent.surface.solid',
-				backgroundImage: 'var(--luke-action-control-finish-resting)',
-				color: 'intent.accent.onSolid',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.accent.surface.solidHover',
-					backgroundImage: 'var(--luke-action-control-finish-raised)',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.accent.surface.solidPressed',
-					backgroundImage: 'var(--luke-action-control-finish-recessed)',
-				},
-			},
-		},
-		{
-			appearance: 'solid',
-			tone: 'danger',
-			css: {
-				'@media (forced-colors: active)': { backgroundImage: 'none' },
-				backgroundColor: 'intent.danger.surface.solid',
-				backgroundImage: 'var(--luke-action-control-finish-resting)',
-				color: 'intent.danger.onSolid',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.danger.surface.solidHover',
-					backgroundImage: 'var(--luke-action-control-finish-raised)',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.danger.surface.solidPressed',
-					backgroundImage: 'var(--luke-action-control-finish-recessed)',
-				},
-			},
-		},
-		{
-			appearance: 'subtle',
-			tone: 'neutral',
-			css: {
-				'@media (forced-colors: active)': { backgroundImage: 'none' },
-				backgroundColor: 'intent.neutral.surface.subtle',
-				backgroundImage: 'var(--luke-action-control-finish-resting)',
-				color: 'text.primary',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.neutral.surface.subtleHover',
-					backgroundImage: 'var(--luke-action-control-finish-raised)',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.neutral.surface.subtlePressed',
-					backgroundImage: 'var(--luke-action-control-finish-recessed)',
-				},
-			},
-		},
-		{
-			appearance: 'subtle',
-			tone: 'accent',
-			css: {
-				'@media (forced-colors: active)': { backgroundImage: 'none' },
-				backgroundColor: 'intent.accent.surface.subtle',
-				backgroundImage: 'var(--luke-action-control-finish-resting)',
-				color: 'intent.accent.text',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.accent.surface.subtleHover',
-					backgroundImage: 'var(--luke-action-control-finish-raised)',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.accent.surface.subtlePressed',
-					backgroundImage: 'var(--luke-action-control-finish-recessed)',
-				},
-			},
-		},
-		{
-			appearance: 'subtle',
-			tone: 'danger',
-			css: {
-				'@media (forced-colors: active)': { backgroundImage: 'none' },
-				backgroundColor: 'intent.danger.surface.subtle',
-				backgroundImage: 'var(--luke-action-control-finish-resting)',
-				color: 'intent.danger.text',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.danger.surface.subtleHover',
-					backgroundImage: 'var(--luke-action-control-finish-raised)',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.danger.surface.subtlePressed',
-					backgroundImage: 'var(--luke-action-control-finish-recessed)',
-				},
-			},
-		},
-		{
-			appearance: 'ghost',
-			tone: 'neutral',
-			css: {
-				backgroundColor: 'transparent',
-				backgroundImage: 'none',
-				borderColor: 'transparent',
-				boxShadow: 'none',
-				color: 'text.primary',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.neutral.surface.subtleHover',
-					boxShadow: 'raised',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.neutral.surface.subtlePressed',
-					boxShadow: 'recessed',
-				},
-			},
-		},
-		{
-			appearance: 'ghost',
-			tone: 'accent',
-			css: {
-				backgroundColor: 'transparent',
-				backgroundImage: 'none',
-				borderColor: 'transparent',
-				boxShadow: 'none',
-				color: 'intent.accent.text',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.accent.surface.subtleHover',
-					boxShadow: 'raised',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.accent.surface.subtlePressed',
-					boxShadow: 'recessed',
-				},
-			},
-		},
-		{
-			appearance: 'ghost',
-			tone: 'danger',
-			css: {
-				backgroundColor: 'transparent',
-				backgroundImage: 'none',
-				borderColor: 'transparent',
-				boxShadow: 'none',
-				color: 'intent.danger.text',
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.danger.surface.subtleHover',
-					boxShadow: 'raised',
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: 'intent.danger.surface.subtlePressed',
-					boxShadow: 'recessed',
-				},
-			},
-		},
-	],
+	compoundVariants: buttonCompoundVariants,
 });
+
+function appearance(
+	tone: ButtonTone,
+	appearance: 'solid' | 'subtle',
+	surface: ButtonSurface,
+	color: ColorToken,
+): ButtonCompoundVariant {
+	const prefix = appearance === 'solid' ? 'solid' : 'subtle';
+
+	return {
+		appearance,
+		tone,
+		css: {
+			'@media (forced-colors: active)': { backgroundImage: 'none' },
+			backgroundColor: surface[prefix],
+			backgroundImage: 'var(--luke-action-control-finish-resting)',
+			color,
+			'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+				backgroundColor: surface[`${prefix}Hover`],
+				backgroundImage: 'var(--luke-action-control-finish-raised)',
+			},
+			'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+				backgroundColor: surface[`${prefix}Pressed`],
+				backgroundImage: 'var(--luke-action-control-finish-recessed)',
+			},
+		},
+	};
+}
+
+function ghostAppearance(
+	tone: ButtonTone,
+	surface: ButtonSurface,
+	color: ColorToken,
+): ButtonCompoundVariant {
+	return {
+		appearance: 'ghost',
+		tone,
+		css: {
+			backgroundColor: 'transparent',
+			backgroundImage: 'none',
+			borderColor: 'transparent',
+			boxShadow: 'none',
+			color,
+			'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+				backgroundColor: surface.subtleHover,
+				boxShadow: 'raised',
+			},
+			'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+				backgroundColor: surface.subtlePressed,
+				boxShadow: 'recessed',
+			},
+		},
+	};
+}

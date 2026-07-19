@@ -2,7 +2,7 @@ import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../.generated/icon-data.js';
 import { useIconSizeContext } from '../icon-size-context/index.js';
-import * as styles from '../recipes/icon.css.js';
+import * as styles from '../recipes/icon.js';
 import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -13,14 +13,12 @@ export { iconNames, iconViewBoxes };
 
 const IconSpritesheetContext = createContext<string | null>(null);
 
-interface IconVariantProps extends NonNullable<styles.IconVariants> {}
-
 interface IconStyleProps {
 	/**
 	 * Sets the icon size.
 	 * @default 'medium'
 	 */
-	size?: IconVariantProps['size'];
+	size?: styles.IconVariants['size'];
 }
 
 /** Props for `IconSpritesheetProvider`. */

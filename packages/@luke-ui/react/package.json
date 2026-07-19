@@ -51,7 +51,6 @@
 		"build": "pnpm run build:tsdown",
 		"build:storybook": "storybook build",
 		"build:tsdown": "vp pack",
-		"check:barrels": "unbarrelify --check --skip src/styles/index.ts --skip src/combobox-field/primitive/index.tsx",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "pnpm run check:types:storybook && pnpm run check:types:browser && pnpm run check:types:node",
@@ -123,7 +122,6 @@
 		"storybook": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",
-		"unbarrelify": "catalog:",
 		"vite": "catalog:",
 		"vite-plus": "catalog:",
 		"vitest": "catalog:"

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { vars } from './contract.css.js';
-import { flattenThemeContract } from './contract.js';
+import { fontSizeSteps, flattenThemeContract } from './contract.js';
 
 function countLeaves(node: unknown): number {
 	if (typeof node === 'string') return 1;
@@ -37,6 +37,9 @@ describe('theme contract', () => {
 	});
 
 	it('exposes font steps and the carried-forward icon-size scale', () => {
+		expect(Object.keys(vars.font).filter((key) => key !== 'family' && key !== 'weight')).toEqual(
+			fontSizeSteps,
+		);
 		expect(vars.font[100]).toEqual({
 			baselineTrim: 'var(--luke-font-100-baseline-trim)',
 			capHeightTrim: 'var(--luke-font-100-cap-height-trim)',

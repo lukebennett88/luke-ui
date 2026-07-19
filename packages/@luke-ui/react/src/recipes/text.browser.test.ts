@@ -1,9 +1,11 @@
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
+import textRecipeCss from '../../styled-system/styles/recipes/text.css?raw';
+import { fontSizeSteps } from '../theme/contract.js';
 import { tactileFoundation } from '../theme/foundations.js';
 import { buildTheme, themeClassName, themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
-import { text } from './text.css.js';
+import { text } from './text.js';
 
 let mounted: Array<HTMLElement> = [];
 let styles: Array<HTMLStyleElement> = [];
@@ -13,6 +15,26 @@ afterEach(() => {
 	mounted = [];
 	for (const style of styles) style.remove();
 	styles = [];
+});
+
+test('clamps one line from a boolean and multiple lines from a number', () => {
+	const singleLine = getComputedStyle(mountText({ lineClamp: true }));
+	const multiLine = mountText({ lineClamp: 3 });
+	const multiLineStyle = getComputedStyle(multiLine);
+
+	expect(singleLine.display).toBe('block');
+	expect(singleLine.overflowX).toBe('clip');
+	expect(singleLine.textOverflow).toBe('ellipsis');
+	expect(singleLine.whiteSpace).toBe('nowrap');
+	expect(multiLineStyle.webkitLineClamp).toBe('3');
+	expect(multiLineStyle.overflow).toBe('hidden');
+});
+
+test('emits standard and WebKit multi-line clamp declarations', () => {
+	for (const lines of [2, 3, 4, 5]) {
+		expect(textRecipeCss).toContain(`-webkit-line-clamp: ${lines};`);
+		expect(textRecipeCss).toContain(`line-clamp: ${lines};`);
+	}
 });
 
 test("defaults to size '300', body weight, and primary colour", () => {
@@ -92,7 +114,6 @@ test('an explicit numeric variant survives font inheritance', () => {
 
 test('all size steps use the generated Capsize trims for every curated font', () => {
 	const families = ['inter', 'apple-system', 'dm-sans'] as const;
-	const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
 	const representativeTrims = new Set<string>();
 
 	for (const fontFamily of families) {
@@ -104,7 +125,7 @@ test('all size steps use the generated Capsize trims for every curated font', ()
 		);
 		expect(authoredFontFamily).toContain(curatedFamilyIdentity[fontFamily]);
 
-		for (const size of sizes) {
+		for (const size of fontSizeSteps) {
 			const element = root.appendChild(document.createElement('span'));
 			element.className = text({ size });
 			element.textContent = `${fontFamily} ${size}`;
