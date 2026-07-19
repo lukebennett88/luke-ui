@@ -4,6 +4,7 @@ import { token } from '../../styled-system/tokens/index.mjs';
 import type { SpacingToken } from '../../styled-system/tokens/index.mjs';
 import type { Conditions } from '../../styled-system/types/conditions.d.mts';
 import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
+import { vars } from '../theme/panda-tokens.js';
 import { cx } from '../utils/index.js';
 
 type RemoveConditionPrefix<Condition extends string> = Condition extends `_${infer Name}`
@@ -146,18 +147,7 @@ export function createSprinkles(props: Partial<SprinklesProps>): {
 	};
 }
 
-const spaceValues = new Set<string>([
-	'0',
-	'100',
-	'200',
-	'300',
-	'400',
-	'600',
-	'800',
-	'1000',
-	'1200',
-	'1600',
-]);
+const spaceValues = new Set(['0', ...Object.keys(vars.space)]);
 
 // This manifest is the single source for the Box split boundary and is kept in
 // lockstep with the curated Panda staticCss surface.

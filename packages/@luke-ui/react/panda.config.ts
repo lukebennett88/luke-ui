@@ -83,30 +83,11 @@ const staticBoxProperties = [
 	'position',
 	'rowGap',
 ] as const;
-const spaceValues = [
-	'none',
-	'100',
-	'200',
-	'300',
-	'400',
-	'600',
-	'800',
-	'1000',
-	'1200',
-	'1600',
-] as const;
+const spaceValues = ['none', ...Object.keys(vars.space)];
 const spaceTokenValues = {
 	none: '0',
-	'100': vars.space[100],
-	'200': vars.space[200],
-	'300': vars.space[300],
-	'400': vars.space[400],
-	'600': vars.space[600],
-	'800': vars.space[800],
-	'1000': vars.space[1000],
-	'1200': vars.space[1200],
-	'1600': vars.space[1600],
-} as const;
+	...vars.space,
+};
 const marginValues = ['auto', ...spaceValues];
 const marginTokenValues = { auto: 'auto', ...spaceTokenValues };
 const boxStaticValuesByProperty = {
