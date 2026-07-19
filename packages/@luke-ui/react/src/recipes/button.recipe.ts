@@ -3,11 +3,20 @@ import type { RecipeConfig } from '@pandacss/dev';
 import type { ColorToken } from '../../styled-system/tokens/index.mjs';
 import { focusRing } from '../styles/focus-ring.js';
 
-type ButtonTone = 'neutral' | 'accent' | 'danger';
-type ButtonSurface = Record<
-	'solid' | 'solidHover' | 'solidPressed' | 'subtle' | 'subtleHover' | 'subtlePressed',
-	ColorToken
->;
+// Tone and surface-key unions derive from the generated colour tokens, so a
+// tone or surface state that disappears from the token set fails to compile.
+type IntentToneOf<Token> = Token extends `intent.${infer Tone}.${string}` ? Tone : never;
+type SurfaceKeyOf<Token> = Token extends `intent.${string}.surface.${infer Key}` ? Key : never;
+type IntentTone = IntentToneOf<ColorToken>;
+type SurfaceKey = SurfaceKeyOf<ColorToken>;
+
+// Button deliberately exposes a subset of the intent tones.
+type ButtonTone = Extract<IntentTone, 'accent' | 'danger' | 'neutral'>;
+
+type ButtonSurface = Record<SurfaceKey, ColorToken>;
+type ToneSurfaces<Tone extends ButtonTone> = {
+	[Key in SurfaceKey]: Extract<ColorToken, `intent.${Tone}.surface.${Key}`>;
+};
 type ButtonCompoundVariant = NonNullable<RecipeConfig['compoundVariants']>[number];
 
 const buttonSurfaces = {
@@ -35,7 +44,9 @@ const buttonSurfaces = {
 		subtleHover: 'intent.neutral.surface.subtleHover',
 		subtlePressed: 'intent.neutral.surface.subtlePressed',
 	},
-} satisfies Record<ButtonTone, ButtonSurface>;
+} as const satisfies {
+	[Tone in ButtonTone]: ToneSurfaces<Tone>;
+};
 
 const buttonCompoundVariants = [
 	appearance('neutral', 'solid', buttonSurfaces.neutral, 'intent.neutral.onSolid'),

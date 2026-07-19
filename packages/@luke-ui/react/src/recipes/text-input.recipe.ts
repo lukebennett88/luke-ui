@@ -1,9 +1,14 @@
 import { defineSlotRecipe } from '@pandacss/dev';
-import type { ColorToken } from '../../styled-system/tokens/index.mjs';
+import type { ColorToken, SizeToken } from '../../styled-system/tokens/index.mjs';
 import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import { focusRing } from '../styles/focus-ring.js';
 
 type TextInputSlot = 'adornmentEnd' | 'adornmentStart' | 'control' | 'group';
+
+// Size keys derive from the generated control-size tokens, so a size that
+// disappears from the token set fails to compile.
+type ControlSizeOf<Token> = Token extends `controlSize.${infer Size}` ? Size : never;
+type ControlSize = ControlSizeOf<SizeToken>;
 
 const textInputSizeVariants = {
 	medium: {
@@ -47,7 +52,7 @@ const textInputSizeVariants = {
 			paddingInlineStart: '200',
 		},
 	},
-} as const satisfies Record<'medium' | 'small', Record<TextInputSlot, SystemStyleObject>>;
+} as const satisfies Record<ControlSize, Record<TextInputSlot, SystemStyleObject>>;
 
 export const textInputRecipe = defineSlotRecipe({
 	className: 'text-input',

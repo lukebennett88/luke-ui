@@ -67,7 +67,7 @@ const sizeStepCompoundVariants = fontSizeSteps.map((size) => ({
 // any one of them fails to compile.
 type FontStepToken = FontSizeStep & FontSizeToken & LetterSpacingToken & LineHeightToken;
 
-function fontSizeStep(size: FontStepToken) {
+function fontSizeStep<Step extends FontStepToken>(size: Step) {
 	return { fontSize: size, letterSpacing: size, lineHeight: size };
 }
 
@@ -81,7 +81,9 @@ const sizeVariants = {
 	'700': fontSizeStep('700'),
 	'800': fontSizeStep('800'),
 	'900': fontSizeStep('900'),
-} satisfies Record<FontSizeStep, SystemStyleObject>;
+} satisfies {
+	[Step in FontSizeStep]: { fontSize: Step; letterSpacing: Step; lineHeight: Step };
+};
 
 const fontVariantNumericVariants = {
 	'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
@@ -123,7 +125,14 @@ const fontWeightVariants = {
 	emphasis: { fontWeight: 'emphasis' },
 	heading: { fontWeight: 'heading' },
 	label: { fontWeight: 'label' },
-} as const satisfies Record<string, { fontWeight: FontWeightToken }>;
+} as const satisfies { [Weight in FontWeightToken]: { fontWeight: Weight } };
+
+// The colour variant names derive from the tokens: intent tones that carry a
+// `.text` leaf (accent, info, success, warning, danger) plus the `text.*`
+// leaves (primary, secondary).
+type IntentTextToneOf<Token> = Token extends `intent.${infer Tone}.text` ? Tone : never;
+type TextLeafOf<Token> = Token extends `text.${infer Leaf}` ? Leaf : never;
+type TextColorKey = IntentTextToneOf<ColorToken> | TextLeafOf<ColorToken>;
 
 const colorVariants = {
 	accent: { color: 'intent.accent.text' },
@@ -133,7 +142,9 @@ const colorVariants = {
 	secondary: { color: 'text.secondary' },
 	success: { color: 'intent.success.text' },
 	warning: { color: 'intent.warning.text' },
-} as const satisfies Record<string, { color: ColorToken }>;
+} as const satisfies {
+	[Key in TextColorKey]: { color: Extract<ColorToken, `intent.${Key}.text` | `text.${Key}`> };
+};
 
 export const textRecipe = defineRecipe({
 	className: 'text',
