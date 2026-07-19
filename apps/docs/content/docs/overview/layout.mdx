@@ -24,8 +24,9 @@ every element.
 
 ## Responsive values
 
-Every Sprinkles property accepts a direct value or an object keyed by breakpoint. Values cascade
-from `xsmall`, so specify only the points where the layout changes.
+Token and enum properties accept a direct value or an object keyed by breakpoint. Values cascade
+from `xsmall`, so specify only the points where the layout changes. Arbitrary sizing, inset, flex,
+and grid values are intentionally direct-only; use custom CSS when those values need breakpoints.
 
 ```tsx
 <Box
@@ -50,7 +51,7 @@ The available breakpoints are `xsmall` (base), `small` (640px), `medium` (768px)
 
 Padding, gap, and margin use the theme spacing steps: `0`, `100`, `200`, `300`, `400`, `600`, `800`,
 `1000`, `1200`, and `1600`. Margin also accepts `auto`. Sizing and grid-placement properties accept
-their CSS values.
+their CSS values as non-responsive escape hatches.
 
 Use logical properties such as `paddingInline`, `marginBlockStart`, and `maxInlineSize`. They work
 in both writing directions without a second layout rule.

@@ -109,7 +109,8 @@ Read [Applying a theme](/theming/applying) for colour modes, portals, and other 
 ## Use layout utilities for layout
 
 `Box` and `createSprinkles` from `@luke-ui/react/styles` handle responsive structure, spacing,
-sizing, positioning, overflow, flex, and grid-child properties. They do not set semantic colour,
+positioning, overflow, flex, and grid-child properties. Arbitrary sizing, inset, flex, and grid
+values are direct-only escape hatches, not responsive values. They do not set semantic colour,
 typography, or pseudo states.
 
 ```tsx
@@ -126,14 +127,15 @@ or interaction states.
 
 ## Use application CSS alongside Luke UI
 
-Luke UI's static CSS uses four cascade layers, ordered from lowest to highest priority: `reset`,
-`theme`, `recipes`, and `utilities`. That internal order is stable regardless of stylesheet import
-order. The reset normalises only the subtree carrying `themeRootClassName`.
+Luke UI's static CSS uses five cascade layers, ordered from lowest to highest priority: `reset`,
+`theme`, `recipes`, `box`, and `utilities`. The order stays stable regardless of stylesheet import
+order. The `box` layer contains styles created by `Box` and `createSprinkles`. The reset normalises
+only the subtree carrying `themeRootClassName`.
 
 If your application also uses cascade layers, declare its layer order before importing stylesheets.
 
 ```css
-@layer reset, theme, base, recipes, components, utilities;
+@layer reset, theme, base, recipes, components, box, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';

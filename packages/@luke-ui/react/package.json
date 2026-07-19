@@ -87,7 +87,6 @@
 	"dependencies": {
 		"@capsizecss/metrics": "catalog:",
 		"@capsizecss/vanilla-extract": "catalog:",
-		"@luke-ui/rainbow-sprinkles": "workspace:*",
 		"@react-aria/utils": "catalog:",
 		"@vanilla-extract/css": "catalog:",
 		"@vanilla-extract/recipes": "catalog:",

@@ -83,6 +83,22 @@ describe('assembled stylesheet (generated output)', () => {
 		expect(recipesBlock).not.toContain(compoundDeclaration);
 	});
 
+	it('keeps curated Box utilities inside @layer box', () => {
+		expect(boxBlock).toContain('padding: var(--luke-space-400)');
+		expect(boxBlock).toContain('display: flex');
+		expect(boxBlock).toContain('padding: var(--box-padding-small)');
+	});
+
+	it('keeps the public stylesheet within the Box migration budget', () => {
+		expect(Buffer.byteLength(css)).toBeLessThan(135_000);
+	});
+
+	it('leaves the final utilities layer free of design-system authored rules', () => {
+		// Panda utility output is re-layered as `box`; Vanilla Extract no longer
+		// emits the retired Sprinkles surface. Consumers own this final layer.
+		expect(utilitiesStart).toBe(-1);
+	});
+
 	it('keeps Capsize trim compound-variant atomics inside @layer box', () => {
 		const compoundDeclaration = 'margin-bottom: var(--luke-font-300-cap-height-trim)';
 		expect(boxBlock).toContain(compoundDeclaration);

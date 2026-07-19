@@ -1,2 +1,2 @@
-export type { SprinklesProps } from './utilities.css.js';
-export { createSprinkles } from './utilities.css.js';
+export type { SprinklesProps } from './utilities.js';
+export { createSprinkles } from './utilities.js';

@@ -2,9 +2,11 @@ import '../../dist/themes/tactile.css';
 import '../stylesheet.css.js';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
+import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
-import { mergeProps } from '../utils/index.js';
-import { createSprinkles } from './utilities.css.js';
+import { cx, mergeProps } from '../utils/index.js';
+import { responsiveBreakpoints } from './breakpoints.js';
+import { createSprinkles } from './utilities.js';
 
 const mounted: Array<HTMLElement> = [];
 
@@ -29,17 +31,17 @@ test('applies every retained breakpoint responsively', async () => {
 	);
 
 	const breakpoints = [
-		{ expected: '4px', name: 'xsmall', width: 320 },
-		{ expected: '8px', name: 'small', width: 640 },
-		{ expected: '12px', name: 'medium', width: 768 },
-		{ expected: '16px', name: 'large', width: 1024 },
-		{ expected: '24px', name: 'xlarge', width: 1280 },
-		{ expected: '32px', name: 'xxlarge', width: 1536 },
+		{ expected: '4px', name: 'xsmall' },
+		{ expected: '8px', name: 'small' },
+		{ expected: '12px', name: 'medium' },
+		{ expected: '16px', name: 'large' },
+		{ expected: '24px', name: 'xlarge' },
+		{ expected: '32px', name: 'xxlarge' },
 	] as const;
 
 	for (const breakpoint of breakpoints) {
 		// eslint-disable-next-line no-await-in-loop -- viewport changes must be observed in order
-		await page.viewport(breakpoint.width, 800);
+		await page.viewport(responsiveBreakpoints[breakpoint.name].minimumWidth, 800);
 		expect(getComputedStyle(element).padding).toBe(breakpoint.expected);
 	}
 });
@@ -87,7 +89,7 @@ test('returns class and style output that merges with consumer props', () => {
 function mount(props: { className?: string; style?: Record<string, unknown> }): HTMLElement {
 	const element = document.body.appendChild(document.createElement('div'));
 	mounted.push(element);
-	element.className = `${tactileThemeClassName} ${props.className ?? ''}`;
+	element.className = cx(themeRootClassName, tactileThemeClassName, props.className);
 	Object.assign(element.style, props.style);
 	for (const [property, value] of Object.entries(props.style ?? {})) {
 		if (property.startsWith('--')) element.style.setProperty(property, String(value));

@@ -77,3 +77,21 @@ test('forwards the ref through a custom rendered div', () => {
 	expect(div).toHaveAttribute('id', 'custom-div');
 	expect(div).toHaveTextContent('Custom div');
 });
+
+test('keeps arbitrary dynamic values in Box CSS variables', () => {
+	const container = document.body.appendChild(document.createElement('div'));
+	container.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	const root = createRoot(container);
+	mounted.push({ container, root });
+
+	act(() => {
+		root.render(<Box inlineSize="calc(100% - 2rem)" padding="400" />);
+	});
+
+	const box = container.firstElementChild;
+	if (!(box instanceof HTMLElement)) throw new Error('Expected Box element.');
+
+	expect(box.style.getPropertyValue('--box-inline-size')).toBe('calc(100% - 2rem)');
+	expect(getComputedStyle(box).inlineSize).toBe(`${document.body.clientWidth - 32}px`);
+	expect(getComputedStyle(box).padding).toBe('16px');
+});
