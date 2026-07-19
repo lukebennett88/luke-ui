@@ -5,7 +5,7 @@ import { ListBox as RacListBox } from 'react-aria-components/ComboBox';
 import { ListBoxContext } from 'react-aria-components/ListBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
-import * as styles from '../../recipes/combobox.css.js';
+import * as styles from '../../recipes/combobox.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
@@ -36,6 +36,7 @@ export type ComboboxListBoxProps<T extends object> = Prettify<_ComboboxListBoxPr
 /** Styled listbox for combobox options. */
 export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>): JSX.Element {
 	const { children, dependencies, items, loadMoreItem, ...listBoxProps } = props;
+	const comboboxStyles = styles.combobox();
 	const listBoxContext = useSlottedContext(ListBoxContext);
 	const collectionItems = items ?? listBoxContext?.items;
 	const listBoxChildren =
@@ -51,7 +52,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 		<RacListBox
 			{...listBoxProps}
 			className={composeRenderProps(listBoxProps.className, (className) => {
-				return cx(styles.comboboxListBox(), className);
+				return cx(comboboxStyles.listBox, className);
 			})}
 		>
 			{listBoxChildren}

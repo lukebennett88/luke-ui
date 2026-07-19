@@ -2,7 +2,7 @@ import type { JSX } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import * as styles from '../../recipes/combobox.css.js';
+import * as styles from '../../recipes/combobox.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
@@ -26,12 +26,13 @@ export type ComboboxControlProps = Prettify<_ComboboxControlProps>;
 export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 	const { size: sizeProp, ...groupProps } = props;
 	const size = useComboboxSize(sizeProp);
+	const comboboxStyles = styles.combobox({ size });
 
 	return (
 		<RacGroup
 			{...groupProps}
 			className={composeRenderProps(groupProps.className, (className) => {
-				return cx(styles.comboboxControl({ size }), className);
+				return cx(comboboxStyles.control, className);
 			})}
 		/>
 	);
