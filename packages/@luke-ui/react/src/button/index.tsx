@@ -1,15 +1,17 @@
 import type { JSX, ReactNode } from 'react';
+import type { ButtonComposedVariantProps } from '../../styled-system/recipes/button-composed.mjs';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import * as styles from '../recipes/button-composed.js';
 import type * as primitiveStyles from '../recipes/button.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
+import type { PlainVariants } from '../types/plain-variants.js';
 import type { Prettify } from '../types/prettify.js';
 import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
 import { Button as PrimitiveButton } from './primitive/index.js';
 
-interface ComposedButtonRecipeProps extends NonNullable<styles.ButtonLabelVariants> {}
+type ComposedButtonRecipeProps = PlainVariants<ButtonComposedVariantProps>;
 
 interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonVariants> {}
 

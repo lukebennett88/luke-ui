@@ -1,7 +1,7 @@
 import { defineSlotRecipe } from '@pandacss/dev';
 
 export const buttonComposedRecipe = defineSlotRecipe({
-	className: 'button-composed',
+	className: 'button',
 	description: 'Private content parts for the composed Button.',
 	slots: ['content', 'label', 'spinnerOverlay'],
 	base: {

@@ -3,6 +3,10 @@ import type { ColorToken } from '../../styled-system/tokens/index.mjs';
 import type { SystemStyleObject } from '../../styled-system/types/system-types.d.mts';
 import { focusRing } from '../styles/focus-ring.js';
 import type { ControlSize, ControlSizeToken } from '../types/token-unions.js';
+import {
+	comboboxTrayKeyboardInsetVar,
+	comboboxTrayViewportHeightVar,
+} from './combobox-viewport-vars.js';
 
 type ComboboxSlot =
 	| 'clearButton'
@@ -19,8 +23,6 @@ type ComboboxSlot =
 	| 'textInput'
 	| 'trigger';
 
-const comboboxTrayViewportHeightVar = '--luke-ui-visual-viewport-height';
-const comboboxTrayKeyboardInsetVar = '--luke-ui-keyboard-inset';
 const trayMediaQuery = '(width < 40rem)';
 
 const disabled =

@@ -1,12 +1,10 @@
 import type { ComboboxVariantProps } from '../../styled-system/recipes/combobox.mjs';
 import { combobox } from '../../styled-system/recipes/combobox.mjs';
 import type { PlainVariants } from '../types/plain-variants.js';
-
-/** Custom property mirroring `visualViewport.height`, set by `useVisualViewportVars`. */
-export const comboboxTrayViewportHeightVar = '--luke-ui-visual-viewport-height';
-
-/** Custom property mirroring the on-screen keyboard's height, set by `useVisualViewportVars`. */
-export const comboboxTrayKeyboardInsetVar = '--luke-ui-keyboard-inset';
+export {
+	comboboxTrayKeyboardInsetVar,
+	comboboxTrayViewportHeightVar,
+} from './combobox-viewport-vars.js';
 
 export type ComboboxVariants = PlainVariants<ComboboxVariantProps>;
 
