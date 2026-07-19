@@ -46,6 +46,14 @@ describe('createComponentPlan', () => {
 		expect(
 			plan.files.find((file) => file.path.endsWith('/recipes/status-badge.css.ts'))?.contents,
 		).not.toContain('StatusBadgeVariants');
+		const recipe = plan.files.find((file) => {
+			return file.path.endsWith('/recipes/status-badge.css.ts');
+		})?.contents;
+
+		expect(recipe).toContain("import { recipe } from '@vanilla-extract/recipes';");
+		expect(recipe).toContain("'@layer': {\n\t\t\trecipes: {");
+		expect(recipe).not.toContain('recipeInLayer');
+		expect(recipe).not.toContain('layered-style');
 
 		const story = plan.files.find((file) => {
 			return file.path.endsWith('/status-badge/status-badge.stories.tsx');

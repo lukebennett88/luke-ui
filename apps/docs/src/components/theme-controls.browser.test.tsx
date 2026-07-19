@@ -1,6 +1,8 @@
 import '../styles/app.css';
 import '@luke-ui/react/themes/paper.css';
 import '@luke-ui/react/themes/tactile.css';
+import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { paperThemeClassName } from '@luke-ui/react/themes';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
@@ -165,7 +167,9 @@ function renderTheme(
 				defaultTheme={options.defaultTheme ?? 'light'}
 				enableSystem={options.enableSystem ?? false}
 			>
-				<DocsThemeRoot>{children}</DocsThemeRoot>
+				<IconSpritesheetProvider href={spriteSheetHref}>
+					<DocsThemeRoot>{children}</DocsThemeRoot>
+				</IconSpritesheetProvider>
 			</ThemeProvider>,
 		);
 	});

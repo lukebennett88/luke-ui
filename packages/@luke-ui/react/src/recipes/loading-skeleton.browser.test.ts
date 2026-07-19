@@ -5,7 +5,7 @@ import { cdp } from 'vite-plus/test/context';
 import { contrastRatio, parseColor } from '../theme/color.js';
 import { themeRootClassName } from '../theme/index.js';
 import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
-import { loadingSkeleton } from './loading-skeleton.css.js';
+import { loadingSkeleton } from './loading-skeleton.js';
 
 let root: HTMLElement | undefined;
 
@@ -39,6 +39,37 @@ test('reduced motion keeps the skeleton surface without a running animation', as
 	expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
 });
 
+test('block skeleton masking overrides wrapped content and its descendants', () => {
+	const inlineSkeleton = mountInlineSkeleton();
+	const { child, nested } = mountBlockSkeleton();
+	const skeletonSurface = getComputedStyle(inlineSkeleton);
+	const childStyle = getComputedStyle(child);
+	const nestedStyle = getComputedStyle(nested);
+	const overlayStyle = getComputedStyle(child, '::after');
+
+	expect(childStyle.backgroundColor).toBe(skeletonSurface.backgroundColor);
+	expect(childStyle.backgroundClip).toBe('border-box');
+	expect(childStyle.backgroundImage).toBe('none');
+	expect(childStyle.borderStyle).toBe('none');
+	expect(childStyle.boxDecorationBreak).toBe('clone');
+	expect(childStyle.boxShadow).toBe('none');
+	expect(childStyle.color).toBe(skeletonSurface.color);
+	expect(childStyle.cursor).toBe('default');
+	expect(childStyle.outlineStyle).toBe('none');
+	expect(childStyle.outlineWidth).toBe('0px');
+	expect(childStyle.overflow).toBe('hidden');
+	expect(childStyle.position).toBe('relative');
+	expect(childStyle.pointerEvents).toBe('none');
+	expect(childStyle.userSelect).toBe('none');
+	expect(nestedStyle.backgroundColor).toBe(skeletonSurface.backgroundColor);
+	expect(nestedStyle.backgroundImage).toBe('none');
+	expect(nestedStyle.color).toBe(skeletonSurface.color);
+	expect(overlayStyle.backgroundColor).toBe(skeletonSurface.backgroundColor);
+	expect(overlayStyle.content).toBe('""');
+	expect(overlayStyle.inset).toBe('-1px');
+	expect(overlayStyle.position).toBe('absolute');
+});
+
 for (const theme of themeCases) {
 	for (const mode of ['light', 'dark'] as const) {
 		test(`${theme.name} ${mode} keeps both pulse extremes distinct from the canvas`, async () => {
@@ -63,9 +94,34 @@ function mountInlineSkeleton(
 	root.dataset.colorMode = mode;
 	root.style.backgroundColor = 'var(--luke-color-surface-canvas)';
 	const skeleton = root.appendChild(document.createElement('span'));
-	skeleton.className = loadingSkeleton;
+	skeleton.className = loadingSkeleton();
 	skeleton.dataset.skeletonInline = '';
 	return skeleton;
+}
+
+function mountBlockSkeleton() {
+	const skeleton = requireRoot().appendChild(document.createElement('span'));
+	skeleton.className = loadingSkeleton();
+	const child = skeleton.appendChild(document.createElement('div'));
+	child.style.backgroundColor = 'red';
+	child.style.backgroundClip = 'content-box';
+	child.style.backgroundImage = 'linear-gradient(blue, green)';
+	child.style.border = '1px solid blue';
+	child.style.boxDecorationBreak = 'slice';
+	child.style.boxShadow = '1px 1px blue';
+	child.style.color = 'blue';
+	child.style.cursor = 'pointer';
+	child.style.outline = '1px solid yellow';
+	child.style.overflow = 'visible';
+	child.style.position = 'static';
+	child.style.pointerEvents = 'auto';
+	child.style.userSelect = 'text';
+	const nested = child.appendChild(document.createElement('span'));
+	nested.style.backgroundColor = 'red';
+	nested.style.backgroundImage = 'linear-gradient(blue, green)';
+	nested.style.color = 'blue';
+
+	return { child, nested };
 }
 
 function requireRoot() {

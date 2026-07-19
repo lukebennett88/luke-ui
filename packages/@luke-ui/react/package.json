@@ -48,7 +48,8 @@
 		"access": "public"
 	},
 	"scripts": {
-		"build": "pnpm run build:tsdown",
+		"build": "pnpm run build:tsdown && pnpm run build:stylesheet",
+		"build:stylesheet": "tsx scripts/assemble-stylesheet.ts --output=dist/stylesheet.css",
 		"build:storybook": "storybook build",
 		"build:tsdown": "vp pack",
 		"check:format": "vp fmt . --check",
