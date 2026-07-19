@@ -14,5 +14,3 @@ export const layers = {
 	recipes: globalLayer('recipes'),
 	utilities: globalLayer('utilities'),
 } as const;
-
-export type LayerName = keyof typeof layers;

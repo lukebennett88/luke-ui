@@ -30,6 +30,26 @@ function staticFunctionBasePathPlugin(): Plugin {
 
 const contentDocsDir = fileURLToPath(new URL('./content/docs/', import.meta.url));
 
+// Search and LLM endpoints are static docs artifacts; preview is explicit because iframe sources aren't link-crawled.
+export const staticPrerenderPages = [
+	{ path: '/api/search' },
+	{ path: '/llms.txt' },
+	{ path: '/llms-full.txt' },
+	{ path: '/playground/preview' },
+];
+
+export function getPrerenderOptions(storybookPath: string) {
+	return {
+		crawlLinks: true,
+		// The generated preview server is unreliable under Netlify's default
+		// parallelism, so serialize its requests.
+		concurrency: 1,
+		enabled: true,
+		filter: (page: { path: string }) => !page.path.startsWith(storybookPath),
+		retryCount: 2,
+	};
+}
+
 async function getMarkdownPrerenderPages(): Promise<Array<{ path: string }>> {
 	const files: Array<string> = [];
 
@@ -127,24 +147,8 @@ export default defineConfig(async () => {
 			mdx(await import('./source.config')),
 			tailwindcss(),
 			tanstackStart({
-				pages: [
-					{ path: '/api/search' },
-					{ path: '/llms.txt' },
-					{ path: '/llms-full.txt' },
-					// The preview page is loaded via an iframe src, which the link
-					// crawler does not follow, so it must be prerendered explicitly.
-					{ path: '/playground/preview' },
-					...markdownPrerenderPages,
-				],
-				prerender: {
-					// Serialize requests to the internal Vite preview server and retry a
-					// transient failure without omitting the iframe preview page.
-					concurrency: 1,
-					crawlLinks: true,
-					enabled: true,
-					filter: (page) => !page.path.startsWith(storybookPath),
-					retryCount: 2,
-				},
+				pages: [...staticPrerenderPages, ...markdownPrerenderPages],
+				prerender: getPrerenderOptions(storybookPath),
 			}),
 			react(),
 			netlify(),

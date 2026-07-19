@@ -77,19 +77,19 @@ specificity.
 | `recipes`   | Component styles, variants, and compound variants.  |
 | `utilities` | One-off layout and override escape hatches.         |
 
-Use `styleInLayer`, `recipeInLayer`, and `globalStyleInLayer` from `styles/layered-style.css.ts`.
-These helpers keep styles inside a named layer.
+Vanilla Extract styles declare their layer directly with `@layer`. Panda config recipes emit into
+the `recipes` layer, and Panda global rules use `globalCss` with an inline `@layer` key.
 
 Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
 
-`LoadingSkeleton` uses `!important` inside the `utilities` layer because it must force placeholder
+`LoadingSkeleton` uses `!important` inside the `recipes` layer because it must force placeholder
 styles onto arbitrary wrapped children.
 
 Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
 in the `reset` layer, so it cannot disable animations declared in `recipes` or `utilities`. Animated
 recipes should add their own `@media (prefers-reduced-motion: reduce)` override. See
-`recipes/loading-skeleton.css.ts` for an example.
+`recipes/loading-skeleton.recipe.ts` for an example.
 
 ## Recipes
 
