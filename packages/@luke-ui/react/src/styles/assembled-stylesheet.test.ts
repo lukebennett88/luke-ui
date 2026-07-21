@@ -3,12 +3,11 @@ import { describe, expect, it } from 'vite-plus/test';
 import { assembleStylesheet, hoistGlobalLayers } from '../../scripts/assemble-stylesheet.js';
 
 /**
- * Concatenate every top-level `@layer <layerName> { ... }` block's inner
- * content, matched with brace-depth counting rather than a positional slice.
- * Real output has several `@layer recipes` / `@layer recipes.slots` blocks
- * (one per Panda recipe file) plus the hoisted global-styles recipes block,
- * so a single `indexOf(...)` pair cannot isolate "the recipes content" — this
- * walks every occurrence instead.
+ * Concatenate the inner content of every `@layer <layerName> { ... }` block,
+ * matching closing braces by depth. The real output has several `@layer recipes`
+ * and `@layer recipes.slots` blocks (one per Panda recipe file, plus the hoisted
+ * global-styles block), so a single `indexOf` slice cannot isolate one layer's
+ * content.
  */
 function extractLayerBlocks(css: string, layerName: string): string {
 	const pattern = new RegExp(`@layer\\s+${layerName.replace('.', '\\.')}\\s*\\{`, 'g');
@@ -124,12 +123,10 @@ describe('assembled stylesheet (generated output)', () => {
 	const css = assembleStylesheet();
 	const boxStart = css.indexOf('@layer box {');
 	const utilitiesStart = css.indexOf('@layer utilities {', boxStart);
-	// `recipesBlock` concatenates every top-level `@layer recipes` /
-	// `@layer recipes.slots` block (the hoisted global-styles recipes block
-	// plus one per Panda recipe file) rather than slicing between the first
-	// `@layer recipes {` and `@layer box {`, because that first occurrence is
-	// now the hoisted global block near the top of the sheet, well before the
-	// config-recipe blocks and the `@layer tokens` block sitting between them.
+	// The first `@layer recipes {` occurrence is the hoisted global-styles block
+	// near the top of the sheet, with `@layer tokens` between it and the
+	// config-recipe blocks, so concatenate every recipes/recipes.slots block
+	// instead of slicing between the first occurrence and `@layer box`.
 	const recipesBlock = `${extractLayerBlocks(css, 'recipes')}\n\n${extractLayerBlocks(css, 'recipes.slots')}`;
 	const resetBlock = extractLayerBlocks(css, 'reset');
 	const baseBlock = extractLayerBlocks(css, 'base');
