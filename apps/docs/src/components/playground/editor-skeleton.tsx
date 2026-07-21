@@ -72,24 +72,26 @@ export function EditorSkeletonShapeScript() {
 /** Shared loading indicator so the editor and preview speak the same language. */
 export function LoadingPill({ label }: { label: string }) {
 	return (
-		<div className={loadingPillStyle}>
+		<div className={loadingPillStyles.pill}>
 			<LoadingSpinner aria-hidden size="small" />
 			<span>{label}</span>
 		</div>
 	);
 }
 
-const loadingPillStyle = css({
-	alignItems: 'center',
-	backgroundColor: 'var(--luke-color-surface-resting)',
-	borderColor: 'var(--luke-color-border-decorative)',
-	borderRadius: 'var(--luke-radius-full)',
-	borderStyle: 'solid',
-	borderWidth: '1px',
-	color: 'var(--luke-color-text-secondary)',
-	display: 'flex',
-	fontSize: 'var(--luke-font-100-font-size)',
-	gap: 'var(--luke-space-200)',
-	paddingBlock: 'var(--luke-space-150)',
-	paddingInline: 'var(--luke-space-300)',
-});
+const loadingPillStyles = {
+	pill: css({
+		alignItems: 'center',
+		backgroundColor: 'var(--luke-color-surface-resting)',
+		borderColor: 'var(--luke-color-border-decorative)',
+		borderRadius: 'var(--luke-radius-full)',
+		borderStyle: 'solid',
+		borderWidth: '1px',
+		color: 'var(--luke-color-text-secondary)',
+		display: 'flex',
+		fontSize: 'var(--luke-font-100-font-size)',
+		gap: 'var(--luke-space-200)',
+		paddingBlock: 'var(--luke-space-150)',
+		paddingInline: 'var(--luke-space-300)',
+	}),
+};
