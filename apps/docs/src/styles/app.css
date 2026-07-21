@@ -5,7 +5,11 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
-:root {
+/* Remap Fumadocs color tokens to Luke UI design system tokens.
+ * Scoped to .luke-ui-theme (not :root) because the --luke-color-* tokens
+ * are only defined on the theme root element, so var() references must
+ * be evaluated there to resolve correctly and inherit to Fumadocs elements. */
+.luke-ui-theme {
 	--color-fd-background: var(--luke-color-surface-canvas);
 	--color-fd-foreground: var(--luke-color-text-primary);
 	--color-fd-muted: var(--luke-color-surface-recessed);
