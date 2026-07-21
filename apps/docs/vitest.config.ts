@@ -1,9 +1,12 @@
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
+import { pandaCss } from './panda-css-vite-plugin';
 
 export default defineConfig({
-	plugins: [tailwindcss()],
+	// Panda must run before `@tailwindcss/vite` here too, so the browser test's
+	// `import './app.css'` gets the docs atomics injected — see panda-css-vite-plugin.
+	plugins: [pandaCss(), tailwindcss()],
 	optimizeDeps: {
 		include: [
 			'next-themes',

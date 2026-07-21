@@ -53,6 +53,7 @@
 	"devDependencies": {
 		"@netlify/vite-plugin-tanstack-start": "catalog:",
 		"@pandacss/dev": "catalog:",
+		"@pandacss/preset-base": "catalog:",
 		"@tailwindcss/vite": "catalog:",
 		"@tanstack/router-cli": "catalog:",
 		"@types/mdx": "catalog:",

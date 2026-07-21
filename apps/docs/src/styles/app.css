@@ -24,5 +24,3 @@
 	--color-fd-ring: var(--luke-color-border-focus);
 	--color-fd-overlay: var(--luke-color-surface-overlay);
 }
-
-@pandacss utilities;

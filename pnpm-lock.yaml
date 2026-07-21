@@ -304,6 +304,9 @@ importers:
       '@pandacss/dev':
         specifier: 'catalog:'
         version: 1.11.4(typescript@6.0.3)
+      '@pandacss/preset-base':
+        specifier: 'catalog:'
+        version: 1.11.4
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.2(@voidzero-dev/vite-plus-core@0.2.2(@arethetypeswrong/core@0.18.5)(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.21)(tsx@4.23.1)(typescript@6.0.3)(unrun@0.2.37)(yaml@2.9.0))
