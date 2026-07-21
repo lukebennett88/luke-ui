@@ -43,6 +43,12 @@ test('builds the docs app with Panda and Tailwind using the public preset', asyn
 	]);
 	expect(outputCss).toContain('display:flex');
 	expect(outputCss).toMatch(/\.c_text\\\.primary\s*\{\s*color:var\(--colors-text-primary\)/);
+	// Prove the docs' OWN css() atomics are emitted — i.e. the Panda PostCSS pass
+	// actually ran alongside Tailwind, not just that the DS stylesheet was bundled.
+	// These come from theme-controls' <select> and the DocsTitle line-height.
+	expect(outputCss).toContain('min-block-size:var(--luke-control-size-small)');
+	expect(outputCss).toContain('border-color:var(--luke-color-border-control)');
+	expect(outputCss).toContain('line-height:var(--luke-font-700-line-height)');
 }, 120_000);
 
 async function readCssFiles(dir: string): Promise<string> {
