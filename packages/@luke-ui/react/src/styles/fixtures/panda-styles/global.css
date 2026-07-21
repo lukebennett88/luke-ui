@@ -1,0 +1,23 @@
+@layer base {
+	:root {
+		--made-with-panda: '🐼';
+	}
+
+	@layer reset {
+		.reset-fixture {
+			color: red;
+		}
+	}
+
+	@layer base {
+		.theme-root-fixture {
+			color: green;
+		}
+	}
+
+	@layer recipes {
+		.global-recipe-fixture {
+			color: purple;
+		}
+	}
+}

@@ -1,6 +1,69 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
-import { assembleStylesheet } from '../../scripts/assemble-stylesheet.js';
+import { assembleStylesheet, hoistGlobalLayers } from '../../scripts/assemble-stylesheet.js';
+
+/**
+ * Concatenate every top-level `@layer <layerName> { ... }` block's inner
+ * content, matched with brace-depth counting rather than a positional slice.
+ * Real output has several `@layer recipes` / `@layer recipes.slots` blocks
+ * (one per Panda recipe file) plus the hoisted global-styles recipes block,
+ * so a single `indexOf(...)` pair cannot isolate "the recipes content" — this
+ * walks every occurrence instead.
+ */
+function extractLayerBlocks(css: string, layerName: string): string {
+	const pattern = new RegExp(`@layer\\s+${layerName.replace('.', '\\.')}\\s*\\{`, 'g');
+	const blocks: Array<string> = [];
+	for (const match of css.matchAll(pattern)) {
+		const start = (match.index ?? 0) + match[0].length;
+		let depth = 1;
+		let index = start;
+		while (depth > 0 && index < css.length) {
+			if (css[index] === '{') depth++;
+			else if (css[index] === '}') depth--;
+			index++;
+		}
+		blocks.push(css.slice(start, index - 1));
+	}
+	return blocks.join('\n\n');
+}
+
+describe('hoistGlobalLayers', () => {
+	it('hoists nested reset/base/recipes layers to the top level in canonical order', () => {
+		const input = `
+			@layer base {
+				:root { --marker: 1; }
+				@layer recipes { .r { color: red; } }
+				@layer reset { .s { color: blue; } }
+				@layer base { .t { color: green; } }
+			}
+		`;
+
+		const output = hoistGlobalLayers(input);
+		const resetIndex = output.indexOf('@layer reset {');
+		const baseIndex = output.indexOf('@layer base {');
+		const recipesIndex = output.indexOf('@layer recipes {');
+
+		expect(resetIndex).toBeGreaterThan(-1);
+		expect(baseIndex).toBeGreaterThan(resetIndex);
+		expect(recipesIndex).toBeGreaterThan(baseIndex);
+		// The `:root` marker (a direct, non-@layer child of the wrapper) merges
+		// into the top-level base block alongside the nested `@layer base` rule.
+		const baseBlock = extractLayerBlocks(output, 'base');
+		expect(baseBlock).toContain('--marker: 1');
+		expect(baseBlock).toContain('.t { color: green; }');
+		// No @layer block should survive nested inside the hoisted output.
+		expect(output).not.toMatch(/@layer\s+\w[\w.-]*\s*\{[^{}]*@layer/);
+	});
+
+	it('throws when given anything other than exactly one top-level "@layer base" block', () => {
+		expect(() => hoistGlobalLayers('.foo { color: red; }')).toThrow(/top-level/);
+		expect(() => hoistGlobalLayers('@layer base {} @layer base {}')).toThrow(/top-level/);
+		expect(() => hoistGlobalLayers('@layer reset { .x { color: red; } }')).toThrow(
+			/Expected global\.css's top-level block to be "@layer base"/,
+		);
+		expect(() => hoistGlobalLayers('')).toThrow(/top-level/);
+	});
+});
 
 describe('assembled stylesheet', () => {
 	const css = assembleStylesheet({
@@ -11,6 +74,27 @@ describe('assembled stylesheet', () => {
 		expect(css.split('\n')[0]).toBe('@layer reset, base, tokens, recipes, box, utilities;');
 	});
 
+	it('hoists the nested global reset layer into a top-level @layer reset block', () => {
+		const resetBlock = extractLayerBlocks(css, 'reset');
+		expect(resetBlock).toContain('.reset-fixture');
+	});
+
+	it('hoists the wrapper marker and nested global base layer into one top-level @layer base block', () => {
+		const baseBlock = extractLayerBlocks(css, 'base');
+		expect(baseBlock).toContain(`--made-with-panda: '🐼'`);
+		expect(baseBlock).toContain('.theme-root-fixture');
+	});
+
+	it('hoists the nested global recipes layer into a top-level @layer recipes block', () => {
+		const recipesBlock = extractLayerBlocks(css, 'recipes');
+		expect(recipesBlock).toContain('.global-recipe-fixture');
+	});
+
+	it('leaves no @layer block nested directly inside the base layer', () => {
+		const baseBlock = extractLayerBlocks(css, 'base');
+		expect(baseBlock).not.toContain('@layer');
+	});
+
 	it('contains a @layer box block with a real token-referencing box rule', () => {
 		expect(css).toContain('@layer box {');
 		const boxBlock = css.slice(css.indexOf('@layer box {'));
@@ -18,7 +102,8 @@ describe('assembled stylesheet', () => {
 	});
 
 	it('includes the config recipe output inside @layer recipes', () => {
-		expect(css).toMatch(/@layer recipes\s*\{[\s\S]*?\.recipe-fixture\s*\{\s*color:\s*blue;\s*\}/);
+		const recipesBlock = extractLayerBlocks(css, 'recipes');
+		expect(recipesBlock).toMatch(/\.recipe-fixture\s*\{\s*color:\s*blue;\s*\}/);
 	});
 
 	it('includes the token alias bridge inside @layer tokens', () => {
@@ -37,10 +122,17 @@ describe('assembled stylesheet', () => {
 // requires `pnpm generate` to have run first, as the turbo `test` task does.
 describe('assembled stylesheet (generated output)', () => {
 	const css = assembleStylesheet();
-	const recipesStart = css.indexOf('@layer recipes {');
 	const boxStart = css.indexOf('@layer box {');
 	const utilitiesStart = css.indexOf('@layer utilities {', boxStart);
-	const recipesBlock = css.slice(recipesStart, boxStart);
+	// `recipesBlock` concatenates every top-level `@layer recipes` /
+	// `@layer recipes.slots` block (the hoisted global-styles recipes block
+	// plus one per Panda recipe file) rather than slicing between the first
+	// `@layer recipes {` and `@layer box {`, because that first occurrence is
+	// now the hoisted global block near the top of the sheet, well before the
+	// config-recipe blocks and the `@layer tokens` block sitting between them.
+	const recipesBlock = `${extractLayerBlocks(css, 'recipes')}\n\n${extractLayerBlocks(css, 'recipes.slots')}`;
+	const resetBlock = extractLayerBlocks(css, 'reset');
+	const baseBlock = extractLayerBlocks(css, 'base');
 	const boxBlock = css.slice(boxStart, utilitiesStart);
 
 	it('starts with the canonical combined layer-order declaration', () => {
@@ -48,8 +140,9 @@ describe('assembled stylesheet (generated output)', () => {
 	});
 
 	it('orders @layer recipes before @layer box', () => {
-		expect(recipesStart).toBeGreaterThan(-1);
-		expect(boxStart).toBeGreaterThan(recipesStart);
+		const firstRecipesStart = css.indexOf('@layer recipes {');
+		expect(firstRecipesStart).toBeGreaterThan(-1);
+		expect(boxStart).toBeGreaterThan(firstRecipesStart);
 	});
 
 	it('keeps the button recipe base and variant rules inside @layer recipes', () => {
@@ -103,5 +196,19 @@ describe('assembled stylesheet (generated output)', () => {
 		const compoundDeclaration = 'margin-bottom: var(--luke-font-300-cap-height-trim)';
 		expect(boxBlock).toContain(compoundDeclaration);
 		expect(recipesBlock).not.toContain(compoundDeclaration);
+	});
+
+	it('keeps the DS reset contract inside the top-level @layer reset block', () => {
+		expect(resetBlock).toContain('.luke-ui-reset :where(h1, h2, h3, h4, h5, h6)');
+	});
+
+	it('keeps the theme-root base contract inside the top-level @layer base block', () => {
+		expect(baseBlock).toContain('.luke-ui-theme');
+	});
+
+	it('keeps loading skeleton masking inside @layer recipes, not @layer base', () => {
+		const maskingDeclaration = 'overflow: hidden !important';
+		expect(recipesBlock).toContain(maskingDeclaration);
+		expect(baseBlock).not.toContain(maskingDeclaration);
 	});
 });
