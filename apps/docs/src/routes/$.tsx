@@ -10,6 +10,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
+import { css } from '../../styled-system/css';
 import { ExampleBlock } from '../components/example-block';
 import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
@@ -18,6 +19,11 @@ import { source } from '../lib/source';
 import { getStorybookStoryUrl, withBasePath } from '../lib/storybook';
 
 const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
+
+// Fumadocs' DocsTitle sets font-size (1.75em = 28px = the DS font-700 step) but no
+// line-height, so inside `.luke-ui-theme` it inherits the 24px base line-height and
+// renders cramped. Restore the DS font-700 line-height without touching size/weight.
+const docsTitleStyles = css({ lineHeight: 'var(--luke-font-700-line-height)' });
 
 const mdxComponents = {
 	...defaultMdxComponents,
@@ -71,7 +77,7 @@ const clientLoader = browserCollections.docs.createClientLoader({
 		const { githubUrl, markdownUrl, storybookUrl, ...pageProps } = props;
 		return (
 			<DocsPage toc={toc} {...pageProps}>
-				<DocsTitle>{frontmatter.title}</DocsTitle>
+				<DocsTitle className={docsTitleStyles}>{frontmatter.title}</DocsTitle>
 				<DocsBody>
 					{frontmatter.description ? <blockquote>{frontmatter.description}</blockquote> : null}
 					<PageActions
