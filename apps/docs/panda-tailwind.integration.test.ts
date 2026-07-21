@@ -27,7 +27,20 @@ test('builds the docs app with Panda and Tailwind using the public preset', asyn
 	).toBe(true);
 	expect(appCss).toContain("@import '@luke-ui/react/stylesheet.css';");
 	expect(appCss).toContain("@import 'tailwindcss';");
-	expect(outputCss).toContain('@layer reset;');
+	const emittedLayerOrder = [...outputCss.matchAll(/@layer ([a-z][a-z0-9]*)[;{]/g)]
+		.map((match) => match[1])
+		.filter((name, index, all) => all.indexOf(name) === index)
+		.filter((name) => name !== 'properties');
+	expect(emittedLayerOrder).toEqual([
+		'reset',
+		'theme',
+		'base',
+		'tokens',
+		'recipes',
+		'box',
+		'components',
+		'utilities',
+	]);
 	expect(outputCss).toContain('display:flex');
 	expect(outputCss).toMatch(/\.c_text\\\.primary\s*\{\s*color:var\(--colors-text-primary\)/);
 }, 120_000);
