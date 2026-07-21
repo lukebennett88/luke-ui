@@ -1,6 +1,28 @@
-@layer reset, theme, base, recipes, components, utilities;
+@layer reset, theme, base, tokens, recipes, box, components, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
+
+:root {
+	--color-fd-background: var(--luke-color-surface-canvas);
+	--color-fd-foreground: var(--luke-color-text-primary);
+	--color-fd-muted: var(--luke-color-surface-recessed);
+	--color-fd-muted-foreground: var(--luke-color-text-secondary);
+	--color-fd-popover: var(--luke-color-surface-overlay);
+	--color-fd-popover-foreground: var(--luke-color-text-primary);
+	--color-fd-card: var(--luke-color-surface-resting);
+	--color-fd-card-foreground: var(--luke-color-text-primary);
+	--color-fd-border: var(--luke-color-border-decorative);
+	--color-fd-primary: var(--luke-color-intent-accent-surface-solid);
+	--color-fd-primary-foreground: var(--luke-color-intent-accent-on-solid);
+	--color-fd-secondary: var(--luke-color-intent-neutral-surface-subtle);
+	--color-fd-secondary-foreground: var(--luke-color-text-primary);
+	--color-fd-accent: var(--luke-color-intent-neutral-surface-subtle-hover);
+	--color-fd-accent-foreground: var(--luke-color-text-primary);
+	--color-fd-ring: var(--luke-color-border-focus);
+	--color-fd-overlay: var(--luke-color-surface-overlay);
+}
+
+@pandacss utilities;

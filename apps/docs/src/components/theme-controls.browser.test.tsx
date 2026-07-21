@@ -39,7 +39,7 @@ test('persists theme identity and colour mode independently', async () => {
 	);
 
 	const profile = page.getByRole('combobox', { name: 'Theme profile' });
-	const darkMode = page.getByRole('radio', { name: 'Dark theme' });
+	const darkMode = page.getByRole('button', { name: 'Dark theme' });
 	const themeRoot = getThemeRoot();
 
 	await userEvent.selectOptions(profile, 'paper');
@@ -57,7 +57,7 @@ test('persists theme identity and colour mode independently', async () => {
 	renderTheme(<ThemeControls />);
 
 	expect(page.getByRole('combobox', { name: 'Theme profile' })).toHaveValue('paper');
-	expect(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
+	expect(page.getByRole('button', { name: 'Dark theme' })).toHaveAttribute('aria-pressed', 'true');
 	expect(getThemeRoot()).toHaveClass(paperThemeClassName);
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
 });
@@ -66,7 +66,7 @@ test('system colour mode follows the platform preference and drives the docs chr
 	await emulateColorScheme('dark');
 	renderTheme(<ThemeControls />, { defaultTheme: 'system', enableSystem: true });
 
-	await userEvent.click(page.getByRole('radio', { name: 'System theme' }), { force: true });
+	await userEvent.click(page.getByRole('button', { name: 'System theme' }), { force: true });
 
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
 	expect(document.documentElement).toHaveClass('dark');
@@ -92,7 +92,7 @@ test('bridges dark mode into the Luke UI root and example canvas', async () => {
 	if (!exampleCanvas) throw new Error('Expected an example canvas');
 
 	const lightBackground = getComputedStyle(exampleCanvas).backgroundColor;
-	await userEvent.click(page.getByRole('radio', { name: 'Dark theme' }), { force: true });
+	await userEvent.click(page.getByRole('button', { name: 'Dark theme' }), { force: true });
 
 	await expect.poll(() => themeRoot.dataset.colorMode).toBe('dark');
 	expect(getComputedStyle(exampleCanvas).backgroundColor).not.toBe(lightBackground);
@@ -121,7 +121,7 @@ test('keeps inherited docs shell text readable in dark mode', async () => {
 		</>,
 	);
 
-	await userEvent.click(page.getByRole('radio', { name: 'Dark theme' }), { force: true });
+	await userEvent.click(page.getByRole('button', { name: 'Dark theme' }), { force: true });
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
 
 	const shellText = page.getByText('Unstyled shell text').element();

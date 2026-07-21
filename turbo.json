@@ -82,7 +82,7 @@
 		"docs#generate": {
 			"cache": true,
 			"dependsOn": ["^build"],
-			"outputs": ["src/routeTree.gen.ts", "src/generated/**"]
+			"outputs": ["src/routeTree.gen.ts", "src/generated/**", "styled-system/**"]
 		},
 		"fix": {
 			"cache": false,

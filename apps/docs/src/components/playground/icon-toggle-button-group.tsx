@@ -1,9 +1,6 @@
-import { Icon } from '@luke-ui/react/icon';
 import type { IconName } from '@luke-ui/react/icon';
-import { cx } from '@luke-ui/react/utils';
-import type { Selection } from 'react-aria-components/GridList';
-import { ToggleButton } from 'react-aria-components/ToggleButton';
-import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
+import { IconButton } from '@luke-ui/react/icon-button';
+import { css } from '../../../styled-system/css';
 
 type IconToggleItem<Value extends string> = {
 	icon: IconName;
@@ -24,41 +21,31 @@ export function IconToggleButtonGroup<Value extends string>({
 	options,
 	value,
 }: IconToggleButtonGroupProps<Value>) {
-	const handleSelectionChange = (selection: Selection) => {
-		if (selection === 'all') return;
-
-		const selectedKey = selection.values().next().value;
-		const selectedOption = options.find((option) => option.value === selectedKey);
-		if (!selectedOption) return;
-
-		onChange(selectedOption.value);
-	};
-
 	return (
-		<ToggleButtonGroup
-			aria-label={label}
-			className="flex items-center rounded-full bg-fd-secondary p-0.5"
-			disallowEmptySelection={value !== null}
-			onSelectionChange={handleSelectionChange}
-			orientation="horizontal"
-			selectedKeys={value === null ? [] : [value]}
-			selectionMode="single"
-		>
+		<div aria-label={label} className={iconToggleStyles.group} role="group">
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
-				<ToggleButton
+				<IconButton
+					appearance={value === optionValue ? 'solid' : 'ghost'}
 					aria-label={optionLabel}
-					className={({ isSelected }) => {
-						return cx(
-							'flex size-8 cursor-pointer items-center justify-center rounded-full text-fd-muted-foreground transition-colors data-hovered:bg-fd-accent data-hovered:text-fd-accent-foreground data-pressed:bg-fd-accent',
-							isSelected && 'bg-fd-background text-fd-foreground shadow-sm',
-						);
-					}}
-					id={optionValue}
+					aria-pressed={value === optionValue}
+					icon={icon}
 					key={optionValue}
-				>
-					<Icon aria-hidden className="size-4" name={icon} />
-				</ToggleButton>
+					onPress={() => onChange(optionValue)}
+					size="small"
+					tone="neutral"
+				/>
 			))}
-		</ToggleButtonGroup>
+		</div>
 	);
 }
+
+const iconToggleStyles = {
+	group: css({
+		alignItems: 'center',
+		backgroundColor: 'var(--luke-color-surface-recessed)',
+		borderRadius: 'var(--luke-radius-full)',
+		display: 'flex',
+		gap: 'var(--luke-space-100)',
+		padding: 'var(--luke-space-100)',
+	}),
+};

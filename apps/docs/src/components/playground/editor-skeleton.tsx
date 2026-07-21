@@ -1,5 +1,6 @@
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { css } from '../../../styled-system/css';
 import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
 import { toSkeletonLines } from '../../lib/playground-shape';
 
@@ -71,9 +72,24 @@ export function EditorSkeletonShapeScript() {
 /** Shared loading indicator so the editor and preview speak the same language. */
 export function LoadingPill({ label }: { label: string }) {
 	return (
-		<div className="flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3 py-1.5 text-fd-muted-foreground text-xs">
+		<div className={loadingPillStyle}>
 			<LoadingSpinner aria-hidden size="small" />
 			<span>{label}</span>
 		</div>
 	);
 }
+
+const loadingPillStyle = css({
+	alignItems: 'center',
+	backgroundColor: 'var(--luke-color-surface-resting)',
+	borderColor: 'var(--luke-color-border-decorative)',
+	borderRadius: 'var(--luke-radius-full)',
+	borderStyle: 'solid',
+	borderWidth: '1px',
+	color: 'var(--luke-color-text-secondary)',
+	display: 'flex',
+	fontSize: 'var(--luke-font-100-font-size)',
+	gap: 'var(--luke-space-200)',
+	paddingBlock: 'var(--luke-space-150)',
+	paddingInline: 'var(--luke-space-300)',
+});
