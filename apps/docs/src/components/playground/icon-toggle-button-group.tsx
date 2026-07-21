@@ -1,5 +1,7 @@
 import type { IconName } from '@luke-ui/react/icon';
-import { IconButton } from '@luke-ui/react/icon-button';
+import { Icon } from '@luke-ui/react/icon';
+import { ToggleButton } from 'react-aria-components/ToggleButton';
+import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
 import { css } from '../../../styled-system/css';
 
 type IconToggleItem<Value extends string> = {
@@ -22,24 +24,62 @@ export function IconToggleButtonGroup<Value extends string>({
 	value,
 }: IconToggleButtonGroupProps<Value>) {
 	return (
-		<div aria-label={label} className={iconToggleStyles.group} role="group">
+		<ToggleButtonGroup
+			aria-label={label}
+			className={iconToggleStyles.group}
+			disallowEmptySelection
+			onSelectionChange={(keys) => {
+				for (const key of keys) {
+					onChange(key as Value);
+					return;
+				}
+			}}
+			selectedKeys={value == null ? [] : [value]}
+			selectionMode="single"
+		>
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
-				<IconButton
-					appearance={value === optionValue ? 'solid' : 'ghost'}
+				<ToggleButton
 					aria-label={optionLabel}
-					aria-pressed={value === optionValue}
-					icon={icon}
+					className={iconToggleStyles.button}
+					id={optionValue}
 					key={optionValue}
-					onPress={() => onChange(optionValue)}
-					size="small"
-					tone="neutral"
-				/>
+				>
+					<Icon aria-hidden name={icon} />
+				</ToggleButton>
 			))}
-		</div>
+		</ToggleButtonGroup>
 	);
 }
 
 const iconToggleStyles = {
+	button: css({
+		alignItems: 'center',
+		backgroundColor: 'transparent',
+		blockSize: 'var(--luke-control-size-small)',
+		borderRadius: 'var(--luke-radius-control)',
+		borderStyle: 'none',
+		color: 'var(--luke-color-text-secondary)',
+		cursor: 'pointer',
+		display: 'inline-flex',
+		inlineSize: 'var(--luke-control-size-small)',
+		justifyContent: 'center',
+		'&[data-hovered]': {
+			backgroundColor: 'var(--luke-color-intent-neutral-surface-subtle-hover)',
+			color: 'var(--luke-color-text-primary)',
+		},
+		'&[data-selected]': {
+			backgroundColor: 'var(--luke-color-intent-neutral-surface-solid)',
+			color: 'var(--luke-color-intent-neutral-on-solid)',
+		},
+		'&[data-focus-visible]': {
+			outline: '2px solid var(--luke-color-border-focus)',
+			outlineOffset: '2px',
+		},
+		'& svg': {
+			blockSize: 'var(--luke-icon-size-small)',
+			inlineSize: 'var(--luke-icon-size-small)',
+		},
+	}),
 	group: css({
 		alignItems: 'center',
 		backgroundColor: 'var(--luke-color-surface-recessed)',

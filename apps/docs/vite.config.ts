@@ -137,6 +137,8 @@ export default defineConfig(async () => {
 				'react-aria-components/slots',
 				'react-aria-components/Text',
 				'react-aria-components/TextField',
+				'react-aria-components/ToggleButton',
+				'react-aria-components/ToggleButtonGroup',
 				'react-aria-components/useAsyncList',
 				'sucrase',
 			],
