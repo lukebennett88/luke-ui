@@ -61,7 +61,7 @@ const pulse = {
 } as const satisfies StyleRule;
 
 /** Vanilla-extract class for the `LoadingSkeleton` component's styles. */
-export const loadingSkeleton = styleInLayer('utilities', {
+export const loadingSkeleton = styleInLayer('recipes', {
 	selectors: {
 		// Inline mode: the element itself is the skeleton (used when wrapping text).
 		'&[data-skeleton-inline]': {
@@ -76,14 +76,14 @@ export const loadingSkeleton = styleInLayer('utilities', {
 	},
 });
 
-globalStyleInLayer('utilities', `${loadingSkeleton}:not([data-skeleton-inline]) > *`, {
+globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > *`, {
 	...surface,
 	...pulse,
 	overflow: 'hidden !important',
 	position: 'relative !important' as 'relative',
 });
 
-globalStyleInLayer('utilities', `${loadingSkeleton}:not([data-skeleton-inline]) > * *`, {
+globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > * *`, {
 	'@media': {
 		'(forced-colors: active)': forcedColorsSurface,
 	},
@@ -92,7 +92,7 @@ globalStyleInLayer('utilities', `${loadingSkeleton}:not([data-skeleton-inline]) 
 
 // A pseudo-element painted over the child covers visuals the forced styles can't reach (nested backgrounds,
 // rounded corners); `inset: -1px` also covers the child's border box edges.
-globalStyleInLayer('utilities', `${loadingSkeleton}:not([data-skeleton-inline]) > *::after`, {
+globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > *::after`, {
 	...surface,
 	...pulse,
 	borderRadius: `var(${skeletonRadiusVar}, 0px)`,
