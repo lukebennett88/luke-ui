@@ -81,8 +81,8 @@ specificity.
 Use `styleInLayer`, `recipeInLayer`, and `globalStyleInLayer` from `styles/layered-style.css.ts`.
 These helpers keep styles inside a named layer.
 
-Text's Capsize trim declarations are calculated with `@capsizecss/core` and emitted through
-`recipeInLayer`, so they remain owned by `recipes` with the rest of the Text recipe.
+Text's Capsize trim declarations use logical properties for the pseudo-element margins and are
+emitted through `recipeInLayer`, so they remain owned by `recipes` with the rest of the Text recipe.
 
 Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
