@@ -1,4 +1,3 @@
-import { createStyleObject } from '@capsizecss/core';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { styleInLayer, recipeInLayer } from '../styles/layered-style.css.js';
@@ -128,21 +127,19 @@ function createLayeredTextStyle({
 	fontSize: string;
 	lineHeight: string;
 }) {
-	const styles = createStyleObject({ baselineTrim, capHeightTrim, fontSize, lineHeight });
-
 	return {
-		fontSize: styles.fontSize,
-		lineHeight: styles.lineHeight,
+		fontSize,
+		lineHeight,
 		selectors: {
-			'&::after': {
-				content: styles['::after'].content,
-				display: 'table',
-				marginTop: styles['::after'].marginTop,
-			},
 			'&::before': {
-				content: styles['::before'].content,
+				content: "''",
 				display: 'table',
-				marginBottom: styles['::before'].marginBottom,
+				marginBlockEnd: capHeightTrim,
+			},
+			'&::after': {
+				content: "''",
+				display: 'table',
+				marginBlockStart: baselineTrim,
 			},
 		},
 	} satisfies ComplexStyleRule;

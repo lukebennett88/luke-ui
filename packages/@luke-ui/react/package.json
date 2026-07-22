@@ -80,8 +80,8 @@
 		"test:watch": "vp test --project=storybook"
 	},
 	"dependencies": {
-		"@capsizecss/core": "catalog:",
 		"@capsizecss/metrics": "catalog:",
+		"@capsizecss/vanilla-extract": "catalog:",
 		"@luke-ui/rainbow-sprinkles": "workspace:*",
 		"@react-aria/utils": "catalog:",
 		"@vanilla-extract/css": "catalog:",

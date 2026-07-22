@@ -48,8 +48,8 @@ trustPolicy: no-downgrade
 catalog:
   '@netlify/vite-plugin-tanstack-start': ^1.3.16
   '@arethetypeswrong/core': ^0.18.4
-  '@capsizecss/core': ^4.1.3
   '@capsizecss/metrics': ^4.1.0
+  '@capsizecss/vanilla-extract': ^2.0.4
   '@catppuccin/palette': ^1.8.0
   '@changesets/cli': ^2.31.0
   '@monaco-editor/react': ^4.7.0

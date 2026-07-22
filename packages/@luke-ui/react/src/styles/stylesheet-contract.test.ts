@@ -199,13 +199,13 @@ function assertTextTrimOwnership(root: Root, textClassesBySize: TextClassesBySiz
 		assertPseudoDeclaration(
 			rules,
 			'::before',
-			'margin-bottom',
+			'margin-block-end',
 			`var(--luke-font-${size}-cap-height-trim)`,
 		);
 		assertPseudoDeclaration(
 			rules,
 			'::after',
-			'margin-top',
+			'margin-block-start',
 			`var(--luke-font-${size}-baseline-trim)`,
 		);
 	}

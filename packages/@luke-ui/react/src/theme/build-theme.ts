@@ -1,7 +1,7 @@
-import { precomputeValues } from '@capsizecss/core';
 import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
 import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
+import { precomputeValues } from '@capsizecss/vanilla-extract';
 import type { Oklch } from './color.js';
 import { contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
