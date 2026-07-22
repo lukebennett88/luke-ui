@@ -1,5 +1,3 @@
-import '../stylesheet.css.js';
-
 export type { ButtonVariants } from '../recipes/button.css.js';
 export { button } from '../recipes/button.css.js';
 export { field, fieldLabel, fieldMessage } from '../recipes/field.css.js';

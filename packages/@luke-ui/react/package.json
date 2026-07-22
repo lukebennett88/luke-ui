@@ -32,6 +32,7 @@
 		"./numeral": "./dist/numeral/index.js",
 		"./recipes": "./dist/recipes/index.js",
 		"./styles": "./dist/styles/index.js",
+		"./stylesheet-entry": "./dist/stylesheet-entry.js",
 		"./text": "./dist/text/index.js",
 		"./text-field": "./dist/text-field/index.js",
 		"./text-field/primitive": "./dist/text-field/primitive/index.js",

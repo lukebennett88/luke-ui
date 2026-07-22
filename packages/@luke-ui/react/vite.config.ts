@@ -53,6 +53,17 @@ export default defineConfig({
 		entry: {
 			'*': ['src/*/index.tsx', 'src/*/index.ts', 'src/*/primitive/index.tsx'],
 		},
+		inputOptions: (options) => {
+			if (options.input != null && !Array.isArray(options.input)) {
+				return {
+					...options,
+					input: Object.assign({}, options.input, {
+						'stylesheet-entry': 'src/stylesheet.css.ts',
+					}),
+				};
+			}
+			return options;
+		},
 		exports: {
 			customExports: Object.fromEntries(
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
@@ -61,6 +72,14 @@ export default defineConfig({
 		format: ['esm'],
 		hooks: {
 			'build:prepare': cleanDistExceptPreservedFiles,
+			'build:done': async (_ctx) => {
+				const stylesheetEntryDir = join(distDir, 'stylesheet-entry');
+				try {
+					await rm(stylesheetEntryDir, { force: true, recursive: true });
+				} catch {
+					// Ignore — file may not exist depending on build output structure
+				}
+			},
 		},
 		outputOptions: {
 			assetFileNames: '[name][extname]',
