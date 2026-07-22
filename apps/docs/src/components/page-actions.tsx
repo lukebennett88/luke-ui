@@ -1,5 +1,6 @@
+import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { Link } from '@luke-ui/react/link';
 import { useState } from 'react';
 
 interface PageActionsProps {
@@ -13,34 +14,31 @@ export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageAction
 		<div className="not-prose flex flex-row items-center gap-2 border-fd-border border-b pt-2 pb-6">
 			<CopyMarkdownButton markdownUrl={markdownUrl} />
 			{storybookUrl ? (
-				<a
-					className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+				<Link
+					className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm"
 					href={storybookUrl}
-					rel="noreferrer"
 					target="_blank"
 				>
 					<Icon aria-hidden className="size-4" name="bookOpen" />
 					View in Storybook
-				</a>
+				</Link>
 			) : null}
-			<a
-				className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+			<Link
+				className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm"
 				href={markdownUrl}
-				rel="noreferrer"
 				target="_blank"
 			>
 				<Icon aria-hidden className="size-4" name="externalLink" />
 				View as Markdown
-			</a>
-			<a
-				className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+			</Link>
+			<Link
+				className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm"
 				href={githubUrl}
-				rel="noreferrer"
 				target="_blank"
 			>
 				<Icon aria-hidden className="size-4" name="edit" />
 				Edit on GitHub
-			</a>
+			</Link>
 		</div>
 	);
 }
@@ -61,13 +59,9 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 	};
 
 	return (
-		<button
-			className={buttonVariants({ size: 'sm', variant: 'secondary' })}
-			onClick={onCopy}
-			type="button"
-		>
+		<Button appearance="subtle" onPress={onCopy} size="small">
 			<Icon aria-hidden className="size-4" name={copied ? 'check' : 'copy'} />
 			{copied ? 'Copied' : 'Copy Markdown'}
-		</button>
+		</Button>
 	);
 }
