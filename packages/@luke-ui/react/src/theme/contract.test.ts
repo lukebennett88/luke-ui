@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { vars } from './contract.css.js';
-import { flattenThemeContract } from './contract.js';
+import { flattenThemeContract, fontSizeSteps, themeContractTree } from './contract.js';
 
 function countLeaves(node: unknown): number {
 	if (typeof node === 'string') return 1;
@@ -51,5 +51,12 @@ describe('theme contract', () => {
 			small: 'var(--luke-icon-size-small)',
 			xsmall: 'var(--luke-icon-size-xsmall)',
 		});
+	});
+
+	it('keeps fontSizeSteps as the single source of truth for the font contract keys', () => {
+		const fontStepKeys = Object.keys(themeContractTree.font).filter((key) => {
+			return key !== 'family' && key !== 'weight';
+		});
+		expect(fontSizeSteps).toEqual(fontStepKeys);
 	});
 });

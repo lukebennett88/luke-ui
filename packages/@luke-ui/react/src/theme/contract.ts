@@ -6,10 +6,26 @@ const fontStep = {
 	lineHeight: null,
 };
 
+/** Source-owned typography size step keys, in display order. */
+export const fontSizeSteps = [
+	'100',
+	'200',
+	'300',
+	'400',
+	'500',
+	'600',
+	'700',
+	'800',
+	'900',
+] as const;
+
+/** A typography size step key. */
+export type FontSizeStep = (typeof fontSizeSteps)[number];
+
 /**
- * The semantic token tree shared by the vanilla-extract contract and `buildTheme`, so typed paths
- * and emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one
- * stable `--luke-*` custom property.
+ * The semantic token tree shared by the public `vars` contract and `buildTheme`, so typed paths and
+ * emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one stable
+ * `--luke-*` custom property.
  */
 export const themeContractTree = {
 	/** Semantic colours for surfaces, content, borders, loading, and six named intents. */
@@ -227,7 +243,7 @@ export function flattenThemeContract(): Array<[path: string, varName: string]> {
  * Kebab-cases one camelCase path segment, for example `solidHover` becomes `solid-hover`. Joining
  * kebab-cased segments with `-` under the `luke-` prefix yields the CSS variable name.
  */
-export function kebabCaseSegment(segment: string): string {
+function kebabCaseSegment(segment: string): string {
 	return segment.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 }
 
@@ -253,6 +269,11 @@ function isContractNode(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function themeVarName(segments: Array<string>): string {
+/**
+ * Builds the stable `--luke-*` CSS variable name for a contract path's segments, for example
+ * `['color', 'intent', 'danger', 'surface', 'solidHover']` becomes
+ * `--luke-color-intent-danger-surface-solid-hover`.
+ */
+export function themeVarName(segments: Array<string>): string {
 	return `--luke-${segments.map(kebabCaseSegment).join('-')}`;
 }

@@ -13,8 +13,10 @@ element. Neither step injects styles at runtime.
 - `styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
 - `recipes/`: component recipes exported from `@luke-ui/react/recipes`.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
-- `theme/contract.ts`: the semantic token tree and its `--luke-*` variable naming.
-- `theme/contract.css.ts`: the typed `vars` contract built with `createGlobalThemeContract`.
+- `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
+  `fontSizeSteps` typography step keys.
+- `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
+  directly so it stays source-owned and free of styling-engine types.
 - `theme/foundation.ts`: the typed theme-foundation input and curated defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/build-theme.ts`: `buildTheme(foundation)`, `themeClassName`, and contrast validation.

@@ -3,12 +3,18 @@ import { parse } from 'postcss';
 import type { AtRule, Root, Rule } from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { expect, test } from 'vite-plus/test';
+import { fontSizeSteps } from '../theme/contract.js';
+import type { FontSizeStep } from '../theme/contract.js';
 
 const retainedLayerNames = ['reset', 'theme', 'recipes', 'utilities'] as const;
 const retainedLayerNameSet = new Set<string>(retainedLayerNames);
-const textSizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
-type TextSize = (typeof textSizes)[number];
-type TextClassesBySize = Record<TextSize, Array<string>>;
+type TextClassesBySize = Record<FontSizeStep, Array<string>>;
+const numericLineClampVariants = [2, 3, 4, 5] as const;
+type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
+type LineClampClasses = {
+	singleLine: Array<string>;
+	numeric: Record<NumericLineClampVariant, Array<string>>;
+};
 
 test('builds the public stylesheet with the retained layer contract', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url), 'utf8');
@@ -16,12 +22,26 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	const styles = await import('@luke-ui/react/styles');
 	const recipeClasses = recipes.icon().split(' ');
 	const textClassesBySize = Object.fromEntries(
-		textSizes.map((size) => [size, recipes.text({ size }).split(' ')]),
+		fontSizeSteps.map((size) => [size, recipes.text({ size }).split(' ')]),
 	) as TextClassesBySize;
 	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
+	const lineClampClasses: LineClampClasses = {
+		numeric: Object.fromEntries(
+			numericLineClampVariants.map((lineClamp) => [
+				lineClamp,
+				recipes.text({ lineClamp }).split(' '),
+			]),
+		) as Record<NumericLineClampVariant, Array<string>>,
+		singleLine: recipes.text({ lineClamp: true }).split(' '),
+	};
 
 	expect(() =>
-		assertStylesheetContract(stylesheet, { recipeClasses, textClassesBySize, utilityClasses }),
+		assertStylesheetContract(stylesheet, {
+			lineClampClasses,
+			recipeClasses,
+			textClassesBySize,
+			utilityClasses,
+		}),
 	).not.toThrow();
 });
 
@@ -87,10 +107,12 @@ test('recognises escaped class identifiers', () => {
 function assertStylesheetContract(
 	stylesheet: string,
 	{
+		lineClampClasses,
 		recipeClasses,
 		textClassesBySize,
 		utilityClasses,
 	}: {
+		lineClampClasses?: LineClampClasses;
 		recipeClasses: Array<string>;
 		textClassesBySize?: TextClassesBySize;
 		utilityClasses: Array<string>;
@@ -109,6 +131,7 @@ function assertStylesheetContract(
 	for (const className of recipeClasses) assertClassOwnership(root, className, 'recipes');
 	for (const className of utilityClasses) assertClassOwnership(root, className, 'utilities');
 	if (textClassesBySize) assertTextTrimOwnership(root, textClassesBySize);
+	if (lineClampClasses) assertLineClampOwnership(root, lineClampClasses);
 }
 
 function getInitialLayerOrder(root: Root): Array<string> {
@@ -194,7 +217,7 @@ function assertClassOwnership(root: Root, className: string, layerName: string):
 }
 
 function assertTextTrimOwnership(root: Root, textClassesBySize: TextClassesBySize): void {
-	for (const size of textSizes) {
+	for (const size of fontSizeSteps) {
 		const rules = textClassesBySize[size].flatMap((className) => getRulesForClass(root, className));
 		assertPseudoDeclaration(
 			rules,
@@ -209,6 +232,31 @@ function assertTextTrimOwnership(root: Root, textClassesBySize: TextClassesBySiz
 			`var(--luke-font-${size}-baseline-trim)`,
 		);
 	}
+}
+
+function assertLineClampOwnership(root: Root, { numeric, singleLine }: LineClampClasses): void {
+	const singleLineRules = singleLine.flatMap((className) => getRulesForClass(root, className));
+	assertDeclaration(singleLineRules, 'display', 'block');
+	assertDeclaration(singleLineRules, 'text-overflow', 'ellipsis');
+	assertDeclaration(singleLineRules, 'white-space', 'nowrap');
+
+	for (const lineClamp of numericLineClampVariants) {
+		const rules = numeric[lineClamp].flatMap((className) => getRulesForClass(root, className));
+		assertDeclaration(rules, 'display', '-webkit-box');
+		assertDeclaration(rules, '-webkit-box-orient', 'vertical');
+		assertDeclaration(rules, '-webkit-line-clamp', String(lineClamp));
+		assertDeclaration(rules, 'line-clamp', String(lineClamp));
+	}
+}
+
+function assertDeclaration(rules: Array<Rule>, property: string, value: string): void {
+	const matchingRules = rules.filter((rule) =>
+		rule.nodes.some(
+			(node) => node.type === 'decl' && node.prop === property && node.value === value,
+		),
+	);
+	expect(matchingRules.length).toBeGreaterThan(0);
+	for (const rule of matchingRules) expect(getOwningLayer(rule)).toBe('recipes');
 }
 
 function assertPseudoDeclaration(

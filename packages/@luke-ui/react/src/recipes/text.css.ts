@@ -2,10 +2,11 @@ import type { ComplexStyleRule } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { styleInLayer, recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import { fontSizeSteps } from '../theme/contract.js';
+import type { FontSizeStep } from '../theme/contract.js';
 
-const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
 /** Typography size steps. */
-export type TextSize = (typeof sizes)[number];
+export type TextSize = FontSizeStep;
 
 /** Semantic text colours. */
 export type TextColor =
@@ -98,7 +99,7 @@ const weightVariants = {
 } as const;
 
 const sizeVariants = Object.fromEntries(
-	sizes.map((size) => [
+	fontSizeSteps.map((size) => [
 		size,
 		{
 			fontSize: vars.font[size].fontSize,
@@ -108,7 +109,7 @@ const sizeVariants = Object.fromEntries(
 	]),
 ) as Record<TextSize, { fontSize: string; letterSpacing: string; lineHeight: string }>;
 
-const sizeStepCompoundVariants = sizes.map((size) => {
+const sizeStepCompoundVariants = fontSizeSteps.map((size) => {
 	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
 	return {
 		style: createLayeredTextStyle({ baselineTrim, capHeightTrim, fontSize, lineHeight }),
