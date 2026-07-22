@@ -91,6 +91,7 @@ catalog:
   playwright: '*'
   pixelmatch: ^7.1.0
   pngjs: ^7.0.0
+  postcss: ^8.5.14
   publint: ^0.3.21
   react: ^19.2.7
   react-aria-components: ^1.19.0

@@ -1,9 +1,8 @@
-import { Icon } from '@luke-ui/react/icon';
 import type { IconName } from '@luke-ui/react/icon';
-import { cx } from '@luke-ui/react/utils';
-import type { Selection } from 'react-aria-components/GridList';
+import { Icon } from '@luke-ui/react/icon';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
+import { css } from '../../../styled-system/css';
 
 type IconToggleItem<Value extends string> = {
 	icon: IconName;
@@ -24,41 +23,71 @@ export function IconToggleButtonGroup<Value extends string>({
 	options,
 	value,
 }: IconToggleButtonGroupProps<Value>) {
-	const handleSelectionChange = (selection: Selection) => {
-		if (selection === 'all') return;
-
-		const selectedKey = selection.values().next().value;
-		const selectedOption = options.find((option) => option.value === selectedKey);
-		if (!selectedOption) return;
-
-		onChange(selectedOption.value);
-	};
-
 	return (
 		<ToggleButtonGroup
 			aria-label={label}
-			className="flex items-center rounded-full bg-fd-secondary p-0.5"
-			disallowEmptySelection={value !== null}
-			onSelectionChange={handleSelectionChange}
-			orientation="horizontal"
-			selectedKeys={value === null ? [] : [value]}
+			className={iconToggleStyles.group}
+			disallowEmptySelection
+			onSelectionChange={(keys) => {
+				for (const key of keys) {
+					onChange(key as Value);
+					return;
+				}
+			}}
+			selectedKeys={value == null ? [] : [value]}
 			selectionMode="single"
 		>
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
 					aria-label={optionLabel}
-					className={({ isSelected }) => {
-						return cx(
-							'flex size-8 cursor-pointer items-center justify-center rounded-full text-fd-muted-foreground transition-colors data-hovered:bg-fd-accent data-hovered:text-fd-accent-foreground data-pressed:bg-fd-accent',
-							isSelected && 'bg-fd-background text-fd-foreground shadow-sm',
-						);
-					}}
+					className={iconToggleStyles.button}
 					id={optionValue}
 					key={optionValue}
 				>
-					<Icon aria-hidden className="size-4" name={icon} />
+					<Icon aria-hidden name={icon} />
 				</ToggleButton>
 			))}
 		</ToggleButtonGroup>
 	);
 }
+
+const iconToggleStyles = {
+	button: css({
+		alignItems: 'center',
+		backgroundColor: 'transparent',
+		blockSize: 'controlSize.small',
+		borderRadius: 'control',
+		borderStyle: 'none',
+		color: 'text.secondary',
+		cursor: 'pointer',
+		display: 'inline-flex',
+		inlineSize: 'controlSize.small',
+		justifyContent: 'center',
+		'&[data-hovered]': {
+			backgroundColor: 'intent.neutral.surface.subtleHover',
+			color: 'text.primary',
+		},
+		'&[data-selected]': {
+			backgroundColor: 'intent.neutral.surface.solid',
+			color: 'intent.neutral.onSolid',
+		},
+		'&[data-focus-visible]': {
+			outlineColor: 'border.focus',
+			outlineStyle: 'solid',
+			outlineWidth: '2px',
+			outlineOffset: '2px',
+		},
+		'& svg': {
+			blockSize: 'iconSize.small',
+			inlineSize: 'iconSize.small',
+		},
+	}),
+	group: css({
+		alignItems: 'center',
+		backgroundColor: 'surface.recessed',
+		borderRadius: 'full',
+		display: 'flex',
+		gap: '100',
+		padding: '100',
+	}),
+};

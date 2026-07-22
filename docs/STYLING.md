@@ -13,7 +13,7 @@ stylesheet and apply its identity class to the same element. Neither step inject
 - `recipes/`: component recipes exported from `@luke-ui/react/recipes`.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree and its `--luke-*` variable naming.
-- `theme/panda-tokens.ts`: the typed `vars` contract and Panda token aliases.
+- `theme/panda-tokens.ts`: the typed runtime `vars` contract and Panda token aliases.
 - `theme/foundation.ts`: the typed theme-foundation input and curated defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/build-theme.ts`: `buildTheme(foundation)`, `themeClassName`, and contrast validation.
@@ -242,7 +242,8 @@ Use CSS-native values throughout, for example `flex-start` instead of `start`.
 
 Semantic colour, typography, and pseudo-state properties are deliberately excluded. Use component
 APIs where possible. Sanctioned custom styling uses the public typed `vars` from
-`@luke-ui/react/theme`, which resolve to stable `--luke-*` variables.
+`@luke-ui/react/theme`, which resolve to stable `--luke-*` variables. Use `vars` for runtime inline
+styles or values that Panda does not extract; use Panda token keys in build-time `css()` calls.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
@@ -257,6 +258,29 @@ return (
 		Custom content
 	</div>
 );
+```
+
+A Panda consumer imports `lukePreset` alongside its base utilities. The preset contains alias
+metadata for extraction and generated types, with no Luke UI reset, global, or recipe definitions.
+Panda can still emit its alias token declarations. Import the prebuilt stylesheet and a theme
+stylesheet separately.
+
+```ts
+import { lukePreset } from '@luke-ui/react/preset';
+import { defineConfig } from '@pandacss/dev';
+import presetBase from '@pandacss/preset-base';
+
+export default defineConfig({
+	eject: true,
+	presets: [lukePreset],
+	utilities: { ...presetBase.utilities },
+});
+```
+
+Use semantic token-key strings in extracted styles, not `vars` member expressions:
+
+```ts
+css({ backgroundColor: 'surface.resting', fontSize: '700', padding: '100' });
 ```
 
 ## Implementation rules

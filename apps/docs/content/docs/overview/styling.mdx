@@ -63,7 +63,8 @@ import { button } from '@luke-ui/react/recipes';
 </button>;
 ```
 
-The public `vars` token contract lets an application-owned element follow the active theme.
+The public `vars` token contract lets an application-owned element follow the active theme at
+runtime, including inline styles and values Panda does not extract.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
@@ -161,8 +162,9 @@ selectors or implementation attributes.
 ## Extend Panda deliberately
 
 The default floor is the prebuilt stylesheet, themes, components, recipes, and `vars`. Consumers
-that run Panda can opt into `@luke-ui/react/preset` for the shared layer order. Keep the starter as
-the first statement in global CSS and extend it with any consumer-owned layer names.
+that run Panda can opt into `@luke-ui/react/preset` for the shared layer order and token aliases.
+Keep the starter as the first statement in global CSS and extend it with any consumer-owned layer
+names.
 
 ```ts
 import { lukeLayerOrderStarter } from '@luke-ui/react/preset';
@@ -171,8 +173,28 @@ console.log(lukeLayerOrderStarter);
 // @layer reset, base, tokens, recipes, box, utilities;
 ```
 
-The preset does not replace the prebuilt stylesheet or theme CSS: import both before using its token
-aliases. It intentionally exports neither a prebuilt `css()` helper nor a separate token entrypoint.
+Add `lukePreset` to an ejected Panda configuration with the base utility preset. It provides token
+metadata for `css()` extraction and generated types, with no Luke UI reset, global, or recipe
+definitions. Panda can still emit its alias token declarations; the docs app removes its duplicate
+non-utility layers because the prebuilt stylesheet already supplies them. Import the prebuilt
+stylesheet and a theme stylesheet separately.
+
+```ts
+import { lukePreset } from '@luke-ui/react/preset';
+import { defineConfig } from '@pandacss/dev';
+import presetBase from '@pandacss/preset-base';
+
+export default defineConfig({
+	eject: true,
+	presets: [lukePreset],
+	utilities: { ...presetBase.utilities },
+});
+```
+
+Use token-key strings in a Panda `css()` style object, such as
+`css({ backgroundColor: 'surface.resting', fontSize: '700', padding: '100' })`. Do not pass
+`vars.color.surface.resting` to `css()`: imported member expressions are not extractor-visible. Use
+`vars` for runtime inline styles and non-extracted CSS values instead.
 
 ## Continue learning
 

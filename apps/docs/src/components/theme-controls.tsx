@@ -3,6 +3,7 @@ import { paperThemeClassName, tactileThemeClassName } from '@luke-ui/react/theme
 import { cx } from '@luke-ui/react/utils';
 import type { ChangeEvent, ComponentProps, PropsWithChildren } from 'react';
 import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
+import { css } from '../../styled-system/css';
 import { ColorModeToggle, useHydratedColorMode } from './playground/color-mode-toggle.js';
 
 export type ThemeIdentity = 'paper' | 'tactile';
@@ -44,16 +45,16 @@ export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
 	const { setThemeIdentity, themeIdentity } = useDocsThemeIdentity();
 
 	function handleThemeChange(event: ChangeEvent<HTMLSelectElement>) {
-		setThemeIdentity(event.target.value === 'paper' ? 'paper' : 'tactile');
+		setThemeIdentity(event.target.value as ThemeIdentity);
 	}
 
 	return (
-		<div {...props} className={cx('flex items-center gap-1', className)}>
+		<div {...props} className={cx(themeControlsStyles.root, className)}>
 			<label>
 				<span className="sr-only">Theme profile</span>
 				<select
 					aria-label="Theme profile"
-					className="h-8 rounded-md border border-fd-border bg-fd-background px-2 text-fd-foreground text-xs"
+					className={themeControlsStyles.select}
 					onChange={handleThemeChange}
 					value={themeIdentity}
 				>
@@ -65,6 +66,24 @@ export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
 		</div>
 	);
 }
+
+const themeControlsStyles = {
+	root: css({ alignItems: 'center', display: 'flex', gap: '100' }),
+	select: css({
+		appearance: 'none',
+		backgroundColor: 'surface.resting',
+		borderColor: 'border.control',
+		borderRadius: 'control',
+		borderStyle: 'solid',
+		borderWidth: '1px',
+		color: 'text.primary',
+		fontFamily: 'family',
+		fontSize: '100',
+		lineHeight: '100',
+		minBlockSize: 'controlSize.small',
+		paddingInline: '300',
+	}),
+};
 
 export function useDocsThemeIdentity() {
 	const settings = useContext(ThemeIdentitySettingsContext);

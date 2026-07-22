@@ -57,7 +57,7 @@ test('persists theme identity and colour mode independently', async () => {
 	renderTheme(<ThemeControls />);
 
 	expect(page.getByRole('combobox', { name: 'Theme profile' })).toHaveValue('paper');
-	expect(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
+	expect(page.getByRole('radio', { name: 'Dark theme' })).toHaveAttribute('aria-checked', 'true');
 	expect(getThemeRoot()).toHaveClass(paperThemeClassName);
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
 });

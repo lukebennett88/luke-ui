@@ -8,6 +8,7 @@ import mdx from 'fumadocs-mdx/vite';
 import { readdir } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { pandaCss } from './panda-css-vite-plugin';
 
 // staticFunctionMiddleware hardcodes `/__tsr/staticServerFnCache/...` for the
 // client fetch URL with no base-path support. When deployed under a sub-path
@@ -136,11 +137,16 @@ export default defineConfig(async () => {
 				'react-aria-components/slots',
 				'react-aria-components/Text',
 				'react-aria-components/TextField',
+				'react-aria-components/ToggleButton',
+				'react-aria-components/ToggleButtonGroup',
 				'react-aria-components/useAsyncList',
 				'sucrase',
 			],
 		},
 		plugins: lazyPlugins(async () => [
+			// Panda's atomic-CSS injection must run before `@tailwindcss/vite`'s
+			// `enforce: 'pre'` transforms rewrite app.css — see panda-css-vite-plugin.
+			pandaCss(),
 			staticFunctionBasePathPlugin(),
 			mdx(await import('./source.config')),
 			tailwindcss(),

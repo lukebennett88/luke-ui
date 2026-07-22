@@ -1,6 +1,9 @@
+import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { Link } from '@luke-ui/react/link';
+import { cx } from '@luke-ui/react/utils';
 import { useState } from 'react';
+import { css } from '../../styled-system/css';
 
 interface PageActionsProps {
 	githubUrl: string;
@@ -10,37 +13,22 @@ interface PageActionsProps {
 
 export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageActionsProps) {
 	return (
-		<div className="not-prose flex flex-row items-center gap-2 border-fd-border border-b pt-2 pb-6">
+		<div className={cx('not-prose', pageActionStyles.root)}>
 			<CopyMarkdownButton markdownUrl={markdownUrl} />
 			{storybookUrl ? (
-				<a
-					className={buttonVariants({ size: 'sm', variant: 'secondary' })}
-					href={storybookUrl}
-					rel="noreferrer"
-					target="_blank"
-				>
-					<Icon aria-hidden className="size-4" name="bookOpen" />
+				<Link href={storybookUrl} isStandalone rel="noreferrer" target="_blank">
+					<Icon aria-hidden name="bookOpen" />
 					View in Storybook
-				</a>
+				</Link>
 			) : null}
-			<a
-				className={buttonVariants({ size: 'sm', variant: 'secondary' })}
-				href={markdownUrl}
-				rel="noreferrer"
-				target="_blank"
-			>
-				<Icon aria-hidden className="size-4" name="externalLink" />
+			<Link href={markdownUrl} isStandalone rel="noreferrer" target="_blank">
+				<Icon aria-hidden name="externalLink" />
 				View as Markdown
-			</a>
-			<a
-				className={buttonVariants({ size: 'sm', variant: 'secondary' })}
-				href={githubUrl}
-				rel="noreferrer"
-				target="_blank"
-			>
-				<Icon aria-hidden className="size-4" name="edit" />
+			</Link>
+			<Link href={githubUrl} isStandalone rel="noreferrer" target="_blank">
+				<Icon aria-hidden name="edit" />
 				Edit on GitHub
-			</a>
+			</Link>
 		</div>
 	);
 }
@@ -61,13 +49,24 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 	};
 
 	return (
-		<button
-			className={buttonVariants({ size: 'sm', variant: 'secondary' })}
-			onClick={onCopy}
-			type="button"
-		>
-			<Icon aria-hidden className="size-4" name={copied ? 'check' : 'copy'} />
+		<Button onClick={onCopy} size="small" type="button">
+			<Icon aria-hidden name={copied ? 'check' : 'copy'} />
 			{copied ? 'Copied' : 'Copy Markdown'}
-		</button>
+		</Button>
 	);
 }
+
+const pageActionStyles = {
+	root: css({
+		alignItems: 'center',
+		borderBlockEndColor: 'border.decorative',
+		borderBlockEndStyle: 'solid',
+		borderBlockEndWidth: '1px',
+		display: 'flex',
+		flexDirection: 'row',
+		flexWrap: 'wrap',
+		gap: '200',
+		paddingBlockEnd: '600',
+		paddingBlockStart: '200',
+	}),
+};

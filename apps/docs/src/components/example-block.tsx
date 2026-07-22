@@ -1,10 +1,12 @@
 import { Box } from '@luke-ui/react/box';
+import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
+import { cx } from '@luke-ui/react/utils';
 import { Link } from '@tanstack/react-router';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type { ComponentType, JSX } from 'react';
 import { Suspense, use, useId, useState } from 'react';
+import { css } from '../../styled-system/css';
 import { encodeCodeHash } from '../lib/playground-hash';
 import { StoryWrapper } from '../lib/story-wrapper';
 
@@ -17,9 +19,7 @@ type ExampleBlockProps = {
 
 export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
 	return (
-		<Suspense
-			fallback={<Box className="rounded-lg border border-fd-border p-4">Loading example…</Box>}
-		>
+		<Suspense fallback={<Box className={exampleBlockStyles.loading}>Loading example…</Box>}>
 			<ExampleContent {...props} />
 		</Suspense>
 	);
@@ -40,7 +40,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 
 	if (!result.ok) {
 		return (
-			<Box className="rounded-lg border border-fd-destructive p-4 text-fd-destructive">
+			<Box className={exampleBlockStyles.error}>
 				Failed to load example {component}/{name}: {result.error.message}
 			</Box>
 		);
@@ -49,29 +49,30 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 	const [PreviewComponent, source] = result.data;
 
 	return (
-		<Box className="not-prose overflow-hidden rounded-lg border border-fd-border">
-			<Box className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
-				<span className="text-fd-muted-foreground text-sm">{title}</span>
-				<Box className="flex items-center gap-1">
+		<Box className={cx('not-prose', exampleBlockStyles.root)}>
+			<Box className={exampleBlockStyles.header}>
+				<span className={exampleBlockStyles.title}>{title}</span>
+				<Box className={exampleBlockStyles.actions}>
 					<Link
-						className={buttonVariants({ size: 'sm', variant: 'ghost' })}
+						className={exampleBlockStyles.playgroundLink}
 						hash={encodeCodeHash(source.trim())}
 						target="_blank"
 						to="/playground"
 					>
-						<Icon aria-hidden className="size-4" name="externalLink" />
+						<Icon aria-hidden name="externalLink" />
 						Open in playground
 					</Link>
-					<button
+					<Button
 						aria-controls={codeId}
 						aria-expanded={showCode}
-						className={buttonVariants({ size: 'sm', variant: 'ghost' })}
 						onClick={() => setShowCode((previous) => !previous)}
+						appearance="ghost"
+						size="small"
 						type="button"
 					>
-						<Icon aria-hidden className="size-4" name="codeBlock" />
+						<Icon aria-hidden name="codeBlock" />
 						{showCode ? 'Hide code' : 'Show code'}
-					</button>
+					</Button>
 				</Box>
 			</Box>
 			<StoryWrapper mode={mode}>
@@ -89,6 +90,61 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 		</Box>
 	);
 }
+
+const exampleBlockStyles = {
+	actions: css({ alignItems: 'center', display: 'flex', gap: '100' }),
+	error: css({
+		borderColor: 'intent.danger.border',
+		borderRadius: 'control',
+		borderStyle: 'solid',
+		borderWidth: '1px',
+		color: 'intent.danger.text',
+		padding: '400',
+	}),
+	header: css({
+		alignItems: 'center',
+		backgroundColor: 'surface.recessed',
+		borderBlockEndColor: 'border.decorative',
+		borderBlockEndStyle: 'solid',
+		borderBlockEndWidth: '1px',
+		display: 'flex',
+		gap: '200',
+		justifyContent: 'space-between',
+		paddingBlock: '200',
+		paddingInline: '400',
+	}),
+	loading: css({
+		borderColor: 'border.decorative',
+		borderRadius: 'control',
+		borderStyle: 'solid',
+		borderWidth: '1px',
+		padding: '400',
+	}),
+	playgroundLink: css({
+		alignItems: 'center',
+		color: 'intent.accent.text',
+		display: 'inline-flex',
+		fontFamily: 'family',
+		fontSize: '100',
+		gap: '100',
+		minBlockSize: 'controlSize.small',
+		paddingInline: '300',
+		textDecoration: 'none',
+		'&:hover': { textDecoration: 'underline' },
+	}),
+	root: css({
+		borderColor: 'border.decorative',
+		borderRadius: 'control',
+		borderStyle: 'solid',
+		borderWidth: '1px',
+		overflow: 'hidden',
+	}),
+	title: css({
+		color: 'text.secondary',
+		fontFamily: 'family',
+		fontSize: '100',
+	}),
+};
 
 const _sources = import.meta.glob<string>('../examples/*/*.tsx', {
 	eager: false,
