@@ -2,9 +2,10 @@
 
 ## Setup
 
-Luke UI ships static CSS. Consumers import `@luke-ui/react/stylesheet.css` and apply
-`themeRootClassName` from `@luke-ui/react/theme` near the app root. Import one bundled theme
-stylesheet and apply its identity class to the same element. Neither step injects styles at runtime.
+Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities. Consumers
+import `@luke-ui/react/stylesheet.css` and apply `themeRootClassName` from `@luke-ui/react/theme`
+near the app root. Import one bundled theme stylesheet and apply its identity class to the same
+element. Neither step injects styles at runtime.
 
 ## Structure
 
@@ -79,6 +80,9 @@ specificity.
 
 Use `styleInLayer`, `recipeInLayer`, and `globalStyleInLayer` from `styles/layered-style.css.ts`.
 These helpers keep styles inside a named layer.
+
+Text's Capsize trim declarations use logical properties for the pseudo-element margins and are
+emitted through `recipeInLayer`, so they remain owned by `recipes` with the rest of the Text recipe.
 
 Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.

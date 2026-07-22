@@ -13,6 +13,9 @@ pnpm add @luke-ui/react
 Import the component stylesheet and one bundled theme stylesheet. Apply the theme root and identity
 classes to the same element.
 
+The shared stylesheet owns reset, theme-root, recipe, and utility rules in `reset`, `theme`,
+`recipes`, `utilities` order.
+
 ```tsx
 import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/tactile.css';

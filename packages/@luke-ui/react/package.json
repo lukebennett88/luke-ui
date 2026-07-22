@@ -110,6 +110,8 @@
 		"pixelmatch": "catalog:",
 		"playwright": "catalog:",
 		"pngjs": "catalog:",
+		"postcss": "catalog:",
+		"postcss-selector-parser": "catalog:",
 		"publint": "catalog:",
 		"react": "catalog:",
 		"react-dom": "catalog:",

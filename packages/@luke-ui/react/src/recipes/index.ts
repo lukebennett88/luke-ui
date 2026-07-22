@@ -1,3 +1,8 @@
+// VE build-time side-effect: brings the stylesheet root module (reset, theme,
+// primitives) into the Rollup graph so they are extracted into stylesheet.css.
+// VE strips this import from the compiled JS output at build time.
+import '../stylesheet.css.js';
+
 export type { ButtonVariants } from '../recipes/button.css.js';
 export { button } from '../recipes/button.css.js';
 export { field, fieldLabel, fieldMessage } from '../recipes/field.css.js';

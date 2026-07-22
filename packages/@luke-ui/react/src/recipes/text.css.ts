@@ -1,4 +1,3 @@
-import { createTextStyle } from '@capsizecss/vanilla-extract';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { styleInLayer, recipeInLayer } from '../styles/layered-style.css.js';
@@ -112,13 +111,39 @@ const sizeVariants = Object.fromEntries(
 const sizeStepCompoundVariants = sizes.map((size) => {
 	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
 	return {
-		style: createTextStyle(
-			{ baselineTrim, capHeightTrim, fontSize, lineHeight },
-			`text_typography_${size}`,
-		),
-		variants: { shouldDisableTrim: false, size },
+		style: createLayeredTextStyle({ baselineTrim, capHeightTrim, fontSize, lineHeight }),
+		variants: { shouldDisableTrim: false, size } as const,
 	};
 });
+
+function createLayeredTextStyle({
+	baselineTrim,
+	capHeightTrim,
+	fontSize,
+	lineHeight,
+}: {
+	baselineTrim: string;
+	capHeightTrim: string;
+	fontSize: string;
+	lineHeight: string;
+}) {
+	return {
+		fontSize,
+		lineHeight,
+		selectors: {
+			'&::before': {
+				content: "''",
+				display: 'table',
+				marginBlockEnd: capHeightTrim,
+			},
+			'&::after': {
+				content: "''",
+				display: 'table',
+				marginBlockStart: baselineTrim,
+			},
+		},
+	} satisfies ComplexStyleRule;
+}
 
 /** Vanilla-extract recipe for the `Text` primitive's styles. */
 export const text = recipeInLayer('recipes', {

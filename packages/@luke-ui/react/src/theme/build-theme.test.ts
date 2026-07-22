@@ -244,19 +244,59 @@ describe('buildTheme defaults', () => {
 		expect(css).toContain('--luke-color-border-focus: oklch(');
 	});
 
-	it('emits Capsize trim values for each curated font family', () => {
-		const trimValues = (fontFamily: 'inter' | 'apple-system' | 'dm-sans') => {
-			const css = buildTheme({ ...minimalFoundation, typography: { fontFamily } });
-			const identity = splitBlocks(css).identity;
-			return {
-				baseline: extractValue(identity, '--luke-font-300-baseline-trim'),
-				capHeight: extractValue(identity, '--luke-font-300-cap-height-trim'),
-			};
-		};
+	it('preserves every Capsize trim for each curated font family and size', () => {
+		const expectedTrims = {
+			'apple-system': {
+				'100': { baselineTrim: '-0.2887em', capHeightTrim: '-0.34em' },
+				'200': { baselineTrim: '-0.3364em', capHeightTrim: '-0.3876em' },
+				'300': { baselineTrim: '-0.3721em', capHeightTrim: '-0.4233em' },
+				'400': { baselineTrim: '-0.3443em', capHeightTrim: '-0.3956em' },
+				'500': { baselineTrim: '-0.3221em', capHeightTrim: '-0.3733em' },
+				'600': { baselineTrim: '-0.2471em', capHeightTrim: '-0.2983em' },
+				'700': { baselineTrim: '-0.2649em', capHeightTrim: '-0.3162em' },
+				'800': { baselineTrim: '-0.1935em', capHeightTrim: '-0.2448em' },
+				'900': { baselineTrim: '-0.1221em', capHeightTrim: '-0.1733em' },
+			},
+			'dm-sans': {
+				'100': { baselineTrim: '-0.3257em', capHeightTrim: '-0.3077em' },
+				'200': { baselineTrim: '-0.3733em', capHeightTrim: '-0.3553em' },
+				'300': { baselineTrim: '-0.409em', capHeightTrim: '-0.391em' },
+				'400': { baselineTrim: '-0.3812em', capHeightTrim: '-0.3632em' },
+				'500': { baselineTrim: '-0.359em', capHeightTrim: '-0.341em' },
+				'600': { baselineTrim: '-0.284em', capHeightTrim: '-0.266em' },
+				'700': { baselineTrim: '-0.3019em', capHeightTrim: '-0.2839em' },
+				'800': { baselineTrim: '-0.2304em', capHeightTrim: '-0.2124em' },
+				'900': { baselineTrim: '-0.159em', capHeightTrim: '-0.141em' },
+			},
+			inter: {
+				'100': { baselineTrim: '-0.3029em', capHeightTrim: '-0.3029em' },
+				'200': { baselineTrim: '-0.3505em', capHeightTrim: '-0.3505em' },
+				'300': { baselineTrim: '-0.3862em', capHeightTrim: '-0.3862em' },
+				'400': { baselineTrim: '-0.3585em', capHeightTrim: '-0.3585em' },
+				'500': { baselineTrim: '-0.3362em', capHeightTrim: '-0.3362em' },
+				'600': { baselineTrim: '-0.2612em', capHeightTrim: '-0.2612em' },
+				'700': { baselineTrim: '-0.2791em', capHeightTrim: '-0.2791em' },
+				'800': { baselineTrim: '-0.2077em', capHeightTrim: '-0.2077em' },
+				'900': { baselineTrim: '-0.1362em', capHeightTrim: '-0.1362em' },
+			},
+		} as const;
 
-		const values = [trimValues('inter'), trimValues('apple-system'), trimValues('dm-sans')];
-		expect(new Set(values.map(({ baseline }) => baseline)).size).toBe(3);
-		expect(new Set(values.map(({ capHeight }) => capHeight)).size).toBe(3);
+		for (const [fontFamily, trims] of Object.entries(expectedTrims)) {
+			const css = buildTheme({
+				...minimalFoundation,
+				typography: { fontFamily: fontFamily as keyof typeof expectedTrims },
+			});
+			const identity = splitBlocks(css).identity;
+
+			for (const [size, expected] of Object.entries(trims)) {
+				expect(extractValue(identity, `--luke-font-${size}-cap-height-trim`)).toBe(
+					expected.capHeightTrim,
+				);
+				expect(extractValue(identity, `--luke-font-${size}-baseline-trim`)).toBe(
+					expected.baselineTrim,
+				);
+			}
+		}
 	});
 });
 
