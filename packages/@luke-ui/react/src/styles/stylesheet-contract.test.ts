@@ -55,9 +55,10 @@ test('builds the public stylesheet with the reset and theme layers', async () =>
 		}
 	}
 
-	expect([
-		...new Set([...stylesheet.matchAll(/\.luke-ui-[\w-]+/g)].map((match) => match[0])),
-	]).toEqual(['.luke-ui-reset', '.luke-ui-theme']);
+	const lukeUiSelectors = new Set(
+		[...stylesheet.matchAll(/\.luke-ui-[\w-]+/g)].map((match) => match[0]),
+	);
+	expect(lukeUiSelectors).toEqual(new Set(['.luke-ui-reset', '.luke-ui-theme']));
 });
 
 test.each([
