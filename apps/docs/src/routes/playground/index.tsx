@@ -1,7 +1,6 @@
-import { Icon } from '@luke-ui/react/icon';
+import { IconButton } from '@luke-ui/react/icon-button';
 import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute, Link } from '@tanstack/react-router';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
@@ -153,15 +152,12 @@ function Playground() {
 				<div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
 					<ThemeControls />
 					<ViewportToggle onChange={setViewportWidth} value={viewportWidth} />
-					<button
+					<IconButton
 						aria-label="Fullscreen preview"
-						className={buttonVariants({ size: 'icon-sm', variant: 'ghost' })}
-						onClick={() => setIsPreviewFullscreen(true)}
-						title="Fullscreen preview"
-						type="button"
-					>
-						<Icon aria-hidden className="size-4" name="expand" />
-					</button>
+						icon="expand"
+						onPress={() => setIsPreviewFullscreen(true)}
+						size="small"
+					/>
 				</div>
 			</header>
 			<Group
@@ -206,20 +202,13 @@ function Playground() {
 					style={{ overflow: 'hidden' }}
 				>
 					{isPreviewFullscreen ? (
-						<button
+						<IconButton
 							aria-label="Exit fullscreen preview"
-							className={buttonVariants({
-								className:
-									'absolute inset-e-4 z-20 rounded-full! bg-fd-background shadow-sm inset-bs-4',
-								size: 'icon-sm',
-								variant: 'outline',
-							})}
-							onClick={() => setIsPreviewFullscreen(false)}
-							title="Exit fullscreen preview"
-							type="button"
-						>
-							<Icon aria-hidden className="size-4" name="minimize" />
-						</button>
+							className="absolute inset-e-4 z-20 rounded-full! bg-fd-background shadow-sm inset-bs-4"
+							icon="minimize"
+							onPress={() => setIsPreviewFullscreen(false)}
+							size="small"
+						/>
 					) : null}
 					{error === null ? null : (
 						<div
