@@ -35,6 +35,7 @@ export type ComboboxItemProps<T extends object> = Prettify<_ComboboxItemProps<T>
 export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX.Element {
 	const { size: sizeProp, ...itemProps } = props;
 	const size = useComboboxSize(sizeProp);
+	const c = styles.combobox({ size });
 
 	return (
 		<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
@@ -44,7 +45,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 				textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
 				{...itemProps}
 				className={composeRenderProps(itemProps.className, (className) => {
-					return cx(styles.comboboxItem({ size }), className);
+					return cx(c.item(), className);
 				})}
 			>
 				{composeRenderProps(itemProps.children, (children, { isSelected }) => {
@@ -52,7 +53,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 						<>
 							{children}
 							{isSelected ? (
-								<Icon aria-hidden className={styles.comboboxItemCheck} name="check" />
+								<Icon aria-hidden className={c.itemCheck()} name="check" />
 							) : null}
 						</>
 					);
@@ -82,7 +83,7 @@ export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Elem
 	return (
 		<RacListBoxLoadMoreItem
 			{...loadMoreItemProps}
-			className={cx(styles.comboboxLoadMoreItem({ size }), loadMoreItemProps.className)}
+			className={cx(styles.combobox({ size }).loadMoreItem(), loadMoreItemProps.className)}
 		/>
 	);
 }

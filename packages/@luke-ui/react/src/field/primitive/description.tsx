@@ -26,7 +26,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	return (
 		<RacText
 			{...restProps}
-			className={cx(styles.fieldMessage({ tone: 'description' }), className)}
+			className={cx(styles.field().message({ tone: 'description' }), className)}
 			slot="description"
 		/>
 	);

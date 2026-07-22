@@ -5,7 +5,8 @@ import '../stylesheet.css.js';
 
 export type { ButtonVariants } from '../recipes/button.css.js';
 export { button } from '../recipes/button.css.js';
-export { field, fieldLabel, fieldMessage } from '../recipes/field.css.js';
+export type { FieldLabelVariants, FieldMessageVariants } from '../recipes/field.css.js';
+export { field } from '../recipes/field.css.js';
 export type { IconVariants } from '../recipes/icon.css.js';
 export { icon } from '../recipes/icon.css.js';
 export type { IconButtonVariants } from '../recipes/icon-button.css.js';
@@ -29,9 +30,4 @@ export type {
 } from '../recipes/text.css.js';
 export { text } from '../recipes/text.css.js';
 export type { TextInputVariants } from '../recipes/text-input.css.js';
-export {
-	textInputAdornmentEnd,
-	textInputAdornmentStart,
-	textInputControl,
-	textInputGroup,
-} from '../recipes/text-input.css.js';
+export { textInput } from '../recipes/text-input.css.js';

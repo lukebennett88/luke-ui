@@ -25,7 +25,7 @@ export function FieldError(props: FieldErrorProps): JSX.Element {
 		<RacFieldError
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return cx(styles.fieldMessage({ tone: 'error' }), className);
+				return cx(styles.field().message({ tone: 'error' }), className);
 			})}
 		/>
 	);

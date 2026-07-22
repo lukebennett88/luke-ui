@@ -1,8 +1,8 @@
 import { Box } from '@luke-ui/react/box';
+import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@tanstack/react-router';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import type { ComponentType, JSX } from 'react';
 import { Suspense, use, useId, useState } from 'react';
 import { encodeCodeHash } from '../lib/playground-hash';
@@ -54,7 +54,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 				<span className="text-fd-muted-foreground text-sm">{title}</span>
 				<Box className="flex items-center gap-1">
 					<Link
-						className={buttonVariants({ size: 'sm', variant: 'ghost' })}
+						className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
 						hash={encodeCodeHash(source.trim())}
 						target="_blank"
 						to="/playground"
@@ -62,16 +62,16 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 						<Icon aria-hidden className="size-4" name="externalLink" />
 						Open in playground
 					</Link>
-					<button
+					<Button
+						appearance="ghost"
 						aria-controls={codeId}
 						aria-expanded={showCode}
-						className={buttonVariants({ size: 'sm', variant: 'ghost' })}
-						onClick={() => setShowCode((previous) => !previous)}
-						type="button"
+						onPress={() => setShowCode((previous) => !previous)}
+						size="small"
 					>
 						<Icon aria-hidden className="size-4" name="codeBlock" />
 						{showCode ? 'Hide code' : 'Show code'}
-					</button>
+					</Button>
 				</Box>
 			</Box>
 			<StoryWrapper mode={mode}>

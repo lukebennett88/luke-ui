@@ -64,7 +64,7 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 			<RacComboBox
 				{...comboboxProps}
 				className={composeRenderProps(className, (renderedClassName) => {
-					return cx(styles.comboboxRoot, renderedClassName);
+					return cx(styles.combobox({ size }).root(), renderedClassName);
 				})}
 				menuTrigger={menuTrigger}
 				ref={ref}

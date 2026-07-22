@@ -29,6 +29,9 @@ export function FieldLabel(props: FieldLabelProps): JSX.Element {
 	const { className, necessityIndicator = 'icon', ...restProps } = props;
 
 	return (
-		<RacLabel {...restProps} className={cx(styles.fieldLabel({ necessityIndicator }), className)} />
+		<RacLabel
+			{...restProps}
+			className={cx(styles.field().label({ necessityIndicator }), className)}
+		/>
 	);
 }

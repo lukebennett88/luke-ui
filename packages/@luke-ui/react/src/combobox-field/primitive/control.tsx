@@ -31,7 +31,7 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 		<RacGroup
 			{...groupProps}
 			className={composeRenderProps(groupProps.className, (className) => {
-				return cx(styles.comboboxControl({ size }), className);
+				return cx(styles.combobox({ size }).control(), className);
 			})}
 		/>
 	);

@@ -4,7 +4,7 @@ import interMetrics from '@capsizecss/metrics/inter';
 import { precomputeValues } from '@capsizecss/vanilla-extract';
 import type { Oklch } from './color.js';
 import { contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
-import { flattenThemeContract } from './contract.js';
+import { flattenThemeContract, fontSizeSteps } from './contract.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import {
 	defaultFontFamily,
@@ -721,7 +721,7 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 
 function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): Record<string, string> {
 	const values: Record<string, string> = {};
-	for (const step of [100, 200, 300, 400, 500, 600, 700, 800, 900] as const) {
+	for (const step of fontSizeSteps) {
 		const fontSize = Number.parseFloat(FONT_VALUES[`font.${step}.fontSize`]);
 		const leading = Number.parseFloat(FONT_VALUES[`font.${step}.lineHeight`]);
 		const { baselineTrim, capHeightTrim } = precomputeValues({

@@ -5,8 +5,7 @@ import { vars } from '../theme/contract.css.js';
 const dataDisabledSelector = '[data-disabled="true"]';
 const dataRequiredSelector = '[data-required="true"]';
 
-/** Vanilla-extract recipe for the `Field` primitive's layout styles. */
-export const field = recipeInLayer('recipes', {
+const fieldRecipe = recipeInLayer('recipes', {
 	base: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -15,8 +14,7 @@ export const field = recipeInLayer('recipes', {
 	},
 });
 
-/** Vanilla-extract recipe for the `Field` primitive's label styles. */
-export const fieldLabel = recipeInLayer('recipes', {
+const fieldLabelRecipe = recipeInLayer('recipes', {
 	base: {
 		color: vars.color.text.primary,
 		...vars.font[200],
@@ -57,10 +55,9 @@ export const fieldLabel = recipeInLayer('recipes', {
 	},
 });
 
-export type FieldLabelVariants = RecipeVariants<typeof fieldLabel>;
+export type FieldLabelVariants = RecipeVariants<typeof fieldLabelRecipe>;
 
-/** Vanilla-extract recipe for the `Field` primitive's message styles. */
-export const fieldMessage = recipeInLayer('recipes', {
+const fieldMessageRecipe = recipeInLayer('recipes', {
 	base: {
 		...vars.font[200],
 		minInlineSize: 0,
@@ -86,4 +83,16 @@ export const fieldMessage = recipeInLayer('recipes', {
 	},
 });
 
-export type FieldMessageVariants = RecipeVariants<typeof fieldMessage>;
+export type FieldMessageVariants = RecipeVariants<typeof fieldMessageRecipe>;
+
+export function field(): {
+	root: () => string;
+	label: (variants?: Parameters<typeof fieldLabelRecipe>[0]) => string;
+	message: (variants?: Parameters<typeof fieldMessageRecipe>[0]) => string;
+} {
+	return {
+		root: () => fieldRecipe(),
+		label: (variants) => fieldLabelRecipe(variants),
+		message: (variants) => fieldMessageRecipe(variants),
+	};
+}

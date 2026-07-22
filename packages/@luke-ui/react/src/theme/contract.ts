@@ -6,6 +6,22 @@ const fontStep = {
 	lineHeight: null,
 };
 
+/** Source-owned typography size step keys, in display order. */
+export const fontSizeSteps = [
+	'100',
+	'200',
+	'300',
+	'400',
+	'500',
+	'600',
+	'700',
+	'800',
+	'900',
+] as const;
+
+/** A typography size step key. */
+export type FontSizeStep = (typeof fontSizeSteps)[number];
+
 /**
  * The semantic token tree shared by the vanilla-extract contract and `buildTheme`, so typed paths
  * and emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one
@@ -253,6 +269,6 @@ function isContractNode(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function themeVarName(segments: Array<string>): string {
+export function themeVarName(segments: Array<string>): string {
 	return `--luke-${segments.map(kebabCaseSegment).join('-')}`;
 }

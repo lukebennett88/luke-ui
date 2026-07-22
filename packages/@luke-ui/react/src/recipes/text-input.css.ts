@@ -236,3 +236,17 @@ export const textInputAdornmentEnd = recipeInLayer('recipes', {
 
 /** Variant type for the `TextInput` recipe. */
 export type TextInputVariants = RecipeVariants<typeof textInputGroup>;
+
+export function textInput(variants?: TextInputVariants): {
+	group: () => string;
+	control: () => string;
+	adornmentStart: () => string;
+	adornmentEnd: () => string;
+} {
+	return {
+		group: () => textInputGroup(variants),
+		control: () => textInputControl(variants),
+		adornmentStart: () => textInputAdornmentStart(variants),
+		adornmentEnd: () => textInputAdornmentEnd(variants),
+	};
+}

@@ -511,3 +511,35 @@ export const comboboxItem = recipeInLayer('recipes', {
 });
 
 export type ComboboxVariants = RecipeVariants<typeof comboboxControl>;
+
+export function combobox(variants?: ComboboxVariants): {
+	clearButton: () => string;
+	control: () => string;
+	emptyState: () => string;
+	item: () => string;
+	itemCheck: () => string;
+	listBox: () => string;
+	loadMoreItem: () => string;
+	popover: () => string;
+	root: () => string;
+	section: () => string;
+	sectionHeading: () => string;
+	textInput: () => string;
+	trigger: () => string;
+} {
+	return {
+		clearButton: () => comboboxClearButton(variants),
+		control: () => comboboxControl(variants),
+		emptyState: () => comboboxEmptyState(),
+		item: () => comboboxItem(variants),
+		itemCheck: () => comboboxItemCheck,
+		listBox: () => comboboxListBox(),
+		loadMoreItem: () => comboboxLoadMoreItem(variants),
+		popover: () => comboboxPopover(),
+		root: () => comboboxRoot,
+		section: () => comboboxSection(),
+		sectionHeading: () => comboboxSectionHeading,
+		textInput: () => comboboxTextInput(variants),
+		trigger: () => comboboxTrigger(variants),
+	};
+}

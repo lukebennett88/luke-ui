@@ -34,7 +34,7 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 			<RacButton
 				{...buttonProps}
 				className={composeRenderProps(buttonProps.className, (className) => {
-					return cx(styles.comboboxTrigger({ size }), className);
+					return cx(styles.combobox({ size }).trigger(), className);
 				})}
 			/>
 		</IconSizeProvider>
