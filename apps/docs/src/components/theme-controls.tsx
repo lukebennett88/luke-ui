@@ -68,20 +68,20 @@ export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
 }
 
 const themeControlsStyles = {
-	root: css({ alignItems: 'center', display: 'flex', gap: 'var(--luke-space-100)' }),
+	root: css({ alignItems: 'center', display: 'flex', gap: '100' }),
 	select: css({
 		appearance: 'none',
-		backgroundColor: 'var(--luke-color-surface-resting)',
-		borderColor: 'var(--luke-color-border-control)',
-		borderRadius: 'var(--luke-radius-control)',
+		backgroundColor: 'surface.resting',
+		borderColor: 'border.control',
+		borderRadius: 'control',
 		borderStyle: 'solid',
 		borderWidth: '1px',
-		color: 'var(--luke-color-text-primary)',
-		fontFamily: 'var(--luke-font-family)',
-		fontSize: 'var(--luke-font-100-font-size)',
-		lineHeight: 'var(--luke-font-100-line-height)',
-		minBlockSize: 'var(--luke-control-size-small)',
-		paddingInline: 'var(--luke-space-300)',
+		color: 'text.primary',
+		fontFamily: 'family',
+		fontSize: '100',
+		lineHeight: '100',
+		minBlockSize: 'controlSize.small',
+		paddingInline: '300',
 	}),
 };
 

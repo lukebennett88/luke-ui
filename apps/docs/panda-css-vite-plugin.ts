@@ -13,6 +13,8 @@ type PandaDependencyMessage =
 	| { type: 'dependency'; file: string }
 	| { type: 'dir-dependency'; dir: string; glob?: string };
 
+const pandaDesignSystemLayers = new Set(['base', 'recipes', 'reset', 'tokens']);
+
 function isDependencyMessage(
 	message: postcss.Message,
 ): message is postcss.Message & PandaDependencyMessage {
@@ -35,6 +37,26 @@ function collectSourceFiles(dir: string): Array<string> {
 	} catch {
 		return [];
 	}
+}
+
+/** Removes only Panda-appended design-system layers, keeping authored CSS and generated utilities. */
+export function removePandaDesignSystemCss(sourceCss: string, transformedCss: string): string {
+	const sourceRoot = postcss.parse(sourceCss);
+	const transformedRoot = postcss.parse(transformedCss);
+	const sourceNodeCount = sourceRoot.nodes?.length ?? 0;
+
+	for (const node of transformedRoot.nodes?.slice(sourceNodeCount) ?? []) {
+		if (
+			node.type === 'atrule' &&
+			node.name === 'layer' &&
+			node.nodes &&
+			pandaDesignSystemLayers.has(node.params)
+		) {
+			node.remove();
+		}
+	}
+
+	return transformedRoot.toString();
 }
 
 // Panda runs as a PostCSS pass wrapped in a Vite plugin (the #132 "Panda as a
@@ -87,7 +109,7 @@ export function pandaCss(): Plugin {
 					this.addWatchFile(file);
 				}
 			}
-			return { code: result.css };
+			return { code: removePandaDesignSystemCss(code, result.css) };
 		},
 		// Editing a `css({…})` value in a component hot-updates that module (React
 		// refresh) but leaves app.css untouched, so this plugin's pass never re-runs

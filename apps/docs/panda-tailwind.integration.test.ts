@@ -42,13 +42,22 @@ test('builds the docs app with Panda and Tailwind using the public preset', asyn
 		'utilities',
 	]);
 	expect(outputCss).toContain('display:flex');
+	// Token-key atomics resolve through aliases in the shipped stylesheet. The
+	// docs config emits no second token declaration layer beside it.
 	expect(outputCss).toMatch(/\.c_text\\\.primary\s*\{\s*color:var\(--colors-text-primary\)/);
+	expect(outputCss).toContain('line-height:var(--line-heights-700)');
+	expect(outputCss.match(/--colors-text-primary:var\(--luke-color-text-primary\)/g)).toHaveLength(
+		1,
+	);
 	// Prove the docs' OWN css() atomics are emitted — i.e. the Panda PostCSS pass
 	// actually ran alongside Tailwind, not just that the DS stylesheet was bundled.
 	// These come from theme-controls' <select> and the DocsTitle line-height.
-	expect(outputCss).toContain('min-block-size:var(--luke-control-size-small)');
-	expect(outputCss).toContain('border-color:var(--luke-color-border-control)');
-	expect(outputCss).toContain('line-height:var(--luke-font-700-line-height)');
+	expect(outputCss).toContain('min-block-size:var(--sizes-control-size-small)');
+	expect(outputCss).toContain('border-color:var(--colors-border-control)');
+	expect(outputCss).toContain('inline-size:var(--spacing-800)');
+	expect(outputCss).toContain('block-size:var(--spacing-800)');
+	expect(outputCss).toContain('inset-block:calc(var(--spacing-200) * -1)');
+	expect(outputCss).toContain('inset-inline:calc(var(--spacing-200) * -1)');
 }, 120_000);
 
 async function readCssFiles(dir: string): Promise<string> {

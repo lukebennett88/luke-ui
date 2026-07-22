@@ -1,21 +1,18 @@
-import { lukeLayerOrder } from '@luke-ui/react/preset';
+import { lukeLayerOrder, lukePreset } from '@luke-ui/react/preset';
 import { defineConfig } from '@pandacss/dev';
 import presetBase from '@pandacss/preset-base';
 
 const [reset, base, tokens, recipes, , utilities] = lukeLayerOrder;
 
 export default defineConfig({
-	// Ejected mode: no bundled preset theme/reset/tokens. The docs consume the DS
-	// prebuilt stylesheet (`@luke-ui/react/stylesheet.css`) for reset/base/tokens/
-	// recipes and author their own atomics with raw `var(--luke-*)` values, so
-	// this config must emit ONLY those atomics into `@layer utilities`.
+	// Ejected mode: the docs consume the DS prebuilt stylesheet for reset, themes,
+	// and recipes. `lukePreset` supplies only token aliases for docs atomics.
 	eject: true,
-	presets: [],
+	presets: [lukePreset],
 	include: ['./src/**/*.{ts,tsx}'],
 	exclude: ['./src/**/*.test.{ts,tsx}', './src/**/*.browser.test.{ts,tsx}'],
 	layers: { base, recipes, reset, tokens, utilities },
-	// Pull in the base utility definitions so css() property names resolve,
-	// without bundling a preset theme/reset.
+	// Pull in the base utility definitions without its reset, globals, or theme.
 	utilities: { ...presetBase.utilities },
 	outdir: 'styled-system',
 });

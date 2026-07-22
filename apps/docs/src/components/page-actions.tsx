@@ -59,14 +59,14 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 const pageActionStyles = {
 	root: css({
 		alignItems: 'center',
-		borderBlockEndColor: 'var(--luke-color-border-decorative)',
+		borderBlockEndColor: 'border.decorative',
 		borderBlockEndStyle: 'solid',
 		borderBlockEndWidth: '1px',
 		display: 'flex',
 		flexDirection: 'row',
 		flexWrap: 'wrap',
-		gap: 'var(--luke-space-200)',
-		paddingBlockEnd: 'var(--luke-space-600)',
-		paddingBlockStart: 'var(--luke-space-200)',
+		gap: '200',
+		paddingBlockEnd: '600',
+		paddingBlockStart: '200',
 	}),
 };

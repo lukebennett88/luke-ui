@@ -40,7 +40,7 @@ test('gives the Fumadocs page title the DS font-700 line-height via a docs css()
 	// Mirror Fumadocs' DocsTitle: font-size 1.75em (= the DS font-700 step) with
 	// no line-height, plus the docs css() atomic that restores font-700's height.
 	const heading = document.createElement('h1');
-	heading.className = `text-[1.75em] font-semibold ${css({ lineHeight: 'var(--luke-font-700-line-height)' })}`;
+	heading.className = `text-[1.75em] font-semibold ${css({ lineHeight: '700' })}`;
 	heading.textContent = 'Page title';
 	themeRoot.append(heading);
 	document.body.append(themeRoot);

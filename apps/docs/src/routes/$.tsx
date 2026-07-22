@@ -23,7 +23,7 @@ const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps
 // Fumadocs' DocsTitle sets font-size (1.75em = 28px = the DS font-700 step) but no
 // line-height, so inside `.luke-ui-theme` it inherits the 24px base line-height and
 // renders cramped. Restore the DS font-700 line-height without touching size/weight.
-const docsTitleStyles = css({ lineHeight: 'var(--luke-font-700-line-height)' });
+const docsTitleStyles = css({ lineHeight: '700' });
 
 const mdxComponents = {
 	...defaultMdxComponents,
