@@ -1,396 +1,290 @@
 import { readFile } from 'node:fs/promises';
+import { parse } from 'postcss';
+import type { AtRule, Root, Rule } from 'postcss';
+import selectorParser from 'postcss-selector-parser';
 import { expect, test } from 'vite-plus/test';
 
 const retainedLayerNames = ['reset', 'theme', 'recipes', 'utilities'] as const;
 const retainedLayerNameSet = new Set<string>(retainedLayerNames);
-const retainedTextSizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
+const textSizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
+type TextSize = (typeof textSizes)[number];
+type TextClassesBySize = Record<TextSize, Array<string>>;
 
-test('builds the public stylesheet with the reset and theme layers', async () => {
+test('builds the public stylesheet with the retained layer contract', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url), 'utf8');
 	const recipes = await import('@luke-ui/react/recipes');
 	const styles = await import('@luke-ui/react/styles');
 	const recipeClasses = recipes.icon().split(' ');
-	const textClasses = new Set(
-		retainedTextSizes.flatMap((size) => recipes.text({ size }).split(' ')),
-	);
+	const textClassesBySize = Object.fromEntries(
+		textSizes.map((size) => [size, recipes.text({ size }).split(' ')]),
+	) as TextClassesBySize;
 	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
-	const layerBlocks = getLayerBlocks(stylesheet);
 
-	expect(stylesheet).toMatch(/^@layer reset;\n@layer theme;\n@layer recipes;\n@layer utilities;/);
-	expect(getLayerNames(stylesheet)).toEqual(retainedLayerNames);
-	expect(getNestedLayerNames(stylesheet)).toEqual([]);
-	// The VE Capsize adapter emits existing Text trim assets at the top level.
-	expect(getUnexpectedTopLevelQualifiedRules(stylesheet, textClasses)).toEqual([]);
-	expect(getTopLevelAtRules(stylesheet)).toEqual(['@keyframes']);
-
-	const reset = getLayerBlock(layerBlocks, 'reset');
-	expect(reset).toContain('.luke-ui-reset');
-	expect(reset).toContain('box-sizing: border-box;');
-
-	const theme = getLayerBlock(layerBlocks, 'theme');
-	expect(theme).toContain('.luke-ui-theme');
-	expect(theme).toContain('color: var(--luke-color-text-primary);');
-	expect(theme).toContain('font-family: var(--luke-font-family);');
-
-	const recipeStyles = getLayerBlock(layerBlocks, 'recipes');
-	const utilityStyles = getLayerBlock(layerBlocks, 'utilities');
-	const layers = new Map([
-		['recipes', recipeStyles],
-		['reset', reset],
-		['theme', theme],
-		['utilities', utilityStyles],
-	]);
-
-	for (const className of recipeClasses) {
-		expect(layers.get('recipes')).toContain(`.${className}`);
-		for (const layer of ['reset', 'theme', 'utilities']) {
-			expect(layers.get(layer)).not.toContain(`.${className}`);
-		}
-	}
-
-	for (const className of utilityClasses) {
-		expect(layers.get('utilities')).toContain(`.${className}`);
-		for (const layer of ['reset', 'theme', 'recipes']) {
-			expect(layers.get(layer)).not.toContain(`.${className}`);
-		}
-	}
-
-	const lukeUiSelectors = new Set(
-		[...stylesheet.matchAll(/\.luke-ui-[\w-]+/g)].map((match) => match[0]),
-	);
-	expect(lukeUiSelectors).toEqual(new Set(['.luke-ui-reset', '.luke-ui-theme']));
+	expect(() =>
+		assertStylesheetContract(stylesheet, { recipeClasses, textClassesBySize, utilityClasses }),
+	).not.toThrow();
 });
 
 test.each([
-	['anonymous statement', '@layer;'],
-	['anonymous block', '@layer {}'],
-	['unknown statement', '@layer components;'],
-	['unknown block', '@layer components {}'],
-])('rejects an %s', (_name, layerRule) => {
-	expect(() => getLayerNames(layerRule)).toThrow(/cascade layer/i);
+	['missing stable selector', (css: string) => css.replace('.luke-ui-theme', '.theme-root')],
+	['extra stable selector', (css: string) => `${css}\n@layer theme { .luke-ui-extra {} }`],
+	[
+		'reordered initial layer declarations',
+		(css: string) => css.replace('@layer reset;\n@layer theme;', '@layer theme;\n@layer reset;'),
+	],
+	['anonymous layer statement', (css: string) => `${css}\n@layer;`],
+	['anonymous layer block', (css: string) => `${css}\n@layer { .anonymous {} }`],
+	['unknown layer', (css: string) => `${css}\n@layer components;`],
+	['nested layer', (css: string) => `${css}\n@layer recipes { @layer utilities {} }`],
+	['root qualified rule', (css: string) => `${css}\n.root-rule { color: red; }`],
+	['lookalike layer at-rule', (css: string) => `${css}\n@layered {}`],
+	[
+		'representative recipe class moved to the wrong layer',
+		(css: string) =>
+			css.replace(
+				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
+				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n}',
+			),
+	],
+	[
+		'representative utility class moved to the wrong layer',
+		(css: string) =>
+			css.replace(
+				'@layer utilities {\n  .utility-class { display: grid; }\n}',
+				'@layer recipes {\n  .utility-class { display: grid; }\n}',
+			),
+	],
+	[
+		'representative retained-layer content removed',
+		(css: string) => css.replace('  .recipe-class { display: inline-flex; }\n', ''),
+	],
+	[
+		'class-like text in an attribute value',
+		(css: string) =>
+			css.replace(
+				'.recipe-class { display: inline-flex; }',
+				'[data-class=".recipe-class"] { display: inline-flex; }',
+			),
+	],
+])('rejects a stylesheet with a %s', (_name, mutate) => {
+	expect(() =>
+		assertStylesheetContract(mutate(validStylesheetFixture), {
+			recipeClasses: ['recipe-class'],
+			utilityClasses: ['utility-class'],
+		}),
+	).toThrow(/.+/);
 });
 
-test('rejects an ordinary Text recipe rule at the top level', async () => {
-	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url), 'utf8');
-	const { text } = await import('@luke-ui/react/recipes');
-	const textClasses = new Set(retainedTextSizes.flatMap((size) => text({ size }).split(' ')));
-	const recipeStyles = getLayerBlock(getLayerBlocks(stylesheet), 'recipes');
-	const ordinaryTextClass = [...textClasses].find((className) =>
-		recipeStyles.includes(`.${className} {`),
+test('recognises escaped class identifiers', () => {
+	expect(() =>
+		assertStylesheetContract(validStylesheetFixture.replaceAll('recipe-class', 'recipe\\:class'), {
+			recipeClasses: ['recipe:class'],
+			utilityClasses: ['utility-class'],
+		}),
+	).not.toThrow();
+});
+
+function assertStylesheetContract(
+	stylesheet: string,
+	{
+		recipeClasses,
+		textClassesBySize,
+		utilityClasses,
+	}: {
+		recipeClasses: Array<string>;
+		textClassesBySize?: TextClassesBySize;
+		utilityClasses: Array<string>;
+	},
+): void {
+	const root = parse(stylesheet);
+
+	expect(getInitialLayerOrder(root)).toEqual(retainedLayerNames);
+	assertLayerNames(root);
+	assertRootNodes(root);
+	assertStableSelectors(root);
+	assertSentinel(root, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
+	assertSentinel(root, 'luke-ui-theme', 'theme', 'color', 'var(--luke-color-text-primary)');
+	assertSentinel(root, 'luke-ui-theme', 'theme', 'font-family', 'var(--luke-font-family)');
+
+	for (const className of recipeClasses) assertClassOwnership(root, className, 'recipes');
+	for (const className of utilityClasses) assertClassOwnership(root, className, 'utilities');
+	if (textClassesBySize) assertTextTrimOwnership(root, textClassesBySize);
+}
+
+function getInitialLayerOrder(root: Root): Array<string> {
+	return root.nodes.slice(0, retainedLayerNames.length).map((node) => {
+		if (node.type !== 'atrule' || node.name !== 'layer' || node.nodes) {
+			throw new Error('Expected the stylesheet to begin with layer statements.');
+		}
+
+		return node.params.trim();
+	});
+}
+
+function assertLayerNames(root: Root): void {
+	root.walkAtRules('layer', (atRule) => {
+		if (atRule.parent?.type !== 'root')
+			throw atRule.error('Nested cascade layers are not allowed.');
+
+		const names = getLayerNames(atRule);
+		if (atRule.nodes && names.length !== 1) {
+			throw atRule.error('Layer blocks must have exactly one name.');
+		}
+
+		for (const name of names) {
+			if (!retainedLayerNameSet.has(name)) throw atRule.error(`Unexpected cascade layer: ${name}`);
+		}
+	});
+}
+
+function getLayerNames(atRule: AtRule): Array<string> {
+	const params = atRule.params.trim();
+	if (!params) throw atRule.error('Anonymous cascade layers are not allowed.');
+
+	return params.split(',').map((name) => name.trim());
+}
+
+function assertRootNodes(root: Root): void {
+	for (const node of root.nodes) {
+		if (node.type === 'comment') continue;
+		if (node.type === 'rule') throw node.error('Root qualified rules are not allowed.');
+		if (node.type !== 'atrule') throw node.error('Unexpected root stylesheet node.');
+		if (node.name === 'layer') continue;
+		if (node.name === 'keyframes' && node.nodes) continue;
+
+		throw node.error(`Unexpected root at-rule: @${node.name}`);
+	}
+}
+
+function assertStableSelectors(root: Root): void {
+	const selectors = new Set<string>();
+	root.walkRules((rule) => {
+		for (const className of getClassNames(rule)) {
+			if (className.startsWith('luke-ui-')) selectors.add(`.${className}`);
+		}
+	});
+
+	expect(selectors).toEqual(new Set(['.luke-ui-reset', '.luke-ui-theme']));
+}
+
+function assertSentinel(
+	root: Root,
+	className: string,
+	layerName: string,
+	property: string,
+	value: string,
+): void {
+	const rules = getRulesForClass(root, className);
+	expect(rules.length).toBeGreaterThan(0);
+	for (const rule of rules) expect(getOwningLayer(rule)).toBe(layerName);
+	expect(
+		rules.some((rule) =>
+			rule.nodes.some(
+				(node) => node.type === 'decl' && node.prop === property && node.value === value,
+			),
+		),
+	).toBe(true);
+}
+
+function assertClassOwnership(root: Root, className: string, layerName: string): void {
+	const rules = getRulesForClass(root, className);
+	expect(rules.length).toBeGreaterThan(0);
+	for (const rule of rules) expect(getOwningLayer(rule)).toBe(layerName);
+	expect(rules.some((rule) => rule.nodes.some((node) => node.type === 'decl'))).toBe(true);
+}
+
+function assertTextTrimOwnership(root: Root, textClassesBySize: TextClassesBySize): void {
+	for (const size of textSizes) {
+		const rules = textClassesBySize[size].flatMap((className) => getRulesForClass(root, className));
+		assertPseudoDeclaration(
+			rules,
+			'::before',
+			'margin-bottom',
+			`var(--luke-font-${size}-cap-height-trim)`,
+		);
+		assertPseudoDeclaration(
+			rules,
+			'::after',
+			'margin-top',
+			`var(--luke-font-${size}-baseline-trim)`,
+		);
+	}
+}
+
+function assertPseudoDeclaration(
+	rules: Array<Rule>,
+	pseudo: string,
+	property: string,
+	value: string,
+): void {
+	const matchingRules = rules.filter(
+		(rule) =>
+			hasPseudo(rule, pseudo) &&
+			rule.nodes.some(
+				(node) => node.type === 'decl' && node.prop === property && node.value === value,
+			),
 	);
-	if (!ordinaryTextClass) throw new Error('Expected an ordinary Text recipe class.');
-
-	const selector = `.${ordinaryTextClass}`;
-	const mutatedStylesheet = `${stylesheet}\n${selector} { color: red; }`;
-	expect(getUnexpectedTopLevelQualifiedRules(mutatedStylesheet, textClasses)).toEqual([selector]);
-});
-
-function getLayerNames(stylesheet: string): Array<string> {
-	return [
-		...new Set(
-			[...stylesheet.matchAll(/@layer(?:\s+([^;{]*))?[;{]/g)].flatMap(getNamesFromLayerMatch),
-		),
-	];
+	expect(matchingRules.length).toBeGreaterThan(0);
+	for (const rule of matchingRules) expect(getOwningLayer(rule)).toBe('recipes');
 }
 
-function getNestedLayerNames(stylesheet: string): Array<string> {
-	return [...stylesheet.matchAll(/@layer(?:\s+([^;{]*))?[;{]/g)]
-		.filter((match) => getBraceDepth(stylesheet, match.index) > 0)
-		.flatMap(getNamesFromLayerMatch);
-}
-
-function getLayerBlocks(stylesheet: string): Map<string, Array<string>> {
-	const blocks = new Map<string, Array<string>>();
-
-	for (const match of stylesheet.matchAll(/@layer(?:\s+([^;{]*))?\{/g)) {
-		const start = match.index + match[0].length;
-		const names = getNamesFromLayerMatch(match);
-		if (names.length !== 1) throw new Error('Expected one layer name per layer block.');
-
-		const name = names[0];
-		if (!name) throw new Error('Expected a cascade layer name.');
-
-		const contents = stylesheet.slice(start, getBlockEnd(stylesheet, start));
-		blocks.set(name, [...(blocks.get(name) ?? []), contents]);
-	}
-
-	return blocks;
-}
-
-function getLayerBlock(layerBlocks: Map<string, Array<string>>, name: string): string {
-	const blocks = layerBlocks.get(name);
-	if (!blocks) throw new Error(`Expected ${name} layer block.`);
-
-	return blocks.join('\n');
-}
-
-function getNamesFromLayerMatch(match: RegExpExecArray): Array<string> {
-	const layerList = match[1]?.trim();
-	if (!layerList) throw new Error('Anonymous cascade layers are not allowed.');
-
-	const names = layerList.split(',').map((name) => name.trim());
-	for (const name of names) {
-		if (!retainedLayerNameSet.has(name)) throw new Error(`Unexpected cascade layer: ${name}`);
-	}
-
-	return names;
-}
-
-function getBlockEnd(stylesheet: string, start: number): number {
-	let depth = 0;
-
-	for (let index = start; index < stylesheet.length; index += 1) {
-		if (stylesheet.startsWith('/*', index)) {
-			index = getCommentEnd(stylesheet, index);
-			continue;
-		}
-
-		if (stylesheet[index] === '"' || stylesheet[index] === "'") {
-			index = getStringEnd(stylesheet, index);
-			continue;
-		}
-
-		if (stylesheet[index] === '{') depth += 1;
-		if (stylesheet[index] === '}') {
-			if (depth === 0) return index;
-			depth -= 1;
-		}
-	}
-
-	throw new Error('Expected a matching closing brace.');
-}
-
-function getTopLevelAtRules(stylesheet: string): Array<string> {
-	return [
-		...new Set(
-			getTopLevelNodes(stylesheet)
-				.filter((node) => node.type === 'at-rule')
-				.map((node) => node.name),
-		),
-	];
-}
-
-function getTopLevelQualifiedRules(stylesheet: string): Array<QualifiedRule> {
-	const rules: Array<QualifiedRule> = [];
-
-	for (const node of getTopLevelNodes(stylesheet)) {
-		if (node.type !== 'qualified-rule') continue;
-
-		rules.push({ declarations: node.declarations, selector: node.name });
-	}
-
+function getRulesForClass(root: Root, className: string): Array<Rule> {
+	const rules: Array<Rule> = [];
+	root.walkRules((rule) => {
+		if (getClassNames(rule).has(className)) rules.push(rule);
+	});
 	return rules;
 }
 
-function getUnexpectedTopLevelQualifiedRules(
-	stylesheet: string,
-	textClasses: ReadonlySet<string>,
-): Array<string> {
-	const unexpectedSelectors: Array<string> = [];
-
-	for (const rule of getTopLevelQualifiedRules(stylesheet)) {
-		const classNames = getClassNames(rule.selector);
-		const hasUnexpectedClass = classNames.some((className) => !textClasses.has(className));
-		if (classNames.length > 0 && !hasUnexpectedClass && isTextTrimAsset(rule)) continue;
-
-		unexpectedSelectors.push(rule.selector);
-	}
-
-	return unexpectedSelectors;
-}
-
-function isTextTrimAsset({ declarations: source, selector }: QualifiedRule): boolean {
-	if (!/^\.[_a-zA-Z][\w-]*(?:::(?:before|after))?$/.test(selector)) return false;
-
-	const declarations = getDeclarations(source);
-	if (!declarations) return false;
-
-	if (selector.endsWith('::before')) {
-		return hasDeclarations(declarations, {
-			content: "''",
-			display: 'table',
-			'margin-bottom': isCustomPropertyReference,
+function getClassNames(rule: Rule): Set<string> {
+	const classNames = new Set<string>();
+	selectorParser((selectors) => {
+		selectors.walkClasses((classNode) => {
+			classNames.add(classNode.value);
 		});
-	}
+	}).processSync(rule.selector);
+	return classNames;
+}
 
-	if (selector.endsWith('::after')) {
-		return hasDeclarations(declarations, {
-			content: "''",
-			display: 'table',
-			'margin-top': isCustomPropertyReference,
+function hasPseudo(rule: Rule, pseudo: string): boolean {
+	let hasMatchingPseudo = false;
+	selectorParser((selectors) => {
+		selectors.walkPseudos((pseudoNode) => {
+			if (pseudoNode.value === pseudo) hasMatchingPseudo = true;
 		});
+	}).processSync(rule.selector);
+	return hasMatchingPseudo;
+}
+
+function getOwningLayer(rule: Rule): string | undefined {
+	let parent = rule.parent;
+	while (parent && parent.type !== 'root') {
+		if (parent.type === 'atrule' && parent.name === 'layer') return parent.params.trim();
+		parent = parent.parent;
 	}
-
-	if (
-		hasDeclarations(declarations, {
-			'font-size': isCustomPropertyReference,
-			'line-height': isCustomPropertyReference,
-		})
-	) {
-		return true;
-	}
-
-	return isTextTrimSizeDeclarations(declarations);
+	return undefined;
 }
 
-function getDeclarations(source: string): Map<string, string> | undefined {
-	const declarations = new Map<string, string>();
-
-	for (const candidate of source.split(';')) {
-		const declaration = candidate.trim();
-		if (!declaration) continue;
-
-		const separator = declaration.indexOf(':');
-		if (separator < 1) return undefined;
-
-		const name = declaration.slice(0, separator).trim();
-		const value = declaration.slice(separator + 1).trim();
-		if (!value || declarations.has(name)) return undefined;
-
-		declarations.set(name, value);
-	}
-
-	return declarations;
+const validStylesheetFixture = `@layer reset;
+@layer theme;
+@layer recipes;
+@layer utilities;
+@layer reset {
+  .luke-ui-reset { box-sizing: border-box; }
 }
-
-function hasDeclarations(
-	declarations: ReadonlyMap<string, string>,
-	expected: Record<string, string | ((value: string) => boolean)>,
-): boolean {
-	const entries = Object.entries(expected);
-	if (declarations.size !== entries.length) return false;
-
-	for (const [name, expectedValue] of entries) {
-		const value = declarations.get(name);
-		if (!value) return false;
-		if (typeof expectedValue === 'string' && value !== expectedValue) return false;
-		if (typeof expectedValue === 'function' && !expectedValue(value)) return false;
-	}
-
-	return true;
+@layer theme {
+  .luke-ui-theme {
+    color: var(--luke-color-text-primary);
+    font-family: var(--luke-font-family);
+  }
 }
-
-function isCustomPropertyReference(value: string): boolean {
-	return /^var\(--[\w-]+\)$/.test(value);
+@layer recipes {
+  .recipe-class { display: inline-flex; }
 }
-
-function isTextTrimSizeDeclarations(declarations: ReadonlyMap<string, string>): boolean {
-	if (declarations.size !== 4) return false;
-
-	const sizes = new Set<string>();
-	const properties = new Set<string>();
-	for (const [name, value] of declarations) {
-		if (!name.startsWith('--')) return false;
-
-		const match =
-			/^var\(--luke-font-(\d+)-(baseline-trim|cap-height-trim|font-size|line-height)\)$/.exec(
-				value,
-			);
-		if (!match?.[1] || !match[2]) return false;
-		if (!retainedTextSizes.some((size) => size === match[1])) return false;
-
-		sizes.add(match[1]);
-		properties.add(match[2]);
-	}
-
-	return (
-		sizes.size === 1 &&
-		properties.size === 4 &&
-		['baseline-trim', 'cap-height-trim', 'font-size', 'line-height'].every((property) =>
-			properties.has(property),
-		)
-	);
+@layer utilities {
+  .utility-class { display: grid; }
 }
-
-function getClassNames(selector: string): Array<string> {
-	return [...selector.matchAll(/\.([_a-zA-Z][\w-]*)/g)].map((match) => match[1] ?? '');
-}
-
-function getTopLevelNodes(stylesheet: string): Array<StylesheetNode> {
-	const nodes: Array<StylesheetNode> = [];
-	let start = 0;
-
-	while (start < stylesheet.length) {
-		const contentStart = getNextContentStart(stylesheet, start);
-		if (contentStart === stylesheet.length) return nodes;
-
-		const blockStart = stylesheet.indexOf('{', contentStart);
-		const statementEnd = stylesheet.indexOf(';', contentStart);
-		if (statementEnd !== -1 && (blockStart === -1 || statementEnd < blockStart)) {
-			const name = stylesheet.slice(contentStart, statementEnd).trim();
-			nodes.push({ name, type: 'statement' });
-			start = statementEnd + 1;
-			continue;
-		}
-
-		if (blockStart === -1) throw new Error('Expected a stylesheet block.');
-
-		const name = stylesheet.slice(contentStart, blockStart).trim();
-		const blockEnd = getBlockEnd(stylesheet, blockStart + 1);
-		const declarations = stylesheet.slice(blockStart + 1, blockEnd);
-		nodes.push(getBlockNode(name, declarations));
-		start = blockEnd + 1;
-	}
-
-	return nodes;
-}
-
-function getBlockNode(name: string, declarations: string): StylesheetNode {
-	if (name.startsWith('@layer')) return { name, type: 'layer-block' };
-	if (!name.startsWith('@')) return { declarations, name, type: 'qualified-rule' };
-
-	return { name: name.split(/\s+/)[0] ?? '', type: 'at-rule' };
-}
-
-function getNextContentStart(stylesheet: string, start: number): number {
-	for (let index = start; index < stylesheet.length; index += 1) {
-		if (stylesheet.startsWith('/*', index)) {
-			index = getCommentEnd(stylesheet, index);
-			continue;
-		}
-
-		if (!/\s/.test(stylesheet[index] ?? '')) return index;
-	}
-
-	return stylesheet.length;
-}
-
-function getCommentEnd(stylesheet: string, start: number): number {
-	const end = stylesheet.indexOf('*/', start + 2);
-	if (end === -1) throw new Error('Expected a closing comment delimiter.');
-
-	return end + 1;
-}
-
-function getStringEnd(stylesheet: string, start: number): number {
-	const quote = stylesheet[start];
-
-	for (let index = start + 1; index < stylesheet.length; index += 1) {
-		if (stylesheet[index] === '\\') {
-			index += 1;
-			continue;
-		}
-
-		if (stylesheet[index] === quote) return index;
-	}
-
-	throw new Error('Expected a closing string delimiter.');
-}
-
-function getBraceDepth(stylesheet: string, end: number): number {
-	let depth = 0;
-
-	for (let index = 0; index < end; index += 1) {
-		if (stylesheet[index] === '{') depth += 1;
-		if (stylesheet[index] === '}') depth -= 1;
-	}
-
-	return depth;
-}
-
-type StylesheetNode =
-	| { declarations: string; name: string; type: 'qualified-rule' }
-	| { name: string; type: 'at-rule' | 'layer-block' }
-	| { name: string; type: 'statement' };
-
-type QualifiedRule = { declarations: string; selector: string };
+@keyframes generated-animation {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}`;

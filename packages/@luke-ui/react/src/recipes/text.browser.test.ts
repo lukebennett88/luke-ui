@@ -93,6 +93,17 @@ test('an explicit numeric variant survives font inheritance', () => {
 test('all size steps use the generated Capsize trims for every curated font', () => {
 	const families = ['inter', 'apple-system', 'dm-sans'] as const;
 	const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
+	const expectedTypography = {
+		'100': { fontSize: '12px', lineHeight: '16px' },
+		'200': { fontSize: '14px', lineHeight: '20px' },
+		'300': { fontSize: '16px', lineHeight: '24px' },
+		'400': { fontSize: '18px', lineHeight: '26px' },
+		'500': { fontSize: '20px', lineHeight: '28px' },
+		'600': { fontSize: '24px', lineHeight: '30px' },
+		'700': { fontSize: '28px', lineHeight: '36px' },
+		'800': { fontSize: '35px', lineHeight: '40px' },
+		'900': { fontSize: '60px', lineHeight: '60px' },
+	} as const;
 	const representativeTrims = new Set<string>();
 
 	for (const fontFamily of families) {
@@ -117,6 +128,8 @@ test('all size steps use the generated Capsize trims for every curated font', ()
 
 			const computedFontFamily = normalizeFontFamily(style.fontFamily);
 			expect(computedFontFamily).toContain(computedFamilyIdentity[fontFamily]);
+			expect(style.fontSize).toBe(expectedTypography[size].fontSize);
+			expect(style.lineHeight).toBe(expectedTypography[size].lineHeight);
 			expect(before.content).toBe('""');
 			expect(after.content).toBe('""');
 			expect(Number.parseFloat(before.marginBottom)).toBeCloseTo(
