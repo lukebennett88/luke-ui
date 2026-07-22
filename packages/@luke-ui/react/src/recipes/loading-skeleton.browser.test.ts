@@ -145,6 +145,63 @@ function resolveSystemColor(color: string) {
 	return value;
 }
 
+test('masks direct children in block mode', async () => {
+	const { skeleton, parent, child } = mountBlockSkeleton();
+	const childStyle = getComputedStyle(child);
+
+	expect(childStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+	expect(childStyle.backgroundImage).toBe('none');
+	expect(childStyle.borderStyle).toBe('none');
+	expect(childStyle.boxShadow).toBe('none');
+	expect(childStyle.color).toBe('rgba(0, 0, 0, 0)');
+
+	// The direct child gets pulse animation.
+	const animation = skeleton
+		.getAnimations({ subtree: true })
+		.find(
+			(candidate) =>
+				candidate instanceof CSSAnimation && candidate.effect instanceof KeyframeEffect,
+		);
+	expect(animation).toBeTruthy();
+
+	// The wrapper is invisible.
+	const parentStyle = getComputedStyle(parent);
+	expect(parentStyle.display).toBe('contents');
+});
+
+test('masks descendants in block mode', async () => {
+	const { descendant } = mountBlockSkeleton();
+	const descendantStyle = getComputedStyle(descendant);
+
+	expect(descendantStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+	expect(descendantStyle.backgroundImage).toBe('none');
+	expect(descendantStyle.color).toBe('rgba(0, 0, 0, 0)');
+});
+
+test('paints a pseudo-element over children in block mode', async () => {
+	const { child } = mountBlockSkeleton();
+	const afterStyle = getComputedStyle(child, '::after');
+
+	expect(afterStyle.content).toBe('""');
+	expect(afterStyle.position).toBe('absolute');
+	expect(afterStyle.inset).toBe('-1px');
+	expect(afterStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+});
+
+function mountBlockSkeleton() {
+	root = document.body.appendChild(document.createElement('div'));
+	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	root.dataset.colorMode = 'light';
+	root.style.backgroundColor = 'var(--luke-color-surface-canvas)';
+	const parent = root.appendChild(document.createElement('div'));
+	parent.className = loadingSkeleton;
+	const child = parent.appendChild(document.createElement('div'));
+	child.textContent = 'child';
+	const descendant = child.appendChild(document.createElement('span'));
+	descendant.textContent = 'nested';
+	return { skeleton: parent, parent, child, descendant };
+}
+
 async function setEmulatedMedia(name?: string, value?: string) {
 	await cdp().send('Emulation.setEmulatedMedia', {
 		features: name === undefined || value === undefined ? [] : [{ name, value }],

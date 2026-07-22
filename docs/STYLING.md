@@ -87,8 +87,11 @@ emitted through `recipeInLayer`, so they remain owned by `recipes` with the rest
 Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
 
-`LoadingSkeleton` uses `!important` inside the `utilities` layer because it must force placeholder
-styles onto arbitrary wrapped children.
+`LoadingSkeleton` uses `!important` inside the `recipes` layer because it must force placeholder
+styles onto arbitrary wrapped children. Moving `!important` to a lower layer does not weaken the
+mask — in the `!important` cascade, lower layers win over higher layers. The `recipes` layer is
+below `utilities`, so a `utilities`-layer `!important` override from a consumer cannot beat the
+skeleton.
 
 Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
 in the `reset` layer, so it cannot disable animations declared in `recipes` or `utilities`. Animated
