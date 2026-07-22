@@ -1,7 +1,8 @@
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
-import { Link } from '@luke-ui/react/link';
+import { button } from '@luke-ui/react/recipes';
 import { useState } from 'react';
+import { Link } from 'react-aria-components/Link';
 
 interface PageActionsProps {
 	githubUrl: string;
@@ -9,13 +10,22 @@ interface PageActionsProps {
 	storybookUrl: string | null;
 }
 
+/**
+ * These external actions render as button-shaped pills, not inline text
+ * links, so they use the react-aria-components `Link` primitive (the same
+ * primitive Luke UI's own components build on) styled with Luke UI's
+ * `button()` recipe — not Luke UI's own `<Link>`, which always layers on
+ * its `link()` recipe for underlined inline-text styling. The primitive
+ * still carries real `data-hovered`/`data-pressed`/`data-focus-visible`
+ * states, so hover/press feedback matches the adjacent `<Button>` exactly.
+ */
 export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageActionsProps) {
 	return (
 		<div className="not-prose flex flex-row items-center gap-2 border-fd-border border-b pt-2 pb-6">
 			<CopyMarkdownButton markdownUrl={markdownUrl} />
 			{storybookUrl ? (
 				<Link
-					className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm"
+					className={button({ appearance: 'subtle', size: 'small' })}
 					href={storybookUrl}
 					target="_blank"
 				>
@@ -24,7 +34,7 @@ export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageAction
 				</Link>
 			) : null}
 			<Link
-				className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm"
+				className={button({ appearance: 'subtle', size: 'small' })}
 				href={markdownUrl}
 				target="_blank"
 			>
@@ -32,7 +42,7 @@ export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageAction
 				View as Markdown
 			</Link>
 			<Link
-				className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm"
+				className={button({ appearance: 'subtle', size: 'small' })}
 				href={githubUrl}
 				target="_blank"
 			>

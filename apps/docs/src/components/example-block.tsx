@@ -1,12 +1,27 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
-import { Link } from '@tanstack/react-router';
+import { button } from '@luke-ui/react/recipes';
+import { createLink } from '@tanstack/react-router';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import type { ComponentType, JSX } from 'react';
 import { Suspense, use, useId, useState } from 'react';
+import { Link as RacLink } from 'react-aria-components/Link';
 import { encodeCodeHash } from '../lib/playground-hash';
 import { StoryWrapper } from '../lib/story-wrapper';
+
+/**
+ * "Open in playground" renders as a button-shaped pill, not an inline text
+ * link, so it's styled with Luke UI's `button()` recipe on the raw
+ * react-aria-components `Link` primitive — not Luke UI's own `<Link>`,
+ * which always layers on its `link()` recipe for underlined inline-text
+ * styling (stacking that under `button()` would fight it for color/
+ * decoration). `createLink` delegates rendering to that primitive so
+ * TanStack Router still resolves `to`/`hash` into the correct `href` while
+ * the element keeps real `data-hovered`/`data-pressed`/`data-focus-visible`
+ * states, matching the adjacent `<Button>` exactly.
+ */
+const PlaygroundLink = createLink(RacLink);
 
 type ExampleBlockProps = {
 	src: string;
@@ -53,15 +68,15 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 			<Box className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
 				<span className="text-fd-muted-foreground text-sm">{title}</span>
 				<Box className="flex items-center gap-1">
-					<Link
-						className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+					<PlaygroundLink
+						className={button({ appearance: 'ghost', size: 'small' })}
 						hash={encodeCodeHash(source.trim())}
 						target="_blank"
 						to="/playground"
 					>
 						<Icon aria-hidden className="size-4" name="externalLink" />
 						Open in playground
-					</Link>
+					</PlaygroundLink>
 					<Button
 						appearance="ghost"
 						aria-controls={codeId}
