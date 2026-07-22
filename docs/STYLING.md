@@ -2,9 +2,10 @@
 
 ## Setup
 
-Luke UI ships static CSS. Consumers import `@luke-ui/react/stylesheet.css` and apply
-`themeRootClassName` from `@luke-ui/react/theme` near the app root. Import one bundled theme
-stylesheet and apply its identity class to the same element. Neither step injects styles at runtime.
+Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities. Consumers
+import `@luke-ui/react/stylesheet.css` and apply `themeRootClassName` from `@luke-ui/react/theme`
+near the app root. Import one bundled theme stylesheet and apply its identity class to the same
+element. Neither step injects styles at runtime.
 
 ## Structure
 
