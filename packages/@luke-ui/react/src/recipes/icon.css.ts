@@ -1,6 +1,6 @@
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import type { RecipeSelection } from './recipe.js';
+import { recipe } from './recipe.js';
 
 /** Shared size dimensions for Icon and LoadingSpinner (icon-aligned sizing). */
 export const iconSizeVariants = {
@@ -23,7 +23,7 @@ export const iconSizeVariants = {
 } as const;
 
 /** Vanilla-extract recipe for the `Icon` primitive's styles. */
-export const icon = recipeInLayer('recipes', {
+export const icon = recipe({
 	base: {
 		display: 'inline-flex',
 		flexShrink: 0,
@@ -37,4 +37,4 @@ export const icon = recipeInLayer('recipes', {
 });
 
 /** Variant type for the `Icon` recipe. */
-export type IconVariants = RecipeVariants<typeof icon>;
+export type IconVariants = RecipeSelection<typeof icon>;

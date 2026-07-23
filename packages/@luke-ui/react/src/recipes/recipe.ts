@@ -14,8 +14,8 @@ import { cx } from '../utils/index.js';
  *
  * `recipe()` runs at build time inside a `.css.ts` module. It splits a slotted
  * config into one recipe per slot, in declaration order, so its generated CSS and
- * class names match hand-written per-slot recipes byte-for-byte, and it applies the
- * `recipeInLayer` wrapping inline. Vanilla Extract only serialises `.css.ts`
+ * class names match hand-written per-slot recipes byte-for-byte, and it wraps every
+ * emitted style in the `recipes` cascade layer inline. Vanilla Extract only serialises `.css.ts`
  * exports, and a plain `.ts` helper cannot import a value from a function-exporting
  * `.css.ts` (such as `layered-style`) without turning that module into a failing
  * serialization boundary, so the `recipes`-layer wrapping is applied here directly
@@ -269,7 +269,7 @@ function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescri
 }
 
 // ---------------------------------------------------------------------------
-// Layer wrapping (mirrors `recipeInLayer` for the `recipes` layer)
+// Layer wrapping (wraps every style in the `recipes` layer)
 // ---------------------------------------------------------------------------
 
 type LayeredStyleRule = DistributiveOmit<StyleRule, '@layer'>;

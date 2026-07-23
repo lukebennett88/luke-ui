@@ -1,8 +1,8 @@
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import type { RecipeSelection } from './recipe.js';
+import { recipe } from './recipe.js';
 
-export const buttonContent = recipeInLayer('recipes', {
+export const buttonContent = recipe({
 	base: {
 		alignItems: 'center',
 		display: 'inline-flex',
@@ -11,7 +11,7 @@ export const buttonContent = recipeInLayer('recipes', {
 	},
 });
 
-export const buttonLabel = recipeInLayer('recipes', {
+export const buttonLabel = recipe({
 	base: {
 		alignItems: 'center',
 		display: 'inline-flex',
@@ -31,9 +31,9 @@ export const buttonLabel = recipeInLayer('recipes', {
 	},
 });
 
-export type ButtonLabelVariants = RecipeVariants<typeof buttonLabel>;
+export type ButtonLabelVariants = RecipeSelection<typeof buttonLabel>;
 
-export const spinnerOverlay = recipeInLayer('recipes', {
+export const spinnerOverlay = recipe({
 	base: {
 		'@media': {
 			'(forced-colors: active)': {

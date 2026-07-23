@@ -1,7 +1,8 @@
-import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { focusRing } from '../styles/focus-ring.js';
-import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import type { RecipeSelection } from './recipe.js';
+import { recipe } from './recipe.js';
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -95,7 +96,7 @@ const base = styleInLayer('recipes', {
 });
 
 /** Semantic appearance and material recipe shared by Button and IconButton. */
-export const button = recipeInLayer('recipes', {
+export const button = recipe({
 	base,
 	defaultVariants: {
 		appearance: 'solid',
@@ -173,7 +174,7 @@ export const button = recipeInLayer('recipes', {
 	],
 });
 
-export type ButtonVariants = RecipeVariants<typeof button>;
+export type ButtonVariants = RecipeSelection<typeof button>;
 
 type Tone = 'neutral' | 'accent' | 'danger';
 type Surface = {
