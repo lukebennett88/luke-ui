@@ -31,3 +31,4 @@ export type {
 export { text } from '../recipes/text.css.js';
 export type { TextInputVariants } from '../recipes/text-input.css.js';
 export { textInput } from '../recipes/text-input.css.js';
+export { visuallyHidden } from '../recipes/visually-hidden.css.js';

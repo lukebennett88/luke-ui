@@ -1,4 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
+import { useId } from 'react';
 import { useIconSizeContext } from '../icon-size-context/index.js';
 import * as styles from '../recipes/loading-spinner.css.js';
 import {
@@ -10,6 +11,7 @@ import {
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
+import { VisuallyHidden } from '../visually-hidden/index.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
 
@@ -95,18 +97,19 @@ function SpinnerElement({
 	useSynchronizeAnimations(styles.spinAnimationName);
 	useSynchronizeAnimations(styles.rubberBandAnimationName);
 
+	const labelId = useId();
 	const slots = styles.loadingSpinner({ color, size });
-
 	const viewBoxCenter = ICON_VIEWBOX_SIZE / 2;
 
 	return (
 		<span
 			{...spanProps}
-			aria-label={ariaLabel}
+			aria-labelledby={labelId}
 			className={slots.root(className)}
 			role="status"
 			style={style}
 		>
+			<VisuallyHidden id={labelId}>{ariaLabel}</VisuallyHidden>
 			<svg aria-hidden="true" className={slots.svg()} fill="none" viewBox={ICON_VIEWBOX}>
 				<circle
 					className={slots.indicator()}

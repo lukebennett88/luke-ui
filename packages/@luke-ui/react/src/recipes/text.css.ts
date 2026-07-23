@@ -173,7 +173,7 @@ export const text = recipeInLayer('recipes', {
 		},
 		isVisuallyHidden: {
 			false: {},
-			true: { position: 'absolute', transform: 'scale(0)' },
+			true: { position: 'absolute', clipPath: 'circle(0)' },
 		},
 		lineClamp: lineClampVariants,
 		shouldDisableTrim: { false: {}, true: {} },

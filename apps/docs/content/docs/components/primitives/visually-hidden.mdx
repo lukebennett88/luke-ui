@@ -1,0 +1,35 @@
+---
+title: Visually Hidden
+description: Hide content visually while keeping it available to assistive technology.
+---
+
+Use `VisuallyHidden` to hide content from sight while keeping it in the accessibility tree and the
+document flow. Screen readers still announce it, and it can be referenced by
+`aria-labelledby`/`aria-describedby`. Unlike `display: none` or the `hidden` attribute, the content
+is not removed from assistive technology.
+
+Reach for it when meaning is conveyed visually but needs a text equivalent — a label behind an
+icon-only control, extra context for a link, or a status message inside a live region.
+
+<ExampleBlock
+	src="visually-hidden/basic"
+	title="Visually Hidden — Basic"
+	description="A text equivalent that only assistive technology can perceive."
+/>
+
+## Render a custom element
+
+Use `render` to keep the hidden styles on a custom or semantic element — a motion wrapper, a
+`label`, or a heading. Spread the supplied props on the element you return so it receives
+VisuallyHidden's class name, inline style, ref, accessibility attributes, and event handlers.
+
+```tsx
+<VisuallyHidden render={(props) => <MotionSpan {...props} />}>Loading</VisuallyHidden>
+```
+
+## Props
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/visually-hidden/index.tsx"
+	name="VisuallyHiddenProps"
+/>

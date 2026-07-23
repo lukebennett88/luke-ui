@@ -38,6 +38,7 @@
 		"./theme": "./dist/theme/index.js",
 		"./themes": "./dist/themes/index.js",
 		"./utils": "./dist/utils/index.js",
+		"./visually-hidden": "./dist/visually-hidden/index.js",
 		"./package.json": "./package.json",
 		"./stylesheet.css": "./dist/stylesheet.css",
 		"./spritesheet.svg": "./dist/spritesheet.svg",

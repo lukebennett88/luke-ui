@@ -50,9 +50,11 @@ surrounding text colour.
 ## Accessibility
 
 The spinner has `status` semantics, a polite live region announced by assistive technology. Its
-accessible name defaults to `loading`. Provide an `aria-label` that names the work, such as
-`Loading profile`. While loading, wrapped children are hidden from assistive technology and made
-inert, so they cannot be focused or activated.
+accessible name defaults to `loading`; provide an `aria-label` that names the work, such as
+`Loading profile`. That name is rendered as visually hidden text inside the live region, so it is
+announced as region content rather than relying on the region's label alone. While loading, wrapped
+children are hidden from assistive technology and made inert, so they cannot be focused or
+activated.
 
 ## Props
 
