@@ -20,7 +20,8 @@ export const Default = meta.story({
 		const label = canvas.getByText('Add to favourites');
 		const style = getComputedStyle(label);
 		await expect(style.position).toBe('absolute');
-		await expect(style.clipPath).toMatch(/circle/);
+		await expect(style.width).toBe('1px');
+		await expect(style.height).toBe('1px');
 	},
 	render: () => (
 		<button type="button">

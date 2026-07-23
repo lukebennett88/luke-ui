@@ -173,7 +173,15 @@ export const text = recipeInLayer('recipes', {
 		},
 		isVisuallyHidden: {
 			false: {},
-			true: { position: 'absolute', clipPath: 'circle(0)' },
+			true: {
+				blockSize: '1px',
+				clip: 'rect(1px, 1px, 1px, 1px)',
+				clipPath: 'inset(100%)',
+				inlineSize: '1px',
+				overflow: 'hidden',
+				position: 'absolute',
+				whiteSpace: 'nowrap',
+			},
 		},
 		lineClamp: lineClampVariants,
 		shouldDisableTrim: { false: {}, true: {} },
