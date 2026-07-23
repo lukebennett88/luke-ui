@@ -1,66 +1,18 @@
 import { keyframes } from '@vanilla-extract/css';
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import { iconSizeVariants } from './icon.css.js';
+import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
+import { recipe } from './recipe.js';
 
 const rotationDuration = '1.2s';
 const rubberBandDuration = '2s';
 const rubberBandEasing = 'cubic-bezier(0.42, 0, 0.58, 1)';
-
-const colorVariants = {
-	accent: { color: vars.color.intent.accent.text },
-	danger: { color: vars.color.intent.danger.text },
-	info: { color: vars.color.intent.info.text },
-	primary: { color: vars.color.text.primary },
-	secondary: { color: vars.color.text.secondary },
-	success: { color: vars.color.intent.success.text },
-	warning: { color: vars.color.intent.warning.text },
-} as const;
 
 /**
  * @internal
  */
 export const spinAnimationName = keyframes({
 	to: { transform: 'rotate(360deg)' },
-});
-
-const base = styleInLayer('recipes', {
-	'@media': {
-		'(forced-colors: active)': { animationName: 'none' },
-		'(prefers-reduced-motion: reduce)': { animationName: 'none' },
-	},
-	animationDuration: rotationDuration,
-	animationIterationCount: 'infinite',
-	animationName: spinAnimationName,
-	animationTimingFunction: 'linear',
-	color: 'currentColor',
-	display: 'inline-flex',
-	flexShrink: 0,
-});
-
-/** Vanilla-extract recipe for the `LoadingSpinner` primitive's styles. */
-export const spinner = recipeInLayer('recipes', {
-	base,
-	defaultVariants: {
-		size: 'medium',
-	},
-	variants: {
-		color: colorVariants,
-		size: iconSizeVariants,
-	},
-});
-
-/** Variant type for the `LoadingSpinner` recipe. */
-export type LoadingSpinnerVariants = RecipeVariants<typeof spinner>;
-
-export const svg = recipeInLayer('recipes', {
-	base: {
-		blockSize: '100%',
-		display: 'block',
-		inlineSize: '100%',
-		transform: 'rotate(-90deg)',
-	},
 });
 
 /**
@@ -72,44 +24,101 @@ export const rubberBandAnimationName = keyframes({
 	'100%': { strokeDasharray: '2 100', strokeDashoffset: -100 },
 });
 
-export const indicator = recipeInLayer('recipes', {
-	base: {
-		'@media': {
-			'(forced-colors: active)': {
-				animationName: 'none',
-				strokeDasharray: '25 100',
-				strokeDashoffset: 0,
+/**
+ * Raw slotted config for the `LoadingSpinner` primitive.
+ *
+ * Slots: `root` (the animated spinner span), `svg`, `indicator` (the rubber-band
+ * ring), and the in-place children overlay slots `childrenWrapper`,
+ * `hiddenChildren`, and `spinnerOverlay`.
+ */
+const loadingSpinnerConfig = {
+	slots: {
+		root: {
+			'@media': {
+				'(forced-colors: active)': { animationName: 'none' },
+				'(prefers-reduced-motion: reduce)': { animationName: 'none' },
 			},
-			'(prefers-reduced-motion: reduce)': {
-				animationName: 'none',
-				strokeDasharray: '25 100',
-				strokeDashoffset: 0,
-			},
+			animationDuration: rotationDuration,
+			animationIterationCount: 'infinite',
+			animationName: spinAnimationName,
+			animationTimingFunction: 'linear',
+			color: 'currentColor',
+			display: 'inline-flex',
+			flexShrink: 0,
 		},
-		animationDuration: rubberBandDuration,
-		animationIterationCount: 'infinite',
-		animationName: rubberBandAnimationName,
-		animationTimingFunction: rubberBandEasing,
-		strokeDasharray: '100 100',
+		svg: {
+			blockSize: '100%',
+			display: 'block',
+			inlineSize: '100%',
+			transform: 'rotate(-90deg)',
+		},
+		indicator: {
+			'@media': {
+				'(forced-colors: active)': {
+					animationName: 'none',
+					strokeDasharray: '25 100',
+					strokeDashoffset: 0,
+				},
+				'(prefers-reduced-motion: reduce)': {
+					animationName: 'none',
+					strokeDasharray: '25 100',
+					strokeDashoffset: 0,
+				},
+			},
+			animationDuration: rubberBandDuration,
+			animationIterationCount: 'infinite',
+			animationName: rubberBandAnimationName,
+			animationTimingFunction: rubberBandEasing,
+			strokeDasharray: '100 100',
+		},
+		childrenWrapper: {
+			alignItems: 'center',
+			display: 'inline-flex',
+			justifyContent: 'center',
+			position: 'relative',
+		},
+		hiddenChildren: {
+			display: 'contents',
+			visibility: 'hidden',
+		},
+		spinnerOverlay: {
+			alignItems: 'center',
+			display: 'flex',
+			inset: 0,
+			justifyContent: 'center',
+			position: 'absolute',
+		},
 	},
-});
+	defaultVariants: {
+		size: 'medium',
+	},
+	variants: {
+		color: {
+			accent: { root: { color: vars.color.intent.accent.text } },
+			danger: { root: { color: vars.color.intent.danger.text } },
+			info: { root: { color: vars.color.intent.info.text } },
+			primary: { root: { color: vars.color.text.primary } },
+			secondary: { root: { color: vars.color.text.secondary } },
+			success: { root: { color: vars.color.intent.success.text } },
+			warning: { root: { color: vars.color.intent.warning.text } },
+		},
+		size: {
+			large: { root: iconSizeVariants.large },
+			medium: { root: iconSizeVariants.medium },
+			small: { root: iconSizeVariants.small },
+			xsmall: { root: iconSizeVariants.xsmall },
+		},
+	},
+} as const satisfies SlottedConfigInput;
 
-export const childrenWrapper = styleInLayer('recipes', {
-	alignItems: 'center',
-	display: 'inline-flex',
-	justifyContent: 'center',
-	position: 'relative',
-});
+/**
+ * Slotted recipe for the `LoadingSpinner` primitive.
+ *
+ * `loadingSpinner({ color, size }).root() / .svg() / .indicator()` for the spinner
+ * itself, and `.childrenWrapper() / .hiddenChildren() / .spinnerOverlay()` for the
+ * in-place children overlay.
+ */
+export const loadingSpinner = recipe(loadingSpinnerConfig);
 
-export const hiddenChildren = styleInLayer('recipes', {
-	display: 'contents',
-	visibility: 'hidden',
-});
-
-export const spinnerOverlay = styleInLayer('recipes', {
-	alignItems: 'center',
-	display: 'flex',
-	inset: 0,
-	justifyContent: 'center',
-	position: 'absolute',
-});
+/** Outer variant selection for the `LoadingSpinner` recipe. */
+export type LoadingSpinnerVariants = RecipeSelection<typeof loadingSpinner>;

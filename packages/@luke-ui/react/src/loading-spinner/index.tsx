@@ -10,7 +10,6 @@ import {
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
-import { cx } from '../utils/index.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
 
@@ -69,14 +68,16 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 		/>
 	);
 
-	if (children == null) return spinnerElement;
+	if (!children) return spinnerElement;
+
+	const slots = styles.loadingSpinner();
 
 	return (
-		<span className={styles.childrenWrapper}>
-			<span aria-hidden className={styles.hiddenChildren} inert>
+		<span className={slots.childrenWrapper()}>
+			<span aria-hidden className={slots.hiddenChildren()} inert>
 				{children}
 			</span>
-			<span className={styles.spinnerOverlay}>{spinnerElement}</span>
+			<span className={slots.spinnerOverlay()}>{spinnerElement}</span>
 		</span>
 	);
 }
@@ -94,19 +95,21 @@ function SpinnerElement({
 	useSynchronizeAnimations(styles.spinAnimationName);
 	useSynchronizeAnimations(styles.rubberBandAnimationName);
 
+	const slots = styles.loadingSpinner({ color, size });
+
 	const viewBoxCenter = ICON_VIEWBOX_SIZE / 2;
 
 	return (
 		<span
 			{...spanProps}
 			aria-label={ariaLabel}
-			className={cx(styles.spinner({ color, size }), className)}
+			className={slots.root(className)}
 			role="status"
 			style={style}
 		>
-			<svg aria-hidden="true" className={styles.svg()} fill="none" viewBox={ICON_VIEWBOX}>
+			<svg aria-hidden="true" className={slots.svg()} fill="none" viewBox={ICON_VIEWBOX}>
 				<circle
-					className={styles.indicator()}
+					className={slots.indicator()}
 					cx={viewBoxCenter}
 					cy={viewBoxCenter}
 					fill="none"
