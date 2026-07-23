@@ -17,14 +17,14 @@ icon-only control, extra context for a link, or a status message inside a live r
 	description="A text equivalent that only assistive technology can perceive."
 />
 
-## Render a custom element
+## Render a different element
 
-Use `render` to keep the hidden styles on a custom or semantic element — a motion wrapper, a
-`label`, or a heading. Spread the supplied props on the element you return so it receives
-VisuallyHidden's class name, inline style, ref, accessibility attributes, and event handlers.
+By default `VisuallyHidden` renders a `span`. Pass `elementType` to render a different element — a
+semantic heading, `label`, or list item — while keeping the hidden styles. No render prop or prop
+spreading required.
 
 ```tsx
-<VisuallyHidden render={(props) => <MotionSpan {...props} />}>Loading</VisuallyHidden>
+<VisuallyHidden elementType="h2">Search results</VisuallyHidden>
 ```
 
 ## Props

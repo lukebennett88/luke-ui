@@ -1,17 +1,10 @@
 import type { ComponentPropsWithRef, JSX } from 'react';
+import { Text as RacText } from 'react-aria-components/Text';
 import { visuallyHidden } from '../recipes/visually-hidden.css.js';
 import type { Prettify } from '../types/prettify.js';
-import type { RenderProp } from '../types/render-prop.js';
-import { cx, mergeProps } from '../utils/index.js';
+import { cx } from '../utils/index.js';
 
-interface _VisuallyHiddenProps extends ComponentPropsWithRef<'span'> {
-	/**
-	 * Renders a custom or semantic element while keeping VisuallyHidden's styles.
-	 * Spread the supplied props on the element you return so it receives the class
-	 * name, inline style, ref, and other DOM props.
-	 */
-	render?: RenderProp<'span'>;
-}
+type _VisuallyHiddenProps = ComponentPropsWithRef<typeof RacText>;
 
 /**
  * Props for `VisuallyHidden`.
@@ -29,14 +22,10 @@ export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
  * tree and the document flow (unlike `display: none` or the `hidden` attribute),
  * so it is announced and can be referenced by `aria-labelledby`/`aria-describedby`.
  *
- * Renders a `span` by default. Pass `render` to keep the hidden styles on a
- * different element, such as a semantic tag or a motion wrapper.
+ * Renders a `span` by default. Pass `elementType` to render a different element
+ * (for example `elementType="h2"` for a screen-reader-only section heading).
  */
 export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
-	const { className, render, style, ...restProps } = props;
-	const domProps = mergeProps(restProps, {
-		className: cx(visuallyHidden(), className),
-		style,
-	});
-	return render ? render(domProps, undefined) : <span {...domProps} />;
+	const { className, ...racProps } = props;
+	return <RacText {...racProps} className={cx(visuallyHidden(), className)} />;
 }

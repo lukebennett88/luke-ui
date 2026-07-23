@@ -1,6 +1,4 @@
-import type { VisuallyHiddenProps } from '@luke-ui/react/visually-hidden';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import type { ComponentPropsWithRef } from 'react';
 import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
@@ -22,8 +20,7 @@ export const Default = meta.story({
 		const label = canvas.getByText('Add to favourites');
 		const style = getComputedStyle(label);
 		await expect(style.position).toBe('absolute');
-		await expect(style.width).toBe('1px');
-		await expect(style.height).toBe('1px');
+		await expect(style.clipPath).toMatch(/circle/);
 	},
 	render: () => (
 		<button type="button">
@@ -34,25 +31,20 @@ export const Default = meta.story({
 });
 
 /**
- * Use `render` to keep the hidden styles on a custom or semantic element. Spread the
- * supplied props on the element you return so it keeps the class name and other DOM props.
+ * Pass `elementType` to render a different element while keeping the hidden styles —
+ * here a screen-reader-only section heading, exposed to assistive technology as an `h2`.
  */
-export const CustomElement = meta.story({
-	args: {
-		children: 'Add to favourites',
-		className: 'consumer-class',
-		id: 'favourite-label',
-		render: (domProps) => <MotionSpan {...domProps} />,
-	} satisfies Partial<VisuallyHiddenProps>,
+export const CustomElementType = meta.story({
 	play: async ({ canvas }) => {
-		const label = canvas.getByText('Add to favourites');
-		await expect(label).toHaveClass('consumer-class');
-		await expect(label).toHaveAttribute('data-motion', 'enabled');
-		await expect(label).toHaveAttribute('id', 'favourite-label');
-		await expect(getComputedStyle(label).position).toBe('absolute');
+		const heading = canvas.getByRole('heading', { name: 'Search results' });
+		await expect(heading).toBeInTheDocument();
+		await expect(heading.tagName).toBe('H2');
+		await expect(getComputedStyle(heading).position).toBe('absolute');
 	},
+	render: () => (
+		<section>
+			<VisuallyHidden elementType="h2">Search results</VisuallyHidden>
+			<p>10 results found.</p>
+		</section>
+	),
 });
-
-function MotionSpan(props: ComponentPropsWithRef<'span'>) {
-	return <span data-motion="enabled" {...props} />;
-}
