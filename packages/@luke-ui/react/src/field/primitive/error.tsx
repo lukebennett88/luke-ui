@@ -5,14 +5,12 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/field.css.js';
 import type { Prettify } from '../../types/prettify.js';
 
-interface _FieldErrorProps extends RacFieldErrorProps {}
-
 /**
  * Props for `FieldError`.
  *
  * @tier primitive
  */
-export type FieldErrorProps = Prettify<_FieldErrorProps>;
+export type FieldErrorProps = Prettify<RacFieldErrorProps>;
 
 /** Styled validation message for a field. */
 export function FieldError(props: FieldErrorProps): JSX.Element {

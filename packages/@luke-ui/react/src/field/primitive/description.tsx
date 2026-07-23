@@ -5,8 +5,7 @@ import * as styles from '../../recipes/field.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 
-type _FieldDescriptionOmit = DistributiveOmit<RacTextProps, 'slot'>;
-interface _FieldDescriptionProps extends _FieldDescriptionOmit {}
+type _FieldDescriptionProps = DistributiveOmit<RacTextProps, 'slot'>;
 
 /**
  * Props for `FieldDescription`.
