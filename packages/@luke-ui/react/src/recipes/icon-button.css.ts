@@ -1,6 +1,7 @@
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import type { RecipeSelection } from './recipe.js';
+import { recipe } from './recipe.js';
 
 export const iconButtonReset = styleInLayer('utilities', {
 	'@media': {
@@ -29,7 +30,7 @@ export const iconButtonReset = styleInLayer('utilities', {
 	},
 });
 
-export const icon = recipeInLayer('recipes', {
+export const icon = recipe({
 	defaultVariants: { isPending: false },
 	variants: {
 		isPending: {
@@ -40,7 +41,7 @@ export const icon = recipeInLayer('recipes', {
 });
 
 /** Vanilla-extract recipe for the `IconButton` primitive's styles. */
-export const iconButton = recipeInLayer('recipes', {
+export const iconButton = recipe({
 	variants: {
 		size: {
 			medium: {
@@ -54,4 +55,4 @@ export const iconButton = recipeInLayer('recipes', {
 });
 
 /** Variant type for the `IconButton` recipe. */
-export type IconButtonVariants = RecipeVariants<typeof iconButton>;
+export type IconButtonVariants = RecipeSelection<typeof iconButton>;
