@@ -5,24 +5,23 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { cx } from '../utils/index.js';
 
 /**
- * HeroUI/Tailwind-Variants-style `recipe()` for Vanilla Extract.
+ * `recipe()` styling helper for Vanilla Extract.
  *
  * One helper builds both single-part and multi-part (slotted) recipes and emits
- * static CSS in the `recipes` cascade layer. Variant selection happens at the
- * outer call. A single-part recipe returns a class string. A multi-part recipe
- * returns one function per slot, each accepting an optional extra class to merge.
+ * static CSS in the `recipes` cascade layer. You pick variants at the outer call.
+ * A single-part recipe returns a class string. A multi-part recipe returns one
+ * function per slot, each taking an optional extra class to merge.
  *
- * `recipe()` runs at build time inside a `.css.ts` module: it decomposes a
- * slotted config into one recipe per slot, in slot-declaration order, so its
- * generated CSS and class names match the equivalent hand-written per-slot
- * recipes byte-for-byte. It reproduces the `recipeInLayer` wrapping inline.
- * Vanilla Extract only serialises `.css.ts` exports, and a plain `.ts` helper
- * cannot import a value from a function-exporting `.css.ts` (e.g. `layered-style`)
- * without turning that module into a failing serialization boundary, so the
- * `recipes`-layer wrapping is applied here directly over `layers.recipes`. The
- * returned callable is registered with Vanilla Extract's function serializer so
- * it survives the `.css.ts` build boundary, and `createRecipe`/`createSingleRecipe`
- * reconstruct it at runtime.
+ * `recipe()` runs at build time inside a `.css.ts` module. It splits a slotted
+ * config into one recipe per slot, in declaration order, so its generated CSS and
+ * class names match hand-written per-slot recipes byte-for-byte, and it applies the
+ * `recipeInLayer` wrapping inline. Vanilla Extract only serialises `.css.ts`
+ * exports, and a plain `.ts` helper cannot import a value from a function-exporting
+ * `.css.ts` (such as `layered-style`) without turning that module into a failing
+ * serialization boundary, so the `recipes`-layer wrapping is applied here directly
+ * over `layers.recipes`. The returned function is registered with Vanilla Extract's
+ * function serializer so it survives the `.css.ts` build boundary, and
+ * `createRecipe`/`createSingleRecipe` rebuild it at runtime.
  */
 
 // ---------------------------------------------------------------------------
@@ -138,14 +137,14 @@ export function recipe<const Variants extends VariantGroups>(
 ): SinglePartRecipe<Variants>;
 
 export function recipe(config: AnyMultiPartConfig | SinglePartConfig<VariantGroups>): unknown {
-	if ('slots' in config && isObject(config.slots)) {
+	if (isMultiPart(config)) {
 		const descriptor = buildSlottedDescriptor(config);
 		const fn = createRecipe(descriptor);
 		registerSerializer(fn, 'createRecipe', [descriptor]);
 		return fn;
 	}
 
-	const built = buildSinglePart(config as SinglePartConfig<VariantGroups>);
+	const built = buildSinglePart(config);
 	const fn = createSingleRecipe(built);
 	registerSerializer(fn, 'createSingleRecipe', [built]);
 	return fn;
@@ -162,16 +161,16 @@ type SerializerArgs = Parameters<typeof addFunctionSerializer>[1]['args'];
 
 /**
  * Registers a runtime constructor with Vanilla Extract's function serializer. The
- * args carry built recipe runtime fns (each marked by the serializer) alongside
- * plain descriptor data. They serialise correctly at build time even though the
- * `Serializable` arg type cannot express the recipe fns, so the array is bridged
- * to that type here.
+ * args carry built recipe runtime functions (each marked by the serializer)
+ * alongside plain descriptor data. They serialise correctly at build time even
+ * though the `Serializable` arg type cannot express the recipe functions, so the
+ * array is bridged to that type here.
  */
 function registerSerializer(fn: object, importName: string, args: ReadonlyArray<unknown>): void {
 	addFunctionSerializer(fn, {
 		importPath: SERIALIZER_IMPORT_PATH,
 		importName,
-		args: args as unknown as SerializerArgs,
+		args: args as SerializerArgs,
 	});
 }
 
@@ -253,7 +252,7 @@ function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescri
 			}
 		}
 
-		const defaultVariants = pickDefaults(resolved.defaultVariants, groupsForSlot);
+		const defaultVariants = pickGroups(resolved.defaultVariants, groupsForSlot);
 
 		slots[slotName] = recipeInRecipesLayer({
 			base: resolved.slots[slotName],
@@ -267,20 +266,6 @@ function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescri
 	}
 
 	return { slots, slotGroups };
-}
-
-function pickDefaults(
-	defaults: SlotVariantSelection<SlotVariantGroups<string>> | undefined,
-	groups: ReadonlyArray<string>,
-): Record<string, unknown> | undefined {
-	if (defaults === undefined) return undefined;
-
-	const source = defaults as Record<string, unknown>;
-	const picked: Record<string, unknown> = {};
-	for (const group of groups) {
-		if (group in source) picked[group] = source[group];
-	}
-	return picked;
 }
 
 // ---------------------------------------------------------------------------
@@ -354,6 +339,12 @@ function recipeInRecipesLayer(options: RecipeInLayerOptions): BuiltRecipe {
 // extend (single-base inheritance)
 // ---------------------------------------------------------------------------
 
+function isMultiPart(
+	config: AnyMultiPartConfig | SinglePartConfig<VariantGroups>,
+): config is AnyMultiPartConfig {
+	return 'slots' in config && isObject(config.slots);
+}
+
 function isObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null;
 }
@@ -372,7 +363,7 @@ function withoutExtend(config: AnyMultiPartConfig): AnyMultiPartConfig {
 function mergeConfigs(...configs: Array<AnyMultiPartConfig>): AnyMultiPartConfig {
 	const slots: Record<string, RecipeStyleRule> = {};
 	const variants: Record<string, Record<string, SlotStyles<string>>> = {};
-	const defaultVariants: Record<string, unknown> = {};
+	const defaultVariants: SlotVariantSelection<SlotVariantGroups<string>> = {};
 	const compoundVariants: Array<SlotCompoundVariant<string, SlotVariantGroups<string>>> = [];
 
 	for (const config of configs) {
@@ -402,9 +393,7 @@ function mergeConfigs(...configs: Array<AnyMultiPartConfig>): AnyMultiPartConfig
 	return {
 		slots,
 		...(Object.keys(variants).length > 0 ? { variants } : {}),
-		...(Object.keys(defaultVariants).length > 0
-			? { defaultVariants: defaultVariants as SlotVariantSelection<SlotVariantGroups<string>> }
-			: {}),
+		...(Object.keys(defaultVariants).length > 0 ? { defaultVariants } : {}),
 		...(compoundVariants.length > 0 ? { compoundVariants } : {}),
 	};
 }
