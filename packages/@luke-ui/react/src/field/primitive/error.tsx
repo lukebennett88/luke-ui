@@ -3,14 +3,9 @@ import type { FieldErrorProps as RacFieldErrorProps } from 'react-aria-component
 import { FieldError as RacFieldError } from 'react-aria-components/FieldError';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/field.css.js';
-import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/index.js';
 
-interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVariants> {}
-
-type _FieldErrorOmit = DistributiveOmit<FieldMessageVariantProps, 'tone'>;
-interface _FieldErrorProps extends RacFieldErrorProps, _FieldErrorOmit {}
+interface _FieldErrorProps extends RacFieldErrorProps {}
 
 /**
  * Props for `FieldError`.
@@ -25,7 +20,7 @@ export function FieldError(props: FieldErrorProps): JSX.Element {
 		<RacFieldError
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return cx(styles.fieldMessage({ tone: 'error' }), className);
+				return styles.field({ tone: 'error' }).message(className);
 			})}
 		/>
 	);

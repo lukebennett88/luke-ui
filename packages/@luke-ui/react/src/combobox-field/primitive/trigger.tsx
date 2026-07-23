@@ -7,7 +7,6 @@ import * as styles from '../../recipes/combobox.css.js';
 import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/index.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 
@@ -34,7 +33,7 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 			<RacButton
 				{...buttonProps}
 				className={composeRenderProps(buttonProps.className, (className) => {
-					return cx(styles.comboboxTrigger({ size }), className);
+					return styles.combobox({ size }).trigger(className);
 				})}
 			/>
 		</IconSizeProvider>

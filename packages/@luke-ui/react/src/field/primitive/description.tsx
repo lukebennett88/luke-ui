@@ -4,13 +4,9 @@ import { Text as RacText } from 'react-aria-components/Text';
 import * as styles from '../../recipes/field.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/index.js';
 
-interface FieldMessageVariantProps extends NonNullable<styles.FieldMessageVariants> {}
-
-type _FieldDescriptionOmit1 = DistributiveOmit<RacTextProps, 'slot'>;
-type _FieldDescriptionOmit2 = DistributiveOmit<FieldMessageVariantProps, 'tone'>;
-interface _FieldDescriptionProps extends _FieldDescriptionOmit1, _FieldDescriptionOmit2 {}
+type _FieldDescriptionOmit = DistributiveOmit<RacTextProps, 'slot'>;
+interface _FieldDescriptionProps extends _FieldDescriptionOmit {}
 
 /**
  * Props for `FieldDescription`.
@@ -26,7 +22,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	return (
 		<RacText
 			{...restProps}
-			className={cx(styles.fieldMessage({ tone: 'description' }), className)}
+			className={styles.field({ tone: 'description' }).message(className)}
 			slot="description"
 		/>
 	);

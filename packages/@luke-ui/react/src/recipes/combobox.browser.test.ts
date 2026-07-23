@@ -4,13 +4,7 @@ import { cdp } from 'vite-plus/test/context';
 import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
-import {
-	comboboxClearButton,
-	comboboxControl,
-	comboboxItem,
-	comboboxPopover,
-	comboboxTrigger,
-} from './combobox.css.js';
+import { combobox } from './combobox.css.js';
 
 let wrappers: Array<HTMLElement> = [];
 
@@ -74,10 +68,10 @@ test('disabled and read-only controls preserve their non-interactive material', 
 test('in-field actions are quiet inset squares without a permanent divider or travel', () => {
 	const { root } = mountControl();
 	for (const { className, expectedSize, isTrigger } of [
-		{ className: comboboxClearButton({ size: 'small' }), expectedSize: 24, isTrigger: false },
-		{ className: comboboxTrigger({ size: 'small' }), expectedSize: 24, isTrigger: true },
-		{ className: comboboxClearButton({ size: 'medium' }), expectedSize: 28, isTrigger: false },
-		{ className: comboboxTrigger({ size: 'medium' }), expectedSize: 28, isTrigger: true },
+		{ className: combobox({ size: 'small' }).clearButton(), expectedSize: 24, isTrigger: false },
+		{ className: combobox({ size: 'small' }).trigger(), expectedSize: 24, isTrigger: true },
+		{ className: combobox({ size: 'medium' }).clearButton(), expectedSize: 28, isTrigger: false },
+		{ className: combobox({ size: 'medium' }).trigger(), expectedSize: 28, isTrigger: true },
 	]) {
 		const action = root.appendChild(document.createElement('button'));
 		action.className = className;
@@ -153,7 +147,7 @@ test('options keep hover, keyboard focus, selected, and disabled states distinct
 test('the portalled surface uses floating surface and depth', () => {
 	const { root } = mountControl();
 	const popover = root.appendChild(document.createElement('div'));
-	popover.className = comboboxPopover();
+	popover.className = combobox().popover();
 	const style = getComputedStyle(popover);
 
 	expect(style.backgroundColor).toBe(resolveColor(root, '--luke-color-surface-floating'));
@@ -181,7 +175,7 @@ test('forced colors remove authored depth and preserve system state colors', asy
 	expect(getComputedStyle(focused).outlineColor).toBe(resolveSystemColor(root, 'Highlight'));
 
 	const action = root.appendChild(document.createElement('button'));
-	action.className = comboboxTrigger({ size: 'medium' });
+	action.className = combobox({ size: 'medium' }).trigger();
 	expect(getComputedStyle(action).boxShadow).toBe('none');
 	action.dataset.hovered = 'true';
 	const hoveredActionStyle = getComputedStyle(action);
@@ -196,7 +190,7 @@ test('forced colors remove authored depth and preserve system state colors', asy
 	expect(pressedActionStyle.transform).toBe('none');
 
 	const popover = root.appendChild(document.createElement('div'));
-	popover.className = comboboxPopover();
+	popover.className = combobox().popover();
 	expect(getComputedStyle(popover).boxShadow).toBe('none');
 
 	const disabledItem = mountItem(root, { disabled: 'true' });
@@ -213,11 +207,11 @@ test('reduced motion makes control, action, option, and popover state changes im
 
 	const { control, root } = mountControl();
 	const action = root.appendChild(document.createElement('button'));
-	action.className = comboboxClearButton({ size: 'medium' });
+	action.className = combobox({ size: 'medium' }).clearButton();
 	action.dataset.hovered = 'true';
 	const item = mountItem(root, { hovered: 'true' });
 	const popover = root.appendChild(document.createElement('div'));
-	popover.className = comboboxPopover();
+	popover.className = combobox().popover();
 	popover.dataset.entering = '';
 
 	for (const element of [control, action, item, popover]) {
@@ -235,14 +229,14 @@ function mountControl() {
 	root.dataset.colorMode = 'light';
 	wrappers.push(root);
 	const control = root.appendChild(document.createElement('div'));
-	control.className = comboboxControl({ size: 'medium' });
+	control.className = combobox({ size: 'medium' }).control();
 	control.append(document.createElement('input'), document.createElement('button'));
 	return { control, root };
 }
 
 function mountItem(root: HTMLElement, states: Record<string, string> = {}) {
 	const item = root.appendChild(document.createElement('div'));
-	item.className = comboboxItem({ size: 'medium' });
+	item.className = combobox({ size: 'medium' }).item();
 	for (const [state, value] of Object.entries(states)) item.dataset[state] = value;
 	return item;
 }

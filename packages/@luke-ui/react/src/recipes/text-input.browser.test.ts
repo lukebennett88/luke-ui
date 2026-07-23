@@ -3,7 +3,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
-import { textInputAdornmentStart, textInputGroup } from './text-input.css.js';
+import { textInput } from './text-input.css.js';
 
 let mounted: Array<HTMLElement> = [];
 
@@ -126,7 +126,7 @@ test('read-only still shows the focus ring since read-only fields remain focusab
 test('adornment divider uses the control border color and disabled text color follows the group', () => {
 	const { group, root } = mountGroup();
 	const adornment = group.appendChild(document.createElement('span'));
-	adornment.className = textInputAdornmentStart({ size: 'medium' });
+	adornment.className = textInput({ size: 'medium' }).adornmentStart();
 
 	const controlBorderProbe = root.appendChild(document.createElement('div'));
 	controlBorderProbe.style.borderColor = 'var(--luke-color-border-control)';
@@ -140,12 +140,12 @@ test('adornment divider uses the control border color and disabled text color fo
 	expect(getComputedStyle(adornment).color).toBe(getComputedStyle(disabledTextProbe).color);
 });
 
-function mountGroup(options: Parameters<typeof textInputGroup>[0] = {}) {
+function mountGroup(options: Parameters<typeof textInput>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	const group = root.appendChild(document.createElement('div'));
-	group.className = textInputGroup(options);
+	group.className = textInput(options).group();
 	group.style.transition = 'none';
 	mounted.push(root);
 	return { group, root };

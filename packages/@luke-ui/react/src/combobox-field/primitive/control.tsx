@@ -5,7 +5,6 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/index.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 
@@ -31,7 +30,7 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 		<RacGroup
 			{...groupProps}
 			className={composeRenderProps(groupProps.className, (className) => {
-				return cx(styles.comboboxControl({ size }), className);
+				return styles.combobox({ size }).control(className);
 			})}
 		/>
 	);
