@@ -154,7 +154,7 @@ export const States = meta.story({
 	play: async ({ args, canvas, step }) => {
 		const pending = canvas.getByRole('button', { name: 'Pending' });
 		const disabled = canvas.getByRole('button', { name: 'Disabled' });
-		const busyCue = canvas.getByRole('progressbar', { hidden: true });
+		const busyCue = canvas.getByRole('status', { hidden: true });
 
 		await step('pending remains focusable, busy, and non-interactive', async () => {
 			await userEvent.tab();

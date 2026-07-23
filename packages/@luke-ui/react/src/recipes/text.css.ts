@@ -5,6 +5,7 @@ import { fontSizeSteps } from '../theme/contract.js';
 import type { FontSizeStep } from '../theme/contract.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
+import { visuallyHiddenStyle } from './visually-hidden.css.js';
 
 /** Typography size steps. */
 export type TextSize = FontSizeStep;
@@ -174,7 +175,7 @@ export const text = recipe({
 		},
 		isVisuallyHidden: {
 			false: {},
-			true: { position: 'absolute', transform: 'scale(0)' },
+			true: visuallyHiddenStyle,
 		},
 		lineClamp: lineClampVariants,
 		shouldDisableTrim: { false: {}, true: {} },

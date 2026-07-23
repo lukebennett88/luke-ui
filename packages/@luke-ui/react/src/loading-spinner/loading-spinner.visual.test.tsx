@@ -20,7 +20,12 @@ const rowStyle = {
 const sizes = variantValuesFor<typeof LoadingSpinner, 'size'>()(['small', 'medium', 'large']);
 const colors = variantValuesFor<typeof LoadingSpinner, 'color'>()(['primary', 'info', 'danger']);
 
-test('sizes colors and modes', async () => {
+const fixedChildStyle = {
+	blockSize: '2.5rem',
+	inlineSize: '8rem',
+} satisfies CSSProperties;
+
+test('sizes and colors', async () => {
 	const locator = renderVisual(
 		<Stack>
 			<div style={rowStyle}>
@@ -34,13 +39,21 @@ test('sizes colors and modes', async () => {
 				))}
 			</div>
 			<div style={rowStyle}>
-				<LoadingSpinner aria-label="25 percent" value={25} />
-				<LoadingSpinner aria-label="75 percent" value={75} />
+				<LoadingSpinner aria-label="loading fixed size button">
+					<button style={fixedChildStyle} type="button">
+						Save
+					</button>
+				</LoadingSpinner>
+				<LoadingSpinner aria-label="loaded fixed size button" isLoading={false}>
+					<button style={fixedChildStyle} type="button">
+						Save
+					</button>
+				</LoadingSpinner>
 			</div>
 		</Stack>,
 	);
 
-	await captureVisual(locator, 'loading-spinner/sizes-colors-modes');
+	await captureVisual(locator, 'loading-spinner/sizes-and-colors');
 });
 
 test.each(visualAppearances)('theme matrix: $theme $mode', async (appearance) => {
@@ -51,7 +64,7 @@ test.each(visualAppearances)('theme matrix: $theme $mode', async (appearance) =>
 				<LoadingSpinner aria-label="Root theme pending" style={spinnerStyle} />
 			</ThemeMatrixScope>
 			<ThemeMatrixScope label="Opposite mode" mode={oppositeMode}>
-				<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} value={65} />
+				<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} />
 			</ThemeMatrixScope>
 		</div>,
 		appearance,

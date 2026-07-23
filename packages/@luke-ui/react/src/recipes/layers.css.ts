@@ -9,3 +9,4 @@ import './loading-skeleton.css.js';
 import './loading-spinner.css.js';
 import './text.css.js';
 import './text-input.css.js';
+import './visually-hidden.css.js';

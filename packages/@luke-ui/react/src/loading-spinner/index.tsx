@@ -1,5 +1,5 @@
-import { clamp } from '@react-aria/utils';
-import type { ComponentProps } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
+import { useId } from 'react';
 import { useIconSizeContext } from '../icon-size-context/index.js';
 import * as styles from '../recipes/loading-spinner.css.js';
 import {
@@ -11,7 +11,7 @@ import {
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
-import { cx } from '../utils/index.js';
+import { VisuallyHidden } from '../visually-hidden/index.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
 
@@ -22,24 +22,16 @@ interface LoadingSpinnerStyleProps {
 	size?: LoadingSpinnerVariantProps['size'];
 }
 
-type _LoadingSpinnerOmit = DistributiveOmit<
-	ComponentProps<'div'>,
-	'aria-valuemax' | 'aria-valuemin' | 'aria-valuenow' | 'color' | 'role'
->;
+type _LoadingSpinnerOmit = DistributiveOmit<ComponentProps<'span'>, 'color' | 'role'>;
 
 interface _LoadingSpinnerProps extends _LoadingSpinnerOmit, LoadingSpinnerStyleProps {
+	/** Content to show once loading finishes. While loading, the spinner replaces it in place. */
+	children?: ReactNode;
 	/**
-	 * Max value for determinate mode.
-	 * @default 100
+	 * Whether the spinner is shown in place of `children`.
+	 * @default true
 	 */
-	maxValue?: number;
-	/**
-	 * Min value for determinate mode.
-	 * @default 0
-	 */
-	minValue?: number;
-	/** Current value. Omit for indeterminate mode. */
-	value?: number;
+	isLoading?: boolean;
 }
 
 /**
@@ -49,63 +41,87 @@ interface _LoadingSpinnerProps extends _LoadingSpinnerOmit, LoadingSpinnerStyleP
  */
 export type LoadingSpinnerProps = Prettify<_LoadingSpinnerProps>;
 
-/** Progress spinner for determinate or indeterminate loading state. */
-export function LoadingSpinner(props: LoadingSpinnerProps) {
+/** Animated spinner shown while work is in progress. Wrap content in it to show the spinner in place of that content until loading finishes. */
+export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 	const {
-		'aria-label': ariaLabel = 'pending',
+		'aria-label': ariaLabel = 'loading',
+		children,
 		className,
 		color,
-		maxValue = 100,
-		minValue = 0,
+		isLoading = true,
 		size,
 		style,
-		value,
-		...divProps
+		...spanProps
 	} = props;
 
 	const contextSize = useIconSizeContext();
 	const resolvedSize = size ?? contextSize ?? 'medium';
 
-	const hasValue = value !== undefined && value !== null;
-	const normalizedMin = Math.min(minValue, maxValue);
-	const normalizedMax = Math.max(minValue, maxValue);
-	const clampedRange = Math.max(normalizedMax - normalizedMin, 1);
-	const clampedValue = hasValue ? clamp(value, normalizedMin, normalizedMax) : 0;
-	const progress = ((clampedValue - normalizedMin) / clampedRange) * 100;
-	const dashOffset = 100 - progress;
-	const mode = hasValue ? 'determinate' : 'indeterminate';
+	if (!isLoading) return children;
 
-	useSynchronizeAnimations(mode === 'indeterminate' ? styles.spinAnimationName : null);
-	useSynchronizeAnimations(mode === 'indeterminate' ? styles.rubberBandAnimationName : null);
+	const spinnerElement = (
+		<SpinnerElement
+			{...spanProps}
+			aria-label={ariaLabel}
+			color={color}
+			size={resolvedSize}
+			className={className}
+			style={style}
+		/>
+	);
+
+	if (!children) return spinnerElement;
+
+	const slots = styles.loadingSpinner();
 
 	return (
-		<div
-			{...divProps}
-			aria-label={ariaLabel}
-			aria-valuemax={maxValue}
-			aria-valuemin={minValue}
-			aria-valuenow={hasValue ? clampedValue : undefined}
-			className={cx(
-				styles.spinner({ color, size: resolvedSize }),
-				styles.spinnerState({ mode }),
-				className,
-			)}
-			role="progressbar"
+		<span className={slots.childrenWrapper()}>
+			<span aria-hidden className={slots.hiddenChildren()} inert>
+				{children}
+			</span>
+			<span className={slots.spinnerOverlay()}>{spinnerElement}</span>
+		</span>
+	);
+}
+
+type SpinnerElementProps = DistributiveOmit<LoadingSpinnerProps, 'children' | 'isLoading'>;
+
+function SpinnerElement({
+	'aria-label': ariaLabel,
+	className,
+	color,
+	size,
+	style,
+	...spanProps
+}: SpinnerElementProps) {
+	useSynchronizeAnimations(styles.spinAnimationName);
+	useSynchronizeAnimations(styles.rubberBandAnimationName);
+
+	const labelId = useId();
+	const slots = styles.loadingSpinner({ color, size });
+	const viewBoxCenter = ICON_VIEWBOX_SIZE / 2;
+
+	return (
+		<span
+			{...spanProps}
+			aria-labelledby={labelId}
+			className={slots.root(className)}
+			role="status"
 			style={style}
 		>
-			<svg aria-hidden="true" className={styles.svg()} fill="none" viewBox={ICON_VIEWBOX}>
+			<VisuallyHidden id={labelId}>{ariaLabel}</VisuallyHidden>
+			<svg aria-hidden="true" className={slots.svg()} fill="none" viewBox={ICON_VIEWBOX}>
 				<circle
-					className={styles.indicator({ mode })}
-					cx={ICON_VIEWBOX_SIZE / 2}
-					cy={ICON_VIEWBOX_SIZE / 2}
+					className={slots.indicator()}
+					cx={viewBoxCenter}
+					cy={viewBoxCenter}
 					fill="none"
 					pathLength={100}
 					r={SPINNER_CIRCLE_RADIUS}
 					stroke="currentColor"
-					strokeDashoffset={hasValue ? dashOffset : undefined}
 					strokeWidth={SPINNER_STROKE_WIDTH}
 				/>
 			</svg>
-		</div>
+		</span>
 	);
 }

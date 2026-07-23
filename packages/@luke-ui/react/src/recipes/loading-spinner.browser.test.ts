@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
-import { indicator, spinnerState } from './loading-spinner.css.js';
+import { loadingSpinner } from './loading-spinner.css.js';
 
 const mounted: Array<Element> = [];
 
@@ -10,7 +10,7 @@ afterEach(async () => {
 	await setEmulatedMedia();
 });
 
-test('indeterminate spinner uses the original rotation and rubber-band timing', () => {
+test('spinner uses the original rotation and rubber-band timing', () => {
 	const { ring, spinner } = mountSpinner();
 	const spinnerStyle = getComputedStyle(spinner);
 	const ringStyle = getComputedStyle(ring);
@@ -25,7 +25,7 @@ for (const [name, value] of [
 	['forced-colors', 'active'],
 	['prefers-reduced-motion', 'reduce'],
 ] as const) {
-	test(`${name} renders an indeterminate spinner as a static partial ring`, async () => {
+	test(`${name} renders the spinner as a static partial ring`, async () => {
 		await setEmulatedMedia(name, value);
 		const { ring, spinner } = mountSpinner();
 
@@ -38,10 +38,10 @@ for (const [name, value] of [
 
 function mountSpinner() {
 	const spinner = document.body.appendChild(document.createElement('div'));
-	spinner.className = spinnerState({ mode: 'indeterminate' });
+	spinner.className = loadingSpinner().root();
 	const svg = spinner.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'svg'));
 	const ring = svg.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'circle'));
-	ring.setAttribute('class', indicator({ mode: 'indeterminate' }));
+	ring.setAttribute('class', loadingSpinner().indicator());
 	mounted.push(spinner);
 	return { ring, spinner };
 }

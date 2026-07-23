@@ -3,25 +3,26 @@ title: Loading Spinner
 description: Animated indicator for work that is still in progress.
 ---
 
-Use `LoadingSpinner` when work is in progress. Omit `value` when you cannot report completion.
+Use `LoadingSpinner` to show an animated spinner while work is in progress. Wrap content in it to
+show the spinner in place of that content until loading finishes.
 
 <ExampleBlock
 	src="loading-spinner/basic"
-	title="Loading Spinner — Indeterminate"
-	description="A spinner for work with no known completion point."
+	title="Loading Spinner — Basic"
+	description="A standalone spinner for work in progress."
 />
 
-Indeterminate spinners rotate and pulse in sync, including spinners that mount at different times.
+## Loading children
 
-## Progress
-
-Pass `value` when you can report progress. `minValue` and `maxValue` set the range and default to
-`0` and `100`. Values outside that range are clamped before the indicator is drawn.
+Pass `children` along with `isLoading` to show the spinner in place of that content. While
+`isLoading` is `true`, the spinner replaces the children but preserves their dimensions, and any
+interactive descendants become unavailable. When `isLoading` is `false`, the children render
+normally.
 
 <ExampleBlock
-	src="loading-spinner/progress"
-	title="Loading Spinner — Progress"
-	description="Indeterminate and determinate progress indicators."
+	src="loading-spinner/children"
+	title="Loading Spinner — Children"
+	description="Wrap content so the spinner takes its place while loading."
 />
 
 ## Size
@@ -48,9 +49,12 @@ surrounding text colour.
 
 ## Accessibility
 
-The spinner has `progressbar` semantics. Its accessible name defaults to `pending`. Provide an
-`aria-label` that names the work, such as `Loading profile`. A determinate spinner also exposes its
-current, minimum, and maximum values.
+The spinner has `status` semantics, a polite live region announced by assistive technology. Its
+accessible name defaults to `loading`; provide an `aria-label` that names the work, such as
+`Loading profile`. That name is rendered as visually hidden text inside the live region, so it is
+announced as region content rather than relying on the region's label alone. While loading, wrapped
+children are hidden from assistive technology and made inert, so they cannot be focused or
+activated.
 
 ## Props
 
