@@ -1,7 +1,8 @@
-import type { RecipeVariants } from '@vanilla-extract/recipes';
 import { focusRing } from '../styles/focus-ring.js';
-import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import type { RecipeSelection } from './recipe.js';
+import { recipe } from './recipe.js';
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -46,7 +47,7 @@ const base = styleInLayer('recipes', {
 });
 
 /** Vanilla-extract recipe for the `Link` primitive's styles. */
-export const link = recipeInLayer('recipes', {
+export const link = recipe({
 	base,
 	defaultVariants: {
 		isStandalone: false,
@@ -99,4 +100,4 @@ export const link = recipeInLayer('recipes', {
 });
 
 /** Variant type for the `Link` recipe. */
-export type LinkVariants = RecipeVariants<typeof link>;
+export type LinkVariants = RecipeSelection<typeof link>;

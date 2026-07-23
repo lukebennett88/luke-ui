@@ -275,9 +275,9 @@ import { story } from '../../../../src/${input.name}/${input.name}.story';
 }
 
 function renderRecipe(input: { camelName: string; pascalName: string }): string {
-	return `import { recipeInLayer } from '../styles/layered-style.css.js';
+	return `import { recipe } from './recipe.js';
 
-export const ${input.camelName} = recipeInLayer('recipes', {
+export const ${input.camelName} = recipe({
 \tbase: {
 \t\tdisplay: 'inline-flex',
 \t},

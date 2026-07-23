@@ -1,8 +1,9 @@
 import { keyframes } from '@vanilla-extract/css';
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { recipeInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import { iconSizeVariants } from './icon.css.js';
+import type { RecipeSelection } from './recipe.js';
+import { recipe } from './recipe.js';
 
 const rotationDuration = '1.2s';
 const rubberBandDuration = '2s';
@@ -25,7 +26,7 @@ const base = styleInLayer('recipes', {
 });
 
 /** Vanilla-extract recipe for the `LoadingSpinner` primitive's styles. */
-export const spinner = recipeInLayer('recipes', {
+export const spinner = recipe({
 	base,
 	defaultVariants: {
 		size: 'medium',
@@ -37,14 +38,14 @@ export const spinner = recipeInLayer('recipes', {
 });
 
 /** Variant type for the `LoadingSpinner` recipe. */
-export type LoadingSpinnerVariants = RecipeVariants<typeof spinner>;
+export type LoadingSpinnerVariants = RecipeSelection<typeof spinner>;
 
 /** @internal */
 export const spinAnimationName = keyframes({
 	to: { transform: 'rotate(360deg)' },
 });
 
-export const spinnerState = recipeInLayer('recipes', {
+export const spinnerState = recipe({
 	defaultVariants: {
 		mode: 'determinate',
 	},
@@ -65,7 +66,7 @@ export const spinnerState = recipeInLayer('recipes', {
 	},
 });
 
-export const svg = recipeInLayer('recipes', {
+export const svg = recipe({
 	base: {
 		blockSize: '100%',
 		display: 'block',
@@ -81,7 +82,7 @@ export const rubberBandAnimationName = keyframes({
 	'100%': { strokeDasharray: '2 100', strokeDashoffset: -100 },
 });
 
-export const indicator = recipeInLayer('recipes', {
+export const indicator = recipe({
 	base: {
 		strokeDasharray: '100 100',
 	},

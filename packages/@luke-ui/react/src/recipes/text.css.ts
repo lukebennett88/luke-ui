@@ -1,9 +1,10 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { styleInLayer, recipeInLayer } from '../styles/layered-style.css.js';
+import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import { fontSizeSteps } from '../theme/contract.js';
 import type { FontSizeStep } from '../theme/contract.js';
+import type { RecipeSelection } from './recipe.js';
+import { recipe } from './recipe.js';
 
 /** Typography size steps. */
 export type TextSize = FontSizeStep;
@@ -147,7 +148,7 @@ function createLayeredTextStyle({
 }
 
 /** Vanilla-extract recipe for the `Text` primitive's styles. */
-export const text = recipeInLayer('recipes', {
+export const text = recipe({
 	base,
 	compoundVariants: sizeStepCompoundVariants,
 	defaultVariants: {
@@ -219,4 +220,4 @@ export const text = recipeInLayer('recipes', {
 });
 
 /** Aggregate variant type for the `Text` recipe. */
-export type TextVariants = RecipeVariants<typeof text>;
+export type TextVariants = RecipeSelection<typeof text>;
