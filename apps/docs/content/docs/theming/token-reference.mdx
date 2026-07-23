@@ -26,7 +26,8 @@ colour values into application CSS.
 ## Tokens
 
 This table is generated from the public TypeScript declaration and JSDoc, so it stays aligned with
-the code that produces each theme.
+the theme code. It includes motion, icon sizes, and control sizes. Generated palette values,
+component recipe selectors, and theme-foundation inputs are not public styling APIs.
 
 <auto-type-table
 	path="apps/docs/src/generated/token-reference.generated.ts"
@@ -35,6 +36,20 @@ the code that produces each theme.
 
 ## Next steps
 
-Read [Colour](/overview/color) for the semantic colour model. Read
-[Authoring a theme](/theming/authoring) to generate the complete contract for a product-owned
-identity.
+<Cards>
+	<Card href="/overview/color" title="Colour">
+		Choose surface, content, border, and intent roles.
+	</Card>
+	<Card href="/overview/typography" title="Typography">
+		Use the theme's type scale and weight roles.
+	</Card>
+	<Card href="/overview/layout" title="Layout">
+		Apply spacing through Box and layout utilities.
+	</Card>
+	<Card href="/overview/theme" title="Theming overview">
+		Understand identity, colour mode, radius, and depth.
+	</Card>
+	<Card href="/theming/authoring" title="Author a theme">
+		Generate a product-owned theme stylesheet.
+	</Card>
+</Cards>
