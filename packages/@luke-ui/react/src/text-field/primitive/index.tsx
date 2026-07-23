@@ -7,20 +7,17 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/text-input.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/index.js';
 
-interface TextInputVariantProps extends NonNullable<styles.TextInputVariants> {}
+/** Allowed `size` values for `TextInput`. */
+export type TextInputSize = styles.TextInputSize;
 
 interface TextInputStyleProps {
 	/**
 	 * Sets the input size.
 	 * @default 'medium'
 	 */
-	size?: TextInputVariantProps['size'];
+	size?: TextInputSize;
 }
-
-/** Allowed `size` values for `TextInput`. */
-export type TextInputSize = NonNullable<TextInputVariantProps['size']>;
 
 type _TextInputOmit = DistributiveOmit<RacInputProps, 'className' | keyof TextInputStyleProps>;
 interface _TextInputProps extends _TextInputOmit, TextInputStyleProps {
@@ -52,24 +49,24 @@ export function TextInput(props: TextInputProps): JSX.Element {
 		...inputProps
 	} = props;
 
+	const slots = styles.textInput({ size });
+
 	return (
 		<RacGroup
 			className={composeRenderProps(className, (value) => {
-				return cx(styles.textInputGroup({ size }), value);
+				return slots.group(value);
 			})}
 		>
 			{adornmentStart != null ? (
-				<span className={styles.textInputAdornmentStart({ size })}>{adornmentStart}</span>
+				<span className={slots.adornmentStart()}>{adornmentStart}</span>
 			) : null}
 			<RacInput
 				{...inputProps}
 				className={composeRenderProps(inputClassName, (value) => {
-					return cx(styles.textInputControl({ size }), value);
+					return slots.control(value);
 				})}
 			/>
-			{adornmentEnd != null ? (
-				<span className={styles.textInputAdornmentEnd({ size })}>{adornmentEnd}</span>
-			) : null}
+			{adornmentEnd != null ? <span className={slots.adornmentEnd()}>{adornmentEnd}</span> : null}
 		</RacGroup>
 	);
 }

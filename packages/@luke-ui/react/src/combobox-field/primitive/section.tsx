@@ -5,7 +5,6 @@ import { Header as RacHeader } from 'react-aria-components/Header';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/index.js';
 
 type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
 	RacListBoxSectionProps<T>,
@@ -27,7 +26,7 @@ export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionPr
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
 	const { children, className, title, ...sectionProps } = props;
 
-	const sectionClassName = cx(styles.comboboxSection(), className);
+	const sectionClassName = styles.combobox().section(className);
 
 	if (typeof children === 'function') {
 		return (
@@ -40,7 +39,7 @@ export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>
 	return (
 		<RacListBoxSection {...sectionProps} className={sectionClassName}>
 			{title != null ? (
-				<RacHeader className={styles.comboboxSectionHeading}>{title}</RacHeader>
+				<RacHeader className={styles.combobox().sectionHeading()}>{title}</RacHeader>
 			) : null}
 			{children}
 		</RacListBoxSection>

@@ -1,89 +1,100 @@
-import type { RecipeVariants } from '@vanilla-extract/recipes';
-import { recipeInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
+import { recipe } from './recipe.js';
 
 const dataDisabledSelector = '[data-disabled="true"]';
 const dataRequiredSelector = '[data-required="true"]';
 
-/** Vanilla-extract recipe for the `Field` primitive's layout styles. */
-export const field = recipeInLayer('recipes', {
-	base: {
-		display: 'flex',
-		flexDirection: 'column',
-		gap: vars.space[100],
-		minInlineSize: 0,
-	},
-});
+/**
+ * Raw slotted config for the `Field` primitive.
+ *
+ * Slots: `root` (layout), `label`, and `message` (description/error text).
+ */
+const fieldConfig = {
+	slots: {
+		root: {
+			display: 'flex',
+			flexDirection: 'column',
+			gap: vars.space[100],
+			minInlineSize: 0,
+		},
+		label: {
+			color: vars.color.text.primary,
+			...vars.font[200],
+			fontWeight: vars.font.weight.label,
+			minInlineSize: 0,
 
-/** Vanilla-extract recipe for the `Field` primitive's label styles. */
-export const fieldLabel = recipeInLayer('recipes', {
-	base: {
-		color: vars.color.text.primary,
-		...vars.font[200],
-		fontWeight: vars.font.weight.label,
-		minInlineSize: 0,
+			selectors: {
+				[`${dataDisabledSelector} &`]: {
+					color: vars.color.textDisabled,
+				},
+			},
+		},
+		message: {
+			...vars.font[200],
+			minInlineSize: 0,
 
-		selectors: {
-			[`${dataDisabledSelector} &`]: {
-				color: vars.color.textDisabled,
+			selectors: {
+				[`${dataDisabledSelector} &`]: {
+					color: vars.color.textDisabled,
+				},
 			},
 		},
 	},
 	defaultVariants: {
 		necessityIndicator: 'icon',
+		tone: 'description',
 	},
 	variants: {
 		necessityIndicator: {
 			icon: {
-				selectors: {
-					[`${dataRequiredSelector} &::after`]: {
-						color: vars.color.intent.danger.text,
-						content: '"*"',
-						marginInlineStart: vars.space[100],
+				label: {
+					selectors: {
+						[`${dataRequiredSelector} &::after`]: {
+							color: vars.color.intent.danger.text,
+							content: '"*"',
+							marginInlineStart: vars.space[100],
+						},
 					},
 				},
 			},
 			label: {
-				selectors: {
-					[`${dataRequiredSelector} &::after`]: {
-						color: vars.color.text.secondary,
-						content: '"(required)"',
-						fontWeight: vars.font.weight.body,
-						marginInlineStart: vars.space[100],
+				label: {
+					selectors: {
+						[`${dataRequiredSelector} &::after`]: {
+							color: vars.color.text.secondary,
+							content: '"(required)"',
+							fontWeight: vars.font.weight.body,
+							marginInlineStart: vars.space[100],
+						},
 					},
 				},
 			},
 		},
-	},
-});
-
-export type FieldLabelVariants = RecipeVariants<typeof fieldLabel>;
-
-/** Vanilla-extract recipe for the `Field` primitive's message styles. */
-export const fieldMessage = recipeInLayer('recipes', {
-	base: {
-		...vars.font[200],
-		minInlineSize: 0,
-
-		selectors: {
-			[`${dataDisabledSelector} &`]: {
-				color: vars.color.textDisabled,
-			},
-		},
-	},
-	defaultVariants: {
-		tone: 'description',
-	},
-	variants: {
 		tone: {
 			description: {
-				color: vars.color.text.secondary,
+				message: {
+					color: vars.color.text.secondary,
+				},
 			},
 			error: {
-				color: vars.color.intent.danger.text,
+				message: {
+					color: vars.color.intent.danger.text,
+				},
 			},
 		},
 	},
-});
+} as const satisfies SlottedConfigInput;
 
-export type FieldMessageVariants = RecipeVariants<typeof fieldMessage>;
+/**
+ * Slotted recipe for the `Field` primitive.
+ *
+ * `field({ necessityIndicator, tone }).root() / .label() / .message()`.
+ */
+export const field = recipe(fieldConfig);
+
+/** Outer variant selection for the `Field` recipe. */
+export type FieldVariants = RecipeSelection<typeof field>;
+
+/** Allowed `necessityIndicator` values for the field label. */
+export type FieldNecessityIndicator = keyof typeof fieldConfig.variants.necessityIndicator;

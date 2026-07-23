@@ -6,7 +6,6 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/index.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 
@@ -40,7 +39,7 @@ export function ComboboxTextInput(props: ComboboxTextInputProps): JSX.Element {
 		<RacInput
 			{...inputProps}
 			className={composeRenderProps(inputProps.className, (className) => {
-				return cx(styles.comboboxTextInput({ size }), className);
+				return styles.combobox({ size }).textInput(className);
 			})}
 			onClick={handleClick}
 		/>
