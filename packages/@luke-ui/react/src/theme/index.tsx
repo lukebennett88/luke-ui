@@ -24,6 +24,22 @@ export { buildTheme, ThemeContrastError, themeClassName } from './build-theme.js
 /** One WCAG contrast failure recorded on a {@link ThemeContrastError}. */
 export type { ThemeContrastFailure } from './build-theme.js';
 
+/**
+ * `defineTheme(input)` is the curated authoring entry point: it normalises a small {@link ThemeInput}
+ * (accent + neutral character, with everything else defaulting) into the per-mode foundation and
+ * compiles it through `buildTheme`. It adapts single-value accents and neutrals per mode, generates
+ * the radius scale, and merges optional materials over curated defaults. It throws when a
+ * single-value accent has no accessible lightness, and otherwise throws the same
+ * {@link ThemeContrastError} as `buildTheme`.
+ */
+export { defineTheme } from './define-theme.js';
+
+/** The curated `defineTheme` authoring input plus its colour and material building blocks. */
+export type { ColorInput, ControlFinish, DepthLadder, ThemeInput } from './define-theme.js';
+
+/** Curated defaults `defineTheme` applies for omitted materials and scrim. */
+export { defaultControlFinish, defaultDepth, defaultScrim } from './define-theme.js';
+
 /** The typed theme-foundation contract accepted by `buildTheme`. */
 export type {
 	ActionControlFinishFoundation,
