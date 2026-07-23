@@ -26,17 +26,28 @@ percentages, units, and compact values. Use `Emoji` when an emoji needs a reliab
 
 ## Type scale
 
-Text and Heading use the steps `100` through `900`. A `size` changes the whole type treatment,
-rather than a font size alone.
+Text and Heading use the steps `100` through `900`. A `size` applies the complete type treatment.
 
-```tsx
-<Text size="600" fontWeight="heading">
-	Quarterly revenue
-</Text>
-```
+<ExampleBlock src="overview/type-scale" title="Type scale" description="Every public type step." />
 
 Text defaults to `300`. Heading selects a size from its level, and accepts `size` when the visual
 hierarchy needs a deliberate override.
+
+Choose `200` through `400` for labels, supporting text, and running copy. Move to `500` through
+`800` as heading prominence increases. Reserve `900` for display text. Change a Heading's `size`
+only when the visual hierarchy needs to differ from its semantic level.
+
+## Capsize trims and baseline alignment
+
+Each type step includes Capsize trims. They remove the font's extra space above capitals and below
+the baseline, so spacing around text is more predictable. Text is trimmed by default. Turn trimming
+off only when a layout needs the untrimmed line box.
+
+<ExampleBlock
+	src="overview/capsize-alignment"
+	title="Capsize trims"
+	description="Trimmed text has predictable edges. Different sizes share a baseline."
+/>
 
 ## Weight and colour
 
