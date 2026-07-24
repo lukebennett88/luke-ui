@@ -12,10 +12,12 @@ export { vars } from './contract.css.js';
 
 /**
  * `themeClassName(name)` returns the identity class for a theme name. `ThemeContrastError` is thrown
- * by `defineTheme` when a resolved pair misses WCAG 2.2 AA (4.5:1 for text, 3:1 for non-text UI); it
- * carries every failing mode-and-pair in its `failures` array.
+ * by `defineTheme` when a resolved pair misses WCAG 2.2 AA (4.5:1 for text, 3:1 for the focus ring);
+ * it carries every failing mode-and-pair in its `failures` array. `ThemeGenerationError` is thrown
+ * when a role that must guarantee on-solid contrast (an inaccessible explicit per-mode accent, for
+ * example) cannot reach an accessible solid; it names the failing `role` and `mode`.
  */
-export { ThemeContrastError, themeClassName } from './build-theme.js';
+export { ThemeContrastError, ThemeGenerationError, themeClassName } from './build-theme.js';
 
 /** One WCAG contrast failure recorded on a {@link ThemeContrastError}. */
 export type { ThemeContrastFailure } from './build-theme.js';

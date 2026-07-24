@@ -233,10 +233,12 @@ const NEUTRAL_SOLID = {
 } as const satisfies Record<ColorMode, SolidBand>;
 
 // Text lightness targets: step 11 (low contrast) and step 12 (high contrast). Step 12 is a
-// scale-quality rung only — no semantic leaf consumes a high-contrast contract guarantee yet.
+// scale-quality rung only — no semantic leaf consumes a high-contrast contract guarantee yet. Light
+// `low` sits at 0.49 (not 0.5) so step 11 keeps a small AA margin over the pressed subtle surface
+// (step 5) even for the highest-luminance hues — accent/danger text is mapped onto that subtle trio.
 const TEXT_LIGHTNESS = {
 	dark: { high: 0.94, low: 0.76 },
-	light: { high: 0.3, low: 0.5 },
+	light: { high: 0.3, low: 0.49 },
 } as const satisfies Record<ColorMode, { low: number; high: number }>;
 const TEXT_LOW_CHROMA_FRACTION = 0.55;
 const TEXT_LOW_CHROMA_CAP = 0.13;

@@ -1,5 +1,5 @@
 import type { Oklch } from './color.js';
-import { gamutMapOklch } from './color.js';
+import { clampUnit, gamutMapOklch } from './color.js';
 
 /** The colour mode a set of surfaces is generated for. */
 type ElevationMode = 'light' | 'dark';
@@ -29,8 +29,8 @@ export interface GenerateSurfacesRequest {
 
 // Surface roles encode usage directly: light wells use neutral white, dark wells sit below the
 // canvas, and detached surfaces separate more strongly without exposing generated palette steps.
-// Mirrors the deltas `buildModeColors` in build-theme.ts uses today (minus the hidden `resting`
-// rung, which has no public semantic meaning and is dropped here).
+// This module owns the surface deltas outright — `build-theme.ts` consumes `generateSurfaces` rather
+// than re-deriving them, so there is a single source of truth for the elevation model.
 const LIGHT_RECESSED_SURFACE = { l: 1, c: 0, h: 0 } as const satisfies Oklch;
 const DARK_RECESSED_SURFACE_LIGHTNESS_DELTA = -0.025;
 const SURFACE_LIGHTNESS_DELTAS = {
@@ -59,8 +59,4 @@ export function generateSurfaces(request: GenerateSurfacesRequest): GeneratedSur
 		overlay: surfaceAt(deltas.overlay),
 		recessed: isLight ? LIGHT_RECESSED_SURFACE : surfaceAt(DARK_RECESSED_SURFACE_LIGHTNESS_DELTA),
 	};
-}
-
-function clampUnit(value: number): number {
-	return Math.min(1, Math.max(0, value));
 }

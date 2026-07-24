@@ -1,7 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
 import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
-import { buildTheme, ThemeContrastError, themeClassName } from './build-theme.js';
+import {
+	buildTheme,
+	compileTheme,
+	ThemeContrastError,
+	ThemeGenerationError,
+	themeClassName,
+} from './build-theme.js';
 import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { normalizeTheme } from './define-theme.js';
@@ -399,14 +405,17 @@ describe('buildTheme contrast failures', () => {
 		);
 	});
 
-	it('rejects a light dark-mode neutral through the text lightness windows', () => {
+	it('rejects a pathological dark-mode canvas the fixed text anchors cannot clear', () => {
+		// v2 pins text lightness (neutral steps 11/12) per mode, so an unworkable neutral character no
+		// longer produces low-contrast text; the honest failure mode is instead a canvas whose lightness
+		// leaves the fixed text anchors below AA. A near-white dark canvas does exactly that.
 		const error = buildFailures({
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, neutral: '#9a9a9a' },
+				color: { ...tactileFoundation.dark.color, background: 'oklch(0.9 0 0)' },
 			},
-			name: 'bad-dark-neutral',
+			name: 'bad-dark-canvas',
 		});
 		const failure = error.failures.find((candidate) => {
 			return (
@@ -420,41 +429,84 @@ describe('buildTheme contrast failures', () => {
 		expect(error.message).toContain('dark: color.text.primary on color.surface.canvas');
 	});
 
-	it('rejects a mid-lightness accent that no onSolid colour can sit on', () => {
-		const error = buildFailures({
-			...tactileFoundation,
-			light: {
-				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, accent: '#7a7a7a' },
-			},
-			name: 'bad-accent',
-		});
-		const onSolidFailures = error.failures.filter(
-			(candidate) => candidate.foreground === 'color.intent.accent.onSolid',
-		);
-		expect(onSolidFailures.length).toBeGreaterThan(0);
-		expect(onSolidFailures[0]?.background).toMatch(/^color\.intent\.accent\.surface\.solid/);
-		expect(error.message).toContain('light: color.intent.accent.onSolid');
-	});
-
 	it('aggregates every failing pair into one error', () => {
 		const error = buildFailures({
 			...tactileFoundation,
+			dark: {
+				...tactileFoundation.dark,
+				color: { ...tactileFoundation.dark.color, background: 'oklch(0.9 0 0)' },
+			},
 			light: {
 				...tactileFoundation.light,
-				color: {
-					...tactileFoundation.light.color,
-					accent: '#7a7a7a',
-					focus: '#c5d9ff',
-				},
+				color: { ...tactileFoundation.light.color, focus: '#c5d9ff' },
 			},
 			name: 'bad-both',
 		});
 		const foregrounds = new Set(error.failures.map((failure) => failure.foreground));
+		// A low-contrast light focus ring and a pathological dark canvas fail different pairs across both
+		// modes; the error collects them all.
 		expect(foregrounds.has('color.border.focus')).toBe(true);
-		expect(foregrounds.has('color.intent.accent.onSolid')).toBe(true);
+		expect(foregrounds.has('color.text.primary')).toBe(true);
 		expect(error.failures.length).toBeGreaterThan(2);
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
+	});
+});
+
+describe('buildTheme generation failures', () => {
+	it('throws ThemeGenerationError for an accent no on-solid text can sit on', () => {
+		const caught = (() => {
+			try {
+				// A mid-lightness tone whose whole solid window is an on-solid dead zone: neither near-white
+				// nor near-black on-solid text clears AA anywhere the search can reach.
+				buildTheme({
+					...tactileFoundation,
+					light: {
+						...tactileFoundation.light,
+						color: { ...tactileFoundation.light.color, accent: 'oklch(0.62 0.19 27)' },
+					},
+					name: 'bad-accent',
+				});
+				return null;
+			} catch (error) {
+				return error;
+			}
+		})();
+		expect(caught).toBeInstanceOf(ThemeGenerationError);
+		const error = caught as ThemeGenerationError;
+		expect(error.role).toBe('accent');
+		expect(error.mode).toBe('light');
+		expect(error.bestAttempt.step).toBe(9);
+		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
+		// The partial diagnostics carry the failing role/mode and the families resolved before it.
+		expect(error.diagnostics.role).toBe('accent');
+		expect(error.diagnostics.mode).toBe('light');
+		expect(error.diagnostics.completedFamilies.neutral).toBeDefined();
+		expect(error.diagnostics.completedFamilies.accent).toBeUndefined();
+	});
+});
+
+describe('compileTheme diagnostics', () => {
+	it('returns the emitted CSS plus complete per-mode diagnostics for a valid theme', () => {
+		const { css, diagnostics } = compileTheme(tactileFoundation);
+		expect(css).toBe(buildTheme(tactileFoundation));
+		for (const mode of ['light', 'dark'] as const) {
+			const modeDiagnostics = diagnostics[mode];
+			expect(modeDiagnostics.mode).toBe(mode);
+			// A family diagnostic per role, and every scale role generated.
+			expect(Object.keys(modeDiagnostics.families).sort()).toEqual(
+				['accent', 'danger', 'info', 'neutral', 'success', 'warning'].sort(),
+			);
+			expect(modeDiagnostics.families.accent.solidAnchor.satisfied).toBe(true);
+			// The canvas surface equals the resolved background anchor.
+			expect(modeDiagnostics.surfaces.canvas).toBeDefined();
+			// Every recorded contrast check for a fully compiled theme's hard gates passes; advisory
+			// border checks may sit below their nominal 3:1 requirement.
+			const hardTextChecks = modeDiagnostics.contrastChecks.filter(
+				(check) => check.required === 4.5,
+			);
+			expect(hardTextChecks.length).toBeGreaterThan(0);
+			for (const check of hardTextChecks) expect(check.passes).toBe(true);
+		}
 	});
 });
 
@@ -467,7 +519,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 	];
 
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`${foundation.name} passes recomputed text and border contrast in both modes`, () => {
+		it(`${foundation.name} passes recomputed text contrast and emits a subtle control border in both modes`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				const textPrimary = parseColor(extractValue(block, '--luke-color-text-primary'));
@@ -477,7 +529,11 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 					const surface = parseColor(extractValue(block, varName));
 					expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
 				}
-				expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
+				// v2 control borders map to the neutral scale's step 7 — a subtle Radix-style separator
+				// distinct from the canvas but below the old solver's hard 3:1 UI gate.
+				const borderContrast = contrastRatio(borderControl, canvas);
+				expect(borderContrast).toBeGreaterThan(1.2);
+				expect(borderContrast).toBeLessThan(3);
 			}
 		});
 
@@ -497,20 +553,21 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
 		});
 
-		it(`${foundation.name} keeps dark subtle hover states distinct and legible`, () => {
+		it(`${foundation.name} keeps dark subtle hover states legible for primary text`, () => {
 			const { mediaDark } = splitBlocks(buildTheme(foundation));
-			const floating = parseColor(extractValue(mediaDark, '--luke-color-surface-floating'));
 			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
+			// The subtle component surfaces (scale steps 3-5) ramp from the canvas independently of the
+			// elevation surfaces, so v2 no longer pins them apart from `floating`; what still matters is
+			// that primary text stays legible on the hovered subtle surface.
 			for (const intent of ['neutral', 'accent']) {
 				const subtleHover = parseColor(
 					extractValue(mediaDark, `--luke-color-intent-${intent}-surface-subtle-hover`),
 				);
-				expect(contrastRatio(subtleHover, floating)).toBeGreaterThanOrEqual(1.4);
 				expect(contrastRatio(textPrimary, subtleHover)).toBeGreaterThanOrEqual(4.5);
 			}
 		});
 
-		it(`${foundation.name} generates the least-contrasting passing control borders`, () => {
+		it(`${foundation.name} generates subtle, distinct neutral and intent borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				const surfaces = ['canvas', 'recessed'].map((surface) => {
@@ -528,13 +585,11 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 					const minimumContrast = Math.min(
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
-					expect(minimumContrast).toBeGreaterThanOrEqual(3);
-					// Borders are still solved against the generator's internal base ladder, which keeps an
-					// unemitted `resting` rung (between canvas and recessed) so retained values stay
-					// byte-identical. That rung is the tightest dark-mode background, so measured against
-					// only the emitted base surfaces the minimum sits a little higher (~3.05 light, ~3.5 dark)
-					// while still proving the border is not over-contrasted.
-					expect(minimumContrast).toBeLessThan(3.6);
+					// v2 borders alias the scale's step 7 (subtle UI border). They stay visibly distinct from
+					// the base surfaces but sit below the 3:1 non-text gate the old bespoke solver targeted —
+					// a deliberate move to the reference scale's softer separators.
+					expect(minimumContrast).toBeGreaterThan(1.2);
+					expect(minimumContrast).toBeLessThan(3);
 				}
 			}
 		});
@@ -548,7 +603,10 @@ describe('bundled loading skeleton surfaces', () => {
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
 				const skeleton = parseColor(extractValue(block, '--luke-color-loading-skeleton'));
-				expect(contrastRatio(skeleton, canvas)).toBeGreaterThanOrEqual(1.4);
+				// v2 aliases the loading skeleton onto the neutral scale's step 3 (a subtle component
+				// surface), so it is a soft tint of the canvas rather than the old higher-contrast pulse.
+				expect(skeleton).not.toEqual(canvas);
+				expect(contrastRatio(skeleton, canvas)).toBeGreaterThan(1);
 			}
 		});
 	}
@@ -576,25 +634,47 @@ describe('bundled theme identity', () => {
 	});
 });
 
-// Permanent compatibility (pre-v2) goldens: the exact `buildTheme` output for the bundled themes,
-// captured before the theme-v2 generator work (wayfinder #232) touched anything. They are a fixed
-// historical reference — unlike a future Stage 6 "v2 regression goldens" set, these are never
-// re-frozen, so a real Stage 6 visual diff always has an unmodified pre-v2 baseline to compare
-// against. Every generated colour, depth, and identity value below (including the header line)
-// must stay byte-identical to today.
+// v2 regression goldens: the exact `buildTheme` output for the bundled themes under the wired-in
+// scale/elevation/semantic-map pipeline (Stage 6, #238). Asserted byte-identical so any later
+// generator change is a reviewed, deliberate diff. Committed alongside — not overwriting — the
+// permanent pre-v2 compatibility fixtures below.
+describe('v2 regression goldens', () => {
+	const v2Goldens = {
+		paper: new URL('./__fixtures__/v2-goldens/paper.v2.css', import.meta.url),
+		tactile: new URL('./__fixtures__/v2-goldens/tactile.v2.css', import.meta.url),
+	} as const;
+
+	it('keeps every generated token byte-identical to the v2 baseline', async () => {
+		const goldenTactile = await readFile(v2Goldens.tactile, 'utf8');
+		const goldenPaper = await readFile(v2Goldens.paper, 'utf8');
+
+		expect(buildTheme(tactileFoundation)).toBe(goldenTactile);
+		expect(buildTheme(paperFoundation)).toBe(goldenPaper);
+	});
+});
+
+// Permanent compatibility (pre-v2) goldens: the exact `buildTheme` output captured before the
+// theme-v2 generator work (wayfinder #232). They are a frozen historical reference — NOT asserted
+// equal to live output, which the v2 pipeline has deliberately changed — kept so the pre-v2 → v2
+// diff always has an unmodified baseline until the epic tears them down (#240).
 describe('compatibility (pre-v2) goldens', () => {
 	const compatGoldens = {
 		paper: new URL('./__fixtures__/compat-goldens/paper.pre-v2.css', import.meta.url),
 		tactile: new URL('./__fixtures__/compat-goldens/tactile.pre-v2.css', import.meta.url),
 	} as const;
 
-	it('keeps every generated token byte-identical to the pre-v2 baseline', async () => {
+	it('remains a readable frozen pre-v2 reference the live output has since diverged from', async () => {
 		const goldenTactile = await readFile(compatGoldens.tactile, 'utf8');
 		const goldenPaper = await readFile(compatGoldens.paper, 'utf8');
-		const currentTactile = buildTheme(tactileFoundation);
-		const currentPaper = buildTheme(paperFoundation);
 
-		expect(currentTactile).toBe(goldenTactile);
-		expect(currentPaper).toBe(goldenPaper);
+		// Sanity: the frozen fixtures are the pre-v2 shape (same header, same identity class) but no
+		// longer match live output, which the wired-in v2 pipeline repainted.
+		expect(goldenTactile).toContain(
+			'/* Generated by buildTheme from @luke-ui/react. Do not edit. */',
+		);
+		expect(goldenTactile).toContain('.luke-ui-theme-tactile {');
+		expect(goldenPaper).toContain('.luke-ui-theme-paper {');
+		expect(buildTheme(tactileFoundation)).not.toBe(goldenTactile);
+		expect(buildTheme(paperFoundation)).not.toBe(goldenPaper);
 	});
 });

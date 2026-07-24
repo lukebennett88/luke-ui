@@ -54,7 +54,11 @@ describe('defineTheme colour-only authoring', () => {
 				const surface = parseColor(extractValue(block, varName));
 				expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
 			}
-			expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
+			// v2 borders map to the Radix-style scale step 7: a subtle separator that sits below the old
+			// bespoke solver's 3:1 gate but stays visibly distinct from the canvas.
+			const borderContrast = contrastRatio(borderControl, canvas);
+			expect(borderContrast).toBeGreaterThan(1.2);
+			expect(borderContrast).toBeLessThan(3);
 		}
 	});
 });
@@ -289,18 +293,22 @@ describe('defineTheme emits the reduced contract for the bundled themes', () => 
 		});
 	}
 
-	it('keeps known retained Tactile values byte-identical to the pre-flip baseline', () => {
+	it('emits the expected v2 token values for known Tactile leaves', () => {
 		const css = defineTheme(tactileTheme);
 		for (const declaration of [
+			// The canvas IS the resolved background (Tactile's light neutral), unchanged from pre-v2.
 			'--luke-color-surface-canvas: oklch(0.985 0 0);',
-			'--luke-color-text-primary: oklch(0.225 0 0);',
-			'--luke-color-text-disabled: oklch(0.58 0.01 210);',
-			'--luke-color-intent-neutral-surface-subtle: oklch(0.94 0 0);',
+			// Global text/skeleton now alias the neutral family: primary = neutral 12 (light) / dark 12,
+			// disabled = neutral 8, the neutral subtle surface = neutral 3.
+			'--luke-color-text-primary: oklch(0.3 0 0);',
+			'--luke-color-text-disabled: oklch(0.5 0.0117 210);',
+			'--luke-color-intent-neutral-surface-subtle: oklch(0.955 0 0);',
+			// The danger solid stays the authored default source (danger step 9 lands on it verbatim).
 			'--luke-color-intent-danger-surface-solid: oklch(0.52 0.18 27);',
 		]) {
 			expect(css).toContain(declaration);
 		}
-		// Scrim is new: black at the mode-aware default alpha.
+		// Scrim is passed through: black at the mode-aware default alpha.
 		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.2);');
 		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.4);');
 	});
