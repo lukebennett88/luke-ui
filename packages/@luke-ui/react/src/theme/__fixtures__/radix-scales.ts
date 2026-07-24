@@ -16,7 +16,7 @@ import type { Oklch } from '../color.js';
 import { parseColor } from '../color.js';
 
 /** A Radix 12-step scale as published hex values, step 1 through step 12. */
-export interface RadixScaleHex {
+interface RadixScaleHex {
 	/** The Radix family name. */
 	name: string;
 	/** The colour mode the scale is authored for. */
@@ -39,7 +39,7 @@ export interface RadixScaleHex {
 }
 
 /** Radix light-mode reference scales spanning neutral, cool, warm, and light-solid hues. */
-export const RADIX_LIGHT_SCALES: ReadonlyArray<RadixScaleHex> = [
+const RADIX_LIGHT_SCALES: ReadonlyArray<RadixScaleHex> = [
 	{
 		mode: 'light',
 		name: 'slate',
@@ -151,7 +151,7 @@ export const RADIX_LIGHT_SCALES: ReadonlyArray<RadixScaleHex> = [
 ];
 
 /** Radix dark-mode reference scales. */
-export const RADIX_DARK_SCALES: ReadonlyArray<RadixScaleHex> = [
+const RADIX_DARK_SCALES: ReadonlyArray<RadixScaleHex> = [
 	{
 		mode: 'dark',
 		name: 'slate',
@@ -234,7 +234,7 @@ export interface RadixScaleOklch {
 }
 
 /** Converts a hex scale to OKLCH using the generator's own colour math. */
-export function toOklchScale(scale: RadixScaleHex): RadixScaleOklch {
+function toOklchScale(scale: RadixScaleHex): RadixScaleOklch {
 	return { mode: scale.mode, name: scale.name, steps: scale.steps.map((hex) => parseColor(hex)) };
 }
 
