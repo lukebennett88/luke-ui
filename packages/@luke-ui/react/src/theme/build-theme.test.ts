@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
 import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { buildTheme, ThemeContrastError, themeClassName } from './build-theme.js';
@@ -572,5 +573,28 @@ describe('bundled theme identity', () => {
 		expect(() => themeClassName('double--hyphen')).toThrow(/kebab-case/);
 		expect(() => themeClassName('9lives')).toThrow(/kebab-case/);
 		expect(themeClassName('tactile')).toBe('luke-ui-theme-tactile');
+	});
+});
+
+// Permanent compatibility (pre-v2) goldens: the exact `buildTheme` output for the bundled themes,
+// captured before the theme-v2 generator work (wayfinder #232) touched anything. They are a fixed
+// historical reference — unlike a future Stage 6 "v2 regression goldens" set, these are never
+// re-frozen, so a real Stage 6 visual diff always has an unmodified pre-v2 baseline to compare
+// against. Every generated colour, depth, and identity value below (including the header line)
+// must stay byte-identical to today.
+describe('compatibility (pre-v2) goldens', () => {
+	const compatGoldens = {
+		paper: new URL('./__fixtures__/compat-goldens/paper.pre-v2.css', import.meta.url),
+		tactile: new URL('./__fixtures__/compat-goldens/tactile.pre-v2.css', import.meta.url),
+	} as const;
+
+	it('keeps every generated token byte-identical to the pre-v2 baseline', async () => {
+		const goldenTactile = await readFile(compatGoldens.tactile, 'utf8');
+		const goldenPaper = await readFile(compatGoldens.paper, 'utf8');
+		const currentTactile = buildTheme(tactileFoundation);
+		const currentPaper = buildTheme(paperFoundation);
+
+		expect(currentTactile).toBe(goldenTactile);
+		expect(currentPaper).toBe(goldenPaper);
 	});
 });
