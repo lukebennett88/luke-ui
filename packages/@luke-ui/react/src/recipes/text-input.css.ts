@@ -123,7 +123,7 @@ const textInputConfig = {
 					opacity: 1,
 				},
 				'&:where([data-disabled="true"], :disabled)': {
-					color: vars.color.textDisabled,
+					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 				},
 			},
@@ -139,7 +139,7 @@ const textInputConfig = {
 
 			selectors: {
 				[descendantDisabledSelector]: {
-					color: vars.color.textDisabled,
+					color: vars.color.text.disabled,
 				},
 			},
 		},
@@ -154,7 +154,7 @@ const textInputConfig = {
 
 			selectors: {
 				[descendantDisabledSelector]: {
-					color: vars.color.textDisabled,
+					color: vars.color.text.disabled,
 				},
 			},
 		},

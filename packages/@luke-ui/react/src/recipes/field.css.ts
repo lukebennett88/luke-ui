@@ -26,7 +26,7 @@ const fieldConfig = {
 
 			selectors: {
 				[`${dataDisabledSelector} &`]: {
-					color: vars.color.textDisabled,
+					color: vars.color.text.disabled,
 				},
 			},
 		},
@@ -36,7 +36,7 @@ const fieldConfig = {
 
 			selectors: {
 				[`${dataDisabledSelector} &`]: {
-					color: vars.color.textDisabled,
+					color: vars.color.text.disabled,
 				},
 			},
 		},

@@ -1,8 +1,8 @@
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { fontSizeSteps } from '../theme/contract.js';
-import { tactileFoundation } from '../theme/foundations.js';
-import { buildTheme, themeClassName, themeRootClassName } from '../theme/index.js';
+import { tactileTheme } from '../theme/foundations.js';
+import { defineTheme, themeClassName, themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 import { text } from './text.css.js';
 
@@ -188,8 +188,8 @@ function mountRoot(themeClass = tactileThemeClassName) {
 function installTheme(fontFamily: 'inter' | 'apple-system' | 'dm-sans') {
 	const name = `capsize-${fontFamily}`;
 	const style = document.head.appendChild(document.createElement('style'));
-	style.textContent = buildTheme({
-		...tactileFoundation,
+	style.textContent = defineTheme({
+		...tactileTheme,
 		name,
 		typography: { fontFamily },
 	});

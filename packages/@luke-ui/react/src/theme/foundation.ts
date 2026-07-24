@@ -119,6 +119,11 @@ export interface ThemeSourceColors {
 	 * Luke UI blue for the mode.
 	 */
 	focus?: string;
+	/**
+	 * Modal-backdrop dimming colour, emitted verbatim (may carry an alpha channel). Required
+	 * internally: `defineTheme` always resolves it, from the author's value or a mode-aware default.
+	 */
+	scrim: string;
 }
 
 /** Authored composite `box-shadow` values for one colour mode. */

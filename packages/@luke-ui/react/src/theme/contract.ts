@@ -32,25 +32,26 @@ export const themeContractTree = {
 	color: {
 		surface: {
 			canvas: null,
-			resting: null,
 			recessed: null,
 			floating: null,
 			overlay: null,
 		},
-		surfaceDisabled: null,
+		/** Modal-backdrop dimming layer behind an overlay surface. */
+		scrim: null,
 		loadingSkeleton: null,
 		text: {
 			primary: null,
 			secondary: null,
+			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
+			disabled: null,
 		},
-		textDisabled: null,
 		border: {
 			decorative: null,
 			control: null,
 			focus: null,
 		},
-		borderDisabled: null,
 		intent: {
+			// Action intents: full 6-rung interactive ramp + onSolid.
 			neutral: {
 				surface: {
 					subtle: null,
@@ -76,45 +77,6 @@ export const themeContractTree = {
 				textHover: null,
 				onSolid: null,
 			},
-			info: {
-				surface: {
-					subtle: null,
-					subtleHover: null,
-					subtlePressed: null,
-					solid: null,
-					solidHover: null,
-					solidPressed: null,
-				},
-				border: null,
-				text: null,
-				onSolid: null,
-			},
-			success: {
-				surface: {
-					subtle: null,
-					subtleHover: null,
-					subtlePressed: null,
-					solid: null,
-					solidHover: null,
-					solidPressed: null,
-				},
-				border: null,
-				text: null,
-				onSolid: null,
-			},
-			warning: {
-				surface: {
-					subtle: null,
-					subtleHover: null,
-					subtlePressed: null,
-					solid: null,
-					solidHover: null,
-					solidPressed: null,
-				},
-				border: null,
-				text: null,
-				onSolid: null,
-			},
 			danger: {
 				surface: {
 					subtle: null,
@@ -127,6 +89,28 @@ export const themeContractTree = {
 				border: null,
 				text: null,
 				onSolid: null,
+			},
+			// Feedback intents: static soft kit only (subtle surface + border + text).
+			info: {
+				surface: {
+					subtle: null,
+				},
+				border: null,
+				text: null,
+			},
+			success: {
+				surface: {
+					subtle: null,
+				},
+				border: null,
+				text: null,
+			},
+			warning: {
+				surface: {
+					subtle: null,
+				},
+				border: null,
+				text: null,
 			},
 		},
 	},
@@ -217,13 +201,9 @@ export const themeContractTree = {
 	motion: {
 		duration: {
 			fast: null,
-			medium: null,
-			slow: null,
-			ambient: null,
 		},
 		easing: {
 			standard: null,
-			enter: null,
 			exit: null,
 		},
 	},

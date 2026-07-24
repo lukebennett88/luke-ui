@@ -3,20 +3,20 @@
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { buildTheme } from '../src/theme/build-theme.js';
-import { paperFoundation, tactileFoundation } from '../src/theme/foundations.js';
+import { defineTheme } from '../src/theme/define-theme.js';
+import { paperTheme, tactileTheme } from '../src/theme/foundations.js';
 
-const foundations = [tactileFoundation, paperFoundation];
+const themes = [tactileTheme, paperTheme];
 
 async function main() {
 	await Promise.all(
-		foundations.map(async (foundation) => {
+		themes.map(async (theme) => {
 			const outputPath = fileURLToPath(
-				new URL(`../dist/themes/${foundation.name}.css`, import.meta.url),
+				new URL(`../dist/themes/${theme.name}.css`, import.meta.url),
 			);
 			await mkdir(dirname(outputPath), { recursive: true });
-			await writeFile(outputPath, buildTheme(foundation), 'utf8');
-			process.stdout.write(`Generated dist/themes/${foundation.name}.css\n`);
+			await writeFile(outputPath, defineTheme(theme), 'utf8');
+			process.stdout.write(`Generated dist/themes/${theme.name}.css\n`);
 		}),
 	);
 }

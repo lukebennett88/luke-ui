@@ -3,6 +3,7 @@ import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { buildTheme, ThemeContrastError, themeClassName } from './build-theme.js';
 import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
+import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
 	defaultFontWeights,
@@ -11,7 +12,12 @@ import {
 	deriveConcentricRadius,
 	deriveNestedRadius,
 } from './foundation.js';
-import { paperFoundation, tactileFoundation } from './foundations.js';
+import { paperTheme, tactileTheme } from './foundations.js';
+
+// The bundled themes are authored as `defineTheme` inputs; these engine tests exercise the raw
+// `buildTheme` pipeline directly, so resolve each input into the foundation `buildTheme` consumes.
+const tactileFoundation = normalizeTheme(tactileTheme);
+const paperFoundation = normalizeTheme(paperTheme);
 
 const pairs = flattenThemeContract();
 const isModePath = (path: string) => {
@@ -122,7 +128,8 @@ describe('buildTheme output', () => {
 	it('uses the stable kebab-case variable names', () => {
 		expect(css).toContain('--luke-color-intent-danger-surface-solid-hover');
 		expect(css).toContain('--luke-color-loading-skeleton');
-		expect(css).toContain('--luke-color-surface-disabled');
+		expect(css).toContain('--luke-color-scrim');
+		expect(css).toContain('--luke-color-text-disabled');
 		expect(css).toContain('--luke-color-intent-accent-text-hover');
 		expect(css).toContain('--luke-depth-raised');
 		expect(css).toContain('--luke-action-control-finish-resting');
@@ -453,7 +460,6 @@ describe('buildTheme contrast failures', () => {
 describe('bundled themes meet WCAG 2.2 AA', () => {
 	const surfaceVarNames = [
 		'--luke-color-surface-canvas',
-		'--luke-color-surface-resting',
 		'--luke-color-surface-recessed',
 		'--luke-color-surface-floating',
 		'--luke-color-surface-overlay',
@@ -506,7 +512,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		it(`${foundation.name} generates the least-contrasting passing control borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const surfaces = ['canvas', 'resting', 'recessed'].map((surface) => {
+				const surfaces = ['canvas', 'recessed'].map((surface) => {
 					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
 				});
 				const borderVarNames = [
@@ -522,7 +528,12 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
 					expect(minimumContrast).toBeGreaterThanOrEqual(3);
-					expect(minimumContrast).toBeLessThan(3.15);
+					// Borders are still solved against the generator's internal base ladder, which keeps an
+					// unemitted `resting` rung (between canvas and recessed) so retained values stay
+					// byte-identical. That rung is the tightest dark-mode background, so measured against
+					// only the emitted base surfaces the minimum sits a little higher (~3.05 light, ~3.5 dark)
+					// while still proving the border is not over-contrasted.
+					expect(minimumContrast).toBeLessThan(3.6);
 				}
 			}
 		});
