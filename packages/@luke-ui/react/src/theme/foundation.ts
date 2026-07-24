@@ -88,7 +88,7 @@ export interface ThemeModeFoundation {
 }
 
 /** Authored action-control face lighting for one colour mode. */
-export interface ActionControlFinishFoundation {
+interface ActionControlFinishFoundation {
 	/** Face lighting for a pressed control. */
 	recessed: string;
 	/** Face lighting for a resting control. */
@@ -127,7 +127,7 @@ export interface ThemeSourceColors {
 }
 
 /** Authored composite `box-shadow` values for one colour mode. */
-export interface ThemeDepthFoundation {
+interface ThemeDepthFoundation {
 	/** Inset treatment for a pressed control or sunken surface. */
 	recessed: string;
 	/** Resting treatment for an interactive control or surface. */

@@ -19,7 +19,7 @@ export default function ConcentricRadiusExample() {
 					blockSize="6rem"
 					inlineSize="100%"
 					style={{
-						backgroundColor: vars.color.surface.resting,
+						backgroundColor: vars.color.surface.floating,
 						borderRadius: vars.radius.control,
 					}}
 				/>

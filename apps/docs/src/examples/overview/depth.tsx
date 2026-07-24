@@ -17,7 +17,7 @@ export default function DepthExample() {
 				<Box display="grid" gap="200" key={name}>
 					<Box
 						style={{
-							backgroundColor: vars.color.surface.resting,
+							backgroundColor: vars.color.surface.floating,
 							blockSize: '5rem',
 							border: `1px solid ${vars.color.border.control}`,
 							borderRadius: vars.radius.surface,

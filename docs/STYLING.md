@@ -17,19 +17,26 @@ element. Neither step injects styles at runtime.
   `fontSizeSteps` typography step keys.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
-- `theme/foundation.ts`: the typed theme-foundation input and curated defaults.
+- `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
+  and the curated defaults it applies for omitted materials and scrim.
+- `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into and
+  the curated colour, radius, and typography defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
-- `theme/build-theme.ts`: `buildTheme(foundation)`, `themeClassName`, and contrast validation.
-- `theme/foundations.ts`: foundations for the bundled Tactile and Paper themes.
+- `theme/build-theme.ts`: the internal `buildTheme(foundation)` value pipeline, `themeClassName`,
+  and contrast validation.
+- `theme/foundations.ts`: `defineTheme(...)` inputs for the bundled Tactile and Paper themes.
 - `themes/`: bundled theme class-name constants exported from `@luke-ui/react/themes`.
 - `scripts/build-themes.ts`: writes the bundled theme stylesheets to `dist/themes/`.
 
 ## Themes
 
-`buildTheme(foundation)` from `@luke-ui/react/theme` compiles a typed theme foundation into static
-stylesheet text. It is pure and Node-compatible. It generates the full semantic contract in OKLCH
-and throws a `ThemeContrastError` naming each failing mode and token pair when a generated pair
-misses WCAG 2.2 AA contrast.
+`defineTheme(input)` from `@luke-ui/react/theme` is the sole public theme-authoring surface. It
+normalises a small, curated `ThemeInput` — a required `color.accent`, an optional neutral character,
+and optional materials — into static stylesheet text. It is pure and Node-compatible. It generates
+the full semantic contract in OKLCH and throws a `ThemeContrastError` naming each failing mode and
+token pair when a generated pair misses WCAG 2.2 AA contrast. A single-value accent or neutral is
+adapted per mode through a lightness search; it throws when no lightness in the vibrant band is
+accessible. The raw `ThemeFoundation` object and `buildTheme` are internal only.
 
 The semantic contract includes `font.100` through `font.900` size steps. Each step groups its font
 size, line height, letter spacing, and per-font Capsize trims so components cannot combine unrelated

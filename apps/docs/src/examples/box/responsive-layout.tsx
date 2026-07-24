@@ -12,7 +12,7 @@ export default function ResponsiveLayout() {
 			justifyContent="space-between"
 			padding={{ medium: '600', xsmall: '300' }}
 			style={{
-				backgroundColor: vars.color.surface.resting,
+				backgroundColor: vars.color.surface.floating,
 				border: `1px solid ${vars.color.border.decorative}`,
 				borderRadius: vars.radius.surface,
 				boxShadow: vars.depth.resting,
