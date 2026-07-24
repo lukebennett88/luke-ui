@@ -76,9 +76,13 @@ export const loadingSkeleton = styleInLayer('recipes', {
 	},
 });
 
+// The child's own background is forced flat and pulses in sync with the `::after` overlay below,
+// so at a rounded corner its square edge would otherwise show through the overlay's rounded
+// recess. Give it the same radius so both surfaces agree on the visible shape.
 globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > *`, {
 	...surface,
 	...pulse,
+	borderRadius: `var(${skeletonRadiusVar}, 0px)`,
 	overflow: 'hidden !important',
 	position: 'relative !important' as 'relative',
 });
