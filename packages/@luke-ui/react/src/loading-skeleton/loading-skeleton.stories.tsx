@@ -114,6 +114,11 @@ export const Radius = meta.story({
 		await expect(skeletonOverlayStyles.opacity).toBe('1');
 		await expect(skeletonOverlayStyles.borderRadius).toBe(expectedRadius);
 		await expect(getBrightnessFilterValue(skeletonOverlayStyles.filter)).toBeLessThanOrEqual(0.9);
+
+		// The surface itself (not just its `::after` overlay) must carry the same radius: its
+		// `overflow: hidden` clips to its own corners, and its flat background sits directly
+		// beneath the overlay, so a square surface would show through the overlay's rounded recess.
+		await expect(getComputedStyle(skeletonSurface).borderRadius).toBe(expectedRadius);
 	},
 	render: () => (
 		<LoadingSkeleton radius="control">
