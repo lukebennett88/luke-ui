@@ -493,7 +493,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			);
 
 			expect(lightCanvas.c).toBe(0);
-			expect(lightRecessed).toEqual({ c: 0, h: 0, l: 1 });
+			expect(lightRecessed).toEqual({ l: 1, c: 0, h: 0 });
 			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
 		});
 

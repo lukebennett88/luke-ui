@@ -31,7 +31,7 @@ export interface GenerateSurfacesRequest {
 // canvas, and detached surfaces separate more strongly without exposing generated palette steps.
 // Mirrors the deltas `buildModeColors` in build-theme.ts uses today (minus the hidden `resting`
 // rung, which has no public semantic meaning and is dropped here).
-const LIGHT_RECESSED_SURFACE = { c: 0, h: 0, l: 1 } as const satisfies Oklch;
+const LIGHT_RECESSED_SURFACE = { l: 1, c: 0, h: 0 } as const satisfies Oklch;
 const DARK_RECESSED_SURFACE_LIGHTNESS_DELTA = -0.025;
 const SURFACE_LIGHTNESS_DELTAS = {
 	dark: { floating: 0.07, overlay: 0.09 },

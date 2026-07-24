@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { Oklch } from './color.js';
 import { generateSurfaces } from './elevation.js';
 
-const lightBackground: Oklch = { c: 0.006, h: 90, l: 0.985 };
-const darkBackground: Oklch = { c: 0.01, h: 260, l: 0.18 };
+const lightBackground: Oklch = { l: 0.985, c: 0.006, h: 90 };
+const darkBackground: Oklch = { l: 0.18, c: 0.01, h: 260 };
 
 describe('generateSurfaces', () => {
 	it('sets canvas to exactly the background input, in both modes', () => {
@@ -38,7 +38,7 @@ describe('generateSurfaces', () => {
 		const surfaces = generateSurfaces({ background: lightBackground, mode: 'light' });
 
 		it('pins recessed to neutral white', () => {
-			expect(surfaces.recessed).toEqual({ c: 0, h: 0, l: 1 });
+			expect(surfaces.recessed).toEqual({ l: 1, c: 0, h: 0 });
 		});
 
 		it('separates floating and overlay from the canvas only slightly, with overlay further', () => {

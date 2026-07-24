@@ -299,12 +299,12 @@ function resolveNeutral(color: ThemeInput['color'], mode: ColorMode): string {
 		if (other !== undefined) return adaptNeutralString(gamutMapOklch(parseColor(other)), mode);
 	}
 	const style = NEUTRAL_STYLE[color.neutralStyle ?? 'neutral'];
-	return formatOklch(gamutMapOklch({ c: style.chroma, h: style.hue, l: NEUTRAL_LIGHTNESS[mode] }));
+	return formatOklch(gamutMapOklch({ l: NEUTRAL_LIGHTNESS[mode], c: style.chroma, h: style.hue }));
 }
 
 /** Adapts a single neutral source to the mode canvas lightness, preserving hue and chroma. */
 function adaptNeutralString(source: Oklch, mode: ColorMode): string {
-	return formatOklch(gamutMapOklch({ c: source.c, h: source.h, l: NEUTRAL_LIGHTNESS[mode] }));
+	return formatOklch(gamutMapOklch({ l: NEUTRAL_LIGHTNESS[mode], c: source.c, h: source.h }));
 }
 
 /**
@@ -357,7 +357,7 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
 function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 	const target = ACCENT_TARGET[mode];
 	const [low, high] = ACCENT_BAND[mode];
-	const makeSolid = (l: number) => gamutMapOklch({ c: source.c, h: source.h, l });
+	const makeSolid = (l: number) => gamutMapOklch({ l, c: source.c, h: source.h });
 	const passes = (l: number) => onSolidGatePasses(mode, makeSolid(l));
 
 	if (passes(target)) return makeSolid(target);
@@ -395,8 +395,8 @@ function onSolidGatePasses(mode: ColorMode, solid: Oklch): boolean {
 		gamutMapOklch({ ...solid, l: clampUnit(solid.l + 0.05 * hoverDirection) }),
 		gamutMapOklch({ ...solid, l: clampUnit(solid.l + 0.09 * hoverDirection) }),
 	];
-	const nearWhite = gamutMapOklch({ c: 0, h: solid.h, l: 0.985 });
-	const nearBlack = gamutMapOklch({ c: 0.01, h: solid.h, l: 0.18 });
+	const nearWhite = gamutMapOklch({ l: 0.985, c: 0, h: solid.h });
+	const nearBlack = gamutMapOklch({ l: 0.18, c: 0.01, h: solid.h });
 	const whiteMinimum = Math.min(...solids.map((state) => contrastRatio(nearWhite, state)));
 	const blackMinimum = Math.min(...solids.map((state) => contrastRatio(nearBlack, state)));
 	return Math.max(whiteMinimum, blackMinimum) >= TEXT_RATIO;

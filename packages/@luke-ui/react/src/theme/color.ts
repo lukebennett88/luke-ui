@@ -30,7 +30,7 @@ export function parseColor(input: string): Oklch {
 		if (l < 0 || l > 1) {
 			throw new Error(`cannot parse colour "${input}"; oklch lightness must be 0-1 or 0%-100%`);
 		}
-		return { c, h: normalizeHue(h), l };
+		return { l, c, h: normalizeHue(h) };
 	}
 	throw new Error(`cannot parse colour "${input}"; expected #rgb, #rrggbb, or oklch(<l> <c> <h>)`);
 }
@@ -52,21 +52,21 @@ export function contrastRatio(a: Oklch, b: Oklch): number {
  */
 export function gamutMapOklch(color: Oklch): Oklch {
 	const h = normalizeHue(color.h);
-	if (color.l <= 0) return { c: 0, h, l: 0 };
-	if (color.l >= 1) return { c: 0, h, l: 1 };
-	const candidate = { c: Math.max(color.c, 0), h, l: color.l };
+	if (color.l <= 0) return { l: 0, c: 0, h };
+	if (color.l >= 1) return { l: 1, c: 0, h };
+	const candidate = { l: color.l, c: Math.max(color.c, 0), h };
 	if (isInSrgbGamut(candidate)) return candidate;
 	let inGamutChroma = 0;
 	let outOfGamutChroma = candidate.c;
 	for (let iteration = 0; iteration < 32; iteration++) {
 		const mid = (inGamutChroma + outOfGamutChroma) / 2;
-		if (isInSrgbGamut({ c: mid, h, l: color.l })) {
+		if (isInSrgbGamut({ l: color.l, c: mid, h })) {
 			inGamutChroma = mid;
 		} else {
 			outOfGamutChroma = mid;
 		}
 	}
-	return { c: inGamutChroma, h, l: color.l };
+	return { l: color.l, c: inGamutChroma, h };
 }
 
 /** Formats an OKLCH colour as a CSS `oklch()` value, with an optional alpha channel. */
@@ -157,5 +157,5 @@ function linearSrgbToOklch(rgb: SrgbTriple): Oklch {
 	const labB = 0.0259040371 * lCubeRoot + 0.7827717662 * mCubeRoot - 0.808675766 * sCubeRoot;
 	const c = Math.hypot(labA, labB);
 	const h = c < 0.000001 ? 0 : normalizeHue((Math.atan2(labB, labA) * 180) / Math.PI);
-	return { c, h, l };
+	return { l, c, h };
 }
