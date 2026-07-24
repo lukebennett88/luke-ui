@@ -1,8 +1,8 @@
 /**
- * The `defineTheme` authoring util: a small, curated-default authoring surface that normalises a
- * {@link ThemeInput} into the existing per-mode {@link ThemeFoundation} and hands it to
- * {@link buildTheme}. It is additive — `buildTheme` and its raw `ThemeFoundation` stay public — and
- * owns the single-value accent/neutral adaptation the raw foundation never had.
+ * The `defineTheme` authoring util: the sole public theme-authoring surface. It normalises a small,
+ * curated-default {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} and hands it
+ * to the internal {@link buildTheme} value pipeline. It owns the single-value accent/neutral
+ * adaptation and the resolution of curated defaults (materials, radius, scrim).
  */
 
 import { buildTheme } from './build-theme.js';
@@ -200,22 +200,15 @@ const RADIUS_STEPS = { control: 2, detail: 1, overlay: 4, surface: 3 } as const;
  * {@link ThemeContrastError} when any resolved pair misses WCAG 2.2 AA.
  */
 export function defineTheme(input: ThemeInput): string {
-	const { foundation } = normalizeTheme(input);
-	// The resolved `scrim` is computed by `normalizeTheme` but the emitted contract has no scrim
-	// leaf yet, so there is nowhere to emit it in this additive slice. Emission lands in #228; until
-	// then the resolved value is intentionally not consumed here.
-	return buildTheme(foundation);
+	return buildTheme(normalizeTheme(input));
 }
 
-/** The fully resolved theme: the foundation `buildTheme` consumes plus the not-yet-emitted scrim. */
-interface NormalizedTheme {
-	foundation: ThemeFoundation;
-	/** Resolved per-mode scrim. Computed but not emitted until the contract gains a scrim leaf (#228). */
-	scrim: Record<ColorMode, string>;
-}
-
-/** Resolves a {@link ThemeInput} into the per-mode foundation and the resolved scrim. */
-function normalizeTheme(input: ThemeInput): NormalizedTheme {
+/**
+ * Resolves a {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} `buildTheme`
+ * consumes. Exported for internal callers and tests only; it is not part of the public package
+ * entry, where `defineTheme` is the sole authoring surface.
+ */
+export function normalizeTheme(input: ThemeInput): ThemeFoundation {
 	const foundation: ThemeFoundation = {
 		dark: buildModeFoundation(input, 'dark'),
 		light: buildModeFoundation(input, 'light'),
@@ -223,13 +216,7 @@ function normalizeTheme(input: ThemeInput): NormalizedTheme {
 		radius: resolveRadius(input),
 	};
 	if (input.typography !== undefined) foundation.typography = input.typography;
-	return {
-		foundation,
-		scrim: {
-			dark: resolveVerbatimRole(input.color.scrim, 'dark', defaultScrim.dark),
-			light: resolveVerbatimRole(input.color.scrim, 'light', defaultScrim.light),
-		},
-	};
+	return foundation;
 }
 
 /** Resolves one mode's source colours and materials. */
@@ -248,6 +235,9 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const colors: ThemeSourceColors = {
 		accent: resolveAdaptedRole(color.accent, mode, adaptAccent),
 		neutral: resolveNeutral(color, mode),
+		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
+		// curated mode-aware default.
+		scrim: resolveVerbatimRole(color.scrim, mode, defaultScrim[mode]),
 	};
 	const feedback = {
 		danger: color.danger,

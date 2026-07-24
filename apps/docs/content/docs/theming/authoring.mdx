@@ -1,56 +1,67 @@
 ---
 title: Authoring a theme
-description: Compile a typed foundation into a static Luke UI theme stylesheet.
+description: Compile a curated theme input into a static Luke UI theme stylesheet.
 ---
 
-Author a custom theme when the bundled identities do not suit the product. `buildTheme` turns a
-typed foundation into static CSS for one identity with light and dark modes. It does not need a
-browser or a Luke UI release.
+Author a custom theme when the bundled identities do not suit the product. `defineTheme` turns a
+small, curated `ThemeInput` into static CSS for one identity with light and dark modes. It does not
+need a browser or a Luke UI release.
 
-## Define the foundation
+## Define the input
 
-A `ThemeFoundation` includes:
+A basic theme authors an accent colour and a neutral character; everything else defaults. A
+`ThemeInput` includes:
 
 - a kebab-case `name`
-- independent `light` and `dark` mode foundations
-- `color.neutral` and `color.accent` source colours for each mode
-- `actionControlFinish` backgrounds for recessed, resting, and raised controls
-- `depth` shadows for recessed, resting, raised, floating, and overlay surfaces
+- `color.accent`, the required brand or interaction accent
+- `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral
+  canvas anchor
+- optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
+  `color.scrim`
+- optional `typography`, `radius`, `depth`, and `actionControlFinish` overrides
 
-Optional source colours cover info, success, warning, danger, and focus. Luke UI supplies accessible
-mode-specific defaults when they are omitted. Optional shared values choose a supported
-Capsize-compatible font, its weight roles, and the detail, control, surface, and overlay radii.
+Each colour accepts one string, adapted independently for light and dark, or an explicit
+`{ light, dark }` pair where either side can be omitted to fall back to that role's default. Luke UI
+supplies accessible mode-specific defaults for every optional colour. `radius` is a generative
+`base` and `multiplier` scale with explicit per-step overrides. `depth` and `actionControlFinish`
+are optional and deep-partial per mode over curated, extremely-subtle defaults. The type scale and
+motion values are source-owned and are not authored.
 
-<auto-type-table
-	path="packages/@luke-ui/react/src/theme/foundation.ts"
-	name="ThemeFoundation"
-/>
+<auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
-<auto-type-table
-	path="packages/@luke-ui/react/src/theme/foundation.ts"
-	name="ThemeModeFoundation"
-/>
+The minimal theme authors one colour and a neutral character:
+
+```tsx
+import { defineTheme } from '@luke-ui/react/theme';
+
+const css = defineTheme({
+	name: 'product',
+	color: { accent: '#3b82f6', neutralStyle: 'cool' },
+});
+```
 
 ## Generate a stylesheet
 
-Call `buildTheme` from an application build script and write the returned CSS to a stylesheet your
+Call `defineTheme` from an application build script and write the returned CSS to a stylesheet your
 framework can load.
 
 <SourceCodeBlock src="theming/author-theme" />
 
 Apply `themeRootClassName` and `themeClassName('product')` to the same root. The supplied name must
-match the foundation name. Colour mode uses the same `data-color-mode` attribute as bundled themes.
+match the input's `name`. Colour mode uses the same `data-color-mode` attribute as bundled themes.
 
 <SourceCodeBlock src="theming/custom-theme-app" />
 
-Applications are responsible for loading any non-system font files selected by their foundation.
+Applications are responsible for loading any non-system font files selected by their `typography`.
 
 ## Contrast validation
 
-`buildTheme` calculates the generated colour values in OKLCH, maps them to the sRGB gamut, and
-checks WCAG 2.2 AA contrast. Text pairs must reach 4.5:1. Non-text UI pairs must reach 3:1.
+`defineTheme` calculates the generated colour values in OKLCH, maps them to the sRGB gamut, and
+checks WCAG 2.2 AA contrast. Text pairs must reach 4.5:1. Non-text UI pairs must reach 3:1. A
+single-value accent that has no accessible lightness in a mode throws before contrast validation
+runs; author an explicit `{ light, dark }` accent instead.
 
-When validation fails, `buildTheme` throws `ThemeContrastError`. Its `failures` array identifies
+When validation fails, `defineTheme` throws `ThemeContrastError`. Its `failures` array identifies
 each colour mode and token pair, so the stylesheet is not written with an invalid combination.
 
 ## Next steps

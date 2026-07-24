@@ -11,15 +11,11 @@ export const themeRootClassName = cx(lukeUiClassNames.themeRoot, lukeUiClassName
 export { vars } from './contract.css.js';
 
 /**
- * `buildTheme(foundation)` compiles a typed theme foundation into complete stylesheet text: pure
- * and Node-compatible, containing the theme identity class plus both colour-mode blocks. It throws
- * {@link ThemeContrastError} naming the mode and token pair when a generated pair misses WCAG 2.2
- * AA (4.5:1 for text, 3:1 for non-text UI). Colours are computed and emitted in OKLCH.
- *
- * `themeClassName(name)` returns the identity class for a theme name. `ThemeContrastError` carries
- * every failing mode-and-pair in its `failures` array.
+ * `themeClassName(name)` returns the identity class for a theme name. `ThemeContrastError` is thrown
+ * by `defineTheme` when a resolved pair misses WCAG 2.2 AA (4.5:1 for text, 3:1 for non-text UI); it
+ * carries every failing mode-and-pair in its `failures` array.
  */
-export { buildTheme, ThemeContrastError, themeClassName } from './build-theme.js';
+export { ThemeContrastError, themeClassName } from './build-theme.js';
 
 /** One WCAG contrast failure recorded on a {@link ThemeContrastError}. */
 export type { ThemeContrastFailure } from './build-theme.js';
@@ -39,15 +35,6 @@ export type { ColorInput, ControlFinish, DepthLadder, ThemeInput } from './defin
 
 /** Curated defaults `defineTheme` applies for omitted materials and scrim. */
 export { defaultControlFinish, defaultDepth, defaultScrim } from './define-theme.js';
-
-/** The typed theme-foundation contract accepted by `buildTheme`. */
-export type {
-	ActionControlFinishFoundation,
-	ThemeDepthFoundation,
-	ThemeFoundation,
-	ThemeModeFoundation,
-	ThemeSourceColors,
-} from './foundation.js';
 
 /** Derives a concentric outer corner from an inner radius plus the intervening gap. */
 export { deriveConcentricRadius } from './foundation.js';

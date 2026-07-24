@@ -45,7 +45,7 @@ export const CustomDiv = meta.story({
 		id: 'account-summary',
 		padding: '400',
 		render: (domProps) => <MotionDiv {...domProps} />,
-		style: { backgroundColor: vars.color.surface.resting },
+		style: { backgroundColor: vars.color.surface.recessed },
 	} satisfies Partial<BoxProps>,
 	play: async ({ canvas }) => {
 		const div = canvas.getByText('Account summary content');

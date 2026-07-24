@@ -9,16 +9,16 @@ mode, so a component can remain consistent without knowing the underlying palett
 ## Surfaces and content
 
 Surface roles describe where an element sits in the interface. Use `canvas` for the page, `recessed`
-for an inset area, `resting` for ordinary content, `floating` for elevated UI, and `overlay` for
-modal backdrops. Text uses `primary` and `secondary` roles. Borders distinguish decorative, control,
-and focus uses.
+for an inset area, `floating` for elevated UI such as menus and cards, and `overlay` for dialogs and
+other high-elevation surfaces. `scrim` dims the page behind an open overlay. Text uses `primary` and
+`secondary` roles. Borders distinguish decorative, control, and focus uses.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
 
 <section
 	style={{
-		backgroundColor: vars.color.surface.resting,
+		backgroundColor: vars.color.surface.floating,
 		borderColor: vars.color.border.decorative,
 		color: vars.color.text.primary,
 	}}
@@ -30,9 +30,12 @@ CSS, because it will not adapt when the identity or colour mode changes.
 
 ## Intent colours
 
-Intent roles cover `neutral`, `accent`, `info`, `success`, `warning`, and `danger`. Each intent has
-subtle and solid surfaces, along with the matching text, border, and on-solid values where needed.
-Components choose these values for their own states. Custom UI can use the same public roles.
+Intent roles cover `neutral`, `accent`, `danger`, `info`, `success`, and `warning`. `neutral`,
+`accent`, and `danger` are action intents: they render hover and pressed states across `subtle` and
+`solid` surfaces, plus matching text, border, and on-solid values where needed. `info`, `success`,
+and `warning` are static feedback intents: they render only a `subtle` surface, `border`, and
+`text`, with no hover, pressed, solid, or on-solid state. Components choose these values for their
+own states. Custom UI can use the same public roles.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
@@ -56,8 +59,9 @@ import { vars } from '@luke-ui/react/theme';
 ## Disabled and loading states
 
 Use the component's disabled or loading API when it has one. Those states account for interaction
-and accessibility as well as colour. The public `textDisabled`, `surfaceDisabled`, and
-`loadingSkeleton` roles are available when you are building an equivalent custom element.
+and accessibility as well as colour. Disabled is a state, not a palette: interactive controls fade
+with reduced opacity, and only field text recolors, through the public `text.disabled` role. The
+public `loadingSkeleton` role is available when you are building an equivalent custom element.
 
 ## Continue learning
 

@@ -99,7 +99,7 @@ function ThemeMatrixScope({
 			data-color-mode={mode}
 			style={{
 				alignItems: 'center',
-				backgroundColor: vars.color.surface.resting,
+				backgroundColor: vars.color.surface.recessed,
 				border: `1px solid ${vars.color.border.decorative}`,
 				color: vars.color.text.primary,
 				display: 'flex',

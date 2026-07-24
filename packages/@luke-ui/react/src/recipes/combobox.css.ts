@@ -90,7 +90,7 @@ const comboboxActionStyles = {
 			backgroundColor: vars.color.intent.accent.surface.subtlePressed,
 			color: vars.color.text.primary,
 		},
-		[descendantDisabledSelector]: { color: vars.color.textDisabled },
+		[descendantDisabledSelector]: { color: vars.color.text.disabled },
 	},
 } satisfies StyleRule;
 
@@ -190,7 +190,7 @@ const comboboxConfig = {
 			selectors: {
 				'&::placeholder': { color: vars.color.text.secondary, opacity: 1 },
 				'&:where([data-disabled="true"], :disabled)': {
-					color: vars.color.textDisabled,
+					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 				},
 			},
@@ -228,7 +228,7 @@ const comboboxConfig = {
 					borderEndStartRadius: 0,
 					borderStartEndRadius: vars.radius.overlay,
 					borderStartStartRadius: vars.radius.overlay,
-					boxShadow: `${vars.depth.floating}, 0 0 0 100vmax rgb(0 0 0 / 20%)`,
+					boxShadow: `${vars.depth.floating}, 0 0 0 100vmax ${vars.color.scrim}`,
 					inlineSize: 'auto !important' as 'auto',
 					insetBlockEnd: `var(${comboboxTrayKeyboardInsetVar}, 0px) !important`,
 					insetBlockStart: 'auto !important' as 'auto',
@@ -385,7 +385,7 @@ const comboboxConfig = {
 
 			selectors: {
 				'&[data-disabled="true"]': {
-					color: vars.color.textDisabled,
+					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 					opacity: 0.55,
 				},

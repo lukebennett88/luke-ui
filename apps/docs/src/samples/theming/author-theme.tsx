@@ -1,7 +1,7 @@
-import { buildTheme } from '@luke-ui/react/theme';
-import type { ThemeFoundation } from '@luke-ui/react/theme';
+import { defineTheme } from '@luke-ui/react/theme';
+import type { ThemeInput } from '@luke-ui/react/theme';
 import { writeFile } from 'node:fs/promises';
 
-export async function writeTheme(foundation: ThemeFoundation) {
-	await writeFile('src/product-theme.css', buildTheme(foundation));
+export async function writeTheme(input: ThemeInput) {
+	await writeFile('src/product-theme.css', defineTheme(input));
 }

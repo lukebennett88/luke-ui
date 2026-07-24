@@ -77,24 +77,22 @@ interface ValueSample {
 const surfaceSamples: Array<ColorSample> = [
 	{ label: 'Canvas', value: vars.color.surface.canvas },
 	{ label: 'Recessed', value: vars.color.surface.recessed },
-	{ label: 'Resting', value: vars.color.surface.resting },
 	{ label: 'Floating', value: vars.color.surface.floating },
 	{ label: 'Overlay', value: vars.color.surface.overlay },
-	{ label: 'Disabled', value: vars.color.surfaceDisabled },
+	{ label: 'Scrim', value: vars.color.scrim },
 	{ label: 'Loading skeleton', value: vars.color.loadingSkeleton },
 ];
 
 const textSamples: Array<ColorSample> = [
 	{ label: 'Primary', value: vars.color.text.primary },
 	{ label: 'Secondary', value: vars.color.text.secondary },
-	{ label: 'Disabled', value: vars.color.textDisabled },
+	{ label: 'Disabled', value: vars.color.text.disabled },
 ];
 
 const borderSamples: Array<ColorSample> = [
 	{ label: 'Decorative', value: vars.color.border.decorative },
 	{ label: 'Control', value: vars.color.border.control },
 	{ label: 'Focus', value: vars.color.border.focus },
-	{ label: 'Disabled', value: vars.color.borderDisabled },
 ];
 
 const intentSamples: Array<IntentSample> = [
@@ -137,35 +135,20 @@ const intentSamples: Array<IntentSample> = [
 	{
 		key: 'info',
 		label: 'Info',
-		roles: intentRoles(
-			vars.color.intent.info.border,
-			vars.color.intent.info.text,
-			vars.color.intent.info.onSolid,
-			vars.color.intent.info.surface.solid,
-		),
-		surfaces: intentSurfaceSamples(vars.color.intent.info.surface),
+		roles: feedbackRoles(vars.color.intent.info.border, vars.color.intent.info.text),
+		surfaces: [{ label: 'Subtle', value: vars.color.intent.info.surface.subtle }],
 	},
 	{
 		key: 'success',
 		label: 'Success',
-		roles: intentRoles(
-			vars.color.intent.success.border,
-			vars.color.intent.success.text,
-			vars.color.intent.success.onSolid,
-			vars.color.intent.success.surface.solid,
-		),
-		surfaces: intentSurfaceSamples(vars.color.intent.success.surface),
+		roles: feedbackRoles(vars.color.intent.success.border, vars.color.intent.success.text),
+		surfaces: [{ label: 'Subtle', value: vars.color.intent.success.surface.subtle }],
 	},
 	{
 		key: 'warning',
 		label: 'Warning',
-		roles: intentRoles(
-			vars.color.intent.warning.border,
-			vars.color.intent.warning.text,
-			vars.color.intent.warning.onSolid,
-			vars.color.intent.warning.surface.solid,
-		),
-		surfaces: intentSurfaceSamples(vars.color.intent.warning.surface),
+		roles: feedbackRoles(vars.color.intent.warning.border, vars.color.intent.warning.text),
+		surfaces: [{ label: 'Subtle', value: vars.color.intent.warning.surface.subtle }],
 	},
 	{
 		key: 'danger',
@@ -257,28 +240,12 @@ const motionSamples: Array<MotionSample> = [
 		label: 'Fast / standard',
 	},
 	{
-		accessibleLabel: 'Medium enter motion sample',
-		duration: vars.motion.duration.medium,
-		durationKey: 'medium',
-		easing: vars.motion.easing.enter,
-		easingKey: 'enter',
-		label: 'Medium / enter',
-	},
-	{
-		accessibleLabel: 'Slow exit motion sample',
-		duration: vars.motion.duration.slow,
-		durationKey: 'slow',
+		accessibleLabel: 'Fast exit motion sample',
+		duration: vars.motion.duration.fast,
+		durationKey: 'fast',
 		easing: vars.motion.easing.exit,
 		easingKey: 'exit',
-		label: 'Slow / exit',
-	},
-	{
-		accessibleLabel: 'Ambient standard motion sample',
-		duration: vars.motion.duration.ambient,
-		durationKey: 'ambient',
-		easing: vars.motion.easing.standard,
-		easingKey: 'standard',
-		label: 'Ambient / standard',
+		label: 'Fast / exit',
 	},
 ];
 
@@ -423,8 +390,8 @@ export const Reference = meta.story({
 		const mediumControl = canvas.getByRole('img', { name: 'Control medium size sample' });
 		await expect(getComputedStyle(mediumControl).blockSize).toBe('40px');
 
-		const mediumMotion = canvas.getByRole('img', { name: 'Medium enter motion sample' });
-		await expect(getComputedStyle(mediumMotion).animationDuration).toBe('0.2s');
+		const fastMotion = canvas.getByRole('img', { name: 'Fast standard motion sample' });
+		await expect(getComputedStyle(fastMotion).animationDuration).toBe('0.12s');
 
 		const resolvedCanvas = canvasElement.querySelector('[data-token-path="color.surface.canvas"]');
 		await expect(resolvedCanvas).not.toBeNull();
@@ -461,10 +428,7 @@ function ThemeTokens() {
 				<TokenTable
 					caption="Text colour tokens"
 					rows={textSamples.map((sample) => {
-						const path =
-							sample.label === 'Disabled'
-								? 'color.textDisabled'
-								: `color.text.${toKey(sample.label)}`;
+						const path = `color.text.${toKey(sample.label)}`;
 						return tokenRow(
 							path,
 							<TextPreview label={`${sample.label} text colour sample`} value={sample.value} />,
@@ -478,10 +442,7 @@ function ThemeTokens() {
 				<TokenTable
 					caption="Border colour tokens"
 					rows={borderSamples.map((sample) => {
-						const path =
-							sample.label === 'Disabled'
-								? 'color.borderDisabled'
-								: `color.border.${toKey(sample.label)}`;
+						const path = `color.border.${toKey(sample.label)}`;
 						return tokenRow(
 							path,
 							<BorderPreview label={`${sample.label} border colour sample`} value={sample.value} />,
@@ -776,7 +737,7 @@ function BorderPreview({ label, value }: { label: string; value: string }) {
 			role="img"
 			style={{
 				...swatchStyle,
-				backgroundColor: vars.color.surface.resting,
+				backgroundColor: vars.color.surface.recessed,
 				borderColor: value,
 				borderWidth: 3,
 			}}
@@ -818,7 +779,7 @@ function DepthPreview({ label, value }: { label: string; value: string }) {
 		<span
 			aria-label={label}
 			role="img"
-			style={{ ...swatchStyle, backgroundColor: vars.color.surface.resting, boxShadow: value }}
+			style={{ ...swatchStyle, backgroundColor: vars.color.surface.recessed, boxShadow: value }}
 		/>
 	);
 }
@@ -952,13 +913,21 @@ function intentRoles(
 	];
 }
 
+/** Roles for a static feedback intent: soft border and text only (no solid surface or onSolid). */
+function feedbackRoles(border: string, text: string): Array<IntentRoleSample> {
+	return [
+		{ key: 'border', label: 'Border', preview: 'border', value: border },
+		{ key: 'text', label: 'Text', preview: 'text', value: text },
+	];
+}
+
 function customPropertyName(value: string): string {
 	const match = /^var\((--[^,)]+)/.exec(value);
 	return match?.[1] ?? value;
 }
 
 function surfacePath(label: string): string {
-	if (label === 'Disabled') return 'color.surfaceDisabled';
+	if (label === 'Scrim') return 'color.scrim';
 	if (label === 'Loading skeleton') return 'color.loadingSkeleton';
 	return `color.surface.${toKey(label)}`;
 }

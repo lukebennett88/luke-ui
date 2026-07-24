@@ -63,8 +63,8 @@ Do not depend on a component's selectors, generated palette values, or theme imp
 
 ## Author a theme
 
-When neither bundled identity fits a product, define a typed `ThemeFoundation` and compile it with
-`buildTheme`. The generated stylesheet contains the full semantic contract for both colour modes and
+When neither bundled identity fits a product, call `defineTheme` with a curated accent and neutral
+character. The generated stylesheet contains the full semantic contract for both colour modes and
 validates contrast before it is written.
 
 <Cards>
@@ -72,7 +72,7 @@ validates contrast before it is written.
 		Load the CSS, set the root classes, and preserve them through portals.
 	</Card>
 	<Card href="/theming/authoring" title="Author a theme">
-		Compile a product-owned stylesheet from a typed foundation.
+		Compile a product-owned stylesheet from a curated `defineTheme` input.
 	</Card>
 	<Card href="/theming/token-reference" title="Token reference">
 		Browse the public semantic CSS variables for custom UI.

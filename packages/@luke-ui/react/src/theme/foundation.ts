@@ -88,7 +88,7 @@ export interface ThemeModeFoundation {
 }
 
 /** Authored action-control face lighting for one colour mode. */
-export interface ActionControlFinishFoundation {
+interface ActionControlFinishFoundation {
 	/** Face lighting for a pressed control. */
 	recessed: string;
 	/** Face lighting for a resting control. */
@@ -119,10 +119,15 @@ export interface ThemeSourceColors {
 	 * Luke UI blue for the mode.
 	 */
 	focus?: string;
+	/**
+	 * Modal-backdrop dimming colour, emitted verbatim (may carry an alpha channel). Required
+	 * internally: `defineTheme` always resolves it, from the author's value or a mode-aware default.
+	 */
+	scrim: string;
 }
 
 /** Authored composite `box-shadow` values for one colour mode. */
-export interface ThemeDepthFoundation {
+interface ThemeDepthFoundation {
 	/** Inset treatment for a pressed control or sunken surface. */
 	recessed: string;
 	/** Resting treatment for an interactive control or surface. */

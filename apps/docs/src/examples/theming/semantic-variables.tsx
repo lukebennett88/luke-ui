@@ -25,7 +25,7 @@ function PublicationStatus({ mode }: { mode: 'light' | 'dark' }) {
 			padding="600"
 			render={(props) => <section {...props} />}
 			style={{
-				backgroundColor: vars.color.surface.resting,
+				backgroundColor: vars.color.surface.floating,
 				border: `1px solid ${vars.color.border.decorative}`,
 				borderRadius: vars.radius.surface,
 				boxShadow: vars.depth.resting,

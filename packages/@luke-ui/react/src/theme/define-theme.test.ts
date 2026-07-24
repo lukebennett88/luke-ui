@@ -1,10 +1,9 @@
+import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
-import { buildTheme } from './build-theme.js';
 import { contrastRatio, gamutMapOklch, parseColor } from './color.js';
+import { flattenThemeContract } from './contract.js';
 import { defaultDepth, defineTheme } from './define-theme.js';
-import type { ThemeInput } from './define-theme.js';
-import { defaultSourceColors } from './foundation.js';
-import { paperFoundation, tactileFoundation } from './foundations.js';
+import { paperTheme, tactileTheme } from './foundations.js';
 
 /**
  * Splits a generated stylesheet into its five rule blocks: identity, base light, media-query dark,
@@ -35,7 +34,6 @@ function extractValue(block: string, varName: string): string {
 const ACCENT_SOLID = '--luke-color-intent-accent-surface-solid';
 const SURFACE_VAR_NAMES = [
 	'--luke-color-surface-canvas',
-	'--luke-color-surface-resting',
 	'--luke-color-surface-recessed',
 	'--luke-color-surface-floating',
 	'--luke-color-surface-overlay',
@@ -146,62 +144,98 @@ describe('defineTheme partial per-mode merges', () => {
 	});
 });
 
-describe('defineTheme parity with the bundled foundations', () => {
-	const tactileInput: ThemeInput = {
-		actionControlFinish: {
-			dark: tactileFoundation.dark.actionControlFinish,
-			light: tactileFoundation.light.actionControlFinish,
-		},
-		color: {
-			accent: {
-				dark: tactileFoundation.dark.color.accent,
-				light: tactileFoundation.light.color.accent,
-			},
-			neutral: {
-				dark: tactileFoundation.dark.color.neutral,
-				light: tactileFoundation.light.color.neutral,
-			},
-		},
-		depth: { dark: tactileFoundation.dark.depth, light: tactileFoundation.light.depth },
-		name: 'tactile',
-	};
+/** The 25 leaves the 128-leaf flip removes, by stable `--luke-*` variable name. */
+const REMOVED_VAR_NAMES = [
+	'--luke-color-surface-resting',
+	'--luke-color-surface-disabled',
+	'--luke-color-border-disabled',
+	...['info', 'success', 'warning'].flatMap((intent) =>
+		[
+			'surface-subtle-hover',
+			'surface-subtle-pressed',
+			'surface-solid',
+			'surface-solid-hover',
+			'surface-solid-pressed',
+			'on-solid',
+		].map((leaf) => `--luke-color-intent-${intent}-${leaf}`),
+	),
+	'--luke-motion-duration-medium',
+	'--luke-motion-duration-slow',
+	'--luke-motion-duration-ambient',
+	'--luke-motion-easing-enter',
+];
 
-	const paperInput: ThemeInput = {
-		actionControlFinish: {
-			dark: paperFoundation.dark.actionControlFinish,
-			light: paperFoundation.light.actionControlFinish,
-		},
-		color: {
-			accent: {
-				dark: paperFoundation.dark.color.accent,
-				light: paperFoundation.light.color.accent,
-			},
-			// Paper authors feedback colours in light only; the omitted dark sides default.
-			danger: { light: paperFoundation.light.color.danger },
-			info: { light: paperFoundation.light.color.info },
-			neutral: {
-				dark: paperFoundation.dark.color.neutral,
-				light: paperFoundation.light.color.neutral,
-			},
-			success: { light: paperFoundation.light.color.success },
-			warning: { light: paperFoundation.light.color.warning },
-		},
-		depth: { dark: paperFoundation.dark.depth, light: paperFoundation.light.depth },
-		name: 'paper',
-		radius: { control: 4 },
-	};
+/** Extracts the set of unique `--luke-*` variable names declared in a stylesheet. */
+function emittedVarNames(css: string): Set<string> {
+	return new Set([...css.matchAll(/(--luke-[a-z0-9-]+):/g)].map((match) => match[1] ?? ''));
+}
 
-	it('reproduces Tactile byte-for-byte', () => {
-		expect(defineTheme(tactileInput)).toBe(buildTheme(tactileFoundation));
+describe('the reduced 128-leaf contract', () => {
+	it('flattens to exactly 128 leaves with scrim added and the 25 removed leaves absent', () => {
+		const names = flattenThemeContract().map(([, varName]) => varName);
+		expect(names).toHaveLength(128);
+		expect(names).toContain('--luke-color-scrim');
+		// text.disabled kept its stable CSS variable across the rename from color.textDisabled.
+		expect(names).toContain('--luke-color-text-disabled');
+		for (const removed of REMOVED_VAR_NAMES) expect(names).not.toContain(removed);
 	});
+});
 
-	it('reproduces Paper byte-for-byte', () => {
-		expect(defineTheme(paperInput)).toBe(buildTheme(paperFoundation));
+describe('defineTheme emits the reduced contract for the bundled themes', () => {
+	const contractNames = flattenThemeContract().map(([, varName]) => varName);
+
+	for (const [name, input] of [
+		['tactile', tactileTheme],
+		['paper', paperTheme],
+	] as const) {
+		const css = defineTheme(input);
+		const emitted = emittedVarNames(css);
+
+		it(`${name} emits exactly the 128 contract variables, including scrim and disabled text`, () => {
+			expect(emitted.size).toBe(128);
+			expect([...emitted].sort()).toEqual([...contractNames].sort());
+			expect(emitted.has('--luke-color-scrim')).toBe(true);
+			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
+		});
+
+		it(`${name} drops every one of the 25 removed leaves`, () => {
+			for (const removed of REMOVED_VAR_NAMES) expect(emitted.has(removed)).toBe(false);
+		});
+
+		it(`${name} keeps feedback intents static — soft kit only, no solid or state variables`, () => {
+			for (const intent of ['info', 'success', 'warning']) {
+				expect(css).not.toContain(`--luke-color-intent-${intent}-surface-solid`);
+				expect(css).not.toContain(`--luke-color-intent-${intent}-surface-subtle-hover`);
+				expect(css).not.toContain(`--luke-color-intent-${intent}-surface-subtle-pressed`);
+				expect(css).not.toContain(`--luke-color-intent-${intent}-on-solid`);
+				expect(css).toContain(`--luke-color-intent-${intent}-surface-subtle:`);
+				expect(css).toContain(`--luke-color-intent-${intent}-border:`);
+				expect(css).toContain(`--luke-color-intent-${intent}-text:`);
+			}
+		});
+	}
+
+	it('keeps known retained Tactile values byte-identical to the pre-flip baseline', () => {
+		const css = defineTheme(tactileTheme);
+		for (const declaration of [
+			'--luke-color-surface-canvas: oklch(0.985 0 0);',
+			'--luke-color-text-primary: oklch(0.225 0 0);',
+			'--luke-color-text-disabled: oklch(0.58 0.01 210);',
+			'--luke-color-intent-neutral-surface-subtle: oklch(0.94 0 0);',
+			'--luke-color-intent-danger-surface-solid: oklch(0.52 0.18 27);',
+		]) {
+			expect(css).toContain(declaration);
+		}
+		// Scrim is new: black at the mode-aware default alpha.
+		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.2);');
+		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.4);');
 	});
+});
 
-	it('resolves the omitted dark feedback sides to the curated defaults', () => {
-		// Sanity-check the parity claim: Paper's dark feedback intents come from defaultSourceColors.
-		expect(paperFoundation.dark.color.info).toBeUndefined();
-		expect(defaultSourceColors.dark.info).toMatch(/^oklch\(/);
+describe('the combobox tray scrim adopts the scrim token', () => {
+	it('replaces the hardcoded rgb(0 0 0 / 20%) literal with vars.color.scrim', async () => {
+		const source = await readFile(new URL('../recipes/combobox.css.ts', import.meta.url), 'utf8');
+		expect(source).not.toContain('rgb(0 0 0 / 20%)');
+		expect(source).toContain('vars.color.scrim');
 	});
 });

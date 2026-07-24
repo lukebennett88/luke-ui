@@ -38,7 +38,7 @@ export const Layout = meta.story({
 				<div {...row}>
 					<div
 						{...mergeProps(
-							{ style: { background: vars.color.surface.resting } },
+							{ style: { background: vars.color.surface.recessed } },
 							createSprinkles({ inlineSize: '100%', minInlineSize: '0', padding: '400' }),
 						)}
 					>
@@ -46,7 +46,7 @@ export const Layout = meta.story({
 					</div>
 					<div
 						{...mergeProps(
-							{ style: { background: vars.color.surface.resting } },
+							{ style: { background: vars.color.surface.recessed } },
 							createSprinkles({ flexGrow: '1', padding: '400' }),
 						)}
 					>
@@ -75,7 +75,7 @@ export const Responsive = meta.story({
 			<div {...mergeProps({ style: panelStyle }, responsive)}>
 				<div
 					style={{
-						background: vars.color.surface.resting,
+						background: vars.color.surface.recessed,
 						padding: '1rem',
 					}}
 				>
@@ -83,7 +83,7 @@ export const Responsive = meta.story({
 				</div>
 				<div
 					style={{
-						background: vars.color.surface.resting,
+						background: vars.color.surface.recessed,
 						padding: '1rem',
 					}}
 				>

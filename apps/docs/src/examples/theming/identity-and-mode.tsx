@@ -22,7 +22,7 @@ export default function IdentityAndModeExample() {
 			gap="400"
 			padding="600"
 			style={{
-				backgroundColor: vars.color.surface.resting,
+				backgroundColor: vars.color.surface.canvas,
 				color: vars.color.text.primary,
 			}}
 		>
@@ -65,7 +65,7 @@ export default function IdentityAndModeExample() {
 			<Box
 				padding="600"
 				style={{
-					backgroundColor: vars.color.surface.resting,
+					backgroundColor: vars.color.surface.floating,
 					border: `1px solid ${vars.color.border.decorative}`,
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.depth.resting,
