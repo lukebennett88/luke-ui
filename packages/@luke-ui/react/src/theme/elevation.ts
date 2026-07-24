@@ -2,7 +2,7 @@ import type { Oklch } from './color.js';
 import { gamutMapOklch } from './color.js';
 
 /** The colour mode a set of surfaces is generated for. */
-export type ElevationMode = 'light' | 'dark';
+type ElevationMode = 'light' | 'dark';
 
 /**
  * The four surface colours a theme mode emits, keyed by elevation. `canvas` is the resolved
