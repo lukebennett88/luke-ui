@@ -249,6 +249,10 @@ function buildModeColors(
 	const neutral = source.neutral;
 	const neutralChroma = Math.min(neutral.c, 0.02);
 
+	// The canvas still derives from `neutral` here, not the resolved `background` (#234 Stage 2):
+	// `modeFoundation.color.background` is resolved and available, but wiring it in is #235/#236's
+	// job, once the scale/elevation generators can consume it. Keeps this stage's output
+	// byte-identical.
 	const canvas = gamutMapOklch({ ...neutral, c: Math.min(neutral.c, 0.015) });
 	const surfaceAt = (delta: number) => gamutMapOklch({ ...canvas, l: clampUnit(canvas.l + delta) });
 	const surfaceDeltas = SURFACE_LIGHTNESS_DELTAS[mode];

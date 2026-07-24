@@ -102,8 +102,19 @@ interface ActionControlFinishFoundation {
  * lightness as a 0-1 number or a percentage, and no alpha channel.
  */
 export interface ThemeSourceColors {
-	/** Required. Anchors the surface, text, and border ramps; this is the canvas colour. */
+	/**
+	 * Required. Anchors the surface, text, and border ramps — the family's hue/chroma character.
+	 * `background` is the actual canvas colour; the two coincide unless `background` is authored
+	 * separately.
+	 */
 	neutral: string;
+	/**
+	 * Required. The canvas anchor, resolved per mode from an explicit `background`, an adapted
+	 * opposite-mode `background`, or (when `background` is entirely omitted) a copy of the resolved
+	 * `neutral` canvas anchor. Not yet consumed by `buildTheme`, which still derives its canvas
+	 * directly from `neutral`; carried here for the scale/elevation stages (#235/#236) to consume.
+	 */
+	background: string;
 	/** Required. The brand or interaction accent colour. */
 	accent: string;
 	/** Informational intent colour. Defaults to an accessible Luke UI blue for the mode. */

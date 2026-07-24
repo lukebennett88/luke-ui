@@ -66,6 +66,12 @@ export interface ThemeInput {
 		 * @default 'neutral'
 		 */
 		neutralStyle?: 'cool' | 'neutral' | 'warm';
+		/**
+		 * The canvas anchor, split from `neutral`'s hue/chroma character. Give a raw colour to move the
+		 * canvas away from the resolved neutral while keeping the neutral family's own character.
+		 * Defaults to the resolved neutral canvas anchor.
+		 */
+		background?: ColorInput;
 		/** Informational intent colour. Defaults to an accessible Luke UI blue for the mode. */
 		info?: ColorInput;
 		/** Success intent colour. Defaults to an accessible Luke UI green for the mode. */
@@ -232,9 +238,17 @@ function buildModeFoundation(input: ThemeInput, mode: ColorMode): ThemeModeFound
 function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const { color } = input;
 	const defaults = defaultSourceColors[mode];
+	const neutral = resolveNeutral(color, mode);
 	const colors: ThemeSourceColors = {
 		accent: resolveAdaptedRole(color.accent, mode, adaptAccent),
-		neutral: resolveNeutral(color, mode),
+		neutral,
+		// The canvas anchor, split from `neutral`'s hue/chroma character: explicit per-mode value wins,
+		// a single value or the opposite side is adapted to the mode canvas lightness, and an entirely
+		// omitted `background` copies the resolved neutral canvas anchor exactly (not a second,
+		// independent adaptation of the neutral source). Resolved and carried in the foundation only —
+		// `buildModeColors` still derives its canvas from `neutral`, so output stays byte-identical
+		// until #235/#236 wire `background` through the generator.
+		background: resolveOptionalModeColour(color.background, mode, neutral),
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
 		scrim: resolveVerbatimRole(color.scrim, mode, defaultScrim[mode]),
@@ -291,6 +305,28 @@ function resolveNeutral(color: ThemeInput['color'], mode: ColorMode): string {
 /** Adapts a single neutral source to the mode canvas lightness, preserving hue and chroma. */
 function adaptNeutralString(source: Oklch, mode: ColorMode): string {
 	return formatOklch(gamutMapOklch({ c: source.c, h: source.h, l: NEUTRAL_LIGHTNESS[mode] }));
+}
+
+/**
+ * Resolves an optional canvas-anchor role (currently `background`) for one mode: an explicit side
+ * wins, a single string or the opposite side is adapted to the mode canvas lightness (mirroring
+ * `adaptNeutralString`), and an entirely omitted input falls back to `fallback` verbatim — the
+ * resolved neutral canvas anchor, not a second independent adaptation.
+ */
+function resolveOptionalModeColour(
+	input: ColorInput | undefined,
+	mode: ColorMode,
+	fallback: string,
+): string {
+	if (input === undefined) return fallback;
+	const side = sideOf(input, mode);
+	if (side !== undefined) return side;
+	if (typeof input === 'string') {
+		return adaptNeutralString(gamutMapOklch(parseColor(input)), mode);
+	}
+	const other = sideOf(input, mode === 'light' ? 'dark' : 'light');
+	if (other !== undefined) return adaptNeutralString(gamutMapOklch(parseColor(other)), mode);
+	return fallback;
 }
 
 /**
