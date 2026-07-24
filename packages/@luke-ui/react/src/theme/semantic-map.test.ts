@@ -89,7 +89,7 @@ describe('mapSemanticColors', () => {
 				expect(result['color.surface.floating']).toBe(formatOklch(surfaces.floating));
 				expect(result['color.surface.overlay']).toBe(formatOklch(surfaces.overlay));
 				expect(result['color.scrim']).toBe(scrim);
-				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[3]));
+				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[7]));
 
 				// Global text / borders: neutral only. `border.control` is a solved contrast boundary
 				// (Stage 6 Option B), not a scale-step alias, so it aliases the passed-through value.

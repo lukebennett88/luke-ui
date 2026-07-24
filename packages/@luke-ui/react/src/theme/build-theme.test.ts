@@ -608,8 +608,8 @@ describe('bundled loading skeleton surfaces', () => {
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
 				const skeleton = parseColor(extractValue(block, '--luke-color-loading-skeleton'));
-				// v2 aliases the loading skeleton onto the neutral scale's step 3 (a subtle component
-				// surface), so it is a soft tint of the canvas rather than the old higher-contrast pulse.
+				// v2 aliases the loading skeleton onto the neutral scale's step 7 (a visible placeholder
+				// tint, clearing the pulse-extreme contrast gate the component's browser test enforces).
 				expect(skeleton).not.toEqual(canvas);
 				expect(contrastRatio(skeleton, canvas)).toBeGreaterThan(1);
 			}
