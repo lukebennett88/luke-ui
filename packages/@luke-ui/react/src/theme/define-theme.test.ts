@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
 import { contrastRatio, gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
-import { defaultDepth, defineTheme } from './define-theme.js';
+import { defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
 import { paperTheme, tactileTheme } from './foundations.js';
 
 /**
@@ -141,6 +141,80 @@ describe('defineTheme partial per-mode merges', () => {
 		);
 		const defaultLight = infoVarNames.map((varName) => extractValue(allDefault.baseLight, varName));
 		expect(overriddenLight).not.toEqual(defaultLight);
+	});
+});
+
+describe('normalizeTheme resolves the source-tier `background` split from `neutral`', () => {
+	it('omitted background resolves to the resolved neutral canvas anchor in both modes', () => {
+		const foundation = normalizeTheme({
+			color: {
+				accent: '#3b82f6',
+				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
+			},
+			name: 'background-omitted',
+		});
+		expect(foundation.light.color.background).toBe(foundation.light.color.neutral);
+		expect(foundation.dark.color.background).toBe(foundation.dark.color.neutral);
+	});
+
+	it('omitted background also coincides with a curated neutralStyle', () => {
+		const foundation = normalizeTheme({
+			color: { accent: '#3b82f6', neutralStyle: 'warm' },
+			name: 'background-omitted-style',
+		});
+		expect(foundation.light.color.background).toBe(foundation.light.color.neutral);
+		expect(foundation.dark.color.background).toBe(foundation.dark.color.neutral);
+	});
+
+	it('an explicit per-mode background wins over the neutral canvas anchor', () => {
+		const foundation = normalizeTheme({
+			color: {
+				accent: '#3b82f6',
+				background: { dark: 'oklch(0.18 0.01 210)', light: 'oklch(0.99 0.002 210)' },
+				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
+			},
+			name: 'background-explicit',
+		});
+		expect(foundation.light.color.background).toBe('oklch(0.99 0.002 210)');
+		expect(foundation.dark.color.background).toBe('oklch(0.18 0.01 210)');
+		// Different from the neutral canvas anchor: the split actually took effect.
+		expect(foundation.light.color.background).not.toBe(foundation.light.color.neutral);
+		expect(foundation.dark.color.background).not.toBe(foundation.dark.color.neutral);
+	});
+
+	it('a single-mode background is adapted to the opposite mode canvas lightness, not copied verbatim', () => {
+		const foundation = normalizeTheme({
+			color: {
+				accent: '#3b82f6',
+				background: { light: 'oklch(0.4 0.05 30)' },
+				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
+			},
+			name: 'background-single-mode',
+		});
+		// Light keeps the authored value verbatim.
+		expect(foundation.light.color.background).toBe('oklch(0.4 0.05 30)');
+		// Dark is adapted from light: same hue and chroma, but the dark canvas lightness (~0.22), not
+		// the light source's lightness (0.4) and not a raw copy of the light string.
+		const adaptedDark = parseColor(foundation.dark.color.background);
+		expect(adaptedDark.h).toBeCloseTo(30, 0);
+		expect(adaptedDark.c).toBeCloseTo(0.05, 2);
+		expect(adaptedDark.l).toBeCloseTo(0.22, 2);
+		expect(foundation.dark.color.background).not.toBe(foundation.light.color.background);
+		// And it still differs from the resolved dark neutral canvas anchor (background is split).
+		expect(foundation.dark.color.background).not.toBe(foundation.dark.color.neutral);
+	});
+
+	it('a single-value background string adapts independently per mode, mirroring single-value neutral', () => {
+		const foundation = normalizeTheme({
+			color: { accent: '#3b82f6', background: 'oklch(0.5 0.03 140)' },
+			name: 'background-single-value',
+		});
+		const light = parseColor(foundation.light.color.background);
+		const dark = parseColor(foundation.dark.color.background);
+		expect(light.h).toBeCloseTo(140, 0);
+		expect(dark.h).toBeCloseTo(140, 0);
+		expect(light.l).toBeCloseTo(0.985, 2);
+		expect(dark.l).toBeCloseTo(0.22, 2);
 	});
 });
 
