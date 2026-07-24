@@ -209,7 +209,7 @@ const LIGHTNESS_WINDOWS: Record<ColorMode, LightnessWindows> = {
 
 // Surface roles encode usage directly: light wells use neutral white, dark wells sit below the
 // canvas, and detached surfaces separate more strongly without exposing generated palette steps.
-const LIGHT_RECESSED_SURFACE = { c: 0, h: 0, l: 1 } as const satisfies Oklch;
+const LIGHT_RECESSED_SURFACE = { l: 1, c: 0, h: 0 } as const satisfies Oklch;
 const DARK_RECESSED_SURFACE_LIGHTNESS_DELTA = -0.025;
 const SURFACE_LIGHTNESS_DELTAS = {
 	dark: { floating: 0.07, overlay: 0.09, resting: 0.04 },
@@ -317,9 +317,9 @@ function buildModeColors(
 		window: windows.borderControl,
 	});
 	colors['color.border.decorative'] = gamutMapOklch({
+		l: clampUnit(canvas.l + (isLight ? -0.08 : 0.1)),
 		c: neutralChroma,
 		h: neutral.h,
-		l: clampUnit(canvas.l + (isLight ? -0.08 : 0.1)),
 	});
 	colors['color.border.focus'] = source.focus;
 
@@ -327,9 +327,9 @@ function buildModeColors(
 	// surfaces/borders are gone from the contract; interactive controls fade with opacity instead.
 	const disabledChroma = Math.min(neutral.c, 0.01);
 	colors['color.text.disabled'] = gamutMapOklch({
+		l: clampUnit(canvas.l + (isLight ? -0.32 : 0.33)),
 		c: disabledChroma,
 		h: neutral.h,
-		l: clampUnit(canvas.l + (isLight ? -0.32 : 0.33)),
 	});
 
 	for (const intent of FULL_KIT_INTENTS) {
@@ -353,9 +353,9 @@ function buildModeColors(
 	}
 
 	const neutralSolid = gamutMapOklch({
+		l: isLight ? 0.32 : 0.85,
 		c: neutralChroma,
 		h: neutral.h,
-		l: isLight ? 0.32 : 0.85,
 	});
 	const neutralSolidAt = (delta: number) => {
 		return gamutMapOklch({
@@ -457,8 +457,8 @@ function buildSubtleTrio(
 }
 
 function chooseOnSolid(hue: number, solids: Array<Oklch>): Oklch {
-	const nearWhite = gamutMapOklch({ c: 0, h: hue, l: 0.985 });
-	const nearBlack = gamutMapOklch({ c: 0.01, h: hue, l: 0.18 });
+	const nearWhite = gamutMapOklch({ l: 0.985, c: 0, h: hue });
+	const nearBlack = gamutMapOklch({ l: 0.18, c: 0.01, h: hue });
 	const whiteMinimum = minimumRatio(nearWhite, solids);
 	const blackMinimum = minimumRatio(nearBlack, solids);
 	if (whiteMinimum >= TEXT_RATIO + RATIO_HEADROOM) return nearWhite;
@@ -483,7 +483,7 @@ interface LightnessSolveRequest {
  */
 function solveLightness(request: LightnessSolveRequest): Oklch {
 	const [low, high] = request.window;
-	const makeColor = (l: number) => gamutMapOklch({ c: request.chroma, h: request.hue, l });
+	const makeColor = (l: number) => gamutMapOklch({ l, c: request.chroma, h: request.hue });
 	const target = request.ratio + RATIO_HEADROOM;
 	const passes = (l: number) => minimumRatio(makeColor(l), request.backgrounds) >= target;
 	const start = clamp(request.startLightness, low, high);
