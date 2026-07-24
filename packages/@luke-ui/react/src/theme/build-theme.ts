@@ -3,8 +3,17 @@ import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
 import { precomputeValues } from '@capsizecss/vanilla-extract';
 import type { Oklch } from './color.js';
-import { contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
+import { clampUnit, contrastRatio, gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract, fontSizeSteps } from './contract.js';
+import type {
+	ContrastCheck,
+	FamilyDiagnostics,
+	ThemeDiagnostics,
+	ThemeGenerationDiagnostics,
+	ThemeModeDiagnostics,
+} from './diagnostics.js';
+import type { GeneratedSurfaces } from './elevation.js';
+import { generateSurfaces } from './elevation.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import {
 	defaultFontFamily,
@@ -13,23 +22,47 @@ import {
 	defaultSourceColors,
 	themeFontFamilyStacks,
 } from './foundation.js';
+import type { FamilyRole, ScaleFamily } from './scale.js';
+import { generateFamilyWithDiagnostics, ScaleGenerationError } from './scale.js';
+import type { SemanticColorValues } from './semantic-map.js';
+import { mapSemanticColors } from './semantic-map.js';
 
 /**
- * Compiles a theme foundation into a complete static stylesheet.
+ * Compiles a theme foundation into a complete static stylesheet plus its {@link ThemeDiagnostics}.
  *
- * Pure and Node-compatible: no DOM and deterministic output. Returns stylesheet text containing
- * the theme identity class plus both colour-mode blocks, selected by `data-color-mode` with
- * `prefers-color-scheme` as the fallback. Throws {@link ThemeContrastError} naming the mode and
- * token pair when any generated pair misses WCAG 2.2 AA (4.5:1 for text pairs, 3:1 for non-text UI
- * pairs). Colours are computed and emitted in OKLCH.
+ * Per mode: resolves the source colours and canvas anchor, generates the six private scale families
+ * (neutral / accent / danger / info / success / warning), derives the mode-aware elevation surfaces,
+ * applies the one default semantic mapping onto the colour contract, and runs the full WCAG 2.2
+ * validation matrix — which stays authoritative for text and on-solid pairs.
+ *
+ * Pure and Node-compatible: no DOM and deterministic output. Throws {@link ThemeGenerationError}
+ * when a role that must guarantee on-solid contrast cannot reach an accessible solid (an inaccessible
+ * explicit per-mode accent, for example), and {@link ThemeContrastError} when a generated text or
+ * on-solid pair misses AA. The returned `diagnostics` describe a fully compiled theme only; a build
+ * that throws never returns them. Colours are computed and emitted in OKLCH.
  */
-export function buildTheme(foundation: ThemeFoundation): string {
+export function compileTheme(foundation: ThemeFoundation): {
+	css: string;
+	diagnostics: ThemeDiagnostics;
+} {
 	validateFoundation(foundation);
 	const light = buildModeValues('light', foundation.light);
 	const dark = buildModeValues('dark', foundation.dark);
 	const failures = [...light.failures, ...dark.failures];
 	if (failures.length > 0) throw new ThemeContrastError(failures);
-	return assembleStylesheet(foundation, light.values, dark.values);
+	return {
+		css: assembleStylesheet(foundation, light.values, dark.values),
+		diagnostics: { dark: dark.diagnostics, light: light.diagnostics },
+	};
+}
+
+/**
+ * Compiles a theme foundation into a complete static stylesheet. Thin wrapper over
+ * {@link compileTheme} that returns only the emitted CSS; callers that need the diagnostics data
+ * model (tests, Storybook) use `compileTheme` directly. Throws the same errors as `compileTheme`.
+ */
+export function buildTheme(foundation: ThemeFoundation): string {
+	return compileTheme(foundation).css;
 }
 
 /**
@@ -85,31 +118,58 @@ export class ThemeContrastError extends Error {
 	}
 }
 
+/**
+ * Thrown by {@link compileTheme} when a role that must guarantee on-solid contrast cannot reach an
+ * accessible solid — for example an explicit per-mode accent whose whole tone band is an on-solid
+ * dead zone. Single-value accents are pre-conditioned into an accessible band by `defineTheme`, so
+ * this surfaces for verbatim per-mode sources that the author asked to use exactly. Re-raises the
+ * scale generator's {@link ScaleGenerationError} with the failing `role`/`mode`, the closest
+ * `bestAttempt`, and the partial {@link ThemeGenerationDiagnostics} resolved before the failure.
+ */
+export class ThemeGenerationError extends Error {
+	/** The role whose family could not be generated. */
+	readonly role: FamilyRole;
+	/** The mode the family was being generated for. */
+	readonly mode: ColorMode;
+	/** The closest the solid-anchor search came to satisfying the on-solid gate. */
+	readonly bestAttempt: ScaleGenerationError['bestAttempt'];
+	/** The partial diagnostics resolved before the failing role threw. */
+	readonly diagnostics: ThemeGenerationDiagnostics;
+
+	constructor(cause: ScaleGenerationError, diagnostics: ThemeGenerationDiagnostics) {
+		super(cause.message);
+		this.role = cause.role;
+		this.mode = cause.mode;
+		this.bestAttempt = cause.bestAttempt;
+		this.diagnostics = diagnostics;
+		this.name = 'ThemeGenerationError';
+	}
+}
+
 type ColorMode = 'light' | 'dark';
 
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const TEXT_RATIO = 4.5;
 const UI_RATIO = 3;
-// Skeletons are decorative, so this is a perceptual distinction target rather than a WCAG
-// requirement. Dark mode needs more headroom because the brightness pulse moves toward the canvas.
-const LOADING_SKELETON_RATIOS = { dark: 1.75, light: 1.4 } as const;
-// Solve slightly past the requested ratio so 4-decimal OKLCH emission cannot round a passing pair
-// below its target.
-const RATIO_HEADROOM = 0.05;
+// border.control is solved past the nominal 3:1 gate so 4-decimal OKLCH emission cannot round a
+// passing pair below it, mirroring the on-solid search's headroom in scale.ts.
+const CONTROL_BORDER_HEADROOM = 0.05;
+const CONTROL_BORDER_SEARCH_STEP = 0.0025;
 
-// Action intents render the full interactive ramp (surface trio + solid trio + onSolid); feedback
-// intents are static and emit only the soft kit (subtle surface + border + text).
+// The six private scale families, generated in this order so a build that fails part-way reports the
+// families it had already resolved. Feedback roles never throw (they do not guarantee on-solid).
+const FAMILY_ROLES = ['neutral', 'accent', 'danger', 'info', 'success', 'warning'] as const;
+// Action intents render the full interactive ramp (subtle trio + solid trio + onSolid); feedback
+// intents are static and expose only the soft kit (subtle surface + border + text).
 const ACTION_INTENTS = ['neutral', 'accent', 'danger'] as const;
 const FEEDBACK_INTENTS = ['info', 'success', 'warning'] as const;
-// Intents whose full kit is generated by buildIntentKit (every intent but neutral, which has its
-// own solid ladder). Feedback kits are computed in full — the subtle trio anchors the text solve —
-// but only their subtle/border/text leaves are emitted.
-const FULL_KIT_INTENTS = ['accent', 'info', 'success', 'warning', 'danger'] as const;
-// The only leaves a feedback intent emits.
-const FEEDBACK_EMITTED_KEYS = new Set(['surface.subtle', 'border', 'text']);
-const FEEDBACK_INTENT_SET: ReadonlySet<string> = new Set(FEEDBACK_INTENTS);
+// Accent and danger additionally expose a border and low-contrast text.
+const BORDER_AND_TEXT_INTENTS = ['accent', 'danger'] as const;
+// Parse-validated per-mode source colours. `background` is the resolved canvas anchor (#242); `focus`
+// is the authored keyboard-focus ring; both are colours the foundation must carry.
 const SOURCE_COLOR_FIELDS = [
 	'neutral',
+	'background',
 	'accent',
 	'info',
 	'success',
@@ -179,337 +239,119 @@ const ICON_SIZE_VALUES = {
 	'iconSize.xsmall': '16px',
 } as const;
 
-interface LightnessWindows {
-	borderControl: [number, number];
-	intentBorder: [number, number];
-	intentText: [number, number];
-	textPrimary: [number, number];
-	textSecondary: [number, number];
-}
-
-// Windows encode mode character: dark-mode text must stay light and light-mode text must stay
-// dark, so an unworkable source colour becomes an honest contrast failure at the window edge
-// instead of an off-character colour.
-const LIGHTNESS_WINDOWS: Record<ColorMode, LightnessWindows> = {
-	dark: {
-		borderControl: [0.5, 0.8],
-		intentBorder: [0.5, 0.85],
-		intentText: [0.62, 0.92],
-		textPrimary: [0.8, 0.98],
-		textSecondary: [0.68, 0.88],
-	},
-	light: {
-		borderControl: [0.35, 0.8],
-		intentBorder: [0.38, 0.8],
-		intentText: [0.25, 0.56],
-		textPrimary: [0.1, 0.35],
-		textSecondary: [0.3, 0.52],
-	},
-};
-
-// Surface roles encode usage directly: light wells use neutral white, dark wells sit below the
-// canvas, and detached surfaces separate more strongly without exposing generated palette steps.
-const LIGHT_RECESSED_SURFACE = { l: 1, c: 0, h: 0 } as const satisfies Oklch;
-const DARK_RECESSED_SURFACE_LIGHTNESS_DELTA = -0.025;
-const SURFACE_LIGHTNESS_DELTAS = {
-	dark: { floating: 0.07, overlay: 0.09, resting: 0.04 },
-	light: { floating: 0.012, overlay: 0.015, resting: 0.012 },
-} as const satisfies Record<ColorMode, Record<'floating' | 'overlay' | 'resting', number>>;
-
 interface ModeValues {
 	failures: Array<ThemeContrastFailure>;
 	values: Record<string, string>;
+	diagnostics: ThemeModeDiagnostics;
 }
 
 function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeValues {
-	const colors = buildModeColors(mode, modeFoundation);
-	const failures = validateContrast(mode, colors);
-	const values: Record<string, string> = {};
-	for (const [path, color] of Object.entries(colors)) {
-		values[path] = formatOklch(color);
-	}
-	// The scrim is emitted verbatim (it may carry an alpha channel), so it bypasses the OKLCH pipeline.
-	values['color.scrim'] = modeFoundation.color.scrim;
+	const { colorValues, familyDiagnostics, surfaces } = buildModeColors(mode, modeFoundation);
+	const { checks, failures } = validateContrast(mode, colorValues);
+	const values: Record<string, string> = { ...colorValues };
 	for (const [name, value] of Object.entries(modeFoundation.depth)) {
 		values[`depth.${name}`] = value;
 	}
 	for (const [name, value] of Object.entries(modeFoundation.actionControlFinish)) {
 		values[`actionControlFinish.${name}`] = value;
 	}
-	return { failures, values };
-}
-
-function buildModeColors(
-	mode: ColorMode,
-	modeFoundation: ThemeModeFoundation,
-): Record<string, Oklch> {
-	const isLight = mode === 'light';
-	const windows = LIGHTNESS_WINDOWS[mode];
-	const source = resolveSourceColors(mode, modeFoundation.color);
-	const neutral = source.neutral;
-	const neutralChroma = Math.min(neutral.c, 0.02);
-
-	// The canvas still derives from `neutral` here, not the resolved `background` (#234 Stage 2):
-	// `modeFoundation.color.background` is resolved and available, but wiring it in is #235/#236's
-	// job, once the scale/elevation generators can consume it. Keeps this stage's output
-	// byte-identical.
-	const canvas = gamutMapOklch({ ...neutral, c: Math.min(neutral.c, 0.015) });
-	const surfaceAt = (delta: number) => gamutMapOklch({ ...canvas, l: clampUnit(canvas.l + delta) });
-	const surfaceDeltas = SURFACE_LIGHTNESS_DELTAS[mode];
-	const surfaces = {
-		canvas,
-		floating: surfaceAt(surfaceDeltas.floating),
-		overlay: surfaceAt(surfaceDeltas.overlay),
-		recessed: isLight ? LIGHT_RECESSED_SURFACE : surfaceAt(DARK_RECESSED_SURFACE_LIGHTNESS_DELTA),
-		resting: surfaceAt(surfaceDeltas.resting),
-	};
-	const allSurfaces = [
-		surfaces.canvas,
-		surfaces.resting,
-		surfaces.recessed,
-		surfaces.floating,
-		surfaces.overlay,
-	];
-	const baseSurfaces = [surfaces.canvas, surfaces.resting, surfaces.recessed];
-
-	const colors: Record<string, Oklch> = {
-		'color.surface.canvas': surfaces.canvas,
-		'color.surface.resting': surfaces.resting,
-		'color.surface.recessed': surfaces.recessed,
-		'color.surface.floating': surfaces.floating,
-		'color.surface.overlay': surfaces.overlay,
-	};
-	colors['color.loadingSkeleton'] = solveLightness({
-		backgrounds: [canvas],
-		chroma: Math.min(neutral.c, 0.01),
-		hue: neutral.h,
-		mode,
-		ratio: LOADING_SKELETON_RATIOS[mode],
-		startLightness: canvas.l,
-		window: isLight ? [0, canvas.l] : [canvas.l, 1],
-	});
-
-	colors['color.text.primary'] = solveLightness({
-		backgrounds: allSurfaces,
-		chroma: neutralChroma,
-		hue: neutral.h,
-		mode,
-		ratio: TEXT_RATIO,
-		startLightness: midpoint(windows.textPrimary),
-		window: windows.textPrimary,
-	});
-	colors['color.text.secondary'] = solveLightness({
-		backgrounds: allSurfaces,
-		chroma: neutralChroma,
-		hue: neutral.h,
-		mode,
-		ratio: TEXT_RATIO,
-		startLightness: midpoint(windows.textSecondary),
-		window: windows.textSecondary,
-	});
-	colors['color.border.control'] = solveLightness({
-		backgrounds: baseSurfaces,
-		chroma: neutralChroma,
-		hue: neutral.h,
-		mode,
-		ratio: UI_RATIO,
-		startLightness: lowContrastLightness(mode, windows.borderControl),
-		window: windows.borderControl,
-	});
-	colors['color.border.decorative'] = gamutMapOklch({
-		l: clampUnit(canvas.l + (isLight ? -0.08 : 0.1)),
-		c: neutralChroma,
-		h: neutral.h,
-	});
-	colors['color.border.focus'] = source.focus;
-
-	// Disabled text is exempt from contrast checks but must remain perceptibly muted. Disabled
-	// surfaces/borders are gone from the contract; interactive controls fade with opacity instead.
-	const disabledChroma = Math.min(neutral.c, 0.01);
-	colors['color.text.disabled'] = gamutMapOklch({
-		l: clampUnit(canvas.l + (isLight ? -0.32 : 0.33)),
-		c: disabledChroma,
-		h: neutral.h,
-	});
-
-	for (const intent of FULL_KIT_INTENTS) {
-		const intentSource = source[intent];
-		const kit = buildIntentKit(mode, canvas, baseSurfaces, intentSource, windows);
-		const isFeedback = FEEDBACK_INTENT_SET.has(intent);
-		for (const [key, value] of Object.entries(kit)) {
-			// Feedback intents are static: emit only the soft kit even though the full kit is computed
-			// (the subtle trio is needed as a background while solving the feedback text colour).
-			if (isFeedback && !FEEDBACK_EMITTED_KEYS.has(key)) continue;
-			colors[`color.intent.${intent}.${key}`] = value;
-		}
-	}
-
-	const accentText = colors['color.intent.accent.text'];
-	if (accentText !== undefined) {
-		colors['color.intent.accent.textHover'] = gamutMapOklch({
-			...accentText,
-			l: clampUnit(accentText.l + (isLight ? -0.06 : 0.06)),
-		});
-	}
-
-	const neutralSolid = gamutMapOklch({
-		l: isLight ? 0.32 : 0.85,
-		c: neutralChroma,
-		h: neutral.h,
-	});
-	const neutralSolidAt = (delta: number) => {
-		return gamutMapOklch({
-			...neutralSolid,
-			l: clampUnit(neutralSolid.l + (isLight ? -delta : delta)),
-		});
-	};
-	const neutralSolidHover = neutralSolidAt(0.05);
-	const neutralSolidPressed = neutralSolidAt(0.09);
-	const neutralSubtle = buildSubtleTrio(mode, canvas, neutral);
-	colors['color.intent.neutral.surface.subtle'] = neutralSubtle.subtle;
-	colors['color.intent.neutral.surface.subtleHover'] = neutralSubtle.subtleHover;
-	colors['color.intent.neutral.surface.subtlePressed'] = neutralSubtle.subtlePressed;
-	colors['color.intent.neutral.surface.solid'] = neutralSolid;
-	colors['color.intent.neutral.surface.solidHover'] = neutralSolidHover;
-	colors['color.intent.neutral.surface.solidPressed'] = neutralSolidPressed;
-	colors['color.intent.neutral.onSolid'] = chooseOnSolid(neutral.h, [
-		neutralSolid,
-		neutralSolidHover,
-		neutralSolidPressed,
-	]);
-
-	return colors;
-}
-
-interface IntentKit {
-	border: Oklch;
-	onSolid: Oklch;
-	'surface.solid': Oklch;
-	'surface.solidHover': Oklch;
-	'surface.solidPressed': Oklch;
-	'surface.subtle': Oklch;
-	'surface.subtleHover': Oklch;
-	'surface.subtlePressed': Oklch;
-	text: Oklch;
-}
-
-function buildIntentKit(
-	mode: ColorMode,
-	canvas: Oklch,
-	baseSurfaces: Array<Oklch>,
-	source: Oklch,
-	windows: LightnessWindows,
-): IntentKit {
-	const isLight = mode === 'light';
-	const hoverDirection = isLight ? -1 : 1;
-	const solid = source;
-	const solidHover = gamutMapOklch({ ...solid, l: clampUnit(solid.l + 0.05 * hoverDirection) });
-	const solidPressed = gamutMapOklch({ ...solid, l: clampUnit(solid.l + 0.09 * hoverDirection) });
-	const subtle = buildSubtleTrio(mode, canvas, source);
-	const text = solveLightness({
-		backgrounds: [...baseSurfaces, subtle.subtle, subtle.subtleHover, subtle.subtlePressed],
-		chroma: Math.min(source.c, 0.13),
-		hue: source.h,
-		mode,
-		ratio: TEXT_RATIO,
-		startLightness: source.l,
-		window: windows.intentText,
-	});
-	const border = solveLightness({
-		backgrounds: baseSurfaces,
-		chroma: Math.min(source.c, 0.12),
-		hue: source.h,
-		mode,
-		ratio: UI_RATIO,
-		startLightness: lowContrastLightness(mode, windows.intentBorder),
-		window: windows.intentBorder,
-	});
 	return {
-		border,
-		onSolid: chooseOnSolid(source.h, [solid, solidHover, solidPressed]),
-		'surface.solid': solid,
-		'surface.solidHover': solidHover,
-		'surface.solidPressed': solidPressed,
-		'surface.subtle': subtle.subtle,
-		'surface.subtleHover': subtle.subtleHover,
-		'surface.subtlePressed': subtle.subtlePressed,
-		text,
+		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
+		failures,
+		values,
 	};
 }
 
-function buildSubtleTrio(
-	mode: ColorMode,
-	canvas: Oklch,
-	source: Oklch,
-): { subtle: Oklch; subtleHover: Oklch; subtlePressed: Oklch } {
-	const isLight = mode === 'light';
-	const chroma = Math.min(0.35 * source.c, 0.06);
-	const at = (delta: number) => {
-		return gamutMapOklch({
-			l: clampUnit(canvas.l + delta),
-			c: chroma,
-			h: source.h,
-		});
-	};
-	return isLight
-		? { subtle: at(-0.045), subtleHover: at(-0.07), subtlePressed: at(-0.1) }
-		: { subtle: at(0.1), subtleHover: at(0.16), subtlePressed: at(0.2) };
-}
-
-function chooseOnSolid(hue: number, solids: Array<Oklch>): Oklch {
-	const nearWhite = gamutMapOklch({ l: 0.985, c: 0, h: hue });
-	const nearBlack = gamutMapOklch({ l: 0.18, c: 0.01, h: hue });
-	const whiteMinimum = minimumRatio(nearWhite, solids);
-	const blackMinimum = minimumRatio(nearBlack, solids);
-	if (whiteMinimum >= TEXT_RATIO + RATIO_HEADROOM) return nearWhite;
-	if (blackMinimum >= TEXT_RATIO + RATIO_HEADROOM) return nearBlack;
-	return whiteMinimum >= blackMinimum ? nearWhite : nearBlack;
-}
-
-interface LightnessSolveRequest {
-	backgrounds: Array<Oklch>;
-	chroma: number;
-	hue: number;
-	mode: ColorMode;
-	ratio: number;
-	startLightness: number;
-	window: [number, number];
+interface ModeColors {
+	colorValues: SemanticColorValues;
+	familyDiagnostics: Record<FamilyRole, FamilyDiagnostics>;
+	surfaces: GeneratedSurfaces;
 }
 
 /**
- * Finds a lightness inside the window that satisfies every contrast constraint, moving as little
- * as possible from the start lightness. When even the window's high-contrast edge fails, returns
- * the edge colour so the validation matrix records the achieved ratio.
+ * Runs the v2 colour pipeline for one mode: resolve source colours and the canvas anchor, generate
+ * the six scale families, derive the elevation surfaces, and apply the semantic map. Rethrows a
+ * scale-level {@link ScaleGenerationError} as a {@link ThemeGenerationError} carrying the families it
+ * had already resolved.
  */
-function solveLightness(request: LightnessSolveRequest): Oklch {
-	const [low, high] = request.window;
-	const makeColor = (l: number) => gamutMapOklch({ l, c: request.chroma, h: request.hue });
-	const target = request.ratio + RATIO_HEADROOM;
-	const passes = (l: number) => minimumRatio(makeColor(l), request.backgrounds) >= target;
-	const start = clamp(request.startLightness, low, high);
-	if (passes(start)) return makeColor(start);
-	// Contrast improves toward darker lightness in light mode and lighter lightness in dark mode.
-	const edge = request.mode === 'light' ? low : high;
-	if (!passes(edge)) return makeColor(edge);
-	let passing = edge;
-	let failing = start;
-	for (let iteration = 0; iteration < 30; iteration++) {
-		const mid = (passing + failing) / 2;
-		if (passes(mid)) {
-			passing = mid;
-		} else {
-			failing = mid;
+function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeColors {
+	const source = resolveSourceColors(mode, modeFoundation.color);
+	// The canvas anchor drives every family's ramp and the elevation surfaces alike, so a family's
+	// subtle steps always ramp away from the same background the surfaces sit on.
+	const canvasAnchor = source.background;
+
+	const families = {} as Record<FamilyRole, ScaleFamily>;
+	const familyDiagnostics = {} as Record<FamilyRole, FamilyDiagnostics>;
+	for (const role of FAMILY_ROLES) {
+		try {
+			const generated = generateFamilyWithDiagnostics({
+				background: canvasAnchor,
+				mode,
+				role,
+				source: source[role],
+			});
+			families[role] = generated.family;
+			familyDiagnostics[role] = generated.diagnostics;
+		} catch (error) {
+			if (error instanceof ScaleGenerationError) {
+				throw new ThemeGenerationError(error, {
+					completedFamilies: { ...familyDiagnostics },
+					mode,
+					role,
+				});
+			}
+			throw error;
 		}
 	}
-	return makeColor(passing);
+
+	const surfaces = generateSurfaces({ background: canvasAnchor, mode });
+	const controlBorder = solveControlBorder({
+		canvas: surfaces.canvas,
+		mode,
+		neutral: families.neutral,
+		recessed: surfaces.recessed,
+	});
+	const colorValues = mapSemanticColors({
+		controlBorder,
+		families,
+		focus: source.focus,
+		mode,
+		scrim: modeFoundation.color.scrim,
+		surfaces,
+	});
+	return { colorValues, familyDiagnostics, surfaces };
 }
 
-function lowContrastLightness(mode: ColorMode, window: [number, number]): number {
-	return mode === 'light' ? window[1] : window[0];
-}
+/**
+ * Solves `color.border.control` as a dedicated contrast boundary (Stage 6 Option B), rather than a
+ * subtle step-7 alias: neutral steps 7-8 land at roughly 1.6-2.7:1 against the base surfaces, well
+ * short of the 3:1 non-text gate. Starting from step 7's own lightness (its hue and a low, neutral
+ * chroma), the search steps in the higher-contrast direction — darker in light mode, lighter in
+ * dark mode — until the candidate clears 3:1 (plus headroom) against BOTH `canvas` and `recessed`,
+ * gated on whichever of the two currently has the lower contrast. It stops at the first clearing
+ * lightness, so the result deviates from the step-7 aesthetic by the minimum needed to reach the
+ * boundary. Lightness is clamped to [0, 1]; a neutral hue always reaches the target within range.
+ */
+function solveControlBorder(params: {
+	neutral: ScaleFamily;
+	canvas: Oklch;
+	recessed: Oklch;
+	mode: ColorMode;
+}): Oklch {
+	const { neutral, canvas, recessed, mode } = params;
+	const seed = neutral[7];
+	const direction = mode === 'light' ? -1 : 1;
+	const target = UI_RATIO + CONTROL_BORDER_HEADROOM;
+	const worstRatio = (candidate: Oklch) =>
+		Math.min(contrastRatio(candidate, canvas), contrastRatio(candidate, recessed));
 
-function minimumRatio(foreground: Oklch, backgrounds: Array<Oklch>): number {
-	return Math.min(...backgrounds.map((background) => contrastRatio(foreground, background)));
+	let lightness = seed.l;
+	for (;;) {
+		const clamped = clampUnit(lightness);
+		const candidate = gamutMapOklch({ c: seed.c, h: seed.h, l: clamped });
+		if (worstRatio(candidate) >= target || clamped === 0 || clamped === 1) return candidate;
+		lightness = clamped + direction * CONTROL_BORDER_SEARCH_STEP;
+	}
 }
 
 function resolveSourceColors(
@@ -520,6 +362,7 @@ function resolveSourceColors(
 	const resolve = (value: string) => gamutMapOklch(parseColor(value));
 	return {
 		accent: resolve(colors.accent),
+		background: resolve(colors.background),
 		danger: resolve(colors.danger ?? defaults.danger),
 		focus: resolve(colors.focus ?? defaults.focus),
 		info: resolve(colors.info ?? defaults.info),
@@ -529,79 +372,100 @@ function resolveSourceColors(
 	};
 }
 
-function validateContrast(
-	mode: ColorMode,
-	colors: Record<string, Oklch>,
-): Array<ThemeContrastFailure> {
+interface ValidationResult {
+	failures: Array<ThemeContrastFailure>;
+	checks: Array<ContrastCheck>;
+}
+
+/**
+ * Runs the full semantic validation matrix over the emitted (rounded) colour values. Every pair is
+ * recorded as a {@link ContrastCheck}; the AA text/on-solid pairs, the authored focus ring, and
+ * `border.control` are hard gates that populate `failures` (which `compileTheme` raises as a
+ * {@link ThemeContrastError}). `border.control` is `solveControlBorder`'s dedicated boundary, not a
+ * scale-step alias, so it is hard-gated at 3:1 against both base surfaces (Stage 6 Option B). The
+ * generated neutral/intent borders (decorative and the per-intent border) still map to the
+ * Radix-style step 6/7 (a subtle separator) and stay advisory checks only — v2 deliberately keeps
+ * those below the old solver's 3:1 for the reference scale's softer look.
+ */
+function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): ValidationResult {
 	const failures: Array<ThemeContrastFailure> = [];
+	const checks: Array<ContrastCheck> = [];
 	const colorAt = (path: string): Oklch => {
-		const value = colors[path];
+		const value = colorValues[path];
 		if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
-		return value;
+		return parseColor(value);
 	};
-	const check = (foreground: string, background: string, required: number) => {
+	const check = (foreground: string, background: string, required: number, hard: boolean) => {
 		const ratio = contrastRatio(colorAt(foreground), colorAt(background));
-		if (ratio < required) failures.push({ background, foreground, mode, ratio, required });
+		const passes = ratio >= required;
+		checks.push({ background, foreground, passes, ratio, required });
+		if (hard && !passes) failures.push({ background, foreground, mode, ratio, required });
 	};
 
-	const surfacePaths = ['canvas', 'resting', 'recessed', 'floating', 'overlay'].map(
+	// v2 validates only against surfaces consumers can reference (the hidden `resting` rung is gone).
+	const surfacePaths = ['canvas', 'recessed', 'floating', 'overlay'].map(
 		(surface) => `color.surface.${surface}`,
 	);
-	const intentBackgroundPaths = (intent: string) => [
-		'color.surface.canvas',
-		'color.surface.resting',
-		'color.surface.recessed',
+	const basePaths = ['color.surface.canvas', 'color.surface.recessed'];
+	const actionTextBackgrounds = (intent: string) => [
+		...basePaths,
 		`color.intent.${intent}.surface.subtle`,
 		`color.intent.${intent}.surface.subtleHover`,
 		`color.intent.${intent}.surface.subtlePressed`,
 	];
-	// Feedback intents emit only `surface.subtle`, so their text is validated against just that plus
-	// the base surfaces (a subset of the action-intent backgrounds).
-	const intentTextBackgroundPaths = (intent: string) =>
-		FEEDBACK_INTENT_SET.has(intent)
-			? [
-					'color.surface.canvas',
-					'color.surface.resting',
-					'color.surface.recessed',
-					`color.intent.${intent}.surface.subtle`,
-				]
-			: intentBackgroundPaths(intent);
-	const basePaths = ['color.surface.canvas', 'color.surface.resting', 'color.surface.recessed'];
+	const feedbackTextBackgrounds = (intent: string) => [
+		...basePaths,
+		`color.intent.${intent}.surface.subtle`,
+	];
 
+	// Global text vs every mapped elevation surface, plus the neutral subtle trio behind neutral
+	// controls and the neutral/gray badge (carried from #137/#139).
 	for (const text of ['color.text.primary', 'color.text.secondary']) {
-		for (const surface of surfacePaths) check(text, surface, TEXT_RATIO);
+		for (const surface of surfacePaths) check(text, surface, TEXT_RATIO, true);
 	}
-	// Carried from #137/#139: primary text must stay legible on the neutral subtle trio, which backs
-	// the neutral/gray badge and neutral-subtle controls.
 	for (const state of ['subtle', 'subtleHover', 'subtlePressed']) {
-		check('color.text.primary', `color.intent.neutral.surface.${state}`, TEXT_RATIO);
+		check('color.text.primary', `color.intent.neutral.surface.${state}`, TEXT_RATIO, true);
 	}
-	for (const intent of FULL_KIT_INTENTS) {
-		for (const background of intentTextBackgroundPaths(intent)) {
-			check(`color.intent.${intent}.text`, background, TEXT_RATIO);
+	// Accent/danger text (and accent textHover) vs the base surfaces and their own subtle trio.
+	for (const intent of BORDER_AND_TEXT_INTENTS) {
+		for (const background of actionTextBackgrounds(intent)) {
+			check(`color.intent.${intent}.text`, background, TEXT_RATIO, true);
 		}
 	}
-	for (const background of intentBackgroundPaths('accent')) {
-		check('color.intent.accent.textHover', background, TEXT_RATIO);
+	for (const background of actionTextBackgrounds('accent')) {
+		check('color.intent.accent.textHover', background, TEXT_RATIO, true);
 	}
-	// Only action intents render solid surfaces, so only they carry an onSolid contrast gate.
+	// Feedback text vs the base surfaces and its single subtle surface.
+	for (const intent of FEEDBACK_INTENTS) {
+		for (const background of feedbackTextBackgrounds(intent)) {
+			check(`color.intent.${intent}.text`, background, TEXT_RATIO, true);
+		}
+	}
+	// On-solid text vs the solid ladder — the scale generator already guarantees this for the action
+	// intents; revalidated here on the emitted values.
 	for (const intent of ACTION_INTENTS) {
 		for (const state of ['solid', 'solidHover', 'solidPressed']) {
 			check(
 				`color.intent.${intent}.onSolid`,
 				`color.intent.${intent}.surface.${state}`,
 				TEXT_RATIO,
+				true,
 			);
 		}
 	}
-	for (const background of basePaths) check('color.border.control', background, UI_RATIO);
-	for (const background of basePaths.slice(0, 2)) check('color.border.focus', background, UI_RATIO);
-	for (const intent of FULL_KIT_INTENTS) {
-		for (const background of basePaths)
-			check(`color.intent.${intent}.border`, background, UI_RATIO);
+	// The keyboard-focus ring is authored and focus-visibility critical, so it stays a hard 3:1 gate.
+	for (const background of basePaths) check('color.border.focus', background, UI_RATIO, true);
+	// border.control is a solved contrast boundary (Stage 6 Option B): hard-gated at 3:1 against both
+	// base surfaces in both modes. Decorative and intent borders (step 6/7) stay advisory Radix-style
+	// separators below 3:1.
+	for (const background of basePaths) check('color.border.control', background, UI_RATIO, true);
+	for (const intent of [...BORDER_AND_TEXT_INTENTS, ...FEEDBACK_INTENTS]) {
+		for (const background of basePaths) {
+			check(`color.intent.${intent}.border`, background, UI_RATIO, false);
+		}
 	}
 
-	return failures;
+	return { checks, failures };
 }
 
 function validateFoundation(foundation: ThemeFoundation): void {
@@ -780,18 +644,6 @@ function declarations(
 
 function indent(line: string): string {
 	return `\t${line}`;
-}
-
-function midpoint([low, high]: [number, number]): number {
-	return (low + high) / 2;
-}
-
-function clamp(value: number, low: number, high: number): number {
-	return Math.min(high, Math.max(low, value));
-}
-
-function clampUnit(value: number): number {
-	return clamp(value, 0, 1);
 }
 
 function errorMessage(error: unknown): string {

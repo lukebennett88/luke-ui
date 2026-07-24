@@ -19,6 +19,13 @@ const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
 const ACTION_ROLES = ['neutral', 'accent', 'danger'] as const;
 const FEEDBACK_ROLES = ['info', 'success', 'warning'] as const;
 
+// A stand-in for `build-theme.ts`'s `solveControlBorder` output: mapSemanticColors only aliases this
+// through, so any distinct Oklch value proves the passthrough without re-testing the solver itself.
+const CONTROL_BORDER: Record<ColorMode, Oklch> = {
+	dark: parseColor('oklch(0.62 0.006 250)'),
+	light: parseColor('oklch(0.38 0.006 250)'),
+};
+
 // A representative source per role and mode. `info`/`success`/`warning`/`danger` reuse Luke UI's
 // curated defaults, which are chosen to clear the on-solid gate on near-white/near-black canvases;
 // `accent` reuses the vibrant blue scale.test.ts exercises without adaptation in either mode;
@@ -65,8 +72,16 @@ describe('mapSemanticColors', () => {
 				const surfaces = generateSurfaces({ background, mode });
 				const scrim = 'oklch(0 0 0 / 0.45)';
 				const focus = parseColor('oklch(0.6 0.2 260)');
+				const controlBorder = CONTROL_BORDER[mode];
 
-				const result = mapSemanticColors({ families, focus, mode, scrim, surfaces });
+				const result = mapSemanticColors({
+					controlBorder,
+					families,
+					focus,
+					mode,
+					scrim,
+					surfaces,
+				});
 
 				// Surfaces: canvas IS the background.
 				expect(result['color.surface.canvas']).toBe(formatOklch(surfaces.canvas));
@@ -74,14 +89,15 @@ describe('mapSemanticColors', () => {
 				expect(result['color.surface.floating']).toBe(formatOklch(surfaces.floating));
 				expect(result['color.surface.overlay']).toBe(formatOklch(surfaces.overlay));
 				expect(result['color.scrim']).toBe(scrim);
-				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[3]));
+				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[7]));
 
-				// Global text / borders: neutral only.
+				// Global text / borders: neutral only. `border.control` is a solved contrast boundary
+				// (Stage 6 Option B), not a scale-step alias, so it aliases the passed-through value.
 				expect(result['color.text.primary']).toBe(formatOklch(families.neutral[12]));
 				expect(result['color.text.secondary']).toBe(formatOklch(families.neutral[11]));
 				expect(result['color.text.disabled']).toBe(formatOklch(families.neutral[8]));
 				expect(result['color.border.decorative']).toBe(formatOklch(families.neutral[6]));
-				expect(result['color.border.control']).toBe(formatOklch(families.neutral[7]));
+				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
 				expect(result['color.border.focus']).toBe(formatOklch(focus));
 
 				// Action intents: full ramp, keyed to the intent's own family.
@@ -118,6 +134,7 @@ describe('mapSemanticColors', () => {
 				const surfaces = generateSurfaces({ background, mode });
 
 				const result = mapSemanticColors({
+					controlBorder: CONTROL_BORDER[mode],
 					families,
 					mode,
 					scrim: 'oklch(0 0 0 / 0.45)',
@@ -143,6 +160,7 @@ describe('mapSemanticColors', () => {
 				const surfaces = generateSurfaces({ background, mode });
 
 				const result = mapSemanticColors({
+					controlBorder: CONTROL_BORDER[mode],
 					families,
 					mode,
 					scrim: 'oklch(0 0 0 / 0.45)',
@@ -163,7 +181,13 @@ describe('mapSemanticColors', () => {
 			const surfaces = generateSurfaces({ background, mode: 'light' });
 			const scrim = 'oklch(0 0 0 / 0.5)';
 
-			const result = mapSemanticColors({ families, mode: 'light', scrim, surfaces });
+			const result = mapSemanticColors({
+				controlBorder: CONTROL_BORDER.light,
+				families,
+				mode: 'light',
+				scrim,
+				surfaces,
+			});
 
 			expect(result['color.scrim']).toBe(scrim);
 		});

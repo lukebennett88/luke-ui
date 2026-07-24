@@ -50,11 +50,15 @@ describe('defineTheme colour-only authoring', () => {
 			const textPrimary = parseColor(extractValue(block, '--luke-color-text-primary'));
 			const borderControl = parseColor(extractValue(block, '--luke-color-border-control'));
 			const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
+			const recessed = parseColor(extractValue(block, '--luke-color-surface-recessed'));
 			for (const varName of SURFACE_VAR_NAMES) {
 				const surface = parseColor(extractValue(block, varName));
 				expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
 			}
+			// border.control is a solved contrast boundary (Stage 6 Option B), not a scale-step alias, so
+			// it must clear the 3:1 non-text gate against both base surfaces.
 			expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
+			expect(contrastRatio(borderControl, recessed)).toBeGreaterThanOrEqual(3);
 		}
 	});
 });
@@ -289,18 +293,22 @@ describe('defineTheme emits the reduced contract for the bundled themes', () => 
 		});
 	}
 
-	it('keeps known retained Tactile values byte-identical to the pre-flip baseline', () => {
+	it('emits the expected v2 token values for known Tactile leaves', () => {
 		const css = defineTheme(tactileTheme);
 		for (const declaration of [
+			// The canvas IS the resolved background (Tactile's light neutral), unchanged from pre-v2.
 			'--luke-color-surface-canvas: oklch(0.985 0 0);',
-			'--luke-color-text-primary: oklch(0.225 0 0);',
-			'--luke-color-text-disabled: oklch(0.58 0.01 210);',
-			'--luke-color-intent-neutral-surface-subtle: oklch(0.94 0 0);',
+			// Global text/skeleton now alias the neutral family: primary = neutral 12 (light) / dark 12,
+			// disabled = neutral 8, the neutral subtle surface = neutral 3.
+			'--luke-color-text-primary: oklch(0.3 0 0);',
+			'--luke-color-text-disabled: oklch(0.5 0.0117 210);',
+			'--luke-color-intent-neutral-surface-subtle: oklch(0.955 0 0);',
+			// The danger solid stays the authored default source (danger step 9 lands on it verbatim).
 			'--luke-color-intent-danger-surface-solid: oklch(0.52 0.18 27);',
 		]) {
 			expect(css).toContain(declaration);
 		}
-		// Scrim is new: black at the mode-aware default alpha.
+		// Scrim is passed through: black at the mode-aware default alpha.
 		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.2);');
 		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.4);');
 	});

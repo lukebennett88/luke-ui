@@ -109,7 +109,8 @@ function normalizeHue(hue: number): number {
 	return wrapped < 0 ? wrapped + 360 : wrapped;
 }
 
-function clampUnit(value: number): number {
+/** Clamps a value to the unit interval `[0, 1]`, the valid range for OKLCH lightness. */
+export function clampUnit(value: number): number {
 	return Math.min(1, Math.max(0, value));
 }
 
