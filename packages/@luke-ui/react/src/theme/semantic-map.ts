@@ -26,6 +26,12 @@ interface MapSemanticColorsRequest {
 	families: Record<FamilyRole, ScaleFamily>;
 	/** The generated elevation surface set, already resolved for `mode`. */
 	surfaces: GeneratedSurfaces;
+	/**
+	 * `color.border.control`'s solved value: a dedicated contrast boundary (Stage 6 Option B), not a
+	 * scale-step alias. Resolved by `build-theme.ts`'s `solveControlBorder` against `surfaces.canvas`
+	 * and `surfaces.recessed` before this map runs; passed through verbatim here.
+	 */
+	controlBorder: Oklch;
 	/** The authored scrim value, passed through verbatim (it may carry an alpha channel). */
 	scrim: string;
 	/** The authored keyboard-focus source colour. Defaults to the accent family's step 8. */
@@ -49,7 +55,7 @@ const FEEDBACK_INTENTS = ['info', 'success', 'warning'] as const;
  * verbatim; `focus` defaults to the accent family's step 8 when the theme author omits it.
  */
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
-	const { families, surfaces, scrim, focus } = request;
+	const { families, surfaces, scrim, focus, controlBorder } = request;
 	const neutral = families.neutral;
 	const values: Record<string, string> = {};
 
@@ -66,7 +72,7 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 	values['color.text.secondary'] = formatOklch(neutral[11]);
 	values['color.text.disabled'] = formatOklch(neutral[8]);
 	values['color.border.decorative'] = formatOklch(neutral[6]);
-	values['color.border.control'] = formatOklch(neutral[7]);
+	values['color.border.control'] = formatOklch(controlBorder);
 	values['color.border.focus'] = formatOklch(focus ?? families.accent[8]);
 
 	// Action intents: full ramp, keyed to the intent's own family.

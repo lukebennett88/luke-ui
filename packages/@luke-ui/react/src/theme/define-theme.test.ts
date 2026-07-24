@@ -50,15 +50,15 @@ describe('defineTheme colour-only authoring', () => {
 			const textPrimary = parseColor(extractValue(block, '--luke-color-text-primary'));
 			const borderControl = parseColor(extractValue(block, '--luke-color-border-control'));
 			const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
+			const recessed = parseColor(extractValue(block, '--luke-color-surface-recessed'));
 			for (const varName of SURFACE_VAR_NAMES) {
 				const surface = parseColor(extractValue(block, varName));
 				expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
 			}
-			// v2 borders map to the Radix-style scale step 7: a subtle separator that sits below the old
-			// bespoke solver's 3:1 gate but stays visibly distinct from the canvas.
-			const borderContrast = contrastRatio(borderControl, canvas);
-			expect(borderContrast).toBeGreaterThan(1.2);
-			expect(borderContrast).toBeLessThan(3);
+			// border.control is a solved contrast boundary (Stage 6 Option B), not a scale-step alias, so
+			// it must clear the 3:1 non-text gate against both base surfaces.
+			expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
+			expect(contrastRatio(borderControl, recessed)).toBeGreaterThanOrEqual(3);
 		}
 	});
 });

@@ -519,21 +519,27 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 	];
 
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`${foundation.name} passes recomputed text contrast and emits a subtle control border in both modes`, () => {
+		it(`${foundation.name} passes recomputed text contrast in both modes`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				const textPrimary = parseColor(extractValue(block, '--luke-color-text-primary'));
-				const borderControl = parseColor(extractValue(block, '--luke-color-border-control'));
-				const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
 				for (const varName of surfaceVarNames) {
 					const surface = parseColor(extractValue(block, varName));
 					expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
 				}
-				// v2 control borders map to the neutral scale's step 7 — a subtle Radix-style separator
-				// distinct from the canvas but below the old solver's hard 3:1 UI gate.
-				const borderContrast = contrastRatio(borderControl, canvas);
-				expect(borderContrast).toBeGreaterThan(1.2);
-				expect(borderContrast).toBeLessThan(3);
+			}
+		});
+
+		it(`${foundation.name} hard-gates border.control at >=3:1 against canvas and recessed in both modes`, () => {
+			const blocks = splitBlocks(buildTheme(foundation));
+			for (const block of [blocks.baseLight, blocks.mediaDark]) {
+				const borderControl = parseColor(extractValue(block, '--luke-color-border-control'));
+				const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
+				const recessed = parseColor(extractValue(block, '--luke-color-surface-recessed'));
+				// Stage 6 Option B: border.control is a solved contrast boundary, not a scale-step alias,
+				// so it must clear the 3:1 non-text gate against both base surfaces.
+				expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
+				expect(contrastRatio(borderControl, recessed)).toBeGreaterThanOrEqual(3);
 			}
 		});
 
@@ -567,27 +573,26 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			}
 		});
 
-		it(`${foundation.name} generates subtle, distinct neutral and intent borders`, () => {
+		it(`${foundation.name} generates subtle, distinct intent borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				const surfaces = ['canvas', 'recessed'].map((surface) => {
 					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
 				});
-				const borderVarNames = [
-					'--luke-color-border-control',
-					...['accent', 'info', 'success', 'warning', 'danger'].map(
-						(intent) => `--luke-color-intent-${intent}-border`,
-					),
-				];
+				// border.control is excluded here: it is now a solved contrast boundary (>=3:1, asserted
+				// separately above), not one of these subtle Radix-style separators.
+				const borderVarNames = ['accent', 'info', 'success', 'warning', 'danger'].map(
+					(intent) => `--luke-color-intent-${intent}-border`,
+				);
 
 				for (const varName of borderVarNames) {
 					const border = parseColor(extractValue(block, varName));
 					const minimumContrast = Math.min(
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
-					// v2 borders alias the scale's step 7 (subtle UI border). They stay visibly distinct from
-					// the base surfaces but sit below the 3:1 non-text gate the old bespoke solver targeted —
-					// a deliberate move to the reference scale's softer separators.
+					// v2 intent borders alias the scale's step 7 (subtle UI border). They stay visibly
+					// distinct from the base surfaces but sit below the 3:1 non-text gate the old bespoke
+					// solver targeted — a deliberate move to the reference scale's softer separators.
 					expect(minimumContrast).toBeGreaterThan(1.2);
 					expect(minimumContrast).toBeLessThan(3);
 				}

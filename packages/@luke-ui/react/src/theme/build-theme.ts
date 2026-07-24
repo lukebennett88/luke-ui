@@ -3,7 +3,7 @@ import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
 import { precomputeValues } from '@capsizecss/vanilla-extract';
 import type { Oklch } from './color.js';
-import { contrastRatio, gamutMapOklch, parseColor } from './color.js';
+import { clampUnit, contrastRatio, gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract, fontSizeSteps } from './contract.js';
 import type {
 	ContrastCheck,
@@ -151,6 +151,10 @@ type ColorMode = 'light' | 'dark';
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const TEXT_RATIO = 4.5;
 const UI_RATIO = 3;
+// border.control is solved past the nominal 3:1 gate so 4-decimal OKLCH emission cannot round a
+// passing pair below it, mirroring the on-solid search's headroom in scale.ts.
+const CONTROL_BORDER_HEADROOM = 0.05;
+const CONTROL_BORDER_SEARCH_STEP = 0.0025;
 
 // The six private scale families, generated in this order so a build that fails part-way reports the
 // families it had already resolved. Feedback roles never throw (they do not guarantee on-solid).
@@ -301,7 +305,14 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 	}
 
 	const surfaces = generateSurfaces({ background: canvasAnchor, mode });
+	const controlBorder = solveControlBorder({
+		canvas: surfaces.canvas,
+		mode,
+		neutral: families.neutral,
+		recessed: surfaces.recessed,
+	});
 	const colorValues = mapSemanticColors({
+		controlBorder,
 		families,
 		focus: source.focus,
 		mode,
@@ -309,6 +320,38 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		surfaces,
 	});
 	return { colorValues, familyDiagnostics, surfaces };
+}
+
+/**
+ * Solves `color.border.control` as a dedicated contrast boundary (Stage 6 Option B), rather than a
+ * subtle step-7 alias: neutral steps 7-8 land at roughly 1.6-2.7:1 against the base surfaces, well
+ * short of the 3:1 non-text gate. Starting from step 7's own lightness (its hue and a low, neutral
+ * chroma), the search steps in the higher-contrast direction — darker in light mode, lighter in
+ * dark mode — until the candidate clears 3:1 (plus headroom) against BOTH `canvas` and `recessed`,
+ * gated on whichever of the two currently has the lower contrast. It stops at the first clearing
+ * lightness, so the result deviates from the step-7 aesthetic by the minimum needed to reach the
+ * boundary. Lightness is clamped to [0, 1]; a neutral hue always reaches the target within range.
+ */
+function solveControlBorder(params: {
+	neutral: ScaleFamily;
+	canvas: Oklch;
+	recessed: Oklch;
+	mode: ColorMode;
+}): Oklch {
+	const { neutral, canvas, recessed, mode } = params;
+	const seed = neutral[7];
+	const direction = mode === 'light' ? -1 : 1;
+	const target = UI_RATIO + CONTROL_BORDER_HEADROOM;
+	const worstRatio = (candidate: Oklch) =>
+		Math.min(contrastRatio(candidate, canvas), contrastRatio(candidate, recessed));
+
+	let lightness = seed.l;
+	for (;;) {
+		const clamped = clampUnit(lightness);
+		const candidate = gamutMapOklch({ c: seed.c, h: seed.h, l: clamped });
+		if (worstRatio(candidate) >= target || clamped === 0 || clamped === 1) return candidate;
+		lightness = clamped + direction * CONTROL_BORDER_SEARCH_STEP;
+	}
 }
 
 function resolveSourceColors(
@@ -336,11 +379,13 @@ interface ValidationResult {
 
 /**
  * Runs the full semantic validation matrix over the emitted (rounded) colour values. Every pair is
- * recorded as a {@link ContrastCheck}; the AA text/on-solid pairs and the authored focus ring are
- * hard gates that populate `failures` (which `compileTheme` raises as a {@link ThemeContrastError}).
- * The generated neutral/intent borders map to the Radix-style step 7 (a subtle UI border) and are
- * recorded as advisory checks only — v2 deliberately trades the old solver's 3:1 borders for the
- * reference scale's softer separators.
+ * recorded as a {@link ContrastCheck}; the AA text/on-solid pairs, the authored focus ring, and
+ * `border.control` are hard gates that populate `failures` (which `compileTheme` raises as a
+ * {@link ThemeContrastError}). `border.control` is `solveControlBorder`'s dedicated boundary, not a
+ * scale-step alias, so it is hard-gated at 3:1 against both base surfaces (Stage 6 Option B). The
+ * generated neutral/intent borders (decorative and the per-intent border) still map to the
+ * Radix-style step 6/7 (a subtle separator) and stay advisory checks only — v2 deliberately keeps
+ * those below the old solver's 3:1 for the reference scale's softer look.
  */
 function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): ValidationResult {
 	const failures: Array<ThemeContrastFailure> = [];
@@ -410,8 +455,10 @@ function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): Va
 	}
 	// The keyboard-focus ring is authored and focus-visibility critical, so it stays a hard 3:1 gate.
 	for (const background of basePaths) check('color.border.focus', background, UI_RATIO, true);
-	// Neutral and intent borders (step 7) are advisory: subtle Radix-style separators below 3:1.
-	for (const background of basePaths) check('color.border.control', background, UI_RATIO, false);
+	// border.control is a solved contrast boundary (Stage 6 Option B): hard-gated at 3:1 against both
+	// base surfaces in both modes. Decorative and intent borders (step 6/7) stay advisory Radix-style
+	// separators below 3:1.
+	for (const background of basePaths) check('color.border.control', background, UI_RATIO, true);
 	for (const intent of [...BORDER_AND_TEXT_INTENTS, ...FEEDBACK_INTENTS]) {
 		for (const background of basePaths) {
 			check(`color.intent.${intent}.border`, background, UI_RATIO, false);
