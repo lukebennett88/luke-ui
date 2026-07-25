@@ -42,18 +42,6 @@ const diagnosticsByTheme: Record<BundledThemeKey, ThemeDiagnostics> = {
 	tactile: compileTheme(normalizeTheme(tactileTheme)).diagnostics,
 };
 
-/**
- * Whether a recorded contrast check is a build-time hard gate. `ThemeModeDiagnostics.contrastChecks`
- * records every pair `validateContrast` measures in `build-theme.ts`, not only the ones that can fail
- * a build, so hard vs advisory is reconstructed here from the same path pattern `validateContrast`
- * gates on: every intent border is advisory (subtle by design) except the two solved boundaries,
- * `border.control` and `border.focus` (theme-v2 border-contrast policy, Stage 6 / #238).
- * `border.decorative` is not measured at all — it carries no check in either bucket.
- */
-function isAdvisoryCheck(check: ContrastCheck): boolean {
-	return /^color\.intent\.\w+\.border$/.test(check.foreground);
-}
-
 const pageStyle = {
 	display: 'grid',
 	gap: vars.space[1000],
@@ -386,8 +374,10 @@ function SolidAnchorSection({ families }: { families: Record<FamilyRole, FamilyD
 }
 
 function ContrastChecksSection({ checks }: { checks: Array<ContrastCheck> }) {
-	const hard = checks.filter((check) => !isAdvisoryCheck(check));
-	const advisory = checks.filter(isAdvisoryCheck);
+	// Each check carries the compiler's own hard-gate classification, so this split cannot drift from
+	// `validateContrast` the way inferring it from token paths could.
+	const hard = checks.filter((check) => check.hard);
+	const advisory = checks.filter((check) => !check.hard);
 	return (
 		<SectionCard title="Contrast checks">
 			<ContrastCheckTable

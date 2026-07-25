@@ -5,13 +5,15 @@
  * search and the capability-based role guarantees; it is calibrated to testable scale properties
  * rather than to exact Radix reproduction.
  *
- * Isolated by design: nothing here is wired into `buildTheme` yet (that is a later stage). It reuses
- * the dependency-free colour math in `color.ts` and never distorts a family to satisfy a guarantee
- * the public contract does not consume.
+ * It also owns {@link passesOnSolidGate}, the one on-solid accessibility gate — `defineTheme`'s accent
+ * pre-conditioner calls it rather than reimplementing it. It reuses the dependency-free colour math in
+ * `color.ts` and the shared thresholds in `contrast-policy.ts`, and never distorts a family to satisfy
+ * a guarantee the public contract does not consume.
  */
 
 import type { Oklch } from './color.js';
-import { contrastRatio, gamutMapOklch } from './color.js';
+import { clampUnit, contrastRatio, gamutMapOklch } from './color.js';
+import { CONTRAST_SEARCH_STEP, RATIO_HEADROOM, TEXT_RATIO } from './contrast-policy.js';
 import type { FamilyDiagnostics, GamutReduction, SolidAnchorDiagnostics } from './diagnostics.js';
 
 /** A scale family's semantic role. Drives the capability guarantees, not the geometry. */
@@ -161,11 +163,9 @@ export class ScaleGenerationError extends Error {
 	}
 }
 
-// The WCAG 2.2 AA text ratio the on-solid gate must clear. Matches build-theme's TEXT_RATIO so the
-// solid-anchor search agrees with the (later) build-time validation.
-const TEXT_RATIO = 4.5;
-// Solve slightly past the target so 4-decimal OKLCH emission cannot round a passing pair below it.
-const RATIO_HEADROOM = 0.05;
+// The ratio the on-solid gate solves for: the AA text ratio plus the rounding headroom every contrast
+// search adds (see contrast-policy.ts). Validation re-measures the emitted values at TEXT_RATIO.
+const ON_SOLID_TARGET = TEXT_RATIO + RATIO_HEADROOM;
 
 /**
  * The OKLab ΔE floor between consecutive component states (steps 3-4 and 4-5). The muted ramp's
@@ -207,9 +207,10 @@ const RAMP_SPEC = {
 	],
 } as const satisfies Record<ColorMode, ReadonlyArray<RampRungSpec>>;
 
-// The solid step 10 (hover) offset from step 9: darker in light mode, lighter in dark mode.
+// The solid step 10 (hover) offset from step 9: darker in light mode, lighter in dark mode. The
+// pressed solid leaf deliberately reuses step 10, so the on-solid gate has exactly these two states
+// to clear — there is no third, deeper pressed colour to test.
 const SOLID_HOVER_DELTA = 0.05;
-const SOLID_SEARCH_STEP = 0.0025;
 
 interface SolidBand {
 	/** The lightness the search prefers when it clears the gate. */
@@ -245,10 +246,51 @@ const TEXT_LOW_CHROMA_CAP = 0.13;
 const TEXT_HIGH_CHROMA_FRACTION = 0.45;
 const TEXT_HIGH_CHROMA_CAP = 0.1;
 
-// The near-white and near-black candidates the on-solid gate chooses between, mirroring build-theme.
+// The near-white and near-black candidates the on-solid gate chooses between.
 const ON_SOLID_WHITE_LIGHTNESS = 0.985;
 const ON_SOLID_BLACK_LIGHTNESS = 0.18;
 const ON_SOLID_BLACK_CHROMA = 0.01;
+
+/** A candidate solid the on-solid gate is asked about. */
+export interface OnSolidGateRequest {
+	/** The family character. Only its hue and chroma are read; `lightness` supplies the tone. */
+	source: Oklch;
+	/** The candidate step-9 solid lightness. */
+	lightness: number;
+	/** The colour mode, which sets the direction step 10 (hover) moves in. */
+	mode: ColorMode;
+}
+
+/**
+ * The one on-solid accessibility gate: whether the near-white or near-black on-solid text this
+ * generator would choose clears the AA text ratio (plus the search headroom) across *both* solid
+ * states a candidate lightness produces — step 9 and its step-10 hover. The pressed solid reuses step
+ * 10, so there is no third state to test.
+ *
+ * `defineTheme`'s accent pre-conditioner calls this rather than reimplementing it, so the
+ * pre-conditioner can never be stricter than {@link generateFamily}'s solid-anchor search: a
+ * lightness it accepts is one the search accepts too.
+ */
+export function passesOnSolidGate(request: OnSolidGateRequest): boolean {
+	return onSolidGateRatio(request) >= ON_SOLID_TARGET;
+}
+
+/**
+ * The contrast {@link passesOnSolidGate} measures: the better on-solid candidate's minimum ratio
+ * across the candidate solid and its hover. Exposed for the solid-anchor search's best-attempt
+ * diagnostics.
+ */
+export function onSolidGateRatio(request: OnSolidGateRequest): number {
+	const { lightness, mode, source } = request;
+	const direction = mode === 'light' ? -1 : 1;
+	const solid = gamutMapOklch({ c: source.c, h: source.h, l: clampUnit(lightness) });
+	const hover = gamutMapOklch({
+		c: source.c,
+		h: source.h,
+		l: clampUnit(lightness + direction * SOLID_HOVER_DELTA),
+	});
+	return chooseOnSolid(source.h, [solid, hover]).minRatio;
+}
 
 /**
  * Generates the 12-step OKLCH family plus its on-solid `contrast` colour for a role. Owns the
@@ -424,21 +466,10 @@ function resolveSolidAnchor(
 		return { adapted: false, band, lightness: clampUnit(source.l), target: source.l };
 	}
 
-	const direction = mode === 'light' ? -1 : 1;
 	const preferred = clamp(target, low, high);
-	const gateRatio = (lightness: number): number => {
-		const solid = gamutMapOklch({ c: source.c, h: source.h, l: clampUnit(lightness) });
-		const hover = gamutMapOklch({
-			c: source.c,
-			h: source.h,
-			l: clampUnit(lightness + direction * SOLID_HOVER_DELTA),
-		});
-		return chooseOnSolid(source.h, [solid, hover]).minRatio;
-	};
-	const passes = (lightness: number): boolean =>
-		gateRatio(lightness) >= TEXT_RATIO + RATIO_HEADROOM;
+	const gateRatio = (lightness: number): number => onSolidGateRatio({ lightness, mode, source });
 
-	if (passes(preferred)) {
+	if (passesOnSolidGate({ lightness: preferred, mode, source })) {
 		return { adapted: false, band, lightness: preferred, target };
 	}
 
@@ -446,15 +477,15 @@ function resolveSolidAnchor(
 	let bestDistance = Number.POSITIVE_INFINITY;
 	let bestAttemptLightness = preferred;
 	let bestAttemptRatio = gateRatio(preferred);
-	const stepCount = Math.round((high - low) / SOLID_SEARCH_STEP);
+	const stepCount = Math.round((high - low) / CONTRAST_SEARCH_STEP);
 	for (let index = 0; index <= stepCount; index++) {
-		const lightness = low + index * SOLID_SEARCH_STEP;
+		const lightness = low + index * CONTRAST_SEARCH_STEP;
 		const ratio = gateRatio(lightness);
 		if (ratio > bestAttemptRatio) {
 			bestAttemptRatio = ratio;
 			bestAttemptLightness = lightness;
 		}
-		if (ratio < TEXT_RATIO + RATIO_HEADROOM) continue;
+		if (ratio < ON_SOLID_TARGET) continue;
 		const distance = Math.abs(lightness - preferred);
 		if (distance < bestDistance) {
 			bestDistance = distance;
@@ -475,7 +506,7 @@ function resolveSolidAnchor(
 
 /**
  * Chooses the on-solid text colour: the near-white or near-black candidate at the hue with the
- * higher minimum contrast across the given solids. Mirrors build-theme's `chooseOnSolid`.
+ * higher minimum contrast across the given solids.
  */
 function chooseOnSolid(hue: number, solids: Array<Oklch>): { color: Oklch; minRatio: number } {
 	const nearWhite = gamutMapOklch({ c: 0, h: hue, l: ON_SOLID_WHITE_LIGHTNESS });
@@ -486,10 +517,8 @@ function chooseOnSolid(hue: number, solids: Array<Oklch>): { color: Oklch; minRa
 	});
 	const whiteMinimum = minimumRatio(nearWhite, solids);
 	const blackMinimum = minimumRatio(nearBlack, solids);
-	if (whiteMinimum >= TEXT_RATIO + RATIO_HEADROOM)
-		return { color: nearWhite, minRatio: whiteMinimum };
-	if (blackMinimum >= TEXT_RATIO + RATIO_HEADROOM)
-		return { color: nearBlack, minRatio: blackMinimum };
+	if (whiteMinimum >= ON_SOLID_TARGET) return { color: nearWhite, minRatio: whiteMinimum };
+	if (blackMinimum >= ON_SOLID_TARGET) return { color: nearBlack, minRatio: blackMinimum };
 	return whiteMinimum >= blackMinimum
 		? { color: nearWhite, minRatio: whiteMinimum }
 		: { color: nearBlack, minRatio: blackMinimum };
@@ -508,8 +537,4 @@ const GAMUT_REDUCTION_EPSILON = 0.0001;
 
 function clamp(value: number, low: number, high: number): number {
 	return Math.min(high, Math.max(low, value));
-}
-
-function clampUnit(value: number): number {
-	return clamp(value, 0, 1);
 }

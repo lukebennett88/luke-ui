@@ -22,8 +22,11 @@ element. Neither step injects styles at runtime.
 - `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into and
   the curated colour, radius, and typography defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
+- `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and intent role
+  groups the generator, the compiler's validation matrix, and the semantic map all read.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
-  constrained step-9 solid-anchor search and the per-role capability guarantees.
+  constrained step-9 solid-anchor search, the per-role capability guarantees, and
+  `passesOnSolidGate` — the one on-solid accessibility gate.
 - `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
   `surfaces.canvas` is always exactly the resolved `background`.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and

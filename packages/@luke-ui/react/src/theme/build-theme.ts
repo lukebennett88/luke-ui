@@ -5,6 +5,15 @@ import { precomputeValues } from '@capsizecss/vanilla-extract';
 import type { Oklch } from './color.js';
 import { clampUnit, contrastRatio, gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract, fontSizeSteps } from './contract.js';
+import {
+	ACTION_INTENTS,
+	BORDER_AND_TEXT_INTENTS,
+	CONTRAST_SEARCH_STEP,
+	FEEDBACK_INTENTS,
+	RATIO_HEADROOM,
+	TEXT_RATIO,
+	UI_RATIO,
+} from './contrast-policy.js';
 import type {
 	ContrastCheck,
 	FamilyDiagnostics,
@@ -149,22 +158,10 @@ export class ThemeGenerationError extends Error {
 type ColorMode = 'light' | 'dark';
 
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
-const TEXT_RATIO = 4.5;
-const UI_RATIO = 3;
-// border.control is solved past the nominal 3:1 gate so 4-decimal OKLCH emission cannot round a
-// passing pair below it, mirroring the on-solid search's headroom in scale.ts.
-const CONTROL_BORDER_HEADROOM = 0.05;
-const CONTROL_BORDER_SEARCH_STEP = 0.0025;
 
 // The six private scale families, generated in this order so a build that fails part-way reports the
 // families it had already resolved. Feedback roles never throw (they do not guarantee on-solid).
 const FAMILY_ROLES = ['neutral', 'accent', 'danger', 'info', 'success', 'warning'] as const;
-// Action intents render the full interactive ramp (subtle trio + solid trio + onSolid); feedback
-// intents are static and expose only the soft kit (subtle surface + border + text).
-const ACTION_INTENTS = ['neutral', 'accent', 'danger'] as const;
-const FEEDBACK_INTENTS = ['info', 'success', 'warning'] as const;
-// Accent and danger additionally expose a border and low-contrast text.
-const BORDER_AND_TEXT_INTENTS = ['accent', 'danger'] as const;
 // Parse-validated per-mode source colours. `background` is the resolved canvas anchor (#242); `focus`
 // is the authored keyboard-focus ring; both are colours the foundation must carry.
 const SOURCE_COLOR_FIELDS = [
@@ -341,7 +338,7 @@ function solveControlBorder(params: {
 	const { neutral, canvas, recessed, mode } = params;
 	const seed = neutral[7];
 	const direction = mode === 'light' ? -1 : 1;
-	const target = UI_RATIO + CONTROL_BORDER_HEADROOM;
+	const target = UI_RATIO + RATIO_HEADROOM;
 	const worstRatio = (candidate: Oklch) =>
 		Math.min(contrastRatio(candidate, canvas), contrastRatio(candidate, recessed));
 
@@ -350,7 +347,7 @@ function solveControlBorder(params: {
 		const clamped = clampUnit(lightness);
 		const candidate = gamutMapOklch({ c: seed.c, h: seed.h, l: clamped });
 		if (worstRatio(candidate) >= target || clamped === 0 || clamped === 1) return candidate;
-		lightness = clamped + direction * CONTROL_BORDER_SEARCH_STEP;
+		lightness = clamped + direction * CONTRAST_SEARCH_STEP;
 	}
 }
 
@@ -398,7 +395,9 @@ function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): Va
 	const check = (foreground: string, background: string, required: number, hard: boolean) => {
 		const ratio = contrastRatio(colorAt(foreground), colorAt(background));
 		const passes = ratio >= required;
-		checks.push({ background, foreground, passes, ratio, required });
+		// `hard` is recorded on the check itself, so tooling reads the compiler's own decision instead of
+		// re-deriving it from token paths.
+		checks.push({ background, foreground, hard, passes, ratio, required });
 		if (hard && !passes) failures.push({ background, foreground, mode, ratio, required });
 	};
 

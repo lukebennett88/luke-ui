@@ -16,6 +16,8 @@ import {
 	generateFamilyWithDiagnostics,
 	MIN_STATE_DELTA,
 	oklabDeltaE,
+	onSolidGateRatio,
+	passesOnSolidGate,
 	ScaleGenerationError,
 } from './scale.js';
 
@@ -268,6 +270,83 @@ describe('solid-anchor search', () => {
 				TEXT_RATIO,
 			);
 		}
+	});
+});
+
+describe('the one on-solid gate', () => {
+	// `passesOnSolidGate` is the single predicate for "can this solid carry readable text": the
+	// solid-anchor search below decides on it, and `defineTheme`'s accent pre-conditioner calls it
+	// rather than keeping a second copy. These tests pin the properties that copy had drifted on.
+
+	/** How the solid-anchor search resolved a source, or `null` when it found nothing in the band. */
+	function resolveAnchor(source: Oklch, mode: ColorMode) {
+		try {
+			return generateFamilyWithDiagnostics({
+				background: BACKGROUND[mode],
+				mode,
+				role: 'accent',
+				source,
+			}).diagnostics.solidAnchor;
+		} catch (error) {
+			if (error instanceof ScaleGenerationError) return null;
+			throw error;
+		}
+	}
+
+	it('accepts exactly the lightnesses the solid-anchor search honours verbatim', () => {
+		// Swept across the generator's whole vibrant solid range, which contains `defineTheme`'s wider
+		// accent adaptation bands. A lightness the gate accepts must be one the search keeps as-is; one it
+		// rejects must be re-searched or reported unsatisfiable. That is the invariant that makes the
+		// pre-conditioner unable to be stricter than the solver.
+		const disagreements: Array<string> = [];
+		for (const mode of MODES) {
+			for (const hue of [0, 100, 210, 300]) {
+				for (const chroma of [0.01, 0.1, 0.2]) {
+					for (let lightness = 0.3; lightness <= 0.92 + 1e-9; lightness += 0.01) {
+						const source: Oklch = { c: chroma, h: hue, l: lightness };
+						const anchor = resolveAnchor(source, mode);
+						const honoured =
+							anchor !== null &&
+							!anchor.adaptedForOnSolid &&
+							Math.abs(anchor.resolvedLightness - lightness) < 1e-9;
+						const gated = passesOnSolidGate({ lightness, mode, source });
+						if (gated === honoured) continue;
+						disagreements.push(
+							`${mode} oklch(${lightness.toFixed(2)} ${chroma} ${hue}): ` +
+								`gate ${gated}, search honoured ${honoured}`,
+						);
+					}
+				}
+			}
+		}
+		expect(disagreements).toEqual([]);
+	});
+
+	it('solves past the AA text ratio, so a pair that only just clears 4.5:1 does not pass', () => {
+		// Light `oklch(0.5575 0.01 0)` reaches 4.53:1 across its solid and hover: enough for a plain 4.5
+		// check, short of the headroom the gate solves for so 4-decimal emission cannot round it under.
+		const source: Oklch = { c: 0.01, h: 0, l: 0.5575 };
+		const ratio = onSolidGateRatio({ lightness: source.l, mode: 'light', source });
+		expect(ratio).toBeGreaterThan(TEXT_RATIO);
+		expect(ratio).toBeLessThan(TEXT_RATIO + 0.05);
+		expect(passesOnSolidGate({ lightness: source.l, mode: 'light', source })).toBe(false);
+		// And the search agrees: it moves the anchor off this lightness rather than emitting it.
+		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(true);
+	});
+
+	it('tests only the solid and its hover, never a deeper pressed state the engine does not generate', () => {
+		// Light `oklch(0.64 0 0)` clears 4.58:1 across the two states the engine emits. A phantom third
+		// state 0.09 darker would drag it to 3.88:1 and fail — the pressed solid reuses step 10, so no such
+		// colour exists and the gate must not invent one.
+		const source: Oklch = { c: 0, h: 0, l: 0.64 };
+		const phantomPressed = { c: 0, h: 0, l: source.l - 0.09 };
+		const onSolid = family('oklch(0.64 0 0)', 'light', 'accent').contrast;
+		expect(contrastRatio(onSolid, phantomPressed)).toBeLessThan(TEXT_RATIO);
+		expect(onSolidGateRatio({ lightness: source.l, mode: 'light', source })).toBeGreaterThan(
+			TEXT_RATIO,
+		);
+		expect(passesOnSolidGate({ lightness: source.l, mode: 'light', source })).toBe(true);
+		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(false);
 	});
 });
 
