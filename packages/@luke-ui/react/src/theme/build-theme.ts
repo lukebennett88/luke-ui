@@ -468,6 +468,19 @@ function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): Va
 	return { checks, failures };
 }
 
+/**
+ * Whether a value is unsafe to emit verbatim into the generated stylesheet: anything other than a
+ * non-empty string, or a string containing a statement-breaking character (`;`, `{`, `}`). Shared by
+ * every authored-but-unparsed CSS value — the depth box-shadow rungs, the action-control-finish
+ * background-images, and the scrim colour (deliberately excluded from OKLCH colour parsing because
+ * its alpha channel does not fit that pattern) — so the rule has one home. Checking `typeof value`
+ * rather than assuming a string keeps this guard correct even when a caller other than `defineTheme`
+ * hands `buildTheme` a foundation with a rung explicitly set to `undefined`.
+ */
+function isUnsafeCssValue(value: unknown): boolean {
+	return typeof value !== 'string' || value.trim() === '' || /[;{}]/.test(value);
+}
+
 function validateFoundation(foundation: ThemeFoundation): void {
 	const issues: Array<string> = [];
 	try {
@@ -486,13 +499,16 @@ function validateFoundation(foundation: ThemeFoundation): void {
 				issues.push(`${mode}.color.${field}: ${errorMessage(error)}`);
 			}
 		}
+		if (isUnsafeCssValue(modeFoundation.color.scrim)) {
+			issues.push(`${mode}.color.scrim: must be a non-empty CSS colour value`);
+		}
 		for (const [name, value] of Object.entries(modeFoundation.depth)) {
-			if (value.trim() === '' || /[;{}]/.test(value)) {
+			if (isUnsafeCssValue(value)) {
 				issues.push(`${mode}.depth.${name}: must be a non-empty CSS box-shadow value`);
 			}
 		}
 		for (const [name, value] of Object.entries(modeFoundation.actionControlFinish)) {
-			if (value.trim() === '' || /[;{}]/.test(value)) {
+			if (isUnsafeCssValue(value)) {
 				issues.push(
 					`${mode}.actionControlFinish.${name}: must be a non-empty CSS background-image value`,
 				);

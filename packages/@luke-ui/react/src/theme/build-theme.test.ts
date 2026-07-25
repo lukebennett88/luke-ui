@@ -340,6 +340,40 @@ describe('buildTheme foundation validation', () => {
 			'dark.depth.overlay: must be a non-empty CSS box-shadow value',
 		);
 	});
+
+	it('rejects an unsafe scrim value with a message naming the field', () => {
+		const unsafeScrim: ThemeFoundation = {
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: { ...tactileFoundation.light.color, scrim: 'oklch(0 0 0 / 0.2); } .evil {' },
+			},
+			name: 'unsafe-scrim',
+		};
+
+		expect(() => buildTheme(unsafeScrim)).toThrow(
+			'light.color.scrim: must be a non-empty CSS colour value',
+		);
+	});
+
+	it("produces the validator's message rather than a TypeError for a shadow rung set to undefined", () => {
+		// `defineTheme` now filters `undefined` rungs before merging (define-theme.test.ts covers that
+		// fallback), but `buildTheme` is also called directly with a raw foundation (tests, tooling,
+		// or any future composition that does not go through `defineTheme`). The validator's guard must
+		// stay robust to that shape regardless of caller, rather than crash inside `.trim()`.
+		const undefinedDepthRung = {
+			...tactileFoundation,
+			dark: {
+				...tactileFoundation.dark,
+				depth: { ...tactileFoundation.dark.depth, resting: undefined },
+			},
+			name: 'undefined-depth-rung',
+		} as unknown as ThemeFoundation;
+
+		expect(() => buildTheme(undefinedDepthRung)).toThrow(
+			'dark.depth.resting: must be a non-empty CSS box-shadow value',
+		);
+	});
 });
 
 describe('buildTheme independent modes', () => {
