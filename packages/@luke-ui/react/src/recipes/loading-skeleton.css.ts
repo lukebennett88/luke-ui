@@ -61,7 +61,7 @@ const pulse = {
 } as const satisfies StyleRule;
 
 /** Vanilla-extract class for the `LoadingSkeleton` component's styles. */
-export const loadingSkeleton = styleInLayer('recipes', {
+export const loadingSkeletonClassName = styleInLayer('recipes', {
 	selectors: {
 		// Inline mode: the element itself is the skeleton (used when wrapping text).
 		'&[data-skeleton-inline]': {
@@ -79,7 +79,7 @@ export const loadingSkeleton = styleInLayer('recipes', {
 // The child's own background is forced flat and pulses in sync with the `::after` overlay below,
 // so at a rounded corner its square edge would otherwise show through the overlay's rounded
 // recess. Give it the same radius so both surfaces agree on the visible shape.
-globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > *`, {
+globalStyleInLayer('recipes', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > *`, {
 	...surface,
 	...pulse,
 	borderRadius: `var(${skeletonRadiusVar}, 0px)`,
@@ -87,7 +87,7 @@ globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > 
 	position: 'relative !important' as 'relative',
 });
 
-globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > * *`, {
+globalStyleInLayer('recipes', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > * *`, {
 	'@media': {
 		'(forced-colors: active)': forcedColorsSurface,
 	},
@@ -96,11 +96,15 @@ globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > 
 
 // A pseudo-element painted over the child covers visuals the forced styles can't reach (nested backgrounds,
 // rounded corners); `inset: -1px` also covers the child's border box edges.
-globalStyleInLayer('recipes', `${loadingSkeleton}:not([data-skeleton-inline]) > *::after`, {
-	...surface,
-	...pulse,
-	borderRadius: `var(${skeletonRadiusVar}, 0px)`,
-	content: '""',
-	inset: '-1px',
-	position: 'absolute',
-});
+globalStyleInLayer(
+	'recipes',
+	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > *::after`,
+	{
+		...surface,
+		...pulse,
+		borderRadius: `var(${skeletonRadiusVar}, 0px)`,
+		content: '""',
+		inset: '-1px',
+		position: 'absolute',
+	},
+);

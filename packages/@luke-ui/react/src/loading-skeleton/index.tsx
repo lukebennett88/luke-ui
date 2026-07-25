@@ -77,7 +77,7 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 		<Component
 			{...spanProps}
 			aria-hidden
-			className={cx(styles.loadingSkeleton, className)}
+			className={cx(styles.loadingSkeletonClassName, className)}
 			data-skeleton-inline={isInline ? '' : undefined}
 			inert
 			style={radius ? { ...style, [styles.skeletonRadiusVar]: vars.radius[radius] } : style}

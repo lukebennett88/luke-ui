@@ -5,7 +5,7 @@ import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 	inputStates,
-} from './input-states.css.js';
+} from './input-states.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 

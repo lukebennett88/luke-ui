@@ -53,7 +53,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			isPending={isPending}
 			size={size}
 		>
-			<Icon aria-hidden className={styles.icon({ isPending })} name={icon} />
+			<Icon aria-hidden className={styles.iconButtonIcon({ isPending })} name={icon} />
 		</Button>
 	);
 }

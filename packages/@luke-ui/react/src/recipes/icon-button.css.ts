@@ -30,7 +30,7 @@ export const iconButtonReset = styleInLayer('utilities', {
 	},
 });
 
-export const icon = recipe({
+export const iconButtonIcon = recipe({
 	defaultVariants: { isPending: false },
 	variants: {
 		isPending: {

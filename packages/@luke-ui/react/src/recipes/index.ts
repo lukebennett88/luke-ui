@@ -13,21 +13,10 @@ export type { IconButtonVariants } from '../recipes/icon-button.css.js';
 export { iconButton } from '../recipes/icon-button.css.js';
 export type { LinkVariants } from '../recipes/link.css.js';
 export { link } from '../recipes/link.css.js';
-export { loadingSkeleton } from '../recipes/loading-skeleton.css.js';
+export { loadingSkeletonClassName } from '../recipes/loading-skeleton.css.js';
 export type { LoadingSpinnerVariants } from '../recipes/loading-spinner.css.js';
 export { loadingSpinner } from '../recipes/loading-spinner.css.js';
-export type {
-	TextAlign,
-	TextColor,
-	TextDecoration,
-	TextFontVariantNumeric,
-	TextFontWeight,
-	TextLineClampVariant,
-	TextSize,
-	TextTransform,
-	TextVariants,
-	TextWrap,
-} from '../recipes/text.css.js';
+export type { TextVariants } from '../recipes/text.css.js';
 export { text } from '../recipes/text.css.js';
 export type { TextInputVariants } from '../recipes/text-input.css.js';
 export { textInput } from '../recipes/text-input.css.js';
