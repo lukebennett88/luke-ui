@@ -35,15 +35,15 @@ independently, so **every generated colour value can move**, even where the prev
 looked visually similar. This is a property of switching generators, not a regression in any one
 token.
 
-Two fixture sets document the transition and stay in the repo permanently:
+The v2 pipeline output is pinned in a regression golden:
 
-- `theme/__fixtures__/compat-goldens/*.pre-v2.css` — the exact `buildTheme` output for the bundled
-  themes captured before the v2 rewrite (frozen once, byte-identical to the original solver).
-- `theme/__fixtures__/v2-goldens/*.v2.css` — the exact output under the v2 pipeline.
+- `theme/__fixtures__/v2-goldens/*.v2.css` — the exact `buildTheme` output under the v2 pipeline,
+  asserted byte-identical in `build-theme.test.ts` so any later generator change is a reviewed,
+  deliberate diff.
 
-`build-theme.test.ts` asserts the v2 output differs from the pre-v2 goldens (the repaint happened)
-and pins the v2 goldens for future regressions. Re-generate the v2 goldens deliberately, reviewing
-the diff, when a later engine change intentionally repaints again — never to silence a failing test.
+The pre-v2 output is recoverable from git history (commit `cef0076`) and no longer committed to the
+repo. Re-generate the v2 goldens deliberately, reviewing the diff, when a later engine change
+intentionally repaints again — never to silence a failing test.
 
 ## Private ≠ non-breaking
 

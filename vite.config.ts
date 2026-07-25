@@ -16,7 +16,6 @@ export default defineConfig({
 			'**/storybook-static/**',
 			// Golden fixtures are frozen `buildTheme` output, asserted byte-identical in tests; they must
 			// never be reformatted.
-			'**/__fixtures__/compat-goldens/**',
 			'**/__fixtures__/v2-goldens/**',
 			'node_modules',
 		],
