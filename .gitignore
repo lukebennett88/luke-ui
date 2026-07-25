@@ -1,11 +1,12 @@
+.artifacts/
 .DS_Store
 .env
+.netlify
 .source/
 .tanstack/
 .turbo/
-.vitest-attachments/
-.artifacts/
 .visual-captures/
+.vitest-attachments/
 *.local
 *.log
 apps/docs/.story/
