@@ -7,43 +7,6 @@ import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
 import { visuallyHiddenStyle } from './visually-hidden.css.js';
 
-/** Typography size steps. */
-export type TextSize = FontSizeStep;
-
-/** Semantic text colours. */
-export type TextColor =
-	| 'primary'
-	| 'secondary'
-	| 'accent'
-	| 'info'
-	| 'success'
-	| 'warning'
-	| 'danger';
-/** Semantic font-weight roles. */
-export type TextFontWeight = 'body' | 'label' | 'heading' | 'emphasis';
-/** Logical text alignment values. */
-export type TextAlign = 'start' | 'center' | 'end';
-/** Text wrapping values. */
-export type TextWrap = 'unset' | 'balance' | 'pretty';
-
-const textDecorationKeys = ['none', 'underline', 'line-through', 'inherit'] as const;
-/** Text decoration variant values. */
-export type TextDecoration = (typeof textDecorationKeys)[number];
-
-const textTransformKeys = ['none', 'capitalize', 'uppercase', 'lowercase', 'inherit'] as const;
-/** Text transform variant values. */
-export type TextTransform = (typeof textTransformKeys)[number];
-
-const fontVariantNumericKeys = [
-	'unset',
-	'diagonal-fractions',
-	'ordinal',
-	'slashed-zero',
-	'tabular-nums',
-] as const;
-/** Numeric glyph variant values. */
-export type TextFontVariantNumeric = (typeof fontVariantNumericKeys)[number];
-
 const lineClampNone = {} satisfies ComplexStyleRule;
 const lineClampSingleLine = {
 	display: 'block',
@@ -72,9 +35,6 @@ const lineClampVariants = {
 	4: lineClampMultiLine(4),
 	5: lineClampMultiLine(5),
 } as const;
-
-/** Text line-clamp variant values. */
-export type TextLineClampVariant = keyof typeof lineClampVariants;
 
 const base = styleInLayer('recipes', {
 	color: vars.color.text.primary,
@@ -109,7 +69,7 @@ const sizeVariants = Object.fromEntries(
 			lineHeight: vars.font[size].lineHeight,
 		},
 	]),
-) as Record<TextSize, { fontSize: string; letterSpacing: string; lineHeight: string }>;
+) as Record<FontSizeStep, { fontSize: string; letterSpacing: string; lineHeight: string }>;
 
 const sizeStepCompoundVariants = fontSizeSteps.map((size) => {
 	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];

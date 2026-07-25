@@ -20,7 +20,7 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url), 'utf8');
 	const recipes = await import('@luke-ui/react/recipes');
 	const styles = await import('@luke-ui/react/styles');
-	const recipeClasses = [...recipes.icon().split(' '), recipes.loadingSkeleton];
+	const recipeClasses = [...recipes.icon().split(' '), recipes.loadingSkeletonClassName];
 	const textClassesBySize = Object.fromEntries(
 		fontSizeSteps.map((size) => [size, recipes.text({ size }).split(' ')]),
 	) as TextClassesBySize;

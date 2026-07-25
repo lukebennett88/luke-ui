@@ -5,7 +5,7 @@ import { cdp } from 'vite-plus/test/context';
 import { contrastRatio, parseColor } from '../theme/color.js';
 import { themeRootClassName } from '../theme/index.js';
 import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
-import { loadingSkeleton } from './loading-skeleton.css.js';
+import { loadingSkeletonClassName } from './loading-skeleton.css.js';
 
 let root: HTMLElement | undefined;
 
@@ -63,7 +63,7 @@ function mountInlineSkeleton(
 	root.dataset.colorMode = mode;
 	root.style.backgroundColor = 'var(--luke-color-surface-canvas)';
 	const skeleton = root.appendChild(document.createElement('span'));
-	skeleton.className = loadingSkeleton;
+	skeleton.className = loadingSkeletonClassName;
 	skeleton.dataset.skeletonInline = '';
 	return skeleton;
 }
@@ -194,7 +194,7 @@ function mountBlockSkeleton() {
 	root.dataset.colorMode = 'light';
 	root.style.backgroundColor = 'var(--luke-color-surface-canvas)';
 	const parent = root.appendChild(document.createElement('div'));
-	parent.className = loadingSkeleton;
+	parent.className = loadingSkeletonClassName;
 	const child = parent.appendChild(document.createElement('div'));
 	child.textContent = 'child';
 	const descendant = child.appendChild(document.createElement('span'));

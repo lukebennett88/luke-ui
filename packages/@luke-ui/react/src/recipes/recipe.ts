@@ -54,7 +54,6 @@ interface SinglePartConfig<Variants extends VariantGroups> {
 	variants?: Variants;
 	defaultVariants?: VariantSelection<Variants>;
 	compoundVariants?: Array<CompoundVariant<Variants>>;
-	extend?: SinglePartConfig<VariantGroups>;
 }
 
 /** The runtime function a single-part `recipe()` returns. */
@@ -73,19 +72,11 @@ type SlotVariantSelection<Variants extends SlotVariantGroups<string>> = {
 	-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
 };
 
-/** A compound variant for a slotted recipe, whose style is keyed by slot. */
-interface SlotCompoundVariant<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
-	variants: SlotVariantSelection<Variants>;
-	style: SlotStyles<Slot>;
-}
-
 /** Slotted recipe config. */
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
 	slots: Record<Slot, RecipeStyleRule>;
 	variants?: Variants;
 	defaultVariants?: SlotVariantSelection<Variants>;
-	compoundVariants?: Array<SlotCompoundVariant<Slot, Variants>>;
-	extend?: MultiPartConfig<Slot, SlotVariantGroups<Slot>>;
 }
 
 /** A single slot function: takes an optional extra class and returns a class string. */
@@ -111,10 +102,6 @@ export interface SlottedConfigInput {
 	slots: Record<string, RecipeStyleRule>;
 	variants?: Record<string, Record<string, Record<string, RecipeStyleRule>>>;
 	defaultVariants?: Record<string, string | number | boolean>;
-	compoundVariants?: ReadonlyArray<{
-		variants: Record<string, string | number | boolean>;
-		style: Record<string, RecipeStyleRule>;
-	}>;
 }
 
 /** Derives the outer variant selection type for a built recipe. */
@@ -175,45 +162,16 @@ function registerSerializer(fn: object, importName: string, args: ReadonlyArray<
 }
 
 function buildSinglePart(config: SinglePartConfig<VariantGroups>): BuiltRecipe {
-	const resolved = config.extend ? mergeSingleConfigs(config.extend, config) : config;
-
 	return recipeInRecipesLayer({
-		...(resolved.base === undefined ? {} : { base: resolved.base }),
-		...(resolved.variants === undefined ? {} : { variants: resolved.variants }),
-		...(resolved.defaultVariants === undefined
-			? {}
-			: { defaultVariants: resolved.defaultVariants }),
-		...(resolved.compoundVariants === undefined
-			? {}
-			: { compoundVariants: resolved.compoundVariants }),
+		...(config.base === undefined ? {} : { base: config.base }),
+		...(config.variants === undefined ? {} : { variants: config.variants }),
+		...(config.defaultVariants === undefined ? {} : { defaultVariants: config.defaultVariants }),
+		...(config.compoundVariants === undefined ? {} : { compoundVariants: config.compoundVariants }),
 	});
 }
 
-function mergeSingleConfigs(
-	base: SinglePartConfig<VariantGroups>,
-	override: SinglePartConfig<VariantGroups>,
-): SinglePartConfig<VariantGroups> {
-	const variants: VariantGroups = { ...base.variants };
-	if (override.variants !== undefined) {
-		for (const [group, values] of Object.entries(override.variants)) {
-			variants[group] = { ...variants[group], ...values };
-		}
-	}
-
-	const mergedBase = override.base ?? base.base;
-
-	return {
-		...(mergedBase === undefined ? {} : { base: mergedBase }),
-		...(Object.keys(variants).length > 0 ? { variants } : {}),
-		defaultVariants: { ...base.defaultVariants, ...override.defaultVariants },
-		compoundVariants: [...(base.compoundVariants ?? []), ...(override.compoundVariants ?? [])],
-	};
-}
-
 function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescriptor {
-	const resolved = config.extend ? mergeConfigs(config.extend, withoutExtend(config)) : config;
-
-	const slotNames = Object.keys(resolved.slots);
+	const slotNames = Object.keys(config.slots);
 	const slots: Record<string, BuiltRecipe> = {};
 	const slotGroups: Record<string, ReadonlyArray<string>> = {};
 
@@ -221,8 +179,8 @@ function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescri
 		const variants: Record<string, Record<string, RecipeStyleRule>> = {};
 		const groupsForSlot: Array<string> = [];
 
-		if (resolved.variants !== undefined) {
-			for (const [group, values] of Object.entries(resolved.variants)) {
+		if (config.variants !== undefined) {
+			for (const [group, values] of Object.entries(config.variants)) {
 				const slotValues: Record<string, RecipeStyleRule> = {};
 				let hasSlot = false;
 
@@ -241,26 +199,14 @@ function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescri
 			}
 		}
 
-		const compoundVariants: Array<{ variants: Record<string, unknown>; style: RecipeStyleRule }> =
-			[];
-		if (resolved.compoundVariants !== undefined) {
-			for (const compound of resolved.compoundVariants) {
-				const style = compound.style[slotName];
-				if (style !== undefined) {
-					compoundVariants.push({ variants: compound.variants, style });
-				}
-			}
-		}
-
-		const defaultVariants = pickGroups(resolved.defaultVariants, groupsForSlot);
+		const defaultVariants = pickGroups(config.defaultVariants, groupsForSlot);
 
 		slots[slotName] = recipeInRecipesLayer({
-			base: resolved.slots[slotName],
+			base: config.slots[slotName],
 			...(groupsForSlot.length > 0 ? { variants } : {}),
 			...(defaultVariants !== undefined && Object.keys(defaultVariants).length > 0
 				? { defaultVariants }
 				: {}),
-			...(compoundVariants.length > 0 ? { compoundVariants } : {}),
 		});
 		slotGroups[slotName] = groupsForSlot;
 	}
@@ -336,7 +282,7 @@ function recipeInRecipesLayer(options: RecipeInLayerOptions): BuiltRecipe {
 }
 
 // ---------------------------------------------------------------------------
-// extend (single-base inheritance)
+// Config shape detection
 // ---------------------------------------------------------------------------
 
 function isMultiPart(
@@ -347,55 +293,6 @@ function isMultiPart(
 
 function isObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null;
-}
-
-function withoutExtend(config: AnyMultiPartConfig): AnyMultiPartConfig {
-	const { extend: _extend, ...rest } = config;
-	return rest;
-}
-
-/**
- * Merges a slotted config's single `extend` base into it. Slots, variant groups,
- * variant values, per-slot variant styles, and default variants are combined. The
- * extending config takes precedence on same-named keys, and compound variants are
- * concatenated. Internal to `extend` resolution.
- */
-function mergeConfigs(...configs: Array<AnyMultiPartConfig>): AnyMultiPartConfig {
-	const slots: Record<string, RecipeStyleRule> = {};
-	const variants: Record<string, Record<string, SlotStyles<string>>> = {};
-	const defaultVariants: SlotVariantSelection<SlotVariantGroups<string>> = {};
-	const compoundVariants: Array<SlotCompoundVariant<string, SlotVariantGroups<string>>> = [];
-
-	for (const config of configs) {
-		const resolved = config.extend ? mergeConfigs(config.extend, withoutExtend(config)) : config;
-
-		Object.assign(slots, resolved.slots);
-
-		if (resolved.variants !== undefined) {
-			for (const [group, values] of Object.entries(resolved.variants)) {
-				const mergedGroup = variants[group] ?? {};
-				for (const [value, slotStyles] of Object.entries(values)) {
-					mergedGroup[value] = { ...mergedGroup[value], ...slotStyles };
-				}
-				variants[group] = mergedGroup;
-			}
-		}
-
-		if (resolved.defaultVariants !== undefined) {
-			Object.assign(defaultVariants, resolved.defaultVariants);
-		}
-
-		if (resolved.compoundVariants !== undefined) {
-			compoundVariants.push(...resolved.compoundVariants);
-		}
-	}
-
-	return {
-		slots,
-		...(Object.keys(variants).length > 0 ? { variants } : {}),
-		...(Object.keys(defaultVariants).length > 0 ? { defaultVariants } : {}),
-		...(compoundVariants.length > 0 ? { compoundVariants } : {}),
-	};
 }
 
 // ---------------------------------------------------------------------------
