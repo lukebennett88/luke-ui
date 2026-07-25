@@ -1,4 +1,3 @@
-import { IconButton } from '@luke-ui/react/icon-button';
 import { cx } from '@luke-ui/react/utils';
 import { ClientOnly, createFileRoute, Link } from '@tanstack/react-router';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
@@ -10,9 +9,9 @@ import {
 	EditorSkeletonShapeScript,
 	LoadingPill,
 } from '../../components/playground/editor-skeleton';
+import { PreviewToolbar } from '../../components/playground/preview-toolbar';
 import { useIsDesktop } from '../../components/playground/use-is-desktop';
 import type { ViewportWidth } from '../../components/playground/viewport-toggle';
-import { ViewportToggle } from '../../components/playground/viewport-toggle';
 import { ThemeControls, useDocsThemeIdentity } from '../../components/theme-controls';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
 import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
@@ -149,15 +148,8 @@ function Playground() {
 						Docs
 					</Link>
 				</div>
-				<div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start">
+				<div className="flex w-full items-center justify-end gap-2 sm:w-auto">
 					<ThemeControls />
-					<ViewportToggle onChange={setViewportWidth} value={viewportWidth} />
-					<IconButton
-						aria-label="Fullscreen preview"
-						icon="expand"
-						onPress={() => setIsPreviewFullscreen(true)}
-						size="small"
-					/>
 				</div>
 			</header>
 			<Group
@@ -201,15 +193,12 @@ function Playground() {
 					defaultSize="50%"
 					style={{ overflow: 'hidden' }}
 				>
-					{isPreviewFullscreen ? (
-						<IconButton
-							aria-label="Exit fullscreen preview"
-							className="absolute inset-e-4 z-20 rounded-full! bg-fd-background shadow-sm inset-bs-4"
-							icon="minimize"
-							onPress={() => setIsPreviewFullscreen(false)}
-							size="small"
-						/>
-					) : null}
+					<PreviewToolbar
+						isFullscreen={isPreviewFullscreen}
+						onFullscreenChange={setIsPreviewFullscreen}
+						onViewportChange={setViewportWidth}
+						viewportWidth={viewportWidth}
+					/>
 					{error === null ? null : (
 						<div
 							className="border-fd-border border-b bg-fd-card px-4 py-2 font-mono text-red-600 text-xs dark:text-red-400"
