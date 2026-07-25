@@ -5,7 +5,7 @@ import { IconToggleButtonGroup } from './icon-toggle-button-group.js';
 const COLOR_MODES = [
 	{ icon: 'sun', label: 'Light theme', value: 'light' },
 	{ icon: 'moon', label: 'Dark theme', value: 'dark' },
-	{ icon: 'monitor', label: 'System theme', value: 'system' },
+	{ icon: 'circleHalf', label: 'System theme', value: 'system' },
 ] as const;
 
 type ColorMode = (typeof COLOR_MODES)[number]['value'];

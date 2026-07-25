@@ -1,6 +1,8 @@
 import '../styles/app.css';
 import '@luke-ui/react/themes/paper.css';
 import '@luke-ui/react/themes/tactile.css';
+import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { paperThemeClassName } from '@luke-ui/react/themes';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
@@ -36,13 +38,13 @@ test('persists theme identity and colour mode independently', async () => {
 		</>,
 	);
 
-	const profile = page.getByRole('combobox', { name: 'Theme profile' });
+	const paperProfile = page.getByRole('radio', { name: 'Paper' });
 	const darkMode = page.getByRole('radio', { name: 'Dark theme' });
 	const themeRoot = getThemeRoot();
 
-	await userEvent.selectOptions(profile, 'paper');
+	await userEvent.click(paperProfile, { force: true });
 
-	expect(profile).toHaveValue('paper');
+	expect(paperProfile).toBeChecked();
 	expect(themeRoot).toHaveClass(paperThemeClassName);
 	expect(themeRoot.dataset.colorMode).toBe('light');
 
@@ -54,10 +56,32 @@ test('persists theme identity and colour mode independently', async () => {
 	unmountTheme();
 	renderTheme(<ThemeControls />);
 
-	expect(page.getByRole('combobox', { name: 'Theme profile' })).toHaveValue('paper');
+	expect(page.getByRole('radio', { name: 'Paper' })).toBeChecked();
 	expect(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
 	expect(getThemeRoot()).toHaveClass(paperThemeClassName);
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
+});
+
+test('theme profile is labelled and operable with arrow keys', async () => {
+	renderTheme(<ThemeControls />);
+
+	const group = page.getByRole('radiogroup', { name: 'Theme profile' });
+	const tactileProfile = page.getByRole('radio', { name: 'Tactile' });
+	const paperProfile = page.getByRole('radio', { name: 'Paper' });
+
+	expect(group.element()).toBeInTheDocument();
+	expect(tactileProfile).toBeChecked();
+
+	await userEvent.tab();
+	expect(tactileProfile.element()).toHaveFocus();
+
+	await userEvent.keyboard('{ArrowRight}');
+	expect(paperProfile.element()).toHaveFocus();
+
+	await userEvent.keyboard('{Enter}');
+
+	expect(paperProfile).toBeChecked();
+	expect(getThemeRoot()).toHaveClass(paperThemeClassName);
 });
 
 test('system colour mode follows the platform preference and drives the docs chrome', async () => {
@@ -165,7 +189,9 @@ function renderTheme(
 				defaultTheme={options.defaultTheme ?? 'light'}
 				enableSystem={options.enableSystem ?? false}
 			>
-				<DocsThemeRoot>{children}</DocsThemeRoot>
+				<IconSpritesheetProvider href={spriteSheetHref}>
+					<DocsThemeRoot>{children}</DocsThemeRoot>
+				</IconSpritesheetProvider>
 			</ThemeProvider>,
 		);
 	});
