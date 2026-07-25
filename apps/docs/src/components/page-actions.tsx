@@ -64,7 +64,7 @@ function PageActionLink({
 	label: string;
 }) {
 	return (
-		<Link className={rowClassName} href={href} target="_blank">
+		<Link className={rowClassName} href={href} rel="noreferrer noopener" target="_blank">
 			<Icon aria-hidden className="size-4 shrink-0" name={iconName} />
 			{label}
 			<Icon
@@ -77,6 +77,11 @@ function PageActionLink({
 }
 
 function CopyMarkdownRow({ markdownUrl }: { markdownUrl: string }) {
+	// Deliberately no try/catch here. `useCopyButton` only flips to its
+	// "Copied" state once this callback's promise resolves — it has no
+	// `onRejected` handler — so a fetch failure or a denied clipboard
+	// permission already leaves `copied` at `false` instead of lying about
+	// success. Swallowing the error here would remove that protection.
 	const [copied, onCopy] = useCopyButton(async () => {
 		const res = await fetch(markdownUrl);
 		const text = await res.text();
