@@ -24,9 +24,9 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
 
 `compileTheme` returns `{ css, diagnostics }`; `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling. The
-Storybook "Theme/Diagnostics" story is a read-only inspector over this data model, and "Theme/Color
-token board" renders every `color.*` contract leaf (driven off `flattenThemeContract()`) for both
-bundled themes and modes.
+Storybook "Theme/Diagnostics" story is a read-only inspector over this data model, and "Theme/Token
+board" renders every contract leaf (driven off `flattenThemeContract()`) for both bundled themes and
+modes.
 
 ## The v2 repaint is expected
 
