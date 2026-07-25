@@ -29,8 +29,9 @@ element. Neither step injects styles at runtime.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
   surfaces onto the colour contract's leaves.
 - `theme/diagnostics.ts`: the `compileTheme` diagnostics data model (family, surface, solid-anchor,
-  and contrast-check detail) consumed by the "Theme/Diagnostics" and "Theme/Color token board"
-  Storybook stories.
+  and contrast-check detail) consumed by the "Theme/Diagnostics" Storybook story.
+- `theme/token-board.tsx`: the contract-driven "Theme/Token board" Storybook story, which renders
+  every contract leaf for the active theme and colour mode.
 - `theme/build-theme.ts`: the internal `compileTheme(foundation) → { css, diagnostics }` value
   pipeline, `buildTheme`, `themeClassName`, and contrast validation.
 - `theme/foundations.ts`: `defineTheme(...)` inputs for the bundled Tactile and Paper themes.
