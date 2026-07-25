@@ -228,10 +228,25 @@ export function normalizeTheme(input: ThemeInput): ThemeFoundation {
 /** Resolves one mode's source colours and materials. */
 function buildModeFoundation(input: ThemeInput, mode: ColorMode): ThemeModeFoundation {
 	return {
-		actionControlFinish: { ...defaultControlFinish, ...(input.actionControlFinish?.[mode] ?? {}) },
+		actionControlFinish: {
+			...defaultControlFinish,
+			...omitUndefined(input.actionControlFinish?.[mode] ?? {}),
+		},
 		color: resolveColors(input, mode),
-		depth: { ...defaultDepth[mode], ...(input.depth?.[mode] ?? {}) },
+		depth: { ...defaultDepth[mode], ...omitUndefined(input.depth?.[mode] ?? {}) },
 	};
+}
+
+/**
+ * Drops keys whose value is explicitly `undefined`. Composed authoring naturally produces objects
+ * like `{ resting: someCondition ? value : undefined }`, and an object spread keeps an
+ * explicitly-`undefined` key, which would otherwise overwrite (rather than fall back to) the curated
+ * default it is merged over.
+ */
+function omitUndefined<T extends Record<string, unknown>>(record: T): Partial<T> {
+	return Object.fromEntries(
+		Object.entries(record).filter(([, value]) => value !== undefined),
+	) as Partial<T>;
 }
 
 /** Resolves every source-colour role for one mode into the strings `buildTheme` accepts. */

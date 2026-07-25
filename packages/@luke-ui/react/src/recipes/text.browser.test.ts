@@ -91,6 +91,17 @@ test('font inheritance also preserves surrounding currentColor', () => {
 	expect(style.fontWeight).toBe('500');
 });
 
+test('shouldInheritFont alone inherits the ancestor font size and line height', () => {
+	const root = mountRoot();
+	root.style.font = '18px / 22px serif';
+	const element = root.appendChild(document.createElement('span'));
+	element.className = text({ shouldInheritFont: true });
+	const style = getComputedStyle(element);
+
+	expect(style.fontSize).toBe('18px');
+	expect(style.lineHeight).toBe('22px');
+});
+
 test('an explicit semantic colour overrides inherited currentColor', () => {
 	const root = mountRoot();
 	root.style.color = 'rgb(1, 2, 3)';

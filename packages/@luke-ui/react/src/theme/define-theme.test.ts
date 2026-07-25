@@ -121,6 +121,20 @@ describe('defineTheme partial per-mode merges', () => {
 		expect(extractValue(blocks.mediaDark, '--luke-depth-resting')).toBe(defaultDepth.dark.resting);
 	});
 
+	it('falls back to the curated default for a rung explicitly authored as undefined', () => {
+		// Composed authoring naturally produces `{ resting: condition ? value : undefined }`. An
+		// explicit `undefined` must behave exactly like an omitted rung, not overwrite the default with
+		// `undefined` (which previously crashed the validator's `.trim()` guard).
+		const blocks = splitBlocks(
+			defineTheme({
+				color: { accent: '#3b82f6' },
+				depth: { light: { resting: undefined } },
+				name: 'undefined-depth-rung',
+			}),
+		);
+		expect(extractValue(blocks.baseLight, '--luke-depth-resting')).toBe(defaultDepth.light.resting);
+	});
+
 	it('defaults the omitted dark side of a partial colour without bleeding the light override', () => {
 		const infoVarNames = [
 			'--luke-color-intent-info-text',
@@ -145,6 +159,19 @@ describe('defineTheme partial per-mode merges', () => {
 		);
 		const defaultLight = infoVarNames.map((varName) => extractValue(allDefault.baseLight, varName));
 		expect(overriddenLight).not.toEqual(defaultLight);
+	});
+});
+
+describe('defineTheme scrim validation', () => {
+	it('rejects an unsafe authored scrim value with a message naming the field', () => {
+		// The scrim is deliberately excluded from OKLCH colour parsing (its alpha channel does not fit
+		// that pattern) and emitted verbatim, so it needs its own shape check rather than none at all.
+		expect(() =>
+			defineTheme({
+				color: { accent: '#3b82f6', scrim: 'oklch(0 0 0 / 0.2); } .evil {' },
+				name: 'unsafe-scrim',
+			}),
+		).toThrow('color.scrim: must be a non-empty CSS colour value');
 	});
 });
 

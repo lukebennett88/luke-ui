@@ -115,7 +115,11 @@ const sizeStepCompoundVariants = fontSizeSteps.map((size) => {
 	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
 	return {
 		style: createLayeredTextStyle({ baselineTrim, capHeightTrim, fontSize, lineHeight }),
-		variants: { shouldDisableTrim: false, size } as const,
+		// `shouldInheritFont: true` asks the browser to resolve font size and line height from
+		// the surrounding context, not this step's Capsize metrics. Without this condition, the
+		// compound's own `fontSize`/`lineHeight` always wins over the plain `shouldInheritFont`
+		// variant, because vanilla-extract applies compound variants after simple ones.
+		variants: { shouldDisableTrim: false, shouldInheritFont: false, size } as const,
 	};
 });
 
