@@ -7,9 +7,11 @@
 
 import { buildTheme } from './build-theme.js';
 import type { Oklch } from './color.js';
-import { contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
+import { clampUnit, formatOklch, gamutMapOklch, parseColor } from './color.js';
+import { CONTRAST_SEARCH_STEP, TEXT_RATIO } from './contrast-policy.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import { defaultSourceColors } from './foundation.js';
+import { passesOnSolidGate } from './scale.js';
 
 /**
  * A colour value: one string (adapted independently for each mode) OR a per-mode object where
@@ -132,10 +134,6 @@ export interface ThemeInput {
 
 type ColorMode = 'light' | 'dark';
 
-// The WCAG 2.2 AA text ratio the on-solid gate must clear; matches build-theme's TEXT_RATIO so the
-// adaptation search and the build-time validation agree.
-const TEXT_RATIO = 4.5;
-
 /**
  * `neutralStyle` → the source neutral's hue and small chroma; the mode supplies the lightness.
  * Light `'cool'` ≈ `oklch(0.985 0.01 250)`; dark `'cool'` ≈ `oklch(0.22 0.01 250)`.
@@ -154,13 +152,14 @@ const NEUTRAL_LIGHTNESS = { dark: 0.22, light: 0.985 } as const satisfies Record
 // The vibrant band a single-value accent is adapted into, and the lightness the search starts from.
 // Contrast for the on-solid text lives at the band edges (dark solids take near-white text, light
 // solids take near-black); the middle is a dead zone, so the search targets a vibrant lightness and
-// walks outward to the nearest lightness whose whole solid trio clears the gate.
+// walks outward to the nearest lightness whose solid and hover both clear the on-solid gate. The band
+// is deliberately wider than the generator's own tone-faithful window, which is what lets it rescue
+// accents the generator alone could not reach.
 const ACCENT_TARGET = { dark: 0.72, light: 0.5 } as const satisfies Record<ColorMode, number>;
 const ACCENT_BAND = {
 	dark: [0.6, 0.82],
 	light: [0.4, 0.62],
 } as const satisfies Record<ColorMode, [number, number]>;
-const ACCENT_SEARCH_STEP = 0.0025;
 
 /** Curated extremely-subtle, hue-neutral shadow ladder applied when a `depth` rung is omitted. */
 export const defaultDepth: Record<ColorMode, DepthLadder> = {
@@ -365,21 +364,26 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
 
 /**
  * Adapts a single-value accent for one mode: preserve the source hue and chroma, then search the
- * vibrant band for a lightness whose whole solid trio (`solid`/`solidHover`/`solidPressed`) clears
- * the on-solid contrast gate. Returns the lightness nearest the mode target, and throws when no
+ * vibrant band for a lightness that clears the scale generator's own on-solid gate
+ * ({@link passesOnSolidGate}). Returns the lightness nearest the mode target, and throws when no
  * lightness in the band is accessible.
+ *
+ * The gate is the generator's, not a second copy of it, so this pre-conditioner can never be stricter
+ * than the solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too,
+ * and the accent it hands over is the one the generator emits. Its band is the wider of the two, which
+ * is what lets it rescue accents the generator's tone-faithful window cannot reach.
  */
 function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 	const target = ACCENT_TARGET[mode];
 	const [low, high] = ACCENT_BAND[mode];
 	const makeSolid = (l: number) => gamutMapOklch({ l, c: source.c, h: source.h });
-	const passes = (l: number) => onSolidGatePasses(mode, makeSolid(l));
+	const passes = (l: number) => passesOnSolidGate({ lightness: l, mode, source });
 
 	if (passes(target)) return makeSolid(target);
 
 	let best: number | null = null;
 	let bestDistance = Number.POSITIVE_INFINITY;
-	for (let l = low; l <= high + 1e-9; l += ACCENT_SEARCH_STEP) {
+	for (let l = low; l <= high + 1e-9; l += CONTRAST_SEARCH_STEP) {
 		const candidate = clampUnit(l);
 		if (!passes(candidate)) continue;
 		const distance = Math.abs(candidate - target);
@@ -391,30 +395,11 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 	if (best === null) {
 		throw new Error(
 			`Theme accent "${raw}" has no accessible ${mode} lightness: no vibrant lightness lets ` +
-				'near-white or near-black on-solid text clear 4.5:1 across the solid, hover, and pressed ' +
-				'states. Author an explicit { light, dark } accent instead.',
+				`near-white or near-black on-solid text clear ${TEXT_RATIO}:1 across the solid and its ` +
+				'hover. Author an explicit { light, dark } accent instead.',
 		);
 	}
 	return makeSolid(best);
-}
-
-/**
- * Whether the on-solid gate passes for an accent solid: the near-white or near-black on-solid text
- * `buildTheme` would choose clears 4.5:1 against the solid, hover, and pressed states. Mirrors
- * `buildIntentKit` + `chooseOnSolid` in build-theme so the search agrees with build-time validation.
- */
-function onSolidGatePasses(mode: ColorMode, solid: Oklch): boolean {
-	const hoverDirection = mode === 'light' ? -1 : 1;
-	const solids = [
-		solid,
-		gamutMapOklch({ ...solid, l: clampUnit(solid.l + 0.05 * hoverDirection) }),
-		gamutMapOklch({ ...solid, l: clampUnit(solid.l + 0.09 * hoverDirection) }),
-	];
-	const nearWhite = gamutMapOklch({ l: 0.985, c: 0, h: solid.h });
-	const nearBlack = gamutMapOklch({ l: 0.18, c: 0.01, h: solid.h });
-	const whiteMinimum = Math.min(...solids.map((state) => contrastRatio(nearWhite, state)));
-	const blackMinimum = Math.min(...solids.map((state) => contrastRatio(nearBlack, state)));
-	return Math.max(whiteMinimum, blackMinimum) >= TEXT_RATIO;
 }
 
 /** Generates the radius scale from `base`/`multiplier`, with explicit per-step overrides winning. */
@@ -429,8 +414,4 @@ function resolveRadius(input: ThemeInput): NonNullable<ThemeFoundation['radius']
 		overlay: radius?.overlay ?? generated(RADIUS_STEPS.overlay),
 		surface: radius?.surface ?? generated(RADIUS_STEPS.surface),
 	};
-}
-
-function clampUnit(value: number): number {
-	return Math.min(1, Math.max(0, value));
 }

@@ -4,13 +4,15 @@
  * table. It is a pure lookup: no colour math happens here, and it never distorts a family or
  * surface to make a leaf fit.
  *
- * Isolated by design: nothing here is wired into `buildTheme` yet (that is a later stage). Values
- * are formatted with `formatOklch`, the same representation the current pipeline emits, so the
- * result can be dropped straight into the mode value record `buildModeColors` produces today.
+ * The intent role groups it keys off come from `contrast-policy.ts`, which `build-theme.ts`'s
+ * validation matrix reads too, so a role can never be emitted here without being gated there. Values
+ * are formatted with `formatOklch`, the representation the pipeline emits, so the result drops
+ * straight into the mode value record `buildModeColors` produces.
  */
 
 import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
+import { ACTION_INTENTS, BORDER_AND_TEXT_INTENTS, FEEDBACK_INTENTS } from './contrast-policy.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 
@@ -39,15 +41,6 @@ interface MapSemanticColorsRequest {
 	/** The colour mode the families and surfaces were resolved for. */
 	mode: ColorMode;
 }
-
-// Action intents render the full interactive ramp; feedback intents are static and expose only the
-// soft kit (subtle surface + border + text). Mirrors ACTION_INTENTS/FEEDBACK_INTENTS in
-// build-theme.ts.
-const ACTION_INTENTS = ['neutral', 'accent', 'danger'] as const;
-// Accent and danger additionally expose a border and low-contrast text; neutral does not (its
-// borders/text are the global neutral leaves instead).
-const BORDER_AND_TEXT_INTENTS = ['accent', 'danger'] as const;
-const FEEDBACK_INTENTS = ['info', 'success', 'warning'] as const;
 
 /**
  * Resolves every colour contract leaf onto the private families and surfaces, per the locked
