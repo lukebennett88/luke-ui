@@ -18,12 +18,12 @@ interface ColorLeafNode {
 	varName: string;
 }
 
-interface ColorGroupNode {
+export interface ColorGroupNode {
 	kind: 'group';
 	children: Record<string, ColorTreeNode>;
 }
 
-type ColorTreeNode = ColorLeafNode | ColorGroupNode;
+export type ColorTreeNode = ColorLeafNode | ColorGroupNode;
 
 // Capped at the contract's deepest colour group (color.intent.<role>.surface.<state>); depths past
 // this reuse the smallest heading.
@@ -167,9 +167,10 @@ function ColorSwatch({ label, path, varName }: { label: string; path: string; va
 
 /**
  * Builds the colour subtree from `flattenThemeContract()`'s flat `[path, varName]` pairs, grouped by
- * path segment so the board's structure mirrors `contract.ts`'s own nesting exactly.
+ * path segment so the board's structure mirrors `contract.ts`'s own nesting exactly. Exported for
+ * `color-token-board.test.ts`, which unit-tests the grouping logic directly.
  */
-function buildColorTree(): ColorGroupNode {
+export function buildColorTree(): ColorGroupNode {
 	const root: ColorGroupNode = { children: {}, kind: 'group' };
 	for (const [path, varName] of flattenThemeContract()) {
 		if (!path.startsWith('color.')) continue;
