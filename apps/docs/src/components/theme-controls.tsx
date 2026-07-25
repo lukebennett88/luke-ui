@@ -1,14 +1,20 @@
 import { themeRootClassName } from '@luke-ui/react/theme';
 import { paperThemeClassName, tactileThemeClassName } from '@luke-ui/react/themes';
 import { cx } from '@luke-ui/react/utils';
-import type { ChangeEvent, ComponentProps, PropsWithChildren } from 'react';
+import type { ComponentProps, PropsWithChildren } from 'react';
 import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
 import { ColorModeToggle, useHydratedColorMode } from './playground/color-mode-toggle.js';
+import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
 
 export type ThemeIdentity = 'paper' | 'tactile';
 
 const THEME_IDENTITY_STORAGE_KEY = 'luke-ui-docs-theme';
 const THEME_IDENTITY_CHANGE_EVENT = 'luke-ui-docs-theme-change';
+
+const THEME_IDENTITIES = [
+	{ label: 'Tactile', value: 'tactile' },
+	{ label: 'Paper', value: 'paper' },
+] as const satisfies ReadonlyArray<{ label: string; value: ThemeIdentity }>;
 
 interface ThemeIdentitySettings {
 	setThemeIdentity: (themeIdentity: ThemeIdentity) => void;
@@ -43,24 +49,14 @@ export function DocsThemeRoot({ children }: PropsWithChildren) {
 export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
 	const { setThemeIdentity, themeIdentity } = useDocsThemeIdentity();
 
-	function handleThemeChange(event: ChangeEvent<HTMLSelectElement>) {
-		setThemeIdentity(event.target.value === 'paper' ? 'paper' : 'tactile');
-	}
-
 	return (
 		<div {...props} className={cx('flex items-center gap-1', className)}>
-			<label>
-				<span className="sr-only">Theme profile</span>
-				<select
-					aria-label="Theme profile"
-					className="h-8 rounded-md border border-fd-border bg-fd-background px-2 text-fd-foreground text-xs"
-					onChange={handleThemeChange}
-					value={themeIdentity}
-				>
-					<option value="tactile">Tactile</option>
-					<option value="paper">Paper</option>
-				</select>
-			</label>
+			<TextToggleButtonGroup
+				label="Theme profile"
+				onChange={setThemeIdentity}
+				options={THEME_IDENTITIES}
+				value={themeIdentity}
+			/>
 			<ColorModeToggle />
 		</div>
 	);
