@@ -5,7 +5,7 @@ import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
@@ -72,13 +72,15 @@ const clientLoader = browserCollections.docs.createClientLoader({
 		return (
 			<DocsPage toc={toc} {...pageProps}>
 				<DocsTitle>{frontmatter.title}</DocsTitle>
-				<DocsBody>
-					{frontmatter.description ? <blockquote>{frontmatter.description}</blockquote> : null}
+				<div className="not-prose flex flex-wrap items-start gap-4">
+					<DocsDescription className="mb-0 flex-1">{frontmatter.description}</DocsDescription>
 					<PageActions
 						githubUrl={githubUrl}
 						markdownUrl={markdownUrl}
 						storybookUrl={storybookUrl}
 					/>
+				</div>
+				<DocsBody>
 					<MDX components={mdxComponents} />
 				</DocsBody>
 			</DocsPage>
