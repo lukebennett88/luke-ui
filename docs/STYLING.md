@@ -22,8 +22,17 @@ element. Neither step injects styles at runtime.
 - `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into and
   the curated colour, radius, and typography defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
-- `theme/build-theme.ts`: the internal `buildTheme(foundation)` value pipeline, `themeClassName`,
-  and contrast validation.
+- `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
+  constrained step-9 solid-anchor search and the per-role capability guarantees.
+- `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
+  `surfaces.canvas` is always exactly the resolved `background`.
+- `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
+  surfaces onto the colour contract's leaves.
+- `theme/diagnostics.ts`: the `compileTheme` diagnostics data model (family, surface, solid-anchor,
+  and contrast-check detail) consumed by the "Theme/Diagnostics" and "Theme/Color token board"
+  Storybook stories.
+- `theme/build-theme.ts`: the internal `compileTheme(foundation) → { css, diagnostics }` value
+  pipeline, `buildTheme`, `themeClassName`, and contrast validation.
 - `theme/foundations.ts`: `defineTheme(...)` inputs for the bundled Tactile and Paper themes.
 - `themes/`: bundled theme class-name constants exported from `@luke-ui/react/themes`.
 - `scripts/build-themes.ts`: writes the bundled theme stylesheets to `dist/themes/`.
@@ -37,6 +46,12 @@ the full semantic contract in OKLCH and throws a `ThemeContrastError` naming eac
 token pair when a generated pair misses WCAG 2.2 AA contrast. A single-value accent or neutral is
 adapted per mode through a lightness search; it throws when no lightness in the vibrant band is
 accessible. The raw `ThemeFoundation` object and `buildTheme` are internal only.
+
+Every colour token is generated from a private 12-step scale per role (neutral, accent, danger,
+info, success, warning) plus a mode-aware elevation surface set, then mapped onto the public colour
+contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border
+and accent contrast policies, and what changed when this generator replaced the original per-token
+solver.
 
 The semantic contract includes `font.100` through `font.900` size steps. Each step groups its font
 size, line height, letter spacing, and per-font Capsize trims so components cannot combine unrelated
