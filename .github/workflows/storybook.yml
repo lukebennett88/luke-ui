@@ -49,3 +49,38 @@ jobs:
           corepack pnpm --filter @luke-ui/react run test:unit && corepack pnpm --filter
           @luke-ui/react run test:browser && corepack pnpm --filter @luke-ui/react run
           test:storybook
+
+  docs-tests:
+    name: docs-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup tooling with mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
+          cache: true
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: corepack pnpm --filter docs exec playwright install --with-deps chromium
+
+      - name: Build package
+        run: corepack pnpm build:packages
+
+      - name: Generate docs app files
+        run: corepack pnpm --filter docs run generate
+
+      - name: Run docs tests
+        run: corepack pnpm --filter docs run test

@@ -189,6 +189,9 @@ function renderTheme(
 				defaultTheme={options.defaultTheme ?? 'light'}
 				enableSystem={options.enableSystem ?? false}
 			>
+				{/* Mirrors `__root.tsx`'s real tree shape: `IconSpritesheetProvider` wraps
+				`DocsThemeRoot` there too, and `ThemeControls` (rendered by these tests) consumes it
+				through `ColorModeToggle`'s icons. */}
 				<IconSpritesheetProvider href={spriteSheetHref}>
 					<DocsThemeRoot>{children}</DocsThemeRoot>
 				</IconSpritesheetProvider>

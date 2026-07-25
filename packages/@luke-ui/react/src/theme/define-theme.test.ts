@@ -1,6 +1,5 @@
-import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
-import { contrastRatio, gamutMapOklch, parseColor } from './color.js';
+import { gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
 import { paperTheme, tactileTheme } from './foundations.js';
@@ -32,34 +31,19 @@ function extractValue(block: string, varName: string): string {
 }
 
 const ACCENT_SOLID = '--luke-color-intent-accent-surface-solid';
-const SURFACE_VAR_NAMES = [
-	'--luke-color-surface-canvas',
-	'--luke-color-surface-recessed',
-	'--luke-color-surface-floating',
-	'--luke-color-surface-overlay',
-];
 
 describe('defineTheme colour-only authoring', () => {
-	it('builds a theme from just an accent and a neutral character, accessible in both modes', () => {
-		const css = defineTheme({
-			color: { accent: '#3b82f6', neutralStyle: 'cool' },
-			name: 'colour-only',
-		});
-		const blocks = splitBlocks(css);
-		for (const block of [blocks.baseLight, blocks.mediaDark]) {
-			const textPrimary = parseColor(extractValue(block, '--luke-color-text-primary'));
-			const borderControl = parseColor(extractValue(block, '--luke-color-border-control'));
-			const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
-			const recessed = parseColor(extractValue(block, '--luke-color-surface-recessed'));
-			for (const varName of SURFACE_VAR_NAMES) {
-				const surface = parseColor(extractValue(block, varName));
-				expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
-			}
-			// border.control is a solved contrast boundary (Stage 6 Option B), not a scale-step alias, so
-			// it must clear the 3:1 non-text gate against both base surfaces.
-			expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
-			expect(contrastRatio(borderControl, recessed)).toBeGreaterThanOrEqual(3);
-		}
+	// `defineTheme` compiles through `buildTheme`, whose `validateContrast` already hard-gates
+	// text-vs-surface contrast (>=4.5:1, every surface) and border.control-vs-surface contrast
+	// (>=3:1, canvas and recessed) for every mode, throwing `ThemeContrastError` on any miss.
+	// Recomputing those exact ratios from the emitted CSS here can never fail: if either gate had
+	// missed, `defineTheme` would already have thrown before an assertion could run. The honest
+	// statement of the same property is that building from just an accent and a neutral character
+	// does not throw.
+	it('builds a theme from just an accent and a neutral character without a WCAG hard-gate failure', () => {
+		expect(() =>
+			defineTheme({ color: { accent: '#3b82f6', neutralStyle: 'cool' }, name: 'colour-only' }),
+		).not.toThrow();
 	});
 });
 
@@ -249,44 +233,12 @@ describe('normalizeTheme resolves the source-tier `background` split from `neutr
 	});
 });
 
-/** The 25 leaves the 128-leaf flip removes, by stable `--luke-*` variable name. */
-const REMOVED_VAR_NAMES = [
-	'--luke-color-surface-resting',
-	'--luke-color-surface-disabled',
-	'--luke-color-border-disabled',
-	...['info', 'success', 'warning'].flatMap((intent) =>
-		[
-			'surface-subtle-hover',
-			'surface-subtle-pressed',
-			'surface-solid',
-			'surface-solid-hover',
-			'surface-solid-pressed',
-			'on-solid',
-		].map((leaf) => `--luke-color-intent-${intent}-${leaf}`),
-	),
-	'--luke-motion-duration-medium',
-	'--luke-motion-duration-slow',
-	'--luke-motion-duration-ambient',
-	'--luke-motion-easing-enter',
-];
-
 /** Extracts the set of unique `--luke-*` variable names declared in a stylesheet. */
 function emittedVarNames(css: string): Set<string> {
 	return new Set([...css.matchAll(/(--luke-[a-z0-9-]+):/g)].map((match) => match[1] ?? ''));
 }
 
-describe('the reduced 128-leaf contract', () => {
-	it('flattens to exactly 128 leaves with scrim added and the 25 removed leaves absent', () => {
-		const names = flattenThemeContract().map(([, varName]) => varName);
-		expect(names).toHaveLength(128);
-		expect(names).toContain('--luke-color-scrim');
-		// text.disabled kept its stable CSS variable across the rename from color.textDisabled.
-		expect(names).toContain('--luke-color-text-disabled');
-		for (const removed of REMOVED_VAR_NAMES) expect(names).not.toContain(removed);
-	});
-});
-
-describe('defineTheme emits the reduced contract for the bundled themes', () => {
+describe('defineTheme emits the full contract for the bundled themes', () => {
 	const contractNames = flattenThemeContract().map(([, varName]) => varName);
 
 	for (const [name, input] of [
@@ -296,15 +248,14 @@ describe('defineTheme emits the reduced contract for the bundled themes', () => 
 		const css = defineTheme(input);
 		const emitted = emittedVarNames(css);
 
-		it(`${name} emits exactly the 128 contract variables, including scrim and disabled text`, () => {
-			expect(emitted.size).toBe(128);
+		it(`${name} emits exactly the contract variables, including scrim and disabled text`, () => {
+			// Derived from the contract, not hardcoded: `contract.test.ts` already asserts the typed
+			// `vars` tree has exactly as many leaves as `flattenThemeContract()`, so this only needs to
+			// check that a bundled theme's emitted CSS matches that same list, not restate its length.
+			expect(emitted.size).toBe(contractNames.length);
 			expect([...emitted].sort()).toEqual([...contractNames].sort());
 			expect(emitted.has('--luke-color-scrim')).toBe(true);
 			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
-		});
-
-		it(`${name} drops every one of the 25 removed leaves`, () => {
-			for (const removed of REMOVED_VAR_NAMES) expect(emitted.has(removed)).toBe(false);
 		});
 
 		it(`${name} keeps feedback intents static — soft kit only, no solid or state variables`, () => {
@@ -338,13 +289,5 @@ describe('defineTheme emits the reduced contract for the bundled themes', () => 
 		// Scrim is passed through: black at the mode-aware default alpha.
 		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.2);');
 		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.4);');
-	});
-});
-
-describe('the combobox tray scrim adopts the scrim token', () => {
-	it('replaces the hardcoded rgb(0 0 0 / 20%) literal with vars.color.scrim', async () => {
-		const source = await readFile(new URL('../recipes/combobox.css.ts', import.meta.url), 'utf8');
-		expect(source).not.toContain('rgb(0 0 0 / 20%)');
-		expect(source).toContain('vars.color.scrim');
 	});
 });

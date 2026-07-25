@@ -45,7 +45,11 @@ jobs:
           TURBO_SCM_BASE: ${{ github.event.pull_request.base.sha }}
           TURBO_SCM_HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
-          corepack pnpm exec turbo run check:format-root check:format check:lint check:types ${{ github.event_name == 'pull_request' && '--affected' || '' }}
+          # `check` is the same turbo task the root `pnpm run check` script runs (`turbo run check
+          # check:unused`), so CI and local checks are the same task graph — barrels, root format,
+          # package format, lint, and types. `--affected` is added here only as a PR speed
+          # optimisation and is never applied to `check:unused`.
+          corepack pnpm exec turbo run check ${{ github.event_name == 'pull_request' && '--affected' || '' }}
           # knip is repo-wide, but --affected only selects packages whose own files
           # changed, so it must run unscoped. Running it via turbo (rather than the
           # bare `knip` script) pulls in its generate dependencies first.

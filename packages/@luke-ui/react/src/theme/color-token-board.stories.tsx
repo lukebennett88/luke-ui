@@ -1,12 +1,15 @@
 import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { ColorTokenBoard } from './color-token-board.js';
+import { flattenThemeContract } from './contract.js';
 
 const meta = preview.meta({
 	component: ColorTokenBoard,
 	tags: ['theme'],
 	title: 'Theme/Color token board',
 });
+
+const colorLeafCount = flattenThemeContract().filter(([path]) => path.startsWith('color.')).length;
 
 /**
  * Every `color.*` semantic contract leaf, resolved for the active theme and colour mode. Switch the
@@ -17,7 +20,10 @@ const meta = preview.meta({
  */
 export const Board = meta.story({
 	play: async ({ canvasElement }) => {
+		// Derived from the contract, not hardcoded, so the board's own claim that coverage cannot
+		// drift out of sync with the contract is actually enforced: this fails the moment a rendered
+		// swatch count and the contract's colour-leaf count disagree.
 		const swatches = canvasElement.querySelectorAll('[role="img"]');
-		await expect(swatches.length).toBeGreaterThan(0);
+		await expect(swatches.length).toBe(colorLeafCount);
 	},
 });

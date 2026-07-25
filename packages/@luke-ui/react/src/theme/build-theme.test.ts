@@ -533,48 +533,28 @@ describe('compileTheme diagnostics', () => {
 			expect(modeDiagnostics.families.accent.solidAnchor.satisfied).toBe(true);
 			// The canvas surface equals the resolved background anchor.
 			expect(modeDiagnostics.surfaces.canvas).toBeDefined();
-			// Every recorded contrast check for a fully compiled theme's hard gates passes; advisory
-			// border checks may sit below their nominal 3:1 requirement.
+			// The diagnostics data model records every hard-gated text check, not just failures, so
+			// tooling (the "Theme/Diagnostics" story) can display the full matrix. Asserting `passes` on
+			// each would be dead: `compileTheme` above already throws `ThemeContrastError` before
+			// returning if any hard check failed, so every recorded hard check necessarily passed already.
 			const hardTextChecks = modeDiagnostics.contrastChecks.filter(
 				(check) => check.required === 4.5,
 			);
 			expect(hardTextChecks.length).toBeGreaterThan(0);
-			for (const check of hardTextChecks) expect(check.passes).toBe(true);
 		}
 	});
 });
 
 describe('bundled themes meet WCAG 2.2 AA', () => {
-	const surfaceVarNames = [
-		'--luke-color-surface-canvas',
-		'--luke-color-surface-recessed',
-		'--luke-color-surface-floating',
-		'--luke-color-surface-overlay',
-	];
-
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`${foundation.name} passes recomputed text contrast in both modes`, () => {
-			const blocks = splitBlocks(buildTheme(foundation));
-			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const textPrimary = parseColor(extractValue(block, '--luke-color-text-primary'));
-				for (const varName of surfaceVarNames) {
-					const surface = parseColor(extractValue(block, varName));
-					expect(contrastRatio(textPrimary, surface)).toBeGreaterThanOrEqual(4.5);
-				}
-			}
-		});
-
-		it(`${foundation.name} hard-gates border.control at >=3:1 against canvas and recessed in both modes`, () => {
-			const blocks = splitBlocks(buildTheme(foundation));
-			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const borderControl = parseColor(extractValue(block, '--luke-color-border-control'));
-				const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
-				const recessed = parseColor(extractValue(block, '--luke-color-surface-recessed'));
-				// Stage 6 Option B: border.control is a solved contrast boundary, not a scale-step alias,
-				// so it must clear the 3:1 non-text gate against both base surfaces.
-				expect(contrastRatio(borderControl, canvas)).toBeGreaterThanOrEqual(3);
-				expect(contrastRatio(borderControl, recessed)).toBeGreaterThanOrEqual(3);
-			}
+		// `validateContrast` in build-theme.ts already hard-gates text-vs-surface contrast (>=4.5:1,
+		// every surface) and border.control-vs-surface contrast (>=3:1, canvas and recessed) for every
+		// mode, throwing `ThemeContrastError` on any miss (exercised directly in "buildTheme contrast
+		// failures" below). Recomputing those exact ratios from the emitted CSS here can never fail: if
+		// either gate had missed, `buildTheme` would already have thrown before this assertion ran. The
+		// honest statement of the same property is that building the bundled theme does not throw.
+		it(`${foundation.name} compiles without a WCAG hard-gate failure`, () => {
+			expect(() => buildTheme(foundation)).not.toThrow();
 		});
 
 		it(`${foundation.name} keeps light canvas neutral, recessed surfaces white, and dark wells distinct`, () => {
@@ -593,18 +573,20 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
 		});
 
-		it(`${foundation.name} keeps dark subtle hover states legible for primary text`, () => {
-			const { mediaDark } = splitBlocks(buildTheme(foundation));
-			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
+		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
 			// The subtle component surfaces (scale steps 3-5) ramp from the canvas independently of the
 			// elevation surfaces, so v2 no longer pins them apart from `floating`; what still matters is
-			// that primary text stays legible on the hovered subtle surface.
-			for (const intent of ['neutral', 'accent']) {
-				const subtleHover = parseColor(
-					extractValue(mediaDark, `--luke-color-intent-${intent}-surface-subtle-hover`),
-				);
-				expect(contrastRatio(textPrimary, subtleHover)).toBeGreaterThanOrEqual(4.5);
-			}
+			// that primary text stays legible on the hovered subtle surface. Neutral subtleHover is
+			// excluded here: `validateContrast` already hard-gates `color.text.primary` against every
+			// neutral surface state (including subtleHover) at >=4.5:1, so recomputing that exact pair
+			// would be dead — accent subtleHover is not one of the hard-gated pairs, so it is the one
+			// worth recomputing.
+			const { mediaDark } = splitBlocks(buildTheme(foundation));
+			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
+			const subtleHover = parseColor(
+				extractValue(mediaDark, '--luke-color-intent-accent-surface-subtle-hover'),
+			);
+			expect(contrastRatio(textPrimary, subtleHover)).toBeGreaterThanOrEqual(4.5);
 		});
 
 		it(`${foundation.name} generates subtle, distinct intent borders`, () => {
@@ -613,8 +595,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 				const surfaces = ['canvas', 'recessed'].map((surface) => {
 					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
 				});
-				// border.control is excluded here: it is now a solved contrast boundary (>=3:1, asserted
-				// separately above), not one of these subtle Radix-style separators.
+				// border.control is excluded here: it is now a solved contrast boundary, hard-gated at
+				// >=3:1 by `validateContrast`, not one of these subtle Radix-style separators.
 				const borderVarNames = ['accent', 'info', 'success', 'warning', 'danger'].map(
 					(intent) => `--luke-color-intent-${intent}-border`,
 				);
@@ -635,21 +617,11 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 	}
 });
 
-describe('bundled loading skeleton surfaces', () => {
-	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`${foundation.name} keeps loading skeletons distinct from the canvas in both modes`, () => {
-			const blocks = splitBlocks(buildTheme(foundation));
-			for (const block of [blocks.baseLight, blocks.mediaDark]) {
-				const canvas = parseColor(extractValue(block, '--luke-color-surface-canvas'));
-				const skeleton = parseColor(extractValue(block, '--luke-color-loading-skeleton'));
-				// v2 aliases the loading skeleton onto the neutral scale's step 7 (a visible placeholder
-				// tint, clearing the pulse-extreme contrast gate the component's browser test enforces).
-				expect(skeleton).not.toEqual(canvas);
-				expect(contrastRatio(skeleton, canvas)).toBeGreaterThan(1);
-			}
-		});
-	}
-});
+// The loading-skeleton contrast gate lives in `loading-skeleton.browser.test.ts` ("keeps the
+// pulse's dimmest frame perceptible against every bundled theme's canvas"), which samples the real
+// animated pulse and requires >=1.4:1 at both its brightest and dimmest frame. That subsumes and is
+// stricter than a static "skeleton !== canvas and contrastRatio > 1" check would ever be — the
+// latter is a tautology once the two colours are already known to differ, so it added no coverage.
 
 describe('bundled theme identity', () => {
 	it('exports class-name constants that match the emitted identity classes', () => {
