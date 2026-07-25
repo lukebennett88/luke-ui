@@ -46,7 +46,10 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 				</div>
 			))}
 			{showPill ? (
-				<div aria-hidden className="absolute inset-0 flex items-center justify-center">
+				<div
+					aria-hidden
+					className="absolute inset-0 flex items-center justify-center bg-fd-background/90"
+				>
 					<LoadingPill label="Loading editor" />
 				</div>
 			) : null}

@@ -182,7 +182,7 @@ function Playground() {
 				</Panel>
 				<Separator
 					aria-label="Resize editor and preview panels"
-					className="relative z-10 shrink-0 block-px inline-auto cursor-row-resize bg-fd-border before:absolute before:-inset-y-2 before:inset-x-0 before:content-[''] after:absolute after:block-0.5 after:inline-8 after:rounded-full after:bg-fd-border after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/60 data-[separator=focus]:after:bg-fd-muted-foreground/60 data-[separator=hover]:after:bg-fd-muted-foreground/50 md:block-auto md:inline-px md:cursor-col-resize md:before:inset-y-0 md:before:-inset-x-2 md:after:block-8 md:after:inline-0.5"
+					className="relative z-10 shrink-0 block-px inline-auto cursor-row-resize bg-fd-border before:absolute before:-inset-y-2 before:inset-x-0 before:content-[''] after:absolute after:block-0.5 after:inline-8 after:rounded-full after:bg-fd-muted-foreground/35 after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/70 data-[separator=focus]:after:bg-fd-muted-foreground/70 data-[separator=hover]:after:bg-fd-muted-foreground/55 md:block-auto md:inline-px md:cursor-col-resize md:before:inset-y-0 md:before:-inset-x-2 md:after:block-8 md:after:inline-0.5"
 				/>
 				<Panel
 					className={cx(

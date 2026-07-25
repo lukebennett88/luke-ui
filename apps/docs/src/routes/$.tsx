@@ -70,7 +70,11 @@ const clientLoader = browserCollections.docs.createClientLoader({
 	) {
 		const { githubUrl, markdownUrl, storybookUrl, ...pageProps } = props;
 		return (
-			<DocsPage toc={toc} {...pageProps}>
+			<DocsPage
+				toc={toc}
+				{...pageProps}
+				footer={{ className: 'mt-12 border-t pt-8 md:mt-16 md:pt-10' }}
+			>
 				<DocsTitle>{frontmatter.title}</DocsTitle>
 				<div className="not-prose flex flex-wrap items-start gap-4">
 					<DocsDescription className="mb-0 flex-1">{frontmatter.description}</DocsDescription>
@@ -95,7 +99,7 @@ function Page() {
 		<DocsLayout {...baseOptions()} tree={data.pageTree}>
 			<Suspense>
 				{clientLoader.useContent(data.path, {
-					className: '',
+					className: 'pb-16 md:pb-20 xl:pb-24',
 					githubUrl: data.githubUrl,
 					markdownUrl: data.markdownUrl,
 					storybookUrl: data.storybookUrl,
