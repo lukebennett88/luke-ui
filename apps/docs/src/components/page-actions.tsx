@@ -77,13 +77,17 @@ function PageActionLink({
 }
 
 function CopyMarkdownRow({ markdownUrl }: { markdownUrl: string }) {
-	// Deliberately no try/catch here. `useCopyButton` only flips to its
-	// "Copied" state once this callback's promise resolves — it has no
-	// `onRejected` handler — so a fetch failure or a denied clipboard
-	// permission already leaves `copied` at `false` instead of lying about
-	// success. Swallowing the error here would remove that protection.
+	// `useCopyButton` only flips to its "Copied" state once this callback's
+	// promise resolves — it has no `onRejected` handler — so a rejection
+	// leaves `copied` at `false` instead of lying about success. `fetch`
+	// itself does not reject on an HTTP error response (a 404 resolves
+	// normally with `res.ok === false`), so a non-ok response is thrown here
+	// to convert it into a rejection. Without that throw, a stale route or a
+	// missing generated `.md` file would copy an error page's HTML to the
+	// clipboard while the button still claimed success.
 	const [copied, onCopy] = useCopyButton(async () => {
 		const res = await fetch(markdownUrl);
+		if (!res.ok) throw new Error(`Failed to fetch ${markdownUrl}: ${res.status}`);
 		const text = await res.text();
 		await navigator.clipboard.writeText(text);
 	});
