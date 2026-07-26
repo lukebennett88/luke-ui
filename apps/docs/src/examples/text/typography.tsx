@@ -9,7 +9,7 @@ export default function Typography() {
 		<Box overflowX="auto">
 			<Box minInlineSize="45rem">
 				<Box
-					alignItems="baseline"
+					alignItems="flex-end"
 					display="grid"
 					style={{
 						borderBlockEnd: `1px dashed ${vars.color.border.decorative}`,
