@@ -17,13 +17,23 @@ describe('createComponentPlan', () => {
 			storySlug: 'status-badge',
 		});
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
-			'apps/docs/content/docs/components/feedback/status-badge.mdx',
+			'apps/docs/content/docs/components/feedback/status-badge/index.mdx',
+			'apps/docs/content/docs/components/feedback/status-badge/meta.json',
+			'apps/docs/content/docs/components/feedback/status-badge/props.mdx',
 			'apps/docs/src/status-badge/status-badge.story.tsx',
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
 			'packages/@luke-ui/react/src/status-badge/index.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.docs.md',
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
 		]);
+		expect(
+			plan.files.find((file) => file.path.endsWith('/status-badge/meta.json'))?.contents,
+		).toBe('{\n\t"pages": ["!props"],\n\t"collapsible": false\n}\n');
+		expect(
+			plan.files.find((file) => file.path.endsWith('/status-badge/props.mdx'))?.contents,
+		).toContain(
+			'<auto-type-table path="packages/@luke-ui/react/src/status-badge/index.tsx" name="StatusBadgeProps" />',
+		);
 		expect(plan.jsonEdits).toEqual([
 			{
 				key: 'pages',

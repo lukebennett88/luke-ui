@@ -70,7 +70,15 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 		},
 		{
 			contents: renderHostedDocsPage({ displayName, name }),
-			path: `apps/docs/content/docs/components/${docsGroup}/${name}.mdx`,
+			path: `apps/docs/content/docs/components/${docsGroup}/${name}/index.mdx`,
+		},
+		{
+			contents: renderHostedPropsPage({ displayName, name, pascalName }),
+			path: `apps/docs/content/docs/components/${docsGroup}/${name}/props.mdx`,
+		},
+		{
+			contents: '{\n\t"pages": ["!props"],\n\t"collapsible": false\n}\n',
+			path: `apps/docs/content/docs/components/${docsGroup}/${name}/meta.json`,
 		},
 	];
 
@@ -266,11 +274,27 @@ title: ${input.displayName}
 description: ${input.displayName} component.
 ---
 
-import { story } from '../../../../src/${input.name}/${input.name}.story';
+import { story } from '../../../../../src/${input.name}/${input.name}.story';
 
 <story.WithControl />
 
-<include>../../../../../../packages/@luke-ui/react/docs/${input.name}.md</include>
+<include>../../../../../../../packages/@luke-ui/react/docs/${input.name}.md</include>
+`;
+}
+
+function renderHostedPropsPage(input: {
+	displayName: string;
+	name: string;
+	pascalName: string;
+}): string {
+	return `---
+title: ${input.displayName}
+description: ${input.displayName} component.
+---
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/${input.name}/index.tsx" name="${input.pascalName}Props" />
 `;
 }
 
