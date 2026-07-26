@@ -1,10 +1,12 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
+import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
+import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { button } from '@luke-ui/react/recipes';
 import { createLink } from '@tanstack/react-router';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import type { ComponentType, JSX } from 'react';
+import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useId, useState } from 'react';
 import { Link as RacLink } from 'react-aria-components/Link';
 import { encodeCodeHash } from '../lib/playground-hash';
@@ -32,9 +34,7 @@ type ExampleBlockProps = {
 
 export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
 	return (
-		<Suspense
-			fallback={<Box className="rounded-lg border border-fd-border p-4">Loading example…</Box>}
-		>
+		<Suspense fallback={<ExampleLoadingState mode={props.mode} title={props.title} />}>
 			<ExampleContent {...props} />
 		</Suspense>
 	);
@@ -64,9 +64,8 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 	const [PreviewComponent, source] = result.data;
 
 	return (
-		<Box className="not-prose overflow-hidden rounded-lg border border-fd-border">
-			<Box className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
-				<span className="text-fd-muted-foreground text-sm">{title}</span>
+		<ExampleFrame
+			actions={
 				<Box className="flex items-center gap-1">
 					<PlaygroundLink
 						className={button({ appearance: 'ghost', size: 'small' })}
@@ -88,7 +87,9 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 						{showCode ? 'Hide code' : 'Show code'}
 					</Button>
 				</Box>
-			</Box>
+			}
+			title={title}
+		>
 			<StoryWrapper mode={mode}>
 				<PreviewComponent />
 			</StoryWrapper>
@@ -101,6 +102,68 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 					/>
 				</Box>
 			) : null}
+		</ExampleFrame>
+	);
+}
+
+export function ExampleLoadingState({ mode, title }: Pick<ExampleBlockProps, 'mode' | 'title'>) {
+	const loadingLabel = `Loading ${title} example`;
+	const isFullBleed = mode === 'full-bleed';
+
+	return (
+		<ExampleFrame actions={<ExampleLoadingActions />} ariaLabel={loadingLabel} title={title}>
+			<StoryWrapper mode={mode}>
+				<Box
+					alignItems="center"
+					display="flex"
+					justifyContent="center"
+					minBlockSize={isFullBleed ? '6rem' : undefined}
+				>
+					<LoadingSpinner aria-label={loadingLabel} />
+				</Box>
+			</StoryWrapper>
+		</ExampleFrame>
+	);
+}
+
+function ExampleLoadingActions() {
+	return (
+		<Box aria-hidden className="flex items-center gap-1" inert>
+			<LoadingSkeleton radius="control">
+				<span className={button({ appearance: 'ghost', size: 'small' })}>
+					<Icon aria-hidden className="size-4" name="externalLink" />
+					Open in playground
+				</span>
+			</LoadingSkeleton>
+			<LoadingSkeleton radius="control">
+				<Button appearance="ghost" isDisabled size="small">
+					<Icon aria-hidden className="size-4" name="codeBlock" />
+					Show code
+				</Button>
+			</LoadingSkeleton>
+		</Box>
+	);
+}
+
+type ExampleFrameProps = {
+	actions?: ReactNode;
+	ariaLabel?: string;
+	children: ReactNode;
+	title: string;
+};
+
+function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps) {
+	return (
+		<Box
+			aria-label={ariaLabel}
+			className="not-prose overflow-hidden rounded-lg border border-fd-border"
+			role={ariaLabel ? 'region' : undefined}
+		>
+			<Box className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
+				<span className="text-fd-muted-foreground text-sm">{title}</span>
+				{actions}
+			</Box>
+			{children}
 		</Box>
 	);
 }
