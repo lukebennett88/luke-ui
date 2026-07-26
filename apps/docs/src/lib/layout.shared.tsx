@@ -1,25 +1,20 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { ThemeControls } from '../components/theme-controls';
-import { getStorybookBaseUrl } from './storybook';
+import type { DocsLayoutProps } from 'fumadocs-ui/layouts/notebook';
+import { DocsSiteNav } from '../components/docs-site-nav.js';
+import { siteDestinations } from './site-destinations.js';
 
-export function baseOptions(): BaseLayoutProps {
+export function baseOptions(): Omit<DocsLayoutProps, 'tree'> {
 	return {
-		links: [
-			{
-				text: 'Playground',
-				url: '/playground',
-			},
-			{
-				external: true,
-				text: 'Storybook',
-				url: `${getStorybookBaseUrl(import.meta.env.BASE_URL)}/`,
-			},
-		],
+		links: siteDestinations.map((destination) => ({
+			external: destination.isExternal ?? false,
+			text: destination.label,
+			url: destination.url,
+		})),
 		nav: {
-			title: 'Luke UI',
+			mode: 'top',
 		},
 		slots: {
-			themeSwitch: ThemeControls,
+			header: DocsSiteNav,
+			themeSwitch: false,
 		},
 	};
 }
