@@ -6,17 +6,17 @@
  */
 import { flavors } from '@catppuccin/palette';
 import { loader } from '@monaco-editor/react';
-import * as monaco from 'monaco-editor/esm/vs/editor/editor.main.js';
+import * as monaco from 'monaco-editor';
 
 self.MonacoEnvironment = {
 	getWorker: (_workerId, label) => {
 		if (label === 'typescript' || label === 'javascript') {
 			return new Worker(
-				new URL('monaco-editor/esm/vs/language/typescript/ts.worker.js', import.meta.url),
+				new URL('monaco-editor/language/typescript/ts.worker.js', import.meta.url),
 				{ type: 'module' },
 			);
 		}
-		return new Worker(new URL('monaco-editor/esm/vs/editor/editor.worker.js', import.meta.url), {
+		return new Worker(new URL('monaco-editor/editor/editor.worker.js', import.meta.url), {
 			type: 'module',
 		});
 	},

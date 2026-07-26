@@ -165,14 +165,10 @@ export const button = recipe({
 	defaultVariants: { appearance: 'solid', size: 'medium', tone: 'neutral' },
 	variants: {
 		appearance: { ghost: {}, solid: {}, subtle: {} },
-		size: {
-			/* … */
-		},
+		size: {/* … */},
 		tone: { accent: {}, danger: {}, neutral: {} },
 	},
-	compoundVariants: [
-		/* … */
-	],
+	compoundVariants: [/* … */],
 });
 ```
 
@@ -187,9 +183,7 @@ function per slot, each accepting an optional extra class to merge:
 ```tsx
 export const combobox = recipe({
 	slots: { control: '…', root: '…', textInput: '…' /* … */ },
-	variants: {
-		/* per-slot styles keyed by variant value */
-	},
+	variants: {/* per-slot styles keyed by variant value */},
 } as const satisfies SlottedConfigInput);
 
 const { root, control } = combobox({ size: 'medium' });
