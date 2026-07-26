@@ -320,11 +320,11 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 }
 
 /**
- * Solves `color.border.control` as a dedicated contrast boundary (Stage 6 Option B), rather than a
- * subtle step-7 alias: neutral steps 7-8 land at roughly 1.6-2.7:1 against the base surfaces, well
+ * Solves `color.border.control` as a dedicated contrast boundary, rather than a subtle step-7
+ * alias: neutral steps 7-8 land at roughly 1.6-2.7:1 against the base surfaces, well
  * short of the 3:1 non-text gate. Starting from step 7's own lightness (its hue and a low, neutral
- * chroma), the search steps in the higher-contrast direction — darker in light mode, lighter in
- * dark mode — until the candidate clears 3:1 (plus headroom) against BOTH `canvas` and `recessed`,
+ * chroma), the search steps in the higher-contrast direction, darker in light mode and lighter in
+ * dark mode, until the candidate clears 3:1 (plus headroom) against both `canvas` and `recessed`,
  * gated on whichever of the two currently has the lower contrast. It stops at the first clearing
  * lightness, so the result deviates from the step-7 aesthetic by the minimum needed to reach the
  * boundary. Lightness is clamped to [0, 1]; a neutral hue always reaches the target within range.
@@ -376,13 +376,13 @@ interface ValidationResult {
 
 /**
  * Runs the full semantic validation matrix over the emitted (rounded) colour values. Every pair is
- * recorded as a {@link ContrastCheck}; the AA text/on-solid pairs, the authored focus ring, and
+ * recorded as a {@link ContrastCheck}. The AA text/on-solid pairs, the authored focus ring, and
  * `border.control` are hard gates that populate `failures` (which `compileTheme` raises as a
  * {@link ThemeContrastError}). `border.control` is `solveControlBorder`'s dedicated boundary, not a
- * scale-step alias, so it is hard-gated at 3:1 against both base surfaces (Stage 6 Option B). The
- * generated neutral/intent borders (decorative and the per-intent border) still map to the
- * Radix-style step 6/7 (a subtle separator) and stay advisory checks only — v2 deliberately keeps
- * those below the old solver's 3:1 for the reference scale's softer look.
+ * scale-step alias, so it is hard-gated at 3:1 against both base surfaces. The per-intent borders
+ * use the Radix-style step 6/7, a subtle separator, and are advisory checks only.
+ * `color.border.decorative` is not checked. V2 deliberately keeps these borders below the old
+ * solver's 3:1 for the reference scale's softer look.
  */
 function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): ValidationResult {
 	const failures: Array<ThemeContrastFailure> = [];
@@ -395,8 +395,8 @@ function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): Va
 	const check = (foreground: string, background: string, required: number, hard: boolean) => {
 		const ratio = contrastRatio(colorAt(foreground), colorAt(background));
 		const passes = ratio >= required;
-		// `hard` is recorded on the check itself, so tooling reads the compiler's own decision instead of
-		// re-deriving it from token paths.
+		// `hard` is recorded on the check itself, so tooling reads the compiler's own decision rather
+		// than re-deriving it from token paths.
 		checks.push({ background, foreground, hard, passes, ratio, required });
 		if (hard && !passes) failures.push({ background, foreground, mode, ratio, required });
 	};
@@ -454,9 +454,9 @@ function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): Va
 	}
 	// The keyboard-focus ring is authored and focus-visibility critical, so it stays a hard 3:1 gate.
 	for (const background of basePaths) check('color.border.focus', background, UI_RATIO, true);
-	// border.control is a solved contrast boundary (Stage 6 Option B): hard-gated at 3:1 against both
-	// base surfaces in both modes. Decorative and intent borders (step 6/7) stay advisory Radix-style
-	// separators below 3:1.
+	// border.control is a solved contrast boundary: hard-gated at 3:1 against both
+	// base surfaces in both modes. Intent borders use the Radix-style step 6/7 and are advisory checks
+	// below 3:1. `color.border.decorative` is not checked.
 	for (const background of basePaths) check('color.border.control', background, UI_RATIO, true);
 	for (const intent of [...BORDER_AND_TEXT_INTENTS, ...FEEDBACK_INTENTS]) {
 		for (const background of basePaths) {

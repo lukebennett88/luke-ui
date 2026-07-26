@@ -1,9 +1,9 @@
 /**
  * The theme compiler's diagnostics data model. Family-level diagnostics are populated by the scale
- * generator ({@link import('./scale.js').generateFamilyWithDiagnostics}) in Stage 3. The theme-level
+ * generator ({@link import('./scale.js').generateFamilyWithDiagnostics}). The theme-level
  * {@link ThemeDiagnostics} (complete, only for a fully compiled theme) and
  * {@link ThemeGenerationDiagnostics} (partial, for a build that failed part-way) are consumed by
- * `compileTheme` / `ThemeGenerationError` in `build-theme.ts` (Stage 6).
+ * `compileTheme` / `ThemeGenerationError` in `build-theme.ts`.
  */
 
 import type { Oklch } from './color.js';
@@ -66,7 +66,7 @@ export interface FamilyDiagnostics {
 /**
  * One WCAG pair the semantic validation matrix checked while compiling a theme mode. Records the
  * factual ratio, whether it clears the required minimum, and whether the compiler treats it as a hard
- * gate — so tooling reads that classification instead of inferring it from token paths.
+ * gate. Tooling reads that classification instead of inferring it from token paths.
  */
 export interface ContrastCheck {
 	/** Token path of the foreground colour, for example `color.text.primary`. */

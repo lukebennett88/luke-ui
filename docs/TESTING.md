@@ -129,7 +129,7 @@ import { captureVisual, renderVisual } from '../test-utils/render-visual.js';
 import { Button } from './index.js';
 
 test('keyboard focus ring', async () => {
-	const locator = renderVisual(<Button tone="primary">Focus me</Button>);
+	const locator = renderVisual(<Button tone="accent">Focus me</Button>);
 	// Tab so the browser applies `:focus-visible`; a programmatic `.focus()` would not.
 	await userEvent.tab();
 	await captureVisual(locator, 'button/focus-visible');

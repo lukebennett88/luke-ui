@@ -295,8 +295,8 @@ describe('the one on-solid gate', () => {
 
 	it('accepts exactly the lightnesses the solid-anchor search honours verbatim', () => {
 		// Swept across the generator's whole vibrant solid range, which contains `defineTheme`'s wider
-		// accent adaptation bands. A lightness the gate accepts must be one the search keeps as-is; one it
-		// rejects must be re-searched or reported unsatisfiable. That is the invariant that makes the
+		// accent adaptation bands. A lightness the gate accepts must be one the search keeps as-is. One it
+		// rejects must be re-searched or reported unsatisfiable. This invariant makes the
 		// pre-conditioner unable to be stricter than the solver.
 		const disagreements: Array<string> = [];
 		for (const mode of MODES) {
@@ -336,8 +336,8 @@ describe('the one on-solid gate', () => {
 
 	it('tests only the solid and its hover, never a deeper pressed state the engine does not generate', () => {
 		// Light `oklch(0.64 0 0)` clears 4.58:1 across the two states the engine emits. A phantom third
-		// state 0.09 darker would drag it to 3.88:1 and fail — the pressed solid reuses step 10, so no such
-		// colour exists and the gate must not invent one.
+		// state 0.09 darker would drag it to 3.88:1 and fail. The pressed solid reuses step 10, so no
+		// such colour exists and the gate must not invent one.
 		const source: Oklch = { c: 0, h: 0, l: 0.64 };
 		const phantomPressed = { c: 0, h: 0, l: source.l - 0.09 };
 		const onSolid = family('oklch(0.64 0 0)', 'light', 'accent').contrast;

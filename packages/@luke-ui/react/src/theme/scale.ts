@@ -5,7 +5,7 @@
  * search and the capability-based role guarantees; it is calibrated to testable scale properties
  * rather than to exact Radix reproduction.
  *
- * It also owns {@link passesOnSolidGate}, the one on-solid accessibility gate — `defineTheme`'s accent
+ * It also owns {@link passesOnSolidGate}, the on-solid accessibility gate. `defineTheme`'s accent
  * pre-conditioner calls it rather than reimplementing it. It reuses the dependency-free colour math in
  * `color.ts` and the shared thresholds in `contrast-policy.ts`, and never distorts a family to satisfy
  * a guarantee the public contract does not consume.
@@ -209,7 +209,7 @@ const RAMP_SPEC = {
 
 // The solid step 10 (hover) offset from step 9: darker in light mode, lighter in dark mode. The
 // pressed solid leaf deliberately reuses step 10, so the on-solid gate has exactly these two states
-// to clear — there is no third, deeper pressed colour to test.
+// to clear. There is no third, deeper pressed colour to test.
 const SOLID_HOVER_DELTA = 0.05;
 
 interface SolidBand {
@@ -264,7 +264,7 @@ export interface OnSolidGateRequest {
 /**
  * The one on-solid accessibility gate: whether the near-white or near-black on-solid text this
  * generator would choose clears the AA text ratio (plus the search headroom) across *both* solid
- * states a candidate lightness produces — step 9 and its step-10 hover. The pressed solid reuses step
+ * states a candidate lightness produces: step 9 and its step-10 hover. The pressed solid reuses step
  * 10, so there is no third state to test.
  *
  * `defineTheme`'s accent pre-conditioner calls this rather than reimplementing it, so the

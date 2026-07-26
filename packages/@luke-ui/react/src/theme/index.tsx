@@ -12,10 +12,12 @@ export { vars } from './contract.css.js';
 
 /**
  * `themeClassName(name)` returns the identity class for a theme name. `ThemeContrastError` is thrown
- * by `defineTheme` when a resolved pair misses WCAG 2.2 AA (4.5:1 for text, 3:1 for the focus ring);
- * it carries every failing mode-and-pair in its `failures` array. `ThemeGenerationError` is thrown
- * when a role that must guarantee on-solid contrast (an inaccessible explicit per-mode accent, for
- * example) cannot reach an accessible solid; it names the failing `role` and `mode`.
+ * by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1 for text/on-solid pairs, 3:1 for
+ * the focus ring and `border.control`. The five `intent.*.border` pairs are measured but advisory
+ * only and cannot trigger this error. It carries every failing mode-and-pair in its `failures`
+ * array. `ThemeGenerationError` is thrown when a role that must guarantee on-solid contrast (an
+ * inaccessible explicit per-mode accent, for example) cannot reach an accessible solid. It names the
+ * failing `role` and `mode`.
  */
 export { ThemeContrastError, ThemeGenerationError, themeClassName } from './build-theme.js';
 
@@ -26,9 +28,8 @@ export type { ThemeContrastFailure } from './build-theme.js';
  * `defineTheme(input)` is the curated authoring entry point: it normalises a small {@link ThemeInput}
  * (accent + neutral character, with everything else defaulting) into the per-mode foundation and
  * compiles it through `buildTheme`. It adapts single-value accents and neutrals per mode, generates
- * the radius scale, and merges optional materials over curated defaults. It throws when a
- * single-value accent has no accessible lightness, and otherwise throws the same
- * {@link ThemeContrastError} as `buildTheme`.
+ * the radius scale, and merges optional materials over curated defaults. It throws the same
+ * {@link ThemeContrastError} and {@link ThemeGenerationError} as `buildTheme`.
  */
 export { defineTheme } from './define-theme.js';
 

@@ -259,9 +259,8 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 		// The canvas anchor, split from `neutral`'s hue/chroma character: explicit per-mode value wins,
 		// a single value or the opposite side is adapted to the mode canvas lightness, and an entirely
 		// omitted `background` copies the resolved neutral canvas anchor exactly (not a second,
-		// independent adaptation of the neutral source). Resolved and carried in the foundation only —
-		// `buildModeColors` still derives its canvas from `neutral`, so output stays byte-identical
-		// until #235/#236 wire `background` through the generator.
+		// independent adaptation of the neutral source). `buildModeColors` takes this resolved value
+		// directly as the canvas anchor for every family's ramp and the elevation surfaces.
 		background: resolveOptionalModeColour(color.background, mode, neutral),
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
@@ -368,9 +367,9 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
  * ({@link passesOnSolidGate}). Returns the lightness nearest the mode target, and throws when no
  * lightness in the band is accessible.
  *
- * The gate is the generator's, not a second copy of it, so this pre-conditioner can never be stricter
- * than the solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too,
- * and the accent it hands over is the one the generator emits. Its band is the wider of the two, which
+ * The gate is the generator's, not a second copy of it. This pre-conditioner cannot be stricter than
+ * the solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too, and
+ * the accent it hands over is the one the generator emits. Its band is wider, which
  * is what lets it rescue accents the generator's tone-faithful window cannot reach.
  */
 function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
