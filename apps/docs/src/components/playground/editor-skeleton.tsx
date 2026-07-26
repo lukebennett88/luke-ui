@@ -1,5 +1,6 @@
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { cx } from '@luke-ui/react/utils';
 import shapeScript from '../../generated/editor-skeleton-script.iife.js?raw';
 import { toSkeletonLines } from '../../lib/playground-shape';
 
@@ -50,7 +51,7 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 					aria-hidden
 					className="pointer-events-none absolute inset-0 flex items-center justify-center"
 				>
-					<LoadingPill label="Loading editor" />
+					<LoadingPill className="!bg-[#eff1f5] dark:!bg-[#1e1e2e]" label="Loading editor" />
 				</div>
 			) : null}
 		</div>
@@ -72,9 +73,14 @@ export function EditorSkeletonShapeScript() {
 }
 
 /** Shared loading indicator so the editor and preview speak the same language. */
-export function LoadingPill({ label }: { label: string }) {
+export function LoadingPill({ className, label }: { className?: string; label: string }) {
 	return (
-		<div className="flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3 py-1.5 text-fd-muted-foreground text-xs">
+		<div
+			className={cx(
+				'flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3 py-1.5 text-fd-muted-foreground text-xs',
+				className,
+			)}
+		>
 			<LoadingSpinner aria-hidden size="small" />
 			<span>{label}</span>
 		</div>
