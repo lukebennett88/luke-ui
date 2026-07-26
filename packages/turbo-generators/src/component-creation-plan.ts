@@ -57,10 +57,6 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `packages/@luke-ui/react/src/${name}/index.tsx`,
 		},
 		{
-			contents: renderPackageDocs({ name, packagePath, pascalName }),
-			path: `packages/@luke-ui/react/src/${name}/${name}.docs.md`,
-		},
-		{
 			contents: renderPackageStory({ docsGroup, name, pascalName }),
 			path: `packages/@luke-ui/react/src/${name}/${name}.stories.tsx`,
 		},
@@ -69,8 +65,16 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `apps/docs/src/${name}/${name}.story.tsx`,
 		},
 		{
-			contents: renderHostedDocsPage({ displayName, name }),
-			path: `apps/docs/content/docs/components/${docsGroup}/${name}.mdx`,
+			contents: renderHostedDocsPage({ displayName, name, packagePath, pascalName }),
+			path: `apps/docs/content/docs/components/${docsGroup}/${name}/index.mdx`,
+		},
+		{
+			contents: renderHostedPropsPage({ displayName, name, pascalName }),
+			path: `apps/docs/content/docs/components/${docsGroup}/${name}/props.mdx`,
+		},
+		{
+			contents: '{\n\t"pages": ["!props"],\n\t"collapsible": false\n}\n',
+			path: `apps/docs/content/docs/components/${docsGroup}/${name}/meta.json`,
 		},
 	];
 
@@ -260,17 +264,38 @@ export const story = defineStory({
 `;
 }
 
-function renderHostedDocsPage(input: { displayName: string; name: string }): string {
+function renderHostedDocsPage(input: {
+	displayName: string;
+	name: string;
+	packagePath: string;
+	pascalName: string;
+}): string {
 	return `---
 title: ${input.displayName}
 description: ${input.displayName} component.
 ---
 
-import { story } from '../../../../src/${input.name}/${input.name}.story';
+import { story } from '../../../../../src/${input.name}/${input.name}.story';
 
 <story.WithControl />
 
-<include>../../../../../../packages/@luke-ui/react/docs/${input.name}.md</include>
+${renderPackageDocs(input)}
+`;
+}
+
+function renderHostedPropsPage(input: {
+	displayName: string;
+	name: string;
+	pascalName: string;
+}): string {
+	return `---
+title: ${input.displayName}
+description: ${input.displayName} component.
+---
+
+## Props
+
+<auto-type-table path="packages/@luke-ui/react/src/${input.name}/index.tsx" name="${input.pascalName}Props" />
 `;
 }
 

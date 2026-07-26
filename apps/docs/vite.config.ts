@@ -8,6 +8,7 @@ import mdx from 'fumadocs-mdx/vite';
 import { readdir } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { getMarkdownPagePath } from './src/lib/markdown-page-path.js';
 
 // staticFunctionMiddleware hardcodes `/__tsr/staticServerFnCache/...` for the
 // client fetch URL with no base-path support. When deployed under a sub-path
@@ -48,8 +49,7 @@ async function getMarkdownPrerenderPages(): Promise<Array<{ path: string }>> {
 
 	return files.map((filePath) => {
 		const relativePath = relative(contentDocsDir, filePath).split(sep).join('/');
-		const withoutExtension = relativePath.slice(0, -'.mdx'.length);
-		return { path: `/${withoutExtension}.md` };
+		return { path: getMarkdownPagePath(relativePath) };
 	});
 }
 

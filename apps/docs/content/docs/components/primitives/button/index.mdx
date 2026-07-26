@@ -1,0 +1,41 @@
+---
+title: Button primitive
+description: Lower-level button styles and behaviour for custom composed controls.
+---
+
+Use the button primitive to build a custom button pattern. It provides Luke UI button styles and
+React Aria button behaviour, while leaving child layout and loading treatment to you. For ordinary
+application actions, use [`Button`](/components/actions/button).
+
+```tsx
+import { Button } from '@luke-ui/react/button/primitive';
+
+<Button appearance="solid" tone="accent">
+	Save
+</Button>;
+```
+
+## Composition
+
+Use the primitive when a composed control needs custom children, render-prop children, or its own
+loading layout. The composed `Button` adds a truncating label, start and end icon slots, and a
+pending spinner. The primitive does not.
+
+## Appearance and size
+
+Use `tone` and `appearance` to set visual emphasis. Use `size` to match nearby controls. Set
+`isBlock` when the button should take up its container's inline size. The primitive renders a native
+`<button>` by default and accepts the React Aria button API.
+
+## Pending
+
+Set `isPending` to prevent another press while keeping the control focusable and applying the muted
+pending treatment. The primitive does not add a spinner or replace its children, so add a clear busy
+cue in your custom content. Set `isDisabled` when the action cannot receive focus or respond to
+presses.
+
+## Accessibility
+
+Give the button an accessible name through its visible text or an appropriate ARIA label. Keep the
+name stable when possible. If a custom pending treatment changes the action's meaning, update the
+name to reflect that state.

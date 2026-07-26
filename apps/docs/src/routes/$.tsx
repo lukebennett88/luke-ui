@@ -13,6 +13,7 @@ import browserCollections from '../../.source/browser';
 import { ExampleBlock } from '../components/example-block';
 import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
+import { getComponentPageNavigation } from '../lib/component-page-navigation.js';
 import { baseOptions } from '../lib/layout.shared';
 import { source } from '../lib/source';
 import { getStorybookStoryUrl, withBasePath } from '../lib/storybook';
@@ -48,8 +49,16 @@ const loader = createServerFn({
 		if (!page) throw notFound();
 
 		const markdownPath = `${page.url === '/' ? '/index' : page.url}.md`;
+		const componentNavigation = getComponentPageNavigation(page.url);
 
 		return {
+			componentNavigation: componentNavigation
+				? {
+						...componentNavigation,
+						guideUrl: withBasePath(componentNavigation.guideUrl, import.meta.env.BASE_URL),
+						propsUrl: withBasePath(componentNavigation.propsUrl, import.meta.env.BASE_URL),
+					}
+				: null,
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
 			markdownUrl: withBasePath(markdownPath, import.meta.env.BASE_URL),
 			pageTree: await source.serializePageTree(source.getPageTree()),
@@ -63,12 +72,13 @@ const clientLoader = browserCollections.docs.createClientLoader({
 		{ toc, frontmatter, default: MDX },
 		props: {
 			className?: string;
+			componentNavigation: ReturnType<typeof getComponentPageNavigation>;
 			githubUrl: string;
 			markdownUrl: string;
 			storybookUrl: string | null;
 		},
 	) {
-		const { githubUrl, markdownUrl, storybookUrl, ...pageProps } = props;
+		const { componentNavigation, githubUrl, markdownUrl, storybookUrl, ...pageProps } = props;
 		return (
 			<DocsPage
 				toc={toc}
@@ -84,6 +94,33 @@ const clientLoader = browserCollections.docs.createClientLoader({
 						storybookUrl={storybookUrl}
 					/>
 				</div>
+				{componentNavigation ? (
+					<nav
+						aria-label="Component documentation"
+						className="not-prose mt-6 flex gap-6 border-fd-border border-b"
+					>
+						{[
+							{ href: componentNavigation.guideUrl, id: 'guide', label: 'Guide' },
+							{ href: componentNavigation.propsUrl, id: 'props', label: 'Props' },
+						].map((item) => {
+							const isCurrent = componentNavigation.current === item.id;
+							return (
+								<a
+									aria-current={isCurrent ? 'page' : undefined}
+									className={`-mb-px border-b-2 px-1 py-3 text-sm transition-colors focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring ${
+										isCurrent
+											? 'border-fd-primary text-fd-primary'
+											: 'border-transparent text-fd-muted-foreground hover:border-fd-border hover:text-fd-foreground'
+									}`}
+									href={item.href}
+									key={item.id}
+								>
+									{item.label}
+								</a>
+							);
+						})}
+					</nav>
+				) : null}
 				<DocsBody>
 					<MDX components={mdxComponents} />
 				</DocsBody>
@@ -100,6 +137,7 @@ function Page() {
 			<Suspense>
 				{clientLoader.useContent(data.path, {
 					className: 'pb-16 md:pb-20 xl:pb-24',
+					componentNavigation: data.componentNavigation,
 					githubUrl: data.githubUrl,
 					markdownUrl: data.markdownUrl,
 					storybookUrl: data.storybookUrl,
