@@ -58,7 +58,7 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 	values['color.surface.floating'] = formatOklch(surfaces.floating);
 	values['color.surface.overlay'] = formatOklch(surfaces.overlay);
 	values['color.scrim'] = scrim;
-	values['color.loadingSkeleton'] = formatOklch(neutral[7]);
+	values['color.loadingSkeleton'] = formatOklch(neutral[8]);
 
 	// Global text / borders: neutral only.
 	values['color.text.primary'] = formatOklch(neutral[12]);

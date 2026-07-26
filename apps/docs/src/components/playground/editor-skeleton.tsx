@@ -46,7 +46,10 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 				</div>
 			))}
 			{showPill ? (
-				<div aria-hidden className="absolute inset-0 flex items-center justify-center">
+				<div
+					aria-hidden
+					className="pointer-events-none absolute inset-0 flex items-center justify-center"
+				>
 					<LoadingPill label="Loading editor" />
 				</div>
 			) : null}
@@ -71,7 +74,7 @@ export function EditorSkeletonShapeScript() {
 /** Shared loading indicator so the editor and preview speak the same language. */
 export function LoadingPill({ label }: { label: string }) {
 	return (
-		<div className="flex items-center gap-2 rounded-full border border-fd-border bg-fd-card px-3 py-1.5 text-fd-muted-foreground text-xs">
+		<div className="flex items-center gap-2 rounded-full border border-fd-border bg-fd-popover px-3 py-1.5 text-fd-muted-foreground text-xs">
 			<LoadingSpinner aria-hidden size="small" />
 			<span>{label}</span>
 		</div>
