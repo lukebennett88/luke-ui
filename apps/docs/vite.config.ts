@@ -97,6 +97,7 @@ export default defineConfig(async () => {
 			include: [
 				'@monaco-editor/react',
 				'@react-aria/utils',
+				'@tanstack/react-router',
 				'@vanilla-extract/recipes',
 				'@vanilla-extract/recipes/createRuntimeFn',
 				// Fumadocs' chrome (search trigger, popover, sidebar) imports icons

@@ -4,7 +4,7 @@ import { SiteNav } from './site-nav.js';
 export function NotFound() {
 	return (
 		<>
-			<SiteNav />
+			<SiteNav hideActiveDestination />
 			<main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-32 text-center">
 				<h1 className="font-bold text-6xl text-fd-muted-foreground">404</h1>
 				<h2 className="font-semibold text-2xl">Page Not Found</h2>

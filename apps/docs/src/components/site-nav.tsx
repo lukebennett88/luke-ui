@@ -1,4 +1,5 @@
 import { cx } from '@luke-ui/react/utils';
+import { useLinkProps } from '@tanstack/react-router';
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
@@ -7,41 +8,23 @@ import type { ComponentProps } from 'react';
 import { getActiveSiteDestination, siteDestinations } from '../lib/site-destinations.js';
 import { ThemeControls } from './theme-controls.js';
 
-/** Shared treatment for the bar's own small controls, so surfaces adding one match. */
 export const SITE_NAV_BUTTON_CLASS_NAME =
 	'inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md px-2 text-fd-muted-foreground text-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring';
 
 interface SiteNavProps extends ComponentProps<'header'> {
-	/**
-	 * Set by a surface whose sidebar also lists the destinations. Fumadocs shows
-	 * those sidebar entries below `lg`, so the bar hides its own copy at the same
-	 * breakpoint rather than printing the destinations twice. Surfaces without a
-	 * sidebar leave this off, and get the destinations at every width — on a
-	 * second row below `md`, where they no longer fit beside the controls.
-	 */
 	hasSidebarNavigation?: boolean;
+	hideActiveDestination?: boolean;
 }
 
-/**
- * The one chrome bar shared by every surface: the docs routes render it as their
- * layout header slot, the playground and the 404 render it directly. All of them
- * therefore carry the same wordmark, destinations, search, and appearance
- * controls.
- *
- * The bar's first row is a fixed `h-14`, which the docs layout depends on — see
- * `docs-site-nav.tsx`. Everything in that row is sized to still fit at 320px, so
- * it never wraps and quietly makes the bar taller than the layout believes.
- *
- * `children` is a trailing slot for controls only one surface has, such as the
- * docs sidebar triggers.
- */
 export function SiteNav({
 	children,
 	className,
 	hasSidebarNavigation = false,
+	hideActiveDestination = false,
 	...props
 }: SiteNavProps) {
-	const activeDestination = getActiveSiteDestination(usePathname());
+	const pathname = usePathname();
+	const activeDestination = hideActiveDestination ? undefined : getActiveSiteDestination(pathname);
 
 	return (
 		<header
@@ -51,9 +34,7 @@ export function SiteNav({
 				className,
 			)}
 		>
-			<Link className="flex h-14 items-center truncate font-semibold text-sm" href="/">
-				Luke UI
-			</Link>
+			<SiteWordmark />
 			<nav
 				aria-label="Site"
 				className={cx(
@@ -85,7 +66,6 @@ export function SiteNav({
 				})}
 			</nav>
 			<div className="ms-auto flex h-14 shrink-0 items-center gap-2">
-				{/* Narrow at `md`, where the playground's destinations share the row. */}
 				<FullSearchTrigger className="w-40 max-md:hidden lg:w-56" hideIfDisabled />
 				<SearchTrigger className="md:hidden" hideIfDisabled />
 				<div className="max-md:hidden">
@@ -98,13 +78,21 @@ export function SiteNav({
 	);
 }
 
-/**
- * The appearance controls are ~230px of pills, which cannot share a 320px row
- * with the wordmark, search, and the docs sidebar trigger. Below `md` they move
- * behind a disclosure instead of wrapping the bar onto a second row — theme
- * choice is a settings-shaped decision, not something a phone needs on screen
- * while reading. The controls themselves are unchanged in either place.
- */
+function SiteWordmark() {
+	const linkProps = useLinkProps({
+		activeProps: {},
+		className: 'flex h-14 shrink-0 items-center truncate font-semibold text-sm',
+		params: { _splat: '' },
+		to: '/$',
+	});
+
+	return (
+		<a {...linkProps} aria-current={undefined} data-status={undefined}>
+			Luke UI
+		</a>
+	);
+}
+
 function AppearancePopover() {
 	return (
 		<Popover>
