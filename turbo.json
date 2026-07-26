@@ -13,6 +13,10 @@
 		"//#check:format-root": {
 			"cache": true
 		},
+		"//#check:cycles": {
+			"cache": true,
+			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
+		},
 		"//#check:unused": {
 			"cache": true,
 			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
