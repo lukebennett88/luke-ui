@@ -9,6 +9,7 @@ export default {
 	workspaces: {
 		'apps/docs': {
 			entry: [
+				'source.config.ts',
 				'scripts/**/*.ts',
 				// Compiled to an inline-able IIFE by the `pack` config in vite.config.ts.
 				'src/components/playground/editor-skeleton-script.ts',
