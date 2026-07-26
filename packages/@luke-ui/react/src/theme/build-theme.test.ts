@@ -546,9 +546,9 @@ describe('compileTheme diagnostics', () => {
 
 	it('records on each check whether missing its ratio fails the build', () => {
 		// Every text pair is a hard gate, and so are the two solved boundaries `border.focus` and
-		// `border.control`. The per-intent borders are the only advisory checks — deliberately subtle
-		// Radix-style separators below 3:1 (theme-v2 border-contrast policy). The "Theme/Diagnostics"
-		// inspector splits its tables on this flag rather than pattern-matching token paths.
+		// `border.control`. The per-intent borders are the only advisory checks.
+		// `color.border.decorative` is not measured. The "Theme/Diagnostics" inspector uses this flag
+		// instead of matching token paths.
 		const { diagnostics } = compileTheme(tactileFoundation);
 		const advisoryBorders = ['accent', 'danger', 'info', 'success', 'warning'].map(
 			(intent) => `color.intent.${intent}.border`,
@@ -559,8 +559,8 @@ describe('compileTheme diagnostics', () => {
 			const hard = checks.filter((check) => check.hard);
 			return {
 				advisoryForegrounds: [...new Set(advisory.map((check) => check.foreground))].sort(),
-				// A hard gate that missed its ratio would have thrown before `compileTheme` returned, so a
-				// recorded hard check that did not pass would mean the flag disagrees with the compiler.
+				// A hard gate that missed its ratio would throw before `compileTheme` returns. A recorded
+				// hard check that does not pass means the flag disagrees with the compiler.
 				everyHardGatePasses: hard.every((check) => check.passes),
 				hardBoundaryForegrounds: [
 					...new Set(hard.filter((check) => check.required === 3).map((check) => check.foreground)),

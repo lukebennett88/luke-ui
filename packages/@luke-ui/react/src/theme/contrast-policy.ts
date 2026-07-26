@@ -5,13 +5,13 @@
  * the build-time validation matrix and `border.control` solver (`build-theme.ts`).
  *
  * The intent role groups live here too, because they decide both which contract leaves the semantic
- * map emits (`semantic-map.ts`) and which pairs the validation matrix gates (`build-theme.ts`). Split
- * across the two modules the failure was asymmetric and half silent: adding a role to the map alone
- * emitted an ungated colour, while adding it to the compiler alone threw an internal error. One
- * declaration makes both sides move together.
+ * map emits (`semantic-map.ts`) and which pairs the validation matrix gates (`build-theme.ts`). When
+ * the lists were split across two modules, failures were asymmetric and only partly reported. Adding
+ * a role to the map alone emitted an ungated colour, while adding it to the compiler alone threw an
+ * internal error. One declaration makes both sides move together.
  *
- * Dependency-free on purpose — it is the leaf both the generator and the compiler import, so it can
- * never close an import cycle.
+ * This module has no dependencies. Both the generator and compiler import it, so it cannot close an
+ * import cycle.
  */
 
 /** The WCAG 2.2 AA contrast ratio text must clear against the surface behind it. */
@@ -43,7 +43,7 @@ export const ACTION_INTENTS = ['neutral', 'accent', 'danger'] as const;
 export const FEEDBACK_INTENTS = ['info', 'success', 'warning'] as const;
 
 /**
- * Action intents that additionally expose a border and low-contrast text. Neutral does not — its
- * borders and text are the global neutral leaves instead.
+ * Action intents that additionally expose a border and low-contrast text. Neutral does not because
+ * its borders and text are the global neutral leaves instead.
  */
 export const BORDER_AND_TEXT_INTENTS = ['accent', 'danger'] as const;

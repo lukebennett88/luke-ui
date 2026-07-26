@@ -91,8 +91,8 @@ describe('mapSemanticColors', () => {
 				expect(result['color.scrim']).toBe(scrim);
 				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[7]));
 
-				// Global text / borders: neutral only. `border.control` is a solved contrast boundary,
-				// not a scale-step alias, so it aliases the passed-through value.
+				// Global text and borders use the neutral family. `border.control` is a solved
+				// contrast boundary, not a scale-step alias, so it aliases the passed-through value.
 				expect(result['color.text.primary']).toBe(formatOklch(families.neutral[12]));
 				expect(result['color.text.secondary']).toBe(formatOklch(families.neutral[11]));
 				expect(result['color.text.disabled']).toBe(formatOklch(families.neutral[8]));
@@ -147,8 +147,8 @@ describe('mapSemanticColors', () => {
 	});
 
 	describe('completeness', () => {
-		// Every generated colour leaf (every `color.*` path except the passed-through `color.scrim`)
-		// must receive a value.
+		// Every generated colour leaf must receive a value. This includes every `color.*` path except the
+		// passed-through `color.scrim`.
 		const generatedColourPaths = flattenThemeContract().filter(
 			([path]) => path.startsWith('color.') && path !== 'color.scrim',
 		);

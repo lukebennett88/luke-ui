@@ -70,57 +70,57 @@ WCAG 2.2 SC 1.4.11 requires 3:1 contrast only for visual information required to
 component or state, not every authored border, so v2 splits border tokens into a hard gate and an
 advisory group:
 
-- **`color.border.control` is a hard gate**, solved as a dedicated contrast boundary (not a
-  scale-step alias) at ≥3:1 against both `canvas` and `recessed`, in both modes. It is frequently
-  the sole resting boundary of a form control, so it cannot be left at the softer step-7 aesthetic.
-- **`color.border.decorative` and every intent border** (`color.intent.*.border`) are **advisory**:
-  measured (where measured at all) but not build-gated, and deliberately kept subtle, Radix-style
-  separators below 3:1. `color.border.focus` is the other hard gate — the keyboard-focus ring stays
-  build-time validated at ≥3:1.
+- `color.border.control` is a hard gate. It is a dedicated contrast boundary, not a scale-step
+  alias, and must reach ≥3:1 against both `canvas` and `recessed` in both modes. It is frequently
+  the sole resting boundary of a form control, so it cannot use the softer step-7 aesthetic.
+- `color.border.decorative` is not checked. It is a deliberately subtle, Radix-style separator below
+  3:1.
+- Every intent border (`color.intent.*.border`) is an advisory 3:1 check. A miss does not gate the
+  build. `color.border.focus` is the other hard gate. The keyboard-focus ring stays build-time
+  validated at ≥3:1.
 
 Component invariant (tracked separately,
 [#247](https://github.com/lukebennett88/luke-ui/issues/247)): any component that uses an advisory
-border as the **sole** cue for a required state (invalid, selected, checked) must add another 3:1 or
-non-colour cue — error text or an icon, a border-thickness/shape change, or a separately gated
-indicator. Advisory borders were never guaranteed to be visible enough on their own.
+border as the sole cue for a required state (invalid, selected, checked) must add another 3:1 or
+non-colour cue: error text or an icon, a border-thickness or shape change, or a separately gated
+indicator. Advisory borders are not guaranteed to be visible enough on their own.
 
 ## Accent policy
 
 Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 
-- A **single-value** accent (`accent: '#...'`) is pre-adapted by `defineTheme`'s `adaptAccent` into
-  an accessible vibrant band before the scale generator ever sees it, so the common case never
-  throws at build time.
-- An **explicit per-mode** accent (`accent: { light, dark }`) is used verbatim — the author asked
-  for exact control. If its whole tone band has no lightness where near-white or near-black on-solid
-  text clears AA, `compileTheme` throws `ThemeGenerationError` naming the failing role and mode.
+- A single-value accent (`accent: '#...'`) is pre-adapted by `defineTheme`'s `adaptAccent` into an
+  accessible vibrant band before the scale generator sees it, so the common case never throws at
+  build time.
+- An explicit per-mode accent (`accent: { light, dark }`) is used verbatim because the author has
+  chosen its lightness. If its whole tone band has no lightness where near-white or near-black
+  on-solid text clears AA, `compileTheme` throws `ThemeGenerationError` naming the failing role and
+  mode.
 
 ## One gate for on-solid contrast
 
 `scale.ts`'s `passesOnSolidGate` is the only function that decides whether a solid can carry
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
-choose clears the AA text ratio plus the search headroom across **both** solid states the engine
-emits — step 9 and its step-10 hover. There is no third, deeper pressed state to test:
+choose clears the AA text ratio plus the search headroom across both solid states the engine emits:
+step 9 and its step-10 hover. There is no third, deeper pressed state to test.
 `surface.solidPressed` reuses step 10 and carries the press through depth, finish, and transform
 instead.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
-copy. Two consequences hold structurally, not by two implementations agreeing:
+copy. That gives two guarantees:
 
-- The pre-conditioner can never be stricter than the solid-anchor search, so "a single-value accent
-  never fails the build" holds for one reason instead of two.
-- The accent the pre-conditioner picks is the accent the generator emits — the search honours it
-  verbatim rather than quietly re-solving for a different lightness.
+- Any lightness the pre-conditioner accepts also passes the generator's solid-anchor search.
+- The generator emits the accent the pre-conditioner picks. The search honours it verbatim instead
+  of quietly resolving a different lightness.
 
-The pre-conditioner is still load bearing and is not redundant: its adaptation band is deliberately
-wider than the generator's tone-faithful window, so it rescues accents (a mid-lightness red, say)
-that the generator alone would report as unsatisfiable.
+The pre-conditioner is necessary because its adaptation band is deliberately wider than the
+generator's tone-faithful window. It can rescue accents, such as a mid-lightness red, that the
+generator alone would report as unsatisfiable.
 
-The shared thresholds themselves — the 4.5 text ratio, the 3:1 non-text ratio, the search headroom
-and the search step — are declared once in `contrast-policy.ts`, along with the intent role groups
-both the validation matrix and the semantic map key off. Splitting those role lists is what made the
-failure asymmetric: a role added to the map alone emitted an ungated colour, while one added to the
-compiler alone threw an internal error.
+`contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
+search headroom, and the search step. It also declares the intent role groups used by both the
+validation matrix and the semantic map. Previously, separate role lists allowed a role added only to
+the map to emit an ungated colour, while a role added only to the compiler threw an internal error.
 
 ## `loadingSkeleton`
 

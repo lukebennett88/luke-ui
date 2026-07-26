@@ -190,7 +190,7 @@ const meta = preview.meta({
  * Read-only inspector over `compileTheme`'s diagnostics data model for the bundled themes: the
  * private 12-step families, the generated elevation surfaces, the step-9 solid-anchor search, the
  * full WCAG 2.2 validation matrix (split into hard gates and advisory-only checks), and any sRGB
- * gamut reductions. Not public API — a diagnostic view over an already-built data model.
+ * gamut reductions. This diagnostic view uses an already-built data model and is not public API.
  */
 export const Inspector = meta.story({
 	play: async ({ canvas }) => {
@@ -216,7 +216,8 @@ function ThemeDiagnosticsInspector() {
 				<h1 style={{ marginBlock: 0 }}>Theme diagnostics</h1>
 				<p style={{ color: vars.color.text.secondary, marginBlockEnd: 0 }}>
 					The private scale families, generated surfaces, solid-anchor search, and WCAG 2.2
-					validation matrix `compileTheme` resolved for a bundled theme. Read-only — not public API.
+					validation matrix `compileTheme` resolved for a bundled theme. It is read-only and not
+					public API.
 				</p>
 			</header>
 
@@ -381,11 +382,11 @@ function ContrastChecksSection({ checks }: { checks: Array<ContrastCheck> }) {
 	return (
 		<SectionCard title="Contrast checks">
 			<ContrastCheckTable
-				caption="Hard gates — compileTheme throws ThemeContrastError if any of these misses its ratio"
+				caption="Hard-gate checks: compileTheme throws ThemeContrastError if any of these misses its ratio"
 				checks={hard}
 			/>
 			<ContrastCheckTable
-				caption="Advisory — measured only; borders other than border.control/border.focus are subtle by design and do not gate the build"
+				caption="Advisory checks are measured only. Borders other than border.control/border.focus are subtle and do not gate the build"
 				checks={advisory}
 			/>
 		</SectionCard>

@@ -15,9 +15,9 @@ element. Neither step injects styles at runtime.
 - `recipes/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
 - `recipes/input-states.ts`: the shared field control-state selectors (`inputStates`,
-  `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose and extend.
-  Named `.ts`, not `.css.ts`, because it emits no CSS itself — only the plain data and functions
-  each field recipe's own `.css.ts` module composes.
+  `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose and extend. It
+  is named `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module
+  composes its plain data and functions.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
   `fontSizeSteps` typography step keys.
@@ -32,7 +32,7 @@ element. Neither step injects styles at runtime.
   groups the generator, the compiler's validation matrix, and the semantic map all read.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
   constrained step-9 solid-anchor search, the per-role capability guarantees, and
-  `passesOnSolidGate` — the one on-solid accessibility gate.
+  `passesOnSolidGate`, the on-solid accessibility gate.
 - `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
   `surfaces.canvas` is always exactly the resolved `background`.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
@@ -113,12 +113,12 @@ specificity.
 | `utilities` | One-off layout and override escape hatches.         |
 
 Use `styleInLayer` and `globalStyleInLayer` from `styles/layered-style.css.ts` to place a plain
-Vanilla Extract style in a named layer directly, for a recipe with no variants (see
+Vanilla Extract style for a recipe with no variants in a named layer (see
 `recipes/loading-skeleton.css.ts`). A variant-driven recipe instead calls `recipe()` from
 `recipes/recipe.ts`, which wraps every base, variant, and compound-variant style it is given in the
-`recipes` layer itself; a recipe can still pre-build a static `base` with
-`styleInLayer('recipes', …)` and hand the resulting class string to `recipe()`, which passes a
-string value through unchanged rather than wrapping it again.
+`recipes` layer. A recipe can still pre-build a static `base` with `styleInLayer('recipes', …)` and
+hand the resulting class string to `recipe()`, which passes a string value through unchanged rather
+than wrapping it again.
 
 Text's Capsize trim declarations use logical properties for the pseudo-element margins and are
 authored as one of the Text recipe's `recipe()` compound-variant styles, so they remain owned by
@@ -149,8 +149,8 @@ import { button, link } from '@luke-ui/react/recipes';
 Recipes are component-specific. Keep them separate from general layout utilities.
 
 Every recipe is built with the internal `recipe()` engine from `recipes/recipe.ts`. It is not part
-of the public package entry — component authors inside `@luke-ui/react` use it to define a new
-recipe; consumers only ever call the built recipe functions it returns (`button`, `text`, and so
+of the public package entry. Component authors inside `@luke-ui/react` use it to define a new
+recipe. Consumers only ever call the built recipe functions it returns (`button`, `text`, and so
 on). `recipe()` wraps every base, variant, and compound-variant style it is given in the `recipes`
 cascade layer itself, so a recipe author does not add layering by hand.
 
@@ -215,7 +215,7 @@ Never hand-maintain a recipe's variant type. Derive it from the built recipe wit
 export type ButtonVariants = RecipeSelection<typeof button>;
 ```
 
-Do not cast a hand-written variant interface onto a recipe's selection parameter — if the exported
+Do not cast a hand-written variant interface onto a recipe's selection parameter. If the exported
 type and the recipe definition can drift, something is wrong with how the type was produced, not
 with the recipe.
 
@@ -235,8 +235,8 @@ import {
 const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSelectors(inputStates);
 ```
 
-`inputStates` is the base attribute/pseudo-class selector for each state;
-`composeInputStateSelectors` combines them into the mutually-exclusive selectors a recipe applies to
+`inputStates` is the base attribute/pseudo-class selector for each state.
+`composeInputStateSelectors` combines them into the mutually exclusive selectors a recipe applies to
 its styles (for example, `hover` deliberately excludes an element that is also focused or
 read-only). A recipe with a more complex anatomy can widen a state before composing it, the way
 `combobox.css.ts` extends `disabled` and `invalid` to also match its trigger button.

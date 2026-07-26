@@ -1,7 +1,7 @@
 /**
  * The one default semantic colour mapping. `mapSemanticColors` aliases every generated colour
  * contract leaf onto a private scale family's step or a generated surface, per the locked mapping
- * table. It is a pure lookup: no colour math happens here, and it never distorts a family or
+ * table. It is a pure lookup. No colour math happens here, and it never distorts a family or
  * surface to make a leaf fit.
  *
  * The intent role groups it keys off come from `contrast-policy.ts`, which `build-theme.ts`'s
@@ -29,8 +29,9 @@ interface MapSemanticColorsRequest {
 	/** The generated elevation surface set, already resolved for `mode`. */
 	surfaces: GeneratedSurfaces;
 	/**
-	 * `color.border.control`'s solved value: a dedicated contrast boundary, not a scale-step alias. Resolved by `build-theme.ts`'s `solveControlBorder` against `surfaces.canvas`
-	 * and `surfaces.recessed` before this map runs; passed through verbatim here.
+	 * `color.border.control`'s solved value is a dedicated contrast boundary, not a scale-step alias.
+	 * `build-theme.ts`'s `solveControlBorder` resolves it against `surfaces.canvas` and
+	 * `surfaces.recessed` before this map runs, then this function passes it through verbatim.
 	 */
 	controlBorder: Oklch;
 	/** The authored scrim value, passed through verbatim (it may carry an alpha channel). */
@@ -43,8 +44,8 @@ interface MapSemanticColorsRequest {
 
 /**
  * Resolves every colour contract leaf onto the private families and surfaces, per the locked
- * semantic mapping table. `families`/`surfaces` are already mode-resolved; `scrim` passes through
- * verbatim; `focus` defaults to the accent family's step 8 when the theme author omits it.
+ * semantic mapping table. `families` and `surfaces` are already mode-resolved. `scrim` passes through
+ * verbatim. `focus` defaults to the accent family's step 8 when the theme author omits it.
  */
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
 	const { families, surfaces, scrim, focus, controlBorder } = request;

@@ -98,16 +98,16 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 		'oklch(0.7 0.15 320)',
 		'oklch(0.6 0.12 160)',
 		'oklch(0.5 0.2 270)',
-		// Tones the generator alone cannot reach: their whole tone-faithful window is an on-solid dead
-		// zone, so only the pre-conditioner's wider band rescues them.
+		// Tones the generator cannot reach through its tone-faithful window, which is an on-solid dead
+		// zone. The pre-conditioner's wider band rescues them.
 		'oklch(0.62 0.19 27)',
 		'oklch(0.55 0.2 258)',
 	];
 
 	it('hands the generator an accent the solid-anchor search honours verbatim in both modes', () => {
 		// The pre-conditioner gates on `passesOnSolidGate`, the same predicate the solid-anchor search
-		// decides on, so it can never be stricter than the solver and the solver never quietly re-searches
-		// what it chose: the emitted solid IS the pre-conditioned accent, not a second guess at it.
+		// decides on. It cannot be stricter than the solver, and the solver does not re-search the chosen
+		// tone: the emitted solid is the pre-conditioned accent.
 		const resolved = accents.flatMap((accent) => {
 			return (['light', 'dark'] as const).map((mode) => {
 				const foundation = normalizeTheme({ color: { accent }, name: 'accent-gate' });

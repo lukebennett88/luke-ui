@@ -66,7 +66,7 @@ export interface FamilyDiagnostics {
 /**
  * One WCAG pair the semantic validation matrix checked while compiling a theme mode. Records the
  * factual ratio, whether it clears the required minimum, and whether the compiler treats it as a hard
- * gate — so tooling reads that classification instead of inferring it from token paths.
+ * gate. Tooling reads that classification instead of inferring it from token paths.
  */
 export interface ContrastCheck {
 	/** Token path of the foreground colour, for example `color.text.primary`. */

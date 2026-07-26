@@ -367,9 +367,9 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
  * ({@link passesOnSolidGate}). Returns the lightness nearest the mode target, and throws when no
  * lightness in the band is accessible.
  *
- * The gate is the generator's, not a second copy of it, so this pre-conditioner can never be stricter
- * than the solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too,
- * and the accent it hands over is the one the generator emits. Its band is the wider of the two, which
+ * The gate is the generator's, not a second copy of it. This pre-conditioner cannot be stricter than
+ * the solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too, and
+ * the accent it hands over is the one the generator emits. Its band is wider, which
  * is what lets it rescue accents the generator's tone-faithful window cannot reach.
  */
 function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {

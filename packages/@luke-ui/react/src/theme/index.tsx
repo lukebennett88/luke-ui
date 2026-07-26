@@ -16,7 +16,7 @@ export { vars } from './contract.css.js';
  * the focus ring and `border.control`. The five `intent.*.border` pairs are measured but advisory
  * only and cannot trigger this error. It carries every failing mode-and-pair in its `failures`
  * array. `ThemeGenerationError` is thrown when a role that must guarantee on-solid contrast (an
- * inaccessible explicit per-mode accent, for example) cannot reach an accessible solid; it names the
+ * inaccessible explicit per-mode accent, for example) cannot reach an accessible solid. It names the
  * failing `role` and `mode`.
  */
 export { ThemeContrastError, ThemeGenerationError, themeClassName } from './build-theme.js';
