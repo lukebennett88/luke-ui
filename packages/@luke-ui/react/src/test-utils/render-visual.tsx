@@ -67,27 +67,29 @@ export async function captureVisual(locator: Locator, id: string) {
 		throw new Error(`Visual capture IDs must use a component namespace: ${id}`);
 	}
 	const viewport = `${window.innerWidth}x${window.innerHeight}`;
+	const element = locator.element();
+	const fullHeight = element.scrollHeight;
+
+	if (fullHeight > window.innerHeight) {
+		// The element extends beyond the viewport.  Increase the viewport height
+		// so Playwright renders the full content, then restore after capture.
+		await cdp().send('Emulation.setDeviceMetricsOverride', {
+			width: window.innerWidth,
+			height: fullHeight,
+			deviceScaleFactor: window.devicePixelRatio,
+			mobile: false,
+		});
+	}
+
 	await expect.element(locator).toMatchScreenshot(`${id}__viewport-${viewport}`);
 
-	// If the element extends beyond the viewport, verify that the full content
-	// was captured by checking the last child's bottom edge.
-	const element = locator.element();
-	const lastChild = element.lastElementChild;
-	if (
-		lastChild &&
-		element.scrollHeight > window.innerHeight &&
-		lastChild.getBoundingClientRect().bottom <= window.innerHeight
-	) {
-		// The last child ends at or above the viewport bottom, which means the
-		// element's scrollHeight is inflated (likely from padding or margin
-		// collapsing upward) but no actual content sits below the fold.  That
-		// can happen legitimately, so warn but don't fail.
-		// eslint-disable-next-line no-console
-		console.warn(
-			`Visual capture "${id}": scroll height ${element.scrollHeight}px exceeds ` +
-				`viewport ${window.innerHeight}px but no child reaches beyond it. ` +
-				'The capture is probably fine, but verify content is not being clipped.',
-		);
+	if (fullHeight > window.innerHeight) {
+		await cdp().send('Emulation.setDeviceMetricsOverride', {
+			width: window.innerWidth,
+			height: window.innerHeight,
+			deviceScaleFactor: window.devicePixelRatio,
+			mobile: false,
+		});
 	}
 }
 

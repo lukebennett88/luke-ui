@@ -78,19 +78,10 @@ export default defineConfig({
 						enabled: true,
 						expect: {
 							toMatchScreenshot: {
-								// Tall elements (e.g. token board with 128 leaves) extend
-								// beyond the fixed 800px viewport. Without this, Playwright
-								// only paints content in the initial viewport.
-								captureBeyondViewport: true,
-								resolveScreenshotPath: ({
-									arg,
-									ext,
-									root,
-								}: {
-									arg: string;
-									ext: string;
-									root: string;
-								}) => {
+								// captureBeyondViewport is NOT set globally — it is applied
+								// per-capture in captureVisual via CDP viewport resizing only
+								// when the element extends beyond the viewport.
+								resolveScreenshotPath: ({ arg, ext, root }) => {
 									return path.join(
 										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
 										`${arg}${ext}`,
@@ -104,7 +95,7 @@ export default defineConfig({
 									// jitter; raise it if a real regression proves otherwise.
 									allowedMismatchedPixelRatio: 0.001,
 								},
-							} as any,
+							},
 						},
 						headless: true,
 						instances: [{ browser: 'chromium' }],
