@@ -16,7 +16,10 @@
 
 ## Dev loop
 
-- Run `pnpm run check` from the repo root before committing.
+- Run `pnpm run check` from the repo root before committing. `check` covers barrels,
+  format, lint, and types but **not** tests. Run `pnpm run test` separately,
+  or rely on the `storybook.yml` CI workflow to run unit, browser, and docs tests
+  on pull requests.
 - Component prose lives in MDX files in `apps/docs/content/docs/`, not `.docs.md` files in the
   package. Update the relevant MDX page in the same change as component code.
 - Do not add or edit `.docs.md` files in `packages/@luke-ui/react/src/`.
