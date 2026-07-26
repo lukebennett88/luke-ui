@@ -1,9 +1,9 @@
 /**
  * The theme compiler's diagnostics data model. Family-level diagnostics are populated by the scale
- * generator ({@link import('./scale.js').generateFamilyWithDiagnostics}) in Stage 3. The theme-level
+ * generator ({@link import('./scale.js').generateFamilyWithDiagnostics}). The theme-level
  * {@link ThemeDiagnostics} (complete, only for a fully compiled theme) and
  * {@link ThemeGenerationDiagnostics} (partial, for a build that failed part-way) are consumed by
- * `compileTheme` / `ThemeGenerationError` in `build-theme.ts` (Stage 6).
+ * `compileTheme` / `ThemeGenerationError` in `build-theme.ts`.
  */
 
 import type { Oklch } from './color.js';

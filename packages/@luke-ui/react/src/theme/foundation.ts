@@ -111,8 +111,9 @@ export interface ThemeSourceColors {
 	/**
 	 * Required. The canvas anchor, resolved per mode from an explicit `background`, an adapted
 	 * opposite-mode `background`, or (when `background` is entirely omitted) a copy of the resolved
-	 * `neutral` canvas anchor. Not yet consumed by `buildTheme`, which still derives its canvas
-	 * directly from `neutral`; carried here for the scale/elevation stages (#235/#236) to consume.
+	 * `neutral` canvas anchor. `buildTheme` takes this value directly as the canvas anchor: every
+	 * family's ramp and the elevation surfaces (including `color.surface.canvas`) are generated
+	 * against `background`, not `neutral`.
 	 */
 	background: string;
 	/** Required. The brand or interaction accent colour. */

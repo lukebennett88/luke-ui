@@ -29,8 +29,7 @@ interface MapSemanticColorsRequest {
 	/** The generated elevation surface set, already resolved for `mode`. */
 	surfaces: GeneratedSurfaces;
 	/**
-	 * `color.border.control`'s solved value: a dedicated contrast boundary (Stage 6 Option B), not a
-	 * scale-step alias. Resolved by `build-theme.ts`'s `solveControlBorder` against `surfaces.canvas`
+	 * `color.border.control`'s solved value: a dedicated contrast boundary, not a scale-step alias. Resolved by `build-theme.ts`'s `solveControlBorder` against `surfaces.canvas`
 	 * and `surfaces.recessed` before this map runs; passed through verbatim here.
 	 */
 	controlBorder: Oklch;

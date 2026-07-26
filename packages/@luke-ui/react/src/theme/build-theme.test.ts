@@ -684,8 +684,8 @@ describe('bundled theme identity', () => {
 });
 
 // v2 regression goldens: the exact `buildTheme` output for the bundled themes under the wired-in
-// scale/elevation/semantic-map pipeline (Stage 6, #238). Asserted byte-identical so any later
-// generator change is a reviewed, deliberate diff.
+// scale/elevation/semantic-map pipeline (#238). Asserted byte-identical so any later generator
+// change is a reviewed, deliberate diff.
 describe('v2 regression goldens', () => {
 	const v2Goldens = {
 		paper: new URL('./__fixtures__/v2-goldens/paper.v2.css', import.meta.url),
