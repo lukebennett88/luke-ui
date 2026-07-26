@@ -82,6 +82,7 @@ export async function captureVisual(locator: Locator, id: string) {
 		// element's scrollHeight is inflated (likely from padding or margin
 		// collapsing upward) but no actual content sits below the fold.  That
 		// can happen legitimately, so warn but don't fail.
+		// eslint-disable-next-line no-console
 		console.warn(
 			`Visual capture "${id}": scroll height ${element.scrollHeight}px exceeds ` +
 				`viewport ${window.innerHeight}px but no child reaches beyond it. ` +

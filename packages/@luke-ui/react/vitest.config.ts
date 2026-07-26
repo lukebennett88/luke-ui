@@ -82,7 +82,15 @@ export default defineConfig({
 								// beyond the fixed 800px viewport. Without this, Playwright
 								// only paints content in the initial viewport.
 								captureBeyondViewport: true,
-								resolveScreenshotPath: ({ arg, ext, root }) => {
+								resolveScreenshotPath: ({
+									arg,
+									ext,
+									root,
+								}: {
+									arg: string;
+									ext: string;
+									root: string;
+								}) => {
 									return path.join(
 										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
 										`${arg}${ext}`,
@@ -96,7 +104,7 @@ export default defineConfig({
 									// jitter; raise it if a real regression proves otherwise.
 									allowedMismatchedPixelRatio: 0.001,
 								},
-							},
+							} as any,
 						},
 						headless: true,
 						instances: [{ browser: 'chromium' }],
