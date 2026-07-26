@@ -78,6 +78,10 @@ export default defineConfig({
 						enabled: true,
 						expect: {
 							toMatchScreenshot: {
+								// Tall elements (e.g. token board with 128 leaves) extend
+								// beyond the fixed 800px viewport. Without this, Playwright
+								// only paints content in the initial viewport.
+								captureBeyondViewport: true,
 								resolveScreenshotPath: ({ arg, ext, root }) => {
 									return path.join(
 										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
