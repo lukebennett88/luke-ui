@@ -137,6 +137,24 @@ export interface ThemeSourceColors {
 	scrim: string;
 }
 
+/**
+ * The parse-validated per-mode source colour fields of {@link ThemeSourceColors}: the fields the
+ * compiler resolves into OKLCH and the validator parses. `background` is the resolved canvas anchor
+ * (#242); `focus` is the authored keyboard-focus ring; both are colours the foundation must carry.
+ * `scrim` is deliberately absent — it is emitted verbatim and may carry an alpha channel, so it is
+ * checked as a CSS value instead of parsed.
+ */
+export const SOURCE_COLOR_FIELDS = [
+	'neutral',
+	'background',
+	'accent',
+	'info',
+	'success',
+	'warning',
+	'danger',
+	'focus',
+] as const;
+
 /** Authored composite `box-shadow` values for one colour mode. */
 interface ThemeDepthFoundation {
 	/** Inset treatment for a pressed control or sunken surface. */

@@ -4,7 +4,7 @@
  * table. It is a pure lookup: no colour math happens here, and it never distorts a family or
  * surface to make a leaf fit.
  *
- * The intent role groups it keys off come from `contrast-policy.ts`, which `build-theme.ts`'s
+ * The intent role groups it keys off come from `contrast-policy.ts`, which `validate-contrast.ts`'s
  * validation matrix reads too, so a role can never be emitted here without being gated there. Values
  * are formatted with `formatOklch`, the representation the pipeline emits, so the result drops
  * straight into the mode value record `buildModeColors` produces.
@@ -30,7 +30,7 @@ interface MapSemanticColorsRequest {
 	surfaces: GeneratedSurfaces;
 	/**
 	 * `color.border.control`'s solved value: a dedicated contrast boundary (Stage 6 Option B), not a
-	 * scale-step alias. Resolved by `build-theme.ts`'s `solveControlBorder` against `surfaces.canvas`
+	 * scale-step alias. Resolved by `control-border.ts`'s `solveControlBorder` against `surfaces.canvas`
 	 * and `surfaces.recessed` before this map runs; passed through verbatim here.
 	 */
 	controlBorder: Oklch;

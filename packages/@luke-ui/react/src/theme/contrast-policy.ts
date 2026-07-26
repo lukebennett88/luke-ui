@@ -1,14 +1,15 @@
 /**
  * The accessibility policy the theme layer is built to guarantee, declared once. Every module that
  * solves for or validates contrast reads its thresholds from here rather than restating them: the
- * scale generator's on-solid gate (`scale.ts`), the accent pre-conditioner (`define-theme.ts`), and
- * the build-time validation matrix and `border.control` solver (`build-theme.ts`).
+ * scale generator's on-solid gate (`scale.ts`), the accent pre-conditioner (`define-theme.ts`), the
+ * `border.control` solver (`control-border.ts`), and the build-time validation matrix
+ * (`validate-contrast.ts`).
  *
  * The intent role groups live here too, because they decide both which contract leaves the semantic
- * map emits (`semantic-map.ts`) and which pairs the validation matrix gates (`build-theme.ts`). Split
- * across the two modules the failure was asymmetric and half silent: adding a role to the map alone
- * emitted an ungated colour, while adding it to the compiler alone threw an internal error. One
- * declaration makes both sides move together.
+ * map emits (`semantic-map.ts`) and which pairs the validation matrix gates
+ * (`validate-contrast.ts`). Split across the two modules the failure was asymmetric and half silent:
+ * adding a role to the map alone emitted an ungated colour, while adding it to the compiler alone threw
+ * an internal error. One declaration makes both sides move together.
  *
  * Dependency-free on purpose — it is the leaf both the generator and the compiler import, so it can
  * never close an import cycle.

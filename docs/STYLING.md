@@ -17,10 +17,17 @@ element. Neither step injects styles at runtime.
   `fontSizeSteps` typography step keys.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
+- `theme/token-values.ts`: the static values behind the contract's non-colour leaves — the spacing
+  scale, motion durations and easings, the composite type steps, the curated Capsize font metrics,
+  and the icon and control size scales.
+- `theme/identity.ts`: `themeClassName(name)`, the one stable identity class the emitted stylesheet
+  scopes every declaration to.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
   and the curated defaults it applies for omitted materials and scrim.
 - `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into and
   the curated colour, radius, and typography defaults.
+- `theme/validate-foundation.ts`: shape validation for an authored foundation, aggregating every
+  issue (unusable name, unparseable source colour, unsafe verbatim CSS value) into one error.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and intent role
   groups the generator, the compiler's validation matrix, and the semantic map all read.
@@ -29,13 +36,20 @@ element. Neither step injects styles at runtime.
   `passesOnSolidGate` — the one on-solid accessibility gate.
 - `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
   `surfaces.canvas` is always exactly the resolved `background`.
+- `theme/control-border.ts`: the `color.border.control` solver (`solveControlBorder`), which
+  searches for a dedicated 3:1 boundary against both base surfaces instead of aliasing a scale step.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
   surfaces onto the colour contract's leaves.
+- `theme/validate-contrast.ts`: the build-time WCAG 2.2 validation matrix (`validateContrast`) over
+  the emitted colour values, and the hard-gate failures it reports.
 - `theme/diagnostics.ts`: the `compileTheme` diagnostics data model (family, surface, solid-anchor,
   and contrast-check detail) consumed by the "Theme/Diagnostics" and "Theme/Color token board"
   Storybook stories.
+- `theme/stylesheet.ts`: the stylesheet writer (`assembleStylesheet`), which emits the identity
+  block and the four mode-scoped blocks from the compiler's resolved value maps.
 - `theme/build-theme.ts`: the internal `compileTheme(foundation) → { css, diagnostics }` value
-  pipeline, `buildTheme`, `themeClassName`, and contrast validation.
+  pipeline and `buildTheme` — the entry points, the errors a build throws, and the order the stages
+  above run in.
 - `theme/foundations.ts`: `defineTheme(...)` inputs for the bundled Tactile and Paper themes.
 - `themes/`: bundled theme class-name constants exported from `@luke-ui/react/themes`.
 - `scripts/build-themes.ts`: writes the bundled theme stylesheets to `dist/themes/`.

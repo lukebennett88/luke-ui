@@ -1,5 +1,5 @@
-import { themeClassName } from '../theme/build-theme.js';
 import { paperTheme, tactileTheme } from '../theme/foundations.js';
+import { themeClassName } from '../theme/identity.js';
 
 /**
  * Identity class for the Tactile theme, the Luke UI default. Apply it to `<html>` or a

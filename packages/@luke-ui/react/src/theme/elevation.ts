@@ -29,8 +29,8 @@ export interface GenerateSurfacesRequest {
 
 // Surface roles encode usage directly: light wells use neutral white, dark wells sit below the
 // canvas, and detached surfaces separate more strongly without exposing generated palette steps.
-// This module owns the surface deltas outright — `build-theme.ts` consumes `generateSurfaces` rather
-// than re-deriving them, so there is a single source of truth for the elevation model.
+// This module owns the surface deltas outright — the compiler consumes `generateSurfaces` rather than
+// re-deriving them, so there is a single source of truth for the elevation model.
 const LIGHT_RECESSED_SURFACE = { l: 1, c: 0, h: 0 } as const satisfies Oklch;
 const DARK_RECESSED_SURFACE_LIGHTNESS_DELTA = -0.025;
 const SURFACE_LIGHTNESS_DELTAS = {
