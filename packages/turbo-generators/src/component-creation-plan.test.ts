@@ -23,12 +23,14 @@ describe('createComponentPlan', () => {
 			'apps/docs/src/status-badge/status-badge.story.tsx',
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
 			'packages/@luke-ui/react/src/status-badge/index.tsx',
-			'packages/@luke-ui/react/src/status-badge/status-badge.docs.md',
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
 		]);
 		expect(
-			plan.files.find((file) => file.path.endsWith('/status-badge/meta.json'))?.contents,
-		).toBe('{\n\t"pages": ["!props"],\n\t"collapsible": false\n}\n');
+			plan.files.find((file) => file.path.endsWith('/status-badge/index.mdx'))?.contents,
+		).toContain('`StatusBadge` from `@luke-ui/react/status-badge`.');
+		expect(plan.files.find((file) => file.path.endsWith('/status-badge/meta.json'))?.contents).toBe(
+			'{\n\t"pages": ["!props"],\n\t"collapsible": false\n}\n',
+		);
 		expect(
 			plan.files.find((file) => file.path.endsWith('/status-badge/props.mdx'))?.contents,
 		).toContain(

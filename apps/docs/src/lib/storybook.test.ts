@@ -3,7 +3,7 @@ import { getStorybookStoryUrl } from './storybook.js';
 
 test('links component folder indexes to their Storybook docs', () => {
 	expect(getStorybookStoryUrl('components/actions/icon-button/index.mdx', '/')).toBe(
-		'/storybook/?path=/docs/actions-iconbutton--docs',
+		'http://localhost:6006/?path=/docs/actions-iconbutton--docs',
 	);
 });
 
