@@ -13,9 +13,6 @@ export default function Alignment() {
 			<Text elementType="div" textAlign="end">
 				End aligned
 			</Text>
-			<Text elementType="div" fontVariantNumeric="tabular-nums" textAlign="end">
-				12,121.21
-			</Text>
 		</Box>
 	);
 }
