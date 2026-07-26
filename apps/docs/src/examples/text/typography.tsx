@@ -1,18 +1,37 @@
 import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
+import { vars } from '@luke-ui/react/theme';
+
+const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
 
 export default function Typography() {
 	return (
-		<Box display="flex" flexDirection="column" gap="300">
-			<Text size="100">The quick brown fox jumps over the lazy dog.</Text>
-			<Text size="200">The quick brown fox jumps over the lazy dog.</Text>
-			<Text size="300">The quick brown fox jumps over the lazy dog.</Text>
-			<Text fontWeight="emphasis" size="400">
-				The quick brown fox jumps over the lazy dog.
-			</Text>
-			<Text color="secondary" size="200">
-				Supporting text uses a secondary colour role.
-			</Text>
+		<Box minInlineSize="45rem">
+			<Box
+				alignItems="flex-end"
+				display="grid"
+				style={{
+					borderBlockEnd: `1px dashed ${vars.color.border.decorative}`,
+					gridTemplateColumns: 'repeat(9, minmax(5rem, 1fr))',
+				}}
+			>
+				{sizes.map((size) => (
+					<Text elementType="div" key={size} size={size} textAlign="center">
+						Aa
+					</Text>
+				))}
+			</Box>
+			<Box
+				display="grid"
+				paddingBlockStart="200"
+				style={{ gridTemplateColumns: 'repeat(9, minmax(5rem, 1fr))' }}
+			>
+				{sizes.map((size) => (
+					<Text color="secondary" elementType="div" key={size} size="100" textAlign="center">
+						{size}
+					</Text>
+				))}
+			</Box>
 		</Box>
 	);
 }

@@ -29,38 +29,56 @@ compact UI labels, while larger steps are useful for display text that is not a 
 
 <ExampleBlock
 	src="text/typography"
-	title="Text — Size, weight and colour"
-	description="Use coordinated size steps, semantic colour roles, and font-weight roles."
+	title="Text — Type scale"
+	description="Compare the coordinated 100–900 size steps."
 />
 
 The active theme supplies the font family and values behind each `fontWeight` role. Use `body` for
 copy, `label` for controls, `heading` for prominent non-heading text, and `emphasis` when text needs
 more weight.
 
-## Alignment and numeric glyphs
+## Alignment
 
-Set `textAlign` when the layout needs a different inline alignment. Use `fontVariantNumeric` for
-numeric content, such as `tabular-nums` in a column of values.
+Set `textAlign` when the layout needs a different inline alignment.
 
 <ExampleBlock
 	src="text/alignment"
-	title="Text — Alignment and numeric glyphs"
-	description="Align text and use tabular figures where numbers need to line up."
+	title="Text — Alignment"
+	description="Compare start, centre, and end alignment."
 />
 
-## Trimming and truncation
+## Numeric glyphs
+
+Use `fontVariantNumeric` to align numeric columns, format fractions and ordinals, or distinguish
+zero with a slash.
+
+<ExampleBlock
+	src="text/numeric-glyphs"
+	title="Text — Numeric glyphs"
+	description="Compare tabular numerals, fractions, ordinals, and slashed zeroes."
+/>
+
+## Trimming
 
 Text trims space above capitals and below the baseline by default. That makes vertical spacing more
 predictable in cards and other bounded layouts. Set `shouldDisableTrim` only when the untrimmed line
-box is required. Trimming is disabled automatically when `lineClamp` is set.
+box is required.
+
+<ExampleBlock
+	src="text/trim"
+	title="Text — Trimming"
+	description="Compare trimmed text with its full line box."
+/>
+
+## Truncation
 
 Use `lineClamp` to constrain text to one line or up to five lines. Overflow is truncated with an
-ellipsis.
+ellipsis. Trimming is disabled automatically when `lineClamp` is set.
 
 <ExampleBlock
 	src="text/truncation"
-	title="Text — Trimming and truncation"
-	description="Clamp text when the layout has a fixed amount of space."
+	title="Text — Truncation"
+	description="Compare one-line and two-line truncation."
 />
 
 ## Transform and decoration

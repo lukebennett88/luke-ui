@@ -29,11 +29,13 @@ percentages, units, and compact values. Use `Emoji` when an emoji needs a reliab
 Text and Heading use the steps `100` through `900`. A `size` changes the whole type treatment,
 rather than a font size alone.
 
-```tsx
-<Text size="600" fontWeight="heading">
-	Quarterly revenue
-</Text>
-```
+The specimen keeps each step's font size, line height, letter spacing, and trim together.
+
+<ExampleBlock
+	src="text/typography"
+	title="Text — Type scale"
+	description="Compare the coordinated 100–900 size steps."
+/>
 
 Text defaults to `300`. Heading selects a size from its level, and accepts `size` when the visual
 hierarchy needs a deliberate override.

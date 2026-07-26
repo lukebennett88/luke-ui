@@ -7,7 +7,7 @@ export default function Children() {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
+		<Box alignItems="flex-start" display="flex" flexDirection="column" gap="400">
 			<LoadingSpinner aria-label="Saving changes" isLoading={isLoading}>
 				<Button>Save changes</Button>
 			</LoadingSpinner>
@@ -18,7 +18,7 @@ export default function Children() {
 						onChange={(event) => setIsLoading(event.target.checked)}
 						type="checkbox"
 					/>
-					Saving
+					Loading
 				</Box>
 			</label>
 		</Box>

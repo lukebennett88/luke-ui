@@ -10,14 +10,9 @@ export default function TextSkeleton() {
 		<Box display="grid" gap="400" maxInlineSize="32rem">
 			<Text>
 				<LoadingSkeleton isLoading={isLoading}>
-					Your application uses a shared type scale, colour system, and component library.
+					The placeholder follows each line of text as this sentence wraps.
 				</LoadingSkeleton>
 			</Text>
-			<LoadingSkeleton isLoading={isLoading}>
-				<Text>
-					Your application uses a shared type scale, colour system, and component library.
-				</Text>
-			</LoadingSkeleton>
 			<label>
 				<Box alignItems="center" display="flex" gap="200">
 					<input
@@ -25,7 +20,7 @@ export default function TextSkeleton() {
 						onChange={(event) => setIsLoading(event.target.checked)}
 						type="checkbox"
 					/>
-					Show placeholders
+					Loading
 				</Box>
 			</label>
 		</Box>

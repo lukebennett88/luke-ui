@@ -18,7 +18,7 @@ export default function BorderRadius() {
 						onChange={(event) => setIsLoading(event.target.checked)}
 						type="checkbox"
 					/>
-					Show placeholder
+					Loading
 				</Box>
 			</label>
 		</Box>

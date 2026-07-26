@@ -4,37 +4,33 @@ import { vars } from '@luke-ui/react/theme';
 
 export default function ResponsiveLayout() {
 	return (
+		<Box display="flex" flexDirection={{ medium: 'row', xsmall: 'column' }} gap="300">
+			<Item />
+			<Item />
+		</Box>
+	);
+}
+
+function Item() {
+	return (
 		<Box
-			alignItems={{ medium: 'center', xsmall: 'flex-start' }}
+			alignItems="center"
 			display="flex"
-			flexDirection={{ medium: 'row', xsmall: 'column' }}
-			gap={{ medium: '800', xsmall: '400' }}
-			justifyContent="space-between"
-			padding={{ medium: '600', xsmall: '300' }}
+			justifyContent="center"
+			padding="400"
 			style={{
-				backgroundColor: vars.color.surface.floating,
-				border: `1px solid ${vars.color.border.decorative}`,
-				borderRadius: vars.radius.surface,
-				boxShadow: vars.depth.resting,
-				color: vars.color.text.primary,
+				backgroundColor: vars.color.intent.neutral.surface.solid,
+				flex: 1,
+				minBlockSize: '4rem',
 			}}
 		>
-			<Box display="flex" flexDirection="column" gap="100">
-				<Text elementType="strong" fontWeight="emphasis">
-					Quarterly product update
-				</Text>
-				<Text color="secondary" elementType="span">
-					A summary for the team and stakeholders.
-				</Text>
-			</Box>
-			<Box display="flex" flexDirection="column" gap="100">
-				<Text color="secondary" elementType="span">
-					Published
-				</Text>
-				<Text elementType="strong" fontWeight="emphasis">
-					24 July 2026
-				</Text>
-			</Box>
+			<Text
+				elementType="span"
+				fontWeight="label"
+				style={{ color: vars.color.intent.neutral.onSolid }}
+			>
+				Item
+			</Text>
 		</Box>
 	);
 }
