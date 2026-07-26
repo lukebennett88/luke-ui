@@ -7,42 +7,36 @@ import { useState } from 'react';
 const intents = {
 	neutral: {
 		border: vars.color.border.decorative,
-		description: 'Draft changes have not been shared yet.',
 		label: 'Neutral',
 		surface: vars.color.intent.neutral.surface.subtle,
 		text: vars.color.text.primary,
 	},
 	accent: {
 		border: vars.color.intent.accent.border,
-		description: 'Changes are ready to publish.',
 		label: 'Accent',
 		surface: vars.color.intent.accent.surface.subtle,
 		text: vars.color.intent.accent.text,
 	},
 	success: {
 		border: vars.color.intent.success.border,
-		description: 'Your changes were published successfully.',
 		label: 'Success',
 		surface: vars.color.intent.success.surface.subtle,
 		text: vars.color.intent.success.text,
 	},
 	info: {
 		border: vars.color.intent.info.border,
-		description: 'A new version is available for your team.',
 		label: 'Info',
 		surface: vars.color.intent.info.surface.subtle,
 		text: vars.color.intent.info.text,
 	},
 	warning: {
 		border: vars.color.intent.warning.border,
-		description: 'Payment details need review before publishing.',
 		label: 'Warning',
 		surface: vars.color.intent.warning.surface.subtle,
 		text: vars.color.intent.warning.text,
 	},
 	danger: {
 		border: vars.color.intent.danger.border,
-		description: 'This action permanently removes the project.',
 		label: 'Danger',
 		surface: vars.color.intent.danger.surface.subtle,
 		text: vars.color.intent.danger.text,
@@ -82,12 +76,7 @@ export default function IntentColoursExample() {
 				<Text elementType="strong" fontWeight="emphasis">
 					{selectedIntent.label}
 				</Text>
-				<Text elementType="p">{selectedIntent.description}</Text>
 			</Box>
-			<Text color="secondary" elementType="p" size="200">
-				The surface and text use semantic intent roles, so they adapt to the active theme instead
-				and colour mode.
-			</Text>
 		</Box>
 	);
 }

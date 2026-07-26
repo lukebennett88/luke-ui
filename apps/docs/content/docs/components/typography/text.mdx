@@ -29,8 +29,8 @@ compact UI labels, while larger steps are useful for display text that is not a 
 
 <ExampleBlock
 	src="text/typography"
-	title="Text — Size, weight and colour"
-	description="Use coordinated size steps, semantic colour roles, and font-weight roles."
+	title="Text — Type scale"
+	description="Compare the coordinated 100–900 size steps."
 />
 
 The active theme supplies the font family and values behind each `fontWeight` role. Use `body` for
@@ -48,19 +48,27 @@ numeric content, such as `tabular-nums` in a column of values.
 	description="Align text and use tabular figures where numbers need to line up."
 />
 
-## Trimming and truncation
+## Trimming
 
 Text trims space above capitals and below the baseline by default. That makes vertical spacing more
 predictable in cards and other bounded layouts. Set `shouldDisableTrim` only when the untrimmed line
-box is required. Trimming is disabled automatically when `lineClamp` is set.
+box is required.
+
+<ExampleBlock
+	src="text/trim"
+	title="Text — Trimming"
+	description="Compare trimmed text with its full line box."
+/>
+
+## Truncation
 
 Use `lineClamp` to constrain text to one line or up to five lines. Overflow is truncated with an
-ellipsis.
+ellipsis. Trimming is disabled automatically when `lineClamp` is set.
 
 <ExampleBlock
 	src="text/truncation"
-	title="Text — Trimming and truncation"
-	description="Clamp text when the layout has a fixed amount of space."
+	title="Text — Truncation"
+	description="Compare one-line and two-line truncation."
 />
 
 ## Transform and decoration

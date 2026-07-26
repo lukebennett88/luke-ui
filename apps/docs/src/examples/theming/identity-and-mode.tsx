@@ -63,34 +63,22 @@ export default function IdentityAndModeExample() {
 				</Box>
 			</Box>
 			<Box
-				padding="600"
+				alignItems="center"
+				display="flex"
+				gap="300"
+				justifyContent="space-between"
+				padding="400"
 				style={{
 					backgroundColor: vars.color.surface.floating,
 					border: `1px solid ${vars.color.border.decorative}`,
 					borderRadius: vars.radius.surface,
-					boxShadow: vars.depth.resting,
 					color: vars.color.text.primary,
 				}}
 			>
-				<Box alignItems="center" display="flex" gap="300" justifyContent="space-between">
-					<Box display="grid" gap="100">
-						<Text elementType="strong" fontWeight="emphasis">
-							Product updates
-						</Text>
-						<Text color="secondary" elementType="span" size="200">
-							{identity === 'tactile' ? 'Tactile material' : 'Paper material'} in {colorMode} mode
-						</Text>
-					</Box>
-					<Button size="small" tone="accent">
-						View all
-					</Button>
-				</Box>
-				<Box marginBlockStart="400">
-					<Text elementType="p">
-						A new release is ready for review. The same components respond to this local theme
-						boundary.
-					</Text>
-				</Box>
+				<Text>Preview</Text>
+				<Button size="small" tone="accent">
+					Action
+				</Button>
 			</Box>
 		</Box>
 	);
