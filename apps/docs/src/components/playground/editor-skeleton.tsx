@@ -48,7 +48,7 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 			{showPill ? (
 				<div
 					aria-hidden
-					className="absolute inset-0 flex items-center justify-center bg-fd-background/90"
+					className="pointer-events-none absolute inset-0 flex items-center justify-center"
 				>
 					<LoadingPill label="Loading editor" />
 				</div>

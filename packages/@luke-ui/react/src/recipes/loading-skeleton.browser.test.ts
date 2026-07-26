@@ -49,7 +49,7 @@ for (const theme of themeCases) {
 			const brightRatio = await samplePulseContrast(skeleton, animation, canvasColor, 50);
 			const dimRatio = await samplePulseContrast(skeleton, animation, canvasColor, 1050);
 
-			expect(Math.min(brightRatio, dimRatio)).toBeGreaterThanOrEqual(1.4);
+			expect(Math.min(brightRatio, dimRatio)).toBeGreaterThanOrEqual(1.8);
 		});
 	}
 }
