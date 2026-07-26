@@ -1,15 +1,11 @@
 import { Link } from '@tanstack/react-router';
-import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { SiteNav } from './site-nav.js';
 
 export function NotFound() {
 	return (
-		<HomeLayout
-			className="justify-center py-32 text-center"
-			nav={{
-				title: 'Luke UI',
-			}}
-		>
-			<div className="flex flex-col items-center gap-4">
+		<>
+			<SiteNav />
+			<main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-32 text-center">
 				<h1 className="font-bold text-6xl text-fd-muted-foreground">404</h1>
 				<h2 className="font-semibold text-2xl">Page Not Found</h2>
 				<p className="max-w-md text-fd-muted-foreground">
@@ -23,7 +19,7 @@ export function NotFound() {
 				>
 					Back to Home
 				</Link>
-			</div>
-		</HomeLayout>
+			</main>
+		</>
 	);
 }

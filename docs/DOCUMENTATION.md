@@ -57,6 +57,26 @@ update an example in the same change when the feature is easier to understand vi
 
 Use short, legible sample values. Do not use lorem ipsum.
 
+## Site chrome
+
+Every surface shares one top nav, `SiteNav` in `apps/docs/src/components/site-nav.tsx`. It carries
+the wordmark, the primary destinations, search, and the appearance controls. The destination list
+and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`, so the nav and the
+docs layout navigate to the same places. Appearance controls belong to the nav on every surface, not
+to the docs sidebar footer.
+
+The docs routes use Fumadocs' notebook layout with `nav.mode: 'top'`, which spans the header across
+the full width and starts the sidebar beneath it. `apps/docs/src/lib/layout.shared.tsx` supplies the
+nav through the layout's `header` slot as `DocsSiteNav`
+(`apps/docs/src/components/docs-site-nav.tsx`), which adds the sidebar triggers. The playground and
+the 404 render `SiteNav` directly.
+
+`DocsSiteNav` passes `hasSidebarNavigation`, which hides the bar's destinations below `lg` — the
+breakpoint where Fumadocs starts listing them in the sidebar and its mobile drawer instead, so they
+never appear twice. It also keeps the bar on one row at exactly `h-14`, which the layout's
+`--fd-header-height` is declared to match; changing the bar's height means changing both. Surfaces
+with no sidebar keep the destinations at every width, moving them to a second nav row below `md`.
+
 ## Playground
 
 The docs site has a live playground at `/playground`: a Monaco editor with TypeScript IntelliSense

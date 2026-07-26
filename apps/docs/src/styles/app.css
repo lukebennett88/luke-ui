@@ -32,6 +32,6 @@
 }
 
 /* Keep Fumadocs' 28px DocsTitle with Luke UI's matching 36px line height */
-.luke-ui-theme #nd-docs-layout article h1:first-of-type {
+.luke-ui-theme #nd-notebook-layout article h1:first-of-type {
 	line-height: 36px;
 }

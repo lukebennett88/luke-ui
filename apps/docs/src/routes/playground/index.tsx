@@ -1,5 +1,5 @@
 import { cx } from '@luke-ui/react/utils';
-import { ClientOnly, createFileRoute, Link } from '@tanstack/react-router';
+import { ClientOnly, createFileRoute } from '@tanstack/react-router';
 import { lazy, Suspense, useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { useSpinDoctor } from 'spin-doctor';
@@ -12,7 +12,8 @@ import {
 import { PreviewToolbar } from '../../components/playground/preview-toolbar';
 import { useIsDesktop } from '../../components/playground/use-is-desktop';
 import type { ViewportWidth } from '../../components/playground/viewport-toggle';
-import { ThemeControls, useDocsThemeIdentity } from '../../components/theme-controls';
+import { SiteNav } from '../../components/site-nav.js';
+import { useDocsThemeIdentity } from '../../components/theme-controls';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
 import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
 import type {
@@ -137,21 +138,7 @@ function Playground() {
 
 	return (
 		<div className="flex h-dvh flex-col">
-			<header className="flex flex-wrap items-center justify-between gap-4 border-fd-border border-b px-4 py-2">
-				<div className="flex items-baseline gap-4">
-					<span className="font-medium text-sm">Luke UI Playground</span>
-					<Link
-						className="text-fd-muted-foreground text-sm underline-offset-4 hover:underline"
-						params={{ _splat: '' }}
-						to="/$"
-					>
-						Docs
-					</Link>
-				</div>
-				<div className="flex w-full items-center justify-end gap-2 sm:w-auto">
-					<ThemeControls />
-				</div>
-			</header>
+			<SiteNav />
 			<Group
 				className="min-h-0 flex-1 flex-col! md:flex-row!"
 				orientation={isDesktop ? 'horizontal' : 'vertical'}

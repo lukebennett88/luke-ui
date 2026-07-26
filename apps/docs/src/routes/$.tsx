@@ -4,8 +4,8 @@ import { staticFunctionMiddleware } from '@tanstack/start-static-server-function
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page';
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';

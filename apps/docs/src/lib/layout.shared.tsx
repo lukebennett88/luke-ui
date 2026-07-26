@@ -1,25 +1,26 @@
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { ThemeControls } from '../components/theme-controls';
-import { getStorybookBaseUrl } from './storybook';
+import type { DocsLayoutProps } from 'fumadocs-ui/layouts/notebook';
+import { DocsSiteNav } from '../components/docs-site-nav.js';
+import { siteDestinations } from './site-destinations.js';
 
-export function baseOptions(): BaseLayoutProps {
+export function baseOptions(): Omit<DocsLayoutProps, 'tree'> {
 	return {
-		links: [
-			{
-				text: 'Playground',
-				url: '/playground',
-			},
-			{
-				external: true,
-				text: 'Storybook',
-				url: `${getStorybookBaseUrl(import.meta.env.BASE_URL)}/`,
-			},
-		],
+		// Drives the sidebar and its mobile drawer, which list the destinations
+		// below `lg` — the widths where the nav hands them off (see `SiteNav`).
+		links: siteDestinations.map((destination) => ({
+			external: destination.isExternal ?? false,
+			text: destination.label,
+			url: destination.url,
+		})),
+		// `top` spans the header across the full width and starts the sidebar
+		// below it, so the shared nav is the outermost chrome on the page.
 		nav: {
-			title: 'Luke UI',
+			mode: 'top',
 		},
 		slots: {
-			themeSwitch: ThemeControls,
+			header: DocsSiteNav,
+			// The nav owns the appearance controls now, so the sidebar footer no
+			// longer renders them.
+			themeSwitch: false,
 		},
 	};
 }

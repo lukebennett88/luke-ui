@@ -99,6 +99,11 @@ export default defineConfig(async () => {
 				'@react-aria/utils',
 				'@vanilla-extract/recipes',
 				'@vanilla-extract/recipes/createRuntimeFn',
+				// Fumadocs' chrome (search trigger, popover, sidebar) imports icons
+				// from lucide-react's barrel, which unbundled is ~1750 separate module
+				// requests. On the playground, which also loads Monaco, that exhausts
+				// the browser's connection pool and the page never hydrates.
+				'fumadocs-ui > lucide-react',
 				'lz-string',
 				'monaco-editor',
 				'react-aria-components/Breadcrumbs',
