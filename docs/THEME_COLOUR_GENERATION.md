@@ -95,6 +95,33 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
   for exact control. If its whole tone band has no lightness where near-white or near-black on-solid
   text clears AA, `compileTheme` throws `ThemeGenerationError` naming the failing role and mode.
 
+## One gate for on-solid contrast
+
+`scale.ts`'s `passesOnSolidGate` is the only function that decides whether a solid can carry
+readable text. It asks whether the near-white or near-black on-solid colour the generator would
+choose clears the AA text ratio plus the search headroom across **both** solid states the engine
+emits — step 9 and its step-10 hover. There is no third, deeper pressed state to test:
+`surface.solidPressed` reuses step 10 and carries the press through depth, finish, and transform
+instead.
+
+`defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
+copy. Two consequences hold structurally, not by two implementations agreeing:
+
+- The pre-conditioner can never be stricter than the solid-anchor search, so "a single-value accent
+  never fails the build" holds for one reason instead of two.
+- The accent the pre-conditioner picks is the accent the generator emits — the search honours it
+  verbatim rather than quietly re-solving for a different lightness.
+
+The pre-conditioner is still load bearing and is not redundant: its adaptation band is deliberately
+wider than the generator's tone-faithful window, so it rescues accents (a mid-lightness red, say)
+that the generator alone would report as unsatisfiable.
+
+The shared thresholds themselves — the 4.5 text ratio, the 3:1 non-text ratio, the search headroom
+and the search step — are declared once in `contrast-policy.ts`, along with the intent role groups
+both the validation matrix and the semantic map key off. Splitting those role lists is what made the
+failure asymmetric: a role added to the map alone emitted an ungated colour, while one added to the
+compiler alone threw an internal error.
+
 ## `loadingSkeleton`
 
 `color.loadingSkeleton` maps to the neutral family's step 7 (previously a lighter neutral step), for

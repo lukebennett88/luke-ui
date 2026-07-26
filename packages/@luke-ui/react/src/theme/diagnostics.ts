@@ -65,9 +65,8 @@ export interface FamilyDiagnostics {
 
 /**
  * One WCAG pair the semantic validation matrix checked while compiling a theme mode. Records the
- * factual ratio and whether it clears the required minimum; not every recorded check is a build-time
- * hard gate (see `build-theme.ts` for which contribute to a thrown {@link
- * import('./build-theme.js').ThemeContrastError}).
+ * factual ratio, whether it clears the required minimum, and whether the compiler treats it as a hard
+ * gate — so tooling reads that classification instead of inferring it from token paths.
  */
 export interface ContrastCheck {
 	/** Token path of the foreground colour, for example `color.text.primary`. */
@@ -80,6 +79,12 @@ export interface ContrastCheck {
 	required: number;
 	/** Whether the achieved ratio clears the required minimum. */
 	passes: boolean;
+	/**
+	 * Whether missing `required` fails the build: `true` for a hard gate that contributes to a thrown
+	 * {@link import('./build-theme.js').ThemeContrastError}, `false` for an advisory check that is
+	 * measured and reported only.
+	 */
+	hard: boolean;
 }
 
 /** Everything the compiler resolved for one colour mode of a fully compiled theme. */

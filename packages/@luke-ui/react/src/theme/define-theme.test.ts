@@ -3,6 +3,7 @@ import { gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
 import { paperTheme, tactileTheme } from './foundations.js';
+import { generateFamilyWithDiagnostics } from './scale.js';
 
 /**
  * Splits a generated stylesheet into its five rule blocks: identity, base light, media-query dark,
@@ -85,6 +86,52 @@ describe('defineTheme single-value accent adaptation', () => {
 			expect(movedFromSource).toBe(true);
 		});
 	}
+});
+
+describe('defineTheme accent pre-conditioning shares the generator gate', () => {
+	const accents = [
+		'#3b82f6',
+		'#ef4444',
+		'#22c55e',
+		'#eab308',
+		'#f97316',
+		'oklch(0.7 0.15 320)',
+		'oklch(0.6 0.12 160)',
+		'oklch(0.5 0.2 270)',
+		// Tones the generator alone cannot reach: their whole tone-faithful window is an on-solid dead
+		// zone, so only the pre-conditioner's wider band rescues them.
+		'oklch(0.62 0.19 27)',
+		'oklch(0.55 0.2 258)',
+	];
+
+	it('hands the generator an accent the solid-anchor search honours verbatim in both modes', () => {
+		// The pre-conditioner gates on `passesOnSolidGate`, the same predicate the solid-anchor search
+		// decides on, so it can never be stricter than the solver and the solver never quietly re-searches
+		// what it chose: the emitted solid IS the pre-conditioned accent, not a second guess at it.
+		const resolved = accents.flatMap((accent) => {
+			return (['light', 'dark'] as const).map((mode) => {
+				const foundation = normalizeTheme({ color: { accent }, name: 'accent-gate' });
+				const source = parseColor(foundation[mode].color.accent);
+				const { diagnostics } = generateFamilyWithDiagnostics({
+					background: parseColor(foundation[mode].color.background),
+					mode,
+					role: 'accent',
+					source,
+				});
+				return {
+					accent,
+					mode,
+					reSearched: diagnostics.solidAnchor.adaptedForOnSolid,
+					solidMovedOffPreconditionedTone:
+						Math.abs(diagnostics.family[9].l - source.l) > 1e-9 ||
+						Math.abs(diagnostics.solidAnchor.resolvedLightness - source.l) > 1e-9,
+				};
+			});
+		});
+		expect(
+			resolved.filter((entry) => entry.reSearched || entry.solidMovedOffPreconditionedTone),
+		).toEqual([]);
+	});
 });
 
 describe('defineTheme partial per-mode merges', () => {
