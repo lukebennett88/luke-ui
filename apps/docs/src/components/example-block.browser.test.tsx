@@ -12,6 +12,8 @@ import { ExampleLoadingState } from './example-block';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
+const exampleTitle = 'Combobox Field — Basic';
+const loadingLabel = `Loading ${exampleTitle} example`;
 
 afterEach(() => {
 	if (root) act(() => root?.unmount());
@@ -21,13 +23,11 @@ afterEach(() => {
 });
 
 test('shows a named loading state in a frame that reserves the preview space', () => {
-	renderExample('Combobox Field — Basic');
+	renderExample(exampleTitle);
 
-	const loadingState = page.getByRole('region', { name: 'Loading Combobox Field — Basic example' });
-	expect(page.getByText('Combobox Field — Basic', { exact: true })).toBeVisible();
-	expect(
-		page.getByRole('status', { name: 'Loading Combobox Field — Basic example' }),
-	).toBeVisible();
+	const loadingState = page.getByRole('region', { name: loadingLabel });
+	expect(page.getByText(exampleTitle, { exact: true })).toBeVisible();
+	expect(page.getByRole('status', { name: loadingLabel })).toBeVisible();
 	expect(loadingState.element().getBoundingClientRect().height).toBeGreaterThanOrEqual(96);
 
 	const playgroundPlaceholder = page.getByText('Open in playground', { exact: true }).element();
