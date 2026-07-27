@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
@@ -8,6 +9,17 @@ import { playwright } from 'vite-plus/test/browser-playwright';
 const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.join(dirname, '.storybook');
+
+function findAncestorDir(name: string, from = dirname): string | undefined {
+	let current = path.resolve(from);
+	do {
+		if (fs.existsSync(path.join(current, name))) return current;
+		current = path.dirname(current);
+	} while (current !== path.dirname(current));
+}
+
+const artifactsDir = findAncestorDir('.artifacts');
+
 export default defineConfig({
 	optimizeDeps: {
 		include: [
@@ -16,7 +28,13 @@ export default defineConfig({
 			'react-aria-components/Link',
 		],
 	},
+	server: {
+		fs: {
+			allow: artifactsDir ? [artifactsDir] : undefined,
+		},
+	},
 	test: {
+		api: { allowWrite: true },
 		projects: [
 			{
 				extends: true,
@@ -76,8 +94,12 @@ export default defineConfig({
 				test: {
 					browser: {
 						enabled: true,
+						api: { allowWrite: true },
 						expect: {
 							toMatchScreenshot: {
+								// captureBeyondViewport is NOT set globally — it is applied
+								// per-capture in captureVisual via CDP viewport resizing only
+								// when the element extends beyond the viewport.
 								resolveScreenshotPath: ({ arg, ext, root }) => {
 									return path.join(
 										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
