@@ -23,7 +23,7 @@ describe('applyComponentCreationPlan', () => {
 				hostedDocsPath: 'components/feedback/status-badge',
 				packageDocsSlug: 'status-badge',
 				packageExportPath: './status-badge',
-				storySlug: 'status-badge',
+				exampleSlug: 'status-badge/basic',
 			},
 			files: [
 				{
@@ -47,6 +47,7 @@ describe('applyComponentCreationPlan', () => {
 					value: 'status-badge',
 				},
 			],
+			textFileAppends: [],
 		};
 
 		await applyComponentCreationPlan(root, plan);
@@ -67,6 +68,60 @@ describe('applyComponentCreationPlan', () => {
 		});
 	});
 
+	it('appends lines to a text file', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
+		roots.push(root);
+
+		const barrelPath = 'packages/@luke-ui/react/src/recipes/index.ts';
+		const initialContent = [
+			"import '../stylesheet.css.js';",
+			'',
+			"export type { ButtonVariants } from '../recipes/button.css.js';",
+			"export { button } from '../recipes/button.css.js';",
+			"export { visuallyHidden } from '../recipes/visually-hidden.css.js';",
+		].join('\n');
+
+		await mkdir(join(root, 'packages/@luke-ui/react/src/recipes'), { recursive: true });
+		await writeFile(join(root, barrelPath), initialContent, 'utf8');
+
+		const plan: ComponentCreationPlan = {
+			expected: {
+				hostedDocsPath: 'components/actions/status-badge',
+				packageDocsSlug: 'status-badge',
+				packageExportPath: './status-badge',
+				exampleSlug: 'status-badge/basic',
+			},
+			files: [],
+			jsonEdits: [],
+			textFileAppends: [
+				{
+					kind: 'text-append',
+					path: barrelPath,
+					lines: [
+						"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
+						"export { statusBadge } from '../recipes/status-badge.css.js';",
+					],
+				},
+			],
+		};
+
+		await applyComponentCreationPlan(root, plan);
+
+		const result = await readFile(join(root, barrelPath), 'utf8');
+		expect(result).toBe(
+			[
+				"import '../stylesheet.css.js';",
+				'',
+				"export type { ButtonVariants } from '../recipes/button.css.js';",
+				"export { button } from '../recipes/button.css.js';",
+				"export { visuallyHidden } from '../recipes/visually-hidden.css.js';",
+				"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
+				"export { statusBadge } from '../recipes/status-badge.css.js';",
+				'',
+			].join('\n'),
+		);
+	});
+
 	it('rejects docs navigation JSON that is not an object', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 		roots.push(root);
@@ -80,7 +135,7 @@ describe('applyComponentCreationPlan', () => {
 				hostedDocsPath: 'components/feedback/status-badge',
 				packageDocsSlug: 'status-badge',
 				packageExportPath: './status-badge',
-				storySlug: 'status-badge',
+				exampleSlug: 'status-badge/basic',
 			},
 			files: [],
 			jsonEdits: [
@@ -92,6 +147,7 @@ describe('applyComponentCreationPlan', () => {
 					value: 'feedback',
 				},
 			],
+			textFileAppends: [],
 		};
 
 		await expect(applyComponentCreationPlan(root, plan)).rejects.toBeInstanceOf(z.ZodError);

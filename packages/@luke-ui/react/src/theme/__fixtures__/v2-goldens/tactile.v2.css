@@ -45,7 +45,8 @@
 	--luke-font-900-font-size: 60px;
 	--luke-font-900-letter-spacing: -0.025em;
 	--luke-font-900-line-height: 60px;
-	--luke-font-family: 'Inter', system-ui, sans-serif;
+	--luke-font-family-body: 'Inter', system-ui, sans-serif;
+	--luke-font-family-code: ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
 	--luke-font-weight-body: 400;
 	--luke-font-weight-label: 500;
 	--luke-font-weight-heading: 600;

@@ -1,4 +1,15 @@
 {
 	"title": "Typography",
-	"pages": ["emoji", "heading", "numeral", "text"]
+	"pages": [
+		"blockquote",
+		"code",
+		"em",
+		"emoji",
+		"heading",
+		"kbd",
+		"numeral",
+		"quote",
+		"strong",
+		"text"
+	]
 }

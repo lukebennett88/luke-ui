@@ -21,15 +21,22 @@ export interface JsonArrayAddSortedEdit {
 	value: string;
 }
 
+export interface TextFileAppendEdit {
+	kind: 'text-append';
+	lines: Array<string>;
+	path: string;
+}
+
 export interface ComponentCreationPlan {
 	expected: {
 		hostedDocsPath: string;
 		packageDocsSlug: string;
 		packageExportPath: string;
-		storySlug: string;
+		exampleSlug: string;
 	};
 	files: Array<PlanFile>;
 	jsonEdits: Array<JsonArrayAddSortedEdit>;
+	textFileAppends: Array<TextFileAppendEdit>;
 }
 
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
@@ -61,8 +68,8 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `packages/@luke-ui/react/src/${name}/${name}.stories.tsx`,
 		},
 		{
-			contents: renderHostedStory({ name, pascalName }),
-			path: `apps/docs/src/${name}/${name}.story.tsx`,
+			contents: renderHostedExample({ name, pascalName }),
+			path: `apps/docs/src/examples/${name}/basic.tsx`,
 		},
 		{
 			contents: renderHostedDocsPage({ displayName, name, packagePath, pascalName }),
@@ -85,12 +92,20 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 		});
 	}
 
+	const recipeBarrelLines =
+		input.styling === 'recipe'
+			? [
+					`export type { ${pascalName}Variants } from '../recipes/${name}.css.js';`,
+					`export { ${camelName} } from '../recipes/${name}.css.js';`,
+				]
+			: [];
+
 	return {
 		expected: {
 			hostedDocsPath: `components/${docsGroup}/${name}`,
 			packageDocsSlug: name,
 			packageExportPath: `./${name}`,
-			storySlug: name,
+			exampleSlug: `${name}/basic`,
 		},
 		files,
 		jsonEdits: [
@@ -109,6 +124,16 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 				value: name,
 			},
 		],
+		textFileAppends:
+			recipeBarrelLines.length > 0
+				? [
+						{
+							kind: 'text-append' as const,
+							lines: recipeBarrelLines,
+							path: 'packages/@luke-ui/react/src/recipes/index.ts',
+						},
+					]
+				: [],
 	};
 }
 
@@ -187,18 +212,8 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 `;
 }
 
-function renderPackageDocs(input: {
-	name: string;
-	packagePath: string;
-	pascalName: string;
-}): string {
-	return `\`${input.pascalName}\` from \`${input.packagePath}\`.
-
-\`\`\`tsx
-<${input.pascalName}>Label</${input.pascalName}>
-\`\`\`
-
-## Best Practices
+function renderPackageGuidance(): string {
+	return `## Best practices
 
 | Guidance | Practices |
 | -------- | --------- |
@@ -234,33 +249,12 @@ export const Default = meta.story({
 `;
 }
 
-function renderHostedStory(input: { name: string; pascalName: string }): string {
-	return `import type { ${input.pascalName}Props } from '@luke-ui/react/${input.name}';
-import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
-import { defineStoryFactory } from '@fumadocs/story/vite/client';
-import { StoryWrapper } from '../lib/story-wrapper';
+function renderHostedExample(input: { name: string; pascalName: string }): string {
+	return `import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
 
-const { defineStory } = defineStoryFactory();
-
-// Add more prop names here as the component grows, in the order they should appear
-// in the controls panel. Only include props a control can meaningfully render —
-// drop event handlers, refs, and other escape hatches.
-type ${input.pascalName}StoryProps = Pick<${input.pascalName}Props, 'children'>;
-
-function ${input.pascalName}Playground(props: ${input.pascalName}StoryProps) {
-\treturn (
-\t\t<StoryWrapper>
-\t\t\t<${input.pascalName} {...props} />
-\t\t</StoryWrapper>
-\t);
+export default function Basic() {
+\treturn <${input.pascalName}>${input.pascalName}</${input.pascalName}>;
 }
-
-export const story = defineStory({
-\tComponent: ${input.pascalName}Playground,
-\targs: {
-\t\tinitial: { children: '${input.pascalName}' },
-\t},
-});
 `;
 }
 
@@ -275,11 +269,15 @@ title: ${input.displayName}
 description: ${input.displayName} component.
 ---
 
-import { story } from '../../../../../src/${input.name}/${input.name}.story';
+\`${input.pascalName}\` from \`${input.packagePath}\`.
 
-<story.WithControl />
+<ExampleBlock
+\tsrc="${input.name}/basic"
+\ttitle="${input.displayName} — Basic"
+\tdescription="A basic ${input.displayName} example."
+/>
 
-${renderPackageDocs(input)}
+${renderPackageGuidance()}
 `;
 }
 

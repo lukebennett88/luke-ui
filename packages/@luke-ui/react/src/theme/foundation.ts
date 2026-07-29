@@ -159,6 +159,10 @@ export const themeFontFamilyStacks = {
 	inter: "'Inter', system-ui, sans-serif",
 } as const;
 
+/** Fixed neutral font stack for code and keyboard input. */
+export const codeFontFamilyStack =
+	"ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace";
+
 /** Default font-family choice applied when `typography.fontFamily` is omitted. */
 export const defaultFontFamily = 'inter';
 

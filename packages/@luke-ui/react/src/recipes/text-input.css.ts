@@ -51,7 +51,7 @@ const textInputConfig = {
 			boxShadow: vars.depth.recessed,
 			cursor: 'text',
 			display: 'inline-flex',
-			fontFamily: vars.font.family,
+			fontFamily: vars.font.family.body,
 			inlineSize: '100%',
 			isolation: 'isolate',
 			letterSpacing: vars.font[300].letterSpacing,

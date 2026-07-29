@@ -38,7 +38,7 @@ const lineClampVariants = {
 
 const base = styleInLayer('recipes', {
 	color: vars.color.text.primary,
-	fontFamily: vars.font.family,
+	fontFamily: vars.font.family.body,
 	minInlineSize: 0,
 	overflowWrap: 'break-word',
 });

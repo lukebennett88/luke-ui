@@ -11,16 +11,16 @@ describe('createComponentPlan', () => {
 		});
 
 		expect(plan.expected).toEqual({
+			exampleSlug: 'status-badge/basic',
 			hostedDocsPath: 'components/feedback/status-badge',
 			packageDocsSlug: 'status-badge',
 			packageExportPath: './status-badge',
-			storySlug: 'status-badge',
 		});
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/feedback/status-badge/index.mdx',
 			'apps/docs/content/docs/components/feedback/status-badge/meta.json',
 			'apps/docs/content/docs/components/feedback/status-badge/props.mdx',
-			'apps/docs/src/status-badge/status-badge.story.tsx',
+			'apps/docs/src/examples/status-badge/basic.tsx',
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
 			'packages/@luke-ui/react/src/status-badge/index.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
@@ -28,6 +28,12 @@ describe('createComponentPlan', () => {
 		expect(
 			plan.files.find((file) => file.path.endsWith('/status-badge/index.mdx'))?.contents,
 		).toContain('`StatusBadge` from `@luke-ui/react/status-badge`.');
+		expect(
+			plan.files.find((file) => file.path.endsWith('/status-badge/index.mdx'))?.contents,
+		).toContain('src="status-badge/basic"');
+		expect(
+			plan.files.find((file) => file.path.endsWith('/examples/status-badge/basic.tsx'))?.contents,
+		).toContain('<StatusBadge>StatusBadge</StatusBadge>');
 		expect(plan.files.find((file) => file.path.endsWith('/status-badge/meta.json'))?.contents).toBe(
 			'{\n\t"pages": ["!props"],\n\t"collapsible": false\n}\n',
 		);
@@ -50,6 +56,16 @@ describe('createComponentPlan', () => {
 				path: 'apps/docs/content/docs/components/feedback/meta.json',
 				title: 'Feedback',
 				value: 'status-badge',
+			},
+		]);
+		expect(plan.textFileAppends).toEqual([
+			{
+				kind: 'text-append',
+				path: 'packages/@luke-ui/react/src/recipes/index.ts',
+				lines: [
+					"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
+					"export { statusBadge } from '../recipes/status-badge.css.js';",
+				],
 			},
 		]);
 		expect(
@@ -83,6 +99,7 @@ describe('createComponentPlan', () => {
 				path: 'packages/@luke-ui/react/src/date-field/index.tsx',
 			}),
 		);
+		expect(plan.textFileAppends).toEqual([]);
 	});
 
 	it('rejects invalid component names before file writes', () => {

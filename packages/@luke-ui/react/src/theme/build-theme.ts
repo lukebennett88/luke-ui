@@ -25,6 +25,7 @@ import type { GeneratedSurfaces } from './elevation.js';
 import { generateSurfaces } from './elevation.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import {
+	codeFontFamilyStack,
 	defaultFontFamily,
 	defaultFontWeights,
 	defaultRadius,
@@ -611,7 +612,8 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 		'controlSize.small': '32px',
 		...FONT_VALUES,
 		...buildCapsizeValues(fontFamily),
-		'font.family': themeFontFamilyStacks[fontFamily],
+		'font.family.body': themeFontFamilyStacks[fontFamily],
+		'font.family.code': codeFontFamilyStack,
 		'font.weight.body': String(fontWeight?.body ?? defaultFontWeights.body),
 		'font.weight.emphasis': String(fontWeight?.emphasis ?? defaultFontWeights.emphasis),
 		'font.weight.heading': String(fontWeight?.heading ?? defaultFontWeights.heading),

@@ -144,7 +144,7 @@ test('all size steps use the generated Capsize trims for every curated font', ()
 		const root = mountRoot(className);
 		const rootStyle = getComputedStyle(root);
 		const authoredFontFamily = normalizeFontFamily(
-			rootStyle.getPropertyValue('--luke-font-family'),
+			rootStyle.getPropertyValue('--luke-font-family-body'),
 		);
 		expect(authoredFontFamily).toContain(curatedFamilyIdentity[fontFamily]);
 

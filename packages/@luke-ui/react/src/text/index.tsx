@@ -30,8 +30,8 @@ interface TextStyleProps {
 	/** Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5. */
 	lineClamp?: TextVariantProps['lineClamp'];
 	/**
-	 * Turns off cap-height trim. Trimming is disabled automatically when `lineClamp` is set.
-	 * @default false
+	 * Turns cap-height trim on or off. When omitted, trimming is disabled for inline or unknown
+	 * element types. Line clamp always disables trim.
 	 */
 	shouldDisableTrim?: TextVariantProps['shouldDisableTrim'];
 	/**
@@ -76,12 +76,32 @@ interface _TextProps extends _TextOmit, TextStyleProps {}
  */
 export type TextProps = Prettify<_TextProps>;
 
-/** Styled text with a coordinated type scale and semantic colour controls. */
+const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
+	'blockquote',
+	'div',
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'p',
+	'pre',
+]);
+
+/**
+ * Styled text with a coordinated type scale and semantic colour controls.
+ *
+ * Capsize trim is applied to known block text elements and skipped for inline or unknown element
+ * types. Set `shouldDisableTrim` explicitly to override this inference. Line clamp always disables
+ * trim.
+ */
 export function Text(props: TextProps) {
 	const {
 		children,
 		className,
 		color,
+		elementType = 'span',
 		fontVariantNumeric,
 		fontWeight,
 		isVisuallyHidden,
@@ -96,11 +116,17 @@ export function Text(props: TextProps) {
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
-	const resolvedShouldDisableTrim = shouldDisableTrim ?? hasLineClamp;
+
+	const resolvedShouldDisableTrim: boolean = (() => {
+		if (hasLineClamp) return true;
+		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
+		return !blockTextElementTypes.has(elementType);
+	})();
 
 	return (
 		<RacText
 			{...racProps}
+			elementType={elementType}
 			className={cx(
 				styles.text({
 					color,

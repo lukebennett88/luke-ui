@@ -6,14 +6,18 @@ description: Styled text with a coordinated type scale and semantic colour roles
 `Text` applies Luke UI typography without adding heading semantics. It needs a Luke UI theme root;
 see [Getting started](/overview/getting-started).
 
-```tsx
-<Text>The quick brown fox jumps over the lazy dog.</Text>
-```
+<ExampleBlock
+	src="text/basic"
+	title="Text — Basic"
+	description="Body text using the default type treatment."
+/>
 
 ## Element type
 
 `Text` renders React Aria's `Text` component, which uses a `span` by default. Set `elementType` to
-choose a semantic element without changing the type treatment.
+choose a semantic element without changing the type treatment. Capsize trim is applied to known
+block text elements such as `p`, `div`, headings, and `blockquote`, and skipped automatically for
+inline or unknown element types.
 
 ```tsx
 <Text elementType="p">A paragraph of supporting copy.</Text>
@@ -60,9 +64,10 @@ zero with a slash.
 
 ## Trimming
 
-Text trims space above capitals and below the baseline by default. That makes vertical spacing more
-predictable in cards and other bounded layouts. Set `shouldDisableTrim` only when the untrimmed line
-box is required.
+Block text trims space above capitals and below the baseline by default. That makes vertical spacing
+more predictable in cards and other bounded layouts. Inline text skips trim so its pseudo-elements
+cannot interrupt the surrounding line. Set `shouldDisableTrim` explicitly when you need to override
+the element-type inference.
 
 <ExampleBlock
 	src="text/trim"

@@ -315,6 +315,17 @@ describe('buildTheme defaults', () => {
 });
 
 describe('buildTheme foundation validation', () => {
+	it('does not accept the code stack as a curated Capsize font family', () => {
+		const codeFontFoundation = {
+			...tactileFoundation,
+			typography: { fontFamily: 'code' },
+		} as unknown as ThemeFoundation;
+
+		expect(() => buildTheme(codeFontFoundation)).toThrow(
+			'typography.fontFamily: "code" is not a curated font-family choice',
+		);
+	});
+
 	it('rejects empty or stylesheet-breaking depth values', () => {
 		const emptyDepth: ThemeFoundation = {
 			...tactileFoundation,
