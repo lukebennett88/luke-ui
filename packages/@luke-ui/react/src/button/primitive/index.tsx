@@ -55,10 +55,9 @@ export function Button(props: ButtonProps): JSX.Element {
 		tone = 'neutral',
 		...restProps
 	} = props;
-	const iconSize = BUTTON_ICON_SIZE[size];
 
 	return (
-		<IconSizeProvider size={iconSize}>
+		<IconSizeProvider size={BUTTON_ICON_SIZE}>
 			<RacButton
 				{...restProps}
 				className={composeRenderProps(props.className, (className) => {
