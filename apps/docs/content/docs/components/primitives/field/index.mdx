@@ -7,20 +7,16 @@ Use the field primitives to build a custom field with Luke UI labels, descriptio
 messages. Application code should usually use a composed field such as
 [`TextField`](/components/forms/text-field) or [`ComboboxField`](/components/forms/combobox-field).
 
-```tsx
-import { Field, FieldDescription, FieldError, FieldLabel } from '@luke-ui/react/field/primitive';
-```
+<ExampleBlock
+	src="field-primitive/basic"
+	title="Field primitive — Basic"
+	description="A labelled custom field with supporting text."
+/>
 
 ## Anatomy
 
 `Field` arranges a label, your control, an optional description, and a validation message. Pass
 `label`, `description`, and `errorMessage` to use its standard slots.
-
-```tsx
-<Field description="Use your work email." label="Email">
-	<input />
-</Field>
-```
 
 For a custom structure, use `FieldLabel`, `FieldDescription`, and `FieldError` with the field
 control. Keep their relationship to the control intact so React Aria can expose the label,

@@ -7,18 +7,13 @@ Use `LoadingSkeleton` when content is loading but its layout is known. Wrap the 
 appear so the placeholder occupies the same space.
 
 <ExampleBlock
-	src="loading-skeleton/text"
-	title="Loading Skeleton — Text"
-	description="A text placeholder that follows the wrapped copy."
+	src="loading-skeleton/basic"
+	title="Loading Skeleton — Basic"
+	description="Toggle the loading state to reveal the final content."
 />
 
-## With text
-
-Wrap text itself, rather than its parent. The placeholder then follows each line of text. If you
-wrap the parent element, the skeleton covers the whole block instead.
-
-This matters most for copy that wraps across several lines. `LoadingSkeleton` renders non-element
-children inline, so it follows the text without changing the line layout.
+Wrap text itself, rather than its parent, when it can span several lines. The placeholder then
+follows each line without changing the layout.
 
 ## With components
 

@@ -55,4 +55,8 @@ The component creation rules live in `packages/turbo-generators/src/component-cr
 Turbo and Plop are adapters that apply the plan. Keep new creation rules in the plan module so
 dry-run tests can prove which files, exports, stories, docs, and checks a component needs.
 
+The generator creates the component guide's primary `apps/docs/src/examples/<component>/basic.tsx`
+example and references it with `ExampleBlock`. Replace the placeholder content with one focused,
+renderable use of the component.
+
 Do not move creation rules into one-off generator code.
