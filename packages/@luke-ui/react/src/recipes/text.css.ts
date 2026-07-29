@@ -64,12 +64,16 @@ const sizeVariants = Object.fromEntries(
 	fontSizeSteps.map((size) => [
 		size,
 		{
+			'--luke-text-line-height': vars.font[size].lineHeight,
 			fontSize: vars.font[size].fontSize,
 			letterSpacing: vars.font[size].letterSpacing,
 			lineHeight: vars.font[size].lineHeight,
 		},
 	]),
-) as Record<FontSizeStep, { fontSize: string; letterSpacing: string; lineHeight: string }>;
+) as Record<
+	FontSizeStep,
+	{ '--luke-text-line-height': string; fontSize: string; letterSpacing: string; lineHeight: string }
+>;
 
 const sizeStepCompoundVariants = fontSizeSteps.map((size) => {
 	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
@@ -171,6 +175,7 @@ export const text = recipe({
 		shouldInheritFont: {
 			false: {},
 			true: {
+				'--luke-text-line-height': '1lh',
 				color: 'inherit',
 				fontFamily: 'inherit',
 				fontSize: 'inherit',

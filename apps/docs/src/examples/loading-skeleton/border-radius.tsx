@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { Checkbox } from '@luke-ui/react/checkbox';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { TextField } from '@luke-ui/react/text-field';
 import { useState } from 'react';
@@ -11,16 +12,9 @@ export default function BorderRadius() {
 			<LoadingSkeleton isLoading={isLoading} radius="control">
 				<TextField label="Email address" name="email" placeholder="you@example.com" />
 			</LoadingSkeleton>
-			<label>
-				<Box alignItems="center" display="flex" gap="200">
-					<input
-						checked={isLoading}
-						onChange={(event) => setIsLoading(event.target.checked)}
-						type="checkbox"
-					/>
-					Loading
-				</Box>
-			</label>
+			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
+				Loading
+			</Checkbox>
 		</Box>
 	);
 }

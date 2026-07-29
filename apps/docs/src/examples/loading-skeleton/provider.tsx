@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { Checkbox } from '@luke-ui/react/checkbox';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
 import { Text } from '@luke-ui/react/text';
 import { useState } from 'react';
@@ -36,16 +37,9 @@ export default function ProviderSkeleton() {
 					</Box>
 				</Box>
 			</LoadingSkeletonProvider>
-			<label>
-				<Box alignItems="center" display="flex" gap="200">
-					<input
-						checked={isLoading}
-						onChange={(event) => setIsLoading(event.target.checked)}
-						type="checkbox"
-					/>
-					Provider loading
-				</Box>
-			</label>
+			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
+				Provider loading
+			</Checkbox>
 		</Box>
 	);
 }

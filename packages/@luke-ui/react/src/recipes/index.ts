@@ -9,6 +9,8 @@ export type { BlockquoteVariants } from '../recipes/blockquote.css.js';
 export { blockquote } from '../recipes/blockquote.css.js';
 export type { ButtonVariants } from '../recipes/button.css.js';
 export { button } from '../recipes/button.css.js';
+export type { CheckboxVariants } from '../recipes/checkbox.css.js';
+export { checkbox } from '../recipes/checkbox.css.js';
 export type { FieldVariants } from '../recipes/field.css.js';
 export { field } from '../recipes/field.css.js';
 export type { IconVariants } from '../recipes/icon.css.js';

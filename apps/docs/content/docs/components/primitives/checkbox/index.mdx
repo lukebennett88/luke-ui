@@ -1,0 +1,33 @@
+---
+title: Checkbox primitive
+description: Lower-level checkbox anatomy for custom composed form controls.
+---
+
+Use the Checkbox primitive when a composed control needs a custom label layout or extra content. For
+normal application forms, use [`Checkbox`](/components/forms/checkbox).
+
+<ExampleBlock
+	src="checkbox-primitive/basic"
+	title="Checkbox primitive — Basic"
+	description="The root, clickable content, control, and indicator anatomy."
+/>
+
+## Anatomy
+
+`Checkbox` is the React Aria field root. `CheckboxContent` is the clickable label and must contain
+`CheckboxControl`, which centres `CheckboxIndicator`. Place visible label content beside the control
+inside `CheckboxContent`. Use `FieldDescription` and `FieldError` as siblings of `CheckboxContent`
+for the standard supporting and validation semantics.
+
+```tsx
+<Checkbox>
+	<CheckboxContent>
+		<CheckboxControl>
+			<CheckboxIndicator />
+		</CheckboxControl>
+		Email me when a report is ready
+	</CheckboxContent>
+	<FieldDescription>Choose the delivery channel in notification settings.</FieldDescription>
+	<FieldError>Choose an option.</FieldError>
+</Checkbox>
+```

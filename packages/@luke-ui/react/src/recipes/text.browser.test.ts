@@ -35,6 +35,7 @@ test('size composes font size, line height, and letter spacing', () => {
 	expect(style.fontSize).toBe('24px');
 	expect(style.lineHeight).toBe('30px');
 	expect(style.letterSpacing).toBe('-0.15px');
+	expect(style.getPropertyValue('--luke-text-line-height')).toBe('30px');
 });
 
 test('semantic colour and weight roles resolve through the active theme', () => {
@@ -97,9 +98,12 @@ test('shouldInheritFont alone inherits the ancestor font size and line height', 
 	const element = root.appendChild(document.createElement('span'));
 	element.className = text({ shouldInheritFont: true });
 	const style = getComputedStyle(element);
+	const control = element.appendChild(document.createElement('span'));
+	control.style.blockSize = 'var(--luke-text-line-height)';
 
 	expect(style.fontSize).toBe('18px');
 	expect(style.lineHeight).toBe('22px');
+	expect(getComputedStyle(control).blockSize).toBe('22px');
 });
 
 test('an explicit semantic colour overrides inherited currentColor', () => {
