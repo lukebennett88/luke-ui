@@ -5,6 +5,7 @@ import type {
 	ComponentCreationPlan,
 	JsonArrayAddSortedEdit,
 	PlanFile,
+	TextFileAppendEdit,
 } from './component-creation-plan.js';
 
 const docsMetaSchema = z.record(z.string(), z.unknown());
@@ -15,6 +16,7 @@ export async function applyComponentCreationPlan(
 ): Promise<void> {
 	await Promise.all(plan.files.map((file) => writePlanFile(root, file)));
 	await Promise.all(plan.jsonEdits.map((edit) => applyJsonEdit(root, edit)));
+	await Promise.all(plan.textFileAppends.map((edit) => applyTextAppendEdit(root, edit)));
 }
 
 async function writePlanFile(root: string, file: PlanFile): Promise<void> {
@@ -44,6 +46,15 @@ async function readJson(path: string, title: string): Promise<Record<string, unk
 		}
 		throw err;
 	}
+}
+
+async function applyTextAppendEdit(root: string, edit: TextFileAppendEdit): Promise<void> {
+	const target = join(root, edit.path);
+	await mkdir(dirname(target), { recursive: true });
+	const content = await readFile(target, 'utf8').catch(() => '');
+	const trimmed = content.endsWith('\n') ? content.slice(0, -1) : content;
+	const updated = trimmed + '\n' + edit.lines.join('\n') + '\n';
+	await writeFile(target, updated, 'utf8');
 }
 
 function isString(value: unknown): value is string {

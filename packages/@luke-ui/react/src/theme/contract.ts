@@ -128,7 +128,7 @@ export const themeContractTree = {
 		resting: null,
 		raised: null,
 	},
-	/** Composite type steps, font family, and theme-controlled weight roles. */
+	/** Composite type steps, font families, and theme-controlled weight roles. */
 	font: {
 		100: {
 			...fontStep,
@@ -157,7 +157,10 @@ export const themeContractTree = {
 		900: {
 			...fontStep,
 		},
-		family: null,
+		family: {
+			body: null,
+			code: null,
+		},
 		weight: {
 			body: null,
 			label: null,

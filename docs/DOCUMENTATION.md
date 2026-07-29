@@ -62,10 +62,18 @@ Interactive examples live in `apps/docs/src/examples/<component>/`.
 An example module default-exports a React component. Reference it from an MDX page with
 `<ExampleBlock src="<component>/<name>" title="..." description="..." />`.
 
+Every component guide starts with a focused `basic.tsx` example and references it as the primary
+`<ExampleBlock src="<component>/basic" ... />`. This is the default first example generated for a
+new component.
+
 Keep example content aligned with the section that mentions it. If you add a feature section, add or
 update an example in the same change when the feature is easier to understand visually.
 
 Use short, legible sample values. Do not use lorem ipsum.
+
+Prefer a typechecked `ExampleBlock` over an inline TSX fence whenever the code benefits from a
+rendered preview. Reserve inline TSX for non-renderable setup, partial composition, or API details
+that would be less clear inside a complete example.
 
 ## Site chrome
 

@@ -65,9 +65,10 @@ solver.
 
 The semantic contract includes `font.100` through `font.900` size steps. Each step groups its font
 size, line height, letter spacing, and per-font Capsize trims so components cannot combine unrelated
-values. `buildTheme` computes those trim values from the curated Inter, Apple System, or DM Sans
-font metrics. Icon sizes carry forward the `xsmall`, `small`, `medium`, and `large` scale at 16px,
-20px, 24px, and 32px.
+values. `font.family.body` is selected from the curated Inter, Apple System, or DM Sans metrics and
+`buildTheme` computes the matching trims. `font.family.code` is a fixed neutral monospace stack for
+code and keyboard input; it is not a brand-family or Capsize choice. Icon sizes carry forward the
+`xsmall`, `small`, `medium`, and `large` scale at 16px, 20px, 24px, and 32px.
 
 Each colour mode authors the final composite `box-shadow` for `depth.recessed`, `depth.resting`,
 `depth.raised`, `depth.floating`, and `depth.overlay`. Components select a semantic depth and do not

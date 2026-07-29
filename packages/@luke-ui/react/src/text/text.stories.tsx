@@ -119,9 +119,16 @@ export const Default = meta.story({
 	play: async ({ canvas }) => {
 		const element = canvas.getByText(/quick brown/);
 		const style = getComputedStyle(element);
+		const before = getComputedStyle(element, '::before');
+		const after = getComputedStyle(element, '::after');
+		await expect(style.display).toBe('inline');
 		await expect(style.fontSize).toBe('16px');
 		await expect(style.lineHeight).toBe('24px');
 		await expect(style.fontWeight).toBe('400');
+		await expect(before.content).toBe('none');
+		await expect(before.display).not.toBe('table');
+		await expect(after.content).toBe('none');
+		await expect(after.display).not.toBe('table');
 	},
 });
 
@@ -193,15 +200,35 @@ export const EmptyText = meta.story({
  * Change the rendered HTML element with `elementType` when semantics require it.
  */
 export const ElementType = meta.story({
+	play: async ({ canvas }) => {
+		const inline = canvas.getByTestId('inline');
+		const custom = canvas.getByTestId('custom');
+		const explicitTrim = canvas.getByTestId('explicit-trim');
+		const clamped = canvas.getByTestId('clamped');
+		const block = canvas.getByTestId('block');
+
+		await expect(getComputedStyle(inline, '::before').content).toBe('none');
+		await expect(getComputedStyle(custom, '::before').content).toBe('none');
+		await expect(getComputedStyle(explicitTrim, '::before').display).toBe('table');
+		await expect(getComputedStyle(clamped, '::before').content).toBe('none');
+		await expect(getComputedStyle(block, '::before').display).toBe('table');
+		await expect(getComputedStyle(block, '::after').display).toBe('table');
+	},
 	render: (props) => (
 		<div style={stackContainerStyle}>
-			<Text {...props} elementType="span">
+			<Text {...props} data-testid="inline" elementType="span">
 				span: {storyText}
 			</Text>
-			<Text {...props} elementType="strong">
-				strong: {storyText}
+			<Text {...props} data-testid="custom" elementType="x-inline-copy">
+				custom: {storyText}
 			</Text>
-			<Text {...props} elementType="p">
+			<Text {...props} data-testid="explicit-trim" elementType="span" shouldDisableTrim={false}>
+				span with explicit trim: {storyText}
+			</Text>
+			<Text {...props} data-testid="clamped" elementType="span" lineClamp shouldDisableTrim={false}>
+				clamped span: {storyText}
+			</Text>
+			<Text {...props} data-testid="block" elementType="p">
 				p: {storyText}
 			</Text>
 		</div>

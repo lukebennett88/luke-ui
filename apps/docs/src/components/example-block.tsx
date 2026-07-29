@@ -4,26 +4,12 @@ import { Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { button } from '@luke-ui/react/recipes';
-import { createLink } from '@tanstack/react-router';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useId, useState } from 'react';
-import { Link as RacLink } from 'react-aria-components/Link';
 import { encodeCodeHash } from '../lib/playground-hash';
 import { StoryWrapper } from '../lib/story-wrapper';
-
-/**
- * "Open in playground" renders as a button-shaped pill, not an inline text
- * link, so it's styled with Luke UI's `button()` recipe on the raw
- * react-aria-components `Link` primitive — not Luke UI's own `<Link>`,
- * which always layers on its `link()` recipe for underlined inline-text
- * styling (stacking that under `button()` would fight it for color/
- * decoration). `createLink` delegates rendering to that primitive so
- * TanStack Router still resolves `to`/`hash` into the correct `href` while
- * the element keeps real `data-hovered`/`data-pressed`/`data-focus-visible`
- * states, matching the adjacent `<Button>` exactly.
- */
-const PlaygroundLink = createLink(RacLink);
+import { DocsLink } from './docs-link';
 
 type ExampleBlockProps = {
 	src: string;
@@ -67,7 +53,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 		<ExampleFrame
 			actions={
 				<Box className="flex items-center gap-1">
-					<PlaygroundLink
+					<DocsLink
 						className={button({ appearance: 'ghost', size: 'small' })}
 						hash={encodeCodeHash(source.trim())}
 						target="_blank"
@@ -75,7 +61,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 					>
 						<Icon aria-hidden className="size-4" name="externalLink" />
 						Open in playground
-					</PlaygroundLink>
+					</DocsLink>
 					<Button
 						appearance="ghost"
 						aria-controls={codeId}

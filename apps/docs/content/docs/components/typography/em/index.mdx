@@ -1,0 +1,15 @@
+---
+title: Em
+description: Marks text to stress emphasis.
+---
+
+<ExampleBlock src="em/basic" title="Em — Basic" description="Stress emphasis within a sentence." />
+
+`Em` composes `Text` as a native `em` element while keeping a lean native public API. It stays
+inline, inherits typography from the surrounding text, applies italic styling, and skips Capsize
+trim by default. Use `textWrap` to control wrapping or `lineClamp` to constrain longer emphasis.
+
+## Accessibility
+
+Uses the native `<em>` element, which conveys emphasis to assistive technologies. Avoid using `Em`
+solely for visual italic styling — use `<Text elementType="i">` instead.

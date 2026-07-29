@@ -1,5 +1,5 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { extname, relative, resolve } from 'node:path';
 import { visit } from 'unist-util-visit';
 
 interface Position {
@@ -17,6 +17,11 @@ interface MdxJsxFlowElement {
 	name: string;
 	position?: Position;
 	type: string;
+}
+
+interface FindOrphanedExamplesOptions {
+	docsDir: string;
+	examplesDir: string;
 }
 
 export function remarkValidateExamples() {
@@ -48,4 +53,75 @@ export function remarkValidateExamples() {
 			}
 		});
 	};
+}
+
+export function findOrphanedExamples({
+	docsDir,
+	examplesDir,
+}: FindOrphanedExamplesOptions): Array<string> {
+	const resolvedDocsDir = resolve(docsDir);
+	const resolvedExamplesDir = resolve(examplesDir);
+	const reachableExamples = findDocumentedExamples(resolvedDocsDir, resolvedExamplesDir);
+	const pendingExamples = [...reachableExamples];
+
+	for (const examplePath of pendingExamples) {
+		for (const importedExample of findImportedExamples(examplePath, resolvedExamplesDir)) {
+			if (reachableExamples.has(importedExample)) continue;
+
+			reachableExamples.add(importedExample);
+			pendingExamples.push(importedExample);
+		}
+	}
+
+	return findFiles(resolvedExamplesDir, '.tsx')
+		.filter((examplePath) => !reachableExamples.has(examplePath))
+		.map((examplePath) => relative(resolvedExamplesDir, examplePath))
+		.sort();
+}
+
+function findFiles(directory: string, extension: string): Array<string> {
+	return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+		const path = resolve(directory, entry.name);
+
+		if (entry.isDirectory()) return findFiles(path, extension);
+		return extname(entry.name) === extension ? [path] : [];
+	});
+}
+
+function findDocumentedExamples(docsDir: string, examplesDir: string): Set<string> {
+	const documentedExamples = new Set<string>();
+	const exampleBlockPattern = /<ExampleBlock\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/g;
+
+	for (const file of findFiles(docsDir, '.mdx')) {
+		const contents = readFileSync(file, 'utf8');
+
+		for (const match of contents.matchAll(exampleBlockPattern)) {
+			const src = match[1];
+			if (src) documentedExamples.add(resolve(examplesDir, `${src}.tsx`));
+		}
+	}
+
+	return documentedExamples;
+}
+
+function findImportedExamples(examplePath: string, examplesDir: string): Array<string> {
+	const importedExamples: Array<string> = [];
+	const importPattern = /\bfrom\s+["'](\.[^"']+)["']/g;
+	const contents = readFileSync(examplePath, 'utf8');
+
+	for (const match of contents.matchAll(importPattern)) {
+		const importPath = match[1];
+		if (!importPath) continue;
+
+		const resolvedImportPath = resolve(examplePath, '..', importPath);
+		const importedPath = extname(resolvedImportPath)
+			? resolvedImportPath.replace(/\.js$/, '.tsx')
+			: `${resolvedImportPath}.tsx`;
+
+		if (importedPath.startsWith(`${examplesDir}/`) && existsSync(importedPath)) {
+			importedExamples.push(importedPath);
+		}
+	}
+
+	return importedExamples;
 }

@@ -1,0 +1,21 @@
+---
+title: Quote
+description: Short inline quotation.
+---
+
+<ExampleBlock
+	src="quote/basic"
+	title="Quote — Basic"
+	description="A short quotation within a paragraph."
+/>
+
+`Quote` composes `Text` as a native `q` element while keeping a lean native public API. It stays
+inline, inherits surrounding typography, skips Capsize trim by default, and receives automatic
+quotation marks from the browser. Use `textWrap` to control wrapping or `lineClamp` to constrain a
+longer quotation.
+
+## Accessibility
+
+Uses the native `<q>` element, which conveys quotation semantics to assistive technologies. The
+`cite` attribute lets screen readers present the source URL when supported. For block-length
+quotations use `Blockquote` instead.

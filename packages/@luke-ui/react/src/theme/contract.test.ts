@@ -45,6 +45,10 @@ describe('theme contract', () => {
 			lineHeight: 'var(--luke-font-100-line-height)',
 		});
 		expect(vars.font[900].fontSize).toBe('var(--luke-font-900-font-size)');
+		expect(vars.font.family).toEqual({
+			body: 'var(--luke-font-family-body)',
+			code: 'var(--luke-font-family-code)',
+		});
 		expect(vars.iconSize).toEqual({
 			large: 'var(--luke-icon-size-large)',
 			medium: 'var(--luke-icon-size-medium)',

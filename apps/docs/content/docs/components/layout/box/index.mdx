@@ -8,9 +8,9 @@ token spacing, constrain an element's size, or control a flex or grid child. Use
 no supported layout property is needed.
 
 <ExampleBlock
-	src="box/responsive-layout"
-	title="Box — Responsive layout"
-	description="A stack that becomes a row at the medium breakpoint."
+	src="box/basic"
+	title="Box — Basic"
+	description="A simple layout using token spacing."
 />
 
 ## Layout properties
@@ -32,6 +32,12 @@ to the writing direction without left and right variants.
 
 Pass a direct value when it does not change. Use an object keyed by breakpoint when it does. Values
 cascade upward from `xsmall`, so only specify the changes.
+
+<ExampleBlock
+	src="box/responsive-layout"
+	title="Box — Responsive layout"
+	description="A stack that becomes a row at the medium breakpoint."
+/>
 
 ```tsx
 <Box
