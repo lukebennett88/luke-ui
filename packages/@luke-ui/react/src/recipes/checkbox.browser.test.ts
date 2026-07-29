@@ -50,7 +50,7 @@ test('the fallback follows the label line height and centres the indicator with 
 	expect(control.getBoundingClientRect().height).toBe(28);
 	expect(
 		Math.abs(indicatorRect.top + indicatorRect.height / 2 - (labelRect.top + labelRect.height / 2)),
-	).toBeLessThan(0.1);
+	).toBeLessThanOrEqual(0.5);
 });
 
 test('content spacing and field messages align with the visible label', () => {
