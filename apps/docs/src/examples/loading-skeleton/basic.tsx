@@ -8,9 +8,6 @@ export default function Basic() {
 
 	return (
 		<Box display="grid" gap="400" maxInlineSize="32rem">
-			<Text>
-				<LoadingSkeleton isLoading={isLoading}>Loading</LoadingSkeleton>
-			</Text>
 			<label>
 				<input
 					checked={isLoading}
@@ -19,6 +16,11 @@ export default function Basic() {
 				/>{' '}
 				isLoading
 			</label>
+			<Text>
+				<LoadingSkeleton isLoading={isLoading}>
+					Three projects are ready for review.
+				</LoadingSkeleton>
+			</Text>
 		</Box>
 	);
 }

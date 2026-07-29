@@ -17,7 +17,7 @@ export const iconButtonReset = styleInLayer('utilities', {
 	paddingInline: 0,
 	selectors: {
 		'&[data-pending="true"]::after': {
-			borderColor: vars.color.border.focus,
+			borderColor: 'currentColor',
 			borderInlineEndColor: 'transparent',
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',

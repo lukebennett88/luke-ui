@@ -126,7 +126,7 @@ export const States = meta.story({
 			await expect(pending).toHaveFocus();
 			await expect(pending).toHaveAttribute('aria-disabled', 'true');
 			await expect(getComputedStyle(pending, '::after').borderTopColor).toBe(
-				getComputedStyle(pending).outlineColor,
+				getComputedStyle(pending).color,
 			);
 			await userEvent.click(pending);
 			await expect(args.onPress).not.toHaveBeenCalled();

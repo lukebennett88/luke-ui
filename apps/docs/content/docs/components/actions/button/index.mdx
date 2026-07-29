@@ -12,6 +12,17 @@ description: A labelled control for actions in an interface.
 	description="A labelled control for an interface action."
 />
 
+## Size
+
+`medium` is the default size. Use `small` in dense toolbars, tables, and other compact interfaces.
+Keep related controls at the same size.
+
+<ExampleBlock
+	src="button/sizes"
+	title="Button — Size"
+	description="Use small controls in compact layouts and medium controls by default."
+/>
+
 ## Appearance
 
 Use `appearance` to set a button's visual weight. `solid` is the default. Choose `subtle` or `ghost`
@@ -19,7 +30,7 @@ for secondary actions that should recede beside the main action. Appearance sets
 not communicate intent.
 
 <ExampleBlock
-	src="button/tone-and-appearance"
+	src="button/appearance"
 	title="Button — Appearance"
 	description="Choose visual weight according to the action's emphasis."
 />
@@ -31,20 +42,9 @@ and `danger` marks a destructive one. Tone and appearance are independent, so ev
 available.
 
 <ExampleBlock
-	src="button/variants"
+	src="button/tones"
 	title="Button — Tone"
-	description="Compare every tone and appearance combination."
-/>
-
-## Size
-
-`medium` is the default size. Use `small` in dense toolbars, tables, and other compact interfaces.
-Keep related controls at the same size.
-
-<ExampleBlock
-	src="button/sizes"
-	title="Button — Size"
-	description="Use small controls in compact layouts and medium controls by default."
+	description="Choose a tone that matches the action's intent."
 />
 
 ## Block layout
@@ -62,25 +62,33 @@ Use `startIcon` or `endIcon` with a visible label. `Button` supplies the icon si
 `Icon` does not need its own `size` prop. Use [`IconButton`](/components/actions/icon-button) only
 when the icon is familiar without a text label.
 
-```tsx
-import { Icon } from '@luke-ui/react/icon';
+<ExampleBlock
+	src="button/icons"
+	title="Button — Icons"
+	description="Pair an icon with a visible label that describes the action."
+/>
 
-<Button startIcon={<Icon aria-hidden name="add" />}>Add item</Button>;
-```
-
-## Pending and disabled states
+## Pending
 
 Set `isPending` while an action is running. The button remains focusable, ignores further presses,
 and overlays its label with a spinner. Update the visible label when the status matters, for example
 from “Save” to “Saving”.
 
-Set `isDisabled` only when the action is unavailable. Disabled buttons cannot receive focus or be
-pressed.
-
 <ExampleBlock
 	src="button/pending"
 	title="Button — Pending"
 	description="Pending buttons remain available to assistive technology but ignore repeat presses."
+/>
+
+## Disabled
+
+Set `isDisabled` only when the action is unavailable. Disabled buttons cannot receive focus or be
+pressed.
+
+<ExampleBlock
+	src="button/disabled"
+	title="Button — Disabled"
+	description="Disabled buttons are visible but unavailable."
 />
 
 ## Accessibility

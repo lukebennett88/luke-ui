@@ -3,55 +3,62 @@ title: Loading Spinner
 description: Animated indicator for work that is still in progress.
 ---
 
-Use `LoadingSpinner` to show an animated spinner while work is in progress. Wrap content in it to
-show the spinner in place of that content until loading finishes.
+`LoadingSpinner` shows that work is in progress. Use it on its own for a small loading region, or
+wrap final content to replace it in place.
 
 <ExampleBlock
 	src="loading-spinner/basic"
 	title="Loading Spinner — Basic"
-	description="A standalone spinner for work in progress."
-/>
-
-## Loading children
-
-Pass `children` along with `isLoading` to show the spinner in place of that content. While
-`isLoading` is `true`, the spinner replaces the children but preserves their dimensions, and any
-interactive descendants become unavailable. When `isLoading` is `false`, the children render
-normally.
-
-<ExampleBlock
-	src="loading-spinner/children"
-	title="Loading Spinner — Children"
-	description="Wrap content so the spinner takes its place while loading."
+	description="A default spinner for an independent loading region."
 />
 
 ## Size
 
-Use `size` to match the surrounding control or content. The default is `medium`. A surrounding icon
-size context can also set the size.
+`medium` is the default. Set `size` to match the surrounding control or content.
 
 <ExampleBlock
 	src="loading-spinner/sizes"
 	title="Loading Spinner — Sizes"
-	description="Small and medium spinner sizes."
+	description="All spinner sizes, from inline to prominent."
+/>
+
+## With content
+
+Pass final content with `isLoading` to replace it in place. While loading, the spinner keeps the
+content's dimensions and interactive descendants are unavailable. Set `isLoading` to `false` to
+reveal the content.
+
+<ExampleBlock
+	src="loading-spinner/children"
+	title="Loading Spinner — With content"
+	description="Toggle loading to reveal the final action."
 />
 
 ## Colour
 
-Use `color` to apply a semantic content colour. When you omit it, the spinner inherits the
-surrounding text colour.
+Omit `color` to inherit the surrounding text colour. Set it only when the spinner needs to match
+nearby semantic content.
 
 <ExampleBlock
 	src="loading-spinner/colors"
 	title="Loading Spinner — Colours"
-	description="Every supported semantic content colour."
+	description="Inherit the surrounding colour or choose a semantic colour."
 />
 
 ## Accessibility
 
-The spinner has `status` semantics, a polite live region announced by assistive technology. Its
-accessible name defaults to `loading`; provide an `aria-label` that names the work, such as
-`Loading profile`. That name is rendered as visually hidden text inside the live region, so it is
-announced as region content rather than relying on the region's label alone. While loading, wrapped
-children are hidden from assistive technology and made inert, so they cannot be focused or
-activated.
+The spinner is a polite status region. Its accessible name defaults to `loading`; provide an
+`aria-label` that names the work, such as `Loading profile`. While loading, wrapped children are
+hidden from assistive technology and cannot be focused or activated.
+
+## With buttons
+
+[`Button`](/components/actions/button) has its own `isPending` prop for a standard loading action.
+For a labelled button that keeps its text visible, wrap the icon in `LoadingSpinner` and disable the
+button while the action runs.
+
+<ExampleBlock
+	src="loading-spinner/button"
+	title="Loading Spinner — With a button"
+	description="Replace a button icon with a spinner while keeping the label visible."
+/>
