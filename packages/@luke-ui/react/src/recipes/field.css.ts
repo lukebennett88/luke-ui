@@ -1,9 +1,13 @@
+import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../theme/contract.css.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 
 const dataDisabledSelector = '[data-disabled="true"]';
 const dataRequiredSelector = '[data-required="true"]';
+
+/** Optional indentation shared with form controls that place messages beneath their labels. */
+export const fieldMessageIndent = createVar();
 
 /**
  * Raw slotted config for the `Field` primitive.
@@ -33,6 +37,7 @@ const fieldConfig = {
 		message: {
 			...vars.font[200],
 			minInlineSize: 0,
+			paddingInlineStart: fallbackVar(fieldMessageIndent, '0px'),
 
 			selectors: {
 				[`${dataDisabledSelector} &`]: {

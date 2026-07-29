@@ -1,5 +1,6 @@
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
+import { fieldMessageIndent } from './field.css.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 
@@ -10,6 +11,9 @@ const checkboxConfig = {
 			flexDirection: 'column',
 			gap: vars.space[100],
 			minInlineSize: 0,
+			vars: {
+				[fieldMessageIndent]: `calc(${vars.font[300].lineHeight} + ${vars.space[200]})`,
+			},
 		},
 		content: {
 			alignItems: 'flex-start',
@@ -17,7 +21,7 @@ const checkboxConfig = {
 			cursor: 'pointer',
 			display: 'inline-flex',
 			font: 'inherit',
-			gap: vars.space[100],
+			gap: vars.space[200],
 			minInlineSize: 0,
 			selectors: {
 				'&[data-disabled="true"]': {
@@ -31,7 +35,7 @@ const checkboxConfig = {
 		},
 		control: {
 			alignItems: 'center',
-			blockSize: `var(--luke-text-line-height, ${vars.font[300].lineHeight})`,
+			blockSize: 'var(--luke-text-line-height, 1lh)',
 			display: 'inline-flex',
 			flexShrink: 0,
 			inlineSize: vars.font[300].lineHeight,
@@ -41,8 +45,8 @@ const checkboxConfig = {
 			'@media': {
 				'(forced-colors: active)': {
 					backgroundColor: 'Canvas',
+					backgroundImage: 'none',
 					borderColor: 'CanvasText',
-					boxShadow: 'none',
 					color: 'CanvasText',
 					forcedColorAdjust: 'auto',
 					selectors: {
@@ -67,12 +71,13 @@ const checkboxConfig = {
 			},
 			alignItems: 'center',
 			backgroundColor: vars.color.surface.canvas,
+			backgroundImage: vars.actionControlFinish.resting,
 			blockSize: vars.iconSize.small,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.detail,
 			borderStyle: 'solid',
 			borderWidth: '1px',
-			boxShadow: vars.depth.resting,
+			boxShadow: 'none',
 			boxSizing: 'border-box',
 			color: vars.color.intent.accent.onSolid,
 			display: 'inline-flex',
@@ -86,7 +91,7 @@ const checkboxConfig = {
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
 			transitionDuration: vars.motion.duration.fast,
-			transitionProperty: 'background-color, border-color, box-shadow, color, opacity',
+			transitionProperty: 'background-color, background-image, border-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
 				'&::after': {
@@ -97,6 +102,14 @@ const checkboxConfig = {
 					opacity: 0.55,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
+				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: vars.color.intent.accent.border,
+				},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
+					backgroundImage: vars.actionControlFinish.recessed,
+					borderColor: vars.color.intent.accent.border,
+				},
 				'[data-indeterminate="true"] &': {
 					backgroundColor: vars.color.intent.accent.surface.solid,
 					borderColor: vars.color.intent.accent.surface.solid,
@@ -115,6 +128,16 @@ const checkboxConfig = {
 				'[data-selected="true"] &::after': {
 					opacity: 1,
 				},
+				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundColor: vars.color.intent.accent.surface.solidHover,
+						borderColor: vars.color.intent.accent.surface.solidHover,
+					},
+				'[data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundColor: vars.color.intent.accent.surface.solidPressed,
+						borderColor: vars.color.intent.accent.surface.solidPressed,
+					},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
 						backgroundColor: vars.color.intent.danger.surface.solid,
