@@ -25,7 +25,7 @@ test('the control uses the recessed field material and semantic state grammar', 
 	const { control: hovered } = mountControl();
 	hovered.dataset.hovered = 'true';
 	expect(getComputedStyle(hovered).borderColor).toBe(
-		resolveColor(root, '--luke-color-intent-accent-border'),
+		resolveColor(root, '--luke-color-border-accent'),
 	);
 
 	const { control: focused } = mountControl();
@@ -39,7 +39,7 @@ test('the control uses the recessed field material and semantic state grammar', 
 	const { control: invalid } = mountControl();
 	invalid.dataset.invalid = 'true';
 	expect(getComputedStyle(invalid).borderColor).toBe(
-		resolveColor(root, '--luke-color-intent-danger-border'),
+		resolveColor(root, '--luke-color-border-danger'),
 	);
 });
 
@@ -90,7 +90,7 @@ test('in-field actions are quiet inset squares without a permanent divider or tr
 		action.dataset.hovered = 'true';
 		const hoveredStyle = getComputedStyle(action);
 		expect(hoveredStyle.backgroundColor).toBe(
-			resolveColor(root, '--luke-color-intent-accent-surface-subtle-hover'),
+			resolveColor(root, '--luke-color-background-accent-subtle-hover'),
 		);
 		expect(hoveredStyle.boxShadow).toBe('none');
 		expect(hoveredStyle.transform).toBe('none');
@@ -99,7 +99,7 @@ test('in-field actions are quiet inset squares without a permanent divider or tr
 		action.dataset.pressed = 'true';
 		const pressedStyle = getComputedStyle(action);
 		expect(pressedStyle.backgroundColor).toBe(
-			resolveColor(root, '--luke-color-intent-accent-surface-subtle-pressed'),
+			resolveColor(root, '--luke-color-background-accent-subtle-pressed'),
 		);
 		expect(pressedStyle.boxShadow).toBe('none');
 		expect(pressedStyle.transform).toBe('none');
@@ -118,19 +118,39 @@ test('options keep hover, keyboard focus, selected, and disabled states distinct
 		hovered: 'true',
 	});
 	const selected = mountItem(root, { selected: 'true' });
+	const selectedAndKeyboardFocused = mountItem(root, {
+		focusVisible: 'true',
+		focused: 'true',
+		hovered: 'true',
+		selected: 'true',
+	});
 	const disabled = mountItem(root, { disabled: 'true', focused: 'true' });
 
 	expect(getComputedStyle(focused).backgroundColor).toBe(
-		resolveColor(root, '--luke-color-intent-neutral-surface-subtle'),
+		resolveColor(root, '--luke-color-background-neutral-subtle-rest'),
 	);
 	expect(getComputedStyle(hoveredAndFocused).backgroundColor).toBe(
-		resolveColor(root, '--luke-color-intent-neutral-surface-subtle-hover'),
+		resolveColor(root, '--luke-color-background-neutral-subtle-hover'),
 	);
 	expect(getComputedStyle(keyboardFocused).backgroundColor).toBe(
-		resolveColor(root, '--luke-color-intent-accent-surface-subtle-hover'),
+		resolveColor(root, '--luke-color-background-accent-subtle-hover'),
+	);
+	expect(getComputedStyle(selected).backgroundColor).toBe(
+		resolveColor(root, '--luke-color-background-accent-subtle-rest'),
+	);
+	// Selected plus keyboard focus is its own composed step on the ramp, not a
+	// re-application of either state alone.
+	expect(getComputedStyle(selectedAndKeyboardFocused).backgroundColor).toBe(
+		resolveColor(root, '--luke-color-background-accent-subtle-pressed'),
 	);
 
-	const interactiveBackgrounds = [resting, hovered, keyboardFocused, selected].map((item) => {
+	const interactiveBackgrounds = [
+		resting,
+		hovered,
+		keyboardFocused,
+		selected,
+		selectedAndKeyboardFocused,
+	].map((item) => {
 		return getComputedStyle(item).backgroundColor;
 	});
 	expect(new Set(interactiveBackgrounds)).toHaveLength(interactiveBackgrounds.length);

@@ -57,6 +57,43 @@ test('hover raises and press recesses without scale', () => {
 	expect(pressedTransform.startsWith('matrix(1, 0, 0, 1')).toBe(true);
 });
 
+test('subtle appearance walks rest, hover, and pressed background colours per tone', () => {
+	for (const tone of ['neutral', 'accent', 'danger'] as const) {
+		const control = mountButton({ appearance: 'subtle', tone });
+
+		const restingColor = getComputedStyle(control).backgroundColor;
+		expect(restingColor).toBe(resolveColor(control, `--luke-color-background-${tone}-subtle-rest`));
+
+		control.dataset.hovered = 'true';
+		const hoveredColor = getComputedStyle(control).backgroundColor;
+		expect(hoveredColor).toBe(
+			resolveColor(control, `--luke-color-background-${tone}-subtle-hover`),
+		);
+
+		delete control.dataset.hovered;
+		control.dataset.pressed = 'true';
+		const pressedColor = getComputedStyle(control).backgroundColor;
+		expect(pressedColor).toBe(
+			resolveColor(control, `--luke-color-background-${tone}-subtle-pressed`),
+		);
+
+		// Rest, hover, and pressed must be three genuinely distinct steps of the ramp.
+		expect(new Set([restingColor, hoveredColor, pressedColor])).toHaveLength(3);
+	}
+});
+
+test('disabled preserves subtle resting colour and suppresses hover and pressed treatment', () => {
+	const resting = mountButton({ appearance: 'subtle', tone: 'accent' });
+	const disabled = mountButton({ appearance: 'subtle', tone: 'accent' });
+	disabled.dataset.disabled = 'true';
+	disabled.dataset.hovered = 'true';
+	disabled.dataset.pressed = 'true';
+
+	expect(getComputedStyle(disabled).backgroundColor).toBe(
+		getComputedStyle(resting).backgroundColor,
+	);
+});
+
 test('disabled preserves resting material and ignores interaction', () => {
 	const resting = mountButton();
 	const disabled = mountButton();
@@ -126,4 +163,12 @@ async function setEmulatedMedia(name?: string, value?: string) {
 	await cdp().send('Emulation.setEmulatedMedia', {
 		features: name === undefined || value === undefined ? [] : [{ name, value }],
 	});
+}
+
+function resolveColor(scope: HTMLElement, variable: string) {
+	const probe = scope.appendChild(document.createElement('div'));
+	probe.style.backgroundColor = `var(${variable})`;
+	const value = getComputedStyle(probe).backgroundColor;
+	probe.remove();
+	return value;
 }

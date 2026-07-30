@@ -6,11 +6,9 @@ import type { Oklch } from './color.js';
 import { clampUnit, contrastRatio, gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract, fontSizeSteps } from './contract.js';
 import {
-	ACTION_INTENTS,
-	BORDER_AND_TEXT_INTENTS,
 	CONTRAST_SEARCH_STEP,
-	FEEDBACK_INTENTS,
 	RATIO_HEADROOM,
+	SEMANTIC_ROLES,
 	TEXT_RATIO,
 	UI_RATIO,
 } from './contrast-policy.js';
@@ -41,7 +39,7 @@ import { mapSemanticColors } from './semantic-map.js';
  * Compiles a theme foundation into a complete static stylesheet plus its {@link ThemeDiagnostics}.
  *
  * Per mode: resolves the source colours and canvas anchor, generates the six private scale families
- * (neutral / accent / danger / info / success / warning), derives the mode-aware elevation surfaces,
+ * (neutral / accent / info / success / warning / danger), derives the mode-aware elevation surfaces,
  * applies the one default semantic mapping onto the colour contract, and runs the full WCAG 2.2
  * validation matrix — which stays authoritative for text and on-solid pairs.
  *
@@ -132,9 +130,10 @@ export class ThemeContrastError extends Error {
  * Thrown by {@link compileTheme} when a role that must guarantee on-solid contrast cannot reach an
  * accessible solid — for example an explicit per-mode accent whose whole tone band is an on-solid
  * dead zone. Single-value accents are pre-conditioned into an accessible band by `defineTheme`, so
- * this surfaces for verbatim per-mode sources that the author asked to use exactly. Re-raises the
- * scale generator's {@link ScaleGenerationError} with the failing `role`/`mode`, the closest
- * `bestAttempt`, and the partial {@link ThemeGenerationDiagnostics} resolved before the failure.
+ * this surfaces for verbatim sources the author asked to use exactly: a per-mode accent, or any status
+ * source, which `defineTheme` passes through unadapted. Re-raises the scale generator's
+ * {@link ScaleGenerationError} with the failing `role`/`mode`, the closest `bestAttempt`, and the
+ * partial {@link ThemeGenerationDiagnostics} resolved before the failure.
  */
 export class ThemeGenerationError extends Error {
 	/** The role whose family could not be generated. */
@@ -160,9 +159,6 @@ type ColorMode = 'light' | 'dark';
 
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
-// The six private scale families, generated in this order so a build that fails part-way reports the
-// families it had already resolved. Feedback roles never throw (they do not guarantee on-solid).
-const FAMILY_ROLES = ['neutral', 'accent', 'danger', 'info', 'success', 'warning'] as const;
 // Parse-validated per-mode source colours. `background` is the resolved canvas anchor (#242); `focus`
 // is the authored keyboard-focus ring; both are colours the foundation must carry.
 const SOURCE_COLOR_FIELDS = [
@@ -280,7 +276,9 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 
 	const families = {} as Record<FamilyRole, ScaleFamily>;
 	const familyDiagnostics = {} as Record<FamilyRole, FamilyDiagnostics>;
-	for (const role of FAMILY_ROLES) {
+	// Generated in canonical role order, so a build that fails part-way reports the families it had
+	// already resolved. Every role now guarantees on-solid, so any of the six can be the one that throws.
+	for (const role of SEMANTIC_ROLES) {
 		try {
 			const generated = generateFamilyWithDiagnostics({
 				background: canvasAnchor,
@@ -376,14 +374,21 @@ interface ValidationResult {
 }
 
 /**
- * Runs the full semantic validation matrix over the emitted (rounded) colour values. Every pair is
- * recorded as a {@link ContrastCheck}. The AA text/on-solid pairs, the authored focus ring, and
- * `border.control` are hard gates that populate `failures` (which `compileTheme` raises as a
- * {@link ThemeContrastError}). `border.control` is `solveControlBorder`'s dedicated boundary, not a
- * scale-step alias, so it is hard-gated at 3:1 against both base surfaces. The per-intent borders
- * use the Radix-style step 6/7, a subtle separator, and are advisory checks only.
- * `color.border.decorative` is not checked. V2 deliberately keeps these borders below the old
- * solver's 3:1 for the reference scale's softer look.
+ * Runs the full semantic validation matrix over the emitted (rounded) colour values: 90 hard checks
+ * and 12 advisory checks per mode. Every pair is recorded as a {@link ContrastCheck}, and the hard
+ * ones populate `failures` (which `compileTheme` raises as a {@link ThemeContrastError}).
+ *
+ * Hard at the AA text ratio: functional primary and secondary text against all four elevation
+ * surfaces; every role's resting and hover foreground against the base surfaces and that role's own
+ * subtle ramp; and every role's on-solid foreground against its solid ramp. Hard at the non-text
+ * ratio: the authored focus ring and `border.control`, which is `solveControlBorder`'s dedicated
+ * boundary rather than a scale-step alias.
+ *
+ * The six semantic borders alias the Radix-style step 7, a subtle separator that deliberately sits
+ * below the non-text ratio for the reference scale's softer look, so they are advisory only — which is
+ * why a component must never let one be the sole cue for a required state. `color.border.decorative`,
+ * `color.text.disabled`, and `color.loadingSkeleton` keep their own separate policies and are not
+ * measured here.
  */
 function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): ValidationResult {
 	const failures: Array<ThemeContrastFailure> = [];
@@ -407,61 +412,40 @@ function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): Va
 		(surface) => `color.surface.${surface}`,
 	);
 	const basePaths = ['color.surface.canvas', 'color.surface.recessed'];
-	const actionTextBackgrounds = (intent: string) => [
-		...basePaths,
-		`color.intent.${intent}.surface.subtle`,
-		`color.intent.${intent}.surface.subtleHover`,
-		`color.intent.${intent}.surface.subtlePressed`,
-	];
-	const feedbackTextBackgrounds = (intent: string) => [
-		...basePaths,
-		`color.intent.${intent}.surface.subtle`,
-	];
 
-	// Global text vs every mapped elevation surface, plus the neutral subtle trio behind neutral
-	// controls and the neutral/gray badge (carried from #137/#139).
+	// Functional text vs every mapped elevation surface: 8 checks.
 	for (const text of ['color.text.primary', 'color.text.secondary']) {
 		for (const surface of surfacePaths) check(text, surface, TEXT_RATIO, true);
 	}
-	for (const state of ['subtle', 'subtleHover', 'subtlePressed']) {
-		check('color.text.primary', `color.intent.neutral.surface.${state}`, TEXT_RATIO, true);
-	}
-	// Accent/danger text (and accent textHover) vs the base surfaces and their own subtle trio.
-	for (const intent of BORDER_AND_TEXT_INTENTS) {
-		for (const background of actionTextBackgrounds(intent)) {
-			check(`color.intent.${intent}.text`, background, TEXT_RATIO, true);
+	// Per role: both foregrounds vs the base surfaces and that role's own subtle ramp (60 checks), and
+	// the on-solid foreground vs its solid ramp (18). The scale generator already guarantees on-solid;
+	// this revalidates it on the emitted, rounded values.
+	for (const role of SEMANTIC_ROLES) {
+		const subtleBackgrounds = ['rest', 'hover', 'pressed'].map(
+			(state) => `color.background.${role}.subtle.${state}`,
+		);
+		for (const state of ['rest', 'hover']) {
+			for (const background of [...basePaths, ...subtleBackgrounds]) {
+				check(`color.foreground.${role}.${state}`, background, TEXT_RATIO, true);
+			}
 		}
-	}
-	for (const background of actionTextBackgrounds('accent')) {
-		check('color.intent.accent.textHover', background, TEXT_RATIO, true);
-	}
-	// Feedback text vs the base surfaces and its single subtle surface.
-	for (const intent of FEEDBACK_INTENTS) {
-		for (const background of feedbackTextBackgrounds(intent)) {
-			check(`color.intent.${intent}.text`, background, TEXT_RATIO, true);
-		}
-	}
-	// On-solid text vs the solid ladder — the scale generator already guarantees this for the action
-	// intents; revalidated here on the emitted values.
-	for (const intent of ACTION_INTENTS) {
-		for (const state of ['solid', 'solidHover', 'solidPressed']) {
+		for (const state of ['rest', 'hover', 'pressed']) {
 			check(
-				`color.intent.${intent}.onSolid`,
-				`color.intent.${intent}.surface.${state}`,
+				`color.foreground.${role}.onSolid`,
+				`color.background.${role}.solid.${state}`,
 				TEXT_RATIO,
 				true,
 			);
 		}
 	}
-	// The keyboard-focus ring is authored and focus-visibility critical, so it stays a hard 3:1 gate.
+	// The keyboard-focus ring is authored and focus-visibility critical, so it stays a hard 3:1 gate,
+	// and `border.control` is a solved boundary held to the same ratio: 4 checks.
 	for (const background of basePaths) check('color.border.focus', background, UI_RATIO, true);
-	// border.control is a solved contrast boundary: hard-gated at 3:1 against both
-	// base surfaces in both modes. Intent borders use the Radix-style step 6/7 and are advisory checks
-	// below 3:1. `color.border.decorative` is not checked.
 	for (const background of basePaths) check('color.border.control', background, UI_RATIO, true);
-	for (const intent of [...BORDER_AND_TEXT_INTENTS, ...FEEDBACK_INTENTS]) {
+	// The six semantic borders, measured and reported but not gated: 12 advisory checks.
+	for (const role of SEMANTIC_ROLES) {
 		for (const background of basePaths) {
-			check(`color.intent.${intent}.border`, background, UI_RATIO, false);
+			check(`color.border.${role}`, background, UI_RATIO, false);
 		}
 	}
 

@@ -6,15 +6,15 @@ export const themeRootClassName = cx(lukeUiClassNames.themeRoot, lukeUiClassName
 
 /**
  * Typed access to the semantic theme custom properties. Each path resolves to a stable global
- * `--luke-*` variable reference, for example `vars.color.intent.danger.surface.solidHover`.
+ * `--luke-*` variable reference, for example `vars.color.background.danger.solid.hover`.
  */
 export { vars } from './contract.css.js';
 
 /**
  * `themeClassName(name)` returns the identity class for a theme name. `ThemeContrastError` is thrown
  * by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1 for text/on-solid pairs, 3:1 for
- * the focus ring and `border.control`. The five `intent.*.border` pairs are measured but advisory
- * only and cannot trigger this error. It carries every failing mode-and-pair in its `failures`
+ * the focus ring and `border.control`. The six semantic `border.<role>` pairs are measured but
+ * advisory only and cannot trigger this error. It carries every failing mode-and-pair in its `failures`
  * array. `ThemeGenerationError` is thrown when a role that must guarantee on-solid contrast (an
  * inaccessible explicit per-mode accent, for example) cannot reach an accessible solid. It names the
  * failing `role` and `mode`.

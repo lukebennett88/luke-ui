@@ -9,6 +9,7 @@ import {
 } from './__fixtures__/radix-scales.js';
 import type { Oklch } from './color.js';
 import { contrastRatio, parseColor } from './color.js';
+import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { FamilyRole } from './scale.js';
 import {
 	FAMILY_REQUIREMENTS,
@@ -30,27 +31,32 @@ const BACKGROUND: Record<ColorMode, Oklch> = {
 };
 
 const TEXT_RATIO = 4.5;
-const NEEDS_ON_SOLID_ROLES: ReadonlyArray<FamilyRole> = ['neutral', 'accent', 'danger'];
-const FEEDBACK_ROLES: ReadonlyArray<FamilyRole> = ['info', 'success', 'warning'];
 const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
+// Every role declares the same guarantees now, so `SEMANTIC_ROLES` stands in for the old per-capability
+// subsets. The one split left is geometric rather than semantic: neutral's solid comes from its own
+// curated dark/light chip band instead of the source lightness, so it is the only role a dead-zone
+// source cannot make unsatisfiable.
+const SOURCE_TONED_ROLES = SEMANTIC_ROLES.filter((role) => role !== 'neutral');
 
 function family(source: string, mode: ColorMode, role: FamilyRole) {
 	return generateFamily({ background: BACKGROUND[mode], mode, role, source: parseColor(source) });
 }
 
 describe('FAMILY_REQUIREMENTS', () => {
-	it('requires on-solid only for the action roles the contract renders solids for', () => {
-		expect(FAMILY_REQUIREMENTS.neutral.needsOnSolid).toBe(true);
-		expect(FAMILY_REQUIREMENTS.accent.needsOnSolid).toBe(true);
-		expect(FAMILY_REQUIREMENTS.danger.needsOnSolid).toBe(true);
-		for (const role of FEEDBACK_ROLES) {
-			expect(FAMILY_REQUIREMENTS[role].needsOnSolid).toBe(false);
-			expect(FAMILY_REQUIREMENTS[role].needsSolidStates).toBe(false);
-			// Feedback roles still guarantee the subtle surface, border, and text they publicly consume.
-			expect(FAMILY_REQUIREMENTS[role].needsSubtleStates).toBe(true);
-			expect(FAMILY_REQUIREMENTS[role].needsBorder).toBe(true);
-			expect(FAMILY_REQUIREMENTS[role].needsText).toBe(true);
-		}
+	it('guarantees every capability for every role', () => {
+		const requirements = SEMANTIC_ROLES.map((role) => [role, FAMILY_REQUIREMENTS[role]] as const);
+		expect(requirements).toEqual(
+			SEMANTIC_ROLES.map((role) => [
+				role,
+				{
+					needsBorder: true,
+					needsOnSolid: true,
+					needsSolidStates: true,
+					needsSubtleStates: true,
+					needsText: true,
+				},
+			]),
+		);
 	});
 });
 
@@ -72,9 +78,9 @@ describe('component state distinctness', () => {
 	it('keeps steps 3-4 and 4-5 at least MIN_STATE_DELTA apart across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
-				// The muted ramp is role-independent, so any role that generates cleanly exercises it;
-				// feedback roles never throw, so they cover every corpus source.
-				for (const role of [...FEEDBACK_ROLES, 'neutral', 'accent'] as const) {
+				// The muted ramp is role-independent, but every role now runs the solid-anchor search, so
+				// the corpus is swept across all six rather than the roles that used to skip it.
+				for (const role of SEMANTIC_ROLES) {
 					const scale = family(entry.source, mode, role);
 					const delta34 = oklabDeltaE(scale[3], scale[4]);
 					const delta45 = oklabDeltaE(scale[4], scale[5]);
@@ -91,10 +97,10 @@ describe('component state distinctness', () => {
 });
 
 describe('on-solid contrast guarantee', () => {
-	it('clears 4.5:1 against the solid (9) and its hover (10) for needsOnSolid roles across the corpus', () => {
+	it('clears 4.5:1 against the solid (9) and its hover (10) for every role across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
-				for (const role of NEEDS_ON_SOLID_ROLES) {
+				for (const role of SEMANTIC_ROLES) {
 					const scale = family(entry.source, mode, role);
 					expect(
 						contrastRatio(scale.contrast, scale[9]),
@@ -109,7 +115,7 @@ describe('on-solid contrast guarantee', () => {
 		}
 	});
 
-	it('reports a satisfied on-solid anchor for needsOnSolid roles', () => {
+	it('reports a satisfied on-solid anchor', () => {
 		const { diagnostics } = generateFamilyWithDiagnostics({
 			background: BACKGROUND.light,
 			mode: 'light',
@@ -241,23 +247,26 @@ describe('solid-anchor search', () => {
 		);
 	});
 
-	it('never distorts a feedback family: the solid keeps the source lightness exactly', () => {
-		for (const role of FEEDBACK_ROLES) {
-			for (const mode of MODES) {
-				const source = parseColor('oklch(0.6 0.14 80)');
-				const { diagnostics } = generateFamilyWithDiagnostics({
-					background: BACKGROUND[mode],
-					mode,
-					role,
-					source,
-				});
-				expect(diagnostics.solidAnchor.adaptedForOnSolid, `${role} ${mode}`).toBe(false);
-				expect(diagnostics.solidAnchor.resolvedLightness, `${role} ${mode}`).toBeCloseTo(
-					source.l,
-					5,
-				);
-			}
-		}
+	it('resolves the solid identically for every source-toned role', () => {
+		// The search is keyed to capabilities, not meaning, and every role now declares the same ones. A
+		// status role and the accent handed the same character must therefore produce the same solid —
+		// this is what makes a `danger` badge and an `info` badge equally able to render a solid.
+		const source = parseColor('oklch(0.51 0.19 150)');
+		const resolvedLightness = (mode: ColorMode, role: FamilyRole) => {
+			return generateFamilyWithDiagnostics({ background: BACKGROUND[mode], mode, role, source })
+				.diagnostics.solidAnchor.resolvedLightness;
+		};
+		const anchors = MODES.flatMap((mode) => {
+			return SOURCE_TONED_ROLES.map((role) => [mode, role, resolvedLightness(mode, role)]);
+		});
+
+		// Every role in a mode must land on whatever the accent lands on, mode by mode.
+		expect(anchors).toEqual(
+			MODES.flatMap((mode) => {
+				const accentLightness = resolvedLightness(mode, 'accent');
+				return SOURCE_TONED_ROLES.map((role) => [mode, role, accentLightness]);
+			}),
+		);
 	});
 
 	it('keeps the neutral solid accessible in both modes', () => {
@@ -351,10 +360,10 @@ describe('the one on-solid gate', () => {
 });
 
 describe('unsatisfiable input', () => {
-	it('throws ScaleGenerationError carrying role and mode when a needsOnSolid tone is a dead zone', () => {
+	it('throws ScaleGenerationError carrying role and mode when a source tone is a dead zone', () => {
 		for (const mode of MODES) {
 			const entry = UNSATISFIABLE_ON_SOLID[mode];
-			for (const role of ['accent', 'danger'] as const) {
+			for (const role of SOURCE_TONED_ROLES) {
 				let thrown: unknown;
 				try {
 					family(entry.source, mode, role);
@@ -371,11 +380,9 @@ describe('unsatisfiable input', () => {
 		}
 	});
 
-	it('does not throw for feedback roles given the same dead-zone tone', () => {
+	it('does not throw for neutral, whose solid comes from a curated band rather than the source tone', () => {
 		for (const mode of MODES) {
-			for (const role of FEEDBACK_ROLES) {
-				expect(() => family(UNSATISFIABLE_ON_SOLID[mode].source, mode, role)).not.toThrow();
-			}
+			expect(() => family(UNSATISFIABLE_ON_SOLID[mode].source, mode, 'neutral')).not.toThrow();
 		}
 	});
 });

@@ -82,7 +82,7 @@ const checkboxConfig = {
 			borderWidth: '1px',
 			boxShadow: 'none',
 			boxSizing: 'border-box',
-			color: vars.color.intent.accent.onSolid,
+			color: vars.color.foreground.accent.onSolid,
 			display: 'inline-flex',
 			fontSize: checkboxGlyphSize,
 			fontWeight: vars.font.weight.heading,
@@ -107,45 +107,45 @@ const checkboxConfig = {
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
 				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
 					backgroundImage: vars.actionControlFinish.raised,
-					borderColor: vars.color.intent.accent.border,
+					borderColor: vars.color.border.accent,
 				},
 				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
 					backgroundImage: vars.actionControlFinish.recessed,
-					borderColor: vars.color.intent.accent.border,
+					borderColor: vars.color.border.accent,
 				},
 				'[data-indeterminate="true"] &': {
-					backgroundColor: vars.color.intent.accent.surface.solid,
-					borderColor: vars.color.intent.accent.surface.solid,
+					backgroundColor: vars.color.background.accent.solid.rest,
+					borderColor: vars.color.background.accent.solid.rest,
 				},
 				'[data-indeterminate="true"] &::after': {
 					content: '"−"',
 					opacity: 1,
 				},
 				'[data-invalid="true"] &': {
-					borderColor: vars.color.intent.danger.border,
+					borderColor: vars.color.border.danger,
 				},
 				'[data-selected="true"] &': {
-					backgroundColor: vars.color.intent.accent.surface.solid,
-					borderColor: vars.color.intent.accent.surface.solid,
+					backgroundColor: vars.color.background.accent.solid.rest,
+					borderColor: vars.color.background.accent.solid.rest,
 				},
 				'[data-selected="true"] &::after': {
 					opacity: 1,
 				},
 				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
-						backgroundColor: vars.color.intent.accent.surface.solidHover,
-						borderColor: vars.color.intent.accent.surface.solidHover,
+						backgroundColor: vars.color.background.accent.solid.hover,
+						borderColor: vars.color.background.accent.solid.hover,
 					},
 				'[data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
-						backgroundColor: vars.color.intent.accent.surface.solidPressed,
-						borderColor: vars.color.intent.accent.surface.solidPressed,
+						backgroundColor: vars.color.background.accent.solid.pressed,
+						borderColor: vars.color.background.accent.solid.pressed,
 					},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
-						backgroundColor: vars.color.intent.danger.surface.solid,
-						borderColor: vars.color.intent.danger.surface.solid,
-						color: vars.color.intent.danger.onSolid,
+						backgroundColor: vars.color.background.danger.solid.rest,
+						borderColor: vars.color.background.danger.solid.rest,
+						color: vars.color.foreground.danger.onSolid,
 					},
 			},
 		},

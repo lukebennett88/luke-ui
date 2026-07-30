@@ -105,7 +105,7 @@ export const WithRenderProp = meta.story({
 			padding: '400',
 		});
 		const customStyle = mergeProps(buttonBox, {
-			style: { backgroundColor: vars.color.intent.accent.surface.solid },
+			style: { backgroundColor: vars.color.background.accent.solid.rest },
 		});
 		return (
 			<Button

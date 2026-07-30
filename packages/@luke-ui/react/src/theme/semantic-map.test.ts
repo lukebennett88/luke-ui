@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { Oklch } from './color.js';
 import { formatOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
+import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { generateSurfaces } from './elevation.js';
 import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
@@ -16,8 +17,6 @@ const BACKGROUND: Record<ColorMode, Oklch> = {
 };
 
 const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
-const ACTION_ROLES = ['neutral', 'accent', 'danger'] as const;
-const FEEDBACK_ROLES = ['info', 'success', 'warning'] as const;
 
 // A stand-in for `build-theme.ts`'s `solveControlBorder` output: mapSemanticColors only aliases this
 // through, so any distinct Oklch value proves the passthrough without re-testing the solver itself.
@@ -100,31 +99,20 @@ describe('mapSemanticColors', () => {
 				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
 				expect(result['color.border.focus']).toBe(formatOklch(focus));
 
-				// Action intents: full ramp, keyed to the intent's own family.
-				for (const role of ACTION_ROLES) {
+				// The shared contract: identical steps for all six roles, keyed to the role's own family.
+				for (const role of SEMANTIC_ROLES) {
 					const family = families[role];
-					expect(result[`color.intent.${role}.surface.subtle`]).toBe(formatOklch(family[3]));
-					expect(result[`color.intent.${role}.surface.subtleHover`]).toBe(formatOklch(family[4]));
-					expect(result[`color.intent.${role}.surface.subtlePressed`]).toBe(formatOklch(family[5]));
-					expect(result[`color.intent.${role}.surface.solid`]).toBe(formatOklch(family[9]));
-					expect(result[`color.intent.${role}.surface.solidHover`]).toBe(formatOklch(family[10]));
+					expect(result[`color.background.${role}.subtle.rest`]).toBe(formatOklch(family[3]));
+					expect(result[`color.background.${role}.subtle.hover`]).toBe(formatOklch(family[4]));
+					expect(result[`color.background.${role}.subtle.pressed`]).toBe(formatOklch(family[5]));
+					expect(result[`color.background.${role}.solid.rest`]).toBe(formatOklch(family[9]));
+					expect(result[`color.background.${role}.solid.hover`]).toBe(formatOklch(family[10]));
 					// Deliberate dup: pressed reuses the hover value.
-					expect(result[`color.intent.${role}.surface.solidPressed`]).toBe(formatOklch(family[10]));
-					expect(result[`color.intent.${role}.onSolid`]).toBe(formatOklch(family.contrast));
-				}
-				for (const role of ['accent', 'danger'] as const) {
-					const family = families[role];
-					expect(result[`color.intent.${role}.border`]).toBe(formatOklch(family[7]));
-					expect(result[`color.intent.${role}.text`]).toBe(formatOklch(family[11]));
-				}
-				expect(result['color.intent.accent.textHover']).toBe(formatOklch(families.accent[12]));
-
-				// Feedback intents: reduced kit only.
-				for (const role of FEEDBACK_ROLES) {
-					const family = families[role];
-					expect(result[`color.intent.${role}.surface.subtle`]).toBe(formatOklch(family[3]));
-					expect(result[`color.intent.${role}.border`]).toBe(formatOklch(family[7]));
-					expect(result[`color.intent.${role}.text`]).toBe(formatOklch(family[11]));
+					expect(result[`color.background.${role}.solid.pressed`]).toBe(formatOklch(family[10]));
+					expect(result[`color.foreground.${role}.rest`]).toBe(formatOklch(family[11]));
+					expect(result[`color.foreground.${role}.hover`]).toBe(formatOklch(family[12]));
+					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.contrast));
+					expect(result[`color.border.${role}`]).toBe(formatOklch(family[7]));
 				}
 			});
 
@@ -147,14 +135,13 @@ describe('mapSemanticColors', () => {
 	});
 
 	describe('completeness', () => {
-		// Every generated colour leaf must receive a value. This includes every `color.*` path except the
-		// passed-through `color.scrim`.
-		const generatedColourPaths = flattenThemeContract().filter(
-			([path]) => path.startsWith('color.') && path !== 'color.scrim',
-		);
+		// Every `color.*` leaf, including the passed-through `color.scrim`.
+		const colourPaths = flattenThemeContract()
+			.map(([path]) => path)
+			.filter((path) => path.startsWith('color.'));
 
 		for (const mode of MODES) {
-			it(`assigns every generated colour leaf a value (${mode})`, () => {
+			it(`assigns every colour leaf exactly once, and nothing else (${mode})`, () => {
 				const background = BACKGROUND[mode];
 				const families = buildFamilies(mode, background);
 				const surfaces = generateSurfaces({ background, mode });
@@ -167,9 +154,10 @@ describe('mapSemanticColors', () => {
 					surfaces,
 				});
 
-				for (const [path] of generatedColourPaths) {
-					expect(typeof result[path]).toBe('string');
-				}
+				// Comparing the whole key set both ways is what makes this a completeness check: a missing
+				// leaf leaves `buildTheme` emitting an undefined variable, and an extra key is a path that
+				// no longer exists in the contract and so is silently dropped.
+				expect(Object.keys(result).sort()).toEqual([...colourPaths].sort());
 			});
 		}
 	});

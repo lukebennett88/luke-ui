@@ -10,10 +10,12 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
 
 1. Resolves the source colours and the canvas anchor (`background`, split from `neutral`'s
    hue/chroma character — see `define-theme.ts`).
-2. Generates six private 12-step OKLCH families (`neutral`, `accent`, `danger`, `info`, `success`,
-   `warning`) with `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast`
-   on-solid colour, and guarantees only the capabilities its role's `FamilyRequirements` declares
-   (see the capability matrix in `scale.ts`).
+2. Generates six private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`,
+   `danger`) with `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast`
+   on-solid colour. Every role now guarantees the same capabilities (see `scale.ts`'s
+   `FAMILY_REQUIREMENTS`) — the public contract gives all six roles identical background,
+   foreground, on-solid, and border slots, so there is no role that can opt out of a capability
+   another role emits.
 3. Derives the mode-aware elevation surfaces (`canvas`/`recessed`/`floating`/`overlay`) with
    `elevation.ts`'s `generateSurfaces`. `surfaces.canvas` is always exactly the resolved
    `background` — canvas IS the background, not a derived value.
@@ -75,9 +77,9 @@ advisory group:
   the sole resting boundary of a form control, so it cannot use the softer step-7 aesthetic.
 - `color.border.decorative` is not checked. It is a deliberately subtle, Radix-style separator below
   3:1.
-- Every intent border (`color.intent.*.border`) is an advisory 3:1 check. A miss does not gate the
-  build. `color.border.focus` is the other hard gate. The keyboard-focus ring stays build-time
-  validated at ≥3:1.
+- Every semantic role border (`color.border.<role>`, all six roles) is an advisory 3:1 check. A miss
+  does not gate the build. `color.border.focus` is the other hard gate. The keyboard-focus ring
+  stays build-time validated at ≥3:1.
 
 Component invariant (tracked separately,
 [#247](https://github.com/lukebennett88/luke-ui/issues/247)): any component that uses an advisory
@@ -103,8 +105,8 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
 choose clears the AA text ratio plus the search headroom across both solid states the engine emits:
 step 9 and its step-10 hover. There is no third, deeper pressed state to test.
-`surface.solidPressed` reuses step 10 and carries the press through depth, finish, and transform
-instead.
+`background.<role>.solid.pressed` reuses step 10 and carries the press through depth, finish, and
+transform instead.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
 copy. That gives two guarantees:
@@ -118,14 +120,16 @@ generator's tone-faithful window. It can rescue accents, such as a mid-lightness
 generator alone would report as unsatisfiable.
 
 `contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
-search headroom, and the search step. It also declares the intent role groups used by both the
-validation matrix and the semantic map. Previously, separate role lists allowed a role added only to
-the map to emit an ungated colour, while a role added only to the compiler threw an internal error.
+search headroom, and the search step. It also declares `SEMANTIC_ROLES`, the one canonical role list
+used by family generation, the capability matrix, the semantic map, and the validation matrix.
+Previously, separate role lists allowed a role added only to the map to emit an ungated colour,
+while a role added only to the compiler threw an internal error. One list makes both sides move
+together.
 
 ## `loadingSkeleton`
 
-`color.loadingSkeleton` maps to the neutral family's step 7 (previously a lighter neutral step), for
-better perceptibility of the loading state against typical surfaces.
+`color.loadingSkeleton` maps to the neutral family's step 8, for better perceptibility of the
+loading state against typical surfaces.
 
 ## Alpha is deferred
 

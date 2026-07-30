@@ -83,11 +83,11 @@ const comboboxActionStyles = {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
 		'&[data-focus-visible="true"]': { ...focusRing(vars.color.border.focus) },
 		'&[data-hovered="true"]:not([data-disabled="true"])': {
-			backgroundColor: vars.color.intent.accent.surface.subtleHover,
+			backgroundColor: vars.color.background.accent.subtle.hover,
 			color: vars.color.text.primary,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"])': {
-			backgroundColor: vars.color.intent.accent.surface.subtlePressed,
+			backgroundColor: vars.color.background.accent.subtle.pressed,
 			color: vars.color.text.primary,
 		},
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
@@ -153,13 +153,13 @@ const comboboxConfig = {
 			selectors: {
 				[disabled]: { cursor: 'not-allowed', opacity: 0.55 },
 				[focusWithin]: {
-					borderColor: vars.color.intent.accent.border,
+					borderColor: vars.color.border.accent,
 					...focusRing(vars.color.border.focus),
 				},
-				[hover]: { borderColor: vars.color.intent.accent.border },
-				[invalid]: { borderColor: vars.color.intent.danger.border },
+				[hover]: { borderColor: vars.color.border.accent },
+				[invalid]: { borderColor: vars.color.border.danger },
 				[invalidFocusWithin]: {
-					borderColor: vars.color.intent.danger.border,
+					borderColor: vars.color.border.danger,
 					...focusRing(vars.color.border.focus),
 				},
 				[readOnly]: {
@@ -390,20 +390,20 @@ const comboboxConfig = {
 					opacity: 0.55,
 				},
 				'&[data-focused="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.intent.neutral.surface.subtle,
+					backgroundColor: vars.color.background.neutral.subtle.rest,
 				},
 				'&[data-hovered="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.intent.neutral.surface.subtleHover,
+					backgroundColor: vars.color.background.neutral.subtle.hover,
 				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.intent.accent.surface.subtleHover,
+					backgroundColor: vars.color.background.accent.subtle.hover,
 				},
 				'&[data-selected="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.intent.accent.surface.subtle,
+					backgroundColor: vars.color.background.accent.subtle.rest,
 					fontWeight: vars.font.weight.label,
 				},
 				'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.intent.accent.surface.subtlePressed,
+					backgroundColor: vars.color.background.accent.subtle.pressed,
 				},
 			},
 		},

@@ -13,11 +13,12 @@
 
 import type { Oklch } from './color.js';
 import { clampUnit, contrastRatio, gamutMapOklch } from './color.js';
+import type { SEMANTIC_ROLES } from './contrast-policy.js';
 import { CONTRAST_SEARCH_STEP, RATIO_HEADROOM, TEXT_RATIO } from './contrast-policy.js';
 import type { FamilyDiagnostics, GamutReduction, SolidAnchorDiagnostics } from './diagnostics.js';
 
-/** A scale family's semantic role. Drives the capability guarantees, not the geometry. */
-export type FamilyRole = 'neutral' | 'accent' | 'danger' | 'info' | 'success' | 'warning';
+/** A scale family's semantic role. Derived from the canonical role list, never restated. */
+export type FamilyRole = (typeof SEMANTIC_ROLES)[number];
 
 /** A step index in the 12-step scale. */
 export type ScaleStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
@@ -42,54 +43,31 @@ export interface FamilyRequirements {
 }
 
 /**
- * The locked capability matrix. `neutral` is explicit, not fall-through: it publicly supplies the
- * subtle trio, the solid ladder, `contrast`, text, borders, and the loading skeleton. Feedback roles
- * consume only steps 3 / 7 / 11 publicly, so they do NOT require on-solid or solid states — their
- * families are never distorted to satisfy an unused on-solid guarantee.
+ * Every capability the public contract can consume. The shared semantic contract gives all six roles
+ * the same visual slots, so every family must guarantee all of them — the old split, where the three
+ * feedback roles opted out of solid states and on-solid because no leaf consumed them, no longer
+ * describes what is emitted. A role that opted out would now publish an ungated solid.
+ */
+const everyCapability = {
+	needsBorder: true,
+	needsOnSolid: true,
+	needsSolidStates: true,
+	needsSubtleStates: true,
+	needsText: true,
+} as const satisfies FamilyRequirements;
+
+/**
+ * The locked capability matrix. Kept keyed per role rather than collapsed to one shared value: it is
+ * what {@link FamilyDiagnostics} reports per family, and the exhaustive `Record<FamilyRole, …>` makes
+ * a newly added role a type error here until its guarantees are stated.
  */
 export const FAMILY_REQUIREMENTS = {
-	accent: {
-		needsBorder: true,
-		needsOnSolid: true,
-		needsSolidStates: true,
-		needsSubtleStates: true,
-		needsText: true,
-	},
-	danger: {
-		needsBorder: true,
-		needsOnSolid: true,
-		needsSolidStates: true,
-		needsSubtleStates: true,
-		needsText: true,
-	},
-	info: {
-		needsBorder: true,
-		needsOnSolid: false,
-		needsSolidStates: false,
-		needsSubtleStates: true,
-		needsText: true,
-	},
-	neutral: {
-		needsBorder: true,
-		needsOnSolid: true,
-		needsSolidStates: true,
-		needsSubtleStates: true,
-		needsText: true,
-	},
-	success: {
-		needsBorder: true,
-		needsOnSolid: false,
-		needsSolidStates: false,
-		needsSubtleStates: true,
-		needsText: true,
-	},
-	warning: {
-		needsBorder: true,
-		needsOnSolid: false,
-		needsSolidStates: false,
-		needsSubtleStates: true,
-		needsText: true,
-	},
+	accent: everyCapability,
+	danger: everyCapability,
+	info: everyCapability,
+	neutral: everyCapability,
+	success: everyCapability,
+	warning: everyCapability,
 } as const satisfies Record<FamilyRole, FamilyRequirements>;
 
 /**
@@ -437,11 +415,13 @@ interface ResolvedAnchor {
 }
 
 /**
- * Resolves the step-9 solid lightness. Feedback roles (`needsOnSolid: false`) take their source
- * lightness verbatim as a pure geometric anchor — never distorted for an unused guarantee. Roles
- * that must guarantee on-solid contrast search their solid band for a lightness whose solid and
- * hover both clear the on-solid gate, preferring the lightness nearest the source (vibrant) or the
- * curated target (neutral), and throwing when none clears.
+ * Resolves the step-9 solid lightness. A role that must guarantee on-solid contrast searches its
+ * solid band for a lightness whose solid and hover both clear the on-solid gate, preferring the
+ * lightness nearest the source (vibrant) or the curated target (neutral), and throwing when none
+ * clears. Every semantic role guarantees on-solid today; the `needsOnSolid: false` path stays because
+ * the requirement is a capability flag, not a role name — a family generated for a slot the contract
+ * does not publish a solid for takes its source lightness verbatim rather than being distorted for a
+ * guarantee nothing consumes.
  */
 function resolveSolidAnchor(
 	request: GenerateFamilyRequest,

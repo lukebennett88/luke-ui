@@ -6,6 +6,34 @@ const fontStep = {
 	lineHeight: null,
 };
 
+/**
+ * The background capabilities every semantic role gets, spread once per role so the six roles cannot
+ * drift apart. `rest` is an explicit leaf because a nested tree path cannot be both a string leaf and
+ * the parent of `hover` and `pressed`.
+ */
+const roleBackground = {
+	subtle: {
+		rest: null,
+		hover: null,
+		pressed: null,
+	},
+	solid: {
+		rest: null,
+		hover: null,
+		pressed: null,
+	},
+};
+
+/**
+ * The content capabilities every semantic role gets. There is no `pressed` foreground: press is
+ * carried by the background ramp and non-colour cues, so text and icons reuse `hover`.
+ */
+const roleForeground = {
+	rest: null,
+	hover: null,
+	onSolid: null,
+};
+
 /** Source-owned typography size step keys, in display order. */
 export const fontSizeSteps = [
 	'100',
@@ -28,7 +56,16 @@ export type FontSizeStep = (typeof fontSizeSteps)[number];
  * `--luke-*` custom property.
  */
 export const themeContractTree = {
-	/** Semantic colours for surfaces, content, borders, loading, and six named intents. */
+	/**
+	 * Semantic colours for surfaces, content, borders, and loading, plus the six shared semantic roles
+	 * (`neutral`, `accent`, `info`, `success`, `warning`, `danger`).
+	 *
+	 * Organised by the property a token styles, not by the component that happens to use it: the
+	 * functional leaves (`surface`, `scrim`, `loadingSkeleton`, `text`, and the first three `border`
+	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
+	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
+	 * so no role is a special case here.
+	 */
 	color: {
 		surface: {
 			canvas: null,
@@ -45,73 +82,36 @@ export const themeContractTree = {
 			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
 			disabled: null,
 		},
+		/** Subtle and solid background ramps, each with the shared rest / hover / pressed states. */
+		background: {
+			neutral: { ...roleBackground },
+			accent: { ...roleBackground },
+			info: { ...roleBackground },
+			success: { ...roleBackground },
+			warning: { ...roleBackground },
+			danger: { ...roleBackground },
+		},
+		/** Resting and stronger interactive content colours, plus the guaranteed on-solid pairing. */
+		foreground: {
+			neutral: { ...roleForeground },
+			accent: { ...roleForeground },
+			info: { ...roleForeground },
+			success: { ...roleForeground },
+			warning: { ...roleForeground },
+			danger: { ...roleForeground },
+		},
 		border: {
 			decorative: null,
 			control: null,
 			focus: null,
-		},
-		intent: {
-			// Action intents: full 6-rung interactive ramp + onSolid.
-			neutral: {
-				surface: {
-					subtle: null,
-					subtleHover: null,
-					subtlePressed: null,
-					solid: null,
-					solidHover: null,
-					solidPressed: null,
-				},
-				onSolid: null,
-			},
-			accent: {
-				surface: {
-					subtle: null,
-					subtleHover: null,
-					subtlePressed: null,
-					solid: null,
-					solidHover: null,
-					solidPressed: null,
-				},
-				border: null,
-				text: null,
-				textHover: null,
-				onSolid: null,
-			},
-			danger: {
-				surface: {
-					subtle: null,
-					subtleHover: null,
-					subtlePressed: null,
-					solid: null,
-					solidHover: null,
-					solidPressed: null,
-				},
-				border: null,
-				text: null,
-				onSolid: null,
-			},
-			// Feedback intents: static soft kit only (subtle surface + border + text).
-			info: {
-				surface: {
-					subtle: null,
-				},
-				border: null,
-				text: null,
-			},
-			success: {
-				surface: {
-					subtle: null,
-				},
-				border: null,
-				text: null,
-			},
-			warning: {
-				surface: {
-					subtle: null,
-				},
-				border: null,
-				text: null,
-			},
+			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
+			// component decides when to apply it.
+			neutral: null,
+			accent: null,
+			info: null,
+			success: null,
+			warning: null,
+			danger: null,
 		},
 	},
 	/** Composite box-shadow values for the shared depth ladder. */
@@ -214,7 +214,7 @@ export const themeContractTree = {
 
 /**
  * Flattens the semantic token tree into `[path, varName]` pairs, in tree order, for example
- * `['color.intent.danger.surface.solidHover', '--luke-color-intent-danger-surface-solid-hover']`.
+ * `['color.background.danger.solid.hover', '--luke-color-background-danger-solid-hover']`.
  */
 export function flattenThemeContract(): Array<[path: string, varName: string]> {
 	const pairs: Array<[string, string]> = [];
@@ -223,7 +223,7 @@ export function flattenThemeContract(): Array<[path: string, varName: string]> {
 }
 
 /**
- * Kebab-cases one camelCase path segment, for example `solidHover` becomes `solid-hover`. Joining
+ * Kebab-cases one camelCase path segment, for example `onSolid` becomes `on-solid`. Joining
  * kebab-cased segments with `-` under the `luke-` prefix yields the CSS variable name.
  */
 function kebabCaseSegment(segment: string): string {
@@ -254,8 +254,7 @@ function isContractNode(value: unknown): value is Record<string, unknown> {
 
 /**
  * Builds the stable `--luke-*` CSS variable name for a contract path's segments, for example
- * `['color', 'intent', 'danger', 'surface', 'solidHover']` becomes
- * `--luke-color-intent-danger-surface-solid-hover`.
+ * `['color', 'foreground', 'danger', 'onSolid']` becomes `--luke-color-foreground-danger-on-solid`.
  */
 export function themeVarName(segments: Array<string>): string {
 	return `--luke-${segments.map(kebabCaseSegment).join('-')}`;
