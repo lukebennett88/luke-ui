@@ -1,9 +1,11 @@
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
+import { fontSizeSteps } from '../theme/contract.js';
 import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 import { checkbox } from './checkbox.css.js';
 import { field as fieldRecipe } from './field.css.js';
+import { text } from './text.css.js';
 
 let mounted: Array<HTMLElement> = [];
 
@@ -13,16 +15,14 @@ afterEach(() => {
 });
 
 test('the control follows a Text line-height custom property and centres its indicator', () => {
-	const lineHeights = [16, 20, 24, 26, 28, 30, 36, 40, 60];
-
-	for (const lineHeight of lineHeights) {
-		const { content, control, indicator } = mountCheckbox(lineHeight);
+	for (const size of fontSizeSteps) {
+		const { content, control, indicator } = mountCheckbox(undefined, size);
 		const contentRect = content.getBoundingClientRect();
 		const controlRect = control.getBoundingClientRect();
 		const indicatorRect = indicator.getBoundingClientRect();
 
 		expect(Math.abs(controlRect.top - contentRect.top)).toBeLessThan(0.1);
-		expect(controlRect.height).toBe(lineHeight);
+		expect(controlRect.height).toBe(Number.parseFloat(getComputedStyle(content).lineHeight));
 		expect(
 			Math.abs(
 				indicatorRect.top + indicatorRect.height / 2 - (controlRect.top + controlRect.height / 2),
@@ -72,7 +72,7 @@ test('sizes inherit from the root into the control, indicator, and field message
 	] as const;
 
 	for (const { glyph, indicator: indicatorSize, size, wrapper } of sizes) {
-		const { content, control, description, error, indicator } = mountCheckbox(undefined, size);
+		const { content, control, description, error, indicator } = mountCheckbox(size);
 		const contentStyle = getComputedStyle(content);
 		const expectedIndent = wrapper + Number.parseFloat(contentStyle.columnGap);
 
@@ -111,15 +111,19 @@ test('hover and pressed states change the control material', () => {
 	expect(pressedFinish).not.toBe(hoveredFinish);
 });
 
-function mountCheckbox(lineHeight?: number, size?: 'small' | 'medium' | 'large') {
+function mountCheckbox(
+	size?: 'small' | 'medium' | 'large',
+	textSize?: (typeof fontSizeSteps)[number],
+) {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	root.style.lineHeight = '24px';
-	if (lineHeight != null) root.style.setProperty('--luke-text-line-height', `${lineHeight}px`);
+	const textElement = root.appendChild(document.createElement('span'));
+	if (textSize != null) textElement.className = text({ shouldDisableTrim: true, size: textSize });
 
 	const classes = checkbox({ size });
-	const field = root.appendChild(document.createElement('div'));
+	const field = textElement.appendChild(document.createElement('div'));
 	field.className = classes.root();
 	const content = field.appendChild(document.createElement('label'));
 	content.className = classes.content();

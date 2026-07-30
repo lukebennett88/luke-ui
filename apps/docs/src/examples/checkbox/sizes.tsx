@@ -5,13 +5,13 @@ export default function Sizes() {
 	return (
 		<Box display="grid" gap="300">
 			<Checkbox defaultSelected size="small">
-				Small checkbox
+				Small
 			</Checkbox>
 			<Checkbox defaultSelected size="medium">
-				Medium checkbox
+				Medium
 			</Checkbox>
 			<Checkbox defaultSelected size="large">
-				Large checkbox
+				Large
 			</Checkbox>
 		</Box>
 	);

@@ -13,9 +13,9 @@ export default function Basic() {
 				<CheckboxControl>
 					<CheckboxIndicator />
 				</CheckboxControl>
-				Email me when a report is ready
+				Email notifications
 			</CheckboxContent>
-			<FieldDescription>Choose the delivery channel in notification settings.</FieldDescription>
+			<FieldDescription>Receive updates by email.</FieldDescription>
 			<FieldError>Choose an option.</FieldError>
 		</Checkbox>
 	);

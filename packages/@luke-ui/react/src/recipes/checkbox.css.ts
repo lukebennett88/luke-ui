@@ -1,9 +1,10 @@
-import { createVar } from '@vanilla-extract/css';
+import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
 import { fieldMessageIndent } from './field.css.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
+import { textLineHeight } from './text.css.js';
 
 const checkboxControlSize = createVar();
 const checkboxGlyphSize = createVar();
@@ -37,7 +38,7 @@ const checkboxConfig = {
 		},
 		control: {
 			alignItems: 'center',
-			blockSize: 'var(--luke-text-line-height, 1lh)',
+			blockSize: fallbackVar(textLineHeight, '1lh'),
 			display: 'inline-flex',
 			flexShrink: 0,
 			inlineSize: checkboxControlSize,

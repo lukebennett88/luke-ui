@@ -6,7 +6,7 @@ export default function Controlled() {
 
 	return (
 		<Checkbox isSelected={isSelected} onChange={setIsSelected}>
-			Send me a weekly summary
+			Weekly summary
 		</Checkbox>
 	);
 }

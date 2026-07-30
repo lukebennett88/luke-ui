@@ -1,3 +1,4 @@
+import { createVar } from '@vanilla-extract/css';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
@@ -8,6 +9,7 @@ import { recipe } from './recipe.js';
 import { visuallyHiddenStyle } from './visually-hidden.css.js';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
+export const textLineHeight = createVar();
 const lineClampSingleLine = {
 	display: 'block',
 	minInlineSize: 0,
@@ -64,15 +66,20 @@ const sizeVariants = Object.fromEntries(
 	fontSizeSteps.map((size) => [
 		size,
 		{
-			'--luke-text-line-height': vars.font[size].lineHeight,
 			fontSize: vars.font[size].fontSize,
 			letterSpacing: vars.font[size].letterSpacing,
 			lineHeight: vars.font[size].lineHeight,
+			vars: { [textLineHeight]: vars.font[size].lineHeight },
 		},
 	]),
 ) as Record<
 	FontSizeStep,
-	{ '--luke-text-line-height': string; fontSize: string; letterSpacing: string; lineHeight: string }
+	{
+		fontSize: string;
+		letterSpacing: string;
+		lineHeight: string;
+		vars: { [textLineHeight]: string };
+	}
 >;
 
 const sizeStepCompoundVariants = fontSizeSteps.map((size) => {
@@ -175,7 +182,6 @@ export const text = recipe({
 		shouldInheritFont: {
 			false: {},
 			true: {
-				'--luke-text-line-height': '1lh',
 				color: 'inherit',
 				fontFamily: 'inherit',
 				fontSize: 'inherit',
@@ -183,6 +189,7 @@ export const text = recipe({
 				fontWeight: 'inherit',
 				letterSpacing: 'inherit',
 				lineHeight: 'inherit',
+				vars: { [textLineHeight]: '1lh' },
 			},
 		},
 		color: colorVariants,

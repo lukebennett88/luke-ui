@@ -9,7 +9,7 @@ normal application forms, use [`Checkbox`](/components/forms/checkbox).
 <ExampleBlock
 	src="checkbox-primitive/basic"
 	title="Checkbox primitive — Basic"
-	description="The root, clickable content, control, and indicator anatomy."
+	description="Checkbox anatomy with supporting and validation slots."
 />
 
 ## Anatomy
@@ -20,14 +20,14 @@ inside `CheckboxContent`. Use `FieldDescription` and `FieldError` as siblings of
 for the standard supporting and validation semantics.
 
 ```tsx
-<Checkbox>
+<Checkbox isInvalid>
 	<CheckboxContent>
 		<CheckboxControl>
 			<CheckboxIndicator />
 		</CheckboxControl>
-		Email me when a report is ready
+		Email notifications
 	</CheckboxContent>
-	<FieldDescription>Choose the delivery channel in notification settings.</FieldDescription>
+	<FieldDescription>Receive updates by email.</FieldDescription>
 	<FieldError>Choose an option.</FieldError>
 </Checkbox>
 ```
