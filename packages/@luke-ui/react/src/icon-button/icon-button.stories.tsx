@@ -26,6 +26,11 @@ const flexWrapStyle = {
 	gap: '1rem',
 } as const satisfies CSSProperties;
 
+/** Turns a camelCase icon name like `arrowDown` into a readable label like `Arrow Down`. */
+function iconNameToLabel(iconName: string): string {
+	return iconName.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
+}
+
 export const Default = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Add' },
 	play: async ({ canvas }) => {
@@ -144,7 +149,12 @@ export const AllIcons = meta.story({
 	render: (props) => (
 		<div style={flexWrapStyle}>
 			{iconNames.map((iconName) => (
-				<IconButton {...props} icon={iconName} key={iconName} />
+				<IconButton
+					{...props}
+					aria-label={iconNameToLabel(iconName)}
+					icon={iconName}
+					key={iconName}
+				/>
 			))}
 		</div>
 	),

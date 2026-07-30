@@ -6,7 +6,7 @@ import { useState } from 'react';
 import type { Key } from 'react-aria-components/Breadcrumbs';
 import { Form } from 'react-aria-components/Form';
 import { useAsyncList } from 'react-aria-components/useAsyncList';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -224,6 +224,12 @@ export const Size = meta.story({
 		const overrideOption = page.getByRole('option', { name: 'Override' });
 		const overridePadding = window.getComputedStyle(overrideOption).paddingBlock;
 		await expect(overridePadding).toBe(mediumOptionPadding);
+
+		// Leave the story settled with the popover closed
+		await userEvent.keyboard('{Escape}');
+		await waitFor(async () => {
+			await expect(page.queryByRole('listbox')).not.toBeInTheDocument();
+		});
 	},
 	render: function Render() {
 		return (
@@ -433,8 +439,17 @@ export const DisabledKeys = meta.story({
 export const Validation = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
+		const page = within(document.body);
 		await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
 		await expect(canvas.getByText('Please select a country.')).toBeInTheDocument();
+
+		// Native validation focuses the invalid combobox, which opens its listbox
+		// (menuTrigger="focus"). Close it so the story doesn't leave the popover
+		// open with the rest of the page hidden from assistive technology.
+		await userEvent.keyboard('{Escape}');
+		await waitFor(async () => {
+			await expect(page.queryByRole('listbox')).not.toBeInTheDocument();
+		});
 	},
 	render: function Render() {
 		return (
