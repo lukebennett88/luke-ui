@@ -8,6 +8,9 @@ export default function States() {
 			<Checkbox defaultSelected>Checked</Checkbox>
 			<Checkbox isIndeterminate>Indeterminate</Checkbox>
 			<Checkbox isDisabled>Disabled</Checkbox>
+			<Checkbox defaultSelected isDisabled>
+				Disabled and checked
+			</Checkbox>
 			<Checkbox errorMessage="Choose an option." isInvalid>
 				Invalid
 			</Checkbox>
