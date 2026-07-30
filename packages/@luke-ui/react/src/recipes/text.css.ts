@@ -1,3 +1,4 @@
+import { createVar } from '@vanilla-extract/css';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
@@ -8,6 +9,7 @@ import { recipe } from './recipe.js';
 import { visuallyHiddenStyle } from './visually-hidden.css.js';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
+export const textLineHeight = createVar();
 const lineClampSingleLine = {
 	display: 'block',
 	minInlineSize: 0,
@@ -67,9 +69,18 @@ const sizeVariants = Object.fromEntries(
 			fontSize: vars.font[size].fontSize,
 			letterSpacing: vars.font[size].letterSpacing,
 			lineHeight: vars.font[size].lineHeight,
+			vars: { [textLineHeight]: vars.font[size].lineHeight },
 		},
 	]),
-) as Record<FontSizeStep, { fontSize: string; letterSpacing: string; lineHeight: string }>;
+) as Record<
+	FontSizeStep,
+	{
+		fontSize: string;
+		letterSpacing: string;
+		lineHeight: string;
+		vars: { [textLineHeight]: string };
+	}
+>;
 
 const sizeStepCompoundVariants = fontSizeSteps.map((size) => {
 	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
@@ -178,6 +189,7 @@ export const text = recipe({
 				fontWeight: 'inherit',
 				letterSpacing: 'inherit',
 				lineHeight: 'inherit',
+				vars: { [textLineHeight]: '1lh' },
 			},
 		},
 		color: colorVariants,

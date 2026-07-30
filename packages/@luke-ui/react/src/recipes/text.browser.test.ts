@@ -4,7 +4,7 @@ import { fontSizeSteps } from '../theme/contract.js';
 import { tactileTheme } from '../theme/foundations.js';
 import { defineTheme, themeClassName, themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
-import { text } from './text.css.js';
+import { text, textLineHeight } from './text.css.js';
 
 let mounted: Array<HTMLElement> = [];
 let styles: Array<HTMLStyleElement> = [];
@@ -30,11 +30,14 @@ test("defaults to size '300', body weight, and primary colour", () => {
 });
 
 test('size composes font size, line height, and letter spacing', () => {
-	const style = getComputedStyle(mountText({ size: '600' }));
+	const element = mountText({ size: '600' });
+	const control = mountTextLineHeightControl(element);
+	const style = getComputedStyle(element);
 
 	expect(style.fontSize).toBe('24px');
 	expect(style.lineHeight).toBe('30px');
 	expect(style.letterSpacing).toBe('-0.15px');
+	expect(getComputedStyle(control).blockSize).toBe('30px');
 });
 
 test('semantic colour and weight roles resolve through the active theme', () => {
@@ -97,9 +100,11 @@ test('shouldInheritFont alone inherits the ancestor font size and line height', 
 	const element = root.appendChild(document.createElement('span'));
 	element.className = text({ shouldInheritFont: true });
 	const style = getComputedStyle(element);
+	const control = mountTextLineHeightControl(element);
 
 	expect(style.fontSize).toBe('18px');
 	expect(style.lineHeight).toBe('22px');
+	expect(getComputedStyle(control).blockSize).toBe('22px');
 });
 
 test('an explicit semantic colour overrides inherited currentColor', () => {
@@ -186,6 +191,17 @@ function mountText(options: Parameters<typeof text>[0] = {}) {
 	element.className = text(options);
 	element.textContent = 'Text';
 	return element;
+}
+
+function mountTextLineHeightControl(parent: HTMLElement) {
+	const className = 'text-line-height-control';
+	const style = document.head.appendChild(document.createElement('style'));
+	style.textContent = `.${className} { block-size: ${textLineHeight}; }`;
+	styles.push(style);
+
+	const control = parent.appendChild(document.createElement('span'));
+	control.className = className;
+	return control;
 }
 
 function mountRoot(themeClass = tactileThemeClassName) {

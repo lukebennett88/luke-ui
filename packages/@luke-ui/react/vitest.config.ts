@@ -24,6 +24,7 @@ export default defineConfig({
 	optimizeDeps: {
 		include: [
 			'@vanilla-extract/recipes/createRuntimeFn',
+			'react-aria-components/Checkbox',
 			'react-aria-components/I18nProvider',
 			'react-aria-components/Link',
 		],
