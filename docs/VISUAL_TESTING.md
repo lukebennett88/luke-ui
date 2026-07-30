@@ -24,6 +24,11 @@ Local pixel differences are advisory: the command reports them but succeeds so i
 work does not make the development loop permanently red. Capture failures, duplicate IDs, and other
 infrastructure errors still fail.
 
+Scenes taller than the fixed viewport are captured by growing both the page and the Vitest test
+iframe before the screenshot, so they come out at 1:1 rather than the scaled-to-fit size used for
+scenes that fit the viewport. The runner fails if a tall capture from the current tree's bottom
+decile comes back blank, since that means the scene only painted part of its height.
+
 ## Read the report
 
 The report classifies captures as unchanged, changed, added, or removed. Added and removed captures

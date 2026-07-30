@@ -66,30 +66,33 @@ export async function captureVisual(locator: Locator, id: string) {
 	if (!/^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
 		throw new Error(`Visual capture IDs must use a component namespace: ${id}`);
 	}
-	const viewport = `${window.innerWidth}x${window.innerHeight}`;
+	const viewportWidth = window.innerWidth;
+	const viewportHeight = window.innerHeight;
+	const viewport = `${viewportWidth}x${viewportHeight}`;
 	const element = locator.element();
 	const fullHeight = element.scrollHeight;
+	const isTall = fullHeight > viewportHeight;
 
-	if (fullHeight > window.innerHeight) {
-		// The element extends beyond the viewport.  Increase the viewport height
-		// so Playwright renders the full content, then restore after capture.
+	if (isTall) {
+		// Vitest browser mode renders the test inside an iframe sized to the
+		// configured viewport; growing only the top-level page (via CDP) leaves
+		// the iframe's own box unchanged, so it never paints past its original
+		// height. `page.viewport` resizes and re-lays-out the iframe itself, so
+		// both must grow together for the revealed region to paint. See #310.
 		await cdp().send('Emulation.setDeviceMetricsOverride', {
-			width: window.innerWidth,
+			width: viewportWidth,
 			height: fullHeight,
 			deviceScaleFactor: window.devicePixelRatio,
 			mobile: false,
 		});
+		await page.viewport(viewportWidth, fullHeight);
 	}
 
 	await expect.element(locator).toMatchScreenshot(`${id}__viewport-${viewport}`);
 
-	if (fullHeight > window.innerHeight) {
-		await cdp().send('Emulation.setDeviceMetricsOverride', {
-			width: window.innerWidth,
-			height: window.innerHeight,
-			deviceScaleFactor: window.devicePixelRatio,
-			mobile: false,
-		});
+	if (isTall) {
+		await page.viewport(viewportWidth, viewportHeight);
+		await cdp().send('Emulation.clearDeviceMetricsOverride');
 	}
 }
 

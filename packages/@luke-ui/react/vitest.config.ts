@@ -98,9 +98,8 @@ export default defineConfig({
 						api: { allowWrite: true },
 						expect: {
 							toMatchScreenshot: {
-								// captureBeyondViewport is NOT set globally — it is applied
-								// per-capture in captureVisual via CDP viewport resizing only
-								// when the element extends beyond the viewport.
+								// Tall scenes are handled in captureVisual, which grows both
+								// the page and the test iframe before capturing.
 								resolveScreenshotPath: ({ arg, ext, root }) => {
 									return path.join(
 										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
