@@ -10,6 +10,7 @@ import {
 } from './build-theme.js';
 import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
+import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
@@ -100,25 +101,30 @@ describe('buildTheme output', () => {
 		expect(modeCounts).toEqual(modeVarNames.map(() => 0));
 	});
 
-	it('declares every colour and depth variable exactly once per mode block', () => {
-		const modeBlocks = [
-			blocks.baseLight,
-			blocks.mediaDark,
-			blocks.explicitLight,
-			blocks.explicitDark,
-		];
-		for (const block of modeBlocks) {
-			const counts = modeVarNames.map((varName) => [
-				varName,
-				countOccurrences(block, `${varName}: `),
-			]);
-			expect(counts).toEqual(modeVarNames.map((varName) => [varName, 1]));
-			const identityCounts = identityVarNames.map((varName) => {
-				return countOccurrences(block, `${varName}: `);
-			});
-			expect(identityCounts).toEqual(identityVarNames.map(() => 0));
-		}
-	});
+	// Both bundled themes, because the contract inventory is what every consumer resolves against: a
+	// leaf the map forgets for one theme's palette is a `var()` that silently falls back at runtime.
+	for (const foundation of [tactileFoundation, paperFoundation]) {
+		it(`declares every ${foundation.name} colour and depth variable exactly once per mode block`, () => {
+			const themeBlocks = splitBlocks(buildTheme(foundation));
+			const modeBlocks = [
+				themeBlocks.baseLight,
+				themeBlocks.mediaDark,
+				themeBlocks.explicitLight,
+				themeBlocks.explicitDark,
+			];
+			for (const block of modeBlocks) {
+				const counts = modeVarNames.map((varName) => [
+					varName,
+					countOccurrences(block, `${varName}: `),
+				]);
+				expect(counts).toEqual(modeVarNames.map((varName) => [varName, 1]));
+				const identityCounts = identityVarNames.map((varName) => {
+					return countOccurrences(block, `${varName}: `);
+				});
+				expect(identityCounts).toEqual(identityVarNames.map(() => 0));
+			}
+		});
+	}
 
 	it('emits every colour value in OKLCH', () => {
 		const colorVarNames = pairs
@@ -133,11 +139,13 @@ describe('buildTheme output', () => {
 	});
 
 	it('uses the stable kebab-case variable names', () => {
-		expect(css).toContain('--luke-color-intent-danger-surface-solid-hover');
+		expect(css).toContain('--luke-color-background-danger-solid-hover');
+		expect(css).toContain('--luke-color-foreground-danger-on-solid');
+		expect(css).toContain('--luke-color-border-danger');
 		expect(css).toContain('--luke-color-loading-skeleton');
 		expect(css).toContain('--luke-color-scrim');
 		expect(css).toContain('--luke-color-text-disabled');
-		expect(css).toContain('--luke-color-intent-accent-text-hover');
+		expect(css).toContain('--luke-color-foreground-accent-hover');
 		expect(css).toContain('--luke-depth-raised');
 		expect(css).toContain('--luke-action-control-finish-resting');
 		expect(css).toContain('--luke-space-100:');
@@ -401,7 +409,7 @@ describe('buildTheme independent modes', () => {
 			name: 'green-purple',
 		};
 		const blocks = splitBlocks(buildTheme(greenPurpleFoundation));
-		const solidVar = '--luke-color-intent-accent-surface-solid';
+		const solidVar = '--luke-color-background-accent-solid-rest';
 		const lightSolid = parseColor(extractValue(blocks.baseLight, solidVar));
 		const darkSolid = parseColor(extractValue(blocks.mediaDark, solidVar));
 		expect(lightSolid.h).toBeCloseTo(150, 0);
@@ -498,6 +506,49 @@ describe('buildTheme contrast failures', () => {
 });
 
 describe('buildTheme generation failures', () => {
+	function buildGenerationError(foundation: ThemeFoundation): ThemeGenerationError {
+		const caught = (() => {
+			try {
+				buildTheme(foundation);
+				return null;
+			} catch (error) {
+				return error;
+			}
+		})();
+		if (caught instanceof ThemeGenerationError) return caught;
+		throw new Error('expected buildTheme to throw ThemeGenerationError');
+	}
+
+	// Every semantic role now publishes a solid, so every role must reach an accessible solid/on-solid
+	// pair — a status source in an on-solid dead zone is a build failure rather than the silently
+	// unguaranteed solid the old feedback-only kit left unemitted. Status sources are used verbatim (only
+	// a single-value accent is pre-conditioned into an accessible band), so an authored one reaches the
+	// generator exactly as written.
+	it('throws ThemeGenerationError naming the role, mode, and achieved ratio for a dead-zone warning', () => {
+		const error = buildGenerationError({
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: { ...tactileFoundation.light.color, warning: 'oklch(0.62 0.19 27)' },
+			},
+			name: 'bad-warning',
+		});
+
+		expect(error.role).toBe('warning');
+		expect(error.mode).toBe('light');
+		expect(error.bestAttempt.step).toBe(9);
+		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
+		expect(error.message).toContain('Cannot generate the light "warning" family');
+		expect(error.message).toContain(`${error.bestAttempt.onSolidRatio.toFixed(2)}:1`);
+		// Warning is generated fifth, so the four roles before it are reported and the last one is not.
+		expect(Object.keys(error.diagnostics.completedFamilies)).toEqual([
+			'neutral',
+			'accent',
+			'info',
+			'success',
+		]);
+	});
+
 	it('throws ThemeGenerationError for an accent no on-solid text can sit on', () => {
 		const caught = (() => {
 			try {
@@ -555,15 +606,57 @@ describe('compileTheme diagnostics', () => {
 		}
 	});
 
+	// The matrix is role-uniform by construction, so its size and its per-role shape together pin it:
+	// 8 functional text pairs + 6 roles x (2 foregrounds x 5 backgrounds + 3 on-solid) + the 4 solved
+	// boundaries = 90 hard checks, and 6 semantic borders x 2 base surfaces = 12 advisory ones.
+	for (const foundation of [tactileFoundation, paperFoundation]) {
+		it(`measures 90 hard and 12 advisory checks per mode for ${foundation.name}, the same for every role`, () => {
+			// `compileTheme` returns only once every hard gate passed, so reaching these assertions is
+			// itself the proof that all 90 hard checks pass for the bundled theme.
+			const { diagnostics } = compileTheme(foundation);
+			const summary = (['light', 'dark'] as const).map((mode) => {
+				const checks = diagnostics[mode].contrastChecks;
+				const countFor = (foreground: string, hard: boolean) => {
+					return checks.filter((check) => check.hard === hard && check.foreground === foreground)
+						.length;
+				};
+				return {
+					advisory: checks.filter((check) => !check.hard).length,
+					hard: checks.filter((check) => check.hard).length,
+					mode,
+					perRole: SEMANTIC_ROLES.map((role) => ({
+						advisoryBorder: countFor(`color.border.${role}`, false),
+						hardHover: countFor(`color.foreground.${role}.hover`, true),
+						hardOnSolid: countFor(`color.foreground.${role}.onSolid`, true),
+						hardRest: countFor(`color.foreground.${role}.rest`, true),
+						role,
+					})),
+				};
+			});
+			expect(summary).toEqual(
+				(['light', 'dark'] as const).map((mode) => ({
+					advisory: 12,
+					hard: 90,
+					mode,
+					perRole: SEMANTIC_ROLES.map((role) => ({
+						advisoryBorder: 2,
+						hardHover: 5,
+						hardOnSolid: 3,
+						hardRest: 5,
+						role,
+					})),
+				})),
+			);
+		});
+	}
+
 	it('records on each check whether missing its ratio fails the build', () => {
 		// Every text pair is a hard gate, and so are the two solved boundaries `border.focus` and
-		// `border.control`. The per-intent borders are the only advisory checks.
+		// `border.control`. The six semantic borders are the only advisory checks.
 		// `color.border.decorative` is not measured. The "Theme/Diagnostics" inspector uses this flag
 		// instead of matching token paths.
 		const { diagnostics } = compileTheme(tactileFoundation);
-		const advisoryBorders = ['accent', 'danger', 'info', 'success', 'warning'].map(
-			(intent) => `color.intent.${intent}.border`,
-		);
+		const advisoryBorders = SEMANTIC_ROLES.map((role) => `color.border.${role}`);
 		const summary = (['light', 'dark'] as const).map((mode) => {
 			const checks = diagnostics[mode].contrastChecks;
 			const advisory = checks.filter((check) => !check.hard);
@@ -625,37 +718,37 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
 			// The subtle component surfaces (scale steps 3-5) ramp from the canvas independently of the
 			// elevation surfaces, so v2 no longer pins them apart from `floating`; what still matters is
-			// that primary text stays legible on the hovered subtle surface. Neutral subtleHover is
-			// excluded here: `validateContrast` already hard-gates `color.text.primary` against every
-			// neutral surface state (including subtleHover) at >=4.5:1, so recomputing that exact pair
-			// would be dead — accent subtleHover is not one of the hard-gated pairs, so it is the one
+			// that primary text stays legible on the hovered subtle surface. The neutral subtle hover is
+			// excluded here because that exact colour pair is already hard-gated under different names:
+			// `color.text.primary` and `color.foreground.neutral.hover` both alias neutral step 12, and
+			// `validateContrast` gates the latter against all three neutral subtle states at >=4.5:1.
+			// No hard-gated pair covers primary text on the *accent* subtle ramp, so that is the pair
 			// worth recomputing.
 			const { mediaDark } = splitBlocks(buildTheme(foundation));
 			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
 			const subtleHover = parseColor(
-				extractValue(mediaDark, '--luke-color-intent-accent-surface-subtle-hover'),
+				extractValue(mediaDark, '--luke-color-background-accent-subtle-hover'),
 			);
 			expect(contrastRatio(textPrimary, subtleHover)).toBeGreaterThanOrEqual(4.5);
 		});
 
-		it(`${foundation.name} generates subtle, distinct intent borders`, () => {
+		it(`${foundation.name} generates subtle, distinct semantic borders`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				const surfaces = ['canvas', 'recessed'].map((surface) => {
 					return parseColor(extractValue(block, `--luke-color-surface-${surface}`));
 				});
-				// border.control is excluded here: it is now a solved contrast boundary, hard-gated at
-				// >=3:1 by `validateContrast`, not one of these subtle Radix-style separators.
-				const borderVarNames = ['accent', 'info', 'success', 'warning', 'danger'].map(
-					(intent) => `--luke-color-intent-${intent}-border`,
-				);
+				// The functional borders are excluded: `border.control` is a solved contrast boundary,
+				// hard-gated at >=3:1 by `validateContrast`, and `border.decorative` keeps its own policy.
+				// Driven off `SEMANTIC_ROLES` so a role added there is covered here without a second list.
+				const borderVarNames = SEMANTIC_ROLES.map((role) => `--luke-color-border-${role}`);
 
 				for (const varName of borderVarNames) {
 					const border = parseColor(extractValue(block, varName));
 					const minimumContrast = Math.min(
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
-					// v2 intent borders alias the scale's step 7 (subtle UI border). They stay visibly
+					// The semantic borders alias the scale's step 7 (subtle UI border). They stay visibly
 					// distinct from the base surfaces but sit below the 3:1 non-text gate the old bespoke
 					// solver targeted — a deliberate move to the reference scale's softer separators.
 					expect(minimumContrast).toBeGreaterThan(1.2);

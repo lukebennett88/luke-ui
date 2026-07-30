@@ -74,13 +74,13 @@ export interface ThemeInput {
 		 * Defaults to the resolved neutral canvas anchor.
 		 */
 		background?: ColorInput;
-		/** Informational intent colour. Defaults to an accessible Luke UI blue for the mode. */
+		/** Source colour for the `info` role. Defaults to an accessible Luke UI blue for the mode. */
 		info?: ColorInput;
-		/** Success intent colour. Defaults to an accessible Luke UI green for the mode. */
+		/** Source colour for the `success` role. Defaults to an accessible Luke UI green for the mode. */
 		success?: ColorInput;
-		/** Warning intent colour. Defaults to an accessible Luke UI amber for the mode. */
+		/** Source colour for the `warning` role. Defaults to an accessible Luke UI amber for the mode. */
 		warning?: ColorInput;
-		/** Danger intent colour. Defaults to an accessible Luke UI red for the mode. */
+		/** Source colour for the `danger` role. Defaults to an accessible Luke UI red for the mode. */
 		danger?: ColorInput;
 		/** Keyboard-focus ring colour, used verbatim after gamut mapping. Defaults per mode. */
 		focus?: ColorInput;

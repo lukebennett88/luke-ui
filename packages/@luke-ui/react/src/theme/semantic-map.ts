@@ -4,15 +4,15 @@
  * table. It is a pure lookup. No colour math happens here, and it never distorts a family or
  * surface to make a leaf fit.
  *
- * The intent role groups it keys off come from `contrast-policy.ts`, which `build-theme.ts`'s
- * validation matrix reads too, so a role can never be emitted here without being gated there. Values
- * are formatted with `formatOklch`, the representation the pipeline emits, so the result drops
- * straight into the mode value record `buildModeColors` produces.
+ * The role list it keys off comes from `contrast-policy.ts`, which `build-theme.ts`'s validation
+ * matrix reads too, so a role can never be emitted here without being gated there. Values are
+ * formatted with `formatOklch`, the representation the pipeline emits, so the result drops straight
+ * into the mode value record `buildModeColors` produces.
  */
 
 import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
-import { ACTION_INTENTS, BORDER_AND_TEXT_INTENTS, FEEDBACK_INTENTS } from './contrast-policy.js';
+import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 
@@ -60,7 +60,8 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 	values['color.scrim'] = scrim;
 	values['color.loadingSkeleton'] = formatOklch(neutral[8]);
 
-	// Global text / borders: neutral only.
+	// Functional text and borders: neutral only, and distinct from the six shared roles that share the
+	// `border` branch with them.
 	values['color.text.primary'] = formatOklch(neutral[12]);
 	values['color.text.secondary'] = formatOklch(neutral[11]);
 	values['color.text.disabled'] = formatOklch(neutral[8]);
@@ -68,32 +69,22 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 	values['color.border.control'] = formatOklch(controlBorder);
 	values['color.border.focus'] = formatOklch(focus ?? families.accent[8]);
 
-	// Action intents: full ramp, keyed to the intent's own family.
-	for (const role of ACTION_INTENTS) {
+	// The shared semantic contract: every role maps onto its own family through the same steps, so a
+	// role's meaning never decides which visual slots it can fill.
+	for (const role of SEMANTIC_ROLES) {
 		const family = families[role];
-		values[`color.intent.${role}.surface.subtle`] = formatOklch(family[3]);
-		values[`color.intent.${role}.surface.subtleHover`] = formatOklch(family[4]);
-		values[`color.intent.${role}.surface.subtlePressed`] = formatOklch(family[5]);
-		values[`color.intent.${role}.surface.solid`] = formatOklch(family[9]);
-		values[`color.intent.${role}.surface.solidHover`] = formatOklch(family[10]);
-		// Deliberate dup: pressed is carried by depth.recessed / actionControlFinish.recessed /
-		// transform, not a distinct colour.
-		values[`color.intent.${role}.surface.solidPressed`] = formatOklch(family[10]);
-		values[`color.intent.${role}.onSolid`] = formatOklch(family.contrast);
-	}
-	for (const role of BORDER_AND_TEXT_INTENTS) {
-		const family = families[role];
-		values[`color.intent.${role}.border`] = formatOklch(family[7]);
-		values[`color.intent.${role}.text`] = formatOklch(family[11]);
-	}
-	values['color.intent.accent.textHover'] = formatOklch(families.accent[12]);
-
-	// Feedback intents: reduced kit only (subtle surface + border + text).
-	for (const role of FEEDBACK_INTENTS) {
-		const family = families[role];
-		values[`color.intent.${role}.surface.subtle`] = formatOklch(family[3]);
-		values[`color.intent.${role}.border`] = formatOklch(family[7]);
-		values[`color.intent.${role}.text`] = formatOklch(family[11]);
+		values[`color.background.${role}.subtle.rest`] = formatOklch(family[3]);
+		values[`color.background.${role}.subtle.hover`] = formatOklch(family[4]);
+		values[`color.background.${role}.subtle.pressed`] = formatOklch(family[5]);
+		values[`color.background.${role}.solid.rest`] = formatOklch(family[9]);
+		values[`color.background.${role}.solid.hover`] = formatOklch(family[10]);
+		// Deliberate dup: the pressed solid is carried by depth.recessed / actionControlFinish.recessed /
+		// transform, not a third solid colour.
+		values[`color.background.${role}.solid.pressed`] = formatOklch(family[10]);
+		values[`color.foreground.${role}.rest`] = formatOklch(family[11]);
+		values[`color.foreground.${role}.hover`] = formatOklch(family[12]);
+		values[`color.foreground.${role}.onSolid`] = formatOklch(family.contrast);
+		values[`color.border.${role}`] = formatOklch(family[7]);
 	}
 
 	return values;

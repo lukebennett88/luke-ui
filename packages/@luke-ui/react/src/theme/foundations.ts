@@ -91,9 +91,9 @@ export const tactileTheme: ThemeInput = {
 
 /**
  * Paper, the materially minimal bundled theme. Its light mode approximates the flat,
- * hairline-bordered Luke UI look with the blue `#185281`-family accent and explicitly authored
- * feedback colours; its dark mode is net-new and lets the feedback intents fall back to the curated
- * mode defaults (their dark sides are omitted).
+ * hairline-bordered Luke UI look with the blue `#185281`-family accent and explicitly authored status
+ * colours; its dark mode is net-new and lets the `info`, `success`, and `warning` roles fall back to
+ * the curated mode defaults (their dark sides are omitted).
  */
 export const paperTheme: ThemeInput = {
 	actionControlFinish: {

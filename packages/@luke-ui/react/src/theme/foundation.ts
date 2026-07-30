@@ -118,13 +118,13 @@ export interface ThemeSourceColors {
 	background: string;
 	/** Required. The brand or interaction accent colour. */
 	accent: string;
-	/** Informational intent colour. Defaults to an accessible Luke UI blue for the mode. */
+	/** Source colour for the `info` role. Defaults to an accessible Luke UI blue for the mode. */
 	info?: string;
-	/** Success intent colour. Defaults to an accessible Luke UI green for the mode. */
+	/** Source colour for the `success` role. Defaults to an accessible Luke UI green for the mode. */
 	success?: string;
-	/** Warning intent colour. Defaults to an accessible Luke UI amber for the mode. */
+	/** Source colour for the `warning` role. Defaults to an accessible Luke UI amber for the mode. */
 	warning?: string;
-	/** Danger intent colour. Defaults to an accessible Luke UI red for the mode. */
+	/** Source colour for the `danger` role. Defaults to an accessible Luke UI red for the mode. */
 	danger?: string;
 	/**
 	 * Keyboard-focus ring colour, used verbatim after gamut mapping. Defaults to an accessible

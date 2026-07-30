@@ -4,11 +4,11 @@
  * scale generator's on-solid gate (`scale.ts`), the accent pre-conditioner (`define-theme.ts`), and
  * the build-time validation matrix and `border.control` solver (`build-theme.ts`).
  *
- * The intent role groups live here too, because they decide both which contract leaves the semantic
- * map emits (`semantic-map.ts`) and which pairs the validation matrix gates (`build-theme.ts`). When
- * the lists were split across two modules, failures were asymmetric and only partly reported. Adding
- * a role to the map alone emitted an ungated colour, while adding it to the compiler alone threw an
- * internal error. One declaration makes both sides move together.
+ * The one semantic role list lives here too, because it decides both which contract leaves the
+ * semantic map emits (`semantic-map.ts`) and which pairs the validation matrix gates
+ * (`build-theme.ts`). While those two sides named roles separately, failures were asymmetric and only
+ * partly reported: adding a role to the map alone emitted an ungated colour, and adding it to the
+ * compiler alone threw an internal error. Declaring the roles once makes both sides move together.
  *
  * This module has no dependencies. Both the generator and compiler import it, so it cannot close an
  * import cycle.
@@ -34,16 +34,18 @@ export const RATIO_HEADROOM = 0.05;
 export const CONTRAST_SEARCH_STEP = 0.0025;
 
 /**
- * Action intents render the full interactive ramp (subtle trio + solid trio + onSolid), so they are
- * the intents whose on-solid text is gated.
+ * The canonical semantic roles, in contract order. Every role offers the same capabilities, so this
+ * one list drives family generation, the capability matrix (`scale.ts`), the semantic mapping
+ * (`semantic-map.ts`), the validation matrix and diagnostics (`build-theme.ts`), and the token-board
+ * tooling. A role's meaning never decides what it can style, so there is nothing left to split the
+ * list on: restating a subset anywhere would reintroduce the asymmetry this module exists to prevent.
+ * `FamilyRole` in `scale.ts` is derived from this, so the type cannot drift from the list either.
  */
-export const ACTION_INTENTS = ['neutral', 'accent', 'danger'] as const;
-
-/** Feedback intents are static and expose only the soft kit (subtle surface + border + text). */
-export const FEEDBACK_INTENTS = ['info', 'success', 'warning'] as const;
-
-/**
- * Action intents that additionally expose a border and low-contrast text. Neutral does not because
- * its borders and text are the global neutral leaves instead.
- */
-export const BORDER_AND_TEXT_INTENTS = ['accent', 'danger'] as const;
+export const SEMANTIC_ROLES = [
+	'neutral',
+	'accent',
+	'info',
+	'success',
+	'warning',
+	'danger',
+] as const;

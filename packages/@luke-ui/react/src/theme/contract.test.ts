@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { vars } from './contract.css.js';
 import { flattenThemeContract, fontSizeSteps, themeContractTree } from './contract.js';
+import { SEMANTIC_ROLES } from './contrast-policy.js';
 
 function countLeaves(node: unknown): number {
 	if (typeof node === 'string') return 1;
@@ -34,6 +35,38 @@ describe('theme contract', () => {
 
 	it('has no typed paths beyond the flattened contract', () => {
 		expect(countLeaves(vars)).toBe(flattenThemeContract().length);
+	});
+
+	it('gives all six semantic roles the same 60 leaves under the documented variable names', () => {
+		// The migration table in the specification is a promise about these exact names, so they are
+		// spelled out here rather than re-derived through `themeVarName` (which would only restate the
+		// kebab-casing the contract already applied). `on-solid` is the one name a naive reading gets
+		// wrong. Comparing the whole set, not a sample, also catches a seventh role or a stray leaf.
+		const expected = SEMANTIC_ROLES.flatMap((role) => [
+			[`color.border.${role}`, `--luke-color-border-${role}`],
+			...['subtle', 'solid'].flatMap((prominence) =>
+				['rest', 'hover', 'pressed'].map((state) => [
+					`color.background.${role}.${prominence}.${state}`,
+					`--luke-color-background-${role}-${prominence}-${state}`,
+				]),
+			),
+			[`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`],
+			[`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`],
+			[`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`],
+		]);
+		const rolePaths = new Set(expected.map(([path]) => path));
+		const emitted = flattenThemeContract().filter(([path]) => {
+			return (
+				path.startsWith('color.background.') ||
+				path.startsWith('color.foreground.') ||
+				rolePaths.has(path)
+			);
+		});
+
+		expect(expected).toHaveLength(60);
+		const byPath = (a: ReadonlyArray<string>, b: ReadonlyArray<string>) =>
+			(a[0] ?? '').localeCompare(b[0] ?? '');
+		expect([...emitted].sort(byPath)).toEqual([...expected].sort(byPath));
 	});
 
 	it('exposes font steps and the carried-forward icon-size scale', () => {
