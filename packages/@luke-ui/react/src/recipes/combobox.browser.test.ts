@@ -38,9 +38,11 @@ test('the control uses the recessed field material and semantic state grammar', 
 
 	const { control: invalid } = mountControl();
 	invalid.dataset.invalid = 'true';
-	expect(getComputedStyle(invalid).borderColor).toBe(
-		resolveColor(root, '--luke-color-border-danger'),
+	const invalidStyle = getComputedStyle(invalid);
+	expect(invalidStyle.borderColor).toBe(
+		resolveColor(root, '--luke-color-background-danger-solid-rest'),
 	);
+	expect(invalidStyle.borderWidth).toBe('2px');
 });
 
 test('disabled and read-only controls preserve their non-interactive material', () => {

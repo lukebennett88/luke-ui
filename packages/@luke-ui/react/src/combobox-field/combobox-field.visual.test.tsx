@@ -412,6 +412,58 @@ test.each(visualAppearances)('mobile tray short list: $theme $mode', async (appe
 	}
 });
 
+// #247: with a selected value, the control also shows a clear button before the
+// trigger. Confirms the badge lands after both actions rather than overlapping them.
+test.each(visualAppearances)(
+	'invalid with a selected value shows the badge after the clear and trigger buttons: $theme $mode',
+	async (appearance) => {
+		const scene = renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					errorMessage="Choose a different country."
+					isInvalid
+					label="Invalid with a selection"
+					name="invalid-with-selection"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
+		await expect
+			.element(page.getByRole('combobox', { name: 'Invalid with a selection' }))
+			.toBeVisible();
+
+		await captureVisualAppearance(scene, 'combobox-field/invalid-with-selection', appearance);
+	},
+);
+
+// #247: without `errorMessage` the badge is the only cue that the field is invalid, so
+// this scene has no error text at all.
+test.each(visualAppearances)(
+	'invalid without an error message: $theme $mode',
+	async (appearance) => {
+		const scene = renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					isInvalid
+					label="Invalid, no message"
+					name="invalid-no-message"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
+		await expect.element(page.getByRole('combobox', { name: 'Invalid, no message' })).toBeVisible();
+
+		await captureVisualAppearance(scene, 'combobox-field/invalid-no-message', appearance);
+	},
+);
+
 test.each(visualAppearances)('sizes: $theme $mode', async (appearance) => {
 	const locator = renderVisual(
 		<Stack>

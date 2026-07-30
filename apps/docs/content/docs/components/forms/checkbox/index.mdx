@@ -50,6 +50,10 @@ default. Use `small` in compact layouts and `large` where a larger control impro
 Pass `description` to clarify an option. Set `isRequired` and `errorMessage` when selection is
 required for form submission.
 
+An invalid checkbox switches its control to a 2px boundary and shows a filled error badge after the
+label. The badge is a non-colour cue, so an invalid checkbox stays perceivable even when
+`errorMessage` is omitted.
+
 ## Labels with Text
 
 Wrap a checkbox in block `Text` when its label needs a specific text size. The control follows the

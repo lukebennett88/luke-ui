@@ -374,7 +374,7 @@ interface ValidationResult {
 }
 
 /**
- * Runs the full semantic validation matrix over the emitted (rounded) colour values: 90 hard checks
+ * Runs the full semantic validation matrix over the emitted (rounded) colour values: 92 hard checks
  * and 12 advisory checks per mode. Every pair is recorded as a {@link ContrastCheck}, and the hard
  * ones populate `failures` (which `compileTheme` raises as a {@link ThemeContrastError}).
  *
@@ -382,7 +382,11 @@ interface ValidationResult {
  * surfaces; every role's resting and hover foreground against the base surfaces and that role's own
  * subtle ramp; and every role's on-solid foreground against its solid ramp. Hard at the non-text
  * ratio: the authored focus ring and `border.control`, which is `solveControlBorder`'s dedicated
- * boundary rather than a scale-step alias.
+ * boundary rather than a scale-step alias; and `danger.solid.rest` against the base surfaces, because
+ * it is the only role fill that carries a required state's boundary (the invalid field boundary —
+ * issue #247). This last gate is deliberately not extended to the other five roles: a role's solid
+ * anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for
+ * `warning` that lands at only 2.43:1 against canvas in light mode.
  *
  * The six semantic borders alias the Radix-style step 7, a subtle separator that deliberately sits
  * below the non-text ratio for the reference scale's softer look, so they are advisory only — which is
@@ -442,6 +446,14 @@ function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): Va
 	// and `border.control` is a solved boundary held to the same ratio: 4 checks.
 	for (const background of basePaths) check('color.border.focus', background, UI_RATIO, true);
 	for (const background of basePaths) check('color.border.control', background, UI_RATIO, true);
+	// `danger.solid.rest` vs the base surfaces: 2 checks. It is the only role fill that carries a
+	// required state's boundary (the invalid field boundary — issue #247), so it is held to the same
+	// hard non-text ratio as the focus ring and `border.control`. This is deliberately NOT a per-role
+	// loop: a role's solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface
+	// behind it, and for `warning` that lands at only 2.43:1 against canvas in light mode. Extending
+	// this gate to the other five roles throws `ThemeContrastError` on the bundled themes.
+	for (const background of basePaths)
+		check('color.background.danger.solid.rest', background, UI_RATIO, true);
 	// The six semantic borders, measured and reported but not gated: 12 advisory checks.
 	for (const role of SEMANTIC_ROLES) {
 		for (const background of basePaths) {

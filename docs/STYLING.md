@@ -18,6 +18,10 @@ element. Neither step injects styles at runtime.
   `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose and extend. It
   is named `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module
   composes its plain data and functions.
+- `recipes/invalid-indicator.ts`: the shared invalid-state badge (`invalidIndicatorBadge`,
+  `invalidIndicatorBadgeForcedColors`) `text-input.css.ts`, `combobox.css.ts`, and `checkbox.css.ts`
+  apply under their own invalid selector's `::after`. Named `.ts` for the same reason as
+  `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
   `fontSizeSteps` typography step keys.

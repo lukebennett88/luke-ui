@@ -2,6 +2,7 @@ import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
 import { fieldMessageIndent } from './field.css.js';
+import { invalidIndicatorBadge, invalidIndicatorBadgeForcedColors } from './invalid-indicator.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 import { textLineHeight } from './text.css.js';
@@ -19,6 +20,14 @@ const checkboxConfig = {
 			minInlineSize: 0,
 		},
 		content: {
+			'@media': {
+				'(forced-colors: active)': {
+					forcedColorAdjust: 'auto',
+					selectors: {
+						'[data-invalid="true"] &::after': invalidIndicatorBadgeForcedColors,
+					},
+				},
+			},
 			alignItems: 'flex-start',
 			color: 'inherit',
 			cursor: 'pointer',
@@ -34,6 +43,7 @@ const checkboxConfig = {
 				'&[data-readonly="true"]': {
 					cursor: 'default',
 				},
+				'[data-invalid="true"] &::after': invalidIndicatorBadge,
 			},
 		},
 		control: {
@@ -122,7 +132,8 @@ const checkboxConfig = {
 					opacity: 1,
 				},
 				'[data-invalid="true"] &': {
-					borderColor: vars.color.border.danger,
+					borderColor: vars.color.background.danger.solid.rest,
+					borderWidth: '2px',
 				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,

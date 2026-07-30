@@ -608,11 +608,12 @@ describe('compileTheme diagnostics', () => {
 
 	// The matrix is role-uniform by construction, so its size and its per-role shape together pin it:
 	// 8 functional text pairs + 6 roles x (2 foregrounds x 5 backgrounds + 3 on-solid) + the 4 solved
-	// boundaries = 90 hard checks, and 6 semantic borders x 2 base surfaces = 12 advisory ones.
+	// boundaries + 2 for `danger.solid.rest` (not per-role, see `validateContrast`) = 92 hard checks,
+	// and 6 semantic borders x 2 base surfaces = 12 advisory ones.
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`measures 90 hard and 12 advisory checks per mode for ${foundation.name}, the same for every role`, () => {
+		it(`measures 92 hard and 12 advisory checks per mode for ${foundation.name}, the same for every role`, () => {
 			// `compileTheme` returns only once every hard gate passed, so reaching these assertions is
-			// itself the proof that all 90 hard checks pass for the bundled theme.
+			// itself the proof that all 92 hard checks pass for the bundled theme.
 			const { diagnostics } = compileTheme(foundation);
 			const summary = (['light', 'dark'] as const).map((mode) => {
 				const checks = diagnostics[mode].contrastChecks;
@@ -636,7 +637,7 @@ describe('compileTheme diagnostics', () => {
 			expect(summary).toEqual(
 				(['light', 'dark'] as const).map((mode) => ({
 					advisory: 12,
-					hard: 90,
+					hard: 92,
 					mode,
 					perRole: SEMANTIC_ROLES.map((role) => ({
 						advisoryBorder: 2,
@@ -652,9 +653,10 @@ describe('compileTheme diagnostics', () => {
 
 	it('records on each check whether missing its ratio fails the build', () => {
 		// Every text pair is a hard gate, and so are the two solved boundaries `border.focus` and
-		// `border.control`. The six semantic borders are the only advisory checks.
-		// `color.border.decorative` is not measured. The "Theme/Diagnostics" inspector uses this flag
-		// instead of matching token paths.
+		// `border.control`, plus `danger.solid.rest` vs the base surfaces (the only role fill gated —
+		// see `validateContrast` for why the other five roles are not). The six semantic borders are the
+		// only advisory checks. `color.border.decorative` is not measured. The "Theme/Diagnostics"
+		// inspector uses this flag instead of matching token paths.
 		const { diagnostics } = compileTheme(tactileFoundation);
 		const advisoryBorders = SEMANTIC_ROLES.map((role) => `color.border.${role}`);
 		const summary = (['light', 'dark'] as const).map((mode) => {
@@ -678,7 +680,11 @@ describe('compileTheme diagnostics', () => {
 			(['light', 'dark'] as const).map((mode) => ({
 				advisoryForegrounds: [...advisoryBorders].sort(),
 				everyHardGatePasses: true,
-				hardBoundaryForegrounds: ['color.border.control', 'color.border.focus'],
+				hardBoundaryForegrounds: [
+					'color.background.danger.solid.rest',
+					'color.border.control',
+					'color.border.focus',
+				].sort(),
 				hardRatios: [3, 4.5],
 				mode,
 				partitionsEveryCheck: true,

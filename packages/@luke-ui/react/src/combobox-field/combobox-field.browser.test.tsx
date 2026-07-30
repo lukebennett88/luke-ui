@@ -69,3 +69,52 @@ test('sets the tray viewport height and keyboard inset custom properties from vi
 		`${window.innerHeight - fake.height}px`,
 	);
 });
+
+// Proves the invalid cue survives without `errorMessage`, which `composeField` treats
+// as optional — the case #247 flags as otherwise colour-only and imperceptible.
+test('invalid without an error message still carries a non-colour cue', async () => {
+	renderVisual(
+		<ComboboxField defaultItems={countryItems} isInvalid label="Invalid" name="invalid">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+
+	const input = page.getByRole('combobox', { name: 'Invalid' });
+	await expect.element(input).toBeVisible();
+
+	const control = input.element().closest<HTMLElement>('[role="group"]');
+	if (control == null) throw new Error('Expected the combobox control group.');
+
+	const badge = getComputedStyle(control, '::after');
+	expect(badge.content).not.toBe('none');
+	expect(badge.content).toContain('!');
+
+	expect(getComputedStyle(control).borderWidth).toBe('2px');
+});
+
+test('valid control keeps the 1px boundary the invalid state widens', async () => {
+	renderVisual(
+		<ComboboxField defaultItems={countryItems} label="Valid" name="valid">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+
+	const input = page.getByRole('combobox', { name: 'Valid' });
+	await expect.element(input).toBeVisible();
+
+	const control = input.element().closest<HTMLElement>('[role="group"]');
+	if (control == null) throw new Error('Expected the combobox control group.');
+
+	expect(getComputedStyle(control).borderWidth).toBe('1px');
+});
+
+test('the badge glyph stays out of the accessible name', async () => {
+	renderVisual(
+		<ComboboxField defaultItems={countryItems} isInvalid label="Invalid" name="invalid">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+
+	const input = page.getByRole('combobox', { name: 'Invalid' });
+	await expect.element(input).toHaveAccessibleName('Invalid');
+});

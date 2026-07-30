@@ -5,8 +5,12 @@ import { expect, test } from 'vite-plus/test';
 // Keep the public bundle below its pre-Sprinkles baseline while leaving room for reviewed components.
 // Checkbox size variants measured 500 raw bytes and 10 gzip bytes; the limits retain minimal
 // reviewed headroom.
-const maximumRawBytes = 85_600;
-const maximumGzipBytes = 8_975;
+// #247's shared invalid-indicator badge (a gated 2px boundary plus a non-colour `::after` glyph,
+// applied to TextInput, Combobox, and Checkbox, each with its own forced-colors override) measured
+// roughly 3150 raw bytes and 230 gzip bytes across the three recipes; the limits retain minimal
+// reviewed headroom above that.
+const maximumRawBytes = 88_800;
+const maximumGzipBytes = 9_220;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url));

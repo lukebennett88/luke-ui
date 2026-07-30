@@ -131,6 +131,21 @@ test.each(visualAppearances)('invalid interactive states: $theme $mode', async (
 	await captureVisualAppearance(scene, 'text-field/invalid-focus', appearance);
 });
 
+// #247: without `errorMessage` the badge is the only cue that the field is invalid, so
+// this scene has no error text at all.
+test.each(visualAppearances)(
+	'invalid without an error message: $theme $mode',
+	async (appearance) => {
+		const scene = renderVisual(
+			<TextField isInvalid label="Invalid, no message" name="invalid-no-message" />,
+			appearance,
+		);
+		await expect.element(page.getByRole('textbox', { name: 'Invalid, no message' })).toBeVisible();
+
+		await captureVisualAppearance(scene, 'text-field/invalid-no-message', appearance);
+	},
+);
+
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 
