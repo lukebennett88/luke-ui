@@ -68,6 +68,17 @@ function registerCaptureId(id: string | undefined, file: string, owners: Map<str
 
 async function listPngs(root: string) {
 	const result = new Map<string, CaptureFile>();
+	await walkPngs(root, (file, captureName) => {
+		const metadata = captureName.match(/^(.*)__viewport-(\d+x\d+)$/);
+		const id = metadata?.[1] ?? captureName;
+		if (result.has(id)) throw new Error(`Duplicate visual capture ID: ${id}`);
+		result.set(id, { file, viewport: metadata?.[2] });
+	});
+	return result;
+}
+
+/** Walks `root` for `.png` files, calling `visitor` with each file's path and its capture name (the path relative to `root`, without the extension). */
+async function walkPngs(root: string, visitor: (file: string, captureName: string) => void) {
 	async function visit(directory: string) {
 		await Promise.all(
 			(await readdir(directory, { withFileTypes: true }).catch(() => [])).map(async (entry) => {
@@ -79,16 +90,64 @@ async function listPngs(root: string) {
 						.replace(/\.png$/, '')
 						.split(path.sep)
 						.join('/');
-					const metadata = captureName.match(/^(.*)__viewport-(\d+x\d+)$/);
-					const id = metadata?.[1] ?? captureName;
-					if (result.has(id)) throw new Error(`Duplicate visual capture ID: ${id}`);
-					result.set(id, { file, viewport: metadata?.[2] });
+					visitor(file, captureName);
 				}
 			}),
 		);
 	}
 	await visit(root);
-	return result;
+}
+
+/**
+ * Fails captures taller than their recorded viewport whose bottom decile is a
+ * single uniform colour, meaning the scene grew but that region never
+ * painted. See #310 for why `captureVisual` has to grow both the page and the
+ * test iframe for a tall scene to paint in full.
+ */
+export async function assertCapturesPainted(directory: string) {
+	const viewportCaptures: Array<{ file: string; id: string; viewportHeight: number }> = [];
+	await walkPngs(directory, (file, captureName) => {
+		const metadata = captureName.match(/^(.*)__viewport-\d+x(\d+)$/);
+		const id = metadata?.[1];
+		const viewportHeight = metadata?.[2];
+		if (id === undefined || viewportHeight === undefined) return;
+		viewportCaptures.push({ file, id, viewportHeight: Number(viewportHeight) });
+	});
+
+	const offenders: Array<string> = [];
+	await Promise.all(
+		viewportCaptures.map(async ({ file, id, viewportHeight }) => {
+			const png = PNG.sync.read(await readFile(file));
+			if (png.height <= viewportHeight) return;
+			if (isBottomBandUniform(png)) {
+				offenders.push(`${id} (${png.width}x${png.height})`);
+			}
+		}),
+	);
+
+	if (offenders.length > 0) {
+		offenders.sort();
+		throw new Error(
+			`Visual captures painted only part of their height (see #310): ${offenders.join(', ')}`,
+		);
+	}
+}
+
+function isBottomBandUniform(png: PNG) {
+	const bandHeight = Math.max(1, Math.round(png.height / 10));
+	const firstRowStart = (png.height - bandHeight) * png.width * 4;
+	const [r, g, b, a] = png.data.subarray(firstRowStart, firstRowStart + 4);
+	for (let index = firstRowStart; index < png.data.length; index += 4) {
+		if (
+			png.data[index] !== r ||
+			png.data[index + 1] !== g ||
+			png.data[index + 2] !== b ||
+			png.data[index + 3] !== a
+		) {
+			return false;
+		}
+	}
+	return true;
 }
 
 export async function compareCaptures(baseDir: string, currentDir: string, diffDir: string) {

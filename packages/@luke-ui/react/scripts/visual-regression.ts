@@ -4,7 +4,12 @@ import { arch, platform } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { compareCaptures, renderReport, validateCaptureIds } from './visual-regression-lib.js';
+import {
+	assertCapturesPainted,
+	compareCaptures,
+	renderReport,
+	validateCaptureIds,
+} from './visual-regression-lib.js';
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = path.resolve(packageRoot, '../../..');
@@ -43,6 +48,10 @@ async function main() {
 	}
 
 	await capture(repoRoot, currentCaptures);
+	// Guard against unpainted tall captures only on the current tree. The base is
+	// whatever origin/main produced and cannot be fixed retroactively; a stale base
+	// must not block the current tree's comparison.
+	await assertCapturesPainted(currentCaptures);
 	const reportDir = path.join(artifacts, 'report');
 	const results = await compareCaptures(
 		baseCaptures,
