@@ -140,70 +140,69 @@ export const button = recipe({
 		...appearance(
 			'neutral',
 			'solid',
-			vars.color.intent.neutral.surface,
-			vars.color.intent.neutral.onSolid,
+			vars.color.background.neutral,
+			vars.color.foreground.neutral.onSolid,
 		),
 		...appearance(
 			'accent',
 			'solid',
-			vars.color.intent.accent.surface,
-			vars.color.intent.accent.onSolid,
+			vars.color.background.accent,
+			vars.color.foreground.accent.onSolid,
 		),
 		...appearance(
 			'danger',
 			'solid',
-			vars.color.intent.danger.surface,
-			vars.color.intent.danger.onSolid,
+			vars.color.background.danger,
+			vars.color.foreground.danger.onSolid,
 		),
-		...appearance('neutral', 'subtle', vars.color.intent.neutral.surface, vars.color.text.primary),
+		...appearance('neutral', 'subtle', vars.color.background.neutral, vars.color.text.primary),
 		...appearance(
 			'accent',
 			'subtle',
-			vars.color.intent.accent.surface,
-			vars.color.intent.accent.text,
+			vars.color.background.accent,
+			vars.color.foreground.accent.rest,
 		),
 		...appearance(
 			'danger',
 			'subtle',
-			vars.color.intent.danger.surface,
-			vars.color.intent.danger.text,
+			vars.color.background.danger,
+			vars.color.foreground.danger.rest,
 		),
 		ghostAppearance('neutral', vars.color.text.primary),
-		ghostAppearance('accent', vars.color.intent.accent.text),
-		ghostAppearance('danger', vars.color.intent.danger.text),
+		ghostAppearance('accent', vars.color.foreground.accent.rest),
+		ghostAppearance('danger', vars.color.foreground.danger.rest),
 	],
 });
 
 export type ButtonVariants = RecipeSelection<typeof button>;
 
 type Tone = 'neutral' | 'accent' | 'danger';
-type Surface = {
-	solid: string;
-	solidHover: string;
-	solidPressed: string;
-	subtle: string;
-	subtleHover: string;
-	subtlePressed: string;
-};
+/** The subtle/solid background ramp shape shared by every semantic role. */
+type Background = (typeof vars.color.background)[Tone];
 
-function appearance(tone: Tone, appearance: 'solid' | 'subtle', surface: Surface, color: string) {
-	const prefix = appearance === 'solid' ? 'solid' : 'subtle';
+function appearance(
+	tone: Tone,
+	appearance: 'solid' | 'subtle',
+	background: Background,
+	color: string,
+) {
+	const ramp = background[appearance];
 	return [
 		{
 			style: {
 				'@media': {
 					'(forced-colors: active)': { backgroundImage: 'none' },
 				},
-				backgroundColor: surface[prefix],
+				backgroundColor: ramp.rest,
 				backgroundImage: vars.actionControlFinish.resting,
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: surface[`${prefix}Hover`],
+						backgroundColor: ramp.hover,
 						backgroundImage: vars.actionControlFinish.raised,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: surface[`${prefix}Pressed`],
+						backgroundColor: ramp.pressed,
 						backgroundImage: vars.actionControlFinish.recessed,
 					},
 				},
@@ -214,7 +213,7 @@ function appearance(tone: Tone, appearance: 'solid' | 'subtle', surface: Surface
 }
 
 function ghostAppearance(tone: Tone, color: string) {
-	const surface = vars.color.intent[tone].surface;
+	const subtle = vars.color.background[tone].subtle;
 	return {
 		style: {
 			backgroundColor: 'transparent',
@@ -224,11 +223,11 @@ function ghostAppearance(tone: Tone, color: string) {
 			color,
 			selectors: {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: surface.subtleHover,
+					backgroundColor: subtle.hover,
 					boxShadow: vars.depth.raised,
 				},
 				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: surface.subtlePressed,
+					backgroundColor: subtle.pressed,
 					boxShadow: vars.depth.recessed,
 				},
 			},

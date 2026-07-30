@@ -72,17 +72,17 @@ const textInputConfig = {
 					opacity: 0.55,
 				},
 				[focusWithin]: {
-					borderColor: vars.color.intent.accent.border,
+					borderColor: vars.color.border.accent,
 					...focusRing(vars.color.border.focus),
 				},
 				[hover]: {
-					borderColor: vars.color.intent.accent.border,
+					borderColor: vars.color.border.accent,
 				},
 				[invalid]: {
-					borderColor: vars.color.intent.danger.border,
+					borderColor: vars.color.border.danger,
 				},
 				[invalidFocusWithin]: {
-					borderColor: vars.color.intent.danger.border,
+					borderColor: vars.color.border.danger,
 					...focusRing(vars.color.border.focus),
 				},
 				[readOnly]: {

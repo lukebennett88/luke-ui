@@ -20,8 +20,8 @@ const baseArgs = {
 
 const iconSizes: Array<NonNullable<IconProps['size']>> = ['xsmall', 'small', 'medium', 'large'];
 const colors = {
-	accent: vars.color.intent.accent.text,
-	danger: vars.color.intent.danger.text,
+	accent: vars.color.foreground.accent.rest,
+	danger: vars.color.foreground.danger.rest,
 	primary: vars.color.text.primary,
 	secondary: vars.color.text.secondary,
 } as const satisfies Partial<Record<NonNullable<TextProps['color']>, string>>;

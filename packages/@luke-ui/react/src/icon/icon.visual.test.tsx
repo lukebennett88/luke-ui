@@ -48,7 +48,7 @@ test('sizes and glyphs', async () => {
 for (const appearance of visualAppearances) {
 	test(`semantic content inheritance: ${appearance.theme} ${appearance.mode}`, async () => {
 		const scene = renderVisual(
-			<div style={{ color: vars.color.intent.accent.text }}>
+			<div style={{ color: vars.color.foreground.accent.rest }}>
 				<Icon name="checkCircle" title="Inherited accent" />
 			</div>,
 			appearance,

@@ -23,7 +23,7 @@ const base = styleInLayer('recipes', {
 			transition: 'none',
 		},
 	},
-	color: vars.color.intent.accent.text,
+	color: vars.color.foreground.accent.rest,
 	cursor: 'pointer',
 	font: 'inherit',
 	outlineColor: 'transparent',
@@ -74,13 +74,15 @@ export const link = recipe({
 		},
 		tone: {
 			accent: {
-				color: vars.color.intent.accent.text,
+				color: vars.color.foreground.accent.rest,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						color: vars.color.intent.accent.textHover,
+						color: vars.color.foreground.accent.hover,
 					},
+					// Press reuses the hover foreground: the shared contract carries no separate pressed
+					// content colour, so the stronger hover value covers both interactive states.
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: vars.color.intent.accent.textHover,
+						color: vars.color.foreground.accent.hover,
 					},
 				},
 			},

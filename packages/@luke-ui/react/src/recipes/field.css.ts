@@ -56,7 +56,7 @@ const fieldConfig = {
 				label: {
 					selectors: {
 						[`${dataRequiredSelector} &::after`]: {
-							color: vars.color.intent.danger.text,
+							color: vars.color.foreground.danger.rest,
 							content: '"*"',
 							marginInlineStart: vars.space[100],
 						},
@@ -84,7 +84,7 @@ const fieldConfig = {
 			},
 			error: {
 				message: {
-					color: vars.color.intent.danger.text,
+					color: vars.color.foreground.danger.rest,
 				},
 			},
 		},
