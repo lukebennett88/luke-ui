@@ -4,8 +4,8 @@ description: Public semantic CSS variables for building custom Luke UI elements.
 ---
 
 `vars` is Luke UI's typed public token contract. Each path resolves to a stable `--luke-*` CSS
-variable. For example, `vars.color.intent.danger.surface.solidHover` resolves to
-`var(--luke-color-intent-danger-surface-solid-hover)`.
+variable. For example, `vars.color.background.danger.solid.hover` resolves to
+`var(--luke-color-background-danger-solid-hover)`.
 
 Use these variables when a component API or layout utility cannot express a custom element. They
 adapt to the active identity and colour mode. Generated palette values, component selectors, and
@@ -20,8 +20,8 @@ other implementation details are not part of the public styling API.
 />
 
 Choose tokens by purpose. A card might use `surface.floating`, `radius.surface`, and
-`depth.resting`. A warning message might use the warning intent's subtle surface and text. Avoid
-carrying resolved colour values into application CSS.
+`depth.resting`. A warning message might use the warning role's subtle background and foreground.
+Avoid carrying resolved colour values into application CSS.
 
 ## Tokens
 

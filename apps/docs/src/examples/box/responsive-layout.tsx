@@ -19,7 +19,7 @@ function Item() {
 			justifyContent="center"
 			padding="400"
 			style={{
-				backgroundColor: vars.color.intent.neutral.surface.solid,
+				backgroundColor: vars.color.background.neutral.solid.rest,
 				flex: 1,
 				minBlockSize: '4rem',
 			}}
@@ -27,7 +27,7 @@ function Item() {
 			<Text
 				elementType="span"
 				fontWeight="label"
-				style={{ color: vars.color.intent.neutral.onSolid }}
+				style={{ color: vars.color.foreground.neutral.onSolid }}
 			>
 				Item
 			</Text>

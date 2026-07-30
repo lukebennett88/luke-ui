@@ -28,8 +28,8 @@ element. Neither step injects styles at runtime.
 - `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into and
   the curated colour, radius, and typography defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
-- `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and intent role
-  groups the generator, the compiler's validation matrix, and the semantic map all read.
+- `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and the canonical
+  semantic role list the generator, the compiler's validation matrix, and the semantic map all read.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
   constrained step-9 solid-anchor search, the per-role capability guarantees, and
   `passesOnSolidGate`, the on-solid accessibility gate.
@@ -57,11 +57,11 @@ token pair when a generated pair misses WCAG 2.2 AA contrast. A single-value acc
 adapted per mode through a lightness search; it throws when no lightness in the vibrant band is
 accessible. The raw `ThemeFoundation` object and `buildTheme` are internal only.
 
-Every colour token is generated from a private 12-step scale per role (neutral, accent, danger,
-info, success, warning) plus a mode-aware elevation surface set, then mapped onto the public colour
-contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border
-and accent contrast policies, and what changed when this generator replaced the original per-token
-solver.
+Every colour token is generated from a private 12-step scale per role (neutral, accent, info,
+success, warning, danger) plus a mode-aware elevation surface set, then mapped onto the public
+colour contract. Every role gets the same background, foreground, on-solid, and border capabilities.
+See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border and accent
+contrast policies, and what changed when this generator replaced the original per-token solver.
 
 The semantic contract includes `font.100` through `font.900` size steps. Each step groups its font
 size, line height, letter spacing, and per-font Capsize trims so components cannot combine unrelated

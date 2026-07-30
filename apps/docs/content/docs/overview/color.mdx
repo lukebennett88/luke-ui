@@ -1,6 +1,7 @@
 ---
 title: Colour
-description: Use semantic surfaces, content roles, and intents instead of palette values.
+description:
+  Use semantic surfaces, content roles, and the shared role contract instead of palette values.
 ---
 
 Luke UI names colours by their job. A theme maps those roles to values for each identity and colour
@@ -28,22 +29,58 @@ import { vars } from '@luke-ui/react/theme';
 Choose the role that describes the element's purpose. Do not copy a resolved colour into application
 CSS, because it will not adapt when the identity or colour mode changes.
 
-## Intent colours
+## Semantic roles
 
-Intent roles cover `neutral`, `accent`, `danger`, `info`, `success`, and `warning`. `neutral`,
-`accent`, and `danger` are action intents: they render hover and pressed states across `subtle` and
-`solid` surfaces, plus matching text, border, and on-solid values where needed. `info`, `success`,
-and `warning` are static feedback intents: they render only a `subtle` surface, `border`, and
-`text`, with no hover, pressed, solid, or on-solid state. Components choose these values for their
-own states. Custom UI can use the same public roles.
+Six roles cover the meanings a component needs beyond plain surfaces and text: `neutral`, `accent`,
+`info`, `success`, `warning`, and `danger`. Every role offers the same capabilities, so a role's
+meaning never limits what it can do:
+
+- `neutral`: no accent or status meaning, distinct from ordinary surfaces.
+- `accent`: preferred, selected, or emphasised. Not a promise of a brand colour.
+- `info`: noteworthy factual context.
+- `success`: completed, valid, or a positive result.
+- `warning`: needs attention but has not failed and is not dangerous.
+- `danger`: harm, failure, invalidity, or a critical condition.
+
+Components choose the role that fits their own tone or state. Custom UI can use the same six roles.
+
+### Background and foreground
+
+Each role has a `subtle` and a `solid` background ramp, and each ramp has `rest`, `hover`, and
+`pressed` states:
+
+```tsx
+import { vars } from '@luke-ui/react/theme';
+
+vars.color.background.warning.subtle.rest;
+vars.color.background.warning.solid.hover;
+```
+
+`rest` is an explicit state rather than an implied default. A token path cannot be both a string
+leaf and the parent of `hover` and `pressed`, so resting values need their own name. `solid.pressed`
+deliberately reuses the `solid.hover` colour — there is no third, deeper solid rung. A component
+carries a pressed look through depth, finish, or a transform instead of inventing another solid
+colour.
+
+Foreground gives each role a resting and a stronger interactive colour, plus a colour guaranteed to
+read against that role's solid backgrounds:
+
+```tsx
+vars.color.foreground.warning.rest;
+vars.color.foreground.warning.hover;
+vars.color.foreground.warning.onSolid;
+```
+
+There is no foreground `pressed`. A press is carried by the background ramp and other cues, so text
+and icons reuse `hover` for a pressed control.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
 
 <div
 	style={{
-		backgroundColor: vars.color.intent.warning.surface.subtle,
-		color: vars.color.intent.warning.text,
+		backgroundColor: vars.color.background.warning.subtle.rest,
+		color: vars.color.foreground.warning.rest,
 	}}
 >
 	Payment details need review.
@@ -51,10 +88,21 @@ import { vars } from '@luke-ui/react/theme';
 ```
 
 <ExampleBlock
-	src="overview/intent-colours"
-	title="Intent colours"
-	description="Select a semantic intent to see the matching surface and text roles."
+	src="overview/role-colours"
+	title="Semantic roles"
+	description="Select a role to see its subtle and solid background paired with its foreground."
 />
+
+### Borders
+
+Each role also has one state-free border, for example `vars.color.border.warning`. The token
+describes meaning; the component decides when to apply it, such as only while invalid or as a
+permanent outline.
+
+A semantic border is measured for contrast but not guaranteed to reach 3:1 — see
+[contrast validation](/theming/authoring#contrast-validation). Never rely on one alone to
+communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or
+another cue that is separately contrast-gated.
 
 ## Disabled and loading states
 
@@ -62,6 +110,35 @@ Use the component's disabled or loading API when it has one. Those states accoun
 and accessibility as well as colour. Disabled is a state, not a palette: interactive controls fade
 with reduced opacity, and only field text recolors, through the public `text.disabled` role. The
 public `loadingSkeleton` role is available when you are building an equivalent custom element.
+
+## Migrate from `color.intent`
+
+`color.intent` was the previous asymmetric contract. `neutral`, `accent`, and `danger` rendered a
+full interactive ramp, while `info`, `success`, and `warning` rendered only a static subtle kit. It
+has been removed: there are no `color.intent` paths and no `--luke-color-intent-*` variables left to
+fall back on. If you are upgrading from a release that had them, this table is the old-to-new
+reference — move each usage to its `color.background` / `color.foreground` / `color.border`
+equivalent:
+
+| Old path                                    | New path                                 |
+| ------------------------------------------- | ---------------------------------------- |
+| `color.intent.<role>.surface.subtle`        | `color.background.<role>.subtle.rest`    |
+| `color.intent.<role>.surface.subtleHover`   | `color.background.<role>.subtle.hover`   |
+| `color.intent.<role>.surface.subtlePressed` | `color.background.<role>.subtle.pressed` |
+| `color.intent.<role>.surface.solid`         | `color.background.<role>.solid.rest`     |
+| `color.intent.<role>.surface.solidHover`    | `color.background.<role>.solid.hover`    |
+| `color.intent.<role>.surface.solidPressed`  | `color.background.<role>.solid.pressed`  |
+| `color.intent.<role>.text`                  | `color.foreground.<role>.rest`           |
+| `color.intent.<role>.textHover`             | `color.foreground.<role>.hover`          |
+| `color.intent.<role>.onSolid`               | `color.foreground.<role>.onSolid`        |
+| `color.intent.<role>.border`                | `color.border.<role>`                    |
+
+CSS variable names followed the same shape, so `--luke-color-intent-danger-surface-solid-hover`
+became `--luke-color-background-danger-solid-hover`.
+
+The current contract also carries capabilities `color.intent` never had: a foreground and border for
+`neutral`, and interactive backgrounds, hover foregrounds, and on-solid foregrounds for `info`,
+`success`, and `warning`.
 
 ## Continue learning
 

@@ -64,35 +64,40 @@ only, and one category is not checked.
 
 ### Guaranteed at 4.5:1
 
-Every text/surface pair the compiler emits is a hard gate: `color.text.primary` and
-`color.text.secondary` against all four elevation surfaces (`canvas`, `recessed`, `floating`,
-`overlay`), `color.text.primary` against the neutral subtle trio, each action or border/text
-intent's `text` (and accent's `textHover`) against the base surfaces and its own subtle trio,
-feedback intents' `text` against the base surfaces and their subtle surface, and every intent's
-`onSolid` text against its solid, solidHover, and solidPressed surfaces.
+Every text/surface pair the compiler emits is a hard gate, 86 checks in total:
+
+- `color.text.primary` and `color.text.secondary` against all four elevation surfaces (`canvas`,
+  `recessed`, `floating`, `overlay`): 8 checks.
+- For each of the six semantic roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`),
+  its foreground `rest` and `hover` against `canvas`, `recessed`, and that role's own `subtle` rest,
+  hover, and pressed backgrounds: 60 checks.
+- Each role's `onSolid` foreground against its `solid` rest, hover, and pressed backgrounds: 18
+  checks.
 
 ### Guaranteed at 3:1
 
-Two non-text pairs are also hard gates: `color.border.focus` and `color.border.control` must both
-reach 3:1 against the canvas and recessed surfaces. `border.control` is a dedicated solved colour
-for this boundary, not a scale-step alias that happens to pass.
+Four more pairs are hard gates, at the WCAG 2.2 non-text ratio: `color.border.focus` and
+`color.border.control`, each against the canvas and recessed surfaces. `border.control` is a
+dedicated solved colour for this boundary, not a scale-step alias that happens to pass. That brings
+the total to 90 hard gates across both ratios.
 
 If any hard gate fails, `defineTheme` throws `ThemeContrastError`. Its `failures` array identifies
 each colour mode and token pair, so the stylesheet is never written with an invalid combination.
 
 ### Measured only, cannot fail the build
 
-The five `color.intent.*.border` pairs (`accent`, `danger`, `info`, `success`, `warning`) are
-checked against the base surfaces at 3:1, but only as advisory diagnostics. A miss is recorded and
-reported, but never thrown. These borders use the same subtle scale step as ordinary separators, so
-an author can choose a neutral character whose intent borders read as gentle separators rather than
-assertive boundaries. Diagnostics record whether each check is a hard gate or advisory-only
-(`ContrastCheck.hard`), so tooling can tell the two apart without guessing from the token path.
+Each role's border (`color.border.neutral`, `color.border.accent`, and so on for all six roles) is
+checked against the canvas and recessed surfaces at 3:1, but only as advisory diagnostics — 12
+checks. A miss is recorded and reported, but never thrown. These borders use the same subtle scale
+step as ordinary separators, so an author can choose a neutral character whose role borders read as
+gentle separators rather than assertive boundaries. Diagnostics record whether each check is a hard
+gate or advisory-only (`ContrastCheck.hard`), so tooling can tell the two apart without guessing
+from the token path.
 
-Because these pairs are not guaranteed to reach 3:1, do not rely on an intent border alone to
-communicate an error, warning, or success state. Pair it with text, an icon, or a
-guaranteed-contrast surface change so the state is still legible for a theme whose intent border
-happens to measure under 3:1.
+Because these pairs are not guaranteed to reach 3:1, never rely on a role border alone to
+communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or a
+guaranteed-contrast surface change so the state stays legible for a theme whose role border happens
+to measure under 3:1.
 
 ### Never checked
 
@@ -103,13 +108,13 @@ separator, never as the sole signal for state or meaning.
 
 Separately from contrast validation, `compileTheme` (and so `defineTheme`) can throw
 `ThemeGenerationError` when a role that must guarantee on-solid text cannot reach an accessible
-solid colour. For a single-value accent, `defineTheme` holds the hue and chroma while searching for
-a lightness that clears the same on-solid gate the generator enforces internally. An explicit
-`{ light, dark }` accent skips that adaptation and is used verbatim for each side. If its authored
-lightness sits in an on-solid dead zone (no near-white or near-black text reaches 4.5:1 against it),
-`compileTheme` throws `ThemeGenerationError` naming the failing role and mode. Author an explicit
-`{ light, dark }` accent when you need exact control over its lightness. Otherwise, author a single
-value and let `defineTheme` adapt it.
+solid colour. Every one of the six roles is gated this way. For a single-value accent, `defineTheme`
+holds the hue and chroma while searching for a lightness that clears the same on-solid gate the
+generator enforces internally. An explicit `{ light, dark }` accent skips that adaptation and is
+used verbatim for each side. If its authored lightness sits in an on-solid dead zone (no near-white
+or near-black text reaches 4.5:1 against it), `compileTheme` throws `ThemeGenerationError` naming
+the failing role and mode. Author an explicit `{ light, dark }` accent when you need exact control
+over its lightness. Otherwise, author a single value and let `defineTheme` adapt it.
 
 ## Next steps
 
