@@ -1,5 +1,6 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Checkbox } from '@luke-ui/react/checkbox';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { useState } from 'react';
 
@@ -11,16 +12,9 @@ export default function Children() {
 			<LoadingSpinner aria-label="Saving changes" isLoading={isLoading}>
 				<Button>Save changes</Button>
 			</LoadingSpinner>
-			<label>
-				<Box alignItems="center" display="flex" gap="200">
-					<input
-						checked={isLoading}
-						onChange={(event) => setIsLoading(event.target.checked)}
-						type="checkbox"
-					/>
-					Loading
-				</Box>
-			</label>
+			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
+				Loading
+			</Checkbox>
 		</Box>
 	);
 }
