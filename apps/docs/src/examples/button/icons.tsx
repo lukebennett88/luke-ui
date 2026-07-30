@@ -5,8 +5,8 @@ import { Icon } from '@luke-ui/react/icon';
 export default function Icons() {
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
-			<Button startIcon={<Icon aria-hidden name="add" />}>Add item</Button>
-			<Button appearance="subtle" endIcon={<Icon aria-hidden name="arrowRight" />}>
+			<Button startIcon={<Icon name="add" />}>Add item</Button>
+			<Button appearance="subtle" endIcon={<Icon name="arrowRight" />}>
 				Continue
 			</Button>
 		</Box>
