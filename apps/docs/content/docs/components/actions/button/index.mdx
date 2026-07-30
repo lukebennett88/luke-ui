@@ -20,7 +20,7 @@ Keep related controls at the same size.
 <ExampleBlock
 	src="button/sizes"
 	title="Button — Size"
-	description="Use small controls in compact layouts and medium controls by default."
+	description="Only the control grows between sizes — the icon holds at 16px."
 />
 
 ## Appearance
@@ -58,9 +58,10 @@ primary action at the end of a narrow form or panel.
 
 ## Icons
 
-Use `startIcon` or `endIcon` with a visible label. `Button` supplies the icon size, so the nested
-`Icon` does not need its own `size` prop. Use [`IconButton`](/components/actions/icon-button) only
-when the icon is familiar without a text label.
+Use `startIcon` or `endIcon` with a visible label. `Button` sizes nested icons at 16px for both
+`small` and `medium`, so the `Icon` needs no `size` prop of its own — pass one only to override it
+deliberately. Use [`IconButton`](/components/actions/icon-button) only when the icon is familiar
+without a text label.
 
 <ExampleBlock
 	src="button/icons"
