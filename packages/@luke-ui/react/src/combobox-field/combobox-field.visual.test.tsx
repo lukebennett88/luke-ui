@@ -413,9 +413,9 @@ test.each(visualAppearances)('mobile tray short list: $theme $mode', async (appe
 });
 
 // #247: with a selected value, the control also shows a clear button before the
-// trigger. Confirms the badge lands after both actions rather than overlapping them.
+// trigger. Confirms the icon lands after both actions rather than overlapping them.
 test.each(visualAppearances)(
-	'invalid with a selected value shows the badge after the clear and trigger buttons: $theme $mode',
+	'invalid with a selected value shows the icon after the clear and trigger buttons: $theme $mode',
 	async (appearance) => {
 		const scene = renderVisual(
 			<Stack>
@@ -440,7 +440,7 @@ test.each(visualAppearances)(
 	},
 );
 
-// #247: without `errorMessage` the badge is the only cue that the field is invalid, so
+// #247: without `errorMessage` the icon is the only cue that the field is invalid, so
 // this scene has no error text at all.
 test.each(visualAppearances)(
 	'invalid without an error message: $theme $mode',

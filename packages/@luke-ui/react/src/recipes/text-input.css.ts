@@ -5,7 +5,7 @@ import {
 	descendantDisabledSelector,
 	inputStates,
 } from './input-states.js';
-import { invalidIndicatorBadge, invalidIndicatorBadgeForcedColors } from './invalid-indicator.js';
+import { invalidIndicatorIcon, invalidIndicatorIconForcedColors } from './invalid-indicator.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 
@@ -42,7 +42,7 @@ const textInputConfig = {
 						},
 						// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 						// here touches `::after`, so this already covers the focused case.
-						[`${invalid}::after`]: invalidIndicatorBadgeForcedColors,
+						[`${invalid}::after`]: invalidIndicatorIconForcedColors,
 					},
 				},
 			},
@@ -88,7 +88,7 @@ const textInputConfig = {
 				},
 				// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 				// here touches `::after`, so this already covers the focused case.
-				[`${invalid}::after`]: invalidIndicatorBadge,
+				[`${invalid}::after`]: invalidIndicatorIcon,
 				[invalidFocusWithin]: {
 					borderColor: vars.color.background.danger.solid.rest,
 					borderWidth: '2px',

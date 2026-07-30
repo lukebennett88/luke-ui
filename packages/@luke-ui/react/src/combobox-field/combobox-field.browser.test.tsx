@@ -85,9 +85,9 @@ test('invalid without an error message still carries a non-colour cue', async ()
 	const control = input.element().closest<HTMLElement>('[role="group"]');
 	if (control == null) throw new Error('Expected the combobox control group.');
 
-	const badge = getComputedStyle(control, '::after');
-	expect(badge.content).not.toBe('none');
-	expect(badge.content).toContain('!');
+	const icon = getComputedStyle(control, '::after');
+	expect(icon.content).toBe('""');
+	expect(icon.maskImage).not.toBe('none');
 
 	expect(getComputedStyle(control).borderWidth).toBe('2px');
 });
@@ -108,7 +108,7 @@ test('valid control keeps the 1px boundary the invalid state widens', async () =
 	expect(getComputedStyle(control).borderWidth).toBe('1px');
 });
 
-test('the badge glyph stays out of the accessible name', async () => {
+test('the indicator icon adds no text to the accessible name', async () => {
 	renderVisual(
 		<ComboboxField defaultItems={countryItems} isInvalid label="Invalid" name="invalid">
 			{renderCountryItem}

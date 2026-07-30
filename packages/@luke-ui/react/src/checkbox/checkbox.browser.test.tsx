@@ -24,9 +24,9 @@ test('invalid without an error message still carries a non-colour cue', async ()
 	const indicator = content.querySelector<HTMLElement>('[aria-hidden="true"]');
 	if (indicator == null) throw new Error('Expected the checkbox indicator.');
 
-	const badge = getComputedStyle(content, '::after');
-	expect(badge.content).not.toBe('none');
-	expect(badge.content).toContain('!');
+	const icon = getComputedStyle(content, '::after');
+	expect(icon.content).toBe('""');
+	expect(icon.maskImage).not.toBe('none');
 
 	expect(getComputedStyle(indicator).borderWidth).toBe('2px');
 });
@@ -45,18 +45,19 @@ test('valid indicator keeps the 1px boundary the invalid state widens', async ()
 	expect(getComputedStyle(indicator).borderWidth).toBe('1px');
 });
 
-// The badge uses `content: "!" / ""` so the "!" glyph stays out of
-// `CheckboxContent`'s accessible name (a native `<label>` wrapping the hidden
-// input, which otherwise takes its name from its contents). This is asserted
-// against Chromium's own accessibility tree over CDP, not through `getByRole`'s
-// name matching or jest-dom's `toHaveAccessibleName`: both of those are resolved
-// by JS reimplementations of the accname algorithm (Vitest browser mode's own port
-// of Playwright's locator engine, and the `dom-accessibility-api` package,
-// respectively) that do not parse the `/ "alt"` delimiter at all and so report the
-// raw, unparsed `content` string appended to the label text. The real browser
-// gets this right; the test libraries in this stack do not, so this test bypasses
-// them entirely.
-test('the badge glyph stays out of the accessible name', async () => {
+// The indicator is a CSS mask now, not a text glyph: its `content` is empty
+// (`content: '""'`), so there is nothing for `CheckboxContent` (a native
+// `<label>` wrapping the hidden input, which otherwise takes its name from its
+// contents) to pick up as accessible-name text. The old badge used the CSS
+// alt-text syntax (`content: "!" / ""`) for the same guarantee, which needed
+// this CDP-based assertion because the test libraries in this stack (Vitest
+// browser mode's own port of Playwright's locator engine, and the
+// `dom-accessibility-api` package behind jest-dom's `toHaveAccessibleName`) are
+// JS reimplementations of the accname algorithm that do not parse the `/ "alt"`
+// delimiter at all. An empty `content` has no such gap — `getByRole`'s name
+// matching would already prove this — but the guard is kept as the right belt-
+// and-braces check against a future regression back to a text glyph.
+test('the icon indicator stays out of the accessible name', async () => {
 	renderVisual(
 		<Checkbox defaultSelected isInvalid name="invalid">
 			Invalid

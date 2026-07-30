@@ -131,7 +131,7 @@ test.each(visualAppearances)('invalid interactive states: $theme $mode', async (
 	await captureVisualAppearance(scene, 'text-field/invalid-focus', appearance);
 });
 
-// #247: without `errorMessage` the badge is the only cue that the field is invalid, so
+// #247: without `errorMessage` the icon is the only cue that the field is invalid, so
 // this scene has no error text at all.
 test.each(visualAppearances)(
 	'invalid without an error message: $theme $mode',

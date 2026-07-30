@@ -2,7 +2,7 @@ import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
 import { fieldMessageIndent } from './field.css.js';
-import { invalidIndicatorBadge, invalidIndicatorBadgeForcedColors } from './invalid-indicator.js';
+import { invalidIndicatorIcon, invalidIndicatorIconForcedColors } from './invalid-indicator.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 import { textLineHeight } from './text.css.js';
@@ -24,7 +24,7 @@ const checkboxConfig = {
 				'(forced-colors: active)': {
 					forcedColorAdjust: 'auto',
 					selectors: {
-						'[data-invalid="true"] &::after': invalidIndicatorBadgeForcedColors,
+						'[data-invalid="true"] &::after': invalidIndicatorIconForcedColors,
 					},
 				},
 			},
@@ -43,7 +43,15 @@ const checkboxConfig = {
 				'&[data-readonly="true"]': {
 					cursor: 'default',
 				},
-				'[data-invalid="true"] &::after': invalidIndicatorBadge,
+				// `content`'s siblings are `control` and the label text, both first-line
+				// aligned via `blockSize: 1lh` (see `control` below), so the icon gets the
+				// same override: without it the icon's own 16px box sits at `flex-start`
+				// (`content`'s own alignment, chosen so a wrapping label reads top-down),
+				// floating at the row's top edge instead of the first line.
+				'[data-invalid="true"] &::after': {
+					...invalidIndicatorIcon,
+					blockSize: fallbackVar(textLineHeight, '1lh'),
+				},
 			},
 		},
 		control: {

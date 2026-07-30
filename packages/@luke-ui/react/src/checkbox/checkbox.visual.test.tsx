@@ -107,3 +107,21 @@ test('first-line label alignment across Text sizes', async () => {
 
 	await captureVisual(scene, 'checkbox/first-line-alignment');
 });
+
+// #247: the invalid icon sits on `content`'s own `::after`, alongside the control
+// and the label text, so it needs the same first-line alignment fix as the
+// control — otherwise it floats at the row's top edge instead of the label's
+// first line once the label wraps.
+test('invalid icon aligns with a wrapping label’s first line', async () => {
+	const scene = renderVisual(
+		<Stack width="20rem">
+			<Checkbox defaultSelected isInvalid name="invalid-wrapping">
+				This label wraps onto a second line so the error icon should sit on the first line, not
+				float at the row's top edge.
+			</Checkbox>
+		</Stack>,
+	);
+
+	await expect.element(page.getByRole('checkbox', { name: /This label wraps/ })).toBeVisible();
+	await captureVisual(scene, 'checkbox/invalid-wrapping-label');
+});
