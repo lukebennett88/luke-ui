@@ -1,8 +1,13 @@
+import { createVar } from '@vanilla-extract/css';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
 import { fieldMessageIndent } from './field.css.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
+
+const checkboxControlSize = createVar();
+const checkboxGlyphSize = createVar();
+const checkboxIndicatorSize = createVar();
 
 const checkboxConfig = {
 	slots: {
@@ -11,9 +16,6 @@ const checkboxConfig = {
 			flexDirection: 'column',
 			gap: vars.space[100],
 			minInlineSize: 0,
-			vars: {
-				[fieldMessageIndent]: `calc(${vars.font[300].lineHeight} + ${vars.space[200]})`,
-			},
 		},
 		content: {
 			alignItems: 'flex-start',
@@ -38,7 +40,7 @@ const checkboxConfig = {
 			blockSize: 'var(--luke-text-line-height, 1lh)',
 			display: 'inline-flex',
 			flexShrink: 0,
-			inlineSize: vars.font[300].lineHeight,
+			inlineSize: checkboxControlSize,
 			justifyContent: 'center',
 		},
 		indicator: {
@@ -72,7 +74,7 @@ const checkboxConfig = {
 			alignItems: 'center',
 			backgroundColor: vars.color.surface.canvas,
 			backgroundImage: vars.actionControlFinish.resting,
-			blockSize: vars.iconSize.small,
+			blockSize: checkboxIndicatorSize,
 			borderColor: vars.color.border.control,
 			borderRadius: vars.radius.detail,
 			borderStyle: 'solid',
@@ -81,9 +83,9 @@ const checkboxConfig = {
 			boxSizing: 'border-box',
 			color: vars.color.intent.accent.onSolid,
 			display: 'inline-flex',
-			fontSize: vars.iconSize.xsmall,
+			fontSize: checkboxGlyphSize,
 			fontWeight: vars.font.weight.heading,
-			inlineSize: vars.iconSize.small,
+			inlineSize: checkboxIndicatorSize,
 			justifyContent: 'center',
 			lineHeight: 1,
 			outlineColor: 'transparent',
@@ -144,6 +146,43 @@ const checkboxConfig = {
 						borderColor: vars.color.intent.danger.surface.solid,
 						color: vars.color.intent.danger.onSolid,
 					},
+			},
+		},
+	},
+	defaultVariants: {
+		size: 'medium',
+	},
+	variants: {
+		size: {
+			large: {
+				root: {
+					vars: {
+						[checkboxControlSize]: vars.font[500].lineHeight,
+						[checkboxGlyphSize]: vars.iconSize.small,
+						[checkboxIndicatorSize]: vars.iconSize.medium,
+						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
+					},
+				},
+			},
+			medium: {
+				root: {
+					vars: {
+						[checkboxControlSize]: vars.font[300].lineHeight,
+						[checkboxGlyphSize]: vars.iconSize.xsmall,
+						[checkboxIndicatorSize]: vars.iconSize.small,
+						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
+					},
+				},
+			},
+			small: {
+				root: {
+					vars: {
+						[checkboxControlSize]: vars.iconSize.small,
+						[checkboxGlyphSize]: vars.font[100].fontSize,
+						[checkboxIndicatorSize]: vars.iconSize.xsmall,
+						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
+					},
+				},
 			},
 		},
 	},

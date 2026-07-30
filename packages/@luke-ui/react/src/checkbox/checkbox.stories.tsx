@@ -37,6 +37,26 @@ export const Default = meta.story({
 });
 
 /**
+ * Use `size` to fit the checkbox control to compact, standard, or spacious layouts.
+ * Label typography continues to follow the surrounding text.
+ */
+export const Sizes = meta.story({
+	render: () => (
+		<div style={stackStyle}>
+			<Checkbox defaultSelected size="small">
+				Small checkbox
+			</Checkbox>
+			<Checkbox defaultSelected size="medium">
+				Medium checkbox
+			</Checkbox>
+			<Checkbox defaultSelected size="large">
+				Large checkbox
+			</Checkbox>
+		</div>
+	),
+});
+
+/**
  * Use `isIndeterminate` when a parent option represents a mixed selection.
  * It is visual state only, so update it with the child selections in application code.
  */

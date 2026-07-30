@@ -64,6 +64,26 @@ test('content spacing and field messages align with the visible label', () => {
 	expect(getComputedStyle(error).paddingInlineStart).toBe(`${expectedOffset}px`);
 });
 
+test('sizes inherit from the root into the control, indicator, and field messages', () => {
+	const sizes = [
+		{ glyph: 12, indicator: 16, size: 'small', wrapper: 20 },
+		{ glyph: 16, indicator: 20, size: 'medium', wrapper: 24 },
+		{ glyph: 20, indicator: 24, size: 'large', wrapper: 28 },
+	] as const;
+
+	for (const { glyph, indicator: indicatorSize, size, wrapper } of sizes) {
+		const { content, control, description, error, indicator } = mountCheckbox(undefined, size);
+		const contentStyle = getComputedStyle(content);
+		const expectedIndent = wrapper + Number.parseFloat(contentStyle.columnGap);
+
+		expect(control.getBoundingClientRect().width).toBe(wrapper);
+		expect(indicator.getBoundingClientRect().width).toBe(indicatorSize);
+		expect(Number.parseFloat(getComputedStyle(indicator).fontSize)).toBe(glyph);
+		expect(getComputedStyle(description).paddingInlineStart).toBe(`${expectedIndent}px`);
+		expect(getComputedStyle(error).paddingInlineStart).toBe(`${expectedIndent}px`);
+	}
+});
+
 test('ordinary field messages keep their zero indentation fallback', () => {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
@@ -91,14 +111,14 @@ test('hover and pressed states change the control material', () => {
 	expect(pressedFinish).not.toBe(hoveredFinish);
 });
 
-function mountCheckbox(lineHeight?: number) {
+function mountCheckbox(lineHeight?: number, size?: 'small' | 'medium' | 'large') {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	root.style.lineHeight = '24px';
 	if (lineHeight != null) root.style.setProperty('--luke-text-line-height', `${lineHeight}px`);
 
-	const classes = checkbox();
+	const classes = checkbox({ size });
 	const field = root.appendChild(document.createElement('div'));
 	field.className = classes.root();
 	const content = field.appendChild(document.createElement('label'));

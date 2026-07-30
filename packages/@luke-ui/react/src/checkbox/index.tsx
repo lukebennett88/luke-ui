@@ -17,6 +17,12 @@ type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
 interface _CheckboxProps extends _CheckboxOmit {
 	/** Checkbox label content. */
 	children: ReactNode;
+	/**
+	 * Visual size of the checkbox control.
+	 *
+	 * @default 'medium'
+	 */
+	size?: PrimitiveCheckboxProps['size'];
 	/** Supporting text shown beneath the checkbox label. */
 	description?: ReactNode;
 	/** Validation message shown when the checkbox is invalid. */

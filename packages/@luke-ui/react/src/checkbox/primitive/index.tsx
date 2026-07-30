@@ -9,6 +9,7 @@ import {
 } from 'react-aria-components/Checkbox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/checkbox.css.js';
+import type { CheckboxVariants } from '../../recipes/checkbox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 
@@ -17,6 +18,12 @@ type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
 interface _CheckboxProps extends _CheckboxOmit {
 	/** Checkbox anatomy, including clickable `CheckboxContent`. */
 	children: RacCheckboxFieldProps['children'];
+	/**
+	 * Visual size of the checkbox control.
+	 *
+	 * @default 'medium'
+	 */
+	size?: CheckboxVariants['size'];
 	/** Whether the checkbox is selected. */
 	isSelected?: RacCheckboxFieldProps['isSelected'];
 	/** Initial selection state for an uncontrolled checkbox. */
@@ -108,11 +115,13 @@ export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
  * @tier primitive
  */
 export function Checkbox(props: CheckboxProps): JSX.Element {
+	const { className, size, ...restProps } = props;
+
 	return (
 		<RacCheckboxField
-			{...props}
-			className={composeRenderProps(props.className, (className) => {
-				return styles.checkbox().root(className);
+			{...restProps}
+			className={composeRenderProps(className, (className) => {
+				return styles.checkbox({ size }).root(className);
 			})}
 		/>
 	);
