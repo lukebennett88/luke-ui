@@ -1,5 +1,7 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { ComboboxField } from '../combobox-field/index.js';
+import { ComboboxItem } from '../combobox-field/primitive/item.js';
 import { inputGroup } from '../recipes/input-group.css.js';
 import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
 import { TextField } from './index.js';
@@ -23,10 +25,9 @@ function groupFor(name: string): HTMLElement {
 	return group;
 }
 
-// The `invalidIndicator` slot's `marginInlineEnd` now has a `size` variant (it matches
-// the control's own horizontal padding at each size, see `input-group.css.ts`), so the
-// full class string differs between `small` and `medium`. Only its first token — the
-// slot's base class — is stable across sizes, so that is what a lookup keys on.
+// `inputGroup().invalidIndicator()` returns one stable class list regardless of `size`
+// (the slot's `marginInlineEnd` is a constant, see `input-group.css.ts`), but the lookup
+// still keys on the first token only, matching the other slot lookups in this file.
 const invalidIndicatorClass = inputGroup().invalidIndicator().split(' ')[0];
 
 /**
@@ -104,41 +105,62 @@ test('the indicator icon matches the control size variant, not a constant', asyn
 	expect(getComputedStyle(small).blockSize).toBe('16px');
 });
 
-// #247: the icon must read as optically centred between the two borders — its inset
-// from the trailing border equal to the text's inset from the leading border — rather
-// than hugging the trailing edge on a flat constant while the text scales with `size`.
-// This is the geometry regression guard for that bug: measured from rendered layout,
-// not from the CSS declarations, so it fails if the `size` variant on `invalidIndicator`
-// (`input-group.css.ts`) ever drifts out of step with `control`'s own horizontal
-// padding again.
+/**
+ * Gap between an element's trailing edge and its ancestor control's inner (inside the
+ * border) trailing edge, measured from rendered layout rather than CSS declarations.
+ */
+function trailingInsetFromControlBorder(control: Element, element: Element): number {
+	const controlRect = control.getBoundingClientRect();
+	const borderWidth = Number.parseFloat(getComputedStyle(control).borderRightWidth);
+	const innerBorderRight = controlRect.right - borderWidth;
+	return innerBorderRight - element.getBoundingClientRect().right;
+}
+
+// #247: the invalid icon is a trailing glyph in a field, and `ComboboxField`'s chevron
+// is the system's existing trailing-glyph precedent — a constant inset from the control's
+// inner border, not one that scales with the control's own horizontal padding the way
+// text does. This locks the two together across components at both sizes, so the
+// `invalidIndicator` slot's `marginInlineEnd` (`input-group.css.ts`) cannot drift back to
+// matching `control`'s padding without this failing.
 test.each(['medium', 'small'] as const)(
-	'the indicator sits as far from the trailing border as the text sits from the leading border: %s',
+	'the invalid icon sits at the same trailing inset as the combobox chevron: %s',
 	async (size) => {
-		renderVisual(<TextField isInvalid label="Invalid" name="invalid" size={size} />);
+		renderVisual(
+			<>
+				<TextField isInvalid label="Invalid" name="invalid" size={size} />
+				<ComboboxField
+					defaultItems={[{ id: 'au', label: 'Australia' }]}
+					label="Country"
+					name="country"
+					size={size}
+				>
+					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+				</ComboboxField>
+			</>,
+		);
 
-		const input = page.getByRole('textbox', { name: 'Invalid' });
-		await expect.element(input).toBeVisible();
+		const textInput = page.getByRole('textbox', { name: 'Invalid' });
+		await expect.element(textInput).toBeVisible();
 
-		const group = groupFor('Invalid');
+		const textFieldGroup = groupFor('Invalid');
 		const indicator = indicatorFor('Invalid');
 		if (indicator == null) throw new Error('Expected the invalid indicator.');
 
-		const groupStyle = getComputedStyle(group);
-		const groupRect = group.getBoundingClientRect();
-		const borderWidth = Number.parseFloat(groupStyle.borderRightWidth);
-		const innerBorderLeft = groupRect.left + borderWidth;
-		const innerBorderRight = groupRect.right - borderWidth;
+		const comboboxInput = page.getByRole('combobox', { name: 'Country' });
+		const comboboxGroup = comboboxInput.element().closest<HTMLElement>('[role="group"]');
+		if (comboboxGroup == null) throw new Error('Expected the combobox control group.');
 
-		const inputElement = input.element();
-		const inputStyle = getComputedStyle(inputElement);
-		const inputRect = inputElement.getBoundingClientRect();
-		const textInsetFromLeadingBorder =
-			inputRect.left + Number.parseFloat(inputStyle.paddingInlineStart) - innerBorderLeft;
+		const chevron = page
+			.getByRole('button', { name: 'Toggle options' })
+			.element()
+			.querySelector('svg');
+		if (chevron == null) throw new Error('Expected the combobox trigger chevron.');
 
-		const indicatorInsetFromTrailingBorder =
-			innerBorderRight - indicator.getBoundingClientRect().right;
+		const indicatorInset = trailingInsetFromControlBorder(textFieldGroup, indicator);
+		const chevronInset = trailingInsetFromControlBorder(comboboxGroup, chevron);
 
-		expect(indicatorInsetFromTrailingBorder).toBeCloseTo(textInsetFromLeadingBorder, 0);
+		expect(indicatorInset).toBeCloseTo(chevronInset, 0);
+		expect(indicatorInset).toBeCloseTo(8, 0);
 	},
 );
 

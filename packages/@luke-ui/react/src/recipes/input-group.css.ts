@@ -184,9 +184,11 @@ const inputGroupConfig = {
 		// No `marginInlineStart` here: the `control` slot's own `paddingInlineEnd`
 		// already supplies the gap between the value text and the icon, so a margin
 		// stacked on top of it would make the leading gap bigger than the trailing one.
-		// `marginInlineEnd` is set per `size` variant below, matching the `control`
-		// slot's own horizontal padding at that size, so the icon's inset from the
-		// trailing border equals the text's inset from the leading border.
+		// `marginInlineEnd` is a constant `space[200]`, not a per-size value: it matches
+		// `ComboboxField`'s chevron, the system's existing trailing-glyph inset, which is
+		// itself constant across sizes rather than scaling with the control's padding.
+		// Matching it here means a `TextField` and a `ComboboxField` read the same trailing
+		// rhythm at both sizes.
 		invalidIndicator: {
 			'@media': {
 				'(forced-colors: active)': {
@@ -194,6 +196,7 @@ const inputGroupConfig = {
 				},
 			},
 			color: vars.color.foreground.danger.rest,
+			marginInlineEnd: vars.space[200],
 		},
 	},
 	defaultVariants: {
@@ -210,9 +213,6 @@ const inputGroupConfig = {
 					blockSize: vars.controlSize.medium,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
-				},
-				invalidIndicator: {
-					marginInlineEnd: vars.space[300],
 				},
 				prefix: {
 					lineHeight: vars.font[300].lineHeight,
@@ -236,9 +236,6 @@ const inputGroupConfig = {
 					blockSize: vars.controlSize.small,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
-				},
-				invalidIndicator: {
-					marginInlineEnd: vars.space[200],
 				},
 				prefix: {
 					lineHeight: vars.font[200].lineHeight,
