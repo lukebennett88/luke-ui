@@ -77,6 +77,13 @@ const comboboxActionStyles = {
 	justifyContent: 'center',
 	minBlockSize: '24px',
 	minInlineSize: '24px',
+	// The invalid `::after` icon on `control` below is its last DOM child (a
+	// pseudo-element always renders after real children), which put it after both
+	// action buttons too. Giving them an explicit `order` moves them behind the icon
+	// (default `order: 0`) in flex layout without touching document order, so the
+	// icon lands right after the text input and before the clear/trigger buttons,
+	// matching the Spectrum reference this direction is drawn from.
+	order: 1,
 	outlineColor: 'transparent',
 	outlineOffset: '2px',
 	outlineStyle: 'solid',

@@ -33,8 +33,15 @@ import { expect, test } from 'vite-plus/test';
 // value instead. Net effect was a small decrease despite the new `max()` guard and
 // `marginInlineEnd`; the limits retain minimal reviewed headroom above the new measured total
 // (89,765 raw / 9,575 gzip).
-const maximumRawBytes = 89_870;
-const maximumGzipBytes = 9_625;
+// A fourth follow-up (#247/#312 Spectrum-match pass) swapped the `exclamationCircle` glyph for
+// `exclamationTriangle` (a longer path, so a longer mask data URI in each of the three inlined
+// copies) and reordered the in-control icon ahead of each control's trailing affordances with a
+// plain `order` on `adornmentEnd` (`text-input.css.ts`) and the shared clear/trigger action styles
+// (`combobox.css.ts`), plus a new `marginInlineEnd` on `invalidIndicatorIcon` matching its existing
+// `marginInlineStart`. The limits retain minimal reviewed headroom above the new measured total
+// (90,223 raw / 9,685 gzip).
+const maximumRawBytes = 90_320;
+const maximumGzipBytes = 9_735;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url));

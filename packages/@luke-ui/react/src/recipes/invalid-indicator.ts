@@ -3,7 +3,7 @@ import { iconMaskUrls } from '../../.generated/icon-mask-data.js';
 import { vars } from '../theme/contract.css.js';
 
 /**
- * The `exclamationCircle` icon rendered as a CSS mask, at `size`. Factored out so
+ * The `exclamationTriangle` icon rendered as a CSS mask, at `size`. Factored out so
  * `invalidIndicatorIcon` (in-control) and `invalidMessageIcon` (message-leading)
  * share one mask definition instead of duplicating the mask URL and sizing.
  *
@@ -13,6 +13,10 @@ import { vars } from '../theme/contract.css.js';
  * accessible-name concern entirely — there is no glyph for a wrapping `<label>`
  * (`Checkbox`) to read as its own text, so unlike the old text-glyph badge this
  * needs no alt-text trick.
+ *
+ * The triangle (Heroicons `exclamation-triangle`) replaced an earlier
+ * `exclamationCircle` glyph on design review against a Spectrum reference: the
+ * triangle reads more clearly at these small in-control/in-message sizes.
  */
 function invalidIconMask(size: string) {
 	return {
@@ -21,7 +25,7 @@ function invalidIconMask(size: string) {
 		content: '""',
 		flexShrink: 0,
 		inlineSize: size,
-		maskImage: iconMaskUrls.exclamationCircle,
+		maskImage: iconMaskUrls.exclamationTriangle,
 		maskPosition: 'center',
 		maskRepeat: 'no-repeat',
 		maskSize: 'contain',
@@ -34,9 +38,17 @@ function invalidIconMask(size: string) {
 }
 
 /**
- * In-control invalid icon for `TextInput` and `Combobox`: a trailing `::after` inside
- * the control, gated on the invalid selector alone (not on whether a message exists),
- * for example `selectors: { [`${invalid}::after`]: invalidIndicatorIcon(size) }`.
+ * In-control invalid icon for `TextInput` and `Combobox`: a `::after` inside the
+ * control, gated on the invalid selector alone (not on whether a message exists), for
+ * example `selectors: { [`${invalid}::after`]: invalidIndicatorIcon(size) }`.
+ *
+ * `::after` is the last child in DOM order, but each consuming recipe reorders it
+ * ahead of its own trailing affordances with a plain flex `order` (giving `order: 1`
+ * to `adornmentEnd` in `text-input.css.ts`, and to `clearButton`/`trigger` in
+ * `combobox.css.ts`) so the icon sits immediately after the field's text content and
+ * before any trailing buttons, matching the Spectrum reference this direction was
+ * drawn from. `marginInlineStart`/`marginInlineEnd` give it breathing room on both
+ * sides so it reads as its own element rather than crowding the text or the buttons.
  *
  * Takes `size` rather than a fixed constant: both consuming recipes have `small`/
  * `medium` control-size variants, and the icon must match its variant's own scale —
@@ -52,6 +64,7 @@ function invalidIconMask(size: string) {
 export function invalidIndicatorIcon(size: string) {
 	return {
 		...invalidIconMask(size),
+		marginInlineEnd: vars.space[100],
 		marginInlineStart: vars.space[100],
 	} satisfies StyleRule;
 }

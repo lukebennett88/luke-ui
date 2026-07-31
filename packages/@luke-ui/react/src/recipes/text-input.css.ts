@@ -172,6 +172,14 @@ const textInputConfig = {
 			color: vars.color.text.secondary,
 			display: 'inline-flex',
 			flexShrink: 0,
+			// The invalid `::after` icon below is the group's last DOM child (a
+			// pseudo-element always renders after real children), which put it after
+			// this slot too. Giving `adornmentEnd` an explicit `order` moves it behind
+			// the icon (default `order: 0`) in flex layout without touching document
+			// order, so the icon lands right after the input's text content and before
+			// this trailing adornment, matching the Spectrum reference this direction
+			// is drawn from.
+			order: 1,
 
 			selectors: {
 				[descendantDisabledSelector]: {

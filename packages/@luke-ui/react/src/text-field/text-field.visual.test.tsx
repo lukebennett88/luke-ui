@@ -5,6 +5,7 @@ import {
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
+	pseudoElementLeft,
 	renderVisual,
 	Stack,
 	visualAppearances,
@@ -62,6 +63,33 @@ test('adornments', async () => {
 	);
 
 	await captureVisual(locator, 'text-field/adornments');
+});
+
+// #247/#312: the invalid icon must land before a trailing `adornmentEnd`, not after
+// it — the exact ordering that broke and the plain `adornments` scene above has no
+// invalid case to catch. Geometry, not just a screenshot, pins the invariant.
+test('invalid field with an adornment shows the icon before it', async () => {
+	const scene = renderVisual(
+		<Stack>
+			<TextField
+				adornmentEnd="USD"
+				defaultValue="0.00"
+				errorMessage="Enter a valid amount."
+				isInvalid
+				label="Invalid with an adornment"
+				name="invalid-adornment"
+				placeholder="0.00"
+			/>
+		</Stack>,
+	);
+	const input = page.getByRole('textbox', { name: 'Invalid with an adornment' });
+	await expect.element(input).toBeVisible();
+
+	const adornmentEnd = page.getByText('USD');
+	const iconLeft = await pseudoElementLeft('name', 'invalid-adornment');
+	expect(iconLeft).toBeLessThan(adornmentEnd.element().getBoundingClientRect().left);
+
+	await captureVisual(scene, 'text-field/invalid-with-adornment');
 });
 
 test('keyboard focus ring', async () => {

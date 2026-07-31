@@ -112,6 +112,96 @@ export async function emulateForcedColors(value: 'active' | 'none') {
 	});
 }
 
+/** The CDP DOM node shape, inferred from `DOM.getDocument`'s own response type. */
+type CdpDomNode = Awaited<ReturnType<typeof getCdpDomRoot>>;
+
+/** Fetches the CDP DOM tree root, piercing into the Vitest iframe and any shadow roots. */
+async function getCdpDomRoot() {
+	const { root } = await cdp().send('DOM.getDocument', { depth: -1, pierce: true });
+	return root;
+}
+
+/** Reads one attribute from a CDP DOM node's flat `[name1, value1, name2, value2, …]` array. */
+function cdpAttribute(node: CdpDomNode, name: string): string | undefined {
+	const attributes = node.attributes ?? [];
+	for (let index = 0; index < attributes.length; index += 2) {
+		if (attributes[index] === name) return attributes[index + 1];
+	}
+	return undefined;
+}
+
+/**
+ * Depth-first search for a CDP DOM node with the given attribute value, piercing into
+ * iframe content documents and shadow roots, returning it alongside its immediate
+ * parent. Standard DOM APIs give a test no way to identify a live element's own CDP
+ * node, so callers that need one (to reach a `::after` pseudo-element's box model, see
+ * `pseudoElementLeft`) look their element up by a known attribute instead of a JS
+ * reference.
+ */
+function findCdpNodeWithParent(
+	node: CdpDomNode,
+	attribute: string,
+	value: string,
+	parent?: CdpDomNode,
+): { node: CdpDomNode; parent?: CdpDomNode } | undefined {
+	if (cdpAttribute(node, attribute) === value) return { node, parent };
+	for (const child of node.children ?? []) {
+		const found = findCdpNodeWithParent(child, attribute, value, node);
+		if (found != null) return found;
+	}
+	if (node.contentDocument != null) {
+		const found = findCdpNodeWithParent(node.contentDocument, attribute, value, node);
+		if (found != null) return found;
+	}
+	for (const shadowRoot of node.shadowRoots ?? []) {
+		const found = findCdpNodeWithParent(shadowRoot, attribute, value, node);
+		if (found != null) return found;
+	}
+	return undefined;
+}
+
+/**
+ * Returns the rendered left edge (border box, viewport coordinates) of a `::after`
+ * pseudo-element, found by looking up a descendant with a known attribute/value pair
+ * (typically a control's own input, via its `name`) and reading its parent's own
+ * `::after` from the CDP DOM domain's `pseudoElements`.
+ *
+ * `getBoundingClientRect` cannot target a pseudo-element — there is no live DOM node
+ * for one — so this is the only way to measure where the invalid-indicator icon
+ * (`invalidIndicatorIcon`, drawn as its host's `::after`) actually renders, rather than
+ * trusting the CSS declarations that are supposed to place it there. Used to assert
+ * the icon lands before a control's trailing affordances (`adornmentEnd`, the combobox
+ * clear button and trigger) instead of after them.
+ */
+export async function pseudoElementLeft(
+	descendantAttribute: string,
+	descendantValue: string,
+): Promise<number> {
+	const root = await getCdpDomRoot();
+	const found = findCdpNodeWithParent(root, descendantAttribute, descendantValue);
+	if (found?.parent == null) {
+		throw new Error(
+			`Could not find a CDP DOM node for ${descendantAttribute}="${descendantValue}" with a parent.`,
+		);
+	}
+
+	const pseudoNode = found.parent.pseudoElements?.find(
+		(candidate) => candidate.pseudoType === 'after',
+	);
+	if (pseudoNode == null) {
+		throw new Error(
+			`Expected a "::after" pseudo-element on the parent of ${descendantAttribute}="${descendantValue}".`,
+		);
+	}
+
+	const { model } = await cdp().send('DOM.getBoxModel', { nodeId: pseudoNode.nodeId });
+	// `border` is a clockwise quad `[x1, y1, x2, y2, x3, y3, x4, y4]` starting at the
+	// top-left corner, so index 0 is the border box's left edge.
+	const left = model.border[0];
+	if (left == null) throw new Error('Expected the pseudo-element border quad to have a left edge.');
+	return left;
+}
+
 /** Unmounts everything rendered by `renderVisual`. Registered globally in `visual-setup.ts`. */
 export function cleanupVisual() {
 	for (const { container, root } of mounted) {

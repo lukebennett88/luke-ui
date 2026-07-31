@@ -7,6 +7,7 @@ import {
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
+	pseudoElementLeft,
 	renderVisual,
 	Stack,
 	visualAppearances,
@@ -412,10 +413,12 @@ test.each(visualAppearances)('mobile tray short list: $theme $mode', async (appe
 	}
 });
 
-// #247: with a selected value, the control also shows a clear button before the
-// trigger. Confirms the icon lands after both actions rather than overlapping them.
+// #247/#312: with a selected value, the control also shows a clear button before the
+// trigger. Confirms the icon lands between the text and both actions (Spectrum's
+// ordering), not after them, which is the ordering that broke and needs a geometry
+// assertion, not just a screenshot.
 test.each(visualAppearances)(
-	'invalid with a selected value shows the icon after the clear and trigger buttons: $theme $mode',
+	'invalid with a selected value shows the icon before the clear and trigger buttons: $theme $mode',
 	async (appearance) => {
 		const scene = renderVisual(
 			<Stack>
@@ -432,9 +435,18 @@ test.each(visualAppearances)(
 			</Stack>,
 			appearance,
 		);
-		await expect
-			.element(page.getByRole('combobox', { name: 'Invalid with a selection' }))
-			.toBeVisible();
+		const input = page.getByRole('combobox', { name: 'Invalid with a selection' });
+		await expect.element(input).toBeVisible();
+
+		const clear = page.getByRole('button', { name: 'Clear selection' });
+		const trigger = page.getByRole('button', { name: 'Toggle options' });
+		// Not `name`: RAC's `ComboBox` also renders a `<input type="hidden" name="…">`
+		// for form submission alongside the visible combobox input, and that hidden
+		// input shares the same `name` value. `aria-invalid` is only ever on the
+		// visible input.
+		const iconLeft = await pseudoElementLeft('aria-invalid', 'true');
+		expect(iconLeft).toBeLessThan(clear.element().getBoundingClientRect().left);
+		expect(iconLeft).toBeLessThan(trigger.element().getBoundingClientRect().left);
 
 		await captureVisualAppearance(scene, 'combobox-field/invalid-with-selection', appearance);
 	},

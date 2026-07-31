@@ -18,15 +18,19 @@ element. Neither step injects styles at runtime.
   `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose and extend. It
   is named `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module
   composes its plain data and functions.
-- `recipes/invalid-indicator.ts`: the shared invalid-state `exclamationCircle` icon, rendered as a
+- `recipes/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
   CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is the
   in-control icon `text-input.css.ts` and `combobox.css.ts` apply under their own invalid selector's
   `::after` — the border stays at its resting 1px for these two, since the icon is already the
-  non-colour cue. `invalidMessageIcon` is the smaller, message-leading variant `field.css.ts` draws
-  on its `message` slot, switched on by `checkbox.css.ts` alone: `Checkbox`'s own box has no room
-  for an in-control icon without floating past the label, so its icon moves to the message and its
-  box keeps a `2px` border as its own non-colour cue instead. Named `.ts` for the same reason as
-  `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
+  non-colour cue. It renders as the pseudo-element's own last DOM child, but each recipe gives its
+  trailing affordances (`adornmentEnd`; the combobox clear button and trigger) a flex `order` ahead
+  of the icon's default `order: 0`, so it lands right after the field's text content and before
+  them, matching the Spectrum reference this ordering is drawn from. `invalidMessageIcon` is the
+  smaller, message-leading variant `field.css.ts` draws on its `message` slot, switched on by
+  `checkbox.css.ts` alone: `Checkbox`'s own box has no room for an in-control icon without floating
+  past the label, so its icon moves to the message and its box keeps a `2px` border as its own
+  non-colour cue instead. Named `.ts` for the same reason as `input-states.ts`: it emits no CSS of
+  its own, only plain style-rule data each recipe composes.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
   `fontSizeSteps` typography step keys.
