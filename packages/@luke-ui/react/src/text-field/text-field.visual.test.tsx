@@ -20,8 +20,11 @@ import {
 	InputGroupSuffix,
 } from './primitive/index.js';
 
-// The `invalidIndicator` slot has no `size` variant, so this is one stable class.
-const invalidIndicatorClass = inputGroup().invalidIndicator();
+// The `invalidIndicator` slot's `marginInlineEnd` now has a `size` variant (it matches
+// the control's own horizontal padding at each size, see `input-group.css.ts`), so the
+// full class string differs between `small` and `medium`. Only its first token — the
+// slot's base class — is stable across sizes, so that is what a lookup keys on.
+const invalidIndicatorClass = inputGroup().invalidIndicator().split(' ')[0];
 
 test('sizes', async () => {
 	const locator = renderVisual(

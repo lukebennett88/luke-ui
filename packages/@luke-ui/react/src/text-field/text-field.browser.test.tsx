@@ -23,8 +23,11 @@ function groupFor(name: string): HTMLElement {
 	return group;
 }
 
-// The `invalidIndicator` slot has no `size` variant, so this is one stable class.
-const invalidIndicatorClass = inputGroup().invalidIndicator();
+// The `invalidIndicator` slot's `marginInlineEnd` now has a `size` variant (it matches
+// the control's own horizontal padding at each size, see `input-group.css.ts`), so the
+// full class string differs between `small` and `medium`. Only its first token — the
+// slot's base class — is stable across sizes, so that is what a lookup keys on.
+const invalidIndicatorClass = inputGroup().invalidIndicator().split(' ')[0];
 
 /**
  * The invalid indicator `InputGroup` renders itself, if it is present. Matched by the
@@ -100,6 +103,44 @@ test('the indicator icon matches the control size variant, not a constant', asyn
 	expect(getComputedStyle(medium).blockSize).toBe('20px');
 	expect(getComputedStyle(small).blockSize).toBe('16px');
 });
+
+// #247: the icon must read as optically centred between the two borders — its inset
+// from the trailing border equal to the text's inset from the leading border — rather
+// than hugging the trailing edge on a flat constant while the text scales with `size`.
+// This is the geometry regression guard for that bug: measured from rendered layout,
+// not from the CSS declarations, so it fails if the `size` variant on `invalidIndicator`
+// (`input-group.css.ts`) ever drifts out of step with `control`'s own horizontal
+// padding again.
+test.each(['medium', 'small'] as const)(
+	'the indicator sits as far from the trailing border as the text sits from the leading border: %s',
+	async (size) => {
+		renderVisual(<TextField isInvalid label="Invalid" name="invalid" size={size} />);
+
+		const input = page.getByRole('textbox', { name: 'Invalid' });
+		await expect.element(input).toBeVisible();
+
+		const group = groupFor('Invalid');
+		const indicator = indicatorFor('Invalid');
+		if (indicator == null) throw new Error('Expected the invalid indicator.');
+
+		const groupStyle = getComputedStyle(group);
+		const groupRect = group.getBoundingClientRect();
+		const borderWidth = Number.parseFloat(groupStyle.borderRightWidth);
+		const innerBorderLeft = groupRect.left + borderWidth;
+		const innerBorderRight = groupRect.right - borderWidth;
+
+		const inputElement = input.element();
+		const inputStyle = getComputedStyle(inputElement);
+		const inputRect = inputElement.getBoundingClientRect();
+		const textInsetFromLeadingBorder =
+			inputRect.left + Number.parseFloat(inputStyle.paddingInlineStart) - innerBorderLeft;
+
+		const indicatorInsetFromTrailingBorder =
+			innerBorderRight - indicator.getBoundingClientRect().right;
+
+		expect(indicatorInsetFromTrailingBorder).toBeCloseTo(textInsetFromLeadingBorder, 0);
+	},
+);
 
 // #247/#312: the invalid icon must land before a trailing suffix, not after it. The
 // suffix's flex `order` is what puts it there, so the DOM position of the appended

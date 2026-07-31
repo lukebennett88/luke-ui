@@ -47,9 +47,13 @@ function invalidIconMask(size: string) {
  * ahead of its own trailing affordances with a plain flex `order` (giving `order: 1`
  * to `clearButton`/`trigger` in `combobox.css.ts`) so the icon sits immediately after
  * the field's text content and before any trailing buttons, matching the Spectrum
- * reference this direction was drawn from. `marginInlineStart`/`marginInlineEnd` give
- * it breathing room on both sides so it reads as its own element rather than crowding
- * the text or the buttons.
+ * reference this direction was drawn from.
+ *
+ * No `marginInlineStart`: the control's own `paddingInlineEnd` already supplies the
+ * gap between the value text and the icon (same reasoning as `InputGroup`'s
+ * `invalidIndicator` in `input-group.css.ts` — see #247), so a margin stacked on top
+ * of it would double the leading gap for no reason. `marginInlineEnd` gives the icon
+ * breathing room from the trailing buttons that follow it.
  *
  * Takes `size` rather than a fixed constant: the recipe has `small`/`medium`
  * control-size variants and the icon must match its variant's own scale, so
@@ -70,7 +74,6 @@ export function invalidIndicatorIcon(size: string) {
 	return {
 		...invalidIconMask(size),
 		marginInlineEnd: vars.space[100],
-		marginInlineStart: vars.space[100],
 	} satisfies StyleRule;
 }
 
