@@ -21,7 +21,7 @@ custom composition. The `/primitive` path makes that lower-level audience visibl
 
 ```tsx
 import { Button } from '@luke-ui/react/button';
-import { TextInput } from '@luke-ui/react/text-field/primitive';
+import { InputGroup } from '@luke-ui/react/text-field/primitive';
 ```
 
 Use a composed component for ordinary application UI. For example, `Button` includes its standard
@@ -42,7 +42,7 @@ primitives when `ComboboxField` does not fit your control, popover, or loading U
 <ExampleBlock
 	src="composition/amount-field"
 	title="Amount field"
-	description="Compose the Field and TextInput primitives without adding a new workflow."
+	description="Compose the Field and InputGroup primitives without adding a new workflow."
 />
 
 Give the custom component the same accessibility care as a composed component: preserve its

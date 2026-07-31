@@ -10,8 +10,13 @@ import { Field } from '../field/primitive/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import type { TextInputSize } from './primitive/index.js';
-import { TextInput } from './primitive/index.js';
+import type { InputGroupSize } from './primitive/index.js';
+import {
+	InputGroup,
+	InputGroupInput,
+	InputGroupPrefix,
+	InputGroupSuffix,
+} from './primitive/index.js';
 
 type _TextFieldOmit = DistributiveOmit<RacTextFieldProps, 'children' | keyof DocumentedInputProps>;
 
@@ -25,7 +30,7 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	/** Placeholder text for the input. */
 	placeholder?: string;
 	/** Control size. Defaults to `'medium'`. */
-	size?: TextInputSize;
+	size?: InputGroupSize;
 }
 
 /**
@@ -35,7 +40,13 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
  */
 export type TextFieldProps = Prettify<_TextFieldProps>;
 
-/** Composes `TextInput` with label, description, and error slots. */
+/**
+ * Composes the input group primitive with label, description, and error slots.
+ *
+ * `adornmentStart` / `adornmentEnd` are the Spectrum-style prop names this tier
+ * speaks; they map onto the primitive's `InputGroupPrefix` / `InputGroupSuffix`
+ * children below.
+ */
 export function TextField(props: TextFieldProps): JSX.Element {
 	const [fieldSlotProps, restProps] = composeField(props);
 	const {
@@ -50,13 +61,11 @@ export function TextField(props: TextFieldProps): JSX.Element {
 	return (
 		<RacTextField {...textFieldProps}>
 			<Field {...fieldSlotProps}>
-				<TextInput
-					adornmentEnd={adornmentEnd}
-					adornmentStart={adornmentStart}
-					inputClassName={inputClassName}
-					placeholder={placeholder}
-					size={size}
-				/>
+				<InputGroup size={size}>
+					{adornmentStart != null ? <InputGroupPrefix>{adornmentStart}</InputGroupPrefix> : null}
+					<InputGroupInput className={inputClassName} placeholder={placeholder} />
+					{adornmentEnd != null ? <InputGroupSuffix>{adornmentEnd}</InputGroupSuffix> : null}
+				</InputGroup>
 			</Field>
 		</RacTextField>
 	);

@@ -1,7 +1,39 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { textInput } from '../recipes/text-input.css.js';
 import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
 import { TextField } from './index.js';
+import {
+	InputGroup,
+	InputGroupInput,
+	InputGroupPrefix,
+	InputGroupSuffix,
+} from './primitive/index.js';
+
+/**
+ * The input is always a direct child of the styled group (prefix and suffix are
+ * siblings, not wrappers), so `parentElement` is the group regardless of what else
+ * the composition contains. The group carries `role="presentation"` under a
+ * `TextField` (`RacTextField` supplies that through `GroupContext` when the field has
+ * its own external `<label>`), so it cannot be found via `[role="group"]`.
+ */
+function groupFor(name: string): HTMLElement {
+	const group = page.getByRole('textbox', { name }).element().parentElement;
+	if (group == null) throw new Error(`Expected a text input group for "${name}".`);
+	return group;
+}
+
+// The `invalidIndicator` slot has no `size` variant, so this is one stable class.
+const invalidIndicatorClass = textInput().invalidIndicator();
+
+/**
+ * The invalid indicator `InputGroup` renders itself, if it is present. Matched by the
+ * recipe's own slot class rather than by tag name: a prefix or suffix can hold an
+ * `<svg>` of its own.
+ */
+function indicatorFor(name: string): SVGSVGElement | null {
+	return groupFor(name).querySelector<SVGSVGElement>(`.${invalidIndicatorClass}`);
+}
 
 afterEach(() => {
 	cleanupVisual();
@@ -20,24 +52,14 @@ test('invalid without an error message still carries a non-colour cue', async ()
 		</>,
 	);
 
-	const restingInput = page.getByRole('textbox', { name: 'Resting' });
 	const invalidInput = page.getByRole('textbox', { name: 'Invalid' });
 	await expect.element(invalidInput).toBeVisible();
 
-	// The input is always a direct child of the styled group (adornments are
-	// siblings, not wrappers), so `parentElement` is the group regardless of
-	// whether adornments are present. The group carries `role="presentation"`
-	// here (`RacTextField` supplies that through `GroupContext` when the field
-	// has its own external `<label>`), so it cannot be found via `[role="group"]`.
-	const restingGroup = restingInput.element().parentElement;
-	const invalidGroup = invalidInput.element().parentElement;
-	if (restingGroup == null || invalidGroup == null) {
-		throw new Error('Expected both text input groups.');
-	}
+	const restingGroup = groupFor('Resting');
+	const invalidGroup = groupFor('Invalid');
 
-	const indicator = getComputedStyle(invalidGroup, '::after');
-	expect(indicator.content).toBe('""');
-	expect(indicator.maskImage).not.toBe('none');
+	expect(indicatorFor('Resting')).toBe(null);
+	expect(indicatorFor('Invalid')).not.toBe(null);
 
 	expect(getComputedStyle(invalidGroup).borderWidth).toBe('1px');
 	expect(getComputedStyle(invalidGroup).borderColor).not.toBe(
@@ -50,13 +72,61 @@ test('the indicator icon adds no text to the accessible name', async () => {
 
 	const input = page.getByRole('textbox', { name: 'Invalid' });
 	// The field's label is an external `<label>` associated via `aria-labelledby`,
-	// not an ancestor of the group carrying the indicator, so the indicator's
-	// `::after` is never in this input's accessible-name computation regardless.
-	// The indicator's `content` is empty (a mask, not a glyph) either way, so
-	// there is nothing for a label ancestor to pick up — see
-	// `checkbox.browser.test.tsx` for the case where the indicator does sit
-	// inside a `<label>`.
+	// not an ancestor of the group carrying the indicator, so the indicator is never
+	// in this input's accessible-name computation regardless. It is `aria-hidden`
+	// either way, so there is nothing for a label ancestor to pick up — see
+	// `checkbox.browser.test.tsx` for the case where the indicator does sit inside a
+	// `<label>`.
 	await expect.element(input).toHaveAccessibleName('Invalid');
+	expect(indicatorFor('Invalid')?.getAttribute('aria-hidden')).toBe('true');
+});
+
+// The indicator scales with the control's own `size` (`INPUT_GROUP_ICON_SIZE`), the
+// same `medium` → 20px, `small` → 16px mapping Combobox uses, so it stays proportioned
+// to the field it sits in rather than sitting at a constant.
+test('the indicator icon matches the control size variant, not a constant', async () => {
+	renderVisual(
+		<>
+			<TextField isInvalid label="Medium" name="medium" />
+			<TextField isInvalid label="Small" name="small" size="small" />
+		</>,
+	);
+	await expect.element(page.getByRole('textbox', { name: 'Medium' })).toBeVisible();
+
+	const medium = indicatorFor('Medium');
+	const small = indicatorFor('Small');
+	if (medium == null || small == null) throw new Error('Expected both invalid indicators.');
+
+	expect(getComputedStyle(medium).blockSize).toBe('20px');
+	expect(getComputedStyle(small).blockSize).toBe('16px');
+});
+
+// #247/#312: the invalid icon must land before a trailing suffix, not after it. The
+// suffix's flex `order` is what puts it there, so the DOM position of the appended
+// icon alone does not prove it — the rendered geometry does.
+test('the indicator lands after the input and before a trailing suffix', async () => {
+	renderVisual(
+		<InputGroup isInvalid>
+			<InputGroupPrefix>$</InputGroupPrefix>
+			<InputGroupInput aria-label="Amount" defaultValue="0.00" />
+			<InputGroupSuffix>USD</InputGroupSuffix>
+		</InputGroup>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Amount' });
+	await expect.element(input).toBeVisible();
+
+	const indicator = indicatorFor('Amount');
+	if (indicator == null) throw new Error('Expected the invalid indicator.');
+
+	const inputRect = input.element().getBoundingClientRect();
+	const indicatorRect = indicator.getBoundingClientRect();
+	const prefixRect = page.getByText('$').element().getBoundingClientRect();
+	const suffixRect = page.getByText('USD').element().getBoundingClientRect();
+
+	expect(prefixRect.left).toBeLessThan(inputRect.left);
+	expect(indicatorRect.left).toBeGreaterThanOrEqual(inputRect.right);
+	expect(indicatorRect.left).toBeLessThan(suffixRect.left);
 });
 
 // #247: `inputStates.invalid` used to include `:has(:invalid)`, which matches a
@@ -80,12 +150,10 @@ test('a required field with no value is not painted invalid before validation ru
 	await expect.element(input).toBeVisible();
 	await expect.element(input).not.toHaveAttribute('aria-invalid');
 
-	const restingGroup = page.getByRole('textbox', { name: 'Resting' }).element().parentElement;
-	const group = input.element().parentElement;
-	if (restingGroup == null || group == null) throw new Error('Expected the text input groups.');
-
-	expect(getComputedStyle(group).borderColor).toBe(getComputedStyle(restingGroup).borderColor);
-	expect(getComputedStyle(group, '::after').maskImage).toBe('none');
+	expect(getComputedStyle(groupFor('Email')).borderColor).toBe(
+		getComputedStyle(groupFor('Resting')).borderColor,
+	);
+	expect(indicatorFor('Email')).toBe(null);
 });
 
 test('a required field is painted invalid once a real submit fails validation', async () => {
@@ -109,10 +177,8 @@ test('a required field is painted invalid once a real submit fails validation', 
 
 	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
 
-	const restingGroup = page.getByRole('textbox', { name: 'Resting' }).element().parentElement;
-	const group = input.element().parentElement;
-	if (restingGroup == null || group == null) throw new Error('Expected the text input groups.');
-
-	expect(getComputedStyle(group).borderColor).not.toBe(getComputedStyle(restingGroup).borderColor);
-	expect(getComputedStyle(group, '::after').maskImage).not.toBe('none');
+	expect(getComputedStyle(groupFor('Email')).borderColor).not.toBe(
+		getComputedStyle(groupFor('Resting')).borderColor,
+	);
+	expect(indicatorFor('Email')).not.toBe(null);
 });

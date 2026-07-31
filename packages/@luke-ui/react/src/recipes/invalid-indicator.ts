@@ -4,8 +4,9 @@ import { vars } from '../theme/contract.css.js';
 
 /**
  * The `exclamationTriangle` icon rendered as a CSS mask, at `size`. Factored out so
- * `invalidIndicatorIcon` (in-control) and `invalidMessageIcon` (message-leading)
- * share one mask definition instead of duplicating the mask URL and sizing.
+ * `invalidIndicatorIcon` (Combobox, in-control) and `invalidMessageIcon` (Checkbox,
+ * message-leading) share one mask definition instead of duplicating the mask URL and
+ * sizing.
  *
  * A mask, not an `<Icon>` element: each usage stays a pseudo-element driven entirely
  * by its recipe's invalid selector, so it can never drift out of sync with the
@@ -38,24 +39,28 @@ function invalidIconMask(size: string) {
 }
 
 /**
- * In-control invalid icon for `TextInput` and `Combobox`: a `::after` inside the
- * control, gated on the invalid selector alone (not on whether a message exists), for
- * example `selectors: { [`${invalid}::after`]: invalidIndicatorIcon(size) }`.
+ * In-control invalid icon for `Combobox`: a `::after` inside the control, gated on
+ * the invalid selector alone (not on whether a message exists), for example
+ * `selectors: { [`${invalid}::after`]: invalidIndicatorIcon(size) }`.
  *
- * `::after` is the last child in DOM order, but each consuming recipe reorders it
+ * `::after` is the last child in DOM order, but the consuming recipe reorders it
  * ahead of its own trailing affordances with a plain flex `order` (giving `order: 1`
- * to `adornmentEnd` in `text-input.css.ts`, and to `clearButton`/`trigger` in
- * `combobox.css.ts`) so the icon sits immediately after the field's text content and
- * before any trailing buttons, matching the Spectrum reference this direction was
- * drawn from. `marginInlineStart`/`marginInlineEnd` give it breathing room on both
- * sides so it reads as its own element rather than crowding the text or the buttons.
+ * to `clearButton`/`trigger` in `combobox.css.ts`) so the icon sits immediately after
+ * the field's text content and before any trailing buttons, matching the Spectrum
+ * reference this direction was drawn from. `marginInlineStart`/`marginInlineEnd` give
+ * it breathing room on both sides so it reads as its own element rather than crowding
+ * the text or the buttons.
  *
- * Takes `size` rather than a fixed constant: both consuming recipes have `small`/
- * `medium` control-size variants, and the icon must match its variant's own scale —
- * `combobox.css.ts` mirrors `COMBOBOX_ICON_SIZE` (`sizing/combobox-sizing.ts`) so the
- * error icon lands on the same size as the trigger/clear chevrons it sits beside;
- * `text-input.css.ts` has no internal icon to match but follows the same mapping for
- * consistency between the two field controls.
+ * Takes `size` rather than a fixed constant: the recipe has `small`/`medium`
+ * control-size variants and the icon must match its variant's own scale, so
+ * `combobox.css.ts` mirrors `COMBOBOX_ICON_SIZE` (`sizing/combobox-sizing.ts`) and the
+ * error icon lands on the same size as the trigger/clear chevrons it sits beside.
+ *
+ * `InputGroup` (`text-field/primitive/`) draws the same glyph but as a real `Icon`
+ * element, not this mask: `Group`'s `isInvalid` render prop tracks React Aria's
+ * validation state exactly, so the invalid state is readable in React there and the
+ * component can guarantee the icon itself. Combobox's control is not a plain `Group`
+ * with that state to hand, so it stays CSS-driven.
  *
  * This is the only non-colour cue an invalid control carries when `errorMessage` is
  * omitted (it is optional on `composeField`), so the icon alone must stay perceivable
@@ -99,7 +104,7 @@ const invalidMessageIconGap = vars.space[200];
 /**
  * Leading icon for the shared `Field` error message (`field.css.ts`'s `message`
  * slot), switched on there by the `fieldMessageIcon` var. Checkbox is the only
- * recipe that turns it on: unlike `TextInput`/`Combobox`, its own box has no room
+ * recipe that turns it on: unlike `InputGroup`/`Combobox`, its own box has no room
  * for an in-control icon without floating past the label — the specific thing an
  * earlier design pass on #247 was rejected for — so its icon moves to the message
  * instead. Fixed at `xsmall`, not sized per `size` variant like

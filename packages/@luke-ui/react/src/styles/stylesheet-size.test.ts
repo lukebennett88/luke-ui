@@ -40,8 +40,14 @@ import { expect, test } from 'vite-plus/test';
 // (`combobox.css.ts`), plus a new `marginInlineEnd` on `invalidIndicatorIcon` matching its existing
 // `marginInlineStart`. The limits retain minimal reviewed headroom above the new measured total
 // (90,223 raw / 9,685 gzip).
-const maximumRawBytes = 90_320;
-const maximumGzipBytes = 9_735;
+// The InputGroup refactor (#247/#312) moved the text-input control's in-control icon off `::after`
+// onto a real `Icon` element the primitive renders itself, so `text-input.css.ts` lost its inlined
+// `exclamationTriangle` mask data URI (one of the three), both per-size `::after` rules and their
+// `createVar`, and the forced-colors `::after` override, gaining only a small `invalidIndicator`
+// slot. The limits retain minimal reviewed headroom above the new measured total
+// (88,812 raw / 9,638 gzip).
+const maximumRawBytes = 88_910;
+const maximumGzipBytes = 9_690;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url));

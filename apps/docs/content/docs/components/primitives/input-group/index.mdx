@@ -1,0 +1,63 @@
+---
+title: InputGroup primitives
+description: Lower-level parts for composing a text input with content at either end.
+---
+
+Use these primitives to build a custom text control when you need the styled input without label,
+description, or error slots. For most application forms, use
+[`TextField`](/components/forms/text-field).
+
+<ExampleBlock
+	src="input-group-primitive/basic"
+	title="InputGroup primitives — Basic"
+	description="An amount input with a currency prefix and a unit suffix."
+/>
+
+## Anatomy
+
+`InputGroup` owns the border, background, shadow, and rounding. Its parts are transparent flex
+children, so position follows document order: put `InputGroupPrefix` before `InputGroupInput` and
+`InputGroupSuffix` after it.
+
+```tsx
+<InputGroup>
+	<InputGroupPrefix>$</InputGroupPrefix>
+	<InputGroupInput aria-label="Amount" inputMode="decimal" />
+	<InputGroupSuffix>USD</InputGroupSuffix>
+</InputGroup>
+```
+
+A prefix or suffix accepts any React node, including an interactive one such as a button. Give an
+interactive part an accessible name, keyboard behaviour, and a considered focus order.
+
+This primitive composes from children while the composed `TextField` above it takes `adornmentStart`
+and `adornmentEnd` props. That difference is deliberate: `TextField` maps those props onto
+`InputGroupPrefix` and `InputGroupSuffix` for you.
+
+## Size
+
+Set `size` on `InputGroup` and the parts inherit it. `medium` is the default. Use `small` when the
+input belongs in a compact control group, and match the size of nearby fields and actions. An
+individual part can override the inherited size.
+
+The group also sets the icon size for everything inside it, so an `Icon` in a prefix or suffix
+scales with the control without a `size` of its own.
+
+## Validation
+
+`InputGroup` reads its invalid state from the enclosing React Aria field, or from an explicit
+`isInvalid`. Whenever it is invalid it renders its own error icon after the input value and before
+any `InputGroupSuffix`, so a composition always carries a non-colour cue even when no error message
+is shown. The icon is decorative and hidden from assistive technology; the field's error message
+carries the meaning.
+
+## Styling and composition
+
+`className` on `InputGroup` applies to the group element, and `className` on `InputGroupInput`
+applies to the input. Use these hooks when composing the primitive with other controls. Give a
+standalone `InputGroupInput` an accessible name with `aria-label` or a connected label.
+
+## TextField composition
+
+`TextField` combines these primitives with the field primitive and React Aria text-field behaviour.
+Use the primitives only when you need a different composed structure or control arrangement.

@@ -20,17 +20,23 @@ element. Neither step injects styles at runtime.
   composes its plain data and functions.
 - `recipes/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
   CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is the
-  in-control icon `text-input.css.ts` and `combobox.css.ts` apply under their own invalid selector's
-  `::after` — the border stays at its resting 1px for these two, since the icon is already the
-  non-colour cue. It renders as the pseudo-element's own last DOM child, but each recipe gives its
-  trailing affordances (`adornmentEnd`; the combobox clear button and trigger) a flex `order` ahead
-  of the icon's default `order: 0`, so it lands right after the field's text content and before
-  them, matching the Spectrum reference this ordering is drawn from. `invalidMessageIcon` is the
-  smaller, message-leading variant `field.css.ts` draws on its `message` slot, switched on by
-  `checkbox.css.ts` alone: `Checkbox`'s own box has no room for an in-control icon without floating
-  past the label, so its icon moves to the message and its box keeps a `2px` border as its own
-  non-colour cue instead. Named `.ts` for the same reason as `input-states.ts`: it emits no CSS of
-  its own, only plain style-rule data each recipe composes.
+  in-control icon `combobox.css.ts` applies under its own invalid selector's `::after` — the border
+  stays at its resting 1px there, since the icon is already the non-colour cue. It renders as the
+  pseudo-element's own last DOM child, so the recipe gives its trailing affordances (the combobox
+  clear button and trigger) a flex `order` ahead of the icon's default `order: 0`, so it lands right
+  after the field's text content and before them, matching the Spectrum reference this ordering is
+  drawn from. `invalidMessageIcon` is the smaller, message-leading variant `field.css.ts` draws on
+  its `message` slot, switched on by `checkbox.css.ts` alone: `Checkbox`'s own box has no room for
+  an in-control icon without floating past the label, so its icon moves to the message and its box
+  keeps a `2px` border as its own non-colour cue instead. Named `.ts` for the same reason as
+  `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
+- `text-input.css.ts` draws the same glyph, but as a real `Icon` element on its own
+  `invalidIndicator` slot rather than a mask: `InputGroup` (`text-field/primitive/`) reads React
+  Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid control cannot
+  be composed without a non-colour cue. The recipe owns only the icon's colour and margins — `Icon`
+  owns its box, and `IconSizeProvider` (`INPUT_GROUP_ICON_SIZE`) owns its per-size step — and gives
+  the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control is not a
+  plain `Group` with that state to hand, so it stays CSS-driven.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
   `fontSizeSteps` typography step keys.

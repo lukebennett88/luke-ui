@@ -128,7 +128,7 @@ const checkboxConfig = {
 					content: '"−"',
 					opacity: 1,
 				},
-				// Unlike `TextInput`/`Combobox` (which dropped their invalid border back to
+				// Unlike `InputGroup`/`Combobox` (which dropped their invalid border back to
 				// 1px once their in-control icon became the non-colour cue), the box keeps
 				// `borderWidth: '2px'` here. The reference systems this direction is drawn
 				// from accept a colour-only invalid checkbox when there is no message

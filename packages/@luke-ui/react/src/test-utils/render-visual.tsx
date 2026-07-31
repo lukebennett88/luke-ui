@@ -167,11 +167,12 @@ function findCdpNodeWithParent(
  * `::after` from the CDP DOM domain's `pseudoElements`.
  *
  * `getBoundingClientRect` cannot target a pseudo-element — there is no live DOM node
- * for one — so this is the only way to measure where the invalid-indicator icon
+ * for one — so this is the only way to measure where a CSS-drawn invalid-indicator icon
  * (`invalidIndicatorIcon`, drawn as its host's `::after`) actually renders, rather than
- * trusting the CSS declarations that are supposed to place it there. Used to assert
- * the icon lands before a control's trailing affordances (`adornmentEnd`, the combobox
- * clear button and trigger) instead of after them.
+ * trusting the CSS declarations that are supposed to place it there. Used by Combobox
+ * to assert the icon lands before its clear button and trigger instead of after them.
+ * `InputGroup` draws the same glyph as a real `Icon` element, so its own ordering test
+ * reads a plain `getBoundingClientRect` instead.
  */
 export async function pseudoElementLeft(
 	descendantAttribute: string,

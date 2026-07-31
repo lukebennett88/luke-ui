@@ -84,18 +84,28 @@ test('invalid shows the danger border even while focus-within, ring stays the sa
 	expect(invalidBorder).not.toBe(getComputedStyle(resting).borderColor);
 });
 
-// The invalid icon must scale with `size` rather than sit at a constant — TextInput
-// has no internal icon to compare it against (its adornments are caller-supplied),
-// but it mirrors Combobox's `medium` → `small` (20px), `small` → `xsmall` (16px)
-// mapping (`sizing/combobox-sizing.ts`) so the two field controls scale the same way.
-test('invalid icon matches the control size variant, not a constant', () => {
-	const { group: medium } = mountGroup({ size: 'medium' });
-	medium.dataset.invalid = 'true';
-	const { group: small } = mountGroup({ size: 'small' });
-	small.dataset.invalid = 'true';
+// The invalid icon is a real `Icon` element `InputGroup` renders, not a `::after`, so
+// its size lives in React (`INPUT_GROUP_ICON_SIZE`, applied through `IconSizeProvider`)
+// and this recipe owns only its colour and the flex `order` that keeps it ahead of a
+// trailing suffix. `text-field.browser.test.tsx` guards the size and the rendered
+// geometry; this guards the declarations behind them.
+test('the invalid indicator draws in the danger foreground and orders ahead of the suffix', () => {
+	const { group, root } = mountGroup();
+	group.dataset.invalid = 'true';
 
-	expect(getComputedStyle(medium, '::after').blockSize).toBe('20px');
-	expect(getComputedStyle(small, '::after').blockSize).toBe('16px');
+	const indicator = group.appendChild(document.createElement('span'));
+	indicator.className = textInput().invalidIndicator();
+	const suffix = group.appendChild(document.createElement('span'));
+	suffix.className = textInput().suffix();
+
+	const dangerProbe = root.appendChild(document.createElement('div'));
+	dangerProbe.style.color = 'var(--luke-color-foreground-danger-rest)';
+	expect(getComputedStyle(indicator).color).toBe(getComputedStyle(dangerProbe).color);
+
+	expect(Number(getComputedStyle(suffix).order)).toBeGreaterThan(
+		Number(getComputedStyle(indicator).order),
+	);
+	expect(getComputedStyle(group, '::after').maskImage).toBe('none');
 });
 
 test('disabled preserves resting background and border, only dropping opacity', () => {
@@ -137,21 +147,21 @@ test('read-only still shows the focus ring since read-only fields remain focusab
 	expect(style.outlineWidth).toBe('2px');
 });
 
-test('adornment divider uses the control border color and disabled text color follows the group', () => {
+test('prefix divider uses the control border color and disabled text color follows the group', () => {
 	const { group, root } = mountGroup();
-	const adornment = group.appendChild(document.createElement('span'));
-	adornment.className = textInput({ size: 'medium' }).adornmentStart();
+	const prefix = group.appendChild(document.createElement('span'));
+	prefix.className = textInput({ size: 'medium' }).prefix();
 
 	const controlBorderProbe = root.appendChild(document.createElement('div'));
 	controlBorderProbe.style.borderColor = 'var(--luke-color-border-control)';
-	expect(getComputedStyle(adornment).borderInlineEndColor).toBe(
+	expect(getComputedStyle(prefix).borderInlineEndColor).toBe(
 		getComputedStyle(controlBorderProbe).borderColor,
 	);
 
 	group.dataset.disabled = 'true';
 	const disabledTextProbe = root.appendChild(document.createElement('div'));
 	disabledTextProbe.style.color = 'var(--luke-color-text-disabled)';
-	expect(getComputedStyle(adornment).color).toBe(getComputedStyle(disabledTextProbe).color);
+	expect(getComputedStyle(prefix).color).toBe(getComputedStyle(disabledTextProbe).color);
 });
 
 function mountGroup(options: Parameters<typeof textInput>[0] = {}) {
