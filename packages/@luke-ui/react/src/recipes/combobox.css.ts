@@ -1,4 +1,6 @@
 import type { StyleRule } from '@vanilla-extract/css';
+import { createVar } from '@vanilla-extract/css';
+import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
 import {
@@ -15,6 +17,10 @@ export const comboboxTrayViewportHeightVar = '--luke-ui-visual-viewport-height';
 
 /** Custom property mirroring the on-screen keyboard's height, set by `useVisualViewportVars`. */
 export const comboboxTrayKeyboardInsetVar = '--luke-ui-keyboard-inset';
+
+// Set per `size` variant on `control` below, from `COMBOBOX_ICON_SIZE`, so the invalid
+// `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
+const comboboxErrorIconSize = createVar();
 
 // Below 640px the popover renders as a bottom tray, matching Adobe Spectrum's combobox pattern.
 const trayMediaQuery = '(width < 40rem)';
@@ -161,16 +167,20 @@ const comboboxConfig = {
 					...focusRing(vars.color.border.focus),
 				},
 				[hover]: { borderColor: vars.color.border.accent },
+				// The border stays at the resting 1px here: the in-control icon just below
+				// (`::after`) is the non-colour cue, so thickening the border as well would
+				// be redundant, and none of the five reference systems this direction is
+				// drawn from (Spectrum, Astryx, Polaris, HeroUI, Radix Themes) thicken the
+				// border for an invalid control. The gated danger colour is what satisfies
+				// the contrast requirement, and it is unchanged.
 				[invalid]: {
 					borderColor: vars.color.background.danger.solid.rest,
-					borderWidth: '2px',
 				},
 				// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 				// here touches `::after`, so this already covers the focused case.
-				[`${invalid}::after`]: invalidIndicatorIcon,
+				[`${invalid}::after`]: invalidIndicatorIcon(comboboxErrorIconSize),
 				[invalidFocusWithin]: {
 					borderColor: vars.color.background.danger.solid.rest,
-					borderWidth: '2px',
 					...focusRing(vars.color.border.focus),
 				},
 				[readOnly]: {
@@ -423,7 +433,11 @@ const comboboxConfig = {
 	variants: {
 		size: {
 			medium: {
-				control: { blockSize: vars.controlSize.medium, fontSize: vars.font[300].fontSize },
+				control: {
+					blockSize: vars.controlSize.medium,
+					fontSize: vars.font[300].fontSize,
+					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.medium] },
+				},
 				textInput: {
 					blockSize: vars.controlSize.medium,
 					paddingInlineEnd: vars.space[300],
@@ -451,6 +465,7 @@ const comboboxConfig = {
 				control: {
 					blockSize: vars.controlSize.small,
 					...vars.font[200],
+					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.small] },
 				},
 				textInput: {
 					blockSize: vars.controlSize.small,

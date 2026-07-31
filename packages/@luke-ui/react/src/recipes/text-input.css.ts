@@ -1,3 +1,4 @@
+import { createVar } from '@vanilla-extract/css';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
 import {
@@ -11,6 +12,13 @@ import { recipe } from './recipe.js';
 
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
 	composeInputStateSelectors(inputStates);
+
+// Set per `size` variant on `group` below, at the same `small`/`medium` → `xsmall`/`small`
+// icon-size mapping `sizing/combobox-sizing.ts` uses for Combobox, so the invalid `::after`
+// icon matches the control's own scale instead of a constant. TextInput's adornments are
+// caller-supplied — there is no internal icon here to match sizes with directly — but the
+// two field controls should still scale their error icon the same way.
+const textInputErrorIconSize = createVar();
 
 /**
  * Raw slotted config for the `TextInput` primitive.
@@ -82,16 +90,20 @@ const textInputConfig = {
 				[hover]: {
 					borderColor: vars.color.border.accent,
 				},
+				// The border stays at the resting 1px here: the in-control icon just below
+				// (`::after`) is the non-colour cue, so thickening the border as well would
+				// be redundant, and none of the five reference systems this direction is
+				// drawn from (Spectrum, Astryx, Polaris, HeroUI, Radix Themes) thicken the
+				// border for an invalid control. The gated danger colour is what satisfies
+				// the contrast requirement, and it is unchanged.
 				[invalid]: {
 					borderColor: vars.color.background.danger.solid.rest,
-					borderWidth: '2px',
 				},
 				// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 				// here touches `::after`, so this already covers the focused case.
-				[`${invalid}::after`]: invalidIndicatorIcon,
+				[`${invalid}::after`]: invalidIndicatorIcon(textInputErrorIconSize),
 				[invalidFocusWithin]: {
 					borderColor: vars.color.background.danger.solid.rest,
-					borderWidth: '2px',
 					...focusRing(vars.color.border.focus),
 				},
 				[readOnly]: {
@@ -177,6 +189,7 @@ const textInputConfig = {
 				group: {
 					blockSize: vars.controlSize.medium,
 					fontSize: vars.font[300].fontSize,
+					vars: { [textInputErrorIconSize]: vars.iconSize.small },
 				},
 				control: {
 					blockSize: vars.controlSize.medium,
@@ -200,6 +213,7 @@ const textInputConfig = {
 					fontSize: vars.font[200].fontSize,
 					letterSpacing: vars.font[200].letterSpacing,
 					lineHeight: vars.font[200].lineHeight,
+					vars: { [textInputErrorIconSize]: vars.iconSize.xsmall },
 				},
 				control: {
 					blockSize: vars.controlSize.small,

@@ -50,9 +50,10 @@ default. Use `small` in compact layouts and `large` where a larger control impro
 Pass `description` to clarify an option. Set `isRequired` and `errorMessage` when selection is
 required for form submission.
 
-An invalid checkbox switches its control to a 2px boundary and shows an error icon after the label.
-The icon is a non-colour cue, so an invalid checkbox stays perceivable even when `errorMessage` is
-omitted.
+An invalid checkbox switches its control to a 2px boundary — unlike TextField and ComboboxField,
+whose in-control icon already carries the non-colour cue, Checkbox's control has no room for an icon
+without floating past the label, so the boundary is its own always-present cue. When `errorMessage`
+is set, the error icon leads the message instead, so the icon still appears exactly once per field.
 
 ## Labels with Text
 

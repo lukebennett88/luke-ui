@@ -71,41 +71,40 @@ test('sets the tray viewport height and keyboard inset custom properties from vi
 });
 
 // Proves the invalid cue survives without `errorMessage`, which `composeField` treats
-// as optional — the case #247 flags as otherwise colour-only and imperceptible.
+// as optional — the case #247 flags as otherwise colour-only and imperceptible. The
+// border stays at the resting 1px (see `combobox.css.ts`): the in-control icon is the
+// non-colour cue here, so the proof is the icon's presence plus the gated border colour,
+// not a border-width change.
 test('invalid without an error message still carries a non-colour cue', async () => {
 	renderVisual(
-		<ComboboxField defaultItems={countryItems} isInvalid label="Invalid" name="invalid">
-			{renderCountryItem}
-		</ComboboxField>,
+		<>
+			<ComboboxField defaultItems={countryItems} label="Resting" name="resting">
+				{renderCountryItem}
+			</ComboboxField>
+			<ComboboxField defaultItems={countryItems} isInvalid label="Invalid" name="invalid">
+				{renderCountryItem}
+			</ComboboxField>
+		</>,
 	);
 
-	const input = page.getByRole('combobox', { name: 'Invalid' });
-	await expect.element(input).toBeVisible();
+	const restingInput = page.getByRole('combobox', { name: 'Resting' });
+	const invalidInput = page.getByRole('combobox', { name: 'Invalid' });
+	await expect.element(invalidInput).toBeVisible();
 
-	const control = input.element().closest<HTMLElement>('[role="group"]');
-	if (control == null) throw new Error('Expected the combobox control group.');
+	const restingControl = restingInput.element().closest<HTMLElement>('[role="group"]');
+	const invalidControl = invalidInput.element().closest<HTMLElement>('[role="group"]');
+	if (restingControl == null || invalidControl == null) {
+		throw new Error('Expected both combobox control groups.');
+	}
 
-	const icon = getComputedStyle(control, '::after');
+	const icon = getComputedStyle(invalidControl, '::after');
 	expect(icon.content).toBe('""');
 	expect(icon.maskImage).not.toBe('none');
 
-	expect(getComputedStyle(control).borderWidth).toBe('2px');
-});
-
-test('valid control keeps the 1px boundary the invalid state widens', async () => {
-	renderVisual(
-		<ComboboxField defaultItems={countryItems} label="Valid" name="valid">
-			{renderCountryItem}
-		</ComboboxField>,
+	expect(getComputedStyle(invalidControl).borderWidth).toBe('1px');
+	expect(getComputedStyle(invalidControl).borderColor).not.toBe(
+		getComputedStyle(restingControl).borderColor,
 	);
-
-	const input = page.getByRole('combobox', { name: 'Valid' });
-	await expect.element(input).toBeVisible();
-
-	const control = input.element().closest<HTMLElement>('[role="group"]');
-	if (control == null) throw new Error('Expected the combobox control group.');
-
-	expect(getComputedStyle(control).borderWidth).toBe('1px');
 });
 
 test('the indicator icon adds no text to the accessible name', async () => {

@@ -146,6 +146,25 @@ test.each(visualAppearances)(
 	},
 );
 
+// The in-control icon scales with `size` (`invalidIndicatorIcon` takes a size from
+// `text-input.css.ts`'s `size` variant, `xsmall` at `small`), so this locks in the
+// small control at its own icon scale rather than the `medium` default.
+test('invalid at the small size', async () => {
+	const scene = renderVisual(
+		<TextField
+			defaultValue="nope"
+			errorMessage="Please enter a valid email."
+			isInvalid
+			label="Invalid"
+			name="invalid-small"
+			size="small"
+		/>,
+	);
+	await expect.element(page.getByRole('textbox', { name: 'Invalid' })).toBeVisible();
+
+	await captureVisual(scene, 'text-field/invalid-small');
+});
+
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 

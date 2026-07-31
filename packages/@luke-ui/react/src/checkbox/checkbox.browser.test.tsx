@@ -8,7 +8,9 @@ afterEach(() => {
 });
 
 // Proves the invalid cue survives without `errorMessage`, which `composeField` treats
-// as optional — the case #247 flags as otherwise colour-only and imperceptible.
+// as optional — the case #247 flags as otherwise colour-only and imperceptible. Unlike
+// TextField/ComboboxField (whose in-control icon carries this), Checkbox has no message
+// to attach an icon to here, so its box's own 2px border is the whole non-colour cue.
 test('invalid without an error message still carries a non-colour cue', async () => {
 	renderVisual(
 		<Checkbox defaultSelected isInvalid name="invalid">
@@ -24,11 +26,35 @@ test('invalid without an error message still carries a non-colour cue', async ()
 	const indicator = content.querySelector<HTMLElement>('[aria-hidden="true"]');
 	if (indicator == null) throw new Error('Expected the checkbox indicator.');
 
-	const icon = getComputedStyle(content, '::after');
-	expect(icon.content).toBe('""');
-	expect(icon.maskImage).not.toBe('none');
-
 	expect(getComputedStyle(indicator).borderWidth).toBe('2px');
+});
+
+// #247/#312: with an `errorMessage`, the icon that used to sit on `content` now leads
+// the message instead — proves both halves of the cue at once: the box keeps its 2px
+// border regardless, and the message grows the leading icon `field.css.ts` gates behind
+// `fieldMessageIcon`.
+test('invalid with an error message shows the 2px box and the message-leading icon', async () => {
+	renderVisual(
+		<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid-message">
+			Invalid
+		</Checkbox>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Invalid' });
+	await expect.element(checkbox).toBeVisible();
+
+	const content = checkbox.element().closest('label');
+	if (content == null) throw new Error('Expected the checkbox content label.');
+	const indicator = content.querySelector<HTMLElement>('[aria-hidden="true"]');
+	if (indicator == null) throw new Error('Expected the checkbox indicator.');
+	expect(getComputedStyle(indicator).borderWidth).toBe('2px');
+
+	const message = page.getByText('Choose an option.');
+	await expect.element(message).toBeVisible();
+	const icon = getComputedStyle(message.element(), '::before');
+	expect(icon.content).toBe('""');
+	expect(icon.display).not.toBe('none');
+	expect(icon.maskImage).not.toBe('none');
 });
 
 test('valid indicator keeps the 1px boundary the invalid state widens', async () => {
@@ -45,18 +71,17 @@ test('valid indicator keeps the 1px boundary the invalid state widens', async ()
 	expect(getComputedStyle(indicator).borderWidth).toBe('1px');
 });
 
-// The indicator is a CSS mask now, not a text glyph: its `content` is empty
-// (`content: '""'`), so there is nothing for `CheckboxContent` (a native
-// `<label>` wrapping the hidden input, which otherwise takes its name from its
-// contents) to pick up as accessible-name text. The old badge used the CSS
-// alt-text syntax (`content: "!" / ""`) for the same guarantee, which needed
-// this CDP-based assertion because the test libraries in this stack (Vitest
-// browser mode's own port of Playwright's locator engine, and the
-// `dom-accessibility-api` package behind jest-dom's `toHaveAccessibleName`) are
-// JS reimplementations of the accname algorithm that do not parse the `/ "alt"`
-// delimiter at all. An empty `content` has no such gap — `getByRole`'s name
-// matching would already prove this — but the guard is kept as the right belt-
-// and-braces check against a future regression back to a text glyph.
+// #247/#312's invalid icon now lives on the error message, not on `content` (the
+// native `<label>` wrapping the hidden input, which otherwise takes its name from
+// its contents), so there is nothing on the label itself for accessible-name
+// computation to pick up regardless. This CDP-based assertion predates that move —
+// it originally guarded a text-glyph badge that _did_ sit on `content` — and is kept
+// as the right belt-and-braces regression guard against a future icon landing back
+// inside the label, since the test libraries in this stack (Vitest browser mode's
+// own port of Playwright's locator engine, and the `dom-accessibility-api` package
+// behind jest-dom's `toHaveAccessibleName`) are JS reimplementations of the accname
+// algorithm that can diverge from a real browser's computation in edge cases like
+// that one.
 test('the icon indicator stays out of the accessible name', async () => {
 	renderVisual(
 		<Checkbox defaultSelected isInvalid name="invalid">

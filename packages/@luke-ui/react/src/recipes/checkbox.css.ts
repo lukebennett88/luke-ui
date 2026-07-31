@@ -1,8 +1,8 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
-import { fieldMessageIndent } from './field.css.js';
-import { invalidIndicatorIcon, invalidIndicatorIconForcedColors } from './invalid-indicator.js';
+import { fieldMessageIcon, fieldMessageIconOffset, fieldMessageIndent } from './field.css.js';
+import { invalidMessageIconOffset } from './invalid-indicator.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 import { textLineHeight } from './text.css.js';
@@ -18,16 +18,16 @@ const checkboxConfig = {
 			flexDirection: 'column',
 			gap: vars.space[100],
 			minInlineSize: 0,
+			// Checkbox's own box has no room for an in-control invalid icon without it
+			// floating past the label (see `indicator` below), so its icon renders on
+			// the error message instead — `field.css.ts`'s `message` slot draws it,
+			// gated behind these vars, which stay off for every other consumer.
+			vars: {
+				[fieldMessageIcon]: 'inline-block',
+				[fieldMessageIconOffset]: invalidMessageIconOffset,
+			},
 		},
 		content: {
-			'@media': {
-				'(forced-colors: active)': {
-					forcedColorAdjust: 'auto',
-					selectors: {
-						'[data-invalid="true"] &::after': invalidIndicatorIconForcedColors,
-					},
-				},
-			},
 			alignItems: 'flex-start',
 			color: 'inherit',
 			cursor: 'pointer',
@@ -42,15 +42,6 @@ const checkboxConfig = {
 				},
 				'&[data-readonly="true"]': {
 					cursor: 'default',
-				},
-				// `content`'s siblings are `control` and the label text, both first-line
-				// aligned via `blockSize: 1lh` (see `control` below), so the icon gets the
-				// same override: without it the icon's own 16px box sits at `flex-start`
-				// (`content`'s own alignment, chosen so a wrapping label reads top-down),
-				// floating at the row's top edge instead of the first line.
-				'[data-invalid="true"] &::after': {
-					...invalidIndicatorIcon,
-					blockSize: fallbackVar(textLineHeight, '1lh'),
 				},
 			},
 		},
@@ -139,6 +130,17 @@ const checkboxConfig = {
 					content: '"−"',
 					opacity: 1,
 				},
+				// Unlike `TextInput`/`Combobox` (which dropped their invalid border back to
+				// 1px once their in-control icon became the non-colour cue), the box keeps
+				// `borderWidth: '2px'` here. The reference systems this direction is drawn
+				// from accept a colour-only invalid checkbox when there is no message
+				// (Astryx: "no message = no icon, no visible cue at all beyond
+				// aria-invalid"). We deliberately do not, because `errorMessage` is optional
+				// on `composeField` and issue #247 exists precisely to fix that colour-only
+				// case. The icon moved to the message (see `root`'s `fieldMessageIcon` var
+				// above), so this 2px boundary is now the box's own always-present
+				// non-colour cue — a deliberate divergence from the references, not an
+				// oversight.
 				'[data-invalid="true"] &': {
 					borderColor: vars.color.background.danger.solid.rest,
 					borderWidth: '2px',

@@ -108,20 +108,68 @@ test('first-line label alignment across Text sizes', async () => {
 	await captureVisual(scene, 'checkbox/first-line-alignment');
 });
 
-// #247: the invalid icon sits on `content`'s own `::after`, alongside the control
-// and the label text, so it needs the same first-line alignment fix as the
-// control — otherwise it floats at the row's top edge instead of the label's
-// first line once the label wraps.
-test('invalid icon aligns with a wrapping label’s first line', async () => {
+// An invalid checkbox's control still needs the same first-line alignment fix as
+// any other checkbox once its label wraps — it just no longer carries the error
+// icon itself (see the message-icon test below for that).
+test('invalid control aligns with a wrapping label’s first line', async () => {
 	const scene = renderVisual(
 		<Stack width="20rem">
 			<Checkbox defaultSelected isInvalid name="invalid-wrapping">
-				This label wraps onto a second line so the error icon should sit on the first line, not
-				float at the row's top edge.
+				This label wraps onto a second line so the control should sit on the first line, not float
+				at the row's top edge.
 			</Checkbox>
 		</Stack>,
 	);
 
 	await expect.element(page.getByRole('checkbox', { name: /This label wraps/ })).toBeVisible();
 	await captureVisual(scene, 'checkbox/invalid-wrapping-label');
+});
+
+// #247/#312: the error icon now sits on the message (not the control), so it needs
+// its own first-line alignment proof — the message text wraps to several lines and
+// the icon must stay pinned to the first one instead of centring against the whole
+// block.
+test('error message icon aligns with a wrapping message’s first line', async () => {
+	const scene = renderVisual(
+		<Stack width="20rem">
+			<Checkbox
+				defaultSelected
+				errorMessage="This error message wraps onto a second and third line so the icon should sit on the first line, not centre itself against the whole block."
+				isInvalid
+				name="invalid-wrapping-message"
+			>
+				Accept the terms
+			</Checkbox>
+		</Stack>,
+	);
+
+	await expect.element(page.getByRole('checkbox', { name: 'Accept the terms' })).toBeVisible();
+	await captureVisual(scene, 'checkbox/invalid-wrapping-message');
+});
+
+// `errorMessage` is typed `ReactNode`, so rich content (not just a plain string) is
+// supported and common. A `flex` message container turned each top-level child of
+// content like this into its own independently-wrapping column — this scene is the
+// regression guard for that, uncovered until it was found by rendering exactly this
+// case.
+test('error message renders rich content without breaking into flex columns', async () => {
+	const scene = renderVisual(
+		<Stack width="20rem">
+			<Checkbox
+				defaultSelected
+				errorMessage={
+					<>
+						Please accept the <strong>updated terms</strong> before continuing.
+					</>
+				}
+				isInvalid
+				name="invalid-rich-message"
+			>
+				Accept the terms
+			</Checkbox>
+		</Stack>,
+	);
+
+	await expect.element(page.getByRole('checkbox', { name: 'Accept the terms' })).toBeVisible();
+	await captureVisual(scene, 'checkbox/invalid-rich-message');
 });

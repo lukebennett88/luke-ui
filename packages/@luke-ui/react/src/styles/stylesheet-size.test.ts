@@ -12,10 +12,23 @@ import { expect, test } from 'vite-plus/test';
 // The indicator's later polish pass (design review on #247/#312) replaced a text-glyph badge with
 // the `exclamationCircle` icon rendered as a `mask-image` data URI, one inlined per recipe that
 // applies it (three total). That added roughly 730 raw bytes and 590 gzip bytes over the badge
-// version — a URL-encoded SVG compresses worse than short CSS declarations — so the limits below
-// retain minimal reviewed headroom above the new measured total (89,481 raw / 9,793 gzip).
-const maximumRawBytes = 89_600;
-const maximumGzipBytes = 9_850;
+// version — a URL-encoded SVG compresses worse than short CSS declarations.
+// A third design pass (#247/#312 again) moved the invalid border back to 1px on TextInput and
+// Combobox (their in-control icon already carries the non-colour cue) and moved Checkbox's icon
+// off `content` onto the shared `Field` error message instead, gated behind a new
+// `fieldMessageIcon` var. Net effect was a small decrease — dropping the `content` forced-colors
+// selector and the border-width overrides outweighed the new message-icon rule.
+// A follow-up fix in the same pass made TextInput's and Combobox's in-control icon follow the
+// control's own `size` variant (a `createVar` per recipe) instead of a fixed constant, so it stays
+// proportioned to the chevron/clear icons beside it at `small`. That added two more per-size `::after`
+// rules (89,564 raw / 9,500 gzip).
+// A second follow-up replaced the message icon's `flex` container with an ordinary block plus a
+// `text-indent`/`padding-inline-start` hanging indent, because `flex` broke rich `errorMessage`
+// content (a `ReactNode`) into independently-wrapping columns. The `calc()` padding/indent
+// expressions cost a little more raw text than the `flex`/`gap` declarations they replaced; the
+// limits below retain minimal reviewed headroom above the new measured total (89,793 raw / 9,565 gzip).
+const maximumRawBytes = 89_900;
+const maximumGzipBytes = 9_620;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url));

@@ -464,6 +464,31 @@ test.each(visualAppearances)(
 	},
 );
 
+// The in-control icon scales with `size` via `COMBOBOX_ICON_SIZE` (`xsmall` at `small`,
+// matching the trigger/clear chevron beside it), so this locks in the small control at
+// its own icon scale rather than the `medium` default.
+test.each(visualAppearances)('invalid at the small size: $theme $mode', async (appearance) => {
+	const scene = renderVisual(
+		<Stack>
+			<ComboboxField
+				defaultItems={countryItems}
+				defaultValue="ca"
+				errorMessage="Choose a different country."
+				isInvalid
+				label="Invalid"
+				name="invalid-small"
+				size="small"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+		</Stack>,
+		appearance,
+	);
+	await expect.element(page.getByRole('combobox', { name: 'Invalid' })).toBeVisible();
+
+	await captureVisualAppearance(scene, 'combobox-field/invalid-small', appearance);
+});
+
 test.each(visualAppearances)('sizes: $theme $mode', async (appearance) => {
 	const locator = renderVisual(
 		<Stack>

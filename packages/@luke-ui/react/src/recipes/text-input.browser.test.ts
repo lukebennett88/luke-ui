@@ -84,6 +84,20 @@ test('invalid shows the danger border even while focus-within, ring stays the sa
 	expect(invalidBorder).not.toBe(getComputedStyle(resting).borderColor);
 });
 
+// The invalid icon must scale with `size` rather than sit at a constant — TextInput
+// has no internal icon to compare it against (its adornments are caller-supplied),
+// but it mirrors Combobox's `medium` → `small` (20px), `small` → `xsmall` (16px)
+// mapping (`sizing/combobox-sizing.ts`) so the two field controls scale the same way.
+test('invalid icon matches the control size variant, not a constant', () => {
+	const { group: medium } = mountGroup({ size: 'medium' });
+	medium.dataset.invalid = 'true';
+	const { group: small } = mountGroup({ size: 'small' });
+	small.dataset.invalid = 'true';
+
+	expect(getComputedStyle(medium, '::after').blockSize).toBe('20px');
+	expect(getComputedStyle(small, '::after').blockSize).toBe('16px');
+});
+
 test('disabled preserves resting background and border, only dropping opacity', () => {
 	const { group: resting } = mountGroup();
 	const { group: disabled } = mountGroup();

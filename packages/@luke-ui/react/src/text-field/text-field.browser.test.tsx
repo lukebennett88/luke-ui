@@ -8,38 +8,41 @@ afterEach(() => {
 });
 
 // Proves the invalid cue survives without `errorMessage`, which `composeField` treats
-// as optional — the case #247 flags as otherwise colour-only and imperceptible.
+// as optional — the case #247 flags as otherwise colour-only and imperceptible. The
+// border stays at the resting 1px (see `text-input.css.ts`): the in-control icon is the
+// non-colour cue here, so the proof is the icon's presence plus the gated border colour,
+// not a border-width change.
 test('invalid without an error message still carries a non-colour cue', async () => {
-	renderVisual(<TextField isInvalid label="Invalid" name="invalid" />);
+	renderVisual(
+		<>
+			<TextField label="Resting" name="resting" />
+			<TextField isInvalid label="Invalid" name="invalid" />
+		</>,
+	);
 
-	const input = page.getByRole('textbox', { name: 'Invalid' });
-	await expect.element(input).toBeVisible();
+	const restingInput = page.getByRole('textbox', { name: 'Resting' });
+	const invalidInput = page.getByRole('textbox', { name: 'Invalid' });
+	await expect.element(invalidInput).toBeVisible();
 
 	// The input is always a direct child of the styled group (adornments are
 	// siblings, not wrappers), so `parentElement` is the group regardless of
 	// whether adornments are present. The group carries `role="presentation"`
 	// here (`RacTextField` supplies that through `GroupContext` when the field
 	// has its own external `<label>`), so it cannot be found via `[role="group"]`.
-	const group = input.element().parentElement;
-	if (group == null) throw new Error('Expected the text input group.');
+	const restingGroup = restingInput.element().parentElement;
+	const invalidGroup = invalidInput.element().parentElement;
+	if (restingGroup == null || invalidGroup == null) {
+		throw new Error('Expected both text input groups.');
+	}
 
-	const indicator = getComputedStyle(group, '::after');
+	const indicator = getComputedStyle(invalidGroup, '::after');
 	expect(indicator.content).toBe('""');
 	expect(indicator.maskImage).not.toBe('none');
 
-	expect(getComputedStyle(group).borderWidth).toBe('2px');
-});
-
-test('valid group keeps the 1px boundary the invalid state widens', async () => {
-	renderVisual(<TextField label="Valid" name="valid" />);
-
-	const input = page.getByRole('textbox', { name: 'Valid' });
-	await expect.element(input).toBeVisible();
-
-	const group = input.element().parentElement;
-	if (group == null) throw new Error('Expected the text input group.');
-
-	expect(getComputedStyle(group).borderWidth).toBe('1px');
+	expect(getComputedStyle(invalidGroup).borderWidth).toBe('1px');
+	expect(getComputedStyle(invalidGroup).borderColor).not.toBe(
+		getComputedStyle(restingGroup).borderColor,
+	);
 });
 
 test('the indicator icon adds no text to the accessible name', async () => {
@@ -61,18 +64,27 @@ test('the indicator icon adds no text to the accessible name', async () => {
 // while `aria-invalid` stays null. That painted an untouched required field
 // invalid though assistive technology was told it was fine. These two tests are
 // the regression guard for the fix: the group only picks up the invalid
-// treatment once React Aria has recorded a real validation failure.
+// treatment once React Aria has recorded a real validation failure. The border
+// stays 1px in both the untouched and the invalid case now that the in-control
+// icon (not a width change) is the invalid cue, so the proof is the border colour
+// and the icon's presence, not a width comparison.
 test('a required field with no value is not painted invalid before validation runs', async () => {
-	renderVisual(<TextField isRequired label="Email" name="email" />);
+	renderVisual(
+		<>
+			<TextField label="Resting" name="resting" />
+			<TextField isRequired label="Email" name="email" />
+		</>,
+	);
 
 	const input = page.getByRole('textbox', { name: 'Email' });
 	await expect.element(input).toBeVisible();
 	await expect.element(input).not.toHaveAttribute('aria-invalid');
 
+	const restingGroup = page.getByRole('textbox', { name: 'Resting' }).element().parentElement;
 	const group = input.element().parentElement;
-	if (group == null) throw new Error('Expected the text input group.');
+	if (restingGroup == null || group == null) throw new Error('Expected the text input groups.');
 
-	expect(getComputedStyle(group).borderWidth).toBe('1px');
+	expect(getComputedStyle(group).borderColor).toBe(getComputedStyle(restingGroup).borderColor);
 	expect(getComputedStyle(group, '::after').maskImage).toBe('none');
 });
 
@@ -83,6 +95,7 @@ test('a required field is painted invalid once a real submit fails validation', 
 	// an ancestor `Form`, so a native submit is enough to trigger it.
 	renderVisual(
 		<form>
+			<TextField label="Resting" name="resting" />
 			<TextField isRequired label="Email" name="email" />
 			<button type="submit">Submit</button>
 		</form>,
@@ -96,9 +109,10 @@ test('a required field is painted invalid once a real submit fails validation', 
 
 	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
 
+	const restingGroup = page.getByRole('textbox', { name: 'Resting' }).element().parentElement;
 	const group = input.element().parentElement;
-	if (group == null) throw new Error('Expected the text input group.');
+	if (restingGroup == null || group == null) throw new Error('Expected the text input groups.');
 
-	expect(getComputedStyle(group).borderWidth).toBe('2px');
+	expect(getComputedStyle(group).borderColor).not.toBe(getComputedStyle(restingGroup).borderColor);
 	expect(getComputedStyle(group, '::after').maskImage).not.toBe('none');
 });

@@ -1,5 +1,6 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../theme/contract.css.js';
+import { invalidIndicatorIconForcedColors, invalidMessageIcon } from './invalid-indicator.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 
@@ -8,6 +9,26 @@ const dataRequiredSelector = '[data-required="true"]';
 
 /** Optional indentation shared with form controls that place messages beneath their labels. */
 export const fieldMessageIndent = createVar();
+
+/**
+ * Optional leading icon on the error message, off (`none`) by default. A field
+ * recipe whose own control has no room for an in-control invalid icon switches this
+ * to `inline-block` on its own `root` slot instead (see `checkbox.css.ts`) so its
+ * `FieldError` message renders `invalidMessageIcon`. `TextInput`/`Combobox` draw
+ * their invalid icon inside the control (`invalid-indicator.ts`) and never touch
+ * this var, so the icon still appears exactly once per field — attached to the
+ * control where there is room, beside the message where there is not.
+ */
+export const fieldMessageIcon = createVar();
+
+/**
+ * Inline space reserved for `fieldMessageIcon` when it is on, `0px` by default. Set
+ * alongside `fieldMessageIcon` (to `invalidMessageIconOffset`, see
+ * `invalid-indicator.ts`) by whichever consumer turns the icon on. Composed into the
+ * error message's `paddingInlineStart`/`textIndent` below to hang-indent wrapped
+ * lines under the text rather than the icon — see the comment there.
+ */
+export const fieldMessageIconOffset = createVar();
 
 /**
  * Raw slotted config for the `Field` primitive.
@@ -84,7 +105,37 @@ const fieldConfig = {
 			},
 			error: {
 				message: {
+					'@media': {
+						'(forced-colors: active)': {
+							selectors: {
+								'&::before': invalidIndicatorIconForcedColors,
+							},
+						},
+					},
 					color: vars.color.foreground.danger.rest,
+					// Hanging indent, not `flex`: `errorMessage` is typed `ReactNode` (rich
+					// content, e.g. `<>text <strong>emphasis</strong> text</>`) and RAC's
+					// `FieldError` also accepts a render-prop child, so this recipe cannot
+					// safely wrap the message in a span of its own to make it a single flex
+					// item — a `flex` container instead turns every top-level child into its
+					// own item, each wrapping independently. `paddingInlineStart` reserves the
+					// icon's width (`fieldMessageIconOffset`, `0px` unless a consumer turns
+					// the icon on) on every line, then `textIndent` pulls the FIRST line back
+					// by that same amount so the icon — the line's first inline content —
+					// sits in the reserved space instead of pushing the text after it.
+					// Wrapped lines keep the padding, so they hang aligned with the text
+					// rather than tucking under the icon. This composes with
+					// `fieldMessageIndent` (which aligns a checkbox's message under its
+					// label) rather than replacing it.
+					paddingInlineStart: `calc(${fallbackVar(fieldMessageIndent, '0px')} + ${fallbackVar(fieldMessageIconOffset, '0px')})`,
+					textIndent: `calc(-1 * ${fallbackVar(fieldMessageIconOffset, '0px')})`,
+
+					selectors: {
+						'&::before': {
+							...invalidMessageIcon,
+							display: fallbackVar(fieldMessageIcon, 'none'),
+						},
+					},
 				},
 			},
 		},

@@ -54,14 +54,20 @@ test('the fallback follows the label line height and centres the indicator with 
 });
 
 test('content spacing and field messages align with the visible label', () => {
-	const { content, control, description, error } = mountCheckbox();
+	const { content, control, description, error, root } = mountCheckbox();
 	const contentStyle = getComputedStyle(content);
 	const expectedOffset =
 		control.getBoundingClientRect().width + Number.parseFloat(contentStyle.columnGap);
 
 	expect(contentStyle.columnGap).toBe('8px');
 	expect(getComputedStyle(description).paddingInlineStart).toBe(`${expectedOffset}px`);
-	expect(getComputedStyle(error).paddingInlineStart).toBe(`${expectedOffset}px`);
+	// The error message reserves extra space beyond `expectedOffset`: `fieldMessageIconOffset`
+	// (the message-leading icon's own width plus its gap), so a wrapped error message hangs
+	// aligned with its own text rather than the icon (see `field.css.ts`). `description` never
+	// switches the icon on, so it keeps the plain `expectedOffset`.
+	expect(getComputedStyle(error).paddingInlineStart).toBe(
+		`${expectedOffset + resolveMessageIconOffset(root)}px`,
+	);
 });
 
 test('sizes inherit from the root into the control, indicator, and field messages', () => {
@@ -72,7 +78,7 @@ test('sizes inherit from the root into the control, indicator, and field message
 	] as const;
 
 	for (const { glyph, indicator: indicatorSize, size, wrapper } of sizes) {
-		const { content, control, description, error, indicator } = mountCheckbox(size);
+		const { content, control, description, error, indicator, root } = mountCheckbox(size);
 		const contentStyle = getComputedStyle(content);
 		const expectedIndent = wrapper + Number.parseFloat(contentStyle.columnGap);
 
@@ -80,7 +86,12 @@ test('sizes inherit from the root into the control, indicator, and field message
 		expect(indicator.getBoundingClientRect().width).toBe(indicatorSize);
 		expect(Number.parseFloat(getComputedStyle(indicator).fontSize)).toBe(glyph);
 		expect(getComputedStyle(description).paddingInlineStart).toBe(`${expectedIndent}px`);
-		expect(getComputedStyle(error).paddingInlineStart).toBe(`${expectedIndent}px`);
+		// The message-leading icon's reservation is constant across sizes (it does not scale
+		// with the checkbox's own size, see `invalid-indicator.ts`), so it stacks the same way
+		// on top of `expectedIndent` at every size.
+		expect(getComputedStyle(error).paddingInlineStart).toBe(
+			`${expectedIndent + resolveMessageIconOffset(root)}px`,
+		);
 	}
 });
 
@@ -142,5 +153,14 @@ function mountCheckbox(
 	error.textContent = 'Error';
 	mounted.push(root);
 
-	return { content, control, description, error, indicator };
+	return { content, control, description, error, indicator, root };
+}
+
+/** Resolves `invalidMessageIcon`'s inline size plus its gap: `iconSize.xsmall + space[200]`. */
+function resolveMessageIconOffset(root: HTMLElement): number {
+	const probe = root.appendChild(document.createElement('div'));
+	probe.style.width = 'calc(var(--luke-icon-size-xsmall) + var(--luke-space-200))';
+	const value = Number.parseFloat(getComputedStyle(probe).width);
+	probe.remove();
+	return value;
 }
