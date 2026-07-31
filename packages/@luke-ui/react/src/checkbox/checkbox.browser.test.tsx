@@ -57,6 +57,41 @@ test('invalid with an error message shows the 2px box and the message-leading ic
 	expect(icon.maskImage).not.toBe('none');
 });
 
+// #247/#312 regression: an earlier pass added the message-leading icon's own width
+// to `paddingInlineStart`/`textIndent` on top of `fieldMessageIndent`, which pushed
+// the message text 24px right of the label above it — the whole point of
+// `fieldMessageIndent` is to align the two, and this went unguarded. Pins the
+// invariant with real rendered text-node geometry, not computed-style padding
+// math, so a future change to either side of the hang-indent calc trips this the
+// moment the two texts stop lining up.
+test('the error message text aligns with the label text, not the icon', async () => {
+	renderVisual(
+		<Checkbox errorMessage="Choose an option." isInvalid name="invalid-alignment">
+			Invalid
+		</Checkbox>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Invalid' });
+	await expect.element(checkbox).toBeVisible();
+
+	const content = checkbox.element().closest('label');
+	if (content == null) throw new Error('Expected the checkbox content label.');
+	const labelTextNode = Array.from(content.childNodes).find(
+		(node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+	);
+	if (labelTextNode == null) throw new Error('Expected the checkbox label text node.');
+
+	const message = page.getByText('Choose an option.');
+	await expect.element(message).toBeVisible();
+	const messageTextNode = findTextNode(message.element(), 'Choose an option.');
+	if (messageTextNode == null) throw new Error('Expected the error message text node.');
+
+	const labelRect = rangeRectFor(labelTextNode);
+	const messageRect = rangeRectFor(messageTextNode);
+
+	expect(messageRect.left).toBeCloseTo(labelRect.left, 0);
+});
+
 test('valid indicator keeps the 1px boundary the invalid state widens', async () => {
 	renderVisual(<Checkbox name="valid">Valid</Checkbox>);
 
@@ -101,6 +136,23 @@ test('the icon indicator stays out of the accessible name', async () => {
 	expect(axNode.role?.value).toBe('checkbox');
 	expect(axNode.name?.value).toBe('Invalid');
 });
+
+/** A `Range` spanning `node`'s own content, for measuring rendered text geometry. */
+function rangeRectFor(node: Node): DOMRect {
+	const range = document.createRange();
+	range.selectNodeContents(node);
+	return range.getBoundingClientRect();
+}
+
+/** Depth-first search for a descendant text node whose content includes `text`. */
+function findTextNode(root: Node, text: string): Node | undefined {
+	if (root.nodeType === Node.TEXT_NODE && root.textContent?.includes(text)) return root;
+	for (const child of Array.from(root.childNodes)) {
+		const found = findTextNode(child, text);
+		if (found != null) return found;
+	}
+	return undefined;
+}
 
 /** Fetches the CDP DOM tree root, piercing into the Vitest iframe and any shadow roots. */
 async function getDomRoot() {

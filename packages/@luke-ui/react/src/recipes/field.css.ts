@@ -11,6 +11,13 @@ const dataRequiredSelector = '[data-required="true"]';
 export const fieldMessageIndent = createVar();
 
 /**
+ * `fieldMessageIndent` with its `0px` fallback pre-applied, computed once so the
+ * error message's own hang-indent and the icon box it wraps around
+ * (`invalidMessageIcon`) can never disagree about where the text resumes.
+ */
+const messageIndent = fallbackVar(fieldMessageIndent, '0px');
+
+/**
  * Optional leading icon on the error message, off (`none`) by default. A field
  * recipe whose own control has no room for an in-control invalid icon switches this
  * to `inline-block` on its own `root` slot instead (see `checkbox.css.ts`) so its
@@ -20,15 +27,6 @@ export const fieldMessageIndent = createVar();
  * control where there is room, beside the message where there is not.
  */
 export const fieldMessageIcon = createVar();
-
-/**
- * Inline space reserved for `fieldMessageIcon` when it is on, `0px` by default. Set
- * alongside `fieldMessageIcon` (to `invalidMessageIconOffset`, see
- * `invalid-indicator.ts`) by whichever consumer turns the icon on. Composed into the
- * error message's `paddingInlineStart`/`textIndent` below to hang-indent wrapped
- * lines under the text rather than the icon — see the comment there.
- */
-export const fieldMessageIconOffset = createVar();
 
 /**
  * Raw slotted config for the `Field` primitive.
@@ -58,7 +56,7 @@ const fieldConfig = {
 		message: {
 			...vars.font[200],
 			minInlineSize: 0,
-			paddingInlineStart: fallbackVar(fieldMessageIndent, '0px'),
+			paddingInlineStart: messageIndent,
 
 			selectors: {
 				[`${dataDisabledSelector} &`]: {
@@ -118,21 +116,20 @@ const fieldConfig = {
 					// `FieldError` also accepts a render-prop child, so this recipe cannot
 					// safely wrap the message in a span of its own to make it a single flex
 					// item — a `flex` container instead turns every top-level child into its
-					// own item, each wrapping independently. `paddingInlineStart` reserves the
-					// icon's width (`fieldMessageIconOffset`, `0px` unless a consumer turns
-					// the icon on) on every line, then `textIndent` pulls the FIRST line back
-					// by that same amount so the icon — the line's first inline content —
-					// sits in the reserved space instead of pushing the text after it.
-					// Wrapped lines keep the padding, so they hang aligned with the text
-					// rather than tucking under the icon. This composes with
-					// `fieldMessageIndent` (which aligns a checkbox's message under its
-					// label) rather than replacing it.
-					paddingInlineStart: `calc(${fallbackVar(fieldMessageIndent, '0px')} + ${fallbackVar(fieldMessageIconOffset, '0px')})`,
-					textIndent: `calc(-1 * ${fallbackVar(fieldMessageIconOffset, '0px')})`,
+					// own item, each wrapping independently. `paddingInlineStart` reserves
+					// `fieldMessageIndent` (`0px` unless a consumer sets it, e.g. `Checkbox`
+					// aligning its message under its label) on every line, then `textIndent`
+					// pulls the FIRST line back by that same amount so the icon — the line's
+					// first inline content, sized to fill exactly that reserved space by
+					// `invalidMessageIcon` itself — sits in it instead of pushing the text
+					// after it. Wrapped lines keep the padding, so they hang aligned with the
+					// text rather than tucking under the icon.
+					paddingInlineStart: messageIndent,
+					textIndent: `calc(-1 * ${messageIndent})`,
 
 					selectors: {
 						'&::before': {
-							...invalidMessageIcon,
+							...invalidMessageIcon(messageIndent),
 							display: fallbackVar(fieldMessageIcon, 'none'),
 						},
 					},

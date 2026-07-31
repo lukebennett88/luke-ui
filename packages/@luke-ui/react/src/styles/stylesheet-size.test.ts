@@ -27,8 +27,14 @@ import { expect, test } from 'vite-plus/test';
 // content (a `ReactNode`) into independently-wrapping columns. The `calc()` padding/indent
 // expressions cost a little more raw text than the `flex`/`gap` declarations they replaced; the
 // limits below retain minimal reviewed headroom above the new measured total (89,793 raw / 9,565 gzip).
-const maximumRawBytes = 89_900;
-const maximumGzipBytes = 9_620;
+// A third follow-up (#247/#312 horizontal-alignment fix) dropped the separate
+// `fieldMessageIconOffset` var and its `calc()` composition with `fieldMessageIndent`, and moved
+// `invalidMessageIcon`'s own hang-indent-and-centring math onto `field.css.ts`'s single indent
+// value instead. Net effect was a small decrease despite the new `max()` guard and
+// `marginInlineEnd`; the limits retain minimal reviewed headroom above the new measured total
+// (89,765 raw / 9,575 gzip).
+const maximumRawBytes = 89_870;
+const maximumGzipBytes = 9_625;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url));

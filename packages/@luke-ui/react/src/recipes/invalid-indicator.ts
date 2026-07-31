@@ -73,7 +73,14 @@ export const invalidIndicatorIconForcedColors = {
 	backgroundColor: 'CanvasText',
 } satisfies StyleRule;
 
-/** Gap between `invalidMessageIcon` and the message text that follows it. */
+/**
+ * Gap between `invalidMessageIcon` and the message text that follows it, and also
+ * the amount peeled off the leading end of `indent` before centring the icon (see
+ * `invalidMessageIcon`) — for `Checkbox`, `indent` (`fieldMessageIndent`) is itself
+ * `checkboxControlSize + this same space[200] token` (`checkbox.css.ts`), so
+ * subtracting it back out recovers the control column's own width for the icon to
+ * centre against, leaving this gap as the trailing space before text.
+ */
 const invalidMessageIconGap = vars.space[200];
 
 /**
@@ -95,23 +102,35 @@ const invalidMessageIconGap = vars.space[200];
  * An inline-block `::before` participates in the message's own normal text flow
  * instead, so rich content behaves exactly as it would with no icon at all.
  *
- * `marginInlineEnd` (not a container `gap`) supplies the space before the message
- * text, and `textIndent: 0` resets the negative indent `field.css.ts` applies to the
- * message itself (see `fieldMessageIconOffset`) so it does not also shift this icon.
- * `verticalAlign` is tuned by eye against the message's first line, not derived from
- * a token — icon masks do not share text's baseline metrics.
+ * Takes `indent` — `field.css.ts`'s own `fieldMessageIndent` (with its `0px`
+ * fallback already applied) — rather than a fixed size: the box's total inline
+ * advance (its own `inlineSize` plus `marginInlineEnd`) must equal `indent` exactly,
+ * so the text that resumes after the icon lands back at the label's left edge.
+ * `inlineSize` itself is `indent` minus the trailing `invalidMessageIconGap` (see
+ * there): for `Checkbox`, that recovers the control column's own width, so a
+ * centred icon lines up with the control above it instead of centring across the
+ * control-plus-gap span and drifting half the gap's width to the right of it.
+ * `marginInlineEnd` supplies that trailing gap back. `maskSize` is set explicitly
+ * to the icon's own `xsmall` size (not `contain`, which `invalidIconMask` defaults
+ * to) so the 16px glyph centres inside the wider box instead of stretching to fill
+ * it — `maskSize: 'contain'` would scale the icon up to the box, not stay the
+ * checkbox's own icon size. `max()` guards the case where a consumer switches the
+ * icon on without also setting `fieldMessageIndent`: `indent` would then fall back
+ * to `0px`, and `indent - gap` would go negative and collapse the box (and the icon
+ * inside it) to nothing, so the floor is the icon's own size alone.
+ *
+ * `textIndent: 0` resets the negative indent `field.css.ts` applies to the message
+ * itself so it does not also shift this icon. `verticalAlign` is tuned by eye
+ * against the message's first line, not derived from a token — icon masks do not
+ * share text's baseline metrics.
  */
-export const invalidMessageIcon = {
-	...invalidIconMask(vars.iconSize.xsmall),
-	marginInlineEnd: invalidMessageIconGap,
-	textIndent: 0,
-	verticalAlign: 'middle',
-} satisfies StyleRule;
-
-/**
- * The inline space `field.css.ts` reserves via `fieldMessageIconOffset` when a
- * consumer switches the message icon on — `invalidMessageIcon`'s own inline size
- * plus its gap. Exported as one value so the reservation can never drift out of
- * sync with the icon's actual footprint.
- */
-export const invalidMessageIconOffset = `calc(${vars.iconSize.xsmall} + ${invalidMessageIconGap})`;
+export function invalidMessageIcon(indent: string) {
+	return {
+		...invalidIconMask(vars.iconSize.xsmall),
+		inlineSize: `max(calc(${indent} - ${invalidMessageIconGap}), ${vars.iconSize.xsmall})`,
+		marginInlineEnd: invalidMessageIconGap,
+		maskSize: vars.iconSize.xsmall,
+		textIndent: 0,
+		verticalAlign: 'middle',
+	} satisfies StyleRule;
+}
