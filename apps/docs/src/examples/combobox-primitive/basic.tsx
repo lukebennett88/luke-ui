@@ -1,20 +1,20 @@
 import {
-	ComboboxControl,
+	ComboboxInput,
+	ComboboxInputGroup,
 	ComboboxItem,
 	ComboboxListBox,
 	ComboboxPopover,
 	ComboboxRoot,
-	ComboboxTextInput,
 	ComboboxTrigger,
 } from '@luke-ui/react/combobox-field/primitive';
 
 export default function Basic() {
 	return (
 		<ComboboxRoot aria-label="Country">
-			<ComboboxControl>
-				<ComboboxTextInput />
+			<ComboboxInputGroup>
+				<ComboboxInput />
 				<ComboboxTrigger aria-label="Toggle options" />
-			</ComboboxControl>
+			</ComboboxInputGroup>
 			<ComboboxPopover>
 				<ComboboxListBox>
 					<ComboboxItem id="au">Australia</ComboboxItem>

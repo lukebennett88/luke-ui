@@ -3,7 +3,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
-import { textInput } from './text-input.css.js';
+import { inputGroup } from './input-group.css.js';
 
 let mounted: Array<HTMLElement> = [];
 
@@ -94,9 +94,9 @@ test('the invalid indicator draws in the danger foreground and orders ahead of t
 	group.dataset.invalid = 'true';
 
 	const indicator = group.appendChild(document.createElement('span'));
-	indicator.className = textInput().invalidIndicator();
+	indicator.className = inputGroup().invalidIndicator();
 	const suffix = group.appendChild(document.createElement('span'));
-	suffix.className = textInput().suffix();
+	suffix.className = inputGroup().suffix();
 
 	const dangerProbe = root.appendChild(document.createElement('div'));
 	dangerProbe.style.color = 'var(--luke-color-foreground-danger-rest)';
@@ -150,7 +150,7 @@ test('read-only still shows the focus ring since read-only fields remain focusab
 test('prefix divider uses the control border color and disabled text color follows the group', () => {
 	const { group, root } = mountGroup();
 	const prefix = group.appendChild(document.createElement('span'));
-	prefix.className = textInput({ size: 'medium' }).prefix();
+	prefix.className = inputGroup({ size: 'medium' }).prefix();
 
 	const controlBorderProbe = root.appendChild(document.createElement('div'));
 	controlBorderProbe.style.borderColor = 'var(--luke-color-border-control)';
@@ -164,12 +164,12 @@ test('prefix divider uses the control border color and disabled text color follo
 	expect(getComputedStyle(prefix).color).toBe(getComputedStyle(disabledTextProbe).color);
 });
 
-function mountGroup(options: Parameters<typeof textInput>[0] = {}) {
+function mountGroup(options: Parameters<typeof inputGroup>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	const group = root.appendChild(document.createElement('div'));
-	group.className = textInput(options).group();
+	group.className = inputGroup(options).group();
 	group.style.transition = 'none';
 	mounted.push(root);
 	return { group, root };

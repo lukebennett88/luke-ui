@@ -7,13 +7,13 @@ import { Input as RacInput } from 'react-aria-components/Input';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon-size-context/index.js';
 import { Icon } from '../../icon/index.js';
-import * as styles from '../../recipes/text-input.css.js';
+import * as styles from '../../recipes/input-group.css.js';
 import { INPUT_GROUP_ICON_SIZE } from '../../sizing/input-group-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 
 /** Allowed `size` values for `InputGroup` and its parts. */
-export type InputGroupSize = styles.TextInputSize;
+export type InputGroupSize = styles.InputGroupSize;
 
 const InputGroupSizeContext = createContext<InputGroupSize | null>(null);
 
@@ -120,7 +120,7 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
  */
 export function InputGroup(props: InputGroupProps): JSX.Element {
 	const { children, className, size = 'medium', ...groupProps } = props;
-	const slots = styles.textInput({ size });
+	const slots = styles.inputGroup({ size });
 
 	return (
 		<InputGroupSizeContext.Provider value={size}>
@@ -166,7 +166,7 @@ export function InputGroupInput(props: InputGroupInputProps): JSX.Element {
 		<RacInput
 			{...inputProps}
 			className={composeRenderProps(className, (value) => {
-				return styles.textInput({ size }).control(value);
+				return styles.inputGroup({ size }).control(value);
 			})}
 		/>
 	);
@@ -177,7 +177,7 @@ export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
 	const { className, size: sizeProp, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={styles.textInput({ size }).prefix(className)} />;
+	return <span {...spanProps} className={styles.inputGroup({ size }).prefix(className)} />;
 }
 
 /**
@@ -188,5 +188,5 @@ export function InputGroupSuffix(props: InputGroupSuffixProps): JSX.Element {
 	const { className, size: sizeProp, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={styles.textInput({ size }).suffix(className)} />;
+	return <span {...spanProps} className={styles.inputGroup({ size }).suffix(className)} />;
 }

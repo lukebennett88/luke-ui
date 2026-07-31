@@ -30,7 +30,7 @@ element. Neither step injects styles at runtime.
   an in-control icon without floating past the label, so its icon moves to the message and its box
   keeps a `2px` border as its own non-colour cue instead. Named `.ts` for the same reason as
   `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
-- `text-input.css.ts` draws the same glyph, but as a real `Icon` element on its own
+- `input-group.css.ts` draws the same glyph, but as a real `Icon` element on its own
   `invalidIndicator` slot rather than a mask: `InputGroup` (`text-field/primitive/`) reads React
   Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid control cannot
   be composed without a non-colour cue. The recipe owns only the icon's colour and margins — `Icon`
@@ -202,13 +202,13 @@ function per slot, each accepting an optional extra class to merge:
 
 ```tsx
 export const combobox = recipe({
-	slots: { control: '…', root: '…', textInput: '…' /* … */ },
+	slots: { inputGroup: '…', root: '…', textInput: '…' /* … */ },
 	variants: {/* per-slot styles keyed by variant value */},
 } as const satisfies SlottedConfigInput);
 
-const { root, control } = combobox({ size: 'medium' });
+const { root, inputGroup } = combobox({ size: 'medium' });
 <div className={root()}>
-	<div className={control(extraClassName)}>…</div>
+	<div className={inputGroup(extraClassName)}>…</div>
 </div>;
 ```
 
@@ -235,8 +235,8 @@ with the recipe.
 
 ### Shared input-state selectors
 
-Field-style recipes (`text-input.css.ts`, `combobox.css.ts`) share one definition of what "hovered",
-"focused", "disabled", "invalid", and "read-only" mean for a control, from
+Field-style recipes (`input-group.css.ts`, `combobox.css.ts`) share one definition of what
+"hovered", "focused", "disabled", "invalid", and "read-only" mean for a control, from
 `recipes/input-states.ts`:
 
 ```ts

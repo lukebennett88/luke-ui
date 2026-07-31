@@ -267,7 +267,7 @@ function mountControl(size: 'medium' | 'small' = 'medium') {
 	root.dataset.colorMode = 'light';
 	wrappers.push(root);
 	const control = root.appendChild(document.createElement('div'));
-	control.className = combobox({ size }).control();
+	control.className = combobox({ size }).inputGroup();
 	control.append(document.createElement('input'), document.createElement('button'));
 	return { control, root };
 }

@@ -18,7 +18,7 @@ export const comboboxTrayViewportHeightVar = '--luke-ui-visual-viewport-height';
 /** Custom property mirroring the on-screen keyboard's height, set by `useVisualViewportVars`. */
 export const comboboxTrayKeyboardInsetVar = '--luke-ui-keyboard-inset';
 
-// Set per `size` variant on `control` below, from `COMBOBOX_ICON_SIZE`, so the invalid
+// Set per `size` variant on `inputGroup` below, from `COMBOBOX_ICON_SIZE`, so the invalid
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
 
@@ -77,7 +77,7 @@ const comboboxActionStyles = {
 	justifyContent: 'center',
 	minBlockSize: '24px',
 	minInlineSize: '24px',
-	// The invalid `::after` icon on `control` below is its last DOM child (a
+	// The invalid `::after` icon on `inputGroup` below is its last DOM child (a
 	// pseudo-element always renders after real children), which put it after both
 	// action buttons too. Giving them an explicit `order` moves them behind the icon
 	// (default `order: 0`) in flex layout without touching document order, so the
@@ -111,7 +111,7 @@ const comboboxActionStyles = {
 /**
  * Raw slotted config for the combobox anatomy.
  *
- * Slots follow the anatomy top to bottom: `root`, `control`, `textInput`,
+ * Slots follow the anatomy top to bottom: `root`, `inputGroup`, `textInput`,
  * `trigger`, `clearButton`, `itemCheck`, `popover`, `listBox`, `loadMoreItem`,
  * `section`, `sectionHeading`, `emptyState`, `item`.
  */
@@ -123,7 +123,7 @@ const comboboxConfig = {
 			inlineSize: '100%',
 			minInlineSize: 0,
 		},
-		control: {
+		inputGroup: {
 			'@media': {
 				'(forced-colors: active)': {
 					backgroundColor: 'Field',
@@ -440,7 +440,7 @@ const comboboxConfig = {
 	variants: {
 		size: {
 			medium: {
-				control: {
+				inputGroup: {
 					blockSize: vars.controlSize.medium,
 					fontSize: vars.font[300].fontSize,
 					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.medium] },
@@ -469,7 +469,7 @@ const comboboxConfig = {
 				},
 			},
 			small: {
-				control: {
+				inputGroup: {
 					blockSize: vars.controlSize.small,
 					...vars.font[200],
 					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.small] },

@@ -8,21 +8,21 @@ import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 
-type _ComboboxControlOmit = DistributiveOmit<RacGroupProps, 'className'>;
-interface _ComboboxControlProps extends _ComboboxControlOmit {
+type _ComboboxInputGroupOmit = DistributiveOmit<RacGroupProps, 'className'>;
+interface _ComboboxInputGroupProps extends _ComboboxInputGroupOmit {
 	className?: RacGroupProps['className'];
 	size?: ComboboxSize;
 }
 
 /**
- * Props for the styled combobox control group.
+ * Props for the styled combobox input group.
  *
  * @tier primitive
  */
-export type ComboboxControlProps = Prettify<_ComboboxControlProps>;
+export type ComboboxInputGroupProps = Prettify<_ComboboxInputGroupProps>;
 
-/** Control wrapper for combobox text input + trigger content. */
-export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
+/** Wrapper for combobox text input + trigger content. */
+export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element {
 	const { size: sizeProp, ...groupProps } = props;
 	const size = useComboboxSize(sizeProp);
 
@@ -30,7 +30,7 @@ export function ComboboxControl(props: ComboboxControlProps): JSX.Element {
 		<RacGroup
 			{...groupProps}
 			className={composeRenderProps(groupProps.className, (className) => {
-				return styles.combobox({ size }).control(className);
+				return styles.combobox({ size }).inputGroup(className);
 			})}
 		/>
 	);

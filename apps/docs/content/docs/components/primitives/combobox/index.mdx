@@ -16,15 +16,15 @@ composed field. Application code should usually use `ComboboxField`.
 ## Anatomy
 
 `ComboboxRoot` owns the searchable single-select state. Put the control and popover inside it. Put
-the text input and trigger in `ComboboxControl`, then put the listbox and its items in
+the text input and trigger in `ComboboxInputGroup`, then put the listbox and its items in
 `ComboboxPopover`.
 
 ```tsx
 <ComboboxRoot defaultItems={countries} aria-label="Country">
-	<ComboboxControl>
-		<ComboboxTextInput />
+	<ComboboxInputGroup>
+		<ComboboxInput />
 		<ComboboxTrigger aria-label="Toggle options" />
-	</ComboboxControl>
+	</ComboboxInputGroup>
 	<ComboboxPopover>
 		<ComboboxListBox>{(item) => <ComboboxItem>{item.label}</ComboboxItem>}</ComboboxListBox>
 	</ComboboxPopover>
@@ -33,7 +33,7 @@ the text input and trigger in `ComboboxControl`, then put the listbox and its it
 
 ## Control and options
 
-`ComboboxTextInput` opens the menu when clicked and supplies the editable combobox input.
+`ComboboxInput` opens the menu when clicked and supplies the editable combobox input.
 `ComboboxTrigger` toggles the option menu. `ComboboxClearButton` renders only when the root has a
 selection and clears both the selection and input value.
 
@@ -44,8 +44,8 @@ render function with `items`. Its `loadMoreItem` slot appends content after the 
 ## Size
 
 Set `size` on `ComboboxRoot` to give the control and option primitives a shared size. Individual
-`ComboboxControl`, `ComboboxTextInput`, `ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`,
-and `ComboboxLoadMoreItem` components can override that size when needed.
+`ComboboxInputGroup`, `ComboboxInput`, `ComboboxClearButton`, `ComboboxTrigger`, `ComboboxItem`, and
+`ComboboxLoadMoreItem` components can override that size when needed.
 
 ## Loading and empty results
 

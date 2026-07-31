@@ -18,7 +18,7 @@ const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, rea
  * (the leading and trailing parts), and `invalidIndicator` (the error icon
  * `InputGroup` renders itself).
  */
-const textInputConfig = {
+const inputGroupConfig = {
 	slots: {
 		group: {
 			'@media': {
@@ -247,13 +247,13 @@ const textInputConfig = {
 /**
  * Slotted recipe for the `InputGroup` primitive.
  *
- * `textInput({ size }).group() / .control() / .prefix() / .suffix() /
+ * `inputGroup({ size }).group() / .control() / .prefix() / .suffix() /
  * .invalidIndicator()`.
  */
-export const textInput = recipe(textInputConfig);
+export const inputGroup = recipe(inputGroupConfig);
 
-/** Outer variant selection for the `textInput` recipe. */
-export type TextInputVariants = RecipeSelection<typeof textInput>;
+/** Outer variant selection for the `inputGroup` recipe. */
+export type InputGroupVariants = RecipeSelection<typeof inputGroup>;
 
-/** Allowed `size` values for the `textInput` recipe. */
-export type TextInputSize = keyof typeof textInputConfig.variants.size;
+/** Allowed `size` values for the `inputGroup` recipe. */
+export type InputGroupSize = keyof typeof inputGroupConfig.variants.size;

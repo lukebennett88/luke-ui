@@ -2,7 +2,7 @@ import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { Button } from '../button/index.js';
 import { Icon } from '../icon/index.js';
-import { textInput } from '../recipes/text-input.css.js';
+import { inputGroup } from '../recipes/input-group.css.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -21,7 +21,7 @@ import {
 } from './primitive/index.js';
 
 // The `invalidIndicator` slot has no `size` variant, so this is one stable class.
-const invalidIndicatorClass = textInput().invalidIndicator();
+const invalidIndicatorClass = inputGroup().invalidIndicator();
 
 test('sizes', async () => {
 	const locator = renderVisual(

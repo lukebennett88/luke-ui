@@ -1,6 +1,6 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { textInput } from '../recipes/text-input.css.js';
+import { inputGroup } from '../recipes/input-group.css.js';
 import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
 import { TextField } from './index.js';
 import {
@@ -24,7 +24,7 @@ function groupFor(name: string): HTMLElement {
 }
 
 // The `invalidIndicator` slot has no `size` variant, so this is one stable class.
-const invalidIndicatorClass = textInput().invalidIndicator();
+const invalidIndicatorClass = inputGroup().invalidIndicator();
 
 /**
  * The invalid indicator `InputGroup` renders itself, if it is present. Matched by the
@@ -41,7 +41,7 @@ afterEach(() => {
 
 // Proves the invalid cue survives without `errorMessage`, which `composeField` treats
 // as optional — the case #247 flags as otherwise colour-only and imperceptible. The
-// border stays at the resting 1px (see `text-input.css.ts`): the in-control icon is the
+// border stays at the resting 1px (see `input-group.css.ts`): the in-control icon is the
 // non-colour cue here, so the proof is the icon's presence plus the gated border colour,
 // not a border-width change.
 test('invalid without an error message still carries a non-colour cue', async () => {

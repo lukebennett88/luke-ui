@@ -36,12 +36,12 @@ import { expect, test } from 'vite-plus/test';
 // A fourth follow-up (#247/#312 Spectrum-match pass) swapped the `exclamationCircle` glyph for
 // `exclamationTriangle` (a longer path, so a longer mask data URI in each of the three inlined
 // copies) and reordered the in-control icon ahead of each control's trailing affordances with a
-// plain `order` on `adornmentEnd` (`text-input.css.ts`) and the shared clear/trigger action styles
+// plain `order` on `adornmentEnd` (`input-group.css.ts`) and the shared clear/trigger action styles
 // (`combobox.css.ts`), plus a new `marginInlineEnd` on `invalidIndicatorIcon` matching its existing
 // `marginInlineStart`. The limits retain minimal reviewed headroom above the new measured total
 // (90,223 raw / 9,685 gzip).
 // The InputGroup refactor (#247/#312) moved the text-input control's in-control icon off `::after`
-// onto a real `Icon` element the primitive renders itself, so `text-input.css.ts` lost its inlined
+// onto a real `Icon` element the primitive renders itself, so `input-group.css.ts` lost its inlined
 // `exclamationTriangle` mask data URI (one of the three), both per-size `::after` rules and their
 // `createVar`, and the forced-colors `::after` override, gaining only a small `invalidIndicator`
 // slot. The limits retain minimal reviewed headroom above the new measured total
