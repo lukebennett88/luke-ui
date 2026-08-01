@@ -75,8 +75,10 @@ with the same sizing and accessibility behaviour as `Icon`.
 Pass `title` when an icon conveys meaning without adjacent text, such as a standalone status icon.
 The icon is then exposed to assistive technology with `role="img"`.
 
-When `title` is omitted, `aria-hidden` defaults to `true`. Do not pass both `aria-hidden` and
-`title` because a titled icon should not be hidden from assistive technology.
+When `title` is omitted, `aria-hidden` defaults to `true`. An icon renders either
+`aria-hidden="true"` or no `aria-hidden` attribute at all — never `aria-hidden="false"`, which is
+not a meaningful state for an icon. Passing `aria-hidden={false}` therefore has no effect; pass
+`title` to expose an icon to assistive technology.
 
 <ExampleBlock
 	src="icon/decorative"

@@ -58,9 +58,9 @@ vars.color.background.warning.solid.hover;
 
 `rest` is an explicit state rather than an implied default. A token path cannot be both a string
 leaf and the parent of `hover` and `pressed`, so resting values need their own name. `solid.pressed`
-deliberately reuses the `solid.hover` colour — there is no third, deeper solid rung. A component
-carries a pressed look through depth, finish, or a transform instead of inventing another solid
-colour.
+deliberately reuses the `solid.hover` colour, because there is no third, deeper solid rung. A
+component carries a pressed look through depth, finish, or a transform instead of inventing another
+solid colour.
 
 Foreground gives each role a resting and a stronger interactive colour, plus a colour guaranteed to
 read against that role's solid backgrounds:
@@ -89,17 +89,17 @@ import { vars } from '@luke-ui/react/theme';
 
 <ExampleBlock
 	src="overview/role-colours"
-	title="Semantic roles"
+	title="Colour — Background and foreground"
 	description="Select a role to see its subtle and solid background paired with its foreground."
 />
 
 ### Borders
 
 Each role also has one state-free border, for example `vars.color.border.warning`. The token
-describes meaning; the component decides when to apply it, such as only while invalid or as a
+describes meaning. The component decides when to apply it, such as only while invalid or as a
 permanent outline.
 
-A semantic border is measured for contrast but not guaranteed to reach 3:1 — see
+A semantic border is measured for contrast but not guaranteed to reach 3:1. See
 [contrast validation](/theming/authoring#contrast-validation). Never rely on one alone to
 communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or
 another cue that is separately contrast-gated.
@@ -117,7 +117,7 @@ public `loadingSkeleton` role is available when you are building an equivalent c
 full interactive ramp, while `info`, `success`, and `warning` rendered only a static subtle kit. It
 has been removed: there are no `color.intent` paths and no `--luke-color-intent-*` variables left to
 fall back on. If you are upgrading from a release that had them, this table is the old-to-new
-reference — move each usage to its `color.background` / `color.foreground` / `color.border`
+reference. Move each usage to its `color.background` / `color.foreground` / `color.border`
 equivalent:
 
 | Old path                                    | New path                                 |

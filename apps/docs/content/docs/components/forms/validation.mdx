@@ -1,0 +1,72 @@
+---
+title: Validation
+description: Mark a form field invalid, and write the message that tells someone how to fix it.
+---
+
+Every Luke UI form field can report a problem. An invalid field takes the danger border colour and
+renders the message you pass as `errorMessage` beneath the control.
+
+<ExampleBlock
+	src="forms/validation"
+	title="Validation — Invalid fields"
+	description="A form that reports what went wrong in each field on submit."
+/>
+
+## Mark a field invalid
+
+Pass `isInvalid` and `errorMessage` together when your own code decides a value is wrong.
+
+```tsx
+<TextField
+	errorMessage={emailError}
+	isInvalid={emailError != null}
+	label="Email address"
+	name="emailAddress"
+/>
+```
+
+Pass server errors through React Aria `Form`. Each key matches a field's `name`.
+
+```tsx
+import { Form } from 'react-aria-components';
+
+<Form validationErrors={{ username: 'That username is taken.' }}>
+	<TextField label="Username" name="username" />
+</Form>;
+```
+
+## Always pair an invalid field with a message
+
+Colour alone cannot report a problem. Someone who cannot separate the danger border from the resting
+one gets no signal at all, so an invalid field with no message is invisible to them.
+
+`TextField` and `ComboboxField` add an error icon inside the control, after the value. The icon says
+that something is wrong, not what is wrong, so it does not stand in for the message.
+
+Pass `errorMessage` every time you set `isInvalid`. The message is what makes an invalid field
+understandable, and it is what satisfies WCAG 1.4.1 Use of Colour.
+
+## Validate on submit
+
+Mark a field invalid on submit, then clear its message as soon as the value changes. Flagging a
+field while someone is still typing tells them they are wrong before they have finished, and a
+message that appears and disappears on every keystroke is harder to read than one that waits.
+
+## Write the message
+
+An error message has two jobs: name the problem, and name the fix.
+
+| Instead of             | Write                                               |
+| ---------------------- | --------------------------------------------------- |
+| Invalid input          | Enter an email address in the form you@example.com. |
+| This field is required | Choose the country where you work.                  |
+| Error                  | Passwords need at least 12 characters.              |
+
+- Say what to do next, not only what went wrong. "Choose a delivery date" beats "No date selected".
+- Use the field's own words. If the label says "Work location", the message says work location, not
+  region.
+- Keep it to one sentence. A long message pushes the rest of the form down the page.
+- Describe the value, not the person. "Enter a date after today" rather than "You entered an invalid
+  date".
+- Repeat anything the person needs from `description`. Someone reading an error may never look back
+  up.

@@ -128,20 +128,8 @@ const checkboxConfig = {
 					content: '"−"',
 					opacity: 1,
 				},
-				// Unlike `InputGroup`/`Combobox` (which dropped their invalid border back to
-				// 1px once their in-control icon became the non-colour cue), the box keeps
-				// `borderWidth: '2px'` here. The reference systems this direction is drawn
-				// from accept a colour-only invalid checkbox when there is no message
-				// (Astryx: "no message = no icon, no visible cue at all beyond
-				// aria-invalid"). We deliberately do not, because `errorMessage` is optional
-				// on `composeField` and issue #247 exists precisely to fix that colour-only
-				// case. The icon moved to the message (see `root`'s `fieldMessageIcon` var
-				// above), so this 2px boundary is now the box's own always-present
-				// non-colour cue — a deliberate divergence from the references, not an
-				// oversight.
 				'[data-invalid="true"] &': {
 					borderColor: vars.color.background.danger.solid.rest,
-					borderWidth: '2px',
 				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,

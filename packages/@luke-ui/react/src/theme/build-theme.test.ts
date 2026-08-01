@@ -606,14 +606,30 @@ describe('compileTheme diagnostics', () => {
 		}
 	});
 
-	// The matrix is role-uniform by construction, so its size and its per-role shape together pin it:
-	// 8 functional text pairs + 6 roles x (2 foregrounds x 5 backgrounds + 3 on-solid) + the 4 solved
-	// boundaries + 2 for `danger.solid.rest` (not per-role, see `validateContrast`) = 92 hard checks,
-	// and 6 semantic borders x 2 base surfaces = 12 advisory ones.
+	// The matrix is role-uniform by construction: each role contributes the same per-role hard
+	// and advisory counts below, plus a handful of hard checks that aren't per-role at all (see
+	// `validateContrast`). Deriving the totals from those pieces means adding a role, or changing
+	// a per-role count, updates the expectation automatically instead of needing a hand-edited
+	// number.
+	const PER_ROLE_HARD_HOVER = 5;
+	const PER_ROLE_HARD_ON_SOLID = 3;
+	const PER_ROLE_HARD_REST = 5;
+	const PER_ROLE_ADVISORY_BORDER = 2;
+
+	// Hard checks `validateContrast` runs once, not per role: functional primary/secondary text
+	// against the 4 elevation surfaces (8), the focus ring and `border.control` boundaries
+	// against the 2 base surfaces (4), and `danger.solid.rest` against the 2 base surfaces (2).
+	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2;
+
+	const expectedHard =
+		SEMANTIC_ROLES.length * (PER_ROLE_HARD_HOVER + PER_ROLE_HARD_ON_SOLID + PER_ROLE_HARD_REST) +
+		NON_PER_ROLE_HARD_CHECKS;
+	const expectedAdvisory = SEMANTIC_ROLES.length * PER_ROLE_ADVISORY_BORDER;
+
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`measures 92 hard and 12 advisory checks per mode for ${foundation.name}, the same for every role`, () => {
+		it(`measures ${expectedHard} hard and ${expectedAdvisory} advisory checks per mode for ${foundation.name}, the same for every role`, () => {
 			// `compileTheme` returns only once every hard gate passed, so reaching these assertions is
-			// itself the proof that all 92 hard checks pass for the bundled theme.
+			// itself the proof that all hard checks pass for the bundled theme.
 			const { diagnostics } = compileTheme(foundation);
 			const summary = (['light', 'dark'] as const).map((mode) => {
 				const checks = diagnostics[mode].contrastChecks;
@@ -636,14 +652,14 @@ describe('compileTheme diagnostics', () => {
 			});
 			expect(summary).toEqual(
 				(['light', 'dark'] as const).map((mode) => ({
-					advisory: 12,
-					hard: 92,
+					advisory: expectedAdvisory,
+					hard: expectedHard,
 					mode,
 					perRole: SEMANTIC_ROLES.map((role) => ({
-						advisoryBorder: 2,
-						hardHover: 5,
-						hardOnSolid: 3,
-						hardRest: 5,
+						advisoryBorder: PER_ROLE_ADVISORY_BORDER,
+						hardHover: PER_ROLE_HARD_HOVER,
+						hardOnSolid: PER_ROLE_HARD_ON_SOLID,
+						hardRest: PER_ROLE_HARD_REST,
 						role,
 					})),
 				})),

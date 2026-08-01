@@ -38,23 +38,17 @@ Set `isRequired` for required fields. `necessityIndicator="icon"` adds a visual 
 
 ## Validation
 
-Use `errorMessage` to render a validation message. For client validation, use React Aria validation
-props. For server validation, pass errors through React Aria `Form`.
+Pass `errorMessage` with `isInvalid` to report a problem. Always pass both: an invalid field with no
+message leaves someone who cannot see the border colour with no way to know what is wrong.
 
-```tsx
-import { Form } from 'react-aria-components';
+<ExampleBlock
+	src="text-field/validation"
+	title="Text Field — Validation"
+	description="An invalid email field with a message that names the fix."
+/>
 
-<Form validationErrors={{ username: 'Username is not available.' }}>
-	<TextField
-		errorMessage={(validation) => validation.validationErrors.join(' ')}
-		label="Username"
-		name="username"
-	/>
-</Form>;
-```
-
-An invalid field shows an error icon after the input value and before any `adornmentEnd`. The icon
-is a non-colour cue, so an invalid field stays perceivable even when `errorMessage` is omitted.
+Read [Validation](/components/forms/validation) for server validation and for how to word the
+message.
 
 ## Adornments
 
@@ -75,7 +69,7 @@ default. The HTML numeric `size` attribute is unavailable because `size` is the 
 
 <ExampleBlock
 	src="text-field/sizes"
-	title="Text Field — Sizes"
+	title="Text Field — Size"
 	description="Small and medium text fields."
 />
 

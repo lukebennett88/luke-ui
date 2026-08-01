@@ -43,25 +43,17 @@ beside the label.
 
 ## Validation
 
-Use `errorMessage` to render a validation message. Pass server errors through React Aria `Form`.
+Pass `errorMessage` with `isInvalid` to report a problem. Always pass both: an invalid field with no
+message leaves someone who cannot see the border colour with no way to know what is wrong.
 
-```tsx
-import { Form } from 'react-aria-components';
+<ExampleBlock
+	src="combobox-field/validation"
+	title="Combobox Field — Validation"
+	description="An invalid combobox with a message that names the fix."
+/>
 
-<Form validationErrors={{ country: 'Please select a country.' }}>
-	<ComboboxField
-		errorMessage={(validation) => validation.validationErrors.join(' ')}
-		label="Country"
-		name="country"
-	>
-		{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-	</ComboboxField>
-</Form>;
-```
-
-An invalid field shows an error icon after the input value and before the clear and trigger buttons.
-The icon is a non-colour cue, so an invalid field stays perceivable even when `errorMessage` is
-omitted.
+Read [Validation](/components/forms/validation) for server validation and for how to word the
+message.
 
 ## Groups
 

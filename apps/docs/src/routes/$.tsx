@@ -49,7 +49,14 @@ const loader = createServerFn({
 		if (!page) throw notFound();
 
 		const markdownPath = `${page.url === '/' ? '/index' : page.url}.md`;
-		const componentNavigation = getComponentPageNavigation(page.url);
+		const rawComponentNavigation = getComponentPageNavigation(page.url);
+		// A guide-depth URL only gets Guide/Props tabs when a props page actually
+		// exists alongside it — a standalone guide page (e.g. a shared Validation
+		// page with no API surface of its own) sits at the same URL depth but has
+		// no props.mdx sibling, so showing the tab would link to a 404.
+		const hasPropsPage =
+			rawComponentNavigation?.current === 'props' || source.getPage([...slugs, 'props']) != null;
+		const componentNavigation = hasPropsPage ? rawComponentNavigation : null;
 
 		return {
 			componentNavigation: componentNavigation

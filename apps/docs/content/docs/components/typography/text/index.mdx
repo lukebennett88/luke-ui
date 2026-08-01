@@ -3,8 +3,8 @@ title: Text
 description: Styled text with a coordinated type scale and semantic colour roles.
 ---
 
-`Text` applies Luke UI typography without adding heading semantics. It needs a Luke UI theme root;
-see [Getting started](/overview/getting-started).
+`Text` applies Luke UI typography without adding heading semantics. It needs a Luke UI theme root.
+See [Getting started](/overview/getting-started).
 
 <ExampleBlock
 	src="text/basic"
@@ -15,9 +15,9 @@ see [Getting started](/overview/getting-started).
 ## Element type
 
 `Text` renders React Aria's `Text` component, which uses a `span` by default. Set `elementType` to
-choose a semantic element without changing the type treatment. Capsize trim is applied to known
-block text elements such as `p`, `div`, headings, and `blockquote`, and skipped automatically for
-inline or unknown element types.
+choose a semantic element without changing the type treatment. `Text` trims Capsize space on known
+block elements such as `p`, `div`, headings, and `blockquote`, and skips it for inline or unknown
+element types.
 
 ```tsx
 <Text elementType="p">A paragraph of supporting copy.</Text>
@@ -97,14 +97,11 @@ rendered text only, so avoid using uppercase styling as a substitute for a clear
 	description="Apply text transformation and decoration when the content needs it."
 />
 
-## When to use Text or Heading
-
-Use `Heading` for a section heading. It manages heading levels automatically.
-
-Use `Text` with a larger `size` and `heading` or `emphasis` `fontWeight` when content should look
-prominent without becoming a heading, such as a large status value.
-
 ## Related components
+
+Use [Heading](/components/typography/heading) for a section heading. It manages heading levels for
+you. Use `Text` with a larger `size` and the `heading` or `emphasis` `fontWeight` when content should
+look prominent without becoming a heading, such as a large status value.
 
 Use [Numeral](/components/typography/numeral) to format locale-aware numbers and
 [Emoji](/components/typography/emoji) for an emoji with a reliable accessible label.

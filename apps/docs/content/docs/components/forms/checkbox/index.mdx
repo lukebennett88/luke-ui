@@ -4,7 +4,8 @@ description:
   Lets a person select an independent option, with optional supporting and validation text.
 ---
 
-Use `Checkbox` when a person can choose an option independently of nearby controls.
+Use `Checkbox` when a person can choose an option independently of nearby controls. Pass
+`description` to clarify what the option means.
 
 <ExampleBlock
 	src="checkbox/basic"
@@ -25,8 +26,8 @@ option whose child options are only partly selected.
 />
 
 Disabled checkboxes cannot be changed or focused. Read-only checkboxes remain focusable so their
-state is available to keyboard and assistive-technology users. Keyboard navigation shows a
-focus-visible ring; it is intentionally not shown for pointer focus.
+state is available to keyboard and assistive-technology users. Keyboard navigation shows a focus
+ring. Pointer focus does not.
 
 <ExampleBlock
 	src="checkbox/controlled"
@@ -41,19 +42,23 @@ default. Use `small` in compact layouts and `large` where a larger control impro
 
 <ExampleBlock
 	src="checkbox/sizes"
-	title="Checkbox — Sizes"
+	title="Checkbox — Size"
 	description="Selected small, medium, and large checkboxes."
 />
 
-## Description and validation
+## Validation
 
-Pass `description` to clarify an option. Set `isRequired` and `errorMessage` when selection is
-required for form submission.
+Pass `errorMessage` with `isInvalid` when the choice blocks submission. Always pass both: an invalid
+field with no message leaves someone who cannot see the border colour with no way to know what is
+wrong.
 
-An invalid checkbox switches its control to a 2px boundary — unlike TextField and ComboboxField,
-whose in-control icon already carries the non-colour cue, Checkbox's control has no room for an icon
-without floating past the label, so the boundary is its own always-present cue. When `errorMessage`
-is set, the error icon leads the message instead, so the icon still appears exactly once per field.
+<ExampleBlock
+	src="checkbox/validation"
+	title="Checkbox — Validation"
+	description="A required checkbox with supporting text and a validation message."
+/>
+
+Read [Validation](/components/forms/validation) for how to word the message.
 
 ## Labels with Text
 

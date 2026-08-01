@@ -7,11 +7,10 @@ afterEach(() => {
 	cleanupVisual();
 });
 
-// Proves the invalid cue survives without `errorMessage`, which `composeField` treats
-// as optional — the case #247 flags as otherwise colour-only and imperceptible. Unlike
-// TextField/ComboboxField (whose in-control icon carries this), Checkbox has no message
-// to attach an icon to here, so its box's own 2px border is the whole non-colour cue.
-test('invalid without an error message still carries a non-colour cue', async () => {
+// #247/#312: an invalid checkbox is colour-only when there's no `errorMessage` — the
+// border stays 1px, since a width change isn't perceivable to vision-impaired or
+// colour-blind users.
+test('invalid without an error message keeps the 1px border', async () => {
 	renderVisual(
 		<Checkbox defaultSelected isInvalid name="invalid">
 			Invalid
@@ -26,14 +25,12 @@ test('invalid without an error message still carries a non-colour cue', async ()
 	const indicator = content.querySelector<HTMLElement>('[aria-hidden="true"]');
 	if (indicator == null) throw new Error('Expected the checkbox indicator.');
 
-	expect(getComputedStyle(indicator).borderWidth).toBe('2px');
+	expect(getComputedStyle(indicator).borderWidth).toBe('1px');
 });
 
-// #247/#312: with an `errorMessage`, the icon that used to sit on `content` now leads
-// the message instead — proves both halves of the cue at once: the box keeps its 2px
-// border regardless, and the message grows the leading icon `field.css.ts` gates behind
-// `fieldMessageIcon`.
-test('invalid with an error message shows the 2px box and the message-leading icon', async () => {
+// #247/#312: with an `errorMessage`, the non-colour cue is the icon leading the
+// message — the box itself stays colour-only.
+test('invalid with an error message shows the message-leading icon', async () => {
 	renderVisual(
 		<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid-message">
 			Invalid
@@ -47,7 +44,7 @@ test('invalid with an error message shows the 2px box and the message-leading ic
 	if (content == null) throw new Error('Expected the checkbox content label.');
 	const indicator = content.querySelector<HTMLElement>('[aria-hidden="true"]');
 	if (indicator == null) throw new Error('Expected the checkbox indicator.');
-	expect(getComputedStyle(indicator).borderWidth).toBe('2px');
+	expect(getComputedStyle(indicator).borderWidth).toBe('1px');
 
 	const message = page.getByText('Choose an option.');
 	await expect.element(message).toBeVisible();
@@ -92,7 +89,7 @@ test('the error message text aligns with the label text, not the icon', async ()
 	expect(messageRect.left).toBeCloseTo(labelRect.left, 0);
 });
 
-test('valid indicator keeps the 1px boundary the invalid state widens', async () => {
+test('valid indicator has the same 1px border as invalid', async () => {
 	renderVisual(<Checkbox name="valid">Valid</Checkbox>);
 
 	const checkbox = page.getByRole('checkbox', { name: 'Valid' });
