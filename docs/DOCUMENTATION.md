@@ -15,6 +15,59 @@ The package README links to the hosted docs. Fumadocs provides:
 - `/llms-full.txt` for full docs.
 - Per-page Markdown by appending `.md` to a docs URL.
 
+## Writing style
+
+These rules cover MDX pages, JSDoc, code comments, and package READMEs.
+
+**Simplified Technical English.** Luke UI follows the rules of ASD-STE100. The approved-word
+dictionary needs a paid licence. This guide states the rule set only, not the word list.
+
+- Write descriptive sentences with 25 words or fewer. Write instructions with 20 words or fewer.
+  Split a long sentence into two. Do not trim words from it.
+- Write one instruction per sentence. Keep each paragraph to six sentences or fewer.
+- Use active voice. Name the actor in each sentence.
+- Write instructions as commands. Write "Pass a title", not "A title should be passed".
+- Use simple tenses. Avoid perfect tenses, such as "has changed", and continuous tenses, such as "is
+  changing".
+- Keep articles. Do not drop "the" or "a" to shorten a sentence.
+- Avoid "-ing" forms as nouns or in participial phrases. An established technical name, such as
+  "styling" or "theming", is an exception.
+- Keep noun clusters to three words or fewer.
+- Write positively. Avoid double negatives, such as "not uncommon".
+- State what a thing does. Avoid "can be used to", "allows you to", and "enables you to".
+
+**One term per concept.** Do not use different words for the same concept. Use the same word every
+time.
+
+| Term                   | Definition                                                                                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `someone`              | The person who uses an interface built with Luke UI. Never write "a person", "people", "users", or "the user".                                   |
+| `developer`            | The reader of these docs.                                                                                                                        |
+| `assistive technology` | A singular, uncountable term. Never write "assistive technologies". Write "screen reader" only when the behaviour is specific to screen readers. |
+| `control`              | An interactive element.                                                                                                                          |
+| `field`                | A label, control, description, and validation message together.                                                                                  |
+| `set`                  | Use `set` for a boolean prop.                                                                                                                    |
+| `pass`                 | Use `pass` for a value or node prop.                                                                                                             |
+| `choose`               | Use `choose` when someone picks from options.                                                                                                    |
+| `select`               | Use `select` only for a control's selection state.                                                                                               |
+
+**Spelling and punctuation.** Spell words in Australian English. Write headings in sentence case. Do
+not use an em dash or a semicolon in prose. One exception applies. The em dash inside an
+`<ExampleBlock title>` separates the title from its qualifier. It stays.
+
+**Comments explain the code, not its history.** Luke UI is pre-1.0. Do not carry a prior state in a
+comment.
+
+- Do not write "previously", "used to", "no longer", "an earlier pass", or "the old X".
+- Do not use an issue number to narrate why a change happened.
+- Do not name another design system to justify a decision. A design system may appear as test
+  reference data, as `theme/__fixtures__/radix-scales.ts` does.
+- Keep an explanation that justifies a rule a reader would otherwise undo. When unsure, shorten the
+  explanation rather than delete it.
+
+**Say it once.** Cut a sentence when its only content restates the prop, token, or concept in its
+own heading.
+
 ## Component docs
 
 Atoms and composed components get hosted docs pages in the primary component navigation.
