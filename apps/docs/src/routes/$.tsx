@@ -11,6 +11,7 @@ import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
 import { ExampleBlock } from '../components/example-block';
+import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
 import { getComponentPageNavigation } from '../lib/component-page-navigation.js';
@@ -24,6 +25,7 @@ const mdxComponents = {
 	...defaultMdxComponents,
 	AutoTypeTable,
 	ExampleBlock,
+	IconGallery,
 	SourceCodeBlock,
 	TypeTable,
 };

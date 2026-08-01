@@ -6,43 +6,13 @@ description: SVG icon component backed by the generated spritesheet.
 `Icon` renders a symbol from the generated Luke UI spritesheet. It needs an
 `IconSpritesheetProvider` ancestor so it can resolve the spritesheet URL.
 
+To find an icon, or to set up the spritesheet, see [Iconography](/overview/iconography).
+
 <ExampleBlock
 	src="icon/basic"
 	title="Icon — Basic"
 	description="Standalone icons with accessible titles."
 />
-
-## Set up the spritesheet
-
-Wrap your app with `IconSpritesheetProvider`. Pass the URL of the generated spritesheet asset.
-
-- Source asset: `@luke-ui/react/spritesheet.svg`, exported from `./dist/spritesheet.svg`
-- Runtime lookup: `<configured-sprite-href>#<icon-name>`
-
-```tsx
-<IconSpritesheetProvider href="/assets/spritesheet.svg">
-	<App />
-</IconSpritesheetProvider>
-```
-
-Vite and Storybook should import the spritesheet as a URL.
-
-```ts
-import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-
-<IconSpritesheetProvider href={spriteSheetHref}>
-	<App />
-</IconSpritesheetProvider>;
-```
-
-The `no-inline` query avoids `data:` URLs, which can break `<use href="...#icon-id">` rendering.
-
-When developing `@luke-ui/react`, generate the spritesheet from
-`packages/@luke-ui/react/icons/*.svg`.
-
-```bash
-pnpm --dir packages/@luke-ui/react run generate:icons
-```
 
 ## Use an icon
 
