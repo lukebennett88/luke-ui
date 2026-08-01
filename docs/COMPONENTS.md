@@ -60,3 +60,15 @@ example and references it with `ExampleBlock`. Replace the placeholder content w
 renderable use of the component.
 
 Do not move creation rules into one-off generator code.
+
+## Icons
+
+Icon SVGs live in `packages/@luke-ui/react/icons`. After adding, renaming, or removing one,
+regenerate the spritesheet and the `iconNames` union:
+
+```bash
+pnpm --dir packages/@luke-ui/react run generate:icons
+```
+
+The generated `iconNames` export drives the docs gallery at `/overview/iconography`, so a new icon
+appears there with no further changes.

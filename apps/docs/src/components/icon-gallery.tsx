@@ -8,15 +8,15 @@
  * the JSX in one click.
  * FIRST VIEWPORT: Filter, size pills, live count, then the grid — the set is visible
  * without scrolling.
- * FORM: Extension of an established surface. Heroicons' split-tile copy, TanStack's
- * ruled grid.
+ * FORM: Extension of an established surface. TanStack's ruled grid, with the two copy targets
+ * always present in a ruled cell footer rather than revealed on hover.
  */
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon, iconNames } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import type { JSX } from 'react';
+import type { JSX, ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
 
@@ -44,24 +44,16 @@ interface CopyStatus {
 	state: 'copied' | 'error';
 }
 
-/** Fixed height of each cell's glyph area. The preview size scales inside it, not the cell itself. */
-const GLYPH_AREA_CLASS_NAME = 'relative flex h-28 w-full items-center justify-center';
-
 /**
- * Shared treatment for the two per-cell copy buttons. Hidden state is `opacity-0` plus
- * `pointer-events-none` so the buttons stay real, tab-reachable, but inert until revealed.
- * Permanently revealed on coarse-pointer (touch) devices, which have no hover state.
+ * Shared treatment for the two per-cell copy buttons. Always visible, on every input method,
+ * as part of the cell's ruled footer. The only state change is a tint on hover/focus-visible.
  */
 const COPY_BUTTON_CLASS_NAME = cx(
-	'absolute inset-x-1 flex h-7 items-center justify-center gap-1 whitespace-nowrap rounded-md',
+	'flex h-7 min-w-0 items-center justify-center gap-1 whitespace-nowrap',
 	'font-medium text-[11px] text-fd-muted-foreground',
-	'bg-fd-background ring-1 ring-fd-border',
-	'pointer-events-none opacity-0',
-	'group-focus-within:pointer-events-auto group-focus-within:opacity-100',
-	'group-hover:pointer-events-auto group-hover:opacity-100',
-	'pointer-coarse:pointer-events-auto pointer-coarse:opacity-100',
-	'transition-opacity duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none',
-	'focus-visible:pointer-events-auto focus-visible:opacity-100',
+	'hover:bg-fd-accent hover:text-fd-accent-foreground',
+	'focus-visible:bg-fd-accent focus-visible:text-fd-accent-foreground',
+	'transition-colors duration-150 motion-reduce:transition-none',
 );
 
 /** Searchable index of the first-party icon set, sized at the token you'll ship it at. */
@@ -185,30 +177,32 @@ interface IconGalleryCellProps {
 	previewSize: GalleryIconSize;
 }
 
-/** One grid cell: a fixed-height glyph area, the name below it, and two hover-revealed copy buttons. */
+/** One grid cell: a fixed-height glyph area, the name below it, and a ruled footer of two copy buttons. */
 function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryCellProps) {
 	return (
-		<div className="group relative -mr-px -mb-px flex flex-col items-center gap-1 border-fd-border border-r border-b p-2">
-			<div className={GLYPH_AREA_CLASS_NAME}>
-				<Icon aria-hidden name={name} size={previewSize} />
+		<div className="-mr-px -mb-px flex flex-col border-fd-border border-r border-b">
+			<div className="flex flex-col items-center gap-1 p-2">
+				<div className="flex h-20 w-full items-center justify-center">
+					<Icon aria-hidden name={name} size={previewSize} />
+				</div>
+				<span className="w-full truncate text-center text-fd-muted-foreground text-xs" title={name}>
+					{name}
+				</span>
+			</div>
+			<div className="grid grid-cols-2 border-fd-border border-t">
 				<CopyButton
 					copyStatus={copyStatus?.kind === 'jsx' ? copyStatus : null}
 					kind="jsx"
 					name={name}
 					onCopy={onCopy}
-					position="top"
 				/>
 				<CopyButton
 					copyStatus={copyStatus?.kind === 'name' ? copyStatus : null}
 					kind="name"
 					name={name}
 					onCopy={onCopy}
-					position="bottom"
 				/>
 			</div>
-			<span className="w-full truncate text-center text-fd-muted-foreground text-xs" title={name}>
-				{name}
-			</span>
 		</div>
 	);
 }
@@ -218,32 +212,29 @@ interface CopyButtonProps {
 	kind: CopyKind;
 	name: IconName;
 	onCopy: (name: IconName, kind: CopyKind) => void;
-	position: 'bottom' | 'top';
 }
 
-/** One half of the Heroicons-style split-tile copy control. */
-function CopyButton({ copyStatus, kind, name, onCopy, position }: CopyButtonProps) {
+/** One half of the ruled footer's copy control. The `jsx` button renders first, so it carries the divider. */
+function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 	const accessibleLabel = kind === 'jsx' ? `Copy JSX for ${name}` : `Copy name ${name}`;
+
+	const label: ReactNode = (() => {
+		const copyStatusState = copyStatus?.state;
+		if (copyStatusState === 'copied') return 'Copied';
+		if (copyStatusState === 'error') return 'Failed';
+		if (kind === 'jsx') return 'JSX';
+
+		return 'Name';
+	})();
 
 	return (
 		<button
 			aria-label={accessibleLabel}
-			className={cx(COPY_BUTTON_CLASS_NAME, position === 'top' ? 'top-1' : 'bottom-1')}
+			className={cx(COPY_BUTTON_CLASS_NAME, kind === 'jsx' && 'border-r border-fd-border')}
 			onClick={() => onCopy(name, kind)}
 			type="button"
 		>
-			{copyStatus?.state === 'copied' ? (
-				<>
-					<Icon aria-hidden className="size-3" name="check" />
-					Copied
-				</>
-			) : copyStatus?.state === 'error' ? (
-				'Copy failed'
-			) : kind === 'jsx' ? (
-				'JSX'
-			) : (
-				'Name'
-			)}
+			{label}
 		</button>
 	);
 }
