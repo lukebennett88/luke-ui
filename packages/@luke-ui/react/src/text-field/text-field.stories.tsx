@@ -1,6 +1,14 @@
+import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
+import {
+	InputGroup,
+	InputGroupInput,
+	InputGroupPrefix,
+	InputGroupSuffix,
+} from '@luke-ui/react/text-field/primitive';
 import type { CSSProperties } from 'react';
+import { useState } from 'react';
 import { Form } from 'react-aria-components/Form';
 import { expect, userEvent, within } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
@@ -35,7 +43,7 @@ export const Default = meta.story({
 });
 
 /**
- * `placeholder` is forwarded to the internal `TextInput` control.
+ * `placeholder` is forwarded to the internal `InputGroupInput` control.
  */
 export const Placeholder = meta.story({
 	render: () => (
@@ -45,7 +53,7 @@ export const Placeholder = meta.story({
 
 /**
  * Size can be set directly on composed `TextField` and forwards to the
- * primitive `TextInput`.
+ * `InputGroup` primitive.
  */
 export const Size = meta.story({
 	render: () => (
@@ -58,18 +66,80 @@ export const Size = meta.story({
 });
 
 /**
- * Start/end adornments are passed through to the primitive `TextInput`.
+ * `prefix` and `suffix` become the primitive's `InputGroupPrefix` and
+ * `InputGroupSuffix` children.
  */
-export const Adornments = meta.story({
+export const PrefixAndSuffix = meta.story({
 	render: () => (
 		<div style={stackStyle}>
-			<TextField
-				adornmentStart={<Icon name="add" />}
-				label="Search"
-				name="search"
-				placeholder="Search"
-			/>
-			<TextField adornmentEnd="USD" label="Amount" name="amount" placeholder="0.00" />
+			<TextField label="Search" name="search" placeholder="Search" prefix={<Icon name="add" />} />
+			<TextField label="Amount" name="amount" placeholder="0.00" suffix="USD" />
+		</div>
+	),
+});
+
+/**
+ * The `InputGroup` primitive composes the same control from children instead of
+ * props. The group owns the border, background, and rounding; the parts are
+ * transparent flex children whose position follows document order. Use it when a
+ * composition needs something `prefix` / `suffix` cannot express, such
+ * as an interactive trailing button.
+ *
+ * The group also provides the icon size, so the search `Icon` below scales with the
+ * control without a `size` of its own.
+ */
+export const InputGroupComposition = meta.story({
+	play: async ({ canvas }) => {
+		await expect(canvas.getByLabelText('Amount')).toBeInTheDocument();
+		await userEvent.click(canvas.getByRole('button', { name: 'Clear' }));
+		await expect(canvas.getByLabelText('Search')).toHaveValue('');
+	},
+	render: function InputGroupCompositionStory() {
+		const [search, setSearch] = useState('invoices');
+
+		return (
+			<div style={stackStyle}>
+				<InputGroup>
+					<InputGroupPrefix>$</InputGroupPrefix>
+					<InputGroupInput aria-label="Amount" defaultValue="1250.00" inputMode="decimal" />
+					<InputGroupSuffix>USD</InputGroupSuffix>
+				</InputGroup>
+				<InputGroup>
+					<InputGroupPrefix>
+						<Icon aria-hidden name="search" />
+					</InputGroupPrefix>
+					<InputGroupInput
+						aria-label="Search"
+						onChange={(event) => setSearch(event.target.value)}
+						value={search}
+					/>
+					<InputGroupSuffix>
+						<Button appearance="subtle" onPress={() => setSearch('')} size="small">
+							Clear
+						</Button>
+					</InputGroupSuffix>
+				</InputGroup>
+			</div>
+		);
+	},
+});
+
+/**
+ * `InputGroup` renders the invalid icon itself whenever the control is invalid, so a
+ * composition cannot end up with a colour-only invalid cue. It lands after the input
+ * and before any `InputGroupSuffix`.
+ */
+export const InputGroupInvalid = meta.story({
+	play: async ({ canvas }) => {
+		await expect(canvas.getByLabelText('Invalid amount')).toHaveAttribute('aria-invalid', 'true');
+	},
+	render: () => (
+		<div style={stackStyle}>
+			<InputGroup isInvalid>
+				<InputGroupPrefix>$</InputGroupPrefix>
+				<InputGroupInput aria-label="Invalid amount" aria-invalid defaultValue="-1" />
+				<InputGroupSuffix>USD</InputGroupSuffix>
+			</InputGroup>
 		</div>
 	),
 });

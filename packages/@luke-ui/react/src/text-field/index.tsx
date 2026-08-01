@@ -10,22 +10,27 @@ import { Field } from '../field/primitive/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import type { TextInputSize } from './primitive/index.js';
-import { TextInput } from './primitive/index.js';
+import type { InputGroupSize } from './primitive/index.js';
+import {
+	InputGroup,
+	InputGroupInput,
+	InputGroupPrefix,
+	InputGroupSuffix,
+} from './primitive/index.js';
 
 type _TextFieldOmit = DistributiveOmit<RacTextFieldProps, 'children' | keyof DocumentedInputProps>;
 
 interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
-	/** Element shown after the input value. */
-	adornmentEnd?: ReactNode;
-	/** Element shown before the input value. */
-	adornmentStart?: ReactNode;
 	/** Class name forwarded to the inner input element. */
 	inputClassName?: RacInputProps['className'];
 	/** Placeholder text for the input. */
 	placeholder?: string;
+	/** Element shown before the input value. */
+	prefix?: ReactNode;
 	/** Control size. Defaults to `'medium'`. */
-	size?: TextInputSize;
+	size?: InputGroupSize;
+	/** Element shown after the input value. */
+	suffix?: ReactNode;
 }
 
 /**
@@ -35,28 +40,31 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
  */
 export type TextFieldProps = Prettify<_TextFieldProps>;
 
-/** Composes `TextInput` with label, description, and error slots. */
+/**
+ * Composes the input group primitive with label, description, and error slots.
+ *
+ * `prefix` / `suffix` map onto the primitive's `InputGroupPrefix` /
+ * `InputGroupSuffix` children below.
+ */
 export function TextField(props: TextFieldProps): JSX.Element {
 	const [fieldSlotProps, restProps] = composeField(props);
 	const {
-		adornmentEnd,
-		adornmentStart,
 		inputClassName,
 		placeholder,
+		prefix,
 		size = 'medium',
+		suffix,
 		...textFieldProps
 	} = restProps;
 
 	return (
 		<RacTextField {...textFieldProps}>
 			<Field {...fieldSlotProps}>
-				<TextInput
-					adornmentEnd={adornmentEnd}
-					adornmentStart={adornmentStart}
-					inputClassName={inputClassName}
-					placeholder={placeholder}
-					size={size}
-				/>
+				<InputGroup size={size}>
+					{prefix != null ? <InputGroupPrefix>{prefix}</InputGroupPrefix> : null}
+					<InputGroupInput className={inputClassName} placeholder={placeholder} />
+					{suffix != null ? <InputGroupSuffix>{suffix}</InputGroupSuffix> : null}
+				</InputGroup>
 			</Field>
 		</RacTextField>
 	);

@@ -44,30 +44,32 @@ test('loaded content', async () => {
 	await captureVisual(locator, 'loading-skeleton/loaded');
 });
 
-test.each(visualAppearances)('flattens tactile descendants: $theme $mode', async (appearance) => {
-	const scene = renderVisual(
-		<LoadingSkeleton radius="surface">
-			<div>
-				<Button>Nested action</Button>
-				<TextField label="Email" name="email" />
-			</div>
-		</LoadingSkeleton>,
-		appearance,
-	);
-	const button = requireElement(scene.element(), 'button');
-	const field = requireElement(scene.element(), 'input');
+for (const appearance of visualAppearances) {
+	test(`flattens tactile descendants: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<LoadingSkeleton radius="surface">
+				<div>
+					<Button>Nested action</Button>
+					<TextField label="Email" name="email" />
+				</div>
+			</LoadingSkeleton>,
+			appearance,
+		);
+		const button = requireElement(scene.element(), 'button');
+		const field = requireElement(scene.element(), 'input');
 
-	for (const descendant of [button, field]) {
-		const style = getComputedStyle(descendant);
-		expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-		expect(style.backgroundImage).toBe('none');
-		expect(style.borderStyle).toBe('none');
-		expect(style.boxShadow).toBe('none');
-		expect(style.color).toBe('rgba(0, 0, 0, 0)');
-	}
+		for (const descendant of [button, field]) {
+			const style = getComputedStyle(descendant);
+			expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+			expect(style.backgroundImage).toBe('none');
+			expect(style.borderStyle).toBe('none');
+			expect(style.boxShadow).toBe('none');
+			expect(style.color).toBe('rgba(0, 0, 0, 0)');
+		}
 
-	await captureVisualAppearance(scene, 'loading-skeleton/descendant-suppression', appearance);
-});
+		await captureVisualAppearance(scene, 'loading-skeleton/descendant-suppression', appearance);
+	});
+}
 
 function requireElement(parent: ParentNode, selector: string) {
 	const element = parent.querySelector(selector);

@@ -1,7 +1,7 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
-import { fieldMessageIndent } from './field.css.js';
+import { fieldMessageIcon, fieldMessageIndent } from './field.css.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 import { textLineHeight } from './text.css.js';
@@ -17,6 +17,13 @@ const checkboxConfig = {
 			flexDirection: 'column',
 			gap: vars.space[100],
 			minInlineSize: 0,
+			// Checkbox's own box has no room for an in-control invalid icon without it
+			// floating past the label (see `indicator` below), so its icon renders on
+			// the error message instead — `field.css.ts`'s `message` slot draws it,
+			// gated behind this var, which stays off for every other consumer.
+			vars: {
+				[fieldMessageIcon]: 'inline-block',
+			},
 		},
 		content: {
 			alignItems: 'flex-start',
@@ -122,7 +129,7 @@ const checkboxConfig = {
 					opacity: 1,
 				},
 				'[data-invalid="true"] &': {
-					borderColor: vars.color.border.danger,
+					borderColor: vars.color.background.danger.solid.rest,
 				},
 				'[data-selected="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,

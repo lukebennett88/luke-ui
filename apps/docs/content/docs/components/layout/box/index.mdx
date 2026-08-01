@@ -3,9 +3,9 @@ title: Box
 description: A div with responsive Luke UI layout properties.
 ---
 
-`Box` is a `div` that accepts Luke UI Sprinkles properties. Use it to place content in a layout, add
-token spacing, constrain an element's size, or control a flex or grid child. Use a normal `div` when
-no supported layout property is needed.
+`Box` is a `div` that accepts Luke UI Sprinkles properties. It places content in a layout, adds
+token spacing, constrains an element's size, or controls a flex or grid child. Use a normal `div`
+when no supported layout property applies.
 
 <ExampleBlock
 	src="box/basic"
@@ -61,8 +61,8 @@ grid-placement properties accept their CSS values.
 ## Render a custom div
 
 Use `render` for a compatible custom `div`, such as a motion wrapper. Spread the supplied props on
-the final element so it receives Box's class name, inline style, ref, accessibility attributes, and
-event handlers. `render` does not make Box polymorphic. It must return a `div`.
+the final element. It then receives Box's class name, inline style, ref, accessibility attributes,
+and event handlers. `render` does not make Box polymorphic. It must return a `div`.
 
 ```tsx
 <Box padding="400" render={(props) => <MotionDiv {...props} />}>

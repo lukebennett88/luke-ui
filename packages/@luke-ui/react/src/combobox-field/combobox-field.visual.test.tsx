@@ -7,6 +7,7 @@ import {
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
+	pseudoElementLeft,
 	renderVisual,
 	Stack,
 	visualAppearances,
@@ -30,118 +31,122 @@ const countryItems: Array<CountryItem> = [
 
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
-test.each(visualAppearances)('material states: $theme $mode', async (appearance) => {
-	const scene = renderVisual(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems}
-				label="Resting"
-				name="resting"
-				placeholder="Select a country..."
-			>
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField
-				defaultItems={countryItems}
-				defaultValue="ca"
-				isDisabled
-				label="Disabled"
-				name="disabled"
-			>
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField
-				defaultItems={countryItems}
-				defaultValue="ca"
-				isReadOnly
-				label="Read-only"
-				name="readonly"
-			>
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField
-				defaultItems={countryItems}
-				errorMessage="Choose a valid country."
-				isInvalid
-				label="Invalid"
-				name="invalid"
-			>
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField
-				defaultItems={countryItems}
-				defaultValue="ca"
-				label="With actions"
-				name="actions"
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-		appearance,
-	);
-	await expect.element(page.getByRole('combobox', { name: 'Resting' })).toBeVisible();
+for (const appearance of visualAppearances) {
+	test(`material states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					label="Resting"
+					name="resting"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					isDisabled
+					label="Disabled"
+					name="disabled"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					isReadOnly
+					label="Read-only"
+					name="readonly"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={countryItems}
+					errorMessage="Choose a valid country."
+					isInvalid
+					label="Invalid"
+					name="invalid"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					label="With actions"
+					name="actions"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
+		await expect.element(page.getByRole('combobox', { name: 'Resting' })).toBeVisible();
 
-	await captureVisualAppearance(scene, 'combobox-field/material-states', appearance);
-});
+		await captureVisualAppearance(scene, 'combobox-field/material-states', appearance);
+	});
+}
 
-test.each(visualAppearances)('interactive states: $theme $mode', async (appearance) => {
-	const scene = renderVisual(
-		<Stack>
-			<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-		appearance,
-	);
-	const input = page.getByRole('combobox', { name: 'Country' });
-	const clear = page.getByRole('button', { name: 'Clear selection' });
-	const trigger = page.getByRole('button', { name: 'Toggle options' });
-	await expect.element(input).toBeVisible();
-	const control = input.element().closest<HTMLElement>('[role="group"]');
-	if (control == null) throw new Error('Expected the combobox control group.');
-	const clearRect = clear.element().getBoundingClientRect();
-	const triggerRect = trigger.element().getBoundingClientRect();
-	const controlRect = control.getBoundingClientRect();
-	expect(clearRect.width).toBe(clearRect.height);
-	expect(triggerRect.width).toBe(triggerRect.height);
-	expect(clearRect.width).toBeGreaterThanOrEqual(24);
-	expect(triggerRect.width).toBeGreaterThanOrEqual(24);
-	expect(triggerRect.left - clearRect.right).toBeGreaterThan(0);
-	expect(controlRect.right - triggerRect.right).toBeGreaterThan(0);
-	expect(getComputedStyle(trigger.element()).boxShadow).toBe('none');
+for (const appearance of visualAppearances) {
+	test(`interactive states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack>
+				<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
+		const input = page.getByRole('combobox', { name: 'Country' });
+		const clear = page.getByRole('button', { name: 'Clear selection' });
+		const trigger = page.getByRole('button', { name: 'Toggle options' });
+		await expect.element(input).toBeVisible();
+		const control = input.element().closest<HTMLElement>('[role="group"]');
+		if (control == null) throw new Error('Expected the combobox control group.');
+		const clearRect = clear.element().getBoundingClientRect();
+		const triggerRect = trigger.element().getBoundingClientRect();
+		const controlRect = control.getBoundingClientRect();
+		expect(clearRect.width).toBe(clearRect.height);
+		expect(triggerRect.width).toBe(triggerRect.height);
+		expect(clearRect.width).toBeGreaterThanOrEqual(24);
+		expect(triggerRect.width).toBeGreaterThanOrEqual(24);
+		expect(triggerRect.left - clearRect.right).toBeGreaterThan(0);
+		expect(controlRect.right - triggerRect.right).toBeGreaterThan(0);
+		expect(getComputedStyle(trigger.element()).boxShadow).toBe('none');
 
-	await captureVisualAppearance(scene, 'combobox-field/resting', appearance);
-	await userEvent.hover(input);
-	await captureVisualAppearance(scene, 'combobox-field/hover', appearance);
-	await userEvent.unhover(input);
-	await userEvent.hover(clear);
-	await captureVisualAppearance(scene, 'combobox-field/clear-hover', appearance);
-	await userEvent.unhover(clear);
-	await userEvent.hover(trigger);
-	await captureVisualAppearance(scene, 'combobox-field/trigger-hover', appearance);
-	await userEvent.unhover(trigger);
-	await focusViaKeyboard(input);
-	await captureVisualAppearance(
-		refreshVisualScene(scene),
-		'combobox-field/focus-visible',
-		appearance,
-	);
-	await userEvent.tab();
-	await expect.element(clear).toHaveFocus();
-	await captureVisualAppearance(
-		refreshVisualScene(scene),
-		'combobox-field/clear-focus-visible',
-		appearance,
-	);
-	await userEvent.keyboard('{Space>}');
-	await expect.element(clear).toHaveAttribute('data-pressed', 'true');
-	await captureVisualAppearance(
-		refreshVisualScene(scene),
-		'combobox-field/clear-pressed',
-		appearance,
-	);
-	await userEvent.keyboard('{/Space}');
-});
+		await captureVisualAppearance(scene, 'combobox-field/resting', appearance);
+		await userEvent.hover(input);
+		await captureVisualAppearance(scene, 'combobox-field/hover', appearance);
+		await userEvent.unhover(input);
+		await userEvent.hover(clear);
+		await captureVisualAppearance(scene, 'combobox-field/clear-hover', appearance);
+		await userEvent.unhover(clear);
+		await userEvent.hover(trigger);
+		await captureVisualAppearance(scene, 'combobox-field/trigger-hover', appearance);
+		await userEvent.unhover(trigger);
+		await focusViaKeyboard(input);
+		await captureVisualAppearance(
+			refreshVisualScene(scene),
+			'combobox-field/focus-visible',
+			appearance,
+		);
+		await userEvent.tab();
+		await expect.element(clear).toHaveFocus();
+		await captureVisualAppearance(
+			refreshVisualScene(scene),
+			'combobox-field/clear-focus-visible',
+			appearance,
+		);
+		await userEvent.keyboard('{Space>}');
+		await expect.element(clear).toHaveAttribute('data-pressed', 'true');
+		await captureVisualAppearance(
+			refreshVisualScene(scene),
+			'combobox-field/clear-pressed',
+			appearance,
+		);
+		await userEvent.keyboard('{/Space}');
+	});
+}
 
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
@@ -234,79 +239,84 @@ test('forced-colors states', async () => {
 	}
 });
 
-test.each(visualAppearances)('open option interactions: $theme $mode', async (appearance) => {
-	renderVisual(
-		<Stack>
-			<ComboboxField defaultItems={countryItems} label="Country" name="country">
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-		appearance,
-	);
+for (const appearance of visualAppearances) {
+	test(`open option interactions: ${appearance.theme} ${appearance.mode}`, async () => {
+		renderVisual(
+			<Stack>
+				<ComboboxField defaultItems={countryItems} label="Country" name="country">
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
 
-	const input = page.getByRole('combobox', { name: 'Country' });
-	await focusViaKeyboard(input);
-	await userEvent.keyboard('{ArrowDown}');
-	const keyboardFocused = page.getByRole('option', { name: 'Australia' });
-	await expect.element(keyboardFocused).toHaveAttribute('data-focused', 'true');
-	await captureVisualAppearance(
-		page.elementLocator(document.body),
-		'combobox-field/option-keyboard-focus',
-		appearance,
-	);
+		const input = page.getByRole('combobox', { name: 'Country' });
+		await focusViaKeyboard(input);
+		await userEvent.keyboard('{ArrowDown}');
+		const keyboardFocused = page.getByRole('option', { name: 'Australia' });
+		await expect.element(keyboardFocused).toHaveAttribute('data-focused', 'true');
+		await captureVisualAppearance(
+			page.elementLocator(document.body),
+			'combobox-field/option-keyboard-focus',
+			appearance,
+		);
 
-	const hovered = page.getByRole('option', { name: 'New Zealand' });
-	await userEvent.hover(hovered);
-	await expect.element(hovered).toHaveAttribute('data-hovered', 'true');
-	await captureVisualAppearance(
-		page.elementLocator(document.body),
-		'combobox-field/option-hover',
-		appearance,
-	);
-});
+		const hovered = page.getByRole('option', { name: 'New Zealand' });
+		await userEvent.hover(hovered);
+		await expect.element(hovered).toHaveAttribute('data-hovered', 'true');
+		await captureVisualAppearance(
+			page.elementLocator(document.body),
+			'combobox-field/option-hover',
+			appearance,
+		);
+	});
+}
 
-test.each(visualAppearances)('open selection states: $theme $mode', async (appearance) => {
-	renderVisual(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems}
-				defaultValue="ca"
-				disabledKeys={['se']}
-				label="Country"
-				loadMoreItem={
-					<ComboboxLoadMoreItem isLoading>
-						<LoadingSpinner aria-label="Loading more options..." size="small" />
-					</ComboboxLoadMoreItem>
-				}
-				name="country"
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-		appearance,
-	);
+for (const appearance of visualAppearances) {
+	test(`open selection states: ${appearance.theme} ${appearance.mode}`, async () => {
+		renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					disabledKeys={['se']}
+					label="Country"
+					loadMoreItem={
+						<ComboboxLoadMoreItem isLoading>
+							<LoadingSpinner aria-label="Loading more options..." size="small" />
+						</ComboboxLoadMoreItem>
+					}
+					name="country"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
 
-	const input = page.getByRole('combobox', { name: 'Country' });
-	await userEvent.click(input);
-	await expect.element(input).toHaveAttribute('aria-expanded', 'true');
-	await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
-	await expect
-		.element(page.getByRole('option', { name: 'Canada' }))
-		.toHaveAttribute('aria-selected', 'true');
-	await expect
-		.element(page.getByRole('option', { name: 'Sweden' }))
-		.toHaveAttribute('aria-disabled', 'true');
-	await expect.element(page.getByRole('status', { name: 'Loading more options...' })).toBeVisible();
-	await captureVisualAppearance(
-		page.elementLocator(document.body),
-		'combobox-field/open-selected-disabled-loading',
-		appearance,
-	);
-});
+		const input = page.getByRole('combobox', { name: 'Country' });
+		await userEvent.click(input);
+		await expect.element(input).toHaveAttribute('aria-expanded', 'true');
+		await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
+		await expect
+			.element(page.getByRole('option', { name: 'Canada' }))
+			.toHaveAttribute('aria-selected', 'true');
+		await expect
+			.element(page.getByRole('option', { name: 'Sweden' }))
+			.toHaveAttribute('aria-disabled', 'true');
+		await expect
+			.element(page.getByRole('status', { name: 'Loading more options...' }))
+			.toBeVisible();
+		await captureVisualAppearance(
+			page.elementLocator(document.body),
+			'combobox-field/open-selected-disabled-loading',
+			appearance,
+		);
+	});
+}
 
-test.each(visualAppearances)(
-	'nested opposite mode reaches the portal: $theme $mode',
-	async (appearance) => {
+for (const appearance of visualAppearances) {
+	test(`nested opposite mode reaches the portal: ${appearance.theme} ${appearance.mode}`, async () => {
 		const nestedMode = appearance.mode === 'light' ? 'dark' : 'light';
 		renderVisual(
 			<div data-color-mode={nestedMode}>
@@ -337,122 +347,216 @@ test.each(visualAppearances)(
 			'combobox-field/nested-opposite-mode-portal',
 			appearance,
 		);
-	},
-);
+	});
+}
 
-test.each(visualAppearances)('mobile tray: $theme $mode', async (appearance) => {
-	renderVisual(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems}
-				description="Select where the user is located."
-				label="Country"
-				name="country"
-				placeholder="Select a country..."
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-		appearance,
-	);
-
-	await page.viewport(390, 700);
-	try {
-		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-		await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
-
-		// Below the `small` breakpoint the popover renders as a bottom tray; screenshot
-		// document.body (the popover portals there) to capture it pinned to the viewport edge.
-		await captureVisualAppearance(
-			page.elementLocator(document.body),
-			'combobox-field/tray',
+for (const appearance of visualAppearances) {
+	test(`mobile tray: ${appearance.theme} ${appearance.mode}`, async () => {
+		renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
 			appearance,
 		);
-	} finally {
-		// Restore the viewport fixed by the visual project config (vitest.config.ts) so later
-		// tests in this file/run aren't affected.
-		await page.viewport(1024, 800);
-	}
-});
+
+		await page.viewport(390, 700);
+		try {
+			await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+			await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
+
+			// Below the `small` breakpoint the popover renders as a bottom tray; screenshot
+			// document.body (the popover portals there) to capture it pinned to the viewport edge.
+			await captureVisualAppearance(
+				page.elementLocator(document.body),
+				'combobox-field/tray',
+				appearance,
+			);
+		} finally {
+			// Restore the viewport fixed by the visual project config (vitest.config.ts) so later
+			// tests in this file/run aren't affected.
+			await page.viewport(1024, 800);
+		}
+	});
+}
 
 // Guards the calc-size `fit-content` goldilocks behavior: a short, 2-item tray must hug its
 // content height, not stretch to fill the 12em minimum reserved for taller lists.
-test.each(visualAppearances)('mobile tray short list: $theme $mode', async (appearance) => {
-	renderVisual(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems.slice(0, 2)}
-				description="Select where the user is located."
-				label="Country"
-				name="country"
-				placeholder="Select a country..."
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-		appearance,
-	);
-
-	await page.viewport(390, 700);
-	try {
-		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-		await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
-
-		// Below the `small` breakpoint the popover renders as a bottom tray; screenshot
-		// document.body (the popover portals there) to capture it pinned to the viewport edge.
-		await captureVisualAppearance(
-			page.elementLocator(document.body),
-			'combobox-field/tray-short',
+for (const appearance of visualAppearances) {
+	test(`mobile tray short list: ${appearance.theme} ${appearance.mode}`, async () => {
+		renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems.slice(0, 2)}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
 			appearance,
 		);
-	} finally {
-		// Restore the viewport fixed by the visual project config (vitest.config.ts) so later
-		// tests in this file/run aren't affected.
-		await page.viewport(1024, 800);
-	}
-});
 
-test.each(visualAppearances)('sizes: $theme $mode', async (appearance) => {
-	const locator = renderVisual(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems}
-				label="Small"
-				name="small"
-				placeholder="Small"
-				size="small"
-			>
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField
-				defaultItems={countryItems}
-				label="Medium"
-				name="medium"
-				placeholder="Medium"
-				size="medium"
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-		appearance,
-	);
-	const smallControl = page
-		.getByRole('combobox', { name: 'Small' })
-		.element()
-		.closest<HTMLElement>('[role="group"]');
-	const mediumControl = page
-		.getByRole('combobox', { name: 'Medium' })
-		.element()
-		.closest<HTMLElement>('[role="group"]');
-	if (smallControl == null || mediumControl == null) {
-		throw new Error('Expected small and medium combobox controls.');
-	}
-	expect(getComputedStyle(smallControl).blockSize).not.toBe(
-		getComputedStyle(mediumControl).blockSize,
-	);
+		await page.viewport(390, 700);
+		try {
+			await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+			await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
 
-	await captureVisualAppearance(locator, 'combobox-field/sizes', appearance);
-});
+			// Below the `small` breakpoint the popover renders as a bottom tray; screenshot
+			// document.body (the popover portals there) to capture it pinned to the viewport edge.
+			await captureVisualAppearance(
+				page.elementLocator(document.body),
+				'combobox-field/tray-short',
+				appearance,
+			);
+		} finally {
+			// Restore the viewport fixed by the visual project config (vitest.config.ts) so later
+			// tests in this file/run aren't affected.
+			await page.viewport(1024, 800);
+		}
+	});
+}
+
+// With a selected value, the control also shows a clear button before the trigger.
+// Confirms the icon lands between the text and both action buttons, not after
+// them — a geometry assertion, since a screenshot alone wouldn't catch the icon
+// landing on the wrong side of the buttons.
+for (const appearance of visualAppearances) {
+	test(`invalid with a selected value shows the icon before the clear and trigger buttons: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					errorMessage="Choose a different country."
+					isInvalid
+					label="Invalid with a selection"
+					name="invalid-with-selection"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
+		const input = page.getByRole('combobox', { name: 'Invalid with a selection' });
+		await expect.element(input).toBeVisible();
+
+		const clear = page.getByRole('button', { name: 'Clear selection' });
+		const trigger = page.getByRole('button', { name: 'Toggle options' });
+		// Not `name`: RAC's `ComboBox` also renders a `<input type="hidden" name="…">`
+		// for form submission alongside the visible combobox input, and that hidden
+		// input shares the same `name` value. `aria-invalid` is only ever on the
+		// visible input.
+		const iconLeft = await pseudoElementLeft('aria-invalid', 'true');
+		expect(iconLeft).toBeLessThan(clear.element().getBoundingClientRect().left);
+		expect(iconLeft).toBeLessThan(trigger.element().getBoundingClientRect().left);
+
+		await captureVisualAppearance(scene, 'combobox-field/invalid-with-selection', appearance);
+	});
+}
+
+// Without `errorMessage` the icon is the only cue that the field is invalid, so this
+// scene has no error text at all.
+for (const appearance of visualAppearances) {
+	test(`invalid without an error message: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					isInvalid
+					label="Invalid, no message"
+					name="invalid-no-message"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
+		await expect.element(page.getByRole('combobox', { name: 'Invalid, no message' })).toBeVisible();
+
+		await captureVisualAppearance(scene, 'combobox-field/invalid-no-message', appearance);
+	});
+}
+
+// The in-control icon scales with `size` via `COMBOBOX_ICON_SIZE` (`xsmall` at `small`,
+// matching the trigger/clear chevron beside it), so this locks in the small control at
+// its own icon scale rather than the `medium` default.
+for (const appearance of visualAppearances) {
+	test(`invalid at the small size: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="ca"
+					errorMessage="Choose a different country."
+					isInvalid
+					label="Invalid"
+					name="invalid-small"
+					size="small"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
+		await expect.element(page.getByRole('combobox', { name: 'Invalid' })).toBeVisible();
+
+		await captureVisualAppearance(scene, 'combobox-field/invalid-small', appearance);
+	});
+}
+
+for (const appearance of visualAppearances) {
+	test(`sizes: ${appearance.theme} ${appearance.mode}`, async () => {
+		const locator = renderVisual(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					label="Small"
+					name="small"
+					placeholder="Small"
+					size="small"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={countryItems}
+					label="Medium"
+					name="medium"
+					placeholder="Medium"
+					size="medium"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+			appearance,
+		);
+		const smallControl = page
+			.getByRole('combobox', { name: 'Small' })
+			.element()
+			.closest<HTMLElement>('[role="group"]');
+		const mediumControl = page
+			.getByRole('combobox', { name: 'Medium' })
+			.element()
+			.closest<HTMLElement>('[role="group"]');
+		if (smallControl == null || mediumControl == null) {
+			throw new Error('Expected small and medium combobox controls.');
+		}
+		expect(getComputedStyle(smallControl).blockSize).not.toBe(
+			getComputedStyle(mediumControl).blockSize,
+		);
+
+		await captureVisualAppearance(locator, 'combobox-field/sizes', appearance);
+	});
+}
 
 function refreshVisualScene(scene: Locator) {
 	return page.elementLocator(scene.element());

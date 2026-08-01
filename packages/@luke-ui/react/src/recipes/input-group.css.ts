@@ -12,12 +12,13 @@ const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, rea
 	composeInputStateSelectors(inputStates);
 
 /**
- * Raw slotted config for the `TextInput` primitive.
+ * Raw slotted config for the `InputGroup` primitive.
  *
- * Slots: `group` (tactile well chrome), `control` (the input), and
- * `adornmentStart` / `adornmentEnd`.
+ * Slots: `group` (tactile well chrome), `control` (the input), `prefix` / `suffix`
+ * (the leading and trailing parts), and `invalidIndicator` (the error icon
+ * `InputGroup` renders itself).
  */
-const textInputConfig = {
+const inputGroupConfig = {
 	slots: {
 		group: {
 			'@media': {
@@ -78,11 +79,15 @@ const textInputConfig = {
 				[hover]: {
 					borderColor: vars.color.border.accent,
 				},
+				// The border stays at the resting 1px here: the `invalidIndicator` icon
+				// `InputGroup` renders is the non-colour cue, so thickening the border as
+				// well would be redundant. The gated danger colour is what satisfies the
+				// contrast requirement, and it is unchanged.
 				[invalid]: {
-					borderColor: vars.color.border.danger,
+					borderColor: vars.color.background.danger.solid.rest,
 				},
 				[invalidFocusWithin]: {
-					borderColor: vars.color.border.danger,
+					borderColor: vars.color.background.danger.solid.rest,
 					...focusRing(vars.color.border.focus),
 				},
 				[readOnly]: {
@@ -128,7 +133,7 @@ const textInputConfig = {
 				},
 			},
 		},
-		adornmentStart: {
+		prefix: {
 			alignItems: 'center',
 			borderInlineEndColor: vars.color.border.control,
 			borderInlineEndStyle: 'solid',
@@ -143,7 +148,7 @@ const textInputConfig = {
 				},
 			},
 		},
-		adornmentEnd: {
+		suffix: {
 			alignItems: 'center',
 			borderInlineStartColor: vars.color.border.control,
 			borderInlineStartStyle: 'solid',
@@ -151,12 +156,44 @@ const textInputConfig = {
 			color: vars.color.text.secondary,
 			display: 'inline-flex',
 			flexShrink: 0,
+			// `InputGroup` appends the invalid indicator after its children, so the icon
+			// is the group's last DOM child and would otherwise land after this slot.
+			// Giving `suffix` an explicit `order` moves it behind the icon (default
+			// `order: 0`) in flex layout without touching document order, so the icon
+			// lands right after the input's text content and before this trailing part.
+			// It is the one place `InputGroup` departs from pure document order.
+			order: 1,
 
 			selectors: {
 				[descendantDisabledSelector]: {
 					color: vars.color.text.disabled,
 				},
 			},
+		},
+		// The invalid icon `InputGroup` renders itself. Only colour and spacing here:
+		// the element is a real `Icon`, so `icon.css.ts` already owns its box dimensions
+		// and `flexShrink`, and its per-size step comes from the `IconSizeProvider`
+		// `InputGroup` wraps the group in (`INPUT_GROUP_ICON_SIZE`) rather than from a
+		// variant here. `color`, not `background-color`, because an `Icon` fills with
+		// `currentColor`. `CanvasText` (not the gated danger token) keeps it a solid,
+		// high-contrast shape when author colours are ignored.
+		//
+		// No `marginInlineStart` here: the `control` slot's own `paddingInlineEnd`
+		// already supplies the gap between the value text and the icon, so a margin
+		// stacked on top of it would make the leading gap bigger than the trailing one.
+		// `marginInlineEnd` is a constant `space[200]`, not a per-size value: it matches
+		// `ComboboxField`'s chevron, the system's existing trailing-glyph inset, which is
+		// itself constant across sizes rather than scaling with the control's padding.
+		// Matching it here means a `TextField` and a `ComboboxField` read the same trailing
+		// rhythm at both sizes.
+		invalidIndicator: {
+			'@media': {
+				'(forced-colors: active)': {
+					color: 'CanvasText',
+				},
+			},
+			color: vars.color.foreground.danger.rest,
+			marginInlineEnd: vars.space[200],
 		},
 	},
 	defaultVariants: {
@@ -174,12 +211,12 @@ const textInputConfig = {
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
-				adornmentStart: {
+				prefix: {
 					lineHeight: vars.font[300].lineHeight,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
-				adornmentEnd: {
+				suffix: {
 					lineHeight: vars.font[300].lineHeight,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
@@ -197,12 +234,12 @@ const textInputConfig = {
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},
-				adornmentStart: {
+				prefix: {
 					lineHeight: vars.font[200].lineHeight,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},
-				adornmentEnd: {
+				suffix: {
 					lineHeight: vars.font[200].lineHeight,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
@@ -213,14 +250,15 @@ const textInputConfig = {
 } as const satisfies SlottedConfigInput;
 
 /**
- * Slotted recipe for the `TextInput` primitive.
+ * Slotted recipe for the `InputGroup` primitive.
  *
- * `textInput({ size }).group() / .control() / .adornmentStart() / .adornmentEnd()`.
+ * `inputGroup({ size }).group() / .control() / .prefix() / .suffix() /
+ * .invalidIndicator()`.
  */
-export const textInput = recipe(textInputConfig);
+export const inputGroup = recipe(inputGroupConfig);
 
-/** Outer variant selection for the `TextInput` recipe. */
-export type TextInputVariants = RecipeSelection<typeof textInput>;
+/** Outer variant selection for the `inputGroup` recipe. */
+export type InputGroupVariants = RecipeSelection<typeof inputGroup>;
 
-/** Allowed `size` values for the `TextInput` recipe. */
-export type TextInputSize = keyof typeof textInputConfig.variants.size;
+/** Allowed `size` values for the `inputGroup` recipe. */
+export type InputGroupSize = keyof typeof inputGroupConfig.variants.size;

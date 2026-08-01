@@ -3,18 +3,19 @@ title: Blockquote
 description: Block-level quotation from another source.
 ---
 
+`Blockquote` quotes another source as a block. It renders a native `blockquote` element, which
+conveys quotation semantics to assistive technology.
+
 <ExampleBlock
 	src="blockquote/basic"
 	title="Blockquote — Basic"
 	description="A simple block-level quotation."
 />
 
-This component is based on the `blockquote` element and supports text size, font weight, and line
-clamping.
+## Typography
 
-## Size
-
-Use the `size` prop to control text size.
+`Blockquote` accepts the `size`, `fontWeight`, and `lineClamp` props from
+[Text](/components/typography/text).
 
 <ExampleBlock
 	src="blockquote/size"
@@ -22,19 +23,11 @@ Use the `size` prop to control text size.
 	description="Compare the coordinated 100–900 size steps."
 />
 
-## Font weight
-
-Use the `fontWeight` prop to set the semantic font-weight role.
-
 <ExampleBlock
 	src="blockquote/font-weight"
 	title="Blockquote — Font weight"
 	description="Compare the body, emphasis, heading, and label weight roles."
 />
-
-## Line clamp
-
-Use the `lineClamp` prop to truncate text with an ellipsis when it overflows its container.
 
 <ExampleBlock
 	src="blockquote/line-clamp"
@@ -42,7 +35,6 @@ Use the `lineClamp` prop to truncate text with an ellipsis when it overflows its
 	description="Compare one-line and two-line truncation."
 />
 
-## Accessibility
+## Related components
 
-Uses the native `<blockquote>` element, which conveys block-level quotation semantics to assistive
-technologies. For short inline quotations use `Quote` instead.
+Use [Quote](/components/typography/quote) for a short quotation inside a sentence.

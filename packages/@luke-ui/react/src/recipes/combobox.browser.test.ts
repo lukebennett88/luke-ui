@@ -38,9 +38,27 @@ test('the control uses the recessed field material and semantic state grammar', 
 
 	const { control: invalid } = mountControl();
 	invalid.dataset.invalid = 'true';
-	expect(getComputedStyle(invalid).borderColor).toBe(
-		resolveColor(root, '--luke-color-border-danger'),
+	const invalidStyle = getComputedStyle(invalid);
+	expect(invalidStyle.borderColor).toBe(
+		resolveColor(root, '--luke-color-background-danger-solid-rest'),
 	);
+	// The border stays at the resting 1px: the in-control icon (`::after`) is the
+	// non-colour cue, so a width change would be redundant.
+	expect(invalidStyle.borderWidth).toBe('1px');
+});
+
+// The invalid icon must scale with `size` — a constant would sit oversized (or
+// undersized) beside the trigger/clear chevrons, which are themselves sized from
+// `COMBOBOX_ICON_SIZE` (`sizing/combobox-sizing.ts`). `medium` → `small` (20px),
+// `small` → `xsmall` (16px), matching that same mapping exactly.
+test('invalid icon matches the control size variant, not a constant', () => {
+	const { control: medium } = mountControl('medium');
+	medium.dataset.invalid = 'true';
+	const { control: small } = mountControl('small');
+	small.dataset.invalid = 'true';
+
+	expect(getComputedStyle(medium, '::after').blockSize).toBe('20px');
+	expect(getComputedStyle(small, '::after').blockSize).toBe('16px');
 });
 
 test('disabled and read-only controls preserve their non-interactive material', () => {
@@ -243,13 +261,13 @@ test('reduced motion makes control, action, option, and popover state changes im
 	expect(getComputedStyle(popover).translate).toBe('none');
 });
 
-function mountControl() {
+function mountControl(size: 'medium' | 'small' = 'medium') {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	wrappers.push(root);
 	const control = root.appendChild(document.createElement('div'));
-	control.className = combobox({ size: 'medium' }).control();
+	control.className = combobox({ size }).inputGroup();
 	control.append(document.createElement('input'), document.createElement('button'));
 	return { control, root };
 }

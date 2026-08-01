@@ -3,18 +3,17 @@ title: Strong
 description: Marks text to signify strong importance.
 ---
 
+`Strong` marks text as important. It renders a native `strong` element, which conveys importance to
+assistive technology, and uses the theme's emphasis font weight.
+
 <ExampleBlock
 	src="strong/basic"
 	title="Strong — Basic"
 	description="Strong markers within a paragraph."
 />
 
-`Strong` composes `Text` as a native `strong` element while keeping a lean native public API. It
-stays inline, inherits surrounding typography, skips Capsize trim by default, and uses the theme's
-emphasis font weight. Use `textWrap` to control wrapping or `lineClamp` to constrain longer
-important text.
+`Strong` stays inline and inherits the surrounding typography. Use `textWrap` to control wrapping.
+Use `lineClamp` to constrain longer text.
 
-## Accessibility
-
-Uses the native `<strong>` element, which conveys strong importance to assistive technologies. Avoid
-using `Strong` solely for visual bold styling — use `<Text fontWeight="emphasis">` instead.
+Use `<Text fontWeight="emphasis">` when text only needs to look bold. `Strong` tells assistive
+technology the text matters.

@@ -26,6 +26,6 @@ export type { KbdVariants } from '../recipes/kbd.css.js';
 export { kbd } from '../recipes/kbd.css.js';
 export type { TextVariants } from '../recipes/text.css.js';
 export { text } from '../recipes/text.css.js';
-export type { TextInputVariants } from '../recipes/text-input.css.js';
-export { textInput } from '../recipes/text-input.css.js';
+export type { InputGroupVariants } from '../recipes/input-group.css.js';
+export { inputGroup } from '../recipes/input-group.css.js';
 export { visuallyHidden } from '../recipes/visually-hidden.css.js';

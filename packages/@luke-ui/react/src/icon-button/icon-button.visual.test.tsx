@@ -24,39 +24,43 @@ test('sizes and states', async () => {
 	await captureVisual(locator, 'icon-button/sizes-states');
 });
 
-test.each(visualAppearances)('action states: $theme $mode', async (appearance) => {
-	const scene = renderVisual(
-		<Grid columns={5}>
-			<IconButton aria-label="Resting" icon="add" />
-			<IconButton aria-label="Disabled" icon="delete" isDisabled />
-			<IconButton aria-label="Pending" icon="add" isPending />
-			<IconButton appearance="subtle" aria-label="Subtle" icon="add" />
-			<IconButton appearance="ghost" aria-label="Ghost" icon="add" />
-		</Grid>,
-		appearance,
-	);
-	await expect
-		.element(page.getByRole('button', { name: 'Pending' }))
-		.toHaveAttribute('aria-disabled', 'true');
+for (const appearance of visualAppearances) {
+	test(`action states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Grid columns={5}>
+				<IconButton aria-label="Resting" icon="add" />
+				<IconButton aria-label="Disabled" icon="delete" isDisabled />
+				<IconButton aria-label="Pending" icon="add" isPending />
+				<IconButton appearance="subtle" aria-label="Subtle" icon="add" />
+				<IconButton appearance="ghost" aria-label="Ghost" icon="add" />
+			</Grid>,
+			appearance,
+		);
+		await expect
+			.element(page.getByRole('button', { name: 'Pending' }))
+			.toHaveAttribute('aria-disabled', 'true');
 
-	await captureVisualAppearance(scene, 'icon-button/action-states', appearance);
-});
+		await captureVisualAppearance(scene, 'icon-button/action-states', appearance);
+	});
+}
 
-test.each(visualAppearances)('interactive states: $theme $mode', async (appearance) => {
-	const scene = renderVisual(<IconButton aria-label="Action" icon="add" />, appearance);
-	const button = page.getByRole('button', { name: 'Action' });
-	await expect.element(button).toBeVisible();
+for (const appearance of visualAppearances) {
+	test(`interactive states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(<IconButton aria-label="Action" icon="add" />, appearance);
+		const button = page.getByRole('button', { name: 'Action' });
+		await expect.element(button).toBeVisible();
 
-	await captureVisualAppearance(scene, 'icon-button/resting', appearance);
-	await userEvent.hover(button);
-	await captureVisualAppearance(scene, 'icon-button/hover', appearance);
-	await userEvent.unhover(button);
-	await focusViaKeyboard(button);
-	await captureVisualAppearance(scene, 'icon-button/focus-visible', appearance);
-	await userEvent.keyboard('{Space>}');
-	await captureVisualAppearance(scene, 'icon-button/pressed', appearance);
-	await userEvent.keyboard('{/Space}');
-});
+		await captureVisualAppearance(scene, 'icon-button/resting', appearance);
+		await userEvent.hover(button);
+		await captureVisualAppearance(scene, 'icon-button/hover', appearance);
+		await userEvent.unhover(button);
+		await focusViaKeyboard(button);
+		await captureVisualAppearance(scene, 'icon-button/focus-visible', appearance);
+		await userEvent.keyboard('{Space>}');
+		await captureVisualAppearance(scene, 'icon-button/pressed', appearance);
+		await userEvent.keyboard('{/Space}');
+	});
+}
 
 test('keyboard focus ring', async () => {
 	const scene = renderVisual(

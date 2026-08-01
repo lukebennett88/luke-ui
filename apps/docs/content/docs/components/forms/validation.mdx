@@ -1,0 +1,126 @@
+---
+title: Validation
+description: Validate a form field, and write the message that tells someone how to fix it.
+---
+
+Every Luke UI form field can report a problem. An invalid field takes the danger border colour and
+renders a message beneath the control.
+
+<ExampleBlock
+	src="forms/validation"
+	title="Validation — Invalid fields"
+	description="A form that reports what went wrong in each field on submit."
+/>
+
+## Let the browser validate
+
+Set `isRequired` on `TextField`, `ComboboxField`, or `Checkbox` to require a value before the form
+submits. Pass `minLength`, `maxLength`, or `pattern` on `TextField` to state a rule for the text.
+Pass `type="email"` or `type="url"` to check the value's format.
+
+Leave out `errorMessage`. The field then shows the browser's own message. The browser checks the
+value on blur and on submit.
+
+<ExampleBlock
+	src="forms/constraint-validation"
+	title="Validation — Constraint validation"
+	description="A required email field with no errorMessage, using the browser's own message."
+/>
+
+Pass `validationBehavior="native"` to block submission until every field passes. This is the
+default.
+
+Pass `validationBehavior="aria"` to mark an invalid field for assistive technology. The form still
+submits.
+
+## Add your own rule
+
+Pass a `validate` function for a rule the browser cannot check, such as a username already in use.
+The function takes the value and returns an error message, or `null` when the value is valid.
+
+```tsx
+<TextField
+	label="Username"
+	name="username"
+	validate={(value) => (value.includes(' ') ? 'Usernames cannot contain spaces.' : null)}
+/>
+```
+
+The field runs `validate` when someone commits the value, for example on blur, not on every
+keystroke.
+
+## Validate as someone types
+
+Pass `isInvalid` and `errorMessage` yourself for feedback that must update on every keystroke, such
+as password strength. Make the field controlled with `value` and `onChange`. Compute `isInvalid` and
+`errorMessage` from that value on every render.
+
+```tsx
+const [password, setPassword] = useState('');
+const isTooShort = password.length > 0 && password.length < 12;
+
+<TextField
+	errorMessage={isTooShort ? 'Passwords need at least 12 characters.' : undefined}
+	isInvalid={isTooShort}
+	label="Password"
+	onChange={setPassword}
+	type="password"
+	value={password}
+/>;
+```
+
+This is the exception. Constraint validation and `validate` wait until the value is committed. This
+does not distract someone while they type.
+
+## Show server errors
+
+Pass server errors through React Aria's `Form` component. `@luke-ui/react` does not export `Form`.
+Import it from `react-aria-components` instead.
+
+```tsx
+import { Form } from 'react-aria-components';
+
+<Form validationErrors={{ username: 'That username is taken.' }}>
+	<TextField label="Username" name="username" />
+</Form>;
+```
+
+Pass `validationErrors` with an object keyed by each field's `name`. Each field shows its message as
+soon as you pass `validationErrors`. The message clears once someone changes the field's value.
+
+## When errors appear and clear
+
+An error appears on blur or on submit. It never appears between keystrokes. An error clears as soon
+as the value changes.
+
+The controlled `isInvalid` pattern in the previous section is the exception. It updates on every
+keystroke because that is its purpose.
+
+## Always pair an invalid field with a message
+
+Colour alone cannot report a problem. Someone who cannot separate the danger border from the resting
+one gets no signal at all. An invalid field with no message is invisible to them.
+
+`TextField` and `ComboboxField` add an error icon inside the control, after the value. The icon says
+that something is wrong, not what is wrong, so it does not stand in for the message.
+
+Pass `errorMessage` every time you set `isInvalid`. The message is what makes an invalid field
+understandable, and it is what satisfies WCAG 1.4.1 Use of Colour.
+
+## Write the message
+
+An error message has two jobs: name the problem, and name the fix.
+
+| Instead of             | Write                                               |
+| ---------------------- | --------------------------------------------------- |
+| Invalid input          | Enter an email address in the form you@example.com. |
+| This field is required | Choose the country where you work.                  |
+| Error                  | Passwords need at least 12 characters.              |
+
+- Say what to do next, not only what went wrong. "Choose a delivery date" beats "No date selected".
+- Use the field's own words. If the label says "Work location", the message says work location, not
+  region.
+- Keep it to one sentence. A long message pushes the rest of the form down the page.
+- Describe what is wrong with the value. Do not blame the reader. "Enter a date after today" rather
+  than "You entered an invalid date".
+- Repeat anything someone needs from `description`. They may never look back up.

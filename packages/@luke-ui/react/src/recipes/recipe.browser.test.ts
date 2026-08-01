@@ -1,9 +1,9 @@
 import { expect, expectTypeOf, test } from 'vite-plus/test';
 import type { ComboboxVariants } from './combobox.css.js';
 import { field } from './field.css.js';
-import { textInput } from './text-input.css.js';
+import { inputGroup } from './input-group.css.js';
 
-// The public recipe surface: `field` and `textInput` from `@luke-ui/react/recipes`.
+// The public recipe surface: `field` and `inputGroup` from `@luke-ui/react/recipes`.
 
 test('field selects variants at the outer call and returns slot functions', () => {
 	const slots = field({ necessityIndicator: 'icon', tone: 'error' });
@@ -15,23 +15,23 @@ test('field selects variants at the outer call and returns slot functions', () =
 
 test('slot functions merge an optional extra class', () => {
 	expect(field().root('extra-class').split(' ')).toContain('extra-class');
-	expect(textInput({ size: 'small' }).control('mine').split(' ')).toContain('mine');
+	expect(inputGroup({ size: 'small' }).control('mine').split(' ')).toContain('mine');
 });
 
 // Type assertions are compile-time only.
 // oxlint-disable-next-line vitest/expect-expect
 test('outer variant selection accepts known variants and rejects siblings/unknowns', () => {
 	expectTypeOf(field).toBeCallableWith({ necessityIndicator: 'icon', tone: 'description' });
-	expectTypeOf(textInput).toBeCallableWith({ size: 'medium' });
+	expectTypeOf(inputGroup).toBeCallableWith({ size: 'medium' });
 
-	// @ts-expect-error `size` belongs to text-input/combobox, not field.
+	// @ts-expect-error `size` belongs to input-group/combobox, not field.
 	field({ size: 'small' });
 	// @ts-expect-error `icon`/`label` are the only necessity indicators.
 	field({ necessityIndicator: 'asterisk' });
-	// @ts-expect-error `tone` is a field variant, not a text-input one.
-	textInput({ tone: 'error' });
-	// @ts-expect-error `large` is not a text-input size.
-	textInput({ size: 'large' });
+	// @ts-expect-error `tone` is a field variant, not an input-group one.
+	inputGroup({ tone: 'error' });
+	// @ts-expect-error `large` is not an input-group size.
+	inputGroup({ size: 'large' });
 });
 
 // Type assertions are compile-time only.

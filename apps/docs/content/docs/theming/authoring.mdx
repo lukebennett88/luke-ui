@@ -9,7 +9,7 @@ need a browser or a Luke UI release.
 
 ## Define the input
 
-A basic theme authors an accent colour and a neutral character; everything else defaults. A
+A basic theme authors an accent colour and a neutral character. Everything else defaults. A
 `ThemeInput` includes:
 
 - a kebab-case `name`
@@ -23,11 +23,11 @@ A basic theme authors an accent colour and a neutral character; everything else 
 - optional `typography`, `radius`, `depth`, and `actionControlFinish` overrides
 
 Each colour accepts one string, adapted independently for light and dark, or an explicit
-`{ light, dark }` pair where either side can be omitted to fall back to that role's default. Luke UI
-supplies accessible mode-specific defaults for every optional colour. `radius` is a generative
-`base` and `multiplier` scale with explicit per-step overrides. `depth` and `actionControlFinish`
-are optional and deep-partial per mode over curated, extremely-subtle defaults. The type scale and
-motion values are source-owned and are not authored.
+`{ light, dark }` pair. Omit either side to fall back to that role's default. Luke UI supplies
+accessible mode-specific defaults for every optional colour. `radius` is a generative `base` and
+`multiplier` scale with explicit per-step overrides. `depth` and `actionControlFinish` are optional
+and deep-partial per mode over curated, extremely-subtle defaults. The type scale and motion values
+are source-owned and are not authored.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
@@ -44,7 +44,7 @@ const css = defineTheme({
 
 ## Generate a stylesheet
 
-Call `defineTheme` from an application build script and write the returned CSS to a stylesheet your
+Call `defineTheme` from an application build script. Write the returned CSS to a stylesheet your
 framework can load.
 
 <SourceCodeBlock src="theming/author-theme" />
@@ -54,50 +54,50 @@ match the input's `name`. Colour mode uses the same `data-color-mode` attribute 
 
 <SourceCodeBlock src="theming/custom-theme-app" />
 
-Applications are responsible for loading any non-system font files selected by their `typography`.
+Applications must load any non-system font files their `typography` selects.
 
 ## Contrast validation
 
 `defineTheme` calculates the generated colour values in OKLCH, maps them to the sRGB gamut, and runs
-a WCAG 2.2 validation matrix over the result. Some pairs are hard requirements, some are measured
-only, and one category is not checked.
+a WCAG 2.2 validation matrix over the result. It treats some pairs as hard requirements, measures
+some only, and does not check one category.
 
 ### Guaranteed at 4.5:1
 
-Every text/surface pair the compiler emits is a hard gate, 86 checks in total:
+Every text/surface pair the compiler emits is a hard gate:
 
 - `color.text.primary` and `color.text.secondary` against all four elevation surfaces (`canvas`,
-  `recessed`, `floating`, `overlay`): 8 checks.
+  `recessed`, `floating`, `overlay`).
 - For each of the six semantic roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`),
   its foreground `rest` and `hover` against `canvas`, `recessed`, and that role's own `subtle` rest,
-  hover, and pressed backgrounds: 60 checks.
-- Each role's `onSolid` foreground against its `solid` rest, hover, and pressed backgrounds: 18
-  checks.
+  hover, and pressed backgrounds.
+- Each role's `onSolid` foreground against its `solid` rest, hover, and pressed backgrounds.
 
 ### Guaranteed at 3:1
 
 Four more pairs are hard gates, at the WCAG 2.2 non-text ratio: `color.border.focus` and
 `color.border.control`, each against the canvas and recessed surfaces. `border.control` is a
-dedicated solved colour for this boundary, not a scale-step alias that happens to pass. That brings
-the total to 90 hard gates across both ratios.
+dedicated solved colour for this boundary, not a scale-step alias that happens to pass.
 
 If any hard gate fails, `defineTheme` throws `ThemeContrastError`. Its `failures` array identifies
-each colour mode and token pair, so the stylesheet is never written with an invalid combination.
+each colour mode and token pair, so `defineTheme` never writes the stylesheet with an invalid
+combination.
 
 ### Measured only, cannot fail the build
 
-Each role's border (`color.border.neutral`, `color.border.accent`, and so on for all six roles) is
-checked against the canvas and recessed surfaces at 3:1, but only as advisory diagnostics — 12
-checks. A miss is recorded and reported, but never thrown. These borders use the same subtle scale
-step as ordinary separators, so an author can choose a neutral character whose role borders read as
-gentle separators rather than assertive boundaries. Diagnostics record whether each check is a hard
-gate or advisory-only (`ContrastCheck.hard`), so tooling can tell the two apart without guessing
-from the token path.
+`defineTheme` checks each role's border against the canvas and recessed surfaces at 3:1, for example
+`color.border.neutral` and `color.border.accent`. This applies to all six roles, but only as an
+advisory diagnostic. `defineTheme` records and reports a miss, but never throws it.
 
-Because these pairs are not guaranteed to reach 3:1, never rely on a role border alone to
-communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or a
-guaranteed-contrast surface change so the state stays legible for a theme whose role border happens
-to measure under 3:1.
+These borders use the same subtle scale step as ordinary separators. An author can then choose a
+neutral character whose role borders read as gentle separators rather than assertive boundaries.
+Diagnostics record whether each check is a hard gate or advisory-only (`ContrastCheck.hard`).
+Tooling can then tell the two apart without a guess from the token path.
+
+These pairs are not guaranteed to reach 3:1. Never rely on a role border alone to communicate a
+required state such as selected, invalid, or checked. Pair it with text, an icon, or a
+guaranteed-contrast surface change instead. This keeps the state legible for a theme whose role
+border happens to measure under 3:1.
 
 ### Never checked
 
@@ -108,13 +108,15 @@ separator, never as the sole signal for state or meaning.
 
 Separately from contrast validation, `compileTheme` (and so `defineTheme`) can throw
 `ThemeGenerationError` when a role that must guarantee on-solid text cannot reach an accessible
-solid colour. Every one of the six roles is gated this way. For a single-value accent, `defineTheme`
-holds the hue and chroma while searching for a lightness that clears the same on-solid gate the
-generator enforces internally. An explicit `{ light, dark }` accent skips that adaptation and is
-used verbatim for each side. If its authored lightness sits in an on-solid dead zone (no near-white
-or near-black text reaches 4.5:1 against it), `compileTheme` throws `ThemeGenerationError` naming
-the failing role and mode. Author an explicit `{ light, dark }` accent when you need exact control
-over its lightness. Otherwise, author a single value and let `defineTheme` adapt it.
+solid colour. The generator gates every one of the six roles this way. For a single-value accent,
+`defineTheme` holds the hue and chroma. It searches for a lightness that clears the same on-solid
+gate the generator enforces internally. An explicit `{ light, dark }` accent skips that adaptation.
+`defineTheme` uses it verbatim for each side.
+
+A dead zone is a lightness where no near-white or near-black text reaches 4.5:1 against it. If an
+authored accent's lightness sits in that zone, `compileTheme` throws `ThemeGenerationError` and
+names the failing role and mode. Author an explicit `{ light, dark }` accent when you need exact
+control over its lightness. Otherwise, author a single value and let `defineTheme` adapt it.
 
 ## Next steps
 

@@ -11,7 +11,7 @@ export default function States() {
 			<Checkbox defaultSelected isDisabled>
 				Disabled and checked
 			</Checkbox>
-			<Checkbox errorMessage="Choose an option." isInvalid>
+			<Checkbox errorMessage="Accept the terms of service before you continue." isInvalid>
 				Invalid
 			</Checkbox>
 		</Box>

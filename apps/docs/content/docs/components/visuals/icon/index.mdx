@@ -47,8 +47,8 @@ pnpm --dir packages/@luke-ui/react run generate:icons
 ## Use an icon
 
 `Icon` renders an `<svg>` that references a symbol in the generated spritesheet with
-`<use href="..." />`. `name` is restricted to the generated icon set. Use `size` to choose `xsmall`,
-`small`, `medium`, or `large`.
+`<use href="..." />`. `Icon` restricts `name` to the generated icon set. Use `size` to choose
+`xsmall`, `small`, `medium`, or `large`.
 
 - `name` chooses the symbol id.
 - The sprite URL comes from `IconSpritesheetProvider`.
@@ -73,10 +73,12 @@ with the same sizing and accessibility behaviour as `Icon`.
 ## Accessibility
 
 Pass `title` when an icon conveys meaning without adjacent text, such as a standalone status icon.
-The icon is then exposed to assistive technology with `role="img"`.
+`Icon` then exposes it to assistive technology with `role="img"`.
 
-When `title` is omitted, `aria-hidden` defaults to `true`. Do not pass both `aria-hidden` and
-`title` because a titled icon should not be hidden from assistive technology.
+When `title` is omitted, `aria-hidden` defaults to `true`. An icon renders either
+`aria-hidden="true"` or no `aria-hidden` attribute at all — never `aria-hidden="false"`, which is
+not a meaningful state for an icon. Passing `aria-hidden={false}` therefore has no effect; pass
+`title` to expose an icon to assistive technology.
 
 <ExampleBlock
 	src="icon/decorative"

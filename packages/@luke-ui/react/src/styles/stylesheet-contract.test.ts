@@ -45,7 +45,7 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	).not.toThrow();
 });
 
-test.each([
+const stylesheetMutations: Array<[string, (css: string) => string]> = [
 	['missing stable selector', (css: string) => css.replace('.luke-ui-theme', '.theme-root')],
 	['extra stable selector', (css: string) => `${css}\n@layer theme { .luke-ui-extra {} }`],
 	[
@@ -86,14 +86,18 @@ test.each([
 				'[data-class=".recipe-class"] { display: inline-flex; }',
 			),
 	],
-])('rejects a stylesheet with a %s', (_name, mutate) => {
-	expect(() =>
-		assertStylesheetContract(mutate(validStylesheetFixture), {
-			recipeClasses: ['recipe-class'],
-			utilityClasses: ['utility-class'],
-		}),
-	).toThrow(/.+/);
-});
+];
+
+for (const [name, mutate] of stylesheetMutations) {
+	test(`rejects a stylesheet with a ${name}`, () => {
+		expect(() =>
+			assertStylesheetContract(mutate(validStylesheetFixture), {
+				recipeClasses: ['recipe-class'],
+				utilityClasses: ['utility-class'],
+			}),
+		).toThrow(/.+/);
+	});
+}
 
 test('recognises escaped class identifiers', () => {
 	expect(() =>

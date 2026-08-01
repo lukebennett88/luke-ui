@@ -9,8 +9,8 @@ import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 
-type _ComboboxTextInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
-interface _ComboboxTextInputProps extends _ComboboxTextInputOmit {
+type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
+interface _ComboboxInputProps extends _ComboboxInputOmit {
 	className?: RacInputProps['className'];
 	size?: ComboboxSize;
 }
@@ -20,10 +20,10 @@ interface _ComboboxTextInputProps extends _ComboboxTextInputOmit {
  *
  * @tier primitive
  */
-export type ComboboxTextInputProps = Prettify<_ComboboxTextInputProps>;
+export type ComboboxInputProps = Prettify<_ComboboxInputProps>;
 
-/** Text input used within `ComboboxControl` for combobox behavior. */
-export function ComboboxTextInput(props: ComboboxTextInputProps): JSX.Element {
+/** Text input used within `ComboboxInputGroup` for combobox behavior. */
+export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 	const { onClick, size: sizeProp, ...inputProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);

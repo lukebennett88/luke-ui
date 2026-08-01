@@ -15,12 +15,12 @@ description: Locale-aware number formatting powered by Intl.NumberFormat.
 ## Format
 
 `Numeral` uses decimal formatting by default. It infers currency or unit formatting when `currency`
-or `unit` is present. Set `format` to `'percent'` or `'decimal'`, or when you want to make currency
-and unit formatting explicit in the component call.
+or `unit` is present. Set `format` to `'percent'` or `'decimal'` for those formats. Set it to
+`'currency'` or `'unit'` when you want that formatting explicit in the component call.
 
 <ExampleBlock
 	src="numeral/formats"
-	title="Numeral — Formats"
+	title="Numeral — Format"
 	description="Percent, currency, unit, and decimal number formats."
 />
 
@@ -50,10 +50,10 @@ other `Intl.NumberFormat` options.
 
 `Numeral` throws when:
 
-- both `currency` and `unit` are provided.
-- `format="currency"` is used without a `currency` code.
-- `format="unit"` is used without a `unit` value.
-- `precision` is not a non-negative integer or valid `[min, max]` tuple.
+- you provide both `currency` and `unit`.
+- you use `format="currency"` without a `currency` code.
+- you use `format="unit"` without a `unit` value.
+- `precision` is not a non-negative integer or a valid `[min, max]` tuple.
 
 ## Typography and alignment
 

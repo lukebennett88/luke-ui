@@ -61,6 +61,10 @@ test('content spacing and field messages align with the visible label', () => {
 
 	expect(contentStyle.columnGap).toBe('8px');
 	expect(getComputedStyle(description).paddingInlineStart).toBe(`${expectedOffset}px`);
+	// The error message's indent is the same reservation as `description`'s: the
+	// message-leading icon (`invalidMessageIcon`) is sized to fill that space rather
+	// than add to it, so both messages resume text at the same left edge as the
+	// label above them (see `field.css.ts`).
 	expect(getComputedStyle(error).paddingInlineStart).toBe(`${expectedOffset}px`);
 });
 
@@ -80,6 +84,8 @@ test('sizes inherit from the root into the control, indicator, and field message
 		expect(indicator.getBoundingClientRect().width).toBe(indicatorSize);
 		expect(Number.parseFloat(getComputedStyle(indicator).fontSize)).toBe(glyph);
 		expect(getComputedStyle(description).paddingInlineStart).toBe(`${expectedIndent}px`);
+		// The error message shares `description`'s indent at every size: the
+		// message-leading icon fills the reserved space instead of adding to it.
 		expect(getComputedStyle(error).paddingInlineStart).toBe(`${expectedIndent}px`);
 	}
 });
@@ -142,5 +148,5 @@ function mountCheckbox(
 	error.textContent = 'Error';
 	mounted.push(root);
 
-	return { content, control, description, error, indicator };
+	return { content, control, description, error, indicator, root };
 }

@@ -68,11 +68,13 @@ import {
 	visualAppearances,
 } from '../test-utils/render-visual.js';
 
-test.each(visualAppearances)('theme matrix: $theme $mode', async (appearance) => {
-	const scene = renderVisual(<Button>Continue</Button>, appearance);
+for (const appearance of visualAppearances) {
+	test(`theme matrix: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(<Button>Continue</Button>, appearance);
 
-	await captureVisualAppearance(scene, 'button/theme-matrix', appearance);
-});
+		await captureVisualAppearance(scene, 'button/theme-matrix', appearance);
+	});
+}
 ```
 
 The helper appends the selected appearance to the literal base ID. The example creates these stable

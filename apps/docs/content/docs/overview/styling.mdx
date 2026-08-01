@@ -1,11 +1,11 @@
 ---
 title: Styling
 description:
-  Choose component APIs, primitives, recipes, variables, or themes without overriding internals.
+  Choose component APIs, primitives, recipes, variables, or themes. Do not override internals.
 ---
 
 Luke UI ships static CSS. It does not inject styles at runtime. Import the shared stylesheet and a
-theme stylesheet once, then use component props for the variations each component supports.
+theme stylesheet once. Then use component props for the variations each component supports.
 
 ## Choose a styling approach
 
@@ -23,8 +23,8 @@ can change without a migration path.
 ### Start with component props
 
 Components are intentionally opinionated. Their public props cover supported variants, states, and
-behaviour, while the active theme provides the semantic colours, typography, spacing, radii, and
-depth that make those components work together.
+behaviour. The active theme provides the semantic colours, typography, spacing, radii, and depth
+that make those components work together.
 
 ```tsx
 import { Button } from '@luke-ui/react/button';
@@ -37,7 +37,7 @@ import { Button } from '@luke-ui/react/button';
 ### Compose from primitives
 
 Use a documented primitive when component props do not provide the structure you need. Primitives
-keep the accessibility and visual contract for a component family while leaving its children and
+keep the accessibility and visual contract for a component family. They leave its children and
 composition to your application.
 
 ```tsx
@@ -92,7 +92,7 @@ from a curated accent and neutral character. It is not a per-component override 
 
 Import `@luke-ui/react/stylesheet.css` and one bundled theme stylesheet at the application entry
 point. Apply `themeRootClassName` and the matching identity class to the same application or subtree
-root. The reset is scoped to that root, so it does not reset unrelated application content.
+root. Luke UI scopes the reset to that root, so it does not reset unrelated application content.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
@@ -128,9 +128,9 @@ or interaction states.
 
 Luke UI's static CSS uses four cascade layers, ordered from lowest to highest priority: `reset`,
 `theme`, `recipes`, and `utilities`. That internal order is stable regardless of stylesheet import
-order. The reset normalises only the subtree carrying `themeRootClassName`.
+order. The reset normalises only the subtree that carries `themeRootClassName`.
 
-If your application also uses cascade layers, declare its layer order before importing stylesheets.
+If your application also uses cascade layers, declare its layer order before you import stylesheets.
 
 ```css
 @layer reset, theme, base, recipes, components, utilities;
@@ -140,7 +140,7 @@ If your application also uses cascade layers, declare its layer order before imp
 ```
 
 Tailwind utilities, CSS Modules, and application CSS work well for application-owned layout and
-custom elements. Put Tailwind classes on surrounding elements or `Box`, and use CSS Modules or
+custom elements. Put Tailwind classes on surrounding elements or `Box`. Use CSS Modules or
 application styles with public semantic variables for custom UI. Unlayered application CSS sits
 outside Luke UI's layers, so do not use it to reach into a component's internal DOM.
 

@@ -13,19 +13,19 @@ public theme contract for the active identity and colour mode.
 
 <ExampleBlock
 	src="overview/depth"
-	title="Depth scale"
+	title="Shadow — Depth scale"
 	description="Each surface uses one public depth role from the active theme."
 />
 
-Use a component's API before setting depth yourself. Components already apply the right depth for
-each of their states. Use `vars.depth` when building a custom surface that needs to belong to the
+Use a component's API before you set depth yourself. Components already apply the right depth for
+each of their states. Use `vars.depth` when you build a custom surface that needs to belong to the
 same elevation system.
 
 ## Use semantic depth
 
 Pair depth with a semantic surface role. A menu might use `surface.floating` with `depth.floating`,
 and a dialog `surface.overlay` with `depth.overlay`. Do not copy a resolved shadow value into
-application CSS, because it will not adapt to a custom identity or colour mode.
+application CSS. It will not adapt to a custom identity or colour mode.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';

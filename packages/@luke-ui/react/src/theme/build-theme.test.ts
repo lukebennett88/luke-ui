@@ -519,11 +519,11 @@ describe('buildTheme generation failures', () => {
 		throw new Error('expected buildTheme to throw ThemeGenerationError');
 	}
 
-	// Every semantic role now publishes a solid, so every role must reach an accessible solid/on-solid
-	// pair — a status source in an on-solid dead zone is a build failure rather than the silently
-	// unguaranteed solid the old feedback-only kit left unemitted. Status sources are used verbatim (only
-	// a single-value accent is pre-conditioned into an accessible band), so an authored one reaches the
-	// generator exactly as written.
+	// Every semantic role publishes a solid, so every role must reach an accessible
+	// solid/on-solid pair — a status source in an on-solid dead zone is a build failure,
+	// not a silently unguaranteed solid. Status sources are used verbatim (only a
+	// single-value accent is pre-conditioned into an accessible band), so an authored
+	// one reaches the generator exactly as written.
 	it('throws ThemeGenerationError naming the role, mode, and achieved ratio for a dead-zone warning', () => {
 		const error = buildGenerationError({
 			...tactileFoundation,
@@ -606,13 +606,30 @@ describe('compileTheme diagnostics', () => {
 		}
 	});
 
-	// The matrix is role-uniform by construction, so its size and its per-role shape together pin it:
-	// 8 functional text pairs + 6 roles x (2 foregrounds x 5 backgrounds + 3 on-solid) + the 4 solved
-	// boundaries = 90 hard checks, and 6 semantic borders x 2 base surfaces = 12 advisory ones.
+	// The matrix is role-uniform by construction: each role contributes the same per-role hard
+	// and advisory counts below, plus a handful of hard checks that aren't per-role at all (see
+	// `validateContrast`). Deriving the totals from those pieces means adding a role, or changing
+	// a per-role count, updates the expectation automatically instead of needing a hand-edited
+	// number.
+	const PER_ROLE_HARD_HOVER = 5;
+	const PER_ROLE_HARD_ON_SOLID = 3;
+	const PER_ROLE_HARD_REST = 5;
+	const PER_ROLE_ADVISORY_BORDER = 2;
+
+	// Hard checks `validateContrast` runs once, not per role: functional primary/secondary text
+	// against the 4 elevation surfaces (8), the focus ring and `border.control` boundaries
+	// against the 2 base surfaces (4), and `danger.solid.rest` against the 2 base surfaces (2).
+	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2;
+
+	const expectedHard =
+		SEMANTIC_ROLES.length * (PER_ROLE_HARD_HOVER + PER_ROLE_HARD_ON_SOLID + PER_ROLE_HARD_REST) +
+		NON_PER_ROLE_HARD_CHECKS;
+	const expectedAdvisory = SEMANTIC_ROLES.length * PER_ROLE_ADVISORY_BORDER;
+
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`measures 90 hard and 12 advisory checks per mode for ${foundation.name}, the same for every role`, () => {
+		it(`measures ${expectedHard} hard and ${expectedAdvisory} advisory checks per mode for ${foundation.name}, the same for every role`, () => {
 			// `compileTheme` returns only once every hard gate passed, so reaching these assertions is
-			// itself the proof that all 90 hard checks pass for the bundled theme.
+			// itself the proof that all hard checks pass for the bundled theme.
 			const { diagnostics } = compileTheme(foundation);
 			const summary = (['light', 'dark'] as const).map((mode) => {
 				const checks = diagnostics[mode].contrastChecks;
@@ -635,14 +652,14 @@ describe('compileTheme diagnostics', () => {
 			});
 			expect(summary).toEqual(
 				(['light', 'dark'] as const).map((mode) => ({
-					advisory: 12,
-					hard: 90,
+					advisory: expectedAdvisory,
+					hard: expectedHard,
 					mode,
 					perRole: SEMANTIC_ROLES.map((role) => ({
-						advisoryBorder: 2,
-						hardHover: 5,
-						hardOnSolid: 3,
-						hardRest: 5,
+						advisoryBorder: PER_ROLE_ADVISORY_BORDER,
+						hardHover: PER_ROLE_HARD_HOVER,
+						hardOnSolid: PER_ROLE_HARD_ON_SOLID,
+						hardRest: PER_ROLE_HARD_REST,
 						role,
 					})),
 				})),
@@ -652,9 +669,10 @@ describe('compileTheme diagnostics', () => {
 
 	it('records on each check whether missing its ratio fails the build', () => {
 		// Every text pair is a hard gate, and so are the two solved boundaries `border.focus` and
-		// `border.control`. The six semantic borders are the only advisory checks.
-		// `color.border.decorative` is not measured. The "Theme/Diagnostics" inspector uses this flag
-		// instead of matching token paths.
+		// `border.control`, plus `danger.solid.rest` vs the base surfaces (the only role fill gated —
+		// see `validateContrast` for why the other five roles are not). The six semantic borders are the
+		// only advisory checks. `color.border.decorative` is not measured. The "Theme/Diagnostics"
+		// inspector uses this flag instead of matching token paths.
 		const { diagnostics } = compileTheme(tactileFoundation);
 		const advisoryBorders = SEMANTIC_ROLES.map((role) => `color.border.${role}`);
 		const summary = (['light', 'dark'] as const).map((mode) => {
@@ -678,7 +696,11 @@ describe('compileTheme diagnostics', () => {
 			(['light', 'dark'] as const).map((mode) => ({
 				advisoryForegrounds: [...advisoryBorders].sort(),
 				everyHardGatePasses: true,
-				hardBoundaryForegrounds: ['color.border.control', 'color.border.focus'],
+				hardBoundaryForegrounds: [
+					'color.background.danger.solid.rest',
+					'color.border.control',
+					'color.border.focus',
+				].sort(),
 				hardRatios: [3, 4.5],
 				mode,
 				partitionsEveryCheck: true,
@@ -717,8 +739,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 
 		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
 			// The subtle component surfaces (scale steps 3-5) ramp from the canvas independently of the
-			// elevation surfaces, so v2 no longer pins them apart from `floating`; what still matters is
-			// that primary text stays legible on the hovered subtle surface. The neutral subtle hover is
+			// elevation surfaces and aren't pinned apart from `floating`; what matters is that primary
+			// text stays legible on the hovered subtle surface. The neutral subtle hover is
 			// excluded here because that exact colour pair is already hard-gated under different names:
 			// `color.text.primary` and `color.foreground.neutral.hover` both alias neutral step 12, and
 			// `validateContrast` gates the latter against all three neutral subtle states at >=4.5:1.
@@ -749,8 +771,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
 					// The semantic borders alias the scale's step 7 (subtle UI border). They stay visibly
-					// distinct from the base surfaces but sit below the 3:1 non-text gate the old bespoke
-					// solver targeted — a deliberate move to the reference scale's softer separators.
+					// distinct from the base surfaces but sit below the 3:1 non-text gate by design: these
+					// are soft separators, not solved-contrast boundaries like `border.control`.
 					expect(minimumContrast).toBeGreaterThan(1.2);
 					expect(minimumContrast).toBeLessThan(3);
 				}
@@ -787,9 +809,9 @@ describe('bundled theme identity', () => {
 	});
 });
 
-// v2 regression goldens: the exact `buildTheme` output for the bundled themes under the wired-in
-// scale/elevation/semantic-map pipeline (#238). Asserted byte-identical so any later generator
-// change is a reviewed, deliberate diff.
+// Regression goldens: the exact `buildTheme` output for the bundled themes under the wired-in
+// scale/elevation/semantic-map pipeline. Asserted byte-identical so any later generator change
+// is a reviewed, deliberate diff.
 describe('v2 regression goldens', () => {
 	const v2Goldens = {
 		paper: new URL('./__fixtures__/v2-goldens/paper.v2.css', import.meta.url),

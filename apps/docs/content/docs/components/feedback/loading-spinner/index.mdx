@@ -3,8 +3,8 @@ title: Loading Spinner
 description: Animated indicator for work that is still in progress.
 ---
 
-`LoadingSpinner` shows that work is in progress. Use it on its own for a small loading region, or
-wrap final content to replace it in place.
+`LoadingSpinner` shows that work is in progress. Use it on its own for a small loading region. Wrap
+final content to replace it in place.
 
 <ExampleBlock
 	src="loading-spinner/basic"
@@ -25,8 +25,8 @@ wrap final content to replace it in place.
 ## With content
 
 Pass final content with `isLoading` to replace it in place. While loading, the spinner keeps the
-content's dimensions and interactive descendants are unavailable. Set `isLoading` to `false` to
-reveal the content.
+content's dimensions and disables interactive descendants. Set `isLoading` to `false` to reveal the
+content.
 
 <ExampleBlock
 	src="loading-spinner/children"
@@ -47,14 +47,14 @@ nearby semantic content.
 
 ## Accessibility
 
-The spinner is a polite status region. Its accessible name defaults to `loading`; provide an
-`aria-label` that names the work, such as `Loading profile`. While loading, wrapped children are
-hidden from assistive technology and cannot be focused or activated.
+The spinner is a polite status region. Its accessible name defaults to `loading`. Provide an
+`aria-label` that names the work, such as `Loading profile`. While loading, the spinner hides
+wrapped children from assistive technology and blocks focus and activation.
 
 ## With buttons
 
 [`Button`](/components/actions/button) has its own `isPending` prop for a standard loading action.
-For a labelled button that keeps its text visible, wrap the icon in `LoadingSpinner` and disable the
+For a labelled button that keeps its text visible, wrap the icon in `LoadingSpinner`. Disable the
 button while the action runs.
 
 <ExampleBlock

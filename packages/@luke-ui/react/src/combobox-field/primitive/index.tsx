@@ -1,11 +1,11 @@
 export type { ComboboxClearButtonProps } from './clear-button.js';
 export { ComboboxClearButton } from './clear-button.js';
-export type { ComboboxControlProps } from './control.js';
-export { ComboboxControl } from './control.js';
 export type { ComboboxEmptyStateProps } from './empty-state.js';
 export { ComboboxEmptyState } from './empty-state.js';
-export type { ComboboxTextInputProps } from './input.js';
-export { ComboboxTextInput } from './input.js';
+export type { ComboboxInputProps } from './input.js';
+export { ComboboxInput } from './input.js';
+export type { ComboboxInputGroupProps } from './input-group.js';
+export { ComboboxInputGroup } from './input-group.js';
 export type { ComboboxItemProps, ComboboxLoadMoreItemProps } from './item.js';
 export { ComboboxItem, ComboboxLoadMoreItem } from './item.js';
 export type { ComboboxListBoxProps } from './listbox.js';

@@ -3,8 +3,8 @@ title: Combobox Field
 description: Searchable single-select field with label, validation, and option list.
 ---
 
-Use `ComboboxField` when people need to search for or choose one option from a list. It combines an
-input, label, description, validation message, popover, and listbox.
+Use `ComboboxField` when someone needs to search for or choose one option from a list. It combines
+an input, label, description, validation message, popover, and listbox.
 
 <ExampleBlock
 	src="combobox-field/basic"
@@ -18,11 +18,12 @@ Use `defaultItems` for a static collection. Use `items` with `loadingState` when
 filter asynchronously. `ComboboxField` supports one selected value. Use another component for
 multiple selection.
 
-## Select and clear an option
+## Choose and clear an option
 
 Pass static children or a render function to create options. The listbox marks the selected option.
-When there is a selection, the field shows a clear button before the trigger. Clearing removes the
-selection and input text. The clear button is unavailable for disabled and read-only fields.
+When there is a selection, the field shows a clear button before the trigger. The clear button
+removes the selection and input text. The clear button is unavailable for disabled and read-only
+fields.
 
 ```tsx
 <ComboboxField defaultItems={countries} defaultValue="ca" label="Country" name="country">
@@ -43,21 +44,17 @@ beside the label.
 
 ## Validation
 
-Use `errorMessage` to render a validation message. Pass server errors through React Aria `Form`.
+Pass `errorMessage` with `isInvalid` to report a problem. Always pass both. An invalid field with no
+message leaves someone who cannot see the border colour with no way to know what is wrong.
 
-```tsx
-import { Form } from 'react-aria-components';
+<ExampleBlock
+	src="combobox-field/validation"
+	title="Combobox Field — Validation"
+	description="An invalid combobox with a message that names the fix."
+/>
 
-<Form validationErrors={{ country: 'Please select a country.' }}>
-	<ComboboxField
-		errorMessage={(validation) => validation.validationErrors.join(' ')}
-		label="Country"
-		name="country"
-	>
-		{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-	</ComboboxField>
-</Form>;
-```
+Read [Validation](/components/forms/validation) for server validation and for how to word the
+message.
 
 ## Groups
 
@@ -72,7 +69,7 @@ Use `ComboboxSection` to group related static options.
 ## Async results
 
 Pass `items` and `loadingState` when results load or filter asynchronously. If the list is empty
-while loading or filtering, the field shows a loading indicator. An empty completed result shows “No
+while it loads or filters, the field shows a loading indicator. An empty completed result shows “No
 results”.
 
 ```tsx

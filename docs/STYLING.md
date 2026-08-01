@@ -18,6 +18,25 @@ element. Neither step injects styles at runtime.
   `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose and extend. It
   is named `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module
   composes its plain data and functions.
+- `recipes/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
+  CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is the
+  in-control icon `combobox.css.ts` applies under its own invalid selector's `::after` — the border
+  stays at its resting 1px there, since the icon is already the non-colour cue. It renders as the
+  pseudo-element's own last DOM child, so the recipe gives its trailing affordances (the combobox
+  clear button and trigger) a flex `order` ahead of the icon's default `order: 0`, so it lands right
+  after the field's text content and before them, matching the Spectrum reference this ordering is
+  drawn from. `invalidMessageIcon` is the smaller, message-leading variant `field.css.ts` draws on
+  its `message` slot, switched on by `checkbox.css.ts` alone: `Checkbox`'s own box has no room for
+  an in-control icon without floating past the label, so its icon moves to the message and its box
+  keeps a `2px` border as its own non-colour cue instead. Named `.ts` for the same reason as
+  `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
+- `input-group.css.ts` draws the same glyph, but as a real `Icon` element on its own
+  `invalidIndicator` slot rather than a mask: `InputGroup` (`text-field/primitive/`) reads React
+  Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid control cannot
+  be composed without a non-colour cue. The recipe owns only the icon's colour and margins — `Icon`
+  owns its box, and `IconSizeProvider` (`INPUT_GROUP_ICON_SIZE`) owns its per-size step — and gives
+  the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control is not a
+  plain `Group` with that state to hand, so it stays CSS-driven.
 - `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
   `fontSizeSteps` typography step keys.
@@ -183,13 +202,13 @@ function per slot, each accepting an optional extra class to merge:
 
 ```tsx
 export const combobox = recipe({
-	slots: { control: '…', root: '…', textInput: '…' /* … */ },
+	slots: { inputGroup: '…', root: '…', textInput: '…' /* … */ },
 	variants: {/* per-slot styles keyed by variant value */},
 } as const satisfies SlottedConfigInput);
 
-const { root, control } = combobox({ size: 'medium' });
+const { root, inputGroup } = combobox({ size: 'medium' });
 <div className={root()}>
-	<div className={control(extraClassName)}>…</div>
+	<div className={inputGroup(extraClassName)}>…</div>
 </div>;
 ```
 
@@ -216,8 +235,8 @@ with the recipe.
 
 ### Shared input-state selectors
 
-Field-style recipes (`text-input.css.ts`, `combobox.css.ts`) share one definition of what "hovered",
-"focused", "disabled", "invalid", and "read-only" mean for a control, from
+Field-style recipes (`input-group.css.ts`, `combobox.css.ts`) share one definition of what
+"hovered", "focused", "disabled", "invalid", and "read-only" mean for a control, from
 `recipes/input-states.ts`:
 
 ```ts
@@ -235,8 +254,8 @@ const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSel
 its styles (for example, `hover` deliberately excludes an element that is also focused or
 read-only). A recipe with a more complex anatomy can widen a state before composing it, the way
 `combobox.css.ts` extends `disabled` and `invalid` to also match its trigger button.
-`descendantDisabledSelector` styles a part (an adornment or trigger) when an ancestor control is
-disabled.
+`descendantDisabledSelector` styles a part (a prefix, suffix, or trigger) when an ancestor control
+is disabled.
 
 ## Styling utilities
 

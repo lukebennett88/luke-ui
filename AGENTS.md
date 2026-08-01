@@ -13,6 +13,8 @@
 - When you change code, update or delete the docs that describe it in the same change. This includes
   comments, JSDoc, MDX files in `apps/docs/content/docs/`, `README.md`, package READMEs, and files
   in `docs/`. See [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md#keeping-docs-current).
+- Follow the writing style in [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md#writing-style). It
+  governs MDX prose, JSDoc, and code comments.
 
 ## Dev loop
 

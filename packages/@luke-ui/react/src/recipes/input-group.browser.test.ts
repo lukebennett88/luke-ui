@@ -3,7 +3,7 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';
 import { tactileThemeClassName } from '../themes/index.js';
 import { cx } from '../utils/index.js';
-import { textInput } from './text-input.css.js';
+import { inputGroup } from './input-group.css.js';
 
 let mounted: Array<HTMLElement> = [];
 
@@ -84,6 +84,30 @@ test('invalid shows the danger border even while focus-within, ring stays the sa
 	expect(invalidBorder).not.toBe(getComputedStyle(resting).borderColor);
 });
 
+// The invalid icon is a real `Icon` element `InputGroup` renders, not a `::after`, so
+// its size lives in React (`INPUT_GROUP_ICON_SIZE`, applied through `IconSizeProvider`)
+// and this recipe owns only its colour and the flex `order` that keeps it ahead of a
+// trailing suffix. `text-field.browser.test.tsx` guards the size and the rendered
+// geometry; this guards the declarations behind them.
+test('the invalid indicator draws in the danger foreground and orders ahead of the suffix', () => {
+	const { group, root } = mountGroup();
+	group.dataset.invalid = 'true';
+
+	const indicator = group.appendChild(document.createElement('span'));
+	indicator.className = inputGroup().invalidIndicator();
+	const suffix = group.appendChild(document.createElement('span'));
+	suffix.className = inputGroup().suffix();
+
+	const dangerProbe = root.appendChild(document.createElement('div'));
+	dangerProbe.style.color = 'var(--luke-color-foreground-danger-rest)';
+	expect(getComputedStyle(indicator).color).toBe(getComputedStyle(dangerProbe).color);
+
+	expect(Number(getComputedStyle(suffix).order)).toBeGreaterThan(
+		Number(getComputedStyle(indicator).order),
+	);
+	expect(getComputedStyle(group, '::after').maskImage).toBe('none');
+});
+
 test('disabled preserves resting background and border, only dropping opacity', () => {
 	const { group: resting } = mountGroup();
 	const { group: disabled } = mountGroup();
@@ -123,29 +147,29 @@ test('read-only still shows the focus ring since read-only fields remain focusab
 	expect(style.outlineWidth).toBe('2px');
 });
 
-test('adornment divider uses the control border color and disabled text color follows the group', () => {
+test('prefix divider uses the control border color and disabled text color follows the group', () => {
 	const { group, root } = mountGroup();
-	const adornment = group.appendChild(document.createElement('span'));
-	adornment.className = textInput({ size: 'medium' }).adornmentStart();
+	const prefix = group.appendChild(document.createElement('span'));
+	prefix.className = inputGroup({ size: 'medium' }).prefix();
 
 	const controlBorderProbe = root.appendChild(document.createElement('div'));
 	controlBorderProbe.style.borderColor = 'var(--luke-color-border-control)';
-	expect(getComputedStyle(adornment).borderInlineEndColor).toBe(
+	expect(getComputedStyle(prefix).borderInlineEndColor).toBe(
 		getComputedStyle(controlBorderProbe).borderColor,
 	);
 
 	group.dataset.disabled = 'true';
 	const disabledTextProbe = root.appendChild(document.createElement('div'));
 	disabledTextProbe.style.color = 'var(--luke-color-text-disabled)';
-	expect(getComputedStyle(adornment).color).toBe(getComputedStyle(disabledTextProbe).color);
+	expect(getComputedStyle(prefix).color).toBe(getComputedStyle(disabledTextProbe).color);
 });
 
-function mountGroup(options: Parameters<typeof textInput>[0] = {}) {
+function mountGroup(options: Parameters<typeof inputGroup>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
 	root.className = cx(themeRootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	const group = root.appendChild(document.createElement('div'));
-	group.className = textInput(options).group();
+	group.className = inputGroup(options).group();
 	group.style.transition = 'none';
 	mounted.push(root);
 	return { group, root };

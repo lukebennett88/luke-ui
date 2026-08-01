@@ -8,9 +8,9 @@ import { LoadingSpinner } from '../loading-spinner/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { ComboboxClearButton } from './primitive/clear-button.js';
-import { ComboboxControl } from './primitive/control.js';
 import { ComboboxEmptyState } from './primitive/empty-state.js';
-import { ComboboxTextInput } from './primitive/input.js';
+import { ComboboxInputGroup } from './primitive/input-group.js';
+import { ComboboxInput } from './primitive/input.js';
 import type { ComboboxLoadMoreItemProps } from './primitive/item.js';
 import { ComboboxLoadMoreItem } from './primitive/item.js';
 import type { ComboboxListBoxProps } from './primitive/listbox.js';
@@ -119,8 +119,8 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	return (
 		<ComboboxRoot<T> size={size} {...comboboxRootProps}>
 			<Field {...fieldSlotProps}>
-				<ComboboxControl>
-					<ComboboxTextInput placeholder={placeholder} />
+				<ComboboxInputGroup>
+					<ComboboxInput placeholder={placeholder} />
 					{isInteractive ? (
 						<ComboboxClearButton aria-label="Clear selection">
 							<Icon aria-hidden name="close" />
@@ -129,7 +129,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 					<ComboboxTrigger aria-label="Toggle options">
 						<Icon aria-hidden name="chevronDown" />
 					</ComboboxTrigger>
-				</ComboboxControl>
+				</ComboboxInputGroup>
 				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
 					<ComboboxListBox<T>
 						{...listBoxProps}

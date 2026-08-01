@@ -4,13 +4,13 @@ description: Understand what a Luke UI theme supplies and how it affects compone
 ---
 
 A Luke UI theme is a static stylesheet that supplies the semantic values used throughout the
-library. It gives components a visual identity without changing their APIs or behaviour.
+library. It gives components a visual identity. It does not change their APIs or behaviour.
 
 ## Anatomy of a theme
 
 Each identity includes a light and dark mode. It supplies semantic colours, typography, spacing,
-radii, material, and depth. Components select those values through the shared contract instead of
-making their own palette or shadow decisions.
+radii, material, and depth. Components select those values through the shared contract. They do not
+make their own palette or shadow decisions.
 
 Luke UI includes two identities:
 
@@ -18,12 +18,12 @@ Luke UI includes two identities:
 - Paper is flatter, with lighter borders and depth.
 
 Apply one identity to an application or independent themed subtree. Identity classes do not nest.
-Choose the identity for that scope, then use nested colour modes when a child needs a different
+Choose the identity for that scope. Then use nested colour modes when a child needs a different
 light or dark appearance.
 
 ## Component variants
 
-Themes define the visual system. Components define the choices people can make within it. For
+Themes define the visual system. Components define the choices developers can make within it. For
 example, Button controls its own tone, appearance, size, pending state, and accessible behaviour.
 The theme supplies the semantic values behind those choices.
 

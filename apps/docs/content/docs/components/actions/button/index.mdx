@@ -20,14 +20,14 @@ Keep related controls at the same size.
 <ExampleBlock
 	src="button/sizes"
 	title="Button — Size"
-	description="Only the control grows between sizes — the icon holds at 16px."
+	description="Small and medium buttons for compact and default layouts."
 />
 
 ## Appearance
 
 Use `appearance` to set a button's visual weight. `solid` is the default. Choose `subtle` or `ghost`
-for secondary actions that should recede beside the main action. Appearance sets emphasis; it does
-not communicate intent.
+for secondary actions that should recede beside the main action. Appearance sets emphasis. Use
+`tone` to communicate intent.
 
 <ExampleBlock
 	src="button/appearance"
@@ -58,10 +58,9 @@ primary action at the end of a narrow form or panel.
 
 ## Icons
 
-Use `startIcon` or `endIcon` with a visible label. `Button` sizes nested icons at 16px for both
-`small` and `medium`, so the `Icon` needs no `size` prop of its own — pass one only to override it
-deliberately. Use [`IconButton`](/components/actions/icon-button) only when the icon is familiar
-without a text label.
+Use `startIcon` or `endIcon` with a visible label. `Button` sizes nested icons for you, so an `Icon`
+needs no `size` prop. Pass one only to override it. Use
+[`IconButton`](/components/actions/icon-button) only when the icon is familiar without a text label.
 
 <ExampleBlock
 	src="button/icons"
@@ -71,8 +70,8 @@ without a text label.
 
 ## Pending
 
-Set `isPending` while an action is running. The button remains focusable, ignores further presses,
-and overlays its label with a spinner. Update the visible label when the status matters, for example
+Set `isPending` while an action runs. The button remains focusable, ignores further presses, and
+overlays its label with a spinner. Update the visible label when the status matters, for example
 from “Save” to “Saving”.
 
 <ExampleBlock
@@ -83,8 +82,8 @@ from “Save” to “Saving”.
 
 ## Disabled
 
-Set `isDisabled` only when the action is unavailable. Disabled buttons cannot receive focus or be
-pressed.
+Set `isDisabled` only when the action is unavailable. Disabled buttons cannot receive focus or
+respond to presses.
 
 <ExampleBlock
 	src="button/disabled"
@@ -98,12 +97,12 @@ The visible label provides the accessible name, so most buttons do not need `ari
 label that describes the action, such as “Save changes” or “Delete account”, rather than a vague
 label such as “OK”.
 
-The spinner is hidden from assistive technology. Change the label when pending status needs to be
-announced.
+The spinner is hidden from assistive technology. Change the label when assistive technology needs to
+announce the pending status.
 
-## Button primitive
+## Primitive
 
 `Button` is the composed component for application UI. It wraps its label for truncation, provides
 icon slots, and supplies the pending spinner. Use the
-[button primitive](/components/primitives/button) when building a custom control and you need to own
+[button primitive](/components/primitives/button) when you build a custom control and need to own
 the child layout or loading treatment.

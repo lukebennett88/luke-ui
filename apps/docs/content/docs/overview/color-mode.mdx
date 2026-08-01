@@ -1,10 +1,10 @@
 ---
 title: Colour modes
-description: Follow the system setting or select light and dark modes for themed content.
+description: Follow the system setting or choose light and dark modes for themed content.
 ---
 
-Every Luke UI identity provides light and dark values. Omit `data-color-mode` and the browser's
-`prefers-color-scheme` setting selects the mode. Add `data-color-mode="light"` or
+Every Luke UI identity provides light and dark values. Omit `data-color-mode`. The browser's
+`prefers-color-scheme` setting then selects the mode. Add `data-color-mode="light"` or
 `data-color-mode="dark"` when an application or preview needs a fixed mode.
 
 ## Basic usage
@@ -38,9 +38,9 @@ Do not add a second identity class to the nested element. Theme identity does no
 
 ## System preference and server rendering
 
-System preference works without JavaScript because CSS selects the mode. If the server knows a
-person's saved preference, render the `data-color-mode` attribute in the first HTML response. If a
-client-only setting can differ from the server, set it before the themed UI paints to avoid a flash
+System preference works without JavaScript because CSS selects the mode. If the server knows
+someone's saved preference, render the `data-color-mode` attribute in the first HTML response. A
+client-only setting can differ from the server. Set it before the themed UI paints, to avoid a flash
 or hydration mismatch.
 
 ## Portals

@@ -56,23 +56,25 @@ test('sizes and colors', async () => {
 	await captureVisual(locator, 'loading-spinner/sizes-and-colors');
 });
 
-test.each(visualAppearances)('theme matrix: $theme $mode', async (appearance) => {
-	const oppositeMode = appearance.mode === 'light' ? 'dark' : 'light';
-	const scene = renderVisual(
-		<div style={themeMatrixStyle}>
-			<ThemeMatrixScope label="Root scope">
-				<LoadingSpinner aria-label="Root theme pending" style={spinnerStyle} />
-			</ThemeMatrixScope>
-			<ThemeMatrixScope label="Opposite mode" mode={oppositeMode}>
-				<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} />
-			</ThemeMatrixScope>
-		</div>,
-		appearance,
-	);
+for (const appearance of visualAppearances) {
+	test(`theme matrix: ${appearance.theme} ${appearance.mode}`, async () => {
+		const oppositeMode = appearance.mode === 'light' ? 'dark' : 'light';
+		const scene = renderVisual(
+			<div style={themeMatrixStyle}>
+				<ThemeMatrixScope label="Root scope">
+					<LoadingSpinner aria-label="Root theme pending" style={spinnerStyle} />
+				</ThemeMatrixScope>
+				<ThemeMatrixScope label="Opposite mode" mode={oppositeMode}>
+					<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} />
+				</ThemeMatrixScope>
+			</div>,
+			appearance,
+		);
 
-	await expect.element(scene).toHaveAttribute('data-color-mode', appearance.mode);
-	await captureVisualAppearance(scene, 'loading-spinner/theme-matrix', appearance);
-});
+		await expect.element(scene).toHaveAttribute('data-color-mode', appearance.mode);
+		await captureVisualAppearance(scene, 'loading-spinner/theme-matrix', appearance);
+	});
+}
 
 const themeMatrixStyle = {
 	backgroundColor: vars.color.surface.canvas,

@@ -12,8 +12,8 @@ Luke UI uses three component tiers. The tier decides the export path, docs page,
 | Composed  | App developers  | Combines atoms and primitives into an opinionated, ready-to-use pattern.                                 | `Button`, `IconButton`, `TextField`, `ComboboxField`                                      |
 | Primitive | Library authors | Provides lower-level public API for composed components or custom components.                            | `button/primitive`, `field/primitive`, `text-field/primitive`, `combobox-field/primitive` |
 
-A primitive can be one component, such as `TextInput`, or a group of related components, such as the
-combobox primitives.
+A primitive can be one component, such as `Field`, or a group of related components, such as the
+input-group and combobox primitives.
 
 Do not call atoms or primitives "base" or "raw" in source comments or docs. Use the tier name.
 
@@ -32,12 +32,12 @@ import { Text } from '@luke-ui/react/text';
 Primitives that support a composed component export from `[composed]/primitive`:
 
 ```ts
-import { TextInput } from '@luke-ui/react/text-field/primitive';
+import { InputGroup } from '@luke-ui/react/text-field/primitive';
 import { Field, FieldLabel } from '@luke-ui/react/field/primitive';
 import { ComboboxRoot } from '@luke-ui/react/combobox-field/primitive';
 ```
 
-Do not add top-level primitive paths such as `@luke-ui/react/field` or `@luke-ui/react/text-input`.
+Do not add top-level primitive paths such as `@luke-ui/react/field` or `@luke-ui/react/input-group`.
 The `/primitive` segment makes the lower-level audience visible.
 
 Keep primitives public when consumers need them to build custom composed components. Do not make a
