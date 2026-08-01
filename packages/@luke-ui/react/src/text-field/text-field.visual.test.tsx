@@ -79,6 +79,43 @@ test('prefix and suffix', async () => {
 	await captureVisual(locator, 'text-field/prefix-and-suffix');
 });
 
+// `prefix` and `suffix` are typed `ReactNode`, so a consumer can pass more than one
+// top-level element, for example a leading icon paired with a status icon. Each
+// top-level child of `prefix`/`suffix` becomes its own item in that slot's own flex
+// row (`input-group.css.ts`), so this locks in that a second element sits cleanly
+// beside the first rather than overlapping it or breaking the row.
+test('prefix and suffix render more than one element', async () => {
+	const locator = renderVisual(
+		<Stack width="14rem">
+			<TextField
+				label="Search"
+				name="prefix-multiple-elements"
+				placeholder="Search…"
+				prefix={
+					<>
+						<Icon aria-hidden name="search" />
+						<Icon aria-hidden name="check" />
+					</>
+				}
+			/>
+			<TextField
+				label="Amount"
+				name="suffix-multiple-elements"
+				placeholder="0.00"
+				suffix={
+					<>
+						<Icon aria-hidden name="check" />
+						<Icon aria-hidden name="close" />
+					</>
+				}
+			/>
+		</Stack>,
+	);
+
+	await expect.element(page.getByRole('textbox', { name: 'Search' })).toBeVisible();
+	await captureVisual(locator, 'text-field/prefix-suffix-multiple-elements');
+});
+
 // The invalid icon must land before a trailing `suffix`, not after it; the plain
 // `prefix and suffix` scene above has no invalid case to catch that. Geometry, not
 // just a screenshot, pins the invariant: the icon is appended after the suffix in

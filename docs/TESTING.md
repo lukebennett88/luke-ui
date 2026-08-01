@@ -153,6 +153,29 @@ test('keyboard focus ring', async () => {
 
 The full workflow and report are documented in [`VISUAL_TESTING.md`](./VISUAL_TESTING.md).
 
+## Test ReactNode props with rich content
+
+A prop typed `ReactNode` accepts a plain string or markup with several elements. Test both shapes
+when the prop's own container applies layout or text-flow CSS.
+
+A flex container turns each top-level child into its own flex item. A string is one text node, so it
+wraps as a single block. Markup with two or more top-level children wraps each child on its own. The
+result reads as separate columns, not one sentence.
+
+Add a scene with at least two top-level children and surrounding text. Make the content long enough
+to wrap at the capture width. A short scene, or one where a single string wraps, does not expose the
+difference.
+
+Example: `errorMessage` accepts `<>Enter a date after <Strong>today</Strong>, not before it.</>`. A
+message container styled with `display: flex` splits that sentence into separate, independently
+wrapping columns instead of one paragraph.
+
+Skip this test when a prop's container passes children straight through with no layout of its own.
+
+Assert a layout invariant directly when one exists, rather than relying only on a capture. A
+computed-style assertion fails on its own. A capture only helps once a reviewer spots the difference
+by eye.
+
 ## Style-contract tests for CSS recipes
 
 Recipes in `src/recipes/*.css.ts` have no roles or user interactions. Their contract is: given this
