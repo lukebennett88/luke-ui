@@ -125,10 +125,10 @@ export function IconGallery(): JSX.Element {
 			<div className="flex flex-wrap items-center gap-3">
 				<div className="min-w-[12rem] flex-1 basis-56" ref={filterFieldRef}>
 					<TextField
-						adornmentStart={<Icon aria-hidden name="search" size="small" />}
 						aria-label="Filter icons by name"
 						onChange={setFilter}
 						placeholder="Filter by name"
+						prefix={<Icon aria-hidden name="search" size="small" />}
 						size="small"
 						value={filter}
 					/>
