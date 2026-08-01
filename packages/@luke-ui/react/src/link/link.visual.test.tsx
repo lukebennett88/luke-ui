@@ -42,56 +42,60 @@ test('keyboard focus ring', async () => {
 	await captureVisual(scene, 'link/focus-visible');
 });
 
-test.each(visualAppearances)('navigation states: $theme $mode', async (appearance) => {
-	const scene = renderVisual(
-		<Grid columns={3}>
-			<Link href="#" isStandalone>
-				Accent
-			</Link>
-			<Link href="#" isStandalone tone="neutral">
-				Neutral
-			</Link>
-			<Link href="#" isDisabled isStandalone>
-				Disabled
-			</Link>
-		</Grid>,
-		appearance,
-	);
-	const accent = page.getByRole('link', { name: 'Accent' });
-	const neutral = page.getByRole('link', { name: 'Neutral' });
-	const disabled = page.getByRole('link', { name: 'Disabled' });
+for (const appearance of visualAppearances) {
+	test(`navigation states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Grid columns={3}>
+				<Link href="#" isStandalone>
+					Accent
+				</Link>
+				<Link href="#" isStandalone tone="neutral">
+					Neutral
+				</Link>
+				<Link href="#" isDisabled isStandalone>
+					Disabled
+				</Link>
+			</Grid>,
+			appearance,
+		);
+		const accent = page.getByRole('link', { name: 'Accent' });
+		const neutral = page.getByRole('link', { name: 'Neutral' });
+		const disabled = page.getByRole('link', { name: 'Disabled' });
 
-	expect(getComputedStyle(accent.element()).color).not.toBe(
-		getComputedStyle(neutral.element()).color,
-	);
-	expect(getComputedStyle(disabled.element()).opacity).toBe('0.55');
+		expect(getComputedStyle(accent.element()).color).not.toBe(
+			getComputedStyle(neutral.element()).color,
+		);
+		expect(getComputedStyle(disabled.element()).opacity).toBe('0.55');
 
-	await captureVisualAppearance(scene, 'link/navigation-states', appearance);
-});
+		await captureVisualAppearance(scene, 'link/navigation-states', appearance);
+	});
+}
 
-test.each(visualAppearances)('interactive states: $theme $mode', async (appearance) => {
-	const scene = renderVisual(
-		<Stack align="flex-start">
-			<Link href="#" isStandalone>
-				Destination
-			</Link>
-		</Stack>,
-		appearance,
-	);
-	const link = page.getByRole('link', { name: 'Destination' });
-	await expect.element(link).toBeVisible();
+for (const appearance of visualAppearances) {
+	test(`interactive states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack align="flex-start">
+				<Link href="#" isStandalone>
+					Destination
+				</Link>
+			</Stack>,
+			appearance,
+		);
+		const link = page.getByRole('link', { name: 'Destination' });
+		await expect.element(link).toBeVisible();
 
-	await captureVisualAppearance(scene, 'link/resting', appearance);
-	await userEvent.hover(link);
-	await captureVisualAppearance(scene, 'link/hover', appearance);
-	await userEvent.unhover(link);
-	await focusViaKeyboard(link);
-	await captureVisualAppearance(scene, 'link/focus-visible', appearance);
-	await userEvent.keyboard('{Enter>}');
-	await expect.element(link).toHaveAttribute('data-pressed', 'true');
-	await captureVisualAppearance(scene, 'link/pressed', appearance);
-	await userEvent.keyboard('{/Enter}');
-});
+		await captureVisualAppearance(scene, 'link/resting', appearance);
+		await userEvent.hover(link);
+		await captureVisualAppearance(scene, 'link/hover', appearance);
+		await userEvent.unhover(link);
+		await focusViaKeyboard(link);
+		await captureVisualAppearance(scene, 'link/focus-visible', appearance);
+		await userEvent.keyboard('{Enter>}');
+		await expect.element(link).toHaveAttribute('data-pressed', 'true');
+		await captureVisualAppearance(scene, 'link/pressed', appearance);
+		await userEvent.keyboard('{/Enter}');
+	});
+}
 
 test('forced-colors navigation states', async () => {
 	await emulateForcedColors('active');

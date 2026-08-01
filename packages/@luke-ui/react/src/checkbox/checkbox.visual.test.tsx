@@ -41,28 +41,30 @@ test('keyboard focus ring', async () => {
 	await captureVisual(scene, 'checkbox/focus-visible');
 });
 
-test.each(visualAppearances)('material states: $theme $mode', async (appearance) => {
-	const scene = renderVisual(
-		<Stack>
-			<Checkbox name="default">Default</Checkbox>
-			<Checkbox defaultSelected name="selected">
-				Selected
-			</Checkbox>
-			<Checkbox isIndeterminate name="indeterminate">
-				Indeterminate
-			</Checkbox>
-			<Checkbox defaultSelected isDisabled name="disabled">
-				Disabled
-			</Checkbox>
-			<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid">
-				Invalid
-			</Checkbox>
-		</Stack>,
-		appearance,
-	);
-	await expect.element(page.getByRole('checkbox', { name: 'Default' })).toBeVisible();
-	await captureVisualAppearance(scene, 'checkbox/material-states', appearance);
-});
+for (const appearance of visualAppearances) {
+	test(`material states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack>
+				<Checkbox name="default">Default</Checkbox>
+				<Checkbox defaultSelected name="selected">
+					Selected
+				</Checkbox>
+				<Checkbox isIndeterminate name="indeterminate">
+					Indeterminate
+				</Checkbox>
+				<Checkbox defaultSelected isDisabled name="disabled">
+					Disabled
+				</Checkbox>
+				<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid">
+					Invalid
+				</Checkbox>
+			</Stack>,
+			appearance,
+		);
+		await expect.element(page.getByRole('checkbox', { name: 'Default' })).toBeVisible();
+		await captureVisualAppearance(scene, 'checkbox/material-states', appearance);
+	});
+}
 
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');

@@ -11,9 +11,11 @@ import { TokenBoard } from './token-board.js';
 // #257 closes the remaining gap, where the other 81 leaves previously had no visual capture at all —
 // this board makes any future generator or semantic-mapping change produce an obvious, intentional
 // diff regardless of whether a component happens to consume the changed leaf.
-test.each(visualAppearances)('token board: $theme $mode', async (appearance) => {
-	const scene = renderVisual(<TokenBoard />, appearance);
-	await expect.element(scene).toBeVisible();
+for (const appearance of visualAppearances) {
+	test(`token board: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(<TokenBoard />, appearance);
+		await expect.element(scene).toBeVisible();
 
-	await captureVisualAppearance(scene, 'theme/token-board', appearance);
-});
+		await captureVisualAppearance(scene, 'theme/token-board', appearance);
+	});
+}

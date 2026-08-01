@@ -30,9 +30,8 @@ test('only standalone links provide a structural 24px target', () => {
 	expect(getComputedStyle(standalone).minInlineSize).toBe('24px');
 });
 
-test.each(['accent', 'neutral'] as const)(
-	'%s hover and press change color and decoration without tactile travel',
-	(tone) => {
+for (const tone of ['accent', 'neutral'] as const) {
+	test(`${tone} hover and press change color and decoration without tactile travel`, () => {
 		const resting = mountLink({ isStandalone: true, tone });
 		const hovered = mountLink({ isStandalone: true, tone });
 		hovered.dataset.hovered = 'true';
@@ -52,12 +51,11 @@ test.each(['accent', 'neutral'] as const)(
 		expect(pressedStyle.boxShadow).toBe('none');
 		expect(hoveredStyle.transform).toBe('none');
 		expect(pressedStyle.transform).toBe('none');
-	},
-);
+	});
+}
 
-test.each(['accent', 'neutral'] as const)(
-	'disabled %s links preserve their resting tone and ignore interaction states',
-	(tone) => {
+for (const tone of ['accent', 'neutral'] as const) {
+	test(`disabled ${tone} links preserve their resting tone and ignore interaction states`, () => {
 		const resting = mountLink({ isStandalone: true, tone });
 		const disabled = mountLink({ isStandalone: true, tone });
 		disabled.dataset.disabled = 'true';
@@ -67,8 +65,8 @@ test.each(['accent', 'neutral'] as const)(
 		expect(getComputedStyle(disabled).color).toBe(getComputedStyle(resting).color);
 		expect(getComputedStyle(disabled).textDecorationLine).toBe('none');
 		expect(getComputedStyle(disabled).opacity).toBe('0.55');
-	},
-);
+	});
+}
 
 test('focus-visible shows the complete independent semantic ring', () => {
 	const focused = mountLink();

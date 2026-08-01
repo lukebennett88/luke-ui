@@ -122,9 +122,8 @@ function trailingInsetFromControlBorder(control: Element, element: Element): num
 // text does. This locks the two together across components at both sizes, so the
 // `invalidIndicator` slot's `marginInlineEnd` (`input-group.css.ts`) cannot drift back to
 // matching `control`'s padding without this failing.
-test.each(['medium', 'small'] as const)(
-	'the invalid icon sits at the same trailing inset as the combobox chevron: %s',
-	async (size) => {
+for (const size of ['medium', 'small'] as const) {
+	test(`the invalid icon sits at the same trailing inset as the combobox chevron: ${size}`, async () => {
 		renderVisual(
 			<>
 				<TextField isInvalid label="Invalid" name="invalid" size={size} />
@@ -161,8 +160,8 @@ test.each(['medium', 'small'] as const)(
 
 		expect(indicatorInset).toBeCloseTo(chevronInset, 0);
 		expect(indicatorInset).toBeCloseTo(8, 0);
-	},
-);
+	});
+}
 
 // #247/#312: the invalid icon must land before a trailing suffix, not after it. The
 // suffix's flex `order` is what puts it there, so the DOM position of the appended
