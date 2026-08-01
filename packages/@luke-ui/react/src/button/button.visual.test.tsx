@@ -53,6 +53,37 @@ test('states: disabled, pending, with icons', async () => {
 	await captureVisual(locator, 'button/states');
 });
 
+// `startIcon`/`endIcon` are typed `ReactNode`, so a consumer can pass more than
+// one top-level element, for example a compound icon. Each becomes its own item
+// in the `buttonLabel` flex row (`button-composed.css.ts`), so this locks in that
+// a second element sits cleanly beside the first and the label rather than
+// overlapping either.
+test('start and end icons render more than one element', async () => {
+	const locator = renderVisual(
+		<Grid columns={1}>
+			<Button
+				endIcon={
+					<>
+						<Icon name="check" />
+						<Icon name="close" />
+					</>
+				}
+				startIcon={
+					<>
+						<Icon name="add" />
+						<Icon name="search" />
+					</>
+				}
+			>
+				New task
+			</Button>
+		</Grid>,
+	);
+
+	await expect.element(page.getByRole('button', { name: 'New task' })).toBeVisible();
+	await captureVisual(locator, 'button/multi-element-icons');
+});
+
 test('keyboard focus ring', async () => {
 	const scene = renderVisual(
 		<Grid columns={1}>

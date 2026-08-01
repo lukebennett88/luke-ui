@@ -15,6 +15,7 @@ import {
 import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { ComboboxField } from './index.js';
 import { ComboboxItem, ComboboxLoadMoreItem } from './primitive/item.js';
+import { ComboboxSection } from './primitive/section.js';
 
 type CountryItem = {
 	id: string;
@@ -557,6 +558,40 @@ for (const appearance of visualAppearances) {
 		await captureVisualAppearance(locator, 'combobox-field/sizes', appearance);
 	});
 }
+
+// `ComboboxSection`'s `title` is typed `ReactNode`, so it can hold rich content
+// such as `<>text <strong>emphasis</strong> text</>`, not only a plain string.
+// The heading it renders into (`sectionHeading` in `combobox.css.ts`) is a plain
+// block with no flex or per-line layout trick, so this locks in that rich content
+// wraps as one heading instead of breaking apart the way a flex message container
+// would.
+test('a section title with rich content wraps as one heading', async () => {
+	renderVisual(
+		<Stack width="14rem">
+			<ComboboxField label="Country" name="grouped-rich" placeholder="Select a country...">
+				<ComboboxSection
+					id="north"
+					title={
+						<>
+							Northern <strong>hemisphere</strong> countries and <em>territories</em>
+						</>
+					}
+				>
+					<ComboboxItem id="ca">Canada</ComboboxItem>
+					<ComboboxItem id="us">United States</ComboboxItem>
+				</ComboboxSection>
+			</ComboboxField>
+		</Stack>,
+	);
+
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	await expect.element(page.getByRole('listbox')).toBeVisible();
+
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/section-title-rich-content',
+	);
+});
 
 function refreshVisualScene(scene: Locator) {
 	return page.elementLocator(scene.element());
