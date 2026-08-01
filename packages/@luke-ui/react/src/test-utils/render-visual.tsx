@@ -78,7 +78,7 @@ export async function captureVisual(locator: Locator, id: string) {
 		// configured viewport; growing only the top-level page (via CDP) leaves
 		// the iframe's own box unchanged, so it never paints past its original
 		// height. `page.viewport` resizes and re-lays-out the iframe itself, so
-		// both must grow together for the revealed region to paint. See #310.
+		// both must grow together for the revealed region to paint.
 		await cdp().send('Emulation.setDeviceMetricsOverride', {
 			width: viewportWidth,
 			height: fullHeight,

@@ -110,9 +110,9 @@ test('first-line label alignment across Text sizes', async () => {
 	await captureVisual(scene, 'checkbox/first-line-alignment');
 });
 
-// An invalid checkbox's control still needs the same first-line alignment fix as
-// any other checkbox once its label wraps — it just no longer carries the error
-// icon itself (see the message-icon test below for that).
+// An invalid checkbox's control needs the same first-line alignment as any other
+// checkbox once its label wraps; the control itself carries no error icon (see the
+// message-icon test below for that).
 test('invalid control aligns with a wrapping label’s first line', async () => {
 	const scene = renderVisual(
 		<Stack width="20rem">
@@ -127,9 +127,9 @@ test('invalid control aligns with a wrapping label’s first line', async () => 
 	await captureVisual(scene, 'checkbox/invalid-wrapping-label');
 });
 
-// #247/#312: the error icon now sits on the message (not the control), so it needs
-// its own first-line alignment proof — the message text wraps to several lines and
-// the icon must stay pinned to the first one instead of centring against the whole
+// The error icon sits on the message, not the control, so it needs its own
+// first-line alignment proof: the message text wraps to several lines and the
+// icon must stay pinned to the first one instead of centring against the whole
 // block.
 test('error message icon aligns with a wrapping message’s first line', async () => {
 	const scene = renderVisual(

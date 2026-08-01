@@ -44,10 +44,10 @@ afterEach(() => {
 });
 
 // Proves the invalid cue survives without `errorMessage`, which `composeField` treats
-// as optional — the case #247 flags as otherwise colour-only and imperceptible. The
-// border stays at the resting 1px (see `input-group.css.ts`): the in-control icon is the
-// non-colour cue here, so the proof is the icon's presence plus the gated border colour,
-// not a border-width change.
+// as optional and which would otherwise leave the field colour-only and imperceptible.
+// The border stays at the resting 1px (see `input-group.css.ts`): the in-control icon is
+// the non-colour cue here, so the proof is the icon's presence plus the gated border
+// colour, not a border-width change.
 test('invalid without an error message still carries a non-colour cue', async () => {
 	renderVisual(
 		<>
@@ -116,8 +116,8 @@ function trailingInsetFromControlBorder(control: Element, element: Element): num
 	return innerBorderRight - element.getBoundingClientRect().right;
 }
 
-// #247: the invalid icon is a trailing glyph in a field, and `ComboboxField`'s chevron
-// is the system's existing trailing-glyph precedent — a constant inset from the control's
+// The invalid icon is a trailing glyph in a field, and `ComboboxField`'s chevron is
+// the system's existing trailing-glyph precedent — a constant inset from the control's
 // inner border, not one that scales with the control's own horizontal padding the way
 // text does. This locks the two together across components at both sizes, so the
 // `invalidIndicator` slot's `marginInlineEnd` (`input-group.css.ts`) cannot drift back to
@@ -163,9 +163,9 @@ for (const size of ['medium', 'small'] as const) {
 	});
 }
 
-// #247/#312: the invalid icon must land before a trailing suffix, not after it. The
-// suffix's flex `order` is what puts it there, so the DOM position of the appended
-// icon alone does not prove it — the rendered geometry does.
+// The invalid icon must land before a trailing suffix, not after it. The suffix's
+// flex `order` is what puts it there, so the DOM position of the appended icon
+// alone does not prove it — the rendered geometry does.
 test('the indicator lands after the input and before a trailing suffix', async () => {
 	renderVisual(
 		<InputGroup isInvalid>
@@ -191,15 +191,14 @@ test('the indicator lands after the input and before a trailing suffix', async (
 	expect(indicatorRect.left).toBeLessThan(suffixRect.left);
 });
 
-// #247: `inputStates.invalid` used to include `:has(:invalid)`, which matches a
-// required, empty input from first render — before any interaction or submit —
-// while `aria-invalid` stays null. That painted an untouched required field
-// invalid though assistive technology was told it was fine. These two tests are
-// the regression guard for the fix: the group only picks up the invalid
-// treatment once React Aria has recorded a real validation failure. The border
-// stays 1px in both the untouched and the invalid case now that the in-control
-// icon (not a width change) is the invalid cue, so the proof is the border colour
-// and the icon's presence, not a width comparison.
+// `inputStates.invalid` must not match `:has(:invalid)`: that matches a required,
+// empty input from first render — before any interaction or submit — while
+// `aria-invalid` stays null, painting an untouched required field invalid even
+// though assistive technology is told it's fine. These two tests guard that the
+// group only picks up the invalid treatment once React Aria has recorded a real
+// validation failure. The border stays 1px in both the untouched and the invalid
+// case, since the in-control icon (not a width change) is the invalid cue, so the
+// proof is the border colour and the icon's presence, not a width comparison.
 test('a required field with no value is not painted invalid before validation runs', async () => {
 	renderVisual(
 		<>

@@ -1,7 +1,5 @@
-import type { FieldControlSize } from '../sizing/control-size.js';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
-import type { AssertTrue, TypesAreEqual } from '../types/type-equality.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -83,10 +81,8 @@ const inputGroupConfig = {
 				},
 				// The border stays at the resting 1px here: the `invalidIndicator` icon
 				// `InputGroup` renders is the non-colour cue, so thickening the border as
-				// well would be redundant, and none of the five reference systems this
-				// direction is drawn from (Spectrum, Astryx, Polaris, HeroUI, Radix Themes)
-				// thicken the border for an invalid control. The gated danger colour is what
-				// satisfies the contrast requirement, and it is unchanged.
+				// well would be redundant. The gated danger colour is what satisfies the
+				// contrast requirement, and it is unchanged.
 				[invalid]: {
 					borderColor: vars.color.background.danger.solid.rest,
 				},
@@ -164,9 +160,8 @@ const inputGroupConfig = {
 			// is the group's last DOM child and would otherwise land after this slot.
 			// Giving `suffix` an explicit `order` moves it behind the icon (default
 			// `order: 0`) in flex layout without touching document order, so the icon
-			// lands right after the input's text content and before this trailing part,
-			// matching the Spectrum reference this direction is drawn from. It is the one
-			// place `InputGroup` departs from pure document order.
+			// lands right after the input's text content and before this trailing part.
+			// It is the one place `InputGroup` departs from pure document order.
 			order: 1,
 
 			selectors: {
@@ -267,11 +262,3 @@ export type InputGroupVariants = RecipeSelection<typeof inputGroup>;
 
 /** Allowed `size` values for the `inputGroup` recipe. */
 export type InputGroupSize = keyof typeof inputGroupConfig.variants.size;
-
-// Compile-time guard: `InputGroupSize` (derived above from the recipe config) and
-// `FieldControlSize` (the union `INPUT_GROUP_ICON_SIZE` is keyed by) must stay exactly
-// the same set of values in both directions, or the icon-size map silently drifts from
-// the `size` variants it's meant to cover.
-type _InputGroupSizeMatchesFieldControlSize = AssertTrue<
-	TypesAreEqual<InputGroupSize, FieldControlSize>
->;

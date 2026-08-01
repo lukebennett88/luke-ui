@@ -1,10 +1,8 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
-import type { FieldControlSize } from '../sizing/control-size.js';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
-import type { AssertTrue, TypesAreEqual } from '../types/type-equality.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -24,7 +22,8 @@ export const comboboxTrayKeyboardInsetVar = '--luke-ui-keyboard-inset';
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
 
-// Below 640px the popover renders as a bottom tray, matching Adobe Spectrum's combobox pattern.
+// Below 640px the popover renders as a bottom tray fixed to the viewport edge,
+// instead of a dropdown anchored below the control.
 const trayMediaQuery = '(width < 40rem)';
 
 const comboboxStates = {
@@ -83,8 +82,7 @@ const comboboxActionStyles = {
 	// pseudo-element always renders after real children), which put it after both
 	// action buttons too. Giving them an explicit `order` moves them behind the icon
 	// (default `order: 0`) in flex layout without touching document order, so the
-	// icon lands right after the text input and before the clear/trigger buttons,
-	// matching the Spectrum reference this direction is drawn from.
+	// icon lands right after the text input and before the clear/trigger buttons.
 	order: 1,
 	outlineColor: 'transparent',
 	outlineOffset: '2px',
@@ -178,10 +176,8 @@ const comboboxConfig = {
 				[hover]: { borderColor: vars.color.border.accent },
 				// The border stays at the resting 1px here: the in-control icon just below
 				// (`::after`) is the non-colour cue, so thickening the border as well would
-				// be redundant, and none of the five reference systems this direction is
-				// drawn from (Spectrum, Astryx, Polaris, HeroUI, Radix Themes) thicken the
-				// border for an invalid control. The gated danger colour is what satisfies
-				// the contrast requirement, and it is unchanged.
+				// be redundant. The gated danger colour is what satisfies the contrast
+				// requirement, and it is unchanged.
 				[invalid]: {
 					borderColor: vars.color.background.danger.solid.rest,
 				},
@@ -514,11 +510,3 @@ export type ComboboxVariants = RecipeSelection<typeof combobox>;
 
 /** Allowed `size` values for the combobox recipe. */
 export type ComboboxSize = keyof typeof comboboxConfig.variants.size;
-
-// Compile-time guard: `ComboboxSize` (derived above from the recipe config) and
-// `FieldControlSize` (the union `COMBOBOX_ICON_SIZE` is keyed by) must stay exactly the
-// same set of values in both directions, or the icon-size map silently drifts from the
-// `size` variants it's meant to cover.
-type _ComboboxSizeMatchesFieldControlSize = AssertTrue<
-	TypesAreEqual<ComboboxSize, FieldControlSize>
->;

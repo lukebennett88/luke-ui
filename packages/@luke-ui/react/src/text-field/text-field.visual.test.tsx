@@ -20,7 +20,7 @@ import {
 	InputGroupSuffix,
 } from './primitive/index.js';
 
-// The `invalidIndicator` slot's `marginInlineEnd` now has a `size` variant (it matches
+// The `invalidIndicator` slot's `marginInlineEnd` has a `size` variant (it matches
 // the control's own horizontal padding at each size, see `input-group.css.ts`), so the
 // full class string differs between `small` and `medium`. Only its first token — the
 // slot's base class — is stable across sizes, so that is what a lookup keys on.
@@ -79,11 +79,11 @@ test('prefix and suffix', async () => {
 	await captureVisual(locator, 'text-field/prefix-and-suffix');
 });
 
-// #247/#312: the invalid icon must land before a trailing `suffix`, not after it — the
-// exact ordering that broke and the plain `prefix and suffix` scene above has no invalid
-// case to catch. Geometry, not just a screenshot, pins the invariant: the icon is
-// appended after the suffix in DOM order and only the suffix's flex `order` puts it
-// back in front, so its rendered position is the thing worth asserting.
+// The invalid icon must land before a trailing `suffix`, not after it; the plain
+// `prefix and suffix` scene above has no invalid case to catch that. Geometry, not
+// just a screenshot, pins the invariant: the icon is appended after the suffix in
+// DOM order and only the suffix's flex `order` puts it back in front, so its
+// rendered position is the thing worth asserting.
 test('invalid field with a suffix shows the icon before it', async () => {
 	const scene = renderVisual(
 		<Stack>
@@ -115,9 +115,9 @@ test('invalid field with a suffix shows the icon before it', async () => {
 
 // The compositions the primitive exists to serve: a prefix, a plain-text suffix, and an
 // interactive suffix. The interactive one is not reachable through the composed
-// `TextField`'s prop API at all, and none of the three was covered before this scene.
-// The prefix icon carries no `size`: it takes the control's own step from the
-// `IconSizeProvider` `InputGroup` supplies, which is the behaviour worth capturing.
+// `TextField`'s prop API at all. The prefix icon carries no `size`: it takes the
+// control's own step from the `IconSizeProvider` `InputGroup` supplies, which is the
+// behaviour worth capturing.
 test('input group composition', async () => {
 	const scene = renderVisual(
 		<Stack>
@@ -226,8 +226,8 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-// #247: without `errorMessage` the icon is the only cue that the field is invalid, so
-// this scene has no error text at all.
+// Without `errorMessage` the icon is the only cue that the field is invalid, so this
+// scene has no error text at all.
 for (const appearance of visualAppearances) {
 	test(`invalid without an error message: ${appearance.theme} ${appearance.mode}`, async () => {
 		const scene = renderVisual(

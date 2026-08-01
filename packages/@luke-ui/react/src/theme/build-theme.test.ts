@@ -519,11 +519,11 @@ describe('buildTheme generation failures', () => {
 		throw new Error('expected buildTheme to throw ThemeGenerationError');
 	}
 
-	// Every semantic role now publishes a solid, so every role must reach an accessible solid/on-solid
-	// pair — a status source in an on-solid dead zone is a build failure rather than the silently
-	// unguaranteed solid the old feedback-only kit left unemitted. Status sources are used verbatim (only
-	// a single-value accent is pre-conditioned into an accessible band), so an authored one reaches the
-	// generator exactly as written.
+	// Every semantic role publishes a solid, so every role must reach an accessible
+	// solid/on-solid pair — a status source in an on-solid dead zone is a build failure,
+	// not a silently unguaranteed solid. Status sources are used verbatim (only a
+	// single-value accent is pre-conditioned into an accessible band), so an authored
+	// one reaches the generator exactly as written.
 	it('throws ThemeGenerationError naming the role, mode, and achieved ratio for a dead-zone warning', () => {
 		const error = buildGenerationError({
 			...tactileFoundation,
@@ -739,8 +739,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 
 		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
 			// The subtle component surfaces (scale steps 3-5) ramp from the canvas independently of the
-			// elevation surfaces, so v2 no longer pins them apart from `floating`; what still matters is
-			// that primary text stays legible on the hovered subtle surface. The neutral subtle hover is
+			// elevation surfaces and aren't pinned apart from `floating`; what matters is that primary
+			// text stays legible on the hovered subtle surface. The neutral subtle hover is
 			// excluded here because that exact colour pair is already hard-gated under different names:
 			// `color.text.primary` and `color.foreground.neutral.hover` both alias neutral step 12, and
 			// `validateContrast` gates the latter against all three neutral subtle states at >=4.5:1.
@@ -771,8 +771,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
 					// The semantic borders alias the scale's step 7 (subtle UI border). They stay visibly
-					// distinct from the base surfaces but sit below the 3:1 non-text gate the old bespoke
-					// solver targeted — a deliberate move to the reference scale's softer separators.
+					// distinct from the base surfaces but sit below the 3:1 non-text gate by design: these
+					// are soft separators, not solved-contrast boundaries like `border.control`.
 					expect(minimumContrast).toBeGreaterThan(1.2);
 					expect(minimumContrast).toBeLessThan(3);
 				}
@@ -809,9 +809,9 @@ describe('bundled theme identity', () => {
 	});
 });
 
-// v2 regression goldens: the exact `buildTheme` output for the bundled themes under the wired-in
-// scale/elevation/semantic-map pipeline (#238). Asserted byte-identical so any later generator
-// change is a reviewed, deliberate diff.
+// Regression goldens: the exact `buildTheme` output for the bundled themes under the wired-in
+// scale/elevation/semantic-map pipeline. Asserted byte-identical so any later generator change
+// is a reviewed, deliberate diff.
 describe('v2 regression goldens', () => {
 	const v2Goldens = {
 		paper: new URL('./__fixtures__/v2-goldens/paper.v2.css', import.meta.url),

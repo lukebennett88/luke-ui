@@ -6,11 +6,9 @@ import {
 } from '../test-utils/render-visual.js';
 import { TokenBoard } from './token-board.js';
 
-// Captures every contract leaf for both bundled themes and modes. Theme v2 repainted 34/47 colour
-// leaves but moved only 5 of ~122 existing captures (#249); generalising the board past colour in
-// #257 closes the remaining gap, where the other 81 leaves previously had no visual capture at all —
-// this board makes any future generator or semantic-mapping change produce an obvious, intentional
-// diff regardless of whether a component happens to consume the changed leaf.
+// Captures every contract leaf, colour and non-colour alike, for both bundled themes and
+// modes, so any generator or semantic-mapping change produces an obvious, intentional diff
+// regardless of whether a component happens to consume the changed leaf.
 for (const appearance of visualAppearances) {
 	test(`token board: ${appearance.theme} ${appearance.mode}`, async () => {
 		const scene = renderVisual(<TokenBoard />, appearance);

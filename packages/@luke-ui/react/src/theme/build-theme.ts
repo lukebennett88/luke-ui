@@ -159,7 +159,7 @@ type ColorMode = 'light' | 'dark';
 
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
-// Parse-validated per-mode source colours. `background` is the resolved canvas anchor (#242); `focus`
+// Parse-validated per-mode source colours. `background` is the resolved canvas anchor; `focus`
 // is the authored keyboard-focus ring; both are colours the foundation must carry.
 const SOURCE_COLOR_FIELDS = [
 	'neutral',
@@ -383,14 +383,14 @@ interface ValidationResult {
  * subtle ramp; and every role's on-solid foreground against its solid ramp. Hard at the non-text
  * ratio: the authored focus ring and `border.control`, which is `solveControlBorder`'s dedicated
  * boundary rather than a scale-step alias; and `danger.solid.rest` against the base surfaces, because
- * it is the only role fill that carries a required state's boundary (the invalid field boundary —
- * issue #247). This last gate is deliberately not extended to the other five roles: a role's solid
- * anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for
- * `warning` that lands at only 2.43:1 against canvas in light mode.
+ * it is the only role fill that carries a required state's boundary (the invalid field boundary).
+ * This last gate is deliberately not extended to the other five roles: a role's solid anchor is
+ * solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for `warning` that
+ * lands at only 2.43:1 against canvas in light mode.
  *
- * The six semantic borders alias the Radix-style step 7, a subtle separator that deliberately sits
- * below the non-text ratio for the reference scale's softer look, so they are advisory only — which is
- * why a component must never let one be the sole cue for a required state. `color.border.decorative`,
+ * The six semantic borders alias step 7 of the 12-step scale, a subtle separator that deliberately
+ * sits below the non-text ratio for a softer look, so they are advisory only — which is why a
+ * component must never let one be the sole cue for a required state. `color.border.decorative`,
  * `color.text.disabled`, and `color.loadingSkeleton` keep their own separate policies and are not
  * measured here.
  */
@@ -447,8 +447,8 @@ function validateContrast(mode: ColorMode, colorValues: SemanticColorValues): Va
 	for (const background of basePaths) check('color.border.focus', background, UI_RATIO, true);
 	for (const background of basePaths) check('color.border.control', background, UI_RATIO, true);
 	// `danger.solid.rest` vs the base surfaces: 2 checks. It is the only role fill that carries a
-	// required state's boundary (the invalid field boundary — issue #247), so it is held to the same
-	// hard non-text ratio as the focus ring and `border.control`. This is deliberately NOT a per-role
+	// required state's boundary (the invalid field boundary), so it is held to the same hard
+	// non-text ratio as the focus ring and `border.control`. This is deliberately NOT a per-role
 	// loop: a role's solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface
 	// behind it, and for `warning` that lands at only 2.43:1 against canvas in light mode. Extending
 	// this gate to the other five roles throws `ThemeContrastError` on the bundled themes.

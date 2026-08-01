@@ -71,10 +71,10 @@ test('sets the tray viewport height and keyboard inset custom properties from vi
 });
 
 // Proves the invalid cue survives without `errorMessage`, which `composeField` treats
-// as optional — the case #247 flags as otherwise colour-only and imperceptible. The
-// border stays at the resting 1px (see `combobox.css.ts`): the in-control icon is the
-// non-colour cue here, so the proof is the icon's presence plus the gated border colour,
-// not a border-width change.
+// as optional and which would otherwise leave the field colour-only and imperceptible.
+// The border stays at the resting 1px (see `combobox.css.ts`): the in-control icon is
+// the non-colour cue here, so the proof is the icon's presence plus the gated border
+// colour, not a border-width change.
 test('invalid without an error message still carries a non-colour cue', async () => {
 	renderVisual(
 		<>

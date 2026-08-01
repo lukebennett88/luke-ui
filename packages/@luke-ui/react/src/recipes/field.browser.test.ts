@@ -48,8 +48,8 @@ test('error tone renders the message in the resting danger foreground', () => {
 	);
 });
 
-// #312: `fieldMessageIcon` stays off (`none`) unless a consumer recipe switches it
-// on for its own `root` (only `checkbox.css.ts` does; see `checkbox.browser.test.tsx`
+// `fieldMessageIcon` stays off (`none`) unless a consumer recipe switches it on
+// for its own `root` (only `checkbox.css.ts` does; see `checkbox.browser.test.tsx`
 // for the on case). TextField/ComboboxField never touch the var, so their error
 // message never grows the icon their control already carries.
 test('error message icon stays off unless a consumer recipe switches it on', () => {
@@ -58,8 +58,8 @@ test('error message icon stays off unless a consumer recipe switches it on', () 
 	expect(getComputedStyle(message, '::before').display).toBe('none');
 });
 
-// #312: the message container must stay a normal block, never `flex`.  `errorMessage`
-// is typed `ReactNode` (and RAC's `FieldError` also accepts a render-prop child), so
+// The message container must stay a normal block, never `flex`. `errorMessage` is
+// typed `ReactNode` (and RAC's `FieldError` also accepts a render-prop child), so
 // it can hold rich content such as `<>text <strong>emphasis</strong> text</>` — a
 // `flex` container would turn each top-level child into its own independently-
 // wrapping flex item instead of one paragraph. The hanging indent that lines wrapped

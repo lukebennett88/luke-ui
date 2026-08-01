@@ -426,10 +426,10 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-// #247/#312: with a selected value, the control also shows a clear button before the
-// trigger. Confirms the icon lands between the text and both actions (Spectrum's
-// ordering), not after them, which is the ordering that broke and needs a geometry
-// assertion, not just a screenshot.
+// With a selected value, the control also shows a clear button before the trigger.
+// Confirms the icon lands between the text and both action buttons, not after
+// them — a geometry assertion, since a screenshot alone wouldn't catch the icon
+// landing on the wrong side of the buttons.
 for (const appearance of visualAppearances) {
 	test(`invalid with a selected value shows the icon before the clear and trigger buttons: ${appearance.theme} ${appearance.mode}`, async () => {
 		const scene = renderVisual(
@@ -464,8 +464,8 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-// #247: without `errorMessage` the icon is the only cue that the field is invalid, so
-// this scene has no error text at all.
+// Without `errorMessage` the icon is the only cue that the field is invalid, so this
+// scene has no error text at all.
 for (const appearance of visualAppearances) {
 	test(`invalid without an error message: ${appearance.theme} ${appearance.mode}`, async () => {
 		const scene = renderVisual(

@@ -7,9 +7,6 @@ afterEach(() => {
 	cleanupVisual();
 });
 
-// #247/#312: an invalid checkbox is colour-only when there's no `errorMessage` — the
-// border stays 1px, since a width change isn't perceivable to vision-impaired or
-// colour-blind users.
 test('invalid without an error message keeps the 1px border', async () => {
 	renderVisual(
 		<Checkbox defaultSelected isInvalid name="invalid">
@@ -28,8 +25,8 @@ test('invalid without an error message keeps the 1px border', async () => {
 	expect(getComputedStyle(indicator).borderWidth).toBe('1px');
 });
 
-// #247/#312: with an `errorMessage`, the non-colour cue is the icon leading the
-// message — the box itself stays colour-only.
+// With an `errorMessage`, the icon leading the message is the non-colour cue; the
+// box itself stays colour-only.
 test('invalid with an error message shows the message-leading icon', async () => {
 	renderVisual(
 		<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid-message">
@@ -54,13 +51,10 @@ test('invalid with an error message shows the message-leading icon', async () =>
 	expect(icon.maskImage).not.toBe('none');
 });
 
-// #247/#312 regression: an earlier pass added the message-leading icon's own width
-// to `paddingInlineStart`/`textIndent` on top of `fieldMessageIndent`, which pushed
-// the message text 24px right of the label above it — the whole point of
-// `fieldMessageIndent` is to align the two, and this went unguarded. Pins the
-// invariant with real rendered text-node geometry, not computed-style padding
-// math, so a future change to either side of the hang-indent calc trips this the
-// moment the two texts stop lining up.
+// `fieldMessageIndent` exists to align the message's hang indent with the label
+// text above it, icon width included. Pinned with real rendered text-node
+// geometry rather than computed-style padding math, so a change to either side
+// of the hang-indent calc trips this the moment the two texts stop lining up.
 test('the error message text aligns with the label text, not the icon', async () => {
 	renderVisual(
 		<Checkbox errorMessage="Choose an option." isInvalid name="invalid-alignment">
@@ -103,17 +97,14 @@ test('valid indicator has the same 1px border as invalid', async () => {
 	expect(getComputedStyle(indicator).borderWidth).toBe('1px');
 });
 
-// #247/#312's invalid icon now lives on the error message, not on `content` (the
-// native `<label>` wrapping the hidden input, which otherwise takes its name from
-// its contents), so there is nothing on the label itself for accessible-name
-// computation to pick up regardless. This CDP-based assertion predates that move —
-// it originally guarded a text-glyph badge that _did_ sit on `content` — and is kept
-// as the right belt-and-braces regression guard against a future icon landing back
-// inside the label, since the test libraries in this stack (Vitest browser mode's
-// own port of Playwright's locator engine, and the `dom-accessibility-api` package
-// behind jest-dom's `toHaveAccessibleName`) are JS reimplementations of the accname
-// algorithm that can diverge from a real browser's computation in edge cases like
-// that one.
+// The invalid icon lives on the error message, not on `content` (the native
+// `<label>` wrapping the hidden input, which otherwise takes its name from its
+// contents), so there is nothing on the label itself for accessible-name
+// computation to pick up. Checked via CDP against the browser's own accname
+// computation, not Vitest browser mode's locator engine or the
+// `dom-accessibility-api` package behind `toHaveAccessibleName` — both are JS
+// reimplementations of the accname algorithm that can diverge from a real
+// browser in edge cases.
 test('the icon indicator stays out of the accessible name', async () => {
 	renderVisual(
 		<Checkbox defaultSelected isInvalid name="invalid">
