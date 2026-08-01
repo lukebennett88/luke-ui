@@ -68,49 +68,49 @@ test('states: default, disabled, read-only, invalid', async () => {
 	await captureVisual(locator, 'text-field/states');
 });
 
-test('adornments', async () => {
+test('prefix and suffix', async () => {
 	const locator = renderVisual(
 		<Stack>
-			<TextField adornmentStart="$" label="Amount" name="amount" placeholder="0.00" />
-			<TextField adornmentEnd="USD" label="Total" name="total" placeholder="0.00" />
+			<TextField label="Amount" name="amount" placeholder="0.00" prefix="$" />
+			<TextField label="Total" name="total" placeholder="0.00" suffix="USD" />
 		</Stack>,
 	);
 
-	await captureVisual(locator, 'text-field/adornments');
+	await captureVisual(locator, 'text-field/prefix-and-suffix');
 });
 
-// #247/#312: the invalid icon must land before a trailing `adornmentEnd`, not after
-// it — the exact ordering that broke and the plain `adornments` scene above has no
-// invalid case to catch. Geometry, not just a screenshot, pins the invariant: the
-// icon is appended after the suffix in DOM order and only the suffix's flex `order`
-// puts it back in front, so its rendered position is the thing worth asserting.
-test('invalid field with an adornment shows the icon before it', async () => {
+// #247/#312: the invalid icon must land before a trailing `suffix`, not after it — the
+// exact ordering that broke and the plain `prefix and suffix` scene above has no invalid
+// case to catch. Geometry, not just a screenshot, pins the invariant: the icon is
+// appended after the suffix in DOM order and only the suffix's flex `order` puts it
+// back in front, so its rendered position is the thing worth asserting.
+test('invalid field with a suffix shows the icon before it', async () => {
 	const scene = renderVisual(
 		<Stack>
 			<TextField
-				adornmentEnd="USD"
 				defaultValue="0.00"
 				errorMessage="Enter a valid amount."
 				isInvalid
-				label="Invalid with an adornment"
-				name="invalid-adornment"
+				label="Invalid with a suffix"
+				name="invalid-suffix"
 				placeholder="0.00"
+				suffix="USD"
 			/>
 		</Stack>,
 	);
-	const input = page.getByRole('textbox', { name: 'Invalid with an adornment' });
+	const input = page.getByRole('textbox', { name: 'Invalid with a suffix' });
 	await expect.element(input).toBeVisible();
 
 	const group = input.element().parentElement;
 	const icon = group?.querySelector(`.${invalidIndicatorClass}`);
 	if (icon == null) throw new Error('Expected the invalid indicator icon.');
 
-	const adornmentEnd = page.getByText('USD');
+	const suffixText = page.getByText('USD');
 	expect(icon.getBoundingClientRect().left).toBeLessThan(
-		adornmentEnd.element().getBoundingClientRect().left,
+		suffixText.element().getBoundingClientRect().left,
 	);
 
-	await captureVisual(scene, 'text-field/invalid-with-adornment');
+	await captureVisual(scene, 'text-field/invalid-with-suffix');
 });
 
 // The compositions the primitive exists to serve: a prefix, a plain-text suffix, and an

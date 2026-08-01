@@ -254,8 +254,8 @@ const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSel
 its styles (for example, `hover` deliberately excludes an element that is also focused or
 read-only). A recipe with a more complex anatomy can widen a state before composing it, the way
 `combobox.css.ts` extends `disabled` and `invalid` to also match its trigger button.
-`descendantDisabledSelector` styles a part (an adornment or trigger) when an ancestor control is
-disabled.
+`descendantDisabledSelector` styles a part (a prefix, suffix, or trigger) when an ancestor control
+is disabled.
 
 ## Styling utilities
 

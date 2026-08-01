@@ -108,9 +108,9 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
  *
  * The two tiers deliberately speak different languages, and that is a decision rather
  * than an oversight. This primitive follows HeroUI's `InputGroup` child-composition
- * pattern, while the composed `TextField` above it keeps its Spectrum-style
- * `adornmentStart` / `adornmentEnd` props and maps them onto `InputGroupPrefix` /
- * `InputGroupSuffix` internally. Library authors compose; app developers pass props.
+ * pattern, while the composed `TextField` above it keeps its own `prefix` / `suffix`
+ * props and maps them onto `InputGroupPrefix` / `InputGroupSuffix` internally. Library
+ * authors compose; app developers pass props.
  *
  * Invalid state arrives from the enclosing field (React Aria's `GroupContext`) or from
  * an explicit `isInvalid`, and surfaces as `[data-invalid]` on the group. The group

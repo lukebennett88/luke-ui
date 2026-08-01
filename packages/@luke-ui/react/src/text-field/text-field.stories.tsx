@@ -66,19 +66,14 @@ export const Size = meta.story({
 });
 
 /**
- * Start/end adornments become the primitive's `InputGroupPrefix` and
+ * `prefix` and `suffix` become the primitive's `InputGroupPrefix` and
  * `InputGroupSuffix` children.
  */
-export const Adornments = meta.story({
+export const PrefixAndSuffix = meta.story({
 	render: () => (
 		<div style={stackStyle}>
-			<TextField
-				adornmentStart={<Icon name="add" />}
-				label="Search"
-				name="search"
-				placeholder="Search"
-			/>
-			<TextField adornmentEnd="USD" label="Amount" name="amount" placeholder="0.00" />
+			<TextField label="Search" name="search" placeholder="Search" prefix={<Icon name="add" />} />
+			<TextField label="Amount" name="amount" placeholder="0.00" suffix="USD" />
 		</div>
 	),
 });
@@ -87,7 +82,7 @@ export const Adornments = meta.story({
  * The `InputGroup` primitive composes the same control from children instead of
  * props. The group owns the border, background, and rounding; the parts are
  * transparent flex children whose position follows document order. Use it when a
- * composition needs something `adornmentStart` / `adornmentEnd` cannot express, such
+ * composition needs something `prefix` / `suffix` cannot express, such
  * as an interactive trailing button.
  *
  * The group also provides the icon size, so the search `Icon` below scales with the

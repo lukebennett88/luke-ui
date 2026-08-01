@@ -21,16 +21,16 @@ import {
 type _TextFieldOmit = DistributiveOmit<RacTextFieldProps, 'children' | keyof DocumentedInputProps>;
 
 interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
-	/** Element shown after the input value. */
-	adornmentEnd?: ReactNode;
-	/** Element shown before the input value. */
-	adornmentStart?: ReactNode;
 	/** Class name forwarded to the inner input element. */
 	inputClassName?: RacInputProps['className'];
 	/** Placeholder text for the input. */
 	placeholder?: string;
+	/** Element shown before the input value. */
+	prefix?: ReactNode;
 	/** Control size. Defaults to `'medium'`. */
 	size?: InputGroupSize;
+	/** Element shown after the input value. */
+	suffix?: ReactNode;
 }
 
 /**
@@ -43,18 +43,17 @@ export type TextFieldProps = Prettify<_TextFieldProps>;
 /**
  * Composes the input group primitive with label, description, and error slots.
  *
- * `adornmentStart` / `adornmentEnd` are the Spectrum-style prop names this tier
- * speaks; they map onto the primitive's `InputGroupPrefix` / `InputGroupSuffix`
- * children below.
+ * `prefix` / `suffix` map onto the primitive's `InputGroupPrefix` /
+ * `InputGroupSuffix` children below.
  */
 export function TextField(props: TextFieldProps): JSX.Element {
 	const [fieldSlotProps, restProps] = composeField(props);
 	const {
-		adornmentEnd,
-		adornmentStart,
 		inputClassName,
 		placeholder,
+		prefix,
 		size = 'medium',
+		suffix,
 		...textFieldProps
 	} = restProps;
 
@@ -62,9 +61,9 @@ export function TextField(props: TextFieldProps): JSX.Element {
 		<RacTextField {...textFieldProps}>
 			<Field {...fieldSlotProps}>
 				<InputGroup size={size}>
-					{adornmentStart != null ? <InputGroupPrefix>{adornmentStart}</InputGroupPrefix> : null}
+					{prefix != null ? <InputGroupPrefix>{prefix}</InputGroupPrefix> : null}
 					<InputGroupInput className={inputClassName} placeholder={placeholder} />
-					{adornmentEnd != null ? <InputGroupSuffix>{adornmentEnd}</InputGroupSuffix> : null}
+					{suffix != null ? <InputGroupSuffix>{suffix}</InputGroupSuffix> : null}
 				</InputGroup>
 			</Field>
 		</RacTextField>
