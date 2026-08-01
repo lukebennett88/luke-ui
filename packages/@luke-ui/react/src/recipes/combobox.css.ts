@@ -1,8 +1,10 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
+import type { FieldControlSize } from '../sizing/control-size.js';
 import { focusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
+import type { AssertTrue, TypesAreEqual } from '../types/type-equality.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -512,3 +514,11 @@ export type ComboboxVariants = RecipeSelection<typeof combobox>;
 
 /** Allowed `size` values for the combobox recipe. */
 export type ComboboxSize = keyof typeof comboboxConfig.variants.size;
+
+// Compile-time guard: `ComboboxSize` (derived above from the recipe config) and
+// `FieldControlSize` (the union `COMBOBOX_ICON_SIZE` is keyed by) must stay exactly the
+// same set of values in both directions, or the icon-size map silently drifts from the
+// `size` variants it's meant to cover.
+type _ComboboxSizeMatchesFieldControlSize = AssertTrue<
+	TypesAreEqual<ComboboxSize, FieldControlSize>
+>;
