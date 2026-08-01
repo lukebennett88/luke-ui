@@ -1,0 +1,80 @@
+---
+title: Iconography
+description: Browse the first-party icon set and size it with theme tokens.
+---
+
+Luke UI ships one first-party icon set, generated into a spritesheet at build time. Every icon
+shares a single weight, and `Icon` sizes it with a theme token rather than a literal pixel value.
+
+## Browse
+
+Filter by name or scan the grid. Each icon shows at the size you'll ship it at, and either button
+copies the JSX or the bare name.
+
+<IconGallery />
+
+## Set up the spritesheet
+
+Wrap your app with `IconSpritesheetProvider`. Pass the URL of the generated spritesheet asset.
+
+- Source asset: `@luke-ui/react/spritesheet.svg`, exported from `./dist/spritesheet.svg`
+- Runtime lookup: `<configured-sprite-href>#<icon-name>`
+
+```tsx
+<IconSpritesheetProvider href="/assets/spritesheet.svg">
+	<App />
+</IconSpritesheetProvider>
+```
+
+Vite and Storybook should import the spritesheet as a URL.
+
+```ts
+import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
+
+<IconSpritesheetProvider href={spriteSheetHref}>
+	<App />
+</IconSpritesheetProvider>;
+```
+
+The `no-inline` query avoids `data:` URLs, which can break `<use href="...#icon-id">` rendering.
+
+When developing `@luke-ui/react`, generate the spritesheet from
+`packages/@luke-ui/react/icons/*.svg`.
+
+```bash
+pnpm --dir packages/@luke-ui/react run generate:icons
+```
+
+## Size
+
+Use `size` to choose `xsmall`, `small`, `medium`, or `large`. Each step is a theme token, not a
+literal pixel value, so a custom theme can change what an icon size resolves to.
+
+```tsx
+<Icon name="search" size="small" />
+```
+
+The bundled themes resolve the four steps to 16px, 20px, 24px, and 32px. `medium` is the default.
+
+Nest icons inside an `IconSizeProvider` when a group of icons should share a size without repeating
+`size` on each one. An icon still honours its own `size` prop over the inherited context value.
+
+```tsx
+import { IconSizeProvider } from '@luke-ui/react/icon-size-context';
+
+<IconSizeProvider size="small">
+	<Icon name="chevronLeft" />
+	<Icon name="chevronRight" />
+</IconSizeProvider>;
+```
+
+## Continue learning
+
+<Cards>
+	<Card href="/components/visuals/icon" title="Icon">
+		Render a symbol from the spritesheet, or create a one-off custom icon.
+	</Card>
+	<Card href="/components/actions/icon-button" title="Icon Button">
+		Pair an icon with an accessible name for a compact action control.
+	</Card>
+</Cards>
