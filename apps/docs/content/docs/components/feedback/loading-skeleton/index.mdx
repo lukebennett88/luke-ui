@@ -26,9 +26,9 @@ and other content with a fixed shape.
 	description="A circular placeholder keeps the avatar's space while it loads."
 />
 
-Set `radius` when the direct child has square corners but a visible descendant is rounded. This is
-useful when a `TextField` is the child because its input control is rounded inside the field
-wrapper.
+Set `radius` when the direct child has square corners but a visible descendant has rounded corners.
+This is useful when a `TextField` is the child because its input control has rounded corners inside
+the field wrapper.
 
 <ExampleBlock
 	src="loading-skeleton/border-radius"
@@ -69,5 +69,5 @@ element, such as an `li` inside a list.
 
 ## Accessibility
 
-While loading, the content is hidden from assistive technology, removed from the tab order, and
-cannot receive pointer input. It becomes available again when `isLoading` is `false`.
+While loading, `LoadingSkeleton` hides content from assistive technology, removes it from the tab
+order, and blocks pointer input. It becomes available again when `isLoading` is `false`.

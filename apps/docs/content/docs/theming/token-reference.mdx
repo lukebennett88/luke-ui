@@ -1,6 +1,6 @@
 ---
 title: Token reference
-description: Public semantic CSS variables for building custom Luke UI elements.
+description: Public semantic CSS variables to build custom Luke UI elements.
 ---
 
 `vars` is Luke UI's typed public token contract. Each path resolves to a stable `--luke-*` CSS
@@ -20,13 +20,13 @@ other implementation details are not part of the public styling API.
 />
 
 Choose tokens by purpose. A card might use `surface.floating`, `radius.surface`, and
-`depth.resting`. A warning message might use the warning role's subtle background and foreground.
-Avoid carrying resolved colour values into application CSS.
+`depth.resting`. A warning message might use the warning role's subtle background and foreground. Do
+not carry resolved colour values into application CSS.
 
 ## Tokens
 
-This table is generated from the public TypeScript declaration and JSDoc, so it stays aligned with
-the code that produces each theme.
+Luke UI generates this table from the public TypeScript declaration and JSDoc, so it stays aligned
+with the code that produces each theme.
 
 <auto-type-table
 	path="apps/docs/src/generated/token-reference.generated.ts"

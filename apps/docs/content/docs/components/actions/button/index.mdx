@@ -70,8 +70,8 @@ needs no `size` prop. Pass one only to override it. Use
 
 ## Pending
 
-Set `isPending` while an action is running. The button remains focusable, ignores further presses,
-and overlays its label with a spinner. Update the visible label when the status matters, for example
+Set `isPending` while an action runs. The button remains focusable, ignores further presses, and
+overlays its label with a spinner. Update the visible label when the status matters, for example
 from “Save” to “Saving”.
 
 <ExampleBlock
@@ -82,8 +82,8 @@ from “Save” to “Saving”.
 
 ## Disabled
 
-Set `isDisabled` only when the action is unavailable. Disabled buttons cannot receive focus or be
-pressed.
+Set `isDisabled` only when the action is unavailable. Disabled buttons cannot receive focus or
+respond to presses.
 
 <ExampleBlock
 	src="button/disabled"
@@ -97,12 +97,12 @@ The visible label provides the accessible name, so most buttons do not need `ari
 label that describes the action, such as “Save changes” or “Delete account”, rather than a vague
 label such as “OK”.
 
-The spinner is hidden from assistive technology. Change the label when pending status needs to be
-announced.
+The spinner is hidden from assistive technology. Change the label when assistive technology needs to
+announce the pending status.
 
 ## Primitive
 
 `Button` is the composed component for application UI. It wraps its label for truncation, provides
 icon slots, and supplies the pending spinner. Use the
-[button primitive](/components/primitives/button) when building a custom control and you need to own
+[button primitive](/components/primitives/button) when you build a custom control and need to own
 the child layout or loading treatment.

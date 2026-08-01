@@ -3,8 +3,8 @@ title: InputGroup primitives
 description: Lower-level parts for composing a text input with content at either end.
 ---
 
-Use these primitives to build a custom text control when you need the styled input without label,
-description, or error slots. For most application forms, use
+Use these primitives to build a custom text control. Reach for them when you need the styled input
+without label, description, or error slots. For most application forms, use
 [`TextField`](/components/forms/text-field).
 
 <ExampleBlock
@@ -16,7 +16,7 @@ description, or error slots. For most application forms, use
 ## Anatomy
 
 `InputGroup` owns the border, background, shadow, and rounding. Its parts are transparent flex
-children, so position follows document order: put `InputGroupPrefix` before `InputGroupInput` and
+children, so position follows document order. Put `InputGroupPrefix` before `InputGroupInput` and
 `InputGroupSuffix` after it.
 
 ```tsx
@@ -33,8 +33,8 @@ interactive part an accessible name, keyboard behaviour, and a considered focus 
 ## Size
 
 Set `size` on `InputGroup` and the parts inherit it. `medium` is the default. Use `small` when the
-input belongs in a compact control group, and match the size of nearby fields and actions. An
-individual part can override the inherited size.
+input belongs in a compact control group. Match the size of nearby fields and actions. An individual
+part can override the inherited size.
 
 The group also sets the icon size for everything inside it, so an `Icon` in a prefix or suffix
 scales with the control without a `size` of its own.
@@ -45,12 +45,12 @@ scales with the control without a `size` of its own.
 `isInvalid`. While invalid it renders an error icon after the input value and before any
 `InputGroupSuffix`.
 
-The icon is decorative and hidden from assistive technology, so it marks a problem without
-describing one. Always give an invalid composition an error message. See
+The icon is decorative and hidden from assistive technology, so it marks a problem but does not
+describe it. Always give an invalid composition an error message. See
 [Validation](/components/forms/validation).
 
 ## Styling and composition
 
 `className` on `InputGroup` applies to the group element, and `className` on `InputGroupInput`
-applies to the input. Use these hooks when composing the primitive with other controls. Give a
+applies to the input. Use these hooks when you compose the primitive with other controls. Give a
 standalone `InputGroupInput` an accessible name with `aria-label` or a connected label.

@@ -38,7 +38,7 @@ compact UI labels, while larger steps are useful for display text that is not a 
 />
 
 The active theme supplies the font family and values behind each `fontWeight` role. Use `body` for
-copy, `label` for controls, `heading` for prominent non-heading text, and `emphasis` when text needs
+text, `label` for controls, `heading` for prominent non-heading text, and `emphasis` when text needs
 more weight.
 
 ## Alignment
@@ -77,8 +77,8 @@ the element-type inference.
 
 ## Truncation
 
-Use `lineClamp` to constrain text to one line or up to five lines. Overflow is truncated with an
-ellipsis. Trimming is disabled automatically when `lineClamp` is set.
+Use `lineClamp` to constrain text to one line or up to five lines. `Text` truncates overflow with an
+ellipsis. It disables trimming automatically when you set `lineClamp`.
 
 <ExampleBlock
 	src="text/truncation"
@@ -100,8 +100,8 @@ rendered text only, so avoid using uppercase styling as a substitute for a clear
 ## Related components
 
 Use [Heading](/components/typography/heading) for a section heading. It manages heading levels for
-you. Use `Text` with a larger `size` and the `heading` or `emphasis` `fontWeight` when content should
-look prominent without becoming a heading, such as a large status value.
+you. Use `Text` with a larger `size` and the `heading` or `emphasis` `fontWeight` for prominent
+content that is not a heading. A large status value is one example.
 
 Use [Numeral](/components/typography/numeral) to format locale-aware numbers and
 [Emoji](/components/typography/emoji) for an emoji with a reliable accessible label.

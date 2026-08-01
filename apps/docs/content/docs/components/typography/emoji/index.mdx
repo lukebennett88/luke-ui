@@ -19,8 +19,8 @@ description: Emoji rendering with a reliable screen reader label.
 
 ## Accessibility
 
-Both `emoji` and `label` are required. Screen readers announce the label instead of the raw emoji,
-which is not announced consistently across platforms.
+`Emoji` requires both `emoji` and `label`. Screen readers announce the label instead of the raw
+emoji, because they do not announce it consistently across platforms.
 
 Write a label that describes the emoji's meaning in context, such as "Celebration". Do not repeat
 text that is already in the surrounding sentence, because that creates duplicate screen reader
@@ -28,5 +28,5 @@ output.
 
 ## Related components
 
-Use [Text](/components/typography/text) when the content is text, and
-[Icon](/components/visuals/icon) for interface symbols from Luke UI's icon set.
+Use [Text](/components/typography/text) for text and [Icon](/components/visuals/icon) for interface
+symbols from Luke UI's icon set.

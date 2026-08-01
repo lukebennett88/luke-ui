@@ -3,8 +3,8 @@ title: Heading
 description: Semantic heading with automatic level management.
 ---
 
-`Heading` renders a semantic section heading. It reads its level from `HeadingLevels` context, or
-you can set `level` directly.
+`Heading` renders a semantic section heading. It reads its level from `HeadingLevels` context. Set
+`level` to override it directly.
 
 <ExampleBlock
 	src="heading/basic"
@@ -30,20 +30,20 @@ children.
 <Heading level={2}>Explicit h2</Heading>
 ```
 
-Do not skip levels, such as an h2 followed by an h4. Screen reader users navigate a page by heading
-level.
+Do not skip levels, such as an h2 followed by an h4. Someone who uses a screen reader navigates a
+page by heading level.
 
 ## Size and colour
 
 By default, `Heading` maps h1 through h6 to size steps `'800'` through `'300'` and uses the
-`heading` font-weight role. Set `size` to change visual scale without changing the semantic level.
-Use `'900'` for display headings. Set `color` for a semantic text colour, such as `info` for a
-heading that needs to read as informational.
+`heading` font-weight role. Set `size` to change visual scale. It does not change the semantic
+level. Use `'900'` for display headings. Set `color` for a semantic text colour, such as `info` for
+a heading that needs to read as informational.
 
 <ExampleBlock
 	src="heading/typography"
 	title="Heading — Size and colour"
-	description="Change visual size and colour without changing the semantic heading level."
+	description="Change visual size and colour. The semantic heading level stays the same."
 />
 
 ## Related components

@@ -3,14 +3,14 @@ title: Applying a theme
 description: Load Luke UI CSS and apply a theme identity and colour mode.
 ---
 
-A themed subtree needs the shared Luke UI stylesheet, one identity stylesheet, and a root carrying
-both theme classes. All three are static. Luke UI does not inject styles at runtime.
+A themed subtree needs the shared Luke UI stylesheet, one identity stylesheet, and a root that
+carries both theme classes. All three are static. Luke UI does not inject styles at runtime.
 
 ## Import the stylesheets
 
 Import `@luke-ui/react/stylesheet.css` and the stylesheet for the identity your application uses.
 The example below uses Tactile. Use `@luke-ui/react/themes/paper.css` with `paperThemeClassName` for
-Paper. Importing one bundled identity does not load the other.
+Paper. If you import one bundled identity, Luke UI does not load the other.
 
 ## Apply the root classes
 
@@ -22,12 +22,12 @@ semantic values.
 
 Theme identities do not nest. Use one identity for an application or independent themed subtree.
 
-## Select a colour mode
+## Choose a colour mode
 
 Set `data-color-mode="light"` or `data-color-mode="dark"` on the root to force a mode. Leave the
 attribute off to follow `prefers-color-scheme`.
 
-Colour-mode scopes can nest. A child can force the opposite mode without changing the identity.
+Colour-mode scopes can nest. A child can force the opposite mode. It does not change the identity.
 
 <SourceCodeBlock src="theming/nested-color-mode" />
 

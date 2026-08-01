@@ -1,10 +1,10 @@
 ---
 title: Checkbox
 description:
-  Lets a person select an independent option, with optional supporting and validation text.
+  Lets someone select an independent option, with optional supporting and validation text.
 ---
 
-Use `Checkbox` when a person can choose an option independently of nearby controls. Pass
+Use `Checkbox` when someone can choose an option independently of nearby controls. Pass
 `description` to clarify what the option means.
 
 <ExampleBlock
@@ -25,9 +25,9 @@ option whose child options are only partly selected.
 	description="Checked, unchecked, disabled, indeterminate, and invalid checkboxes."
 />
 
-Disabled checkboxes cannot be changed or focused. Read-only checkboxes remain focusable so their
-state is available to keyboard and assistive-technology users. Keyboard navigation shows a focus
-ring. Pointer focus does not.
+Disabled checkboxes cannot receive focus, and their value cannot change. Read-only checkboxes remain
+focusable, so someone who uses a keyboard or assistive technology can still perceive their state.
+Keyboard navigation shows a focus ring. Pointer focus does not.
 
 <ExampleBlock
 	src="checkbox/controlled"
@@ -37,7 +37,7 @@ ring. Pointer focus does not.
 
 ## Size
 
-Use `size` to change the checkbox control without changing its label typography. `medium` is the
+Use `size` to change the checkbox control. It does not change the label typography. `medium` is the
 default. Use `small` in compact layouts and `large` where a larger control improves scanning.
 
 <ExampleBlock
@@ -48,7 +48,7 @@ default. Use `small` in compact layouts and `large` where a larger control impro
 
 ## Validation
 
-Pass `errorMessage` with `isInvalid` when the choice blocks submission. Always pass both: an invalid
+Pass `errorMessage` with `isInvalid` when the choice blocks submission. Always pass both. An invalid
 field with no message leaves someone who cannot see the border colour with no way to know what is
 wrong.
 
@@ -63,7 +63,7 @@ Read [Validation](/components/forms/validation) for how to word the message.
 ## Labels with Text
 
 Wrap a checkbox in block `Text` when its label needs a specific text size. The control follows the
-inherited line height, keeping its fixed visual square centred on the first line when the label
+inherited line height. It keeps its fixed visual square centred on the first line when the label
 wraps. Outside `Text`, it uses the normal compact control size.
 
 <ExampleBlock

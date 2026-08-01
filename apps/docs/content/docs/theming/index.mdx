@@ -19,8 +19,7 @@ identity supplies semantic colour, typography, spacing, radii, material, and dep
 <SourceCodeBlock src="theming/apply-theme" />
 
 Use one identity for an application or independent themed subtree. Identity classes are not
-nestable, so a child scope cannot switch from Tactile to Paper without becoming a separate themed
-boundary.
+nestable, so a child scope must become a separate themed boundary to switch from Tactile to Paper.
 
 ## Choose a colour mode
 
@@ -64,8 +63,8 @@ Do not depend on a component's selectors, generated palette values, or theme imp
 ## Author a theme
 
 When neither bundled identity fits a product, call `defineTheme` with a curated accent and neutral
-character. The generated stylesheet contains the full semantic contract for both colour modes and
-validates contrast before it is written.
+character. The generated stylesheet contains the full semantic contract for both colour modes.
+`defineTheme` validates contrast before it writes the stylesheet.
 
 <Cards>
 	<Card href="/theming/applying" title="Apply a bundled theme">
