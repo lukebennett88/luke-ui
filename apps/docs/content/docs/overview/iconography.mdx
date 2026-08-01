@@ -9,9 +9,6 @@ file.
 
 ## Browse
 
-Type in the filter to find an icon by name. Each icon shows at the size that you select. To copy the
-component code, click the JSX button. To copy the icon name, click the Name button.
-
 <IconGallery />
 
 ## Use an icon
@@ -19,45 +16,40 @@ component code, click the JSX button. To copy the icon name, click the Name butt
 Import `Icon` and give it a name from the set. The `name` prop accepts only the names in the gallery
 above. The compiler rejects any other name.
 
-```tsx
-import { Icon } from '@luke-ui/react/icon';
-
-<Icon name="search" />;
-```
+<ExampleBlock
+	description="Icons rendered with accessible titles."
+	src="icon/basic"
+	title="Icon — Basic"
+/>
 
 ## Size
 
 Set `size` to `xsmall`, `small`, `medium`, or `large`. Each size is a theme token, not a pixel
 value. A custom theme can give each size a different value.
 
-```tsx
-<Icon name="search" size="small" />
-```
+<ExampleBlock description="The four size tokens." src="icon/sizes" title="Icon — Sizes" />
 
-In the supplied themes, the four sizes are 16px, 20px, 24px, and 32px. The default size is `medium`.
+The default size is `medium`.
 
 To give a group of icons the same size, put an `IconSizeProvider` around them. An icon that has its
 own `size` prop keeps that size.
 
-```tsx
-import { IconSizeProvider } from '@luke-ui/react/icon-size-context';
-
-<IconSizeProvider size="small">
-	<Icon name="chevronLeft" />
-	<Icon name="chevronRight" />
-</IconSizeProvider>;
-```
+<ExampleBlock
+	description="One size for a group of icons."
+	src="icon/size-context"
+	title="Icon — Shared size"
+/>
 
 ## Colour
 
 An icon takes the colour of the text around it. To change the colour of an icon, set the colour on
 the icon or on a parent element.
 
-```tsx
-<Text color="danger">
-	<Icon name="closeCircle" />
-</Text>
-```
+<ExampleBlock
+	description="Icons take the colour of surrounding text."
+	src="icon/colours"
+	title="Icon — Colour"
+/>
 
 An icon that gives information must have a contrast ratio of 3 to 1 or more against its background.
 An icon that only decorates adjacent text has no contrast requirement.
@@ -69,19 +61,20 @@ Each icon is decorative or informative. Use the correct one.
 The icon is decorative when the text next to it gives the meaning. Do not give it a title. The
 component then hides the icon from assistive technology.
 
-```tsx
-<button>
-	<Icon name="delete" />
-	Delete
-</button>
-```
+<ExampleBlock
+	description="Hide an icon whose meaning is carried by adjacent text."
+	src="icon/decorative"
+	title="Icon — Decorative"
+/>
 
 The icon is informative when it appears alone. Give it a `title`. The component then shows the icon
 to assistive technology as an image.
 
-```tsx
-<Icon name="checkCircle" title="Payment complete" />
-```
+<ExampleBlock
+	description="Give a standalone icon an accessible title."
+	src="icon/informative"
+	title="Icon — Informative"
+/>
 
 Do not set `aria-hidden` and `title` on the same icon.
 
@@ -113,9 +106,6 @@ import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 
 Use `createIcon` to make a component for a symbol that the set does not include. The new component
 gets the same size behaviour and accessibility behaviour as `Icon`.
-
-Ask the Luke UI maintainers for a new icon when you need one for a common action. A shared icon is
-better than a custom one.
 
 ## Continue learning
 

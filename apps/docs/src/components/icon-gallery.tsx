@@ -11,16 +11,16 @@
  * FORM: Extension of an established surface. TanStack's ruled grid, with the two copy targets
  * always present in a ruled cell footer rather than revealed on hover.
  */
-import type { IconName } from '@luke-ui/react/icon';
+import type { IconName, IconProps } from '@luke-ui/react/icon';
 import { Icon, iconNames } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { JSX, ReactNode } from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { TextToggleButtonGroup } from './playground/icon-toggle-button-group.js';
 
-type GalleryIconSize = 'large' | 'medium' | 'small' | 'xsmall';
+type GalleryIconSize = NonNullable<IconProps['size']>;
 
 const SIZE_OPTIONS = [
 	{ label: 'XS', value: 'xsmall' },
@@ -31,9 +31,6 @@ const SIZE_OPTIONS = [
 
 /** How long a copy button shows its "Copied"/error feedback before reverting. */
 const COPY_FEEDBACK_DURATION_MS = 1500;
-
-/** How long to wait after the last keystroke before announcing the settled filter count. */
-const COUNT_ANNOUNCEMENT_DEBOUNCE_MS = 300;
 
 type CopyKind = 'jsx' | 'name';
 
@@ -60,17 +57,13 @@ const COPY_BUTTON_CLASS_NAME = cx(
 export function IconGallery(): JSX.Element {
 	const [filter, setFilter] = useState('');
 	const [previewSize, setPreviewSize] = useState<GalleryIconSize>('medium');
-	const [copyStatus, setCopyStatus] = useState<CopyStatus | null>(null);
-	const [announcement, setAnnouncement] = useState('');
-	const filterFieldRef = useRef<HTMLDivElement>(null);
+	const [copyState, dispatchCopy] = useReducer(copyReducer, { announcement: '', status: null });
+	const inputRef = useRef<HTMLInputElement | null>(null);
 	const copyTimeoutRef = useRef<number | null>(null);
-	const countAnnounceTimeoutRef = useRef<number | null>(null);
 
 	useEffect(() => {
 		return () => {
 			if (copyTimeoutRef.current != null) window.clearTimeout(copyTimeoutRef.current);
-			if (countAnnounceTimeoutRef.current != null)
-				window.clearTimeout(countAnnounceTimeoutRef.current);
 		};
 	}, []);
 
@@ -85,20 +78,12 @@ export function IconGallery(): JSX.Element {
 			? `${iconNames.length} icons`
 			: `${filteredNames.length} of ${iconNames.length}`;
 
-	/** Announced count, debounced so a screen reader hears the settled result, not every keystroke. */
-	const [announcedCountText, setAnnouncedCountText] = useState(countText);
-
-	useEffect(() => {
-		if (countAnnounceTimeoutRef.current != null)
-			window.clearTimeout(countAnnounceTimeoutRef.current);
-		countAnnounceTimeoutRef.current = window.setTimeout(() => {
-			setAnnouncedCountText(countText);
-		}, COUNT_ANNOUNCEMENT_DEBOUNCE_MS);
-	}, [countText]);
+	/** Deferred so a screen reader hears the settled result, not every keystroke. */
+	const deferredCountText = useDeferredValue(countText);
 
 	function handleClearFilter() {
 		setFilter('');
-		filterFieldRef.current?.querySelector('input')?.focus();
+		inputRef.current?.focus();
 	}
 
 	async function handleCopy(name: IconName, kind: CopyKind) {
@@ -108,22 +93,25 @@ export function IconGallery(): JSX.Element {
 
 		try {
 			await navigator.clipboard.writeText(copiedText);
-			setCopyStatus({ kind, name, state: 'copied' });
-			setAnnouncement(`Copied ${copiedText}`);
+			dispatchCopy({ kind, name, text: copiedText, type: 'copied' });
 		} catch {
-			setCopyStatus({ kind, name, state: 'error' });
-			setAnnouncement(`Couldn't copy automatically. Please copy manually: ${copiedText}.`);
+			dispatchCopy({ kind, name, text: copiedText, type: 'failed' });
 		}
 
 		copyTimeoutRef.current = window.setTimeout(() => {
-			setCopyStatus(null);
+			dispatchCopy({ type: 'reset' });
 		}, COPY_FEEDBACK_DURATION_MS);
 	}
 
 	return (
 		<div className="not-prose flex flex-col gap-4">
 			<div className="flex flex-wrap items-center gap-3">
-				<div className="min-w-[12rem] flex-1 basis-56" ref={filterFieldRef}>
+				<div
+					className="min-w-[12rem] flex-1 basis-56"
+					ref={(node) => {
+						inputRef.current = node?.querySelector('input') ?? null;
+					}}
+				>
 					<TextField
 						aria-label="Filter icons by name"
 						onChange={setFilter}
@@ -141,7 +129,7 @@ export function IconGallery(): JSX.Element {
 				/>
 				<p className="ms-auto text-fd-muted-foreground text-sm tabular-nums">{countText}</p>
 				<VisuallyHidden aria-live="polite" elementType="p">
-					{announcedCountText}
+					{deferredCountText}
 				</VisuallyHidden>
 			</div>
 
@@ -152,7 +140,7 @@ export function IconGallery(): JSX.Element {
 					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
 						{filteredNames.map((name) => (
 							<IconGalleryCell
-								copyStatus={copyStatus?.name === name ? copyStatus : null}
+								copyStatus={copyState.status?.name === name ? copyState.status : null}
 								key={name}
 								name={name}
 								onCopy={handleCopy}
@@ -164,10 +152,38 @@ export function IconGallery(): JSX.Element {
 			</div>
 
 			<VisuallyHidden aria-live="polite" elementType="p">
-				{announcement}
+				{copyState.announcement}
 			</VisuallyHidden>
 		</div>
 	);
+}
+
+interface CopyState {
+	announcement: string;
+	status: CopyStatus | null;
+}
+
+type CopyAction =
+	| { kind: CopyKind; name: IconName; text: string; type: 'copied' }
+	| { kind: CopyKind; name: IconName; text: string; type: 'failed' }
+	| { type: 'reset' };
+
+/** Drives the copy button feedback: sets status and announcement together, resets status only. */
+function copyReducer(state: CopyState, action: CopyAction): CopyState {
+	switch (action.type) {
+		case 'copied':
+			return {
+				announcement: `Copied ${action.text}`,
+				status: { kind: action.kind, name: action.name, state: 'copied' },
+			};
+		case 'failed':
+			return {
+				announcement: `Couldn't copy automatically. Please copy manually: ${action.text}.`,
+				status: { kind: action.kind, name: action.name, state: 'error' },
+			};
+		case 'reset':
+			return { ...state, status: null };
+	}
 }
 
 interface IconGalleryCellProps {
