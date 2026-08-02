@@ -67,9 +67,9 @@ export const Responsive = meta.story({
 	render: () => {
 		const responsive = createSprinkles({
 			display: 'flex',
-			flexDirection: { medium: 'row', xsmall: 'column' },
-			gap: { medium: '600', xsmall: '300' },
-			padding: { large: '800', xsmall: '300' },
+			flexDirection: { initial: 'column', medium: 'row' },
+			gap: { initial: '300', medium: '600' },
+			padding: { initial: '300', large: '800' },
 		});
 		return (
 			<div {...mergeProps({ style: panelStyle }, responsive)}>

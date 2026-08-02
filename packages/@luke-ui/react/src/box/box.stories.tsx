@@ -21,9 +21,9 @@ export const Default = meta.story({
 			</>
 		),
 		display: 'flex',
-		flexDirection: { medium: 'row', xsmall: 'column' },
-		gap: { medium: '600', xsmall: '200' },
-		padding: { medium: '600', xsmall: '300' },
+		flexDirection: { initial: 'column', medium: 'row' },
+		gap: { initial: '200', medium: '600' },
+		padding: { initial: '300', medium: '600' },
 		style: { backgroundColor: vars.color.surface.recessed },
 	} satisfies Partial<BoxProps>,
 	play: async ({ canvas }) => {

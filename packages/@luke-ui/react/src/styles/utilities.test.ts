@@ -3,21 +3,21 @@ import type { SprinklesProps } from './utilities.css.js';
 import { createSprinkles } from './utilities.css.js';
 
 const responsiveLayout = {
-	alignItems: { medium: 'center', xsmall: 'stretch' },
-	blockSize: { large: '50vh', xsmall: 'auto' },
-	display: { medium: 'grid', xsmall: 'flex' },
+	alignItems: { initial: 'stretch', medium: 'center' },
+	blockSize: { initial: 'auto', large: '50vh' },
+	display: { initial: 'flex', medium: 'grid' },
 	flex: '1 1 auto',
 	flexBasis: '12rem',
 	flexDirection: 'column',
 	flexGrow: '1',
 	flexShrink: '0',
 	flexWrap: 'wrap',
-	gap: { medium: '600', xsmall: '200' },
+	gap: { initial: '200', medium: '600' },
 	gridColumn: '1 / -1',
 	gridColumnEnd: 'span 2',
 	gridColumnStart: '2',
 	gridRow: 'auto / span 2',
-	inlineSize: { medium: '50%', xsmall: '100%' },
+	inlineSize: { initial: '100%', medium: '50%' },
 	insetBlockStart: '0',
 	insetInline: 'var(--luke-space-400)',
 	justifyContent: 'space-between',
@@ -26,7 +26,7 @@ const responsiveLayout = {
 	maxInlineSize: '64rem',
 	minBlockSize: '10rem',
 	overflow: 'auto',
-	padding: { small: '400', xsmall: '300' },
+	padding: { initial: '300', small: '400' },
 	placeSelf: 'stretch',
 	position: 'sticky',
 	rowGap: '1000',
@@ -73,9 +73,17 @@ const invalidResponsiveSpaceValue = {
 	},
 } satisfies SprinklesProps;
 
+const removedXsmallCondition = {
+	display: {
+		// @ts-expect-error The responsive base condition is named `initial`.
+		xsmall: 'block',
+	},
+} satisfies SprinklesProps;
+
 void removedColor;
 void removedBackgroundColor;
 void removedTypography;
 void removedPseudoState;
 void invalidSpaceValue;
 void invalidResponsiveSpaceValue;
+void removedXsmallCondition;

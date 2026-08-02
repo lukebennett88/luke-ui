@@ -1,19 +1,18 @@
 ---
 title: Breakpoints
-description:
-  Change layout at a named viewport width, using the responsive value that every Sprinkles property
-  accepts.
+description: Change layout at named viewport widths with responsive layout properties.
 ---
 
-Luke UI defines six breakpoints. Every Sprinkles layout property, including `display`, accepts a
-value for each one. Use a breakpoint to change layout at the point where it actually breaks, not by
-default.
+Luke UI defines six breakpoint keys for responsive layout. `Box` layout properties accept a value at
+each key. Choose a breakpoint when content needs a deliberate layout change.
+
+Read [Layout](/overview/layout) for the full layout API.
 
 ## Breakpoints
 
 | Breakpoint | Minimum viewport width |
 | ---------- | ---------------------- |
-| `xsmall`   | 0px (base)             |
+| `initial`  | 0px (base)             |
 | `small`    | 640px                  |
 | `medium`   | 768px                  |
 | `large`    | 1024px                 |
@@ -25,13 +24,13 @@ Each breakpoint is a fixed constant, not a theme token. A custom theme cannot ch
 Every breakpoint is a minimum width. There is no maximum-width or range condition. A value set at
 `medium` also applies at `large`, `xlarge`, and `xxlarge`, unless a later breakpoint overrides it.
 
-## The responsive value API
+## Responsive values
 
-Every Sprinkles property accepts a direct value or an object keyed by breakpoint. Values cascade up
-from `xsmall`. Specify only the breakpoints where the value changes.
+Pass a direct value when a layout property stays constant. Pass an object keyed by breakpoint when
+it changes. Values cascade up from `initial`, so specify only the changes.
 
 ```tsx
-<Box display="flex" flexDirection={{ xsmall: 'column', medium: 'row' }}>
+<Box display="flex" flexDirection={{ initial: 'column', medium: 'row' }}>
 	{children}
 </Box>
 ```
@@ -44,8 +43,3 @@ This example stacks the children by default. It places them in a row from `mediu
 
 Set a responsive value when the layout needs a deliberate change. Prefer intrinsic wrapping when the
 content can adapt without a breakpoint.
-
-## Continue learning
-
-- [Box](/components/layout/box) documents the component API.
-- [Layout](/overview/layout) explains the other layout utilities.

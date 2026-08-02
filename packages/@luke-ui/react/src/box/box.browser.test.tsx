@@ -30,8 +30,8 @@ test('renders a responsive layout at the retained breakpoints', async () => {
 		root.render(
 			<Box
 				display="flex"
-				flexDirection={{ medium: 'row', xsmall: 'column' }}
-				gap={{ medium: '600', xsmall: '200' }}
+				flexDirection={{ initial: 'column', medium: 'row' }}
+				gap={{ initial: '200', medium: '600' }}
 			>
 				<span>First item</span>
 				<span>Second item</span>
