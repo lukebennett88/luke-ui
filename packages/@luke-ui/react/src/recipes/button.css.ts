@@ -51,7 +51,7 @@ const base = styleInLayer('recipes', {
 	borderWidth: '1px',
 	boxShadow: vars.depth.resting,
 	boxSizing: 'border-box',
-	cursor: 'pointer',
+	cursor: 'default',
 	display: 'inline-flex',
 	fontFamily: vars.font.family.body,
 	fontWeight: vars.font.weight.label,
