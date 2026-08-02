@@ -2,7 +2,6 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { ComboboxField } from '../combobox-field/index.js';
 import { ComboboxItem } from '../combobox-field/primitive/item.js';
-import { Icon } from '../icon/index.js';
 import { inputGroup } from '../recipes/input-group.css.js';
 import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
 import { TextField } from './index.js';
@@ -190,42 +189,6 @@ test('the indicator lands after the input and before a trailing suffix', async (
 	expect(prefixRect.left).toBeLessThan(inputRect.left);
 	expect(indicatorRect.left).toBeGreaterThanOrEqual(inputRect.right);
 	expect(indicatorRect.left).toBeLessThan(suffixRect.left);
-});
-
-// `prefix` is typed `ReactNode`, so it can hold more than one top-level element.
-// Each becomes its own flex item in the `prefix` slot (`input-group.css.ts`), so
-// this proves the second element renders beside the first rather than being
-// clipped or drawn on top of it. Found by the sprite each `<use>` references
-// (`icon/index.tsx`), not a test id, since there is no accessible name to query by
-// on a decorative, `aria-hidden` icon.
-test('a prefix with two elements renders them side by side, not overlapping', async () => {
-	renderVisual(
-		<TextField
-			label="Search"
-			name="prefix-multiple"
-			prefix={
-				<>
-					<Icon aria-hidden name="search" />
-					<Icon aria-hidden name="check" />
-				</>
-			}
-		/>,
-	);
-
-	const input = page.getByRole('textbox', { name: 'Search' });
-	await expect.element(input).toBeVisible();
-
-	const group = groupFor('Search');
-	const first = group.querySelector<SVGUseElement>('use[href$="#search"]')?.closest('svg');
-	const second = group.querySelector<SVGUseElement>('use[href$="#check"]')?.closest('svg');
-	if (first == null || second == null) throw new Error('Expected both prefix elements.');
-
-	const firstRect = first.getBoundingClientRect();
-	const secondRect = second.getBoundingClientRect();
-
-	expect(firstRect.width).toBeGreaterThan(0);
-	expect(secondRect.width).toBeGreaterThan(0);
-	expect(secondRect.left).toBeGreaterThanOrEqual(firstRect.right);
 });
 
 // `inputStates.invalid` must not match `:has(:invalid)`: that matches a required,

@@ -6,11 +6,7 @@ description: Styled text with a coordinated type scale and semantic colour roles
 `Text` applies Luke UI typography without adding heading semantics. It needs a Luke UI theme root.
 See [Getting started](/overview/getting-started).
 
-<ExampleBlock
-	src="text/basic"
-	title="Text — Basic"
-	description="Body text using the default type treatment."
-/>
+<ExampleBlock src="text/basic" title="Text — Basic" />
 
 ## Element type
 
@@ -31,11 +27,7 @@ Use `size` to set font size, line height, letter spacing, and Capsize trim as on
 `'300'` is the default. Sizes `'200'` through `'400'` work well for running text. Smaller steps suit
 compact UI labels, while larger steps are useful for display text that is not a semantic heading.
 
-<ExampleBlock
-	src="text/typography"
-	title="Text — Type scale"
-	description="Compare the coordinated 100–900 size steps."
-/>
+<ExampleBlock src="text/typography" title="Text — Type scale" />
 
 The active theme supplies the font family and values behind each `fontWeight` role. Use `body` for
 text, `label` for controls, `heading` for prominent non-heading text, and `emphasis` when text needs
@@ -45,22 +37,14 @@ more weight.
 
 Set `textAlign` when the layout needs a different inline alignment.
 
-<ExampleBlock
-	src="text/alignment"
-	title="Text — Alignment"
-	description="Compare start, centre, and end alignment."
-/>
+<ExampleBlock src="text/alignment" title="Text — Alignment" />
 
 ## Numeric glyphs
 
 Use `fontVariantNumeric` to align numeric columns, format fractions and ordinals, or distinguish
 zero with a slash.
 
-<ExampleBlock
-	src="text/numeric-glyphs"
-	title="Text — Numeric glyphs"
-	description="Compare tabular numerals, fractions, ordinals, and slashed zeroes."
-/>
+<ExampleBlock src="text/numeric-glyphs" title="Text — Numeric glyphs" />
 
 ## Trimming
 
@@ -69,33 +53,21 @@ more predictable in cards and other bounded layouts. Inline text skips trim so i
 cannot interrupt the surrounding line. Set `shouldDisableTrim` explicitly when you need to override
 the element-type inference.
 
-<ExampleBlock
-	src="text/trim"
-	title="Text — Trimming"
-	description="Compare trimmed text with its full line box."
-/>
+<ExampleBlock src="text/trim" title="Text — Trimming" />
 
 ## Truncation
 
 Use `lineClamp` to constrain text to one line or up to five lines. `Text` truncates overflow with an
 ellipsis. It disables trimming automatically when you set `lineClamp`.
 
-<ExampleBlock
-	src="text/truncation"
-	title="Text — Truncation"
-	description="Compare one-line and two-line truncation."
-/>
+<ExampleBlock src="text/truncation" title="Text — Truncation" />
 
 ## Transform and decoration
 
 Use `textTransform` and `textDecoration` when the content calls for them. These props affect the
 rendered text only, so avoid using uppercase styling as a substitute for a clear label.
 
-<ExampleBlock
-	src="text/transform"
-	title="Text — Transform and decoration"
-	description="Apply text transformation and decoration when the content needs it."
-/>
+<ExampleBlock src="text/transform" title="Text — Transform and decoration" />
 
 ## Related components
 

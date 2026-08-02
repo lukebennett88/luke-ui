@@ -90,6 +90,10 @@ Each component has a folder named for its URL slug:
 - `meta.json` uses `"pages": ["!props"]` and `"collapsible": false` so the component stays one
   ordinary sidebar link without exposing the props page in the tree.
 
+Keep the guide and Props frontmatter titles and descriptions identical. The component generator
+leaves editorial descriptions out instead of adding placeholder copy. Add one useful description to
+both pages when you write the guide.
+
 The page header adds Guide and Props links from these routes. Keep that navigation in the shared
 docs route rather than duplicating it in MDX.
 
@@ -113,11 +117,14 @@ Headings use sentence case. Capitalise only proper nouns and product names.
 Interactive examples live in `apps/docs/src/examples/<component>/`.
 
 An example module default-exports a React component. Reference it from an MDX page with
-`<ExampleBlock src="<component>/<name>" title="..." description="..." />`.
+`<ExampleBlock src="<component>/<name>" title="..." />`.
 
 Every component guide starts with a focused `basic.tsx` example and references it as the primary
 `<ExampleBlock src="<component>/basic" ... />`. This is the default first example generated for a
 new component.
+
+The generated guide contains this example and no placeholder prose. Add a short usage lead-in and
+only the sections that help a developer use the component.
 
 Keep example content aligned with the section that mentions it. If you add a feature section, add or
 update an example in the same change when the feature is easier to understand visually.

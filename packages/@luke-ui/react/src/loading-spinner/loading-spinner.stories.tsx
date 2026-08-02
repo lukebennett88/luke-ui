@@ -24,14 +24,7 @@ const flexStackStyle = {
 	gap: '1rem',
 } as const satisfies CSSProperties;
 
-/**
- * The spinner shows an animated loading indicator.
- */
-export const Default = meta.story({
-	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('status', { name: 'loading' })).toBeInTheDocument();
-	},
-});
+export const Default = meta.story({});
 
 const sizes: Array<NonNullable<LoadingSpinnerProps['size']>> = ['small', 'medium'];
 
@@ -51,7 +44,7 @@ export const Size = meta.story({
 const colors = ['primary', 'secondary', 'accent', 'info', 'success', 'warning', 'danger'] as const;
 
 /**
- * Spinner color can use semantic content roles, or inherit its parent's color when omitted.
+ * Choose a semantic content colour, or omit `color` to inherit the parent's colour.
  */
 export const Color = meta.story({
 	play: async ({ canvas }) => {

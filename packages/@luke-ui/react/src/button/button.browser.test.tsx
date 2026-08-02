@@ -82,38 +82,6 @@ test('an explicit icon size overrides the button-provided icon size', () => {
 	expect(styles.blockSize).toBe('32px');
 });
 
-// `startIcon` is typed `ReactNode`, so it can hold more than one top-level
-// element, for example a compound icon. Each becomes its own item in the
-// `buttonLabel` flex row (`button-composed.css.ts`), so this proves the second
-// element renders beside the first and the label, not on top of it.
-test('a start icon with two elements renders them side by side, not overlapping', () => {
-	const { container } = mountFixture(
-		<Button
-			size="medium"
-			startIcon={
-				<>
-					<Icon name="add" />
-					<Icon name="check" />
-				</>
-			}
-		>
-			New task
-		</Button>,
-	);
-
-	const icons = container.querySelectorAll('svg');
-	const [first, second] = icons;
-	if (!(first instanceof SVGElement) || !(second instanceof SVGElement)) {
-		throw new Error('Expected both start icon elements.');
-	}
-
-	const firstRect = first.getBoundingClientRect();
-	const secondRect = second.getBoundingClientRect();
-	expect(firstRect.width).toBeGreaterThan(0);
-	expect(secondRect.width).toBeGreaterThan(0);
-	expect(secondRect.left).toBeGreaterThanOrEqual(firstRect.right);
-});
-
 function mountFixture(node: ReactNode) {
 	const container = document.body.appendChild(document.createElement('div'));
 	container.className = `${themeRootClassName} ${tactileThemeClassName}`;

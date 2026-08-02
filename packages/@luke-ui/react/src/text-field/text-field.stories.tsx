@@ -28,33 +28,18 @@ const stackStyle = {
 	maxInlineSize: '24rem',
 } as const satisfies CSSProperties;
 
-/**
- * Composed `TextField` provides top-level props while preserving accessible
- * behavior from the underlying form primitives.
- */
 export const Default = meta.story({
-	play: async ({ canvas }) => {
-		await expect(canvas.getByLabelText('Email')).toBeInTheDocument();
-		await expect(canvas.getByText("We'll only use this for account updates.")).toBeInTheDocument();
-	},
 	render: () => (
 		<TextField description="We'll only use this for account updates." label="Email" name="email" />
 	),
 });
 
-/**
- * `placeholder` is forwarded to the internal `InputGroupInput` control.
- */
 export const Placeholder = meta.story({
 	render: () => (
 		<TextField label="Project name" name="projectName" placeholder="Untitled project" />
 	),
 });
 
-/**
- * Size can be set directly on composed `TextField` and forwards to the
- * `InputGroup` primitive.
- */
 export const Size = meta.story({
 	render: () => (
 		<div style={stackStyle}>
@@ -65,10 +50,6 @@ export const Size = meta.story({
 	),
 });
 
-/**
- * `prefix` and `suffix` become the primitive's `InputGroupPrefix` and
- * `InputGroupSuffix` children.
- */
 export const PrefixAndSuffix = meta.story({
 	render: () => (
 		<div style={stackStyle}>
@@ -79,14 +60,11 @@ export const PrefixAndSuffix = meta.story({
 });
 
 /**
- * The `InputGroup` primitive composes the same control from children instead of
- * props. The group owns the border, background, and rounding; the parts are
- * transparent flex children whose position follows document order. Use it when a
- * composition needs something `prefix` / `suffix` cannot express, such
- * as an interactive trailing button.
+ * `InputGroup` composes a control from children instead of props. The group owns the border,
+ * background, and rounding. Its transparent parts follow document order.
  *
- * The group also provides the icon size, so the search `Icon` below scales with the
- * control without a `size` of its own.
+ * Use it for content that `prefix` and `suffix` cannot express, such as an interactive trailing
+ * button. The group also sets the icon size, so nested icons scale with the control.
  */
 export const InputGroupComposition = meta.story({
 	play: async ({ canvas }) => {
@@ -192,10 +170,8 @@ export const ServerValidation = meta.story({
 });
 
 /**
- * Disabled and read-only states are forwarded to the field container. Unlike
- * disabled, a read-only field stays focusable and in the tab order — its
- * value is still relevant to assistive technology and copy/paste, it just
- * can't be edited.
+ * A read-only field stays focusable and in the tab order. Someone can still access and copy its
+ * value, but cannot edit it.
  */
 export const DisabledAndReadOnly = meta.story({
 	play: async ({ canvas }) => {

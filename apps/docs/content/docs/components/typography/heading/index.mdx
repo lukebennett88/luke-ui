@@ -6,22 +6,14 @@ description: Semantic heading with automatic level management.
 `Heading` renders a semantic section heading. It reads its level from `HeadingLevels` context. Set
 `level` to override it directly.
 
-<ExampleBlock
-	src="heading/basic"
-	title="Heading — Basic"
-	description="A semantic section heading."
-/>
+<ExampleBlock src="heading/basic" title="Heading — Basic" />
 
 ## Heading level
 
 Set `base` on the root `HeadingLevels`. Each nested `HeadingLevels` advances the next heading level.
 This keeps the document outline aligned with the component structure.
 
-<ExampleBlock
-	src="heading/automatic-leveling"
-	title="Heading — Automatic levels"
-	description="Nested HeadingLevels contexts advance each heading level."
-/>
+<ExampleBlock src="heading/automatic-leveling" title="Heading — Automatic levels" />
 
 Use `level` to override the context for one heading. It does not change the level for siblings or
 children.
@@ -40,11 +32,7 @@ By default, `Heading` maps h1 through h6 to size steps `'800'` through `'300'` a
 level. Use `'900'` for display headings. Set `color` for a semantic text colour, such as `info` for
 a heading that needs to read as informational.
 
-<ExampleBlock
-	src="heading/typography"
-	title="Heading — Size and colour"
-	description="Change visual size and colour. The semantic heading level stays the same."
-/>
+<ExampleBlock src="heading/typography" title="Heading — Size and colour" />
 
 ## Related components
 

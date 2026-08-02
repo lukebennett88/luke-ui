@@ -25,7 +25,7 @@ const stackStyle = {
 
 /**
  * Use `Link` for navigation and external destinations while preserving native
- * anchor behavior.
+ * anchor behaviour.
  */
 export const Default = meta.story({
 	args: baseArgs,

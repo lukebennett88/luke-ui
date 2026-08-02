@@ -156,7 +156,7 @@ describe('mapSemanticColors', () => {
 
 				// Comparing the whole key set both ways is what makes this a completeness check: a missing
 				// leaf leaves `buildTheme` emitting an undefined variable, and an extra key is a path that
-				// no longer exists in the contract and so is silently dropped.
+				// is outside the contract and so is silently dropped.
 				expect(Object.keys(result).sort()).toEqual([...colourPaths].sort());
 			});
 		}

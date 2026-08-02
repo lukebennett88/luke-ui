@@ -155,7 +155,7 @@ describe('defineTheme partial per-mode merges', () => {
 	it('falls back to the curated default for a rung explicitly authored as undefined', () => {
 		// Composed authoring naturally produces `{ resting: condition ? value : undefined }`. An
 		// explicit `undefined` must behave exactly like an omitted rung, not overwrite the default with
-		// `undefined` (which previously crashed the validator's `.trim()` guard).
+		// `undefined` or reach the validator's `.trim()` guard.
 		const blocks = splitBlocks(
 			defineTheme({
 				color: { accent: '#3b82f6' },
@@ -306,10 +306,9 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 		});
 
 		it(`${name} paints info, success, and warning with a real interactive ramp`, () => {
-			// The three roles that used to publish only a static soft kit now carry the same capabilities
-			// as every other role. The contract-inventory test above cannot show that landed: it would
-			// pass just as happily if every new leaf resolved to one flat colour. These are the emitted
-			// values, so what is asserted is the repaint itself rather than its shape.
+			// The three feedback roles carry the same capabilities as every other role. The contract
+			// inventory cannot prove that each ramp is interactive because a flat colour still fills every
+			// leaf. These emitted values prove that each state stays distinct.
 			const blocks = splitBlocks(css);
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				for (const role of ['info', 'success', 'warning']) {

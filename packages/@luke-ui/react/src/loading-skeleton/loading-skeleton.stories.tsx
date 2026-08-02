@@ -115,9 +115,8 @@ export const Radius = meta.story({
 		await expect(skeletonOverlayStyles.borderRadius).toBe(expectedRadius);
 		await expect(getBrightnessFilterValue(skeletonOverlayStyles.filter)).toBeLessThanOrEqual(0.9);
 
-		// The surface itself (not just its `::after` overlay) must carry the same radius: its
-		// `overflow: hidden` clips to its own corners, and its flat background sits directly
-		// beneath the overlay, so a square surface would show through the overlay's rounded recess.
+		// The surface and its `::after` overlay need the same radius. The surface clips to its own
+		// corners, so a square background would show through a rounded overlay.
 		await expect(getComputedStyle(skeletonSurface).borderRadius).toBe(expectedRadius);
 	},
 	render: () => (
@@ -141,7 +140,6 @@ export const CustomDimensions = meta.story({
 	),
 });
 
-/** Pass `isLoading={false}` to render children unchanged. */
 export const Loaded = meta.story({
 	play: async ({ canvas }) => {
 		await expect(canvas.getByRole('button', { name: 'Submit' })).toBeEnabled();

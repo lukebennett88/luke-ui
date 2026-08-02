@@ -39,9 +39,9 @@ multiple stories that render the same state with small variations.
   easier to compare and avoids duplicate sidebar entries.
 - Keep controls usable. Forward story args through custom renders and use `argTypes` only to improve
   or constrain controls. Do not hide ordinary consumer props to make a story implementation easier.
-- Add JSDoc that explains why a consumer would use the state or API. Do not merely restate the story
-  name or describe what is visibly rendered. Replace the generator's JSDoc TODO with this
-  consumer-value guidance before the story is complete.
+- Add JSDoc when the story name and canvas do not make the consumer use or a non-obvious contract
+  clear. Omit JSDoc that only restates the story name or visible rendering. The generated `Default`
+  story needs no placeholder. Add its JSDoc only when this rule applies.
 
 A `play` function should prove behaviour, a CSS contract, or an accessibility contract that could
 regress. Interactions, focus management, computed styles, and semantic state are useful assertions.

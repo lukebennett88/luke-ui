@@ -7,11 +7,7 @@ description:
 Use `Checkbox` when someone can choose an option independently of nearby controls. Pass
 `description` to clarify what the option means.
 
-<ExampleBlock
-	src="checkbox/basic"
-	title="Checkbox — Basic"
-	description="A labelled checkbox with supporting text."
-/>
+<ExampleBlock src="checkbox/basic" title="Checkbox — Basic" />
 
 ## States
 
@@ -19,32 +15,20 @@ Use `defaultSelected` for an uncontrolled initial value, or pair `isSelected` wi
 application state owns the selection. `isIndeterminate` communicates a mixed state, such as a parent
 option whose child options are only partly selected.
 
-<ExampleBlock
-	src="checkbox/states"
-	title="Checkbox — States"
-	description="Checked, unchecked, disabled, indeterminate, and invalid checkboxes."
-/>
+<ExampleBlock src="checkbox/states" title="Checkbox — States" />
 
 Disabled checkboxes cannot receive focus, and their value cannot change. Read-only checkboxes remain
 focusable, so someone who uses a keyboard or assistive technology can still perceive their state.
 Keyboard navigation shows a focus ring. Pointer focus does not.
 
-<ExampleBlock
-	src="checkbox/controlled"
-	title="Checkbox — Controlled"
-	description="A controlled checkbox with explicit selection state."
-/>
+<ExampleBlock src="checkbox/controlled" title="Checkbox — Controlled" />
 
 ## Size
 
 Use `size` to change the checkbox control. It does not change the label typography. `medium` is the
 default. Use `small` in compact layouts and `large` where a larger control improves scanning.
 
-<ExampleBlock
-	src="checkbox/sizes"
-	title="Checkbox — Size"
-	description="Selected small, medium, and large checkboxes."
-/>
+<ExampleBlock src="checkbox/sizes" title="Checkbox — Size" />
 
 ## Validation
 
@@ -52,11 +36,7 @@ Pass `errorMessage` with `isInvalid` when the choice blocks submission. Always p
 field with no message leaves someone who cannot see the border colour with no way to know what is
 wrong.
 
-<ExampleBlock
-	src="checkbox/validation"
-	title="Checkbox — Validation"
-	description="A required checkbox with supporting text and a validation message."
-/>
+<ExampleBlock src="checkbox/validation" title="Checkbox — Validation" />
 
 Read [Validation](/components/forms/validation) for how to word the message.
 
@@ -66,11 +46,7 @@ Wrap a checkbox in block `Text` when its label needs a specific text size. The c
 inherited line height. It keeps its fixed visual square centred on the first line when the label
 wraps. Outside `Text`, it uses the normal compact control size.
 
-<ExampleBlock
-	src="checkbox/first-line-alignment"
-	title="Checkbox — First-line alignment"
-	description="Checkbox controls follow the first line across Text sizes."
-/>
+<ExampleBlock src="checkbox/first-line-alignment" title="Checkbox — First-line alignment" />
 
 ## Primitive
 

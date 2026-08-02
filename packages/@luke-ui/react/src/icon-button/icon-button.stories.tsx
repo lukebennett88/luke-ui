@@ -1,4 +1,3 @@
-import { iconNames } from '@luke-ui/react/icon';
 import type { IconButtonProps } from '@luke-ui/react/icon-button';
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { CSSProperties } from 'react';
@@ -25,11 +24,6 @@ const flexWrapStyle = {
 	flexWrap: 'wrap',
 	gap: '1rem',
 } as const satisfies CSSProperties;
-
-/** Turns a camelCase icon name like `arrowDown` into a readable label like `Arrow Down`. */
-function iconNameToLabel(iconName: string): string {
-	return iconName.replace(/([A-Z])/g, ' $1').replace(/^./, (char) => char.toUpperCase());
-}
 
 export const Default = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Add' },
@@ -142,20 +136,4 @@ export const States = meta.story({
 			await expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(disabled).boxShadow);
 		});
 	},
-});
-
-export const AllIcons = meta.story({
-	args: baseArgs,
-	render: (props) => (
-		<div style={flexWrapStyle}>
-			{iconNames.map((iconName) => (
-				<IconButton
-					{...props}
-					aria-label={iconNameToLabel(iconName)}
-					icon={iconName}
-					key={iconName}
-				/>
-			))}
-		</div>
-	),
 });

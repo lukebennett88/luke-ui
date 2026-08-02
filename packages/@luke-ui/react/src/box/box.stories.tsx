@@ -36,7 +36,6 @@ export const Default = meta.story({
 	},
 });
 
-/** Use `render` with a compatible custom div while preserving generated and consumer props. */
 export const CustomDiv = meta.story({
 	args: {
 		'aria-label': 'Account summary',

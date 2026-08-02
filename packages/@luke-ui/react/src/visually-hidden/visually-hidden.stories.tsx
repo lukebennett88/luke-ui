@@ -9,8 +9,7 @@ const meta = preview.meta({
 });
 
 /**
- * The label is hidden visually but stays in the accessibility tree, so the button
- * still has an accessible name and screen readers announce it.
+ * A visually hidden label gives the button an accessible name without adding visible text.
  */
 export const Default = meta.story({
 	play: async ({ canvas }) => {
@@ -32,8 +31,7 @@ export const Default = meta.story({
 });
 
 /**
- * Pass `elementType` to render a different element while keeping the hidden styles —
- * here a screen-reader-only section heading, exposed to assistive technology as an `h2`.
+ * Pass `elementType` when hidden content needs a specific semantic element, such as a section heading.
  */
 export const CustomElementType = meta.story({
 	play: async ({ canvas }) => {

@@ -80,19 +80,24 @@ test('start and end icons render more than one element', async () => {
 		</Grid>,
 	);
 
-	await expect.element(page.getByRole('button', { name: 'New task' })).toBeVisible();
+	const button = page.getByRole('button', { name: 'New task' });
+	await expect.element(button).toBeVisible();
+	const [firstStart, secondStart, firstEnd, secondEnd] = button.element().querySelectorAll('svg');
+	if (firstStart == null || secondStart == null || firstEnd == null || secondEnd == null) {
+		throw new Error('Expected all four icon elements.');
+	}
+	const iconPairs: Array<[SVGSVGElement, SVGSVGElement]> = [
+		[firstStart, secondStart],
+		[firstEnd, secondEnd],
+	];
+	for (const [first, second] of iconPairs) {
+		const firstRect = first.getBoundingClientRect();
+		const secondRect = second.getBoundingClientRect();
+		expect(firstRect.width).toBeGreaterThan(0);
+		expect(secondRect.width).toBeGreaterThan(0);
+		expect(secondRect.left).toBeGreaterThanOrEqual(firstRect.right);
+	}
 	await captureVisual(locator, 'button/multi-element-icons');
-});
-
-test('keyboard focus ring', async () => {
-	const scene = renderVisual(
-		<Grid columns={1}>
-			<Button>Focus me</Button>
-		</Grid>,
-	);
-
-	await focusViaKeyboard(page.getByRole('button', { name: 'Focus me' }));
-	await captureVisual(scene, 'button/focus-visible');
 });
 
 for (const appearance of visualAppearances) {

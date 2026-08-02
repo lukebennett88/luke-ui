@@ -32,8 +32,8 @@ const BACKGROUND: Record<ColorMode, Oklch> = {
 
 const TEXT_RATIO = 4.5;
 const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
-// Every role declares the same guarantees now, so `SEMANTIC_ROLES` stands in for the old per-capability
-// subsets. The one split left is geometric rather than semantic: neutral's solid comes from its own
+// Every role declares the same guarantees, so `SEMANTIC_ROLES` is the complete capability set. The
+// one split is geometric rather than semantic: neutral's solid comes from its own
 // curated dark/light chip band instead of the source lightness, so it is the only role a dead-zone
 // source cannot make unsatisfiable.
 const SOURCE_TONED_ROLES = SEMANTIC_ROLES.filter((role) => role !== 'neutral');
@@ -78,8 +78,8 @@ describe('component state distinctness', () => {
 	it('keeps steps 3-4 and 4-5 at least MIN_STATE_DELTA apart across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
-				// The muted ramp is role-independent, but every role now runs the solid-anchor search, so
-				// the corpus is swept across all six rather than the roles that used to skip it.
+				// The muted ramp is role-independent, but every role runs the solid-anchor search, so the
+				// corpus covers all six roles.
 				for (const role of SEMANTIC_ROLES) {
 					const scale = family(entry.source, mode, role);
 					const delta34 = oklabDeltaE(scale[3], scale[4]);

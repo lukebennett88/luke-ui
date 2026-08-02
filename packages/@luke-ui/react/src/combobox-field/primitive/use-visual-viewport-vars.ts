@@ -17,7 +17,7 @@ export function useVisualViewportVars(element: HTMLElement | null): void {
 
 		// `innerHeight`/`clientHeight` don't reliably report the fixed-position containing
 		// block's height across browsers: on iOS Safari `innerHeight` tracks the visual
-		// viewport, so it shrinks with the keyboard and the old inset math collapsed to ~0.
+		// viewport, so the keyboard shrink can make the calculated inset approach zero.
 		// A probe pinned to all four edges via `inset: 0` measures that containing block
 		// directly, by construction, regardless of toolbar/keyboard state.
 		const probe = document.createElement('div');

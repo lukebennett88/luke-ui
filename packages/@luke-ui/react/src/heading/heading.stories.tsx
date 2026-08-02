@@ -92,9 +92,6 @@ export const SizeOverride = meta.story({
 	),
 });
 
-/**
- * Truncate heading content when layout is constrained.
- */
 export const Truncate = meta.story({
 	args: {
 		level: 2,
