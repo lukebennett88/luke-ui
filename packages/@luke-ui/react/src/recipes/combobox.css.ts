@@ -2,6 +2,7 @@ import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
 import { focusRing } from '../styles/focus-ring.js';
+import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import {
 	composeInputStateSelectors,
@@ -107,6 +108,22 @@ const comboboxActionStyles = {
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
 	},
 } satisfies StyleRule;
+
+/**
+ * The chrome above as a single class, composed into the `trigger` and `clearButton`
+ * slots below. Spreading the object into both slots emitted every declaration twice,
+ * including both media queries and all five state selectors.
+ */
+const comboboxActionClassName = styleInLayer('recipes', comboboxActionStyles);
+
+/**
+ * Per-size box for both action buttons, shared for the same reason: the two slots
+ * occupy an identical square at each size.
+ */
+const comboboxActionSizeClassNames = {
+	medium: styleInLayer('recipes', { blockSize: '28px', inlineSize: '28px', paddingInline: 0 }),
+	small: styleInLayer('recipes', { blockSize: '24px', inlineSize: '24px', paddingInline: 0 }),
+};
 
 /**
  * Raw slotted config for the combobox anatomy.
@@ -221,22 +238,23 @@ const comboboxConfig = {
 				},
 			},
 		},
-		trigger: {
-			...comboboxActionStyles,
-			marginInlineEnd: vars.space[100],
-			marginInlineStart: vars.space[100],
+		trigger: [
+			comboboxActionClassName,
+			{
+				marginInlineEnd: vars.space[100],
+				marginInlineStart: vars.space[100],
 
-			selectors: {
-				...comboboxActionStyles.selectors,
-				'&:first-child': {
-					color: vars.color.text.primary,
-					inlineSize: '100%',
-					justifyContent: 'space-between',
-					marginInline: 0,
+				selectors: {
+					'&:first-child': {
+						color: vars.color.text.primary,
+						inlineSize: '100%',
+						justifyContent: 'space-between',
+						marginInline: 0,
+					},
 				},
 			},
-		},
-		clearButton: comboboxActionStyles,
+		],
+		clearButton: comboboxActionClassName,
 		itemCheck: {
 			flexShrink: 0,
 			marginInlineStart: 'auto',
@@ -448,12 +466,8 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
-				trigger: {
-					blockSize: '28px',
-					inlineSize: '28px',
-					paddingInline: 0,
-				},
-				clearButton: { blockSize: '28px', inlineSize: '28px', paddingInline: 0 },
+				trigger: comboboxActionSizeClassNames.medium,
+				clearButton: comboboxActionSizeClassNames.medium,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.medium,
 					paddingBlock: vars.space[200],
@@ -477,12 +491,8 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},
-				trigger: {
-					blockSize: '24px',
-					inlineSize: '24px',
-					paddingInline: 0,
-				},
-				clearButton: { blockSize: '24px', inlineSize: '24px', paddingInline: 0 },
+				trigger: comboboxActionSizeClassNames.small,
+				clearButton: comboboxActionSizeClassNames.small,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space[100],
