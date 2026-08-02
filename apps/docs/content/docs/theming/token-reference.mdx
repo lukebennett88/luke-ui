@@ -20,34 +20,7 @@ not carry resolved colour values into application CSS.
 
 ## Browse the tokens
 
-Luke UI generates this explorer from the contract that builds every theme, so it holds each public
-token once and nothing else. Each sample renders in the active identity and colour mode.
+Luke UI generates this explorer from the contract that builds every theme. It holds each public
+variable once and nothing else. Each sample renders in the active identity and colour mode.
 
 <TokenExplorer />
-
-## What stays private
-
-The explorer lists the whole public styling API. These parts are internal, and they change without a
-breaking release:
-
-- The generated colour scales. `defineTheme` derives a full scale for each colour mode, and only the
-  semantic tokens above name a step of it.
-- Component recipe selectors and generated class names.
-- Any `--luke-*` custom property that the explorer does not list.
-
-Read a private value into application CSS and the element stops following the active identity and
-colour mode.
-
-## Continue learning
-
-<Cards>
-	<Card href="/theming/authoring" title="Author a theme">
-		Compile a product-owned stylesheet for the whole contract.
-	</Card>
-	<Card href="/theming/applying" title="Apply a bundled theme">
-		Load the CSS, set the root classes, and preserve them through portals.
-	</Card>
-	<Card href="/overview/styling" title="Styling">
-		Understand when to reach for a token instead of a component API.
-	</Card>
-</Cards>

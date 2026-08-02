@@ -55,7 +55,7 @@ const PURPOSE_DEFINITIONS = [
 	{
 		description: 'The spacing scale for gaps, padding, and margin.',
 		id: 'spacing',
-		related: { label: 'Spacing', splat: 'overview/spacing' },
+		related: null,
 		title: 'Spacing',
 	},
 	{
@@ -103,7 +103,6 @@ const FAMILY_PURPOSES = {
 	space: 'spacing',
 } as const satisfies Record<ThemeTokenFamily, TokenPurposeId | null>;
 
-/** Second path segment of a colour token to its purpose. `border` splits again, so it is absent. */
 const COLOR_SECTION_PURPOSES: Record<string, TokenPurposeId | undefined> = {
 	background: 'roles',
 	foreground: 'roles',
@@ -113,7 +112,6 @@ const COLOR_SECTION_PURPOSES: Record<string, TokenPurposeId | undefined> = {
 	text: 'content',
 };
 
-/** Borders that name a structural part rather than one of the six semantic roles. */
 const STRUCTURAL_BORDERS = new Set(['control', 'decorative', 'focus']);
 
 function resolveColorPurpose(path: string): TokenPurposeId | undefined {

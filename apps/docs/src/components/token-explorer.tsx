@@ -1,22 +1,10 @@
-/**
- * THESIS: A shop-by-purpose index of the public token contract, not a variable dump. Every row is
- * the token doing its own job in the theme the reader is already looking at, so the page cannot
- * disagree with the product.
- * OWN-WORLD: The docs' hairline-ruled grid and fumadocs token language, matched to the icon
- * gallery. No cards, no shadows, no colour of its own.
- * STORY: Pick a purpose or filter by name, see the effect, take the path or the variable.
- * FIRST VIEWPORT: Filter, live count, the ten purposes, then the first group — the shape of the
- * contract is visible before any scrolling.
- * FORM: Extension of an established surface. Sections carry the purpose and the link out; the grid
- * carries the tokens.
- */
+import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
 import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
-import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import type { CSSProperties, JSX, ReactNode } from 'react';
-import { Fragment, useDeferredValue, useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { ThemeToken, ThemeTokenFamily } from '../generated/token-reference.generated.js';
 import { themeTokens } from '../generated/token-reference.generated.js';
 import type { TokenPurposeGroup } from '../lib/token-purpose-groups.js';
@@ -24,22 +12,9 @@ import { tokenPurposeGroups } from '../lib/token-purpose-groups.js';
 import { DocsLink } from './docs-link.js';
 
 const TOTAL_TOKEN_COUNT = themeTokens.length;
-
-/** Lets one sample reference a sibling token without rebuilding the `--luke-*` naming rule here. */
 const VARIABLE_BY_PATH = new Map(themeTokens.map((token) => [token.path, token.variable]));
-
-/**
- * Shared sample stage. One minimum height gives the grid a single scan line, and the stage grows
- * for the tokens a fixed height would clip, such as the line height of the largest type step.
- */
-const SAMPLE_FRAME_CLASS_NAME = 'flex min-h-12 w-full items-center justify-center';
-
-const FOCUS_RING_CLASS_NAME =
-	'focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring';
-
+const SAMPLE_FRAME_CLASS_NAME = 'flex min-h-10 w-24 items-center justify-center';
 const MOTION_KEYFRAMES = `@keyframes luke-docs-token-motion { from { transform: translateX(-0.75rem); } to { transform: translateX(0.75rem); } } @media (prefers-reduced-motion: reduce) { [data-token-motion] { animation: none !important; } }`;
-
-/** Fixed counterpart for whichever motion axis a leaf does not itself demonstrate. */
 const FALLBACK_MOTION_DURATION = '0.9s';
 const FALLBACK_MOTION_EASING = 'ease-in-out';
 
@@ -50,182 +25,131 @@ const stageStyle = {
 	borderWidth: 1,
 } as const satisfies CSSProperties;
 
-/** Purpose-grouped index of every public token, sampled in the active identity and colour mode. */
+/** Purpose-grouped index of every public token, sampled in the active theme. */
 export function TokenExplorer(): JSX.Element {
 	const [filter, setFilter] = useState('');
-	const inputRef = useRef<HTMLInputElement | null>(null);
-
 	const query = filter.trim().toLowerCase();
-	const groups = useMemo(() => matchGroups(query), [query]);
+	const groups = matchGroups(query);
 	const matchCount = groups.reduce((total, group) => total + group.tokens.length, 0);
-
 	const countText =
 		query === '' ? `${TOTAL_TOKEN_COUNT} tokens` : `${matchCount} of ${TOTAL_TOKEN_COUNT}`;
-	/** Deferred so a screen reader hears the settled result, not every keystroke. */
-	const deferredCountText = useDeferredValue(countText);
-
-	function handleClearFilter() {
-		setFilter('');
-		inputRef.current?.focus();
-	}
 
 	return (
-		<div className="not-prose flex flex-col gap-6">
+		<div className="not-prose flex flex-col gap-4">
 			<style>{MOTION_KEYFRAMES}</style>
 
-			<div className="flex flex-col gap-3">
-				<div className="flex flex-wrap items-center gap-3">
-					<div
-						className="min-w-[12rem] flex-1 basis-56"
-						ref={(node) => {
-							inputRef.current = node?.querySelector('input') ?? null;
-						}}
-					>
-						<TextField
-							aria-label="Filter tokens by name"
-							onChange={setFilter}
-							placeholder="Filter by name"
-							prefix={<Icon aria-hidden name="search" size="small" />}
-							size="small"
-							value={filter}
-						/>
-					</div>
-					<p className="ms-auto text-fd-muted-foreground text-sm tabular-nums">{countText}</p>
-					<VisuallyHidden aria-live="polite" elementType="p">
-						{deferredCountText}
-					</VisuallyHidden>
+			<div className="flex flex-wrap items-center gap-3">
+				<div className="min-w-48 flex-1">
+					<TextField
+						aria-label="Filter tokens by name"
+						onChange={setFilter}
+						placeholder="Filter by name"
+						prefix={<Icon aria-hidden name="search" size="small" />}
+						size="small"
+						value={filter}
+					/>
 				</div>
-
-				{groups.length > 0 ? (
-					<nav aria-label="Token purposes" className="flex flex-wrap gap-x-4 gap-y-1">
-						{groups.map((group) => (
-							<a
-								className={cx(
-									'text-fd-muted-foreground text-sm underline-offset-4 hover:text-fd-foreground hover:underline',
-									FOCUS_RING_CLASS_NAME,
-								)}
-								href={`#${sectionId(group)}`}
-								key={group.id}
-							>
-								{group.title}
-							</a>
-						))}
-					</nav>
-				) : null}
+				<p aria-live="polite" className="ms-auto text-fd-muted-foreground text-sm tabular-nums">
+					{countText}
+				</p>
 			</div>
 
 			{groups.length === 0 ? (
-				<EmptyState onClear={handleClearFilter} query={filter.trim()} />
+				<EmptyState onClear={() => setFilter('')} query={filter.trim()} />
 			) : (
-				groups.map((group) => <PurposeSection group={group} key={group.id} />)
+				groups.map((group, index) => (
+					<PurposeDetails group={group} isOpen={query !== '' || index === 0} key={group.id} />
+				))
 			)}
 		</div>
 	);
 }
 
-function sectionId(group: TokenPurposeGroup): string {
-	return `token-purpose-${group.id}`;
-}
-
-/** Matches a token on the strings a reader has: its path, its variable, and the purpose it serves. */
 function matchGroups(query: string): ReadonlyArray<TokenPurposeGroup> {
 	if (query === '') return tokenPurposeGroups;
 
-	const matched: Array<TokenPurposeGroup> = [];
-	for (const group of tokenPurposeGroups) {
-		if (group.title.toLowerCase().includes(query)) {
-			matched.push(group);
-			continue;
-		}
+	return tokenPurposeGroups.flatMap((group) => {
+		if (group.title.toLowerCase().includes(query)) return [group];
 		const tokens = group.tokens.filter(
 			(token) =>
 				token.path.toLowerCase().includes(query) || token.variable.toLowerCase().includes(query),
 		);
-		if (tokens.length > 0) matched.push({ ...group, tokens });
-	}
-	return matched;
+		return tokens.length === 0 ? [] : [{ ...group, tokens }];
+	});
 }
 
-function PurposeSection({ group }: { group: TokenPurposeGroup }) {
-	const headingId = sectionId(group);
-
+function PurposeDetails({ group, isOpen }: { group: TokenPurposeGroup; isOpen: boolean }) {
 	return (
-		<section aria-labelledby={headingId} className="flex flex-col gap-3">
-			<div className="flex flex-col gap-1">
-				<div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-					<h3 className="scroll-mt-24 font-semibold text-base" id={headingId}>
-						{group.title}
-					</h3>
+		<details className="group rounded-xl border border-fd-border" open={isOpen}>
+			<summary className="flex cursor-pointer items-center gap-2 px-4 py-3 font-semibold text-base marker:hidden">
+				<Icon
+					aria-hidden
+					className="transition-transform group-open:rotate-90 motion-reduce:transition-none"
+					name="chevronRight"
+					size="xsmall"
+				/>
+				{group.title}
+				<span className="ms-auto font-normal text-fd-muted-foreground text-sm tabular-nums">
+					{group.tokens.length}
+				</span>
+			</summary>
+
+			<div className="border-fd-border border-t">
+				<div className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3">
+					<p className="text-fd-muted-foreground text-sm">{group.description}</p>
 					{group.related ? (
 						<DocsLink
-							className={cx(
-								'flex items-center gap-0.5 text-fd-muted-foreground text-sm underline-offset-4 hover:text-fd-foreground hover:underline',
-								FOCUS_RING_CLASS_NAME,
-							)}
+							className="text-fd-muted-foreground text-sm underline-offset-4 hover:text-fd-foreground hover:underline"
 							params={{ _splat: group.related.splat }}
 							to="/$"
 						>
 							{group.related.label}
-							<Icon aria-hidden name="chevronRight" size="xsmall" />
 						</DocsLink>
 					) : null}
 				</div>
-				<p className="text-fd-muted-foreground text-sm">{group.description}</p>
+				<TokenTable tokens={group.tokens} />
 			</div>
-
-			<div className="grid grid-cols-1 overflow-hidden rounded-xl border border-fd-border sm:grid-cols-2 xl:grid-cols-3">
-				{group.tokens.map((token) => (
-					<TokenCell key={token.path} token={token} />
-				))}
-			</div>
-		</section>
+		</details>
 	);
 }
 
-/** One token: the sample it produces, the `vars` path, and the custom property it resolves to. */
-function TokenCell({ token }: { token: ThemeToken }) {
+function TokenTable({ tokens }: { tokens: ReadonlyArray<ThemeToken> }) {
 	return (
-		<div className="-mr-px -mb-px flex flex-col gap-2 border-fd-border border-r border-b p-3">
-			<div aria-hidden>
-				<TokenSample token={token} />
-			</div>
-			<div className="flex min-w-0 flex-col gap-0.5">
-				<code className="break-words font-mono text-fd-foreground text-xs leading-snug">
-					<WrappablePath path={token.path} />
-				</code>
-				<code className="break-words font-mono text-[11px] text-fd-muted-foreground leading-snug">
-					{token.variable}
-				</code>
-			</div>
+		<div className="overflow-x-auto border-fd-border border-t">
+			<table className="w-full min-w-[40rem] border-collapse text-sm">
+				<thead>
+					<tr className="border-fd-border border-b text-left">
+						<th className="w-32 px-4 py-2 font-medium" scope="col">
+							Sample
+						</th>
+						<th className="px-4 py-2 font-medium" scope="col">
+							<code>vars</code> path
+						</th>
+						<th className="px-4 py-2 font-medium" scope="col">
+							CSS variable
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{tokens.map((token) => (
+						<tr className="border-fd-border border-b last:border-b-0" key={token.path}>
+							<td aria-hidden className="px-4 py-2">
+								<TokenSample token={token} />
+							</td>
+							<td className="px-4 py-2">
+								<code>{token.path}</code>
+							</td>
+							<td className="px-4 py-2">
+								<code className="text-fd-muted-foreground">{token.variable}</code>
+							</td>
+						</tr>
+					))}
+				</tbody>
+			</table>
 		</div>
 	);
 }
 
-/**
- * A dotted path has no break opportunity of its own, so a narrow column would either overflow or
- * break mid-segment. This offers a break after each dot, keeping every segment whole.
- */
-function WrappablePath({ path }: { path: string }) {
-	const segments = path.split('.');
-	const lastIndex = segments.length - 1;
-
-	return segments.map((segment, index) =>
-		index === lastIndex ? (
-			segment
-		) : (
-			// Segments repeat across tokens, so the segment and its position together form the key.
-			<Fragment key={`${segment}-${String(index)}`}>
-				{`${segment}.`}
-				<wbr />
-			</Fragment>
-		),
-	);
-}
-
-/**
- * Every sample reads the resolved `--luke-*` custom property off the page's own theme root, so it
- * follows the identity and colour mode already in use without re-rendering.
- */
 function TokenSample({ token }: { token: ThemeToken }) {
 	const Sample = FAMILY_SAMPLES[token.family];
 	return <Sample {...token} />;
@@ -237,7 +161,6 @@ function ColorSample({ variable }: ThemeToken) {
 			className={SAMPLE_FRAME_CLASS_NAME}
 			style={{ ...stageStyle, backgroundColor: vars.color.surface.canvas }}
 		>
-			{/* Stretched rather than sized in percent: the stage has no definite height to resolve against. */}
 			<span
 				style={{ alignSelf: 'stretch', backgroundColor: `var(${variable})`, inlineSize: '100%' }}
 			/>
@@ -317,7 +240,6 @@ function SpaceSample({ variable }: ThemeToken) {
 	);
 }
 
-/** Shared by `controlSize` and `iconSize`: both are box dimensions, sized straight from the token. */
 function SizeSample({ variable }: ThemeToken) {
 	return (
 		<span className={SAMPLE_FRAME_CLASS_NAME}>
@@ -334,8 +256,6 @@ function SizeSample({ variable }: ThemeToken) {
 }
 
 function MotionSample({ path, variable }: ThemeToken) {
-	// `motion.duration.*` and `motion.easing.*` each drive one axis of the same animation; the other
-	// axis takes a fixed value, purely so the dot has something to move along.
 	const axis = path.split('.')[1];
 
 	return (
@@ -366,10 +286,6 @@ function TextSample({ children = 'Aa', style }: { children?: ReactNode; style: C
 	);
 }
 
-/**
- * `capHeightTrim` and `baselineTrim` are the capsize margin offsets Luke UI applies above and below a
- * line of text. A swatch cannot show a margin, so this applies the trim to a bar's own margin.
- */
 function TrimSample({
 	property,
 	variable,
@@ -397,17 +313,13 @@ function FontSample({ path, variable }: ThemeToken) {
 	if (section === 'family') return <TextSample style={{ fontFamily: `var(${variable})` }} />;
 	if (section === 'weight') return <TextSample style={{ fontWeight: `var(${variable})` }} />;
 
-	// Every other `font` path is a size step, and each step carries the same five sub-properties. The
-	// step's own font size sizes the sample, so a line height or a letter spacing reads at the scale
-	// it ships at.
 	const stepFontSizeVariable = VARIABLE_BY_PATH.get(`font.${section}.fontSize`);
-	const stepFontSize =
-		stepFontSizeVariable === undefined ? undefined : `var(${stepFontSizeVariable})`;
+	const fontSize = stepFontSizeVariable ? `var(${stepFontSizeVariable})` : undefined;
 
 	if (property === 'fontSize') return <TextSample style={{ fontSize: `var(${variable})` }} />;
 	if (property === 'lineHeight') {
 		return (
-			<TextSample style={{ fontSize: stepFontSize, lineHeight: `var(${variable})` }}>
+			<TextSample style={{ fontSize, lineHeight: `var(${variable})` }}>
 				Aa
 				<br />
 				Aa
@@ -415,21 +327,18 @@ function FontSample({ path, variable }: ThemeToken) {
 		);
 	}
 	if (property === 'letterSpacing') {
-		return <TextSample style={{ fontSize: stepFontSize, letterSpacing: `var(${variable})` }} />;
+		return <TextSample style={{ fontSize, letterSpacing: `var(${variable})` }} />;
+	}
+	if (property === 'baselineTrim') {
+		return <TrimSample property="marginBlockStart" variable={variable} />;
+	}
+	if (property === 'capHeightTrim') {
+		return <TrimSample property="marginBlockEnd" variable={variable} />;
 	}
 
-	return (
-		<TrimSample
-			property={property === 'baselineTrim' ? 'marginBlockStart' : 'marginBlockEnd'}
-			variable={variable}
-		/>
-	);
+	return <TextSample style={{}} />;
 }
 
-/**
- * The sample each family needs. Typed as a total record, so a new top-level family in the theme
- * contract is a type error here until the explorer can show what it does.
- */
 const FAMILY_SAMPLES: Record<ThemeTokenFamily, (token: ThemeToken) => ReactNode> = {
 	actionControlFinish: FinishSample,
 	color: ColorSample,
@@ -446,16 +355,9 @@ function EmptyState({ onClear, query }: { onClear: () => void; query: string }) 
 	return (
 		<div className="flex flex-col items-center gap-3 rounded-xl border border-fd-border px-6 py-16 text-center">
 			<p className="text-fd-muted-foreground text-sm">No token matches &quot;{query}&quot;</p>
-			<button
-				className={cx(
-					'rounded-md border border-fd-border px-3 py-1.5 font-medium text-fd-foreground text-sm',
-					'hover:bg-fd-accent hover:text-fd-accent-foreground',
-				)}
-				onClick={onClear}
-				type="button"
-			>
+			<Button appearance="subtle" onPress={onClear} size="small">
 				Clear filter
-			</button>
+			</Button>
 		</div>
 	);
 }
