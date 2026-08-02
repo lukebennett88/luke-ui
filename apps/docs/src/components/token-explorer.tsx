@@ -1,10 +1,13 @@
-import { Button } from '@luke-ui/react/button';
+import { Button as LukeButton } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
 import { vars } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import type { CSSProperties, JSX, ReactNode } from 'react';
 import { useState } from 'react';
+import { Button as RacButton } from 'react-aria-components/Button';
+import { Disclosure, DisclosurePanel } from 'react-aria-components/Disclosure';
+import { Heading } from 'react-aria-components/Heading';
 import type { ThemeToken, ThemeTokenFamily } from '../generated/token-reference.generated.js';
 import { themeTokens } from '../generated/token-reference.generated.js';
 import type { TokenPurposeGroup } from '../lib/token-purpose-groups.js';
@@ -57,9 +60,7 @@ export function TokenExplorer(): JSX.Element {
 			{groups.length === 0 ? (
 				<EmptyState onClear={() => setFilter('')} query={filter.trim()} />
 			) : (
-				groups.map((group, index) => (
-					<PurposeDetails group={group} isOpen={query !== '' || index === 0} key={group.id} />
-				))
+				groups.map((group) => <PurposeDetails group={group} key={group.id} />)
 			)}
 		</div>
 	);
@@ -78,23 +79,28 @@ function matchGroups(query: string): ReadonlyArray<TokenPurposeGroup> {
 	});
 }
 
-function PurposeDetails({ group, isOpen }: { group: TokenPurposeGroup; isOpen: boolean }) {
+function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 	return (
-		<details className="group rounded-xl border border-fd-border" open={isOpen}>
-			<summary className="flex cursor-pointer items-center gap-2 px-4 py-3 font-semibold text-base marker:hidden">
-				<Icon
-					aria-hidden
-					className="transition-transform group-open:rotate-90 motion-reduce:transition-none"
-					name="chevronRight"
-					size="xsmall"
-				/>
-				{group.title}
-				<span className="ms-auto font-normal text-fd-muted-foreground text-sm tabular-nums">
-					{group.tokens.length}
-				</span>
-			</summary>
+		<Disclosure className="group rounded-xl border border-fd-border" defaultExpanded>
+			<Heading className="m-0" level={3}>
+				<RacButton
+					className="flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-left font-semibold text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:ring-inset"
+					slot="trigger"
+				>
+					<Icon
+						aria-hidden
+						className="transition-transform group-data-[expanded]:rotate-90 motion-reduce:transition-none"
+						name="chevronRight"
+						size="xsmall"
+					/>
+					{group.title}
+					<span className="ms-auto font-normal text-fd-muted-foreground text-sm tabular-nums">
+						{group.tokens.length}
+					</span>
+				</RacButton>
+			</Heading>
 
-			<div className="border-fd-border border-t">
+			<DisclosurePanel className="border-fd-border border-t">
 				<div className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3">
 					<p className="text-fd-muted-foreground text-sm">{group.description}</p>
 					{group.related ? (
@@ -108,8 +114,8 @@ function PurposeDetails({ group, isOpen }: { group: TokenPurposeGroup; isOpen: b
 					) : null}
 				</div>
 				<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
-			</div>
-		</details>
+			</DisclosurePanel>
+		</Disclosure>
 	);
 }
 
@@ -370,9 +376,9 @@ function EmptyState({ onClear, query }: { onClear: () => void; query: string }) 
 	return (
 		<div className="flex flex-col items-center gap-3 rounded-xl border border-fd-border px-6 py-16 text-center">
 			<p className="text-fd-muted-foreground text-sm">No token matches &quot;{query}&quot;</p>
-			<Button appearance="subtle" onPress={onClear} size="small">
+			<LukeButton appearance="subtle" onPress={onClear} size="small">
 				Clear filter
-			</Button>
+			</LukeButton>
 		</div>
 	);
 }
