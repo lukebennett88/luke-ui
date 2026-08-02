@@ -309,12 +309,12 @@ only overrides need to be specified.
 ```tsx
 const responsive = createSprinkles({
 	display: 'flex',
-	flexDirection: { xsmall: 'column', medium: 'row' },
-	gap: { xsmall: '300', medium: '600' },
+	flexDirection: { initial: 'column', medium: 'row' },
+	gap: { initial: '300', medium: '600' },
 });
 ```
 
-The retained breakpoints are `xsmall` (base), `small` (640px), `medium` (768px), `large` (1024px),
+The retained breakpoints are `initial` (base), `small` (640px), `medium` (768px), `large` (1024px),
 `xlarge` (1280px), and `xxlarge` (1536px).
 
 ## React Aria `render` prop

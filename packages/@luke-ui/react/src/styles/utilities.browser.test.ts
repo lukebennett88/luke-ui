@@ -18,18 +18,18 @@ test('applies every retained breakpoint responsively', async () => {
 	const element = mount(
 		createSprinkles({
 			padding: {
+				initial: '100',
 				large: '400',
 				medium: '300',
 				small: '200',
 				xlarge: '600',
-				xsmall: '100',
 				xxlarge: '800',
 			},
 		}),
 	);
 
 	const breakpoints = [
-		{ expected: '4px', name: 'xsmall', width: 320 },
+		{ expected: '4px', name: 'initial', width: 320 },
 		{ expected: '8px', name: 'small', width: 640 },
 		{ expected: '12px', name: 'medium', width: 768 },
 		{ expected: '16px', name: 'large', width: 1024 },

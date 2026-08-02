@@ -4,7 +4,7 @@ import { vars } from '../theme/contract.css.js';
 import { layers } from './layers.css.js';
 
 const responsiveConditions = {
-	xsmall: {},
+	initial: {},
 	small: { '@media': 'screen and (width >= 640px)' },
 	medium: { '@media': 'screen and (width >= 768px)' },
 	large: { '@media': 'screen and (width >= 1024px)' },
@@ -30,7 +30,7 @@ const marginScale = { ...spaceScale, auto: 'auto' } as const;
 const responsiveProperties = defineProperties({
 	'@layer': layers.utilities,
 	conditions: responsiveConditions,
-	defaultCondition: 'xsmall',
+	defaultCondition: 'initial',
 	dynamicProperties: {
 		alignContent: {
 			center: 'center',

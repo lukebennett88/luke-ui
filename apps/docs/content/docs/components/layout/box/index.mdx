@@ -3,9 +3,9 @@ title: Box
 description: A div with responsive Luke UI layout properties.
 ---
 
-`Box` is a `div` that accepts Luke UI Sprinkles properties. It places content in a layout, adds
-token spacing, constrains an element's size, or controls a flex or grid child. Use a normal `div`
-when no supported layout property applies.
+`Box` is a `div` that accepts Luke UI layout properties. It places content in a layout, adds token
+spacing, constrains an element's size, or controls a flex or grid child. Use a normal `div` when no
+supported layout property applies.
 
 <ExampleBlock src="box/basic" title="Box — Basic" />
 
@@ -27,22 +27,21 @@ to the writing direction without left and right variants.
 ## Responsive values
 
 Pass a direct value when it does not change. Use an object keyed by breakpoint when it does. Values
-cascade upward from `xsmall`, so only specify the changes.
+cascade upward from `initial`, so only specify the changes.
 
 <ExampleBlock src="box/responsive-layout" title="Box — Responsive layout" />
 
 ```tsx
 <Box
 	display="flex"
-	flexDirection={{ xsmall: 'column', medium: 'row' }}
-	gap={{ xsmall: '200', medium: '600' }}
+	flexDirection={{ initial: 'column', medium: 'row' }}
+	gap={{ initial: '200', medium: '600' }}
 >
 	{children}
 </Box>
 ```
 
-The breakpoints are `xsmall` (base), `small` (640px), `medium` (768px), `large` (1024px), `xlarge`
-(1280px), and `xxlarge` (1536px).
+See [Breakpoints](/overview/breakpoints) for the available keys and fixed thresholds.
 
 ## Spacing values
 

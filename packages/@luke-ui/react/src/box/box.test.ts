@@ -4,7 +4,7 @@ import type { BoxProps } from './index.js';
 
 const boxProps = {
 	'aria-label': 'Account summary',
-	display: { medium: 'flex', xsmall: 'block' },
+	display: { initial: 'block', medium: 'flex' },
 	id: 'account-summary',
 	onClick: () => undefined,
 	padding: '400',
@@ -22,7 +22,7 @@ test('preserves native DOM, render, and responsive layout props', () => {
 	expectTypeOf(boxProps).toExtend<BoxProps>();
 	expectTypeOf(boxProps.render).toExtend<BoxProps['render']>();
 	expectTypeOf(boxProps.display).toEqualTypeOf<{
+		initial: 'block';
 		medium: 'flex';
-		xsmall: 'block';
 	}>();
 });

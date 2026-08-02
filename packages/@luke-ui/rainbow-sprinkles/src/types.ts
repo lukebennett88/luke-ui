@@ -153,35 +153,40 @@ export type SprinkleProperties = {
 };
 
 // Mapped config types produced by defineProperties, preserving literal scale key types.
+type ConfigConditionalPropertyValue<ConditionName extends string> = {
+	default: string;
+	conditions: Record<ConditionName, string>;
+};
+
 type DynamicConfigEntry<
 	K extends string,
 	Scale extends Record<string, unknown> | true,
-	HasCond extends boolean,
+	ConditionName extends string,
 > = Scale extends true
-	? HasCond extends true
+	? [ConditionName] extends [never]
 		? {
-				dynamic: ConditionalPropertyValue;
-				vars: ConditionalPropertyValue;
-				dynamicScale: true;
-				name: K;
-			}
-		: {
 				dynamic: NonConditionalPropertyValue;
 				vars: NonConditionalPropertyValue;
 				dynamicScale: true;
 				name: K;
 			}
+		: {
+				dynamic: ConfigConditionalPropertyValue<ConditionName>;
+				vars: ConfigConditionalPropertyValue<ConditionName>;
+				dynamicScale: true;
+				name: K;
+			}
 	: Scale extends Record<string, unknown>
-		? HasCond extends true
+		? [ConditionName] extends [never]
 			? {
-					dynamic: ConditionalPropertyValue;
-					vars: ConditionalPropertyValue;
+					dynamic: NonConditionalPropertyValue;
+					vars: NonConditionalPropertyValue;
 					dynamicScale: { [T in keyof Scale & string]: string };
 					name: K;
 				}
 			: {
-					dynamic: NonConditionalPropertyValue;
-					vars: NonConditionalPropertyValue;
+					dynamic: ConfigConditionalPropertyValue<ConditionName>;
+					vars: ConfigConditionalPropertyValue<ConditionName>;
 					dynamicScale: { [T in keyof Scale & string]: string };
 					name: K;
 				}
@@ -190,21 +195,27 @@ type DynamicConfigEntry<
 type StaticConfigEntry<
 	K extends string,
 	Scale extends ReadonlyArray<string> | Record<string, unknown>,
-	HasCond extends boolean,
+	ConditionName extends string,
 > =
 	Scale extends ReadonlyArray<infer V extends string>
-		? HasCond extends true
-			? { values: { [X in V]: ConditionalPropertyValue }; staticScale: Scale; name: K }
-			: { values: { [X in V]: NonConditionalPropertyValue }; staticScale: Scale; name: K }
+		? [ConditionName] extends [never]
+			? { values: { [X in V]: NonConditionalPropertyValue }; staticScale: Scale; name: K }
+			: {
+					values: { [X in V]: ConfigConditionalPropertyValue<ConditionName> };
+					staticScale: Scale;
+					name: K;
+				}
 		: Scale extends Record<string, unknown>
-			? HasCond extends true
+			? [ConditionName] extends [never]
 				? {
-						values: { [T in keyof Scale & string]: ConditionalPropertyValue };
+						values: { [T in keyof Scale & string]: NonConditionalPropertyValue };
 						staticScale: { [T in keyof Scale & string]: string };
 						name: K;
 					}
 				: {
-						values: { [T in keyof Scale & string]: NonConditionalPropertyValue };
+						values: {
+							[T in keyof Scale & string]: ConfigConditionalPropertyValue<ConditionName>;
+						};
 						staticScale: { [T in keyof Scale & string]: string };
 						name: K;
 					}
@@ -219,7 +230,7 @@ export type MakeConfig<
 			[K in keyof Dyn & string]: DynamicConfigEntry<
 				K,
 				NonNullable<Dyn[K]>,
-				Cond extends undefined ? false : true
+				Cond extends ConfigConditions ? keyof Cond & string : never
 			>;
 		}
 	: Record<never, never>) &
@@ -228,7 +239,7 @@ export type MakeConfig<
 				[K in keyof Stat & string]: StaticConfigEntry<
 					K,
 					NonNullable<Stat[K]>,
-					Cond extends undefined ? false : true
+					Cond extends ConfigConditions ? keyof Cond & string : never
 				>;
 			}
 		: Record<never, never>);

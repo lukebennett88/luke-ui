@@ -4,7 +4,7 @@ import { vars } from '@luke-ui/react/theme';
 
 export default function ResponsiveLayout() {
 	return (
-		<Box display="flex" flexDirection={{ medium: 'row', xsmall: 'column' }} gap="300">
+		<Box display="flex" flexDirection={{ initial: 'column', medium: 'row' }} gap="300">
 			<Item />
 			<Item />
 		</Box>
