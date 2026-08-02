@@ -36,6 +36,26 @@ The specimen keeps each step's font size, line height, letter spacing, and trim 
 Text defaults to `300`. Heading selects a size from its level, and accepts `size` when the visual
 hierarchy needs a deliberate override.
 
+## Choose a size step
+
+Pick a step for the role the content plays, not for a pixel measurement. The low steps, `100` and
+`200`, suit compact labels and metadata that sit beside other content. The middle steps, `300`
+through `500`, carry running text and short supporting copy. The high steps, `600` through `900`,
+suit display text and prominent standalone values. A custom theme can change every step's exact
+size, so the role is what stays true across themes.
+
+## Capsize trims
+
+Every step also carries a Capsize trim. A line box normally reserves space above the capital letters
+and below the baseline, left over from the font's internal metrics. The trim removes that reserve,
+so a text box's own edges land on the cap height and the baseline instead.
+
+Trimmed text keeps a predictable baseline, regardless of line height. Two very different size steps
+land on the same line when trimmed. Left untrimmed, the reserved space pushes each step's letters a
+different distance above it.
+
+<CapsizeTrimExplorer />
+
 ## Weight and colour
 
 Themes define the `body`, `label`, `heading`, and `emphasis` weight roles. Use the role that
@@ -50,6 +70,15 @@ values such as `primary`, `secondary`, `accent`, `info`, `success`, `warning`, a
 
 Applications load any font files required by a custom theme. The theme then assigns that typeface to
 the shared scale and weight roles.
+
+## Best practices
+
+| Guidance | Practice                                                                                            |
+| -------- | --------------------------------------------------------------------------------------------------- |
+| Do       | Choose a size step for the content's role, such as `100` for metadata or `700` for a display value. |
+| Don't    | Pick a size step by comparing pixel measurements between themes.                                    |
+| Do       | Use `Heading` levels to build document structure, and reach for `size` only as a visual override.   |
+| Don't    | Skip a heading level to get a smaller size. Set `size` on the correct level instead.                |
 
 ## Continue learning
 

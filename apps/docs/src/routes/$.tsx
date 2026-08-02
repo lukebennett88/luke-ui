@@ -10,6 +10,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
+import { CapsizeTrimExplorer } from '../components/capsize-trim-explorer';
 import { ExampleBlock } from '../components/example-block';
 import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
@@ -24,6 +25,7 @@ const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps
 const mdxComponents = {
 	...defaultMdxComponents,
 	AutoTypeTable,
+	CapsizeTrimExplorer,
 	ExampleBlock,
 	IconGallery,
 	SourceCodeBlock,
