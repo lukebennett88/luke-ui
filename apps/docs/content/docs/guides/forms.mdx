@@ -4,114 +4,89 @@ description:
   Build an accessible native form from Luke UI's field components, and handle submit and reset.
 ---
 
-A Luke UI form is a native HTML `<form>`. Compose it from `TextField`, `ComboboxField`, `Checkbox`,
-and `Button`. The browser submits and resets it the same way it handles a form built from plain
-HTML.
+A Luke UI form uses the native HTML `<form>` element. Compose it from Luke UI fields and buttons.
 
-<ExampleBlock
-	description="A native form with visible labels, descriptions, a required field, and a working reset."
-	src="forms/build-a-form"
-	title="Forms — Build a form"
-/>
+<ExampleBlock src="forms/build-a-form" title="Forms — Build a form" />
 
 ## Visible labels
 
-Give every field a visible label through `label`. Luke UI's field components associate the label,
-description, and error message with the control for you.
+Pass a visible `label` to `TextField` and `ComboboxField`. Luke UI associates the label with its
+control.
 
-A visible label helps everyone, not only assistive technology. It stays on screen once someone
-starts typing, unlike a placeholder. Use `aria-label` only when a nearby heading or the surrounding
-text already names the field.
+Pass the visible checkbox label through `Checkbox` children. Use `aria-label` only when surrounding
+content already names the control.
+
+A placeholder disappears after someone enters a value. Do not use a placeholder as the only label.
 
 ## Descriptions
 
-Pass `description` for information someone needs before they fill in the field, such as a format or
-a reason for asking. Luke UI links the description to the control, so assistive technology reads it
-as part of the field.
+Pass `description` when someone needs information before they complete a field. Luke UI associates
+the description with its control.
 
-Keep a description to one sentence. Repeat anything the error message also needs. A description does
-not carry over once the field becomes invalid.
+Keep each description to one sentence. Repeat necessary instructions in the error message because
+the description disappears when the field becomes invalid.
 
 ## Required fields
 
-Set `isRequired` on a field someone must complete before the form submits. It adds a required
-indicator to the label, and blocks submission with the browser's own message until the value is
-present.
+Set `isRequired` when someone must complete a field. The browser blocks submission until the field
+has a value.
 
-Set `necessityIndicator` to choose how the requirement shows: `"icon"` (the default) or `"label"`,
-which appends “(required)” to the label text. Read
-[Required fields](/components/forms/text-field#required-fields) for both.
+Set `necessityIndicator="label"` to append “(required)” to a field label. The default indicator is
+an icon.
+
+Read [Required fields](/components/forms/text-field#required-fields) for both indicators.
 
 ## Controlled and uncontrolled fields
 
-Most fields in the example above are uncontrolled. React never touches their value between renders.
-Give an uncontrolled field a `defaultValue` (or `defaultSelected` for `Checkbox`), and read its
-value from `FormData` on submit.
+Prefer an uncontrolled field when the application needs its value only during submission. Pass a
+starting value through `defaultValue` or `defaultSelected`.
 
-Make a field controlled when your application needs its value on every render, not only on submit,
-for example to compute a live summary, mirror a value elsewhere, or disable another control based on
-it. Pass `value` and `onChange` (or `isSelected` and `onChange` for `Checkbox`), and store the value
-in state.
+Use a controlled field when the application needs its value during each render. Pass `value` and
+`onChange`, then store the value in state.
 
-In the example, Email address is controlled, because the summary beneath the form reads it. Every
-other field is uncontrolled.
+For a controlled `Checkbox`, pass `isSelected` and `onChange`.
 
 ## Submit
 
-Pass `onSubmit` to the `<form>` element, not to `Button`. Call `event.preventDefault()` so the
-browser does not navigate, then read each field's value from `FormData` by its `name`.
+Pass `onSubmit` to the `<form>` element. Call `event.preventDefault()`, then read the values from
+`FormData`.
 
 ```tsx
 function handleSubmit(event: FormEvent<HTMLFormElement>) {
 	event.preventDefault();
 	const data = new FormData(event.currentTarget);
 	const email = data.get('email');
-	// ...
 }
 ```
 
-Give the submitting button `type="submit"`.
+Give the submit button `type="submit"`.
 
 ## Reset
 
-Give a button `type="reset"` to restore the form to its starting values. The browser resets every
-uncontrolled field on its own, without any code from you.
+Give a button `type="reset"` to restore uncontrolled fields. The browser restores their starting
+values.
 
-A controlled field does not reset itself. Its value lives in React state, and the browser's reset
-does not touch that state. Pass `onReset` to the `<form>`, and set each controlled field's state
-back to its starting value there.
+An `onReset` handler must reset state that React owns.
 
 ```tsx
-function handleReset() {
-	setEmail(INITIAL_EMAIL);
-}
+const INITIAL_EMAIL = '';
+const [email, setEmail] = useState(INITIAL_EMAIL);
 
-<form onReset={handleReset} onSubmit={handleSubmit}>
+<form onReset={() => setEmail(INITIAL_EMAIL)}>
+	<TextField label="Email address" name="email" onChange={setEmail} value={email} />
+	<Button type="reset">Reset</Button>
+</form>;
 ```
-
-The browser resets the uncontrolled fields before it fires `reset`, so `onReset` only needs to cover
-the state your application owns.
 
 ## Validation
 
-Luke UI validates a form the way native HTML does, plus two ways to add your own rule.
-[Validation](/components/forms/validation) covers the full detail.
+Luke UI supports browser validation, custom validation, and server validation. The
+[Validation guide](/components/forms/validation) explains each approach.
 
-- **Browser validation.** Set `isRequired`, `minLength`, `maxLength`, `pattern`, or `type="email"`,
-  and leave out `errorMessage`. The browser checks the value and shows its own message. Read
-  [Let the browser validate](/components/forms/validation#let-the-browser-validate).
-- **Custom errors.** Pass a `validate` function for a rule the browser cannot check, or pass
-  `isInvalid` and `errorMessage` yourself for feedback that must update on every keystroke. Read
-  [Add your own rule](/components/forms/validation#add-your-own-rule) and
-  [Validate as someone types](/components/forms/validation#validate-as-someone-types).
-- **Server errors.** Pass `validationErrors` to React Aria's `Form` component, keyed by each field's
-  `name`. Read [Show server errors](/components/forms/validation#show-server-errors).
+- Set native constraints such as `isRequired`, `minLength`, `pattern`, or `type="email"` for browser
+  validation.
+- Pass `validate` for a custom rule. Pass `isInvalid` and `errorMessage` for controlled feedback.
+- Pass `validationErrors` to React Aria's `Form` for server errors. Key each error by the field
+  `name`.
 
-## Best practices
-
-| Guidance | Practice                                                                                             |
-| -------- | ---------------------------------------------------------------------------------------------------- |
-| Do       | Give every field a visible `label`. Reserve `aria-label` for when a nearby heading already names it. |
-| Do       | Read submitted values from `FormData`, so they match the DOM regardless of controlled state.         |
-| Don't    | Reach for a third-party form library. Luke UI has not tested or documented one yet.                  |
-| Don't    | Assume a controlled field resets itself. Reset its state in the form's own `onReset`.                |
+Luke UI does not provide recipes for third-party form libraries. Start with native form behaviour.
