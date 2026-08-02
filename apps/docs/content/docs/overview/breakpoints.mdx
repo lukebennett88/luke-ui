@@ -11,14 +11,14 @@ default.
 
 ## Breakpoints
 
-| Breakpoint | Minimum viewport width        |
-| ---------- | ----------------------------- |
-| `xsmall`   | None. This is the base value. |
-| `small`    | 640px                         |
-| `medium`   | 768px                         |
-| `large`    | 1024px                        |
-| `xlarge`   | 1280px                        |
-| `xxlarge`  | 1536px                        |
+| Breakpoint | Minimum viewport width |
+| ---------- | ---------------------- |
+| `xsmall`   | 0px (base)             |
+| `small`    | 640px                  |
+| `medium`   | 768px                  |
+| `large`    | 1024px                 |
+| `xlarge`   | 1280px                 |
+| `xxlarge`  | 1536px                 |
 
 Each breakpoint is a fixed constant, not a theme token. A custom theme cannot change these widths.
 
@@ -31,61 +31,21 @@ Every Sprinkles property accepts a direct value or an object keyed by breakpoint
 from `xsmall`. Specify only the breakpoints where the value changes.
 
 ```tsx
-<Box display={{ xsmall: 'none', large: 'flex' }} gap={{ xsmall: '200', medium: '400' }}>
+<Box display="flex" flexDirection={{ xsmall: 'column', medium: 'row' }}>
 	{children}
 </Box>
 ```
 
-This example hides an element below `large`, then shows it from `large` up. The same object form
-works on every Sprinkles property, so a breakpoint can change spacing, direction, sizing, or
-visibility together.
+This example stacks the children by default. It places them in a row from `medium`.
 
-<ExampleBlock
-	description="Resize your browser window. The content stacks below medium, then aligns in a row from medium."
-	src="box/responsive-layout"
-	title="Breakpoints — A row from medium"
-/>
-
-## Simulate a breakpoint change
-
-The example above needs a wide browser window to show every breakpoint. This page sits in a
-fixed-width column, so a real window resize is not always practical here.
-
-The preview below simulates a viewport width with a slider, so you can see a breakpoint change
-without resizing your browser. The layout inside does not use Sprinkles conditions: it reads the
-slider value in JavaScript and reproduces what each real breakpoint would do.
-
-<ExampleBlock
-	description="Drag the slider to change the simulated width. The cards move to a row from small, and a badge appears from large."
-	mode="full-bleed"
-	src="overview/breakpoint-preview"
-	title="Breakpoints — Simulated preview"
-/>
+<ExampleBlock src="box/responsive-layout" title="Breakpoints — A row from medium" />
 
 ## When to use a responsive value
 
-Set a responsive value only for a deliberate layout change, such as moving from a stacked to a
-side-by-side arrangement, or hiding a decorative element on a small screen. Do not set one because
-content might wrap.
-
-Content that wraps well on its own, such as `flex-wrap` or a `minmax` grid track, needs no
-breakpoint at all. Reach for a responsive value only once the layout actually breaks somewhere.
-
-## Best practices
-
-| Guidance | Practice                                                                         |
-| -------- | -------------------------------------------------------------------------------- |
-| Do       | Change a value only at the breakpoint where the layout actually breaks.          |
-| Don't    | Set a different value at every breakpoint out of habit.                          |
-| Don't    | Reach for a responsive value when intrinsic wrapping already handles the layout. |
+Set a responsive value when the layout needs a deliberate change. Prefer intrinsic wrapping when the
+content can adapt without a breakpoint.
 
 ## Continue learning
 
-<Cards>
-	<Card href="/components/layout/box" title="Box">
-		See the Box example, props, and custom div rendering contract.
-	</Card>
-	<Card href="/overview/layout" title="Layout">
-		Learn where responsive values sit beside spacing, sizing, and Sprinkles.
-	</Card>
-</Cards>
+- [Box](/components/layout/box) documents the component API.
+- [Layout](/overview/layout) explains the other layout utilities.

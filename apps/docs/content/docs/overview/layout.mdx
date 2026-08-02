@@ -24,23 +24,12 @@ every element.
 
 ## Responsive values
 
-Every Sprinkles property accepts a direct value or an object keyed by breakpoint. Values cascade
-from `xsmall`, so specify only the points where the layout changes.
-
-```tsx
-<Box
-	display="flex"
-	flexDirection={{ xsmall: 'column', medium: 'row' }}
-	gap={{ xsmall: '300', medium: '600' }}
->
-	{children}
-</Box>
-```
-
-The available breakpoints are `xsmall` (base), `small` (640px), `medium` (768px), `large` (1024px),
-`xlarge` (1280px), and `xxlarge` (1536px).
+Every Sprinkles property accepts responsive values. Specify only the points where the layout
+changes.
 
 <ExampleBlock src="box/responsive-layout" title="Box — Responsive values" />
+
+See [Breakpoints](/overview/breakpoints) for the responsive value API and fixed thresholds.
 
 ## Spacing and sizing
 
