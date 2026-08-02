@@ -10,6 +10,10 @@ export const themeRootClassName = cx(lukeUiClassNames.themeRoot, lukeUiClassName
  */
 export { vars } from './contract.css.js';
 
+/** The fixed spacing steps shared by the built-in themes. */
+export { spaceScale } from './contract.js';
+export type { SpaceStep } from './contract.js';
+
 /**
  * `themeClassName(name)` returns the identity class for a theme name. `ThemeContrastError` is thrown
  * by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1 for text/on-solid pairs, 3:1 for

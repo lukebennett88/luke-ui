@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { vars } from './contract.css.js';
-import { flattenThemeContract, fontSizeSteps, themeContractTree } from './contract.js';
+import { flattenThemeContract, fontSizeSteps, spaceScale, themeContractTree } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 
 function countLeaves(node: unknown): number {
@@ -95,5 +95,23 @@ describe('theme contract', () => {
 			return key !== 'family' && key !== 'weight';
 		});
 		expect(fontSizeSteps).toEqual(fontStepKeys);
+	});
+
+	it('defines the selected spacing steps from the 4px scale', () => {
+		expect(spaceScale).toEqual([
+			['100', '4px'],
+			['200', '8px'],
+			['300', '12px'],
+			['400', '16px'],
+			['600', '24px'],
+			['800', '32px'],
+			['1000', '40px'],
+			['1200', '48px'],
+			['1600', '64px'],
+		]);
+	});
+
+	it('derives the spacing contract keys from the spacing scale', () => {
+		expect(Object.keys(themeContractTree.space)).toEqual(spaceScale.map(([step]) => step));
 	});
 });

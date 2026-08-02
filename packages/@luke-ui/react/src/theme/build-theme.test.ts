@@ -9,7 +9,7 @@ import {
 	themeClassName,
 } from './build-theme.js';
 import { contrastRatio, parseColor } from './color.js';
-import { flattenThemeContract } from './contract.js';
+import { flattenThemeContract, spaceScale } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
@@ -157,6 +157,15 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-font-900-letter-spacing: -0.025em');
 		expect(css).toContain('--luke-icon-size-xsmall: 16px');
 		expect(css).toContain('--luke-icon-size-large: 32px');
+	});
+
+	it('emits the public spacing scale in every built-in theme', () => {
+		for (const foundation of [tactileFoundation, paperFoundation]) {
+			const { identity } = splitBlocks(buildTheme(foundation));
+			expect(
+				spaceScale.map(([step]) => [step, extractValue(identity, `--luke-space-${step}`)]),
+			).toEqual(spaceScale);
+		}
 	});
 
 	it('emits authored semantic depth while keeping only Paper light flat', () => {

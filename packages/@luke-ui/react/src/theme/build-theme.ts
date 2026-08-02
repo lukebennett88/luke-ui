@@ -4,7 +4,7 @@ import interMetrics from '@capsizecss/metrics/inter';
 import { precomputeValues } from '@capsizecss/vanilla-extract';
 import type { Oklch } from './color.js';
 import { clampUnit, contrastRatio, gamutMapOklch, parseColor } from './color.js';
-import { flattenThemeContract, fontSizeSteps } from './contract.js';
+import { flattenThemeContract, fontSizeSteps, spaceScale } from './contract.js';
 import {
 	CONTRAST_SEARCH_STEP,
 	RATIO_HEADROOM,
@@ -171,18 +171,6 @@ const SOURCE_COLOR_FIELDS = [
 	'danger',
 	'focus',
 ] as const;
-
-const SPACE_VALUES = {
-	100: '4px',
-	200: '8px',
-	300: '12px',
-	400: '16px',
-	600: '24px',
-	800: '32px',
-	1000: '40px',
-	1200: '48px',
-	1600: '64px',
-} as const;
 
 const MOTION_VALUES = {
 	'motion.duration.fast': '120ms',
@@ -622,7 +610,7 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 		...ICON_SIZE_VALUES,
 		...MOTION_VALUES,
 	};
-	for (const [step, value] of Object.entries(SPACE_VALUES)) {
+	for (const [step, value] of spaceScale) {
 		values[`space.${step}`] = value;
 	}
 	return values;
