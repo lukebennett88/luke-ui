@@ -47,7 +47,10 @@ meaning never limits what it can do:
 - `warning`: needs attention but has not failed and is not dangerous.
 - `danger`: harm, failure, invalidity, or a critical condition.
 
-Components choose the role that fits their own tone or state. Custom UI can use the same six roles.
+Select a role to compare the same semantic token pairs in light and dark mode. The notice content
+stays constant, so only the role and mode change its colours.
+
+<ExampleBlock src="overview/role-colours" title="Colour — Roles and modes" />
 
 ### Background and foreground
 
@@ -78,21 +81,6 @@ vars.color.foreground.warning.onSolid;
 
 There is no foreground `pressed`. The background ramp and other cues carry a pressed look instead,
 so text and icons reuse `hover` for a pressed control.
-
-```tsx
-import { vars } from '@luke-ui/react/theme';
-
-<div
-	style={{
-		backgroundColor: vars.color.background.warning.subtle.rest,
-		color: vars.color.foreground.warning.rest,
-	}}
->
-	Payment details need review.
-</div>;
-```
-
-<ExampleBlock src="overview/role-colours" title="Colour — Background and foreground" />
 
 ### Borders
 
