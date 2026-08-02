@@ -8,6 +8,14 @@ description: A labelled control for actions in an interface.
 
 <ExampleBlock src="button/basic" title="Button — Basic" />
 
+## Choose Button or Link
+
+| Guidance | Practices                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------- |
+| Do       | Use `Button` for an action, such as saving, submitting, or opening a dialog.                                  |
+| Do       | Use [`Link`](/components/actions/link) with an `href` when the interaction navigates to another URL or route. |
+| Don't    | Navigate from a `Button`. It loses native link semantics and browser link behaviours.                         |
+
 ## Size
 
 `medium` is the default size. Use `small` in dense toolbars, tables, and other compact interfaces.
@@ -78,12 +86,3 @@ announce the pending status.
 icon slots, and supplies the pending spinner. Use the
 [button primitive](/components/primitives/button) when you build a custom control and need to own
 the child layout or loading treatment.
-
-## Best practices
-
-| Guidance | Practice                                                                                                                                  |
-| -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use `Button` for an action that changes something, such as saving, submitting, or opening a dialog.                                       |
-| Do       | Use [`Link`](/components/actions/link) with an `href` for navigation, even when the design shows a solid control.                         |
-| Don't    | Give a `Button` an `onPress` handler that only navigates. The destination then disappears from the browser and from assistive technology. |
-| Don't    | Write a vague label such as “OK”. Name the action the button performs.                                                                    |

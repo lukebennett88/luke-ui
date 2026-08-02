@@ -16,6 +16,12 @@ Work from the most specific public API to the broadest one.
 3. Build custom UI with public recipes and semantic variables when the component is not provided.
 4. Author a custom theme when the product needs a different visual foundation everywhere.
 
+| Guidance | Practices                                                                                                  |
+| -------- | ---------------------------------------------------------------------------------------------------------- |
+| Do       | Use a supported component prop for its appearance, size, state, or behaviour.                              |
+| Do       | Use a documented primitive or recipe for its element contract, and `vars` for application-owned custom UI. |
+| Don't    | Target generated selectors or implementation-state attributes such as `data-pressed`.                      |
+
 Do not override component recipe selectors or implementation-state attributes such as
 `data-hovered`, `data-pressed`, or `data-focus-visible`. They are not supported styling hooks and
 can change without a migration path.
@@ -23,8 +29,8 @@ can change without a migration path.
 ### Start with component props
 
 Components are intentionally opinionated. Their public props cover supported variants, states, and
-behaviour. The active theme provides the semantic colours, typography, spacing, radii, and depth
-that make those components work together.
+behaviour. The active identity supplies semantic colours, font roles, radii, and depth. Luke UI
+defines its type and spacing steps in source.
 
 <SourceCodeBlock src="styling/component-props" />
 
@@ -117,15 +123,6 @@ import { Box } from '@luke-ui/react/box';
 When a CSS Module or application stylesheet needs a token, use the stable `--luke-*` variable listed
 in the [token reference](/theming/token-reference). Do not couple application CSS to undocumented
 selectors or implementation attributes.
-
-## Best practices
-
-| Guidance | Practice                                                                                                          |
-| -------- | ----------------------------------------------------------------------------------------------------------------- |
-| Do       | Set a supported prop such as `appearance`, `size`, or `tone` before you write any custom style.                   |
-| Do       | Reach for a public recipe or `vars` only when no component covers the pattern.                                    |
-| Don't    | Target a component's generated class name or a state attribute such as `data-pressed` to change how it looks.     |
-| Don't    | Author a theme to restyle one component. A theme changes the visual foundation for every component in that scope. |
 
 ## Continue learning
 

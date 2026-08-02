@@ -8,9 +8,9 @@ library. It gives components a visual identity. It does not change their APIs or
 
 ## Anatomy of a theme
 
-Each identity includes a light and dark mode. It supplies semantic colours, typography, spacing,
-radii, material, and depth. Components select those values through the shared contract. They do not
-make their own palette or shadow decisions.
+Each identity includes a light and dark mode. It supplies semantic colours, font families and weight
+roles, radii, material, and depth. Luke UI defines spacing and type steps in source. Components
+select the shared values through the public contract.
 
 Luke UI includes two identities:
 
@@ -59,14 +59,11 @@ import { vars } from '@luke-ui/react/theme';
 The contract is stable across bundled and custom themes. Do not depend on a theme's source colours,
 generated palette, or component recipe selectors.
 
-## Best practices
-
-| Guidance | Practice                                                                                                       |
-| -------- | -------------------------------------------------------------------------------------------------------------- |
-| Do       | Read colour, radius, depth, and spacing from `vars`, so custom UI follows the active identity and colour mode. |
-| Do       | Pick the variable that names the job, such as `color.surface.floating` for a menu panel.                       |
-| Don't    | Copy a resolved colour, shadow, or radius value out of the browser into application CSS.                       |
-| Don't    | Read a theme's source colours or generated palette steps. Only the semantic contract is public.                |
+| Guidance | Practices                                                                                             |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| Do       | Use a semantic variable such as `color.surface.floating` for the job it names.                        |
+| Do       | Use public `vars` when application-owned UI must follow the active identity or colour mode.           |
+| Don't    | Copy resolved values or read source colours, generated palette steps, and component recipe selectors. |
 
 ## Continue learning
 
@@ -78,6 +75,6 @@ generated palette, or component recipe selectors.
 		Learn the semantic roles behind surfaces, content, and borders.
 	</Card>
 	<Card href="/overview/typography" title="Typography">
-		Use the type scale supplied by the active theme.
+		Use Luke UI's type scale with the active theme's font family and weight roles.
 	</Card>
 </Cards>
