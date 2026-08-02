@@ -3,13 +3,14 @@ title: Token reference
 description: Public semantic CSS variables to build custom Luke UI elements.
 ---
 
+import { TokenExplorer } from '../../../src/components/token-explorer';
+
 `vars` is Luke UI's typed public token contract. Each path resolves to a stable `--luke-*` CSS
 variable. For example, `vars.color.background.danger.solid.hover` resolves to
 `var(--luke-color-background-danger-solid-hover)`.
 
 Use these variables when a component API or layout utility cannot express a custom element. They
-adapt to the active identity and colour mode. Generated palette values, component selectors, and
-other implementation details are not part of the public styling API.
+adapt to the active identity and colour mode.
 
 ## Use semantic variables
 
@@ -19,18 +20,9 @@ Choose tokens by purpose. A card might use `surface.floating`, `radius.surface`,
 `depth.resting`. A warning message might use the warning role's subtle background and foreground. Do
 not carry resolved colour values into application CSS.
 
-## Tokens
+## Browse the tokens
 
-Luke UI generates this table from the public TypeScript declaration and JSDoc, so it stays aligned
-with the code that produces each theme.
+Luke UI generates this explorer from the contract that builds every theme. It holds each public
+variable once and nothing else. Each sample renders in the active identity and colour mode.
 
-<auto-type-table
-	path="apps/docs/src/generated/token-reference.generated.ts"
-	name="ThemeTokenReference"
-/>
-
-## Next steps
-
-Read [Colour](/overview/color) for the semantic colour model. Read
-[Authoring a theme](/theming/authoring) to generate the complete contract for a product-owned
-identity.
+<TokenExplorer />

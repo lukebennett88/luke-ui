@@ -1,13 +1,34 @@
 import { expect, test } from 'vite-plus/test';
 import { generateTokenReference } from '../../scripts/generate-token-reference.js';
+import { themeTokens } from '../generated/token-reference.generated.js';
 
-test('generates documented leaf token mappings from the public contract', () => {
+test('generates one runtime entry per public contract leaf', () => {
 	const reference = generateTokenReference();
 
-	expect(reference).toContain("'color.surface.canvas': 'var(--luke-color-surface-canvas)';\n");
 	expect(reference).toContain(
-		'Semantic colours for surfaces, content, borders, and loading, plus the six shared semantic roles',
+		"{ family: 'color', path: 'color.surface.canvas', variable: '--luke-color-surface-canvas' },",
 	);
-	expect(reference).toContain("'motion.easing.exit': 'var(--luke-motion-easing-exit)';\n");
+	expect(reference).toContain(
+		"{ family: 'motion', path: 'motion.easing.exit', variable: '--luke-motion-easing-exit' },",
+	);
+	expect(reference).toContain('export const themeTokens: ReadonlyArray<ThemeToken> = [');
 	expect(reference).not.toContain('MapLeafNodes');
+});
+
+test('declares the family union the token entries are keyed by', () => {
+	const reference = generateTokenReference();
+
+	expect(reference).toContain('export type ThemeTokenFamily =');
+	for (const family of new Set(themeTokens.map((token) => token.family))) {
+		expect(reference).toContain(`| '${family}'`);
+	}
+});
+
+test('emits the generated file on disk that the docs app imports', () => {
+	const emitted = generateTokenReference();
+
+	for (const token of themeTokens) {
+		expect(emitted).toContain(`path: '${token.path}'`);
+	}
+	expect(themeTokens.length).toBe(emitted.match(/\bvariable: '--luke-/g)?.length);
 });
