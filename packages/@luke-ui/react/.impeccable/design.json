@@ -1,0 +1,194 @@
+{
+	"schemaVersion": 2,
+	"generatedAt": "2026-08-02T00:00:00.000Z",
+	"title": "Design System: Luke UI",
+	"extensions": {
+		"colorMeta": {
+			"accent": {
+				"role": "accent",
+				"displayName": "Accent",
+				"canonical": "oklch(0.52 0.0884 200)",
+				"tonalRamp": [
+					"oklch(0.15 0.0884 200)",
+					"oklch(0.3 0.0884 200)",
+					"oklch(0.45 0.0884 200)",
+					"oklch(0.6 0.0884 200)",
+					"oklch(0.7 0.0884 200)",
+					"oklch(0.8 0.0884 200)",
+					"oklch(0.9 0.0884 200)",
+					"oklch(0.95 0.0884 200)"
+				]
+			},
+			"neutral-solid": {
+				"role": "neutral",
+				"displayName": "Neutral",
+				"canonical": "oklch(0.35 0 0)",
+				"tonalRamp": [
+					"oklch(0.15 0 0)",
+					"oklch(0.3 0 0)",
+					"oklch(0.45 0 0)",
+					"oklch(0.6 0 0)",
+					"oklch(0.7 0 0)",
+					"oklch(0.8 0 0)",
+					"oklch(0.9 0 0)",
+					"oklch(0.95 0 0)"
+				]
+			},
+			"info": {
+				"role": "info",
+				"displayName": "Info",
+				"canonical": "oklch(0.52 0.16 255)",
+				"tonalRamp": [
+					"oklch(0.15 0.16 255)",
+					"oklch(0.3 0.16 255)",
+					"oklch(0.45 0.16 255)",
+					"oklch(0.6 0.16 255)",
+					"oklch(0.7 0.16 255)",
+					"oklch(0.8 0.16 255)",
+					"oklch(0.9 0.16 255)",
+					"oklch(0.95 0.16 255)"
+				]
+			},
+			"success": {
+				"role": "success",
+				"displayName": "Success",
+				"canonical": "oklch(0.5 0.13 150)",
+				"tonalRamp": [
+					"oklch(0.15 0.13 150)",
+					"oklch(0.3 0.13 150)",
+					"oklch(0.45 0.13 150)",
+					"oklch(0.6 0.13 150)",
+					"oklch(0.7 0.13 150)",
+					"oklch(0.8 0.13 150)",
+					"oklch(0.9 0.13 150)",
+					"oklch(0.95 0.13 150)"
+				]
+			},
+			"warning": {
+				"role": "warning",
+				"displayName": "Warning",
+				"canonical": "oklch(0.72 0.14 75)",
+				"tonalRamp": [
+					"oklch(0.15 0.14 75)",
+					"oklch(0.3 0.14 75)",
+					"oklch(0.45 0.14 75)",
+					"oklch(0.6 0.14 75)",
+					"oklch(0.7 0.14 75)",
+					"oklch(0.8 0.14 75)",
+					"oklch(0.9 0.14 75)",
+					"oklch(0.95 0.14 75)"
+				]
+			},
+			"danger": {
+				"role": "danger",
+				"displayName": "Danger",
+				"canonical": "oklch(0.52 0.18 27)",
+				"tonalRamp": [
+					"oklch(0.15 0.18 27)",
+					"oklch(0.3 0.18 27)",
+					"oklch(0.45 0.18 27)",
+					"oklch(0.6 0.18 27)",
+					"oklch(0.7 0.18 27)",
+					"oklch(0.8 0.18 27)",
+					"oklch(0.9 0.18 27)",
+					"oklch(0.95 0.18 27)"
+				]
+			},
+			"border-control": {
+				"role": "neutral",
+				"displayName": "Border (control)",
+				"canonical": "oklch(0.6525 0 0)"
+			},
+			"border-focus": {
+				"role": "info",
+				"displayName": "Border (focus)",
+				"canonical": "oklch(0.55 0.17 255)"
+			}
+		},
+		"typographyMeta": {
+			"900": { "displayName": "Step 900", "purpose": "Largest available step; no fixed component maps to it by default." },
+			"800": { "displayName": "Step 800", "purpose": "Heading level 1." },
+			"700": { "displayName": "Step 700", "purpose": "Heading level 2." },
+			"600": { "displayName": "Step 600", "purpose": "Heading level 3." },
+			"500": { "displayName": "Step 500", "purpose": "Heading level 4." },
+			"400": { "displayName": "Step 400", "purpose": "Heading level 5." },
+			"300": { "displayName": "Step 300", "purpose": "Heading level 6; also Text's and the document root's default body size." },
+			"200": { "displayName": "Step 200", "purpose": "Secondary/dense body text; small Field size." },
+			"100": { "displayName": "Step 100", "purpose": "Smallest step — labels, captions." }
+		},
+		"shadows": [
+			{ "name": "recessed", "value": "inset 0 2px 3px oklch(0.3 0.03 220 / 0.18), inset 0 -1px 0 oklch(0.98 0.03 220 / 0.65)", "purpose": "Inset wells, e.g. InputGroup's background. Literally 'none' in Paper light mode." },
+			{ "name": "resting", "value": "0 2px 0 oklch(0.3 0.03 220 / 0.28), 0 3px 5px -1px oklch(0.3 0.03 220 / 0.16)", "purpose": "A control's default at-rest elevation (Button default state)." },
+			{ "name": "raised", "value": "0 3px 0 oklch(0.3 0.03 220 / 0.3), 0 5px 8px -2px oklch(0.3 0.03 220 / 0.2)", "purpose": "Hover elevation, paired with translateY(-1px)." },
+			{ "name": "floating", "value": "0 4px 12px oklch(0.3 0.03 220 / 0.16), 0 2px 4px oklch(0.3 0.03 220 / 0.1)", "purpose": "Elements sitting above page content (menus, popovers)." },
+			{ "name": "overlay", "value": "0 12px 32px oklch(0.3 0.03 220 / 0.2), 0 4px 12px oklch(0.3 0.03 220 / 0.12)", "purpose": "Modal/dialog-level elevation, the largest blur radius in the ladder." }
+		],
+		"motion": [
+			{ "name": "duration-fast", "value": "120ms", "purpose": "Default transition duration for interactive state changes." },
+			{ "name": "easing-standard", "value": "cubic-bezier(0, 0, 0.4, 1)", "purpose": "Default easing for entering/state transitions." },
+			{ "name": "easing-exit", "value": "cubic-bezier(0.3, 0, 1, 1)", "purpose": "Easing for exit transitions." }
+		],
+		"breakpoints": [
+			{ "name": "xsmall", "value": "0px" },
+			{ "name": "small", "value": "640px" },
+			{ "name": "medium", "value": "768px" },
+			{ "name": "large", "value": "1024px" },
+			{ "name": "xlarge", "value": "1280px" },
+			{ "name": "xxlarge", "value": "1536px" }
+		]
+	},
+	"components": [
+		{
+			"name": "Button (solid, accent)",
+			"kind": "button",
+			"refersTo": "button-solid-accent",
+			"description": "Default call-to-action button: solid accent background, tactile depth-ladder feedback on hover/press.",
+			"html": "<button class=\"ds-btn-solid-accent\">Save changes</button>",
+			"css": ".ds-btn-solid-accent { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: oklch(0.52 0.0884 200); background-image: radial-gradient(80% 70% at 50% 0%, rgb(255 255 255 / 0.24) 0%, transparent 100%), radial-gradient(70% 45% at 50% 110%, rgb(255 255 255 / 0.12) 0%, transparent 70%); color: oklch(0.985 0 200); font: 400 16px/24px 'Inter', system-ui, sans-serif; box-shadow: 0 2px 0 oklch(0.3 0.03 220 / 0.28), 0 3px 5px -1px oklch(0.3 0.03 220 / 0.16); transition: background-color 120ms cubic-bezier(0, 0, 0.4, 1), box-shadow 120ms cubic-bezier(0, 0, 0.4, 1), transform 120ms cubic-bezier(0, 0, 0.4, 1); cursor: pointer; } .ds-btn-solid-accent:hover { background-color: oklch(0.47 0.0799 200); box-shadow: 0 3px 0 oklch(0.3 0.03 220 / 0.3), 0 5px 8px -2px oklch(0.3 0.03 220 / 0.2); transform: translateY(-1px); } .ds-btn-solid-accent:focus-visible { outline: 2px solid oklch(0.55 0.17 255); outline-offset: 2px; } .ds-btn-solid-accent:active { background-color: oklch(0.47 0.0799 200); box-shadow: inset 0 2px 3px oklch(0.3 0.03 220 / 0.18), inset 0 -1px 0 oklch(0.98 0.03 220 / 0.65); transform: translateY(1px); }"
+		},
+		{
+			"name": "Button (ghost, neutral)",
+			"kind": "button",
+			"refersTo": "button-ghost-neutral",
+			"description": "Lowest-emphasis button variant: transparent at rest, subtle background only on hover/press.",
+			"html": "<button class=\"ds-btn-ghost-neutral\">Cancel</button>",
+			"css": ".ds-btn-ghost-neutral { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: transparent; color: oklch(0.49 0 0); font: 400 16px/24px 'Inter', system-ui, sans-serif; transition: background-color 120ms cubic-bezier(0, 0, 0.4, 1), color 120ms cubic-bezier(0, 0, 0.4, 1); cursor: pointer; } .ds-btn-ghost-neutral:hover { background-color: oklch(0.933 0 0); color: oklch(0.3 0 0); } .ds-btn-ghost-neutral:focus-visible { outline: 2px solid oklch(0.55 0.17 255); outline-offset: 2px; } .ds-btn-ghost-neutral:active { background-color: oklch(0.907 0 0); }"
+		},
+		{
+			"name": "Input Group (Field well)",
+			"kind": "input",
+			"refersTo": "input-group",
+			"description": "The recessed 'well' every text input sits in: inset by default, border shifts to accent on hover/focus.",
+			"html": "<div class=\"ds-input-group\"><input class=\"ds-input-group__input\" type=\"text\" placeholder=\"you@example.com\" /></div>",
+			"css": ".ds-input-group { display: flex; align-items: center; height: 40px; padding: 0 12px; border: 1px solid oklch(0.6525 0 0); border-radius: 8px; background-color: oklch(1 0 0); box-shadow: inset 0 2px 3px oklch(0.3 0.03 220 / 0.18), inset 0 -1px 0 oklch(0.98 0.03 220 / 0.65); transition: border-color 120ms cubic-bezier(0, 0, 0.4, 1); } .ds-input-group:hover, .ds-input-group:focus-within { border-color: oklch(0.82 0.0583 200); } .ds-input-group:focus-within { outline: 2px solid oklch(0.55 0.17 255); outline-offset: 2px; } .ds-input-group__input { flex: 1; border: none; background: transparent; font: 400 16px/24px 'Inter', system-ui, sans-serif; color: oklch(0.3 0 0); outline: none; }"
+		}
+	],
+	"narrative": {
+		"northStar": "Two Materials, One Skeleton",
+		"overview": "Luke UI is a component architecture first and a look second. Everything an app developer touches — the six semantic color roles, the two-tier border policy, the depth ladder, the type scale, the radius steps — is fixed, tested, and shared by every theme. What each theme does with that skeleton is not fixed at all: Tactile and Paper, the two bundled themes, prove the same components can carry a glossy, pressable, physically-shadowed material or a flat, soft, paper-like one without a single component file changing. There is no confirmed visual anti-reference and no single \"Luke UI look\" to protect — deep themeability is the point. The one thing that doesn't bend is accessibility: contrast thresholds are enforced at build time regardless of which theme, or which future theme, is active.",
+		"keyCharacteristics": [
+			"One `defineTheme` contract, many valid looks — Tactile and Paper diverge in accent hue, neutral chroma, control radius, and shadow character, and any theme a consumer authors is free to diverge further.",
+			"Six semantic color roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`), each publishing an identical set of capabilities — no role is a partial citizen.",
+			"A two-tier border policy: hard-gated borders (contrast-solved, ~3:1) for anything that must be seen, advisory borders (deliberately sub-3:1) for everything else, enforced by build-time tests.",
+			"Depth (`box-shadow` ladder) and the `actionControlFinish` gradient sheen exist to communicate interactive state, not to decorate — they change together, on hover and press.",
+			"No aesthetic property is claimed as a brand constant. Color, radius character, and shadow character are all theme-owned and expected to diverge."
+		],
+		"rules": [
+			{ "name": "The Advisory Border Rule", "body": "`border.control`, `border.focus`, and the invalid-field boundary (aliased to `background.danger.solid.rest`, not `border.danger`) are contrast-solved and hard-gated at the WCAG non-text minimum (~3:1). The six semantic `border.{role}` tokens plus `border.decorative` alias scale step 7 — deliberately sub-3:1 (measured ~1.4–2.0:1 across both themes, light and dark) — advisory only, and must never be the sole cue for a state change.", "section": "colors" },
+			{ "name": "The Un-styled Heading Rule", "body": "The reset sets `font: unset; margin: 0` on every heading element — browsers contribute zero typographic character. All type character comes from the `Text`/`Heading` recipe, never from a bare `<h1>`–`<h6>`.", "section": "typography" },
+			{ "name": "The Depth-as-Feedback Rule", "body": "Every interactive control changes its depth rung on hover and press — Button moves `resting → raised` (+ `translateY(-1px)`) on hover and `resting → recessed` (+ `translateY(1px)`) on press. The rung change itself is a fixed invariant; only how dramatic it looks (Tactile's drawn edge vs Paper's soft blur) is theme-owned.", "section": "elevation" }
+		],
+		"dos": [
+			"Do keep every new semantic role uniform across all six capabilities (subtle/solid states, onSolid, text, border) — the system currently has zero partial roles, and that's load-bearing.",
+			"Do route any state that must be seen (invalid, required, disabled) through a hard-gated color (`background.*.solid.rest` or `border.control`/`border.focus`), never through an advisory border alone.",
+			"Do give every new interactive control a depth-ladder change on hover and press, even if a theme chooses to render that change subtly.",
+			"Do let new themes diverge in accent hue, neutral chroma, control radius, and shadow character — that divergence is the design, not drift to reconcile."
+		],
+		"donts": [
+			"Don't invent or protect a single fixed \"Luke UI look.\" Tactile and Paper exist specifically to prove there isn't one.",
+			"Don't let an advisory border (`border.{role}`, `border.decorative`) be the sole indicator of a state change — it's calibrated below the non-text contrast minimum by design.",
+			"Don't hand-author component files or hand-edit generated exports/barrels; components come from `pnpm generate:component`.",
+			"Don't apply the `actionControlFinish` gradient sheen independent of the `depth` shadow on the same control — they're a paired face-lighting + physical-depth cue for one state, not two separate decorations."
+		]
+	}
+}
