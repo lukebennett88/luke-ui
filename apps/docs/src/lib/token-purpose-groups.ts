@@ -11,6 +11,7 @@ export interface TokenPurposeGroup {
 	description: string;
 	id: string;
 	related: TokenPurposeLink | null;
+	showSamples: boolean;
 	title: string;
 	tokens: ReadonlyArray<ThemeToken>;
 }
@@ -24,6 +25,7 @@ const PURPOSE_DEFINITIONS = [
 		description: 'Background layers, from the page canvas to the dimming layer behind an overlay.',
 		id: 'surfaces',
 		related: { label: 'Colour', splat: 'overview/color' },
+		showSamples: true,
 		title: 'Surfaces',
 	},
 	{
@@ -31,12 +33,14 @@ const PURPOSE_DEFINITIONS = [
 			'Text colours, and the placeholder colour that stands in for content while it loads.',
 		id: 'content',
 		related: { label: 'Colour', splat: 'overview/color' },
+		showSamples: true,
 		title: 'Content',
 	},
 	{
 		description: 'Border colours for decoration, control outlines, and the focus ring.',
 		id: 'borders',
 		related: { label: 'Colour', splat: 'overview/color' },
+		showSamples: true,
 		title: 'Borders',
 	},
 	{
@@ -44,42 +48,49 @@ const PURPOSE_DEFINITIONS = [
 			'The six semantic roles. Every role carries the same backgrounds, foregrounds, and border.',
 		id: 'roles',
 		related: { label: 'Colour', splat: 'overview/color' },
+		showSamples: true,
 		title: 'Roles',
 	},
 	{
 		description: 'Type steps, font families, and weight roles.',
 		id: 'typography',
 		related: { label: 'Typography', splat: 'overview/typography' },
+		showSamples: false,
 		title: 'Typography',
 	},
 	{
 		description: 'The spacing scale for gaps, padding, and margin.',
 		id: 'spacing',
 		related: null,
+		showSamples: true,
 		title: 'Spacing',
 	},
 	{
 		description: 'Corner radii, from small details to full rounding.',
 		id: 'radius',
 		related: { label: 'Radius', splat: 'overview/radius' },
+		showSamples: true,
 		title: 'Radius',
 	},
 	{
 		description: 'The shadow ladder, and the face finish that pairs with it on action controls.',
 		id: 'depth',
 		related: { label: 'Shadow', splat: 'overview/shadow' },
+		showSamples: false,
 		title: 'Depth',
 	},
 	{
 		description: 'Block sizes for controls and icons.',
 		id: 'sizing',
 		related: null,
+		showSamples: true,
 		title: 'Sizing',
 	},
 	{
 		description: 'Durations and easing curves for interaction.',
 		id: 'motion',
 		related: null,
+		showSamples: true,
 		title: 'Motion',
 	},
 ] as const satisfies ReadonlyArray<Omit<TokenPurposeGroup, 'tokens'>>;

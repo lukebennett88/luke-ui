@@ -107,21 +107,34 @@ function PurposeDetails({ group, isOpen }: { group: TokenPurposeGroup; isOpen: b
 						</DocsLink>
 					) : null}
 				</div>
-				<TokenTable tokens={group.tokens} />
+				<TokenTable showSamples={group.showSamples} tokens={group.tokens} />
 			</div>
 		</details>
 	);
 }
 
-function TokenTable({ tokens }: { tokens: ReadonlyArray<ThemeToken> }) {
+function TokenTable({
+	showSamples,
+	tokens,
+}: {
+	showSamples: boolean;
+	tokens: ReadonlyArray<ThemeToken>;
+}) {
 	return (
 		<div className="overflow-x-auto border-fd-border border-t">
-			<table className="w-full min-w-[40rem] border-collapse text-sm">
+			<table
+				className={cx(
+					'w-full border-collapse text-sm',
+					showSamples ? 'min-w-[40rem]' : 'min-w-[32rem]',
+				)}
+			>
 				<thead>
 					<tr className="border-fd-border border-b text-left">
-						<th className="w-32 px-4 py-2 font-medium" scope="col">
-							Sample
-						</th>
+						{showSamples ? (
+							<th className="w-32 px-4 py-2 font-medium" scope="col">
+								Sample
+							</th>
+						) : null}
 						<th className="px-4 py-2 font-medium" scope="col">
 							<code>vars</code> path
 						</th>
@@ -133,9 +146,11 @@ function TokenTable({ tokens }: { tokens: ReadonlyArray<ThemeToken> }) {
 				<tbody>
 					{tokens.map((token) => (
 						<tr className="border-fd-border border-b last:border-b-0" key={token.path}>
-							<td aria-hidden className="px-4 py-2">
-								<TokenSample token={token} />
-							</td>
+							{showSamples ? (
+								<td aria-hidden className="px-4 py-2">
+									<TokenSample token={token} />
+								</td>
+							) : null}
 							<td className="px-4 py-2">
 								<code>{token.path}</code>
 							</td>
