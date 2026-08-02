@@ -9,25 +9,26 @@ messages. Application code should usually use a composed field such as
 
 <ExampleBlock src="field-primitive/basic" title="Field primitive — Basic" />
 
+## Choose a composed field or primitives
+
+| Guidance | Practices                                                                                                            |
+| -------- | -------------------------------------------------------------------------------------------------------------------- |
+| Do       | Use a composed field such as [`TextField`](/components/forms/text-field) for a supported control.                    |
+| Do       | Use field primitives when a custom control needs a different documented arrangement.                                 |
+| Don't    | Assume adjacent parts create semantics. Connect the label, description, and control through their public HTML props. |
+
 ## Anatomy
 
-`Field` arranges a label, your control, an optional description, and a validation message. Pass
-`label`, `description`, and `errorMessage` to use its standard slots.
+`Field` arranges a label, control, description, and validation message. Composed fields connect
+these parts for their supported controls.
 
 For a custom structure, use `FieldLabel`, `FieldDescription`, and `FieldError` with the field
-control. Keep their relationship to the control intact so React Aria can expose the label,
-description, and error semantics.
+control. Connect each part through its public HTML props, as the primary example shows.
 
 ## Required fields
 
-`necessityIndicator` controls how `FieldLabel` marks a required field. Its default is `icon`. Use
-the supported values from the API table when you need a different required-field convention.
-
-```tsx
-<Field label="Email" necessityIndicator="label">
-	<input required />
-</Field>
-```
+`necessityIndicator` changes the visible marker on `FieldLabel`. It does not make the control
+required, so set the required state on the control separately.
 
 ## Validation messages
 
