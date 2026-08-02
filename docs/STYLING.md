@@ -15,9 +15,9 @@ element. Neither step injects styles at runtime.
 - `recipes/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
 - `recipes/input-states.ts`: the shared field control-state selectors (`inputStates`,
-  `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose and extend. It
-  is named `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module
-  composes its plain data and functions.
+  `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose. It is named
+  `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module composes its
+  plain data and functions.
 - `recipes/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
   CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is the
   in-control icon `combobox.css.ts` applies under its own invalid selector's `::after` — the border
@@ -252,10 +252,13 @@ const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSel
 `inputStates` is the base attribute/pseudo-class selector for each state.
 `composeInputStateSelectors` combines them into the mutually exclusive selectors a recipe applies to
 its styles (for example, `hover` deliberately excludes an element that is also focused or
-read-only). A recipe with a more complex anatomy can widen a state before composing it, the way
-`combobox.css.ts` extends `disabled` and `invalid` to also match its trigger button.
-`descendantDisabledSelector` styles a part (a prefix, suffix, or trigger) when an ancestor control
-is disabled.
+read-only). Both field recipes use these definitions unchanged.
+
+Resist widening a state to probe descendants with `:has()`. React Aria publishes `isDisabled` and
+`isInvalid` through `GroupContext`, so a control group already carries `data-disabled` and
+`data-invalid`; probing cannot distinguish a control that is disabled from one that merely contains
+a disabled button. `descendantDisabledSelector` styles a part (a prefix, suffix, or trigger) when an
+ancestor control is disabled.
 
 ## Styling utilities
 
