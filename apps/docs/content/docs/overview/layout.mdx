@@ -57,6 +57,15 @@ Sprinkles excludes semantic colour, typography, and interaction states. Choose a
 those concerns. When a custom element needs a visual token, use `vars` from `@luke-ui/react/theme`
 rather than a palette value or component selector.
 
+## Best practices
+
+| Guidance | Practice                                                                                                   |
+| -------- | ---------------------------------------------------------------------------------------------------------- |
+| Do       | Use `Box` when an element needs layout properties. Use a plain `div` when it needs none.                   |
+| Do       | Give a property an object keyed by breakpoint, and let the value cascade up from `xsmall`.                 |
+| Don't    | Expect Sprinkles to set semantic colour, typography, or interaction states. Use a component API or `vars`. |
+| Don't    | Write a pixel value where a spacing step exists. The steps come from the active theme.                     |
+
 ## Continue learning
 
 <Cards>

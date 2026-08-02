@@ -1,0 +1,76 @@
+---
+title: Principles
+description: The five conventions behind Luke UI, and the pages that apply each one.
+---
+
+Luke UI follows five conventions. This page states them. The pages linked at the end carry the
+examples that apply them.
+
+## Start with the semantic component
+
+Every component names an intent. `Button` performs an action. `Link` goes to a destination.
+`TextField` collects a value. Choose the component whose name matches the job. Then use its props
+for appearance, size, and state.
+
+A component that carries the intent stays correct when the theme changes, the colour mode changes,
+or the component itself gains a feature. Build custom UI only when no component covers the pattern.
+
+## Compose from primitives when props do not fit
+
+Primitives are public. Each one keeps the behaviour and the accessible structure of a component
+family, and leaves the children to you. Use a primitive when you need a different structure. Do not
+use one to get a different look, because a prop already covers the look.
+
+Keep the documented relationship between a primitive's parts. That relationship supplies the label,
+the description, and the validation state.
+
+## Style custom UI with public theme variables
+
+`vars` from `@luke-ui/react/theme` is the public token contract. Custom UI reads colour, radius,
+depth, type, and spacing from it. Those values follow the active identity and colour mode.
+
+Component selectors, generated palette values, and implementation-state attributes are not public.
+Code that depends on them breaks without a migration path.
+
+## Treat accessible behaviour as part of the contract
+
+Each component supplies keyboard behaviour, focus order, and the accessible name and state it needs.
+Preserve that behaviour when you compose. Give a custom composition the same care: an accessible
+name, a visible focus indicator, and a text equivalent for any meaning that colour or shape carries
+alone.
+
+Never use a border alone to signal a required state such as selected or invalid. Pair it with text,
+an icon, or a surface change.
+
+## Respond to mode and viewport
+
+One identity applies to an application or to an independent themed subtree. Colour modes nest inside
+it. Set `data-color-mode` when the application must fix a mode. Leave the attribute off to follow
+the system setting.
+
+Layout responds through breakpoint values on `Box` and Sprinkles rather than a hand-written media
+query. Spacing, type, radius, and depth all come from the theme, so one theme change moves the whole
+interface together.
+
+## Continue learning
+
+<Cards>
+	<Card href="/overview/styling" title="Styling">
+		Choose between component props, primitives, recipes, and a custom theme.
+	</Card>
+	<Card href="/overview/composition" title="Composition and customisation">
+		Compose a custom pattern from public primitives.
+	</Card>
+	<Card href="/overview/theme" title="Theme">
+		Use the public token contract for custom UI.
+	</Card>
+	<Card href="/overview/layout" title="Layout">
+		Build responsive structure with Box and Sprinkles.
+	</Card>
+	<Card href="/overview/color-mode" title="Colour modes">
+		Follow the system setting or fix a light or dark scope.
+	</Card>
+	<Card href="/theming/token-reference" title="Token reference">
+		Browse every public semantic CSS variable.
+	</Card>
+</Cards>

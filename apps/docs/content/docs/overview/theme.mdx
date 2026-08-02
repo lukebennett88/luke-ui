@@ -59,6 +59,15 @@ import { vars } from '@luke-ui/react/theme';
 The contract is stable across bundled and custom themes. Do not depend on a theme's source colours,
 generated palette, or component recipe selectors.
 
+## Best practices
+
+| Guidance | Practice                                                                                                       |
+| -------- | -------------------------------------------------------------------------------------------------------------- |
+| Do       | Read colour, radius, depth, and spacing from `vars`, so custom UI follows the active identity and colour mode. |
+| Do       | Pick the variable that names the job, such as `color.surface.floating` for a menu panel.                       |
+| Don't    | Copy a resolved colour, shadow, or radius value out of the browser into application CSS.                       |
+| Don't    | Read a theme's source colours or generated palette steps. Only the semantic contract is public.                |
+
 ## Continue learning
 
 <Cards>

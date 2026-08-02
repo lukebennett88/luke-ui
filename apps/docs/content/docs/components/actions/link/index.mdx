@@ -36,3 +36,12 @@ focus or respond to activation. Explain why nearby when someone needs that infor
 
 Write link text that names the destination and makes sense outside its surrounding sentence. Avoid
 generic labels such as “Click here”.
+
+## Best practices
+
+| Guidance | Practice                                                                                                       |
+| -------- | -------------------------------------------------------------------------------------------------------------- |
+| Do       | Keep the default treatment inside a sentence, so the underline marks the destination in running text.          |
+| Do       | Set `isStandalone` for a link that sits on its own, such as a card link or a navigation item.                  |
+| Don't    | Set `isStandalone` to remove the underline from a link inside prose. The link then loses its only resting cue. |
+| Don't    | Use `Link` for an action that stays on the page. Use [`Button`](/components/actions/button) instead.           |

@@ -118,6 +118,15 @@ When a CSS Module or application stylesheet needs a token, use the stable `--luk
 in the [token reference](/theming/token-reference). Do not couple application CSS to undocumented
 selectors or implementation attributes.
 
+## Best practices
+
+| Guidance | Practice                                                                                                          |
+| -------- | ----------------------------------------------------------------------------------------------------------------- |
+| Do       | Set a supported prop such as `appearance`, `size`, or `tone` before you write any custom style.                   |
+| Do       | Reach for a public recipe or `vars` only when no component covers the pattern.                                    |
+| Don't    | Target a component's generated class name or a state attribute such as `data-pressed` to change how it looks.     |
+| Don't    | Author a theme to restyle one component. A theme changes the visual foundation for every component in that scope. |
+
 ## Continue learning
 
 <Cards>

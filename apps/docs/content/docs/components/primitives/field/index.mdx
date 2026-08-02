@@ -33,3 +33,12 @@ the supported values from the API table when you need a different required-field
 
 Use `errorMessage` for validation feedback. `FieldError` is styled for the field error slot and
 works with the validation state from the surrounding React Aria form control.
+
+## Best practices
+
+| Guidance | Practice                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Do       | Use a composed field such as [`TextField`](/components/forms/text-field) for an ordinary form field.                                 |
+| Do       | Use these primitives when a custom control needs the Luke UI label, description, and validation slots.                               |
+| Don't    | Rebuild a composed field from the primitives to change how it looks. Component props already cover appearance.                       |
+| Don't    | Separate `FieldLabel`, `FieldDescription`, or `FieldError` from the control. That link supplies the accessible name and description. |

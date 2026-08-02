@@ -2,6 +2,7 @@
 	"title": "Overview",
 	"pages": [
 		"getting-started",
+		"principles",
 		"styling",
 		"composition",
 		"layout",
