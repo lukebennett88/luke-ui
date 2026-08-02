@@ -14,6 +14,12 @@ export { vars } from './contract.css.js';
 export { spaceScale } from './contract.js';
 export type { SpaceStep } from './contract.js';
 
+/** Typography size step keys in display order. */
+export { fontSizeSteps } from './contract.js';
+
+/** A typography size step key. */
+export type { FontSizeStep } from './contract.js';
+
 /**
  * `themeClassName(name)` returns the identity class for a theme name. `ThemeContrastError` is thrown
  * by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1 for text/on-solid pairs, 3:1 for

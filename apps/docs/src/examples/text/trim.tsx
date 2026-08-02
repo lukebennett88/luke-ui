@@ -1,6 +1,8 @@
 import { Box } from '@luke-ui/react/box';
+import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
+import { useState } from 'react';
 
 const lineBoxStyle = {
 	backgroundColor: vars.color.surface.recessed,
@@ -8,27 +10,17 @@ const lineBoxStyle = {
 } as const;
 
 export default function Trim() {
+	const [isTrimmed, setIsTrimmed] = useState(true);
+
 	return (
 		<Box display="flex" flexDirection="column" gap="400">
-			<Box display="grid" gap="200">
-				<Text color="secondary" elementType="div" size="100">
-					Without trim
+			<Checkbox isSelected={isTrimmed} onChange={setIsTrimmed}>
+				Trim text
+			</Checkbox>
+			<Box paddingInline="300" style={lineBoxStyle}>
+				<Text elementType="div" shouldDisableTrim={!isTrimmed} size="900">
+					Aa
 				</Text>
-				<Box paddingInline="300" style={lineBoxStyle}>
-					<Text elementType="div" shouldDisableTrim size="900">
-						Aa
-					</Text>
-				</Box>
-			</Box>
-			<Box display="grid" gap="200">
-				<Text color="secondary" elementType="div" size="100">
-					With trim
-				</Text>
-				<Box paddingInline="300" style={lineBoxStyle}>
-					<Text elementType="div" size="900">
-						Aa
-					</Text>
-				</Box>
 			</Box>
 		</Box>
 	);
