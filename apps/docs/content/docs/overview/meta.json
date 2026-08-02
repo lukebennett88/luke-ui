@@ -3,18 +3,18 @@
 	"pages": [
 		"getting-started",
 		"principles",
-		"styling",
-		"composition",
-		"breakpoints",
-		"layout",
-		"spacing",
-		"radius",
-		"theme",
 		"color",
 		"color-mode",
-		"shadow",
-		"typography",
+		"composition",
+		"cursors",
 		"iconography",
-		"cursors"
+		"layout",
+		"breakpoints",
+		"spacing",
+		"radius",
+		"shadow",
+		"styling",
+		"theme",
+		"typography"
 	]
 }

@@ -3,29 +3,26 @@ title: Cursors
 description: Know which cursor a control shows, and why some elements keep the browser default.
 ---
 
-Luke UI uses cursor changes for links, text entry, and control states. Buttons keep the default
-cursor.
+Luke UI uses cursor changes to show the type and state of an interaction.
 
-| Convention           | Cursor        |
-| -------------------- | ------------- |
-| `Button`             | `default`     |
-| `Link` or `Checkbox` | `pointer`     |
-| `TextField`          | `text`        |
-| Disabled control     | `not-allowed` |
-| Pending `Button`     | `wait`        |
-
-A `ComboboxField` uses text for its input, pointer for its action buttons, and default for its
-options.
+| Convention        | Cursor        |
+| ----------------- | ------------- |
+| Press action      | `default`     |
+| Navigation link   | `pointer`     |
+| Selection control | `pointer`     |
+| Text entry        | `text`        |
+| Disabled control  | `not-allowed` |
+| Pending action    | `wait`        |
 
 Move the pointer over each control to compare its cursor.
 
-<ExampleBlock src="overview/cursors" title="Cursors — Component states" />
+<ExampleBlock src="overview/cursors" title="Cursors — Control states" />
 
 ## Control states
 
 Set `isDisabled` when an action is unavailable. The control leaves the focus order and blocks
-interaction. Set `isPending` while a button action runs. The button remains focusable and blocks
-further presses. Change its visible label when the status matters.
+interaction. Set `isPending` while an action runs. The control remains focusable and blocks further
+presses. Change its visible label when the status matters.
 
 ## Browser default cursors
 
