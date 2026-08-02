@@ -1,37 +1,28 @@
 import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
-
-const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
+import { fontSizeSteps, vars } from '@luke-ui/react/theme';
 
 export default function Typography() {
 	return (
-		<Box minInlineSize="45rem">
-			<Box
-				alignItems="flex-end"
-				display="grid"
-				style={{
-					borderBlockEnd: `1px dashed ${vars.color.border.decorative}`,
-					gridTemplateColumns: 'repeat(9, minmax(5rem, 1fr))',
-				}}
-			>
-				{sizes.map((size) => (
-					<Text elementType="div" key={size} size={size} textAlign="center">
-						Aa
-					</Text>
-				))}
-			</Box>
-			<Box
-				display="grid"
-				paddingBlockStart="200"
-				style={{ gridTemplateColumns: 'repeat(9, minmax(5rem, 1fr))' }}
-			>
-				{sizes.map((size) => (
-					<Text color="secondary" elementType="div" key={size} size="100" textAlign="center">
+		<Box display="flex" flexDirection="column" gap="300">
+			{fontSizeSteps.map((size) => (
+				<Box
+					alignItems="flex-end"
+					display="grid"
+					gap="300"
+					key={size}
+					style={{ gridTemplateColumns: '3rem minmax(0, 1fr)' }}
+				>
+					<Text color="secondary" elementType="div" size="100">
 						{size}
 					</Text>
-				))}
-			</Box>
+					<Box style={{ borderBlockEnd: `1px dashed ${vars.color.border.decorative}` }}>
+						<Text elementType="div" size={size}>
+							Aa
+						</Text>
+					</Box>
+				</Box>
+			))}
 		</Box>
 	);
 }
