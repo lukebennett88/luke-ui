@@ -3,12 +3,12 @@ import { Button } from '@luke-ui/react/button';
 import { useState } from 'react';
 import { DecorativeBox } from './decorative-box.js';
 
-const spacingSteps = [100, 200, 300, 400, 600, 800, 1000, 1200, 1600] as const;
+const spacingSteps = ['200', '600', '1200'] as const;
 
 type SpacingStep = (typeof spacingSteps)[number];
 
 export default function SpacingPickerExample() {
-	const [step, setStep] = useState<SpacingStep>(400);
+	const [step, setStep] = useState<SpacingStep>('600');
 
 	return (
 		<Box display="grid" gap="400">
@@ -25,8 +25,7 @@ export default function SpacingPickerExample() {
 					</Button>
 				))}
 			</Box>
-			<Box display="flex" gap={`${step}`}>
-				<DecorativeBox style={{ blockSize: '3rem', inlineSize: '3rem' }} />
+			<Box display="flex" gap={step}>
 				<DecorativeBox style={{ blockSize: '3rem', inlineSize: '3rem' }} />
 				<DecorativeBox style={{ blockSize: '3rem', inlineSize: '3rem' }} />
 			</Box>

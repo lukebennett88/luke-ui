@@ -1,33 +1,25 @@
 ---
 title: Spacing
-description: Space layout with theme spacing steps instead of fixed lengths.
+description: Space layouts with Luke UI spacing steps instead of fixed lengths.
 ---
 
-Luke UI themes provide a semantic spacing scale for `gap`, `padding`, and `margin`. Use a step from
-the scale, not a fixed length. The active theme controls each step's value.
+Luke UI provides one spacing scale for `gap`, `padding`, and `margin`. The built-in themes use the
+same values, so layout does not change with the theme identity.
 
 ## The scale
 
-The public scale has nine steps. The scale is deliberately non-linear. There is no `500`, `700`,
-`900`, or `1100`, and no step between `1200` and `1600`.
+The scale has nine steps from `100` to `1600`. Each step maps to a fixed value owned by Luke UI.
 
-<ExampleBlock
-	description="Every public spacing step, read from the active theme."
-	src="overview/spacing-scale"
-	title="Spacing — Scale"
-/>
+<ExampleBlock src="overview/spacing-scale" title="Spacing — Scale" />
 
-## Try a step
+## Choose by relationship
 
-Use small steps (100–300) to space elements inside one component, and middle steps (400–800) to
-separate groups within a section. The largest steps (1000–1600) separate major page sections. The
-step names carry the relationship, so spacing stays consistent when a theme changes the values.
+Use the same step for the same relationship. Choose smaller steps for closely related elements and
+larger steps between separate groups.
 
-<ExampleBlock
-	description="Choose a spacing step and see gap respond in a real layout."
-	src="overview/spacing-picker"
-	title="Spacing — Choose a step"
-/>
+Set `gap` on a flex or grid parent to space its children. This keeps the relationship in one place.
+
+<ExampleBlock src="overview/spacing-picker" title="Spacing — Compare steps" />
 
 ## Responsive spacing
 
@@ -37,25 +29,4 @@ step names carry the relationship, so spacing stays consistent when a theme chan
 <Box gap={{ xsmall: '300', medium: '600' }}>{children}</Box>
 ```
 
-Read [Layout](/overview/layout) for Box and Sprinkles, and [Breakpoints](/overview/breakpoints) for
-the full breakpoint list.
-
-## Best practices
-
-| Guidance | Practice                                                                  |
-| -------- | ------------------------------------------------------------------------- |
-| Do       | Choose a spacing step for `gap`, `padding`, and `margin`.                 |
-| Don't    | Use a fixed length because it looks right in the current theme.           |
-| Do       | Set `gap` on the flex or grid parent to space its children.               |
-| Don't    | Set `margin` on each child to create space between flex or grid siblings. |
-
-## Continue learning
-
-<Cards>
-	<Card href="/components/layout/box" title="Box">
-		The component API for spacing, sizing, and layout properties.
-	</Card>
-	<Card href="/overview/layout" title="Layout">
-		Build responsive structure with Box and Sprinkles.
-	</Card>
-</Cards>
+Read [Layout](/overview/layout) for Box, Sprinkles, and the full breakpoint list.
