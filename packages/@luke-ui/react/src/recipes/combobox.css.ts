@@ -27,13 +27,13 @@ const comboboxErrorIconSize = createVar();
 // instead of a dropdown anchored below the control.
 const trayMediaQuery = '(width < 40rem)';
 
-const comboboxStates = {
-	...inputStates,
-	disabled: `${inputStates.disabled}, :has(button:disabled), :has([data-disabled="true"])`,
-	invalid: `${inputStates.invalid}, :has([data-invalid="true"]), :has([aria-invalid="true"])`,
-};
+// The combobox uses the base state definitions unchanged, so its state selectors are
+// byte-identical to `input-group`'s and the two share one rule per state in the output.
+// The group can rely on its own attributes because React Aria's `ComboBox` publishes
+// `isDisabled` and `isInvalid` through `GroupContext`, which `Group` picks up and writes
+// out as `data-disabled` / `data-invalid` on the group element itself.
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
-	composeInputStateSelectors(comboboxStates);
+	composeInputStateSelectors(inputStates);
 
 const comboboxActionStyles = {
 	'@media': {
