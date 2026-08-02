@@ -143,9 +143,16 @@ export const States = meta.story({
 		</div>
 	),
 	play: async ({ args, canvas, step }) => {
+		const button = canvas.getByRole('button', { name: 'Default' });
 		const pending = canvas.getByRole('button', { name: 'Pending' });
 		const disabled = canvas.getByRole('button', { name: 'Disabled' });
 		const busyCue = canvas.getByRole('status', { hidden: true });
+
+		await step('cursors match action states', async () => {
+			await expect(getComputedStyle(button).cursor).toBe('default');
+			await expect(getComputedStyle(disabled).cursor).toBe('not-allowed');
+			await expect(getComputedStyle(pending).cursor).toBe('wait');
+		});
 
 		await step('pending remains focusable, busy, and non-interactive', async () => {
 			await userEvent.tab();

@@ -3,17 +3,17 @@
 	"pages": [
 		"getting-started",
 		"principles",
-		"styling",
-		"composition",
-		"breakpoints",
-		"layout",
-		"spacing",
-		"radius",
-		"theme",
 		"color",
 		"color-mode",
+		"composition",
+		"iconography",
+		"layout",
+		"breakpoints",
+		"spacing",
+		"radius",
 		"shadow",
-		"typography",
-		"iconography"
+		"styling",
+		"theme",
+		"typography"
 	]
 }
