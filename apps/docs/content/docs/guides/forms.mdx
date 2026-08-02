@@ -1,0 +1,92 @@
+---
+title: Forms
+description:
+  Build an accessible native form from Luke UI's field components, and handle submit and reset.
+---
+
+A Luke UI form uses the native HTML `<form>` element. Compose it from Luke UI fields and buttons.
+
+<ExampleBlock src="forms/build-a-form" title="Forms — Build a form" />
+
+## Visible labels
+
+Pass a visible `label` to `TextField` and `ComboboxField`. Luke UI associates the label with its
+control.
+
+Pass the visible checkbox label through `Checkbox` children. Use `aria-label` only when surrounding
+content already names the control.
+
+A placeholder disappears after someone enters a value. Do not use a placeholder as the only label.
+
+## Descriptions
+
+Pass `description` when someone needs information before they complete a field. Luke UI associates
+the description with its control.
+
+Keep each description to one sentence. Luke UI keeps it visible and associated with the control when
+an error message appears.
+
+## Required fields
+
+Set `isRequired` when someone must complete a field. The browser blocks submission until the field
+has a value.
+
+Set `necessityIndicator="label"` to append “(required)” to a field label. The default indicator is
+an icon.
+
+Read [Required fields](/components/forms/text-field#required-fields) for both indicators.
+
+## Controlled and uncontrolled fields
+
+Prefer an uncontrolled field when the application needs its value only during submission. Pass a
+starting value through `defaultValue` or `defaultSelected`.
+
+Use a controlled field when the application needs its value during each render. Pass `value` and
+`onChange`, then store the value in state.
+
+For a controlled `Checkbox`, pass `isSelected` and `onChange`.
+
+## Submit
+
+Pass `onSubmit` to the `<form>` element. Call `event.preventDefault()`, then read the values from
+`FormData`.
+
+```tsx
+function handleSubmit(event: FormEvent<HTMLFormElement>) {
+	event.preventDefault();
+	const data = new FormData(event.currentTarget);
+	const email = data.get('email');
+}
+```
+
+Give the submit button `type="submit"`.
+
+## Reset
+
+Give a button `type="reset"` to restore uncontrolled fields. The browser restores their starting
+values.
+
+An `onReset` handler must reset state that React owns.
+
+```tsx
+const INITIAL_EMAIL = '';
+const [email, setEmail] = useState(INITIAL_EMAIL);
+
+<form onReset={() => setEmail(INITIAL_EMAIL)}>
+	<TextField label="Email address" name="email" onChange={setEmail} value={email} />
+	<Button type="reset">Reset</Button>
+</form>;
+```
+
+## Validation
+
+Luke UI supports browser validation, custom validation, and server validation. The
+[Validation guide](/components/forms/validation) explains each approach.
+
+- Set native constraints such as `isRequired`, `minLength`, `pattern`, or `type="email"` for browser
+  validation.
+- Pass `validate` for a custom rule. Pass `isInvalid` and `errorMessage` for controlled feedback.
+- Pass `validationErrors` to React Aria's `Form` for server errors. Key each error by the field
+  `name`.
+
+Luke UI does not provide recipes for third-party form libraries. Start with native form behaviour.

@@ -85,6 +85,29 @@ test('the indicator icon adds no text to the accessible name', async () => {
 	expect(indicatorFor('Invalid')?.getAttribute('aria-hidden')).toBe('true');
 });
 
+test('an invalid field keeps its description and error associated with the input', async () => {
+	renderVisual(
+		<TextField
+			description="Use your work email."
+			errorMessage="Enter a valid email."
+			isInvalid
+			label="Email"
+			name="email"
+		/>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Email' });
+	const description = page.getByText('Use your work email.');
+	const error = page.getByText('Enter a valid email.');
+
+	await expect.element(description).toBeVisible();
+	await expect.element(error).toBeVisible();
+
+	const describedBy = input.element().getAttribute('aria-describedby')?.split(' ') ?? [];
+	expect(describedBy).toContain(description.element().id);
+	expect(describedBy).toContain(error.element().id);
+});
+
 // The indicator scales with the control's own `size` (`INPUT_GROUP_ICON_SIZE`), the
 // same `medium` → 20px, `small` → 16px mapping Combobox uses, so it stays proportioned
 // to the field it sits in rather than sitting at a constant.
