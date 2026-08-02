@@ -1,0 +1,61 @@
+---
+title: Spacing
+description: Space layout with theme spacing steps instead of fixed lengths.
+---
+
+Luke UI themes provide a semantic spacing scale for `gap`, `padding`, and `margin`. Use a step from
+the scale, not a fixed length. The active theme controls each step's value.
+
+## The scale
+
+The public scale has nine steps. The scale is deliberately non-linear. There is no `500`, `700`,
+`900`, or `1100`, and no step between `1200` and `1600`.
+
+<ExampleBlock
+	description="Every public spacing step, read from the active theme."
+	src="overview/spacing-scale"
+	title="Spacing — Scale"
+/>
+
+## Try a step
+
+Use small steps (100–300) to space elements inside one component, and middle steps (400–800) to
+separate groups within a section. The largest steps (1000–1600) separate major page sections. The
+step names carry the relationship, so spacing stays consistent when a theme changes the values.
+
+<ExampleBlock
+	description="Choose a spacing step and see gap respond in a real layout."
+	src="overview/spacing-picker"
+	title="Spacing — Choose a step"
+/>
+
+## Responsive spacing
+
+`gap`, `padding`, and `margin` accept an object keyed by breakpoint, cascading up from `xsmall`.
+
+```tsx
+<Box gap={{ xsmall: '300', medium: '600' }}>{children}</Box>
+```
+
+Read [Layout](/overview/layout) for Box and Sprinkles, and [Breakpoints](/overview/breakpoints) for
+the full breakpoint list.
+
+## Best practices
+
+| Guidance | Practice                                                                  |
+| -------- | ------------------------------------------------------------------------- |
+| Do       | Choose a spacing step for `gap`, `padding`, and `margin`.                 |
+| Don't    | Use a fixed length because it looks right in the current theme.           |
+| Do       | Set `gap` on the flex or grid parent to space its children.               |
+| Don't    | Set `margin` on each child to create space between flex or grid siblings. |
+
+## Continue learning
+
+<Cards>
+	<Card href="/components/layout/box" title="Box">
+		The component API for spacing, sizing, and layout properties.
+	</Card>
+	<Card href="/overview/layout" title="Layout">
+		Build responsive structure with Box and Sprinkles.
+	</Card>
+</Cards>
