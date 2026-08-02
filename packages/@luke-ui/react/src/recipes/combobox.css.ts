@@ -27,11 +27,8 @@ const comboboxErrorIconSize = createVar();
 // instead of a dropdown anchored below the control.
 const trayMediaQuery = '(width < 40rem)';
 
-// The combobox uses the base state definitions unchanged, so its state selectors are
-// byte-identical to `input-group`'s and the two share one rule per state in the output.
-// The group can rely on its own attributes because React Aria's `ComboBox` publishes
-// `isDisabled` and `isInvalid` through `GroupContext`, which `Group` picks up and writes
-// out as `data-disabled` / `data-invalid` on the group element itself.
+// React Aria's `ComboBox` publishes `isDisabled`/`isInvalid` through `GroupContext`, which
+// `Group` writes onto the group element, so no `:has()` probing of descendants is needed.
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
 	composeInputStateSelectors(inputStates);
 
@@ -109,17 +106,8 @@ const comboboxActionStyles = {
 	},
 } satisfies StyleRule;
 
-/**
- * The chrome above as a single class, composed into the `trigger` and `clearButton`
- * slots below. Spreading the object into both slots emitted every declaration twice,
- * including both media queries and all five state selectors.
- */
 const comboboxActionClassName = styleInLayer('recipes', comboboxActionStyles);
 
-/**
- * Per-size box for both action buttons, shared for the same reason: the two slots
- * occupy an identical square at each size.
- */
 const comboboxActionSizeClassNames = {
 	medium: styleInLayer('recipes', { blockSize: '28px', inlineSize: '28px', paddingInline: 0 }),
 	small: styleInLayer('recipes', { blockSize: '24px', inlineSize: '24px', paddingInline: 0 }),

@@ -107,12 +107,7 @@ test('invalid without an error message still carries a non-colour cue', async ()
 	);
 });
 
-// The recipe used to detect these states by probing descendants — `:has(button:disabled)`,
-// `:has([data-disabled="true"])`, `:has([data-invalid="true"])`, `:has([aria-invalid="true"])`
-// — because nothing was thought to reach the group itself. React Aria's `ComboBox`
-// publishes `isDisabled`/`isInvalid` on `GroupContext` and `Group` merges them, so the
-// group carries the attributes directly. These assertions pin that down: if a React Aria
-// upgrade stopped publishing them, the state selectors would silently stop matching.
+// A React Aria upgrade that stopped publishing these on `GroupContext` would silently stop the state selectors matching.
 test('the control group carries its own disabled and invalid attributes', async () => {
 	renderVisual(
 		<>
@@ -135,8 +130,7 @@ test('the control group carries its own disabled and invalid attributes', async 
 	expect(disabledControl.dataset.disabled).toBe('true');
 	expect(invalidControl.dataset.invalid).toBe('true');
 
-	// The trigger is disabled too. That is what the removed `:has(button:disabled)` clause
-	// keyed on, and it must not be what carries the group's own treatment any more.
+	// The trigger is disabled too, but it is not what carries the group's treatment.
 	expect(disabledControl.querySelector('button')?.disabled).toBe(true);
 
 	const disabledStyle = getComputedStyle(disabledControl);
@@ -148,11 +142,7 @@ test('the control group carries its own disabled and invalid attributes', async 
 	expect(getComputedStyle(invalidControl, '::after').content).toBe('""');
 });
 
-// React Aria disables the trigger button on a read-only combobox, so the old
-// `:has(button:disabled)` / `:has([data-disabled="true"])` clauses matched a read-only
-// control and painted it disabled — while also suppressing the read-only treatment,
-// because every other composed selector is gated on `:not(disabled)`. Keying on the
-// group's own `data-disabled` separates the two states again.
+// React Aria disables the trigger on a read-only combobox, which must not make the control read as disabled.
 test('read-only controls keep the read-only material, not the disabled one', async () => {
 	renderVisual(
 		<>

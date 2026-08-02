@@ -21,17 +21,7 @@ interface _ComboboxInputGroupProps extends _ComboboxInputGroupOmit {
  */
 export type ComboboxInputGroupProps = Prettify<_ComboboxInputGroupProps>;
 
-/**
- * Wrapper for combobox text input + trigger content.
- *
- * Disabled and invalid state arrives through React Aria's `GroupContext`: `ComboBox`
- * publishes `isDisabled` and `isInvalid` on it, and `Group` merges context props under
- * its own, so the group element carries `data-disabled` / `data-invalid` without this
- * component forwarding anything. `recipes/combobox.css.ts` styles those attributes
- * directly rather than probing descendants with `:has()`. Read-only has no context entry
- * on either `ComboBox` or `TextField`, so both recipes detect it from the input's
- * `:read-only` instead (see `recipes/input-states.ts`).
- */
+/** Wrapper for combobox text input + trigger content. */
 export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element {
 	const { size: sizeProp, ...groupProps } = props;
 	const size = useComboboxSize(sizeProp);

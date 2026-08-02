@@ -12,11 +12,6 @@ import { cx } from '../utils/index.js';
  * A single-part recipe returns a class string. A multi-part recipe returns one
  * function per slot, each taking an optional extra class to merge.
  *
- * Every style position — a slot, a variant value, a compound variant, a single-part
- * `base` — takes a style object, a class string, or an array composing both, so a
- * block shared by two slots can be emitted once as a class and composed into each
- * rather than duplicated in the output.
- *
  * `recipe()` runs at build time inside a `.css.ts` module. It splits a slotted
  * config into one recipe per slot, in declaration order, so its generated CSS and
  * class names match hand-written per-slot recipes byte-for-byte, and it wraps every
@@ -36,11 +31,7 @@ import { cx } from '../utils/index.js';
 /** One part of a recipe style: a layered style object or a pre-built class string. */
 type RecipeStylePart = DistributiveOmit<StyleRule, '@layer'> | string;
 
-/**
- * A style rule authored for a recipe: a single part, or an array composing several
- * parts (Vanilla Extract's `ComplexStyleRule`). Composing a shared class into two
- * slots emits that block once instead of per slot.
- */
+/** A style rule authored for a recipe: one part, or an array composing several. */
 type RecipeStyleRule = RecipeStylePart | ReadonlyArray<RecipeStylePart>;
 
 /** Maps the string variant keys `'true'`/`'false'` onto `boolean` for selection. */
@@ -108,8 +99,7 @@ type AnyMultiPartConfig = MultiPartConfig<string, SlotVariantGroups<string>>;
  * keeps the literal slot names and variant values that `recipe()` infers, while
  * `satisfies` type-checks every slot and variant style against `StyleRule` (so a
  * mistyped CSS property is caught where it is written, not silently accepted by
- * `recipe()`'s structural inference). Slots and variant values may also be class
- * strings or `as const` arrays composing a shared class with local overrides.
+ * `recipe()`'s structural inference).
  */
 export interface SlottedConfigInput {
 	slots: Record<string, RecipeStyleRule>;
@@ -255,11 +245,6 @@ function withRecipesLayerIfObject(part: RecipeStylePart): RecipeStylePart {
 	return typeof part === 'string' ? part : withRecipesLayer(part);
 }
 
-/**
- * Wraps an authored style in the `recipes` layer. A composed style (an array) is
- * mapped part by part: style objects are wrapped exactly as a lone object would be,
- * and class strings pass through untouched — a class already carries its own layer.
- */
 function withLayerIfStyleRule(styleRule: RecipeStyleRule): RecipeStyleRule {
 	return isComposedStyle(styleRule)
 		? styleRule.map(withRecipesLayerIfObject)
