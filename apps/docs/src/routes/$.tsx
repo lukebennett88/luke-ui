@@ -14,6 +14,7 @@ import { ExampleBlock } from '../components/example-block';
 import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
+import { TokenExplorer } from '../components/token-explorer';
 import { getComponentPageNavigation } from '../lib/component-page-navigation.js';
 import { baseOptions } from '../lib/layout.shared';
 import { source } from '../lib/source';
@@ -27,6 +28,7 @@ const mdxComponents = {
 	ExampleBlock,
 	IconGallery,
 	SourceCodeBlock,
+	TokenExplorer,
 	TypeTable,
 };
 
