@@ -6,11 +6,7 @@ description: Replaces content with a placeholder that keeps its shape while it l
 Use `LoadingSkeleton` when content is loading but its layout is known. Wrap the content that will
 appear so the placeholder occupies the same space.
 
-<ExampleBlock
-	src="loading-skeleton/basic"
-	title="Loading Skeleton — Basic"
-	description="Toggle the loading state to reveal the final content."
-/>
+<ExampleBlock src="loading-skeleton/basic" title="Loading Skeleton — Basic" />
 
 Wrap text itself, rather than its parent, when it can span several lines. The placeholder then
 follows each line without changing the layout.
@@ -23,18 +19,13 @@ and other content with a fixed shape.
 <ExampleBlock
 	src="loading-skeleton/custom-dimensions"
 	title="Loading Skeleton — Fixed dimensions"
-	description="A circular placeholder keeps the avatar's space while it loads."
 />
 
 Set `radius` when the direct child has square corners but a visible descendant has rounded corners.
 This is useful when a `TextField` is the child because its input control has rounded corners inside
 the field wrapper.
 
-<ExampleBlock
-	src="loading-skeleton/border-radius"
-	title="Loading Skeleton — Control radius"
-	description="The skeleton uses the same radius as the TextField control."
-/>
+<ExampleBlock src="loading-skeleton/border-radius" title="Loading Skeleton — Control radius" />
 
 ## Loading state
 
@@ -50,22 +41,14 @@ returns its children without a wrapper.
 Use `LoadingSkeletonProvider` when one loading state controls a section. Its value overrides
 `isLoading` on every descendant skeleton, so a section changes together.
 
-<ExampleBlock
-	src="loading-skeleton/provider"
-	title="Loading Skeleton — Shared state"
-	description="Provider state overrides every descendant skeleton's local state."
-/>
+<ExampleBlock src="loading-skeleton/provider" title="Loading Skeleton — Shared state" />
 
 ## Element type
 
 `LoadingSkeleton` renders a `span` by default. Set `elementType` when the parent requires another
 element, such as an `li` inside a list.
 
-<ExampleBlock
-	src="loading-skeleton/element"
-	title="Loading Skeleton — List item"
-	description="A skeleton rendered as a list item."
-/>
+<ExampleBlock src="loading-skeleton/element" title="Loading Skeleton — List item" />
 
 ## Accessibility
 

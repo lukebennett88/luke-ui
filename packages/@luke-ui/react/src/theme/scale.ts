@@ -43,10 +43,8 @@ export interface FamilyRequirements {
 }
 
 /**
- * Every capability the public contract can consume. The shared semantic contract gives all six roles
- * the same visual slots, so every family must guarantee all of them — the old split, where the three
- * feedback roles opted out of solid states and on-solid because no leaf consumed them, no longer
- * describes what is emitted. A role that opted out would now publish an ungated solid.
+ * Every capability the public contract can consume. All six roles publish the same visual slots, so
+ * every family must guarantee all capabilities. A role that opts out would publish an ungated solid.
  */
 const everyCapability = {
 	needsBorder: true,

@@ -30,7 +30,7 @@ const baseArgs = {
 } satisfies EmojiProps;
 
 /**
- * `Emoji` renders decorative emoji with an accessible label.
+ * Pass a label when an emoji conveys meaning.
  */
 export const Default = meta.story({
 	args: baseArgs,
@@ -47,9 +47,6 @@ export const Default = meta.story({
 	),
 });
 
-/**
- * Emoji size follows text sizing so it scales consistently with typography.
- */
 export const Size = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {

@@ -26,13 +26,7 @@ Components are intentionally opinionated. Their public props cover supported var
 behaviour. The active theme provides the semantic colours, typography, spacing, radii, and depth
 that make those components work together.
 
-```tsx
-import { Button } from '@luke-ui/react/button';
-
-<Button appearance="subtle" size="small" tone="accent">
-	Save changes
-</Button>;
-```
+<SourceCodeBlock src="styling/component-props" />
 
 ### Compose from primitives
 
@@ -40,14 +34,7 @@ Use a documented primitive when component props do not provide the structure you
 keep the accessibility and visual contract for a component family. They leave its children and
 composition to your application.
 
-```tsx
-import { Button } from '@luke-ui/react/button/primitive';
-
-<Button appearance="solid" tone="accent">
-	<span>Save changes</span>
-	<span aria-hidden>⌘S</span>
-</Button>;
-```
+<SourceCodeBlock src="styling/primitive" />
 
 ### Build custom UI with public recipes and variables
 
@@ -55,28 +42,11 @@ Recipes from `@luke-ui/react/recipes` are public, component-specific styling API
 custom composition follows that recipe's documented element contract. Do not copy or target its
 generated selectors.
 
-```tsx
-import { button } from '@luke-ui/react/recipes';
-
-<button className={button({ appearance: 'solid', size: 'medium', tone: 'accent' })} type="button">
-	Save changes
-</button>;
-```
+<SourceCodeBlock src="styling/recipe" />
 
 The public `vars` token contract lets an application-owned element follow the active theme.
 
-```tsx
-import { vars } from '@luke-ui/react/theme';
-
-<aside
-	style={{
-		backgroundColor: vars.color.surface.floating,
-		borderRadius: vars.radius.surface,
-		boxShadow: vars.depth.floating,
-		color: vars.color.text.primary,
-	}}
-/>;
-```
+<SourceCodeBlock src="styling/semantic-variables" />
 
 The token contract is public. Component selectors, generated palette values, and theme
 implementation details are not. See the [token reference](/theming/token-reference) for the full
@@ -94,15 +64,7 @@ Import `@luke-ui/react/stylesheet.css` and one bundled theme stylesheet at the a
 point. Apply `themeRootClassName` and the matching identity class to the same application or subtree
 root. Luke UI scopes the reset to that root, so it does not reset unrelated application content.
 
-```tsx
-import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/tactile.css';
-import { themeRootClassName } from '@luke-ui/react/theme';
-import { tactileThemeClassName } from '@luke-ui/react/themes';
-import { cx } from '@luke-ui/react/utils';
-
-<div className={cx(themeRootClassName, tactileThemeClassName)}>{children}</div>;
-```
+<SourceCodeBlock src="styling/static-styles" />
 
 Read [Applying a theme](/theming/applying) for colour modes, portals, and other theme setup details.
 

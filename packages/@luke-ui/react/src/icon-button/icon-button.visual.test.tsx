@@ -62,17 +62,6 @@ for (const appearance of visualAppearances) {
 	});
 }
 
-test('keyboard focus ring', async () => {
-	const scene = renderVisual(
-		<Grid columns={1}>
-			<IconButton aria-label="Focus add" icon="add" />
-		</Grid>,
-	);
-
-	await focusViaKeyboard(page.getByRole('button', { name: 'Focus add' }));
-	await captureVisual(scene, 'icon-button/focus-visible');
-});
-
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 

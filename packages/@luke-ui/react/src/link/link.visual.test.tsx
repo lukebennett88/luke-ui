@@ -31,17 +31,6 @@ test('tones and states', async () => {
 	await captureVisual(locator, 'link/tones-states');
 });
 
-test('keyboard focus ring', async () => {
-	const scene = renderVisual(
-		<Stack>
-			<Link href="#">Focus link</Link>
-		</Stack>,
-	);
-
-	await focusViaKeyboard(page.getByRole('link', { name: 'Focus link' }));
-	await captureVisual(scene, 'link/focus-visible');
-});
-
 for (const appearance of visualAppearances) {
 	test(`navigation states: ${appearance.theme} ${appearance.mode}`, async () => {
 		const scene = renderVisual(

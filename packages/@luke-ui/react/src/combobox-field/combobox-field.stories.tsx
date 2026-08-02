@@ -36,7 +36,7 @@ const stackStyle = {
 } as const satisfies CSSProperties;
 
 /**
- * Use the ComboboxField component when the user needs to choose one option from a large group of options.
+ * Use `ComboboxField` when someone must choose one option from a large set.
  */
 export const Default = meta.story({
 	play: async ({ canvasElement, step }) => {
@@ -92,8 +92,7 @@ export const Default = meta.story({
 });
 
 /**
- * Uncontrolled mode uses `defaultValue` and `defaultItems`.
- * The component manages its own state internally.
+ * Use uncontrolled mode when the component owns its initial value and items.
  */
 export const Uncontrolled = meta.story({
 	render: function Render() {
@@ -111,27 +110,20 @@ export const Uncontrolled = meta.story({
 	},
 });
 
-/**
- * The selected option shows a checkmark in the listbox, and the control shows
- * a clear button while a selection is present.
- */
 export const ClearSelection = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		const page = within(document.body);
 		const combobox = canvas.getByRole('combobox', { name: 'Country' });
 
-		// A selection is present, so the clear button renders.
 		const clearButton = canvas.getByRole('button', { name: 'Clear selection' });
 		await expect(combobox).toHaveValue('Canada');
 
-		// The selected option is marked with a checkmark.
 		await userEvent.click(combobox);
 		const selected = page.getByRole('option', { name: 'Canada' });
 		await expect(selected).toHaveAttribute('aria-selected', 'true');
 		await expect(selected.querySelector('svg')).not.toBeNull();
 
-		// Clearing resets the value and removes the clear button.
 		await userEvent.click(clearButton);
 		await expect(combobox).toHaveValue('');
 		await expect(canvas.queryByRole('button', { name: 'Clear selection' })).not.toBeInTheDocument();
@@ -152,8 +144,7 @@ export const ClearSelection = meta.story({
 });
 
 /**
- * Controlled mode uses `value`, `onChange`, and `items`.
- * The parent component manages the state.
+ * Use controlled mode when the parent owns the value and items.
  */
 export const Controlled = meta.story({
 	render: function Render() {
@@ -182,10 +173,7 @@ export const Controlled = meta.story({
 
 const sizeStoryItems: Array<CountryItem> = [...countryItems, { id: 'override', label: 'Override' }];
 
-/**
- * The input supports two sizes: small and medium (default).
- * Prefer using size consistently with other form controls.
- */
+/** Match the size of adjacent form controls. */
 export const Size = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
@@ -196,19 +184,16 @@ export const Size = meta.story({
 		const smallControl = smallInput.closest('[role="group"]')!;
 		const mediumControl = mediumInput.closest('[role="group"]')!;
 
-		// Verify controls have different computed block sizes
 		await expect(window.getComputedStyle(smallControl).blockSize).not.toBe(
 			window.getComputedStyle(mediumControl).blockSize,
 		);
 
-		// Open small combobox and check first option padding
 		await userEvent.click(smallInput);
 		const smallOptions = page.getAllByRole('option');
 		await expect(smallOptions.length).toBeGreaterThan(0);
 		const smallFirstOption = smallOptions[0]!;
 		const smallOptionPadding = window.getComputedStyle(smallFirstOption).paddingBlock;
 
-		// Close small and open medium
 		await userEvent.keyboard('{Escape}');
 		await userEvent.click(mediumInput);
 		const mediumOptions = page.getAllByRole('option');
@@ -218,14 +203,12 @@ export const Size = meta.story({
 
 		await expect(smallOptionPadding).not.toBe(mediumOptionPadding);
 
-		// Close medium and open small again to check override
 		await userEvent.keyboard('{Escape}');
 		await userEvent.click(smallInput);
 		const overrideOption = page.getByRole('option', { name: 'Override' });
 		const overridePadding = window.getComputedStyle(overrideOption).paddingBlock;
 		await expect(overridePadding).toBe(mediumOptionPadding);
 
-		// Leave the story settled with the popover closed
 		await userEvent.keyboard('{Escape}');
 		await waitFor(async () => {
 			await expect(page.queryByRole('listbox')).not.toBeInTheDocument();
@@ -260,9 +243,6 @@ export const Size = meta.story({
 	},
 });
 
-/**
- * Disabling the combobox input can be done via the disabled prop.
- */
 export const Disabled = meta.story({
 	render: function Render() {
 		return (
@@ -308,10 +288,7 @@ export const ReadOnly = meta.story({
 	},
 });
 
-/**
- * Groups are used to separate items into appropriate sections.
- * A divider is also included between each section.
- */
+/** Group related options when a long list needs labelled sections. */
 export const Groups = meta.story({
 	render: function Render() {
 		return (
@@ -335,7 +312,7 @@ interface Pokemon {
 }
 
 /**
- * Async filtering forwards the listbox loading UI through listBoxProps.
+ * Pass asynchronous loading feedback through `listBoxProps`.
  */
 export const AsyncFiltering = meta.story({
 	render: function AsyncFilteringExample() {
@@ -373,7 +350,7 @@ export const AsyncFiltering = meta.story({
 });
 
 /**
- * Infinite scroll composes a load-more row after the item renderer.
+ * Compose a load-more row after the item renderer for incremental results.
  */
 export const AsyncInfiniteScroll = meta.story({
 	render: function AsyncInfiniteScrollExample() {
@@ -413,8 +390,7 @@ export const AsyncInfiniteScroll = meta.story({
 });
 
 /**
- * Disabled keys prevent selection of specific options.
- * Disabled items cannot be selected, focused, or interacted with.
+ * Disabled options cannot receive focus or selection.
  */
 export const DisabledKeys = meta.story({
 	render: function Render() {
@@ -443,9 +419,8 @@ export const Validation = meta.story({
 		await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
 		await expect(canvas.getByText('Please select a country.')).toBeInTheDocument();
 
-		// Native validation focuses the invalid combobox, which opens its listbox
-		// (menuTrigger="focus"). Close it so the story doesn't leave the popover
-		// open with the rest of the page hidden from assistive technology.
+		// Native validation focuses the invalid combobox and opens its listbox. Close the listbox so
+		// the test does not leave the rest of the page hidden from assistive technology.
 		await userEvent.keyboard('{Escape}');
 		await waitFor(async () => {
 			await expect(page.queryByRole('listbox')).not.toBeInTheDocument();
@@ -472,7 +447,7 @@ export const Validation = meta.story({
 });
 
 /**
- * Use `validationBehavior="aria"` to mark the field invalid for assistive technologies without blocking form submission.
+ * Use `validationBehavior="aria"` to expose an invalid field to assistive technology without blocking form submission.
  */
 export const AriaValidation = meta.story({
 	render: function Render() {

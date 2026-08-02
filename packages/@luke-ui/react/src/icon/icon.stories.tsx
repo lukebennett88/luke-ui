@@ -44,9 +44,6 @@ const HeartIcon = createIcon({
 	),
 });
 
-/**
- * `Icon` renders a single symbol from the configured spritesheet by name.
- */
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
@@ -60,9 +57,6 @@ export const Default = meta.story({
 	},
 });
 
-/**
- * Size uses the semantic icon steps `xsmall`, `small`, `medium`, and `large`.
- */
 export const Sizes = meta.story({
 	args: baseArgs,
 	render: (props) => (
@@ -75,7 +69,7 @@ export const Sizes = meta.story({
 });
 
 /**
- * Icon color follows the semantic content color inherited from its parent.
+ * Icon colour follows the semantic content colour inherited from its parent.
  */
 export const Color = meta.story({
 	args: baseArgs,
@@ -93,7 +87,7 @@ export const Color = meta.story({
 
 /**
  * Build a one-off icon component with `createIcon` while keeping Luke UI icon
- * sizing and accessibility behavior.
+ * sizing and accessibility behaviour.
  */
 export const CreateYourOwnIcon = meta.story({
 	render: () => (
@@ -119,7 +113,7 @@ export const CreateYourOwnIcon = meta.story({
 });
 
 /**
- * Complete icon catalog. Clicking an item copies its icon name for quick use.
+ * Select an item in the complete icon catalogue to copy its name.
  */
 export const AllIcons = meta.story({
 	args: baseArgs,

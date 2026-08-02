@@ -43,31 +43,14 @@ provides the reset, base typography, and semantic variables for its children.
 Import each component from its package path. The setup above renders `Text`. `Button` comes from
 `@luke-ui/react/button`.
 
-```tsx
-import { Button } from '@luke-ui/react/button';
-import { Text } from '@luke-ui/react/text';
-
-export function Welcome() {
-	return (
-		<>
-			<Text>Welcome to Luke UI.</Text>
-			<Button>Continue</Button>
-		</>
-	);
-}
-```
+<SourceCodeBlock src="overview/welcome" />
 
 ## Change the theme
 
 Tactile is the default bundled identity. Paper uses the same component APIs with a flatter visual
 treatment. Switch the CSS import and class together.
 
-```tsx
-import '@luke-ui/react/themes/paper.css';
-import { paperThemeClassName } from '@luke-ui/react/themes';
-
-<div className={cx(themeRootClassName, paperThemeClassName)}>{children}</div>;
-```
+<SourceCodeBlock src="overview/paper-theme" />
 
 Set `data-color-mode="light"` or `data-color-mode="dark"` on a themed element when the application
 must use a specific mode. Without it, Luke UI follows the system preference.

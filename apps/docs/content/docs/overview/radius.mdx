@@ -10,11 +10,7 @@ job, not a fixed pixel value. The public variables adapt to the active theme.
 
 Luke UI exposes five radius roles, each matched to the kind of element it rounds.
 
-<ExampleBlock
-	src="overview/radius-roles"
-	title="Radius — Radius roles"
-	description="Each shape uses one public radius role from the active theme."
-/>
+<ExampleBlock src="overview/radius-roles" title="Radius — Radius roles" />
 
 ## Use the active theme
 
@@ -39,11 +35,7 @@ A rounded surface sometimes sits inside another. Derive the wrapper's radius fro
 so the two corners stay concentric. Pass the space between their corners (usually the wrapper's
 padding) as the gap.
 
-<ExampleBlock
-	src="overview/concentric-radius"
-	title="Radius — Keep nested corners concentric"
-	description="The outer and inner corners use the same visible curve."
-/>
+<ExampleBlock src="overview/concentric-radius" title="Radius — Keep nested corners concentric" />
 
 ```tsx
 import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';

@@ -18,7 +18,7 @@ const meta = preview.meta({
 });
 
 /**
- * Checkboxes let a person choose an independent option. They expose native form
+ * Checkboxes let someone choose an independent option. They expose native form
  * behaviour while keeping the label as the clickable target.
  */
 export const Default = meta.story({
@@ -58,7 +58,7 @@ export const Sizes = meta.story({
 
 /**
  * Use `isIndeterminate` when a parent option represents a mixed selection.
- * It is visual state only, so update it with the child selections in application code.
+ * It sets only the visual state, so update it with the child selections in application code.
  */
 export const Indeterminate = meta.story({
 	args: {
@@ -76,7 +76,7 @@ export const Indeterminate = meta.story({
 
 /**
  * Disabled checkboxes cannot receive focus or change selection. Read-only
- * checkboxes stay in the tab order so their state remains available to keyboard users.
+ * checkboxes stay in the tab order so someone who uses a keyboard can access their state.
  */
 export const DisabledAndReadOnly = meta.story({
 	play: async ({ canvasElement }) => {

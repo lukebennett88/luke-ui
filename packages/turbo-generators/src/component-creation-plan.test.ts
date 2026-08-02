@@ -25,12 +25,12 @@ describe('createComponentPlan', () => {
 			'packages/@luke-ui/react/src/status-badge/index.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
 		]);
-		expect(
-			plan.files.find((file) => file.path.endsWith('/status-badge/index.mdx'))?.contents,
-		).toContain('`StatusBadge` from `@luke-ui/react/status-badge`.');
-		expect(
-			plan.files.find((file) => file.path.endsWith('/status-badge/index.mdx'))?.contents,
-		).toContain('src="status-badge/basic"');
+		const guide = plan.files.find((file) => {
+			return file.path.endsWith('/status-badge/index.mdx');
+		})?.contents;
+		expect(guide).toContain('src="status-badge/basic"');
+		expect(guide).not.toContain('description=');
+		expect(guide).not.toContain('TODO');
 		expect(
 			plan.files.find((file) => file.path.endsWith('/examples/status-badge/basic.tsx'))?.contents,
 		).toContain('<StatusBadge>StatusBadge</StatusBadge>');
@@ -42,6 +42,9 @@ describe('createComponentPlan', () => {
 		).toContain(
 			'<auto-type-table path="packages/@luke-ui/react/src/status-badge/index.tsx" name="StatusBadgeProps" />',
 		);
+		expect(
+			plan.files.find((file) => file.path.endsWith('/status-badge/props.mdx'))?.contents,
+		).not.toContain('description:');
 		expect(plan.jsonEdits).toEqual([
 			{
 				key: 'pages',
@@ -79,8 +82,8 @@ describe('createComponentPlan', () => {
 			return file.path.endsWith('/status-badge/status-badge.stories.tsx');
 		})?.contents;
 
-		expect(story).toContain('/** TODO: Explain when a consumer should use this component. */');
 		expect(story).toContain("children: 'StatusBadge'");
+		expect(story).not.toContain('TODO');
 		expect(story).not.toContain('render:');
 		expect(story).not.toContain('play:');
 	});

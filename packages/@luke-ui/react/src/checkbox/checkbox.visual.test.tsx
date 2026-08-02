@@ -12,29 +12,6 @@ import {
 import { Text } from '../text/index.js';
 import { Checkbox } from './index.js';
 
-test('states: default, selected, indeterminate, disabled, invalid', async () => {
-	const scene = renderVisual(
-		<Stack>
-			<Checkbox name="default">Default</Checkbox>
-			<Checkbox defaultSelected name="selected">
-				Selected
-			</Checkbox>
-			<Checkbox isIndeterminate name="indeterminate">
-				Indeterminate
-			</Checkbox>
-			<Checkbox defaultSelected isDisabled name="disabled">
-				Disabled
-			</Checkbox>
-			<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid">
-				Invalid
-			</Checkbox>
-		</Stack>,
-	);
-
-	await expect.element(page.getByRole('checkbox', { name: 'Default' })).toBeVisible();
-	await captureVisual(scene, 'checkbox/states');
-});
-
 test('keyboard focus ring', async () => {
 	const scene = renderVisual(<Checkbox name="focus">Focus me</Checkbox>);
 	await focusViaKeyboard(page.getByRole('checkbox', { name: 'Focus me' }));

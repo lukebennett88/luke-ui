@@ -6,11 +6,7 @@ description: Validate a form field, and write the message that tells someone how
 Every Luke UI form field can report a problem. An invalid field takes the danger border colour and
 renders a message beneath the control.
 
-<ExampleBlock
-	src="forms/validation"
-	title="Validation — Invalid fields"
-	description="A form that reports what went wrong in each field on submit."
-/>
+<ExampleBlock src="forms/validation" title="Validation — Invalid fields" />
 
 ## Let the browser validate
 
@@ -21,11 +17,7 @@ Pass `type="email"` or `type="url"` to check the value's format.
 Leave out `errorMessage`. The field then shows the browser's own message. The browser checks the
 value on blur and on submit.
 
-<ExampleBlock
-	src="forms/constraint-validation"
-	title="Validation — Constraint validation"
-	description="A required email field with no errorMessage, using the browser's own message."
-/>
+<ExampleBlock src="forms/constraint-validation" title="Validation — Constraint validation" />
 
 Pass `validationBehavior="native"` to block submission until every field passes. This is the
 default.

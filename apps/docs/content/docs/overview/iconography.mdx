@@ -16,40 +16,28 @@ file.
 Import `Icon` and give it a name from the set. The `name` prop accepts only the names in the gallery
 above. The compiler rejects any other name.
 
-<ExampleBlock
-	description="Icons rendered with accessible titles."
-	src="icon/basic"
-	title="Icon — Basic"
-/>
+<ExampleBlock src="icon/basic" title="Icon — Basic" />
 
 ## Size
 
 Set `size` to `xsmall`, `small`, `medium`, or `large`. Each size is a theme token, not a pixel
 value. A custom theme can give each size a different value.
 
-<ExampleBlock description="The four size tokens." src="icon/sizes" title="Icon — Sizes" />
+<ExampleBlock src="icon/sizes" title="Icon — Sizes" />
 
 The default size is `medium`.
 
 To give a group of icons the same size, put an `IconSizeProvider` around them. An icon that has its
 own `size` prop keeps that size.
 
-<ExampleBlock
-	description="One size for a group of icons."
-	src="icon/size-context"
-	title="Icon — Shared size"
-/>
+<ExampleBlock src="icon/size-context" title="Icon — Shared size" />
 
 ## Colour
 
 An icon takes the colour of the text around it. To change the colour of an icon, set the colour on
 the icon or on a parent element.
 
-<ExampleBlock
-	description="Icons take the colour of surrounding text."
-	src="icon/colours"
-	title="Icon — Colour"
-/>
+<ExampleBlock src="icon/colours" title="Icon — Colour" />
 
 An icon that gives information must have a contrast ratio of 3 to 1 or more against its background.
 An icon that only decorates adjacent text has no contrast requirement.
@@ -61,20 +49,12 @@ Each icon is decorative or informative. Use the correct one.
 The icon is decorative when the text next to it gives the meaning. Do not give it a title. The
 component then hides the icon from assistive technology.
 
-<ExampleBlock
-	description="Hide an icon whose meaning is carried by adjacent text."
-	src="icon/decorative"
-	title="Icon — Decorative"
-/>
+<ExampleBlock src="icon/decorative" title="Icon — Decorative" />
 
 The icon is informative when it appears alone. Give it a `title`. The component then shows the icon
 to assistive technology as an image.
 
-<ExampleBlock
-	description="Give a standalone icon an accessible title."
-	src="icon/informative"
-	title="Icon — Informative"
-/>
+<ExampleBlock src="icon/informative" title="Icon — Informative" />
 
 Do not set `aria-hidden` and `title` on the same icon.
 
@@ -86,13 +66,7 @@ The `Icon` component reads its symbols from a spritesheet file. The package supp
 Put an `IconSpritesheetProvider` around your application. Give the provider the URL of the
 spritesheet file.
 
-```tsx
-import { IconSpritesheetProvider } from '@luke-ui/react/icon';
-
-<IconSpritesheetProvider href="/assets/spritesheet.svg">
-	<App />
-</IconSpritesheetProvider>;
-```
+<SourceCodeBlock src="iconography/spritesheet-provider" />
 
 Your bundler must give a URL for the spritesheet file. It must not inline the file as a `data:` URL,
 because a `<use>` reference to a `data:` URL does not resolve in all browsers. In Vite, the

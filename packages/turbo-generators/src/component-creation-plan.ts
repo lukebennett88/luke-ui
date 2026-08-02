@@ -72,7 +72,7 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `apps/docs/src/examples/${name}/basic.tsx`,
 		},
 		{
-			contents: renderHostedDocsPage({ displayName, name, packagePath, pascalName }),
+			contents: renderHostedDocsPage({ displayName, name }),
 			path: `apps/docs/content/docs/components/${docsGroup}/${name}/index.mdx`,
 		},
 		{
@@ -212,20 +212,6 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 `;
 }
 
-function renderPackageGuidance(): string {
-	return `## Best practices
-
-| Guidance | Practices |
-| -------- | --------- |
-| _Do/Don't_ | _Add a row per practice worth calling out. Rows don't need to pair up. Delete this section if there's no useful guidance to give._ |
-
-## Accessibility
-
-_Describe accessibility considerations (e.g. required aria-label, keyboard behavior, screen reader
-announcements). Delete this section if there's nothing beyond default semantics._
-`;
-}
-
 function renderPackageStory(input: {
 	docsGroup: string;
 	name: string;
@@ -240,7 +226,6 @@ const meta = preview.meta({
 \ttitle: '${toDisplayName(input.docsGroup)}/${input.pascalName}',
 });
 
-/** TODO: Explain when a consumer should use this component. */
 export const Default = meta.story({
 \targs: {
 \t\tchildren: '${input.pascalName}',
@@ -258,26 +243,15 @@ export default function Basic() {
 `;
 }
 
-function renderHostedDocsPage(input: {
-	displayName: string;
-	name: string;
-	packagePath: string;
-	pascalName: string;
-}): string {
+function renderHostedDocsPage(input: { displayName: string; name: string }): string {
 	return `---
 title: ${input.displayName}
-description: ${input.displayName} component.
 ---
-
-\`${input.pascalName}\` from \`${input.packagePath}\`.
 
 <ExampleBlock
 \tsrc="${input.name}/basic"
 \ttitle="${input.displayName} — Basic"
-\tdescription="A basic ${input.displayName} example."
 />
-
-${renderPackageGuidance()}
 `;
 }
 
@@ -288,7 +262,6 @@ function renderHostedPropsPage(input: {
 }): string {
 	return `---
 title: ${input.displayName}
-description: ${input.displayName} component.
 ---
 
 ## Props

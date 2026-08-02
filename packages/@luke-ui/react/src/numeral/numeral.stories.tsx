@@ -28,9 +28,6 @@ const baseArgs = {
 	value: 120_000,
 } satisfies Pick<NumeralProps, 'value'>;
 
-/**
- * `Numeral` formats numbers and can be composed with other typography components.
- */
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
@@ -54,17 +51,11 @@ export const Format = meta.story({
 	),
 });
 
-/**
- * Providing `currency` automatically derives currency formatting.
- */
 export const Currency = meta.story({
 	args: baseArgs,
 	render: (props) => <Numeral {...props} currency="AUD" value={98.7654} />,
 });
 
-/**
- * Providing `unit` automatically derives unit formatting.
- */
 export const Units = meta.story({
 	args: baseArgs,
 	render: (props) => <Numeral {...props} unit="kilometer-per-hour" value={98} />,
@@ -84,9 +75,6 @@ export const Abbreviations = meta.story({
 	),
 });
 
-/**
- * Precision can be fixed or a min/max fraction digit range.
- */
 export const Precision = meta.story({
 	args: baseArgs,
 	render: (props) => (
@@ -98,9 +86,6 @@ export const Precision = meta.story({
 	),
 });
 
-/**
- * Compose `Numeral` with `Heading` and `Text` for rich financial content.
- */
 export const Composition = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
@@ -135,7 +120,7 @@ export const Composition = meta.story({
 });
 
 /**
- * Locale defaults come from RAC i18n context, with optional per-component override.
+ * Locale defaults come from the React Aria internationalisation context. Pass `locale` to override it for one numeral.
  */
 export const Locale = meta.story({
 	args: baseArgs,

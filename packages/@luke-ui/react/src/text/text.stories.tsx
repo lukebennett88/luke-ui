@@ -107,9 +107,6 @@ const weights = ['body', 'label', 'heading', 'emphasis'] as const satisfies Read
 export type LineClampOption = NonNullable<TextProps['lineClamp']>;
 const lineClampOptions: ReadonlyArray<LineClampOption> = [false, true, 1, 2, 3, 4, 5];
 
-/**
- * `Text` is the base typography primitive for paragraph and inline copy.
- */
 export const Default = meta.story({
 	args: baseArgs,
 	play: async ({ canvas }) => {
@@ -231,9 +228,6 @@ export const ElementType = meta.story({
 	),
 });
 
-/**
- * Alignment supports logical values.
- */
 export const Align = meta.story({
 	render: (props) => (
 		<div style={stackContainerStyle}>
@@ -250,9 +244,6 @@ export const Align = meta.story({
 	),
 });
 
-/**
- * Truncate limits text to one line with an ellipsis.
- */
 export const Truncate = meta.story({
 	render: (props) => {
 		const container = createSprinkles({
@@ -276,9 +267,7 @@ export const Truncate = meta.story({
 /**
  * Middle truncation keeps an important suffix visible by truncating only the prefix.
  *
- * This story dog-foods the public `@luke-ui/react/styles` `createSprinkles()` utility to compose
- * layout, flex-item, sizing, and text-overflow utilities into a reusable truncation
- * pattern that component props do not cover.
+ * Use `createSprinkles()` to compose the layout and overflow utilities that this pattern needs.
  */
 export const MiddleTruncation = meta.story({
 	play: async ({ canvas }) => {
@@ -315,10 +304,6 @@ export const MiddleTruncation = meta.story({
 	},
 });
 
-/**
- * Line clamp limits text to a fixed number of lines via `lineClamp`.
- * Covers values `false`, `true`, and `1`–`5`.
- */
 export const LineClamp = meta.story({
 	render: (props) => {
 		const container = createSprinkles({
@@ -341,9 +326,6 @@ export const LineClamp = meta.story({
 	},
 });
 
-/**
- * Numeric variants enable glyph behavior for fractions, ordinals, and tabular numbers.
- */
 export const FontVariantNumeric = meta.story({
 	render: (props) => (
 		<div style={stackContainerStyle}>
@@ -361,7 +343,7 @@ export const FontVariantNumeric = meta.story({
 });
 
 /**
- * Visually hidden text remains accessible to assistive technologies.
+ * Visually hidden text remains available to assistive technology.
  */
 export const VisuallyHidden = meta.story({
 	render: (props) => (

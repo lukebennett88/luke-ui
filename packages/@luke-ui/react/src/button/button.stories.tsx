@@ -73,8 +73,7 @@ export const ToneAndAppearance = meta.story({
 });
 
 /**
- * Button size controls touch target and spacing. `small` is compact and
- * `medium` is the default size.
+ * Choose `small` for compact layouts. Choose `medium` for a standard touch target and spacing.
  */
 export const Size = meta.story({
 	args: baseArgs,
@@ -89,10 +88,6 @@ export const Size = meta.story({
 	),
 });
 
-/**
- * `isBlock` expands a button to fill the parent container's inline size.
- * Compare it against the default intrinsic button width.
- */
 export const Block = meta.story({
 	args: {
 		...baseArgs,
@@ -131,10 +126,6 @@ export const IconContent = meta.story({
 	),
 });
 
-/**
- * Hover and pressed states are interactive in canvas, while disabled and
- * pending states are rendered directly.
- */
 export const States = meta.story({
 	args: {
 		...baseArgs,
@@ -173,9 +164,6 @@ export const States = meta.story({
 	},
 });
 
-/**
- * Disabled buttons communicate that an action is temporarily unavailable.
- */
 export const Disabled = meta.story({
 	args: {
 		...baseArgs,
@@ -192,9 +180,6 @@ export const Disabled = meta.story({
 	),
 });
 
-/**
- * Long labels truncate with an ellipsis when space is constrained.
- */
 export const Truncation = meta.story({
 	args: {
 		children:

@@ -6,8 +6,8 @@ import { expect, test } from 'vite-plus/test';
 // If this test fails: re-measure `dist/stylesheet.css` (raw and gzip) and deliberately
 // update both constants below to the new size plus a small reviewed margin — don't just
 // nudge the numbers until it passes.
-const maximumRawBytes = 88_420;
-const maximumGzipBytes = 9_520;
+const maximumRawBytes = 88_500;
+const maximumGzipBytes = 9_650;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url));

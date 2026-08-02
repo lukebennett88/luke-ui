@@ -13,7 +13,6 @@ import { DocsLink } from './docs-link';
 
 type ExampleBlockProps = {
 	src: string;
-	description: string;
 	title: string;
 	mode?: 'inset' | 'full-bleed';
 };

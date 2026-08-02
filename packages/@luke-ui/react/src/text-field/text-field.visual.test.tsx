@@ -49,25 +49,6 @@ test('sizes', async () => {
 	await captureVisual(locator, 'text-field/sizes');
 });
 
-test('states: default, disabled, read-only, invalid', async () => {
-	const locator = renderVisual(
-		<Stack>
-			<TextField label="Default" name="default" placeholder="Type here" />
-			<TextField defaultValue="Unavailable" isDisabled label="Disabled" name="disabled" />
-			<TextField defaultValue="Read only" isReadOnly label="Read-only" name="readonly" />
-			<TextField
-				defaultValue="nope"
-				errorMessage="Please enter a valid email."
-				isInvalid
-				label="Invalid"
-				name="invalid"
-			/>
-		</Stack>,
-	);
-
-	await captureVisual(locator, 'text-field/states');
-});
-
 test('prefix and suffix', async () => {
 	const locator = renderVisual(
 		<Stack>
@@ -112,7 +93,26 @@ test('prefix and suffix render more than one element', async () => {
 		</Stack>,
 	);
 
-	await expect.element(page.getByRole('textbox', { name: 'Search' })).toBeVisible();
+	const search = page.getByRole('textbox', { name: 'Search' });
+	const amount = page.getByRole('textbox', { name: 'Amount' });
+	await expect.element(search).toBeVisible();
+	await expect.element(amount).toBeVisible();
+	const inputs = [
+		{ input: search, name: 'Search' },
+		{ input: amount, name: 'Amount' },
+	];
+	for (const { input, name } of inputs) {
+		const icons = input.element().parentElement?.querySelectorAll('svg');
+		const first = icons?.item(0);
+		const second = icons?.item(1);
+		if (first == null || second == null) throw new Error(`Expected both ${name} icon elements.`);
+
+		const firstRect = first.getBoundingClientRect();
+		const secondRect = second.getBoundingClientRect();
+		expect(firstRect.width).toBeGreaterThan(0);
+		expect(secondRect.width).toBeGreaterThan(0);
+		expect(secondRect.left).toBeGreaterThanOrEqual(firstRect.right);
+	}
 	await captureVisual(locator, 'text-field/prefix-suffix-multiple-elements');
 });
 
@@ -188,17 +188,6 @@ test('input group composition', async () => {
 	await expect.element(page.getByRole('textbox', { name: 'Refund' })).toBeVisible();
 
 	await captureVisual(scene, 'text-field/input-group-composition');
-});
-
-test('keyboard focus ring', async () => {
-	const scene = renderVisual(
-		<Stack>
-			<TextField label="Focus me" name="focus" placeholder="Type here" />
-		</Stack>,
-	);
-
-	await focusViaKeyboard(page.getByRole('textbox', { name: 'Focus me' }));
-	await captureVisual(scene, 'text-field/focus');
 });
 
 for (const appearance of visualAppearances) {

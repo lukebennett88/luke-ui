@@ -96,7 +96,7 @@ export const Responsive = meta.story({
 
 /**
  * Combine `createSprinkles` with React Aria Components' `render` prop to style the
- * underlying DOM element while preserving RAC behavior and accessibility.
+ * underlying DOM element while preserving its behaviour and accessibility.
  * Use `mergeProps` to merge the provided DOM props with `createSprinkles()` output.
  */
 export const WithRenderProp = meta.story({
