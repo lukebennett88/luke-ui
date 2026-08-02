@@ -1,0 +1,153 @@
+---
+title: Quality
+description:
+  What Luke UI guarantees for accessibility, motion, and testing, and what your application still
+  owns.
+---
+
+Luke UI guarantees part of your application's quality. Your application code decides the rest. This
+guide states the boundary for each concern below, so you know what to build yourself.
+
+## Accessibility
+
+This is the accessibility entry point for Luke UI's documentation. Each subsection states what Luke
+UI guarantees and what your application must still do. A component's own page covers its specific
+detail.
+
+### Labels
+
+**Luke UI does.** Every composed field (`TextField`, `ComboboxField`, `Checkbox`) links its `label`,
+`description`, and error message to the control with the correct ARIA attributes.
+
+**You do.** Pass a visible `label`. Use `aria-label` only when a nearby heading already names the
+field. Do not rely on `placeholder` as a label. It disappears once someone starts typing.
+
+### Contrast
+
+**Luke UI does.** Guarantees 4.5:1 contrast for every text and surface pair the theme compiler
+emits, and 3:1 for the focus and control borders, in every theme it produces.
+
+**You do.** Never rely on a role border alone to show a state such as selected, invalid, or checked.
+A role border is only measured against the canvas and recessed surfaces at 3:1, and a miss is
+reported rather than blocked. Pair a role border with text, an icon, or a guaranteed-contrast
+surface change instead. Read [Contrast validation](/theming/authoring#contrast-validation) for the
+full matrix.
+
+### Focus
+
+**Luke UI does.** Applies a 2px solid focus ring in `color.border.focus` to any element that reaches
+`:focus-visible` inside the theme root, including an element you build yourself. It also switches
+the ring to the system `Highlight` colour under forced colours.
+
+**You do.** Give a custom interactive element a real interactive role and keyboard behaviour. A
+focus ring alone does not make it accessible. Override the default ring only when your own design
+needs a different indicator. The reset sits in the lowest-priority CSS layer, so any style you add
+already wins over it.
+
+### Target size
+
+**Luke UI does.** Does not fix a control's size in pixels. `controlSize`, and the icon sizes a
+checkbox or button derives its box from, are theme tokens. Their value belongs to the active theme,
+not to Luke UI itself.
+
+**You do.** Check that your theme's control and icon sizes meet WCAG 2.2 SC 2.5.8 Target Size
+(Minimum), which requires at least 24 by 24 CSS pixels, if you author a custom theme. Do not shrink
+a control below the theme's own size with custom CSS.
+
+### Reduced motion
+
+**Luke UI does.** Turns off animation and transition for its own animated states (the loading
+spinner, loading skeleton, checkbox, combobox, button, and link) under
+`prefers-reduced-motion: reduce`. It also applies the same rule as a fallback across the whole theme
+root.
+
+**You do.** Add your own `prefers-reduced-motion` handling to any animation you write in ordinary
+application CSS. Luke UI's fallback rule sits in the lowest-priority CSS layer, so an ordinary style
+you add always overrides it.
+
+### Forced colours
+
+**Luke UI does.** Adapts every Luke UI component to Windows High Contrast Mode
+(`forced-colors: active`), drawing borders, backgrounds, and the focus ring from system colours such
+as `Canvas`, `CanvasText`, `Highlight`, and `GrayText`.
+
+**You do.** Test any custom UI you build yourself under forced colours. Luke UI can only adapt the
+markup it renders.
+
+### Component accessibility notes
+
+Read a component's own page for detail specific to that control.
+
+<Cards>
+	<Card href="/components/actions/button" title="Button">
+		Write an action label instead of a vague one, and hide the pending spinner from assistive
+		technology.
+	</Card>
+	<Card href="/components/actions/icon-button" title="Icon Button">
+		Give every icon button an `aria-label` that names the action.
+	</Card>
+	<Card href="/components/actions/link" title="Link">
+		Write link text that names the destination on its own.
+	</Card>
+	<Card href="/components/forms/combobox-field" title="Combobox Field">
+		Give the field a visible label. The field forwards combobox semantics to its parts.
+	</Card>
+	<Card href="/components/visuals/icon" title="Icon">
+		Give a standalone icon a `title`, and leave a decorative icon hidden.
+	</Card>
+	<Card href="/components/typography/emoji" title="Emoji">
+		Give every emoji a `label`, because screen readers do not announce it consistently.
+	</Card>
+	<Card href="/components/feedback/loading-spinner" title="Loading Spinner">
+		Name the work in progress with `aria-label`.
+	</Card>
+	<Card href="/components/feedback/loading-skeleton" title="Loading Skeleton">
+		Content stays out of the tab order and hidden from assistive technology while it loads.
+	</Card>
+	<Card href="/components/primitives/button" title="Button primitive">
+		Keep a stable accessible name, and update it when a custom pending state changes the action.
+	</Card>
+</Cards>
+
+## Responsive behaviour
+
+**Luke UI does.** Gives every layout Sprinkles property, through `Box` and `createSprinkles`, a
+value or an object keyed by breakpoint, so a property can change at `xsmall`, `small`, `medium`,
+`large`, `xlarge`, and `xxlarge`. A field or button sizes to its content and reflows inside a
+narrower container.
+
+**You do.** Choose the breakpoints and layout for your own page. Luke UI does not decide your page
+structure or reflow it for you. Test your layout at the viewport widths your application supports.
+Read [Layout](/overview/layout) for the breakpoint values and the responsive value syntax.
+
+## Locale-aware numerals
+
+**Luke UI does.** Formats a number through `Numeral`, using `Intl.NumberFormat` and reading the
+active locale from React Aria's `I18nProvider`.
+
+**You do.** Put an `I18nProvider` around your application with the correct locale. Use `Numeral` for
+every number, currency, unit, or percentage someone sees, rather than a template literal or a
+hard-coded string, so the locale takes effect. Read [Numeral](/components/typography/numeral) for
+the supported formats.
+
+## Testing
+
+**Luke UI does.** Verifies behaviour and accessible roles and names for interactive components
+through browser tests. Visual tests cover forced-colours and reduced-motion states for the
+interactive and animated components. Contrast is enforced when the theme compiles, not tested
+per-component.
+
+**You do.** Test your own application, not only its individual components. Run an automated
+accessibility check, such as axe, against your rendered pages. Tab through every flow you build, and
+confirm the focus order and that each stop shows a visible indicator. Check your pages under
+`prefers-reduced-motion: reduce` and `forced-colors: active`. Verify contrast for any colour you
+introduce outside Luke UI's semantic roles. Test with the locales your application supports.
+
+## Best practices
+
+| Guidance | Practice                                                                                             |
+| -------- | ---------------------------------------------------------------------------------------------------- |
+| Do       | Read a component's own `## Accessibility` section for detail beyond this guide.                      |
+| Do       | Treat every "You do" item above as a task for your own application, not as optional detail.          |
+| Don't    | Rely on a role border alone to show state. Role borders are advisory, not a guaranteed 3:1 contrast. |
+| Don't    | Assume Luke UI's reduced-motion fallback reaches an animation you wrote in ordinary application CSS. |
