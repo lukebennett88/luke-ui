@@ -5,6 +5,10 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+code > * {
+	tab-size: 2;
+}
+
 /**
  * Bridge Fumadocs structural colour variables to Luke UI stable tokens.
  * Scoped to the Luke UI theme root so Fumadocs chrome components resolve

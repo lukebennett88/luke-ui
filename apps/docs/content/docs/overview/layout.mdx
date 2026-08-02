@@ -3,13 +3,14 @@ title: Layout
 description: Build responsive structure with Box and token-aware layout utilities.
 ---
 
-Use `Box` or `createSprinkles` for layout. They keep structure, spacing, sizing, positioning,
-overflow, flex, and grid-child rules separate from a component's content and behaviour.
-
 ## Box
 
-`Box` is a `div` with the supported layout properties. Use it to space child content. Constrain its
-size the same way. Place an item in a flex or grid layout, or hide content at a breakpoint.
+Box is the most fundamental layout component. Box is used to:
+
+- Provide spacing to child elements.
+- Impose sizing constraints on content.
+- Control layout behaviour within flex and grid containers.
+- Hide content based on screen size using its responsive display prop.
 
 ```tsx
 import { Box } from '@luke-ui/react/box';
@@ -19,13 +20,13 @@ import { Box } from '@luke-ui/react/box';
 </Box>;
 ```
 
-Use a normal `div` when no layout properties are needed. Box is a layout tool, not a replacement for
+Use semantic HTML when no layout properties are needed. Box is a layout tool, not a replacement for
 every element.
 
 ## Responsive values
 
-Properties passed to `Box` or `createSprinkles` accept responsive values. Specify only the points
-where the layout changes.
+Properties passed to `Box` accept responsive values. Specify only the points where the layout
+changes.
 
 <ExampleBlock src="box/responsive-layout" title="Box — Responsive values" />
 

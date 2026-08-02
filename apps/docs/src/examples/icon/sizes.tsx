@@ -1,26 +1,35 @@
 import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
+import type { PropsWithChildren } from 'react';
 
 export default function Sizes() {
 	return (
-		<Box alignItems="center" display="flex" gap="400">
-			<Box alignItems="center" display="flex" flexDirection="column" gap="100">
-				<Icon name="search" size="xsmall" title="Search" />
+		<Box alignItems="flex-end" display="flex" gap="400">
+			<FlexCol>
+				<Icon name="search" size="xsmall" />
 				<Text color="secondary">xsmall</Text>
-			</Box>
-			<Box alignItems="center" display="flex" flexDirection="column" gap="100">
-				<Icon name="search" size="small" title="Search" />
+			</FlexCol>
+			<FlexCol>
+				<Icon name="search" size="small" />
 				<Text color="secondary">small</Text>
-			</Box>
-			<Box alignItems="center" display="flex" flexDirection="column" gap="100">
-				<Icon name="search" size="medium" title="Search" />
+			</FlexCol>
+			<FlexCol>
+				<Icon name="search" size="medium" />
 				<Text color="secondary">medium</Text>
-			</Box>
-			<Box alignItems="center" display="flex" flexDirection="column" gap="100">
-				<Icon name="search" size="large" title="Search" />
+			</FlexCol>
+			<FlexCol>
+				<Icon name="search" size="large" />
 				<Text color="secondary">large</Text>
-			</Box>
+			</FlexCol>
+		</Box>
+	);
+}
+
+function FlexCol({ children }: PropsWithChildren) {
+	return (
+		<Box alignItems="center" display="flex" flexDirection="column" gap="100">
+			{children}
 		</Box>
 	);
 }

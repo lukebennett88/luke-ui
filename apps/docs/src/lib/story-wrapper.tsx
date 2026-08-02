@@ -4,6 +4,8 @@ import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { vars } from '@luke-ui/react/theme';
 import type { ReactNode } from 'react';
 
+type Mode = 'inset' | 'full-bleed';
+
 const modeToBoxProps = {
 	'full-bleed': {},
 	inset: {
@@ -17,17 +19,17 @@ const modeToBoxProps = {
 			color: vars.color.text.primary,
 		},
 	},
-} as const satisfies Record<'inset' | 'full-bleed', React.ComponentProps<typeof Box>>;
+} as const satisfies Record<Mode, React.ComponentProps<typeof Box>>;
 
 type StoryWrapperProps = {
 	children: ReactNode;
-	mode?: 'inset' | 'full-bleed';
+	mode?: Mode;
 };
 
 export function StoryWrapper({ children, mode = 'inset' }: StoryWrapperProps) {
 	const boxProps = modeToBoxProps[mode];
 	return (
-		<Box {...boxProps}>
+		<Box overflow="auto" {...boxProps}>
 			<IconSpritesheetProvider href={spriteSheetHref}>{children}</IconSpritesheetProvider>
 		</Box>
 	);
