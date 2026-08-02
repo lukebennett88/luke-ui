@@ -131,7 +131,9 @@ test('leaves full-bleed story surfaces unframed', () => {
 	const storyRoot = exampleContent.parentElement;
 	if (!storyRoot) throw new Error('Expected a full-bleed story root');
 
-	expect(storyRoot).not.toHaveAttribute('style');
+	const storyRootStyle = getComputedStyle(storyRoot);
+	expect(storyRootStyle.padding).toBe('0px');
+	expect(storyRootStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)');
 });
 
 test('keeps inherited docs shell text readable in dark mode', async () => {
