@@ -1,0 +1,72 @@
+---
+title: Cursors
+description: Know which cursor a control shows, and why some elements keep the browser default.
+---
+
+Luke UI changes the pointer's cursor only where the cursor carries meaning: a control you can
+activate, a surface you can type into, or a control that blocks or defers the action. Everywhere
+else, the cursor stays at the browser default.
+
+## Interactive controls
+
+A control you can press, such as `Button`, `Link`, and `Checkbox`, shows a pointer cursor. A typing
+surface, such as `TextField`, shows a text cursor over the whole field, not only over the value.
+
+A disabled control shows a not-allowed cursor. A pending `Button` shows a wait cursor while it
+defers the press. A read-only `Checkbox` shows the browser default cursor, because a reader can
+still focus and read it, but cannot change it.
+
+<ExampleBlock
+	description="Each control labelled with the cursor its current state produces."
+	src="overview/cursors"
+	title="Cursors — Component states"
+/>
+
+## The cursor is not the only signal
+
+A disabled or pending control never relies on its cursor alone. Set `isDisabled` or `isPending` on
+the component. The prop also removes the control from the focus order or announces the pending state
+to assistive technology. A cursor change alone cannot do either of these.
+
+## Cursors inside Combobox
+
+A `ComboboxField` follows the same rules as its parts. The text input shows a text cursor. The
+trigger and clear buttons show a pointer cursor, the same as any button.
+
+A list item is the one exception. Even though a reader can click it, an item shows the browser
+default cursor. Hover and focus show through a background tint instead, the same idiom a native menu
+uses.
+
+## Browser default cursors
+
+Luke UI leaves the browser default in place wherever no interaction changes. Plain text, a
+paragraph, a card, and any other non-interactive element keep the arrow cursor. Do not add a cursor
+style to make an element look clickable when it is not.
+
+A `LoadingSkeleton` placeholder keeps the default cursor too, and blocks pointer events outright. A
+reader cannot click through to whatever the skeleton is standing in for, so there is nothing for a
+pointer cursor to invite.
+
+This documentation site includes a resizable split panel in its code playground, with a draggable
+separator. That separator is docs-site UI, not a Luke UI component, and its resize cursor is the
+browser's own `col-resize` and `row-resize`, not a Luke UI convention. Luke UI itself ships no
+resizable panel and no resize cursor.
+
+## Best practices
+
+| Guidance | Practice                                                                                                               |
+| -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Do       | Set `isDisabled` or `isPending` on the component. The cursor changes as one part of that state.                        |
+| Don't    | Set `cursor: not-allowed` or `cursor: wait` by hand to imply a state a component is not in.                            |
+| Don't    | Add `cursor: pointer` to a non-interactive element, such as a card or a row that only navigates through a nested link. |
+
+## Continue learning
+
+<Cards>
+	<Card href="/components/actions/button" title="Button">
+		The `isDisabled` and `isPending` props that change a button's cursor and state together.
+	</Card>
+	<Card href="/components/forms/text-field" title="Text Field">
+		The text field's disabled and read-only states.
+	</Card>
+</Cards>
