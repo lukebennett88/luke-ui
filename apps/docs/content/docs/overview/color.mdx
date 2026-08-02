@@ -47,28 +47,10 @@ meaning never limits what it can do:
 - `warning`: needs attention but has not failed and is not dangerous.
 - `danger`: harm, failure, invalidity, or a critical condition.
 
-Components choose the role that fits their own tone or state. Custom UI can use the same six roles.
+Select a role to compare the same semantic token pairs in light and dark mode. The notice content
+stays constant, so only the role and mode change its colours.
 
-### Choose a role
-
-Use this checklist when custom UI needs a semantic role.
-
-| Guidance | Practice                                                                                                                 |
-| -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Do       | Choose a role for what it means, such as `danger` for a destructive action, not for a colour you like.                   |
-| Do       | Pair `foreground.<role>.onSolid` with a `solid` background, and `foreground.<role>.rest` with a `subtle` background.     |
-| Don't    | Rely on `border.<role>` alone to signal a state such as selected or invalid. Pair it with text, an icon, or another cue. |
-
-### Compare light and dark
-
-A colour mode changes every surface, text, and role colour together. Compare both modes side by
-side, rather than switching one page back and forth.
-
-<ExampleBlock
-	description="The same surfaces, text, and role colours, in light and dark mode side by side."
-	src="overview/light-and-dark"
-	title="Colour — Light and dark"
-/>
+<ExampleBlock src="overview/role-colours" title="Colour — Roles and modes" />
 
 ### Background and foreground
 
@@ -99,15 +81,6 @@ vars.color.foreground.warning.onSolid;
 
 There is no foreground `pressed`. The background ramp and other cues carry a pressed look instead,
 so text and icons reuse `hover` for a pressed control.
-
-A role's subtle background and solid background pair with different foregrounds. Select a role to
-see the pairing hold across a realistic notice, not just a swatch:
-
-<ExampleBlock
-	description="Select a role to see a realistic notice take on that role's background, foreground, and border."
-	src="overview/role-colours"
-	title="Colour — Roles in context"
-/>
 
 ### Borders
 
