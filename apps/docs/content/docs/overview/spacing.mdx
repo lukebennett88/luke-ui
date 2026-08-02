@@ -3,23 +3,14 @@ title: Spacing
 description: Space layouts with Luke UI spacing steps instead of fixed lengths.
 ---
 
-Luke UI provides one spacing scale for `gap`, `padding`, and `margin`. The built-in themes use the
-same values, so layout does not change with the theme identity.
+Luke UI provides one spacing scale for `gap`, `padding`, and `margin`.
 
 ## The scale
 
-The scale has nine steps from `100` to `1600`. Each step maps to a fixed value owned by Luke UI.
+The scale selects nine steps from a 4px linear scale. Each selected step maps to a fixed value. The
+built-in themes share these values, so spacing does not change with the theme identity.
 
 <ExampleBlock src="overview/spacing-scale" title="Spacing — Scale" />
-
-## Choose by relationship
-
-Use the same step for the same relationship. Choose smaller steps for closely related elements and
-larger steps between separate groups.
-
-Set `gap` on a flex or grid parent to space its children. This keeps the relationship in one place.
-
-<ExampleBlock src="overview/spacing-picker" title="Spacing — Compare steps" />
 
 ## Responsive spacing
 

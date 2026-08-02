@@ -51,6 +51,29 @@ export const fontSizeSteps = [
 export type FontSizeStep = (typeof fontSizeSteps)[number];
 
 /**
+ * The fixed spacing steps shared by the built-in themes. Each value is a selected step from the
+ * 4px linear scale.
+ */
+export const spaceScale = [
+	['100', '4px'],
+	['200', '8px'],
+	['300', '12px'],
+	['400', '16px'],
+	['600', '24px'],
+	['800', '32px'],
+	['1000', '40px'],
+	['1200', '48px'],
+	['1600', '64px'],
+] as const;
+
+/** A spacing step key accepted by the layout APIs. */
+export type SpaceStep = (typeof spaceScale)[number][0];
+
+const spaceContract = Object.fromEntries(spaceScale.map(([step]) => [step, null])) as {
+	readonly [Step in SpaceStep]: null;
+};
+
+/**
  * The semantic token tree shared by the public `vars` contract and `buildTheme`, so typed paths and
  * emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one stable
  * `--luke-*` custom property.
@@ -177,17 +200,7 @@ export const themeContractTree = {
 		full: null,
 	},
 	/** The semantic spacing scale used by components and layout utilities. */
-	space: {
-		100: null,
-		200: null,
-		300: null,
-		400: null,
-		600: null,
-		800: null,
-		1000: null,
-		1200: null,
-		1600: null,
-	},
+	space: spaceContract,
 	/** Structural block sizes for small and medium controls. */
 	controlSize: {
 		small: null,
