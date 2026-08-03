@@ -115,6 +115,8 @@ const REMOVED_DOCS_PATHS = [
 	'/theming/token-reference',
 	'/guides/forms',
 	'/guides/quality',
+	'/principles',
+	'/breakpoints',
 ];
 
 test('every removed docs path redirects to a page that exists', () => {
