@@ -28,8 +28,16 @@ import { cx } from '../utils/index.js';
 // Config surface (types)
 // ---------------------------------------------------------------------------
 
-/** A style rule authored for a recipe: a layered style object or a pre-built class string. */
-type RecipeStyleRule = DistributiveOmit<StyleRule, '@layer'> | string;
+/** A pre-built class string, or an array composing several (possibly nested). */
+type ClassNames = string | ReadonlyArray<ClassNames>;
+
+/** One part of a recipe style: a layered style object or pre-built class name(s). */
+type RecipeStylePart = DistributiveOmit<StyleRule, '@layer'> | ClassNames;
+
+/** A style rule authored for a recipe: one part, or an array composing several. */
+type RecipeStyleRule =
+	| RecipeStylePart
+	| ReadonlyArray<DistributiveOmit<StyleRule, '@layer'> | ClassNames>;
 
 /** Maps the string variant keys `'true'`/`'false'` onto `boolean` for selection. */
 type BooleanMap<T> = T extends 'true' | 'false' ? boolean : T;
@@ -238,8 +246,19 @@ function withRecipesLayer(rule: LayeredStyleRule): StyleRule {
 	return { '@layer': { [RECIPES_LAYER]: rule } };
 }
 
+function isClassNames(part: RecipeStylePart): part is ClassNames {
+	return Array.isArray(part) || typeof part === 'string';
+}
+
+function withRecipesLayerIfObject(part: RecipeStylePart): RecipeStylePart {
+	// Strings and nested class-name arrays are already-built classes; pass through unwrapped.
+	return isClassNames(part) ? part : withRecipesLayer(part);
+}
+
 function withLayerIfStyleRule(styleRule: RecipeStyleRule): RecipeStyleRule {
-	return typeof styleRule === 'string' ? styleRule : withRecipesLayer(styleRule);
+	return isComposedStyle(styleRule)
+		? styleRule.map(withRecipesLayerIfObject)
+		: withRecipesLayerIfObject(styleRule);
 }
 
 /** Builds a Vanilla Extract recipe with every style wrapped in the `recipes` layer. */
@@ -293,6 +312,12 @@ function isMultiPart(
 
 function isObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null;
+}
+
+function isComposedStyle(
+	styleRule: RecipeStyleRule,
+): styleRule is ReadonlyArray<DistributiveOmit<StyleRule, '@layer'> | ClassNames> {
+	return Array.isArray(styleRule);
 }
 
 // ---------------------------------------------------------------------------
