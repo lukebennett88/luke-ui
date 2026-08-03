@@ -1,4 +1,5 @@
 {
 	"title": "Components",
+	"root": true,
 	"pages": ["actions", "feedback", "forms", "layout", "typography", "visuals", "primitives"]
 }

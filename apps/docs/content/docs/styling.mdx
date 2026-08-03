@@ -55,12 +55,11 @@ The public `vars` token contract lets an application-owned element follow the ac
 <SourceCodeBlock src="styling/semantic-variables" />
 
 The token contract is public. Component selectors, generated palette values, and theme
-implementation details are not. See the [token reference](/theming/token-reference) for the full
-contract.
+implementation details are not. See the [token reference](/token-reference) for the full contract.
 
 ### Change the visual foundation with a custom theme
 
-Use a [custom theme](/theming/authoring) when a product needs a different identity, typeface, or
+Use a [custom theme](/authoring-a-theme) when a product needs a different identity, typeface, or
 semantic colour system. `defineTheme` produces a static stylesheet for the full semantic contract
 from a curated accent and neutral character. It is not a per-component override tool.
 
@@ -72,7 +71,7 @@ root. Luke UI scopes the reset to that root, so it does not reset unrelated appl
 
 <SourceCodeBlock src="styling/static-styles" />
 
-Read [Applying a theme](/theming/applying) for colour modes, portals, and other theme setup details.
+Read [Applying a theme](/applying-a-theme) for colour modes, portals, and other theme setup details.
 
 ## Use layout utilities for layout
 
@@ -121,22 +120,22 @@ import { Box } from '@luke-ui/react/box';
 ```
 
 When a CSS Module or application stylesheet needs a token, use the stable `--luke-*` variable listed
-in the [token reference](/theming/token-reference). Do not couple application CSS to undocumented
-selectors or implementation attributes.
+in the [token reference](/token-reference). Do not couple application CSS to undocumented selectors
+or implementation attributes.
 
 ## Continue learning
 
 <Cards>
-	<Card href="/overview/layout" title="Layout">
+	<Card href="/layout" title="Layout">
 		Use Box and Sprinkles for responsive structure.
 	</Card>
-	<Card href="/overview/color" title="Colour">
+	<Card href="/color" title="Colour">
 		Choose semantic surfaces and roles for custom UI.
 	</Card>
-	<Card href="/theming/token-reference" title="Token reference">
+	<Card href="/token-reference" title="Token reference">
 		Browse every public semantic CSS variable.
 	</Card>
-	<Card href="/theming/authoring" title="Author a theme">
+	<Card href="/authoring-a-theme" title="Author a theme">
 		Create a product-owned visual foundation when the bundled identities do not fit.
 	</Card>
 </Cards>

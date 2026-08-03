@@ -18,7 +18,7 @@ test('marks Props as current on a component props page', () => {
 });
 
 test('does not add component navigation to other docs pages', () => {
-	expect(getComponentPageNavigation('/overview/getting-started')).toBeNull();
+	expect(getComponentPageNavigation('/installation')).toBeNull();
 	expect(getComponentPageNavigation('/components/actions')).toBeNull();
 	expect(getComponentPageNavigation('/components/actions/button/examples')).toBeNull();
 });
