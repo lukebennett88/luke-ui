@@ -3,79 +3,18 @@ title: Introduction
 description: Components, themes, and layout utilities for React applications.
 ---
 
-Luke UI is a React based design system and component library for building applications. It includes
-static CSS, two bundled themes, and layout utilities that use the same semantic token contract as
-the components.
+Luke UI is a React based design system and component library for building applications. It ships
+static CSS, two bundled themes, and layout utilities that share one semantic token contract with its
+components.
 
-## Start building
+The box includes semantic components such as `Button`, `TextField`, and `ComboboxField` for everyday
+application UI, primitives for custom compositions, and public recipes and theme variables for
+styling application-owned elements.
 
-Install the package. Load the shared CSS and a theme. Then add the theme classes near the root of
-your application. [Getting started](/installation) has the complete setup.
+Reach for Luke UI when you need an accessible component, a themeable visual foundation, or
+responsive layout without hand-rolled CSS. Start with a semantic component before building a custom
+pattern.
 
-<Cards>
-	<Card href="/installation" title="Getting started">
-		Install Luke UI, load a theme, and render your first component.
-	</Card>
-	<Card href="/principles" title="Principles">
-		Choose the right component, composition boundary, styling API, and responsive behaviour.
-	</Card>
-	<Card href="/styling" title="Styling">
-		Use component APIs, recipes, layout utilities, and semantic variables in the right place.
-	</Card>
-	<Card href="/layout" title="Layout">
-		Build responsive structure with Box.
-	</Card>
-</Cards>
-
-## Theme your application
-
-Luke UI themes provide light and dark modes. The active theme supplies the colours, type, spacing,
-radii, and depth behind every component.
-
-<Cards>
-	<Card href="/theme" title="Theme">
-		Learn what an identity owns and when to author your own.
-	</Card>
-	<Card href="/color" title="Colour">
-		Use semantic surfaces and role-based colours instead of palette values.
-	</Card>
-	<Card href="/color-mode" title="Colour modes">
-		Follow the system setting or force light and dark scopes.
-	</Card>
-	<Card href="/typography" title="Typography">
-		Use the type scale through Text, Heading, Numeral, and Emoji.
-	</Card>
-</Cards>
-
-## Explore components
-
-Import atoms and composed components from their own package paths, such as `@luke-ui/react/button`
-and `@luke-ui/react/text`.
-
-<Cards>
-	<Card href="/components/actions/button" title="Actions">
-		Buttons, links, and controls for actions someone takes.
-	</Card>
-	<Card href="/components/forms/combobox-field" title="Forms">
-		Fields and inputs that collect information.
-	</Card>
-	<Card href="/components/typography/text" title="Typography">
-		Text, headings, numerals, and emoji that share one type scale.
-	</Card>
-	<Card href="/components/visuals/icon" title="Visuals">
-		Icons and visual building blocks.
-	</Card>
-	<Card href="/components/feedback/loading-spinner" title="Feedback">
-		Loading states and system feedback.
-	</Card>
-	<Card href="/components/layout/box" title="Layout">
-		Box and token-aware layout utilities.
-	</Card>
-</Cards>
-
-## Build custom components
-
-Most applications can start with the components above. [Primitives](/components/primitives/button)
-are public lower-level APIs for library authors and custom composed components. Use the public
-[token reference](/token-reference) to style a custom element. It does not depend on component
-internals.
+Read [Getting started](/installation) to install Luke UI, load a theme, and render your first
+component. Browse [Components](/components/actions/button) for the full catalogue of atoms, composed
+components, and primitives.

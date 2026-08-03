@@ -11,7 +11,12 @@ status = 301
 
 [[redirects]]
 from = "/overview/principles"
-to = "/principles"
+to = "/composition"
+status = 301
+
+[[redirects]]
+from = "/principles"
+to = "/composition"
 status = 301
 
 [[redirects]]
@@ -31,7 +36,12 @@ status = 301
 
 [[redirects]]
 from = "/overview/breakpoints"
-to = "/breakpoints"
+to = "/layout"
+status = 301
+
+[[redirects]]
+from = "/breakpoints"
+to = "/layout"
 status = 301
 
 [[redirects]]

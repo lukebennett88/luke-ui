@@ -1,6 +1,6 @@
 ---
 title: Layout
-description: Build responsive structure with Box and token-aware layout utilities.
+description: Build responsive structure with Box, layout utilities, and named breakpoints.
 ---
 
 ## Box
@@ -21,16 +21,40 @@ import { Box } from '@luke-ui/react/box';
 ```
 
 Use semantic HTML when no layout properties are needed. Box is a layout tool, not a replacement for
-every element.
+every element. Use `createSprinkles` from `@luke-ui/react/styles` when another application-owned
+element needs the same responsive layout properties without wrapping it in a `Box`.
 
 ## Responsive values
 
-Properties passed to `Box` accept responsive values. Specify only the points where the layout
-changes.
+Properties passed to `Box` and Sprinkles accept a direct value when a layout property stays
+constant, or an object keyed by breakpoint when it changes at a named viewport width.
 
-<ExampleBlock src="box/responsive-layout" title="Box — Responsive values" />
+| Breakpoint | Minimum viewport width |
+| ---------- | ---------------------- |
+| `initial`  | 0px (base)             |
+| `small`    | 640px                  |
+| `medium`   | 768px                  |
+| `large`    | 1024px                 |
+| `xlarge`   | 1280px                 |
+| `xxlarge`  | 1536px                 |
 
-See [Breakpoints](/breakpoints) for the responsive value API and fixed thresholds.
+Each breakpoint is a fixed constant, not a theme token. A custom theme cannot change these widths.
+Every breakpoint is a minimum width, so there is no maximum width or range condition. A value set at
+`small` also applies at `medium` and above, unless a later breakpoint overrides it. Values cascade
+up from `initial`, so specify only the points where the layout changes.
+
+```tsx
+<Box display="flex" flexDirection={{ initial: 'column', medium: 'row' }}>
+	{children}
+</Box>
+```
+
+This example stacks the children by default, then places them in a row from `medium`.
+
+<ExampleBlock src="box/responsive-layout" title="Layout — Responsive values" />
+
+Set a responsive value when the layout needs a deliberate change. Prefer intrinsic wrapping when the
+content can adapt without a breakpoint.
 
 ## Spacing and sizing
 
@@ -45,7 +69,8 @@ in both writing directions without a second layout rule.
 
 The layout APIs exclude semantic colour, typography, and interaction states. Choose a component API
 for those concerns. When a custom element needs a visual token, use `vars` from
-`@luke-ui/react/theme`.
+`@luke-ui/react/theme` — semantic values follow the active identity and colour mode, while Luke UI
+defines its spacing and type steps in source.
 
 ## Continue learning
 

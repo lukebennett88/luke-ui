@@ -3,9 +3,10 @@ title: Composition and customisation
 description: Choose a Luke UI component, primitive, recipe, or token for custom interface patterns.
 ---
 
-Start with Luke UI's primary component API when it matches the interaction and structure you need.
-It handles the intended behaviour, accessibility, and visual treatment together. Compose from public
-primitives only when that API does not fit.
+Start with a semantic component such as `Button`, `Link`, or `TextField` when its purpose matches
+the task. It handles the intended behaviour, accessibility, and visual treatment together, so use
+its supported props before you build a custom pattern. Compose from a documented primitive only when
+a component's props do not fit.
 
 ## Start with the primary API
 
@@ -29,9 +30,12 @@ label, icon slots, and pending treatment. Use its primitive only to build a rela
 component with its own structure. For example, use a different child layout or loading treatment.
 Keep Luke UI button behaviour and styling.
 
-Each primitive page documents the structure and accessibility responsibilities for that primitive.
-Keep those documented relationships intact when you compose one. Do not depend on React Aria
-contexts, slots, or Luke UI implementation details as an application API.
+Each primitive page documents the structure and accessibility responsibilities for that primitive —
+the label, description, state, and control relationships it expects. Preserve or author those
+relationships when you compose one. Do not depend on React Aria contexts, slots, or Luke UI
+implementation details as an application API.
+
+<SourceCodeBlock src="styling/primitive" />
 
 ## Build a custom composition
 
