@@ -13,7 +13,7 @@ interface ComponentIndexEntry {
 }
 
 interface ComponentIndexGroup {
-	entries: ReadonlyArray<ComponentIndexEntry>;
+	entries: Array<ComponentIndexEntry>;
 	title: string;
 }
 
@@ -65,31 +65,39 @@ ${groupEntries}
 
 function readGroups(): ReadonlyArray<ComponentIndexGroup> {
 	const rootMeta = readJson(resolve(componentsDir, 'meta.json')) as { pages?: Array<string> };
-	const groupSlugs = rootMeta.pages ?? [];
+	const entries = rootMeta.pages ?? [];
+	const groups: Array<ComponentIndexGroup> = [];
+	let currentTitle = 'Components';
 
-	return groupSlugs.flatMap((groupSlug): Array<ComponentIndexGroup> => {
-		const groupDir = resolve(componentsDir, groupSlug);
-		const groupMeta = readJson(resolve(groupDir, 'meta.json')) as {
-			pages?: Array<string>;
-			title?: string;
-		};
-		const title = groupMeta.title ?? groupSlug;
-		const entries = (groupMeta.pages ?? []).flatMap((componentSlug): Array<ComponentIndexEntry> => {
-			const guidePath = resolve(groupDir, componentSlug, 'index.mdx');
-			if (!existsSync(guidePath)) return [];
+	for (const entry of entries) {
+		if (isSeparator(entry)) {
+			currentTitle = entry.slice(3, -3);
+			groups.push({ entries: [], title: currentTitle });
+			continue;
+		}
 
-			const frontmatter = readFrontmatter(readFileSync(guidePath, 'utf8'));
-			return [
-				{
-					description: frontmatter.description ?? '',
-					name: frontmatter.title ?? componentSlug,
-					url: `/components/${groupSlug}/${componentSlug}`,
-				},
-			];
+		const guidePath = resolve(componentsDir, `${entry}/index.mdx`);
+		if (!existsSync(guidePath)) continue;
+
+		const frontmatter = readFrontmatter(readFileSync(guidePath, 'utf8'));
+		let lastGroup = groups[groups.length - 1];
+		if (!lastGroup) {
+			lastGroup = { entries: [], title: currentTitle };
+			groups.push(lastGroup);
+		}
+
+		lastGroup.entries.push({
+			description: frontmatter.description ?? '',
+			name: frontmatter.title ?? entry,
+			url: `/components/${entry}`,
 		});
+	}
 
-		return [{ entries, title }];
-	});
+	return groups;
+}
+
+function isSeparator(value: string): boolean {
+	return /^---.+---$/.test(value);
 }
 
 function readJson(path: string): unknown {
