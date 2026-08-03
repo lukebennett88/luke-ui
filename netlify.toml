@@ -3,3 +3,103 @@ base = "."
 command = "pnpm run build:docs && pnpm run build:storybook && rm -rf apps/docs/dist/client/storybook && cp -R packages/@luke-ui/react/storybook-static apps/docs/dist/client/storybook"
 publish = "apps/docs/dist/client"
 functions = "apps/docs/.netlify/v1/functions"
+
+[[redirects]]
+from = "/overview/getting-started"
+to = "/installation"
+status = 301
+
+[[redirects]]
+from = "/overview/principles"
+to = "/principles"
+status = 301
+
+[[redirects]]
+from = "/overview/composition"
+to = "/composition"
+status = 301
+
+[[redirects]]
+from = "/overview/styling"
+to = "/styling"
+status = 301
+
+[[redirects]]
+from = "/overview/layout"
+to = "/layout"
+status = 301
+
+[[redirects]]
+from = "/overview/breakpoints"
+to = "/breakpoints"
+status = 301
+
+[[redirects]]
+from = "/overview/typography"
+to = "/typography"
+status = 301
+
+[[redirects]]
+from = "/overview/iconography"
+to = "/iconography"
+status = 301
+
+[[redirects]]
+from = "/overview/color"
+to = "/color"
+status = 301
+
+[[redirects]]
+from = "/overview/color-mode"
+to = "/color-mode"
+status = 301
+
+[[redirects]]
+from = "/overview/theme"
+to = "/theme"
+status = 301
+
+[[redirects]]
+from = "/overview/spacing"
+to = "/spacing"
+status = 301
+
+[[redirects]]
+from = "/overview/radius"
+to = "/radius"
+status = 301
+
+[[redirects]]
+from = "/overview/shadow"
+to = "/shadow"
+status = 301
+
+[[redirects]]
+from = "/theming/system"
+to = "/theme-system"
+status = 301
+
+[[redirects]]
+from = "/theming/applying"
+to = "/applying-a-theme"
+status = 301
+
+[[redirects]]
+from = "/theming/authoring"
+to = "/authoring-a-theme"
+status = 301
+
+[[redirects]]
+from = "/theming/token-reference"
+to = "/token-reference"
+status = 301
+
+[[redirects]]
+from = "/guides/forms"
+to = "/forms"
+status = 301
+
+[[redirects]]
+from = "/guides/quality"
+to = "/quality"
+status = 301

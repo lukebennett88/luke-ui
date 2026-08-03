@@ -1,5 +1,5 @@
 ---
-title: Theming overview
+title: Theming
 description: Apply a bundled identity, choose a colour mode, or author a static theme.
 ---
 
@@ -27,8 +27,8 @@ Each identity provides light and dark values. Omit `data-color-mode` to follow
 `prefers-color-scheme`, or set it to `light` or `dark` to force a mode. Modes can nest within an
 identity, which is useful for previews and intentional light-on-dark or dark-on-light boundaries.
 
-See [Theme system](/theming/system) for how root, identity, mode, and nested scopes relate, and
-[Colour modes](/overview/color-mode) for server-rendering and portal behaviour.
+See [Theme system](/theme-system) for how root, identity, mode, and nested scopes relate, and
+[Colour modes](/color-mode) for server-rendering and portal behaviour.
 
 <ExampleBlock
 	src="theming/identity-and-mode"
@@ -58,16 +58,16 @@ character. The generated stylesheet contains the full semantic contract for both
 `defineTheme` validates contrast before it writes the stylesheet.
 
 <Cards>
-	<Card href="/theming/system" title="Theme system">
+	<Card href="/theme-system" title="Theme system">
 		See how the root, identity, colour mode, and nested scopes relate.
 	</Card>
-	<Card href="/theming/applying" title="Apply a bundled theme">
+	<Card href="/applying-a-theme" title="Apply a bundled theme">
 		Load the CSS, set the root classes, and preserve them through portals.
 	</Card>
-	<Card href="/theming/authoring" title="Author a theme">
+	<Card href="/authoring-a-theme" title="Author a theme">
 		Compile a product-owned stylesheet from a curated `defineTheme` input.
 	</Card>
-	<Card href="/theming/token-reference" title="Token reference">
+	<Card href="/token-reference" title="Token reference">
 		Browse the public semantic CSS variables for custom UI.
 	</Card>
 </Cards>
