@@ -1,10 +1,15 @@
 import { expect, test } from 'vite-plus/test';
 import { getActiveSiteDestination } from './site-destinations.js';
 
-test('the docs destination covers every route the playground does not', () => {
+test('the docs destination covers the routes no other destination claims', () => {
 	expect(getActiveSiteDestination('/')?.label).toBe('Docs');
-	expect(getActiveSiteDestination('/components/actions/button')?.label).toBe('Docs');
 	expect(getActiveSiteDestination('/theming')?.label).toBe('Docs');
+});
+
+test('the components destination wins over the docs root it sits under', () => {
+	expect(getActiveSiteDestination('/components')?.label).toBe('Components');
+	expect(getActiveSiteDestination('/components/actions/button')?.label).toBe('Components');
+	expect(getActiveSiteDestination('/components/primitives/field/props')?.label).toBe('Components');
 });
 
 test('the playground destination wins over the docs root it sits under', () => {
@@ -14,4 +19,5 @@ test('the playground destination wins over the docs root it sits under', () => {
 
 test('a route that only shares a name prefix with a destination is not active', () => {
 	expect(getActiveSiteDestination('/playgrounds')?.label).toBe('Docs');
+	expect(getActiveSiteDestination('/component')?.label).toBe('Docs');
 });

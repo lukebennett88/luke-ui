@@ -42,6 +42,16 @@ test('marks only the current destination on desktop and keeps search available',
 	await expect.element(page.getByRole('button', { name: /Search/ })).toBeVisible();
 });
 
+test('marks the components destination active on a component page', async () => {
+	await page.viewport(1024, 800);
+	await renderAt('/components/actions/button', <SiteNav />);
+
+	await expect
+		.element(page.getByRole('link', { name: 'Components' }))
+		.toHaveAttribute('aria-current', 'page');
+	expect(getCurrentLinks()).toHaveLength(1);
+});
+
 test('offers search and theme controls from the mobile bar', async () => {
 	await page.viewport(390, 800);
 	await renderAt('/', <SiteNav />);
