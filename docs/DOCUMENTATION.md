@@ -72,6 +72,13 @@ own heading.
 
 Atoms and composed components get hosted docs pages in the primary component navigation.
 
+The components landing page at `/components` lists every component guide, grouped by category. The
+list is generated from the guides themselves. `scripts/generate-components-index.ts` reads each
+guide's frontmatter and emits `src/generated/components-index.generated.ts`. The docs app renders
+that file through `src/components/components-index.tsx`. A new component appears on the landing page
+with no further edit. `components-index-generator.test.ts` fails when the generated file drifts from
+the guides on disk.
+
 Primitives are public API for library authors. Document every primitive export path in hosted docs.
 Primitive pages live in the "Primitives" section under components.
 
