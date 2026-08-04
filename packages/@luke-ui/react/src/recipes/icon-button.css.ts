@@ -3,7 +3,7 @@ import { vars } from '../theme/contract.css.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
 
-export const iconButtonReset = styleInLayer('utilities', {
+export const iconButtonReset = styleInLayer('recipes', {
 	'@media': {
 		'(forced-colors: active)': {
 			selectors: {

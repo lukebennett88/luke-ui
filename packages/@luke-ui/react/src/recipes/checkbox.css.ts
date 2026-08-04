@@ -1,5 +1,5 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
-import { focusRing } from '../styles/focus-ring.js';
+import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
 import { fieldMessageIcon, fieldMessageIndent } from './field.css.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
@@ -96,10 +96,7 @@ const checkboxConfig = {
 			inlineSize: checkboxIndicatorSize,
 			justifyContent: 'center',
 			lineHeight: 1,
-			outlineColor: 'transparent',
-			outlineOffset: '2px',
-			outlineStyle: 'solid',
-			outlineWidth: '2px',
+			...restingFocusRing(),
 			transitionDuration: vars.motion.duration.fast,
 			transitionProperty: 'background-color, background-image, border-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
@@ -109,7 +106,7 @@ const checkboxConfig = {
 					opacity: 0,
 				},
 				'[data-disabled="true"] &': {
-					opacity: 0.55,
+					opacity: vars.interaction.disabledOpacity,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
 				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {

@@ -594,6 +594,8 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 	const values: Record<string, string> = {
 		'controlSize.medium': '40px',
 		'controlSize.small': '32px',
+		'controlSize.minTarget': '24px',
+		'interaction.disabledOpacity': '0.55',
 		...FONT_VALUES,
 		...buildCapsizeValues(fontFamily),
 		'font.family.body': themeFontFamilyStacks[fontFamily],

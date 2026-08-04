@@ -1,6 +1,7 @@
 import { vars } from '../theme/contract.css.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
+import { spinnerOverlayBase } from './spinner-overlay.js';
 
 export const buttonContent = recipe({
 	base: {
@@ -40,10 +41,6 @@ export const spinnerOverlay = recipe({
 				color: 'ButtonText',
 			},
 		},
-		alignItems: 'center',
-		display: 'flex',
-		inset: 0,
-		justifyContent: 'center',
-		position: 'absolute',
+		...spinnerOverlayBase,
 	},
 });

@@ -1,7 +1,7 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
-import { focusRing } from '../styles/focus-ring.js';
+import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import {
@@ -74,18 +74,15 @@ const comboboxActionStyles = {
 	fontSize: 'inherit',
 	fontWeight: 'inherit',
 	justifyContent: 'center',
-	minBlockSize: '24px',
-	minInlineSize: '24px',
+	minBlockSize: vars.controlSize.minTarget,
+	minInlineSize: vars.controlSize.minTarget,
 	// The invalid `::after` icon on `inputGroup` below is its last DOM child (a
 	// pseudo-element always renders after real children), which put it after both
 	// action buttons too. Giving them an explicit `order` moves them behind the icon
 	// (default `order: 0`) in flex layout without touching document order, so the
 	// icon lands right after the text input and before the clear/trigger buttons.
 	order: 1,
-	outlineColor: 'transparent',
-	outlineOffset: '2px',
-	outlineStyle: 'solid',
-	outlineWidth: '2px',
+	...restingFocusRing(),
 	transform: 'none',
 	transitionDuration: vars.motion.duration.fast,
 	transitionProperty: 'background-color, color',
@@ -108,10 +105,21 @@ const comboboxActionStyles = {
 
 const comboboxActionClassName = styleInLayer('recipes', comboboxActionStyles);
 
-const comboboxActionSizeClassNames = {
-	medium: styleInLayer('recipes', { blockSize: '28px', inlineSize: '28px', paddingInline: 0 }),
-	small: styleInLayer('recipes', { blockSize: '24px', inlineSize: '24px', paddingInline: 0 }),
-};
+const comboboxActionSizeClassName = styleInLayer('recipes', {
+	blockSize: vars.controlSize.minTarget,
+	inlineSize: vars.controlSize.minTarget,
+	paddingInline: 0,
+});
+
+// Medium stays above the tap-target floor so the trailing chevron keeps the same 8px
+// inset as `InputGroup`'s invalid indicator: (28 − 20px icon) ÷ 2 plus the 4px
+// `space[100]` trigger gap. Shrinking to the 24px floor would pull it to 6px and break
+// that cross-control alignment.
+const comboboxActionSizeClassNameMedium = styleInLayer('recipes', {
+	blockSize: '28px',
+	inlineSize: '28px',
+	paddingInline: 0,
+});
 
 /**
  * Raw slotted config for the combobox anatomy.
@@ -163,17 +171,14 @@ const comboboxConfig = {
 			letterSpacing: vars.font[300].letterSpacing,
 			lineHeight: vars.font[300].lineHeight,
 			minInlineSize: 0,
-			outlineColor: 'transparent',
-			outlineOffset: 0,
-			outlineStyle: 'solid',
-			outlineWidth: '2px',
+			...restingFocusRing('0px'),
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.fast,
 			transitionProperty: 'background-color, border-color, color',
 			transitionTimingFunction: vars.motion.easing.standard,
 
 			selectors: {
-				[disabled]: { cursor: 'not-allowed', opacity: 0.55 },
+				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
 				[focusWithin]: {
 					borderColor: vars.color.border.accent,
 					...focusRing(vars.color.border.focus),
@@ -407,7 +412,7 @@ const comboboxConfig = {
 			display: 'flex',
 			gap: vars.space[200],
 			inlineSize: '100%',
-			minBlockSize: '24px',
+			minBlockSize: vars.controlSize.minTarget,
 			minInlineSize: 0,
 			outline: 'none',
 			transform: 'none',
@@ -419,7 +424,7 @@ const comboboxConfig = {
 				'&[data-disabled="true"]': {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
-					opacity: 0.55,
+					opacity: vars.interaction.disabledOpacity,
 				},
 				'&[data-focused="true"]:not([data-disabled="true"])': {
 					backgroundColor: vars.color.background.neutral.subtle.rest,
@@ -454,8 +459,8 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
-				trigger: comboboxActionSizeClassNames.medium,
-				clearButton: comboboxActionSizeClassNames.medium,
+				trigger: comboboxActionSizeClassNameMedium,
+				clearButton: comboboxActionSizeClassNameMedium,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.medium,
 					paddingBlock: vars.space[200],
@@ -479,8 +484,8 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},
-				trigger: comboboxActionSizeClassNames.small,
-				clearButton: comboboxActionSizeClassNames.small,
+				trigger: comboboxActionSizeClassName,
+				clearButton: comboboxActionSizeClassName,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space[100],

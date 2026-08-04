@@ -67,6 +67,8 @@
 	--luke-space-1600: 64px;
 	--luke-control-size-small: 32px;
 	--luke-control-size-medium: 40px;
+	--luke-control-size-min-target: 24px;
+	--luke-interaction-disabled-opacity: 0.55;
 	--luke-icon-size-xsmall: 16px;
 	--luke-icon-size-small: 20px;
 	--luke-icon-size-medium: 24px;
