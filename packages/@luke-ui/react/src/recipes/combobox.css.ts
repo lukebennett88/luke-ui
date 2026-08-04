@@ -41,7 +41,6 @@ const comboboxActionStyles = {
 			forcedColorAdjust: 'auto',
 			selectors: {
 				'&[data-disabled="true"]': { color: 'GrayText', opacity: 1 },
-				'&[data-focus-visible="true"]': { outlineColor: 'Highlight' },
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([aria-disabled="true"])': {
 					backgroundColor: 'Highlight',
 					boxShadow: 'none',
@@ -82,7 +81,6 @@ const comboboxActionStyles = {
 	// (default `order: 0`) in flex layout without touching document order, so the
 	// icon lands right after the text input and before the clear/trigger buttons.
 	order: 1,
-	...restingFocusRing(),
 	transform: 'none',
 	transitionDuration: vars.motion.duration.fast,
 	transitionProperty: 'background-color, color',
@@ -90,7 +88,6 @@ const comboboxActionStyles = {
 
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
-		'&[data-focus-visible="true"]': { ...focusRing(vars.color.border.focus) },
 		'&[data-hovered="true"]:not([data-disabled="true"])': {
 			backgroundColor: vars.color.background.accent.subtle.hover,
 			color: vars.color.text.primary,

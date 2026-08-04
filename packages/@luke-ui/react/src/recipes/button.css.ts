@@ -1,4 +1,3 @@
-import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import type { RecipeSelection } from './recipe.js';
@@ -14,9 +13,6 @@ const base = styleInLayer('recipes', {
 			color: 'ButtonText',
 			forcedColorAdjust: 'auto',
 			selectors: {
-				'&[data-focus-visible="true"]': {
-					outlineColor: 'Highlight',
-				},
 				'&[data-disabled="true"]': {
 					borderColor: 'GrayText',
 					color: 'GrayText',
@@ -61,7 +57,6 @@ const base = styleInLayer('recipes', {
 	lineHeight: vars.font[200].lineHeight,
 	minBlockSize: vars.controlSize.minTarget,
 	minInlineSize: vars.controlSize.minTarget,
-	...restingFocusRing(),
 	position: 'relative',
 	textDecoration: 'none',
 	transform: 'translateY(0)',
@@ -73,9 +68,6 @@ const base = styleInLayer('recipes', {
 		'&[data-disabled="true"]': {
 			cursor: 'not-allowed',
 			opacity: vars.interaction.disabledOpacity,
-		},
-		'&[data-focus-visible="true"]': {
-			...focusRing(vars.color.border.focus),
 		},
 		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 			boxShadow: vars.depth.raised,
