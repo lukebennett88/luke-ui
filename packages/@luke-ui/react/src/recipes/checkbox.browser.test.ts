@@ -1,3 +1,4 @@
+import '../styles/reset.css.js';
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { fontSizeSteps } from '../theme/contract.js';
@@ -115,6 +116,22 @@ test('hover and pressed states change the control material', () => {
 	expect(hoveredFinish).not.toBe(restingFinish);
 	expect(pressedFinish).not.toBe(restingFinish);
 	expect(pressedFinish).not.toBe(hoveredFinish);
+});
+
+// Keyboard focus projects onto the indicator box alone. Without the explicit
+// `outline: none` on the clickable content, the reset default would paint a second
+// ring around the whole row and the checkbox would show two outlines at once.
+test('keyboard focus outlines only the indicator, not the interactive content', () => {
+	const { content, indicator } = mountCheckbox();
+
+	content.dataset.focusVisible = 'true';
+
+	const contentStyle = getComputedStyle(content);
+	const indicatorStyle = getComputedStyle(indicator);
+	expect(contentStyle.outlineStyle).toBe('none');
+	expect(indicatorStyle.outlineStyle).toBe('solid');
+	expect(indicatorStyle.outlineWidth).toBe('2px');
+	expect(indicatorStyle.outlineOffset).toBe('2px');
 });
 
 function mountCheckbox(

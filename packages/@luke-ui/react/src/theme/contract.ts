@@ -207,6 +207,8 @@ export const themeContractTree = {
 		medium: null,
 		/** Minimum block and inline size for interactive targets, per WCAG 2.5.8. */
 		minTarget: null,
+		/** Square tap target for `Combobox`'s trigger and clear-button actions. */
+		comboboxAction: null,
 	},
 	/** Interaction treatment shared by every control recipe. */
 	interaction: {

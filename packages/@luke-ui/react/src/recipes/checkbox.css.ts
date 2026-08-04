@@ -38,6 +38,11 @@ const checkboxConfig = {
 					color: vars.color.text.disabled,
 					cursor: 'not-allowed',
 				},
+				// The reset default ring would otherwise paint both this clickable row and the
+				// indicator box; the box alone carries the focus indication (see `indicator`).
+				'&[data-focus-visible="true"]': {
+					outline: 'none',
+				},
 				'&[data-readonly="true"]': {
 					cursor: 'default',
 				},

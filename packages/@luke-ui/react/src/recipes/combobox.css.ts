@@ -111,10 +111,11 @@ const comboboxActionSizeClassName = styleInLayer('recipes', {
 // Medium stays above the tap-target floor so the trailing chevron keeps the same 8px
 // inset as `InputGroup`'s invalid indicator: (28 − 20px icon) ÷ 2 plus the 4px
 // `space[100]` trigger gap. Shrinking to the 24px floor would pull it to 6px and break
-// that cross-control alignment.
+// that cross-control alignment. Tokenised as `controlSize.comboboxAction` so the sizing
+// flows from the theme contract rather than a recipe-local literal.
 const comboboxActionSizeClassNameMedium = styleInLayer('recipes', {
-	blockSize: '28px',
-	inlineSize: '28px',
+	blockSize: vars.controlSize.comboboxAction,
+	inlineSize: vars.controlSize.comboboxAction,
 	paddingInline: 0,
 });
 
