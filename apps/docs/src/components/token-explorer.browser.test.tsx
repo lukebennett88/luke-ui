@@ -58,7 +58,7 @@ async function renderExplorer() {
 		),
 	});
 	const router = createRouter({
-		history: createMemoryHistory({ initialEntries: ['/theming/token-reference'] }),
+		history: createMemoryHistory({ initialEntries: ['/token-reference'] }),
 		routeTree: rootRoute,
 	});
 

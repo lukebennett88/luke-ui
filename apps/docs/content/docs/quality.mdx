@@ -9,7 +9,9 @@ Luke UI guarantees part of your application's quality. Your application owns the
 
 ## Accessibility
 
-This guide defines Luke UI's guarantees. Each component page documents its specific requirements.
+Luke UI supplies component mechanics and semantics as part of its contract. This guide defines those
+guarantees. Each component page documents its specific requirements. Applications supply meaningful
+names and content, and own the focus order of custom compositions.
 
 ### Labels
 
@@ -32,7 +34,7 @@ pairs. It guarantees 3:1 for required focus and control borders.
 **You do.** Do not rely on a role border alone to show state. Pair it with text, an icon, or a
 guaranteed surface change.
 
-Read [Contrast validation](/theming/authoring#contrast-validation) for the full matrix.
+Read [Contrast validation](/authoring-a-theme#contrast-validation) for the full matrix.
 
 ### Focus
 
@@ -87,11 +89,11 @@ Open each component page for its specific requirements:
 ## Responsive behaviour
 
 **Luke UI does.** `Box` and `createSprinkles` accept responsive values for every layout property.
-Values use the named breakpoints from `xsmall` through `xxlarge`.
+Values use the named breakpoints from `initial` through `xxlarge`.
 
 **You do.** Choose the breakpoints for your page. Test the layout at each supported viewport width.
 
-Read [Layout](/overview/layout) for breakpoint values and responsive syntax.
+Read [Layout](/layout) for breakpoint values and responsive syntax.
 
 ## Locale-aware numerals
 

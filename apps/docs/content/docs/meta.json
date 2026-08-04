@@ -1,4 +1,29 @@
 {
 	"title": "Documentation",
-	"pages": ["index", "overview", "guides", "theming", "components"]
+	"pages": [
+		"---Overview---",
+		"index",
+		"installation",
+		"---Foundations---",
+		"composition",
+		"styling",
+		"layout",
+		"typography",
+		"iconography",
+		"---Theming---",
+		"theming",
+		"theme-system",
+		"applying-a-theme",
+		"theme",
+		"color",
+		"color-mode",
+		"authoring-a-theme",
+		"spacing",
+		"radius",
+		"shadow",
+		"token-reference",
+		"---Guides---",
+		"forms",
+		"quality"
+	]
 }

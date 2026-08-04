@@ -1,7 +1,8 @@
 ---
 title: Styling
 description:
-  Choose component APIs, primitives, recipes, variables, or themes. Do not override internals.
+  Choose component props, layout utilities, recipes, variables, or themes. Do not override
+  internals.
 ---
 
 Luke UI ships static CSS. It does not inject styles at runtime. Import the shared stylesheet and a
@@ -12,15 +13,18 @@ theme stylesheet once. Then use component props for the variations each componen
 Work from the most specific public API to the broadest one.
 
 1. Use a component's props for its supported appearance, size, state, and behaviour.
-2. Use a documented primitive when you need a different component structure.
+2. Use layout utilities for spacing, sizing, and responsive structure around components.
 3. Build custom UI with public recipes and semantic variables when the component is not provided.
 4. Author a custom theme when the product needs a different visual foundation everywhere.
 
-| Guidance | Practices                                                                                                  |
-| -------- | ---------------------------------------------------------------------------------------------------------- |
-| Do       | Use a supported component prop for its appearance, size, state, or behaviour.                              |
-| Do       | Use a documented primitive or recipe for its element contract, and `vars` for application-owned custom UI. |
-| Don't    | Target generated selectors or implementation-state attributes such as `data-pressed`.                      |
+Read [Composition](/composition) when the choice is between a component and a documented primitive
+rather than between styling mechanisms.
+
+| Guidance | Practices                                                                                            |
+| -------- | ---------------------------------------------------------------------------------------------------- |
+| Do       | Use a supported component prop for its appearance, size, state, or behaviour.                        |
+| Do       | Use a layout utility or recipe for its element contract, and `vars` for application-owned custom UI. |
+| Don't    | Target generated selectors or implementation-state attributes such as `data-pressed`.                |
 
 Do not override component recipe selectors or implementation-state attributes such as
 `data-hovered`, `data-pressed`, or `data-focus-visible`. They are not supported styling hooks and
@@ -34,13 +38,11 @@ defines its type and spacing steps in source.
 
 <SourceCodeBlock src="styling/component-props" />
 
-### Compose from primitives
+### Use layout utilities for structure
 
-Use a documented primitive when component props do not provide the structure you need. Primitives
-keep the accessibility and visual contract for a component family. They leave its children and
-composition to your application.
-
-<SourceCodeBlock src="styling/primitive" />
+`Box` and layout utilities from `@luke-ui/react/styles` handle spacing, sizing, positioning, and
+responsive structure around components. They do not set semantic colour, typography, or pseudo
+states. Read [Layout](/layout) for the full API.
 
 ### Build custom UI with public recipes and variables
 
@@ -55,12 +57,11 @@ The public `vars` token contract lets an application-owned element follow the ac
 <SourceCodeBlock src="styling/semantic-variables" />
 
 The token contract is public. Component selectors, generated palette values, and theme
-implementation details are not. See the [token reference](/theming/token-reference) for the full
-contract.
+implementation details are not. See the [token reference](/token-reference) for the full contract.
 
 ### Change the visual foundation with a custom theme
 
-Use a [custom theme](/theming/authoring) when a product needs a different identity, typeface, or
+Use a [custom theme](/authoring-a-theme) when a product needs a different identity, typeface, or
 semantic colour system. `defineTheme` produces a static stylesheet for the full semantic contract
 from a curated accent and neutral character. It is not a per-component override tool.
 
@@ -72,25 +73,7 @@ root. Luke UI scopes the reset to that root, so it does not reset unrelated appl
 
 <SourceCodeBlock src="styling/static-styles" />
 
-Read [Applying a theme](/theming/applying) for colour modes, portals, and other theme setup details.
-
-## Use layout utilities for layout
-
-`Box` and `createSprinkles` from `@luke-ui/react/styles` handle responsive structure, spacing,
-sizing, positioning, overflow, flex, and grid-child properties. They do not set semantic colour,
-typography, or pseudo states.
-
-```tsx
-import { Box } from '@luke-ui/react/box';
-
-<Box display="flex" flexDirection={{ initial: 'column', medium: 'row' }} gap="400">
-	{children}
-</Box>;
-```
-
-`Box` is useful for layout around components. Use `createSprinkles` when another application-owned
-element needs the same responsive layout properties. Neither API sets semantic colour, typography,
-or interaction states.
+Read [Applying a theme](/applying-a-theme) for colour modes, portals, and other theme setup details.
 
 ## Use application CSS alongside Luke UI
 
@@ -121,22 +104,22 @@ import { Box } from '@luke-ui/react/box';
 ```
 
 When a CSS Module or application stylesheet needs a token, use the stable `--luke-*` variable listed
-in the [token reference](/theming/token-reference). Do not couple application CSS to undocumented
-selectors or implementation attributes.
+in the [token reference](/token-reference). Do not couple application CSS to undocumented selectors
+or implementation attributes.
 
 ## Continue learning
 
 <Cards>
-	<Card href="/overview/layout" title="Layout">
+	<Card href="/layout" title="Layout">
 		Use Box and Sprinkles for responsive structure.
 	</Card>
-	<Card href="/overview/color" title="Colour">
+	<Card href="/color" title="Colour">
 		Choose semantic surfaces and roles for custom UI.
 	</Card>
-	<Card href="/theming/token-reference" title="Token reference">
+	<Card href="/token-reference" title="Token reference">
 		Browse every public semantic CSS variable.
 	</Card>
-	<Card href="/theming/authoring" title="Author a theme">
+	<Card href="/authoring-a-theme" title="Author a theme">
 		Create a product-owned visual foundation when the bundled identities do not fit.
 	</Card>
 </Cards>
