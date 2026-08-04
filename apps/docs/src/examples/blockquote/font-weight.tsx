@@ -1,7 +1,7 @@
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
 
-export default function FontWeight() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="300" maxInlineSize="40rem">
 			<Blockquote fontWeight="body">
@@ -22,4 +22,4 @@ export default function FontWeight() {
 			</Blockquote>
 		</Box>
 	);
-}
+};

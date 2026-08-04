@@ -1,6 +1,6 @@
 import { TextField } from '@luke-ui/react/text-field';
 
-export default function Basic() {
+export default () => {
 	return (
 		<TextField
 			description="Use the address you check most often."
@@ -9,4 +9,4 @@ export default function Basic() {
 			placeholder="you@example.com"
 		/>
 	);
-}
+};

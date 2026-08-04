@@ -116,8 +116,10 @@ Headings use sentence case. Capitalise only proper nouns and product names.
 
 Interactive examples live in `apps/docs/src/examples/<component>/`.
 
-An example module default-exports a React component. Reference it from an MDX page with
-`<ExampleBlock src="<component>/<name>" title="..." />`.
+An example module default-exports a React component as an anonymous arrow function,
+`export default () => {...}`. The component and variation are identified by the module path, not the
+function name, so the name is not repeated in the rendered source. Reference an example from an MDX
+page with `<ExampleBlock src="<component>/<name>" title="..." />`.
 
 Every component guide starts with a focused `basic.tsx` example and references it as the primary
 `<ExampleBlock src="<component>/basic" ... />`. This is the default first example generated for a

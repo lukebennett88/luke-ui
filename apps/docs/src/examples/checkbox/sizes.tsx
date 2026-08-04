@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Checkbox } from '@luke-ui/react/checkbox';
 
-export default function Sizes() {
+export default () => {
 	return (
 		<Box display="grid" gap="300">
 			<Checkbox defaultSelected size="small">
@@ -15,4 +15,4 @@ export default function Sizes() {
 			</Checkbox>
 		</Box>
 	);
-}
+};

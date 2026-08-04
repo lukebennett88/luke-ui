@@ -8,7 +8,7 @@ import {
 	ComboboxTrigger,
 } from '@luke-ui/react/combobox-field/primitive';
 
-export default function Basic() {
+export default () => {
 	return (
 		<ComboboxRoot aria-label="Country">
 			<ComboboxInputGroup>
@@ -23,4 +23,4 @@ export default function Basic() {
 			</ComboboxPopover>
 		</ComboboxRoot>
 	);
-}
+};

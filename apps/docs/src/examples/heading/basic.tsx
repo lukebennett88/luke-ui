@@ -1,5 +1,5 @@
 import { Heading } from '@luke-ui/react/heading';
 
-export default function Basic() {
+export default () => {
 	return <Heading level={2}>Account settings</Heading>;
-}
+};

@@ -1,7 +1,7 @@
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox-field/primitive';
 
-export default function Grouped() {
+export default () => {
 	return (
 		<ComboboxField defaultValue="apple" label="Produce" name="produce" placeholder="Choose produce">
 			<ComboboxSection title="Fruit">
@@ -14,4 +14,4 @@ export default function Grouped() {
 			</ComboboxSection>
 		</ComboboxField>
 	);
-}
+};

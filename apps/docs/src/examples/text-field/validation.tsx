@@ -1,6 +1,6 @@
 import { TextField } from '@luke-ui/react/text-field';
 
-export default function Validation() {
+export default () => {
 	return (
 		<TextField
 			defaultValue="jordan.example"
@@ -10,4 +10,4 @@ export default function Validation() {
 			name="emailAddress"
 		/>
 	);
-}
+};

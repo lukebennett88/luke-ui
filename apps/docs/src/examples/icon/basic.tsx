@@ -1,5 +1,5 @@
 import { Icon } from '@luke-ui/react/icon';
 
-export default function Basic() {
+export default () => {
 	return <Icon name="search" />;
-}
+};

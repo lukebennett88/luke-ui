@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
 
-export default function Truncation() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
 			<Text elementType="div" lineClamp>
@@ -12,4 +12,4 @@ export default function Truncation() {
 			</Text>
 		</Box>
 	);
-}
+};

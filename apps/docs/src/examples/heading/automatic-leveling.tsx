@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
 import { HeadingLevels } from '@luke-ui/react/heading-context';
 
-export default function AutomaticLeveling() {
+export default () => {
 	return (
 		<HeadingLevels base={1}>
 			<Box display="flex" flexDirection="column" gap="300">
@@ -16,4 +16,4 @@ export default function AutomaticLeveling() {
 			</Box>
 		</HeadingLevels>
 	);
-}
+};

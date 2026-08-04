@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
 
-export default function PrefixAndSuffix() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
 			<TextField
@@ -15,4 +15,4 @@ export default function PrefixAndSuffix() {
 			<TextField label="Budget" name="budget" placeholder="0.00" suffix="AUD" />
 		</Box>
 	);
-}
+};

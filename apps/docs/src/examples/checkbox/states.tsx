@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Checkbox } from '@luke-ui/react/checkbox';
 
-export default function States() {
+export default () => {
 	return (
 		<Box display="grid" gap="300">
 			<Checkbox>Unchecked</Checkbox>
@@ -16,4 +16,4 @@ export default function States() {
 			</Checkbox>
 		</Box>
 	);
-}
+};

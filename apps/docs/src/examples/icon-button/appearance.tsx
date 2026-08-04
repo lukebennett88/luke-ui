@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { IconButton } from '@luke-ui/react/icon-button';
 
-export default function Appearance() {
+export default () => {
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
 			<IconButton appearance="solid" aria-label="Open documentation" icon="bookOpen" />
@@ -9,4 +9,4 @@ export default function Appearance() {
 			<IconButton appearance="ghost" aria-label="Open documentation" icon="bookOpen" />
 		</Box>
 	);
-}
+};

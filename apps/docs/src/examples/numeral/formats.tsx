@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Numeral } from '@luke-ui/react/numeral';
 import { Text } from '@luke-ui/react/text';
 
-export default function Formats() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="200">
 			<Text>
@@ -19,4 +19,4 @@ export default function Formats() {
 			</Text>
 		</Box>
 	);
-}
+};

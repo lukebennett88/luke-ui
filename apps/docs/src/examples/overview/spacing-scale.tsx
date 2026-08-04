@@ -3,7 +3,7 @@ import { Text } from '@luke-ui/react/text';
 import { spaceScale, vars } from '@luke-ui/react/theme';
 import { Fragment } from 'react';
 
-export default function SpacingScaleExample() {
+export default () => {
 	return (
 		<Box
 			alignItems="center"
@@ -31,4 +31,4 @@ export default function SpacingScaleExample() {
 			))}
 		</Box>
 	);
-}
+};

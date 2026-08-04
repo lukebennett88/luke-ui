@@ -11,7 +11,7 @@ const radiusRoles = [
 	{ label: 'Full', value: vars.radius.full },
 ] as const;
 
-export default function RadiusRolesExample() {
+export default () => {
 	return (
 		<Box
 			display="grid"
@@ -41,4 +41,4 @@ export default function RadiusRolesExample() {
 			))}
 		</Box>
 	);
-}
+};

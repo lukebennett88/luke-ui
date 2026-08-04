@@ -6,6 +6,6 @@ const HeartIcon = createIcon({
 	),
 });
 
-export default function Custom() {
+export default () => {
 	return <HeartIcon size="small" title="Add to favourites" />;
-}
+};

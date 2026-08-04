@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 
-export default function Appearance() {
+export default () => {
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
 			<Button appearance="solid">Save changes</Button>
@@ -9,4 +9,4 @@ export default function Appearance() {
 			<Button appearance="ghost">Save changes</Button>
 		</Box>
 	);
-}
+};

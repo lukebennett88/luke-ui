@@ -6,7 +6,7 @@ import {
 } from '@luke-ui/react/checkbox/primitive';
 import { FieldDescription, FieldError } from '@luke-ui/react/field/primitive';
 
-export default function Basic() {
+export default () => {
 	return (
 		<Checkbox isInvalid>
 			<CheckboxContent>
@@ -19,4 +19,4 @@ export default function Basic() {
 			<FieldError>Choose an option.</FieldError>
 		</Checkbox>
 	);
-}
+};

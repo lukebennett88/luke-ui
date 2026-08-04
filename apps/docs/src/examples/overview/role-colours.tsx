@@ -17,7 +17,7 @@ type Role = keyof typeof roles;
 
 const modes = ['light', 'dark'] as const;
 
-export default function RoleColoursExample() {
+export default () => {
 	const [role, setRole] = useState<Role>('warning');
 
 	return (
@@ -106,4 +106,4 @@ export default function RoleColoursExample() {
 			</Box>
 		</Box>
 	);
-}
+};

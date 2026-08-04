@@ -8,7 +8,7 @@ const variants = [
 	{ label: 'Slashed zero', sample: '012 OQR', value: 'slashed-zero' },
 ] as const;
 
-export default function NumericGlyphs() {
+export default () => {
 	return (
 		<Box
 			display="grid"
@@ -29,4 +29,4 @@ export default function NumericGlyphs() {
 			))}
 		</Box>
 	);
-}
+};

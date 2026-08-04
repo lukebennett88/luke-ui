@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
 
-export default function Typography() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="300">
 			<Heading level={2} size="900">
@@ -15,4 +15,4 @@ export default function Typography() {
 			</Heading>
 		</Box>
 	);
-}
+};

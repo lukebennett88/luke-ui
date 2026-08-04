@@ -2,7 +2,7 @@ import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 
-export default function WithButton() {
+export default () => {
 	return (
 		<Button
 			isDisabled
@@ -15,4 +15,4 @@ export default function WithButton() {
 			Save changes
 		</Button>
 	);
-}
+};

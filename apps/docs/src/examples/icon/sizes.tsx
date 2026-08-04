@@ -3,7 +3,7 @@ import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
 import type { PropsWithChildren } from 'react';
 
-export default function Sizes() {
+export default () => {
 	return (
 		<Box alignItems="flex-end" display="flex" gap="400">
 			<FlexCol>
@@ -24,7 +24,7 @@ export default function Sizes() {
 			</FlexCol>
 		</Box>
 	);
-}
+};
 
 function FlexCol({ children }: PropsWithChildren) {
 	return (

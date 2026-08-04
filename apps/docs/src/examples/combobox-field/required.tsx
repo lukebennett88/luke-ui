@@ -8,7 +8,7 @@ const countries = [
 	{ id: 'united-states', label: 'United States' },
 ];
 
-export default function Required() {
+export default () => {
 	return (
 		<ComboboxField
 			defaultItems={countries}
@@ -22,4 +22,4 @@ export default function Required() {
 			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 		</ComboboxField>
 	);
-}
+};

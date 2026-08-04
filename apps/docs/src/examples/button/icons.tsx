@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 
-export default function Icons() {
+export default () => {
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
 			<Button startIcon={<Icon name="add" />}>Add item</Button>
@@ -11,4 +11,4 @@ export default function Icons() {
 			</Button>
 		</Box>
 	);
-}
+};
