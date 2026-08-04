@@ -1,5 +1,5 @@
 import { Code } from '@luke-ui/react/code';
 
-export default function Basic() {
+export default () => {
 	return <Code>console.log()</Code>;
-}
+};

@@ -4,7 +4,7 @@ import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading
 import { Text } from '@luke-ui/react/text';
 import { useState } from 'react';
 
-export default function ProviderSkeleton() {
+export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
@@ -42,4 +42,4 @@ export default function ProviderSkeleton() {
 			</Checkbox>
 		</Box>
 	);
-}
+};

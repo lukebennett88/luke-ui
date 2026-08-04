@@ -9,7 +9,7 @@ const lineBoxStyle = {
 	borderBlock: `1px dashed ${vars.color.border.decorative}`,
 } as const;
 
-export default function Trim() {
+export default () => {
 	const [isTrimmed, setIsTrimmed] = useState(true);
 
 	return (
@@ -24,4 +24,4 @@ export default function Trim() {
 			</Box>
 		</Box>
 	);
-}
+};

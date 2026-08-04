@@ -1,7 +1,7 @@
 import { Button } from '@luke-ui/react/button/primitive';
 import { mergeProps } from '@luke-ui/react/utils';
 
-export default function AnimatedButton() {
+export default () => {
 	return (
 		<Button
 			render={(domProps, { isHovered, isPressed }) => {
@@ -24,4 +24,4 @@ export default function AnimatedButton() {
 			Continue
 		</Button>
 	);
-}
+};

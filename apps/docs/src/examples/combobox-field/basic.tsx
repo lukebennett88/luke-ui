@@ -11,7 +11,7 @@ const fruits: Array<Fruit> = [
 	{ id: 'grape', label: 'Grape' },
 ];
 
-export default function Basic() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
 			<ComboboxField
@@ -25,4 +25,4 @@ export default function Basic() {
 			</ComboboxField>
 		</Box>
 	);
-}
+};

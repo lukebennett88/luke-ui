@@ -1,7 +1,7 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { useState } from 'react';
 
-export default function Controlled() {
+export default () => {
 	const [isSelected, setIsSelected] = useState(false);
 
 	return (
@@ -9,4 +9,4 @@ export default function Controlled() {
 			Weekly summary
 		</Checkbox>
 	);
-}
+};

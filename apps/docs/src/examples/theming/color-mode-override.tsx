@@ -11,7 +11,7 @@ const OPPOSITE_MODE: Record<ColorMode, ColorMode> = {
 	light: 'dark',
 };
 
-export default function ColorModeOverrideExample() {
+export default () => {
 	const [parentMode, setParentMode] = useState<ColorMode>('light');
 	const nestedMode = OPPOSITE_MODE[parentMode];
 
@@ -69,4 +69,4 @@ export default function ColorModeOverrideExample() {
 			</Box>
 		</Box>
 	);
-}
+};

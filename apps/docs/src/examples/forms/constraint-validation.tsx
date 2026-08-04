@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { TextField } from '@luke-ui/react/text-field';
 
-export default function ConstraintValidation() {
+export default () => {
 	return (
 		<form>
 			<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
@@ -13,4 +13,4 @@ export default function ConstraintValidation() {
 			</Box>
 		</form>
 	);
-}
+};

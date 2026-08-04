@@ -3,7 +3,7 @@ import { Text } from '@luke-ui/react/text';
 import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
 import { DecorativeBox } from './decorative-box.js';
 
-export default function ConcentricRadiusExample() {
+export default () => {
 	const controlGap = vars.space[200];
 
 	return (
@@ -27,4 +27,4 @@ export default function ConcentricRadiusExample() {
 			<Text size="100">Outer radius from inner radius + gap</Text>
 		</Box>
 	);
-}
+};

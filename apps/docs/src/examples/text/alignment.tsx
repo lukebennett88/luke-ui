@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
 
-export default function Alignment() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="200">
 			<Text elementType="div" textAlign="start">
@@ -15,4 +15,4 @@ export default function Alignment() {
 			</Text>
 		</Box>
 	);
-}
+};

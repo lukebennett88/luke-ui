@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
 
-export default function FirstLineAlignment() {
+export default () => {
 	return (
 		<Box display="grid" gap="400" maxInlineSize="18rem">
 			<Text elementType="div" size="100">
@@ -13,4 +13,4 @@ export default function FirstLineAlignment() {
 			</Text>
 		</Box>
 	);
-}
+};

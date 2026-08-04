@@ -5,7 +5,7 @@ import {
 	InputGroupSuffix,
 } from '@luke-ui/react/text-field/primitive';
 
-export default function Basic() {
+export default () => {
 	return (
 		<InputGroup>
 			<InputGroupPrefix>$</InputGroupPrefix>
@@ -13,4 +13,4 @@ export default function Basic() {
 			<InputGroupSuffix>USD</InputGroupSuffix>
 		</InputGroup>
 	);
-}
+};

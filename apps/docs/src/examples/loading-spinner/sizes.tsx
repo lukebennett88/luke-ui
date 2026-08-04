@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 
-export default function Sizes() {
+export default () => {
 	return (
 		<Box alignItems="center" display="flex" gap="400">
 			<LoadingSpinner aria-label="Loading inline content" size="xsmall" />
@@ -10,4 +10,4 @@ export default function Sizes() {
 			<LoadingSpinner aria-label="Loading prominent content" size="large" />
 		</Box>
 	);
-}
+};

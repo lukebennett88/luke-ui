@@ -4,7 +4,7 @@ import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { TextField } from '@luke-ui/react/text-field';
 import { useState } from 'react';
 
-export default function BorderRadius() {
+export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
@@ -17,4 +17,4 @@ export default function BorderRadius() {
 			</Checkbox>
 		</Box>
 	);
-}
+};

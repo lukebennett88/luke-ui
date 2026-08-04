@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 
-export default function Tones() {
+export default () => {
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
 			<Button>Cancel</Button>
@@ -9,4 +9,4 @@ export default function Tones() {
 			<Button tone="danger">Delete account</Button>
 		</Box>
 	);
-}
+};

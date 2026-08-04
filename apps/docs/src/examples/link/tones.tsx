@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Link } from '@luke-ui/react/link';
 
-export default function Tones() {
+export default () => {
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
 			<Link href="#view-report">View report</Link>
@@ -10,4 +10,4 @@ export default function Tones() {
 			</Link>
 		</Box>
 	);
-}
+};

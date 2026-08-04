@@ -1,6 +1,6 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
 
-export default function Validation() {
+export default () => {
 	return (
 		<Checkbox
 			description="We record the date you accepted."
@@ -11,4 +11,4 @@ export default function Validation() {
 			I accept the terms of service
 		</Checkbox>
 	);
-}
+};

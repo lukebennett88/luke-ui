@@ -4,7 +4,7 @@ import { Checkbox } from '@luke-ui/react/checkbox';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { useState } from 'react';
 
-export default function Children() {
+export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
@@ -17,4 +17,4 @@ export default function Children() {
 			</Checkbox>
 		</Box>
 	);
-}
+};

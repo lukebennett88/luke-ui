@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
 import { fontSizeSteps, vars } from '@luke-ui/react/theme';
 
-export default function Typography() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="300">
 			{fontSizeSteps.map((size) => (
@@ -25,4 +25,4 @@ export default function Typography() {
 			))}
 		</Box>
 	);
-}
+};

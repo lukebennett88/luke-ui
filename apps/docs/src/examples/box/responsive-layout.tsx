@@ -2,14 +2,14 @@ import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 
-export default function ResponsiveLayout() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection={{ initial: 'column', medium: 'row' }} gap="300">
 			<Item />
 			<Item />
 		</Box>
 	);
-}
+};
 
 function Item() {
 	return (

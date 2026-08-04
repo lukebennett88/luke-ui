@@ -16,7 +16,7 @@ const countries = [
 
 type Errors = { country?: string; email?: string; terms?: string };
 
-export default function Validation() {
+export default () => {
 	const [errors, setErrors] = useState<Errors>({});
 
 	function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -63,4 +63,4 @@ export default function Validation() {
 			</Box>
 		</form>
 	);
-}
+};

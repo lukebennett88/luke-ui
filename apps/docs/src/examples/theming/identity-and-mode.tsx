@@ -9,7 +9,7 @@ import { useState } from 'react';
 type ColorMode = 'dark' | 'light';
 type Identity = 'paper' | 'tactile';
 
-export default function IdentityAndModeExample() {
+export default () => {
 	const [colorMode, setColorMode] = useState<ColorMode>('light');
 	const [identity, setIdentity] = useState<Identity>('tactile');
 	const identityClassName = identity === 'tactile' ? tactileThemeClassName : paperThemeClassName;
@@ -82,4 +82,4 @@ export default function IdentityAndModeExample() {
 			</Box>
 		</Box>
 	);
-}
+};

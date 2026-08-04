@@ -5,7 +5,7 @@ import { TextField } from '@luke-ui/react/text-field';
 import type { FormEvent } from 'react';
 import { useState } from 'react';
 
-export default function BuildAForm() {
+export default () => {
 	const [submittedEmail, setSubmittedEmail] = useState('');
 
 	function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -37,4 +37,4 @@ export default function BuildAForm() {
 			{submittedEmail ? <Text elementType="p">Submitted: {submittedEmail}</Text> : null}
 		</Box>
 	);
-}
+};

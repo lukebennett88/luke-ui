@@ -4,7 +4,7 @@ import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { Text } from '@luke-ui/react/text';
 import { useState } from 'react';
 
-export default function Basic() {
+export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
@@ -19,4 +19,4 @@ export default function Basic() {
 			</Text>
 		</Box>
 	);
-}
+};

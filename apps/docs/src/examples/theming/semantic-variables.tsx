@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 
-export default function SemanticVariablesExample() {
+export default () => {
 	return (
 		<Box
 			display="grid"
@@ -13,7 +13,7 @@ export default function SemanticVariablesExample() {
 			<SemanticSurface mode="dark" />
 		</Box>
 	);
-}
+};
 
 function SemanticSurface({ mode }: { mode: 'light' | 'dark' }) {
 	return (

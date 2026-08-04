@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { IconButton } from '@luke-ui/react/icon-button';
 
-export default function Tones() {
+export default () => {
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="400">
 			<IconButton aria-label="Search" icon="search" />
@@ -9,4 +9,4 @@ export default function Tones() {
 			<IconButton aria-label="Delete item" icon="delete" tone="danger" />
 		</Box>
 	);
-}
+};

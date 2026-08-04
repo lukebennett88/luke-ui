@@ -1,7 +1,7 @@
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
 
-export default function LineClamp() {
+export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="30rem">
 			<Blockquote lineClamp>
@@ -14,4 +14,4 @@ export default function LineClamp() {
 			</Blockquote>
 		</Box>
 	);
-}
+};
