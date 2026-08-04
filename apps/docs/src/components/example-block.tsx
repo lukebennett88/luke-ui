@@ -7,9 +7,9 @@ import { button } from '@luke-ui/react/recipes';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useId, useState } from 'react';
-import { encodeCodeHash } from '../lib/playground-hash';
-import { StoryWrapper } from '../lib/story-wrapper';
-import { DocsLink } from './docs-link';
+import { encodeCodeHash } from '../lib/playground-hash.js';
+import { StoryWrapper } from '../lib/story-wrapper.js';
+import { DocsLink } from './docs-link.js';
 
 type ExampleBlockProps = {
 	src: string;
@@ -24,11 +24,6 @@ export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
 		</Suspense>
 	);
 }
-
-const _modules = import.meta.glob<ComponentType>('../examples/*/*.tsx', {
-	eager: false,
-	import: 'default',
-});
 
 function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 	const slashIndex = src.indexOf('/');
@@ -47,6 +42,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 	}
 
 	const [PreviewComponent, source] = result.data;
+	const code = source.trim();
 
 	return (
 		<ExampleFrame
@@ -54,7 +50,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 				<Box className="flex items-center gap-1">
 					<DocsLink
 						className={button({ appearance: 'ghost', size: 'small' })}
-						hash={encodeCodeHash(source.trim())}
+						hash={encodeCodeHash(code)}
 						target="_blank"
 						to="/playground"
 					>
@@ -81,7 +77,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 			{showCode ? (
 				<Box id={codeId}>
 					<DynamicCodeBlock
-						code={source.trim()}
+						code={code}
 						codeblock={{ className: 'my-0 rounded-none border-x-0 border-b-0 shadow-none' }}
 						lang="tsx"
 					/>
@@ -153,11 +149,18 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 	);
 }
 
+const _modules = import.meta.glob<ComponentType>('../examples/*/*.tsx', {
+	eager: false,
+	import: 'default',
+});
+
 const _sources = import.meta.glob<string>('../examples/*/*.tsx', {
 	eager: false,
 	import: 'default',
 	query: '?raw',
 });
+
+type ExampleLoader = [() => Promise<ComponentType>, () => Promise<string>];
 
 type ExampleTuple = [ComponentType, string];
 
@@ -173,10 +176,7 @@ type ExampleResult =
 
 const exampleCache = new Map<string, Promise<ExampleResult>>();
 
-function findExample(
-	component: string,
-	name: string,
-): [() => Promise<ComponentType>, () => Promise<string>] | null {
+function findExample(component: string, name: string): ExampleLoader | null {
 	const key = `../examples/${component}/${name}.tsx`;
 	const loadModule = _modules[key];
 	const loadSource = _sources[key];
@@ -194,7 +194,7 @@ function loadExample(component: string, name: string): Promise<ExampleResult> {
 	const match = findExample(component, name);
 	if (!match) {
 		const promise = Promise.resolve({
-			error: new Error(`Example not found: ${component}/${name}`),
+			error: new Error(`Example not found: ${key}`),
 			ok: false,
 		} satisfies ExampleResult);
 		exampleCache.set(key, promise);
