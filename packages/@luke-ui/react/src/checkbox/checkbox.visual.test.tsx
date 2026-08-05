@@ -1,5 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import { page } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -40,6 +40,43 @@ for (const appearance of visualAppearances) {
 		);
 		await expect.element(page.getByRole('checkbox', { name: 'Default' })).toBeVisible();
 		await captureVisualAppearance(scene, 'checkbox/material-states', appearance);
+	});
+}
+
+for (const appearance of visualAppearances) {
+	test(`invalid interaction states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack>
+				<Checkbox isInvalid name="invalid-unchecked">
+					Invalid
+				</Checkbox>
+				<Checkbox defaultSelected isInvalid name="invalid-selected">
+					Invalid selected
+				</Checkbox>
+				<Checkbox isIndeterminate isInvalid name="invalid-indeterminate">
+					Invalid indeterminate
+				</Checkbox>
+			</Stack>,
+			appearance,
+		);
+		const unchecked = page.getByRole('checkbox', { name: 'Invalid', exact: true });
+		await expect.element(unchecked).toBeVisible();
+		const uncheckedLabel = unchecked.element().closest('label');
+		if (uncheckedLabel == null) throw new Error('Expected the checkbox content label.');
+
+		await captureVisualAppearance(scene, 'checkbox/invalid-interactive-rest', appearance);
+
+		await userEvent.hover(uncheckedLabel);
+		await captureVisualAppearance(scene, 'checkbox/invalid-interactive-hover', appearance);
+		await userEvent.unhover(uncheckedLabel);
+
+		await focusViaKeyboard(unchecked);
+		await userEvent.keyboard('{Space>}');
+		if (uncheckedLabel.getAttribute('data-pressed') !== 'true') {
+			throw new Error('Expected the checkbox to enter the pressed state.');
+		}
+		await captureVisualAppearance(scene, 'checkbox/invalid-interactive-pressed', appearance);
+		await userEvent.keyboard('{/Space}');
 	});
 }
 
