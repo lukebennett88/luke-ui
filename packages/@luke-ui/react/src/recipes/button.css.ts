@@ -1,4 +1,3 @@
-import { focusRing } from '../styles/focus-ring.js';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import type { RecipeSelection } from './recipe.js';
@@ -14,9 +13,6 @@ const base = styleInLayer('recipes', {
 			color: 'ButtonText',
 			forcedColorAdjust: 'auto',
 			selectors: {
-				'&[data-focus-visible="true"]': {
-					outlineColor: 'Highlight',
-				},
 				'&[data-disabled="true"]': {
 					borderColor: 'GrayText',
 					color: 'GrayText',
@@ -59,12 +55,8 @@ const base = styleInLayer('recipes', {
 	justifyContent: 'center',
 	letterSpacing: vars.font[200].letterSpacing,
 	lineHeight: vars.font[200].lineHeight,
-	minBlockSize: '24px',
-	minInlineSize: '24px',
-	outlineColor: 'transparent',
-	outlineOffset: '2px',
-	outlineStyle: 'solid',
-	outlineWidth: '2px',
+	minBlockSize: vars.controlSize.minTarget,
+	minInlineSize: vars.controlSize.minTarget,
 	position: 'relative',
 	textDecoration: 'none',
 	transform: 'translateY(0)',
@@ -75,10 +67,7 @@ const base = styleInLayer('recipes', {
 	selectors: {
 		'&[data-disabled="true"]': {
 			cursor: 'not-allowed',
-			opacity: 0.55,
-		},
-		'&[data-focus-visible="true"]': {
-			...focusRing(vars.color.border.focus),
+			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 			boxShadow: vars.depth.raised,
@@ -86,7 +75,7 @@ const base = styleInLayer('recipes', {
 		},
 		'&[data-pending="true"]': {
 			cursor: 'wait',
-			opacity: 0.55,
+			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 			boxShadow: vars.depth.recessed,

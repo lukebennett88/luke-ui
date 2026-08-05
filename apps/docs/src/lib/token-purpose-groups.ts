@@ -87,6 +87,13 @@ const PURPOSE_DEFINITIONS = [
 		title: 'Sizing',
 	},
 	{
+		description: 'State effects a control applies to its own material, such as the disabled fade.',
+		id: 'interaction',
+		related: null,
+		showSamples: true,
+		title: 'Interaction',
+	},
+	{
 		description: 'Durations and easing curves for interaction.',
 		id: 'motion',
 		related: null,
@@ -109,6 +116,7 @@ const FAMILY_PURPOSES = {
 	depth: 'depth',
 	font: 'typography',
 	iconSize: 'sizing',
+	interaction: 'interaction',
 	motion: 'motion',
 	radius: 'radius',
 	space: 'spacing',

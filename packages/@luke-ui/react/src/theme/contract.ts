@@ -201,10 +201,19 @@ export const themeContractTree = {
 	},
 	/** The semantic spacing scale used by components and layout utilities. */
 	space: spaceContract,
-	/** Structural block sizes for small and medium controls. */
+	/** Structural block sizes for small and medium controls, plus the shared minimum tap target. */
 	controlSize: {
 		small: null,
 		medium: null,
+		/** Minimum block and inline size for interactive targets, per WCAG 2.5.8. */
+		minTarget: null,
+		/** Square tap target for `Combobox`'s trigger and clear-button actions. */
+		comboboxAction: null,
+	},
+	/** Interaction treatment shared by every control recipe. */
+	interaction: {
+		/** The fade applied to disabled and pending controls. */
+		disabledOpacity: null,
 	},
 	/** Inline and block sizes for the four public icon sizes. */
 	iconSize: {

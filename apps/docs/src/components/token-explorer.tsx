@@ -276,6 +276,30 @@ function SizeSample({ variable }: ThemeToken) {
 	);
 }
 
+function InteractionSample({ variable }: ThemeToken) {
+	return (
+		<span className={cx(SAMPLE_FRAME_CLASS_NAME, 'gap-1.5')}>
+			<span
+				style={{
+					backgroundColor: vars.color.background.accent.solid.rest,
+					blockSize: '1rem',
+					borderRadius: vars.radius.detail,
+					inlineSize: '1rem',
+				}}
+			/>
+			<span
+				style={{
+					backgroundColor: vars.color.background.accent.solid.rest,
+					blockSize: '1rem',
+					borderRadius: vars.radius.detail,
+					inlineSize: '1rem',
+					opacity: `var(${variable})`,
+				}}
+			/>
+		</span>
+	);
+}
+
 function MotionSample({ path, variable }: ThemeToken) {
 	const axis = path.split('.')[1];
 
@@ -367,6 +391,7 @@ const FAMILY_SAMPLES: Record<ThemeTokenFamily, (token: ThemeToken) => ReactNode>
 	depth: DepthSample,
 	font: FontSample,
 	iconSize: SizeSample,
+	interaction: InteractionSample,
 	motion: MotionSample,
 	radius: RadiusSample,
 	space: SpaceSample,

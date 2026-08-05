@@ -3,6 +3,7 @@ import { vars } from '../theme/contract.css.js';
 import { iconSizeVariants } from './icon.css.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
+import { spinnerOverlayBase } from './spinner-overlay.js';
 
 const rotationDuration = '1.2s';
 const rubberBandDuration = '2s';
@@ -81,13 +82,7 @@ const loadingSpinnerConfig = {
 			display: 'contents',
 			visibility: 'hidden',
 		},
-		spinnerOverlay: {
-			alignItems: 'center',
-			display: 'flex',
-			inset: 0,
-			justifyContent: 'center',
-			position: 'absolute',
-		},
+		spinnerOverlay: spinnerOverlayBase,
 	},
 	defaultVariants: {
 		size: 'medium',

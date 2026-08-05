@@ -1,4 +1,4 @@
-import { focusRing } from '../styles/focus-ring.js';
+import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
 import {
 	composeInputStateSelectors,
@@ -58,10 +58,7 @@ const inputGroupConfig = {
 			letterSpacing: vars.font[300].letterSpacing,
 			lineHeight: vars.font[300].lineHeight,
 			minInlineSize: 0,
-			outlineColor: 'transparent',
-			outlineOffset: 0,
-			outlineStyle: 'solid',
-			outlineWidth: '2px',
+			...restingFocusRing('0px'),
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.fast,
 			transitionProperty: 'background-color, border-color, color',
@@ -70,7 +67,7 @@ const inputGroupConfig = {
 			selectors: {
 				[disabled]: {
 					cursor: 'not-allowed',
-					opacity: 0.55,
+					opacity: vars.interaction.disabledOpacity,
 				},
 				[focusWithin]: {
 					borderColor: vars.color.border.accent,

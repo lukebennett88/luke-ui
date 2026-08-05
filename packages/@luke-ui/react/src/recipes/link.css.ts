@@ -1,4 +1,3 @@
-import { focusRing } from '../styles/focus-ring.js';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import type { RecipeSelection } from './recipe.js';
@@ -14,9 +13,6 @@ const base = styleInLayer('recipes', {
 					color: 'GrayText',
 					opacity: 1,
 				},
-				'&[data-focus-visible="true"]': {
-					outlineColor: 'Highlight',
-				},
 			},
 		},
 		'(prefers-reduced-motion: reduce)': {
@@ -26,10 +22,6 @@ const base = styleInLayer('recipes', {
 	color: vars.color.foreground.accent.rest,
 	cursor: 'pointer',
 	font: 'inherit',
-	outlineColor: 'transparent',
-	outlineOffset: '2px',
-	outlineStyle: 'solid',
-	outlineWidth: '2px',
 	textDecoration: 'underline',
 	textDecorationColor: 'currentColor',
 	transitionDuration: vars.motion.duration.fast,
@@ -38,10 +30,7 @@ const base = styleInLayer('recipes', {
 	selectors: {
 		'&[data-disabled="true"]': {
 			cursor: 'not-allowed',
-			opacity: 0.55,
-		},
-		'&[data-focus-visible="true"]': {
-			...focusRing(vars.color.border.focus),
+			opacity: vars.interaction.disabledOpacity,
 		},
 	},
 });
@@ -59,8 +48,8 @@ export const link = recipe({
 			true: {
 				alignItems: 'center',
 				display: 'inline-flex',
-				minBlockSize: '24px',
-				minInlineSize: '24px',
+				minBlockSize: vars.controlSize.minTarget,
+				minInlineSize: vars.controlSize.minTarget,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
 						textDecoration: 'underline',

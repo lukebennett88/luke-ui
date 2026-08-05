@@ -25,6 +25,7 @@ test('shows samples only when a purpose group has one coherent preview treatment
 		borders: true,
 		content: true,
 		depth: false,
+		interaction: true,
 		motion: true,
 		radius: true,
 		roles: true,

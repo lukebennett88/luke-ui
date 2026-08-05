@@ -1,3 +1,4 @@
+import '../styles/reset.css.js';
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { themeRootClassName } from '../theme/index.js';

@@ -327,6 +327,34 @@ function SizePreview({ path, varName }: LeafPreviewProps) {
 	);
 }
 
+/**
+ * `interaction` tokens are scalar effects applied on top of a control's resting material
+ * (`disabledOpacity` is the only leaf today). A plain colour swatch cannot show a fade, so this
+ * pairs a full-strength accent square with the same square held at the token's own opacity — the
+ * reference is decorative (`aria-hidden`, no `role`), keeping the emphasised sample the single
+ * `role="img"` each leaf is expected to render.
+ */
+function InteractionPreview({ path, varName }: LeafPreviewProps) {
+	const swatch = {
+		backgroundColor: vars.color.background.accent.solid.rest,
+		blockSize: vars.iconSize.medium,
+		borderRadius: vars.radius.detail,
+		display: 'inline-block',
+		inlineSize: vars.iconSize.medium,
+	} as const satisfies CSSProperties;
+
+	return (
+		<span style={{ ...previewFrameStyle, gap: vars.space[300] }}>
+			<span aria-hidden={true} style={swatch} />
+			<span
+				aria-label={`${path} sample`}
+				role="img"
+				style={{ ...swatch, opacity: `var(${varName})` }}
+			/>
+		</span>
+	);
+}
+
 function MotionPreview({ path, segments, varName }: LeafPreviewProps) {
 	// `motion.duration.fast` and `motion.easing.standard` each drive one animation axis; the other
 	// axis takes a fixed, non-token value purely so the dot has something to animate along.
@@ -480,6 +508,7 @@ const familyPreviews: Record<Family, PreviewRenderer> = {
 	depth: DepthPreview,
 	font: FontPreview,
 	iconSize: SizePreview,
+	interaction: InteractionPreview,
 	motion: MotionPreview,
 	radius: RadiusPreview,
 	space: SpacePreview,

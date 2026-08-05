@@ -71,7 +71,11 @@ globalStyleInLayer('reset', `${root} :where(:disabled, [data-disabled="true"])`,
 	cursor: 'not-allowed',
 });
 
-globalStyleInLayer('reset', `${root} :where(:focus-visible)`, {
+// The default focus ring, defined once here as the base for every focusable control. Recipes only
+// restate it when they deviate — focus-within on a group, or a ring on a non-focusable box like a
+// checkbox's indicator. `[data-focus-visible="true"]` mirrors native `:focus-visible` with React
+// Aria's deterministic signal, so both the browser heuristic and the attribute drive the same ring.
+globalStyleInLayer('reset', `${root} :where(:focus-visible, [data-focus-visible="true"])`, {
 	...focusRing(vars.color.border.focus),
 
 	'@media': {
