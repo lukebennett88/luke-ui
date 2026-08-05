@@ -1,46 +1,31 @@
 ---
 title: Theming
-description: Apply a bundled identity, choose a colour mode, or author a static theme.
+description: Understand how the theme root, identity, colour mode, and tokens fit together.
 ---
 
-Luke UI themes are static stylesheets. An identity defines the visual foundation. A colour mode
-selects its light or dark values. Components keep the same API in every combination.
+A theme supplies the semantic values used by Luke UI components and custom UI. It is static CSS and
+does not change component behaviour.
 
-## Choose an identity
+## Theme foundations
 
-Luke UI ships with two bundled identities:
+Every themed subtree has one root element. It carries `themeRootClassName` and one identity class,
+such as `tactileThemeClassName`.
 
-- Tactile is the default. It uses stronger depth and a compact material treatment.
-- Paper is flatter, with lighter borders and depth.
+`themeRootClassName` applies the shared reset and base theme layer. The identity class supplies the
+semantic token values used by components and custom UI.
 
-Apply the matching CSS file and identity class at the same themed root as `themeRootClassName`. The
-identity supplies semantic colour, typography, spacing, radii, material, and depth to its subtree.
+Each identity includes light and dark colour values. The active colour mode chooses between them.
+Colour-mode scopes can nest within an identity. Identity classes cannot.
 
-<SourceCodeBlock src="theming/apply-theme" />
+Use a separate root for an independent subtree that needs another identity.
 
-Use one identity for an application or independent themed subtree. Identity classes are not
-nestable, so a child scope must become a separate themed boundary to switch from Tactile to Paper.
+Read [Applying a theme](/applying-a-theme) for the exact imports, classes, and colour-mode rules.
 
-## Choose a colour mode
+## Component variants
 
-Each identity provides light and dark values. Omit `data-color-mode` to follow
-`prefers-color-scheme`, or set it to `light` or `dark` to force a mode. Modes can nest within an
-identity, which is useful for previews and intentional light-on-dark or dark-on-light boundaries.
-
-See [Theme system](/theme-system) for how root, identity, mode, and nested scopes relate, and
-[Colour modes](/color-mode) for server-rendering and portal behaviour.
-
-<ExampleBlock
-	src="theming/identity-and-mode"
-	title="Theming overview — Choose a colour mode"
-	mode="full-bleed"
-/>
-
-## Theme values and component variants
-
-Themes supply the values behind a component. Components expose the safe choices that use those
-values. For example, Button uses `tone` and `appearance` to communicate intent and hierarchy, while
-the theme supplies the final colours, finish, and depth.
+Components define the choices available within the theme. For example, Button owns its tone,
+appearance, size, and interaction behaviour. The theme supplies the semantic values behind those
+choices.
 
 ```tsx
 <Button appearance="solid" tone="accent">
@@ -48,23 +33,27 @@ the theme supplies the final colours, finish, and depth.
 </Button>
 ```
 
-Use a component API before custom CSS. For a custom element, use the public `vars` token contract.
-Do not depend on a component's selectors, generated palette values, or theme implementation details.
+Prefer component props over custom CSS. Author a theme when the product needs a different visual
+foundation across the system.
 
-## Author a theme
+## Semantic tokens
 
-When neither bundled identity fits a product, call `defineTheme` with a curated accent and neutral
-character. The generated stylesheet contains the full semantic contract for both colour modes.
-`defineTheme` validates contrast before it writes the stylesheet.
+The active theme exposes a typed, public `vars` contract. Use it when a custom element sits beside
+Luke UI components.
+
+Read [Token reference](/token-reference) for the full contract. Read [Colour](/color) for the
+semantic roles it exposes.
+
+## Next steps
 
 <Cards>
-	<Card href="/theme-system" title="Theme system">
-		See how the root, identity, colour mode, and nested scopes relate.
-	</Card>
-	<Card href="/applying-a-theme" title="Apply a bundled theme">
+	<Card href="/applying-a-theme" title="Applying a theme">
 		Load the CSS, set the root classes, and preserve them through portals.
 	</Card>
-	<Card href="/authoring-a-theme" title="Author a theme">
+	<Card href="/color" title="Colour">
+		Choose semantic surfaces and roles for custom UI.
+	</Card>
+	<Card href="/authoring-a-theme" title="Authoring a theme">
 		Compile a product-owned stylesheet from a curated `defineTheme` input.
 	</Card>
 	<Card href="/token-reference" title="Token reference">
