@@ -47,16 +47,13 @@ Radius provides five semantic roles. Choose the role that matches the element be
 
 <ExampleBlock src="overview/radius-roles" title="Token reference — Radius roles" />
 
-When one rounded surface sits inside another, derive the outer radius from the inner radius and the
-space between them. This keeps their corners concentric.
-
 <ExampleBlock
 	src="overview/concentric-radius"
 	title="Token reference — Keep nested corners concentric"
 />
 
-Derive the wrapper's radius from the inner surface, so the two corners stay concentric. Pass the
-space between their corners, usually the wrapper's padding, as the gap.
+When one rounded surface sits inside another, derive the outer radius from the inner radius and the
+space between them, usually the wrapper's padding. This keeps their corners concentric.
 
 ```tsx
 import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
