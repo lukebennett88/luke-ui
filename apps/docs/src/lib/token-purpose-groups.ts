@@ -68,14 +68,14 @@ const PURPOSE_DEFINITIONS = [
 	{
 		description: 'Corner radii, from small details to full rounding.',
 		id: 'radius',
-		related: { label: 'Radius', splat: 'radius' },
+		related: null,
 		showSamples: true,
 		title: 'Radius',
 	},
 	{
 		description: 'The shadow ladder, and the face finish that pairs with it on action controls.',
 		id: 'depth',
-		related: { label: 'Shadow', splat: 'shadow' },
+		related: null,
 		showSamples: false,
 		title: 'Depth',
 	},

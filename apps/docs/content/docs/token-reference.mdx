@@ -10,15 +10,75 @@ variable. For example, `vars.color.background.danger.solid.hover` resolves to
 `var(--luke-color-background-danger-solid-hover)`.
 
 Use these variables when a component API or layout utility cannot express a custom element. They
-adapt to the active identity and colour mode.
+adapt to the active identity and colour mode. The contract is stable across bundled and custom
+themes.
 
 ## Use semantic variables
 
 <ExampleBlock src="theming/semantic-variables" title="Token reference — Use semantic variables" />
 
 Choose tokens by purpose. A card might use `surface.floating`, `radius.surface`, and
-`depth.resting`. A warning message might use the warning role's subtle background and foreground. Do
-not carry resolved colour values into application CSS.
+`depth.resting`. A warning message might use the warning role's subtle background and foreground.
+
+| Guidance | Practices                                                                                             |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| Do       | Use a semantic variable such as `color.surface.floating` for the job it names.                        |
+| Do       | Use public `vars` when application-owned UI must follow the active identity or colour mode.           |
+| Don't    | Copy resolved values or read source colours, generated palette steps, and component recipe selectors. |
+
+## Choosing a scale
+
+Spacing, radius, and depth each expose a small scale of semantic steps. Choose the step that matches
+the element's job. Do not copy a resolved pixel value into application CSS. It will not adapt when
+the identity or colour mode changes.
+
+### Spacing
+
+Spacing provides one scale for `gap`, `padding`, and `margin`. The scale selects nine steps from a
+4px linear scale.
+
+<ExampleBlock src="overview/spacing-scale" title="Token reference — Spacing scale" />
+
+The spacing properties also accept an object keyed by breakpoint, cascading up from `xsmall`.
+
+```tsx
+<Box gap={{ xsmall: '300', medium: '600' }}>{children}</Box>
+```
+
+Read [Layout](/layout) for Box, Sprinkles, and the full breakpoint list.
+
+### Radius
+
+Radius exposes five roles, each matched to the kind of element it rounds.
+
+<ExampleBlock src="overview/radius-roles" title="Token reference — Radius roles" />
+
+Choose the role that matches the element's job, such as `control` for an input or `surface` for a
+card. Keep nested corners concentric when a rounded surface sits inside another.
+
+<ExampleBlock
+	src="overview/concentric-radius"
+	title="Token reference — Keep nested corners concentric"
+/>
+
+Derive the wrapper's radius from the inner surface, so the two corners stay concentric. Pass the
+space between their corners, usually the wrapper's padding, as the gap.
+
+```tsx
+import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
+
+const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space[200]);
+```
+
+### Depth
+
+Depth exposes five roles that describe how a surface sits in the interface.
+
+<ExampleBlock src="overview/depth" title="Token reference — Depth scale" />
+
+Pair a depth role with a semantic surface role. A menu might use `surface.floating` with
+`depth.floating`, and a dialog `surface.overlay` with `depth.overlay`. Use a component's API before
+you set depth yourself. Components already apply the right depth for each of their states.
 
 ## Browse the tokens
 
