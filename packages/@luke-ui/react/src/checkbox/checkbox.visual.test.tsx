@@ -62,7 +62,10 @@ for (const appearance of visualAppearances) {
 		);
 		const unchecked = page.getByRole('checkbox', { name: 'Invalid', exact: true });
 		const selected = page.getByRole('checkbox', { name: 'Invalid selected', exact: true });
-		const indeterminate = page.getByRole('checkbox', { name: 'Invalid indeterminate', exact: true });
+		const indeterminate = page.getByRole('checkbox', {
+			name: 'Invalid indeterminate',
+			exact: true,
+		});
 		await expect.element(unchecked).toBeVisible();
 		const uncheckedLabel = checkboxLabel(unchecked);
 		const selectedLabel = checkboxLabel(selected);
@@ -71,7 +74,11 @@ for (const appearance of visualAppearances) {
 		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-rest', appearance);
 
 		await userEvent.hover(uncheckedLabel);
-		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-hover-unchecked', appearance);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-hover-unchecked',
+			appearance,
+		);
 		await userEvent.unhover(uncheckedLabel);
 
 		await userEvent.hover(selectedLabel);
@@ -79,19 +86,35 @@ for (const appearance of visualAppearances) {
 		await userEvent.unhover(selectedLabel);
 
 		await userEvent.hover(indeterminateLabel);
-		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-hover-indeterminate', appearance);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-hover-indeterminate',
+			appearance,
+		);
 		await userEvent.unhover(indeterminateLabel);
 
 		await pressCheckbox(unchecked, uncheckedLabel);
-		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-pressed-unchecked', appearance);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-pressed-unchecked',
+			appearance,
+		);
 		await userEvent.keyboard('{/Space}');
 
 		await pressCheckbox(selected, selectedLabel);
-		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-pressed-selected', appearance);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-pressed-selected',
+			appearance,
+		);
 		await userEvent.keyboard('{/Space}');
 
 		await pressCheckbox(indeterminate, indeterminateLabel);
-		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-pressed-indeterminate', appearance);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-pressed-indeterminate',
+			appearance,
+		);
 		await userEvent.keyboard('{/Space}');
 	});
 }
