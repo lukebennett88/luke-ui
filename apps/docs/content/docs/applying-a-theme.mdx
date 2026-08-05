@@ -25,9 +25,8 @@ another identity.
 
 ## Choose a colour mode
 
-Omit `data-color-mode`. The browser's `prefers-color-scheme` setting then selects the mode. Set
-`data-color-mode="light"` or `data-color-mode="dark"` when a root or nested scope needs a fixed
-mode.
+Leave `data-color-mode` unset to follow `prefers-color-scheme`. Set `data-color-mode="light"` or
+`data-color-mode="dark"` when a root or nested scope needs a fixed mode.
 
 An explicit mode also sets the native `color-scheme` property. Browser controls and scrollbars then
 match the Luke UI content.
@@ -58,10 +57,6 @@ The server HTML and first client render must use the same value to avoid a hydra
 Application-owned portals render outside the themed DOM branch, so inherited theme variables no
 longer reach them. Apply the active identity class and nearest explicit `data-color-mode` value to
 the portal root. Leave the attribute off when the source follows the system setting.
-
-Luke UI's Combobox does this for its popover. It finds the active identity and nearest explicit
-colour mode around the trigger, then applies them to the popover root. Application-owned portals
-must preserve the same context.
 
 ## Next steps
 
