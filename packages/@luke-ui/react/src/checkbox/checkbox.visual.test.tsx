@@ -1,5 +1,6 @@
 import { expect, test } from 'vite-plus/test';
-import { page } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
+import type { Locator } from 'vite-plus/test/context';
 import {
 	captureVisual,
 	captureVisualAppearance,
@@ -41,6 +42,98 @@ for (const appearance of visualAppearances) {
 		await expect.element(page.getByRole('checkbox', { name: 'Default' })).toBeVisible();
 		await captureVisualAppearance(scene, 'checkbox/material-states', appearance);
 	});
+}
+
+for (const appearance of visualAppearances) {
+	test(`invalid interaction states: ${appearance.theme} ${appearance.mode}`, async () => {
+		const scene = renderVisual(
+			<Stack>
+				<Checkbox isInvalid name="invalid-unchecked">
+					Invalid
+				</Checkbox>
+				<Checkbox defaultSelected isInvalid name="invalid-selected">
+					Invalid selected
+				</Checkbox>
+				<Checkbox isIndeterminate isInvalid name="invalid-indeterminate">
+					Invalid indeterminate
+				</Checkbox>
+			</Stack>,
+			appearance,
+		);
+		const unchecked = page.getByRole('checkbox', { name: 'Invalid', exact: true });
+		const selected = page.getByRole('checkbox', { name: 'Invalid selected', exact: true });
+		const indeterminate = page.getByRole('checkbox', {
+			name: 'Invalid indeterminate',
+			exact: true,
+		});
+		await expect.element(unchecked).toBeVisible();
+		const uncheckedLabel = checkboxLabel(unchecked);
+		const selectedLabel = checkboxLabel(selected);
+		const indeterminateLabel = checkboxLabel(indeterminate);
+
+		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-rest', appearance);
+
+		await userEvent.hover(uncheckedLabel);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-hover-unchecked',
+			appearance,
+		);
+		await userEvent.unhover(uncheckedLabel);
+
+		await userEvent.hover(selectedLabel);
+		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-hover-selected', appearance);
+		await userEvent.unhover(selectedLabel);
+
+		await userEvent.hover(indeterminateLabel);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-hover-indeterminate',
+			appearance,
+		);
+		await userEvent.unhover(indeterminateLabel);
+
+		await pressCheckbox(unchecked, uncheckedLabel);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-pressed-unchecked',
+			appearance,
+		);
+		await userEvent.keyboard('{/Space}');
+
+		await pressCheckbox(selected, selectedLabel);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-pressed-selected',
+			appearance,
+		);
+		await userEvent.keyboard('{/Space}');
+
+		await pressCheckbox(indeterminate, indeterminateLabel);
+		await captureVisualAppearance(
+			scene,
+			'checkbox/invalid-interaction-pressed-indeterminate',
+			appearance,
+		);
+		await userEvent.keyboard('{/Space}');
+	});
+}
+
+/** The clickable `<label>` carrying a checkbox's interactive data attributes. */
+function checkboxLabel(checkbox: Locator): HTMLElement {
+	const label = checkbox.element().closest('label');
+	if (label == null) throw new Error('Expected the checkbox content label.');
+	return label;
+}
+
+/** Focuses a checkbox and holds the space key so its label reports `data-pressed`. */
+async function pressCheckbox(checkbox: Locator, label: HTMLElement): Promise<void> {
+	checkbox.element().focus();
+	await expect.element(checkbox).toHaveFocus();
+	await userEvent.keyboard('{Space>}');
+	if (label.getAttribute('data-pressed') !== 'true') {
+		throw new Error('Expected the checkbox to enter the pressed state.');
+	}
 }
 
 test('forced-colors states', async () => {

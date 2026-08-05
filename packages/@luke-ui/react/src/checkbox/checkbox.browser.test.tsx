@@ -1,7 +1,19 @@
 import { afterEach, expect, test } from 'vite-plus/test';
-import { cdp, page } from 'vite-plus/test/context';
-import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
+import { cdp, page, userEvent } from 'vite-plus/test/context';
+import type { Locator } from 'vite-plus/test/context';
+import { cleanupVisual, renderVisual, Stack } from '../test-utils/render-visual.js';
 import { Checkbox } from './index.js';
+
+// Freeze CSS transitions so colour reads are deterministic mid-interaction; the
+// indicator animates its state colours over the fast motion token otherwise.
+const freezeMotion = document.createElement('style');
+freezeMotion.textContent = `
+*, *::before, *::after {
+	transition-delay: 0s !important;
+	transition-duration: 0s !important;
+}
+`;
+document.head.append(freezeMotion);
 
 afterEach(() => {
 	cleanupVisual();
@@ -124,6 +136,201 @@ test('the icon indicator stays out of the accessible name', async () => {
 	expect(axNode.role?.value).toBe('checkbox');
 	expect(axNode.name?.value).toBe('Invalid');
 });
+
+test('an invalid unchecked checkbox stays danger across rest, hover, and pressed', async () => {
+	const scene = renderVisual(
+		<Checkbox isInvalid name="invalid-unchecked">
+			Invalid unchecked
+		</Checkbox>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Invalid unchecked' });
+	await expect.element(checkbox).toBeVisible();
+	const indicator = indicatorFor(checkbox);
+
+	expect(getComputedStyle(indicator).borderColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-rest'),
+	);
+
+	await userEvent.hover(contentFor(checkbox));
+	expect(getComputedStyle(indicator).borderColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-hover'),
+	);
+	await userEvent.unhover(contentFor(checkbox));
+
+	await pressViaKeyboard(checkbox);
+	expect(getComputedStyle(indicator).borderColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-pressed'),
+	);
+});
+
+test('an invalid selected checkbox stays danger across rest, hover, and pressed', async () => {
+	const scene = renderVisual(
+		<Checkbox defaultSelected isInvalid name="invalid-selected">
+			Invalid selected
+		</Checkbox>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Invalid selected' });
+	await expect.element(checkbox).toBeVisible();
+	const indicator = indicatorFor(checkbox);
+
+	expect(getComputedStyle(indicator).backgroundColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-rest'),
+	);
+	expect(getComputedStyle(indicator).color).toBe(
+		resolvedColor(scene, '--luke-color-foreground-danger-on-solid'),
+	);
+
+	await userEvent.hover(contentFor(checkbox));
+	expect(getComputedStyle(indicator).backgroundColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-hover'),
+	);
+	expect(getComputedStyle(indicator).color).toBe(
+		resolvedColor(scene, '--luke-color-foreground-danger-on-solid'),
+	);
+	await userEvent.unhover(contentFor(checkbox));
+
+	await pressViaKeyboard(checkbox);
+	expect(getComputedStyle(indicator).backgroundColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-pressed'),
+	);
+	expect(getComputedStyle(indicator).color).toBe(
+		resolvedColor(scene, '--luke-color-foreground-danger-on-solid'),
+	);
+});
+
+test('an invalid indeterminate checkbox stays danger across rest, hover, and pressed', async () => {
+	const scene = renderVisual(
+		<Checkbox isIndeterminate isInvalid name="invalid-indeterminate">
+			Invalid indeterminate
+		</Checkbox>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Invalid indeterminate' });
+	await expect.element(checkbox).toBeVisible();
+	const indicator = indicatorFor(checkbox);
+
+	expect(getComputedStyle(indicator).backgroundColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-rest'),
+	);
+	expect(getComputedStyle(indicator).color).toBe(
+		resolvedColor(scene, '--luke-color-foreground-danger-on-solid'),
+	);
+
+	await userEvent.hover(contentFor(checkbox));
+	expect(getComputedStyle(indicator).backgroundColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-hover'),
+	);
+	expect(getComputedStyle(indicator).color).toBe(
+		resolvedColor(scene, '--luke-color-foreground-danger-on-solid'),
+	);
+	await userEvent.unhover(contentFor(checkbox));
+
+	await pressViaKeyboard(checkbox);
+	expect(getComputedStyle(indicator).backgroundColor).toBe(
+		resolvedColor(scene, '--luke-color-background-danger-solid-pressed'),
+	);
+	expect(getComputedStyle(indicator).color).toBe(
+		resolvedColor(scene, '--luke-color-foreground-danger-on-solid'),
+	);
+});
+
+test('invalid disabled and read-only checkboxes do not adopt interactive states', async () => {
+	const scene = renderVisual(
+		<Stack>
+			<Checkbox defaultSelected isDisabled isInvalid name="invalid-disabled">
+				Invalid disabled
+			</Checkbox>
+			<Checkbox defaultSelected isInvalid isReadOnly name="invalid-readonly">
+				Invalid read-only
+			</Checkbox>
+		</Stack>,
+	);
+
+	const disabled = page.getByRole('checkbox', { name: 'Invalid disabled' });
+	const readOnly = page.getByRole('checkbox', { name: 'Invalid read-only' });
+	await expect.element(disabled).toBeVisible();
+
+	const dangerRest = resolvedColor(scene, '--luke-color-background-danger-solid-rest');
+	const disabledIndicator = indicatorFor(disabled);
+	const readOnlyIndicator = indicatorFor(readOnly);
+
+	expect(getComputedStyle(disabledIndicator).backgroundColor).toBe(dangerRest);
+	expect(getComputedStyle(readOnlyIndicator).backgroundColor).toBe(dangerRest);
+
+	await userEvent.hover(contentFor(disabled));
+	await userEvent.hover(contentFor(readOnly));
+	expect(getComputedStyle(disabledIndicator).backgroundColor).toBe(dangerRest);
+	expect(getComputedStyle(readOnlyIndicator).backgroundColor).toBe(dangerRest);
+	await userEvent.unhover(contentFor(disabled));
+	await userEvent.unhover(contentFor(readOnly));
+
+	await userEvent.tab();
+	await userEvent.keyboard('{Space>}');
+	expect(getComputedStyle(readOnlyIndicator).backgroundColor).toBe(dangerRest);
+	await userEvent.keyboard('{/Space}');
+});
+
+test('a valid checkbox keeps its accent interaction colours', async () => {
+	const scene = renderVisual(
+		<Stack>
+			<Checkbox name="valid-unchecked">Valid</Checkbox>
+			<Checkbox defaultSelected name="valid-selected">
+				Valid selected
+			</Checkbox>
+		</Stack>,
+	);
+
+	const unchecked = page.getByRole('checkbox', { name: 'Valid', exact: true });
+	const selected = page.getByRole('checkbox', { name: 'Valid selected' });
+	await expect.element(unchecked).toBeVisible();
+
+	await userEvent.hover(contentFor(unchecked));
+	expect(getComputedStyle(indicatorFor(unchecked)).borderColor).toBe(
+		resolvedColor(scene, '--luke-color-border-accent'),
+	);
+	await userEvent.unhover(contentFor(unchecked));
+
+	await userEvent.hover(contentFor(selected));
+	expect(getComputedStyle(indicatorFor(selected)).backgroundColor).toBe(
+		resolvedColor(scene, '--luke-color-background-accent-solid-hover'),
+	);
+	expect(getComputedStyle(indicatorFor(selected)).borderColor).toBe(
+		resolvedColor(scene, '--luke-color-background-accent-solid-hover'),
+	);
+});
+
+/** Focuses `checkbox` with a real keyboard press and returns once it is held. */
+async function pressViaKeyboard(checkbox: Locator) {
+	await userEvent.tab();
+	await expect.element(checkbox).toHaveFocus();
+	await userEvent.keyboard('{Space>}');
+}
+
+/** The visual box inside a checkbox's content label, target of the recipe styles. */
+function indicatorFor(checkbox: Locator): HTMLElement {
+	const content = contentFor(checkbox);
+	const indicator = content.querySelector<HTMLElement>('[aria-hidden="true"]');
+	if (indicator == null) throw new Error('Expected the checkbox indicator.');
+	return indicator;
+}
+
+/** The clickable `<label>` carrying the checkbox's interactive data attributes. */
+function contentFor(checkbox: Locator): HTMLElement {
+	const content = checkbox.element().closest('label');
+	if (content == null) throw new Error('Expected the checkbox content label.');
+	return content;
+}
+
+/** The computed colour a theme token resolves to inside the scene's theme root. */
+function resolvedColor(scene: Locator, variable: string): string {
+	const probe = scene.element().appendChild(document.createElement('span'));
+	probe.style.backgroundColor = `var(${variable})`;
+	const value = getComputedStyle(probe).backgroundColor;
+	probe.remove();
+	return value;
+}
 
 /** A `Range` spanning `node`'s own content, for measuring rendered text geometry. */
 function rangeRectFor(node: Node): DOMRect {
