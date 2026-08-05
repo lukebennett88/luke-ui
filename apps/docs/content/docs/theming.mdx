@@ -3,21 +3,21 @@ title: Theming
 description: Understand how the theme root, identity, colour mode, and tokens fit together.
 ---
 
-A Luke UI theme is a static stylesheet. It defines the visual foundation for a themed subtree. It
-does not change a component's API or behaviour.
+A theme supplies the semantic values used by Luke UI components and custom UI. It is static CSS and
+does not change component behaviour.
 
 ## Theme foundations
 
-A themed subtree starts at one root. The root carries `themeRootClassName` and one identity class,
-such as `tactileThemeClassName`. `themeRootClassName` supplies the reset and the base theme layer.
-The identity class supplies the semantic values for that subtree.
+Every themed subtree has one root element. It carries `themeRootClassName` and one identity class,
+such as `tactileThemeClassName`.
 
-The identity generates those values. It provides semantic colour, typography, spacing, radii,
-material, and depth for both light and dark modes. A colour mode selects one side of those values.
+`themeRootClassName` applies the shared reset and base theme layer. The identity class supplies the
+semantic token values used by components and custom UI.
 
-A nested scope changes mode, or starts a new root, for one part of a page. Colour-mode scopes nest.
-Identity classes do not. Use a second identity only on a new root beside the first scope, never
-inside it.
+Each identity includes light and dark colour values. The active colour mode chooses between them.
+Colour-mode scopes can nest within an identity. Identity classes cannot.
+
+Use a separate root for an independent subtree that needs another identity.
 
 Read [Applying a theme](/applying-a-theme) for the exact imports, classes, and colour-mode rules.
 
@@ -34,9 +34,9 @@ Use one identity for an application or an independent themed subtree.
 
 ## Component variants
 
-Themes define the visual system. Components define the choices a developer can make within it. For
-example, Button controls its own `tone`, `appearance`, size, pending state, and accessible
-behaviour. The theme supplies the semantic values behind those choices.
+Components define the choices available within the theme. For example, Button owns its tone,
+appearance, size, and interaction behaviour. The theme supplies the semantic values behind those
+choices.
 
 ```tsx
 <Button appearance="solid" tone="accent">
@@ -44,8 +44,8 @@ behaviour. The theme supplies the semantic values behind those choices.
 </Button>
 ```
 
-Use a component API before custom CSS. Use a custom theme when the product needs different global
-colours, type, radii, or depth.
+Prefer component props over custom CSS. Author a theme when the product needs a different visual
+foundation across the system.
 
 ## Semantic tokens
 

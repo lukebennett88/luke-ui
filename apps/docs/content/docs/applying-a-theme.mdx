@@ -21,22 +21,22 @@ semantic values.
 <SourceCodeBlock src="theming/apply-theme" />
 
 Theme identities do not nest. Use one identity for an application or an independent themed subtree.
-A scope that needs a different identity becomes its own root.
+Create a separate theme root for an independent subtree that needs another identity.
 
 ## Choose a colour mode
 
-Omit `data-color-mode`. The browser's `prefers-color-scheme` setting then selects the mode. Add
-`data-color-mode="light"` or `data-color-mode="dark"` to a themed element when an application or
-preview needs a fixed mode.
+Omit `data-color-mode`. The browser's `prefers-color-scheme` setting then selects the mode. Set
+`data-color-mode="light"` or `data-color-mode="dark"` when a root or nested scope needs a fixed
+mode.
 
 An explicit mode also sets the native `color-scheme` property. Browser controls and scrollbars then
 match the Luke UI content.
 
 ## Nest colour-mode scopes
 
-Colour modes nest within one theme identity. Use a nested mode for a preview, a dark page with a
-light embedded document, or another intentional visual boundary. Do not add a second identity class
-to the nested element.
+Colour modes nest within one theme identity. Use a nested mode when one part of the interface must
+remain light or dark independently of its parent. Do not add a second identity class to the nested
+element.
 
 <ExampleBlock
 	src="theming/color-mode-override"
@@ -48,22 +48,20 @@ to the nested element.
 
 ## Avoid a colour-mode flash
 
-Render the root classes and any known explicit mode in the server HTML. CSS can then select the
-correct system mode before JavaScript runs. If a stored client preference may differ from the server
-value, set the attribute before themed UI paints. A React effect runs after the first paint.
+Render the root classes and any known explicit mode in the initial HTML. When the mode comes from a
+client-side preference, set `data-color-mode` before the themed UI paints.
 
-Keep the server fallback and hydrated value consistent to avoid a hydration warning.
+The server HTML and first client render must use the same value to avoid a hydration warning.
 
 ## Preserve the theme in portals
 
-Application-owned portals render outside the themed DOM branch. A CSS custom property set on the
-themed root does not reach across that gap. Give the portal root the active identity class and the
-explicit `data-color-mode` value, if there is one. If the source follows the system setting, leave
-the attribute off the portal root too.
+Application-owned portals render outside the themed DOM branch, so inherited theme variables no
+longer reach them. Apply the active identity class and nearest explicit `data-color-mode` value to
+the portal root. Leave the attribute off when the source follows the system setting.
 
-Luke UI's Combobox carries this contract to its own popover. It reads the trigger's identity class
-and colour-mode attribute when the popover opens, and applies the same values to the popover root.
-An application-owned portal needs to copy the same two values itself.
+Luke UI's Combobox does this for its popover. It finds the active identity and nearest explicit
+colour mode around the trigger, then applies them to the popover root. Application-owned portals
+must preserve the same context.
 
 ## Next steps
 

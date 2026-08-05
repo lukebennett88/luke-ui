@@ -9,33 +9,26 @@ import { TokenExplorer } from '../../src/components/token-explorer';
 variable. For example, `vars.color.background.danger.solid.hover` resolves to
 `var(--luke-color-background-danger-solid-hover)`.
 
-Use these variables when a component API or layout utility cannot express a custom element. They
-adapt to the active identity and colour mode. The contract is stable across bundled and custom
-themes.
+Use these variables when a component API or layout utility cannot express a custom element. Some
+values vary by theme identity or colour mode, while others remain fixed. The token paths stay the
+same across bundled and custom themes.
 
 ## Use semantic variables
 
 <ExampleBlock src="theming/semantic-variables" title="Token reference — Use semantic variables" />
 
-Choose tokens by purpose. A card might use `surface.floating`, `radius.surface`, and
-`depth.resting`. A warning message might use the warning role's subtle background and foreground.
-
-| Guidance | Practices                                                                                             |
-| -------- | ----------------------------------------------------------------------------------------------------- |
-| Do       | Use a semantic variable such as `color.surface.floating` for the job it names.                        |
-| Do       | Use public `vars` when application-owned UI must follow the active identity or colour mode.           |
-| Don't    | Copy resolved values or read source colours, generated palette steps, and component recipe selectors. |
+Choose the token whose name matches the element's role. A card might use `surface.floating`,
+`radius.surface`, and `depth.resting`. A warning message might use the warning role's subtle
+background and foreground.
 
 ## Choosing a scale
 
-Spacing, radius, and depth each expose a small scale of semantic steps. Choose the step that matches
-the element's job. Do not copy a resolved pixel value into application CSS. It will not adapt when
-the identity or colour mode changes.
+Choose a token by the job it performs. Spacing uses numbered steps. Radius and depth use semantic
+roles. Use the public variable instead of copying its resolved CSS value.
 
 ### Spacing
 
-Spacing provides one scale for `gap`, `padding`, and `margin`. The scale selects nine steps from a
-4px linear scale.
+Spacing provides one scale for `gap`, `padding`, and `margin`.
 
 <ExampleBlock src="overview/spacing-scale" title="Token reference — Spacing scale" />
 
@@ -49,12 +42,13 @@ Read [Layout](/layout) for Box, Sprinkles, and the full breakpoint list.
 
 ### Radius
 
-Radius exposes five roles, each matched to the kind of element it rounds.
+Radius provides five semantic roles. Choose the role that matches the element being rounded, such as
+`control` for an input or `surface` for a card.
 
 <ExampleBlock src="overview/radius-roles" title="Token reference — Radius roles" />
 
-Choose the role that matches the element's job, such as `control` for an input or `surface` for a
-card. Keep nested corners concentric when a rounded surface sits inside another.
+When one rounded surface sits inside another, derive the outer radius from the inner radius and the
+space between them. This keeps their corners concentric.
 
 <ExampleBlock
 	src="overview/concentric-radius"
@@ -72,17 +66,18 @@ const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space[200
 
 ### Depth
 
-Depth exposes five roles that describe how a surface sits in the interface.
+Depth describes how a surface sits above or within the interface.
 
 <ExampleBlock src="overview/depth" title="Token reference — Depth scale" />
 
-Pair a depth role with a semantic surface role. A menu might use `surface.floating` with
-`depth.floating`, and a dialog `surface.overlay` with `depth.overlay`. Use a component's API before
-you set depth yourself. Components already apply the right depth for each of their states.
+Pair each depth role with the matching surface role. For example, a menu can use `surface.floating`
+with `depth.floating`, while a dialog can use `surface.overlay` with `depth.overlay`.
+
+Components already apply depth to their own states. Use these variables only for custom surfaces.
 
 ## Browse the tokens
 
-Luke UI generates this explorer from the contract that builds every theme. It holds each public
-variable once and nothing else. Each sample renders in the active identity and colour mode.
+The explorer lists every public token in the contract. Samples use the active identity and colour
+mode.
 
 <TokenExplorer />
