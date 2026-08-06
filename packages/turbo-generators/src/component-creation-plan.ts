@@ -72,16 +72,8 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `apps/docs/src/examples/${name}/basic.tsx`,
 		},
 		{
-			contents: renderHostedDocsPage({ displayName, name }),
+			contents: renderHostedDocsPage({ displayName, name, pascalName }),
 			path: `apps/docs/content/docs/components/${docsGroup}/${name}/index.mdx`,
-		},
-		{
-			contents: renderHostedPropsPage({ displayName, name, pascalName }),
-			path: `apps/docs/content/docs/components/${docsGroup}/${name}/props.mdx`,
-		},
-		{
-			contents: '{\n\t"pages": ["!props"],\n\t"collapsible": false\n}\n',
-			path: `apps/docs/content/docs/components/${docsGroup}/${name}/meta.json`,
 		},
 	];
 
@@ -243,30 +235,23 @@ export default function Basic() {
 `;
 }
 
-function renderHostedDocsPage(input: { displayName: string; name: string }): string {
-	return `---
-title: ${input.displayName}
----
-
-<ExampleBlock
-\tsrc="${input.name}/basic"
-\ttitle="${input.displayName} — Basic"
-/>
-`;
-}
-
-function renderHostedPropsPage(input: {
+function renderHostedDocsPage(input: {
 	displayName: string;
 	name: string;
 	pascalName: string;
 }): string {
 	return `---
 title: ${input.displayName}
+source: packages/@luke-ui/react/src/${input.name}
+props:
+  - name: ${input.pascalName}Props
+    path: packages/@luke-ui/react/src/${input.name}/index.tsx
 ---
 
-## Props
-
-<auto-type-table path="packages/@luke-ui/react/src/${input.name}/index.tsx" name="${input.pascalName}Props" />
+<ExampleBlock
+\tsrc="${input.name}/basic"
+\ttitle="${input.displayName} — Basic"
+/>
 `;
 }
 
