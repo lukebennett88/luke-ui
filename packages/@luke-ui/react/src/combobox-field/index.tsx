@@ -1,4 +1,4 @@
-import type { CSSProperties, JSX } from 'react';
+import type { CSSProperties, JSX, Ref } from 'react';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { composeField } from '../field/compose-field.js';
@@ -40,6 +40,14 @@ interface _ComboboxFieldProps<T extends object>
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 
+	/**
+	 * Forwarded to the inner `<input>` element.
+	 *
+	 * Composed fields take no plain `ref`: `inputRef` is the only way to reach the
+	 * control, so a ref can never silently resolve to a wrapper element instead.
+	 */
+	inputRef?: Ref<HTMLInputElement>;
+
 	/** Props forwarded to the inner listbox. */
 	listBoxProps?: DistributiveOmit<ComboboxListBoxProps<T>, 'children' | 'items' | 'loadMoreItem'>;
 
@@ -77,6 +85,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	const [fieldSlotProps, restProps] = composeField(props);
 	const {
 		children,
+		inputRef,
 		listBoxProps,
 		loadMoreItem: loadMoreItemProp,
 		loadingState,
@@ -120,7 +129,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		<ComboboxRoot<T> size={size} {...comboboxRootProps}>
 			<Field {...fieldSlotProps}>
 				<ComboboxInputGroup>
-					<ComboboxInput placeholder={placeholder} />
+					<ComboboxInput placeholder={placeholder} ref={inputRef} />
 					{isInteractive ? (
 						<ComboboxClearButton aria-label="Clear selection">
 							<Icon aria-hidden name="close" />

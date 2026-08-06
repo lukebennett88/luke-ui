@@ -1,3 +1,4 @@
+import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
@@ -299,6 +300,95 @@ test('a valid checkbox keeps its accent interaction colours', async () => {
 	expect(getComputedStyle(indicatorFor(selected)).borderColor).toBe(
 		resolvedColor(scene, '--luke-color-background-accent-solid-hover'),
 	);
+});
+
+// `inputRef` must land on the hidden `<input type="checkbox">`, not on the wrapper
+// `<div>` React Aria's own `ref` targets.
+test('resolves an inputRef object to the checkbox input, not a wrapper', async () => {
+	const ref = createRef<HTMLInputElement>();
+	renderVisual(
+		<Checkbox inputRef={ref} name="terms">
+			Terms
+		</Checkbox>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Terms' });
+	await expect.element(checkbox).toBeVisible();
+
+	expect(ref.current).toBeInstanceOf(HTMLInputElement);
+	expect(ref.current).toBe(checkbox.element());
+});
+
+// React Aria types its own `inputRef` as a ref object, so this is the case our
+// widened prop plus the `useObjectRef` bridge exists for: React Hook Form's
+// `field.ref` is a callback.
+test('resolves a callback inputRef to the checkbox input', async () => {
+	const resolved: Array<HTMLInputElement | null> = [];
+	renderVisual(
+		<Checkbox
+			inputRef={(node) => {
+				resolved.push(node);
+			}}
+			name="terms"
+		>
+			Terms
+		</Checkbox>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Terms' });
+	await expect.element(checkbox).toBeVisible();
+
+	expect(resolved.at(-1)).toBeInstanceOf(HTMLInputElement);
+	expect(resolved.at(-1)).toBe(checkbox.element());
+});
+
+test('forwards name to the input so a native form submit collects it', async () => {
+	const scene = renderVisual(
+		<form>
+			<Checkbox name="terms">Terms</Checkbox>
+		</form>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Terms' });
+	await expect.element(checkbox).toHaveAttribute('name', 'terms');
+
+	const form = scene.element().querySelector('form');
+	if (form == null) throw new Error('Expected the form element.');
+	expect(new FormData(form).get('terms')).toBe(null);
+
+	// The input itself is visually hidden behind the indicator, so the clickable
+	// content label is the only hit target — same as every other test in this file.
+	await userEvent.click(contentFor(checkbox));
+	expect(new FormData(form).get('terms')).toBe('on');
+});
+
+test('forwards onBlur to the input', async () => {
+	const blurs: Array<string> = [];
+	renderVisual(
+		<>
+			<Checkbox
+				name="terms"
+				onBlur={() => {
+					blurs.push('terms');
+				}}
+			>
+				Terms
+			</Checkbox>
+			<button type="button">Next</button>
+		</>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'Terms' });
+	await expect.element(checkbox).toBeVisible();
+
+	// Tabbed rather than clicked: the input is visually hidden behind the indicator,
+	// so it is not its own hit target.
+	await userEvent.tab();
+	await expect.element(checkbox).toHaveFocus();
+	expect(blurs).toEqual([]);
+
+	await userEvent.click(page.getByRole('button', { name: 'Next' }));
+	expect(blurs).toEqual(['terms']);
 });
 
 /** Focuses `checkbox` with a real keyboard press and returns once it is held. */

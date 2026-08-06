@@ -1,4 +1,4 @@
-import type { JSX, ReactNode } from 'react';
+import type { JSX, ReactNode, Ref } from 'react';
 import type {
 	InputProps as RacInputProps,
 	TextFieldProps as RacTextFieldProps,
@@ -23,6 +23,13 @@ type _TextFieldOmit = DistributiveOmit<RacTextFieldProps, 'children' | keyof Doc
 interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
 	/** Class name forwarded to the inner input element. */
 	inputClassName?: RacInputProps['className'];
+	/**
+	 * Forwarded to the inner `<input>` element.
+	 *
+	 * Composed fields take no plain `ref`: `inputRef` is the only way to reach the
+	 * control, so a ref can never silently resolve to a wrapper element instead.
+	 */
+	inputRef?: Ref<HTMLInputElement>;
 	/** Placeholder text for the input. */
 	placeholder?: string;
 	/** Element shown before the input value. */
@@ -50,6 +57,7 @@ export function TextField(props: TextFieldProps): JSX.Element {
 	const [fieldSlotProps, restProps] = composeField(props);
 	const {
 		inputClassName,
+		inputRef,
 		placeholder,
 		prefix,
 		size = 'medium',
@@ -62,7 +70,7 @@ export function TextField(props: TextFieldProps): JSX.Element {
 			<Field {...fieldSlotProps}>
 				<InputGroup size={size}>
 					{prefix != null ? <InputGroupPrefix>{prefix}</InputGroupPrefix> : null}
-					<InputGroupInput className={inputClassName} placeholder={placeholder} />
+					<InputGroupInput className={inputClassName} placeholder={placeholder} ref={inputRef} />
 					{suffix != null ? <InputGroupSuffix>{suffix}</InputGroupSuffix> : null}
 				</InputGroup>
 			</Field>

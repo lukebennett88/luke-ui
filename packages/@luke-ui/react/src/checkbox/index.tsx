@@ -1,4 +1,5 @@
-import type { JSX, ReactNode } from 'react';
+import { useObjectRef } from '@react-aria/utils';
+import type { JSX, ReactNode, Ref } from 'react';
 import type { CheckboxFieldProps as RacCheckboxFieldProps } from 'react-aria-components/Checkbox';
 import { FieldDescription, FieldError } from '../field/primitive/index.js';
 import type { FieldErrorProps } from '../field/primitive/index.js';
@@ -12,11 +13,21 @@ import {
 } from './primitive/index.js';
 import type { CheckboxProps as PrimitiveCheckboxProps } from './primitive/index.js';
 
-type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
+type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children' | 'inputRef'>;
 
 interface _CheckboxProps extends _CheckboxOmit {
 	/** Checkbox label content. */
 	children: ReactNode;
+	/**
+	 * Forwarded to the underlying `<input type="checkbox">` element.
+	 *
+	 * Composed fields take no plain `ref`: `inputRef` is the only way to reach the
+	 * control, so a ref can never silently resolve to a wrapper element instead.
+	 *
+	 * Widened from React Aria's own `inputRef`, which only takes a ref object, so a
+	 * callback ref (what form libraries hand out) is accepted too.
+	 */
+	inputRef?: Ref<HTMLInputElement>;
 	/**
 	 * Visual size of the checkbox control.
 	 *
@@ -54,10 +65,14 @@ export type CheckboxProps = Prettify<_CheckboxProps>;
 
 /** A labelled checkbox with optional description and validation message. */
 export function Checkbox(props: CheckboxProps): JSX.Element {
-	const { children, description, errorMessage, ...checkboxProps } = props;
+	const { children, description, errorMessage, inputRef, ...checkboxProps } = props;
+	// React Aria reads `inputRef.current`, so a callback ref cannot be handed to it
+	// directly; `useObjectRef` gives it the object ref it wants while still calling
+	// the caller's callback.
+	const objectInputRef = useObjectRef(inputRef);
 
 	return (
-		<PrimitiveCheckbox {...checkboxProps}>
+		<PrimitiveCheckbox {...checkboxProps} inputRef={objectInputRef}>
 			<CheckboxContent>
 				<CheckboxControl>
 					<CheckboxIndicator />

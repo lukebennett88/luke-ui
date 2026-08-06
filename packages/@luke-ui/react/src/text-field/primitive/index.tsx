@@ -1,4 +1,4 @@
-import type { ComponentProps, JSX } from 'react';
+import type { ComponentProps, JSX, Ref } from 'react';
 import { createContext, use } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
@@ -62,6 +62,11 @@ type _InputGroupInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'
 interface _InputGroupInputProps extends _InputGroupInputOmit, InputGroupPartStyleProps {
 	/** Class name for the input element. */
 	className?: RacInputProps['className'];
+	/**
+	 * Forwarded to the underlying `<input>` element. Accepts a callback ref or a ref
+	 * object, so form libraries that hand out callback refs work without a bridge.
+	 */
+	ref?: Ref<HTMLInputElement>;
 }
 
 /**

@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, Ref } from 'react';
 import { useContext } from 'react';
 import type { InputProps as RacInputProps } from 'react-aria-components/ComboBox';
 import { ComboBoxStateContext, Input as RacInput } from 'react-aria-components/ComboBox';
@@ -12,6 +12,11 @@ import { useComboboxSize } from './size-context.js';
 type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
 interface _ComboboxInputProps extends _ComboboxInputOmit {
 	className?: RacInputProps['className'];
+	/**
+	 * Forwarded to the underlying `<input>` element. Accepts a callback ref or a ref
+	 * object, so form libraries that hand out callback refs work without a bridge.
+	 */
+	ref?: Ref<HTMLInputElement>;
 	size?: ComboboxSize;
 }
 

@@ -1,3 +1,4 @@
+import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { ComboboxField } from '../combobox-field/index.js';
@@ -212,6 +213,121 @@ test('the indicator lands after the input and before a trailing suffix', async (
 	expect(prefixRect.left).toBeLessThan(inputRect.left);
 	expect(indicatorRect.left).toBeGreaterThanOrEqual(inputRect.right);
 	expect(indicatorRect.left).toBeLessThan(suffixRect.left);
+});
+
+// The primitive renders the control itself, so it takes a plain `ref`. Both ref
+// shapes are covered: React Hook Form hands out a callback ref, so the callback
+// arm is the one that decides whether the component is usable with it at all.
+test('InputGroupInput resolves a ref object to the input element', async () => {
+	const ref = createRef<HTMLInputElement>();
+	renderVisual(
+		<InputGroup>
+			<InputGroupInput aria-label="Amount" ref={ref} />
+		</InputGroup>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Amount' });
+	await expect.element(input).toBeVisible();
+
+	expect(ref.current).toBeInstanceOf(HTMLInputElement);
+	expect(ref.current).toBe(input.element());
+});
+
+test('InputGroupInput resolves a callback ref to the input element', async () => {
+	const resolved: Array<HTMLInputElement | null> = [];
+	renderVisual(
+		<InputGroup>
+			<InputGroupInput
+				aria-label="Amount"
+				ref={(node) => {
+					resolved.push(node);
+				}}
+			/>
+		</InputGroup>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Amount' });
+	await expect.element(input).toBeVisible();
+
+	expect(resolved.at(-1)).toBeInstanceOf(HTMLInputElement);
+	expect(resolved.at(-1)).toBe(input.element());
+});
+
+// The composed field takes no plain `ref`, so `inputRef` is the only way in — and
+// it must land on the editable control, never on the wrapper `<div>` or the group.
+test('TextField resolves inputRef to the input element, not a wrapper', async () => {
+	const ref = createRef<HTMLInputElement>();
+	renderVisual(<TextField inputRef={ref} label="Email" name="email" />);
+
+	const input = page.getByRole('textbox', { name: 'Email' });
+	await expect.element(input).toBeVisible();
+
+	expect(ref.current).toBeInstanceOf(HTMLInputElement);
+	expect(ref.current).toBe(input.element());
+});
+
+test('TextField resolves a callback inputRef to the input element', async () => {
+	const resolved: Array<HTMLInputElement | null> = [];
+	renderVisual(
+		<TextField
+			inputRef={(node) => {
+				resolved.push(node);
+			}}
+			label="Email"
+			name="email"
+		/>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Email' });
+	await expect.element(input).toBeVisible();
+
+	expect(resolved.at(-1)).toBeInstanceOf(HTMLInputElement);
+	expect(resolved.at(-1)).toBe(input.element());
+});
+
+// `name` and `onBlur` are the other half of uncontrolled use: without them a caller
+// has to reach through `inputRef` to do what a native `<input>` does for free.
+test('TextField forwards name to the input so a native form submit collects it', async () => {
+	const scene = renderVisual(
+		<form>
+			<TextField label="Email" name="email" />
+		</form>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Email' });
+	await expect.element(input).toHaveAttribute('name', 'email');
+
+	await userEvent.fill(input, 'ada@example.com');
+
+	const form = scene.element().querySelector('form');
+	if (form == null) throw new Error('Expected the form element.');
+	expect(new FormData(form).get('email')).toBe('ada@example.com');
+});
+
+test('TextField forwards onBlur to the input', async () => {
+	const blurs: Array<string> = [];
+	renderVisual(
+		<>
+			<TextField
+				label="Email"
+				name="email"
+				onBlur={() => {
+					blurs.push('email');
+				}}
+			/>
+			<button type="button">Next</button>
+		</>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Email' });
+	await expect.element(input).toBeVisible();
+
+	await userEvent.click(input);
+	await expect.element(input).toHaveFocus();
+	expect(blurs).toEqual([]);
+
+	await userEvent.click(page.getByRole('button', { name: 'Next' }));
+	expect(blurs).toEqual(['email']);
 });
 
 // `inputStates.invalid` must not match `:has(:invalid)`: that matches a required,
