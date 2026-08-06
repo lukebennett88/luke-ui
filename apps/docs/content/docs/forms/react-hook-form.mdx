@@ -25,13 +25,18 @@ the prop `Checkbox` reads.
 
 ## Set validationBehavior to aria
 
-Fields default to `validationBehavior="native"`, which lets the browser block submission until every
-field passes its own constraint validation. The browser blocks first, so React Hook Form never runs
-its schema and `shouldFocusError` never fires.
+Fields default to `validationBehavior="native"`, which hands each field's error state to the
+browser's constraint validation. The first submit goes through. `handleSubmit` runs the Zod schema
+through `zodResolver`, and a failing field gets marked invalid. React Aria reacts to that by calling
+`setCustomValidity` on the field, so the browser now treats it as invalid too. From the second
+submit onward the browser blocks the form before the `submit` event ever fires, and React Aria's
+`onInvalid` handler calls `e.preventDefault()`, so no error bubble shows either. Pressing the button
+does nothing.
 
-Set `validationBehavior="aria"` on every field a `Controller` wraps. React Hook Form then owns
-validation, and the browser marks the field for assistive technology instead of blocking submit.
-Read [Validation](/components/forms/validation) for the other `validationBehavior` options.
+Set `validationBehavior="aria"` on every field a `Controller` wraps, so React Hook Form stays the
+only thing deciding whether the form is valid. The browser then marks each field for assistive
+technology through `aria-invalid` instead of running its own constraint validation. Read
+[Validation](/components/forms/validation) for the other `validationBehavior` options.
 
 ## Pass field.ref to inputRef
 
