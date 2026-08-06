@@ -75,6 +75,7 @@ export function findOrphanedExamples({
 
 	return findFiles(resolvedExamplesDir, '.tsx')
 		.filter((examplePath) => !reachableExamples.has(examplePath))
+		.filter((examplePath) => !examplePath.endsWith('.test.tsx'))
 		.map((examplePath) => relative(resolvedExamplesDir, examplePath))
 		.sort();
 }

@@ -4,16 +4,8 @@ import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
 
-type ColorMode = 'dark' | 'light';
-
-const OPPOSITE_MODE: Record<ColorMode, ColorMode> = {
-	dark: 'light',
-	light: 'dark',
-};
-
 export default () => {
-	const [parentMode, setParentMode] = useState<ColorMode>('light');
-	const nestedMode = OPPOSITE_MODE[parentMode];
+	const [parentMode, setParentMode] = useState<'light' | 'dark'>('light');
 
 	return (
 		<Box
@@ -53,10 +45,10 @@ export default () => {
 					color: vars.color.text.primary,
 				}}
 			>
-				<Text>This panel follows the parent mode: {parentMode}.</Text>
+				<Text>This panel follows the parent mode.</Text>
 			</Box>
 			<Box
-				data-color-mode={nestedMode}
+				data-color-mode="dark"
 				padding="400"
 				style={{
 					backgroundColor: vars.color.surface.floating,
@@ -65,7 +57,7 @@ export default () => {
 					color: vars.color.text.primary,
 				}}
 			>
-				<Text>This nested scope forces the opposite mode: {nestedMode}.</Text>
+				<Text>This panel is fixed to dark mode.</Text>
 			</Box>
 		</Box>
 	);
