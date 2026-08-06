@@ -1,17 +1,9 @@
 import type { ComponentProps, JSX } from 'react';
 
 /**
- * The Storybook mark, copied verbatim from HeroUI's `StorybookIcon`
- * (heroui.com's docs icon set). Kept as a docs-local component rather than
- * joining `@luke-ui/react`'s icon spritesheet, which only holds generic
- * `currentColor` UI glyphs, not third-party trademarks.
- *
- * The source path uses `fill="currentColor"`, so it is tinted here with
- * Storybook's brand pink (#FF4785) — the same tint HeroUI applies — via an
- * inline `color`, which callers can still override through `style`.
- *
- * Always decorative — pair it with adjacent visible text (a "Storybook"
- * label) rather than relying on it for an accessible name.
+ * Storybook's mark. Kept local to the docs app rather than added to
+ * `@luke-ui/react`'s icon spritesheet, which ships to every consumer of the
+ * library and holds generic UI glyphs rather than third-party trademarks.
  */
 export function StorybookMark({ style, ...props }: ComponentProps<'svg'>): JSX.Element {
 	return (

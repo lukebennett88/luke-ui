@@ -1,14 +1,9 @@
 import type { ComponentProps, JSX } from 'react';
 
 /**
- * The GitHub mark, copied verbatim from HeroUI's `GithubIcon` (heroui.com's
- * docs icon set). Kept as a docs-local component rather than joining
- * `@luke-ui/react`'s icon spritesheet, which only holds generic glyphs, not
- * third-party trademarks.
- *
- * Uses `currentColor` so it inherits the surrounding text colour. Always
- * decorative — pair it with an accessible name from visible or visually
- * hidden text rather than relying on it alone.
+ * GitHub's mark. Kept local to the docs app rather than added to
+ * `@luke-ui/react`'s icon spritesheet, which ships to every consumer of the
+ * library and holds generic UI glyphs rather than third-party trademarks.
  */
 export function GithubMark(props: ComponentProps<'svg'>): JSX.Element {
 	return (

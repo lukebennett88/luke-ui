@@ -20,18 +20,14 @@ interface PageActionsProps {
 const pillClassName = cx(buttonVariants({ color: 'secondary', size: 'sm' }), 'gap-1.5');
 
 /**
- * Every destination a page can offer sits inline, directly under the page
- * title, as a row of pill links — each a brand mark plus a visible text
- * label. This mirrors HeroUI's component page chrome
- * (heroui.com/docs/components/button), rather than collapsing the actions
- * behind a "View options" trigger: a six-item row reads fine unwrapped, and
- * `flex-wrap` keeps it usable once there is no room for all six on one
- * line.
+ * Every destination a page offers sits inline under the title, as a row of
+ * pill links with a brand mark and a visible label. The row wraps, so a page
+ * carrying all six actions falls onto a second line at narrower widths.
  *
- * This deliberately does not adopt Fumadocs' own `ViewOptionsPopover`
- * export, because it bakes in third-party AI-assistant deep links (ChatGPT,
- * Claude, Cursor, Scira) this repo does not want to surface, and has no
- * notion of a Storybook, React Aria, or component-source destination.
+ * This does not use Fumadocs' own `ViewOptionsPopover`, because it bakes in
+ * third-party AI-assistant deep links this repo does not want to surface, and
+ * it has no notion of a Storybook, React Aria, or component-source
+ * destination.
  */
 export function PageActions({
 	githubUrl,
@@ -95,13 +91,12 @@ function PageActionLink({
 
 function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 	// `useCopyButton` only flips to its "Copied" state once this callback's
-	// promise resolves — it has no `onRejected` handler — so a rejection
-	// leaves `copied` at `false` instead of lying about success. `fetch`
-	// itself does not reject on an HTTP error response (a 404 resolves
-	// normally with `res.ok === false`), so a non-ok response is thrown here
-	// to convert it into a rejection. Without that throw, a stale route or a
-	// missing generated `.md` file would copy an error page's HTML to the
-	// clipboard while the button still claimed success.
+	// promise resolves, and it has no `onRejected` handler, so a rejection
+	// leaves `copied` at `false` instead of claiming success. `fetch` does not
+	// reject on an HTTP error (a 404 resolves with `res.ok === false`), so a
+	// non-ok response is thrown here to turn it into one. Without the throw, a
+	// stale route or a missing generated `.md` file would copy an error page's
+	// HTML to the clipboard while the button reported success.
 	const [copied, onCopy] = useCopyButton(async () => {
 		const res = await fetch(markdownUrl);
 		if (!res.ok) throw new Error(`Failed to fetch ${markdownUrl}: ${res.status}`);
