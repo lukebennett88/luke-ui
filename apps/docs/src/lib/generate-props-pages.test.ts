@@ -1,7 +1,20 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import {
+	existsSync,
+	mkdirSync,
+	mkdtempSync,
+	readdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { expect, test } from 'vite-plus/test';
-import { parseComponentFrontmatter, renderPropsPage } from '../../scripts/generate-props-pages.js';
+import { afterEach, expect, test } from 'vite-plus/test';
+import {
+	generatePropsPages,
+	parseComponentFrontmatter,
+	renderPropsPage,
+} from '../../scripts/generate-props-pages.js';
 
 const componentsDir = resolve(import.meta.dirname, '../../content/docs/components');
 
@@ -93,4 +106,53 @@ test('every component index.mdx declaring props has a generated Props page on di
 			expect(readFileSync(propsPath, 'utf8')).toBe(renderPropsPage(frontmatter));
 		}
 	}
+});
+
+let scratchDir: string | undefined;
+
+afterEach(() => {
+	if (scratchDir !== undefined) rmSync(scratchDir, { force: true, recursive: true });
+	scratchDir = undefined;
+});
+
+function writeScratchComponent(indexContents: string): {
+	metaPath: string;
+	propsPath: string;
+	rootDir: string;
+} {
+	scratchDir = mkdtempSync(resolve(tmpdir(), 'luke-ui-props-'));
+	const componentDir = resolve(scratchDir, 'actions/button');
+	mkdirSync(componentDir, { recursive: true });
+	writeFileSync(resolve(componentDir, 'index.mdx'), indexContents);
+	return {
+		metaPath: resolve(componentDir, 'meta.json'),
+		propsPath: resolve(componentDir, 'props.mdx'),
+		rootDir: scratchDir,
+	};
+}
+
+const SCRATCH_INDEX = `---
+title: Button
+props:
+  - name: ButtonProps
+    path: packages/@luke-ui/react/src/button/index.tsx
+---
+
+Guide body.
+`;
+
+test('removes generated output for a component whose index.mdx has gone', () => {
+	const { metaPath, propsPath, rootDir } = writeScratchComponent(SCRATCH_INDEX);
+
+	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
+	expect(existsSync(propsPath)).toBe(true);
+	expect(existsSync(metaPath)).toBe(true);
+
+	// Deleting or renaming the guide must not leave an orphaned Props page behind. It would keep
+	// serving stale content from a route that is gitignored, so review would never surface it.
+	rmSync(resolve(rootDir, 'actions/button/index.mdx'));
+
+	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 0, removedCount: 2 });
+	expect(existsSync(propsPath)).toBe(false);
+	expect(existsSync(metaPath)).toBe(false);
 });

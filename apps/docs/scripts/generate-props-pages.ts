@@ -32,14 +32,23 @@ export interface ComponentFrontmatter {
  * Only writes files whose content changed, and removes generated output for components that no
  * longer declare `props`.
  */
-export function generatePropsPages(): { componentCount: number; removedCount: number } {
+export function generatePropsPages(rootDir: string = componentsDir): {
+	componentCount: number;
+	removedCount: number;
+} {
 	let componentCount = 0;
 	let removedCount = 0;
 
-	for (const componentDir of findComponentDirs(componentsDir)) {
+	for (const componentDir of findComponentDirs(rootDir)) {
 		const indexPath = resolve(componentDir, 'index.mdx');
 		const propsPath = resolve(componentDir, 'props.mdx');
 		const metaPath = resolve(componentDir, 'meta.json');
+
+		if (!existsSync(indexPath)) {
+			if (removeIfExists(propsPath)) removedCount++;
+			if (removeIfExists(metaPath)) removedCount++;
+			continue;
+		}
 
 		const frontmatter = parseComponentFrontmatter(readFileSync(indexPath, 'utf8'));
 
@@ -173,8 +182,10 @@ function findComponentDirs(directory: string): ReadonlyArray<string> {
 
 		for (const component of readdirSync(groupDir, { withFileTypes: true })) {
 			if (!component.isDirectory()) continue;
-			const componentDir = resolve(groupDir, component.name);
-			if (existsSync(resolve(componentDir, 'index.mdx'))) dirs.push(componentDir);
+			// Every component directory, including one whose `index.mdx` has gone. Its generated
+			// output has to be cleaned up, and skipping it here would leave an orphaned Props page
+			// serving stale content from a route nobody can see in review, because it is gitignored.
+			dirs.push(resolve(groupDir, component.name));
 		}
 	}
 
