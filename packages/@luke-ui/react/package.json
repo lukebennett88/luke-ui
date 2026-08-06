@@ -2,6 +2,11 @@
 	"name": "@luke-ui/react",
 	"version": "0.0.0",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukebennett88/luke-ui.git",
+		"directory": "packages/@luke-ui/react"
+	},
 	"files": [
 		"dist",
 		"README.md",
