@@ -22,18 +22,12 @@ title: Status Badge
 
 <ExampleBlock src="status-badge/basic" title="Status Badge — Basic" />
 `,
-		props: `---
-title: Status Badge
----
-
-## Props
-`,
 	});
 
 	expect(findComponentDocContractIssues({ docsDir })).toEqual([]);
 });
 
-test('reports metadata drift, placeholders, and the wrong primary example', () => {
+test('reports placeholders and the wrong primary example', () => {
 	const docsDir = createDocsFixture({
 		guide: `---
 title: Status Badge
@@ -46,21 +40,13 @@ description: Status Badge component.
 
 TODO: Describe accessibility considerations.
 `,
-		props: `---
-title: Badge
-description: Badge component.
----
-`,
 	});
 
 	expect(findComponentDocContractIssues({ docsDir })).toEqual([
-		'status-badge: guide and Props titles must match',
-		'status-badge: guide and Props descriptions must match',
 		'status-badge/index.mdx: replace the generic component description',
 		'status-badge/index.mdx: remove the generator TODO',
 		'status-badge/index.mdx: remove the accessibility placeholder',
 		'status-badge/index.mdx: remove the package-path placeholder',
-		'status-badge/props.mdx: replace the generic component description',
 		'status-badge/index.mdx: primary example must use status-badge/basic',
 	]);
 });
@@ -73,7 +59,7 @@ test('finds no component-doc contract issues in the docs app', () => {
 	).toEqual([]);
 });
 
-function createDocsFixture({ guide, props }: { guide: string; props: string }): string {
+function createDocsFixture({ guide }: { guide: string }): string {
 	const directory = mkdtempSync(join(tmpdir(), 'luke-ui-component-doc-contract-'));
 	testDirectories.push(directory);
 
@@ -81,7 +67,6 @@ function createDocsFixture({ guide, props }: { guide: string; props: string }): 
 	const componentDir = join(docsDir, 'status-badge');
 	mkdirSync(componentDir, { recursive: true });
 	writeFileSync(join(componentDir, 'index.mdx'), guide);
-	writeFileSync(join(componentDir, 'props.mdx'), props);
 
 	return docsDir;
 }

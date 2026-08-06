@@ -10,6 +10,8 @@
 *.local
 *.log
 apps/docs/.story/
+apps/docs/content/docs/components/*/*/meta.json
+apps/docs/content/docs/components/*/*/props.mdx
 apps/docs/src/generated/
 apps/docs/src/routeTree.gen.ts
 dist/
