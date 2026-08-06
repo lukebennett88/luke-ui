@@ -29,6 +29,7 @@ for the validation message.
 			label="Name"
 			onBlur={field.onBlur}
 			onChange={field.onChange}
+			validationBehavior="aria"
 			value={field.value}
 		/>
 	)}
@@ -51,6 +52,7 @@ the prop `Checkbox` reads.
 			isSelected={field.value}
 			onBlur={field.onBlur}
 			onChange={field.onChange}
+			validationBehavior="aria"
 		>
 			I accept the terms of service
 		</Checkbox>
@@ -58,6 +60,16 @@ the prop `Checkbox` reads.
 	rules={{ required: 'Accept the terms of service before you continue.' }}
 />
 ```
+
+## Set validationBehavior to aria
+
+Fields default to `validationBehavior="native"`: the browser blocks submission until every field
+passes its own constraint validation. React Hook Form never gets a chance to run when the browser
+blocks submission first, so `rules` messages never appear and `shouldFocusError` never fires.
+
+Set `validationBehavior="aria"` on every field a `Controller` wraps. This hands validation to React
+Hook Form and lets the browser mark the field for assistive technology instead of blocking submit.
+Read [Validation](/components/forms/validation) for the full set of `validationBehavior` options.
 
 ## Pass field.ref to inputRef
 

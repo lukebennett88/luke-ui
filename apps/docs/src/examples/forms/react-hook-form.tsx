@@ -41,6 +41,7 @@ export default () => {
 								label="Name"
 								onBlur={field.onBlur}
 								onChange={field.onChange}
+								validationBehavior="aria"
 								value={field.value}
 							/>
 						)}
@@ -57,6 +58,7 @@ export default () => {
 								isSelected={field.value}
 								onBlur={field.onBlur}
 								onChange={field.onChange}
+								validationBehavior="aria"
 							>
 								I accept the terms of service
 							</Checkbox>
