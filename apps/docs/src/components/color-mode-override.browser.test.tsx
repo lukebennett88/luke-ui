@@ -1,4 +1,4 @@
-import '../../styles/app.css';
+import '../styles/app.css';
 import '@luke-ui/react/themes/tactile.css';
 import { tactileThemeClassName } from '@luke-ui/react/themes';
 import { act } from 'react';
@@ -6,7 +6,7 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import ColorModeOverride from './color-mode-override';
+import ColorModeOverride from '../examples/theming/color-mode-override';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -27,8 +27,9 @@ function renderColourModeExample() {
 	});
 }
 
-function backgroundOf(panel: HTMLElement): string {
-	return getComputedStyle(panel).backgroundColor;
+function panelStyle(panel: HTMLElement): { backgroundColor: string; color: string } {
+	const style = getComputedStyle(panel);
+	return { backgroundColor: style.backgroundColor, color: style.color };
 }
 
 test(
@@ -45,15 +46,17 @@ test(
 			throw new Error('Expected the colour-mode panels rendered');
 		}
 
-		const lightFollowing = backgroundOf(followingPanel);
-		const darkFixed = backgroundOf(fixedPanel);
+		const lightFollowing = panelStyle(followingPanel);
+		const darkFixed = panelStyle(fixedPanel);
 
-		expect(lightFollowing).not.toBe(darkFixed);
+		expect(lightFollowing.backgroundColor).not.toBe(darkFixed.backgroundColor);
+		expect(lightFollowing.color).not.toBe(darkFixed.color);
 
 		await userEvent.click(page.getByRole('button', { name: 'Dark' }));
 
-		await expect.poll(() => backgroundOf(followingPanel)).toBe(darkFixed);
-		expect(backgroundOf(followingPanel)).not.toBe(lightFollowing);
-		expect(backgroundOf(fixedPanel)).toBe(darkFixed);
+		await expect.poll(() => panelStyle(followingPanel)).toEqual(darkFixed);
+		expect(panelStyle(followingPanel).backgroundColor).not.toBe(lightFollowing.backgroundColor);
+		expect(panelStyle(followingPanel).color).not.toBe(lightFollowing.color);
+		expect(panelStyle(fixedPanel)).toEqual(darkFixed);
 	},
 );
