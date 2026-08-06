@@ -1,0 +1,158 @@
+{
+	$schema: 'https://docs.renovatebot.com/renovate-schema.json',
+	extends: [
+		'config:recommended',
+		// Commit subjects in this repo are plain imperative, so keep Renovate off conventional prefixes.
+		':semanticCommitsDisabled',
+	],
+	labels: ['dependencies'],
+
+	// pnpm refuses to resolve any release younger than `minimumReleaseAge: 7200` (5 days) in
+	// pnpm-workspace.yaml, so a PR raised for a fresher release cannot generate a lockfile.
+	minimumReleaseAge: '5 days',
+	// Hold the branch back until the release is old enough instead of opening a PR that cannot install.
+	internalChecksFilter: 'strict',
+
+	// One batch a week keeps the PR count down and resolves each new version once.
+	schedule: ['before 6am on monday'],
+	prConcurrentLimit: 8,
+	prHourlyLimit: 0,
+
+	// Catalog entries carry caret ranges, and `replace` would leave them untouched for every in-range
+	// release. `bump` moves the declared range so pnpm-workspace.yaml stays the record of what is used.
+	rangeStrategy: 'bump',
+
+	// Transitive versions only move when the lockfile is regenerated, so refresh it on a slow cycle.
+	lockFileMaintenance: {
+		enabled: true,
+		schedule: ['before 6am on the first day of the month'],
+		automerge: false,
+	},
+
+	// Security fixes skip the quarantine. pnpm does not: a fix younger than 5 days still needs a
+	// `minimumReleaseAgeExclude` entry added by hand before the lockfile will resolve.
+	vulnerabilityAlerts: {
+		minimumReleaseAge: null,
+		addLabels: ['security'],
+		automerge: false,
+	},
+
+	packageRules: [
+		// Broad rule first. Later rules win, so the family groups below pull their members back out.
+		{
+			matchUpdateTypes: ['minor', 'patch'],
+			groupName: 'non-major dependencies',
+		},
+		{
+			// The catalog aliases `vite` to @voidzero-dev/vite-plus-core, pins it beside `vite-plus` and
+			// `vitest` at exact versions, and `overrides` forces one copy workspace-wide. They only
+			// resolve if they move in the same commit.
+			matchPackageNames: [
+				'@voidzero-dev/vite-plus-core',
+				'@vitest/**',
+				'vite',
+				'vite-plus',
+				'vitest',
+			],
+			groupName: 'vite-plus toolchain',
+		},
+		{
+			matchPackageNames: ['@storybook/**', 'storybook'],
+			groupName: 'storybook',
+		},
+		{
+			// @types/react has to land with the react major it describes, so it stays out of the
+			// automerged type-definitions group below.
+			matchPackageNames: ['@types/react', '@types/react-dom', 'react', 'react-dom'],
+			groupName: 'react',
+		},
+		{
+			// react and react-dom are peerDependencies of the published package, and the catalog range is
+			// what gets published. Widening it on every minor would narrow the range consumers can satisfy.
+			matchDepTypes: ['pnpm.catalog.default'],
+			matchPackageNames: ['react', 'react-dom'],
+			rangeStrategy: 'replace',
+		},
+		{
+			matchPackageNames: ['@react-aria/**', 'react-aria-components'],
+			groupName: 'react-aria',
+		},
+		{
+			matchPackageNames: ['@vanilla-extract/**'],
+			groupName: 'vanilla-extract',
+		},
+		{
+			matchPackageNames: ['@capsizecss/**'],
+			groupName: 'capsize',
+		},
+		{
+			matchPackageNames: ['@tanstack/**'],
+			groupName: 'tanstack',
+		},
+		{
+			matchPackageNames: ['fumadocs-**'],
+			groupName: 'fumadocs',
+		},
+		{
+			matchPackageNames: ['@tailwindcss/**', 'tailwindcss'],
+			groupName: 'tailwindcss',
+		},
+		{
+			matchPackageNames: ['@turbo/**', 'turbo'],
+			groupName: 'turbo',
+		},
+		{
+			matchPackageNames: ['@netlify/**'],
+			groupName: 'netlify',
+		},
+		{
+			// Workflows pin actions at the major tag, so the only update Renovate can offer is a major tag
+			// move. Read the changelog before merging one.
+			matchManagers: ['github-actions'],
+			groupName: 'github actions',
+			automerge: false,
+		},
+		{
+			// mise pins the Node major only, and Renovate's node versioning treats odd majors as unstable,
+			// so this stays quiet until the next LTS line opens. The top-level `bump` would instead
+			// rewrite `24` to an exact `24.18.1` and then raise a PR for every Node patch.
+			matchManagers: ['mise'],
+			groupName: 'node',
+			rangeStrategy: 'replace',
+			automerge: false,
+		},
+		{
+			// Moving the pinned pnpm version changes how every install resolves, including the quarantine
+			// and trust policy checks.
+			matchDepTypes: ['packageManager'],
+			groupName: 'pnpm',
+			automerge: false,
+		},
+		{
+			// Type-only packages ship nothing to consumers and a bad bump fails `check:types`, so CI is a
+			// sufficient reviewer. This is the only automerge in the config.
+			matchPackageNames: ['@types/**', '!@types/react', '!@types/react-dom'],
+			matchUpdateTypes: ['minor', 'patch'],
+			groupName: 'type definitions',
+			automerge: true,
+		},
+		{
+			// Runtime and peer dependencies of the published @luke-ui/react. Bumping one changes what
+			// consumers install, so the PR needs a changeset, and Renovate cannot write one.
+			// Keep in step with `dependencies` and `peerDependencies` in
+			// packages/@luke-ui/react/package.json.
+			matchPackageNames: [
+				'@capsizecss/metrics',
+				'@capsizecss/vanilla-extract',
+				'@react-aria/utils',
+				'@vanilla-extract/css',
+				'@vanilla-extract/recipes',
+				'react',
+				'react-aria-components',
+				'react-dom',
+			],
+			addLabels: ['needs-changeset'],
+			automerge: false,
+		},
+	],
+}

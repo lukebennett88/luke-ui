@@ -1,7 +1,7 @@
 # Luke UI agent guide
 
 - Use `catalog:` dependency versions in `package.json`. The catalog lives in `pnpm-workspace.yaml`.
-  Do not add raw versions.
+  Do not add raw versions. See [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md).
 - Read [docs/CONVENTIONS.md](docs/CONVENTIONS.md), [docs/COMPONENTS.md](docs/COMPONENTS.md),
   [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md), [docs/STYLING.md](docs/STYLING.md), and
   [docs/TESTING.md](docs/TESTING.md) before changing code, styles, docs, or tests.

@@ -23,6 +23,8 @@ peerDependencyRules:
 
 minimumReleaseAge: 7200 # 5 days, in minutes
 
+# Hand maintained: Renovate cannot add or prune these. Add a version here when an install fails
+# because it is younger than the quarantine. See docs/DEPENDENCIES.md.
 minimumReleaseAgeExclude:
   - '@babel/core@7.29.1'
   - '@tanstack/start-server-core@1.167.30'
@@ -45,6 +47,7 @@ trustLockfile: true
 
 trustPolicy: no-downgrade
 
+# Hand maintained, same as minimumReleaseAgeExclude. See docs/DEPENDENCIES.md.
 trustPolicyExclude:
   - '@netlify/edge-bundler@14.10.3'
   - '@netlify/serverless-functions-api@2.16.0'
