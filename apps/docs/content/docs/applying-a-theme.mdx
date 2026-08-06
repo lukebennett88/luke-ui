@@ -55,8 +55,9 @@ The server HTML and first client render must use the same value to avoid a hydra
 ## Preserve the theme in portals
 
 Application-owned portals render outside the themed DOM branch, so inherited theme variables no
-longer reach them. Apply the active identity class and nearest explicit `data-color-mode` value to
-the portal root. Leave the attribute off when the source follows the system setting.
+longer reach them. Apply `themeRootClassName`, the active identity class, and the nearest explicit
+`data-color-mode` value to the portal root. Leave the attribute off when the source follows the
+system setting.
 
 ## Next steps
 

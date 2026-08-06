@@ -8,13 +8,13 @@ does not change component behaviour.
 
 ## Theme foundations
 
-Every themed subtree has one root element. It carries `themeRootClassName` and one identity class,
-such as `tactileThemeClassName`.
+Every themed subtree has one root element. It carries `themeRootClassName` and one identity class.
 
 `themeRootClassName` applies the shared reset and base theme layer. The identity class supplies the
 semantic token values used by components and custom UI.
 
-Each identity includes light and dark colour values. The active colour mode chooses between them.
+Each identity includes light and dark colour values. The active colour mode chooses between them. An
+explicit `data-color-mode` is optional. Without one, the theme follows the system preference.
 Colour-mode scopes can nest within an identity. Identity classes cannot.
 
 Use a separate root for an independent subtree that needs another identity.
