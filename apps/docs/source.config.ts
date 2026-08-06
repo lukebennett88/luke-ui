@@ -16,6 +16,22 @@ export const docs = defineDocs({
 			includeProcessedMarkdown: true,
 		},
 		schema: pageSchema.extend({
+			/**
+			 * Type tables to generate onto this component's Props page, in display order. Drives
+			 * `scripts/generate-props-pages.ts`.
+			 */
+			props: z
+				.array(
+					z.object({
+						/** Heading text for entries backed by more than one type, e.g. `CheckboxContent`. */
+						heading: z.string().optional(),
+						/** Exported type name to render, e.g. `ButtonProps`. */
+						name: z.string(),
+						/** Repo-relative path to the file exporting `name`, e.g. `packages/@luke-ui/react/src/button/index.tsx`. */
+						path: z.string(),
+					}),
+				)
+				.optional(),
 			/** Full URL to this component's React Aria Components docs page, when it genuinely wraps one. */
 			reactAria: z.string().optional(),
 			/** Repo-relative path to this component's source, e.g. `packages/@luke-ui/react/src/button`. */

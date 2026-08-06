@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { basename, relative, resolve } from 'node:path';
 
 interface ComponentDocContractOptions {
@@ -26,24 +26,18 @@ export function findComponentDocContractIssues({
 	const resolvedDocsDir = resolve(docsDir);
 	const issues: Array<string> = [];
 
-	for (const propsPath of findFiles(resolvedDocsDir, 'props.mdx')) {
-		const componentDir = resolve(propsPath, '..');
-		const guidePath = resolve(componentDir, 'index.mdx');
+	for (const guidePath of findFiles(resolvedDocsDir, 'index.mdx')) {
+		const componentDir = resolve(guidePath, '..');
 		const relativeComponentDir = relative(resolvedDocsDir, componentDir);
 
-		if (!existsSync(guidePath)) {
-			issues.push(`${relativeComponentDir}: missing index.mdx`);
-			continue;
-		}
+		// Skip the components-index listing page itself, which lives directly in docsDir rather
+		// than in a per-component directory.
+		if (relativeComponentDir === '') continue;
 
 		const guide = readFileSync(guidePath, 'utf8');
-		const props = readFileSync(propsPath, 'utf8');
 		const guideFrontmatter = readFrontmatter(guide);
-		const propsFrontmatter = readFrontmatter(props);
 
-		compareFrontmatter(issues, relativeComponentDir, guideFrontmatter, propsFrontmatter);
 		findPlaceholders(issues, `${relativeComponentDir}/index.mdx`, guide, guideFrontmatter);
-		findPlaceholders(issues, `${relativeComponentDir}/props.mdx`, props, propsFrontmatter);
 
 		const componentName = basename(componentDir);
 		const expectedExamples = [`${componentName}/basic`];
@@ -60,21 +54,6 @@ export function findComponentDocContractIssues({
 	}
 
 	return issues;
-}
-
-function compareFrontmatter(
-	issues: Array<string>,
-	componentDir: string,
-	guide: Frontmatter,
-	props: Frontmatter,
-): void {
-	if (guide.title !== props.title) {
-		issues.push(`${componentDir}: guide and Props titles must match`);
-	}
-
-	if (guide.description !== props.description) {
-		issues.push(`${componentDir}: guide and Props descriptions must match`);
-	}
 }
 
 function findPlaceholders(

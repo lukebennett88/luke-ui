@@ -1,4 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
+import {
+	parseComponentFrontmatter,
+	renderPropsPage,
+} from '../../../apps/docs/scripts/generate-props-pages.js';
 import { createComponentPlan } from './component-creation-plan.js';
 
 describe('createComponentPlan', () => {
@@ -18,8 +22,6 @@ describe('createComponentPlan', () => {
 		});
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/feedback/status-badge/index.mdx',
-			'apps/docs/content/docs/components/feedback/status-badge/meta.json',
-			'apps/docs/content/docs/components/feedback/status-badge/props.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
 			'packages/@luke-ui/react/src/status-badge/index.tsx',
@@ -31,20 +33,12 @@ describe('createComponentPlan', () => {
 		expect(guide).toContain('src="status-badge/basic"');
 		expect(guide).not.toContain('description=');
 		expect(guide).not.toContain('TODO');
+		expect(guide).toContain('source: packages/@luke-ui/react/src/status-badge');
+		expect(guide).toContain('name: StatusBadgeProps');
+		expect(guide).toContain('path: packages/@luke-ui/react/src/status-badge/index.tsx');
 		expect(
 			plan.files.find((file) => file.path.endsWith('/examples/status-badge/basic.tsx'))?.contents,
 		).toContain('<StatusBadge>StatusBadge</StatusBadge>');
-		expect(plan.files.find((file) => file.path.endsWith('/status-badge/meta.json'))?.contents).toBe(
-			'{\n\t"pages": ["!props"],\n\t"collapsible": false\n}\n',
-		);
-		expect(
-			plan.files.find((file) => file.path.endsWith('/status-badge/props.mdx'))?.contents,
-		).toContain(
-			'<auto-type-table path="packages/@luke-ui/react/src/status-badge/index.tsx" name="StatusBadgeProps" />',
-		);
-		expect(
-			plan.files.find((file) => file.path.endsWith('/status-badge/props.mdx'))?.contents,
-		).not.toContain('description:');
 		expect(plan.jsonEdits).toEqual([
 			{
 				key: 'pages',
@@ -149,5 +143,31 @@ describe('createComponentPlan', () => {
 		expect(source).not.toContain("import { cx } from '../utils/index.js';");
 		expect(source).not.toContain('cx(');
 		expect(source).toContain('className={className}');
+	});
+
+	it('scaffolds a index.mdx that generate:props can turn into a props.mdx', () => {
+		const plan = createComponentPlan({
+			docsGroup: 'feedback',
+			name: 'StatusBadge',
+			styling: 'none',
+			tier: 'atom',
+		});
+
+		const guide = plan.files.find((file) =>
+			file.path.endsWith('/status-badge/index.mdx'),
+		)?.contents;
+		if (guide === undefined) throw new Error('Expected the scaffold to write index.mdx.');
+
+		const frontmatter = parseComponentFrontmatter(guide);
+		expect(frontmatter.props).toEqual([
+			{
+				heading: undefined,
+				name: 'StatusBadgeProps',
+				path: 'packages/@luke-ui/react/src/status-badge/index.tsx',
+			},
+		]);
+		expect(renderPropsPage(frontmatter)).toContain(
+			'<auto-type-table\n\tpath="packages/@luke-ui/react/src/status-badge/index.tsx"\n\tname="StatusBadgeProps"\n/>',
+		);
 	});
 });
