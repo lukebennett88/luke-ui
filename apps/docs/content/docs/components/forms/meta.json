@@ -1,4 +1,4 @@
 {
 	"title": "Forms",
-	"pages": ["checkbox", "combobox-field", "text-field", "validation"]
+	"pages": ["checkbox", "combobox-field", "text-field", "validation", "react-hook-form"]
 }

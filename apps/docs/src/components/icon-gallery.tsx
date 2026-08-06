@@ -106,14 +106,10 @@ export function IconGallery(): JSX.Element {
 	return (
 		<div className="not-prose flex flex-col gap-4">
 			<div className="flex flex-wrap items-center gap-3">
-				<div
-					className="min-w-[12rem] flex-1 basis-56"
-					ref={(node) => {
-						inputRef.current = node?.querySelector('input') ?? null;
-					}}
-				>
+				<div className="min-w-[12rem] flex-1 basis-56">
 					<TextField
 						aria-label="Filter icons by name"
+						inputRef={inputRef}
 						onChange={setFilter}
 						placeholder="Filter by name"
 						prefix={<Icon aria-hidden name="search" size="small" />}
