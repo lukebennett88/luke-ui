@@ -71,6 +71,7 @@ catalog:
   '@storybook/addon-vitest': ^10.5.5
   '@storybook/react-vite': ^10.5.5
   '@tailwindcss/vite': ^4.3.3
+  '@tanstack/react-form': ^1.33.3
   '@tanstack/react-router': ^1.170.18
   '@tanstack/react-start': ^1.168.34
   '@tanstack/router-cli': ^1.167.21

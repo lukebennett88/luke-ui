@@ -1,4 +1,4 @@
 {
 	"title": "Forms",
-	"pages": ["react-hook-form"]
+	"pages": ["react-hook-form", "tanstack-form"]
 }

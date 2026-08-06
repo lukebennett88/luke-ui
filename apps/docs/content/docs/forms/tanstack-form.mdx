@@ -1,0 +1,62 @@
+---
+title: TanStack Form
+description: Wire a Luke UI field to TanStack Form with form.Field.
+---
+
+TanStack Form has no `register`-style helper that spreads DOM props onto an input. Every field goes
+through the `form.Field` component, whose render prop hands you a value and a set of handlers. Luke
+UI fields report a change as a value, through `onChange(value)`, which is the shape
+`field.handleChange` takes.
+
+## Wire a field with form.Field
+
+Give `form.Field` a `name` and a children function. The function receives `field`. Read the value
+from `field.state.value`, pass `field.handleChange` to `onChange`, and pass `field.handleBlur` to
+`onBlur`.
+
+Validation messages arrive in `field.state.meta.errors`. A Standard Schema validator fills that
+array with issue objects, so read `message` from the first one. Read `field.state.meta.isValid` for
+`isInvalid`.
+
+The examples below pass a Zod schema straight to `validators`. TanStack Form accepts any Standard
+Schema validator, so Zod needs no resolver package. The form's value types come from
+`defaultValues`, and TypeScript checks the schema against them.
+
+<ExampleBlock src="forms/tanstack-form" title="TanStack Form — Text fields" />
+
+A checkbox works the same way. Map `field.state.value` to `isSelected` instead of `value`, since
+that is the prop `Checkbox` reads.
+
+<ExampleBlock src="forms/tanstack-form-checkbox" title="TanStack Form — Checkbox" />
+
+## Set validationBehavior to aria
+
+Fields default to `validationBehavior="native"`, which hands the field's error state to the
+browser's constraint validation. The first submit goes through and TanStack Form runs its schema.
+From then on the schema has marked a field invalid, so the browser refuses to submit the form, and
+the field suppresses the browser's own error bubble. Pressing the submit button does nothing.
+
+Set `validationBehavior="aria"` on every field a `form.Field` wraps. TanStack Form then owns
+validation, and the browser marks the field for assistive technology instead of blocking submit.
+Read [Validation](/components/forms/validation) for the other `validationBehavior` options.
+
+## Focus the first invalid field on submit
+
+TanStack Form holds no reference to the elements a field renders, so it has nothing to focus after a
+failed submission. This is the point where it differs most from React Hook Form, which registers a
+ref per field and focuses the first invalid one for you. Under TanStack Form, nothing moves, and the
+person filling in the form gets an error message without being taken to it.
+
+`onSubmitInvalid` runs after a failed submission and receives `formApi`, which reads each field's
+errors through `formApi.getFieldMeta(name)`. The TanStack Form documentation finds the element there
+with `document.querySelector('[aria-invalid="true"]')`. Holding a ref per field does the same job
+without the DOM query, and keeps the order you check the fields in visible in the code.
+
+## Pass the ref to inputRef
+
+Give the ref to `inputRef`, not `ref`. `TextField` and `Checkbox` render a label, description, and
+error message around the control, so they take no plain `ref`. `inputRef` reaches the input
+underneath.
+
+If you drop down to a primitive that renders the control itself, such as `ComboboxInput`, give the
+ref to its `ref` prop instead.

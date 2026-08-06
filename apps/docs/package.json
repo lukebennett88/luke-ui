@@ -35,6 +35,7 @@
 		"@luke-ui/react": "workspace:*",
 		"@monaco-editor/react": "catalog:",
 		"@react-aria/utils": "catalog:",
+		"@tanstack/react-form": "catalog:",
 		"@tanstack/react-router": "catalog:",
 		"@tanstack/react-start": "catalog:",
 		"@tanstack/start-static-server-functions": "catalog:",
