@@ -2,61 +2,75 @@ import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import { cx } from '@luke-ui/react/utils';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
 import type { ReactNode } from 'react';
 import { Link } from 'react-aria-components/Link';
+import { GithubMark } from './github-mark.js';
+import { ReactAriaMark } from './react-aria-mark.js';
 import { StorybookMark } from './storybook-mark.js';
 
 interface PageActionsProps {
 	githubUrl: string;
 	markdownUrl: string;
+	reactAriaUrl: string | null;
+	sourceUrl: string | null;
 	storybookUrl: string | null;
 }
 
-const rowClassName = cx(
-	'flex w-full items-center gap-2 rounded-lg p-2 text-start text-sm text-fd-popover-foreground',
-	'hover:bg-fd-accent hover:text-fd-accent-foreground',
-	'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
-);
+const pillClassName = cx(buttonVariants({ color: 'secondary', size: 'sm' }), 'gap-1.5');
 
 /**
- * Copy Markdown, View as Markdown, and Edit on GitHub are utilities most
- * visits never touch, so they collapse into a single compact "view options"
- * control instead of sitting on the page as a row of filled pill buttons
- * above the first paragraph. This reuses Fumadocs' own popover primitives
- * (`fumadocs-ui/components/ui/popover`) — the same "house pattern" behind
- * its `ViewOptionsPopover` — rather than adopting that export directly,
- * because `ViewOptionsPopover` bakes in third-party AI-assistant deep links
- * (ChatGPT, Claude, Cursor, Scira) this repo does not want to surface, and
- * has no notion of a Storybook destination.
+ * Every destination a page can offer sits inline, directly under the page
+ * title, as a row of pill links — each a brand mark plus a visible text
+ * label. This mirrors HeroUI's component page chrome
+ * (heroui.com/docs/components/button), rather than collapsing the actions
+ * behind a "View options" trigger: a six-item row reads fine unwrapped, and
+ * `flex-wrap` keeps it usable once there is no room for all six on one
+ * line.
+ *
+ * This deliberately does not adopt Fumadocs' own `ViewOptionsPopover`
+ * export, because it bakes in third-party AI-assistant deep links (ChatGPT,
+ * Claude, Cursor, Scira) this repo does not want to surface, and has no
+ * notion of a Storybook, React Aria, or component-source destination.
  */
-export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageActionsProps) {
+export function PageActions({
+	githubUrl,
+	markdownUrl,
+	reactAriaUrl,
+	sourceUrl,
+	storybookUrl,
+}: PageActionsProps) {
 	return (
-		<Popover>
-			<PopoverTrigger
-				className={cx(
-					buttonVariants({ color: 'secondary', size: 'sm' }),
-					'not-prose ms-auto shrink-0 gap-1.5',
-					'data-[state=open]:bg-fd-accent data-[state=open]:text-fd-accent-foreground',
-				)}
-			>
-				View options
-				<Icon aria-hidden className="size-3.5" name="chevronDown" />
-			</PopoverTrigger>
-			<PopoverContent align="end" className="flex flex-col gap-1">
-				<CopyMarkdownRow markdownUrl={markdownUrl} />
-				<PageActionLink href={markdownUrl} iconName="codeBlock" label="View as Markdown" />
-				{storybookUrl ? (
-					<PageActionLink
-						href={storybookUrl}
-						icon={<StorybookMark className="size-4 shrink-0" />}
-						label="View in Storybook"
-					/>
-				) : null}
-				<PageActionLink href={githubUrl} iconName="edit" label="Edit on GitHub" />
-			</PopoverContent>
-		</Popover>
+		<div className="not-prose flex w-full flex-wrap items-center gap-2">
+			{storybookUrl ? (
+				<PageActionLink
+					href={storybookUrl}
+					icon={<StorybookMark className="size-4 shrink-0" />}
+					label="Storybook"
+				/>
+			) : null}
+			{reactAriaUrl ? (
+				<PageActionLink
+					href={reactAriaUrl}
+					icon={<ReactAriaMark className="size-4 shrink-0" />}
+					label="React Aria"
+				/>
+			) : null}
+			{sourceUrl ? (
+				<PageActionLink
+					href={sourceUrl}
+					icon={<GithubMark className="size-4 shrink-0" />}
+					label="Source"
+				/>
+			) : null}
+			<CopyMarkdownButton markdownUrl={markdownUrl} />
+			<PageActionLink href={markdownUrl} iconName="codeBlock" label="View as Markdown" />
+			<PageActionLink
+				href={githubUrl}
+				icon={<GithubMark className="size-4 shrink-0" />}
+				label="Edit on GitHub"
+			/>
+		</div>
 	);
 }
 
@@ -72,19 +86,14 @@ function PageActionLink({
 	label: string;
 }) {
 	return (
-		<Link className={rowClassName} href={href} rel="noreferrer noopener" target="_blank">
+		<Link className={pillClassName} href={href} rel="noreferrer noopener" target="_blank">
 			{icon ?? (iconName ? <Icon aria-hidden className="size-4 shrink-0" name={iconName} /> : null)}
 			{label}
-			<Icon
-				aria-hidden
-				className="ms-auto size-3.5 shrink-0 text-fd-muted-foreground"
-				name="externalLink"
-			/>
 		</Link>
 	);
 }
 
-function CopyMarkdownRow({ markdownUrl }: { markdownUrl: string }) {
+function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 	// `useCopyButton` only flips to its "Copied" state once this callback's
 	// promise resolves — it has no `onRejected` handler — so a rejection
 	// leaves `copied` at `false` instead of lying about success. `fetch`
@@ -101,7 +110,7 @@ function CopyMarkdownRow({ markdownUrl }: { markdownUrl: string }) {
 	});
 
 	return (
-		<button className={rowClassName} onClick={onCopy} type="button">
+		<button className={pillClassName} onClick={onCopy} type="button">
 			<Icon aria-hidden className="size-4 shrink-0" name={copied ? 'check' : 'copy'} />
 			{copied ? 'Copied' : 'Copy Markdown'}
 		</button>

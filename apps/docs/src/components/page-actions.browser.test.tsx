@@ -21,59 +21,76 @@ afterEach(() => {
 
 const githubUrl = 'https://github.com/example/repo/edit/main/page.mdx';
 const markdownUrl = '/example-page.md';
+const reactAriaUrl = 'https://react-spectrum.adobe.com/react-aria/Button.html';
+const sourceUrl = 'https://github.com/example/repo/tree/main/packages/example/src/button';
 const storybookUrl = 'https://storybook.example/?path=/docs/example--docs';
 
-test('collapses into a single trigger until opened', async () => {
-	renderActions({ githubUrl, markdownUrl, storybookUrl });
+test('renders every destination inline, labelled and reachable, when all are present', async () => {
+	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl, storybookUrl });
 
-	await expect.element(page.getByRole('button', { name: 'View options' })).toBeVisible();
-	expect(page.getByRole('link', { name: 'Edit on GitHub' })).not.toBeInTheDocument();
-	expect(page.getByRole('link', { name: 'View as Markdown' })).not.toBeInTheDocument();
-	expect(page.getByRole('button', { name: 'Copy Markdown' })).not.toBeInTheDocument();
-});
-
-test('opening the control surfaces every destination, labelled and reachable', async () => {
-	renderActions({ githubUrl, markdownUrl, storybookUrl });
-
-	await userEvent.click(page.getByRole('button', { name: 'View options' }));
-
+	await expect
+		.element(page.getByRole('link', { name: 'Storybook' }))
+		.toHaveAttribute('href', storybookUrl);
+	await expect
+		.element(page.getByRole('link', { name: 'React Aria' }))
+		.toHaveAttribute('href', reactAriaUrl);
+	await expect
+		.element(page.getByRole('link', { name: 'Source' }))
+		.toHaveAttribute('href', sourceUrl);
 	await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toBeVisible();
 	await expect
 		.element(page.getByRole('link', { name: 'View as Markdown' }))
 		.toHaveAttribute('href', markdownUrl);
 	await expect
-		.element(page.getByRole('link', { name: 'View in Storybook' }))
-		.toHaveAttribute('href', storybookUrl);
-	await expect
 		.element(page.getByRole('link', { name: 'Edit on GitHub' }))
 		.toHaveAttribute('href', githubUrl);
 });
 
-test('omits the Storybook destination when the page has none', async () => {
-	renderActions({ githubUrl, markdownUrl, storybookUrl: null });
+test('omits the Storybook, React Aria, and Source pills when the page has none', async () => {
+	renderActions({
+		githubUrl,
+		markdownUrl,
+		reactAriaUrl: null,
+		sourceUrl: null,
+		storybookUrl: null,
+	});
 
-	await userEvent.click(page.getByRole('button', { name: 'View options' }));
-
+	expect(page.getByRole('link', { name: 'Storybook' })).not.toBeInTheDocument();
+	expect(page.getByRole('link', { name: 'React Aria' })).not.toBeInTheDocument();
+	expect(page.getByRole('link', { name: 'Source' })).not.toBeInTheDocument();
 	await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toBeVisible();
-	expect(page.getByRole('link', { name: 'View in Storybook' })).not.toBeInTheDocument();
+	await expect.element(page.getByRole('link', { name: 'View as Markdown' })).toBeVisible();
+	await expect.element(page.getByRole('link', { name: 'Edit on GitHub' })).toBeVisible();
 });
 
-test('is keyboard operable: Enter opens it, Tab moves through items, Escape returns focus to the trigger', async () => {
-	renderActions({ githubUrl, markdownUrl, storybookUrl: null });
+test('the Source and Edit on GitHub pills stay distinguishable, even though both use the GitHub mark', async () => {
+	renderActions({ githubUrl, markdownUrl, reactAriaUrl: null, sourceUrl, storybookUrl: null });
 
-	const trigger = page.getByRole('button', { name: 'View options' });
-	await userEvent.tab();
-	await expect.element(trigger).toHaveFocus();
+	const sourceLink = page.getByRole('link', { name: 'Source' });
+	const editLink = page.getByRole('link', { name: 'Edit on GitHub' });
+	await expect.element(sourceLink).toHaveAttribute('href', sourceUrl);
+	await expect.element(editLink).toHaveAttribute('href', githubUrl);
+});
 
-	await userEvent.keyboard('{Enter}');
-	await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toHaveFocus();
+test('reports the copied state after Copy Markdown succeeds', async () => {
+	vi.stubGlobal(
+		'fetch',
+		vi.fn(async () => new Response('# Example', { status: 200 })),
+	);
+	const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 
-	await userEvent.tab();
-	await expect.element(page.getByRole('link', { name: 'View as Markdown' })).toHaveFocus();
+	renderActions({
+		githubUrl,
+		markdownUrl,
+		reactAriaUrl: null,
+		sourceUrl: null,
+		storybookUrl: null,
+	});
 
-	await userEvent.keyboard('{Escape}');
-	await expect.element(trigger).toHaveFocus();
-	expect(page.getByRole('link', { name: 'View as Markdown' })).not.toBeInTheDocument();
+	await userEvent.click(page.getByRole('button', { name: 'Copy Markdown' }));
+
+	await expect.element(page.getByRole('button', { name: 'Copied' })).toBeVisible();
+	expect(writeText).toHaveBeenCalledWith('# Example');
 });
 
 test('does not claim success when the markdown fetch 404s', async () => {
@@ -95,8 +112,13 @@ test('does not claim success when the markdown fetch 404s', async () => {
 	window.addEventListener('unhandledrejection', onUnhandledRejection);
 
 	try {
-		renderActions({ githubUrl, markdownUrl, storybookUrl: null });
-		await userEvent.click(page.getByRole('button', { name: 'View options' }));
+		renderActions({
+			githubUrl,
+			markdownUrl,
+			reactAriaUrl: null,
+			sourceUrl: null,
+			storybookUrl: null,
+		});
 		await userEvent.click(page.getByRole('button', { name: 'Copy Markdown' }));
 
 		// Give the rejected promise a tick to settle, then confirm the label
@@ -109,9 +131,22 @@ test('does not claim success when the markdown fetch 404s', async () => {
 	}
 });
 
+test('does not announce the brand marks as separate content', async () => {
+	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl, storybookUrl });
+
+	// Each pill's accessible name comes from its visible label alone — the
+	// brand mark inside it is `aria-hidden`, not a second named element.
+	await expect.element(page.getByRole('link', { name: 'Storybook' })).toBeVisible();
+	expect(page.getByRole('img', { name: /storybook/i })).not.toBeInTheDocument();
+	expect(page.getByRole('img', { name: /react aria/i })).not.toBeInTheDocument();
+	expect(page.getByRole('img', { name: /github/i })).not.toBeInTheDocument();
+});
+
 function renderActions(props: {
 	githubUrl: string;
 	markdownUrl: string;
+	reactAriaUrl: string | null;
+	sourceUrl: string | null;
 	storybookUrl: string | null;
 }) {
 	container = document.body.appendChild(document.createElement('div'));

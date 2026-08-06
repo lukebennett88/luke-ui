@@ -1,9 +1,10 @@
 import type { ComponentProps, JSX } from 'react';
 
 /**
- * The GitHub "Octocat" mark, from Primer Octicons' `mark-github` (16×16).
- * Kept as a docs-local component rather than joining `@luke-ui/react`'s icon
- * spritesheet, which only holds generic glyphs, not third-party trademarks.
+ * The GitHub mark, copied verbatim from HeroUI's `GithubIcon` (heroui.com's
+ * docs icon set). Kept as a docs-local component rather than joining
+ * `@luke-ui/react`'s icon spritesheet, which only holds generic glyphs, not
+ * third-party trademarks.
  *
  * Uses `currentColor` so it inherits the surrounding text colour. Always
  * decorative — pair it with an accessible name from visible or visually
@@ -11,14 +12,13 @@ import type { ComponentProps, JSX } from 'react';
  */
 export function GithubMark(props: ComponentProps<'svg'>): JSX.Element {
 	return (
-		<svg
-			aria-hidden="true"
-			fill="currentColor"
-			viewBox="0 0 16 16"
-			xmlns="http://www.w3.org/2000/svg"
-			{...props}
-		>
-			<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.05-.13-.36-.93.08-1.94 0 0 .67-.21 2.2.82.63-.18 1.31-.27 1.98-.27.67 0 1.35.09 1.98.27 1.53-1.04 2.2-.82 2.2-.82.44 1.01.13 1.81.08 1.94.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0016 8c0-4.42-3.58-8-8-8z" />
+		<svg aria-hidden="true" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
+			<path
+				clipRule="evenodd"
+				d="M12.026 2c-5.509 0-9.974 4.465-9.974 9.974 0 4.406 2.857 8.145 6.821 9.465.499.09.679-.217.679-.481 0-.237-.008-.865-.011-1.696-2.775.602-3.361-1.338-3.361-1.338-.452-1.152-1.107-1.459-1.107-1.459-.905-.619.069-.605.069-.605 1.002.07 1.527 1.028 1.527 1.028.89 1.524 2.336 1.084 2.902.829.091-.645.351-1.085.635-1.334-2.214-.251-4.542-1.107-4.542-4.93 0-1.087.389-1.979 1.024-2.675-.101-.253-.446-1.268.099-2.64 0 0 .837-.269 2.742 1.021a9.582 9.582 0 0 1 2.496-.336 9.554 9.554 0 0 1 2.496.336c1.906-1.291 2.742-1.021 2.742-1.021.545 1.372.203 2.387.099 2.64.64.696 1.024 1.587 1.024 2.675 0 3.833-2.33 4.675-4.552 4.922.355.308.675.916.675 1.846 0 1.334-.012 2.41-.012 2.737 0 .267.178.577.687.479C19.146 20.115 22 16.379 22 11.974 22 6.465 17.535 2 12.026 2z"
+				fill="currentColor"
+				fillRule="evenodd"
+			/>
 		</svg>
 	);
 }
