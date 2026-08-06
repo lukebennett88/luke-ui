@@ -109,7 +109,7 @@ catalog:
   postcss-selector-parser: ^7.1.4
   publint: ^0.3.22
   react: ^19.2.7
-  react-aria-components: ^1.19.0
+  react-aria-components: ^1.20.0
   react-dom: ^19.2.7
   react-error-boundary: ^6.1.2
   react-resizable-panels: ^4.12.2
