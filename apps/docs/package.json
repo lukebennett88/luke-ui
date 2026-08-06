@@ -33,7 +33,6 @@
 		"@catppuccin/palette": "catalog:",
 		"@luke-ui/react": "workspace:*",
 		"@monaco-editor/react": "catalog:",
-		"@orama/orama": "catalog:",
 		"@react-aria/utils": "catalog:",
 		"@tanstack/react-router": "catalog:",
 		"@tanstack/react-start": "catalog:",
@@ -54,6 +53,7 @@
 		"spin-doctor": "catalog:",
 		"sucrase": "catalog:",
 		"vite": "catalog:",
+		"zbsearch": "catalog:",
 		"zod": "catalog:"
 	},
 	"devDependencies": {
