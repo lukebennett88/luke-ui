@@ -66,9 +66,9 @@ export type CheckboxProps = Prettify<_CheckboxProps>;
 /** A labelled checkbox with optional description and validation message. */
 export function Checkbox(props: CheckboxProps): JSX.Element {
 	const { children, description, errorMessage, inputRef, ...checkboxProps } = props;
-	// React Aria reads `inputRef.current`, so a callback ref cannot be handed to it
-	// directly; `useObjectRef` gives it the object ref it wants while still calling
-	// the caller's callback.
+	// React Aria types its own `inputRef` as a ref object, so a callback ref is a type
+	// error even though it would work: RAC merges the ref itself. `useObjectRef` gives
+	// the declared type what it asks for rather than leaning on that internal detail.
 	const objectInputRef = useObjectRef(inputRef);
 
 	return (
