@@ -8,6 +8,7 @@ import { RootProvider } from 'fumadocs-ui/provider/tanstack';
 import type { ReactNode } from 'react';
 import { lazy, Suspense } from 'react';
 import { DocsThemeRoot } from '../components/theme-controls';
+import { withBasePath } from '../lib/base-path.js';
 import appCss from '../styles/app.css?url';
 
 const SearchDialog = lazy(() => import('../components/search'));
@@ -19,6 +20,20 @@ export const Route = createRootRoute({
 			{ href: appCss, rel: 'stylesheet' },
 			{ href: paperCss, rel: 'stylesheet' },
 			{ href: tactileCss, rel: 'stylesheet' },
+			{
+				href: withBasePath('/favicon.svg', import.meta.env.BASE_URL),
+				rel: 'icon',
+				type: 'image/svg+xml',
+			},
+			{
+				href: withBasePath('/favicon-dark.svg', import.meta.env.BASE_URL),
+				media: '(prefers-color-scheme: dark)',
+				rel: 'icon',
+			},
+			{
+				href: withBasePath('/apple-touch-icon.png', import.meta.env.BASE_URL),
+				rel: 'apple-touch-icon',
+			},
 		],
 		meta: [
 			{

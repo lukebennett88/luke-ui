@@ -14,12 +14,15 @@ import { ExampleBlock } from '../components/example-block';
 import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
+import { withBasePath } from '../lib/base-path.js';
 import { getComponentPageNavigation } from '../lib/component-page-navigation.js';
+import { GITHUB_REPO_URL } from '../lib/github.js';
 import { baseOptions } from '../lib/layout.shared';
 import { source } from '../lib/source';
-import { getStorybookStoryUrl, withBasePath } from '../lib/storybook';
+import { getStorybookStoryUrl } from '../lib/storybook';
 
-const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
+const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
+const GITHUB_TREE_URL = `${GITHUB_REPO_URL}/tree/main`;
 
 const mdxComponents = {
 	...defaultMdxComponents,
@@ -72,6 +75,8 @@ const loader = createServerFn({
 			markdownUrl: withBasePath(markdownPath, import.meta.env.BASE_URL),
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
+			reactAriaUrl: page.data.reactAria ?? null,
+			sourceUrl: page.data.source ? `${GITHUB_TREE_URL}/${page.data.source}` : null,
 			storybookUrl: getStorybookStoryUrl(page.path, import.meta.env.BASE_URL),
 		};
 	});
@@ -84,10 +89,20 @@ const clientLoader = browserCollections.docs.createClientLoader({
 			componentNavigation: ReturnType<typeof getComponentPageNavigation>;
 			githubUrl: string;
 			markdownUrl: string;
+			reactAriaUrl: string | null;
+			sourceUrl: string | null;
 			storybookUrl: string | null;
 		},
 	) {
-		const { componentNavigation, githubUrl, markdownUrl, storybookUrl, ...pageProps } = props;
+		const {
+			componentNavigation,
+			githubUrl,
+			markdownUrl,
+			reactAriaUrl,
+			sourceUrl,
+			storybookUrl,
+			...pageProps
+		} = props;
 		return (
 			<DocsPage
 				toc={toc}
@@ -95,11 +110,13 @@ const clientLoader = browserCollections.docs.createClientLoader({
 				footer={{ className: 'mt-12 border-t pt-8 md:mt-16 md:pt-10' }}
 			>
 				<DocsTitle>{frontmatter.title}</DocsTitle>
-				<div className="not-prose flex flex-wrap items-start gap-4">
-					<DocsDescription className="mb-0 flex-1">{frontmatter.description}</DocsDescription>
+				<DocsDescription>{frontmatter.description}</DocsDescription>
+				<div className="not-prose mt-4">
 					<PageActions
 						githubUrl={githubUrl}
 						markdownUrl={markdownUrl}
+						reactAriaUrl={reactAriaUrl}
+						sourceUrl={sourceUrl}
 						storybookUrl={storybookUrl}
 					/>
 				</div>
@@ -149,6 +166,8 @@ function Page() {
 					componentNavigation: data.componentNavigation,
 					githubUrl: data.githubUrl,
 					markdownUrl: data.markdownUrl,
+					reactAriaUrl: data.reactAriaUrl,
+					sourceUrl: data.sourceUrl,
 					storybookUrl: data.storybookUrl,
 				})}
 			</Suspense>
