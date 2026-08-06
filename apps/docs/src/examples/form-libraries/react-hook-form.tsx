@@ -7,12 +7,13 @@ import { Controller, useForm } from 'react-hook-form';
 
 type FormValues = {
 	name: string;
+	email: string;
 };
 
 export default () => {
 	const [submittedName, setSubmittedName] = useState('');
 	const { control, handleSubmit } = useForm<FormValues>({
-		defaultValues: { name: '' },
+		defaultValues: { name: '', email: '' },
 	});
 
 	function onSubmit(values: FormValues) {
@@ -39,6 +40,23 @@ export default () => {
 							/>
 						)}
 						rules={{ required: 'Enter your name.' }}
+					/>
+					<Controller
+						control={control}
+						name="email"
+						render={({ field, fieldState }) => (
+							<TextField
+								errorMessage={fieldState.error?.message}
+								inputRef={field.ref}
+								isInvalid={fieldState.invalid}
+								label="Email"
+								onBlur={field.onBlur}
+								onChange={field.onChange}
+								validationBehavior="aria"
+								value={field.value}
+							/>
+						)}
+						rules={{ required: 'Enter your email address.' }}
 					/>
 					<Box>
 						<Button type="submit">Create account</Button>
