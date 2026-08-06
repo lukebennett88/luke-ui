@@ -57,7 +57,7 @@ test('offers search and theme controls from the mobile bar', async () => {
 	await renderAt('/', <SiteNav />);
 
 	await expect
-		.element(page.getByRole('link', { name: 'Getting started' }))
+		.element(page.getByRole('link', { name: 'Docs' }))
 		.toHaveAttribute('aria-current', 'page');
 	expect(getCurrentLinks()).toHaveLength(1);
 

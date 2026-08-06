@@ -8,7 +8,7 @@ export interface SiteDestination {
 }
 
 export const siteDestinations: ReadonlyArray<SiteDestination> = [
-	{ activePath: '/', label: 'Getting started', url: '/' },
+	{ activePath: '/', label: 'Docs', url: '/' },
 	{ activePath: '/components', label: 'Components', url: '/components' },
 	{ activePath: '/playground', label: 'Playground', url: '/playground' },
 	{
