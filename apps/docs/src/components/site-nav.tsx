@@ -1,11 +1,15 @@
 import { cx } from '@luke-ui/react/utils';
+import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import { useLinkProps } from '@tanstack/react-router';
 import { usePathname } from 'fumadocs-core/framework';
 import Link from 'fumadocs-core/link';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { FullSearchTrigger, SearchTrigger } from 'fumadocs-ui/layouts/shared/slots/search-trigger';
 import type { ComponentProps } from 'react';
+import { GITHUB_REPO_URL } from '../lib/github.js';
 import { getActiveSiteDestination, siteDestinations } from '../lib/site-destinations.js';
+import { GithubMark } from './github-mark.js';
+import { StorybookMark } from './storybook-mark.js';
 import { ThemeControls } from './theme-controls.js';
 
 export const SITE_NAV_BUTTON_CLASS_NAME =
@@ -46,12 +50,13 @@ export function SiteNav({
 			>
 				{siteDestinations.map((destination) => {
 					const isActive = destination === activeDestination;
+					const isStorybook = destination.label === 'Storybook';
 
 					return (
 						<Link
 							aria-current={isActive ? 'page' : undefined}
 							className={cx(
-								'text-sm transition-colors',
+								'inline-flex items-center gap-1.5 text-sm transition-colors',
 								isActive
 									? 'font-medium text-fd-primary'
 									: 'text-fd-muted-foreground hover:text-fd-accent-foreground',
@@ -60,6 +65,7 @@ export function SiteNav({
 							href={destination.url}
 							key={destination.url}
 						>
+							{isStorybook ? <StorybookMark className="size-4" /> : null}
 							{destination.label}
 						</Link>
 					);
@@ -72,6 +78,7 @@ export function SiteNav({
 					<ThemeControls />
 				</div>
 				<AppearancePopover />
+				<RepositoryLink />
 				{children}
 			</div>
 		</header>
@@ -108,5 +115,19 @@ function AppearancePopover() {
 				<ThemeControls />
 			</PopoverContent>
 		</Popover>
+	);
+}
+
+function RepositoryLink() {
+	return (
+		<a
+			className={cx(SITE_NAV_BUTTON_CLASS_NAME, 'w-8 px-0')}
+			href={GITHUB_REPO_URL}
+			rel="noreferrer noopener"
+			target="_blank"
+		>
+			<GithubMark className="size-4" />
+			<VisuallyHidden>GitHub repository</VisuallyHidden>
+		</a>
 	);
 }

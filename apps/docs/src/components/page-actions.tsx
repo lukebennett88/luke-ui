@@ -4,7 +4,9 @@ import { cx } from '@luke-ui/react/utils';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from 'fumadocs-ui/components/ui/popover';
 import { useCopyButton } from 'fumadocs-ui/utils/use-copy-button';
+import type { ReactNode } from 'react';
 import { Link } from 'react-aria-components/Link';
+import { StorybookMark } from './storybook-mark.js';
 
 interface PageActionsProps {
 	githubUrl: string;
@@ -46,7 +48,11 @@ export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageAction
 				<CopyMarkdownRow markdownUrl={markdownUrl} />
 				<PageActionLink href={markdownUrl} iconName="codeBlock" label="View as Markdown" />
 				{storybookUrl ? (
-					<PageActionLink href={storybookUrl} iconName="bookOpen" label="View in Storybook" />
+					<PageActionLink
+						href={storybookUrl}
+						icon={<StorybookMark className="size-4 shrink-0" />}
+						label="View in Storybook"
+					/>
 				) : null}
 				<PageActionLink href={githubUrl} iconName="edit" label="Edit on GitHub" />
 			</PopoverContent>
@@ -56,16 +62,18 @@ export function PageActions({ markdownUrl, githubUrl, storybookUrl }: PageAction
 
 function PageActionLink({
 	href,
+	icon,
 	iconName,
 	label,
 }: {
 	href: string;
-	iconName: IconName;
+	icon?: ReactNode;
+	iconName?: IconName;
 	label: string;
 }) {
 	return (
 		<Link className={rowClassName} href={href} rel="noreferrer noopener" target="_blank">
-			<Icon aria-hidden className="size-4 shrink-0" name={iconName} />
+			{icon ?? (iconName ? <Icon aria-hidden className="size-4 shrink-0" name={iconName} /> : null)}
 			{label}
 			<Icon
 				aria-hidden

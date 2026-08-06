@@ -14,6 +14,7 @@ import { useIsDesktop } from '../../components/playground/use-is-desktop';
 import type { ViewportWidth } from '../../components/playground/viewport-toggle';
 import { SiteNav } from '../../components/site-nav.js';
 import { useDocsThemeIdentity } from '../../components/theme-controls';
+import { withBasePath } from '../../lib/base-path.js';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
 import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
 import type {
@@ -21,7 +22,6 @@ import type {
 	PlaygroundCodeMessage,
 } from '../../lib/playground-protocol';
 import { isPlaygroundPreviewMessage } from '../../lib/playground-protocol';
-import { withBasePath } from '../../lib/storybook';
 
 const PlaygroundEditor = lazy(() => import('../../components/playground/editor'));
 

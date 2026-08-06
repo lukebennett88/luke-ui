@@ -14,12 +14,14 @@ import { ExampleBlock } from '../components/example-block';
 import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
+import { withBasePath } from '../lib/base-path.js';
 import { getComponentPageNavigation } from '../lib/component-page-navigation.js';
+import { GITHUB_REPO_URL } from '../lib/github.js';
 import { baseOptions } from '../lib/layout.shared';
 import { source } from '../lib/source';
-import { getStorybookStoryUrl, withBasePath } from '../lib/storybook';
+import { getStorybookStoryUrl } from '../lib/storybook';
 
-const GITHUB_DOCS_URL = 'https://github.com/lukebennett88/luke-ui/blob/main/apps/docs/content/docs';
+const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
 
 const mdxComponents = {
 	...defaultMdxComponents,

@@ -57,7 +57,7 @@ test('offers search and theme controls from the mobile bar', async () => {
 	await renderAt('/', <SiteNav />);
 
 	await expect
-		.element(page.getByRole('link', { name: 'Docs' }))
+		.element(page.getByRole('link', { name: 'Getting started' }))
 		.toHaveAttribute('aria-current', 'page');
 	expect(getCurrentLinks()).toHaveLength(1);
 
@@ -77,6 +77,17 @@ test('leaves every destination inactive on the 404 page', async () => {
 	await renderAt('/missing', <NotFound />);
 
 	expect(getCurrentLinks()).toHaveLength(0);
+});
+
+test('links to the repository with an accessible name', async () => {
+	await page.viewport(1024, 800);
+	await renderAt('/', <SiteNav />);
+
+	const repositoryLink = page.getByRole('link', { name: 'GitHub repository' });
+	await expect.element(repositoryLink).toBeVisible();
+	await expect
+		.element(repositoryLink)
+		.toHaveAttribute('href', 'https://github.com/lukebennett88/luke-ui');
 });
 
 async function renderAt(pathname: string, children: ReactNode) {
