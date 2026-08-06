@@ -37,7 +37,7 @@ const baseSpecifiers = ['react', 'react-dom', 'react-dom/client', 'react/jsx-run
 // internals above). Add a package here — and to the types allowlist in
 // generate-playground-types.ts, if its payload cost is reasonable — whenever
 // an example needs to import it in the playground.
-const thirdPartySpecifiers = ['react-hook-form'];
+const thirdPartySpecifiers = ['@hookform/resolvers/zod', 'react-hook-form', 'zod'];
 
 const specifiers = [...lukeUiSpecifiers, ...baseSpecifiers, ...thirdPartySpecifiers];
 

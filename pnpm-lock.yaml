@@ -21,6 +21,9 @@ catalogs:
     '@changesets/cli':
       specifier: ^2.31.1
       version: 2.31.1
+    '@hookform/resolvers':
+      specifier: ^5.6.0
+      version: 5.6.0
     '@monaco-editor/react':
       specifier: ^4.7.0
       version: 4.7.0
@@ -249,6 +252,9 @@ importers:
       '@catppuccin/palette':
         specifier: 'catalog:'
         version: 1.8.0
+      '@hookform/resolvers':
+        specifier: 'catalog:'
+        version: 5.6.0(@standard-schema/spec@1.1.0)(ajv-errors@3.0.0(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.84.0(react@19.2.7))(zod@4.4.3)
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../../packages/@luke-ui/react
@@ -1132,6 +1138,84 @@ packages:
       tailwindcss: ^4.0.0
     peerDependenciesMeta:
       tailwindcss:
+        optional: true
+
+  '@hookform/resolvers@5.6.0':
+    resolution: {integrity: sha512-qtgE4NUK/WQFPq8aDe+GOhr0/UiUSKT0m9ta9SMnDS5ZE63yC850ShAGz1lxtwO+dBjhUKvUxmHwkp4eN7/kBQ==}
+    peerDependencies:
+      '@sinclair/typebox': '>=0.25.24'
+      '@standard-schema/spec': ^1.0.0
+      '@typeschema/main': '>=0.13.7'
+      '@vinejs/vine': ^2.0.0 || ^3.0.0
+      ajv: ^8.12.0
+      ajv-errors: ^3.0.0
+      ajv-formats: ^2.1.1
+      arktype: ^2.0.0
+      ata-validator: ^0.7.0
+      class-transformer: '>=0.4.0'
+      class-validator: '>=0.12.0'
+      computed-types: ^1.0.0
+      effect: ^3.10.3
+      fluentvalidation-ts: ^3.0.0
+      fp-ts: ^2.7.0
+      io-ts: ^2.0.0
+      joi: ^17.0.0
+      nope-validator: '>=0.12.0'
+      react-hook-form: ^7.55.0
+      superstruct: '>=0.12.0'
+      typanion: ^3.3.2
+      valibot: '>=0.31.0 || ^1.0.0-beta.4 || ^1.0.0-rc'
+      vest: '>=3.0.0'
+      yup: ^1.0.0
+      zod: ^3.25.0 || ^4.0.0
+    peerDependenciesMeta:
+      '@sinclair/typebox':
+        optional: true
+      '@standard-schema/spec':
+        optional: true
+      '@typeschema/main':
+        optional: true
+      '@vinejs/vine':
+        optional: true
+      ajv:
+        optional: true
+      ajv-errors:
+        optional: true
+      ajv-formats:
+        optional: true
+      arktype:
+        optional: true
+      ata-validator:
+        optional: true
+      class-transformer:
+        optional: true
+      class-validator:
+        optional: true
+      computed-types:
+        optional: true
+      effect:
+        optional: true
+      fluentvalidation-ts:
+        optional: true
+      fp-ts:
+        optional: true
+      io-ts:
+        optional: true
+      joi:
+        optional: true
+      nope-validator:
+        optional: true
+      superstruct:
+        optional: true
+      typanion:
+        optional: true
+      valibot:
+        optional: true
+      vest:
+        optional: true
+      yup:
+        optional: true
+      zod:
         optional: true
 
   '@humanfs/core@0.19.2':
@@ -3079,6 +3163,9 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@standard-schema/utils@0.3.0':
+    resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
   '@storybook/addon-a11y@10.5.5':
     resolution: {integrity: sha512-nsMnSRe7pzepXIkUUqI/rL7sp8juXOluyypU4Dz0UuYHhw/cKaxfzuO+3WJN5EtEr/gcnKYb4awxH/duPGavUw==}
@@ -8971,6 +9058,16 @@ snapshots:
     optionalDependencies:
       tailwindcss: 4.3.3
 
+  '@hookform/resolvers@5.6.0(@standard-schema/spec@1.1.0)(ajv-errors@3.0.0(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.84.0(react@19.2.7))(zod@4.4.3)':
+    dependencies:
+      '@standard-schema/utils': 0.3.0
+      react-hook-form: 7.84.0(react@19.2.7)
+    optionalDependencies:
+      '@standard-schema/spec': 1.1.0
+      ajv: 8.20.0
+      ajv-errors: 3.0.0(ajv@8.20.0)
+      zod: 4.4.3
+
   '@humanfs/core@0.19.2':
     dependencies:
       '@humanfs/types': 0.15.0
@@ -10740,6 +10837,8 @@ snapshots:
       text-hex: 1.0.0
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@standard-schema/utils@0.3.0': {}
 
   '@storybook/addon-a11y@10.5.5(storybook@10.5.5(@types/react@19.2.18)(prettier@3.9.5)(react@19.2.7)(vite-plus@0.2.7(@arethetypeswrong/core@0.18.5)(@opentelemetry/api@1.9.0)(@types/node@26.1.2)(@vitest/browser-playwright@4.1.10)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(@voidzero-dev/vite-plus-core@0.2.7(@arethetypeswrong/core@0.18.5)(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.22)(tsx@4.23.1)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.1)(jiti@2.7.0)(publint@0.3.22)(tsx@4.23.1)(typescript@7.0.2)(yaml@2.9.0)))':
     dependencies:

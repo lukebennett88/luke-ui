@@ -1,28 +1,25 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
-import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
 
-type FormValues = {
-	name: string;
-	email: string;
-};
+const schema = z.object({
+	email: z.email('Enter an email address in the form you@example.com.'),
+	name: z.string().min(1, 'Enter your name.'),
+});
 
 export default () => {
-	const [submittedName, setSubmittedName] = useState('');
-	const { control, handleSubmit } = useForm<FormValues>({
-		defaultValues: { name: '', email: '' },
+	const { control, formState, getValues, handleSubmit } = useForm({
+		defaultValues: { email: '', name: '' },
+		resolver: zodResolver(schema),
 	});
-
-	function onSubmit(values: FormValues) {
-		setSubmittedName(values.name);
-	}
 
 	return (
 		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<form onSubmit={handleSubmit(() => undefined)}>
 				<Box display="flex" flexDirection="column" gap="400">
 					<Controller
 						control={control}
@@ -39,7 +36,6 @@ export default () => {
 								value={field.value}
 							/>
 						)}
-						rules={{ required: 'Enter your name.' }}
 					/>
 					<Controller
 						control={control}
@@ -56,7 +52,6 @@ export default () => {
 								value={field.value}
 							/>
 						)}
-						rules={{ required: 'Enter your email address.' }}
 					/>
 					<Box>
 						<Button type="submit">Create account</Button>
@@ -64,7 +59,7 @@ export default () => {
 				</Box>
 			</form>
 			<Text elementType="p" role="status">
-				{submittedName ? `Submitted: ${submittedName}` : null}
+				{formState.isSubmitSuccessful ? `Submitted: ${getValues('name')}` : null}
 			</Text>
 		</Box>
 	);

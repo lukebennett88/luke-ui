@@ -1,0 +1,51 @@
+---
+title: React Hook Form
+description: Wire a Luke UI field to React Hook Form with Controller.
+---
+
+Luke UI fields report a change as a value, through `onChange(value)`, not as a DOM event. React Hook
+Form's `register` returns an `onChange` that reads `event.target.value`, so it cannot read a Luke UI
+field. Use `Controller`, which hands you a value and a setter.
+
+## Wire a field with Controller
+
+Pass `control` and a `name` to `Controller`. Its `render` prop hands you `field` and `fieldState`.
+Spread `field`'s `value`, `onChange`, and `onBlur` onto the Luke UI field. Read `fieldState.error`
+for the validation message.
+
+The examples below validate with a Zod schema through `zodResolver`. React Hook Form takes the
+form's value types from the schema, so no hand-written type repeats it.
+
+<ExampleBlock src="forms/react-hook-form" title="React Hook Form — Controller" />
+
+A checkbox works the same way. Map `field.value` to `isSelected` instead of `value`, since that is
+the prop `Checkbox` reads.
+
+<ExampleBlock src="forms/react-hook-form-checkbox" title="React Hook Form — Checkbox" />
+
+## Set validationBehavior to aria
+
+Fields default to `validationBehavior="native"`, which lets the browser block submission until every
+field passes its own constraint validation. The browser blocks first, so React Hook Form never runs
+its schema and `shouldFocusError` never fires.
+
+Set `validationBehavior="aria"` on every field a `Controller` wraps. React Hook Form then owns
+validation, and the browser marks the field for assistive technology instead of blocking submit.
+Read [Validation](/components/forms/validation) for the other `validationBehavior` options.
+
+## Pass field.ref to inputRef
+
+Give `field.ref` to `inputRef`, not `ref`. `TextField` and `Checkbox` render a label, description,
+and error message around the control, so they take no plain `ref`. `inputRef` reaches the input
+underneath.
+
+If you drop down to a primitive that renders the control itself, such as `ComboboxInput`, give
+`field.ref` to its `ref` prop instead.
+
+## Focus the first invalid field on submit
+
+React Hook Form focuses the first invalid field after a failed submission. It uses the ref each
+field registered, so a field that never received `field.ref` stays unfocused, and the person filling
+in the form gets an error message without being taken to it.
+
+Set `shouldFocusError` to `false` on `useForm` to turn this off.

@@ -138,6 +138,8 @@ const externalTypePackages: Array<[string, string]> = [
 	['@internationalized/number', resolvePackageDir(racPackageJsonPath, '@internationalized/number')],
 	['@internationalized/string', resolvePackageDir(racPackageJsonPath, '@internationalized/string')],
 	['react-hook-form', resolvePackageDir(docsPackageJsonPath, 'react-hook-form')],
+	['@hookform/resolvers', resolvePackageDir(docsPackageJsonPath, '@hookform/resolvers')],
+	['zod', resolvePackageDir(docsPackageJsonPath, 'zod')],
 ];
 for (const [packageName, packageDir] of externalTypePackages) {
 	addTypesPackage(packageName, packageDir);

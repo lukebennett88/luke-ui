@@ -1,27 +1,26 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
-import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
 
-type FormValues = {
-	terms: boolean;
-};
+const schema = z.object({
+	terms: z.boolean().refine((accepted) => accepted, {
+		error: 'Accept the terms of service before you continue.',
+	}),
+});
 
 export default () => {
-	const [hasAcceptedTerms, setHasAcceptedTerms] = useState(false);
-	const { control, handleSubmit } = useForm<FormValues>({
+	const { control, formState, handleSubmit } = useForm({
 		defaultValues: { terms: false },
+		resolver: zodResolver(schema),
 	});
-
-	function onSubmit() {
-		setHasAcceptedTerms(true);
-	}
 
 	return (
 		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
-			<form onSubmit={handleSubmit(onSubmit)}>
+			<form onSubmit={handleSubmit(() => undefined)}>
 				<Box display="flex" flexDirection="column" gap="400">
 					<Controller
 						control={control}
@@ -39,7 +38,6 @@ export default () => {
 								I accept the terms of service
 							</Checkbox>
 						)}
-						rules={{ required: 'Accept the terms of service before you continue.' }}
 					/>
 					<Box>
 						<Button type="submit">Continue</Button>
@@ -47,7 +45,7 @@ export default () => {
 				</Box>
 			</form>
 			<Text elementType="p" role="status">
-				{hasAcceptedTerms ? 'Terms accepted.' : null}
+				{formState.isSubmitSuccessful ? 'Terms accepted.' : null}
 			</Text>
 		</Box>
 	);
