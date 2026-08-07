@@ -5,10 +5,11 @@
  * adaptation and the resolution of curated defaults (materials, radius, scrim).
  */
 
-import { buildTheme } from './build-theme.js';
+import { buildTheme, ThemeContrastError } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { clampUnit, formatOklch, gamutMapOklch, parseColor } from './color.js';
 import { CONTRAST_SEARCH_STEP, TEXT_RATIO } from './contrast-policy.js';
+import { resolveThemeInput } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import { defaultSourceColors } from './foundation.js';
 import { passesOnSolidGate } from './scale.js';
@@ -46,47 +47,15 @@ export interface ControlFinish {
 }
 
 /**
- * The curated theme-authoring input. A basic theme authors an accent and a neutral character and
- * lets everything else default; materials are optional and deep-partial; light and dark stay
- * independently authorable.
+ * The theme identity plus the optional sections a theme inherits key by key. Shared by a theme that
+ * authors its own accent and one that extends another theme.
  */
-export interface ThemeInput {
+interface ThemeInputCommon {
 	/**
 	 * Kebab-case theme identity, for example `'tactile'`. The theme's identity class is
 	 * `luke-ui-theme-${name}`.
 	 */
 	name: string;
-	/** Source colours. Each is one value (adapted per mode) or an explicit `{ light, dark }` pair. */
-	color: {
-		/** Required — the brand or interaction accent. */
-		accent: ColorInput;
-		/** Neutral canvas anchor. Give a raw colour, or set `neutralStyle` for a curated neutral. */
-		neutral?: ColorInput;
-		/**
-		 * Curated neutral character when `neutral` is omitted; sets the neutral hue and tint while the
-		 * mode sets its lightness.
-		 * @default 'neutral'
-		 */
-		neutralStyle?: 'cool' | 'neutral' | 'warm';
-		/**
-		 * The canvas anchor, split from `neutral`'s hue/chroma character. Give a raw colour to move the
-		 * canvas away from the resolved neutral while keeping the neutral family's own character.
-		 * Defaults to the resolved neutral canvas anchor.
-		 */
-		background?: ColorInput;
-		/** Source colour for the `info` role. Defaults to an accessible Luke UI blue for the mode. */
-		info?: ColorInput;
-		/** Source colour for the `success` role. Defaults to an accessible Luke UI green for the mode. */
-		success?: ColorInput;
-		/** Source colour for the `warning` role. Defaults to an accessible Luke UI amber for the mode. */
-		warning?: ColorInput;
-		/** Source colour for the `danger` role. Defaults to an accessible Luke UI red for the mode. */
-		danger?: ColorInput;
-		/** Keyboard-focus ring colour, used verbatim after gamut mapping. Defaults per mode. */
-		focus?: ColorInput;
-		/** Modal-backdrop dimming colour, used verbatim; defaults to black at a mode-aware alpha. */
-		scrim?: ColorInput;
-	};
 	/** Typography — family and weights only. The type scale is source-owned (not authored here). */
 	typography?: {
 		/**
@@ -130,6 +99,62 @@ export interface ThemeInput {
 	 * to `'none'` (a flat control).
 	 */
 	actionControlFinish?: { light?: Partial<ControlFinish>; dark?: Partial<ControlFinish> };
+}
+
+/**
+ * The curated theme-authoring input for a theme that authors its own accent. A basic theme authors
+ * an accent and a neutral character and lets everything else default. Materials are optional and
+ * deep-partial, and light and dark stay independently authorable. A theme that starts from another
+ * theme instead uses {@link ExtendingThemeInput}.
+ */
+export interface ThemeInput extends ThemeInputCommon {
+	/** Source colours. Each is one value (adapted per mode) or an explicit `{ light, dark }` pair. */
+	color: {
+		/** Required — the brand or interaction accent. */
+		accent: ColorInput;
+		/** Neutral canvas anchor. Give a raw colour, or set `neutralStyle` for a curated neutral. */
+		neutral?: ColorInput;
+		/**
+		 * Curated neutral character when `neutral` is omitted; sets the neutral hue and tint while the
+		 * mode sets its lightness.
+		 * @default 'neutral'
+		 */
+		neutralStyle?: 'cool' | 'neutral' | 'warm';
+		/**
+		 * The canvas anchor, split from `neutral`'s hue/chroma character. Give a raw colour to move the
+		 * canvas away from the resolved neutral while keeping the neutral family's own character.
+		 * Defaults to the resolved neutral canvas anchor.
+		 */
+		background?: ColorInput;
+		/** Source colour for the `info` role. Defaults to an accessible Luke UI blue for the mode. */
+		info?: ColorInput;
+		/** Source colour for the `success` role. Defaults to an accessible Luke UI green for the mode. */
+		success?: ColorInput;
+		/** Source colour for the `warning` role. Defaults to an accessible Luke UI amber for the mode. */
+		warning?: ColorInput;
+		/** Source colour for the `danger` role. Defaults to an accessible Luke UI red for the mode. */
+		danger?: ColorInput;
+		/** Keyboard-focus ring colour, used verbatim after gamut mapping. Defaults per mode. */
+		focus?: ColorInput;
+		/** Modal-backdrop dimming colour, used verbatim; defaults to black at a mode-aware alpha. */
+		scrim?: ColorInput;
+	};
+	/**
+	 * A theme to start from. Every value this theme leaves out comes from the base. `name` never
+	 * inherits, so an extending theme always declares its own identity.
+	 */
+	extends?: ThemeInput | ExtendingThemeInput;
+}
+
+/**
+ * A theme that starts from another theme. It declares its own `name` and a base to extend, and every
+ * other value is an override. Use it to change one part of a bundled theme.
+ */
+export interface ExtendingThemeInput extends ThemeInputCommon {
+	/** The theme to start from. Its own base, if it has one, resolves first. */
+	extends: ThemeInput | ExtendingThemeInput;
+	/** Source-colour overrides. Every role the theme leaves out comes from the base. */
+	color?: Partial<ThemeInput['color']>;
 }
 
 type ColorMode = 'light' | 'dark';
@@ -197,23 +222,36 @@ const DEFAULT_RADIUS_MULTIPLIER = 1;
 const RADIUS_STEPS = { control: 2, detail: 1, overlay: 4, surface: 3 } as const;
 
 /**
- * Compiles a curated {@link ThemeInput} into a complete static stylesheet. Normalises the input
- * into the per-mode {@link ThemeFoundation} shape — adapting single-value accents and neutrals per
- * mode, generating the radius scale, and merging materials over curated defaults — then delegates
- * to {@link buildTheme}, whose build-time contrast validation stays authoritative. Throws when a
- * single-value accent has no accessible lightness in a mode, and (via `buildTheme`) throws
- * {@link ThemeContrastError} when any resolved pair misses WCAG 2.2 AA.
+ * Compiles a curated {@link ThemeInput} into a complete static stylesheet. Resolves any `extends`
+ * chain into one merged input first, then normalises it into the per-mode {@link ThemeFoundation}
+ * shape — adapting single-value accents and neutrals per mode, generating the radius scale, and
+ * merging materials over curated defaults — then delegates to {@link buildTheme}, whose build-time
+ * contrast validation stays authoritative. Throws when a single-value accent has no accessible
+ * lightness in a mode, and (via `buildTheme`) throws {@link ThemeContrastError} when any resolved
+ * pair misses WCAG 2.2 AA.
  */
-export function defineTheme(input: ThemeInput): string {
-	return buildTheme(normalizeTheme(input));
+export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
+	const resolved = resolveThemeInput(input);
+	try {
+		return buildTheme(normalizeTheme(resolved.input));
+	} catch (error) {
+		// The compiler sees one merged input and stays ignorant of authoring inheritance, so the
+		// authoring surface is the layer that can name where a failing colour came from.
+		if (error instanceof ThemeContrastError && resolved.inheritance !== null) {
+			throw new ThemeContrastError(error.failures, resolved.inheritance);
+		}
+		throw error;
+	}
 }
 
 /**
  * Resolves a {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} `buildTheme`
- * consumes. Exported for internal callers and tests only; it is not part of the public package
- * entry, where `defineTheme` is the sole authoring surface.
+ * consumes, resolving any `extends` chain into one merged input first. Exported for internal callers
+ * and tests only; it is not part of the public package entry, where `defineTheme` is the sole
+ * authoring surface.
  */
-export function normalizeTheme(input: ThemeInput): ThemeFoundation {
+export function normalizeTheme(themeInput: ThemeInput | ExtendingThemeInput): ThemeFoundation {
+	const input = resolveThemeInput(themeInput).input;
 	const foundation: ThemeFoundation = {
 		dark: buildModeFoundation(input, 'dark'),
 		light: buildModeFoundation(input, 'light'),

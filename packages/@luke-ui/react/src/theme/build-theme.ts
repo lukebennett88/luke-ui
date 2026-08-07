@@ -12,6 +12,7 @@ import type {
 } from './diagnostics.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import { generateSurfaces } from './elevation.js';
+import type { ThemeInheritance } from './extend-theme.js';
 import type {
 	SOURCE_COLOR_FIELDS,
 	ThemeFoundation,
@@ -68,15 +69,22 @@ export function buildTheme(foundation: ThemeFoundation): string {
 // now that the failure shape lives in its own module.
 export type { ThemeContrastFailure } from './contrast-validation.js';
 
+/** The colour provenance `defineTheme` records for a theme built from an `extends` chain. */
+export type { ThemeInheritance } from './extend-theme.js';
+
 /**
  * Thrown by `buildTheme` when generated colours miss WCAG 2.2 AA contrast. Aggregates every
- * failing mode-and-pair before throwing, one per message line.
+ * failing mode-and-pair before throwing, one per message line. For a theme built from an `extends`
+ * chain, `defineTheme` supplies the {@link ThemeInheritance} that names the chain and separates the
+ * inherited colours from the theme's own.
  */
 export class ThemeContrastError extends Error {
 	/** Every failing pair across both modes. */
 	readonly failures: Array<ThemeContrastFailure>;
+	/** The colour provenance, or `null` when the theme extends nothing. */
+	readonly inheritance: ThemeInheritance | null;
 
-	constructor(failures: Array<ThemeContrastFailure>) {
+	constructor(failures: Array<ThemeContrastFailure>, inheritance: ThemeInheritance | null = null) {
 		super(
 			[
 				'Theme foundation fails WCAG 2.2 AA contrast:',
@@ -86,11 +94,27 @@ export class ThemeContrastError extends Error {
 						`${failure.ratio.toFixed(2)}:1 < ${failure.required}:1`
 					);
 				}),
+				...inheritanceLines(inheritance),
 			].join('\n'),
 		);
 		this.failures = failures;
+		this.inheritance = inheritance;
 		this.name = 'ThemeContrastError';
 	}
+}
+
+/** The message lines that trace a failing theme back to the themes its colours came from. */
+function inheritanceLines(inheritance: ThemeInheritance | null): Array<string> {
+	if (inheritance === null) return [];
+	const provenance = [
+		inheritance.inheritedColors.length > 0
+			? `Inherited colours: ${inheritance.inheritedColors.join(', ')}.`
+			: '',
+		inheritance.ownColors.length > 0 ? `Own colours: ${inheritance.ownColors.join(', ')}.` : '',
+	].filter((sentence) => sentence !== '');
+	const lines = [`Theme ${inheritance.chain.map((name) => `"${name}"`).join(' extends ')}.`];
+	if (provenance.length > 0) lines.push(provenance.join(' '));
+	return lines;
 }
 
 /**
