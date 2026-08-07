@@ -18,8 +18,9 @@ const BACKGROUND: Record<ColorMode, Oklch> = {
 
 const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
 
-// A stand-in for `build-theme.ts`'s `solveControlBorder` output: mapSemanticColors only aliases this
-// through, so any distinct Oklch value proves the passthrough without re-testing the solver itself.
+// A stand-in for `control-border.ts`'s `solveControlBorder` output: mapSemanticColors only
+// aliases this through, so any distinct Oklch value proves the passthrough without re-testing
+// the solver itself.
 const CONTROL_BORDER: Record<ColorMode, Oklch> = {
 	dark: parseColor('oklch(0.62 0.006 250)'),
 	light: parseColor('oklch(0.38 0.006 250)'),
