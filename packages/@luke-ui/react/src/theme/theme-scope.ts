@@ -13,7 +13,7 @@ export interface ThemeScope {
 
 /**
  * Internal to the `theme` directory: `Theme` provides it and `useThemeScope`/`useThemeScopeProps`
- * read it. Not re-exported from the barrel — consumers use the hooks instead.
+ * read it. It is not re-exported from the barrel. Consumers use `Theme` and `useThemeScopeProps`.
  */
 export const ThemeScopeContext = createContext<ThemeScope | null>(null);
 

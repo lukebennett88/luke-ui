@@ -9,8 +9,8 @@
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
 /**
- * Prefix shared by every theme's identity class, before the theme name. The one place this
- * literal is written; `themeClassName` and the DOM-fallback path in `useThemeScopeProps` both
+ * Prefix shared by every theme's identity class, before the theme name. This is the one place the
+ * literal is written. `themeClassName` and the DOM-fallback path in `useThemeScopeProps` both
  * build from it instead of repeating it.
  */
 export const THEME_CLASS_NAME_PREFIX = 'luke-ui-theme-';

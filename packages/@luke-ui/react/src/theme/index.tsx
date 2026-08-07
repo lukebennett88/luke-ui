@@ -7,7 +7,7 @@ export { themeRootClassName } from './theme-root-class-name.js';
 
 /**
  * `Theme` applies a theme identity and/or colour mode to a React subtree. It is the recommended
- * entrypoint for theming a React app; `themeRootClassName` and `themeClassName` remain the
+ * entrypoint for theming a React app. `themeRootClassName` and `themeClassName` remain the
  * low-level path underneath it.
  */
 export { Theme } from './theme.js';
@@ -15,14 +15,8 @@ export { Theme } from './theme.js';
 /** Props for {@link Theme}. */
 export type { ThemeProps } from './theme.js';
 
-/**
- * `useThemeScope` reads the {@link ThemeScope} of the nearest enclosing `Theme`, or `null` outside
- * of one.
- */
-export { useThemeScope } from './theme-scope.js';
-
-/** The theme identity and colour mode a `Theme` applies to its subtree, and its colour mode type. */
-export type { ColorMode, ThemeScope } from './theme-scope.js';
+/** An explicit colour mode, as passed to {@link Theme} and returned by `useThemeScopeProps`. */
+export type { ColorMode } from './theme-scope.js';
 
 /**
  * `useThemeScopeProps` carries the enclosing theme scope onto a portal root React does not

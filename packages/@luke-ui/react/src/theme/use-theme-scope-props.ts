@@ -9,11 +9,11 @@ import { useThemeScope } from './theme-scope.js';
 /** Options for `useThemeScopeProps`. */
 export interface UseThemeScopePropsOptions {
 	/**
-	 * An element inside the themed subtree the portal belongs to. Used only when no `Theme`
-	 * encloses the portal, to recover the identity and colour mode from the DOM instead: ancestors
-	 * of `sourceRef.current` (or, when omitted, `document.activeElement`) are walked for the
-	 * outermost identity class and the nearest `data-color-mode`. Pass the trigger element, since
-	 * it sits inside the themed subtree the portal is conceptually part of.
+	 * An element inside the themed subtree the portal belongs to. It applies only when no `Theme`
+	 * encloses the portal. The hook then walks the ancestors of `sourceRef.current` for the
+	 * outermost identity class and the nearest `data-color-mode`. It walks from
+	 * `document.activeElement` when this option is omitted. Pass the trigger element, because it
+	 * sits inside the subtree the portal belongs to.
 	 */
 	sourceRef?: RefObject<Element | null>;
 }
@@ -31,12 +31,13 @@ const noopRef: RefCallback<HTMLElement> = () => {};
  * Carries the enclosing theme scope onto a portal root that React does not otherwise place inside
  * the themed subtree (for example a popover rendered into `document.body`).
  *
- * When a `Theme` encloses the call site, the returned props are declarative: they read the
- * identity and colour mode straight from context, so a later change to either is applied on the
- * next render. Otherwise, they fall back to the documented low-level path: `className` is just
- * `themeRootClassName`, and the returned `ref` callback carries the identity class and colour mode
- * from the DOM ancestors of `sourceRef.current` (or `document.activeElement`) once, when the
- * portal element mounts.
+ * When a `Theme` encloses the call site, the returned props are declarative. They read the
+ * identity and colour mode straight from context. A later change to either applies on the next
+ * render.
+ *
+ * Otherwise they fall back to the documented low-level path. `className` is `themeRootClassName`
+ * alone, and the returned `ref` callback carries the identity class and colour mode from the DOM.
+ * It reads them once, when the portal element mounts.
  */
 export function useThemeScopeProps(options?: UseThemeScopePropsOptions): ThemeScopeProps {
 	const scope = useThemeScope();

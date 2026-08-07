@@ -107,9 +107,11 @@ The bundled themes ship precompiled. Import `@luke-ui/react/themes/tactile.css` 
 `<Theme name="paper">` from `@luke-ui/react/theme`. Importing one theme never pulls in the other.
 
 Omit `colorMode` to follow `prefers-color-scheme`. Set `colorMode="light"` or `colorMode="dark"` on
-a `Theme` to force that mode for its subtree; a nested `Theme` without a `name` overrides just the
-mode, without re-applying the identity or the reset. Every scope also sets native `color-scheme` so
-form controls and scrollbars agree.
+a `Theme` to force that mode for its subtree. A nested `Theme` without a `name` overrides just the
+mode, without re-applying the identity or the reset. The emitted CSS also matches a
+`data-color-mode` attribute on an ancestor of the theme root, so a framework that writes the mode
+onto `<html>` still drives a `Theme` below it. Every scope also sets native `color-scheme` so form
+controls and scrollbars agree.
 
 Components move to the semantic contract in the component-family migration slices.
 
@@ -117,7 +119,7 @@ Components move to the semantic contract in the component-family migration slice
 them directly to `<html>`, another non-React root, or when composing a scope by hand, together with
 a `data-color-mode` attribute. Luke UI's portalled Combobox popover carries the enclosing `Theme`'s
 identity and colour mode onto its portal automatically. Portals an application owns can call the
-same `useThemeScopeProps` hook from `@luke-ui/react/theme` to do the same; without an enclosing
+same `useThemeScopeProps` hook from `@luke-ui/react/theme` to do the same. Without an enclosing
 `Theme`, it falls back to reading the identity class and `data-color-mode` from the DOM ancestors of
 a given trigger element.
 

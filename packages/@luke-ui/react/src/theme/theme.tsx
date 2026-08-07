@@ -11,7 +11,7 @@ export interface ThemeProps extends ComponentProps<'div'> {
 	/** The explicit colour mode. Omit it to follow `prefers-color-scheme`. */
 	colorMode?: ColorMode;
 	/**
-	 * The theme's name, as given to `defineTheme`. Provide it to start a theme root; omit it to
+	 * The theme's name, as given to `defineTheme`. Provide it to start a theme root. Omit it to
 	 * change only the colour mode of an enclosing `Theme`'s identity. Do not nest one named
 	 * `Theme` inside another.
 	 */
@@ -21,19 +21,20 @@ export interface ThemeProps extends ComponentProps<'div'> {
 /**
  * Applies a theme identity and/or colour mode to a subtree.
  *
- * With `name`, this is a theme root: it renders the CSS reset, the base theme layer, and the
- * named identity, matching a hand-built `cx(themeRootClassName, themeClassName(name))`. Without
- * `name`, it changes only the colour mode of the identity established by an enclosing `Theme` —
- * it renders no reset and no identity class of its own, so the reset never runs twice and the
- * identity is never re-applied.
+ * With `name`, this is a theme root. It renders the CSS reset, the base theme layer, and the
+ * named identity. The result matches a hand-built `cx(themeRootClassName, themeClassName(name))`.
  *
- * `data-color-mode` is always rendered, including as `undefined` (which React omits) when the
- * scope follows the system preference, so server rendering emits the same markup a client
- * hydrates against.
+ * Without `name`, it changes only the colour mode of the enclosing `Theme`'s identity. It renders
+ * no reset and no identity class of its own. The reset never runs twice, and the identity is never
+ * re-applied.
  *
- * Identities do not nest. A named `Theme` inside another one emits an identity class that ties
- * with the outer identity's `[data-color-mode]` rules at equal specificity, so which one wins
- * depends on stylesheet order. Render an independent theme root outside the first instead.
+ * `data-color-mode` is always rendered. It is `undefined` when the scope follows the system
+ * preference, which React omits. Server rendering therefore emits the markup a client hydrates
+ * against.
+ *
+ * Identities do not nest. A named `Theme` inside another emits an identity class that ties with
+ * the outer identity's `[data-color-mode]` rules at equal specificity. The winner then depends on
+ * stylesheet order. Render an independent theme root outside the first instead.
  */
 export function Theme(props: ThemeProps): JSX.Element {
 	const { children, className, colorMode, name, ref, ...restProps } = props;

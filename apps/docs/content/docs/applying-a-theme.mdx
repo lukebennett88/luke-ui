@@ -48,11 +48,16 @@ the interface must stay light or dark independently of its parent.
 
 ## Avoid a colour-mode flash
 
-`Theme` renders `data-color-mode` in the initial HTML, including as an omitted attribute when the
-mode follows the system preference. When the mode comes from a client-side preference instead,
-resolve it before the themed UI's first render.
+`colorMode` is a rendered attribute, so when the server knows the mode it lands in the initial HTML
+and the first paint is already correct.
 
-The server HTML and first client render must use the same value to avoid a hydration warning.
+When the mode comes from a client-side preference the server cannot know it. Omit `colorMode` until
+the preference is read, and have a blocking script set `data-color-mode` on an ancestor of the theme
+root, such as `<html>`, before the first paint. An ancestor's mode applies to the theme root below
+it, so the subtree paints in the right mode without a flash.
+
+The server HTML and first client render must pass the same `colorMode` to avoid a hydration warning.
+Omitting it on both, and letting the ancestor attribute carry the mode, satisfies that.
 
 ## Preserve the theme in portals
 
