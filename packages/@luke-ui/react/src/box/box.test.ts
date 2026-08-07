@@ -16,13 +16,34 @@ const boxProps = {
 	},
 } satisfies BoxProps;
 
+const anchorBoxProps = {
+	elementType: 'a',
+	href: '/account',
+	padding: '400',
+} satisfies BoxProps<'a'>;
+
+function acceptsBoxProps(props: BoxProps): BoxProps {
+	return props;
+}
+
+function acceptsAnchorBoxProps(props: BoxProps<'a'>): BoxProps<'a'> {
+	return props;
+}
+
 // Type assertions are compile-time only.
 // oxlint-disable-next-line vitest/expect-expect
-test('preserves native DOM, render, and responsive layout props', () => {
+test('types DOM props from the chosen element and keeps elementType and render exclusive', () => {
 	expectTypeOf(boxProps).toExtend<BoxProps>();
 	expectTypeOf(boxProps.render).toExtend<BoxProps['render']>();
 	expectTypeOf(boxProps.display).toEqualTypeOf<{
 		initial: 'block';
 		medium: 'flex';
 	}>();
+	expectTypeOf(anchorBoxProps).toExtend<BoxProps<'a'>>();
+
+	// @ts-expect-error `href` is not a div prop, so it is rejected without `elementType`.
+	acceptsBoxProps({ href: '/account' });
+
+	// @ts-expect-error `elementType` and `render` are mutually exclusive.
+	acceptsAnchorBoxProps({ elementType: 'a', href: '/account', render: boxProps.render });
 });

@@ -1,15 +1,15 @@
 ---
 title: Box
-description: A div with responsive Luke UI layout properties.
+description: A layout element with responsive Luke UI layout properties.
 source: packages/@luke-ui/react/src/box
 props:
   - name: BoxProps
     path: packages/@luke-ui/react/src/box/index.tsx
 ---
 
-`Box` is a `div` that accepts Luke UI layout properties. It places content in a layout, adds token
-spacing, constrains an element's size, or controls a flex or grid child. Use a normal `div` when no
-supported layout property applies.
+`Box` accepts Luke UI layout properties and renders a `div` by default. It places content in a
+layout, adds token spacing, constrains an element's size, or controls a flex or grid child. Use a
+normal `div` when no supported layout property applies.
 
 <ExampleBlock src="box/basic" title="Box — Basic" />
 
@@ -53,11 +53,33 @@ Padding, gap, and margin accept `0` and the semantic steps `100`, `200`, `300`, 
 `1000`, `1200`, and `1600`. Margin also accepts `auto`. Sizing, inset, flex-basis, order, and
 grid-placement properties accept their CSS values.
 
+## Choose the rendered element
+
+Set `elementType` to render an element other than `div`, such as an `a`. Box's DOM props then match
+that element, so `href` and other element-specific attributes type-check.
+
+`elementType` accepts a curated set of layout and sectioning elements: `a`, `article`, `aside`,
+`div`, `footer`, `header`, `li`, `main`, `nav`, `ol`, `section`, `span`, and `ul`. Elements that
+carry their own behaviour, such as `input` or `button`, are not included. Use a dedicated component
+or the `render` prop for those cases.
+
+Use `Link` from `@luke-ui/react/link` for link styling, tone, and a standalone target.
+`elementType="a"` suits a layout region that needs to be a link, such as a card.
+
+<ExampleBlock src="box/anchor-element" title="Box — Anchor element" />
+
+```tsx
+<Box elementType="a" href="#account-summary" padding="400">
+	Account summary
+</Box>
+```
+
 ## Render a custom div
 
 Use `render` for a compatible custom `div`, such as a motion wrapper. Spread the supplied props on
 the final element. It then receives Box's class name, inline style, ref, accessibility attributes,
-and event handlers. `render` does not make Box polymorphic. It must return a `div`.
+and event handlers. `render` keeps the rendered element a `div`. Use `elementType` to change the
+element instead.
 
 ```tsx
 <Box padding="400" render={(props) => <MotionDiv {...props} />}>

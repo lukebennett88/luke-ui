@@ -64,6 +64,12 @@ Return one DOM root. Custom wrappers must pass the supplied `ref` to that elemen
 
 The second `render` argument contains interaction state such as `isPressed`.
 
+Choose between `Box`'s two related props for the same reason. Set `elementType` when you only need a
+different supported element, such as an `a` instead of a `div`. Use `render` to wrap the element in
+a compatible custom component, such as a motion wrapper. It keeps the element a `div`.
+
+<SourceCodeBlock src="composition/box-element-choice" />
+
 ## Style the new pattern
 
 Use public recipes from `@luke-ui/react/recipes` when the custom composition follows that
