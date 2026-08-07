@@ -121,6 +121,8 @@ const typesReactDir = resolvePackageDir(docsPackageJsonPath, '@types/react');
 const recipesDir = resolvePackageDir(docsPackageJsonPath, '@vanilla-extract/recipes');
 const racDir = resolvePackageDir(docsPackageJsonPath, 'react-aria-components');
 const racPackageJsonPath = join(racDir, 'package.json');
+const reactFormDir = resolvePackageDir(docsPackageJsonPath, '@tanstack/react-form');
+const reactFormPackageJsonPath = join(reactFormDir, 'package.json');
 const externalTypePackages: Array<[string, string]> = [
 	['@types/react', typesReactDir],
 	['@types/react-dom', resolvePackageDir(docsPackageJsonPath, '@types/react-dom')],
@@ -137,6 +139,13 @@ const externalTypePackages: Array<[string, string]> = [
 	['@internationalized/date', resolvePackageDir(racPackageJsonPath, '@internationalized/date')],
 	['@internationalized/number', resolvePackageDir(racPackageJsonPath, '@internationalized/number')],
 	['@internationalized/string', resolvePackageDir(racPackageJsonPath, '@internationalized/string')],
+	['react-hook-form', resolvePackageDir(docsPackageJsonPath, 'react-hook-form')],
+	['@hookform/resolvers', resolvePackageDir(docsPackageJsonPath, '@hookform/resolvers')],
+	['@tanstack/react-form', reactFormDir],
+	['@tanstack/form-core', resolvePackageDir(reactFormPackageJsonPath, '@tanstack/form-core')],
+	['@tanstack/react-store', resolvePackageDir(reactFormPackageJsonPath, '@tanstack/react-store')],
+	['@tanstack/store', resolvePackageDir(reactFormPackageJsonPath, '@tanstack/store')],
+	['zod', resolvePackageDir(docsPackageJsonPath, 'zod')],
 ];
 for (const [packageName, packageDir] of externalTypePackages) {
 	addTypesPackage(packageName, packageDir);

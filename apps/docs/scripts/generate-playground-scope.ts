@@ -32,7 +32,19 @@ const lukeUiSpecifiers = Object.keys(reactPackageJson.exports)
 	.sort();
 
 const baseSpecifiers = ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'];
-const specifiers = [...lukeUiSpecifiers, ...baseSpecifiers];
+
+// Third-party packages that docs examples import directly (beyond React
+// internals above). Add a package here — and to the types allowlist in
+// generate-playground-types.ts, if its payload cost is reasonable — whenever
+// an example needs to import it in the playground.
+const thirdPartySpecifiers = [
+	'@hookform/resolvers/zod',
+	'@tanstack/react-form',
+	'react-hook-form',
+	'zod',
+];
+
+const specifiers = [...lukeUiSpecifiers, ...baseSpecifiers, ...thirdPartySpecifiers];
 
 const SPECIFIER_TO_IDENTIFIER_RE = /^@|[^a-zA-Z0-9]+/g;
 
