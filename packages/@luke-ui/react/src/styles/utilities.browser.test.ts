@@ -1,4 +1,4 @@
-import '../../dist/themes/tactile.css';
+import '../../dist/themes/tactile/stylesheet.css';
 import '../stylesheet.css.js';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';

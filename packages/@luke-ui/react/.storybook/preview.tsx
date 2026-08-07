@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
-import '../dist/themes/paper.css';
-import '../dist/themes/tactile.css';
+import '../dist/themes/paper/stylesheet.css';
+import '../dist/themes/tactile/stylesheet.css';
 import '@luke-ui/react/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';

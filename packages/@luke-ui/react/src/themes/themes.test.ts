@@ -1,12 +1,16 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
 import packageJson from '../../package.json' with { type: 'json' };
-import { themeClassName as paperThemeClassName } from './paper/index.js';
-import { themeClassName as tactileThemeClassName } from './tactile/index.js';
+import { getThemeClassName } from '../theme/theme-class-name.js';
+import { theme as paperThemeInput, themeClassName as paperThemeClassName } from './paper/index.js';
+import {
+	theme as tactileThemeInput,
+	themeClassName as tactileThemeClassName,
+} from './tactile/index.js';
 
 const themeArtifacts = {
-	paper: new URL('../../dist/themes/paper.css', import.meta.url),
-	tactile: new URL('../../dist/themes/tactile.css', import.meta.url),
+	paper: new URL('../../dist/themes/paper/stylesheet.css', import.meta.url),
+	tactile: new URL('../../dist/themes/tactile/stylesheet.css', import.meta.url),
 } as const;
 
 const themeEntrypoints = {
@@ -18,9 +22,20 @@ describe('bundled theme package exports', () => {
 	it('publishes a per-theme entrypoint and stylesheet, with no combined barrel', () => {
 		expect(packageJson.exports['./themes/tactile']).toBe('./dist/themes/tactile/index.js');
 		expect(packageJson.exports['./themes/paper']).toBe('./dist/themes/paper/index.js');
-		expect(packageJson.exports['./themes/tactile.css']).toBe('./dist/themes/tactile.css');
-		expect(packageJson.exports['./themes/paper.css']).toBe('./dist/themes/paper.css');
+		expect(packageJson.exports['./themes/tactile/stylesheet.css']).toBe(
+			'./dist/themes/tactile/stylesheet.css',
+		);
+		expect(packageJson.exports['./themes/paper/stylesheet.css']).toBe(
+			'./dist/themes/paper/stylesheet.css',
+		);
 		expect('./themes' in packageJson.exports).toBe(false);
+	});
+
+	// Each identity-class leaf holds its theme's name as a literal, so the class costs a consumer
+	// nothing but the string. That literal can drift from the foundation, and this is what catches it.
+	it('derives each identity class from its own theme name', () => {
+		expect(paperThemeClassName).toBe(getThemeClassName(paperThemeInput.name));
+		expect(tactileThemeClassName).toBe(getThemeClassName(tactileThemeInput.name));
 	});
 
 	it('exports each generated stylesheet as an independent package entrypoint', async () => {

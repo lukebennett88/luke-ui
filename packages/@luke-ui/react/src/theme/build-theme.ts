@@ -65,8 +65,7 @@ export function buildTheme(foundation: ThemeFoundation): string {
 }
 
 // Re-exported so `./build-theme.js` stays the one import path for the compiler's public surface,
-// now that the theme-name solver and the failure shape live in their own modules.
-export { themeClassName } from './theme-class-name.js';
+// now that the failure shape lives in its own module.
 export type { ThemeContrastFailure } from './contrast-validation.js';
 
 /**

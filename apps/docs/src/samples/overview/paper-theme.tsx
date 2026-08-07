@@ -1,4 +1,4 @@
-import '@luke-ui/react/themes/paper.css';
+import '@luke-ui/react/themes/paper/stylesheet.css';
 import { rootClassName } from '@luke-ui/react/theme';
 import type { PropsWithChildren } from 'react';
 

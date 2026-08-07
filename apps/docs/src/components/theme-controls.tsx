@@ -40,10 +40,8 @@ export function DocsThemeRoot({ children }: PropsWithChildren) {
 	const themeIdentity = useThemeIdentity();
 	const settings = useMemo(() => ({ setThemeIdentity, themeIdentity }), [themeIdentity]);
 
-	// The docs site loads both bundled theme stylesheets, so an explicit identity class is
-	// required to make one authoritative. It goes on `<html>`, not this root `div`, so a
-	// body-level portal inherits it too. `useInsertionEffect` applies it before the browser paints,
-	// and its cleanup removes the previous identity first, so the two never both sit on `<html>`.
+	// The class goes on `<html>`, not this root `div`, so a body-level portal inherits it too.
+	// `useInsertionEffect` applies it before the browser paints.
 	useInsertionEffect(() => {
 		const identityClassName = THEME_IDENTITY_CLASS_NAMES[themeIdentity];
 		document.documentElement.classList.add(identityClassName);

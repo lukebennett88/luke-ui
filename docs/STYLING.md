@@ -5,8 +5,8 @@
 Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities. Consumers
 import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from `@luke-ui/react/theme` to
 `<body>`, `<main>`, or an app shell. Import one bundled theme stylesheet, for example
-`@luke-ui/react/themes/tactile.css`. That alone themes the whole document from `:root`, with no
-class and no JS required. Neither step injects styles at runtime.
+`@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes the whole document from
+`:root`, with no class and no JS required. Neither step injects styles at runtime.
 
 ## Structure
 
@@ -62,14 +62,20 @@ class and no JS required. Neither step injects styles at runtime.
 - `theme/token-board.tsx`: the contract-driven "Theme/Token board" Storybook story, which renders
   every contract leaf for the active theme and colour mode.
 - `theme/build-theme.ts`: the internal `compileTheme(foundation) → { css, diagnostics }` value
-  pipeline, `buildTheme`, `themeClassName`, and contrast validation.
+  pipeline, `buildTheme`, and contrast validation.
+- `theme/theme-class-name.ts`: `getThemeClassName(name)`, the one home for the identity class and its
+  kebab-case rule, exported from `@luke-ui/react/theme`. It imports nothing, so importing a class
+  never drags in the compiler or a foundation.
 - `theme/foundations/tactile.ts` and `theme/foundations/paper.ts`: each bundled theme's
   `defineTheme(...)` input, kept as separate leaf modules so importing one never pulls in the other.
 - `themes/tactile/` and `themes/paper/`: each theme's public entrypoint, exported from
   `@luke-ui/react/themes/tactile` and `@luke-ui/react/themes/paper`. Each exports its own
   `themeClassName` identity class and its `theme` (the public `ThemeInput` a consumer can read,
-  copy, or spread).
-- `scripts/build-themes.ts`: writes the bundled theme stylesheets to `dist/themes/`.
+  copy, or spread). The class comes from a per-theme `theme-class-name.ts` leaf holding the name as
+  a literal, so importing the class alone leaves the foundation out of a consumer's bundle.
+  `themes/theme-bundle.test.ts` proves that with a real bundler run.
+- `scripts/build-themes.ts`: writes the bundled theme stylesheets to
+  `dist/themes/<name>/stylesheet.css`, alongside the entrypoint `vp pack` emits there.
 
 ## Themes
 
@@ -108,15 +114,17 @@ Use `deriveConcentricRadius(innerRadius, gap)` for rounded elements nested insid
 surface. It returns a CSS `calc()` value for the outer radius, so both inputs can be semantic theme
 variables instead of theme-specific numbers.
 
-The bundled themes ship precompiled. Import `@luke-ui/react/themes/tactile.css` or
-`@luke-ui/react/themes/paper.css` alone to theme the whole document from `:root`, with no class
-applied anywhere. Each stylesheet pairs a `:where(:root)` fallback with its own
+The bundled themes ship precompiled. Import `@luke-ui/react/themes/tactile/stylesheet.css` or
+`@luke-ui/react/themes/paper/stylesheet.css` alone to theme the whole document from `:root`, with
+no class applied anywhere. Each stylesheet pairs a `:where(:root)` fallback with its own
 `.luke-ui-theme-<name>` identity class, so importing one theme never pulls in the other.
 
 Apply the theme's `themeClassName`, from `@luke-ui/react/themes/tactile` or
 `@luke-ui/react/themes/paper`, only when a document needs more than one theme active at once, for
 example a marketing page next to an app shell. Scope it to `<html>` or a subtree root alongside the
-matching stylesheet.
+matching stylesheet. An authored theme reaches the same class through
+`getThemeClassName(name)` from `@luke-ui/react/theme`, so a `defineTheme` theme is applied by exactly
+the mechanism a bundled one is.
 
 Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Setting
 `data-color-mode="light"` or `data-color-mode="dark"` on the theme root, an ancestor, or any element

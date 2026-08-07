@@ -52,6 +52,14 @@ export type { ColorInput, ControlFinish, DepthLadder, ThemeInput } from './defin
 /** Curated defaults `defineTheme` applies for omitted materials and scrim. */
 export { defaultControlFinish, defaultDepth, defaultScrim } from './define-theme.js';
 
+/**
+ * `getThemeClassName(name)` returns a theme's identity class, `luke-ui-theme-${name}`. Pass the same
+ * `name` the theme's {@link ThemeInput} declares. Apply the result alongside {@link rootClassName}
+ * only when one document loads more than one theme stylesheet, so an explicit class outranks another
+ * theme's `:root` fallback. It throws when the name is not the kebab-case `defineTheme` requires.
+ */
+export { getThemeClassName } from './theme-class-name.js';
+
 /** Derives a concentric outer corner from an inner radius plus the intervening gap. */
 export { deriveConcentricRadius } from './foundation.js';
 

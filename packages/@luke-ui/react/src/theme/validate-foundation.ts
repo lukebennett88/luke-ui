@@ -8,7 +8,7 @@
 import { parseColor } from './color.js';
 import type { ThemeFoundation } from './foundation.js';
 import { SOURCE_COLOR_FIELDS, themeFontFamilyStacks } from './foundation.js';
-import { themeClassName } from './theme-class-name.js';
+import { getThemeClassName } from './theme-class-name.js';
 
 /**
  * Whether a value is unsafe to emit verbatim into the generated stylesheet: anything other than a
@@ -30,7 +30,7 @@ function isUnsafeCssValue(value: unknown): boolean {
 export function validateFoundation(foundation: ThemeFoundation): void {
 	const issues: Array<string> = [];
 	try {
-		themeClassName(foundation.name);
+		getThemeClassName(foundation.name);
 	} catch (error) {
 		issues.push(`name: ${errorMessage(error)}`);
 	}

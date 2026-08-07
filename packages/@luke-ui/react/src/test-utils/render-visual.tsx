@@ -2,8 +2,8 @@
 
 // Loads the design-token stylesheet into the test document.
 import '../stylesheet.css.js';
-import '@luke-ui/react/themes/paper.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/paper/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import type { ComponentProps, ComponentType, CSSProperties, ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -23,11 +23,7 @@ import { themeClassName as tactileThemeClassName } from '../themes/tactile/index
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
 
-/**
- * The identity class most recently applied to `document.documentElement` by
- * `renderVisual`, so a later call (or `cleanupVisual`) can remove exactly that
- * one instead of accumulating classes across tests.
- */
+/** The identity class currently applied to `document.documentElement`, if any. */
 let appliedIdentityClassName: string | undefined;
 
 export type VisualAppearance = {
@@ -51,12 +47,10 @@ const defaultVisualAppearance: VisualAppearance = visualAppearances[0];
  *
  * The identity class and colour mode go on `document.documentElement`, not the
  * container, so a portal (combobox popover, mobile tray) that mounts outside
- * the container still inherits the intended theme and mode. The previous
- * identity class is removed first so calling this more than once never leaves
- * two identity classes on `<html>` at once.
+ * the container still gets the intended theme and mode.
  */
 export function renderVisual(node: ReactNode, appearance = defaultVisualAppearance) {
-	const identityClassName = getThemeClassName(appearance.theme);
+	const identityClassName = identityClassNameFor(appearance.theme);
 	if (appliedIdentityClassName != null) {
 		document.documentElement.classList.remove(appliedIdentityClassName);
 	}
@@ -77,7 +71,7 @@ export function renderVisual(node: ReactNode, appearance = defaultVisualAppearan
 	return page.elementLocator(container);
 }
 
-function getThemeClassName(theme: VisualAppearance['theme']) {
+function identityClassNameFor(theme: VisualAppearance['theme']) {
 	return theme === 'tactile' ? tactileThemeClassName : paperThemeClassName;
 }
 

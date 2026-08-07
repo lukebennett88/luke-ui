@@ -1,9 +1,9 @@
 /**
  * Derives a theme's identity class from its name, and rejects a name that is not kebab-case.
  *
- * A leaf module with no dependencies, because two modules that do not otherwise know about each
- * other both need it: `validate-foundation.ts` checks a foundation's `name` through it, and
- * `stylesheet.ts` needs the class as the emitted stylesheet's selector.
+ * A leaf module that must keep importing nothing. `validate-foundation.ts`, `stylesheet.ts`, and
+ * each bundled theme's class module all need it. Staying dependency-free is what lets a consumer
+ * import one theme's class without pulling in the compiler, a foundation, or colour generation.
  */
 
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
@@ -12,7 +12,7 @@ const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
  * Returns the identity class for a theme name, `luke-ui-theme-${name}`. Throws when the name is
  * not kebab-case.
  */
-export function themeClassName(name: string): string {
+export function getThemeClassName(name: string): string {
 	if (!THEME_NAME_PATTERN.test(name)) {
 		throw new Error(
 			`Theme name "${name}" must be kebab-case: lowercase letters and digits separated by ` +

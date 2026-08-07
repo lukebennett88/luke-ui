@@ -16,7 +16,7 @@
 	"sideEffects": [
 		"**/*.css.ts",
 		"./dist/stylesheet.css",
-		"./dist/themes/*.css"
+		"./dist/themes/*/stylesheet.css"
 	],
 	"exports": {
 		"./blockquote": "./dist/blockquote/index.js",
@@ -56,8 +56,8 @@
 		"./package.json": "./package.json",
 		"./stylesheet.css": "./dist/stylesheet.css",
 		"./spritesheet.svg": "./dist/spritesheet.svg",
-		"./themes/tactile.css": "./dist/themes/tactile.css",
-		"./themes/paper.css": "./dist/themes/paper.css"
+		"./themes/tactile/stylesheet.css": "./dist/themes/tactile/stylesheet.css",
+		"./themes/paper/stylesheet.css": "./dist/themes/paper/stylesheet.css"
 	},
 	"publishConfig": {
 		"access": "public"

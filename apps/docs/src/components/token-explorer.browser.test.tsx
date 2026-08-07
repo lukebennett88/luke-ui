@@ -1,5 +1,5 @@
 import '../styles/app.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import {
 	createMemoryHistory,
 	createRootRoute,

@@ -13,11 +13,11 @@ async function main() {
 	await Promise.all(
 		themes.map(async (theme) => {
 			const outputPath = fileURLToPath(
-				new URL(`../dist/themes/${theme.name}.css`, import.meta.url),
+				new URL(`../dist/themes/${theme.name}/stylesheet.css`, import.meta.url),
 			);
 			await mkdir(dirname(outputPath), { recursive: true });
 			await writeFile(outputPath, defineTheme(theme), 'utf8');
-			process.stdout.write(`Generated dist/themes/${theme.name}.css\n`);
+			process.stdout.write(`Generated dist/themes/${theme.name}/stylesheet.css\n`);
 		}),
 	);
 }

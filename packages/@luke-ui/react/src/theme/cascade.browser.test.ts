@@ -10,8 +10,8 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
-import paperCss from '../../dist/themes/paper.css?inline';
-import tactileCss from '../../dist/themes/tactile.css?inline';
+import paperCss from '../../dist/themes/paper/stylesheet.css?inline';
+import tactileCss from '../../dist/themes/tactile/stylesheet.css?inline';
 import { themeClassName as paperThemeClassName } from '../themes/paper/index.js';
 import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { extractValue, splitBlocks } from './__fixtures__/theme-css.js';

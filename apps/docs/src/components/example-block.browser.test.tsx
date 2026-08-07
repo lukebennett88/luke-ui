@@ -1,5 +1,5 @@
 import '../styles/app.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';

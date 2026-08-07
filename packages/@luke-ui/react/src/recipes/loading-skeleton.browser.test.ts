@@ -1,5 +1,5 @@
-import '@luke-ui/react/themes/paper.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/paper/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { contrastRatio, parseColor } from '../theme/color.js';

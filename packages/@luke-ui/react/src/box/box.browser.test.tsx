@@ -1,4 +1,4 @@
-import '../../dist/themes/tactile.css';
+import '../../dist/themes/tactile/stylesheet.css';
 import '../stylesheet.css.js';
 import { act, createRef } from 'react';
 import type { Root } from 'react-dom/client';

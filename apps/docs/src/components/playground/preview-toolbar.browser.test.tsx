@@ -1,6 +1,6 @@
 import '../../styles/app.css';
-import '@luke-ui/react/themes/paper.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/paper/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { act, useState } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';

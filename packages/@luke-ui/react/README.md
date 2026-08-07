@@ -19,7 +19,7 @@ The shared stylesheet owns reset, theme-root, recipe, and utility rules in `rese
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { rootClassName } from '@luke-ui/react/theme';
 
 export function App() {

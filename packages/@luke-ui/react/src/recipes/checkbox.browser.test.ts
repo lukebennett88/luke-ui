@@ -1,5 +1,5 @@
 import '../styles/reset.css.js';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { fontSizeSteps } from '../theme/contract.js';
 import { rootClassName } from '../theme/index.js';

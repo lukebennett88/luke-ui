@@ -14,7 +14,7 @@ import {
 	defaultRadius,
 	themeFontFamilyStacks,
 } from './foundation.js';
-import { themeClassName } from './theme-class-name.js';
+import { getThemeClassName } from './theme-class-name.js';
 import {
 	CONTROL_SIZE_VALUES,
 	FONT_METRICS,
@@ -29,16 +29,15 @@ type ColorMode = 'light' | 'dark';
 /**
  * Emits the five rule blocks: an identity rule, the base light rule, the
  * `prefers-color-scheme: dark` media rule, and the two explicit `data-color-mode` rules. The
- * identity rule carries every non-mode contract leaf. Each rule pairs a `:where(:root)` fallback
- * selector with the explicit identity class, so one loaded stylesheet themes the whole document
- * with no class applied. Throws when a contract leaf has no resolved value.
+ * identity rule carries every non-mode contract leaf. Throws when a contract leaf has no resolved
+ * value.
  */
 export function assembleStylesheet(
 	foundation: ThemeFoundation,
 	lightValues: Record<string, string>,
 	darkValues: Record<string, string>,
 ): string {
-	const selector = `.${themeClassName(foundation.name)}`;
+	const selector = `.${getThemeClassName(foundation.name)}`;
 	const pairs = flattenThemeContract();
 	const isModePath = (path: string) => {
 		return (
@@ -54,11 +53,12 @@ export function assembleStylesheet(
 	const lightDeclarations = ['color-scheme: light;', ...declarations(modePairs, lightValues)];
 	const darkDeclarations = ['color-scheme: dark;', ...declarations(modePairs, darkValues)];
 
-	// Every rule pairs a `:where(:root)` fallback with the explicit identity class. One loaded theme
-	// stylesheet then covers the whole document with no class applied, including body-level
-	// portals. `:where()` zeroes the fallback's specificity to (0,0,0), so an explicit identity
-	// class always outranks another loaded theme's fallback, independent of stylesheet order. Every
-	// scope sets native color-scheme, and the output is unlayered on purpose.
+	// Every rule pairs a `:where(:root)` fallback with the identity class, so one stylesheet themes
+	// the whole document, including body-level portals. `:where()` zeroes the fallback's specificity
+	// to (0,0,0), so an explicit identity always outranks another loaded theme's fallback, whatever
+	// the stylesheet order. The explicit attribute rules are (0,2,0), so they beat the (0,1,0)
+	// media-query rule wherever the attribute sits, whether on the theme root, inside its subtree,
+	// or on an ancestor. Every scope sets native color-scheme, and the output is unlayered on purpose.
 	const rootAndIdentitySelector = [':where(:root),', `${selector} {`];
 	const attributeSelectors = (attributeMode: ColorMode) => {
 		return [

@@ -9,8 +9,9 @@ Luke UI does not inject styles at runtime.
 ## Import the stylesheets
 
 Import `@luke-ui/react/stylesheet.css` and one theme's stylesheet, for example
-`@luke-ui/react/themes/tactile.css`. A theme stylesheet themes the whole document from `:root`, with
-no class and no JavaScript. Import one bundled theme, and Luke UI does not load the other.
+`@luke-ui/react/themes/tactile/stylesheet.css`. A theme stylesheet themes the whole document from
+`:root`, with no class and no JavaScript. Import one bundled theme, and Luke UI does not load the
+other.
 
 ## Apply the root class
 
@@ -54,8 +55,8 @@ A theme stylesheet themes the whole document from `:root`, so a body-level porta
 no class applied.
 
 A colour mode does not follow a portal out of its branch. A portal rendered into `document.body`
-takes the document's mode, not a mode set on a nested scope near its trigger. Set
-`data-color-mode` on the portal root yourself when it must match a nested scope.
+takes the document's mode, not a mode set on a nested scope near its trigger. Set `data-color-mode`
+on the portal root yourself when it must match a nested scope.
 
 ## Add an identity class for more than one theme
 
@@ -65,6 +66,12 @@ an explicit class can win over another theme's `:root` fallback.
 Each bundled theme exports its identity class as `themeClassName` from its own entrypoint, for
 example `@luke-ui/react/themes/tactile`. Apply it to `<html>`, or to the root of the subtree that
 needs it.
+
+An authored theme gets its class the same way, from `getThemeClassName` in `@luke-ui/react/theme`.
+Pass the `name` your `ThemeInput` declares. It returns the same class the generated stylesheet
+selects on, and throws when the name is not kebab-case.
+
+<SourceCodeBlock src="theming/multi-theme-app" />
 
 Theme identities do not nest. Never place one identity class inside another identity's subtree,
 because the two resolve at equal precedence and stylesheet order decides the winner.

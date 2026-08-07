@@ -1,9 +1,8 @@
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { fontSizeSteps } from '../theme/contract.js';
 import { tactileTheme } from '../theme/foundations/tactile.js';
-import { defineTheme, rootClassName } from '../theme/index.js';
-import { themeClassName } from '../theme/theme-class-name.js';
+import { defineTheme, getThemeClassName, rootClassName } from '../theme/index.js';
 import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { text, textLineHeight } from './text.css.js';
 
@@ -222,7 +221,7 @@ function installTheme(fontFamily: 'inter' | 'apple-system' | 'dm-sans') {
 		typography: { fontFamily },
 	});
 	styles.push(style);
-	return themeClassName(name);
+	return getThemeClassName(name);
 }
 
 const curatedFamilyIdentity = {

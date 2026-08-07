@@ -1,6 +1,6 @@
 import '../../styles/app.css';
-import '@luke-ui/react/themes/paper.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/paper/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';

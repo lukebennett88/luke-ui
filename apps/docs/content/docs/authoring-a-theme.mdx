@@ -49,11 +49,15 @@ framework can load.
 Apply a product theme exactly like a bundled one. Load the generated stylesheet. Apply
 `rootClassName` to an element you own.
 
-The product theme's own stylesheet themes the document. It needs no identity class unless the same
-document also loads another theme. Colour mode uses the same `data-color-mode` attribute as bundled
-themes.
+The product theme's own stylesheet themes the document. Colour mode uses the same `data-color-mode`
+attribute as bundled themes.
 
 <SourceCodeBlock src="theming/custom-theme-app" />
+
+The theme needs no identity class unless the same document also loads another theme. When it does,
+call `getThemeClassName` from `@luke-ui/react/theme` with the `name` your `ThemeInput` declares.
+That is the same helper the bundled themes use for their own classes. See
+[Applying a theme](/applying-a-theme) for where to put the result.
 
 Applications must load any non-system font files their `typography` selects.
 
