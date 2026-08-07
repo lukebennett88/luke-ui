@@ -36,6 +36,26 @@ export const Default = meta.story({
 	},
 });
 
+/** `elementType` picks the rendered element. Its DOM props follow that element. */
+export const CustomElement = meta.story({
+	render: () => (
+		<Box
+			elementType="a"
+			href="/account"
+			padding="400"
+			style={{ backgroundColor: vars.color.surface.recessed }}
+		>
+			Account summary
+		</Box>
+	),
+	play: async ({ canvas }) => {
+		const link = canvas.getByRole('link', { name: 'Account summary' });
+		await expect(link.tagName).toBe('A');
+		await expect(link).toHaveAttribute('href', '/account');
+		await expect(getComputedStyle(link).padding).toBe('16px');
+	},
+});
+
 export const CustomDiv = meta.story({
 	args: {
 		'aria-label': 'Account summary',
