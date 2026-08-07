@@ -18,6 +18,8 @@
 		"token-reference",
 		"---Guides---",
 		"forms",
+		"react-hook-form",
+		"tanstack-form",
 		"quality"
 	]
 }
