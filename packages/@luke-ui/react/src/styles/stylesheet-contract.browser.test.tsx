@@ -1,8 +1,8 @@
 import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/tactile.css';
 import { Icon, IconSpritesheetProvider } from '@luke-ui/react/icon';
-import { themeRootClassName } from '@luke-ui/react/theme';
-import { tactileThemeClassName } from '@luke-ui/react/themes';
+import { rootClassName } from '@luke-ui/react/theme';
+import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
@@ -48,7 +48,7 @@ test('applies the public reset, theme, and icon-size contracts', () => {
 
 function mountFixture() {
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	container.className = `${rootClassName} ${tactileThemeClassName}`;
 	const root = createRoot(container);
 	mounted.push({ container, root });
 

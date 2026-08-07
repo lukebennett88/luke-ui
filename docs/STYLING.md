@@ -3,9 +3,10 @@
 ## Setup
 
 Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities. Consumers
-import `@luke-ui/react/stylesheet.css` and apply `themeRootClassName` from `@luke-ui/react/theme`
-near the app root. Import one bundled theme stylesheet and apply its identity class to the same
-element. Neither step injects styles at runtime.
+import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from `@luke-ui/react/theme` to
+`<body>`, `<main>`, or an app shell. Import one bundled theme stylesheet, for example
+`@luke-ui/react/themes/tactile.css`. That alone themes the whole document from `:root`, with no
+class and no JS required. Neither step injects styles at runtime.
 
 ## Structure
 
@@ -62,8 +63,12 @@ element. Neither step injects styles at runtime.
   every contract leaf for the active theme and colour mode.
 - `theme/build-theme.ts`: the internal `compileTheme(foundation) → { css, diagnostics }` value
   pipeline, `buildTheme`, `themeClassName`, and contrast validation.
-- `theme/foundations.ts`: `defineTheme(...)` inputs for the bundled Tactile and Paper themes.
-- `themes/`: bundled theme class-name constants exported from `@luke-ui/react/themes`.
+- `theme/foundations/tactile.ts` and `theme/foundations/paper.ts`: each bundled theme's
+  `defineTheme(...)` input, kept as separate leaf modules so importing one never pulls in the other.
+- `themes/tactile/` and `themes/paper/`: each theme's public entrypoint, exported from
+  `@luke-ui/react/themes/tactile` and `@luke-ui/react/themes/paper`. Each exports its own
+  `themeClassName` identity class and its `theme` (the public `ThemeInput` a consumer can read,
+  copy, or spread).
 - `scripts/build-themes.ts`: writes the bundled theme stylesheets to `dist/themes/`.
 
 ## Themes
@@ -104,9 +109,14 @@ surface. It returns a CSS `calc()` value for the outer radius, so both inputs ca
 variables instead of theme-specific numbers.
 
 The bundled themes ship precompiled. Import `@luke-ui/react/themes/tactile.css` or
-`@luke-ui/react/themes/paper.css` and apply the matching `tactileThemeClassName` or
-`paperThemeClassName` constant from `@luke-ui/react/themes` to `<html>` or a subtree root. Importing
-one theme never pulls in the other.
+`@luke-ui/react/themes/paper.css` alone to theme the whole document from `:root`, with no class
+applied anywhere. Each stylesheet pairs a `:where(:root)` fallback with its own
+`.luke-ui-theme-<name>` identity class, so importing one theme never pulls in the other.
+
+Apply the theme's `themeClassName`, from `@luke-ui/react/themes/tactile` or
+`@luke-ui/react/themes/paper`, only when a document needs more than one theme active at once, for
+example a marketing page next to an app shell. Scope it to `<html>` or a subtree root alongside the
+matching stylesheet.
 
 Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Setting
 `data-color-mode="light"` or `data-color-mode="dark"` on the theme root, an ancestor, or any element
@@ -115,10 +125,11 @@ inside the subtree forces that mode, and nested scopes can override it. Every sc
 
 Components move to the semantic contract in the component-family migration slices.
 
-Luke UI's portalled Combobox popover carries the nearest identity class and explicit colour mode
-from its trigger. Portals created by an application must apply the same public class and attribute
-contract to their portal root. When no explicit mode exists, omit `data-color-mode` so the portalled
-surface continues to follow the system preference.
+Luke UI's portalled Combobox popover inherits the document's theme. It carries no theme identity or
+colour mode propagation logic of its own, because a loaded theme stylesheet already themes the whole
+document from `:root`. A colour mode scoped to a nested element below `<html>` does not reach a
+body-level portal. Set `data-color-mode` on `<html>` itself when a portalled surface must follow an
+explicit mode.
 
 ## Cascade layers
 

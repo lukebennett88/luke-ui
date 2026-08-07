@@ -1,7 +1,7 @@
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { cx } from '../utils/index.js';
 import { inputGroup } from './input-group.css.js';
 
@@ -166,7 +166,7 @@ test('prefix divider uses the control border color and disabled text color follo
 
 function mountGroup(options: Parameters<typeof inputGroup>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = cx(themeRootClassName, tactileThemeClassName);
+	root.className = cx(rootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	const group = root.appendChild(document.createElement('div'));
 	group.className = inputGroup(options).group();

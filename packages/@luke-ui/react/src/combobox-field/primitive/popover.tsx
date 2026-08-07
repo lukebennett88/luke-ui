@@ -5,7 +5,7 @@ import type { PopoverProps as RacPopoverProps } from 'react-aria-components/Comb
 import { Popover as RacPopover } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
-import { themeRootClassName } from '../../theme/index.js';
+import { rootClassName } from '../../theme/index.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
@@ -25,8 +25,9 @@ interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
 export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 
 /**
- * Popover surface used for listbox content. The portal preserves the theme identity and explicit
- * colour mode active at its trigger.
+ * Popover surface used for listbox content. The portal inherits the document's theme: importing a
+ * theme stylesheet themes the whole document from `:root`, so no propagation is needed. A colour
+ * mode scoped below `<html>` does not reach the portal.
  */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { ref, ...restProps } = props;
@@ -37,41 +38,9 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 		<RacPopover
 			{...restProps}
 			className={composeRenderProps(restProps.className, (className) => {
-				return cx(themeRootClassName, styles.combobox().popover(className));
+				return cx(rootClassName, styles.combobox().popover(className));
 			})}
-			ref={mergeRefs(ref, (node: HTMLElement | null) => {
-				setElement(node);
-				if (node === null) return;
-
-				const themeSource = props.triggerRef?.current ?? document.activeElement;
-				if (!(themeSource instanceof Element)) return;
-
-				carryThemeScope(themeSource, node);
-			})}
+			ref={mergeRefs(ref, (node: HTMLElement | null) => setElement(node))}
 		/>
 	);
-}
-
-function carryThemeScope(source: Element, portal: HTMLElement) {
-	const identityClassName = findThemeIdentity(source);
-	if (identityClassName !== undefined) portal.classList.add(identityClassName);
-
-	const modeRoot = source.closest<HTMLElement>('[data-color-mode]');
-	const mode = modeRoot?.dataset.colorMode;
-	if (mode === 'light' || mode === 'dark') portal.dataset.colorMode = mode;
-}
-
-function findThemeIdentity(source: Element) {
-	let identityClassName: string | undefined;
-	let ancestor: Element | null = source;
-
-	while (ancestor !== null) {
-		for (const className of ancestor.classList) {
-			// Keep the outer identity because nested identities are not supported.
-			if (className.startsWith('luke-ui-theme-')) identityClassName = className;
-		}
-		ancestor = ancestor.parentElement;
-	}
-
-	return identityClassName;
 }

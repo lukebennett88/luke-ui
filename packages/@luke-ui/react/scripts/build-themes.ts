@@ -4,7 +4,8 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { defineTheme } from '../src/theme/define-theme.js';
-import { paperTheme, tactileTheme } from '../src/theme/foundations.js';
+import { paperTheme } from '../src/theme/foundations/paper.js';
+import { tactileTheme } from '../src/theme/foundations/tactile.js';
 
 const themes = [tactileTheme, paperTheme];
 

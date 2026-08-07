@@ -8,16 +8,18 @@ does not change component behaviour.
 
 ## Theme foundations
 
-Every themed subtree has one root element. It carries `themeRootClassName` and one identity class.
+A theme stylesheet themes the whole document from `:root`. Import one theme stylesheet, and every
+element uses its semantic values, with no class applied and no JavaScript.
 
-`themeRootClassName` applies the shared reset and base theme layer. The identity class supplies the
-semantic token values used by components and custom UI.
+`rootClassName` applies the shared reset and base typography. It carries no theme identity. Apply it
+to an element you already own, such as the application shell.
 
-Each identity includes light and dark colour values. The active colour mode chooses between them. An
+Each theme includes light and dark colour values. The active colour mode chooses between them. An
 explicit `data-color-mode` is optional. Without one, the theme follows the system preference.
-Colour-mode scopes can nest within an identity. Identity classes cannot.
+Colour-mode scopes nest freely. Theme identities do not.
 
-Use a separate root for an independent subtree that needs another identity.
+Loading more than one theme in the same document needs an explicit identity class, so one theme wins
+over the other's `:root` fallback.
 
 Read [Applying a theme](/applying-a-theme) for the exact imports, classes, and colour-mode rules.
 

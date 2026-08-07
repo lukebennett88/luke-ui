@@ -1,8 +1,8 @@
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
-import { themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { cx } from '../utils/index.js';
 import { combobox } from './combobox.css.js';
 
@@ -263,7 +263,7 @@ test('reduced motion makes control, action, option, and popover state changes im
 
 function mountControl(size: 'medium' | 'small' = 'medium') {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = cx(themeRootClassName, tactileThemeClassName);
+	root.className = cx(rootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	wrappers.push(root);
 	const control = root.appendChild(document.createElement('div'));

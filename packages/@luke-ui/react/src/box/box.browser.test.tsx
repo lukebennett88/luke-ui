@@ -5,8 +5,8 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { Box } from './index.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
@@ -22,7 +22,7 @@ afterEach(async () => {
 
 test('renders a responsive layout at the retained breakpoints', async () => {
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	container.className = `${rootClassName} ${tactileThemeClassName}`;
 	const root = createRoot(container);
 	mounted.push({ container, root });
 

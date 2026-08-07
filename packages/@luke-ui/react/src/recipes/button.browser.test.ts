@@ -2,8 +2,8 @@ import '../styles/reset.css.js';
 import '@luke-ui/react/themes/tactile.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
-import { themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { button } from './button.css.js';
 
 let mounted: Array<HTMLElement> = [];
@@ -151,7 +151,7 @@ test('reduced motion removes hover and press travel', async () => {
 
 function mountButton(options: Parameters<typeof button>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	root.className = `${rootClassName} ${tactileThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	const control = root.appendChild(document.createElement('button'));
 	control.className = button(options);

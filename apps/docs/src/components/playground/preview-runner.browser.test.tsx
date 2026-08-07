@@ -1,7 +1,7 @@
 import '../../styles/app.css';
 import '@luke-ui/react/themes/paper.css';
 import '@luke-ui/react/themes/tactile.css';
-import { paperThemeClassName } from '@luke-ui/react/themes';
+import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -47,5 +47,5 @@ test('applies appearance messages to the playground preview root', async () => {
 	const themeRoot = container.querySelector<HTMLElement>('[data-color-mode]');
 	if (!themeRoot) throw new Error('Expected a playground theme root');
 	await expect.poll(() => themeRoot.dataset.colorMode).toBe('dark');
-	expect(themeRoot).toHaveClass(paperThemeClassName);
+	expect(document.documentElement).toHaveClass(paperThemeClassName);
 });

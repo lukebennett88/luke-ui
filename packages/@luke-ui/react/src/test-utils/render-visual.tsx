@@ -15,13 +15,20 @@ import { cdp, page, userEvent } from 'vite-plus/test/context';
 // both `build` and `test` depend on, so it is always present when tests run.
 import spritesheetHref from '../../dist/spritesheet.svg?url';
 import { IconSpritesheetProvider } from '../icon/index.js';
-import { themeRootClassName, vars } from '../theme/index.js';
-import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
-import { cx } from '../utils/index.js';
+import { rootClassName, vars } from '../theme/index.js';
+import { themeClassName as paperThemeClassName } from '../themes/paper/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
+
+/**
+ * The identity class most recently applied to `document.documentElement` by
+ * `renderVisual`, so a later call (or `cleanupVisual`) can remove exactly that
+ * one instead of accumulating classes across tests.
+ */
+let appliedIdentityClassName: string | undefined;
 
 export type VisualAppearance = {
 	mode: 'light' | 'dark';
@@ -41,11 +48,24 @@ const defaultVisualAppearance: VisualAppearance = visualAppearances[0];
  * Renders `node` inside the same theme root and icon spritesheet provider the
  * app (and Storybook) wrap components with, then returns a Vitest locator for
  * the mounted subtree ready to pass to `captureVisual`.
+ *
+ * The identity class and colour mode go on `document.documentElement`, not the
+ * container, so a portal (combobox popover, mobile tray) that mounts outside
+ * the container still inherits the intended theme and mode. The previous
+ * identity class is removed first so calling this more than once never leaves
+ * two identity classes on `<html>` at once.
  */
 export function renderVisual(node: ReactNode, appearance = defaultVisualAppearance) {
+	const identityClassName = getThemeClassName(appearance.theme);
+	if (appliedIdentityClassName != null) {
+		document.documentElement.classList.remove(appliedIdentityClassName);
+	}
+	document.documentElement.classList.add(identityClassName);
+	appliedIdentityClassName = identityClassName;
+	document.documentElement.dataset.colorMode = appearance.mode;
+
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = cx(themeRootClassName, getThemeClassName(appearance.theme));
-	container.dataset.colorMode = appearance.mode;
+	container.className = rootClassName;
 	container.style.backgroundColor = vars.color.surface.canvas;
 	const root = createRoot(container);
 	mounted.push({ container, root });
@@ -210,6 +230,12 @@ export function cleanupVisual() {
 		container.remove();
 	}
 	mounted.length = 0;
+
+	if (appliedIdentityClassName != null) {
+		document.documentElement.classList.remove(appliedIdentityClassName);
+		appliedIdentityClassName = undefined;
+	}
+	delete document.documentElement.dataset.colorMode;
 }
 
 /**

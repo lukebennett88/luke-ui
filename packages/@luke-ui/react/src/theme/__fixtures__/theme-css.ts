@@ -6,7 +6,8 @@
  */
 
 import { normalizeTheme } from '../define-theme.js';
-import { paperTheme, tactileTheme } from '../foundations.js';
+import { paperTheme } from '../foundations/paper.js';
+import { tactileTheme } from '../foundations/tactile.js';
 
 // The bundled themes are authored as `defineTheme` inputs; these engine tests exercise the raw
 // `buildTheme` pipeline directly, so resolve each input into the foundation `buildTheme` consumes.

@@ -12,7 +12,6 @@ import {
 	Stack,
 	visualAppearances,
 } from '../test-utils/render-visual.js';
-import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
 import { ComboboxField } from './index.js';
 import { ComboboxItem, ComboboxLoadMoreItem } from './primitive/item.js';
 import { ComboboxSection } from './primitive/section.js';
@@ -311,41 +310,6 @@ for (const appearance of visualAppearances) {
 		await captureVisualAppearance(
 			page.elementLocator(document.body),
 			'combobox-field/open-selected-disabled-loading',
-			appearance,
-		);
-	});
-}
-
-for (const appearance of visualAppearances) {
-	test(`nested opposite mode reaches the portal: ${appearance.theme} ${appearance.mode}`, async () => {
-		const nestedMode = appearance.mode === 'light' ? 'dark' : 'light';
-		renderVisual(
-			<div data-color-mode={nestedMode}>
-				<Stack>
-					<ComboboxField
-						defaultItems={countryItems}
-						label="Themed country"
-						name="themed-country"
-						placeholder="Select a country..."
-					>
-						{renderCountryItem}
-					</ComboboxField>
-				</Stack>
-			</div>,
-			appearance,
-		);
-
-		await userEvent.click(page.getByRole('combobox', { name: 'Themed country' }));
-		const listbox = page.getByRole('listbox');
-		const portal = listbox.element().closest('[data-color-mode]');
-
-		expect(portal).toHaveClass(
-			appearance.theme === 'paper' ? paperThemeClassName : tactileThemeClassName,
-		);
-		expect(portal).toHaveAttribute('data-color-mode', nestedMode);
-		await captureVisualAppearance(
-			page.elementLocator(document.body),
-			'combobox-field/nested-opposite-mode-portal',
 			appearance,
 		);
 	});

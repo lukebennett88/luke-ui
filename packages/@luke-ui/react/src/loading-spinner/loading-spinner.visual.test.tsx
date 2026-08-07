@@ -71,7 +71,7 @@ for (const appearance of visualAppearances) {
 			appearance,
 		);
 
-		await expect.element(scene).toHaveAttribute('data-color-mode', appearance.mode);
+		expect(document.documentElement).toHaveAttribute('data-color-mode', appearance.mode);
 		await captureVisualAppearance(scene, 'loading-spinner/theme-matrix', appearance);
 	});
 }

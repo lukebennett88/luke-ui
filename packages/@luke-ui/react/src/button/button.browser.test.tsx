@@ -8,8 +8,8 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import spritesheetHref from '../../dist/spritesheet.svg?url';
 import { IconButton } from '../icon-button/index.js';
 import { Icon, IconSpritesheetProvider } from '../icon/index.js';
-import { themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { Button } from './index.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
@@ -84,7 +84,7 @@ test('an explicit icon size overrides the button-provided icon size', () => {
 
 function mountFixture(node: ReactNode) {
 	const container = document.body.appendChild(document.createElement('div'));
-	container.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	container.className = `${rootClassName} ${tactileThemeClassName}`;
 	const root = createRoot(container);
 	mounted.push({ container, root });
 

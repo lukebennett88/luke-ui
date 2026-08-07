@@ -18,6 +18,10 @@ export const Route = createRootRoute({
 	head: () => ({
 		links: [
 			{ href: appCss, rel: 'stylesheet' },
+			// Both bundled themes load so the theme switcher can swap identities without a reload.
+			// `DocsThemeRoot` puts the active identity class on `<html>` after mount. Before that,
+			// the last stylesheet's `:where(:root)` fallback wins, so Tactile must stay last to
+			// match `getServerThemeIdentity`. Reordering these changes the first paint.
 			{ href: paperCss, rel: 'stylesheet' },
 			{ href: tactileCss, rel: 'stylesheet' },
 			{

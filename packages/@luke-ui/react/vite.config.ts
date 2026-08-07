@@ -52,6 +52,7 @@ export default defineConfig({
 		dts: true,
 		entry: {
 			'*': ['src/*/index.tsx', 'src/*/index.ts', 'src/*/primitive/index.tsx'],
+			'themes/*': ['src/themes/*/index.ts'],
 		},
 		exports: {
 			customExports: Object.fromEntries(

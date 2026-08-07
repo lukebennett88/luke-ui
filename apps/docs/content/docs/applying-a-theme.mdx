@@ -1,27 +1,24 @@
 ---
 title: Applying a theme
-description: Load Luke UI CSS and apply a theme identity and colour mode.
+description: Load Luke UI CSS and apply the shared root class.
 ---
 
-A themed subtree needs the shared Luke UI stylesheet, one identity stylesheet, and a root that
-carries both theme classes. All three are static. Luke UI does not inject styles at runtime.
+A themed subtree needs the shared Luke UI stylesheet and one theme stylesheet. Both are static CSS.
+Luke UI does not inject styles at runtime.
 
 ## Import the stylesheets
 
-Import `@luke-ui/react/stylesheet.css` and the stylesheet for the identity your application uses.
-The example below uses Tactile. Use `@luke-ui/react/themes/paper.css` with `paperThemeClassName` for
-Paper. If you import one bundled identity, Luke UI does not load the other.
+Import `@luke-ui/react/stylesheet.css` and one theme's stylesheet, for example
+`@luke-ui/react/themes/tactile.css`. A theme stylesheet themes the whole document from `:root`, with
+no class and no JavaScript. Import one bundled theme, and Luke UI does not load the other.
 
-## Apply the root classes
+## Apply the root class
 
-Apply `themeRootClassName` and the matching identity class to the same element near the application
-root. `themeRootClassName` includes the reset and base theme class. The identity class supplies the
-semantic values.
+Apply `rootClassName` to an element you own, such as the application shell. It supplies the reset
+and base typography. It carries no theme identity, so it works the same way for a bundled theme and
+a custom theme.
 
 <SourceCodeBlock src="theming/apply-theme" />
-
-Theme identities do not nest. Create a separate theme root for an independent subtree that needs
-another identity.
 
 ## Choose a colour mode
 
@@ -33,9 +30,8 @@ match the Luke UI content.
 
 ## Nest colour-mode scopes
 
-Colour modes nest within one theme identity. Use a nested mode when one part of the interface must
-remain light or dark independently of its parent. Do not add a second identity class to the nested
-element.
+Colour modes nest freely. Use a nested mode when one part of the interface must stay light or dark
+independently of its parent.
 
 <ExampleBlock
 	src="theming/color-mode-override"
@@ -47,17 +43,31 @@ element.
 
 ## Avoid a colour-mode flash
 
-Render the root classes and any known explicit mode in the initial HTML. When the mode comes from a
+Render `rootClassName` and any known explicit mode in the initial HTML. When the mode comes from a
 client-side preference, set `data-color-mode` before the themed UI paints.
 
-The server HTML and first client render must use the same value to avoid a hydration warning.
+Use the same value for the server HTML and the first client render. This avoids a hydration warning.
 
-## Preserve the theme in portals
+## Portals need nothing extra
 
-Application-owned portals render outside the themed DOM branch, so inherited theme variables no
-longer reach them. Apply `themeRootClassName`, the active identity class, and the nearest explicit
-`data-color-mode` value to the portal root. Leave the attribute off when the source follows the
-system setting.
+A theme stylesheet themes the whole document from `:root`, so a body-level portal inherits it with
+no class applied.
+
+A colour mode does not follow a portal out of its branch. A portal rendered into `document.body`
+takes the document's mode, not a mode set on a nested scope near its trigger. Set
+`data-color-mode` on the portal root yourself when it must match a nested scope.
+
+## Add an identity class for more than one theme
+
+Loading one theme needs no identity class. Loading more than one theme in the same document does, so
+an explicit class can win over another theme's `:root` fallback.
+
+Each bundled theme exports its identity class as `themeClassName` from its own entrypoint, for
+example `@luke-ui/react/themes/tactile`. Apply it to `<html>`, or to the root of the subtree that
+needs it.
+
+Theme identities do not nest. Never place one identity class inside another identity's subtree,
+because the two resolve at equal precedence and stylesheet order decides the winner.
 
 ## Next steps
 

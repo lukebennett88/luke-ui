@@ -10,8 +10,9 @@ pnpm add @luke-ui/react
 
 ## Setup
 
-Import the component stylesheet and one bundled theme stylesheet. Apply the theme root and identity
-classes to the same element.
+Import the component stylesheet and one bundled theme stylesheet. Importing a theme stylesheet
+themes the whole document from `:root`, so no identity class is needed for a single theme. Apply
+`rootClassName` to an element you own for the reset and base typography.
 
 The shared stylesheet owns reset, theme-root, recipe, and utility rules in `reset`, `theme`,
 `recipes`, `utilities` order.
@@ -19,14 +20,16 @@ The shared stylesheet owns reset, theme-root, recipe, and utility rules in `rese
 ```tsx
 import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/tactile.css';
-import { themeRootClassName } from '@luke-ui/react/theme';
-import { tactileThemeClassName } from '@luke-ui/react/themes';
-import { cx } from '@luke-ui/react/utils';
+import { rootClassName } from '@luke-ui/react/theme';
 
 export function App() {
-	return <div className={cx(themeRootClassName, tactileThemeClassName)}>{/* your app */}</div>;
+	return <div className={rootClassName}>{/* your app */}</div>;
 }
 ```
+
+Loading more than one theme stylesheet in the same document needs an explicit identity class so one
+theme wins. Import it from that theme's own entrypoint, for example
+`@luke-ui/react/themes/tactile`'s `themeClassName`.
 
 ## Components and docs
 

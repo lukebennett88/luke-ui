@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
+import { themeClassName as paperThemeClassName } from '../themes/paper/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import {
 	extractValue,
 	paperFoundation,
@@ -40,9 +41,31 @@ describe('buildTheme output', () => {
 		expect(blocks.baseLight).toContain('color-scheme: light;');
 		expect(blocks.mediaDark).toContain('color-scheme: dark;');
 		for (const mode of ['light', 'dark']) {
+			expect(css).toContain(`:where(:root[data-color-mode='${mode}']),`);
+			expect(css).toContain(`:where(:root) :where([data-color-mode='${mode}']),`);
 			expect(css).toContain(`.luke-ui-theme-tactile[data-color-mode='${mode}'],`);
 			expect(css).toContain(`.luke-ui-theme-tactile [data-color-mode='${mode}'],`);
 			expect(css).toContain(`[data-color-mode='${mode}'] .luke-ui-theme-tactile {`);
+		}
+	});
+
+	it('pairs every rule block with a zero-specificity `:where(:root)` fallback', () => {
+		for (const block of [
+			blocks.identity,
+			blocks.baseLight,
+			blocks.mediaDark,
+			blocks.explicitLight,
+			blocks.explicitDark,
+		]) {
+			expect(block).toContain(':where(:root');
+		}
+	});
+
+	it('never emits a bare `:root` selector outside of `:where()`', () => {
+		const rootIndexes = [...css.matchAll(/:root/g)].map((match) => match.index);
+		expect(rootIndexes.length).toBeGreaterThan(0);
+		for (const index of rootIndexes) {
+			expect(css.slice(index - ':where('.length, index)).toBe(':where(');
 		}
 	});
 

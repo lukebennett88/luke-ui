@@ -2,7 +2,7 @@ import '../styles/app.css';
 import '@luke-ui/react/themes/tactile.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { tactileThemeClassName } from '@luke-ui/react/themes';
+import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';

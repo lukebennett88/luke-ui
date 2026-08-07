@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 import { gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
-import { paperTheme, tactileTheme } from './foundations.js';
+import { paperTheme } from './foundations/paper.js';
+import { tactileTheme } from './foundations/tactile.js';
 import { generateFamilyWithDiagnostics } from './scale.js';
 
 /**

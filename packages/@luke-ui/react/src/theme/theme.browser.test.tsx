@@ -8,7 +8,7 @@ import { Button } from '../button/index.js';
 import { ComboboxField } from '../combobox-field/index.js';
 import { ComboboxItem } from '../combobox-field/primitive/item.js';
 import { IconSpritesheetProvider } from '../icon/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
 const scopes: Array<HTMLElement> = [];
@@ -22,6 +22,7 @@ afterEach(async () => {
 	for (const scope of scopes) scope.remove();
 	scopes.length = 0;
 
+	document.documentElement.removeAttribute('data-color-mode');
 	await emulateColorScheme('light');
 });
 
@@ -70,12 +71,11 @@ test('renders components from static CSS without theme context or injected style
 	expect(document.querySelectorAll('style')).toHaveLength(styleCount);
 });
 
-test('preserves identity and an opposite nested mode on a portalled combobox', async () => {
-	const outer = renderScope('light');
-	const nested = outer.appendChild(document.createElement('div'));
-	nested.dataset.colorMode = 'dark';
-	const root = createRoot(nested);
-	mounted.push({ container: outer, root });
+// Portal theme propagation was deliberately removed: importing a theme stylesheet themes the
+// whole document from `:root`, so a body-level portal inherits it with no JS or class needed.
+async function openPortalledCombobox(mountTarget: HTMLElement) {
+	const root = createRoot(mountTarget);
+	mounted.push({ container: mountTarget, root });
 
 	act(() => {
 		root.render(
@@ -98,11 +98,39 @@ test('preserves identity and an opposite nested mode on a portalled combobox', a
 	const portal = document.querySelector('[role="listbox"]')?.parentElement;
 	if (!portal) throw new Error('expected the listbox to have a popover parent');
 
-	expect(portal).toHaveAttribute('data-color-mode', 'dark');
+	return portal;
+}
+
+test('a portalled combobox follows a colour mode set on the document', async () => {
+	document.documentElement.dataset.colorMode = 'dark';
+
+	const outer = renderScope('light');
+	const portal = await openPortalledCombobox(outer);
+
 	expect(getComputedStyle(portal).colorScheme).toBe('dark');
 	const portalCanvas = getComputedStyle(portal).getPropertyValue('--luke-color-surface-canvas');
 	expect(portalCanvas).not.toBe('');
 	expect(portalCanvas).toBe(
+		getComputedStyle(document.documentElement).getPropertyValue('--luke-color-surface-canvas'),
+	);
+});
+
+test('a colour mode scoped to a nested div does not reach a portalled combobox (propagation removed by design)', async () => {
+	const outer = renderScope('light');
+	const nested = outer.appendChild(document.createElement('div'));
+	nested.dataset.colorMode = 'dark';
+
+	const portal = await openPortalledCombobox(nested);
+
+	// The nested div's dark mode stays local to that subtree. The document carries no explicit
+	// mode, so the portal resolves the system preference instead, not the nested div's mode.
+	expect(portal).not.toHaveAttribute('data-color-mode');
+	expect(getComputedStyle(portal).colorScheme).not.toBe('dark');
+	const portalCanvas = getComputedStyle(portal).getPropertyValue('--luke-color-surface-canvas');
+	expect(portalCanvas).toBe(
+		getComputedStyle(document.documentElement).getPropertyValue('--luke-color-surface-canvas'),
+	);
+	expect(portalCanvas).not.toBe(
 		getComputedStyle(nested).getPropertyValue('--luke-color-surface-canvas'),
 	);
 });
