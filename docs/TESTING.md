@@ -111,6 +111,36 @@ play: async ({ canvasElement, step }) => {
 };
 ```
 
+## Test structure
+
+Prefer fewer, longer tests over many tiny ones. A test should follow one workflow end to end: one
+setup, then as many actions and assertions as that workflow needs. Multiple related assertions in a
+single test are a feature, not a smell. Use `step()` to name each behaviour inside the workflow, as
+described above.
+
+- Keep setup explicit and local. Inline the setup a test needs instead of hoisting it into
+  `beforeEach`. Use `afterEach` only for real cleanup, such as unmounting, removing DOM nodes, or
+  deleting temp directories.
+- Avoid shared mutable state between tests. If the next assertion depends on the same rendered
+  component or result, it belongs in the same test.
+- Build helpers as factories that return a ready-to-use object, not as module-level state that tests
+  mutate in turn.
+- Keep files flat. A single top-level `describe` to group a file is fine; nesting is not.
+- Name the test after the behaviour it proves, for example "returns the fallback tone for an unknown
+  intent".
+
+## What not to test
+
+Keep the bar for adding a test high. Every test is code to maintain, and a test that cannot fail for
+an interesting reason still costs review time on every change.
+
+- Do not test what TypeScript already guarantees, such as a required prop being present or a union
+  rejecting an invalid value.
+- Do not pin incidental copy. Assert behaviour and structured output instead of asserting that
+  particular prose appears in a message, a doc, or a generated file.
+- Do not add a regression test for a bug that is unlikely to recur, unless the flow is important
+  enough to justify keeping the test.
+
 ## Visual regression tests
 
 Visual tests capture a rendered component in the current checkout and compare it with the local
