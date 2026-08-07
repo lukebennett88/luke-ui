@@ -2,13 +2,14 @@
  * The accessibility policy the theme layer is built to guarantee, declared once. Every module that
  * solves for or validates contrast reads its thresholds from here rather than restating them: the
  * scale generator's on-solid gate (`scale.ts`), the accent pre-conditioner (`define-theme.ts`), and
- * the build-time validation matrix and `border.control` solver (`build-theme.ts`).
+ * the build-time validation matrix (`contrast-validation.ts`) and `border.control` solver
+ * (`control-border.ts`).
  *
  * The one semantic role list lives here too, because it decides both which contract leaves the
  * semantic map emits (`semantic-map.ts`) and which pairs the validation matrix gates
- * (`build-theme.ts`). While those two sides named roles separately, failures were asymmetric and only
- * partly reported: adding a role to the map alone emitted an ungated colour, and adding it to the
- * compiler alone threw an internal error. Declaring the roles once makes both sides move together.
+ * (`contrast-validation.ts`). While those two sides named roles separately, failures were asymmetric
+ * and only partly reported: adding a role to the map alone emitted an ungated colour, and adding it to
+ * the compiler alone threw an internal error. Declaring the roles once makes both sides move together.
  *
  * This module has no dependencies. Both the generator and compiler import it, so it cannot close an
  * import cycle.
@@ -36,10 +37,11 @@ export const CONTRAST_SEARCH_STEP = 0.0025;
 /**
  * The canonical semantic roles, in contract order. Every role offers the same capabilities, so this
  * one list drives family generation, the capability matrix (`scale.ts`), the semantic mapping
- * (`semantic-map.ts`), the validation matrix and diagnostics (`build-theme.ts`), and the token-board
- * tooling. A role's meaning never decides what it can style, so there is nothing left to split the
- * list on: restating a subset anywhere would reintroduce the asymmetry this module exists to prevent.
- * `FamilyRole` in `scale.ts` is derived from this, so the type cannot drift from the list either.
+ * (`semantic-map.ts`), the validation matrix (`contrast-validation.ts`) and diagnostics
+ * (`build-theme.ts`), and the token-board tooling. A role's meaning never decides what it can style,
+ * so there is nothing left to split the list on: restating a subset anywhere would reintroduce the
+ * asymmetry this module exists to prevent. `FamilyRole` in `scale.ts` is derived from this, so the
+ * type cannot drift from the list either.
  */
 export const SEMANTIC_ROLES = [
 	'neutral',

@@ -30,7 +30,7 @@ interface MapSemanticColorsRequest {
 	surfaces: GeneratedSurfaces;
 	/**
 	 * `color.border.control`'s solved value is a dedicated contrast boundary, not a scale-step alias.
-	 * `build-theme.ts`'s `solveControlBorder` resolves it against `surfaces.canvas` and
+	 * `control-border.ts`'s `solveControlBorder` resolves it against `surfaces.canvas` and
 	 * `surfaces.recessed` before this map runs, then this function passes it through verbatim.
 	 */
 	controlBorder: Oklch;
