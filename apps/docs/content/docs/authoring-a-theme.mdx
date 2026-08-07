@@ -37,34 +37,27 @@ The minimal theme authors one colour and a neutral character:
 
 ## Extend a bundled theme
 
-Set `extends` to another theme's input to start from that theme. Each bundled theme's entrypoint,
-for example `@luke-ui/react/themes/tactile`, exports its input as `theme`. Every value your theme
-leaves out comes from the base.
+Set `extends` to another theme's input. Your theme inherits every value it does not set. Each
+bundled theme entrypoint, such as `@luke-ui/react/themes/tactile`, exports its input as `theme`.
 
 <SourceCodeBlock src="theming/extend-bundled-theme" />
 
-`name` never inherits. Two themes with one name emit a colliding identity class, so your theme
-always declares its own `name`.
+Your theme always declares its own `name`. Two themes with one name emit a colliding identity class.
 
-Each section inherits at the granularity the compiler resolves it at:
+What each section inherits:
 
-- `color` merges role by role.
-- A colour role replaces the base's role whole. A single string adapts per colour mode, and an
-  explicit `{ light, dark }` pair is used verbatim. A per-mode merge would turn a base's adapted
-  string into two verbatim values and change what the base meant.
-- `color.neutral` and `color.neutralStyle` are one decision, so setting either one drops both
-  inherited keys.
-- `radius` merges key by key, including `base` and `multiplier`.
-- `typography.fontFamily` replaces the base value, and `typography.fontWeight` merges key by key.
+- `color` merges role by role. A role replaces the base's role whole.
+- `color.neutral` and `color.neutralStyle` are one decision. Setting either one drops both.
+- `radius` and `typography.fontWeight` merge key by key.
+- `typography.fontFamily` replaces the base value.
 - `depth` and `actionControlFinish` merge per mode, then per rung.
 
-A value your theme sets to `undefined` reads as an omitted value and inherits the base value.
+A value set to `undefined` counts as omitted and inherits.
 
-A theme may extend a theme that extends another theme. Each base resolves before the theme that
-extends it. A cycle throws.
+A theme may extend a theme that extends another. A cycle throws.
 
-Contrast validation runs on the merged input. `ThemeContrastError` carries `inheritance`, which
-names the chain and separates the inherited colours from your own.
+Contrast validation runs on the merged theme. `ThemeContrastError` carries `inheritance`, naming the
+chain of themes and which colours came from a base.
 
 <auto-type-table
 	path="packages/@luke-ui/react/src/theme/define-theme.ts"

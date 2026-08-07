@@ -74,9 +74,8 @@ export type { ThemeInheritance } from './extend-theme.js';
 
 /**
  * Thrown by `buildTheme` when generated colours miss WCAG 2.2 AA contrast. Aggregates every
- * failing mode-and-pair before throwing, one per message line. For a theme built from an `extends`
- * chain, `defineTheme` supplies the {@link ThemeInheritance} that names the chain and separates the
- * inherited colours from the theme's own.
+ * failing mode-and-pair before throwing, one per message line. For a theme built with `extends`,
+ * `inheritance` names the chain of themes and which colours came from a base.
  */
 export class ThemeContrastError extends Error {
 	/** Every failing pair across both modes. */

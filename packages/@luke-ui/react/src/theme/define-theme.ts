@@ -147,11 +147,11 @@ export interface ThemeInput extends ThemeInputCommon {
 }
 
 /**
- * A theme that starts from another theme. It declares its own `name` and a base to extend, and every
- * other value is an override. Use it to change one part of a bundled theme.
+ * A theme that starts from another theme. It declares its own `name` and overrides any part of the
+ * base.
  */
 export interface ExtendingThemeInput extends ThemeInputCommon {
-	/** The theme to start from. Its own base, if it has one, resolves first. */
+	/** The theme to start from. */
 	extends: ThemeInput | ExtendingThemeInput;
 	/** Source-colour overrides. Every role the theme leaves out comes from the base. */
 	color?: Partial<ThemeInput['color']>;
@@ -235,8 +235,6 @@ export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
 	try {
 		return buildTheme(normalizeTheme(resolved.input));
 	} catch (error) {
-		// The compiler sees one merged input and stays ignorant of authoring inheritance, so the
-		// authoring surface is the layer that can name where a failing colour came from.
 		if (error instanceof ThemeContrastError && resolved.inheritance !== null) {
 			throw new ThemeContrastError(error.failures, resolved.inheritance);
 		}

@@ -35,18 +35,14 @@ describe('theme inheritance', () => {
 		const accentOnly = (css: string) =>
 			declarations(css).filter(([name]) => name.includes('accent'));
 
-		// Overriding one role changes that role's variables and nothing else.
 		expect(withoutAccent(subject)).toEqual(withoutAccent(reference));
 		expect(accentOnly(subject)).not.toEqual(accentOnly(reference));
 
-		// The identity is the extending theme's, never the base's.
 		expect(splitBlocks(subject).identity).toContain('.luke-ui-theme-product');
 		expect(splitBlocks(subject).identity).not.toContain('luke-ui-theme-tactile');
 	});
 
 	it('inherits every colour role a base authors', () => {
-		// Guards against a role being left out of the merge: the base sets all ten colour keys, and the
-		// extending theme overrides none of them.
 		const base: ThemeInput = {
 			color: {
 				accent: '#3b82f6',
@@ -77,11 +73,9 @@ describe('theme inheritance', () => {
 			name: 'string-accent',
 		});
 
-		// Neither mode keeps the base's verbatim side.
 		expect(foundation.light.color.accent).not.toBe('oklch(0.52 0.11 200)');
 		expect(foundation.dark.color.accent).not.toBe('oklch(0.75 0.1 200)');
 
-		// Both modes adapt the extending theme's single string: its hue, each mode's own lightness.
 		const light = parseColor(foundation.light.color.accent);
 		const dark = parseColor(foundation.dark.color.accent);
 		expect(light.h).toBeCloseTo(30, 0);
@@ -128,8 +122,6 @@ describe('theme inheritance', () => {
 			radius: { base: 8 },
 		});
 
-		// The overridden rung wins, and the base's other light rung survives instead of falling back to
-		// the curated default.
 		expect(foundation.light.depth.overlay).toBe('own-light-overlay');
 		// A rung authored as `undefined` reads as omitted, so it inherits rather than resetting.
 		expect(foundation.light.depth.resting).toBe('base-light-resting');
@@ -179,7 +171,6 @@ describe('theme inheritance', () => {
 		expect(foundation.light.color.success).toBe('oklch(0.45 0.12 150)');
 		expect(foundation.dark.color.success).toBe('oklch(0.8 0.12 150)');
 
-		// Naming both themes is the only observable outcome of a cycle, so assert the message here.
 		const first: ThemeInput = { color: { accent: '#3b82f6' }, name: 'first' };
 		const second: ExtendingThemeInput = { extends: first, name: 'second' };
 		first.extends = second;
@@ -203,42 +194,39 @@ describe('theme inheritance', () => {
 		expect(thrown).toBeInstanceOf(ThemeContrastError);
 		if (!(thrown instanceof ThemeContrastError)) return;
 		expect(thrown.failures.map((failure) => failure.foreground)).toContain('color.border.focus');
-		// The provenance traces the failing colour back to the theme that supplied it.
 		expect(thrown.inheritance?.chain).toEqual(['low-contrast-focus', 'tactile']);
 		expect(thrown.inheritance?.ownColors).toContain('color.focus');
 		expect(thrown.inheritance?.inheritedColors).toContain('color.accent');
 		expect(thrown.inheritance?.inheritedColors).toContain('color.neutral');
 	});
 
-	it('does not credit a base with a neutral the merge already dropped', () => {
-		// The base authors an explicit `neutral` pair, and the extending theme authors only
-		// `neutralStyle`, which discards the inherited `neutral` per `inheritColor`'s neutral coupling.
-		const base: ThemeInput = {
+	it('does not report a colour a later theme in the chain discarded', () => {
+		const root: ThemeInput = {
 			color: {
 				accent: '#3b82f6',
 				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
 			},
-			name: 'neutral-base',
+			name: 'root',
+		};
+		const middle: ExtendingThemeInput = {
+			color: { focus: 'oklch(0.99 0 0)', neutralStyle: 'warm' },
+			extends: root,
+			name: 'middle',
 		};
 		let thrown: unknown = null;
 		try {
-			defineTheme({
-				color: { focus: 'oklch(0.99 0 0)', neutralStyle: 'warm' },
-				extends: base,
-				name: 'neutral-style-child',
-			});
+			defineTheme({ extends: middle, name: 'leaf' });
 		} catch (error) {
 			thrown = error;
 		}
 
 		expect(thrown).toBeInstanceOf(ThemeContrastError);
 		if (!(thrown instanceof ThemeContrastError)) return;
-		expect(thrown.inheritance?.ownColors).toContain('color.neutralStyle');
-		expect(thrown.inheritance?.ownColors).toContain('color.focus');
+		// middle's neutralStyle discards root's neutral, so the merge carries no neutral to inherit.
+		expect(thrown.inheritance?.chain).toEqual(['leaf', 'middle', 'root']);
+		expect(thrown.inheritance?.ownColors).toEqual([]);
 		expect(thrown.inheritance?.inheritedColors).toContain('color.accent');
-		// The child authors `neutralStyle`, so the merge drops the base's `neutral`. The merged input
-		// carries no value for `color.neutral`, so it belongs in neither list.
+		expect(thrown.inheritance?.inheritedColors).toContain('color.neutralStyle');
 		expect(thrown.inheritance?.inheritedColors).not.toContain('color.neutral');
-		expect(thrown.inheritance?.ownColors).not.toContain('color.neutral');
 	});
 });

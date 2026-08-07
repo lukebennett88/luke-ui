@@ -29,8 +29,8 @@ export type { FontSizeStep } from './contract.js';
  * for text/on-solid pairs, 3:1 for the focus ring and `border.control`. The six semantic
  * `border.<role>` pairs are measured but advisory only and cannot trigger this error. It carries
  * every failing mode-and-pair in its `failures` array. For a theme built with `extends`, it also
- * carries `inheritance`, which names the chain and separates the inherited colours from the theme's
- * own. `ThemeGenerationError` is thrown when a role that must guarantee on-solid contrast (an
+ * carries `inheritance`, naming the chain of themes and which colours came from a base.
+ * `ThemeGenerationError` is thrown when a role that must guarantee on-solid contrast (an
  * inaccessible explicit per-mode accent, for example) cannot reach an accessible solid. It names the
  * failing `role` and `mode`.
  */
@@ -47,8 +47,8 @@ export type { ThemeInheritance } from './build-theme.js';
  * (accent + neutral character, with everything else defaulting) into the per-mode foundation and
  * compiles it through `buildTheme`. It adapts single-value accents and neutrals per mode, generates
  * the radius scale, and merges optional materials over curated defaults. It also accepts an
- * {@link ExtendingThemeInput}, whose `extends` chain resolves into one merged input first. It throws
- * the same {@link ThemeContrastError} and {@link ThemeGenerationError} as `buildTheme`.
+ * {@link ExtendingThemeInput} and resolves its `extends` chain first. It throws the same
+ * {@link ThemeContrastError} and {@link ThemeGenerationError} as `buildTheme`.
  */
 export { defineTheme } from './define-theme.js';
 

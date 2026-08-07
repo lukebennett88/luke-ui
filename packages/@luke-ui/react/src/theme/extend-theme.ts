@@ -1,24 +1,17 @@
 /**
  * Inheritance between theme-authoring inputs. `resolveThemeInput` folds an `extends` chain into one
- * plain {@link ThemeInput}, so the compiler consumes a merged input and stays ignorant of the chain.
- * It also records which colour roles the outermost theme inherited, so a contrast failure on a merged
- * input stays diagnosable.
+ * {@link ThemeInput}, and records which colours came from a base.
  *
- * Inheritance happens at the granularity the compiler already resolves a value at. A child's values
- * behave exactly as if an author wrote them on top of the base in one input.
+ * A theme's values behave as if an author wrote them on top of the base in one input.
  */
 
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
 
-/**
- * Where an extending theme's authored colours came from. `defineTheme` attaches it to a
- * {@link import('./build-theme.js').ThemeContrastError}, so a failing pair traces back to the theme
- * that supplied its source.
- */
+/** Which colours a theme authored, and which it inherited. Carried by `ThemeContrastError`. */
 export interface ThemeInheritance {
 	/** Theme names, the extending theme first and the innermost base last. */
 	chain: Array<string>;
-	/** Colour roles the theme took from a base, for example `color.neutral`. */
+	/** Colour roles the theme took from a base, for example `color.accent`. */
 	inheritedColors: Array<string>;
 	/** Colour roles the theme authored itself. */
 	ownColors: Array<string>;
@@ -61,19 +54,23 @@ function authorsNeutral(color: Partial<ThemeInput['color']> | undefined): boolea
  * provenance of the outermost theme. Throws when a theme extends a theme that extends it.
  */
 export function resolveThemeInput(input: ThemeInput | ExtendingThemeInput): ResolvedThemeInput {
-	// A theme with no base returns the very object it was handed. That is what keeps a theme with no
-	// base compiling exactly as it did.
+	// Returns the object it was handed, so inheritance cannot affect a theme with no base.
 	if (extendsNothing(input)) return { inheritance: null, input };
 	const { base, inputs } = collectChain(input);
-	// Fold from the innermost base outward, so each step merges one input over a complete
-	// `ThemeInput` and `color.accent` is always present.
+	// Fold from the innermost base outward, so every step merges over a complete `ThemeInput` and
+	// `color.accent` is always present.
 	let merged = base;
-	// `inputs` runs outermost first and ends at `base`, which seeds the fold, so drop the last entry
-	// and walk the rest backwards.
 	for (const own of inputs.slice(0, -1).reverse()) {
 		merged = inheritInput(merged, own);
 	}
-	return { inheritance: describeInheritance(input, inputs), input: merged };
+	return {
+		inheritance: describeInheritance(
+			input,
+			merged,
+			inputs.map((entry) => entry.name),
+		),
+		input: merged,
+	};
 }
 
 interface ThemeChain {
@@ -84,10 +81,9 @@ interface ThemeChain {
 }
 
 /**
- * Reports whether an input ends a chain. Only {@link ExtendingThemeInput} makes `extends` required,
- * so an input without one authors its own `color.accent` and is a complete {@link ThemeInput}. The
- * two inputs share no literal-typed key, so TypeScript cannot narrow the union on its own and this
- * predicate states the relationship once.
+ * Whether an input ends a chain. Only {@link ExtendingThemeInput} requires `extends`, so an input
+ * without one is a complete {@link ThemeInput}. `extends` is not a discriminant, so the union needs
+ * this predicate to narrow.
  */
 function extendsNothing(input: ThemeInput | ExtendingThemeInput): input is ThemeInput {
 	return input.extends === undefined;
@@ -100,7 +96,6 @@ function collectChain(input: ThemeInput | ExtendingThemeInput): ThemeChain {
 	let current: ThemeInput | ExtendingThemeInput = input;
 	for (;;) {
 		if (seen.has(current)) {
-			// The repeated name is the one that closes the cycle, which is not always the outermost theme.
 			const cycle = [...inputs, current].map((entry) => `"${entry.name}"`).join(' -> ');
 			throw new Error(
 				`Theme "${input.name}" has a cyclic extends chain: ${cycle}. ` +
@@ -120,27 +115,22 @@ function inheritInput(base: ThemeInput, own: ThemeInput | ExtendingThemeInput): 
 		actionControlFinish: inheritModes(base.actionControlFinish, own.actionControlFinish),
 		color: inheritColor(base.color, own.color),
 		depth: inheritModes(base.depth, own.depth),
-		// The identity belongs to the theme the author declares, so `name` never comes from a base.
+		// `name` never inherits: the identity belongs to the theme the author declares.
 		name: own.name,
 		radius: inheritKeys(base.radius, own.radius),
 		typography: inheritTypography(base.typography, own.typography),
 	};
 }
 
-/**
- * Merges source colours role by role. A role replaces the base's role whole. `resolveAdaptedRole` in
- * `define-theme.ts` adapts a bare string per colour mode and uses an explicit `{ light, dark }` side
- * verbatim. A per-mode merge would turn a base's adapted string into two verbatim values and change
- * what the base meant. So the role is the smallest coherent unit.
- */
+/** Merges source colours role by role. A role replaces the base's role whole. */
 function inheritColor(
 	base: ThemeInput['color'],
 	own: Partial<ThemeInput['color']> | undefined,
 ): ThemeInput['color'] {
 	if (own === undefined) return base;
 	// `neutral` and `neutralStyle` are two spellings of one decision, and `resolveNeutral` prefers
-	// `neutral`. A child that sets only `neutralStyle` and inherits a raw `neutral` loses its own
-	// character. A child that sets either key drops both inherited keys instead.
+	// `neutral`. A theme that sets only `neutralStyle` must drop an inherited `neutral`, or the
+	// inherited value would win.
 	const ownNeutral = authorsNeutral(own);
 	return {
 		accent: own.accent ?? base.accent,
@@ -156,13 +146,13 @@ function inheritColor(
 	};
 }
 
-/** A per-mode material section as the merge reads it: two optional modes of named string rungs. */
+/** A per-mode material section as the merge reads it: two optional modes of named rungs. */
 interface ModeLadders {
 	dark?: Record<string, string | undefined>;
 	light?: Record<string, string | undefined>;
 }
 
-/** Merges a per-mode material section, mode by mode and then rung by rung inside each mode. */
+/** Merges a per-mode material section, mode by mode and then rung by rung. */
 function inheritModes(
 	base: ModeLadders | undefined,
 	own: ModeLadders | undefined,
@@ -193,10 +183,8 @@ function inheritTypography(
 }
 
 /**
- * Merges two flat records key by key, an own value winning over a base value. A key the own record
- * sets to `undefined` inherits the base value. Composed authoring writes
- * `{ resting: condition ? value : undefined }`, and an explicit `undefined` must read as an omitted
- * key. The returned record carries no key whose value is `undefined`.
+ * Merges two flat records key by key, an own value winning. A key set to `undefined` counts as
+ * omitted and inherits, because composed authoring writes `{ resting: on ? value : undefined }`.
  */
 function inheritKeys<Value>(
 	base: Readonly<Record<string, Value | undefined>> | undefined,
@@ -212,27 +200,19 @@ function inheritKeys<Value>(
 }
 
 /**
- * Reports colour provenance from the collected chain. A role the outermost input sets is its own. A
- * role only an ancestor sets is inherited. A role no input sets appears in neither list.
+ * Reports which colours a theme authored and which it inherited. Reads the merged input, so a
+ * colour a later theme discarded is reported as neither.
  */
 function describeInheritance(
 	outermost: ThemeInput | ExtendingThemeInput,
-	inputs: Array<ThemeInput | ExtendingThemeInput>,
+	merged: ThemeInput,
+	chain: Array<string>,
 ): ThemeInheritance {
 	const inheritedColors: Array<string> = [];
 	const ownColors: Array<string> = [];
 	for (const role of COLOR_ROLES) {
-		if (outermost.color?.[role] !== undefined) {
-			ownColors.push(`color.${role}`);
-			continue;
-		}
-		// A theme that authors the neutral character under the other key drops both inherited keys. The
-		// merged input carries no value for this role, so it belongs in neither list.
-		const isNeutralRole = NEUTRAL_ROLES.some((neutralRole) => neutralRole === role);
-		if (isNeutralRole && authorsNeutral(outermost.color)) continue;
-		if (inputs.some((entry) => entry.color?.[role] !== undefined)) {
-			inheritedColors.push(`color.${role}`);
-		}
+		if (outermost.color?.[role] !== undefined) ownColors.push(`color.${role}`);
+		else if (merged.color[role] !== undefined) inheritedColors.push(`color.${role}`);
 	}
-	return { chain: inputs.map((entry) => entry.name), inheritedColors, ownColors };
+	return { chain, inheritedColors, ownColors };
 }
