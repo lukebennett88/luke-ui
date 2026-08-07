@@ -1,9 +1,8 @@
 /**
  * Derives a theme's identity class from its name, and rejects a name that is not kebab-case.
  *
- * A leaf module that must keep importing nothing. `validate-foundation.ts`, `stylesheet.ts`, and
- * each bundled theme's class module all need it. Staying dependency-free is what lets a consumer
- * import one theme's class without pulling in the compiler, a foundation, or colour generation.
+ * This module must keep importing nothing. Staying dependency-free is what lets a consumer import
+ * one theme's class without pulling in the compiler, a foundation, or colour generation.
  */
 
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;

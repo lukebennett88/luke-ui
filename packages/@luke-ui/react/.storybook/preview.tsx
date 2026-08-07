@@ -8,6 +8,7 @@ import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { rootClassName, vars } from '@luke-ui/react/theme';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
+import { cx } from '@luke-ui/react/utils';
 import addonA11y from '@storybook/addon-a11y';
 import addonDocs from '@storybook/addon-docs';
 import { definePreview } from '@storybook/react-vite';
@@ -28,7 +29,7 @@ export default definePreview({
 						<StoryCanvasTheme colorMode={colorMode} themeClassName={themeClassName} />
 					) : null}
 					<div
-						className={`${rootClassName} ${themeClassName}`}
+						className={cx(rootClassName, themeClassName)}
 						data-color-mode={colorMode}
 						style={{
 							backgroundColor: vars.color.surface.canvas,

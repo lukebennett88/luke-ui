@@ -40,7 +40,7 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 			className={composeRenderProps(restProps.className, (className) => {
 				return cx(rootClassName, styles.combobox().popover(className));
 			})}
-			ref={mergeRefs(ref, (node: HTMLElement | null) => setElement(node))}
+			ref={mergeRefs<HTMLElement>(ref, setElement)}
 		/>
 	);
 }

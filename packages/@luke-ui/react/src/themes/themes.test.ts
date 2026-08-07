@@ -32,7 +32,7 @@ describe('bundled theme package exports', () => {
 	});
 
 	// Each identity-class leaf holds its theme's name as a literal, so the class costs a consumer
-	// nothing but the string. That literal can drift from the foundation, and this is what catches it.
+	// nothing but the string. That literal can drift from the foundation's own `name`.
 	it('derives each identity class from its own theme name', () => {
 		expect(paperThemeClassName).toBe(getThemeClassName(paperThemeInput.name));
 		expect(tactileThemeClassName).toBe(getThemeClassName(tactileThemeInput.name));
@@ -48,8 +48,8 @@ describe('bundled theme package exports', () => {
 		expect(tactileCss).not.toContain(paperThemeClassName);
 	});
 
-	// Pins the coupling the old combined barrel had: each per-theme entrypoint must import only
-	// its own foundation leaf, so a consumer of one theme never pulls the other into their bundle.
+	// Each per-theme entrypoint must import only its own foundation leaf, so a consumer of one theme
+	// never pulls the other into their bundle.
 	it('keeps each built theme entrypoint decoupled from the other theme', async () => {
 		const paperEntry = await readFile(themeEntrypoints.paper, 'utf8');
 		const tactileEntry = await readFile(themeEntrypoints.tactile, 'utf8');

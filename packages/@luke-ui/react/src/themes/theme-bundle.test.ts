@@ -1,14 +1,9 @@
 /**
- * Proves at the bundler level what tree-shaking is otherwise only assumed to do: importing a bundled
- * theme's `themeClassName` must not pull its foundation in. Each case bundles a one-line entry
- * against the built `dist/themes/<name>/index.js`, so it measures what a consumer's bundler keeps.
- *
- * This test guards two invariants. The identity class must not derive from `<name>Theme.name`,
- * which would make the foundation object a prerequisite of the class string. A multi-layer CSS
- * value must stay a concatenated literal, not `[...].join(', ')`, because a joined value survives
- * dead-code elimination even when nothing reads it.
- *
- * Runs in the `unit` project and reads `dist`, so `build:packages` must have run first.
+ * Bundles a one-line entry against the built `dist/themes/<name>/index.js`, so it measures what a
+ * consumer's bundler keeps. The identity class must not derive from `<name>Theme.name`, which would
+ * make the foundation a prerequisite of the class string. A multi-layer CSS value must stay a
+ * concatenated literal, not `[...].join(', ')`, because a joined value survives dead-code
+ * elimination even when nothing reads it. Reads `dist`, so `build:packages` must run first.
  */
 
 import { fileURLToPath } from 'node:url';
@@ -23,30 +18,33 @@ const BUILD_TIMEOUT_MS = 120_000;
 const VIRTUAL_ENTRY = '\0luke-ui-theme-bundle-entry';
 
 /**
- * Foundation data that must be absent from a class-only bundle and present in a `theme` bundle.
- * Several independent markers per theme, so one bundler change that happens to drop a single string
- * cannot carry the negative case on its own. Paper authors a hex accent and Tactile an OKLCH one, so
- * the last marker is each theme's own authored accent value.
+ * Foundation data that must be absent from a class-only bundle and present in a `theme` bundle. The
+ * last marker is each theme's own authored accent, a hex value for Paper and an OKLCH one for
+ * Tactile.
  */
 const FOUNDATION_MARKERS = {
 	paper: ['oklch(', 'radial-gradient(', '#185281'],
 	tactile: ['oklch(', 'radial-gradient(', 'oklch(0.75 0.1 200)'],
 } as const;
 
-/**
- * A byte ceiling for a class-only bundle: room for the leaf helper and its comments, and far under
- * the foundation's own weight. A regression that retains the foundation blows straight through it.
- */
-const CLASS_ONLY_CEILING_BYTES = 2_000;
+const bundleCache = new Map<string, Promise<string>>();
 
-/** A floor for a `theme` bundle, proving the positive control really carries the foundation. */
-const THEME_FLOOR_BYTES = 3_000;
+/** Memoised so the four bundles below are built once each, however many tests read them. */
+function bundleThemeExport(
+	themeName: keyof typeof FOUNDATION_MARKERS,
+	exportName: 'theme' | 'themeClassName',
+): Promise<string> {
+	const cacheKey = `${themeName}:${exportName}`;
+	const cached = bundleCache.get(cacheKey);
+	if (cached) return cached;
 
-/**
- * Bundles `export { <exportName> } from '<dist entrypoint>'` and returns the emitted code. Nothing
- * reaches disk. Minification stays off, so a marker cannot go missing through mangling.
- */
-async function bundleThemeExport(
+	const pending = runThemeExportBuild(themeName, exportName);
+	bundleCache.set(cacheKey, pending);
+	return pending;
+}
+
+/** Minification stays off, so a marker cannot go missing through mangling. */
+async function runThemeExportBuild(
 	themeName: keyof typeof FOUNDATION_MARKERS,
 	exportName: 'theme' | 'themeClassName',
 ): Promise<string> {
@@ -97,13 +95,11 @@ for (const themeName of ['paper', 'tactile'] as const) {
 					expect(code).not.toContain(marker);
 				}
 				expect(code).toContain('luke-ui-theme-');
-				expect(byteLength(code)).toBeLessThan(CLASS_ONLY_CEILING_BYTES);
 			},
 			BUILD_TIMEOUT_MS,
 		);
 
-		// The positive control. Without it the assertions above would also pass on an empty bundle
-		// from a bundler that silently resolved nothing.
+		// The positive control: the negative assertions above would also pass on an empty bundle.
 		it(
 			'keeps the foundation in a bundle that imports theme',
 			async () => {
@@ -112,7 +108,21 @@ for (const themeName of ['paper', 'tactile'] as const) {
 				for (const marker of markers) {
 					expect(code).toContain(marker);
 				}
-				expect(byteLength(code)).toBeGreaterThan(THEME_FLOOR_BYTES);
+			},
+			BUILD_TIMEOUT_MS,
+		);
+
+		// A ratio ignores output growth that hits both bundles equally, and still catches retained
+		// foundation data that happens to contain none of the markers above.
+		it(
+			'bundles the class alone at well under the weight of the whole theme',
+			async () => {
+				const [classOnly, whole] = await Promise.all([
+					bundleThemeExport(themeName, 'themeClassName'),
+					bundleThemeExport(themeName, 'theme'),
+				]);
+
+				expect(byteLength(classOnly) / byteLength(whole)).toBeLessThan(0.5);
 			},
 			BUILD_TIMEOUT_MS,
 		);

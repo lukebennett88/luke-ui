@@ -54,9 +54,9 @@ export { defaultControlFinish, defaultDepth, defaultScrim } from './define-theme
 
 /**
  * `getThemeClassName(name)` returns a theme's identity class, `luke-ui-theme-${name}`. Pass the same
- * `name` the theme's {@link ThemeInput} declares. Apply the result alongside {@link rootClassName}
- * only when one document loads more than one theme stylesheet, so an explicit class outranks another
- * theme's `:root` fallback. It throws when the name is not the kebab-case `defineTheme` requires.
+ * `name` the theme's {@link ThemeInput} declares. Apply the result to the theme root when one
+ * document loads more than one theme stylesheet, so the explicit identity outranks another theme's
+ * `:root` fallback. It throws when the name is not the kebab-case `defineTheme` requires.
  */
 export { getThemeClassName } from './theme-class-name.js';
 
