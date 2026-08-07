@@ -27,14 +27,26 @@ export const Default = meta.story({
 	} satisfies Partial<BoxProps>,
 });
 
-export const CustomDiv = meta.story({
+export const Section = meta.story({
 	args: {
 		'aria-label': 'Account summary',
 		children: 'Account summary content',
-		className: 'consumer-class',
-		id: 'account-summary',
+		display: 'flex',
+		elementType: 'section',
 		padding: '400',
-		render: (domProps) => <MotionDiv {...domProps} />,
+		style: { backgroundColor: vars.color.surface.recessed },
+	} satisfies Partial<BoxProps>,
+});
+
+export const CustomDiv = meta.story({
+	args: {
+		children: 'Account summary content',
+		className: 'consumer-class',
+		padding: '400',
+		ref: (element) => element?.setAttribute('data-box-ref', 'received'),
+		render: (resolvedProps) => (
+			<MotionDiv aria-label="Account summary" id="account-summary" {...resolvedProps} />
+		),
 		style: { backgroundColor: vars.color.surface.recessed },
 	} satisfies Partial<BoxProps>,
 });

@@ -48,6 +48,21 @@ Short version:
 
 Components wrap `react-aria-components` and use `composeRenderProps` for styling.
 
+### Element choice
+
+`elementType` changes the semantic element. It does not change the accepted DOM prop surface. Accept
+only elements that the component is designed to render.
+
+Use a dedicated component when an element needs behaviour or an element-specific API. For example,
+use `Link` for links and `Button` for buttons.
+
+When a component supports render ownership, the callback receives that component's documented
+resolved props and owns the rendered element's DOM attributes. Keep render ownership and semantic
+element choice mutually exclusive.
+
+Do not add generic polymorphic props, `as`, or `asChild` without a demonstrated need. This is a
+component design rule, not an internal prop normalisation rule.
+
 See [COMPONENTS.md](COMPONENTS.md) for component tiers, package paths, and generator rules.
 
 ## Styling

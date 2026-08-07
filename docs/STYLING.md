@@ -291,9 +291,10 @@ bundle smaller as the token scale grows.
 The tradeoff is that some values are applied through inline `style`, which raises specificity. That
 is acceptable because styling utilities are already the highest-priority escape hatch.
 
-`Box` from `@luke-ui/react/box` applies the same utilities to a `div`. Its `render` prop can use a
-compatible custom `div` component while preserving the generated class, style, ref, and DOM props.
-It does not provide `as` or `asChild` polymorphism.
+`Box` from `@luke-ui/react/box` applies the same utilities and renders a `div` by default. Set
+`elementType` to choose a supported structural element. This choice does not change Box's DOM prop
+surface. Use `render` when the callback must own the element. See the
+[Box documentation](/components/layout/box) for the full contract.
 
 Do not add style props to every component. Component props should stay focused on component-specific
 variants and behaviour.

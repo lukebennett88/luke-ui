@@ -64,6 +64,20 @@ Return one DOM root. Custom wrappers must pass the supplied `ref` to that elemen
 
 The second `render` argument contains interaction state such as `isPressed`.
 
+For `Box`, set `elementType` when the layout needs a supported structural element. This choice does
+not change Box's accepted DOM props. Box owns the rendered element.
+
+<ExampleBlock src="box/semantic-element" title="Composition and customisation — Semantic element" />
+
+Use Box's `render` prop when the callback must own the rendered element and its DOM attributes. The
+callback can return an appropriate intrinsic element or custom component. Do not combine `render`
+with `elementType`. Use `Link` and `Button` when you need their behaviour.
+
+<ExampleBlock
+	src="box/render-element"
+	title="Composition and customisation — Own the rendered element"
+/>
+
 ## Style the new pattern
 
 Use public recipes from `@luke-ui/react/recipes` when the custom composition follows that
