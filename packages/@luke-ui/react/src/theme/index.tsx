@@ -1,8 +1,12 @@
 import { lukeUiClassNames } from '../styles/class-names.js';
 import { cx } from '../utils/index.js';
 
-/** Convenience class name combining the theme-root and CSS-reset classes. */
-export const themeRootClassName = cx(lukeUiClassNames.themeRoot, lukeUiClassNames.resetRoot);
+/**
+ * Applies the descendant CSS reset and the base Luke UI typography and theme layer. It carries no
+ * theme identity of its own. Apply it to `<body>`, `<main>`, an app shell, or any element you
+ * already own.
+ */
+export const rootClassName = cx(lukeUiClassNames.themeRoot, lukeUiClassNames.resetRoot);
 
 /**
  * Typed access to the semantic theme custom properties. Each path resolves to a stable global
@@ -21,15 +25,14 @@ export { fontSizeSteps } from './contract.js';
 export type { FontSizeStep } from './contract.js';
 
 /**
- * `themeClassName(name)` returns the identity class for a theme name. `ThemeContrastError` is thrown
- * by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1 for text/on-solid pairs, 3:1 for
- * the focus ring and `border.control`. The six semantic `border.<role>` pairs are measured but
- * advisory only and cannot trigger this error. It carries every failing mode-and-pair in its `failures`
- * array. `ThemeGenerationError` is thrown when a role that must guarantee on-solid contrast (an
- * inaccessible explicit per-mode accent, for example) cannot reach an accessible solid. It names the
- * failing `role` and `mode`.
+ * `ThemeContrastError` is thrown by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1
+ * for text/on-solid pairs, 3:1 for the focus ring and `border.control`. The six semantic
+ * `border.<role>` pairs are measured but advisory only and cannot trigger this error. It carries
+ * every failing mode-and-pair in its `failures` array. `ThemeGenerationError` is thrown when a role
+ * that must guarantee on-solid contrast (an inaccessible explicit per-mode accent, for example)
+ * cannot reach an accessible solid. It names the failing `role` and `mode`.
  */
-export { ThemeContrastError, ThemeGenerationError, themeClassName } from './build-theme.js';
+export { ThemeContrastError, ThemeGenerationError } from './build-theme.js';
 
 /** One WCAG contrast failure recorded on a {@link ThemeContrastError}. */
 export type { ThemeContrastFailure } from './build-theme.js';
@@ -48,6 +51,14 @@ export type { ColorInput, ControlFinish, DepthLadder, ThemeInput } from './defin
 
 /** Curated defaults `defineTheme` applies for omitted materials and scrim. */
 export { defaultControlFinish, defaultDepth, defaultScrim } from './define-theme.js';
+
+/**
+ * `getThemeClassName(name)` returns a theme's identity class, `luke-ui-theme-${name}`. Pass the same
+ * `name` the theme's {@link ThemeInput} declares. Apply the result to the theme root when one
+ * document loads more than one theme stylesheet, so the explicit identity outranks another theme's
+ * `:root` fallback. It throws when the name is not the kebab-case `defineTheme` requires.
+ */
+export { getThemeClassName } from './theme-class-name.js';
 
 /** Derives a concentric outer corner from an inner radius plus the intervening gap. */
 export { deriveConcentricRadius } from './foundation.js';

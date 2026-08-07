@@ -13,7 +13,8 @@ import type {
 	ThemeModeDiagnostics,
 } from './diagnostics.js';
 import type { GeneratedSurfaces } from './elevation.js';
-import { paperTheme, tactileTheme } from './foundations.js';
+import { paperTheme } from './foundations/paper.js';
+import { tactileTheme } from './foundations/tactile.js';
 import type { FamilyRequirements, FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
 
 type BundledThemeKey = 'tactile' | 'paper';

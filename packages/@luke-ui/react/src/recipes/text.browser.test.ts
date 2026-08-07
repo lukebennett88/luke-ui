@@ -1,9 +1,9 @@
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { fontSizeSteps } from '../theme/contract.js';
-import { tactileTheme } from '../theme/foundations.js';
-import { defineTheme, themeClassName, themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { tactileTheme } from '../theme/foundations/tactile.js';
+import { defineTheme, getThemeClassName, rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { text, textLineHeight } from './text.css.js';
 
 let mounted: Array<HTMLElement> = [];
@@ -206,7 +206,7 @@ function mountTextLineHeightControl(parent: HTMLElement) {
 
 function mountRoot(themeClass = tactileThemeClassName) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${themeClass}`;
+	root.className = `${rootClassName} ${themeClass}`;
 	root.dataset.colorMode = 'light';
 	mounted.push(root);
 	return root;
@@ -221,7 +221,7 @@ function installTheme(fontFamily: 'inter' | 'apple-system' | 'dm-sans') {
 		typography: { fontFamily },
 	});
 	styles.push(style);
-	return themeClassName(name);
+	return getThemeClassName(name);
 }
 
 const curatedFamilyIdentity = {

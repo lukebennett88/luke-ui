@@ -18,13 +18,13 @@ pnpm add @luke-ui/react
 
 ### 2. Import the CSS
 
-Import the shared stylesheet and the stylesheet for one identity at your application root. This
-example uses Tactile. To use Paper, import `@luke-ui/react/themes/paper.css` instead.
+Import the shared stylesheet and one theme's stylesheet at your application root. This example uses
+Tactile. To use Paper, import `@luke-ui/react/themes/paper/stylesheet.css` instead.
 
 ### 3. Add the theme root
 
-Apply `themeRootClassName` and the matching identity class to the same element. The theme root
-provides the reset, base typography, and semantic variables for its children.
+Apply `rootClassName` to an element you own, such as the application shell. The theme stylesheet
+supplies the semantic variables. `rootClassName` adds the reset and base typography.
 
 <SourceCodeBlock src="theming/getting-started" />
 
@@ -37,8 +37,8 @@ Import each component from its package path. The setup above renders `Text`. `Bu
 
 ## Change the theme
 
-Tactile is the default bundled identity. Paper uses the same component APIs with a flatter visual
-treatment. Switch the CSS import and class together.
+Tactile is the default bundled theme. Paper uses the same component APIs with a flatter visual
+treatment. Switch which theme stylesheet you import to change the theme.
 
 <SourceCodeBlock src="overview/paper-theme" />
 

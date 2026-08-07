@@ -1,9 +1,9 @@
 import '../styles/reset.css.js';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { fontSizeSteps } from '../theme/contract.js';
-import { themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { checkbox } from './checkbox.css.js';
 import { field as fieldRecipe } from './field.css.js';
 import { text } from './text.css.js';
@@ -93,7 +93,7 @@ test('sizes inherit from the root into the control, indicator, and field message
 
 test('ordinary field messages keep their zero indentation fallback', () => {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	root.className = `${rootClassName} ${tactileThemeClassName}`;
 	const message = root.appendChild(document.createElement('span'));
 	message.className = fieldRecipe({ tone: 'description' }).message();
 	mounted.push(root);
@@ -139,7 +139,7 @@ function mountCheckbox(
 	textSize?: (typeof fontSizeSteps)[number],
 ) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	root.className = `${rootClassName} ${tactileThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	root.style.lineHeight = '24px';
 	const textElement = root.appendChild(document.createElement('span'));

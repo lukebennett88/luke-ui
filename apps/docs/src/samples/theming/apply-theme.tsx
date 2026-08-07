@@ -1,13 +1,11 @@
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/tactile.css';
-import { themeRootClassName } from '@luke-ui/react/theme';
-import { tactileThemeClassName } from '@luke-ui/react/themes';
-import { cx } from '@luke-ui/react/utils';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
+import { rootClassName } from '@luke-ui/react/theme';
 import type { PropsWithChildren } from 'react';
 
 export function App({ children }: PropsWithChildren) {
 	return (
-		<div className={cx(themeRootClassName, tactileThemeClassName)} data-color-mode="dark">
+		<div className={rootClassName} data-color-mode="dark">
 			{children}
 		</div>
 	);

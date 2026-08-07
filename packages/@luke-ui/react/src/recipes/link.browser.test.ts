@@ -1,8 +1,8 @@
 import '../styles/reset.css.js';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { link } from './link.css.js';
 
 let mounted: Array<HTMLElement> = [];
@@ -82,7 +82,7 @@ test('focus-visible shows the complete independent semantic ring', () => {
 
 function mountLink(options: Parameters<typeof link>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	root.className = `${rootClassName} ${tactileThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	const anchor = root.appendChild(document.createElement('a'));
 	anchor.className = link(options);

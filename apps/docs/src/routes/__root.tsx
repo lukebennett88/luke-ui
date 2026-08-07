@@ -1,7 +1,7 @@
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import paperCss from '@luke-ui/react/themes/paper.css?url';
-import tactileCss from '@luke-ui/react/themes/tactile.css?url';
+import paperCss from '@luke-ui/react/themes/paper/stylesheet.css?url';
+import tactileCss from '@luke-ui/react/themes/tactile/stylesheet.css?url';
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
@@ -18,6 +18,8 @@ export const Route = createRootRoute({
 	head: () => ({
 		links: [
 			{ href: appCss, rel: 'stylesheet' },
+			// Tactile must stay last: before hydration, the last stylesheet's `:where(:root)`
+			// fallback wins, and it has to match what `getServerThemeIdentity` returns.
 			{ href: paperCss, rel: 'stylesheet' },
 			{ href: tactileCss, rel: 'stylesheet' },
 			{

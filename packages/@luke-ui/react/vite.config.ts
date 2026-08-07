@@ -13,8 +13,8 @@ const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
 const assetExports = [
 	'./stylesheet.css',
 	'./spritesheet.svg',
-	'./themes/tactile.css',
-	'./themes/paper.css',
+	'./themes/tactile/stylesheet.css',
+	'./themes/paper/stylesheet.css',
 ];
 
 async function cleanDistExceptPreservedFiles() {
@@ -52,6 +52,7 @@ export default defineConfig({
 		dts: true,
 		entry: {
 			'*': ['src/*/index.tsx', 'src/*/index.ts', 'src/*/primitive/index.tsx'],
+			'themes/*': ['src/themes/*/index.ts'],
 		},
 		exports: {
 			customExports: Object.fromEntries(

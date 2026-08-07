@@ -1,7 +1,7 @@
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { themeRootClassName } from '../theme/index.js';
-import { tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { cx } from '../utils/index.js';
 import { field } from './field.css.js';
 
@@ -87,7 +87,7 @@ test('disabled field text takes the functional disabled colour, not a role colou
 
 function mountField(options: Parameters<typeof field>[0] = {}) {
 	const root = document.body.appendChild(document.createElement('div'));
-	root.className = cx(themeRootClassName, tactileThemeClassName);
+	root.className = cx(rootClassName, tactileThemeClassName);
 	root.dataset.colorMode = 'light';
 	mounted.push(root);
 

@@ -3,9 +3,9 @@ title: Authoring a theme
 description: Compile a curated theme input into a static Luke UI theme stylesheet.
 ---
 
-Author a custom theme when the bundled identities do not suit the product. `defineTheme` turns a
-small, curated `ThemeInput` into static CSS for one identity with light and dark modes. It does not
-need a browser or a Luke UI release.
+Author a custom theme when the bundled themes do not suit the product. `defineTheme` turns a small,
+curated `ThemeInput` into static CSS for one theme with light and dark modes. It does not need a
+browser or a Luke UI release.
 
 ## Define the input
 
@@ -35,6 +35,10 @@ The minimal theme authors one colour and a neutral character:
 
 <SourceCodeBlock src="theming/minimal-theme" />
 
+Start from a bundled theme instead of a blank input. Each bundled theme's entrypoint, for example
+`@luke-ui/react/themes/tactile`, exports `theme`, its own `ThemeInput`. Read it, copy it, or spread
+it into your own `defineTheme` call.
+
 ## Generate a stylesheet
 
 Call `defineTheme` from an application build script. Write the returned CSS to a stylesheet your
@@ -42,10 +46,18 @@ framework can load.
 
 <SourceCodeBlock src="theming/author-theme" />
 
-Apply `themeRootClassName` and `themeClassName('product')` to the same root. The supplied name must
-match the input's `name`. Colour mode uses the same `data-color-mode` attribute as bundled themes.
+Apply a product theme exactly like a bundled one. Load the generated stylesheet. Apply
+`rootClassName` to an element you own.
+
+The product theme's own stylesheet themes the document. Colour mode uses the same `data-color-mode`
+attribute as bundled themes.
 
 <SourceCodeBlock src="theming/custom-theme-app" />
+
+The theme needs no identity class unless the same document also loads another theme. When it does,
+call `getThemeClassName` from `@luke-ui/react/theme` with the `name` your `ThemeInput` declares.
+That is the same helper the bundled themes use for their own classes. See
+[Applying a theme](/applying-a-theme) for where to put the result.
 
 Applications must load any non-system font files their `typography` selects.
 

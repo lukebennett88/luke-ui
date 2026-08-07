@@ -1,5 +1,6 @@
 import { expect, test } from 'vite-plus/test';
-import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
+import { themeClassName as paperThemeClassName } from '../themes/paper/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { cleanupVisual, renderVisual, visualAppearances } from './render-visual.js';
 
 test('renders every bundled identity and explicit colour mode independently', () => {
@@ -7,10 +8,10 @@ test('renders every bundled identity and explicit colour mode independently', ()
 		const scene = renderVisual(<span>Theme contract</span>, appearance);
 		const root = scene.element();
 
-		expect(root).toHaveClass(
+		expect(document.documentElement).toHaveClass(
 			appearance.theme === 'tactile' ? tactileThemeClassName : paperThemeClassName,
 		);
-		expect(root).toHaveAttribute('data-color-mode', appearance.mode);
+		expect(document.documentElement).toHaveAttribute('data-color-mode', appearance.mode);
 		const styles = getComputedStyle(root);
 		expect(styles.colorScheme).toBe(appearance.mode);
 		expect(styles.backgroundColor).toBe(styles.getPropertyValue('--luke-color-surface-canvas'));
@@ -20,10 +21,10 @@ test('renders every bundled identity and explicit colour mode independently', ()
 });
 
 test('defaults existing callers to Tactile light', () => {
-	const root = renderVisual(<span>Default contract</span>).element();
+	renderVisual(<span>Default contract</span>);
 
-	expect(root).toHaveClass(tactileThemeClassName);
-	expect(root).toHaveAttribute('data-color-mode', 'light');
+	expect(document.documentElement).toHaveClass(tactileThemeClassName);
+	expect(document.documentElement).toHaveAttribute('data-color-mode', 'light');
 });
 
 test('allows a nested scope to select the opposite colour mode', () => {

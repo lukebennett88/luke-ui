@@ -68,8 +68,8 @@ from a curated accent and neutral character. It is not a per-component override 
 ## Set up static styles
 
 Import `@luke-ui/react/stylesheet.css` and one bundled theme stylesheet at the application entry
-point. Apply `themeRootClassName` and the matching identity class to the same application or subtree
-root. Luke UI scopes the reset to that root, so it does not reset unrelated application content.
+point. Apply `rootClassName` to the application or subtree root you own. Luke UI scopes the reset to
+that root, so it does not reset unrelated application content.
 
 <SourceCodeBlock src="styling/static-styles" />
 
@@ -79,7 +79,7 @@ Read [Applying a theme](/applying-a-theme) for colour modes, portals, and other 
 
 Luke UI's static CSS uses four cascade layers, ordered from lowest to highest priority: `reset`,
 `theme`, `recipes`, and `utilities`. That internal order is stable regardless of stylesheet import
-order. The reset normalises only the subtree that carries `themeRootClassName`.
+order. The reset normalises only the subtree that carries `rootClassName`.
 
 If your application also uses cascade layers, declare its layer order before you import stylesheets.
 

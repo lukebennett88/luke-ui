@@ -1,9 +1,9 @@
 import '../styles/app.css';
-import '@luke-ui/react/themes/paper.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/paper/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { paperThemeClassName } from '@luke-ui/react/themes';
+import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
@@ -45,20 +45,20 @@ test('persists theme identity and colour mode independently', async () => {
 	await userEvent.click(paperProfile, { force: true });
 
 	expect(paperProfile).toBeChecked();
-	expect(themeRoot).toHaveClass(paperThemeClassName);
+	expect(document.documentElement).toHaveClass(paperThemeClassName);
 	expect(themeRoot.dataset.colorMode).toBe('light');
 
 	await userEvent.click(darkMode, { force: true });
 
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
-	expect(themeRoot).toHaveClass(paperThemeClassName);
+	expect(document.documentElement).toHaveClass(paperThemeClassName);
 
 	unmountTheme();
 	renderTheme(<ThemeControls />);
 
 	expect(page.getByRole('radio', { name: 'Paper' })).toBeChecked();
 	expect(page.getByRole('radio', { name: 'Dark theme' })).toBeChecked();
-	expect(getThemeRoot()).toHaveClass(paperThemeClassName);
+	expect(document.documentElement).toHaveClass(paperThemeClassName);
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
 });
 
@@ -81,7 +81,7 @@ test('theme profile is labelled and operable with arrow keys', async () => {
 	await userEvent.keyboard('{Enter}');
 
 	expect(paperProfile).toBeChecked();
-	expect(getThemeRoot()).toHaveClass(paperThemeClassName);
+	expect(document.documentElement).toHaveClass(paperThemeClassName);
 });
 
 test('system colour mode follows the platform preference and drives the docs chrome', async () => {

@@ -1,10 +1,11 @@
-import '@luke-ui/react/themes/paper.css';
-import '@luke-ui/react/themes/tactile.css';
+import '@luke-ui/react/themes/paper/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { contrastRatio, parseColor } from '../theme/color.js';
-import { themeRootClassName } from '../theme/index.js';
-import { paperThemeClassName, tactileThemeClassName } from '../themes/index.js';
+import { rootClassName } from '../theme/index.js';
+import { themeClassName as paperThemeClassName } from '../themes/paper/index.js';
+import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import { loadingSkeletonClassName } from './loading-skeleton.css.js';
 
 let root: HTMLElement | undefined;
@@ -59,7 +60,7 @@ function mountInlineSkeleton(
 	mode: 'light' | 'dark' = 'light',
 ) {
 	root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${themeClassName}`;
+	root.className = `${rootClassName} ${themeClassName}`;
 	root.dataset.colorMode = mode;
 	root.style.backgroundColor = 'var(--luke-color-surface-canvas)';
 	const skeleton = root.appendChild(document.createElement('span'));
@@ -190,7 +191,7 @@ test('paints a pseudo-element over children in block mode', async () => {
 
 function mountBlockSkeleton() {
 	root = document.body.appendChild(document.createElement('div'));
-	root.className = `${themeRootClassName} ${tactileThemeClassName}`;
+	root.className = `${rootClassName} ${tactileThemeClassName}`;
 	root.dataset.colorMode = 'light';
 	root.style.backgroundColor = 'var(--luke-color-surface-canvas)';
 	const parent = root.appendChild(document.createElement('div'));

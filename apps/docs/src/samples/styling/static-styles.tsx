@@ -1,10 +1,8 @@
 import '@luke-ui/react/stylesheet.css';
-import '@luke-ui/react/themes/tactile.css';
-import { themeRootClassName } from '@luke-ui/react/theme';
-import { tactileThemeClassName } from '@luke-ui/react/themes';
-import { cx } from '@luke-ui/react/utils';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
+import { rootClassName } from '@luke-ui/react/theme';
 import type { PropsWithChildren } from 'react';
 
 export function App({ children }: PropsWithChildren) {
-	return <div className={cx(themeRootClassName, tactileThemeClassName)}>{children}</div>;
+	return <div className={rootClassName}>{children}</div>;
 }
