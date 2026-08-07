@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
-import { useForm } from '@tanstack/react-form';
+import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { useRef } from 'react';
 import * as z from 'zod';
 
@@ -12,14 +12,27 @@ const schema = z.object({
 	}),
 });
 
+const FOCUSABLE_SELECTOR =
+	'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
+function focusFirstInvalidField(form: HTMLFormElement | null) {
+	const invalid = form?.querySelector('[aria-invalid="true"]');
+	if (!invalid) return;
+	const control = invalid.matches(FOCUSABLE_SELECTOR)
+		? invalid
+		: invalid.querySelector(FOCUSABLE_SELECTOR);
+	if (control instanceof HTMLElement) control.focus();
+}
+
 export default () => {
-	const termsRef = useRef<HTMLInputElement>(null);
+	const formRef = useRef<HTMLFormElement>(null);
 
 	const form = useForm({
 		defaultValues: { terms: false },
 		onSubmit: () => undefined,
-		onSubmitInvalid: () => termsRef.current?.focus(),
-		validators: { onChange: schema },
+		onSubmitInvalid: () => focusFirstInvalidField(formRef.current),
+		validationLogic: revalidateLogic({ mode: 'submit', modeAfterSubmission: 'change' }),
+		validators: { onDynamic: schema, onSubmit: schema },
 	});
 
 	return (
@@ -29,13 +42,13 @@ export default () => {
 					event.preventDefault();
 					void form.handleSubmit();
 				}}
+				ref={formRef}
 			>
 				<Box display="flex" flexDirection="column" gap="400">
 					<form.Field name="terms">
 						{(field) => (
 							<Checkbox
 								errorMessage={field.state.meta.errors[0]?.message}
-								inputRef={termsRef}
 								isInvalid={!field.state.meta.isValid}
 								isSelected={field.state.value}
 								onBlur={field.handleBlur}

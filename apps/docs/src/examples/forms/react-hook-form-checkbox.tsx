@@ -13,17 +13,17 @@ const schema = z.object({
 });
 
 export default () => {
-	const { control, formState, handleSubmit } = useForm({
+	const form = useForm({
 		defaultValues: { terms: false },
 		resolver: zodResolver(schema),
 	});
 
 	return (
 		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
-			<form onSubmit={handleSubmit(() => undefined)}>
+			<form onSubmit={form.handleSubmit(() => undefined)}>
 				<Box display="flex" flexDirection="column" gap="400">
 					<Controller
-						control={control}
+						control={form.control}
 						name="terms"
 						render={({ field, fieldState }) => (
 							<Checkbox
@@ -45,7 +45,7 @@ export default () => {
 				</Box>
 			</form>
 			<Text elementType="p" role="status">
-				{formState.isSubmitSuccessful ? 'Terms accepted.' : null}
+				{form.formState.isSubmitSuccessful ? 'Terms accepted.' : null}
 			</Text>
 		</Box>
 	);

@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
-import { useForm } from '@tanstack/react-form';
+import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { useRef } from 'react';
 import * as z from 'zod';
 
@@ -11,18 +11,27 @@ const schema = z.object({
 	name: z.string().min(1, 'Enter your name.'),
 });
 
+const FOCUSABLE_SELECTOR =
+	'input:not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])';
+
+function focusFirstInvalidField(form: HTMLFormElement | null) {
+	const invalid = form?.querySelector('[aria-invalid="true"]');
+	if (!invalid) return;
+	const control = invalid.matches(FOCUSABLE_SELECTOR)
+		? invalid
+		: invalid.querySelector(FOCUSABLE_SELECTOR);
+	if (control instanceof HTMLElement) control.focus();
+}
+
 export default () => {
-	const nameRef = useRef<HTMLInputElement>(null);
-	const emailRef = useRef<HTMLInputElement>(null);
+	const formRef = useRef<HTMLFormElement>(null);
 
 	const form = useForm({
 		defaultValues: { email: '', name: '' },
 		onSubmit: () => undefined,
-		onSubmitInvalid: ({ formApi }) => {
-			const firstInvalid = formApi.getFieldMeta('name')?.errors.length ? nameRef : emailRef;
-			firstInvalid.current?.focus();
-		},
-		validators: { onChange: schema },
+		onSubmitInvalid: () => focusFirstInvalidField(formRef.current),
+		validationLogic: revalidateLogic({ mode: 'submit', modeAfterSubmission: 'change' }),
+		validators: { onDynamic: schema, onSubmit: schema },
 	});
 
 	return (
@@ -32,13 +41,13 @@ export default () => {
 					event.preventDefault();
 					void form.handleSubmit();
 				}}
+				ref={formRef}
 			>
 				<Box display="flex" flexDirection="column" gap="400">
 					<form.Field name="name">
 						{(field) => (
 							<TextField
 								errorMessage={field.state.meta.errors[0]?.message}
-								inputRef={nameRef}
 								isInvalid={!field.state.meta.isValid}
 								label="Name"
 								onBlur={field.handleBlur}
@@ -52,7 +61,6 @@ export default () => {
 						{(field) => (
 							<TextField
 								errorMessage={field.state.meta.errors[0]?.message}
-								inputRef={emailRef}
 								isInvalid={!field.state.meta.isValid}
 								label="Email"
 								onBlur={field.handleBlur}

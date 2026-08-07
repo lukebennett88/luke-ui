@@ -12,17 +12,17 @@ const schema = z.object({
 });
 
 export default () => {
-	const { control, formState, getValues, handleSubmit } = useForm({
+	const form = useForm({
 		defaultValues: { email: '', name: '' },
 		resolver: zodResolver(schema),
 	});
 
 	return (
 		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
-			<form onSubmit={handleSubmit(() => undefined)}>
+			<form onSubmit={form.handleSubmit(() => undefined)}>
 				<Box display="flex" flexDirection="column" gap="400">
 					<Controller
-						control={control}
+						control={form.control}
 						name="name"
 						render={({ field, fieldState }) => (
 							<TextField
@@ -38,7 +38,7 @@ export default () => {
 						)}
 					/>
 					<Controller
-						control={control}
+						control={form.control}
 						name="email"
 						render={({ field, fieldState }) => (
 							<TextField
@@ -59,7 +59,7 @@ export default () => {
 				</Box>
 			</form>
 			<Text elementType="p" role="status">
-				{formState.isSubmitSuccessful ? `Submitted: ${getValues('name')}` : null}
+				{form.formState.isSubmitSuccessful ? `Submitted: ${form.getValues('name')}` : null}
 			</Text>
 		</Box>
 	);
