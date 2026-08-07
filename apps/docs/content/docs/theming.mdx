@@ -8,18 +8,19 @@ does not change component behaviour.
 
 ## Theme foundations
 
-Every themed subtree has one root element. It carries `themeRootClassName` and one identity class.
+Every themed subtree has one theme root, rendered by `Theme` with a `name`. It carries the reset,
+the base theme layer, and one identity class.
 
-`themeRootClassName` applies the shared reset and base theme layer. The identity class supplies the
-semantic token values used by components and custom UI.
+The identity class supplies the semantic token values used by components and custom UI. Each
+identity includes light and dark colour values. The active colour mode chooses between them. An
+explicit colour mode is optional. Without one, the theme follows the system preference.
 
-Each identity includes light and dark colour values. The active colour mode chooses between them. An
-explicit `data-color-mode` is optional. Without one, the theme follows the system preference.
-Colour-mode scopes can nest within an identity. Identity classes cannot.
+Colour-mode scopes nest within an identity: a `Theme` without `name` changes only the colour mode of
+the enclosing identity. Identities do not nest. A `Theme` with a `name` inside another one resolves
+against the outer identity's values at equal precedence, so the result depends on stylesheet order.
+Use a separate theme root, outside the first, for a subtree that needs another identity.
 
-Use a separate root for an independent subtree that needs another identity.
-
-Read [Applying a theme](/applying-a-theme) for the exact imports, classes, and colour-mode rules.
+Read [Applying a theme](/applying-a-theme) for the exact imports, props, and colour-mode rules.
 
 ## Component variants
 

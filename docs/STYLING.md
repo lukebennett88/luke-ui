@@ -3,9 +3,8 @@
 ## Setup
 
 Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities. Consumers
-import `@luke-ui/react/stylesheet.css` and apply `themeRootClassName` from `@luke-ui/react/theme`
-near the app root. Import one bundled theme stylesheet and apply its identity class to the same
-element. Neither step injects styles at runtime.
+import `@luke-ui/react/stylesheet.css`, import one bundled theme stylesheet, and wrap the app in a
+`Theme` from `@luke-ui/react/theme` naming that theme. Neither step injects styles at runtime.
 
 ## Structure
 
@@ -104,21 +103,23 @@ surface. It returns a CSS `calc()` value for the outer radius, so both inputs ca
 variables instead of theme-specific numbers.
 
 The bundled themes ship precompiled. Import `@luke-ui/react/themes/tactile.css` or
-`@luke-ui/react/themes/paper.css` and apply the matching `tactileThemeClassName` or
-`paperThemeClassName` constant from `@luke-ui/react/themes` to `<html>` or a subtree root. Importing
-one theme never pulls in the other.
+`@luke-ui/react/themes/paper.css`, then wrap the subtree in `<Theme name="tactile">` or
+`<Theme name="paper">` from `@luke-ui/react/theme`. Importing one theme never pulls in the other.
 
-Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Setting
-`data-color-mode="light"` or `data-color-mode="dark"` on the theme root, an ancestor, or any element
-inside the subtree forces that mode, and nested scopes can override it. Every scope also sets native
-`color-scheme` so form controls and scrollbars agree.
+Omit `colorMode` to follow `prefers-color-scheme`. Set `colorMode="light"` or `colorMode="dark"` on
+a `Theme` to force that mode for its subtree; a nested `Theme` without a `name` overrides just the
+mode, without re-applying the identity or the reset. Every scope also sets native `color-scheme` so
+form controls and scrollbars agree.
 
 Components move to the semantic contract in the component-family migration slices.
 
-Luke UI's portalled Combobox popover carries the nearest identity class and explicit colour mode
-from its trigger. Portals created by an application must apply the same public class and attribute
-contract to their portal root. When no explicit mode exists, omit `data-color-mode` so the portalled
-surface continues to follow the system preference.
+`themeRootClassName` and `themeClassName(name)` are the low-level path `Theme` is built on: apply
+them directly to `<html>`, another non-React root, or when composing a scope by hand, together with
+a `data-color-mode` attribute. Luke UI's portalled Combobox popover carries the enclosing `Theme`'s
+identity and colour mode onto its portal automatically. Portals an application owns can call the
+same `useThemeScopeProps` hook from `@luke-ui/react/theme` to do the same; without an enclosing
+`Theme`, it falls back to reading the identity class and `data-color-mode` from the DOM ancestors of
+a given trigger element.
 
 ## Cascade layers
 

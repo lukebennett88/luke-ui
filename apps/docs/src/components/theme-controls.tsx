@@ -1,5 +1,4 @@
-import { themeRootClassName } from '@luke-ui/react/theme';
-import { paperThemeClassName, tactileThemeClassName } from '@luke-ui/react/themes';
+import { Theme } from '@luke-ui/react/theme';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, PropsWithChildren } from 'react';
 import { createContext, useContext, useMemo, useSyncExternalStore } from 'react';
@@ -26,22 +25,17 @@ const ThemeIdentitySettingsContext = createContext<ThemeIdentitySettings | null>
 export function DocsThemeRoot({ children }: PropsWithChildren) {
 	const colorMode = useHydratedColorMode();
 	const themeIdentity = useThemeIdentity();
-	const themeIdentityClassName =
-		themeIdentity === 'tactile' ? tactileThemeClassName : paperThemeClassName;
 	const settings = useMemo(() => ({ setThemeIdentity, themeIdentity }), [themeIdentity]);
 
 	return (
 		<ThemeIdentitySettingsContext.Provider value={settings}>
-			<div
-				className={cx(
-					themeRootClassName,
-					themeIdentityClassName,
-					'flex min-h-screen flex-1 flex-col text-fd-foreground',
-				)}
-				data-color-mode={colorMode ?? undefined}
+			<Theme
+				className="flex min-h-screen flex-1 flex-col text-fd-foreground"
+				colorMode={colorMode ?? undefined}
+				name={themeIdentity}
 			>
 				{children}
-			</div>
+			</Theme>
 		</ThemeIdentitySettingsContext.Provider>
 	);
 }

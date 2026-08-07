@@ -3,39 +3,40 @@ title: Applying a theme
 description: Load Luke UI CSS and apply a theme identity and colour mode.
 ---
 
-A themed subtree needs the shared Luke UI stylesheet, one identity stylesheet, and a root that
-carries both theme classes. All three are static. Luke UI does not inject styles at runtime.
+A themed subtree needs the shared Luke UI stylesheet, one identity stylesheet, and a `Theme` near
+the application root. All the CSS is static. Luke UI does not inject styles at runtime.
 
 ## Import the stylesheets
 
 Import `@luke-ui/react/stylesheet.css` and the stylesheet for the identity your application uses.
-The example below uses Tactile. Use `@luke-ui/react/themes/paper.css` with `paperThemeClassName` for
-Paper. If you import one bundled identity, Luke UI does not load the other.
+The example below uses Tactile. Use `@luke-ui/react/themes/paper.css` for Paper. If you import one
+bundled identity, Luke UI does not load the other.
 
-## Apply the root classes
+## Apply the theme root
 
-Apply `themeRootClassName` and the matching identity class to the same element near the application
-root. `themeRootClassName` includes the reset and base theme class. The identity class supplies the
-semantic values.
+Render `Theme` with `name` set to the identity's name near the application root. With `name`,
+`Theme` is a theme root: it renders the CSS reset, the base theme layer, and the identity class on
+one element.
 
 <SourceCodeBlock src="theming/apply-theme" />
 
-Theme identities do not nest. Create a separate theme root for an independent subtree that needs
-another identity.
+Theme identities do not nest. A `Theme` with a `name` inside another one resolves against the outer
+identity's values at equal precedence, so the result depends on stylesheet order. Create a separate
+theme root, outside the first, for an independent subtree that needs another identity.
 
 ## Choose a colour mode
 
-Leave `data-color-mode` unset to follow `prefers-color-scheme`. Set `data-color-mode="light"` or
-`data-color-mode="dark"` when a root or nested scope needs a fixed mode.
+Omit `colorMode` to follow `prefers-color-scheme`. Pass `colorMode="light"` or `colorMode="dark"`
+when a `Theme` needs a fixed mode.
 
 An explicit mode also sets the native `color-scheme` property. Browser controls and scrollbars then
 match the Luke UI content.
 
 ## Nest colour-mode scopes
 
-Colour modes nest within one theme identity. Use a nested mode when one part of the interface must
-remain light or dark independently of its parent. Do not add a second identity class to the nested
-element.
+A `Theme` without `name` changes only the colour mode of the identity established by the nearest
+enclosing `Theme`. It renders no reset and no identity class of its own, so use it when one part of
+the interface must stay light or dark independently of its parent.
 
 <ExampleBlock
 	src="theming/color-mode-override"
@@ -47,17 +48,30 @@ element.
 
 ## Avoid a colour-mode flash
 
-Render the root classes and any known explicit mode in the initial HTML. When the mode comes from a
-client-side preference, set `data-color-mode` before the themed UI paints.
+`Theme` renders `data-color-mode` in the initial HTML, including as an omitted attribute when the
+mode follows the system preference. When the mode comes from a client-side preference instead,
+resolve it before the themed UI's first render.
 
 The server HTML and first client render must use the same value to avoid a hydration warning.
 
 ## Preserve the theme in portals
 
 Application-owned portals render outside the themed DOM branch, so inherited theme variables no
-longer reach them. Apply `themeRootClassName`, the active identity class, and the nearest explicit
-`data-color-mode` value to the portal root. Leave the attribute off when the source follows the
-system setting.
+longer reach them. Call `useThemeScopeProps()` and spread the result onto the portal root.
+
+<SourceCodeBlock src="theming/theme-scope-portal" />
+
+Inside a `Theme`, it reads the active identity and colour mode from context, so a later change to
+either is applied on the next render. Outside of one, it falls back to recovering them from the DOM
+ancestors of the trigger element, which keeps the low-level class-name path working for portals a
+`Theme` does not enclose. Pass `sourceRef` pointing at the trigger element to support that fallback.
+
+## The low-level class names
+
+`themeRootClassName`, `themeClassName(name)`, `tactileThemeClassName`, and `paperThemeClassName`
+remain exported from `@luke-ui/react/theme` and `@luke-ui/react/themes`. They are the low-level
+path: apply them directly to `<html>`, another non-React root, or an imperative test setup, where
+rendering a `Theme` component is not possible. Prefer `Theme` for React subtrees.
 
 ## Next steps
 

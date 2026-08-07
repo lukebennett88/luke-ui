@@ -1,10 +1,11 @@
+import { Theme } from '@luke-ui/react/theme';
 import type { PropsWithChildren } from 'react';
 
 export function DarkPageWithLightPreview({ children }: PropsWithChildren) {
 	return (
-		<div data-color-mode="dark">
+		<Theme colorMode="dark" name="tactile">
 			Dark application
-			<section data-color-mode="light">{children}</section>
-		</div>
+			<Theme colorMode="light">{children}</Theme>
+		</Theme>
 	);
 }

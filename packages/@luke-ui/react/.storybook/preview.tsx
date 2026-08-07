@@ -5,7 +5,7 @@ import '../dist/themes/tactile.css';
 import '@luke-ui/react/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
-import { themeRootClassName, vars } from '@luke-ui/react/theme';
+import { Theme, vars } from '@luke-ui/react/theme';
 import { paperThemeClassName, tactileThemeClassName } from '@luke-ui/react/themes';
 import addonA11y from '@storybook/addon-a11y';
 import addonDocs from '@storybook/addon-docs';
@@ -26,9 +26,9 @@ export default definePreview({
 					{isStoryView ? (
 						<StoryCanvasTheme colorMode={colorMode} themeClassName={themeClassName} />
 					) : null}
-					<div
-						className={`${themeRootClassName} ${themeClassName}`}
-						data-color-mode={colorMode}
+					<Theme
+						colorMode={colorMode}
+						name={globals.theme === 'paper' ? 'paper' : 'tactile'}
 						style={{
 							backgroundColor: vars.color.surface.canvas,
 							boxSizing: 'border-box',
@@ -39,7 +39,7 @@ export default definePreview({
 						}}
 					>
 						<Story />
-					</div>
+					</Theme>
 				</IconSpritesheetProvider>
 			);
 		},

@@ -1,8 +1,37 @@
-import { lukeUiClassNames } from '../styles/class-names.js';
-import { cx } from '../utils/index.js';
+/**
+ * Convenience class name combining the theme-root and CSS-reset classes. This is the low-level
+ * path: apply it directly to `<html>` or another non-React root, or when composing a scope by
+ * hand. Prefer `Theme` for React subtrees.
+ */
+export { themeRootClassName } from './theme-root-class-name.js';
 
-/** Convenience class name combining the theme-root and CSS-reset classes. */
-export const themeRootClassName = cx(lukeUiClassNames.themeRoot, lukeUiClassNames.resetRoot);
+/**
+ * `Theme` applies a theme identity and/or colour mode to a React subtree. It is the recommended
+ * entrypoint for theming a React app; `themeRootClassName` and `themeClassName` remain the
+ * low-level path underneath it.
+ */
+export { Theme } from './theme.js';
+
+/** Props for {@link Theme}. */
+export type { ThemeProps } from './theme.js';
+
+/**
+ * `useThemeScope` reads the {@link ThemeScope} of the nearest enclosing `Theme`, or `null` outside
+ * of one.
+ */
+export { useThemeScope } from './theme-scope.js';
+
+/** The theme identity and colour mode a `Theme` applies to its subtree, and its colour mode type. */
+export type { ColorMode, ThemeScope } from './theme-scope.js';
+
+/**
+ * `useThemeScopeProps` carries the enclosing theme scope onto a portal root React does not
+ * otherwise place inside the themed subtree, such as a popover rendered into `document.body`.
+ */
+export { useThemeScopeProps } from './use-theme-scope-props.js';
+
+/** Options and return props for {@link useThemeScopeProps}. */
+export type { ThemeScopeProps, UseThemeScopePropsOptions } from './use-theme-scope-props.js';
 
 /**
  * Typed access to the semantic theme custom properties. Each path resolves to a stable global

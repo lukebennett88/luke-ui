@@ -5,7 +5,7 @@ import type { PopoverProps as RacPopoverProps } from 'react-aria-components/Comb
 import { Popover as RacPopover } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import * as styles from '../../recipes/combobox.css.js';
-import { themeRootClassName } from '../../theme/index.js';
+import { useThemeScopeProps } from '../../theme/index.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
@@ -33,45 +33,16 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const [element, setElement] = useState<HTMLElement | null>(null);
 	useVisualViewportVars(element);
 
+	const themeScopeProps = useThemeScopeProps({ sourceRef: props.triggerRef });
+
 	return (
 		<RacPopover
 			{...restProps}
 			className={composeRenderProps(restProps.className, (className) => {
-				return cx(themeRootClassName, styles.combobox().popover(className));
+				return cx(themeScopeProps.className, styles.combobox().popover(className));
 			})}
-			ref={mergeRefs(ref, (node: HTMLElement | null) => {
-				setElement(node);
-				if (node === null) return;
-
-				const themeSource = props.triggerRef?.current ?? document.activeElement;
-				if (!(themeSource instanceof Element)) return;
-
-				carryThemeScope(themeSource, node);
-			})}
+			data-color-mode={themeScopeProps['data-color-mode']}
+			ref={mergeRefs(ref, themeScopeProps.ref, (node: HTMLElement | null) => setElement(node))}
 		/>
 	);
-}
-
-function carryThemeScope(source: Element, portal: HTMLElement) {
-	const identityClassName = findThemeIdentity(source);
-	if (identityClassName !== undefined) portal.classList.add(identityClassName);
-
-	const modeRoot = source.closest<HTMLElement>('[data-color-mode]');
-	const mode = modeRoot?.dataset.colorMode;
-	if (mode === 'light' || mode === 'dark') portal.dataset.colorMode = mode;
-}
-
-function findThemeIdentity(source: Element) {
-	let identityClassName: string | undefined;
-	let ancestor: Element | null = source;
-
-	while (ancestor !== null) {
-		for (const className of ancestor.classList) {
-			// Keep the outer identity because nested identities are not supported.
-			if (className.startsWith('luke-ui-theme-')) identityClassName = className;
-		}
-		ancestor = ancestor.parentElement;
-	}
-
-	return identityClassName;
 }

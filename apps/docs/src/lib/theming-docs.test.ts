@@ -76,8 +76,9 @@ test('spacing, radius, and shadow live on the token reference', () => {
 	}
 });
 
-test('no rendered example applies a theme identity class', () => {
+test('no rendered example establishes its own theme identity', () => {
 	const identityClassNames = ['tactileThemeClassName', 'paperThemeClassName', 'themeClassName'];
+	const namedThemeElementPattern = /<Theme\b(?:(?!\/?>)[\s\S])*\bname\s*=/;
 
 	for (const file of findAllMdxFiles(contentDir)) {
 		const contents = readFileSync(file, 'utf8');
@@ -94,6 +95,7 @@ test('no rendered example applies a theme identity class', () => {
 			for (const className of identityClassNames) {
 				expect(exampleSource).not.toContain(className);
 			}
+			expect(namedThemeElementPattern.test(exampleSource)).toBe(false);
 		}
 	}
 });

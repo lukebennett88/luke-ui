@@ -42,10 +42,14 @@ framework can load.
 
 <SourceCodeBlock src="theming/author-theme" />
 
-Apply `themeRootClassName` and `themeClassName('product')` to the same root. The supplied name must
-match the input's `name`. Colour mode uses the same `data-color-mode` attribute as bundled themes.
+Render `Theme` with `name="product"` at the root. The supplied name must match the input's `name`.
+Colour mode uses the same `colorMode` prop as bundled themes.
 
 <SourceCodeBlock src="theming/custom-theme-app" />
+
+`themeRootClassName` and `themeClassName('product')` remain available as the low-level equivalent,
+for `<html>`, another non-React root, or an imperative setup where rendering a `Theme` is not
+possible.
 
 Applications must load any non-system font files their `typography` selects.
 

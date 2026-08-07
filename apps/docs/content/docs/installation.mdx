@@ -23,8 +23,8 @@ example uses Tactile. To use Paper, import `@luke-ui/react/themes/paper.css` ins
 
 ### 3. Add the theme root
 
-Apply `themeRootClassName` and the matching identity class to the same element. The theme root
-provides the reset, base typography, and semantic variables for its children.
+Render `Theme` with `name` set to the identity's name near the application root. It provides the
+reset, base typography, and semantic variables for its children.
 
 <SourceCodeBlock src="theming/getting-started" />
 
@@ -38,12 +38,12 @@ Import each component from its package path. The setup above renders `Text`. `Bu
 ## Change the theme
 
 Tactile is the default bundled identity. Paper uses the same component APIs with a flatter visual
-treatment. Switch the CSS import and class together.
+treatment. Switch the CSS import and the `name` prop together.
 
 <SourceCodeBlock src="overview/paper-theme" />
 
-Set `data-color-mode="light"` or `data-color-mode="dark"` on a themed element when the application
-must use a specific mode. Without it, Luke UI follows the system preference.
+Pass `colorMode="light"` or `colorMode="dark"` to `Theme` when the application must use a specific
+mode. Without it, Luke UI follows the system preference.
 
 ## Continue learning
 

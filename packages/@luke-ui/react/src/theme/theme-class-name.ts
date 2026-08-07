@@ -9,6 +9,13 @@
 const THEME_NAME_PATTERN = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 
 /**
+ * Prefix shared by every theme's identity class, before the theme name. The one place this
+ * literal is written; `themeClassName` and the DOM-fallback path in `useThemeScopeProps` both
+ * build from it instead of repeating it.
+ */
+export const THEME_CLASS_NAME_PREFIX = 'luke-ui-theme-';
+
+/**
  * Returns the identity class for a theme name, `luke-ui-theme-${name}`. Throws when the name is
  * not kebab-case.
  */
@@ -19,5 +26,5 @@ export function themeClassName(name: string): string {
 				'single hyphens, starting with a letter.',
 		);
 	}
-	return `luke-ui-theme-${name}`;
+	return `${THEME_CLASS_NAME_PREFIX}${name}`;
 }
