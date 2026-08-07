@@ -5,7 +5,7 @@ export { themeClassName } from './theme-class-name.js';
 
 /**
  * Tactile's `defineTheme` input, the Luke UI default: a teal accent, a neutral near-white light
- * canvas, and a compact tactile material. Read it, copy it, or spread it into your own
- * `defineTheme` call to start from Tactile.
+ * canvas, and a compact tactile material. Set it as `extends` on your own input to start from
+ * Tactile.
  */
 export const theme: ThemeInput = tactileTheme;
