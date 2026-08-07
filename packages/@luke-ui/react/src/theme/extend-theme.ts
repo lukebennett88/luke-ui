@@ -5,7 +5,7 @@
  * input stays diagnosable.
  *
  * Inheritance happens at the granularity the compiler already resolves a value at. A child's values
- * behave exactly as if an author had written them on top of the base in one input.
+ * behave exactly as if an author wrote them on top of the base in one input.
  */
 
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
@@ -46,12 +46,22 @@ const COLOR_ROLES = [
 	'scrim',
 ] as const satisfies ReadonlyArray<keyof ThemeInput['color']>;
 
+/** The two keys that spell one neutral decision. `inheritColor` inherits them together. */
+const NEUTRAL_ROLES = ['neutral', 'neutralStyle'] as const satisfies ReadonlyArray<
+	keyof ThemeInput['color']
+>;
+
+/** Whether a colour input authors the neutral character under either of its two keys. */
+function authorsNeutral(color: Partial<ThemeInput['color']> | undefined): boolean {
+	return NEUTRAL_ROLES.some((role) => color?.[role] !== undefined);
+}
+
 /**
  * Resolves a theme input's `extends` chain into one merged {@link ThemeInput}, plus the colour
  * provenance of the outermost theme. Throws when a theme extends a theme that extends it.
  */
 export function resolveThemeInput(input: ThemeInput | ExtendingThemeInput): ResolvedThemeInput {
-	// A theme with no base returns the very object it was handed, which is what keeps a theme with no
+	// A theme with no base returns the very object it was handed. That is what keeps a theme with no
 	// base compiling exactly as it did.
 	if (extendsNothing(input)) return { inheritance: null, input };
 	const { base, inputs } = collectChain(input);
@@ -118,10 +128,10 @@ function inheritInput(base: ThemeInput, own: ThemeInput | ExtendingThemeInput): 
 }
 
 /**
- * Merges source colours role by role. A role replaces the base's role whole, because
- * `resolveAdaptedRole` in `define-theme.ts` adapts a bare string per colour mode and uses an explicit
- * `{ light, dark }` side verbatim. A per-mode merge would turn a base's adapted string into two
- * verbatim values and change what the base meant, so the role is the smallest coherent unit.
+ * Merges source colours role by role. A role replaces the base's role whole. `resolveAdaptedRole` in
+ * `define-theme.ts` adapts a bare string per colour mode and uses an explicit `{ light, dark }` side
+ * verbatim. A per-mode merge would turn a base's adapted string into two verbatim values and change
+ * what the base meant. So the role is the smallest coherent unit.
  */
 function inheritColor(
 	base: ThemeInput['color'],
@@ -130,8 +140,8 @@ function inheritColor(
 	if (own === undefined) return base;
 	// `neutral` and `neutralStyle` are two spellings of one decision, and `resolveNeutral` prefers
 	// `neutral`. A child that sets only `neutralStyle` and inherits a raw `neutral` loses its own
-	// character, so a child that sets either key drops both inherited keys.
-	const ownNeutral = own.neutral !== undefined || own.neutralStyle !== undefined;
+	// character. A child that sets either key drops both inherited keys instead.
+	const ownNeutral = authorsNeutral(own);
 	return {
 		accent: own.accent ?? base.accent,
 		background: own.background ?? base.background,
@@ -184,8 +194,8 @@ function inheritTypography(
 
 /**
  * Merges two flat records key by key, an own value winning over a base value. A key the own record
- * sets to `undefined` inherits the base value, because composed authoring writes
- * `{ resting: condition ? value : undefined }` and an explicit `undefined` must read as an omitted
+ * sets to `undefined` inherits the base value. Composed authoring writes
+ * `{ resting: condition ? value : undefined }`, and an explicit `undefined` must read as an omitted
  * key. The returned record carries no key whose value is `undefined`.
  */
 function inheritKeys<Value>(
@@ -202,8 +212,8 @@ function inheritKeys<Value>(
 }
 
 /**
- * Reports colour provenance from the collected chain. A role the outermost input sets is its own, a
- * role only an ancestor sets is inherited, and a role no input sets appears in neither list.
+ * Reports colour provenance from the collected chain. A role the outermost input sets is its own. A
+ * role only an ancestor sets is inherited. A role no input sets appears in neither list.
  */
 function describeInheritance(
 	outermost: ThemeInput | ExtendingThemeInput,
@@ -216,6 +226,10 @@ function describeInheritance(
 			ownColors.push(`color.${role}`);
 			continue;
 		}
+		// A theme that authors the neutral character under the other key drops both inherited keys. The
+		// merged input carries no value for this role, so it belongs in neither list.
+		const isNeutralRole = NEUTRAL_ROLES.some((neutralRole) => neutralRole === role);
+		if (isNeutralRole && authorsNeutral(outermost.color)) continue;
 		if (inputs.some((entry) => entry.color?.[role] !== undefined)) {
 			inheritedColors.push(`color.${role}`);
 		}

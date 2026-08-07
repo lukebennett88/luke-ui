@@ -209,4 +209,36 @@ describe('theme inheritance', () => {
 		expect(thrown.inheritance?.inheritedColors).toContain('color.accent');
 		expect(thrown.inheritance?.inheritedColors).toContain('color.neutral');
 	});
+
+	it('does not credit a base with a neutral the merge already dropped', () => {
+		// The base authors an explicit `neutral` pair, and the extending theme authors only
+		// `neutralStyle`, which discards the inherited `neutral` per `inheritColor`'s neutral coupling.
+		const base: ThemeInput = {
+			color: {
+				accent: '#3b82f6',
+				neutral: { dark: 'oklch(0.25 0.02 210)', light: 'oklch(0.98 0 0)' },
+			},
+			name: 'neutral-base',
+		};
+		let thrown: unknown = null;
+		try {
+			defineTheme({
+				color: { focus: 'oklch(0.99 0 0)', neutralStyle: 'warm' },
+				extends: base,
+				name: 'neutral-style-child',
+			});
+		} catch (error) {
+			thrown = error;
+		}
+
+		expect(thrown).toBeInstanceOf(ThemeContrastError);
+		if (!(thrown instanceof ThemeContrastError)) return;
+		expect(thrown.inheritance?.ownColors).toContain('color.neutralStyle');
+		expect(thrown.inheritance?.ownColors).toContain('color.focus');
+		expect(thrown.inheritance?.inheritedColors).toContain('color.accent');
+		// The child authors `neutralStyle`, so the merge drops the base's `neutral`. The merged input
+		// carries no value for `color.neutral`, so it belongs in neither list.
+		expect(thrown.inheritance?.inheritedColors).not.toContain('color.neutral');
+		expect(thrown.inheritance?.ownColors).not.toContain('color.neutral');
+	});
 });

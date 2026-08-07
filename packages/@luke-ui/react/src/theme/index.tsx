@@ -39,6 +39,9 @@ export { ThemeContrastError, ThemeGenerationError } from './build-theme.js';
 /** One WCAG contrast failure recorded on a {@link ThemeContrastError}. */
 export type { ThemeContrastFailure } from './build-theme.js';
 
+/** The colour provenance a `ThemeContrastError` carries for a theme built with `extends`. */
+export type { ThemeInheritance } from './build-theme.js';
+
 /**
  * `defineTheme(input)` is the curated authoring entry point: it normalises a small {@link ThemeInput}
  * (accent + neutral character, with everything else defaulting) into the per-mode foundation and
