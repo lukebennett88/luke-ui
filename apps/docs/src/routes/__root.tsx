@@ -77,7 +77,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 			<body className="flex min-h-screen flex-col">
 				<RootProvider
 					search={{ SearchDialog: LazySearchDialog }}
-					theme={{ attribute: ['class', 'data-color-mode'] }}
+					theme={{ attribute: ['class', 'data-color-mode'], hotKey: false }}
 				>
 					<IconSpritesheetProvider href={spriteSheetHref}>
 						<DocsThemeRoot>{children}</DocsThemeRoot>

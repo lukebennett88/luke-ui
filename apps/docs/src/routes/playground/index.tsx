@@ -142,6 +142,7 @@ function Playground() {
 			<Group
 				className="min-h-0 flex-1 flex-col! md:flex-row!"
 				orientation={isDesktop ? 'horizontal' : 'vertical'}
+				resizeTargetMinimumSize={{ coarse: 20, fine: 16 }}
 			>
 				{/* Pane backgrounds match the Catppuccin Latte/Mocha `editor.background` values in monaco-setup.ts. */}
 				<Panel
@@ -167,9 +168,10 @@ function Playground() {
 						</Suspense>
 					</ClientOnly>
 				</Panel>
+				{/* react-resizable-panels owns hit-testing at the document level (see resizeTargetMinimumSize on Group above) — no CSS hit area needed here. */}
 				<Separator
 					aria-label="Resize editor and preview panels"
-					className="relative z-10 shrink-0 block-px inline-auto cursor-row-resize bg-fd-border before:absolute before:-inset-y-2 before:inset-x-0 before:content-[''] after:absolute after:block-1.5 after:inline-16 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:block-auto md:inline-px md:cursor-col-resize md:before:inset-y-0 md:before:-inset-x-2 md:after:block-16 md:after:inline-1.5"
+					className="relative z-10 shrink-0 block-px inline-auto cursor-row-resize bg-fd-border after:absolute after:block-1.5 after:inline-16 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:block-auto md:inline-px md:cursor-col-resize md:after:block-16 md:after:inline-1.5"
 				/>
 				<Panel
 					className={cx(
