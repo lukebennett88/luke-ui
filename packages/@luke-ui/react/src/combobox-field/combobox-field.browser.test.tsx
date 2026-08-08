@@ -1,8 +1,9 @@
 import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
+import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import {
-	comboboxTrayKeyboardInsetVar,
+	comboboxTrayScrollOffsetVar,
 	comboboxTrayViewportHeightVar,
 } from '../recipes/combobox.css.js';
 import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
@@ -24,24 +25,18 @@ const countryItems: Array<CountryItem> = [
 
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
-const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'visualViewport');
-
 afterEach(() => {
 	cleanupVisual();
-	if (originalDescriptor) {
-		Object.defineProperty(window, 'visualViewport', originalDescriptor);
-	} else {
-		// @ts-expect-error -- deleting a test-only own property
-		delete window.visualViewport;
-	}
 });
 
-test('sets the tray viewport height and keyboard inset custom properties from visualViewport', async () => {
-	const fake = Object.assign(new EventTarget(), {
-		height: window.innerHeight - 300,
-		offsetTop: 0,
-	});
-	Object.defineProperty(window, 'visualViewport', { configurable: true, value: fake });
+// A real on-screen keyboard cannot be simulated in this headless browser test, so this asserts
+// the CSS contract, that the padding derives from the visible-viewport-height custom property,
+// rather than actual device behaviour.
+test('the tray spends the keyboard inset on bottom padding', async () => {
+	// Confirms the assumption behind the tray media query, rather than just trusting it: this
+	// browser project's viewport is 414x896, comfortably inside `(width < 40rem)`.
+	expect(window.innerWidth).toBe(414);
+	expect(window.innerHeight).toBe(896);
 
 	renderVisual(
 		<ComboboxField
@@ -60,18 +55,49 @@ test('sets the tray viewport height and keyboard inset custom properties from vi
 	const popover = document.querySelector('[role="listbox"]')?.parentElement;
 	if (!popover) throw new Error('expected the listbox to have a popover parent');
 
-	expect(popover.style.getPropertyValue(comboboxTrayViewportHeightVar)).toBe(`${fake.height}px`);
-	expect(popover.style.getPropertyValue(comboboxTrayKeyboardInsetVar)).toBe(
-		`${window.innerHeight - fake.height}px`,
+	expect(getComputedStyle(popover).position).toBe('absolute');
+
+	// Stands in for the keyboard shrinking the visible viewport.
+	popover.style.setProperty(comboboxTrayViewportHeightVar, '500px');
+
+	expect(getComputedStyle(popover).paddingBlockEnd).toBe(`${window.innerHeight - 500}px`);
+});
+
+// React Aria opens the combobox popover as non-modal, so `useCloseOnScroll` closes it on any
+// document scroll instead of letting the tray drift. The offset only has to be right at the
+// moment the tray opens.
+test('the tray captures the scroll offset once when it opens', async () => {
+	renderVisual(
+		<ComboboxField
+			defaultItems={countryItems}
+			label="Country"
+			name="country"
+			placeholder="Select a country..."
+		>
+			{renderCountryItem}
+		</ComboboxField>,
 	);
 
-	fake.height -= 100;
-	fake.dispatchEvent(new Event('resize'));
+	// A tall spacer makes the page scrollable so there is an offset to capture.
+	const spacer = document.createElement('div');
+	spacer.style.blockSize = '300vh';
+	document.body.append(spacer);
 
-	expect(popover.style.getPropertyValue(comboboxTrayViewportHeightVar)).toBe(`${fake.height}px`);
-	expect(popover.style.getPropertyValue(comboboxTrayKeyboardInsetVar)).toBe(
-		`${window.innerHeight - fake.height}px`,
-	);
+	try {
+		window.scrollTo(0, 120);
+		expect(window.scrollY).toBeGreaterThan(0);
+
+		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		await expect.element(page.getByRole('listbox')).toBeInTheDocument();
+
+		const popover = document.querySelector('[role="listbox"]')?.parentElement;
+		if (!popover) throw new Error('expected the listbox to have a popover parent');
+
+		expect(popover.style.getPropertyValue(comboboxTrayScrollOffsetVar)).toBe(`${window.scrollY}px`);
+	} finally {
+		window.scrollTo(0, 0);
+		spacer.remove();
+	}
 });
 
 // Proves the invalid cue survives without `errorMessage`, which `composeField` treats
@@ -290,7 +316,12 @@ test('ComboboxField forwards name so a native form submit collects the selected 
 	expect(new FormData(form).get('country')).toBe('');
 
 	await userEvent.click(input);
-	await userEvent.click(page.getByRole('option', { name: 'Canada' }));
+
+	const option = page.getByRole('option', { name: 'Canada' });
+	await expect.element(option).toBeInTheDocument();
+
+	await waitForTrayToSettle(option);
+	await userEvent.click(option);
 
 	expect(new FormData(form).get('country')).toBe('ca');
 });
@@ -328,6 +359,26 @@ test('ComboboxField forwards onBlur to the input', async () => {
 	await userEvent.click(page.getByRole('button', { name: 'Next' }));
 	expect(blurs).toEqual(['country']);
 });
+
+/**
+ * Waits for the tray's slide-up transition on `option` to settle.
+ *
+ * This browser project runs at a tray viewport, so the popover slides up while `position:
+ * absolute`. Mid-slide it briefly extends past the initial containing block, making the short
+ * page scrollable. Playwright would then scroll the option into view, and React Aria closes this
+ * non-modal popover on scroll, detaching it before the click lands.
+ */
+async function waitForTrayToSettle(option: Locator) {
+	let previousTop = Number.NaN;
+	await expect
+		.poll(() => {
+			const top = option.element().getBoundingClientRect().top;
+			const settled = top === previousTop;
+			previousTop = top;
+			return settled;
+		})
+		.toBe(true);
+}
 
 /** The control group wrapping the combobox input labelled `name`. */
 function getControl(name: string) {
