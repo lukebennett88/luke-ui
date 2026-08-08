@@ -24,6 +24,14 @@ self.MonacoEnvironment = {
 
 loader.config({ monaco });
 
+// Monaco binds Ctrl/Cmd+L to `expandLineSelection` and preventDefaults it,
+// which stops the browser shortcut for focusing the address bar. A playground
+// is not an IDE — give the shortcut back to the browser.
+monaco.editor.addKeybindingRule({
+	command: null,
+	keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL,
+});
+
 /**
  * The official Catppuccin palette mapped onto Monaco's coarser token
  * vocabulary per the Catppuccin style guide (there is no official Monaco

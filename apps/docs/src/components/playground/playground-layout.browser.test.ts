@@ -41,7 +41,7 @@ function renderPanelLayout(inlineDirection: 'column' | 'row') {
 
 	const separator = document.createElement('div');
 	separator.className =
-		"relative z-10 shrink-0 [block-size:1px] [inline-size:auto] cursor-row-resize bg-fd-border before:absolute before:[inset-block:-0.5rem] before:[inset-inline:0] before:content-[''] after:absolute after:[block-size:0.375rem] after:[inline-size:4rem] after:rounded-full after:bg-fd-border after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:[block-size:auto] md:[inline-size:1px] md:cursor-col-resize md:before:[inset-block:0] md:before:[inset-inline:-0.5rem] md:after:[block-size:4rem] md:after:[inline-size:0.375rem]";
+		"relative z-10 shrink-0 [block-size:1px] [inline-size:auto] cursor-row-resize bg-fd-border after:absolute after:[block-size:0.375rem] after:[inline-size:4rem] after:rounded-full after:bg-fd-border after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:[block-size:auto] md:[inline-size:1px] md:cursor-col-resize md:after:[block-size:4rem] md:after:[inline-size:0.375rem]";
 	group.append(separator);
 	document.body.append(group);
 
