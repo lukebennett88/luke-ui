@@ -288,6 +288,9 @@ const comboboxConfig = {
 					insetInline: '0 !important',
 					maxBlockSize: `calc(var(${comboboxTrayViewportHeightVar}, 100dvh) - ${vars.space[800]}) !important`,
 					minInlineSize: 'auto !important' as 'auto',
+					// Also a scroll container via overflow: hidden below, so this blocks
+					// chaining from the tray's non-list areas too.
+					overscrollBehavior: 'contain',
 					// One expression covers all three things that eat the bottom of the screen: the
 					// on-screen keyboard, Safari's toolbar and the home indicator. Spending it on
 					// padding rather than a bottom offset keeps the tray's background behind the
@@ -354,7 +357,14 @@ const comboboxConfig = {
 			},
 		},
 		listBox: {
-			'@media': { [trayMediaQuery]: { maxBlockSize: 'none' } },
+			'@media': {
+				[trayMediaQuery]: {
+					maxBlockSize: 'none',
+					// Stops a swipe on the list from scrolling the page behind the tray, once
+					// the list reaches its own scroll boundary instead of chaining to the document.
+					overscrollBehavior: 'contain',
+				},
+			},
 			boxSizing: 'border-box',
 			flex: 1,
 			inlineSize: '100%',
