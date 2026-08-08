@@ -9,7 +9,7 @@ import { rootClassName } from '../../theme/index.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
-import { useVisualViewportVars } from './use-visual-viewport-vars.js';
+import { useTrayViewportVars } from './use-tray-viewport-vars.js';
 
 type _ComboboxPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;
 interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
@@ -32,7 +32,7 @@ export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { ref, ...restProps } = props;
 	const [element, setElement] = useState<HTMLElement | null>(null);
-	useVisualViewportVars(element);
+	useTrayViewportVars(element);
 
 	return (
 		<RacPopover

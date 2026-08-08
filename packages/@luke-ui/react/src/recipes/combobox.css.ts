@@ -13,15 +13,31 @@ import { invalidIndicatorIcon, invalidIndicatorIconForcedColors } from './invali
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 
-/** Custom property mirroring `visualViewport.height`, set by `useVisualViewportVars`. */
+/**
+ * Custom property carrying the zoom-normalised visible viewport height reported by
+ * `useViewportSize`, set by `useTrayViewportVars`. Falls back to
+ * `document.documentElement.clientHeight` when there is no `visualViewport`.
+ */
 export const comboboxTrayViewportHeightVar = '--luke-ui-visual-viewport-height';
 
-/** Custom property mirroring the on-screen keyboard's height, set by `useVisualViewportVars`. */
-export const comboboxTrayKeyboardInsetVar = '--luke-ui-keyboard-inset';
+/** Custom property mirroring the page's scroll offset, set by `useTrayViewportVars`. */
+export const comboboxTrayScrollOffsetVar = '--luke-ui-tray-scroll-offset';
 
 // Set per `size` variant on `inputGroup` below, from `COMBOBOX_ICON_SIZE`, so the invalid
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
+
+// Space between the tray's content box and the bottom of the initial containing block, set
+// inside the tray media query below.
+const trayBottomPadding = createVar();
+
+// `data-entering` and `data-exiting` share this transform: the tray slides from the same offset
+// in both directions, only the transition's start and end swap.
+const trayEnterExitStyles = {
+	boxShadow: `${vars.depth.floating}, 0 0 0 100vmax transparent`,
+	opacity: 1,
+	translate: `0 calc(100% - ${trayBottomPadding})`,
+};
 
 // Below 640px the popover renders as a bottom tray fixed to the viewport edge,
 // instead of a dropdown anchored below the control.
@@ -264,14 +280,23 @@ const comboboxConfig = {
 					borderStartEndRadius: vars.radius.overlay,
 					borderStartStartRadius: vars.radius.overlay,
 					boxShadow: `${vars.depth.floating}, 0 0 0 100vmax ${vars.color.scrim}`,
+					// So the padding below is added outside `maxBlockSize` rather than eating into it.
+					boxSizing: 'content-box',
 					inlineSize: 'auto !important' as 'auto',
-					insetBlockEnd: `var(${comboboxTrayKeyboardInsetVar}, 0px) !important`,
+					insetBlockEnd: `calc(-1 * var(${comboboxTrayScrollOffsetVar}, 0px)) !important`,
 					insetBlockStart: 'auto !important' as 'auto',
 					insetInline: '0 !important',
 					maxBlockSize: `calc(var(${comboboxTrayViewportHeightVar}, 100dvh) - ${vars.space[800]}) !important`,
 					minInlineSize: 'auto !important' as 'auto',
-					paddingBlockEnd: 'env(safe-area-inset-bottom, 0px)',
-					position: 'fixed !important' as 'fixed',
+					// One expression covers all three things that eat the bottom of the screen: the
+					// on-screen keyboard, Safari's toolbar and the home indicator. Spending it on
+					// padding rather than a bottom offset keeps the tray's background behind the
+					// keyboard, so no page content shows through while the keyboard animates.
+					paddingBlockEnd: trayBottomPadding,
+					position: 'absolute !important' as 'absolute',
+					vars: {
+						[trayBottomPadding]: `max(calc(100vh - var(${comboboxTrayViewportHeightVar}, 100dvh)), env(safe-area-inset-bottom, 0px))`,
+					},
 					selectors: {
 						'&::before': {
 							alignSelf: 'center',
@@ -284,16 +309,11 @@ const comboboxConfig = {
 							marginBlockEnd: vars.space[100],
 							marginBlockStart: vars.space[200],
 						},
-						'&[data-entering]': {
-							boxShadow: `${vars.depth.floating}, 0 0 0 100vmax transparent`,
-							opacity: 1,
-							translate: '0 100%',
-						},
-						'&[data-exiting]': {
-							boxShadow: `${vars.depth.floating}, 0 0 0 100vmax transparent`,
-							opacity: 1,
-							translate: '0 100%',
-						},
+						// The bottom padding is now large, because it carries the keyboard and toolbar
+						// inset, so an unadjusted `100%` would start the tray far below the fold and
+						// overshoot the slide. Subtracting the padding keeps the start just off screen.
+						'&[data-entering]': trayEnterExitStyles,
+						'&[data-exiting]': trayEnterExitStyles,
 					},
 				},
 				'(prefers-reduced-motion: reduce)': {
