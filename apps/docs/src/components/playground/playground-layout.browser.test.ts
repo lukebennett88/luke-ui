@@ -15,7 +15,6 @@ test('uses the desktop panel layout before JavaScript corrects the server orient
 	const separator = renderPanelLayout('column');
 
 	expect(getComputedStyle(group as HTMLDivElement).flexDirection).toBe('row');
-	expect(getComputedStyle(separator).cursor).toBe('col-resize');
 	expect(getComputedStyle(separator).inlineSize).toBe('1px');
 	expect(getComputedStyle(separator).blockSize).toBe('400px');
 	expect(getComputedStyle(separator, '::after').width).toBe('6px');
@@ -27,7 +26,6 @@ test('uses the mobile panel layout independently of the JavaScript orientation',
 	const separator = renderPanelLayout('row');
 
 	expect(getComputedStyle(group as HTMLDivElement).flexDirection).toBe('column');
-	expect(getComputedStyle(separator).cursor).toBe('row-resize');
 	expect(getComputedStyle(separator).inlineSize).toBe('390px');
 	expect(getComputedStyle(separator).blockSize).toBe('1px');
 	expect(getComputedStyle(separator, '::after').width).toBe('64px');
@@ -41,7 +39,7 @@ function renderPanelLayout(inlineDirection: 'column' | 'row') {
 
 	const separator = document.createElement('div');
 	separator.className =
-		"relative z-10 shrink-0 [block-size:1px] [inline-size:auto] cursor-row-resize bg-fd-border after:absolute after:[block-size:0.375rem] after:[inline-size:4rem] after:rounded-full after:bg-fd-border after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:[block-size:auto] md:[inline-size:1px] md:cursor-col-resize md:after:[block-size:4rem] md:after:[inline-size:0.375rem]";
+		"relative z-10 shrink-0 [block-size:1px] [inline-size:auto] bg-fd-border after:absolute after:[block-size:0.375rem] after:[inline-size:4rem] after:rounded-full after:bg-fd-border after:transition-colors after:-translate-x-1/2 after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[50%] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:[block-size:auto] md:[inline-size:1px] md:after:[block-size:4rem] md:after:[inline-size:0.375rem]";
 	group.append(separator);
 	document.body.append(group);
 
