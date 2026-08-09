@@ -74,10 +74,10 @@ describe('buildTokenTree', () => {
 		const duration = motion.children.duration;
 		if (duration?.kind !== 'group') throw new Error('expected a duration group');
 
-		expect(duration.children.fast).toEqual({
+		expect(duration.children.feedback).toEqual({
 			kind: 'leaf',
-			path: 'motion.duration.fast',
-			varName: '--luke-motion-duration-fast',
+			path: 'motion.duration.feedback',
+			varName: '--luke-motion-duration-feedback',
 		});
 	});
 });

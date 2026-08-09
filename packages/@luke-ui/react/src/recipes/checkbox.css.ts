@@ -102,7 +102,7 @@ const checkboxConfig = {
 			justifyContent: 'center',
 			lineHeight: 1,
 			...restingFocusRing(),
-			transitionDuration: vars.motion.duration.fast,
+			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, background-image, border-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {

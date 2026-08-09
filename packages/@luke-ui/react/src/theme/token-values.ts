@@ -10,6 +10,7 @@
 import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
 import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
+import { MOTION_DURATION_SCALE } from './motion.js';
 
 /**
  * Structural block sizes for the small and medium controls, the minimum tap target, and
@@ -73,9 +74,16 @@ export const INTERACTION_VALUES = {
 	'interaction.disabledOpacity': '0.55',
 } as const;
 
-/** Luke UI-owned durations and easing curves for interaction motion. */
+/**
+ * Luke UI-owned durations and easing curves for interaction motion. Each duration is named for the
+ * role it plays and read from the private numbered scale in `motion.ts`, which is never emitted.
+ *
+ * `exit` is shorter than `enter`, so a dismissal feels more immediate than an arrival.
+ */
 export const MOTION_VALUES = {
-	'motion.duration.fast': '120ms',
+	'motion.duration.enter': MOTION_DURATION_SCALE[500],
+	'motion.duration.exit': MOTION_DURATION_SCALE[300],
+	'motion.duration.feedback': MOTION_DURATION_SCALE[200],
 	'motion.easing.exit': 'cubic-bezier(0.3, 0, 1, 1)',
 	'motion.easing.standard': 'cubic-bezier(0, 0, 0.4, 1)',
 } as const;

@@ -4,11 +4,6 @@ import { vars } from '../theme/contract.css.js';
 
 const trayPaddingBlockEnd = createVar();
 
-// The sheet crosses the whole viewport, so it enters over a longer, component-private duration
-// rather than the shared fast one, and leaves over that shared fast duration. Entry decelerates
-// with the standard easing curve, while exit accelerates with the exit curve.
-const trayEnterDuration = '240ms';
-
 // The scrim strip left above the tray. It is sized to be a comfortable tap target,
 // since tapping it is how a pointer user dismisses the sheet.
 const trayMarginBlockStart = vars.space[1200];
@@ -17,17 +12,20 @@ const trayMarginBlockStart = vars.space[1200];
 // stretch edge to edge on a wide phone or a small foldable.
 const trayMaxInlineSize = '450px';
 
-const scrimTransition = `opacity ${trayEnterDuration} ${vars.motion.easing.standard}`;
-const scrimExitTransition = `opacity ${vars.motion.duration.fast} ${vars.motion.easing.exit}`;
+// The sheet and its scrim are overlays, so they take the enter and exit duration roles rather than
+// the in-place feedback one. Entry decelerates with the standard easing curve, while exit
+// accelerates with the exit curve.
+const scrimTransition = `opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`;
+const scrimExitTransition = `opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`;
 
 const trayTransition = [
-	`opacity ${trayEnterDuration} ${vars.motion.easing.standard}`,
-	`translate ${trayEnterDuration} ${vars.motion.easing.standard}`,
+	`opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+	`translate ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
 ].join(', ');
 
 const trayExitTransition = [
-	`opacity ${vars.motion.duration.fast} ${vars.motion.easing.exit}`,
-	`translate ${vars.motion.duration.fast} ${vars.motion.easing.exit}`,
+	`opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
+	`translate ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
 ].join(', ');
 
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */

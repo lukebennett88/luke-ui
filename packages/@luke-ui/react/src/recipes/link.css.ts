@@ -24,7 +24,7 @@ const base = styleInLayer('recipes', {
 	font: 'inherit',
 	textDecoration: 'underline',
 	textDecorationColor: 'currentColor',
-	transitionDuration: vars.motion.duration.fast,
+	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'color, text-decoration-color',
 	transitionTimingFunction: vars.motion.easing.standard,
 	selectors: {

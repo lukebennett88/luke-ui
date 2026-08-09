@@ -94,7 +94,7 @@ const PURPOSE_DEFINITIONS = [
 		title: 'Interaction',
 	},
 	{
-		description: 'Durations and easing curves for interaction.',
+		description: 'Durations named for the role they play, plus the easing curves that shape them.',
 		id: 'motion',
 		related: null,
 		showSamples: true,
