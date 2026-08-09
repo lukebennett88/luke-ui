@@ -3,6 +3,8 @@ import path from 'node:path';
 
 const packageRoot = path.resolve(import.meta.dirname, '..');
 const storiesRoot = path.join(packageRoot, 'src');
+const STORY_PLAY_PATTERN = /\bplay\s*:\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g;
+const ASSERTION_PATTERN = /\bexpect\s*\(/;
 
 function storyFiles(directory: string): Array<string> {
 	const files: Array<string> = [];
@@ -16,9 +18,7 @@ function storyFiles(directory: string): Array<string> {
 
 function findPlayBodies(source: string): Array<{ body: string; line: number }> {
 	const plays: Array<{ body: string; line: number }> = [];
-	const playPattern = /\bplay\s*:\s*(?:async\s*)?\([^)]*\)\s*=>\s*\{/g;
-
-	for (const match of source.matchAll(playPattern)) {
+	for (const match of source.matchAll(STORY_PLAY_PATTERN)) {
 		const openingBrace = (match.index ?? 0) + match[0].length - 1;
 		let depth = 0;
 		let closingBrace = openingBrace;
@@ -45,7 +45,7 @@ for (const file of storyFiles(storiesRoot)) {
 	if (path.relative(storiesRoot, file).startsWith(`theme${path.sep}`)) continue;
 	const source = fs.readFileSync(file, 'utf8');
 	for (const play of findPlayBodies(source)) {
-		if (/\bexpect\s*\(/.test(play.body)) {
+		if (ASSERTION_PATTERN.test(play.body)) {
 			violations.push(`${path.relative(packageRoot, file)}:${play.line}`);
 		}
 	}

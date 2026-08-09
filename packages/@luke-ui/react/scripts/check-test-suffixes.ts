@@ -15,6 +15,7 @@ const ignoredDirNames = new Set([
 	'.generated',
 	'storybook-static',
 ]);
+const TEST_FILE_PATTERN = /\.test\.tsx?$/;
 
 type VitestProjectConfig = { test?: { include?: Array<string> } };
 type VitestRootConfig = { test?: { projects?: Array<VitestProjectConfig> } };
@@ -37,7 +38,7 @@ async function collectTestFiles(root: string): Promise<Array<string>> {
 					await visit(entryPath);
 					return;
 				}
-				if (/\.test\.tsx?$/.test(entry.name)) {
+				if (TEST_FILE_PATTERN.test(entry.name)) {
 					results.push(path.relative(root, entryPath).split(path.sep).join('/'));
 				}
 			}),
