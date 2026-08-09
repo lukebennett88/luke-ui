@@ -10,6 +10,7 @@ import {
 	focusViaKeyboard,
 	Stack,
 } from '../test-utils/visual.js';
+import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 import { ComboboxField } from './index.js';
 import { ComboboxItem, ComboboxLoadMoreItem } from './primitive/item.js';
 import { ComboboxSection } from './primitive/section.js';
@@ -322,20 +323,15 @@ test('rich section title', async () => {
 });
 
 /**
- * Waits for the tray to finish opening before a capture.
- *
- * React Aria clears `data-entering` when the slide-up starts rather than when it ends, so the
- * running transitions have to be waited on too. The screenshot owns the resting geometry, so
- * nothing here measures a position.
+ * Waits for the tray to finish opening before a capture. The screenshot owns the resting geometry,
+ * so nothing here measures a position.
  */
 async function waitForMobileTrayToSettle() {
 	const dialog = page.getByRole('dialog');
 	await expect.element(dialog).toBeVisible();
 
-	const modal = dialog.element().parentElement;
-	const overlay = modal?.parentElement;
-	if (modal == null || overlay == null) throw new Error('Expected the mobile modal structure.');
+	const overlay = dialog.element().parentElement?.parentElement;
+	if (overlay == null) throw new Error('Expected the mobile modal structure.');
 
-	await expect.poll(() => modal.hasAttribute('data-entering')).toBe(false);
-	await expect.poll(() => overlay.getAnimations({ subtree: true }).length).toBe(0);
+	await waitForOverlayEnter(overlay);
 }

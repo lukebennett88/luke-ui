@@ -4,6 +4,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
+import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 import { componentTestRegistration } from './component-test-registration.js';
 import type { ComboboxFieldProps } from './index.js';
 import { ComboboxField } from './index.js';
@@ -139,10 +140,8 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 			throw new Error('Expected the mobile modal structure.');
 		}
 
-		// React Aria clears `data-entering` when the slide-up starts, not when it ends, so wait for the
-		// tray's own transitions to run out before measuring it.
-		await expect.poll(() => modal.hasAttribute('data-entering')).toBe(false);
-		await expect.poll(() => modal.getAnimations().length).toBe(0);
+		// Measuring the tray only means anything once it has stopped sliding up.
+		await waitForOverlayEnter(overlay);
 
 		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so overriding it
 		// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
@@ -362,6 +361,13 @@ test('ComboboxField forwards name so a native form submit collects the selected 
 
 	const option = page.getByRole('option', { name: 'Canada' });
 	await expect.element(option).toBeInTheDocument();
+
+	// Clicking an option scrolls it into view first, and React Aria closes the popover on a
+	// document scroll. While the popover is still entering, that close lands before the click and
+	// detaches the option.
+	const popover = page.getByRole('listbox').element().parentElement;
+	if (popover == null) throw new Error('Expected the popover element.');
+	await waitForOverlayEnter(popover);
 
 	await userEvent.click(option);
 
