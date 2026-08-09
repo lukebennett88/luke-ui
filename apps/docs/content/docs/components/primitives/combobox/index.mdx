@@ -87,8 +87,9 @@ empty-state handling when its built-in composition is enough.
 
 ## Popover and accessibility
 
-`ComboboxPopover` portals a desktop-style positioned popover for the listbox. It does not become a
-mobile tray. `ComboboxField` owns the modal mobile pattern.
+`ComboboxPopover` preserves the active Luke UI theme identity and explicit colour mode when it
+portals the listbox. It portals a desktop-style positioned popover and never becomes a mobile tray.
+`ComboboxField` owns the modal mobile pattern.
 
 Give `ComboboxRoot` an accessible name with `aria-label` or a connected label. Keep the
 root/control/input/listbox structure so React Aria's combobox semantics and keyboard behaviour

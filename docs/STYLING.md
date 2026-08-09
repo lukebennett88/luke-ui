@@ -12,6 +12,9 @@ with no class and no JS required. Neither step injects styles at runtime.
 
 - `styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
 - `styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
+- `styles/breakpoints.ts`: the shared breakpoint pixel widths, kept in a plain module so runtime
+  code can read them without importing Vanilla Extract. The styling utilities turn them into media
+  queries, and `useIsMobileDevice` reads the same values for its mobile threshold.
 - `recipes/`: component recipes exported from `@luke-ui/react/recipes`.
 - `recipes/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
@@ -38,7 +41,12 @@ with no class and no JS required. Neither step injects styles at runtime.
   owns its box, and `IconSizeProvider` (`INPUT_GROUP_ICON_SIZE`) owns its per-size step — and gives
   the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control is not a
   plain `Group` with that state to hand, so it stays CSS-driven.
-- `styles/`: public layout utilities exported from `@luke-ui/react/styles`.
+- `recipes/mobile-overlay.css.ts`: the scrim, tray, and dialog styles `MobileOverlay` renders for
+  the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and `tray/index.css`.
+- `overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
+  `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
+  device screen width, not the viewport width, to decide when a combobox switches to it.
+- `styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
   `fontSizeSteps` typography step keys.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
@@ -53,6 +61,9 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
   constrained step-9 solid-anchor search, the per-role capability guarantees, and
   `passesOnSolidGate`, the on-solid accessibility gate.
+- `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
+  `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
+  no `--luke-motion-duration-*` custom property exists.
 - `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
   `surfaces.canvas` is always exactly the resolved `background`.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and

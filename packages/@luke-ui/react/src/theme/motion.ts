@@ -6,10 +6,9 @@
  * The keys are ordinal steps, not encoded millisecond values. Step 400 is the fourth step, and it
  * is not 400ms.
  *
- * The scale covers very short interaction feedback through large surface movement, so a new
- * component picks an existing step instead of an invented one-off value. Material spans 50ms to
- * 1000ms. Carbon uses a deliberately non-linear six-step scale of 70, 110, 150, 240, 400, and
- * 700ms, and puts ordinary micro-interactions at roughly 90 to 120ms.
+ * The scale covers 50ms to 700ms, from short feedback through large surface movement, so a
+ * component picks an existing step rather than inventing one. That range sits within the bounds
+ * Material and Carbon use for similar motion.
  *
  * Easing gets no numbered counterpart. Curves differ in shape rather than in magnitude, so an
  * ordinal position would be artificial. The easing tokens stay role-named.
