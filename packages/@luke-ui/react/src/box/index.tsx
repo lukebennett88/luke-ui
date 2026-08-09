@@ -82,10 +82,12 @@ interface _BoxResolvedRenderProps extends _BoxResolvedRenderOmit {
 	ref: RefCallback<HTMLElement>;
 }
 
+type BoxResolvedRenderProps = Prettify<_BoxResolvedRenderProps>;
+
 interface _BoxRenderProps extends _BoxPresentationProps {
 	elementType?: never;
 	/** Passes Box's content and presentation props to a caller-owned element. */
-	render: (props: _BoxResolvedRenderProps) => ReactElement;
+	render: (props: BoxResolvedRenderProps) => ReactElement;
 }
 
 const sprinklesProperties: ReadonlySet<PropertyKey> = createSprinkles.properties;
