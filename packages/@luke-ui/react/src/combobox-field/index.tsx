@@ -211,11 +211,14 @@ function MobileComboboxContent<T extends object>({
 	const popoverContext = useSlottedContext(PopoverContext);
 	const state = useContext(ComboBoxStateContext);
 	const valueId = useId();
-	const ariaLabelledBy =
-		labelContext?.id == null ? undefined : [labelContext.id, valueId].join(' ');
+
+	const ariaLabelledBy = labelContext?.id != null ? `${labelContext.id} ${valueId}` : undefined;
+	const comboboxStyles = styles.combobox({ size });
+
 	const mobileListBoxClassName = composeRenderProps(listBoxProps?.className, (className) => {
-		return styles.combobox({ size }).mobileListBox(className);
+		return comboboxStyles.mobileListBox(className);
 	});
+
 	const listBox = (
 		<SelectableCollectionContext.Provider value={mobileListBoxContextValue}>
 			<ComboboxListBox<T>
@@ -230,16 +233,15 @@ function MobileComboboxContent<T extends object>({
 		</SelectableCollectionContext.Provider>
 	);
 
+	// Focus the tray search input when the tray opens
 	useEffect(() => {
 		if (state?.isOpen !== true) return;
 
 		mobileInputRef.current?.focus({ preventScroll: true });
 	}, [mobileInputRef, state?.isOpen]);
 
-	if (state == null) {
-		// RAC builds the collection before it provides state.
-		return listBox;
-	}
+	// RAC builds the collection before it provides state.
+	if (state == null) return listBox;
 
 	return (
 		<>
@@ -250,7 +252,7 @@ function MobileComboboxContent<T extends object>({
 						aria-haspopup="dialog"
 						aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
 						aria-labelledby={ariaLabelledBy}
-						className={styles.combobox({ size }).mobileTrigger()}
+						className={comboboxStyles.mobileTrigger()}
 						isDisabled={isDisabled || isReadOnly}
 						onPress={() => {
 							if (isReadOnly) return;
@@ -260,7 +262,7 @@ function MobileComboboxContent<T extends object>({
 						slot={null}
 					>
 						<ComboBoxValue
-							className={styles.combobox({ size }).mobileValue()}
+							className={comboboxStyles.mobileValue()}
 							id={valueId}
 							placeholder={placeholder}
 						/>
@@ -280,7 +282,7 @@ function MobileComboboxContent<T extends object>({
 				}}
 				ref={popoverContext?.ref}
 			>
-				<ComboboxInputGroup className={styles.combobox({ size }).mobileInputGroup()}>
+				<ComboboxInputGroup className={comboboxStyles.mobileInputGroup()}>
 					<ComboboxInput
 						aria-expanded={undefined}
 						aria-haspopup="listbox"
