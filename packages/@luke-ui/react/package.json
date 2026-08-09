@@ -124,6 +124,7 @@
 		"@vitest/ui": "catalog:",
 		"babel-plugin-react-compiler": "catalog:",
 		"node-html-parser": "catalog:",
+		"oxc-parser": "catalog:",
 		"pixelmatch": "catalog:",
 		"playwright": "catalog:",
 		"pngjs": "catalog:",

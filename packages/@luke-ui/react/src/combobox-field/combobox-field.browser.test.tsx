@@ -7,6 +7,7 @@ import {
 	comboboxTrayViewportHeightVar,
 } from '../recipes/combobox.css.js';
 import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
 import type { ComboboxFieldProps } from './index.js';
 import { ComboboxField } from './index.js';
 import { ComboboxInputGroup } from './primitive/input-group.js';
@@ -54,6 +55,7 @@ testFieldShapedConformance({
 		return target;
 	},
 	name: 'ComboboxField',
+	registration: componentTestRegistration,
 	render: (props = {}) =>
 		render(
 			<ComboboxField<CountryItem>
@@ -67,7 +69,7 @@ testFieldShapedConformance({
 		),
 });
 
-testIntegration('ComboboxField', async () => {
+testIntegration(componentTestRegistration, 'ComboboxField', async () => {
 	const { locator, user } = render(
 		<ComboboxField defaultItems={countryItems} label="Country">
 			{renderCountryItem}

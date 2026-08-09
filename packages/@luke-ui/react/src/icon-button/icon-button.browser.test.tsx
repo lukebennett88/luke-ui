@@ -2,6 +2,7 @@ import type { ComponentProps } from 'react';
 import { expect } from 'vite-plus/test';
 import { testIntegration, testUniversalConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
 import { IconButton } from './index.js';
 
 testUniversalConformance({
@@ -11,13 +12,14 @@ testUniversalConformance({
 		return target;
 	},
 	name: 'IconButton',
+	registration: componentTestRegistration,
 	render: (props = {}) =>
 		render(
 			<IconButton {...(props as ComponentProps<typeof IconButton>)} aria-label="Add" icon="add" />,
 		),
 });
 
-testIntegration('IconButton', async () => {
+testIntegration(componentTestRegistration, 'IconButton', async () => {
 	let pressed = false;
 	const { locator, user } = render(
 		<IconButton aria-label="Add" icon="add" onPress={() => (pressed = true)} />,

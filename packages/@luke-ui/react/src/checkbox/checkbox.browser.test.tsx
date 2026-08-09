@@ -5,6 +5,7 @@ import { cdp, page, userEvent } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
 import { Checkbox } from './index.js';
 
 testFieldShapedConformance({
@@ -25,11 +26,12 @@ testFieldShapedConformance({
 		return target;
 	},
 	name: 'Checkbox',
+	registration: componentTestRegistration,
 	render: (props = {}) =>
 		render(<Checkbox {...(props as ComponentProps<typeof Checkbox>)}>Terms</Checkbox>),
 });
 
-testIntegration('Checkbox', async () => {
+testIntegration(componentTestRegistration, 'Checkbox', async () => {
 	const { locator, user } = render(<Checkbox>Terms</Checkbox>);
 	const checkbox = locator.getByRole('checkbox', { name: 'Terms' });
 

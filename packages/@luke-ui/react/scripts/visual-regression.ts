@@ -4,12 +4,7 @@ import { arch, platform } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import {
-	assertCapturesPainted,
-	compareCaptures,
-	renderReport,
-	validateCaptureIds,
-} from './visual-regression-lib.js';
+import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = path.resolve(packageRoot, '../../..');
@@ -89,7 +84,6 @@ async function capture(worktree: string, target: string) {
 			),
 		);
 	}
-	await validateCaptureIds(path.join(worktree, 'packages/@luke-ui/react/src'));
 	await rm(target, { force: true, recursive: true });
 	await mkdir(target, { recursive: true });
 	if (worktree !== repoRoot) {

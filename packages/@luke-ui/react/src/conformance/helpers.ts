@@ -1,10 +1,12 @@
 import { expect, test } from 'vite-plus/test';
 import type { RenderResult } from '../test-utils/render.js';
+import type { ComponentTestRegistration } from './registrations.js';
 
 type RenderComponent = (props?: Record<string, unknown>) => RenderResult;
 
 type UniversalConformanceOptions = {
 	name: string;
+	registration: ComponentTestRegistration;
 	render: RenderComponent;
 	getTarget: (result: RenderResult) => HTMLElement;
 };
@@ -20,7 +22,10 @@ function assertNativeName(_: RenderResult, control: HTMLElement) {
 }
 
 export function testUniversalConformance(options: UniversalConformanceOptions) {
-	const { getTarget, name, render } = options;
+	const { getTarget, name, registration, render } = options;
+	if (registration.conformanceTier !== 'universal') {
+		throw new Error(`Expected a universal registration for ${registration.path}.`);
+	}
 
 	test(`${name} forwards its universal DOM contract`, () => {
 		const ref = { current: null as HTMLElement | null };
@@ -41,7 +46,10 @@ export function testUniversalConformance(options: UniversalConformanceOptions) {
 }
 
 export function testFieldShapedConformance(options: FieldConformanceOptions) {
-	const { assertAssociation, assertName, getControl, name, render } = options;
+	const { assertAssociation, assertName, getControl, name, registration, render } = options;
+	if (registration.conformanceTier !== 'field-shaped') {
+		throw new Error(`Expected a field-shaped registration for ${registration.path}.`);
+	}
 	test(`${name} forwards its field contract`, async () => {
 		const inputRef = { current: null as HTMLElement | null };
 		let blurred = false;
@@ -60,15 +68,42 @@ export function testFieldShapedConformance(options: FieldConformanceOptions) {
 		expect(inputRef.current).toBe(control);
 		const assertFieldName = assertName ?? assertNativeName;
 		assertFieldName(result, control);
+		const form = document.createElement('form');
+		result.container.replaceWith(form);
+		form.append(result.container);
+		const namedControl = form.elements.namedItem('conformance-field');
+		if (
+			!(namedControl instanceof HTMLInputElement) &&
+			!(namedControl instanceof HTMLSelectElement) &&
+			!(namedControl instanceof HTMLTextAreaElement)
+		) {
+			throw new Error('Expected a native form control for conformance-field.');
+		}
+		if (
+			namedControl instanceof HTMLInputElement &&
+			(namedControl.type === 'checkbox' || namedControl.type === 'radio')
+		) {
+			namedControl.checked = true;
+		}
+		namedControl.value = 'conformance-value';
+		expect(new FormData(form).get('conformance-field')).toBe('conformance-value');
 		control.focus();
 		control.blur();
 		expect(blurred).toBe(true);
 		assertAssociation?.(result);
 		result.unmount();
+		form.remove();
 	});
 }
 
-export function testIntegration(name: string, run: () => void | Promise<void>) {
+export function testIntegration(
+	registration: ComponentTestRegistration,
+	name: string,
+	run: () => void | Promise<void>,
+) {
+	if (registration.integrationTripwire !== 'required') {
+		throw new Error(`Expected an integration registration for ${registration.path}.`);
+	}
 	test(`${name} integration`, async () => {
 		expect.hasAssertions();
 		await run();

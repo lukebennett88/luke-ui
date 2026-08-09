@@ -5,6 +5,7 @@ import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { inputGroup } from '../recipes/input-group.css.js';
 import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
 import { TextField } from './index.js';
 import {
 	InputGroup,
@@ -30,6 +31,7 @@ testFieldShapedConformance({
 		return target;
 	},
 	name: 'TextField',
+	registration: componentTestRegistration,
 	render: (props = {}) =>
 		render(
 			<TextField
@@ -40,7 +42,7 @@ testFieldShapedConformance({
 		),
 });
 
-testIntegration('TextField', async () => {
+testIntegration(componentTestRegistration, 'TextField', async () => {
 	let value = '';
 	const { locator, user } = render(<TextField label="Name" onChange={(next) => (value = next)} />);
 	const input = locator.getByRole('textbox', { name: 'Name' });

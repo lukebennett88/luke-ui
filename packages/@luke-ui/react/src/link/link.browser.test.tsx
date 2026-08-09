@@ -2,6 +2,7 @@ import type { ComponentProps } from 'react';
 import { expect } from 'vite-plus/test';
 import { testIntegration, testUniversalConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
 import { Link } from './index.js';
 
 testUniversalConformance({
@@ -11,6 +12,7 @@ testUniversalConformance({
 		return target;
 	},
 	name: 'Link',
+	registration: componentTestRegistration,
 	render: (props = {}) =>
 		render(
 			<Link {...(props as ComponentProps<typeof Link>)} href="/settings">
@@ -19,7 +21,7 @@ testUniversalConformance({
 		),
 });
 
-testIntegration('Link', async () => {
+testIntegration(componentTestRegistration, 'Link', async () => {
 	let pressed = false;
 	const { locator, user } = render(<Link onPress={() => (pressed = true)}>Settings</Link>);
 

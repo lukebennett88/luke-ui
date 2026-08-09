@@ -27,8 +27,10 @@ export const componentTestManifest = [
 	['Emoji', 'emoji', 'atom', 'none', 'none', 'applicable'],
 	['Field primitive', 'field/primitive', 'primitive', 'none', 'none', 'none'],
 	['Heading', 'heading', 'atom', 'none', 'none', 'applicable'],
+	['Heading context', 'heading-context', 'primitive', 'none', 'none', 'none'],
 	['Icon', 'icon', 'atom', 'none', 'none', 'applicable'],
 	['IconButton', 'icon-button', 'composed', 'universal', 'required', 'applicable'],
+	['Icon size context', 'icon-size-context', 'primitive', 'none', 'none', 'none'],
 	['Kbd', 'kbd', 'atom', 'none', 'none', 'none'],
 	['Link', 'link', 'atom', 'universal', 'required', 'applicable'],
 	['LoadingSkeleton', 'loading-skeleton', 'atom', 'none', 'none', 'applicable'],
@@ -39,6 +41,7 @@ export const componentTestManifest = [
 	['Text', 'text', 'atom', 'none', 'none', 'applicable'],
 	['TextField', 'text-field', 'composed', 'field-shaped', 'required', 'applicable'],
 	['TextField primitive', 'text-field/primitive', 'primitive', 'none', 'none', 'none'],
+	['Theme', 'theme', 'primitive', 'none', 'none', 'none'],
 	['VisuallyHidden', 'visually-hidden', 'atom', 'none', 'none', 'none'],
 ].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({
 	name,

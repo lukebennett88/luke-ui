@@ -2,6 +2,7 @@ import type { ComponentProps } from 'react';
 import { expect } from 'vite-plus/test';
 import { testIntegration, testUniversalConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
 import { Button } from './index.js';
 
 testUniversalConformance({
@@ -11,11 +12,12 @@ testUniversalConformance({
 		return target;
 	},
 	name: 'Button',
+	registration: componentTestRegistration,
 	render: (props = {}) =>
 		render(<Button {...(props as ComponentProps<typeof Button>)}>Action</Button>),
 });
 
-testIntegration('Button', async () => {
+testIntegration(componentTestRegistration, 'Button', async () => {
 	let pressed = false;
 	const { locator, user } = render(<Button onPress={() => (pressed = true)}>Action</Button>);
 
