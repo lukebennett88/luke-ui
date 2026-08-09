@@ -72,7 +72,7 @@ const comboboxActionStyles = {
 	// icon lands right after the text input and before the clear/trigger buttons.
 	order: 1,
 	transform: 'none',
-	transitionDuration: vars.motion.duration.fast,
+	transitionDuration: vars.motion.duration.transition,
 	transitionProperty: 'background-color, color',
 	transitionTimingFunction: vars.motion.easing.standard,
 
@@ -161,7 +161,7 @@ const comboboxConfig = {
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
-			transitionDuration: vars.motion.duration.fast,
+			transitionDuration: vars.motion.duration.transition,
 			transitionProperty: 'background-color, border-color, color',
 			transitionTimingFunction: vars.motion.easing.standard,
 
@@ -257,9 +257,9 @@ const comboboxConfig = {
 			minInlineSize: 'var(--trigger-width)',
 			overflow: 'hidden',
 			transition: [
-				`opacity ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
-				`translate ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
-				`box-shadow ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+				`opacity ${vars.motion.duration.transition} ${vars.motion.easing.standard}`,
+				`translate ${vars.motion.duration.transition} ${vars.motion.easing.standard}`,
+				`box-shadow ${vars.motion.duration.transition} ${vars.motion.easing.standard}`,
 			].join(', '),
 
 			selectors: {
@@ -353,7 +353,7 @@ const comboboxConfig = {
 			minInlineSize: 0,
 			outline: 'none',
 			transform: 'none',
-			transitionDuration: vars.motion.duration.fast,
+			transitionDuration: vars.motion.duration.transition,
 			transitionProperty: 'background-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
 

@@ -60,7 +60,7 @@ const base = styleInLayer('recipes', {
 	position: 'relative',
 	textDecoration: 'none',
 	transform: 'translateY(0)',
-	transitionDuration: vars.motion.duration.fast,
+	transitionDuration: vars.motion.duration.transition,
 	transitionProperty: 'background-color, border-color, box-shadow, color, opacity, transform',
 	transitionTimingFunction: vars.motion.easing.standard,
 	whiteSpace: 'nowrap',

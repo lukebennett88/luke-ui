@@ -4,20 +4,21 @@ import { vars } from '../theme/contract.css.js';
 
 const trayPaddingBlockEnd = createVar();
 
-// The sheet and its scrim cross the whole viewport height, so the fast duration used by buttons
-// and links reads as a snap. Both use the slower duration instead. Entry decelerates with the
-// standard easing curve, while exit accelerates with the exit curve, matching React Spectrum.
-const scrimTransition = `opacity ${vars.motion.duration.slow} ${vars.motion.easing.standard}`;
-const scrimExitTransition = `opacity ${vars.motion.duration.slow} ${vars.motion.easing.exit}`;
+// The sheet and its scrim cross the whole viewport height, so the transition duration used by
+// buttons and links reads as a snap. Both take the overlay durations instead, which arrive over
+// `enter` and leave over the shorter `exit`. Entry decelerates with the standard easing curve, while
+// exit accelerates with the exit curve, matching React Spectrum.
+const scrimTransition = `opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`;
+const scrimExitTransition = `opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`;
 
 const trayTransition = [
-	`opacity ${vars.motion.duration.slow} ${vars.motion.easing.standard}`,
-	`translate ${vars.motion.duration.slow} ${vars.motion.easing.standard}`,
+	`opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+	`translate ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
 ].join(', ');
 
 const trayExitTransition = [
-	`opacity ${vars.motion.duration.slow} ${vars.motion.easing.exit}`,
-	`translate ${vars.motion.duration.slow} ${vars.motion.easing.exit}`,
+	`opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
+	`translate ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
 ].join(', ');
 
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */
