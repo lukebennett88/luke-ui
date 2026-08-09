@@ -226,6 +226,7 @@ export const themeContractTree = {
 	motion: {
 		duration: {
 			fast: null,
+			slow: null,
 		},
 		easing: {
 			standard: null,

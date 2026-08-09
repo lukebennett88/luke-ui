@@ -76,6 +76,7 @@ export const INTERACTION_VALUES = {
 /** Luke UI-owned durations and easing curves for interaction motion. */
 export const MOTION_VALUES = {
 	'motion.duration.fast': '120ms',
+	'motion.duration.slow': '240ms',
 	'motion.easing.exit': 'cubic-bezier(0.3, 0, 1, 1)',
 	'motion.easing.standard': 'cubic-bezier(0, 0, 0.4, 1)',
 } as const;
