@@ -28,26 +28,38 @@ export type { FontSizeStep } from './contract.js';
  * `ThemeContrastError` is thrown by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1
  * for text/on-solid pairs, 3:1 for the focus ring and `border.control`. The six semantic
  * `border.<role>` pairs are measured but advisory only and cannot trigger this error. It carries
- * every failing mode-and-pair in its `failures` array. `ThemeGenerationError` is thrown when a role
- * that must guarantee on-solid contrast (an inaccessible explicit per-mode accent, for example)
- * cannot reach an accessible solid. It names the failing `role` and `mode`.
+ * every failing mode-and-pair in its `failures` array. For a theme built with `extends`, it also
+ * carries `inheritance`, naming the chain of themes and which colours came from a base.
+ * `ThemeGenerationError` is thrown when a role that must guarantee on-solid contrast (an
+ * inaccessible explicit per-mode accent, for example) cannot reach an accessible solid. It names the
+ * failing `role` and `mode`.
  */
 export { ThemeContrastError, ThemeGenerationError } from './build-theme.js';
 
 /** One WCAG contrast failure recorded on a {@link ThemeContrastError}. */
 export type { ThemeContrastFailure } from './build-theme.js';
 
+/** The colour provenance a `ThemeContrastError` carries for a theme built with `extends`. */
+export type { ThemeInheritance } from './build-theme.js';
+
 /**
  * `defineTheme(input)` is the curated authoring entry point: it normalises a small {@link ThemeInput}
  * (accent + neutral character, with everything else defaulting) into the per-mode foundation and
  * compiles it through `buildTheme`. It adapts single-value accents and neutrals per mode, generates
- * the radius scale, and merges optional materials over curated defaults. It throws the same
+ * the radius scale, and merges optional materials over curated defaults. It also accepts an
+ * {@link ExtendingThemeInput} and resolves its `extends` chain first. It throws the same
  * {@link ThemeContrastError} and {@link ThemeGenerationError} as `buildTheme`.
  */
 export { defineTheme } from './define-theme.js';
 
 /** The curated `defineTheme` authoring input plus its colour and material building blocks. */
-export type { ColorInput, ControlFinish, DepthLadder, ThemeInput } from './define-theme.js';
+export type {
+	ColorInput,
+	ControlFinish,
+	DepthLadder,
+	ExtendingThemeInput,
+	ThemeInput,
+} from './define-theme.js';
 
 /** Curated defaults `defineTheme` applies for omitted materials and scrim. */
 export { defaultControlFinish, defaultDepth, defaultScrim } from './define-theme.js';

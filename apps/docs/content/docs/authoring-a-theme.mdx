@@ -35,9 +35,35 @@ The minimal theme authors one colour and a neutral character:
 
 <SourceCodeBlock src="theming/minimal-theme" />
 
-Start from a bundled theme instead of a blank input. Each bundled theme's entrypoint, for example
-`@luke-ui/react/themes/tactile`, exports `theme`, its own `ThemeInput`. Read it, copy it, or spread
-it into your own `defineTheme` call.
+## Extend a bundled theme
+
+Set `extends` to another theme's input. Your theme inherits every value it does not set. Each
+bundled theme entrypoint, such as `@luke-ui/react/themes/tactile`, exports its input as `theme`.
+
+<SourceCodeBlock src="theming/extend-bundled-theme" />
+
+Your theme always declares its own `name`. Two themes with one name emit a colliding identity class.
+
+What each section inherits:
+
+- `color` merges role by role. A role replaces the base's role whole.
+- `color.neutral` and `color.neutralStyle` are one decision. Setting either replaces the base's
+  neutral decision.
+- `radius` and `typography.fontWeight` merge key by key.
+- `typography.fontFamily` replaces the base value.
+- `depth` and `actionControlFinish` merge per mode, then per rung.
+
+A value set to `undefined` counts as omitted and inherits.
+
+A theme may extend a theme that extends another. A cycle throws.
+
+Contrast validation runs on the merged theme. `ThemeContrastError` carries `inheritance`, naming the
+chain of themes and which colours came from a base.
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/theme/define-theme.ts"
+	name="ExtendingThemeInput"
+/>
 
 ## Generate a stylesheet
 
