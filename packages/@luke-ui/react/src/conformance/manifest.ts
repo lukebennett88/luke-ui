@@ -1,7 +1,7 @@
-export type ConformanceTier = 'universal' | 'field-shaped' | 'none';
-export type IntegrationTripwire = 'required' | 'none';
-export type VisualApplicability = 'applicable' | 'none';
-export type ComponentTier = 'atom' | 'composed' | 'primitive';
+type ConformanceTier = 'universal' | 'field-shaped' | 'none';
+type IntegrationTripwire = 'required' | 'none';
+type VisualApplicability = 'applicable' | 'none';
+type ComponentTier = 'atom' | 'composed' | 'primitive';
 
 export type ComponentTestManifestEntry = {
 	name: string;

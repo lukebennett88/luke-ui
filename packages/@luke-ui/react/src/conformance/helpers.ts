@@ -1,7 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import type { RenderResult } from '../test-utils/render.js';
 
-export type RenderComponent = (props?: Record<string, unknown>) => RenderResult;
+type RenderComponent = (props?: Record<string, unknown>) => RenderResult;
 
 type UniversalConformanceOptions = {
 	name: string;
