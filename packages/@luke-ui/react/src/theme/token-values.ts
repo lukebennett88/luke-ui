@@ -10,7 +10,6 @@
 import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
 import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
-import { MOTION_DURATION_SCALE } from './motion.js';
 
 /**
  * Structural block sizes for the small and medium controls, the minimum tap target, and
@@ -74,18 +73,9 @@ export const INTERACTION_VALUES = {
 	'interaction.disabledOpacity': '0.55',
 } as const;
 
-/**
- * Luke UI-owned durations and easing curves for interaction motion. Each duration is named for the
- * role it plays and resolved from the private numbered scale in `motion.ts`, which is never emitted.
- *
- * `enter` runs at twice `exit` on purpose. An overlay should arrive gently and leave promptly, and
- * that asymmetry is the one timing choice React Spectrum (250/130), HeroUI (200/100) and Material 3
- * (500/150) all agree on.
- */
+/** Luke UI-owned durations and easing curves for interaction motion. */
 export const MOTION_VALUES = {
-	'motion.duration.enter': MOTION_DURATION_SCALE[400],
-	'motion.duration.exit': MOTION_DURATION_SCALE[200],
-	'motion.duration.transition': MOTION_DURATION_SCALE[200],
+	'motion.duration.fast': '120ms',
 	'motion.easing.exit': 'cubic-bezier(0.3, 0, 1, 1)',
 	'motion.easing.standard': 'cubic-bezier(0, 0, 0.4, 1)',
 } as const;
