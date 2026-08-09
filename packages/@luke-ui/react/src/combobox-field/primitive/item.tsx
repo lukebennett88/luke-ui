@@ -46,9 +46,8 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 			})}
 		>
 			{composeRenderProps(itemProps.children, (children, { isSelected }) => {
-				// RAC renders item content at the listbox's tree position, outside this
-				// component's own tree, so the provider must wrap the content here rather
-				// than wrap `RacListBoxItem` above.
+				// RAC renders item content outside this component's original tree.
+				// Put the provider inside the item render function so the content receives the context.
 				return (
 					<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
 						{children}
