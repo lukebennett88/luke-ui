@@ -50,18 +50,17 @@ Components wrap `react-aria-components` and use `composeRenderProps` for styling
 
 ### Element choice
 
-`elementType` changes the semantic element. It does not change the accepted DOM prop surface. Accept
-only elements that the component is designed to render.
+Use `elementType` to change the semantic element without changing the accepted DOM props. Accept
+only the elements a component is designed to render.
 
-Use a dedicated component when an element needs behaviour or an element-specific API. For example,
-use `Link` for links and `Button` for buttons.
+Use a dedicated component for element-specific behaviour or props. Use `Link` for links and `Button`
+for buttons.
 
-When a component supports render ownership, the callback receives that component's documented
-resolved props and owns the rendered element's DOM attributes. Keep render ownership and semantic
-element choice mutually exclusive.
+Use `render` when its callback must own the element and its DOM attributes. Pass the component's
+documented resolved props to that element. Keep `render` and `elementType` mutually exclusive.
 
-Do not add generic polymorphic props, `as`, or `asChild` without a demonstrated need. This is a
-component design rule, not an internal prop normalisation rule.
+Do not add generic polymorphic props, `as`, or `asChild` without a demonstrated need. Apply this
+rule to public component APIs, not internal prop handling.
 
 See [COMPONENTS.md](COMPONENTS.md) for component tiers, package paths, and generator rules.
 

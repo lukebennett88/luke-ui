@@ -56,7 +56,7 @@ grid-placement properties accept their CSS values.
 ## Choose the rendered element
 
 Set `elementType` when the layout needs a supported structural element. The prop does not change
-Box's accepted DOM props. Without `render`, Box owns this element and its common DOM attributes.
+Box's accepted DOM props. Box owns the element and its DOM attributes.
 
 The supported elements are `article`, `aside`, `dd`, `div`, `dl`, `dt`, `figcaption`, `figure`,
 `footer`, `header`, `li`, `main`, `nav`, `ol`, `section`, `span`, and `ul`.
@@ -66,11 +66,10 @@ The supported elements are `article`, `aside`, `dd`, `div`, `dl`, `dt`, `figcapt
 ## Own the rendered element
 
 Use `render` when the callback must own the element and its DOM attributes. The callback can return
-an appropriate intrinsic element or custom component. It receives the resolved children, generated
-and consumer styling, and a neutral callback ref.
+an appropriate intrinsic element or custom component. It receives resolved `children`, `className`,
+and `style` props, plus a callback `ref`.
 
-In this mode, Box accepts layout props plus `children`, `className`, `style`, and `ref`. Put event,
-accessibility, and element-specific attributes on the element inside the callback.
+Put event, accessibility, and element-specific attributes on the element inside the callback.
 
 Do not combine `render` with `elementType`. Use `Link` or `Button` when you need their behaviour.
 
