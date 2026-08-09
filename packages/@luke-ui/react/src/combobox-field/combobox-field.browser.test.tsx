@@ -106,7 +106,7 @@ test('the selected option shows a check icon sized to the option text', async ()
 });
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
-	const restoreScreenWidth = mockScreenWidth(700);
+	const restoreScreenWidth = mockScreenWidth(390);
 	const mobileCountryItems: Array<CountryItem> = [
 		...countryItems,
 		{ id: 'dk', label: 'Denmark' },
@@ -271,7 +271,7 @@ test('the control group carries its own disabled and invalid attributes', async 
 
 // React Aria disables the trigger on a read-only combobox, which must not make the control read as disabled.
 test('read-only controls keep the read-only material, not the disabled one', async () => {
-	const restoreScreenWidth = mockScreenWidth(700);
+	const restoreScreenWidth = mockScreenWidth(390);
 	try {
 		render(
 			<>

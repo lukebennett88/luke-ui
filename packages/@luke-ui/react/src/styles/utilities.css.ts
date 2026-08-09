@@ -1,15 +1,20 @@
 import type { SprinklesFn } from '@luke-ui/rainbow-sprinkles';
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
 import { vars } from '../theme/contract.css.js';
+import { breakpoints } from './breakpoints.js';
 import { layers } from './layers.css.js';
+
+function fromBreakpoint(minimumWidth: number) {
+	return { '@media': `screen and (width >= ${minimumWidth}px)` };
+}
 
 const responsiveConditions = {
 	initial: {},
-	small: { '@media': 'screen and (width >= 640px)' },
-	medium: { '@media': 'screen and (width >= 768px)' },
-	large: { '@media': 'screen and (width >= 1024px)' },
-	xlarge: { '@media': 'screen and (width >= 1280px)' },
-	xxlarge: { '@media': 'screen and (width >= 1536px)' },
+	small: fromBreakpoint(breakpoints.small),
+	medium: fromBreakpoint(breakpoints.medium),
+	large: fromBreakpoint(breakpoints.large),
+	xlarge: fromBreakpoint(breakpoints.xlarge),
+	xxlarge: fromBreakpoint(breakpoints.xxlarge),
 } as const;
 
 const spaceScale = {

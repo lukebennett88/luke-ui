@@ -181,7 +181,7 @@ test('open option and selection states', async () => {
 
 test('mobile tray', async () => {
 	await page.viewport(390, 700);
-	const restoreScreenWidth = mockScreenWidth(700);
+	const restoreScreenWidth = mockScreenWidth(390);
 	try {
 		render(
 			<Stack>
@@ -207,7 +207,7 @@ test('mobile tray', async () => {
 
 test('mobile tray short list', async () => {
 	await page.viewport(390, 700);
-	const restoreScreenWidth = mockScreenWidth(700);
+	const restoreScreenWidth = mockScreenWidth(390);
 	try {
 		render(
 			<Stack>
