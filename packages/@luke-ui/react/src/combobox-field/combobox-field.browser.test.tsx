@@ -202,12 +202,12 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		await expect.poll(() => modal.hasAttribute('data-entering')).toBe(false);
 		overlay.style.setProperty('--visual-viewport-height', '500px');
 
-		const space800 = Number.parseFloat(
-			getComputedStyle(document.documentElement).getPropertyValue('--luke-space-800'),
+		const trayMarginBlockStart = Number.parseFloat(
+			getComputedStyle(document.documentElement).getPropertyValue('--luke-space-1200'),
 		);
 		const fullViewportHeight = window.innerHeight;
 		const forcedViewportHeight = 500;
-		const expectedBlockSize = forcedViewportHeight - space800;
+		const expectedBlockSize = forcedViewportHeight - trayMarginBlockStart;
 		const expectedPaddingBlockEnd =
 			Math.max(fullViewportHeight - forcedViewportHeight, 0) + fullViewportHeight;
 		expect(Number.parseFloat(getComputedStyle(modal).height)).toBeCloseTo(expectedBlockSize, 1);

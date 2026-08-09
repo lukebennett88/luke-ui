@@ -333,7 +333,9 @@ async function waitForMobileTrayToSettle() {
 			if (modal == null) return false;
 
 			const modalTop = modal.getBoundingClientRect().top;
-			const finalTop = 32;
+			const finalTop = Number.parseFloat(
+				getComputedStyle(document.documentElement).getPropertyValue('--luke-space-1200'),
+			);
 			return {
 				dialogBottomInside: dialogRect.bottom <= window.innerHeight + 1,
 				dialogTopInside: dialogRect.top >= 0,

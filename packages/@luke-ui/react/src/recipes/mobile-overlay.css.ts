@@ -9,6 +9,14 @@ const trayPaddingBlockEnd = createVar();
 // with the standard easing curve, while exit accelerates with the exit curve.
 const trayEnterDuration = '240ms';
 
+// The scrim strip left above the tray. It is sized to be a comfortable tap target,
+// since tapping it is how a pointer user dismisses the sheet.
+const trayMarginBlockStart = vars.space[1200];
+
+// React Spectrum caps its tray at this width and centres it, so the sheet does not
+// stretch edge to edge on a wide phone or a small foldable.
+const trayMaxInlineSize = '450px';
+
 const scrimTransition = `opacity ${trayEnterDuration} ${vars.motion.easing.standard}`;
 const scrimExitTransition = `opacity ${vars.motion.duration.fast} ${vars.motion.easing.exit}`;
 
@@ -57,7 +65,7 @@ export const mobileOverlay = styleInLayer('recipes', {
 
 export const mobileModal = styleInLayer('recipes', {
 	backgroundColor: vars.color.surface.floating,
-	blockSize: `calc(var(--visual-viewport-height) - ${vars.space[800]})`,
+	blockSize: `calc(var(--visual-viewport-height) - ${trayMarginBlockStart})`,
 	borderEndEndRadius: 0,
 	borderEndStartRadius: 0,
 	borderStartEndRadius: vars.radius.overlay,
@@ -71,10 +79,14 @@ export const mobileModal = styleInLayer('recipes', {
 	// Physical insets preserve the intended overconstraint. Logical block insets resolve the content-box tray from the wrong edge.
 	bottom: '-100vh',
 	insetInline: 0,
+	// The tray is absolutely positioned, so auto inline margins centre it against the
+	// zero inline insets once the cap starts clamping its width.
+	marginInline: 'auto',
+	maxInlineSize: trayMaxInlineSize,
 	overflow: 'hidden',
 	paddingBlockEnd: trayPaddingBlockEnd,
 	position: 'absolute',
-	top: vars.space[800],
+	top: trayMarginBlockStart,
 	transition: trayTransition,
 	translate: 'none',
 	vars: {
@@ -110,6 +122,12 @@ export const mobileModal = styleInLayer('recipes', {
 				'&[data-entering]': { opacity: 1, transition: 'none', translate: 'none' },
 				'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
 			},
+		},
+		// Past the cap the tray is inset from the viewport edges, so its bottom corners are
+		// no longer flush and have to be rounded like the top ones.
+		[`(width > ${trayMaxInlineSize})`]: {
+			borderEndEndRadius: vars.radius.overlay,
+			borderEndStartRadius: vars.radius.overlay,
 		},
 	},
 });
