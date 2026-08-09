@@ -36,33 +36,34 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 	const size = useComboboxSize(sizeProp);
 
 	return (
-		<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
-			<RacListBoxItem
-				// The children wrapper below is a render function, which disables RAC's
-				// own string-children textValue inference — so re-derive it here.
-				textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
-				{...itemProps}
-				className={composeRenderProps(itemProps.className, (className) => {
-					return styles.combobox({ size }).item(className);
-				})}
-			>
-				{composeRenderProps(itemProps.children, (children, { isSelected }) => {
-					return (
-						<>
-							{children}
-							{isSelected ? (
-								<Icon
-									aria-hidden
-									className={styles.combobox().itemCheck()}
-									name="check"
-									size={COMBOBOX_CHECK_ICON_SIZE}
-								/>
-							) : null}
-						</>
-					);
-				})}
-			</RacListBoxItem>
-		</IconSizeProvider>
+		<RacListBoxItem
+			// The children wrapper below is a render function, which disables RAC's
+			// own string-children textValue inference — so re-derive it here.
+			textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
+			{...itemProps}
+			className={composeRenderProps(itemProps.className, (className) => {
+				return styles.combobox({ size }).item(className);
+			})}
+		>
+			{composeRenderProps(itemProps.children, (children, { isSelected }) => {
+				// RAC renders item content at the listbox's tree position, outside this
+				// component's own tree, so the provider must wrap the content here rather
+				// than wrap `RacListBoxItem` above.
+				return (
+					<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
+						{children}
+						{isSelected ? (
+							<Icon
+								aria-hidden
+								className={styles.combobox().itemCheck()}
+								name="check"
+								size={COMBOBOX_CHECK_ICON_SIZE}
+							/>
+						) : null}
+					</IconSizeProvider>
+				);
+			})}
+		</RacListBoxItem>
 	);
 }
 
