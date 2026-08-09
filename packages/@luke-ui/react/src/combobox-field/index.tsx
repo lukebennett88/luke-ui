@@ -21,6 +21,7 @@ import * as styles from '../recipes/combobox.css.js';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
+import { cx } from '../utils/index.js';
 import { ComboboxClearButton } from './primitive/clear-button.js';
 import { ComboboxEmptyState } from './primitive/empty-state.js';
 import { ComboboxInputGroup } from './primitive/input-group.js';
@@ -212,7 +213,7 @@ function MobileComboboxContent<T extends object>({
 	const state = useContext(ComboBoxStateContext);
 	const valueId = useId();
 
-	const ariaLabelledBy = labelContext?.id != null ? `${labelContext.id} ${valueId}` : undefined;
+	const ariaLabelledBy = labelContext?.id == null ? undefined : cx(labelContext.id, valueId);
 	const comboboxStyles = styles.combobox({ size });
 
 	const mobileListBoxClassName = composeRenderProps(listBoxProps?.className, (className) => {

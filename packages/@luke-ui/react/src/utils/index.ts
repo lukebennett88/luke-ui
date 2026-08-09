@@ -1,4 +1,7 @@
-/** Joins class names and skips empty values. */
+/**
+ * Joins a space-separated token list, such as class names or an `aria-labelledby` ID list, and
+ * skips empty values.
+ */
 export function cx(...parts: Array<string | undefined | null | false>): string {
 	let result = '';
 	for (const part of parts) {
