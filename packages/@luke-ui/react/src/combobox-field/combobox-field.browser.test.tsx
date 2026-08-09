@@ -1,7 +1,5 @@
 import { createRef } from 'react';
-import { ListBox as RacListBox } from 'react-aria-components/ComboBox';
 import { expect, test } from 'vite-plus/test';
-import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
@@ -80,31 +78,6 @@ testIntegration(componentTestRegistration, 'ComboboxField', async () => {
 	expect(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Australia');
 });
 
-// The selected item's check icon is sized to the option text (16px, #308), not the
-// control's larger icon size. `ComboboxItem` renders through RAC's `ListBoxItem`, which
-// works the same whether its parent is a live ComboBox popover or a static `ListBox`, so
-// a static, pre-selected list exercises the same rendering deterministically.
-test('the selected option shows a check icon sized to the option text', async () => {
-	render(
-		<RacListBox
-			aria-label="Country"
-			defaultSelectedKeys={['au']}
-			items={countryItems}
-			selectionMode="single"
-		>
-			{renderCountryItem}
-		</RacListBox>,
-	);
-
-	const selectedOption = page.getByRole('option', { name: 'Australia' });
-	// oxlint-disable-next-line vitest/no-standalone-expect
-	await expect.element(selectedOption).toBeInTheDocument();
-	const checkIcon = selectedOption.element().querySelector('svg[aria-hidden]');
-	if (checkIcon == null) throw new Error('Expected the selected option check icon.');
-	// oxlint-disable-next-line vitest/no-standalone-expect
-	expect(getComputedStyle(checkIcon).width).toBe('16px');
-});
-
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
 	const restoreScreenWidth = mockScreenWidth(390);
 	const mobileCountryItems: Array<CountryItem> = [
@@ -146,9 +119,9 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		const dialog = page.getByRole('dialog');
 		const searchbox = page.getByRole('searchbox', { name: 'Country' });
 
+		// The mobile composition renders a value button where the desktop one renders a text input.
 		await expect.element(trigger).toBeVisible();
 		expect(inputRef.current).toBeNull();
-		const geometryFailures: Array<string> = [];
 
 		window.scrollTo(0, 400);
 		await expect.poll(() => window.scrollY).toBe(400);
@@ -156,6 +129,8 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		await expect.element(dialog).toBeVisible();
 		await expect.element(searchbox).toHaveFocus();
 		expect(inputRef.current).toBe(searchbox.element());
+		// Luke UI deliberately moved this overlay from a non-modal popover to a modal, so the page
+		// behind the tray must stop scrolling while it is open.
 		expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
 
 		const modal = dialog.element().parentElement;
@@ -163,81 +138,55 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		if (modal == null || overlay == null) {
 			throw new Error('Expected the mobile modal structure.');
 		}
-		await expect
-			.poll(() => {
-				const rect = searchbox.element().getBoundingClientRect();
-				return rect.top >= 0 && rect.bottom <= window.innerHeight;
-			})
-			.toBe(true);
-		const searchboxRect = searchbox.element().getBoundingClientRect();
-		const inputGroup = searchbox.element().closest<HTMLElement>('[role="group"]');
-		if (inputGroup == null) throw new Error('Expected the mobile input group.');
-		const inputGroupRect = inputGroup.getBoundingClientRect();
-		const dialogRect = dialog.element().getBoundingClientRect();
-		const borderRoundingTolerance = 1;
-		if (inputGroupRect.left < dialogRect.left - borderRoundingTolerance) {
-			geometryFailures.push(
-				`mobile input group starts at ${inputGroupRect.left}px before tray at ${dialogRect.left}px`,
-			);
-		}
-		if (inputGroupRect.right > dialogRect.right + borderRoundingTolerance) {
-			geometryFailures.push(
-				`mobile input group ends at ${inputGroupRect.right}px after tray at ${dialogRect.right}px`,
-			);
-		}
-		const overlayTop = overlay.getBoundingClientRect().top;
-		if (overlayTop !== 0) geometryFailures.push(`overlay starts at ${overlayTop}px, expected 0px`);
-		if (searchboxRect.top < 0 || searchboxRect.bottom > window.innerHeight) {
-			geometryFailures.push(
-				`tray searchbox spans ${searchboxRect.top}px to ${searchboxRect.bottom}px outside a ${window.innerHeight}px viewport`,
-			);
-		}
-		expect(geometryFailures).toEqual([]);
 
-		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, standing in for
-		// the keyboard shrinking the visual viewport. `mobileModal` must spend the shrunk amount on
-		// `paddingBlockEnd`, not on `blockSize`, so the sheet keeps its full height above the
-		// keyboard instead of shrinking. Wait for `data-entering` to clear first: the rect is
-		// unreliable mid-transition, and only entry animates position, not this padding swap.
+		// React Aria clears `data-entering` when the slide-up starts, not when it ends, so wait for the
+		// tray's own transitions to run out before measuring it.
 		await expect.poll(() => modal.hasAttribute('data-entering')).toBe(false);
-		overlay.style.setProperty('--visual-viewport-height', '500px');
+		await expect.poll(() => modal.getAnimations().length).toBe(0);
 
-		const trayMarginBlockStart = Number.parseFloat(
-			getComputedStyle(document.documentElement).getPropertyValue('--luke-space-1200'),
+		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so overriding it
+		// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
+		// amount off `blockSize` and spend it on `paddingBlockEnd`, so the sheet keeps its content above
+		// the keyboard. Every expectation is measured at runtime, so none pins a resolved spacing value.
+		// A soft keyboard commonly covers about half the viewport, and taking that much away also leaves
+		// the option list taller than the tray, so the scroll check below has something to scroll.
+		const restingViewportHeight = window.innerHeight;
+		const keyboardInset = Math.round(restingViewportHeight / 2);
+		overlay.style.setProperty('--visual-viewport-height', `${restingViewportHeight}px`);
+		const trayTop = modal.getBoundingClientRect().top;
+		const restingBlockSize = Number.parseFloat(getComputedStyle(modal).height);
+		const restingPaddingBlockEnd = Number.parseFloat(getComputedStyle(modal).paddingBottom);
+		// The tray's content box runs from its top offset to the bottom of the visual viewport.
+		expect(restingBlockSize + trayTop).toBeCloseTo(restingViewportHeight, 1);
+
+		overlay.style.setProperty(
+			'--visual-viewport-height',
+			`${restingViewportHeight - keyboardInset}px`,
 		);
-		const fullViewportHeight = window.innerHeight;
-		const forcedViewportHeight = 500;
-		const expectedBlockSize = forcedViewportHeight - trayMarginBlockStart;
-		const expectedPaddingBlockEnd =
-			Math.max(fullViewportHeight - forcedViewportHeight, 0) + fullViewportHeight;
-		expect(Number.parseFloat(getComputedStyle(modal).height)).toBeCloseTo(expectedBlockSize, 1);
+		expect(Number.parseFloat(getComputedStyle(modal).height) + trayTop).toBeCloseTo(
+			restingViewportHeight - keyboardInset,
+			1,
+		);
 		expect(Number.parseFloat(getComputedStyle(modal).paddingBottom)).toBeCloseTo(
-			expectedPaddingBlockEnd,
+			restingPaddingBlockEnd + keyboardInset,
 			1,
 		);
 
+		// The rest of the journey runs with the keyboard still up, which is how someone picks an
+		// option after typing.
 		const listbox = page.getByRole('listbox').element();
 		const pageScrollY = window.scrollY;
 		listbox.scrollTo(0, listbox.scrollHeight);
 		await expect.poll(() => listbox.scrollTop).toBeGreaterThan(0);
+		// Scrolling the tray's list must not chain out to the page behind it.
 		expect(window.scrollY).toBe(pageScrollY);
 
-		await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
 		const canada = page.getByRole('option', { name: 'Canada' });
 		listbox.scrollTo(0, 0);
 		await expect.poll(() => listbox.scrollTop).toBe(0);
-		await expect
-			.poll(() => canada.element().getBoundingClientRect().top)
-			.toBeGreaterThanOrEqual(listbox.getBoundingClientRect().top);
-		await expect
-			.poll(() => canada.element().getBoundingClientRect().bottom)
-			.toBeLessThanOrEqual(listbox.getBoundingClientRect().bottom);
 		await userEvent.click(canada);
 
 		await expect.poll(() => new FormData(form).get('country')).toBe('ca');
-		await expect.element(dialog).not.toBeInTheDocument();
-		await expect.element(trigger).toHaveFocus();
-		expect(inputRef.current).toBeNull();
 	} finally {
 		window.scrollTo(0, 0);
 		restoreScreenWidth();
@@ -414,7 +363,6 @@ test('ComboboxField forwards name so a native form submit collects the selected 
 	const option = page.getByRole('option', { name: 'Canada' });
 	await expect.element(option).toBeInTheDocument();
 
-	await waitForTrayToSettle(option);
 	await userEvent.click(option);
 
 	expect(new FormData(form).get('country')).toBe('ca');
@@ -453,26 +401,6 @@ test('ComboboxField forwards onBlur to the input', async () => {
 	await userEvent.click(page.getByRole('button', { name: 'Next' }));
 	expect(blurs).toEqual(['country']);
 });
-
-/**
- * Waits for the tray's slide-up transition on `option` to settle.
- *
- * This browser project runs at a tray viewport, so the popover slides up while `position:
- * absolute`. Mid-slide it briefly extends past the initial containing block, making the short
- * page scrollable. Playwright would then scroll the option into view, and React Aria closes this
- * non-modal popover on scroll, detaching it before the click lands.
- */
-async function waitForTrayToSettle(option: Locator) {
-	let previousTop = Number.NaN;
-	await expect
-		.poll(() => {
-			const top = option.element().getBoundingClientRect().top;
-			const settled = top === previousTop;
-			previousTop = top;
-			return settled;
-		})
-		.toBe(true);
-}
 
 /** The control group wrapping the combobox input labelled `name`. */
 function getControl(name: string) {

@@ -321,36 +321,21 @@ test('rich section title', async () => {
 	);
 });
 
+/**
+ * Waits for the tray to finish opening before a capture.
+ *
+ * React Aria clears `data-entering` when the slide-up starts rather than when it ends, so the
+ * running transitions have to be waited on too. The screenshot owns the resting geometry, so
+ * nothing here measures a position.
+ */
 async function waitForMobileTrayToSettle() {
-	const searchbox = page.getByRole('searchbox', { name: 'Country' });
 	const dialog = page.getByRole('dialog');
+	await expect.element(dialog).toBeVisible();
 
-	await expect
-		.poll(() => {
-			const searchboxRect = searchbox.element().getBoundingClientRect();
-			const dialogRect = dialog.element().getBoundingClientRect();
-			const modal = dialog.element().parentElement;
-			if (modal == null) return false;
+	const modal = dialog.element().parentElement;
+	const overlay = modal?.parentElement;
+	if (modal == null || overlay == null) throw new Error('Expected the mobile modal structure.');
 
-			const modalTop = modal.getBoundingClientRect().top;
-			const finalTop = Number.parseFloat(
-				getComputedStyle(document.documentElement).getPropertyValue('--luke-space-1200'),
-			);
-			return {
-				dialogBottomInside: dialogRect.bottom <= window.innerHeight + 1,
-				dialogTopInside: dialogRect.top >= 0,
-				modalAtFinalTop: Math.abs(modalTop - finalTop) < 0.5,
-				searchboxBottomInside: searchboxRect.bottom <= window.innerHeight,
-				searchboxTopInside: searchboxRect.top >= 0,
-				windowScrollY: window.scrollY,
-			};
-		})
-		.toEqual({
-			dialogBottomInside: true,
-			dialogTopInside: true,
-			modalAtFinalTop: true,
-			searchboxBottomInside: true,
-			searchboxTopInside: true,
-			windowScrollY: 0,
-		});
+	await expect.poll(() => modal.hasAttribute('data-entering')).toBe(false);
+	await expect.poll(() => overlay.getAnimations({ subtree: true }).length).toBe(0);
 }
