@@ -141,47 +141,53 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		return Object.assign({}, popoverProps?.style, { width: menuWidth });
 	})();
 
-	return (
-		<ComboboxRoot<T> size={size} {...comboboxRootProps}>
-			<Field {...fieldSlotProps}>
-				{isMobileDevice ? (
-					<MobileComboboxContent<T>
-						isDisabled={comboboxRootProps.isDisabled === true}
-						isReadOnly={comboboxRootProps.isReadOnly === true}
-						inputRef={inputRef}
-						listBoxProps={listBoxProps}
+	const content = (() => {
+		if (isMobileDevice) {
+			return (
+				<MobileComboboxContent<T>
+					isDisabled={comboboxRootProps.isDisabled === true}
+					isReadOnly={comboboxRootProps.isReadOnly === true}
+					inputRef={inputRef}
+					listBoxProps={listBoxProps}
+					loadMoreItem={loadMoreItem}
+					placeholder={placeholder}
+					renderEmptyState={resolvedEmptyState}
+					size={size}
+				>
+					{children}
+				</MobileComboboxContent>
+			);
+		}
+
+		return (
+			<>
+				<ComboboxInputGroup>
+					<ComboboxInput placeholder={placeholder} ref={inputRef} />
+					{isInteractive ? (
+						<ComboboxClearButton aria-label="Clear selection">
+							<Icon aria-hidden name="close" />
+						</ComboboxClearButton>
+					) : null}
+					<ComboboxTrigger aria-label="Toggle options">
+						<Icon aria-hidden name="chevronDown" />
+					</ComboboxTrigger>
+				</ComboboxInputGroup>
+				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
+					<ComboboxListBox<T>
+						{...listBoxProps}
 						loadMoreItem={loadMoreItem}
-						placeholder={placeholder}
 						renderEmptyState={resolvedEmptyState}
-						size={size}
 					>
 						{children}
-					</MobileComboboxContent>
-				) : (
-					<>
-						<ComboboxInputGroup>
-							<ComboboxInput placeholder={placeholder} ref={inputRef} />
-							{isInteractive ? (
-								<ComboboxClearButton aria-label="Clear selection">
-									<Icon aria-hidden name="close" />
-								</ComboboxClearButton>
-							) : null}
-							<ComboboxTrigger aria-label="Toggle options">
-								<Icon aria-hidden name="chevronDown" />
-							</ComboboxTrigger>
-						</ComboboxInputGroup>
-						<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
-							<ComboboxListBox<T>
-								{...listBoxProps}
-								loadMoreItem={loadMoreItem}
-								renderEmptyState={resolvedEmptyState}
-							>
-								{children}
-							</ComboboxListBox>
-						</ComboboxPopover>
-					</>
-				)}
-			</Field>
+					</ComboboxListBox>
+				</ComboboxPopover>
+			</>
+		);
+	})();
+
+	return (
+		<ComboboxRoot size={size} {...comboboxRootProps}>
+			<Field {...fieldSlotProps}>{content}</Field>
 		</ComboboxRoot>
 	);
 }
