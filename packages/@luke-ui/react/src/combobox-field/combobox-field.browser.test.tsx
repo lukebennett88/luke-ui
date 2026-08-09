@@ -1,4 +1,5 @@
 import { createRef } from 'react';
+import { ListBox as RacListBox } from 'react-aria-components/ComboBox';
 import { expect, test } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -76,6 +77,31 @@ testIntegration(componentTestRegistration, 'ComboboxField', async () => {
 	await user.click(page.getByRole('option', { name: 'Australia' }));
 	// oxlint-disable-next-line vitest/no-standalone-expect
 	expect(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Australia');
+});
+
+// The selected item's check icon is sized to the option text (16px, #308), not the
+// control's larger icon size. `ComboboxItem` renders through RAC's `ListBoxItem`, which
+// works the same whether its parent is a live ComboBox popover or a static `ListBox`, so
+// a static, pre-selected list exercises the same rendering deterministically.
+test('the selected option shows a check icon sized to the option text', async () => {
+	render(
+		<RacListBox
+			aria-label="Country"
+			defaultSelectedKeys={['au']}
+			items={countryItems}
+			selectionMode="single"
+		>
+			{renderCountryItem}
+		</RacListBox>,
+	);
+
+	const selectedOption = page.getByRole('option', { name: 'Australia' });
+	// oxlint-disable-next-line vitest/no-standalone-expect
+	await expect.element(selectedOption).toBeInTheDocument();
+	const checkIcon = selectedOption.element().querySelector('svg[aria-hidden]');
+	if (checkIcon == null) throw new Error('Expected the selected option check icon.');
+	// oxlint-disable-next-line vitest/no-standalone-expect
+	expect(getComputedStyle(checkIcon).width).toBe('16px');
 });
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
