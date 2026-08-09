@@ -141,7 +141,8 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 			<Field {...fieldSlotProps}>
 				{isMobileDevice ? (
 					<MobileComboboxContent<T>
-						isDisabled={!isInteractive}
+						isDisabled={comboboxRootProps.isDisabled === true}
+						isReadOnly={comboboxRootProps.isReadOnly === true}
 						inputRef={inputRef}
 						listBoxProps={listBoxProps}
 						loadMoreItem={loadMoreItem}
@@ -184,6 +185,7 @@ function MobileComboboxContent<T extends object>({
 	children,
 	inputRef,
 	isDisabled,
+	isReadOnly,
 	listBoxProps,
 	loadMoreItem,
 	placeholder,
@@ -192,6 +194,7 @@ function MobileComboboxContent<T extends object>({
 }: {
 	children: ComboboxListBoxProps<T>['children'];
 	isDisabled: boolean;
+	isReadOnly: boolean;
 	inputRef: Ref<HTMLInputElement> | undefined;
 	listBoxProps: ComboboxFieldProps<T>['listBoxProps'];
 	loadMoreItem: ComboboxListBoxProps<T>['loadMoreItem'];
@@ -239,6 +242,8 @@ function MobileComboboxContent<T extends object>({
 						className={styles.combobox({ size }).mobileTrigger()}
 						isDisabled={isDisabled}
 						onPress={() => {
+							if (isReadOnly) return;
+
 							state.open(null, 'manual');
 						}}
 						slot={null}

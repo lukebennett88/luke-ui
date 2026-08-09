@@ -37,7 +37,7 @@ export const MobileOverlay = forwardRef(function MobileOverlay(
 				isDismissable
 				isOpen={isOpen}
 				onOpenChange={onOpenChange}
-				style={{ top: typeof window === 'undefined' ? 0 : window.scrollY }}
+				style={() => ({ top: typeof window === 'undefined' ? 0 : window.scrollY })}
 			>
 				<Modal className={styles.mobileModal}>
 					<Dialog

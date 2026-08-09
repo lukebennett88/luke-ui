@@ -83,16 +83,22 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 	try {
 		const inputRef = createRef<HTMLInputElement>();
 		const { container } = render(
-			<form aria-label="Country form">
-				<ComboboxField
-					defaultItems={countryItems}
-					inputRef={inputRef}
-					label="Country"
-					name="country"
-				>
-					{renderCountryItem}
-				</ComboboxField>
-			</form>,
+			<>
+				<header style={{ position: 'sticky', top: 0, zIndex: 10 }}>Page header</header>
+				<div style={{ blockSize: 500 }} />
+				<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
+					<ComboboxField
+						defaultItems={countryItems}
+						defaultValue="au"
+						inputRef={inputRef}
+						label="Country"
+						name="country"
+					>
+						{renderCountryItem}
+					</ComboboxField>
+				</form>
+				<div style={{ blockSize: 800 }} />
+			</>,
 		);
 		const form = container.querySelector('form');
 		if (form == null) throw new Error('Expected the form element.');
@@ -103,6 +109,24 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 
 		await expect.element(trigger).toBeVisible();
 		expect(inputRef.current).toBeNull();
+		const geometryFailures: Array<string> = [];
+		const triggerStyle = getComputedStyle(trigger.element());
+		if (triggerStyle.display !== 'flex') {
+			geometryFailures.push(`closed trigger display is ${triggerStyle.display}, expected flex`);
+		}
+		if (Number.parseFloat(triggerStyle.paddingInlineStart) <= 0) {
+			geometryFailures.push('closed trigger has no inline-start padding');
+		}
+		if (Number.parseFloat(triggerStyle.paddingInlineEnd) <= 0) {
+			geometryFailures.push('closed trigger has no inline-end padding');
+		}
+		const triggerWidth = trigger.element().getBoundingClientRect().width;
+		if (triggerWidth <= 160) {
+			geometryFailures.push(`closed trigger shrink-wrapped to ${triggerWidth}px`);
+		}
+
+		window.scrollTo(0, 400);
+		await expect.poll(() => window.scrollY).toBe(400);
 		await userEvent.click(trigger);
 		await expect.element(dialog).toBeVisible();
 		await expect.element(searchbox).toHaveFocus();
@@ -110,8 +134,34 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
 
 		const modal = dialog.element().parentElement;
-		if (modal == null) throw new Error('Expected the mobile modal.');
-		modal.parentElement?.style.setProperty('--visual-viewport-height', '500px');
+		const overlay = modal?.parentElement;
+		if (modal == null || overlay == null) {
+			throw new Error('Expected the mobile modal structure.');
+		}
+		const stickyHeader = page.getByRole('banner').element();
+		await expect
+			.poll(() => {
+				const rect = searchbox.element().getBoundingClientRect();
+				return rect.top >= 0 && rect.bottom <= window.innerHeight;
+			})
+			.toBe(true);
+		const searchboxRect = searchbox.element().getBoundingClientRect();
+		const overlayTop = overlay.getBoundingClientRect().top;
+		if (overlayTop !== 0) geometryFailures.push(`overlay starts at ${overlayTop}px, expected 0px`);
+		if (searchboxRect.top < 0 || searchboxRect.bottom > window.innerHeight) {
+			geometryFailures.push(
+				`tray searchbox spans ${searchboxRect.top}px to ${searchboxRect.bottom}px outside a ${window.innerHeight}px viewport`,
+			);
+		}
+		const overlayZIndex = Number.parseInt(getComputedStyle(overlay).zIndex, 10);
+		const stickyHeaderZIndex = Number.parseInt(getComputedStyle(stickyHeader).zIndex, 10);
+		if (!(overlayZIndex > stickyHeaderZIndex)) {
+			geometryFailures.push(
+				`overlay z-index is ${getComputedStyle(overlay).zIndex}, expected above ${stickyHeaderZIndex}`,
+			);
+		}
+		expect(geometryFailures).toEqual([]);
+		overlay.style.setProperty('--visual-viewport-height', '500px');
 		expect(getComputedStyle(modal).blockSize).toBe('468px');
 		expect(getComputedStyle(modal).paddingBlockEnd).toBe(
 			`${window.innerHeight - 500 + window.innerHeight}px`,
@@ -123,13 +173,24 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		await expect.poll(() => listbox.scrollTop).toBeGreaterThan(0);
 		expect(window.scrollY).toBe(pageScrollY);
 
-		await userEvent.type(searchbox, 'Can');
-		await userEvent.click(page.getByRole('option', { name: 'Canada' }));
+		await expect.element(page.getByRole('option', { name: 'Australia' })).toBeInTheDocument();
+		const canada = page.getByRole('option', { name: 'Canada' });
+		listbox.scrollTo(0, 0);
+		await expect.poll(() => listbox.scrollTop).toBe(0);
+		await expect
+			.poll(() => canada.element().getBoundingClientRect().top)
+			.toBeGreaterThanOrEqual(listbox.getBoundingClientRect().top);
+		await expect
+			.poll(() => canada.element().getBoundingClientRect().bottom)
+			.toBeLessThanOrEqual(listbox.getBoundingClientRect().bottom);
+		await userEvent.click(canada);
+
+		await expect.poll(() => new FormData(form).get('country')).toBe('ca');
 		await expect.element(dialog).not.toBeInTheDocument();
 		await expect.element(trigger).toHaveFocus();
 		expect(inputRef.current).toBeNull();
-		expect(new FormData(form).get('country')).toBe('ca');
 	} finally {
+		window.scrollTo(0, 0);
 		restoreScreenWidth();
 	}
 });

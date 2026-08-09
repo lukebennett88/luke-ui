@@ -15,6 +15,7 @@ export const mobileOverlay = styleInLayer('recipes', {
 	blockSize: '100dvh',
 	insetInline: 0,
 	position: 'absolute',
+	zIndex: 100,
 });
 
 export const mobileModal = styleInLayer('recipes', {

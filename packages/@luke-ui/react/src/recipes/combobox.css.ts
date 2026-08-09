@@ -391,10 +391,14 @@ const comboboxConfig = {
 			overscrollBehavior: 'contain',
 		},
 		mobileTrigger: {
+			alignItems: 'center',
+			blockSize: '100%',
 			color: vars.color.text.primary,
+			display: 'flex',
 			inlineSize: '100%',
 			justifyContent: 'space-between',
 			marginInline: 0,
+			minInlineSize: `calc(20ch + ${vars.controlSize.comboboxAction})`,
 		},
 		mobileValue: {
 			flex: 1,
@@ -425,6 +429,10 @@ const comboboxConfig = {
 					paddingBlock: vars.space[200],
 					paddingInline: vars.space[300],
 				},
+				mobileTrigger: {
+					paddingInlineEnd: vars.space[300],
+					paddingInlineStart: vars.space[300],
+				},
 				item: {
 					...vars.font[200],
 					minBlockSize: vars.controlSize.medium,
@@ -449,6 +457,10 @@ const comboboxConfig = {
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space[100],
 					paddingInline: vars.space[200],
+				},
+				mobileTrigger: {
+					paddingInlineEnd: vars.space[200],
+					paddingInlineStart: vars.space[200],
 				},
 				item: {
 					...vars.font[200],
