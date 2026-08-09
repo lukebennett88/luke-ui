@@ -56,7 +56,10 @@ interface _ComboboxFieldProps<T extends object>
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 
-	/** Targets the persistent desktop input or mobile search input while the tray is open. */
+	/**
+	 * Targets the persistent combobox input on desktop. On mobile it targets the tray search input
+	 * only while the tray is open, so it is null when the tray is closed.
+	 */
 	inputRef?: Ref<HTMLInputElement>;
 
 	/** Props forwarded to the inner listbox. */
@@ -68,7 +71,7 @@ interface _ComboboxFieldProps<T extends object>
 	/** Optional content appended after the main collection, e.g. a load-more sentinel. */
 	loadMoreItem?: ComboboxListBoxProps<T>['loadMoreItem'];
 
-	/** Width applied to the popover menu. */
+	/** Width applied to the desktop popover menu. Mobile uses the tray instead. */
 	menuWidth?: CSSProperties['width'];
 
 	/** Called when the listbox reaches its load-more sentinel. */
@@ -77,7 +80,7 @@ interface _ComboboxFieldProps<T extends object>
 	/** Placeholder text shown in the input. */
 	placeholder?: string;
 
-	/** Props forwarded to the inner popover. */
+	/** Props forwarded to the desktop popover. Mobile uses the tray instead. */
 	popoverProps?: DistributiveOmit<ComboboxPopoverProps, 'children'>;
 
 	/** Control size. @default 'medium' */
