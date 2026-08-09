@@ -1,5 +1,6 @@
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
@@ -29,6 +30,13 @@ const countryItems: Array<CountryItem> = [
 ];
 
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
+
+const renderIconItem = (item: CountryItem) => (
+	<ComboboxItem>
+		<Icon aria-hidden name="bookOpen" />
+		{item.label}
+	</ComboboxItem>
+);
 
 test('kitchen sink', async () => {
 	for (const appearance of visualAppearances) {
@@ -178,6 +186,32 @@ test('open option and selection states', async () => {
 	);
 	await userEvent.keyboard('{Home}');
 	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-keyboard-focus');
+});
+
+test('option with leading icon', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderIconItem}
+		</ComboboxField>,
+	);
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/option-leading-icon-medium',
+	);
+});
+
+test('option with leading icon, small', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country" size="small">
+			{renderIconItem}
+		</ComboboxField>,
+	);
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/option-leading-icon-small',
+	);
 });
 
 test('mobile tray', async () => {
