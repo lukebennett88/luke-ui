@@ -86,6 +86,11 @@ async function capture(worktree: string, target: string) {
 	await mkdir(target, { recursive: true });
 	if (worktree !== repoRoot) {
 		run('corepack', ['pnpm', 'install', '--frozen-lockfile'], worktree);
+		run(
+			'corepack',
+			['pnpm', '--filter', '@luke-ui/react', 'exec', 'playwright', 'install', 'chromium'],
+			worktree,
+		);
 	}
 	run('corepack', ['pnpm', 'build:packages'], worktree);
 	run(
