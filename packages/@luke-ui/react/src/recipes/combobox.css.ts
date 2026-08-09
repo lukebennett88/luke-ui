@@ -3,6 +3,7 @@ import { createVar } from '@vanilla-extract/css';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
 import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { styleInLayer } from '../styles/layered-style.css.js';
+import { overlayEnterTransition, overlayExitTransition } from '../styles/overlay-motion.js';
 import { vars } from '../theme/contract.css.js';
 import {
 	composeInputStateSelectors,
@@ -13,19 +14,9 @@ import { invalidIndicatorIcon, invalidIndicatorIconForcedColors } from './invali
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 
-/** Custom property mirroring `visualViewport.height`, set by `useVisualViewportVars`. */
-export const comboboxTrayViewportHeightVar = '--luke-ui-visual-viewport-height';
-
-/** Custom property mirroring the on-screen keyboard's height, set by `useVisualViewportVars`. */
-export const comboboxTrayKeyboardInsetVar = '--luke-ui-keyboard-inset';
-
 // Set per `size` variant on `inputGroup` below, from `COMBOBOX_ICON_SIZE`, so the invalid
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
-
-// Below 640px the popover renders as a bottom tray fixed to the viewport edge,
-// instead of a dropdown anchored below the control.
-const trayMediaQuery = '(width < 40rem)';
 
 // React Aria's `ComboBox` publishes `isDisabled`/`isInvalid` through `GroupContext`, which
 // `Group` writes onto the group element, so no `:has()` probing of descendants is needed.
@@ -82,7 +73,7 @@ const comboboxActionStyles = {
 	// icon lands right after the text input and before the clear/trigger buttons.
 	order: 1,
 	transform: 'none',
-	transitionDuration: vars.motion.duration.fast,
+	transitionDuration: vars.motion.duration.feedback,
 	transitionProperty: 'background-color, color',
 	transitionTimingFunction: vars.motion.easing.standard,
 
@@ -119,12 +110,18 @@ const comboboxActionSizeClassNameMedium = styleInLayer('recipes', {
 	paddingInline: 0,
 });
 
+// The popover is an overlay, so it takes the shared overlay motion roles. See
+// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
+const popoverProperties = ['opacity', 'translate', 'box-shadow'];
+const popoverTransition = overlayEnterTransition(popoverProperties);
+const popoverExitTransition = overlayExitTransition(popoverProperties);
+
 /**
  * Raw slotted config for the combobox anatomy.
  *
  * Slots follow the anatomy top to bottom: `root`, `inputGroup`, `textInput`,
  * `trigger`, `clearButton`, `itemCheck`, `popover`, `listBox`, `loadMoreItem`,
- * `section`, `sectionHeading`, `emptyState`, `item`.
+ * `section`, `sectionHeading`, `emptyState`, `item`, then mobile-only slots.
  */
 const comboboxConfig = {
 	slots: {
@@ -171,7 +168,7 @@ const comboboxConfig = {
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
-			transitionDuration: vars.motion.duration.fast,
+			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, color',
 			transitionTimingFunction: vars.motion.easing.standard,
 
@@ -231,19 +228,7 @@ const comboboxConfig = {
 		},
 		trigger: [
 			comboboxActionClassName,
-			{
-				marginInlineEnd: vars.space[100],
-				marginInlineStart: vars.space[100],
-
-				selectors: {
-					'&:first-child': {
-						color: vars.color.text.primary,
-						inlineSize: '100%',
-						justifyContent: 'space-between',
-						marginInline: 0,
-					},
-				},
-			},
+			{ marginInlineEnd: vars.space[100], marginInlineStart: vars.space[100] },
 		],
 		clearButton: comboboxActionClassName,
 		itemCheck: {
@@ -258,49 +243,12 @@ const comboboxConfig = {
 					boxShadow: 'none',
 					forcedColorAdjust: 'auto',
 				},
-				[trayMediaQuery]: {
-					borderEndEndRadius: 0,
-					borderEndStartRadius: 0,
-					borderStartEndRadius: vars.radius.overlay,
-					borderStartStartRadius: vars.radius.overlay,
-					boxShadow: `${vars.depth.floating}, 0 0 0 100vmax ${vars.color.scrim}`,
-					inlineSize: 'auto !important' as 'auto',
-					insetBlockEnd: `var(${comboboxTrayKeyboardInsetVar}, 0px) !important`,
-					insetBlockStart: 'auto !important' as 'auto',
-					insetInline: '0 !important',
-					maxBlockSize: `calc(var(${comboboxTrayViewportHeightVar}, 100dvh) - ${vars.space[800]}) !important`,
-					minInlineSize: 'auto !important' as 'auto',
-					paddingBlockEnd: 'env(safe-area-inset-bottom, 0px)',
-					position: 'fixed !important' as 'fixed',
-					selectors: {
-						'&::before': {
-							alignSelf: 'center',
-							backgroundColor: vars.color.border.decorative,
-							blockSize: '4px',
-							borderRadius: vars.radius.full,
-							content: '',
-							flexShrink: 0,
-							inlineSize: '36px',
-							marginBlockEnd: vars.space[100],
-							marginBlockStart: vars.space[200],
-						},
-						'&[data-entering]': {
-							boxShadow: `${vars.depth.floating}, 0 0 0 100vmax transparent`,
-							opacity: 1,
-							translate: '0 100%',
-						},
-						'&[data-exiting]': {
-							boxShadow: `${vars.depth.floating}, 0 0 0 100vmax transparent`,
-							opacity: 1,
-							translate: '0 100%',
-						},
-					},
-				},
 				'(prefers-reduced-motion: reduce)': {
 					transition: 'none',
 					selectors: {
 						'&[data-entering]': { opacity: 1, translate: 'none' },
-						'&[data-exiting]': { opacity: 1, translate: 'none' },
+						// Reduced motion has to repeat `none` here. See `styles/overlay-motion.ts`.
+						'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
 					},
 				},
 			},
@@ -316,15 +264,11 @@ const comboboxConfig = {
 			isolation: 'isolate',
 			minInlineSize: 'var(--trigger-width)',
 			overflow: 'hidden',
-			transition: [
-				`opacity ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
-				`translate ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
-				`box-shadow ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
-			].join(', '),
+			transition: popoverTransition,
 
 			selectors: {
 				'&[data-entering]': { opacity: 0 },
-				'&[data-exiting]': { opacity: 0 },
+				'&[data-exiting]': { opacity: 0, transition: popoverExitTransition },
 			},
 
 			'@supports': {
@@ -334,7 +278,6 @@ const comboboxConfig = {
 			},
 		},
 		listBox: {
-			'@media': { [trayMediaQuery]: { maxBlockSize: 'none' } },
 			boxSizing: 'border-box',
 			flex: 1,
 			inlineSize: '100%',
@@ -414,7 +357,7 @@ const comboboxConfig = {
 			minInlineSize: 0,
 			outline: 'none',
 			transform: 'none',
-			transitionDuration: vars.motion.duration.fast,
+			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
 
@@ -442,6 +385,37 @@ const comboboxConfig = {
 				},
 			},
 		},
+		mobileInputGroup: {
+			flexShrink: 0,
+			inlineSize: 'auto',
+			marginBlock: vars.space[300],
+			marginInline: vars.space[300],
+		},
+		mobileListBox: {
+			maxBlockSize: 'none',
+			overscrollBehavior: 'contain',
+		},
+		mobileTrigger: {
+			alignItems: 'center',
+			blockSize: '100%',
+			color: vars.color.text.primary,
+			display: 'flex',
+			inlineSize: '100%',
+			justifyContent: 'space-between',
+			marginInline: 0,
+			// `inlineSize: '100%'` resolves against a shrink-to-fit ancestor, which would collapse
+			// the closed trigger onto its selected value. This floor reserves 20ch of value text
+			// plus room for the trailing chevron.
+			minInlineSize: `calc(20ch + ${vars.controlSize.comboboxAction})`,
+		},
+		mobileValue: {
+			flex: 1,
+			minInlineSize: 0,
+			overflow: 'hidden',
+			textAlign: 'start',
+			textOverflow: 'ellipsis',
+			whiteSpace: 'nowrap',
+		},
 	},
 	defaultVariants: { size: 'medium' },
 	variants: {
@@ -463,6 +437,10 @@ const comboboxConfig = {
 					minBlockSize: vars.controlSize.medium,
 					paddingBlock: vars.space[200],
 					paddingInline: vars.space[300],
+				},
+				mobileTrigger: {
+					paddingInlineEnd: vars.space[300],
+					paddingInlineStart: vars.space[300],
 				},
 				item: {
 					...vars.font[200],
@@ -488,6 +466,10 @@ const comboboxConfig = {
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space[100],
 					paddingInline: vars.space[200],
+				},
+				mobileTrigger: {
+					paddingInlineEnd: vars.space[200],
+					paddingInlineStart: vars.space[200],
 				},
 				item: {
 					...vars.font[200],

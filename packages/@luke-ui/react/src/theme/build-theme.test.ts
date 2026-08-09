@@ -234,4 +234,23 @@ describe('v2 regression goldens', () => {
 		expect(buildTheme(tactileFoundation)).toBe(goldenTactile);
 		expect(buildTheme(paperFoundation)).toBe(goldenPaper);
 	});
+
+	// The numbered duration scale in `motion.ts` is private in the same sense as the 12-step colour
+	// scale: resolved in TypeScript and never published as a custom property. Only the three
+	// role-named durations reach the stylesheet, so a numbered variable here is a leak.
+	it('emits the three role-named durations and no numbered duration step', () => {
+		for (const foundation of [tactileFoundation, paperFoundation]) {
+			const css = buildTheme(foundation);
+			const durationVarNames = [...css.matchAll(/--luke-motion-duration-[\w-]+/g)].map(
+				([varName]) => varName,
+			);
+
+			expect([...new Set(durationVarNames)]).toEqual([
+				'--luke-motion-duration-feedback',
+				'--luke-motion-duration-enter',
+				'--luke-motion-duration-exit',
+			]);
+			expect(css).not.toMatch(/--luke-motion-duration-\d/);
+		}
+	});
 });

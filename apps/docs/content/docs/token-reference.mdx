@@ -72,6 +72,16 @@ with `depth.floating`, while a dialog can use `surface.overlay` with `depth.over
 
 Components already apply depth to their own states. Use these variables only for custom surfaces.
 
+### Motion
+
+Motion provides three durations. Each duration is named for the role the movement plays.
+
+- `feedback` covers an in-place state change, such as hover, focus, or selection.
+- `enter` covers an element or an overlay that enters the interface.
+- `exit` covers an element or an overlay that leaves the interface.
+
+Pair `easing.standard` with feedback and with entry. Pair `easing.exit` with a dismissal.
+
 ## Browse the tokens
 
 The explorer lists every public token in the contract. Samples use the active identity and colour

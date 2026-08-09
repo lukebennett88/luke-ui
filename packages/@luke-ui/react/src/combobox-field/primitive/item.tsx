@@ -11,7 +11,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon-size-context/index.js';
 import { Icon } from '../../icon/index.js';
 import * as styles from '../../recipes/combobox.css.js';
-import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
+import { COMBOBOX_CHECK_ICON_SIZE, COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
@@ -51,7 +51,12 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 						<>
 							{children}
 							{isSelected ? (
-								<Icon aria-hidden className={styles.combobox().itemCheck()} name="check" />
+								<Icon
+									aria-hidden
+									className={styles.combobox().itemCheck()}
+									name="check"
+									size={COMBOBOX_CHECK_ICON_SIZE}
+								/>
 							) : null}
 						</>
 					);

@@ -74,14 +74,18 @@ results”.
 ```
 
 Pass `onLoadMore` for incremental results. It adds the built-in load-more row and spinner. Use
-`loadMoreItem` when that row needs custom content. `listBoxProps` and `popoverProps` configure the
-underlying listbox and popover. `menuWidth` sets the popover width.
+`loadMoreItem` when that row needs custom content. `listBoxProps` configures the underlying listbox.
+`popoverProps` and `menuWidth` configure the desktop popover, which mobile replaces with a tray.
 
 ## Mobile behaviour
 
-Below the `small` breakpoint (640px), options appear in a bottom tray instead of a positioned
-popover. The tray follows the visual viewport so it stays above the on-screen keyboard. The tray
-motion and desktop popover fade respect reduced-motion preferences.
+`ComboboxField` checks the device screen width, not the browser viewport width. Narrowing a desktop
+browser window does not switch to the tray.
+
+Below the `small` breakpoint (640px), the field shows a button that displays the selected option.
+Someone taps the button to open a modal tray with a focused search input. The tray has a fixed
+height and locks page scroll. The tray motion and desktop popover fade respect reduced-motion
+preferences.
 
 ## Accessibility
 

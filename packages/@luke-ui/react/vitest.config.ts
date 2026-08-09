@@ -25,8 +25,11 @@ export default defineConfig({
 		include: [
 			'@vanilla-extract/recipes/createRuntimeFn',
 			'react-aria-components/Checkbox',
+			'react-aria-components/Dialog',
 			'react-aria-components/I18nProvider',
 			'react-aria-components/Link',
+			'react-aria-components/Modal',
+			'react-aria-components/Popover',
 		],
 	},
 	server: {

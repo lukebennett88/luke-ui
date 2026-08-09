@@ -1,12 +1,10 @@
 import { createRef } from 'react';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
-import {
-	comboboxTrayKeyboardInsetVar,
-	comboboxTrayViewportHeightVar,
-} from '../recipes/combobox.css.js';
+import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
+import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 import { componentTestRegistration } from './component-test-registration.js';
 import type { ComboboxFieldProps } from './index.js';
 import { ComboboxField } from './index.js';
@@ -26,8 +24,6 @@ const countryItems: Array<CountryItem> = [
 ];
 
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
-
-const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'visualViewport');
 
 testFieldShapedConformance({
 	assertAssociation: (result) => {
@@ -83,51 +79,117 @@ testIntegration(componentTestRegistration, 'ComboboxField', async () => {
 	expect(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Australia');
 });
 
-afterEach(() => {
-	if (originalDescriptor) {
-		Object.defineProperty(window, 'visualViewport', originalDescriptor);
-	} else {
-		// @ts-expect-error -- deleting a test-only own property
-		delete window.visualViewport;
+test('ComboboxField uses a mobile modal to search and select an option', async () => {
+	const restoreScreenWidth = mockScreenWidth(390);
+	const mobileCountryItems: Array<CountryItem> = [
+		...countryItems,
+		{ id: 'dk', label: 'Denmark' },
+		{ id: 'fr', label: 'France' },
+		{ id: 'de', label: 'Germany' },
+		{ id: 'jp', label: 'Japan' },
+		{ id: 'mx', label: 'Mexico' },
+		{ id: 'nz', label: 'New Zealand' },
+		{ id: 'sg', label: 'Singapore' },
+		{ id: 'za', label: 'South Africa' },
+		{ id: 'se', label: 'Sweden' },
+		{ id: 'us', label: 'United States' },
+	];
+	try {
+		const inputRef = createRef<HTMLInputElement>();
+		const { container } = render(
+			<>
+				<div style={{ blockSize: 500 }} />
+				<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
+					<ComboboxField
+						defaultItems={mobileCountryItems}
+						defaultValue="au"
+						inputRef={inputRef}
+						label="Country"
+						name="country"
+					>
+						{renderCountryItem}
+					</ComboboxField>
+				</form>
+				<div style={{ blockSize: 800 }} />
+			</>,
+		);
+		const form = container.querySelector('form');
+		if (form == null) throw new Error('Expected the form element.');
+
+		const trigger = page.getByRole('button', { name: 'Country' });
+		const dialog = page.getByRole('dialog');
+		const searchbox = page.getByRole('searchbox', { name: 'Country' });
+
+		// The mobile composition renders a value button where the desktop one renders a text input.
+		await expect.element(trigger).toBeVisible();
+		expect(inputRef.current).toBeNull();
+
+		window.scrollTo(0, 400);
+		await expect.poll(() => window.scrollY).toBe(400);
+		await userEvent.click(trigger);
+		await expect.element(dialog).toBeVisible();
+		await expect.element(searchbox).toHaveFocus();
+		expect(inputRef.current).toBe(searchbox.element());
+		// Luke UI deliberately moved this overlay from a non-modal popover to a modal, so the page
+		// behind the tray must stop scrolling while it is open.
+		expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
+
+		const modal = dialog.element().parentElement;
+		const overlay = modal?.parentElement;
+		if (modal == null || overlay == null) {
+			throw new Error('Expected the mobile modal structure.');
+		}
+
+		// Measuring the tray only means anything once it has stopped sliding up.
+		await waitForOverlayEnter(overlay);
+
+		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so overriding it
+		// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
+		// amount off `blockSize` and spend it on `paddingBlockEnd`, so the sheet keeps its content above
+		// the keyboard. Every expectation is measured at runtime, so none pins a resolved spacing value.
+		// A soft keyboard commonly covers about half the viewport, and taking that much away also leaves
+		// the option list taller than the tray, so the scroll check below has something to scroll.
+		const restingViewportHeight = window.innerHeight;
+		const keyboardInset = Math.round(restingViewportHeight / 2);
+		overlay.style.setProperty('--visual-viewport-height', `${restingViewportHeight}px`);
+		const trayTop = modal.getBoundingClientRect().top;
+		const restingBlockSize = Number.parseFloat(getComputedStyle(modal).height);
+		const restingPaddingBlockEnd = Number.parseFloat(getComputedStyle(modal).paddingBottom);
+		// The tray's content box runs from its top offset to the bottom of the visual viewport.
+		expect(restingBlockSize + trayTop).toBeCloseTo(restingViewportHeight, 1);
+
+		overlay.style.setProperty(
+			'--visual-viewport-height',
+			`${restingViewportHeight - keyboardInset}px`,
+		);
+		expect(Number.parseFloat(getComputedStyle(modal).height) + trayTop).toBeCloseTo(
+			restingViewportHeight - keyboardInset,
+			1,
+		);
+		expect(Number.parseFloat(getComputedStyle(modal).paddingBottom)).toBeCloseTo(
+			restingPaddingBlockEnd + keyboardInset,
+			1,
+		);
+
+		// The rest of the journey runs with the keyboard still up, which is how someone picks an
+		// option after typing.
+		const listbox = page.getByRole('listbox').element();
+		const pageScrollY = window.scrollY;
+		listbox.scrollTo(0, listbox.scrollHeight);
+		await expect.poll(() => listbox.scrollTop).toBeGreaterThan(0);
+		// Scrolling the tray's list must not chain out to the page behind it.
+		expect(window.scrollY).toBe(pageScrollY);
+
+		const canada = page.getByRole('option', { name: 'Canada' });
+		listbox.scrollTo(0, 0);
+		await expect.poll(() => listbox.scrollTop).toBe(0);
+		await userEvent.click(canada);
+
+		await expect.poll(() => new FormData(form).get('country')).toBe('ca');
+	} finally {
+		window.scrollTo(0, 0);
+		restoreScreenWidth();
 	}
-});
-
-test('sets the tray viewport height and keyboard inset custom properties from visualViewport', async () => {
-	const fake = Object.assign(new EventTarget(), {
-		height: window.innerHeight - 300,
-		offsetTop: 0,
-	});
-	Object.defineProperty(window, 'visualViewport', { configurable: true, value: fake });
-
-	render(
-		<ComboboxField
-			defaultItems={countryItems}
-			label="Country"
-			name="country"
-			placeholder="Select a country..."
-		>
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-	await expect.element(page.getByRole('listbox')).toBeInTheDocument();
-
-	const popover = document.querySelector('[role="listbox"]')?.parentElement;
-	if (!popover) throw new Error('expected the listbox to have a popover parent');
-
-	expect(popover.style.getPropertyValue(comboboxTrayViewportHeightVar)).toBe(`${fake.height}px`);
-	expect(popover.style.getPropertyValue(comboboxTrayKeyboardInsetVar)).toBe(
-		`${window.innerHeight - fake.height}px`,
-	);
-
-	fake.height -= 100;
-	fake.dispatchEvent(new Event('resize'));
-
-	expect(popover.style.getPropertyValue(comboboxTrayViewportHeightVar)).toBe(`${fake.height}px`);
-	expect(popover.style.getPropertyValue(comboboxTrayKeyboardInsetVar)).toBe(
-		`${window.innerHeight - fake.height}px`,
-	);
 });
 
 // A React Aria upgrade that stopped publishing these on `GroupContext` would silently stop the state selectors matching.
@@ -157,24 +219,33 @@ test('the control group carries its own disabled and invalid attributes', async 
 
 // React Aria disables the trigger on a read-only combobox, which must not make the control read as disabled.
 test('read-only controls keep the read-only material, not the disabled one', async () => {
-	render(
-		<>
-			<ComboboxField defaultItems={countryItems} isReadOnly label="Read-only" name="readOnly">
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField defaultItems={countryItems} isDisabled label="Disabled" name="disabled">
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField defaultItems={countryItems} label="Resting" name="resting">
-				{renderCountryItem}
-			</ComboboxField>
-		</>,
-	);
+	const restoreScreenWidth = mockScreenWidth(390);
+	try {
+		render(
+			<>
+				<ComboboxField defaultItems={countryItems} isReadOnly label="Read-only" name="readOnly">
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField defaultItems={countryItems} isDisabled label="Disabled" name="disabled">
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField defaultItems={countryItems} label="Resting" name="resting">
+					{renderCountryItem}
+				</ComboboxField>
+			</>,
+		);
 
-	const readOnlyControl = getControl('Read-only');
-	// The group itself is not disabled, even though the trigger inside it is.
-	expect(readOnlyControl.dataset.disabled).toBeUndefined();
-	expect(readOnlyControl.querySelector('button')?.disabled).toBe(true);
+		const readOnlyControl = page
+			.getByRole('button', { name: 'Read-only' })
+			.element()
+			.closest<HTMLElement>('[role="group"]');
+		if (readOnlyControl == null) throw new Error('Expected the read-only control group.');
+		// The group itself is not disabled, even though the trigger inside it is.
+		expect(readOnlyControl.dataset.disabled).toBeUndefined();
+		expect(readOnlyControl.querySelector('button')?.disabled).toBe(true);
+	} finally {
+		restoreScreenWidth();
+	}
 });
 
 test('the indicator icon adds no text to the accessible name', async () => {
@@ -287,7 +358,18 @@ test('ComboboxField forwards name so a native form submit collects the selected 
 	expect(new FormData(form).get('country')).toBe('');
 
 	await userEvent.click(input);
-	await userEvent.click(page.getByRole('option', { name: 'Canada' }));
+
+	const option = page.getByRole('option', { name: 'Canada' });
+	await expect.element(option).toBeInTheDocument();
+
+	// Clicking an option scrolls it into view first, and React Aria closes the popover on a
+	// document scroll. While the popover is still entering, that close lands before the click and
+	// detaches the option.
+	const popover = page.getByRole('listbox').element().parentElement;
+	if (popover == null) throw new Error('Expected the popover element.');
+	await waitForOverlayEnter(popover);
+
+	await userEvent.click(option);
 
 	expect(new FormData(form).get('country')).toBe('ca');
 });

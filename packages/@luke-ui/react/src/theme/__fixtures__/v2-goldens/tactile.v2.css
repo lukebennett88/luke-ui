@@ -75,7 +75,9 @@
 	--luke-icon-size-small: 20px;
 	--luke-icon-size-medium: 24px;
 	--luke-icon-size-large: 32px;
-	--luke-motion-duration-fast: 120ms;
+	--luke-motion-duration-feedback: 100ms;
+	--luke-motion-duration-enter: 250ms;
+	--luke-motion-duration-exit: 150ms;
 	--luke-motion-easing-standard: cubic-bezier(0, 0, 0.4, 1);
 	--luke-motion-easing-exit: cubic-bezier(0.3, 0, 1, 1);
 }

@@ -1,6 +1,7 @@
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { LoadingSpinner } from '../loading-spinner/index.js';
+import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -9,6 +10,7 @@ import {
 	focusViaKeyboard,
 	Stack,
 } from '../test-utils/visual.js';
+import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 import { ComboboxField } from './index.js';
 import { ComboboxItem, ComboboxLoadMoreItem } from './primitive/item.js';
 import { ComboboxSection } from './primitive/section.js';
@@ -179,49 +181,53 @@ test('open option and selection states', async () => {
 });
 
 test('mobile tray', async () => {
-	render(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems}
-				description="Select where the user is located."
-				label="Country"
-				name="country"
-				placeholder="Select a country..."
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-	);
-
 	await page.viewport(390, 700);
+	const restoreScreenWidth = mockScreenWidth(390);
 	try {
-		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		render(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+		);
+		await userEvent.click(page.getByRole('button', { name: 'Country' }));
+		await waitForMobileTrayToSettle();
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
 	} finally {
+		restoreScreenWidth();
 		await page.viewport(1024, 800);
 	}
 });
 
 test('mobile tray short list', async () => {
-	render(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems.slice(0, 2)}
-				description="Select where the user is located."
-				label="Country"
-				name="country"
-				placeholder="Select a country..."
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-	);
-
 	await page.viewport(390, 700);
+	const restoreScreenWidth = mockScreenWidth(390);
 	try {
-		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		render(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems.slice(0, 2)}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+		);
+		await userEvent.click(page.getByRole('button', { name: 'Country' }));
+		await waitForMobileTrayToSettle();
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-short');
 	} finally {
+		restoreScreenWidth();
 		await page.viewport(1024, 800);
 	}
 });
@@ -315,3 +321,17 @@ test('rich section title', async () => {
 		'combobox-field/section-title-rich-content',
 	);
 });
+
+/**
+ * Waits for the tray to finish opening before a capture. The screenshot owns the resting geometry,
+ * so nothing here measures a position.
+ */
+async function waitForMobileTrayToSettle() {
+	const dialog = page.getByRole('dialog');
+	await expect.element(dialog).toBeVisible();
+
+	const overlay = dialog.element().parentElement?.parentElement;
+	if (overlay == null) throw new Error('Expected the mobile modal structure.');
+
+	await waitForOverlayEnter(overlay);
+}

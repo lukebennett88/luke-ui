@@ -60,7 +60,7 @@ const inputGroupConfig = {
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
-			transitionDuration: vars.motion.duration.fast,
+			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, color',
 			transitionTimingFunction: vars.motion.easing.standard,
 
