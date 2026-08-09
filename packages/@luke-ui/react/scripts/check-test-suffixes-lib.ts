@@ -7,6 +7,13 @@
  * directories, a bare `*` as a single path segment, and `{a,b}` alternation.
  */
 const GLOB_SPECIAL_CHARACTER_PATTERN = /[.+^$()|[\]\\]/;
+const OPTIONAL_DIRECTORY_PATTERN = '(?:.*/)?';
+const ANY_PATH_PATTERN = '.*';
+const PATH_SEGMENT_PATTERN = '[^/]*';
+
+function alternationPattern(options: Array<string>) {
+	return `(?:${options.join('|')})`;
+}
 
 export function globToRegExp(glob: string): RegExp {
 	let pattern = '';
@@ -14,24 +21,24 @@ export function globToRegExp(glob: string): RegExp {
 	while (index < glob.length) {
 		const char = glob[index];
 		if (char === '*' && glob[index + 1] === '*' && glob[index + 2] === '/') {
-			pattern += '(?:.*/)?';
+			pattern += OPTIONAL_DIRECTORY_PATTERN;
 			index += 3;
 			continue;
 		}
 		if (char === '*' && glob[index + 1] === '*') {
-			pattern += '.*';
+			pattern += ANY_PATH_PATTERN;
 			index += 2;
 			continue;
 		}
 		if (char === '*') {
-			pattern += '[^/]*';
+			pattern += PATH_SEGMENT_PATTERN;
 			index += 1;
 			continue;
 		}
 		if (char === '{') {
 			const end = glob.indexOf('}', index);
 			const options = glob.slice(index + 1, end).split(',');
-			pattern += `(?:${options.join('|')})`;
+			pattern += alternationPattern(options);
 			index = end + 1;
 			continue;
 		}
