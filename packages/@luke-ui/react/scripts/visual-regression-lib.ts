@@ -11,6 +11,7 @@ export type VisualResult = {
 	diff?: string;
 	mismatchedPixels?: number;
 	mismatchRatio?: number;
+	mismatchBoundingBoxArea?: number;
 	height?: number;
 	width?: number;
 	baseViewport?: string;
@@ -18,6 +19,58 @@ export type VisualResult = {
 };
 
 type CaptureFile = { file: string; viewport?: string };
+
+// pixelmatch's default `diffColor`/`diffColorAlt` (unset here, so both fall
+// back to this value). Background pixels are always drawn as a shade of grey
+// (equal R/G/B) and anti-aliasing-excluded pixels as yellow, so a pixel this
+// exact colour is unambiguously a real mismatch.
+const DIFF_MARKER_COLOR: readonly [number, number, number] = [255, 0, 0];
+
+// Minimum bounding-box area (in px²) a cluster of mismatched pixels must span
+// before it counts as a real, localised change rather than noise.
+//
+// Measured empirically (#249) by running the full visual suite against an
+// unchanged tree with `includeAA: true, threshold: 0.1`: rendering here is
+// otherwise deterministic (same machine, same Chromium, motion frozen). A
+// blinking text-field caret was one source of noise in that measurement (16
+// mismatched pixels in a 1×16px, 16px², bounding box); that source has since
+// been eliminated at the root with `caret-color: transparent` in
+// `visual-setup.ts`, not by this threshold. The remaining, binding noise
+// source is sub-pixel text anti-aliasing jitter, which produced 33 mismatched
+// pixels in an 8×11px (88px²) bounding box - a small cluster. A real 16×16
+// icon spans roughly 256px². This threshold sits above the measured noise
+// ceiling (88px²) and below that signal size.
+//
+// Ratio-of-canvas gating is deliberately not used here: it is what let a
+// visible 16px icon addition (16 mismatched pixels on a 199,152px canvas,
+// concentrated in roughly a 16×16 region) go unnoticed in PR #312. A
+// canvas-relative ratio dilutes a small element's change in a large scene;
+// this area is absolute, so it does not.
+const MISMATCH_BBOX_AREA_THRESHOLD = 120;
+
+/** The area (in px²) of the bounding box enclosing every pixel `diff` marked as a real mismatch. */
+function mismatchBoundingBoxArea(diff: PNG, width: number, height: number) {
+	let minX = Infinity;
+	let minY = Infinity;
+	let maxX = -Infinity;
+	let maxY = -Infinity;
+	for (let y = 0; y < height; y++) {
+		for (let x = 0; x < width; x++) {
+			const index = (y * width + x) * 4;
+			if (
+				diff.data[index] === DIFF_MARKER_COLOR[0] &&
+				diff.data[index + 1] === DIFF_MARKER_COLOR[1] &&
+				diff.data[index + 2] === DIFF_MARKER_COLOR[2]
+			) {
+				if (x < minX) minX = x;
+				if (x > maxX) maxX = x;
+				if (y < minY) minY = y;
+				if (y > maxY) maxY = y;
+			}
+		}
+	}
+	return maxX >= minX ? (maxX - minX + 1) * (maxY - minY + 1) : 0;
+}
 
 async function listPngs(root: string) {
 	const result = new Map<string, CaptureFile>();
@@ -143,12 +196,20 @@ export async function compareCaptures(baseDir: string, currentDir: string, diffD
 				}
 			} else {
 				mismatchedPixels = pixelmatch(basePng.data, currentPng.data, diffPng.data, width, height, {
-					threshold: 0.2,
+					includeAA: true,
+					threshold: 0.1,
 				});
 			}
 			const mismatchRatio = mismatchedPixels / (width * height);
+			const bboxArea = mismatchedPixels === 0 ? 0 : mismatchBoundingBoxArea(diffPng, width, height);
 			const hasViewportChange = baseCapture.viewport !== currentCapture.viewport;
-			const status = mismatchRatio > 0.001 || hasViewportChange ? 'changed' : 'unchanged';
+			// A mismatch counts as a real change once its bounding box is large enough
+			// (see MISMATCH_BBOX_AREA_THRESHOLD), or, on a canvas smaller than that
+			// threshold, once the mismatch covers the entire canvas.
+			const status =
+				bboxArea >= Math.min(MISMATCH_BBOX_AREA_THRESHOLD, width * height) || hasViewportChange
+					? 'changed'
+					: 'unchanged';
 			let diff: string | undefined;
 			if (status === 'changed') {
 				diff = path.join(diffDir, `${id}.png`);
@@ -163,6 +224,7 @@ export async function compareCaptures(baseDir: string, currentDir: string, diffD
 				diff,
 				height,
 				id,
+				mismatchBoundingBoxArea: bboxArea,
 				mismatchedPixels,
 				mismatchRatio,
 				status,
@@ -205,6 +267,10 @@ async function renderCard(result: VisualResult) {
 	const dimensions = result.width && result.height ? `${result.width} × ${result.height}` : '';
 	const pixels =
 		result.mismatchedPixels == null ? '' : `${result.mismatchedPixels} mismatched pixels`;
+	// The deciding signal (see MISMATCH_BBOX_AREA_THRESHOLD): mismatchRatio is
+	// informational only and no longer gates the status.
+	const bboxArea =
+		result.mismatchBoundingBoxArea == null ? '' : `${result.mismatchBoundingBoxArea}px² diff area`;
 	const viewports = `main viewport ${result.baseViewport ?? 'unknown'} · current viewport ${result.currentViewport ?? 'unknown'}`;
 	const namespace = getNamespace(result.id);
 	const overlay =
@@ -213,7 +279,7 @@ async function renderCard(result: VisualResult) {
 			: '';
 	const images = `${overlay}${renderImage('main', base)}${renderImage('current', current)}${renderImage('diff', diff)}`;
 
-	return `<article data-status="${result.status}" data-namespace="${namespace}"><h2>${escapeHtml(result.id)}</h2><p><strong>${result.status}</strong> ${ratio} · ${dimensions} · ${pixels}<br>${viewports}</p><div class="images">${images}</div></article>`;
+	return `<article data-status="${result.status}" data-namespace="${namespace}"><h2>${escapeHtml(result.id)}</h2><p><strong>${result.status}</strong> ${ratio} · ${dimensions} · ${pixels} · ${bboxArea}<br>${viewports}</p><div class="images">${images}</div></article>`;
 }
 
 function renderDocument(

@@ -109,14 +109,8 @@ export default defineConfig({
 										`${arg}${ext}`,
 									);
 								},
-								comparatorName: 'pixelmatch',
-								comparatorOptions: {
-									// Baselines are captured on the same OS/browser as CI, and
-									// motion is frozen (see `visual-setup.ts`), so rendering is
-									// deterministic. Keep a tiny tolerance only for anti-aliasing
-									// jitter; raise it if a real regression proves otherwise.
-									allowedMismatchedPixelRatio: 0.001,
-								},
+								// Captures are always written fresh (never compared here);
+								// actual comparison happens in scripts/visual-regression-lib.ts (compareCaptures).
 							},
 						},
 						headless: true,

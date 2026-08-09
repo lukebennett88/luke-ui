@@ -32,9 +32,16 @@ decile comes back blank, since that means the scene only painted part of its hei
 ## Read the report
 
 The report classifies captures as unchanged, changed, added, or removed. Added and removed captures
-are informational. A changed result means matching IDs differ by more than 0.1% of their pixels. Use
-the filters, overlay slider, and main, current, and diff images to review each result. Run
-`pnpm --filter @luke-ui/react run test:visual:report` to open the latest local report.
+are informational. A changed result means the pixels that differ between matching IDs form a
+bounding box larger than 120px², or cover the whole capture if it is smaller than that. The box is
+measured on its own rather than as a percentage of the canvas, so a 16px icon still counts as a
+change on a large capture. Use the filters, overlay slider, and main, current, and diff images to
+review each result. Run `pnpm --filter @luke-ui/react run test:visual:report` to open the latest
+local report.
+
+A change confined to a thin element, such as a 1px divider, an underline, or a focus ring, can fall
+under the 120px² box and stay classified as unchanged. Cover those cases with a direct assertion,
+the way the LoadingSkeleton bug in #225 was caught with `getComputedStyle`.
 
 ## CI review
 
