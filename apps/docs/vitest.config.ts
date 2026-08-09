@@ -9,6 +9,7 @@ export default defineConfig({
 			'next-themes',
 			'react-aria-components/ToggleButton',
 			'react-aria-components/ToggleButtonGroup',
+			'react-resizable-panels',
 		],
 	},
 	test: {
@@ -27,6 +28,18 @@ export default defineConfig({
 				extends: true,
 				test: {
 					browser: {
+						commands: {
+							dragFromSeparator: async ({ iframe, page }, offsetX: number, dragBy: number) => {
+								const box = await iframe.locator('[role="separator"]').boundingBox();
+								if (!box) throw new Error('separator not found');
+								const x = box.x + box.width / 2 + offsetX;
+								const y = box.y + box.height / 2;
+								await page.mouse.move(x, y);
+								await page.mouse.down();
+								await page.mouse.move(x + dragBy, y, { steps: 10 });
+								await page.mouse.up();
+							},
+						},
 						enabled: true,
 						headless: true,
 						instances: [{ browser: 'chromium' }],
