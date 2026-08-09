@@ -383,6 +383,7 @@ const comboboxConfig = {
 		},
 		mobileInputGroup: {
 			flexShrink: 0,
+			inlineSize: 'auto',
 			marginBlock: vars.space[300],
 			marginInline: vars.space[300],
 		},
@@ -404,6 +405,7 @@ const comboboxConfig = {
 			flex: 1,
 			minInlineSize: 0,
 			overflow: 'hidden',
+			textAlign: 'start',
 			textOverflow: 'ellipsis',
 			whiteSpace: 'nowrap',
 		},

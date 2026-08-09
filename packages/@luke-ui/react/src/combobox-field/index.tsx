@@ -248,7 +248,7 @@ function MobileComboboxContent<T extends object>({
 						aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
 						aria-labelledby={ariaLabelledBy}
 						className={styles.combobox({ size }).mobileTrigger()}
-						isDisabled={isDisabled}
+						isDisabled={isDisabled || isReadOnly}
 						onPress={() => {
 							if (isReadOnly) return;
 

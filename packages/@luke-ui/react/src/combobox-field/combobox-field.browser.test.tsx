@@ -137,6 +137,14 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		if (triggerWidth <= 160) {
 			geometryFailures.push(`closed trigger shrink-wrapped to ${triggerWidth}px`);
 		}
+		const mobileValue = trigger.element().firstElementChild;
+		if (!(mobileValue instanceof HTMLElement)) {
+			throw new Error('Expected the mobile trigger value.');
+		}
+		const valueTextAlign = getComputedStyle(mobileValue).textAlign;
+		if (valueTextAlign !== 'start') {
+			geometryFailures.push(`closed value text-align is ${valueTextAlign}, expected start`);
+		}
 
 		window.scrollTo(0, 400);
 		await expect.poll(() => window.scrollY).toBe(400);
@@ -159,6 +167,21 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 			})
 			.toBe(true);
 		const searchboxRect = searchbox.element().getBoundingClientRect();
+		const inputGroup = searchbox.element().closest<HTMLElement>('[role="group"]');
+		if (inputGroup == null) throw new Error('Expected the mobile input group.');
+		const inputGroupRect = inputGroup.getBoundingClientRect();
+		const dialogRect = dialog.element().getBoundingClientRect();
+		const borderRoundingTolerance = 1;
+		if (inputGroupRect.left < dialogRect.left - borderRoundingTolerance) {
+			geometryFailures.push(
+				`mobile input group starts at ${inputGroupRect.left}px before tray at ${dialogRect.left}px`,
+			);
+		}
+		if (inputGroupRect.right > dialogRect.right + borderRoundingTolerance) {
+			geometryFailures.push(
+				`mobile input group ends at ${inputGroupRect.right}px after tray at ${dialogRect.right}px`,
+			);
+		}
 		const overlayTop = overlay.getBoundingClientRect().top;
 		if (overlayTop !== 0) geometryFailures.push(`overlay starts at ${overlayTop}px, expected 0px`);
 		if (searchboxRect.top < 0 || searchboxRect.bottom > window.innerHeight) {
@@ -235,24 +258,33 @@ test('the control group carries its own disabled and invalid attributes', async 
 
 // React Aria disables the trigger on a read-only combobox, which must not make the control read as disabled.
 test('read-only controls keep the read-only material, not the disabled one', async () => {
-	render(
-		<>
-			<ComboboxField defaultItems={countryItems} isReadOnly label="Read-only" name="readOnly">
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField defaultItems={countryItems} isDisabled label="Disabled" name="disabled">
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField defaultItems={countryItems} label="Resting" name="resting">
-				{renderCountryItem}
-			</ComboboxField>
-		</>,
-	);
+	const restoreScreenWidth = mockScreenWidth(700);
+	try {
+		render(
+			<>
+				<ComboboxField defaultItems={countryItems} isReadOnly label="Read-only" name="readOnly">
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField defaultItems={countryItems} isDisabled label="Disabled" name="disabled">
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField defaultItems={countryItems} label="Resting" name="resting">
+					{renderCountryItem}
+				</ComboboxField>
+			</>,
+		);
 
-	const readOnlyControl = getControl('Read-only');
-	// The group itself is not disabled, even though the trigger inside it is.
-	expect(readOnlyControl.dataset.disabled).toBeUndefined();
-	expect(readOnlyControl.querySelector('button')?.disabled).toBe(true);
+		const readOnlyControl = page
+			.getByRole('button', { name: 'Read-only' })
+			.element()
+			.closest<HTMLElement>('[role="group"]');
+		if (readOnlyControl == null) throw new Error('Expected the read-only control group.');
+		// The group itself is not disabled, even though the trigger inside it is.
+		expect(readOnlyControl.dataset.disabled).toBeUndefined();
+		expect(readOnlyControl.querySelector('button')?.disabled).toBe(true);
+	} finally {
+		restoreScreenWidth();
+	}
 });
 
 test('the indicator icon adds no text to the accessible name', async () => {
