@@ -28,6 +28,8 @@ export const mobileOverlay = styleInLayer('recipes', {
 	insetInline: 0,
 	position: 'absolute',
 	transition: scrimTransition,
+	// Nothing else in this package sets a competing z-index, so this is not calibrated
+	// against anything of ours. It is a floor meant to sit above consumer page content.
 	zIndex: 100,
 
 	selectors: {

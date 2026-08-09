@@ -31,6 +31,9 @@ export const MobileOverlay = forwardRef(function MobileOverlay(
 	ref: ForwardedRef<HTMLElement>,
 ): JSX.Element {
 	return (
+		// Resets the ambient overlay trigger state. Without this, `Dialog` would read the
+		// enclosing combobox's own `OverlayTriggerStateContext` and wire its close and
+		// labelling behaviour to that state instead of this tray's own `Modal` state.
 		<OverlayTriggerStateContext.Provider value={null}>
 			<ModalOverlay
 				className={cx(rootClassName, styles.mobileOverlay)}

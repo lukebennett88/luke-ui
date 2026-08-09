@@ -4,6 +4,7 @@ import { expect, test } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
+import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { componentTestRegistration } from './component-test-registration.js';
 import type { ComboboxFieldProps } from './index.js';
@@ -471,19 +472,6 @@ async function waitForTrayToSettle(option: Locator) {
 			return settled;
 		})
 		.toBe(true);
-}
-
-function mockScreenWidth(width: number) {
-	const descriptor = Object.getOwnPropertyDescriptor(window.screen, 'width');
-	Object.defineProperty(window.screen, 'width', { configurable: true, value: width });
-
-	return () => {
-		if (descriptor == null) {
-			Reflect.deleteProperty(window.screen, 'width');
-			return;
-		}
-		Object.defineProperty(window.screen, 'width', descriptor);
-	};
 }
 
 /** The control group wrapping the combobox input labelled `name`. */

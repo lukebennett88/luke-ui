@@ -1,6 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { LoadingSpinner } from '../loading-spinner/index.js';
+import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -350,17 +351,4 @@ async function waitForMobileTrayToSettle() {
 			searchboxTopInside: true,
 			windowScrollY: 0,
 		});
-}
-
-function mockScreenWidth(width: number) {
-	const descriptor = Object.getOwnPropertyDescriptor(window.screen, 'width');
-	Object.defineProperty(window.screen, 'width', { configurable: true, value: width });
-
-	return () => {
-		if (descriptor == null) {
-			Reflect.deleteProperty(window.screen, 'width');
-			return;
-		}
-		Object.defineProperty(window.screen, 'width', descriptor);
-	};
 }
