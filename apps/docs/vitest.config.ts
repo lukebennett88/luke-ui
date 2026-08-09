@@ -7,6 +7,9 @@ export default defineConfig({
 	optimizeDeps: {
 		include: [
 			'next-themes',
+			'react-aria-components/Dialog',
+			'react-aria-components/Modal',
+			'react-aria-components/Popover',
 			'react-aria-components/ToggleButton',
 			'react-aria-components/ToggleButtonGroup',
 			'react-resizable-panels',

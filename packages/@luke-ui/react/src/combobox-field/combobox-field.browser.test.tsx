@@ -3,10 +3,6 @@ import { expect, test } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
-import {
-	comboboxTrayScrollOffsetVar,
-	comboboxTrayViewportHeightVar,
-} from '../recipes/combobox.css.js';
 import { render } from '../test-utils/render.js';
 import { componentTestRegistration } from './component-test-registration.js';
 import type { ComboboxFieldProps } from './index.js';
@@ -82,74 +78,59 @@ testIntegration(componentTestRegistration, 'ComboboxField', async () => {
 	expect(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Australia');
 });
 
-// A real on-screen keyboard cannot be simulated in this headless browser test, so this asserts
-// the CSS contract, that the padding derives from the visible-viewport-height custom property,
-// rather than actual device behaviour.
-test('the tray spends the keyboard inset on bottom padding', async () => {
-	// Confirms the assumption behind the tray media query, rather than just trusting it: this
-	// browser project's viewport is 414x896, comfortably inside `(width < 40rem)`.
-	expect(window.innerWidth).toBe(414);
-	expect(window.innerHeight).toBe(896);
-
-	render(
-		<ComboboxField
-			defaultItems={countryItems}
-			label="Country"
-			name="country"
-			placeholder="Select a country..."
-		>
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-	await expect.element(page.getByRole('listbox')).toBeInTheDocument();
-
-	const popover = document.querySelector('[role="listbox"]')?.parentElement;
-	if (!popover) throw new Error('expected the listbox to have a popover parent');
-
-	expect(getComputedStyle(popover).position).toBe('absolute');
-
-	// Stands in for the keyboard shrinking the visible viewport.
-	popover.style.setProperty(comboboxTrayViewportHeightVar, '500px');
-
-	expect(getComputedStyle(popover).paddingBlockEnd).toBe(`${window.innerHeight - 500}px`);
-});
-
-// React Aria opens the combobox popover as non-modal, so `useCloseOnScroll` closes it on any
-// document scroll instead of letting the tray drift. The offset only has to be right at the
-// moment the tray opens.
-test('the tray captures the scroll offset once when it opens', async () => {
-	render(
-		<ComboboxField
-			defaultItems={countryItems}
-			label="Country"
-			name="country"
-			placeholder="Select a country..."
-		>
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-
-	// A tall spacer makes the page scrollable so there is an offset to capture.
-	const spacer = document.createElement('div');
-	spacer.style.blockSize = '300vh';
-	document.body.append(spacer);
-
+test('ComboboxField uses a mobile modal to search and select an option', async () => {
+	const restoreScreenWidth = mockScreenWidth(700);
 	try {
-		window.scrollTo(0, 120);
-		expect(window.scrollY).toBeGreaterThan(0);
+		const inputRef = createRef<HTMLInputElement>();
+		const { container } = render(
+			<form aria-label="Country form">
+				<ComboboxField
+					defaultItems={countryItems}
+					inputRef={inputRef}
+					label="Country"
+					name="country"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</form>,
+		);
+		const form = container.querySelector('form');
+		if (form == null) throw new Error('Expected the form element.');
 
-		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-		await expect.element(page.getByRole('listbox')).toBeInTheDocument();
+		const trigger = page.getByRole('button', { name: 'Country' });
+		const dialog = page.getByRole('dialog');
+		const searchbox = page.getByRole('searchbox', { name: 'Country' });
 
-		const popover = document.querySelector('[role="listbox"]')?.parentElement;
-		if (!popover) throw new Error('expected the listbox to have a popover parent');
+		await expect.element(trigger).toBeVisible();
+		expect(inputRef.current).toBeNull();
+		await userEvent.click(trigger);
+		await expect.element(dialog).toBeVisible();
+		await expect.element(searchbox).toHaveFocus();
+		expect(inputRef.current).toBe(searchbox.element());
+		expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
 
-		expect(popover.style.getPropertyValue(comboboxTrayScrollOffsetVar)).toBe(`${window.scrollY}px`);
+		const modal = dialog.element().parentElement;
+		if (modal == null) throw new Error('Expected the mobile modal.');
+		modal.parentElement?.style.setProperty('--visual-viewport-height', '500px');
+		expect(getComputedStyle(modal).blockSize).toBe('468px');
+		expect(getComputedStyle(modal).paddingBlockEnd).toBe(
+			`${window.innerHeight - 500 + window.innerHeight}px`,
+		);
+
+		const listbox = page.getByRole('listbox').element();
+		const pageScrollY = window.scrollY;
+		listbox.scrollTo(0, listbox.scrollHeight);
+		await expect.poll(() => listbox.scrollTop).toBeGreaterThan(0);
+		expect(window.scrollY).toBe(pageScrollY);
+
+		await userEvent.type(searchbox, 'Can');
+		await userEvent.click(page.getByRole('option', { name: 'Canada' }));
+		await expect.element(dialog).not.toBeInTheDocument();
+		await expect.element(trigger).toHaveFocus();
+		expect(inputRef.current).toBeNull();
+		expect(new FormData(form).get('country')).toBe('ca');
 	} finally {
-		window.scrollTo(0, 0);
-		spacer.remove();
+		restoreScreenWidth();
 	}
 });
 
@@ -372,6 +353,19 @@ async function waitForTrayToSettle(option: Locator) {
 			return settled;
 		})
 		.toBe(true);
+}
+
+function mockScreenWidth(width: number) {
+	const descriptor = Object.getOwnPropertyDescriptor(window.screen, 'width');
+	Object.defineProperty(window.screen, 'width', { configurable: true, value: width });
+
+	return () => {
+		if (descriptor == null) {
+			Reflect.deleteProperty(window.screen, 'width');
+			return;
+		}
+		Object.defineProperty(window.screen, 'width', descriptor);
+	};
 }
 
 /** The control group wrapping the combobox input labelled `name`. */

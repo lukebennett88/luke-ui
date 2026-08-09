@@ -1,6 +1,4 @@
-import { mergeRefs } from '@react-aria/utils';
 import type { JSX, Ref } from 'react';
-import { useState } from 'react';
 import type { PopoverProps as RacPopoverProps } from 'react-aria-components/ComboBox';
 import { Popover as RacPopover } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -9,7 +7,6 @@ import { rootClassName } from '../../theme/index.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
-import { useTrayViewportVars } from './use-tray-viewport-vars.js';
 
 type _ComboboxPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;
 interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
@@ -31,8 +28,6 @@ export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
  */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { ref, ...restProps } = props;
-	const [element, setElement] = useState<HTMLElement | null>(null);
-	useTrayViewportVars(element);
 
 	return (
 		<RacPopover
@@ -40,7 +35,7 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 			className={composeRenderProps(restProps.className, (className) => {
 				return cx(rootClassName, styles.combobox().popover(className));
 			})}
-			ref={mergeRefs<HTMLElement>(ref, setElement)}
+			ref={ref}
 		/>
 	);
 }

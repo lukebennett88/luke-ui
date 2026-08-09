@@ -179,49 +179,51 @@ test('open option and selection states', async () => {
 });
 
 test('mobile tray', async () => {
-	render(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems}
-				description="Select where the user is located."
-				label="Country"
-				name="country"
-				placeholder="Select a country..."
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-	);
-
 	await page.viewport(390, 700);
+	const restoreScreenWidth = mockScreenWidth(700);
 	try {
-		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		render(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+		);
+		await userEvent.click(page.getByRole('button', { name: 'Country' }));
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
 	} finally {
+		restoreScreenWidth();
 		await page.viewport(1024, 800);
 	}
 });
 
 test('mobile tray short list', async () => {
-	render(
-		<Stack>
-			<ComboboxField
-				defaultItems={countryItems.slice(0, 2)}
-				description="Select where the user is located."
-				label="Country"
-				name="country"
-				placeholder="Select a country..."
-			>
-				{renderCountryItem}
-			</ComboboxField>
-		</Stack>,
-	);
-
 	await page.viewport(390, 700);
+	const restoreScreenWidth = mockScreenWidth(700);
 	try {
-		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		render(
+			<Stack>
+				<ComboboxField
+					defaultItems={countryItems.slice(0, 2)}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+		);
+		await userEvent.click(page.getByRole('button', { name: 'Country' }));
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-short');
 	} finally {
+		restoreScreenWidth();
 		await page.viewport(1024, 800);
 	}
 });
@@ -315,3 +317,16 @@ test('rich section title', async () => {
 		'combobox-field/section-title-rich-content',
 	);
 });
+
+function mockScreenWidth(width: number) {
+	const descriptor = Object.getOwnPropertyDescriptor(window.screen, 'width');
+	Object.defineProperty(window.screen, 'width', { configurable: true, value: width });
+
+	return () => {
+		if (descriptor == null) {
+			Reflect.deleteProperty(window.screen, 'width');
+			return;
+		}
+		Object.defineProperty(window.screen, 'width', descriptor);
+	};
+}

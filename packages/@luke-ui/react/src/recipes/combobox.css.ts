@@ -13,35 +13,9 @@ import { invalidIndicatorIcon, invalidIndicatorIconForcedColors } from './invali
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 
-/**
- * Custom property carrying the zoom-normalised visible viewport height reported by
- * `useViewportSize`, set by `useTrayViewportVars`. Falls back to
- * `document.documentElement.clientHeight` when there is no `visualViewport`.
- */
-export const comboboxTrayViewportHeightVar = '--luke-ui-visual-viewport-height';
-
-/** Custom property mirroring the page's scroll offset, set by `useTrayViewportVars`. */
-export const comboboxTrayScrollOffsetVar = '--luke-ui-tray-scroll-offset';
-
 // Set per `size` variant on `inputGroup` below, from `COMBOBOX_ICON_SIZE`, so the invalid
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
-
-// Space between the tray's content box and the bottom of the initial containing block, set
-// inside the tray media query below.
-const trayBottomPadding = createVar();
-
-// `data-entering` and `data-exiting` share this transform: the tray slides from the same offset
-// in both directions, only the transition's start and end swap.
-const trayEnterExitStyles = {
-	boxShadow: `${vars.depth.floating}, 0 0 0 100vmax transparent`,
-	opacity: 1,
-	translate: `0 calc(100% - ${trayBottomPadding})`,
-};
-
-// Below 640px the popover renders as a bottom tray fixed to the viewport edge,
-// instead of a dropdown anchored below the control.
-const trayMediaQuery = '(width < 40rem)';
 
 // React Aria's `ComboBox` publishes `isDisabled`/`isInvalid` through `GroupContext`, which
 // `Group` writes onto the group element, so no `:has()` probing of descendants is needed.
@@ -140,7 +114,7 @@ const comboboxActionSizeClassNameMedium = styleInLayer('recipes', {
  *
  * Slots follow the anatomy top to bottom: `root`, `inputGroup`, `textInput`,
  * `trigger`, `clearButton`, `itemCheck`, `popover`, `listBox`, `loadMoreItem`,
- * `section`, `sectionHeading`, `emptyState`, `item`.
+ * `section`, `sectionHeading`, `emptyState`, `item`, then mobile-only slots.
  */
 const comboboxConfig = {
 	slots: {
@@ -247,19 +221,7 @@ const comboboxConfig = {
 		},
 		trigger: [
 			comboboxActionClassName,
-			{
-				marginInlineEnd: vars.space[100],
-				marginInlineStart: vars.space[100],
-
-				selectors: {
-					'&:first-child': {
-						color: vars.color.text.primary,
-						inlineSize: '100%',
-						justifyContent: 'space-between',
-						marginInline: 0,
-					},
-				},
-			},
+			{ marginInlineEnd: vars.space[100], marginInlineStart: vars.space[100] },
 		],
 		clearButton: comboboxActionClassName,
 		itemCheck: {
@@ -273,51 +235,6 @@ const comboboxConfig = {
 					borderColor: 'CanvasText',
 					boxShadow: 'none',
 					forcedColorAdjust: 'auto',
-				},
-				[trayMediaQuery]: {
-					borderEndEndRadius: 0,
-					borderEndStartRadius: 0,
-					borderStartEndRadius: vars.radius.overlay,
-					borderStartStartRadius: vars.radius.overlay,
-					boxShadow: `${vars.depth.floating}, 0 0 0 100vmax ${vars.color.scrim}`,
-					// So the padding below is added outside `maxBlockSize` rather than eating into it.
-					boxSizing: 'content-box',
-					inlineSize: 'auto !important' as 'auto',
-					insetBlockEnd: `calc(-1 * var(${comboboxTrayScrollOffsetVar}, 0px)) !important`,
-					insetBlockStart: 'auto !important' as 'auto',
-					insetInline: '0 !important',
-					maxBlockSize: `calc(var(${comboboxTrayViewportHeightVar}, 100dvh) - ${vars.space[800]}) !important`,
-					minInlineSize: 'auto !important' as 'auto',
-					// Also a scroll container via overflow: hidden below, so this blocks
-					// chaining from the tray's non-list areas too.
-					overscrollBehavior: 'contain',
-					// One expression covers all three things that eat the bottom of the screen: the
-					// on-screen keyboard, Safari's toolbar and the home indicator. Spending it on
-					// padding rather than a bottom offset keeps the tray's background behind the
-					// keyboard, so no page content shows through while the keyboard animates.
-					paddingBlockEnd: trayBottomPadding,
-					position: 'absolute !important' as 'absolute',
-					vars: {
-						[trayBottomPadding]: `max(calc(100vh - var(${comboboxTrayViewportHeightVar}, 100dvh)), env(safe-area-inset-bottom, 0px))`,
-					},
-					selectors: {
-						'&::before': {
-							alignSelf: 'center',
-							backgroundColor: vars.color.border.decorative,
-							blockSize: '4px',
-							borderRadius: vars.radius.full,
-							content: '',
-							flexShrink: 0,
-							inlineSize: '36px',
-							marginBlockEnd: vars.space[100],
-							marginBlockStart: vars.space[200],
-						},
-						// The bottom padding is now large, because it carries the keyboard and toolbar
-						// inset, so an unadjusted `100%` would start the tray far below the fold and
-						// overshoot the slide. Subtracting the padding keeps the start just off screen.
-						'&[data-entering]': trayEnterExitStyles,
-						'&[data-exiting]': trayEnterExitStyles,
-					},
 				},
 				'(prefers-reduced-motion: reduce)': {
 					transition: 'none',
@@ -357,14 +274,6 @@ const comboboxConfig = {
 			},
 		},
 		listBox: {
-			'@media': {
-				[trayMediaQuery]: {
-					maxBlockSize: 'none',
-					// Stops a swipe on the list from scrolling the page behind the tray, once
-					// the list reaches its own scroll boundary instead of chaining to the document.
-					overscrollBehavior: 'contain',
-				},
-			},
 			boxSizing: 'border-box',
 			flex: 1,
 			inlineSize: '100%',
@@ -471,6 +380,28 @@ const comboboxConfig = {
 					backgroundColor: vars.color.background.accent.subtle.pressed,
 				},
 			},
+		},
+		mobileInputGroup: {
+			flexShrink: 0,
+			marginBlock: vars.space[300],
+			marginInline: vars.space[300],
+		},
+		mobileListBox: {
+			maxBlockSize: 'none',
+			overscrollBehavior: 'contain',
+		},
+		mobileTrigger: {
+			color: vars.color.text.primary,
+			inlineSize: '100%',
+			justifyContent: 'space-between',
+			marginInline: 0,
+		},
+		mobileValue: {
+			flex: 1,
+			minInlineSize: 0,
+			overflow: 'hidden',
+			textOverflow: 'ellipsis',
+			whiteSpace: 'nowrap',
 		},
 	},
 	defaultVariants: { size: 'medium' },
