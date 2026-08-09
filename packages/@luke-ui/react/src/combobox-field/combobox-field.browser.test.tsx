@@ -166,7 +166,28 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 			);
 		}
 		expect(geometryFailures).toEqual([]);
+
+		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, standing in for
+		// the keyboard shrinking the visual viewport. `mobileModal` must spend the shrunk amount on
+		// `paddingBlockEnd`, not on `blockSize`, so the sheet keeps its full height above the
+		// keyboard instead of shrinking. Wait for `data-entering` to clear first: the rect is
+		// unreliable mid-transition, and only entry animates position, not this padding swap.
+		await expect.poll(() => modal.hasAttribute('data-entering')).toBe(false);
 		overlay.style.setProperty('--visual-viewport-height', '500px');
+
+		const space800 = Number.parseFloat(
+			getComputedStyle(document.documentElement).getPropertyValue('--luke-space-800'),
+		);
+		const fullViewportHeight = window.innerHeight;
+		const forcedViewportHeight = 500;
+		const expectedBlockSize = forcedViewportHeight - space800;
+		const expectedPaddingBlockEnd =
+			Math.max(fullViewportHeight - forcedViewportHeight, 0) + fullViewportHeight;
+		expect(Number.parseFloat(getComputedStyle(modal).height)).toBeCloseTo(expectedBlockSize, 1);
+		expect(Number.parseFloat(getComputedStyle(modal).paddingBottom)).toBeCloseTo(
+			expectedPaddingBlockEnd,
+			1,
+		);
 
 		const listbox = page.getByRole('listbox').element();
 		const pageScrollY = window.scrollY;

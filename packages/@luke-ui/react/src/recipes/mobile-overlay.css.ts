@@ -4,9 +4,20 @@ import { vars } from '../theme/contract.css.js';
 
 const trayPaddingBlockEnd = createVar();
 
+// The sheet and its scrim cross the whole viewport height, so the fast duration used by buttons
+// and links reads as a snap. Both use the slower duration instead. Entry decelerates with the
+// standard easing curve, while exit accelerates with the exit curve, matching React Spectrum.
+const scrimTransition = `opacity ${vars.motion.duration.slow} ${vars.motion.easing.standard}`;
+const scrimExitTransition = `opacity ${vars.motion.duration.slow} ${vars.motion.easing.exit}`;
+
 const trayTransition = [
-	`opacity ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
-	`translate ${vars.motion.duration.fast} ${vars.motion.easing.standard}`,
+	`opacity ${vars.motion.duration.slow} ${vars.motion.easing.standard}`,
+	`translate ${vars.motion.duration.slow} ${vars.motion.easing.standard}`,
+].join(', ');
+
+const trayExitTransition = [
+	`opacity ${vars.motion.duration.slow} ${vars.motion.easing.exit}`,
+	`translate ${vars.motion.duration.slow} ${vars.motion.easing.exit}`,
 ].join(', ');
 
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */
@@ -15,7 +26,29 @@ export const mobileOverlay = styleInLayer('recipes', {
 	blockSize: '100dvh',
 	insetInline: 0,
 	position: 'absolute',
+	transition: scrimTransition,
 	zIndex: 100,
+
+	selectors: {
+		'&[data-entering]': {
+			opacity: 0,
+		},
+		'&[data-exiting]': {
+			opacity: 0,
+			transition: scrimExitTransition,
+		},
+	},
+
+	'@media': {
+		'(prefers-reduced-motion: reduce)': {
+			transition: 'none',
+
+			selectors: {
+				'&[data-entering]': { opacity: 1, transition: 'none' },
+				'&[data-exiting]': { opacity: 1, transition: 'none' },
+			},
+		},
+	},
 });
 
 export const mobileModal = styleInLayer('recipes', {
@@ -51,6 +84,7 @@ export const mobileModal = styleInLayer('recipes', {
 		},
 		'&[data-exiting]': {
 			opacity: 0,
+			transition: trayExitTransition,
 			translate: '0 calc(100% - 100vh)',
 		},
 	},
@@ -66,8 +100,11 @@ export const mobileModal = styleInLayer('recipes', {
 			transition: 'none',
 
 			selectors: {
-				'&[data-entering]': { opacity: 1, translate: 'none' },
-				'&[data-exiting]': { opacity: 1, translate: 'none' },
+				// The entering and exiting selectors above set their own `transition`, which is more
+				// specific than the plain class rule here, so reduced motion must repeat `none` on
+				// each one too or the sheet keeps animating.
+				'&[data-entering]': { opacity: 1, transition: 'none', translate: 'none' },
+				'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
 			},
 		},
 	},
