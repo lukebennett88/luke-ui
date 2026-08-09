@@ -2,7 +2,6 @@ import { createFileRoute, notFound } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
 import { staticFunctionMiddleware } from '@tanstack/start-static-server-functions';
 import { useFumadocsLoader } from 'fumadocs-core/source/client';
-import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/notebook/page';
@@ -24,9 +23,9 @@ import { getStorybookStoryUrl } from '../lib/storybook';
 const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
 const GITHUB_TREE_URL = `${GITHUB_REPO_URL}/tree/main`;
 
+// `remarkAutoTypeTable` converts `<auto-type-table>` to a static `<TypeTable>` during MDX compilation.
 const mdxComponents = {
 	...defaultMdxComponents,
-	AutoTypeTable,
 	ExampleBlock,
 	IconGallery,
 	SourceCodeBlock,

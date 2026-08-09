@@ -8,6 +8,7 @@ import mdx from 'fumadocs-mdx/vite';
 import { readdir } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 import { getMarkdownPagePath } from './src/lib/markdown-page-path.js';
 
 // staticFunctionMiddleware hardcodes `/__tsr/staticServerFnCache/...` for the
@@ -130,6 +131,7 @@ export default defineConfig(async () => {
 		},
 		plugins: lazyPlugins(async () => [
 			staticFunctionBasePathPlugin(),
+			highlightSourcePlugin(),
 			mdx(await import('./source.config')),
 			tailwindcss(),
 			tanstackStart({

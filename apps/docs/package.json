@@ -71,6 +71,7 @@
 		"@vitest/browser-playwright": "catalog:",
 		"playwright": "catalog:",
 		"serve": "catalog:",
+		"shiki": "catalog:",
 		"tailwindcss": "catalog:",
 		"typescript": "catalog:",
 		"unist-util-visit": "catalog:",
