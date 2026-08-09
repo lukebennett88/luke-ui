@@ -1,17 +1,9 @@
 /**
  * The private numbered duration scale behind the public `motion.duration` roles. It is resolved in
- * TypeScript and never emitted, so no `--luke-motion-duration-100` custom property exists. Only the
- * role-named durations in `token-values.ts` reach the stylesheet.
+ * TypeScript and never emitted, so no `--luke-motion-duration-100` custom property exists.
  *
  * The keys are ordinal steps, not encoded millisecond values. Step 400 is the fourth step, and it
- * is not 400ms.
- *
- * The scale covers 50ms to 700ms, from short feedback through large surface movement, so a
- * component picks an existing step rather than inventing one. That range sits within the bounds
- * Material and Carbon use for similar motion.
- *
- * Easing gets no numbered counterpart. Curves differ in shape rather than in magnitude, so an
- * ordinal position would be artificial. The easing tokens stay role-named.
+ * is not 400ms. The public semantic roles in `token-values.ts` map onto these steps.
  */
 
 /** An ordinal position on the private duration scale. */

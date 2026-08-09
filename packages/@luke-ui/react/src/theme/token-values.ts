@@ -74,12 +74,7 @@ export const INTERACTION_VALUES = {
 	'interaction.disabledOpacity': '0.55',
 } as const;
 
-/**
- * Luke UI-owned durations and easing curves for interaction motion. Each duration is named for the
- * role it plays and read from the private numbered scale in `motion.ts`, which is never emitted.
- *
- * `exit` is shorter than `enter`, so a dismissal feels more immediate than an arrival.
- */
+/** Durations and easing curves for interaction motion, named for the role each plays. */
 export const MOTION_VALUES = {
 	'motion.duration.enter': MOTION_DURATION_SCALE[500],
 	'motion.duration.exit': MOTION_DURATION_SCALE[300],
