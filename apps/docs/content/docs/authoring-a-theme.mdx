@@ -47,7 +47,8 @@ Your theme always declares its own `name`. Two themes with one name emit a colli
 What each section inherits:
 
 - `color` merges role by role. A role replaces the base's role whole.
-- `color.neutral` and `color.neutralStyle` are one decision. Setting either one drops both.
+- `color.neutral` and `color.neutralStyle` are one decision. Setting either replaces the base's
+  neutral decision.
 - `radius` and `typography.fontWeight` merge key by key.
 - `typography.fontFamily` replaces the base value.
 - `depth` and `actionControlFinish` merge per mode, then per rung.
