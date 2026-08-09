@@ -109,6 +109,21 @@ const comboboxActionSizeClassNameMedium = styleInLayer('recipes', {
 	paddingInline: 0,
 });
 
+// The popover is an overlay, so it takes the enter and exit duration roles rather than the in-place
+// feedback one. Entry decelerates with the standard easing curve, while exit accelerates with the
+// exit curve.
+const popoverTransition = [
+	`opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+	`translate ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+	`box-shadow ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
+].join(', ');
+
+const popoverExitTransition = [
+	`opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
+	`translate ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
+	`box-shadow ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
+].join(', ');
+
 /**
  * Raw slotted config for the combobox anatomy.
  *
@@ -240,7 +255,9 @@ const comboboxConfig = {
 					transition: 'none',
 					selectors: {
 						'&[data-entering]': { opacity: 1, translate: 'none' },
-						'&[data-exiting]': { opacity: 1, translate: 'none' },
+						// The exiting selector on the base rule sets its own `transition`, which is more
+						// specific than the plain class rule here, so reduced motion must repeat `none` on it.
+						'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
 					},
 				},
 			},
@@ -256,15 +273,11 @@ const comboboxConfig = {
 			isolation: 'isolate',
 			minInlineSize: 'var(--trigger-width)',
 			overflow: 'hidden',
-			transition: [
-				`opacity ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
-				`translate ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
-				`box-shadow ${vars.motion.duration.feedback} ${vars.motion.easing.standard}`,
-			].join(', '),
+			transition: popoverTransition,
 
 			selectors: {
 				'&[data-entering]': { opacity: 0 },
-				'&[data-exiting]': { opacity: 0 },
+				'&[data-exiting]': { opacity: 0, transition: popoverExitTransition },
 			},
 
 			'@supports': {
