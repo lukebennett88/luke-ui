@@ -186,6 +186,9 @@ catalogs:
     serve:
       specifier: ^14.2.6
       version: 14.2.6
+    shiki:
+      specifier: ^4.4.1
+      version: 4.4.1
     spin-doctor:
       specifier: ^0.0.1
       version: 0.0.1
@@ -370,6 +373,9 @@ importers:
       serve:
         specifier: 'catalog:'
         version: 14.2.6(supports-color@7.2.0)
+      shiki:
+        specifier: 'catalog:'
+        version: 4.4.1
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3

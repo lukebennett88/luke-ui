@@ -4,10 +4,10 @@ import { Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { button } from '@luke-ui/react/recipes';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useId, useState } from 'react';
-import { encodeCodeHash } from '../lib/playground-hash.js';
+import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { DocsLink } from './docs-link.js';
 
@@ -41,8 +41,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 		);
 	}
 
-	const [PreviewComponent, source] = result.data;
-	const code = source.trim();
+	const [PreviewComponent, highlightedSource] = result.data;
 
 	return (
 		<ExampleFrame
@@ -50,7 +49,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 				<Box className="flex items-center gap-1">
 					<DocsLink
 						className={button({ appearance: 'ghost', size: 'small' })}
-						hash={encodeCodeHash(code)}
+						hash={highlightedSource.playgroundHash}
 						target="_blank"
 						to="/playground"
 					>
@@ -76,11 +75,10 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 			</StoryWrapper>
 			{showCode ? (
 				<Box id={codeId}>
-					<DynamicCodeBlock
-						code={code}
-						codeblock={{ className: 'my-0 rounded-none border-x-0 border-b-0 shadow-none' }}
-						lang="tsx"
-					/>
+					<CodeBlock className="my-0 rounded-none border-x-0 border-b-0 shadow-none">
+						{/* This trusted HTML comes from the build-time Shiki plugin, not from developer input. */}
+						<Pre dangerouslySetInnerHTML={{ __html: highlightedSource.html }} />
+					</CodeBlock>
 				</Box>
 			) : null}
 		</ExampleFrame>
@@ -154,15 +152,15 @@ const _modules = import.meta.glob<ComponentType>('../examples/*/*.tsx', {
 	import: 'default',
 });
 
-const _sources = import.meta.glob<string>('../examples/*/*.tsx', {
+const _highlightedSources = import.meta.glob<HighlightedSource>('../examples/*/*.tsx', {
 	eager: false,
 	import: 'default',
-	query: '?raw',
+	query: '?highlight',
 });
 
-type ExampleLoader = [() => Promise<ComponentType>, () => Promise<string>];
+type ExampleLoader = [() => Promise<ComponentType>, () => Promise<HighlightedSource>];
 
-type ExampleTuple = [ComponentType, string];
+type ExampleTuple = [ComponentType, HighlightedSource];
 
 type ExampleResult =
 	| {
@@ -179,11 +177,11 @@ const exampleCache = new Map<string, Promise<ExampleResult>>();
 function findExample(component: string, name: string): ExampleLoader | null {
 	const key = `../examples/${component}/${name}.tsx`;
 	const loadModule = _modules[key];
-	const loadSource = _sources[key];
+	const loadHighlightedSource = _highlightedSources[key];
 
-	if (!loadModule || !loadSource) return null;
+	if (!loadModule || !loadHighlightedSource) return null;
 
-	return [loadModule, loadSource];
+	return [loadModule, loadHighlightedSource];
 }
 
 function loadExample(component: string, name: string): Promise<ExampleResult> {
@@ -201,8 +199,8 @@ function loadExample(component: string, name: string): Promise<ExampleResult> {
 		return promise;
 	}
 
-	const [loadModule, loadSource] = match;
-	const promise = Promise.all([loadModule(), loadSource()])
+	const [loadModule, loadHighlightedSource] = match;
+	const promise = Promise.all([loadModule(), loadHighlightedSource()])
 		.then(
 			([loadedComponent, loadedSource]): ExampleResult => ({
 				data: [loadedComponent, loadedSource],

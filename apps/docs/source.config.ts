@@ -8,6 +8,7 @@ import {
 } from 'fumadocs-typescript';
 import * as z from 'zod';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
+import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 
 export const docs = defineDocs({
 	dir: 'content/docs',
@@ -48,6 +49,10 @@ const generator = createGenerator({
 
 export default defineConfig({
 	mdxOptions: {
+		// MDX fences and source modules use the same themes.
+		rehypeCodeOptions: {
+			themes: SHIKI_THEMES,
+		},
 		remarkPlugins: (v) => [
 			...v,
 			[remarkAutoTypeTable, { generator, options: { basePath: repoRoot } }],
