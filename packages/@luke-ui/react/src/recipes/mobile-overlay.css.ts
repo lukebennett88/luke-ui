@@ -1,32 +1,36 @@
 import { createVar } from '@vanilla-extract/css';
 import { styleInLayer } from '../styles/layered-style.css.js';
+import { overlayEnterTransition, overlayExitTransition } from '../styles/overlay-motion.js';
 import { vars } from '../theme/contract.css.js';
 
 const trayPaddingBlockEnd = createVar();
 
 // The scrim strip left above the tray. It is sized to be a comfortable tap target,
 // since tapping it is how a pointer user dismisses the sheet.
-const trayMarginBlockStart = vars.space[1200];
+const trayInsetBlockStart = vars.space[1200];
+
+const trayBorderWidth = '1px';
 
 // React Spectrum caps its tray at this width and centres it, so the sheet does not
-// stretch edge to edge on a wide phone or a small foldable.
+// stretch edge to edge on a wide phone or a small foldable. The cap is a border-box width, and
+// `box-sizing: content-box` below makes `max-inline-size` cap the content box, so the two borders
+// come off it. That keeps the border box at exactly the width the media query below switches on.
 const trayMaxInlineSize = '450px';
+const trayMaxContentInlineSize = `calc(${trayMaxInlineSize} - ${trayBorderWidth} * 2)`;
 
-// The sheet and its scrim are overlays, so they take the enter and exit duration roles rather than
-// the in-place feedback one. Entry decelerates with the standard easing curve, while exit
-// accelerates with the exit curve.
-const scrimTransition = `opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`;
-const scrimExitTransition = `opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`;
+// React Aria Components' own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so
+// the tray reads the keyboard-shrunk viewport in CSS alone.
+const keyboardInset = `calc(100dvh - var(--visual-viewport-height))`;
+const safeAreaInset = `env(safe-area-inset-bottom, 0px)`;
+const trayPaddingBlockEndValue = `calc(max(${keyboardInset}, ${safeAreaInset}) + 100vh)`;
 
-const trayTransition = [
-	`opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
-	`translate ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
-].join(', ');
+// The sheet and its scrim are overlays, so they take the shared overlay motion roles. See
+// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
+const scrimTransition = overlayEnterTransition(['opacity']);
+const scrimExitTransition = overlayExitTransition(['opacity']);
 
-const trayExitTransition = [
-	`opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
-	`translate ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
-].join(', ');
+const trayTransition = overlayEnterTransition(['opacity', 'translate']);
+const trayExitTransition = overlayExitTransition(['opacity', 'translate']);
 
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */
 export const mobileOverlay = styleInLayer('recipes', {
@@ -63,32 +67,34 @@ export const mobileOverlay = styleInLayer('recipes', {
 
 export const mobileModal = styleInLayer('recipes', {
 	backgroundColor: vars.color.surface.floating,
-	blockSize: `calc(var(--visual-viewport-height) - ${trayMarginBlockStart})`,
+	blockSize: `calc(var(--visual-viewport-height) - ${trayInsetBlockStart})`,
 	borderEndEndRadius: 0,
 	borderEndStartRadius: 0,
 	borderStartEndRadius: vars.radius.overlay,
 	borderStartStartRadius: vars.radius.overlay,
 	borderStyle: 'solid',
-	borderWidth: '1px',
+	borderWidth: trayBorderWidth,
+	// Physical on purpose, paired with `top` below. The two preserve an intended over-constraint
+	// that logical block insets would resolve from the wrong edge on a content-box element.
+	bottom: '-100vh',
 	boxShadow: vars.depth.floating,
 	boxSizing: 'content-box',
 	display: 'flex',
 	flexDirection: 'column',
-	// Physical insets preserve the intended overconstraint. Logical block insets resolve the content-box tray from the wrong edge.
-	bottom: '-100vh',
 	insetInline: 0,
 	// The tray is absolutely positioned, so auto inline margins centre it against the
 	// zero inline insets once the cap starts clamping its width.
 	marginInline: 'auto',
-	maxInlineSize: trayMaxInlineSize,
+	maxInlineSize: trayMaxContentInlineSize,
 	overflow: 'hidden',
 	paddingBlockEnd: trayPaddingBlockEnd,
 	position: 'absolute',
-	top: trayMarginBlockStart,
+	// Physical on purpose, paired with `bottom` above. See the note there.
+	top: trayInsetBlockStart,
 	transition: trayTransition,
 	translate: 'none',
 	vars: {
-		[trayPaddingBlockEnd]: `calc(max(calc(100dvh - var(--visual-viewport-height)), env(safe-area-inset-bottom, 0px)) + 100vh)`,
+		[trayPaddingBlockEnd]: trayPaddingBlockEndValue,
 	},
 
 	selectors: {
@@ -114,9 +120,7 @@ export const mobileModal = styleInLayer('recipes', {
 			transition: 'none',
 
 			selectors: {
-				// The entering and exiting selectors above set their own `transition`, which is more
-				// specific than the plain class rule here, so reduced motion must repeat `none` on
-				// each one too or the sheet keeps animating.
+				// Reduced motion has to repeat `none` on each selector. See `styles/overlay-motion.ts`.
 				'&[data-entering]': { opacity: 1, transition: 'none', translate: 'none' },
 				'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
 			},

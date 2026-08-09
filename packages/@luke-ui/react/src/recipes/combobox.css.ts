@@ -3,6 +3,7 @@ import { createVar } from '@vanilla-extract/css';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
 import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { styleInLayer } from '../styles/layered-style.css.js';
+import { overlayEnterTransition, overlayExitTransition } from '../styles/overlay-motion.js';
 import { vars } from '../theme/contract.css.js';
 import {
 	composeInputStateSelectors,
@@ -109,20 +110,11 @@ const comboboxActionSizeClassNameMedium = styleInLayer('recipes', {
 	paddingInline: 0,
 });
 
-// The popover is an overlay, so it takes the enter and exit duration roles rather than the in-place
-// feedback one. Entry decelerates with the standard easing curve, while exit accelerates with the
-// exit curve.
-const popoverTransition = [
-	`opacity ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
-	`translate ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
-	`box-shadow ${vars.motion.duration.enter} ${vars.motion.easing.standard}`,
-].join(', ');
-
-const popoverExitTransition = [
-	`opacity ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
-	`translate ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
-	`box-shadow ${vars.motion.duration.exit} ${vars.motion.easing.exit}`,
-].join(', ');
+// The popover is an overlay, so it takes the shared overlay motion roles. See
+// `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
+const popoverProperties = ['opacity', 'translate', 'box-shadow'];
+const popoverTransition = overlayEnterTransition(popoverProperties);
+const popoverExitTransition = overlayExitTransition(popoverProperties);
 
 /**
  * Raw slotted config for the combobox anatomy.
@@ -255,8 +247,7 @@ const comboboxConfig = {
 					transition: 'none',
 					selectors: {
 						'&[data-entering]': { opacity: 1, translate: 'none' },
-						// The exiting selector on the base rule sets its own `transition`, which is more
-						// specific than the plain class rule here, so reduced motion must repeat `none` on it.
+						// Reduced motion has to repeat `none` here. See `styles/overlay-motion.ts`.
 						'&[data-exiting]': { opacity: 1, transition: 'none', translate: 'none' },
 					},
 				},
@@ -412,6 +403,9 @@ const comboboxConfig = {
 			inlineSize: '100%',
 			justifyContent: 'space-between',
 			marginInline: 0,
+			// `inlineSize: '100%'` resolves against a shrink-to-fit ancestor, which would collapse
+			// the closed trigger onto its selected value. This floor reserves 20ch of value text
+			// plus room for the trailing chevron.
 			minInlineSize: `calc(20ch + ${vars.controlSize.comboboxAction})`,
 		},
 		mobileValue: {
