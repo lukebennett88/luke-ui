@@ -1,12 +1,7 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
-import {
-	captureVisualAppearance,
-	renderVisual,
-	Stack,
-	variantValuesFor,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance, Stack, variantValuesFor } from '../test-utils/visual.js';
 import { Emoji } from './index.js';
 
 const rowStyle = {
@@ -19,7 +14,7 @@ const sizes = variantValuesFor<typeof Emoji, 'size'>()(['100', '300', '500', '70
 
 for (const appearance of visualAppearances) {
 	test(`sizes and colours: ${appearance.theme} ${appearance.mode}`, async () => {
-		const locator = renderVisual(
+		const { locator } = render(
 			<Stack>
 				<div style={rowStyle}>
 					{sizes.map((size) => (
@@ -32,9 +27,8 @@ for (const appearance of visualAppearances) {
 					<Emoji color="danger" emoji="⚠️" label="Warning" />
 				</div>
 			</Stack>,
-			appearance,
+			{ appearance },
 		);
-		await expect.element(locator).toBeVisible();
 
 		await captureVisualAppearance(locator, 'emoji/sizes-colors', appearance);
 	});

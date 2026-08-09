@@ -1,9 +1,6 @@
 import { expect, test } from 'vite-plus/test';
-import {
-	captureVisualAppearance,
-	renderVisual,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance } from '../test-utils/visual.js';
 import { TokenBoard } from './token-board.js';
 
 // Captures every contract leaf, colour and non-colour alike, for both bundled themes and
@@ -11,7 +8,7 @@ import { TokenBoard } from './token-board.js';
 // regardless of whether a component happens to consume the changed leaf.
 for (const appearance of visualAppearances) {
 	test(`token board: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(<TokenBoard />, appearance);
+		const { locator: scene } = render(<TokenBoard />, { appearance });
 		await expect.element(scene).toBeVisible();
 
 		await captureVisualAppearance(scene, 'theme/token-board', appearance);

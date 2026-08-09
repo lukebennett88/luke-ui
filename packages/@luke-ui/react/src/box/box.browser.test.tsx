@@ -1,45 +1,38 @@
-import '../../dist/themes/tactile/stylesheet.css';
-import '../stylesheet.css.js';
-import { act, createRef } from 'react';
-import type { Root } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
+import { createRef } from 'react';
+import type { ComponentProps } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { rootClassName } from '../theme/index.js';
-import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
+import { testUniversalConformance } from '../conformance/helpers.js';
+import { render } from '../test-utils/render.js';
 import { Box } from './index.js';
 
-const mounted: Array<{ container: HTMLElement; root: Root }> = [];
+testUniversalConformance({
+	getTarget: (result) => {
+		const target = result.container.firstElementChild;
+		if (!(target instanceof HTMLElement)) throw new Error('Expected a Box element.');
+		return target;
+	},
+	name: 'Box',
+	render: (props = {}) => render(<Box {...(props as ComponentProps<typeof Box>)}>Content</Box>),
+});
 
 afterEach(async () => {
-	for (const { container, root } of mounted) {
-		act(() => root.unmount());
-		container.remove();
-	}
-	mounted.length = 0;
 	await page.viewport(1024, 800);
 });
 
 test('renders a responsive layout at the retained breakpoints', async () => {
-	const container = document.body.appendChild(document.createElement('div'));
-	container.className = `${rootClassName} ${tactileThemeClassName}`;
-	const root = createRoot(container);
-	mounted.push({ container, root });
+	const { locator } = render(
+		<Box
+			display="flex"
+			flexDirection={{ initial: 'column', medium: 'row' }}
+			gap={{ initial: '200', medium: '600' }}
+		>
+			<span>First item</span>
+			<span>Second item</span>
+		</Box>,
+	);
 
-	act(() => {
-		root.render(
-			<Box
-				display="flex"
-				flexDirection={{ initial: 'column', medium: 'row' }}
-				gap={{ initial: '200', medium: '600' }}
-			>
-				<span>First item</span>
-				<span>Second item</span>
-			</Box>,
-		);
-	});
-
-	const box = container.firstElementChild;
+	const box = locator.element().firstElementChild;
 	if (!(box instanceof HTMLElement)) throw new Error('Expected Box element.');
 
 	await page.viewport(640, 800);
@@ -52,24 +45,18 @@ test('renders a responsive layout at the retained breakpoints', async () => {
 });
 
 test('forwards the ref through a custom rendered div', () => {
-	const container = document.body.appendChild(document.createElement('div'));
-	const root = createRoot(container);
 	const ref = createRef<HTMLDivElement>();
-	mounted.push({ container, root });
+	const { locator } = render(
+		<Box
+			id="custom-div"
+			ref={ref}
+			render={(domProps) => <div data-motion="enabled" {...domProps} />}
+		>
+			Custom div
+		</Box>,
+	);
 
-	act(() => {
-		root.render(
-			<Box
-				id="custom-div"
-				ref={ref}
-				render={(domProps) => <div data-motion="enabled" {...domProps} />}
-			>
-				Custom div
-			</Box>,
-		);
-	});
-
-	const div = container.firstElementChild;
+	const div = locator.element().firstElementChild;
 	if (!(div instanceof HTMLDivElement)) throw new Error('Expected custom rendered div.');
 
 	expect(ref.current).toBe(div);

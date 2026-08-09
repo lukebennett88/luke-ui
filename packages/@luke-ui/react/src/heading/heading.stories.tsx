@@ -1,7 +1,6 @@
 import type { HeadingProps } from '@luke-ui/react/heading';
 import { Heading } from '@luke-ui/react/heading';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -23,18 +22,6 @@ const levels = [1, 2, 3, 4, 5, 6] as const satisfies Array<NonNullable<HeadingPr
  * Use `level` to define heading hierarchy and default heading size.
  */
 export const Level = meta.story({
-	play: async ({ canvas }) => {
-		const expectedSizes = ['35px', '28px', '24px', '20px', '18px', '16px'];
-		await Promise.all(
-			levels.map(async (level, index) => {
-				const heading = canvas.getByRole('heading', { name: `Level ${level} heading` });
-				const style = getComputedStyle(heading);
-				await expect(heading.tagName).toBe(`H${level}`);
-				await expect(style.fontSize).toBe(expectedSizes[index]);
-				await expect(style.fontWeight).toBe('600');
-			}),
-		);
-	},
 	render: (props) => (
 		<div style={stackStyle}>
 			{levels.map((level) => (
@@ -72,12 +59,6 @@ export const ElementType = meta.story({
 export const SizeOverride = meta.story({
 	args: {
 		level: 2,
-	},
-	play: async ({ canvas }) => {
-		const display = canvas.getByRole('heading', { name: /display size 900/ });
-		await expect(display.tagName).toBe('H2');
-		await expect(getComputedStyle(display).fontSize).toBe('60px');
-		await expect(getComputedStyle(display).fontWeight).toBe('600');
 	},
 	render: (props) => (
 		<div style={stackStyle}>

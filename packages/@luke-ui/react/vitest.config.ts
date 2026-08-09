@@ -65,7 +65,7 @@ export default defineConfig({
 					},
 					include: ['src/**/*.browser.test.{ts,tsx}'],
 					name: 'browser',
-					setupFiles: ['./src/test-utils/browser-setup.ts'],
+					setupFiles: ['./src/test-utils/render-setup.ts'],
 				},
 			},
 			{
@@ -125,7 +125,7 @@ export default defineConfig({
 					},
 					include: ['src/**/*.visual.test.{ts,tsx}'],
 					name: 'visual',
-					setupFiles: ['./src/test-utils/visual-setup.ts'],
+					setupFiles: ['./src/test-utils/render-setup.ts', './src/test-utils/visual-setup.ts'],
 				},
 			},
 		],

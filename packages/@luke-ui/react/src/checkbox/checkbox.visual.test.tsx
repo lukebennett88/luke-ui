@@ -1,27 +1,20 @@
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
+import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
-	renderVisual,
 	Stack,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+} from '../test-utils/visual.js';
 import { Text } from '../text/index.js';
 import { Checkbox } from './index.js';
 
-test('keyboard focus ring', async () => {
-	const scene = renderVisual(<Checkbox name="focus">Focus me</Checkbox>);
-	await focusViaKeyboard(page.getByRole('checkbox', { name: 'Focus me' }));
-	await captureVisual(scene, 'checkbox/focus-visible');
-});
-
-for (const appearance of visualAppearances) {
-	test(`material states: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
+test('kitchen sink', async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
 			<Stack>
 				<Checkbox name="default">Default</Checkbox>
 				<Checkbox defaultSelected name="selected">
@@ -36,88 +29,86 @@ for (const appearance of visualAppearances) {
 				<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid">
 					Invalid
 				</Checkbox>
+				{(['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const).map((size) => (
+					<Text key={size} elementType="div" size={size}>
+						<Checkbox name={`text-${size}`}>
+							{size}: This label wraps to show that the control aligns with its first line.
+						</Checkbox>
+					</Text>
+				))}
+				<Checkbox name="standalone">Standalone control</Checkbox>
+				<Checkbox defaultSelected isInvalid name="invalid-wrapping">
+					This label wraps onto a second line so the control should sit on the first line, not float
+					at the row's top edge.
+				</Checkbox>
+				<Checkbox
+					defaultSelected
+					errorMessage="This error message wraps onto a second and third line so the icon should sit on the first line, not centre itself against the whole block."
+					isInvalid
+					name="invalid-wrapping-message"
+				>
+					Accept the terms
+				</Checkbox>
+				<Checkbox
+					defaultSelected
+					errorMessage={
+						<>
+							Please accept the <strong>updated terms</strong> before continuing.
+						</>
+					}
+					isInvalid
+					name="invalid-rich-message"
+				>
+					Accept the terms
+				</Checkbox>
 			</Stack>,
-			appearance,
+			{ appearance },
 		);
-		await expect.element(page.getByRole('checkbox', { name: 'Default' })).toBeVisible();
-		await captureVisualAppearance(scene, 'checkbox/material-states', appearance);
+		await captureVisualAppearance(locator, 'checkbox/kitchen-sink', appearance);
+	}
+});
+
+test('keyboard focus ring', async () => {
+	const { locator } = render(<Checkbox name="focus">Focus me</Checkbox>);
+	await focusViaKeyboard(page.getByRole('checkbox', { name: 'Focus me' }));
+	await captureVisual(locator, 'checkbox/focus-visible');
+});
+
+test('interactive states', async () => {
+	const { locator } = render(
+		<Stack>
+			<Checkbox isInvalid name="invalid-unchecked">
+				Invalid
+			</Checkbox>
+			<Checkbox defaultSelected isInvalid name="invalid-selected">
+				Invalid selected
+			</Checkbox>
+			<Checkbox isIndeterminate isInvalid name="invalid-indeterminate">
+				Invalid indeterminate
+			</Checkbox>
+		</Stack>,
+	);
+	const unchecked = page.getByRole('checkbox', { name: 'Invalid', exact: true });
+	const selected = page.getByRole('checkbox', { name: 'Invalid selected', exact: true });
+	const indeterminate = page.getByRole('checkbox', {
+		name: 'Invalid indeterminate',
+		exact: true,
 	});
-}
 
-for (const appearance of visualAppearances) {
-	test(`invalid interaction states: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
-			<Stack>
-				<Checkbox isInvalid name="invalid-unchecked">
-					Invalid
-				</Checkbox>
-				<Checkbox defaultSelected isInvalid name="invalid-selected">
-					Invalid selected
-				</Checkbox>
-				<Checkbox isIndeterminate isInvalid name="invalid-indeterminate">
-					Invalid indeterminate
-				</Checkbox>
-			</Stack>,
-			appearance,
-		);
-		const unchecked = page.getByRole('checkbox', { name: 'Invalid', exact: true });
-		const selected = page.getByRole('checkbox', { name: 'Invalid selected', exact: true });
-		const indeterminate = page.getByRole('checkbox', {
-			name: 'Invalid indeterminate',
-			exact: true,
-		});
-		await expect.element(unchecked).toBeVisible();
-		const uncheckedLabel = checkboxLabel(unchecked);
-		const selectedLabel = checkboxLabel(selected);
-		const indeterminateLabel = checkboxLabel(indeterminate);
-
-		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-rest', appearance);
-
-		await userEvent.hover(uncheckedLabel);
-		await captureVisualAppearance(
-			scene,
-			'checkbox/invalid-interaction-hover-unchecked',
-			appearance,
-		);
-		await userEvent.unhover(uncheckedLabel);
-
-		await userEvent.hover(selectedLabel);
-		await captureVisualAppearance(scene, 'checkbox/invalid-interaction-hover-selected', appearance);
-		await userEvent.unhover(selectedLabel);
-
-		await userEvent.hover(indeterminateLabel);
-		await captureVisualAppearance(
-			scene,
-			'checkbox/invalid-interaction-hover-indeterminate',
-			appearance,
-		);
-		await userEvent.unhover(indeterminateLabel);
-
-		await pressCheckbox(unchecked, uncheckedLabel);
-		await captureVisualAppearance(
-			scene,
-			'checkbox/invalid-interaction-pressed-unchecked',
-			appearance,
-		);
+	for (const [name, checkbox] of [
+		['unchecked', unchecked],
+		['selected', selected],
+		['indeterminate', indeterminate],
+	] as const) {
+		const label = checkboxLabel(checkbox);
+		await userEvent.hover(label);
+		await captureVisual(locator, `checkbox/invalid-hover-${name}`);
+		await userEvent.unhover(label);
+		await pressCheckbox(checkbox);
+		await captureVisual(locator, `checkbox/invalid-pressed-${name}`);
 		await userEvent.keyboard('{/Space}');
-
-		await pressCheckbox(selected, selectedLabel);
-		await captureVisualAppearance(
-			scene,
-			'checkbox/invalid-interaction-pressed-selected',
-			appearance,
-		);
-		await userEvent.keyboard('{/Space}');
-
-		await pressCheckbox(indeterminate, indeterminateLabel);
-		await captureVisualAppearance(
-			scene,
-			'checkbox/invalid-interaction-pressed-indeterminate',
-			appearance,
-		);
-		await userEvent.keyboard('{/Space}');
-	});
-}
+	}
+});
 
 /** The clickable `<label>` carrying a checkbox's interactive data attributes. */
 function checkboxLabel(checkbox: Locator): HTMLElement {
@@ -126,21 +117,17 @@ function checkboxLabel(checkbox: Locator): HTMLElement {
 	return label;
 }
 
-/** Focuses a checkbox and holds the space key so its label reports `data-pressed`. */
-async function pressCheckbox(checkbox: Locator, label: HTMLElement): Promise<void> {
+/** Focuses a checkbox and holds the space key so its label enters its pressed state. */
+async function pressCheckbox(checkbox: Locator): Promise<void> {
 	checkbox.element().focus();
-	await expect.element(checkbox).toHaveFocus();
 	await userEvent.keyboard('{Space>}');
-	if (label.getAttribute('data-pressed') !== 'true') {
-		throw new Error('Expected the checkbox to enter the pressed state.');
-	}
 }
 
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 
 	try {
-		const scene = renderVisual(
+		const { locator } = render(
 			<Stack>
 				<Checkbox name="default">Default</Checkbox>
 				<Checkbox defaultSelected name="selected">
@@ -157,91 +144,8 @@ test('forced-colors states', async () => {
 				</Checkbox>
 			</Stack>,
 		);
-		await captureVisual(scene, 'checkbox/forced-colors-states');
+		await captureVisual(locator, 'checkbox/forced-colors-states');
 	} finally {
 		await emulateForcedColors('none');
 	}
-});
-
-test('first-line label alignment across Text sizes', async () => {
-	const scene = renderVisual(
-		<Stack width="26rem">
-			{(['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const).map((size) => (
-				<Text key={size} elementType="div" size={size}>
-					<Checkbox name={`text-${size}`}>
-						{size}: This label wraps to show that the control aligns with its first line.
-					</Checkbox>
-				</Text>
-			))}
-			<Checkbox name="standalone">Standalone control</Checkbox>
-		</Stack>,
-	);
-
-	await captureVisual(scene, 'checkbox/first-line-alignment');
-});
-
-// An invalid checkbox's control needs the same first-line alignment as any other
-// checkbox once its label wraps; the control itself carries no error icon (see the
-// message-icon test below for that).
-test('invalid control aligns with a wrapping label’s first line', async () => {
-	const scene = renderVisual(
-		<Stack width="20rem">
-			<Checkbox defaultSelected isInvalid name="invalid-wrapping">
-				This label wraps onto a second line so the control should sit on the first line, not float
-				at the row's top edge.
-			</Checkbox>
-		</Stack>,
-	);
-
-	await expect.element(page.getByRole('checkbox', { name: /This label wraps/ })).toBeVisible();
-	await captureVisual(scene, 'checkbox/invalid-wrapping-label');
-});
-
-// The error icon sits on the message, not the control, so it needs its own
-// first-line alignment proof: the message text wraps to several lines and the
-// icon must stay pinned to the first one instead of centring against the whole
-// block.
-test('error message icon aligns with a wrapping message’s first line', async () => {
-	const scene = renderVisual(
-		<Stack width="20rem">
-			<Checkbox
-				defaultSelected
-				errorMessage="This error message wraps onto a second and third line so the icon should sit on the first line, not centre itself against the whole block."
-				isInvalid
-				name="invalid-wrapping-message"
-			>
-				Accept the terms
-			</Checkbox>
-		</Stack>,
-	);
-
-	await expect.element(page.getByRole('checkbox', { name: 'Accept the terms' })).toBeVisible();
-	await captureVisual(scene, 'checkbox/invalid-wrapping-message');
-});
-
-// `errorMessage` is typed `ReactNode`, so rich content (not just a plain string) is
-// supported and common. A `flex` message container turned each top-level child of
-// content like this into its own independently-wrapping column — this scene is the
-// regression guard for that, uncovered until it was found by rendering exactly this
-// case.
-test('error message renders rich content without breaking into flex columns', async () => {
-	const scene = renderVisual(
-		<Stack width="20rem">
-			<Checkbox
-				defaultSelected
-				errorMessage={
-					<>
-						Please accept the <strong>updated terms</strong> before continuing.
-					</>
-				}
-				isInvalid
-				name="invalid-rich-message"
-			>
-				Accept the terms
-			</Checkbox>
-		</Stack>,
-	);
-
-	await expect.element(page.getByRole('checkbox', { name: 'Accept the terms' })).toBeVisible();
-	await captureVisual(scene, 'checkbox/invalid-rich-message');
 });

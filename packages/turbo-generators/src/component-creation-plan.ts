@@ -1,11 +1,15 @@
 type ComponentTier = 'atom' | 'composed';
 type ComponentStyling = 'none' | 'recipe';
+type ConformanceTier = 'universal' | 'field-shaped' | 'none';
 
 export interface CreateComponentInput {
 	docsGroup: string;
 	name: string;
 	styling: ComponentStyling;
 	tier: ComponentTier;
+	conformanceTier?: ConformanceTier;
+	integrationTripwire?: boolean;
+	visualCoverage?: boolean;
 }
 
 export interface PlanFile {
@@ -27,6 +31,13 @@ export interface TextFileAppendEdit {
 	path: string;
 }
 
+export interface TextFileInsertEdit {
+	kind: 'text-insert';
+	lines: Array<string>;
+	marker: string;
+	path: string;
+}
+
 export interface ComponentCreationPlan {
 	expected: {
 		hostedDocsPath: string;
@@ -37,6 +48,7 @@ export interface ComponentCreationPlan {
 	files: Array<PlanFile>;
 	jsonEdits: Array<JsonArrayAddSortedEdit>;
 	textFileAppends: Array<TextFileAppendEdit>;
+	textFileInserts?: Array<TextFileInsertEdit>;
 }
 
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
@@ -50,6 +62,9 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 	const pascalName = displayName.replaceAll(' ', '');
 	const camelName = toCamelCase(name);
 	const packagePath = `@luke-ui/react/${name}`;
+	const conformanceTier = input.conformanceTier ?? 'universal';
+	const integrationTripwire = input.integrationTripwire === true ? 'required' : 'none';
+	const visualApplicability = input.visualCoverage === false ? 'none' : 'applicable';
 
 	const files: Array<PlanFile> = [
 		{
@@ -92,6 +107,13 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 				]
 			: [];
 
+	if (input.visualCoverage !== false) {
+		files.push({
+			contents: renderVisualTest({ name, pascalName }),
+			path: `packages/@luke-ui/react/src/${name}/${name}.visual.test.tsx`,
+		});
+	}
+
 	return {
 		expected: {
 			hostedDocsPath: `components/${docsGroup}/${name}`,
@@ -126,6 +148,17 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 						},
 					]
 				: [],
+		textFileInserts: [
+			{
+				kind: 'text-insert',
+				lines: [
+					`\t['${pascalName}', '${name}', '${input.tier}', '${conformanceTier}', '${integrationTripwire}', '${visualApplicability}'],`,
+				],
+				marker:
+					'].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({',
+				path: 'packages/@luke-ui/react/src/conformance/manifest.ts',
+			},
+		],
 	};
 }
 
@@ -230,8 +263,27 @@ function renderHostedExample(input: { name: string; pascalName: string }): strin
 	return `import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
 
 export default function Basic() {
-\treturn <${input.pascalName}>${input.pascalName}</${input.pascalName}>;
+	return <${input.pascalName}>${input.pascalName}</${input.pascalName}>;
 }
+`;
+}
+
+function renderVisualTest(input: { name: string; pascalName: string }): string {
+	return `import { test } from 'vite-plus/test';
+import { render } from '../test-utils/render.js';
+import { captureVisual, Grid } from '../test-utils/visual.js';
+import { ${input.pascalName} } from './index.js';
+
+test('kitchen sink', async () => {
+	const { locator } = render(
+		<Grid columns={2}>
+			<${input.pascalName}>Default</${input.pascalName}>
+			<${input.pascalName}>With content</${input.pascalName}>
+		</Grid>,
+	);
+
+	await captureVisual(locator, '${input.name}/kitchen-sink');
+});
 `;
 }
 

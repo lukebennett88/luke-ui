@@ -26,6 +26,7 @@ describe('createComponentPlan', () => {
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
 			'packages/@luke-ui/react/src/status-badge/index.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
+			'packages/@luke-ui/react/src/status-badge/status-badge.visual.test.tsx',
 		]);
 		const guide = plan.files.find((file) => {
 			return file.path.endsWith('/status-badge/index.mdx');
@@ -65,6 +66,15 @@ describe('createComponentPlan', () => {
 				],
 			},
 		]);
+		expect(plan.textFileInserts).toEqual([
+			{
+				kind: 'text-insert',
+				lines: ["\t['StatusBadge', 'status-badge', 'atom', 'universal', 'none', 'applicable'],"],
+				marker:
+					'].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({',
+				path: 'packages/@luke-ui/react/src/conformance/manifest.ts',
+			},
+		]);
 		expect(
 			plan.files.find((file) => file.path.endsWith('/status-badge/index.tsx'))?.contents,
 		).toContain("export interface StatusBadgeProps extends ComponentProps<'div'> {}");
@@ -97,6 +107,39 @@ describe('createComponentPlan', () => {
 			}),
 		);
 		expect(plan.textFileAppends).toEqual([]);
+	});
+
+	it('omits visual coverage when it does not apply', () => {
+		const plan = createComponentPlan({
+			docsGroup: 'forms',
+			name: 'DateField',
+			styling: 'none',
+			tier: 'composed',
+			visualCoverage: false,
+		});
+
+		expect(plan.files.map((file) => file.path)).not.toContain(
+			'packages/@luke-ui/react/src/date-field/date-field.visual.test.tsx',
+		);
+		expect(plan.textFileInserts?.[0]?.lines).toEqual([
+			"\t['DateField', 'date-field', 'composed', 'universal', 'none', 'none'],",
+		]);
+	});
+
+	it('uses explicit applicability overrides in the manifest entry', () => {
+		const plan = createComponentPlan({
+			docsGroup: 'forms',
+			name: 'DateField',
+			styling: 'none',
+			tier: 'composed',
+			conformanceTier: 'field-shaped',
+			integrationTripwire: true,
+			visualCoverage: false,
+		});
+
+		expect(plan.textFileInserts?.[0]?.lines).toEqual([
+			"\t['DateField', 'date-field', 'composed', 'field-shaped', 'required', 'none'],",
+		]);
 	});
 
 	it('rejects invalid component names before file writes', () => {

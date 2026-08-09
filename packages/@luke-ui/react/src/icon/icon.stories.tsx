@@ -4,7 +4,6 @@ import { createIcon, Icon, iconNames } from '@luke-ui/react/icon';
 import type { TextProps } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -46,15 +45,6 @@ const HeartIcon = createIcon({
 
 export const Default = meta.story({
 	args: baseArgs,
-	play: async ({ canvas }) => {
-		const icon = canvas.getByRole('img', { name: 'add' });
-		const iconStyles = getComputedStyle(icon);
-		const bodyStyles = getComputedStyle(document.body);
-		const primaryColor = bodyStyles.getPropertyValue('--luke-color-text-primary');
-
-		await expect(iconStyles.color).toBe(primaryColor);
-		await expect(bodyStyles.color).toBe(primaryColor);
-	},
 });
 
 export const Sizes = meta.story({

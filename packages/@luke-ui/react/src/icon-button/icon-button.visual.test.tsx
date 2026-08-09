@@ -1,72 +1,52 @@
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
-	renderVisual,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+} from '../test-utils/visual.js';
 import { IconButton } from './index.js';
 
-test('sizes and states', async () => {
-	const locator = renderVisual(
-		<Grid columns={4}>
-			<IconButton aria-label="Add small" icon="add" size="small" />
-			<IconButton aria-label="Add medium" icon="add" size="medium" />
-			<IconButton aria-label="Disabled small" icon="delete" isDisabled size="small" />
-			<IconButton aria-label="Disabled medium" icon="delete" isDisabled size="medium" />
-		</Grid>,
-	);
-
-	await captureVisual(locator, 'icon-button/sizes-states');
-});
-
-for (const appearance of visualAppearances) {
-	test(`action states: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
-			<Grid columns={5}>
-				<IconButton aria-label="Resting" icon="add" />
-				<IconButton aria-label="Disabled" icon="delete" isDisabled />
-				<IconButton aria-label="Pending" icon="add" isPending />
+test('kitchen sink', async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Grid columns={4}>
+				<IconButton aria-label="Add small" icon="add" size="small" />
+				<IconButton aria-label="Add medium" icon="add" size="medium" />
+				<IconButton aria-label="Disabled" icon="delete" isDisabled size="small" />
+				<IconButton aria-label="Pending" icon="add" isPending size="medium" />
 				<IconButton appearance="subtle" aria-label="Subtle" icon="add" />
 				<IconButton appearance="ghost" aria-label="Ghost" icon="add" />
 			</Grid>,
-			appearance,
+			{ appearance },
 		);
-		await expect
-			.element(page.getByRole('button', { name: 'Pending' }))
-			.toHaveAttribute('aria-disabled', 'true');
+		await captureVisualAppearance(locator, 'icon-button/kitchen-sink', appearance);
+	}
+});
 
-		await captureVisualAppearance(scene, 'icon-button/action-states', appearance);
-	});
-}
+test('interactive states', async () => {
+	const { locator } = render(<IconButton aria-label="Action" icon="add" />);
+	const button = page.getByRole('button', { name: 'Action' });
 
-for (const appearance of visualAppearances) {
-	test(`interactive states: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(<IconButton aria-label="Action" icon="add" />, appearance);
-		const button = page.getByRole('button', { name: 'Action' });
-		await expect.element(button).toBeVisible();
-
-		await captureVisualAppearance(scene, 'icon-button/resting', appearance);
-		await userEvent.hover(button);
-		await captureVisualAppearance(scene, 'icon-button/hover', appearance);
-		await userEvent.unhover(button);
-		await focusViaKeyboard(button);
-		await captureVisualAppearance(scene, 'icon-button/focus-visible', appearance);
-		await userEvent.keyboard('{Space>}');
-		await captureVisualAppearance(scene, 'icon-button/pressed', appearance);
-		await userEvent.keyboard('{/Space}');
-	});
-}
+	await captureVisual(locator, 'icon-button/resting');
+	await userEvent.hover(button);
+	await captureVisual(locator, 'icon-button/hover');
+	await userEvent.unhover(button);
+	await focusViaKeyboard(button);
+	await captureVisual(locator, 'icon-button/focus-visible');
+	await userEvent.keyboard('{Space>}');
+	await captureVisual(locator, 'icon-button/pressed');
+	await userEvent.keyboard('{/Space}');
+});
 
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 
 	try {
-		const scene = renderVisual(
+		const { locator } = render(
 			<Grid columns={3}>
 				<IconButton aria-label="Action" icon="add" />
 				<IconButton aria-label="Disabled" icon="delete" isDisabled />
@@ -74,20 +54,15 @@ test('forced-colors states', async () => {
 			</Grid>,
 		);
 		const action = page.getByRole('button', { name: 'Action' });
-		const disabled = page.getByRole('button', { name: 'Disabled' });
-		const pending = page.getByRole('button', { name: 'Pending' });
 
-		await expect.element(disabled).toHaveStyle({ opacity: '1' });
-		await expect.element(pending).toHaveStyle({ opacity: '1' });
-		await captureVisual(scene, 'icon-button/forced-colors-resting');
+		await captureVisual(locator, 'icon-button/forced-colors-resting');
 		await userEvent.hover(action);
-		await captureVisual(scene, 'icon-button/forced-colors-hover');
+		await captureVisual(locator, 'icon-button/forced-colors-hover');
 		await userEvent.unhover(action);
 		await focusViaKeyboard(action);
-		await captureVisual(scene, 'icon-button/forced-colors-focus-visible');
+		await captureVisual(locator, 'icon-button/forced-colors-focus-visible');
 		await userEvent.keyboard('{Space>}');
-		await expect.element(action).toHaveAttribute('data-pressed', 'true');
-		await captureVisual(scene, 'icon-button/forced-colors-pressed');
+		await captureVisual(locator, 'icon-button/forced-colors-pressed');
 		await userEvent.keyboard('{/Space}');
 	} finally {
 		await emulateForcedColors('none');

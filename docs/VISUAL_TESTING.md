@@ -58,19 +58,16 @@ See [`TESTING.md`](./TESTING.md#visual-regression-tests) for how to write a visu
 ## Test every theme and mode
 
 Migrated components use the shared appearance matrix for Tactile and Paper in explicit light and
-dark modes. Pass each appearance to `renderVisual`, then capture it with `captureVisualAppearance`:
+dark modes. Pass each appearance to `render`, then capture it with `captureVisualAppearance`:
 
 ```tsx
 import { test } from 'vite-plus/test';
-import {
-	captureVisualAppearance,
-	renderVisual,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+import { captureVisualAppearance, visualAppearances } from '../test-utils/visual.js';
+import { render } from '../test-utils/render.js';
 
 for (const appearance of visualAppearances) {
 	test(`theme matrix: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(<Button>Continue</Button>, appearance);
+		const { locator: scene } = render(<Button>Continue</Button>, { appearance });
 
 		await captureVisualAppearance(scene, 'button/theme-matrix', appearance);
 	});
@@ -87,7 +84,7 @@ capture IDs:
 
 Use one literal base ID for the matrix. The visual runner expands it during duplicate-ID validation,
 so each look remains independently reviewable without repeating theme setup. Existing tests that
-call `renderVisual(node)` continue to render in Tactile light.
+call `render(node)` continues to render in Tactile light.
 
 Theme identity and colour mode stay separate. To cover nested mode, put `data-color-mode="dark"` or
 `data-color-mode="light"` on a descendant inside the rendered scene. Do not add a nested theme

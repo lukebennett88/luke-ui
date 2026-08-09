@@ -122,6 +122,45 @@ describe('applyComponentCreationPlan', () => {
 		);
 	});
 
+	it('inserts manifest entries idempotently', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
+		roots.push(root);
+
+		const manifestPath = 'packages/@luke-ui/react/src/conformance/manifest.ts';
+		const marker =
+			'].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({';
+		const initialContent = `const entries = [\n\t['Button', 'button', 'composed', 'universal', 'required', 'applicable'],\n${marker}\n\tname,\n}));\n`;
+		await mkdir(join(root, 'packages/@luke-ui/react/src/conformance'), { recursive: true });
+		await writeFile(join(root, manifestPath), initialContent, 'utf8');
+
+		const plan: ComponentCreationPlan = {
+			expected: {
+				hostedDocsPath: 'components/feedback/status-badge',
+				packageDocsSlug: 'status-badge',
+				packageExportPath: './status-badge',
+				exampleSlug: 'status-badge/basic',
+			},
+			files: [],
+			jsonEdits: [],
+			textFileAppends: [],
+			textFileInserts: [
+				{
+					kind: 'text-insert',
+					lines: ["\t['StatusBadge', 'status-badge', 'atom', 'universal', 'none', 'applicable'],"],
+					marker,
+					path: manifestPath,
+				},
+			],
+		};
+
+		await applyComponentCreationPlan(root, plan);
+		await applyComponentCreationPlan(root, plan);
+
+		expect(await readFile(join(root, manifestPath), 'utf8')).toBe(
+			`const entries = [\n\t['Button', 'button', 'composed', 'universal', 'required', 'applicable'],\n\t['StatusBadge', 'status-badge', 'atom', 'universal', 'none', 'applicable'],\n${marker}\n\tname,\n}));\n`,
+		);
+	});
+
 	it('rejects docs navigation JSON that is not an object', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 		roots.push(root);

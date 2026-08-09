@@ -1,79 +1,8 @@
-/// <reference types="vite/client" />
-
-// Loads the design-token stylesheet into the test document.
-import '../stylesheet.css.js';
-import '@luke-ui/react/themes/paper/stylesheet.css';
-import '@luke-ui/react/themes/tactile/stylesheet.css';
 import type { ComponentProps, ComponentType, CSSProperties, ReactNode } from 'react';
-import { act } from 'react';
-import type { Root } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
 import { expect } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
-// The generated spritesheet is emitted to `dist/` by the `generate` task, which
-// both `build` and `test` depend on, so it is always present when tests run.
-import spritesheetHref from '../../dist/spritesheet.svg?url';
-import { IconSpritesheetProvider } from '../icon/index.js';
-import { rootClassName, vars } from '../theme/index.js';
-import { themeClassName as paperThemeClassName } from '../themes/paper/index.js';
-import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
-
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
-
-const mounted: Array<{ container: HTMLElement; root: Root }> = [];
-
-/** The identity class currently applied to `document.documentElement`, if any. */
-let appliedIdentityClassName: string | undefined;
-
-export type VisualAppearance = {
-	mode: 'light' | 'dark';
-	theme: 'tactile' | 'paper';
-};
-
-export const visualAppearances = [
-	{ mode: 'light', theme: 'tactile' },
-	{ mode: 'dark', theme: 'tactile' },
-	{ mode: 'light', theme: 'paper' },
-	{ mode: 'dark', theme: 'paper' },
-] as const satisfies ReadonlyArray<VisualAppearance>;
-
-const defaultVisualAppearance: VisualAppearance = visualAppearances[0];
-
-/**
- * Renders `node` inside the same theme root and icon spritesheet provider the
- * app (and Storybook) wrap components with, then returns a Vitest locator for
- * the mounted subtree ready to pass to `captureVisual`.
- *
- * The identity class and colour mode go on `document.documentElement`, not the
- * container, so a portal (combobox popover, mobile tray) that mounts outside
- * the container still gets the intended theme and mode.
- */
-export function renderVisual(node: ReactNode, appearance = defaultVisualAppearance) {
-	const identityClassName = identityClassNameFor(appearance.theme);
-	if (appliedIdentityClassName != null) {
-		document.documentElement.classList.remove(appliedIdentityClassName);
-	}
-	document.documentElement.classList.add(identityClassName);
-	appliedIdentityClassName = identityClassName;
-	document.documentElement.dataset.colorMode = appearance.mode;
-
-	const container = document.body.appendChild(document.createElement('div'));
-	container.className = rootClassName;
-	container.style.backgroundColor = vars.color.surface.canvas;
-	const root = createRoot(container);
-	mounted.push({ container, root });
-
-	act(() => {
-		root.render(<IconSpritesheetProvider href={spritesheetHref}>{node}</IconSpritesheetProvider>);
-	});
-
-	return page.elementLocator(container);
-}
-
-function identityClassNameFor(theme: VisualAppearance['theme']) {
-	return theme === 'tactile' ? tactileThemeClassName : paperThemeClassName;
-}
+import type { VisualAppearance } from './render.js';
 
 /** Captures a named scene into the revision output selected by the visual runner. */
 export async function captureVisual(locator: Locator, id: string) {
@@ -215,21 +144,6 @@ export async function pseudoElementLeft(
 	const left = model.border[0];
 	if (left == null) throw new Error('Expected the pseudo-element border quad to have a left edge.');
 	return left;
-}
-
-/** Unmounts everything rendered by `renderVisual`. Registered globally in `visual-setup.ts`. */
-export function cleanupVisual() {
-	for (const { container, root } of mounted) {
-		act(() => root.unmount());
-		container.remove();
-	}
-	mounted.length = 0;
-
-	if (appliedIdentityClassName != null) {
-		document.documentElement.classList.remove(appliedIdentityClassName);
-		appliedIdentityClassName = undefined;
-	}
-	delete document.documentElement.dataset.colorMode;
 }
 
 /**

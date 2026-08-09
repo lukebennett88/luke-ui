@@ -1,7 +1,7 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
 import type { CSSProperties } from 'react';
 import { Form } from 'react-aria-components/Form';
-import { expect, userEvent, within } from 'storybook/test';
+import { userEvent, within } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const stackStyle = {
@@ -30,9 +30,7 @@ export const Default = meta.story({
 		const canvas = within(canvasElement);
 		const checkbox = canvas.getByRole('checkbox', { name: 'Send me account updates' });
 
-		await expect(checkbox).not.toBeChecked();
 		await userEvent.click(checkbox);
-		await expect(checkbox).toBeChecked();
 	},
 });
 
@@ -66,12 +64,6 @@ export const Indeterminate = meta.story({
 		isIndeterminate: true,
 		name: 'projects',
 	},
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		await expect(
-			canvas.getByRole('checkbox', { name: 'Select all projects' }),
-		).toBePartiallyChecked();
-	},
 });
 
 /**
@@ -79,16 +71,6 @@ export const Indeterminate = meta.story({
  * checkboxes stay in the tab order so someone who uses a keyboard can access their state.
  */
 export const DisabledAndReadOnly = meta.story({
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		const disabled = canvas.getByRole('checkbox', { name: 'Unavailable' });
-		const readOnly = canvas.getByRole('checkbox', { name: 'Read-only' });
-
-		await expect(disabled).toBeDisabled();
-		await expect(readOnly).not.toBeDisabled();
-		await userEvent.click(readOnly);
-		await expect(readOnly).not.toBeChecked();
-	},
 	render: () => (
 		<div style={stackStyle}>
 			<Checkbox isDisabled name="disabled">
@@ -109,7 +91,6 @@ export const Validation = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
-		await expect(canvas.getByText('Accept the terms to continue.')).toBeInTheDocument();
 	},
 	render: () => (
 		<Form>

@@ -45,6 +45,8 @@
 				"check:format",
 				"//#check:format-root",
 				"check:lint",
+				"check:story-plays",
+				"check:test-suffixes",
 				"check:types"
 			]
 		},
@@ -56,6 +58,12 @@
 		},
 		"check:lint": {
 			"dependsOn": ["generate", "^build"]
+		},
+		"check:story-plays": {
+			"dependsOn": ["generate"]
+		},
+		"check:test-suffixes": {
+			"dependsOn": ["generate"]
 		},
 		"check:types": {
 			"dependsOn": ["generate", "^build"]

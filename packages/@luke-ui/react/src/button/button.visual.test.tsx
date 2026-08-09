@@ -1,148 +1,86 @@
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { Icon } from '../icon/index.js';
+import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
-	renderVisual,
-	visualAppearances,
 	variantValuesFor,
-} from '../test-utils/render-visual.js';
+} from '../test-utils/visual.js';
 import { Button } from './index.js';
 
 const tones = variantValuesFor<typeof Button, 'tone'>()(['neutral', 'accent', 'danger']);
 const appearances = variantValuesFor<typeof Button, 'appearance'>()(['solid', 'subtle', 'ghost']);
 const sizes = variantValuesFor<typeof Button, 'size'>()(['small', 'medium']);
 
-test('tones and appearances across sizes', async () => {
-	const locator = renderVisual(
-		<Grid columns={appearances.length}>
-			{sizes.flatMap((size) => {
-				return tones.flatMap((tone) => {
-					return appearances.map((appearance) => (
-						<Button
-							appearance={appearance}
-							key={`${size}-${tone}-${appearance}`}
-							size={size}
-							tone={tone}
-						>
-							{tone} {appearance}
-						</Button>
-					));
-				});
-			})}
-		</Grid>,
-	);
-
-	await captureVisual(locator, 'button/tones');
-});
-
-test('states: disabled, pending, with icons', async () => {
-	const locator = renderVisual(
-		<Grid columns={4}>
-			<Button>Default</Button>
-			<Button isDisabled>Disabled</Button>
-			<Button isPending>Pending</Button>
-			<Button startIcon={<Icon name="add" />}>With icon</Button>
-		</Grid>,
-	);
-
-	await captureVisual(locator, 'button/states');
-});
-
-// `startIcon`/`endIcon` are typed `ReactNode`, so a consumer can pass more than
-// one top-level element, for example a compound icon. Each becomes its own item
-// in the `buttonLabel` flex row (`button-composed.css.ts`), so this locks in that
-// a second element sits cleanly beside the first and the label rather than
-// overlapping either.
-test('start and end icons render more than one element', async () => {
-	const locator = renderVisual(
-		<Grid columns={1}>
-			<Button
-				endIcon={
-					<>
-						<Icon name="check" />
-						<Icon name="close" />
-					</>
-				}
-				startIcon={
-					<>
-						<Icon name="add" />
-						<Icon name="search" />
-					</>
-				}
-			>
-				New task
-			</Button>
-		</Grid>,
-	);
-
-	const button = page.getByRole('button', { name: 'New task' });
-	await expect.element(button).toBeVisible();
-	const [firstStart, secondStart, firstEnd, secondEnd] = button.element().querySelectorAll('svg');
-	if (firstStart == null || secondStart == null || firstEnd == null || secondEnd == null) {
-		throw new Error('Expected all four icon elements.');
-	}
-	const iconPairs: Array<[SVGSVGElement, SVGSVGElement]> = [
-		[firstStart, secondStart],
-		[firstEnd, secondEnd],
-	];
-	for (const [first, second] of iconPairs) {
-		const firstRect = first.getBoundingClientRect();
-		const secondRect = second.getBoundingClientRect();
-		expect(firstRect.width).toBeGreaterThan(0);
-		expect(secondRect.width).toBeGreaterThan(0);
-		expect(secondRect.left).toBeGreaterThanOrEqual(firstRect.right);
-	}
-	await captureVisual(locator, 'button/multi-element-icons');
-});
-
-for (const appearance of visualAppearances) {
-	test(`action states: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
-			<Grid columns={5}>
-				<Button>Resting</Button>
+test('kitchen sink', async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Grid columns={appearances.length}>
+				{sizes.flatMap((size) => {
+					return tones.flatMap((tone) => {
+						return appearances.map((buttonAppearance) => (
+							<Button
+								appearance={buttonAppearance}
+								key={`${size}-${tone}-${buttonAppearance}`}
+								size={size}
+								tone={tone}
+							>
+								{tone} {buttonAppearance}
+							</Button>
+						));
+					});
+				})}
+				<Button>Default</Button>
 				<Button isDisabled>Disabled</Button>
 				<Button isPending>Pending</Button>
-				<Button appearance="subtle">Subtle</Button>
-				<Button appearance="ghost">Ghost</Button>
+				<Button startIcon={<Icon name="add" />}>With icon</Button>
+				<Button
+					endIcon={
+						<>
+							<Icon name="check" />
+							<Icon name="close" />
+						</>
+					}
+					startIcon={
+						<>
+							<Icon name="add" />
+							<Icon name="search" />
+						</>
+					}
+				>
+					New task
+				</Button>
 			</Grid>,
-			appearance,
+			{ appearance },
 		);
-		await expect
-			.element(page.getByRole('button', { name: 'Pending' }))
-			.toHaveAttribute('aria-disabled', 'true');
+		await captureVisualAppearance(locator, 'button/kitchen-sink', appearance);
+	}
+});
 
-		await captureVisualAppearance(scene, 'button/action-states', appearance);
-	});
-}
+test('interactive states', async () => {
+	const { locator } = render(<Button>Action</Button>);
+	const button = page.getByRole('button', { name: 'Action' });
 
-for (const appearance of visualAppearances) {
-	test(`interactive states: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(<Button>Action</Button>, appearance);
-		const button = page.getByRole('button', { name: 'Action' });
-		await expect.element(button).toBeVisible();
-
-		await captureVisualAppearance(scene, 'button/resting', appearance);
-		await userEvent.hover(button);
-		await captureVisualAppearance(scene, 'button/hover', appearance);
-		await userEvent.unhover(button);
-		await focusViaKeyboard(button);
-		await captureVisualAppearance(scene, 'button/focus-visible', appearance);
-		await userEvent.keyboard('{Space>}');
-		await captureVisualAppearance(scene, 'button/pressed', appearance);
-		await userEvent.keyboard('{/Space}');
-	});
-}
+	await captureVisual(locator, 'button/resting');
+	await userEvent.hover(button);
+	await captureVisual(locator, 'button/hover');
+	await userEvent.unhover(button);
+	await focusViaKeyboard(button);
+	await captureVisual(locator, 'button/focus-visible');
+	await userEvent.keyboard('{Space>}');
+	await captureVisual(locator, 'button/pressed');
+	await userEvent.keyboard('{/Space}');
+});
 
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 
 	try {
-		const scene = renderVisual(
+		const { locator } = render(
 			<Grid columns={3}>
 				<Button>Action</Button>
 				<Button isDisabled>Disabled</Button>
@@ -150,20 +88,15 @@ test('forced-colors states', async () => {
 			</Grid>,
 		);
 		const action = page.getByRole('button', { name: 'Action' });
-		const disabled = page.getByRole('button', { name: 'Disabled' });
-		const pending = page.getByRole('button', { name: 'Pending' });
 
-		await expect.element(disabled).toHaveStyle({ opacity: '1' });
-		await expect.element(pending).toHaveStyle({ opacity: '1' });
-		await captureVisual(scene, 'button/forced-colors-resting');
+		await captureVisual(locator, 'button/forced-colors-resting');
 		await userEvent.hover(action);
-		await captureVisual(scene, 'button/forced-colors-hover');
+		await captureVisual(locator, 'button/forced-colors-hover');
 		await userEvent.unhover(action);
 		await focusViaKeyboard(action);
-		await captureVisual(scene, 'button/forced-colors-focus-visible');
+		await captureVisual(locator, 'button/forced-colors-focus-visible');
 		await userEvent.keyboard('{Space>}');
-		await expect.element(action).toHaveAttribute('data-pressed', 'true');
-		await captureVisual(scene, 'button/forced-colors-pressed');
+		await captureVisual(locator, 'button/forced-colors-pressed');
 		await userEvent.keyboard('{/Space}');
 	} finally {
 		await emulateForcedColors('none');

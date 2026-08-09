@@ -1,11 +1,7 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
-import {
-	captureVisualAppearance,
-	renderVisual,
-	Stack,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { Numeral } from './index.js';
 
 const rowStyle = {
@@ -15,7 +11,7 @@ const rowStyle = {
 
 for (const appearance of visualAppearances) {
 	test(`formats and typography: ${appearance.theme} ${appearance.mode}`, async () => {
-		const locator = renderVisual(
+		const { locator } = render(
 			<Stack>
 				<div style={rowStyle}>
 					<Numeral value={120_000} />
@@ -37,9 +33,8 @@ for (const appearance of visualAppearances) {
 					/>
 				</div>
 			</Stack>,
-			appearance,
+			{ appearance },
 		);
-		await expect.element(locator).toBeVisible();
 
 		await captureVisualAppearance(locator, 'numeral/formats-typography', appearance);
 	});

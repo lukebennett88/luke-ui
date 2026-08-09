@@ -7,6 +7,7 @@ import { createComponentPlan } from './src/component-creation-plan.js';
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
 const COMPONENT_TIERS = ['atom', 'composed'] as const;
 const COMPONENT_STYLING = ['none', 'recipe'] as const;
+const CONFORMANCE_TIERS = ['universal', 'field-shaped', 'none'] as const;
 // Mirrors apps/docs/content/docs/components/*/meta.json — the pages listed there.
 const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
@@ -15,6 +16,9 @@ const componentAnswersSchema = z.object({
 	name: z.string().min(1),
 	styling: z.enum(COMPONENT_STYLING),
 	tier: z.enum(COMPONENT_TIERS),
+	conformanceTier: z.enum(CONFORMANCE_TIERS).default('universal'),
+	integrationTripwire: z.boolean().default(false),
+	visualCoverage: z.boolean().default(true),
 });
 
 export default function generator(plop: PlopTypes.NodePlopAPI): void {
@@ -57,6 +61,34 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				],
 				message: 'Styling:',
 				name: 'styling',
+				type: 'list',
+			},
+			{
+				choices: [
+					{ name: 'Yes', value: true },
+					{ name: 'No', value: false },
+				],
+				message: 'Add visual coverage?',
+				name: 'visualCoverage',
+				type: 'list',
+			},
+			{
+				choices: [
+					{ name: 'Universal', value: 'universal' },
+					{ name: 'Field-shaped', value: 'field-shaped' },
+					{ name: 'None', value: 'none' },
+				],
+				message: 'Conformance tier:',
+				name: 'conformanceTier',
+				type: 'list',
+			},
+			{
+				choices: [
+					{ name: 'Yes', value: true },
+					{ name: 'No', value: false },
+				],
+				message: 'Add an integration tripwire?',
+				name: 'integrationTripwire',
 				type: 'list',
 			},
 		],

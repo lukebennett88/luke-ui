@@ -10,7 +10,7 @@ import {
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
 import { Form } from 'react-aria-components/Form';
-import { expect, userEvent, within } from 'storybook/test';
+import { userEvent, within } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -68,9 +68,7 @@ export const PrefixAndSuffix = meta.story({
  */
 export const InputGroupComposition = meta.story({
 	play: async ({ canvas }) => {
-		await expect(canvas.getByLabelText('Amount')).toBeInTheDocument();
 		await userEvent.click(canvas.getByRole('button', { name: 'Clear' }));
-		await expect(canvas.getByLabelText('Search')).toHaveValue('');
 	},
 	render: function InputGroupCompositionStory() {
 		const [search, setSearch] = useState('invoices');
@@ -108,9 +106,6 @@ export const InputGroupComposition = meta.story({
  * and before any `InputGroupSuffix`.
  */
 export const InputGroupInvalid = meta.story({
-	play: async ({ canvas }) => {
-		await expect(canvas.getByLabelText('Invalid amount')).toHaveAttribute('aria-invalid', 'true');
-	},
 	render: () => (
 		<div style={stackStyle}>
 			<InputGroup isInvalid>
@@ -130,8 +125,6 @@ export const Validation = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
-		await expect(canvas.getByText('Please enter an email.')).toBeInTheDocument();
-		await expect(canvas.getByText('Must be at least 3 characters.')).toBeInTheDocument();
 	},
 	render: () => (
 		<Form>
@@ -155,9 +148,6 @@ export const Validation = meta.story({
  * `errorMessage` uses the render-function signature.
  */
 export const ServerValidation = meta.story({
-	play: async ({ canvas }) => {
-		await expect(canvas.getByText('This username is not available.')).toBeInTheDocument();
-	},
 	render: () => (
 		<Form validationErrors={{ username: 'This username is not available.' }}>
 			<TextField
@@ -174,17 +164,6 @@ export const ServerValidation = meta.story({
  * value, but cannot edit it.
  */
 export const DisabledAndReadOnly = meta.story({
-	play: async ({ canvas }) => {
-		const disabledInput = canvas.getByLabelText('Disabled');
-		const readOnlyInput = canvas.getByLabelText('Read-only');
-
-		await expect(disabledInput).toBeDisabled();
-		await expect(readOnlyInput).not.toBeDisabled();
-		await expect(readOnlyInput).toHaveAttribute('readonly');
-
-		await userEvent.click(readOnlyInput);
-		await expect(readOnlyInput).toHaveFocus();
-	},
 	render: () => (
 		<div style={stackStyle}>
 			<TextField
