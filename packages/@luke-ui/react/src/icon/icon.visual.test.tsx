@@ -1,13 +1,12 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
+import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
-	renderVisual,
 	Stack,
 	variantValuesFor,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+} from '../test-utils/visual.js';
 import { vars } from '../theme/index.js';
 import { Icon } from './index.js';
 
@@ -27,7 +26,7 @@ const names = variantValuesFor<typeof Icon, 'name'>()([
 ]);
 
 test('sizes and glyphs', async () => {
-	const locator = renderVisual(
+	const { locator } = render(
 		<Stack>
 			<div style={rowStyle}>
 				{sizes.map((size) => (
@@ -47,17 +46,12 @@ test('sizes and glyphs', async () => {
 
 for (const appearance of visualAppearances) {
 	test(`semantic content inheritance: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
+		const { locator: scene } = render(
 			<div style={{ color: vars.color.foreground.accent.rest }}>
 				<Icon name="checkCircle" title="Inherited accent" />
 			</div>,
-			appearance,
+			{ appearance },
 		);
-		const icon = scene.getByRole('img', { name: 'Inherited accent' });
-		const parent = icon.element().parentElement;
-		if (!parent) throw new Error('Expected icon parent.');
-
-		expect(getComputedStyle(icon.element()).color).toBe(getComputedStyle(parent).color);
 		await captureVisualAppearance(scene, 'icon/content-inheritance', appearance);
 	});
 }

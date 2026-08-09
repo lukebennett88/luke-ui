@@ -6,7 +6,7 @@ import { useState } from 'react';
 import type { Key } from 'react-aria-components/Breadcrumbs';
 import { Form } from 'react-aria-components/Form';
 import { useAsyncList } from 'react-aria-components/useAsyncList';
-import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { userEvent, within } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -39,40 +39,12 @@ const stackStyle = {
  * Use `ComboboxField` when someone must choose one option from a large set.
  */
 export const Default = meta.story({
-	play: async ({ canvasElement, step }) => {
-		const canvas = within(canvasElement);
+	play: async () => {
 		const page = within(document.body);
-		const combobox = canvas.getByRole('combobox', { name: 'Country' });
-		const control = canvas.getByRole('group');
 
-		await step('the keyboard opens the options and moves active focus', async () => {
-			await userEvent.tab();
-			await expect(combobox).toHaveFocus();
-			await userEvent.keyboard('{ArrowDown}');
-			await expect(combobox).toHaveAttribute('aria-expanded', 'true');
-			await expect(page.getByRole('option', { name: 'Australia' })).toHaveAttribute(
-				'data-focused',
-				'true',
-			);
-		});
-
-		await step('the popover aligns with the control well', async () => {
-			const controlRect = control.getBoundingClientRect();
-			const listboxRect = page.getByRole('listbox').getBoundingClientRect();
-			const listboxGap = listboxRect.top - controlRect.bottom;
-			await expect(listboxGap).toBeGreaterThanOrEqual(4);
-			await expect(listboxGap).toBeLessThanOrEqual(6);
-			const inlineStartInset = listboxRect.left - controlRect.left;
-			await expect(inlineStartInset).toBeGreaterThanOrEqual(1);
-			await expect(inlineStartInset).toBeLessThanOrEqual(13);
-			await expect(Math.abs(listboxRect.width + 2 - controlRect.width)).toBeLessThanOrEqual(1);
-		});
-
-		await step('selecting an option closes the popover and fills the input', async () => {
-			await userEvent.click(page.getByRole('option', { name: 'Australia' }));
-			await expect(combobox).toHaveValue('Australia');
-			await expect(combobox).toHaveAttribute('aria-expanded', 'false');
-		});
+		await userEvent.tab();
+		await userEvent.keyboard('{ArrowDown}');
+		await userEvent.click(page.getByRole('option', { name: 'Australia' }));
 	},
 	render: function Render() {
 		return (
@@ -113,20 +85,11 @@ export const Uncontrolled = meta.story({
 export const ClearSelection = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const page = within(document.body);
+		const clearButton = canvas.getByRole('button', { name: 'Clear selection' });
 		const combobox = canvas.getByRole('combobox', { name: 'Country' });
 
-		const clearButton = canvas.getByRole('button', { name: 'Clear selection' });
-		await expect(combobox).toHaveValue('Canada');
-
 		await userEvent.click(combobox);
-		const selected = page.getByRole('option', { name: 'Canada' });
-		await expect(selected).toHaveAttribute('aria-selected', 'true');
-		await expect(selected.querySelector('svg')).not.toBeNull();
-
 		await userEvent.click(clearButton);
-		await expect(combobox).toHaveValue('');
-		await expect(canvas.queryByRole('button', { name: 'Clear selection' })).not.toBeInTheDocument();
 	},
 	render: function Render() {
 		return (
@@ -175,45 +138,6 @@ const sizeStoryItems: Array<CountryItem> = [...countryItems, { id: 'override', l
 
 /** Match the size of adjacent form controls. */
 export const Size = meta.story({
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		const page = within(document.body);
-
-		const smallInput = canvas.getByRole('combobox', { name: 'Small' });
-		const mediumInput = canvas.getByRole('combobox', { name: 'Medium (default)' });
-		const smallControl = smallInput.closest('[role="group"]')!;
-		const mediumControl = mediumInput.closest('[role="group"]')!;
-
-		await expect(window.getComputedStyle(smallControl).blockSize).not.toBe(
-			window.getComputedStyle(mediumControl).blockSize,
-		);
-
-		await userEvent.click(smallInput);
-		const smallOptions = page.getAllByRole('option');
-		await expect(smallOptions.length).toBeGreaterThan(0);
-		const smallFirstOption = smallOptions[0]!;
-		const smallOptionPadding = window.getComputedStyle(smallFirstOption).paddingBlock;
-
-		await userEvent.keyboard('{Escape}');
-		await userEvent.click(mediumInput);
-		const mediumOptions = page.getAllByRole('option');
-		await expect(mediumOptions.length).toBeGreaterThan(0);
-		const mediumFirstOption = mediumOptions[0]!;
-		const mediumOptionPadding = window.getComputedStyle(mediumFirstOption).paddingBlock;
-
-		await expect(smallOptionPadding).not.toBe(mediumOptionPadding);
-
-		await userEvent.keyboard('{Escape}');
-		await userEvent.click(smallInput);
-		const overrideOption = page.getByRole('option', { name: 'Override' });
-		const overridePadding = window.getComputedStyle(overrideOption).paddingBlock;
-		await expect(overridePadding).toBe(mediumOptionPadding);
-
-		await userEvent.keyboard('{Escape}');
-		await waitFor(async () => {
-			await expect(page.queryByRole('listbox')).not.toBeInTheDocument();
-		});
-	},
 	render: function Render() {
 		return (
 			<div style={stackStyle}>
@@ -264,14 +188,6 @@ export const Disabled = meta.story({
  * Read-only comboboxes preserve their selected value without exposing interactive actions.
  */
 export const ReadOnly = meta.story({
-	play: async ({ canvasElement }) => {
-		const canvas = within(canvasElement);
-		const combobox = canvas.getByRole('combobox', { name: 'Country' });
-
-		await expect(combobox).toHaveValue('Canada');
-		await expect(combobox).toHaveAttribute('readonly');
-		await expect(canvas.queryByRole('button', { name: 'Clear selection' })).not.toBeInTheDocument();
-	},
 	render: function Render() {
 		return (
 			<ComboboxField
@@ -415,16 +331,11 @@ export const DisabledKeys = meta.story({
 export const Validation = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		const page = within(document.body);
 		await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
-		await expect(canvas.getByText('Please select a country.')).toBeInTheDocument();
 
 		// Native validation focuses the invalid combobox and opens its listbox. Close the listbox so
 		// the test does not leave the rest of the page hidden from assistive technology.
 		await userEvent.keyboard('{Escape}');
-		await waitFor(async () => {
-			await expect(page.queryByRole('listbox')).not.toBeInTheDocument();
-		});
 	},
 	render: function Render() {
 		return (

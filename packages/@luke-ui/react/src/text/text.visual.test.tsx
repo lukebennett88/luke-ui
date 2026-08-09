@@ -1,12 +1,7 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
-import {
-	captureVisual,
-	captureVisualAppearance,
-	renderVisual,
-	Stack,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { Text } from './index.js';
 
 const rowStyle = {
@@ -18,7 +13,7 @@ const rowStyle = {
 
 for (const appearance of visualAppearances) {
 	test(`type scale: ${appearance.theme} ${appearance.mode}`, async () => {
-		const locator = renderVisual(
+		const { locator } = render(
 			<Stack width="40rem">
 				<div style={rowStyle}>
 					<Text size="100">100</Text>
@@ -49,16 +44,15 @@ for (const appearance of visualAppearances) {
 				<Text>Trimmed by default</Text>
 				<Text shouldDisableTrim>Trim disabled</Text>
 			</Stack>,
-			appearance,
+			{ appearance },
 		);
-		await expect.element(locator).toBeVisible();
 
 		await captureVisualAppearance(locator, 'text/type-scale', appearance);
 	});
 }
 
 test('line clamp and transforms', async () => {
-	const locator = renderVisual(
+	const { locator } = render(
 		<Stack width="18rem">
 			<Text lineClamp={2}>
 				A short paragraph of placeholder copy that wraps across multiple lines and then clamps.

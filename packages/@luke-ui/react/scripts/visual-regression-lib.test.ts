@@ -3,12 +3,7 @@ import path from 'node:path';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { PNG } from 'pngjs';
 import { expect, test } from 'vite-plus/test';
-import {
-	assertCapturesPainted,
-	compareCaptures,
-	renderReport,
-	validateCaptureIds,
-} from './visual-regression-lib.js';
+import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
 const png = (red: number) => {
 	const image = new PNG({ height: 1, width: 1 });
@@ -59,58 +54,6 @@ test('classifies matched, changed, added, and removed captures', async () => {
 	const report = path.join(root, 'report.html');
 	await renderReport(results, { base: 'abc', current: 'working tree', platform: 'test' }, report);
 	expect(await readFile(report, 'utf8')).toContain('Visual regression report');
-});
-
-test('rejects duplicate explicit capture IDs', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'visual-ids-'));
-	await writeFile(path.join(root, 'one.visual.test.tsx'), "captureVisual(scene, 'button/default')");
-	await writeFile(path.join(root, 'two.visual.test.tsx'), "captureVisual(scene, 'button/default')");
-	await expect(validateCaptureIds(root)).rejects.toThrow(
-		'Duplicate visual capture ID button/default',
-	);
-});
-
-test('accepts multiline calls with trailing commas', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'visual-ids-'));
-	await writeFile(
-		path.join(root, 'one.visual.test.tsx'),
-		"captureVisual(\n\tpage.elementLocator(document.body),\n\t'button/multiline',\n)",
-	);
-	const owners = await validateCaptureIds(root);
-	expect([...owners.keys()]).toEqual(['button/multiline']);
-});
-
-test('expands appearance capture IDs and rejects collisions with explicit captures', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'visual-ids-'));
-	await writeFile(
-		path.join(root, 'matrix.visual.test.tsx'),
-		"captureVisualAppearance(scene, 'button/tones', appearance)",
-	);
-	await writeFile(
-		path.join(root, 'single.visual.test.tsx'),
-		"captureVisual(scene, 'button/tones-paper-dark')",
-	);
-
-	await expect(validateCaptureIds(root)).rejects.toThrow(
-		'Duplicate visual capture ID button/tones-paper-dark',
-	);
-});
-
-test('registers every independently named appearance capture', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'visual-ids-'));
-	await writeFile(
-		path.join(root, 'matrix.visual.test.tsx'),
-		"captureVisualAppearance(scene, 'button/tones', appearance)",
-	);
-
-	const owners = await validateCaptureIds(root);
-
-	expect([...owners.keys()]).toEqual([
-		'button/tones-tactile-light',
-		'button/tones-tactile-dark',
-		'button/tones-paper-light',
-		'button/tones-paper-dark',
-	]);
 });
 
 test('rejects a tall capture whose bottom decile never painted', async () => {

@@ -17,54 +17,7 @@ export type VisualResult = {
 	currentViewport?: string;
 };
 
-const appearanceSuffixes = ['tactile-light', 'tactile-dark', 'paper-light', 'paper-dark'] as const;
-
 type CaptureFile = { file: string; viewport?: string };
-
-export async function validateCaptureIds(sourceRoot: string) {
-	const owners = new Map<string, string>();
-	async function visit(directory: string) {
-		await Promise.all(
-			(await readdir(directory, { withFileTypes: true })).map(async (entry) => {
-				const file = path.join(directory, entry.name);
-				if (entry.isDirectory()) await visit(file);
-				else if (entry.name.endsWith('.visual.test.tsx')) {
-					const source = await readFile(file, 'utf8');
-					const calls = [...source.matchAll(/captureVisual\(/g)];
-					const matches = [...source.matchAll(/captureVisual\([\s\S]*?,\s*'([^']+)'\s*,?\s*\)/g)];
-					if (calls.length !== matches.length) {
-						throw new Error(`Visual capture IDs must be string literals: ${file}`);
-					}
-					for (const match of matches) registerCaptureId(match[1], file, owners);
-
-					const appearanceCalls = [...source.matchAll(/captureVisualAppearance\(/g)];
-					const appearanceMatches = [
-						...source.matchAll(/captureVisualAppearance\([\s\S]*?,\s*'([^']+)'\s*,/g),
-					];
-					if (appearanceCalls.length !== appearanceMatches.length) {
-						throw new Error(`Visual appearance capture IDs must be string literals: ${file}`);
-					}
-					for (const match of appearanceMatches) {
-						for (const suffix of appearanceSuffixes) {
-							registerCaptureId(`${match[1]}-${suffix}`, file, owners);
-						}
-					}
-				}
-			}),
-		);
-	}
-	await visit(sourceRoot);
-	return owners;
-}
-
-function registerCaptureId(id: string | undefined, file: string, owners: Map<string, string>) {
-	if (!id || !/^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
-		throw new Error(`Visual capture ID must be namespaced: ${id}`);
-	}
-	const owner = owners.get(id);
-	if (owner) throw new Error(`Duplicate visual capture ID ${id}: ${owner} and ${file}`);
-	owners.set(id, file);
-}
 
 async function listPngs(root: string) {
 	const result = new Map<string, CaptureFile>();

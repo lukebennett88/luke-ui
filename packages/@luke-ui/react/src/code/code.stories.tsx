@@ -1,6 +1,5 @@
 import { Code } from '@luke-ui/react/code';
 import { Text } from '@luke-ui/react/text';
-import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -12,13 +11,6 @@ const meta = preview.meta({
 export const Default = meta.story({
 	args: {
 		children: 'console.log("hello world")',
-	},
-	play: async ({ canvas, canvasElement }) => {
-		const code = getComputedStyle(canvas.getByText(/console\.log/)).fontFamily;
-		const codeToken = getComputedStyle(canvasElement)
-			.getPropertyValue('--luke-font-family-code')
-			.trim();
-		await expect(code.replaceAll(/['"]/g, '')).toBe(codeToken.replaceAll(/['"]/g, ''));
 	},
 });
 

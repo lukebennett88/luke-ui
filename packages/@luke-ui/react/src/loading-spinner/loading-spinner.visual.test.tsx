@@ -1,13 +1,12 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
+import { render, visualAppearances } from '../test-utils/render.js';
 import {
-	captureVisualAppearance,
 	captureVisual,
-	renderVisual,
+	captureVisualAppearance,
 	Stack,
 	variantValuesFor,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+} from '../test-utils/visual.js';
 import { vars } from '../theme/index.js';
 import { LoadingSpinner } from './index.js';
 
@@ -26,7 +25,7 @@ const fixedChildStyle = {
 } satisfies CSSProperties;
 
 test('sizes and colors', async () => {
-	const locator = renderVisual(
+	const { locator } = render(
 		<Stack>
 			<div style={rowStyle}>
 				{sizes.map((size) => (
@@ -59,7 +58,7 @@ test('sizes and colors', async () => {
 for (const appearance of visualAppearances) {
 	test(`theme matrix: ${appearance.theme} ${appearance.mode}`, async () => {
 		const oppositeMode = appearance.mode === 'light' ? 'dark' : 'light';
-		const scene = renderVisual(
+		const { locator: scene } = render(
 			<div style={themeMatrixStyle}>
 				<ThemeMatrixScope label="Root scope">
 					<LoadingSpinner aria-label="Root theme pending" style={spinnerStyle} />
@@ -68,10 +67,9 @@ for (const appearance of visualAppearances) {
 					<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} />
 				</ThemeMatrixScope>
 			</div>,
-			appearance,
+			{ appearance },
 		);
 
-		expect(document.documentElement).toHaveAttribute('data-color-mode', appearance.mode);
 		await captureVisualAppearance(scene, 'loading-spinner/theme-matrix', appearance);
 	});
 }

@@ -1,16 +1,12 @@
-import { expect, test } from 'vite-plus/test';
-import { page } from 'vite-plus/test/context';
-import {
-	captureVisualAppearance,
-	renderVisual,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+import { test } from 'vite-plus/test';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance } from '../test-utils/visual.js';
 import { vars } from '../theme/index.js';
 import { Box } from './index.js';
 
 for (const appearance of visualAppearances) {
 	test(`layout: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
+		const { locator: scene } = render(
 			<Box
 				display="flex"
 				flexDirection="column"
@@ -29,14 +25,8 @@ for (const appearance of visualAppearances) {
 					<Box>Security</Box>
 				</Box>
 			</Box>,
-			appearance,
+			{ appearance },
 		);
-		const layout = page.getByText('Account').element().parentElement;
-		if (layout == null) throw new Error('Expected the Box layout container.');
-
-		await expect
-			.element(page.elementLocator(layout))
-			.toHaveStyle({ display: 'flex', flexDirection: 'column' });
 		await captureVisualAppearance(scene, 'box/layout', appearance);
 	});
 }

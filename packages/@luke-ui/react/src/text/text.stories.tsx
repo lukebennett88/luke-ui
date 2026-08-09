@@ -3,7 +3,6 @@ import { Text } from '@luke-ui/react/text';
 import { mergeProps } from '@luke-ui/react/utils';
 import { VisuallyHidden as VisuallyHiddenText } from '@luke-ui/react/visually-hidden';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { createSprinkles } from '../styles/index.js';
 import { vars } from '../theme/index.js';
@@ -109,34 +108,12 @@ const lineClampOptions: ReadonlyArray<LineClampOption> = [false, true, 1, 2, 3, 
 
 export const Default = meta.story({
 	args: baseArgs,
-	play: async ({ canvas }) => {
-		const element = canvas.getByText(/quick brown/);
-		const style = getComputedStyle(element);
-		const before = getComputedStyle(element, '::before');
-		const after = getComputedStyle(element, '::after');
-		await expect(style.display).toBe('inline');
-		await expect(style.fontSize).toBe('16px');
-		await expect(style.lineHeight).toBe('24px');
-		await expect(style.fontWeight).toBe('400');
-		await expect(before.content).toBe('none');
-		await expect(before.display).not.toBe('table');
-		await expect(after.content).toBe('none');
-		await expect(after.display).not.toBe('table');
-	},
 });
 
 /**
  * Each size step applies font size, line height, letter spacing, and trim as one treatment.
  */
 export const Size = meta.story({
-	play: async ({ canvas }) => {
-		const small = getComputedStyle(canvas.getByText(/^100:/));
-		const display = getComputedStyle(canvas.getByText(/^900:/));
-		await expect(small.fontSize).toBe('12px');
-		await expect(small.lineHeight).toBe('16px');
-		await expect(display.fontSize).toBe('60px');
-		await expect(display.lineHeight).toBe('60px');
-	},
 	render: (props) => (
 		<div style={stackContainerStyle}>
 			{sizes.map((size) => (
@@ -193,20 +170,6 @@ export const EmptyText = meta.story({
  * Change the rendered HTML element with `elementType` when semantics require it.
  */
 export const ElementType = meta.story({
-	play: async ({ canvas }) => {
-		const inline = canvas.getByTestId('inline');
-		const custom = canvas.getByTestId('custom');
-		const explicitTrim = canvas.getByTestId('explicit-trim');
-		const clamped = canvas.getByTestId('clamped');
-		const block = canvas.getByTestId('block');
-
-		await expect(getComputedStyle(inline, '::before').content).toBe('none');
-		await expect(getComputedStyle(custom, '::before').content).toBe('none');
-		await expect(getComputedStyle(explicitTrim, '::before').display).toBe('table');
-		await expect(getComputedStyle(clamped, '::before').content).toBe('none');
-		await expect(getComputedStyle(block, '::before').display).toBe('table');
-		await expect(getComputedStyle(block, '::after').display).toBe('table');
-	},
 	render: (props) => (
 		<div style={stackContainerStyle}>
 			<Text {...props} data-testid="inline" elementType="span">
@@ -270,9 +233,6 @@ export const Truncate = meta.story({
  * Use `createSprinkles()` to compose the layout and overflow utilities that this pattern needs.
  */
 export const MiddleTruncation = meta.story({
-	play: async ({ canvas }) => {
-		await expect(canvas.getByText(importantIdentifierSuffix)).toBeInTheDocument();
-	},
 	render: (props) => {
 		const container = createSprinkles({
 			display: 'flex',

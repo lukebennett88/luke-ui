@@ -1,223 +1,139 @@
 # Testing
 
-This guide explains how to choose, place, and write tests in this repo.
+This is the normative testing guide for the repository. The goal is fewer tests with more confidence
+and one obvious place for each new regression.
 
-## Choosing test type
+## Test types
 
-Use the smallest test surface that proves the behaviour.
+Use the smallest surface that can falsify the intention.
 
-- **Unit tests** (`*.test.ts`): pure logic, generators, scripts, docs tooling, package metadata, and
-  non-React utilities.
-- **Storybook play tests**: React component behaviour that belongs in a real story. For
-  `@luke-ui/react` components, stories are component tests. Do not add separate `*.test.tsx`
-  component tests unless Storybook cannot exercise the behaviour cleanly.
-- **Visual regression tests** (`*.visual.test.tsx`): pixel snapshots of public UI states and
-  variants worth reviewing for regressions. See [Visual regression tests](#visual-regression-tests).
-- **Browser Vitest tests** (`*.browser.test.{ts,tsx}`): non-component DOM logic that needs real
-  browser APIs and does not fit a story, including CSS recipe style-contract tests.
+- **Unit tests** (`*.test.ts`) cover pure logic, generators, scripts, docs tooling, package
+  metadata, and other non-React utilities. The component-testing rules below do not apply to them.
+- **Component tests** (`*.browser.test.tsx`) run in real Chromium beside the component. They test
+  the behaviour and plumbing Luke UI owns on top of React Aria Components (RAC).
+- **Visual tests** (`*.visual.test.tsx`) capture public appearance and layout. They use the same
+  renderer as component tests and add capture helpers.
+- **Stories** (`*.stories.tsx`) are curated documentation, render-smoke fixtures, and the surface
+  used by the automated accessibility scan. They contain no assertions.
 
-## Placement
+Do not add a new test flavour for a component. Recipe tests are infrastructure tests, not a
+component-testing category. If a recipe implementation needs a browser to test its own machinery,
+keep that test under `src/recipes/` and exclude it from these component rules.
 
-Colocate tests with the source file they cover, for example `foo.test.ts` beside `foo.ts`.
+## Component tests
 
-Do not add `__tests__` directories unless the suite does not map to one source file.
-
-Do not add DOM shims such as happy-dom or jsdom. DOM-dependent tests run in a real browser through
-`vitest.config.ts`, using real browser APIs instead of stubs.
-
-## Writing stories
-
-Stories are both consumer examples and component tests. Each story should earn its place by showing
-a materially distinct state or behaviour, not one point in a Cartesian product of props. Do not add
-multiple stories that render the same state with small variations.
-
-- Make `Default` a useful prop sandbox. Put representative values in `args` so controls can change
-  the component without editing the story.
-- Prefer `args` to `render`. Add `render` only when the example needs composition, local state,
-  hooks, or a matrix of related variants.
-- Show related visual variants together in a small matrix, such as every size or tone. A matrix is
-  easier to compare and avoids duplicate sidebar entries.
-- Keep controls usable. Forward story args through custom renders and use `argTypes` only to improve
-  or constrain controls. Do not hide ordinary consumer props to make a story implementation easier.
-- Add JSDoc when the story name and canvas do not make the consumer use or a non-obvious contract
-  clear. Omit JSDoc that only restates the story name or visible rendering. The generated `Default`
-  story needs no placeholder. Add its JSDoc only when this rule applies.
-
-A `play` function should prove behaviour, a CSS contract, or an accessibility contract that could
-regress. Interactions, focus management, computed styles, and semantic state are useful assertions.
-Semantic role and accessible-name assertions are useful when they protect an accessibility contract.
-Presence-only smoke assertions for ordinary initial content add little value.
-
-## Write the test first
-
-For bug fixes, start with a failing test that reproduces the bug. Watch it fail for the right reason
-before changing the implementation. That test proves the fix and keeps the bug from returning.
-
-For features, prefer a test first when the behaviour can be specified up front. Exploratory UI work
-may need a sketched component before a story play test makes sense. That is fine, but the test
-should land in the same change as the behaviour it covers.
-
-## Test behaviour, not implementation
-
-Tests should survive refactors that preserve behaviour. Exercise code the way consumers do: through
-public API modules, roles, and user interactions. Assert outcomes the consumer can observe.
-
-Do not assert internals such as private functions, call counts inside repo modules, generated class
-names, or CSS selector text. If a test only works by reaching into internals, the module interface
-is probably missing something.
-
-Mock only true system boundaries such as network, clock, or external processes. Prefer real
-implementations everywhere else. Filesystem-dependent tests should use temp directories and real
-`fs`, not mocks.
-
-## Behaviour tests
-
-Behaviour tests include Storybook play functions and any test that simulates a user.
-
-- Query by role and accessible name, for example `getByRole('combobox', { name: 'Country' })`. Fall
-  back to label or visible text only when no role fits.
-- Do not use test IDs or CSS selectors. In a component library, if an element cannot be found by
-  role or accessible name, assistive-technology users probably cannot find it either. Fix the
-  component, not the test.
-- Interact through `userEvent` only. Do not use `fireEvent`, manual event dispatch, or attribute and
-  state mutation to fake interactions.
-
-## Declarative over imperative
-
-State the behaviour under test. Do not narrate every step in the journey.
-
-- Name and assert one behaviour at a time. Each test or `step()` should name a single behaviour,
-  such as "selecting an option closes the popover". Use setup interactions only to reach the state
-  being asserted.
-- Set up state with props rather than interactions when possible, for example `defaultValue` or
-  `isReadOnly`. Use interactions only when the interaction itself is the behaviour under test.
-- Map behaviours to `step()`, not to extra stories. Keep one story per meaningful state-prop
-  combination. Inside the play function, group behaviours with named `step()` calls from
-  `storybook/test`. Steps report individually without adding duplicate sidebar entries or visual
-  snapshots.
-
-```ts
-play: async ({ canvasElement, step }) => {
-	const canvas = within(canvasElement);
-	const combobox = canvas.getByRole('combobox', { name: 'Country' });
-
-	await step('selecting an option closes the popover and fills the input', async () => {
-		await userEvent.click(combobox);
-		await userEvent.click(within(document.body).getByRole('option', { name: 'Australia' }));
-
-		await expect(combobox).toHaveValue('Australia');
-		await expect(combobox).toHaveAttribute('aria-expanded', 'false');
-	});
-};
-```
-
-## Test structure
-
-Prefer fewer, longer tests over many tiny ones. A test should follow one workflow end to end: one
-setup, then as many actions and assertions as that workflow needs. Multiple related assertions in a
-single test are a feature, not a smell. Use `step()` to name each behaviour inside the workflow, as
-described above.
-
-- Keep setup explicit and local. Inline the setup a test needs instead of hoisting it into
-  `beforeEach`. Use `afterEach` only for real cleanup, such as unmounting, removing DOM nodes, or
-  deleting temp directories.
-- Avoid shared mutable state between tests. If the next assertion depends on the same rendered
-  component or result, it belongs in the same test.
-- Build helpers as factories that return a ready-to-use object, not as module-level state that tests
-  mutate in turn.
-- Keep files flat. A single top-level `describe` to group a file is fine; nesting is not.
-- Name the test after the behaviour it proves, for example "returns the fallback tone for an unknown
-  intent".
-
-## What not to test
-
-Keep the bar for adding a test high. Every test is code to maintain, and a test that cannot fail for
-an interesting reason still costs review time on every change.
-
-- Do not test what TypeScript already guarantees, such as a required prop being present or a union
-  rejecting an invalid value.
-- Do not pin incidental copy. Assert behaviour and structured output instead of asserting that
-  particular prose appears in a message, a doc, or a generated file.
-- Do not add a regression test for a bug that is unlikely to recur, unless the flow is important
-  enough to justify keeping the test.
-
-## Visual regression tests
-
-Visual tests capture a rendered component in the current checkout and compare it with the local
-`origin/main` ref captured on the same device. They catch unintended visual changes (spacing,
-colour, focus rings, open menus) that behaviour assertions miss. They run via `pnpm run test:visual`
-and as part of the aggregate `pnpm test` development flow.
-
-Place them in `*.visual.test.tsx` beside the component. Render with the shared `renderVisual`
-helper, which wraps the subtree in the theme root and icon spritesheet provider and returns a
-locator:
+Component tests use the shared renderer:
 
 ```tsx
-import { test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
-import { captureVisual, renderVisual } from '../test-utils/render-visual.js';
+import { expect, test } from 'vite-plus/test';
 import { Button } from './index.js';
+import { render } from '../test-utils/render.js';
 
-test('keyboard focus ring', async () => {
-	const locator = renderVisual(<Button tone="accent">Focus me</Button>);
-	// Tab so the browser applies `:focus-visible`; a programmatic `.focus()` would not.
-	await userEvent.tab();
-	await captureVisual(locator, 'button/focus-visible');
+test('calls the consumer handler when the button is pressed', async () => {
+	let pressed = false;
+	const { locator, user } = render(<Button onPress={() => (pressed = true)}>Save</Button>);
+
+	await user.click(locator.getByRole('button', { name: 'Save' }));
+	expect(pressed).toBe(true);
 });
 ```
 
-- **Capture states, not just static variants.** Drive focus, open menus, and pressed states with
-  `userEvent`, then screenshot. This is the main reason to reach for a visual test over a story.
-- **Overlays render in a portal** appended to `document.body`, outside the rendered container. To
-  capture an open menu, screenshot the overlay locator (for example `page.getByRole('listbox')`)
-  rather than the container.
-- **Frame tightly.** Render a small kitchen-sink grid of the states under test, not a whole page, so
-  a diff points at the component that changed.
-- **Use explicit, globally unique IDs.** Namespace every capture by component, for example
-  `button/focus-visible`. Duplicate IDs fail before capture. Moving a test file does not change its
-  identity.
-- **Added and removed captures are informational.** Matching IDs with pixel differences require CI
-  review; inventory changes are still visible in the report but do not block.
-- **Keep responsive coverage explicit.** The default viewport is 1024 by 800. Change the viewport in
-  a test only when the component has a responsive state worth capturing, then restore it.
+`render()` mounts the component in the real themed browser environment and returns
+`{ locator, user }`. Do not call `createRoot`, `hydrateRoot`, or hand-roll a React mount in a
+component or visual test. Ancillary DOM nodes are fine when a browser/layout fixture needs them.
 
-The full workflow and report are documented in [`VISUAL_TESTING.md`](./VISUAL_TESTING.md).
+### Test our delta over RAC
 
-## Test ReactNode props with rich content
+Do not test RAC's contract. RAC already owns focus management, keyboard navigation, selection
+semantics, ARIA wiring, validation semantics, and disabled/read-only interaction blocking. Test the
+composition, prop plumbing, styling hooks, and behaviour that Luke UI adds or deliberately changes.
 
-A prop typed `ReactNode` accepts a plain string or markup with several elements. Test both shapes
-when the prop's own container applies layout or text-flow CSS.
+Each component opts into the applicable tier in the component test manifest:
 
-A flex container turns each top-level child into its own flex item. A string is one text node, so it
-wraps as a single block. Markup with two or more top-level children wraps each child on its own. The
-result reads as separate columns, not one sentence.
+- **Universal**: documented element, `ref`, `className`, `id`, and `data-*` forwarding.
+- **Field-shaped**: `inputRef`, native `name`/form participation, `onBlur`, and label, description,
+  and error association.
+- **None**: an explicit exception for a component that does not satisfy either contract.
 
-Add a scene with at least two top-level children and surrounding text. Make the content long enough
-to wrap at the capture width. A short scene, or one where a single string wraps, does not expose the
-difference.
+The shared conformance helpers test these contracts once. Do not repeat them in individual tests.
 
-Example: `errorMessage` accepts `<>Enter a date after <Strong>today</Strong>, not before it.</>`. A
-message container styled with `display: flex` splits that sentence into separate, independently
-wrapping columns instead of one paragraph.
+Interactive RAC-backed components also register exactly one `testIntegration()` journey. It is an
+upgrade tripwire: perform one representative real-user workflow and assert only the result Luke UI
+owns. For example, a combobox may type and select an option, then assert that the selected value is
+exposed. Do not accumulate RAC assertions about focus, ARIA attributes, popup keyboard semantics, or
+intermediate state in this test.
 
-Skip this test when a prop's container passes children straight through with no layout of its own.
+### Assertions
 
-Assert a layout invariant directly when one exists, rather than relying only on a capture. A
-computed-style assertion fails on its own. A capture only helps once a reviewer spots the difference
-by eye.
+An authored assertion should fail if, and only if, an intention we own is not met.
 
-## Style-contract tests for CSS recipes
+- Assert observable outcomes through public APIs, roles, accessible names, and user interactions.
+- Prefer role and accessible-name queries. Use label or visible text when no role fits. Do not
+  invent semantics purely to make a test queryable.
+- Use `getBy*` for synchronous presence and `findBy*` for asynchronous presence. Use `queryBy*` only
+  to assert absence.
+- Prefer `userEvent`. Do not use `fireEvent`, manual event dispatch, or state mutation to fake a
+  user interaction.
+- Keep workflow tests fewer and longer: one meaningful journey with related assertions. Generated
+  matrices are different: finite, valid combinations should remain separate cases or rows when
+  exhaustive contract coverage is useful. Exclude forbidden or meaningless combinations.
+- Keep setup local and explicit. Avoid shared mutable state and `beforeEach` setup. Use cleanup
+  hooks only for real cleanup; the shared renderer cleans up its own mounts automatically.
 
-Recipes in `src/recipes/*.css.ts` have no roles or user interactions. Their contract is: given this
-DOM structure in this state, the element computes these styles.
+Do not test TypeScript guarantees, private functions, call counts inside repository modules,
+generated class names, selector text, incidental copy, or low-value bugs unlikely to recur.
 
-For recipe tests, raw DOM construction and `querySelector` are appropriate because there is no user
-to impersonate.
+## Stories
 
-- Assert computed styles with `getComputedStyle`, resolving tokens to concrete values. Assert the
-  outcome the user sees.
-- Do not assert generated class names or selector strings.
-- Build DOM recipe documents, such as a control containing an input and trigger button. Do not rely
-  on incidental markup that happens to pass.
-- Every recipe state covered by a test must also exist in a story on at least one consuming
-  component. If the story is missing, add it in the same change.
+Every story is a render-smoke test and an accessibility fixture. Keep stories curated: show
+materially distinct consumer states, not every point in a prop Cartesian product.
+
+`play` has one job: drive a story into a state that cannot be expressed declaratively. It must not
+contain `expect`, behavioural verification, accessibility assertions, or computed-style assertions.
+Most stories should have no `play` function. A story play may interact with the component to open a
+menu, focus a control, or reveal a loading state for documentation or an accessibility scan.
+
+## Visual tests
+
+Visual tests use `render()` from `src/test-utils/render.tsx` and capture helpers from
+`src/test-utils/visual.tsx`. The visual test is not a story and does not reuse a story as its
+fixture.
+
+Each component with a meaningful visual surface gets one kitchen-sink fixture:
+
+- derive declared variant coverage with `variantValuesFor` or `PropOptions`;
+- explicitly add semantic/rendering states not represented by variants, such as disabled, invalid,
+  pending, loading, prefixes, suffixes, and long content;
+- generate the finite valid matrix, but do not generate meaningless or forbidden combinations;
+- expand the kitchen-sink capture across the four shared Tactile/Paper and light/dark appearances;
+- add state-specific captures only for material states that cannot be represented declaratively;
+  those use one canonical appearance by default;
+- add a dark-mode state capture only for a concrete mode-specific implementation or regression.
+
+Do not capture a state already covered by the kitchen sink. Visual tests own appearance. Do not
+assert resolved token values, colours, shadows, opacity, border colours, or focus-ring colours in a
+component test. Never import the theme contract merely to assert an appearance; the lint rule is a
+deliberately simple proxy and rare structural uses may suppress it with a reason.
+
+Computed-style assertions are allowed only when browser-computed layout is itself the contract and
+there is no meaningful DOM or ARIA assertion, such as the documented `ReactNode` flex-wrapping case.
+Never use them to pin token values or appearance.
+
+See [`VISUAL_TESTING.md`](./VISUAL_TESTING.md) for capture, comparison, and review workflow.
+
+## Accessibility
+
+Storybook's automated axe check is a floor, not proof of accessibility. It covers only part of WCAG
+and does not replace deliberate testing of the behaviour Luke UI owns. Keep the automated check
+enabled as an error gate, then use component tests for the small number of composition and behaviour
+contracts that axe cannot express.
+
+## Bug fixes and maintenance
+
+For a bug fix, start with a failing test that reproduces the bug when the intention is worth
+protecting. Watch it fail for the right reason, then make the smallest fix. Delete duplicate tests
+when the shared conformance suite, one integration journey, or visual fixture already protects the
+same intention.
+
+The acceptance test for this strategy is not a case count. Every surviving assertion should protect
+an intention we own, and a new regression should normally have one obvious place for its test.

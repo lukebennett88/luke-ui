@@ -4,9 +4,9 @@
   `tsdown` updates exports during build.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
   files by hand. The generator updates group barrels, the styles index, and docs wiring.
-- Stories (`*.stories.tsx`) are the component tests. Do not add separate `*.test.tsx` component
-  tests unless Storybook cannot exercise the behaviour. Follow the story authoring and play-function
-  guidance in `docs/TESTING.md#writing-stories`.
+- Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests. It is
+  the only normative testing guide. Component tests use the shared browser renderer; stories are
+  documentation and render/a11y fixtures, not assertion files.
 - React Compiler is enabled. Do not use `useCallback` or `useMemo` unless there is a specific reason
   the compiler cannot handle.
 
@@ -14,7 +14,9 @@
 
 A component directory contains:
 
-- `[component].stories.tsx`: Storybook stories that also serve as tests
+- `[component].stories.tsx`: Storybook documentation and render/a11y fixtures
+- `[component].browser.test.tsx`: component behaviour, conformance, and the integration tripwire
+- `[component].visual.test.tsx`: visual regression captures when the component has a visual surface
 - `index.tsx`: component implementation
 - `primitive/`: optional primitive exports
 

@@ -2,7 +2,7 @@ import type { ButtonProps } from '@luke-ui/react/button';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import type { CSSProperties } from 'react';
-import { expect, fn, userEvent } from 'storybook/test';
+import { fn } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 import { vars } from '../theme/index.js';
 
@@ -142,33 +142,6 @@ export const States = meta.story({
 			</Button>
 		</div>
 	),
-	play: async ({ args, canvas, step }) => {
-		const button = canvas.getByRole('button', { name: 'Default' });
-		const pending = canvas.getByRole('button', { name: 'Pending' });
-		const disabled = canvas.getByRole('button', { name: 'Disabled' });
-		const busyCue = canvas.getByRole('status', { hidden: true });
-
-		await step('cursors match action states', async () => {
-			await expect(getComputedStyle(button).cursor).toBe('default');
-			await expect(getComputedStyle(disabled).cursor).toBe('not-allowed');
-			await expect(getComputedStyle(pending).cursor).toBe('wait');
-		});
-
-		await step('pending remains focusable, busy, and non-interactive', async () => {
-			await userEvent.tab();
-			await userEvent.tab();
-			await expect(pending).toHaveFocus();
-			await expect(pending).toHaveAttribute('aria-disabled', 'true');
-			await expect(getComputedStyle(busyCue).color).toBe(getComputedStyle(pending).color);
-			await userEvent.click(pending);
-			await expect(args.onPress).not.toHaveBeenCalled();
-		});
-
-		await step('pending uses the disabled visual treatment', async () => {
-			await expect(getComputedStyle(pending).opacity).toBe('0.55');
-			await expect(getComputedStyle(pending).boxShadow).toBe(getComputedStyle(disabled).boxShadow);
-		});
-	},
 });
 
 export const Disabled = meta.story({
@@ -198,13 +171,4 @@ export const Truncation = meta.story({
 			<Button {...props} />
 		</div>
 	),
-	play: async ({ canvas }) => {
-		const label = canvas.getByText(
-			'This a really really really really long string of text that should truncate instead of wrapping',
-		);
-
-		await expect(getComputedStyle(label).textOverflow).toBe('ellipsis');
-		await expect(getComputedStyle(label).whiteSpace).toBe('nowrap');
-		await expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
-	},
 });

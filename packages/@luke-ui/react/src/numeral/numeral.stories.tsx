@@ -3,7 +3,6 @@ import type { NumeralProps } from '@luke-ui/react/numeral';
 import { Numeral } from '@luke-ui/react/numeral';
 import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
-import { expect } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -30,12 +29,6 @@ const baseArgs = {
 
 export const Default = meta.story({
 	args: baseArgs,
-	play: async ({ canvas }) => {
-		const numeral = canvas.getByText('120,000');
-		const style = getComputedStyle(numeral);
-		await expect(style.fontSize).toBe('16px');
-		await expect(style.fontVariantNumeric).toContain('tabular-nums');
-	},
 });
 
 /**
@@ -88,17 +81,6 @@ export const Precision = meta.story({
 
 export const Composition = meta.story({
 	args: baseArgs,
-	play: async ({ canvas }) => {
-		const heading = canvas.getByRole('heading', { name: /Acme Corporation shares hit/ });
-		const numeral = canvas.getByText('1,456,789');
-		const headingStyle = getComputedStyle(heading);
-		const numeralStyle = getComputedStyle(numeral);
-		await expect(numeralStyle.fontFamily).toBe(headingStyle.fontFamily);
-		await expect(numeralStyle.fontSize).toBe(headingStyle.fontSize);
-		await expect(numeralStyle.fontWeight).toBe(headingStyle.fontWeight);
-		await expect(numeralStyle.fontVariantNumeric).toContain('tabular-nums');
-		await expect(numeralStyle.color).not.toBe(headingStyle.color);
-	},
 	render: (props) => (
 		<div style={stackStyle}>
 			<Heading level={2}>

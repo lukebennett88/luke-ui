@@ -3,7 +3,7 @@ import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
-import { expect, userEvent } from 'storybook/test';
+import { userEvent } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -47,13 +47,6 @@ const colors = ['primary', 'secondary', 'accent', 'info', 'success', 'warning', 
  * Choose a semantic content colour, or omit `color` to inherit the parent's colour.
  */
 export const Color = meta.story({
-	play: async ({ canvas }) => {
-		const inherited = canvas.getByRole('status', { name: 'Inherited accent' });
-		const parent = inherited.parentElement;
-		if (!parent) throw new Error('Expected spinner parent.');
-
-		await expect(getComputedStyle(inherited).color).toBe(getComputedStyle(parent).color);
-	},
 	render: (props) => (
 		<div style={flexRowStyle}>
 			<div style={{ color: vars.color.foreground.accent.rest }}>
@@ -72,13 +65,7 @@ export const Color = meta.story({
  */
 export const Children = meta.story({
 	play: async ({ canvas }) => {
-		await expect(canvas.getByRole('status', { name: 'loading' })).toBeInTheDocument();
-		await expect(canvas.queryByRole('button', { name: 'Save' })).toBeNull();
-
 		await userEvent.click(canvas.getByRole('button', { name: 'Toggle loading' }));
-
-		await expect(canvas.queryByRole('status', { name: 'loading' })).toBeNull();
-		await expect(canvas.getByRole('button', { name: 'Save' })).toBeInTheDocument();
 	},
 	render: () => <ToggleableChildren />,
 });

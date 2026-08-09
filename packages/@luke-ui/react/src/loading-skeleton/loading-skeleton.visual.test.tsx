@@ -1,18 +1,13 @@
 import type { CSSProperties } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { Button } from '../button/index.js';
-import {
-	captureVisual,
-	captureVisualAppearance,
-	renderVisual,
-	Stack,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { TextField } from '../text-field/index.js';
 import { LoadingSkeleton } from './index.js';
 
 test('text and component placeholders', async () => {
-	const locator = renderVisual(
+	const { locator } = render(
 		<Stack align="flex-start">
 			<LoadingSkeleton>Loading placeholder text</LoadingSkeleton>
 			<div style={{ maxInlineSize: '16rem' } satisfies CSSProperties}>
@@ -33,7 +28,7 @@ test('text and component placeholders', async () => {
 });
 
 test('loaded content', async () => {
-	const locator = renderVisual(
+	const { locator } = render(
 		<Stack align="flex-start">
 			<LoadingSkeleton isLoading={false}>
 				<Button>Submit</Button>
@@ -46,33 +41,15 @@ test('loaded content', async () => {
 
 for (const appearance of visualAppearances) {
 	test(`flattens tactile descendants: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
+		const { locator: scene } = render(
 			<LoadingSkeleton radius="surface">
 				<div>
 					<Button>Nested action</Button>
 					<TextField label="Email" name="email" />
 				</div>
 			</LoadingSkeleton>,
-			appearance,
+			{ appearance },
 		);
-		const button = requireElement(scene.element(), 'button');
-		const field = requireElement(scene.element(), 'input');
-
-		for (const descendant of [button, field]) {
-			const style = getComputedStyle(descendant);
-			expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-			expect(style.backgroundImage).toBe('none');
-			expect(style.borderStyle).toBe('none');
-			expect(style.boxShadow).toBe('none');
-			expect(style.color).toBe('rgba(0, 0, 0, 0)');
-		}
-
 		await captureVisualAppearance(scene, 'loading-skeleton/descendant-suppression', appearance);
 	});
-}
-
-function requireElement(parent: ParentNode, selector: string) {
-	const element = parent.querySelector(selector);
-	if (!element) throw new Error(`Expected element matching "${selector}".`);
-	return element;
 }

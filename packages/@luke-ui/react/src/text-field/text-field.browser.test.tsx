@@ -1,10 +1,11 @@
 import { createRef } from 'react';
-import { afterEach, expect, test } from 'vite-plus/test';
+import type { ComponentProps } from 'react';
+import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { ComboboxField } from '../combobox-field/index.js';
-import { ComboboxItem } from '../combobox-field/primitive/item.js';
+import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { inputGroup } from '../recipes/input-group.css.js';
-import { cleanupVisual, renderVisual } from '../test-utils/render-visual.js';
+import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
 import { TextField } from './index.js';
 import {
 	InputGroup,
@@ -12,6 +13,44 @@ import {
 	InputGroupPrefix,
 	InputGroupSuffix,
 } from './primitive/index.js';
+
+testFieldShapedConformance({
+	assertAssociation: (result) => {
+		const input = result.locator.getByRole('textbox', { name: 'Name' }).element();
+		// oxlint-disable-next-line vitest/no-standalone-expect
+		expect(input).toHaveAttribute('aria-describedby');
+	},
+	getControl: (result) => {
+		const control = result.locator.getByRole('textbox', { name: 'Name' }).element();
+		if (!(control instanceof HTMLElement)) throw new Error('Expected a text input.');
+		return control;
+	},
+	getTarget: (result) => {
+		const target = result.container.firstElementChild;
+		if (!(target instanceof HTMLElement)) throw new Error('Expected a text-field root.');
+		return target;
+	},
+	name: 'TextField',
+	registration: componentTestRegistration,
+	render: (props = {}) =>
+		render(
+			<TextField
+				{...(props as ComponentProps<typeof TextField>)}
+				description="Helpful context"
+				label="Name"
+			/>,
+		),
+});
+
+testIntegration(componentTestRegistration, 'TextField', async () => {
+	let value = '';
+	const { locator, user } = render(<TextField label="Name" onChange={(next) => (value = next)} />);
+	const input = locator.getByRole('textbox', { name: 'Name' });
+
+	await user.type(input, 'Luke');
+	// oxlint-disable-next-line vitest/no-standalone-expect
+	expect(value).toBe('Luke');
+});
 
 /**
  * The input is always a direct child of the styled group (prefix and suffix are
@@ -40,40 +79,8 @@ function indicatorFor(name: string): SVGSVGElement | null {
 	return groupFor(name).querySelector<SVGSVGElement>(`.${invalidIndicatorClass}`);
 }
 
-afterEach(() => {
-	cleanupVisual();
-});
-
-// Proves the invalid cue survives without `errorMessage`, which `composeField` treats
-// as optional and which would otherwise leave the field colour-only and imperceptible.
-// The border stays at the resting 1px (see `input-group.css.ts`): the in-control icon is
-// the non-colour cue here, so the proof is the icon's presence plus the gated border
-// colour, not a border-width change.
-test('invalid without an error message still carries a non-colour cue', async () => {
-	renderVisual(
-		<>
-			<TextField label="Resting" name="resting" />
-			<TextField isInvalid label="Invalid" name="invalid" />
-		</>,
-	);
-
-	const invalidInput = page.getByRole('textbox', { name: 'Invalid' });
-	await expect.element(invalidInput).toBeVisible();
-
-	const restingGroup = groupFor('Resting');
-	const invalidGroup = groupFor('Invalid');
-
-	expect(indicatorFor('Resting')).toBe(null);
-	expect(indicatorFor('Invalid')).not.toBe(null);
-
-	expect(getComputedStyle(invalidGroup).borderWidth).toBe('1px');
-	expect(getComputedStyle(invalidGroup).borderColor).not.toBe(
-		getComputedStyle(restingGroup).borderColor,
-	);
-});
-
 test('the indicator icon adds no text to the accessible name', async () => {
-	renderVisual(<TextField isInvalid label="Invalid" name="invalid" />);
+	render(<TextField isInvalid label="Invalid" name="invalid" />);
 
 	const input = page.getByRole('textbox', { name: 'Invalid' });
 	// The field's label is an external `<label>` associated via `aria-labelledby`,
@@ -87,7 +94,7 @@ test('the indicator icon adds no text to the accessible name', async () => {
 });
 
 test('an invalid field keeps its description and error associated with the input', async () => {
-	renderVisual(
+	render(
 		<TextField
 			description="Use your work email."
 			errorMessage="Enter a valid email."
@@ -109,89 +116,11 @@ test('an invalid field keeps its description and error associated with the input
 	expect(describedBy).toContain(error.element().id);
 });
 
-// The indicator scales with the control's own `size` (`INPUT_GROUP_ICON_SIZE`), the
-// same `medium` → 20px, `small` → 16px mapping Combobox uses, so it stays proportioned
-// to the field it sits in rather than sitting at a constant.
-test('the indicator icon matches the control size variant, not a constant', async () => {
-	renderVisual(
-		<>
-			<TextField isInvalid label="Medium" name="medium" />
-			<TextField isInvalid label="Small" name="small" size="small" />
-		</>,
-	);
-	await expect.element(page.getByRole('textbox', { name: 'Medium' })).toBeVisible();
-
-	const medium = indicatorFor('Medium');
-	const small = indicatorFor('Small');
-	if (medium == null || small == null) throw new Error('Expected both invalid indicators.');
-
-	expect(getComputedStyle(medium).blockSize).toBe('20px');
-	expect(getComputedStyle(small).blockSize).toBe('16px');
-});
-
-/**
- * Gap between an element's trailing edge and its ancestor control's inner (inside the
- * border) trailing edge, measured from rendered layout rather than CSS declarations.
- */
-function trailingInsetFromControlBorder(control: Element, element: Element): number {
-	const controlRect = control.getBoundingClientRect();
-	const borderWidth = Number.parseFloat(getComputedStyle(control).borderRightWidth);
-	const innerBorderRight = controlRect.right - borderWidth;
-	return innerBorderRight - element.getBoundingClientRect().right;
-}
-
-// The invalid icon is a trailing glyph in a field, and `ComboboxField`'s chevron is
-// the system's existing trailing-glyph precedent — a constant inset from the control's
-// inner border, not one that scales with the control's own horizontal padding the way
-// text does. This locks the two together across components at both sizes, so the
-// `invalidIndicator` slot's `marginInlineEnd` (`input-group.css.ts`) cannot drift back to
-// matching `control`'s padding without this failing.
-for (const size of ['medium', 'small'] as const) {
-	test(`the invalid icon sits at the same trailing inset as the combobox chevron: ${size}`, async () => {
-		renderVisual(
-			<>
-				<TextField isInvalid label="Invalid" name="invalid" size={size} />
-				<ComboboxField
-					defaultItems={[{ id: 'au', label: 'Australia' }]}
-					label="Country"
-					name="country"
-					size={size}
-				>
-					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-				</ComboboxField>
-			</>,
-		);
-
-		const textInput = page.getByRole('textbox', { name: 'Invalid' });
-		await expect.element(textInput).toBeVisible();
-
-		const textFieldGroup = groupFor('Invalid');
-		const indicator = indicatorFor('Invalid');
-		if (indicator == null) throw new Error('Expected the invalid indicator.');
-
-		const comboboxInput = page.getByRole('combobox', { name: 'Country' });
-		const comboboxGroup = comboboxInput.element().closest<HTMLElement>('[role="group"]');
-		if (comboboxGroup == null) throw new Error('Expected the combobox control group.');
-
-		const chevron = page
-			.getByRole('button', { name: 'Toggle options' })
-			.element()
-			.querySelector('svg');
-		if (chevron == null) throw new Error('Expected the combobox trigger chevron.');
-
-		const indicatorInset = trailingInsetFromControlBorder(textFieldGroup, indicator);
-		const chevronInset = trailingInsetFromControlBorder(comboboxGroup, chevron);
-
-		expect(indicatorInset).toBeCloseTo(chevronInset, 0);
-		expect(indicatorInset).toBeCloseTo(8, 0);
-	});
-}
-
 // The invalid icon must land before a trailing suffix, not after it. The suffix's
 // flex `order` is what puts it there, so the DOM position of the appended icon
 // alone does not prove it — the rendered geometry does.
 test('the indicator lands after the input and before a trailing suffix', async () => {
-	renderVisual(
+	render(
 		<InputGroup isInvalid>
 			<InputGroupPrefix>$</InputGroupPrefix>
 			<InputGroupInput aria-label="Amount" defaultValue="0.00" />
@@ -220,7 +149,7 @@ test('the indicator lands after the input and before a trailing suffix', async (
 // arm is the one that decides whether the component is usable with it at all.
 test('InputGroupInput resolves a ref object to the input element', async () => {
 	const ref = createRef<HTMLInputElement>();
-	renderVisual(
+	render(
 		<InputGroup>
 			<InputGroupInput aria-label="Amount" ref={ref} />
 		</InputGroup>,
@@ -235,7 +164,7 @@ test('InputGroupInput resolves a ref object to the input element', async () => {
 
 test('InputGroupInput resolves a callback ref to the input element', async () => {
 	const resolved: Array<HTMLInputElement | null> = [];
-	renderVisual(
+	render(
 		<InputGroup>
 			<InputGroupInput
 				aria-label="Amount"
@@ -257,7 +186,7 @@ test('InputGroupInput resolves a callback ref to the input element', async () =>
 // it must land on the editable control, never on the wrapper `<div>` or the group.
 test('TextField resolves inputRef to the input element, not a wrapper', async () => {
 	const ref = createRef<HTMLInputElement>();
-	renderVisual(<TextField inputRef={ref} label="Email" name="email" />);
+	render(<TextField inputRef={ref} label="Email" name="email" />);
 
 	const input = page.getByRole('textbox', { name: 'Email' });
 	await expect.element(input).toBeVisible();
@@ -268,7 +197,7 @@ test('TextField resolves inputRef to the input element, not a wrapper', async ()
 
 test('TextField resolves a callback inputRef to the input element', async () => {
 	const resolved: Array<HTMLInputElement | null> = [];
-	renderVisual(
+	render(
 		<TextField
 			inputRef={(node) => {
 				resolved.push(node);
@@ -288,7 +217,7 @@ test('TextField resolves a callback inputRef to the input element', async () => 
 // `name` and `onBlur` are the other half of uncontrolled use: without them a caller
 // has to reach through `inputRef` to do what a native `<input>` does for free.
 test('TextField forwards name to the input so a native form submit collects it', async () => {
-	const scene = renderVisual(
+	const { locator: scene } = render(
 		<form>
 			<TextField label="Email" name="email" />
 		</form>,
@@ -306,7 +235,7 @@ test('TextField forwards name to the input so a native form submit collects it',
 
 test('TextField forwards onBlur to the input', async () => {
 	const blurs: Array<string> = [];
-	renderVisual(
+	render(
 		<>
 			<TextField
 				label="Email"
@@ -339,7 +268,7 @@ test('TextField forwards onBlur to the input', async () => {
 // case, since the in-control icon (not a width change) is the invalid cue, so the
 // proof is the border colour and the icon's presence, not a width comparison.
 test('a required field with no value is not painted invalid before validation runs', async () => {
-	renderVisual(
+	render(
 		<>
 			<TextField label="Resting" name="resting" />
 			<TextField isRequired label="Email" name="email" />
@@ -361,7 +290,7 @@ test('a required field is painted invalid once a real submit fails validation', 
 	// resolve in this browser test environment. React Aria's own field
 	// validation listens for the browser's native `invalid` event regardless of
 	// an ancestor `Form`, so a native submit is enough to trigger it.
-	renderVisual(
+	render(
 		<form>
 			<TextField label="Resting" name="resting" />
 			<TextField isRequired label="Email" name="email" />

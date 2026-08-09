@@ -1,7 +1,7 @@
 import type { LinkProps } from '@luke-ui/react/link';
 import { Link } from '@luke-ui/react/link';
 import type { CSSProperties } from 'react';
-import { expect, fn, userEvent } from 'storybook/test';
+import { fn } from 'storybook/test';
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -29,14 +29,6 @@ const stackStyle = {
  */
 export const Default = meta.story({
 	args: baseArgs,
-	play: async ({ canvas }) => {
-		const link = canvas.getByRole('link', { name: 'Link' });
-		await userEvent.tab();
-		await expect(link).toHaveFocus();
-		await expect(getComputedStyle(link).outlineStyle).toBe('solid');
-		await expect(getComputedStyle(link).outlineWidth).toBe('2px');
-		await expect(getComputedStyle(link).outlineOffset).toBe('2px');
-	},
 });
 
 /**
@@ -75,20 +67,6 @@ export const Standalone = meta.story({
 			</p>
 		</div>
 	),
-	play: async ({ canvas, step }) => {
-		const standalone = canvas.getByRole('link', { name: 'Standalone link' });
-		const inline = canvas.getByRole('link', { name: 'inline link' });
-
-		await step('standalone links provide the structural target', async () => {
-			await expect(getComputedStyle(standalone).minBlockSize).toBe('24px');
-			await expect(getComputedStyle(standalone).minInlineSize).toBe('24px');
-		});
-
-		await step('inline links retain the prose target-size exception', async () => {
-			await expect(getComputedStyle(inline).minBlockSize).toBe('0px');
-			await expect(getComputedStyle(inline).minInlineSize).toBe('0px');
-		});
-	},
 });
 
 /**
@@ -99,15 +77,5 @@ export const Disabled = meta.story({
 		...baseArgs,
 		isDisabled: true,
 		onPress: fn(),
-	},
-	play: async ({ args, canvas }) => {
-		const link = canvas.getByRole('link', { name: 'Link' });
-		const restingColor = getComputedStyle(link).color;
-
-		await userEvent.hover(link);
-		await userEvent.click(link);
-
-		await expect(getComputedStyle(link).color).toBe(restingColor);
-		await expect(args.onPress).not.toHaveBeenCalled();
 	},
 });

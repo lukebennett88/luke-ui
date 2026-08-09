@@ -58,12 +58,6 @@ const fieldConfig = {
 			...vars.font[200],
 			minInlineSize: 0,
 			paddingInlineStart: messageIndent,
-
-			selectors: {
-				[`${dataDisabledSelector} &`]: {
-					color: vars.color.text.disabled,
-				},
-			},
 		},
 	},
 	defaultVariants: {

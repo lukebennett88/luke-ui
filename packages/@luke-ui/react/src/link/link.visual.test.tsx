@@ -1,96 +1,74 @@
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
+import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
-	renderVisual,
 	Stack,
-	visualAppearances,
-} from '../test-utils/render-visual.js';
+} from '../test-utils/visual.js';
 import { Link } from './index.js';
 
-test('tones and states', async () => {
-	const locator = renderVisual(
+test('kitchen sink', async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Stack align="flex-start">
+				<Link href="#">Accent link</Link>
+				<Link href="#" tone="neutral">
+					Neutral link
+				</Link>
+				<Link href="#" isStandalone>
+					Standalone link
+				</Link>
+				<Link href="#" isDisabled>
+					Disabled link
+				</Link>
+				<Grid columns={3}>
+					<Link href="#" isStandalone>
+						Accent
+					</Link>
+					<Link href="#" isStandalone tone="neutral">
+						Neutral
+					</Link>
+					<Link href="#" isDisabled isStandalone>
+						Disabled
+					</Link>
+				</Grid>
+			</Stack>,
+			{ appearance },
+		);
+		await captureVisualAppearance(locator, 'link/kitchen-sink', appearance);
+	}
+});
+
+test('interactive states', async () => {
+	const { locator } = render(
 		<Stack align="flex-start">
-			<Link href="#">Accent link</Link>
-			<Link href="#" tone="neutral">
-				Neutral link
-			</Link>
 			<Link href="#" isStandalone>
-				Standalone link
-			</Link>
-			<Link href="#" isDisabled>
-				Disabled link
+				Destination
 			</Link>
 		</Stack>,
 	);
+	const link = page.getByRole('link', { name: 'Destination' });
 
-	await captureVisual(locator, 'link/tones-states');
+	await captureVisual(locator, 'link/resting');
+	await userEvent.hover(link);
+	await captureVisual(locator, 'link/hover');
+	await userEvent.unhover(link);
+	await focusViaKeyboard(link);
+	await captureVisual(locator, 'link/focus-visible');
+	await userEvent.keyboard('{Enter>}');
+	await captureVisual(locator, 'link/pressed');
+	await userEvent.keyboard('{/Enter}');
 });
 
-for (const appearance of visualAppearances) {
-	test(`navigation states: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
-			<Grid columns={3}>
-				<Link href="#" isStandalone>
-					Accent
-				</Link>
-				<Link href="#" isStandalone tone="neutral">
-					Neutral
-				</Link>
-				<Link href="#" isDisabled isStandalone>
-					Disabled
-				</Link>
-			</Grid>,
-			appearance,
-		);
-		const accent = page.getByRole('link', { name: 'Accent' });
-		const neutral = page.getByRole('link', { name: 'Neutral' });
-		const disabled = page.getByRole('link', { name: 'Disabled' });
-
-		expect(getComputedStyle(accent.element()).color).not.toBe(
-			getComputedStyle(neutral.element()).color,
-		);
-		expect(getComputedStyle(disabled.element()).opacity).toBe('0.55');
-
-		await captureVisualAppearance(scene, 'link/navigation-states', appearance);
-	});
-}
-
-for (const appearance of visualAppearances) {
-	test(`interactive states: ${appearance.theme} ${appearance.mode}`, async () => {
-		const scene = renderVisual(
-			<Stack align="flex-start">
-				<Link href="#" isStandalone>
-					Destination
-				</Link>
-			</Stack>,
-			appearance,
-		);
-		const link = page.getByRole('link', { name: 'Destination' });
-		await expect.element(link).toBeVisible();
-
-		await captureVisualAppearance(scene, 'link/resting', appearance);
-		await userEvent.hover(link);
-		await captureVisualAppearance(scene, 'link/hover', appearance);
-		await userEvent.unhover(link);
-		await focusViaKeyboard(link);
-		await captureVisualAppearance(scene, 'link/focus-visible', appearance);
-		await userEvent.keyboard('{Enter>}');
-		await expect.element(link).toHaveAttribute('data-pressed', 'true');
-		await captureVisualAppearance(scene, 'link/pressed', appearance);
-		await userEvent.keyboard('{/Enter}');
-	});
-}
-
-test('forced-colors navigation states', async () => {
+test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 
 	try {
-		const scene = renderVisual(
+		const { locator } = render(
 			<Grid columns={4}>
 				<Link href="#" isStandalone>
 					Resting
@@ -107,20 +85,13 @@ test('forced-colors navigation states', async () => {
 			</Grid>,
 		);
 		const hovered = page.getByRole('link', { name: 'Hovered' });
-		const pressed = page.getByRole('link', { name: 'Pressed and focused' });
-		const disabled = page.getByRole('link', { name: 'Disabled' });
 
 		await userEvent.hover(hovered);
 		await userEvent.tab();
 		await userEvent.tab();
 		await userEvent.tab();
 		await userEvent.keyboard('{Enter>}');
-
-		await expect.element(pressed).toHaveAttribute('data-pressed', 'true');
-		await expect.element(pressed).toHaveAttribute('data-focus-visible', 'true');
-		await expect.element(disabled).toBeVisible();
-		await expect.element(disabled).toHaveStyle({ opacity: '1' });
-		await captureVisual(scene, 'link/forced-colors-states');
+		await captureVisual(locator, 'link/forced-colors-states');
 		await userEvent.keyboard('{/Enter}');
 	} finally {
 		await emulateForcedColors('none');

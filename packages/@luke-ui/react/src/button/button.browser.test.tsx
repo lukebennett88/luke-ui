@@ -1,96 +1,28 @@
-import '../../dist/themes/tactile/stylesheet.css';
-import '../stylesheet.css.js';
-import { act } from 'react';
-import type { ReactNode } from 'react';
-import type { Root } from 'react-dom/client';
-import { createRoot } from 'react-dom/client';
-import { afterEach, expect, test } from 'vite-plus/test';
-import spritesheetHref from '../../dist/spritesheet.svg?url';
-import { IconButton } from '../icon-button/index.js';
-import { Icon, IconSpritesheetProvider } from '../icon/index.js';
-import { rootClassName } from '../theme/index.js';
-import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
+import type { ComponentProps } from 'react';
+import { expect } from 'vite-plus/test';
+import { testIntegration, testUniversalConformance } from '../conformance/helpers.js';
+import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
 import { Button } from './index.js';
 
-const mounted: Array<{ container: HTMLElement; root: Root }> = [];
-
-afterEach(() => {
-	for (const { container, root } of mounted) {
-		act(() => root.unmount());
-		container.remove();
-	}
-	mounted.length = 0;
+testUniversalConformance({
+	getTarget: (result) => {
+		const target = result.locator.getByRole('button').element();
+		if (!(target instanceof HTMLElement)) throw new Error('Expected a button.');
+		return target;
+	},
+	name: 'Button',
+	registration: componentTestRegistration,
+	render: (props = {}) =>
+		render(<Button {...(props as ComponentProps<typeof Button>)}>Action</Button>),
 });
 
-test('renders a 16px start icon in a medium button', () => {
-	const { container } = mountFixture(
-		<Button size="medium" startIcon={<Icon name="add" />}>
-			Add
-		</Button>,
-	);
+testIntegration(componentTestRegistration, 'Button', async () => {
+	let pressed = false;
+	const { locator, user } = render(<Button onPress={() => (pressed = true)}>Action</Button>);
 
-	const icon = container.querySelector('svg');
-	if (!(icon instanceof SVGElement)) throw new Error('Expected icon.');
-
-	const styles = getComputedStyle(icon);
-	expect(styles.inlineSize).toBe('16px');
-	expect(styles.blockSize).toBe('16px');
+	await user.click(locator.getByRole('button', { name: 'Action' }));
+	// The assertion belongs to the journey registered by testIntegration.
+	// oxlint-disable-next-line vitest/no-standalone-expect
+	expect(pressed).toBe(true);
 });
-
-test('renders a 16px start icon in a small button', () => {
-	const { container } = mountFixture(
-		<Button size="small" startIcon={<Icon name="add" />}>
-			Add
-		</Button>,
-	);
-
-	const icon = container.querySelector('svg');
-	if (!(icon instanceof SVGElement)) throw new Error('Expected icon.');
-
-	const styles = getComputedStyle(icon);
-	expect(styles.inlineSize).toBe('16px');
-	expect(styles.blockSize).toBe('16px');
-});
-
-test('renders a 16px icon in a medium icon button while the button itself stays 40px', () => {
-	const { container } = mountFixture(<IconButton aria-label="Add" icon="add" size="medium" />);
-
-	const button = container.firstElementChild;
-	if (!(button instanceof HTMLElement)) throw new Error('Expected button.');
-	expect(getComputedStyle(button).inlineSize).toBe('40px');
-
-	const icon = button.querySelector('svg');
-	if (!(icon instanceof SVGElement)) throw new Error('Expected icon.');
-
-	const styles = getComputedStyle(icon);
-	expect(styles.inlineSize).toBe('16px');
-	expect(styles.blockSize).toBe('16px');
-});
-
-test('an explicit icon size overrides the button-provided icon size', () => {
-	const { container } = mountFixture(
-		<Button size="medium" startIcon={<Icon name="add" size="large" />}>
-			Add
-		</Button>,
-	);
-
-	const icon = container.querySelector('svg');
-	if (!(icon instanceof SVGElement)) throw new Error('Expected icon.');
-
-	const styles = getComputedStyle(icon);
-	expect(styles.inlineSize).toBe('32px');
-	expect(styles.blockSize).toBe('32px');
-});
-
-function mountFixture(node: ReactNode) {
-	const container = document.body.appendChild(document.createElement('div'));
-	container.className = `${rootClassName} ${tactileThemeClassName}`;
-	const root = createRoot(container);
-	mounted.push({ container, root });
-
-	act(() => {
-		root.render(<IconSpritesheetProvider href={spritesheetHref}>{node}</IconSpritesheetProvider>);
-	});
-
-	return { container };
-}
