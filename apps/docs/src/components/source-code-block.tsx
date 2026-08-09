@@ -32,7 +32,7 @@ function SourceCodeContent({ src }: SourceCodeBlockProps) {
 
 	return (
 		<CodeBlock className="my-0">
-			{/* This trusted HTML comes from the build-time Shiki plugin, not from developer input. */}
+			{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
 			<Pre dangerouslySetInnerHTML={{ __html: highlightedSource.html }} />
 		</CodeBlock>
 	);
@@ -40,7 +40,7 @@ function SourceCodeContent({ src }: SourceCodeBlockProps) {
 
 function SourceCodeLoadingState() {
 	return (
-		<CodeBlock allowCopy={false} aria-hidden className="my-0">
+		<CodeBlock allowCopy={false} aria-hidden className="my-0" inert>
 			<Pre>
 				<code>
 					{Array.from({ length: FALLBACK_LINE_COUNT }, (_, index) => (

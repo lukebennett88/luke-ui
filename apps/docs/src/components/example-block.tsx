@@ -76,7 +76,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 			{showCode ? (
 				<Box id={codeId}>
 					<CodeBlock className="my-0 rounded-none border-x-0 border-b-0 shadow-none">
-						{/* This trusted HTML comes from the build-time Shiki plugin, not from developer input. */}
+						{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
 						<Pre dangerouslySetInnerHTML={{ __html: highlightedSource.html }} />
 					</CodeBlock>
 				</Box>

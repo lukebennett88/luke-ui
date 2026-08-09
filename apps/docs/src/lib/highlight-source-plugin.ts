@@ -4,12 +4,10 @@ import type { HighlighterCore } from 'shiki/core';
 import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import tsx from 'shiki/langs/tsx.mjs';
-import githubDark from 'shiki/themes/github-dark.mjs';
-import githubLight from 'shiki/themes/github-light.mjs';
 import type { Plugin } from 'vite-plus';
 import type { HighlightedSource } from './highlighted-source.js';
 import { encodeCodeHash } from './playground-hash.js';
-import { SHIKI_THEMES } from './shiki-theme.js';
+import { SHIKI_THEME_REGISTRATIONS, SHIKI_THEMES } from './shiki-theme.js';
 
 const HIGHLIGHT_QUERY = '?highlight';
 
@@ -30,7 +28,7 @@ export function highlightSourcePlugin(): Plugin {
 			highlighter ??= createHighlighterCore({
 				engine: createJavaScriptRegexEngine(),
 				langs: [tsx],
-				themes: [githubLight, githubDark],
+				themes: SHIKI_THEME_REGISTRATIONS,
 			});
 
 			const path = id.slice(0, -HIGHLIGHT_QUERY.length);
