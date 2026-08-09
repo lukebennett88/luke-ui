@@ -79,6 +79,15 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `packages/@luke-ui/react/src/${name}/index.tsx`,
 		},
 		{
+			contents: renderComponentTest({
+				conformanceTier,
+				integrationTripwire,
+				name,
+				pascalName,
+			}),
+			path: `packages/@luke-ui/react/src/${name}/${name}.browser.test.tsx`,
+		},
+		{
 			contents: renderPackageStory({ docsGroup, name, pascalName }),
 			path: `packages/@luke-ui/react/src/${name}/${name}.stories.tsx`,
 		},
@@ -91,6 +100,17 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `apps/docs/content/docs/components/${docsGroup}/${name}/index.mdx`,
 		},
 	];
+
+	if (conformanceTier !== 'none' || integrationTripwire === 'required') {
+		files.push({
+			contents: renderComponentTestRegistration({
+				conformanceTier,
+				integrationTripwire,
+				name,
+			}),
+			path: `packages/@luke-ui/react/src/${name}/component-test-registration.ts`,
+		});
+	}
 
 	if (input.styling === 'recipe') {
 		files.push({
@@ -265,6 +285,103 @@ function renderHostedExample(input: { name: string; pascalName: string }): strin
 export default function Basic() {
 	return <${input.pascalName}>${input.pascalName}</${input.pascalName}>;
 }
+`;
+}
+
+function renderComponentTest(input: {
+	conformanceTier: ConformanceTier;
+	integrationTripwire: 'none' | 'required';
+	name: string;
+	pascalName: string;
+}): string {
+	const conformanceHelper =
+		input.conformanceTier === 'universal'
+			? 'testUniversalConformance'
+			: input.conformanceTier === 'field-shaped'
+				? 'testFieldShapedConformance'
+				: undefined;
+	const helperImports = [
+		conformanceHelper,
+		input.integrationTripwire === 'required' ? 'testIntegration' : undefined,
+	].filter((value): value is string => value != null);
+	const imports = [
+		...(input.conformanceTier !== 'none' ? ["import type { ComponentProps } from 'react';"] : []),
+		...(input.integrationTripwire === 'required'
+			? ["import { expect } from 'vite-plus/test';"]
+			: input.conformanceTier === 'none'
+				? ["import { expect, test } from 'vite-plus/test';"]
+				: []),
+		...(helperImports.length > 0
+			? [`import { ${helperImports.join(', ')} } from '../conformance/helpers.js';`]
+			: []),
+		"import { render } from '../test-utils/render.js';",
+		...(input.conformanceTier !== 'none' || input.integrationTripwire === 'required'
+			? ["import { componentTestRegistration } from './component-test-registration.js';"]
+			: []),
+		`import { ${input.pascalName} } from './index.js';`,
+	];
+
+	const renderComponent = `render(<${input.pascalName} {...(props as ComponentProps<typeof ${input.pascalName}>)}>Content</${input.pascalName}>)`;
+	const contract =
+		input.conformanceTier === 'universal'
+			? `testUniversalConformance({
+	getTarget: (result) => {
+		const target = result.container.firstElementChild;
+		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
+		return target;
+	},
+	name: '${input.pascalName}',
+	registration: componentTestRegistration,
+	render: (props = {}) => ${renderComponent},
+});`
+			: input.conformanceTier === 'field-shaped'
+				? `testFieldShapedConformance({
+	getControl: (result) => {
+		const control = result.container.querySelector('[name="conformance-field"]');
+		if (!(control instanceof HTMLElement)) throw new Error('Expected a native field control.');
+		return control;
+	},
+	name: '${input.pascalName}',
+	registration: componentTestRegistration,
+	render: (props = {}) => ${renderComponent},
+});`
+				: `test('${input.pascalName} renders its root element', () => {
+	const result = render(<${input.pascalName}>Content</${input.pascalName}>);
+	expect(result.locator.element().firstElementChild).toHaveTextContent('Content');
+});`;
+
+	const integration =
+		input.integrationTripwire === 'required'
+			? `
+testIntegration(componentTestRegistration, '${input.pascalName}', async () => {
+	let clicked = false;
+	const { locator, user } = render(
+		<${input.pascalName} onClick={() => (clicked = true)}>Content</${input.pascalName}>,
+	);
+
+	await user.click(locator.getByText('Content'));
+	expect(clicked).toBe(true);
+});`
+			: '';
+
+	return `${imports.join('\n')}
+
+${contract}${integration}
+`;
+}
+
+function renderComponentTestRegistration(input: {
+	conformanceTier: ConformanceTier;
+	integrationTripwire: 'none' | 'required';
+	name: string;
+}): string {
+	return `import { defineComponentTestRegistration } from '../conformance/registrations.js';
+
+export const componentTestRegistration = defineComponentTestRegistration({
+	conformanceTier: '${input.conformanceTier}',
+	integrationTripwire: '${input.integrationTripwire}',
+	path: '${input.name}',
+});
 `;
 }
 

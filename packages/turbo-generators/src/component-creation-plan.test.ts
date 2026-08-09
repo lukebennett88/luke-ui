@@ -24,7 +24,9 @@ describe('createComponentPlan', () => {
 			'apps/docs/content/docs/components/feedback/status-badge/index.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
+			'packages/@luke-ui/react/src/status-badge/component-test-registration.ts',
 			'packages/@luke-ui/react/src/status-badge/index.tsx',
+			'packages/@luke-ui/react/src/status-badge/status-badge.browser.test.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.visual.test.tsx',
 		]);
@@ -78,6 +80,12 @@ describe('createComponentPlan', () => {
 		expect(
 			plan.files.find((file) => file.path.endsWith('/status-badge/index.tsx'))?.contents,
 		).toContain("export interface StatusBadgeProps extends ComponentProps<'div'> {}");
+		expect(plan.files.find((file) => file.path.endsWith('.browser.test.tsx'))?.contents).toContain(
+			'testUniversalConformance',
+		);
+		expect(
+			plan.files.find((file) => file.path.endsWith('component-test-registration.ts'))?.contents,
+		).toContain("path: 'status-badge'");
 		expect(
 			plan.files.find((file) => file.path.endsWith('/recipes/status-badge.css.ts'))?.contents,
 		).not.toContain('StatusBadgeVariants');
@@ -124,6 +132,9 @@ describe('createComponentPlan', () => {
 		expect(plan.textFileInserts?.[0]?.lines).toEqual([
 			"\t['DateField', 'date-field', 'composed', 'universal', 'none', 'none'],",
 		]);
+		expect(plan.files.map((file) => file.path)).toContain(
+			'packages/@luke-ui/react/src/date-field/date-field.browser.test.tsx',
+		);
 	});
 
 	it('uses explicit applicability overrides in the manifest entry', () => {
@@ -140,6 +151,14 @@ describe('createComponentPlan', () => {
 		expect(plan.textFileInserts?.[0]?.lines).toEqual([
 			"\t['DateField', 'date-field', 'composed', 'field-shaped', 'required', 'none'],",
 		]);
+		expect(
+			plan.files.find((file) => file.path.endsWith('/date-field.browser.test.tsx'))?.contents,
+		).toMatch(/testFieldShapedConformance[\s\S]*testIntegration/);
+		expect(
+			plan.files.find((file) => file.path.endsWith('/date-field.browser.test.tsx'))?.contents,
+		).toContain(
+			"import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';",
+		);
 	});
 
 	it('rejects invalid component names before file writes', () => {
