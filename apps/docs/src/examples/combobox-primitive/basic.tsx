@@ -7,13 +7,16 @@ import {
 	ComboboxRoot,
 	ComboboxTrigger,
 } from '@luke-ui/react/combobox-field/primitive';
+import { Icon } from '@luke-ui/react/icon';
 
 export default () => {
 	return (
 		<ComboboxRoot aria-label="Country">
 			<ComboboxInputGroup>
 				<ComboboxInput />
-				<ComboboxTrigger aria-label="Toggle options" />
+				<ComboboxTrigger aria-label="Toggle options">
+					<Icon name="chevronDown" />
+				</ComboboxTrigger>
 			</ComboboxInputGroup>
 			<ComboboxPopover>
 				<ComboboxListBox>
