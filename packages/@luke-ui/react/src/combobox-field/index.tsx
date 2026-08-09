@@ -1,5 +1,6 @@
+import { useObjectRef } from '@react-aria/utils';
 import type { CSSProperties, JSX, Ref } from 'react';
-import { useContext, useId } from 'react';
+import { useContext, useEffect, useId } from 'react';
 import { SelectableCollectionContext } from 'react-aria-components/Autocomplete';
 import { Button as RacButton } from 'react-aria-components/Button';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
@@ -202,6 +203,7 @@ function MobileComboboxContent<T extends object>({
 	renderEmptyState: ComboboxListBoxProps<T>['renderEmptyState'];
 	size: ComboboxSize;
 }): JSX.Element | null {
+	const mobileInputRef = useObjectRef(inputRef);
 	const labelContext = useSlottedContext(LabelContext);
 	const popoverContext = useSlottedContext(PopoverContext);
 	const state = useContext(ComboBoxStateContext);
@@ -224,6 +226,12 @@ function MobileComboboxContent<T extends object>({
 			</ComboboxListBox>
 		</SelectableCollectionContext.Provider>
 	);
+
+	useEffect(() => {
+		if (state?.isOpen !== true) return;
+
+		mobileInputRef.current?.focus({ preventScroll: true });
+	}, [mobileInputRef, state?.isOpen]);
 
 	if (state == null) {
 		// RAC builds the collection before it provides state.
@@ -273,11 +281,8 @@ function MobileComboboxContent<T extends object>({
 					<ComboboxInput
 						aria-expanded={undefined}
 						aria-haspopup="listbox"
-						// The mobile dialog must focus its search field when it opens.
-						// oxlint-disable-next-line jsx-a11y/no-autofocus
-						autoFocus
 						placeholder={placeholder}
-						ref={inputRef}
+						ref={mobileInputRef}
 						role="searchbox"
 					/>
 					<MobileComboboxClearButton size={size} />

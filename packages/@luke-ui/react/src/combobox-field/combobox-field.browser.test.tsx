@@ -80,15 +80,28 @@ testIntegration(componentTestRegistration, 'ComboboxField', async () => {
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
 	const restoreScreenWidth = mockScreenWidth(700);
+	const mobileCountryItems: Array<CountryItem> = [
+		...countryItems,
+		{ id: 'dk', label: 'Denmark' },
+		{ id: 'fr', label: 'France' },
+		{ id: 'de', label: 'Germany' },
+		{ id: 'jp', label: 'Japan' },
+		{ id: 'mx', label: 'Mexico' },
+		{ id: 'nz', label: 'New Zealand' },
+		{ id: 'sg', label: 'Singapore' },
+		{ id: 'za', label: 'South Africa' },
+		{ id: 'se', label: 'Sweden' },
+		{ id: 'us', label: 'United States' },
+	];
 	try {
 		const inputRef = createRef<HTMLInputElement>();
 		const { container } = render(
 			<>
-				<header style={{ position: 'sticky', top: 0, zIndex: 10 }}>Page header</header>
+				<header style={{ insetBlockStart: 0, position: 'sticky', zIndex: 10 }}>Page header</header>
 				<div style={{ blockSize: 500 }} />
 				<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
 					<ComboboxField
-						defaultItems={countryItems}
+						defaultItems={mobileCountryItems}
 						defaultValue="au"
 						inputRef={inputRef}
 						label="Country"

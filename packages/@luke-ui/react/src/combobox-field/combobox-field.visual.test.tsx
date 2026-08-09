@@ -1,4 +1,4 @@
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import { render, visualAppearances } from '../test-utils/render.js';
@@ -196,6 +196,7 @@ test('mobile tray', async () => {
 			</Stack>,
 		);
 		await userEvent.click(page.getByRole('button', { name: 'Country' }));
+		await waitForMobileTrayToSettle();
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
 	} finally {
 		restoreScreenWidth();
@@ -221,6 +222,7 @@ test('mobile tray short list', async () => {
 			</Stack>,
 		);
 		await userEvent.click(page.getByRole('button', { name: 'Country' }));
+		await waitForMobileTrayToSettle();
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-short');
 	} finally {
 		restoreScreenWidth();
@@ -317,6 +319,38 @@ test('rich section title', async () => {
 		'combobox-field/section-title-rich-content',
 	);
 });
+
+async function waitForMobileTrayToSettle() {
+	const searchbox = page.getByRole('searchbox', { name: 'Country' });
+	const dialog = page.getByRole('dialog');
+
+	await expect
+		.poll(() => {
+			const searchboxRect = searchbox.element().getBoundingClientRect();
+			const dialogRect = dialog.element().getBoundingClientRect();
+			const modal = dialog.element().parentElement;
+			if (modal == null) return false;
+
+			const modalTop = modal.getBoundingClientRect().top;
+			const finalTop = 32;
+			return {
+				dialogBottomInside: dialogRect.bottom <= window.innerHeight + 1,
+				dialogTopInside: dialogRect.top >= 0,
+				modalAtFinalTop: Math.abs(modalTop - finalTop) < 0.5,
+				searchboxBottomInside: searchboxRect.bottom <= window.innerHeight,
+				searchboxTopInside: searchboxRect.top >= 0,
+				windowScrollY: window.scrollY,
+			};
+		})
+		.toEqual({
+			dialogBottomInside: true,
+			dialogTopInside: true,
+			modalAtFinalTop: true,
+			searchboxBottomInside: true,
+			searchboxTopInside: true,
+			windowScrollY: 0,
+		});
+}
 
 function mockScreenWidth(width: number) {
 	const descriptor = Object.getOwnPropertyDescriptor(window.screen, 'width');

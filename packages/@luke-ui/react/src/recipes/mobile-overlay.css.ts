@@ -31,12 +31,13 @@ export const mobileModal = styleInLayer('recipes', {
 	boxSizing: 'content-box',
 	display: 'flex',
 	flexDirection: 'column',
-	insetBlockEnd: '-100vh',
-	insetBlockStart: vars.space[800],
+	// Physical insets preserve the intended overconstraint. Logical block insets resolve the content-box tray from the wrong edge.
+	bottom: '-100vh',
 	insetInline: 0,
 	overflow: 'hidden',
 	paddingBlockEnd: trayPaddingBlockEnd,
 	position: 'absolute',
+	top: vars.space[800],
 	transition: trayTransition,
 	translate: 'none',
 	vars: {
