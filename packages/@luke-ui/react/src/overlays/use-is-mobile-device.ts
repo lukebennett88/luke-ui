@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { breakpoints } from '../styles/breakpoints.js';
+import { breakpoints } from '../theme/breakpoints.js';
 
 /**
  * Reports whether the current device is a mobile one, so an overlay can switch to

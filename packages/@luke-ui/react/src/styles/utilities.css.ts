@@ -1,7 +1,7 @@
 import type { SprinklesFn } from '@luke-ui/rainbow-sprinkles';
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
+import { breakpoints } from '../theme/breakpoints.js';
 import { vars } from '../theme/contract.css.js';
-import { breakpoints } from './breakpoints.js';
 import { layers } from './layers.css.js';
 
 function fromBreakpoint(minimumWidth: number) {

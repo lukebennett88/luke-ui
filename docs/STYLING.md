@@ -12,9 +12,6 @@ with no class and no JS required. Neither step injects styles at runtime.
 
 - `styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
 - `styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
-- `styles/breakpoints.ts`: the shared breakpoint pixel widths, kept in a plain module so runtime
-  code can read them without importing Vanilla Extract. The styling utilities turn them into media
-  queries, and `useIsMobileDevice` reads the same values for its mobile threshold.
 - `recipes/`: component recipes exported from `@luke-ui/react/recipes`.
 - `recipes/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
@@ -64,6 +61,10 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
   `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
   no `--luke-motion-duration-*` custom property exists.
+- `theme/breakpoints.ts`: the private responsive breakpoint widths, in pixels. Like `motion.ts`, it
+  is a plain module with no Vanilla Extract import, resolved in TypeScript and never emitted as a
+  custom property, because a media query cannot read one. The styling utilities turn the widths into
+  media queries, and `useIsMobileDevice` reads the same values for its mobile threshold.
 - `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
   `surfaces.canvas` is always exactly the resolved `background`.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
