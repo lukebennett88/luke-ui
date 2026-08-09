@@ -6,6 +6,8 @@
  * supported: a double-star directory segment as an optional run of
  * directories, a bare `*` as a single path segment, and `{a,b}` alternation.
  */
+const GLOB_SPECIAL_CHARACTER_PATTERN = /[.+^$()|[\]\\]/;
+
 export function globToRegExp(glob: string): RegExp {
 	let pattern = '';
 	let index = 0;
@@ -33,7 +35,7 @@ export function globToRegExp(glob: string): RegExp {
 			index = end + 1;
 			continue;
 		}
-		if (char !== undefined && '.+^$()|[]\\'.includes(char)) {
+		if (char !== undefined && GLOB_SPECIAL_CHARACTER_PATTERN.test(char)) {
 			pattern += `\\${char}`;
 			index += 1;
 			continue;
