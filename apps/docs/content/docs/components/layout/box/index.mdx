@@ -1,15 +1,15 @@
 ---
 title: Box
-description: A div with responsive Luke UI layout properties.
+description: A layout element with responsive Luke UI layout properties.
 source: packages/@luke-ui/react/src/box
 props:
   - name: BoxProps
     path: packages/@luke-ui/react/src/box/index.tsx
 ---
 
-`Box` is a `div` that accepts Luke UI layout properties. It places content in a layout, adds token
-spacing, constrains an element's size, or controls a flex or grid child. Use a normal `div` when no
-supported layout property applies.
+`Box` accepts Luke UI layout properties and renders a `div` by default. It places content in a
+layout, adds token spacing, constrains an element's size, or controls a flex or grid child. Use a
+normal `div` when no supported layout property applies.
 
 <ExampleBlock src="box/basic" title="Box — Basic" />
 
@@ -53,17 +53,27 @@ Padding, gap, and margin accept `0` and the semantic steps `100`, `200`, `300`, 
 `1000`, `1200`, and `1600`. Margin also accepts `auto`. Sizing, inset, flex-basis, order, and
 grid-placement properties accept their CSS values.
 
-## Render a custom div
+## Choose the rendered element
 
-Use `render` for a compatible custom `div`, such as a motion wrapper. Spread the supplied props on
-the final element. It then receives Box's class name, inline style, ref, accessibility attributes,
-and event handlers. `render` does not make Box polymorphic. It must return a `div`.
+Set `elementType` when the layout needs a supported structural element. The prop does not change
+Box's accepted DOM props. Box owns the element and its DOM attributes.
 
-```tsx
-<Box padding="400" render={(props) => <MotionDiv {...props} />}>
-	Account summary
-</Box>
-```
+The supported elements are `article`, `aside`, `dd`, `div`, `dl`, `dt`, `figcaption`, `figure`,
+`footer`, `header`, `li`, `main`, `nav`, `ol`, `section`, `span`, and `ul`.
+
+<ExampleBlock src="box/semantic-element" title="Box — Semantic element" />
+
+## Own the rendered element
+
+Use `render` when the callback must own the element and its DOM attributes. The callback can return
+an appropriate intrinsic element or custom component. It receives resolved `children`, `className`,
+and `style` props, plus a callback `ref`.
+
+Put event, accessibility, and element-specific attributes on the element inside the callback.
+
+Do not combine `render` with `elementType`. Use `Link` or `Button` when you need their behaviour.
+
+<ExampleBlock src="box/render-element" title="Box — Own the rendered element" />
 
 ## Visual styles
 
