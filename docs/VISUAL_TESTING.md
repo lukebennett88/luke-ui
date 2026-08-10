@@ -2,7 +2,8 @@
 
 Visual tests compare the current checkout with the latest `origin/main` on the same machine and in
 the same Chromium installation. The repository does not store screenshots, baseline manifests, or
-Git LFS objects.
+Git LFS objects. The one exception is `scripts/__fixtures__/pr-312`, a frozen historical capture
+pair used by a unit test, not a checked-in baseline.
 
 ## Run the comparison
 

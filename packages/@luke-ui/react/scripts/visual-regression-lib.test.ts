@@ -5,21 +5,13 @@ import { PNG } from 'pngjs';
 import { expect, test } from 'vite-plus/test';
 import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
+const FIXTURES = path.join(import.meta.dirname, '__fixtures__');
+
 /** Builds a `size` x `size` solid-colour PNG. */
 const png = (red: number, size = 1) => {
 	const image = new PNG({ height: size, width: size });
 	for (let index = 0; index < image.data.length; index += 4) {
 		image.data.set([red, 0, 0, 255], index);
-	}
-	return PNG.sync.write(image);
-};
-
-/** Builds a `width` x `height` white PNG with a black pixel at each `[x, y]` in `dots`. */
-const pngWithDots = (width: number, height: number, dots: Array<[number, number]>) => {
-	const image = new PNG({ width, height });
-	image.data.fill(255);
-	for (const [x, y] of dots) {
-		image.data.set([0, 0, 0, 255], (y * width + x) * 4);
 	}
 	return PNG.sync.write(image);
 };
@@ -111,26 +103,22 @@ test('classifies matched, changed, added, and removed captures', async () => {
 	expect(await readFile(report, 'utf8')).toContain('Visual regression report');
 });
 
-test('classifies a scattered localized change on a large canvas as changed (#312)', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'visual-regression-icon-'));
+test('catches the #312 checkbox icon regression the old gate missed', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-regression-312-'));
 	const base = path.join(root, 'base');
 	const current = path.join(root, 'current');
 	await Promise.all([base, current].map((directory) => mkdir(directory)));
-	const width = 600;
-	const height = 400;
-	// 16 pixels spaced 4px apart (the CLUSTER_PROXIMITY radius) so consecutive
-	// dots aren't 8-adjacent, matching #312's scattered, non-adjacent shape.
-	const dots: Array<[number, number]> = [];
-	for (let i = 0; i < 4; i++) {
-		for (let j = 0; j < 4; j++) dots.push([100 + i * 4, 100 + j * 4]);
-	}
 	await Promise.all([
-		writeFile(path.join(base, 'icon.png'), pngWithDots(width, height, [])),
-		writeFile(path.join(current, 'icon.png'), pngWithDots(width, height, dots)),
+		writeFile(
+			path.join(base, 'checkbox-states.png'),
+			await readFile(path.join(FIXTURES, 'pr-312', 'checkbox-states-main.png')),
+		),
+		writeFile(
+			path.join(current, 'checkbox-states.png'),
+			await readFile(path.join(FIXTURES, 'pr-312', 'checkbox-states-current.png')),
+		),
 	]);
 	const [result] = await compareCaptures(base, current, path.join(root, 'diff'));
-	expect(result?.mismatchedPixels).toBe(16);
-	expect(result?.mismatchClusterArea).toBe(13 * 13);
 	expect(result?.status).toBe('changed');
 });
 
@@ -142,9 +130,8 @@ test('keeps two separated sub-threshold noise clusters unchanged', async () => {
 	const width = 600;
 	const height = 400;
 	// A 1x16px cluster (the measured caret noise) and an 8x11px cluster (the
-	// measured anti-aliasing noise), far enough apart to never share a
-	// CLUSTER_PROXIMITY neighbourhood. A single capture-wide box would combine
-	// them into one large, wrongly "changed" box.
+	// measured anti-aliasing noise), far apart. A single capture-wide box would
+	// combine them into one large, wrongly "changed" box.
 	await Promise.all([
 		writeFile(path.join(base, 'noise.png'), pngWithRects(width, height, [])),
 		writeFile(
@@ -186,10 +173,15 @@ test('classifies identical large captures as unchanged', async () => {
 	await Promise.all([base, current].map((directory) => mkdir(directory)));
 	const width = 600;
 	const height = 400;
-	const dots: Array<[number, number]> = Array.from({ length: 16 }, (_, i) => [100 + i, 100 + i]);
+	const rects: Array<[number, number, number, number]> = Array.from({ length: 16 }, (_, i) => [
+		100 + i,
+		100 + i,
+		1,
+		1,
+	]);
 	await Promise.all([
-		writeFile(path.join(base, 'icon.png'), pngWithDots(width, height, dots)),
-		writeFile(path.join(current, 'icon.png'), pngWithDots(width, height, dots)),
+		writeFile(path.join(base, 'icon.png'), pngWithRects(width, height, rects)),
+		writeFile(path.join(current, 'icon.png'), pngWithRects(width, height, rects)),
 	]);
 	const [result] = await compareCaptures(base, current, path.join(root, 'diff'));
 	expect(result?.mismatchedPixels).toBe(0);

@@ -35,20 +35,8 @@ const DIFF_MARKER_COLOR: readonly [number, number, number] = [255, 0, 0];
 // a real 16px icon (#312) go unnoticed on a large canvas.
 const MISMATCH_CLUSTER_AREA_THRESHOLD = 120;
 
-// Chebyshev distance within which two mismatched pixels are treated as the
-// same cluster, so a change's own scattered anti-aliasing doesn't get
-// counted as several small, separately-harmless clusters. Chosen so 16
-// pixels scattered across a 16x16 region (the #312 shape) merge into one
-// cluster, while staying well under the distance between unrelated noise
-// clusters elsewhere in a capture.
-const CLUSTER_PROXIMITY = 4;
-
-/**
- * The bounding-box area (px²) of the largest local cluster of mismatched pixels in `diff`,
- * grouping pixels within `CLUSTER_PROXIMITY` of each other. Returns early once a cluster
- * reaches `stopAt`, since callers only need to know whether that's been crossed.
- */
-function largestMismatchClusterArea(diff: PNG, width: number, height: number, stopAt: number) {
+/** The bounding-box area (px²) of the largest 8-connected cluster of mismatched pixels in `diff`. */
+function largestMismatchClusterArea(diff: PNG, width: number, height: number) {
 	const isMismatch = (x: number, y: number) => {
 		const index = (y * width + x) * 4;
 		return (
@@ -70,10 +58,10 @@ function largestMismatchClusterArea(diff: PNG, width: number, height: number, st
 			visited[y * width + x] = 1;
 			while (queue.length > 0) {
 				const [cx, cy] = queue.pop() as [number, number];
-				const top = Math.max(0, cy - CLUSTER_PROXIMITY);
-				const bottom = Math.min(height - 1, cy + CLUSTER_PROXIMITY);
-				const left = Math.max(0, cx - CLUSTER_PROXIMITY);
-				const right = Math.min(width - 1, cx + CLUSTER_PROXIMITY);
+				const top = Math.max(0, cy - 1);
+				const bottom = Math.min(height - 1, cy + 1);
+				const left = Math.max(0, cx - 1);
+				const right = Math.min(width - 1, cx + 1);
 				for (let ny = top; ny <= bottom; ny++) {
 					for (let nx = left; nx <= right; nx++) {
 						const index = ny * width + nx;
@@ -87,8 +75,6 @@ function largestMismatchClusterArea(diff: PNG, width: number, height: number, st
 						}
 					}
 				}
-				const area = (maxX - minX + 1) * (maxY - minY + 1);
-				if (area >= stopAt) return area;
 			}
 			largest = Math.max(largest, (maxX - minX + 1) * (maxY - minY + 1));
 		}
@@ -226,9 +212,7 @@ export async function compareCaptures(baseDir: string, currentDir: string, diffD
 			}
 			const mismatchRatio = mismatchedPixels / (width * height);
 			const clusterArea =
-				mismatchedPixels === 0
-					? 0
-					: largestMismatchClusterArea(diffPng, width, height, MISMATCH_CLUSTER_AREA_THRESHOLD);
+				mismatchedPixels === 0 ? 0 : largestMismatchClusterArea(diffPng, width, height);
 			const hasViewportChange = baseCapture.viewport !== currentCapture.viewport;
 			const status =
 				clusterArea >= MISMATCH_CLUSTER_AREA_THRESHOLD || hasViewportChange
