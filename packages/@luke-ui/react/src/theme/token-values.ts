@@ -23,12 +23,25 @@ export const CONTROL_SIZE_VALUES = {
 	'controlSize.small': '32px',
 } as const;
 
+/**
+ * Shape of a Capsize font-metrics object, named locally so `.d.ts` output never needs Capsize's
+ * unexported per-font interfaces.
+ */
+type CapsizeFontMetrics = {
+	ascent: number;
+	capHeight: number;
+	descent: number;
+	lineGap: number;
+	unitsPerEm: number;
+	xHeight: number;
+};
+
 /** Capsize font metrics for each curated font-family choice. */
-export const FONT_METRICS = {
+export const FONT_METRICS: Record<'apple-system' | 'dm-sans' | 'inter', CapsizeFontMetrics> = {
 	'apple-system': appleSystemMetrics,
 	'dm-sans': dMSansMetrics,
 	inter: interMetrics,
-} as const;
+};
 
 /** The fixed type scale: size, line height, and letter spacing for each of the nine steps. */
 export const FONT_VALUES = {
