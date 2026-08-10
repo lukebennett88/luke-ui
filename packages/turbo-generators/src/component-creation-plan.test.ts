@@ -207,7 +207,7 @@ describe('createComponentPlan', () => {
 		expect(source).toContain('className={className}');
 	});
 
-	it('scaffolds a flattened guide that generate:props can turn into a props.mdx', () => {
+	it('scaffolds a <group>/<name>.mdx guide that generate:props can turn into a props.mdx', () => {
 		const plan = createComponentPlan({
 			docsGroup: 'feedback',
 			name: 'StatusBadge',

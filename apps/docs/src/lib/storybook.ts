@@ -9,7 +9,12 @@ export function getStorybookBaseUrl(basePath: string): string {
 	return withBasePath('/storybook', basePath).replace(/\/$/, '');
 }
 
-export function getStorybookStoryUrl(pagePath: string, basePath: string): string | null {
+export function getStorybookStoryUrl(
+	pagePath: string,
+	basePath: string,
+	source?: string | null,
+): string | null {
+	if (!source) return null;
 	const match = COMPONENT_DOC_PATH.exec(pagePath);
 	if (!match?.[1] || !match[2]) return null;
 	const [, category, name] = match;

@@ -1,7 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { getMarkdownPagePath } from './markdown-page-path.js';
 
-test('maps a flattened component guide to the guide Markdown URL', () => {
+test('maps a component guide to the guide Markdown URL', () => {
 	expect(getMarkdownPagePath('components/actions/button.mdx')).toBe(
 		'/components/actions/button.md',
 	);

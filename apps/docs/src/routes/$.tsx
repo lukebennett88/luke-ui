@@ -55,9 +55,9 @@ const loader = createServerFn({
 		const markdownPath = `${page.url === '/' ? '/index' : page.url}.md`;
 		const rawComponentNavigation = getComponentPageNavigation(page.url);
 		// A guide-depth URL only gets Guide/Props tabs when a props page actually
-		// exists alongside it — a standalone guide page (e.g. a shared Validation
-		// page with no API surface of its own) sits at the same URL depth but has
-		// no props.mdx sibling, so showing the tab would link to a 404.
+		// exists alongside it — a standalone guide page with no API surface of its
+		// own sits at the same URL depth but has no props.mdx sibling, so showing
+		// the tab would link to a 404.
 		const hasPropsPage =
 			rawComponentNavigation?.current === 'props' || source.getPage([...slugs, 'props']) != null;
 		const componentNavigation = hasPropsPage ? rawComponentNavigation : null;
@@ -76,7 +76,7 @@ const loader = createServerFn({
 			path: page.path,
 			reactAriaUrl: page.data.reactAria ?? null,
 			sourceUrl: page.data.source ? `${GITHUB_TREE_URL}/${page.data.source}` : null,
-			storybookUrl: getStorybookStoryUrl(page.path, import.meta.env.BASE_URL),
+			storybookUrl: getStorybookStoryUrl(page.path, import.meta.env.BASE_URL, page.data.source),
 		};
 	});
 

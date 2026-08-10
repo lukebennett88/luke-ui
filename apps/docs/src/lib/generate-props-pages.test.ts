@@ -106,6 +106,11 @@ test('every component guide declaring props has a generated Props page on disk',
 			expect(existsSync(propsPath), `${relativeOutputDir}/props.mdx should exist`).toBe(true);
 			expect(existsSync(metaPath), `${relativeOutputDir}/meta.json should exist`).toBe(true);
 			expect(readFileSync(propsPath, 'utf8')).toBe(renderPropsPage(frontmatter));
+			expect(JSON.parse(readFileSync(metaPath, 'utf8'))).toEqual({
+				pages: ['!props'],
+				collapsible: false,
+				pagesIndex: `../${componentName}`,
+			});
 		}
 	}
 });
@@ -159,6 +164,11 @@ test('generates props.mdx and meta.json under <group>/<name>/ from the <group>/<
 	expect(existsSync(propsPath)).toBe(true);
 	expect(existsSync(metaPath)).toBe(true);
 	expect(resolve(propsPath, '..')).toBe(outputDir);
+	expect(JSON.parse(readFileSync(metaPath, 'utf8'))).toEqual({
+		pages: ['!props'],
+		collapsible: false,
+		pagesIndex: '../button',
+	});
 });
 
 test('removes generated output and the empty output directory once the guide is removed', () => {

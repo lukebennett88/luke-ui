@@ -95,8 +95,9 @@ Do not document exports that are not public API.
 `<group>/<name>/props.mdx` and `<group>/<name>/meta.json` are generated from the guide's `props`
 frontmatter by `scripts/generate-props-pages.ts`. `props.mdx` is the API reference at
 `/components/<group>/<name>/props`. `meta.json` uses `"pages": ["!props"]` and
-`"collapsible": false` so the component stays one ordinary sidebar link without exposing the props
-page in the tree. Component output directories hold no authored content.
+`"collapsible": false` so the component stays one ordinary sidebar link. It also sets
+`"pagesIndex": "../<name>"` so the folder index is the sibling authored guide. Component output
+directories hold no authored content.
 
 Keep the guide and Props frontmatter titles and descriptions identical. The component generator
 leaves editorial descriptions out instead of adding placeholder copy. Add one useful description to

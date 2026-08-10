@@ -32,8 +32,7 @@ export function findComponentDocContractIssues({
 		const guide = readFileSync(guidePath, 'utf8');
 		const guideFrontmatter = readFrontmatter(guide);
 
-		// Topical pages (e.g. forms/validation.mdx) live flat alongside component guides but
-		// aren't component guides themselves — only a component guide declares a package `source:`.
+		// Only a component guide declares a package `source:`.
 		if (guideFrontmatter.source === undefined) continue;
 
 		findPlaceholders(issues, relativeGuidePath, guide, guideFrontmatter);
@@ -108,10 +107,9 @@ function readFrontmatterValue(frontmatter: string, key: keyof Frontmatter): stri
 }
 
 /**
- * Discovers authored `*.mdx` files directly inside each group directory. This also picks up
- * flat topical pages (e.g. forms/validation.mdx), which the caller filters out by checking for
- * a `source:` frontmatter field — only real component guides declare one. Generated Props pages
- * live one level deeper as `<group>/<name>/props.mdx`, so they're excluded by directory depth.
+ * Discovers authored `*.mdx` files directly inside each group directory. Generated Props pages
+ * live one level deeper as `<group>/<name>/props.mdx`, so they stay out. The caller skips files
+ * that do not declare `source:`.
  */
 function findComponentGuides(directory: string): Array<string> {
 	const guides: Array<string> = [];

@@ -13,7 +13,6 @@
 		"forms/checkbox",
 		"forms/combobox-field",
 		"forms/text-field",
-		"forms/validation",
 		"---Layout---",
 		"layout/box",
 		"---Typography---",

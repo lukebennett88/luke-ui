@@ -13,11 +13,18 @@ import { fileURLToPath } from 'node:url';
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const componentsDir = resolve(scriptDir, '../content/docs/components');
 
-const META_JSON = `{
+/**
+ * Fumadocs joins `pagesIndex` to this folder. `../<name>` is the sibling authored guide, which
+ * becomes the folder's clickable index.
+ */
+function renderMetaJson(componentName: string): string {
+	return `{
 \t"pages": ["!props"],
-\t"collapsible": false
+\t"collapsible": false,
+\t"pagesIndex": "../${componentName}"
 }
 `;
+}
 
 export interface PropsEntry {
 	heading?: string;
@@ -39,7 +46,7 @@ export interface ComponentFrontmatter {
  * frontmatter at runtime.
  *
  * Only writes files whose content changed, and removes generator-owned output for components that
- * no longer declare `props` or whose guide has gone.
+ * do not declare `props` or whose guide is missing.
  */
 export function generatePropsPages(rootDir: string = componentsDir): {
 	componentCount: number;
@@ -77,7 +84,7 @@ export function generatePropsPages(rootDir: string = componentsDir): {
 			componentCount++;
 			mkdirSync(outputDir, { recursive: true });
 			writeIfChanged(propsPath, renderPropsPage(frontmatter));
-			writeIfChanged(metaPath, META_JSON);
+			writeIfChanged(metaPath, renderMetaJson(componentName));
 		}
 	}
 
@@ -192,9 +199,8 @@ function parsePropsEntries(lines: ReadonlyArray<string>): ReadonlyArray<PropsEnt
 }
 
 /**
- * Every component name in a group: the union of `*.mdx` guides (component or otherwise — a guide
- * declaring no `props`, like `validation.mdx`, is simply skipped below) and existing directories,
- * which may hold generated output for a guide that has since been removed or renamed.
+ * Every component name in a group: the union of authored `*.mdx` guides and existing directories,
+ * so stale generated output is still discovered after a guide is deleted or renamed.
  */
 function discoverComponentNames(groupDir: string): ReadonlyArray<string> {
 	const names = new Set<string>();

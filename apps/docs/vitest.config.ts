@@ -1,9 +1,11 @@
 import tailwindcss from '@tailwindcss/vite';
+import mdx from 'fumadocs-mdx/vite';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
+import * as sourceConfig from './source.config.js';
 
 export default defineConfig({
-	plugins: [tailwindcss()],
+	plugins: [tailwindcss(), mdx(sourceConfig)],
 	optimizeDeps: {
 		include: [
 			'next-themes',

@@ -22,8 +22,8 @@ interface ComponentIndexGroup {
  * component guide, grouped by category in sidebar order. The components landing page renders from
  * this array, so the documented set can never drift from the guides that live on disk.
  */
-export function generateComponentsIndex(): string {
-	const groups = readGroups();
+export function generateComponentsIndex(rootDir: string = componentsDir): string {
+	const groups = readGroups(rootDir);
 
 	const groupEntries = groups
 		.map(
@@ -63,8 +63,8 @@ ${groupEntries}
 `;
 }
 
-function readGroups(): ReadonlyArray<ComponentIndexGroup> {
-	const rootMeta = readJson(resolve(componentsDir, 'meta.json')) as { pages?: Array<string> };
+function readGroups(rootDir: string): ReadonlyArray<ComponentIndexGroup> {
+	const rootMeta = readJson(resolve(rootDir, 'meta.json')) as { pages?: Array<string> };
 	const entries = rootMeta.pages ?? [];
 	const groups: Array<ComponentIndexGroup> = [];
 	let currentTitle = 'Components';
@@ -76,10 +76,12 @@ function readGroups(): ReadonlyArray<ComponentIndexGroup> {
 			continue;
 		}
 
-		const guidePath = resolve(componentsDir, `${entry}.mdx`);
+		const guidePath = resolve(rootDir, `${entry}.mdx`);
 		if (!existsSync(guidePath)) continue;
 
 		const frontmatter = readFrontmatter(readFileSync(guidePath, 'utf8'));
+		if (frontmatter.source === undefined) continue;
+
 		let lastGroup = groups[groups.length - 1];
 		if (!lastGroup) {
 			lastGroup = { entries: [], title: currentTitle };
@@ -104,18 +106,23 @@ function readJson(path: string): unknown {
 	return JSON.parse(readFileSync(path, 'utf8'));
 }
 
-function readFrontmatter(contents: string): { description?: string; title?: string } {
+function readFrontmatter(contents: string): {
+	description?: string;
+	source?: string;
+	title?: string;
+} {
 	const frontmatter = contents.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
 
 	return {
 		description: readFrontmatterValue(frontmatter, 'description'),
+		source: readFrontmatterValue(frontmatter, 'source'),
 		title: readFrontmatterValue(frontmatter, 'title'),
 	};
 }
 
 function readFrontmatterValue(
 	frontmatter: string,
-	key: 'description' | 'title',
+	key: 'description' | 'source' | 'title',
 ): string | undefined {
 	const lines = frontmatter.split('\n');
 	const keyPrefix = `${key}:`;
@@ -146,7 +153,7 @@ if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(
 	const output = generateComponentsIndex();
 	mkdirSync(dirname(outputPath), { recursive: true });
 	writeFileSync(outputPath, output);
-	const entryCount = readGroups().flatMap((group) => group.entries).length;
+	const entryCount = readGroups(componentsDir).flatMap((group) => group.entries).length;
 	// oxlint-disable-next-line no-console
 	console.log(`generate-components-index: wrote ${entryCount} entries`);
 }
