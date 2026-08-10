@@ -31,6 +31,11 @@ trustLockfile: true
 
 trustPolicy: no-downgrade
 
+trustPolicyExclude:
+  - semver@6.3.1
+  - chokidar@4.0.3
+  - '@netlify/serverless-functions-api@2.18.0'
+
 catalog:
   '@arethetypeswrong/core': ^0.18.5
   '@capsizecss/metrics': ^4.2.0
