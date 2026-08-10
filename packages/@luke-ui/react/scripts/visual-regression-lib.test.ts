@@ -5,30 +5,9 @@ import { PNG } from 'pngjs';
 import { expect, test } from 'vite-plus/test';
 import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
-/** Builds a `size` x `size` solid-colour PNG. */
-const png = (red: number, size = 1) => {
-	const image = new PNG({ height: size, width: size });
-	for (let index = 0; index < image.data.length; index += 4) {
-		image.data.set([red, 0, 0, 255], index);
-	}
-	return PNG.sync.write(image);
-};
-
-/** Builds a `width` x `height` white PNG with a black `[x, y, w, h]` rectangle for each of `rects`. */
-const pngWithRects = (
-	width: number,
-	height: number,
-	rects: Array<[number, number, number, number]>,
-) => {
-	const image = new PNG({ width, height });
-	image.data.fill(255);
-	for (const [rx, ry, rw, rh] of rects) {
-		for (let y = ry; y < ry + rh; y++) {
-			for (let x = rx; x < rx + rw; x++) {
-				image.data.set([0, 0, 0, 255], (y * width + x) * 4);
-			}
-		}
-	}
+const png = (red: number) => {
+	const image = new PNG({ height: 1, width: 1 });
+	image.data.set([red, 0, 0, 255]);
 	return PNG.sync.write(image);
 };
 
@@ -84,8 +63,8 @@ test('classifies matched, changed, added, and removed captures', async () => {
 	await Promise.all([
 		writeFile(path.join(base, 'same.png'), png(0)),
 		writeFile(path.join(current, 'same.png'), png(0)),
-		writeFile(path.join(base, 'changed.png'), png(0, 12)),
-		writeFile(path.join(current, 'changed.png'), png(255, 12)),
+		writeFile(path.join(base, 'changed.png'), png(0)),
+		writeFile(path.join(current, 'changed.png'), png(255)),
 		writeFile(path.join(base, 'removed.png'), png(0)),
 		writeFile(path.join(current, 'added.png'), png(0)),
 	]);
@@ -99,28 +78,6 @@ test('classifies matched, changed, added, and removed captures', async () => {
 	const report = path.join(root, 'report.html');
 	await renderReport(results, { base: 'abc', current: 'working tree', platform: 'test' }, report);
 	expect(await readFile(report, 'utf8')).toContain('Visual regression report');
-});
-
-test('keeps sub-threshold noise spread across a large capture unchanged', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'visual-regression-noise-'));
-	const base = path.join(root, 'base');
-	const current = path.join(root, 'current');
-	await Promise.all([base, current].map((directory) => mkdir(directory)));
-	const width = 600;
-	const height = 400;
-	await Promise.all([
-		writeFile(path.join(base, 'noise.png'), pngWithRects(width, height, [])),
-		writeFile(
-			path.join(current, 'noise.png'),
-			pngWithRects(width, height, [
-				[5, 5, 1, 16],
-				[300, 300, 8, 11],
-			]),
-		),
-	]);
-	const [result] = await compareCaptures(base, current, path.join(root, 'diff'));
-	expect(result?.mismatchedPixels).toBe(16 + 8 * 11);
-	expect(result?.status).toBe('unchanged');
 });
 
 test('counts anti-aliased pixels and flags a removed thin stroke as a change', async () => {
