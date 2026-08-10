@@ -70,5 +70,5 @@ regenerate the spritesheet and the `iconNames` union:
 pnpm --dir packages/@luke-ui/react run generate:icons
 ```
 
-The generated `iconNames` export drives the docs gallery at `/overview/iconography`, so a new icon
+The generated `iconNames` export drives the docs gallery at `/docs/iconography`, so a new icon
 appears there with no further changes.

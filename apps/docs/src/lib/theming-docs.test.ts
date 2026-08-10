@@ -2,7 +2,8 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { extname, resolve } from 'node:path';
 import { expect, test } from 'vite-plus/test';
 
-const contentDir = resolve(import.meta.dirname, '../../content/docs');
+const contentDir = resolve(import.meta.dirname, '../../content/docs/docs');
+const allDocsContentDir = resolve(import.meta.dirname, '../../content/docs');
 const examplesDir = resolve(import.meta.dirname, '../examples');
 
 const SETTLED_THEMING_PAGES = [
@@ -89,7 +90,7 @@ test('no rendered example applies a theme identity class', () => {
 		'getThemeClassName',
 	];
 
-	for (const file of findAllMdxFiles(contentDir)) {
+	for (const file of findAllMdxFiles(allDocsContentDir)) {
 		const contents = readFileSync(file, 'utf8');
 		const examplePattern = /<ExampleBlock\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/g;
 

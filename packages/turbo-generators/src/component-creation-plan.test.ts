@@ -21,7 +21,7 @@ describe('createComponentPlan', () => {
 			packageExportPath: './status-badge',
 		});
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
-			'apps/docs/content/docs/components/feedback/status-badge/index.mdx',
+			'apps/docs/content/docs/components/feedback/status-badge.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
 			'packages/@luke-ui/react/src/recipes/status-badge.css.ts',
 			'packages/@luke-ui/react/src/status-badge/component-test-registration.ts',
@@ -31,7 +31,7 @@ describe('createComponentPlan', () => {
 			'packages/@luke-ui/react/src/status-badge/status-badge.visual.test.tsx',
 		]);
 		const guide = plan.files.find((file) => {
-			return file.path.endsWith('/status-badge/index.mdx');
+			return file.path.endsWith('feedback/status-badge.mdx');
 		})?.contents;
 		expect(guide).toContain('src="status-badge/basic"');
 		expect(guide).not.toContain('description=');
@@ -207,7 +207,7 @@ describe('createComponentPlan', () => {
 		expect(source).toContain('className={className}');
 	});
 
-	it('scaffolds a index.mdx that generate:props can turn into a props.mdx', () => {
+	it('scaffolds a <group>/<name>.mdx guide that generate:props can turn into a props.mdx', () => {
 		const plan = createComponentPlan({
 			docsGroup: 'feedback',
 			name: 'StatusBadge',
@@ -216,9 +216,9 @@ describe('createComponentPlan', () => {
 		});
 
 		const guide = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/index.mdx'),
+			file.path.endsWith('feedback/status-badge.mdx'),
 		)?.contents;
-		if (guide === undefined) throw new Error('Expected the scaffold to write index.mdx.');
+		if (guide === undefined) throw new Error('Expected the scaffold to write the guide.');
 
 		const frontmatter = parseComponentFrontmatter(guide);
 		expect(frontmatter.props).toEqual([

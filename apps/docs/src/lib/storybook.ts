@@ -2,14 +2,19 @@ import { withBasePath } from './base-path.js';
 
 const STORYBOOK_DEV_URL = 'http://localhost:6006';
 
-const COMPONENT_DOC_PATH = /^components\/([^/]+)\/([^/]+)\/index\.mdx$/;
+const COMPONENT_DOC_PATH = /^components\/([^/]+)\/([^/]+)\.mdx$/;
 
 export function getStorybookBaseUrl(basePath: string): string {
 	if (import.meta.env.DEV) return STORYBOOK_DEV_URL;
 	return withBasePath('/storybook', basePath).replace(/\/$/, '');
 }
 
-export function getStorybookStoryUrl(pagePath: string, basePath: string): string | null {
+export function getStorybookStoryUrl(
+	pagePath: string,
+	basePath: string,
+	source?: string | null,
+): string | null {
+	if (!source) return null;
 	const match = COMPONENT_DOC_PATH.exec(pagePath);
 	if (!match?.[1] || !match[2]) return null;
 	const [, category, name] = match;

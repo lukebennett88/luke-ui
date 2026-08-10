@@ -34,7 +34,7 @@ theme wins. Import it from that theme's own entrypoint, for example
 ## Components and docs
 
 Full component documentation, interactive examples, and API reference are at
-[lukebennett88.github.io/luke-ui/docs](https://lukebennett88.github.io/luke-ui/docs).
+[lukebennett88.github.io/luke-ui](https://lukebennett88.github.io/luke-ui).
 
 AI agents can fetch documentation at:
 

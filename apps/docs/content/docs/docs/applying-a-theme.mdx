@@ -1,0 +1,82 @@
+---
+title: Applying a theme
+description: Load Luke UI CSS and apply the shared root class.
+---
+
+A themed subtree needs the shared Luke UI stylesheet and one theme stylesheet. Both are static CSS.
+Luke UI does not inject styles at runtime.
+
+## Import the stylesheets
+
+Import `@luke-ui/react/stylesheet.css` and one theme's stylesheet, for example
+`@luke-ui/react/themes/tactile/stylesheet.css`. A theme stylesheet themes the whole document from
+`:root`, with no class and no JavaScript. Import one bundled theme, and Luke UI does not load the
+other.
+
+## Apply the root class
+
+Apply `rootClassName` to an element you own, such as the application shell. It supplies the reset
+and base typography. It carries no theme identity, so it works the same way for a bundled theme and
+a custom theme.
+
+<SourceCodeBlock src="theming/apply-theme" />
+
+## Choose a colour mode
+
+Leave `data-color-mode` unset to follow `prefers-color-scheme`. Set `data-color-mode="light"` or
+`data-color-mode="dark"` when a root or nested scope needs a fixed mode.
+
+An explicit mode also sets the native `color-scheme` property. Browser controls and scrollbars then
+match the Luke UI content.
+
+## Nest colour-mode scopes
+
+Colour modes nest freely. Use a nested mode when one part of the interface must stay light or dark
+independently of its parent.
+
+<ExampleBlock
+	src="theming/color-mode-override"
+	title="Applying a theme — Colour-mode override"
+	mode="full-bleed"
+/>
+
+<SourceCodeBlock src="theming/nested-color-mode" />
+
+## Avoid a colour-mode flash
+
+Render `rootClassName` and any known explicit mode in the initial HTML. When the mode comes from a
+client-side preference, set `data-color-mode` before the themed UI paints.
+
+Use the same value for the server HTML and the first client render. This avoids a hydration warning.
+
+## Portals need nothing extra
+
+A theme stylesheet themes the whole document from `:root`, so a body-level portal inherits it with
+no class applied.
+
+A colour mode does not follow a portal out of its branch. A portal rendered into `document.body`
+takes the document's mode, not a mode set on a nested scope near its trigger. Set `data-color-mode`
+on the portal root yourself when it must match a nested scope.
+
+## Add an identity class for more than one theme
+
+Loading one theme needs no identity class. Loading more than one theme in the same document does, so
+an explicit class can win over another theme's `:root` fallback.
+
+Each bundled theme exports its identity class as `themeClassName` from its own entrypoint, for
+example `@luke-ui/react/themes/tactile`. Apply it to `<html>`, or to the root of the subtree that
+needs it.
+
+An authored theme gets its class the same way, from `getThemeClassName` in `@luke-ui/react/theme`.
+Pass the `name` your `ThemeInput` declares. It returns the same class the generated stylesheet
+selects on, and throws when the name is not kebab-case.
+
+<SourceCodeBlock src="theming/multi-theme-app" />
+
+Theme identities do not nest. Never place one identity class inside another identity's subtree,
+because the two resolve at equal precedence and stylesheet order decides the winner.
+
+## Next steps
+
+Read [Authoring a theme](/docs/authoring-a-theme) to create a product-owned stylesheet. Use the
+[token reference](/docs/token-reference) when a custom element needs public semantic values.

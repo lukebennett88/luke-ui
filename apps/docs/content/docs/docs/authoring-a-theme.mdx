@@ -1,0 +1,156 @@
+---
+title: Authoring a theme
+description: Compile a curated theme input into a static Luke UI theme stylesheet.
+---
+
+Author a custom theme when the bundled themes do not suit the product. `defineTheme` turns a small,
+curated `ThemeInput` into static CSS for one theme with light and dark modes. It does not need a
+browser or a Luke UI release.
+
+## Define the input
+
+A basic theme authors an accent colour and a neutral character. Everything else defaults. A
+`ThemeInput` includes:
+
+- a kebab-case `name`
+- `color.accent`, the required brand or interaction accent
+- `color.neutral` or `color.neutralStyle` (`'cool'`, `'neutral'`, or `'warm'`) for the neutral
+  canvas anchor
+- optional `color.background` to separate the page canvas from the neutral family's hue and chroma
+  character. It defaults to the resolved neutral canvas anchor.
+- optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
+  `color.scrim`
+- optional `typography`, `radius`, `depth`, and `actionControlFinish` overrides
+
+Each colour accepts one string, adapted independently for light and dark, or an explicit
+`{ light, dark }` pair. Omit either side to fall back to that role's default. Luke UI supplies
+accessible mode-specific defaults for every optional colour. `radius` is a generative `base` and
+`multiplier` scale with explicit per-step overrides. `depth` and `actionControlFinish` are optional
+and deep-partial per mode over curated, extremely-subtle defaults. The type scale and motion values
+are source-owned and are not authored.
+
+<auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
+
+The minimal theme authors one colour and a neutral character:
+
+<SourceCodeBlock src="theming/minimal-theme" />
+
+## Extend a bundled theme
+
+Set `extends` to another theme's input. Your theme inherits every value it does not set. Each
+bundled theme entrypoint, such as `@luke-ui/react/themes/tactile`, exports its input as `theme`.
+
+<SourceCodeBlock src="theming/extend-bundled-theme" />
+
+Your theme always declares its own `name`. Two themes with one name emit a colliding identity class.
+
+What each section inherits:
+
+- `color` merges role by role. A role replaces the base's role whole.
+- `color.neutral` and `color.neutralStyle` are one decision. Setting either replaces the base's
+  neutral decision.
+- `radius` and `typography.fontWeight` merge key by key.
+- `typography.fontFamily` replaces the base value.
+- `depth` and `actionControlFinish` merge per mode, then per rung.
+
+A value set to `undefined` counts as omitted and inherits.
+
+A theme may extend a theme that extends another. A cycle throws.
+
+Contrast validation runs on the merged theme. `ThemeContrastError` carries `inheritance`, naming the
+chain of themes and which colours came from a base.
+
+<auto-type-table
+	path="packages/@luke-ui/react/src/theme/define-theme.ts"
+	name="ExtendingThemeInput"
+/>
+
+## Generate a stylesheet
+
+Call `defineTheme` from an application build script. Write the returned CSS to a stylesheet your
+framework can load.
+
+<SourceCodeBlock src="theming/author-theme" />
+
+Apply a product theme exactly like a bundled one. Load the generated stylesheet. Apply
+`rootClassName` to an element you own.
+
+The product theme's own stylesheet themes the document. Colour mode uses the same `data-color-mode`
+attribute as bundled themes.
+
+<SourceCodeBlock src="theming/custom-theme-app" />
+
+The theme needs no identity class unless the same document also loads another theme. When it does,
+call `getThemeClassName` from `@luke-ui/react/theme` with the `name` your `ThemeInput` declares.
+That is the same helper the bundled themes use for their own classes. See
+[Applying a theme](/docs/applying-a-theme) for where to put the result.
+
+Applications must load any non-system font files their `typography` selects.
+
+## Contrast validation
+
+`defineTheme` calculates the generated colour values in OKLCH, maps them to the sRGB gamut, and runs
+a WCAG 2.2 validation matrix over the result. It treats some pairs as hard requirements, measures
+some only, and does not check one category.
+
+### Guaranteed at 4.5:1
+
+Every text/surface pair the compiler emits is a hard gate:
+
+- `color.text.primary` and `color.text.secondary` against all four elevation surfaces (`canvas`,
+  `recessed`, `floating`, `overlay`).
+- For each of the six semantic roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`),
+  its foreground `rest` and `hover` against `canvas`, `recessed`, and that role's own `subtle` rest,
+  hover, and pressed backgrounds.
+- Each role's `onSolid` foreground against its `solid` rest, hover, and pressed backgrounds.
+
+### Guaranteed at 3:1
+
+Four more pairs are hard gates, at the WCAG 2.2 non-text ratio: `color.border.focus` and
+`color.border.control`, each against the canvas and recessed surfaces. `border.control` is a
+dedicated solved colour for this boundary, not a scale-step alias that happens to pass.
+
+If any hard gate fails, `defineTheme` throws `ThemeContrastError`. Its `failures` array identifies
+each colour mode and token pair, so `defineTheme` never writes the stylesheet with an invalid
+combination.
+
+### Measured only, cannot fail the build
+
+`defineTheme` checks each role's border against the canvas and recessed surfaces at 3:1, for example
+`color.border.neutral` and `color.border.accent`. This applies to all six roles, but only as an
+advisory diagnostic. `defineTheme` records and reports a miss, but never throws it.
+
+These borders use the same subtle scale step as ordinary separators. An author can then choose a
+neutral character whose role borders read as gentle separators rather than assertive boundaries.
+Diagnostics record whether each check is a hard gate or advisory-only (`ContrastCheck.hard`).
+Tooling can then tell the two apart without a guess from the token path.
+
+These pairs are not guaranteed to reach 3:1. Never rely on a role border alone to communicate a
+required state such as selected, invalid, or checked. Pair it with text, an icon, or a
+guaranteed-contrast surface change instead. This keeps the state legible for a theme whose role
+border happens to measure under 3:1.
+
+### Never checked
+
+`color.border.decorative` has no contrast check at all, in any mode. Treat it as a pure visual
+separator, never as the sole signal for state or meaning.
+
+### When generation itself fails
+
+Separately from contrast validation, `compileTheme` (and so `defineTheme`) can throw
+`ThemeGenerationError` when a role that must guarantee on-solid text cannot reach an accessible
+solid colour. The generator gates every one of the six roles this way. For a single-value accent,
+`defineTheme` holds the hue and chroma. It searches for a lightness that clears the same on-solid
+gate the generator enforces internally. An explicit `{ light, dark }` accent skips that adaptation.
+`defineTheme` uses it verbatim for each side.
+
+A dead zone is a lightness where no near-white or near-black text reaches 4.5:1 against it. If an
+authored accent's lightness sits in that zone, `compileTheme` throws `ThemeGenerationError` and
+names the failing role and mode. Author an explicit `{ light, dark }` accent when you need exact
+control over its lightness. Otherwise, author a single value and let `defineTheme` adapt it.
+
+## Next steps
+
+Read [Applying a theme](/docs/applying-a-theme) for root, mode, and portal setup. The
+[token reference](/docs/token-reference) lists the semantic variables every generated theme
+provides.
