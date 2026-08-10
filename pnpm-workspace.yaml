@@ -103,7 +103,7 @@ catalog:
   storybook: ^10.5.6
   sucrase: ^3.35.1
   tailwindcss: ^4.3.3
-  tsx: ^4.23.6
+  tsx: ^4.23.7
   turbo: ^2.10.8
   typescript: ^7.0.2
   unbarrelify: ^1.1.2
