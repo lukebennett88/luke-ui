@@ -23,18 +23,13 @@ function Home() {
 					Components, themes, and layout utilities for React applications.
 				</Text>
 				<Text elementType="p">
-					Luke UI is a React based design system and component library for building applications. It
-					ships static CSS, two bundled themes, and layout utilities that share one semantic token
-					contract with its components.
-				</Text>
-				<Text elementType="p">
-					Use Luke UI when you need an accessible component, a visual foundation you can theme, or
-					responsive layout without writing CSS.
+					Luke UI is a React design system and component library. It ships static CSS, two bundled
+					themes, and layout utilities that share a semantic token contract.
 				</Text>
 				<Text elementType="p">
 					Read <Link href="/docs/installation">Getting started</Link> to install Luke UI, load a
 					theme, and render your first component. Browse <Link href="/components">Components</Link>{' '}
-					for the full catalogue of atoms, composed components, and primitives.
+					for the full catalogue.
 				</Text>
 			</main>
 		</>

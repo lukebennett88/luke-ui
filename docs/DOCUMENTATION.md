@@ -97,9 +97,8 @@ Do not document exports that are not public API.
 `<group>/<name>/props.mdx` and `<group>/<name>/meta.json` are generated from the guide's `props`
 frontmatter by `scripts/generate-props-pages.ts`. `props.mdx` is the API reference at
 `/components/<group>/<name>/props`. `meta.json` uses `"pages": ["!props"]` and
-`"collapsible": false` so the component stays one ordinary sidebar link. It also sets
-`"pagesIndex": "../<name>"` so the folder index is the sibling authored guide. Component output
-directories hold no authored content.
+`"collapsible": false` so the component stays one ordinary sidebar link. It sets
+`"pagesIndex": "../<name>"` so the folder's sidebar entry points to the sibling guide.
 
 Keep the guide and Props frontmatter titles and descriptions identical. The component generator
 leaves editorial descriptions out instead of adding placeholder copy. Add one useful description to
@@ -157,8 +156,7 @@ destination list and its active-route matching live in `apps/docs/src/lib/site-d
 the nav and the docs layout navigate to the same places. Appearance controls belong to the nav on
 every surface, not to the docs sidebar footer.
 
-The landing page at `/` renders `SiteNav` with no docs sidebar, the same way the playground and the
-404 page do. It has no active destination in the nav, since it sits above both Docs and Components.
+The landing page at `/` renders `SiteNav` with no docs sidebar. It has no active destination.
 
 The docs routes use Fumadocs' notebook layout with `nav.mode: 'top'`, which spans the header across
 the full width and starts the sidebar beneath it. `apps/docs/src/lib/layout.shared.tsx` supplies the
