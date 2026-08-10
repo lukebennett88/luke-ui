@@ -16,3 +16,7 @@ test('keeps the props segment in the props Markdown URL', () => {
 test('collapses a genuine index page to its parent Markdown URL', () => {
 	expect(getMarkdownPagePath('components/index.mdx')).toBe('/components.md');
 });
+
+test('maps a guide to its nested Markdown URL', () => {
+	expect(getMarkdownPagePath('docs/installation.mdx')).toBe('/docs/installation.md');
+});

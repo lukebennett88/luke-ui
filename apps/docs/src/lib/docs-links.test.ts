@@ -12,10 +12,6 @@ function findAllMdxFiles(directory: string): Array<string> {
 	});
 }
 
-function docsPagePath(slug: string): string {
-	return resolve(contentDir, `${slug}.mdx`);
-}
-
 function docsLinks(contents: string): Array<string> {
 	const links: Array<string> = [];
 
@@ -40,7 +36,8 @@ function docsLinks(contents: string): Array<string> {
 
 function docsLinkTargetExists(pathname: string): boolean {
 	const segments = pathname.split('/').filter((segment) => segment !== '');
-	if (segments.length === 0) return existsSync(docsPagePath('index'));
+	// `/` is the landing route, not an MDX page — no docs page links to it.
+	if (segments.length === 0) return false;
 
 	const base = resolve(contentDir, ...segments);
 	return (

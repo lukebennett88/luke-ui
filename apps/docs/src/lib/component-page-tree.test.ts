@@ -38,6 +38,16 @@ function findAnyNodeWithUrl(nodes: ReadonlyArray<Node>, url: string): Node | und
 	return undefined;
 }
 
+test('guides live under /docs, not the docs content root', () => {
+	const tree = source.getPageTree();
+	const nodes = allNodes(tree);
+
+	expect(findClickableNode(nodes, '/docs/installation')?.url).toBe('/docs/installation');
+	expect(findAnyNodeWithUrl(nodes, '/installation')).toBeUndefined();
+	expect(source.getPage(['docs', 'installation'])).toBeDefined();
+	expect(source.getPage(['installation'])).toBeUndefined();
+});
+
 const components: ReadonlyArray<{ group: string; name: string }> = [
 	{ group: 'actions', name: 'button' },
 	{ group: 'actions', name: 'icon-button' },

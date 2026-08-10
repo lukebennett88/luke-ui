@@ -89,8 +89,7 @@ function SiteWordmark() {
 	const linkProps = useLinkProps({
 		activeProps: {},
 		className: 'flex h-14 shrink-0 items-center truncate font-semibold text-sm',
-		params: { _splat: '' },
-		to: '/$',
+		to: '/',
 	});
 
 	return (

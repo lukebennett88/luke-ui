@@ -5,7 +5,8 @@ Use this guide when you write or move Luke UI documentation.
 ## Primary docs surface
 
 The hosted docs app in `apps/docs` is the primary docs surface for app developers and library
-authors. Component prose lives in `apps/docs/content/docs/**/*.mdx`.
+authors. Authored guides live under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component
+guides live under `apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
 
@@ -13,7 +14,8 @@ The package README links to the hosted docs. Fumadocs provides:
 
 - `/llms.txt` for the component index.
 - `/llms-full.txt` for full docs.
-- Per-page Markdown by appending `.md` to a docs URL.
+- Per-page Markdown by appending `.md` to a docs URL, for example `/docs/installation.md` or
+  `/components/actions/button.md`.
 
 ## Writing style
 
@@ -149,10 +151,14 @@ that would be less clear inside a complete example.
 ## Site chrome
 
 Every surface shares one top nav, `SiteNav` in `apps/docs/src/components/site-nav.tsx`. It carries
-the wordmark, the primary destinations, search, and the appearance controls. The destination list
-and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`, so the nav and the
-docs layout navigate to the same places. Appearance controls belong to the nav on every surface, not
-to the docs sidebar footer.
+the wordmark, the primary destinations, search, and the appearance controls. The wordmark links to
+`/`, the landing page. Docs opens `/docs/installation`. Components opens `/components`. The
+destination list and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`, so
+the nav and the docs layout navigate to the same places. Appearance controls belong to the nav on
+every surface, not to the docs sidebar footer.
+
+The landing page at `/` renders `SiteNav` with no docs sidebar, the same way the playground and the
+404 page do. It has no active destination in the nav, since it sits above both Docs and Components.
 
 The docs routes use Fumadocs' notebook layout with `nav.mode: 'top'`, which spans the header across
 the full width and starts the sidebar beneath it. `apps/docs/src/lib/layout.shared.tsx` supplies the

@@ -8,7 +8,7 @@ export interface SiteDestination {
 }
 
 export const siteDestinations: ReadonlyArray<SiteDestination> = [
-	{ activePath: '/', label: 'Docs', url: '/' },
+	{ activePath: '/docs', label: 'Docs', url: '/docs/installation' },
 	{ activePath: '/components', label: 'Components', url: '/components' },
 	{ activePath: '/playground', label: 'Playground', url: '/playground' },
 	{
@@ -33,6 +33,5 @@ export function getActiveSiteDestination(pathname: string): SiteDestination | un
 }
 
 function isAtOrBelow(pathname: string, activePath: string): boolean {
-	if (activePath === '/') return true;
 	return pathname === activePath || pathname.startsWith(`${activePath}/`);
 }

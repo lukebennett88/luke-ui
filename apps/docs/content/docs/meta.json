@@ -1,26 +1,4 @@
 {
 	"title": "Documentation",
-	"pages": [
-		"---Overview---",
-		"index",
-		"installation",
-		"---Foundations---",
-		"composition",
-		"styling",
-		"layout",
-		"typography",
-		"iconography",
-		"---Theming---",
-		"theming",
-		"applying-a-theme",
-		"color",
-		"authoring-a-theme",
-		"token-reference",
-		"---Guides---",
-		"forms",
-		"validation",
-		"react-hook-form",
-		"tanstack-form",
-		"quality"
-	]
+	"pages": ["docs"]
 }
