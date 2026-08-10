@@ -143,7 +143,8 @@ export async function compareCaptures(baseDir: string, currentDir: string, diffD
 				}
 			} else {
 				mismatchedPixels = pixelmatch(basePng.data, currentPng.data, diffPng.data, width, height, {
-					threshold: 0.2,
+					includeAA: true,
+					threshold: 0.1,
 				});
 			}
 			const mismatchRatio = mismatchedPixels / (width * height);

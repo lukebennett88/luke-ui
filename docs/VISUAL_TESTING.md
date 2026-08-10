@@ -32,9 +32,16 @@ decile comes back blank, since that means the scene only painted part of its hei
 ## Read the report
 
 The report classifies captures as unchanged, changed, added, or removed. Added and removed captures
-are informational. A changed result means matching IDs differ by more than 0.1% of their pixels. Use
-the filters, overlay slider, and main, current, and diff images to review each result. Run
-`pnpm --filter @luke-ui/react run test:visual:report` to open the latest local report.
+are informational. A changed result means the capture-wide mismatch ratio exceeds 0.1%
+(`mismatchRatio > 0.001`). The comparison runs `pixelmatch` with `includeAA: true` and
+`threshold: 0.1`, counting anti-aliased edge pixels rather than discarding them, so a thin icon
+stroke on a large canvas still registers. Use the filters, overlay slider, and main, current, and
+diff images to review each result. Run `pnpm --filter @luke-ui/react run test:visual:report` to open
+the latest local report.
+
+A diff small enough to keep the capture-wide ratio under 0.1% can be missed, so keep a direct
+assertion for intent the visual gate cannot promise. The LoadingSkeleton rounding fix in #225, for
+example, stays guarded by a `getComputedStyle` assertion.
 
 ## CI review
 
