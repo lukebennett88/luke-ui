@@ -2,7 +2,7 @@ import { withBasePath } from './base-path.js';
 
 const STORYBOOK_DEV_URL = 'http://localhost:6006';
 
-const COMPONENT_DOC_PATH = /^components\/([^/]+)\/([^/]+)\/index\.mdx$/;
+const COMPONENT_DOC_PATH = /^components\/([^/]+)\/([^/]+)\.mdx$/;
 
 export function getStorybookBaseUrl(basePath: string): string {
 	if (import.meta.env.DEV) return STORYBOOK_DEV_URL;

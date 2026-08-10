@@ -7,6 +7,7 @@ interface ComponentDocContractOptions {
 
 interface Frontmatter {
 	description?: string;
+	source?: string;
 	title?: string;
 }
 
@@ -26,29 +27,27 @@ export function findComponentDocContractIssues({
 	const resolvedDocsDir = resolve(docsDir);
 	const issues: Array<string> = [];
 
-	for (const guidePath of findFiles(resolvedDocsDir, 'index.mdx')) {
-		const componentDir = resolve(guidePath, '..');
-		const relativeComponentDir = relative(resolvedDocsDir, componentDir);
-
-		// Skip the components-index listing page itself, which lives directly in docsDir rather
-		// than in a per-component directory.
-		if (relativeComponentDir === '') continue;
-
+	for (const guidePath of findComponentGuides(resolvedDocsDir)) {
+		const relativeGuidePath = relative(resolvedDocsDir, guidePath);
 		const guide = readFileSync(guidePath, 'utf8');
 		const guideFrontmatter = readFrontmatter(guide);
 
-		findPlaceholders(issues, `${relativeComponentDir}/index.mdx`, guide, guideFrontmatter);
+		// Topical pages (e.g. forms/validation.mdx) live flat alongside component guides but
+		// aren't component guides themselves — only a component guide declares a package `source:`.
+		if (guideFrontmatter.source === undefined) continue;
 
-		const componentName = basename(componentDir);
+		findPlaceholders(issues, relativeGuidePath, guide, guideFrontmatter);
+
+		const componentName = basename(guidePath, '.mdx');
 		const expectedExamples = [`${componentName}/basic`];
-		if (relativeComponentDir.startsWith('primitives/')) {
+		if (relativeGuidePath.startsWith('primitives/')) {
 			expectedExamples.push(`${componentName}-primitive/basic`);
 		}
 		const primaryExample = guide.match(/<ExampleBlock\b[\s\S]*?\bsrc=["']([^"']+)["']/)?.[1];
 
 		if (primaryExample === undefined || !expectedExamples.includes(primaryExample)) {
 			issues.push(
-				`${relativeComponentDir}/index.mdx: primary example must use ${expectedExamples.join(' or ')}`,
+				`${relativeGuidePath}: primary example must use ${expectedExamples.join(' or ')}`,
 			);
 		}
 	}
@@ -81,6 +80,7 @@ function readFrontmatter(contents: string): Frontmatter {
 
 	return {
 		description: readFrontmatterValue(frontmatter, 'description'),
+		source: readFrontmatterValue(frontmatter, 'source'),
 		title: readFrontmatterValue(frontmatter, 'title'),
 	};
 }
@@ -107,17 +107,24 @@ function readFrontmatterValue(frontmatter: string, key: keyof Frontmatter): stri
 	return undefined;
 }
 
-function findFiles(directory: string, fileName: string): Array<string> {
-	const files: Array<string> = [];
+/**
+ * Discovers authored `*.mdx` files directly inside each group directory. This also picks up
+ * flat topical pages (e.g. forms/validation.mdx), which the caller filters out by checking for
+ * a `source:` frontmatter field — only real component guides declare one. Generated Props pages
+ * live one level deeper as `<group>/<name>/props.mdx`, so they're excluded by directory depth.
+ */
+function findComponentGuides(directory: string): Array<string> {
+	const guides: Array<string> = [];
 
-	for (const entry of readdirSync(directory, { withFileTypes: true })) {
-		const path = resolve(directory, entry.name);
-		if (entry.isDirectory()) {
-			files.push(...findFiles(path, fileName));
-			continue;
+	for (const group of readdirSync(directory, { withFileTypes: true })) {
+		if (!group.isDirectory()) continue;
+		const groupDir = resolve(directory, group.name);
+
+		for (const entry of readdirSync(groupDir, { withFileTypes: true })) {
+			if (!entry.isFile() || !entry.name.endsWith('.mdx')) continue;
+			guides.push(resolve(groupDir, entry.name));
 		}
-		if (entry.name === fileName) files.push(path);
 	}
 
-	return files.sort();
+	return guides.sort();
 }

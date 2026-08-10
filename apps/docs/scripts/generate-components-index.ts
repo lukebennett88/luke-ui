@@ -76,7 +76,7 @@ function readGroups(): ReadonlyArray<ComponentIndexGroup> {
 			continue;
 		}
 
-		const guidePath = resolve(componentsDir, `${entry}/index.mdx`);
+		const guidePath = resolve(componentsDir, `${entry}.mdx`);
 		if (!existsSync(guidePath)) continue;
 
 		const frontmatter = readFrontmatter(readFileSync(guidePath, 'utf8'));

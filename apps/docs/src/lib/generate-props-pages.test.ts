@@ -4,6 +4,7 @@ import {
 	mkdtempSync,
 	readdirSync,
 	readFileSync,
+	renameSync,
 	rmSync,
 	writeFileSync,
 } from 'node:fs';
@@ -83,26 +84,27 @@ source: packages/@luke-ui/react/src/field/primitive
 `);
 });
 
-test('every component index.mdx declaring props has a generated Props page on disk', () => {
+test('every component guide declaring props has a generated Props page on disk', () => {
 	for (const group of readdirSync(componentsDir, { withFileTypes: true })) {
 		if (!group.isDirectory()) continue;
 		const groupDir = resolve(componentsDir, group.name);
 
-		for (const component of readdirSync(groupDir, { withFileTypes: true })) {
-			if (!component.isDirectory()) continue;
-			const componentDir = resolve(groupDir, component.name);
-			const indexPath = resolve(componentDir, 'index.mdx');
-			if (!existsSync(indexPath)) continue;
+		for (const entry of readdirSync(groupDir, { withFileTypes: true })) {
+			if (!entry.isFile() || !entry.name.endsWith('.mdx')) continue;
+			const componentName = entry.name.slice(0, -'.mdx'.length);
 
-			const frontmatter = parseComponentFrontmatter(readFileSync(indexPath, 'utf8'));
+			const frontmatter = parseComponentFrontmatter(
+				readFileSync(resolve(groupDir, entry.name), 'utf8'),
+			);
 			if (frontmatter.props.length === 0) continue;
 
-			const relativeComponentDir = `${group.name}/${component.name}`;
-			const propsPath = resolve(componentDir, 'props.mdx');
-			const metaPath = resolve(componentDir, 'meta.json');
+			const outputDir = resolve(groupDir, componentName);
+			const relativeOutputDir = `${group.name}/${componentName}`;
+			const propsPath = resolve(outputDir, 'props.mdx');
+			const metaPath = resolve(outputDir, 'meta.json');
 
-			expect(existsSync(propsPath), `${relativeComponentDir}/props.mdx should exist`).toBe(true);
-			expect(existsSync(metaPath), `${relativeComponentDir}/meta.json should exist`).toBe(true);
+			expect(existsSync(propsPath), `${relativeOutputDir}/props.mdx should exist`).toBe(true);
+			expect(existsSync(metaPath), `${relativeOutputDir}/meta.json should exist`).toBe(true);
 			expect(readFileSync(propsPath, 'utf8')).toBe(renderPropsPage(frontmatter));
 		}
 	}
@@ -115,23 +117,32 @@ afterEach(() => {
 	scratchDir = undefined;
 });
 
-function writeScratchComponent(indexContents: string): {
+function writeScratchGuide(
+	name: string,
+	guideContents: string,
+): {
+	guidePath: string;
 	metaPath: string;
+	outputDir: string;
 	propsPath: string;
 	rootDir: string;
 } {
-	scratchDir = mkdtempSync(resolve(tmpdir(), 'luke-ui-props-'));
-	const componentDir = resolve(scratchDir, 'actions/button');
-	mkdirSync(componentDir, { recursive: true });
-	writeFileSync(resolve(componentDir, 'index.mdx'), indexContents);
+	scratchDir ??= mkdtempSync(resolve(tmpdir(), 'luke-ui-props-'));
+	const groupDir = resolve(scratchDir, 'actions');
+	mkdirSync(groupDir, { recursive: true });
+	const guidePath = resolve(groupDir, `${name}.mdx`);
+	writeFileSync(guidePath, guideContents);
+	const outputDir = resolve(groupDir, name);
 	return {
-		metaPath: resolve(componentDir, 'meta.json'),
-		propsPath: resolve(componentDir, 'props.mdx'),
+		guidePath,
+		metaPath: resolve(outputDir, 'meta.json'),
+		outputDir,
+		propsPath: resolve(outputDir, 'props.mdx'),
 		rootDir: scratchDir,
 	};
 }
 
-const SCRATCH_INDEX = `---
+const SCRATCH_GUIDE = `---
 title: Button
 props:
   - name: ButtonProps
@@ -141,18 +152,60 @@ props:
 Guide body.
 `;
 
-test('removes generated output for a component whose index.mdx has gone', () => {
-	const { metaPath, propsPath, rootDir } = writeScratchComponent(SCRATCH_INDEX);
+test('generates props.mdx and meta.json under <group>/<name>/ from the <group>/<name>.mdx guide', () => {
+	const { metaPath, outputDir, propsPath, rootDir } = writeScratchGuide('button', SCRATCH_GUIDE);
 
 	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
 	expect(existsSync(propsPath)).toBe(true);
 	expect(existsSync(metaPath)).toBe(true);
+	expect(resolve(propsPath, '..')).toBe(outputDir);
+});
+
+test('removes generated output and the empty output directory once the guide is removed', () => {
+	const { guidePath, metaPath, outputDir, propsPath, rootDir } = writeScratchGuide(
+		'button',
+		SCRATCH_GUIDE,
+	);
+
+	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
+	expect(existsSync(outputDir)).toBe(true);
 
 	// Deleting or renaming the guide must not leave an orphaned Props page behind. It would keep
 	// serving stale content from a route that is gitignored, so review would never surface it.
-	rmSync(resolve(rootDir, 'actions/button/index.mdx'));
+	rmSync(guidePath);
 
 	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 0, removedCount: 2 });
 	expect(existsSync(propsPath)).toBe(false);
 	expect(existsSync(metaPath)).toBe(false);
+	expect(existsSync(outputDir)).toBe(false);
+});
+
+test('removes generated output for the old name once a guide is renamed', () => {
+	const { guidePath, metaPath, outputDir, propsPath, rootDir } = writeScratchGuide(
+		'button',
+		SCRATCH_GUIDE,
+	);
+
+	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
+
+	renameSync(guidePath, resolve(rootDir, 'actions/icon-button.mdx'));
+
+	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 2 });
+	expect(existsSync(propsPath)).toBe(false);
+	expect(existsSync(metaPath)).toBe(false);
+	expect(existsSync(outputDir)).toBe(false);
+	expect(existsSync(resolve(rootDir, 'actions/icon-button/props.mdx'))).toBe(true);
+});
+
+test('leaves the output directory in place when it still holds files the generator does not own', () => {
+	const { outputDir, rootDir } = writeScratchGuide('button', SCRATCH_GUIDE);
+
+	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
+
+	writeFileSync(resolve(outputDir, 'notes.txt'), 'kept by hand');
+	rmSync(resolve(rootDir, 'actions/button.mdx'));
+
+	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 0, removedCount: 2 });
+	expect(existsSync(outputDir)).toBe(true);
+	expect(existsSync(resolve(outputDir, 'notes.txt'))).toBe(true);
 });

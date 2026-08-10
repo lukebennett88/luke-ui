@@ -1,8 +1,8 @@
 import { expect, test } from 'vite-plus/test';
 import { getStorybookStoryUrl } from './storybook.js';
 
-test('links component folder indexes to their Storybook docs', () => {
-	expect(getStorybookStoryUrl('components/actions/icon-button/index.mdx', '/')).toBe(
+test('links component guides to their Storybook docs', () => {
+	expect(getStorybookStoryUrl('components/actions/icon-button.mdx', '/')).toBe(
 		'http://localhost:6006/?path=/docs/actions-iconbutton--docs',
 	);
 });

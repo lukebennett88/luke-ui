@@ -97,7 +97,7 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 		},
 		{
 			contents: renderHostedDocsPage({ displayName, name, pascalName }),
-			path: `apps/docs/content/docs/components/${docsGroup}/${name}/index.mdx`,
+			path: `apps/docs/content/docs/components/${docsGroup}/${name}.mdx`,
 		},
 	];
 

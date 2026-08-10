@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+	existsSync,
+	mkdirSync,
+	readdirSync,
+	readFileSync,
+	rmdirSync,
+	rmSync,
+	writeFileSync,
+} from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -25,12 +33,13 @@ export interface ComponentFrontmatter {
 
 /**
  * Emits each component's generated Props page and `meta.json` from the `props` frontmatter
- * declared on its `index.mdx`. `remarkAutoTypeTable` resolves types during MDX compilation and
- * `TypeTable` carries shiki-highlighted `ReactNode` fields, neither of which survives a loader
- * boundary, so the Props page is generated MDX rather than rendered from frontmatter at runtime.
+ * declared on its `<group>/<name>.mdx` guide. `remarkAutoTypeTable` resolves types during MDX
+ * compilation and `TypeTable` carries shiki-highlighted `ReactNode` fields, neither of which
+ * survives a loader boundary, so the Props page is generated MDX rather than rendered from
+ * frontmatter at runtime.
  *
- * Only writes files whose content changed, and removes generated output for components that no
- * longer declare `props`.
+ * Only writes files whose content changed, and removes generator-owned output for components that
+ * no longer declare `props` or whose guide has gone.
  */
 export function generatePropsPages(rootDir: string = componentsDir): {
 	componentCount: number;
@@ -39,28 +48,37 @@ export function generatePropsPages(rootDir: string = componentsDir): {
 	let componentCount = 0;
 	let removedCount = 0;
 
-	for (const componentDir of findComponentDirs(rootDir)) {
-		const indexPath = resolve(componentDir, 'index.mdx');
-		const propsPath = resolve(componentDir, 'props.mdx');
-		const metaPath = resolve(componentDir, 'meta.json');
+	for (const group of readdirSync(rootDir, { withFileTypes: true })) {
+		if (!group.isDirectory()) continue;
+		const groupDir = resolve(rootDir, group.name);
 
-		if (!existsSync(indexPath)) {
-			if (removeIfExists(propsPath)) removedCount++;
-			if (removeIfExists(metaPath)) removedCount++;
-			continue;
+		for (const componentName of discoverComponentNames(groupDir)) {
+			const guidePath = resolve(groupDir, `${componentName}.mdx`);
+			const outputDir = resolve(groupDir, componentName);
+			const propsPath = resolve(outputDir, 'props.mdx');
+			const metaPath = resolve(outputDir, 'meta.json');
+
+			if (!existsSync(guidePath)) {
+				if (removeIfExists(propsPath)) removedCount++;
+				if (removeIfExists(metaPath)) removedCount++;
+				removeDirIfEmpty(outputDir);
+				continue;
+			}
+
+			const frontmatter = parseComponentFrontmatter(readFileSync(guidePath, 'utf8'));
+
+			if (frontmatter.props.length === 0) {
+				if (removeIfExists(propsPath)) removedCount++;
+				if (removeIfExists(metaPath)) removedCount++;
+				removeDirIfEmpty(outputDir);
+				continue;
+			}
+
+			componentCount++;
+			mkdirSync(outputDir, { recursive: true });
+			writeIfChanged(propsPath, renderPropsPage(frontmatter));
+			writeIfChanged(metaPath, META_JSON);
 		}
-
-		const frontmatter = parseComponentFrontmatter(readFileSync(indexPath, 'utf8'));
-
-		if (frontmatter.props.length === 0) {
-			if (removeIfExists(propsPath)) removedCount++;
-			if (removeIfExists(metaPath)) removedCount++;
-			continue;
-		}
-
-		componentCount++;
-		writeIfChanged(propsPath, renderPropsPage(frontmatter));
-		writeIfChanged(metaPath, META_JSON);
 	}
 
 	return { componentCount, removedCount };
@@ -96,7 +114,7 @@ function renderAutoTypeTable(entry: PropsEntry): string {
 
 export function parseComponentFrontmatter(contents: string): ComponentFrontmatter {
 	const match = contents.match(/^---\n([\s\S]*?)\n---\n/);
-	if (!match?.[1]) throw new Error('index.mdx is missing frontmatter');
+	if (!match?.[1]) throw new Error('guide is missing frontmatter');
 
 	const lines = match[1].split('\n');
 	const blocks = groupFrontmatterBlocks(lines);
@@ -173,23 +191,23 @@ function parsePropsEntries(lines: ReadonlyArray<string>): ReadonlyArray<PropsEnt
 	});
 }
 
-function findComponentDirs(directory: string): ReadonlyArray<string> {
-	const dirs: Array<string> = [];
+/**
+ * Every component name in a group: the union of `*.mdx` guides (component or otherwise — a guide
+ * declaring no `props`, like `validation.mdx`, is simply skipped below) and existing directories,
+ * which may hold generated output for a guide that has since been removed or renamed.
+ */
+function discoverComponentNames(groupDir: string): ReadonlyArray<string> {
+	const names = new Set<string>();
 
-	for (const group of readdirSync(directory, { withFileTypes: true })) {
-		if (!group.isDirectory()) continue;
-		const groupDir = resolve(directory, group.name);
-
-		for (const component of readdirSync(groupDir, { withFileTypes: true })) {
-			if (!component.isDirectory()) continue;
-			// Every component directory, including one whose `index.mdx` has gone. Its generated
-			// output has to be cleaned up, and skipping it here would leave an orphaned Props page
-			// serving stale content from a route nobody can see in review, because it is gitignored.
-			dirs.push(resolve(groupDir, component.name));
+	for (const entry of readdirSync(groupDir, { withFileTypes: true })) {
+		if (entry.isDirectory()) {
+			names.add(entry.name);
+		} else if (entry.name.endsWith('.mdx')) {
+			names.add(entry.name.slice(0, -'.mdx'.length));
 		}
 	}
 
-	return dirs.sort();
+	return [...names].sort();
 }
 
 function writeIfChanged(filepath: string, content: string): boolean {
@@ -207,6 +225,13 @@ function removeIfExists(filepath: string): boolean {
 	if (!existsSync(filepath)) return false;
 	rmSync(filepath);
 	return true;
+}
+
+/** Removes the component output directory when it is empty. */
+function removeDirIfEmpty(dirPath: string): void {
+	if (!existsSync(dirPath)) return;
+	if (readdirSync(dirPath).length > 0) return;
+	rmdirSync(dirPath);
 }
 
 if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

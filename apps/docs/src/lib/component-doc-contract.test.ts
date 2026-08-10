@@ -18,6 +18,7 @@ test('accepts a focused component-doc scaffold without placeholder prose', () =>
 	const docsDir = createDocsFixture({
 		guide: `---
 title: Status Badge
+source: packages/@luke-ui/react/src/status-badge
 ---
 
 <ExampleBlock src="status-badge/basic" title="Status Badge — Basic" />
@@ -32,6 +33,7 @@ test('reports placeholders and the wrong primary example', () => {
 		guide: `---
 title: Status Badge
 description: Status Badge component.
+source: packages/@luke-ui/react/src/status-badge
 ---
 
 \`StatusBadge\` from \`@luke-ui/react/status-badge\`.
@@ -43,11 +45,11 @@ TODO: Describe accessibility considerations.
 	});
 
 	expect(findComponentDocContractIssues({ docsDir })).toEqual([
-		'status-badge/index.mdx: replace the generic component description',
-		'status-badge/index.mdx: remove the generator TODO',
-		'status-badge/index.mdx: remove the accessibility placeholder',
-		'status-badge/index.mdx: remove the package-path placeholder',
-		'status-badge/index.mdx: primary example must use status-badge/basic',
+		'actions/status-badge.mdx: replace the generic component description',
+		'actions/status-badge.mdx: remove the generator TODO',
+		'actions/status-badge.mdx: remove the accessibility placeholder',
+		'actions/status-badge.mdx: remove the package-path placeholder',
+		'actions/status-badge.mdx: primary example must use status-badge/basic',
 	]);
 });
 
@@ -64,9 +66,9 @@ function createDocsFixture({ guide }: { guide: string }): string {
 	testDirectories.push(directory);
 
 	const docsDir = join(directory, 'components');
-	const componentDir = join(docsDir, 'status-badge');
-	mkdirSync(componentDir, { recursive: true });
-	writeFileSync(join(componentDir, 'index.mdx'), guide);
+	const groupDir = join(docsDir, 'actions');
+	mkdirSync(groupDir, { recursive: true });
+	writeFileSync(join(groupDir, 'status-badge.mdx'), guide);
 
 	return docsDir;
 }
