@@ -39,7 +39,10 @@ jobs:
           key:
             visual-main-${{ runner.os }}-${{ runner.arch }}-${{ github.event.pull_request.base.sha
             || github.event.before }}-${{ hashFiles('pnpm-lock.yaml',
-            'packages/@luke-ui/react/vitest.config.ts') }}
+            'packages/@luke-ui/react/vitest.config.ts',
+            'packages/@luke-ui/react/src/test-utils/render-setup.ts',
+            'packages/@luke-ui/react/src/test-utils/render.tsx',
+            'packages/@luke-ui/react/src/test-utils/visual-setup.ts') }}
       - name: Compare visual captures
         run: corepack pnpm test:visual
         env:

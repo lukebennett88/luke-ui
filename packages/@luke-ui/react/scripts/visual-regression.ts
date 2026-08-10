@@ -10,16 +10,28 @@ const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const repoRoot = path.resolve(packageRoot, '../../..');
 const artifacts = path.join(repoRoot, '.artifacts/visual-regression');
 
+// Files that shape how a capture renders. Copied into the base worktree so both
+// revisions render under the same harness, and hashed into the cache key so a
+// change to any of them invalidates cached baselines. Keep this list in sync with
+// the `hashFiles` list in .github/workflows/visual-regression.yml.
+const HARNESS_FILES = [
+	'packages/@luke-ui/react/vitest.config.ts',
+	'packages/@luke-ui/react/src/test-utils/render-setup.ts',
+	'packages/@luke-ui/react/src/test-utils/render.tsx',
+	'packages/@luke-ui/react/src/test-utils/visual-setup.ts',
+];
+
 async function main() {
 	const configuredBaseSha = process.env.VISUAL_BASE_SHA?.trim();
 	const baseRef = process.env.VISUAL_BASE_REF?.trim() || 'origin/main';
 	const baseSha = configuredBaseSha || output(['rev-parse', baseRef]);
 	const current = process.env.GITHUB_SHA ?? 'working tree';
-	const signature = createHash('sha256')
-		.update(await readFile(path.join(repoRoot, 'pnpm-lock.yaml')))
-		.update(await readFile(path.join(packageRoot, 'vitest.config.ts')))
-		.digest('hex')
-		.slice(0, 12);
+	const hashedFiles = await Promise.all(
+		['pnpm-lock.yaml', ...HARNESS_FILES].map((file) => readFile(path.join(repoRoot, file))),
+	);
+	const hash = createHash('sha256');
+	for (const contents of hashedFiles) hash.update(contents);
+	const signature = hash.digest('hex').slice(0, 12);
 	const cache = path.join(
 		artifacts,
 		'cache',
@@ -71,17 +83,8 @@ async function main() {
 
 async function capture(worktree: string, target: string) {
 	if (worktree !== repoRoot) {
-		await copyFile(
-			path.join(packageRoot, 'vitest.config.ts'),
-			path.join(worktree, 'packages/@luke-ui/react/vitest.config.ts'),
-		);
 		await Promise.all(
-			['render-setup.ts', 'render.tsx'].map((file) =>
-				copyFile(
-					path.join(packageRoot, 'src/test-utils', file),
-					path.join(worktree, 'packages/@luke-ui/react/src/test-utils', file),
-				),
-			),
+			HARNESS_FILES.map((file) => copyFile(path.join(repoRoot, file), path.join(worktree, file))),
 		);
 	}
 	await rm(target, { force: true, recursive: true });

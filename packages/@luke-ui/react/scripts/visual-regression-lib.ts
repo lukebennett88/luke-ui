@@ -11,7 +11,7 @@ export type VisualResult = {
 	diff?: string;
 	mismatchedPixels?: number;
 	mismatchRatio?: number;
-	mismatchBoundingBoxArea?: number;
+	mismatchClusterArea?: number;
 	height?: number;
 	width?: number;
 	baseViewport?: string;
@@ -21,55 +21,79 @@ export type VisualResult = {
 type CaptureFile = { file: string; viewport?: string };
 
 // pixelmatch's default `diffColor`/`diffColorAlt` (unset here, so both fall
-// back to this value). Background pixels are always drawn as a shade of grey
-// (equal R/G/B) and anti-aliasing-excluded pixels as yellow, so a pixel this
-// exact colour is unambiguously a real mismatch.
+// back to this value). Background pixels are always a shade of grey (equal
+// R/G/B) and anti-aliasing-excluded pixels are yellow, so this exact colour
+// unambiguously marks a real mismatch.
 const DIFF_MARKER_COLOR: readonly [number, number, number] = [255, 0, 0];
 
-// Minimum bounding-box area (in px²) a cluster of mismatched pixels must span
-// before it counts as a real, localised change rather than noise.
-//
-// Measured empirically (#249) by running the full visual suite against an
-// unchanged tree with `includeAA: true, threshold: 0.1`: rendering here is
-// otherwise deterministic (same machine, same Chromium, motion frozen). A
-// blinking text-field caret was one source of noise in that measurement (16
-// mismatched pixels in a 1×16px, 16px², bounding box); that source has since
-// been eliminated at the root with `caret-color: transparent` in
-// `visual-setup.ts`, not by this threshold. The remaining, binding noise
-// source is sub-pixel text anti-aliasing jitter, which produced 33 mismatched
-// pixels in an 8×11px (88px²) bounding box - a small cluster. A real 16×16
-// icon spans roughly 256px². This threshold sits above the measured noise
-// ceiling (88px²) and below that signal size.
-//
-// Ratio-of-canvas gating is deliberately not used here: it is what let a
-// visible 16px icon addition (16 mismatched pixels on a 199,152px canvas,
-// concentrated in roughly a 16×16 region) go unnoticed in PR #312. A
-// canvas-relative ratio dilutes a small element's change in a large scene;
-// this area is absolute, so it does not.
-const MISMATCH_BBOX_AREA_THRESHOLD = 120;
+// Minimum bounding-box area (px²) a single local cluster of mismatched pixels
+// must span to count as a real change rather than noise. Measured (#249) by
+// running the full visual suite against an unchanged tree: with motion frozen
+// and the caret hidden, the worst noise was 33 pixels of text anti-aliasing
+// jitter in an 8x11px (88px²) cluster. A real 16x16 icon spans ~256px². 120
+// sits between the two. A capture-wide ratio isn't used because it's what let
+// a real 16px icon (#312) go unnoticed on a large canvas.
+const MISMATCH_CLUSTER_AREA_THRESHOLD = 120;
 
-/** The area (in px²) of the bounding box enclosing every pixel `diff` marked as a real mismatch. */
-function mismatchBoundingBoxArea(diff: PNG, width: number, height: number) {
-	let minX = Infinity;
-	let minY = Infinity;
-	let maxX = -Infinity;
-	let maxY = -Infinity;
+// Chebyshev distance within which two mismatched pixels are treated as the
+// same cluster, so a change's own scattered anti-aliasing doesn't get
+// counted as several small, separately-harmless clusters. Chosen so 16
+// pixels scattered across a 16x16 region (the #312 shape) merge into one
+// cluster, while staying well under the distance between unrelated noise
+// clusters elsewhere in a capture.
+const CLUSTER_PROXIMITY = 4;
+
+/**
+ * The bounding-box area (px²) of the largest local cluster of mismatched pixels in `diff`,
+ * grouping pixels within `CLUSTER_PROXIMITY` of each other. Returns early once a cluster
+ * reaches `stopAt`, since callers only need to know whether that's been crossed.
+ */
+function largestMismatchClusterArea(diff: PNG, width: number, height: number, stopAt: number) {
+	const isMismatch = (x: number, y: number) => {
+		const index = (y * width + x) * 4;
+		return (
+			diff.data[index] === DIFF_MARKER_COLOR[0] &&
+			diff.data[index + 1] === DIFF_MARKER_COLOR[1] &&
+			diff.data[index + 2] === DIFF_MARKER_COLOR[2]
+		);
+	};
+	const visited = new Uint8Array(width * height);
+	let largest = 0;
 	for (let y = 0; y < height; y++) {
 		for (let x = 0; x < width; x++) {
-			const index = (y * width + x) * 4;
-			if (
-				diff.data[index] === DIFF_MARKER_COLOR[0] &&
-				diff.data[index + 1] === DIFF_MARKER_COLOR[1] &&
-				diff.data[index + 2] === DIFF_MARKER_COLOR[2]
-			) {
-				if (x < minX) minX = x;
-				if (x > maxX) maxX = x;
-				if (y < minY) minY = y;
-				if (y > maxY) maxY = y;
+			if (visited[y * width + x] || !isMismatch(x, y)) continue;
+			let minX = x;
+			let maxX = x;
+			let minY = y;
+			let maxY = y;
+			const queue: Array<[number, number]> = [[x, y]];
+			visited[y * width + x] = 1;
+			while (queue.length > 0) {
+				const [cx, cy] = queue.pop() as [number, number];
+				const top = Math.max(0, cy - CLUSTER_PROXIMITY);
+				const bottom = Math.min(height - 1, cy + CLUSTER_PROXIMITY);
+				const left = Math.max(0, cx - CLUSTER_PROXIMITY);
+				const right = Math.min(width - 1, cx + CLUSTER_PROXIMITY);
+				for (let ny = top; ny <= bottom; ny++) {
+					for (let nx = left; nx <= right; nx++) {
+						const index = ny * width + nx;
+						if (!visited[index] && isMismatch(nx, ny)) {
+							visited[index] = 1;
+							queue.push([nx, ny]);
+							if (nx < minX) minX = nx;
+							if (nx > maxX) maxX = nx;
+							if (ny < minY) minY = ny;
+							if (ny > maxY) maxY = ny;
+						}
+					}
+				}
+				const area = (maxX - minX + 1) * (maxY - minY + 1);
+				if (area >= stopAt) return area;
 			}
+			largest = Math.max(largest, (maxX - minX + 1) * (maxY - minY + 1));
 		}
 	}
-	return maxX >= minX ? (maxX - minX + 1) * (maxY - minY + 1) : 0;
+	return largest;
 }
 
 async function listPngs(root: string) {
@@ -201,13 +225,13 @@ export async function compareCaptures(baseDir: string, currentDir: string, diffD
 				});
 			}
 			const mismatchRatio = mismatchedPixels / (width * height);
-			const bboxArea = mismatchedPixels === 0 ? 0 : mismatchBoundingBoxArea(diffPng, width, height);
+			const clusterArea =
+				mismatchedPixels === 0
+					? 0
+					: largestMismatchClusterArea(diffPng, width, height, MISMATCH_CLUSTER_AREA_THRESHOLD);
 			const hasViewportChange = baseCapture.viewport !== currentCapture.viewport;
-			// A mismatch counts as a real change once its bounding box is large enough
-			// (see MISMATCH_BBOX_AREA_THRESHOLD), or, on a canvas smaller than that
-			// threshold, once the mismatch covers the entire canvas.
 			const status =
-				bboxArea >= Math.min(MISMATCH_BBOX_AREA_THRESHOLD, width * height) || hasViewportChange
+				clusterArea >= MISMATCH_CLUSTER_AREA_THRESHOLD || hasViewportChange
 					? 'changed'
 					: 'unchanged';
 			let diff: string | undefined;
@@ -224,7 +248,7 @@ export async function compareCaptures(baseDir: string, currentDir: string, diffD
 				diff,
 				height,
 				id,
-				mismatchBoundingBoxArea: bboxArea,
+				mismatchClusterArea: clusterArea,
 				mismatchedPixels,
 				mismatchRatio,
 				status,
@@ -267,10 +291,8 @@ async function renderCard(result: VisualResult) {
 	const dimensions = result.width && result.height ? `${result.width} × ${result.height}` : '';
 	const pixels =
 		result.mismatchedPixels == null ? '' : `${result.mismatchedPixels} mismatched pixels`;
-	// The deciding signal (see MISMATCH_BBOX_AREA_THRESHOLD): mismatchRatio is
-	// informational only and no longer gates the status.
-	const bboxArea =
-		result.mismatchBoundingBoxArea == null ? '' : `${result.mismatchBoundingBoxArea}px² diff area`;
+	const clusterArea =
+		result.mismatchClusterArea == null ? '' : `${result.mismatchClusterArea}px² diff area`;
 	const viewports = `main viewport ${result.baseViewport ?? 'unknown'} · current viewport ${result.currentViewport ?? 'unknown'}`;
 	const namespace = getNamespace(result.id);
 	const overlay =
@@ -279,7 +301,7 @@ async function renderCard(result: VisualResult) {
 			: '';
 	const images = `${overlay}${renderImage('main', base)}${renderImage('current', current)}${renderImage('diff', diff)}`;
 
-	return `<article data-status="${result.status}" data-namespace="${namespace}"><h2>${escapeHtml(result.id)}</h2><p><strong>${result.status}</strong> ${ratio} · ${dimensions} · ${pixels} · ${bboxArea}<br>${viewports}</p><div class="images">${images}</div></article>`;
+	return `<article data-status="${result.status}" data-namespace="${namespace}"><h2>${escapeHtml(result.id)}</h2><p><strong>${result.status}</strong> ${ratio} · ${dimensions} · ${pixels} · ${clusterArea}<br>${viewports}</p><div class="images">${images}</div></article>`;
 }
 
 function renderDocument(

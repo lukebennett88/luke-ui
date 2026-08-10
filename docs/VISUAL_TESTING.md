@@ -39,9 +39,9 @@ change on a large capture. Use the filters, overlay slider, and main, current, a
 review each result. Run `pnpm --filter @luke-ui/react run test:visual:report` to open the latest
 local report.
 
-A change confined to a thin element, such as a 1px divider, an underline, or a focus ring, can fall
-under the 120px² box and stay classified as unchanged. Cover those cases with a direct assertion,
-the way the LoadingSkeleton bug in #225 was caught with `getComputedStyle`.
+A change whose bounding box stays under 120px² in both dimensions, meaning small on both axes, can
+be missed. Cover those cases with a direct assertion, the way the LoadingSkeleton bug in #225 was
+caught with `getComputedStyle`.
 
 ## CI review
 
