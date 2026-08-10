@@ -30,9 +30,10 @@ const DIFF_MARKER_COLOR: readonly [number, number, number] = [255, 0, 0];
 // must span to count as a real change rather than noise. Measured (#249) by
 // running the full visual suite against an unchanged tree: with motion frozen
 // and the caret hidden, the worst noise was 33 pixels of text anti-aliasing
-// jitter in an 8x11px (88px²) cluster. A real 16x16 icon spans ~256px². 120
-// sits between the two. A capture-wide ratio isn't used because it's what let
-// a real 16px icon (#312) go unnoticed on a large canvas.
+// jitter in an 8x11px (88px²) cluster, while the real #312 icon in
+// `__fixtures__/pr-312` clusters to 324px². 120 sits between the two. A
+// capture-wide ratio isn't used because it dilutes a small change on a large
+// canvas, which is how #312 went unnoticed.
 const MISMATCH_CLUSTER_AREA_THRESHOLD = 120;
 
 /** The bounding-box area (px²) of the largest 8-connected cluster of mismatched pixels in `diff`. */
