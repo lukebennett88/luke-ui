@@ -4,7 +4,7 @@ import { Checkbox } from '@luke-ui/react/checkbox';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/combobox-field/primitive';
 import { TextField } from '@luke-ui/react/text-field';
-import type { FormEvent } from 'react';
+import type { SubmitEvent } from 'react';
 import { useState } from 'react';
 
 const countries = [
@@ -19,7 +19,7 @@ type Errors = { country?: string; email?: string; terms?: string };
 export default () => {
 	const [errors, setErrors] = useState<Errors>({});
 
-	function handleSubmit(event: FormEvent<HTMLFormElement>) {
+	function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
 		event.preventDefault();
 		const data = new FormData(event.currentTarget);
 		const emailValue = data.get('emailAddress');
