@@ -74,7 +74,18 @@ testIntegration(componentTestRegistration, 'ComboboxField', async () => {
 	const input = locator.getByRole('combobox', { name: 'Country' });
 
 	await user.click(input);
-	await user.click(page.getByRole('option', { name: 'Australia' }));
+
+	const option = page.getByRole('option', { name: 'Australia' });
+	// oxlint-disable-next-line vitest/no-standalone-expect
+	await expect.element(option).toBeInTheDocument();
+	// Clicking an option scrolls it into view first, and React Aria closes the popover on a
+	// document scroll. While the popover is still entering, that close lands before the click and
+	// detaches the option.
+	const popover = page.getByRole('listbox').element().parentElement;
+	if (popover == null) throw new Error('Expected the popover element.');
+	await waitForOverlayEnter(popover);
+
+	await user.click(option);
 	// oxlint-disable-next-line vitest/no-standalone-expect
 	expect(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Australia');
 });
