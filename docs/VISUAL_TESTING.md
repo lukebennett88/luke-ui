@@ -2,8 +2,7 @@
 
 Visual tests compare the current checkout with the latest `origin/main` on the same machine and in
 the same Chromium installation. The repository does not store screenshots, baseline manifests, or
-Git LFS objects. The one exception is `scripts/__fixtures__/pr-312`, a frozen historical capture
-pair used by a unit test, not a checked-in baseline.
+Git LFS objects.
 
 ## Run the comparison
 
@@ -33,16 +32,16 @@ decile comes back blank, since that means the scene only painted part of its hei
 ## Read the report
 
 The report classifies captures as unchanged, changed, added, or removed. Added and removed captures
-are informational. A changed result means the differing pixels form at least one local cluster whose
-bounding box is 120px² or larger. Each cluster is measured on its own rather than as a percentage of
-the canvas, so a 16px icon still counts as a change on a large capture, and two separate patches of
-rendering noise do not add up into one. Use the filters, overlay slider, and main, current, and diff
-images to review each result. Run `pnpm --filter @luke-ui/react run test:visual:report` to open the
-latest local report.
+are informational. A changed result means the capture-wide mismatch ratio exceeds 0.1%
+(`mismatchRatio > 0.001`). The comparison runs `pixelmatch` with `includeAA: true` and
+`threshold: 0.1`, counting anti-aliased edge pixels rather than discarding them, so a thin icon
+stroke on a large canvas still registers. Use the filters, overlay slider, and main, current, and
+diff images to review each result. Run `pnpm --filter @luke-ui/react run test:visual:report` to open
+the latest local report.
 
-A change that stays small on both axes, so that its bounding box is under 120px², can be missed.
-Cover those cases with a direct assertion, the way the LoadingSkeleton bug in #225 was caught with
-`getComputedStyle`.
+A diff small enough to keep the capture-wide ratio under 0.1% can be missed, so keep a direct
+assertion for intent the visual gate cannot promise. The LoadingSkeleton rounding fix in #225, for
+example, stays guarded by a `getComputedStyle` assertion.
 
 ## CI review
 

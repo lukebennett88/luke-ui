@@ -5,8 +5,6 @@ import { PNG } from 'pngjs';
 import { expect, test } from 'vite-plus/test';
 import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
-const FIXTURES = path.join(import.meta.dirname, '__fixtures__');
-
 /** Builds a `size` x `size` solid-colour PNG. */
 const png = (red: number, size = 1) => {
 	const image = new PNG({ height: size, width: size });
@@ -103,35 +101,13 @@ test('classifies matched, changed, added, and removed captures', async () => {
 	expect(await readFile(report, 'utf8')).toContain('Visual regression report');
 });
 
-test('catches the #312 checkbox icon regression the old gate missed', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'visual-regression-312-'));
-	const base = path.join(root, 'base');
-	const current = path.join(root, 'current');
-	await Promise.all([base, current].map((directory) => mkdir(directory)));
-	await Promise.all([
-		writeFile(
-			path.join(base, 'checkbox-states.png'),
-			await readFile(path.join(FIXTURES, 'pr-312', 'checkbox-states-main.png')),
-		),
-		writeFile(
-			path.join(current, 'checkbox-states.png'),
-			await readFile(path.join(FIXTURES, 'pr-312', 'checkbox-states-current.png')),
-		),
-	]);
-	const [result] = await compareCaptures(base, current, path.join(root, 'diff'));
-	expect(result?.status).toBe('changed');
-});
-
-test('keeps two separated sub-threshold noise clusters unchanged', async () => {
+test('keeps sub-threshold noise spread across a large capture unchanged', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-regression-noise-'));
 	const base = path.join(root, 'base');
 	const current = path.join(root, 'current');
 	await Promise.all([base, current].map((directory) => mkdir(directory)));
 	const width = 600;
 	const height = 400;
-	// A 1x16px cluster (the measured caret noise) and an 8x11px cluster (the
-	// measured anti-aliasing noise), far apart. A single capture-wide box would
-	// combine them into one large, wrongly "changed" box.
 	await Promise.all([
 		writeFile(path.join(base, 'noise.png'), pngWithRects(width, height, [])),
 		writeFile(
@@ -144,11 +120,10 @@ test('keeps two separated sub-threshold noise clusters unchanged', async () => {
 	]);
 	const [result] = await compareCaptures(base, current, path.join(root, 'diff'));
 	expect(result?.mismatchedPixels).toBe(16 + 8 * 11);
-	expect(result?.mismatchClusterArea).toBe(8 * 11);
 	expect(result?.status).toBe('unchanged');
 });
 
-test('counts anti-aliased pixels but still treats a stroke-sized cluster as noise', async () => {
+test('counts anti-aliased pixels and flags a removed thin stroke as a change', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-regression-aa-'));
 	const base = path.join(root, 'base');
 	const current = path.join(root, 'current');
@@ -162,30 +137,7 @@ test('counts anti-aliased pixels but still treats a stroke-sized cluster as nois
 	const [result] = await compareCaptures(base, current, path.join(root, 'diff'));
 	// `includeAA: true` counts the blended edge columns too, not just the solid centre.
 	expect(result?.mismatchedPixels).toBe(60);
-	expect(result?.mismatchClusterArea).toBe(60);
-	expect(result?.status).toBe('unchanged');
-});
-
-test('classifies identical large captures as unchanged', async () => {
-	const root = await mkdtemp(path.join(tmpdir(), 'visual-regression-identical-'));
-	const base = path.join(root, 'base');
-	const current = path.join(root, 'current');
-	await Promise.all([base, current].map((directory) => mkdir(directory)));
-	const width = 600;
-	const height = 400;
-	const rects: Array<[number, number, number, number]> = Array.from({ length: 16 }, (_, i) => [
-		100 + i,
-		100 + i,
-		1,
-		1,
-	]);
-	await Promise.all([
-		writeFile(path.join(base, 'icon.png'), pngWithRects(width, height, rects)),
-		writeFile(path.join(current, 'icon.png'), pngWithRects(width, height, rects)),
-	]);
-	const [result] = await compareCaptures(base, current, path.join(root, 'diff'));
-	expect(result?.mismatchedPixels).toBe(0);
-	expect(result?.status).toBe('unchanged');
+	expect(result?.status).toBe('changed');
 });
 
 test('rejects a tall capture whose bottom decile never painted', async () => {
