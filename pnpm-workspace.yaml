@@ -31,6 +31,11 @@ trustLockfile: true
 
 trustPolicy: no-downgrade
 
+trustPolicyExclude:
+  - semver@6.3.1
+  - chokidar@4.0.3
+  - '@netlify/serverless-functions-api@2.18.0'
+
 catalog:
   '@arethetypeswrong/core': ^0.18.5
   '@capsizecss/metrics': ^4.2.0
@@ -79,13 +84,13 @@ catalog:
   monaco-editor: ^0.56.0
   next-themes: ^0.4.6
   node-html-parser: ^9.0.1
-  oxc-parser: ^0.142.0
+  oxc-parser: ^0.143.0
   pixelmatch: ^7.2.0
   playwright: '^1.62.1'
   pngjs: ^7.0.0
   postcss: ^8.5.25
   postcss-selector-parser: ^7.1.4
-  publint: ^0.3.22
+  publint: ^0.3.23
   react: ^19.2.8
   react-aria-components: ^1.20.0
   react-dom: ^19.2.8
@@ -93,12 +98,12 @@ catalog:
   react-hook-form: ^7.84.0
   react-resizable-panels: ^4.12.2
   serve: ^14.2.6
-  shiki: ^4.4.1
+  shiki: ^4.4.2
   spin-doctor: ^0.0.1
   storybook: ^10.5.6
   sucrase: ^3.35.1
   tailwindcss: ^4.3.3
-  tsx: ^4.23.5
+  tsx: ^4.23.6
   turbo: ^2.10.8
   typescript: ^7.0.2
   unbarrelify: ^1.1.2
