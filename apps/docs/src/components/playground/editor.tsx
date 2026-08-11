@@ -4,7 +4,11 @@ import type { OnMount } from '@monaco-editor/react';
 import type * as Monaco from 'monaco-editor';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { loadPlaygroundTypes, monacoThemes } from '../../lib/monaco-setup';
-import { registerPlaygroundFormatter, runFormatDocument } from '../../lib/playground-format';
+import {
+	registerFormatDocumentKeybinding,
+	registerPlaygroundFormatter,
+	runFormatDocument,
+} from '../../lib/playground-format';
 import { EditorSkeleton } from './editor-skeleton';
 
 type PlaygroundEditorProps = {
@@ -29,6 +33,7 @@ export default function PlaygroundEditor({
 	const handleMount: OnMount = (editor, monaco) => {
 		editorRef.current = editor;
 		registerPlaygroundFormatter(monaco);
+		registerFormatDocumentKeybinding(editor, monaco);
 	};
 
 	const handleFormat = async () => {

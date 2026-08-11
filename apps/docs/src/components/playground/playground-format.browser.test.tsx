@@ -17,6 +17,9 @@ vi.mock('../../lib/playground-format-fn.js', () => ({
 
 const PlaygroundEditor = (await import('./editor.js')).default;
 
+const badlyFormatted = 'const playgroundFormatTest=(x)=>x';
+const formatted = 'const playgroundFormatTest = (x) => x;';
+
 let container: HTMLElement | undefined;
 let root: Root | undefined;
 
@@ -27,7 +30,6 @@ afterEach(() => {
 });
 
 test('monaco fills the editor pane and format updates source through onChange', async () => {
-	const badlyFormatted = 'const playgroundFormatTest=(x)=>x';
 	const hashRef = { current: window.location.hash };
 	renderPlayground(badlyFormatted, (code) => {
 		hashRef.current = `#${encodeCodeHash(code)}`;
@@ -60,7 +62,6 @@ test('monaco fills the editor pane and format updates source through onChange', 
 
 	await userEvent.click(formatButton);
 
-	const formatted = 'const playgroundFormatTest = (x) => x;';
 	const viewText = () =>
 		(document.querySelector('.view-lines')?.textContent ?? '').replace(/\u00a0/g, ' ');
 	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain(formatted);
@@ -71,6 +72,27 @@ test('monaco fills the editor pane and format updates source through onChange', 
 	await userEvent.click(monacoEditor()!);
 	await userEvent.keyboard('{Control>}z{/Control}');
 	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain('playgroundFormatTest=(x)=>x');
+}, 60_000);
+
+test('Ctrl+S formats through the Monaco provider and onChange', async () => {
+	const onChangeCalls: Array<string> = [];
+	renderPlayground(badlyFormatted, (code) => onChangeCalls.push(code));
+
+	const monacoEditor = () => document.querySelector('.monaco-editor');
+	await expect
+		.poll(() => monacoEditor()?.getBoundingClientRect().height ?? 0, { timeout: 30_000 })
+		.toBeGreaterThan(100);
+
+	const viewText = () =>
+		(document.querySelector('.view-lines')?.textContent ?? '').replace(/\u00a0/g, ' ');
+
+	await userEvent.click(monacoEditor()!);
+	await userEvent.keyboard('{Control>}s{/Control}');
+
+	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain(formatted);
+	await expect
+		.poll(() => onChangeCalls.some((code) => code.includes(formatted)), { timeout: 10_000 })
+		.toBe(true);
 }, 60_000);
 
 function renderPlayground(defaultValue: string, onChange: (code: string) => void) {

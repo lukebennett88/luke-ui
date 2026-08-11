@@ -1,16 +1,15 @@
 import type * as Monaco from 'monaco-editor';
 
 const FORMAT_DOCUMENT_ACTION_ID = 'editor.action.formatDocument';
+const FORMAT_SHORTCUT_ACTION_ID = 'luke-ui.playground.formatDocumentShortcut';
 
-async function formatPlaygroundSource(source: string): Promise<string | null> {
-	try {
-		const { formatPlaygroundCode } = await import('./playground-format-fn.js');
-		const result = await formatPlaygroundCode({ data: { source } });
-		if (!result.ok) return null;
-		return result.code;
-	} catch {
-		return null;
-	}
+type FormatPlaygroundSourceResult = { status: 'formatted'; code: string } | { status: 'no-edit' };
+
+async function formatPlaygroundSource(source: string): Promise<FormatPlaygroundSourceResult> {
+	const { formatPlaygroundCode } = await import('./playground-format-fn.js');
+	const result = await formatPlaygroundCode({ data: { source } });
+	if (!result.ok) return { status: 'no-edit' };
+	return { status: 'formatted', code: result.code };
 }
 
 export function documentFormattingEdits(
@@ -27,15 +26,15 @@ function createOxfmtFormattingProvider(): Monaco.languages.DocumentFormattingEdi
 		displayName: 'Oxfmt',
 		async provideDocumentFormattingEdits(model) {
 			const original = model.getValue();
-			let formatted: string | null;
 			try {
-				formatted = await formatPlaygroundSource(original);
+				const result = await formatPlaygroundSource(original);
+				if (result.status === 'no-edit') return [];
+				return documentFormattingEdits(original, result.code, model.getFullModelRange());
 			} catch (error) {
 				// oxlint-disable-next-line no-console
 				console.warn('[playground] Format failed: Oxfmt server request failed.', error);
 				return [];
 			}
-			return documentFormattingEdits(original, formatted, model.getFullModelRange());
 		},
 	};
 }
@@ -57,6 +56,22 @@ export function registerPlaygroundFormatter(monaco: typeof Monaco): Monaco.IDisp
 	);
 	registry[FORMATTER_REGISTERED] = disposable;
 	return disposable;
+}
+
+export function registerFormatDocumentKeybinding(
+	editor: Monaco.editor.IStandaloneCodeEditor,
+	monaco: typeof Monaco,
+): Monaco.IDisposable {
+	return editor.addAction({
+		id: FORMAT_SHORTCUT_ACTION_ID,
+		label: 'Format Document',
+		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+		run: (ed) => {
+			const action = ed.getAction(FORMAT_DOCUMENT_ACTION_ID);
+			if (!action) return;
+			return action.run();
+		},
+	});
 }
 
 export async function runFormatDocument(
