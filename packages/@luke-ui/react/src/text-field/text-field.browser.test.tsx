@@ -104,39 +104,32 @@ test('the indicator lands after the input and before a trailing suffix', async (
 // The primitive renders the control itself, so it takes a plain `ref`. Both ref
 // shapes are covered: React Hook Form hands out a callback ref, so the callback
 // arm is the one that decides whether the component is usable with it at all.
-test('InputGroupInput resolves a ref object to the input element', async () => {
-	const ref = createRef<HTMLInputElement>();
+test('InputGroupInput resolves object and callback refs to the input element', async () => {
+	const objectRef = createRef<HTMLInputElement>();
+	const callbackResolved: Array<HTMLInputElement | null> = [];
 	render(
-		<InputGroup>
-			<InputGroupInput aria-label="Amount" ref={ref} />
-		</InputGroup>,
+		<>
+			<InputGroup>
+				<InputGroupInput aria-label="Amount object" ref={objectRef} />
+			</InputGroup>
+			<InputGroup>
+				<InputGroupInput
+					aria-label="Amount callback"
+					ref={(node) => {
+						callbackResolved.push(node);
+					}}
+				/>
+			</InputGroup>
+		</>,
 	);
 
-	const input = page.getByRole('textbox', { name: 'Amount' });
-	await expect.element(input).toBeVisible();
+	const objectInput = page.getByRole('textbox', { name: 'Amount object' });
+	const callbackInput = page.getByRole('textbox', { name: 'Amount callback' });
+	await expect.element(objectInput).toBeVisible();
+	await expect.element(callbackInput).toBeVisible();
 
-	expect(ref.current).toBeInstanceOf(HTMLInputElement);
-	expect(ref.current).toBe(input.element());
-});
-
-test('InputGroupInput resolves a callback ref to the input element', async () => {
-	const resolved: Array<HTMLInputElement | null> = [];
-	render(
-		<InputGroup>
-			<InputGroupInput
-				aria-label="Amount"
-				ref={(node) => {
-					resolved.push(node);
-				}}
-			/>
-		</InputGroup>,
-	);
-
-	const input = page.getByRole('textbox', { name: 'Amount' });
-	await expect.element(input).toBeVisible();
-
-	expect(resolved.at(-1)).toBeInstanceOf(HTMLInputElement);
-	expect(resolved.at(-1)).toBe(input.element());
+	expect(objectRef.current).toBe(objectInput.element());
+	expect(callbackResolved.at(-1)).toBe(callbackInput.element());
 });
 
 // `inputStates.invalid` must not match `:has(:invalid)`: that matches a required,

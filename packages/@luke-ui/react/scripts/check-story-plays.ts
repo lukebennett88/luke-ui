@@ -127,10 +127,10 @@ function storyFiles(directory: string): Array<string> {
 	return files;
 }
 
-const files = storyFiles(storiesRoot).flatMap((file) => {
-	if (path.relative(storiesRoot, file).startsWith(`theme${path.sep}`)) return [];
-	return [{ file, source: fs.readFileSync(file, 'utf8') }];
-});
+const files = storyFiles(storiesRoot).map((file) => ({
+	file,
+	source: fs.readFileSync(file, 'utf8'),
+}));
 const violations = findStoryPlayViolations(files);
 
 if (violations.length > 0) {

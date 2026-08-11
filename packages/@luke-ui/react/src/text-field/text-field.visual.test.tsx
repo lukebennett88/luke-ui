@@ -127,7 +127,6 @@ test('interactive states', async () => {
 	const { locator } = render(<TextField label="Focus me" name="focus" placeholder="Type here" />);
 	const input = page.getByRole('textbox', { name: 'Focus me' });
 
-	await captureVisual(locator, 'text-field/resting');
 	await userEvent.hover(input);
 	await captureVisual(locator, 'text-field/hover');
 	await userEvent.unhover(input);

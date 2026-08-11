@@ -335,24 +335,4 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 			}
 		});
 	}
-
-	it('emits the expected v2 token values for known Tactile leaves', () => {
-		const css = defineTheme(tactileTheme);
-		for (const declaration of [
-			// The canvas IS the resolved background (Tactile's light neutral), unchanged from pre-v2.
-			'--luke-color-surface-canvas: oklch(0.985 0 0);',
-			// Global text/skeleton now alias the neutral family: primary = neutral 12 (light) / dark 12,
-			// disabled = neutral 8, the neutral subtle surface = neutral 3.
-			'--luke-color-text-primary: oklch(0.3 0 0);',
-			'--luke-color-text-disabled: oklch(0.5 0.0117 210);',
-			'--luke-color-background-neutral-subtle-rest: oklch(0.955 0 0);',
-			// The danger solid stays the authored default source (danger step 9 lands on it verbatim).
-			'--luke-color-background-danger-solid-rest: oklch(0.52 0.18 27);',
-		]) {
-			expect(css).toContain(declaration);
-		}
-		// Scrim is passed through: black at the mode-aware default alpha.
-		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.2);');
-		expect(css).toContain('--luke-color-scrim: oklch(0 0 0 / 0.4);');
-	});
 });

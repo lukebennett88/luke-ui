@@ -11,7 +11,7 @@ import {
 	inputStates,
 } from './input-states.js';
 import { invalidIndicatorIcon, invalidIndicatorIconForcedColors } from './invalid-indicator.js';
-import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
+import type { SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
 
 // Set per `size` variant on `inputGroup` below, from `COMBOBOX_ICON_SIZE`, so the invalid
@@ -487,9 +487,6 @@ const comboboxConfig = {
  * `@luke-ui/react/recipes`.
  */
 export const combobox = recipe(comboboxConfig);
-
-/** Outer variant selection for the combobox recipe. */
-export type ComboboxVariants = RecipeSelection<typeof combobox>;
 
 /** Allowed `size` values for the combobox recipe. */
 export type ComboboxSize = keyof typeof comboboxConfig.variants.size;

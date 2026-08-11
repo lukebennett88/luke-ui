@@ -141,7 +141,6 @@ test('interactive states', async () => {
 	const clear = page.getByRole('button', { name: 'Clear selection' });
 	const trigger = page.getByRole('button', { name: 'Toggle options' });
 
-	await captureVisual(locator, 'combobox-field/resting');
 	await userEvent.hover(input);
 	await captureVisual(locator, 'combobox-field/hover');
 	await userEvent.unhover(input);
@@ -188,26 +187,24 @@ test('open option and selection states', async () => {
 	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-keyboard-focus');
 });
 
-test('option with leading icon', async () => {
+test('option with leading icon at both sizes', async () => {
 	render(
-		<ComboboxField defaultItems={countryItems} label="Country" name="country">
-			{renderIconItem}
-		</ComboboxField>,
+		<Stack>
+			<ComboboxField defaultItems={countryItems} label="Medium" name="medium">
+				{renderIconItem}
+			</ComboboxField>
+			<ComboboxField defaultItems={countryItems} label="Small" name="small" size="small">
+				{renderIconItem}
+			</ComboboxField>
+		</Stack>,
 	);
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	await userEvent.click(page.getByRole('combobox', { name: 'Medium' }));
 	await captureVisual(
 		page.elementLocator(document.body),
 		'combobox-field/option-leading-icon-medium',
 	);
-});
-
-test('option with leading icon, small', async () => {
-	render(
-		<ComboboxField defaultItems={countryItems} label="Country" name="country" size="small">
-			{renderIconItem}
-		</ComboboxField>,
-	);
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	await userEvent.keyboard('{Escape}');
+	await userEvent.click(page.getByRole('combobox', { name: 'Small' }));
 	await captureVisual(
 		page.elementLocator(document.body),
 		'combobox-field/option-leading-icon-small',

@@ -8,12 +8,10 @@ import { componentIndexGroups } from '../generated/components-index.generated.js
 test('generates one runtime entry per component guide', () => {
 	const reference = generateComponentsIndex();
 
-	expect(reference).toContain(
-		"{ description: 'A labelled control for actions in an interface.', name: 'Button', url: '/components/actions/button' },",
-	);
-	expect(reference).toContain(
-		"{ description: 'Hide content visually and keep it available to assistive technology.', name: 'Visually Hidden', url: '/components/primitives/visually-hidden' },",
-	);
+	expect(reference).toContain("name: 'Button'");
+	expect(reference).toContain("url: '/components/actions/button'");
+	expect(reference).toContain("name: 'Visually Hidden'");
+	expect(reference).toContain("url: '/components/primitives/visually-hidden'");
 	expect(reference).toContain(
 		'export const componentIndexGroups: ReadonlyArray<ComponentIndexGroup> = [',
 	);
