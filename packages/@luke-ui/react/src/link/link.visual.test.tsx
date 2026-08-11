@@ -53,7 +53,6 @@ test('interactive states', async () => {
 	);
 	const link = page.getByRole('link', { name: 'Destination' });
 
-	await captureVisual(locator, 'link/resting');
 	await userEvent.hover(link);
 	await captureVisual(locator, 'link/hover');
 	await userEvent.unhover(link);

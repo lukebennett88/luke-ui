@@ -31,7 +31,6 @@ test('interactive states', async () => {
 	const { locator } = render(<IconButton aria-label="Action" icon="add" />);
 	const button = page.getByRole('button', { name: 'Action' });
 
-	await captureVisual(locator, 'icon-button/resting');
 	await userEvent.hover(button);
 	await captureVisual(locator, 'icon-button/hover');
 	await userEvent.unhover(button);

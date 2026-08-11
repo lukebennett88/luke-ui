@@ -254,42 +254,35 @@ test('read-only controls keep the read-only material, not the disabled one', asy
 });
 
 // The primitive renders the control itself, so it takes a plain `ref`.
-test('ComboboxInput resolves a ref object to the input element', async () => {
-	const ref = createRef<HTMLInputElement>();
+test('ComboboxInput resolves object and callback refs to the input element', async () => {
+	const objectRef = createRef<HTMLInputElement>();
+	const callbackResolved: Array<HTMLInputElement | null> = [];
 	render(
-		<ComboboxRoot<CountryItem> aria-label="Country" defaultItems={countryItems}>
-			<ComboboxInputGroup>
-				<ComboboxInput ref={ref} />
-			</ComboboxInputGroup>
-		</ComboboxRoot>,
+		<>
+			<ComboboxRoot<CountryItem> aria-label="Country object" defaultItems={countryItems}>
+				<ComboboxInputGroup>
+					<ComboboxInput ref={objectRef} />
+				</ComboboxInputGroup>
+			</ComboboxRoot>
+			<ComboboxRoot<CountryItem> aria-label="Country callback" defaultItems={countryItems}>
+				<ComboboxInputGroup>
+					<ComboboxInput
+						ref={(node) => {
+							callbackResolved.push(node);
+						}}
+					/>
+				</ComboboxInputGroup>
+			</ComboboxRoot>
+		</>,
 	);
 
-	const input = page.getByRole('combobox', { name: 'Country' });
-	await expect.element(input).toBeVisible();
+	const objectInput = page.getByRole('combobox', { name: 'Country object' });
+	const callbackInput = page.getByRole('combobox', { name: 'Country callback' });
+	await expect.element(objectInput).toBeVisible();
+	await expect.element(callbackInput).toBeVisible();
 
-	expect(ref.current).toBeInstanceOf(HTMLInputElement);
-	expect(ref.current).toBe(input.element());
-});
-
-test('ComboboxInput resolves a callback ref to the input element', async () => {
-	const resolved: Array<HTMLInputElement | null> = [];
-	render(
-		<ComboboxRoot<CountryItem> aria-label="Country" defaultItems={countryItems}>
-			<ComboboxInputGroup>
-				<ComboboxInput
-					ref={(node) => {
-						resolved.push(node);
-					}}
-				/>
-			</ComboboxInputGroup>
-		</ComboboxRoot>,
-	);
-
-	const input = page.getByRole('combobox', { name: 'Country' });
-	await expect.element(input).toBeVisible();
-
-	expect(resolved.at(-1)).toBeInstanceOf(HTMLInputElement);
-	expect(resolved.at(-1)).toBe(input.element());
+	expect(objectRef.current).toBe(objectInput.element());
+	expect(callbackResolved.at(-1)).toBe(callbackInput.element());
 });
 
 /** The control group wrapping the combobox input labelled `name`. */

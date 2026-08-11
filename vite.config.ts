@@ -14,9 +14,6 @@ export default defineConfig({
 			'**/dist/**',
 			'**/routeTree.gen.ts',
 			'**/storybook-static/**',
-			// Golden fixtures are frozen `buildTheme` output, asserted byte-identical in tests; they must
-			// never be reformatted.
-			'**/__fixtures__/v2-goldens/**',
 			'node_modules',
 		],
 		jsxSingleQuote: false,

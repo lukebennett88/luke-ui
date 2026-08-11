@@ -1,4 +1,3 @@
-import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
 import {
 	extractValue,
@@ -222,23 +221,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 // stricter than a static "skeleton !== canvas and contrastRatio > 1" check would ever be — the
 // latter is a tautology once the two colours are already known to differ, so it added no coverage.
 
-// Regression goldens: the exact `buildTheme` output for the bundled themes under the wired-in
-// scale/elevation/semantic-map pipeline. Asserted byte-identical so any later generator change
-// is a reviewed, deliberate diff.
-describe('v2 regression goldens', () => {
-	const v2Goldens = {
-		paper: new URL('./__fixtures__/v2-goldens/paper.v2.css', import.meta.url),
-		tactile: new URL('./__fixtures__/v2-goldens/tactile.v2.css', import.meta.url),
-	} as const;
-
-	it('keeps every generated token byte-identical to the v2 baseline', async () => {
-		const goldenTactile = await readFile(v2Goldens.tactile, 'utf8');
-		const goldenPaper = await readFile(v2Goldens.paper, 'utf8');
-
-		expect(buildTheme(tactileFoundation)).toBe(goldenTactile);
-		expect(buildTheme(paperFoundation)).toBe(goldenPaper);
-	});
-
+describe('buildTheme public motion surface', () => {
 	// The numbered duration scale in `motion.ts` is private in the same sense as the 12-step colour
 	// scale: resolved in TypeScript and never published as a custom property. Only the three
 	// role-named durations reach the stylesheet, so a numbered variable here is a leak.

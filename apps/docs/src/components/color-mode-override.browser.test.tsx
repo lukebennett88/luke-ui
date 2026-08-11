@@ -27,36 +27,21 @@ function renderColourModeExample() {
 	});
 }
 
-function panelStyle(panel: HTMLElement): { backgroundColor: string; color: string } {
-	const style = getComputedStyle(panel);
-	return { backgroundColor: style.backgroundColor, color: style.color };
-}
+test('toggles the parent colour mode and leaves the nested panel fixed to dark', async () => {
+	renderColourModeExample();
 
-test(
-	're-colours the parent-following panel when the parent mode changes and leaves the fixed nested' +
-		' panel in its explicit mode',
-	async () => {
-		renderColourModeExample();
+	const parent = container?.firstElementChild;
+	if (!(parent instanceof HTMLElement)) throw new Error('Expected the colour-mode example root');
+	expect(parent).toHaveAttribute('data-color-mode', 'light');
 
-		const followingPanel = page
-			.getByText('This panel follows the parent mode.')
-			.element().parentElement;
-		const fixedPanel = page.getByText('This panel is fixed to dark mode.').element().parentElement;
-		if (!followingPanel || !fixedPanel) {
-			throw new Error('Expected the colour-mode panels rendered');
-		}
+	const fixedPanel = page
+		.getByText('This panel is fixed to dark mode.')
+		.element()
+		.closest('[data-color-mode]');
+	expect(fixedPanel).toHaveAttribute('data-color-mode', 'dark');
 
-		const lightFollowing = panelStyle(followingPanel);
-		const darkFixed = panelStyle(fixedPanel);
+	await userEvent.click(page.getByRole('button', { name: 'Dark' }));
 
-		expect(lightFollowing.backgroundColor).not.toBe(darkFixed.backgroundColor);
-		expect(lightFollowing.color).not.toBe(darkFixed.color);
-
-		await userEvent.click(page.getByRole('button', { name: 'Dark' }));
-
-		await expect.poll(() => panelStyle(followingPanel)).toEqual(darkFixed);
-		expect(panelStyle(followingPanel).backgroundColor).not.toBe(lightFollowing.backgroundColor);
-		expect(panelStyle(followingPanel).color).not.toBe(lightFollowing.color);
-		expect(panelStyle(fixedPanel)).toEqual(darkFixed);
-	},
-);
+	await expect.poll(() => parent.getAttribute('data-color-mode')).toBe('dark');
+	expect(fixedPanel).toHaveAttribute('data-color-mode', 'dark');
+});

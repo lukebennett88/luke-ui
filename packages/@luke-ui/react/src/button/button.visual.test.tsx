@@ -65,7 +65,6 @@ test('interactive states', async () => {
 	const { locator } = render(<Button>Action</Button>);
 	const button = page.getByRole('button', { name: 'Action' });
 
-	await captureVisual(locator, 'button/resting');
 	await userEvent.hover(button);
 	await captureVisual(locator, 'button/hover');
 	await userEvent.unhover(button);

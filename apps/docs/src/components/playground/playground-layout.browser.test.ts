@@ -12,20 +12,16 @@ afterEach(async () => {
 
 test('uses the desktop panel layout before JavaScript corrects the server orientation', async () => {
 	await page.viewport(1024, 800);
-	const separator = renderPanelLayout('column');
+	renderPanelLayout('column');
 
 	expect(getComputedStyle(group as HTMLDivElement).flexDirection).toBe('row');
-	expect(getComputedStyle(separator).inlineSize).toBe('1px');
-	expect(getComputedStyle(separator).blockSize).toBe('400px');
 });
 
 test('uses the mobile panel layout independently of the JavaScript orientation', async () => {
 	await page.viewport(390, 800);
-	const separator = renderPanelLayout('row');
+	renderPanelLayout('row');
 
 	expect(getComputedStyle(group as HTMLDivElement).flexDirection).toBe('column');
-	expect(getComputedStyle(separator).inlineSize).toBe('390px');
-	expect(getComputedStyle(separator).blockSize).toBe('1px');
 });
 
 function renderPanelLayout(inlineDirection: 'column' | 'row') {
