@@ -35,8 +35,8 @@ Useful repo commands:
 - [Conventions](docs/CONVENTIONS.md): repo-wide coding conventions.
 - [Components](docs/COMPONENTS.md): component tiers, package paths, and generator rules.
 - [Dependencies](docs/DEPENDENCIES.md): the catalog, the release quarantine, and Renovate.
-- [Documentation](docs/DOCUMENTATION.md): hosted docs ownership, MDX structure, examples, and API
-  reference.
+- [Documentation](docs/DOCUMENTATION.md): what to document, writing style, examples, and MDX
+  structure.
 - [Styling](docs/STYLING.md): cascade layers, recipes, and styling utilities.
 - [Testing](docs/TESTING.md): test type, placement, and writing rules.
 - [Visual testing](docs/VISUAL_TESTING.md): visual regression workflow.
