@@ -1,7 +1,17 @@
 import { Blockquote } from '@luke-ui/react/blockquote';
 import { Box } from '@luke-ui/react/box';
 
-const sizes = ['caption', 'label', 'body', 'lead', 'heading4', 'heading3', 'heading2', 'heading1', 'display'] as const;
+const sizes = [
+	'caption',
+	'label',
+	'body',
+	'lead',
+	'heading4',
+	'heading3',
+	'heading2',
+	'heading1',
+	'display',
+] as const;
 
 export default () => {
 	return (

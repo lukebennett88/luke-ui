@@ -1,6 +1,6 @@
 import { expect, test } from 'vite-plus/test';
-import { Text } from '../text/index.js';
 import { render } from '../test-utils/render.js';
+import { Text } from '../text/index.js';
 import { Heading } from './index.js';
 
 test('keeps semantic heading level independent of visual type style', async () => {
