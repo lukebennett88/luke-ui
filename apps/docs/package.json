@@ -78,8 +78,5 @@
 		"unist-util-visit": "catalog:",
 		"vite-plus": "catalog:",
 		"vitest": "catalog:"
-	},
-	"optionalDependencies": {
-		"@oxfmt/binding-linux-x64-gnu": "catalog:"
 	}
 }
