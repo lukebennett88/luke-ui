@@ -80,8 +80,9 @@ Do not write "you can do this, but it is not recommended". Either recommend it o
 ### Internal distinctions
 
 Expose an internal architectural distinction only when it reaches the public API or a developer's
-choice. Component tiers qualify, because the tier decides the import path and the audience. See
-[COMPONENTS.md](COMPONENTS.md).
+choice. The atom versus composed split does not: it is maintainer architecture, so do not teach it
+in public docs. Primitives do, because they use `/primitive` export paths and target library
+authors. See [COMPONENTS.md](COMPONENTS.md).
 
 Do not document an export that is not public API.
 
