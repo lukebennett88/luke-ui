@@ -1,7 +1,7 @@
 import { Heading } from '@luke-ui/react/heading';
 import { Text } from '@luke-ui/react/text';
 import { createFileRoute } from '@tanstack/react-router';
-import Link from 'fumadocs-core/link';
+import { Card, Cards } from 'fumadocs-ui/components/card';
 import { SiteNav } from '../components/site-nav.js';
 
 export const Route = createFileRoute('/')({
@@ -26,11 +26,14 @@ function Home() {
 					Luke UI is a React design system and component library. It ships static CSS, two bundled
 					themes, and layout utilities that share a semantic token contract.
 				</Text>
-				<Text elementType="p">
-					Read <Link href="/docs/installation">Getting started</Link> to install Luke UI, load a
-					theme, and render your first component. Browse <Link href="/components">Components</Link>{' '}
-					for the full catalogue.
-				</Text>
+				<Cards>
+					<Card href="/docs/installation" title="Installation">
+						Install Luke UI, apply a bundled theme, and render a component.
+					</Card>
+					<Card href="/components" title="Components">
+						Browse Components for the full catalogue
+					</Card>
+				</Cards>
 			</main>
 		</>
 	);
