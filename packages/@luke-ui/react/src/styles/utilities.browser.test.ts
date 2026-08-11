@@ -37,18 +37,14 @@ test('applies every retained breakpoint responsively', async () => {
 		{ name: 'xxlarge', width: 1536 },
 	] as const;
 
-	let previousPadding: string | undefined;
+	const paddings: Array<string> = [];
 	for (const breakpoint of breakpoints) {
 		// eslint-disable-next-line no-await-in-loop -- viewport changes must be observed in order
 		await page.viewport(breakpoint.width, 800);
-		const padding = getComputedStyle(element).padding;
-		if (previousPadding !== undefined) {
-			expect(padding, `${breakpoint.name} should resolve a different space step`).not.toBe(
-				previousPadding,
-			);
-		}
-		previousPadding = padding;
+		paddings.push(getComputedStyle(element).padding);
 	}
+
+	expect(new Set(paddings).size).toBe(breakpoints.length);
 });
 
 test('returns class and style output that merges with consumer props', () => {
