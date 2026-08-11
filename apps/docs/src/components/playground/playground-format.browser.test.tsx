@@ -2,18 +2,9 @@ import '../../styles/app.css';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import { afterEach, expect, test, vi } from 'vite-plus/test';
+import { afterEach, expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
-
-vi.mock('../../lib/playground-format-fn.js', () => ({
-	formatPlaygroundCode: async ({ data }: { data: { source: string } }) => {
-		if (data.source === 'const playgroundFormatTest=(x)=>x') {
-			return { ok: true, code: 'const playgroundFormatTest = (x) => x;\n' };
-		}
-		return { ok: false, reason: 'parse' };
-	},
-}));
 
 const PlaygroundEditor = (await import('./editor.js')).default;
 

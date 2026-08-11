@@ -85,9 +85,9 @@ catalog:
   next-themes: ^0.4.6
   node-html-parser: ^9.0.1
   oxc-parser: ^0.143.0
-  oxfmt: 0.60.0
   pixelmatch: ^7.2.0
   playwright: '^1.62.1'
+  prettier: ^3.9.6
   pngjs: ^7.0.0
   postcss: ^8.5.25
   postcss-selector-parser: ^7.1.4

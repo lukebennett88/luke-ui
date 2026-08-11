@@ -1,15 +1,67 @@
 import type * as Monaco from 'monaco-editor';
+import type * as EstreePlugin from 'prettier/plugins/estree';
+import type * as TypeScriptPlugin from 'prettier/plugins/typescript';
+import type * as Prettier from 'prettier/standalone';
 
 const FORMAT_DOCUMENT_ACTION_ID = 'editor.action.formatDocument';
 const FORMAT_SHORTCUT_ACTION_ID = 'luke-ui.playground.formatDocumentShortcut';
 
-type FormatPlaygroundSourceResult = { status: 'formatted'; code: string } | { status: 'no-edit' };
+type PrettierModules = {
+	estree: typeof EstreePlugin;
+	prettier: typeof Prettier;
+	typescript: typeof TypeScriptPlugin;
+};
 
-async function formatPlaygroundSource(source: string): Promise<FormatPlaygroundSourceResult> {
-	const { formatPlaygroundCode } = await import('./playground-format-fn.js');
-	const result = await formatPlaygroundCode({ data: { source } });
-	if (!result.ok) return { status: 'no-edit' };
-	return { status: 'formatted', code: result.code };
+export function createPrettierLoader(
+	load: () => Promise<PrettierModules>,
+): () => Promise<PrettierModules> {
+	let modulesPromise: Promise<PrettierModules> | undefined;
+	return () => {
+		if (!modulesPromise) {
+			modulesPromise = load().catch((error: unknown) => {
+				modulesPromise = undefined;
+				throw error;
+			});
+		}
+		return modulesPromise;
+	};
+}
+
+const loadPrettier = createPrettierLoader(async () => {
+	const [prettier, typescript, estree] = await Promise.all([
+		import('prettier/standalone'),
+		import('prettier/plugins/typescript'),
+		import('prettier/plugins/estree'),
+	]);
+	return {
+		estree: estree.default as typeof EstreePlugin,
+		prettier,
+		typescript: typescript.default as typeof TypeScriptPlugin,
+	};
+});
+
+export async function formatPlaygroundSource(source: string): Promise<string | null> {
+	const { prettier, typescript, estree } = await loadPrettier();
+	try {
+		return await prettier.format(source, {
+			arrowParens: 'always',
+			bracketSameLine: false,
+			bracketSpacing: true,
+			jsxSingleQuote: false,
+			parser: 'typescript',
+			plugins: [typescript, estree],
+			printWidth: 100,
+			quoteProps: 'as-needed',
+			semi: true,
+			singleAttributePerLine: false,
+			singleQuote: true,
+			tabWidth: 2,
+			trailingComma: 'all',
+			useTabs: true,
+		});
+	} catch {
+		return null;
+	}
 }
 
 export function documentFormattingEdits(
@@ -21,25 +73,24 @@ export function documentFormattingEdits(
 	return [{ range: fullRange, text: formatted }];
 }
 
-function createOxfmtFormattingProvider(): Monaco.languages.DocumentFormattingEditProvider {
+function createPrettierFormattingProvider(): Monaco.languages.DocumentFormattingEditProvider {
 	return {
-		displayName: 'Oxfmt',
+		displayName: 'Prettier',
 		async provideDocumentFormattingEdits(model) {
 			const original = model.getValue();
 			try {
-				const result = await formatPlaygroundSource(original);
-				if (result.status === 'no-edit') return [];
-				return documentFormattingEdits(original, result.code, model.getFullModelRange());
+				const formatted = await formatPlaygroundSource(original);
+				return documentFormattingEdits(original, formatted, model.getFullModelRange());
 			} catch (error) {
 				// oxlint-disable-next-line no-console
-				console.warn('[playground] Format failed: Oxfmt server request failed.', error);
+				console.warn('[playground] Format failed: Prettier could not load.', error);
 				return [];
 			}
 		},
 	};
 }
 
-const FORMATTER_REGISTERED = Symbol.for('luke-ui.playground.oxfmtFormatterRegistered');
+const FORMATTER_REGISTERED = Symbol.for('luke-ui.playground.prettierFormatterRegistered');
 
 type FormatterRegistry = typeof Monaco.languages & {
 	[FORMATTER_REGISTERED]?: Monaco.IDisposable;
@@ -52,7 +103,7 @@ export function registerPlaygroundFormatter(monaco: typeof Monaco): Monaco.IDisp
 
 	const disposable = monaco.languages.registerDocumentFormattingEditProvider(
 		['typescript', 'javascript'],
-		createOxfmtFormattingProvider(),
+		createPrettierFormattingProvider(),
 	);
 	registry[FORMATTER_REGISTERED] = disposable;
 	return disposable;

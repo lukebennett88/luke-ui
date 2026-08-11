@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite-plus';
-import { repoFmtOptions } from './tooling/fmt-options.ts';
 
 export default defineConfig({
 	fmt: {
-		...repoFmtOptions,
+		arrowParens: 'always',
+		bracketSameLine: false,
+		bracketSpacing: true,
 		ignorePatterns: [
 			'.source',
 			'**/.generated/entries.*',
@@ -18,8 +19,36 @@ export default defineConfig({
 			'**/__fixtures__/v2-goldens/**',
 			'node_modules',
 		],
+		jsxSingleQuote: false,
 		overrides: [{ files: ['**/*.css.ts'], options: { sortImports: { sortSideEffects: false } } }],
+		printWidth: 100,
 		proseWrap: 'always',
+		quoteProps: 'as-needed',
+		semi: true,
+		singleAttributePerLine: false,
+		singleQuote: true,
+		sortImports: {
+			customGroups: [
+				{ elementNamePattern: ['http://**', 'https://**'], groupName: 'url' },
+				{ elementNamePattern: ['*:*'], groupName: 'protocol' },
+			],
+			groups: [
+				['side_effect_style', 'side_effect'],
+				'url',
+				'protocol',
+				['builtin', 'external', 'type-builtin', 'type-external'],
+				['subpath', 'internal', 'type-subpath', 'type-internal'],
+				['parent', 'sibling', 'index', 'type-parent', 'type-sibling', 'type-index'],
+				'unknown',
+			],
+			ignoreCase: false,
+			internalPattern: ['@/', '#', '~'],
+			newlinesBetween: false,
+			sortSideEffects: true,
+		},
+		tabWidth: 2,
+		trailingComma: 'all',
+		useTabs: true,
 	},
 	lint: {
 		categories: {
