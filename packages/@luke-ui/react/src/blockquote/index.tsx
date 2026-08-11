@@ -1,6 +1,6 @@
 import * as styles from '../recipes/blockquote.css.js';
-import { Text } from '../text/index.js';
 import type { TextProps } from '../text/index.js';
+import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
@@ -23,7 +23,7 @@ export type BlockquoteProps = Prettify<_BlockquoteProps>;
 export function Blockquote(props: BlockquoteProps) {
 	const { children, className, ...textProps } = props;
 	return (
-		<Text {...textProps} elementType="blockquote" className={cx(styles.blockquote(), className)}>
+		<Text {...textProps} className={cx(styles.blockquote(), className)} elementType="blockquote">
 			{children}
 		</Text>
 	);

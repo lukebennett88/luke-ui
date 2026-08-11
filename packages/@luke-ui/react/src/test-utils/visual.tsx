@@ -25,10 +25,10 @@ export async function captureVisual(locator: Locator, id: string) {
 		// height. `page.viewport` resizes and re-lays-out the iframe itself, so
 		// both must grow together for the revealed region to paint.
 		await cdp().send('Emulation.setDeviceMetricsOverride', {
-			width: viewportWidth,
-			height: fullHeight,
 			deviceScaleFactor: window.devicePixelRatio,
+			height: fullHeight,
 			mobile: false,
+			width: viewportWidth,
 		});
 		await page.viewport(viewportWidth, fullHeight);
 	}

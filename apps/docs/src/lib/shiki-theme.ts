@@ -12,6 +12,6 @@ export const SHIKI_THEME_REGISTRATIONS: [typeof githubLight, typeof githubDark] 
  * Theme order controls Shiki's generated classes and custom properties.
  */
 export const SHIKI_THEMES = {
-	light: SHIKI_THEME_REGISTRATIONS[0].name,
 	dark: SHIKI_THEME_REGISTRATIONS[1].name,
+	light: SHIKI_THEME_REGISTRATIONS[0].name,
 };

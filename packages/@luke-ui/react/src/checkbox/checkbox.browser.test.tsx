@@ -1,8 +1,7 @@
 import { createRef } from 'react';
-import type { ComponentProps } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { cdp, page, userEvent } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
+import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { componentTestRegistration } from './component-test-registration.js';
@@ -27,8 +26,9 @@ testFieldShapedConformance({
 	},
 	name: 'Checkbox',
 	registration: componentTestRegistration,
-	render: (props = {}) =>
-		render(<Checkbox {...(props as ComponentProps<typeof Checkbox>)}>Terms</Checkbox>),
+	render: (props = {}) => {
+		return render(<Checkbox {...props}>Terms</Checkbox>);
+	},
 });
 
 testIntegration(componentTestRegistration, 'Checkbox', async () => {

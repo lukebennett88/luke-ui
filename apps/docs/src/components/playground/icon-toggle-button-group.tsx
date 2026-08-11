@@ -1,5 +1,5 @@
-import { Icon } from '@luke-ui/react/icon';
 import type { IconName } from '@luke-ui/react/icon';
+import { Icon } from '@luke-ui/react/icon';
 import { cx } from '@luke-ui/react/utils';
 import type { Selection } from 'react-aria-components/GridList';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
@@ -61,13 +61,13 @@ export function IconToggleButtonGroup<Value extends string>({
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
 					aria-label={optionLabel}
-					className={({ isSelected }) =>
-						cx(
+					className={({ isSelected }) => {
+						return cx(
 							'flex size-8 items-center justify-center',
 							PILL_CLASS_NAME,
 							isSelected && PILL_SELECTED_CLASS_NAME,
-						)
-					}
+						);
+					}}
 					id={optionValue}
 					key={optionValue}
 				>
@@ -112,13 +112,13 @@ export function TextToggleButtonGroup<Value extends string>({
 		>
 			{options.map(({ label: optionLabel, value: optionValue }) => (
 				<ToggleButton
-					className={({ isSelected }) =>
-						cx(
+					className={({ isSelected }) => {
+						return cx(
 							'flex h-8 items-center justify-center whitespace-nowrap px-3 font-medium text-xs',
 							PILL_CLASS_NAME,
 							isSelected && PILL_SELECTED_CLASS_NAME,
-						)
-					}
+						);
+					}}
 					id={optionValue}
 					key={optionValue}
 				>

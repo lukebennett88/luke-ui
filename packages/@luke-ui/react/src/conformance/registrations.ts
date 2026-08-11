@@ -1,5 +1,5 @@
-import { componentTestManifest } from './manifest.js';
 import type { ComponentTestManifestEntry } from './manifest.js';
+import { componentTestManifest } from './manifest.js';
 
 export type ComponentTestRegistration = Pick<
 	ComponentTestManifestEntry,

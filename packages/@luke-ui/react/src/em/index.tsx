@@ -1,6 +1,6 @@
 import * as styles from '../recipes/em.css.js';
-import { Text } from '../text/index.js';
 import type { TextProps } from '../text/index.js';
+import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
@@ -37,8 +37,8 @@ export function Em(props: EmProps) {
 	return (
 		<Text
 			{...elementProps}
-			elementType="em"
 			className={cx(styles.em, className)}
+			elementType="em"
 			lineClamp={lineClamp}
 			shouldInheritFont
 			textWrap={textWrap}

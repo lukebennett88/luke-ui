@@ -44,10 +44,10 @@ export const componentTestManifest = [
 	['Theme', 'theme', 'primitive', 'none', 'none', 'none'],
 	['VisuallyHidden', 'visually-hidden', 'atom', 'none', 'none', 'none'],
 ].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({
+	conformanceTier,
+	integrationTripwire,
 	name,
 	path,
 	tier,
-	conformanceTier,
-	integrationTripwire,
 	visualApplicability,
 })) as ReadonlyArray<ComponentTestManifestEntry>;

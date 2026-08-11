@@ -6,7 +6,10 @@ import { getDocsTreePathname } from '../lib/component-page-navigation.js';
 
 const framework = {
 	Link({ href, prefetch = true, ...props }: ComponentProps<'a'> & { prefetch?: boolean }) {
-		return <Link to={href} preload={prefetch ? 'intent' : false} {...props} />;
+		return <Link preload={prefetch ? 'intent' : false} to={href} {...props} />;
+	},
+	useParams() {
+		return useParams({ strict: false });
 	},
 	usePathname() {
 		const { isLoading, pathname } = useRouterState({
@@ -35,9 +38,6 @@ const framework = {
 			}),
 			[router],
 		);
-	},
-	useParams() {
-		return useParams({ strict: false });
 	},
 };
 

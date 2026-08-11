@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 

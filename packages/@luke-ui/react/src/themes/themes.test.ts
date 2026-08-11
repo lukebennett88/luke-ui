@@ -2,10 +2,10 @@ import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
 import packageJson from '../../package.json' with { type: 'json' };
 import { getThemeClassName } from '../theme/theme-class-name.js';
-import { theme as paperThemeInput, themeClassName as paperThemeClassName } from './paper/index.js';
+import { themeClassName as paperThemeClassName, theme as paperThemeInput } from './paper/index.js';
 import {
-	theme as tactileThemeInput,
 	themeClassName as tactileThemeClassName,
+	theme as tactileThemeInput,
 } from './tactile/index.js';
 
 const themeArtifacts = {

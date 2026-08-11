@@ -86,6 +86,6 @@ Body.
 		expect(generated).not.toContain('/components/forms/topic');
 		expect(generated).not.toContain("name: 'Topic'");
 	} finally {
-		rmSync(scratchDir, { recursive: true, force: true });
+		rmSync(scratchDir, { force: true, recursive: true });
 	}
 });

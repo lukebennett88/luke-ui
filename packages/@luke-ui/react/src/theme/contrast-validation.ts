@@ -14,12 +14,12 @@ type ColorMode = 'light' | 'dark';
 
 /** One WCAG contrast failure recorded while generating a theme. */
 export interface ThemeContrastFailure {
-	/** The colour mode the pair was generated for. */
-	mode: 'light' | 'dark';
-	/** Token path of the foreground colour, for example `color.text.primary`. */
-	foreground: string;
 	/** Token path of the background colour, for example `color.surface.floating`. */
 	background: string;
+	/** Token path of the foreground colour, for example `color.text.primary`. */
+	foreground: string;
+	/** The colour mode the pair was generated for. */
+	mode: 'light' | 'dark';
 	/** The contrast ratio achieved by the best attempt. */
 	ratio: number;
 	/** The WCAG 2.2 AA ratio the pair must reach. */
@@ -27,8 +27,8 @@ export interface ThemeContrastFailure {
 }
 
 interface ValidationResult {
-	failures: Array<ThemeContrastFailure>;
 	checks: Array<ContrastCheck>;
+	failures: Array<ThemeContrastFailure>;
 }
 
 /**

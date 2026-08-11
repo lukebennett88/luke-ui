@@ -63,9 +63,9 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 		<SpinnerElement
 			{...spanProps}
 			aria-label={ariaLabel}
+			className={className}
 			color={color}
 			size={resolvedSize}
-			className={className}
 			style={style}
 		/>
 	);

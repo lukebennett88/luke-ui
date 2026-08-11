@@ -61,11 +61,11 @@ describe('createComponentPlan', () => {
 		expect(plan.textFileAppends).toEqual([
 			{
 				kind: 'text-append',
-				path: 'packages/@luke-ui/react/src/recipes/index.ts',
 				lines: [
 					"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
 					"export { statusBadge } from '../recipes/status-badge.css.js';",
 				],
+				path: 'packages/@luke-ui/react/src/recipes/index.ts',
 			},
 		]);
 		expect(plan.textFileInserts).toEqual([
@@ -139,12 +139,12 @@ describe('createComponentPlan', () => {
 
 	it('uses explicit applicability overrides in the manifest entry', () => {
 		const plan = createComponentPlan({
+			conformanceTier: 'field-shaped',
 			docsGroup: 'forms',
+			integrationTripwire: true,
 			name: 'DateField',
 			styling: 'none',
 			tier: 'composed',
-			conformanceTier: 'field-shaped',
-			integrationTripwire: true,
 			visualCoverage: false,
 		});
 
@@ -215,9 +215,9 @@ describe('createComponentPlan', () => {
 			tier: 'atom',
 		});
 
-		const guide = plan.files.find((file) =>
-			file.path.endsWith('feedback/status-badge.mdx'),
-		)?.contents;
+		const guide = plan.files.find((file) => {
+			return file.path.endsWith('feedback/status-badge.mdx');
+		})?.contents;
 		if (guide === undefined) throw new Error('Expected the scaffold to write the guide.');
 
 		const frontmatter = parseComponentFrontmatter(guide);

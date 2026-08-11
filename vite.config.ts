@@ -76,6 +76,52 @@ export default defineConfig({
 			typeAware: true,
 			typeCheck: true,
 		},
+		overrides: [
+			{
+				excludeFiles: [
+					'packages/@luke-ui/react/src/theme/**',
+					'packages/@luke-ui/react/src/styles/**',
+					'packages/@luke-ui/react/src/use-synchronize-animations/**',
+				],
+				files: ['packages/@luke-ui/react/src/**/*.browser.test.tsx'],
+				rules: {
+					'no-restricted-imports': [
+						'error',
+						{
+							paths: [
+								{
+									message: 'Mount components through src/test-utils/render.tsx.',
+									name: 'react-dom/client',
+								},
+								{
+									message:
+										'Do not assert resolved theme tokens in component tests. Suppress this rule only for structural fixture setup.',
+									name: '@luke-ui/react/theme',
+								},
+							],
+						},
+					],
+				},
+			},
+			{
+				excludeFiles: ['packages/@luke-ui/react/src/theme/**'],
+				files: ['packages/@luke-ui/react/src/**/*.visual.test.tsx'],
+				rules: {
+					'no-await-in-loop': 'off',
+					'no-restricted-imports': [
+						'error',
+						{
+							paths: [
+								{
+									message: 'Mount components through src/test-utils/render.tsx.',
+									name: 'react-dom/client',
+								},
+							],
+						},
+					],
+				},
+			},
+		],
 		plugins: ['import', 'jsx-a11y', 'react', 'typescript', 'vitest'],
 		rules: {
 			curly: 'off',
@@ -88,10 +134,6 @@ export default defineConfig({
 			'jsx-a11y/prefer-tag-over-role': 'off',
 			'no-console': 'warn',
 			'no-unused-vars': 'error',
-			'vitest/expect-expect': [
-				'error',
-				{ assertFunctionNames: ['captureVisual', 'captureVisualAppearance', 'expect'] },
-			],
 			'react-hooks-js/config': 'error',
 			'react-hooks-js/error-boundaries': 'error',
 			'react-hooks-js/gating': 'error',
@@ -120,52 +162,10 @@ export default defineConfig({
 				{ fixStyle: 'separate-type-imports', prefer: 'type-imports' },
 			],
 			'vite-plus/prefer-vite-plus-imports': 'error',
+			'vitest/expect-expect': [
+				'error',
+				{ assertFunctionNames: ['captureVisual', 'captureVisualAppearance', 'expect'] },
+			],
 		},
-		overrides: [
-			{
-				files: ['packages/@luke-ui/react/src/**/*.browser.test.tsx'],
-				excludeFiles: [
-					'packages/@luke-ui/react/src/theme/**',
-					'packages/@luke-ui/react/src/styles/**',
-					'packages/@luke-ui/react/src/use-synchronize-animations/**',
-				],
-				rules: {
-					'no-restricted-imports': [
-						'error',
-						{
-							paths: [
-								{
-									name: 'react-dom/client',
-									message: 'Mount components through src/test-utils/render.tsx.',
-								},
-								{
-									name: '@luke-ui/react/theme',
-									message:
-										'Do not assert resolved theme tokens in component tests. Suppress this rule only for structural fixture setup.',
-								},
-							],
-						},
-					],
-				},
-			},
-			{
-				files: ['packages/@luke-ui/react/src/**/*.visual.test.tsx'],
-				excludeFiles: ['packages/@luke-ui/react/src/theme/**'],
-				rules: {
-					'no-await-in-loop': 'off',
-					'no-restricted-imports': [
-						'error',
-						{
-							paths: [
-								{
-									name: 'react-dom/client',
-									message: 'Mount components through src/test-utils/render.tsx.',
-								},
-							],
-						},
-					],
-				},
-			},
-		],
 	},
 });

@@ -1,5 +1,5 @@
-import { Text } from '../text/index.js';
 import type { TextProps } from '../text/index.js';
+import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 

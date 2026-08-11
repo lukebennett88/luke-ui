@@ -30,10 +30,12 @@ describe('theme inheritance', () => {
 			extends: tactileTheme,
 			name: 'product',
 		});
-		const withoutAccent = (css: string) =>
-			declarations(css).filter(([name]) => !name.includes('accent'));
-		const accentOnly = (css: string) =>
-			declarations(css).filter(([name]) => name.includes('accent'));
+		const withoutAccent = (css: string) => {
+			return declarations(css).filter(([name]) => !name.includes('accent'));
+		};
+		const accentOnly = (css: string) => {
+			return declarations(css).filter(([name]) => name.includes('accent'));
+		};
 
 		expect(withoutAccent(subject)).toEqual(withoutAccent(reference));
 		expect(accentOnly(subject)).not.toEqual(accentOnly(reference));

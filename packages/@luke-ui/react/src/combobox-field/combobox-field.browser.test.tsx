@@ -6,7 +6,6 @@ import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 import { componentTestRegistration } from './component-test-registration.js';
-import type { ComboboxFieldProps } from './index.js';
 import { ComboboxField } from './index.js';
 import { ComboboxInputGroup } from './primitive/input-group.js';
 import { ComboboxInput } from './primitive/input.js';
@@ -32,11 +31,6 @@ testFieldShapedConformance({
 			'aria-describedby',
 		);
 	},
-	getControl: (result) => {
-		const control = result.locator.getByRole('combobox', { name: 'Country' }).element();
-		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
-		return control;
-	},
 	assertName: (result) => {
 		// React Aria uses a hidden input for the selected form value.
 		const hiddenInput = result.container.querySelector(
@@ -45,6 +39,11 @@ testFieldShapedConformance({
 		// oxlint-disable-next-line vitest/no-standalone-expect
 		expect(hiddenInput).not.toBeNull();
 	},
+	getControl: (result) => {
+		const control = result.locator.getByRole('combobox', { name: 'Country' }).element();
+		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
+		return control;
+	},
 	getTarget: (result) => {
 		const target = result.container.firstElementChild;
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a combobox root.');
@@ -52,17 +51,18 @@ testFieldShapedConformance({
 	},
 	name: 'ComboboxField',
 	registration: componentTestRegistration,
-	render: (props = {}) =>
-		render(
+	render: (props = {}) => {
+		return render(
 			<ComboboxField<CountryItem>
-				{...(props as ComboboxFieldProps<CountryItem>)}
+				{...props}
 				defaultItems={countryItems}
 				description="Helpful context"
 				label="Country"
 			>
 				{renderCountryItem}
 			</ComboboxField>,
-		),
+		);
+	},
 });
 
 testIntegration(componentTestRegistration, 'ComboboxField', async () => {

@@ -110,7 +110,7 @@ export const InputGroupInvalid = meta.story({
 		<div style={stackStyle}>
 			<InputGroup isInvalid>
 				<InputGroupPrefix>$</InputGroupPrefix>
-				<InputGroupInput aria-label="Invalid amount" aria-invalid defaultValue="-1" />
+				<InputGroupInput aria-invalid aria-label="Invalid amount" defaultValue="-1" />
 				<InputGroupSuffix>USD</InputGroupSuffix>
 			</InputGroup>
 		</div>

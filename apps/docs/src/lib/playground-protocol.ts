@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
 const codeMessageSchema = z.object({
-	type: z.literal('playground:code'),
 	code: z.string(),
+	type: z.literal('playground:code'),
 });
 
 const appearanceMessageSchema = z.object({
-	type: z.literal('playground:appearance'),
 	colorMode: z.enum(['light', 'dark', 'system']),
 	themeIdentity: z.enum(['tactile', 'paper']),
+	type: z.literal('playground:appearance'),
 });
 
 const parentMessageSchema = z.discriminatedUnion('type', [
@@ -19,7 +19,7 @@ const parentMessageSchema = z.discriminatedUnion('type', [
 const previewMessageSchema = z.discriminatedUnion('type', [
 	z.object({ type: z.literal('playground:ready') }),
 	z.object({ type: z.literal('playground:success') }),
-	z.object({ type: z.literal('playground:error'), message: z.string() }),
+	z.object({ message: z.string(), type: z.literal('playground:error') }),
 ]);
 
 export type PlaygroundCodeMessage = z.infer<typeof codeMessageSchema>;

@@ -5,7 +5,6 @@ import { playwright } from 'vite-plus/test/browser-playwright';
 import * as sourceConfig from './source.config.js';
 
 export default defineConfig({
-	plugins: [tailwindcss(), mdx(sourceConfig)],
 	optimizeDeps: {
 		include: [
 			'next-themes',
@@ -17,6 +16,7 @@ export default defineConfig({
 			'react-resizable-panels',
 		],
 	},
+	plugins: [tailwindcss(), mdx(sourceConfig)],
 	test: {
 		passWithNoTests: true,
 		projects: [

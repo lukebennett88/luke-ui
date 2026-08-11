@@ -44,12 +44,12 @@ describe('theme contract', () => {
 		// wrong. Comparing the whole set, not a sample, also catches a seventh role or a stray leaf.
 		const expected = SEMANTIC_ROLES.flatMap((role) => [
 			[`color.border.${role}`, `--luke-color-border-${role}`],
-			...['subtle', 'solid'].flatMap((prominence) =>
-				['rest', 'hover', 'pressed'].map((state) => [
+			...['subtle', 'solid'].flatMap((prominence) => {
+				return ['rest', 'hover', 'pressed'].map((state) => [
 					`color.background.${role}.${prominence}.${state}`,
 					`--luke-color-background-${role}-${prominence}-${state}`,
-				]),
-			),
+				]);
+			}),
 			[`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`],
 			[`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`],
 			[`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`],
@@ -64,8 +64,9 @@ describe('theme contract', () => {
 		});
 
 		expect(expected).toHaveLength(60);
-		const byPath = (a: ReadonlyArray<string>, b: ReadonlyArray<string>) =>
-			(a[0] ?? '').localeCompare(b[0] ?? '');
+		const byPath = (a: ReadonlyArray<string>, b: ReadonlyArray<string>) => {
+			return (a[0] ?? '').localeCompare(b[0] ?? '');
+		};
 		expect([...emitted].sort(byPath)).toEqual([...expected].sort(byPath));
 	});
 

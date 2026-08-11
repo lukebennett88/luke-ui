@@ -30,16 +30,16 @@ type ColorMode = 'light' | 'dark';
  * actually consumes (not by hue). Named for capabilities so the flags do not leak token names.
  */
 export interface FamilyRequirements {
-	/** Steps 3-5: component surface trio (normal / hover / active). */
-	needsSubtleStates: boolean;
-	/** Steps 9-10: solid surface and its hover. */
-	needsSolidStates: boolean;
-	/** `contrast` clears WCAG AA text contrast against steps 9 and 10. */
-	needsOnSolid: boolean;
-	/** Step 11 low-contrast text (neutral additionally uses 12 / secondary / disabled). */
-	needsText: boolean;
 	/** Step 7: UI border and focus ring. */
 	needsBorder: boolean;
+	/** `contrast` clears WCAG AA text contrast against steps 9 and 10. */
+	needsOnSolid: boolean;
+	/** Steps 9-10: solid surface and its hover. */
+	needsSolidStates: boolean;
+	/** Steps 3-5: component surface trio (normal / hover / active). */
+	needsSubtleStates: boolean;
+	/** Step 11 low-contrast text (neutral additionally uses 12 / secondary / disabled). */
+	needsText: boolean;
 }
 
 /**
@@ -92,14 +92,14 @@ export interface ScaleFamily {
 
 /** The inputs to {@link generateFamily}. */
 export interface GenerateFamilyRequest {
-	/** The family's hue/chroma character. Its lightness anchors vibrant solids only. */
-	source: Oklch;
 	/** The resolved canvas anchor. Steps 1-8 ramp away from it toward the solid. */
 	background: Oklch;
 	/** The colour mode the family is generated for. */
 	mode: ColorMode;
 	/** The semantic role, which selects the capability guarantees. */
 	role: FamilyRole;
+	/** The family's hue/chroma character. Its lightness anchors vibrant solids only. */
+	source: Oklch;
 }
 
 /**
@@ -156,9 +156,9 @@ export const MIN_STATE_DELTA = 0.015;
 // `chromaFraction` scales the source chroma and `chromaCap` caps it so the pale near-background
 // steps stay tinted rather than saturated.
 interface RampRungSpec {
-	offset: number;
-	chromaFraction: number;
 	chromaCap: number;
+	chromaFraction: number;
+	offset: number;
 }
 const RAMP_SPEC = {
 	dark: [
@@ -189,10 +189,10 @@ const RAMP_SPEC = {
 const SOLID_HOVER_DELTA = 0.05;
 
 interface SolidBand {
-	/** The lightness the search prefers when it clears the gate. */
-	target: number;
 	/** The inclusive lightness range the search may explore. */
 	band: [number, number];
+	/** The lightness the search prefers when it clears the gate. */
+	target: number;
 }
 
 // A vibrant solid (accent / danger) stays faithful to its authored lightness: the search explores a
@@ -229,12 +229,12 @@ const ON_SOLID_BLACK_CHROMA = 0.01;
 
 /** A candidate solid the on-solid gate is asked about. */
 export interface OnSolidGateRequest {
-	/** The family character. Only its hue and chroma are read; `lightness` supplies the tone. */
-	source: Oklch;
 	/** The candidate step-9 solid lightness. */
 	lightness: number;
 	/** The colour mode, which sets the direction step 10 (hover) moves in. */
 	mode: ColorMode;
+	/** The family character. Only its hue and chroma are read; `lightness` supplies the tone. */
+	source: Oklch;
 }
 
 /**
@@ -259,7 +259,11 @@ export function passesOnSolidGate(request: OnSolidGateRequest): boolean {
 export function onSolidGateRatio(request: OnSolidGateRequest): number {
 	const { lightness, mode, source } = request;
 	const direction = mode === 'light' ? -1 : 1;
-	const solid = gamutMapOklch({ c: source.c, h: source.h, l: clampUnit(lightness) });
+	const solid = gamutMapOklch({
+		l: clampUnit(lightness),
+		c: source.c,
+		h: source.h,
+	});
 	const hover = gamutMapOklch({
 		c: source.c,
 		h: source.h,
@@ -406,10 +410,10 @@ function buildFamily(request: GenerateFamilyRequest): {
 }
 
 interface ResolvedAnchor {
+	adapted: boolean;
+	band: [number, number];
 	lightness: number;
 	target: number;
-	band: [number, number];
-	adapted: boolean;
 }
 
 /**
@@ -471,7 +475,11 @@ function resolveSolidAnchor(
 		}
 	}
 	if (best === null) {
-		const solid = gamutMapOklch({ c: source.c, h: source.h, l: clampUnit(bestAttemptLightness) });
+		const solid = gamutMapOklch({
+			l: clampUnit(bestAttemptLightness),
+			c: source.c,
+			h: source.h,
+		});
 		throw new ScaleGenerationError(role, mode, {
 			lightness: bestAttemptLightness,
 			onSolidRatio: bestAttemptRatio,
@@ -487,11 +495,15 @@ function resolveSolidAnchor(
  * higher minimum contrast across the given solids.
  */
 function chooseOnSolid(hue: number, solids: Array<Oklch>): { color: Oklch; minRatio: number } {
-	const nearWhite = gamutMapOklch({ c: 0, h: hue, l: ON_SOLID_WHITE_LIGHTNESS });
+	const nearWhite = gamutMapOklch({
+		l: ON_SOLID_WHITE_LIGHTNESS,
+		c: 0,
+		h: hue,
+	});
 	const nearBlack = gamutMapOklch({
+		l: ON_SOLID_BLACK_LIGHTNESS,
 		c: ON_SOLID_BLACK_CHROMA,
 		h: hue,
-		l: ON_SOLID_BLACK_LIGHTNESS,
 	});
 	const whiteMinimum = minimumRatio(nearWhite, solids);
 	const blackMinimum = minimumRatio(nearBlack, solids);

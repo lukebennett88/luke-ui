@@ -11,8 +11,8 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { createElement, useLayoutEffect, useRef, useState } from 'react';
 import { vars } from './contract.css.js';
-import { flattenThemeContract, themeVarName } from './contract.js';
 import type { themeContractTree } from './contract.js';
+import { flattenThemeContract, themeVarName } from './contract.js';
 
 interface TokenLeafNode {
 	kind: 'leaf';
@@ -21,8 +21,8 @@ interface TokenLeafNode {
 }
 
 export interface TokenGroupNode {
-	kind: 'group';
 	children: Record<string, TokenTreeNode>;
+	kind: 'group';
 }
 
 export type TokenTreeNode = TokenLeafNode | TokenGroupNode;

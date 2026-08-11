@@ -20,10 +20,10 @@ describe('applyComponentCreationPlan', () => {
 
 		const plan: ComponentCreationPlan = {
 			expected: {
+				exampleSlug: 'status-badge/basic',
 				hostedDocsPath: 'components/feedback/status-badge',
 				packageDocsSlug: 'status-badge',
 				packageExportPath: './status-badge',
-				exampleSlug: 'status-badge/basic',
 			},
 			files: [
 				{
@@ -86,21 +86,21 @@ describe('applyComponentCreationPlan', () => {
 
 		const plan: ComponentCreationPlan = {
 			expected: {
+				exampleSlug: 'status-badge/basic',
 				hostedDocsPath: 'components/actions/status-badge',
 				packageDocsSlug: 'status-badge',
 				packageExportPath: './status-badge',
-				exampleSlug: 'status-badge/basic',
 			},
 			files: [],
 			jsonEdits: [],
 			textFileAppends: [
 				{
 					kind: 'text-append',
-					path: barrelPath,
 					lines: [
 						"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
 						"export { statusBadge } from '../recipes/status-badge.css.js';",
 					],
+					path: barrelPath,
 				},
 			],
 		};
@@ -135,10 +135,10 @@ describe('applyComponentCreationPlan', () => {
 
 		const plan: ComponentCreationPlan = {
 			expected: {
+				exampleSlug: 'status-badge/basic',
 				hostedDocsPath: 'components/feedback/status-badge',
 				packageDocsSlug: 'status-badge',
 				packageExportPath: './status-badge',
-				exampleSlug: 'status-badge/basic',
 			},
 			files: [],
 			jsonEdits: [],
@@ -171,10 +171,10 @@ describe('applyComponentCreationPlan', () => {
 
 		const plan: ComponentCreationPlan = {
 			expected: {
+				exampleSlug: 'status-badge/basic',
 				hostedDocsPath: 'components/feedback/status-badge',
 				packageDocsSlug: 'status-badge',
 				packageExportPath: './status-badge',
-				exampleSlug: 'status-badge/basic',
 			},
 			files: [],
 			jsonEdits: [

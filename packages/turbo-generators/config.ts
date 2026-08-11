@@ -12,12 +12,12 @@ const CONFORMANCE_TIERS = ['universal', 'field-shaped', 'none'] as const;
 const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
 const componentAnswersSchema = z.object({
+	conformanceTier: z.enum(CONFORMANCE_TIERS).default('universal'),
 	docsGroup: z.enum(DOC_GROUPS),
+	integrationTripwire: z.boolean().default(false),
 	name: z.string().min(1),
 	styling: z.enum(COMPONENT_STYLING),
 	tier: z.enum(COMPONENT_TIERS),
-	conformanceTier: z.enum(CONFORMANCE_TIERS).default('universal'),
-	integrationTripwire: z.boolean().default(false),
 	visualCoverage: z.boolean().default(true),
 });
 

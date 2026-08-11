@@ -52,16 +52,16 @@ type VariantSelection<Variants extends VariantGroups> = {
 
 /** A compound variant for a single-part recipe. */
 interface CompoundVariant<Variants extends VariantGroups> {
-	variants: VariantSelection<Variants>;
 	style: RecipeStyleRule;
+	variants: VariantSelection<Variants>;
 }
 
 /** Single-part recipe config. */
 interface SinglePartConfig<Variants extends VariantGroups> {
 	base?: RecipeStyleRule;
-	variants?: Variants;
-	defaultVariants?: VariantSelection<Variants>;
 	compoundVariants?: Array<CompoundVariant<Variants>>;
+	defaultVariants?: VariantSelection<Variants>;
+	variants?: Variants;
 }
 
 /** The runtime function a single-part `recipe()` returns. */
@@ -82,9 +82,9 @@ type SlotVariantSelection<Variants extends SlotVariantGroups<string>> = {
 
 /** Slotted recipe config. */
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
+	defaultVariants?: SlotVariantSelection<Variants>;
 	slots: Record<Slot, RecipeStyleRule>;
 	variants?: Variants;
-	defaultVariants?: SlotVariantSelection<Variants>;
 }
 
 /** A single slot function: takes an optional extra class and returns a class string. */
@@ -107,9 +107,9 @@ type AnyMultiPartConfig = MultiPartConfig<string, SlotVariantGroups<string>>;
  * `recipe()`'s structural inference).
  */
 export interface SlottedConfigInput {
+	defaultVariants?: Record<string, string | number | boolean>;
 	slots: Record<string, RecipeStyleRule>;
 	variants?: Record<string, Record<string, Record<string, RecipeStyleRule>>>;
-	defaultVariants?: Record<string, string | number | boolean>;
 }
 
 /** Derives the outer variant selection type for a built recipe. */
@@ -163,9 +163,9 @@ type SerializerArgs = Parameters<typeof addFunctionSerializer>[1]['args'];
  */
 function registerSerializer(fn: object, importName: string, args: ReadonlyArray<unknown>): void {
 	addFunctionSerializer(fn, {
-		importPath: SERIALIZER_IMPORT_PATH,
-		importName,
 		args: args as SerializerArgs,
+		importName,
+		importPath: SERIALIZER_IMPORT_PATH,
 	});
 }
 
@@ -219,7 +219,7 @@ function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescri
 		slotGroups[slotName] = groupsForSlot;
 	}
 
-	return { slots, slotGroups };
+	return { slotGroups, slots };
 }
 
 // ---------------------------------------------------------------------------
@@ -237,9 +237,9 @@ const RECIPES_LAYER = 'recipes';
 
 interface RecipeInLayerOptions {
 	base?: RecipeStyleRule;
-	variants?: Record<string, Record<string, RecipeStyleRule>>;
-	defaultVariants?: Record<string, unknown>;
 	compoundVariants?: Array<{ variants: Record<string, unknown>; style: RecipeStyleRule }>;
+	defaultVariants?: Record<string, unknown>;
+	variants?: Record<string, Record<string, RecipeStyleRule>>;
 }
 
 function withRecipesLayer(rule: LayeredStyleRule): StyleRule {
@@ -329,8 +329,8 @@ type BuiltRecipe = (selection?: Record<string, unknown>) => string;
 
 /** Serialized descriptor for a slotted recipe: per-slot runtime fns and their variant groups. */
 interface SlottedRecipeDescriptor {
-	slots: Record<string, BuiltRecipe>;
 	slotGroups: Record<string, ReadonlyArray<string>>;
+	slots: Record<string, BuiltRecipe>;
 }
 
 /** Narrows an outer selection to the variant groups a given slot actually uses. */

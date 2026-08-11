@@ -1,6 +1,6 @@
 import { test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
 import type { Locator } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -30,7 +30,7 @@ test('kitchen sink', async () => {
 					Invalid
 				</Checkbox>
 				{(['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const).map((size) => (
-					<Text key={size} elementType="div" size={size}>
+					<Text elementType="div" key={size} size={size}>
 						<Checkbox name={`text-${size}`}>
 							{size}: This label wraps to show that the control aligns with its first line.
 						</Checkbox>
@@ -88,11 +88,11 @@ test('interactive states', async () => {
 			</Checkbox>
 		</Stack>,
 	);
-	const unchecked = page.getByRole('checkbox', { name: 'Invalid', exact: true });
-	const selected = page.getByRole('checkbox', { name: 'Invalid selected', exact: true });
+	const unchecked = page.getByRole('checkbox', { exact: true, name: 'Invalid' });
+	const selected = page.getByRole('checkbox', { exact: true, name: 'Invalid selected' });
 	const indeterminate = page.getByRole('checkbox', {
-		name: 'Invalid indeterminate',
 		exact: true,
+		name: 'Invalid indeterminate',
 	});
 
 	for (const [name, checkbox] of [

@@ -14,11 +14,11 @@ export function ComponentsIndex(): JSX.Element {
 	return (
 		<HeadingLevels base={1}>
 			<Box
+				className="not-prose"
 				display="flex"
 				flexDirection="column"
 				gap="800"
 				marginBlockStart="800"
-				className="not-prose"
 			>
 				{componentIndexGroups.map((group) => (
 					<CategoryGroup group={group} key={group.title} />
@@ -31,8 +31,8 @@ export function ComponentsIndex(): JSX.Element {
 function CategoryGroup({ group }: { group: ComponentIndexGroup }) {
 	return (
 		<Box
-			elementType="section"
 			display="flex"
+			elementType="section"
 			flexDirection="column"
 			gap="400"
 			marginBlockStart="400"

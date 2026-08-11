@@ -26,12 +26,12 @@ export default () => {
 					<DecorativeBox
 						alignItems="center"
 						display="flex"
+						flexGrow="1"
 						justifyContent="center"
 						padding="200"
-						flexGrow="1"
 						style={{
-							borderRadius: role.value,
 							blockSize: '5rem',
+							borderRadius: role.value,
 						}}
 					/>
 					<Text size="100" style={{ textAlign: 'center' }}>

@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises';
-import { parse } from 'postcss';
 import type { AtRule, Root, Rule } from 'postcss';
+import { parse } from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { expect, test } from 'vite-plus/test';
-import { fontSizeSteps } from '../theme/contract.js';
 import type { FontSizeStep } from '../theme/contract.js';
+import { fontSizeSteps } from '../theme/contract.js';
 
 const retainedLayerNames = ['reset', 'theme', 'recipes', 'utilities'] as const;
 const retainedLayerNameSet = new Set<string>(retainedLayerNames);
@@ -35,14 +35,14 @@ test('builds the public stylesheet with the retained layer contract', async () =
 		singleLine: recipes.text({ lineClamp: true }).split(' '),
 	};
 
-	expect(() =>
-		assertStylesheetContract(stylesheet, {
+	expect(() => {
+		return assertStylesheetContract(stylesheet, {
 			lineClampClasses,
 			recipeClasses,
 			textClassesBySize,
 			utilityClasses,
-		}),
-	).not.toThrow();
+		});
+	}).not.toThrow();
 });
 
 const stylesheetMutations: Array<[string, (css: string) => string]> = [
@@ -60,19 +60,21 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 	['lookalike layer at-rule', (css: string) => `${css}\n@layered {}`],
 	[
 		'representative recipe class moved to the wrong layer',
-		(css: string) =>
-			css.replace(
+		(css: string) => {
+			return css.replace(
 				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
 				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n}',
-			),
+			);
+		},
 	],
 	[
 		'representative utility class moved to the wrong layer',
-		(css: string) =>
-			css.replace(
+		(css: string) => {
+			return css.replace(
 				'@layer utilities {\n  .utility-class { display: grid; }\n}',
 				'@layer recipes {\n  .utility-class { display: grid; }\n}',
-			),
+			);
+		},
 	],
 	[
 		'representative retained-layer content removed',
@@ -80,32 +82,36 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 	],
 	[
 		'class-like text in an attribute value',
-		(css: string) =>
-			css.replace(
+		(css: string) => {
+			return css.replace(
 				'.recipe-class { display: inline-flex; }',
 				'[data-class=".recipe-class"] { display: inline-flex; }',
-			),
+			);
+		},
 	],
 ];
 
 for (const [name, mutate] of stylesheetMutations) {
 	test(`rejects a stylesheet with a ${name}`, () => {
-		expect(() =>
-			assertStylesheetContract(mutate(validStylesheetFixture), {
+		expect(() => {
+			return assertStylesheetContract(mutate(validStylesheetFixture), {
 				recipeClasses: ['recipe-class'],
 				utilityClasses: ['utility-class'],
-			}),
-		).toThrow(/.+/);
+			});
+		}).toThrow(/.+/);
 	});
 }
 
 test('recognises escaped class identifiers', () => {
-	expect(() =>
-		assertStylesheetContract(validStylesheetFixture.replaceAll('recipe-class', 'recipe\\:class'), {
-			recipeClasses: ['recipe:class'],
-			utilityClasses: ['utility-class'],
-		}),
-	).not.toThrow();
+	expect(() => {
+		return assertStylesheetContract(
+			validStylesheetFixture.replaceAll('recipe-class', 'recipe\\:class'),
+			{
+				recipeClasses: ['recipe:class'],
+				utilityClasses: ['utility-class'],
+			},
+		);
+	}).not.toThrow();
 });
 
 function assertStylesheetContract(
@@ -205,11 +211,11 @@ function assertSentinel(
 	expect(rules.length).toBeGreaterThan(0);
 	for (const rule of rules) expect(getOwningLayer(rule)).toBe(layerName);
 	expect(
-		rules.some((rule) =>
-			rule.nodes.some(
+		rules.some((rule) => {
+			return rule.nodes.some(
 				(node) => node.type === 'decl' && node.prop === property && node.value === value,
-			),
-		),
+			);
+		}),
 	).toBe(true);
 }
 
@@ -254,11 +260,11 @@ function assertLineClampOwnership(root: Root, { numeric, singleLine }: LineClamp
 }
 
 function assertDeclaration(rules: Array<Rule>, property: string, value: string): void {
-	const matchingRules = rules.filter((rule) =>
-		rule.nodes.some(
+	const matchingRules = rules.filter((rule) => {
+		return rule.nodes.some(
 			(node) => node.type === 'decl' && node.prop === property && node.value === value,
-		),
-	);
+		);
+	});
 	expect(matchingRules.length).toBeGreaterThan(0);
 	for (const rule of matchingRules) expect(getOwningLayer(rule)).toBe('recipes');
 }
@@ -269,13 +275,14 @@ function assertPseudoDeclaration(
 	property: string,
 	value: string,
 ): void {
-	const matchingRules = rules.filter(
-		(rule) =>
+	const matchingRules = rules.filter((rule) => {
+		return (
 			hasPseudo(rule, pseudo) &&
 			rule.nodes.some(
 				(node) => node.type === 'decl' && node.prop === property && node.value === value,
-			),
-	);
+			)
+		);
+	});
 	expect(matchingRules.length).toBeGreaterThan(0);
 	for (const rule of matchingRules) expect(getOwningLayer(rule)).toBe('recipes');
 }

@@ -4,8 +4,8 @@ import { compileTheme } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
 import { vars } from './contract.css.js';
-import { normalizeTheme } from './define-theme.js';
 import type { ThemeInput } from './define-theme.js';
+import { normalizeTheme } from './define-theme.js';
 import type {
 	ContrastCheck,
 	FamilyDiagnostics,
@@ -330,9 +330,9 @@ function SolidAnchorSection({ families }: { families: Record<FamilyRole, FamilyD
 									<td style={{ ...cellStyle, textTransform: 'capitalize' }}>{role}</td>
 									<td style={cellStyle}>{solidAnchor.targetLightness.toFixed(3)}</td>
 									<td style={cellStyle}>{solidAnchor.resolvedLightness.toFixed(3)}</td>
-									<td style={cellStyle}>
-										{`[${solidAnchor.band[0].toFixed(2)}, ${solidAnchor.band[1].toFixed(2)}]`}
-									</td>
+									<td
+										style={cellStyle}
+									>{`[${solidAnchor.band[0].toFixed(2)}, ${solidAnchor.band[1].toFixed(2)}]`}</td>
 									<td style={cellStyle}>{solidAnchor.adaptedForOnSolid ? 'yes' : 'no'}</td>
 									<td style={cellStyle}>{`${solidAnchor.onSolidRatioSolid.toFixed(2)}:1`}</td>
 									<td style={cellStyle}>{`${solidAnchor.onSolidRatioSolidHover.toFixed(2)}:1`}</td>
@@ -411,9 +411,13 @@ function ContrastCheckTable({
 }
 
 function GamutReductionsSection({ families }: { families: Record<FamilyRole, FamilyDiagnostics> }) {
-	const rows = FAMILY_ROLES.flatMap((role) =>
-		families[role].gamutReductions.map((reduction, index) => ({ index, role, ...reduction })),
-	);
+	const rows = FAMILY_ROLES.flatMap((role) => {
+		return families[role].gamutReductions.map((reduction, index) => ({
+			index,
+			role,
+			...reduction,
+		}));
+	});
 	return (
 		<SectionCard title="Gamut reductions">
 			{rows.length === 0 ? (

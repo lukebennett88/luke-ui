@@ -1,4 +1,3 @@
-import type { ComponentProps } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { testUniversalConformance } from '../conformance/helpers.js';
@@ -14,7 +13,7 @@ testUniversalConformance({
 	},
 	name: 'Box',
 	registration: componentTestRegistration,
-	render: (props = {}) => render(<Box {...(props as ComponentProps<typeof Box>)}>Content</Box>),
+	render: (props = {}) => render(<Box {...props}>Content</Box>),
 });
 
 afterEach(async () => {

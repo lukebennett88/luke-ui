@@ -9,8 +9,8 @@ import {
 	RouterProvider,
 } from '@tanstack/react-router';
 import { RootProvider } from 'fumadocs-ui/provider/tanstack';
-import { act } from 'react';
 import type { ReactNode } from 'react';
+import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';

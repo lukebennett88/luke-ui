@@ -148,8 +148,8 @@ function Playground() {
 				{/* Pane backgrounds match the Catppuccin Latte/Mocha `editor.background` values in monaco-setup.ts. */}
 				<Panel
 					className="min-h-0 bg-[#eff1f5] dark:bg-[#1e1e2e]"
-					minSize={160}
 					defaultSize="50%"
+					minSize={160}
 					style={{ overflow: 'hidden' }}
 				>
 					<ClientOnly
@@ -179,8 +179,8 @@ function Playground() {
 						'relative flex min-h-0 flex-col',
 						isPreviewFullscreen && 'fixed! inset-0 z-50 size-auto! bg-fd-muted',
 					)}
-					minSize={160}
 					defaultSize="50%"
+					minSize={160}
 					style={{ overflow: 'hidden' }}
 				>
 					<PreviewToolbar
@@ -237,13 +237,13 @@ function previewReducer(state: PreviewState, action: PreviewAction): PreviewStat
 	switch (action.type) {
 		case 'iframe-ready': {
 			if (state.status === 'ready') return state;
-			return { status: 'ready', error: null };
+			return { error: null, status: 'ready' };
 		}
 		case 'code-applied': {
-			return { status: 'ready', error: null };
+			return { error: null, status: 'ready' };
 		}
 		case 'code-error': {
-			return { status: 'ready', error: action.message };
+			return { error: action.message, status: 'ready' };
 		}
 	}
 }
@@ -259,7 +259,7 @@ function usePreviewStatus() {
 	});
 	// dispatch is guaranteed stable by React, so these callbacks keep a stable
 	// identity across renders without needing it in the dependency array.
-	const markError = useCallback((message: string) => dispatch({ type: 'code-error', message }), []);
+	const markError = useCallback((message: string) => dispatch({ message, type: 'code-error' }), []);
 	const markReady = useCallback(() => dispatch({ type: 'iframe-ready' }), []);
 	const markSuccess = useCallback(() => dispatch({ type: 'code-applied' }), []);
 

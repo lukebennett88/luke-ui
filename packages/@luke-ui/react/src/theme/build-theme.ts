@@ -148,9 +148,9 @@ export class ThemeGenerationError extends Error {
 type ColorMode = 'light' | 'dark';
 
 interface ModeValues {
+	diagnostics: ThemeModeDiagnostics;
 	failures: Array<ThemeContrastFailure>;
 	values: Record<string, string>;
-	diagnostics: ThemeModeDiagnostics;
 }
 
 function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeValues {

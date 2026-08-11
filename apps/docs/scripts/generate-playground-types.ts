@@ -79,8 +79,8 @@ function addTypesPackage(packageName: string, packageDir: string): void {
 // @luke-ui/react — dist .d.ts files plus a package.json stub so Monaco's
 // bundler-mode resolution can follow the subpath exports map.
 const reactPackageJsonSchema = z.object({
-	name: z.string(),
 	exports: z.record(z.string(), z.string()),
+	name: z.string(),
 });
 
 const reactPackageJson = reactPackageJsonSchema.parse(
