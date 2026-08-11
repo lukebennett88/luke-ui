@@ -42,7 +42,7 @@ export default function PlaygroundEditor({
 	};
 
 	return (
-		<div className="flex min-h-0 flex-1 flex-col">
+		<div className="flex h-full min-h-0 flex-col">
 			<div className="flex shrink-0 items-center border-fd-border border-b bg-fd-background px-2 py-1.5 sm:px-3">
 				<Button
 					appearance="ghost"
@@ -55,6 +55,7 @@ export default function PlaygroundEditor({
 			</div>
 			<div className="min-h-0 flex-1">
 				<Editor
+					height="100%"
 					defaultLanguage="typescript"
 					defaultValue={defaultValue}
 					loading={<EditorSkeleton code={defaultValue} showPill={showLoadingPill} />}

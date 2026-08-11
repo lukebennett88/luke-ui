@@ -152,22 +152,24 @@ function Playground() {
 					defaultSize="50%"
 					style={{ overflow: 'hidden' }}
 				>
-					<ClientOnly
-						fallback={
-							<>
-								<EditorSkeleton code={initialCode} showPill={showEditorPill} />
-								<EditorSkeletonShapeScript />
-							</>
-						}
-					>
-						<Suspense fallback={<EditorSkeleton code={initialCode} showPill={showEditorPill} />}>
-							<PlaygroundEditor
-								defaultValue={initialCode}
-								onChange={handleChange}
-								showLoadingPill={showEditorPill}
-							/>
-						</Suspense>
-					</ClientOnly>
+					<div className="h-full min-h-0">
+						<ClientOnly
+							fallback={
+								<>
+									<EditorSkeleton code={initialCode} showPill={showEditorPill} />
+									<EditorSkeletonShapeScript />
+								</>
+							}
+						>
+							<Suspense fallback={<EditorSkeleton code={initialCode} showPill={showEditorPill} />}>
+								<PlaygroundEditor
+									defaultValue={initialCode}
+									onChange={handleChange}
+									showLoadingPill={showEditorPill}
+								/>
+							</Suspense>
+						</ClientOnly>
+					</div>
 				</Panel>
 				{/* react-resizable-panels owns hit-testing and the resize cursor at the document level; the grab band is configured by resizeTargetMinimumSize on Group above. */}
 				<Separator

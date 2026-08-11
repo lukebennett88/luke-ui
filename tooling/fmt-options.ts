@@ -1,6 +1,6 @@
 /**
  * Shared Oxfmt options for TypeScript and TSX. Imported by root `vite.config.ts`
- * and the docs Playground browser formatter so both surfaces stay aligned.
+ * and the docs Playground server formatter.
  */
 export const repoFmtOptions = {
 	arrowParens: 'always' as const,

@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite-plus';
-import { repoFmtOptions } from './apps/docs/src/lib/repo-fmt-options.js';
+import { repoFmtOptions } from './tooling/fmt-options.ts';
 
 export default defineConfig({
 	fmt: {
