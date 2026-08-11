@@ -164,8 +164,8 @@ const comboboxConfig = {
 			fontFamily: vars.font.family.body,
 			inlineSize: '100%',
 			isolation: 'isolate',
-			letterSpacing: FONT_METRIC_SCALE[300].letterSpacing,
-			lineHeight: FONT_METRIC_SCALE[300].lineHeight,
+			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
+			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
@@ -423,7 +423,7 @@ const comboboxConfig = {
 			medium: {
 				inputGroup: {
 					blockSize: vars.controlSize.medium,
-					fontSize: FONT_METRIC_SCALE[300].fontSize,
+					fontSize: FONT_METRIC_SCALE[16].fontSize,
 					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.medium] },
 				},
 				textInput: {
@@ -452,9 +452,9 @@ const comboboxConfig = {
 			small: {
 				inputGroup: {
 					blockSize: vars.controlSize.small,
-					fontSize: FONT_METRIC_SCALE[200].fontSize,
-					letterSpacing: FONT_METRIC_SCALE[200].letterSpacing,
-					lineHeight: FONT_METRIC_SCALE[200].lineHeight,
+					fontSize: FONT_METRIC_SCALE[14].fontSize,
+					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
+					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.small] },
 				},
 				textInput: {

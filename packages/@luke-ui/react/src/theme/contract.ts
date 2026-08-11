@@ -71,16 +71,16 @@ export type FontWeightRole = (typeof fontWeightRoles)[number];
  * `FONT_VALUES` emission cannot invent a different mapping.
  */
 export const typeStyleMetricStep = {
-	caption: 100,
-	support: 200,
-	label: 200,
-	body: 300,
-	lead: 400,
-	heading4: 500,
-	heading3: 600,
-	heading2: 700,
-	heading1: 800,
-	display: 900,
+	caption: 12,
+	support: 14,
+	label: 14,
+	body: 16,
+	lead: 18,
+	heading4: 20,
+	heading3: 24,
+	heading2: 28,
+	heading1: 35,
+	display: 60,
 } as const satisfies Record<TypeStyle, FontMetricStep>;
 
 /**

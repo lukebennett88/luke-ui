@@ -10,8 +10,11 @@ import { visuallyHiddenStyle } from './visually-hidden.css.js';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
 export const textLineHeight = createVar();
-/** Set only when `fontWeight` is passed; otherwise each typography style's default weight applies. */
-const textFontWeight = createVar();
+/**
+ * Optional weight override for one Text instance. `inherits: false` keeps a parent's explicit
+ * `fontWeight` from leaking into nested Text that should use its own typography default.
+ */
+const textFontWeight = createVar({ inherits: false, syntax: '*' });
 const lineClampSingleLine = {
 	display: 'block',
 	minInlineSize: 0,

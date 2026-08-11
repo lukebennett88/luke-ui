@@ -131,7 +131,7 @@ export function Text(props: TextProps) {
 				styles.text({
 					color,
 					fontVariantNumeric,
-					...(fontWeight === undefined ? {} : { fontWeight }),
+					...(shouldInheritFont || fontWeight === undefined ? {} : { fontWeight }),
 					isVisuallyHidden,
 					lineClamp,
 					shouldDisableTrim: resolvedShouldDisableTrim,

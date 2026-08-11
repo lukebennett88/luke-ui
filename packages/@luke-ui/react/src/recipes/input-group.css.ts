@@ -56,8 +56,8 @@ const inputGroupConfig = {
 			fontFamily: vars.font.family.body,
 			inlineSize: '100%',
 			isolation: 'isolate',
-			letterSpacing: FONT_METRIC_SCALE[300].letterSpacing,
-			lineHeight: FONT_METRIC_SCALE[300].lineHeight,
+			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
+			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
@@ -202,7 +202,7 @@ const inputGroupConfig = {
 			medium: {
 				group: {
 					blockSize: vars.controlSize.medium,
-					fontSize: FONT_METRIC_SCALE[300].fontSize,
+					fontSize: FONT_METRIC_SCALE[16].fontSize,
 				},
 				control: {
 					blockSize: vars.controlSize.medium,
@@ -210,12 +210,12 @@ const inputGroupConfig = {
 					paddingInlineStart: vars.space[300],
 				},
 				prefix: {
-					lineHeight: FONT_METRIC_SCALE[300].lineHeight,
+					lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
 				suffix: {
-					lineHeight: FONT_METRIC_SCALE[300].lineHeight,
+					lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
@@ -223,9 +223,9 @@ const inputGroupConfig = {
 			small: {
 				group: {
 					blockSize: vars.controlSize.small,
-					fontSize: FONT_METRIC_SCALE[200].fontSize,
-					letterSpacing: FONT_METRIC_SCALE[200].letterSpacing,
-					lineHeight: FONT_METRIC_SCALE[200].lineHeight,
+					fontSize: FONT_METRIC_SCALE[14].fontSize,
+					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
+					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 				},
 				control: {
 					blockSize: vars.controlSize.small,
@@ -233,12 +233,12 @@ const inputGroupConfig = {
 					paddingInlineStart: vars.space[200],
 				},
 				prefix: {
-					lineHeight: FONT_METRIC_SCALE[200].lineHeight,
+					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},
 				suffix: {
-					lineHeight: FONT_METRIC_SCALE[200].lineHeight,
+					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},

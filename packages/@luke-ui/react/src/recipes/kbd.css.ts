@@ -14,7 +14,7 @@ const base = styleInLayer('recipes', {
 	color: vars.color.text.primary,
 	display: 'inline-flex',
 	fontFamily: vars.font.family.code,
-	fontSize: FONT_METRIC_SCALE[100].fontSize,
+	fontSize: FONT_METRIC_SCALE[12].fontSize,
 	fontWeight: vars.font.weight.body,
 	inlineSize: 'fit-content',
 	lineHeight: 1,
