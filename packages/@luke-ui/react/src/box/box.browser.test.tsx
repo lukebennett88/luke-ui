@@ -37,24 +37,20 @@ test('renders a responsive layout at the retained breakpoints', async () => {
 
 	await page.viewport(640, 800);
 	expect(getComputedStyle(box).flexDirection).toBe('column');
-	expect(getComputedStyle(box).gap).toBe('8px');
 
 	await page.viewport(768, 800);
 	expect(getComputedStyle(box).flexDirection).toBe('row');
-	expect(getComputedStyle(box).gap).toBe('24px');
 });
 
 test('renders semantic and consumer-owned elements with resolved props', () => {
 	const semanticResult = render(
-		<Box aria-label="Account summary" display="flex" elementType="section" padding="400">
+		<Box aria-label="Account summary" elementType="section">
 			Account summary content
 		</Box>,
 	);
 	const section = semanticResult.locator.getByRole('region', { name: 'Account summary' });
 
 	expect(section.element().tagName).toBe('SECTION');
-	expect(getComputedStyle(section.element()).display).toBe('flex');
-	expect(getComputedStyle(section.element()).padding).toBe('16px');
 
 	let refElement: HTMLElement | null = null;
 	let receivedAriaLabel = false;

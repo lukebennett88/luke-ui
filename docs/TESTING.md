@@ -51,8 +51,8 @@ composition, prop plumbing, styling hooks, and behaviour that Luke UI adds or de
 Each component opts into the applicable tier in the component test manifest:
 
 - **Universal**: documented element, `ref`, `className`, `id`, and `data-*` forwarding.
-- **Field-shaped**: `inputRef`, native `name`/form participation, `onBlur`, and label, description,
-  and error association.
+- **Field-shaped**: object and callback `inputRef`, native `name`/form participation, `onBlur`, and
+  label, description, and error association.
 - **None**: an explicit exception for a component that does not satisfy either contract.
 
 The shared conformance helpers test these contracts once. Do not repeat them in individual tests.

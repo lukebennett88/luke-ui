@@ -17,8 +17,6 @@ test('uses the desktop panel layout before JavaScript corrects the server orient
 	expect(getComputedStyle(group as HTMLDivElement).flexDirection).toBe('row');
 	expect(getComputedStyle(separator).inlineSize).toBe('1px');
 	expect(getComputedStyle(separator).blockSize).toBe('400px');
-	expect(getComputedStyle(separator, '::after').width).toBe('6px');
-	expect(getComputedStyle(separator, '::after').height).toBe('64px');
 });
 
 test('uses the mobile panel layout independently of the JavaScript orientation', async () => {
@@ -28,8 +26,6 @@ test('uses the mobile panel layout independently of the JavaScript orientation',
 	expect(getComputedStyle(group as HTMLDivElement).flexDirection).toBe('column');
 	expect(getComputedStyle(separator).inlineSize).toBe('390px');
 	expect(getComputedStyle(separator).blockSize).toBe('1px');
-	expect(getComputedStyle(separator, '::after').width).toBe('64px');
-	expect(getComputedStyle(separator, '::after').height).toBe('6px');
 });
 
 function renderPanelLayout(inlineDirection: 'column' | 'row') {

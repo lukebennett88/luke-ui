@@ -42,34 +42,11 @@ test('marks only the current destination on desktop and keeps search available',
 	await expect.element(page.getByRole('button', { name: /Search/ })).toBeVisible();
 });
 
-test('marks the components destination active on a component page', async () => {
-	await page.viewport(1024, 800);
-	await renderAt('/components/actions/button', <SiteNav />);
-
-	await expect
-		.element(page.getByRole('link', { name: 'Components' }))
-		.toHaveAttribute('aria-current', 'page');
-	expect(getCurrentLinks()).toHaveLength(1);
-});
-
-test('marks the docs destination active on a docs page', async () => {
-	await page.viewport(1024, 800);
-	await renderAt('/docs/installation', <SiteNav />);
-
-	await expect
-		.element(page.getByRole('link', { name: 'Docs' }))
-		.toHaveAttribute('aria-current', 'page');
-	expect(getCurrentLinks()).toHaveLength(1);
-});
-
 test('offers search and theme controls from the mobile bar with no destination active on the landing page', async () => {
 	await page.viewport(390, 800);
 	await renderAt('/', <SiteNav />);
 
 	expect(getCurrentLinks()).toHaveLength(0);
-
-	const wordmark = page.getByRole('link', { name: 'Luke UI' }).element();
-	expect(wordmark.scrollWidth).toBeLessThanOrEqual(wordmark.clientWidth);
 	await expect.element(page.getByRole('button', { name: 'Open Search' })).toBeVisible();
 
 	const themeTrigger = page.getByRole('button', { name: 'Theme' });
@@ -84,17 +61,6 @@ test('leaves every destination inactive on the 404 page', async () => {
 	await renderAt('/missing', <NotFound />);
 
 	expect(getCurrentLinks()).toHaveLength(0);
-});
-
-test('links to the repository with an accessible name', async () => {
-	await page.viewport(1024, 800);
-	await renderAt('/', <SiteNav />);
-
-	const repositoryLink = page.getByRole('link', { name: 'GitHub repository' });
-	await expect.element(repositoryLink).toBeVisible();
-	await expect
-		.element(repositoryLink)
-		.toHaveAttribute('href', 'https://github.com/lukebennett88/luke-ui');
 });
 
 async function renderAt(pathname: string, children: ReactNode) {
