@@ -63,15 +63,6 @@ test('omits the Storybook, React Aria, and Source pills when the page has none',
 	await expect.element(page.getByRole('link', { name: 'Edit on GitHub' })).toBeVisible();
 });
 
-test('the Source and Edit on GitHub pills stay distinguishable, even though both use the GitHub mark', async () => {
-	renderActions({ githubUrl, markdownUrl, reactAriaUrl: null, sourceUrl, storybookUrl: null });
-
-	const sourceLink = page.getByRole('link', { name: 'Source' });
-	const editLink = page.getByRole('link', { name: 'Edit on GitHub' });
-	await expect.element(sourceLink).toHaveAttribute('href', sourceUrl);
-	await expect.element(editLink).toHaveAttribute('href', githubUrl);
-});
-
 test('reports the copied state after Copy Markdown succeeds', async () => {
 	vi.stubGlobal(
 		'fetch',

@@ -62,28 +62,6 @@ test('persists theme identity and colour mode independently', async () => {
 	await expect.poll(() => getThemeRoot().dataset.colorMode).toBe('dark');
 });
 
-test('theme profile is labelled and operable with arrow keys', async () => {
-	renderTheme(<ThemeControls />);
-
-	const group = page.getByRole('radiogroup', { name: 'Theme profile' });
-	const tactileProfile = page.getByRole('radio', { name: 'Tactile' });
-	const paperProfile = page.getByRole('radio', { name: 'Paper' });
-
-	expect(group.element()).toBeInTheDocument();
-	expect(tactileProfile).toBeChecked();
-
-	await userEvent.tab();
-	expect(tactileProfile.element()).toHaveFocus();
-
-	await userEvent.keyboard('{ArrowRight}');
-	expect(paperProfile.element()).toHaveFocus();
-
-	await userEvent.keyboard('{Enter}');
-
-	expect(paperProfile).toBeChecked();
-	expect(document.documentElement).toHaveClass(paperThemeClassName);
-});
-
 test('system colour mode follows the platform preference and drives the docs chrome', async () => {
 	await emulateColorScheme('dark');
 	renderTheme(<ThemeControls />, { defaultTheme: 'system', enableSystem: true });

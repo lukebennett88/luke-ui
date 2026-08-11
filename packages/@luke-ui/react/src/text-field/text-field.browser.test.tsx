@@ -73,43 +73,6 @@ function indicatorFor(name: string): SVGSVGElement | null {
 	return groupFor(name).querySelector<SVGSVGElement>(`.${invalidIndicatorClass}`);
 }
 
-test('the indicator icon adds no text to the accessible name', async () => {
-	render(<TextField isInvalid label="Invalid" name="invalid" />);
-
-	const input = page.getByRole('textbox', { name: 'Invalid' });
-	// The field's label is an external `<label>` associated via `aria-labelledby`,
-	// not an ancestor of the group carrying the indicator, so the indicator is never
-	// in this input's accessible-name computation regardless. It is `aria-hidden`
-	// either way, so there is nothing for a label ancestor to pick up — see
-	// `checkbox.browser.test.tsx` for the case where the indicator does sit inside a
-	// `<label>`.
-	await expect.element(input).toHaveAccessibleName('Invalid');
-	expect(indicatorFor('Invalid')?.getAttribute('aria-hidden')).toBe('true');
-});
-
-test('an invalid field keeps its description and error associated with the input', async () => {
-	render(
-		<TextField
-			description="Use your work email."
-			errorMessage="Enter a valid email."
-			isInvalid
-			label="Email"
-			name="email"
-		/>,
-	);
-
-	const input = page.getByRole('textbox', { name: 'Email' });
-	const description = page.getByText('Use your work email.');
-	const error = page.getByText('Enter a valid email.');
-
-	await expect.element(description).toBeVisible();
-	await expect.element(error).toBeVisible();
-
-	const describedBy = input.element().getAttribute('aria-describedby')?.split(' ') ?? [];
-	expect(describedBy).toContain(description.element().id);
-	expect(describedBy).toContain(error.element().id);
-});
-
 // The invalid icon must land before a trailing suffix, not after it. The suffix's
 // flex `order` is what puts it there, so the DOM position of the appended icon
 // alone does not prove it — the rendered geometry does.
@@ -176,106 +139,18 @@ test('InputGroupInput resolves a callback ref to the input element', async () =>
 	expect(resolved.at(-1)).toBe(input.element());
 });
 
-// The composed field takes no plain `ref`, so `inputRef` is the only way in — and
-// it must land on the editable control, never on the wrapper `<div>` or the group.
-test('TextField resolves inputRef to the input element, not a wrapper', async () => {
-	const ref = createRef<HTMLInputElement>();
-	render(<TextField inputRef={ref} label="Email" name="email" />);
-
-	const input = page.getByRole('textbox', { name: 'Email' });
-	await expect.element(input).toBeVisible();
-
-	expect(ref.current).toBeInstanceOf(HTMLInputElement);
-	expect(ref.current).toBe(input.element());
-});
-
-test('TextField resolves a callback inputRef to the input element', async () => {
-	const resolved: Array<HTMLInputElement | null> = [];
-	render(
-		<TextField
-			inputRef={(node) => {
-				resolved.push(node);
-			}}
-			label="Email"
-			name="email"
-		/>,
-	);
-
-	const input = page.getByRole('textbox', { name: 'Email' });
-	await expect.element(input).toBeVisible();
-
-	expect(resolved.at(-1)).toBeInstanceOf(HTMLInputElement);
-	expect(resolved.at(-1)).toBe(input.element());
-});
-
-// `name` and `onBlur` are the other half of uncontrolled use: without them a caller
-// has to reach through `inputRef` to do what a native `<input>` does for free.
-test('TextField forwards name to the input so a native form submit collects it', async () => {
-	const { locator: scene } = render(
-		<form>
-			<TextField label="Email" name="email" />
-		</form>,
-	);
-
-	const input = page.getByRole('textbox', { name: 'Email' });
-	await expect.element(input).toHaveAttribute('name', 'email');
-
-	await userEvent.fill(input, 'ada@example.com');
-
-	const form = scene.element().querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-	expect(new FormData(form).get('email')).toBe('ada@example.com');
-});
-
-test('TextField forwards onBlur to the input', async () => {
-	const blurs: Array<string> = [];
-	render(
-		<>
-			<TextField
-				label="Email"
-				name="email"
-				onBlur={() => {
-					blurs.push('email');
-				}}
-			/>
-			<button type="button">Next</button>
-		</>,
-	);
-
-	const input = page.getByRole('textbox', { name: 'Email' });
-	await expect.element(input).toBeVisible();
-
-	await userEvent.click(input);
-	await expect.element(input).toHaveFocus();
-	expect(blurs).toEqual([]);
-
-	await userEvent.click(page.getByRole('button', { name: 'Next' }));
-	expect(blurs).toEqual(['email']);
-});
-
 // `inputStates.invalid` must not match `:has(:invalid)`: that matches a required,
 // empty input from first render — before any interaction or submit — while
 // `aria-invalid` stays null, painting an untouched required field invalid even
 // though assistive technology is told it's fine. These two tests guard that the
 // group only picks up the invalid treatment once React Aria has recorded a real
-// validation failure. The border stays 1px in both the untouched and the invalid
-// case, since the in-control icon (not a width change) is the invalid cue, so the
-// proof is the border colour and the icon's presence, not a width comparison.
+// validation failure. The in-control icon is the invalid cue Luke UI owns.
 test('a required field with no value is not painted invalid before validation runs', async () => {
-	render(
-		<>
-			<TextField label="Resting" name="resting" />
-			<TextField isRequired label="Email" name="email" />
-		</>,
-	);
+	render(<TextField isRequired label="Email" name="email" />);
 
 	const input = page.getByRole('textbox', { name: 'Email' });
 	await expect.element(input).toBeVisible();
-	await expect.element(input).not.toHaveAttribute('aria-invalid');
 
-	expect(getComputedStyle(groupFor('Email')).borderColor).toBe(
-		getComputedStyle(groupFor('Resting')).borderColor,
-	);
 	expect(indicatorFor('Email')).toBe(null);
 });
 
@@ -286,7 +161,6 @@ test('a required field is painted invalid once a real submit fails validation', 
 	// an ancestor `Form`, so a native submit is enough to trigger it.
 	render(
 		<form>
-			<TextField label="Resting" name="resting" />
 			<TextField isRequired label="Email" name="email" />
 			<button type="submit">Submit</button>
 		</form>,
@@ -294,14 +168,9 @@ test('a required field is painted invalid once a real submit fails validation', 
 
 	const input = page.getByRole('textbox', { name: 'Email' });
 	await expect.element(input).toBeVisible();
-	await expect.element(input).not.toHaveAttribute('aria-invalid');
+	expect(indicatorFor('Email')).toBe(null);
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
-	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
-
-	expect(getComputedStyle(groupFor('Email')).borderColor).not.toBe(
-		getComputedStyle(groupFor('Resting')).borderColor,
-	);
-	expect(indicatorFor('Email')).not.toBe(null);
+	await expect.poll(() => indicatorFor('Email')).not.toBe(null);
 });

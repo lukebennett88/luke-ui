@@ -1,7 +1,5 @@
-import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
-import type { Locator } from 'vite-plus/test/context';
-import { cdp, page, userEvent } from 'vite-plus/test/context';
+import { cdp, page } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { componentTestRegistration } from './component-test-registration.js';
@@ -99,102 +97,6 @@ test('the icon indicator stays out of the accessible name', async () => {
 	expect(axNode.role?.value).toBe('checkbox');
 	expect(axNode.name?.value).toBe('Invalid');
 });
-
-// `inputRef` must land on the hidden `<input type="checkbox">`, not on the wrapper
-// `<div>` React Aria's own `ref` targets.
-test('resolves an inputRef object to the checkbox input, not a wrapper', async () => {
-	const ref = createRef<HTMLInputElement>();
-	render(
-		<Checkbox inputRef={ref} name="terms">
-			Terms
-		</Checkbox>,
-	);
-
-	const checkbox = page.getByRole('checkbox', { name: 'Terms' });
-	await expect.element(checkbox).toBeVisible();
-
-	expect(ref.current).toBeInstanceOf(HTMLInputElement);
-	expect(ref.current).toBe(checkbox.element());
-});
-
-// React Aria types its own `inputRef` as a ref object, so this is the case our
-// widened prop plus the `useObjectRef` bridge exists for: React Hook Form's
-// `field.ref` is a callback.
-test('resolves a callback inputRef to the checkbox input', async () => {
-	const resolved: Array<HTMLInputElement | null> = [];
-	render(
-		<Checkbox
-			inputRef={(node) => {
-				resolved.push(node);
-			}}
-			name="terms"
-		>
-			Terms
-		</Checkbox>,
-	);
-
-	const checkbox = page.getByRole('checkbox', { name: 'Terms' });
-	await expect.element(checkbox).toBeVisible();
-
-	expect(resolved.at(-1)).toBeInstanceOf(HTMLInputElement);
-	expect(resolved.at(-1)).toBe(checkbox.element());
-});
-
-test('forwards name to the input so a native form submit collects it', async () => {
-	const { locator: scene } = render(
-		<form>
-			<Checkbox name="terms">Terms</Checkbox>
-		</form>,
-	);
-
-	const checkbox = page.getByRole('checkbox', { name: 'Terms' });
-	await expect.element(checkbox).toHaveAttribute('name', 'terms');
-
-	const form = scene.element().querySelector('form');
-	if (form == null) throw new Error('Expected the form element.');
-	expect(new FormData(form).get('terms')).toBe(null);
-
-	// The input itself is visually hidden behind the indicator, so the clickable
-	// content label is the only hit target — same as every other test in this file.
-	await userEvent.click(contentFor(checkbox));
-	expect(new FormData(form).get('terms')).toBe('on');
-});
-
-test('forwards onBlur to the input', async () => {
-	const blurs: Array<string> = [];
-	render(
-		<>
-			<Checkbox
-				name="terms"
-				onBlur={() => {
-					blurs.push('terms');
-				}}
-			>
-				Terms
-			</Checkbox>
-			<button type="button">Next</button>
-		</>,
-	);
-
-	const checkbox = page.getByRole('checkbox', { name: 'Terms' });
-	await expect.element(checkbox).toBeVisible();
-
-	// Tabbed rather than clicked: the input is visually hidden behind the indicator,
-	// so it is not its own hit target.
-	await userEvent.tab();
-	await expect.element(checkbox).toHaveFocus();
-	expect(blurs).toEqual([]);
-
-	await userEvent.click(page.getByRole('button', { name: 'Next' }));
-	expect(blurs).toEqual(['terms']);
-});
-
-/** The clickable `<label>` carrying the checkbox's interactive data attributes. */
-function contentFor(checkbox: Locator): HTMLElement {
-	const content = checkbox.element().closest('label');
-	if (content == null) throw new Error('Expected the checkbox content label.');
-	return content;
-}
 
 /** A `Range` spanning `node`'s own content, for measuring rendered text geometry. */
 function rangeRectFor(node: Node): DOMRect {

@@ -94,6 +94,22 @@ export function testFieldShapedConformance(options: FieldConformanceOptions) {
 		result.unmount();
 		form.remove();
 	});
+
+	// React Aria types `inputRef` as a ref object. Luke UI widens it to accept a
+	// callback so React Hook Form's `field.ref` works without an adapter.
+	test(`${name} resolves a callback inputRef to the control`, () => {
+		const resolved: Array<HTMLElement | null> = [];
+		const result = render({
+			inputRef: (node: HTMLElement | null) => {
+				resolved.push(node);
+			},
+			name: 'conformance-field',
+		});
+		const control = getControl(result);
+
+		expect(resolved.at(-1)).toBe(control);
+		result.unmount();
+	});
 }
 
 export function testIntegration(

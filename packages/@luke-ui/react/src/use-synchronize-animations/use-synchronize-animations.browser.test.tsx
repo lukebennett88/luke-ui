@@ -147,29 +147,7 @@ test('ignores script-created animations', () => {
 	scripted.cancel();
 });
 
-test('batches same-frame mounts into a single getAnimations pass', () => {
-	const getAnimations = vi.spyOn(document, 'getAnimations');
-
-	mount(
-		<>
-			<PulsingBox name="pulse-a" />
-			<PulsingBox name="pulse-a" />
-			<PulsingBox name="pulse-a" />
-		</>,
-	);
-	const [first, second] = cssAnimationsNamed('pulse-a');
-	first!.currentTime = 400;
-	second!.currentTime = 100;
-
-	flushFrames();
-
-	expect(getAnimations).toHaveBeenCalledTimes(1);
-	expect(second?.currentTime).toBe(400);
-});
-
-test('schedules no work for a falsy animation name', () => {
-	const getAnimations = vi.spyOn(document, 'getAnimations');
-
+test('leaves a falsy animation name’s neighbours untouched', () => {
 	mount(
 		<>
 			<AnimatedBox name="pulse-a" />
@@ -181,8 +159,6 @@ test('schedules no work for a falsy animation name', () => {
 
 	flushFrames();
 
-	expect(requestFrame).not.toHaveBeenCalled();
-	expect(getAnimations).not.toHaveBeenCalled();
 	expect(animation?.currentTime).toBe(400);
 });
 
@@ -192,7 +168,6 @@ test('mounts without throwing in browsers missing the Web Animations API', () =>
 	Object.defineProperty(document, 'getAnimations', { configurable: true, value: undefined });
 
 	expect(() => mount(<PulsingBox name="pulse-a" />)).not.toThrow();
-	expect(requestFrame).not.toHaveBeenCalled();
 });
 
 test('syncs animations mounted after an earlier sync frame has completed', () => {

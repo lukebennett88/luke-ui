@@ -1,7 +1,5 @@
 import '../../styles/app.css';
-import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -20,23 +18,16 @@ afterEach(() => {
 	root = undefined;
 });
 
-for (const [themeName, themeClassName] of [
-	['Tactile', tactileThemeClassName],
-	['Paper', paperThemeClassName],
-] as const) {
-	for (const mode of ['light', 'dark'] as const) {
-		test(`uses an opaque ${themeName} ${mode} popover surface behind its loading pill`, () => {
-			renderSkeleton(themeClassName, mode);
+test('uses an opaque popover surface behind its loading pill', () => {
+	renderSkeleton(tactileThemeClassName, 'light');
 
-			const label = page.getByText('Loading editor', { exact: true }).nth(1).element();
-			const pillBackground = getComputedStyle(label.parentElement as HTMLElement).backgroundColor;
-			const expectedBackground = getSemanticSurfaceBackground();
+	const label = page.getByText('Loading editor', { exact: true }).nth(1).element();
+	const pillBackground = getComputedStyle(label.parentElement as HTMLElement).backgroundColor;
+	const expectedBackground = getSemanticSurfaceBackground();
 
-			expect(pillBackground).toBe(expectedBackground);
-			expect(pillBackground).not.toBe('rgba(0, 0, 0, 0)');
-		});
-	}
-}
+	expect(pillBackground).toBe(expectedBackground);
+	expect(pillBackground).not.toBe('rgba(0, 0, 0, 0)');
+});
 
 function renderSkeleton(themeClassName: string, mode: 'light' | 'dark') {
 	container = document.body.appendChild(document.createElement('div'));
