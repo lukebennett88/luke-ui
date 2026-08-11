@@ -1,5 +1,5 @@
 /**
- * The fixed values behind the contract's non-colour leaves: motion, the type scale and its Capsize
+ * The fixed values behind the contract's non-colour leaves: motion, typography styles and Capsize
  * metrics, icon sizes, control sizes, and the disabled-control opacity. None of them depend on a
  * theme's source colours, so they live here beside `contract.ts` rather than inside the compiler.
  *

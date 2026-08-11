@@ -6,10 +6,10 @@ import { Heading } from './index.js';
 test('keeps semantic heading level independent of visual type style', async () => {
 	const { locator } = render(
 		<>
-			<Heading level={2} size="heading3">
+			<Heading level={2} typography="heading3">
 				Styled as heading3
 			</Heading>
-			<Text elementType="div" fontWeight="heading" size="heading3">
+			<Text elementType="div" fontWeight="heading" typography="heading3">
 				Reference heading3
 			</Text>
 			<Heading level={2}>Default h2</Heading>

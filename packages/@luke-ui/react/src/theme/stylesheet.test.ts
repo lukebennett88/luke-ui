@@ -8,7 +8,7 @@ import {
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
 import { buildTheme } from './build-theme.js';
-import { flattenThemeContract, spaceScale } from './contract.js';
+import { flattenThemeContract, spaceScale, typeStyles } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius, defaultSourceColors } from './foundation.js';
 
@@ -242,17 +242,6 @@ describe('buildTheme defaults', () => {
 
 	it('emits Capsize trim variables for every curated font family and type style', () => {
 		const fontFamilies = ['apple-system', 'dm-sans', 'inter'] as const;
-		const styles = [
-			'caption',
-			'label',
-			'body',
-			'lead',
-			'heading4',
-			'heading3',
-			'heading2',
-			'heading1',
-			'display',
-		] as const;
 
 		for (const fontFamily of fontFamilies) {
 			const css = buildTheme({
@@ -261,7 +250,7 @@ describe('buildTheme defaults', () => {
 			});
 			const identity = splitBlocks(css).identity;
 
-			for (const style of styles) {
+			for (const style of typeStyles) {
 				expect(identity).toContain(`--luke-font-${style}-cap-height-trim:`);
 				expect(identity).toContain(`--luke-font-${style}-baseline-trim:`);
 				expect(identity).toContain(`--luke-font-${style}-font-weight:`);

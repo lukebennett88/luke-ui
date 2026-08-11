@@ -18,7 +18,7 @@ export default () => {
 				Trim text
 			</Checkbox>
 			<Box paddingInline="300" style={lineBoxStyle}>
-				<Text elementType="div" shouldDisableTrim={!isTrimmed} size="display">
+				<Text elementType="div" shouldDisableTrim={!isTrimmed} typography="display">
 					Aa
 				</Text>
 			</Box>

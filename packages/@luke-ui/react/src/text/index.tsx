@@ -18,7 +18,8 @@ interface TextStyleProps {
 	 */
 	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
 	/**
-	 * Sets the semantic font-weight role. When omitted, the selected type style supplies its weight.
+	 * Sets the semantic font-weight role. When omitted, the selected typography style supplies its
+	 * weight.
 	 */
 	fontWeight?: TextVariantProps['fontWeight'];
 	/**
@@ -39,11 +40,6 @@ interface TextStyleProps {
 	 */
 	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
 	/**
-	 * Sets the complete type style: family, size, weight, line height, letter spacing, and trim.
-	 * @default 'body'
-	 */
-	size?: TextVariantProps['size'];
-	/**
 	 * Sets text alignment.
 	 * @default 'start'
 	 */
@@ -63,6 +59,12 @@ interface TextStyleProps {
 	 * @default 'unset'
 	 */
 	textWrap?: TextVariantProps['textWrap'];
+	/**
+	 * Applies a complete typography style: family, size, weight, line height, letter spacing, and
+	 * trim.
+	 * @default 'body'
+	 */
+	typography?: TextVariantProps['typography'];
 }
 
 type _TextOmit = DistributiveOmit<React.ComponentProps<typeof RacText>, 'color'>;
@@ -89,7 +91,7 @@ const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
 ]);
 
 /**
- * Styled text with coordinated semantic type styles and colour controls.
+ * Styled text with semantic typography styles and colour controls.
  *
  * Capsize trim is applied to known block text elements and skipped for inline or unknown element
  * types. Set `shouldDisableTrim` explicitly to override this inference. Line clamp always disables
@@ -107,11 +109,11 @@ export function Text(props: TextProps) {
 		lineClamp,
 		shouldDisableTrim,
 		shouldInheritFont,
-		size,
 		textAlign,
 		textDecoration,
 		textTransform,
 		textWrap,
+		typography,
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
@@ -134,11 +136,11 @@ export function Text(props: TextProps) {
 					lineClamp,
 					shouldDisableTrim: resolvedShouldDisableTrim,
 					shouldInheritFont,
-					size,
 					textAlign,
 					textDecoration,
 					textTransform,
 					textWrap,
+					typography,
 				}),
 				className,
 			)}

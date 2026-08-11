@@ -12,7 +12,7 @@ export default () => {
 			<LoadingSkeletonProvider isLoading={isLoading}>
 				<Box display="flex" flexWrap="wrap" gap="400">
 					<Box display="grid" gap="100">
-						<Text color="secondary" size="caption">
+						<Text color="secondary" typography="caption">
 							No local prop
 						</Text>
 						<Text>
@@ -20,7 +20,7 @@ export default () => {
 						</Text>
 					</Box>
 					<Box display="grid" gap="100">
-						<Text color="secondary" size="caption">
+						<Text color="secondary" typography="caption">
 							isLoading
 						</Text>
 						<Text>
@@ -28,7 +28,7 @@ export default () => {
 						</Text>
 					</Box>
 					<Box display="grid" gap="100">
-						<Text color="secondary" size="caption">
+						<Text color="secondary" typography="caption">
 							{'isLoading={false}'}
 						</Text>
 						<Text>

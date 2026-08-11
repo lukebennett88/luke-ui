@@ -8,7 +8,7 @@ import { typeStyles } from '../theme/contract.js';
 
 const retainedLayerNames = ['reset', 'theme', 'recipes', 'utilities'] as const;
 const retainedLayerNameSet = new Set<string>(retainedLayerNames);
-type TextClassesBySize = Record<TypeStyle, Array<string>>;
+type TextClassesByTypography = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
 type LineClampClasses = {
@@ -21,9 +21,9 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	const recipes = await import('@luke-ui/react/recipes');
 	const styles = await import('@luke-ui/react/styles');
 	const recipeClasses = [...recipes.icon().split(' '), recipes.loadingSkeletonClassName];
-	const textClassesBySize = Object.fromEntries(
-		typeStyles.map((size) => [size, recipes.text({ size }).split(' ')]),
-	) as TextClassesBySize;
+	const textClassesByTypography = Object.fromEntries(
+		typeStyles.map((typography) => [typography, recipes.text({ typography }).split(' ')]),
+	) as TextClassesByTypography;
 	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
 	const lineClampClasses: LineClampClasses = {
 		numeric: Object.fromEntries(
@@ -39,7 +39,7 @@ test('builds the public stylesheet with the retained layer contract', async () =
 		return assertStylesheetContract(stylesheet, {
 			lineClampClasses,
 			recipeClasses,
-			textClassesBySize,
+			textClassesByTypography,
 			utilityClasses,
 		});
 	}).not.toThrow();
@@ -119,12 +119,12 @@ function assertStylesheetContract(
 	{
 		lineClampClasses,
 		recipeClasses,
-		textClassesBySize,
+		textClassesByTypography,
 		utilityClasses,
 	}: {
 		lineClampClasses?: LineClampClasses;
 		recipeClasses: Array<string>;
-		textClassesBySize?: TextClassesBySize;
+		textClassesByTypography?: TextClassesByTypography;
 		utilityClasses: Array<string>;
 	},
 ): void {
@@ -147,7 +147,7 @@ function assertStylesheetContract(
 
 	for (const className of recipeClasses) assertClassOwnership(root, className, 'recipes');
 	for (const className of utilityClasses) assertClassOwnership(root, className, 'utilities');
-	if (textClassesBySize) assertTextTrimOwnership(root, textClassesBySize);
+	if (textClassesByTypography) assertTextTrimOwnership(root, textClassesByTypography);
 	if (lineClampClasses) assertLineClampOwnership(root, lineClampClasses);
 }
 
@@ -233,20 +233,25 @@ function assertClassOwnership(root: Root, className: string, layerName: string):
 	expect(rules.some((rule) => rule.nodes.some((node) => node.type === 'decl'))).toBe(true);
 }
 
-function assertTextTrimOwnership(root: Root, textClassesBySize: TextClassesBySize): void {
-	for (const size of typeStyles) {
-		const rules = textClassesBySize[size].flatMap((className) => getRulesForClass(root, className));
+function assertTextTrimOwnership(
+	root: Root,
+	textClassesByTypography: TextClassesByTypography,
+): void {
+	for (const typography of typeStyles) {
+		const rules = textClassesByTypography[typography].flatMap((className) =>
+			getRulesForClass(root, className),
+		);
 		assertPseudoDeclaration(
 			rules,
 			'::before',
 			'margin-block-end',
-			`var(--luke-font-${size}-cap-height-trim)`,
+			`var(--luke-font-${typography}-cap-height-trim)`,
 		);
 		assertPseudoDeclaration(
 			rules,
 			'::after',
 			'margin-block-start',
-			`var(--luke-font-${size}-baseline-trim)`,
+			`var(--luke-font-${typography}-baseline-trim)`,
 		);
 	}
 }

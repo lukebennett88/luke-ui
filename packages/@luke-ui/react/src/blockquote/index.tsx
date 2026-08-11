@@ -18,7 +18,7 @@ export type BlockquoteProps = Prettify<_BlockquoteProps>;
 
 /**
  * Block-level quotation from another source, rendered as `<blockquote>`.
- * Composes `Text` for the type scale and semantic font-weight controls.
+ * Composes `Text` for typography styles and semantic font-weight controls.
  */
 export function Blockquote(props: BlockquoteProps) {
 	const { children, className, ...textProps } = props;

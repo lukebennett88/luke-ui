@@ -10,7 +10,7 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-const sizes = variantValuesFor<typeof Emoji, 'size'>()([
+const typographyStyles = variantValuesFor<typeof Emoji, 'typography'>()([
 	'caption',
 	'body',
 	'heading4',
@@ -19,12 +19,17 @@ const sizes = variantValuesFor<typeof Emoji, 'size'>()([
 ]);
 
 for (const appearance of visualAppearances) {
-	test(`sizes and colours: ${appearance.theme} ${appearance.mode}`, async () => {
+	test(`typography and colours: ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(
 			<Stack>
 				<div style={rowStyle}>
-					{sizes.map((size) => (
-						<Emoji emoji="🚀" key={size} label={`Rocket ${size}`} size={size} />
+					{typographyStyles.map((typography) => (
+						<Emoji
+							emoji="🚀"
+							key={typography}
+							label={`Rocket ${typography}`}
+							typography={typography}
+						/>
 					))}
 				</div>
 				<div style={rowStyle}>

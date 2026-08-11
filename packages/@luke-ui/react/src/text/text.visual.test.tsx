@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
+import { typeStyles } from '../theme/contract.js';
 import { Text } from './index.js';
 
 const rowStyle = {
@@ -12,19 +13,15 @@ const rowStyle = {
 } satisfies CSSProperties;
 
 for (const appearance of visualAppearances) {
-	test(`type scale: ${appearance.theme} ${appearance.mode}`, async () => {
+	test(`typography styles: ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(
 			<Stack width="40rem">
 				<div style={rowStyle}>
-					<Text size="caption">caption</Text>
-					<Text size="label">label</Text>
-					<Text size="body">body</Text>
-					<Text size="lead">lead</Text>
-					<Text size="heading4">heading4</Text>
-					<Text size="heading3">heading3</Text>
-					<Text size="heading2">heading2</Text>
-					<Text size="heading1">heading1</Text>
-					<Text size="display">display</Text>
+					{typeStyles.map((typography) => (
+						<Text key={typography} typography={typography}>
+							{typography}
+						</Text>
+					))}
 				</div>
 				<div style={rowStyle}>
 					<Text fontWeight="body">Body</Text>

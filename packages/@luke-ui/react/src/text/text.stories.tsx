@@ -5,7 +5,7 @@ import { VisuallyHidden as VisuallyHiddenText } from '@luke-ui/react/visually-hi
 import type { CSSProperties } from 'react';
 import preview from '../../.storybook/preview.js';
 import { createSprinkles } from '../styles/index.js';
-import { vars } from '../theme/index.js';
+import { typeStyles, vars } from '../theme/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 
 const meta = preview.meta({
@@ -76,8 +76,8 @@ function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 
 const baseArgs = {
 	children: storyText,
-	size: 'body',
-} as const satisfies Pick<TextProps, 'children' | 'size'>;
+	typography: 'body',
+} as const satisfies Pick<TextProps, 'children' | 'typography'>;
 
 const colors = [
 	'primary',
@@ -88,17 +88,6 @@ const colors = [
 	'warning',
 	'danger',
 ] as const satisfies ReadonlyArray<NonNullable<TextProps['color']>>;
-const sizes = [
-	'caption',
-	'label',
-	'body',
-	'lead',
-	'heading4',
-	'heading3',
-	'heading2',
-	'heading1',
-	'display',
-] as const satisfies ReadonlyArray<NonNullable<TextProps['size']>>;
 const weights = ['body', 'label', 'heading', 'emphasis'] as const satisfies ReadonlyArray<
 	NonNullable<TextProps['fontWeight']>
 >;
@@ -111,14 +100,14 @@ export const Default = meta.story({
 });
 
 /**
- * Each type style applies family, size, weight, line height, letter spacing, and trim together.
+ * Each typography style applies family, size, weight, line height, letter spacing, and trim together.
  */
-export const Size = meta.story({
+export const Typography = meta.story({
 	render: (props) => (
 		<div style={stackContainerStyle}>
-			{sizes.map((size) => (
-				<Text key={size} size={size} style={panelStyle} {...props}>
-					{size}: {storyText}
+			{typeStyles.map((typography) => (
+				<Text key={typography} style={panelStyle} typography={typography} {...props}>
+					{typography}: {storyText}
 				</Text>
 			))}
 		</div>
@@ -162,7 +151,7 @@ export const EmptyText = meta.story({
 	args: {
 		...baseArgs,
 		children: '',
-	} satisfies Pick<TextProps, 'children' | 'size'>,
+	} satisfies Pick<TextProps, 'children' | 'typography'>,
 	render: (props) => <Text {...props} />,
 });
 

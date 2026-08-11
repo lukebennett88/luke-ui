@@ -8,7 +8,7 @@ export default () => {
 			<Text>
 				Deployment complete <Emoji emoji="🎉" label="Celebration" />
 			</Text>
-			<Emoji emoji="🚀" label="Rocket" size="heading4" />
+			<Emoji emoji="🚀" label="Rocket" typography="heading4" />
 		</Box>
 	);
 };

@@ -34,7 +34,7 @@ export default () => {
 							borderRadius: role.value,
 						}}
 					/>
-					<Text size="caption" style={{ textAlign: 'center' }}>
+					<Text typography="caption" style={{ textAlign: 'center' }}>
 						{role.label}
 					</Text>
 				</Box>

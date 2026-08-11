@@ -24,7 +24,7 @@ export default () => {
 					}}
 				/>
 			</DecorativeBox>
-			<Text size="caption">Outer radius from inner radius + gap</Text>
+			<Text typography="caption">Outer radius from inner radius + gap</Text>
 		</Box>
 	);
 };

@@ -19,7 +19,7 @@ const stackStyle = {
 const levels = [1, 2, 3, 4, 5, 6] as const satisfies Array<NonNullable<HeadingProps['level']>>;
 
 /**
- * Use `level` to define heading hierarchy and default heading size.
+ * Use `level` to define heading hierarchy and default typography.
  */
 export const Level = meta.story({
 	render: (props) => (
@@ -54,20 +54,20 @@ export const ElementType = meta.story({
 });
 
 /**
- * Override visual heading size with `size` while preserving semantic level.
+ * Override visual typography with `typography` while preserving semantic level.
  */
-export const SizeOverride = meta.story({
+export const TypographyOverride = meta.story({
 	args: {
 		level: 2,
 	},
 	render: (props) => (
 		<div style={stackStyle}>
 			<Heading {...props}>Level 2 semantic and visual</Heading>
-			<Heading {...props} size="heading4">
-				Level 2 semantic, size 500
+			<Heading {...props} typography="heading4">
+				Level 2 semantic, heading4 typography
 			</Heading>
-			<Heading {...props} size="display">
-				Level 2 semantic, display size 900
+			<Heading {...props} typography="display">
+				Level 2 semantic, display typography
 			</Heading>
 		</div>
 	),

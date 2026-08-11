@@ -24,7 +24,7 @@ export default () => {
 							boxShadow: depth,
 						}}
 					/>
-					<Text size="caption" style={{ textAlign: 'center' }}>
+					<Text typography="caption" style={{ textAlign: 'center' }}>
 						{name}
 					</Text>
 				</Box>

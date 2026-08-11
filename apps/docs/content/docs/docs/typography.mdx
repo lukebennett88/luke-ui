@@ -1,22 +1,22 @@
 ---
 title: Typography
-description: Use Luke UI's semantic type styles through typography components.
+description: Use Luke UI's semantic typography styles through typography components.
 ---
 
-Luke UI defines nine semantic type styles. Each style is a complete treatment: font family, size,
-weight, line height, letter spacing, and Capsize trim.
+Luke UI defines nine semantic typography styles. Each style is a complete treatment: font family,
+size, weight, line height, letter spacing, and Capsize trim.
 
 ## Base components
 
 Use `Text` for body copy and other non-heading content. Use `Heading` for document and section
-headings. Heading manages semantic levels and selects a matching type style by default.
+headings. Heading manages semantic levels and selects a matching typography style by default.
 
 <ExampleBlock src="overview/typography-components" title="Typography — Base components" />
 
-Use `Numeral` for locale-aware values. It inherits the type styles. It formats currencies,
+Use `Numeral` for locale-aware values. It inherits the typography styles. It formats currencies,
 percentages, units, and compact values. Use `Emoji` when an emoji needs a reliable accessible label.
 
-## Type styles
+## Typography styles
 
 `Text` and `Heading` use these styles, from smallest to largest:
 
@@ -31,12 +31,12 @@ percentages, units, and compact values. Use `Emoji` when an emoji needs a reliab
 
 The specimen keeps each style's metrics together.
 
-<ExampleBlock src="text/typography" title="Text — Type styles" />
+<ExampleBlock src="text/typography" title="Text — Typography styles" />
 
-`Text` defaults to `body`. `Heading` selects a style from its level, and accepts `size` when the
-visual hierarchy needs a deliberate override. An `h2` can use `heading3` visually without changing
-its semantic level. There is no `heading5` or `heading6` type style; those HTML levels reuse `lead`
-and `body` with heading weight.
+`Text` defaults to `body`. `Heading` selects a style from its level, and accepts `typography` when
+the visual hierarchy needs a deliberate override. An `h2` can use `heading3` visually without
+changing its semantic level. There is no `heading5` or `heading6` style; those HTML levels reuse
+`lead` and `body` with heading weight.
 
 ## Capsize trims
 
@@ -47,12 +47,12 @@ space above and below its letters. Trim removes that extra space from a block te
 
 ## Weight and colour
 
-Each type style already carries its weight. Themes still expose `body`, `label`, `heading`, and
-`emphasis` weight roles for overrides and for `Strong`. Text also accepts semantic `color` values
-such as `primary`, `secondary`, `accent`, `info`, `success`, `warning`, and `danger`.
+Each typography style already carries its weight. Themes still expose `body`, `label`, `heading`,
+and `emphasis` weight roles for overrides and for `Strong`. Text also accepts semantic `color`
+values such as `primary`, `secondary`, `accent`, `info`, `success`, `warning`, and `danger`.
 
 ```tsx
-<Text color="secondary" size="label">
+<Text color="secondary" typography="label">
 	Last updated 12 minutes ago
 </Text>
 ```

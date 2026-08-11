@@ -19,7 +19,7 @@ for (const appearance of visualAppearances) {
 						Level {level} heading
 					</Heading>
 				))}
-				<Heading level={1} size="display">
+				<Heading level={1} typography="display">
 					Display heading
 				</Heading>
 			</Stack>,

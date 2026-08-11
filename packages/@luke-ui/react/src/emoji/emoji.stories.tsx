@@ -41,14 +41,14 @@ export const Default = meta.story({
 	),
 });
 
-export const Size = meta.story({
+export const Typography = meta.story({
 	args: baseArgs,
 	render: (props) => (
 		<div style={stackStyle}>
-			<Emoji {...props} emoji="🚀" label="Rocket" size="display" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="heading3" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="body" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="caption" />
+			<Emoji {...props} emoji="🚀" label="Rocket" typography="display" />
+			<Emoji {...props} emoji="🚀" label="Rocket" typography="heading3" />
+			<Emoji {...props} emoji="🚀" label="Rocket" typography="body" />
+			<Emoji {...props} emoji="🚀" label="Rocket" typography="caption" />
 		</div>
 	),
 });

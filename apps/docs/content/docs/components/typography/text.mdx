@@ -1,6 +1,6 @@
 ---
 title: Text
-description: Styled text with semantic type styles and colour roles.
+description: Styled text with semantic typography styles and colour roles.
 source: packages/@luke-ui/react/src/text
 props:
   - name: TextProps
@@ -25,9 +25,9 @@ element types.
 <Text elementType="label">Email address</Text>
 ```
 
-## Type style
+## Typography
 
-Use `size` to apply a complete type style: family, size, weight, line height, letter spacing, and
+Use `typography` to apply a complete style: family, size, weight, line height, letter spacing, and
 Capsize trim. `body` is the default.
 
 | Style                 | Intended use                             |
@@ -39,7 +39,7 @@ Capsize trim. `body` is the default.
 | `heading4`–`heading1` | Visual heading hierarchy                 |
 | `display`             | Oversized editorial or marketing moments |
 
-<ExampleBlock src="text/typography" title="Text — Type styles" />
+<ExampleBlock src="text/typography" title="Text — Typography styles" />
 
 Set `fontWeight` only when you need to override the style's weight. Themes expose `body`, `label`,
 `heading`, and `emphasis` roles for that purpose.
@@ -83,8 +83,8 @@ rendered text only, so avoid using uppercase styling as a substitute for a clear
 ## Related components
 
 Use [Heading](/components/typography/heading) for a section heading. It manages heading levels for
-you. Use `Text` with a larger type style such as `display` or `heading1` for prominent content that
-is not a heading. A large status value is one example.
+you. Use `Text` with a larger style such as `display` or `heading1` for prominent content that is
+not a heading. A large status value is one example.
 
 Use [Numeral](/components/typography/numeral) to format locale-aware numbers and
 [Emoji](/components/typography/emoji) for an emoji with a reliable accessible label.

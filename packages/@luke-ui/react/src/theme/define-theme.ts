@@ -89,7 +89,7 @@ interface ThemeInputCommon {
 		overlay?: number;
 		// radius.full is fixed at 9999px and is not authored.
 	};
-	/** Typography — family and weights only. The type scale is source-owned (not authored here). */
+	/** Typography — family and weights only. The typography styles are source-owned (not authored here). */
 	typography?: {
 		/**
 		 * Curated Capsize-compatible font-family choice.

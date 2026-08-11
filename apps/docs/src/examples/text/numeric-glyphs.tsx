@@ -19,7 +19,7 @@ export default () => {
 		>
 			{variants.map((variant) => (
 				<Box display="grid" gap="200" key={variant.value}>
-					<Text color="secondary" size="caption">
+					<Text color="secondary" typography="caption">
 						{variant.label}
 					</Text>
 					<Text elementType="div" fontVariantNumeric={variant.value}>

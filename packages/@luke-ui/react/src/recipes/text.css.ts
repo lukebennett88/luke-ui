@@ -62,16 +62,16 @@ const weightVariants = {
 	label: { fontWeight: vars.font.weight.label },
 } as const;
 
-const sizeVariants = Object.fromEntries(
-	typeStyles.map((size) => [
-		size,
+const typographyVariants = Object.fromEntries(
+	typeStyles.map((typography) => [
+		typography,
 		{
-			fontFamily: vars.font[size].fontFamily,
-			fontSize: vars.font[size].fontSize,
-			fontWeight: vars.font[size].fontWeight,
-			letterSpacing: vars.font[size].letterSpacing,
-			lineHeight: vars.font[size].lineHeight,
-			vars: { [textLineHeight]: vars.font[size].lineHeight },
+			fontFamily: vars.font[typography].fontFamily,
+			fontSize: vars.font[typography].fontSize,
+			fontWeight: vars.font[typography].fontWeight,
+			letterSpacing: vars.font[typography].letterSpacing,
+			lineHeight: vars.font[typography].lineHeight,
+			vars: { [textLineHeight]: vars.font[typography].lineHeight },
 		},
 	]),
 ) as Record<
@@ -86,15 +86,15 @@ const sizeVariants = Object.fromEntries(
 	}
 >;
 
-const sizeStepCompoundVariants = typeStyles.map((size) => {
-	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
+const typographyCompoundVariants = typeStyles.map((typography) => {
+	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[typography];
 	return {
 		style: createLayeredTextStyle({ baselineTrim, capHeightTrim, fontSize, lineHeight }),
 		// `shouldInheritFont: true` asks the browser to resolve font size and line height from
 		// the surrounding context, not this style's Capsize metrics. Without this condition, the
 		// compound's own `fontSize`/`lineHeight` always wins over the plain `shouldInheritFont`
 		// variant, because vanilla-extract applies compound variants after simple ones.
-		variants: { shouldDisableTrim: false, shouldInheritFont: false, size } as const,
+		variants: { shouldDisableTrim: false, shouldInheritFont: false, typography } as const,
 	};
 });
 
@@ -130,18 +130,18 @@ function createLayeredTextStyle({
 /** Vanilla-extract recipe for the `Text` primitive's styles. */
 export const text = recipe({
 	base,
-	compoundVariants: sizeStepCompoundVariants,
+	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
 		fontVariantNumeric: 'unset',
 		isVisuallyHidden: false,
 		lineClamp: false,
 		shouldDisableTrim: false,
 		shouldInheritFont: false,
-		size: 'body',
 		textAlign: 'start',
 		textDecoration: 'none',
 		textTransform: 'none',
 		textWrap: 'unset',
+		typography: 'body',
 	},
 	variants: {
 		fontVariantNumeric: {
@@ -157,7 +157,6 @@ export const text = recipe({
 		},
 		lineClamp: lineClampVariants,
 		shouldDisableTrim: { false: {}, true: {} },
-		size: sizeVariants,
 		textAlign: {
 			center: { textAlign: 'center' },
 			end: { textAlign: 'end' },
@@ -181,7 +180,9 @@ export const text = recipe({
 			pretty: { textWrap: 'pretty' },
 			unset: {},
 		},
-		// Declared after `size` so an explicit weight override wins over the type style's weight.
+		typography: typographyVariants,
+		// Declared after `typography` so an explicit weight override wins over the type style's
+		// weight.
 		fontWeight: weightVariants,
 		shouldInheritFont: {
 			false: {},

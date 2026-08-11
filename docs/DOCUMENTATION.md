@@ -202,7 +202,7 @@ the code first.
 Exhaustive variant and state coverage belongs in the visual test kitchen sink, not in a docs
 example. See [TESTING.md](TESTING.md).
 
-A reference page is the exception. A token, type scale, or icon page enumerates on purpose, because
+A reference page is the exception. A token, typography, or icon page enumerates on purpose, because
 the enumeration is the content.
 
 ### Prose around an example
