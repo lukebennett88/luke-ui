@@ -1,7 +1,10 @@
+import { Box } from '@luke-ui/react/box';
+import { Heading } from '@luke-ui/react/heading';
+import { HeadingLevels } from '@luke-ui/react/heading-context';
+import { Card, Cards } from 'fumadocs-ui/components/card';
 import type { JSX } from 'react';
 import type { ComponentIndexGroup } from '../generated/components-index.generated.js';
 import { componentIndexGroups } from '../generated/components-index.generated.js';
-import { DocsLink } from './docs-link.js';
 
 /**
  * Purpose-grouped index of every component guide, generated from the guides themselves. The
@@ -9,34 +12,39 @@ import { DocsLink } from './docs-link.js';
  */
 export function ComponentsIndex(): JSX.Element {
 	return (
-		<div className="not-prose flex flex-col gap-8">
-			{componentIndexGroups.map((group) => (
-				<CategoryGroup group={group} key={group.title} />
-			))}
-		</div>
+		<HeadingLevels base={1}>
+			<Box
+				display="flex"
+				flexDirection="column"
+				gap="800"
+				marginBlockStart="800"
+				className="not-prose"
+			>
+				{componentIndexGroups.map((group) => (
+					<CategoryGroup group={group} key={group.title} />
+				))}
+			</Box>
+		</HeadingLevels>
 	);
 }
 
 function CategoryGroup({ group }: { group: ComponentIndexGroup }) {
 	return (
-		<section>
-			<h2 className="mb-3 mt-0 text-sm font-semibold uppercase tracking-[0.2em] text-fd-muted-foreground">
-				{group.title}
-			</h2>
-			<ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+		<Box
+			elementType="section"
+			display="flex"
+			flexDirection="column"
+			gap="400"
+			marginBlockStart="400"
+		>
+			<Heading size="500">{group.title}</Heading>
+			<Cards>
 				{group.entries.map((entry) => (
-					<li className="m-0 p-0" key={entry.url}>
-						<DocsLink
-							className="flex h-full flex-col gap-1 rounded-lg border border-fd-border bg-fd-background px-4 py-3 transition-colors hover:border-fd-ring hover:bg-fd-accent/40 hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring focus-visible:ring-inset"
-							params={{ _splat: entry.url.slice(1) }}
-							to="/$"
-						>
-							<span className="font-medium text-fd-foreground text-sm">{entry.name}</span>
-							<span className="text-fd-muted-foreground text-sm">{entry.description}</span>
-						</DocsLink>
-					</li>
+					<Card href={entry.url} key={entry.url} title={entry.name}>
+						{entry.description}
+					</Card>
 				))}
-			</ul>
-		</section>
+			</Cards>
+		</Box>
 	);
 }
