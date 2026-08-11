@@ -12,6 +12,7 @@ export function baseOptions(): Omit<DocsLayoutProps, 'tree'> {
 		nav: {
 			mode: 'top',
 		},
+		tabs: false,
 		slots: {
 			header: DocsSiteNav,
 			themeSwitch: false,
