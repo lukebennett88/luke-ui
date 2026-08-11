@@ -1,16 +1,26 @@
 # Documentation
 
 This is the only normative documentation guide for the repository. It covers MDX pages in the hosted
-docs app, JSDoc, code comments, and READMEs. It decides what belongs in documentation, how to write
-it, and where it lives. The internal guides in `docs/` follow the same judgement about usefulness
-and scope, but not the punctuation rules.
+docs app, JSDoc, code comments, READMEs, and the internal guides in `docs/`. Package-level
+`AGENTS.md` files must not restate these rules. Point here instead.
+
+## Surfaces
+
+Luke UI has two documentation audiences, and they need different content:
+
+| Surface                  | Lives in                                  | Reader                            | Purpose                           |
+| ------------------------ | ----------------------------------------- | --------------------------------- | --------------------------------- |
+| Public documentation     | Hosted MDX, public JSDoc, package READMEs | A developer building with Luke UI | How to use Luke UI                |
+| Internal repository docs | `docs/*.md`                               | A contributor maintaining Luke UI | How to build and maintain Luke UI |
+
+Both surfaces follow the shared editorial rules in this guide: a clear purpose for the intended
+reader, enough context, no redundancy, no session-history prose, and no detail that does not help
+that reader. They differ in scope. Public docs explain observable behaviour and usage. Internal docs
+deliberately explain architecture, recipes, generators, and implementation.
 
 ## What documentation is for
 
-Public documentation helps a developer build an interface with Luke UI. It is not a record of how
-Luke UI works.
-
-A section of documentation should help answer at least one of these questions:
+A section of documentation should help its reader answer at least one of these questions:
 
 - What is this?
 - When would I use it?
@@ -22,12 +32,13 @@ This is an editorial test, not a page template. Do not add a heading per questio
 answers none of them probably does not belong.
 
 Documentation can follow every rule in this guide and still be poor documentation. Prose that is
-verbose, redundant, obvious, or focused on implementation fails its reader even when the wording is
-correct.
+verbose, redundant, or obvious fails its reader even when the wording is correct.
 
-## What to document
+## Public documentation scope
 
-Document how a developer builds interfaces with Luke UI. Do not document how Luke UI is built.
+Public documentation helps a developer build an interface with Luke UI. Document how developers use
+Luke UI, including the observable behaviour they rely on. Do not document how Luke UI is
+implemented.
 
 ### Implementation detail
 
@@ -74,7 +85,22 @@ choice. Component tiers qualify, because the tier decides the import path and th
 
 Do not document an export that is not public API.
 
+## Internal documentation scope
+
+Internal guides such as [COMPONENTS.md](COMPONENTS.md), [STYLING.md](STYLING.md), and
+[TESTING.md](TESTING.md) explain how contributors build and maintain Luke UI. They may document
+architecture, cascade layers, recipes, generators, and implementation. The public "do not document
+implementation" rule does not apply to them.
+
+They still need a clear purpose for a maintainer, enough context to act, no redundancy, and no prose
+that only explains one editing session. Cut an implementation detail that does not help a
+contributor do the work the guide is for.
+
 ## Writing style
+
+These rules cover public MDX, JSDoc, code comments, and package READMEs. Internal guides in `docs/`
+follow the shared editorial rules under Surfaces. They are not bound to the terminology table or
+punctuation rules below.
 
 Write short, plain sentences. Split a sentence that carries two ideas rather than trimming the words
 that carry meaning.
@@ -94,8 +120,10 @@ that carry meaning.
 - Use "you can" only to grant permission or present a real choice. When the reader should do
   something, tell them to do it.
 - Address the reader as "you". Never write "we", "us", "let's", or "I".
-- Cut filler: "simply", "just", "note that", "it is important to", "powerful", "flexible",
-  "seamless", "robust".
+- Cut empty promotional filler: "simply", "just", "note that", "it is important to", and adjectives
+  used only for praise, such as "powerful", "flexible", "seamless", or "robust". Keep a word when it
+  names a real property. "Flexible" is fine when the point is that a value accepts more than one
+  shape.
 
 **One term per concept.** Do not use different words for the same concept. Use the same word every
 time.
@@ -103,7 +131,7 @@ time.
 | Term                   | Definition                                                                                                                                       |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `someone`              | The person who uses an interface built with Luke UI. Never write "a person", "people", "users", or "the user".                                   |
-| `developer`            | The reader of these docs.                                                                                                                        |
+| `developer`            | The reader of public documentation.                                                                                                              |
 | `assistive technology` | A singular, uncountable term. Never write "assistive technologies". Write "screen reader" only when the behaviour is specific to screen readers. |
 | `control`              | An interactive element.                                                                                                                          |
 | `field`                | A label, control, description, and validation message together.                                                                                  |
@@ -113,9 +141,9 @@ time.
 | `select`               | Use `select` only for a control's selection state.                                                                                               |
 
 **Spelling and punctuation.** Spell words in Australian English. Write headings in sentence case,
-and capitalise only proper nouns and product names. Do not use an em dash or a semicolon in prose.
-One exception applies. The em dash inside an `<ExampleBlock title>` separates the title from its
-qualifier. It stays.
+and capitalise only proper nouns and product names. Do not use a semicolon in prose. An em dash is
+fine when it has a space on each side, as in `foo — bar`. Do not write `foo—bar`. The em dash inside
+an `<ExampleBlock title>` already follows that form: `<page or component> — <qualifier>`.
 
 **Say it once.** Cut a sentence whose only content restates its heading, a prop name, or the example
 below it. Do not summarise a section at the end of it. When more than one page needs the same rule,
@@ -123,15 +151,22 @@ explain it on the page that owns the topic and link to it from the others.
 
 ## Comments and JSDoc
 
-JSDoc on a public type is published documentation. The generated Props pages render it, so the rules
-above apply to it.
+JSDoc on a public type is published documentation. The generated Props pages render it, so the
+public documentation rules above apply to it. JSDoc and TypeScript types drive the docs app.
 
-- Write one line for a prop: what it does, plus `@default` when the component sets a default.
+When adding or changing a component:
+
+- Write function-level JSDoc on the exported component that describes it for an app developer.
+- Put an `@tier` JSDoc tag on the exported `Props` type: `atom`, `composed`, or `primitive`.
+- Document every public prop. Include `@default` when the component destructures a default value.
+- Keep a straightforward prop description to one concise sentence. Add explanation when a
+  constraint, choice, caveat, or non-obvious behaviour affects how the prop is used. Do not optimise
+  JSDoc for line count.
 - Do not restate the prop name. `endIcon` needs "Icon shown after the label", not "The end icon".
-- Explain a constraint a reader would otherwise get wrong, such as why a composed field exposes
-  `inputRef` instead of `ref`.
-- Redeclare an important inherited `react-aria-components` prop with useful JSDoc. Point a long-tail
-  inherited prop at the upstream React Aria component.
+- On atom and composed components, redeclare important inherited `react-aria-components` props with
+  useful JSDoc, using the passthrough pattern such as `isDisabled?: RacButtonProps['isDisabled']`.
+  Redeclare only the props an app developer is likely to reach for. Point a long-tail inherited prop
+  at the upstream React Aria component through the page's `reactAria` frontmatter link.
 
 A code comment explains the code, not its history. Luke UI is pre-1.0, so no comment carries a prior
 state.
@@ -205,7 +240,7 @@ update its example in the same change.
 
 ### Choose for the reader
 
-When a task has several valid approaches, do not hand the undecided choice to the reader.
+When a task has several valid approaches, the reader still needs only one.
 
 1. State the requirement, goal, or criterion that decides the choice.
 2. Choose one approach and show it.
@@ -221,13 +256,14 @@ Instructions run in one direction. A reader on step four should never have to re
 
 - Put a prerequisite before the step that needs it.
 - Do not annotate a finished step with what the reader could have done instead.
-- Do not narrate what you happened to do while writing the guide.
+- Write the steps a reader follows, not a narrative walkthrough of what you did.
 - Give a guide one outcome. Split a guide that teaches two unrelated goals.
 
 ## Review
 
 Review the page, not the sentences. New content anchors a reviewer to the words in front of them.
-The problem is more often the shape of the page.
+The problem is more often the shape of the page. Use this checklist for public documentation. For an
+internal guide, ask the same questions with a maintainer as the reader.
 
 Read the whole page, then ask:
 
@@ -235,7 +271,8 @@ Read the whole page, then ask:
 - Does another page already say it? Link instead of repeating.
 - Can someone scanning headings and examples find the important information?
 - Does each section earn its place? Could anything go without losing information?
-- Is the page helping with usage and decisions, or describing implementation?
+- Is the page helping with usage and decisions, or describing implementation that does not affect
+  them?
 - Are the examples realistic and focused?
 - Do the instructions move forwards?
 - Is prose repeating what a heading, prop name, or example already says?
