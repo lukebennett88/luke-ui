@@ -1,5 +1,6 @@
 import { Text as RacText } from 'react-aria-components/Text';
 import * as styles from '../recipes/text.css.js';
+import { typeStyleWeightRole } from '../theme/contract.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
@@ -117,6 +118,7 @@ export function Text(props: TextProps) {
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
+	const resolvedTypography = typography ?? 'body';
 
 	const resolvedShouldDisableTrim: boolean = (() => {
 		if (hasLineClamp) return true;
@@ -131,7 +133,9 @@ export function Text(props: TextProps) {
 				styles.text({
 					color,
 					fontVariantNumeric,
-					...(shouldInheritFont || fontWeight === undefined ? {} : { fontWeight }),
+					...(shouldInheritFont
+						? {}
+						: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
 					isVisuallyHidden,
 					lineClamp,
 					shouldDisableTrim: resolvedShouldDisableTrim,
@@ -140,7 +144,7 @@ export function Text(props: TextProps) {
 					textDecoration,
 					textTransform,
 					textWrap,
-					typography,
+					typography: resolvedTypography,
 				}),
 				className,
 			)}

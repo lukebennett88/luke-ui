@@ -1,5 +1,5 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
-import { createVar, fallbackVar } from '@vanilla-extract/css';
+import { createVar } from '@vanilla-extract/css';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../theme/contract.js';
@@ -10,11 +10,6 @@ import { visuallyHiddenStyle } from './visually-hidden.css.js';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
 export const textLineHeight = createVar();
-/**
- * Optional weight override for one Text instance. `inherits: false` keeps a parent's explicit
- * `fontWeight` from leaking into nested Text that should use its own typography default.
- */
-const textFontWeight = createVar({ inherits: false, syntax: '*' });
 const lineClampSingleLine = {
 	display: 'block',
 	minInlineSize: 0,
@@ -63,9 +58,9 @@ const colorVariants = {
 const weightVariants = Object.fromEntries(
 	fontWeightRoles.map((fontWeight) => [
 		fontWeight,
-		{ vars: { [textFontWeight]: vars.font.weight[fontWeight] } },
+		{ fontWeight: vars.font.weight[fontWeight] },
 	]),
-) as Record<FontWeightRole, { vars: { [textFontWeight]: string } }>;
+) as Record<FontWeightRole, { fontWeight: string }>;
 
 const typographyVariants = Object.fromEntries(
 	typeStyles.map((typography) => [
@@ -73,7 +68,6 @@ const typographyVariants = Object.fromEntries(
 		{
 			fontFamily: vars.font[typography].fontFamily,
 			fontSize: vars.font[typography].fontSize,
-			fontWeight: fallbackVar(textFontWeight, vars.font[typography].fontWeight),
 			letterSpacing: vars.font[typography].letterSpacing,
 			lineHeight: vars.font[typography].lineHeight,
 			vars: { [textLineHeight]: vars.font[typography].lineHeight },
@@ -84,7 +78,6 @@ const typographyVariants = Object.fromEntries(
 	{
 		fontFamily: string;
 		fontSize: string;
-		fontWeight: string;
 		letterSpacing: string;
 		lineHeight: string;
 		vars: { [textLineHeight]: string };

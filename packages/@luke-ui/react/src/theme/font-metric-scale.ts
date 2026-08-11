@@ -7,8 +7,7 @@
  * composite control chrome read this scale directly instead of borrowing a semantic text treatment.
  */
 
-/** Size, leading, and tracking for one private metric step. */
-export type FontMetric = {
+type FontMetric = {
 	fontSize: string;
 	letterSpacing: string;
 	lineHeight: string;
@@ -25,7 +24,7 @@ export const FONT_METRIC_SCALE = {
 	28: { fontSize: '28px', letterSpacing: '-0.0075em', lineHeight: '36px' },
 	35: { fontSize: '35px', letterSpacing: '-0.01em', lineHeight: '40px' },
 	60: { fontSize: '60px', letterSpacing: '-0.025em', lineHeight: '60px' },
-} as const;
+} as const satisfies Record<number, FontMetric>;
 
 /** A key on the private typography metric scale. */
 export type FontMetricStep = keyof typeof FONT_METRIC_SCALE;
