@@ -56,10 +56,7 @@ const colorVariants = {
 } as const;
 
 const weightVariants = Object.fromEntries(
-	fontWeightRoles.map((fontWeight) => [
-		fontWeight,
-		{ fontWeight: vars.font.weight[fontWeight] },
-	]),
+	fontWeightRoles.map((fontWeight) => [fontWeight, { fontWeight: vars.font.weight[fontWeight] }]),
 ) as Record<FontWeightRole, { fontWeight: string }>;
 
 const typographyVariants = Object.fromEntries(
