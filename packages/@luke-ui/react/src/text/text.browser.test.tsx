@@ -5,40 +5,50 @@ import { Text } from './index.js';
 test('resolves typography default weight, explicit overrides, nesting, and shouldInheritFont', () => {
 	const { locator } = render(
 		<>
-			<Text typography="label">Label default</Text>
-			<Text fontWeight="body" typography="label">
+			<Text elementType="div" typography="label">
+				Label default
+			</Text>
+			<Text elementType="div" fontWeight="body" typography="label">
 				Label with body weight
 			</Text>
-			<Text fontWeight="body">Body weight reference</Text>
-			<Text fontWeight="emphasis" typography="body">
-				Emphasis parent <Text typography="label">Nested label default</Text>{' '}
+			<Text elementType="div" fontWeight="body">
+				Body weight reference
+			</Text>
+			<Text elementType="div" fontWeight="emphasis" typography="body">
+				Emphasis parent
+				<Text typography="label">Nested label default</Text>
 				<Text fontWeight="body" typography="label">
 					Nested label with body weight
-				</Text>{' '}
+				</Text>
 				<Text shouldInheritFont>Inherited emphasis</Text>
 			</Text>
-			<Text fontWeight="emphasis">Emphasis weight reference</Text>
+			<Text elementType="div" fontWeight="emphasis">
+				Emphasis weight reference
+			</Text>
 		</>,
 	);
 
-	const labelDefault = getComputedStyle(locator.getByText('Label default').element()).fontWeight;
+	const exact = { exact: true } as const;
+	const labelDefault = getComputedStyle(
+		locator.getByText('Label default', exact).element(),
+	).fontWeight;
 	const labelWithBody = getComputedStyle(
-		locator.getByText('Label with body weight').element(),
+		locator.getByText('Label with body weight', exact).element(),
 	).fontWeight;
 	const bodyReference = getComputedStyle(
-		locator.getByText('Body weight reference').element(),
+		locator.getByText('Body weight reference', exact).element(),
 	).fontWeight;
 	const nestedLabelDefault = getComputedStyle(
-		locator.getByText('Nested label default').element(),
+		locator.getByText('Nested label default', exact).element(),
 	).fontWeight;
 	const nestedLabelWithBody = getComputedStyle(
-		locator.getByText('Nested label with body weight').element(),
+		locator.getByText('Nested label with body weight', exact).element(),
 	).fontWeight;
 	const inheritedEmphasis = getComputedStyle(
-		locator.getByText('Inherited emphasis').element(),
+		locator.getByText('Inherited emphasis', exact).element(),
 	).fontWeight;
 	const emphasisReference = getComputedStyle(
-		locator.getByText('Emphasis weight reference').element(),
+		locator.getByText('Emphasis weight reference', exact).element(),
 	).fontWeight;
 
 	expect(labelDefault).not.toBe(bodyReference);
