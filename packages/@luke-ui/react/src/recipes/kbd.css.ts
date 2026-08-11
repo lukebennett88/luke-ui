@@ -1,5 +1,6 @@
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import { FONT_METRIC_SCALE } from '../theme/font-metric-scale.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
 
@@ -13,7 +14,7 @@ const base = styleInLayer('recipes', {
 	color: vars.color.text.primary,
 	display: 'inline-flex',
 	fontFamily: vars.font.family.code,
-	fontSize: vars.font.caption.fontSize,
+	fontSize: FONT_METRIC_SCALE[100].fontSize,
 	fontWeight: vars.font.weight.body,
 	inlineSize: 'fit-content',
 	lineHeight: 1,

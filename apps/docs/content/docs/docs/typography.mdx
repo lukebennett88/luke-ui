@@ -3,8 +3,8 @@ title: Typography
 description: Use Luke UI's semantic typography styles through typography components.
 ---
 
-Luke UI defines nine semantic typography styles. Each style is a complete treatment: font family,
-size, weight, line height, letter spacing, and Capsize trim.
+Luke UI defines semantic typography styles. Each style is a complete treatment: font family, size,
+weight, line height, letter spacing, and Capsize trim.
 
 ## Base components
 
@@ -20,18 +20,17 @@ percentages, units, and compact values. Use `Emoji` when an emoji needs a reliab
 
 `Text` and `Heading` use these styles, from smallest to largest:
 
-| Style                 | Intended use                             |
-| --------------------- | ---------------------------------------- |
-| `caption`             | Ancillary or supporting text             |
-| `label`               | Terse UI and control text                |
-| `body`                | Normal body copy                         |
-| `lead`                | Larger introductory body copy            |
-| `heading4`–`heading1` | Visual heading hierarchy                 |
-| `display`             | Oversized editorial or marketing moments |
+| Style                 | Intended use                                                              |
+| --------------------- | ------------------------------------------------------------------------- |
+| `caption`             | Ancillary text at the smallest size                                       |
+| `support`             | Secondary UI copy at label size with body weight — messages and list text |
+| `label`               | Terse UI and control text at the same size with label weight              |
+| `body`                | Normal body copy                                                          |
+| `lead`                | Larger introductory body copy                                             |
+| `heading4`–`heading1` | Visual heading hierarchy                                                  |
+| `display`             | Oversized editorial or marketing moments                                  |
 
-The specimen keeps each style's metrics together.
-
-<ExampleBlock src="text/typography" title="Text — Typography styles" />
+<ExampleBlock src="text/typography" title="Typography — Styles" />
 
 `Text` defaults to `body`. `Heading` selects a style from its level, and accepts `typography` when
 the visual hierarchy needs a deliberate override. An `h2` can use `heading3` visually without
@@ -47,12 +46,13 @@ space above and below its letters. Trim removes that extra space from a block te
 
 ## Weight and colour
 
-Each typography style already carries its weight. Themes still expose `body`, `label`, `heading`,
-and `emphasis` weight roles for overrides and for `Strong`. Text also accepts semantic `color`
-values such as `primary`, `secondary`, `accent`, `info`, `success`, `warning`, and `danger`.
+Each typography style already carries its weight. Pass `fontWeight` only when you need a different
+role. Themes expose `body`, `label`, `heading`, and `emphasis` for that purpose, and for `Strong`.
+Text also accepts semantic `color` values such as `primary`, `secondary`, `accent`, `info`,
+`success`, `warning`, and `danger`.
 
 ```tsx
-<Text color="secondary" typography="label">
+<Text color="secondary" typography="support">
 	Last updated 12 minutes ago
 </Text>
 ```

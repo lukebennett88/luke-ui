@@ -1,5 +1,6 @@
 import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
+import { FONT_METRIC_SCALE } from '../theme/font-metric-scale.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -55,8 +56,8 @@ const inputGroupConfig = {
 			fontFamily: vars.font.family.body,
 			inlineSize: '100%',
 			isolation: 'isolate',
-			letterSpacing: vars.font.body.letterSpacing,
-			lineHeight: vars.font.body.lineHeight,
+			letterSpacing: FONT_METRIC_SCALE[300].letterSpacing,
+			lineHeight: FONT_METRIC_SCALE[300].lineHeight,
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
@@ -201,7 +202,7 @@ const inputGroupConfig = {
 			medium: {
 				group: {
 					blockSize: vars.controlSize.medium,
-					fontSize: vars.font.body.fontSize,
+					fontSize: FONT_METRIC_SCALE[300].fontSize,
 				},
 				control: {
 					blockSize: vars.controlSize.medium,
@@ -209,12 +210,12 @@ const inputGroupConfig = {
 					paddingInlineStart: vars.space[300],
 				},
 				prefix: {
-					lineHeight: vars.font.body.lineHeight,
+					lineHeight: FONT_METRIC_SCALE[300].lineHeight,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
 				suffix: {
-					lineHeight: vars.font.body.lineHeight,
+					lineHeight: FONT_METRIC_SCALE[300].lineHeight,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
@@ -222,9 +223,9 @@ const inputGroupConfig = {
 			small: {
 				group: {
 					blockSize: vars.controlSize.small,
-					fontSize: vars.font.label.fontSize,
-					letterSpacing: vars.font.label.letterSpacing,
-					lineHeight: vars.font.label.lineHeight,
+					fontSize: FONT_METRIC_SCALE[200].fontSize,
+					letterSpacing: FONT_METRIC_SCALE[200].letterSpacing,
+					lineHeight: FONT_METRIC_SCALE[200].lineHeight,
 				},
 				control: {
 					blockSize: vars.controlSize.small,
@@ -232,12 +233,12 @@ const inputGroupConfig = {
 					paddingInlineStart: vars.space[200],
 				},
 				prefix: {
-					lineHeight: vars.font.label.lineHeight,
+					lineHeight: FONT_METRIC_SCALE[200].lineHeight,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},
 				suffix: {
-					lineHeight: vars.font.label.lineHeight,
+					lineHeight: FONT_METRIC_SCALE[200].lineHeight,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},

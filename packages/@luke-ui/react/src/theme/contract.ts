@@ -1,3 +1,5 @@
+import type { FontMetricStep } from './font-metric-scale.js';
+
 /** Leaves shared by every public type style. */
 const typeStyle = {
 	baselineTrim: null,
@@ -39,10 +41,12 @@ const roleForeground = {
 
 /**
  * Public semantic type styles, in ascending visual size. Each style is a complete typography
- * treatment: family, size, weight, line height, letter spacing, and Capsize trims.
+ * treatment: family, size, weight, line height, letter spacing, and Capsize trims. Styles may share
+ * private metric steps when they differ by weight rather than size.
  */
 export const typeStyles = [
 	'caption',
+	'support',
 	'label',
 	'body',
 	'lead',
@@ -56,12 +60,36 @@ export const typeStyles = [
 /** A public semantic type style key. */
 export type TypeStyle = (typeof typeStyles)[number];
 
+/** Theme weight roles available on `vars.font.weight` and as `Text`/`Heading` overrides. */
+export const fontWeightRoles = ['body', 'label', 'heading', 'emphasis'] as const;
+
+/** A theme font-weight role key. */
+export type FontWeightRole = (typeof fontWeightRoles)[number];
+
+/**
+ * Private metric step each public type style resolves from. Kept beside `typeStyles` so
+ * `FONT_VALUES` emission cannot invent a different mapping.
+ */
+export const typeStyleMetricStep = {
+	caption: 100,
+	support: 200,
+	label: 200,
+	body: 300,
+	lead: 400,
+	heading4: 500,
+	heading3: 600,
+	heading2: 700,
+	heading1: 800,
+	display: 900,
+} as const satisfies Record<TypeStyle, FontMetricStep>;
+
 /**
  * Theme weight role each type style resolves to. Kept beside `typeStyles` so stylesheet emission and
  * the Text recipe cannot pick different defaults.
  */
 export const typeStyleWeightRole = {
 	caption: 'body',
+	support: 'body',
 	label: 'label',
 	body: 'body',
 	lead: 'body',
@@ -70,7 +98,11 @@ export const typeStyleWeightRole = {
 	heading2: 'heading',
 	heading1: 'heading',
 	display: 'heading',
-} as const satisfies Record<TypeStyle, 'body' | 'label' | 'heading' | 'emphasis'>;
+} as const satisfies Record<TypeStyle, FontWeightRole>;
+
+const fontStyleContract = Object.fromEntries(
+	typeStyles.map((style) => [style, { ...typeStyle }]),
+) as { readonly [Style in TypeStyle]: typeof typeStyle };
 
 /**
  * The fixed spacing steps shared by the built-in themes. Each value is a selected step from the
@@ -176,36 +208,11 @@ export const themeContractTree = {
 	/**
 	 * Semantic type styles, plus the shared family and weight primitives those styles resolve from.
 	 * `family` and `weight` stay public for code surfaces and weight overrides; they are not type
-	 * styles themselves.
+	 * styles themselves. The private metric scale that styles compose from is not part of this
+	 * contract.
 	 */
 	font: {
-		caption: {
-			...typeStyle,
-		},
-		label: {
-			...typeStyle,
-		},
-		body: {
-			...typeStyle,
-		},
-		lead: {
-			...typeStyle,
-		},
-		heading4: {
-			...typeStyle,
-		},
-		heading3: {
-			...typeStyle,
-		},
-		heading2: {
-			...typeStyle,
-		},
-		heading1: {
-			...typeStyle,
-		},
-		display: {
-			...typeStyle,
-		},
+		...fontStyleContract,
 		family: {
 			body: null,
 			code: null,

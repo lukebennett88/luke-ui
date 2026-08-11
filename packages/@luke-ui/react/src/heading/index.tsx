@@ -28,7 +28,7 @@ const typographyByLevel = {
 	// h5/h6 stay in the outline without inventing heading5/heading6 type styles.
 	5: 'lead',
 	6: 'body',
-} as const;
+} as const satisfies Record<HeadingLevel, NonNullable<TextProps['typography']>>;
 
 /** Semantic heading with automatic level composition and level-based typography. */
 export function Heading(props: HeadingProps) {

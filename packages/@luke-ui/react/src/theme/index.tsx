@@ -24,6 +24,9 @@ export { typeStyles } from './contract.js';
 /** A public semantic type style key. */
 export type { TypeStyle } from './contract.js';
 
+/** Theme font-weight role keys used by typography defaults and weight overrides. */
+export type { FontWeightRole } from './contract.js';
+
 /**
  * `ThemeContrastError` is thrown by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1
  * for text/on-solid pairs, 3:1 for the focus ring and `border.control`. The six semantic

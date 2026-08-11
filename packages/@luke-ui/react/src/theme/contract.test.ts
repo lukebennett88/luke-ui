@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { vars } from './contract.css.js';
 import { flattenThemeContract, spaceScale, themeContractTree, typeStyles } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 
 function countLeaves(node: unknown): number {
 	if (typeof node === 'string') return 1;
@@ -101,9 +102,12 @@ describe('theme contract', () => {
 		expect(typeStyles).toEqual(fontStepKeys);
 	});
 
-	it('does not expose numeric font steps on the public contract', () => {
-		for (const step of ['100', '200', '300', '400', '500', '600', '700', '800', '900']) {
+	it('keeps literal typography metrics internal while public tokens stay semantic', () => {
+		for (const step of Object.keys(FONT_METRIC_SCALE)) {
 			expect(Object.hasOwn(vars.font, step)).toBe(false);
+		}
+		for (const style of typeStyles) {
+			expect(Object.hasOwn(vars.font, style)).toBe(true);
 		}
 	});
 

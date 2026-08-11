@@ -1,6 +1,7 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { vars } from '../theme/contract.css.js';
+import { FONT_METRIC_SCALE } from '../theme/font-metric-scale.js';
 import { fieldMessageIcon, fieldMessageIndent } from './field.css.js';
 import type { RecipeSelection, SlottedConfigInput } from './recipe.js';
 import { recipe } from './recipe.js';
@@ -189,7 +190,7 @@ const checkboxConfig = {
 			large: {
 				root: {
 					vars: {
-						[checkboxControlSize]: vars.font.heading4.lineHeight,
+						[checkboxControlSize]: FONT_METRIC_SCALE[500].lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.small,
 						[checkboxIndicatorSize]: vars.iconSize.medium,
 						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
@@ -199,7 +200,7 @@ const checkboxConfig = {
 			medium: {
 				root: {
 					vars: {
-						[checkboxControlSize]: vars.font.body.lineHeight,
+						[checkboxControlSize]: FONT_METRIC_SCALE[300].lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.xsmall,
 						[checkboxIndicatorSize]: vars.iconSize.small,
 						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
@@ -210,7 +211,7 @@ const checkboxConfig = {
 				root: {
 					vars: {
 						[checkboxControlSize]: vars.iconSize.small,
-						[checkboxGlyphSize]: vars.font.caption.fontSize,
+						[checkboxGlyphSize]: FONT_METRIC_SCALE[100].fontSize,
 						[checkboxIndicatorSize]: vars.iconSize.xsmall,
 						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
 					},

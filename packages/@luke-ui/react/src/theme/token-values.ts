@@ -10,6 +10,8 @@
 import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
 import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
+import { typeStyles, typeStyleMetricStep } from './contract.js';
+import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
 
 /**
@@ -43,39 +45,24 @@ export const FONT_METRICS: Record<'apple-system' | 'dm-sans' | 'inter', CapsizeF
 	inter: interMetrics,
 };
 
+type FontValueLeaf = 'fontSize' | 'letterSpacing' | 'lineHeight';
+type FontValueKey = `font.${(typeof typeStyles)[number]}.${FontValueLeaf}`;
+
 /**
- * Fixed metrics for each public type style: font size, line height, and letter spacing. Family,
- * weight, and Capsize trims are resolved in the stylesheet from the active theme.
+ * Fixed metrics for each public type style: font size, line height, and letter spacing, resolved
+ * from the private metric scale. Family, weight, and Capsize trims are resolved in the stylesheet
+ * from the active theme.
  */
-export const FONT_VALUES = {
-	'font.caption.fontSize': '12px',
-	'font.caption.letterSpacing': '0.0025em',
-	'font.caption.lineHeight': '16px',
-	'font.label.fontSize': '14px',
-	'font.label.letterSpacing': '0',
-	'font.label.lineHeight': '20px',
-	'font.body.fontSize': '16px',
-	'font.body.letterSpacing': '0',
-	'font.body.lineHeight': '24px',
-	'font.lead.fontSize': '18px',
-	'font.lead.letterSpacing': '-0.0025em',
-	'font.lead.lineHeight': '26px',
-	'font.heading4.fontSize': '20px',
-	'font.heading4.letterSpacing': '-0.005em',
-	'font.heading4.lineHeight': '28px',
-	'font.heading3.fontSize': '24px',
-	'font.heading3.letterSpacing': '-0.00625em',
-	'font.heading3.lineHeight': '30px',
-	'font.heading2.fontSize': '28px',
-	'font.heading2.letterSpacing': '-0.0075em',
-	'font.heading2.lineHeight': '36px',
-	'font.heading1.fontSize': '35px',
-	'font.heading1.letterSpacing': '-0.01em',
-	'font.heading1.lineHeight': '40px',
-	'font.display.fontSize': '60px',
-	'font.display.letterSpacing': '-0.025em',
-	'font.display.lineHeight': '60px',
-} as const;
+export const FONT_VALUES = Object.fromEntries(
+	typeStyles.flatMap((style) => {
+		const metrics = FONT_METRIC_SCALE[typeStyleMetricStep[style]];
+		return [
+			[`font.${style}.fontSize`, metrics.fontSize],
+			[`font.${style}.letterSpacing`, metrics.letterSpacing],
+			[`font.${style}.lineHeight`, metrics.lineHeight],
+		] as const;
+	}),
+) as { readonly [Key in FontValueKey]: string };
 
 /** Inline and block sizes for the four public icon sizes. */
 export const ICON_SIZE_VALUES = {

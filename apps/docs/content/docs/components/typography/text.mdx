@@ -27,19 +27,12 @@ element types.
 
 ## Typography
 
-Use `typography` to apply a complete style: family, size, weight, line height, letter spacing, and
-Capsize trim. `body` is the default.
+Pass `typography` to choose a style. `body` is the default. See
+[Typography](/docs/typography) for the full style reference.
 
-| Style                 | Intended use                             |
-| --------------------- | ---------------------------------------- |
-| `caption`             | Ancillary or supporting text             |
-| `label`               | Terse UI and control text                |
-| `body`                | Normal body copy                         |
-| `lead`                | Larger introductory body copy            |
-| `heading4`–`heading1` | Visual heading hierarchy                 |
-| `display`             | Oversized editorial or marketing moments |
-
-<ExampleBlock src="text/typography" title="Text — Typography styles" />
+```tsx
+<Text typography="lead">A short introduction to the section below.</Text>
+```
 
 Set `fontWeight` only when you need to override the style's weight. Themes expose `body`, `label`,
 `heading`, and `emphasis` roles for that purpose.

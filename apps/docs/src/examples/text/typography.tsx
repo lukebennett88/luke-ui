@@ -11,7 +11,7 @@ export default () => {
 					display="grid"
 					gap="300"
 					key={typography}
-					style={{ gridTemplateColumns: '6rem minmax(0, 1fr)' }}
+					style={{ gridTemplateColumns: 'max-content minmax(0, 1fr)' }}
 				>
 					<Text color="secondary" elementType="div" typography="caption">
 						{typography}

@@ -5,6 +5,7 @@ import { focusRing, restingFocusRing } from '../styles/focus-ring.js';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { overlayEnterTransition, overlayExitTransition } from '../styles/overlay-motion.js';
 import { vars } from '../theme/contract.css.js';
+import { FONT_METRIC_SCALE } from '../theme/font-metric-scale.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -163,8 +164,8 @@ const comboboxConfig = {
 			fontFamily: vars.font.family.body,
 			inlineSize: '100%',
 			isolation: 'isolate',
-			letterSpacing: vars.font.body.letterSpacing,
-			lineHeight: vars.font.body.lineHeight,
+			letterSpacing: FONT_METRIC_SCALE[300].letterSpacing,
+			lineHeight: FONT_METRIC_SCALE[300].lineHeight,
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
@@ -310,7 +311,6 @@ const comboboxConfig = {
 		sectionHeading: {
 			color: vars.color.text.secondary,
 			...vars.font.label,
-			fontWeight: vars.font.weight.label,
 			paddingBlockEnd: vars.space[100],
 			paddingBlockStart: 0,
 			paddingInline: vars.space[300],
@@ -319,10 +319,8 @@ const comboboxConfig = {
 			alignItems: 'center',
 			color: vars.color.text.secondary,
 			display: 'flex',
-			fontSize: vars.font.label.fontSize,
+			...vars.font.support,
 			justifyContent: 'center',
-			letterSpacing: vars.font.label.letterSpacing,
-			lineHeight: vars.font.label.lineHeight,
 			paddingBlock: vars.space[600],
 			paddingInline: vars.space[300],
 			textAlign: 'center',
@@ -425,7 +423,7 @@ const comboboxConfig = {
 			medium: {
 				inputGroup: {
 					blockSize: vars.controlSize.medium,
-					fontSize: vars.font.body.fontSize,
+					fontSize: FONT_METRIC_SCALE[300].fontSize,
 					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.medium] },
 				},
 				textInput: {
@@ -445,9 +443,7 @@ const comboboxConfig = {
 					paddingInlineStart: vars.space[300],
 				},
 				item: {
-					fontSize: vars.font.label.fontSize,
-					letterSpacing: vars.font.label.letterSpacing,
-					lineHeight: vars.font.label.lineHeight,
+					...vars.font.support,
 					minBlockSize: vars.controlSize.medium,
 					paddingBlock: vars.space[200],
 					paddingInline: vars.space[300],
@@ -456,9 +452,9 @@ const comboboxConfig = {
 			small: {
 				inputGroup: {
 					blockSize: vars.controlSize.small,
-					fontSize: vars.font.label.fontSize,
-					letterSpacing: vars.font.label.letterSpacing,
-					lineHeight: vars.font.label.lineHeight,
+					fontSize: FONT_METRIC_SCALE[200].fontSize,
+					letterSpacing: FONT_METRIC_SCALE[200].letterSpacing,
+					lineHeight: FONT_METRIC_SCALE[200].lineHeight,
 					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.small] },
 				},
 				textInput: {
@@ -478,9 +474,7 @@ const comboboxConfig = {
 					paddingInlineStart: vars.space[200],
 				},
 				item: {
-					fontSize: vars.font.label.fontSize,
-					letterSpacing: vars.font.label.letterSpacing,
-					lineHeight: vars.font.label.lineHeight,
+					...vars.font.support,
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space[100],
 					paddingInline: vars.space[300],

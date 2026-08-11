@@ -1,15 +1,17 @@
 import type { ComplexStyleRule } from '@vanilla-extract/css';
-import { createVar } from '@vanilla-extract/css';
+import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
-import type { TypeStyle } from '../theme/contract.js';
-import { typeStyles } from '../theme/contract.js';
+import type { FontWeightRole, TypeStyle } from '../theme/contract.js';
+import { fontWeightRoles, typeStyles } from '../theme/contract.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
 import { visuallyHiddenStyle } from './visually-hidden.css.js';
 
 const lineClampNone = {} satisfies ComplexStyleRule;
 export const textLineHeight = createVar();
+/** Set only when `fontWeight` is passed; otherwise each typography style's default weight applies. */
+const textFontWeight = createVar();
 const lineClampSingleLine = {
 	display: 'block',
 	minInlineSize: 0,
@@ -55,12 +57,12 @@ const colorVariants = {
 	warning: { color: vars.color.foreground.warning.rest },
 } as const;
 
-const weightVariants = {
-	body: { fontWeight: vars.font.weight.body },
-	emphasis: { fontWeight: vars.font.weight.emphasis },
-	heading: { fontWeight: vars.font.weight.heading },
-	label: { fontWeight: vars.font.weight.label },
-} as const;
+const weightVariants = Object.fromEntries(
+	fontWeightRoles.map((fontWeight) => [
+		fontWeight,
+		{ vars: { [textFontWeight]: vars.font.weight[fontWeight] } },
+	]),
+) as Record<FontWeightRole, { vars: { [textFontWeight]: string } }>;
 
 const typographyVariants = Object.fromEntries(
 	typeStyles.map((typography) => [
@@ -68,7 +70,7 @@ const typographyVariants = Object.fromEntries(
 		{
 			fontFamily: vars.font[typography].fontFamily,
 			fontSize: vars.font[typography].fontSize,
-			fontWeight: vars.font[typography].fontWeight,
+			fontWeight: fallbackVar(textFontWeight, vars.font[typography].fontWeight),
 			letterSpacing: vars.font[typography].letterSpacing,
 			lineHeight: vars.font[typography].lineHeight,
 			vars: { [textLineHeight]: vars.font[typography].lineHeight },
@@ -181,8 +183,6 @@ export const text = recipe({
 			unset: {},
 		},
 		typography: typographyVariants,
-		// Declared after `typography` so an explicit weight override wins over the type style's
-		// weight.
 		fontWeight: weightVariants,
 		shouldInheritFont: {
 			false: {},

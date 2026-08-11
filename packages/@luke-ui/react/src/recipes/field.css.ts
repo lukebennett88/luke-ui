@@ -54,9 +54,7 @@ const fieldConfig = {
 			},
 		},
 		message: {
-			fontSize: vars.font.label.fontSize,
-			letterSpacing: vars.font.label.letterSpacing,
-			lineHeight: vars.font.label.lineHeight,
+			...vars.font.support,
 			minInlineSize: 0,
 			paddingInlineStart: messageIndent,
 		},
