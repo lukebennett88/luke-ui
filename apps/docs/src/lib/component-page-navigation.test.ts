@@ -1,5 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import { getComponentPageNavigation } from './component-page-navigation.js';
+import { getComponentPageNavigation, getDocsTreePathname } from './component-page-navigation.js';
 
 test('returns Guide and Props links for a component guide', () => {
 	expect(getComponentPageNavigation('/components/actions/button')).toEqual({
@@ -21,4 +21,18 @@ test('does not add component navigation to other docs pages', () => {
 	expect(getComponentPageNavigation('/docs/installation')).toBeNull();
 	expect(getComponentPageNavigation('/components/actions')).toBeNull();
 	expect(getComponentPageNavigation('/components/actions/button/examples')).toBeNull();
+});
+
+test('maps a Props pathname to its Guide pathname for tree matching', () => {
+	expect(getDocsTreePathname('/components/actions/button/props')).toBe(
+		'/components/actions/button',
+	);
+});
+
+test('leaves a Guide pathname unchanged for tree matching', () => {
+	expect(getDocsTreePathname('/components/actions/button')).toBe('/components/actions/button');
+});
+
+test('leaves other docs pathnames unchanged for tree matching', () => {
+	expect(getDocsTreePathname('/docs/installation')).toBe('/docs/installation');
 });

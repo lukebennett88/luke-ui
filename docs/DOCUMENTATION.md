@@ -98,7 +98,9 @@ Do not document exports that are not public API.
 frontmatter by `scripts/generate-props-pages.ts`. `props.mdx` is the API reference at
 `/components/<group>/<name>/props`. `meta.json` uses `"pages": ["!props"]` and
 `"collapsible": false` so the component stays one ordinary sidebar link. It sets
-`"pagesIndex": "../<name>"` so the folder's sidebar entry points to the sibling guide.
+`"pagesIndex": "../<name>"` so the folder's sidebar entry points to the sibling guide. The shared
+docs route remaps a Props pathname to its Guide URL for Fumadocs' sidebar tree matching, so Guide
+and Props share the Components sidebar.
 
 Keep the guide and Props frontmatter titles and descriptions identical. The component generator
 leaves editorial descriptions out instead of adding placeholder copy. Add one useful description to

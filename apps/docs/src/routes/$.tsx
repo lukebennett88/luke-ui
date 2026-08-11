@@ -9,6 +9,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
+import { DocsTreePathnameProvider } from '../components/docs-tree-pathname-provider.js';
 import { ExampleBlock } from '../components/example-block';
 import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
@@ -158,18 +159,20 @@ function Page() {
 	const data = useFumadocsLoader(Route.useLoaderData());
 
 	return (
-		<DocsLayout {...baseOptions()} tree={data.pageTree}>
-			<Suspense>
-				{clientLoader.useContent(data.path, {
-					className: 'pb-16 md:pb-20 xl:pb-24',
-					componentNavigation: data.componentNavigation,
-					githubUrl: data.githubUrl,
-					markdownUrl: data.markdownUrl,
-					reactAriaUrl: data.reactAriaUrl,
-					sourceUrl: data.sourceUrl,
-					storybookUrl: data.storybookUrl,
-				})}
-			</Suspense>
-		</DocsLayout>
+		<DocsTreePathnameProvider>
+			<DocsLayout {...baseOptions()} tree={data.pageTree}>
+				<Suspense>
+					{clientLoader.useContent(data.path, {
+						className: 'pb-16 md:pb-20 xl:pb-24',
+						componentNavigation: data.componentNavigation,
+						githubUrl: data.githubUrl,
+						markdownUrl: data.markdownUrl,
+						reactAriaUrl: data.reactAriaUrl,
+						sourceUrl: data.sourceUrl,
+						storybookUrl: data.storybookUrl,
+					})}
+				</Suspense>
+			</DocsLayout>
+		</DocsTreePathnameProvider>
 	);
 }

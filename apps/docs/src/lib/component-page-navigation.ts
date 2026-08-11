@@ -18,3 +18,8 @@ export function getComponentPageNavigation(pageUrl: string): ComponentPageNaviga
 		propsUrl: `${guideUrl}/props`,
 	};
 }
+
+/** Pathname Fumadocs should use for page-tree matching. Props pages map to their guide. */
+export function getDocsTreePathname(pathname: string): string {
+	return getComponentPageNavigation(pathname)?.guideUrl ?? pathname;
+}
