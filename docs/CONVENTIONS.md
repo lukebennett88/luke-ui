@@ -70,5 +70,5 @@ See [STYLING.md](STYLING.md) for cascade layers, recipes, styling utilities, and
 
 ## Documentation
 
-See [DOCUMENTATION.md](DOCUMENTATION.md) for docs ownership, MDX page structure, examples, API
-reference, and docs freshness rules.
+See [DOCUMENTATION.md](DOCUMENTATION.md) for what to document, writing style, examples, MDX page
+structure, and docs freshness rules. It also governs JSDoc and code comments.

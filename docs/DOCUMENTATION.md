@@ -1,42 +1,101 @@
 # Documentation
 
-Use this guide when you write or move Luke UI documentation.
+This is the only normative documentation guide for the repository. It covers MDX pages in the hosted
+docs app, JSDoc, code comments, and READMEs. It decides what belongs in documentation, how to write
+it, and where it lives. The internal guides in `docs/` follow the same judgement about usefulness
+and scope, but not the punctuation rules.
 
-## Primary docs surface
+## What documentation is for
 
-The hosted docs app in `apps/docs` is the primary docs surface for app developers and library
-authors. Authored guides live under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component
-guides live under `apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
+Public documentation helps a developer build an interface with Luke UI. It is not a record of how
+Luke UI works.
 
-Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
+A section of documentation should help answer at least one of these questions:
 
-The package README links to the hosted docs. Fumadocs provides:
+- What is this?
+- When would I use it?
+- How do I use it?
+- How do I choose between the available options?
+- What mistake does this guidance prevent?
 
-- `/llms.txt` for the component index.
-- `/llms-full.txt` for full docs.
-- Per-page Markdown by appending `.md` to a docs URL, for example `/docs/installation.md` or
-  `/components/actions/button.md`.
+This is an editorial test, not a page template. Do not add a heading per question. Content that
+answers none of them probably does not belong.
+
+Documentation can follow every rule in this guide and still be poor documentation. Prose that is
+verbose, redundant, obvious, or focused on implementation fails its reader even when the wording is
+correct.
+
+## What to document
+
+Document how a developer builds interfaces with Luke UI. Do not document how Luke UI is built.
+
+### Implementation detail
+
+Include an implementation detail only when it changes what a developer writes or chooses. Before you
+keep one, name the decision, constraint, or observable behaviour it explains. When you cannot name
+one, cut it.
+
+Keep the detail that changes the reader's code:
+
+- `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
+- A composed field takes no plain `ref`, so `inputRef` is the only way to reach the control.
+- `solid.pressed` reuses the `solid.hover` colour, so a custom pressed state needs depth, finish, or
+  a transform.
+
+Cut the detail that only explains the mechanism:
+
+- `Icon` renders an `<svg>` that references a symbol in the generated spritesheet.
+- A token path cannot be both a string leaf and the parent of `hover` and `pressed`.
+- Which internal components a composed component renders.
+
+### Other technologies
+
+Document the Luke UI part. Do not document React, React Aria, CSS, TypeScript, or a form library in
+general, because their own documentation owns that. Link upstream when the reader needs it, and
+write link text that says where it goes.
+
+Describe upstream behaviour only when Luke UI changes it, constrains it, or a developer must
+configure it to use Luke UI. Setting `validationBehavior="aria"` to hand validation to a form
+library qualifies. The React Aria validation model in general does not.
+
+### The supported path
+
+Document the ordinary, supported way to use a component. Do not catalogue usage that is unsupported,
+obscure, or merely technically possible. Options crowd out the path most readers need, and a
+documented obscure path becomes a support obligation.
+
+Do not write "you can do this, but it is not recommended". Either recommend it or leave it out.
+
+### Internal distinctions
+
+Expose an internal architectural distinction only when it reaches the public API or a developer's
+choice. Component tiers qualify, because the tier decides the import path and the audience. See
+[COMPONENTS.md](COMPONENTS.md).
+
+Do not document an export that is not public API.
 
 ## Writing style
 
-These rules cover MDX pages, JSDoc, code comments, and package READMEs.
+Write short, plain sentences. Split a sentence that carries two ideas rather than trimming the words
+that carry meaning.
 
-**Simplified Technical English.** Luke UI follows the rules of ASD-STE100. The approved-word
-dictionary needs a paid licence. This guide states the rule set only, not the word list.
-
-- Write descriptive sentences with 25 words or fewer. Write instructions with 20 words or fewer.
-  Split a long sentence into two. Do not trim words from it.
-- Write one instruction per sentence. Keep each paragraph to six sentences or fewer.
-- Use active voice. Name the actor in each sentence.
-- Write instructions as commands. Write "Pass a title", not "A title should be passed".
-- Use simple tenses. Avoid perfect tenses, such as "has changed", and continuous tenses, such as "is
-  changing".
+- Write one instruction per sentence. Write an instruction as a command: "Pass a title", not "A
+  title should be passed".
+- Break a paragraph when it changes subject.
+- Use active voice and name the actor. Passive voice is fine when Luke UI is the actor and naming it
+  adds nothing, as in "The spinner is hidden from assistive technology".
+- Write in the present tense. Use another tense only when the timing is the point.
 - Keep articles. Do not drop "the" or "a" to shorten a sentence.
-- Avoid "-ing" forms as nouns or in participial phrases. An established technical name, such as
-  "styling" or "theming", is an exception.
-- Keep noun clusters to three words or fewer.
-- Write positively. Avoid double negatives, such as "not uncommon".
-- State what a thing does. Avoid "can be used to", "allows you to", and "enables you to".
+- Do not open a sentence with a participial phrase that hides the actor. A gerund is fine in a
+  heading or a title, as in "Choosing a scale".
+- Break up a stack of nouns when the relationship between them is unclear. Add a preposition.
+- Write positively. Avoid a double negative, such as "not uncommon".
+- State what a thing does. Do not write "can be used to", "allows you to", or "enables you to".
+- Use "you can" only to grant permission or present a real choice. When the reader should do
+  something, tell them to do it.
+- Address the reader as "you". Never write "we", "us", "let's", or "I".
+- Cut filler: "simply", "just", "note that", "it is important to", "powerful", "flexible",
+  "seamless", "robust".
 
 **One term per concept.** Do not use different words for the same concept. Use the same word every
 time.
@@ -53,22 +112,151 @@ time.
 | `choose`               | Use `choose` when someone picks from options.                                                                                                    |
 | `select`               | Use `select` only for a control's selection state.                                                                                               |
 
-**Spelling and punctuation.** Spell words in Australian English. Write headings in sentence case. Do
-not use an em dash or a semicolon in prose. One exception applies. The em dash inside an
-`<ExampleBlock title>` separates the title from its qualifier. It stays.
+**Spelling and punctuation.** Spell words in Australian English. Write headings in sentence case,
+and capitalise only proper nouns and product names. Do not use an em dash or a semicolon in prose.
+One exception applies. The em dash inside an `<ExampleBlock title>` separates the title from its
+qualifier. It stays.
 
-**Comments explain the code, not its history.** Luke UI is pre-1.0. Do not carry a prior state in a
-comment.
+**Say it once.** Cut a sentence whose only content restates its heading, a prop name, or the example
+below it. Do not summarise a section at the end of it. When more than one page needs the same rule,
+explain it on the page that owns the topic and link to it from the others.
+
+## Comments and JSDoc
+
+JSDoc on a public type is published documentation. The generated Props pages render it, so the rules
+above apply to it.
+
+- Write one line for a prop: what it does, plus `@default` when the component sets a default.
+- Do not restate the prop name. `endIcon` needs "Icon shown after the label", not "The end icon".
+- Explain a constraint a reader would otherwise get wrong, such as why a composed field exposes
+  `inputRef` instead of `ref`.
+- Redeclare an important inherited `react-aria-components` prop with useful JSDoc. Point a long-tail
+  inherited prop at the upstream React Aria component.
+
+A code comment explains the code, not its history. Luke UI is pre-1.0, so no comment carries a prior
+state.
 
 - Do not write "previously", "used to", "no longer", "an earlier pass", or "the old X".
 - Do not use an issue number to narrate why a change happened.
 - Do not name another design system to justify a decision. A design system may appear as test
   reference data, as `theme/__fixtures__/radix-scales.ts` does.
+- Do not narrate what the next line does.
 - Keep an explanation that justifies a rule a reader would otherwise undo. When unsure, shorten the
   explanation rather than delete it.
 
-**Say it once.** Cut a sentence when its only content restates the prop, token, or concept in its
-own heading.
+## Examples
+
+An example carries more of the explanation than the prose around it, because most readers look for
+the code first.
+
+### What to show
+
+- Show one realistic thing a developer might write. Use values such as "Save changes" and
+  "you@example.com", never `foo`, `bar`, or lorem ipsum.
+- Let the example make the behaviour obvious. A reader should see what the section describes without
+  hunting for it.
+- Keep the example as small as it can be without becoming artificial.
+- Choose one approach and show it. Do not present several interchangeable ways to reach the same
+  result.
+- Do not demonstrate every value a prop accepts. Show the values a reader chooses between, and leave
+  the full list to the Props page.
+- Do not label example UI with prop names. A checkbox labelled "Invalid" documents the API. Label it
+  "Email me a receipt" instead.
+
+A reference page is the exception. A token, type scale, or icon page enumerates on purpose, because
+the enumeration is the content.
+
+### Prose around an example
+
+Explain what the reader should notice when the example does not already make it obvious. Put what a
+reader needs before the example, not after it.
+
+Do not add a lead-in for its own sake. "The following example shows a button with an icon" adds
+nothing beside a titled, rendered example.
+
+### Example files
+
+Interactive examples live in `apps/docs/src/examples/<component>/`. An example module
+default-exports an anonymous arrow function, `export default () => {...}`. The module path
+identifies the component and variation, so the rendered source repeats no function name.
+
+Reference an example from an MDX page with `<ExampleBlock src="<component>/<name>" title="..." />`.
+Title it `<page or component> — <qualifier>`, for example `Button — Icons`.
+
+Every component guide opens with a focused `basic.tsx` example as its primary `ExampleBlock`, which
+the generator scaffolds and `component-doc-contract` enforces. An example that no page references
+and no other example imports fails `example-reachability`.
+
+Prefer a typechecked `ExampleBlock` over an inline TSX fence whenever the code benefits from a
+rendered preview. Reserve an inline fence for non-renderable setup, partial composition, or an API
+detail that is clearer outside a complete example.
+
+Samples that cannot render live in `apps/docs/src/samples/` and appear through
+`<SourceCodeBlock src="<path>" />`, which shows source with no preview. Use it for installation,
+provider setup, and configuration.
+
+Keep an example aligned with the section that references it. When you add a feature section, add or
+update its example in the same change.
+
+## Instructions
+
+### Choose for the reader
+
+When a task has several valid approaches, do not hand the undecided choice to the reader.
+
+1. State the requirement, goal, or criterion that decides the choice.
+2. Choose one approach and show it.
+3. Mention an alternative only when the reader has to pick between them.
+
+"Apply `rootClassName` to an element you own that contains the Luke UI interface. This example uses
+the application shell" beats "You can apply `rootClassName` to `<html>`, `<body>`, or a layout
+wrapper".
+
+### Move forwards
+
+Instructions run in one direction. A reader on step four should never have to replay step two.
+
+- Put a prerequisite before the step that needs it.
+- Do not annotate a finished step with what the reader could have done instead.
+- Do not narrate what you happened to do while writing the guide.
+- Give a guide one outcome. Split a guide that teaches two unrelated goals.
+
+## Review
+
+Review the page, not the sentences. New content anchors a reviewer to the words in front of them.
+The problem is more often the shape of the page.
+
+Read the whole page, then ask:
+
+- Does this belong on this page, in this section?
+- Does another page already say it? Link instead of repeating.
+- Can someone scanning headings and examples find the important information?
+- Does each section earn its place? Could anything go without losing information?
+- Is the page helping with usage and decisions, or describing implementation?
+- Are the examples realistic and focused?
+- Do the instructions move forwards?
+- Is prose repeating what a heading, prop name, or example already says?
+- Has comprehensiveness made the page worse?
+- Is context missing because the author already knew the system?
+
+The last question pulls against the others, and it is the one an author is least likely to catch.
+Cutting applies to words and phrases, not to ideas and context. Adding the missing step often makes
+a page feel shorter.
+
+## Where documentation lives
+
+The hosted docs app in `apps/docs` is the primary docs surface for app developers and library
+authors. Authored guides live under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component
+guides live under `apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
+
+Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
+
+The package README links to the hosted docs. Fumadocs provides:
+
+- `/llms.txt` for the component index.
+- `/llms-full.txt` for full docs.
+- Per-page Markdown by appending `.md` to a docs URL, for example `/docs/installation.md` or
+  `/components/actions/button.md`.
 
 ## Component docs
 
@@ -87,8 +275,6 @@ Primitive pages live in the "Primitives" section under components.
 Component pages may link to their related primitive pages, but should not carry the full primitive
 API reference. Keep primitive pages separate from the primary app-developer component path unless
 they become app-developer-facing.
-
-Do not document exports that are not public API.
 
 ## MDX page structure
 
@@ -119,35 +305,21 @@ Use this order for component guide pages:
 6. `## Accessibility`, when the component has user-facing accessibility behaviour worth calling out.
 7. Related-component sections.
 
+Add only the sections that help a developer use the component. The generated guide ships with the
+primary example and no placeholder prose, and `component-doc-contract` fails on a leftover
+placeholder.
+
 Keep cross-reference sections near the end. Put only the `## Props` section and its
 `<auto-type-table>` content on `props.mdx`.
 
-Headings use sentence case. Capitalise only proper nouns and product names.
+## API reference
 
-## Examples
+Hosted component guide files contain prose and example blocks. Their generated `props.mdx` files
+contain `<auto-type-table>` API references generated from TypeScript types. Hidden props pages stay
+in the docs source collection so direct routes, search, and full-text docs exports can include them.
 
-Interactive examples live in `apps/docs/src/examples/<component>/`.
-
-An example module default-exports a React component as an anonymous arrow function,
-`export default () => {...}`. The component and variation are identified by the module path, not the
-function name, so the name is not repeated in the rendered source. Reference an example from an MDX
-page with `<ExampleBlock src="<component>/<name>" title="..." />`.
-
-Every component guide starts with a focused `basic.tsx` example and references it as the primary
-`<ExampleBlock src="<component>/basic" ... />`. This is the default first example generated for a
-new component.
-
-The generated guide contains this example and no placeholder prose. Add a short usage lead-in and
-only the sections that help a developer use the component.
-
-Keep example content aligned with the section that mentions it. If you add a feature section, add or
-update an example in the same change when the feature is easier to understand visually.
-
-Use short, legible sample values. Do not use lorem ipsum.
-
-Prefer a typechecked `ExampleBlock` over an inline TSX fence whenever the code benefits from a
-rendered preview. Reserve inline TSX for non-renderable setup, partial composition, or API details
-that would be less clear inside a complete example.
+The prose on a Props page comes from JSDoc in the component's source, so the prop is documented
+where it is declared.
 
 ## Site chrome
 
@@ -166,11 +338,12 @@ nav through the layout's `header` slot as `DocsSiteNav`
 (`apps/docs/src/components/docs-site-nav.tsx`), which adds the sidebar triggers. The playground and
 the 404 render `SiteNav` directly.
 
-`DocsSiteNav` passes `hasSidebarNavigation`, which hides the bar's destinations below `lg` — the
-breakpoint where Fumadocs starts listing them in the sidebar and its mobile drawer instead, so they
-never appear twice. It also keeps the bar on one row at exactly `h-14`, which the layout's
-`--fd-header-height` is declared to match; changing the bar's height means changing both. Surfaces
-with no sidebar keep the destinations at every width, moving them to a second nav row below `md`.
+`DocsSiteNav` passes `hasSidebarNavigation`, which hides the bar's destinations below `lg`. That is
+the breakpoint where Fumadocs starts listing them in the sidebar and its mobile drawer instead, so
+they never appear twice. It also keeps the bar on one row at exactly `h-14`, which the layout's
+`--fd-header-height` is declared to match, so changing the bar's height means changing both.
+Surfaces with no sidebar keep the destinations at every width, moving them to a second nav row below
+`md`.
 
 ## Playground
 
@@ -183,19 +356,10 @@ renders an "Open in playground" button that opens its source pre-loaded.
 User code compiles in the browser with sucrase and can import `react` and any `@luke-ui/react/*`
 subpath. The import map and editor types are generated by `apps/docs/scripts/`
 (`generate-playground-scope.ts`, `generate-playground-types.ts`) into the gitignored
-`apps/docs/src/generated/` directory as part of `docs#generate` — new component subpaths in
+`apps/docs/src/generated/` directory as part of `docs#generate`, so new component subpaths in
 `@luke-ui/react`'s `exports` map are picked up automatically. The pre-hydration skeleton script
 (`editor-skeleton-script.ts`) is compiled into the same directory by `vp pack` (configured under
 `pack` in `apps/docs/vite.config.ts`) in the same task.
-
-## API reference
-
-Hosted component guide files contain prose and example blocks. Their generated `props.mdx` files
-contain `<auto-type-table>` API references generated from TypeScript types. Hidden props pages stay
-in the docs source collection so direct routes, search, and full-text docs exports can include them.
-
-Component interfaces should redeclare important inherited `react-aria-components` props with useful
-JSDoc. Long-tail inherited props can use a clear pointer to the upstream React Aria component.
 
 ## Keeping docs current
 
