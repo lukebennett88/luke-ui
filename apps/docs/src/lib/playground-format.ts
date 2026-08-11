@@ -33,11 +33,7 @@ const loadPrettier = createPrettierLoader(async () => {
 		import('prettier/plugins/typescript'),
 		import('prettier/plugins/estree'),
 	]);
-	return {
-		estree: estree.default as typeof EstreePlugin,
-		prettier,
-		typescript: typescript.default as typeof TypeScriptPlugin,
-	};
+	return { estree, prettier, typescript };
 });
 
 export async function formatPlaygroundSource(source: string): Promise<string | null> {
