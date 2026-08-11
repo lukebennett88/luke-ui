@@ -97,8 +97,8 @@ export default defineConfig({
 				],
 				test: {
 					browser: {
-						enabled: true,
 						api: { allowWrite: true },
+						enabled: true,
 						expect: {
 							toMatchScreenshot: {
 								// Tall scenes are handled in captureVisual, which grows both

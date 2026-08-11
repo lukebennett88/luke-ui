@@ -22,9 +22,6 @@ type _ComboboxRootOmit<T extends object> = DistributiveOmit<
 >;
 
 interface _ComboboxRootProps<T extends object> extends _ComboboxRootOmit<T> {
-	/** Forwarded to the combobox root element. */
-	ref?: Ref<HTMLDivElement>;
-
 	/** The initially selected key (uncontrolled). */
 	defaultValue?: Key | null;
 
@@ -39,6 +36,8 @@ interface _ComboboxRootProps<T extends object> extends _ComboboxRootOmit<T> {
 
 	/** Called when the open state changes. */
 	onOpenChange?: (isOpen: boolean) => void;
+	/** Forwarded to the combobox root element. */
+	ref?: Ref<HTMLDivElement>;
 
 	/** Control size. @default 'medium' */
 	size?: ComboboxSize;

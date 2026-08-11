@@ -19,10 +19,10 @@ export interface ThemeInheritance {
 
 /** A theme input with its `extends` chain already resolved. */
 export interface ResolvedThemeInput {
-	/** The merged input, with no `extends` left to resolve. */
-	input: ThemeInput;
 	/** The colour provenance, or `null` when the theme extends nothing. */
 	inheritance: ThemeInheritance | null;
+	/** The merged input, with no `extends` left to resolve. */
+	input: ThemeInput;
 }
 
 /** Colour roles in `ThemeInput['color']` declaration order, for a stable provenance report. */

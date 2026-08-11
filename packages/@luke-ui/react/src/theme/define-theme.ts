@@ -24,26 +24,26 @@ export type ColorInput = string | { light?: string; dark?: string };
 
 /** A composite `box-shadow` ladder for one colour mode, rung by rung. */
 export interface DepthLadder {
-	/** Inset treatment for a pressed control or sunken surface. */
-	recessed: string;
-	/** Resting treatment for an interactive control or surface. */
-	resting: string;
-	/** Treatment for a hovered control or elevated surface. */
-	raised: string;
 	/** Treatment for a floating surface such as a menu. */
 	floating: string;
 	/** Treatment for a high-elevation surface such as a dialog. */
 	overlay: string;
+	/** Treatment for a hovered control or elevated surface. */
+	raised: string;
+	/** Inset treatment for a pressed control or sunken surface. */
+	recessed: string;
+	/** Resting treatment for an interactive control or surface. */
+	resting: string;
 }
 
 /** A Button/IconButton `background-image` face-finish ladder for one colour mode. */
 export interface ControlFinish {
+	/** Face lighting for a hovered control. */
+	raised: string;
 	/** Face lighting for a pressed control. */
 	recessed: string;
 	/** Face lighting for a resting control. */
 	resting: string;
-	/** Face lighting for a hovered control. */
-	raised: string;
 }
 
 /**
@@ -52,20 +52,20 @@ export interface ControlFinish {
  */
 interface ThemeInputCommon {
 	/**
+	 * Button/IconButton face finish, per mode. Optional and deep-partial: an omitted rung falls back
+	 * to `'none'` (a flat control).
+	 */
+	actionControlFinish?: { light?: Partial<ControlFinish>; dark?: Partial<ControlFinish> };
+	/**
+	 * Composite `box-shadow` depth ladder, per mode. Optional and deep-partial: an omitted rung
+	 * falls back to the curated extremely-subtle default for that mode.
+	 */
+	depth?: { light?: Partial<DepthLadder>; dark?: Partial<DepthLadder> };
+	/**
 	 * Kebab-case theme identity, for example `'tactile'`. The theme's identity class is
 	 * `luke-ui-theme-${name}`.
 	 */
 	name: string;
-	/** Typography — family and weights only. The type scale is source-owned (not authored here). */
-	typography?: {
-		/**
-		 * Curated Capsize-compatible font-family choice.
-		 * @default 'inter'
-		 */
-		fontFamily?: 'inter' | 'apple-system' | 'dm-sans';
-		/** Font weights for the four theme-controlled weight roles. */
-		fontWeight?: { body?: number; label?: number; heading?: number; emphasis?: number };
-	};
 	/** Corner radii. A generative base + multiplier scale, with explicit per-step overrides. */
 	radius?: {
 		/**
@@ -89,16 +89,16 @@ interface ThemeInputCommon {
 		overlay?: number;
 		// radius.full is fixed at 9999px and is not authored.
 	};
-	/**
-	 * Composite `box-shadow` depth ladder, per mode. Optional and deep-partial: an omitted rung
-	 * falls back to the curated extremely-subtle default for that mode.
-	 */
-	depth?: { light?: Partial<DepthLadder>; dark?: Partial<DepthLadder> };
-	/**
-	 * Button/IconButton face finish, per mode. Optional and deep-partial: an omitted rung falls back
-	 * to `'none'` (a flat control).
-	 */
-	actionControlFinish?: { light?: Partial<ControlFinish>; dark?: Partial<ControlFinish> };
+	/** Typography — family and weights only. The type scale is source-owned (not authored here). */
+	typography?: {
+		/**
+		 * Curated Capsize-compatible font-family choice.
+		 * @default 'inter'
+		 */
+		fontFamily?: 'inter' | 'apple-system' | 'dm-sans';
+		/** Font weights for the four theme-controlled weight roles. */
+		fontWeight?: { body?: number; label?: number; heading?: number; emphasis?: number };
+	};
 }
 
 /**
@@ -151,10 +151,10 @@ export interface ThemeInput extends ThemeInputCommon {
  * base.
  */
 export interface ExtendingThemeInput extends ThemeInputCommon {
-	/** The theme to start from. */
-	extends: ThemeInput | ExtendingThemeInput;
 	/** Source-colour overrides. Every role the theme leaves out comes from the base. */
 	color?: Partial<ThemeInput['color']>;
+	/** The theme to start from. */
+	extends: ThemeInput | ExtendingThemeInput;
 }
 
 type ColorMode = 'light' | 'dark';
@@ -291,13 +291,13 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const neutral = resolveNeutral(color, mode);
 	const colors: ThemeSourceColors = {
 		accent: resolveAdaptedRole(color.accent, mode, adaptAccent),
-		neutral,
 		// The canvas anchor, split from `neutral`'s hue/chroma character: explicit per-mode value wins,
 		// a single value or the opposite side is adapted to the mode canvas lightness, and an entirely
 		// omitted `background` copies the resolved neutral canvas anchor exactly (not a second,
 		// independent adaptation of the neutral source). `buildModeColors` takes this resolved value
 		// directly as the canvas anchor for every family's ramp and the elevation surfaces.
 		background: resolveOptionalModeColour(color.background, mode, neutral),
+		neutral,
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
 		scrim: resolveVerbatimRole(color.scrim, mode, defaultScrim[mode]),
@@ -348,12 +348,24 @@ function resolveNeutral(color: ThemeInput['color'], mode: ColorMode): string {
 		if (other !== undefined) return adaptNeutralString(gamutMapOklch(parseColor(other)), mode);
 	}
 	const style = NEUTRAL_STYLE[color.neutralStyle ?? 'neutral'];
-	return formatOklch(gamutMapOklch({ l: NEUTRAL_LIGHTNESS[mode], c: style.chroma, h: style.hue }));
+	return formatOklch(
+		gamutMapOklch({
+			l: NEUTRAL_LIGHTNESS[mode],
+			c: style.chroma,
+			h: style.hue,
+		}),
+	);
 }
 
 /** Adapts a single neutral source to the mode canvas lightness, preserving hue and chroma. */
 function adaptNeutralString(source: Oklch, mode: ColorMode): string {
-	return formatOklch(gamutMapOklch({ l: NEUTRAL_LIGHTNESS[mode], c: source.c, h: source.h }));
+	return formatOklch(
+		gamutMapOklch({
+			l: NEUTRAL_LIGHTNESS[mode],
+			c: source.c,
+			h: source.h,
+		}),
+	);
 }
 
 /**
@@ -411,7 +423,13 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
 function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 	const target = ACCENT_TARGET[mode];
 	const [low, high] = ACCENT_BAND[mode];
-	const makeSolid = (l: number) => gamutMapOklch({ l, c: source.c, h: source.h });
+	const makeSolid = (l: number) => {
+		return gamutMapOklch({
+			l,
+			c: source.c,
+			h: source.h,
+		});
+	};
 	const passes = (l: number) => passesOnSolidGate({ lightness: l, mode, source });
 
 	if (passes(target)) return makeSolid(target);

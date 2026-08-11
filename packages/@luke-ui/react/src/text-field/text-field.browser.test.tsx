@@ -1,5 +1,4 @@
 import { createRef } from 'react';
-import type { ComponentProps } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
@@ -32,14 +31,9 @@ testFieldShapedConformance({
 	},
 	name: 'TextField',
 	registration: componentTestRegistration,
-	render: (props = {}) =>
-		render(
-			<TextField
-				{...(props as ComponentProps<typeof TextField>)}
-				description="Helpful context"
-				label="Name"
-			/>,
-		),
+	render: (props = {}) => {
+		return render(<TextField {...props} description="Helpful context" label="Name" />);
+	},
 });
 
 testIntegration(componentTestRegistration, 'TextField', async () => {

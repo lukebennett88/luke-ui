@@ -38,9 +38,9 @@ test('shows samples only when a purpose group has one coherent preview treatment
 
 test('splits the colour family across the purposes it serves', () => {
 	const purposeOf = new Map(
-		buildTokenPurposeGroups().flatMap((group) =>
-			group.tokens.map((token) => [token.path, group.id] as const),
-		),
+		buildTokenPurposeGroups().flatMap((group) => {
+			return group.tokens.map((token) => [token.path, group.id] as const);
+		}),
 	);
 
 	expect(purposeOf.get('color.surface.canvas')).toBe('surfaces');

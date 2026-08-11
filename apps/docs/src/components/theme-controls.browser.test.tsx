@@ -5,8 +5,8 @@ import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
 import { ThemeProvider } from 'next-themes';
-import { act } from 'react';
 import type { ComponentProps, ReactNode } from 'react';
+import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
@@ -168,9 +168,9 @@ test('boots the stored colour mode before the themed root hydrates', async () =>
 	);
 	const iframe = document.body.appendChild(document.createElement('iframe'));
 	iframe.srcdoc = `<!doctype html><html><body>${bootstrap}<script>document.documentElement.dataset.modeAtHydration = document.documentElement.dataset.colorMode;</script></body></html>`;
-	await new Promise<void>((resolve) =>
-		iframe.addEventListener('load', () => resolve(), { once: true }),
-	);
+	await new Promise<void>((resolve) => {
+		iframe.addEventListener('load', () => resolve(), { once: true });
+	});
 
 	expect(iframe.contentDocument?.documentElement).toHaveAttribute('data-color-mode', 'dark');
 	expect(iframe.contentDocument?.documentElement).toHaveAttribute('data-mode-at-hydration', 'dark');

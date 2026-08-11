@@ -17,10 +17,10 @@ import { parseColor } from '../color.js';
 
 /** A Radix 12-step scale as published hex values, step 1 through step 12. */
 interface RadixScaleHex {
-	/** The Radix family name. */
-	name: string;
 	/** The colour mode the scale is authored for. */
 	mode: 'light' | 'dark';
+	/** The Radix family name. */
+	name: string;
 	/** The 12 step hex values, step 1 (app background) through step 12 (high-contrast text). */
 	steps: readonly [
 		string,
@@ -228,8 +228,8 @@ const RADIX_DARK_SCALES: ReadonlyArray<RadixScaleHex> = [
 
 /** A Radix scale converted to the generator's OKLCH space, step 1 through step 12. */
 export interface RadixScaleOklch {
-	name: string;
 	mode: 'light' | 'dark';
+	name: string;
 	steps: Array<Oklch>;
 }
 
@@ -272,10 +272,10 @@ function envelope(
 export interface CorpusEntry {
 	/** A short label for the case. */
 	name: string;
-	/** The source colour, as any string `parseColor` accepts. */
-	source: string;
 	/** Why this case is interesting for the generator. */
 	note: string;
+	/** The source colour, as any string `parseColor` accepts. */
+	source: string;
 }
 
 /**

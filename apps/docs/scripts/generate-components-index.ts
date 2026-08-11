@@ -31,10 +31,9 @@ export function generateComponentsIndex(rootDir: string = componentsDir): string
 \t\ttitle: ${quote(group.title)},
 \t\tentries: [
 ${group.entries
-	.map(
-		(entry) =>
-			`\t\t\t{ description: ${quote(entry.description)}, name: ${quote(entry.name)}, url: ${quote(entry.url)} },`,
-	)
+	.map((entry) => {
+		return `\t\t\t{ description: ${quote(entry.description)}, name: ${quote(entry.name)}, url: ${quote(entry.url)} },`;
+	})
 	.join('\n')}
 \t\t],
 \t},`,

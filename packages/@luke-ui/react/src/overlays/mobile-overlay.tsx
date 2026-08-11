@@ -1,6 +1,6 @@
 import type { JSX, ReactNode, Ref } from 'react';
-import { Dialog, OverlayTriggerStateContext } from 'react-aria-components/Dialog';
 import type { DialogProps } from 'react-aria-components/Dialog';
+import { Dialog, OverlayTriggerStateContext } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
 import * as styles from '../recipes/mobile-overlay.css.js';
 import { rootClassName } from '../theme/index.js';

@@ -126,7 +126,6 @@ export function Text(props: TextProps) {
 	return (
 		<RacText
 			{...racProps}
-			elementType={elementType}
 			className={cx(
 				styles.text({
 					color,
@@ -144,6 +143,7 @@ export function Text(props: TextProps) {
 				}),
 				className,
 			)}
+			elementType={elementType}
 		>
 			{children}
 		</RacText>

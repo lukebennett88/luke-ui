@@ -1,9 +1,9 @@
-import { createVar } from '@vanilla-extract/css';
 import type { ComplexStyleRule } from '@vanilla-extract/css';
+import { createVar } from '@vanilla-extract/css';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
-import { fontSizeSteps } from '../theme/contract.js';
 import type { FontSizeStep } from '../theme/contract.js';
+import { fontSizeSteps } from '../theme/contract.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
 import { visuallyHiddenStyle } from './visually-hidden.css.js';

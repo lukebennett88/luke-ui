@@ -38,7 +38,11 @@ describe('contrastRatio', () => {
 
 describe('gamutMapOklch', () => {
 	it('reduces chroma until the colour fits in sRGB while preserving lightness and hue', () => {
-		const outOfGamut = { l: 0.6, c: 0.4, h: 150 };
+		const outOfGamut = {
+			l: 0.6,
+			c: 0.4,
+			h: 150,
+		};
 		const mapped = gamutMapOklch(outOfGamut);
 		expect(mapped.l).toBe(0.6);
 		expect(mapped.h).toBe(150);
@@ -47,8 +51,22 @@ describe('gamutMapOklch', () => {
 	});
 
 	it('leaves in-gamut colours unchanged and clamps extreme lightness', () => {
-		const inGamut = { l: 0.5, c: 0.05, h: 30 };
+		const inGamut = {
+			l: 0.5,
+			c: 0.05,
+			h: 30,
+		};
 		expect(gamutMapOklch(inGamut)).toEqual(inGamut);
-		expect(gamutMapOklch({ l: 1.2, c: 0.2, h: 30 })).toEqual({ l: 1, c: 0, h: 30 });
+		expect(
+			gamutMapOklch({
+				l: 1.2,
+				c: 0.2,
+				h: 30,
+			}),
+		).toEqual({
+			l: 1,
+			c: 0,
+			h: 30,
+		});
 	});
 });

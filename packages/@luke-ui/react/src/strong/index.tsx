@@ -1,6 +1,6 @@
 import * as styles from '../recipes/strong.css.js';
-import { Text } from '../text/index.js';
 import type { TextProps } from '../text/index.js';
+import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
@@ -37,8 +37,8 @@ export function Strong(props: StrongProps) {
 	return (
 		<Text
 			{...elementProps}
-			elementType="strong"
 			className={cx(styles.strong, className)}
+			elementType="strong"
 			lineClamp={lineClamp}
 			shouldInheritFont
 			textWrap={textWrap}

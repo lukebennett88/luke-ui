@@ -24,22 +24,22 @@ export type SemanticColorValues = Record<string, string>;
 
 /** The inputs to {@link mapSemanticColors}. */
 interface MapSemanticColorsRequest {
-	/** The generated scale family for each role, already resolved for `mode`. */
-	families: Record<FamilyRole, ScaleFamily>;
-	/** The generated elevation surface set, already resolved for `mode`. */
-	surfaces: GeneratedSurfaces;
 	/**
 	 * `color.border.control`'s solved value is a dedicated contrast boundary, not a scale-step alias.
 	 * `control-border.ts`'s `solveControlBorder` resolves it against `surfaces.canvas` and
 	 * `surfaces.recessed` before this map runs, then this function passes it through verbatim.
 	 */
 	controlBorder: Oklch;
-	/** The authored scrim value, passed through verbatim (it may carry an alpha channel). */
-	scrim: string;
+	/** The generated scale family for each role, already resolved for `mode`. */
+	families: Record<FamilyRole, ScaleFamily>;
 	/** The authored keyboard-focus source colour. Defaults to the accent family's step 8. */
 	focus?: Oklch;
 	/** The colour mode the families and surfaces were resolved for. */
 	mode: ColorMode;
+	/** The authored scrim value, passed through verbatim (it may carry an alpha channel). */
+	scrim: string;
+	/** The generated elevation surface set, already resolved for `mode`. */
+	surfaces: GeneratedSurfaces;
 }
 
 /**

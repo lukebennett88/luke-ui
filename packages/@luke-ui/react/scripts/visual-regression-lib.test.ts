@@ -19,7 +19,7 @@ const png = (red: number) => {
  * default discards as anti-aliasing rather than counting as a mismatch.
  */
 const pngWithAAStroke = (width: number, height: number, x: number, withStroke: boolean) => {
-	const image = new PNG({ width, height });
+	const image = new PNG({ height, width });
 	image.data.fill(255);
 	if (withStroke) {
 		for (let y = 10; y < height - 10; y++) {

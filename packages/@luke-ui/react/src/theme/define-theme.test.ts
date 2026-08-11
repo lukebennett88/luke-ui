@@ -43,9 +43,12 @@ describe('defineTheme colour-only authoring', () => {
 	// statement of the same property is that building from just an accent and a neutral character
 	// does not throw.
 	it('builds a theme from just an accent and a neutral character without a WCAG hard-gate failure', () => {
-		expect(() =>
-			defineTheme({ color: { accent: '#3b82f6', neutralStyle: 'cool' }, name: 'colour-only' }),
-		).not.toThrow();
+		expect(() => {
+			return defineTheme({
+				color: { accent: '#3b82f6', neutralStyle: 'cool' },
+				name: 'colour-only',
+			});
+		}).not.toThrow();
 	});
 });
 
@@ -186,9 +189,9 @@ describe('defineTheme partial per-mode merges', () => {
 			);
 		}
 		// The explicit light info override changed the light info kit and did not bleed into dark.
-		const overriddenLight = infoVarNames.map((varName) =>
-			extractValue(overridden.baseLight, varName),
-		);
+		const overriddenLight = infoVarNames.map((varName) => {
+			return extractValue(overridden.baseLight, varName);
+		});
 		const defaultLight = infoVarNames.map((varName) => extractValue(allDefault.baseLight, varName));
 		expect(overriddenLight).not.toEqual(defaultLight);
 	});
@@ -198,12 +201,12 @@ describe('defineTheme scrim validation', () => {
 	it('rejects an unsafe authored scrim value with a message naming the field', () => {
 		// The scrim is deliberately excluded from OKLCH colour parsing (its alpha channel does not fit
 		// that pattern) and emitted verbatim, so it needs its own shape check rather than none at all.
-		expect(() =>
-			defineTheme({
+		expect(() => {
+			return defineTheme({
 				color: { accent: '#3b82f6', scrim: 'oklch(0 0 0 / 0.2); } .evil {' },
 				name: 'unsafe-scrim',
-			}),
-		).toThrow('color.scrim: must be a non-empty CSS colour value');
+			});
+		}).toThrow('color.scrim: must be a non-empty CSS colour value');
 	});
 });
 

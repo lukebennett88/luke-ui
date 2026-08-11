@@ -23,9 +23,9 @@ function stubMatchMedia(matches: boolean) {
 	originalMatchMedia = window.matchMedia;
 	window.matchMedia = ((query: string) => {
 		return {
+			addEventListener: () => {},
 			matches: query === DESKTOP_MEDIA_QUERY && matches,
 			media: query,
-			addEventListener: () => {},
 			removeEventListener: () => {},
 		} as unknown as MediaQueryList;
 	}) as typeof window.matchMedia;

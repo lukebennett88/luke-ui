@@ -8,8 +8,8 @@ import {
 	CheckboxField as RacCheckboxField,
 } from 'react-aria-components/Checkbox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import * as styles from '../../recipes/checkbox.css.js';
 import type { CheckboxVariants } from '../../recipes/checkbox.css.js';
+import * as styles from '../../recipes/checkbox.css.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 
@@ -18,28 +18,28 @@ type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
 interface _CheckboxProps extends _CheckboxOmit {
 	/** Checkbox anatomy, including clickable `CheckboxContent`. */
 	children: RacCheckboxFieldProps['children'];
-	/**
-	 * Visual size of the checkbox control.
-	 *
-	 * @default 'medium'
-	 */
-	size?: CheckboxVariants['size'];
-	/** Whether the checkbox is selected. */
-	isSelected?: RacCheckboxFieldProps['isSelected'];
 	/** Initial selection state for an uncontrolled checkbox. */
 	defaultSelected?: RacCheckboxFieldProps['defaultSelected'];
-	/** Whether the checkbox displays a mixed selection state. */
-	isIndeterminate?: RacCheckboxFieldProps['isIndeterminate'];
 	/** Whether the checkbox is unavailable. */
 	isDisabled?: RacCheckboxFieldProps['isDisabled'];
+	/** Whether the checkbox displays a mixed selection state. */
+	isIndeterminate?: RacCheckboxFieldProps['isIndeterminate'];
 	/** Whether the checkbox is invalid. */
 	isInvalid?: RacCheckboxFieldProps['isInvalid'];
 	/** Whether the checkbox can be read but not changed. */
 	isReadOnly?: RacCheckboxFieldProps['isReadOnly'];
 	/** Whether the checkbox is required before the form can submit. */
 	isRequired?: RacCheckboxFieldProps['isRequired'];
+	/** Whether the checkbox is selected. */
+	isSelected?: RacCheckboxFieldProps['isSelected'];
 	/** Called when the selection changes. */
 	onChange?: RacCheckboxFieldProps['onChange'];
+	/**
+	 * Visual size of the checkbox control.
+	 *
+	 * @default 'medium'
+	 */
+	size?: CheckboxVariants['size'];
 }
 
 /**

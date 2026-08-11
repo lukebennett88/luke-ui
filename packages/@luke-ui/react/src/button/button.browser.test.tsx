@@ -1,4 +1,3 @@
-import type { ComponentProps } from 'react';
 import { expect } from 'vite-plus/test';
 import { testIntegration, testUniversalConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
@@ -13,8 +12,9 @@ testUniversalConformance({
 	},
 	name: 'Button',
 	registration: componentTestRegistration,
-	render: (props = {}) =>
-		render(<Button {...(props as ComponentProps<typeof Button>)}>Action</Button>),
+	render: (props = {}) => {
+		return render(<Button {...props}>Action</Button>);
+	},
 });
 
 testIntegration(componentTestRegistration, 'Button', async () => {

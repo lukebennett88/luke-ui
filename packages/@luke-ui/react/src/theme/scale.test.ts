@@ -312,7 +312,11 @@ describe('the one on-solid gate', () => {
 			for (const hue of [0, 100, 210, 300]) {
 				for (const chroma of [0.01, 0.1, 0.2]) {
 					for (let lightness = 0.3; lightness <= 0.92 + 1e-9; lightness += 0.01) {
-						const source: Oklch = { c: chroma, h: hue, l: lightness };
+						const source: Oklch = {
+							l: lightness,
+							c: chroma,
+							h: hue,
+						};
 						const anchor = resolveAnchor(source, mode);
 						const honoured =
 							anchor !== null &&
@@ -334,7 +338,11 @@ describe('the one on-solid gate', () => {
 	it('solves past the AA text ratio, so a pair that only just clears 4.5:1 does not pass', () => {
 		// Light `oklch(0.5575 0.01 0)` reaches 4.53:1 across its solid and hover: enough for a plain 4.5
 		// check, short of the headroom the gate solves for so 4-decimal emission cannot round it under.
-		const source: Oklch = { c: 0.01, h: 0, l: 0.5575 };
+		const source: Oklch = {
+			l: 0.5575,
+			c: 0.01,
+			h: 0,
+		};
 		const ratio = onSolidGateRatio({ lightness: source.l, mode: 'light', source });
 		expect(ratio).toBeGreaterThan(TEXT_RATIO);
 		expect(ratio).toBeLessThan(TEXT_RATIO + 0.05);
@@ -347,8 +355,16 @@ describe('the one on-solid gate', () => {
 		// Light `oklch(0.64 0 0)` clears 4.58:1 across the two states the engine emits. A phantom third
 		// state 0.09 darker would drag it to 3.88:1 and fail. The pressed solid reuses step 10, so no
 		// such colour exists and the gate must not invent one.
-		const source: Oklch = { c: 0, h: 0, l: 0.64 };
-		const phantomPressed = { c: 0, h: 0, l: source.l - 0.09 };
+		const source: Oklch = {
+			l: 0.64,
+			c: 0,
+			h: 0,
+		};
+		const phantomPressed = {
+			l: source.l - 0.09,
+			c: 0,
+			h: 0,
+		};
 		const onSolid = family('oklch(0.64 0 0)', 'light', 'accent').contrast;
 		expect(contrastRatio(onSolid, phantomPressed)).toBeLessThan(TEXT_RATIO);
 		expect(onSolidGateRatio({ lightness: source.l, mode: 'light', source })).toBeGreaterThan(

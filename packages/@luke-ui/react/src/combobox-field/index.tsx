@@ -145,9 +145,9 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		if (isMobileDevice) {
 			return (
 				<MobileComboboxContent<T>
+					inputRef={inputRef}
 					isDisabled={comboboxRootProps.isDisabled === true}
 					isReadOnly={comboboxRootProps.isReadOnly === true}
-					inputRef={inputRef}
 					listBoxProps={listBoxProps}
 					loadMoreItem={loadMoreItem}
 					placeholder={placeholder}

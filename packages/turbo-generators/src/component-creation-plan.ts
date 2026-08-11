@@ -3,12 +3,12 @@ type ComponentStyling = 'none' | 'recipe';
 type ConformanceTier = 'universal' | 'field-shaped' | 'none';
 
 export interface CreateComponentInput {
+	conformanceTier?: ConformanceTier;
 	docsGroup: string;
+	integrationTripwire?: boolean;
 	name: string;
 	styling: ComponentStyling;
 	tier: ComponentTier;
-	conformanceTier?: ConformanceTier;
-	integrationTripwire?: boolean;
 	visualCoverage?: boolean;
 }
 
@@ -136,10 +136,10 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 
 	return {
 		expected: {
+			exampleSlug: `${name}/basic`,
 			hostedDocsPath: `components/${docsGroup}/${name}`,
 			packageDocsSlug: name,
 			packageExportPath: `./${name}`,
-			exampleSlug: `${name}/basic`,
 		},
 		files,
 		jsonEdits: [
@@ -321,7 +321,7 @@ function renderComponentTest(input: {
 		`import { ${input.pascalName} } from './index.js';`,
 	];
 
-	const renderComponent = `render(<${input.pascalName} {...(props as ComponentProps<typeof ${input.pascalName}>)}>Content</${input.pascalName}>)`;
+	const renderComponent = `render(<${input.pascalName} {...(props}>Content</${input.pascalName}>)`;
 	const contract =
 		input.conformanceTier === 'universal'
 			? `testUniversalConformance({

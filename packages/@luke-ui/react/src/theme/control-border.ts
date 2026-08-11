@@ -14,14 +14,14 @@ type ColorMode = 'light' | 'dark';
 
 /** The inputs to {@link solveControlBorder}. */
 interface SolveControlBorderRequest {
-	/** The generated neutral family for this mode, whose step 7 seeds the search. */
-	neutral: ScaleFamily;
 	/** The canvas surface the boundary is gated against. */
 	canvas: Oklch;
-	/** The recessed surface the boundary is gated against. */
-	recessed: Oklch;
 	/** The colour mode being solved for. */
 	mode: ColorMode;
+	/** The generated neutral family for this mode, whose step 7 seeds the search. */
+	neutral: ScaleFamily;
+	/** The recessed surface the boundary is gated against. */
+	recessed: Oklch;
 }
 
 /**
@@ -39,13 +39,18 @@ export function solveControlBorder(params: SolveControlBorderRequest): Oklch {
 	const seed = neutral[7];
 	const direction = mode === 'light' ? -1 : 1;
 	const target = UI_RATIO + RATIO_HEADROOM;
-	const worstRatio = (candidate: Oklch) =>
-		Math.min(contrastRatio(candidate, canvas), contrastRatio(candidate, recessed));
+	const worstRatio = (candidate: Oklch) => {
+		return Math.min(contrastRatio(candidate, canvas), contrastRatio(candidate, recessed));
+	};
 
 	let lightness = seed.l;
 	for (;;) {
 		const clamped = clampUnit(lightness);
-		const candidate = gamutMapOklch({ c: seed.c, h: seed.h, l: clamped });
+		const candidate = gamutMapOklch({
+			l: clamped,
+			c: seed.c,
+			h: seed.h,
+		});
 		if (worstRatio(candidate) >= target || clamped === 0 || clamped === 1) return candidate;
 		lightness = clamped + direction * CONTRAST_SEARCH_STEP;
 	}

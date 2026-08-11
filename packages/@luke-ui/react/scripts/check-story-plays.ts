@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { parseSync, visitorKeys } from 'oxc-parser';
 import type { Node, Program } from 'oxc-parser';
+import { parseSync, visitorKeys } from 'oxc-parser';
 
 const packageRoot = path.resolve(import.meta.dirname, '..');
 const storiesRoot = path.join(packageRoot, 'src');

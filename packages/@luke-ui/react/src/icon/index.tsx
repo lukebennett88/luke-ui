@@ -122,8 +122,8 @@ function useIconSpritesheetHref(): string {
 }
 
 interface SpritesheetIconProps extends IconProps {
-	spritesheetHref: string;
 	name: (typeof iconNames)[number];
+	spritesheetHref: string;
 }
 
 const SpritesheetIcon = createIcon<SpritesheetIconProps>({

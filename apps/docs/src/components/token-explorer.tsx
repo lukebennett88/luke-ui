@@ -71,10 +71,11 @@ function matchGroups(query: string): ReadonlyArray<TokenPurposeGroup> {
 
 	return tokenPurposeGroups.flatMap((group) => {
 		if (group.title.toLowerCase().includes(query)) return [group];
-		const tokens = group.tokens.filter(
-			(token) =>
-				token.path.toLowerCase().includes(query) || token.variable.toLowerCase().includes(query),
-		);
+		const tokens = group.tokens.filter((token) => {
+			return (
+				token.path.toLowerCase().includes(query) || token.variable.toLowerCase().includes(query)
+			);
+		});
 		return tokens.length === 0 ? [] : [{ ...group, tokens }];
 	});
 }
@@ -89,7 +90,7 @@ function PurposeDetails({ group }: { group: TokenPurposeGroup }) {
 				>
 					<Icon
 						aria-hidden
-						className="transition-transform group-data-[expanded]:rotate-90 motion-reduce:transition-none"
+						className="transition-transform group-data-expanded:rotate-90 motion-reduce:transition-none"
 						name="chevronRight"
 						size="xsmall"
 					/>
@@ -129,10 +130,7 @@ function TokenTable({
 	return (
 		<div className="overflow-x-auto border-fd-border border-t">
 			<table
-				className={cx(
-					'w-full border-collapse text-sm',
-					showSamples ? 'min-w-[40rem]' : 'min-w-[32rem]',
-				)}
+				className={cx('w-full border-collapse text-sm', showSamples ? 'min-w-160' : 'min-w-lg')}
 			>
 				<thead>
 					<tr className="border-fd-border border-b text-left">
