@@ -45,10 +45,10 @@ export const Size = meta.story({
 	args: baseArgs,
 	render: (props) => (
 		<div style={stackStyle}>
-			<Emoji {...props} emoji="🚀" label="Rocket" size="900" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="600" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="300" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="100" />
+			<Emoji {...props} emoji="🚀" label="Rocket" size="display" />
+			<Emoji {...props} emoji="🚀" label="Rocket" size="heading3" />
+			<Emoji {...props} emoji="🚀" label="Rocket" size="body" />
+			<Emoji {...props} emoji="🚀" label="Rocket" size="caption" />
 		</div>
 	),
 });

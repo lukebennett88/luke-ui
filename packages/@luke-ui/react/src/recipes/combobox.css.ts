@@ -163,8 +163,8 @@ const comboboxConfig = {
 			fontFamily: vars.font.family.body,
 			inlineSize: '100%',
 			isolation: 'isolate',
-			letterSpacing: vars.font[300].letterSpacing,
-			lineHeight: vars.font[300].lineHeight,
+			letterSpacing: vars.font.body.letterSpacing,
+			lineHeight: vars.font.body.lineHeight,
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
@@ -309,7 +309,7 @@ const comboboxConfig = {
 		},
 		sectionHeading: {
 			color: vars.color.text.secondary,
-			...vars.font[200],
+			...vars.font.label,
 			fontWeight: vars.font.weight.label,
 			paddingBlockEnd: vars.space[100],
 			paddingBlockStart: 0,
@@ -319,8 +319,10 @@ const comboboxConfig = {
 			alignItems: 'center',
 			color: vars.color.text.secondary,
 			display: 'flex',
-			...vars.font[200],
+			fontSize: vars.font.label.fontSize,
 			justifyContent: 'center',
+			letterSpacing: vars.font.label.letterSpacing,
+			lineHeight: vars.font.label.lineHeight,
 			paddingBlock: vars.space[600],
 			paddingInline: vars.space[300],
 			textAlign: 'center',
@@ -423,7 +425,7 @@ const comboboxConfig = {
 			medium: {
 				inputGroup: {
 					blockSize: vars.controlSize.medium,
-					fontSize: vars.font[300].fontSize,
+					fontSize: vars.font.body.fontSize,
 					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.medium] },
 				},
 				textInput: {
@@ -443,7 +445,9 @@ const comboboxConfig = {
 					paddingInlineStart: vars.space[300],
 				},
 				item: {
-					...vars.font[200],
+					fontSize: vars.font.label.fontSize,
+					letterSpacing: vars.font.label.letterSpacing,
+					lineHeight: vars.font.label.lineHeight,
 					minBlockSize: vars.controlSize.medium,
 					paddingBlock: vars.space[200],
 					paddingInline: vars.space[300],
@@ -452,7 +456,9 @@ const comboboxConfig = {
 			small: {
 				inputGroup: {
 					blockSize: vars.controlSize.small,
-					...vars.font[200],
+					fontSize: vars.font.label.fontSize,
+					letterSpacing: vars.font.label.letterSpacing,
+					lineHeight: vars.font.label.lineHeight,
 					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.small] },
 				},
 				textInput: {
@@ -472,7 +478,9 @@ const comboboxConfig = {
 					paddingInlineStart: vars.space[200],
 				},
 				item: {
-					...vars.font[200],
+					fontSize: vars.font.label.fontSize,
+					letterSpacing: vars.font.label.letterSpacing,
+					lineHeight: vars.font.label.lineHeight,
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space[100],
 					paddingInline: vars.space[300],

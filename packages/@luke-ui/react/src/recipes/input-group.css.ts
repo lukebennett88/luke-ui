@@ -55,8 +55,8 @@ const inputGroupConfig = {
 			fontFamily: vars.font.family.body,
 			inlineSize: '100%',
 			isolation: 'isolate',
-			letterSpacing: vars.font[300].letterSpacing,
-			lineHeight: vars.font[300].lineHeight,
+			letterSpacing: vars.font.body.letterSpacing,
+			lineHeight: vars.font.body.lineHeight,
 			minInlineSize: 0,
 			...restingFocusRing('0px'),
 			overflow: 'visible',
@@ -201,7 +201,7 @@ const inputGroupConfig = {
 			medium: {
 				group: {
 					blockSize: vars.controlSize.medium,
-					fontSize: vars.font[300].fontSize,
+					fontSize: vars.font.body.fontSize,
 				},
 				control: {
 					blockSize: vars.controlSize.medium,
@@ -209,12 +209,12 @@ const inputGroupConfig = {
 					paddingInlineStart: vars.space[300],
 				},
 				prefix: {
-					lineHeight: vars.font[300].lineHeight,
+					lineHeight: vars.font.body.lineHeight,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
 				suffix: {
-					lineHeight: vars.font[300].lineHeight,
+					lineHeight: vars.font.body.lineHeight,
 					paddingInlineEnd: vars.space[300],
 					paddingInlineStart: vars.space[300],
 				},
@@ -222,9 +222,9 @@ const inputGroupConfig = {
 			small: {
 				group: {
 					blockSize: vars.controlSize.small,
-					fontSize: vars.font[200].fontSize,
-					letterSpacing: vars.font[200].letterSpacing,
-					lineHeight: vars.font[200].lineHeight,
+					fontSize: vars.font.label.fontSize,
+					letterSpacing: vars.font.label.letterSpacing,
+					lineHeight: vars.font.label.lineHeight,
 				},
 				control: {
 					blockSize: vars.controlSize.small,
@@ -232,12 +232,12 @@ const inputGroupConfig = {
 					paddingInlineStart: vars.space[200],
 				},
 				prefix: {
-					lineHeight: vars.font[200].lineHeight,
+					lineHeight: vars.font.label.lineHeight,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},
 				suffix: {
-					lineHeight: vars.font[200].lineHeight,
+					lineHeight: vars.font.label.lineHeight,
 					paddingInlineEnd: vars.space[200],
 					paddingInlineStart: vars.space[200],
 				},

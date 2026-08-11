@@ -37,7 +37,7 @@ function CategoryGroup({ group }: { group: ComponentIndexGroup }) {
 			gap="400"
 			marginBlockStart="400"
 		>
-			<Heading size="500">{group.title}</Heading>
+			<Heading size="heading4">{group.title}</Heading>
 			<Cards>
 				{group.entries.map((entry) => (
 					<Card href={entry.url} key={entry.url} title={entry.name}>

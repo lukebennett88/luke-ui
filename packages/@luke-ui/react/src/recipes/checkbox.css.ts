@@ -189,7 +189,7 @@ const checkboxConfig = {
 			large: {
 				root: {
 					vars: {
-						[checkboxControlSize]: vars.font[500].lineHeight,
+						[checkboxControlSize]: vars.font.heading4.lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.small,
 						[checkboxIndicatorSize]: vars.iconSize.medium,
 						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
@@ -199,7 +199,7 @@ const checkboxConfig = {
 			medium: {
 				root: {
 					vars: {
-						[checkboxControlSize]: vars.font[300].lineHeight,
+						[checkboxControlSize]: vars.font.body.lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.xsmall,
 						[checkboxIndicatorSize]: vars.iconSize.small,
 						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
@@ -210,7 +210,7 @@ const checkboxConfig = {
 				root: {
 					vars: {
 						[checkboxControlSize]: vars.iconSize.small,
-						[checkboxGlyphSize]: vars.font[100].fontSize,
+						[checkboxGlyphSize]: vars.font.caption.fontSize,
 						[checkboxIndicatorSize]: vars.iconSize.xsmall,
 						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
 					},

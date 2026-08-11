@@ -76,7 +76,7 @@ function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 
 const baseArgs = {
 	children: storyText,
-	size: '300',
+	size: 'body',
 } as const satisfies Pick<TextProps, 'children' | 'size'>;
 
 const colors = [
@@ -89,15 +89,15 @@ const colors = [
 	'danger',
 ] as const satisfies ReadonlyArray<NonNullable<TextProps['color']>>;
 const sizes = [
-	'100',
-	'200',
-	'300',
-	'400',
-	'500',
-	'600',
-	'700',
-	'800',
-	'900',
+	'caption',
+	'label',
+	'body',
+	'lead',
+	'heading4',
+	'heading3',
+	'heading2',
+	'heading1',
+	'display',
 ] as const satisfies ReadonlyArray<NonNullable<TextProps['size']>>;
 const weights = ['body', 'label', 'heading', 'emphasis'] as const satisfies ReadonlyArray<
 	NonNullable<TextProps['fontWeight']>
@@ -111,7 +111,7 @@ export const Default = meta.story({
 });
 
 /**
- * Each size step applies font size, line height, letter spacing, and trim as one treatment.
+ * Each type style applies family, size, weight, line height, letter spacing, and trim together.
  */
 export const Size = meta.story({
 	render: (props) => (

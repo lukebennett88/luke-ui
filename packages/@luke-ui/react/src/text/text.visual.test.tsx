@@ -16,15 +16,15 @@ for (const appearance of visualAppearances) {
 		const { locator } = render(
 			<Stack width="40rem">
 				<div style={rowStyle}>
-					<Text size="100">100</Text>
-					<Text size="200">200</Text>
-					<Text size="300">300</Text>
-					<Text size="400">400</Text>
-					<Text size="500">500</Text>
-					<Text size="600">600</Text>
-					<Text size="700">700</Text>
-					<Text size="800">800</Text>
-					<Text size="900">900</Text>
+					<Text size="caption">caption</Text>
+					<Text size="label">label</Text>
+					<Text size="body">body</Text>
+					<Text size="lead">lead</Text>
+					<Text size="heading4">heading4</Text>
+					<Text size="heading3">heading3</Text>
+					<Text size="heading2">heading2</Text>
+					<Text size="heading1">heading1</Text>
+					<Text size="display">display</Text>
 				</div>
 				<div style={rowStyle}>
 					<Text fontWeight="body">Body</Text>

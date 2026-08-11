@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { vars } from './contract.css.js';
-import { flattenThemeContract, fontSizeSteps, spaceScale, themeContractTree } from './contract.js';
+import { flattenThemeContract, spaceScale, themeContractTree, typeStyles } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 
 function countLeaves(node: unknown): number {
@@ -70,15 +70,18 @@ describe('theme contract', () => {
 		expect([...emitted].sort(byPath)).toEqual([...expected].sort(byPath));
 	});
 
-	it('exposes font steps and the carried-forward icon-size scale', () => {
-		expect(vars.font[100]).toEqual({
-			baselineTrim: 'var(--luke-font-100-baseline-trim)',
-			capHeightTrim: 'var(--luke-font-100-cap-height-trim)',
-			fontSize: 'var(--luke-font-100-font-size)',
-			letterSpacing: 'var(--luke-font-100-letter-spacing)',
-			lineHeight: 'var(--luke-font-100-line-height)',
+	it('exposes semantic type styles and the carried-forward icon-size scale', () => {
+		expect(vars.font.body).toEqual({
+			baselineTrim: 'var(--luke-font-body-baseline-trim)',
+			capHeightTrim: 'var(--luke-font-body-cap-height-trim)',
+			fontFamily: 'var(--luke-font-body-font-family)',
+			fontSize: 'var(--luke-font-body-font-size)',
+			fontWeight: 'var(--luke-font-body-font-weight)',
+			letterSpacing: 'var(--luke-font-body-letter-spacing)',
+			lineHeight: 'var(--luke-font-body-line-height)',
 		});
-		expect(vars.font[900].fontSize).toBe('var(--luke-font-900-font-size)');
+		expect(vars.font.display.fontSize).toBe('var(--luke-font-display-font-size)');
+		expect(vars.font.heading2.fontWeight).toBe('var(--luke-font-heading2-font-weight)');
 		expect(vars.font.family).toEqual({
 			body: 'var(--luke-font-family-body)',
 			code: 'var(--luke-font-family-code)',
@@ -91,11 +94,17 @@ describe('theme contract', () => {
 		});
 	});
 
-	it('keeps fontSizeSteps as the single source of truth for the font contract keys', () => {
+	it('keeps typeStyles as the single source of truth for the font contract keys', () => {
 		const fontStepKeys = Object.keys(themeContractTree.font).filter((key) => {
 			return key !== 'family' && key !== 'weight';
 		});
-		expect(fontSizeSteps).toEqual(fontStepKeys);
+		expect(typeStyles).toEqual(fontStepKeys);
+	});
+
+	it('does not expose numeric font steps on the public contract', () => {
+		for (const step of ['100', '200', '300', '400', '500', '600', '700', '800', '900']) {
+			expect(Object.hasOwn(vars.font, step)).toBe(false);
+		}
 	});
 
 	it('defines the selected spacing steps from the 4px scale', () => {

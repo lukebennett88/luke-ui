@@ -29,7 +29,7 @@ test('kitchen sink', async () => {
 				<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid">
 					Invalid
 				</Checkbox>
-				{(['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const).map((size) => (
+				{(['caption', 'label', 'body', 'lead', 'heading4', 'heading3', 'heading2', 'heading1', 'display'] as const).map((size) => (
 					<Text elementType="div" key={size} size={size}>
 						<Checkbox name={`text-${size}`}>
 							{size}: This label wraps to show that the control aligns with its first line.

@@ -10,7 +10,7 @@ const rowStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-const sizes = variantValuesFor<typeof Emoji, 'size'>()(['100', '300', '500', '700', '900']);
+const sizes = variantValuesFor<typeof Emoji, 'size'>()(['caption', 'body', 'heading4', 'heading2', 'display']);
 
 for (const appearance of visualAppearances) {
 	test(`sizes and colours: ${appearance.theme} ${appearance.mode}`, async () => {

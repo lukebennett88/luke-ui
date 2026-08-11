@@ -52,7 +52,7 @@ const PURPOSE_DEFINITIONS = [
 		title: 'Roles',
 	},
 	{
-		description: 'Type steps, font families, and weight roles.',
+		description: 'Type styles, font families, and weight roles.',
 		id: 'typography',
 		related: { label: 'Typography', splat: 'typography' },
 		showSamples: false,

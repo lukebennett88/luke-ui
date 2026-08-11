@@ -1,6 +1,6 @@
 ---
 title: Text
-description: Styled text with a coordinated type scale and semantic colour roles.
+description: Styled text with semantic type styles and colour roles.
 source: packages/@luke-ui/react/src/text
 props:
   - name: TextProps
@@ -25,17 +25,24 @@ element types.
 <Text elementType="label">Email address</Text>
 ```
 
-## Size
+## Type style
 
-Use `size` to set font size, line height, letter spacing, and Capsize trim as one coordinated step.
-`'300'` is the default. Sizes `'200'` through `'400'` work well for running text. Smaller steps suit
-compact UI labels, while larger steps are useful for display text that is not a semantic heading.
+Use `size` to apply a complete type style: family, size, weight, line height, letter spacing, and
+Capsize trim. `body` is the default.
 
-<ExampleBlock src="text/typography" title="Text — Type scale" />
+| Style | Intended use |
+| --- | --- |
+| `caption` | Ancillary or supporting text |
+| `label` | Terse UI and control text |
+| `body` | Normal body copy |
+| `lead` | Larger introductory body copy |
+| `heading4`–`heading1` | Visual heading hierarchy |
+| `display` | Oversized editorial or marketing moments |
 
-The active theme supplies the font family and values behind each `fontWeight` role. Use `body` for
-text, `label` for controls, `heading` for prominent non-heading text, and `emphasis` when text needs
-more weight.
+<ExampleBlock src="text/typography" title="Text — Type styles" />
+
+Set `fontWeight` only when you need to override the style's weight. Themes expose `body`, `label`,
+`heading`, and `emphasis` roles for that purpose.
 
 ## Alignment
 
@@ -76,8 +83,8 @@ rendered text only, so avoid using uppercase styling as a substitute for a clear
 ## Related components
 
 Use [Heading](/components/typography/heading) for a section heading. It manages heading levels for
-you. Use `Text` with a larger `size` and the `heading` or `emphasis` `fontWeight` for prominent
-content that is not a heading. A large status value is one example.
+you. Use `Text` with a larger type style such as `display` or `heading1` for prominent content that
+is not a heading. A large status value is one example.
 
 Use [Numeral](/components/typography/numeral) to format locale-aware numbers and
 [Emoji](/components/typography/emoji) for an emoji with a reliable accessible label.

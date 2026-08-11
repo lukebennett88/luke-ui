@@ -2,8 +2,8 @@ import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
-import type { FontSizeStep } from '../theme/contract.js';
-import { fontSizeSteps } from '../theme/contract.js';
+import type { TypeStyle } from '../theme/contract.js';
+import { typeStyles } from '../theme/contract.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
 import { visuallyHiddenStyle } from './visually-hidden.css.js';
@@ -63,31 +63,35 @@ const weightVariants = {
 } as const;
 
 const sizeVariants = Object.fromEntries(
-	fontSizeSteps.map((size) => [
+	typeStyles.map((size) => [
 		size,
 		{
+			fontFamily: vars.font[size].fontFamily,
 			fontSize: vars.font[size].fontSize,
+			fontWeight: vars.font[size].fontWeight,
 			letterSpacing: vars.font[size].letterSpacing,
 			lineHeight: vars.font[size].lineHeight,
 			vars: { [textLineHeight]: vars.font[size].lineHeight },
 		},
 	]),
 ) as Record<
-	FontSizeStep,
+	TypeStyle,
 	{
+		fontFamily: string;
 		fontSize: string;
+		fontWeight: string;
 		letterSpacing: string;
 		lineHeight: string;
 		vars: { [textLineHeight]: string };
 	}
 >;
 
-const sizeStepCompoundVariants = fontSizeSteps.map((size) => {
+const sizeStepCompoundVariants = typeStyles.map((size) => {
 	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
 	return {
 		style: createLayeredTextStyle({ baselineTrim, capHeightTrim, fontSize, lineHeight }),
 		// `shouldInheritFont: true` asks the browser to resolve font size and line height from
-		// the surrounding context, not this step's Capsize metrics. Without this condition, the
+		// the surrounding context, not this style's Capsize metrics. Without this condition, the
 		// compound's own `fontSize`/`lineHeight` always wins over the plain `shouldInheritFont`
 		// variant, because vanilla-extract applies compound variants after simple ones.
 		variants: { shouldDisableTrim: false, shouldInheritFont: false, size } as const,
@@ -133,12 +137,11 @@ export const text = recipe({
 		lineClamp: false,
 		shouldDisableTrim: false,
 		shouldInheritFont: false,
-		size: '300',
+		size: 'body',
 		textAlign: 'start',
 		textDecoration: 'none',
 		textTransform: 'none',
 		textWrap: 'unset',
-		fontWeight: 'body',
 	},
 	variants: {
 		fontVariantNumeric: {
@@ -178,6 +181,7 @@ export const text = recipe({
 			pretty: { textWrap: 'pretty' },
 			unset: {},
 		},
+		// Declared after `size` so an explicit weight override wins over the type style's weight.
 		fontWeight: weightVariants,
 		shouldInheritFont: {
 			false: {},

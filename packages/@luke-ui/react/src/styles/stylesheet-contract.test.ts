@@ -3,12 +3,12 @@ import type { AtRule, Root, Rule } from 'postcss';
 import { parse } from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { expect, test } from 'vite-plus/test';
-import type { FontSizeStep } from '../theme/contract.js';
-import { fontSizeSteps } from '../theme/contract.js';
+import type { TypeStyle } from '../theme/contract.js';
+import { typeStyles } from '../theme/contract.js';
 
 const retainedLayerNames = ['reset', 'theme', 'recipes', 'utilities'] as const;
 const retainedLayerNameSet = new Set<string>(retainedLayerNames);
-type TextClassesBySize = Record<FontSizeStep, Array<string>>;
+type TextClassesBySize = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
 type LineClampClasses = {
@@ -22,7 +22,7 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	const styles = await import('@luke-ui/react/styles');
 	const recipeClasses = [...recipes.icon().split(' '), recipes.loadingSkeletonClassName];
 	const textClassesBySize = Object.fromEntries(
-		fontSizeSteps.map((size) => [size, recipes.text({ size }).split(' ')]),
+		typeStyles.map((size) => [size, recipes.text({ size }).split(' ')]),
 	) as TextClassesBySize;
 	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
 	const lineClampClasses: LineClampClasses = {
@@ -227,7 +227,7 @@ function assertClassOwnership(root: Root, className: string, layerName: string):
 }
 
 function assertTextTrimOwnership(root: Root, textClassesBySize: TextClassesBySize): void {
-	for (const size of fontSizeSteps) {
+	for (const size of typeStyles) {
 		const rules = textClassesBySize[size].flatMap((className) => getRulesForClass(root, className));
 		assertPseudoDeclaration(
 			rules,

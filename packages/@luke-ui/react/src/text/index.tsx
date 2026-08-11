@@ -18,8 +18,7 @@ interface TextStyleProps {
 	 */
 	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
 	/**
-	 * Sets the semantic font-weight role.
-	 * @default 'body'
+	 * Sets the semantic font-weight role. When omitted, the selected type style supplies its weight.
 	 */
 	fontWeight?: TextVariantProps['fontWeight'];
 	/**
@@ -40,8 +39,8 @@ interface TextStyleProps {
 	 */
 	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
 	/**
-	 * Sets the font size, line height, letter spacing, and trim as one step.
-	 * @default '300'
+	 * Sets the complete type style: family, size, weight, line height, letter spacing, and trim.
+	 * @default 'body'
 	 */
 	size?: TextVariantProps['size'];
 	/**
@@ -90,7 +89,7 @@ const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
 ]);
 
 /**
- * Styled text with a coordinated type scale and semantic colour controls.
+ * Styled text with coordinated semantic type styles and colour controls.
  *
  * Capsize trim is applied to known block text elements and skipped for inline or unknown element
  * types. Set `shouldDisableTrim` explicitly to override this inference. Line clamp always disables
@@ -130,7 +129,7 @@ export function Text(props: TextProps) {
 				styles.text({
 					color,
 					fontVariantNumeric,
-					fontWeight,
+					...(fontWeight === undefined ? {} : { fontWeight }),
 					isVisuallyHidden,
 					lineClamp,
 					shouldDisableTrim: resolvedShouldDisableTrim,

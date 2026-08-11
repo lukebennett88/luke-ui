@@ -51,7 +51,7 @@ export default () => {
 							borderRadius: vars.radius.surface,
 						}}
 					>
-						<Text elementType="strong" fontWeight="emphasis" size="100">
+						<Text elementType="strong" fontWeight="emphasis" size="caption">
 							{mode === 'light' ? 'Light mode' : 'Dark mode'}
 						</Text>
 						<Box
@@ -85,7 +85,7 @@ export default () => {
 									<Text
 										elementType="span"
 										fontWeight="emphasis"
-										size="100"
+										size="caption"
 										style={{
 											backgroundColor: vars.color.background[role].solid.rest,
 											borderRadius: vars.radius.full,

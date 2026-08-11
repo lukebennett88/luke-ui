@@ -21,12 +21,13 @@ interface _HeadingProps extends TextProps {
 export type HeadingProps = Prettify<_HeadingProps>;
 
 const sizeByLevel = {
-	1: '800',
-	2: '700',
-	3: '600',
-	4: '500',
-	5: '400',
-	6: '300',
+	1: 'heading1',
+	2: 'heading2',
+	3: 'heading3',
+	4: 'heading4',
+	// h5/h6 stay in the outline without inventing heading5/heading6 type styles.
+	5: 'lead',
+	6: 'body',
 } as const;
 
 /** Semantic heading with automatic level composition and level-based typography. */

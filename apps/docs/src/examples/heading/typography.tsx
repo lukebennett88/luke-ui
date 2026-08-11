@@ -4,13 +4,13 @@ import { Heading } from '@luke-ui/react/heading';
 export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="300">
-			<Heading level={2} size="900">
+			<Heading level={2} size="display">
 				The quick brown fox jumps over the lazy dog
 			</Heading>
-			<Heading level={2} size="700">
+			<Heading level={2} size="heading2">
 				The quick brown fox jumps over the lazy dog
 			</Heading>
-			<Heading color="info" level={2} size="500">
+			<Heading color="info" level={2} size="heading4">
 				The quick brown fox jumps over the lazy dog
 			</Heading>
 		</Box>

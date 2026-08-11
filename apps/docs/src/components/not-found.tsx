@@ -9,7 +9,7 @@ export function NotFound() {
 		<>
 			<SiteNav hideActiveDestination />
 			<main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-32 text-center max-w-md mx-auto">
-				<Heading level={1} size="900">
+				<Heading level={1} size="display">
 					404
 				</Heading>
 				<Heading level={2}>Page Not Found</Heading>
