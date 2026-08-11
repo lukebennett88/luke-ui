@@ -26,8 +26,8 @@ test('applies the public reset and theme contracts', () => {
 	const themeStyles = getComputedStyle(container);
 	expect(getComputedStyle(resetTarget).boxSizing).toBe('border-box');
 	expect(themeStyles.color).toBe(themeStyles.getPropertyValue('--luke-color-text-primary'));
-	expect(themeStyles.fontSize).toBe(themeStyles.getPropertyValue('--luke-font-300-font-size'));
-	expect(themeStyles.lineHeight).toBe(themeStyles.getPropertyValue('--luke-font-300-line-height'));
+	expect(themeStyles.fontSize).toBe(themeStyles.getPropertyValue('--luke-font-body-font-size'));
+	expect(themeStyles.lineHeight).toBe(themeStyles.getPropertyValue('--luke-font-body-line-height'));
 });
 
 function mountFixture() {

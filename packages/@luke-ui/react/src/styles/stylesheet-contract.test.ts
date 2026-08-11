@@ -136,7 +136,14 @@ function assertStylesheetContract(
 	assertStableSelectors(root);
 	assertSentinel(root, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
 	assertSentinel(root, 'luke-ui-theme', 'theme', 'color', 'var(--luke-color-text-primary)');
-	assertSentinel(root, 'luke-ui-theme', 'theme', 'font-family', 'var(--luke-font-family-body)');
+	assertSentinel(
+		root,
+		'luke-ui-theme',
+		'theme',
+		'font-family',
+		'var(--luke-font-body-font-family)',
+	);
+	assertSentinel(root, 'luke-ui-theme', 'theme', 'font-size', 'var(--luke-font-body-font-size)');
 
 	for (const className of recipeClasses) assertClassOwnership(root, className, 'recipes');
 	for (const className of utilityClasses) assertClassOwnership(root, className, 'utilities');
@@ -334,7 +341,8 @@ const validStylesheetFixture = `@layer reset;
 @layer theme {
   .luke-ui-theme {
     color: var(--luke-color-text-primary);
-    font-family: var(--luke-font-family-body);
+    font-family: var(--luke-font-body-font-family);
+    font-size: var(--luke-font-body-font-size);
   }
 }
 @layer recipes {

@@ -131,9 +131,10 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-control-size-small');
 		expect(css).toContain('--luke-motion-easing-standard');
 		expect(css).toContain('--luke-font-weight-body');
-		expect(css).toContain('--luke-font-100-font-size:');
-		expect(css).toContain('--luke-font-300-line-height:');
-		expect(css).toContain('--luke-font-900-letter-spacing:');
+		expect(css).toContain('--luke-font-caption-font-size:');
+		expect(css).toContain('--luke-font-body-line-height:');
+		expect(css).toContain('--luke-font-display-letter-spacing:');
+		expect(css).toContain('--luke-font-heading2-font-weight:');
 		expect(css).toContain('--luke-icon-size-xsmall:');
 		expect(css).toContain('--luke-icon-size-large:');
 	});
