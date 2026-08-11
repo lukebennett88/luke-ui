@@ -25,4 +25,3 @@ packages/@luke-ui/react/src/generated/icons.tsx
 public/dist/
 server/dist/
 storybook-static/
-packages/@luke-ui/react/src/**/__screenshots__/
