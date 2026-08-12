@@ -7,15 +7,12 @@ props:
     path: packages/@luke-ui/react/src/emoji/index.tsx
 ---
 
-`Emoji` renders an emoji with a reliable accessible name. It accepts the same typography props as
-`Text`.
+`Emoji` renders an emoji with a reliable accessible name. It inherits the surrounding font styles,
+including size and colour.
 
 <ExampleBlock src="emoji/basic" title="Emoji — Basic" />
 
-## Typography
-
-`Emoji` accepts every `Text` prop except `children` and `elementType`, including `typography`,
-semantic `color`, and `fontWeight`.
+Wrap `Emoji` in [Text](/components/typography/text) when it needs a specific typography treatment.
 
 ## Accessibility
 

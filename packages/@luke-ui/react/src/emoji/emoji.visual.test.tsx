@@ -1,46 +1,38 @@
 import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
-import { captureVisualAppearance, Stack, variantValuesFor } from '../test-utils/visual.js';
+import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
+import { Text } from '../text/index.js';
 import { Emoji } from './index.js';
 
-const rowStyle = {
-	alignItems: 'center',
+const stackStyle = {
 	display: 'flex',
+	flexDirection: 'column',
 	gap: '1rem',
 } satisfies CSSProperties;
 
-const typographyStyles = variantValuesFor<typeof Emoji, 'typography'>()([
-	'caption',
-	'body',
-	'heading4',
-	'heading2',
-	'display',
-]);
-
 for (const appearance of visualAppearances) {
-	test(`typography and colours: ${appearance.theme} ${appearance.mode}`, async () => {
+	test(`inherits surrounding typography: ${appearance.theme} ${appearance.mode}`, async () => {
 		const { locator } = render(
 			<Stack>
-				<div style={rowStyle}>
-					{typographyStyles.map((typography) => (
-						<Emoji
-							emoji="🚀"
-							key={typography}
-							label={`Rocket ${typography}`}
-							typography={typography}
-						/>
-					))}
-				</div>
-				<div style={rowStyle}>
-					<Emoji color="primary" emoji="✅" label="Done" />
-					<Emoji color="info" emoji="💡" label="Idea" />
-					<Emoji color="danger" emoji="⚠️" label="Warning" />
+				<div style={stackStyle}>
+					<Text typography="display">
+						Hello <Emoji emoji="👋" label="Waving hand display" />
+					</Text>
+					<Text typography="heading3">
+						Hello <Emoji emoji="👋" label="Waving hand heading3" />
+					</Text>
+					<Text typography="body">
+						Hello <Emoji emoji="👋" label="Waving hand body" />
+					</Text>
+					<Text typography="caption">
+						Hello <Emoji emoji="👋" label="Waving hand caption" />
+					</Text>
 				</div>
 			</Stack>,
 			{ appearance },
 		);
 
-		await captureVisualAppearance(locator, 'emoji/sizes-colors', appearance);
+		await captureVisualAppearance(locator, 'emoji/inheritance', appearance);
 	});
 }
