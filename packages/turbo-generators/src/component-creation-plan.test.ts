@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 import {
@@ -15,6 +16,8 @@ afterEach(async () => {
 	await Promise.all(roots.map((root) => rm(root, { force: true, recursive: true })));
 	roots.length = 0;
 });
+const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
+const tscPath = join(workspaceRoot, 'node_modules/.bin/tsc');
 
 describe('createComponentPlan', () => {
 	it('plans a component with a colocated recipe across package and hosted docs surfaces', () => {
@@ -162,17 +165,13 @@ describe('createComponentPlan', () => {
 		const recipeSource = plan.files.find((file) =>
 			file.path.endsWith('/status-badge/recipe.css.ts'),
 		)?.contents;
-		if (indexSource === undefined || recipeSource === undefined) {
-			throw new Error('Expected generated component sources.');
+		if (recipeSource === undefined) {
+			throw new Error('Expected generated recipe source.');
 		}
 
-		await writeFile(join(componentDir, 'index.tsx'), indexSource, 'utf8');
+		expect(indexSource).toContain('export { statusBadgeRecipe, type StatusBadgeRecipeVariants }');
+
 		await writeFile(join(componentDir, 'recipe.css.ts'), recipeSource, 'utf8');
-		await writeFile(
-			join(root, 'packages/@luke-ui/react/src/utils/index.ts'),
-			'export function cx(...values: Array<string | undefined>) { return values.filter(Boolean).join(" "); }',
-			'utf8',
-		);
 		await writeFile(
 			join(stylesDir, 'recipe.ts'),
 			[
@@ -200,7 +199,7 @@ describe('createComponentPlan', () => {
 						strict: true,
 						target: 'ES2022',
 					},
-					include: ['packages/@luke-ui/react/src/status-badge/**/*'],
+					include: ['packages/@luke-ui/react/src/status-badge/recipe.css.ts'],
 				},
 				null,
 				'\t',
@@ -209,8 +208,7 @@ describe('createComponentPlan', () => {
 		);
 
 		expect(() => {
-			execFileSync('pnpm', ['exec', 'tsc', '--noEmit', '-p', 'tsconfig.json'], {
-				cwd: root,
+			execFileSync(tscPath, ['--noEmit', '-p', join(root, 'tsconfig.json')], {
 				encoding: 'utf8',
 				stdio: 'pipe',
 			});

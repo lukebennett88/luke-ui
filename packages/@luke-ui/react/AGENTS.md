@@ -3,7 +3,8 @@
 - Do not hand-edit `.generated/entries.ts` or `package.json#exports`. Entries are generated, and
   `vp pack` updates exports during build. The `build:done` hook in `vite.config.ts` runs
   `scripts/finalize-package-manifest.ts` to strip internal-only pack entries from the public export
-  map and wire the private `#recipe-engine` import. This runs after each pack, including watch mode.
+  map and wire the private `#recipe-engine` import. Pack `alias` resolves `#recipe-engine` to source
+  during the build. This runs after each pack, including watch mode.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
   files by hand. The generator updates the stylesheet manifest, conformance manifest, and docs
   wiring.

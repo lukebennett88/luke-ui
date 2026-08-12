@@ -8,6 +8,7 @@ import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
 import { finalizePackageManifest } from './scripts/finalize-package-manifest.js';
 
+const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
 const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
@@ -41,6 +42,9 @@ async function cleanDistExceptPreservedFiles() {
 
 export default defineConfig({
 	pack: {
+		alias: {
+			'#recipe-engine': recipeEngineSource,
+		},
 		attw: {
 			// Exclude static asset exports. CSS/SVG files do not need type definitions.
 			excludeEntrypoints: assetExports,
