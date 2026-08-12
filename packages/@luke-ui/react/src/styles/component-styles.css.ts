@@ -11,7 +11,7 @@ import '../loading-spinner/recipe.css.js';
 import '../overlays/mobile-overlay.css.js';
 import '../primitives/button/recipe.css.js';
 import '../primitives/checkbox/recipe.css.js';
-import '../primitives/combobox/recipe.css.js';
+import '../primitives/combobox/styles.css.js';
 import '../primitives/field/recipe.css.js';
 import '../primitives/input-group/recipe.css.js';
 import '../strong/styles.css.js';

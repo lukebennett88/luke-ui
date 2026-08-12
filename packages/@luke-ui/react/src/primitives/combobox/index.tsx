@@ -1,4 +1,3 @@
-export { comboboxRecipe } from './recipe.css.js';
 export type { ComboboxClearButtonProps } from './clear-button.js';
 export { ComboboxClearButton } from './clear-button.js';
 export type { ComboboxEmptyStateProps } from './empty-state.js';

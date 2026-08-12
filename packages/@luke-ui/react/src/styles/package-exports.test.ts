@@ -1,28 +1,47 @@
 import { expect, test } from 'vite-plus/test';
 import packageJson from '../../package.json' with { type: 'json' };
 
+const absentExportPaths = [
+	'./button/primitive',
+	'./checkbox/primitive',
+	'./combobox-field/primitive',
+	'./field/primitive',
+	'./text-field/primitive',
+	'./recipes',
+	'./heading-context',
+	'./icon-size-context',
+	'./styles/recipe-engine',
+	'./stylesheet',
+	'./primitives',
+	'./tokens',
+] as const;
+
+const presentExportPaths = {
+	'./box': './dist/box/index.js',
+	'./theme': './dist/theme/index.js',
+	'./themes/tactile': './dist/themes/tactile/index.js',
+	'./themes/paper': './dist/themes/paper/index.js',
+	'./styles': './dist/styles/index.js',
+	'./stylesheet.css': './dist/stylesheet.css',
+	'./primitives/button': './dist/primitives/button/index.js',
+	'./primitives/checkbox': './dist/primitives/checkbox/index.js',
+	'./primitives/combobox': './dist/primitives/combobox/index.js',
+	'./primitives/field': './dist/primitives/field/index.js',
+	'./primitives/input-group': './dist/primitives/input-group/index.js',
+} as const;
+
 test('publishes only the final styling entrypoints', () => {
-	expect(packageJson.exports['./box']).toBe('./dist/box/index.js');
-	expect(packageJson.exports['./theme']).toBe('./dist/theme/index.js');
-	expect(packageJson.exports['./themes/tactile']).toBe('./dist/themes/tactile/index.js');
-	expect(packageJson.exports['./themes/paper']).toBe('./dist/themes/paper/index.js');
-	expect(packageJson.exports['./styles']).toBe('./dist/styles/index.js');
-	expect(packageJson.exports['./stylesheet.css']).toBe('./dist/stylesheet.css');
-	expect('./recipes' in packageJson.exports).toBe(false);
-	expect('./styles/recipe-engine' in packageJson.exports).toBe(false);
+	for (const exportPath of absentExportPaths) {
+		expect(exportPath in packageJson.exports).toBe(false);
+	}
+
+	for (const [exportPath, target] of Object.entries(presentExportPaths) as Array<
+		[keyof typeof presentExportPaths, (typeof presentExportPaths)[keyof typeof presentExportPaths]]
+	>) {
+		expect(packageJson.exports[exportPath]).toBe(target);
+	}
+
 	expect(packageJson.imports?.['#recipe-engine']).toBe('./dist/styles/recipe-engine.js');
-	expect('./heading-context' in packageJson.exports).toBe(false);
-	expect('./icon-size-context' in packageJson.exports).toBe(false);
-	expect('./button/primitive' in packageJson.exports).toBe(false);
-	expect(packageJson.exports['./primitives/button']).toBe('./dist/primitives/button/index.js');
-	expect(packageJson.exports['./primitives/checkbox']).toBe('./dist/primitives/checkbox/index.js');
-	expect(packageJson.exports['./primitives/combobox']).toBe('./dist/primitives/combobox/index.js');
-	expect(packageJson.exports['./primitives/field']).toBe('./dist/primitives/field/index.js');
-	expect(packageJson.exports['./primitives/input-group']).toBe(
-		'./dist/primitives/input-group/index.js',
-	);
-	expect('./primitives' in packageJson.exports).toBe(false);
-	expect('./tokens' in packageJson.exports).toBe(false);
 });
 
 test('requires react-aria-components as a peer dependency', () => {
@@ -38,4 +57,9 @@ test('resolves component-owned recipes from the built package', async () => {
 	expect(typeof buttonRecipe({ appearance: 'solid', size: 'medium', tone: 'neutral' })).toBe(
 		'string',
 	);
+});
+
+test('does not expose the private combobox styling recipe from the primitive entrypoint', async () => {
+	const combobox = await import('@luke-ui/react/primitives/combobox');
+	expect('comboboxRecipe' in combobox).toBe(false);
 });

@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from 'react';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
+import * as styles from './styles.css.js';
 
 interface _ComboboxEmptyStateProps {
 	children: ReactNode;

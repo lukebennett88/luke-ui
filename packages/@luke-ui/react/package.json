@@ -46,7 +46,6 @@
 		"./quote": "./dist/quote/index.js",
 		"./strong": "./dist/strong/index.js",
 		"./styles": "./dist/styles/index.js",
-		"./stylesheet": "./dist/stylesheet.js",
 		"./text": "./dist/text/index.js",
 		"./text-field": "./dist/text-field/index.js",
 		"./theme": "./dist/theme/index.js",
@@ -66,7 +65,7 @@
 	"scripts": {
 		"build": "pnpm run build:tsdown",
 		"build:storybook": "storybook build",
-		"build:tsdown": "vp pack && tsx scripts/finalize-package-manifest.ts",
+		"build:tsdown": "vp pack",
 		"check:barrels": "unbarrelify --check --skip src/styles/index.ts --skip src/primitives/combobox/index.tsx",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",

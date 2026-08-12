@@ -6,7 +6,7 @@ import { rootClassName } from '../../theme/index.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
-import * as styles from './recipe.css.js';
+import * as styles from './styles.css.js';
 
 type _ComboboxPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;
 interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {

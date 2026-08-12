@@ -4,8 +4,8 @@ import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
 import { ComboboxSizeProvider } from './size-context.js';
+import * as styles from './styles.css.js';
 
 export type ComboboxSize = styles.ComboboxSize;
 

@@ -62,7 +62,8 @@ documented resolved props to that element. Keep `render` and `elementType` mutua
 Do not add generic polymorphic props, `as`, or `asChild` without a demonstrated need. Apply this
 rule to public component APIs, not internal prop handling.
 
-See [COMPONENTS.md](COMPONENTS.md) for component tiers, package paths, and generator rules.
+See [COMPONENTS.md](COMPONENTS.md) for component and primitive structure, package paths, and
+generator rules.
 
 ## Styling
 

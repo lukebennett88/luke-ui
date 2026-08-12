@@ -35,7 +35,7 @@ const base = styleInLayer('recipes', {
 	},
 });
 
-/** Vanilla-extract recipe for the `Link` primitive's styles. */
+/** Vanilla-extract recipe for the `Link` component's styles. */
 export const linkRecipe = recipe({
 	base,
 	defaultVariants: {

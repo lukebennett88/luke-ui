@@ -13,9 +13,9 @@ import { Icon } from '../../icon/index.js';
 import { COMBOBOX_CHECK_ICON_SIZE, COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
+import * as styles from './styles.css.js';
 
 type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
 

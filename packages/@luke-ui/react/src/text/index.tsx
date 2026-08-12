@@ -72,7 +72,7 @@ interface TextStyleProps {
 type _TextOmit = DistributiveOmit<React.ComponentProps<typeof RacText>, 'color'>;
 interface _TextProps extends _TextOmit, TextStyleProps {}
 
-/** Props for the primitive text component. */
+/** Props for the `Text` component. */
 export type TextProps = Prettify<_TextProps>;
 
 const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([

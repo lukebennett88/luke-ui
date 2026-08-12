@@ -22,7 +22,7 @@ type _LinkOmit = DistributiveOmit<RacLinkProps, keyof DocumentedLinkProps>;
 
 interface _LinkProps extends _LinkOmit, LinkStyleProps, DocumentedLinkProps {}
 
-/** Props for the primitive link. */
+/** Props for the `Link` component. */
 export type LinkProps = Prettify<_LinkProps>;
 
 /** Styled link. */

@@ -23,11 +23,13 @@ Do not add a root `@luke-ui/react/primitives` barrel. Import each primitive entr
 
 ## Component creation
 
-Use the generator for new components:
+Use the component generator for new normal component entrypoints:
 
 ```sh
 pnpm run generate:component --args <name> <docs-group>
 ```
+
+Primitive scaffolding is not handled by the component generator.
 
 The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`.
 Turbo and Plop are adapters that apply the plan. Keep new creation rules in the plan module so

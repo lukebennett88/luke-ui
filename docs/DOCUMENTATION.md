@@ -49,7 +49,7 @@ one, cut it.
 Keep the detail that changes the reader's code:
 
 - `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
-- A composed field takes no plain `ref`, so `inputRef` is the only way to reach the control.
+- A field component takes no plain `ref`, so `inputRef` is the only way to reach the control.
 - `solid.pressed` reuses the `solid.hover` colour, so a custom pressed state needs depth, finish, or
   a transform.
 
@@ -57,7 +57,7 @@ Cut the detail that only explains the mechanism:
 
 - `Icon` renders an `<svg>` that references a symbol in the generated spritesheet.
 - A token path cannot be both a string leaf and the parent of `hover` and `pressed`.
-- Which internal components a composed component renders.
+- Which internal modules a component imports.
 
 ### Other technologies
 
@@ -156,7 +156,7 @@ public documentation rules above apply to it. JSDoc and TypeScript types drive t
 
 When adding or changing a component:
 
-- Write function-level JSDoc on the exported component that describes it for an app developer.
+- Write function-level JSDoc on the exported component that describes it for a developer.
 - Document every public prop. Include `@default` when the component destructures a default value.
 - Keep a straightforward prop description to one concise sentence. Add explanation when a
   constraint, choice, caveat, or non-obvious behaviour affects how the prop is used. Do not optimise
@@ -164,8 +164,8 @@ When adding or changing a component:
 - Do not restate the prop name. `endIcon` needs "Icon shown after the label", not "The end icon".
 - On components, redeclare important inherited `react-aria-components` props with useful JSDoc,
   using the passthrough pattern such as `isDisabled?: RacButtonProps['isDisabled']`. Redeclare only
-  the props an app developer is likely to reach for. Point a long-tail inherited prop at the
-  upstream React Aria component through the page's `reactAria` frontmatter link.
+  the props a developer is likely to reach for. Point a long-tail inherited prop at the upstream
+  React Aria component through the page's `reactAria` frontmatter link.
 
 A code comment explains the code, not its history. Luke UI is pre-1.0, so no comment carries a prior
 state.
@@ -284,9 +284,9 @@ a page feel shorter.
 
 ## Where documentation lives
 
-The hosted docs app in `apps/docs` is the primary docs surface for app developers and library
-authors. Authored guides live under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component
-guides live under `apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
+The hosted docs app in `apps/docs` is the primary docs surface for developers. Authored guides live
+under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component guides live under
+`apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
 

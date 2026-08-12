@@ -4,9 +4,9 @@ import { Group as RacGroup } from 'react-aria-components/Group';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
+import * as styles from './styles.css.js';
 
 type _ComboboxInputGroupOmit = DistributiveOmit<RacGroupProps, 'className'>;
 interface _ComboboxInputGroupProps extends _ComboboxInputGroupOmit {

@@ -4,7 +4,7 @@ import { ListBoxSection as RacListBoxSection } from 'react-aria-components/Combo
 import { Header as RacHeader } from 'react-aria-components/Header';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
+import * as styles from './styles.css.js';
 
 type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
 	RacListBoxSectionProps<T>,

@@ -77,7 +77,7 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			path: `packages/@luke-ui/react/src/${name}/index.tsx`,
 		},
 		{
-			contents: renderRecipe({ recipeName }),
+			contents: renderRecipe({ recipeName, variantsType }),
 			path: `packages/@luke-ui/react/src/${name}/recipe.css.ts`,
 		},
 		{
@@ -398,13 +398,16 @@ props:
 `;
 }
 
-function renderRecipe(input: { recipeName: string }): string {
-	return `import { recipe } from '../styles/recipe.js';
+function renderRecipe(input: { recipeName: string; variantsType: string }): string {
+	return `import type { RecipeSelection } from '../styles/recipe.js';
+import { recipe } from '../styles/recipe.js';
 
 export const ${input.recipeName} = recipe({
 \tbase: {
 \t\tdisplay: 'inline-flex',
 \t},
 });
+
+export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
 `;
 }

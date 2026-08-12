@@ -11,7 +11,7 @@ import * as styles from './recipe.css.js';
 
 export type { IconName } from '../../.generated/icon-data.js';
 export { iconNames, iconViewBoxes };
-export { IconSizeProvider, useIconSizeContext } from './icon-size-context.js';
+export { IconSizeProvider } from './icon-size-context.js';
 
 const IconSpritesheetContext = createContext<string | null>(null);
 

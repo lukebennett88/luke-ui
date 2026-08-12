@@ -7,9 +7,9 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
+import * as styles from './styles.css.js';
 
 type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'slot'>;
 interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {

@@ -3,6 +3,7 @@ import type { AtRule, Root, Rule } from 'postcss';
 import { parse } from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { expect, test } from 'vite-plus/test';
+import { loadingSkeletonClassName } from '../loading-skeleton/styles.css.js';
 import type { TypeStyle } from '../theme/contract.js';
 import { typeStyles } from '../theme/contract.js';
 
@@ -26,6 +27,7 @@ test('builds the public stylesheet with the retained layer contract', async () =
 		typeStyles.map((typography) => [typography, text.textRecipe({ typography }).split(' ')]),
 	) as TextClassesByTypography;
 	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
+	const privateRecipeClasses = [loadingSkeletonClassName];
 	const lineClampClasses: LineClampClasses = {
 		numeric: Object.fromEntries(
 			numericLineClampVariants.map((lineClamp) => [
@@ -39,6 +41,7 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	expect(() => {
 		return assertStylesheetContract(stylesheet, {
 			lineClampClasses,
+			privateRecipeClasses,
 			recipeClasses,
 			textClassesByTypography,
 			utilityClasses,
@@ -119,11 +122,13 @@ function assertStylesheetContract(
 	stylesheet: string,
 	{
 		lineClampClasses,
+		privateRecipeClasses = [],
 		recipeClasses,
 		textClassesByTypography,
 		utilityClasses,
 	}: {
 		lineClampClasses?: LineClampClasses;
+		privateRecipeClasses?: Array<string>;
 		recipeClasses: Array<string>;
 		textClassesByTypography?: TextClassesByTypography;
 		utilityClasses: Array<string>;
@@ -147,6 +152,7 @@ function assertStylesheetContract(
 	assertSentinel(root, 'luke-ui-theme', 'theme', 'font-size', 'var(--luke-font-body-font-size)');
 
 	for (const className of recipeClasses) assertClassOwnership(root, className, 'recipes');
+	for (const className of privateRecipeClasses) assertClassOwnership(root, className, 'recipes');
 	for (const className of utilityClasses) assertClassOwnership(root, className, 'utilities');
 	if (textClassesByTypography) assertTextTrimOwnership(root, textClassesByTypography);
 	if (lineClampClasses) assertLineClampOwnership(root, lineClampClasses);

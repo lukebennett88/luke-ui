@@ -122,7 +122,7 @@ function createLayeredTextStyle({
 	} satisfies ComplexStyleRule;
 }
 
-/** Vanilla-extract recipe for the `Text` primitive's styles. */
+/** Vanilla-extract recipe for the `Text` component's styles. */
 export const textRecipe = recipe({
 	base,
 	compoundVariants: typographyCompoundVariants,

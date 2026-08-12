@@ -26,25 +26,9 @@ const HeadingLevelContext = createContext<HeadingLevel | undefined>(undefined);
 const WithinHeadingContext = createContext(false);
 
 /** Values returned when resolving heading level from context. */
-type HeadingLevelsRenderProps = {
+export type HeadingLevelsRenderProps = {
 	element: `h${HeadingLevel}`;
 	level: HeadingLevel;
-};
-
-/**
- * Get the current heading level from context.
- *
- * @param fallback - Level to use when no provider is found (defaults to 2)
- * @returns An object with the current heading level and element from context, or the fallback value
- */
-export const useHeadingLevel = (
-	fallback: HeadingLevel = DEFAULT_LEVEL,
-): HeadingLevelsRenderProps => {
-	const level = useContext(HeadingLevelContext) ?? fallback;
-	return {
-		element: `h${level}`,
-		level,
-	};
 };
 
 /** Returns true when rendered inside a `Heading`. */

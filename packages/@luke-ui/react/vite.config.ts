@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 import { readdir, rm } from 'node:fs/promises';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
+import { finalizePackageManifest } from './scripts/finalize-package-manifest.js';
 
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
@@ -61,10 +62,14 @@ export default defineConfig({
 			customExports: Object.fromEntries(
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
+			exclude: ['stylesheet', 'styles/recipe-engine'],
 		},
 		format: ['esm'],
 		hooks: {
 			'build:prepare': cleanDistExceptPreservedFiles,
+			'build:done': async () => {
+				await finalizePackageManifest();
+			},
 		},
 		outputOptions: {
 			assetFileNames: '[name][extname]',
