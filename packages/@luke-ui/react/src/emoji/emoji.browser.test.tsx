@@ -12,6 +12,7 @@ test('inherits font size from surrounding Text', () => {
 
 	const emoji = locator.getByRole('img', { name: 'Waving hand' }).element();
 	const parent = emoji.parentElement;
-	expect(parent).not.toBeNull();
-	expect(getComputedStyle(emoji).fontSize).toBe(getComputedStyle(parent!).fontSize);
+	if (!parent) throw new Error('expected a parent element');
+
+	expect(getComputedStyle(emoji).fontSize).toBe(getComputedStyle(parent).fontSize);
 });
