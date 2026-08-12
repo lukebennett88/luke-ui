@@ -1,4 +1,5 @@
-export { checkboxRecipe, type CheckboxRecipeVariants } from './recipe.css.js';
+export { type CheckboxRecipeVariants, checkboxRecipe } from './recipe.css.js';
+
 import type { ComponentProps, JSX } from 'react';
 import type {
 	CheckboxButtonProps as RacCheckboxButtonProps,
@@ -12,7 +13,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { CheckboxRecipeVariants } from './recipe.css.js';
-import * as styles from './recipe.css.js';
+import { checkboxRecipe } from './recipe.css.js';
 
 type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
 
@@ -76,7 +77,7 @@ export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 		<RacCheckboxButton
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return styles.checkboxRecipe().content(className);
+				return checkboxRecipe().content(className);
 			})}
 		/>
 	);
@@ -85,15 +86,13 @@ export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 /** Line-height-sized wrapper that centres the fixed visual checkbox affordance. */
 export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	const { className, ...restProps } = props;
-	return <span {...restProps} className={styles.checkboxRecipe().control(className)} />;
+	return <span {...restProps} className={checkboxRecipe().control(className)} />;
 }
 
 /** Visual square that reflects selected, indeterminate, disabled, and invalid states. */
 export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 	const { className, ...restProps } = props;
-	return (
-		<span {...restProps} aria-hidden className={styles.checkboxRecipe().indicator(className)} />
-	);
+	return <span {...restProps} aria-hidden className={checkboxRecipe().indicator(className)} />;
 }
 
 /** Checkbox field primitive for custom composition. */
@@ -104,7 +103,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 		<RacCheckboxField
 			{...restProps}
 			className={composeRenderProps(className, (className) => {
-				return styles.checkboxRecipe({ size }).root(className);
+				return checkboxRecipe({ size }).root(className);
 			})}
 		/>
 	);

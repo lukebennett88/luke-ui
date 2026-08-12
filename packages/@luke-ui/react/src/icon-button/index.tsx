@@ -1,7 +1,7 @@
-export { iconButtonRecipe, type IconButtonRecipeVariants } from './recipe.css.js';
+export { type IconButtonRecipeVariants, iconButtonRecipe } from './recipe.css.js';
+
 import type { JSX } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import * as styles from '../icon-button/recipe.css.js';
 import type { IconName } from '../icon/index.js';
 import { Icon } from '../icon/index.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/index.js';
@@ -10,8 +10,10 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
+import type { IconButtonRecipeVariants } from './recipe.css.js';
+import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.js';
 
-interface IconButtonRecipeProps extends NonNullable<styles.IconButtonRecipeVariants> {}
+interface IconButtonRecipeProps extends NonNullable<IconButtonRecipeVariants> {}
 
 interface IconButtonStyleProps {
 	/**
@@ -40,8 +42,8 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			{...buttonProps}
 			className={composeRenderProps(props.className, (value) => {
 				return cx(
-					styles.iconButtonReset,
-					styles.iconButtonRecipe({
+					iconButtonReset,
+					iconButtonRecipe({
 						size,
 					}),
 					value,
@@ -50,7 +52,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			isPending={isPending}
 			size={size}
 		>
-			<Icon aria-hidden className={styles.iconButtonIcon({ isPending })} name={icon} />
+			<Icon aria-hidden className={iconButtonIcon({ isPending })} name={icon} />
 		</Button>
 	);
 }

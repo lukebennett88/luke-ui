@@ -2,9 +2,9 @@ import type { JSX, ReactNode, Ref } from 'react';
 import type { DialogProps } from 'react-aria-components/Dialog';
 import { Dialog, OverlayTriggerStateContext } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
-import * as styles from '../overlays/mobile-overlay.css.js';
 import { rootClassName } from '../theme/index.js';
 import { cx } from '../utils/index.js';
+import { mobileDialog, mobileModal, mobileOverlay } from './mobile-overlay.css.js';
 
 interface MobileOverlayProps {
 	'aria-describedby'?: DialogProps['aria-describedby'];
@@ -35,7 +35,7 @@ export function MobileOverlay({
 		// labelling behaviour to that state instead of this tray's own `Modal` state.
 		<OverlayTriggerStateContext.Provider value={null}>
 			<ModalOverlay
-				className={cx(rootClassName, styles.mobileOverlay)}
+				className={cx(rootClassName, mobileOverlay)}
 				isDismissable
 				isOpen={isOpen}
 				onOpenChange={onOpenChange}
@@ -44,12 +44,12 @@ export function MobileOverlay({
 				// open, so this value never has to update.
 				style={() => ({ top: typeof window === 'undefined' ? 0 : window.scrollY })}
 			>
-				<Modal className={styles.mobileModal}>
+				<Modal className={mobileModal}>
 					<Dialog
 						aria-describedby={ariaDescribedBy}
 						aria-label={ariaLabel}
 						aria-labelledby={ariaLabelledBy}
-						className={styles.mobileDialog}
+						className={mobileDialog}
 						ref={ref}
 					>
 						{children}

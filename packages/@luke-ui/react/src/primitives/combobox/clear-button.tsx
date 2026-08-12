@@ -9,7 +9,7 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-import * as styles from './styles.css.js';
+import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'slot'>;
 interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {
@@ -36,7 +36,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 			<RacButton
 				{...buttonProps}
 				className={composeRenderProps(buttonProps.className, (className) => {
-					return styles.comboboxRecipe({ size }).clearButton(className);
+					return comboboxRecipe({ size }).clearButton(className);
 				})}
 				onPress={(event) => {
 					state.setValue(Array.isArray(state.value) ? [] : null);

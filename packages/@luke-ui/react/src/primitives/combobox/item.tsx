@@ -15,7 +15,7 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-import * as styles from './styles.css.js';
+import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
 
@@ -38,7 +38,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 			textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
 			{...itemProps}
 			className={composeRenderProps(itemProps.className, (className) => {
-				return styles.comboboxRecipe({ size }).item(className);
+				return comboboxRecipe({ size }).item(className);
 			})}
 		>
 			{composeRenderProps(itemProps.children, (children, { isSelected }) => {
@@ -50,7 +50,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 						{isSelected ? (
 							<Icon
 								aria-hidden
-								className={styles.comboboxRecipe().itemCheck()}
+								className={comboboxRecipe().itemCheck()}
 								name="check"
 								size={COMBOBOX_CHECK_ICON_SIZE}
 							/>
@@ -78,7 +78,7 @@ export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Elem
 	return (
 		<RacListBoxLoadMoreItem
 			{...loadMoreItemProps}
-			className={styles.comboboxRecipe({ size }).loadMoreItem(loadMoreItemProps.className)}
+			className={comboboxRecipe({ size }).loadMoreItem(loadMoreItemProps.className)}
 		/>
 	);
 }

@@ -8,7 +8,7 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-import * as styles from './styles.css.js';
+import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxTriggerOmit = DistributiveOmit<RacButtonProps, 'className'>;
 interface _ComboboxTriggerProps extends _ComboboxTriggerOmit {
@@ -29,7 +29,7 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 			<RacButton
 				{...buttonProps}
 				className={composeRenderProps(buttonProps.className, (className) => {
-					return styles.comboboxRecipe({ size }).trigger(className);
+					return comboboxRecipe({ size }).trigger(className);
 				})}
 			/>
 		</IconSizeProvider>

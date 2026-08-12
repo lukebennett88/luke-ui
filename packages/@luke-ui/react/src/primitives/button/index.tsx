@@ -1,4 +1,5 @@
-export { buttonRecipe, type ButtonRecipeVariants } from './recipe.css.js';
+export { type ButtonRecipeVariants, buttonRecipe } from './recipe.css.js';
+
 import type { JSX } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { Button as RacButton } from 'react-aria-components/Button';
@@ -7,9 +8,10 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import type { Prettify } from '../../types/prettify.js';
 import { cx } from '../../utils/index.js';
-import * as styles from './recipe.css.js';
+import type { ButtonRecipeVariants } from './recipe.css.js';
+import { buttonRecipe } from './recipe.css.js';
 
-interface ButtonRecipeProps extends NonNullable<styles.ButtonRecipeVariants> {}
+interface ButtonRecipeProps extends NonNullable<ButtonRecipeVariants> {}
 
 interface ButtonStyleProps {
 	/**
@@ -57,7 +59,7 @@ export function Button(props: ButtonProps): JSX.Element {
 			<RacButton
 				{...restProps}
 				className={composeRenderProps(props.className, (className) => {
-					return cx(styles.buttonRecipe({ appearance, isBlock, size, tone }), className);
+					return cx(buttonRecipe({ appearance, isBlock, size, tone }), className);
 				})}
 				isDisabled={isDisabled}
 				isPending={isPending}

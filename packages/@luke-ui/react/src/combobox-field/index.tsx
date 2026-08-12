@@ -28,7 +28,7 @@ import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
 import { ComboboxPopover } from '../primitives/combobox/popover.js';
 import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
-import * as styles from '../primitives/combobox/styles.css.js';
+import { comboboxRecipe } from '../primitives/combobox/styles.css.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import { Field } from '../primitives/field/index.js';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
@@ -216,7 +216,7 @@ function MobileComboboxContent<T extends object>({
 	const valueId = useId();
 
 	const ariaLabelledBy = labelContext?.id == null ? undefined : cx(labelContext.id, valueId);
-	const comboboxStyles = styles.comboboxRecipe({ size });
+	const comboboxStyles = comboboxRecipe({ size });
 
 	const mobileListBoxClassName = composeRenderProps(listBoxProps?.className, (className) => {
 		return comboboxStyles.mobileListBox(className);
@@ -310,7 +310,7 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 		<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
 			<RacButton
 				aria-label="Clear search"
-				className={styles.comboboxRecipe({ size }).clearButton()}
+				className={comboboxRecipe({ size }).clearButton()}
 				onPress={() => {
 					state.setInputValue('');
 				}}

@@ -1,12 +1,14 @@
-export { textRecipe, type TextRecipeVariants } from './recipe.css.js';
+export { type TextRecipeVariants, textRecipe } from './recipe.css.js';
+
 import { Text as RacText } from 'react-aria-components/Text';
-import * as styles from '../text/recipe.css.js';
 import { typeStyleWeightRole } from '../theme/contract.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
+import type { TextRecipeVariants } from './recipe.css.js';
+import { textRecipe } from './recipe.css.js';
 
-interface TextVariantProps extends NonNullable<styles.TextRecipeVariants> {}
+interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
 
 interface TextStyleProps {
 	/**
@@ -127,7 +129,7 @@ export function Text(props: TextProps) {
 		<RacText
 			{...racProps}
 			className={cx(
-				styles.textRecipe({
+				textRecipe({
 					color,
 					fontVariantNumeric,
 					...(shouldInheritFont

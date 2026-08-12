@@ -1,6 +1,6 @@
-export { buttonRecipe, type ButtonRecipeVariants } from '../primitives/button/recipe.css.js';
+export { type ButtonRecipeVariants, buttonRecipe } from '../primitives/button/recipe.css.js';
+
 import type { JSX, ReactNode } from 'react';
-import * as styles from '../button/styles.css.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/index.js';
 import { Button as PrimitiveButton } from '../primitives/button/index.js';
@@ -9,8 +9,10 @@ import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
+import type { ButtonLabelVariants } from './styles.css.js';
+import { buttonContent, buttonLabel, spinnerOverlay } from './styles.css.js';
 
-interface ButtonLabelRecipeProps extends NonNullable<styles.ButtonLabelVariants> {}
+interface ButtonLabelRecipeProps extends NonNullable<ButtonLabelVariants> {}
 
 interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonRecipeVariants> {}
 
@@ -70,13 +72,13 @@ export function Button(props: ButtonProps): JSX.Element {
 	return (
 		<PrimitiveButton {...restProps} isPending={isPending} size={size}>
 			{(renderProps) => (
-				<span className={styles.buttonContent()}>
+				<span className={buttonContent()}>
 					{isPending && (
-						<span aria-hidden className={styles.spinnerOverlay()}>
+						<span aria-hidden className={spinnerOverlay()}>
 							<LoadingSpinner aria-hidden />
 						</span>
 					)}
-					<span className={styles.buttonLabel({ isPending })}>
+					<span className={buttonLabel({ isPending })}>
 						{startIcon}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}

@@ -2,10 +2,11 @@ import type { JSX } from 'react';
 import type { LabelProps as RacLabelProps } from 'react-aria-components/Label';
 import { Label as RacLabel } from 'react-aria-components/Label';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
+import type { FieldNecessityIndicator } from './recipe.css.js';
+import { fieldRecipe } from './recipe.css.js';
 
 /** Allowed `necessityIndicator` values for `FieldLabel`. */
-export type FieldNecessityIndicator = styles.FieldNecessityIndicator;
+export type { FieldNecessityIndicator };
 
 interface FieldLabelStyleProps {
 	/** Shows how required fields are marked. */
@@ -22,9 +23,6 @@ export function FieldLabel(props: FieldLabelProps): JSX.Element {
 	const { className, necessityIndicator = 'icon', ...restProps } = props;
 
 	return (
-		<RacLabel
-			{...restProps}
-			className={styles.fieldRecipe({ necessityIndicator }).label(className)}
-		/>
+		<RacLabel {...restProps} className={fieldRecipe({ necessityIndicator }).label(className)} />
 	);
 }

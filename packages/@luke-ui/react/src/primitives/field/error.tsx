@@ -3,7 +3,7 @@ import type { FieldErrorProps as RacFieldErrorProps } from 'react-aria-component
 import { FieldError as RacFieldError } from 'react-aria-components/FieldError';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
+import { fieldRecipe } from './recipe.css.js';
 
 /** Props for `FieldError`. */
 export type FieldErrorProps = Prettify<RacFieldErrorProps>;
@@ -14,7 +14,7 @@ export function FieldError(props: FieldErrorProps): JSX.Element {
 		<RacFieldError
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return styles.fieldRecipe({ tone: 'error' }).message(className);
+				return fieldRecipe({ tone: 'error' }).message(className);
 			})}
 		/>
 	);

@@ -7,7 +7,7 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-import * as styles from './styles.css.js';
+import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
 interface _ComboboxInputProps extends _ComboboxInputOmit {
@@ -40,7 +40,7 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 		<RacInput
 			{...inputProps}
 			className={composeRenderProps(inputProps.className, (className) => {
-				return styles.comboboxRecipe({ size }).textInput(className);
+				return comboboxRecipe({ size }).textInput(className);
 			})}
 			onClick={handleClick}
 		/>

@@ -3,7 +3,7 @@ import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './recipe.css.js';
+import { fieldRecipe } from './recipe.css.js';
 
 type _FieldDescriptionProps = DistributiveOmit<RacTextProps, 'slot'>;
 
@@ -17,7 +17,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	return (
 		<RacText
 			{...restProps}
-			className={styles.fieldRecipe({ tone: 'description' }).message(className)}
+			className={fieldRecipe({ tone: 'description' }).message(className)}
 			slot="description"
 		/>
 	);

@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from 'react';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './styles.css.js';
+import { comboboxRecipe } from './styles.css.js';
 
 interface _ComboboxEmptyStateProps {
 	children: ReactNode;
@@ -13,5 +13,5 @@ export type ComboboxEmptyStateProps = Prettify<_ComboboxEmptyStateProps>;
 export function ComboboxEmptyState(props: ComboboxEmptyStateProps): JSX.Element {
 	const { children, className } = props;
 
-	return <div className={styles.comboboxRecipe().emptyState(className)}>{children}</div>;
+	return <div className={comboboxRecipe().emptyState(className)}>{children}</div>;
 }

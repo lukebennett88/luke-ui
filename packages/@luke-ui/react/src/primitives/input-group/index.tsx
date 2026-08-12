@@ -1,8 +1,9 @@
 export {
-	inputGroupRecipe,
 	type InputGroupRecipeVariants,
 	type InputGroupSize,
+	inputGroupRecipe,
 } from './recipe.css.js';
+
 import type { ComponentProps, JSX, Ref } from 'react';
 import { createContext, use } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
@@ -16,7 +17,7 @@ import { INPUT_GROUP_ICON_SIZE } from '../../sizing/input-group-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { InputGroupSize } from './recipe.css.js';
-import * as styles from './recipe.css.js';
+import { inputGroupRecipe } from './recipe.css.js';
 
 const InputGroupSizeContext = createContext<InputGroupSize | null>(null);
 
@@ -109,7 +110,7 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
  */
 export function InputGroup(props: InputGroupProps): JSX.Element {
 	const { children, className, size = 'medium', ...groupProps } = props;
-	const slots = styles.inputGroupRecipe({ size });
+	const slots = inputGroupRecipe({ size });
 
 	return (
 		<InputGroupSizeContext.Provider value={size}>
@@ -155,7 +156,7 @@ export function InputGroupInput(props: InputGroupInputProps): JSX.Element {
 		<RacInput
 			{...inputProps}
 			className={composeRenderProps(className, (value) => {
-				return styles.inputGroupRecipe({ size }).control(value);
+				return inputGroupRecipe({ size }).control(value);
 			})}
 		/>
 	);
@@ -166,7 +167,7 @@ export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
 	const { className, size: sizeProp, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={styles.inputGroupRecipe({ size }).prefix(className)} />;
+	return <span {...spanProps} className={inputGroupRecipe({ size }).prefix(className)} />;
 }
 
 /**
@@ -177,5 +178,5 @@ export function InputGroupSuffix(props: InputGroupSuffixProps): JSX.Element {
 	const { className, size: sizeProp, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={styles.inputGroupRecipe({ size }).suffix(className)} />;
+	return <span {...spanProps} className={inputGroupRecipe({ size }).suffix(className)} />;
 }

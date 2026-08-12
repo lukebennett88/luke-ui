@@ -5,9 +5,10 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { ComboboxSizeProvider } from './size-context.js';
-import * as styles from './styles.css.js';
+import type { ComboboxSize } from './styles.css.js';
+import { comboboxRecipe } from './styles.css.js';
 
-export type ComboboxSize = styles.ComboboxSize;
+export type { ComboboxSize };
 
 type _ComboboxRootOmit<T extends object> = DistributiveOmit<
 	RacComboBoxProps<T, 'single'>,
@@ -56,7 +57,7 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 			<RacComboBox
 				{...comboboxProps}
 				className={composeRenderProps(className, (renderedClassName) => {
-					return styles.comboboxRecipe().root(renderedClassName);
+					return comboboxRecipe().root(renderedClassName);
 				})}
 				menuTrigger={menuTrigger}
 				ref={ref}

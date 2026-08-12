@@ -7,7 +7,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import * as styles from './styles.css.js';
+import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	RacListBoxProps<T>,
@@ -46,7 +46,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 		<RacListBox
 			{...listBoxProps}
 			className={composeRenderProps(listBoxProps.className, (className) => {
-				return styles.comboboxRecipe().listBox(className);
+				return comboboxRecipe().listBox(className);
 			})}
 		>
 			{listBoxChildren}

@@ -216,7 +216,7 @@ function renderComponentSource(input: {
 }): string {
 	return `import type { ComponentProps, JSX } from 'react';
 import { cx } from '../utils/index.js';
-import * as styles from './recipe.css.js';
+import { ${input.recipeName} } from './recipe.css.js';
 
 export { ${input.recipeName}, type ${input.variantsType} } from './recipe.css.js';
 
@@ -226,7 +226,7 @@ export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
 /** ${input.pascalName} component. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
 \tconst { className, ...divProps } = props;
-\treturn <div {...divProps} className={cx(styles.${input.recipeName}(), className)} />;
+\treturn <div {...divProps} className={cx(${input.recipeName}(), className)} />;
 }
 `;
 }

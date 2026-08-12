@@ -1,4 +1,5 @@
-export { iconRecipe, type IconRecipeVariants } from './recipe.css.js';
+export { type IconRecipeVariants, iconRecipe } from './recipe.css.js';
+
 import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../.generated/icon-data.js';
@@ -7,15 +8,16 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
 import { useIconSizeContext } from './icon-size-context.js';
-import * as styles from './recipe.css.js';
+import type { IconRecipeVariants } from './recipe.css.js';
+import { iconRecipe } from './recipe.css.js';
 
 export type { IconName } from '../../.generated/icon-data.js';
-export { iconNames, iconViewBoxes };
 export { IconSizeProvider } from './icon-size-context.js';
+export { iconNames, iconViewBoxes };
 
 const IconSpritesheetContext = createContext<string | null>(null);
 
-interface IconVariantProps extends NonNullable<styles.IconRecipeVariants> {}
+interface IconVariantProps extends NonNullable<IconRecipeVariants> {}
 
 interface IconStyleProps {
 	/**
@@ -85,7 +87,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 
 		const svgProps: React.SVGProps<SVGSVGElement> = {
 			'aria-hidden': ariaHidden,
-			className: cx(styles.iconRecipe({ size: resolvedSize }), className),
+			className: cx(iconRecipe({ size: resolvedSize }), className),
 			fill: 'currentColor',
 			focusable: false,
 			id,

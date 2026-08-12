@@ -6,7 +6,7 @@ import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
-import * as styles from './styles.css.js';
+import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxInputGroupOmit = DistributiveOmit<RacGroupProps, 'className'>;
 interface _ComboboxInputGroupProps extends _ComboboxInputGroupOmit {
@@ -26,7 +26,7 @@ export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element 
 		<RacGroup
 			{...groupProps}
 			className={composeRenderProps(groupProps.className, (className) => {
-				return styles.comboboxRecipe({ size }).inputGroup(className);
+				return comboboxRecipe({ size }).inputGroup(className);
 			})}
 		/>
 	);
