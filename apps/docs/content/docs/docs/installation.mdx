@@ -3,12 +3,7 @@ title: Installation
 description: Install Luke UI, apply a bundled theme, and render a component.
 ---
 
-Luke UI is a React component library with static CSS and bundled themes. This guide uses Tactile,
-then shows the first component inside a themed root.
-
-## Installation
-
-### 1. Install Luke UI
+## Install Luke UI
 
 Install the package in your application.
 
@@ -16,22 +11,19 @@ Install the package in your application.
 pnpm add @luke-ui/react
 ```
 
-### 2. Import the CSS
+## Set up the theme
 
-Import the shared stylesheet and one theme's stylesheet at your application root. This example uses
-Tactile. To use Paper, import `@luke-ui/react/themes/paper/stylesheet.css` instead.
-
-### 3. Add the theme root
+Import `@luke-ui/react/stylesheet.css` and one theme stylesheet at your application root. This guide
+uses Tactile. To use Paper, import `@luke-ui/react/themes/paper/stylesheet.css` instead.
 
 Apply `rootClassName` to an element you own, such as the application shell. The theme stylesheet
 supplies the semantic variables. `rootClassName` adds the reset and base typography.
 
 <SourceCodeBlock src="theming/getting-started" />
 
-### 4. Use components
+## Use components
 
-Import each component from its package path. The setup above renders `Text`. `Button` comes from
-`@luke-ui/react/button`.
+Import each component from its package path.
 
 <SourceCodeBlock src="overview/welcome" />
 
