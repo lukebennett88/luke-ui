@@ -18,9 +18,6 @@
 		"./dist/stylesheet.css",
 		"./dist/themes/*/stylesheet.css"
 	],
-	"imports": {
-		"#recipe-engine": "./dist/styles/recipe-engine.js"
-	},
 	"exports": {
 		"./blockquote": "./dist/blockquote/index.js",
 		"./box": "./dist/box/index.js",

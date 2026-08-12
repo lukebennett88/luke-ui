@@ -31,6 +31,24 @@ export type HeadingLevelsRenderProps = {
 	level: HeadingLevel;
 };
 
+/**
+ * Get the current heading level from context.
+ *
+ * Reads the current level without wrapping another `HeadingLevels`, which would advance it.
+ *
+ * @param fallback - Level to use when no provider is found (defaults to 2)
+ * @returns An object with the current heading level and element from context, or the fallback value
+ */
+export const useHeadingLevel = (
+	fallback: HeadingLevel = DEFAULT_LEVEL,
+): HeadingLevelsRenderProps => {
+	const level = useContext(HeadingLevelContext) ?? fallback;
+	return {
+		element: `h${level}`,
+		level,
+	};
+};
+
 /** Returns true when rendered inside a `Heading`. */
 export const useIsWithinHeading = () => useContext(WithinHeadingContext);
 

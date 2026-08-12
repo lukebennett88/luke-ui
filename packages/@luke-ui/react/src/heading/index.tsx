@@ -9,7 +9,7 @@ export type {
 	HeadingLevelsProps,
 	HeadingLevelsRenderProps,
 } from './heading-context.js';
-export { HeadingLevels } from './heading-context.js';
+export { HeadingLevels, useHeadingLevel } from './heading-context.js';
 /** Valid heading tag name for Luke UI headings. */
 export type HeadingTag = `h${HeadingLevel}`;
 

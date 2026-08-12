@@ -42,6 +42,8 @@ async function cleanDistExceptPreservedFiles() {
 export default defineConfig({
 	pack: {
 		alias: {
+			// Vanilla Extract serializes recipes to `#recipe-engine`; resolve it to source so pack
+			// can bundle a relative runtime chunk.
 			'#recipe-engine': recipeEngineSource,
 		},
 		attw: {
@@ -58,14 +60,14 @@ export default defineConfig({
 			stylesheet: 'src/stylesheet.css.ts',
 			'*': ['src/*/index.tsx', 'src/*/index.ts'],
 			'primitives/*': ['src/primitives/*/index.tsx', 'src/primitives/*/index.ts'],
-			'styles/recipe-engine': 'src/styles/recipe-engine.ts',
 			'themes/*': ['src/themes/*/index.ts'],
 		},
 		exports: {
 			customExports: Object.fromEntries(
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
-			exclude: ['stylesheet', 'styles/recipe-engine'],
+			// Build the stylesheet for CSS extraction, but do not expose it as a consumer package subpath.
+			exclude: ['stylesheet'],
 		},
 		format: ['esm'],
 		hooks: {

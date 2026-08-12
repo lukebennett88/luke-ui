@@ -28,7 +28,6 @@ export default {
 				'src/**/index.ts',
 				'src/stylesheet.css.ts',
 				'src/styles/index.css.ts',
-				'src/styles/recipe-engine.ts',
 				'src/theme/index.tsx',
 				'src/utils/index.ts',
 				'scripts/**/*.ts',

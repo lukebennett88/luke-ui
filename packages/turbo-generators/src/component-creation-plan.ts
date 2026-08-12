@@ -149,7 +149,7 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 			{
 				kind: 'text-append',
 				lines: [`import '../${name}/recipe.css.js';`],
-				path: 'packages/@luke-ui/react/src/styles/component-styles.css.ts',
+				path: 'packages/@luke-ui/react/src/styles/modules.css.ts',
 			},
 		],
 		textFileInserts: [

@@ -158,6 +158,11 @@ export default defineConfig(async () => {
 			netlify(),
 		]),
 		resolve: {
+			alias: {
+				'#recipe-engine': fileURLToPath(
+					new URL('../../packages/@luke-ui/react/src/styles/recipe-engine.ts', import.meta.url),
+				),
+			},
 			tsconfigPaths: true,
 		},
 		server: {

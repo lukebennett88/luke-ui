@@ -10,10 +10,14 @@ with no class and no JS required. Neither step injects styles at runtime.
 
 ## Structure
 
+- `styles/index.css.ts`: stylesheet graph in cascade order — layers, reset, theme root, style
+  modules, utilities.
 - `styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
 - `styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
-- `styles/component-styles.css.ts`: the committed stylesheet manifest. It explicitly imports every
-  colocated `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet.
+- `styles/modules.css.ts`: the committed stylesheet registry. It explicitly imports every colocated
+  `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet, plus primitive
+  and overlay style modules. Import order does not affect cascade because every rule is in a named
+  layer; keep the list alphabetical by path.
 - `styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
 - `styles/input-states.ts`: the shared field control-state selectors (`inputStates`,

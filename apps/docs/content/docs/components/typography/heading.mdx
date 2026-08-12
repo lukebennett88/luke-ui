@@ -26,6 +26,9 @@ children.
 <Heading level={2}>Explicit h2</Heading>
 ```
 
+To read the current level in a custom heading-like component, use `useHeadingLevel`. Unlike a nested
+`HeadingLevels`, it does not advance the level.
+
 Do not skip levels, such as an h2 followed by an h4. Someone who uses a screen reader navigates a
 page by heading level.
 

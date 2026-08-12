@@ -46,7 +46,7 @@ describe('createComponentPlan', () => {
 			{
 				kind: 'text-append',
 				lines: ["import '../status-badge/recipe.css.js';"],
-				path: 'packages/@luke-ui/react/src/styles/component-styles.css.ts',
+				path: 'packages/@luke-ui/react/src/styles/modules.css.ts',
 			},
 		]);
 		expect(plan.textFileInserts?.[0]?.lines).toEqual([

@@ -72,7 +72,7 @@ describe('applyComponentCreationPlan', () => {
 		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 		roots.push(root);
 
-		const manifestPath = 'packages/@luke-ui/react/src/styles/component-styles.css.ts';
+		const manifestPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';
 		const initialContent = [
 			"import '../button/recipe.css.js';",
 			"import '../text/recipe.css.js';",

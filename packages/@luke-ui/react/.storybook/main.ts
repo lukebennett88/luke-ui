@@ -35,6 +35,10 @@ export default defineMain({
 		const existingAliases = Array.isArray(config.resolve.alias) ? config.resolve.alias : [];
 		config.resolve.alias = [
 			{
+				find: '#recipe-engine',
+				replacement: resolve(srcDir, 'styles/recipe-engine.ts'),
+			},
+			{
 				find: /^@luke-ui\/react\/spritesheet\.svg(\?.*)?$/,
 				replacement: `${resolve(distDir, 'spritesheet.svg')}$1`,
 			},

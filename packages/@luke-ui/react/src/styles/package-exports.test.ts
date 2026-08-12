@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import packageJson from '../../package.json' with { type: 'json' };
 
@@ -41,7 +42,13 @@ test('publishes only the final styling entrypoints', () => {
 		expect(packageJson.exports[exportPath]).toBe(target);
 	}
 
-	expect(packageJson.imports?.['#recipe-engine']).toBe('./dist/styles/recipe-engine.js');
+	expect(packageJson.imports).toBeUndefined();
+});
+
+test('bundles recipe runtime through a relative chunk, not a package import', async () => {
+	const source = await readFile(new URL('../../dist/blockquote/index.js', import.meta.url), 'utf8');
+	expect(source).not.toContain('#recipe-engine');
+	expect(source).toMatch(/createSingleRecipe[\s\S]*from ["']\.\.\//);
 });
 
 test('requires react-aria-components as a peer dependency', () => {

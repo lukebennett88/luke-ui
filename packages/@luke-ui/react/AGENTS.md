@@ -1,13 +1,12 @@
 # @luke-ui/react agent guide
 
 - Do not hand-edit `.generated/entries.ts` or `package.json#exports`. `vp pack` generates entries
-  and updates exports during build. Build-only entries such as `stylesheet` and
-  `styles/recipe-engine` are excluded from the public export map via `exports.exclude` in
-  `vite.config.ts`. The committed `package.json#imports` field wires the private `#recipe-engine`
-  package import to `./dist/styles/recipe-engine.js`. Pack `alias` resolves `#recipe-engine` to
-  source during the build.
+  and updates exports during build. The `stylesheet` build entry is excluded from the public export
+  map via `exports.exclude` in `vite.config.ts`. Vanilla Extract serializes recipes to
+  `#recipe-engine`; pack, Vitest, Storybook, and the docs app alias that specifier to source. Pack
+  then bundles a relative runtime chunk. The specifier is not a public package subpath.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
-  files by hand. The generator updates the stylesheet manifest, conformance manifest, and docs
+  files by hand. The generator updates the style-module registry, conformance manifest, and docs
   wiring.
 - Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests. It is
   the only normative testing guide. Component tests use the shared browser renderer; stories are
