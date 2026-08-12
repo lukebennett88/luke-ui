@@ -1,32 +1,10 @@
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
-import { cx } from '@luke-ui/react/utils';
+import { button } from '@luke-ui/react/recipes';
+import type { ComponentProps } from 'react';
 import type { Selection } from 'react-aria-components/GridList';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
 import { ToggleButtonGroup } from 'react-aria-components/ToggleButtonGroup';
-
-/** Rounded pill group shared by every toggle group in this file, matched on shape and focus. */
-const GROUP_CLASS_NAME = 'flex items-center rounded-full bg-fd-secondary p-0.5';
-
-/** Selected/unselected pill treatment shared by icon and text toggle buttons. */
-const PILL_CLASS_NAME =
-	'cursor-pointer rounded-full text-fd-muted-foreground transition-colors data-hovered:bg-fd-accent data-hovered:text-fd-accent-foreground data-pressed:bg-fd-accent';
-const PILL_SELECTED_CLASS_NAME = 'bg-fd-background text-fd-foreground shadow-sm';
-
-function toSelectionChangeHandler<Value extends string>(
-	options: ReadonlyArray<{ value: Value }>,
-	onChange: (value: Value) => void,
-) {
-	return (selection: Selection) => {
-		if (selection === 'all') return;
-
-		const selectedKey = selection.values().next().value;
-		const selectedOption = options.find((option) => option.value === selectedKey);
-		if (!selectedOption) return;
-
-		onChange(selectedOption.value);
-	};
-}
 
 type IconToggleItem<Value extends string> = {
 	icon: IconName;
@@ -40,6 +18,20 @@ type IconToggleButtonGroupProps<Value extends string> = {
 	options: ReadonlyArray<IconToggleItem<Value>>;
 	value: Value | null;
 };
+
+type TextToggleItem<Value extends string> = {
+	label: string;
+	value: Value;
+};
+
+type TextToggleButtonGroupProps<Value extends string> = {
+	label: string;
+	onChange: (value: Value) => void;
+	options: ReadonlyArray<TextToggleItem<Value>>;
+	value: Value;
+};
+
+const GROUP_CLASS_NAME = 'flex items-center gap-2 bg-fd-secondary p-0.5';
 
 /** A round icon-only pill group, for choices with well-known glyphs such as light/dark/system. */
 export function IconToggleButtonGroup<Value extends string>({
@@ -61,15 +53,10 @@ export function IconToggleButtonGroup<Value extends string>({
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
 					aria-label={optionLabel}
-					className={({ isSelected }) => {
-						return cx(
-							'flex size-8 items-center justify-center',
-							PILL_CLASS_NAME,
-							isSelected && PILL_SELECTED_CLASS_NAME,
-						);
-					}}
+					className={button({ appearance: 'subtle', size: 'small', tone: 'neutral' })}
 					id={optionValue}
 					key={optionValue}
+					render={renderToggleButton}
 				>
 					<Icon aria-hidden className="size-4" name={icon} />
 				</ToggleButton>
@@ -77,18 +64,6 @@ export function IconToggleButtonGroup<Value extends string>({
 		</ToggleButtonGroup>
 	);
 }
-
-type TextToggleItem<Value extends string> = {
-	label: string;
-	value: Value;
-};
-
-type TextToggleButtonGroupProps<Value extends string> = {
-	label: string;
-	onChange: (value: Value) => void;
-	options: ReadonlyArray<TextToggleItem<Value>>;
-	value: Value;
-};
 
 /**
  * A round pill group with visible text labels, for choices without an established glyph, such as
@@ -112,19 +87,40 @@ export function TextToggleButtonGroup<Value extends string>({
 		>
 			{options.map(({ label: optionLabel, value: optionValue }) => (
 				<ToggleButton
-					className={({ isSelected }) => {
-						return cx(
-							'flex h-8 items-center justify-center whitespace-nowrap px-3 font-medium text-xs',
-							PILL_CLASS_NAME,
-							isSelected && PILL_SELECTED_CLASS_NAME,
-						);
-					}}
+					className={button({ appearance: 'subtle', size: 'small', tone: 'neutral' })}
 					id={optionValue}
 					key={optionValue}
+					render={renderToggleButton}
 				>
 					{optionLabel}
 				</ToggleButton>
 			))}
 		</ToggleButtonGroup>
 	);
+}
+
+type RenderToggleButton = ComponentProps<typeof ToggleButton>['render'];
+
+/**
+ * Renders the toggle's `<button>` with `data-pressed` kept true while selected, so the selected
+ * toggle stays in the recipe's pressed treatment. `data-pressed` is a styling hook; the
+ * `aria-pressed` state comes from RAC's selection props.
+ */
+const renderToggleButton: RenderToggleButton = (domProps, state) => {
+	return <button {...domProps} data-pressed={state.isPressed || state.isSelected || undefined} />;
+};
+
+function toSelectionChangeHandler<Value extends string>(
+	options: ReadonlyArray<{ value: Value }>,
+	onChange: (value: Value) => void,
+) {
+	return (selection: Selection) => {
+		if (selection === 'all') return;
+
+		const selectedKey = selection.values().next().value;
+		const selectedOption = options.find((option) => option.value === selectedKey);
+		if (!selectedOption) return;
+
+		onChange(selectedOption.value);
+	};
 }

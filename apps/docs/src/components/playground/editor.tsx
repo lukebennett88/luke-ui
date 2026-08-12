@@ -10,6 +10,7 @@ import {
 	runFormatDocument,
 } from '../../lib/playground-format';
 import { EditorSkeleton } from './editor-skeleton';
+import { PlaygroundPaneToolbar } from './pane-toolbar.js';
 
 type PlaygroundEditorProps = {
 	defaultValue: string;
@@ -48,16 +49,16 @@ export default function PlaygroundEditor({
 
 	return (
 		<div className="flex h-full min-h-0 flex-col">
-			<div className="flex shrink-0 items-center border-fd-border border-b bg-fd-background px-2 py-1.5 sm:px-3">
+			<PlaygroundPaneToolbar>
 				<Button
-					appearance="ghost"
+					appearance="subtle"
 					isPending={isFormatting}
 					onPress={() => void handleFormat()}
 					size="small"
 				>
 					Format
 				</Button>
-			</div>
+			</PlaygroundPaneToolbar>
 			<div className="min-h-0 flex-1">
 				<Editor
 					height="100%"

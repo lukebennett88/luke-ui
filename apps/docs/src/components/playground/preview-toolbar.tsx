@@ -1,5 +1,6 @@
 import { IconButton } from '@luke-ui/react/icon-button';
 import type { Dispatch, SetStateAction } from 'react';
+import { PlaygroundPaneToolbar } from './pane-toolbar.js';
 import type { ViewportWidth } from './viewport-toggle.js';
 import { ViewportToggle } from './viewport-toggle.js';
 
@@ -26,7 +27,7 @@ export function PreviewToolbar({
 	viewportWidth,
 }: PreviewToolbarProps) {
 	return (
-		<div className="flex shrink-0 items-center justify-between gap-2 border-fd-border border-b bg-fd-background px-2 py-1.5 sm:px-3">
+		<PlaygroundPaneToolbar className="justify-between gap-2">
 			<ViewportToggle onChange={onViewportChange} value={viewportWidth} />
 			<IconButton
 				appearance="ghost"
@@ -35,6 +36,6 @@ export function PreviewToolbar({
 				onPress={() => onFullscreenChange((prev) => !prev)}
 				size="small"
 			/>
-		</div>
+		</PlaygroundPaneToolbar>
 	);
 }
