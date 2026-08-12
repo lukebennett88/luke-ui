@@ -18,6 +18,9 @@
 		"./dist/stylesheet.css",
 		"./dist/themes/*/stylesheet.css"
 	],
+	"imports": {
+		"#recipe-engine": "./dist/styles/recipe-engine.js"
+	},
 	"exports": {
 		"./blockquote": "./dist/blockquote/index.js",
 		"./box": "./dist/box/index.js",
@@ -43,7 +46,6 @@
 		"./quote": "./dist/quote/index.js",
 		"./strong": "./dist/strong/index.js",
 		"./styles": "./dist/styles/index.js",
-		"./styles/recipe-engine": "./dist/styles/recipe-engine.js",
 		"./stylesheet": "./dist/stylesheet.js",
 		"./text": "./dist/text/index.js",
 		"./text-field": "./dist/text-field/index.js",
@@ -64,7 +66,7 @@
 	"scripts": {
 		"build": "pnpm run build:tsdown",
 		"build:storybook": "storybook build",
-		"build:tsdown": "vp pack",
+		"build:tsdown": "vp pack && tsx scripts/finalize-package-manifest.ts",
 		"check:barrels": "unbarrelify --check --skip src/styles/index.ts --skip src/primitives/combobox/index.tsx",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",

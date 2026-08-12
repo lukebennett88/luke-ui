@@ -1,7 +1,9 @@
 # @luke-ui/react agent guide
 
 - Do not hand-edit `.generated/entries.ts` or `package.json#exports`. Entries are generated, and
-  `tsdown` updates exports during build.
+  `vp pack` updates exports during build. `scripts/finalize-package-manifest.ts` strips
+  internal-only build artifacts such as `#recipe-engine` from the public export map after each pack
+  run.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
   files by hand. The generator updates the stylesheet manifest, conformance manifest, and docs
   wiring.

@@ -10,7 +10,7 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 
-interface ComposedButtonRecipeProps extends NonNullable<styles.ButtonLabelVariants> {}
+interface ButtonLabelRecipeProps extends NonNullable<styles.ButtonLabelVariants> {}
 
 interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonRecipeVariants> {}
 
@@ -33,7 +33,7 @@ interface ButtonStyleProps {
 	 * Shows pending button styles. When true, a spinner overlays the label.
 	 * @default false
 	 */
-	isPending?: ComposedButtonRecipeProps['isPending'];
+	isPending?: ButtonLabelRecipeProps['isPending'];
 	/**
 	 * Sets the button size.
 	 * @default 'medium'
@@ -57,10 +57,13 @@ type _ButtonOmit = DistributiveOmit<
 
 interface _ButtonProps extends _ButtonOmit, ButtonStyleProps, DocumentedPressProps {}
 
-/** Composed button with size, tone, appearance, pending, and block options. */
+/** Props for `Button`. */
 export type ButtonProps = Prettify<_ButtonProps>;
 
-/** Composed button. Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`. */
+/**
+ * Button with size, tone, appearance, pending, and block options.
+ * Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`.
+ */
 export function Button(props: ButtonProps): JSX.Element {
 	const { children, endIcon, isPending, size = 'medium', startIcon, ...restProps } = props;
 

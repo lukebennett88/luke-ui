@@ -88,7 +88,7 @@ interface _ComboboxFieldProps<T extends object>
 	size?: ComboboxSize;
 }
 
-/** Props for composed `ComboboxField` (searchable single-select). */
+/** Props for `ComboboxField` (searchable single-select). */
 export type ComboboxFieldProps<T extends object> = Prettify<_ComboboxFieldProps<T>>;
 
 /** Composes `ComboboxRoot` with label, description, and error slots. */

@@ -21,7 +21,7 @@ interface _FieldProps extends _FieldOmit, FieldSlotProps {
 	children: ReactNode;
 }
 
-/** Props for the composed `Field`. */
+/** Props for the field primitive. */
 export type FieldProps = Prettify<_FieldProps>;
 
 /** Composes label, control slot, description, and error text. */

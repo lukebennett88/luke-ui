@@ -28,7 +28,7 @@ interface _CheckboxProps extends _CheckboxOmit {
 	/**
 	 * Forwarded to the underlying `<input type="checkbox">` element.
 	 *
-	 * Composed fields take no plain `ref`: `inputRef` is the only way to reach the
+	 * This field takes no plain `ref`: `inputRef` is the only way to reach the
 	 * control, so a ref can never silently resolve to a wrapper element instead.
 	 *
 	 * Widened from React Aria's own `inputRef`, which only takes a ref object, so a
@@ -57,7 +57,7 @@ interface _CheckboxProps extends _CheckboxOmit {
 	size?: PrimitiveCheckboxProps['size'];
 }
 
-/** Props for the composed Checkbox. */
+/** Props for `Checkbox`. */
 export type CheckboxProps = Prettify<_CheckboxProps>;
 
 /** A labelled checkbox with optional description and validation message. */

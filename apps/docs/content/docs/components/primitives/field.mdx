@@ -18,23 +18,23 @@ props:
 ---
 
 Use the field primitives to build a custom field with Luke UI labels, descriptions, and validation
-messages. Application code should usually use a composed field such as
-[`TextField`](/components/forms/text-field) or [`ComboboxField`](/components/forms/combobox-field).
+messages. Start with [`TextField`](/components/forms/text-field) or
+[`ComboboxField`](/components/forms/combobox-field) when one of those components fits.
 
 <ExampleBlock src="field-primitive/basic" title="Field primitive — Basic" />
 
-## Choose a composed field or primitives
+## Choose a component or primitives
 
 | Guidance | Practices                                                                                                            |
 | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| Do       | Use a composed field such as [`TextField`](/components/forms/text-field) for a supported control.                    |
+| Do       | Use [`TextField`](/components/forms/text-field) or another supported field when it fits.                             |
 | Do       | Use field primitives when a custom control needs a different documented arrangement.                                 |
 | Don't    | Assume adjacent parts create semantics. Connect the label, description, and control through their public HTML props. |
 
 ## Anatomy
 
-`Field` arranges a label, control, description, and validation message. Composed fields connect
-these parts for their supported controls.
+`Field` arranges a label, control, description, and validation message. Field components such as
+`TextField` connect these parts for their supported controls.
 
 For a custom structure, use `FieldLabel`, `FieldDescription`, and `FieldError` with the field
 control. Connect each part through its public HTML props, as the primary example shows.

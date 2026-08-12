@@ -1,8 +1,7 @@
 ---
 title: Styling
 description:
-  Choose component props, layout utilities, recipes, variables, or themes. Do not override
-  internals.
+  Choose component props, layout utilities, variables, or themes. Do not override internals.
 ---
 
 Luke UI ships static CSS. It does not inject styles at runtime. Import the shared stylesheet and a
@@ -14,17 +13,17 @@ Work from the most specific public API to the broadest one.
 
 1. Use a component's props for its supported appearance, size, state, and behaviour.
 2. Use layout utilities for spacing, sizing, and responsive structure around components.
-3. Build custom UI with public recipes and semantic variables when the component is not provided.
+3. Use semantic variables for application-owned custom UI when no component fits.
 4. Author a custom theme when the product needs a different visual foundation everywhere.
 
 Read [Composition](/docs/composition) when the choice is between a component and a documented
 primitive rather than between styling mechanisms.
 
-| Guidance | Practices                                                                                            |
-| -------- | ---------------------------------------------------------------------------------------------------- |
-| Do       | Use a supported component prop for its appearance, size, state, or behaviour.                        |
-| Do       | Use a layout utility or recipe for its element contract, and `vars` for application-owned custom UI. |
-| Don't    | Target generated selectors or implementation-state attributes such as `data-pressed`.                |
+| Guidance | Practices                                                                                  |
+| -------- | ------------------------------------------------------------------------------------------ |
+| Do       | Use a supported component prop for its appearance, size, state, or behaviour.              |
+| Do       | Use a layout utility for its element contract, and `vars` for application-owned custom UI. |
+| Don't    | Target generated selectors or implementation-state attributes such as `data-pressed`.      |
 
 Do not override component recipe selectors or implementation-state attributes such as
 `data-hovered`, `data-pressed`, or `data-focus-visible`. They are not supported styling hooks and
@@ -44,12 +43,7 @@ defines its type and spacing steps in source.
 responsive structure around components. They do not set semantic colour, typography, or pseudo
 states. Read [Layout](/docs/layout) for the full API.
 
-### Build custom UI with recipes and variables
-
-Import a recipe from the component or primitive entrypoint that owns the styling contract when a
-custom composition follows that structure.
-
-<SourceCodeBlock src="styling/recipe" />
+### Use semantic variables for custom UI
 
 The public `vars` token contract lets an application-owned element follow the active theme.
 

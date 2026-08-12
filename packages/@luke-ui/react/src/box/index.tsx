@@ -5,7 +5,7 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { mergeProps } from '../utils/index.js';
 
-/** Props for `Box`. Layout props accept responsive values keyed by Luke UI breakpoints. `elementType` and `render` are mutually exclusive ways to choose the rendered element. */
+/** Props for `Box`. */
 export type BoxProps = Prettify<_BoxElementProps | _BoxRenderProps>;
 
 /** Applies layout properties to a supported structural element or an element returned by `render`. */
@@ -62,6 +62,7 @@ interface _BoxElementProps extends HTMLAttributes<HTMLElement>, SprinklesProps {
 	elementType?: BoxElementType;
 	/** Ref to the rendered element. */
 	ref?: Ref<HTMLElement>;
+	/** Use `render` instead of `elementType` to own the rendered element. */
 	render?: never;
 }
 
@@ -79,6 +80,7 @@ interface _BoxResolvedRenderProps extends _BoxResolvedRenderOmit {
 type BoxResolvedRenderProps = Prettify<_BoxResolvedRenderProps>;
 
 interface _BoxRenderProps extends _BoxPresentationProps {
+	/** Use `elementType` instead of `render` for a supported structural element. */
 	elementType?: never;
 	/** Passes Box's content and presentation props to a caller-owned element. */
 	render: (props: BoxResolvedRenderProps) => ReactElement;

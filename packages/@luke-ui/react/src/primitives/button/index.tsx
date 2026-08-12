@@ -36,7 +36,7 @@ interface ButtonStyleProps {
 
 interface _ButtonProps extends RacButtonProps, ButtonStyleProps {}
 
-/** Primitive button — a bare `<button>` styled with size, tone, appearance, and block options. Library-author audience: use this when you need full control over children layout. */
+/** Props for the button primitive. */
 export type ButtonProps = Prettify<_ButtonProps>;
 
 /** Primitive button. See `ButtonProps`. */

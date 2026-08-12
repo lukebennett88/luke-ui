@@ -9,6 +9,8 @@ test('publishes only the final styling entrypoints', () => {
 	expect(packageJson.exports['./styles']).toBe('./dist/styles/index.js');
 	expect(packageJson.exports['./stylesheet.css']).toBe('./dist/stylesheet.css');
 	expect('./recipes' in packageJson.exports).toBe(false);
+	expect('./styles/recipe-engine' in packageJson.exports).toBe(false);
+	expect(packageJson.imports?.['#recipe-engine']).toBe('./dist/styles/recipe-engine.js');
 	expect('./heading-context' in packageJson.exports).toBe(false);
 	expect('./icon-size-context' in packageJson.exports).toBe(false);
 	expect('./button/primitive' in packageJson.exports).toBe(false);
@@ -29,4 +31,11 @@ test('requires react-aria-components as a peer dependency', () => {
 		false,
 	);
 	expect(packageJson.devDependencies['react-aria-components']).toBe('catalog:');
+});
+
+test('resolves component-owned recipes from the built package', async () => {
+	const { buttonRecipe } = await import('@luke-ui/react/button');
+	expect(typeof buttonRecipe({ appearance: 'solid', size: 'medium', tone: 'neutral' })).toBe(
+		'string',
+	);
 });

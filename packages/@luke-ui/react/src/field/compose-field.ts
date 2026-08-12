@@ -17,7 +17,7 @@ export interface FieldSlotProps {
 type KeysOfUnion<T> = T extends T ? keyof T : never;
 type FieldSlotKeys<T extends FieldSlotProps> = Extract<keyof FieldSlotProps, KeysOfUnion<T>>;
 
-/** Splits the `Field` slot props (label/description/errorMessage/necessityIndicator) off a Composed field's props. */
+/** Splits field slot props (label, description, errorMessage, necessityIndicator) off a field component's props. */
 export function composeField<T extends FieldSlotProps>(
 	props: T,
 ): [FieldSlotProps, DistributiveOmit<T, FieldSlotKeys<T>>] {

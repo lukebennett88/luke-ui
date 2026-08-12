@@ -1,5 +1,5 @@
 /**
- * Runtime serializer target for colocated recipes. Imported by path string via Vanilla Extract's
- * function serializer — not part of the supported public styling API.
+ * Runtime serializer target for colocated recipes. Resolved through the package `imports` map,
+ * not `exports`.
  */
 export { createRecipe, createSingleRecipe } from './recipe.js';

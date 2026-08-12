@@ -149,7 +149,7 @@ export function recipe(config: AnyMultiPartConfig | SinglePartConfig<VariantGrou
 // Build helpers
 // ---------------------------------------------------------------------------
 
-const SERIALIZER_IMPORT_PATH = '@luke-ui/react/styles/recipe-engine';
+const SERIALIZER_IMPORT_PATH = '#recipe-engine';
 
 /** The `args` position of `addFunctionSerializer`'s config. */
 type SerializerArgs = Parameters<typeof addFunctionSerializer>[1]['args'];

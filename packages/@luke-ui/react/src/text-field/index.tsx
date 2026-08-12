@@ -26,7 +26,7 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	/**
 	 * Forwarded to the inner `<input>` element.
 	 *
-	 * Composed fields take no plain `ref`: `inputRef` is the only way to reach the
+	 * This field takes no plain `ref`: `inputRef` is the only way to reach the
 	 * control, so a ref can never silently resolve to a wrapper element instead.
 	 */
 	inputRef?: Ref<HTMLInputElement>;
@@ -40,7 +40,7 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	suffix?: ReactNode;
 }
 
-/** Props for the composed text field. */
+/** Props for `TextField`. */
 export type TextFieldProps = Prettify<_TextFieldProps>;
 
 /**

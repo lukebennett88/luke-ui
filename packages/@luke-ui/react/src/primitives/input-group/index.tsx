@@ -98,9 +98,8 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
  * </InputGroup>
  * ```
  *
- * This primitive is child-composed; the composed `TextField` above it keeps its own
- * `prefix` / `suffix` props and maps them onto `InputGroupPrefix` / `InputGroupSuffix`
- * internally. Library authors compose; app developers pass props.
+ * This primitive is child-composed. `TextField` keeps its own `prefix` / `suffix` props and maps
+ * them onto `InputGroupPrefix` / `InputGroupSuffix` internally.
  *
  * Invalid state arrives from the enclosing field's `GroupContext` or from an explicit
  * `isInvalid`, and surfaces as `[data-invalid]` on the group. The group renders its own
