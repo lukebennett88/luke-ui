@@ -145,7 +145,7 @@ describe('createComponentPlan', () => {
 		);
 	});
 
-	it('type-checks generated recipe and entrypoint sources', async () => {
+	it('type-checks the generated recipe contract', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'component-plan-typecheck-'));
 		roots.push(root);
 

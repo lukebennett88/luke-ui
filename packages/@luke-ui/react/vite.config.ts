@@ -6,7 +6,6 @@ import react from '@vitejs/plugin-react';
 import { readdir, rm } from 'node:fs/promises';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
-import { finalizePackageManifest } from './scripts/finalize-package-manifest.js';
 
 const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
@@ -71,9 +70,6 @@ export default defineConfig({
 		format: ['esm'],
 		hooks: {
 			'build:prepare': cleanDistExceptPreservedFiles,
-			'build:done': async () => {
-				await finalizePackageManifest();
-			},
 		},
 		outputOptions: {
 			assetFileNames: '[name][extname]',
