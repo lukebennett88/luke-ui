@@ -42,7 +42,7 @@ test('publishes only the final styling entrypoints', () => {
 		expect(packageJson.exports[exportPath]).toBe(target);
 	}
 
-	expect(packageJson.imports).toBeUndefined();
+	expect('imports' in packageJson).toBe(false);
 });
 
 test('bundles recipe runtime through a relative chunk, not a package import', async () => {
