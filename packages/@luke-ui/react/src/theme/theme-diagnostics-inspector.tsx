@@ -97,7 +97,7 @@ const familyHeaderStyle = {
 
 const requirementsTextStyle = {
 	color: vars.color.text.secondary,
-	fontSize: vars.font[100].fontSize,
+	fontSize: vars.font.caption.fontSize,
 	textTransform: 'none',
 } as const satisfies CSSProperties;
 
@@ -124,7 +124,7 @@ const stepBoxStyle = {
 } as const satisfies CSSProperties;
 
 const stepLabelStyle = {
-	fontSize: vars.font[100].fontSize,
+	fontSize: vars.font.caption.fontSize,
 } as const satisfies CSSProperties;
 
 const swatchRowStyle = {
@@ -140,7 +140,7 @@ const tableWrapStyle = {
 
 const tableStyle = {
 	borderCollapse: 'collapse',
-	fontSize: vars.font[100].fontSize,
+	fontSize: vars.font.caption.fontSize,
 	inlineSize: '100%',
 } as const satisfies CSSProperties;
 
@@ -165,12 +165,12 @@ const cellStyle = {
 
 const codeStyle = {
 	fontFamily: 'ui-monospace, SFMono-Regular, Consolas, monospace',
-	fontSize: vars.font[100].fontSize,
+	fontSize: vars.font.caption.fontSize,
 } as const satisfies CSSProperties;
 
 const captionStyle = {
 	color: vars.color.text.secondary,
-	fontSize: vars.font[100].fontSize,
+	fontSize: vars.font.caption.fontSize,
 	margin: 0,
 } as const satisfies CSSProperties;
 

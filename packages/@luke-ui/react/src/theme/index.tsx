@@ -18,11 +18,14 @@ export { vars } from './contract.css.js';
 export { spaceScale } from './contract.js';
 export type { SpaceStep } from './contract.js';
 
-/** Typography size step keys in display order. */
-export { fontSizeSteps } from './contract.js';
+/** Public semantic type style keys in ascending visual size. */
+export { typeStyles } from './contract.js';
 
-/** A typography size step key. */
-export type { FontSizeStep } from './contract.js';
+/** A public semantic type style key. */
+export type { TypeStyle } from './contract.js';
+
+/** Theme font-weight role keys used by typography defaults and weight overrides. */
+export type { FontWeightRole } from './contract.js';
 
 /**
  * `ThemeContrastError` is thrown by `defineTheme` when a hard-gated pair misses WCAG 2.2 AA: 4.5:1

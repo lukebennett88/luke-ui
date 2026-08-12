@@ -1,5 +1,6 @@
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
+import { FONT_METRIC_SCALE } from '../theme/font-metric-scale.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
 
@@ -53,8 +54,8 @@ const base = styleInLayer('recipes', {
 	fontWeight: vars.font.weight.label,
 	isolation: 'isolate',
 	justifyContent: 'center',
-	letterSpacing: vars.font[200].letterSpacing,
-	lineHeight: vars.font[200].lineHeight,
+	letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
+	lineHeight: FONT_METRIC_SCALE[14].lineHeight,
 	minBlockSize: vars.controlSize.minTarget,
 	minInlineSize: vars.controlSize.minTarget,
 	position: 'relative',
@@ -106,16 +107,16 @@ export const button = recipe({
 		size: {
 			medium: {
 				blockSize: vars.controlSize.medium,
-				fontSize: vars.font[200].fontSize,
+				fontSize: FONT_METRIC_SCALE[14].fontSize,
 				gap: vars.space[200],
 				paddingInline: vars.space[400],
 			},
 			small: {
 				blockSize: vars.controlSize.small,
-				fontSize: vars.font[100].fontSize,
+				fontSize: FONT_METRIC_SCALE[12].fontSize,
 				gap: vars.space[100],
-				letterSpacing: vars.font[100].letterSpacing,
-				lineHeight: vars.font[100].lineHeight,
+				letterSpacing: FONT_METRIC_SCALE[12].letterSpacing,
+				lineHeight: FONT_METRIC_SCALE[12].lineHeight,
 				paddingInline: vars.space[300],
 			},
 		},

@@ -10,12 +10,6 @@ const meta = preview.meta({
 	title: 'Typography/Emoji',
 });
 
-const rowStyle = {
-	alignItems: 'center',
-	display: 'flex',
-	gap: '0.5rem',
-} as const satisfies CSSProperties;
-
 const stackStyle = {
 	display: 'flex',
 	flexDirection: 'column',
@@ -34,21 +28,31 @@ const baseArgs = {
 export const Default = meta.story({
 	args: baseArgs,
 	render: (props) => (
-		<div style={rowStyle}>
-			<Emoji {...props} />
-			<Text>Release deployed successfully.</Text>
-		</div>
+		<Text>
+			Release deployed successfully <Emoji {...props} />
+		</Text>
 	),
 });
 
-export const Size = meta.story({
+/**
+ * Wrap `Emoji` in `Text` when it needs a specific typography treatment.
+ */
+export const Inheritance = meta.story({
 	args: baseArgs,
 	render: (props) => (
 		<div style={stackStyle}>
-			<Emoji {...props} emoji="🚀" label="Rocket" size="900" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="600" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="300" />
-			<Emoji {...props} emoji="🚀" label="Rocket" size="100" />
+			<Text typography="display">
+				Hello <Emoji {...props} emoji="👋" label="Waving hand" />
+			</Text>
+			<Text typography="heading3">
+				Hello <Emoji {...props} emoji="👋" label="Waving hand" />
+			</Text>
+			<Text typography="body">
+				Hello <Emoji {...props} emoji="👋" label="Waving hand" />
+			</Text>
+			<Text typography="caption">
+				Hello <Emoji {...props} emoji="👋" label="Waving hand" />
+			</Text>
 		</div>
 	),
 });

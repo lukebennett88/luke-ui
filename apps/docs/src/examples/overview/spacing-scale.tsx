@@ -15,7 +15,7 @@ export default () => {
 		>
 			{spaceScale.map(([step, value]) => (
 				<Fragment key={step}>
-					<Text elementType="span" fontVariantNumeric="tabular-nums" size="100">
+					<Text elementType="span" fontVariantNumeric="tabular-nums" typography="caption">
 						{step} ({value})
 					</Text>
 					<Box

@@ -8,7 +8,7 @@ import {
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
 import { buildTheme } from './build-theme.js';
-import { flattenThemeContract, spaceScale } from './contract.js';
+import { flattenThemeContract, spaceScale, typeStyles } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius, defaultSourceColors } from './foundation.js';
 
@@ -131,9 +131,10 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-control-size-small');
 		expect(css).toContain('--luke-motion-easing-standard');
 		expect(css).toContain('--luke-font-weight-body');
-		expect(css).toContain('--luke-font-100-font-size:');
-		expect(css).toContain('--luke-font-300-line-height:');
-		expect(css).toContain('--luke-font-900-letter-spacing:');
+		expect(css).toContain('--luke-font-caption-font-size:');
+		expect(css).toContain('--luke-font-body-line-height:');
+		expect(css).toContain('--luke-font-display-letter-spacing:');
+		expect(css).toContain('--luke-font-heading2-font-weight:');
 		expect(css).toContain('--luke-icon-size-xsmall:');
 		expect(css).toContain('--luke-icon-size-large:');
 	});
@@ -239,9 +240,8 @@ describe('buildTheme defaults', () => {
 		expect(css).toContain('--luke-color-border-focus: oklch(');
 	});
 
-	it('emits Capsize trim variables for every curated font family and size', () => {
+	it('emits Capsize trim variables for every curated font family and type style', () => {
 		const fontFamilies = ['apple-system', 'dm-sans', 'inter'] as const;
-		const sizes = ['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const;
 
 		for (const fontFamily of fontFamilies) {
 			const css = buildTheme({
@@ -250,9 +250,11 @@ describe('buildTheme defaults', () => {
 			});
 			const identity = splitBlocks(css).identity;
 
-			for (const size of sizes) {
-				expect(identity).toContain(`--luke-font-${size}-cap-height-trim:`);
-				expect(identity).toContain(`--luke-font-${size}-baseline-trim:`);
+			for (const style of typeStyles) {
+				expect(identity).toContain(`--luke-font-${style}-cap-height-trim:`);
+				expect(identity).toContain(`--luke-font-${style}-baseline-trim:`);
+				expect(identity).toContain(`--luke-font-${style}-font-weight:`);
+				expect(identity).toContain(`--luke-font-${style}-font-family:`);
 			}
 		}
 	});

@@ -91,7 +91,7 @@ const previewFrameStyle = {
 } as const satisfies CSSProperties;
 
 const swatchLabelStyle = {
-	fontSize: vars.font[100].fontSize,
+	fontSize: vars.font.caption.fontSize,
 	fontWeight: vars.font.weight.label,
 	overflowWrap: 'anywhere',
 } as const satisfies CSSProperties;
@@ -99,7 +99,7 @@ const swatchLabelStyle = {
 const swatchVarStyle = {
 	color: vars.color.text.secondary,
 	fontFamily: 'ui-monospace, SFMono-Regular, Consolas, monospace',
-	fontSize: vars.font[100].fontSize,
+	fontSize: vars.font.caption.fontSize,
 	overflowWrap: 'anywhere',
 } as const satisfies CSSProperties;
 
@@ -463,14 +463,18 @@ function FontPreview({ path, segments, varName }: LeafPreviewProps) {
 	if (second === 'weight')
 		return <TextSample label={label} style={{ fontWeight: `var(${varName})` }} />;
 
-	// `second` is a font-size-step key here (`fontSizeSteps` in contract.ts); every step carries the
-	// same five sub-properties (see `fontStep` in contract.ts), so the step's own fontSize var sizes
+	// `second` is a type-style key here (`typeStyles` in contract.ts); every style carries the
+	// same leaf set (see `typeStyle` in contract.ts), so the style's own fontSize var sizes
 	// every other sub-property's sample legibly. `themeVarName` (from contract.ts) builds that sibling
 	// reference the same way the contract builds every variable name, rather than re-deriving it here.
 	const fontSizeVarName = themeVarName(['font', second ?? '', 'fontSize']);
 
 	if (third === 'fontSize')
 		return <TextSample label={label} style={{ fontSize: `var(${varName})` }} />;
+	if (third === 'fontFamily')
+		return <TextSample label={label} style={{ fontFamily: `var(${varName})` }} />;
+	if (third === 'fontWeight')
+		return <TextSample label={label} style={{ fontWeight: `var(${varName})` }} />;
 	if (third === 'lineHeight') {
 		return (
 			<TextSample

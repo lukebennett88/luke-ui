@@ -2,8 +2,8 @@ import type { ComplexStyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { styleInLayer } from '../styles/layered-style.css.js';
 import { vars } from '../theme/contract.css.js';
-import type { FontSizeStep } from '../theme/contract.js';
-import { fontSizeSteps } from '../theme/contract.js';
+import type { FontWeightRole, TypeStyle } from '../theme/contract.js';
+import { fontWeightRoles, typeStyles } from '../theme/contract.js';
 import type { RecipeSelection } from './recipe.js';
 import { recipe } from './recipe.js';
 import { visuallyHiddenStyle } from './visually-hidden.css.js';
@@ -55,26 +55,25 @@ const colorVariants = {
 	warning: { color: vars.color.foreground.warning.rest },
 } as const;
 
-const weightVariants = {
-	body: { fontWeight: vars.font.weight.body },
-	emphasis: { fontWeight: vars.font.weight.emphasis },
-	heading: { fontWeight: vars.font.weight.heading },
-	label: { fontWeight: vars.font.weight.label },
-} as const;
+const weightVariants = Object.fromEntries(
+	fontWeightRoles.map((fontWeight) => [fontWeight, { fontWeight: vars.font.weight[fontWeight] }]),
+) as Record<FontWeightRole, { fontWeight: string }>;
 
-const sizeVariants = Object.fromEntries(
-	fontSizeSteps.map((size) => [
-		size,
+const typographyVariants = Object.fromEntries(
+	typeStyles.map((typography) => [
+		typography,
 		{
-			fontSize: vars.font[size].fontSize,
-			letterSpacing: vars.font[size].letterSpacing,
-			lineHeight: vars.font[size].lineHeight,
-			vars: { [textLineHeight]: vars.font[size].lineHeight },
+			fontFamily: vars.font[typography].fontFamily,
+			fontSize: vars.font[typography].fontSize,
+			letterSpacing: vars.font[typography].letterSpacing,
+			lineHeight: vars.font[typography].lineHeight,
+			vars: { [textLineHeight]: vars.font[typography].lineHeight },
 		},
 	]),
 ) as Record<
-	FontSizeStep,
+	TypeStyle,
 	{
+		fontFamily: string;
 		fontSize: string;
 		letterSpacing: string;
 		lineHeight: string;
@@ -82,15 +81,15 @@ const sizeVariants = Object.fromEntries(
 	}
 >;
 
-const sizeStepCompoundVariants = fontSizeSteps.map((size) => {
-	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[size];
+const typographyCompoundVariants = typeStyles.map((typography) => {
+	const { baselineTrim, capHeightTrim, fontSize, lineHeight } = vars.font[typography];
 	return {
 		style: createLayeredTextStyle({ baselineTrim, capHeightTrim, fontSize, lineHeight }),
 		// `shouldInheritFont: true` asks the browser to resolve font size and line height from
-		// the surrounding context, not this step's Capsize metrics. Without this condition, the
+		// the surrounding context, not this style's Capsize metrics. Without this condition, the
 		// compound's own `fontSize`/`lineHeight` always wins over the plain `shouldInheritFont`
 		// variant, because vanilla-extract applies compound variants after simple ones.
-		variants: { shouldDisableTrim: false, shouldInheritFont: false, size } as const,
+		variants: { shouldDisableTrim: false, shouldInheritFont: false, typography } as const,
 	};
 });
 
@@ -126,19 +125,18 @@ function createLayeredTextStyle({
 /** Vanilla-extract recipe for the `Text` primitive's styles. */
 export const text = recipe({
 	base,
-	compoundVariants: sizeStepCompoundVariants,
+	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
 		fontVariantNumeric: 'unset',
 		isVisuallyHidden: false,
 		lineClamp: false,
 		shouldDisableTrim: false,
 		shouldInheritFont: false,
-		size: '300',
 		textAlign: 'start',
 		textDecoration: 'none',
 		textTransform: 'none',
 		textWrap: 'unset',
-		fontWeight: 'body',
+		typography: 'body',
 	},
 	variants: {
 		fontVariantNumeric: {
@@ -154,7 +152,6 @@ export const text = recipe({
 		},
 		lineClamp: lineClampVariants,
 		shouldDisableTrim: { false: {}, true: {} },
-		size: sizeVariants,
 		textAlign: {
 			center: { textAlign: 'center' },
 			end: { textAlign: 'end' },
@@ -178,6 +175,7 @@ export const text = recipe({
 			pretty: { textWrap: 'pretty' },
 			unset: {},
 		},
+		typography: typographyVariants,
 		fontWeight: weightVariants,
 		shouldInheritFont: {
 			false: {},

@@ -1,5 +1,6 @@
 import { Text as RacText } from 'react-aria-components/Text';
 import * as styles from '../recipes/text.css.js';
+import { typeStyleWeightRole } from '../theme/contract.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
@@ -18,8 +19,8 @@ interface TextStyleProps {
 	 */
 	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
 	/**
-	 * Sets the semantic font-weight role.
-	 * @default 'body'
+	 * Sets the semantic font-weight role. When omitted, the selected typography style supplies its
+	 * weight.
 	 */
 	fontWeight?: TextVariantProps['fontWeight'];
 	/**
@@ -40,11 +41,6 @@ interface TextStyleProps {
 	 */
 	shouldInheritFont?: TextVariantProps['shouldInheritFont'];
 	/**
-	 * Sets the font size, line height, letter spacing, and trim as one step.
-	 * @default '300'
-	 */
-	size?: TextVariantProps['size'];
-	/**
 	 * Sets text alignment.
 	 * @default 'start'
 	 */
@@ -64,6 +60,12 @@ interface TextStyleProps {
 	 * @default 'unset'
 	 */
 	textWrap?: TextVariantProps['textWrap'];
+	/**
+	 * Applies a complete typography style: family, size, weight, line height, letter spacing, and
+	 * trim.
+	 * @default 'body'
+	 */
+	typography?: TextVariantProps['typography'];
 }
 
 type _TextOmit = DistributiveOmit<React.ComponentProps<typeof RacText>, 'color'>;
@@ -90,7 +92,7 @@ const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
 ]);
 
 /**
- * Styled text with a coordinated type scale and semantic colour controls.
+ * Styled text with semantic typography styles and colour controls.
  *
  * Capsize trim is applied to known block text elements and skipped for inline or unknown element
  * types. Set `shouldDisableTrim` explicitly to override this inference. Line clamp always disables
@@ -108,14 +110,15 @@ export function Text(props: TextProps) {
 		lineClamp,
 		shouldDisableTrim,
 		shouldInheritFont,
-		size,
 		textAlign,
 		textDecoration,
 		textTransform,
 		textWrap,
+		typography,
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
+	const resolvedTypography = typography ?? 'body';
 
 	const resolvedShouldDisableTrim: boolean = (() => {
 		if (hasLineClamp) return true;
@@ -130,16 +133,18 @@ export function Text(props: TextProps) {
 				styles.text({
 					color,
 					fontVariantNumeric,
-					fontWeight,
+					...(shouldInheritFont
+						? {}
+						: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
 					isVisuallyHidden,
 					lineClamp,
 					shouldDisableTrim: resolvedShouldDisableTrim,
 					shouldInheritFont,
-					size,
 					textAlign,
 					textDecoration,
 					textTransform,
 					textWrap,
+					typography: resolvedTypography,
 				}),
 				className,
 			)}

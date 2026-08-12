@@ -44,8 +44,7 @@ const fieldConfig = {
 		},
 		label: {
 			color: vars.color.text.primary,
-			...vars.font[200],
-			fontWeight: vars.font.weight.label,
+			...vars.font.label,
 			minInlineSize: 0,
 
 			selectors: {
@@ -55,7 +54,7 @@ const fieldConfig = {
 			},
 		},
 		message: {
-			...vars.font[200],
+			...vars.font.support,
 			minInlineSize: 0,
 			paddingInlineStart: messageIndent,
 		},

@@ -45,7 +45,7 @@ with no class and no JS required. Neither step injects styles at runtime.
   device screen width, not the viewport width, to decide when a combobox switches to it.
 - `styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
-  `fontSizeSteps` typography step keys.
+  `typeStyles` typography keys.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
@@ -105,12 +105,13 @@ colour contract. Every role gets the same background, foreground, on-solid, and 
 See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border and accent
 contrast policies, and what changed when this generator replaced the original per-token solver.
 
-The semantic contract includes `font.100` through `font.900` size steps. Each step groups its font
-size, line height, letter spacing, and per-font Capsize trims so components cannot combine unrelated
-values. `font.family.body` is selected from the curated Inter, Apple System, or DM Sans metrics and
-`buildTheme` computes the matching trims. `font.family.code` is a fixed neutral monospace stack for
-code and keyboard input; it is not a brand-family or Capsize choice. Icon sizes carry forward the
-`xsmall`, `small`, `medium`, and `large` scale at 16px, 20px, 24px, and 32px.
+The semantic contract includes `font.caption` through `font.display` type styles. Each style groups
+its font family, size, weight, line height, letter spacing, and per-font Capsize trims so components
+cannot combine unrelated values. `font.family.body` is selected from the curated Inter, Apple
+System, or DM Sans metrics and `buildTheme` computes the matching trims. `font.family.code` is a
+fixed neutral monospace stack for code and keyboard input; it is not a brand-family or Capsize
+choice. Icon sizes carry forward the `xsmall`, `small`, `medium`, and `large` scale at 16px, 20px,
+24px, and 32px.
 
 Each colour mode authors the final composite `box-shadow` for `depth.recessed`, `depth.resting`,
 `depth.raised`, `depth.floating`, and `depth.overlay`. Components select a semantic depth and do not

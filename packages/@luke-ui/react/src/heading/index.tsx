@@ -20,18 +20,19 @@ interface _HeadingProps extends TextProps {
  */
 export type HeadingProps = Prettify<_HeadingProps>;
 
-const sizeByLevel = {
-	1: '800',
-	2: '700',
-	3: '600',
-	4: '500',
-	5: '400',
-	6: '300',
-} as const;
+const typographyByLevel = {
+	1: 'heading1',
+	2: 'heading2',
+	3: 'heading3',
+	4: 'heading4',
+	// h5/h6 stay in the outline without inventing heading5/heading6 type styles.
+	5: 'lead',
+	6: 'body',
+} as const satisfies Record<HeadingLevel, NonNullable<TextProps['typography']>>;
 
 /** Semantic heading with automatic level composition and level-based typography. */
 export function Heading(props: HeadingProps) {
-	const { elementType, fontWeight = 'heading', level, size, ...textProps } = props;
+	const { elementType, fontWeight = 'heading', level, typography, ...textProps } = props;
 	const baseProps: Pick<HeadingLevelsProps, 'base'> = level === undefined ? {} : { base: level };
 
 	return (
@@ -41,7 +42,7 @@ export function Heading(props: HeadingProps) {
 					<Text
 						elementType={elementType || element}
 						fontWeight={fontWeight}
-						size={size ?? sizeByLevel[resolvedLevel]}
+						typography={typography ?? typographyByLevel[resolvedLevel]}
 						{...textProps}
 					/>
 				</HeadingPresenceProvider>

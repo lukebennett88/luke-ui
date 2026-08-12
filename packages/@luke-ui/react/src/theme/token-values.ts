@@ -1,5 +1,5 @@
 /**
- * The fixed values behind the contract's non-colour leaves: motion, the type scale and its Capsize
+ * The fixed values behind the contract's non-colour leaves: motion, typography styles and Capsize
  * metrics, icon sizes, control sizes, and the disabled-control opacity. None of them depend on a
  * theme's source colours, so they live here beside `contract.ts` rather than inside the compiler.
  *
@@ -10,6 +10,8 @@
 import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
 import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
+import { typeStyles, typeStyleMetricStep } from './contract.js';
+import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
 
 /**
@@ -43,36 +45,24 @@ export const FONT_METRICS: Record<'apple-system' | 'dm-sans' | 'inter', CapsizeF
 	inter: interMetrics,
 };
 
-/** The fixed type scale: size, line height, and letter spacing for each of the nine steps. */
-export const FONT_VALUES = {
-	'font.100.fontSize': '12px',
-	'font.100.letterSpacing': '0.0025em',
-	'font.100.lineHeight': '16px',
-	'font.200.fontSize': '14px',
-	'font.200.letterSpacing': '0',
-	'font.200.lineHeight': '20px',
-	'font.300.fontSize': '16px',
-	'font.300.letterSpacing': '0',
-	'font.300.lineHeight': '24px',
-	'font.400.fontSize': '18px',
-	'font.400.letterSpacing': '-0.0025em',
-	'font.400.lineHeight': '26px',
-	'font.500.fontSize': '20px',
-	'font.500.letterSpacing': '-0.005em',
-	'font.500.lineHeight': '28px',
-	'font.600.fontSize': '24px',
-	'font.600.letterSpacing': '-0.00625em',
-	'font.600.lineHeight': '30px',
-	'font.700.fontSize': '28px',
-	'font.700.letterSpacing': '-0.0075em',
-	'font.700.lineHeight': '36px',
-	'font.800.fontSize': '35px',
-	'font.800.letterSpacing': '-0.01em',
-	'font.800.lineHeight': '40px',
-	'font.900.fontSize': '60px',
-	'font.900.letterSpacing': '-0.025em',
-	'font.900.lineHeight': '60px',
-} as const;
+type FontValueLeaf = 'fontSize' | 'letterSpacing' | 'lineHeight';
+type FontValueKey = `font.${(typeof typeStyles)[number]}.${FontValueLeaf}`;
+
+/**
+ * Fixed metrics for each public type style: font size, line height, and letter spacing, resolved
+ * from the private metric scale. Family, weight, and Capsize trims are resolved in the stylesheet
+ * from the active theme.
+ */
+export const FONT_VALUES = Object.fromEntries(
+	typeStyles.flatMap((style) => {
+		const metrics = FONT_METRIC_SCALE[typeStyleMetricStep[style]];
+		return [
+			[`font.${style}.fontSize`, metrics.fontSize],
+			[`font.${style}.letterSpacing`, metrics.letterSpacing],
+			[`font.${style}.lineHeight`, metrics.lineHeight],
+		] as const;
+	}),
+) as { readonly [Key in FontValueKey]: string };
 
 /** Inline and block sizes for the four public icon sizes. */
 export const ICON_SIZE_VALUES = {

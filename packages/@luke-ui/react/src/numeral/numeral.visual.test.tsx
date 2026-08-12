@@ -27,7 +27,7 @@ for (const appearance of visualAppearances) {
 					<Numeral
 						color="accent"
 						fontWeight="emphasis"
-						size="600"
+						typography="heading3"
 						textAlign="end"
 						value={12_345.67}
 					/>

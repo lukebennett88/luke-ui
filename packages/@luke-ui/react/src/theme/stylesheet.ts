@@ -5,7 +5,7 @@
  */
 
 import { precomputeValues } from '@capsizecss/vanilla-extract';
-import { flattenThemeContract, fontSizeSteps, spaceScale } from './contract.js';
+import { flattenThemeContract, spaceScale, typeStyles, typeStyleWeightRole } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
 	codeFontFamilyStack,
@@ -101,17 +101,24 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 	const fontFamily = foundation.typography?.fontFamily ?? defaultFontFamily;
 	const fontWeight = foundation.typography?.fontWeight;
 	const radius = foundation.radius;
+	const resolvedWeights = {
+		body: String(fontWeight?.body ?? defaultFontWeights.body),
+		emphasis: String(fontWeight?.emphasis ?? defaultFontWeights.emphasis),
+		heading: String(fontWeight?.heading ?? defaultFontWeights.heading),
+		label: String(fontWeight?.label ?? defaultFontWeights.label),
+	};
+	const bodyFontFamily = themeFontFamilyStacks[fontFamily];
 	const values: Record<string, string> = {
 		...CONTROL_SIZE_VALUES,
 		...INTERACTION_VALUES,
 		...FONT_VALUES,
 		...buildCapsizeValues(fontFamily),
-		'font.family.body': themeFontFamilyStacks[fontFamily],
+		'font.family.body': bodyFontFamily,
 		'font.family.code': codeFontFamilyStack,
-		'font.weight.body': String(fontWeight?.body ?? defaultFontWeights.body),
-		'font.weight.emphasis': String(fontWeight?.emphasis ?? defaultFontWeights.emphasis),
-		'font.weight.heading': String(fontWeight?.heading ?? defaultFontWeights.heading),
-		'font.weight.label': String(fontWeight?.label ?? defaultFontWeights.label),
+		'font.weight.body': resolvedWeights.body,
+		'font.weight.emphasis': resolvedWeights.emphasis,
+		'font.weight.heading': resolvedWeights.heading,
+		'font.weight.label': resolvedWeights.label,
 		'radius.control': `${radius?.control ?? defaultRadius.control}px`,
 		'radius.detail': `${radius?.detail ?? defaultRadius.detail}px`,
 		'radius.full': '9999px',
@@ -120,6 +127,10 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 		...ICON_SIZE_VALUES,
 		...MOTION_VALUES,
 	};
+	for (const style of typeStyles) {
+		values[`font.${style}.fontFamily`] = bodyFontFamily;
+		values[`font.${style}.fontWeight`] = resolvedWeights[typeStyleWeightRole[style]];
+	}
 	for (const [step, value] of spaceScale) {
 		values[`space.${step}`] = value;
 	}
@@ -128,16 +139,16 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 
 function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): Record<string, string> {
 	const values: Record<string, string> = {};
-	for (const step of fontSizeSteps) {
-		const fontSize = Number.parseFloat(FONT_VALUES[`font.${step}.fontSize`]);
-		const leading = Number.parseFloat(FONT_VALUES[`font.${step}.lineHeight`]);
+	for (const style of typeStyles) {
+		const fontSize = Number.parseFloat(FONT_VALUES[`font.${style}.fontSize`]);
+		const leading = Number.parseFloat(FONT_VALUES[`font.${style}.lineHeight`]);
 		const { baselineTrim, capHeightTrim } = precomputeValues({
 			fontMetrics: FONT_METRICS[fontFamily],
 			fontSize,
 			leading,
 		});
-		values[`font.${step}.baselineTrim`] = baselineTrim;
-		values[`font.${step}.capHeightTrim`] = capHeightTrim;
+		values[`font.${style}.baselineTrim`] = baselineTrim;
+		values[`font.${style}.capHeightTrim`] = capHeightTrim;
 	}
 	return values;
 }

@@ -10,6 +10,7 @@ import {
 	Stack,
 } from '../test-utils/visual.js';
 import { Text } from '../text/index.js';
+import { typeStyles } from '../theme/contract.js';
 import { Checkbox } from './index.js';
 
 test('kitchen sink', async () => {
@@ -29,10 +30,10 @@ test('kitchen sink', async () => {
 				<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid">
 					Invalid
 				</Checkbox>
-				{(['100', '200', '300', '400', '500', '600', '700', '800', '900'] as const).map((size) => (
-					<Text elementType="div" key={size} size={size}>
-						<Checkbox name={`text-${size}`}>
-							{size}: This label wraps to show that the control aligns with its first line.
+				{typeStyles.map((typography) => (
+					<Text elementType="div" key={typography} typography={typography}>
+						<Checkbox name={`text-${typography}`}>
+							{typography}: This label wraps to show that the control aligns with its first line.
 						</Checkbox>
 					</Text>
 				))}
