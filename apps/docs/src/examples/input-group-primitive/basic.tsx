@@ -3,7 +3,7 @@ import {
 	InputGroupInput,
 	InputGroupPrefix,
 	InputGroupSuffix,
-} from '@luke-ui/react/text-field/primitive';
+} from '@luke-ui/react/primitives/input-group';
 
 export default () => {
 	return (

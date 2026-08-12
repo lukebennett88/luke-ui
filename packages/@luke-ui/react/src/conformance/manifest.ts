@@ -1,12 +1,10 @@
 type ConformanceTier = 'universal' | 'field-shaped' | 'none';
 type IntegrationTripwire = 'required' | 'none';
 type VisualApplicability = 'applicable' | 'none';
-type ComponentTier = 'atom' | 'composed' | 'primitive';
 
 export type ComponentTestManifestEntry = {
 	name: string;
 	path: string;
-	tier: ComponentTier;
 	conformanceTier: ConformanceTier;
 	integrationTripwire: IntegrationTripwire;
 	visualApplicability: VisualApplicability;
@@ -14,40 +12,37 @@ export type ComponentTestManifestEntry = {
 
 // Keep this list explicit. `none` is a deliberate exception, not an omission.
 export const componentTestManifest = [
-	['Blockquote', 'blockquote', 'atom', 'none', 'none', 'none'],
-	['Box', 'box', 'atom', 'universal', 'none', 'applicable'],
-	['Button', 'button', 'composed', 'universal', 'required', 'applicable'],
-	['Button primitive', 'button/primitive', 'primitive', 'none', 'none', 'none'],
-	['Checkbox', 'checkbox', 'composed', 'field-shaped', 'required', 'applicable'],
-	['Checkbox primitive', 'checkbox/primitive', 'primitive', 'none', 'none', 'none'],
-	['Code', 'code', 'atom', 'none', 'none', 'none'],
-	['ComboboxField', 'combobox-field', 'composed', 'field-shaped', 'required', 'applicable'],
-	['ComboboxField primitive', 'combobox-field/primitive', 'primitive', 'none', 'none', 'none'],
-	['Em', 'em', 'atom', 'none', 'none', 'none'],
-	['Emoji', 'emoji', 'atom', 'none', 'none', 'applicable'],
-	['Field primitive', 'field/primitive', 'primitive', 'none', 'none', 'none'],
-	['Heading', 'heading', 'atom', 'none', 'none', 'applicable'],
-	['Heading context', 'heading-context', 'primitive', 'none', 'none', 'none'],
-	['Icon', 'icon', 'atom', 'none', 'none', 'applicable'],
-	['IconButton', 'icon-button', 'composed', 'universal', 'required', 'applicable'],
-	['Icon size context', 'icon-size-context', 'primitive', 'none', 'none', 'none'],
-	['Kbd', 'kbd', 'atom', 'none', 'none', 'none'],
-	['Link', 'link', 'atom', 'universal', 'required', 'applicable'],
-	['LoadingSkeleton', 'loading-skeleton', 'atom', 'none', 'none', 'applicable'],
-	['LoadingSpinner', 'loading-spinner', 'atom', 'none', 'none', 'applicable'],
-	['Numeral', 'numeral', 'atom', 'none', 'none', 'applicable'],
-	['Quote', 'quote', 'atom', 'none', 'none', 'none'],
-	['Strong', 'strong', 'atom', 'none', 'none', 'none'],
-	['Text', 'text', 'atom', 'none', 'none', 'applicable'],
-	['TextField', 'text-field', 'composed', 'field-shaped', 'required', 'applicable'],
-	['TextField primitive', 'text-field/primitive', 'primitive', 'none', 'none', 'none'],
-	['Theme', 'theme', 'primitive', 'none', 'none', 'none'],
-	['VisuallyHidden', 'visually-hidden', 'atom', 'none', 'none', 'none'],
-].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({
+	['Blockquote', 'blockquote', 'none', 'none', 'none'],
+	['Box', 'box', 'universal', 'none', 'applicable'],
+	['Button', 'button', 'universal', 'required', 'applicable'],
+	['Button primitive', 'primitives/button', 'none', 'none', 'none'],
+	['Checkbox', 'checkbox', 'field-shaped', 'required', 'applicable'],
+	['Checkbox primitive', 'primitives/checkbox', 'none', 'none', 'none'],
+	['Code', 'code', 'none', 'none', 'none'],
+	['ComboboxField', 'combobox-field', 'field-shaped', 'required', 'applicable'],
+	['Combobox primitive', 'primitives/combobox', 'none', 'none', 'none'],
+	['Em', 'em', 'none', 'none', 'none'],
+	['Emoji', 'emoji', 'none', 'none', 'applicable'],
+	['Field primitive', 'primitives/field', 'none', 'none', 'none'],
+	['Heading', 'heading', 'none', 'none', 'applicable'],
+	['Icon', 'icon', 'none', 'none', 'applicable'],
+	['IconButton', 'icon-button', 'universal', 'required', 'applicable'],
+	['Input group primitive', 'primitives/input-group', 'none', 'none', 'none'],
+	['Kbd', 'kbd', 'none', 'none', 'none'],
+	['Link', 'link', 'universal', 'required', 'applicable'],
+	['LoadingSkeleton', 'loading-skeleton', 'none', 'none', 'applicable'],
+	['LoadingSpinner', 'loading-spinner', 'none', 'none', 'applicable'],
+	['Numeral', 'numeral', 'none', 'none', 'applicable'],
+	['Quote', 'quote', 'none', 'none', 'none'],
+	['Strong', 'strong', 'none', 'none', 'none'],
+	['Text', 'text', 'none', 'none', 'applicable'],
+	['TextField', 'text-field', 'field-shaped', 'required', 'applicable'],
+	['Theme', 'theme', 'none', 'none', 'none'],
+	['VisuallyHidden', 'visually-hidden', 'none', 'none', 'none'],
+].map(([name, path, conformanceTier, integrationTripwire, visualApplicability]) => ({
 	conformanceTier,
 	integrationTripwire,
 	name,
 	path,
-	tier,
 	visualApplicability,
 })) as ReadonlyArray<ComponentTestManifestEntry>;

@@ -5,8 +5,10 @@ Luke UI is a React design system built on `react-aria-components` and `vanilla-e
 ## Install
 
 ```sh
-pnpm add @luke-ui/react
+pnpm add @luke-ui/react react-aria-components
 ```
+
+Luke UI expects the application to provide a compatible shared `react-aria-components` instance.
 
 ## Setup
 
@@ -42,15 +44,8 @@ AI agents can fetch documentation at:
 - [llms-full.txt](https://lukebennett88.github.io/luke-ui/llms-full.txt): full docs.
 - Any docs URL with `.md` appended: per-page Markdown.
 
-Components follow three tiers:
-
-- Atoms: single units such as `Text`, `Icon`, and `Heading`.
-- Composed components: opinionated combinations such as `Button` and `TextField`.
-- Primitives: lower-level public APIs for library authors, such as `button/primitive` and
-  `field/primitive`.
-
-Atoms and composed components are app-developer-facing. Primitives are documented in hosted docs for
-library authors, separate from the primary component path.
+Start with the normal component API. Use primitives from `@luke-ui/react/primitives/*` when you need
+a custom composition the component API does not cover.
 
 ## License
 

@@ -12,14 +12,15 @@ with no class and no JS required. Neither step injects styles at runtime.
 
 - `styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
 - `styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
-- `recipes/`: component recipes exported from `@luke-ui/react/recipes`.
-- `recipes/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
+- `styles/component-styles.css.ts`: the committed stylesheet manifest. It explicitly imports every
+  colocated `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet.
+- `styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
-- `recipes/input-states.ts`: the shared field control-state selectors (`inputStates`,
+- `styles/input-states.ts`: the shared field control-state selectors (`inputStates`,
   `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose. It is named
   `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module composes its
   plain data and functions.
-- `recipes/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
+- `styles/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
   CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is the
   in-control icon `combobox.css.ts` applies under its own invalid selector's `::after` — the border
   stays at its resting 1px there, since the icon is already the non-colour cue. It renders as the
@@ -32,14 +33,14 @@ with no class and no JS required. Neither step injects styles at runtime.
   keeps a `2px` border as its own non-colour cue instead. Named `.ts` for the same reason as
   `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
 - `input-group.css.ts` draws the same glyph, but as a real `Icon` element on its own
-  `invalidIndicator` slot rather than a mask: `InputGroup` (`text-field/primitive/`) reads React
+  `invalidIndicator` slot rather than a mask: `InputGroup` (`primitives/input-group/`) reads React
   Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid control cannot
   be composed without a non-colour cue. The recipe owns only the icon's colour and margins — `Icon`
   owns its box, and `IconSizeProvider` (`INPUT_GROUP_ICON_SIZE`) owns its per-size step — and gives
   the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control is not a
   plain `Group` with that state to hand, so it stays CSS-driven.
-- `recipes/mobile-overlay.css.ts`: the scrim, tray, and dialog styles `MobileOverlay` renders for
-  the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and `tray/index.css`.
+- `styles/mobile-overlay.css.ts`: the scrim, tray, and dialog styles `MobileOverlay` renders for the
+  mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and `tray/index.css`.
 - `overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
@@ -166,8 +167,8 @@ specificity.
 
 Use `styleInLayer` and `globalStyleInLayer` from `styles/layered-style.css.ts` to place a plain
 Vanilla Extract style for a recipe with no variants in a named layer (see
-`recipes/loading-skeleton.css.ts`). A variant-driven recipe instead calls `recipe()` from
-`recipes/recipe.ts`, which wraps every base, variant, and compound-variant style it is given in the
+`loading-skeleton/styles.css.ts`). A variant-driven recipe instead calls `recipe()` from
+`styles/recipe.ts`, which wraps every base, variant, and compound-variant style it is given in the
 `recipes` layer. A recipe can still pre-build a static `base` with `styleInLayer('recipes', …)` and
 hand the resulting class string to `recipe()`, which passes a string value through unchanged rather
 than wrapping it again.
@@ -188,22 +189,25 @@ skeleton.
 Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
 in the `reset` layer, so it cannot disable animations declared in `recipes` or `utilities`. Animated
 recipes should add their own `@media (prefers-reduced-motion: reduce)` override. See
-`recipes/loading-skeleton.css.ts` for an example.
+`loading-skeleton/styles.css.ts` for an example.
 
 ## Recipes
 
-Recipes are public and can be imported from `@luke-ui/react/recipes`.
-
-```ts
-import { button, link } from '@luke-ui/react/recipes';
-```
+Public recipes export from the component or primitive entrypoint that owns the styling contract, for
+example `buttonRecipe` from `@luke-ui/react/button` or `inputGroupRecipe` from
+`@luke-ui/react/primitives/input-group`.
 
 Recipes are component-specific. Keep them separate from general layout utilities.
 
-Every recipe is built with the internal `recipe()` engine from `recipes/recipe.ts`. It is not part
-of the public package entry. Component authors inside `@luke-ui/react` use it to define a new
-recipe. Consumers only ever call the built recipe functions it returns (`button`, `text`, and so
-on). `recipe()` wraps every base, variant, and compound-variant style it is given in the `recipes`
+Colocate recipe files beside their owner:
+
+- `recipe.css.ts` — public recipe contract
+- `styles.css.ts` — private implementation styling
+
+Every recipe is built with the internal `recipe()` engine from `styles/recipe.ts`. It is not part of
+the public package entry. Component authors inside `@luke-ui/react` use it to define a new recipe.
+Consumers call the built recipe functions it returns (`buttonRecipe`, `textRecipe`, and so on).
+`recipe()` wraps every base, variant, and compound-variant style it is given in the `recipes`
 cascade layer itself, so a recipe author does not add layering by hand.
 
 ### Single-part recipes
@@ -212,7 +216,7 @@ A single-part recipe takes `base`, `variants`, `defaultVariants`, and `compoundV
 returns a function that takes a variant selection and returns one class string:
 
 ```ts
-export const button = recipe({
+export const buttonRecipe = recipe({
 	base,
 	defaultVariants: { appearance: 'solid', size: 'medium', tone: 'neutral' },
 	variants: {
@@ -224,7 +228,7 @@ export const button = recipe({
 });
 ```
 
-See `recipes/button.css.ts` for the full recipe this abbreviates.
+See `primitives/button/recipe.css.ts` for the full recipe this abbreviates.
 
 ### Slotted recipes
 
@@ -233,24 +237,24 @@ value maps to per-slot styles, and the built recipe takes a variant selection an
 function per slot, each accepting an optional extra class to merge:
 
 ```tsx
-export const combobox = recipe({
+export const comboboxRecipe = recipe({
 	slots: { inputGroup: '…', root: '…', textInput: '…' /* … */ },
 	variants: {/* per-slot styles keyed by variant value */},
 } as const satisfies SlottedConfigInput);
 
-const { root, inputGroup } = combobox({ size: 'medium' });
+const { root, inputGroup } = comboboxRecipe({ size: 'medium' });
 <div className={root()}>
 	<div className={inputGroup(extraClassName)}>…</div>
 </div>;
 ```
 
-See `recipes/combobox.css.ts` for a complete slotted recipe. Apply
+See `primitives/combobox/recipe.css.ts` for a complete slotted recipe. Apply
 `as const satisfies SlottedConfigInput` at the definition site: `as const` preserves the literal
 slot names and variant values `recipe()` infers, and `satisfies` type-checks every slot and variant
 style against `StyleRule` where it is written.
 
-Compound variants are single-part only: `button` and `text` both use `compoundVariants` on their
-single-part config. A slotted config has no `compoundVariants` field.
+Compound variants are single-part only: `buttonRecipe` and `textRecipe` both use `compoundVariants`
+on their single-part config. A slotted config has no `compoundVariants` field.
 
 ### Deriving variant types
 
@@ -258,7 +262,7 @@ Never hand-maintain a recipe's variant type. Derive it from the built recipe wit
 `RecipeSelection<typeof recipeFn>`:
 
 ```ts
-export type ButtonVariants = RecipeSelection<typeof button>;
+export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
 ```
 
 Do not cast a hand-written variant interface onto a recipe's selection parameter. If the exported
@@ -267,9 +271,9 @@ with the recipe.
 
 ### Shared input-state selectors
 
-Field-style recipes (`input-group.css.ts`, `combobox.css.ts`) share one definition of what
-"hovered", "focused", "disabled", "invalid", and "read-only" mean for a control, from
-`recipes/input-states.ts`:
+Field-style recipes (`primitives/input-group/recipe.css.ts`, `primitives/combobox/recipe.css.ts`)
+share one definition of what "hovered", "focused", "disabled", "invalid", and "read-only" mean for a
+control, from `styles/input-states.ts`:
 
 ```ts
 import {

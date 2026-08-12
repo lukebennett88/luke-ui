@@ -3,8 +3,8 @@ import {
 	CheckboxContent,
 	CheckboxControl,
 	CheckboxIndicator,
-} from '@luke-ui/react/checkbox/primitive';
-import { FieldDescription, FieldError } from '@luke-ui/react/field/primitive';
+} from '@luke-ui/react/primitives/checkbox';
+import { FieldDescription, FieldError } from '@luke-ui/react/primitives/field';
 
 export default () => {
 	return (

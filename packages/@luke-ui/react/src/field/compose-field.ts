@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
+import type { FieldErrorProps } from '../primitives/field/error.js';
+import type { FieldNecessityIndicator } from '../primitives/field/label.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
-import type { FieldErrorProps } from './primitive/error.js';
-import type { FieldNecessityIndicator } from './primitive/label.js';
 
 export interface FieldSlotProps {
 	/** Optional helper text shown below the control. */

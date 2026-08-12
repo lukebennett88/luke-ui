@@ -1,3 +1,4 @@
+import { Icon } from '@luke-ui/react/icon';
 import {
 	ComboboxInput,
 	ComboboxInputGroup,
@@ -6,8 +7,7 @@ import {
 	ComboboxPopover,
 	ComboboxRoot,
 	ComboboxTrigger,
-} from '@luke-ui/react/combobox-field/primitive';
-import { Icon } from '@luke-ui/react/icon';
+} from '@luke-ui/react/primitives/combobox';
 
 export default () => {
 	return (

@@ -10,8 +10,7 @@
 - Run tasks through Turbo from the repo root, for example `pnpm run check` or `pnpm run build`.
   Package-local scripts can skip Turbo `generate` dependencies, which can leave generated files
   missing.
-- Scaffold components non-interactively:
-  `pnpm run generate:component --args <name> <atom|composed> <docs-group> <recipe|none>`.
+- Scaffold components non-interactively: `pnpm run generate:component --args <name> <docs-group>`.
 - When you change code, update or delete the docs that describe it in the same change. This includes
   comments, JSDoc, MDX files in `apps/docs/content/docs/`, `README.md`, package READMEs, and files
   in `docs/`. See [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md#keeping-docs-current).

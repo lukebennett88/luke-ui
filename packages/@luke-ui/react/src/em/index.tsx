@@ -1,4 +1,4 @@
-import * as styles from '../recipes/em.css.js';
+import * as styles from '../em/styles.css.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -21,11 +21,7 @@ type _EmOmit = DistributiveOmit<React.ComponentProps<'em'>, 'color'>;
 
 interface _EmProps extends _EmOmit, EmStyleProps {}
 
-/**
- * Props for the `Em` component.
- *
- * @tier atom
- */
+/** Props for the `Em` component. */
 export type EmProps = Prettify<_EmProps>;
 
 /**

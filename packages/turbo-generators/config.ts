@@ -5,8 +5,6 @@ import type { CreateComponentInput } from './src/component-creation-plan.js';
 import { createComponentPlan } from './src/component-creation-plan.js';
 
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
-const COMPONENT_TIERS = ['atom', 'composed'] as const;
-const COMPONENT_STYLING = ['none', 'recipe'] as const;
 const CONFORMANCE_TIERS = ['universal', 'field-shaped', 'none'] as const;
 // Mirrors apps/docs/content/docs/components/*/meta.json — the pages listed there.
 const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
@@ -16,8 +14,6 @@ const componentAnswersSchema = z.object({
 	docsGroup: z.enum(DOC_GROUPS),
 	integrationTripwire: z.boolean().default(false),
 	name: z.string().min(1),
-	styling: z.enum(COMPONENT_STYLING),
-	tier: z.enum(COMPONENT_TIERS),
 	visualCoverage: z.boolean().default(true),
 });
 
@@ -31,7 +27,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				return `Created ${plan.expected.packageExportPath}`;
 			},
 		],
-		description: 'Scaffold new Atom or Composed component in @luke-ui/react',
+		description: 'Scaffold a new component in @luke-ui/react',
 		prompts: [
 			{
 				message: 'Component name (PascalCase or kebab-case):',
@@ -40,27 +36,9 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				validate: validateComponentName,
 			},
 			{
-				choices: [
-					{ name: 'Atom', value: 'atom' },
-					{ name: 'Composed', value: 'composed' },
-				],
-				message: 'Component tier:',
-				name: 'tier',
-				type: 'list',
-			},
-			{
 				choices: [...DOC_GROUPS],
 				message: 'Docs group:',
 				name: 'docsGroup',
-				type: 'list',
-			},
-			{
-				choices: [
-					{ name: 'Recipe', value: 'recipe' },
-					{ name: 'None', value: 'none' },
-				],
-				message: 'Styling:',
-				name: 'styling',
 				type: 'list',
 			},
 			{

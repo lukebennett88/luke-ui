@@ -1,9 +1,9 @@
-import { button } from '@luke-ui/react/recipes';
+import { buttonRecipe } from '@luke-ui/react/button';
 
 export function SaveButton() {
 	return (
 		<button
-			className={button({ appearance: 'solid', size: 'medium', tone: 'accent' })}
+			className={buttonRecipe({ appearance: 'solid', size: 'medium', tone: 'accent' })}
 			type="button"
 		>
 			Save changes

@@ -11,30 +11,30 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { composeField } from '../field/compose-field.js';
-import { Field } from '../field/primitive/index.js';
-import { IconSizeProvider } from '../icon-size-context/index.js';
+import { IconSizeProvider } from '../icon/icon-size-context.js';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import { MobileOverlay } from '../overlays/mobile-overlay.js';
 import { useIsMobileDevice } from '../overlays/use-is-mobile-device.js';
-import * as styles from '../recipes/combobox.css.js';
+import { ComboboxClearButton } from '../primitives/combobox/clear-button.js';
+import { ComboboxEmptyState } from '../primitives/combobox/empty-state.js';
+import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
+import { ComboboxInput } from '../primitives/combobox/input.js';
+import type { ComboboxLoadMoreItemProps } from '../primitives/combobox/item.js';
+import { ComboboxLoadMoreItem } from '../primitives/combobox/item.js';
+import type { ComboboxListBoxProps } from '../primitives/combobox/listbox.js';
+import { ComboboxListBox } from '../primitives/combobox/listbox.js';
+import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
+import { ComboboxPopover } from '../primitives/combobox/popover.js';
+import * as styles from '../primitives/combobox/recipe.css.js';
+import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
+import { ComboboxRoot } from '../primitives/combobox/root.js';
+import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
+import { Field } from '../primitives/field/index.js';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
-import { ComboboxClearButton } from './primitive/clear-button.js';
-import { ComboboxEmptyState } from './primitive/empty-state.js';
-import { ComboboxInputGroup } from './primitive/input-group.js';
-import { ComboboxInput } from './primitive/input.js';
-import type { ComboboxLoadMoreItemProps } from './primitive/item.js';
-import { ComboboxLoadMoreItem } from './primitive/item.js';
-import type { ComboboxListBoxProps } from './primitive/listbox.js';
-import { ComboboxListBox } from './primitive/listbox.js';
-import type { ComboboxPopoverProps } from './primitive/popover.js';
-import { ComboboxPopover } from './primitive/popover.js';
-import type { ComboboxRootProps, ComboboxSize } from './primitive/root.js';
-import { ComboboxRoot } from './primitive/root.js';
-import { ComboboxTrigger } from './primitive/trigger.js';
 
 type ComboboxLoadingState = 'error' | 'filtering' | 'idle' | 'loading' | 'loadingMore' | 'sorting';
 
@@ -88,11 +88,7 @@ interface _ComboboxFieldProps<T extends object>
 	size?: ComboboxSize;
 }
 
-/**
- * Props for composed `ComboboxField` (searchable single-select).
- *
- * @tier composed
- */
+/** Props for composed `ComboboxField` (searchable single-select). */
 export type ComboboxFieldProps<T extends object> = Prettify<_ComboboxFieldProps<T>>;
 
 /** Composes `ComboboxRoot` with label, description, and error slots. */
@@ -220,7 +216,7 @@ function MobileComboboxContent<T extends object>({
 	const valueId = useId();
 
 	const ariaLabelledBy = labelContext?.id == null ? undefined : cx(labelContext.id, valueId);
-	const comboboxStyles = styles.combobox({ size });
+	const comboboxStyles = styles.comboboxRecipe({ size });
 
 	const mobileListBoxClassName = composeRenderProps(listBoxProps?.className, (className) => {
 		return comboboxStyles.mobileListBox(className);
@@ -314,7 +310,7 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 		<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
 			<RacButton
 				aria-label="Clear search"
-				className={styles.combobox({ size }).clearButton()}
+				className={styles.comboboxRecipe({ size }).clearButton()}
 				onPress={() => {
 					state.setInputValue('');
 				}}

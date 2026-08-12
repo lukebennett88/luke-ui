@@ -1,5 +1,5 @@
 import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox-field/primitive';
+import { ComboboxItem, ComboboxSection } from '@luke-ui/react/primitives/combobox';
 
 export default () => {
 	return (

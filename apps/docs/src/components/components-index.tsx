@@ -1,6 +1,5 @@
 import { Box } from '@luke-ui/react/box';
-import { Heading } from '@luke-ui/react/heading';
-import { HeadingLevels } from '@luke-ui/react/heading-context';
+import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import type { JSX } from 'react';
 import type { ComponentIndexGroup } from '../generated/components-index.generated.js';

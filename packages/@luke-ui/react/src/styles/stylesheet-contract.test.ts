@@ -18,21 +18,22 @@ type LineClampClasses = {
 
 test('builds the public stylesheet with the retained layer contract', async () => {
 	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url), 'utf8');
-	const recipes = await import('@luke-ui/react/recipes');
+	const icon = await import('@luke-ui/react/icon');
+	const text = await import('@luke-ui/react/text');
 	const styles = await import('@luke-ui/react/styles');
-	const recipeClasses = [...recipes.icon().split(' '), recipes.loadingSkeletonClassName];
+	const recipeClasses = [...icon.iconRecipe({ size: 'medium' }).split(' ')];
 	const textClassesByTypography = Object.fromEntries(
-		typeStyles.map((typography) => [typography, recipes.text({ typography }).split(' ')]),
+		typeStyles.map((typography) => [typography, text.textRecipe({ typography }).split(' ')]),
 	) as TextClassesByTypography;
 	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
 	const lineClampClasses: LineClampClasses = {
 		numeric: Object.fromEntries(
 			numericLineClampVariants.map((lineClamp) => [
 				lineClamp,
-				recipes.text({ lineClamp }).split(' '),
+				text.textRecipe({ lineClamp }).split(' '),
 			]),
 		) as Record<NumericLineClampVariant, Array<string>>,
-		singleLine: recipes.text({ lineClamp: true }).split(' '),
+		singleLine: text.textRecipe({ lineClamp: true }).split(' '),
 	};
 
 	expect(() => {

@@ -7,27 +7,19 @@ Start with a semantic component when its purpose matches the task. It handles th
 behaviour, accessibility, and visual treatment together. Compose from a documented primitive only
 when a component's props do not fit.
 
-## Start with the primary API
+## Start with the component API
 
-Atoms and composed components are Luke UI's primary API for application code. They handle common
-complexity for you and avoid boilerplate. Primitives are public too, but are the secondary API for
-custom composition. The `/primitive` path makes that lower-level audience visible.
-
-| Tier      | Audience        | Import path                            | Use it for                                                                 |
-| --------- | --------------- | -------------------------------------- | -------------------------------------------------------------------------- |
-| Atom      | App developers  | `@luke-ui/react/<component>`           | One complete unit, such as `Text`, `Link`, or `Icon`.                      |
-| Composed  | App developers  | `@luke-ui/react/<component>`           | A ready-to-use pattern, such as `Button`, `TextField`, or `ComboboxField`. |
-| Primitive | Library authors | `@luke-ui/react/<component>/primitive` | A custom composed component that needs lower-level behaviour or structure. |
+Luke UI components handle common complexity together. Use a primitive only when a component's props
+do not fit a custom composition.
 
 ```tsx
 import { Button } from '@luke-ui/react/button';
-import { InputGroup } from '@luke-ui/react/text-field/primitive';
+import { InputGroup } from '@luke-ui/react/primitives/input-group';
 ```
 
-Use a composed component for ordinary application UI. For example, `Button` includes its standard
-label, icon slots, and pending treatment. Use its primitive only to build a related composed
-component with its own structure. For example, use a different child layout or loading treatment.
-Keep Luke UI button behaviour and styling.
+`Button` includes its standard label, icon slots, and pending treatment. Use the button primitive
+when you need a different child layout or loading treatment while keeping Luke UI button behaviour
+and styling.
 
 Each primitive page documents the structure and accessibility responsibilities for that primitive:
 the label, description, state, and control relationships it expects. Preserve or author those
@@ -47,9 +39,9 @@ primitives when `ComboboxField` does not fit your control, popover, or loading U
 	title="Composition and customisation — Build a custom composition"
 />
 
-Give the custom component the same accessibility care as a composed component. Preserve its
-documented structure. Provide an accessible name. Keep keyboard and focus behaviour intact. Use an
-atom or normal React element for surrounding content when no primitive is needed.
+Give the custom component the same accessibility care as a normal component. Preserve its documented
+structure. Provide an accessible name. Keep keyboard and focus behaviour intact. Use a normal React
+element for surrounding content when no primitive is needed.
 
 ## Render a different DOM component
 
@@ -81,14 +73,13 @@ Read the [Box documentation](/components/layout/box) for its full prop contract.
 
 ## Style the new pattern
 
-Use public recipes from `@luke-ui/react/recipes` when the custom composition follows that
-component's documented structure. Recipes are component-specific rather than a general styling
-system.
+Import a recipe from the component or primitive entrypoint that owns the styling contract when the
+custom composition follows that structure.
 
 ```tsx
-import { button } from '@luke-ui/react/recipes';
+import { buttonRecipe } from '@luke-ui/react/button';
 
-const className = button({ appearance: 'subtle', size: 'small' });
+const className = buttonRecipe({ appearance: 'subtle', size: 'small' });
 
 <button className={className} type="button">
 	Save

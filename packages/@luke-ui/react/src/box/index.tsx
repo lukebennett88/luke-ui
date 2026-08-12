@@ -5,13 +5,7 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { mergeProps } from '../utils/index.js';
 
-/**
- * Props for `Box`. Layout props accept responsive values keyed by Luke UI breakpoints.
- *
- * `elementType` and `render` are mutually exclusive ways to choose the rendered element.
- *
- * @tier atom
- */
+/** Props for `Box`. Layout props accept responsive values keyed by Luke UI breakpoints. `elementType` and `render` are mutually exclusive ways to choose the rendered element. */
 export type BoxProps = Prettify<_BoxElementProps | _BoxRenderProps>;
 
 /** Applies layout properties to a supported structural element or an element returned by `render`. */

@@ -51,7 +51,10 @@ export default defineConfig({
 		},
 		dts: true,
 		entry: {
-			'*': ['src/*/index.tsx', 'src/*/index.ts', 'src/*/primitive/index.tsx'],
+			stylesheet: 'src/stylesheet.css.ts',
+			'*': ['src/*/index.tsx', 'src/*/index.ts'],
+			'primitives/*': ['src/primitives/*/index.tsx', 'src/primitives/*/index.ts'],
+			'styles/recipe-engine': 'src/styles/recipe-engine.ts',
 			'themes/*': ['src/themes/*/index.ts'],
 		},
 		exports: {

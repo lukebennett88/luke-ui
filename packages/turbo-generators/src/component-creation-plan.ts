@@ -1,5 +1,3 @@
-type ComponentTier = 'atom' | 'composed';
-type ComponentStyling = 'none' | 'recipe';
 type ConformanceTier = 'universal' | 'field-shaped' | 'none';
 
 export interface CreateComponentInput {
@@ -7,8 +5,6 @@ export interface CreateComponentInput {
 	docsGroup: string;
 	integrationTripwire?: boolean;
 	name: string;
-	styling: ComponentStyling;
-	tier: ComponentTier;
 	visualCoverage?: boolean;
 }
 
@@ -61,6 +57,8 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 	const displayName = toDisplayName(name);
 	const pascalName = displayName.replaceAll(' ', '');
 	const camelName = toCamelCase(name);
+	const recipeName = `${camelName}Recipe`;
+	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/${name}`;
 	const conformanceTier = input.conformanceTier ?? 'universal';
 	const integrationTripwire = input.integrationTripwire === true ? 'required' : 'none';
@@ -73,10 +71,14 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 				name,
 				packagePath,
 				pascalName,
-				styling: input.styling,
-				tier: input.tier,
+				recipeName,
+				variantsType,
 			}),
 			path: `packages/@luke-ui/react/src/${name}/index.tsx`,
+		},
+		{
+			contents: renderRecipe({ recipeName }),
+			path: `packages/@luke-ui/react/src/${name}/recipe.css.ts`,
 		},
 		{
 			contents: renderComponentTest({
@@ -112,21 +114,6 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 		});
 	}
 
-	if (input.styling === 'recipe') {
-		files.push({
-			contents: renderRecipe({ camelName, pascalName }),
-			path: `packages/@luke-ui/react/src/recipes/${name}.css.ts`,
-		});
-	}
-
-	const recipeBarrelLines =
-		input.styling === 'recipe'
-			? [
-					`export type { ${pascalName}Variants } from '../recipes/${name}.css.js';`,
-					`export { ${camelName} } from '../recipes/${name}.css.js';`,
-				]
-			: [];
-
 	if (input.visualCoverage !== false) {
 		files.push({
 			contents: renderVisualTest({ name, pascalName }),
@@ -158,24 +145,21 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 				value: name,
 			},
 		],
-		textFileAppends:
-			recipeBarrelLines.length > 0
-				? [
-						{
-							kind: 'text-append' as const,
-							lines: recipeBarrelLines,
-							path: 'packages/@luke-ui/react/src/recipes/index.ts',
-						},
-					]
-				: [],
+		textFileAppends: [
+			{
+				kind: 'text-append',
+				lines: [`import '../${name}/recipe.css.js';`],
+				path: 'packages/@luke-ui/react/src/styles/component-styles.css.ts',
+			},
+		],
 		textFileInserts: [
 			{
 				kind: 'text-insert',
 				lines: [
-					`\t['${pascalName}', '${name}', '${input.tier}', '${conformanceTier}', '${integrationTripwire}', '${visualApplicability}'],`,
+					`\t['${pascalName}', '${name}', '${conformanceTier}', '${integrationTripwire}', '${visualApplicability}'],`,
 				],
 				marker:
-					'].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({',
+					'].map(([name, path, conformanceTier, integrationTripwire, visualApplicability]) => ({',
 				path: 'packages/@luke-ui/react/src/conformance/manifest.ts',
 			},
 		],
@@ -227,32 +211,22 @@ function renderComponentSource(input: {
 	name: string;
 	packagePath: string;
 	pascalName: string;
-	styling: ComponentStyling;
-	tier: ComponentTier;
+	recipeName: string;
+	variantsType: string;
 }): string {
-	const cxImport = input.styling === 'recipe' ? "import { cx } from '../utils/index.js';\n" : '';
-	const styleImport =
-		input.styling === 'recipe'
-			? `import * as styles from '../recipes/${input.name}.css.js';\n`
-			: '';
-	const propsExtends = ` extends ComponentProps<'div'>`;
-	const className =
-		input.styling === 'recipe'
-			? ` className={cx(styles.${input.camelName}(), className)}`
-			: ' className={className}';
-
 	return `import type { ComponentProps, JSX } from 'react';
-${cxImport}${styleImport}
-/** Props for \`${input.pascalName}\`.
- *
- * @tier ${input.tier}
- */
-export interface ${input.pascalName}Props${propsExtends} {}
+import { cx } from '../utils/index.js';
+import * as styles from './recipe.css.js';
 
-/** ${input.pascalName} ${input.tier} component. */
+export { ${input.recipeName}, type ${input.variantsType} } from './recipe.css.js';
+
+/** Props for \`${input.pascalName}\`. */
+export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
+
+/** ${input.pascalName} component. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
 \tconst { className, ...divProps } = props;
-\treturn <div {...divProps}${className} />;
+\treturn <div {...divProps} className={cx(styles.${input.recipeName}(), className)} />;
 }
 `;
 }
@@ -424,10 +398,10 @@ props:
 `;
 }
 
-function renderRecipe(input: { camelName: string; pascalName: string }): string {
-	return `import { recipe } from './recipe.js';
+function renderRecipe(input: { recipeName: string }): string {
+	return `import { recipe } from '../styles/recipe.js';
 
-export const ${input.camelName} = recipe({
+export const ${input.recipeName} = recipe({
 \tbase: {
 \t\tdisplay: 'inline-flex',
 \t},

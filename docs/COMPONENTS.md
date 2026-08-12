@@ -2,53 +2,31 @@
 
 Use this guide when you add or change a public component in `@luke-ui/react`.
 
-## Component tiers
+## Components and primitives
 
-Luke UI uses three component tiers. The tier decides the export path, docs page, and audience.
+Luke UI exposes one normal component API. Start with the component that fits the use case.
 
-| Tier      | Audience        | Rule                                                                                                     | Examples                                                                                  |
-| --------- | --------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Atom      | App developers  | Presents one conceptual unit. It may compose other atoms internally, but consumers treat it as one unit. | `Text`, `Link`, `Icon`, `Heading`, `Numeral`, `Emoji`, `LoadingSpinner`                   |
-| Composed  | App developers  | Combines atoms and primitives into an opinionated, ready-to-use pattern.                                 | `Button`, `IconButton`, `TextField`, `ComboboxField`                                      |
-| Primitive | Library authors | Provides lower-level public API for composed components or custom components.                            | `button/primitive`, `field/primitive`, `text-field/primitive`, `combobox-field/primitive` |
-
-A primitive can be one component, such as `Field`, or a group of related components, such as the
-input-group and combobox primitives.
-
-Do not call atoms or primitives "base" or "raw" in source comments or docs. Use the tier name.
-
-`Field` is a primitive even though it composes other components. App developers reach field UI
-through wrappers such as `TextField` and `ComboboxField`.
-
-## Package paths
-
-Atoms and composed components export from their bare package path:
+When the component API does not cover a custom composition, drop down to a primitive under
+`@luke-ui/react/primitives/*`. Primitives describe a lower-level composition API, not implementation
+simplicity. Foundational components such as `Text`, `Icon`, `Heading`, and `Box` remain normal
+component entrypoints.
 
 ```ts
 import { Button } from '@luke-ui/react/button';
 import { Text } from '@luke-ui/react/text';
+import { InputGroup } from '@luke-ui/react/primitives/input-group';
+import { Field, FieldLabel } from '@luke-ui/react/primitives/field';
+import { ComboboxRoot } from '@luke-ui/react/primitives/combobox';
 ```
 
-Primitives that support a composed component export from `[composed]/primitive`:
-
-```ts
-import { InputGroup } from '@luke-ui/react/text-field/primitive';
-import { Field, FieldLabel } from '@luke-ui/react/field/primitive';
-import { ComboboxRoot } from '@luke-ui/react/combobox-field/primitive';
-```
-
-Do not add top-level primitive paths such as `@luke-ui/react/field` or `@luke-ui/react/input-group`.
-The `/primitive` segment makes the lower-level audience visible.
-
-Keep primitives public when consumers need them to build custom composed components. Do not make a
-primitive internal only to simplify the export map.
+Do not add a root `@luke-ui/react/primitives` barrel. Import each primitive entrypoint explicitly.
 
 ## Component creation
 
-Use the generator for new atoms and composed components:
+Use the generator for new components:
 
 ```sh
-pnpm run generate:component --args <name> <atom|composed> <docs-group> <recipe|none>
+pnpm run generate:component --args <name> <docs-group>
 ```
 
 The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`.

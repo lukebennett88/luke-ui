@@ -1,17 +1,18 @@
+export { buttonRecipe, type ButtonRecipeVariants } from '../primitives/button/recipe.css.js';
 import type { JSX, ReactNode } from 'react';
+import * as styles from '../button/styles.css.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
-import * as styles from '../recipes/button-composed.css.js';
-import type * as primitiveStyles from '../recipes/button.css.js';
+import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/index.js';
+import { Button as PrimitiveButton } from '../primitives/button/index.js';
+import type * as primitiveStyles from '../primitives/button/recipe.css.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
-import { Button as PrimitiveButton } from './primitive/index.js';
 
 interface ComposedButtonRecipeProps extends NonNullable<styles.ButtonLabelVariants> {}
 
-interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonVariants> {}
+interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonRecipeVariants> {}
 
 interface ButtonStyleProps {
 	/**
@@ -56,11 +57,7 @@ type _ButtonOmit = DistributiveOmit<
 
 interface _ButtonProps extends _ButtonOmit, ButtonStyleProps, DocumentedPressProps {}
 
-/**
- * Composed button with size, tone, appearance, pending, and block options.
- *
- * @tier composed
- */
+/** Composed button with size, tone, appearance, pending, and block options. */
 export type ButtonProps = Prettify<_ButtonProps>;
 
 /** Composed button. Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`. */

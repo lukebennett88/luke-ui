@@ -2,6 +2,8 @@ import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
+import { ComboboxItem, ComboboxLoadMoreItem } from '../primitives/combobox/item.js';
+import { ComboboxSection } from '../primitives/combobox/section.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -13,8 +15,6 @@ import {
 } from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 import { ComboboxField } from './index.js';
-import { ComboboxItem, ComboboxLoadMoreItem } from './primitive/item.js';
-import { ComboboxSection } from './primitive/section.js';
 
 type CountryItem = {
 	id: string;

@@ -1,4 +1,4 @@
-import * as styles from '../recipes/strong.css.js';
+import * as styles from '../strong/styles.css.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -21,11 +21,7 @@ type _StrongOmit = DistributiveOmit<React.ComponentProps<'strong'>, 'color'>;
 
 interface _StrongProps extends _StrongOmit, StrongStyleProps {}
 
-/**
- * Props for the `Strong` component.
- *
- * @tier atom
- */
+/** Props for the `Strong` component. */
 export type StrongProps = Prettify<_StrongProps>;
 
 /**

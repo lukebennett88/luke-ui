@@ -14,11 +14,7 @@ interface _EmojiProps extends _EmojiOmit {
 	label: string;
 }
 
-/**
- * Props for `Emoji`.
- *
- * @tier atom
- */
+/** Props for `Emoji`. */
 export type EmojiProps = Prettify<_EmojiProps>;
 
 /**

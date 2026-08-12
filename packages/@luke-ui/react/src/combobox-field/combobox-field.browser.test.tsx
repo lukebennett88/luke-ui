@@ -2,15 +2,15 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
+import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
+import { ComboboxInput } from '../primitives/combobox/input.js';
+import { ComboboxItem } from '../primitives/combobox/item.js';
+import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
 import { componentTestRegistration } from './component-test-registration.js';
 import { ComboboxField } from './index.js';
-import { ComboboxInputGroup } from './primitive/input-group.js';
-import { ComboboxInput } from './primitive/input.js';
-import { ComboboxItem } from './primitive/item.js';
-import { ComboboxRoot } from './primitive/root.js';
 
 type CountryItem = {
 	id: string;

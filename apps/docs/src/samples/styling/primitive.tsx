@@ -1,4 +1,4 @@
-import { Button } from '@luke-ui/react/button/primitive';
+import { Button } from '@luke-ui/react/primitives/button';
 
 export function SaveShortcutButton() {
 	return (

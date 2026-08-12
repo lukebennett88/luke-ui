@@ -1,16 +1,17 @@
+export { iconButtonRecipe, type IconButtonRecipeVariants } from './recipe.css.js';
 import type { JSX } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import type { ButtonProps as PrimitiveButtonProps } from '../button/primitive/index.js';
-import { Button } from '../button/primitive/index.js';
+import * as styles from '../icon-button/recipe.css.js';
 import type { IconName } from '../icon/index.js';
 import { Icon } from '../icon/index.js';
-import * as styles from '../recipes/icon-button.css.js';
+import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/index.js';
+import { Button } from '../primitives/button/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
 
-interface IconButtonRecipeProps extends NonNullable<styles.IconButtonVariants> {}
+interface IconButtonRecipeProps extends NonNullable<styles.IconButtonRecipeVariants> {}
 
 interface IconButtonStyleProps {
 	/**
@@ -27,11 +28,7 @@ interface _IconButtonProps extends _IconButtonOmit, IconButtonStyleProps, Docume
 	icon: IconName;
 }
 
-/**
- * Props for `IconButton`.
- *
- * @tier composed
- */
+/** Props for `IconButton`. */
 export type IconButtonProps = Prettify<_IconButtonProps>;
 
 /** Button that renders only an icon. */
@@ -44,7 +41,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			className={composeRenderProps(props.className, (value) => {
 				return cx(
 					styles.iconButtonReset,
-					styles.iconButton({
+					styles.iconButtonRecipe({
 						size,
 					}),
 					value,

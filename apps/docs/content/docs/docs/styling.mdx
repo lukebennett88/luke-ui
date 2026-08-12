@@ -44,11 +44,10 @@ defines its type and spacing steps in source.
 responsive structure around components. They do not set semantic colour, typography, or pseudo
 states. Read [Layout](/docs/layout) for the full API.
 
-### Build custom UI with public recipes and variables
+### Build custom UI with recipes and variables
 
-Recipes from `@luke-ui/react/recipes` are public, component-specific styling APIs. Use one when a
-custom composition follows that recipe's documented element contract. Do not copy or target its
-generated selectors.
+Import a recipe from the component or primitive entrypoint that owns the styling contract when a
+custom composition follows that structure.
 
 <SourceCodeBlock src="styling/recipe" />
 

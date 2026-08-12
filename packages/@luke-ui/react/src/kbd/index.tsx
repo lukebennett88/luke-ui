@@ -1,4 +1,5 @@
-import * as styles from '../recipes/kbd.css.js';
+export { kbdRecipe, type KbdRecipeVariants } from './recipe.css.js';
+import * as styles from '../kbd/recipe.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
@@ -7,11 +8,7 @@ type _KbdOmit = DistributiveOmit<React.ComponentProps<'kbd'>, never>;
 
 interface _KbdProps extends _KbdOmit {}
 
-/**
- * Props for the `Kbd` component.
- *
- * @tier atom
- */
+/** Props for the `Kbd` component. */
 export type KbdProps = Prettify<_KbdProps>;
 
 /**
@@ -19,5 +16,5 @@ export type KbdProps = Prettify<_KbdProps>;
  */
 export function Kbd(props: KbdProps) {
 	const { className, ...elementProps } = props;
-	return <kbd {...elementProps} className={cx(styles.kbd(), className)} />;
+	return <kbd {...elementProps} className={cx(styles.kbdRecipe(), className)} />;
 }

@@ -19,11 +19,7 @@ type _QuoteOmit = DistributiveOmit<React.ComponentProps<'q'>, 'color'>;
 
 interface _QuoteProps extends _QuoteOmit, QuoteStyleProps {}
 
-/**
- * Props for the `Quote` component.
- *
- * @tier atom
- */
+/** Props for the `Quote` component. */
 export type QuoteProps = Prettify<_QuoteProps>;
 
 /**

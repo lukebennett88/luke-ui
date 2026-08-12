@@ -68,21 +68,18 @@ describe('applyComponentCreationPlan', () => {
 		});
 	});
 
-	it('appends lines to a text file', async () => {
+	it('appends lines to the stylesheet manifest', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 		roots.push(root);
 
-		const barrelPath = 'packages/@luke-ui/react/src/recipes/index.ts';
+		const manifestPath = 'packages/@luke-ui/react/src/styles/component-styles.css.ts';
 		const initialContent = [
-			"import '../stylesheet.css.js';",
-			'',
-			"export type { ButtonVariants } from '../recipes/button.css.js';",
-			"export { button } from '../recipes/button.css.js';",
-			"export { visuallyHidden } from '../recipes/visually-hidden.css.js';",
+			"import '../button/recipe.css.js';",
+			"import '../text/recipe.css.js';",
 		].join('\n');
 
-		await mkdir(join(root, 'packages/@luke-ui/react/src/recipes'), { recursive: true });
-		await writeFile(join(root, barrelPath), initialContent, 'utf8');
+		await mkdir(join(root, 'packages/@luke-ui/react/src/styles'), { recursive: true });
+		await writeFile(join(root, manifestPath), initialContent, 'utf8');
 
 		const plan: ComponentCreationPlan = {
 			expected: {
@@ -96,27 +93,20 @@ describe('applyComponentCreationPlan', () => {
 			textFileAppends: [
 				{
 					kind: 'text-append',
-					lines: [
-						"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
-						"export { statusBadge } from '../recipes/status-badge.css.js';",
-					],
-					path: barrelPath,
+					lines: ["import '../status-badge/recipe.css.js';"],
+					path: manifestPath,
 				},
 			],
 		};
 
 		await applyComponentCreationPlan(root, plan);
 
-		const result = await readFile(join(root, barrelPath), 'utf8');
+		const result = await readFile(join(root, manifestPath), 'utf8');
 		expect(result).toBe(
 			[
-				"import '../stylesheet.css.js';",
-				'',
-				"export type { ButtonVariants } from '../recipes/button.css.js';",
-				"export { button } from '../recipes/button.css.js';",
-				"export { visuallyHidden } from '../recipes/visually-hidden.css.js';",
-				"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
-				"export { statusBadge } from '../recipes/status-badge.css.js';",
+				"import '../button/recipe.css.js';",
+				"import '../text/recipe.css.js';",
+				"import '../status-badge/recipe.css.js';",
 				'',
 			].join('\n'),
 		);
@@ -128,8 +118,8 @@ describe('applyComponentCreationPlan', () => {
 
 		const manifestPath = 'packages/@luke-ui/react/src/conformance/manifest.ts';
 		const marker =
-			'].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({';
-		const initialContent = `const entries = [\n\t['Button', 'button', 'composed', 'universal', 'required', 'applicable'],\n${marker}\n\tname,\n}));\n`;
+			'].map(([name, path, conformanceTier, integrationTripwire, visualApplicability]) => ({';
+		const initialContent = `const entries = [\n\t['Button', 'button', 'universal', 'required', 'applicable'],\n${marker}\n\tname,\n}));\n`;
 		await mkdir(join(root, 'packages/@luke-ui/react/src/conformance'), { recursive: true });
 		await writeFile(join(root, manifestPath), initialContent, 'utf8');
 
@@ -146,7 +136,7 @@ describe('applyComponentCreationPlan', () => {
 			textFileInserts: [
 				{
 					kind: 'text-insert',
-					lines: ["\t['StatusBadge', 'status-badge', 'atom', 'universal', 'none', 'applicable'],"],
+					lines: ["\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],"],
 					marker,
 					path: manifestPath,
 				},
@@ -157,7 +147,7 @@ describe('applyComponentCreationPlan', () => {
 		await applyComponentCreationPlan(root, plan);
 
 		expect(await readFile(join(root, manifestPath), 'utf8')).toBe(
-			`const entries = [\n\t['Button', 'button', 'composed', 'universal', 'required', 'applicable'],\n\t['StatusBadge', 'status-badge', 'atom', 'universal', 'none', 'applicable'],\n${marker}\n\tname,\n}));\n`,
+			`const entries = [\n\t['Button', 'button', 'universal', 'required', 'applicable'],\n\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],\n${marker}\n\tname,\n}));\n`,
 		);
 	});
 

@@ -18,7 +18,7 @@ Use the smallest surface that can falsify the intention.
 
 Do not add a new test flavour for a component. Recipe tests are infrastructure tests, not a
 component-testing category. If a recipe implementation needs a browser to test its own machinery,
-keep that test under `src/recipes/` and exclude it from these component rules.
+keep that test under `src/styles/` and exclude it from these component rules.
 
 ## Component tests
 

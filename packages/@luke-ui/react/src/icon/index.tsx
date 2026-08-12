@@ -1,19 +1,21 @@
+export { iconRecipe, type IconRecipeVariants } from './recipe.css.js';
 import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../.generated/icon-data.js';
-import { useIconSizeContext } from '../icon-size-context/index.js';
-import * as styles from '../recipes/icon.css.js';
 import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
+import { useIconSizeContext } from './icon-size-context.js';
+import * as styles from './recipe.css.js';
 
 export type { IconName } from '../../.generated/icon-data.js';
 export { iconNames, iconViewBoxes };
+export { IconSizeProvider, useIconSizeContext } from './icon-size-context.js';
 
 const IconSpritesheetContext = createContext<string | null>(null);
 
-interface IconVariantProps extends NonNullable<styles.IconVariants> {}
+interface IconVariantProps extends NonNullable<styles.IconRecipeVariants> {}
 
 interface IconStyleProps {
 	/**
@@ -48,11 +50,7 @@ interface _IconProps
 	title?: string;
 }
 
-/**
- * Props for the built-in `Icon` component.
- *
- * @tier atom
- */
+/** Props for the built-in `Icon` component. */
 export type IconProps = Prettify<_IconProps>;
 
 /** Props used by `createIcon` for custom icon components. */
@@ -87,7 +85,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 
 		const svgProps: React.SVGProps<SVGSVGElement> = {
 			'aria-hidden': ariaHidden,
-			className: cx(styles.icon({ size: resolvedSize }), className),
+			className: cx(styles.iconRecipe({ size: resolvedSize }), className),
 			fill: 'currentColor',
 			focusable: false,
 			id,
