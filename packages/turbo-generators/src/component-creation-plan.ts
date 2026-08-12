@@ -34,6 +34,12 @@ export interface TextFileInsertEdit {
 	path: string;
 }
 
+export interface SortedImportEdit {
+	kind: 'sorted-import';
+	line: string;
+	path: string;
+}
+
 export interface ComponentCreationPlan {
 	expected: {
 		hostedDocsPath: string;
@@ -45,6 +51,7 @@ export interface ComponentCreationPlan {
 	jsonEdits: Array<JsonArrayAddSortedEdit>;
 	textFileAppends: Array<TextFileAppendEdit>;
 	textFileInserts?: Array<TextFileInsertEdit>;
+	sortedImportEdits?: Array<SortedImportEdit>;
 }
 
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
@@ -145,13 +152,14 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 				value: name,
 			},
 		],
-		textFileAppends: [
+		sortedImportEdits: [
 			{
-				kind: 'text-append',
-				lines: [`import '../${name}/recipe.css.js';`],
+				kind: 'sorted-import',
+				line: `import '../${name}/recipe.css.js';`,
 				path: 'packages/@luke-ui/react/src/styles/modules.css.ts',
 			},
 		],
+		textFileAppends: [],
 		textFileInserts: [
 			{
 				kind: 'text-insert',

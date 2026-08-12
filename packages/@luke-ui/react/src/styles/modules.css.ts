@@ -1,5 +1,5 @@
-// Style-producing modules in the shipped stylesheet. Import order does not affect cascade
-// (every rule is in a named layer); keep this list alphabetical by path.
+// Style-producing modules in the shipped stylesheet.
+// Keep imports alphabetical for deterministic output; cascade priority is defined by named layers.
 import '../blockquote/recipe.css.js';
 import '../button/styles.css.js';
 import '../code/recipe.css.js';

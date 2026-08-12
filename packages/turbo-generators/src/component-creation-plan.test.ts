@@ -42,13 +42,14 @@ describe('createComponentPlan', () => {
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.visual.test.tsx',
 		]);
-		expect(plan.textFileAppends).toEqual([
+		expect(plan.sortedImportEdits).toEqual([
 			{
-				kind: 'text-append',
-				lines: ["import '../status-badge/recipe.css.js';"],
+				kind: 'sorted-import',
+				line: "import '../status-badge/recipe.css.js';",
 				path: 'packages/@luke-ui/react/src/styles/modules.css.ts',
 			},
 		]);
+		expect(plan.textFileAppends).toEqual([]);
 		expect(plan.textFileInserts?.[0]?.lines).toEqual([
 			"\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],",
 		]);

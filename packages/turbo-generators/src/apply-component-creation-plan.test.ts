@@ -68,18 +68,15 @@ describe('applyComponentCreationPlan', () => {
 		});
 	});
 
-	it('appends lines to the stylesheet manifest', async () => {
+	it('appends lines without reordering existing content', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 		roots.push(root);
 
-		const manifestPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';
-		const initialContent = [
-			"import '../button/recipe.css.js';",
-			"import '../text/recipe.css.js';",
-		].join('\n');
+		const targetPath = 'packages/@luke-ui/react/src/styles/notes.txt';
+		const initialContent = ['alpha', 'zeta'].join('\n');
 
 		await mkdir(join(root, 'packages/@luke-ui/react/src/styles'), { recursive: true });
-		await writeFile(join(root, manifestPath), initialContent, 'utf8');
+		await writeFile(join(root, targetPath), initialContent, 'utf8');
 
 		const plan: ComponentCreationPlan = {
 			expected: {
@@ -93,20 +90,62 @@ describe('applyComponentCreationPlan', () => {
 			textFileAppends: [
 				{
 					kind: 'text-append',
-					lines: ["import '../status-badge/recipe.css.js';"],
-					path: manifestPath,
+					lines: ['beta'],
+					path: targetPath,
 				},
 			],
 		};
 
 		await applyComponentCreationPlan(root, plan);
 
-		const result = await readFile(join(root, manifestPath), 'utf8');
+		const result = await readFile(join(root, targetPath), 'utf8');
+		expect(result).toBe(['alpha', 'zeta', 'beta', ''].join('\n'));
+	});
+
+	it('inserts a generated recipe import in alphabetical order', async () => {
+		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
+		roots.push(root);
+
+		const registryPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';
+		const initialContent = [
+			'// Style-producing modules in the shipped stylesheet.',
+			"import '../button/recipe.css.js';",
+			"import '../text/recipe.css.js';",
+			'',
+		].join('\n');
+
+		await mkdir(join(root, 'packages/@luke-ui/react/src/styles'), { recursive: true });
+		await writeFile(join(root, registryPath), initialContent, 'utf8');
+
+		const plan: ComponentCreationPlan = {
+			expected: {
+				exampleSlug: 'status-badge/basic',
+				hostedDocsPath: 'components/actions/status-badge',
+				packageDocsSlug: 'status-badge',
+				packageExportPath: './status-badge',
+			},
+			files: [],
+			jsonEdits: [],
+			sortedImportEdits: [
+				{
+					kind: 'sorted-import',
+					line: "import '../status-badge/recipe.css.js';",
+					path: registryPath,
+				},
+			],
+			textFileAppends: [],
+		};
+
+		await applyComponentCreationPlan(root, plan);
+		await applyComponentCreationPlan(root, plan);
+
+		const result = await readFile(join(root, registryPath), 'utf8');
 		expect(result).toBe(
 			[
+				'// Style-producing modules in the shipped stylesheet.',
 				"import '../button/recipe.css.js';",
-				"import '../text/recipe.css.js';",
 				"import '../status-badge/recipe.css.js';",
+				"import '../text/recipe.css.js';",
 				'',
 			].join('\n'),
 		);
