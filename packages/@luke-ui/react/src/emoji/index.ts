@@ -1,1 +1,1 @@
-export { type EmojiProps, Emoji } from './emoji.js';
+export { Emoji, type EmojiProps } from './emoji.js';

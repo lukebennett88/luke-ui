@@ -1,7 +1,7 @@
 export {
-	type NumeralFormat,
+	Numeral,
 	type NumeralAbbreviation,
+	type NumeralFormat,
 	type NumeralPrecision,
 	type NumeralProps,
-	Numeral,
 } from './numeral.js';

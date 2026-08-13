@@ -17,12 +17,12 @@ export const iconButtonReset = styleInLayer('recipes', {
 	paddingInline: 0,
 	selectors: {
 		'&[data-pending="true"]::after': {
+			blockSize: vars.iconSize.xsmall,
 			borderColor: 'currentColor',
 			borderInlineEndColor: 'transparent',
 			borderRadius: vars.radius.full,
 			borderStyle: 'solid',
 			borderWidth: '2px',
-			blockSize: vars.iconSize.xsmall,
 			content: '',
 			inlineSize: vars.iconSize.xsmall,
 			position: 'absolute',

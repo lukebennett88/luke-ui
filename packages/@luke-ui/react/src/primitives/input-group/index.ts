@@ -1,11 +1,11 @@
 export {
 	InputGroup,
 	InputGroupInput,
-	InputGroupPrefix,
-	InputGroupSuffix,
-	type InputGroupProps,
 	type InputGroupInputProps,
+	InputGroupPrefix,
 	type InputGroupPrefixProps,
+	type InputGroupProps,
+	InputGroupSuffix,
 	type InputGroupSuffixProps,
 } from './input-group.js';
 export {

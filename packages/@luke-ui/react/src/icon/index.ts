@@ -1,14 +1,14 @@
 export {
-	IconSizeProvider,
-	iconNames,
-	iconViewBoxes,
-	IconSpritesheetProvider,
+	type CreateIconOptions,
+	type CustomIconProps,
 	createIcon,
 	Icon,
 	type IconName,
-	type IconSpritesheetProviderProps,
 	type IconProps,
-	type CustomIconProps,
-	type CreateIconOptions,
+	IconSizeProvider,
+	IconSpritesheetProvider,
+	type IconSpritesheetProviderProps,
+	iconNames,
+	iconViewBoxes,
 } from './icon.js';
 export { type IconRecipeVariants, iconRecipe } from './recipe.css.js';

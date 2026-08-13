@@ -1,6 +1,6 @@
 export {
-	type LoadingSkeletonProviderProps,
-	LoadingSkeletonProvider,
-	type LoadingSkeletonProps,
 	LoadingSkeleton,
+	type LoadingSkeletonProps,
+	LoadingSkeletonProvider,
+	type LoadingSkeletonProviderProps,
 } from './loading-skeleton.js';

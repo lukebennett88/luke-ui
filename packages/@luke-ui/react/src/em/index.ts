@@ -1,1 +1,1 @@
-export { type EmProps, Em } from './em.js';
+export { Em, type EmProps } from './em.js';
