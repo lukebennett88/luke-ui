@@ -1,6 +1,5 @@
 import { Box } from '@luke-ui/react/box';
-import { Heading } from '@luke-ui/react/heading';
-import { HeadingLevels } from '@luke-ui/react/heading-context';
+import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 
 export default () => {
 	return (

@@ -7,6 +7,7 @@ import { readdir, rm } from 'node:fs/promises';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
 
+const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
 const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
@@ -40,6 +41,11 @@ async function cleanDistExceptPreservedFiles() {
 
 export default defineConfig({
 	pack: {
+		alias: {
+			// Vanilla Extract serializes recipes to `#recipe-engine`; resolve it to source so pack
+			// can bundle a relative runtime chunk.
+			'#recipe-engine': recipeEngineSource,
+		},
 		attw: {
 			// Exclude static asset exports. CSS/SVG files do not need type definitions.
 			excludeEntrypoints: assetExports,
@@ -51,13 +57,17 @@ export default defineConfig({
 		},
 		dts: true,
 		entry: {
-			'*': ['src/*/index.tsx', 'src/*/index.ts', 'src/*/primitive/index.tsx'],
+			stylesheet: 'src/stylesheet.css.ts',
+			'*': ['src/*/index.tsx', 'src/*/index.ts'],
+			'primitives/*': ['src/primitives/*/index.tsx', 'src/primitives/*/index.ts'],
 			'themes/*': ['src/themes/*/index.ts'],
 		},
 		exports: {
 			customExports: Object.fromEntries(
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
+			// Build the stylesheet for CSS extraction, but do not expose it as a consumer package subpath.
+			exclude: ['stylesheet'],
 		},
 		format: ['esm'],
 		hooks: {

@@ -1,16 +1,13 @@
+export { visuallyHiddenRecipe } from './recipe.css.js';
 import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
-import { visuallyHidden } from '../recipes/visually-hidden.css.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
+import { visuallyHiddenRecipe } from './recipe.css.js';
 
 type _VisuallyHiddenProps = ComponentPropsWithRef<typeof RacText>;
 
-/**
- * Props for `VisuallyHidden`.
- *
- * @tier atom
- */
+/** Props for `VisuallyHidden`. */
 export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
 
 /**
@@ -27,5 +24,5 @@ export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
  */
 export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
 	const { className, ...racProps } = props;
-	return <RacText {...racProps} className={cx(visuallyHidden(), className)} />;
+	return <RacText {...racProps} className={cx(visuallyHiddenRecipe(), className)} />;
 }

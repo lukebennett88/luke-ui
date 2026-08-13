@@ -1,6 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { ComboboxItem, ComboboxSection } from '@luke-ui/react/combobox-field/primitive';
+import { ComboboxItem, ComboboxSection } from '@luke-ui/react/primitives/combobox';
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
 import type { Key } from 'react-aria-components/Breadcrumbs';

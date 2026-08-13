@@ -6,17 +6,17 @@ import type {
 import { TextField as RacTextField } from 'react-aria-components/TextField';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { composeField } from '../field/compose-field.js';
-import { Field } from '../field/primitive/index.js';
-import type { DistributiveOmit } from '../types/distributive-omit.js';
-import type { DocumentedInputProps } from '../types/documented-rac-props.js';
-import type { Prettify } from '../types/prettify.js';
-import type { InputGroupSize } from './primitive/index.js';
+import { Field } from '../primitives/field/index.js';
+import type { InputGroupSize } from '../primitives/input-group/index.js';
 import {
 	InputGroup,
 	InputGroupInput,
 	InputGroupPrefix,
 	InputGroupSuffix,
-} from './primitive/index.js';
+} from '../primitives/input-group/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { DocumentedInputProps } from '../types/documented-rac-props.js';
+import type { Prettify } from '../types/prettify.js';
 
 type _TextFieldOmit = DistributiveOmit<RacTextFieldProps, 'children' | keyof DocumentedInputProps>;
 
@@ -26,7 +26,7 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	/**
 	 * Forwarded to the inner `<input>` element.
 	 *
-	 * Composed fields take no plain `ref`: `inputRef` is the only way to reach the
+	 * This field takes no plain `ref`: `inputRef` is the only way to reach the
 	 * control, so a ref can never silently resolve to a wrapper element instead.
 	 */
 	inputRef?: Ref<HTMLInputElement>;
@@ -40,11 +40,7 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	suffix?: ReactNode;
 }
 
-/**
- * Props for the composed text field.
- *
- * @tier composed
- */
+/** Props for `TextField`. */
 export type TextFieldProps = Prettify<_TextFieldProps>;
 
 /**

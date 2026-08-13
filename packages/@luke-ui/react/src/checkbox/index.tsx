@@ -1,17 +1,18 @@
+export { checkboxRecipe, type CheckboxRecipeVariants } from '../primitives/checkbox/recipe.css.js';
 import { useObjectRef } from '@react-aria/utils';
 import type { JSX, ReactNode, Ref } from 'react';
 import type { CheckboxFieldProps as RacCheckboxFieldProps } from 'react-aria-components/Checkbox';
-import type { FieldErrorProps } from '../field/primitive/index.js';
-import { FieldDescription, FieldError } from '../field/primitive/index.js';
-import type { DistributiveOmit } from '../types/distributive-omit.js';
-import type { Prettify } from '../types/prettify.js';
-import type { CheckboxProps as PrimitiveCheckboxProps } from './primitive/index.js';
+import type { CheckboxProps as PrimitiveCheckboxProps } from '../primitives/checkbox/index.js';
 import {
 	CheckboxContent,
 	CheckboxControl,
 	CheckboxIndicator,
 	Checkbox as PrimitiveCheckbox,
-} from './primitive/index.js';
+} from '../primitives/checkbox/index.js';
+import type { FieldErrorProps } from '../primitives/field/index.js';
+import { FieldDescription, FieldError } from '../primitives/field/index.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { Prettify } from '../types/prettify.js';
 
 type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children' | 'inputRef'>;
 
@@ -27,7 +28,7 @@ interface _CheckboxProps extends _CheckboxOmit {
 	/**
 	 * Forwarded to the underlying `<input type="checkbox">` element.
 	 *
-	 * Composed fields take no plain `ref`: `inputRef` is the only way to reach the
+	 * This field takes no plain `ref`: `inputRef` is the only way to reach the
 	 * control, so a ref can never silently resolve to a wrapper element instead.
 	 *
 	 * Widened from React Aria's own `inputRef`, which only takes a ref object, so a
@@ -56,11 +57,7 @@ interface _CheckboxProps extends _CheckboxOmit {
 	size?: PrimitiveCheckboxProps['size'];
 }
 
-/**
- * Props for the composed Checkbox.
- *
- * @tier composed
- */
+/** Props for `Checkbox`. */
 export type CheckboxProps = Prettify<_CheckboxProps>;
 
 /** A labelled checkbox with optional description and validation message. */

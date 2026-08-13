@@ -1,14 +1,17 @@
+export { type LinkRecipeVariants, linkRecipe } from './recipe.css.js';
+
 import type { JSX } from 'react';
 import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
 import { Link as RacLink } from 'react-aria-components/Link';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import * as styles from '../recipes/link.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedLinkProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
+import type { LinkRecipeVariants } from './recipe.css.js';
+import { linkRecipe } from './recipe.css.js';
 
-interface LinkVariantProps extends NonNullable<styles.LinkVariants> {}
+interface LinkVariantProps extends NonNullable<LinkRecipeVariants> {}
 
 interface LinkStyleProps {
 	/** Hides the underline until hover or press and provides a structural 24px target. */
@@ -21,11 +24,7 @@ type _LinkOmit = DistributiveOmit<RacLinkProps, keyof DocumentedLinkProps>;
 
 interface _LinkProps extends _LinkOmit, LinkStyleProps, DocumentedLinkProps {}
 
-/**
- * Props for the primitive link.
- *
- * @tier atom
- */
+/** Props for the `Link` component. */
 export type LinkProps = Prettify<_LinkProps>;
 
 /** Styled link. */
@@ -36,7 +35,7 @@ export function Link(props: LinkProps): JSX.Element {
 		<RacLink
 			{...restProps}
 			className={composeRenderProps(props.className, (className) => {
-				return cx(styles.link({ isStandalone, tone }), className);
+				return cx(linkRecipe({ isStandalone, tone }), className);
 			})}
 		/>
 	);

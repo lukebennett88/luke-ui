@@ -2,16 +2,16 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
-import { inputGroup } from '../recipes/input-group.css.js';
-import { render } from '../test-utils/render.js';
-import { componentTestRegistration } from './component-test-registration.js';
-import { TextField } from './index.js';
 import {
 	InputGroup,
 	InputGroupInput,
 	InputGroupPrefix,
 	InputGroupSuffix,
-} from './primitive/index.js';
+} from '../primitives/input-group/index.js';
+import { inputGroupRecipe } from '../primitives/input-group/recipe.css.js';
+import { render } from '../test-utils/render.js';
+import { componentTestRegistration } from './component-test-registration.js';
+import { TextField } from './index.js';
 
 testFieldShapedConformance({
 	assertAssociation: (result) => {
@@ -59,10 +59,10 @@ function groupFor(name: string): HTMLElement {
 	return group;
 }
 
-// `inputGroup().invalidIndicator()` returns one stable class list regardless of `size`
-// (the slot's `marginInlineEnd` is a constant, see `input-group.css.ts`), but the lookup
+// `inputGroupRecipe().invalidIndicator()` returns one stable class list regardless of `size`
+// (the slot's `marginInlineEnd` is a constant, see `primitives/input-group/recipe.css.ts`), but the lookup
 // still keys on the first token only, matching the other slot lookups in this file.
-const invalidIndicatorClass = inputGroup().invalidIndicator().split(' ')[0];
+const invalidIndicatorClass = inputGroupRecipe().invalidIndicator().split(' ')[0];
 
 /**
  * The invalid indicator `InputGroup` renders itself, if it is present. Matched by the

@@ -1,9 +1,8 @@
 import { Box } from '@luke-ui/react/box';
-import { Button } from '@luke-ui/react/button';
+import { Button, buttonRecipe } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import { button } from '@luke-ui/react/recipes';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useId, useState } from 'react';
@@ -48,7 +47,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 			actions={
 				<Box className="flex items-center gap-1">
 					<DocsLink
-						className={button({ appearance: 'ghost', size: 'small' })}
+						className={buttonRecipe({ appearance: 'ghost', size: 'small' })}
 						hash={highlightedSource.playgroundHash}
 						target="_blank"
 						to="/playground"
@@ -109,7 +108,7 @@ function ExampleLoadingActions() {
 	return (
 		<Box aria-hidden className="flex items-center gap-1" inert>
 			<LoadingSkeleton radius="control">
-				<span className={button({ appearance: 'ghost', size: 'small' })}>
+				<span className={buttonRecipe({ appearance: 'ghost', size: 'small' })}>
 					<Icon aria-hidden className="size-4" name="externalLink" />
 					Open in playground
 				</span>

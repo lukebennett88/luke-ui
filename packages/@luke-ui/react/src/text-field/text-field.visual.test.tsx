@@ -2,6 +2,12 @@ import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { Button } from '../button/index.js';
 import { Icon } from '../icon/index.js';
+import {
+	InputGroup,
+	InputGroupInput,
+	InputGroupPrefix,
+	InputGroupSuffix,
+} from '../primitives/input-group/index.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -11,12 +17,6 @@ import {
 	Stack,
 } from '../test-utils/visual.js';
 import { TextField } from './index.js';
-import {
-	InputGroup,
-	InputGroupInput,
-	InputGroupPrefix,
-	InputGroupSuffix,
-} from './primitive/index.js';
 
 test('kitchen sink', async () => {
 	for (const appearance of visualAppearances) {

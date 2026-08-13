@@ -5,10 +5,11 @@ description: Install Luke UI, apply a bundled theme, and render a component.
 
 ## Install Luke UI
 
-Install the package in your application.
+Install Luke UI and React Aria Components. Luke UI uses the application's React Aria Components
+instance so shared contexts remain compatible.
 
 ```bash
-pnpm add @luke-ui/react
+pnpm add @luke-ui/react react-aria-components
 ```
 
 ## Set up the theme
@@ -41,7 +42,7 @@ must use a specific mode. Without it, Luke UI follows the system preference.
 
 <Cards>
 	<Card href="/docs/styling" title="Styling">
-		Learn how component APIs, recipes, utilities, and tokens fit together.
+		Learn how component APIs, utilities, and tokens fit together.
 	</Card>
 	<Card href="/docs/layout" title="Layout">
 		Build responsive structure with Box.
@@ -50,6 +51,6 @@ must use a specific mode. Without it, Luke UI follows the system preference.
 		Understand how the theme root, identity, and tokens fit together.
 	</Card>
 	<Card href="/components/actions/button" title="Components">
-		Browse the components available to application developers.
+		Browse the components available to developers.
 	</Card>
 </Cards>

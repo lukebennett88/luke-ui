@@ -5,7 +5,7 @@ import type {
 	ComponentCreationPlan,
 	JsonArrayAddSortedEdit,
 	PlanFile,
-	TextFileAppendEdit,
+	SortedImportEdit,
 	TextFileInsertEdit,
 } from './component-creation-plan.js';
 
@@ -17,8 +17,10 @@ export async function applyComponentCreationPlan(
 ): Promise<void> {
 	await Promise.all(plan.files.map((file) => writePlanFile(root, file)));
 	await Promise.all(plan.jsonEdits.map((edit) => applyJsonEdit(root, edit)));
-	await Promise.all(plan.textFileAppends.map((edit) => applyTextAppendEdit(root, edit)));
 	await Promise.all((plan.textFileInserts ?? []).map((edit) => applyTextInsertEdit(root, edit)));
+	await Promise.all(
+		(plan.sortedImportEdits ?? []).map((edit) => applySortedImportEdit(root, edit)),
+	);
 }
 
 async function writePlanFile(root: string, file: PlanFile): Promise<void> {
@@ -50,13 +52,42 @@ async function readJson(path: string, title: string): Promise<Record<string, unk
 	}
 }
 
-async function applyTextAppendEdit(root: string, edit: TextFileAppendEdit): Promise<void> {
+async function applySortedImportEdit(root: string, edit: SortedImportEdit): Promise<void> {
 	const target = join(root, edit.path);
 	await mkdir(dirname(target), { recursive: true });
 	const content = await readFile(target, 'utf8').catch(() => '');
-	const trimmed = content.endsWith('\n') ? content.slice(0, -1) : content;
-	const updated = trimmed + '\n' + edit.lines.join('\n') + '\n';
-	await writeFile(target, updated, 'utf8');
+	await writeFile(target, insertSortedImport(content, edit.line), 'utf8');
+}
+
+function insertSortedImport(content: string, line: string): string {
+	const lines = content.endsWith('\n') ? content.slice(0, -1).split('\n') : content.split('\n');
+	if (lines.length === 1 && lines[0] === '') lines.pop();
+	if (lines.includes(line)) return `${lines.join('\n')}\n`;
+
+	const header: Array<string> = [];
+	const imports: Array<string> = [];
+	const footer: Array<string> = [];
+	let seenImport = false;
+
+	for (const current of lines) {
+		if (current.startsWith('import ')) {
+			seenImport = true;
+			imports.push(current);
+			continue;
+		}
+
+		if (seenImport) {
+			footer.push(current);
+			continue;
+		}
+
+		header.push(current);
+	}
+
+	imports.push(line);
+	imports.sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
+
+	return `${[...header, ...imports, ...footer].join('\n')}\n`;
 }
 
 async function applyTextInsertEdit(root: string, edit: TextFileInsertEdit): Promise<void> {

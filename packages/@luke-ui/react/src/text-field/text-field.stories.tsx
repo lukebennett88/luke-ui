@@ -1,12 +1,12 @@
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
-import { TextField } from '@luke-ui/react/text-field';
 import {
 	InputGroup,
 	InputGroupInput,
 	InputGroupPrefix,
 	InputGroupSuffix,
-} from '@luke-ui/react/text-field/primitive';
+} from '@luke-ui/react/primitives/input-group';
+import { TextField } from '@luke-ui/react/text-field';
 import type { CSSProperties } from 'react';
 import { useState } from 'react';
 import { Form } from 'react-aria-components/Form';

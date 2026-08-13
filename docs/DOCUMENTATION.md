@@ -49,7 +49,7 @@ one, cut it.
 Keep the detail that changes the reader's code:
 
 - `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
-- A composed field takes no plain `ref`, so `inputRef` is the only way to reach the control.
+- A field component takes no plain `ref`, so `inputRef` is the only way to reach the control.
 - `solid.pressed` reuses the `solid.hover` colour, so a custom pressed state needs depth, finish, or
   a transform.
 
@@ -57,7 +57,7 @@ Cut the detail that only explains the mechanism:
 
 - `Icon` renders an `<svg>` that references a symbol in the generated spritesheet.
 - A token path cannot be both a string leaf and the parent of `hover` and `pressed`.
-- Which internal components a composed component renders.
+- Which internal modules a component imports.
 
 ### Other technologies
 
@@ -80,9 +80,8 @@ Do not write "you can do this, but it is not recommended". Either recommend it o
 ### Internal distinctions
 
 Expose an internal architectural distinction only when it reaches the public API or a developer's
-choice. The atom versus composed split does not: it is maintainer architecture, so do not teach it
-in public docs. Primitives do, because they use `/primitive` export paths and target library
-authors. See [COMPONENTS.md](COMPONENTS.md).
+choice. Primitives do, because they use `@luke-ui/react/primitives/*` entrypoints when the normal
+component API does not fit. See [COMPONENTS.md](COMPONENTS.md).
 
 Do not document an export that is not public API.
 
@@ -157,17 +156,16 @@ public documentation rules above apply to it. JSDoc and TypeScript types drive t
 
 When adding or changing a component:
 
-- Write function-level JSDoc on the exported component that describes it for an app developer.
-- Put an `@tier` JSDoc tag on the exported `Props` type: `atom`, `composed`, or `primitive`.
+- Write function-level JSDoc on the exported component that describes it for a developer.
 - Document every public prop. Include `@default` when the component destructures a default value.
 - Keep a straightforward prop description to one concise sentence. Add explanation when a
   constraint, choice, caveat, or non-obvious behaviour affects how the prop is used. Do not optimise
   JSDoc for line count.
 - Do not restate the prop name. `endIcon` needs "Icon shown after the label", not "The end icon".
-- On atom and composed components, redeclare important inherited `react-aria-components` props with
-  useful JSDoc, using the passthrough pattern such as `isDisabled?: RacButtonProps['isDisabled']`.
-  Redeclare only the props an app developer is likely to reach for. Point a long-tail inherited prop
-  at the upstream React Aria component through the page's `reactAria` frontmatter link.
+- On components, redeclare important inherited `react-aria-components` props with useful JSDoc,
+  using the passthrough pattern such as `isDisabled?: RacButtonProps['isDisabled']`. Redeclare only
+  the props a developer is likely to reach for. Point a long-tail inherited prop at the upstream
+  React Aria component through the page's `reactAria` frontmatter link.
 
 A code comment explains the code, not its history. Luke UI is pre-1.0, so no comment carries a prior
 state.
@@ -286,9 +284,9 @@ a page feel shorter.
 
 ## Where documentation lives
 
-The hosted docs app in `apps/docs` is the primary docs surface for app developers and library
-authors. Authored guides live under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component
-guides live under `apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
+The hosted docs app in `apps/docs` is the primary docs surface for developers. Authored guides live
+under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component guides live under
+`apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
 
@@ -301,7 +299,7 @@ The package README links to the hosted docs. Fumadocs provides:
 
 ## Component docs
 
-Atoms and composed components get hosted docs pages in the primary component navigation.
+Components get hosted docs pages in the primary component navigation.
 
 The components landing page at `/components` lists every component guide, grouped by category. The
 list is generated from the guides themselves. `scripts/generate-components-index.ts` reads each
@@ -310,12 +308,11 @@ that file through `src/components/components-index.tsx`. A new component appears
 with no further edit. `components-index-generator.test.ts` fails when the generated file drifts from
 the guides on disk.
 
-Primitives are public API for library authors. Document every primitive export path in hosted docs.
-Primitive pages live in the "Primitives" section under components.
+Primitives are public API. Document every primitive export path in hosted docs. Primitive pages live
+in the "Primitives" section under components.
 
-Component pages may link to their related primitive pages, but should not carry the full primitive
-API reference. Keep primitive pages separate from the primary app-developer component path unless
-they become app-developer-facing.
+Component pages may link to their related primitive pages when the normal component API does not
+fit. Keep primitive pages at the end of the Components area.
 
 ## MDX page structure
 

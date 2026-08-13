@@ -1,6 +1,6 @@
+import { buttonRecipe } from '@luke-ui/react/button';
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
-import { button } from '@luke-ui/react/recipes';
 import type { ComponentProps } from 'react';
 import type { Selection } from 'react-aria-components/GridList';
 import { ToggleButton } from 'react-aria-components/ToggleButton';
@@ -53,7 +53,7 @@ export function IconToggleButtonGroup<Value extends string>({
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
 					aria-label={optionLabel}
-					className={button({ appearance: 'subtle', size: 'small', tone: 'neutral' })}
+					className={buttonRecipe({ appearance: 'subtle', size: 'small', tone: 'neutral' })}
 					id={optionValue}
 					key={optionValue}
 					render={renderToggleButton}
@@ -87,7 +87,7 @@ export function TextToggleButtonGroup<Value extends string>({
 		>
 			{options.map(({ label: optionLabel, value: optionValue }) => (
 				<ToggleButton
-					className={button({ appearance: 'subtle', size: 'small', tone: 'neutral' })}
+					className={buttonRecipe({ appearance: 'subtle', size: 'small', tone: 'neutral' })}
 					id={optionValue}
 					key={optionValue}
 					render={renderToggleButton}

@@ -1,9 +1,13 @@
 # @luke-ui/react agent guide
 
-- Do not hand-edit `.generated/entries.ts` or `package.json#exports`. Entries are generated, and
-  `tsdown` updates exports during build.
+- Do not hand-edit `.generated/entries.ts` or `package.json#exports`. `vp pack` generates entries
+  and updates exports during build. The `stylesheet` build entry is excluded from the public export
+  map via `exports.exclude` in `vite.config.ts`. Vanilla Extract serializes recipes to
+  `#recipe-engine`; pack, Vitest, Storybook, and the docs app alias that specifier to source. Pack
+  then bundles a relative runtime chunk. The specifier is not a public package subpath.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
-  files by hand. The generator updates group barrels, the styles index, and docs wiring.
+  files by hand. The generator updates the style-module registry, conformance manifest, and docs
+  wiring.
 - Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests. It is
   the only normative testing guide. Component tests use the shared browser renderer; stories are
   documentation and render/a11y fixtures, not assertion files.
@@ -18,7 +22,11 @@ A component directory contains:
 - `[component].browser.test.tsx`: component behaviour, conformance, and the integration tripwire
 - `[component].visual.test.tsx`: visual regression captures when the component has a visual surface
 - `index.tsx`: component implementation
-- `primitive/`: optional primitive exports
+- `recipe.css.ts`: public recipe contract (scaffolded by the generator)
+- `styles.css.ts`: private implementation styling when needed
+
+Lower-level composition APIs live under `src/primitives/*` and export from
+`@luke-ui/react/primitives/*`. See [`docs/COMPONENTS.md`](../../docs/COMPONENTS.md).
 
 ## Exported prop types
 
@@ -48,17 +56,8 @@ Rules:
 - Name the internal interface `_ComponentProps` (underscore prefix) and export the Prettified
   version as `ComponentProps`.
 
-## Component taxonomy
-
-Components follow the Atom, Composed, and Primitive taxonomy. See
-[`docs/COMPONENTS.md`](../../docs/COMPONENTS.md) for definitions.
-
-Primitives exported from `*/primitive/` are building blocks for library authors. They are not
-promoted in beginner app-developer navigation, but they are public API and need hosted docs. See
-[`docs/DOCUMENTATION.md`](../../docs/DOCUMENTATION.md).
-
 ## Documentation
 
 JSDoc and TypeScript types drive the docs app. The normative documentation rules — what to document,
-JSDoc, `@tier`, inherited React Aria props, examples, and writing style — live in
+JSDoc, inherited React Aria props, examples, and writing style — live in
 [`docs/DOCUMENTATION.md`](../../docs/DOCUMENTATION.md). Do not restate them here.

@@ -47,7 +47,6 @@ describe('applyComponentCreationPlan', () => {
 					value: 'status-badge',
 				},
 			],
-			textFileAppends: [],
 		};
 
 		await applyComponentCreationPlan(root, plan);
@@ -68,21 +67,22 @@ describe('applyComponentCreationPlan', () => {
 		});
 	});
 
-	it('appends lines to a text file', async () => {
+	it('inserts a generated recipe import in code-point order', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 		roots.push(root);
 
-		const barrelPath = 'packages/@luke-ui/react/src/recipes/index.ts';
+		const registryPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';
 		const initialContent = [
-			"import '../stylesheet.css.js';",
+			'// Style-producing modules in the shipped stylesheet.',
+			"import '../Icon/recipe.css.js';",
+			"import '../button/recipe.css.js';",
+			"import '../icon/recipe.css.js';",
+			"import '../text/recipe.css.js';",
 			'',
-			"export type { ButtonVariants } from '../recipes/button.css.js';",
-			"export { button } from '../recipes/button.css.js';",
-			"export { visuallyHidden } from '../recipes/visually-hidden.css.js';",
 		].join('\n');
 
-		await mkdir(join(root, 'packages/@luke-ui/react/src/recipes'), { recursive: true });
-		await writeFile(join(root, barrelPath), initialContent, 'utf8');
+		await mkdir(join(root, 'packages/@luke-ui/react/src/styles'), { recursive: true });
+		await writeFile(join(root, registryPath), initialContent, 'utf8');
 
 		const plan: ComponentCreationPlan = {
 			expected: {
@@ -93,30 +93,27 @@ describe('applyComponentCreationPlan', () => {
 			},
 			files: [],
 			jsonEdits: [],
-			textFileAppends: [
+			sortedImportEdits: [
 				{
-					kind: 'text-append',
-					lines: [
-						"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
-						"export { statusBadge } from '../recipes/status-badge.css.js';",
-					],
-					path: barrelPath,
+					kind: 'sorted-import',
+					line: "import '../icon-button/recipe.css.js';",
+					path: registryPath,
 				},
 			],
 		};
 
 		await applyComponentCreationPlan(root, plan);
+		await applyComponentCreationPlan(root, plan);
 
-		const result = await readFile(join(root, barrelPath), 'utf8');
+		const result = await readFile(join(root, registryPath), 'utf8');
 		expect(result).toBe(
 			[
-				"import '../stylesheet.css.js';",
-				'',
-				"export type { ButtonVariants } from '../recipes/button.css.js';",
-				"export { button } from '../recipes/button.css.js';",
-				"export { visuallyHidden } from '../recipes/visually-hidden.css.js';",
-				"export type { StatusBadgeVariants } from '../recipes/status-badge.css.js';",
-				"export { statusBadge } from '../recipes/status-badge.css.js';",
+				'// Style-producing modules in the shipped stylesheet.',
+				"import '../Icon/recipe.css.js';",
+				"import '../button/recipe.css.js';",
+				"import '../icon-button/recipe.css.js';",
+				"import '../icon/recipe.css.js';",
+				"import '../text/recipe.css.js';",
 				'',
 			].join('\n'),
 		);
@@ -128,8 +125,8 @@ describe('applyComponentCreationPlan', () => {
 
 		const manifestPath = 'packages/@luke-ui/react/src/conformance/manifest.ts';
 		const marker =
-			'].map(([name, path, tier, conformanceTier, integrationTripwire, visualApplicability]) => ({';
-		const initialContent = `const entries = [\n\t['Button', 'button', 'composed', 'universal', 'required', 'applicable'],\n${marker}\n\tname,\n}));\n`;
+			'].map(([name, path, conformanceTier, integrationTripwire, visualApplicability]) => ({';
+		const initialContent = `const entries = [\n\t['Button', 'button', 'universal', 'required', 'applicable'],\n${marker}\n\tname,\n}));\n`;
 		await mkdir(join(root, 'packages/@luke-ui/react/src/conformance'), { recursive: true });
 		await writeFile(join(root, manifestPath), initialContent, 'utf8');
 
@@ -142,11 +139,10 @@ describe('applyComponentCreationPlan', () => {
 			},
 			files: [],
 			jsonEdits: [],
-			textFileAppends: [],
 			textFileInserts: [
 				{
 					kind: 'text-insert',
-					lines: ["\t['StatusBadge', 'status-badge', 'atom', 'universal', 'none', 'applicable'],"],
+					lines: ["\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],"],
 					marker,
 					path: manifestPath,
 				},
@@ -157,7 +153,7 @@ describe('applyComponentCreationPlan', () => {
 		await applyComponentCreationPlan(root, plan);
 
 		expect(await readFile(join(root, manifestPath), 'utf8')).toBe(
-			`const entries = [\n\t['Button', 'button', 'composed', 'universal', 'required', 'applicable'],\n\t['StatusBadge', 'status-badge', 'atom', 'universal', 'none', 'applicable'],\n${marker}\n\tname,\n}));\n`,
+			`const entries = [\n\t['Button', 'button', 'universal', 'required', 'applicable'],\n\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],\n${marker}\n\tname,\n}));\n`,
 		);
 	});
 
@@ -186,7 +182,6 @@ describe('applyComponentCreationPlan', () => {
 					value: 'feedback',
 				},
 			],
-			textFileAppends: [],
 		};
 
 		await expect(applyComponentCreationPlan(root, plan)).rejects.toBeInstanceOf(z.ZodError);

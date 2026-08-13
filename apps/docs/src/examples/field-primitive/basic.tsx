@@ -1,5 +1,5 @@
-import { Field, FieldDescription, FieldLabel } from '@luke-ui/react/field/primitive';
-import { InputGroup, InputGroupInput } from '@luke-ui/react/text-field/primitive';
+import { Field, FieldDescription, FieldLabel } from '@luke-ui/react/primitives/field';
+import { InputGroup, InputGroupInput } from '@luke-ui/react/primitives/input-group';
 
 export default () => {
 	return (

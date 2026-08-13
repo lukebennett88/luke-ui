@@ -1,10 +1,14 @@
 import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
-import * as styles from '../recipes/loading-skeleton.css.js';
 import { vars } from '../theme/contract.css.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { cx } from '../utils/index.js';
+import {
+	loadingSkeletonClassName,
+	skeletonAnimationName,
+	skeletonRadiusVar,
+} from './styles.css.js';
 
 const LoadingSkeletonContext = createContext<boolean | null>(null);
 
@@ -41,11 +45,7 @@ interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	radius?: keyof typeof vars.radius;
 }
 
-/**
- * Props for `LoadingSkeleton`.
- *
- * @tier atom
- */
+/** Props for `LoadingSkeleton`. */
 export type LoadingSkeletonProps = Prettify<_LoadingSkeletonProps>;
 
 /**
@@ -66,7 +66,7 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	const isLoadingContext = useContext(LoadingSkeletonContext);
 	const isLoading = isLoadingContext ?? isLoadingProp ?? true;
 
-	useSynchronizeAnimations(isLoading ? styles.skeletonAnimationName : null);
+	useSynchronizeAnimations(isLoading ? skeletonAnimationName : null);
 
 	if (!isLoading) return children;
 
@@ -77,10 +77,10 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 		<Component
 			{...spanProps}
 			aria-hidden
-			className={cx(styles.loadingSkeletonClassName, className)}
+			className={cx(loadingSkeletonClassName, className)}
 			data-skeleton-inline={isInline ? '' : undefined}
 			inert
-			style={radius ? { ...style, [styles.skeletonRadiusVar]: vars.radius[radius] } : style}
+			style={radius ? { ...style, [skeletonRadiusVar]: vars.radius[radius] } : style}
 			tabIndex={-1}
 		>
 			{children}

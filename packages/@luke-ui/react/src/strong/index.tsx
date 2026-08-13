@@ -1,9 +1,9 @@
-import * as styles from '../recipes/strong.css.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
+import { strong } from './styles.css.js';
 
 interface StrongStyleProps {
 	/**
@@ -21,11 +21,7 @@ type _StrongOmit = DistributiveOmit<React.ComponentProps<'strong'>, 'color'>;
 
 interface _StrongProps extends _StrongOmit, StrongStyleProps {}
 
-/**
- * Props for the `Strong` component.
- *
- * @tier atom
- */
+/** Props for the `Strong` component. */
 export type StrongProps = Prettify<_StrongProps>;
 
 /**
@@ -37,7 +33,7 @@ export function Strong(props: StrongProps) {
 	return (
 		<Text
 			{...elementProps}
-			className={cx(styles.strong, className)}
+			className={cx(strong, className)}
 			elementType="strong"
 			lineClamp={lineClamp}
 			shouldInheritFont

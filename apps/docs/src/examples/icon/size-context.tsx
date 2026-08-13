@@ -1,6 +1,5 @@
 import { Box } from '@luke-ui/react/box';
-import { Icon } from '@luke-ui/react/icon';
-import { IconSizeProvider } from '@luke-ui/react/icon-size-context';
+import { Icon, IconSizeProvider } from '@luke-ui/react/icon';
 
 export default () => {
 	return (

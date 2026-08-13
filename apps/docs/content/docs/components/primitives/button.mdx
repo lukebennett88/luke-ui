@@ -1,11 +1,11 @@
 ---
 title: Button primitive
-description: Lower-level button styles and behaviour for custom composed controls.
-source: packages/@luke-ui/react/src/button/primitive
+description: Lower-level button styles and behaviour for custom control layouts.
+source: packages/@luke-ui/react/src/primitives/button
 reactAria: https://react-spectrum.adobe.com/react-aria/Button.html
 props:
   - name: ButtonProps
-    path: packages/@luke-ui/react/src/button/primitive/index.tsx
+    path: packages/@luke-ui/react/src/primitives/button/index.tsx
 ---
 
 Use the button primitive to build a custom button pattern. It provides Luke UI button styles and
@@ -16,9 +16,9 @@ application actions, use [`Button`](/components/actions/button).
 
 ## Composition
 
-Use the primitive when a composed control needs custom children, render-prop children, or its own
-loading layout. The composed `Button` wraps its label for truncation, adds start and end icon slots,
-and supplies a pending spinner. The primitive does not.
+Use the primitive when you need custom children, render-prop children, or your own loading layout.
+`Button` wraps its label for truncation, adds start and end icon slots, and supplies a pending
+spinner. The primitive does not.
 
 ## Appearance and size
 

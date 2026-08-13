@@ -1,10 +1,15 @@
-import type { HeadingLevel, HeadingLevelsProps } from '../heading-context/index.js';
-import { HeadingLevels, HeadingPresenceProvider } from '../heading-context/index.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
 import type { Prettify } from '../types/prettify.js';
+import type { HeadingLevel, HeadingLevelsProps } from './heading-context.js';
+import { HeadingLevels, HeadingPresenceProvider } from './heading-context.js';
 
-export type { HeadingLevel } from '../heading-context/index.js';
+export type {
+	HeadingLevel,
+	HeadingLevelsProps,
+	HeadingLevelsRenderProps,
+} from './heading-context.js';
+export { HeadingLevels, useHeadingLevel } from './heading-context.js';
 /** Valid heading tag name for Luke UI headings. */
 export type HeadingTag = `h${HeadingLevel}`;
 
@@ -13,11 +18,7 @@ interface _HeadingProps extends TextProps {
 	level?: HeadingLevel;
 }
 
-/**
- * Props for `Heading`.
- *
- * @tier atom
- */
+/** Props for `Heading`. */
 export type HeadingProps = Prettify<_HeadingProps>;
 
 const typographyByLevel = {

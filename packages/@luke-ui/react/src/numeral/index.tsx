@@ -1,5 +1,5 @@
 import { useLocale } from 'react-aria-components/I18nProvider';
-import { useIsWithinHeading } from '../heading-context/index.js';
+import { useIsWithinHeading } from '../heading/heading-context.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -42,11 +42,7 @@ interface _NumeralProps extends _NumeralOmit {
 	value: number;
 }
 
-/**
- * Props for `Numeral`.
- *
- * @tier atom
- */
+/** Props for `Numeral`. */
 export type NumeralProps = Prettify<_NumeralProps>;
 
 /** Formats a number and renders it with the same typography props as `Text`. */

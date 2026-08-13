@@ -1,17 +1,20 @@
+export { type ButtonRecipeVariants, buttonRecipe } from '../primitives/button/recipe.css.js';
+
 import type { JSX, ReactNode } from 'react';
 import { LoadingSpinner } from '../loading-spinner/index.js';
-import * as styles from '../recipes/button-composed.css.js';
-import type * as primitiveStyles from '../recipes/button.css.js';
+import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/index.js';
+import { Button as PrimitiveButton } from '../primitives/button/index.js';
+import type * as primitiveStyles from '../primitives/button/recipe.css.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import type { ButtonProps as PrimitiveButtonProps } from './primitive/index.js';
-import { Button as PrimitiveButton } from './primitive/index.js';
+import type { ButtonLabelVariants } from './styles.css.js';
+import { buttonContent, buttonLabel, spinnerOverlay } from './styles.css.js';
 
-interface ComposedButtonRecipeProps extends NonNullable<styles.ButtonLabelVariants> {}
+interface ButtonLabelRecipeProps extends NonNullable<ButtonLabelVariants> {}
 
-interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonVariants> {}
+interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonRecipeVariants> {}
 
 interface ButtonStyleProps {
 	/**
@@ -32,7 +35,7 @@ interface ButtonStyleProps {
 	 * Shows pending button styles. When true, a spinner overlays the label.
 	 * @default false
 	 */
-	isPending?: ComposedButtonRecipeProps['isPending'];
+	isPending?: ButtonLabelRecipeProps['isPending'];
 	/**
 	 * Sets the button size.
 	 * @default 'medium'
@@ -56,27 +59,26 @@ type _ButtonOmit = DistributiveOmit<
 
 interface _ButtonProps extends _ButtonOmit, ButtonStyleProps, DocumentedPressProps {}
 
-/**
- * Composed button with size, tone, appearance, pending, and block options.
- *
- * @tier composed
- */
+/** Props for `Button`. */
 export type ButtonProps = Prettify<_ButtonProps>;
 
-/** Composed button. Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`. */
+/**
+ * Button with size, tone, appearance, pending, and block options.
+ * Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`.
+ */
 export function Button(props: ButtonProps): JSX.Element {
 	const { children, endIcon, isPending, size = 'medium', startIcon, ...restProps } = props;
 
 	return (
 		<PrimitiveButton {...restProps} isPending={isPending} size={size}>
 			{(renderProps) => (
-				<span className={styles.buttonContent()}>
+				<span className={buttonContent()}>
 					{isPending && (
-						<span aria-hidden className={styles.spinnerOverlay()}>
+						<span aria-hidden className={spinnerOverlay()}>
 							<LoadingSpinner aria-hidden />
 						</span>
 					)}
-					<span className={styles.buttonLabel({ isPending })}>
+					<span className={buttonLabel({ isPending })}>
 						{startIcon}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}

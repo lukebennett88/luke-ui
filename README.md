@@ -33,7 +33,8 @@ Useful repo commands:
 ## Docs
 
 - [Conventions](docs/CONVENTIONS.md): repo-wide coding conventions.
-- [Components](docs/COMPONENTS.md): component tiers, package paths, and generator rules.
+- [Components](docs/COMPONENTS.md): component and primitive structure, package paths, and generator
+  rules.
 - [Dependencies](docs/DEPENDENCIES.md): the catalog, the release quarantine, and Renovate.
 - [Documentation](docs/DOCUMENTATION.md): what to document, writing style, examples, and MDX
   structure.

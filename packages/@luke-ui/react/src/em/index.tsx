@@ -1,9 +1,9 @@
-import * as styles from '../recipes/em.css.js';
 import type { TextProps } from '../text/index.js';
 import { Text } from '../text/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
+import { em } from './styles.css.js';
 
 interface EmStyleProps {
 	/**
@@ -21,11 +21,7 @@ type _EmOmit = DistributiveOmit<React.ComponentProps<'em'>, 'color'>;
 
 interface _EmProps extends _EmOmit, EmStyleProps {}
 
-/**
- * Props for the `Em` component.
- *
- * @tier atom
- */
+/** Props for the `Em` component. */
 export type EmProps = Prettify<_EmProps>;
 
 /**
@@ -37,7 +33,7 @@ export function Em(props: EmProps) {
 	return (
 		<Text
 			{...elementProps}
-			className={cx(styles.em, className)}
+			className={cx(em, className)}
 			elementType="em"
 			lineClamp={lineClamp}
 			shouldInheritFont

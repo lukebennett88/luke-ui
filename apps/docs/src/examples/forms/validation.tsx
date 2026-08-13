@@ -2,7 +2,7 @@ import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { ComboboxItem } from '@luke-ui/react/combobox-field/primitive';
+import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
 import { TextField } from '@luke-ui/react/text-field';
 import type { SubmitEvent } from 'react';
 import { useState } from 'react';

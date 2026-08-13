@@ -6,8 +6,8 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { Button } from '../button/index.js';
 import { ComboboxField } from '../combobox-field/index.js';
-import { ComboboxItem } from '../combobox-field/primitive/item.js';
 import { IconSpritesheetProvider } from '../icon/index.js';
+import { ComboboxItem } from '../primitives/combobox/item.js';
 import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];

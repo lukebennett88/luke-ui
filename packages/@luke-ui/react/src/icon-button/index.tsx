@@ -1,16 +1,19 @@
+export { type IconButtonRecipeVariants, iconButtonRecipe } from './recipe.css.js';
+
 import type { JSX } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import type { ButtonProps as PrimitiveButtonProps } from '../button/primitive/index.js';
-import { Button } from '../button/primitive/index.js';
 import type { IconName } from '../icon/index.js';
 import { Icon } from '../icon/index.js';
-import * as styles from '../recipes/icon-button.css.js';
+import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/index.js';
+import { Button } from '../primitives/button/index.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
+import type { IconButtonRecipeVariants } from './recipe.css.js';
+import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.js';
 
-interface IconButtonRecipeProps extends NonNullable<styles.IconButtonVariants> {}
+interface IconButtonRecipeProps extends NonNullable<IconButtonRecipeVariants> {}
 
 interface IconButtonStyleProps {
 	/**
@@ -27,11 +30,7 @@ interface _IconButtonProps extends _IconButtonOmit, IconButtonStyleProps, Docume
 	icon: IconName;
 }
 
-/**
- * Props for `IconButton`.
- *
- * @tier composed
- */
+/** Props for `IconButton`. */
 export type IconButtonProps = Prettify<_IconButtonProps>;
 
 /** Button that renders only an icon. */
@@ -43,8 +42,8 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			{...buttonProps}
 			className={composeRenderProps(props.className, (value) => {
 				return cx(
-					styles.iconButtonReset,
-					styles.iconButton({
+					iconButtonReset,
+					iconButtonRecipe({
 						size,
 					}),
 					value,
@@ -53,7 +52,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			isPending={isPending}
 			size={size}
 		>
-			<Icon aria-hidden className={styles.iconButtonIcon({ isPending })} name={icon} />
+			<Icon aria-hidden className={iconButtonIcon({ isPending })} name={icon} />
 		</Button>
 	);
 }

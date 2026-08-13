@@ -19,6 +19,7 @@ function findAncestorDir(name: string, from = dirname): string | undefined {
 }
 
 const artifactsDir = findAncestorDir('.artifacts');
+const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
 
 export default defineConfig({
 	optimizeDeps: {
@@ -35,6 +36,11 @@ export default defineConfig({
 	server: {
 		fs: {
 			allow: artifactsDir ? [artifactsDir] : undefined,
+		},
+	},
+	resolve: {
+		alias: {
+			'#recipe-engine': recipeEngineSource,
 		},
 	},
 	test: {

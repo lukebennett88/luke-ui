@@ -6,8 +6,8 @@
  * value shared by every sized control (buttons included); this is a type, scoped to the
  * two field controls, so the two aren't mistaken for each other.
  *
- * This module is a leaf: it must never import from `../recipes/`. Both `ComboboxSize`
- * (`recipes/combobox.css.ts`) and `InputGroupSize` (`recipes/input-group.css.ts`) stay
+ * This module is a leaf: it must never import recipe modules. Both `ComboboxSize`
+ * (`primitives/combobox/styles.css.ts`) and `InputGroupSize` (`primitives/input-group/recipe.css.ts`)
  * derived from their recipe configs — each recipe file asserts its derived type is
  * exactly this union so the two can never drift apart.
  */

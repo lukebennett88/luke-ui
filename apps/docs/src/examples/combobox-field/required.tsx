@@ -1,5 +1,5 @@
 import { ComboboxField } from '@luke-ui/react/combobox-field';
-import { ComboboxItem } from '@luke-ui/react/combobox-field/primitive';
+import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
 
 const countries = [
 	{ id: 'australia', label: 'Australia' },

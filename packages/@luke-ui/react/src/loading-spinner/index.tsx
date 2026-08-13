@@ -1,7 +1,8 @@
+export { type LoadingSpinnerRecipeVariants, loadingSpinnerRecipe } from './recipe.css.js';
+
 import type { ComponentProps, ReactNode } from 'react';
 import { useId } from 'react';
-import { useIconSizeContext } from '../icon-size-context/index.js';
-import * as styles from '../recipes/loading-spinner.css.js';
+import { useIconSizeContext } from '../icon/icon-size-context.js';
 import {
 	ICON_VIEWBOX,
 	ICON_VIEWBOX_SIZE,
@@ -12,8 +13,10 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { VisuallyHidden } from '../visually-hidden/index.js';
+import type { LoadingSpinnerRecipeVariants } from './recipe.css.js';
+import { loadingSpinnerRecipe, rubberBandAnimationName, spinAnimationName } from './recipe.css.js';
 
-interface LoadingSpinnerVariantProps extends NonNullable<styles.LoadingSpinnerVariants> {}
+interface LoadingSpinnerVariantProps extends NonNullable<LoadingSpinnerRecipeVariants> {}
 
 interface LoadingSpinnerStyleProps {
 	/** Sets a semantic content color. Omit to inherit the surrounding content color. */
@@ -34,11 +37,7 @@ interface _LoadingSpinnerProps extends _LoadingSpinnerOmit, LoadingSpinnerStyleP
 	isLoading?: boolean;
 }
 
-/**
- * Props for `LoadingSpinner`.
- *
- * @tier atom
- */
+/** Props for `LoadingSpinner`. */
 export type LoadingSpinnerProps = Prettify<_LoadingSpinnerProps>;
 
 /** Animated spinner shown while work is in progress. Wrap content in it to show the spinner in place of that content until loading finishes. */
@@ -72,7 +71,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 
 	if (!children) return spinnerElement;
 
-	const slots = styles.loadingSpinner();
+	const slots = loadingSpinnerRecipe();
 
 	return (
 		<span className={slots.childrenWrapper()}>
@@ -94,11 +93,11 @@ function SpinnerElement({
 	style,
 	...spanProps
 }: SpinnerElementProps) {
-	useSynchronizeAnimations(styles.spinAnimationName);
-	useSynchronizeAnimations(styles.rubberBandAnimationName);
+	useSynchronizeAnimations(spinAnimationName);
+	useSynchronizeAnimations(rubberBandAnimationName);
 
 	const labelId = useId();
-	const slots = styles.loadingSpinner({ color, size });
+	const slots = loadingSpinnerRecipe({ color, size });
 	const viewBoxCenter = ICON_VIEWBOX_SIZE / 2;
 
 	return (
