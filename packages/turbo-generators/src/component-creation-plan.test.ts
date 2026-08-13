@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 import {
@@ -16,8 +16,8 @@ afterEach(async () => {
 	await Promise.all(roots.map((root) => rm(root, { force: true, recursive: true })));
 	roots.length = 0;
 });
-const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
-const tscPath = join(workspaceRoot, 'node_modules/.bin/tsc');
+const require = createRequire(import.meta.url);
+const tscPath = join(dirname(require.resolve('typescript/package.json')), 'bin/tsc');
 
 describe('createComponentPlan', () => {
 	it('plans a component with a colocated recipe across package and hosted docs surfaces', () => {

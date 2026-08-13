@@ -44,8 +44,7 @@ async function main() {
 	try {
 		await readFile(path.join(cache, 'complete'));
 	} catch {
-		await rm(worktree, { force: true, recursive: true });
-		run('git', ['worktree', 'add', '--detach', worktree, baseSha]);
+		await resetWorktree(worktree, baseSha);
 		try {
 			await capture(worktree, baseCaptures);
 			await writeFile(path.join(cache, 'complete'), '');
@@ -118,6 +117,23 @@ async function capture(worktree: string, target: string) {
 
 function run(command: string, args: Array<string>, cwd = repoRoot, env = process.env) {
 	return execFileSync(command, args, { cwd, env, stdio: 'inherit' });
+}
+
+function tryGit(args: Array<string>) {
+	try {
+		execFileSync('git', args, { cwd: repoRoot, stdio: 'pipe' });
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+async function resetWorktree(worktree: string, baseSha: string) {
+	if (!tryGit(['worktree', 'remove', '--force', worktree])) {
+		tryGit(['worktree', 'prune']);
+	}
+	await rm(worktree, { force: true, recursive: true });
+	run('git', ['worktree', 'add', '--detach', worktree, baseSha]);
 }
 
 function output(args: Array<string>, cwd = repoRoot) {

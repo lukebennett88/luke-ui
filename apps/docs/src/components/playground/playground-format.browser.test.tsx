@@ -10,6 +10,7 @@ const PlaygroundEditor = (await import('./editor.js')).default;
 
 const badlyFormatted = 'const playgroundFormatTest=(x)=>x';
 const formatted = 'const playgroundFormatTest = (x) => x;';
+const keyboardModifier = navigator.platform.includes('Mac') ? 'Meta' : 'Control';
 
 let container: HTMLElement | undefined;
 let root: Root | undefined;
@@ -61,7 +62,7 @@ test('monaco fills the editor pane and format updates source through onChange', 
 		.toContain(formatted);
 
 	await userEvent.click(monacoEditor()!);
-	await userEvent.keyboard('{Control>}z{/Control}');
+	await userEvent.keyboard(`{${keyboardModifier}>}z{/${keyboardModifier}}`);
 	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain('playgroundFormatTest=(x)=>x');
 }, 60_000);
 
@@ -78,7 +79,7 @@ test('Ctrl+S formats through the Monaco provider and onChange', async () => {
 		(document.querySelector('.view-lines')?.textContent ?? '').replace(/\u00a0/g, ' ');
 
 	await userEvent.click(monacoEditor()!);
-	await userEvent.keyboard('{Control>}s{/Control}');
+	await userEvent.keyboard(`{${keyboardModifier}>}s{/${keyboardModifier}}`);
 
 	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain(formatted);
 	await expect
