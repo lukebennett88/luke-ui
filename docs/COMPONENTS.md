@@ -31,8 +31,8 @@ pnpm run generate:component --args <name> <docs-group>
 
 Primitive scaffolding is not handled by the component generator.
 
-Public subpath `index.ts` files are export-only. Put implementation in named sibling files and keep
-meaningful support modules and multi-part primitive files separate.
+Public subpath `index.ts` files are export-only. A component's implementation lives in a named
+sibling file. Support modules and multi-part primitives each keep their own file.
 
 The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`.
 Turbo and Plop are adapters that apply the plan. Keep new creation rules in the plan module so

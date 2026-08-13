@@ -1,5 +1,3 @@
-export { type TextRecipeVariants, textRecipe } from './recipe.css.js';
-
 import { Text as RacText } from 'react-aria-components/Text';
 import { typeStyleWeightRole } from '../theme/contract.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';

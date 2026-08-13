@@ -1,5 +1,3 @@
-export { type IconRecipeVariants, iconRecipe } from './recipe.css.js';
-
 import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../.generated/icon-data.js';

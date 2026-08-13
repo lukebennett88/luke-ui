@@ -1,4 +1,3 @@
-export { visuallyHiddenRecipe } from './recipe.css.js';
 import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
 import type { Prettify } from '../types/prettify.js';

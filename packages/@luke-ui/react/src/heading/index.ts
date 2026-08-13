@@ -6,3 +6,4 @@ export {
 	type HeadingTag,
 	Heading,
 } from './heading.js';
+export type { HeadingLevelsProps, HeadingLevelsRenderProps } from './heading-context.js';

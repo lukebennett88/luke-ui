@@ -1,5 +1,3 @@
-export { type ButtonRecipeVariants, buttonRecipe } from './recipe.css.js';
-
 import type { JSX } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { Button as RacButton } from 'react-aria-components/Button';

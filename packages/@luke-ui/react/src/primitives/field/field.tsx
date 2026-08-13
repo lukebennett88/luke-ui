@@ -1,4 +1,3 @@
-export { fieldRecipe, type FieldRecipeVariants } from './recipe.css.js';
 import type { ComponentProps, JSX, ReactNode } from 'react';
 import type { FieldSlotProps } from '../../field/compose-field.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';

@@ -5,8 +5,6 @@ import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/utils.js';
 import { blockquoteRecipe } from './recipe.css.js';
 
-export { type BlockquoteRecipeVariants, blockquoteRecipe } from './recipe.css.js';
-
 type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType'>;
 
 interface _BlockquoteProps extends _BlockquoteOmit {}

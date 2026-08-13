@@ -1,5 +1,3 @@
-export { type LoadingSpinnerRecipeVariants, loadingSpinnerRecipe } from './recipe.css.js';
-
 import type { ComponentProps, ReactNode } from 'react';
 import { useId } from 'react';
 import { useIconSizeContext } from '../icon/icon-size-context.js';

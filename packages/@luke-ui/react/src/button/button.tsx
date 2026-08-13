@@ -1,5 +1,3 @@
-export { type ButtonRecipeVariants, buttonRecipe } from '../primitives/button/recipe.css.js';
-
 import type { JSX, ReactNode } from 'react';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';

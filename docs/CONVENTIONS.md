@@ -27,7 +27,7 @@ not as inline string constants.
 
 ## Naming
 
-- Components: `PascalCase`, for example `Button.tsx`.
+- Components: `PascalCase`, for example `IconButton`.
 - Props: `PascalCaseProps`, for example `ButtonProps`.
 - Files: `kebab-case`, for example `icon-button.tsx`.
 - CSS: `*.css.ts`.
@@ -64,8 +64,6 @@ rule to public component APIs, not internal prop handling.
 
 See [COMPONENTS.md](COMPONENTS.md) for component and primitive structure, package paths, and
 generator rules.
-
-Public subpath `index.ts` files are export-only. Put implementation in named sibling files.
 
 ## Styling
 

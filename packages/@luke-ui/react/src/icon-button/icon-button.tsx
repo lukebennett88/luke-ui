@@ -1,5 +1,3 @@
-export { type IconButtonRecipeVariants, iconButtonRecipe } from './recipe.css.js';
-
 import type { JSX } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { IconName } from '../icon/icon.js';

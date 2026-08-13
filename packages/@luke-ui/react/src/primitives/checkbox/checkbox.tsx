@@ -1,5 +1,3 @@
-export { type CheckboxRecipeVariants, checkboxRecipe } from './recipe.css.js';
-
 import type { ComponentProps, JSX } from 'react';
 import type {
 	CheckboxButtonProps as RacCheckboxButtonProps,

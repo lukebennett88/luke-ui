@@ -1,4 +1,3 @@
-export { checkboxRecipe, type CheckboxRecipeVariants } from '../primitives/checkbox/recipe.css.js';
 import { useObjectRef } from '@react-aria/utils';
 import type { JSX, ReactNode, Ref } from 'react';
 import type { CheckboxFieldProps as RacCheckboxFieldProps } from 'react-aria-components/Checkbox';
@@ -9,9 +8,8 @@ import {
 	CheckboxIndicator,
 	Checkbox as PrimitiveCheckbox,
 } from '../primitives/checkbox/checkbox.js';
-import { FieldDescription } from '../primitives/field/description.js';
-import type { FieldErrorProps } from '../primitives/field/error.js';
-import { FieldError } from '../primitives/field/error.js';
+import type { FieldErrorProps } from '../primitives/field/field.js';
+import { FieldDescription, FieldError } from '../primitives/field/field.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 

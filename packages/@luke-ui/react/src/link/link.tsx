@@ -1,5 +1,3 @@
-export { type LinkRecipeVariants, linkRecipe } from './recipe.css.js';
-
 import type { JSX } from 'react';
 import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
 import { Link as RacLink } from 'react-aria-components/Link';

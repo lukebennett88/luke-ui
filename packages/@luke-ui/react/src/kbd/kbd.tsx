@@ -1,5 +1,3 @@
-export { type KbdRecipeVariants, kbdRecipe } from './recipe.css.js';
-
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/utils.js';

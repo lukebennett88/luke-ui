@@ -7,13 +7,13 @@ import { TextField as RacTextField } from 'react-aria-components/TextField';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { composeField } from '../field/compose-field.js';
 import { Field } from '../primitives/field/field.js';
-import type { InputGroupSize } from '../primitives/input-group/input-group.js';
 import {
 	InputGroup,
 	InputGroupInput,
 	InputGroupPrefix,
 	InputGroupSuffix,
 } from '../primitives/input-group/input-group.js';
+import type { InputGroupSize } from '../primitives/input-group/recipe.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
