@@ -29,6 +29,13 @@ for (const appearance of visualAppearances) {
 					<Text fontWeight="heading">Heading</Text>
 					<Text fontWeight="emphasis">Emphasis</Text>
 				</div>
+				<Text fontWeight="emphasis" typography="body">
+					Nested defaults and overrides: <Text typography="label">Label default</Text>{' '}
+					<Text fontWeight="body" typography="label">
+						Label with body weight
+					</Text>{' '}
+					<Text shouldInheritFont>Inherited emphasis</Text>
+				</Text>
 				<div style={rowStyle}>
 					<Text color="primary">Primary</Text>
 					<Text color="secondary">Secondary</Text>
