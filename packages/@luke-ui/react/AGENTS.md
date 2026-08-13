@@ -21,7 +21,8 @@ A component directory contains:
 - `[component].stories.tsx`: Storybook documentation and render/a11y fixtures
 - `[component].browser.test.tsx`: component behaviour, conformance, and the integration tripwire
 - `[component].visual.test.tsx`: visual regression captures when the component has a visual surface
-- `index.tsx`: component implementation
+- `<component>.tsx`: component implementation
+- `index.ts`: export-only public subpath barrel
 - `recipe.css.ts`: public recipe contract (scaffolded by the generator)
 - `styles.css.ts`: private implementation styling when needed
 

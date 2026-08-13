@@ -74,7 +74,11 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 				recipeName,
 				variantsType,
 			}),
-			path: `packages/@luke-ui/react/src/${name}/index.tsx`,
+			path: `packages/@luke-ui/react/src/${name}/${name}.tsx`,
+		},
+		{
+			contents: renderComponentBarrel({ name, pascalName, recipeName, variantsType }),
+			path: `packages/@luke-ui/react/src/${name}/index.ts`,
 		},
 		{
 			contents: renderRecipe({ recipeName, variantsType }),
@@ -215,10 +219,8 @@ function renderComponentSource(input: {
 	variantsType: string;
 }): string {
 	return `import type { ComponentProps, JSX } from 'react';
-import { cx } from '../utils/index.js';
+import { cx } from '../utils/utils.js';
 import { ${input.recipeName} } from './recipe.css.js';
-
-export { ${input.recipeName}, type ${input.variantsType} } from './recipe.css.js';
 
 /** Props for \`${input.pascalName}\`. */
 export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
@@ -228,6 +230,17 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 \tconst { className, ...divProps } = props;
 \treturn <div {...divProps} className={cx(${input.recipeName}(), className)} />;
 }
+`;
+}
+
+function renderComponentBarrel(input: {
+	name: string;
+	pascalName: string;
+	recipeName: string;
+	variantsType: string;
+}): string {
+	return `export { ${input.pascalName}, type ${input.pascalName}Props } from './${input.name}.js';
+export { ${input.recipeName}, type ${input.variantsType} } from './recipe.css.js';
 `;
 }
 
@@ -388,7 +401,7 @@ title: ${input.displayName}
 source: packages/@luke-ui/react/src/${input.name}
 props:
   - name: ${input.pascalName}Props
-    path: packages/@luke-ui/react/src/${input.name}/index.tsx
+    path: packages/@luke-ui/react/src/${input.name}/${input.name}.tsx
 ---
 
 <ExampleBlock

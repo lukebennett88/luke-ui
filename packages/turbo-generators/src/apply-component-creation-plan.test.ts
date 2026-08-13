@@ -28,7 +28,7 @@ describe('applyComponentCreationPlan', () => {
 			files: [
 				{
 					contents: 'export const StatusBadge = 1;\n',
-					path: 'packages/@luke-ui/react/src/status-badge/index.tsx',
+					path: 'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
 				},
 			],
 			jsonEdits: [
@@ -53,7 +53,7 @@ describe('applyComponentCreationPlan', () => {
 		await applyComponentCreationPlan(root, plan);
 
 		await expect(
-			readFile(join(root, 'packages/@luke-ui/react/src/status-badge/index.tsx'), 'utf8'),
+			readFile(join(root, 'packages/@luke-ui/react/src/status-badge/status-badge.tsx'), 'utf8'),
 		).resolves.toBe('export const StatusBadge = 1;\n');
 		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
 			pages: ['feedback'],

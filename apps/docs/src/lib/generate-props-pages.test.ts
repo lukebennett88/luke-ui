@@ -27,7 +27,7 @@ source: packages/@luke-ui/react/src/button
 reactAria: https://react-spectrum.adobe.com/react-aria/Button.html
 props:
   - name: ButtonProps
-    path: packages/@luke-ui/react/src/button/index.tsx
+    path: packages/@luke-ui/react/src/button/button.tsx
 ---
 `);
 
@@ -42,7 +42,7 @@ reactAria: https://react-spectrum.adobe.com/react-aria/Button.html
 
 ## Props
 
-<auto-type-table path="packages/@luke-ui/react/src/button/index.tsx" name="ButtonProps" />
+<auto-type-table path="packages/@luke-ui/react/src/button/button.tsx" name="ButtonProps" />
 `);
 });
 
@@ -53,7 +53,7 @@ description: Shared label, description, and validation parts for custom fields.
 source: packages/@luke-ui/react/src/primitives/field
 props:
   - name: FieldProps
-    path: packages/@luke-ui/react/src/primitives/field/index.tsx
+    path: packages/@luke-ui/react/src/primitives/field/field.tsx
     heading: Field
   - name: FieldLabelProps
     path: packages/@luke-ui/react/src/primitives/field/label.tsx
@@ -73,7 +73,7 @@ source: packages/@luke-ui/react/src/primitives/field
 
 ### Field
 
-<auto-type-table path="packages/@luke-ui/react/src/primitives/field/index.tsx" name="FieldProps" />
+<auto-type-table path="packages/@luke-ui/react/src/primitives/field/field.tsx" name="FieldProps" />
 
 ### FieldLabel
 
@@ -151,7 +151,7 @@ const SCRATCH_GUIDE = `---
 title: Button
 props:
   - name: ButtonProps
-    path: packages/@luke-ui/react/src/button/index.tsx
+    path: packages/@luke-ui/react/src/button/button.tsx
 ---
 
 Guide body.

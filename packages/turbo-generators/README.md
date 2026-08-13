@@ -9,6 +9,8 @@ Custom generators for `turbo generate`.
 
 The component generator asks for name and docs group. Primitive scaffolding is tracked separately.
 
+Generated component folders use a named implementation file and an export-only `index.ts` barrel.
+
 ## Usage
 
 ```bash

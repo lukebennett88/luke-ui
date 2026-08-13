@@ -65,6 +65,8 @@ rule to public component APIs, not internal prop handling.
 See [COMPONENTS.md](COMPONENTS.md) for component and primitive structure, package paths, and
 generator rules.
 
+Public subpath `index.ts` files are export-only. Put implementation in named sibling files.
+
 ## Styling
 
 See [STYLING.md](STYLING.md) for cascade layers, recipes, styling utilities, and logical CSS rules.

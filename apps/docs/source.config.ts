@@ -28,7 +28,7 @@ export const docs = defineDocs({
 						heading: z.string().optional(),
 						/** Exported type name to render, e.g. `ButtonProps`. */
 						name: z.string(),
-						/** Repo-relative path to the file exporting `name`, e.g. `packages/@luke-ui/react/src/button/index.tsx`. */
+						/** Repo-relative path to the file exporting `name`, e.g. `packages/@luke-ui/react/src/button/button.tsx`. */
 						path: z.string(),
 					}),
 				)

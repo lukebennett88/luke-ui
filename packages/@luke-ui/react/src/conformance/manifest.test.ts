@@ -19,10 +19,13 @@ function getExportPaths() {
 	}
 
 	const paths: Array<string> = [];
+	const componentPaths = new Set(componentTestManifest.map((entry) => entry.path));
 	for (const exportPath of Object.keys(packageJson.exports)) {
 		if (!exportPath.startsWith('./') || exportPath.includes('*')) continue;
 		const sourcePath = exportPath.slice(2);
-		if (existsSync(resolve(sourceRoot, sourcePath, 'index.tsx'))) paths.push(sourcePath);
+		if (componentPaths.has(sourcePath) && existsSync(resolve(sourceRoot, sourcePath, 'index.ts'))) {
+			paths.push(sourcePath);
+		}
 	}
 
 	return paths.sort();
@@ -34,7 +37,7 @@ test('covers every public component entrypoint exactly once', () => {
 	expect(new Set(paths).size).toBe(paths.length);
 	expect([...paths].sort()).toEqual(getExportPaths());
 	for (const path of paths) {
-		expect(existsSync(resolve(sourceRoot, path, 'index.tsx'))).toBe(true);
+		expect(existsSync(resolve(sourceRoot, path, 'index.ts'))).toBe(true);
 	}
 });
 
