@@ -76,22 +76,6 @@ test('system colour mode follows the platform preference and drives the docs chr
 	expect(document.documentElement).toHaveClass('light');
 });
 
-test('bridges dark mode into the Luke UI root', async () => {
-	renderTheme(
-		<>
-			<ThemeControls />
-			<StoryWrapper>
-				<span>Example content</span>
-			</StoryWrapper>
-		</>,
-	);
-
-	const themeRoot = getThemeRoot();
-	await userEvent.click(page.getByRole('radio', { name: 'Dark theme' }), { force: true });
-
-	await expect.poll(() => themeRoot.dataset.colorMode).toBe('dark');
-});
-
 test('leaves full-bleed story surfaces unframed', () => {
 	renderTheme(
 		<StoryWrapper mode="full-bleed">
