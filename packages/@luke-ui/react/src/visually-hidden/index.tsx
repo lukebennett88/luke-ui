@@ -3,7 +3,7 @@ import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/index.js';
-import { visuallyHiddenRecipe } from '../visually-hidden/recipe.css.js';
+import { visuallyHiddenRecipe } from './recipe.css.js';
 
 type _VisuallyHiddenProps = ComponentPropsWithRef<typeof RacText>;
 

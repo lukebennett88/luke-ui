@@ -22,7 +22,7 @@ function invalidIconMask(size: string) {
 /**
  * In-control invalid icon for `Combobox`, rendered as a `::after` inside the control
  * and reordered ahead of trailing affordances (`clearButton`/`trigger`) with flex
- * `order` in `combobox.css.ts`. No `marginInlineStart`: the control's own
+ * `order` in `primitives/combobox/styles.css.ts`. No `marginInlineStart`: the control's own
  * `paddingInlineEnd` already supplies the leading gap, so a margin here would double
  * it. `size` matches the recipe's `small`/`medium` control-size variants.
  */
@@ -46,13 +46,13 @@ export const invalidIndicatorIconForcedColors = {
 const invalidMessageIconGap = vars.space[200];
 
 /**
- * Leading icon for the shared `Field` error message (`field.css.ts`'s `message`
+ * Leading icon for the shared `Field` error message (`primitives/field/recipe.css.ts`'s `message`
  * slot), switched on there by the `fieldMessageIcon` var. `indent` is
- * `field.css.ts`'s `fieldMessageIndent`: the icon's `inlineSize` plus
+ * `primitives/field/recipe.css.ts`'s `fieldMessageIndent`: the icon's `inlineSize` plus
  * `marginInlineEnd` must equal it exactly so text resumes at the label's left edge.
  * `max()` floors `inlineSize` at the icon's own size so a consumer that enables the
  * icon without setting `fieldMessageIndent` doesn't collapse the box to nothing.
- * `textIndent: 0` cancels the negative indent `field.css.ts` applies to the message
+ * `textIndent: 0` cancels the negative indent `primitives/field/recipe.css.ts` applies to the message
  * itself so it doesn't also shift this icon.
  */
 export function invalidMessageIcon(indent: string) {

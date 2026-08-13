@@ -23,7 +23,7 @@ const messageIndent = fallbackVar(fieldMessageIndent, '0px');
 /**
  * Optional leading icon on the error message, off (`none`) by default. A field
  * recipe whose own control has no room for an in-control invalid icon switches this
- * to `inline-block` on its own `root` slot instead (see `checkbox.css.ts`) so its
+ * to `inline-block` on its own `root` slot instead (see `primitives/checkbox/recipe.css.ts`) so its
  * `FieldError` message renders `invalidMessageIcon`. `InputGroup` (as a real `Icon`
  * element) and `Combobox` (via `invalid-indicator.ts`) draw their invalid icon inside
  * the control and never touch this var, so the icon still appears exactly once per

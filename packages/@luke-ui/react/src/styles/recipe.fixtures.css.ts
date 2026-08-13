@@ -1,4 +1,4 @@
-import { styleInLayer } from '../styles/layered-style.css.js';
+import { styleInLayer } from './layered-style.css.js';
 import { recipe } from './recipe.js';
 
 // Test-only fixture for recipe.browser.test.ts. Not exported from the package's

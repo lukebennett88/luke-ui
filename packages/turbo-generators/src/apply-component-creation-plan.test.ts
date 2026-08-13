@@ -47,7 +47,6 @@ describe('applyComponentCreationPlan', () => {
 					value: 'status-badge',
 				},
 			],
-			textFileAppends: [],
 		};
 
 		await applyComponentCreationPlan(root, plan);
@@ -68,48 +67,16 @@ describe('applyComponentCreationPlan', () => {
 		});
 	});
 
-	it('appends lines without reordering existing content', async () => {
-		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
-		roots.push(root);
-
-		const targetPath = 'packages/@luke-ui/react/src/styles/notes.txt';
-		const initialContent = ['alpha', 'zeta'].join('\n');
-
-		await mkdir(join(root, 'packages/@luke-ui/react/src/styles'), { recursive: true });
-		await writeFile(join(root, targetPath), initialContent, 'utf8');
-
-		const plan: ComponentCreationPlan = {
-			expected: {
-				exampleSlug: 'status-badge/basic',
-				hostedDocsPath: 'components/actions/status-badge',
-				packageDocsSlug: 'status-badge',
-				packageExportPath: './status-badge',
-			},
-			files: [],
-			jsonEdits: [],
-			textFileAppends: [
-				{
-					kind: 'text-append',
-					lines: ['beta'],
-					path: targetPath,
-				},
-			],
-		};
-
-		await applyComponentCreationPlan(root, plan);
-
-		const result = await readFile(join(root, targetPath), 'utf8');
-		expect(result).toBe(['alpha', 'zeta', 'beta', ''].join('\n'));
-	});
-
-	it('inserts a generated recipe import in alphabetical order', async () => {
+	it('inserts a generated recipe import in code-point order', async () => {
 		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 		roots.push(root);
 
 		const registryPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';
 		const initialContent = [
 			'// Style-producing modules in the shipped stylesheet.',
+			"import '../Icon/recipe.css.js';",
 			"import '../button/recipe.css.js';",
+			"import '../icon/recipe.css.js';",
 			"import '../text/recipe.css.js';",
 			'',
 		].join('\n');
@@ -129,11 +96,10 @@ describe('applyComponentCreationPlan', () => {
 			sortedImportEdits: [
 				{
 					kind: 'sorted-import',
-					line: "import '../status-badge/recipe.css.js';",
+					line: "import '../icon-button/recipe.css.js';",
 					path: registryPath,
 				},
 			],
-			textFileAppends: [],
 		};
 
 		await applyComponentCreationPlan(root, plan);
@@ -143,8 +109,10 @@ describe('applyComponentCreationPlan', () => {
 		expect(result).toBe(
 			[
 				'// Style-producing modules in the shipped stylesheet.',
+				"import '../Icon/recipe.css.js';",
 				"import '../button/recipe.css.js';",
-				"import '../status-badge/recipe.css.js';",
+				"import '../icon-button/recipe.css.js';",
+				"import '../icon/recipe.css.js';",
 				"import '../text/recipe.css.js';",
 				'',
 			].join('\n'),
@@ -171,7 +139,6 @@ describe('applyComponentCreationPlan', () => {
 			},
 			files: [],
 			jsonEdits: [],
-			textFileAppends: [],
 			textFileInserts: [
 				{
 					kind: 'text-insert',
@@ -215,7 +182,6 @@ describe('applyComponentCreationPlan', () => {
 					value: 'feedback',
 				},
 			],
-			textFileAppends: [],
 		};
 
 		await expect(applyComponentCreationPlan(root, plan)).rejects.toBeInstanceOf(z.ZodError);

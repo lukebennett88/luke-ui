@@ -60,7 +60,7 @@ function groupFor(name: string): HTMLElement {
 }
 
 // `inputGroupRecipe().invalidIndicator()` returns one stable class list regardless of `size`
-// (the slot's `marginInlineEnd` is a constant, see `input-group.css.ts`), but the lookup
+// (the slot's `marginInlineEnd` is a constant, see `primitives/input-group/recipe.css.ts`), but the lookup
 // still keys on the first token only, matching the other slot lookups in this file.
 const invalidIndicatorClass = inputGroupRecipe().invalidIndicator().split(' ')[0];
 

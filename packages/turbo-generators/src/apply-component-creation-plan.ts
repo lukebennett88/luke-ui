@@ -6,7 +6,6 @@ import type {
 	JsonArrayAddSortedEdit,
 	PlanFile,
 	SortedImportEdit,
-	TextFileAppendEdit,
 	TextFileInsertEdit,
 } from './component-creation-plan.js';
 
@@ -18,7 +17,6 @@ export async function applyComponentCreationPlan(
 ): Promise<void> {
 	await Promise.all(plan.files.map((file) => writePlanFile(root, file)));
 	await Promise.all(plan.jsonEdits.map((edit) => applyJsonEdit(root, edit)));
-	await Promise.all(plan.textFileAppends.map((edit) => applyTextAppendEdit(root, edit)));
 	await Promise.all((plan.textFileInserts ?? []).map((edit) => applyTextInsertEdit(root, edit)));
 	await Promise.all(
 		(plan.sortedImportEdits ?? []).map((edit) => applySortedImportEdit(root, edit)),
@@ -54,15 +52,6 @@ async function readJson(path: string, title: string): Promise<Record<string, unk
 	}
 }
 
-async function applyTextAppendEdit(root: string, edit: TextFileAppendEdit): Promise<void> {
-	const target = join(root, edit.path);
-	await mkdir(dirname(target), { recursive: true });
-	const content = await readFile(target, 'utf8').catch(() => '');
-	const trimmed = content.endsWith('\n') ? content.slice(0, -1) : content;
-	const updated = trimmed + '\n' + edit.lines.join('\n') + '\n';
-	await writeFile(target, updated, 'utf8');
-}
-
 async function applySortedImportEdit(root: string, edit: SortedImportEdit): Promise<void> {
 	const target = join(root, edit.path);
 	await mkdir(dirname(target), { recursive: true });
@@ -96,7 +85,7 @@ function insertSortedImport(content: string, line: string): string {
 	}
 
 	imports.push(line);
-	imports.sort((left, right) => left.localeCompare(right));
+	imports.sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
 
 	return `${[...header, ...imports, ...footer].join('\n')}\n`;
 }

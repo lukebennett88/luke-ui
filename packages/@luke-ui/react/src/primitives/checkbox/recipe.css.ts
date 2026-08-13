@@ -20,7 +20,7 @@ const checkboxConfig = {
 			minInlineSize: 0,
 			// Checkbox's own box has no room for an in-control invalid icon without it
 			// floating past the label (see `indicator` below), so its icon renders on
-			// the error message instead — `field.css.ts`'s `message` slot draws it,
+			// the error message instead — `primitives/field/recipe.css.ts`'s `message` slot draws it,
 			// gated behind this var, which stays off for every other consumer.
 			vars: {
 				[fieldMessageIcon]: 'inline-block',

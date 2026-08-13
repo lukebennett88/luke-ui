@@ -49,7 +49,6 @@ describe('createComponentPlan', () => {
 				path: 'packages/@luke-ui/react/src/styles/modules.css.ts',
 			},
 		]);
-		expect(plan.textFileAppends).toEqual([]);
 		expect(plan.textFileInserts?.[0]?.lines).toEqual([
 			"\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],",
 		]);

@@ -21,12 +21,6 @@ export interface JsonArrayAddSortedEdit {
 	value: string;
 }
 
-export interface TextFileAppendEdit {
-	kind: 'text-append';
-	lines: Array<string>;
-	path: string;
-}
-
 export interface TextFileInsertEdit {
 	kind: 'text-insert';
 	lines: Array<string>;
@@ -49,7 +43,6 @@ export interface ComponentCreationPlan {
 	};
 	files: Array<PlanFile>;
 	jsonEdits: Array<JsonArrayAddSortedEdit>;
-	textFileAppends: Array<TextFileAppendEdit>;
 	textFileInserts?: Array<TextFileInsertEdit>;
 	sortedImportEdits?: Array<SortedImportEdit>;
 }
@@ -159,7 +152,6 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 				path: 'packages/@luke-ui/react/src/styles/modules.css.ts',
 			},
 		],
-		textFileAppends: [],
 		textFileInserts: [
 			{
 				kind: 'text-insert',

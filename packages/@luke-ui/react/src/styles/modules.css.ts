@@ -1,11 +1,11 @@
 // Style-producing modules in the shipped stylesheet.
-// Keep imports alphabetical for deterministic output; cascade priority is defined by named layers.
+// Keep imports in code-point order for deterministic output; named layers define cascade priority.
 import '../blockquote/recipe.css.js';
 import '../button/styles.css.js';
 import '../code/recipe.css.js';
 import '../em/styles.css.js';
-import '../icon/recipe.css.js';
 import '../icon-button/recipe.css.js';
+import '../icon/recipe.css.js';
 import '../kbd/recipe.css.js';
 import '../link/recipe.css.js';
 import '../loading-skeleton/styles.css.js';
