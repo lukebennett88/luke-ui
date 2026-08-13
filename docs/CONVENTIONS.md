@@ -27,7 +27,7 @@ not as inline string constants.
 
 ## Naming
 
-- Components: `PascalCase`, for example `Button.tsx`.
+- Components: `PascalCase`, for example `IconButton`.
 - Props: `PascalCaseProps`, for example `ButtonProps`.
 - Files: `kebab-case`, for example `icon-button.tsx`.
 - CSS: `*.css.ts`.

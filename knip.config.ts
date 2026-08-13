@@ -24,12 +24,9 @@ export default {
 		'packages/@luke-ui/react': {
 			entry: [
 				'src/**/*.stories.tsx',
-				'src/**/index.tsx',
 				'src/**/index.ts',
 				'src/stylesheet.css.ts',
 				'src/styles/index.css.ts',
-				'src/theme/index.tsx',
-				'src/utils/index.ts',
 				'scripts/**/*.ts',
 			],
 			project: ['src/**/*.{ts,tsx}'],

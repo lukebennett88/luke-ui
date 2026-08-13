@@ -58,8 +58,8 @@ export default defineConfig({
 		dts: true,
 		entry: {
 			stylesheet: 'src/stylesheet.css.ts',
-			'*': ['src/*/index.tsx', 'src/*/index.ts'],
-			'primitives/*': ['src/primitives/*/index.tsx', 'src/primitives/*/index.ts'],
+			'*': ['src/*/index.ts'],
+			'primitives/*': ['src/primitives/*/index.ts'],
 			'themes/*': ['src/themes/*/index.ts'],
 		},
 		exports: {

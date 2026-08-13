@@ -33,25 +33,19 @@ export const rubberBandAnimationName = keyframes({
  * `hiddenChildren`, and `spinnerOverlay`.
  */
 const loadingSpinnerConfig = {
+	defaultVariants: {
+		size: 'medium',
+	},
 	slots: {
-		root: {
-			'@media': {
-				'(forced-colors: active)': { animationName: 'none' },
-				'(prefers-reduced-motion: reduce)': { animationName: 'none' },
-			},
-			animationDuration: rotationDuration,
-			animationIterationCount: 'infinite',
-			animationName: spinAnimationName,
-			animationTimingFunction: 'linear',
-			color: 'currentColor',
+		childrenWrapper: {
+			alignItems: 'center',
 			display: 'inline-flex',
-			flexShrink: 0,
+			justifyContent: 'center',
+			position: 'relative',
 		},
-		svg: {
-			blockSize: '100%',
-			display: 'block',
-			inlineSize: '100%',
-			transform: 'rotate(-90deg)',
+		hiddenChildren: {
+			display: 'contents',
+			visibility: 'hidden',
 		},
 		indicator: {
 			'@media': {
@@ -72,20 +66,26 @@ const loadingSpinnerConfig = {
 			animationTimingFunction: rubberBandEasing,
 			strokeDasharray: '100 100',
 		},
-		childrenWrapper: {
-			alignItems: 'center',
+		root: {
+			animationDuration: rotationDuration,
+			animationIterationCount: 'infinite',
+			animationName: spinAnimationName,
+			animationTimingFunction: 'linear',
+			color: 'currentColor',
 			display: 'inline-flex',
-			justifyContent: 'center',
-			position: 'relative',
-		},
-		hiddenChildren: {
-			display: 'contents',
-			visibility: 'hidden',
+			flexShrink: 0,
+			'@media': {
+				'(forced-colors: active)': { animationName: 'none' },
+				'(prefers-reduced-motion: reduce)': { animationName: 'none' },
+			},
 		},
 		spinnerOverlay: spinnerOverlayBase,
-	},
-	defaultVariants: {
-		size: 'medium',
+		svg: {
+			blockSize: '100%',
+			display: 'block',
+			inlineSize: '100%',
+			transform: 'rotate(-90deg)',
+		},
 	},
 	variants: {
 		color: {

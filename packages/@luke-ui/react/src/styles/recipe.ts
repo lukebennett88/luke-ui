@@ -2,7 +2,7 @@ import type { StyleRule } from '@vanilla-extract/css';
 import { addFunctionSerializer } from '@vanilla-extract/css/functionSerializer';
 import { recipe as vanillaRecipe } from '@vanilla-extract/recipes';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
-import { cx } from '../utils/index.js';
+import { cx } from '../utils/utils.js';
 
 /**
  * `recipe()` styling helper for Vanilla Extract.

@@ -36,10 +36,11 @@ describe('createComponentPlan', () => {
 			'apps/docs/content/docs/components/feedback/status-badge.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
 			'packages/@luke-ui/react/src/status-badge/component-test-registration.ts',
-			'packages/@luke-ui/react/src/status-badge/index.tsx',
+			'packages/@luke-ui/react/src/status-badge/index.ts',
 			'packages/@luke-ui/react/src/status-badge/recipe.css.ts',
 			'packages/@luke-ui/react/src/status-badge/status-badge.browser.test.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
+			'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.visual.test.tsx',
 		]);
 		expect(plan.sortedImportEdits).toEqual([
@@ -53,14 +54,23 @@ describe('createComponentPlan', () => {
 			"\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],",
 		]);
 
-		const indexSource = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/index.tsx'),
-		)?.contents;
 		const recipeSource = plan.files.find((file) =>
 			file.path.endsWith('/status-badge/recipe.css.ts'),
 		)?.contents;
+		const indexSource = plan.files.find((file) =>
+			file.path.endsWith('/status-badge/status-badge.tsx'),
+		)?.contents;
+		const barrelSource = plan.files.find((file) =>
+			file.path.endsWith('/status-badge/index.ts'),
+		)?.contents;
 
-		expect(indexSource).toContain('export { statusBadgeRecipe, type StatusBadgeRecipeVariants }');
+		expect(indexSource).not.toContain('export { statusBadgeRecipe');
+		expect(barrelSource).toContain(
+			"export { StatusBadge, type StatusBadgeProps } from './status-badge.js';",
+		);
+		expect(barrelSource).toContain(
+			"export { statusBadgeRecipe, type StatusBadgeRecipeVariants } from './recipe.css.js';",
+		);
 		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
 		expect(recipeSource).toContain(
 			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
@@ -137,11 +147,11 @@ describe('createComponentPlan', () => {
 			{
 				heading: undefined,
 				name: 'StatusBadgeProps',
-				path: 'packages/@luke-ui/react/src/status-badge/index.tsx',
+				path: 'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
 			},
 		]);
 		expect(renderPropsPage(frontmatter)).toContain(
-			'<auto-type-table\n\tpath="packages/@luke-ui/react/src/status-badge/index.tsx"\n\tname="StatusBadgeProps"\n/>',
+			'<auto-type-table\n\tpath="packages/@luke-ui/react/src/status-badge/status-badge.tsx"\n\tname="StatusBadgeProps"\n/>',
 		);
 	});
 
@@ -159,17 +169,12 @@ describe('createComponentPlan', () => {
 		await mkdir(componentDir, { recursive: true });
 		await mkdir(stylesDir, { recursive: true });
 
-		const indexSource = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/index.tsx'),
-		)?.contents;
 		const recipeSource = plan.files.find((file) =>
 			file.path.endsWith('/status-badge/recipe.css.ts'),
 		)?.contents;
 		if (recipeSource === undefined) {
 			throw new Error('Expected generated recipe source.');
 		}
-
-		expect(indexSource).toContain('export { statusBadgeRecipe, type StatusBadgeRecipeVariants }');
 
 		await writeFile(join(componentDir, 'recipe.css.ts'), recipeSource, 'utf8');
 		await writeFile(

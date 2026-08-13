@@ -2,10 +2,10 @@ import type { JSX, Ref } from 'react';
 import type { PopoverProps as RacPopoverProps } from 'react-aria-components/ComboBox';
 import { Popover as RacPopover } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { rootClassName } from '../../theme/index.js';
+import { rootClassName } from '../../theme/theme.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/index.js';
+import { cx } from '../../utils/utils.js';
 import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;

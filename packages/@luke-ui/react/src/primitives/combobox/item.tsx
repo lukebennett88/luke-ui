@@ -9,7 +9,7 @@ import {
 } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
-import { Icon } from '../../icon/index.js';
+import { Icon } from '../../icon/icon.js';
 import { COMBOBOX_CHECK_ICON_SIZE, COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
