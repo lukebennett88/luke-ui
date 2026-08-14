@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
+import { contrastRatio, formatOklch, gamutMapOklch, mixInOklab, parseColor } from './color.js';
 
 describe('parseColor', () => {
 	it('round-trips a hex colour through OKLCH formatting', () => {
@@ -21,6 +21,21 @@ describe('parseColor', () => {
 		expect(() => parseColor('rgb(0, 0, 0)')).toThrow(/cannot parse colour/);
 		expect(() => parseColor('oklch(1.5 0.1 200)')).toThrow(/lightness/);
 		expect(() => parseColor('oklch(0.5 0.1 200 / 0.5)')).toThrow(/cannot parse colour/);
+	});
+});
+
+describe('mixInOklab', () => {
+	it('returns the background at amount 0 and the foreground at amount 1', () => {
+		const foreground = parseColor('oklch(0.3 0 0)');
+		const background = parseColor('oklch(0.99 0 0)');
+		expect(mixInOklab(foreground, background, 0)).toEqual(background);
+		expect(mixInOklab(foreground, background, 1)).toEqual(foreground);
+	});
+
+	it('mixes 10% of a dark foreground into a light background in OKLab', () => {
+		const mixed = mixInOklab(parseColor('oklch(0.3 0 0)'), parseColor('oklch(0.99 0 0)'), 0.1);
+		expect(mixed.l).toBeCloseTo(0.921, 5);
+		expect(mixed.c).toBeCloseTo(0, 5);
 	});
 });
 

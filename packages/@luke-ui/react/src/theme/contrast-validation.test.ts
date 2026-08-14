@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { paperFoundation, tactileFoundation } from './__fixtures__/theme-css.js';
+import { extractValue, paperFoundation, splitBlocks, tactileFoundation } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
+import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { validateContrast } from './contrast-validation.js';
 import type { ThemeFoundation } from './foundation.js';
 
 describe('buildTheme contrast failures', () => {
@@ -16,6 +18,19 @@ describe('buildTheme contrast failures', () => {
 		})();
 		if (caught instanceof ThemeContrastError) return caught;
 		throw new Error('expected buildTheme to throw ThemeContrastError');
+	}
+
+	function modeColorValues(mode: 'light' | 'dark') {
+		const { baseLight, mediaDark } = splitBlocks(buildTheme(tactileFoundation));
+		const block = mode === 'dark' ? mediaDark : baseLight;
+		return {
+			block,
+			values: Object.fromEntries(
+				flattenThemeContract()
+					.filter(([path]) => path.startsWith('color.'))
+					.map(([path, varName]) => [path, extractValue(block, varName)]),
+			),
+		};
 	}
 
 	it('rejects a low-contrast focus colour, naming mode, pair, and required ratio', () => {
@@ -87,6 +102,46 @@ describe('buildTheme contrast failures', () => {
 		expect(error.failures.length).toBeGreaterThan(2);
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
 	});
+
+	for (const mode of ['light', 'dark'] as const) {
+		it(`rejects a ghost overlay wash in ${mode} mode whose composited surface misses the text ratio`, () => {
+			// Strengthens the emitted pressed wash rather than moving the canvas: a lighter dark canvas
+			// fails uncomposited accent and danger pairs first, so it cannot isolate this gate.
+			const { values } = modeColorValues(mode);
+			const pressed = values['color.overlay.pressed'];
+			if (pressed === undefined) throw new Error('expected color.overlay.pressed');
+			expect(pressed).toContain('10%');
+			values['color.overlay.pressed'] = pressed.replace(' 10%, transparent', ' 80%, transparent');
+
+			const { failures } = validateContrast(mode, values);
+			expect(failures.length).toBeGreaterThan(0);
+			expect(
+				failures.every((failure) => failure.background.startsWith('color.overlay.pressed over ')),
+			).toBe(true);
+			expect(
+				failures.some((failure) => {
+					return (
+						failure.foreground === 'color.foreground.danger.rest' &&
+						failure.background === 'color.overlay.pressed over color.surface.canvas' &&
+						failure.ratio < 4.5
+					);
+				}),
+			).toBe(true);
+			expect(
+				failures.some((failure) => {
+					return failure.foreground === 'color.foreground.accent.rest' && failure.ratio < 4.5;
+				}),
+			).toBe(true);
+		});
+	}
+
+	it('does not parse an interaction overlay as an opaque colour', () => {
+		const { block, values } = modeColorValues('dark');
+		values['color.overlay.hover'] = extractValue(block, '--luke-color-text-primary');
+		expect(() => validateContrast('dark', values)).toThrow(
+			/"color.overlay.hover" must be color-mix\(in oklab/,
+		);
+	});
 });
 
 describe('contrast validation matrix', () => {
@@ -102,8 +157,10 @@ describe('contrast validation matrix', () => {
 
 	// Hard checks `validateContrast` runs once, not per role: functional primary/secondary text
 	// against the 4 elevation surfaces (8), the focus ring and `border.control` boundaries
-	// against the 2 base surfaces (4), and `danger.solid.rest` against the 2 base surfaces (2).
-	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2;
+	// against the 2 base surfaces (4), `danger.solid.rest` against the 2 base surfaces (2), and
+	// ghost Button foregrounds against hover and pressed overlays composited over the 2 base
+	// surfaces (3 foregrounds × 2 overlays × 2 surfaces = 12).
+	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2 + 12;
 
 	const expectedHard =
 		SEMANTIC_ROLES.length * (PER_ROLE_HARD_HOVER + PER_ROLE_HARD_ON_SOLID + PER_ROLE_HARD_REST) +
@@ -118,13 +175,23 @@ describe('contrast validation matrix', () => {
 			const summary = (['light', 'dark'] as const).map((mode) => {
 				const checks = diagnostics[mode].contrastChecks;
 				const countFor = (foreground: string, hard: boolean) => {
-					return checks.filter((check) => check.hard === hard && check.foreground === foreground)
-						.length;
+					return checks.filter(
+						(check) =>
+							check.hard === hard &&
+							check.foreground === foreground &&
+							!check.background.includes(' over '),
+					).length;
 				};
+				const overlayChecks = checks.filter(
+					(check) => check.hard && check.background.includes(' over '),
+				);
 				return {
 					advisory: checks.filter((check) => !check.hard).length,
 					hard: checks.filter((check) => check.hard).length,
 					mode,
+					overlayBackgrounds: [...new Set(overlayChecks.map((check) => check.background))].sort(),
+					overlayForegrounds: [...new Set(overlayChecks.map((check) => check.foreground))].sort(),
+					overlayHard: overlayChecks.length,
 					perRole: SEMANTIC_ROLES.map((role) => ({
 						advisoryBorder: countFor(`color.border.${role}`, false),
 						hardHover: countFor(`color.foreground.${role}.hover`, true),
@@ -139,6 +206,18 @@ describe('contrast validation matrix', () => {
 					advisory: expectedAdvisory,
 					hard: expectedHard,
 					mode,
+					overlayBackgrounds: [
+						'color.overlay.hover over color.surface.canvas',
+						'color.overlay.hover over color.surface.recessed',
+						'color.overlay.pressed over color.surface.canvas',
+						'color.overlay.pressed over color.surface.recessed',
+					],
+					overlayForegrounds: [
+						'color.foreground.accent.rest',
+						'color.foreground.danger.rest',
+						'color.text.primary',
+					],
+					overlayHard: 12,
 					perRole: SEMANTIC_ROLES.map((role) => ({
 						advisoryBorder: PER_ROLE_ADVISORY_BORDER,
 						hardHover: PER_ROLE_HARD_HOVER,

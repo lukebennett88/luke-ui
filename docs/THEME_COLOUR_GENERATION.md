@@ -136,3 +136,8 @@ Luke UI generates two narrow semantic interaction overlays from the high-contras
 step 12), mixed with transparent: `color.overlay.hover` at 5% and `color.overlay.pressed` at 10%.
 The authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated
 per-family alpha track.
+
+`validateContrast` composites those washes over the canvas and recessed surfaces in OKLab, then
+measures the ghost Button foregrounds (`text.primary`, `foreground.accent.rest`,
+`foreground.danger.rest`) against the resulting opaque colour. A `color-mix()` value is never parsed
+as an opaque colour.
