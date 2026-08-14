@@ -156,6 +156,19 @@ test('selected interactive states', async () => {
 	await userEvent.keyboard('{/Space}');
 });
 
+test('invalid hover keeps the danger border', async () => {
+	render(
+		<Checkbox isInvalid name="terms">
+			Accept terms
+		</Checkbox>,
+	);
+	const checkbox = page.getByRole('checkbox', { name: 'Accept terms' });
+	const label = page.elementLocator(checkboxLabel(checkbox));
+
+	await userEvent.hover(checkboxLabel(checkbox));
+	await captureVisual(label, 'checkbox/invalid-unchecked-hover');
+});
+
 /** The clickable `<label>` carrying a checkbox's interactive data attributes. */
 function checkboxLabel(checkbox: Locator): HTMLElement {
 	const label = checkbox.element().closest('label');

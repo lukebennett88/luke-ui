@@ -116,14 +116,13 @@ const checkboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
+				// Overlay is the hover/pressed cue. Semantic borders stay on rest, selected, and invalid.
 				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
 					backgroundImage: vars.actionControlFinish.raised,
-					borderColor: vars.color.border.accent,
 					boxShadow: `inset 0 0 0 100vmax ${vars.color.overlay.hover}`,
 				},
 				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
 					backgroundImage: vars.actionControlFinish.recessed,
-					borderColor: vars.color.border.accent,
 					boxShadow: `inset 0 0 0 100vmax ${vars.color.overlay.pressed}`,
 				},
 				'[data-indeterminate="true"] &': {
