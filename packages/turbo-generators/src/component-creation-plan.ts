@@ -4,7 +4,7 @@ export const CONFORMANCE_TIERS = ['universal', 'field-shaped', 'none'] as const;
 export const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
 export type ConformanceTier = (typeof CONFORMANCE_TIERS)[number];
-export type DocsGroup = (typeof DOC_GROUPS)[number];
+type DocsGroup = (typeof DOC_GROUPS)[number];
 
 export interface CreateComponentInput {
 	conformanceTier: ConformanceTier;

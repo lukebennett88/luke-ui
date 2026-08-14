@@ -1,12 +1,13 @@
 import type { PlopTypes } from '@turbo/gen';
 import { createComponent } from './src/apply-component-creation-plan.js';
+import type { ConformanceTier } from './src/component-creation-plan.js';
 import {
 	CONFORMANCE_TIERS,
 	DOC_GROUPS,
 	validateComponentName,
 } from './src/component-creation-plan.js';
 
-const CONFORMANCE_TIER_LABELS: Record<(typeof CONFORMANCE_TIERS)[number], string> = {
+const CONFORMANCE_TIER_LABELS: Record<ConformanceTier, string> = {
 	'field-shaped': 'Field-shaped',
 	none: 'None',
 	universal: 'Universal',
