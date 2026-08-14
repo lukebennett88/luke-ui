@@ -20,8 +20,8 @@ const GHOST_FOREGROUNDS = [
 const BUTTON_TONES = ['neutral', 'accent', 'danger'] as const;
 
 const SUBTLE_BUTTON_FOREGROUND = {
-	accent: 'color.foreground.accent.rest',
-	danger: 'color.foreground.danger.rest',
+	accent: 'color.foreground.accent.hover',
+	danger: 'color.foreground.danger.hover',
 	neutral: 'color.text.primary',
 } as const;
 
