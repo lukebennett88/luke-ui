@@ -46,3 +46,9 @@ export const componentTestManifest = [
 	path,
 	visualApplicability,
 })) as ReadonlyArray<ComponentTestManifestEntry>;
+
+export function getComponentTestManifestEntry(path: string): ComponentTestManifestEntry {
+	const entry = componentTestManifest.find((item) => item.path === path);
+	if (entry == null) throw new Error(`Unknown component test path: ${path}`);
+	return entry;
+}

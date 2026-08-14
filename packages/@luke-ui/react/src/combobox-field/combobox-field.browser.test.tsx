@@ -9,7 +9,6 @@ import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
-import { componentTestRegistration } from './component-test-registration.js';
 import { ComboboxField } from './index.js';
 
 type CountryItem = {
@@ -49,8 +48,7 @@ testFieldShapedConformance({
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a combobox root.');
 		return target;
 	},
-	name: 'ComboboxField',
-	registration: componentTestRegistration,
+	path: 'combobox-field',
 	render: (props = {}) => {
 		return render(
 			<ComboboxField<CountryItem>
@@ -65,7 +63,7 @@ testFieldShapedConformance({
 	},
 });
 
-testIntegration(componentTestRegistration, 'ComboboxField', async () => {
+testIntegration('combobox-field', async () => {
 	const { locator, user } = render(
 		<ComboboxField defaultItems={countryItems} label="Country">
 			{renderCountryItem}

@@ -107,17 +107,6 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 		},
 	];
 
-	if (conformanceTier !== 'none' || integrationTripwire === 'required') {
-		files.push({
-			contents: renderComponentTestRegistration({
-				conformanceTier,
-				integrationTripwire,
-				name,
-			}),
-			path: `packages/@luke-ui/react/src/${name}/component-test-registration.ts`,
-		});
-	}
-
 	if (input.visualCoverage !== false) {
 		files.push({
 			contents: renderVisualTest({ name, pascalName }),
@@ -302,9 +291,6 @@ function renderComponentTest(input: {
 			? [`import { ${helperImports.join(', ')} } from '../conformance/helpers.js';`]
 			: []),
 		"import { render } from '../test-utils/render.js';",
-		...(input.conformanceTier !== 'none' || input.integrationTripwire === 'required'
-			? ["import { componentTestRegistration } from './component-test-registration.js';"]
-			: []),
 		`import { ${input.pascalName} } from './index.js';`,
 	];
 
@@ -317,8 +303,7 @@ function renderComponentTest(input: {
 		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
 		return target;
 	},
-	name: '${input.pascalName}',
-	registration: componentTestRegistration,
+	path: '${input.name}',
 	render: (props = {}) => ${renderComponent},
 });`
 			: input.conformanceTier === 'field-shaped'
@@ -328,8 +313,12 @@ function renderComponentTest(input: {
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a native field control.');
 		return control;
 	},
-	name: '${input.pascalName}',
-	registration: componentTestRegistration,
+	getTarget: (result) => {
+		const target = result.container.firstElementChild;
+		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
+		return target;
+	},
+	path: '${input.name}',
 	render: (props = {}) => ${renderComponent},
 });`
 				: `test('${input.pascalName} renders its root element', () => {
@@ -340,7 +329,7 @@ function renderComponentTest(input: {
 	const integration =
 		input.integrationTripwire === 'required'
 			? `
-testIntegration(componentTestRegistration, '${input.pascalName}', async () => {
+testIntegration('${input.name}', async () => {
 	let clicked = false;
 	const { locator, user } = render(
 		<${input.pascalName} onClick={() => (clicked = true)}>Content</${input.pascalName}>,
@@ -354,21 +343,6 @@ testIntegration(componentTestRegistration, '${input.pascalName}', async () => {
 	return `${imports.join('\n')}
 
 ${contract}${integration}
-`;
-}
-
-function renderComponentTestRegistration(input: {
-	conformanceTier: ConformanceTier;
-	integrationTripwire: 'none' | 'required';
-	name: string;
-}): string {
-	return `import { defineComponentTestRegistration } from '../conformance/registrations.js';
-
-export const componentTestRegistration = defineComponentTestRegistration({
-	conformanceTier: '${input.conformanceTier}',
-	integrationTripwire: '${input.integrationTripwire}',
-	path: '${input.name}',
-});
 `;
 }
 

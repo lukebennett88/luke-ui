@@ -2,7 +2,6 @@ import { expect, test } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { componentTestRegistration } from './component-test-registration.js';
 import { Checkbox } from './index.js';
 
 testFieldShapedConformance({
@@ -22,14 +21,13 @@ testFieldShapedConformance({
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a checkbox label.');
 		return target;
 	},
-	name: 'Checkbox',
-	registration: componentTestRegistration,
+	path: 'checkbox',
 	render: (props = {}) => {
 		return render(<Checkbox {...props}>Terms</Checkbox>);
 	},
 });
 
-testIntegration(componentTestRegistration, 'Checkbox', async () => {
+testIntegration('checkbox', async () => {
 	const { locator, user } = render(<Checkbox>Terms</Checkbox>);
 	const checkbox = locator.getByRole('checkbox', { name: 'Terms' });
 

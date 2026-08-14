@@ -1,7 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from 'vite-plus/test';
-import { componentTestManifest } from './manifest.js';
+import {
+	componentTestManifest,
+	getComponentTestManifestEntry,
+} from './manifest.js';
+import type { ComponentTestManifestEntry } from './manifest.js';
 
 const sourceRoot = resolve(import.meta.dirname, '..');
 const packageRoot = resolve(sourceRoot, '..');
@@ -56,3 +60,47 @@ test('declares every conformance dimension explicitly', () => {
 		expect(entry.visualApplicability).toBeTypeOf('string');
 	}
 });
+
+test('looks up a manifest entry by path', () => {
+	const button = componentTestManifest.find((entry) => entry.path === 'button');
+	expect(button).toBeDefined();
+	expect(getComponentTestManifestEntry('button')).toBe(button);
+	expect(() => getComponentTestManifestEntry('not-a-component')).toThrow(
+		'Unknown component test path: not-a-component',
+	);
+});
+
+test('enforces every manifest dimension', () => {
+	for (const entry of componentTestManifest) {
+		const browserTestPath = componentTestFile(entry, 'browser.test.tsx');
+		const visualTestPath = componentTestFile(entry, 'visual.test.tsx');
+		const needsBrowserCoverage =
+			entry.conformanceTier !== 'none' || entry.integrationTripwire === 'required';
+
+		if (needsBrowserCoverage) {
+			expect(existsSync(browserTestPath)).toBe(true);
+		}
+
+		if (existsSync(browserTestPath)) {
+			const source = readFileSync(browserTestPath, 'utf8');
+			expect(source.includes('testUniversalConformance')).toBe(
+				entry.conformanceTier === 'universal',
+			);
+			expect(source.includes('testFieldShapedConformance')).toBe(
+				entry.conformanceTier === 'field-shaped',
+			);
+			expect(source.includes('testIntegration')).toBe(entry.integrationTripwire === 'required');
+		}
+
+		expect(existsSync(visualTestPath)).toBe(entry.visualApplicability === 'applicable');
+	}
+});
+
+function componentTestFile(
+	entry: ComponentTestManifestEntry,
+	suffix: 'browser.test.tsx' | 'visual.test.tsx',
+) {
+	const basename = entry.path.split('/').at(-1);
+	if (basename == null) throw new Error(`Invalid component test path: ${entry.path}`);
+	return resolve(sourceRoot, entry.path, `${basename}.${suffix}`);
+}

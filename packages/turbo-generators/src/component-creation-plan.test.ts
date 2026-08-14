@@ -35,7 +35,6 @@ describe('createComponentPlan', () => {
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/feedback/status-badge.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
-			'packages/@luke-ui/react/src/status-badge/component-test-registration.ts',
 			'packages/@luke-ui/react/src/status-badge/index.ts',
 			'packages/@luke-ui/react/src/status-badge/recipe.css.ts',
 			'packages/@luke-ui/react/src/status-badge/status-badge.browser.test.tsx',
@@ -75,9 +74,16 @@ describe('createComponentPlan', () => {
 		expect(recipeSource).toContain(
 			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
 		);
+
+		const browserTest = plan.files.find((file) =>
+			file.path.endsWith('/status-badge.browser.test.tsx'),
+		)?.contents;
+		expect(browserTest).toContain('testUniversalConformance');
+		expect(browserTest).toContain("path: 'status-badge'");
+		expect(browserTest).not.toContain('component-test-registration');
 	});
 
-	it('scaffolds field-shaped conformance registrations', () => {
+	it('scaffolds field-shaped conformance from the manifest path', () => {
 		const plan = createComponentPlan({
 			conformanceTier: 'field-shaped',
 			docsGroup: 'forms',
@@ -87,9 +93,15 @@ describe('createComponentPlan', () => {
 		expect(plan.textFileInserts?.[0]?.lines).toEqual([
 			"\t['DateField', 'date-field', 'field-shaped', 'none', 'applicable'],",
 		]);
-		expect(
-			plan.files.find((file) => file.path.endsWith('/date-field.browser.test.tsx'))?.contents,
-		).toContain('testFieldShapedConformance');
+		const browserTest = plan.files.find((file) =>
+			file.path.endsWith('/date-field.browser.test.tsx'),
+		)?.contents;
+		expect(browserTest).toContain('testFieldShapedConformance');
+		expect(browserTest).toContain("path: 'date-field'");
+		expect(browserTest).not.toContain('component-test-registration');
+		expect(plan.files.map((file) => file.path)).not.toContain(
+			'packages/@luke-ui/react/src/date-field/component-test-registration.ts',
+		);
 	});
 
 	it('scaffolds integration tripwire coverage when requested', () => {
@@ -102,9 +114,11 @@ describe('createComponentPlan', () => {
 		expect(plan.textFileInserts?.[0]?.lines).toEqual([
 			"\t['ActionChip', 'action-chip', 'universal', 'required', 'applicable'],",
 		]);
-		expect(
-			plan.files.find((file) => file.path.endsWith('/action-chip.browser.test.tsx'))?.contents,
-		).toContain('testIntegration');
+		const browserTest = plan.files.find((file) =>
+			file.path.endsWith('/action-chip.browser.test.tsx'),
+		)?.contents;
+		expect(browserTest).toContain("testIntegration('action-chip'");
+		expect(browserTest).not.toContain('component-test-registration');
 	});
 
 	it('omits visual coverage when it does not apply', () => {
