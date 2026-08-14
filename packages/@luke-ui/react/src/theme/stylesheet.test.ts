@@ -106,15 +106,46 @@ describe('buildTheme output', () => {
 	}
 
 	it('emits every colour value in OKLCH', () => {
+		const colorMixVarNames = new Set([
+			'--luke-color-overlay-hover',
+			'--luke-color-overlay-pressed',
+		]);
 		const colorVarNames = pairs
 			.filter(([path]) => path.startsWith('color.'))
 			.map(([, varName]) => varName);
 		for (const block of [blocks.baseLight, blocks.mediaDark]) {
-			const nonOklch = colorVarNames.filter(
-				(varName) => !extractValue(block, varName).startsWith('oklch('),
-			);
+			const nonOklch = colorVarNames.filter((varName) => {
+				return !colorMixVarNames.has(varName) && !extractValue(block, varName).startsWith('oklch(');
+			});
 			expect(nonOklch).toEqual([]);
+			for (const varName of colorMixVarNames) {
+				expect(extractValue(block, varName).startsWith('color-mix(in oklab,')).toBe(true);
+			}
 		}
+	});
+
+	it('uses the stable kebab-case variable names', () => {
+		expect(css).toContain('--luke-color-background-danger-solid-hover');
+		expect(css).toContain('--luke-color-foreground-danger-on-solid');
+		expect(css).toContain('--luke-color-border-danger');
+		expect(css).toContain('--luke-color-loading-skeleton');
+		expect(css).toContain('--luke-color-overlay-backdrop');
+		expect(css).toContain('--luke-color-overlay-hover');
+		expect(css).toContain('--luke-color-overlay-pressed');
+		expect(css).toContain('--luke-color-text-disabled');
+		expect(css).toContain('--luke-color-foreground-accent-hover');
+		expect(css).toContain('--luke-depth-raised');
+		expect(css).toContain('--luke-action-control-finish-resting');
+		expect(css).toContain('--luke-space-100:');
+		expect(css).toContain('--luke-control-size-small');
+		expect(css).toContain('--luke-motion-easing-standard');
+		expect(css).toContain('--luke-font-weight-body');
+		expect(css).toContain('--luke-font-caption-font-size:');
+		expect(css).toContain('--luke-font-body-line-height:');
+		expect(css).toContain('--luke-font-display-letter-spacing:');
+		expect(css).toContain('--luke-font-heading2-font-weight:');
+		expect(css).toContain('--luke-icon-size-xsmall:');
+		expect(css).toContain('--luke-icon-size-large:');
 	});
 
 	it('emits the public spacing scale in every built-in theme', () => {

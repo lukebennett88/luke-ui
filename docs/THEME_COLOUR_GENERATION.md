@@ -19,7 +19,8 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    `elevation.ts`'s `generateSurfaces`. `surfaces.canvas` is always exactly the resolved
    `background` — canvas IS the background, not a derived value.
 4. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
-   every colour contract leaf onto a family step or a generated surface.
+   every colour contract leaf onto a family step or a generated surface, passes the authored
+   backdrop through, and generates the two interaction overlay washes.
 5. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
    throws `ThemeContrastError` on a hard-gate miss.
 
@@ -129,9 +130,9 @@ compiler threw an internal error. One list makes both sides move together.
 `color.loadingSkeleton` maps to the neutral family's step 8, for better perceptibility of the
 loading state against typical surfaces.
 
-## Alpha is deferred
+## Interaction overlays
 
-The private scale intentionally has no alpha (transparent) track yet. Adding one later is
-structurally non-breaking (it does not require a contract shape change), but consuming it in any
-mapped leaf **will** be a visible change to that leaf's rendered colour — plan a review pass the
-same way as any other repaint, not as a silent patch.
+Luke UI generates two narrow semantic interaction overlays from the high-contrast neutral (family
+step 12), mixed with transparent: `color.overlay.hover` at 5% and `color.overlay.pressed` at 10%.
+The authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated
+per-family alpha track.

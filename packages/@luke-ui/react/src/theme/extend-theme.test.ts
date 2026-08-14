@@ -54,7 +54,7 @@ describe('theme inheritance', () => {
 				info: { dark: 'oklch(0.72 0.13 255)', light: 'oklch(0.52 0.16 255)' },
 				neutral: 'oklch(0.5 0.01 260)',
 				neutralStyle: 'cool',
-				scrim: 'oklch(0 0 0 / 0.3)',
+				backdrop: 'oklch(0 0 0 / 0.3)',
 				success: { dark: 'oklch(0.74 0.13 150)', light: 'oklch(0.5 0.13 150)' },
 				warning: { dark: 'oklch(0.78 0.13 80)', light: 'oklch(0.72 0.14 75)' },
 			},

@@ -203,7 +203,6 @@ function appearance(
 }
 
 function ghostAppearance(tone: Tone, color: string) {
-	const subtle = vars.color.background[tone].subtle;
 	return {
 		style: {
 			backgroundColor: 'transparent',
@@ -213,11 +212,11 @@ function ghostAppearance(tone: Tone, color: string) {
 			color,
 			selectors: {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: subtle.hover,
+					backgroundColor: vars.color.overlay.hover,
 					boxShadow: vars.depth.raised,
 				},
 				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: subtle.pressed,
+					backgroundColor: vars.color.overlay.pressed,
 					boxShadow: vars.depth.recessed,
 				},
 			},

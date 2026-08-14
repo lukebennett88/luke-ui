@@ -84,11 +84,11 @@ const comboboxActionStyles = {
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
 		'&[data-hovered="true"]:not([data-disabled="true"])': {
-			backgroundColor: vars.color.background.accent.subtle.hover,
+			backgroundColor: vars.color.overlay.hover,
 			color: vars.color.text.primary,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"])': {
-			backgroundColor: vars.color.background.accent.subtle.pressed,
+			backgroundColor: vars.color.overlay.pressed,
 			color: vars.color.text.primary,
 		},
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
@@ -371,10 +371,10 @@ const comboboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'&[data-focused="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.neutral.subtle.rest,
+					backgroundColor: vars.color.overlay.hover,
 				},
 				'&[data-hovered="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
+					backgroundColor: vars.color.overlay.hover,
 				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 					backgroundColor: vars.color.background.accent.subtle.hover,

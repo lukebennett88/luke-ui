@@ -197,16 +197,17 @@ describe('defineTheme partial per-mode merges', () => {
 	});
 });
 
-describe('defineTheme scrim validation', () => {
-	it('rejects an unsafe authored scrim value with a message naming the field', () => {
-		// The scrim is deliberately excluded from OKLCH colour parsing (its alpha channel does not fit
-		// that pattern) and emitted verbatim, so it needs its own shape check rather than none at all.
+describe('defineTheme backdrop validation', () => {
+	it('rejects an unsafe authored backdrop value with a message naming the field', () => {
+		// The backdrop is deliberately excluded from OKLCH colour parsing (its alpha channel does not
+		// fit that pattern) and emitted verbatim, so it needs its own shape check rather than none at
+		// all.
 		expect(() => {
 			return defineTheme({
-				color: { accent: '#3b82f6', scrim: 'oklch(0 0 0 / 0.2); } .evil {' },
-				name: 'unsafe-scrim',
+				color: { accent: '#3b82f6', backdrop: 'oklch(0 0 0 / 0.2); } .evil {' },
+				name: 'unsafe-backdrop',
 			});
-		}).toThrow('color.scrim: must be a non-empty CSS colour value');
+		}).toThrow('color.backdrop: must be a non-empty CSS colour value');
 	});
 });
 
@@ -299,13 +300,16 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 		const css = defineTheme(input);
 		const emitted = emittedVarNames(css);
 
-		it(`${name} emits exactly the contract variables, including scrim and disabled text`, () => {
+		it(`${name} emits exactly the contract variables, including overlay and disabled text`, () => {
 			// Derived from the contract, not hardcoded: `contract.test.ts` already asserts the typed
 			// `vars` tree has exactly as many leaves as `flattenThemeContract()`, so this only needs to
 			// check that a bundled theme's emitted CSS matches that same list, not restate its length.
 			expect(emitted.size).toBe(contractNames.length);
 			expect([...emitted].sort()).toEqual([...contractNames].sort());
-			expect(emitted.has('--luke-color-scrim')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-backdrop')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-hover')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-pressed')).toBe(true);
+			expect(emitted.has('--luke-color-scrim')).toBe(false);
 			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
 		});
 

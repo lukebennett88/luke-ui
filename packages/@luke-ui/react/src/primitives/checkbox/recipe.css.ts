@@ -123,6 +123,14 @@ const checkboxConfig = {
 					backgroundImage: vars.actionControlFinish.recessed,
 					borderColor: vars.color.border.accent,
 				},
+				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]):not([data-invalid="true"]) &':
+					{
+						backgroundColor: vars.color.overlay.hover,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]):not([data-invalid="true"]) &':
+					{
+						backgroundColor: vars.color.overlay.pressed,
+					},
 				'[data-indeterminate="true"] &': {
 					backgroundColor: vars.color.background.accent.solid.rest,
 					borderColor: vars.color.background.accent.solid.rest,

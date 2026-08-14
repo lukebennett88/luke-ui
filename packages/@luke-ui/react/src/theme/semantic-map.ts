@@ -1,8 +1,8 @@
 /**
  * The one default semantic colour mapping. `mapSemanticColors` aliases every generated colour
  * contract leaf onto a private scale family's step or a generated surface, per the locked mapping
- * table. It is a pure lookup. No colour math happens here, and it never distorts a family or
- * surface to make a leaf fit.
+ * table. It is a pure lookup aside from two generated interaction overlays mixed from the
+ * high-contrast neutral. It never distorts a family or surface to make a leaf fit.
  *
  * The role list it keys off comes from `contrast-policy.ts`, which `build-theme.ts`'s validation
  * matrix reads too, so a role can never be emitted here without being gated there. Values are
@@ -17,11 +17,16 @@ import type { GeneratedSurfaces } from './elevation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 
 /** Every generated colour contract leaf's CSS value, keyed by its dotted path (for example
- * `'color.text.primary'`), plus the passed-through `'color.scrim'`. */
+ * `'color.text.primary'`), plus the passed-through `'color.overlay.backdrop'`. */
 export type SemanticColorValues = Record<string, string>;
 
 /** The inputs to {@link mapSemanticColors}. */
 interface MapSemanticColorsRequest {
+	/**
+	 * `color.overlay.backdrop`'s authored value, passed through verbatim (it may carry an alpha
+	 * channel).
+	 */
+	backdrop: string;
 	/**
 	 * `color.border.control`'s solved value is a dedicated contrast boundary, not a scale-step alias.
 	 * `control-border.ts`'s `solveControlBorder` resolves it against `surfaces.canvas` and
@@ -32,19 +37,23 @@ interface MapSemanticColorsRequest {
 	families: Record<FamilyRole, ScaleFamily>;
 	/** The authored keyboard-focus source colour. Defaults to the accent family's step 8. */
 	focus?: Oklch;
-	/** The authored scrim value, passed through verbatim (it may carry an alpha channel). */
-	scrim: string;
 	/** The generated elevation surface set, already mode-resolved. */
 	surfaces: GeneratedSurfaces;
 }
 
+/** Mixes the high-contrast neutral foreground into a translucent interaction wash. */
+function interactionOverlay(foreground: Oklch, percent: 5 | 10): string {
+	return `color-mix(in oklab, ${formatOklch(foreground)} ${percent}%, transparent)`;
+}
+
 /**
  * Resolves every colour contract leaf onto the private families and surfaces, per the locked
- * semantic mapping table. `families` and `surfaces` are already mode-resolved. `scrim` passes through
- * verbatim. `focus` defaults to the accent family's step 8 when the theme author omits it.
+ * semantic mapping table. `families` and `surfaces` are already mode-resolved. `backdrop` passes
+ * through verbatim. Hover and pressed overlays mix `families.neutral[12]` with transparent.
+ * `focus` defaults to the accent family's step 8 when the theme author omits it.
  */
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
-	const { families, surfaces, scrim, focus, controlBorder } = request;
+	const { families, surfaces, backdrop, focus, controlBorder } = request;
 	const neutral = families.neutral;
 	const values: Record<string, string> = {};
 
@@ -53,7 +62,9 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 	values['color.surface.recessed'] = formatOklch(surfaces.recessed);
 	values['color.surface.floating'] = formatOklch(surfaces.floating);
 	values['color.surface.overlay'] = formatOklch(surfaces.overlay);
-	values['color.scrim'] = scrim;
+	values['color.overlay.backdrop'] = backdrop;
+	values['color.overlay.hover'] = interactionOverlay(neutral[12], 5);
+	values['color.overlay.pressed'] = interactionOverlay(neutral[12], 10);
 	values['color.loadingSkeleton'] = formatOklch(neutral[8]);
 
 	// Functional text and borders: neutral only, and distinct from the six shared roles that share the

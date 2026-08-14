@@ -138,7 +138,7 @@ export const themeContractTree = {
 	 * (`neutral`, `accent`, `info`, `success`, `warning`, `danger`).
 	 *
 	 * Organised by the property a token styles, not by the component that happens to use it: the
-	 * functional leaves (`surface`, `scrim`, `loadingSkeleton`, `text`, and the first three `border`
+	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first three `border`
 	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
 	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
 	 * so no role is a special case here.
@@ -150,8 +150,15 @@ export const themeContractTree = {
 			floating: null,
 			overlay: null,
 		},
-		/** Modal-backdrop dimming layer behind an overlay surface. */
-		scrim: null,
+		/**
+		 * Modal dimming (`backdrop`) and generated translucent interaction washes (`hover`,
+		 * `pressed`).
+		 */
+		overlay: {
+			backdrop: null,
+			hover: null,
+			pressed: null,
+		},
 		loadingSkeleton: null,
 		text: {
 			primary: null,

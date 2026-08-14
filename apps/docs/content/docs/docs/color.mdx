@@ -14,10 +14,18 @@ Surface roles describe where an element sits in the interface:
 - `canvas`: the page.
 - `recessed`: an inset area.
 - `floating`: elevated UI, such as menus and cards.
-- `overlay`: dialogs and other high-elevation surfaces.
+- `overlay`: dialogs and other high-elevation surfaces. This is an opaque colour.
 
-`scrim` dims the page behind an open overlay. Text uses `primary` and `secondary` roles. Borders
-distinguish decorative, control, and focus uses.
+`color.overlay.backdrop` dims content behind a modal. `color.overlay.hover` and
+`color.overlay.pressed` are translucent neutral interaction washes. They live on `color.overlay`,
+not on `color.surface.overlay`.
+
+Prefer a component's state API when the component has one. When you style a custom interactive
+element, use the overlay hover and pressed washes only when the surface underneath should remain
+visible. Use a semantic background ramp when the colour communicates intent, selection, validation,
+or status.
+
+Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';

@@ -87,6 +87,23 @@ describe('theme contract', () => {
 		}
 	});
 
+	it('exposes overlay backdrop, hover, and pressed, and does not emit scrim', () => {
+		const pairs = flattenThemeContract();
+		const byPath = new Map(pairs);
+
+		expect(byPath.get('color.overlay.backdrop')).toBe('--luke-color-overlay-backdrop');
+		expect(byPath.get('color.overlay.hover')).toBe('--luke-color-overlay-hover');
+		expect(byPath.get('color.overlay.pressed')).toBe('--luke-color-overlay-pressed');
+		expect(vars.color.overlay).toEqual({
+			backdrop: 'var(--luke-color-overlay-backdrop)',
+			hover: 'var(--luke-color-overlay-hover)',
+			pressed: 'var(--luke-color-overlay-pressed)',
+		});
+		expect(byPath.has('color.scrim')).toBe(false);
+		expect(pairs.some(([, varName]) => varName === '--luke-color-scrim')).toBe(false);
+		expect(Object.hasOwn(vars.color, 'scrim')).toBe(false);
+	});
+
 	it('defines the selected spacing steps from the 4px scale', () => {
 		expect(spaceScale).toEqual([
 			['100', '4px'],

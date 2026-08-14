@@ -2,7 +2,7 @@
  * The `defineTheme` authoring util: the sole public theme-authoring surface. It normalises a small,
  * curated-default {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} and hands it
  * to the internal {@link buildTheme} value pipeline. It owns the single-value accent/neutral
- * adaptation and the resolution of curated defaults (materials, radius, scrim).
+ * adaptation and the resolution of curated defaults (materials, radius, backdrop).
  */
 
 import { buildTheme, ThemeContrastError } from './build-theme.js';
@@ -17,8 +17,8 @@ import { passesOnSolidGate } from './scale.js';
 /**
  * A colour value: one string (adapted independently for each mode) OR a per-mode object where
  * EITHER side may be omitted to fall back to that role's curated default / generation. Strings
- * accept `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` (lightness 0-1 or %, no alpha), except `scrim`,
- * which is used verbatim and may carry an alpha channel.
+ * accept `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` (lightness 0-1 or %, no alpha), except
+ * `backdrop`, which is used verbatim and may carry an alpha channel.
  */
 export type ColorInput = string | { light?: string; dark?: string };
 
@@ -137,7 +137,7 @@ export interface ThemeInput extends ThemeInputCommon {
 		/** Keyboard-focus ring colour, used verbatim after gamut mapping. Defaults per mode. */
 		focus?: ColorInput;
 		/** Modal-backdrop dimming colour, used verbatim; defaults to black at a mode-aware alpha. */
-		scrim?: ColorInput;
+		backdrop?: ColorInput;
 	};
 	/**
 	 * A theme to start from. Every value this theme leaves out comes from the base. `name` never
@@ -211,8 +211,8 @@ export const defaultControlFinish: ControlFinish = {
 	resting: 'none',
 };
 
-/** Curated modal-backdrop scrim applied when `scrim` is omitted, black at a mode-aware alpha. */
-export const defaultScrim: Record<ColorMode, string> = {
+/** Curated modal-backdrop colour applied when `backdrop` is omitted, black at a mode-aware alpha. */
+export const defaultBackdrop: Record<ColorMode, string> = {
 	dark: 'oklch(0 0 0 / 0.4)',
 	light: 'oklch(0 0 0 / 0.2)',
 };
@@ -300,7 +300,7 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 		neutral,
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
-		scrim: resolveVerbatimRole(color.scrim, mode, defaultScrim[mode]),
+		backdrop: resolveVerbatimRole(color.backdrop, mode, defaultBackdrop[mode]),
 	};
 	const feedback = {
 		danger: color.danger,

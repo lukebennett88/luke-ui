@@ -145,17 +145,38 @@ test('interactive states', async () => {
 	await captureVisual(locator, 'combobox-field/hover');
 	await userEvent.unhover(input);
 	await userEvent.hover(clear);
-	await captureVisual(locator, 'combobox-field/clear-hover');
+	await captureVisual(clear, 'combobox-field/clear-hover');
 	await userEvent.unhover(clear);
 	await userEvent.hover(trigger);
-	await captureVisual(locator, 'combobox-field/trigger-hover');
+	await captureVisual(trigger, 'combobox-field/trigger-hover');
 	await userEvent.unhover(trigger);
 	await focusViaKeyboard(input);
 	await captureVisual(locator, 'combobox-field/focus-visible');
 	await userEvent.tab();
 	await captureVisual(locator, 'combobox-field/clear-focus-visible');
 	await userEvent.keyboard('{Space>}');
-	await captureVisual(locator, 'combobox-field/clear-pressed');
+	await captureVisual(clear, 'combobox-field/clear-pressed');
+	await userEvent.keyboard('{/Space}');
+});
+
+test('action overlay in dark mode', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+		{ appearance: { mode: 'dark', theme: 'tactile' } },
+	);
+	const input = page.getByRole('combobox', { name: 'Country' });
+	const clear = page.getByRole('button', { name: 'Clear selection' });
+	const trigger = page.getByRole('button', { name: 'Toggle options' });
+
+	await userEvent.hover(trigger);
+	await captureVisual(trigger, 'combobox-field/trigger-hover-tactile-dark');
+	await userEvent.unhover(trigger);
+	await focusViaKeyboard(input);
+	await userEvent.tab();
+	await userEvent.keyboard('{Space>}');
+	await captureVisual(clear, 'combobox-field/clear-pressed-tactile-dark');
 	await userEvent.keyboard('{/Space}');
 });
 
@@ -185,6 +206,22 @@ test('open option and selection states', async () => {
 	);
 	await userEvent.keyboard('{Home}');
 	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-keyboard-focus');
+});
+
+test('option keyboard focus in dark mode', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+		{ appearance: { mode: 'dark', theme: 'tactile' } },
+	);
+	const input = page.getByRole('combobox', { name: 'Country' });
+	await userEvent.click(input);
+	await userEvent.keyboard('{Home}');
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/option-keyboard-focus-tactile-dark',
+	);
 });
 
 test('option with leading icon at both sizes', async () => {

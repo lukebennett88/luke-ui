@@ -23,14 +23,29 @@ describe('buildTokenTree', () => {
 		expect([...leavesByPath.entries()].sort(byPath)).toEqual([...contractPairs].sort(byPath));
 	});
 
-	it('nests a top-level colour leaf under its family group, with no intermediate group', () => {
+	it('nests overlay colour leaves under the overlay group', () => {
 		const tree = buildTokenTree();
 		const color = tree.children.color;
 		if (color?.kind !== 'group') throw new Error('expected a color group');
-		expect(color.children.scrim).toEqual({
-			kind: 'leaf',
-			path: 'color.scrim',
-			varName: '--luke-color-scrim',
+		expect(color.children.overlay).toEqual({
+			kind: 'group',
+			children: {
+				backdrop: {
+					kind: 'leaf',
+					path: 'color.overlay.backdrop',
+					varName: '--luke-color-overlay-backdrop',
+				},
+				hover: {
+					kind: 'leaf',
+					path: 'color.overlay.hover',
+					varName: '--luke-color-overlay-hover',
+				},
+				pressed: {
+					kind: 'leaf',
+					path: 'color.overlay.pressed',
+					varName: '--luke-color-overlay-pressed',
+				},
+			},
 		});
 	});
 

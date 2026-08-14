@@ -34,7 +34,7 @@ const trayExitTransition = overlayExitTransition(['opacity', 'translate']);
 
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */
 export const mobileOverlay = styleInLayer('recipes', {
-	backgroundColor: vars.color.scrim,
+	backgroundColor: vars.color.overlay.backdrop,
 	blockSize: '100dvh',
 	insetInline: 0,
 	position: 'absolute',

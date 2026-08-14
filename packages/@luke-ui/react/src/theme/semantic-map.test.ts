@@ -70,15 +70,15 @@ describe('mapSemanticColors', () => {
 				const background = BACKGROUND[mode];
 				const families = buildFamilies(mode, background);
 				const surfaces = generateSurfaces({ background, mode });
-				const scrim = 'oklch(0 0 0 / 0.45)';
+				const backdrop = 'oklch(0 0 0 / 0.45)';
 				const focus = parseColor('oklch(0.6 0.2 260)');
 				const controlBorder = CONTROL_BORDER[mode];
 
 				const result = mapSemanticColors({
+					backdrop,
 					controlBorder,
 					families,
 					focus,
-					scrim,
 					surfaces,
 				});
 
@@ -87,7 +87,13 @@ describe('mapSemanticColors', () => {
 				expect(result['color.surface.recessed']).toBe(formatOklch(surfaces.recessed));
 				expect(result['color.surface.floating']).toBe(formatOklch(surfaces.floating));
 				expect(result['color.surface.overlay']).toBe(formatOklch(surfaces.overlay));
-				expect(result['color.scrim']).toBe(scrim);
+				expect(result['color.overlay.backdrop']).toBe(backdrop);
+				expect(result['color.overlay.hover']).toBe(
+					`color-mix(in oklab, ${formatOklch(families.neutral[12])} 5%, transparent)`,
+				);
+				expect(result['color.overlay.pressed']).toBe(
+					`color-mix(in oklab, ${formatOklch(families.neutral[12])} 10%, transparent)`,
+				);
 				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[8]));
 
 				// Global text and borders use the neutral family. `border.control` is a solved
@@ -122,9 +128,9 @@ describe('mapSemanticColors', () => {
 				const surfaces = generateSurfaces({ background, mode });
 
 				const result = mapSemanticColors({
+					backdrop: 'oklch(0 0 0 / 0.45)',
 					controlBorder: CONTROL_BORDER[mode],
 					families,
-					scrim: 'oklch(0 0 0 / 0.45)',
 					surfaces,
 				});
 
@@ -134,7 +140,7 @@ describe('mapSemanticColors', () => {
 	});
 
 	describe('completeness', () => {
-		// Every `color.*` leaf, including the passed-through `color.scrim`.
+		// Every `color.*` leaf, including the passed-through `color.overlay.backdrop`.
 		const colourPaths = flattenThemeContract()
 			.map(([path]) => path)
 			.filter((path) => path.startsWith('color.'));
@@ -146,9 +152,9 @@ describe('mapSemanticColors', () => {
 				const surfaces = generateSurfaces({ background, mode });
 
 				const result = mapSemanticColors({
+					backdrop: 'oklch(0 0 0 / 0.45)',
 					controlBorder: CONTROL_BORDER[mode],
 					families,
-					scrim: 'oklch(0 0 0 / 0.45)',
 					surfaces,
 				});
 
@@ -160,21 +166,21 @@ describe('mapSemanticColors', () => {
 		}
 	});
 
-	describe('scrim', () => {
-		it('passes the authored scrim value through verbatim, alpha channel included', () => {
+	describe('overlay', () => {
+		it('passes the authored backdrop value through verbatim, alpha channel included', () => {
 			const background = BACKGROUND.light;
 			const families = buildFamilies('light', background);
 			const surfaces = generateSurfaces({ background, mode: 'light' });
-			const scrim = 'oklch(0 0 0 / 0.5)';
+			const backdrop = 'oklch(0 0 0 / 0.5)';
 
 			const result = mapSemanticColors({
+				backdrop,
 				controlBorder: CONTROL_BORDER.light,
 				families,
-				scrim,
 				surfaces,
 			});
 
-			expect(result['color.scrim']).toBe(scrim);
+			expect(result['color.overlay.backdrop']).toBe(backdrop);
 		});
 	});
 });

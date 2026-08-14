@@ -222,10 +222,10 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		recessed: surfaces.recessed,
 	});
 	const colorValues = mapSemanticColors({
+		backdrop: modeFoundation.color.backdrop,
 		controlBorder,
 		families,
 		focus: source.focus,
-		scrim: modeFoundation.color.scrim,
 		surfaces,
 	});
 	return { colorValues, familyDiagnostics, surfaces };
