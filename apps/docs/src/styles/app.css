@@ -25,11 +25,11 @@ code > * {
 	--color-fd-card: var(--luke-color-surface-resting);
 	--color-fd-card-foreground: var(--luke-color-text-primary);
 	--color-fd-border: var(--luke-color-border-decorative);
-	--color-fd-primary: var(--luke-color-background-accent-solid-rest);
+	--color-fd-primary: var(--luke-color-background-accent-solid);
 	--color-fd-primary-foreground: var(--luke-color-foreground-accent-on-solid);
 	--color-fd-secondary: var(--luke-color-surface-raised);
 	--color-fd-secondary-foreground: var(--luke-color-text-primary);
-	--color-fd-accent: var(--luke-color-background-neutral-subtle-hover);
+	--color-fd-accent: var(--luke-color-background-neutral-subtle);
 	--color-fd-accent-foreground: var(--luke-color-text-primary);
 	--color-fd-ring: var(--luke-color-border-focus);
 	--color-fd-overlay: var(--luke-color-surface-overlay);

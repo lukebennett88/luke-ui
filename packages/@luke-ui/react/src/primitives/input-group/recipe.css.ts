@@ -82,10 +82,10 @@ const inputGroupConfig = {
 				// well would be redundant. The gated danger colour is what satisfies the
 				// contrast requirement, and it is unchanged.
 				[invalid]: {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.background.danger.solid,
 				},
 				[invalidFocusWithin]: {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.background.danger.solid,
 					...focusRing(vars.color.border.focus),
 				},
 				[readOnly]: {

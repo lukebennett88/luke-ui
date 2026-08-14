@@ -38,19 +38,15 @@ describe('theme contract', () => {
 		expect(countLeaves(vars)).toBe(flattenThemeContract().length);
 	});
 
-	it('gives all six semantic roles the same 60 leaves under the documented variable names', () => {
+	it('gives all six semantic roles the same 36 leaves under the documented variable names', () => {
 		// The migration table in the specification is a promise about these exact names, so they are
 		// spelled out here rather than re-derived through `themeVarName` (which would only restate the
 		// kebab-casing the contract already applied). `on-solid` is the one name a naive reading gets
 		// wrong. Comparing the whole set, not a sample, also catches a seventh role or a stray leaf.
 		const expected = SEMANTIC_ROLES.flatMap((role) => [
 			[`color.border.${role}`, `--luke-color-border-${role}`],
-			...['subtle', 'solid'].flatMap((prominence) => {
-				return ['rest', 'hover', 'pressed'].map((state) => [
-					`color.background.${role}.${prominence}.${state}`,
-					`--luke-color-background-${role}-${prominence}-${state}`,
-				]);
-			}),
+			[`color.background.${role}.subtle`, `--luke-color-background-${role}-subtle`],
+			[`color.background.${role}.solid`, `--luke-color-background-${role}-solid`],
 			[`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`],
 			[`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`],
 			[`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`],
@@ -64,7 +60,7 @@ describe('theme contract', () => {
 			);
 		});
 
-		expect(expected).toHaveLength(60);
+		expect(expected).toHaveLength(36);
 		const byPath = (a: ReadonlyArray<string>, b: ReadonlyArray<string>) => {
 			return (a[0] ?? '').localeCompare(b[0] ?? '');
 		};
@@ -102,6 +98,22 @@ describe('theme contract', () => {
 		expect(byPath.has('color.scrim')).toBe(false);
 		expect(pairs.some(([, varName]) => varName === '--luke-color-scrim')).toBe(false);
 		expect(Object.hasOwn(vars.color, 'scrim')).toBe(false);
+	});
+
+	it('does not emit per-role background hover or pressed leaves', () => {
+		const pairs = flattenThemeContract();
+		const backgroundPaths = pairs
+			.map(([path]) => path)
+			.filter((path) => {
+				return path.startsWith('color.background.');
+			});
+
+		expect(
+			backgroundPaths.some((path) => path.endsWith('.hover') || path.endsWith('.pressed')),
+		).toBe(false);
+		expect(backgroundPaths.some((path) => path.endsWith('.rest'))).toBe(false);
+		expect(pairs.some(([, varName]) => varName.includes('-solid-hover'))).toBe(false);
+		expect(pairs.some(([, varName]) => varName.includes('-subtle-pressed'))).toBe(false);
 	});
 
 	it('defines the selected spacing steps from the 4px scale', () => {

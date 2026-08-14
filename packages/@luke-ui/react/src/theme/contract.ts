@@ -13,25 +13,17 @@ const typeStyle = {
 
 /**
  * The background capabilities every semantic role gets, spread once per role so the six roles cannot
- * drift apart. `rest` is an explicit leaf because a nested tree path cannot be both a string leaf and
- * the parent of `hover` and `pressed`.
+ * drift apart. Subtle and solid are resting fills. Transient hover and pressed feedback uses
+ * `color.overlay`, not per-role state leaves.
  */
 const roleBackground = {
-	subtle: {
-		rest: null,
-		hover: null,
-		pressed: null,
-	},
-	solid: {
-		rest: null,
-		hover: null,
-		pressed: null,
-	},
+	subtle: null,
+	solid: null,
 };
 
 /**
  * The content capabilities every semantic role gets. There is no `pressed` foreground: press is
- * carried by the background ramp and non-colour cues, so text and icons reuse `hover`.
+ * carried by `color.overlay.pressed` and non-colour cues, so text and icons reuse `hover`.
  */
 const roleForeground = {
 	rest: null,
@@ -166,7 +158,7 @@ export const themeContractTree = {
 			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
 			disabled: null,
 		},
-		/** Subtle and solid background ramps, each with the shared rest / hover / pressed states. */
+		/** Subtle and solid resting backgrounds. Hover and pressed use `color.overlay`. */
 		background: {
 			neutral: { ...roleBackground },
 			accent: { ...roleBackground },
@@ -287,7 +279,7 @@ export const themeContractTree = {
 
 /**
  * Flattens the semantic token tree into `[path, varName]` pairs, in tree order, for example
- * `['color.background.danger.solid.hover', '--luke-color-background-danger-solid-hover']`.
+ * `['color.background.danger.solid', '--luke-color-background-danger-solid']`.
  */
 export function flattenThemeContract(): Array<[path: string, varName: string]> {
 	const pairs: Array<[string, string]> = [];

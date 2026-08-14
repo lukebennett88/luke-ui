@@ -3,7 +3,7 @@ import { classSelector, lukeUiClassNames } from './class-names.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 
 globalStyleInLayer('theme', classSelector(lukeUiClassNames.themeRoot), {
-	accentColor: vars.color.background.accent.solid.rest,
+	accentColor: vars.color.background.accent.solid,
 	color: vars.color.text.primary,
 	...vars.font.body,
 });

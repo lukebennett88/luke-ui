@@ -69,12 +69,12 @@ advisory group:
 - `color.border.control` is a hard gate. It is a dedicated contrast boundary, not a scale-step
   alias, and must reach ≥3:1 against both `canvas` and `recessed` in both modes. It is frequently
   the sole resting boundary of a form control, so it cannot use the softer step-7 aesthetic.
-- `color.background.danger.solid.rest` is also a hard gate, ≥3:1 against both `canvas` and
-  `recessed` in both modes. It is the only role fill that carries a required state's boundary (the
-  invalid field boundary — [#247](https://github.com/lukebennett88/luke-ui/issues/247)), so it needs
-  the same guarantee as `border.control`. This is deliberately not extended to the other five roles:
-  a role's solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind
-  it, and for `warning` that lands at only 2.43:1 against canvas in light mode.
+- `color.background.danger.solid` is also a hard gate, ≥3:1 against both `canvas` and `recessed` in
+  both modes. It is the only role fill that carries a required state's boundary (the invalid field
+  boundary — [#247](https://github.com/lukebennett88/luke-ui/issues/247)), so it needs the same
+  guarantee as `border.control`. This is deliberately not extended to the other five roles: a role's
+  solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for
+  `warning` that lands at only 2.43:1 against canvas in light mode.
 - `color.border.decorative` is not checked. It is a deliberately subtle, Radix-style separator below
   3:1.
 - Every semantic role border (`color.border.<role>`, all six roles) is an advisory 3:1 check. A miss
@@ -103,10 +103,9 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 
 `scale.ts`'s `passesOnSolidGate` is the only function that decides whether a solid can carry
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
-choose clears the AA text ratio plus the search headroom across both solid states the engine emits:
-step 9 and its step-10 hover. There is no third, deeper pressed state to test.
-`background.<role>.solid.pressed` reuses step 10 and carries the press through depth, finish, and
-transform instead.
+choose clears the AA text ratio plus the search headroom across step 9 and step 10. Step 10 is a
+private scale rung used by that gate. It is not a public hover token. Public hover and pressed
+feedback uses `color.overlay` over the resting solid fill, plus depth, finish, and transform.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
 copy. That gives two guarantees:
@@ -135,9 +134,10 @@ loading state against typical surfaces.
 Luke UI generates two narrow semantic interaction overlays from the high-contrast neutral (family
 step 12), mixed with transparent: `color.overlay.hover` at 5% and `color.overlay.pressed` at 10%.
 The authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated
-per-family alpha track.
+per-family alpha track, and the public contract has no per-role background hover or pressed leaves.
 
 `validateContrast` treats each wash as a translucent colour (the `color-mix()` with transparent),
-paints it over the canvas and recessed surfaces, then measures the ghost Button foregrounds
-(`text.primary`, `foreground.accent.rest`, `foreground.danger.rest`) against that opaque result. A
-`color-mix()` value is never parsed as an opaque colour.
+paints it over the resting fills first-party components actually use, then measures the matching
+foregrounds against that opaque result. A `color-mix()` value is never parsed as an opaque colour.
+The pairs are ghost Button foregrounds over canvas and recessed, solid and subtle Button tones,
+selected Combobox options over accent subtle, and unselected Combobox options over floating.

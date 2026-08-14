@@ -104,7 +104,8 @@ const checkboxConfig = {
 			lineHeight: 1,
 			...restingFocusRing(),
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, background-image, border-color, color, opacity',
+			transitionProperty:
+				'background-color, background-image, border-color, box-shadow, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
 				'&::after': {
@@ -118,73 +119,35 @@ const checkboxConfig = {
 				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
 					backgroundImage: vars.actionControlFinish.raised,
 					borderColor: vars.color.border.accent,
+					boxShadow: `inset 0 0 0 100vmax ${vars.color.overlay.hover}`,
 				},
 				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
 					backgroundImage: vars.actionControlFinish.recessed,
 					borderColor: vars.color.border.accent,
+					boxShadow: `inset 0 0 0 100vmax ${vars.color.overlay.pressed}`,
 				},
-				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]):not([data-invalid="true"]) &':
-					{
-						backgroundColor: vars.color.overlay.hover,
-					},
-				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]):not([data-invalid="true"]) &':
-					{
-						backgroundColor: vars.color.overlay.pressed,
-					},
 				'[data-indeterminate="true"] &': {
-					backgroundColor: vars.color.background.accent.solid.rest,
-					borderColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
+					borderColor: vars.color.background.accent.solid,
 				},
 				'[data-indeterminate="true"] &::after': {
 					content: '"−"',
 					opacity: 1,
 				},
 				'[data-invalid="true"] &': {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.background.danger.solid,
 				},
 				'[data-selected="true"] &': {
-					backgroundColor: vars.color.background.accent.solid.rest,
-					borderColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
+					borderColor: vars.color.background.accent.solid,
 				},
 				'[data-selected="true"] &::after': {
 					opacity: 1,
 				},
-				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.accent.solid.hover,
-						borderColor: vars.color.background.accent.solid.hover,
-					},
-				'[data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.accent.solid.pressed,
-						borderColor: vars.color.background.accent.solid.pressed,
-					},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
-						backgroundColor: vars.color.background.danger.solid.rest,
-						borderColor: vars.color.background.danger.solid.rest,
-						color: vars.color.foreground.danger.onSolid,
-					},
-				'[data-invalid="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundImage: vars.actionControlFinish.raised,
-						borderColor: vars.color.background.danger.solid.hover,
-					},
-				'[data-invalid="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundImage: vars.actionControlFinish.recessed,
-						borderColor: vars.color.background.danger.solid.pressed,
-					},
-				'[data-invalid="true"][data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.danger.solid.hover,
-						borderColor: vars.color.background.danger.solid.hover,
-						color: vars.color.foreground.danger.onSolid,
-					},
-				'[data-invalid="true"][data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.danger.solid.pressed,
-						borderColor: vars.color.background.danger.solid.pressed,
+						backgroundColor: vars.color.background.danger.solid,
+						borderColor: vars.color.background.danger.solid,
 						color: vars.color.foreground.danger.onSolid,
 					},
 			},

@@ -80,14 +80,8 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 	// role's meaning never decides which visual slots it can fill.
 	for (const role of SEMANTIC_ROLES) {
 		const family = families[role];
-		values[`color.background.${role}.subtle.rest`] = formatOklch(family[3]);
-		values[`color.background.${role}.subtle.hover`] = formatOklch(family[4]);
-		values[`color.background.${role}.subtle.pressed`] = formatOklch(family[5]);
-		values[`color.background.${role}.solid.rest`] = formatOklch(family[9]);
-		values[`color.background.${role}.solid.hover`] = formatOklch(family[10]);
-		// Deliberate dup: the pressed solid is carried by depth.recessed / actionControlFinish.recessed /
-		// transform, not a third solid colour.
-		values[`color.background.${role}.solid.pressed`] = formatOklch(family[10]);
+		values[`color.background.${role}.subtle`] = formatOklch(family[3]);
+		values[`color.background.${role}.solid`] = formatOklch(family[9]);
 		values[`color.foreground.${role}.rest`] = formatOklch(family[11]);
 		values[`color.foreground.${role}.hover`] = formatOklch(family[12]);
 		values[`color.foreground.${role}.onSolid`] = formatOklch(family.contrast);

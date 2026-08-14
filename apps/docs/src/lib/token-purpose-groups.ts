@@ -87,7 +87,8 @@ const PURPOSE_DEFINITIONS = [
 		title: 'Sizing',
 	},
 	{
-		description: 'State effects a control applies to its own material, such as the disabled fade.',
+		description:
+			'Transient hover and pressed washes, plus state effects a control applies to its own material.',
 		id: 'interaction',
 		related: null,
 		showSamples: true,

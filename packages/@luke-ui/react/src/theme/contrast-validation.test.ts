@@ -109,7 +109,7 @@ describe('buildTheme contrast failures', () => {
 	});
 
 	for (const mode of ['light', 'dark'] as const) {
-		it(`rejects a ghost overlay wash in ${mode} mode whose composited surface misses the text ratio`, () => {
+		it(`rejects an interaction overlay wash in ${mode} mode whose composited surface misses the text ratio`, () => {
 			// Strengthens the emitted pressed wash rather than moving the canvas: a lighter dark canvas
 			// fails uncomposited accent and danger pairs first, so it cannot isolate this gate.
 			const { values } = modeColorValues(mode);
@@ -173,17 +173,18 @@ describe('contrast validation matrix', () => {
 	// `validateContrast`). Deriving the totals from those pieces means adding a role, or changing
 	// a per-role count, updates the expectation automatically instead of needing a hand-edited
 	// number.
-	const PER_ROLE_HARD_HOVER = 5;
-	const PER_ROLE_HARD_ON_SOLID = 3;
-	const PER_ROLE_HARD_REST = 5;
+	const PER_ROLE_HARD_HOVER = 3;
+	const PER_ROLE_HARD_ON_SOLID = 1;
+	const PER_ROLE_HARD_REST = 3;
 	const PER_ROLE_ADVISORY_BORDER = 2;
 
 	// Hard checks `validateContrast` runs once, not per role: functional primary/secondary text
 	// against the 4 elevation surfaces (8), the focus ring and `border.control` boundaries
-	// against the 2 base surfaces (4), `danger.solid.rest` against the 2 base surfaces (2), and
-	// ghost Button foregrounds against hover and pressed overlays composited over the 2 base
-	// surfaces (3 foregrounds × 2 overlays × 2 surfaces = 12).
-	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2 + 12;
+	// against the 2 base surfaces (4), `danger.solid` against the 2 base surfaces (2), and
+	// interaction overlays over real component fills (ghost 12 + solid 6 + subtle 6 +
+	// combobox selected 2 + combobox unselected 2 = 28).
+	const OVERLAY_HARD_CHECKS = 28;
+	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2 + OVERLAY_HARD_CHECKS;
 
 	const expectedHard =
 		SEMANTIC_ROLES.length * (PER_ROLE_HARD_HOVER + PER_ROLE_HARD_ON_SOLID + PER_ROLE_HARD_REST) +
@@ -230,17 +231,34 @@ describe('contrast validation matrix', () => {
 					hard: expectedHard,
 					mode,
 					overlayBackgrounds: [
+						'color.overlay.hover over color.background.accent.solid',
+						'color.overlay.hover over color.background.accent.subtle',
+						'color.overlay.hover over color.background.danger.solid',
+						'color.overlay.hover over color.background.danger.subtle',
+						'color.overlay.hover over color.background.neutral.solid',
+						'color.overlay.hover over color.background.neutral.subtle',
 						'color.overlay.hover over color.surface.canvas',
+						'color.overlay.hover over color.surface.floating',
 						'color.overlay.hover over color.surface.recessed',
+						'color.overlay.pressed over color.background.accent.solid',
+						'color.overlay.pressed over color.background.accent.subtle',
+						'color.overlay.pressed over color.background.danger.solid',
+						'color.overlay.pressed over color.background.danger.subtle',
+						'color.overlay.pressed over color.background.neutral.solid',
+						'color.overlay.pressed over color.background.neutral.subtle',
 						'color.overlay.pressed over color.surface.canvas',
+						'color.overlay.pressed over color.surface.floating',
 						'color.overlay.pressed over color.surface.recessed',
 					],
 					overlayForegrounds: [
+						'color.foreground.accent.onSolid',
 						'color.foreground.accent.rest',
+						'color.foreground.danger.onSolid',
 						'color.foreground.danger.rest',
+						'color.foreground.neutral.onSolid',
 						'color.text.primary',
 					],
-					overlayHard: 12,
+					overlayHard: OVERLAY_HARD_CHECKS,
 					perRole: SEMANTIC_ROLES.map((role) => ({
 						advisoryBorder: PER_ROLE_ADVISORY_BORDER,
 						hardHover: PER_ROLE_HARD_HOVER,
@@ -255,7 +273,7 @@ describe('contrast validation matrix', () => {
 
 	it('records on each check whether missing its ratio fails the build', () => {
 		// Every text pair is a hard gate, and so are the two solved boundaries `border.focus` and
-		// `border.control`, plus `danger.solid.rest` vs the base surfaces (the only role fill gated —
+		// `border.control`, plus `danger.solid` vs the base surfaces (the only role fill gated —
 		// see `validateContrast` for why the other five roles are not). The six semantic borders are the
 		// only advisory checks. `color.border.decorative` is not measured. The "Theme/Diagnostics"
 		// inspector uses this flag instead of matching token paths.
@@ -283,7 +301,7 @@ describe('contrast validation matrix', () => {
 				advisoryForegrounds: [...advisoryBorders].sort(),
 				everyHardGatePasses: true,
 				hardBoundaryForegrounds: [
-					'color.background.danger.solid.rest',
+					'color.background.danger.solid',
 					'color.border.control',
 					'color.border.focus',
 				].sort(),

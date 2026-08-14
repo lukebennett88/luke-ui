@@ -214,7 +214,7 @@ function FinishSample({ variable }: ThemeToken) {
 		>
 			<span
 				style={{
-					backgroundColor: vars.color.background.neutral.solid.rest,
+					backgroundColor: vars.color.background.neutral.solid,
 					backgroundImage: `var(${variable})`,
 					blockSize: '1.75rem',
 					borderRadius: vars.radius.control,
@@ -230,7 +230,7 @@ function RadiusSample({ variable }: ThemeToken) {
 		<span className={SAMPLE_FRAME_CLASS_NAME}>
 			<span
 				style={{
-					backgroundColor: vars.color.background.accent.subtle.rest,
+					backgroundColor: vars.color.background.accent.subtle,
 					blockSize: '2.5rem',
 					borderColor: vars.color.border.decorative,
 					borderRadius: `var(${variable})`,
@@ -248,7 +248,7 @@ function SpaceSample({ variable }: ThemeToken) {
 		<span className={cx(SAMPLE_FRAME_CLASS_NAME, 'justify-start px-2')} style={stageStyle}>
 			<span
 				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: '0.75rem',
 					borderRadius: vars.radius.detail,
 					inlineSize: `var(${variable})`,
@@ -264,7 +264,7 @@ function SizeSample({ variable }: ThemeToken) {
 		<span className={SAMPLE_FRAME_CLASS_NAME}>
 			<span
 				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: `var(${variable})`,
 					borderRadius: vars.radius.detail,
 					inlineSize: `var(${variable})`,
@@ -279,7 +279,7 @@ function InteractionSample({ variable }: ThemeToken) {
 		<span className={cx(SAMPLE_FRAME_CLASS_NAME, 'gap-1.5')}>
 			<span
 				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: '1rem',
 					borderRadius: vars.radius.detail,
 					inlineSize: '1rem',
@@ -287,7 +287,7 @@ function InteractionSample({ variable }: ThemeToken) {
 			/>
 			<span
 				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: '1rem',
 					borderRadius: vars.radius.detail,
 					inlineSize: '1rem',
@@ -311,7 +311,7 @@ function MotionSample({ path, variable }: ThemeToken) {
 					animationIterationCount: 'infinite',
 					animationName: 'luke-docs-token-motion',
 					animationTimingFunction: axis === 'easing' ? `var(${variable})` : FALLBACK_MOTION_EASING,
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: vars.iconSize.xsmall,
 					borderRadius: vars.radius.full,
 					inlineSize: vars.iconSize.xsmall,
@@ -340,7 +340,7 @@ function TrimSample({
 		<span className={SAMPLE_FRAME_CLASS_NAME} style={stageStyle}>
 			<span
 				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: '0.75rem',
 					inlineSize: '3rem',
 					[property]: `var(${variable})`,

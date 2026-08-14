@@ -103,6 +103,56 @@ test('ghost interactive states in dark mode', async () => {
 	await userEvent.keyboard('{/Space}');
 });
 
+test('overlay over solid accent', async () => {
+	render(
+		<Button appearance="solid" tone="accent">
+			Save
+		</Button>,
+	);
+	const button = page.getByRole('button', { name: 'Save' });
+
+	await userEvent.hover(button);
+	await captureVisual(button, 'button/solid-accent-hover');
+	await userEvent.unhover(button);
+	await focusViaKeyboard(button);
+	await userEvent.keyboard('{Space>}');
+	await captureVisual(button, 'button/solid-accent-pressed');
+	await userEvent.keyboard('{/Space}');
+});
+
+test('overlay over solid accent in dark mode', async () => {
+	render(
+		<Button appearance="solid" tone="accent">
+			Save
+		</Button>,
+		{
+			appearance: { mode: 'dark', theme: 'tactile' },
+		},
+	);
+	const button = page.getByRole('button', { name: 'Save' });
+
+	await userEvent.hover(button);
+	await captureVisual(button, 'button/solid-accent-hover-tactile-dark');
+	await userEvent.unhover(button);
+});
+
+test('overlay over subtle danger', async () => {
+	render(
+		<Button appearance="subtle" tone="danger">
+			Delete
+		</Button>,
+	);
+	const button = page.getByRole('button', { name: 'Delete' });
+
+	await userEvent.hover(button);
+	await captureVisual(button, 'button/subtle-danger-hover');
+	await userEvent.unhover(button);
+	await focusViaKeyboard(button);
+	await userEvent.keyboard('{Space>}');
+	await captureVisual(button, 'button/subtle-danger-pressed');
+	await userEvent.keyboard('{/Space}');
+});
+
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 

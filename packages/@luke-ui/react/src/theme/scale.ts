@@ -26,8 +26,9 @@ type ColorMode = 'light' | 'dark';
 
 /**
  * A generated 12-step colour family plus its on-solid `contrast` colour. Step roles: 1-2 app/subtle
- * backgrounds, 3-5 component surface (normal / hover / active), 6-8 borders (subtle / UI+focus /
- * hover), 9-10 solid (9 = anchor, 10 = hover), 11-12 text (low / high contrast).
+ * backgrounds, 3-5 component surface (public rest at 3; 4-5 remain private), 6-8 borders (subtle /
+ * UI+focus / hover), 9-10 solid (9 = public rest, 10 = private on-solid-gate rung), 11-12 text (low /
+ * high contrast).
  */
 export interface ScaleFamily {
 	1: Oklch;

@@ -49,10 +49,8 @@ describe('buildTokenTree', () => {
 		});
 	});
 
-	it('nests the deepest semantic-role leaf under its full chain of contract path segments', () => {
-		// `color.background.<role>.subtle.rest` is the contract's deepest leaf: four group levels, which is
-		// exactly what `HEADING_TAGS` in token-board.tsx caps at. The board needs no role list of its own —
-		// walking the contract is what makes the six roles appear.
+	it('nests a flattened semantic-role background leaf under its contract path segments', () => {
+		// `color.background.<role>.subtle` is a string leaf after hover/pressed ramps were removed.
 		const tree = buildTokenTree();
 		const color = tree.children.color;
 		if (color?.kind !== 'group') throw new Error('expected a color group');
@@ -60,13 +58,11 @@ describe('buildTokenTree', () => {
 		if (background?.kind !== 'group') throw new Error('expected a background group');
 		const danger = background.children.danger;
 		if (danger?.kind !== 'group') throw new Error('expected a danger group');
-		const subtle = danger.children.subtle;
-		if (subtle?.kind !== 'group') throw new Error('expected a subtle group');
 
-		expect(subtle.children.rest).toEqual({
+		expect(danger.children.subtle).toEqual({
 			kind: 'leaf',
-			path: 'color.background.danger.subtle.rest',
-			varName: '--luke-color-background-danger-subtle-rest',
+			path: 'color.background.danger.subtle',
+			varName: '--luke-color-background-danger-subtle',
 		});
 	});
 

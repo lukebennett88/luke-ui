@@ -284,7 +284,7 @@ function FinishPreview({ path, varName }: LeafPreviewProps) {
 			role="img"
 			style={{
 				...swatchBoxStyle,
-				backgroundColor: vars.color.background.neutral.solid.rest,
+				backgroundColor: vars.color.background.neutral.solid,
 				backgroundImage: `var(${varName})`,
 			}}
 		/>
@@ -312,7 +312,7 @@ function SpacePreview({ path, varName }: LeafPreviewProps) {
 				aria-label={`${path} sample`}
 				role="img"
 				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: vars.space[300],
 					display: 'inline-block',
 					inlineSize: `var(${varName})`,
@@ -330,7 +330,7 @@ function SizePreview({ path, varName }: LeafPreviewProps) {
 				aria-label={`${path} sample`}
 				role="img"
 				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: `var(${varName})`,
 					borderRadius: vars.radius.detail,
 					display: 'inline-block',
@@ -350,7 +350,7 @@ function SizePreview({ path, varName }: LeafPreviewProps) {
  */
 function InteractionPreview({ path, varName }: LeafPreviewProps) {
 	const swatch = {
-		backgroundColor: vars.color.background.accent.solid.rest,
+		backgroundColor: vars.color.background.accent.solid,
 		blockSize: vars.iconSize.medium,
 		borderRadius: vars.radius.detail,
 		display: 'inline-block',
@@ -390,7 +390,7 @@ function MotionPreview({ path, segments, varName }: LeafPreviewProps) {
 					animationIterationCount: 'infinite',
 					animationName: 'luke-token-board-motion',
 					animationTimingFunction: easing,
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: vars.iconSize.xsmall,
 					borderRadius: vars.radius.full,
 					display: 'inline-block',
@@ -457,7 +457,7 @@ function TrimSample({
 				aria-label={label}
 				role="img"
 				style={{
-					backgroundColor: vars.color.background.accent.solid.rest,
+					backgroundColor: vars.color.background.accent.solid,
 					blockSize: vars.space[300],
 					display: 'inline-block',
 					inlineSize: vars.space[600],

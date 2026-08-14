@@ -108,13 +108,10 @@ describe('mapSemanticColors', () => {
 				// The shared contract: identical steps for all six roles, keyed to the role's own family.
 				for (const role of SEMANTIC_ROLES) {
 					const family = families[role];
-					expect(result[`color.background.${role}.subtle.rest`]).toBe(formatOklch(family[3]));
-					expect(result[`color.background.${role}.subtle.hover`]).toBe(formatOklch(family[4]));
-					expect(result[`color.background.${role}.subtle.pressed`]).toBe(formatOklch(family[5]));
-					expect(result[`color.background.${role}.solid.rest`]).toBe(formatOklch(family[9]));
-					expect(result[`color.background.${role}.solid.hover`]).toBe(formatOklch(family[10]));
-					// Deliberate dup: pressed reuses the hover value.
-					expect(result[`color.background.${role}.solid.pressed`]).toBe(formatOklch(family[10]));
+					expect(result[`color.background.${role}.subtle`]).toBe(formatOklch(family[3]));
+					expect(result[`color.background.${role}.solid`]).toBe(formatOklch(family[9]));
+					expect(result[`color.background.${role}.subtle.hover`]).toBeUndefined();
+					expect(result[`color.background.${role}.solid.hover`]).toBeUndefined();
 					expect(result[`color.foreground.${role}.rest`]).toBe(formatOklch(family[11]));
 					expect(result[`color.foreground.${role}.hover`]).toBe(formatOklch(family[12]));
 					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.contrast));

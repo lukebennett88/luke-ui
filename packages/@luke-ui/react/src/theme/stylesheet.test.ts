@@ -125,7 +125,8 @@ describe('buildTheme output', () => {
 	});
 
 	it('uses the stable kebab-case variable names', () => {
-		expect(css).toContain('--luke-color-background-danger-solid-hover');
+		expect(css).toContain('--luke-color-background-danger-solid');
+		expect(css).not.toContain('--luke-color-background-danger-solid-hover');
 		expect(css).toContain('--luke-color-foreground-danger-on-solid');
 		expect(css).toContain('--luke-color-border-danger');
 		expect(css).toContain('--luke-color-loading-skeleton');

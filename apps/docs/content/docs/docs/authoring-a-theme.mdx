@@ -102,9 +102,12 @@ Every text/surface pair the compiler emits is a hard gate:
 - `color.text.primary` and `color.text.secondary` against all four elevation surfaces (`canvas`,
   `recessed`, `floating`, `overlay`).
 - For each of the six semantic roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`),
-  its foreground `rest` and `hover` against `canvas`, `recessed`, and that role's own `subtle` rest,
-  hover, and pressed backgrounds.
-- Each role's `onSolid` foreground against its `solid` rest, hover, and pressed backgrounds.
+  its foreground `rest` and `hover` against `canvas`, `recessed`, and that role's own `subtle`
+  background.
+- Each role's `onSolid` foreground against its `solid` background.
+- The first-party contracts that paint `color.overlay.hover` or `color.overlay.pressed` over a
+  resting fill: ghost Button foregrounds on canvas and recessed; solid and subtle Button tones;
+  selected Combobox options on accent subtle; unselected Combobox options on the floating popover.
 
 ### Guaranteed at 3:1
 

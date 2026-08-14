@@ -4,6 +4,9 @@ import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
 
+const hoverOverlay = `inset 0 0 0 100vmax ${vars.color.overlay.hover}`;
+const pressedOverlay = `inset 0 0 0 100vmax ${vars.color.overlay.pressed}`;
+
 const base = styleInLayer('recipes', {
 	'@media': {
 		'(forced-colors: active)': {
@@ -71,7 +74,7 @@ const base = styleInLayer('recipes', {
 			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			boxShadow: vars.depth.raised,
+			boxShadow: `${vars.depth.raised}, ${hoverOverlay}`,
 			transform: 'translateY(-1px)',
 		},
 		'&[data-pending="true"]': {
@@ -79,7 +82,7 @@ const base = styleInLayer('recipes', {
 			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			boxShadow: vars.depth.recessed,
+			boxShadow: `${vars.depth.recessed}, ${pressedOverlay}`,
 			transform: 'translateY(1px)',
 		},
 	},
@@ -176,23 +179,21 @@ function appearance(
 	background: Background,
 	color: string,
 ) {
-	const ramp = background[appearance];
+	const fill = background[appearance];
 	return [
 		{
 			style: {
 				'@media': {
 					'(forced-colors: active)': { backgroundImage: 'none' },
 				},
-				backgroundColor: ramp.rest,
+				backgroundColor: fill,
 				backgroundImage: vars.actionControlFinish.resting,
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: ramp.hover,
 						backgroundImage: vars.actionControlFinish.raised,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: ramp.pressed,
 						backgroundImage: vars.actionControlFinish.recessed,
 					},
 				},
@@ -210,16 +211,6 @@ function ghostAppearance(tone: Tone, color: string) {
 			borderColor: 'transparent',
 			boxShadow: 'none',
 			color,
-			selectors: {
-				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: vars.color.overlay.hover,
-					boxShadow: vars.depth.raised,
-				},
-				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: vars.color.overlay.pressed,
-					boxShadow: vars.depth.recessed,
-				},
-			},
 		},
 		variants: { appearance: 'ghost' as const, tone },
 	};

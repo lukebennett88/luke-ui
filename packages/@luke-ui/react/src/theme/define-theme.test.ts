@@ -32,7 +32,7 @@ function extractValue(block: string, varName: string): string {
 	return match[1];
 }
 
-const ACCENT_SOLID = '--luke-color-background-accent-solid-rest';
+const ACCENT_SOLID = '--luke-color-background-accent-solid';
 
 describe('defineTheme colour-only authoring', () => {
 	// `defineTheme` compiles through `buildTheme`, whose `validateContrast` already hard-gates
@@ -174,7 +174,7 @@ describe('defineTheme partial per-mode merges', () => {
 		const infoVarNames = [
 			'--luke-color-foreground-info-rest',
 			'--luke-color-border-info',
-			'--luke-color-background-info-subtle-rest',
+			'--luke-color-background-info-subtle',
 		];
 		const overridden = splitBlocks(
 			defineTheme({ color: { accent: '#fff', info: { light: '#1d39c4' } }, name: 'partial-color' }),
@@ -313,24 +313,12 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
 		});
 
-		it(`${name} paints info, success, and warning with a real interactive ramp`, () => {
-			// The three feedback roles carry the same capabilities as every other role. The contract
-			// inventory cannot prove that each ramp is interactive because a flat colour still fills every
-			// leaf. These emitted values prove that each state stays distinct.
+		it(`${name} paints info, success, and warning with distinct subtle, solid, and foreground slots`, () => {
 			const blocks = splitBlocks(css);
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				for (const role of ['info', 'success', 'warning']) {
-					const ramp = [
-						`--luke-color-background-${role}-subtle-rest`,
-						`--luke-color-background-${role}-subtle-hover`,
-						`--luke-color-background-${role}-subtle-pressed`,
-						`--luke-color-background-${role}-solid-rest`,
-						`--luke-color-background-${role}-solid-hover`,
-					].map((varName) => extractValue(block, varName));
-					expect(new Set(ramp).size).toBe(ramp.length);
-					// Solid pressed deliberately reuses solid hover: depth and finish carry the press.
-					expect(extractValue(block, `--luke-color-background-${role}-solid-pressed`)).toBe(
-						extractValue(block, `--luke-color-background-${role}-solid-hover`),
+					expect(extractValue(block, `--luke-color-background-${role}-subtle`)).not.toBe(
+						extractValue(block, `--luke-color-background-${role}-solid`),
 					);
 					expect(extractValue(block, `--luke-color-foreground-${role}-rest`)).not.toBe(
 						extractValue(block, `--luke-color-foreground-${role}-hover`),
