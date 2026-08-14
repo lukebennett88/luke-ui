@@ -48,9 +48,9 @@ Do not test RAC's contract. RAC already owns focus management, keyboard navigati
 semantics, ARIA wiring, validation semantics, and disabled/read-only interaction blocking. Test the
 composition, prop plumbing, styling hooks, and behaviour that Luke UI adds or deliberately changes.
 
-Each component's requirements live in the component test manifest. That list is the only
-declaration of conformance tier, integration-tripwire requirement, and visual-test
-applicability. `none` is a deliberate exception, not an omission.
+Each component's requirements live in the component test manifest. That list is the only declaration
+of conformance tier, integration-tripwire requirement, and visual-test applicability. `none` is a
+deliberate exception, not an omission.
 
 Call the matching shared helper with the component's manifest path:
 

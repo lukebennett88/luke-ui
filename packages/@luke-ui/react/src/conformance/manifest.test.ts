@@ -1,10 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from 'vite-plus/test';
-import {
-	componentTestManifest,
-	getComponentTestManifestEntry,
-} from './manifest.js';
+import { componentTestManifest, getComponentTestManifestEntry } from './manifest.js';
 import type { ComponentTestManifestEntry } from './manifest.js';
 
 const sourceRoot = resolve(import.meta.dirname, '..');
