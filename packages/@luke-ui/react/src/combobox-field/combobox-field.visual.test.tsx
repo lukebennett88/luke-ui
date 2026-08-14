@@ -392,18 +392,26 @@ test('rich section title', async () => {
 });
 
 /**
- * Opens with a click, then moves keyboard focus onto the first option. The capture is the option
- * itself, so the overlay wash is in the screenshot.
+ * Opens with a click, then moves keyboard focus onto the first option. React Aria closes the
+ * popover when an option is scrolled into view, so `scrollIntoView` is stubbed for that step.
+ * The page is captured rather than the option: Playwright's element screenshot also scrolls, which
+ * detaches the portalled list.
  */
 async function captureFocusedOption(id: string) {
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-	await userEvent.keyboard('{ArrowDown}');
-	const option = page.getByRole('option', { exact: true, name: 'Australia' });
-	await expect.poll(() => option.element().getAttribute('data-focused')).toBe('true');
-	const popover = page.getByRole('listbox').element().parentElement;
-	if (popover == null) throw new Error('Expected the popover element.');
-	await waitForOverlayEnter(popover);
-	await captureVisual(option, id);
+	const scrollIntoView = Element.prototype.scrollIntoView;
+	Element.prototype.scrollIntoView = () => {};
+	try {
+		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		await userEvent.keyboard('{ArrowDown}');
+		const option = page.getByRole('option', { exact: true, name: 'Australia' });
+		await expect.poll(() => option.element().getAttribute('data-focused')).toBe('true');
+		const popover = page.getByRole('listbox').element().parentElement;
+		if (popover == null) throw new Error('Expected the popover element.');
+		await waitForOverlayEnter(popover);
+		await captureVisual(page.elementLocator(document.body), id);
+	} finally {
+		Element.prototype.scrollIntoView = scrollIntoView;
+	}
 }
 
 /**
