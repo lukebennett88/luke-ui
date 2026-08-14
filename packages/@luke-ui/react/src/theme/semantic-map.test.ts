@@ -88,11 +88,8 @@ describe('mapSemanticColors', () => {
 				expect(result['color.surface.floating']).toBe(formatOklch(surfaces.floating));
 				expect(result['color.surface.overlay']).toBe(formatOklch(surfaces.overlay));
 				expect(result['color.overlay.backdrop']).toBe(backdrop);
-				expect(result['color.overlay.hover']).toBe(
-					`color-mix(in oklab, ${formatOklch(families.neutral[12])} 5%, transparent)`,
-				);
-				expect(result['color.overlay.pressed']).toBe(
-					`color-mix(in oklab, ${formatOklch(families.neutral[12])} 10%, transparent)`,
+				expect(result['color.overlay.tint']).toBe(
+					mode === 'light' ? 'oklch(0 0 0)' : 'oklch(1 0 0)',
 				);
 				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[8]));
 
@@ -178,6 +175,22 @@ describe('mapSemanticColors', () => {
 			});
 
 			expect(result['color.overlay.backdrop']).toBe(backdrop);
+		});
+
+		it('emits an opaque tint that flips with the mode', () => {
+			const tintFor = (mode: 'light' | 'dark') => {
+				const background = BACKGROUND[mode];
+				return mapSemanticColors({
+					backdrop: 'oklch(0 0 0 / 0.5)',
+					controlBorder: CONTROL_BORDER[mode],
+					families: buildFamilies(mode, background),
+					mode,
+					surfaces: generateSurfaces({ background, mode }),
+				})['color.overlay.tint'];
+			};
+
+			expect(tintFor('light')).toBe('oklch(0 0 0)');
+			expect(tintFor('dark')).toBe('oklch(1 0 0)');
 		});
 	});
 });

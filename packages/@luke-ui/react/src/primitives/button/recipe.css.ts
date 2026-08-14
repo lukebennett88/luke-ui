@@ -1,11 +1,9 @@
 import { styleInLayer } from '../../styles/layered-style.css.js';
+import { overlayWash } from '../../styles/overlay-wash.js';
 import type { RecipeSelection } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
-
-const hoverOverlay = `inset 0 0 0 100vmax ${vars.color.overlay.hover}`;
-const pressedOverlay = `inset 0 0 0 100vmax ${vars.color.overlay.pressed}`;
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -74,7 +72,7 @@ const base = styleInLayer('recipes', {
 			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			boxShadow: `${vars.depth.raised}, ${hoverOverlay}`,
+			boxShadow: vars.depth.raised,
 			transform: 'translateY(-1px)',
 		},
 		'&[data-pending="true"]': {
@@ -82,7 +80,7 @@ const base = styleInLayer('recipes', {
 			opacity: vars.interaction.disabledOpacity,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			boxShadow: `${vars.depth.recessed}, ${pressedOverlay}`,
+			boxShadow: vars.depth.recessed,
 			transform: 'translateY(1px)',
 		},
 	},
@@ -191,9 +189,11 @@ function appearance(
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+						backgroundColor: overlayWash(fill, 5),
 						backgroundImage: vars.actionControlFinish.raised,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+						backgroundColor: overlayWash(fill, 10),
 						backgroundImage: vars.actionControlFinish.recessed,
 					},
 				},
@@ -211,6 +211,16 @@ function ghostAppearance(tone: Tone, color: string) {
 			borderColor: 'transparent',
 			boxShadow: 'none',
 			color,
+			selectors: {
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: overlayWash('transparent', 5),
+					boxShadow: vars.depth.raised,
+				},
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: overlayWash('transparent', 10),
+					boxShadow: vars.depth.recessed,
+				},
+			},
 		},
 		variants: { appearance: 'ghost' as const, tone },
 	};

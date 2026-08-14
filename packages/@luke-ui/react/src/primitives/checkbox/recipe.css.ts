@@ -1,5 +1,6 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
+import { overlayWash } from '../../styles/overlay-wash.js';
 import type { RecipeSelection, SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
@@ -104,8 +105,7 @@ const checkboxConfig = {
 			lineHeight: 1,
 			...restingFocusRing(),
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty:
-				'background-color, background-image, border-color, box-shadow, color, opacity',
+			transitionProperty: 'background-color, background-image, border-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
 			selectors: {
 				'&::after': {
@@ -116,14 +116,18 @@ const checkboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
-				// Overlay is the hover/pressed cue. Semantic borders stay on rest, selected, and invalid.
+				// A small box carries a wash poorly, so the border takes the stronger mix and the fill the
+				// weaker one. Each state washes the fill it already rests on, so the accent identity of a
+				// selected box and the danger identity of an invalid one both survive hover and press.
 				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
+					backgroundColor: overlayWash(vars.color.surface.canvas, 5),
 					backgroundImage: vars.actionControlFinish.raised,
-					boxShadow: `inset 0 0 0 100vmax ${vars.color.overlay.hover}`,
+					borderColor: overlayWash(vars.color.border.control, 20),
 				},
 				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
+					backgroundColor: overlayWash(vars.color.surface.canvas, 10),
 					backgroundImage: vars.actionControlFinish.recessed,
-					boxShadow: `inset 0 0 0 100vmax ${vars.color.overlay.pressed}`,
+					borderColor: overlayWash(vars.color.border.control, 20),
 				},
 				'[data-indeterminate="true"] &': {
 					backgroundColor: vars.color.background.accent.solid,
@@ -147,6 +151,38 @@ const checkboxConfig = {
 					{
 						backgroundColor: vars.color.background.danger.solid,
 						borderColor: vars.color.background.danger.solid,
+						color: vars.color.foreground.danger.onSolid,
+					},
+				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundColor: overlayWash(vars.color.background.accent.solid, 15),
+						borderColor: overlayWash(vars.color.background.accent.solid, 15),
+					},
+				'[data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundColor: overlayWash(vars.color.background.accent.solid, 20),
+						borderColor: overlayWash(vars.color.background.accent.solid, 20),
+					},
+				'[data-invalid="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundImage: vars.actionControlFinish.raised,
+						borderColor: overlayWash(vars.color.background.danger.solid, 20),
+					},
+				'[data-invalid="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundImage: vars.actionControlFinish.recessed,
+						borderColor: overlayWash(vars.color.background.danger.solid, 20),
+					},
+				'[data-invalid="true"][data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundColor: overlayWash(vars.color.background.danger.solid, 15),
+						borderColor: overlayWash(vars.color.background.danger.solid, 15),
+						color: vars.color.foreground.danger.onSolid,
+					},
+				'[data-invalid="true"][data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundColor: overlayWash(vars.color.background.danger.solid, 20),
+						borderColor: overlayWash(vars.color.background.danger.solid, 20),
 						color: vars.color.foreground.danger.onSolid,
 					},
 			},

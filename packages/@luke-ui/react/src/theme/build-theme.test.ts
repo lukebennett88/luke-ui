@@ -171,8 +171,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		});
 
 		it(`${foundation.name} keeps dark accent subtle legible for primary text`, () => {
-			// Combobox selected options paint `text.primary` on `background.accent.subtle`. The overlay
-			// matrix gates that pair with a wash on top; this recomputes the resting fill in dark mode.
+			// Combobox selected options paint `text.primary` on `background.accent.subtle`. The wash
+			// matrix gates that pair with tint mixed in; this recomputes the resting fill in dark mode.
 			const { mediaDark } = splitBlocks(buildTheme(foundation));
 			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
 			const subtle = parseColor(extractValue(mediaDark, '--luke-color-background-accent-subtle'));

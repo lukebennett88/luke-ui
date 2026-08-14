@@ -139,6 +139,8 @@ function resolveColorPurpose(path: string): TokenPurposeId | undefined {
 	if (section === 'border') {
 		return leaf !== undefined && STRUCTURAL_BORDERS.has(leaf) ? 'borders' : 'roles';
 	}
+	// `backdrop` is a dimming layer, so it belongs with the surfaces; `tint` is the ink components mix
+	// into a fill for hover and pressed feedback.
 	if (section === 'overlay') {
 		return leaf === 'backdrop' ? 'surfaces' : 'interaction';
 	}

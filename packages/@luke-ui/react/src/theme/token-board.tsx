@@ -240,7 +240,10 @@ interface LeafPreviewProps {
 type PreviewRenderer = (props: LeafPreviewProps) => ReactNode;
 
 function ColorPreview({ path, varName }: LeafPreviewProps) {
-	if (path.startsWith('color.overlay.')) {
+	// `overlay.backdrop` is the one colour leaf that may carry alpha, so it is layered over the canvas
+	// to show what it actually looks like in place. Every other leaf, `overlay.tint` included, is
+	// opaque and reads correctly on its own.
+	if (path === 'color.overlay.backdrop') {
 		return (
 			<span
 				aria-label={`${path} sample`}

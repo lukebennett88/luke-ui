@@ -20,7 +20,7 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    `background` — canvas IS the background, not a derived value.
 4. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
    every colour contract leaf onto a family step or a generated surface, passes the authored
-   backdrop through, and generates the two interaction overlay washes.
+   backdrop through, and generates the mode's interaction tint.
 5. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
    throws `ThemeContrastError` on a hard-gate miss.
 
@@ -105,7 +105,7 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
 choose clears the AA text ratio plus the search headroom across step 9 and step 10. Step 10 is a
 private scale rung used by that gate. It is not a public hover token. Public hover and pressed
-feedback uses `color.overlay` over the resting solid fill, plus depth, finish, and transform.
+feedback mixes `color.overlay.tint` into the resting solid fill, plus depth, finish, and transform.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
 copy. That gives two guarantees:
@@ -129,15 +129,30 @@ compiler threw an internal error. One list makes both sides move together.
 `color.loadingSkeleton` maps to the neutral family's step 8, for better perceptibility of the
 loading state against typical surfaces.
 
-## Interaction overlays
+## The interaction tint
 
-Luke UI generates two narrow semantic interaction overlays from the high-contrast neutral (family
-step 12), mixed with transparent: `color.overlay.hover` at 5% and `color.overlay.pressed` at 10%.
+Luke UI generates one interaction ink, `color.overlay.tint`: pure black in light mode and pure white
+in dark mode. It is opaque, and a component mixes it into the fill it already rests on with
+`color-mix()`. `styles/overlay-wash.ts`'s `overlayWash(fill, percent)` is the one place that shape
+lives.
+
+The strength belongs at the call site rather than in the token, because `color-mix()` cannot
+composite a translucent colour onto a fill and return an opaque result: mixing an alpha-0.05 colour
+into an opaque one at weight `p` yields alpha `0.05p + (1 - p)`, which reaches 1 only when `p` is 0.
+An opaque ink plus a per-call percentage gives an opaque result the control can animate. Button
+hovers at 5% and presses at 10% on every appearance; a Checkbox, whose box is too small to read a
+faint wash, uses 20% on its border and 5% or 10% on its unchecked fill, and 15% or 20% on both once
+it is selected.
+
+Two mechanisms were considered and rejected. A `background-image` gradient cannot be transitioned,
+because `background-image` does not interpolate. An inset `box-shadow` is clipped to the padding
+box, so it never tints the 1px border a control draws.
+
 The authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated
 per-family alpha track, and the public contract has no per-role background hover or pressed leaves.
 
-`validateContrast` treats each wash as a translucent colour (the `color-mix()` with transparent),
-paints it over the resting fills first-party components actually use, then measures the matching
-foregrounds against that opaque result. A `color-mix()` value is never parsed as an opaque colour.
+`validateContrast` mixes the tint into each fill first-party components actually use, at the
+percentage those components use, then measures the matching foreground against the opaque result.
 The pairs are ghost Button foregrounds over canvas and recessed, solid and subtle Button tones,
-selected Combobox options over accent subtle, and unselected Combobox options over floating.
+selected Combobox options over accent subtle, unselected Combobox options over floating, and the
+Checkbox's stronger mixes over the accent and danger solid fills.

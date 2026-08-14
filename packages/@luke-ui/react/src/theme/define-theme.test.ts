@@ -307,8 +307,7 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 			expect(emitted.size).toBe(contractNames.length);
 			expect([...emitted].sort()).toEqual([...contractNames].sort());
 			expect(emitted.has('--luke-color-overlay-backdrop')).toBe(true);
-			expect(emitted.has('--luke-color-overlay-hover')).toBe(true);
-			expect(emitted.has('--luke-color-overlay-pressed')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-tint')).toBe(true);
 			expect(emitted.has('--luke-color-scrim')).toBe(false);
 			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
 		});

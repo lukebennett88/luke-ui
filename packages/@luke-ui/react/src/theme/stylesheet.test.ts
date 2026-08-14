@@ -106,21 +106,14 @@ describe('buildTheme output', () => {
 	}
 
 	it('emits every colour value in OKLCH', () => {
-		const colorMixVarNames = new Set([
-			'--luke-color-overlay-hover',
-			'--luke-color-overlay-pressed',
-		]);
 		const colorVarNames = pairs
 			.filter(([path]) => path.startsWith('color.'))
 			.map(([, varName]) => varName);
 		for (const block of [blocks.baseLight, blocks.mediaDark]) {
 			const nonOklch = colorVarNames.filter((varName) => {
-				return !colorMixVarNames.has(varName) && !extractValue(block, varName).startsWith('oklch(');
+				return !extractValue(block, varName).startsWith('oklch(');
 			});
 			expect(nonOklch).toEqual([]);
-			for (const varName of colorMixVarNames) {
-				expect(extractValue(block, varName).startsWith('color-mix(in oklab,')).toBe(true);
-			}
 		}
 	});
 
@@ -131,8 +124,7 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-color-border-danger');
 		expect(css).toContain('--luke-color-loading-skeleton');
 		expect(css).toContain('--luke-color-overlay-backdrop');
-		expect(css).toContain('--luke-color-overlay-hover');
-		expect(css).toContain('--luke-color-overlay-pressed');
+		expect(css).toContain('--luke-color-overlay-tint');
 		expect(css).toContain('--luke-color-text-disabled');
 		expect(css).toContain('--luke-color-foreground-accent-hover');
 		expect(css).toContain('--luke-depth-raised');
