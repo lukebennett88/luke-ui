@@ -71,24 +71,21 @@ test('enforces every manifest dimension', () => {
 	for (const entry of componentTestManifest) {
 		const browserTestPath = componentTestFile(entry, 'browser.test.tsx');
 		const visualTestPath = componentTestFile(entry, 'visual.test.tsx');
+		const hasBrowserTest = existsSync(browserTestPath);
+		const browserSource = hasBrowserTest ? readFileSync(browserTestPath, 'utf8') : '';
 		const needsBrowserCoverage =
 			entry.conformanceTier !== 'none' || entry.integrationTripwire === 'required';
 
-		if (needsBrowserCoverage) {
-			expect(existsSync(browserTestPath)).toBe(true);
-		}
-
-		if (existsSync(browserTestPath)) {
-			const source = readFileSync(browserTestPath, 'utf8');
-			expect(source.includes('testUniversalConformance')).toBe(
-				entry.conformanceTier === 'universal',
-			);
-			expect(source.includes('testFieldShapedConformance')).toBe(
-				entry.conformanceTier === 'field-shaped',
-			);
-			expect(source.includes('testIntegration')).toBe(entry.integrationTripwire === 'required');
-		}
-
+		expect(hasBrowserTest || !needsBrowserCoverage).toBe(true);
+		expect(browserSource.includes('testUniversalConformance')).toBe(
+			entry.conformanceTier === 'universal',
+		);
+		expect(browserSource.includes('testFieldShapedConformance')).toBe(
+			entry.conformanceTier === 'field-shaped',
+		);
+		expect(browserSource.includes('testIntegration')).toBe(
+			entry.integrationTripwire === 'required',
+		);
 		expect(existsSync(visualTestPath)).toBe(entry.visualApplicability === 'applicable');
 	}
 });
