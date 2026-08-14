@@ -1,5 +1,4 @@
 import { expect, test } from 'vite-plus/test';
-import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
@@ -198,15 +197,22 @@ test('open option and selection states', async () => {
 			{renderCountryItem}
 		</ComboboxField>,
 	);
-	const input = page.getByRole('combobox', { name: 'Country' });
 
-	await openComboboxList(input);
+	const input = page.getByRole('combobox', { name: 'Country' });
+	await userEvent.click(input);
 	await captureVisual(
 		page.elementLocator(document.body),
 		'combobox-field/open-selected-disabled-loading',
 	);
-	await userEvent.keyboard('{Home}');
-	await captureFocusedOption('Australia', 'combobox-field/option-keyboard-focus');
+});
+
+test('option keyboard focus', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	await captureFocusedOption('combobox-field/option-keyboard-focus');
 });
 
 test('option keyboard focus in dark mode', async () => {
@@ -216,10 +222,7 @@ test('option keyboard focus in dark mode', async () => {
 		</ComboboxField>,
 		{ appearance: { mode: 'dark', theme: 'tactile' } },
 	);
-	const input = page.getByRole('combobox', { name: 'Country' });
-	await openComboboxList(input);
-	await userEvent.keyboard('{Home}');
-	await captureFocusedOption('Australia', 'combobox-field/option-keyboard-focus-tactile-dark');
+	await captureFocusedOption('combobox-field/option-keyboard-focus-tactile-dark');
 });
 
 test('option with leading icon at both sizes', async () => {
@@ -389,6 +392,21 @@ test('rich section title', async () => {
 });
 
 /**
+ * Opens with a click, then moves keyboard focus onto the first option. The capture is the option
+ * itself, so the overlay wash is in the screenshot.
+ */
+async function captureFocusedOption(id: string) {
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	await userEvent.keyboard('{ArrowDown}');
+	const option = page.getByRole('option', { exact: true, name: 'Australia' });
+	await expect.poll(() => option.element().getAttribute('data-focused')).toBe('true');
+	const popover = page.getByRole('listbox').element().parentElement;
+	if (popover == null) throw new Error('Expected the popover element.');
+	await waitForOverlayEnter(popover);
+	await captureVisual(option, id);
+}
+
+/**
  * Waits for the tray to finish opening before a capture. The screenshot owns the resting geometry,
  * so nothing here measures a position.
  */
@@ -400,35 +418,4 @@ async function waitForMobileTrayToSettle() {
 	if (overlay == null) throw new Error('Expected the mobile modal structure.');
 
 	await waitForOverlayEnter(overlay);
-}
-
-async function openComboboxList(input: Locator) {
-	await focusViaKeyboard(input);
-	await userEvent.keyboard('{ArrowDown}');
-	await waitForComboboxPopover();
-}
-
-async function waitForComboboxPopover() {
-	const body = page.elementLocator(document.body);
-	await expect.poll(() => body.getByRole('combobox').element().getAttribute('aria-expanded')).toBe(
-		'true',
-	);
-	const listbox = body.getByRole('listbox');
-	await expect.element(listbox).toBeInTheDocument();
-	const popover = listbox.element().parentElement;
-	if (popover == null) throw new Error('Expected the popover element.');
-	// The list can include a loading spinner, so wait on the popover itself, not its subtree.
-	await expect.poll(() => popover.hasAttribute('data-entering')).toBe(false);
-	await expect.poll(() => popover.getAnimations().length).toBe(0);
-}
-
-async function captureFocusedOption(name: string, id: string) {
-	const focusedOption = page.elementLocator(document.body).getByRole('option', {
-		exact: true,
-		name,
-	});
-	await expect.element(focusedOption).toBeInTheDocument();
-	await expect.poll(() => focusedOption.element().getAttribute('data-focused')).toBe('true');
-	await expect.poll(() => focusedOption.element().getAnimations().length).toBe(0);
-	await captureVisual(focusedOption, id);
 }
