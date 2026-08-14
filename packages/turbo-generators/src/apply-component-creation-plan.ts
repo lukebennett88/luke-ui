@@ -1,11 +1,8 @@
 import { dirname, join } from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import * as z from 'zod';
-import {
-	createComponentWork,
-	type ComponentCreationPlan,
-	type PlanFile,
-} from './component-creation-plan.js';
+import type { ComponentCreationPlan, PlanFile } from './component-creation-plan.js';
+import { createComponentWork } from './component-creation-plan.js';
 
 const docsMetaSchema = z.record(z.string(), z.unknown());
 type ComponentCreationWork = ReturnType<typeof createComponentWork>;
@@ -19,7 +16,10 @@ export async function createComponent(
 	return { expected: work.expected, files: work.files };
 }
 
-async function applyComponentCreationPlan(root: string, plan: ComponentCreationWork): Promise<void> {
+async function applyComponentCreationPlan(
+	root: string,
+	plan: ComponentCreationWork,
+): Promise<void> {
 	await Promise.all(plan.files.map((file) => writePlanFile(root, file)));
 	await Promise.all(plan.jsonEdits.map((edit) => applyJsonEdit(root, edit)));
 	await Promise.all(plan.textFileInserts.map((edit) => applyTextInsertEdit(root, edit)));
