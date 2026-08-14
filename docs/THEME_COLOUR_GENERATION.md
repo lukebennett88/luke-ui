@@ -137,7 +137,7 @@ step 12), mixed with transparent: `color.overlay.hover` at 5% and `color.overlay
 The authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated
 per-family alpha track.
 
-`validateContrast` composites those washes over the canvas and recessed surfaces in OKLab, then
-measures the ghost Button foregrounds (`text.primary`, `foreground.accent.rest`,
-`foreground.danger.rest`) against the resulting opaque colour. A `color-mix()` value is never parsed
-as an opaque colour.
+`validateContrast` treats each wash as a translucent colour (the `color-mix()` with transparent),
+paints it over the canvas and recessed surfaces, then measures the ghost Button foregrounds
+(`text.primary`, `foreground.accent.rest`, `foreground.danger.rest`) against that opaque result. A
+`color-mix()` value is never parsed as an opaque colour.

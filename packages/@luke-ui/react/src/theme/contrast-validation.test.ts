@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { extractValue, paperFoundation, splitBlocks, tactileFoundation } from './__fixtures__/theme-css.js';
+import {
+	extractValue,
+	paperFoundation,
+	splitBlocks,
+	tactileFoundation,
+} from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
@@ -141,6 +146,24 @@ describe('buildTheme contrast failures', () => {
 		expect(() => validateContrast('dark', values)).toThrow(
 			/"color.overlay.hover" must be color-mix\(in oklab/,
 		);
+	});
+
+	it('measures ghost overlay contrast from the painted sRGB result', () => {
+		const { values } = modeColorValues('light');
+		values['color.surface.canvas'] = 'oklch(1 0 0)';
+		values['color.overlay.hover'] = 'color-mix(in oklab, oklch(0 0 0) 50%, transparent)';
+		values['color.text.primary'] = 'oklch(0 0 0)';
+
+		const { checks } = validateContrast('light', values);
+		const check = checks.find((candidate) => {
+			return (
+				candidate.foreground === 'color.text.primary' &&
+				candidate.background === 'color.overlay.hover over color.surface.canvas'
+			);
+		});
+		expect(check).toBeDefined();
+		const grayLuminance = ((0.5 + 0.055) / 1.055) ** 2.4;
+		expect(check?.ratio).toBeCloseTo((grayLuminance + 0.05) / 0.05, 5);
 	});
 });
 

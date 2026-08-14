@@ -5,7 +5,7 @@
  */
 
 import type { Oklch } from './color.js';
-import { contrastRatio, mixInOklab, parseColor } from './color.js';
+import { compositeOver, contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import type { ContrastCheck } from './diagnostics.js';
 import type { SemanticColorValues } from './semantic-map.js';
@@ -146,8 +146,8 @@ export function validateContrast(
 		}
 	}
 	// Ghost Button (and IconButton) keep tone-specific foregrounds while hover and pressed paint a
-	// translucent overlay. Composite that wash over the base surfaces in OKLab, then measure the
-	// resulting opaque pair. Do not parse the `color-mix()` string as an opaque colour.
+	// translucent overlay. Mix with transparent sets alpha; painting composites that colour over the
+	// surface. Do not parse the `color-mix()` string as an opaque colour.
 	for (const overlayPath of INTERACTION_OVERLAYS) {
 		const overlayValue = colorValues[overlayPath];
 		if (overlayValue === undefined) throw new Error(`buildTheme did not generate "${overlayPath}"`);
@@ -163,7 +163,7 @@ export function validateContrast(
 	return { checks, failures };
 }
 
-/** Reads an emitted interaction overlay and composites it over an opaque surface in OKLab. */
+/** Reads an emitted `color-mix(..., transparent)` overlay and paints it over an opaque surface. */
 function compositeOverlay(overlayValue: string, overlayPath: string, surface: Oklch): Oklch {
 	const match = INTERACTION_OVERLAY_VALUE.exec(overlayValue);
 	const sourceValue = match?.[1];
@@ -173,5 +173,5 @@ function compositeOverlay(overlayValue: string, overlayPath: string, surface: Ok
 			`"${overlayPath}" must be color-mix(in oklab, oklch(...) N%, transparent); received "${overlayValue}"`,
 		);
 	}
-	return mixInOklab(parseColor(sourceValue), surface, Number(percentText) / 100);
+	return compositeOver(parseColor(sourceValue), surface, Number(percentText) / 100);
 }

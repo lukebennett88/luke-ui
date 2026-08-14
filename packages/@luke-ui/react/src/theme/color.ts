@@ -40,19 +40,20 @@ export function parseColor(input: string): Oklch {
 }
 
 /**
- * Mixes `foreground` over `background` in OKLab. Matches CSS
- * `color-mix(in oklab, foreground <amount * 100>%, transparent)` composited over an opaque
- * background: the result is `amount` of the foreground and the rest of the background.
+ * Paints opaque `source` at `alpha` over opaque `backdrop` with CSS source-over in sRGB.
+ *
+ * `color-mix(in oklab, source N%, transparent)` only produces a translucent colour. This is the
+ * subsequent paint over the surface, not an OKLab interpolation with that surface.
  */
-export function mixInOklab(foreground: Oklch, background: Oklch, amount: number): Oklch {
-	const t = clampUnit(amount);
-	const fg = oklchToOklab(foreground);
-	const bg = oklchToOklab(background);
-	return oklabToOklch({
-		a: bg.a * (1 - t) + fg.a * t,
-		b: bg.b * (1 - t) + fg.b * t,
-		l: bg.l * (1 - t) + fg.l * t,
-	});
+export function compositeOver(source: Oklch, backdrop: Oklch, alpha: number): Oklch {
+	const t = clampUnit(alpha);
+	const src = oklchToSrgb(source);
+	const dst = oklchToSrgb(backdrop);
+	return srgbToOklch([
+		dst[0] * (1 - t) + src[0] * t,
+		dst[1] * (1 - t) + src[1] * t,
+		dst[2] * (1 - t) + src[2] * t,
+	]);
 }
 
 /**
@@ -170,6 +171,19 @@ function trimNumber(value: number, digits: number): string {
 
 function srgbToLinear(channel: number): number {
 	return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+function linearToSrgb(channel: number): number {
+	return channel <= 0.0031308 ? channel * 12.92 : 1.055 * channel ** (1 / 2.4) - 0.055;
+}
+
+function oklchToSrgb(color: Oklch): SrgbTriple {
+	const [r, g, b] = oklchToLinearSrgb(gamutMapOklch(color));
+	return [linearToSrgb(clampUnit(r)), linearToSrgb(clampUnit(g)), linearToSrgb(clampUnit(b))];
+}
+
+function srgbToOklch(rgb: SrgbTriple): Oklch {
+	return linearSrgbToOklch([srgbToLinear(rgb[0]), srgbToLinear(rgb[1]), srgbToLinear(rgb[2])]);
 }
 
 function isInSrgbGamut(color: Oklch): boolean {

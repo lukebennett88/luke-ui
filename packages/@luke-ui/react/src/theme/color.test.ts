@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { contrastRatio, formatOklch, gamutMapOklch, mixInOklab, parseColor } from './color.js';
+import { compositeOver, contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
 
 describe('parseColor', () => {
 	it('round-trips a hex colour through OKLCH formatting', () => {
@@ -24,18 +24,37 @@ describe('parseColor', () => {
 	});
 });
 
-describe('mixInOklab', () => {
-	it('returns the background at amount 0 and the foreground at amount 1', () => {
-		const foreground = parseColor('oklch(0.3 0 0)');
-		const background = parseColor('oklch(0.99 0 0)');
-		expect(mixInOklab(foreground, background, 0)).toEqual(background);
-		expect(mixInOklab(foreground, background, 1)).toEqual(foreground);
+describe('compositeOver', () => {
+	function srgbToLinear(channel: number): number {
+		return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+	}
+
+	function contrastFromLuminance(a: number, b: number): number {
+		const lighter = Math.max(a, b);
+		const darker = Math.min(a, b);
+		return (lighter + 0.05) / (darker + 0.05);
+	}
+
+	it('paints 50% black over white as sRGB gray, not an OKLab mix', () => {
+		const result = compositeOver(parseColor('#000000'), parseColor('#ffffff'), 0.5);
+		const grayLuminance = srgbToLinear(0.5);
+		expect(contrastRatio(parseColor('#000000'), result)).toBeCloseTo(
+			contrastFromLuminance(0, grayLuminance),
+			5,
+		);
+		expect(contrastRatio(parseColor('#ffffff'), result)).toBeCloseTo(
+			contrastFromLuminance(1, grayLuminance),
+			5,
+		);
 	});
 
-	it('mixes 10% of a dark foreground into a light background in OKLab', () => {
-		const mixed = mixInOklab(parseColor('oklch(0.3 0 0)'), parseColor('oklch(0.99 0 0)'), 0.1);
-		expect(mixed.l).toBeCloseTo(0.921, 5);
-		expect(mixed.c).toBeCloseTo(0, 5);
+	it('paints 50% blue over white using sRGB source-over', () => {
+		const result = compositeOver(parseColor('#0000ff'), parseColor('#ffffff'), 0.5);
+		const paintedLuminance = 0.2126 * srgbToLinear(0.5) + 0.7152 * srgbToLinear(0.5) + 0.0722;
+		expect(contrastRatio(parseColor('#000000'), result)).toBeCloseTo(
+			contrastFromLuminance(0, paintedLuminance),
+			5,
+		);
 	});
 });
 
