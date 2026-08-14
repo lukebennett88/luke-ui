@@ -212,7 +212,7 @@ test('option keyboard focus', async () => {
 			{renderCountryItem}
 		</ComboboxField>,
 	);
-	await captureFocusedOption('combobox-field/option-keyboard-focus');
+	await captureVisual(await openFocusedComboboxOption(), 'combobox-field/option-keyboard-focus');
 });
 
 test('option keyboard focus in dark mode', async () => {
@@ -222,7 +222,10 @@ test('option keyboard focus in dark mode', async () => {
 		</ComboboxField>,
 		{ appearance: { mode: 'dark', theme: 'tactile' } },
 	);
-	await captureFocusedOption('combobox-field/option-keyboard-focus-tactile-dark');
+	await captureVisual(
+		await openFocusedComboboxOption(),
+		'combobox-field/option-keyboard-focus-tactile-dark',
+	);
 });
 
 test('option with leading icon at both sizes', async () => {
@@ -397,9 +400,13 @@ test('rich section title', async () => {
  * The page is captured rather than the option: Playwright's element screenshot also scrolls, which
  * detaches the portalled list.
  */
-async function captureFocusedOption(id: string) {
-	const scrollIntoView = Element.prototype.scrollIntoView;
-	Element.prototype.scrollIntoView = () => {};
+async function openFocusedComboboxOption() {
+	const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView');
+	if (descriptor == null) throw new Error('Expected Element.prototype.scrollIntoView');
+	Object.defineProperty(Element.prototype, 'scrollIntoView', {
+		...descriptor,
+		value: () => {},
+	});
 	try {
 		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
 		await userEvent.keyboard('{ArrowDown}');
@@ -408,9 +415,9 @@ async function captureFocusedOption(id: string) {
 		const popover = page.getByRole('listbox').element().parentElement;
 		if (popover == null) throw new Error('Expected the popover element.');
 		await waitForOverlayEnter(popover);
-		await captureVisual(page.elementLocator(document.body), id);
+		return page.elementLocator(document.body);
 	} finally {
-		Element.prototype.scrollIntoView = scrollIntoView;
+		Object.defineProperty(Element.prototype, 'scrollIntoView', descriptor);
 	}
 }
 
