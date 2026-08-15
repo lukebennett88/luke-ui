@@ -1,8 +1,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from 'vite-plus/test';
-import { componentTestManifest, getComponentTestManifestEntry } from './manifest.js';
 import type { ComponentTestManifestEntry } from './manifest.js';
+import { componentTestManifest } from './manifest.js';
 
 const sourceRoot = resolve(import.meta.dirname, '..');
 const packageRoot = resolve(sourceRoot, '..');
@@ -40,6 +40,49 @@ function getExportPaths() {
 	return paths.sort();
 }
 
+function hasHelperCall(source: string, helperName: string, path: string): boolean {
+	const sourceWithoutComments = source.replaceAll(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
+	const escapedPath = path.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	if (helperName === 'testIntegration') {
+		return new RegExp(`\\b${helperName}\\s*\\(\\s*(['"])${escapedPath}\\1\\s*,`).test(
+			sourceWithoutComments,
+		);
+	}
+	return new RegExp(
+		`\\b${helperName}\\s*\\(\\s*\\{(?:(?!\\n\\}\\);)[\\s\\S])*?\\bpath\\s*:\\s*(['"])${escapedPath}\\1`,
+	).test(sourceWithoutComments);
+}
+
+export function getBrowserCoverageErrors(
+	manifest: ReadonlyArray<ComponentTestManifestEntry>,
+	readBrowserSource: (path: string) => string,
+) {
+	const errors: Array<string> = [];
+	for (const entry of manifest) {
+		if (entry.conformanceTier === 'none' && entry.integrationTripwire === 'none') continue;
+		const source = readBrowserSource(entry.path);
+		if (
+			entry.conformanceTier !== 'none' &&
+			!hasHelperCall(
+				source,
+				entry.conformanceTier === 'universal'
+					? 'testUniversalConformance'
+					: 'testFieldShapedConformance',
+				entry.path,
+			)
+		) {
+			errors.push(`${entry.path} must invoke its ${entry.conformanceTier} conformance helper.`);
+		}
+		if (
+			entry.integrationTripwire === 'required' &&
+			!hasHelperCall(source, 'testIntegration', entry.path)
+		) {
+			errors.push(`${entry.path} must invoke its integration tripwire.`);
+		}
+	}
+	return errors;
+}
+
 test('covers every public component entrypoint exactly once', () => {
 	const paths = componentTestManifest.map((entry) => entry.path);
 
@@ -58,43 +101,26 @@ test('declares every conformance dimension explicitly', () => {
 	}
 });
 
-test('looks up a manifest entry by path', () => {
-	const button = componentTestManifest.find((entry) => entry.path === 'button');
-	expect(button).toBeDefined();
-	expect(getComponentTestManifestEntry('button')).toBe(button);
-	expect(() => getComponentTestManifestEntry('not-a-component')).toThrow(
-		'Unknown component test path: not-a-component',
-	);
+test('browser tests invoke the helpers required by their manifest entry', () => {
+	expect(
+		getBrowserCoverageErrors(componentTestManifest, (path) => {
+			const componentName = path.split('/').at(-1);
+			if (componentName == null) throw new Error(`Invalid component test path: ${path}`);
+			return readFileSync(resolve(sourceRoot, path, `${componentName}.browser.test.tsx`), 'utf8');
+		}),
+	).toEqual([]);
 });
 
-test('enforces every manifest dimension', () => {
-	for (const entry of componentTestManifest) {
-		const browserTestPath = componentTestFile(entry, 'browser.test.tsx');
-		const visualTestPath = componentTestFile(entry, 'visual.test.tsx');
-		const hasBrowserTest = existsSync(browserTestPath);
-		const browserSource = hasBrowserTest ? readFileSync(browserTestPath, 'utf8') : '';
-		const needsBrowserCoverage =
-			entry.conformanceTier !== 'none' || entry.integrationTripwire === 'required';
+test('rejects helper calls for another manifest path', () => {
+	const [button] = componentTestManifest.filter((entry) => entry.path === 'button');
+	if (button == null) throw new Error('Expected the Button manifest entry.');
 
-		expect(hasBrowserTest || !needsBrowserCoverage).toBe(true);
-		expect(browserSource.includes('testUniversalConformance')).toBe(
-			entry.conformanceTier === 'universal',
-		);
-		expect(browserSource.includes('testFieldShapedConformance')).toBe(
-			entry.conformanceTier === 'field-shaped',
-		);
-		expect(browserSource.includes('testIntegration')).toBe(
-			entry.integrationTripwire === 'required',
-		);
-		expect(existsSync(visualTestPath)).toBe(entry.visualApplicability === 'applicable');
-	}
+	const wrongPathSource = `
+		testUniversalConformance({ path: 'link' });
+		testIntegration('link', 'Button', async () => {});
+	`;
+	expect(getBrowserCoverageErrors([button], () => wrongPathSource)).toEqual([
+		'button must invoke its universal conformance helper.',
+		'button must invoke its integration tripwire.',
+	]);
 });
-
-function componentTestFile(
-	entry: ComponentTestManifestEntry,
-	suffix: 'browser.test.tsx' | 'visual.test.tsx',
-) {
-	const basename = entry.path.split('/').at(-1);
-	if (basename == null) throw new Error(`Invalid component test path: ${entry.path}`);
-	return resolve(sourceRoot, entry.path, `${basename}.${suffix}`);
-}

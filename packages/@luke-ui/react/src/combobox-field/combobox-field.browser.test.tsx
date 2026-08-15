@@ -24,6 +24,7 @@ const countryItems: Array<CountryItem> = [
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
 testFieldShapedConformance({
+	path: 'combobox-field',
 	assertAssociation: (result) => {
 		// oxlint-disable-next-line vitest/no-standalone-expect
 		expect(result.locator.getByRole('combobox', { name: 'Country' }).element()).toHaveAttribute(
@@ -43,12 +44,8 @@ testFieldShapedConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
 		return control;
 	},
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a combobox root.');
-		return target;
-	},
-	path: 'combobox-field',
+
+	name: 'ComboboxField',
 	render: (props = {}) => {
 		return render(
 			<ComboboxField<CountryItem>
@@ -63,7 +60,7 @@ testFieldShapedConformance({
 	},
 });
 
-testIntegration('combobox-field', async () => {
+testIntegration('combobox-field', 'ComboboxField', async () => {
 	const { locator, user } = render(
 		<ComboboxField defaultItems={countryItems} label="Country">
 			{renderCountryItem}

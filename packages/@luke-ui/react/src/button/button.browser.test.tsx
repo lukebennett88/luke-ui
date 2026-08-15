@@ -4,18 +4,19 @@ import { render } from '../test-utils/render.js';
 import { Button } from './index.js';
 
 testUniversalConformance({
+	path: 'button',
 	getTarget: (result) => {
 		const target = result.locator.getByRole('button').element();
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a button.');
 		return target;
 	},
-	path: 'button',
+	name: 'Button',
 	render: (props = {}) => {
 		return render(<Button {...props}>Action</Button>);
 	},
 });
 
-testIntegration('button', async () => {
+testIntegration('button', 'Button', async () => {
 	let pressed = false;
 	const { locator, user } = render(<Button onPress={() => (pressed = true)}>Action</Button>);
 

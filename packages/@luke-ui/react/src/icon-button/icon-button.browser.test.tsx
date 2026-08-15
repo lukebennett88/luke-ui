@@ -4,18 +4,19 @@ import { render } from '../test-utils/render.js';
 import { IconButton } from './index.js';
 
 testUniversalConformance({
+	path: 'icon-button',
 	getTarget: (result) => {
 		const target = result.locator.getByRole('button', { name: 'Add' }).element();
 		if (!(target instanceof HTMLElement)) throw new Error('Expected an icon button.');
 		return target;
 	},
-	path: 'icon-button',
+	name: 'IconButton',
 	render: (props = {}) => {
 		return render(<IconButton {...props} aria-label="Add" icon="add" />);
 	},
 });
 
-testIntegration('icon-button', async () => {
+testIntegration('icon-button', 'IconButton', async () => {
 	let pressed = false;
 	const { locator, user } = render(
 		<IconButton aria-label="Add" icon="add" onPress={() => (pressed = true)} />,
