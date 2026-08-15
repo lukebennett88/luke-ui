@@ -5,7 +5,7 @@ import {
 	splitBlocks,
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
-import { buildTheme, compileTheme, ThemeGenerationError } from './build-theme.js';
+import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
 import { contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeFoundation } from './foundation.js';
@@ -35,79 +35,39 @@ describe('buildTheme independent modes', () => {
 	});
 });
 
-describe('buildTheme generation failures', () => {
-	function buildGenerationError(foundation: ThemeFoundation): ThemeGenerationError {
-		const caught = (() => {
-			try {
-				buildTheme(foundation);
-				return null;
-			} catch (error) {
-				return error;
-			}
-		})();
-		if (caught instanceof ThemeGenerationError) return caught;
-		throw new Error('expected buildTheme to throw ThemeGenerationError');
-	}
-
-	// Every semantic role publishes a solid, so every role must reach an accessible
-	// solid/on-solid pair — a status source in an on-solid dead zone is a build failure,
-	// not a silently unguaranteed solid. Status sources are used verbatim (only a
-	// single-value accent is pre-conditioned into an accessible band), so an authored
-	// one reaches the generator exactly as written.
-	it('throws ThemeGenerationError naming the role, mode, and achieved ratio for a dead-zone warning', () => {
-		const error = buildGenerationError({
-			...tactileFoundation,
-			light: {
-				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, warning: 'oklch(0.62 0.19 27)' },
-			},
-			name: 'bad-warning',
-		});
-
-		expect(error.role).toBe('warning');
-		expect(error.mode).toBe('light');
-		expect(error.bestAttempt.step).toBe(9);
-		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		expect(error.message).toContain('Cannot generate the light "warning" family');
-		expect(error.message).toContain(`${error.bestAttempt.onSolidRatio.toFixed(2)}:1`);
-		// Warning is generated fifth, so the four roles before it are reported and the last one is not.
-		expect(Object.keys(error.diagnostics.completedFamilies)).toEqual([
-			'neutral',
-			'accent',
-			'info',
-			'success',
-		]);
+describe('buildTheme former step-10 dead zones', () => {
+	it('generates a mid-lightness warning instead of rejecting it at family generation', () => {
+		expect(() => {
+			return buildTheme({
+				...tactileFoundation,
+				light: {
+					...tactileFoundation.light,
+					color: { ...tactileFoundation.light.color, warning: 'oklch(0.62 0.19 27)' },
+				},
+				name: 'adapted-warning',
+			});
+		}).not.toThrow();
 	});
 
-	it('throws ThemeGenerationError for an accent no on-solid text can sit on', () => {
+	it('lets validateContrast, not a synthetic step-10 hover, reject an explicit mid-lightness accent', () => {
 		const caught = (() => {
 			try {
-				// A mid-lightness tone whose whole solid window is an on-solid dead zone: neither near-white
-				// nor near-black on-solid text clears AA anywhere the search can reach.
 				buildTheme({
 					...tactileFoundation,
 					light: {
 						...tactileFoundation.light,
 						color: { ...tactileFoundation.light.color, accent: 'oklch(0.62 0.19 27)' },
 					},
-					name: 'bad-accent',
+					name: 'mid-accent',
 				});
 				return null;
 			} catch (error) {
 				return error;
 			}
 		})();
-		expect(caught).toBeInstanceOf(ThemeGenerationError);
-		const error = caught as ThemeGenerationError;
-		expect(error.role).toBe('accent');
-		expect(error.mode).toBe('light');
-		expect(error.bestAttempt.step).toBe(9);
-		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		// The partial diagnostics carry the failing role/mode and the families resolved before it.
-		expect(error.diagnostics.role).toBe('accent');
-		expect(error.diagnostics.mode).toBe('light');
-		expect(error.diagnostics.completedFamilies.neutral).toBeDefined();
-		expect(error.diagnostics.completedFamilies.accent).toBeUndefined();
+		expect(caught).toBeInstanceOf(ThemeContrastError);
+		const error = caught as ThemeContrastError;
+		expect(error.failures.every((failure) => failure.background.includes(' over '))).toBe(true);
 	});
 });
 
