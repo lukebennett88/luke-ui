@@ -1,16 +1,37 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { ZodError } from 'zod';
 import {
 	parseComponentFrontmatter,
 	renderPropsPage,
 } from '../../../apps/docs/scripts/generate-props-pages.js';
-import { createComponentPlan } from './component-creation-plan.js';
+import {
+	COMPONENT_DEFAULTS,
+	createComponentPlan,
+	parseComponentAnswers,
+} from './component-creation-plan.js';
 
-describe('createComponentPlan', () => {
-	it('plans a component with a colocated recipe across package and hosted docs surfaces', () => {
-		const plan = createComponentPlan({
+const validAnswers = {
+	docsGroup: 'feedback',
+	name: 'StatusBadge',
+} as const;
+
+describe('parseComponentAnswers', () => {
+	it('rejects invalid docs group answers', () => {
+		expect(() => parseComponentAnswers({ ...validAnswers, docsGroup: 'layout' })).toThrow(ZodError);
+	});
+
+	it('defaults test applicability for omitted answers', () => {
+		expect(parseComponentAnswers(validAnswers)).toEqual({
+			...COMPONENT_DEFAULTS,
 			docsGroup: 'feedback',
 			name: 'StatusBadge',
 		});
+	});
+});
+
+describe('createComponentPlan', () => {
+	it('plans a component with a colocated recipe across package and hosted docs surfaces', () => {
+		const plan = createComponentPlan(validAnswers);
 
 		expect(plan.expected).toEqual({
 			exampleSlug: 'status-badge/basic',
@@ -28,16 +49,9 @@ describe('createComponentPlan', () => {
 			'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
 			'packages/@luke-ui/react/src/status-badge/status-badge.visual.test.tsx',
 		]);
-		expect(plan.sortedImportEdits).toEqual([
-			{
-				kind: 'sorted-import',
-				line: "import '../status-badge/recipe.css.js';",
-				path: 'packages/@luke-ui/react/src/styles/modules.css.ts',
-			},
-		]);
-		expect(plan.textFileInserts?.[0]?.lines).toEqual([
-			"\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],",
-		]);
+		expect(plan).not.toHaveProperty('jsonEdits');
+		expect(plan).not.toHaveProperty('sortedImportEdits');
+		expect(plan).not.toHaveProperty('textFileInserts');
 
 		const recipeSource = plan.files.find((file) =>
 			file.path.endsWith('/status-badge/recipe.css.ts'),
@@ -62,55 +76,6 @@ describe('createComponentPlan', () => {
 		);
 	});
 
-	it('scaffolds field-shaped conformance coverage without a universal target', () => {
-		const plan = createComponentPlan({
-			conformanceTier: 'field-shaped',
-			docsGroup: 'forms',
-			name: 'DateField',
-		});
-
-		expect(plan.textFileInserts?.[0]?.lines).toEqual([
-			"\t['DateField', 'date-field', 'field-shaped', 'none', 'applicable'],",
-		]);
-		const browserTest = plan.files.find((file) =>
-			file.path.endsWith('/date-field.browser.test.tsx'),
-		)?.contents;
-		expect(browserTest).toContain('testFieldShapedConformance');
-		expect(browserTest).toContain("path: 'date-field'");
-		expect(browserTest).not.toContain('getTarget');
-		expect(browserTest).not.toContain("name: 'DateField'");
-	});
-
-	it('scaffolds integration tripwire coverage when requested', () => {
-		const plan = createComponentPlan({
-			docsGroup: 'actions',
-			integrationTripwire: true,
-			name: 'ActionChip',
-		});
-
-		expect(plan.textFileInserts?.[0]?.lines).toEqual([
-			"\t['ActionChip', 'action-chip', 'universal', 'required', 'applicable'],",
-		]);
-		expect(
-			plan.files.find((file) => file.path.endsWith('/action-chip.browser.test.tsx'))?.contents,
-		).toContain("testIntegration('action-chip', async");
-	});
-
-	it('omits visual coverage when it does not apply', () => {
-		const plan = createComponentPlan({
-			docsGroup: 'forms',
-			name: 'DateField',
-			visualCoverage: false,
-		});
-
-		expect(plan.files.map((file) => file.path)).not.toContain(
-			'packages/@luke-ui/react/src/date-field/date-field.visual.test.tsx',
-		);
-		expect(plan.textFileInserts?.[0]?.lines).toEqual([
-			"\t['DateField', 'date-field', 'universal', 'none', 'none'],",
-		]);
-	});
-
 	it('rejects invalid component names before file writes', () => {
 		expect(() => {
 			return createComponentPlan({
@@ -121,10 +86,7 @@ describe('createComponentPlan', () => {
 	});
 
 	it('scaffolds a <group>/<name>.mdx guide that generate:props can turn into a props.mdx', () => {
-		const plan = createComponentPlan({
-			docsGroup: 'feedback',
-			name: 'StatusBadge',
-		});
+		const plan = createComponentPlan(validAnswers);
 
 		const guide = plan.files.find((file) => {
 			return file.path.endsWith('feedback/status-badge.mdx');

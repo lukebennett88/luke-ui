@@ -35,8 +35,9 @@ Public subpath `index.ts` files are export-only. A component's implementation li
 sibling file. Support modules and multi-part primitives each keep their own file.
 
 The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`.
-Turbo and Plop are adapters that apply the plan. Keep new creation rules in the plan module so
-dry-run tests can prove which files, exports, stories, docs, and checks a component needs.
+That module owns component-name validation, documentation groups, conformance tiers, and defaults.
+Turbo and Plop collect answers and invoke that flow. Keep new creation rules in the plan module so
+tests can prove the files, exports, stories, docs, and checks a component needs.
 
 The generator creates the component guide's primary `apps/docs/src/examples/<component>/basic.tsx`
 example and references it with `ExampleBlock`. Replace the placeholder content with one focused,

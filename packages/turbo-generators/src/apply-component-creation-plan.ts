@@ -1,26 +1,29 @@
 import { dirname, join } from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import * as z from 'zod';
-import type {
-	ComponentCreationPlan,
-	JsonArrayAddSortedEdit,
-	PlanFile,
-	SortedImportEdit,
-	TextFileInsertEdit,
-} from './component-creation-plan.js';
+import type { ComponentCreationPlan, PlanFile } from './component-creation-plan.js';
+import { createComponentWork, parseComponentAnswers } from './component-creation-plan.js';
 
 const docsMetaSchema = z.record(z.string(), z.unknown());
+type ComponentCreationWork = ReturnType<typeof createComponentWork>;
 
-export async function applyComponentCreationPlan(
+export async function createComponent(
 	root: string,
-	plan: ComponentCreationPlan,
+	answers: unknown,
+): Promise<ComponentCreationPlan> {
+	const work = createComponentWork(parseComponentAnswers(answers));
+	await applyComponentCreationPlan(root, work);
+	return { expected: work.expected, files: work.files };
+}
+
+async function applyComponentCreationPlan(
+	root: string,
+	plan: ComponentCreationWork,
 ): Promise<void> {
 	await Promise.all(plan.files.map((file) => writePlanFile(root, file)));
 	await Promise.all(plan.jsonEdits.map((edit) => applyJsonEdit(root, edit)));
-	await Promise.all((plan.textFileInserts ?? []).map((edit) => applyTextInsertEdit(root, edit)));
-	await Promise.all(
-		(plan.sortedImportEdits ?? []).map((edit) => applySortedImportEdit(root, edit)),
-	);
+	await Promise.all(plan.textFileInserts.map((edit) => applyTextInsertEdit(root, edit)));
+	await Promise.all(plan.sortedImportEdits.map((edit) => applySortedImportEdit(root, edit)));
 }
 
 async function writePlanFile(root: string, file: PlanFile): Promise<void> {
@@ -29,7 +32,10 @@ async function writePlanFile(root: string, file: PlanFile): Promise<void> {
 	await writeFile(target, file.contents, 'utf8');
 }
 
-async function applyJsonEdit(root: string, edit: JsonArrayAddSortedEdit): Promise<void> {
+async function applyJsonEdit(
+	root: string,
+	edit: ComponentCreationWork['jsonEdits'][number],
+): Promise<void> {
 	const target = join(root, edit.path);
 	await mkdir(dirname(target), { recursive: true });
 	const data = await readJson(target, edit.title);
@@ -52,7 +58,10 @@ async function readJson(path: string, title: string): Promise<Record<string, unk
 	}
 }
 
-async function applySortedImportEdit(root: string, edit: SortedImportEdit): Promise<void> {
+async function applySortedImportEdit(
+	root: string,
+	edit: ComponentCreationWork['sortedImportEdits'][number],
+): Promise<void> {
 	const target = join(root, edit.path);
 	await mkdir(dirname(target), { recursive: true });
 	const content = await readFile(target, 'utf8').catch(() => '');
@@ -90,7 +99,10 @@ function insertSortedImport(content: string, line: string): string {
 	return `${[...header, ...imports, ...footer].join('\n')}\n`;
 }
 
-async function applyTextInsertEdit(root: string, edit: TextFileInsertEdit): Promise<void> {
+async function applyTextInsertEdit(
+	root: string,
+	edit: ComponentCreationWork['textFileInserts'][number],
+): Promise<void> {
 	const target = join(root, edit.path);
 	const content = await readFile(target, 'utf8');
 	const insertion = edit.lines.join('\n');

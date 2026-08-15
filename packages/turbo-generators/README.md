@@ -19,6 +19,6 @@ pnpm generate:component
 
 ## Structure
 
-- `config.ts`: Turbo/Plop adapter.
-- `src/component-creation-plan.ts`: Component creation rules and expected outcomes.
-- `src/apply-component-creation-plan.ts`: File and JSON edit adapter.
+- `config.ts`: Turbo/Plop adapter that collects answers and invokes the creation flow.
+- `src/component-creation-plan.ts`: Generator rules, answer parsing, and planned files.
+- `src/apply-component-creation-plan.ts`: Applies a parsed scaffold to the repository.

@@ -1,36 +1,18 @@
-type ConformanceTier = 'universal' | 'field-shaped' | 'none';
+import * as z from 'zod';
 
-export interface CreateComponentInput {
-	conformanceTier?: ConformanceTier;
-	docsGroup: string;
-	integrationTripwire?: boolean;
-	name: string;
-	visualCoverage?: boolean;
-}
+export const CONFORMANCE_TIERS = ['universal', 'field-shaped', 'none'] as const;
+export const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
+
+export const COMPONENT_DEFAULTS = {
+	conformanceTier: 'universal',
+	integrationTripwire: false,
+	visualCoverage: true,
+} as const;
+
+export type ConformanceTier = (typeof CONFORMANCE_TIERS)[number];
 
 export interface PlanFile {
 	contents: string;
-	path: string;
-}
-
-export interface JsonArrayAddSortedEdit {
-	key: 'pages';
-	kind: 'array-add-sorted';
-	path: string;
-	title: string;
-	value: string;
-}
-
-export interface TextFileInsertEdit {
-	kind: 'text-insert';
-	lines: Array<string>;
-	marker: string;
-	path: string;
-}
-
-export interface SortedImportEdit {
-	kind: 'sorted-import';
-	line: string;
 	path: string;
 }
 
@@ -42,27 +24,90 @@ export interface ComponentCreationPlan {
 		exampleSlug: string;
 	};
 	files: Array<PlanFile>;
+}
+
+interface JsonArrayAddSortedEdit {
+	key: 'pages';
+	kind: 'array-add-sorted';
+	path: string;
+	title: string;
+	value: string;
+}
+
+interface TextFileInsertEdit {
+	kind: 'text-insert';
+	lines: Array<string>;
+	marker: string;
+	path: string;
+}
+
+interface SortedImportEdit {
+	kind: 'sorted-import';
+	line: string;
+	path: string;
+}
+
+interface ComponentCreationWork extends ComponentCreationPlan {
 	jsonEdits: Array<JsonArrayAddSortedEdit>;
-	textFileInserts?: Array<TextFileInsertEdit>;
-	sortedImportEdits?: Array<SortedImportEdit>;
+	sortedImportEdits: Array<SortedImportEdit>;
+	textFileInserts: Array<TextFileInsertEdit>;
 }
 
 const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
 const CAMEL_BOUNDARY_RE = /([a-z0-9])([A-Z])/g;
 const NON_ALPHANUM_RE = /[^A-Za-z0-9-]/g;
 
-export function createComponentPlan(input: CreateComponentInput): ComponentCreationPlan {
-	const name = parseName(input.name);
-	const docsGroup = parseDocsGroup(input.docsGroup);
+const componentAnswersSchema = z.object({
+	conformanceTier: z.enum(CONFORMANCE_TIERS).default(COMPONENT_DEFAULTS.conformanceTier),
+	docsGroup: z.enum(DOC_GROUPS),
+	integrationTripwire: z.boolean().default(COMPONENT_DEFAULTS.integrationTripwire),
+	name: z.string(),
+	visualCoverage: z.boolean().default(COMPONENT_DEFAULTS.visualCoverage),
+});
+
+export type CreateComponentInput = z.input<typeof componentAnswersSchema>;
+type ParsedComponentAnswers = z.output<typeof componentAnswersSchema>;
+
+export function validateComponentName(value: unknown): true | string {
+	if (typeof value !== 'string') {
+		return 'Component name required.';
+	}
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return 'Component name required.';
+	}
+	if (!COMPONENT_NAME_RE.test(trimmed)) {
+		return 'Use letters/numbers/hyphens. Start with a letter.';
+	}
+	return true;
+}
+
+export function parseComponentAnswers(answers: unknown): ParsedComponentAnswers {
+	const parsed = componentAnswersSchema.parse(answers);
+	const nameCheck = validateComponentName(parsed.name);
+	if (nameCheck !== true) {
+		throw new Error(nameCheck);
+	}
+	return parsed;
+}
+
+export function createComponentPlan(answers: CreateComponentInput): ComponentCreationPlan {
+	const { expected, files } = createComponentWork(parseComponentAnswers(answers));
+	return { expected, files };
+}
+
+export function createComponentWork(input: ParsedComponentAnswers): ComponentCreationWork {
+	const name = toKebabCase(input.name);
+	const docsGroup = input.docsGroup;
 	const displayName = toDisplayName(name);
 	const pascalName = displayName.replaceAll(' ', '');
 	const camelName = toCamelCase(name);
 	const recipeName = `${camelName}Recipe`;
 	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/${name}`;
-	const conformanceTier = input.conformanceTier ?? 'universal';
-	const integrationTripwire = input.integrationTripwire === true ? 'required' : 'none';
-	const visualApplicability = input.visualCoverage === false ? 'none' : 'applicable';
+	const conformanceTier = input.conformanceTier;
+	const integrationTripwire = input.integrationTripwire ? 'required' : 'none';
+	const visualApplicability = input.visualCoverage ? 'applicable' : 'none';
 
 	const files: Array<PlanFile> = [
 		{
@@ -107,7 +152,7 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 		},
 	];
 
-	if (input.visualCoverage !== false) {
+	if (input.visualCoverage) {
 		files.push({
 			contents: renderVisualTest({ name, pascalName }),
 			path: `packages/@luke-ui/react/src/${name}/${name}.visual.test.tsx`,
@@ -159,25 +204,6 @@ export function createComponentPlan(input: CreateComponentInput): ComponentCreat
 	};
 }
 
-function parseName(value: string): string {
-	const trimmed = value.trim();
-	if (!trimmed) {
-		throw new Error('Component name required.');
-	}
-	if (!COMPONENT_NAME_RE.test(trimmed)) {
-		throw new Error('Use letters/numbers/hyphens. Start with a letter.');
-	}
-	return toKebabCase(trimmed);
-}
-
-function parseDocsGroup(value: string): string {
-	const trimmed = value.trim();
-	if (!trimmed) {
-		throw new Error('Docs group required.');
-	}
-	return toKebabCase(trimmed);
-}
-
 function toKebabCase(value: string): string {
 	return value
 		.trim()
@@ -216,8 +242,8 @@ export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
 
 /** ${input.pascalName} component. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
-\tconst { className, ...divProps } = props;
-\treturn <div {...divProps} className={cx(${input.recipeName}(), className)} />;
+	const { className, ...divProps } = props;
+	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;
 }
 `;
 }
@@ -242,15 +268,15 @@ function renderPackageStory(input: {
 import preview from '../../.storybook/preview.js';
 
 const meta = preview.meta({
-\tcomponent: ${input.pascalName},
-\ttags: ['${input.docsGroup}'],
-\ttitle: '${toDisplayName(input.docsGroup)}/${input.pascalName}',
+	component: ${input.pascalName},
+	tags: ['${input.docsGroup}'],
+	title: '${toDisplayName(input.docsGroup)}/${input.pascalName}',
 });
 
 export const Default = meta.story({
-\targs: {
-\t\tchildren: '${input.pascalName}',
-\t},
+	args: {
+		children: '${input.pascalName}',
+	},
 });
 `;
 }
@@ -374,8 +400,8 @@ props:
 ---
 
 <ExampleBlock
-\tsrc="${input.name}/basic"
-\ttitle="${input.displayName} — Basic"
+	src="${input.name}/basic"
+	title="${input.displayName} — Basic"
 />
 `;
 }
@@ -385,9 +411,9 @@ function renderRecipe(input: { recipeName: string; variantsType: string }): stri
 import { recipe } from '../styles/recipe.js';
 
 export const ${input.recipeName} = recipe({
-\tbase: {
-\t\tdisplay: 'inline-flex',
-\t},
+	base: {
+		display: 'inline-flex',
+	},
 });
 
 export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;

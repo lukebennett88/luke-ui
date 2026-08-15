@@ -3,60 +3,39 @@ import { join } from 'node:path';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 import * as z from 'zod';
-import { applyComponentCreationPlan } from './apply-component-creation-plan.js';
-import type { ComponentCreationPlan } from './component-creation-plan.js';
+import { createComponent } from './apply-component-creation-plan.js';
 
 const roots: Array<string> = [];
+const MANIFEST_MARKER =
+	'].map(([name, path, conformanceTier, integrationTripwire, visualApplicability]) => ({';
 
 afterEach(async () => {
 	await Promise.all(roots.map((root) => rm(root, { force: true, recursive: true })));
 	roots.length = 0;
 });
 
-describe('applyComponentCreationPlan', () => {
-	it('writes files and applies sorted docs navigation edits idempotently', async () => {
-		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
-		roots.push(root);
+describe('createComponent', () => {
+	it('applies parsed answers to a repository fixture and is safe to rerun', async () => {
+		const root = await createRepositoryFixture();
+		const answers = { docsGroup: 'feedback', name: 'StatusBadge' };
 
-		const plan: ComponentCreationPlan = {
-			expected: {
-				exampleSlug: 'status-badge/basic',
-				hostedDocsPath: 'components/feedback/status-badge',
-				packageDocsSlug: 'status-badge',
-				packageExportPath: './status-badge',
-			},
-			files: [
-				{
-					contents: 'export const StatusBadge = 1;\n',
-					path: 'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
-				},
-			],
-			jsonEdits: [
-				{
-					key: 'pages',
-					kind: 'array-add-sorted',
-					path: 'apps/docs/content/docs/components/meta.json',
-					title: 'Components',
-					value: 'feedback',
-				},
-				{
-					key: 'pages',
-					kind: 'array-add-sorted',
-					path: 'apps/docs/content/docs/components/feedback/meta.json',
-					title: 'Feedback',
-					value: 'status-badge',
-				},
-			],
-		};
-
-		await applyComponentCreationPlan(root, plan);
-		await applyComponentCreationPlan(root, plan);
+		await createComponent(root, answers);
+		await createComponent(root, answers);
 
 		await expect(
+			readFile(join(root, 'packages/@luke-ui/react/src/status-badge/index.ts'), 'utf8'),
+		).resolves.toBe(
+			[
+				"export { StatusBadge, type StatusBadgeProps } from './status-badge.js';",
+				"export { statusBadgeRecipe, type StatusBadgeRecipeVariants } from './recipe.css.js';",
+				'',
+			].join('\n'),
+		);
+		await expect(
 			readFile(join(root, 'packages/@luke-ui/react/src/status-badge/status-badge.tsx'), 'utf8'),
-		).resolves.toBe('export const StatusBadge = 1;\n');
+		).resolves.toContain('export function StatusBadge');
 		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
-			pages: ['feedback'],
+			pages: ['actions', 'feedback'],
 			title: 'Components',
 		});
 		await expect(
@@ -65,48 +44,50 @@ describe('applyComponentCreationPlan', () => {
 			pages: ['status-badge'],
 			title: 'Feedback',
 		});
+		expect(await readFile(join(root, modulesRegistryPath), 'utf8')).toBe(
+			[
+				'// Style-producing modules in the shipped stylesheet.',
+				"import '../button/recipe.css.js';",
+				"import '../status-badge/recipe.css.js';",
+				"import '../text/recipe.css.js';",
+				'',
+			].join('\n'),
+		);
+		expect(await readFile(join(root, manifestPath), 'utf8')).toBe(
+			[
+				'const entries = [',
+				"\t['Button', 'button', 'universal', 'required', 'applicable'],",
+				"\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],",
+				MANIFEST_MARKER,
+				'\tname,',
+				'}));',
+				'',
+			].join('\n'),
+		);
+		await expect(
+			readFile(
+				join(root, 'packages/@luke-ui/react/src/status-badge/component-test-registration.ts'),
+				'utf8',
+			),
+		).rejects.toMatchObject({ code: 'ENOENT' });
 	});
 
 	it('inserts a generated recipe import in code-point order', async () => {
-		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
-		roots.push(root);
+		const root = await createRepositoryFixture({
+			modulesRegistry: [
+				'// Style-producing modules in the shipped stylesheet.',
+				"import '../Icon/recipe.css.js';",
+				"import '../button/recipe.css.js';",
+				"import '../icon/recipe.css.js';",
+				"import '../text/recipe.css.js';",
+				'',
+			].join('\n'),
+		});
 
-		const registryPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';
-		const initialContent = [
-			'// Style-producing modules in the shipped stylesheet.',
-			"import '../Icon/recipe.css.js';",
-			"import '../button/recipe.css.js';",
-			"import '../icon/recipe.css.js';",
-			"import '../text/recipe.css.js';",
-			'',
-		].join('\n');
+		await createComponent(root, { docsGroup: 'actions', name: 'IconButton' });
+		await createComponent(root, { docsGroup: 'actions', name: 'IconButton' });
 
-		await mkdir(join(root, 'packages/@luke-ui/react/src/styles'), { recursive: true });
-		await writeFile(join(root, registryPath), initialContent, 'utf8');
-
-		const plan: ComponentCreationPlan = {
-			expected: {
-				exampleSlug: 'status-badge/basic',
-				hostedDocsPath: 'components/actions/status-badge',
-				packageDocsSlug: 'status-badge',
-				packageExportPath: './status-badge',
-			},
-			files: [],
-			jsonEdits: [],
-			sortedImportEdits: [
-				{
-					kind: 'sorted-import',
-					line: "import '../icon-button/recipe.css.js';",
-					path: registryPath,
-				},
-			],
-		};
-
-		await applyComponentCreationPlan(root, plan);
-		await applyComponentCreationPlan(root, plan);
-
-		const result = await readFile(join(root, registryPath), 'utf8');
-		expect(result).toBe(
+		expect(await readFile(join(root, modulesRegistryPath), 'utf8')).toBe(
 			[
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../Icon/recipe.css.js';",
@@ -119,74 +100,120 @@ describe('applyComponentCreationPlan', () => {
 		);
 	});
 
-	it('inserts manifest entries idempotently', async () => {
-		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
-		roots.push(root);
+	it('scaffolds field-shaped conformance on disk', async () => {
+		const root = await createRepositoryFixture();
 
-		const manifestPath = 'packages/@luke-ui/react/src/conformance/manifest.ts';
-		const marker =
-			'].map(([name, path, conformanceTier, integrationTripwire, visualApplicability]) => ({';
-		const initialContent = `const entries = [\n\t['Button', 'button', 'universal', 'required', 'applicable'],\n${marker}\n\tname,\n}));\n`;
-		await mkdir(join(root, 'packages/@luke-ui/react/src/conformance'), { recursive: true });
-		await writeFile(join(root, manifestPath), initialContent, 'utf8');
+		await createComponent(root, {
+			conformanceTier: 'field-shaped',
+			docsGroup: 'forms',
+			name: 'DateField',
+		});
 
-		const plan: ComponentCreationPlan = {
-			expected: {
-				exampleSlug: 'status-badge/basic',
-				hostedDocsPath: 'components/feedback/status-badge',
-				packageDocsSlug: 'status-badge',
-				packageExportPath: './status-badge',
-			},
-			files: [],
-			jsonEdits: [],
-			textFileInserts: [
-				{
-					kind: 'text-insert',
-					lines: ["\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],"],
-					marker,
-					path: manifestPath,
-				},
-			],
-		};
+		const browserTest = await readFile(
+			join(root, 'packages/@luke-ui/react/src/date-field/date-field.browser.test.tsx'),
+			'utf8',
+		);
+		expect(browserTest).toContain('testFieldShapedConformance');
+		expect(browserTest).toContain("path: 'date-field'");
+		expect(browserTest).not.toContain('getTarget');
+		expect(browserTest).not.toContain("name: 'DateField'");
+		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
+			"['DateField', 'date-field', 'field-shaped', 'none', 'applicable']",
+		);
+	});
 
-		await applyComponentCreationPlan(root, plan);
-		await applyComponentCreationPlan(root, plan);
+	it('scaffolds integration tripwire coverage when requested', async () => {
+		const root = await createRepositoryFixture();
 
-		expect(await readFile(join(root, manifestPath), 'utf8')).toBe(
-			`const entries = [\n\t['Button', 'button', 'universal', 'required', 'applicable'],\n\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],\n${marker}\n\tname,\n}));\n`,
+		await createComponent(root, {
+			docsGroup: 'actions',
+			integrationTripwire: true,
+			name: 'ActionChip',
+		});
+
+		expect(
+			await readFile(
+				join(root, 'packages/@luke-ui/react/src/action-chip/action-chip.browser.test.tsx'),
+				'utf8',
+			),
+		).toContain("testIntegration('action-chip', async");
+		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
+			"['ActionChip', 'action-chip', 'universal', 'required', 'applicable']",
+		);
+	});
+
+	it('omits visual coverage when it does not apply', async () => {
+		const root = await createRepositoryFixture();
+
+		await createComponent(root, {
+			docsGroup: 'forms',
+			name: 'DateField',
+			visualCoverage: false,
+		});
+
+		await expect(
+			readFile(
+				join(root, 'packages/@luke-ui/react/src/date-field/date-field.visual.test.tsx'),
+				'utf8',
+			),
+		).rejects.toMatchObject({ code: 'ENOENT' });
+		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
+			"['DateField', 'date-field', 'universal', 'none', 'none']",
 		);
 	});
 
 	it('rejects docs navigation JSON that is not an object', async () => {
-		const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
-		roots.push(root);
+		const root = await createRepositoryFixture();
+		await writeFile(join(root, 'apps/docs/content/docs/components/meta.json'), '[]\n', 'utf8');
 
-		const metaPath = 'apps/docs/content/docs/components/meta.json';
-		await mkdir(join(root, 'apps/docs/content/docs/components'), { recursive: true });
-		await writeFile(join(root, metaPath), '[]\n', 'utf8');
-
-		const plan: ComponentCreationPlan = {
-			expected: {
-				exampleSlug: 'status-badge/basic',
-				hostedDocsPath: 'components/feedback/status-badge',
-				packageDocsSlug: 'status-badge',
-				packageExportPath: './status-badge',
-			},
-			files: [],
-			jsonEdits: [
-				{
-					key: 'pages',
-					kind: 'array-add-sorted',
-					path: metaPath,
-					title: 'Components',
-					value: 'feedback',
-				},
-			],
-		};
-
-		await expect(applyComponentCreationPlan(root, plan)).rejects.toBeInstanceOf(z.ZodError);
+		await expect(
+			createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' }),
+		).rejects.toBeInstanceOf(z.ZodError);
 	});
 });
+
+const modulesRegistryPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';
+const manifestPath = 'packages/@luke-ui/react/src/conformance/manifest.ts';
+
+async function createRepositoryFixture(options?: { modulesRegistry?: string }): Promise<string> {
+	const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
+	roots.push(root);
+
+	await mkdir(join(root, 'apps/docs/content/docs/components'), { recursive: true });
+	await mkdir(join(root, 'packages/@luke-ui/react/src/styles'), { recursive: true });
+	await mkdir(join(root, 'packages/@luke-ui/react/src/conformance'), { recursive: true });
+
+	await writeFile(
+		join(root, 'apps/docs/content/docs/components/meta.json'),
+		`${JSON.stringify({ pages: ['actions'], title: 'Components' }, null, '\t')}\n`,
+		'utf8',
+	);
+	await writeFile(
+		join(root, modulesRegistryPath),
+		options?.modulesRegistry ??
+			[
+				'// Style-producing modules in the shipped stylesheet.',
+				"import '../button/recipe.css.js';",
+				"import '../text/recipe.css.js';",
+				'',
+			].join('\n'),
+		'utf8',
+	);
+	await writeFile(
+		join(root, manifestPath),
+		[
+			'const entries = [',
+			"\t['Button', 'button', 'universal', 'required', 'applicable'],",
+			MANIFEST_MARKER,
+			'\tname,',
+			'}));',
+			'',
+		].join('\n'),
+		'utf8',
+	);
+
+	return root;
+}
 
 async function readJson(root: string, path: string): Promise<unknown> {
 	return z.unknown().parse(JSON.parse(await readFile(join(root, path), 'utf8')));
