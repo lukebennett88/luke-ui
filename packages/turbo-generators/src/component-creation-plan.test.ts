@@ -4,12 +4,16 @@ import {
 	parseComponentFrontmatter,
 	renderPropsPage,
 } from '../../../apps/docs/scripts/generate-props-pages.js';
-import { createComponentPlan, parseComponentAnswers } from './component-creation-plan.js';
+import {
+	COMPONENT_DEFAULTS,
+	createComponentPlan,
+	parseComponentAnswers,
+} from './component-creation-plan.js';
 
 const validAnswers = {
 	docsGroup: 'feedback',
 	name: 'StatusBadge',
-};
+} as const;
 
 describe('parseComponentAnswers', () => {
 	it('rejects invalid docs group answers', () => {
@@ -18,11 +22,9 @@ describe('parseComponentAnswers', () => {
 
 	it('defaults test applicability for omitted answers', () => {
 		expect(parseComponentAnswers(validAnswers)).toEqual({
-			conformanceTier: 'universal',
+			...COMPONENT_DEFAULTS,
 			docsGroup: 'feedback',
-			integrationTripwire: false,
 			name: 'StatusBadge',
-			visualCoverage: true,
 		});
 	});
 });

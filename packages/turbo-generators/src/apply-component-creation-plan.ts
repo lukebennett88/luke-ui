@@ -2,7 +2,7 @@ import { dirname, join } from 'node:path';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import * as z from 'zod';
 import type { ComponentCreationPlan, PlanFile } from './component-creation-plan.js';
-import { createComponentWork } from './component-creation-plan.js';
+import { createComponentWork, parseComponentAnswers } from './component-creation-plan.js';
 
 const docsMetaSchema = z.record(z.string(), z.unknown());
 type ComponentCreationWork = ReturnType<typeof createComponentWork>;
@@ -11,7 +11,7 @@ export async function createComponent(
 	root: string,
 	answers: unknown,
 ): Promise<ComponentCreationPlan> {
-	const work = createComponentWork(answers);
+	const work = createComponentWork(parseComponentAnswers(answers));
 	await applyComponentCreationPlan(root, work);
 	return { expected: work.expected, files: work.files };
 }

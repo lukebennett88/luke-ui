@@ -2,6 +2,7 @@ import type { PlopTypes } from '@turbo/gen';
 import { createComponent } from './src/apply-component-creation-plan.js';
 import type { ConformanceTier } from './src/component-creation-plan.js';
 import {
+	COMPONENT_DEFAULTS,
 	CONFORMANCE_TIERS,
 	DOC_GROUPS,
 	validateComponentName,
@@ -42,6 +43,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 			},
 			{
 				choices: YES_NO,
+				default: COMPONENT_DEFAULTS.visualCoverage,
 				message: 'Add visual coverage?',
 				name: 'visualCoverage',
 				type: 'list',
@@ -51,12 +53,14 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 					name: CONFORMANCE_TIER_LABELS[tier],
 					value: tier,
 				})),
+				default: COMPONENT_DEFAULTS.conformanceTier,
 				message: 'Conformance tier:',
 				name: 'conformanceTier',
 				type: 'list',
 			},
 			{
 				choices: YES_NO,
+				default: COMPONENT_DEFAULTS.integrationTripwire,
 				message: 'Add an integration tripwire?',
 				name: 'integrationTripwire',
 				type: 'list',

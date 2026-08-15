@@ -3,16 +3,13 @@ import * as z from 'zod';
 export const CONFORMANCE_TIERS = ['universal', 'field-shaped', 'none'] as const;
 export const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
-export type ConformanceTier = (typeof CONFORMANCE_TIERS)[number];
-type DocsGroup = (typeof DOC_GROUPS)[number];
+export const COMPONENT_DEFAULTS = {
+	conformanceTier: 'universal',
+	integrationTripwire: false,
+	visualCoverage: true,
+} as const;
 
-export interface CreateComponentInput {
-	conformanceTier: ConformanceTier;
-	docsGroup: DocsGroup;
-	integrationTripwire: boolean;
-	name: string;
-	visualCoverage: boolean;
-}
+export type ConformanceTier = (typeof CONFORMANCE_TIERS)[number];
 
 export interface PlanFile {
 	contents: string;
@@ -61,12 +58,15 @@ const CAMEL_BOUNDARY_RE = /([a-z0-9])([A-Z])/g;
 const NON_ALPHANUM_RE = /[^A-Za-z0-9-]/g;
 
 const componentAnswersSchema = z.object({
-	conformanceTier: z.enum(CONFORMANCE_TIERS).default('universal'),
+	conformanceTier: z.enum(CONFORMANCE_TIERS).default(COMPONENT_DEFAULTS.conformanceTier),
 	docsGroup: z.enum(DOC_GROUPS),
-	integrationTripwire: z.boolean().default(false),
+	integrationTripwire: z.boolean().default(COMPONENT_DEFAULTS.integrationTripwire),
 	name: z.string(),
-	visualCoverage: z.boolean().default(true),
+	visualCoverage: z.boolean().default(COMPONENT_DEFAULTS.visualCoverage),
 });
+
+export type CreateComponentInput = z.input<typeof componentAnswersSchema>;
+type ParsedComponentAnswers = z.output<typeof componentAnswersSchema>;
 
 export function validateComponentName(value: unknown): true | string {
 	if (typeof value !== 'string') {
@@ -82,7 +82,7 @@ export function validateComponentName(value: unknown): true | string {
 	return true;
 }
 
-export function parseComponentAnswers(answers: unknown): CreateComponentInput {
+export function parseComponentAnswers(answers: unknown): ParsedComponentAnswers {
 	const parsed = componentAnswersSchema.parse(answers);
 	const nameCheck = validateComponentName(parsed.name);
 	if (nameCheck !== true) {
@@ -91,14 +91,13 @@ export function parseComponentAnswers(answers: unknown): CreateComponentInput {
 	return parsed;
 }
 
-export function createComponentPlan(answers: unknown): ComponentCreationPlan {
-	const { expected, files } = createComponentWork(answers);
+export function createComponentPlan(answers: CreateComponentInput): ComponentCreationPlan {
+	const { expected, files } = createComponentWork(parseComponentAnswers(answers));
 	return { expected, files };
 }
 
-export function createComponentWork(answers: unknown): ComponentCreationWork {
-	const input = parseComponentAnswers(answers);
-	const name = parseName(input.name);
+export function createComponentWork(input: ParsedComponentAnswers): ComponentCreationWork {
+	const name = toKebabCase(input.name);
 	const docsGroup = input.docsGroup;
 	const displayName = toDisplayName(name);
 	const pascalName = displayName.replaceAll(' ', '');
@@ -203,14 +202,6 @@ export function createComponentWork(answers: unknown): ComponentCreationWork {
 			},
 		],
 	};
-}
-
-function parseName(value: string): string {
-	const nameCheck = validateComponentName(value);
-	if (nameCheck !== true) {
-		throw new Error(nameCheck);
-	}
-	return toKebabCase(value);
 }
 
 function toKebabCase(value: string): string {
