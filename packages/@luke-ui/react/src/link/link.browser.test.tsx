@@ -10,7 +10,6 @@ testUniversalConformance({
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a link.');
 		return target;
 	},
-	name: 'Link',
 	render: (props = {}) => {
 		return render(
 			<Link {...props} href="/settings">
@@ -20,7 +19,7 @@ testUniversalConformance({
 	},
 });
 
-testIntegration('link', 'Link', async () => {
+testIntegration('link', async () => {
 	let pressed = false;
 	const { locator, user } = render(<Link onPress={() => (pressed = true)}>Settings</Link>);
 

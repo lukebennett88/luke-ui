@@ -5,7 +5,6 @@ import { componentTestManifest } from './manifest.js';
 type RenderComponent = (props?: Record<string, unknown>) => RenderResult;
 
 type UniversalConformanceOptions = {
-	name: string;
 	path: string;
 	render: RenderComponent;
 	getTarget: (result: RenderResult) => HTMLElement;
@@ -15,7 +14,6 @@ type FieldConformanceOptions = {
 	assertName?: (result: RenderResult, control: HTMLElement) => void;
 	getControl: (result: RenderResult) => HTMLElement;
 	assertAssociation?: (result: RenderResult) => void;
-	name: string;
 	path: string;
 	render: RenderComponent;
 };
@@ -31,12 +29,13 @@ function assertNativeName(_: RenderResult, control: HTMLElement) {
 }
 
 export function testUniversalConformance(options: UniversalConformanceOptions) {
-	const { getTarget, name, path, render } = options;
-	if (getManifestEntry(path).conformanceTier !== 'universal') {
+	const { getTarget, path, render } = options;
+	const entry = getManifestEntry(path);
+	if (entry.conformanceTier !== 'universal') {
 		throw new Error(`Expected universal conformance for ${path}.`);
 	}
 
-	test(`${name} forwards its universal DOM contract`, () => {
+	test(`${entry.name} forwards its universal DOM contract`, () => {
 		const ref = { current: null as HTMLElement | null };
 		const result = render({
 			className: 'conformance-class',
@@ -55,11 +54,12 @@ export function testUniversalConformance(options: UniversalConformanceOptions) {
 }
 
 export function testFieldShapedConformance(options: FieldConformanceOptions) {
-	const { assertAssociation, assertName, getControl, name, path, render } = options;
-	if (getManifestEntry(path).conformanceTier !== 'field-shaped') {
+	const { assertAssociation, assertName, getControl, path, render } = options;
+	const entry = getManifestEntry(path);
+	if (entry.conformanceTier !== 'field-shaped') {
 		throw new Error(`Expected field-shaped conformance for ${path}.`);
 	}
-	test(`${name} forwards its field contract`, async () => {
+	test(`${entry.name} forwards its field contract`, async () => {
 		const inputRef = { current: null as HTMLElement | null };
 		let blurred = false;
 		const result = render({
@@ -106,7 +106,7 @@ export function testFieldShapedConformance(options: FieldConformanceOptions) {
 
 	// React Aria types `inputRef` as a ref object. Luke UI widens it to accept a
 	// callback so React Hook Form's `field.ref` works without an adapter.
-	test(`${name} resolves a callback inputRef to the control`, () => {
+	test(`${entry.name} resolves a callback inputRef to the control`, () => {
 		const resolved: Array<HTMLElement | null> = [];
 		const result = render({
 			inputRef: (node: HTMLElement | null) => {
@@ -121,11 +121,12 @@ export function testFieldShapedConformance(options: FieldConformanceOptions) {
 	});
 }
 
-export function testIntegration(path: string, name: string, run: () => void | Promise<void>) {
-	if (getManifestEntry(path).integrationTripwire !== 'required') {
+export function testIntegration(path: string, run: () => void | Promise<void>) {
+	const entry = getManifestEntry(path);
+	if (entry.integrationTripwire !== 'required') {
 		throw new Error(`Expected an integration tripwire for ${path}.`);
 	}
-	test(`${name} integration`, async () => {
+	test(`${entry.name} integration`, async () => {
 		expect.hasAssertions();
 		await run();
 	});

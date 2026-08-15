@@ -24,14 +24,12 @@ testFieldShapedConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a text input.');
 		return control;
 	},
-
-	name: 'TextField',
 	render: (props = {}) => {
 		return render(<TextField {...props} description="Helpful context" label="Name" />);
 	},
 });
 
-testIntegration('text-field', 'TextField', async () => {
+testIntegration('text-field', async () => {
 	let value = '';
 	const { locator, user } = render(<TextField label="Name" onChange={(next) => (value = next)} />);
 	const input = locator.getByRole('textbox', { name: 'Name' });

@@ -11,7 +11,6 @@ testUniversalConformance({
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a Box element.');
 		return target;
 	},
-	name: 'Box',
 	render: (props = {}) => render(<Box {...props}>Content</Box>),
 });
 

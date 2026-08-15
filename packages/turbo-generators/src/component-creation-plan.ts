@@ -304,7 +304,6 @@ function renderComponentTest(input: {
 		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
 		return target;
 	},
-	name: '${input.pascalName}',
 	render: (props = {}) => ${renderComponent},
 });`
 			: input.conformanceTier === 'field-shaped'
@@ -315,7 +314,6 @@ function renderComponentTest(input: {
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a native field control.');
 		return control;
 	},
-	name: '${input.pascalName}',
 	render: (props = {}) => ${renderComponent},
 });`
 				: `test('${input.pascalName} renders its root element', () => {
@@ -326,7 +324,7 @@ function renderComponentTest(input: {
 	const integration =
 		input.integrationTripwire === 'required'
 			? `
-testIntegration('${input.name}', '${input.pascalName}', async () => {
+testIntegration('${input.name}', async () => {
 	let clicked = false;
 	const { locator, user } = render(
 		<${input.pascalName} onClick={() => (clicked = true)}>Content</${input.pascalName}>,

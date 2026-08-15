@@ -44,8 +44,6 @@ testFieldShapedConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
 		return control;
 	},
-
-	name: 'ComboboxField',
 	render: (props = {}) => {
 		return render(
 			<ComboboxField<CountryItem>
@@ -60,7 +58,7 @@ testFieldShapedConformance({
 	},
 });
 
-testIntegration('combobox-field', 'ComboboxField', async () => {
+testIntegration('combobox-field', async () => {
 	const { locator, user } = render(
 		<ComboboxField defaultItems={countryItems} label="Country">
 			{renderCountryItem}

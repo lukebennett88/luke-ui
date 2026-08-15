@@ -17,14 +17,12 @@ testFieldShapedConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a checkbox control.');
 		return control;
 	},
-
-	name: 'Checkbox',
 	render: (props = {}) => {
 		return render(<Checkbox {...props}>Terms</Checkbox>);
 	},
 });
 
-testIntegration('checkbox', 'Checkbox', async () => {
+testIntegration('checkbox', async () => {
 	const { locator, user } = render(<Checkbox>Terms</Checkbox>);
 	const checkbox = locator.getByRole('checkbox', { name: 'Terms' });
 

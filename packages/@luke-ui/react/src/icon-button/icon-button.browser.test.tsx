@@ -10,13 +10,12 @@ testUniversalConformance({
 		if (!(target instanceof HTMLElement)) throw new Error('Expected an icon button.');
 		return target;
 	},
-	name: 'IconButton',
 	render: (props = {}) => {
 		return render(<IconButton {...props} aria-label="Add" icon="add" />);
 	},
 });
 
-testIntegration('icon-button', 'IconButton', async () => {
+testIntegration('icon-button', async () => {
 	let pressed = false;
 	const { locator, user } = render(
 		<IconButton aria-label="Add" icon="add" onPress={() => (pressed = true)} />,

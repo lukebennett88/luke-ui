@@ -10,13 +10,12 @@ testUniversalConformance({
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a button.');
 		return target;
 	},
-	name: 'Button',
 	render: (props = {}) => {
 		return render(<Button {...props}>Action</Button>);
 	},
 });
 
-testIntegration('button', 'Button', async () => {
+testIntegration('button', async () => {
 	let pressed = false;
 	const { locator, user } = render(<Button onPress={() => (pressed = true)}>Action</Button>);
 

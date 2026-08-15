@@ -92,6 +92,7 @@ describe('createComponentPlan', () => {
 		expect(browserTest).toContain('testFieldShapedConformance');
 		expect(browserTest).toContain("path: 'date-field'");
 		expect(browserTest).not.toContain('getTarget');
+		expect(browserTest).not.toContain("name: 'DateField'");
 	});
 
 	it('scaffolds integration tripwire coverage when requested', () => {
@@ -106,7 +107,7 @@ describe('createComponentPlan', () => {
 		]);
 		expect(
 			plan.files.find((file) => file.path.endsWith('/action-chip.browser.test.tsx'))?.contents,
-		).toContain("testIntegration('action-chip'");
+		).toContain("testIntegration('action-chip', async");
 	});
 
 	it('omits visual coverage when it does not apply', () => {
