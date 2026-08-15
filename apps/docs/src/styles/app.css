@@ -29,10 +29,10 @@ code > * {
 	--color-fd-primary-foreground: var(--luke-color-foreground-accent-on-solid);
 	--color-fd-secondary: var(--luke-color-surface-raised);
 	--color-fd-secondary-foreground: var(--luke-color-text-primary);
-	--color-fd-accent: var(--luke-color-overlay-hover);
+	--color-fd-accent: var(--luke-color-background-neutral-subtle);
 	--color-fd-accent-foreground: var(--luke-color-text-primary);
 	--color-fd-ring: var(--luke-color-border-focus);
-	--color-fd-overlay: var(--luke-color-surface-overlay);
+	--color-fd-overlay: var(--luke-color-overlay-backdrop);
 }
 
 /* Keep Fumadocs' 28px DocsTitle with Luke UI's matching 36px line height */

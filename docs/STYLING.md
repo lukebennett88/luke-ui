@@ -127,8 +127,9 @@ instead of deriving them from strength multipliers and hidden formulas.
 
 Each mode also authors final `background-image` values for `actionControlFinish.resting`,
 `actionControlFinish.raised`, and `actionControlFinish.recessed`. Button and IconButton layer this
-face lighting over their semantic surface colour. Ghost controls and forced-colours rendering do not
-use the authored finish.
+face lighting over their semantic surface colour. Hover and pressed change `background-color` by
+mixing `color.overlay` into that fill. Ghost controls and forced-colours rendering do not use the
+authored finish.
 
 Use `deriveConcentricRadius(innerRadius, gap)` for rounded elements nested inside another rounded
 surface. It returns a CSS `calc()` value for the outer radius, so both inputs can be semantic theme

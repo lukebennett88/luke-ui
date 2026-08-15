@@ -88,7 +88,7 @@ const PURPOSE_DEFINITIONS = [
 	},
 	{
 		description:
-			'Transient hover and pressed washes, plus state effects a control applies to its own material.',
+			'Transient hover and pressed interaction sources, plus state effects a control applies to its own material.',
 		id: 'interaction',
 		related: null,
 		showSamples: true,
@@ -140,7 +140,7 @@ function resolveColorPurpose(path: string): TokenPurposeId | undefined {
 		return leaf !== undefined && STRUCTURAL_BORDERS.has(leaf) ? 'borders' : 'roles';
 	}
 	// `backdrop` is a dimming layer, so it belongs with the surfaces; hover and pressed are
-	// interaction washes.
+	// interaction sources.
 	if (section === 'overlay') {
 		return leaf === 'backdrop' ? 'surfaces' : 'interaction';
 	}

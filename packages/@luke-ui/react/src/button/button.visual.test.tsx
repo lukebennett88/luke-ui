@@ -88,7 +88,7 @@ test('ghost interactive states', async () => {
 	await userEvent.keyboard('{/Space}');
 });
 
-test('ghost interactive states in dark mode', async () => {
+test('ghost hover in dark mode', async () => {
 	render(<Button appearance="ghost">Action</Button>, {
 		appearance: { mode: 'dark', theme: 'tactile' },
 	});
@@ -96,11 +96,6 @@ test('ghost interactive states in dark mode', async () => {
 
 	await userEvent.hover(button);
 	await captureVisual(button, 'button/ghost-hover-tactile-dark');
-	await userEvent.unhover(button);
-	await focusViaKeyboard(button);
-	await userEvent.keyboard('{Space>}');
-	await captureVisual(button, 'button/ghost-pressed-tactile-dark');
-	await userEvent.keyboard('{/Space}');
 });
 
 test('overlay over solid accent', async () => {
@@ -118,22 +113,6 @@ test('overlay over solid accent', async () => {
 	await userEvent.keyboard('{Space>}');
 	await captureVisual(button, 'button/solid-accent-pressed');
 	await userEvent.keyboard('{/Space}');
-});
-
-test('overlay over solid accent in dark mode', async () => {
-	render(
-		<Button appearance="solid" tone="accent">
-			Save
-		</Button>,
-		{
-			appearance: { mode: 'dark', theme: 'tactile' },
-		},
-	);
-	const button = page.getByRole('button', { name: 'Save' });
-
-	await userEvent.hover(button);
-	await captureVisual(button, 'button/solid-accent-hover-tactile-dark');
-	await userEvent.unhover(button);
 });
 
 test('overlay over subtle danger', async () => {

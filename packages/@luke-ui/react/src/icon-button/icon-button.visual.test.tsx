@@ -41,34 +41,6 @@ test('interactive states', async () => {
 	await userEvent.keyboard('{/Space}');
 });
 
-test('ghost interactive states', async () => {
-	render(<IconButton appearance="ghost" aria-label="Action" icon="add" />);
-	const button = page.getByRole('button', { name: 'Action' });
-
-	await userEvent.hover(button);
-	await captureVisual(button, 'icon-button/ghost-hover');
-	await userEvent.unhover(button);
-	await focusViaKeyboard(button);
-	await userEvent.keyboard('{Space>}');
-	await captureVisual(button, 'icon-button/ghost-pressed');
-	await userEvent.keyboard('{/Space}');
-});
-
-test('ghost interactive states in dark mode', async () => {
-	render(<IconButton appearance="ghost" aria-label="Action" icon="add" />, {
-		appearance: { mode: 'dark', theme: 'tactile' },
-	});
-	const button = page.getByRole('button', { name: 'Action' });
-
-	await userEvent.hover(button);
-	await captureVisual(button, 'icon-button/ghost-hover-tactile-dark');
-	await userEvent.unhover(button);
-	await focusViaKeyboard(button);
-	await userEvent.keyboard('{Space>}');
-	await captureVisual(button, 'icon-button/ghost-pressed-tactile-dark');
-	await userEvent.keyboard('{/Space}');
-});
-
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 

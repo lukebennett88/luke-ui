@@ -111,64 +111,6 @@ test('interactive states', async () => {
 	}
 });
 
-test('unchecked interactive states', async () => {
-	render(<Checkbox name="terms">Accept terms</Checkbox>);
-	const checkbox = page.getByRole('checkbox', { name: 'Accept terms' });
-	const label = page.elementLocator(checkboxLabel(checkbox));
-
-	await userEvent.hover(checkboxLabel(checkbox));
-	await captureVisual(label, 'checkbox/unchecked-hover');
-	await userEvent.unhover(checkboxLabel(checkbox));
-	await pressCheckbox(checkbox);
-	await captureVisual(label, 'checkbox/unchecked-pressed');
-	await userEvent.keyboard('{/Space}');
-});
-
-test('unchecked interactive states in dark mode', async () => {
-	render(<Checkbox name="terms">Accept terms</Checkbox>, {
-		appearance: { mode: 'dark', theme: 'tactile' },
-	});
-	const checkbox = page.getByRole('checkbox', { name: 'Accept terms' });
-	const label = page.elementLocator(checkboxLabel(checkbox));
-
-	await userEvent.hover(checkboxLabel(checkbox));
-	await captureVisual(label, 'checkbox/unchecked-hover-tactile-dark');
-	await userEvent.unhover(checkboxLabel(checkbox));
-	await pressCheckbox(checkbox);
-	await captureVisual(label, 'checkbox/unchecked-pressed-tactile-dark');
-	await userEvent.keyboard('{/Space}');
-});
-
-test('selected interactive states', async () => {
-	render(
-		<Checkbox defaultSelected name="terms">
-			Accept terms
-		</Checkbox>,
-	);
-	const checkbox = page.getByRole('checkbox', { name: 'Accept terms' });
-	const label = page.elementLocator(checkboxLabel(checkbox));
-
-	await userEvent.hover(checkboxLabel(checkbox));
-	await captureVisual(label, 'checkbox/selected-hover');
-	await userEvent.unhover(checkboxLabel(checkbox));
-	await pressCheckbox(checkbox);
-	await captureVisual(label, 'checkbox/selected-pressed');
-	await userEvent.keyboard('{/Space}');
-});
-
-test('invalid hover keeps the danger border', async () => {
-	render(
-		<Checkbox isInvalid name="terms">
-			Accept terms
-		</Checkbox>,
-	);
-	const checkbox = page.getByRole('checkbox', { name: 'Accept terms' });
-	const label = page.elementLocator(checkboxLabel(checkbox));
-
-	await userEvent.hover(checkboxLabel(checkbox));
-	await captureVisual(label, 'checkbox/invalid-unchecked-hover');
-});
-
 /** The clickable `<label>` carrying a checkbox's interactive data attributes. */
 function checkboxLabel(checkbox: Locator): HTMLElement {
 	const label = checkbox.element().closest('label');

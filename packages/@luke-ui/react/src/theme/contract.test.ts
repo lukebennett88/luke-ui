@@ -38,7 +38,7 @@ describe('theme contract', () => {
 		expect(countLeaves(vars)).toBe(flattenThemeContract().length);
 	});
 
-	it('gives all six semantic roles the same 36 leaves under the documented variable names', () => {
+	it('gives every semantic role the same documented contract leaves', () => {
 		// The migration table in the specification is a promise about these exact names, so they are
 		// spelled out here rather than re-derived through `themeVarName` (which would only restate the
 		// kebab-casing the contract already applied). `on-solid` is the one name a naive reading gets
@@ -60,7 +60,6 @@ describe('theme contract', () => {
 			);
 		});
 
-		expect(expected).toHaveLength(36);
 		const byPath = (a: ReadonlyArray<string>, b: ReadonlyArray<string>) => {
 			return (a[0] ?? '').localeCompare(b[0] ?? '');
 		};

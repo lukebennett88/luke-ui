@@ -20,7 +20,7 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    `background` — canvas IS the background, not a derived value.
 4. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
    every colour contract leaf onto a family step or a generated surface, passes the authored
-   backdrop through, and generates the two interaction overlay washes.
+   backdrop through, and aliases the two interaction overlay sources to the high-contrast neutral.
 5. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
    throws `ThemeContrastError` on a hard-gate miss.
 
@@ -104,10 +104,9 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 `scale.ts`'s `passesOnSolidGate` is the only function that decides whether a solid can carry
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
 choose clears the AA text ratio plus the search headroom against the public resting solid (step 9).
-Step 10 remains in the private 12-step family so the scale keeps its shape. It is not a hover,
-solid-hover, or pressed colour. Public hover and pressed feedback uses `color.overlay` over the
-resting solid fill, plus depth, finish, and transform. Those composited pairs are hard-gated by
-`validateContrast`.
+Step 10 remains in the private 12-step family so the scale keeps its shape. It is not a rendered
+interaction colour. Public hover and pressed feedback mixes `color.overlay` into the resting solid
+fill, plus depth, finish, and transform. Those mixed fills are hard-gated by `validateContrast`.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
 copy. That gives two guarantees:
@@ -133,13 +132,14 @@ loading state against typical surfaces.
 
 ## Interaction overlays
 
-Luke UI generates two narrow semantic interaction overlays from the high-contrast neutral (family
-step 12), mixed with transparent: `color.overlay.hover` at 5% and `color.overlay.pressed` at 10%.
-The authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated
+Luke UI generates two interaction overlay sources from the high-contrast neutral
+(`families.neutral[12]`). `color.overlay.hover` and `color.overlay.pressed` both alias that source.
+Recipes mix it into the current semantic fill at the shared strengths in `interaction-overlay.ts`:
+hover at 5% and pressed at 10%, as `color-mix(in srgb, <fill> <100-N>%, <source> <N>%)`. The
+authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated
 per-family alpha track, and the public contract has no per-role background hover or pressed leaves.
 
-`validateContrast` treats each wash as a translucent colour (the `color-mix()` with transparent),
-paints it over the resting fills first-party components actually use, then measures the matching
-foregrounds against that opaque result. A `color-mix()` value is never parsed as an opaque colour.
-The pairs are ghost Button foregrounds over canvas and recessed, solid and subtle Button tones,
-selected Combobox options over accent subtle, and unselected Combobox options over floating.
+`validateContrast` runs the same sRGB mix the recipes emit, then measures the matching foregrounds
+against that result. The pairs are ghost Button foregrounds over canvas and recessed, solid and
+subtle Button tones, selected Combobox options over accent subtle, and unselected Combobox options
+over floating.

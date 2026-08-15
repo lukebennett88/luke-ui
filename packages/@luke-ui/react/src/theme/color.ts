@@ -40,19 +40,17 @@ export function parseColor(input: string): Oklch {
 }
 
 /**
- * Paints opaque `source` at `alpha` over opaque `backdrop` with CSS source-over in sRGB.
- *
- * `color-mix(in oklab, source N%, transparent)` only produces a translucent colour. This is the
- * subsequent paint over the surface, not an OKLab interpolation with that surface.
+ * Mixes opaque `a` and `b` in sRGB, matching
+ * `color-mix(in srgb, a <100-N>%, b <N>%)` where `amountOfB` is `N / 100`.
  */
-export function compositeOver(source: Oklch, backdrop: Oklch, alpha: number): Oklch {
-	const t = clampUnit(alpha);
-	const src = oklchToSrgb(source);
-	const dst = oklchToSrgb(backdrop);
+export function mixSrgb(a: Oklch, b: Oklch, amountOfB: number): Oklch {
+	const t = clampUnit(amountOfB);
+	const from = oklchToSrgb(a);
+	const to = oklchToSrgb(b);
 	return srgbToOklch([
-		dst[0] * (1 - t) + src[0] * t,
-		dst[1] * (1 - t) + src[1] * t,
-		dst[2] * (1 - t) + src[2] * t,
+		from[0] * (1 - t) + to[0] * t,
+		from[1] * (1 - t) + to[1] * t,
+		from[2] * (1 - t) + to[2] * t,
 	]);
 }
 
@@ -133,9 +131,9 @@ function relativeLuminance(color: Oklch): number {
 }
 
 interface Oklab {
+	l: number;
 	a: number;
 	b: number;
-	l: number;
 }
 
 type SrgbTriple = [number, number, number];
@@ -195,9 +193,9 @@ function isInSrgbGamut(color: Oklch): boolean {
 function oklchToOklab(color: Oklch): Oklab {
 	const hueRadians = (normalizeHue(color.h) * Math.PI) / 180;
 	return {
+		l: color.l,
 		a: color.c * Math.cos(hueRadians),
 		b: color.c * Math.sin(hueRadians),
-		l: color.l,
 	};
 }
 
@@ -205,14 +203,14 @@ function oklabToOklch(color: Oklab): Oklch {
 	const c = Math.hypot(color.a, color.b);
 	const h = c < 0.000001 ? 0 : normalizeHue((Math.atan2(color.b, color.a) * 180) / Math.PI);
 	return {
+		l: color.l,
 		c,
 		h,
-		l: color.l,
 	};
 }
 
 function oklchToLinearSrgb(color: Oklch): SrgbTriple {
-	const { a: labA, b: labB, l } = oklchToOklab(color);
+	const { l, a: labA, b: labB } = oklchToOklab(color);
 	const lCubeRoot = l + 0.3963377774 * labA + 0.2158037573 * labB;
 	const mCubeRoot = l - 0.1055613458 * labA - 0.0638541728 * labB;
 	const sCubeRoot = l - 0.0894841775 * labA - 1.291485548 * labB;
@@ -235,8 +233,8 @@ function linearSrgbToOklch(rgb: SrgbTriple): Oklch {
 	const mCubeRoot = Math.cbrt(mCone);
 	const sCubeRoot = Math.cbrt(sCone);
 	return oklabToOklch({
+		l: 0.2104542553 * lCubeRoot + 0.793617785 * mCubeRoot - 0.0040720468 * sCubeRoot,
 		a: 1.9779984951 * lCubeRoot - 2.428592205 * mCubeRoot + 0.4505937099 * sCubeRoot,
 		b: 0.0259040371 * lCubeRoot + 0.7827717662 * mCubeRoot - 0.808675766 * sCubeRoot,
-		l: 0.2104542553 * lCubeRoot + 0.793617785 * mCubeRoot - 0.0040720468 * sCubeRoot,
 	});
 }

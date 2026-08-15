@@ -5,7 +5,7 @@ import {
 	lightnessEnvelope,
 	RADIX_DARK_OKLCH,
 	RADIX_LIGHT_OKLCH,
-	ADAPTABLE_MID_TONES,
+	MID_LIGHTNESS_TONES,
 } from './__fixtures__/radix-scales.js';
 import type { Oklch } from './color.js';
 import { contrastRatio, parseColor } from './color.js';
@@ -14,7 +14,7 @@ import type { FamilyRole } from './scale.js';
 import {
 	generateFamily,
 	generateFamilyWithDiagnostics,
-	MIN_STATE_DELTA,
+	MIN_RAMP_DELTA,
 	oklabDeltaE,
 	onSolidGateRatio,
 	passesOnSolidGate,
@@ -54,8 +54,8 @@ describe('generateFamily shape', () => {
 	});
 });
 
-describe('component state distinctness', () => {
-	it('keeps steps 3-4 and 4-5 at least MIN_STATE_DELTA apart across the corpus', () => {
+describe('muted ramp distinctness', () => {
+	it('keeps private ramp rungs 4 and 5 at least MIN_RAMP_DELTA from their neighbours', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
 				// The muted ramp is role-independent, but every role runs the solid-anchor search, so the
@@ -65,10 +65,10 @@ describe('component state distinctness', () => {
 					const delta34 = oklabDeltaE(scale[3], scale[4]);
 					const delta45 = oklabDeltaE(scale[4], scale[5]);
 					expect(delta34, `${entry.name} ${mode} ${role} ΔE(3,4)`).toBeGreaterThanOrEqual(
-						MIN_STATE_DELTA,
+						MIN_RAMP_DELTA,
 					);
 					expect(delta45, `${entry.name} ${mode} ${role} ΔE(4,5)`).toBeGreaterThanOrEqual(
-						MIN_STATE_DELTA,
+						MIN_RAMP_DELTA,
 					);
 				}
 			}
@@ -183,12 +183,11 @@ describe('reference-envelope properties', () => {
 	});
 });
 
-describe('step 12 is a scale-quality rung, not a contract guarantee', () => {
-	it('is the more extreme text lightness but carries no contrast guarantee', () => {
+describe('step 12 high-contrast text', () => {
+	it('sits further from the background than the low-contrast text rung', () => {
 		for (const mode of MODES) {
 			const scale = family('#0090ff', mode, 'accent');
-			// Light mode: high-contrast text is darker than low-contrast; dark mode: lighter. Either
-			// way step 12 sits further from the low-contrast rung, extending the ramp.
+			// Light mode: high-contrast text is darker than low-contrast; dark mode: lighter.
 			const extension = mode === 'light' ? scale[11].l - scale[12].l : scale[12].l - scale[11].l;
 			expect(extension).toBeGreaterThan(0);
 		}
@@ -325,21 +324,13 @@ describe('the one on-solid gate', () => {
 		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(true);
 	});
 
-	it('gates only the resting solid, not a private step-10 rung or a phantom pressed colour', () => {
-		// Light `oklch(0.64 0 0)` clears the resting solid. A darker private rung or a made-up pressed
-		// colour must not decide whether the public solid is acceptable.
+	it('gates only the resting solid, not the private step-10 rung', () => {
 		const source: Oklch = {
 			l: 0.64,
 			c: 0,
 			h: 0,
 		};
-		const phantomPressed = {
-			l: source.l - 0.09,
-			c: 0,
-			h: 0,
-		};
 		const scale = family('oklch(0.64 0 0)', 'light', 'accent');
-		expect(contrastRatio(scale.contrast, phantomPressed)).toBeLessThan(TEXT_RATIO);
 		expect(onSolidGateRatio({ lightness: source.l, mode: 'light', source })).toBeGreaterThan(
 			TEXT_RATIO,
 		);
@@ -349,13 +340,10 @@ describe('the one on-solid gate', () => {
 	});
 });
 
-describe('unsatisfiable input', () => {
-	it('adapts a former step-10 dead-zone source instead of rejecting it', () => {
-		// These mid-lightness tones used to fail because the gate also measured a synthetic step-10
-		// hover. Against the resting solid they have a neighbour in the tone window, so the search
-		// adapts rather than throwing.
+describe('mid-lightness solid search', () => {
+	it('adapts a mid-lightness source within the solid search band', () => {
 		for (const mode of MODES) {
-			const entry = ADAPTABLE_MID_TONES[mode];
+			const entry = MID_LIGHTNESS_TONES[mode];
 			for (const role of SOURCE_TONED_ROLES) {
 				const { diagnostics } = generateFamilyWithDiagnostics({
 					background: BACKGROUND[mode],
@@ -369,9 +357,9 @@ describe('unsatisfiable input', () => {
 		}
 	});
 
-	it('still generates neutral from a mid-lightness source, using the curated solid band', () => {
+	it('generates neutral from a mid-lightness source using the curated solid band', () => {
 		for (const mode of MODES) {
-			expect(() => family(ADAPTABLE_MID_TONES[mode].source, mode, 'neutral')).not.toThrow();
+			expect(() => family(MID_LIGHTNESS_TONES[mode].source, mode, 'neutral')).not.toThrow();
 		}
 	});
 });

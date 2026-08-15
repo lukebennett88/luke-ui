@@ -35,8 +35,8 @@ describe('buildTheme independent modes', () => {
 	});
 });
 
-describe('buildTheme former step-10 dead zones', () => {
-	it('generates a mid-lightness warning instead of rejecting it at family generation', () => {
+describe('buildTheme mid-lightness sources', () => {
+	it('generates a mid-lightness warning by adapting the solid inside the tone window', () => {
 		expect(() => {
 			return buildTheme({
 				...tactileFoundation,
@@ -44,12 +44,12 @@ describe('buildTheme former step-10 dead zones', () => {
 					...tactileFoundation.light,
 					color: { ...tactileFoundation.light.color, warning: 'oklch(0.62 0.19 27)' },
 				},
-				name: 'adapted-warning',
+				name: 'mid-lightness-warning',
 			});
 		}).not.toThrow();
 	});
 
-	it('lets validateContrast, not a synthetic step-10 hover, reject an explicit mid-lightness accent', () => {
+	it('rejects an explicit mid-lightness accent when mixed interaction fills miss AA', () => {
 		const caught = (() => {
 			try {
 				buildTheme({

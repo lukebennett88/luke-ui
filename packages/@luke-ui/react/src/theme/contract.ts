@@ -144,8 +144,8 @@ export const themeContractTree = {
 			overlay: null,
 		},
 		/**
-		 * Modal dimming (`backdrop`) and generated translucent interaction washes (`hover`,
-		 * `pressed`).
+		 * Modal dimming (`backdrop`) and the generated interaction sources (`hover`, `pressed`)
+		 * recipes mix into the current semantic fill.
 		 */
 		overlay: {
 			backdrop: null,

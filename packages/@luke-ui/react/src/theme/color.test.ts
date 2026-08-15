@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { compositeOver, contrastRatio, formatOklch, gamutMapOklch, parseColor } from './color.js';
+import { contrastRatio, formatOklch, gamutMapOklch, mixSrgb, parseColor } from './color.js';
 
 describe('parseColor', () => {
 	it('round-trips a hex colour through OKLCH formatting', () => {
@@ -24,7 +24,7 @@ describe('parseColor', () => {
 	});
 });
 
-describe('compositeOver', () => {
+describe('mixSrgb', () => {
 	function srgbToLinear(channel: number): number {
 		return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
 	}
@@ -35,8 +35,8 @@ describe('compositeOver', () => {
 		return (lighter + 0.05) / (darker + 0.05);
 	}
 
-	it('paints 50% black over white as sRGB gray, not an OKLab mix', () => {
-		const result = compositeOver(parseColor('#000000'), parseColor('#ffffff'), 0.5);
+	it('mixes white and black at 50% as sRGB gray, matching color-mix(in srgb, ...)', () => {
+		const result = mixSrgb(parseColor('#ffffff'), parseColor('#000000'), 0.5);
 		const grayLuminance = srgbToLinear(0.5);
 		expect(contrastRatio(parseColor('#000000'), result)).toBeCloseTo(
 			contrastFromLuminance(0, grayLuminance),
@@ -48,8 +48,8 @@ describe('compositeOver', () => {
 		);
 	});
 
-	it('paints 50% blue over white using sRGB source-over', () => {
-		const result = compositeOver(parseColor('#0000ff'), parseColor('#ffffff'), 0.5);
+	it('mixes white and blue at 50% in sRGB', () => {
+		const result = mixSrgb(parseColor('#ffffff'), parseColor('#0000ff'), 0.5);
 		const paintedLuminance = 0.2126 * srgbToLinear(0.5) + 0.7152 * srgbToLinear(0.5) + 0.0722;
 		expect(contrastRatio(parseColor('#000000'), result)).toBeCloseTo(
 			contrastFromLuminance(0, paintedLuminance),

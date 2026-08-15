@@ -1,5 +1,6 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
+import { interactionBackground } from '../../styles/interaction-fill.js';
 import type { RecipeSelection, SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
@@ -115,13 +116,16 @@ const checkboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
-				// Overlay is the hover/pressed cue. Semantic borders stay on rest, selected, and invalid.
-				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
-					backgroundImage: `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover}), ${vars.actionControlFinish.raised}`,
-				},
-				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
-					backgroundImage: `linear-gradient(${vars.color.overlay.pressed}, ${vars.color.overlay.pressed}), ${vars.actionControlFinish.recessed}`,
-				},
+				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]) &':
+					{
+						backgroundColor: interactionBackground(vars.color.surface.canvas, 'hover'),
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]) &':
+					{
+						backgroundColor: interactionBackground(vars.color.surface.canvas, 'pressed'),
+						backgroundImage: vars.actionControlFinish.recessed,
+					},
 				'[data-indeterminate="true"] &': {
 					backgroundColor: vars.color.background.accent.solid,
 					borderColor: vars.color.background.accent.solid,
@@ -140,11 +144,31 @@ const checkboxConfig = {
 				'[data-selected="true"] &::after': {
 					opacity: 1,
 				},
+				'[data-hovered="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &, [data-hovered="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &':
+					{
+						backgroundColor: interactionBackground(vars.color.background.accent.solid, 'hover'),
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &, [data-pressed="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &':
+					{
+						backgroundColor: interactionBackground(vars.color.background.accent.solid, 'pressed'),
+						backgroundImage: vars.actionControlFinish.recessed,
+					},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
 						backgroundColor: vars.color.background.danger.solid,
 						borderColor: vars.color.background.danger.solid,
 						color: vars.color.foreground.danger.onSolid,
+					},
+				'[data-hovered="true"][data-invalid="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-hovered="true"][data-invalid="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundColor: interactionBackground(vars.color.background.danger.solid, 'hover'),
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"][data-invalid="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-pressed="true"][data-invalid="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
+					{
+						backgroundColor: interactionBackground(vars.color.background.danger.solid, 'pressed'),
+						backgroundImage: vars.actionControlFinish.recessed,
 					},
 			},
 		},

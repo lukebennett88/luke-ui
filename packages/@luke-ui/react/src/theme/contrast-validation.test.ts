@@ -6,10 +6,13 @@ import {
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
+import { normalizeTheme } from './define-theme.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { contrastRatio, parseColor } from './color.js';
 import { validateContrast } from './contrast-validation.js';
 import type { ThemeFoundation } from './foundation.js';
+import { mixInteractionSrgb } from './interaction-overlay.js';
 
 describe('buildTheme contrast failures', () => {
 	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
@@ -108,50 +111,28 @@ describe('buildTheme contrast failures', () => {
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
 	});
 
-	for (const mode of ['light', 'dark'] as const) {
-		it(`rejects an interaction overlay wash in ${mode} mode whose composited surface misses the text ratio`, () => {
-			// Strengthens the emitted pressed wash rather than moving the canvas: a lighter dark canvas
-			// fails uncomposited accent and danger pairs first, so it cannot isolate this gate.
-			const { values } = modeColorValues(mode);
-			const pressed = values['color.overlay.pressed'];
-			if (pressed === undefined) throw new Error('expected color.overlay.pressed');
-			expect(pressed).toContain('10%');
-			values['color.overlay.pressed'] = pressed.replace(' 10%, transparent', ' 80%, transparent');
-
-			const { failures } = validateContrast(mode, values);
-			expect(failures.length).toBeGreaterThan(0);
-			expect(
-				failures.every((failure) => failure.background.startsWith('color.overlay.pressed over ')),
-			).toBe(true);
-			expect(
-				failures.some((failure) => {
-					return (
-						failure.foreground === 'color.foreground.danger.rest' &&
-						failure.background === 'color.overlay.pressed over color.surface.canvas' &&
-						failure.ratio < 4.5
-					);
-				}),
-			).toBe(true);
-			expect(
-				failures.some((failure) => {
-					return failure.foreground === 'color.foreground.accent.rest' && failure.ratio < 4.5;
-				}),
-			).toBe(true);
-		});
-	}
-
-	it('does not parse an interaction overlay as an opaque colour', () => {
-		const { block, values } = modeColorValues('dark');
-		values['color.overlay.hover'] = extractValue(block, '--luke-color-text-primary');
-		expect(() => validateContrast('dark', values)).toThrow(
-			/"color.overlay.hover" must be color-mix\(in oklab/,
+	it('needs the stronger accent foreground on subtle pressed for a mid-chroma green accent', () => {
+		const { baseLight } = splitBlocks(
+			buildTheme(normalizeTheme({ color: { accent: 'oklch(0.6 0.12 160)' }, name: 'green-accent' })),
 		);
+		const valueOf = (varName: string) => extractValue(baseLight, varName);
+		const mixed = mixInteractionSrgb(
+			parseColor(valueOf('--luke-color-background-accent-subtle')),
+			parseColor(valueOf('--luke-color-overlay-pressed')),
+			'pressed',
+		);
+		expect(
+			contrastRatio(parseColor(valueOf('--luke-color-foreground-accent-rest')), mixed),
+		).toBeLessThan(4.5);
+		expect(
+			contrastRatio(parseColor(valueOf('--luke-color-foreground-accent-hover')), mixed),
+		).toBeGreaterThanOrEqual(4.5);
 	});
 
-	it('measures ghost overlay contrast from the painted sRGB result', () => {
+	it('measures interaction fills with the same sRGB mix the recipes emit', () => {
 		const { values } = modeColorValues('light');
 		values['color.surface.canvas'] = 'oklch(1 0 0)';
-		values['color.overlay.hover'] = 'color-mix(in oklab, oklch(0 0 0) 50%, transparent)';
+		values['color.overlay.hover'] = 'oklch(0 0 0)';
 		values['color.text.primary'] = 'oklch(0 0 0)';
 
 		const { checks } = validateContrast('light', values);
@@ -162,8 +143,8 @@ describe('buildTheme contrast failures', () => {
 			);
 		});
 		expect(check).toBeDefined();
-		const grayLuminance = ((0.5 + 0.055) / 1.055) ** 2.4;
-		expect(check?.ratio).toBeCloseTo((grayLuminance + 0.05) / 0.05, 5);
+		const mixed = mixInteractionSrgb(parseColor('oklch(1 0 0)'), parseColor('oklch(0 0 0)'), 'hover');
+		expect(check?.ratio).toBeCloseTo(contrastRatio(parseColor('oklch(0 0 0)'), mixed), 5);
 	});
 });
 

@@ -1,11 +1,9 @@
+import { interactionBackground } from '../../styles/interaction-fill.js';
 import { styleInLayer } from '../../styles/layered-style.css.js';
 import type { RecipeSelection } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
-
-const hoverOverlay = `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover})`;
-const pressedOverlay = `linear-gradient(${vars.color.overlay.pressed}, ${vars.color.overlay.pressed})`;
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -194,10 +192,12 @@ function appearance(
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundImage: `${hoverOverlay}, ${vars.actionControlFinish.raised}`,
+						backgroundColor: interactionBackground(fill, 'hover'),
+						backgroundImage: vars.actionControlFinish.raised,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundImage: `${pressedOverlay}, ${vars.actionControlFinish.recessed}`,
+						backgroundColor: interactionBackground(fill, 'pressed'),
+						backgroundImage: vars.actionControlFinish.recessed,
 						color: pressedColor,
 					},
 				},
@@ -217,11 +217,11 @@ function ghostAppearance(tone: Tone, color: string) {
 			color,
 			selectors: {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundImage: hoverOverlay,
+					backgroundColor: interactionBackground('transparent', 'hover'),
 					boxShadow: vars.depth.raised,
 				},
 				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundImage: pressedOverlay,
+					backgroundColor: interactionBackground('transparent', 'pressed'),
 					boxShadow: vars.depth.recessed,
 				},
 			},

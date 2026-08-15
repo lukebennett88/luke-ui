@@ -5,9 +5,10 @@
  */
 
 import type { Oklch } from './color.js';
-import { compositeOver, contrastRatio, parseColor } from './color.js';
+import { contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import type { ContrastCheck } from './diagnostics.js';
+import { mixInteractionSrgb, type InteractionOverlayState } from './interaction-overlay.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
 /** Ghost Button and IconButton keep these foregrounds on a transparent rest fill. */
@@ -35,17 +36,15 @@ const SUBTLE_BUTTON_FOREGROUND = {
 	},
 } as const;
 
-const INTERACTION_OVERLAYS = ['color.overlay.hover', 'color.overlay.pressed'] as const;
-
-/** The emitted hover and pressed overlay shape: an opaque OKLCH mixed with transparent in OKLab. */
-const INTERACTION_OVERLAY_VALUE =
-	/^color-mix\(in oklab, (oklch\([^)]+\)) (\d+(?:\.\d+)?)%, transparent\)$/;
+const INTERACTION_OVERLAY_STATES = ['hover', 'pressed'] as const satisfies ReadonlyArray<
+	InteractionOverlayState
+>;
 
 type ColorMode = 'light' | 'dark';
 
 /** One WCAG contrast failure recorded while generating a theme. */
 export interface ThemeContrastFailure {
-	/** Token path of the background colour, or an overlay composited over a surface. */
+	/** Token path of the background colour, or an overlay mixed into a surface. */
 	background: string;
 	/** Token path of the foreground colour, for example `color.text.primary`. */
 	foreground: string;
@@ -71,7 +70,7 @@ interface ValidationResult {
  * Hard at the AA text ratio: functional primary and secondary text against all four elevation
  * surfaces; every role's resting and hover foreground against the base surfaces and that role's own
  * subtle fill; every role's on-solid foreground against its solid fill; and the real component
- * contracts that paint `overlay.hover` / `overlay.pressed` over a resting fill (ghost Button on
+ * contracts that mix `overlay.hover` / `overlay.pressed` into a resting fill (ghost Button on
  * canvas and recessed, solid and subtle Button tones, selected Combobox options on accent subtle,
  * unselected Combobox options on floating). Hard at the non-text ratio: the authored focus ring and
  * `border.control`, which is `control-border.ts`'s solved boundary rather than a scale-step alias;
@@ -116,7 +115,6 @@ export function validateContrast(
 		checkResolved(foreground, background, colorAt(background), required, hard);
 	};
 
-	// v2 validates only against surfaces consumers can reference (the hidden `resting` rung is gone).
 	const surfacePaths = ['canvas', 'recessed', 'floating', 'overlay'].map(
 		(surface) => `color.surface.${surface}`,
 	);
@@ -156,20 +154,25 @@ export function validateContrast(
 			check(`color.border.${role}`, background, UI_RATIO, false);
 		}
 	}
-	// Interaction overlays composite over the resting fill the control already has. Mix with
-	// transparent sets alpha; painting then source-overs that colour. Do not parse the `color-mix()`
-	// string as an opaque colour. Pairs follow first-party recipes, not every theoretical combination.
-	const checkOverlay = (foreground: string, overlayPath: string, surface: string) => {
-		const overlayValue = colorValues[overlayPath];
-		if (overlayValue === undefined) throw new Error(`buildTheme did not generate "${overlayPath}"`);
-		const composited = compositeOverlay(overlayValue, overlayPath, colorAt(surface));
-		checkResolved(foreground, `${overlayPath} over ${surface}`, composited, TEXT_RATIO, true);
+	// Interaction fills are `color-mix(in srgb, <fill>, <overlay source>)` at the shared strengths.
+	// Pairs follow first-party recipes, not every theoretical combination.
+	const checkOverlay = (
+		foreground: string,
+		state: InteractionOverlayState,
+		surface: string,
+	) => {
+		const mixed = mixInteractionSrgb(
+			colorAt(surface),
+			colorAt(`color.overlay.${state}`),
+			state,
+		);
+		checkResolved(foreground, `color.overlay.${state} over ${surface}`, mixed, TEXT_RATIO, true);
 	};
-	for (const overlayPath of INTERACTION_OVERLAYS) {
+	for (const state of INTERACTION_OVERLAY_STATES) {
 		// Ghost Button / IconButton: transparent rest on canvas or recessed.
 		for (const surface of basePaths) {
 			for (const foreground of GHOST_FOREGROUNDS) {
-				checkOverlay(foreground, overlayPath, surface);
+				checkOverlay(foreground, state, surface);
 			}
 		}
 		// Solid Button / IconButton, and selected or invalid Checkbox, which reuse the same on-solid
@@ -177,34 +180,20 @@ export function validateContrast(
 		for (const tone of BUTTON_TONES) {
 			checkOverlay(
 				`color.foreground.${tone}.onSolid`,
-				overlayPath,
+				state,
 				`color.background.${tone}.solid`,
 			);
-			const overlayState = overlayPath === 'color.overlay.hover' ? 'hover' : 'pressed';
 			checkOverlay(
-				SUBTLE_BUTTON_FOREGROUND[tone][overlayState],
-				overlayPath,
+				SUBTLE_BUTTON_FOREGROUND[tone][state],
+				state,
 				`color.background.${tone}.subtle`,
 			);
 		}
 		// Combobox selected option: primary text on accent subtle. Unselected focused or hovered
 		// option: primary text on the floating popover.
-		checkOverlay('color.text.primary', overlayPath, 'color.background.accent.subtle');
-		checkOverlay('color.text.primary', overlayPath, 'color.surface.floating');
+		checkOverlay('color.text.primary', state, 'color.background.accent.subtle');
+		checkOverlay('color.text.primary', state, 'color.surface.floating');
 	}
 
 	return { checks, failures };
-}
-
-/** Reads an emitted `color-mix(..., transparent)` overlay and paints it over an opaque surface. */
-function compositeOverlay(overlayValue: string, overlayPath: string, surface: Oklch): Oklch {
-	const match = INTERACTION_OVERLAY_VALUE.exec(overlayValue);
-	const sourceValue = match?.[1];
-	const percentText = match?.[2];
-	if (sourceValue === undefined || percentText === undefined) {
-		throw new Error(
-			`"${overlayPath}" must be color-mix(in oklab, oklch(...) N%, transparent); received "${overlayValue}"`,
-		);
-	}
-	return compositeOver(parseColor(sourceValue), surface, Number(percentText) / 100);
 }

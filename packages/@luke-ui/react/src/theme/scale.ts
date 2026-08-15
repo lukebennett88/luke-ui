@@ -26,9 +26,9 @@ type ColorMode = 'light' | 'dark';
 
 /**
  * A generated 12-step colour family plus its on-solid `contrast` colour. Step roles: 1-2 app/subtle
- * backgrounds, 3-5 component surface (public rest at 3; 4-5 remain private), 6-8 borders (subtle /
+ * backgrounds, 3-5 muted ramp (public rest at 3; 4-5 remain private), 6-8 borders (subtle /
  * UI+focus / hover), 9-10 solid (9 = public rest, 10 = private scale rung), 11-12 text (low /
- * high contrast).
+ * high contrast). Neutral step 12 is also the interaction overlay source.
  */
 export interface ScaleFamily {
 	1: Oklch;
@@ -100,15 +100,15 @@ export class ScaleGenerationError extends Error {
 const ON_SOLID_TARGET = TEXT_RATIO + RATIO_HEADROOM;
 
 /**
- * The OKLab ΔE floor between consecutive component states (steps 3-4 and 4-5). The muted ramp's
- * fixed lightness deltas clear this comfortably for every role, including near-achromatic neutrals.
+ * The OKLab ΔE floor between consecutive muted-ramp rungs (steps 3-4 and 4-5). The ramp's fixed
+ * lightness deltas clear this comfortably for every role, including near-achromatic neutrals.
  */
-export const MIN_STATE_DELTA = 0.015;
+export const MIN_RAMP_DELTA = 0.015;
 
 // Steps 1-8 form a "muted ramp": lightness walks away from the background toward the solid by fixed
-// absolute offsets (so component-state distinctness never depends on the anchor lightness), while
-// chroma grows from a faint tint to near the solid. `offset` is an absolute OKLCH lightness delta
-// from the background (its sign is set by the mode: darker in light mode, lighter in dark mode);
+// absolute offsets (so ramp distinctness never depends on the anchor lightness), while chroma grows
+// from a faint tint to near the solid. `offset` is an absolute OKLCH lightness delta from the
+// background (its sign is set by the mode: darker in light mode, lighter in dark mode);
 // `chromaFraction` scales the source chroma and `chromaCap` caps it so the pale near-background
 // steps stay tinted rather than saturated.
 interface RampRungSpec {
@@ -164,10 +164,10 @@ const NEUTRAL_SOLID = {
 	light: { band: [0.22, 0.45], target: 0.35 },
 } as const satisfies Record<ColorMode, SolidBand>;
 
-// Text lightness targets: step 11 (low contrast) and step 12 (high contrast). Step 12 is a
-// scale-quality rung only — no semantic leaf consumes a high-contrast contract guarantee yet. Light
-// `low` sits at 0.49 (not 0.5) so step 11 keeps a small AA margin over the pressed subtle surface
-// (step 5) even for the highest-luminance hues — accent/danger text is mapped onto that subtle trio.
+// Text lightness targets: step 11 (low contrast) and step 12 (high contrast). Every role maps step
+// 12 to `foreground.<role>.hover`. Neutral step 12 is also `text.primary` and the overlay source.
+// Light `low` sits at 0.49 (not 0.5) so step 11 keeps a small AA margin over the private ramp rungs
+// that sit above the public subtle fill.
 const TEXT_LIGHTNESS = {
 	dark: { high: 0.94, low: 0.76 },
 	light: { high: 0.3, low: 0.49 },
@@ -298,7 +298,7 @@ function buildFamily(request: GenerateFamilyRequest): {
 	// The on-solid text: the better of near-white / near-black against the resting solid.
 	const onSolid = chooseOnSolid(hue, [solid]);
 
-	// Steps 11-12: text rungs. Step 12 is a scale-quality rung, not a contract guarantee.
+	// Steps 11-12: text rungs. Neutral step 12 is also the interaction overlay source.
 	const text = TEXT_LIGHTNESS[mode];
 	const lowText = rung(
 		11,

@@ -50,7 +50,7 @@ Keep the detail that changes the reader's code:
 
 - `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
 - A field component takes no plain `ref`, so `inputRef` is the only way to reach the control.
-- Hover and pressed use `color.overlay` over the current semantic fill, so a custom control should
+- Hover and pressed mix `color.overlay` into the current semantic fill, so a custom control should
   not pick a different background token to mean hovered or pressed.
 
 Cut the detail that only explains the mechanism:

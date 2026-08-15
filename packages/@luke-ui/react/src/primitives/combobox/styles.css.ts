@@ -11,6 +11,7 @@ import {
 	invalidIndicatorIcon,
 	invalidIndicatorIconForcedColors,
 } from '../../styles/invalid-indicator.js';
+import { interactionBackground } from '../../styles/interaction-fill.js';
 import { styleInLayer } from '../../styles/layered-style.css.js';
 import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
@@ -84,11 +85,11 @@ const comboboxActionStyles = {
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
 		'&[data-hovered="true"]:not([data-disabled="true"])': {
-			backgroundImage: `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover})`,
+			backgroundColor: interactionBackground('transparent', 'hover'),
 			color: vars.color.text.primary,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"])': {
-			backgroundImage: `linear-gradient(${vars.color.overlay.pressed}, ${vars.color.overlay.pressed})`,
+			backgroundColor: interactionBackground('transparent', 'pressed'),
 			color: vars.color.text.primary,
 		},
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
@@ -370,11 +371,11 @@ const comboboxConfig = {
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'&[data-focused="true"]:not([data-disabled="true"])': {
-					backgroundImage: `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover})`,
+				'&[data-focused="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: interactionBackground('transparent', 'hover'),
 				},
-				'&[data-hovered="true"]:not([data-disabled="true"])': {
-					backgroundImage: `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover})`,
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: interactionBackground('transparent', 'hover'),
 				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 					outlineColor: vars.color.border.focus,
@@ -382,6 +383,12 @@ const comboboxConfig = {
 				'&[data-selected="true"]:not([data-disabled="true"])': {
 					backgroundColor: vars.color.background.accent.subtle,
 					fontWeight: vars.font.weight.label,
+				},
+				'&[data-focused="true"][data-selected="true"]:not([data-disabled="true"])': {
+					backgroundColor: interactionBackground(vars.color.background.accent.subtle, 'hover'),
+				},
+				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])': {
+					backgroundColor: interactionBackground(vars.color.background.accent.subtle, 'hover'),
 				},
 			},
 		},

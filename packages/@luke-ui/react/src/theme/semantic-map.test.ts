@@ -7,11 +7,7 @@ import { generateSurfaces } from './elevation.js';
 import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamily } from './scale.js';
-import {
-	mapSemanticColors,
-	OVERLAY_HOVER_PERCENT,
-	OVERLAY_PRESSED_PERCENT,
-} from './semantic-map.js';
+import { mapSemanticColors } from './semantic-map.js';
 
 type ColorMode = 'light' | 'dark';
 
@@ -92,12 +88,8 @@ describe('mapSemanticColors', () => {
 				expect(result['color.surface.floating']).toBe(formatOklch(surfaces.floating));
 				expect(result['color.surface.overlay']).toBe(formatOklch(surfaces.overlay));
 				expect(result['color.overlay.backdrop']).toBe(backdrop);
-				expect(result['color.overlay.hover']).toBe(
-					`color-mix(in oklab, ${formatOklch(families.neutral[12])} ${OVERLAY_HOVER_PERCENT}%, transparent)`,
-				);
-				expect(result['color.overlay.pressed']).toBe(
-					`color-mix(in oklab, ${formatOklch(families.neutral[12])} ${OVERLAY_PRESSED_PERCENT}%, transparent)`,
-				);
+				expect(result['color.overlay.hover']).toBe(formatOklch(families.neutral[12]));
+				expect(result['color.overlay.pressed']).toBe(formatOklch(families.neutral[12]));
 				expect(result['color.overlay.tint']).toBeUndefined();
 				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[8]));
 
@@ -204,18 +196,10 @@ describe('mapSemanticColors', () => {
 
 			const light = overlaysFor('light');
 			const dark = overlaysFor('dark');
-			expect(light.hover).toBe(
-				`color-mix(in oklab, ${light.neutral} ${OVERLAY_HOVER_PERCENT}%, transparent)`,
-			);
-			expect(light.pressed).toBe(
-				`color-mix(in oklab, ${light.neutral} ${OVERLAY_PRESSED_PERCENT}%, transparent)`,
-			);
-			expect(dark.hover).toBe(
-				`color-mix(in oklab, ${dark.neutral} ${OVERLAY_HOVER_PERCENT}%, transparent)`,
-			);
-			expect(dark.pressed).toBe(
-				`color-mix(in oklab, ${dark.neutral} ${OVERLAY_PRESSED_PERCENT}%, transparent)`,
-			);
+			expect(light.hover).toBe(light.neutral);
+			expect(light.pressed).toBe(light.neutral);
+			expect(dark.hover).toBe(dark.neutral);
+			expect(dark.pressed).toBe(dark.neutral);
 			expect(light.neutral).not.toBe('oklch(0 0 0)');
 			expect(dark.neutral).not.toBe('oklch(1 0 0)');
 			expect(light.neutral).not.toBe(dark.neutral);
