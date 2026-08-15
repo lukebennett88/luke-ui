@@ -2,10 +2,10 @@ import { expect, test } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
 import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { componentTestRegistration } from './component-test-registration.js';
 import { Checkbox } from './index.js';
 
 testFieldShapedConformance({
+	path: 'checkbox',
 	assertAssociation: (result) => {
 		// oxlint-disable-next-line vitest/no-standalone-expect
 		expect(result.locator.getByRole('checkbox', { name: 'Terms' }).element()).toHaveAccessibleName(
@@ -17,19 +17,12 @@ testFieldShapedConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a checkbox control.');
 		return control;
 	},
-	getTarget: (result) => {
-		const target = result.container.querySelector('label');
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a checkbox label.');
-		return target;
-	},
-	name: 'Checkbox',
-	registration: componentTestRegistration,
 	render: (props = {}) => {
 		return render(<Checkbox {...props}>Terms</Checkbox>);
 	},
 });
 
-testIntegration(componentTestRegistration, 'Checkbox', async () => {
+testIntegration('checkbox', async () => {
 	const { locator, user } = render(<Checkbox>Terms</Checkbox>);
 	const checkbox = locator.getByRole('checkbox', { name: 'Terms' });
 

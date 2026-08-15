@@ -35,7 +35,6 @@ describe('createComponentPlan', () => {
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/feedback/status-badge.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
-			'packages/@luke-ui/react/src/status-badge/component-test-registration.ts',
 			'packages/@luke-ui/react/src/status-badge/index.ts',
 			'packages/@luke-ui/react/src/status-badge/recipe.css.ts',
 			'packages/@luke-ui/react/src/status-badge/status-badge.browser.test.tsx',
@@ -77,7 +76,7 @@ describe('createComponentPlan', () => {
 		);
 	});
 
-	it('scaffolds field-shaped conformance registrations', () => {
+	it('scaffolds field-shaped conformance coverage without a universal target', () => {
 		const plan = createComponentPlan({
 			conformanceTier: 'field-shaped',
 			docsGroup: 'forms',
@@ -87,9 +86,13 @@ describe('createComponentPlan', () => {
 		expect(plan.textFileInserts?.[0]?.lines).toEqual([
 			"\t['DateField', 'date-field', 'field-shaped', 'none', 'applicable'],",
 		]);
-		expect(
-			plan.files.find((file) => file.path.endsWith('/date-field.browser.test.tsx'))?.contents,
-		).toContain('testFieldShapedConformance');
+		const browserTest = plan.files.find((file) =>
+			file.path.endsWith('/date-field.browser.test.tsx'),
+		)?.contents;
+		expect(browserTest).toContain('testFieldShapedConformance');
+		expect(browserTest).toContain("path: 'date-field'");
+		expect(browserTest).not.toContain('getTarget');
+		expect(browserTest).not.toContain("name: 'DateField'");
 	});
 
 	it('scaffolds integration tripwire coverage when requested', () => {
@@ -104,7 +107,7 @@ describe('createComponentPlan', () => {
 		]);
 		expect(
 			plan.files.find((file) => file.path.endsWith('/action-chip.browser.test.tsx'))?.contents,
-		).toContain('testIntegration');
+		).toContain("testIntegration('action-chip', async");
 	});
 
 	it('omits visual coverage when it does not apply', () => {

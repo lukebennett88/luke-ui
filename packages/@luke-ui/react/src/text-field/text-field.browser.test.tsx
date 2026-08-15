@@ -10,10 +10,10 @@ import {
 } from '../primitives/input-group/index.js';
 import { inputGroupRecipe } from '../primitives/input-group/recipe.css.js';
 import { render } from '../test-utils/render.js';
-import { componentTestRegistration } from './component-test-registration.js';
 import { TextField } from './index.js';
 
 testFieldShapedConformance({
+	path: 'text-field',
 	assertAssociation: (result) => {
 		const input = result.locator.getByRole('textbox', { name: 'Name' }).element();
 		// oxlint-disable-next-line vitest/no-standalone-expect
@@ -24,19 +24,12 @@ testFieldShapedConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a text input.');
 		return control;
 	},
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a text-field root.');
-		return target;
-	},
-	name: 'TextField',
-	registration: componentTestRegistration,
 	render: (props = {}) => {
 		return render(<TextField {...props} description="Helpful context" label="Name" />);
 	},
 });
 
-testIntegration(componentTestRegistration, 'TextField', async () => {
+testIntegration('text-field', async () => {
 	let value = '';
 	const { locator, user } = render(<TextField label="Name" onChange={(next) => (value = next)} />);
 	const input = locator.getByRole('textbox', { name: 'Name' });

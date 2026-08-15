@@ -2,17 +2,15 @@ import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { testUniversalConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { componentTestRegistration } from './component-test-registration.js';
 import { Box } from './index.js';
 
 testUniversalConformance({
+	path: 'box',
 	getTarget: (result) => {
 		const target = result.container.firstElementChild;
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a Box element.');
 		return target;
 	},
-	name: 'Box',
-	registration: componentTestRegistration,
 	render: (props = {}) => render(<Box {...props}>Content</Box>),
 });
 
