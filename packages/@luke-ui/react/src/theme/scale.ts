@@ -128,7 +128,10 @@ const RAMP_SPEC = {
 		border: { chromaCap: 0.11, chromaFraction: 0.66, offset: 0.165 },
 		mid: { chromaCap: 0.14, chromaFraction: 0.78, offset: 0.25 },
 	},
-} as const satisfies Record<ColorMode, Record<'subtle' | 'decorative' | 'border' | 'mid', RampRungSpec>>;
+} as const satisfies Record<
+	ColorMode,
+	Record<'subtle' | 'decorative' | 'border' | 'mid', RampRungSpec>
+>;
 
 interface SolidBand {
 	band: [number, number];

@@ -22,7 +22,8 @@ export interface TokenPurposeGroup {
  */
 const PURPOSE_DEFINITIONS = [
 	{
-		description: 'Background layers, from the page canvas to the translucent backdrop behind a dialog.',
+		description:
+			'Background layers, from the page canvas to the translucent backdrop behind a dialog.',
 		id: 'surfaces',
 		related: { label: 'Colour', splat: 'color' },
 		showSamples: true,

@@ -199,10 +199,7 @@ test('open option and selection states', async () => {
 
 	const selected = page.getByRole('option', { name: 'Canada' });
 	await userEvent.hover(selected);
-	await captureVisual(
-		page.elementLocator(document.body),
-		'combobox-field/selected-option-hover',
-	);
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/selected-option-hover');
 });
 
 test('option keyboard focus', async () => {

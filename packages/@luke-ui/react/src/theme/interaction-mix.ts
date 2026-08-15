@@ -20,10 +20,6 @@ export type InteractionState = keyof typeof INTERACTION_STRENGTH;
  * The same OKLab mix {@link import('./interaction-color.js').interactionColor} asks the browser to
  * paint for an opaque base.
  */
-export function mixInteractionColor(
-	base: Oklch,
-	source: Oklch,
-	state: InteractionState,
-): Oklch {
+export function mixInteractionColor(base: Oklch, source: Oklch, state: InteractionState): Oklch {
 	return mixOklab(base, source, INTERACTION_STRENGTH[state]);
 }

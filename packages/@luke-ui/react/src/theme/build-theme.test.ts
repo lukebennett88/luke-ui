@@ -69,7 +69,9 @@ describe('buildTheme mid-lightness sources', () => {
 		const error = caught as ThemeContrastError;
 		expect(
 			error.failures.every(
-				(failure) => failure.background.startsWith('hover on ') || failure.background.startsWith('pressed on '),
+				(failure) =>
+					failure.background.startsWith('hover on ') ||
+					failure.background.startsWith('pressed on '),
 			),
 		).toBe(true);
 	});

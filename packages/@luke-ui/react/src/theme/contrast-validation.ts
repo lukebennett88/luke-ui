@@ -102,11 +102,7 @@ export function validateContrast(
 	}
 
 	const interactionSource = colorAt('color.text.primary');
-	const checkInteraction = (
-		foreground: string,
-		state: InteractionState,
-		surface: string,
-	) => {
+	const checkInteraction = (foreground: string, state: InteractionState, surface: string) => {
 		const mixed = mixInteractionColor(colorAt(surface), interactionSource, state);
 		checkResolved(foreground, `${state} on ${surface}`, mixed, TEXT_RATIO, true);
 	};

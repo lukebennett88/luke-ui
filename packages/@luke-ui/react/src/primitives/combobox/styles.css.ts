@@ -7,7 +7,6 @@ import {
 	descendantDisabledSelector,
 	inputStates,
 } from '../../styles/input-states.js';
-import { interactionColor } from '../../theme/interaction-color.js';
 import {
 	invalidIndicatorIcon,
 	invalidIndicatorIconForcedColors,
@@ -18,6 +17,7 @@ import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
+import { interactionColor } from '../../theme/interaction-color.js';
 
 // Set per `size` variant on `inputGroup` below, from `FIELD_CONTROL_ICON_SIZE`, so the invalid
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.

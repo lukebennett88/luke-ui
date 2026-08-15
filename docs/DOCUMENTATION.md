@@ -50,8 +50,8 @@ Keep the detail that changes the reader's code:
 
 - `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
 - A field component takes no plain `ref`, so `inputRef` is the only way to reach the control.
-- Hover and pressed colours are derived from the resting semantic colour, so a custom control
-  should call `interactionColor` rather than pick a different background token.
+- Hover and pressed colours are derived from the resting semantic colour, so a custom control should
+  call `interactionColor` rather than pick a different background token.
 
 Cut the detail that only explains the mechanism:
 
