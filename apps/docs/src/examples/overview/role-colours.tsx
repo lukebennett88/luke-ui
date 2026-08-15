@@ -78,7 +78,7 @@ export default () => {
 									<Text
 										elementType="strong"
 										fontWeight="emphasis"
-										style={{ color: vars.color.foreground[role].rest }}
+										style={{ color: vars.color.foreground[role].default }}
 									>
 										Account status
 									</Text>
@@ -96,7 +96,7 @@ export default () => {
 										{roles[role]}
 									</Text>
 								</Box>
-								<Text style={{ color: vars.color.foreground[role].rest }}>
+								<Text style={{ color: vars.color.foreground[role].default }}>
 									This notice uses the selected semantic role.
 								</Text>
 							</Box>
