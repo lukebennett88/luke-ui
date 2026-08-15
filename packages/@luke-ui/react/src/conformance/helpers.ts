@@ -1,33 +1,42 @@
 import { expect, test } from 'vite-plus/test';
 import type { RenderResult } from '../test-utils/render.js';
-import { getComponentTestManifestEntry } from './manifest.js';
+import { componentTestManifest } from './manifest.js';
 
 type RenderComponent = (props?: Record<string, unknown>) => RenderResult;
 
 type UniversalConformanceOptions = {
+	name: string;
 	path: string;
 	render: RenderComponent;
 	getTarget: (result: RenderResult) => HTMLElement;
 };
 
-type FieldConformanceOptions = UniversalConformanceOptions & {
+type FieldConformanceOptions = {
 	assertName?: (result: RenderResult, control: HTMLElement) => void;
 	getControl: (result: RenderResult) => HTMLElement;
 	assertAssociation?: (result: RenderResult) => void;
+	name: string;
+	path: string;
+	render: RenderComponent;
 };
+
+function getManifestEntry(path: string) {
+	const entry = componentTestManifest.find((candidate) => candidate.path === path);
+	if (entry == null) throw new Error(`Unknown component test path: ${path}`);
+	return entry;
+}
 
 function assertNativeName(_: RenderResult, control: HTMLElement) {
 	expect(control).toHaveAttribute('name', 'conformance-field');
 }
 
 export function testUniversalConformance(options: UniversalConformanceOptions) {
-	const { getTarget, path, render } = options;
-	const entry = getComponentTestManifestEntry(path);
-	if (entry.conformanceTier !== 'universal') {
-		throw new Error(`Expected the ${path} manifest entry to require universal conformance.`);
+	const { getTarget, name, path, render } = options;
+	if (getManifestEntry(path).conformanceTier !== 'universal') {
+		throw new Error(`Expected universal conformance for ${path}.`);
 	}
 
-	test(`${entry.name} forwards its universal DOM contract`, () => {
+	test(`${name} forwards its universal DOM contract`, () => {
 		const ref = { current: null as HTMLElement | null };
 		const result = render({
 			className: 'conformance-class',
@@ -46,12 +55,11 @@ export function testUniversalConformance(options: UniversalConformanceOptions) {
 }
 
 export function testFieldShapedConformance(options: FieldConformanceOptions) {
-	const { assertAssociation, assertName, getControl, path, render } = options;
-	const entry = getComponentTestManifestEntry(path);
-	if (entry.conformanceTier !== 'field-shaped') {
-		throw new Error(`Expected the ${path} manifest entry to require field-shaped conformance.`);
+	const { assertAssociation, assertName, getControl, name, path, render } = options;
+	if (getManifestEntry(path).conformanceTier !== 'field-shaped') {
+		throw new Error(`Expected field-shaped conformance for ${path}.`);
 	}
-	test(`${entry.name} forwards its field contract`, async () => {
+	test(`${name} forwards its field contract`, async () => {
 		const inputRef = { current: null as HTMLElement | null };
 		let blurred = false;
 		const result = render({
@@ -98,7 +106,7 @@ export function testFieldShapedConformance(options: FieldConformanceOptions) {
 
 	// React Aria types `inputRef` as a ref object. Luke UI widens it to accept a
 	// callback so React Hook Form's `field.ref` works without an adapter.
-	test(`${entry.name} resolves a callback inputRef to the control`, () => {
+	test(`${name} resolves a callback inputRef to the control`, () => {
 		const resolved: Array<HTMLElement | null> = [];
 		const result = render({
 			inputRef: (node: HTMLElement | null) => {
@@ -113,12 +121,11 @@ export function testFieldShapedConformance(options: FieldConformanceOptions) {
 	});
 }
 
-export function testIntegration(path: string, run: () => void | Promise<void>) {
-	const entry = getComponentTestManifestEntry(path);
-	if (entry.integrationTripwire !== 'required') {
-		throw new Error(`Expected the ${path} manifest entry to require an integration tripwire.`);
+export function testIntegration(path: string, name: string, run: () => void | Promise<void>) {
+	if (getManifestEntry(path).integrationTripwire !== 'required') {
+		throw new Error(`Expected an integration tripwire for ${path}.`);
 	}
-	test(`${entry.name} integration`, async () => {
+	test(`${name} integration`, async () => {
 		expect.hasAssertions();
 		await run();
 	});

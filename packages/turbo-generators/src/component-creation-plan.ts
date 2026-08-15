@@ -298,27 +298,24 @@ function renderComponentTest(input: {
 	const contract =
 		input.conformanceTier === 'universal'
 			? `testUniversalConformance({
+	path: '${input.name}',
 	getTarget: (result) => {
 		const target = result.container.firstElementChild;
 		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
 		return target;
 	},
-	path: '${input.name}',
+	name: '${input.pascalName}',
 	render: (props = {}) => ${renderComponent},
 });`
 			: input.conformanceTier === 'field-shaped'
 				? `testFieldShapedConformance({
+	path: '${input.name}',
 	getControl: (result) => {
 		const control = result.container.querySelector('[name="conformance-field"]');
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a native field control.');
 		return control;
 	},
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
-		return target;
-	},
-	path: '${input.name}',
+	name: '${input.pascalName}',
 	render: (props = {}) => ${renderComponent},
 });`
 				: `test('${input.pascalName} renders its root element', () => {
@@ -329,7 +326,7 @@ function renderComponentTest(input: {
 	const integration =
 		input.integrationTripwire === 'required'
 			? `
-testIntegration('${input.name}', async () => {
+testIntegration('${input.name}', '${input.pascalName}', async () => {
 	let clicked = false;
 	const { locator, user } = render(
 		<${input.pascalName} onClick={() => (clicked = true)}>Content</${input.pascalName}>,

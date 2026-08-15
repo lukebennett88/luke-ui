@@ -48,19 +48,14 @@ Do not test RAC's contract. RAC already owns focus management, keyboard navigati
 semantics, ARIA wiring, validation semantics, and disabled/read-only interaction blocking. Test the
 composition, prop plumbing, styling hooks, and behaviour that Luke UI adds or deliberately changes.
 
-Each component's requirements live in the component test manifest. That list is the only declaration
-of conformance tier, integration-tripwire requirement, and visual-test applicability. `none` is a
-deliberate exception, not an omission.
-
-Call the matching shared helper with the component's manifest path:
+Each component opts into the applicable tier in the component test manifest:
 
 - **Universal**: documented element, `ref`, `className`, `id`, and `data-*` forwarding.
 - **Field-shaped**: object and callback `inputRef`, native `name`/form participation, `onBlur`, and
   label, description, and error association.
 - **None**: an explicit exception for a component that does not satisfy either contract.
 
-The helper reads the manifest and fails if that path does not require the contract. Do not repeat
-these contracts in individual tests.
+The shared conformance helpers test these contracts once. Do not repeat them in individual tests.
 
 Interactive RAC-backed components also register exactly one `testIntegration()` journey. It is an
 upgrade tripwire: perform one representative real-user workflow and assert only the result Luke UI

@@ -5,12 +5,13 @@ import { render } from '../test-utils/render.js';
 import { Box } from './index.js';
 
 testUniversalConformance({
+	path: 'box',
 	getTarget: (result) => {
 		const target = result.container.firstElementChild;
 		if (!(target instanceof HTMLElement)) throw new Error('Expected a Box element.');
 		return target;
 	},
-	path: 'box',
+	name: 'Box',
 	render: (props = {}) => render(<Box {...props}>Content</Box>),
 });
 
