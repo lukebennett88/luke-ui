@@ -134,7 +134,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 	return (
 		<Box
 			aria-label={ariaLabel}
-			className="not-prose overflow-hidden rounded-lg border border-fd-border"
+			className="not-prose my-4 overflow-hidden rounded-lg border border-fd-border"
 			role={ariaLabel ? 'region' : undefined}
 		>
 			<Box className="flex items-center justify-between gap-2 border-fd-border border-b bg-fd-card px-4 py-2">
