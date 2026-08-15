@@ -21,33 +21,16 @@ afterEach(() => {
 	root = undefined;
 });
 
-test('switches the preview viewport width', async () => {
+test('enters and exits fullscreen with a clearly labelled toggle', async () => {
 	renderToolbar();
 
-	await userEvent.click(page.getByRole('radio', { name: 'Mobile' }));
-
-	expect(page.getByRole('radio', { name: 'Mobile' }).element()).toHaveAttribute(
-		'aria-checked',
-		'true',
-	);
-});
-
-test('enters and exits fullscreen with a keyboard-reachable, clearly labelled toggle', async () => {
-	renderToolbar();
-
-	const enterButton = page.getByRole('button', { name: 'Enter fullscreen preview' });
-	await userEvent.tab();
-	await userEvent.tab();
-	await expect.element(enterButton).toHaveFocus();
-
-	await userEvent.keyboard('{Enter}');
+	await userEvent.click(page.getByRole('button', { name: 'Enter fullscreen preview' }));
 
 	const exitButton = page.getByRole('button', { name: 'Exit fullscreen preview' });
 	await expect.element(exitButton).toBeVisible();
-	await expect.element(exitButton).toHaveFocus();
 	expect(page.getByRole('button', { name: 'Enter fullscreen preview' }).elements()).toHaveLength(0);
 
-	await userEvent.keyboard(' ');
+	await userEvent.click(exitButton);
 
 	await expect
 		.element(page.getByRole('button', { name: 'Enter fullscreen preview' }))

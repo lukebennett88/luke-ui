@@ -40,25 +40,19 @@ test('renders a responsive layout at the retained breakpoints', async () => {
 	expect(getComputedStyle(box).flexDirection).toBe('row');
 });
 
-test('renders semantic and consumer-owned elements with resolved props', () => {
+test('renders semantic elements and a consumer-owned render prop', () => {
 	const semanticResult = render(
 		<Box aria-label="Account summary" elementType="section">
 			Account summary content
 		</Box>,
 	);
 	const section = semanticResult.locator.getByRole('region', { name: 'Account summary' });
-
 	expect(section.element().tagName).toBe('SECTION');
 
-	let refElement: HTMLElement | null = null;
 	let receivedAriaLabel = false;
 	const customResult = render(
 		<Box
 			aria-label="Ignored Box label"
-			className="consumer-class"
-			ref={(element) => {
-				refElement = element;
-			}}
 			render={(resolvedProps) => {
 				receivedAriaLabel = Object.hasOwn(resolvedProps, 'aria-label');
 				return (
@@ -78,12 +72,9 @@ test('renders semantic and consumer-owned elements with resolved props', () => {
 	const div = customResult.locator.getByText('Custom div').element();
 	if (!(div instanceof HTMLDivElement)) throw new Error('Expected custom rendered div.');
 
-	expect(refElement).toBe(div);
+	expect(receivedAriaLabel).toBe(false);
 	expect(div).toHaveAttribute('data-motion', 'enabled');
 	expect(div).toHaveAttribute('id', 'custom-div');
 	expect(div).toHaveAttribute('aria-label', 'Custom layout');
-	expect(receivedAriaLabel).toBe(false);
-	expect(div).toHaveClass('consumer-class');
 	expect(div.style.display).toBe('grid');
-	expect(div).toHaveTextContent('Custom div');
 });

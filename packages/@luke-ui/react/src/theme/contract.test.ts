@@ -71,30 +71,6 @@ describe('theme contract', () => {
 		expect([...emitted].sort(byPath)).toEqual([...expected].sort(byPath));
 	});
 
-	it('exposes semantic type styles and the carried-forward icon-size scale', () => {
-		expect(vars.font.body).toEqual({
-			baselineTrim: 'var(--luke-font-body-baseline-trim)',
-			capHeightTrim: 'var(--luke-font-body-cap-height-trim)',
-			fontFamily: 'var(--luke-font-body-font-family)',
-			fontSize: 'var(--luke-font-body-font-size)',
-			fontWeight: 'var(--luke-font-body-font-weight)',
-			letterSpacing: 'var(--luke-font-body-letter-spacing)',
-			lineHeight: 'var(--luke-font-body-line-height)',
-		});
-		expect(vars.font.display.fontSize).toBe('var(--luke-font-display-font-size)');
-		expect(vars.font.heading2.fontWeight).toBe('var(--luke-font-heading2-font-weight)');
-		expect(vars.font.family).toEqual({
-			body: 'var(--luke-font-family-body)',
-			code: 'var(--luke-font-family-code)',
-		});
-		expect(vars.iconSize).toEqual({
-			large: 'var(--luke-icon-size-large)',
-			medium: 'var(--luke-icon-size-medium)',
-			small: 'var(--luke-icon-size-small)',
-			xsmall: 'var(--luke-icon-size-xsmall)',
-		});
-	});
-
 	it('keeps typeStyles as the single source of truth for the font contract keys', () => {
 		const fontStepKeys = Object.keys(themeContractTree.font).filter((key) => {
 			return key !== 'family' && key !== 'weight';

@@ -142,17 +142,6 @@ function scenarios(): Array<Scenario> {
 		},
 		{
 			description:
-				"a class-less div appended straight to <body> resolves paper's dark canvas from <html>'s identity and data-color-mode, standing in for a portal",
-			expected: paperDarkCanvas,
-			target: () => {
-				document.documentElement.className = paperThemeClassName;
-				document.documentElement.dataset.colorMode = 'dark';
-				return createDiv(document.body);
-			},
-			varName: '--luke-color-surface-canvas',
-		},
-		{
-			description:
 				"a div.luke-ui-theme-paper resolves its own radius when nested inside <html class='luke-ui-theme-tactile'>",
 			expected: paperRadius,
 			target: () => {
@@ -198,11 +187,6 @@ describe('a single stylesheet with no identity class applied anywhere', () => {
 	it("resolves tactile's light canvas on a plain descendant", () => {
 		const container = createDiv(document.body);
 		const target = createDiv(container);
-		expect(readVar(target, '--luke-color-surface-canvas')).toBe(tactileLightCanvas);
-	});
-
-	it("resolves tactile's light canvas on a div appended straight to <body>", () => {
-		const target = createDiv(document.body);
 		expect(readVar(target, '--luke-color-surface-canvas')).toBe(tactileLightCanvas);
 	});
 

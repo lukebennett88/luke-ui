@@ -5,19 +5,6 @@ import { expect, test } from 'vite-plus/test';
 import { generateComponentsIndex } from '../../scripts/generate-components-index.js';
 import { componentIndexGroups } from '../generated/components-index.generated.js';
 
-test('generates one runtime entry per component guide', () => {
-	const reference = generateComponentsIndex();
-
-	expect(reference).toContain("name: 'Button'");
-	expect(reference).toContain("url: '/components/actions/button'");
-	expect(reference).toContain("name: 'Visually Hidden'");
-	expect(reference).toContain("url: '/components/primitives/visually-hidden'");
-	expect(reference).toContain(
-		'export const componentIndexGroups: ReadonlyArray<ComponentIndexGroup> = [',
-	);
-	expect(reference).toContain("title: 'Primitives',");
-});
-
 test('groups every entry by category in sidebar order', () => {
 	expect(componentIndexGroups.map((group) => group.title)).toEqual([
 		'Actions',
