@@ -195,7 +195,7 @@ export interface OnSolidGateRequest {
 /**
  * The one on-solid accessibility gate: whether the near-white or near-black on-solid text this
  * generator would choose clears the AA text ratio (plus the search headroom) against the public
- * resting solid (step 9). Hover and pressed are translucent overlays over that fill; those pairs
+ * resting solid (step 9). Hover and pressed mix the overlay source into that fill; those pairs
  * are gated by `validateContrast`, not by a private scale rung.
  *
  * `defineTheme`'s accent pre-conditioner calls this rather than reimplementing it, so the
