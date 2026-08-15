@@ -8,7 +8,8 @@ import type { Oklch } from './color.js';
 import { contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import type { ContrastCheck } from './diagnostics.js';
-import { mixInteractionSrgb, type InteractionOverlayState } from './interaction-overlay.js';
+import type { InteractionOverlayState } from './interaction-overlay.js';
+import { mixInteractionSrgb } from './interaction-overlay.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
 /** Ghost Button and IconButton keep these foregrounds on a transparent rest fill. */

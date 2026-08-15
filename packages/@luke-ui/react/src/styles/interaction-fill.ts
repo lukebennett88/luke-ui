@@ -4,7 +4,8 @@
  */
 
 import { vars } from '../theme/contract.css.js';
-import { interactionFill, type InteractionOverlayState } from '../theme/interaction-overlay.js';
+import type { InteractionOverlayState } from '../theme/interaction-overlay.js';
+import { interactionFill } from '../theme/interaction-overlay.js';
 
 /** `background-color` for a hover or pressed control, mixed from `fill` and the overlay source. */
 export function interactionBackground(fill: string, state: InteractionOverlayState): string {
