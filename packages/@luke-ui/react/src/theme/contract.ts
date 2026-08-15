@@ -13,8 +13,8 @@ const typeStyle = {
 
 /**
  * The background capabilities every semantic role gets, spread once per role so the six roles cannot
- * drift apart. Subtle and solid are resting fills. Transient hover and pressed feedback mixes
- * `color.overlay.tint` into one of those fills, not per-role state leaves.
+ * drift apart. Subtle and solid are resting fills. Transient hover and pressed feedback uses
+ * `color.overlay`, not per-role state leaves.
  */
 const roleBackground = {
 	subtle: null,
@@ -23,7 +23,7 @@ const roleBackground = {
 
 /**
  * The content capabilities every semantic role gets. There is no `pressed` foreground: press is
- * carried by a stronger `color.overlay.tint` mix and non-colour cues, so text and icons reuse
+ * carried by `color.overlay.pressed` and non-colour cues, so text and icons reuse
  * `hover`.
  */
 const roleForeground = {
@@ -144,13 +144,13 @@ export const themeContractTree = {
 			overlay: null,
 		},
 		/**
-		 * Modal dimming (`backdrop`, authored and emitted verbatim, so it may carry alpha) and the
-		 * generated opaque interaction ink (`tint`) components mix into a resting fill for hover and
-		 * pressed feedback.
+		 * Modal dimming (`backdrop`) and generated translucent interaction washes (`hover`,
+		 * `pressed`).
 		 */
 		overlay: {
 			backdrop: null,
-			tint: null,
+			hover: null,
+			pressed: null,
 		},
 		loadingSkeleton: null,
 		text: {
@@ -159,7 +159,7 @@ export const themeContractTree = {
 			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
 			disabled: null,
 		},
-		/** Subtle and solid resting backgrounds. Hover and pressed mix in `color.overlay.tint`. */
+		/** Subtle and solid resting backgrounds. Hover and pressed use `color.overlay`. */
 		background: {
 			neutral: { ...roleBackground },
 			accent: { ...roleBackground },

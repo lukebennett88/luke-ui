@@ -105,10 +105,9 @@ Every text/surface pair the compiler emits is a hard gate:
   its foreground `rest` and `hover` against `canvas`, `recessed`, and that role's own `subtle`
   background.
 - Each role's `onSolid` foreground against its `solid` background.
-- The first-party contracts that mix `color.overlay.tint` into a resting fill: ghost Button
-  foregrounds on canvas and recessed; solid and subtle Button tones; selected Combobox options on
-  accent subtle; unselected Combobox options on the floating popover; and the Checkbox's stronger
-  mixes over the accent and danger solid fills.
+- The first-party contracts that paint `color.overlay.hover` or `color.overlay.pressed` over a
+  resting fill: ghost Button foregrounds on canvas and recessed; solid and subtle Button tones;
+  selected Combobox options on accent subtle; unselected Combobox options on the floating popover.
 
 ### Guaranteed at 3:1
 

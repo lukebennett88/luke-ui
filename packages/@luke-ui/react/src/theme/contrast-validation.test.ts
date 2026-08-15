@@ -29,6 +29,7 @@ describe('buildTheme contrast failures', () => {
 		const { baseLight, mediaDark } = splitBlocks(buildTheme(tactileFoundation));
 		const block = mode === 'dark' ? mediaDark : baseLight;
 		return {
+			block,
 			values: Object.fromEntries(
 				flattenThemeContract()
 					.filter(([path]) => path.startsWith('color.'))
@@ -107,45 +108,61 @@ describe('buildTheme contrast failures', () => {
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
 	});
 
-	it('rejects an interaction wash whose composited fill misses the text ratio', () => {
-		// A light theme's tint is meant to darken; a white one lightens the accent fill towards the pale
-		// label it carries. Only the tint moves, so every resulting failure has to be a washed pair —
-		// moving a fill or a foreground instead would fail the resting pairs first and prove nothing
-		// about this gate. The Checkbox's 20% mix is the strongest wash and so the first to give way.
-		const { values } = modeColorValues('light');
-		values['color.overlay.tint'] = 'oklch(1 0 0)';
+	for (const mode of ['light', 'dark'] as const) {
+		it(`rejects an interaction overlay wash in ${mode} mode whose composited surface misses the text ratio`, () => {
+			// Strengthens the emitted pressed wash rather than moving the canvas: a lighter dark canvas
+			// fails uncomposited accent and danger pairs first, so it cannot isolate this gate.
+			const { values } = modeColorValues(mode);
+			const pressed = values['color.overlay.pressed'];
+			if (pressed === undefined) throw new Error('expected color.overlay.pressed');
+			expect(pressed).toContain('10%');
+			values['color.overlay.pressed'] = pressed.replace(' 10%, transparent', ' 80%, transparent');
 
-		const { failures } = validateContrast('light', values);
-		expect(failures.length).toBeGreaterThan(0);
-		expect(failures.every((failure) => failure.background.startsWith('color.overlay.tint '))).toBe(
-			true,
+			const { failures } = validateContrast(mode, values);
+			expect(failures.length).toBeGreaterThan(0);
+			expect(
+				failures.every((failure) => failure.background.startsWith('color.overlay.pressed over ')),
+			).toBe(true);
+			expect(
+				failures.some((failure) => {
+					return (
+						failure.foreground === 'color.foreground.danger.rest' &&
+						failure.background === 'color.overlay.pressed over color.surface.canvas' &&
+						failure.ratio < 4.5
+					);
+				}),
+			).toBe(true);
+			expect(
+				failures.some((failure) => {
+					return failure.foreground === 'color.foreground.accent.rest' && failure.ratio < 4.5;
+				}),
+			).toBe(true);
+		});
+	}
+
+	it('does not parse an interaction overlay as an opaque colour', () => {
+		const { block, values } = modeColorValues('dark');
+		values['color.overlay.hover'] = extractValue(block, '--luke-color-text-primary');
+		expect(() => validateContrast('dark', values)).toThrow(
+			/"color.overlay.hover" must be color-mix\(in oklab/,
 		);
-		expect(
-			failures.some((failure) => {
-				return (
-					failure.foreground === 'color.foreground.accent.onSolid' &&
-					failure.background === 'color.overlay.tint 20% over color.background.accent.solid' &&
-					failure.ratio < 4.5
-				);
-			}),
-		).toBe(true);
 	});
 
-	it('measures wash contrast from the painted sRGB result', () => {
+	it('measures ghost overlay contrast from the painted sRGB result', () => {
 		const { values } = modeColorValues('light');
 		values['color.surface.canvas'] = 'oklch(1 0 0)';
-		values['color.overlay.tint'] = 'oklch(0 0 0)';
+		values['color.overlay.hover'] = 'color-mix(in oklab, oklch(0 0 0) 50%, transparent)';
 		values['color.text.primary'] = 'oklch(0 0 0)';
 
 		const { checks } = validateContrast('light', values);
 		const check = checks.find((candidate) => {
 			return (
 				candidate.foreground === 'color.text.primary' &&
-				candidate.background === 'color.overlay.tint 10% over color.surface.canvas'
+				candidate.background === 'color.overlay.hover over color.surface.canvas'
 			);
 		});
 		expect(check).toBeDefined();
-		const grayLuminance = ((0.9 + 0.055) / 1.055) ** 2.4;
+		const grayLuminance = ((0.5 + 0.055) / 1.055) ** 2.4;
 		expect(check?.ratio).toBeCloseTo((grayLuminance + 0.05) / 0.05, 5);
 	});
 });
@@ -164,10 +181,9 @@ describe('contrast validation matrix', () => {
 	// Hard checks `validateContrast` runs once, not per role: functional primary/secondary text
 	// against the 4 elevation surfaces (8), the focus ring and `border.control` boundaries
 	// against the 2 base surfaces (4), `danger.solid` against the 2 base surfaces (2), and
-	// interaction washes over real component fills. The Button washes run at both 5% and 10%
-	// (ghost 12 + solid 6 + subtle 6 + combobox selected 2 + combobox unselected 2 = 28), and the
-	// Checkbox adds its stronger 15% and 20% mixes over accent and danger solid (4).
-	const OVERLAY_HARD_CHECKS = 28 + 4;
+	// interaction overlays over real component fills (ghost 12 + solid 6 + subtle 6 +
+	// combobox selected 2 + combobox unselected 2 = 28).
+	const OVERLAY_HARD_CHECKS = 28;
 	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2 + OVERLAY_HARD_CHECKS;
 
 	const expectedHard =
@@ -215,28 +231,24 @@ describe('contrast validation matrix', () => {
 					hard: expectedHard,
 					mode,
 					overlayBackgrounds: [
-						'color.overlay.tint 10% over color.background.accent.solid',
-						'color.overlay.tint 10% over color.background.accent.subtle',
-						'color.overlay.tint 10% over color.background.danger.solid',
-						'color.overlay.tint 10% over color.background.danger.subtle',
-						'color.overlay.tint 10% over color.background.neutral.solid',
-						'color.overlay.tint 10% over color.background.neutral.subtle',
-						'color.overlay.tint 10% over color.surface.canvas',
-						'color.overlay.tint 10% over color.surface.floating',
-						'color.overlay.tint 10% over color.surface.recessed',
-						'color.overlay.tint 15% over color.background.accent.solid',
-						'color.overlay.tint 15% over color.background.danger.solid',
-						'color.overlay.tint 20% over color.background.accent.solid',
-						'color.overlay.tint 20% over color.background.danger.solid',
-						'color.overlay.tint 5% over color.background.accent.solid',
-						'color.overlay.tint 5% over color.background.accent.subtle',
-						'color.overlay.tint 5% over color.background.danger.solid',
-						'color.overlay.tint 5% over color.background.danger.subtle',
-						'color.overlay.tint 5% over color.background.neutral.solid',
-						'color.overlay.tint 5% over color.background.neutral.subtle',
-						'color.overlay.tint 5% over color.surface.canvas',
-						'color.overlay.tint 5% over color.surface.floating',
-						'color.overlay.tint 5% over color.surface.recessed',
+						'color.overlay.hover over color.background.accent.solid',
+						'color.overlay.hover over color.background.accent.subtle',
+						'color.overlay.hover over color.background.danger.solid',
+						'color.overlay.hover over color.background.danger.subtle',
+						'color.overlay.hover over color.background.neutral.solid',
+						'color.overlay.hover over color.background.neutral.subtle',
+						'color.overlay.hover over color.surface.canvas',
+						'color.overlay.hover over color.surface.floating',
+						'color.overlay.hover over color.surface.recessed',
+						'color.overlay.pressed over color.background.accent.solid',
+						'color.overlay.pressed over color.background.accent.subtle',
+						'color.overlay.pressed over color.background.danger.solid',
+						'color.overlay.pressed over color.background.danger.subtle',
+						'color.overlay.pressed over color.background.neutral.solid',
+						'color.overlay.pressed over color.background.neutral.subtle',
+						'color.overlay.pressed over color.surface.canvas',
+						'color.overlay.pressed over color.surface.floating',
+						'color.overlay.pressed over color.surface.recessed',
 					],
 					overlayForegrounds: [
 						'color.foreground.accent.hover',

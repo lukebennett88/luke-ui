@@ -124,7 +124,9 @@ describe('buildTheme output', () => {
 		expect(css).toContain('--luke-color-border-danger');
 		expect(css).toContain('--luke-color-loading-skeleton');
 		expect(css).toContain('--luke-color-overlay-backdrop');
-		expect(css).toContain('--luke-color-overlay-tint');
+		expect(css).toContain('--luke-color-overlay-hover');
+		expect(css).toContain('--luke-color-overlay-pressed');
+		expect(css).not.toContain('--luke-color-overlay-tint');
 		expect(css).toContain('--luke-color-text-disabled');
 		expect(css).toContain('--luke-color-foreground-accent-hover');
 		expect(css).toContain('--luke-depth-raised');

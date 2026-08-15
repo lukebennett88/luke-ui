@@ -13,7 +13,6 @@ import {
 } from '../../styles/invalid-indicator.js';
 import { styleInLayer } from '../../styles/layered-style.css.js';
 import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
-import { overlayWash } from '../../styles/overlay-wash.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
@@ -85,11 +84,11 @@ const comboboxActionStyles = {
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
 		'&[data-hovered="true"]:not([data-disabled="true"])': {
-			backgroundColor: overlayWash('transparent', 5),
+			backgroundImage: `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover})`,
 			color: vars.color.text.primary,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"])': {
-			backgroundColor: overlayWash('transparent', 10),
+			backgroundImage: `linear-gradient(${vars.color.overlay.pressed}, ${vars.color.overlay.pressed})`,
 			color: vars.color.text.primary,
 		},
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
@@ -372,10 +371,10 @@ const comboboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'&[data-focused="true"]:not([data-disabled="true"])': {
-					backgroundColor: overlayWash('transparent', 5),
+					backgroundImage: `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover})`,
 				},
 				'&[data-hovered="true"]:not([data-disabled="true"])': {
-					backgroundColor: overlayWash('transparent', 5),
+					backgroundImage: `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover})`,
 				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 					outlineColor: vars.color.border.focus,
@@ -384,12 +383,6 @@ const comboboxConfig = {
 					backgroundColor: vars.color.background.accent.subtle,
 					fontWeight: vars.font.weight.label,
 				},
-				// A selected option already rests on the accent fill, so its wash goes over that fill
-				// rather than over the transparent one an unselected option rests on.
-				'&[data-selected="true"][data-focused="true"]:not([data-disabled="true"]), &[data-selected="true"][data-hovered="true"]:not([data-disabled="true"])':
-					{
-						backgroundColor: overlayWash(vars.color.background.accent.subtle, 5),
-					},
 			},
 		},
 		mobileInputGroup: {

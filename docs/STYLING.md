@@ -25,11 +25,6 @@ with no class and no JS required. Neither step injects styles at runtime.
   `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose. It is named
   `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module composes its
   plain data and functions.
-- `styles/overlay-wash.ts`: `overlayWash(fill, percent)`, the one place hover and pressed feedback
-  is built. It mixes `color.overlay.tint` into the fill a control already rests on and returns a
-  plain colour string, so a recipe assigns it to `background-color` or `border-color` and the
-  control's existing transition animates it. It is named `.ts`, not `.css.ts`, because it emits no
-  CSS.
 - `styles/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
   CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is the
   in-control icon `primitives/combobox/styles.css.ts` applies under its own invalid selector's

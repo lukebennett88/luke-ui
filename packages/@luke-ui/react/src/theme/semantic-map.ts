@@ -1,8 +1,8 @@
 /**
  * The one default semantic colour mapping. `mapSemanticColors` aliases every generated colour
  * contract leaf onto a private scale family's step or a generated surface, per the locked mapping
- * table. It is a pure lookup aside from the generated interaction ink, which is pure black in light
- * mode and pure white in dark mode. It never distorts a family or surface to make a leaf fit.
+ * table. It is a pure lookup aside from two generated interaction overlays mixed from the
+ * high-contrast neutral. It never distorts a family or surface to make a leaf fit.
  *
  * The role list it keys off comes from `contrast-policy.ts`, which `build-theme.ts`'s validation
  * matrix reads too, so a role can never be emitted here without being gated there. Values are
@@ -15,6 +15,12 @@ import { formatOklch } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
+
+/** Generated hover wash: high-contrast neutral at this alpha. */
+export const OVERLAY_HOVER_PERCENT = 5;
+
+/** Generated pressed wash: high-contrast neutral at this alpha. */
+export const OVERLAY_PRESSED_PERCENT = 10;
 
 /** Every generated colour contract leaf's CSS value, keyed by its dotted path (for example
  * `'color.text.primary'`), plus the passed-through `'color.overlay.backdrop'`. */
@@ -41,25 +47,22 @@ interface MapSemanticColorsRequest {
 	surfaces: GeneratedSurfaces;
 }
 
-/**
- * The opaque interaction ink for each mode. A component mixes it into its own resting fill at a
- * small percentage, so the ink itself has to be opaque: `color-mix()` cannot composite a translucent
- * colour onto a fill and still return an opaque result. Pure black darkens a light interface and
- * pure white lightens a dark one, which is what an interaction wash should do in each mode.
- */
-const OVERLAY_TINT: Record<ColorMode, Oklch> = {
-	dark: { c: 0, h: 0, l: 1 },
-	light: { c: 0, h: 0, l: 0 },
-};
+/** Mixes the high-contrast neutral foreground into a translucent interaction wash. */
+function interactionOverlay(
+	foreground: Oklch,
+	percent: typeof OVERLAY_HOVER_PERCENT | typeof OVERLAY_PRESSED_PERCENT,
+): string {
+	return `color-mix(in oklab, ${formatOklch(foreground)} ${percent}%, transparent)`;
+}
 
 /**
  * Resolves every colour contract leaf onto the private families and surfaces, per the locked
  * semantic mapping table. `families` and `surfaces` are already mode-resolved. `backdrop` passes
- * through verbatim. `color.overlay.tint` is the mode's opaque interaction ink. `focus` defaults to
- * the accent family's step 8 when the theme author omits it.
+ * through verbatim. Hover and pressed overlays mix `families.neutral[12]` with transparent.
+ * `focus` defaults to the accent family's step 8 when the theme author omits it.
  */
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
-	const { families, surfaces, backdrop, focus, controlBorder, mode } = request;
+	const { families, surfaces, backdrop, focus, controlBorder } = request;
 	const neutral = families.neutral;
 	const values: Record<string, string> = {};
 
@@ -69,7 +72,8 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 	values['color.surface.floating'] = formatOklch(surfaces.floating);
 	values['color.surface.overlay'] = formatOklch(surfaces.overlay);
 	values['color.overlay.backdrop'] = backdrop;
-	values['color.overlay.tint'] = formatOklch(OVERLAY_TINT[mode]);
+	values['color.overlay.hover'] = interactionOverlay(neutral[12], OVERLAY_HOVER_PERCENT);
+	values['color.overlay.pressed'] = interactionOverlay(neutral[12], OVERLAY_PRESSED_PERCENT);
 	values['color.loadingSkeleton'] = formatOklch(neutral[8]);
 
 	// Functional text and borders: neutral only, and distinct from the six shared roles that share the

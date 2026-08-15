@@ -1,9 +1,11 @@
 import { styleInLayer } from '../../styles/layered-style.css.js';
-import { overlayWash } from '../../styles/overlay-wash.js';
 import type { RecipeSelection } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
+
+const hoverOverlay = `linear-gradient(${vars.color.overlay.hover}, ${vars.color.overlay.hover})`;
+const pressedOverlay = `linear-gradient(${vars.color.overlay.pressed}, ${vars.color.overlay.pressed})`;
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -189,12 +191,10 @@ function appearance(
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: overlayWash(fill, 5),
-						backgroundImage: vars.actionControlFinish.raised,
+						backgroundImage: `${hoverOverlay}, ${vars.actionControlFinish.raised}`,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: overlayWash(fill, 10),
-						backgroundImage: vars.actionControlFinish.recessed,
+						backgroundImage: `${pressedOverlay}, ${vars.actionControlFinish.recessed}`,
 					},
 				},
 			},
@@ -213,11 +213,11 @@ function ghostAppearance(tone: Tone, color: string) {
 			color,
 			selectors: {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: overlayWash('transparent', 5),
+					backgroundImage: hoverOverlay,
 					boxShadow: vars.depth.raised,
 				},
 				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: overlayWash('transparent', 10),
+					backgroundImage: pressedOverlay,
 					boxShadow: vars.depth.recessed,
 				},
 			},

@@ -19,70 +19,17 @@ const GHOST_FOREGROUNDS = [
 
 const BUTTON_TONES = ['neutral', 'accent', 'danger'] as const;
 
-/** The two surfaces a control can rest directly on. */
-const BASE_SURFACES = ['color.surface.canvas', 'color.surface.recessed'] as const;
-
 const SUBTLE_BUTTON_FOREGROUND = {
 	accent: 'color.foreground.accent.hover',
 	danger: 'color.foreground.danger.hover',
 	neutral: 'color.text.primary',
 } as const;
 
-/** One first-party pair that paints content over a fill washed with `color.overlay.tint`. */
-interface WashedPair {
-	/** The fill the control rests on, which the tint is mixed into. */
-	fill: string;
-	/** The token path of the content painted on top. */
-	foreground: string;
-	/** How much tint the component's recipe mixes in. */
-	percent: number;
-}
+const INTERACTION_OVERLAYS = ['color.overlay.hover', 'color.overlay.pressed'] as const;
 
-/**
- * The washes first-party recipes actually paint, so the validated pairs track the component code.
- * Button hovers at 5% and presses at 10% on every appearance; Checkbox uses the stronger 15% and 20%
- * mixes a small control needs.
- */
-const WASHED_PAIRS: ReadonlyArray<WashedPair> = [
-	...[5, 10].flatMap((percent) => [
-		// Ghost Button and IconButton: a transparent rest fill on canvas or recessed, so the wash lands
-		// on the surface itself.
-		...BASE_SURFACES.flatMap((fill) =>
-			GHOST_FOREGROUNDS.map((foreground) => ({ fill, foreground, percent })),
-		),
-		// Solid and subtle Button and IconButton tones, over their own resting fill.
-		...BUTTON_TONES.flatMap((tone) => [
-			{
-				fill: `color.background.${tone}.solid`,
-				foreground: `color.foreground.${tone}.onSolid`,
-				percent,
-			},
-			{
-				fill: `color.background.${tone}.subtle`,
-				foreground: SUBTLE_BUTTON_FOREGROUND[tone],
-				percent,
-			},
-		]),
-		// Combobox: a selected option rests on the accent subtle fill, an unselected one on the
-		// floating popover.
-		{ fill: 'color.background.accent.subtle', foreground: 'color.text.primary', percent },
-		{ fill: 'color.surface.floating', foreground: 'color.text.primary', percent },
-	]),
-	// Checkbox: a selected or indeterminate box, and its invalid counterpart, wash their own solid
-	// fill while keeping the matching on-solid glyph.
-	...[15, 20].flatMap((percent) => [
-		{
-			fill: 'color.background.accent.solid',
-			foreground: 'color.foreground.accent.onSolid',
-			percent,
-		},
-		{
-			fill: 'color.background.danger.solid',
-			foreground: 'color.foreground.danger.onSolid',
-			percent,
-		},
-	]),
-];
+/** The emitted hover and pressed overlay shape: an opaque OKLCH mixed with transparent in OKLab. */
+const INTERACTION_OVERLAY_VALUE =
+	/^color-mix\(in oklab, (oklch\([^)]+\)) (\d+(?:\.\d+)?)%, transparent\)$/;
 
 type ColorMode = 'light' | 'dark';
 
@@ -106,7 +53,7 @@ interface ValidationResult {
 }
 
 /**
- * Runs the full semantic validation matrix over the emitted (rounded) colour values: 88 hard checks
+ * Runs the full semantic validation matrix over the emitted (rounded) colour values: 84 hard checks
  * and 12 advisory checks per mode. Every pair is recorded as a {@link ContrastCheck}, and the hard
  * ones populate `failures` (which `compileTheme` raises as a
  * {@link import('./build-theme.js').ThemeContrastError}).
@@ -114,10 +61,9 @@ interface ValidationResult {
  * Hard at the AA text ratio: functional primary and secondary text against all four elevation
  * surfaces; every role's resting and hover foreground against the base surfaces and that role's own
  * subtle fill; every role's on-solid foreground against its solid fill; and the real component
- * contracts that mix `overlay.tint` into a resting fill (ghost Button on canvas and recessed, solid
- * and subtle Button tones, selected Combobox options on accent subtle, unselected Combobox options
- * on floating, and the Checkbox's stronger mixes over accent and danger solid). Hard at the non-text
- * ratio: the authored focus ring and
+ * contracts that paint `overlay.hover` / `overlay.pressed` over a resting fill (ghost Button on
+ * canvas and recessed, solid and subtle Button tones, selected Combobox options on accent subtle,
+ * unselected Combobox options on floating). Hard at the non-text ratio: the authored focus ring and
  * `border.control`, which is `control-border.ts`'s solved boundary rather than a scale-step alias;
  * and `danger.solid` against the base surfaces, because it is the only role fill that carries a
  * required state's boundary (the invalid field boundary). This last gate is deliberately not
@@ -164,7 +110,7 @@ export function validateContrast(
 	const surfacePaths = ['canvas', 'recessed', 'floating', 'overlay'].map(
 		(surface) => `color.surface.${surface}`,
 	);
-	const basePaths = BASE_SURFACES;
+	const basePaths = ['color.surface.canvas', 'color.surface.recessed'];
 
 	// Functional text vs every mapped elevation surface: 8 checks.
 	for (const text of ['color.text.primary', 'color.text.secondary']) {
@@ -200,16 +146,50 @@ export function validateContrast(
 			check(`color.border.${role}`, background, UI_RATIO, false);
 		}
 	}
-	// Interaction washes mix the opaque tint into the resting fill the control already has. Browsers
-	// composite in gamma-encoded sRGB, which is what `compositeOver` does. Pairs come from the
-	// `WASHED_PAIRS` table, which follows first-party recipes rather than every theoretical
-	// combination: 32 checks.
-	const tint = colorAt('color.overlay.tint');
-	for (const { foreground, fill, percent } of WASHED_PAIRS) {
-		const washed = compositeOver(tint, colorAt(fill), percent / 100);
-		const background = `color.overlay.tint ${percent}% over ${fill}`;
-		checkResolved(foreground, background, washed, TEXT_RATIO, true);
+	// Interaction overlays composite over the resting fill the control already has. Mix with
+	// transparent sets alpha; painting then source-overs that colour. Do not parse the `color-mix()`
+	// string as an opaque colour. Pairs follow first-party recipes, not every theoretical combination.
+	const checkOverlay = (foreground: string, overlayPath: string, surface: string) => {
+		const overlayValue = colorValues[overlayPath];
+		if (overlayValue === undefined) throw new Error(`buildTheme did not generate "${overlayPath}"`);
+		const composited = compositeOverlay(overlayValue, overlayPath, colorAt(surface));
+		checkResolved(foreground, `${overlayPath} over ${surface}`, composited, TEXT_RATIO, true);
+	};
+	for (const overlayPath of INTERACTION_OVERLAYS) {
+		// Ghost Button / IconButton: transparent rest on canvas or recessed.
+		for (const surface of basePaths) {
+			for (const foreground of GHOST_FOREGROUNDS) {
+				checkOverlay(foreground, overlayPath, surface);
+			}
+		}
+		// Solid Button / IconButton, and selected or invalid Checkbox, which reuse the same on-solid
+		// pairing over accent or danger solid.
+		for (const tone of BUTTON_TONES) {
+			checkOverlay(
+				`color.foreground.${tone}.onSolid`,
+				overlayPath,
+				`color.background.${tone}.solid`,
+			);
+			checkOverlay(SUBTLE_BUTTON_FOREGROUND[tone], overlayPath, `color.background.${tone}.subtle`);
+		}
+		// Combobox selected option: primary text on accent subtle. Unselected focused or hovered
+		// option: primary text on the floating popover.
+		checkOverlay('color.text.primary', overlayPath, 'color.background.accent.subtle');
+		checkOverlay('color.text.primary', overlayPath, 'color.surface.floating');
 	}
 
 	return { checks, failures };
+}
+
+/** Reads an emitted `color-mix(..., transparent)` overlay and paints it over an opaque surface. */
+function compositeOverlay(overlayValue: string, overlayPath: string, surface: Oklch): Oklch {
+	const match = INTERACTION_OVERLAY_VALUE.exec(overlayValue);
+	const sourceValue = match?.[1];
+	const percentText = match?.[2];
+	if (sourceValue === undefined || percentText === undefined) {
+		throw new Error(
+			`"${overlayPath}" must be color-mix(in oklab, oklch(...) N%, transparent); received "${overlayValue}"`,
+		);
+	}
+	return compositeOver(parseColor(sourceValue), surface, Number(percentText) / 100);
 }

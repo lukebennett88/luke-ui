@@ -7,7 +7,11 @@ import { generateSurfaces } from './elevation.js';
 import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamily } from './scale.js';
-import { mapSemanticColors } from './semantic-map.js';
+import {
+	mapSemanticColors,
+	OVERLAY_HOVER_PERCENT,
+	OVERLAY_PRESSED_PERCENT,
+} from './semantic-map.js';
 
 type ColorMode = 'light' | 'dark';
 
@@ -88,9 +92,13 @@ describe('mapSemanticColors', () => {
 				expect(result['color.surface.floating']).toBe(formatOklch(surfaces.floating));
 				expect(result['color.surface.overlay']).toBe(formatOklch(surfaces.overlay));
 				expect(result['color.overlay.backdrop']).toBe(backdrop);
-				expect(result['color.overlay.tint']).toBe(
-					mode === 'light' ? 'oklch(0 0 0)' : 'oklch(1 0 0)',
+				expect(result['color.overlay.hover']).toBe(
+					`color-mix(in oklab, ${formatOklch(families.neutral[12])} ${OVERLAY_HOVER_PERCENT}%, transparent)`,
 				);
+				expect(result['color.overlay.pressed']).toBe(
+					`color-mix(in oklab, ${formatOklch(families.neutral[12])} ${OVERLAY_PRESSED_PERCENT}%, transparent)`,
+				);
+				expect(result['color.overlay.tint']).toBeUndefined();
 				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[8]));
 
 				// Global text and borders use the neutral family. `border.control` is a solved
@@ -177,20 +185,40 @@ describe('mapSemanticColors', () => {
 			expect(result['color.overlay.backdrop']).toBe(backdrop);
 		});
 
-		it('emits an opaque tint that flips with the mode', () => {
-			const tintFor = (mode: 'light' | 'dark') => {
+		it('derives hover and pressed from the mode-resolved high-contrast neutral, not black or white', () => {
+			const overlaysFor = (mode: 'light' | 'dark') => {
 				const background = BACKGROUND[mode];
-				return mapSemanticColors({
+				const families = buildFamilies(mode, background);
+				const result = mapSemanticColors({
 					backdrop: 'oklch(0 0 0 / 0.5)',
 					controlBorder: CONTROL_BORDER[mode],
-					families: buildFamilies(mode, background),
-					mode,
+					families,
 					surfaces: generateSurfaces({ background, mode }),
-				})['color.overlay.tint'];
+				});
+				return {
+					hover: result['color.overlay.hover'],
+					neutral: formatOklch(families.neutral[12]),
+					pressed: result['color.overlay.pressed'],
+				};
 			};
 
-			expect(tintFor('light')).toBe('oklch(0 0 0)');
-			expect(tintFor('dark')).toBe('oklch(1 0 0)');
+			const light = overlaysFor('light');
+			const dark = overlaysFor('dark');
+			expect(light.hover).toBe(
+				`color-mix(in oklab, ${light.neutral} ${OVERLAY_HOVER_PERCENT}%, transparent)`,
+			);
+			expect(light.pressed).toBe(
+				`color-mix(in oklab, ${light.neutral} ${OVERLAY_PRESSED_PERCENT}%, transparent)`,
+			);
+			expect(dark.hover).toBe(
+				`color-mix(in oklab, ${dark.neutral} ${OVERLAY_HOVER_PERCENT}%, transparent)`,
+			);
+			expect(dark.pressed).toBe(
+				`color-mix(in oklab, ${dark.neutral} ${OVERLAY_PRESSED_PERCENT}%, transparent)`,
+			);
+			expect(light.neutral).not.toBe('oklch(0 0 0)');
+			expect(dark.neutral).not.toBe('oklch(1 0 0)');
+			expect(light.neutral).not.toBe(dark.neutral);
 		});
 	});
 });
