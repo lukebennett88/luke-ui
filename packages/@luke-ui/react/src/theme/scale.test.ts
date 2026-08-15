@@ -191,7 +191,7 @@ describe('reference-envelope properties', () => {
 });
 
 describe('high-contrast text', () => {
-	it('keeps the ordinary foreground readable on the pressed subtle fill', () => {
+	it('keeps the ordinary foreground readable on the derived pressed subtle colour', () => {
 		for (const mode of MODES) {
 			const scale = family('#0090ff', mode, 'accent');
 			const pressedSubtle = mixInteractionColor(scale.subtle, scale.highContrast, 'pressed');

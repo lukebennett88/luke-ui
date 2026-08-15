@@ -311,8 +311,9 @@ function buildFamily(request: GenerateFamilyRequest): {
 
 /**
  * Resolves the ordinary semantic foreground. Prefers the curated text lightness, then walks toward
- * the high-contrast lightness until the colour still clears AA against the pressed subtle fill.
- * Pressed is the stronger mix, so a pair that passes there also passes at rest and on hover.
+ * the high-contrast lightness until the colour still clears AA against the derived pressed colour
+ * of the subtle fill. Pressed is the stronger mix, so a pair that passes there also passes at rest
+ * and on hover.
  */
 function resolveForeground({
 	highContrast,

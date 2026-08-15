@@ -196,10 +196,18 @@ test('open option and selection states', async () => {
 		page.elementLocator(document.body),
 		'combobox-field/open-selected-disabled-loading',
 	);
+});
 
-	const selected = page.getByRole('option', { name: 'Canada' });
-	await userEvent.hover(selected);
-	await captureVisual(page.elementLocator(document.body), 'combobox-field/selected-option-hover');
+test('selected option hover', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	await captureVisual(
+		await openHoveredSelectedComboboxOption(),
+		'combobox-field/selected-option-hover',
+	);
 });
 
 test('option keyboard focus', async () => {
@@ -383,7 +391,7 @@ test('rich section title', async () => {
  * The page is captured rather than the option: Playwright's element screenshot also scrolls, which
  * detaches the portalled list.
  */
-async function openFocusedComboboxOption() {
+async function withPopoverScrollStub<T>(run: () => Promise<T>): Promise<T> {
 	const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView');
 	if (descriptor == null) throw new Error('Expected Element.prototype.scrollIntoView');
 	Object.defineProperty(Element.prototype, 'scrollIntoView', {
@@ -391,6 +399,27 @@ async function openFocusedComboboxOption() {
 		value: () => {},
 	});
 	try {
+		return await run();
+	} finally {
+		Object.defineProperty(Element.prototype, 'scrollIntoView', descriptor);
+	}
+}
+
+async function openHoveredSelectedComboboxOption() {
+	return withPopoverScrollStub(async () => {
+		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		const option = page.getByRole('option', { exact: true, name: 'Canada' });
+		await userEvent.hover(option);
+		await expect.poll(() => option.element().getAttribute('data-hovered')).toBe('true');
+		const popover = page.getByRole('listbox').element().parentElement;
+		if (popover == null) throw new Error('Expected the popover element.');
+		await waitForOverlayEnter(popover);
+		return page.elementLocator(document.body);
+	});
+}
+
+async function openFocusedComboboxOption() {
+	return withPopoverScrollStub(async () => {
 		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
 		await userEvent.keyboard('{ArrowDown}');
 		const option = page.getByRole('option', { exact: true, name: 'Australia' });
@@ -399,9 +428,7 @@ async function openFocusedComboboxOption() {
 		if (popover == null) throw new Error('Expected the popover element.');
 		await waitForOverlayEnter(popover);
 		return page.elementLocator(document.body);
-	} finally {
-		Object.defineProperty(Element.prototype, 'scrollIntoView', descriptor);
-	}
+	});
 }
 
 /**
