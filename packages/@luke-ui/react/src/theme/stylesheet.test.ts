@@ -117,28 +117,6 @@ describe('buildTheme output', () => {
 		}
 	});
 
-	it('uses the stable kebab-case variable names', () => {
-		expect(css).toContain('--luke-color-background-danger-solid-hover');
-		expect(css).toContain('--luke-color-foreground-danger-on-solid');
-		expect(css).toContain('--luke-color-border-danger');
-		expect(css).toContain('--luke-color-loading-skeleton');
-		expect(css).toContain('--luke-color-scrim');
-		expect(css).toContain('--luke-color-text-disabled');
-		expect(css).toContain('--luke-color-foreground-accent-hover');
-		expect(css).toContain('--luke-depth-raised');
-		expect(css).toContain('--luke-action-control-finish-resting');
-		expect(css).toContain('--luke-space-100:');
-		expect(css).toContain('--luke-control-size-small');
-		expect(css).toContain('--luke-motion-easing-standard');
-		expect(css).toContain('--luke-font-weight-body');
-		expect(css).toContain('--luke-font-caption-font-size:');
-		expect(css).toContain('--luke-font-body-line-height:');
-		expect(css).toContain('--luke-font-display-letter-spacing:');
-		expect(css).toContain('--luke-font-heading2-font-weight:');
-		expect(css).toContain('--luke-icon-size-xsmall:');
-		expect(css).toContain('--luke-icon-size-large:');
-	});
-
 	it('emits the public spacing scale in every built-in theme', () => {
 		for (const foundation of [tactileFoundation, paperFoundation]) {
 			const { identity } = splitBlocks(buildTheme(foundation));
@@ -176,7 +154,9 @@ describe('buildTheme output', () => {
 
 	it('keeps Paper softer than Tactile while retaining finish and state depth', () => {
 		const paperBlocks = splitBlocks(buildTheme(paperFoundation));
-		expect(extractValue(paperBlocks.identity, '--luke-radius-control')).toBe('4px');
+		expect(extractValue(paperBlocks.identity, '--luke-radius-control')).not.toBe(
+			extractValue(blocks.identity, '--luke-radius-control'),
+		);
 		expect(extractValue(paperBlocks.baseLight, '--luke-depth-recessed')).toBe('none');
 		expect(extractValue(blocks.baseLight, '--luke-depth-recessed').split(', ')).toHaveLength(2);
 

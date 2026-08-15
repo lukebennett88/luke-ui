@@ -128,19 +128,10 @@ test('InputGroupInput resolves object and callback refs to the input element', a
 // `inputStates.invalid` must not match `:has(:invalid)`: that matches a required,
 // empty input from first render — before any interaction or submit — while
 // `aria-invalid` stays null, painting an untouched required field invalid even
-// though assistive technology is told it's fine. These two tests guard that the
-// group only picks up the invalid treatment once React Aria has recorded a real
-// validation failure. The in-control icon is the invalid cue Luke UI owns.
-test('a required field with no value is not painted invalid before validation runs', async () => {
-	render(<TextField isRequired label="Email" name="email" />);
-
-	const input = page.getByRole('textbox', { name: 'Email' });
-	await expect.element(input).toBeVisible();
-
-	expect(indicatorFor('Email')).toBe(null);
-});
-
-test('a required field is painted invalid once a real submit fails validation', async () => {
+// though assistive technology is told it's fine. Guard that the group only picks
+// up the invalid treatment once React Aria has recorded a real validation
+// failure. The in-control icon is the invalid cue Luke UI owns.
+test('a required field is painted invalid only after a real submit fails validation', async () => {
 	// A plain `<form>`, not react-aria-components' `Form`: the latter fails to
 	// resolve in this browser test environment. React Aria's own field
 	// validation listens for the browser's native `invalid` event regardless of

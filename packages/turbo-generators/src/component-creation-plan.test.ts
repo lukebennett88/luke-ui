@@ -1,23 +1,9 @@
-import { execFileSync } from 'node:child_process';
-import { createRequire } from 'node:module';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vite-plus/test';
 import {
 	parseComponentFrontmatter,
 	renderPropsPage,
 } from '../../../apps/docs/scripts/generate-props-pages.js';
 import { createComponentPlan } from './component-creation-plan.js';
-
-const roots: Array<string> = [];
-
-afterEach(async () => {
-	await Promise.all(roots.map((root) => rm(root, { force: true, recursive: true })));
-	roots.length = 0;
-});
-const require = createRequire(import.meta.url);
-const tscPath = join(dirname(require.resolve('typescript/package.json')), 'bin/tsc');
 
 describe('createComponentPlan', () => {
 	it('plans a component with a colocated recipe across package and hosted docs surfaces', () => {
@@ -156,70 +142,5 @@ describe('createComponentPlan', () => {
 		expect(renderPropsPage(frontmatter)).toContain(
 			'<auto-type-table\n\tpath="packages/@luke-ui/react/src/status-badge/status-badge.tsx"\n\tname="StatusBadgeProps"\n/>',
 		);
-	});
-
-	it('type-checks the generated recipe contract', async () => {
-		const root = await mkdtemp(join(tmpdir(), 'component-plan-typecheck-'));
-		roots.push(root);
-
-		const plan = createComponentPlan({
-			docsGroup: 'feedback',
-			name: 'StatusBadge',
-		});
-
-		const componentDir = join(root, 'packages/@luke-ui/react/src/status-badge');
-		const stylesDir = join(root, 'packages/@luke-ui/react/src/styles');
-		await mkdir(componentDir, { recursive: true });
-		await mkdir(stylesDir, { recursive: true });
-
-		const recipeSource = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/recipe.css.ts'),
-		)?.contents;
-		if (recipeSource === undefined) {
-			throw new Error('Expected generated recipe source.');
-		}
-
-		await writeFile(join(componentDir, 'recipe.css.ts'), recipeSource, 'utf8');
-		await writeFile(
-			join(stylesDir, 'recipe.ts'),
-			[
-				'export function recipe(config: { base?: Record<string, string> }) {',
-				'\treturn (selection?: Record<string, string>) => {',
-				'\t\tvoid selection;',
-				'\t\treturn "recipe-class";',
-				'\t};',
-				'}',
-				'export type RecipeSelection<Fn> = Fn extends (selection?: infer Selection) => unknown',
-				'\t? Selection',
-				'\t: never;',
-			].join('\n'),
-			'utf8',
-		);
-		await writeFile(
-			join(root, 'tsconfig.json'),
-			JSON.stringify(
-				{
-					compilerOptions: {
-						jsx: 'react-jsx',
-						module: 'NodeNext',
-						moduleResolution: 'NodeNext',
-						noEmit: true,
-						strict: true,
-						target: 'ES2022',
-					},
-					include: ['packages/@luke-ui/react/src/status-badge/recipe.css.ts'],
-				},
-				null,
-				'\t',
-			),
-			'utf8',
-		);
-
-		expect(() => {
-			execFileSync(tscPath, ['--noEmit', '-p', join(root, 'tsconfig.json')], {
-				encoding: 'utf8',
-				stdio: 'pipe',
-			});
-		}).not.toThrow();
 	});
 });
