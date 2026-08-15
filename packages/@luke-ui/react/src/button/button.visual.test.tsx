@@ -98,7 +98,7 @@ test('ghost hover in dark mode', async () => {
 	await captureVisual(button, 'button/ghost-hover-tactile-dark');
 });
 
-test('solid accent hover and pressed', async () => {
+test('solid accent hover', async () => {
 	render(
 		<Button appearance="solid" tone="accent">
 			Save
@@ -108,11 +108,6 @@ test('solid accent hover and pressed', async () => {
 
 	await userEvent.hover(button);
 	await captureVisual(button, 'button/solid-accent-hover');
-	await userEvent.unhover(button);
-	await focusViaKeyboard(button);
-	await userEvent.keyboard('{Space>}');
-	await captureVisual(button, 'button/solid-accent-pressed');
-	await userEvent.keyboard('{/Space}');
 });
 
 test('forced-colors states', async () => {

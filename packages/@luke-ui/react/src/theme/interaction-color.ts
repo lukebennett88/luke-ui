@@ -1,6 +1,6 @@
 /**
- * Derives hover and pressed colours from a resting semantic colour. Recipes and contrast
- * validation share this module so the source, strengths, and OKLab interpolation cannot drift.
+ * Derives hover and pressed colours from a resting semantic colour. Strengths and OKLab
+ * interpolation live in `interaction-mix.ts` so recipes and contrast validation cannot drift.
  */
 
 import { vars } from './contract.css.js';
