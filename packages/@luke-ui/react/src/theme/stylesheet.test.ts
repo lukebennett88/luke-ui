@@ -106,14 +106,21 @@ describe('buildTheme output', () => {
 	}
 
 	it('emits every colour value in OKLCH', () => {
+		const colorMixVarNames = new Set([
+			'--luke-color-overlay-hover',
+			'--luke-color-overlay-pressed',
+		]);
 		const colorVarNames = pairs
 			.filter(([path]) => path.startsWith('color.'))
 			.map(([, varName]) => varName);
 		for (const block of [blocks.baseLight, blocks.mediaDark]) {
 			const nonOklch = colorVarNames.filter((varName) => {
-				return !extractValue(block, varName).startsWith('oklch(');
+				return !colorMixVarNames.has(varName) && !extractValue(block, varName).startsWith('oklch(');
 			});
 			expect(nonOklch).toEqual([]);
+			for (const varName of colorMixVarNames) {
+				expect(extractValue(block, varName).startsWith('color-mix(in oklab,')).toBe(true);
+			}
 		}
 	});
 
