@@ -1,5 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import type { Node } from 'oxc-parser';
+import { parseSync } from 'oxc-parser';
 import { expect, test } from 'vite-plus/test';
 import type { ComponentTestManifestEntry } from './manifest.js';
 import { componentTestManifest } from './manifest.js';
@@ -47,16 +49,41 @@ function componentFile(path: string, suffix: 'browser.test.tsx' | 'visual.test.t
 }
 
 function hasHelperCall(source: string, helperName: string, path: string): boolean {
-	const uncommented = source.replaceAll(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, '');
-	const escapedPath = path.replaceAll(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	if (helperName === 'testIntegration') {
-		return new RegExp(
-			String.raw`(?:^|\n)\s*testIntegration\s*\(\s*(['"])${escapedPath}\1\s*,`,
-		).test(uncommented);
+	const parsed = parseSync(`${path}.browser.test.tsx`, source, { lang: 'tsx' });
+	if (parsed.errors.length > 0) {
+		throw new Error(`Could not parse ${path}.browser.test.tsx: ${parsed.errors[0]?.message}`);
 	}
-	return new RegExp(
-		String.raw`(?:^|\n)\s*${helperName}\s*\(\s*\{\s*path\s*:\s*(['"])${escapedPath}\1`,
-	).test(uncommented);
+
+	for (const statement of parsed.program.body) {
+		if (statement.type !== 'ExpressionStatement') continue;
+		const expression = statement.expression;
+		if (expression.type !== 'CallExpression') continue;
+		if (expression.callee.type !== 'Identifier' || expression.callee.name !== helperName) {
+			continue;
+		}
+		if (helperPath(expression.arguments[0], helperName) === path) return true;
+	}
+	return false;
+}
+
+function helperPath(argument: Node | undefined, helperName: string): string | undefined {
+	if (helperName === 'testIntegration') return stringLiteral(argument);
+	if (argument?.type !== 'ObjectExpression') return undefined;
+
+	for (const property of argument.properties) {
+		if (property.type !== 'Property' || property.computed) continue;
+		if (propertyName(property.key) !== 'path') continue;
+		return stringLiteral(property.value);
+	}
+}
+
+function propertyName(node: Node): string | undefined {
+	if (node.type === 'Identifier') return node.name;
+	return stringLiteral(node);
+}
+
+function stringLiteral(node: Node | undefined): string | undefined {
+	if (node?.type === 'Literal' && typeof node.value === 'string') return node.value;
 }
 
 function getBrowserCoverageErrors(
@@ -130,6 +157,10 @@ test('rejects helper calls for another manifest path and source lookalikes', () 
 	const wrongPathSource = `
 		// testUniversalConformance({ path: 'button' });
 		const description = "testIntegration('button', async () => {})";
+		const fake = \`
+			testUniversalConformance({ path: 'button' });
+			testIntegration('button', async () => {});
+		\`;
 		testUniversalConformance({ path: 'link' });
 		testIntegration('link', async () => {});
 	`;
@@ -139,15 +170,35 @@ test('rejects helper calls for another manifest path and source lookalikes', () 
 	]);
 });
 
-test('accepts conformance calls with nested callbacks', () => {
+test('accepts a conformance helper when path is not the first property', () => {
+	const [button] = componentTestManifest.filter((entry) => entry.path === 'button');
+	if (button == null) throw new Error('Expected the Button manifest entry.');
+
+	const source = `
+		testUniversalConformance({
+			render: () => render(<Button />),
+			path: 'button',
+			getTarget: (result) => result.locator.getByRole('button').element(),
+		});
+		testIntegration('button', async () => {});
+	`;
+	expect(getBrowserCoverageErrors([button], () => source)).toEqual([]);
+});
+
+test('accepts the generated helper shape', () => {
 	const [button] = componentTestManifest.filter((entry) => entry.path === 'button');
 	if (button == null) throw new Error('Expected the Button manifest entry.');
 
 	const source = `
 		testUniversalConformance({
 			path: 'button',
-			render: () => {
-				return <Button />;
+			getTarget: (result) => {
+				const target = result.locator.getByRole('button').element();
+				if (!(target instanceof HTMLElement)) throw new Error('Expected a button.');
+				return target;
+			},
+			render: (props = {}) => {
+				return render(<Button {...props}>Action</Button>);
 			},
 		});
 		testIntegration('button', async () => {});
