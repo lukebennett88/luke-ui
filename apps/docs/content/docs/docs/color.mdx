@@ -120,18 +120,18 @@ variables to fall back on. If you upgrade from a release that had them, this tab
 reference. Move each usage to its `color.background` / `color.foreground` / `color.border`
 equivalent:
 
-| Old path                                    | New path                                                      |
-| ------------------------------------------- | ------------------------------------------------------------- |
-| `color.intent.<role>.surface.subtle`        | `color.background.<role>.subtle`                              |
+| Old path                                    | New path                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| `color.intent.<role>.surface.subtle`        | `color.background.<role>.subtle`                                    |
 | `color.intent.<role>.surface.subtleHover`   | `color.overlay.hover` mixed into `color.background.<role>.subtle`   |
 | `color.intent.<role>.surface.subtlePressed` | `color.overlay.pressed` mixed into `color.background.<role>.subtle` |
-| `color.intent.<role>.surface.solid`         | `color.background.<role>.solid`                                    |
+| `color.intent.<role>.surface.solid`         | `color.background.<role>.solid`                                     |
 | `color.intent.<role>.surface.solidHover`    | `color.overlay.hover` mixed into `color.background.<role>.solid`    |
 | `color.intent.<role>.surface.solidPressed`  | `color.overlay.pressed` mixed into `color.background.<role>.solid`  |
-| `color.intent.<role>.text`                  | `color.foreground.<role>.rest`                                |
-| `color.intent.<role>.textHover`             | `color.foreground.<role>.hover`                               |
-| `color.intent.<role>.onSolid`               | `color.foreground.<role>.onSolid`                             |
-| `color.intent.<role>.border`                | `color.border.<role>`                                         |
+| `color.intent.<role>.text`                  | `color.foreground.<role>.rest`                                      |
+| `color.intent.<role>.textHover`             | `color.foreground.<role>.hover`                                     |
+| `color.intent.<role>.onSolid`               | `color.foreground.<role>.onSolid`                                   |
+| `color.intent.<role>.border`                | `color.border.<role>`                                               |
 
 CSS variable names followed the same shape, so `--luke-color-intent-danger-surface-solid` became
 `--luke-color-background-danger-solid`. There are no `--luke-color-background-*-hover` or

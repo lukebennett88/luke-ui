@@ -6,11 +6,11 @@ import {
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
-import { normalizeTheme } from './define-theme.js';
+import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
-import { contrastRatio, parseColor } from './color.js';
 import { validateContrast } from './contrast-validation.js';
+import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
 import { mixInteractionSrgb } from './interaction-overlay.js';
 
@@ -113,7 +113,9 @@ describe('buildTheme contrast failures', () => {
 
 	it('needs the stronger accent foreground on subtle pressed for a mid-chroma green accent', () => {
 		const { baseLight } = splitBlocks(
-			buildTheme(normalizeTheme({ color: { accent: 'oklch(0.6 0.12 160)' }, name: 'green-accent' })),
+			buildTheme(
+				normalizeTheme({ color: { accent: 'oklch(0.6 0.12 160)' }, name: 'green-accent' }),
+			),
 		);
 		const valueOf = (varName: string) => extractValue(baseLight, varName);
 		const mixed = mixInteractionSrgb(
@@ -143,7 +145,11 @@ describe('buildTheme contrast failures', () => {
 			);
 		});
 		expect(check).toBeDefined();
-		const mixed = mixInteractionSrgb(parseColor('oklch(1 0 0)'), parseColor('oklch(0 0 0)'), 'hover');
+		const mixed = mixInteractionSrgb(
+			parseColor('oklch(1 0 0)'),
+			parseColor('oklch(0 0 0)'),
+			'hover',
+		);
 		expect(check?.ratio).toBeCloseTo(contrastRatio(parseColor('oklch(0 0 0)'), mixed), 5);
 	});
 });

@@ -136,8 +136,8 @@ Luke UI generates two interaction overlay sources from the high-contrast neutral
 (`families.neutral[12]`). `color.overlay.hover` and `color.overlay.pressed` both alias that source.
 Recipes mix it into the current semantic fill at the shared strengths in `interaction-overlay.ts`:
 hover at 5% and pressed at 10%, as `color-mix(in srgb, <fill> <100-N>%, <source> <N>%)`. The
-authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated
-per-family alpha track, and the public contract has no per-role background hover or pressed leaves.
+authored modal backdrop stays separate as `color.overlay.backdrop`. There is no generated per-family
+alpha track, and the public contract has no per-role background hover or pressed leaves.
 
 `validateContrast` runs the same sRGB mix the recipes emit, then measures the matching foregrounds
 against that result. The pairs are ghost Button foregrounds over canvas and recessed, solid and

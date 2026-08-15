@@ -36,9 +36,10 @@ const SUBTLE_BUTTON_FOREGROUND = {
 	},
 } as const;
 
-const INTERACTION_OVERLAY_STATES = ['hover', 'pressed'] as const satisfies ReadonlyArray<
-	InteractionOverlayState
->;
+const INTERACTION_OVERLAY_STATES = [
+	'hover',
+	'pressed',
+] as const satisfies ReadonlyArray<InteractionOverlayState>;
 
 type ColorMode = 'light' | 'dark';
 
@@ -156,16 +157,8 @@ export function validateContrast(
 	}
 	// Interaction fills are `color-mix(in srgb, <fill>, <overlay source>)` at the shared strengths.
 	// Pairs follow first-party recipes, not every theoretical combination.
-	const checkOverlay = (
-		foreground: string,
-		state: InteractionOverlayState,
-		surface: string,
-	) => {
-		const mixed = mixInteractionSrgb(
-			colorAt(surface),
-			colorAt(`color.overlay.${state}`),
-			state,
-		);
+	const checkOverlay = (foreground: string, state: InteractionOverlayState, surface: string) => {
+		const mixed = mixInteractionSrgb(colorAt(surface), colorAt(`color.overlay.${state}`), state);
 		checkResolved(foreground, `color.overlay.${state} over ${surface}`, mixed, TEXT_RATIO, true);
 	};
 	for (const state of INTERACTION_OVERLAY_STATES) {
@@ -178,16 +171,8 @@ export function validateContrast(
 		// Solid Button / IconButton, and selected or invalid Checkbox, which reuse the same on-solid
 		// pairing over accent or danger solid.
 		for (const tone of BUTTON_TONES) {
-			checkOverlay(
-				`color.foreground.${tone}.onSolid`,
-				state,
-				`color.background.${tone}.solid`,
-			);
-			checkOverlay(
-				SUBTLE_BUTTON_FOREGROUND[tone][state],
-				state,
-				`color.background.${tone}.subtle`,
-			);
+			checkOverlay(`color.foreground.${tone}.onSolid`, state, `color.background.${tone}.solid`);
+			checkOverlay(SUBTLE_BUTTON_FOREGROUND[tone][state], state, `color.background.${tone}.subtle`);
 		}
 		// Combobox selected option: primary text on accent subtle. Unselected focused or hovered
 		// option: primary text on the floating popover.

@@ -7,11 +7,11 @@ import {
 	descendantDisabledSelector,
 	inputStates,
 } from '../../styles/input-states.js';
+import { interactionBackground } from '../../styles/interaction-fill.js';
 import {
 	invalidIndicatorIcon,
 	invalidIndicatorIconForcedColors,
 } from '../../styles/invalid-indicator.js';
-import { interactionBackground } from '../../styles/interaction-fill.js';
 import { styleInLayer } from '../../styles/layered-style.css.js';
 import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
