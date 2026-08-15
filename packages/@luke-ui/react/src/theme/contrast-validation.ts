@@ -19,10 +19,20 @@ const GHOST_FOREGROUNDS = [
 
 const BUTTON_TONES = ['neutral', 'accent', 'danger'] as const;
 
+/** Foreground the Button recipe actually paints on each subtle interaction state. */
 const SUBTLE_BUTTON_FOREGROUND = {
-	accent: 'color.foreground.accent.hover',
-	danger: 'color.foreground.danger.hover',
-	neutral: 'color.text.primary',
+	accent: {
+		hover: 'color.foreground.accent.rest',
+		pressed: 'color.foreground.accent.hover',
+	},
+	danger: {
+		hover: 'color.foreground.danger.rest',
+		pressed: 'color.foreground.danger.rest',
+	},
+	neutral: {
+		hover: 'color.text.primary',
+		pressed: 'color.text.primary',
+	},
 } as const;
 
 const INTERACTION_OVERLAYS = ['color.overlay.hover', 'color.overlay.pressed'] as const;
@@ -170,7 +180,12 @@ export function validateContrast(
 				overlayPath,
 				`color.background.${tone}.solid`,
 			);
-			checkOverlay(SUBTLE_BUTTON_FOREGROUND[tone], overlayPath, `color.background.${tone}.subtle`);
+			const overlayState = overlayPath === 'color.overlay.hover' ? 'hover' : 'pressed';
+			checkOverlay(
+				SUBTLE_BUTTON_FOREGROUND[tone][overlayState],
+				overlayPath,
+				`color.background.${tone}.subtle`,
+			);
 		}
 		// Combobox selected option: primary text on accent subtle. Unselected focused or hovered
 		// option: primary text on the floating popover.

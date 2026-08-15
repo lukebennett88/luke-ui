@@ -153,13 +153,15 @@ export const buttonRecipe = recipe({
 			'accent',
 			'subtle',
 			vars.color.background.accent,
+			vars.color.foreground.accent.rest,
+			// Pressed overlay can drop rest text below 4.5:1 on some accents.
 			vars.color.foreground.accent.hover,
 		),
 		...appearance(
 			'danger',
 			'subtle',
 			vars.color.background.danger,
-			vars.color.foreground.danger.hover,
+			vars.color.foreground.danger.rest,
 		),
 		ghostAppearance('neutral', vars.color.text.primary),
 		ghostAppearance('accent', vars.color.foreground.accent.rest),
@@ -178,6 +180,7 @@ function appearance(
 	appearance: 'solid' | 'subtle',
 	background: Background,
 	color: string,
+	pressedColor = color,
 ) {
 	const fill = background[appearance];
 	return [
@@ -195,6 +198,7 @@ function appearance(
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundImage: `${pressedOverlay}, ${vars.actionControlFinish.recessed}`,
+						color: pressedColor,
 					},
 				},
 			},

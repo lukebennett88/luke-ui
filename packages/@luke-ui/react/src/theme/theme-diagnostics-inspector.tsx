@@ -294,7 +294,6 @@ function SolidAnchorSection({ families }: { families: Record<FamilyRole, FamilyD
 							<th style={headerCellStyle}>Band</th>
 							<th style={headerCellStyle}>Adapted</th>
 							<th style={headerCellStyle}>On-solid vs solid</th>
-							<th style={headerCellStyle}>On-solid vs hover</th>
 							<th style={headerCellStyle}>Satisfied</th>
 						</tr>
 					</thead>
@@ -311,7 +310,6 @@ function SolidAnchorSection({ families }: { families: Record<FamilyRole, FamilyD
 									>{`[${solidAnchor.band[0].toFixed(2)}, ${solidAnchor.band[1].toFixed(2)}]`}</td>
 									<td style={cellStyle}>{solidAnchor.adaptedForOnSolid ? 'yes' : 'no'}</td>
 									<td style={cellStyle}>{`${solidAnchor.onSolidRatioSolid.toFixed(2)}:1`}</td>
-									<td style={cellStyle}>{`${solidAnchor.onSolidRatioSolidHover.toFixed(2)}:1`}</td>
 									<td style={cellStyle}>{solidAnchor.satisfied ? 'yes' : 'no'}</td>
 								</tr>
 							);

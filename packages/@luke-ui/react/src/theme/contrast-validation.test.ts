@@ -254,7 +254,6 @@ describe('contrast validation matrix', () => {
 						'color.foreground.accent.hover',
 						'color.foreground.accent.onSolid',
 						'color.foreground.accent.rest',
-						'color.foreground.danger.hover',
 						'color.foreground.danger.onSolid',
 						'color.foreground.danger.rest',
 						'color.foreground.neutral.onSolid',

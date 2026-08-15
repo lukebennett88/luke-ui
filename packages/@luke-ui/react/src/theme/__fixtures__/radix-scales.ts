@@ -281,9 +281,8 @@ export interface CorpusEntry {
 /**
  * The hue stress-corpus: source colours that push the generator's solid-anchor search, gamut
  * mapping, and on-solid choice. Used as `source` (and, for neutrals, `background`) inputs — not as
- * scales to reproduce. Every entry generates cleanly for a vibrant role (their tone sits clear of
- * the on-solid dead zone); the genuinely-unsatisfiable dead-zone cases live in
- * {@link UNSATISFIABLE_ON_SOLID}.
+ * scales to reproduce. Every entry generates cleanly for a vibrant role. Mid-lightness tones that
+ * the old step-10 hover gate rejected live in {@link ADAPTABLE_MID_TONES}.
  */
 export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 	{
@@ -337,11 +336,11 @@ export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 ];
 
 /**
- * Dead-zone sources: mid-lightness colours where neither near-white nor near-black on-solid text
- * clears AA across the solid and its hover, and whose authored tone the generator preserves. A
- * A source-toned role given one of these is genuinely unsatisfiable and throws.
+ * Mid-lightness sources that used to be unsatisfiable when the on-solid gate also measured a
+ * synthetic step-10 hover. Against the resting solid they have a neighbour in the tone window, so
+ * the search adapts instead of throwing.
  */
-export const UNSATISFIABLE_ON_SOLID: Record<'light' | 'dark', CorpusEntry> = {
+export const ADAPTABLE_MID_TONES: Record<'light' | 'dark', CorpusEntry> = {
 	dark: {
 		name: 'dead-zone-blue-dark',
 		note: 'mid lightness; whole tone window is a dead zone',

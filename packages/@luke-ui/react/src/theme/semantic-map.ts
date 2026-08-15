@@ -90,6 +90,7 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 	for (const role of SEMANTIC_ROLES) {
 		const family = families[role];
 		values[`color.background.${role}.subtle`] = formatOklch(family[3]);
+		// Step 10 is a private scale rung. Public hover and pressed use `color.overlay` over step 9.
 		values[`color.background.${role}.solid`] = formatOklch(family[9]);
 		values[`color.foreground.${role}.rest`] = formatOklch(family[11]);
 		values[`color.foreground.${role}.hover`] = formatOklch(family[12]);

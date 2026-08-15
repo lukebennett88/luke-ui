@@ -103,9 +103,11 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 
 `scale.ts`'s `passesOnSolidGate` is the only function that decides whether a solid can carry
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
-choose clears the AA text ratio plus the search headroom across step 9 and step 10. Step 10 is a
-private scale rung used by that gate. It is not a public hover token. Public hover and pressed
-feedback uses `color.overlay` over the resting solid fill, plus depth, finish, and transform.
+choose clears the AA text ratio plus the search headroom against the public resting solid (step 9).
+Step 10 remains in the private 12-step family so the scale keeps its shape. It is not a hover,
+solid-hover, or pressed colour. Public hover and pressed feedback uses `color.overlay` over the
+resting solid fill, plus depth, finish, and transform. Those composited pairs are hard-gated by
+`validateContrast`.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
 copy. That gives two guarantees:
@@ -115,8 +117,8 @@ copy. That gives two guarantees:
   of quietly resolving a different lightness.
 
 The pre-conditioner is necessary because its adaptation band is deliberately wider than the
-generator's tone-faithful window. It can rescue accents, such as a mid-lightness red, that the
-generator alone would report as unsatisfiable.
+generator's tone-faithful window. It can rescue accents whose preferred lightness sits outside that
+window.
 
 `contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
 search headroom, and the search step. It also declares `SEMANTIC_ROLES`, the one canonical role list

@@ -5,7 +5,7 @@ import {
 	lightnessEnvelope,
 	RADIX_DARK_OKLCH,
 	RADIX_LIGHT_OKLCH,
-	UNSATISFIABLE_ON_SOLID,
+	ADAPTABLE_MID_TONES,
 } from './__fixtures__/radix-scales.js';
 import type { Oklch } from './color.js';
 import { contrastRatio, parseColor } from './color.js';
@@ -77,7 +77,7 @@ describe('component state distinctness', () => {
 });
 
 describe('on-solid contrast guarantee', () => {
-	it('clears 4.5:1 against the solid (9) and its hover (10) for every role across the corpus', () => {
+	it('clears 4.5:1 against the resting solid (9) for every role across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
 				for (const role of SEMANTIC_ROLES) {
@@ -85,10 +85,6 @@ describe('on-solid contrast guarantee', () => {
 					expect(
 						contrastRatio(scale.contrast, scale[9]),
 						`${entry.name} ${mode} ${role} contrast vs 9`,
-					).toBeGreaterThanOrEqual(TEXT_RATIO);
-					expect(
-						contrastRatio(scale.contrast, scale[10]),
-						`${entry.name} ${mode} ${role} contrast vs 10`,
 					).toBeGreaterThanOrEqual(TEXT_RATIO);
 				}
 			}
@@ -104,7 +100,7 @@ describe('on-solid contrast guarantee', () => {
 		});
 		expect(diagnostics.solidAnchor.satisfied).toBe(true);
 		expect(diagnostics.solidAnchor.onSolidRatioSolid).toBeGreaterThanOrEqual(TEXT_RATIO);
-		expect(diagnostics.solidAnchor.onSolidRatioSolidHover).toBeGreaterThanOrEqual(TEXT_RATIO);
+		expect(diagnostics.onSolid.ratioSolid).toBe(diagnostics.solidAnchor.onSolidRatioSolid);
 	});
 });
 
@@ -212,7 +208,7 @@ describe('solid-anchor search', () => {
 	});
 
 	it('nudges the solid off the source lightness when the source itself fails the gate', () => {
-		const source = parseColor('#3b82f6');
+		const source = parseColor('oklch(0.59 0.19 27)');
 		const { diagnostics } = generateFamilyWithDiagnostics({
 			background: BACKGROUND.light,
 			mode: 'light',
@@ -253,9 +249,6 @@ describe('solid-anchor search', () => {
 		for (const mode of MODES) {
 			const scale = family('oklch(0.99 0.003 250)', mode, 'neutral');
 			expect(contrastRatio(scale.contrast, scale[9]), `neutral ${mode}`).toBeGreaterThanOrEqual(
-				TEXT_RATIO,
-			);
-			expect(contrastRatio(scale.contrast, scale[10]), `neutral ${mode}`).toBeGreaterThanOrEqual(
 				TEXT_RATIO,
 			);
 		}
@@ -316,8 +309,9 @@ describe('the one on-solid gate', () => {
 	});
 
 	it('solves past the AA text ratio, so a pair that only just clears 4.5:1 does not pass', () => {
-		// Light `oklch(0.5575 0.01 0)` reaches 4.53:1 across its solid and hover: enough for a plain 4.5
-		// check, short of the headroom the gate solves for so 4-decimal emission cannot round it under.
+		// Light `oklch(0.5575 0.01 0)` reaches just over 4.5:1 against the resting solid: enough for a
+		// plain 4.5 check, short of the headroom the gate solves for so 4-decimal emission cannot round
+		// it under.
 		const source: Oklch = {
 			l: 0.5575,
 			c: 0.01,
@@ -331,10 +325,9 @@ describe('the one on-solid gate', () => {
 		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(true);
 	});
 
-	it('tests only the solid and its hover, never a deeper pressed state the engine does not generate', () => {
-		// Light `oklch(0.64 0 0)` clears 4.58:1 across the two states the engine emits. A phantom third
-		// state 0.09 darker would drag it to 3.88:1 and fail. The pressed solid reuses step 10, so no
-		// such colour exists and the gate must not invent one.
+	it('gates only the resting solid, not a private step-10 rung or a phantom pressed colour', () => {
+		// Light `oklch(0.64 0 0)` clears the resting solid. A darker private rung or a made-up pressed
+		// colour must not decide whether the public solid is acceptable.
 		const source: Oklch = {
 			l: 0.64,
 			c: 0,
@@ -345,40 +338,40 @@ describe('the one on-solid gate', () => {
 			c: 0,
 			h: 0,
 		};
-		const onSolid = family('oklch(0.64 0 0)', 'light', 'accent').contrast;
-		expect(contrastRatio(onSolid, phantomPressed)).toBeLessThan(TEXT_RATIO);
+		const scale = family('oklch(0.64 0 0)', 'light', 'accent');
+		expect(contrastRatio(scale.contrast, phantomPressed)).toBeLessThan(TEXT_RATIO);
 		expect(onSolidGateRatio({ lightness: source.l, mode: 'light', source })).toBeGreaterThan(
 			TEXT_RATIO,
 		);
 		expect(passesOnSolidGate({ lightness: source.l, mode: 'light', source })).toBe(true);
 		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(false);
+		expect(scale[10].l).not.toBe(scale[9].l);
 	});
 });
 
 describe('unsatisfiable input', () => {
-	it('throws ScaleGenerationError carrying role and mode when a source tone is a dead zone', () => {
+	it('adapts a former step-10 dead-zone source instead of rejecting it', () => {
+		// These mid-lightness tones used to fail because the gate also measured a synthetic step-10
+		// hover. Against the resting solid they have a neighbour in the tone window, so the search
+		// adapts rather than throwing.
 		for (const mode of MODES) {
-			const entry = UNSATISFIABLE_ON_SOLID[mode];
+			const entry = ADAPTABLE_MID_TONES[mode];
 			for (const role of SOURCE_TONED_ROLES) {
-				let thrown: unknown;
-				try {
-					family(entry.source, mode, role);
-				} catch (error) {
-					thrown = error;
-				}
-				expect(thrown, `${entry.name} ${role}`).toBeInstanceOf(ScaleGenerationError);
-				const error = thrown as ScaleGenerationError;
-				expect(error.role).toBe(role);
-				expect(error.mode).toBe(mode);
-				expect(error.bestAttempt.step).toBe(9);
-				expect(error.bestAttempt.onSolidRatio).toBeLessThan(TEXT_RATIO);
+				const { diagnostics } = generateFamilyWithDiagnostics({
+					background: BACKGROUND[mode],
+					mode,
+					role,
+					source: parseColor(entry.source),
+				});
+				expect(diagnostics.solidAnchor.satisfied, `${entry.name} ${role}`).toBe(true);
+				expect(diagnostics.solidAnchor.onSolidRatioSolid).toBeGreaterThanOrEqual(TEXT_RATIO);
 			}
 		}
 	});
 
-	it('does not throw for neutral, whose solid comes from a curated band rather than the source tone', () => {
+	it('still generates neutral from a mid-lightness source, using the curated solid band', () => {
 		for (const mode of MODES) {
-			expect(() => family(UNSATISFIABLE_ON_SOLID[mode].source, mode, 'neutral')).not.toThrow();
+			expect(() => family(ADAPTABLE_MID_TONES[mode].source, mode, 'neutral')).not.toThrow();
 		}
 	});
 });

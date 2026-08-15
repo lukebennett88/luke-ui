@@ -27,7 +27,7 @@ type ColorMode = 'light' | 'dark';
 /**
  * A generated 12-step colour family plus its on-solid `contrast` colour. Step roles: 1-2 app/subtle
  * backgrounds, 3-5 component surface (public rest at 3; 4-5 remain private), 6-8 borders (subtle /
- * UI+focus / hover), 9-10 solid (9 = public rest, 10 = private on-solid-gate rung), 11-12 text (low /
+ * UI+focus / hover), 9-10 solid (9 = public rest, 10 = private scale rung), 11-12 text (low /
  * high contrast).
  */
 export interface ScaleFamily {
@@ -43,7 +43,7 @@ export interface ScaleFamily {
 	10: Oklch;
 	11: Oklch;
 	12: Oklch;
-	/** On-solid text: reads over steps 9 and 10, guaranteed WCAG AA. */
+	/** On-solid text: reads over the public resting solid (step 9), guaranteed WCAG AA. */
 	contrast: Oklch;
 }
 
@@ -61,7 +61,7 @@ export interface GenerateFamilyRequest {
 
 /**
  * Thrown when a family has no lightness in its solid band where a near-white or near-black
- * on-solid text clears WCAG AA across the solid and its hover. Carries the `role` and `mode` so the
+ * on-solid text clears WCAG AA against the resting solid. Carries the `role` and `mode` so the
  * caller can name the failing family, plus the best attempt for diagnostics.
  */
 export class ScaleGenerationError extends Error {
@@ -77,14 +77,14 @@ export class ScaleGenerationError extends Error {
 		lightness: number;
 		/** The best-attempt step-9 solid colour. */
 		solid: Oklch;
-		/** The on-solid contrast the best attempt achieved across the solid and its hover. */
+		/** The on-solid contrast the best attempt achieved against the resting solid. */
 		onSolidRatio: number;
 	};
 
 	constructor(role: FamilyRole, mode: ColorMode, bestAttempt: ScaleGenerationError['bestAttempt']) {
 		super(
 			`Cannot generate the ${mode} "${role}" family: no solid lightness in the search band lets ` +
-				'near-white or near-black on-solid text clear 4.5:1 across the solid and its hover ' +
+				'near-white or near-black on-solid text clear 4.5:1 against the resting solid ' +
 				`(best attempt reached ${bestAttempt.onSolidRatio.toFixed(2)}:1 at lightness ` +
 				`${bestAttempt.lightness.toFixed(3)}). Author an explicit, more accessible source colour.`,
 		);
@@ -139,10 +139,9 @@ const RAMP_SPEC = {
 	],
 } as const satisfies Record<ColorMode, ReadonlyArray<RampRungSpec>>;
 
-// The solid step 10 (hover) offset from step 9: darker in light mode, lighter in dark mode. The
-// pressed solid leaf deliberately reuses step 10, so the on-solid gate has exactly these two states
-// to clear. There is no third, deeper pressed colour to test.
-const SOLID_HOVER_DELTA = 0.05;
+// Private step-10 offset from the resting solid: darker in light mode, lighter in dark mode. This
+// keeps the 12-step family shape. It is not a rendered hover or pressed colour.
+const STEP_10_DELTA = 0.05;
 
 interface SolidBand {
 	/** The inclusive lightness range the search may explore. */
@@ -187,7 +186,7 @@ const ON_SOLID_BLACK_CHROMA = 0.01;
 export interface OnSolidGateRequest {
 	/** The candidate step-9 solid lightness. */
 	lightness: number;
-	/** The colour mode, which sets the direction step 10 (hover) moves in. */
+	/** The colour mode the candidate solid is generated for. */
 	mode: ColorMode;
 	/** The family character. Only its hue and chroma are read; `lightness` supplies the tone. */
 	source: Oklch;
@@ -195,9 +194,9 @@ export interface OnSolidGateRequest {
 
 /**
  * The one on-solid accessibility gate: whether the near-white or near-black on-solid text this
- * generator would choose clears the AA text ratio (plus the search headroom) across *both* solid
- * states a candidate lightness produces: step 9 and its step-10 hover. The pressed solid reuses step
- * 10, so there is no third state to test.
+ * generator would choose clears the AA text ratio (plus the search headroom) against the public
+ * resting solid (step 9). Hover and pressed are translucent overlays over that fill; those pairs
+ * are gated by `validateContrast`, not by a private scale rung.
  *
  * `defineTheme`'s accent pre-conditioner calls this rather than reimplementing it, so the
  * pre-conditioner can never be stricter than {@link generateFamily}'s solid-anchor search: a
@@ -208,24 +207,17 @@ export function passesOnSolidGate(request: OnSolidGateRequest): boolean {
 }
 
 /**
- * The contrast {@link passesOnSolidGate} measures: the better on-solid candidate's minimum ratio
- * across the candidate solid and its hover. Exposed for the solid-anchor search's best-attempt
- * diagnostics.
+ * The contrast {@link passesOnSolidGate} measures: the better on-solid candidate's ratio against
+ * the candidate resting solid. Exposed for the solid-anchor search's best-attempt diagnostics.
  */
 export function onSolidGateRatio(request: OnSolidGateRequest): number {
-	const { lightness, mode, source } = request;
-	const direction = mode === 'light' ? -1 : 1;
+	const { lightness, source } = request;
 	const solid = gamutMapOklch({
 		l: clampUnit(lightness),
 		c: source.c,
 		h: source.h,
 	});
-	const hover = gamutMapOklch({
-		c: source.c,
-		h: source.h,
-		l: clampUnit(lightness + direction * SOLID_HOVER_DELTA),
-	});
-	return chooseOnSolid(source.h, [solid, hover]).minRatio;
+	return chooseOnSolid(source.h, [solid]).minRatio;
 }
 
 /**
@@ -301,10 +293,10 @@ function buildFamily(request: GenerateFamilyRequest): {
 	// Step 9: the solid anchor, searched so on-solid text clears AA across the solid and its hover.
 	const anchor = resolveSolidAnchor(request);
 	const solid = rung(9, anchor.lightness, source.c);
-	const solidHover = rung(10, anchor.lightness + direction * SOLID_HOVER_DELTA, source.c);
+	const step10 = rung(10, anchor.lightness + direction * STEP_10_DELTA, source.c);
 
-	// The on-solid text: the better of near-white / near-black across the solid and its hover.
-	const onSolid = chooseOnSolid(hue, [solid, solidHover]);
+	// The on-solid text: the better of near-white / near-black against the resting solid.
+	const onSolid = chooseOnSolid(hue, [solid]);
 
 	// Steps 11-12: text rungs. Step 12 is a scale-quality rung, not a contract guarantee.
 	const text = TEXT_LIGHTNESS[mode];
@@ -329,7 +321,7 @@ function buildFamily(request: GenerateFamilyRequest): {
 		7: step7,
 		8: step8,
 		9: solid,
-		10: solidHover,
+		10: step10,
 		11: lowText,
 		12: highText,
 		contrast: onSolid.color,
@@ -339,7 +331,6 @@ function buildFamily(request: GenerateFamilyRequest): {
 		adaptedForOnSolid: anchor.adapted,
 		band: anchor.band,
 		onSolidRatioSolid: contrastRatio(onSolid.color, solid),
-		onSolidRatioSolidHover: contrastRatio(onSolid.color, solidHover),
 		resolvedLightness: anchor.lightness,
 		satisfied: onSolid.minRatio >= TEXT_RATIO,
 		targetLightness: anchor.target,
@@ -353,7 +344,6 @@ function buildFamily(request: GenerateFamilyRequest): {
 		onSolid: {
 			color: onSolid.color,
 			ratioSolid: solidAnchor.onSolidRatioSolid,
-			ratioSolidHover: solidAnchor.onSolidRatioSolidHover,
 		},
 		role,
 		solidAnchor,
@@ -371,8 +361,8 @@ interface ResolvedAnchor {
 }
 
 /**
- * Resolves the step-9 solid lightness. Searches the solid band for a lightness whose solid and hover
- * both clear the on-solid gate, preferring the lightness nearest the source (vibrant) or the curated
+ * Resolves the step-9 solid lightness. Searches the solid band for a lightness whose resting solid
+ * clears the on-solid gate, preferring the lightness nearest the source (vibrant) or the curated
  * target (neutral), and throwing when none clears. Every semantic role publishes a solid, so every
  * family is searched.
  */
