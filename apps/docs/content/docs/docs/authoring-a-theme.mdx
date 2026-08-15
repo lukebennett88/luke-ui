@@ -99,15 +99,14 @@ some only, and does not check one category.
 
 Every text/surface pair the compiler emits is a hard gate:
 
-- `color.text.primary` and `color.text.secondary` against all four elevation surfaces (`canvas`,
-  `recessed`, `floating`, `overlay`).
+- `color.text.primary` and `color.text.secondary` against the elevation surfaces (`canvas`,
+  `recessed`, `floating`).
 - For each of the six semantic roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`),
-  its foreground `rest` and `hover` against `canvas`, `recessed`, and that role's own `subtle`
-  background.
+  its default foreground against `canvas`, `recessed`, and that role's own `subtle` background.
 - Each role's `onSolid` foreground against its `solid` background.
-- The first-party contracts that mix `color.overlay.hover` or `color.overlay.pressed` into a resting
-  fill: ghost Button foregrounds on canvas and recessed; solid and subtle Button tones; selected
-  Combobox options on accent subtle; unselected Combobox options on the floating popover.
+- First-party hover and pressed colours derived from resting fills: ghost Button foregrounds on
+  canvas and recessed; solid and subtle Button tones; selected Combobox options on accent subtle;
+  unselected Combobox options on the floating popover.
 
 ### Guaranteed at 3:1
 
@@ -125,7 +124,7 @@ combination.
 `color.border.neutral` and `color.border.accent`. This applies to all six roles, but only as an
 advisory diagnostic. `defineTheme` records and reports a miss, but never throws it.
 
-These borders use the same subtle scale step as ordinary separators. An author can then choose a
+These borders use the same subtle family rung as ordinary separators. An author can then choose a
 neutral character whose role borders read as gentle separators rather than assertive boundaries.
 Diagnostics record whether each check is a hard gate or advisory-only (`ContrastCheck.hard`).
 Tooling can then tell the two apart without a guess from the token path.

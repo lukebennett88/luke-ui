@@ -47,8 +47,7 @@ describe('theme contract', () => {
 			[`color.border.${role}`, `--luke-color-border-${role}`],
 			[`color.background.${role}.subtle`, `--luke-color-background-${role}-subtle`],
 			[`color.background.${role}.solid`, `--luke-color-background-${role}-solid`],
-			[`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`],
-			[`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`],
+			[`color.foreground.${role}.default`, `--luke-color-foreground-${role}-default`],
 			[`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`],
 		]);
 		const rolePaths = new Set(expected.map(([path]) => path));
@@ -82,19 +81,18 @@ describe('theme contract', () => {
 		}
 	});
 
-	it('exposes overlay backdrop, hover, and pressed, and does not emit scrim or tint', () => {
+	it('exposes overlay backdrop only, and does not emit hover, pressed, tint, or scrim', () => {
 		const pairs = flattenThemeContract();
 		const byPath = new Map(pairs);
 
 		expect(byPath.get('color.overlay.backdrop')).toBe('--luke-color-overlay-backdrop');
-		expect(byPath.get('color.overlay.hover')).toBe('--luke-color-overlay-hover');
-		expect(byPath.get('color.overlay.pressed')).toBe('--luke-color-overlay-pressed');
 		expect(vars.color.overlay).toEqual({
 			backdrop: 'var(--luke-color-overlay-backdrop)',
-			hover: 'var(--luke-color-overlay-hover)',
-			pressed: 'var(--luke-color-overlay-pressed)',
 		});
+		expect(byPath.has('color.overlay.hover')).toBe(false);
+		expect(byPath.has('color.overlay.pressed')).toBe(false);
 		expect(byPath.has('color.overlay.tint')).toBe(false);
+		expect(byPath.has('color.surface.overlay')).toBe(false);
 		expect(pairs.some(([, varName]) => varName === '--luke-color-overlay-tint')).toBe(false);
 		expect(byPath.has('color.scrim')).toBe(false);
 		expect(pairs.some(([, varName]) => varName === '--luke-color-scrim')).toBe(false);

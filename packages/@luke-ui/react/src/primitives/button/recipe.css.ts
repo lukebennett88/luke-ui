@@ -1,9 +1,9 @@
-import { interactionBackground } from '../../styles/interaction-fill.js';
 import { styleInLayer } from '../../styles/layered-style.css.js';
 import type { RecipeSelection } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
+import { interactionColor } from '../../theme/interaction-color.js';
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -151,19 +151,17 @@ export const buttonRecipe = recipe({
 			'accent',
 			'subtle',
 			vars.color.background.accent,
-			vars.color.foreground.accent.rest,
-			// Pressed overlay can drop rest text below 4.5:1 on some accents.
-			vars.color.foreground.accent.hover,
+			vars.color.foreground.accent.default,
 		),
 		...appearance(
 			'danger',
 			'subtle',
 			vars.color.background.danger,
-			vars.color.foreground.danger.rest,
+			vars.color.foreground.danger.default,
 		),
 		ghostAppearance('neutral', vars.color.text.primary),
-		ghostAppearance('accent', vars.color.foreground.accent.rest),
-		ghostAppearance('danger', vars.color.foreground.danger.rest),
+		ghostAppearance('accent', vars.color.foreground.accent.default),
+		ghostAppearance('danger', vars.color.foreground.danger.default),
 	],
 });
 
@@ -178,7 +176,6 @@ function appearance(
 	appearance: 'solid' | 'subtle',
 	background: Background,
 	color: string,
-	pressedColor = color,
 ) {
 	const fill = background[appearance];
 	return [
@@ -192,13 +189,12 @@ function appearance(
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: interactionBackground(fill, 'hover'),
+						backgroundColor: interactionColor(fill, 'hover'),
 						backgroundImage: vars.actionControlFinish.raised,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: interactionBackground(fill, 'pressed'),
+						backgroundColor: interactionColor(fill, 'pressed'),
 						backgroundImage: vars.actionControlFinish.recessed,
-						color: pressedColor,
 					},
 				},
 			},
@@ -217,11 +213,11 @@ function ghostAppearance(tone: Tone, color: string) {
 			color,
 			selectors: {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: interactionBackground('transparent', 'hover'),
+					backgroundColor: interactionColor('transparent', 'hover'),
 					boxShadow: vars.depth.raised,
 				},
 				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: interactionBackground('transparent', 'pressed'),
+					backgroundColor: interactionColor('transparent', 'pressed'),
 					boxShadow: vars.depth.recessed,
 				},
 			},

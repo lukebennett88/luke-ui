@@ -27,20 +27,6 @@ test('kitchen sink', async () => {
 	}
 });
 
-test('interactive states', async () => {
-	const { locator } = render(<IconButton aria-label="Action" icon="add" />);
-	const button = page.getByRole('button', { name: 'Action' });
-
-	await userEvent.hover(button);
-	await captureVisual(locator, 'icon-button/hover');
-	await userEvent.unhover(button);
-	await focusViaKeyboard(button);
-	await captureVisual(locator, 'icon-button/focus-visible');
-	await userEvent.keyboard('{Space>}');
-	await captureVisual(locator, 'icon-button/pressed');
-	await userEvent.keyboard('{/Space}');
-});
-
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 

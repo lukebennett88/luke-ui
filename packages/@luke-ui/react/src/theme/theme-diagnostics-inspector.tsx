@@ -15,7 +15,8 @@ import type {
 import type { GeneratedSurfaces } from './elevation.js';
 import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
-import type { FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
+import type { FamilyRole, ScaleFamily } from './scale.js';
+import { FAMILY_RUNGS } from './scale.js';
 
 type BundledThemeKey = 'tactile' | 'paper';
 
@@ -32,8 +33,6 @@ const FAMILY_ROLES: ReadonlyArray<FamilyRole> = [
 	'success',
 	'warning',
 ];
-const SCALE_STEPS: ReadonlyArray<ScaleStep> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
 // Computed once at module scope: `compileTheme` is pure and Node-compatible, so both bundled themes'
 // full diagnostics (both colour modes) are available up front rather than recomputed per render.
 const diagnosticsByTheme: Record<BundledThemeKey, ThemeDiagnostics> = {
@@ -230,7 +229,7 @@ function SectionCard({ children, title }: { children: ReactNode; title: string }
 
 function FamiliesSection({ families }: { families: Record<FamilyRole, FamilyDiagnostics> }) {
 	return (
-		<SectionCard title="Private 12-step families">
+		<SectionCard title="Private colour families">
 			{FAMILY_ROLES.map((role) => {
 				const roleDiagnostics = families[role];
 				return (
@@ -247,10 +246,9 @@ function FamiliesSection({ families }: { families: Record<FamilyRole, FamilyDiag
 function FamilyRamp({ family }: { family: ScaleFamily }) {
 	return (
 		<div style={rampRowStyle}>
-			{SCALE_STEPS.map((step) => (
-				<StepSwatch key={step} label={String(step)} oklch={family[step]} />
+			{FAMILY_RUNGS.map((rung) => (
+				<StepSwatch key={rung} label={rung} oklch={family[rung]} />
 			))}
-			<StepSwatch label="On-solid" oklch={family.contrast} />
 		</div>
 	);
 }
@@ -275,7 +273,6 @@ function SurfacesSection({ surfaces }: { surfaces: GeneratedSurfaces }) {
 				<StepSwatch label="Canvas" oklch={surfaces.canvas} />
 				<StepSwatch label="Recessed" oklch={surfaces.recessed} />
 				<StepSwatch label="Floating" oklch={surfaces.floating} />
-				<StepSwatch label="Overlay" oklch={surfaces.overlay} />
 			</div>
 		</SectionCard>
 	);
@@ -283,7 +280,7 @@ function SurfacesSection({ surfaces }: { surfaces: GeneratedSurfaces }) {
 
 function SolidAnchorSection({ families }: { families: Record<FamilyRole, FamilyDiagnostics> }) {
 	return (
-		<SectionCard title="Solid anchor (step 9) search">
+		<SectionCard title="Solid anchor search">
 			<div style={tableWrapStyle}>
 				<table style={tableStyle}>
 					<thead>
@@ -402,16 +399,16 @@ function GamutReductionsSection({ families }: { families: Record<FamilyRole, Fam
 						<thead>
 							<tr>
 								<th style={headerCellStyle}>Role</th>
-								<th style={headerCellStyle}>Step</th>
+								<th style={headerCellStyle}>Rung</th>
 								<th style={headerCellStyle}>Requested chroma</th>
 								<th style={headerCellStyle}>Resolved chroma</th>
 							</tr>
 						</thead>
 						<tbody>
 							{rows.map((row) => (
-								<tr key={`${row.role}-${row.step}-${row.index}`}>
+								<tr key={`${row.role}-${row.rung}-${row.index}`}>
 									<td style={{ ...cellStyle, textTransform: 'capitalize' }}>{row.role}</td>
-									<td style={cellStyle}>{row.step}</td>
+									<td style={cellStyle}>{row.rung}</td>
 									<td style={cellStyle}>{row.requestedChroma.toFixed(4)}</td>
 									<td style={cellStyle}>{row.resolvedChroma.toFixed(4)}</td>
 								</tr>

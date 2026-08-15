@@ -127,7 +127,7 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 					mode,
 					reSearched: diagnostics.solidAnchor.adaptedForOnSolid,
 					solidMovedOffPreconditionedTone:
-						Math.abs(diagnostics.family[9].l - source.l) > 1e-9 ||
+						Math.abs(diagnostics.family.solid.l - source.l) > 1e-9 ||
 						Math.abs(diagnostics.solidAnchor.resolvedLightness - source.l) > 1e-9,
 				};
 			});
@@ -172,7 +172,7 @@ describe('defineTheme partial per-mode merges', () => {
 
 	it('defaults the omitted dark side of a partial colour without bleeding the light override', () => {
 		const infoVarNames = [
-			'--luke-color-foreground-info-rest',
+			'--luke-color-foreground-info-default',
 			'--luke-color-border-info',
 			'--luke-color-background-info-subtle',
 		];
@@ -307,8 +307,8 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 			expect(emitted.size).toBe(contractNames.length);
 			expect([...emitted].sort()).toEqual([...contractNames].sort());
 			expect(emitted.has('--luke-color-overlay-backdrop')).toBe(true);
-			expect(emitted.has('--luke-color-overlay-hover')).toBe(true);
-			expect(emitted.has('--luke-color-overlay-pressed')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-hover')).toBe(false);
+			expect(emitted.has('--luke-color-overlay-pressed')).toBe(false);
 			expect(emitted.has('--luke-color-overlay-tint')).toBe(false);
 			expect(emitted.has('--luke-color-scrim')).toBe(false);
 			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
@@ -321,8 +321,8 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 					expect(extractValue(block, `--luke-color-background-${role}-subtle`)).not.toBe(
 						extractValue(block, `--luke-color-background-${role}-solid`),
 					);
-					expect(extractValue(block, `--luke-color-foreground-${role}-rest`)).not.toBe(
-						extractValue(block, `--luke-color-foreground-${role}-hover`),
+					expect(extractValue(block, `--luke-color-foreground-${role}-default`)).not.toBe(
+						extractValue(block, `--luke-color-foreground-${role}-on-solid`),
 					);
 				}
 			}

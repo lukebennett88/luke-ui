@@ -2,6 +2,7 @@ import { styleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 import { vars } from '../theme/contract.css.js';
+import { interactionColor } from '../theme/interaction-color.js';
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -19,7 +20,7 @@ const base = styleInLayer('recipes', {
 			transition: 'none',
 		},
 	},
-	color: vars.color.foreground.accent.rest,
+	color: vars.color.foreground.accent.default,
 	cursor: 'pointer',
 	font: 'inherit',
 	textDecoration: 'underline',
@@ -63,15 +64,13 @@ export const linkRecipe = recipe({
 		},
 		tone: {
 			accent: {
-				color: vars.color.foreground.accent.rest,
+				color: vars.color.foreground.accent.default,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						color: vars.color.foreground.accent.hover,
+						color: interactionColor(vars.color.foreground.accent.default, 'hover'),
 					},
-					// Press reuses the hover foreground: the shared contract carries no separate pressed
-					// content colour, so the stronger hover value covers both interactive states.
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: vars.color.foreground.accent.hover,
+						color: interactionColor(vars.color.foreground.accent.default, 'pressed'),
 					},
 				},
 			},

@@ -1,9 +1,9 @@
 /**
  * The accessibility policy the theme layer is built to guarantee, declared once. Every module that
  * solves for or validates contrast reads its thresholds from here rather than restating them: the
- * scale generator's on-solid gate (`scale.ts`), the accent pre-conditioner (`define-theme.ts`), and
- * the build-time validation matrix (`contrast-validation.ts`) and `border.control` solver
- * (`control-border.ts`).
+ * scale generator's on-solid and foreground-vs-interaction gates (`scale.ts`), the accent
+ * pre-conditioner (`define-theme.ts`), and the build-time validation matrix
+ * (`contrast-validation.ts`) and `border.control` solver (`control-border.ts`).
  *
  * The one semantic role list lives here too, because it decides both which contract leaves the
  * semantic map emits (`semantic-map.ts`) and which pairs the validation matrix gates

@@ -22,7 +22,7 @@ export interface TokenPurposeGroup {
  */
 const PURPOSE_DEFINITIONS = [
 	{
-		description: 'Background layers, from the page canvas to the dimming layer behind an overlay.',
+		description: 'Background layers, from the page canvas to the translucent backdrop behind a dialog.',
 		id: 'surfaces',
 		related: { label: 'Colour', splat: 'color' },
 		showSamples: true,
@@ -87,8 +87,7 @@ const PURPOSE_DEFINITIONS = [
 		title: 'Sizing',
 	},
 	{
-		description:
-			'Transient hover and pressed interaction sources, plus state effects a control applies to its own material.',
+		description: 'State effects a control applies to its own material, such as disabled opacity.',
 		id: 'interaction',
 		related: null,
 		showSamples: true,
@@ -139,11 +138,7 @@ function resolveColorPurpose(path: string): TokenPurposeId | undefined {
 	if (section === 'border') {
 		return leaf !== undefined && STRUCTURAL_BORDERS.has(leaf) ? 'borders' : 'roles';
 	}
-	// `backdrop` is a dimming layer, so it belongs with the surfaces; hover and pressed are
-	// interaction sources.
-	if (section === 'overlay') {
-		return leaf === 'backdrop' ? 'surfaces' : 'interaction';
-	}
+	if (section === 'overlay') return 'surfaces';
 	return COLOR_SECTION_PURPOSES[section];
 }
 

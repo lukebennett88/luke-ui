@@ -7,7 +7,7 @@ import {
 	descendantDisabledSelector,
 	inputStates,
 } from '../../styles/input-states.js';
-import { interactionBackground } from '../../styles/interaction-fill.js';
+import { interactionColor } from '../../theme/interaction-color.js';
 import {
 	invalidIndicatorIcon,
 	invalidIndicatorIconForcedColors,
@@ -85,11 +85,11 @@ const comboboxActionStyles = {
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
 		'&[data-hovered="true"]:not([data-disabled="true"])': {
-			backgroundColor: interactionBackground('transparent', 'hover'),
+			backgroundColor: interactionColor('transparent', 'hover'),
 			color: vars.color.text.primary,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"])': {
-			backgroundColor: interactionBackground('transparent', 'pressed'),
+			backgroundColor: interactionColor('transparent', 'pressed'),
 			color: vars.color.text.primary,
 		},
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
@@ -372,10 +372,10 @@ const comboboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'&[data-focused="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
-					backgroundColor: interactionBackground('transparent', 'hover'),
+					backgroundColor: interactionColor('transparent', 'hover'),
 				},
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
-					backgroundColor: interactionBackground('transparent', 'hover'),
+					backgroundColor: interactionColor('transparent', 'hover'),
 				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 					outlineColor: vars.color.border.focus,
@@ -385,10 +385,10 @@ const comboboxConfig = {
 					fontWeight: vars.font.weight.label,
 				},
 				'&[data-focused="true"][data-selected="true"]:not([data-disabled="true"])': {
-					backgroundColor: interactionBackground(vars.color.background.accent.subtle, 'hover'),
+					backgroundColor: interactionColor(vars.color.background.accent.subtle, 'hover'),
 				},
 				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])': {
-					backgroundColor: interactionBackground(vars.color.background.accent.subtle, 'hover'),
+					backgroundColor: interactionColor(vars.color.background.accent.subtle, 'hover'),
 				},
 			},
 		},

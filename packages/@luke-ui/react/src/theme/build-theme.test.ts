@@ -67,7 +67,11 @@ describe('buildTheme mid-lightness sources', () => {
 		})();
 		expect(caught).toBeInstanceOf(ThemeContrastError);
 		const error = caught as ThemeContrastError;
-		expect(error.failures.every((failure) => failure.background.includes(' over '))).toBe(true);
+		expect(
+			error.failures.every(
+				(failure) => failure.background.startsWith('hover on ') || failure.background.startsWith('pressed on '),
+			),
+		).toBe(true);
 	});
 });
 
@@ -131,8 +135,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		});
 
 		it(`${foundation.name} keeps dark accent subtle legible for primary text`, () => {
-			// Combobox selected options paint `text.primary` on `background.accent.subtle`. The wash
-			// matrix gates that pair with tint mixed in; this recomputes the resting fill in dark mode.
+			// Combobox selected options paint `text.primary` on `background.accent.subtle`. Contrast
+			// validation also gates the derived hover and pressed fills; this checks the resting pair.
 			const { mediaDark } = splitBlocks(buildTheme(foundation));
 			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
 			const subtle = parseColor(extractValue(mediaDark, '--luke-color-background-accent-subtle'));
@@ -156,7 +160,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 					const minimumContrast = Math.min(
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
-					// The semantic borders alias the scale's step 7 (subtle UI border). They stay visibly
+					// The semantic borders alias the family's border rung. They stay visibly
 					// distinct from the base surfaces but sit below the 3:1 non-text gate by design: these
 					// are soft separators, not solved-contrast boundaries like `border.control`.
 					expect(minimumContrast).toBeGreaterThan(1.2);
@@ -174,7 +178,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 // latter is a tautology once the two colours are already known to differ, so it added no coverage.
 
 describe('buildTheme public motion surface', () => {
-	// The numbered duration scale in `motion.ts` is private in the same sense as the 12-step colour
+	// The numbered duration scale in `motion.ts` is private in the same sense as the colour family
 	// scale: resolved in TypeScript and never published as a custom property. Only the three
 	// role-named durations reach the stylesheet, so a numbered variable here is a leak.
 	it('emits the three role-named durations and no numbered duration step', () => {

@@ -67,10 +67,10 @@ Depth describes how a surface sits above or within the interface.
 
 <ExampleBlock src="overview/depth" title="Token reference — Depth scale" />
 
-Pair each depth role with the matching surface role. For example, a menu can use
-`color.surface.floating` with `depth.floating`, while a dialog can use `color.surface.overlay` with
-`depth.overlay`. `color.overlay` is a different group: the translucent backdrop and the generated
-interaction sources. It is not a surface colour and not a shadow.
+Pair each depth role with the matching surface role. Menus, dialogs, popovers, and sheets use
+`color.surface.floating`. Pair a dialog with `depth.overlay` when it needs more lift than a menu.
+`color.overlay.backdrop` is the translucent layer behind that dialog. It is not a surface colour
+and not a shadow.
 
 Components already apply depth to their own states. Use these variables only for custom surfaces.
 

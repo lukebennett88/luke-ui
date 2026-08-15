@@ -35,16 +35,6 @@ describe('buildTokenTree', () => {
 					path: 'color.overlay.backdrop',
 					varName: '--luke-color-overlay-backdrop',
 				},
-				hover: {
-					kind: 'leaf',
-					path: 'color.overlay.hover',
-					varName: '--luke-color-overlay-hover',
-				},
-				pressed: {
-					kind: 'leaf',
-					path: 'color.overlay.pressed',
-					varName: '--luke-color-overlay-pressed',
-				},
 			},
 		});
 	});

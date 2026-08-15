@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { contrastRatio, formatOklch, gamutMapOklch, mixSrgb, parseColor } from './color.js';
+import { contrastRatio, formatOklch, gamutMapOklch, mixOklab, parseColor } from './color.js';
 
 describe('parseColor', () => {
 	it('round-trips a hex colour through OKLCH formatting', () => {
@@ -24,37 +24,22 @@ describe('parseColor', () => {
 	});
 });
 
-describe('mixSrgb', () => {
-	function srgbToLinear(channel: number): number {
-		return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-	}
-
-	function contrastFromLuminance(a: number, b: number): number {
-		const lighter = Math.max(a, b);
-		const darker = Math.min(a, b);
-		return (lighter + 0.05) / (darker + 0.05);
-	}
-
-	it('mixes white and black at 50% as sRGB gray, matching color-mix(in srgb, ...)', () => {
-		const result = mixSrgb(parseColor('#ffffff'), parseColor('#000000'), 0.5);
-		const grayLuminance = srgbToLinear(0.5);
-		expect(contrastRatio(parseColor('#000000'), result)).toBeCloseTo(
-			contrastFromLuminance(0, grayLuminance),
-			5,
-		);
-		expect(contrastRatio(parseColor('#ffffff'), result)).toBeCloseTo(
-			contrastFromLuminance(1, grayLuminance),
-			5,
-		);
+describe('mixOklab', () => {
+	it('mixes equal parts of two colours toward the midpoint lightness', () => {
+		const white = parseColor('#ffffff');
+		const black = parseColor('#000000');
+		const result = mixOklab(white, black, 0.5);
+		expect(result.l).toBeCloseTo((white.l + black.l) / 2, 5);
+		expect(result.c).toBeCloseTo(0, 5);
 	});
 
-	it('mixes white and blue at 50% in sRGB', () => {
-		const result = mixSrgb(parseColor('#ffffff'), parseColor('#0000ff'), 0.5);
-		const paintedLuminance = 0.2126 * srgbToLinear(0.5) + 0.7152 * srgbToLinear(0.5) + 0.0722;
-		expect(contrastRatio(parseColor('#000000'), result)).toBeCloseTo(
-			contrastFromLuminance(0, paintedLuminance),
-			5,
-		);
+	it('returns the second colour at amount 1', () => {
+		const from = parseColor('#ffffff');
+		const to = parseColor('#0160ae');
+		const result = mixOklab(from, to, 1);
+		expect(result.l).toBeCloseTo(to.l, 5);
+		expect(result.c).toBeCloseTo(to.c, 5);
+		expect(result.h).toBeCloseTo(to.h, 1);
 	});
 });
 

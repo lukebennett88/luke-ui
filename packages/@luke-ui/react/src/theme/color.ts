@@ -40,18 +40,18 @@ export function parseColor(input: string): Oklch {
 }
 
 /**
- * Mixes opaque `a` and `b` in sRGB, matching
- * `color-mix(in srgb, a <100-N>%, b <N>%)` where `amountOfB` is `N / 100`.
+ * Mixes opaque `a` and `b` in OKLab, matching
+ * `color-mix(in oklab, a <100-N>%, b <N>%)` where `amountOfB` is `N / 100`.
  */
-export function mixSrgb(a: Oklch, b: Oklch, amountOfB: number): Oklch {
+export function mixOklab(a: Oklch, b: Oklch, amountOfB: number): Oklch {
 	const t = clampUnit(amountOfB);
-	const from = oklchToSrgb(a);
-	const to = oklchToSrgb(b);
-	return srgbToOklch([
-		from[0] * (1 - t) + to[0] * t,
-		from[1] * (1 - t) + to[1] * t,
-		from[2] * (1 - t) + to[2] * t,
-	]);
+	const from = oklchToOklab(a);
+	const to = oklchToOklab(b);
+	return oklabToOklch({
+		l: from.l * (1 - t) + to.l * t,
+		a: from.a * (1 - t) + to.a * t,
+		b: from.b * (1 - t) + to.b * t,
+	});
 }
 
 /**
@@ -169,19 +169,6 @@ function trimNumber(value: number, digits: number): string {
 
 function srgbToLinear(channel: number): number {
 	return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-}
-
-function linearToSrgb(channel: number): number {
-	return channel <= 0.0031308 ? channel * 12.92 : 1.055 * channel ** (1 / 2.4) - 0.055;
-}
-
-function oklchToSrgb(color: Oklch): SrgbTriple {
-	const [r, g, b] = oklchToLinearSrgb(gamutMapOklch(color));
-	return [linearToSrgb(clampUnit(r)), linearToSrgb(clampUnit(g)), linearToSrgb(clampUnit(b))];
-}
-
-function srgbToOklch(rgb: SrgbTriple): Oklch {
-	return linearSrgbToOklch([srgbToLinear(rgb[0]), srgbToLinear(rgb[1]), srgbToLinear(rgb[2])]);
 }
 
 function isInSrgbGamut(color: Oklch): boolean {

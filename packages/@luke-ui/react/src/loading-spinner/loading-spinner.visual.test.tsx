@@ -82,7 +82,7 @@ const themeMatrixStyle = {
 } satisfies CSSProperties;
 
 const spinnerStyle = {
-	color: vars.color.foreground.accent.rest,
+	color: vars.color.foreground.accent.default,
 } satisfies CSSProperties;
 
 function ThemeMatrixScope({

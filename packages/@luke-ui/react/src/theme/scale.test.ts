@@ -10,11 +10,12 @@ import {
 import type { Oklch } from './color.js';
 import { contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { mixInteractionColor } from './interaction-mix.js';
 import type { FamilyRole } from './scale.js';
 import {
+	FAMILY_RUNGS,
 	generateFamily,
 	generateFamilyWithDiagnostics,
-	MIN_RAMP_DELTA,
 	oklabDeltaE,
 	onSolidGateRatio,
 	passesOnSolidGate,
@@ -41,35 +42,37 @@ function family(source: string, mode: ColorMode, role: FamilyRole) {
 }
 
 describe('generateFamily shape', () => {
-	it('returns all twelve steps plus a contrast colour', () => {
+	it('returns the semantic rungs the contract consumes', () => {
 		const scale = family('#0090ff', 'light', 'accent');
-		for (let step = 1; step <= 12; step++) {
-			const rung = scale[step as 1];
+		expect(Object.keys(scale).sort()).toEqual([...FAMILY_RUNGS].sort());
+		for (const name of FAMILY_RUNGS) {
+			const rung = scale[name];
 			expect(Number.isFinite(rung.l)).toBe(true);
 			expect(rung.l).toBeGreaterThanOrEqual(0);
 			expect(rung.l).toBeLessThanOrEqual(1);
 			expect(rung.c).toBeGreaterThanOrEqual(0);
 		}
-		expect(Number.isFinite(scale.contrast.l)).toBe(true);
 	});
 });
 
 describe('muted ramp distinctness', () => {
-	it('keeps private ramp rungs 4 and 5 at least MIN_RAMP_DELTA from their neighbours', () => {
+	it('keeps consecutive muted rungs perceptibly apart', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
-				// The muted ramp is role-independent, but every role runs the solid-anchor search, so the
-				// corpus covers all six roles.
 				for (const role of SEMANTIC_ROLES) {
 					const scale = family(entry.source, mode, role);
-					const delta34 = oklabDeltaE(scale[3], scale[4]);
-					const delta45 = oklabDeltaE(scale[4], scale[5]);
-					expect(delta34, `${entry.name} ${mode} ${role} ΔE(3,4)`).toBeGreaterThanOrEqual(
-						MIN_RAMP_DELTA,
-					);
-					expect(delta45, `${entry.name} ${mode} ${role} ΔE(4,5)`).toBeGreaterThanOrEqual(
-						MIN_RAMP_DELTA,
-					);
+					expect(
+						oklabDeltaE(scale.subtle, scale.decorative),
+						`${entry.name} ${mode} ${role} ΔE(subtle, decorative)`,
+					).toBeGreaterThan(0);
+					expect(
+						oklabDeltaE(scale.decorative, scale.border),
+						`${entry.name} ${mode} ${role} ΔE(decorative, border)`,
+					).toBeGreaterThan(0);
+					expect(
+						oklabDeltaE(scale.border, scale.mid),
+						`${entry.name} ${mode} ${role} ΔE(border, mid)`,
+					).toBeGreaterThan(0);
 				}
 			}
 		}
@@ -77,14 +80,14 @@ describe('muted ramp distinctness', () => {
 });
 
 describe('on-solid contrast guarantee', () => {
-	it('clears 4.5:1 against the resting solid (9) for every role across the corpus', () => {
+	it('clears 4.5:1 against the resting solid for every role across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
 				for (const role of SEMANTIC_ROLES) {
 					const scale = family(entry.source, mode, role);
 					expect(
-						contrastRatio(scale.contrast, scale[9]),
-						`${entry.name} ${mode} ${role} contrast vs 9`,
+						contrastRatio(scale.onSolid, scale.solid),
+						`${entry.name} ${mode} ${role} onSolid vs solid`,
 					).toBeGreaterThanOrEqual(TEXT_RATIO);
 				}
 			}
@@ -105,8 +108,8 @@ describe('on-solid contrast guarantee', () => {
 });
 
 describe('reference-envelope properties', () => {
-	// Union envelopes across several Radix families bound the muted-ramp steps (1-8). The solid and
-	// text rungs (9-12) are Luke UI design choices, not Radix-pinned, so they are not envelope-checked.
+	// Union envelopes across several Radix families bound the muted rungs. Solid and text rungs
+	// are Luke UI design choices, not Radix-pinned, so they are not envelope-checked.
 	const LIGHTNESS_TOLERANCE = 0.07;
 	const CHROMA_TOLERANCE = 0.06;
 	const envelopes: Record<
@@ -131,27 +134,31 @@ describe('reference-envelope properties', () => {
 
 	for (const mode of MODES) {
 		for (const testCase of cases) {
-			it(`keeps ${testCase.name} background/border steps inside the ${mode} lightness envelope`, () => {
+			it(`keeps ${testCase.name} muted rungs inside the ${mode} lightness envelope`, () => {
 				const source =
 					mode === 'light' ? testCase.source : shiftedForDark(testCase.source, testCase.role);
 				const scale = family(source, mode, testCase.role);
 				const { chroma, lightness } = envelopes[mode];
-				for (let step = 1; step <= 8; step++) {
-					const rung = scale[step as 1];
-					const lightnessBounds = lightness[step - 1];
-					const chromaBounds = chroma[step - 1];
+				const muted = [
+					['subtle', 2, scale.subtle],
+					['decorative', 5, scale.decorative],
+					['border', 6, scale.border],
+					['mid', 7, scale.mid],
+				] as const;
+				for (const [name, envelopeIndex, rung] of muted) {
+					const lightnessBounds = lightness[envelopeIndex];
+					const chromaBounds = chroma[envelopeIndex];
 					if (lightnessBounds === undefined || chromaBounds === undefined) {
-						throw new Error(`missing envelope bounds for step ${step}`);
+						throw new Error(`missing envelope bounds for ${name}`);
 					}
 					const [lMin, lMax] = lightnessBounds;
-					expect(rung.l, `${testCase.name} ${mode} step ${step} L`).toBeGreaterThanOrEqual(
+					expect(rung.l, `${testCase.name} ${mode} ${name} L`).toBeGreaterThanOrEqual(
 						lMin - LIGHTNESS_TOLERANCE,
 					);
-					expect(rung.l, `${testCase.name} ${mode} step ${step} L`).toBeLessThanOrEqual(
+					expect(rung.l, `${testCase.name} ${mode} ${name} L`).toBeLessThanOrEqual(
 						lMax + LIGHTNESS_TOLERANCE,
 					);
-					// Chroma only needs an upper bound: a paler-than-Radix tint is always acceptable.
-					expect(rung.c, `${testCase.name} ${mode} step ${step} C`).toBeLessThanOrEqual(
+					expect(rung.c, `${testCase.name} ${mode} ${name} C`).toBeLessThanOrEqual(
 						chromaBounds[1] + CHROMA_TOLERANCE,
 					);
 				}
@@ -159,36 +166,46 @@ describe('reference-envelope properties', () => {
 		}
 	}
 
-	it('walks the muted ramp monotonically away from the background', () => {
+	it('walks the muted rungs monotonically away from the background', () => {
 		for (const mode of MODES) {
 			const scale = family('#0090ff', mode, 'accent');
-			for (let step = 1; step < 8; step++) {
-				const here = scale[step as 1].l;
-				const next = scale[(step + 1) as 1].l;
-				// Light mode ramps darker, dark mode ramps lighter: the signed move away from the
-				// background is never negative either way.
+			const rungs = [scale.subtle, scale.decorative, scale.border, scale.mid];
+			for (let index = 0; index < rungs.length - 1; index++) {
+				const here = rungs[index]?.l;
+				const next = rungs[index + 1]?.l;
+				if (here === undefined || next === undefined) throw new Error('missing muted rung');
 				const awayFromBackground = mode === 'light' ? here - next : next - here;
-				expect(awayFromBackground, `${mode} step ${step + 1}`).toBeGreaterThanOrEqual(0);
+				expect(awayFromBackground, `${mode} muted ${index}`).toBeGreaterThanOrEqual(0);
 			}
 		}
 	});
 
-	it('peaks chroma at the solid, above the background steps', () => {
+	it('peaks chroma at the solid, above the muted rungs', () => {
 		for (const mode of MODES) {
 			const scale = family('#0090ff', mode, 'accent');
-			for (const step of [1, 2, 3, 4, 5, 6] as const) {
-				expect(scale[9].c, `${mode} step ${step} vs solid`).toBeGreaterThanOrEqual(scale[step].c);
+			for (const rung of [scale.subtle, scale.decorative, scale.border] as const) {
+				expect(scale.solid.c, `${mode} vs solid`).toBeGreaterThanOrEqual(rung.c);
 			}
 		}
 	});
 });
 
-describe('step 12 high-contrast text', () => {
-	it('sits further from the background than the low-contrast text rung', () => {
+describe('high-contrast text', () => {
+	it('keeps the ordinary foreground readable on the pressed subtle fill', () => {
 		for (const mode of MODES) {
 			const scale = family('#0090ff', mode, 'accent');
-			// Light mode: high-contrast text is darker than low-contrast; dark mode: lighter.
-			const extension = mode === 'light' ? scale[11].l - scale[12].l : scale[12].l - scale[11].l;
+			const pressedSubtle = mixInteractionColor(scale.subtle, scale.highContrast, 'pressed');
+			expect(contrastRatio(scale.foreground, pressedSubtle)).toBeGreaterThanOrEqual(4.5);
+		}
+	});
+
+	it('sits further from the background than the ordinary foreground', () => {
+		for (const mode of MODES) {
+			const scale = family('#0090ff', mode, 'accent');
+			const extension =
+				mode === 'light'
+					? scale.foreground.l - scale.highContrast.l
+					: scale.highContrast.l - scale.foreground.l;
 			expect(extension).toBeGreaterThan(0);
 		}
 	});
@@ -247,7 +264,7 @@ describe('solid-anchor search', () => {
 	it('keeps the neutral solid accessible in both modes', () => {
 		for (const mode of MODES) {
 			const scale = family('oklch(0.99 0.003 250)', mode, 'neutral');
-			expect(contrastRatio(scale.contrast, scale[9]), `neutral ${mode}`).toBeGreaterThanOrEqual(
+			expect(contrastRatio(scale.onSolid, scale.solid), `neutral ${mode}`).toBeGreaterThanOrEqual(
 				TEXT_RATIO,
 			);
 		}
@@ -324,19 +341,17 @@ describe('the one on-solid gate', () => {
 		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(true);
 	});
 
-	it('gates only the resting solid, not the private step-10 rung', () => {
+	it('gates the resting solid', () => {
 		const source: Oklch = {
 			l: 0.64,
 			c: 0,
 			h: 0,
 		};
-		const scale = family('oklch(0.64 0 0)', 'light', 'accent');
 		expect(onSolidGateRatio({ lightness: source.l, mode: 'light', source })).toBeGreaterThan(
 			TEXT_RATIO,
 		);
 		expect(passesOnSolidGate({ lightness: source.l, mode: 'light', source })).toBe(true);
 		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(false);
-		expect(scale[10].l).not.toBe(scale[9].l);
 	});
 });
 
@@ -373,7 +388,7 @@ describe('gamut-reduction diagnostics', () => {
 			source: parseColor('oklch(0.7 0.4 195)'),
 		});
 		expect(diagnostics.gamutReductions.length).toBeGreaterThan(0);
-		expect(diagnostics.gamutReductions.some((reduction) => reduction.step === 9)).toBe(true);
+		expect(diagnostics.gamutReductions.some((reduction) => reduction.rung === 'solid')).toBe(true);
 		for (const reduction of diagnostics.gamutReductions) {
 			expect(reduction.resolvedChroma).toBeLessThan(reduction.requestedChroma);
 		}

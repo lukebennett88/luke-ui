@@ -22,12 +22,12 @@ code > * {
 	--color-fd-muted-foreground: var(--luke-color-text-secondary);
 	--color-fd-popover: var(--luke-color-surface-floating);
 	--color-fd-popover-foreground: var(--luke-color-text-primary);
-	--color-fd-card: var(--luke-color-surface-resting);
+	--color-fd-card: var(--luke-color-surface-canvas);
 	--color-fd-card-foreground: var(--luke-color-text-primary);
 	--color-fd-border: var(--luke-color-border-decorative);
 	--color-fd-primary: var(--luke-color-background-accent-solid);
 	--color-fd-primary-foreground: var(--luke-color-foreground-accent-on-solid);
-	--color-fd-secondary: var(--luke-color-surface-raised);
+	--color-fd-secondary: var(--luke-color-surface-recessed);
 	--color-fd-secondary-foreground: var(--luke-color-text-primary);
 	--color-fd-accent: var(--luke-color-background-neutral-subtle);
 	--color-fd-accent-foreground: var(--luke-color-text-primary);

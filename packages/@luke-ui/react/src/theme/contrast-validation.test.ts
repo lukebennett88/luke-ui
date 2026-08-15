@@ -10,9 +10,8 @@ import { contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { validateContrast } from './contrast-validation.js';
-import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
-import { mixInteractionSrgb } from './interaction-overlay.js';
+import { mixInteractionColor } from './interaction-mix.js';
 
 describe('buildTheme contrast failures', () => {
 	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
@@ -66,9 +65,9 @@ describe('buildTheme contrast failures', () => {
 	});
 
 	it('rejects a pathological dark-mode canvas the fixed text anchors cannot clear', () => {
-		// v2 pins text lightness (neutral steps 11/12) per mode, so an unworkable neutral character no
-		// longer produces low-contrast text; the honest failure mode is instead a canvas whose lightness
-		// leaves the fixed text anchors below AA. A near-white dark canvas does exactly that.
+		// v2 pins text lightness per mode, so an unworkable neutral character no longer produces
+		// low-contrast text; the honest failure mode is a canvas whose lightness leaves the fixed
+		// text anchors below AA. A near-white dark canvas does exactly that.
 		const error = buildFailures({
 			...tactileFoundation,
 			dark: {
@@ -111,41 +110,20 @@ describe('buildTheme contrast failures', () => {
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
 	});
 
-	it('needs the stronger accent foreground on subtle pressed for a mid-chroma green accent', () => {
-		const { baseLight } = splitBlocks(
-			buildTheme(
-				normalizeTheme({ color: { accent: 'oklch(0.6 0.12 160)' }, name: 'green-accent' }),
-			),
-		);
-		const valueOf = (varName: string) => extractValue(baseLight, varName);
-		const mixed = mixInteractionSrgb(
-			parseColor(valueOf('--luke-color-background-accent-subtle')),
-			parseColor(valueOf('--luke-color-overlay-pressed')),
-			'pressed',
-		);
-		expect(
-			contrastRatio(parseColor(valueOf('--luke-color-foreground-accent-rest')), mixed),
-		).toBeLessThan(4.5);
-		expect(
-			contrastRatio(parseColor(valueOf('--luke-color-foreground-accent-hover')), mixed),
-		).toBeGreaterThanOrEqual(4.5);
-	});
-
-	it('measures interaction fills with the same sRGB mix the recipes emit', () => {
+	it('measures interaction colours with the same OKLab mix the recipes emit', () => {
 		const { values } = modeColorValues('light');
 		values['color.surface.canvas'] = 'oklch(1 0 0)';
-		values['color.overlay.hover'] = 'oklch(0 0 0)';
 		values['color.text.primary'] = 'oklch(0 0 0)';
 
 		const { checks } = validateContrast('light', values);
 		const check = checks.find((candidate) => {
 			return (
 				candidate.foreground === 'color.text.primary' &&
-				candidate.background === 'color.overlay.hover over color.surface.canvas'
+				candidate.background === 'hover on color.surface.canvas'
 			);
 		});
 		expect(check).toBeDefined();
-		const mixed = mixInteractionSrgb(
+		const mixed = mixInteractionColor(
 			parseColor('oklch(1 0 0)'),
 			parseColor('oklch(0 0 0)'),
 			'hover',
@@ -160,21 +138,20 @@ describe('contrast validation matrix', () => {
 	// `validateContrast`). Deriving the totals from those pieces means adding a role, or changing
 	// a per-role count, updates the expectation automatically instead of needing a hand-edited
 	// number.
-	const PER_ROLE_HARD_HOVER = 3;
+	const PER_ROLE_HARD_DEFAULT = 3;
 	const PER_ROLE_HARD_ON_SOLID = 1;
-	const PER_ROLE_HARD_REST = 3;
 	const PER_ROLE_ADVISORY_BORDER = 2;
 
 	// Hard checks `validateContrast` runs once, not per role: functional primary/secondary text
-	// against the 4 elevation surfaces (8), the focus ring and `border.control` boundaries
+	// against the 3 elevation surfaces (6), the focus ring and `border.control` boundaries
 	// against the 2 base surfaces (4), `danger.solid` against the 2 base surfaces (2), and
-	// interaction overlays over real component fills (ghost 12 + solid 6 + subtle 6 +
-	// combobox selected 2 + combobox unselected 2 = 28).
-	const OVERLAY_HARD_CHECKS = 28;
-	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2 + OVERLAY_HARD_CHECKS;
+	// first-party interaction colours (ghost 12 + solid 6 + subtle 6 + combobox selected 2 +
+	// combobox unselected 2 = 28).
+	const INTERACTION_HARD_CHECKS = 28;
+	const NON_PER_ROLE_HARD_CHECKS = 6 + 4 + 2 + INTERACTION_HARD_CHECKS;
 
 	const expectedHard =
-		SEMANTIC_ROLES.length * (PER_ROLE_HARD_HOVER + PER_ROLE_HARD_ON_SOLID + PER_ROLE_HARD_REST) +
+		SEMANTIC_ROLES.length * (PER_ROLE_HARD_DEFAULT + PER_ROLE_HARD_ON_SOLID) +
 		NON_PER_ROLE_HARD_CHECKS;
 	const expectedAdvisory = SEMANTIC_ROLES.length * PER_ROLE_ADVISORY_BORDER;
 
@@ -190,24 +167,31 @@ describe('contrast validation matrix', () => {
 						(check) =>
 							check.hard === hard &&
 							check.foreground === foreground &&
-							!check.background.includes(' over '),
+							!check.background.startsWith('hover on ') &&
+							!check.background.startsWith('pressed on '),
 					).length;
 				};
-				const overlayChecks = checks.filter(
-					(check) => check.hard && check.background.includes(' over '),
+				const interactionChecks = checks.filter(
+					(check) =>
+						check.hard &&
+						(check.background.startsWith('hover on ') ||
+							check.background.startsWith('pressed on ')),
 				);
 				return {
 					advisory: checks.filter((check) => !check.hard).length,
 					hard: checks.filter((check) => check.hard).length,
+					interactionBackgrounds: [
+						...new Set(interactionChecks.map((check) => check.background)),
+					].sort(),
+					interactionForegrounds: [
+						...new Set(interactionChecks.map((check) => check.foreground)),
+					].sort(),
+					interactionHard: interactionChecks.length,
 					mode,
-					overlayBackgrounds: [...new Set(overlayChecks.map((check) => check.background))].sort(),
-					overlayForegrounds: [...new Set(overlayChecks.map((check) => check.foreground))].sort(),
-					overlayHard: overlayChecks.length,
 					perRole: SEMANTIC_ROLES.map((role) => ({
 						advisoryBorder: countFor(`color.border.${role}`, false),
-						hardHover: countFor(`color.foreground.${role}.hover`, true),
+						hardDefault: countFor(`color.foreground.${role}.default`, true),
 						hardOnSolid: countFor(`color.foreground.${role}.onSolid`, true),
-						hardRest: countFor(`color.foreground.${role}.rest`, true),
 						role,
 					})),
 				};
@@ -216,42 +200,40 @@ describe('contrast validation matrix', () => {
 				(['light', 'dark'] as const).map((mode) => ({
 					advisory: expectedAdvisory,
 					hard: expectedHard,
-					mode,
-					overlayBackgrounds: [
-						'color.overlay.hover over color.background.accent.solid',
-						'color.overlay.hover over color.background.accent.subtle',
-						'color.overlay.hover over color.background.danger.solid',
-						'color.overlay.hover over color.background.danger.subtle',
-						'color.overlay.hover over color.background.neutral.solid',
-						'color.overlay.hover over color.background.neutral.subtle',
-						'color.overlay.hover over color.surface.canvas',
-						'color.overlay.hover over color.surface.floating',
-						'color.overlay.hover over color.surface.recessed',
-						'color.overlay.pressed over color.background.accent.solid',
-						'color.overlay.pressed over color.background.accent.subtle',
-						'color.overlay.pressed over color.background.danger.solid',
-						'color.overlay.pressed over color.background.danger.subtle',
-						'color.overlay.pressed over color.background.neutral.solid',
-						'color.overlay.pressed over color.background.neutral.subtle',
-						'color.overlay.pressed over color.surface.canvas',
-						'color.overlay.pressed over color.surface.floating',
-						'color.overlay.pressed over color.surface.recessed',
+					interactionBackgrounds: [
+						'hover on color.background.accent.solid',
+						'hover on color.background.accent.subtle',
+						'hover on color.background.danger.solid',
+						'hover on color.background.danger.subtle',
+						'hover on color.background.neutral.solid',
+						'hover on color.background.neutral.subtle',
+						'hover on color.surface.canvas',
+						'hover on color.surface.floating',
+						'hover on color.surface.recessed',
+						'pressed on color.background.accent.solid',
+						'pressed on color.background.accent.subtle',
+						'pressed on color.background.danger.solid',
+						'pressed on color.background.danger.subtle',
+						'pressed on color.background.neutral.solid',
+						'pressed on color.background.neutral.subtle',
+						'pressed on color.surface.canvas',
+						'pressed on color.surface.floating',
+						'pressed on color.surface.recessed',
 					],
-					overlayForegrounds: [
-						'color.foreground.accent.hover',
+					interactionForegrounds: [
+						'color.foreground.accent.default',
 						'color.foreground.accent.onSolid',
-						'color.foreground.accent.rest',
+						'color.foreground.danger.default',
 						'color.foreground.danger.onSolid',
-						'color.foreground.danger.rest',
 						'color.foreground.neutral.onSolid',
 						'color.text.primary',
 					],
-					overlayHard: OVERLAY_HARD_CHECKS,
+					interactionHard: INTERACTION_HARD_CHECKS,
+					mode,
 					perRole: SEMANTIC_ROLES.map((role) => ({
 						advisoryBorder: PER_ROLE_ADVISORY_BORDER,
-						hardHover: PER_ROLE_HARD_HOVER,
+						hardDefault: PER_ROLE_HARD_DEFAULT,
 						hardOnSolid: PER_ROLE_HARD_ON_SOLID,
-						hardRest: PER_ROLE_HARD_REST,
 						role,
 					})),
 				})),

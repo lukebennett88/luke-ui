@@ -159,7 +159,7 @@ test('interactive states', async () => {
 	await userEvent.keyboard('{/Space}');
 });
 
-test('action overlay in dark mode', async () => {
+test('trigger hover in dark mode', async () => {
 	render(
 		<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
 			{renderCountryItem}
@@ -195,6 +195,13 @@ test('open option and selection states', async () => {
 	await captureVisual(
 		page.elementLocator(document.body),
 		'combobox-field/open-selected-disabled-loading',
+	);
+
+	const selected = page.getByRole('option', { name: 'Canada' });
+	await userEvent.hover(selected);
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/selected-option-hover',
 	);
 });
 

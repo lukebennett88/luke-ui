@@ -13,8 +13,8 @@ const typeStyle = {
 
 /**
  * The background capabilities every semantic role gets, spread once per role so the six roles cannot
- * drift apart. Subtle and solid are resting fills. Transient hover and pressed feedback uses
- * `color.overlay`, not per-role state leaves.
+ * drift apart. Subtle and solid are resting fills. Hover and pressed colours are derived from those
+ * fills, not stored as extra leaves.
  */
 const roleBackground = {
 	subtle: null,
@@ -22,13 +22,12 @@ const roleBackground = {
 };
 
 /**
- * The content capabilities every semantic role gets. There is no `pressed` foreground: press is
- * carried by `color.overlay.pressed` and non-colour cues, so text and icons reuse
- * `hover`.
+ * The content capabilities every semantic role gets. `default` is the ordinary semantic foreground.
+ * `onSolid` is the contrast-solved colour for that role's solid fill. Hover and pressed foregrounds
+ * are derived from `default` when a control needs them.
  */
 const roleForeground = {
-	rest: null,
-	hover: null,
+	default: null,
 	onSolid: null,
 };
 
@@ -141,16 +140,10 @@ export const themeContractTree = {
 			canvas: null,
 			recessed: null,
 			floating: null,
-			overlay: null,
 		},
-		/**
-		 * Modal dimming (`backdrop`) and the generated interaction sources (`hover`, `pressed`)
-		 * recipes mix into the current semantic fill.
-		 */
+		/** Translucent layer painted over other interface content, such as a modal backdrop. */
 		overlay: {
 			backdrop: null,
-			hover: null,
-			pressed: null,
 		},
 		loadingSkeleton: null,
 		text: {
@@ -159,7 +152,7 @@ export const themeContractTree = {
 			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
 			disabled: null,
 		},
-		/** Subtle and solid resting backgrounds. Hover and pressed use `color.overlay`. */
+		/** Subtle and solid resting backgrounds. Hover and pressed are derived from these fills. */
 		background: {
 			neutral: { ...roleBackground },
 			accent: { ...roleBackground },
@@ -168,7 +161,7 @@ export const themeContractTree = {
 			warning: { ...roleBackground },
 			danger: { ...roleBackground },
 		},
-		/** Resting and stronger interactive content colours, plus the guaranteed on-solid pairing. */
+		/** Ordinary semantic content colours, plus the guaranteed on-solid pairing. */
 		foreground: {
 			neutral: { ...roleForeground },
 			accent: { ...roleForeground },

@@ -1,11 +1,11 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
-import { interactionBackground } from '../../styles/interaction-fill.js';
 import type { RecipeSelection, SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
+import { interactionColor } from '../../theme/interaction-color.js';
 import { fieldMessageIcon, fieldMessageIndent } from '../field/recipe.css.js';
 
 const checkboxControlSize = createVar();
@@ -118,12 +118,12 @@ const checkboxConfig = {
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
 				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]) &':
 					{
-						backgroundColor: interactionBackground(vars.color.surface.canvas, 'hover'),
+						backgroundColor: interactionColor(vars.color.surface.canvas, 'hover'),
 						backgroundImage: vars.actionControlFinish.raised,
 					},
 				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]) &':
 					{
-						backgroundColor: interactionBackground(vars.color.surface.canvas, 'pressed'),
+						backgroundColor: interactionColor(vars.color.surface.canvas, 'pressed'),
 						backgroundImage: vars.actionControlFinish.recessed,
 					},
 				'[data-indeterminate="true"] &': {
@@ -146,12 +146,12 @@ const checkboxConfig = {
 				},
 				'[data-hovered="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &, [data-hovered="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &':
 					{
-						backgroundColor: interactionBackground(vars.color.background.accent.solid, 'hover'),
+						backgroundColor: interactionColor(vars.color.background.accent.solid, 'hover'),
 						backgroundImage: vars.actionControlFinish.raised,
 					},
 				'[data-pressed="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &, [data-pressed="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &':
 					{
-						backgroundColor: interactionBackground(vars.color.background.accent.solid, 'pressed'),
+						backgroundColor: interactionColor(vars.color.background.accent.solid, 'pressed'),
 						backgroundImage: vars.actionControlFinish.recessed,
 					},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
@@ -162,12 +162,12 @@ const checkboxConfig = {
 					},
 				'[data-hovered="true"][data-invalid="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-hovered="true"][data-invalid="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
-						backgroundColor: interactionBackground(vars.color.background.danger.solid, 'hover'),
+						backgroundColor: interactionColor(vars.color.background.danger.solid, 'hover'),
 						backgroundImage: vars.actionControlFinish.raised,
 					},
 				'[data-pressed="true"][data-invalid="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-pressed="true"][data-invalid="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
 					{
-						backgroundColor: interactionBackground(vars.color.background.danger.solid, 'pressed'),
+						backgroundColor: interactionColor(vars.color.background.danger.solid, 'pressed'),
 						backgroundImage: vars.actionControlFinish.recessed,
 					},
 			},

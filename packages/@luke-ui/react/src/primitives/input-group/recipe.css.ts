@@ -190,7 +190,7 @@ const inputGroupConfig = {
 					color: 'CanvasText',
 				},
 			},
-			color: vars.color.foreground.danger.rest,
+			color: vars.color.foreground.danger.default,
 			marginInlineEnd: vars.space[200],
 		},
 	},

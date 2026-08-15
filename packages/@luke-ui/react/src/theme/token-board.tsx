@@ -13,7 +13,6 @@ import { createElement, useLayoutEffect, useRef, useState } from 'react';
 import { vars } from './contract.css.js';
 import type { themeContractTree } from './contract.js';
 import { flattenThemeContract, themeVarName } from './contract.js';
-import { interactionFill } from './interaction-overlay.js';
 
 interface TokenLeafNode {
 	kind: 'leaf';
@@ -250,19 +249,6 @@ function ColorPreview({ path, varName }: LeafPreviewProps) {
 					...swatchBoxStyle,
 					backgroundColor: vars.color.surface.canvas,
 					backgroundImage: `linear-gradient(var(${varName}), var(${varName}))`,
-				}}
-			/>
-		);
-	}
-	if (path === 'color.overlay.hover' || path === 'color.overlay.pressed') {
-		const state = path === 'color.overlay.hover' ? 'hover' : 'pressed';
-		return (
-			<span
-				aria-label={`${path} sample`}
-				role="img"
-				style={{
-					...swatchBoxStyle,
-					backgroundColor: interactionFill(vars.color.surface.canvas, `var(${varName})`, state),
 				}}
 			/>
 		);
