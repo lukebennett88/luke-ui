@@ -73,12 +73,12 @@ advisory group:
 - `color.border.control` is a hard gate. It is a dedicated contrast boundary, not a scale-step
   alias, and must reach ≥3:1 against both `canvas` and `recessed` in both modes. It is frequently
   the sole resting boundary of a form control, so it cannot use the softer step-7 aesthetic.
-- `color.background.danger.solid` is also a hard gate, ≥3:1 against both `canvas` and
-  `recessed` in both modes. It is the only role fill that carries a required state's boundary (the
-  invalid field boundary — [#247](https://github.com/lukebennett88/luke-ui/issues/247)), so it needs
-  the same guarantee as `border.control`. This is deliberately not extended to the other five roles:
-  a role's solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind
-  it, and for `warning` that lands at only 2.43:1 against canvas in light mode.
+- `color.background.danger.solid` is also a hard gate, ≥3:1 against both `canvas` and `recessed` in
+  both modes. It is the only role fill that carries a required state's boundary (the invalid field
+  boundary — [#247](https://github.com/lukebennett88/luke-ui/issues/247)), so it needs the same
+  guarantee as `border.control`. This is deliberately not extended to the other five roles: a role's
+  solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for
+  `warning` that lands at only 2.43:1 against canvas in light mode.
 - `color.border.decorative` is not checked. It is a deliberately subtle, Radix-style separator below
   3:1.
 - Every semantic role border (`color.border.<role>`, all six roles) is an advisory 3:1 check. A miss
@@ -161,11 +161,12 @@ so existing colour transitions work. The public contract has no hover or pressed
 `@luke-ui/react/theme` does not export `interactionColor` or `InteractionState`.
 
 `validateContrast` matches each pair to the paint operation its recipe actually renders. Opaque-base
-pairs — solid and subtle Button tones, selected Combobox options on accent subtle, and Link's
-derived accent foreground — measure `mixInteractionColor`. Transparent-base pairs — ghost Button
-foregrounds on canvas and recessed, and unselected Combobox options on floating — measure
-`compositeSourceOver`, real source-over alpha compositing in gamma-encoded sRGB, matching what those
-controls actually paint rather than an OKLab interpolation between the surface and the source.
+pairs — solid Button tones, subtle Button fill and foreground, selected Combobox options on accent
+subtle, and Link's derived accent foreground — measure `mixInteractionColor`. Transparent-base pairs
+— ghost Button foregrounds on canvas and recessed, and unselected Combobox options on floating —
+measure `compositeSourceOver`, real source-over alpha compositing in gamma-encoded sRGB, matching
+what those controls actually paint rather than an OKLab interpolation between the surface and the
+source.
 
 The authored modal backdrop stays separate as `color.overlay.backdrop`. `color.surface.overlay` is
 the opaque high-elevation surface. Selected, checked, invalid, danger, focus, and disabled remain

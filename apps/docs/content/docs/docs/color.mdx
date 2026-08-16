@@ -87,8 +87,9 @@ vars.color.foreground.warning.default;
 vars.color.foreground.warning.onSolid;
 ```
 
-Not every control changes its foreground on hover or pressed. Button keeps its resting foreground
-and derives only the background. A control that does need stronger content feedback derives it from
+Not every control changes its foreground on hover or pressed. Solid Button keeps its resting
+on-solid foreground and derives only the background. Subtle Button also derives the foreground so
+the darkened fill still clears AA. A control that needs stronger content feedback derives it from
 the resting foreground internally; there is no public token or function for this.
 
 ### Borders

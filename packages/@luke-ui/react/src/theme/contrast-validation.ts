@@ -126,9 +126,20 @@ export function validateContrast(
 		foreground: ColorPath,
 		state: InteractionState,
 		surface: ColorPath,
+		mixForeground = false,
 	) => {
 		const mixed = mixInteractionColor(colorAt(surface), interactionSource, state);
-		checkResolved(foreground, `${state} on ${surface}`, mixed, TEXT_RATIO, true, colorAt(foreground));
+		const foregroundColor = mixForeground
+			? mixInteractionColor(colorAt(foreground), interactionSource, state)
+			: colorAt(foreground);
+		checkResolved(
+			mixForeground ? `${state} of ${foreground}` : foreground,
+			`${state} on ${surface}`,
+			mixed,
+			TEXT_RATIO,
+			true,
+			foregroundColor,
+		);
 	};
 	const checkTransparentInteraction = (
 		foreground: ColorPath,
@@ -160,7 +171,7 @@ export function validateContrast(
 			const subtleForeground =
 				tone === 'neutral' ? 'color.text.primary' : (`color.foreground.${tone}.default` as const);
 			checkOpaqueInteraction(solidForeground, state, `color.background.${tone}.solid`);
-			checkOpaqueInteraction(subtleForeground, state, `color.background.${tone}.subtle`);
+			checkOpaqueInteraction(subtleForeground, state, `color.background.${tone}.subtle`, true);
 		}
 		checkOpaqueInteraction('color.text.primary', state, 'color.background.accent.subtle');
 		checkTransparentInteraction('color.text.primary', state, 'color.surface.floating');

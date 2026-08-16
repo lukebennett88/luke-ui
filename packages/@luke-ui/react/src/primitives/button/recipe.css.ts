@@ -178,6 +178,8 @@ function appearance(
 	color: string,
 ) {
 	const fill = background[appearance];
+	const hoverColor = appearance === 'subtle' ? interactionColor(color, 'hover') : color;
+	const pressedColor = appearance === 'subtle' ? interactionColor(color, 'pressed') : color;
 	return [
 		{
 			style: {
@@ -191,10 +193,12 @@ function appearance(
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundColor: interactionColor(fill, 'hover'),
 						backgroundImage: vars.actionControlFinish.raised,
+						color: hoverColor,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
 						backgroundColor: interactionColor(fill, 'pressed'),
 						backgroundImage: vars.actionControlFinish.recessed,
+						color: pressedColor,
 					},
 				},
 			},

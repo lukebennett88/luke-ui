@@ -19,4 +19,3 @@ document.head.append(freezeMotion);
 // Overlay popovers close when a descendant is scrolled into view. Visual tests capture appearance,
 // not scroll position, so skip that DOM scroll.
 Element.prototype.scrollIntoView = () => {};
-
