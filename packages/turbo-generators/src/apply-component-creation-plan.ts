@@ -1,5 +1,6 @@
 import { dirname, join } from 'node:path';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import type * as ViteFmt from 'vite-plus/fmt';
 import * as z from 'zod';
 import type { ComponentCreationPlan, PlanFile } from './component-creation-plan.js';
@@ -48,7 +49,9 @@ async function loadRootFmtConfig(): Promise<ViteFmt.FormatConfig | undefined> {
 	cachedFmtConfig ??= (async () => {
 		const repoRoot = await findRepoRoot(process.cwd());
 		const configPath = join(repoRoot, 'vite.config.ts');
-		const mod: { default?: { fmt?: ViteFmt.FormatConfig } } = await import(configPath);
+		const mod: { default?: { fmt?: ViteFmt.FormatConfig } } = await import(
+			pathToFileURL(configPath).href,
+		);
 		return mod.default?.fmt;
 	})();
 	return cachedFmtConfig;

@@ -116,4 +116,13 @@ describe('createComponentPlan', () => {
 		const parsed = parseSync(testFile.path, testFile.contents, { lang: 'tsx' });
 		expect(parsed.errors).toEqual([]);
 	});
+
+	it('does not import unused ComponentProps in the browser test', () => {
+		const plan = createComponentPlan(validAnswers);
+
+		const testFile = plan.files.find((file) => file.path.endsWith('.browser.test.tsx'));
+		if (testFile === undefined) throw new Error('Expected the scaffold to write a browser test.');
+
+		expect(testFile.contents).not.toContain('ComponentProps');
+	});
 });
