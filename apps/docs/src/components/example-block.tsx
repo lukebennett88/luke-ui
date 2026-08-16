@@ -46,15 +46,17 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 		<ExampleFrame
 			actions={
 				<Box className="flex items-center gap-1">
-					<DocsLink
-						className={buttonRecipe({ appearance: 'ghost', size: 'small' })}
-						hash={highlightedSource.playgroundHash}
-						target="_blank"
-						to="/playground"
-					>
-						<Icon aria-hidden className="size-4" name="externalLink" />
-						Open in playground
-					</DocsLink>
+					{highlightedSource.playgroundHash != null ? (
+						<DocsLink
+							className={buttonRecipe({ appearance: 'ghost', size: 'small' })}
+							hash={highlightedSource.playgroundHash}
+							target="_blank"
+							to="/playground"
+						>
+							<Icon aria-hidden className="size-4" name="externalLink" />
+							Open in playground
+						</DocsLink>
+					) : null}
 					<Button
 						appearance="ghost"
 						aria-controls={codeId}

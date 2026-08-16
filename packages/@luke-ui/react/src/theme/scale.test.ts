@@ -12,7 +12,6 @@ import { contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { FamilyRole } from './scale.js';
 import {
-	FAMILY_REQUIREMENTS,
 	generateFamily,
 	generateFamilyWithDiagnostics,
 	MIN_STATE_DELTA,
@@ -32,8 +31,7 @@ const BACKGROUND: Record<ColorMode, Oklch> = {
 
 const TEXT_RATIO = 4.5;
 const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
-// Every role declares the same guarantees, so `SEMANTIC_ROLES` is the complete capability set. The
-// one split is geometric rather than semantic: neutral's solid comes from its own
+// The one split is geometric rather than semantic: neutral's solid comes from its own
 // curated dark/light chip band instead of the source lightness, so it is the only role a dead-zone
 // source cannot make unsatisfiable.
 const SOURCE_TONED_ROLES = SEMANTIC_ROLES.filter((role) => role !== 'neutral');
@@ -41,24 +39,6 @@ const SOURCE_TONED_ROLES = SEMANTIC_ROLES.filter((role) => role !== 'neutral');
 function family(source: string, mode: ColorMode, role: FamilyRole) {
 	return generateFamily({ background: BACKGROUND[mode], mode, role, source: parseColor(source) });
 }
-
-describe('FAMILY_REQUIREMENTS', () => {
-	it('guarantees every capability for every role', () => {
-		const requirements = SEMANTIC_ROLES.map((role) => [role, FAMILY_REQUIREMENTS[role]] as const);
-		expect(requirements).toEqual(
-			SEMANTIC_ROLES.map((role) => [
-				role,
-				{
-					needsBorder: true,
-					needsOnSolid: true,
-					needsSolidStates: true,
-					needsSubtleStates: true,
-					needsText: true,
-				},
-			]),
-		);
-	});
-});
 
 describe('generateFamily shape', () => {
 	it('returns all twelve steps plus a contrast colour', () => {
@@ -248,9 +228,9 @@ describe('solid-anchor search', () => {
 	});
 
 	it('resolves the solid identically for every source-toned role', () => {
-		// The search is keyed to capabilities, not meaning, and every role now declares the same ones. A
-		// status role and the accent handed the same character must therefore produce the same solid —
-		// this is what makes a `danger` badge and an `info` badge equally able to render a solid.
+		// The solid-anchor search is geometric, not semantic. A status role and the accent handed the
+		// same character must therefore produce the same solid — this is what makes a `danger` badge
+		// and an `info` badge equally able to render a solid.
 		const source = parseColor('oklch(0.51 0.19 150)');
 		const resolvedLightness = (mode: ColorMode, role: FamilyRole) => {
 			return generateFamilyWithDiagnostics({ background: BACKGROUND[mode], mode, role, source })

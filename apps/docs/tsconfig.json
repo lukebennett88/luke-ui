@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"allowJs": true,
+		"allowImportingTsExtensions": true,
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": true,
 		"jsx": "react-jsx",
@@ -16,7 +17,8 @@
 		"strict": true,
 		"target": "esnext",
 		"types": ["vite-plus/client"],
-		"verbatimModuleSyntax": true
+		"verbatimModuleSyntax": true,
+		"allowImportingTsExtensions": true
 	},
 	"include": ["**/*.ts", "**/*.tsx"]
 }

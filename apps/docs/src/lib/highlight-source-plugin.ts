@@ -7,6 +7,7 @@ import tsx from 'shiki/langs/tsx.mjs';
 import type { Plugin } from 'vite-plus';
 import type { HighlightedSource } from './highlighted-source.js';
 import { encodeCodeHash } from './playground-hash.js';
+import { canRunInPlayground } from './playground-runtime-specifiers.js';
 import { SHIKI_THEME_REGISTRATIONS, SHIKI_THEMES } from './shiki-theme.js';
 
 const HIGHLIGHT_QUERY = '?highlight';
@@ -58,7 +59,7 @@ export function highlightSourcePlugin(): Plugin {
 						},
 					],
 				}),
-				playgroundHash: encodeCodeHash(source),
+				playgroundHash: canRunInPlayground(source) ? encodeCodeHash(source) : null,
 			};
 
 			return `export default ${JSON.stringify(highlighted)};\n`;

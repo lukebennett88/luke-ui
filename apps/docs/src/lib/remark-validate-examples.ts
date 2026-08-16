@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { extname, relative, resolve } from 'node:path';
 import { visit } from 'unist-util-visit';
+import { findMdxFiles } from './docs-mdx-files.js';
+import { exampleBlockSources } from './example-block-sources.js';
 
 interface Position {
 	start: { line: number; column: number };
@@ -73,31 +75,27 @@ export function findOrphanedExamples({
 		}
 	}
 
-	return findFiles(resolvedExamplesDir, '.tsx')
+	return findExampleFiles(resolvedExamplesDir)
 		.filter((examplePath) => !reachableExamples.has(examplePath))
 		.map((examplePath) => relative(resolvedExamplesDir, examplePath))
 		.sort();
 }
 
-function findFiles(directory: string, extension: string): Array<string> {
+function findExampleFiles(directory: string): Array<string> {
 	return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
 		const path = resolve(directory, entry.name);
 
-		if (entry.isDirectory()) return findFiles(path, extension);
-		return extname(entry.name) === extension ? [path] : [];
+		if (entry.isDirectory()) return findExampleFiles(path);
+		return extname(entry.name) === '.tsx' ? [path] : [];
 	});
 }
 
 function findDocumentedExamples(docsDir: string, examplesDir: string): Set<string> {
 	const documentedExamples = new Set<string>();
-	const exampleBlockPattern = /<ExampleBlock\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/g;
 
-	for (const file of findFiles(docsDir, '.mdx')) {
-		const contents = readFileSync(file, 'utf8');
-
-		for (const match of contents.matchAll(exampleBlockPattern)) {
-			const src = match[1];
-			if (src) documentedExamples.add(resolve(examplesDir, `${src}.tsx`));
+	for (const file of findMdxFiles(docsDir)) {
+		for (const src of exampleBlockSources(readFileSync(file, 'utf8'))) {
+			documentedExamples.add(resolve(examplesDir, `${src}.tsx`));
 		}
 	}
 

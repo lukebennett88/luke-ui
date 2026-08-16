@@ -8,7 +8,7 @@
 
 import type { Oklch } from './color.js';
 import type { GeneratedSurfaces } from './elevation.js';
-import type { FamilyRequirements, FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
+import type { FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
 
 /** A chroma reduction forced by sRGB gamut mapping on one generated rung. */
 export interface GamutReduction {
@@ -32,7 +32,7 @@ export interface SolidAnchorDiagnostics {
 	onSolidRatioSolidHover: number;
 	/** The lightness the solid anchor resolved to. */
 	resolvedLightness: number;
-	/** Whether the family satisfies its on-solid guarantee (always true when the role does not need one). */
+	/** Whether on-solid text clears WCAG AA against the solid and its hover. */
 	satisfied: boolean;
 	/** The lightness the search preferred: the source lightness (vibrant) or the curated target (neutral). */
 	targetLightness: number;
@@ -53,8 +53,6 @@ export interface FamilyDiagnostics {
 	mode: 'light' | 'dark';
 	/** The chosen on-solid colour and the contrast it reaches over the solid and its hover. */
 	onSolid: { color: Oklch; ratioSolid: number; ratioSolidHover: number };
-	/** The capability guarantees the role declares. */
-	requirements: FamilyRequirements;
 	/** The semantic role the family was generated for. */
 	role: FamilyRole;
 	/** How the step-9 solid anchor was resolved. */

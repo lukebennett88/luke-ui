@@ -12,10 +12,9 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    hue/chroma character — see `define-theme.ts`).
 2. Generates six private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`,
    `danger`) with `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast`
-   on-solid colour. Every role now guarantees the same capabilities (see `scale.ts`'s
-   `FAMILY_REQUIREMENTS`) — the public contract gives all six roles identical background,
-   foreground, on-solid, and border slots, so there is no role that can opt out of a capability
-   another role emits.
+   on-solid colour. Every role publishes the same background, foreground, on-solid, and border
+   slots, and every role's solid clears 4.5:1 against on-solid text (see `SEMANTIC_ROLES` in
+   `contrast-policy.ts`).
 3. Derives the mode-aware elevation surfaces (`canvas`/`recessed`/`floating`/`overlay`) with
    `elevation.ts`'s `generateSurfaces`. `surfaces.canvas` is always exactly the resolved
    `background` — canvas IS the background, not a derived value.
@@ -121,10 +120,9 @@ generator alone would report as unsatisfiable.
 
 `contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
 search headroom, and the search step. It also declares `SEMANTIC_ROLES`, the one canonical role list
-used by family generation, the capability matrix, the semantic map, and the validation matrix.
-Previously, separate role lists allowed a role added only to the map to emit an ungated colour,
-while a role added only to the compiler threw an internal error. One list makes both sides move
-together.
+used by family generation, the semantic map, and the validation matrix. Previously, separate role
+lists allowed a role added only to the map to emit an ungated colour, while a role added only to the
+compiler threw an internal error. One list makes both sides move together.
 
 ## `loadingSkeleton`
 

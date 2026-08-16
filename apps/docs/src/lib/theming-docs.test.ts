@@ -1,17 +1,11 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { extname, resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { expect, test } from 'vite-plus/test';
+import { findMdxFiles } from './docs-mdx-files.js';
+import { exampleBlockSources } from './example-block-sources.js';
 
 const allDocsContentDir = resolve(import.meta.dirname, '../../content/docs');
 const examplesDir = resolve(import.meta.dirname, '../examples');
-
-function findAllMdxFiles(directory: string): Array<string> {
-	return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-		const path = resolve(directory, entry.name);
-		if (entry.isDirectory()) return findAllMdxFiles(path);
-		return extname(entry.name) === '.mdx' ? [path] : [];
-	});
-}
 
 test('no rendered example applies a theme identity class', () => {
 	// `themeClassName` is the export name every per-theme entrypoint
@@ -26,14 +20,10 @@ test('no rendered example applies a theme identity class', () => {
 		'getThemeClassName',
 	];
 
-	for (const file of findAllMdxFiles(allDocsContentDir)) {
+	for (const file of findMdxFiles(allDocsContentDir)) {
 		const contents = readFileSync(file, 'utf8');
-		const examplePattern = /<ExampleBlock\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/g;
 
-		for (const match of contents.matchAll(examplePattern)) {
-			const src = match[1];
-			if (src === undefined) continue;
-
+		for (const src of exampleBlockSources(contents)) {
 			const examplePath = resolve(examplesDir, `${src}.tsx`);
 			expect(existsSync(examplePath)).toBe(true);
 

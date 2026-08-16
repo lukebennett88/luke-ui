@@ -18,6 +18,7 @@ import { withBasePath } from '../lib/base-path.js';
 import { getComponentPageNavigation } from '../lib/component-page-navigation.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { baseOptions } from '../lib/layout.shared';
+import { markdownUrlForPage } from '../lib/markdown-page-path.js';
 import { source } from '../lib/source';
 import { getStorybookStoryUrl } from '../lib/storybook';
 
@@ -53,7 +54,7 @@ const loader = createServerFn({
 		const page = source.getPage(slugs);
 		if (!page) throw notFound();
 
-		const markdownPath = `${page.url === '/' ? '/index' : page.url}.md`;
+		const markdownPath = markdownUrlForPage(page.url);
 		const rawComponentNavigation = getComponentPageNavigation(page.url);
 		// A guide-depth URL only gets Guide/Props tabs when a props page actually
 		// exists alongside it — a standalone guide page with no API surface of its
