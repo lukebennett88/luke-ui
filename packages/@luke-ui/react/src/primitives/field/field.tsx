@@ -1,5 +1,4 @@
 import type { ComponentProps, JSX, ReactNode } from 'react';
-import type { FieldSlotProps } from '../../field/compose-field.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { FieldDescriptionProps } from './description.js';
@@ -12,6 +11,18 @@ import { Field as PrimitiveField } from './root.js';
 
 export type { FieldDescriptionProps, FieldErrorProps, FieldLabelProps, FieldNecessityIndicator };
 export { FieldDescription, FieldError, FieldLabel };
+
+/** Label, description, and error props shared by field compositions. */
+export interface FieldSlotProps {
+	/** Optional helper text shown below the control. */
+	description?: ReactNode;
+	/** Error content passed to `FieldError`. */
+	errorMessage?: FieldErrorProps['children'];
+	/** Label content shown above the control. */
+	label?: ReactNode;
+	/** Label necessity style. @default 'icon' */
+	necessityIndicator?: FieldNecessityIndicator;
+}
 
 type PrimitiveFieldProps = ComponentProps<typeof PrimitiveField>;
 
