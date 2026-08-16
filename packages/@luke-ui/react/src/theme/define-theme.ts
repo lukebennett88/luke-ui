@@ -2,12 +2,13 @@
  * The `defineTheme` authoring util: the sole public theme-authoring surface. It normalises a small,
  * curated-default {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} and hands it
  * to the internal {@link buildTheme} value pipeline. It owns the single-value accent/neutral
- * adaptation and the resolution of curated defaults (materials, radius, scrim).
+ * adaptation and the one resolution of curated defaults (source colours, materials, radius, scrim)
+ * into {@link Oklch} values the foundation carries.
  */
 
 import { buildTheme, ThemeContrastError } from './build-theme.js';
 import type { Oklch } from './color.js';
-import { clampUnit, formatOklch, gamutMapOklch, parseColor } from './color.js';
+import { clampUnit, gamutMapOklch, parseColor } from './color.js';
 import { CONTRAST_SEARCH_STEP, TEXT_RATIO } from './contrast-policy.js';
 import { resolveThemeInput } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
@@ -224,11 +225,11 @@ const RADIUS_STEPS = { control: 2, detail: 1, overlay: 4, surface: 3 } as const;
 /**
  * Compiles a curated {@link ThemeInput} into a complete static stylesheet. Resolves any `extends`
  * chain into one merged input first, then normalises it into the per-mode {@link ThemeFoundation}
- * shape — adapting single-value accents and neutrals per mode, generating the radius scale, and
- * merging materials over curated defaults — then delegates to {@link buildTheme}, whose build-time
- * contrast validation stays authoritative. Throws when a single-value accent has no accessible
- * lightness in a mode, and (via `buildTheme`) throws {@link ThemeContrastError} when any resolved
- * pair misses WCAG 2.2 AA.
+ * shape — adapting single-value accents and neutrals per mode, resolving source colours to
+ * {@link Oklch} once, generating the radius scale, and merging materials over curated defaults —
+ * then delegates to {@link buildTheme}, whose build-time contrast validation stays authoritative.
+ * Throws when a single-value accent has no accessible lightness in a mode, and (via `buildTheme`)
+ * throws {@link ThemeContrastError} when any resolved pair misses WCAG 2.2 AA.
  */
 export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
 	const resolved = resolveThemeInput(input);
@@ -243,13 +244,12 @@ export function defineTheme(input: ThemeInput | ExtendingThemeInput): string {
 }
 
 /**
- * Resolves a {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} `buildTheme`
- * consumes, resolving any `extends` chain into one merged input first. Exported for internal callers
- * and tests only; it is not part of the public package entry, where `defineTheme` is the sole
- * authoring surface.
+ * Resolves a merged {@link ThemeInput} into the internal per-mode {@link ThemeFoundation}
+ * `buildTheme` consumes. The `extends` chain must already be folded; call {@link resolveThemeInput}
+ * once and pass `resolved.input`. Exported for internal callers and tests only; it is not part of
+ * the public package entry, where `defineTheme` is the sole authoring surface.
  */
-export function normalizeTheme(themeInput: ThemeInput | ExtendingThemeInput): ThemeFoundation {
-	const input = resolveThemeInput(themeInput).input;
+export function normalizeTheme(input: ThemeInput): ThemeFoundation {
 	const foundation: ThemeFoundation = {
 		dark: buildModeFoundation(input, 'dark'),
 		light: buildModeFoundation(input, 'light'),
@@ -284,7 +284,7 @@ function omitUndefined<T extends Record<string, unknown>>(record: T): Partial<T>
 	) as Partial<T>;
 }
 
-/** Resolves every source-colour role for one mode into the strings `buildTheme` accepts. */
+/** Resolves every source-colour role for one mode into the {@link Oklch} values `buildTheme` accepts. */
 function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const { color } = input;
 	const defaults = defaultSourceColors[mode];
@@ -301,17 +301,12 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
 		scrim: resolveVerbatimRole(color.scrim, mode, defaultScrim[mode]),
+		danger: resolveSourceRole(color.danger, mode, defaults.danger),
+		focus: resolveSourceRole(color.focus, mode, defaults.focus),
+		info: resolveSourceRole(color.info, mode, defaults.info),
+		success: resolveSourceRole(color.success, mode, defaults.success),
+		warning: resolveSourceRole(color.warning, mode, defaults.warning),
 	};
-	const feedback = {
-		danger: color.danger,
-		focus: color.focus,
-		info: color.info,
-		success: color.success,
-		warning: color.warning,
-	} as const;
-	for (const role of ['info', 'success', 'warning', 'danger', 'focus'] as const) {
-		colors[role] = resolveVerbatimRole(feedback[role], mode, defaults[role]);
-	}
 	return colors;
 }
 
@@ -323,75 +318,84 @@ function resolveAdaptedRole(
 	input: ColorInput,
 	mode: ColorMode,
 	adapt: (source: Oklch, mode: ColorMode, raw: string) => Oklch,
-): string {
-	if (typeof input === 'string')
-		return formatOklch(adapt(gamutMapOklch(parseColor(input)), mode, input));
+): Oklch {
+	if (typeof input === 'string') return adapt(gamutMapOklch(parseColor(input)), mode, input);
 	const side = sideOf(input, mode);
-	if (side !== undefined) return side;
+	if (side !== undefined) return gamutMapOklch(parseColor(side));
 	// The other side is present (a partial `{ light }` or `{ dark }`); generate this side from it.
 	const other = sideOf(input, mode === 'light' ? 'dark' : 'light');
 	if (other === undefined) {
 		throw new Error(`Theme "accent": provide a colour for at least one of light or dark.`);
 	}
-	return formatOklch(adapt(gamutMapOklch(parseColor(other)), mode, other));
+	return adapt(gamutMapOklch(parseColor(other)), mode, other);
 }
 
 /** Resolves the neutral role, honouring `neutral` then `neutralStyle` (default `'neutral'`). */
-function resolveNeutral(color: ThemeInput['color'], mode: ColorMode): string {
+function resolveNeutral(color: ThemeInput['color'], mode: ColorMode): Oklch {
 	if (color.neutral !== undefined) {
 		const side = sideOf(color.neutral, mode);
-		if (side !== undefined) return side;
+		if (side !== undefined) return gamutMapOklch(parseColor(side));
 		if (typeof color.neutral === 'string') {
-			return adaptNeutralString(gamutMapOklch(parseColor(color.neutral)), mode);
+			return adaptNeutral(gamutMapOklch(parseColor(color.neutral)), mode);
 		}
 		const other = sideOf(color.neutral, mode === 'light' ? 'dark' : 'light');
-		if (other !== undefined) return adaptNeutralString(gamutMapOklch(parseColor(other)), mode);
+		if (other !== undefined) return adaptNeutral(gamutMapOklch(parseColor(other)), mode);
 	}
 	const style = NEUTRAL_STYLE[color.neutralStyle ?? 'neutral'];
-	return formatOklch(
-		gamutMapOklch({
-			l: NEUTRAL_LIGHTNESS[mode],
-			c: style.chroma,
-			h: style.hue,
-		}),
-	);
+	return gamutMapOklch({
+		l: NEUTRAL_LIGHTNESS[mode],
+		c: style.chroma,
+		h: style.hue,
+	});
 }
 
 /** Adapts a single neutral source to the mode canvas lightness, preserving hue and chroma. */
-function adaptNeutralString(source: Oklch, mode: ColorMode): string {
-	return formatOklch(
-		gamutMapOklch({
-			l: NEUTRAL_LIGHTNESS[mode],
-			c: source.c,
-			h: source.h,
-		}),
-	);
+function adaptNeutral(source: Oklch, mode: ColorMode): Oklch {
+	return gamutMapOklch({
+		l: NEUTRAL_LIGHTNESS[mode],
+		c: source.c,
+		h: source.h,
+	});
 }
 
 /**
  * Resolves an optional canvas-anchor role (currently `background`) for one mode: an explicit side
  * wins, a single string or the opposite side is adapted to the mode canvas lightness (mirroring
- * `adaptNeutralString`), and an entirely omitted input falls back to `fallback` verbatim — the
+ * `adaptNeutral`), and an entirely omitted input falls back to `fallback` verbatim — the
  * resolved neutral canvas anchor, not a second independent adaptation.
  */
 function resolveOptionalModeColour(
 	input: ColorInput | undefined,
 	mode: ColorMode,
-	fallback: string,
-): string {
+	fallback: Oklch,
+): Oklch {
 	if (input === undefined) return fallback;
 	const side = sideOf(input, mode);
-	if (side !== undefined) return side;
+	if (side !== undefined) return gamutMapOklch(parseColor(side));
 	if (typeof input === 'string') {
-		return adaptNeutralString(gamutMapOklch(parseColor(input)), mode);
+		return adaptNeutral(gamutMapOklch(parseColor(input)), mode);
 	}
 	const other = sideOf(input, mode === 'light' ? 'dark' : 'light');
-	if (other !== undefined) return adaptNeutralString(gamutMapOklch(parseColor(other)), mode);
+	if (other !== undefined) return adaptNeutral(gamutMapOklch(parseColor(other)), mode);
 	return fallback;
 }
 
 /**
- * Resolves a feedback/focus role used verbatim. A single string is used for both modes; an explicit
+ * Resolves a feedback/focus role used as a generator colour. A single string is used for both modes;
+ * an explicit side is used directly; an omitted side or role falls back to the curated mode default.
+ */
+function resolveSourceRole(
+	input: ColorInput | undefined,
+	mode: ColorMode,
+	fallback: string,
+): Oklch {
+	if (input === undefined) return gamutMapOklch(parseColor(fallback));
+	if (typeof input === 'string') return gamutMapOklch(parseColor(input));
+	return gamutMapOklch(parseColor(sideOf(input, mode) ?? fallback));
+}
+
+/**
+ * Resolves a role used verbatim as CSS text. A single string is used for both modes; an explicit
  * side is used directly; an omitted side or role falls back to the curated mode default.
  */
 function resolveVerbatimRole(

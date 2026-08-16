@@ -1,7 +1,10 @@
 /**
  * The typed theme-foundation contract accepted by `buildTheme`, plus the curated defaults Luke UI
- * applies when optional foundation fields are omitted.
+ * applies when optional foundation fields are omitted. Source colours that participate in generation
+ * cross this boundary as {@link Oklch}; CSS-text values such as scrim stay strings.
  */
+
+import type { Oklch } from './color.js';
 
 /**
  * The complete input for one theme. A foundation is the minimal authored surface: Luke UI
@@ -98,12 +101,14 @@ interface ActionControlFinishFoundation {
 }
 
 /**
- * Source colours for one mode. Values accept `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` with
- * lightness as a 0-1 number or a percentage, and no alpha channel.
+ * Source colours for one mode, already resolved into {@link Oklch} for every role that participates
+ * in generation. `defineTheme` applies curated defaults and parses authoring strings once;
+ * `buildTheme` consumes these values as colours, not CSS text. `scrim` is the exception: it is
+ * emitted verbatim and may carry an alpha channel.
  */
 export interface ThemeSourceColors {
 	/** Required. The brand or interaction accent colour. */
-	accent: string;
+	accent: Oklch;
 	/**
 	 * Required. The canvas anchor, resolved per mode from an explicit `background`, an adapted
 	 * opposite-mode `background`, or (when `background` is entirely omitted) a copy of the resolved
@@ -111,38 +116,34 @@ export interface ThemeSourceColors {
 	 * family's ramp and the elevation surfaces (including `color.surface.canvas`) are generated
 	 * against `background`, not `neutral`.
 	 */
-	background: string;
-	/** Source colour for the `danger` role. Defaults to an accessible Luke UI red for the mode. */
-	danger?: string;
-	/**
-	 * Keyboard-focus ring colour, used verbatim after gamut mapping. Defaults to an accessible
-	 * Luke UI blue for the mode.
-	 */
-	focus?: string;
-	/** Source colour for the `info` role. Defaults to an accessible Luke UI blue for the mode. */
-	info?: string;
+	background: Oklch;
+	/** Source colour for the `danger` role. */
+	danger: Oklch;
+	/** Keyboard-focus ring colour, used verbatim after gamut mapping. */
+	focus: Oklch;
+	/** Source colour for the `info` role. */
+	info: Oklch;
 	/**
 	 * Required. Anchors the surface, text, and border ramps — the family's hue/chroma character.
 	 * `background` is the actual canvas colour; the two coincide unless `background` is authored
 	 * separately.
 	 */
-	neutral: string;
+	neutral: Oklch;
 	/**
 	 * Modal-backdrop dimming colour, emitted verbatim (may carry an alpha channel). Required
 	 * internally: `defineTheme` always resolves it, from the author's value or a mode-aware default.
 	 */
 	scrim: string;
-	/** Source colour for the `success` role. Defaults to an accessible Luke UI green for the mode. */
-	success?: string;
-	/** Source colour for the `warning` role. Defaults to an accessible Luke UI amber for the mode. */
-	warning?: string;
+	/** Source colour for the `success` role. */
+	success: Oklch;
+	/** Source colour for the `warning` role. */
+	warning: Oklch;
 }
 
 /**
- * The per-mode source colour fields the compiler parses and resolves into OKLCH. `background` is the
- * resolved canvas anchor and `focus` is the authored keyboard-focus ring, both colours the
- * foundation must carry. `scrim` is deliberately absent, because it is emitted verbatim rather than
- * parsed.
+ * The per-mode source colour fields that participate in generation as {@link Oklch}. `background` is
+ * the resolved canvas anchor and `focus` is the authored keyboard-focus ring. `scrim` is
+ * deliberately absent, because it is emitted as CSS text rather than parsed.
  */
 export const SOURCE_COLOR_FIELDS = [
 	'neutral',
@@ -221,7 +222,7 @@ export function deriveNestedRadius<OuterRadius extends string, Gap extends strin
  */
 export const defaultSourceColors: Record<
 	'light' | 'dark',
-	Required<Pick<ThemeSourceColors, 'info' | 'success' | 'warning' | 'danger' | 'focus'>>
+	Record<'info' | 'success' | 'warning' | 'danger' | 'focus', string>
 > = {
 	dark: {
 		danger: 'oklch(0.72 0.16 25)',

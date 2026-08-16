@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
 	extractValue,
 	paperFoundation,
+	resolvedColor,
 	splitBlocks,
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
@@ -15,11 +16,11 @@ describe('buildTheme independent modes', () => {
 		const greenPurpleFoundation: ThemeFoundation = {
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, accent: 'oklch(0.75 0.12 300)' },
+				color: { ...tactileFoundation.dark.color, accent: resolvedColor('oklch(0.75 0.12 300)') },
 			},
 			light: {
 				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, accent: 'oklch(0.5 0.13 150)' },
+				color: { ...tactileFoundation.light.color, accent: resolvedColor('oklch(0.5 0.13 150)') },
 			},
 			name: 'green-purple',
 		};
@@ -59,7 +60,7 @@ describe('buildTheme generation failures', () => {
 			...tactileFoundation,
 			light: {
 				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, warning: 'oklch(0.62 0.19 27)' },
+				color: { ...tactileFoundation.light.color, warning: resolvedColor('oklch(0.62 0.19 27)') },
 			},
 			name: 'bad-warning',
 		});
@@ -88,7 +89,7 @@ describe('buildTheme generation failures', () => {
 					...tactileFoundation,
 					light: {
 						...tactileFoundation.light,
-						color: { ...tactileFoundation.light.color, accent: 'oklch(0.62 0.19 27)' },
+						color: { ...tactileFoundation.light.color, accent: resolvedColor('oklch(0.62 0.19 27)') },
 					},
 					name: 'bad-accent',
 				});

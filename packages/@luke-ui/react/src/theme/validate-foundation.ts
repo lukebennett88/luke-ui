@@ -1,11 +1,10 @@
 /**
  * Checks a `ThemeFoundation` before it enters the colour and stylesheet pipeline: kebab-case naming,
- * parseable source colours, safe-to-emit authored CSS strings, curated font-family choices, and
+ * well-formed source colours, safe-to-emit authored CSS strings, curated font-family choices, and
  * in-range weight and radius numbers. It collects every issue before throwing, so an author fixes
  * the whole foundation at once instead of one error per build.
  */
 
-import { parseColor } from './color.js';
 import type { ThemeFoundation } from './foundation.js';
 import { SOURCE_COLOR_FIELDS, themeFontFamilyStacks } from './foundation.js';
 import { getThemeClassName } from './theme-class-name.js';
@@ -23,6 +22,23 @@ function isUnsafeCssValue(value: unknown): boolean {
 	return typeof value !== 'string' || value.trim() === '' || /[;{}]/.test(value);
 }
 
+/** Whether a value is not an OKLCH colour with finite channels and lightness in 0-1. */
+function isInvalidOklch(value: unknown): boolean {
+	if (typeof value !== 'object' || value === null) return true;
+	const { l, c, h } = value as { c?: unknown; h?: unknown; l?: unknown };
+	return (
+		typeof l !== 'number' ||
+		typeof c !== 'number' ||
+		typeof h !== 'number' ||
+		!Number.isFinite(l) ||
+		!Number.isFinite(c) ||
+		!Number.isFinite(h) ||
+		l < 0 ||
+		l > 1 ||
+		c < 0
+	);
+}
+
 /**
  * Throws one `Error` listing every issue found, one per line. Returns nothing when the foundation
  * is well-formed.
@@ -38,11 +54,8 @@ export function validateFoundation(foundation: ThemeFoundation): void {
 		const modeFoundation = foundation[mode];
 		for (const field of SOURCE_COLOR_FIELDS) {
 			const value = modeFoundation.color[field];
-			if (value === undefined) continue;
-			try {
-				parseColor(value);
-			} catch (error) {
-				issues.push(`${mode}.color.${field}: ${errorMessage(error)}`);
+			if (isInvalidOklch(value)) {
+				issues.push(`${mode}.color.${field}: must be an OKLCH colour with lightness 0-1`);
 			}
 		}
 		if (isUnsafeCssValue(modeFoundation.color.scrim)) {

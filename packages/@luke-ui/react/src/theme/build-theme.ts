@@ -1,5 +1,3 @@
-import type { Oklch } from './color.js';
-import { gamutMapOklch, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeContrastFailure } from './contrast-validation.js';
 import { validateContrast } from './contrast-validation.js';
@@ -13,13 +11,7 @@ import type {
 import type { GeneratedSurfaces } from './elevation.js';
 import { generateSurfaces } from './elevation.js';
 import type { ThemeInheritance } from './extend-theme.js';
-import type {
-	SOURCE_COLOR_FIELDS,
-	ThemeFoundation,
-	ThemeModeFoundation,
-	ThemeSourceColors,
-} from './foundation.js';
-import { defaultSourceColors } from './foundation.js';
+import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamilyWithDiagnostics, ScaleGenerationError } from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
@@ -30,10 +22,10 @@ import { validateFoundation } from './validate-foundation.js';
 /**
  * Compiles a theme foundation into a complete static stylesheet plus its {@link ThemeDiagnostics}.
  *
- * Per mode: resolves the source colours and canvas anchor, generates the six private scale families
- * (neutral / accent / info / success / warning / danger), derives the mode-aware elevation surfaces,
- * applies the one default semantic mapping onto the colour contract, and runs the full WCAG 2.2
- * validation matrix — which stays authoritative for text and on-solid pairs.
+ * Per mode: takes the already-resolved source colours and canvas anchor, generates the six private
+ * scale families (neutral / accent / info / success / warning / danger), derives the mode-aware
+ * elevation surfaces, applies the one default semantic mapping onto the colour contract, and runs
+ * the full WCAG 2.2 validation matrix — which stays authoritative for text and on-solid pairs.
  *
  * Pure and Node-compatible: no DOM and deterministic output. Throws {@link ThemeGenerationError}
  * when a role that must guarantee on-solid contrast cannot reach an accessible solid (an inaccessible
@@ -177,13 +169,13 @@ interface ModeColors {
 }
 
 /**
- * Runs the v2 colour pipeline for one mode: resolve source colours and the canvas anchor, generate
- * the six scale families, derive the elevation surfaces, and apply the semantic map. Rethrows a
- * scale-level {@link ScaleGenerationError} as a {@link ThemeGenerationError} carrying the families it
- * had already resolved.
+ * Runs the v2 colour pipeline for one mode: take the resolved source colours and canvas anchor,
+ * generate the six scale families, derive the elevation surfaces, and apply the semantic map.
+ * Rethrows a scale-level {@link ScaleGenerationError} as a {@link ThemeGenerationError} carrying
+ * the families it had already resolved.
  */
 function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeColors {
-	const source = resolveSourceColors(mode, modeFoundation.color);
+	const source = modeFoundation.color;
 	// The canvas anchor drives every family's ramp and the elevation surfaces alike, so a family's
 	// subtle steps always ramp away from the same background the surfaces sit on.
 	const canvasAnchor = source.background;
@@ -229,22 +221,4 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		surfaces,
 	});
 	return { colorValues, familyDiagnostics, surfaces };
-}
-
-function resolveSourceColors(
-	mode: ColorMode,
-	colors: ThemeSourceColors,
-): Record<(typeof SOURCE_COLOR_FIELDS)[number], Oklch> {
-	const defaults = defaultSourceColors[mode];
-	const resolve = (value: string) => gamutMapOklch(parseColor(value));
-	return {
-		accent: resolve(colors.accent),
-		background: resolve(colors.background),
-		danger: resolve(colors.danger ?? defaults.danger),
-		focus: resolve(colors.focus ?? defaults.focus),
-		info: resolve(colors.info ?? defaults.info),
-		neutral: resolve(colors.neutral),
-		success: resolve(colors.success ?? defaults.success),
-		warning: resolve(colors.warning ?? defaults.warning),
-	};
 }

@@ -10,7 +10,7 @@ import {
 import { buildTheme } from './build-theme.js';
 import { flattenThemeContract, spaceScale, typeStyles } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
-import { defaultFontWeights, defaultRadius, defaultSourceColors } from './foundation.js';
+import { defaultFontWeights, defaultRadius } from './foundation.js';
 
 const pairs = flattenThemeContract();
 const isModePath = (path: string) => {
@@ -198,16 +198,8 @@ describe('buildTheme defaults', () => {
 
 	it('fills omitted optional fields with the documented defaults', () => {
 		const explicitFoundation: ThemeFoundation = {
-			dark: {
-				actionControlFinish: minimalFoundation.dark.actionControlFinish,
-				color: { ...minimalFoundation.dark.color, ...defaultSourceColors.dark },
-				depth: minimalFoundation.dark.depth,
-			},
-			light: {
-				actionControlFinish: minimalFoundation.light.actionControlFinish,
-				color: { ...minimalFoundation.light.color, ...defaultSourceColors.light },
-				depth: minimalFoundation.light.depth,
-			},
+			dark: minimalFoundation.dark,
+			light: minimalFoundation.light,
 			name: 'minimal-check',
 			radius: { ...defaultRadius },
 			typography: { fontFamily: 'inter', fontWeight: { ...defaultFontWeights } },

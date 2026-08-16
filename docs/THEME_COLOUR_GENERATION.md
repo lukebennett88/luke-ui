@@ -8,8 +8,9 @@ solver. Read [STYLING.md](STYLING.md) first for the theme module layout.
 
 Per colour mode, `compileTheme` (in `build-theme.ts`):
 
-1. Resolves the source colours and the canvas anchor (`background`, split from `neutral`'s
-   hue/chroma character — see `define-theme.ts`).
+1. Takes the already-resolved source colours and canvas anchor (`background`, split from `neutral`'s
+   hue/chroma character in `define-theme.ts`). Source colours cross the foundation as OKLCH values;
+   `defineTheme` applies defaults and parses authoring strings once before `buildTheme` runs.
 2. Generates six private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`,
    `danger`) with `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast`
    on-solid colour. Every role publishes the same background, foreground, on-solid, and border

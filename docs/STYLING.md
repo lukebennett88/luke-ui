@@ -56,9 +56,11 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
-  and the curated defaults it applies for omitted materials and scrim.
-- `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into and
-  the curated colour, radius, and typography defaults.
+  and the one resolution of curated defaults (source colours, materials, radius, scrim) into the
+  internal foundation.
+- `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into,
+  with generator source colours as OKLCH and CSS-text values such as scrim as strings, plus the
+  curated colour, radius, and typography defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and the canonical
   semantic role list the generator, the compiler's validation matrix, and the semantic map all read.
