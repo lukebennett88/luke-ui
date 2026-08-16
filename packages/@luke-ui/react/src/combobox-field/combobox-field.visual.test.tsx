@@ -146,17 +146,17 @@ test('interactive states', async () => {
 	await captureVisual(locator, 'combobox-field/hover');
 	await userEvent.unhover(input);
 	await userEvent.hover(clear);
-	await captureVisual(clear, 'combobox-field/clear-hover');
+	await captureVisual(locator, 'combobox-field/clear-hover');
 	await userEvent.unhover(clear);
 	await userEvent.hover(trigger);
-	await captureVisual(trigger, 'combobox-field/trigger-hover');
+	await captureVisual(locator, 'combobox-field/trigger-hover');
 	await userEvent.unhover(trigger);
 	await focusViaKeyboard(input);
 	await captureVisual(locator, 'combobox-field/focus-visible');
 	await userEvent.tab();
 	await captureVisual(locator, 'combobox-field/clear-focus-visible');
 	await userEvent.keyboard('{Space>}');
-	await captureVisual(clear, 'combobox-field/clear-pressed');
+	await captureVisual(locator, 'combobox-field/clear-pressed');
 	await userEvent.keyboard('{/Space}');
 });
 
