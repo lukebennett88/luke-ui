@@ -108,8 +108,8 @@ accessible. The raw `ThemeFoundation` object and `buildTheme` are internal only.
 
 Every colour token is generated from a private 12-step scale per role (neutral, accent, info,
 success, warning, danger) plus a mode-aware elevation surface set, then mapped onto the public
-colour contract. Every role gets the same background, foreground, on-solid, and border slots.
-See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border and accent
+colour contract. Every role gets the same background, foreground, on-solid, and border slots. See
+[THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border and accent
 contrast policies, and what changed when this generator replaced the original per-token solver.
 
 The semantic contract includes `font.caption` through `font.display` type styles. Each style groups

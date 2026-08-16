@@ -120,10 +120,9 @@ generator alone would report as unsatisfiable.
 
 `contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
 search headroom, and the search step. It also declares `SEMANTIC_ROLES`, the one canonical role list
-used by family generation, the semantic map, and the validation matrix.
-Previously, separate role lists allowed a role added only to the map to emit an ungated colour,
-while a role added only to the compiler threw an internal error. One list makes both sides move
-together.
+used by family generation, the semantic map, and the validation matrix. Previously, separate role
+lists allowed a role added only to the map to emit an ungated colour, while a role added only to the
+compiler threw an internal error. One list makes both sides move together.
 
 ## `loadingSkeleton`
 
