@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { transform } from 'sucrase';
 import { playgroundScope } from '../../generated/playground-scope.generated';
+import { isTrustedParentMessage } from '../../lib/playground-handshake';
 import { decodeCodeHash } from '../../lib/playground-hash';
 import type { PlaygroundPreviewMessage } from '../../lib/playground-protocol';
-import { isPlaygroundParentMessage } from '../../lib/playground-protocol';
 import { StoryWrapper } from '../../lib/story-wrapper';
 import { useDocsThemeIdentity } from '../theme-controls';
 
@@ -35,8 +35,7 @@ export default function PreviewRunner() {
 		};
 
 		const onMessage = (event: MessageEvent) => {
-			if (event.origin !== window.location.origin) return;
-			if (!isPlaygroundParentMessage(event.data)) return;
+			if (!isTrustedParentMessage(event, window.location.origin, window.parent)) return;
 			if (event.data.type === 'playground:code') {
 				runCode(event.data.code);
 				return;

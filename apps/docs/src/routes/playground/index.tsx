@@ -17,12 +17,9 @@ import { SiteNav } from '../../components/site-nav.js';
 import { useDocsThemeIdentity } from '../../components/theme-controls';
 import { withBasePath } from '../../lib/base-path.js';
 import rawDefaultCode from '../../lib/playground-default-code.tsx?raw';
+import { createPlaygroundPageSession } from '../../lib/playground-handshake';
 import { decodeCodeHash, encodeCodeHash } from '../../lib/playground-hash';
-import type {
-	PlaygroundAppearanceMessage,
-	PlaygroundCodeMessage,
-} from '../../lib/playground-protocol';
-import { isPlaygroundPreviewMessage } from '../../lib/playground-protocol';
+import type { PlaygroundAppearanceMessage } from '../../lib/playground-protocol';
 
 const PlaygroundEditor = lazy(() => import('../../components/playground/editor'));
 
@@ -42,8 +39,7 @@ function Playground() {
 		if (typeof window === 'undefined') return rawDefaultCode;
 		return decodeCodeHash(window.location.hash) ?? rawDefaultCode;
 	});
-	const { error, markError, markReady, markSuccess, previewReadyRef, showPreviewLoading } =
-		usePreviewStatus();
+	const { error, markError, markReady, markSuccess, showPreviewLoading } = usePreviewStatus();
 	// Owned here (not by EditorSkeleton) so the pill survives the skeleton
 	// remounting between loading phases instead of blinking on each one.
 	const showEditorPill = useSpinDoctor(true, { delay: 800 });
@@ -51,67 +47,45 @@ function Playground() {
 	const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
 	const isDesktop = useIsDesktop();
 	const iframeRef = useRef<HTMLIFrameElement>(null);
+	const sessionRef = useRef(createPlaygroundPageSession());
 	const codeRef = useRef(initialCode);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+	const appearanceRef = useRef<Omit<PlaygroundAppearanceMessage, 'type'> | null>(null);
+	appearanceRef.current = colorMode === null ? null : { colorMode, themeIdentity };
 
-	const postCode = useCallback(
-		(code: string) => {
-			const contentWindow = iframeRef.current?.contentWindow;
-			if (!previewReadyRef.current || !contentWindow) return;
-			const message: PlaygroundCodeMessage = { code, type: 'playground:code' };
-			contentWindow.postMessage(message, window.location.origin);
-		},
-		[previewReadyRef],
-	);
+	const ports = () => ({
+		origin: window.location.origin,
+		previewWindow: iframeRef.current?.contentWindow ?? null,
+	});
+
+	const postCode = useCallback((code: string) => {
+		sessionRef.current.postCode(code, ports());
+	}, []);
 	const postAppearance = useCallback(() => {
-		const contentWindow = iframeRef.current?.contentWindow;
-		if (!contentWindow || colorMode === null) return;
-		const message: PlaygroundAppearanceMessage = {
-			colorMode,
-			themeIdentity,
-			type: 'playground:appearance',
-		};
-		contentWindow.postMessage(message, window.location.origin);
+		if (colorMode === null) return;
+		sessionRef.current.postAppearance({ colorMode, themeIdentity }, ports());
 	}, [colorMode, themeIdentity]);
 
 	useEffect(() => {
+		const session = sessionRef.current;
 		const onMessage = (event: MessageEvent) => {
-			if (event.origin !== window.location.origin) return;
-			if (event.source !== iframeRef.current?.contentWindow) return;
-			if (!isPlaygroundPreviewMessage(event.data)) return;
-			// Any preview message proves the runner is listening, including a
-			// success/error reply to the unguarded initial post below.
-			previewReadyRef.current = true;
-			markReady();
-			if (event.data.type === 'playground:ready') {
-				postAppearance();
-				postCode(codeRef.current);
-				return;
-			}
-			if (event.data.type === 'playground:error') {
-				markError(event.data.message);
-				return;
-			}
-			markSuccess();
+			session.handlePreviewMessage(event, ports(), {
+				appearance: appearanceRef.current,
+				currentCode: codeRef.current,
+				onError: markError,
+				onReady: markReady,
+				onSuccess: markSuccess,
+			});
 		};
 
 		window.addEventListener('message', onMessage);
-		// The iframe may have announced readiness before this listener attached
-		// (fast iframe, slow hydration) — deliver the initial code unguarded to
-		// cover that race; it is dropped harmlessly if the runner isn't up yet.
-		const message: PlaygroundCodeMessage = {
-			code: codeRef.current,
-			type: 'playground:code',
-		};
-		iframeRef.current?.contentWindow?.postMessage(message, window.location.origin);
+		// Cover the race where the iframe announced ready before this listener attached.
+		session.postCode(codeRef.current, ports(), { unguarded: true });
 		return () => {
 			window.removeEventListener('message', onMessage);
 			clearTimeout(debounceRef.current);
 		};
-		// previewReadyRef, postCode, markError, markReady, and markSuccess are all
-		// referentially stable (ref + useCallback/dispatch-based), so this still
-		// only runs once per mount despite listing them.
-	}, [previewReadyRef, postAppearance, postCode, markError, markReady, markSuccess]);
+	}, [markError, markReady, markSuccess]);
 
 	useEffect(() => {
 		postAppearance();
@@ -252,9 +226,6 @@ function previewReducer(state: PreviewState, action: PreviewAction): PreviewStat
 
 function usePreviewStatus() {
 	const [state, dispatch] = useReducer(previewReducer, { status: 'connecting' });
-	// Read synchronously inside `postCode`, which `handleChange` calls outside
-	// React's commit cycle — it can't rely on reducer/render state there.
-	const previewReadyRef = useRef(false);
 	const showPreviewLoading = useSpinDoctor(state.status === 'connecting', {
 		delay: 250,
 		minDuration: 200,
@@ -270,7 +241,6 @@ function usePreviewStatus() {
 		markError,
 		markReady,
 		markSuccess,
-		previewReadyRef,
 		showPreviewLoading,
 	};
 }
