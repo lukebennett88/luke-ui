@@ -8,8 +8,9 @@ solver. Read [STYLING.md](STYLING.md) first for the theme module layout.
 
 Per colour mode, `compileTheme` (in `build-theme.ts`):
 
-1. Resolves the source colours and the canvas anchor (`background`, split from `neutral`'s
-   hue/chroma character — see `define-theme.ts`).
+1. Takes the already-resolved source colours and canvas anchor (`background`, split from `neutral`'s
+   hue/chroma character in `define-theme.ts`). Source colours cross the foundation as OKLCH values;
+   `defineTheme` applies defaults and parses authoring strings once before `buildTheme` runs.
 2. Generates six private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`,
    `danger`) with `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast`
    on-solid colour. Every role publishes the same background, foreground, on-solid, and border
@@ -116,13 +117,15 @@ copy. That gives two guarantees:
 
 The pre-conditioner is necessary because its adaptation band is deliberately wider than the
 generator's tone-faithful window. It can rescue accents, such as a mid-lightness red, that the
-generator alone would report as unsatisfiable.
+generator alone would report as unsatisfiable. Both searches walk the same lightness candidate grid,
+so a lightness the pre-conditioner accepts is one the solid-anchor search will visit too.
 
 `contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
-search headroom, and the search step. It also declares `SEMANTIC_ROLES`, the one canonical role list
-used by family generation, the semantic map, and the validation matrix. Previously, separate role
-lists allowed a role added only to the map to emit an ungated colour, while a role added only to the
-compiler threw an internal error. One list makes both sides move together.
+search headroom, and the search step. `lightness-candidates.ts` is the one grid those searches walk.
+It also declares `SEMANTIC_ROLES`, the one canonical role list used by family generation, the
+semantic map, and the validation matrix. Previously, separate role lists allowed a role added only
+to the map to emit an ungated colour, while a role added only to the compiler threw an internal
+error. One list makes both sides move together.
 
 ## `loadingSkeleton`
 

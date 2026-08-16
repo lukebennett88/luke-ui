@@ -5,6 +5,8 @@
  * NOT imported by production code.
  */
 
+import type { Oklch } from '../color.js';
+import { gamutMapOklch, parseColor } from '../color.js';
 import { normalizeTheme } from '../define-theme.js';
 import { paperTheme } from '../foundations/paper.js';
 import { tactileTheme } from '../foundations/tactile.js';
@@ -13,6 +15,11 @@ import { tactileTheme } from '../foundations/tactile.js';
 // `buildTheme` pipeline directly, so resolve each input into the foundation `buildTheme` consumes.
 export const tactileFoundation = normalizeTheme(tactileTheme);
 export const paperFoundation = normalizeTheme(paperTheme);
+
+/** Parses an authoring colour string the same way `defineTheme` resolves a source colour. */
+export function resolvedColor(input: string): Oklch {
+	return gamutMapOklch(parseColor(input));
+}
 
 /**
  * Splits the generated stylesheet into its five rule blocks: identity, base light, media-query

@@ -51,17 +51,23 @@ with no class and no JS required. Neither step injects styles at runtime.
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
 - `styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
-- `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
-  `typeStyles` typography keys.
+- `theme/contract.ts`: the semantic token tree, the mode-family declaration, `--luke-*` variable
+  naming, and the source-owned `typeStyles` typography keys.
+- `theme/path-record.ts`: the typed `[path, value]` record constructor value producers use so
+  `Object.fromEntries` cannot hide a missing contract path.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
-  and the curated defaults it applies for omitted materials and scrim.
-- `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into and
-  the curated colour, radius, and typography defaults.
+  and the one resolution of curated defaults (source colours, materials, radius, scrim) into the
+  internal foundation.
+- `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into,
+  with generator source colours as OKLCH and CSS-text values such as scrim as strings, plus the
+  curated colour, radius, and typography defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and the canonical
   semantic role list the generator, the compiler's validation matrix, and the semantic map all read.
+- `theme/lightness-candidates.ts`: the shared lightness grid the accent pre-conditioner,
+  solid-anchor search, and control-border solver walk.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
   constrained step-9 solid-anchor search and `passesOnSolidGate`, the on-solid accessibility gate.
   Every semantic role's solid clears 4.5:1 against on-solid text.

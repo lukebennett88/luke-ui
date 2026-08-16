@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { paperFoundation, tactileFoundation } from './__fixtures__/theme-css.js';
+import { paperFoundation, resolvedColor, tactileFoundation } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeFoundation } from './foundation.js';
@@ -23,7 +23,7 @@ describe('buildTheme contrast failures', () => {
 			...tactileFoundation,
 			light: {
 				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, focus: '#c5d9ff' },
+				color: { ...tactileFoundation.light.color, focus: resolvedColor('#c5d9ff') },
 			},
 			name: 'bad-focus',
 		});
@@ -50,7 +50,7 @@ describe('buildTheme contrast failures', () => {
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, background: 'oklch(0.9 0 0)' },
+				color: { ...tactileFoundation.dark.color, background: resolvedColor('oklch(0.9 0 0)') },
 			},
 			name: 'bad-dark-canvas',
 		});
@@ -71,11 +71,11 @@ describe('buildTheme contrast failures', () => {
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, background: 'oklch(0.9 0 0)' },
+				color: { ...tactileFoundation.dark.color, background: resolvedColor('oklch(0.9 0 0)') },
 			},
 			light: {
 				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, focus: '#c5d9ff' },
+				color: { ...tactileFoundation.light.color, focus: resolvedColor('#c5d9ff') },
 			},
 			name: 'bad-both',
 		});

@@ -31,6 +31,8 @@ interface ValidationResult {
 	failures: Array<ThemeContrastFailure>;
 }
 
+type ColorPath = keyof SemanticColorValues;
+
 /**
  * Runs the full semantic validation matrix over the emitted (rounded) colour values: 92 hard checks
  * and 12 advisory checks per mode. Every pair is recorded as a {@link ContrastCheck}, and the hard
@@ -59,12 +61,12 @@ export function validateContrast(
 ): ValidationResult {
 	const failures: Array<ThemeContrastFailure> = [];
 	const checks: Array<ContrastCheck> = [];
-	const colorAt = (path: string): Oklch => {
+	const colorAt = (path: ColorPath): Oklch => {
 		const value = colorValues[path];
 		if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
 		return parseColor(value);
 	};
-	const check = (foreground: string, background: string, required: number, hard: boolean) => {
+	const check = (foreground: ColorPath, background: ColorPath, required: number, hard: boolean) => {
 		const ratio = contrastRatio(colorAt(foreground), colorAt(background));
 		const passes = ratio >= required;
 		// `hard` is recorded on the check itself, so tooling reads the compiler's own decision rather
@@ -74,28 +76,34 @@ export function validateContrast(
 	};
 
 	// v2 validates only against surfaces consumers can reference (the hidden `resting` rung is gone).
-	const surfacePaths = ['canvas', 'recessed', 'floating', 'overlay'].map(
-		(surface) => `color.surface.${surface}`,
-	);
-	const basePaths = ['color.surface.canvas', 'color.surface.recessed'];
+	const surfacePaths = [
+		'color.surface.canvas',
+		'color.surface.recessed',
+		'color.surface.floating',
+		'color.surface.overlay',
+	] as const satisfies ReadonlyArray<ColorPath>;
+	const basePaths = [
+		'color.surface.canvas',
+		'color.surface.recessed',
+	] as const satisfies ReadonlyArray<ColorPath>;
 
 	// Functional text vs every mapped elevation surface: 8 checks.
-	for (const text of ['color.text.primary', 'color.text.secondary']) {
+	for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
 		for (const surface of surfacePaths) check(text, surface, TEXT_RATIO, true);
 	}
 	// Per role: both foregrounds vs the base surfaces and that role's own subtle ramp (60 checks), and
 	// the on-solid foreground vs its solid ramp (18). The scale generator already guarantees on-solid;
 	// this revalidates it on the emitted, rounded values.
 	for (const role of SEMANTIC_ROLES) {
-		const subtleBackgrounds = ['rest', 'hover', 'pressed'].map(
-			(state) => `color.background.${role}.subtle.${state}`,
-		);
-		for (const state of ['rest', 'hover']) {
+		const subtleBackgrounds = (['rest', 'hover', 'pressed'] as const).map((state) => {
+			return `color.background.${role}.subtle.${state}` as const;
+		});
+		for (const state of ['rest', 'hover'] as const) {
 			for (const background of [...basePaths, ...subtleBackgrounds]) {
 				check(`color.foreground.${role}.${state}`, background, TEXT_RATIO, true);
 			}
 		}
-		for (const state of ['rest', 'hover', 'pressed']) {
+		for (const state of ['rest', 'hover', 'pressed'] as const) {
 			check(
 				`color.foreground.${role}.onSolid`,
 				`color.background.${role}.solid.${state}`,

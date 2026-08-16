@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
-import { defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
+import { defaultDepth, defaultScrim, defineTheme, normalizeTheme } from './define-theme.js';
+import { defaultSourceColors } from './foundation.js';
 import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
 import { generateFamilyWithDiagnostics } from './scale.js';
@@ -115,9 +116,9 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 		const resolved = accents.flatMap((accent) => {
 			return (['light', 'dark'] as const).map((mode) => {
 				const foundation = normalizeTheme({ color: { accent }, name: 'accent-gate' });
-				const source = parseColor(foundation[mode].color.accent);
+				const source = foundation[mode].color.accent;
 				const { diagnostics } = generateFamilyWithDiagnostics({
-					background: parseColor(foundation[mode].color.background),
+					background: foundation[mode].color.background,
 					mode,
 					role: 'accent',
 					source,
@@ -241,8 +242,12 @@ describe('normalizeTheme resolves the source-tier `background` split from `neutr
 			},
 			name: 'background-explicit',
 		});
-		expect(foundation.light.color.background).toBe('oklch(0.99 0.002 210)');
-		expect(foundation.dark.color.background).toBe('oklch(0.18 0.01 210)');
+		expect(foundation.light.color.background).toEqual(
+			gamutMapOklch(parseColor('oklch(0.99 0.002 210)')),
+		);
+		expect(foundation.dark.color.background).toEqual(
+			gamutMapOklch(parseColor('oklch(0.18 0.01 210)')),
+		);
 		// Different from the neutral canvas anchor: the split actually took effect.
 		expect(foundation.light.color.background).not.toBe(foundation.light.color.neutral);
 		expect(foundation.dark.color.background).not.toBe(foundation.dark.color.neutral);
@@ -258,10 +263,12 @@ describe('normalizeTheme resolves the source-tier `background` split from `neutr
 			name: 'background-single-mode',
 		});
 		// Light keeps the authored value verbatim.
-		expect(foundation.light.color.background).toBe('oklch(0.4 0.05 30)');
+		expect(foundation.light.color.background).toEqual(
+			gamutMapOklch(parseColor('oklch(0.4 0.05 30)')),
+		);
 		// Dark is adapted from light: same hue and chroma, but the dark canvas lightness (~0.22), not
-		// the light source's lightness (0.4) and not a raw copy of the light string.
-		const adaptedDark = parseColor(foundation.dark.color.background);
+		// the light source's lightness (0.4) and not a raw copy of the light colour.
+		const adaptedDark = foundation.dark.color.background;
 		expect(adaptedDark.h).toBeCloseTo(30, 0);
 		expect(adaptedDark.c).toBeCloseTo(0.05, 2);
 		expect(adaptedDark.l).toBeCloseTo(0.22, 2);
@@ -275,12 +282,39 @@ describe('normalizeTheme resolves the source-tier `background` split from `neutr
 			color: { accent: '#3b82f6', background: 'oklch(0.5 0.03 140)' },
 			name: 'background-single-value',
 		});
-		const light = parseColor(foundation.light.color.background);
-		const dark = parseColor(foundation.dark.color.background);
+		const light = foundation.light.color.background;
+		const dark = foundation.dark.color.background;
 		expect(light.h).toBeCloseTo(140, 0);
 		expect(dark.h).toBeCloseTo(140, 0);
 		expect(light.l).toBeCloseTo(0.985, 2);
 		expect(dark.l).toBeCloseTo(0.22, 2);
+	});
+});
+
+describe('normalizeTheme resolves source colours once onto the foundation', () => {
+	it('carries generator colours as Oklch and scrim as CSS text, with defaults applied', () => {
+		const foundation = normalizeTheme({
+			color: { accent: '#3b82f6' },
+			name: 'resolved-once',
+		});
+		const light = foundation.light.color;
+		expect(Number.isFinite(light.accent.l)).toBe(true);
+		expect(Number.isFinite(light.accent.c)).toBe(true);
+		expect(Number.isFinite(light.accent.h)).toBe(true);
+		expect(light.info).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.info)));
+		expect(light.success).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.success)));
+		expect(light.warning).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.warning)));
+		expect(light.danger).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.danger)));
+		expect(light.focus).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.focus)));
+		expect(light.scrim).toBe(defaultScrim.light);
+		expect(typeof light.scrim).toBe('string');
+	});
+
+	it('keeps the adapted accent hue without a format-parse round trip', () => {
+		const source = gamutMapOklch(parseColor('#3b82f6'));
+		const foundation = normalizeTheme({ color: { accent: '#3b82f6' }, name: 'precision' });
+		expect(foundation.light.color.accent.h).toBe(source.h);
+		expect(foundation.dark.color.accent.h).toBe(source.h);
 	});
 });
 

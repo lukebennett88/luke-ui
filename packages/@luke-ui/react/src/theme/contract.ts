@@ -279,11 +279,78 @@ export const themeContractTree = {
 };
 
 /**
+ * Top-level contract families that vary by colour mode. Identity families are the rest of
+ * {@link themeContractTree}. This one list drives the mode-family type, {@link ModePath},
+ * {@link IdentityPath}, and stylesheet partitioning.
+ */
+export const modeFamilies = [
+	'actionControlFinish',
+	'color',
+	'depth',
+] as const satisfies ReadonlyArray<keyof typeof themeContractTree>;
+
+/** A top-level contract family that varies by colour mode. */
+type ModeFamily = (typeof modeFamilies)[number];
+
+/** A top-level contract family that belongs to the theme identity, not a colour mode. */
+type IdentityFamily = Exclude<keyof typeof themeContractTree, ModeFamily>;
+
+type JoinPath<Prefix extends string, Key extends string> = Prefix extends ''
+	? Key
+	: `${Prefix}.${Key}`;
+
+type ContractPaths<T, Prefix extends string = ''> = {
+	[K in keyof T & string]: T[K] extends null
+		? JoinPath<Prefix, K>
+		: ContractPaths<T[K], JoinPath<Prefix, K>>;
+}[keyof T & string];
+
+/** Dotted path of a mode-owned contract leaf, for example `'color.text.primary'`. */
+export type ModePath = {
+	[Family in ModeFamily]: ContractPaths<(typeof themeContractTree)[Family], Family>;
+}[ModeFamily];
+
+/** Dotted path of an identity-owned contract leaf, for example `'radius.control'`. */
+export type IdentityPath = {
+	[Family in IdentityFamily]: ContractPaths<(typeof themeContractTree)[Family], Family>;
+}[IdentityFamily];
+
+/** Dotted path of any contract leaf. */
+export type ContractPath = IdentityPath | ModePath;
+
+const modeFamilySet: ReadonlySet<string> = new Set(modeFamilies);
+
+function isModeFamily(family: string): family is ModeFamily {
+	return modeFamilySet.has(family);
+}
+
+function familyOf(path: string): string {
+	const separator = path.indexOf('.');
+	return separator === -1 ? path : path.slice(0, separator);
+}
+
+/**
+ * Splits flattened contract pairs into identity and mode groups using {@link modeFamilies}.
+ */
+export function partitionContractPairs(pairs: ReadonlyArray<readonly [string, string]>): {
+	identityPairs: Array<[IdentityPath, string]>;
+	modePairs: Array<[ModePath, string]>;
+} {
+	const identityPairs: Array<[IdentityPath, string]> = [];
+	const modePairs: Array<[ModePath, string]> = [];
+	for (const [path, varName] of pairs) {
+		if (isModeFamily(familyOf(path))) modePairs.push([path as ModePath, varName]);
+		else identityPairs.push([path as IdentityPath, varName]);
+	}
+	return { identityPairs, modePairs };
+}
+
+/**
  * Flattens the semantic token tree into `[path, varName]` pairs, in tree order, for example
  * `['color.background.danger.solid.hover', '--luke-color-background-danger-solid-hover']`.
  */
-export function flattenThemeContract(): Array<[path: string, varName: string]> {
-	const pairs: Array<[string, string]> = [];
+export function flattenThemeContract(): Array<[path: ContractPath, varName: string]> {
+	const pairs: Array<[ContractPath, string]> = [];
 	visitContractNode(themeContractTree, [], pairs);
 	return pairs;
 }
@@ -299,12 +366,12 @@ function kebabCaseSegment(segment: string): string {
 function visitContractNode(
 	node: Record<string, unknown>,
 	segments: Array<string>,
-	pairs: Array<[string, string]>,
+	pairs: Array<[ContractPath, string]>,
 ): void {
 	for (const [key, value] of Object.entries(node)) {
 		const path = [...segments, key];
 		if (value === null) {
-			pairs.push([path.join('.'), themeVarName(path)]);
+			pairs.push([path.join('.') as ContractPath, themeVarName(path)]);
 			continue;
 		}
 		if (!isContractNode(value)) {
