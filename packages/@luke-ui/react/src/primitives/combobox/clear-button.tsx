@@ -31,6 +31,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 		return null;
 	}
 
+	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
 		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacButton

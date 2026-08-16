@@ -24,6 +24,7 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 	const { size: sizeProp, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
 
+	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
 		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacButton
