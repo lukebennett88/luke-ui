@@ -2,49 +2,20 @@
  * Generates src/generated/playground-scope.generated.ts — the module map the
  * playground preview uses to resolve imports in user code at runtime.
  *
- * Reads the `exports` map of @luke-ui/react so new component subpaths are
- * picked up automatically. Runs via the `generate:playground` script (wired
- * into `docs#generate` in turbo.json), so dev and build always regenerate it.
+ * Reads the specifier list from `playground-runtime-specifiers.ts` so new
+ * `@luke-ui/react` subpaths and the shared third-party allowlist stay in one
+ * place. Runs via the `generate:playground` script (wired into `docs#generate`
+ * in turbo.json), so dev and build always regenerate it.
  */
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { z } from 'zod';
+import { playgroundRuntimeSpecifierList } from '../src/lib/playground-runtime-specifiers.js';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const reactPackageJsonPath = resolve(scriptDir, '../../../packages/@luke-ui/react/package.json');
 const outputPath = resolve(scriptDir, '../src/generated/playground-scope.generated.ts');
 
-const packageJsonSchema = z.object({
-	exports: z.record(z.string(), z.string()),
-});
-
-const reactPackageJson = packageJsonSchema.parse(
-	JSON.parse(readFileSync(reactPackageJsonPath, 'utf8')),
-);
-
-const lukeUiSpecifiers = Object.keys(reactPackageJson.exports)
-	.flatMap((key) => {
-		const target = reactPackageJson.exports[key];
-		if (key === './package.json' || target === undefined || !target.endsWith('.js')) return [];
-		return [`@luke-ui/react/${key.slice(2)}`];
-	})
-	.sort();
-
-const baseSpecifiers = ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'];
-
-// Third-party packages that docs examples import directly (beyond React
-// internals above). Add a package here — and to the types allowlist in
-// generate-playground-types.ts, if its payload cost is reasonable — whenever
-// an example needs to import it in the playground.
-const thirdPartySpecifiers = [
-	'@hookform/resolvers/zod',
-	'@tanstack/react-form',
-	'react-hook-form',
-	'zod',
-];
-
-const specifiers = [...lukeUiSpecifiers, ...baseSpecifiers, ...thirdPartySpecifiers];
+const specifiers = playgroundRuntimeSpecifierList();
 
 const SPECIFIER_TO_IDENTIFIER_RE = /^@|[^a-zA-Z0-9]+/g;
 
