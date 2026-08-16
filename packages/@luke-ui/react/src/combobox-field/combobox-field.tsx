@@ -31,7 +31,7 @@ import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { comboboxRecipe } from '../primitives/combobox/styles.css.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import { Field } from '../primitives/field/field.js';
-import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
+import { FIELD_CONTROL_ICON_SIZE } from '../sizing/control-size.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/utils.js';
@@ -249,7 +249,7 @@ function MobileComboboxContent<T extends object>({
 	return (
 		<>
 			<ComboboxInputGroup>
-				<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
+				<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 					<RacButton
 						aria-expanded={state.isOpen}
 						aria-haspopup="dialog"
@@ -307,7 +307,7 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 	if (state == null || state.inputValue === '') return null;
 
 	return (
-		<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
+		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacButton
 				aria-label="Clear search"
 				className={comboboxRecipe({ size }).clearButton()}

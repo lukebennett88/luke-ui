@@ -10,7 +10,8 @@ import {
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
-import { COMBOBOX_CHECK_ICON_SIZE, COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
+import { COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
+import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
@@ -45,7 +46,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 				// RAC renders item content outside this component's original tree.
 				// Put the provider inside the item render function so the content receives the context.
 				return (
-					<IconSizeProvider size={COMBOBOX_ICON_SIZE[size]}>
+					<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 						{children}
 						{isSelected ? (
 							<Icon

@@ -171,7 +171,7 @@ const inputGroupConfig = {
 		// The invalid icon `InputGroup` renders itself. Only colour and spacing here:
 		// the element is a real `Icon`, so `icon.css.ts` already owns its box dimensions
 		// and `flexShrink`, and its per-size step comes from the `IconSizeProvider`
-		// `InputGroup` wraps the group in (`INPUT_GROUP_ICON_SIZE`) rather than from a
+		// `InputGroup` wraps the group in (`FIELD_CONTROL_ICON_SIZE`) rather than from a
 		// variant here. `color`, not `background-color`, because an `Icon` fills with
 		// `currentColor`. `CanvasText` (not the gated danger token) keeps it a solid,
 		// high-contrast shape when author colours are ignored.
