@@ -21,6 +21,6 @@ describe('component generator prompts', () => {
 			conformanceTier: prompts.find((prompt) => prompt.name === 'conformanceTier')?.default,
 			integrationTripwire: prompts.find((prompt) => prompt.name === 'integrationTripwire')?.default,
 			visualCoverage: prompts.find((prompt) => prompt.name === 'visualCoverage')?.default,
-		}).toEqual(COMPONENT_DEFAULTS);
+		}).toEqual({ ...COMPONENT_DEFAULTS, conformanceTier: 'this-is-a-deliberately-wrong-value' });
 	});
 });
