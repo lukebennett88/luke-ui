@@ -13,6 +13,7 @@
 	"dependencies": {},
 	"devDependencies": {
 		"@types/node": "catalog:",
+		"oxc-parser": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"vite-plus": "catalog:",

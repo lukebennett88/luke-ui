@@ -170,6 +170,21 @@ describe('createComponent', () => {
 			createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' }),
 		).rejects.toBeInstanceOf(z.ZodError);
 	});
+
+	it('writes docs navigation JSON that is already formatter-clean', async () => {
+		const root = await createRepositoryFixture();
+
+		await createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' });
+
+		// oxfmt collapses short pages arrays onto one line; raw JSON.stringify leaves them
+		// multi-line and fails check:format.
+		await expect(
+			readFile(join(root, 'apps/docs/content/docs/components/feedback/meta.json'), 'utf8'),
+		).resolves.toBe('{\n\t"pages": ["status-badge"],\n\t"title": "Feedback"\n}\n');
+		await expect(
+			readFile(join(root, 'apps/docs/content/docs/components/meta.json'), 'utf8'),
+		).resolves.toBe('{\n\t"pages": ["actions", "feedback"],\n\t"title": "Components"\n}\n');
+	});
 });
 
 const modulesRegistryPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';

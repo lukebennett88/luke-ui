@@ -307,7 +307,6 @@ function renderComponentTest(input: {
 		input.integrationTripwire === 'required' ? 'testIntegration' : undefined,
 	].filter((value): value is string => value != null);
 	const imports = [
-		...(input.conformanceTier !== 'none' ? ["import type { ComponentProps } from 'react';"] : []),
 		...(input.integrationTripwire === 'required'
 			? ["import { expect } from 'vite-plus/test';"]
 			: input.conformanceTier === 'none'
@@ -320,7 +319,7 @@ function renderComponentTest(input: {
 		`import { ${input.pascalName} } from './index.js';`,
 	];
 
-	const renderComponent = `render(<${input.pascalName} {...(props}>Content</${input.pascalName}>)`;
+	const renderComponent = `render(<${input.pascalName} {...props}>Content</${input.pascalName}>)`;
 	const contract =
 		input.conformanceTier === 'universal'
 			? `testUniversalConformance({

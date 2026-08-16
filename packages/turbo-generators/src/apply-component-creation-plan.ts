@@ -1,8 +1,74 @@
 import { dirname, join } from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import type * as ViteFmt from 'vite-plus/fmt';
 import * as z from 'zod';
 import type { ComponentCreationPlan, PlanFile } from './component-creation-plan.js';
 import { createComponentWork, parseComponentAnswers } from './component-creation-plan.js';
+
+// `config.ts` (this module's ultimate importer) is loaded by `@turbo/gen` through an esbuild
+// bundle (bundle:true, format:'cjs'). Two things break once that bundler actually traces into
+// real module content:
+//   - oxfmt's `format()` implementation contains its own dynamic `import()` calls for optional,
+//     uninstalled prettier plugins (Astro, Marko, Twig, ...). A statically analyzable
+//     `import('vite-plus/fmt')` lets esbuild trace into that file and fail the whole bundle
+//     trying to resolve those plugins.
+//   - `vite-plus`'s own published output reads `import.meta.url` at module scope. esbuild's
+//     node+cjs target replaces `import.meta` with `{}` instead of shimming it, so a statically
+//     bundled `import rootConfig from '../../../vite.config.js'` (which pulls in `defineConfig`
+//     from `vite-plus`) throws `createRequire(undefined)` at load time.
+// Routing both specifiers through a variable/expression (rather than a literal esbuild can trace)
+// hides them from static analysis, so they're left as real dynamic imports resolved by Node at
+// runtime, where both work correctly (genuine ESM, real `import.meta`, real installed packages).
+async function loadFormat(): Promise<typeof ViteFmt> {
+	const specifier = 'vite-plus/fmt';
+	return import(specifier);
+}
+
+async function findRepoRoot(startDir: string): Promise<string> {
+	async function walk(dir: string): Promise<string> {
+		try {
+			await access(join(dir, 'pnpm-workspace.yaml'));
+			return dir;
+		} catch {
+			const parent = dirname(dir);
+			if (parent === dir) {
+				throw new Error(
+					`Could not locate repository root (no pnpm-workspace.yaml) above ${startDir}`,
+				);
+			}
+			return walk(parent);
+		}
+	}
+	return walk(startDir);
+}
+
+let cachedFmtConfig: Promise<ViteFmt.FormatConfig | undefined> | undefined;
+
+async function loadRootFmtConfig(): Promise<ViteFmt.FormatConfig | undefined> {
+	cachedFmtConfig ??= (async () => {
+		const repoRoot = await findRepoRoot(process.cwd());
+		const configPath = join(repoRoot, 'vite.config.ts');
+		const mod: { default?: { fmt?: ViteFmt.FormatConfig } } = await import(
+			pathToFileURL(configPath).href
+		);
+		return mod.default?.fmt;
+	})();
+	return cachedFmtConfig;
+}
+
+// Runs generated content through the repo's real formatter before it hits disk, so a freshly
+// scaffolded file never needs a hand edit to satisfy `check:format`/`check:format-root`.
+async function formatGeneratedContent(target: string, raw: string): Promise<string> {
+	const [{ format }, fmtConfig] = await Promise.all([loadFormat(), loadRootFmtConfig()]);
+	const result = await format(target, raw, fmtConfig);
+	if (result.errors.length > 0) {
+		throw new Error(
+			`Failed to format ${target}: ${result.errors.map((error) => error.message).join(', ')}`,
+		);
+	}
+	return result.code;
+}
 
 const docsMetaSchema = z.record(z.string(), z.unknown());
 type ComponentCreationWork = ReturnType<typeof createComponentWork>;
@@ -29,7 +95,8 @@ async function applyComponentCreationPlan(
 async function writePlanFile(root: string, file: PlanFile): Promise<void> {
 	const target = join(root, file.path);
 	await mkdir(dirname(target), { recursive: true });
-	await writeFile(target, file.contents, 'utf8');
+	const formatted = await formatGeneratedContent(target, file.contents);
+	await writeFile(target, formatted, 'utf8');
 }
 
 async function applyJsonEdit(
@@ -43,7 +110,9 @@ async function applyJsonEdit(
 	const currentPages = Array.isArray(current) ? current.filter(isString) : [];
 	const pages = [...new Set([...currentPages, edit.value])].sort((a, b) => a.localeCompare(b));
 	data[edit.key] = pages;
-	await writeFile(target, `${JSON.stringify(data, null, '\t')}\n`, 'utf8');
+	const raw = `${JSON.stringify(data, null, '\t')}\n`;
+	const formatted = await formatGeneratedContent(target, raw);
+	await writeFile(target, formatted, 'utf8');
 }
 
 async function readJson(path: string, title: string): Promise<Record<string, unknown>> {
