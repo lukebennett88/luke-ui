@@ -65,6 +65,14 @@ export interface ScaleFamily {
 export interface GenerateFamilyRequest {
 	/** The resolved canvas anchor. Muted rungs ramp away from it toward the solid. */
 	background: Oklch;
+	/**
+	 * The neutral family's `highContrast` — the same colour `interaction-color.ts` calls
+	 * `INTERACTION_SOURCE` and always mixes toward at runtime, regardless of role. Only used for the
+	 * `resolveForeground` pressed-subtle contrast check, so that check matches what actually renders
+	 * instead of the role's own tinted `highContrast`. Omit when generating the neutral family itself,
+	 * whose own `highContrast` *is* that value.
+	 */
+	interactionSource?: Oklch;
 	/** The colour mode the family is generated for. */
 	mode: ColorMode;
 	/** The semantic role. Neutral uses a curated solid band; other roles keep the source tone. */
@@ -189,7 +197,7 @@ export function onSolidGateRatio(request: OnSolidGateRequest): number {
 		c: source.c,
 		h: source.h,
 	});
-	return chooseOnSolid(source.h, [solid]).minRatio;
+	return chooseOnSolid(source.h, solid).minRatio;
 }
 
 /**
@@ -256,7 +264,7 @@ function buildFamily(request: GenerateFamilyRequest): {
 
 	const anchor = resolveSolidAnchor(request);
 	const solid = rung('solid', anchor.lightness, source.c);
-	const onSolid = chooseOnSolid(hue, [solid]);
+	const onSolid = chooseOnSolid(hue, solid);
 
 	const text = TEXT_LIGHTNESS[mode];
 	const highContrast = rung(
@@ -264,8 +272,11 @@ function buildFamily(request: GenerateFamilyRequest): {
 		text.high,
 		Math.min(source.c * TEXT_HIGH_CHROMA_FRACTION, TEXT_HIGH_CHROMA_CAP),
 	);
+	// `interaction-color.ts` always mixes toward the global neutral interaction source at runtime,
+	// never a role's own `highContrast`. When the caller has not threaded that source (generating the
+	// neutral family itself), this role's own `highContrast` *is* that value.
 	const foreground = resolveForeground({
-		highContrast,
+		interactionSource: request.interactionSource ?? highContrast,
 		mode,
 		rung,
 		source,
@@ -311,18 +322,20 @@ function buildFamily(request: GenerateFamilyRequest): {
 
 /**
  * Resolves the ordinary semantic foreground. Prefers the curated text lightness, then walks toward
- * the high-contrast lightness until the colour still clears AA against the derived pressed colour
- * of the subtle fill. Pressed is the stronger mix, so a pair that passes there also passes at rest
- * and on hover.
+ * the high-contrast lightness until the colour still clears AA against the derived pressed colour of
+ * the subtle fill. Pressed is the stronger mix, so a pair that passes there also passes at rest and
+ * on hover. The pressed-subtle colour mixes toward `interactionSource` — the global neutral
+ * `interaction-color.ts` always mixes toward at runtime — rather than this role's own
+ * `highContrast`, so the guarantee matches what actually renders.
  */
 function resolveForeground({
-	highContrast,
+	interactionSource,
 	mode,
 	rung,
 	source,
 	subtle,
 }: {
-	highContrast: Oklch;
+	interactionSource: Oklch;
 	mode: ColorMode;
 	rung: (name: FamilyRung, lightness: number, requestedChroma: number) => Oklch;
 	source: Oklch;
@@ -331,7 +344,7 @@ function resolveForeground({
 	const preferred = TEXT_LIGHTNESS[mode].low;
 	const toward = TEXT_LIGHTNESS[mode].high;
 	const chroma = Math.min(source.c * TEXT_LOW_CHROMA_FRACTION, TEXT_LOW_CHROMA_CAP);
-	const pressedSubtle = mixInteractionColor(subtle, highContrast, 'pressed');
+	const pressedSubtle = mixInteractionColor(subtle, interactionSource, 'pressed');
 	const colorAt = (lightness: number) => rung('foreground', lightness, chroma);
 	const ratioAt = (lightness: number) => contrastRatio(colorAt(lightness), pressedSubtle);
 
@@ -421,7 +434,7 @@ function resolveSolidAnchor(request: GenerateFamilyRequest): ResolvedAnchor {
 	return { adapted: true, band, lightness: best, target };
 }
 
-function chooseOnSolid(hue: number, solids: Array<Oklch>): { color: Oklch; minRatio: number } {
+function chooseOnSolid(hue: number, solid: Oklch): { color: Oklch; minRatio: number } {
 	const nearWhite = gamutMapOklch({
 		l: ON_SOLID_WHITE_LIGHTNESS,
 		c: 0,
@@ -432,17 +445,13 @@ function chooseOnSolid(hue: number, solids: Array<Oklch>): { color: Oklch; minRa
 		c: ON_SOLID_BLACK_CHROMA,
 		h: hue,
 	});
-	const whiteMinimum = minimumRatio(nearWhite, solids);
-	const blackMinimum = minimumRatio(nearBlack, solids);
-	if (whiteMinimum >= ON_SOLID_TARGET) return { color: nearWhite, minRatio: whiteMinimum };
-	if (blackMinimum >= ON_SOLID_TARGET) return { color: nearBlack, minRatio: blackMinimum };
-	return whiteMinimum >= blackMinimum
-		? { color: nearWhite, minRatio: whiteMinimum }
-		: { color: nearBlack, minRatio: blackMinimum };
-}
-
-function minimumRatio(foreground: Oklch, backgrounds: Array<Oklch>): number {
-	return Math.min(...backgrounds.map((background) => contrastRatio(foreground, background)));
+	const whiteRatio = contrastRatio(nearWhite, solid);
+	const blackRatio = contrastRatio(nearBlack, solid);
+	if (whiteRatio >= ON_SOLID_TARGET) return { color: nearWhite, minRatio: whiteRatio };
+	if (blackRatio >= ON_SOLID_TARGET) return { color: nearBlack, minRatio: blackRatio };
+	return whiteRatio >= blackRatio
+		? { color: nearWhite, minRatio: whiteRatio }
+		: { color: nearBlack, minRatio: blackRatio };
 }
 
 function oklabAxes(color: Oklch): [number, number] {

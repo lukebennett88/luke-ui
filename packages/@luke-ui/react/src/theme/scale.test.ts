@@ -209,6 +209,33 @@ describe('high-contrast text', () => {
 			expect(extension).toBeGreaterThan(0);
 		}
 	});
+
+	it('checks pressed-subtle contrast against a threaded interaction source, not the role own highContrast', () => {
+		// `interaction-color.ts` always mixes toward the global neutral interaction source at
+		// runtime, never a role's own tinted `highContrast`. A caller (the theme compiler) threads
+		// the neutral family's `highContrast` in; this proves the pressed-subtle guarantee is then
+		// checked against that threaded value instead of accent's own.
+		for (const mode of MODES) {
+			const neutralHighContrast = family('oklch(0.99 0.003 250)', mode, 'neutral').highContrast;
+			const scale = generateFamily({
+				background: BACKGROUND[mode],
+				interactionSource: neutralHighContrast,
+				mode,
+				role: 'accent',
+				source: parseColor('#0090ff'),
+			});
+			// The role's own highContrast is unaffected and still generated.
+			expect(scale.highContrast).not.toEqual(neutralHighContrast);
+			const pressedSubtleOnThreadedSource = mixInteractionColor(
+				scale.subtle,
+				neutralHighContrast,
+				'pressed',
+			);
+			expect(contrastRatio(scale.foreground, pressedSubtleOnThreadedSource)).toBeGreaterThanOrEqual(
+				TEXT_RATIO,
+			);
+		}
+	});
 });
 
 describe('solid-anchor search', () => {

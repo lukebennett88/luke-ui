@@ -55,6 +55,29 @@ export function mixOklab(a: Oklch, b: Oklch, amountOfB: number): Oklch {
 }
 
 /**
+ * Composites a translucent `source` at `amount` (0 to 1, the fraction painted) over an opaque
+ * `backdrop`, with normal source-over alpha blending done on gamma-encoded sRGB channels. This
+ * models what the browser actually paints for `color-mix(in oklab, source <amount*100>%,
+ * transparent)` layered on a surface: browsers composite CSS colours with simple alpha
+ * compositing directly on their gamma-encoded channel values (verified empirically against Canvas
+ * 2D `source-over`, which follows the same compositing model as CSS background painting), not in
+ * linear light. This is real alpha compositing either way — the point of contrast with `mixOklab`
+ * is that it is not an OKLab interpolation between two opaque colours — but the blend itself has to
+ * happen on the same gamma-encoded values the browser blends, not their linearised equivalents.
+ */
+export function compositeSourceOver(source: Oklch, backdrop: Oklch, amount: number): Oklch {
+	const alpha = clampUnit(amount);
+	const sourceSrgb = oklchToLinearSrgb(gamutMapOklch(source)).map(linearToSrgb) as SrgbTriple;
+	const backdropSrgb = oklchToLinearSrgb(gamutMapOklch(backdrop)).map(linearToSrgb) as SrgbTriple;
+	const blended: SrgbTriple = [
+		sourceSrgb[0] * alpha + backdropSrgb[0] * (1 - alpha),
+		sourceSrgb[1] * alpha + backdropSrgb[1] * (1 - alpha),
+		sourceSrgb[2] * alpha + backdropSrgb[2] * (1 - alpha),
+	];
+	return linearSrgbToOklch(blended.map(srgbToLinear) as SrgbTriple);
+}
+
+/**
  * WCAG 2.2 contrast ratio between two colours, computed on their sRGB-gamut-mapped equivalents.
  */
 export function contrastRatio(a: Oklch, b: Oklch): number {
@@ -169,6 +192,11 @@ function trimNumber(value: number, digits: number): string {
 
 function srgbToLinear(channel: number): number {
 	return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+}
+
+/** Gamma-encodes a linear sRGB channel back to the 0-1 sRGB value CSS colours are specified in. */
+function linearToSrgb(channel: number): number {
+	return channel <= 0.0031308 ? channel * 12.92 : 1.055 * channel ** (1 / 2.4) - 0.055;
 }
 
 function isInSrgbGamut(color: Oklch): boolean {

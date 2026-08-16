@@ -23,8 +23,9 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    backdrop through. Neutral `highContrast` becomes `text.primary` and is the interaction source
    `interactionColor` reads.
 5. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
-   throws `ThemeContrastError` on a hard-gate miss. Interaction checks share `mixInteractionColor`
-   with the recipes.
+   throws `ThemeContrastError` on a hard-gate miss. Interaction checks measure the same paint
+   operation the recipes emit: `mixInteractionColor`'s OKLab mix for an opaque base, or
+   `compositeSourceOver`'s source-over alpha compositing for a transparent base.
 
 `compileTheme` returns `{ css, diagnostics }`; `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling. The
@@ -143,15 +144,23 @@ Tokens describe semantic colours. Transient hover and pressed colours are derive
 - pressed strength: 10%
 - interpolation: OKLab (`color-mix(in oklab, ...)`)
 
-An opaque base mixes that source into the resting colour. A transparent base becomes a translucent
-interaction colour of the same source and strength. Recipes change `background-color`, `color`, or
-`border-color` so existing colour transitions work. The public contract has no hover or pressed
-colour leaves.
+An opaque base mixes that source into the resting colour: `color-mix(in oklab, <base>, <source>)` is
+a direct OKLab interpolation between two opaque colours. A transparent base instead becomes a
+translucent interaction colour of the same source and strength —
+`color-mix(in oklab, <source> N%, transparent)` resolves to the source's own channels at
+`alpha = N / 100`, per the CSS Color 4 mixing rule for a colour mixed with `transparent`, and the
+browser paints that translucent layer over whatever is beneath it with ordinary source-over alpha
+compositing. That is a different operation from the opaque case: real alpha blending of two colours'
+channels, not an OKLab interpolation. Recipes change `background-color`, `color`, or `border-color`
+so existing colour transitions work. The public contract has no hover or pressed colour leaves.
 
-`validateContrast` calls `mixInteractionColor`, the same OKLab mix the recipes emit, then measures
-the matching foregrounds against that result. The pairs are ghost Button foregrounds on canvas and
-recessed, solid and subtle Button tones, selected Combobox options on accent subtle, and unselected
-Combobox options on floating.
+`validateContrast` matches each pair to the paint operation its recipe actually renders. Opaque-base
+pairs — solid and subtle Button tones, and selected Combobox options on accent subtle — measure
+`mixInteractionColor`, the same OKLab mix the recipes emit. Transparent-base pairs — ghost Button
+foregrounds on canvas and recessed, and unselected Combobox options on floating — measure
+`compositeSourceOver`, real source-over alpha compositing in linear sRGB (the same space
+`relativeLuminance` gamut-maps into for WCAG contrast), matching what those controls actually paint
+rather than an OKLab interpolation between the surface and the source.
 
 The authored modal backdrop stays separate as `color.overlay.backdrop`. Selected, checked, invalid,
 danger, focus, and disabled remain persistent semantic states. Interaction feedback is derived from

@@ -1,17 +1,12 @@
 import { describe, expect, it } from 'vite-plus/test';
-import {
-	extractValue,
-	paperFoundation,
-	splitBlocks,
-	tactileFoundation,
-} from './__fixtures__/theme-css.js';
+import { paperFoundation, tactileFoundation } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
-import { contrastRatio, parseColor } from './color.js';
+import { compositeSourceOver, contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { validateContrast } from './contrast-validation.js';
 import type { ThemeFoundation } from './foundation.js';
-import { mixInteractionColor } from './interaction-mix.js';
+import { INTERACTION_STRENGTH, mixInteractionColor } from './interaction-mix.js';
 
 describe('buildTheme contrast failures', () => {
 	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
@@ -27,17 +22,15 @@ describe('buildTheme contrast failures', () => {
 		throw new Error('expected buildTheme to throw ThemeContrastError');
 	}
 
-	function modeColorValues(mode: 'light' | 'dark') {
-		const { baseLight, mediaDark } = splitBlocks(buildTheme(tactileFoundation));
-		const block = mode === 'dark' ? mediaDark : baseLight;
-		return {
-			block,
-			values: Object.fromEntries(
-				flattenThemeContract()
-					.filter(([path]) => path.startsWith('color.'))
-					.map(([path, varName]) => [path, extractValue(block, varName)]),
-			),
-		};
+	// A synthetic value for every colour leaf the validation matrix reads, so an individual pair's
+	// maths can be measured through `validateContrast` directly without depending on a specific
+	// foundation's colours clearing every other gate first.
+	function syntheticColorValues(overrides: Record<string, string>): Record<string, string> {
+		const values: Record<string, string> = {};
+		for (const [path] of flattenThemeContract()) {
+			if (path.startsWith('color.')) values[path] = 'oklch(0.5 0 0)';
+		}
+		return { ...values, ...overrides };
 	}
 
 	it('rejects a low-contrast focus colour, naming mode, pair, and required ratio', () => {
@@ -110,10 +103,16 @@ describe('buildTheme contrast failures', () => {
 		expect(error.message.split('\n').length).toBe(error.failures.length + 1);
 	});
 
-	it('measures interaction colours with the same OKLab mix the recipes emit', () => {
-		const { values } = modeColorValues('light');
-		values['color.surface.canvas'] = 'oklch(1 0 0)';
-		values['color.text.primary'] = 'oklch(0 0 0)';
+	it('measures ghost-foreground interaction colours with real source-over compositing, not an OKLab mix', () => {
+		// Ghost Button/IconButton foregrounds rest on `interactionColor('transparent', state)`: a
+		// translucent layer of the interaction source composited over the resting surface, not an
+		// OKLab interpolation between the surface and the source.
+		const canvas = 'oklch(1 0 0)';
+		const textPrimary = 'oklch(0 0 0)';
+		const values = syntheticColorValues({
+			'color.surface.canvas': canvas,
+			'color.text.primary': textPrimary,
+		});
 
 		const { checks } = validateContrast('light', values);
 		const check = checks.find((candidate) => {
@@ -123,12 +122,36 @@ describe('buildTheme contrast failures', () => {
 			);
 		});
 		expect(check).toBeDefined();
-		const mixed = mixInteractionColor(
-			parseColor('oklch(1 0 0)'),
-			parseColor('oklch(0 0 0)'),
-			'hover',
+		const composited = compositeSourceOver(
+			parseColor(textPrimary),
+			parseColor(canvas),
+			INTERACTION_STRENGTH.hover,
 		);
-		expect(check?.ratio).toBeCloseTo(contrastRatio(parseColor('oklch(0 0 0)'), mixed), 5);
+		expect(check?.ratio).toBeCloseTo(contrastRatio(parseColor(textPrimary), composited), 5);
+	});
+
+	it('measures solid/subtle Button-tone interaction colours with the same OKLab mix the recipes emit', () => {
+		// Solid and subtle Button tones rest on `interactionColor(<opaque fill>, state)`, a direct
+		// OKLab mix between the fill and the interaction source — unlike the ghost case above.
+		const accentSolid = 'oklch(0.5 0.2 250)';
+		const onSolid = 'oklch(0.98 0 0)';
+		const textPrimary = 'oklch(0.95 0 0)';
+		const values = syntheticColorValues({
+			'color.background.accent.solid': accentSolid,
+			'color.foreground.accent.onSolid': onSolid,
+			'color.text.primary': textPrimary,
+		});
+
+		const { checks } = validateContrast('light', values);
+		const check = checks.find((candidate) => {
+			return (
+				candidate.foreground === 'color.foreground.accent.onSolid' &&
+				candidate.background === 'hover on color.background.accent.solid'
+			);
+		});
+		expect(check).toBeDefined();
+		const mixed = mixInteractionColor(parseColor(accentSolid), parseColor(textPrimary), 'hover');
+		expect(check?.ratio).toBeCloseTo(contrastRatio(parseColor(onSolid), mixed), 5);
 	});
 });
 

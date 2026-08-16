@@ -4,11 +4,11 @@
  */
 
 import type { Oklch } from './color.js';
-import { contrastRatio, parseColor } from './color.js';
+import { compositeSourceOver, contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import type { ContrastCheck } from './diagnostics.js';
 import type { InteractionState } from './interaction-mix.js';
-import { mixInteractionColor } from './interaction-mix.js';
+import { INTERACTION_STRENGTH, mixInteractionColor } from './interaction-mix.js';
 import type { SemanticColorValues } from './semantic-map.js';
 
 /** Ghost Button and IconButton keep these foregrounds on a transparent rest fill. */
@@ -102,25 +102,49 @@ export function validateContrast(
 	}
 
 	const interactionSource = colorAt('color.text.primary');
-	const checkInteraction = (foreground: string, state: InteractionState, surface: string) => {
+	// Recipes render two different paint operations behind `interactionColor`, and validation has to
+	// match each: an opaque base (a resolved fill colour) mixes directly in OKLab, but a transparent
+	// base — ghost Button/IconButton foregrounds, unselected Combobox options — paints a translucent
+	// layer of the interaction source over the resting surface, which the browser composites with
+	// normal source-over alpha blending. That is real alpha compositing, not an OKLab interpolation
+	// between the surface and the source, so it needs its own check.
+	const checkOpaqueInteraction = (foreground: string, state: InteractionState, surface: string) => {
 		const mixed = mixInteractionColor(colorAt(surface), interactionSource, state);
 		checkResolved(foreground, `${state} on ${surface}`, mixed, TEXT_RATIO, true);
 	};
+	const checkTransparentInteraction = (
+		foreground: string,
+		state: InteractionState,
+		surface: string,
+	) => {
+		const composited = compositeSourceOver(
+			interactionSource,
+			colorAt(surface),
+			INTERACTION_STRENGTH[state],
+		);
+		checkResolved(foreground, `${state} on ${surface}`, composited, TEXT_RATIO, true);
+	};
 	for (const state of INTERACTION_STATES) {
+		// Ghost Button/IconButton foregrounds rest on `interactionColor('transparent', state)`.
 		for (const surface of basePaths) {
 			for (const foreground of GHOST_FOREGROUNDS) {
-				checkInteraction(foreground, state, surface);
+				checkTransparentInteraction(foreground, state, surface);
 			}
 		}
+		// Solid and subtle Button tones rest on `interactionColor(<opaque fill>, state)`.
 		for (const tone of BUTTON_TONES) {
 			const solidForeground = `color.foreground.${tone}.onSolid`;
 			const subtleForeground =
 				tone === 'neutral' ? 'color.text.primary' : `color.foreground.${tone}.default`;
-			checkInteraction(solidForeground, state, `color.background.${tone}.solid`);
-			checkInteraction(subtleForeground, state, `color.background.${tone}.subtle`);
+			checkOpaqueInteraction(solidForeground, state, `color.background.${tone}.solid`);
+			checkOpaqueInteraction(subtleForeground, state, `color.background.${tone}.subtle`);
 		}
-		checkInteraction('color.text.primary', state, 'color.background.accent.subtle');
-		checkInteraction('color.text.primary', state, 'color.surface.floating');
+		// Selected Combobox options rest on `interactionColor(vars.color.background.accent.subtle,
+		// state)` — an opaque base.
+		checkOpaqueInteraction('color.text.primary', state, 'color.background.accent.subtle');
+		// Unselected Combobox options rest on `interactionColor('transparent', state)` over the
+		// floating popover surface.
+		checkTransparentInteraction('color.text.primary', state, 'color.surface.floating');
 	}
 
 	return { checks, failures };
