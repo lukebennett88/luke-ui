@@ -2,8 +2,6 @@ export { ThemeContrastError, ThemeGenerationError } from './build-theme.js';
 export type { ThemeContrastFailure, ThemeInheritance } from './build-theme.js';
 export { vars } from './contract.css.js';
 export { spaceScale, typeStyles } from './contract.js';
-export { interactionColor } from './interaction-color.js';
-export type { InteractionState } from './interaction-color.js';
 export type { FontWeightRole, SpaceStep, TypeStyle } from './contract.js';
 export {
 	defaultBackdrop,
