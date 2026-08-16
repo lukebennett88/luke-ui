@@ -51,8 +51,8 @@ with no class and no JS required. Neither step injects styles at runtime.
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
 - `styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
-- `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
-  `typeStyles` typography keys.
+- `theme/contract.ts`: the semantic token tree, the mode-family declaration, `--luke-*` variable
+  naming, and the source-owned `typeStyles` typography keys.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,

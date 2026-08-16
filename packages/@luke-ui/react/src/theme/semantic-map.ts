@@ -12,13 +12,15 @@
 
 import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
+import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 
-/** Every generated colour contract leaf's CSS value, keyed by its dotted path (for example
- * `'color.text.primary'`), plus the passed-through `'color.scrim'`. */
-export type SemanticColorValues = Record<string, string>;
+/** Every generated colour contract leaf's CSS value, keyed by its dotted path. */
+export type SemanticColorValues = {
+	[Path in Extract<ModePath, `color.${string}`>]: string;
+};
 
 /** The inputs to {@link mapSemanticColors}. */
 interface MapSemanticColorsRequest {
@@ -46,7 +48,7 @@ interface MapSemanticColorsRequest {
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
 	const { families, surfaces, scrim, focus, controlBorder } = request;
 	const neutral = families.neutral;
-	const values: Record<string, string> = {};
+	const values: Partial<SemanticColorValues> = {};
 
 	// Surfaces: canvas IS the background, so it is aliased here rather than recomputed.
 	values['color.surface.canvas'] = formatOklch(surfaces.canvas);
@@ -83,5 +85,5 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 		values[`color.border.${role}`] = formatOklch(family[7]);
 	}
 
-	return values;
+	return values as SemanticColorValues;
 }

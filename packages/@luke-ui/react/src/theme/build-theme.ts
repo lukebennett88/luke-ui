@@ -1,3 +1,4 @@
+import type { ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeContrastFailure } from './contrast-validation.js';
 import { validateContrast } from './contrast-validation.js';
@@ -142,19 +143,23 @@ type ColorMode = 'light' | 'dark';
 interface ModeValues {
 	diagnostics: ThemeModeDiagnostics;
 	failures: Array<ThemeContrastFailure>;
-	values: Record<string, string>;
+	values: Record<ModePath, string>;
 }
 
 function buildModeValues(mode: ColorMode, modeFoundation: ThemeModeFoundation): ModeValues {
 	const { colorValues, familyDiagnostics, surfaces } = buildModeColors(mode, modeFoundation);
 	const { checks, failures } = validateContrast(mode, colorValues);
-	const values: Record<string, string> = { ...colorValues };
-	for (const [name, value] of Object.entries(modeFoundation.depth)) {
-		values[`depth.${name}`] = value;
-	}
-	for (const [name, value] of Object.entries(modeFoundation.actionControlFinish)) {
-		values[`actionControlFinish.${name}`] = value;
-	}
+	const values: Record<ModePath, string> = {
+		...colorValues,
+		'actionControlFinish.raised': modeFoundation.actionControlFinish.raised,
+		'actionControlFinish.recessed': modeFoundation.actionControlFinish.recessed,
+		'actionControlFinish.resting': modeFoundation.actionControlFinish.resting,
+		'depth.floating': modeFoundation.depth.floating,
+		'depth.overlay': modeFoundation.depth.overlay,
+		'depth.raised': modeFoundation.depth.raised,
+		'depth.recessed': modeFoundation.depth.recessed,
+		'depth.resting': modeFoundation.depth.resting,
+	};
 	return {
 		diagnostics: { contrastChecks: checks, families: familyDiagnostics, mode, surfaces },
 		failures,

@@ -5,7 +5,14 @@
  */
 
 import { precomputeValues } from '@capsizecss/vanilla-extract';
-import { flattenThemeContract, spaceScale, typeStyles, typeStyleWeightRole } from './contract.js';
+import {
+	flattenThemeContract,
+	partitionContractPairs,
+	spaceScale,
+	typeStyles,
+	typeStyleWeightRole,
+} from './contract.js';
+import type { IdentityPath, ModePath } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
 	codeFontFamilyStack,
@@ -34,20 +41,11 @@ type ColorMode = 'light' | 'dark';
  */
 export function assembleStylesheet(
 	foundation: ThemeFoundation,
-	lightValues: Record<string, string>,
-	darkValues: Record<string, string>,
+	lightValues: Record<ModePath, string>,
+	darkValues: Record<ModePath, string>,
 ): string {
 	const selector = `.${getThemeClassName(foundation.name)}`;
-	const pairs = flattenThemeContract();
-	const isModePath = (path: string) => {
-		return (
-			path.startsWith('actionControlFinish.') ||
-			path.startsWith('color.') ||
-			path.startsWith('depth.')
-		);
-	};
-	const identityPairs = pairs.filter(([path]) => !isModePath(path));
-	const modePairs = pairs.filter(([path]) => isModePath(path));
+	const { identityPairs, modePairs } = partitionContractPairs(flattenThemeContract());
 
 	const identityDeclarations = declarations(identityPairs, buildIdentityValues(foundation));
 	const lightDeclarations = ['color-scheme: light;', ...declarations(modePairs, lightValues)];
@@ -97,7 +95,7 @@ export function assembleStylesheet(
 	].join('\n');
 }
 
-function buildIdentityValues(foundation: ThemeFoundation): Record<string, string> {
+function buildIdentityValues(foundation: ThemeFoundation): Record<IdentityPath, string> {
 	const fontFamily = foundation.typography?.fontFamily ?? defaultFontFamily;
 	const fontWeight = foundation.typography?.fontWeight;
 	const radius = foundation.radius;
@@ -108,7 +106,7 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 		label: String(fontWeight?.label ?? defaultFontWeights.label),
 	};
 	const bodyFontFamily = themeFontFamilyStacks[fontFamily];
-	const values: Record<string, string> = {
+	const values: Partial<Record<IdentityPath, string>> = {
 		...CONTROL_SIZE_VALUES,
 		...INTERACTION_VALUES,
 		...FONT_VALUES,
@@ -134,11 +132,13 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 	for (const [step, value] of spaceScale) {
 		values[`space.${step}`] = value;
 	}
-	return values;
+	return values as Record<IdentityPath, string>;
 }
 
-function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): Record<string, string> {
-	const values: Record<string, string> = {};
+function buildCapsizeValues(
+	fontFamily: keyof typeof FONT_METRICS,
+): Partial<Record<IdentityPath, string>> {
+	const values: Partial<Record<IdentityPath, string>> = {};
 	for (const style of typeStyles) {
 		const fontSize = Number.parseFloat(FONT_VALUES[`font.${style}.fontSize`]);
 		const leading = Number.parseFloat(FONT_VALUES[`font.${style}.lineHeight`]);
@@ -153,9 +153,9 @@ function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): Record<strin
 	return values;
 }
 
-function declarations(
-	pairs: Array<[path: string, varName: string]>,
-	values: Record<string, string>,
+function declarations<Path extends string>(
+	pairs: Array<[Path, string]>,
+	values: Record<Path, string>,
 ): Array<string> {
 	return pairs.map(([path, varName]) => {
 		const value = values[path];

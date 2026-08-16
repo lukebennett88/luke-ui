@@ -8,20 +8,19 @@ import {
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
 import { buildTheme } from './build-theme.js';
-import { flattenThemeContract, spaceScale, typeStyles } from './contract.js';
+import {
+	flattenThemeContract,
+	partitionContractPairs,
+	spaceScale,
+	typeStyles,
+} from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius } from './foundation.js';
 
 const pairs = flattenThemeContract();
-const isModePath = (path: string) => {
-	return (
-		path.startsWith('actionControlFinish.') ||
-		path.startsWith('color.') ||
-		path.startsWith('depth.')
-	);
-};
-const modeVarNames = pairs.filter(([path]) => isModePath(path)).map(([, varName]) => varName);
-const identityVarNames = pairs.filter(([path]) => !isModePath(path)).map(([, varName]) => varName);
+const { identityPairs, modePairs } = partitionContractPairs(pairs);
+const modeVarNames = modePairs.map(([, varName]) => varName);
+const identityVarNames = identityPairs.map(([, varName]) => varName);
 
 function countOccurrences(text: string, needle: string): number {
 	return text.split(needle).length - 1;

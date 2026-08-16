@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { vars } from './contract.css.js';
-import { flattenThemeContract, spaceScale, themeContractTree, typeStyles } from './contract.js';
+import {
+	flattenThemeContract,
+	modeFamilies,
+	partitionContractPairs,
+	spaceScale,
+	themeContractTree,
+	typeStyles,
+} from './contract.js';
+import type { IdentityPath, ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 
@@ -54,7 +62,7 @@ describe('theme contract', () => {
 			[`color.foreground.${role}.rest`, `--luke-color-foreground-${role}-rest`],
 			[`color.foreground.${role}.hover`, `--luke-color-foreground-${role}-hover`],
 			[`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`],
-		]);
+		]) satisfies ReadonlyArray<[ModePath, string]>;
 		const rolePaths = new Set(expected.map(([path]) => path));
 		const emitted = flattenThemeContract().filter(([path]) => {
 			return (
@@ -69,6 +77,22 @@ describe('theme contract', () => {
 			return (a[0] ?? '').localeCompare(b[0] ?? '');
 		};
 		expect([...emitted].sort(byPath)).toEqual([...expected].sort(byPath));
+	});
+
+	it('partitions identity and mode paths from the declared mode families', () => {
+		expect(modeFamilies).toEqual(['actionControlFinish', 'color', 'depth']);
+		const pairs = flattenThemeContract();
+		const { identityPairs, modePairs } = partitionContractPairs(pairs);
+		expect(identityPairs.length + modePairs.length).toBe(pairs.length);
+
+		const modePaths: Array<ModePath> = modePairs.map(([path]) => path);
+		const identityPaths: Array<IdentityPath> = identityPairs.map(([path]) => path);
+		for (const path of modePaths) {
+			expect(modeFamilies).toContain(path.split('.')[0]);
+		}
+		for (const path of identityPaths) {
+			expect(modeFamilies).not.toContain(path.split('.')[0]);
+		}
 	});
 
 	it('keeps typeStyles as the single source of truth for the font contract keys', () => {
