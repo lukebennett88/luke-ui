@@ -37,9 +37,12 @@ test('applies appearance messages to the playground preview root', async () => {
 	});
 
 	await act(async () => {
-		window.postMessage(
-			{ colorMode: 'dark', themeIdentity: 'paper', type: 'playground:appearance' },
-			window.location.origin,
+		window.dispatchEvent(
+			new MessageEvent('message', {
+				data: { colorMode: 'dark', themeIdentity: 'paper', type: 'playground:appearance' },
+				origin: window.location.origin,
+				source: window.parent,
+			}),
 		);
 		await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 	});
