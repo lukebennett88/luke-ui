@@ -78,7 +78,6 @@ describe('mapSemanticColors', () => {
 					controlBorder,
 					families,
 					focus,
-					mode,
 					scrim,
 					surfaces,
 				});
@@ -125,7 +124,6 @@ describe('mapSemanticColors', () => {
 				const result = mapSemanticColors({
 					controlBorder: CONTROL_BORDER[mode],
 					families,
-					mode,
 					scrim: 'oklch(0 0 0 / 0.45)',
 					surfaces,
 				});
@@ -150,7 +148,6 @@ describe('mapSemanticColors', () => {
 				const result = mapSemanticColors({
 					controlBorder: CONTROL_BORDER[mode],
 					families,
-					mode,
 					scrim: 'oklch(0 0 0 / 0.45)',
 					surfaces,
 				});
@@ -173,7 +170,6 @@ describe('mapSemanticColors', () => {
 			const result = mapSemanticColors({
 				controlBorder: CONTROL_BORDER.light,
 				families,
-				mode: 'light',
 				scrim,
 				surfaces,
 			});

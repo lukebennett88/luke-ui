@@ -35,13 +35,17 @@ export const RATIO_HEADROOM = 0.05;
 export const CONTRAST_SEARCH_STEP = 0.0025;
 
 /**
- * The canonical semantic roles, in contract order. Every role offers the same capabilities, so this
- * one list drives family generation, the capability matrix (`scale.ts`), the semantic mapping
- * (`semantic-map.ts`), the validation matrix (`contrast-validation.ts`) and diagnostics
- * (`build-theme.ts`), and the token-board tooling. A role's meaning never decides what it can style,
- * so there is nothing left to split the list on: restating a subset anywhere would reintroduce the
- * asymmetry this module exists to prevent. `FamilyRole` in `scale.ts` is derived from this, so the
- * type cannot drift from the list either.
+ * The canonical semantic roles, in contract order. Every role publishes the same visual slots —
+ * background, foreground, on-solid, and border — so this one list drives family generation
+ * (`scale.ts`), the semantic mapping (`semantic-map.ts`), the validation matrix
+ * (`contrast-validation.ts`) and diagnostics (`build-theme.ts`), and the token-board tooling. A
+ * role's meaning never decides what it can style, so there is nothing left to split the list on:
+ * restating a subset anywhere would reintroduce the asymmetry this module exists to prevent.
+ * `FamilyRole` in `scale.ts` is derived from this, so the type cannot drift from the list either.
+ *
+ * Every role's solid (step 9) and its hover (step 10) must clear 4.5:1 against on-solid text. The
+ * scale generator always searches for that contrast. `contrast-validation.ts` enforces it for all
+ * six roles at compile time.
  */
 export const SEMANTIC_ROLES = [
 	'neutral',

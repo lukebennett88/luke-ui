@@ -15,7 +15,7 @@ import type {
 import type { GeneratedSurfaces } from './elevation.js';
 import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
-import type { FamilyRequirements, FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
+import type { FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
 
 type BundledThemeKey = 'tactile' | 'paper';
 
@@ -88,17 +88,8 @@ const familyRowStyle = {
 	gap: vars.space[100],
 } as const satisfies CSSProperties;
 
-const familyHeaderStyle = {
-	alignItems: 'baseline',
-	display: 'flex',
-	gap: vars.space[300],
+const familyRoleStyle = {
 	textTransform: 'capitalize',
-} as const satisfies CSSProperties;
-
-const requirementsTextStyle = {
-	color: vars.color.text.secondary,
-	fontSize: vars.font.caption.fontSize,
-	textTransform: 'none',
 } as const satisfies CSSProperties;
 
 const rampRowStyle = {
@@ -244,28 +235,13 @@ function FamiliesSection({ families }: { families: Record<FamilyRole, FamilyDiag
 				const roleDiagnostics = families[role];
 				return (
 					<div key={role} style={familyRowStyle}>
-						<div style={familyHeaderStyle}>
-							<strong>{role}</strong>
-							<RequirementBadges requirements={roleDiagnostics.requirements} />
-						</div>
+						<strong style={familyRoleStyle}>{role}</strong>
 						<FamilyRamp family={roleDiagnostics.family} />
 					</div>
 				);
 			})}
 		</SectionCard>
 	);
-}
-
-function RequirementBadges({ requirements }: { requirements: FamilyRequirements }) {
-	const capabilities: Array<[label: string, needed: boolean]> = [
-		['subtle states', requirements.needsSubtleStates],
-		['solid states', requirements.needsSolidStates],
-		['on-solid', requirements.needsOnSolid],
-		['text', requirements.needsText],
-		['border', requirements.needsBorder],
-	];
-	const needed = capabilities.filter(([, isNeeded]) => isNeeded).map(([label]) => label);
-	return <span style={requirementsTextStyle}>{needed.join(' · ')}</span>;
 }
 
 function FamilyRamp({ family }: { family: ScaleFamily }) {

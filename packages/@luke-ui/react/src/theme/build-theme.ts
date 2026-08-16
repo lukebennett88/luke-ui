@@ -225,7 +225,6 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		controlBorder,
 		families,
 		focus: source.focus,
-		mode,
 		scrim: modeFoundation.color.scrim,
 		surfaces,
 	});

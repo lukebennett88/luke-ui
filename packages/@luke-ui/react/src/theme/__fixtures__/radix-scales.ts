@@ -339,7 +339,7 @@ export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 /**
  * Dead-zone sources: mid-lightness colours where neither near-white nor near-black on-solid text
  * clears AA across the solid and its hover, and whose authored tone the generator preserves. A
- * `needsOnSolid` role given one of these is genuinely unsatisfiable and throws.
+ * A source-toned role given one of these is genuinely unsatisfiable and throws.
  */
 export const UNSATISFIABLE_ON_SOLID: Record<'light' | 'dark', CorpusEntry> = {
 	dark: {
