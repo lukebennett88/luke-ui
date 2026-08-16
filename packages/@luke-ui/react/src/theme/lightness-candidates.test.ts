@@ -51,6 +51,32 @@ describe('lightnessCandidates', () => {
 		expect(values.every((lightness) => lightness >= 0 && lightness <= 1)).toBe(true);
 	});
 
+	it('does not append 0 when the destination is off-grid just above 0', () => {
+		const values = [...lightnessCandidates(0.005, 0.001)];
+		expect(values[0]).toBe(0.005);
+		expect(values.at(-1)).toBeCloseTo(0.0025, 12);
+		expect(values).not.toContain(0);
+		expect(values).not.toContain(0.001);
+	});
+
+	it('does not append 1 when the destination is off-grid just below 1', () => {
+		const values = [...lightnessCandidates(0.995, 0.999)];
+		expect(values[0]).toBe(0.995);
+		expect(values.at(-1)).toBeCloseTo(0.9975, 12);
+		expect(values).not.toContain(1);
+		expect(values).not.toContain(0.999);
+	});
+
+	it('yields 0 when the destination is exactly 0', () => {
+		expect([...lightnessCandidates(0.005, 0)].at(-1)).toBe(0);
+		expect([...lightnessCandidates(0.006, 0)].at(-1)).toBe(0);
+	});
+
+	it('yields 1 when the destination is exactly 1', () => {
+		expect([...lightnessCandidates(0.995, 1)].at(-1)).toBe(1);
+		expect([...lightnessCandidates(0.996, 1)].at(-1)).toBe(1);
+	});
+
 	it('walks downward toward a lower destination rather than treating it as empty', () => {
 		const values = [...lightnessCandidates(0.5, 0.49)];
 		expect(values[0]).toBe(0.5);

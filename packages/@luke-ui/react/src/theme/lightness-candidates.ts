@@ -14,7 +14,8 @@ const ENDPOINT_EPSILON = 1e-9;
  * Yields the fixed lightness grid from `from` toward `to`. Each value is clamped to `[0, 1]`. The
  * start is always included when the range is finite. The destination is included only when it lands
  * on the grid; an off-grid `to` is not appended. When `from === to`, yields that single clamped
- * value. Stops when the next step would pass `to`, or when clamping saturates at 0 or 1.
+ * value. Stops when the next step would pass `to`, or when clamping saturates at 0 or 1. A saturated
+ * 0 or 1 is yielded only when that boundary is the destination.
  */
 export function* lightnessCandidates(from: number, to: number): Generator<number, void, void> {
 	if (!Number.isFinite(from) || !Number.isFinite(to)) return;
@@ -33,7 +34,7 @@ export function* lightnessCandidates(from: number, to: number): Generator<number
 		const nextClamped = clampUnit(nextRaw);
 		if (nextClamped === clamped) return;
 		if (hasPassedEnd(nextRaw, to, direction)) {
-			if (nextClamped === 0 || nextClamped === 1) yield nextClamped;
+			if (nextClamped === to && (to === 0 || to === 1)) yield nextClamped;
 			return;
 		}
 		index += 1;
