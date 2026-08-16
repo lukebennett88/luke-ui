@@ -9,10 +9,9 @@ import {
 	flattenThemeContract,
 	partitionContractPairs,
 	spaceScale,
-	typeStyles,
 	typeStyleWeightRole,
 } from './contract.js';
-import type { IdentityPath, ModePath } from './contract.js';
+import type { IdentityPath, ModePath, SpaceStep, TypeStyle } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
 	codeFontFamilyStack,
@@ -95,7 +94,7 @@ export function assembleStylesheet(
 	].join('\n');
 }
 
-function buildIdentityValues(foundation: ThemeFoundation): Record<IdentityPath, string> {
+function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPath]: string } {
 	const fontFamily = foundation.typography?.fontFamily ?? defaultFontFamily;
 	const fontWeight = foundation.typography?.fontWeight;
 	const radius = foundation.radius;
@@ -106,11 +105,13 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<IdentityPath, 
 		label: String(fontWeight?.label ?? defaultFontWeights.label),
 	};
 	const bodyFontFamily = themeFontFamilyStacks[fontFamily];
-	const values: Partial<Record<IdentityPath, string>> = {
+	return {
 		...CONTROL_SIZE_VALUES,
 		...INTERACTION_VALUES,
 		...FONT_VALUES,
 		...buildCapsizeValues(fontFamily),
+		...typeStyleFontFamilies(bodyFontFamily),
+		...typeStyleFontWeights(resolvedWeights),
 		'font.family.body': bodyFontFamily,
 		'font.family.code': codeFontFamilyStack,
 		'font.weight.body': resolvedWeights.body,
@@ -122,35 +123,117 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<IdentityPath, 
 		'radius.full': '9999px',
 		'radius.overlay': `${radius?.overlay ?? defaultRadius.overlay}px`,
 		'radius.surface': `${radius?.surface ?? defaultRadius.surface}px`,
+		...spaceValues(),
 		...ICON_SIZE_VALUES,
 		...MOTION_VALUES,
 	};
-	for (const style of typeStyles) {
-		values[`font.${style}.fontFamily`] = bodyFontFamily;
-		values[`font.${style}.fontWeight`] = resolvedWeights[typeStyleWeightRole[style]];
-	}
-	for (const [step, value] of spaceScale) {
-		values[`space.${step}`] = value;
-	}
-	return values as Record<IdentityPath, string>;
 }
 
-function buildCapsizeValues(
-	fontFamily: keyof typeof FONT_METRICS,
-): Partial<Record<IdentityPath, string>> {
-	const values: Partial<Record<IdentityPath, string>> = {};
-	for (const style of typeStyles) {
-		const fontSize = Number.parseFloat(FONT_VALUES[`font.${style}.fontSize`]);
-		const leading = Number.parseFloat(FONT_VALUES[`font.${style}.lineHeight`]);
-		const { baselineTrim, capHeightTrim } = precomputeValues({
-			fontMetrics: FONT_METRICS[fontFamily],
-			fontSize,
-			leading,
-		});
-		values[`font.${style}.baselineTrim`] = baselineTrim;
-		values[`font.${style}.capHeightTrim`] = capHeightTrim;
+function typeStyleFontFamilies(family: string): {
+	[Style in TypeStyle as `font.${Style}.fontFamily`]: string;
+} {
+	return {
+		'font.body.fontFamily': family,
+		'font.caption.fontFamily': family,
+		'font.display.fontFamily': family,
+		'font.heading1.fontFamily': family,
+		'font.heading2.fontFamily': family,
+		'font.heading3.fontFamily': family,
+		'font.heading4.fontFamily': family,
+		'font.label.fontFamily': family,
+		'font.lead.fontFamily': family,
+		'font.support.fontFamily': family,
+	};
+}
+
+function typeStyleFontWeights(weights: {
+	body: string;
+	emphasis: string;
+	heading: string;
+	label: string;
+}): { [Style in TypeStyle as `font.${Style}.fontWeight`]: string } {
+	return {
+		'font.body.fontWeight': weights[typeStyleWeightRole.body],
+		'font.caption.fontWeight': weights[typeStyleWeightRole.caption],
+		'font.display.fontWeight': weights[typeStyleWeightRole.display],
+		'font.heading1.fontWeight': weights[typeStyleWeightRole.heading1],
+		'font.heading2.fontWeight': weights[typeStyleWeightRole.heading2],
+		'font.heading3.fontWeight': weights[typeStyleWeightRole.heading3],
+		'font.heading4.fontWeight': weights[typeStyleWeightRole.heading4],
+		'font.label.fontWeight': weights[typeStyleWeightRole.label],
+		'font.lead.fontWeight': weights[typeStyleWeightRole.lead],
+		'font.support.fontWeight': weights[typeStyleWeightRole.support],
+	};
+}
+
+function spaceValues(): { [Step in SpaceStep as `space.${Step}`]: string } {
+	return {
+		'space.100': spaceStep('100'),
+		'space.1000': spaceStep('1000'),
+		'space.1200': spaceStep('1200'),
+		'space.1600': spaceStep('1600'),
+		'space.200': spaceStep('200'),
+		'space.300': spaceStep('300'),
+		'space.400': spaceStep('400'),
+		'space.600': spaceStep('600'),
+		'space.800': spaceStep('800'),
+	};
+}
+
+function spaceStep(step: SpaceStep): string {
+	for (const [key, value] of spaceScale) {
+		if (key === step) return value;
 	}
-	return values;
+	throw new Error(`spaceScale is missing "${step}"`);
+}
+
+function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): {
+	[Style in TypeStyle as `font.${Style}.baselineTrim`]: string;
+} & {
+	[Style in TypeStyle as `font.${Style}.capHeightTrim`]: string;
+} {
+	const caption = capsizeTrims(fontFamily, 'caption');
+	const support = capsizeTrims(fontFamily, 'support');
+	const label = capsizeTrims(fontFamily, 'label');
+	const body = capsizeTrims(fontFamily, 'body');
+	const lead = capsizeTrims(fontFamily, 'lead');
+	const heading4 = capsizeTrims(fontFamily, 'heading4');
+	const heading3 = capsizeTrims(fontFamily, 'heading3');
+	const heading2 = capsizeTrims(fontFamily, 'heading2');
+	const heading1 = capsizeTrims(fontFamily, 'heading1');
+	const display = capsizeTrims(fontFamily, 'display');
+	return {
+		'font.body.baselineTrim': body.baselineTrim,
+		'font.body.capHeightTrim': body.capHeightTrim,
+		'font.caption.baselineTrim': caption.baselineTrim,
+		'font.caption.capHeightTrim': caption.capHeightTrim,
+		'font.display.baselineTrim': display.baselineTrim,
+		'font.display.capHeightTrim': display.capHeightTrim,
+		'font.heading1.baselineTrim': heading1.baselineTrim,
+		'font.heading1.capHeightTrim': heading1.capHeightTrim,
+		'font.heading2.baselineTrim': heading2.baselineTrim,
+		'font.heading2.capHeightTrim': heading2.capHeightTrim,
+		'font.heading3.baselineTrim': heading3.baselineTrim,
+		'font.heading3.capHeightTrim': heading3.capHeightTrim,
+		'font.heading4.baselineTrim': heading4.baselineTrim,
+		'font.heading4.capHeightTrim': heading4.capHeightTrim,
+		'font.label.baselineTrim': label.baselineTrim,
+		'font.label.capHeightTrim': label.capHeightTrim,
+		'font.lead.baselineTrim': lead.baselineTrim,
+		'font.lead.capHeightTrim': lead.capHeightTrim,
+		'font.support.baselineTrim': support.baselineTrim,
+		'font.support.capHeightTrim': support.capHeightTrim,
+	};
+}
+
+function capsizeTrims(fontFamily: keyof typeof FONT_METRICS, style: TypeStyle) {
+	const fontSize = Number.parseFloat(FONT_VALUES[`font.${style}.fontSize`]);
+	const leading = Number.parseFloat(FONT_VALUES[`font.${style}.lineHeight`]);
+	return precomputeValues({
+		fontMetrics: FONT_METRICS[fontFamily],
+		fontSize,
+		leading,
+	});
 }
 
 function declarations<Path extends string>(

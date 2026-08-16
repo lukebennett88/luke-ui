@@ -13,13 +13,27 @@
 import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
 import type { ModePath } from './contract.js';
-import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 
 /** Every generated colour contract leaf's CSS value, keyed by its dotted path. */
 export type SemanticColorValues = {
 	[Path in Extract<ModePath, `color.${string}`>]: string;
+};
+
+type RoleColorPath<Role extends FamilyRole> = Extract<
+	keyof SemanticColorValues,
+	| `color.background.${Role}.${string}`
+	| `color.foreground.${Role}.${string}`
+	| `color.border.${Role}`
+>;
+
+type RoleColorValues<Role extends FamilyRole> = {
+	[Path in RoleColorPath<Role>]: string;
+};
+
+type FunctionalColorValues = {
+	[Path in Exclude<keyof SemanticColorValues, RoleColorPath<FamilyRole>>]: string;
 };
 
 /** The inputs to {@link mapSemanticColors}. */
@@ -46,44 +60,145 @@ interface MapSemanticColorsRequest {
  * verbatim. `focus` defaults to the accent family's step 8 when the theme author omits it.
  */
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
+	return {
+		...mapFunctionalColors(request),
+		...mapNeutralColors(request.families.neutral),
+		...mapAccentColors(request.families.accent),
+		...mapInfoColors(request.families.info),
+		...mapSuccessColors(request.families.success),
+		...mapWarningColors(request.families.warning),
+		...mapDangerColors(request.families.danger),
+	};
+}
+
+function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColorValues {
 	const { families, surfaces, scrim, focus, controlBorder } = request;
 	const neutral = families.neutral;
-	const values: Partial<SemanticColorValues> = {};
+	return {
+		'color.surface.canvas': formatOklch(surfaces.canvas),
+		'color.surface.recessed': formatOklch(surfaces.recessed),
+		'color.surface.floating': formatOklch(surfaces.floating),
+		'color.surface.overlay': formatOklch(surfaces.overlay),
+		'color.scrim': scrim,
+		'color.loadingSkeleton': formatOklch(neutral[8]),
+		'color.text.primary': formatOklch(neutral[12]),
+		'color.text.secondary': formatOklch(neutral[11]),
+		'color.text.disabled': formatOklch(neutral[8]),
+		'color.border.decorative': formatOklch(neutral[6]),
+		'color.border.control': formatOklch(controlBorder),
+		'color.border.focus': formatOklch(focus ?? families.accent[8]),
+	};
+}
 
-	// Surfaces: canvas IS the background, so it is aliased here rather than recomputed.
-	values['color.surface.canvas'] = formatOklch(surfaces.canvas);
-	values['color.surface.recessed'] = formatOklch(surfaces.recessed);
-	values['color.surface.floating'] = formatOklch(surfaces.floating);
-	values['color.surface.overlay'] = formatOklch(surfaces.overlay);
-	values['color.scrim'] = scrim;
-	values['color.loadingSkeleton'] = formatOklch(neutral[8]);
-
-	// Functional text and borders: neutral only, and distinct from the six shared roles that share the
-	// `border` branch with them.
-	values['color.text.primary'] = formatOklch(neutral[12]);
-	values['color.text.secondary'] = formatOklch(neutral[11]);
-	values['color.text.disabled'] = formatOklch(neutral[8]);
-	values['color.border.decorative'] = formatOklch(neutral[6]);
-	values['color.border.control'] = formatOklch(controlBorder);
-	values['color.border.focus'] = formatOklch(focus ?? families.accent[8]);
-
-	// The shared semantic contract: every role maps onto its own family through the same steps, so a
-	// role's meaning never decides which visual slots it can fill.
-	for (const role of SEMANTIC_ROLES) {
-		const family = families[role];
-		values[`color.background.${role}.subtle.rest`] = formatOklch(family[3]);
-		values[`color.background.${role}.subtle.hover`] = formatOklch(family[4]);
-		values[`color.background.${role}.subtle.pressed`] = formatOklch(family[5]);
-		values[`color.background.${role}.solid.rest`] = formatOklch(family[9]);
-		values[`color.background.${role}.solid.hover`] = formatOklch(family[10]);
+function roleSlots(family: ScaleFamily) {
+	return {
+		border: formatOklch(family[7]),
+		foregroundHover: formatOklch(family[12]),
+		foregroundRest: formatOklch(family[11]),
+		onSolid: formatOklch(family.contrast),
+		solidHover: formatOklch(family[10]),
 		// Deliberate dup: the pressed solid is carried by depth.recessed / actionControlFinish.recessed /
 		// transform, not a third solid colour.
-		values[`color.background.${role}.solid.pressed`] = formatOklch(family[10]);
-		values[`color.foreground.${role}.rest`] = formatOklch(family[11]);
-		values[`color.foreground.${role}.hover`] = formatOklch(family[12]);
-		values[`color.foreground.${role}.onSolid`] = formatOklch(family.contrast);
-		values[`color.border.${role}`] = formatOklch(family[7]);
-	}
+		solidPressed: formatOklch(family[10]),
+		solidRest: formatOklch(family[9]),
+		subtleHover: formatOklch(family[4]),
+		subtlePressed: formatOklch(family[5]),
+		subtleRest: formatOklch(family[3]),
+	};
+}
 
-	return values as SemanticColorValues;
+function mapNeutralColors(family: ScaleFamily): RoleColorValues<'neutral'> {
+	const slots = roleSlots(family);
+	return {
+		'color.background.neutral.solid.hover': slots.solidHover,
+		'color.background.neutral.solid.pressed': slots.solidPressed,
+		'color.background.neutral.solid.rest': slots.solidRest,
+		'color.background.neutral.subtle.hover': slots.subtleHover,
+		'color.background.neutral.subtle.pressed': slots.subtlePressed,
+		'color.background.neutral.subtle.rest': slots.subtleRest,
+		'color.border.neutral': slots.border,
+		'color.foreground.neutral.hover': slots.foregroundHover,
+		'color.foreground.neutral.onSolid': slots.onSolid,
+		'color.foreground.neutral.rest': slots.foregroundRest,
+	};
+}
+
+function mapAccentColors(family: ScaleFamily): RoleColorValues<'accent'> {
+	const slots = roleSlots(family);
+	return {
+		'color.background.accent.solid.hover': slots.solidHover,
+		'color.background.accent.solid.pressed': slots.solidPressed,
+		'color.background.accent.solid.rest': slots.solidRest,
+		'color.background.accent.subtle.hover': slots.subtleHover,
+		'color.background.accent.subtle.pressed': slots.subtlePressed,
+		'color.background.accent.subtle.rest': slots.subtleRest,
+		'color.border.accent': slots.border,
+		'color.foreground.accent.hover': slots.foregroundHover,
+		'color.foreground.accent.onSolid': slots.onSolid,
+		'color.foreground.accent.rest': slots.foregroundRest,
+	};
+}
+
+function mapInfoColors(family: ScaleFamily): RoleColorValues<'info'> {
+	const slots = roleSlots(family);
+	return {
+		'color.background.info.solid.hover': slots.solidHover,
+		'color.background.info.solid.pressed': slots.solidPressed,
+		'color.background.info.solid.rest': slots.solidRest,
+		'color.background.info.subtle.hover': slots.subtleHover,
+		'color.background.info.subtle.pressed': slots.subtlePressed,
+		'color.background.info.subtle.rest': slots.subtleRest,
+		'color.border.info': slots.border,
+		'color.foreground.info.hover': slots.foregroundHover,
+		'color.foreground.info.onSolid': slots.onSolid,
+		'color.foreground.info.rest': slots.foregroundRest,
+	};
+}
+
+function mapSuccessColors(family: ScaleFamily): RoleColorValues<'success'> {
+	const slots = roleSlots(family);
+	return {
+		'color.background.success.solid.hover': slots.solidHover,
+		'color.background.success.solid.pressed': slots.solidPressed,
+		'color.background.success.solid.rest': slots.solidRest,
+		'color.background.success.subtle.hover': slots.subtleHover,
+		'color.background.success.subtle.pressed': slots.subtlePressed,
+		'color.background.success.subtle.rest': slots.subtleRest,
+		'color.border.success': slots.border,
+		'color.foreground.success.hover': slots.foregroundHover,
+		'color.foreground.success.onSolid': slots.onSolid,
+		'color.foreground.success.rest': slots.foregroundRest,
+	};
+}
+
+function mapWarningColors(family: ScaleFamily): RoleColorValues<'warning'> {
+	const slots = roleSlots(family);
+	return {
+		'color.background.warning.solid.hover': slots.solidHover,
+		'color.background.warning.solid.pressed': slots.solidPressed,
+		'color.background.warning.solid.rest': slots.solidRest,
+		'color.background.warning.subtle.hover': slots.subtleHover,
+		'color.background.warning.subtle.pressed': slots.subtlePressed,
+		'color.background.warning.subtle.rest': slots.subtleRest,
+		'color.border.warning': slots.border,
+		'color.foreground.warning.hover': slots.foregroundHover,
+		'color.foreground.warning.onSolid': slots.onSolid,
+		'color.foreground.warning.rest': slots.foregroundRest,
+	};
+}
+
+function mapDangerColors(family: ScaleFamily): RoleColorValues<'danger'> {
+	const slots = roleSlots(family);
+	return {
+		'color.background.danger.solid.hover': slots.solidHover,
+		'color.background.danger.solid.pressed': slots.solidPressed,
+		'color.background.danger.solid.rest': slots.solidRest,
+		'color.background.danger.subtle.hover': slots.subtleHover,
+		'color.background.danger.subtle.pressed': slots.subtlePressed,
+		'color.background.danger.subtle.rest': slots.subtleRest,
+		'color.border.danger': slots.border,
+		'color.foreground.danger.hover': slots.foregroundHover,
+		'color.foreground.danger.onSolid': slots.onSolid,
+		'color.foreground.danger.rest': slots.foregroundRest,
+	};
 }

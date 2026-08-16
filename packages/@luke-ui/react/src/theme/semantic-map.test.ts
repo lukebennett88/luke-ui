@@ -7,7 +7,7 @@ import { generateSurfaces } from './elevation.js';
 import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamily } from './scale.js';
-import { mapSemanticColors } from './semantic-map.js';
+import { mapSemanticColors, type SemanticColorValues } from './semantic-map.js';
 
 type ColorMode = 'light' | 'dark';
 
@@ -134,6 +134,11 @@ describe('mapSemanticColors', () => {
 	});
 
 	describe('completeness', () => {
+		it('makes an incomplete colour map a type error', () => {
+			// @ts-expect-error -- SemanticColorValues requires every colour path
+			const incomplete: SemanticColorValues = { 'color.scrim': 'transparent' };
+			expect(incomplete).toEqual({ 'color.scrim': 'transparent' });
+		});
 		// Every `color.*` leaf, including the passed-through `color.scrim`.
 		const colourPaths = flattenThemeContract()
 			.map(([path]) => path)
