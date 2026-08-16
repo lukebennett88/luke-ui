@@ -52,8 +52,8 @@ function postFromParent(data: unknown): void {
 	);
 }
 
-function collectParentPreviewMessages(): PlaygroundPreviewMessage[] {
-	const messages: PlaygroundPreviewMessage[] = [];
+function collectParentPreviewMessages(): Array<PlaygroundPreviewMessage> {
+	const messages: Array<PlaygroundPreviewMessage> = [];
 	window.parent.addEventListener(
 		'message',
 		(event: MessageEvent) => {
