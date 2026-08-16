@@ -53,6 +53,8 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the semantic token tree, the mode-family declaration, `--luke-*` variable
   naming, and the source-owned `typeStyles` typography keys.
+- `theme/path-record.ts`: the typed `[path, value]` record constructor value producers use so
+  `Object.fromEntries` cannot hide a missing contract path.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,

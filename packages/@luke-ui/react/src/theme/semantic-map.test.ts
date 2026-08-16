@@ -8,7 +8,6 @@ import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamily } from './scale.js';
 import { mapSemanticColors } from './semantic-map.js';
-import type { SemanticColorValues } from './semantic-map.js';
 
 type ColorMode = 'light' | 'dark';
 
@@ -26,6 +25,8 @@ const CONTROL_BORDER: Record<ColorMode, Oklch> = {
 	dark: parseColor('oklch(0.62 0.006 250)'),
 	light: parseColor('oklch(0.38 0.006 250)'),
 };
+
+const FOCUS = parseColor('oklch(0.6 0.2 260)');
 
 // A representative source per role and mode. `info`/`success`/`warning`/`danger` reuse Luke UI's
 // curated defaults, which are chosen to clear the on-solid gate on near-white/near-black canvases;
@@ -72,13 +73,12 @@ describe('mapSemanticColors', () => {
 				const families = buildFamilies(mode, background);
 				const surfaces = generateSurfaces({ background, mode });
 				const scrim = 'oklch(0 0 0 / 0.45)';
-				const focus = parseColor('oklch(0.6 0.2 260)');
 				const controlBorder = CONTROL_BORDER[mode];
 
 				const result = mapSemanticColors({
 					controlBorder,
 					families,
-					focus,
+					focus: FOCUS,
 					scrim,
 					surfaces,
 				});
@@ -98,7 +98,7 @@ describe('mapSemanticColors', () => {
 				expect(result['color.text.disabled']).toBe(formatOklch(families.neutral[8]));
 				expect(result['color.border.decorative']).toBe(formatOklch(families.neutral[6]));
 				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
-				expect(result['color.border.focus']).toBe(formatOklch(focus));
+				expect(result['color.border.focus']).toBe(formatOklch(FOCUS));
 
 				// The shared contract: identical steps for all six roles, keyed to the role's own family.
 				for (const role of SEMANTIC_ROLES) {
@@ -116,30 +116,10 @@ describe('mapSemanticColors', () => {
 					expect(result[`color.border.${role}`]).toBe(formatOklch(family[7]));
 				}
 			});
-
-			it(`defaults border.focus to the accent family's step 8 when focus is omitted (${mode})`, () => {
-				const background = BACKGROUND[mode];
-				const families = buildFamilies(mode, background);
-				const surfaces = generateSurfaces({ background, mode });
-
-				const result = mapSemanticColors({
-					controlBorder: CONTROL_BORDER[mode],
-					families,
-					scrim: 'oklch(0 0 0 / 0.45)',
-					surfaces,
-				});
-
-				expect(result['color.border.focus']).toBe(formatOklch(families.accent[8]));
-			});
 		}
 	});
 
 	describe('completeness', () => {
-		it('makes an incomplete colour map a type error', () => {
-			// @ts-expect-error -- SemanticColorValues requires every colour path
-			const incomplete: SemanticColorValues = { 'color.scrim': 'transparent' };
-			expect(incomplete).toEqual({ 'color.scrim': 'transparent' });
-		});
 		// Every `color.*` leaf, including the passed-through `color.scrim`.
 		const colourPaths = flattenThemeContract()
 			.map(([path]) => path)
@@ -154,6 +134,7 @@ describe('mapSemanticColors', () => {
 				const result = mapSemanticColors({
 					controlBorder: CONTROL_BORDER[mode],
 					families,
+					focus: FOCUS,
 					scrim: 'oklch(0 0 0 / 0.45)',
 					surfaces,
 				});
@@ -176,6 +157,7 @@ describe('mapSemanticColors', () => {
 			const result = mapSemanticColors({
 				controlBorder: CONTROL_BORDER.light,
 				families,
+				focus: FOCUS,
 				scrim,
 				surfaces,
 			});

@@ -9,6 +9,7 @@ import {
 	flattenThemeContract,
 	partitionContractPairs,
 	spaceScale,
+	typeStyles,
 	typeStyleWeightRole,
 } from './contract.js';
 import type { IdentityPath, ModePath, SpaceStep, TypeStyle } from './contract.js';
@@ -20,6 +21,7 @@ import {
 	defaultRadius,
 	themeFontFamilyStacks,
 } from './foundation.js';
+import { pathEntry, pathRecord } from './path-record.js';
 import { getThemeClassName } from './theme-class-name.js';
 import {
 	CONTROL_SIZE_VALUES,
@@ -110,8 +112,8 @@ function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPa
 		...INTERACTION_VALUES,
 		...FONT_VALUES,
 		...buildCapsizeValues(fontFamily),
-		...typeStyleFontFamilies(bodyFontFamily),
-		...typeStyleFontWeights(resolvedWeights),
+		...typeStyleValues('fontFamily', () => bodyFontFamily),
+		...typeStyleValues('fontWeight', (style) => resolvedWeights[typeStyleWeightRole[style]]),
 		'font.family.body': bodyFontFamily,
 		'font.family.code': codeFontFamilyStack,
 		'font.weight.body': resolvedWeights.body,
@@ -129,62 +131,17 @@ function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPa
 	};
 }
 
-function typeStyleFontFamilies(family: string): {
-	[Style in TypeStyle as `font.${Style}.fontFamily`]: string;
-} {
-	return {
-		'font.body.fontFamily': family,
-		'font.caption.fontFamily': family,
-		'font.display.fontFamily': family,
-		'font.heading1.fontFamily': family,
-		'font.heading2.fontFamily': family,
-		'font.heading3.fontFamily': family,
-		'font.heading4.fontFamily': family,
-		'font.label.fontFamily': family,
-		'font.lead.fontFamily': family,
-		'font.support.fontFamily': family,
-	};
-}
-
-function typeStyleFontWeights(weights: {
-	body: string;
-	emphasis: string;
-	heading: string;
-	label: string;
-}): { [Style in TypeStyle as `font.${Style}.fontWeight`]: string } {
-	return {
-		'font.body.fontWeight': weights[typeStyleWeightRole.body],
-		'font.caption.fontWeight': weights[typeStyleWeightRole.caption],
-		'font.display.fontWeight': weights[typeStyleWeightRole.display],
-		'font.heading1.fontWeight': weights[typeStyleWeightRole.heading1],
-		'font.heading2.fontWeight': weights[typeStyleWeightRole.heading2],
-		'font.heading3.fontWeight': weights[typeStyleWeightRole.heading3],
-		'font.heading4.fontWeight': weights[typeStyleWeightRole.heading4],
-		'font.label.fontWeight': weights[typeStyleWeightRole.label],
-		'font.lead.fontWeight': weights[typeStyleWeightRole.lead],
-		'font.support.fontWeight': weights[typeStyleWeightRole.support],
-	};
+function typeStyleValues<Field extends string>(
+	field: Field,
+	valueFor: (style: TypeStyle) => string,
+): { [P in `font.${TypeStyle}.${Field}`]: string } {
+	return pathRecord(
+		typeStyles.map((style) => pathEntry(`font.${style}.${field}`, valueFor(style))),
+	);
 }
 
 function spaceValues(): { [Step in SpaceStep as `space.${Step}`]: string } {
-	return {
-		'space.100': spaceStep('100'),
-		'space.1000': spaceStep('1000'),
-		'space.1200': spaceStep('1200'),
-		'space.1600': spaceStep('1600'),
-		'space.200': spaceStep('200'),
-		'space.300': spaceStep('300'),
-		'space.400': spaceStep('400'),
-		'space.600': spaceStep('600'),
-		'space.800': spaceStep('800'),
-	};
-}
-
-function spaceStep(step: SpaceStep): string {
-	for (const [key, value] of spaceScale) {
-		if (key === step) return value;
-	}
-	throw new Error(`spaceScale is missing "${step}"`);
+	return pathRecord(spaceScale.map(([step, value]) => pathEntry(`space.${step}`, value)));
 }
 
 function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): {
@@ -192,38 +149,15 @@ function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): {
 } & {
 	[Style in TypeStyle as `font.${Style}.capHeightTrim`]: string;
 } {
-	const caption = capsizeTrims(fontFamily, 'caption');
-	const support = capsizeTrims(fontFamily, 'support');
-	const label = capsizeTrims(fontFamily, 'label');
-	const body = capsizeTrims(fontFamily, 'body');
-	const lead = capsizeTrims(fontFamily, 'lead');
-	const heading4 = capsizeTrims(fontFamily, 'heading4');
-	const heading3 = capsizeTrims(fontFamily, 'heading3');
-	const heading2 = capsizeTrims(fontFamily, 'heading2');
-	const heading1 = capsizeTrims(fontFamily, 'heading1');
-	const display = capsizeTrims(fontFamily, 'display');
-	return {
-		'font.body.baselineTrim': body.baselineTrim,
-		'font.body.capHeightTrim': body.capHeightTrim,
-		'font.caption.baselineTrim': caption.baselineTrim,
-		'font.caption.capHeightTrim': caption.capHeightTrim,
-		'font.display.baselineTrim': display.baselineTrim,
-		'font.display.capHeightTrim': display.capHeightTrim,
-		'font.heading1.baselineTrim': heading1.baselineTrim,
-		'font.heading1.capHeightTrim': heading1.capHeightTrim,
-		'font.heading2.baselineTrim': heading2.baselineTrim,
-		'font.heading2.capHeightTrim': heading2.capHeightTrim,
-		'font.heading3.baselineTrim': heading3.baselineTrim,
-		'font.heading3.capHeightTrim': heading3.capHeightTrim,
-		'font.heading4.baselineTrim': heading4.baselineTrim,
-		'font.heading4.capHeightTrim': heading4.capHeightTrim,
-		'font.label.baselineTrim': label.baselineTrim,
-		'font.label.capHeightTrim': label.capHeightTrim,
-		'font.lead.baselineTrim': lead.baselineTrim,
-		'font.lead.capHeightTrim': lead.capHeightTrim,
-		'font.support.baselineTrim': support.baselineTrim,
-		'font.support.capHeightTrim': support.capHeightTrim,
-	};
+	return pathRecord(
+		typeStyles.flatMap((style) => {
+			const { baselineTrim, capHeightTrim } = capsizeTrims(fontFamily, style);
+			return [
+				pathEntry(`font.${style}.baselineTrim`, baselineTrim),
+				pathEntry(`font.${style}.capHeightTrim`, capHeightTrim),
+			];
+		}),
+	);
 }
 
 function capsizeTrims(fontFamily: keyof typeof FONT_METRICS, style: TypeStyle) {

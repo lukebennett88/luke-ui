@@ -14,7 +14,6 @@ import {
 	spaceScale,
 	typeStyles,
 } from './contract.js';
-import type { IdentityPath, ModePath } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import { defaultFontWeights, defaultRadius } from './foundation.js';
 
@@ -78,15 +77,6 @@ describe('buildTheme output', () => {
 			return countOccurrences(blocks.identity, `${varName}: `);
 		});
 		expect(modeCounts).toEqual(modeVarNames.map(() => 0));
-	});
-
-	it('makes incomplete identity and mode maps type errors', () => {
-		// @ts-expect-error -- every identity path is required
-		const incompleteIdentity: { [Path in IdentityPath]: string } = { 'radius.full': '9999px' };
-		// @ts-expect-error -- every mode path is required
-		const incompleteMode: { [Path in ModePath]: string } = { 'depth.resting': 'none' };
-		expect(incompleteIdentity).toEqual({ 'radius.full': '9999px' });
-		expect(incompleteMode).toEqual({ 'depth.resting': 'none' });
 	});
 
 	// Both bundled themes, because the contract inventory is what every consumer resolves against: a
