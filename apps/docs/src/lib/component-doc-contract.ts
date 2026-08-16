@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { basename, relative, resolve } from 'node:path';
+import { basename, dirname, relative, resolve } from 'node:path';
 import type { DocsFrontmatter } from './docs-frontmatter.js';
 import { readFrontmatter } from './docs-frontmatter.js';
 import { findMdxFiles } from './docs-mdx-files.js';
@@ -78,7 +78,5 @@ function findPlaceholders(
  * that do not declare `source:`.
  */
 function findComponentGuides(directory: string): Array<string> {
-	return findMdxFiles(directory).filter(
-		(file) => relative(directory, file).split('/').length === 2,
-	);
+	return findMdxFiles(directory).filter((file) => dirname(dirname(file)) === directory);
 }

@@ -26,3 +26,10 @@ test('reads every ExampleBlock src on the token-reference page', () => {
 		'overview/depth',
 	]);
 });
+
+test('does not take src from later markup after an ExampleBlock with no src', () => {
+	expect(
+		exampleBlockSources(`<ExampleBlock title="Missing src" />
+<SomethingElse src="not-an-example" />`),
+	).toEqual([]);
+});
