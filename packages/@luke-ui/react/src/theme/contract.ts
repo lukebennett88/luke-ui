@@ -290,10 +290,10 @@ export const modeFamilies = [
 ] as const satisfies ReadonlyArray<keyof typeof themeContractTree>;
 
 /** A top-level contract family that varies by colour mode. */
-export type ModeFamily = (typeof modeFamilies)[number];
+type ModeFamily = (typeof modeFamilies)[number];
 
 /** A top-level contract family that belongs to the theme identity, not a colour mode. */
-export type IdentityFamily = Exclude<keyof typeof themeContractTree, ModeFamily>;
+type IdentityFamily = Exclude<keyof typeof themeContractTree, ModeFamily>;
 
 type JoinPath<Prefix extends string, Key extends string> = Prefix extends ''
 	? Key
