@@ -12,6 +12,25 @@ const checkboxControlSize = createVar();
 const checkboxGlyphSize = createVar();
 const checkboxIndicatorSize = createVar();
 
+/** Shared guard excluding a disabled or read-only control from an interaction selector. */
+const notDisabledOrReadOnly = ':not([data-disabled="true"]):not([data-readonly="true"])';
+
+/**
+ * Builds the indicator's hover/pressed selector list for one interaction state.
+ * `stateAttrs` lists one `[data-*]` attribute clause per OR-ed alternative (an empty string for
+ * the interaction alone, unqualified by selection), and `extraExclusion` adds any further
+ * `:not(...)` clause specific to that state (for example, excluding the invalid selectors already
+ * covered by their own, more specific rule).
+ */
+function interactionSelector(
+	interaction: 'hovered' | 'pressed',
+	stateAttrs: ReadonlyArray<string>,
+	extraExclusion = '',
+): string {
+	const guard = `${notDisabledOrReadOnly}${extraExclusion}`;
+	return stateAttrs.map((attrs) => `[data-${interaction}="true"]${attrs}${guard} &`).join(', ');
+}
+
 const checkboxConfig = {
 	slots: {
 		root: {
@@ -116,16 +135,23 @@ const checkboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
-				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]) &':
-					{
-						backgroundColor: interactionColor(vars.color.surface.canvas, 'hover'),
-						backgroundImage: vars.actionControlFinish.raised,
-					},
-				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-selected="true"]):not([data-indeterminate="true"]) &':
-					{
-						backgroundColor: interactionColor(vars.color.surface.canvas, 'pressed'),
-						backgroundImage: vars.actionControlFinish.recessed,
-					},
+				[interactionSelector(
+					'hovered',
+					[''],
+					':not([data-selected="true"]):not([data-indeterminate="true"])',
+				)]: {
+					backgroundColor: interactionColor(vars.color.surface.canvas, 'hover'),
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: interactionColor(vars.color.border.control, 'hover'),
+				},
+				[interactionSelector(
+					'pressed',
+					[''],
+					':not([data-selected="true"]):not([data-indeterminate="true"])',
+				)]: {
+					backgroundColor: interactionColor(vars.color.surface.canvas, 'pressed'),
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
 				'[data-indeterminate="true"] &': {
 					backgroundColor: vars.color.background.accent.solid,
 					borderColor: vars.color.background.accent.solid,
@@ -144,32 +170,44 @@ const checkboxConfig = {
 				'[data-selected="true"] &::after': {
 					opacity: 1,
 				},
-				'[data-hovered="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &, [data-hovered="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &':
-					{
-						backgroundColor: interactionColor(vars.color.background.accent.solid, 'hover'),
-						backgroundImage: vars.actionControlFinish.raised,
-					},
-				'[data-pressed="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &, [data-pressed="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]):not([data-invalid="true"]) &':
-					{
-						backgroundColor: interactionColor(vars.color.background.accent.solid, 'pressed'),
-						backgroundImage: vars.actionControlFinish.recessed,
-					},
+				[interactionSelector(
+					'hovered',
+					['[data-selected="true"]', '[data-indeterminate="true"]'],
+					':not([data-invalid="true"])',
+				)]: {
+					backgroundColor: interactionColor(vars.color.background.accent.solid, 'hover'),
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: interactionColor(vars.color.background.accent.solid, 'hover'),
+				},
+				[interactionSelector(
+					'pressed',
+					['[data-selected="true"]', '[data-indeterminate="true"]'],
+					':not([data-invalid="true"])',
+				)]: {
+					backgroundColor: interactionColor(vars.color.background.accent.solid, 'pressed'),
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
 						backgroundColor: vars.color.background.danger.solid,
 						borderColor: vars.color.background.danger.solid,
 						color: vars.color.foreground.danger.onSolid,
 					},
-				'[data-hovered="true"][data-invalid="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-hovered="true"][data-invalid="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: interactionColor(vars.color.background.danger.solid, 'hover'),
-						backgroundImage: vars.actionControlFinish.raised,
-					},
-				'[data-pressed="true"][data-invalid="true"][data-selected="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-pressed="true"][data-invalid="true"][data-indeterminate="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: interactionColor(vars.color.background.danger.solid, 'pressed'),
-						backgroundImage: vars.actionControlFinish.recessed,
-					},
+				[interactionSelector('hovered', [
+					'[data-invalid="true"][data-selected="true"]',
+					'[data-invalid="true"][data-indeterminate="true"]',
+				])]: {
+					backgroundColor: interactionColor(vars.color.background.danger.solid, 'hover'),
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: interactionColor(vars.color.background.danger.solid, 'hover'),
+				},
+				[interactionSelector('pressed', [
+					'[data-invalid="true"][data-selected="true"]',
+					'[data-invalid="true"][data-indeterminate="true"]',
+				])]: {
+					backgroundColor: interactionColor(vars.color.background.danger.solid, 'pressed'),
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
 			},
 		},
 	},

@@ -75,6 +75,27 @@ test('keyboard focus ring', async () => {
 	await captureVisual(locator, 'checkbox/focus-visible');
 });
 
+test('hover states', async () => {
+	const { locator } = render(
+		<Stack>
+			<Checkbox name="default">Default</Checkbox>
+			<Checkbox defaultSelected name="selected">
+				Selected
+			</Checkbox>
+		</Stack>,
+	);
+	const defaultLabel = checkboxLabel(page.getByRole('checkbox', { name: 'Default' }));
+	const selectedLabel = checkboxLabel(page.getByRole('checkbox', { name: 'Selected' }));
+
+	await userEvent.hover(defaultLabel);
+	await captureVisual(locator, 'checkbox/hover-default');
+	await userEvent.unhover(defaultLabel);
+
+	await userEvent.hover(selectedLabel);
+	await captureVisual(locator, 'checkbox/hover-selected');
+	await userEvent.unhover(selectedLabel);
+});
+
 test('invalid selected hover', async () => {
 	const { locator } = render(
 		<Checkbox defaultSelected isInvalid name="invalid-selected">
