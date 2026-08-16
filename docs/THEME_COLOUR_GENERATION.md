@@ -24,8 +24,8 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    recipes mix toward at runtime.
 5. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
    throws `ThemeContrastError` on a hard-gate miss. Recipes emit CSS through `interactionColor`.
-   Generation and validation use `mixInteractionColor` from `interaction-mix.ts` for an opaque
-   base, or `compositeSourceOver` for a transparent base.
+   Generation and validation use `mixInteractionColor` from `interaction-mix.ts` for an opaque base,
+   or `compositeSourceOver` for a transparent base.
 
 `compileTheme` returns `{ css, diagnostics }`; `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling. The
@@ -163,8 +163,8 @@ so existing colour transitions work. The public contract has no hover or pressed
 pairs — solid and subtle Button tones, selected Combobox options on accent subtle, and Link's
 derived accent foreground — measure `mixInteractionColor`. Transparent-base pairs — ghost Button
 foregrounds on canvas and recessed, and unselected Combobox options on floating — measure
-`compositeSourceOver`, real source-over alpha compositing in gamma-encoded sRGB, matching what
-those controls actually paint rather than an OKLab interpolation between the surface and the source.
+`compositeSourceOver`, real source-over alpha compositing in gamma-encoded sRGB, matching what those
+controls actually paint rather than an OKLab interpolation between the surface and the source.
 
 The authored modal backdrop stays separate as `color.overlay.backdrop`. `color.surface.overlay` is
 the opaque high-elevation surface. Selected, checked, invalid, danger, focus, and disabled remain
