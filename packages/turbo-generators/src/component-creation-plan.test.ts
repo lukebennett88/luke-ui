@@ -1,3 +1,4 @@
+import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vite-plus/test';
 import { ZodError } from 'zod';
 import {
@@ -104,5 +105,15 @@ describe('createComponentPlan', () => {
 		expect(renderPropsPage(frontmatter)).toContain(
 			'<auto-type-table\n\tpath="packages/@luke-ui/react/src/status-badge/status-badge.tsx"\n\tname="StatusBadgeProps"\n/>',
 		);
+	});
+
+	it('generates a browser test file that parses as valid TSX', () => {
+		const plan = createComponentPlan(validAnswers);
+
+		const testFile = plan.files.find((file) => file.path.endsWith('.browser.test.tsx'));
+		if (testFile === undefined) throw new Error('Expected the scaffold to write a browser test.');
+
+		const parsed = parseSync(testFile.path, testFile.contents, { lang: 'tsx' });
+		expect(parsed.errors).toEqual([]);
 	});
 });
