@@ -332,9 +332,7 @@ function familyOf(path: string): string {
 /**
  * Splits flattened contract pairs into identity and mode groups using {@link modeFamilies}.
  */
-export function partitionContractPairs(
-	pairs: ReadonlyArray<readonly [string, string]>,
-): {
+export function partitionContractPairs(pairs: ReadonlyArray<readonly [string, string]>): {
 	identityPairs: Array<[IdentityPath, string]>;
 	modePairs: Array<[ModePath, string]>;
 } {

@@ -89,7 +89,10 @@ describe('buildTheme generation failures', () => {
 					...tactileFoundation,
 					light: {
 						...tactileFoundation.light,
-						color: { ...tactileFoundation.light.color, accent: resolvedColor('oklch(0.62 0.19 27)') },
+						color: {
+							...tactileFoundation.light.color,
+							accent: resolvedColor('oklch(0.62 0.19 27)'),
+						},
 					},
 					name: 'bad-accent',
 				});

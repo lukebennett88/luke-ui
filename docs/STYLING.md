@@ -64,8 +64,8 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and the canonical
   semantic role list the generator, the compiler's validation matrix, and the semantic map all read.
-- `theme/lightness-candidates.ts`: the shared lightness grid the accent pre-conditioner, solid-anchor
-  search, and control-border solver walk.
+- `theme/lightness-candidates.ts`: the shared lightness grid the accent pre-conditioner,
+  solid-anchor search, and control-border solver walk.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
   constrained step-9 solid-anchor search and `passesOnSolidGate`, the on-solid accessibility gate.
   Every semantic role's solid clears 4.5:1 against on-solid text.
