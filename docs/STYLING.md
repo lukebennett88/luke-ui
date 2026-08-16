@@ -67,6 +67,8 @@ with no class and no JS required. Neither step injects styles at runtime.
   semantic role's solid clears 4.5:1 against on-solid text.
 - `theme/interaction-color.ts`: `interactionColor`, the shared hover and pressed derivation used by
   recipes and contrast validation.
+- `theme/interaction-mix.ts`: `INTERACTION_STRENGTH` and `mixInteractionColor`, the shared hover and
+  pressed colour maths used by the scale generator and contrast validation.
 - `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
   `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
   no `--luke-motion-duration-*` custom property exists.
