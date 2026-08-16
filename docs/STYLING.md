@@ -42,9 +42,9 @@ with no class and no JS required. Neither step injects styles at runtime.
   own `invalidIndicator` slot rather than a mask: `InputGroup` (`primitives/input-group/`) reads
   React Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid control
   cannot be composed without a non-colour cue. The recipe owns only the icon's colour and margins —
-  `Icon` owns its box, and `IconSizeProvider` (`FIELD_CONTROL_ICON_SIZE`) owns its per-size step — and
-  gives the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control is
-  not a plain `Group` with that state to hand, so it stays CSS-driven.
+  `Icon` owns its box, and `IconSizeProvider` (`FIELD_CONTROL_ICON_SIZE`) owns its per-size step —
+  and gives the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control
+  is not a plain `Group` with that state to hand, so it stays CSS-driven.
 - `overlays/mobile-overlay.css.ts`: the scrim, tray, and dialog styles `MobileOverlay` renders for
   the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and `tray/index.css`.
 - `overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
