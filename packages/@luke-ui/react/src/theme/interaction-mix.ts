@@ -1,7 +1,6 @@
 /**
- * Shared hover and pressed colour maths. Recipes emit CSS through {@link interactionColor}; the
- * scale generator and contrast validation use {@link mixInteractionColor} so strengths and OKLab
- * interpolation cannot drift.
+ * Shared hover and pressed colour maths. Recipes emit CSS through {@link interactionColor}; contrast
+ * validation uses {@link mixInteractionColor} so strengths and OKLab interpolation cannot drift.
  */
 
 import type { Oklch } from './color.js';

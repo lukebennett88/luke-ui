@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { vars } from './contract.css.js';
-import { flattenThemeContract, spaceScale, themeContractTree, typeStyles } from './contract.js';
+import {
+	flattenThemeContract,
+	modeFamilies,
+	partitionContractPairs,
+	spaceScale,
+	themeContractTree,
+	typeStyles,
+} from './contract.js';
+import type { IdentityPath, ModePath } from './contract.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 
@@ -43,14 +51,15 @@ describe('theme contract', () => {
 		// spelled out here rather than re-derived through `themeVarName` (which would only restate the
 		// kebab-casing the contract already applied). `on-solid` is the one name a naive reading gets
 		// wrong. Comparing the whole set, not a sample, also catches a seventh role or a stray leaf.
+		const leaf = (path: ModePath, varName: string): [ModePath, string] => [path, varName];
 		const expected = SEMANTIC_ROLES.flatMap((role) => [
-			[`color.border.${role}`, `--luke-color-border-${role}`],
-			[`color.background.${role}.subtle`, `--luke-color-background-${role}-subtle`],
-			[`color.background.${role}.solid`, `--luke-color-background-${role}-solid`],
-			[`color.foreground.${role}.default`, `--luke-color-foreground-${role}-default`],
-			[`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`],
+			leaf(`color.border.${role}`, `--luke-color-border-${role}`),
+			leaf(`color.background.${role}.subtle`, `--luke-color-background-${role}-subtle`),
+			leaf(`color.background.${role}.solid`, `--luke-color-background-${role}-solid`),
+			leaf(`color.foreground.${role}.default`, `--luke-color-foreground-${role}-default`),
+			leaf(`color.foreground.${role}.onSolid`, `--luke-color-foreground-${role}-on-solid`),
 		]);
-		const rolePaths = new Set(expected.map(([path]) => path));
+		const rolePaths = new Set<string>(expected.map(([path]) => path));
 		const emitted = flattenThemeContract().filter(([path]) => {
 			return (
 				path.startsWith('color.background.') ||
@@ -63,6 +72,22 @@ describe('theme contract', () => {
 			return (a[0] ?? '').localeCompare(b[0] ?? '');
 		};
 		expect([...emitted].sort(byPath)).toEqual([...expected].sort(byPath));
+	});
+
+	it('partitions identity and mode paths from the declared mode families', () => {
+		expect(modeFamilies).toEqual(['actionControlFinish', 'color', 'depth']);
+		const pairs = flattenThemeContract();
+		const { identityPairs, modePairs } = partitionContractPairs(pairs);
+		expect(identityPairs.length + modePairs.length).toBe(pairs.length);
+
+		const modePaths: Array<ModePath> = modePairs.map(([path]) => path);
+		const identityPaths: Array<IdentityPath> = identityPairs.map(([path]) => path);
+		for (const path of modePaths) {
+			expect(modeFamilies).toContain(path.split('.')[0]);
+		}
+		for (const path of identityPaths) {
+			expect(modeFamilies).not.toContain(path.split('.')[0]);
+		}
 	});
 
 	it('keeps typeStyles as the single source of truth for the font contract keys', () => {

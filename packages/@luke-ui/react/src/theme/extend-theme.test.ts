@@ -1,10 +1,15 @@
 import { describe, expect, it } from 'vite-plus/test';
 import { splitBlocks } from './__fixtures__/theme-css.js';
 import { ThemeContrastError } from './build-theme.js';
-import { parseColor } from './color.js';
+import { gamutMapOklch, parseColor } from './color.js';
 import type { ExtendingThemeInput, ThemeInput } from './define-theme.js';
 import { defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
+import { resolveThemeInput } from './extend-theme.js';
 import { tactileTheme } from './foundations/tactile.js';
+
+function foundationOf(input: ThemeInput | ExtendingThemeInput) {
+	return normalizeTheme(resolveThemeInput(input).input);
+}
 
 /** Every `--luke-*` declaration in a stylesheet, keyed by rule block and variable name. */
 function declarations(css: string): Array<[string, string]> {
@@ -69,17 +74,21 @@ describe('theme inheritance', () => {
 			color: { accent: { dark: 'oklch(0.75 0.1 200)', light: 'oklch(0.52 0.11 200)' } },
 			name: 'pair-accent',
 		};
-		const foundation = normalizeTheme({
+		const foundation = foundationOf({
 			color: { accent: 'oklch(0.6 0.15 30)' },
 			extends: base,
 			name: 'string-accent',
 		});
 
-		expect(foundation.light.color.accent).not.toBe('oklch(0.52 0.11 200)');
-		expect(foundation.dark.color.accent).not.toBe('oklch(0.75 0.1 200)');
+		expect(foundation.light.color.accent).not.toEqual(
+			gamutMapOklch(parseColor('oklch(0.52 0.11 200)')),
+		);
+		expect(foundation.dark.color.accent).not.toEqual(
+			gamutMapOklch(parseColor('oklch(0.75 0.1 200)')),
+		);
 
-		const light = parseColor(foundation.light.color.accent);
-		const dark = parseColor(foundation.dark.color.accent);
+		const light = foundation.light.color.accent;
+		const dark = foundation.dark.color.accent;
 		expect(light.h).toBeCloseTo(30, 0);
 		expect(dark.h).toBeCloseTo(30, 0);
 		expect(light.l).toBeCloseTo(0.5, 1);
@@ -94,8 +103,8 @@ describe('theme inheritance', () => {
 			},
 			name: 'pair-neutral',
 		};
-		const baseFoundation = normalizeTheme(base);
-		const foundation = normalizeTheme({
+		const baseFoundation = foundationOf(base);
+		const foundation = foundationOf({
 			color: { neutralStyle: 'warm' },
 			extends: base,
 			name: 'warm-neutral',
@@ -103,8 +112,8 @@ describe('theme inheritance', () => {
 
 		// The extending theme's `neutralStyle` decides the canvas, so the inherited raw `neutral` went
 		// with it rather than shadowing the style.
-		expect(foundation.light.color.neutral).not.toBe(baseFoundation.light.color.neutral);
-		expect(parseColor(foundation.light.color.neutral).h).toBeCloseTo(70, 0);
+		expect(foundation.light.color.neutral).not.toEqual(baseFoundation.light.color.neutral);
+		expect(foundation.light.color.neutral.h).toBeCloseTo(70, 0);
 	});
 
 	it('inherits materials per rung and radius per step', () => {
@@ -117,7 +126,7 @@ describe('theme inheritance', () => {
 			name: 'material-base',
 			radius: { base: 4, control: 10 },
 		};
-		const foundation = normalizeTheme({
+		const foundation = foundationOf({
 			depth: { light: { overlay: 'own-light-overlay', resting: undefined } },
 			extends: base,
 			name: 'material-child',
@@ -142,7 +151,7 @@ describe('theme inheritance', () => {
 			name: 'type-base',
 			typography: { fontFamily: 'dm-sans', fontWeight: { body: 300, heading: 800 } },
 		};
-		const foundation = normalizeTheme({
+		const foundation = foundationOf({
 			extends: base,
 			name: 'type-child',
 			typography: { fontFamily: 'apple-system', fontWeight: { body: 400 } },
@@ -167,11 +176,13 @@ describe('theme inheritance', () => {
 			extends: root,
 			name: 'middle',
 		};
-		const foundation = normalizeTheme({ extends: middle, name: 'leaf' });
+		const foundation = foundationOf({ extends: middle, name: 'leaf' });
 
 		// A role only the innermost base sets reaches the outermost theme through the middle theme.
-		expect(foundation.light.color.success).toBe('oklch(0.45 0.12 150)');
-		expect(foundation.dark.color.success).toBe('oklch(0.8 0.12 150)');
+		expect(foundation.light.color.success).toEqual(
+			gamutMapOklch(parseColor('oklch(0.45 0.12 150)')),
+		);
+		expect(foundation.dark.color.success).toEqual(gamutMapOklch(parseColor('oklch(0.8 0.12 150)')));
 
 		const first: ThemeInput = { color: { accent: '#3b82f6' }, name: 'first' };
 		const second: ExtendingThemeInput = { extends: first, name: 'second' };

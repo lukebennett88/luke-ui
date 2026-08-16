@@ -5,7 +5,14 @@
  */
 
 import { precomputeValues } from '@capsizecss/vanilla-extract';
-import { flattenThemeContract, spaceScale, typeStyles, typeStyleWeightRole } from './contract.js';
+import {
+	flattenThemeContract,
+	partitionContractPairs,
+	spaceScale,
+	typeStyles,
+	typeStyleWeightRole,
+} from './contract.js';
+import type { IdentityPath, ModePath, SpaceStep, TypeStyle } from './contract.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
 	codeFontFamilyStack,
@@ -14,6 +21,7 @@ import {
 	defaultRadius,
 	themeFontFamilyStacks,
 } from './foundation.js';
+import { pathEntry, pathRecord } from './path-record.js';
 import { getThemeClassName } from './theme-class-name.js';
 import {
 	CONTROL_SIZE_VALUES,
@@ -34,20 +42,11 @@ type ColorMode = 'light' | 'dark';
  */
 export function assembleStylesheet(
 	foundation: ThemeFoundation,
-	lightValues: Record<string, string>,
-	darkValues: Record<string, string>,
+	lightValues: Record<ModePath, string>,
+	darkValues: Record<ModePath, string>,
 ): string {
 	const selector = `.${getThemeClassName(foundation.name)}`;
-	const pairs = flattenThemeContract();
-	const isModePath = (path: string) => {
-		return (
-			path.startsWith('actionControlFinish.') ||
-			path.startsWith('color.') ||
-			path.startsWith('depth.')
-		);
-	};
-	const identityPairs = pairs.filter(([path]) => !isModePath(path));
-	const modePairs = pairs.filter(([path]) => isModePath(path));
+	const { identityPairs, modePairs } = partitionContractPairs(flattenThemeContract());
 
 	const identityDeclarations = declarations(identityPairs, buildIdentityValues(foundation));
 	const lightDeclarations = ['color-scheme: light;', ...declarations(modePairs, lightValues)];
@@ -97,7 +96,7 @@ export function assembleStylesheet(
 	].join('\n');
 }
 
-function buildIdentityValues(foundation: ThemeFoundation): Record<string, string> {
+function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPath]: string } {
 	const fontFamily = foundation.typography?.fontFamily ?? defaultFontFamily;
 	const fontWeight = foundation.typography?.fontWeight;
 	const radius = foundation.radius;
@@ -108,11 +107,13 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 		label: String(fontWeight?.label ?? defaultFontWeights.label),
 	};
 	const bodyFontFamily = themeFontFamilyStacks[fontFamily];
-	const values: Record<string, string> = {
+	return {
 		...CONTROL_SIZE_VALUES,
 		...INTERACTION_VALUES,
 		...FONT_VALUES,
 		...buildCapsizeValues(fontFamily),
+		...typeStyleValues('fontFamily', () => bodyFontFamily),
+		...typeStyleValues('fontWeight', (style) => resolvedWeights[typeStyleWeightRole[style]]),
 		'font.family.body': bodyFontFamily,
 		'font.family.code': codeFontFamilyStack,
 		'font.weight.body': resolvedWeights.body,
@@ -124,38 +125,54 @@ function buildIdentityValues(foundation: ThemeFoundation): Record<string, string
 		'radius.full': '9999px',
 		'radius.overlay': `${radius?.overlay ?? defaultRadius.overlay}px`,
 		'radius.surface': `${radius?.surface ?? defaultRadius.surface}px`,
+		...spaceValues(),
 		...ICON_SIZE_VALUES,
 		...MOTION_VALUES,
 	};
-	for (const style of typeStyles) {
-		values[`font.${style}.fontFamily`] = bodyFontFamily;
-		values[`font.${style}.fontWeight`] = resolvedWeights[typeStyleWeightRole[style]];
-	}
-	for (const [step, value] of spaceScale) {
-		values[`space.${step}`] = value;
-	}
-	return values;
 }
 
-function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): Record<string, string> {
-	const values: Record<string, string> = {};
-	for (const style of typeStyles) {
-		const fontSize = Number.parseFloat(FONT_VALUES[`font.${style}.fontSize`]);
-		const leading = Number.parseFloat(FONT_VALUES[`font.${style}.lineHeight`]);
-		const { baselineTrim, capHeightTrim } = precomputeValues({
-			fontMetrics: FONT_METRICS[fontFamily],
-			fontSize,
-			leading,
-		});
-		values[`font.${style}.baselineTrim`] = baselineTrim;
-		values[`font.${style}.capHeightTrim`] = capHeightTrim;
-	}
-	return values;
+function typeStyleValues<Field extends string>(
+	field: Field,
+	valueFor: (style: TypeStyle) => string,
+): { [P in `font.${TypeStyle}.${Field}`]: string } {
+	return pathRecord(
+		typeStyles.map((style) => pathEntry(`font.${style}.${field}`, valueFor(style))),
+	);
 }
 
-function declarations(
-	pairs: Array<[path: string, varName: string]>,
-	values: Record<string, string>,
+function spaceValues(): { [Step in SpaceStep as `space.${Step}`]: string } {
+	return pathRecord(spaceScale.map(([step, value]) => pathEntry(`space.${step}`, value)));
+}
+
+function buildCapsizeValues(fontFamily: keyof typeof FONT_METRICS): {
+	[Style in TypeStyle as `font.${Style}.baselineTrim`]: string;
+} & {
+	[Style in TypeStyle as `font.${Style}.capHeightTrim`]: string;
+} {
+	return pathRecord(
+		typeStyles.flatMap((style) => {
+			const { baselineTrim, capHeightTrim } = capsizeTrims(fontFamily, style);
+			return [
+				pathEntry(`font.${style}.baselineTrim`, baselineTrim),
+				pathEntry(`font.${style}.capHeightTrim`, capHeightTrim),
+			];
+		}),
+	);
+}
+
+function capsizeTrims(fontFamily: keyof typeof FONT_METRICS, style: TypeStyle) {
+	const fontSize = Number.parseFloat(FONT_VALUES[`font.${style}.fontSize`]);
+	const leading = Number.parseFloat(FONT_VALUES[`font.${style}.lineHeight`]);
+	return precomputeValues({
+		fontMetrics: FONT_METRICS[fontFamily],
+		fontSize,
+		leading,
+	});
+}
+
+function declarations<Path extends string>(
+	pairs: Array<[Path, string]>,
+	values: Record<Path, string>,
 ): Array<string> {
 	return pairs.map(([path, varName]) => {
 		const value = values[path];

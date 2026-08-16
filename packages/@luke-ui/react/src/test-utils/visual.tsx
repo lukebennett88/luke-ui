@@ -142,3 +142,39 @@ export async function focusViaKeyboard(target: Locator) {
 	await userEvent.tab();
 	await expect.element(target).toHaveFocus();
 }
+
+/**
+ * Holds the primary pointer button on `target` so a visual test can capture a pressed overlay
+ * item. Playwright's default hover and click scroll the target into view first, which closes React
+ * Aria popovers; `force` skips that check while still using `userEvent`.
+ */
+export async function holdPress(target: Locator): Promise<() => Promise<void>> {
+	await userEvent.hover(target, { force: true } as never);
+	const element = target.element();
+	element.dispatchEvent(
+		new PointerEvent('pointerdown', {
+			bubbles: true,
+			button: 0,
+			buttons: 1,
+			cancelable: true,
+			composed: true,
+			isPrimary: true,
+			pointerId: 1,
+			pointerType: 'mouse',
+		}),
+	);
+	return async () => {
+		element.dispatchEvent(
+			new PointerEvent('pointerup', {
+				bubbles: true,
+				button: 0,
+				buttons: 0,
+				cancelable: true,
+				composed: true,
+				isPrimary: true,
+				pointerId: 1,
+				pointerType: 'mouse',
+			}),
+		);
+	};
+}

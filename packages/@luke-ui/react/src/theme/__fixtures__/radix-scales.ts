@@ -281,8 +281,9 @@ export interface CorpusEntry {
 /**
  * The hue stress-corpus: source colours that push the generator's solid-anchor search, gamut
  * mapping, and on-solid choice. Used as `source` (and, for neutrals, `background`) inputs — not as
- * scales to reproduce. Every entry generates cleanly for a vibrant role. Mid-lightness sources that
- * adapt inside the tone window live in {@link MID_LIGHTNESS_TONES}.
+ * scales to reproduce. Every entry generates cleanly for a vibrant role (their tone sits clear of
+ * the on-solid dead zone); the genuinely-unsatisfiable dead-zone cases live in
+ * {@link UNSATISFIABLE_ON_SOLID}.
  */
 export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 	{
@@ -336,18 +337,19 @@ export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 ];
 
 /**
- * Mid-lightness sources whose preferred solid sits off the authored tone. The search finds a
- * neighbour in the tone window that clears the on-solid gate.
+ * Dead-zone sources: mid-lightness colours where neither near-white nor near-black on-solid text
+ * clears AA across the solid and its hover, and whose authored tone the generator preserves. A
+ * A source-toned role given one of these is genuinely unsatisfiable and throws.
  */
-export const MID_LIGHTNESS_TONES: Record<'light' | 'dark', CorpusEntry> = {
+export const UNSATISFIABLE_ON_SOLID: Record<'light' | 'dark', CorpusEntry> = {
 	dark: {
-		name: 'mid-blue-dark',
-		note: 'mid lightness; solid search adapts inside the tone window',
+		name: 'dead-zone-blue-dark',
+		note: 'mid lightness; whole tone window is a dead zone',
 		source: 'oklch(0.55 0.2 258)',
 	},
 	light: {
-		name: 'mid-red-light',
-		note: 'mid lightness; solid search adapts inside the tone window',
+		name: 'dead-zone-red-light',
+		note: 'mid lightness; whole tone window is a dead zone',
 		source: 'oklch(0.62 0.19 27)',
 	},
 };

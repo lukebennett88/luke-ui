@@ -56,6 +56,24 @@ describe('buildTheme foundation validation', () => {
 		);
 	});
 
+	it('rejects a source colour that is not a well-formed OKLCH value', () => {
+		const invalidAccent: ThemeFoundation = {
+			...tactileFoundation,
+			light: {
+				...tactileFoundation.light,
+				color: {
+					...tactileFoundation.light.color,
+					accent: { l: 1.5, c: 0.1, h: 200 },
+				},
+			},
+			name: 'invalid-accent',
+		};
+
+		expect(() => buildTheme(invalidAccent)).toThrow(
+			'light.color.accent: must be an OKLCH colour with lightness 0-1',
+		);
+	});
+
 	it("produces the validator's message rather than a TypeError for a shadow rung set to undefined", () => {
 		// `defineTheme` now filters `undefined` rungs before merging (define-theme.test.ts covers that
 		// fallback), but `buildTheme` is also called directly with a raw foundation (tests, tooling,

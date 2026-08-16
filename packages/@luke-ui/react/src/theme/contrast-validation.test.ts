@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { paperFoundation, tactileFoundation } from './__fixtures__/theme-css.js';
+import { paperFoundation, resolvedColor, tactileFoundation } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
 import { compositeSourceOver, contrastRatio, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
@@ -7,6 +7,7 @@ import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { validateContrast } from './contrast-validation.js';
 import type { ThemeFoundation } from './foundation.js';
 import { INTERACTION_STRENGTH, mixInteractionColor } from './interaction-mix.js';
+import type { SemanticColorValues } from './semantic-map.js';
 
 describe('buildTheme contrast failures', () => {
 	function buildFailures(foundation: ThemeFoundation): ThemeContrastError {
@@ -25,12 +26,12 @@ describe('buildTheme contrast failures', () => {
 	// A synthetic value for every colour leaf the validation matrix reads, so an individual pair's
 	// maths can be measured through `validateContrast` directly without depending on a specific
 	// foundation's colours clearing every other gate first.
-	function syntheticColorValues(overrides: Record<string, string>): Record<string, string> {
+	function syntheticColorValues(overrides: Record<string, string>): SemanticColorValues {
 		const values: Record<string, string> = {};
 		for (const [path] of flattenThemeContract()) {
 			if (path.startsWith('color.')) values[path] = 'oklch(0.5 0 0)';
 		}
-		return { ...values, ...overrides };
+		return { ...values, ...overrides } as SemanticColorValues;
 	}
 
 	it('rejects a low-contrast focus colour, naming mode, pair, and required ratio', () => {
@@ -38,7 +39,7 @@ describe('buildTheme contrast failures', () => {
 			...tactileFoundation,
 			light: {
 				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, focus: '#c5d9ff' },
+				color: { ...tactileFoundation.light.color, focus: resolvedColor('#c5d9ff') },
 			},
 			name: 'bad-focus',
 		});
@@ -58,14 +59,14 @@ describe('buildTheme contrast failures', () => {
 	});
 
 	it('rejects a pathological dark-mode canvas the fixed text anchors cannot clear', () => {
-		// v2 pins text lightness per mode, so an unworkable neutral character no longer produces
-		// low-contrast text; the honest failure mode is a canvas whose lightness leaves the fixed
-		// text anchors below AA. A near-white dark canvas does exactly that.
+		// v2 pins text lightness (neutral steps 11/12) per mode, so an unworkable neutral character no
+		// longer produces low-contrast text; the honest failure mode is instead a canvas whose lightness
+		// leaves the fixed text anchors below AA. A near-white dark canvas does exactly that.
 		const error = buildFailures({
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, background: 'oklch(0.9 0 0)' },
+				color: { ...tactileFoundation.dark.color, background: resolvedColor('oklch(0.9 0 0)') },
 			},
 			name: 'bad-dark-canvas',
 		});
@@ -86,11 +87,11 @@ describe('buildTheme contrast failures', () => {
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, background: 'oklch(0.9 0 0)' },
+				color: { ...tactileFoundation.dark.color, background: resolvedColor('oklch(0.9 0 0)') },
 			},
 			light: {
 				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, focus: '#c5d9ff' },
+				color: { ...tactileFoundation.light.color, focus: resolvedColor('#c5d9ff') },
 			},
 			name: 'bad-both',
 		});

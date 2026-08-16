@@ -1,31 +1,32 @@
-# Theme colour generation
+# Theme colour generation (v2)
 
-This explains how `theme/build-theme.ts` generates colour. Read [STYLING.md](STYLING.md) first for
-the theme module layout.
+This explains how `theme/build-theme.ts` generates colour and what changed when the private 12-step
+scale engine (`scale.ts`, `elevation.ts`, `semantic-map.ts`) replaced the original per-token colour
+solver. Read [STYLING.md](STYLING.md) first for the theme module layout.
 
 ## The pipeline
 
 Per colour mode, `compileTheme` (in `build-theme.ts`):
 
-1. Resolves the source colours and the canvas anchor (`background`, split from `neutral`'s
-   hue/chroma character — see `define-theme.ts`).
-2. Generates six private semantic families (`neutral`, `accent`, `info`, `success`, `warning`,
-   `danger`) with `scale.ts`'s `generateFamily`. Each family carries the rungs the public contract
-   and interaction algorithm consume: `subtle`, `decorative`, `border`, `mid`, `solid`,
-   `foreground`, `highContrast`, and `onSolid`. Every role publishes the same background,
-   foreground, on-solid, and border slots, and every role's solid clears 4.5:1 against on-solid text
-   (see `SEMANTIC_ROLES` in `contrast-policy.ts`).
+1. Takes the already-resolved source colours and canvas anchor (`background`, split from `neutral`'s
+   hue/chroma character in `define-theme.ts`). Source colours cross the foundation as OKLCH values;
+   `defineTheme` applies defaults and parses authoring strings once before `buildTheme` runs.
+2. Generates six private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`,
+   `danger`) with `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast`
+   on-solid colour. Every role publishes the same background, foreground, on-solid, and border
+   slots, and every role's solid clears 4.5:1 against on-solid text (see `SEMANTIC_ROLES` in
+   `contrast-policy.ts`).
 3. Derives the mode-aware elevation surfaces (`canvas`/`recessed`/`floating`/`overlay`) with
    `elevation.ts`'s `generateSurfaces`. `surfaces.canvas` is always exactly the resolved
    `background` — canvas IS the background, not a derived value.
 4. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
-   every colour contract leaf onto a family rung or a generated surface, and passes the authored
-   backdrop through. Neutral `highContrast` becomes `text.primary` and is the interaction source
-   recipes mix toward at runtime.
+   every colour contract leaf onto a family step or a generated surface, and passes the authored
+   backdrop through. Neutral step 12 becomes `text.primary` and is the interaction source recipes
+   mix toward at runtime.
 5. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
    throws `ThemeContrastError` on a hard-gate miss. Recipes emit CSS through `interactionColor`.
-   Generation and validation use `mixInteractionColor` from `interaction-mix.ts` for an opaque base,
-   or `compositeSourceOver` for a transparent base.
+   Contrast validation uses `mixInteractionColor` from `interaction-mix.ts` for an opaque base, or
+   `compositeSourceOver` for a transparent base.
 
 `compileTheme` returns `{ css, diagnostics }`; `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling. The
@@ -71,13 +72,13 @@ advisory group:
 
 - `color.border.control` is a hard gate. It is a dedicated contrast boundary, not a scale-step
   alias, and must reach ≥3:1 against both `canvas` and `recessed` in both modes. It is frequently
-  the sole resting boundary of a form control, so it cannot use the softer border-rung aesthetic.
-- `color.background.danger.solid` is also a hard gate, ≥3:1 against both `canvas` and `recessed` in
-  both modes. It is the only role fill that carries a required state's boundary (the invalid field
-  boundary — [#247](https://github.com/lukebennett88/luke-ui/issues/247)), so it needs the same
-  guarantee as `border.control`. This is deliberately not extended to the other five roles: a role's
-  solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for
-  `warning` that lands at only 2.43:1 against canvas in light mode.
+  the sole resting boundary of a form control, so it cannot use the softer step-7 aesthetic.
+- `color.background.danger.solid` is also a hard gate, ≥3:1 against both `canvas` and
+  `recessed` in both modes. It is the only role fill that carries a required state's boundary (the
+  invalid field boundary — [#247](https://github.com/lukebennett88/luke-ui/issues/247)), so it needs
+  the same guarantee as `border.control`. This is deliberately not extended to the other five roles:
+  a role's solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind
+  it, and for `warning` that lands at only 2.43:1 against canvas in light mode.
 - `color.border.decorative` is not checked. It is a deliberately subtle, Radix-style separator below
   3:1.
 - Every semantic role border (`color.border.<role>`, all six roles) is an advisory 3:1 check. A miss
@@ -106,10 +107,9 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 
 `scale.ts`'s `passesOnSolidGate` is the only function that decides whether a solid can carry
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
-choose clears the AA text ratio plus the search headroom against the public resting solid. Hover and
-pressed colours are derived from that fill. Recipes emit the mix as CSS through `interactionColor`.
-The generator and `validateContrast` use `mixInteractionColor` from `interaction-mix.ts` so the
-strengths cannot drift. Those derived fills are hard-gated by `validateContrast`.
+choose clears the AA text ratio plus the search headroom across the private solid (step 9) and its
+step-10 neighbour. Public hover and pressed colours are derived from the resting solid, not taken
+from that neighbour step.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
 copy. That gives two guarantees:
@@ -119,18 +119,20 @@ copy. That gives two guarantees:
   of quietly resolving a different lightness.
 
 The pre-conditioner is necessary because its adaptation band is deliberately wider than the
-generator's tone-faithful window. It can rescue accents whose preferred lightness sits outside that
-window.
+generator's tone-faithful window. It can rescue accents, such as a mid-lightness red, that the
+generator alone would report as unsatisfiable. Both searches walk the same lightness candidate grid,
+so a lightness the pre-conditioner accepts is one the solid-anchor search will visit too.
 
 `contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
-search headroom, and the search step. It also declares `SEMANTIC_ROLES`, the one canonical role list
-used by family generation, the semantic map, and the validation matrix. Previously, separate role
-lists allowed a role added only to the map to emit an ungated colour, while a role added only to the
-compiler threw an internal error. One list makes both sides move together.
+search headroom, and the search step. `lightness-candidates.ts` is the one grid those searches walk.
+It also declares `SEMANTIC_ROLES`, the one canonical role list used by family generation, the
+semantic map, and the validation matrix. Previously, separate role lists allowed a role added only
+to the map to emit an ungated colour, while a role added only to the compiler threw an internal
+error. One list makes both sides move together.
 
 ## `loadingSkeleton`
 
-`color.loadingSkeleton` maps to the neutral family's `mid` rung, for better perceptibility of the
+`color.loadingSkeleton` maps to the neutral family's step 8, for better perceptibility of the
 loading state against typical surfaces.
 
 ## Interaction colour
@@ -138,12 +140,11 @@ loading state against typical surfaces.
 Tokens describe persistent semantic colours. Transient hover and pressed colours are derived from
 them.
 
-Recipes call `interactionColor(base, 'hover' | 'pressed')` to emit CSS. Generation
-(`resolveForeground` in `scale.ts`) and contrast validation call `mixInteractionColor` from
-`interaction-mix.ts`. Both sides share that module's strengths and OKLab interpolation:
+Recipes call `interactionColor(base, 'hover' | 'pressed')` to emit CSS. Contrast validation calls
+`mixInteractionColor` from `interaction-mix.ts`. Both sides share that module's strengths and OKLab
+interpolation:
 
-- source: the mode-resolved high-contrast neutral (`text.primary`, generated from
-  `neutral.highContrast`)
+- source: the mode-resolved high-contrast neutral (`text.primary`, generated from neutral step 12)
 - hover strength: 5%
 - pressed strength: 10%
 - interpolation: OKLab (`color-mix(in oklab, ...)`)
@@ -170,3 +171,10 @@ The authored modal backdrop stays separate as `color.overlay.backdrop`. `color.s
 the opaque high-elevation surface. Selected, checked, invalid, danger, focus, and disabled remain
 persistent semantic states. Interaction feedback is derived from those resting colours rather than
 replacing them.
+
+## Alpha is deferred
+
+The private scale intentionally has no alpha (transparent) track yet. Adding one later is
+structurally non-breaking (it does not require a contract shape change), but consuming it in any
+mapped leaf **will** be a visible change to that leaf's rendered colour — plan a review pass the
+same way as any other repaint, not as a silent patch.

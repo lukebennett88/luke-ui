@@ -1,6 +1,7 @@
 /**
  * Runs the build-time WCAG 2.2 validation matrix over a mode's emitted colour values and reports
- * every failing pair.
+ * every failing pair. It owns {@link ThemeContrastFailure} because it is what produces failures,
+ * which also keeps `build-theme.ts` and its own validation step from importing each other.
  */
 
 import type { Oklch } from './color.js';
@@ -43,10 +44,18 @@ interface ValidationResult {
 	failures: Array<ThemeContrastFailure>;
 }
 
+type ColorPath = keyof SemanticColorValues;
+
 /**
  * Runs the semantic validation matrix over the emitted colour values. Hard gates cover functional
  * text, role foregrounds, on-solid pairs, first-party interaction colours, and required non-text
  * boundaries. Advisory checks cover role borders.
+ *
+ * The six semantic borders alias step 7 of the 12-step scale, a subtle separator that deliberately
+ * sits below the non-text ratio for a softer look, so they are advisory only — which is why a
+ * component must never let one be the sole cue for a required state. `color.border.decorative`,
+ * `color.text.disabled`, and `color.loadingSkeleton` keep their own separate policies and are not
+ * measured here.
  */
 export function validateContrast(
 	mode: ColorMode,
@@ -54,7 +63,7 @@ export function validateContrast(
 ): ValidationResult {
 	const failures: Array<ThemeContrastFailure> = [];
 	const checks: Array<ContrastCheck> = [];
-	const colorAt = (path: string): Oklch => {
+	const colorAt = (path: ColorPath): Oklch => {
 		const value = colorValues[path];
 		if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
 		return parseColor(value);
@@ -65,27 +74,33 @@ export function validateContrast(
 		backgroundColor: Oklch,
 		required: number,
 		hard: boolean,
-		foregroundColor = colorAt(foreground),
+		foregroundColor: Oklch,
 	) => {
 		const ratio = contrastRatio(foregroundColor, backgroundColor);
 		const passes = ratio >= required;
 		checks.push({ background, foreground, hard, passes, ratio, required });
 		if (hard && !passes) failures.push({ background, foreground, mode, ratio, required });
 	};
-	const check = (foreground: string, background: string, required: number, hard: boolean) => {
-		checkResolved(foreground, background, colorAt(background), required, hard);
+	const check = (foreground: ColorPath, background: ColorPath, required: number, hard: boolean) => {
+		checkResolved(foreground, background, colorAt(background), required, hard, colorAt(foreground));
 	};
 
-	const surfacePaths = ['canvas', 'recessed', 'floating', 'overlay'].map(
-		(surface) => `color.surface.${surface}`,
-	);
-	const basePaths = ['color.surface.canvas', 'color.surface.recessed'];
+	const surfacePaths = [
+		'color.surface.canvas',
+		'color.surface.recessed',
+		'color.surface.floating',
+		'color.surface.overlay',
+	] as const satisfies ReadonlyArray<ColorPath>;
+	const basePaths = [
+		'color.surface.canvas',
+		'color.surface.recessed',
+	] as const satisfies ReadonlyArray<ColorPath>;
 
-	for (const text of ['color.text.primary', 'color.text.secondary']) {
+	for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
 		for (const surface of surfacePaths) check(text, surface, TEXT_RATIO, true);
 	}
 	for (const role of SEMANTIC_ROLES) {
-		const subtle = `color.background.${role}.subtle`;
+		const subtle = `color.background.${role}.subtle` as const;
 		for (const background of [...basePaths, subtle]) {
 			check(`color.foreground.${role}.default`, background, TEXT_RATIO, true);
 		}
@@ -105,46 +120,50 @@ export function validateContrast(
 	const interactionSource = colorAt('color.text.primary');
 	// Recipes emit CSS through `interactionColor`. Validation uses `mixInteractionColor` for an
 	// opaque base and `compositeSourceOver` for a transparent base, so the measured paint matches
-	// what the browser actually does.
-	const checkOpaqueInteraction = (foreground: string, state: InteractionState, surface: string) => {
+	// what the browser actually does. The mix source is the same neutral `text.primary` runtime CSS
+	// mixes toward (neutral step 12).
+	const checkOpaqueInteraction = (
+		foreground: ColorPath,
+		state: InteractionState,
+		surface: ColorPath,
+	) => {
 		const mixed = mixInteractionColor(colorAt(surface), interactionSource, state);
-		checkResolved(foreground, `${state} on ${surface}`, mixed, TEXT_RATIO, true);
+		checkResolved(foreground, `${state} on ${surface}`, mixed, TEXT_RATIO, true, colorAt(foreground));
 	};
 	const checkTransparentInteraction = (
-		foreground: string,
+		foreground: ColorPath,
 		state: InteractionState,
-		surface: string,
+		surface: ColorPath,
 	) => {
 		const composited = compositeSourceOver(
 			interactionSource,
 			colorAt(surface),
 			INTERACTION_STRENGTH[state],
 		);
-		checkResolved(foreground, `${state} on ${surface}`, composited, TEXT_RATIO, true);
+		checkResolved(
+			foreground,
+			`${state} on ${surface}`,
+			composited,
+			TEXT_RATIO,
+			true,
+			colorAt(foreground),
+		);
 	};
 	for (const state of INTERACTION_STATES) {
-		// Ghost Button/IconButton foregrounds rest on `interactionColor('transparent', state)`.
 		for (const surface of basePaths) {
 			for (const foreground of GHOST_FOREGROUNDS) {
 				checkTransparentInteraction(foreground, state, surface);
 			}
 		}
-		// Solid and subtle Button tones rest on `interactionColor(<opaque fill>, state)`.
 		for (const tone of BUTTON_TONES) {
-			const solidForeground = `color.foreground.${tone}.onSolid`;
+			const solidForeground = `color.foreground.${tone}.onSolid` as const;
 			const subtleForeground =
-				tone === 'neutral' ? 'color.text.primary' : `color.foreground.${tone}.default`;
+				tone === 'neutral' ? 'color.text.primary' : (`color.foreground.${tone}.default` as const);
 			checkOpaqueInteraction(solidForeground, state, `color.background.${tone}.solid`);
 			checkOpaqueInteraction(subtleForeground, state, `color.background.${tone}.subtle`);
 		}
-		// Selected Combobox options rest on `interactionColor(vars.color.background.accent.subtle,
-		// state)` — an opaque base.
 		checkOpaqueInteraction('color.text.primary', state, 'color.background.accent.subtle');
-		// Unselected Combobox options rest on `interactionColor('transparent', state)` over the
-		// floating popover surface.
 		checkTransparentInteraction('color.text.primary', state, 'color.surface.floating');
-		// Accent Link mixes its resting foreground toward `text.primary` and paints that colour on
-		// the first-party surfaces Link sits on.
 		const linkForeground = mixInteractionColor(
 			colorAt('color.foreground.accent.default'),
 			interactionSource,

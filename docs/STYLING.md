@@ -51,24 +51,30 @@ with no class and no JS required. Neither step injects styles at runtime.
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
 - `styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
-- `theme/contract.ts`: the semantic token tree, its `--luke-*` variable naming, and the source-owned
-  `typeStyles` typography keys.
+- `theme/contract.ts`: the semantic token tree, the mode-family declaration, `--luke-*` variable
+  naming, and the source-owned `typeStyles` typography keys.
+- `theme/path-record.ts`: the typed `[path, value]` record constructor value producers use so
+  `Object.fromEntries` cannot hide a missing contract path.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
-  and the curated defaults it applies for omitted materials and backdrop.
-- `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into and
-  the curated colour, radius, and typography defaults.
+  and the one resolution of curated defaults (source colours, materials, radius, backdrop) into the
+  internal foundation.
+- `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into,
+  with generator source colours as OKLCH and CSS-text values such as backdrop as strings, plus the
+  curated colour, radius, and typography defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and the canonical
   semantic role list the generator, the compiler's validation matrix, and the semantic map all read.
-- `theme/scale.ts`: the private semantic-family generator (`generateFamily`), including the
-  constrained solid-anchor search and `passesOnSolidGate`, the on-solid accessibility gate. Every
-  semantic role's solid clears 4.5:1 against on-solid text.
+- `theme/lightness-candidates.ts`: the shared lightness grid the accent pre-conditioner,
+  solid-anchor search, and control-border solver walk.
+- `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
+  constrained step-9 solid-anchor search and `passesOnSolidGate`, the on-solid accessibility gate.
+  Every semantic role's solid clears 4.5:1 against on-solid text.
 - `theme/interaction-color.ts`: `interactionColor`, the package-internal hover and pressed
   derivation recipes emit as CSS. It is not exported from `@luke-ui/react/theme`.
 - `theme/interaction-mix.ts`: `INTERACTION_STRENGTH` and `mixInteractionColor`, the shared hover and
-  pressed colour maths used by the scale generator and contrast validation.
+  pressed colour maths contrast validation uses. Recipes do not import this module.
 - `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
   `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
   no `--luke-motion-duration-*` custom property exists.
@@ -110,7 +116,7 @@ token pair when a generated pair misses WCAG 2.2 AA contrast. A single-value acc
 adapted per mode through a lightness search; it throws when no lightness in the vibrant band is
 accessible. The raw `ThemeFoundation` object and `buildTheme` are internal only.
 
-Every colour token is generated from a private semantic family per role (neutral, accent, info,
+Every colour token is generated from a private 12-step scale per role (neutral, accent, info,
 success, warning, danger) plus a mode-aware elevation surface set, then mapped onto the public
 colour contract. Every role gets the same background, foreground, on-solid, and border slots. See
 [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border and accent
@@ -131,8 +137,8 @@ instead of deriving them from strength multipliers and hidden formulas.
 
 Each mode also authors final `background-image` values for `actionControlFinish.resting`,
 `actionControlFinish.raised`, and `actionControlFinish.recessed`. Button and IconButton layer this
-face lighting over their semantic surface colour. Hover and pressed change `background-color` with
-`interactionColor`. Ghost controls and forced-colours rendering do not use the authored finish.
+face lighting over their semantic surface colour. Ghost controls and forced-colours rendering do not
+use the authored finish.
 
 Use `deriveConcentricRadius(innerRadius, gap)` for rounded elements nested inside another rounded
 surface. It returns a CSS `calc()` value for the outer radius, so both inputs can be semantic theme

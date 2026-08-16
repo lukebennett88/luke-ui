@@ -10,20 +10,24 @@
 import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
 import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
-import { typeStyles, typeStyleMetricStep } from './contract.js';
+import { typeStyleMetricStep, typeStyles } from './contract.js';
+import type { IdentityPath, TypeStyle } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
+import { pathEntry, pathRecord } from './path-record.js';
 
 /**
  * Structural block sizes for the small and medium controls, the minimum tap target, and
  * Combobox's square actions.
  */
-export const CONTROL_SIZE_VALUES = {
+export const CONTROL_SIZE_VALUES: {
+	[Path in Extract<IdentityPath, `controlSize.${string}`>]: string;
+} = {
 	'controlSize.comboboxAction': '28px',
 	'controlSize.medium': '40px',
 	'controlSize.minTarget': '24px',
 	'controlSize.small': '32px',
-} as const;
+};
 
 /**
  * Shape of a Capsize font-metrics object, named locally so `.d.ts` output never needs Capsize's
@@ -46,42 +50,52 @@ export const FONT_METRICS: Record<'apple-system' | 'dm-sans' | 'inter', CapsizeF
 };
 
 type FontValueLeaf = 'fontSize' | 'letterSpacing' | 'lineHeight';
-type FontValueKey = `font.${(typeof typeStyles)[number]}.${FontValueLeaf}`;
+type FontValueKey = `font.${TypeStyle}.${FontValueLeaf}`;
+
+function styleMetrics(style: TypeStyle) {
+	return FONT_METRIC_SCALE[typeStyleMetricStep[style]];
+}
 
 /**
  * Fixed metrics for each public type style: font size, line height, and letter spacing, resolved
  * from the private metric scale. Family, weight, and Capsize trims are resolved in the stylesheet
  * from the active theme.
  */
-export const FONT_VALUES = Object.fromEntries(
+export const FONT_VALUES: { readonly [Key in FontValueKey]: string } = pathRecord(
 	typeStyles.flatMap((style) => {
-		const metrics = FONT_METRIC_SCALE[typeStyleMetricStep[style]];
+		const metrics = styleMetrics(style);
 		return [
-			[`font.${style}.fontSize`, metrics.fontSize],
-			[`font.${style}.letterSpacing`, metrics.letterSpacing],
-			[`font.${style}.lineHeight`, metrics.lineHeight],
-		] as const;
+			pathEntry(`font.${style}.fontSize`, metrics.fontSize),
+			pathEntry(`font.${style}.letterSpacing`, metrics.letterSpacing),
+			pathEntry(`font.${style}.lineHeight`, metrics.lineHeight),
+		];
 	}),
-) as { readonly [Key in FontValueKey]: string };
+);
 
 /** Inline and block sizes for the four public icon sizes. */
-export const ICON_SIZE_VALUES = {
+export const ICON_SIZE_VALUES: {
+	[Path in Extract<IdentityPath, `iconSize.${string}`>]: string;
+} = {
 	'iconSize.large': '32px',
 	'iconSize.medium': '24px',
 	'iconSize.small': '20px',
 	'iconSize.xsmall': '16px',
-} as const;
+};
 
 /** The fade every control recipe applies to a disabled or pending control. */
-export const INTERACTION_VALUES = {
+export const INTERACTION_VALUES: {
+	[Path in Extract<IdentityPath, `interaction.${string}`>]: string;
+} = {
 	'interaction.disabledOpacity': '0.55',
-} as const;
+};
 
 /** Durations and easing curves for interaction motion, named for the role each plays. */
-export const MOTION_VALUES = {
+export const MOTION_VALUES: {
+	[Path in Extract<IdentityPath, `motion.${string}`>]: string;
+} = {
 	'motion.duration.enter': MOTION_DURATION_SCALE[500],
 	'motion.duration.exit': MOTION_DURATION_SCALE[300],
 	'motion.duration.feedback': MOTION_DURATION_SCALE[200],
 	'motion.easing.exit': 'cubic-bezier(0.3, 0, 1, 1)',
 	'motion.easing.standard': 'cubic-bezier(0, 0, 0.4, 1)',
-} as const;
+};
