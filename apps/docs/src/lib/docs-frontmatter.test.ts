@@ -5,7 +5,8 @@ test('reads inline and continued frontmatter values', () => {
 	expect(
 		readFrontmatter(`---
 title: Button
-description: A labelled control
+description:
+  A labelled control
   for actions.
 source: packages/@luke-ui/react/src/button
 ---
