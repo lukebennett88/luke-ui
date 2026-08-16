@@ -1,6 +1,6 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
-import { COMBOBOX_ICON_SIZE } from '../../sizing/combobox-sizing.js';
+import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
@@ -18,7 +18,7 @@ import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
 
-// Set per `size` variant on `inputGroup` below, from `COMBOBOX_ICON_SIZE`, so the invalid
+// Set per `size` variant on `inputGroup` below, from `FIELD_CONTROL_ICON_SIZE`, so the invalid
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
 
@@ -427,7 +427,7 @@ const comboboxConfig = {
 				inputGroup: {
 					blockSize: vars.controlSize.medium,
 					fontSize: FONT_METRIC_SCALE[16].fontSize,
-					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.medium] },
+					vars: { [comboboxErrorIconSize]: vars.iconSize[FIELD_CONTROL_ICON_SIZE.medium] },
 				},
 				textInput: {
 					blockSize: vars.controlSize.medium,
@@ -458,7 +458,7 @@ const comboboxConfig = {
 					fontSize: FONT_METRIC_SCALE[14].fontSize,
 					letterSpacing: FONT_METRIC_SCALE[14].letterSpacing,
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-					vars: { [comboboxErrorIconSize]: vars.iconSize[COMBOBOX_ICON_SIZE.small] },
+					vars: { [comboboxErrorIconSize]: vars.iconSize[FIELD_CONTROL_ICON_SIZE.small] },
 				},
 				textInput: {
 					blockSize: vars.controlSize.small,

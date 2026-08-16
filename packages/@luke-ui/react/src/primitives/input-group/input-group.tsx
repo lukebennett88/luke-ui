@@ -7,7 +7,7 @@ import { Input as RacInput } from 'react-aria-components/Input';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
-import { INPUT_GROUP_ICON_SIZE } from '../../sizing/input-group-sizing.js';
+import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { InputGroupSize } from './recipe.css.js';
@@ -112,9 +112,9 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 			 * The provider covers the whole group, not only the indicator below: it sizes
 			 * the group's own error icon *and* any icon a caller puts in a prefix or
 			 * suffix, so both stay proportioned to the control. Same precedent as
-			 * `Button` (`BUTTON_ICON_SIZE`) and `ComboboxTrigger` (`COMBOBOX_ICON_SIZE`).
+			 * `Button` (`BUTTON_ICON_SIZE`) and the field controls (`FIELD_CONTROL_ICON_SIZE`).
 			 */}
-			<IconSizeProvider size={INPUT_GROUP_ICON_SIZE[size]}>
+			<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 				<RacGroup
 					{...groupProps}
 					className={composeRenderProps(className, (value) => {
