@@ -51,7 +51,6 @@ function Playground() {
 	const codeRef = useRef(initialCode);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 	const appearanceRef = useRef<Omit<PlaygroundAppearanceMessage, 'type'> | null>(null);
-	appearanceRef.current = colorMode === null ? null : { colorMode, themeIdentity };
 
 	const ports = () => ({
 		origin: window.location.origin,
@@ -62,8 +61,10 @@ function Playground() {
 		sessionRef.current.postCode(code, ports());
 	}, []);
 	const postAppearance = useCallback(() => {
-		if (colorMode === null) return;
-		sessionRef.current.postAppearance({ colorMode, themeIdentity }, ports());
+		const appearance = colorMode === null ? null : { colorMode, themeIdentity };
+		appearanceRef.current = appearance;
+		if (appearance === null) return;
+		sessionRef.current.postAppearance(appearance, ports());
 	}, [colorMode, themeIdentity]);
 
 	useEffect(() => {

@@ -6,7 +6,7 @@ import type {
 } from './playground-protocol.js';
 import { isPlaygroundParentMessage, isPlaygroundPreviewMessage } from './playground-protocol.js';
 
-export type PlaygroundMessagePort = {
+type PlaygroundMessagePort = {
 	postMessage: (message: unknown, targetOrigin: string) => void;
 };
 
@@ -21,7 +21,7 @@ export type PlaygroundPagePorts = {
 	previewWindow: PlaygroundMessagePort | null;
 };
 
-export type PlaygroundPageHandlers = {
+type PlaygroundPageHandlers = {
 	appearance: Omit<PlaygroundAppearanceMessage, 'type'> | null;
 	currentCode: string;
 	onError: (message: string) => void;
@@ -41,7 +41,7 @@ export function isTrustedParentMessage(
 }
 
 /** True when a page message came from this playground's preview iframe. */
-export function isTrustedPreviewMessage(
+function isTrustedPreviewMessage(
 	event: PlaygroundMessageEvent,
 	origin: string,
 	preview: unknown,
