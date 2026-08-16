@@ -7,8 +7,10 @@ import {
 	rmSync,
 	writeFileSync,
 } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseFrontmatterBlocks } from '../src/lib/docs-frontmatter.ts';
+import { findMdxFiles } from '../src/lib/docs-mdx-files.ts';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const componentsDir = resolve(scriptDir, '../content/docs/components');
@@ -120,11 +122,8 @@ function renderAutoTypeTable(entry: PropsEntry): string {
 }
 
 export function parseComponentFrontmatter(contents: string): ComponentFrontmatter {
-	const match = contents.match(/^---\n([\s\S]*?)\n---\n/);
-	if (!match?.[1]) throw new Error('guide is missing frontmatter');
-
-	const lines = match[1].split('\n');
-	const blocks = groupFrontmatterBlocks(lines);
+	const blocks = parseFrontmatterBlocks(contents);
+	if (blocks === null) throw new Error('guide is missing frontmatter');
 
 	const copiedLines: Array<string> = [];
 	let props: ReadonlyArray<PropsEntry> = [];
@@ -145,30 +144,6 @@ export function parseComponentFrontmatter(contents: string): ComponentFrontmatte
 	}
 
 	return { copiedLines, props };
-}
-
-interface FrontmatterBlock {
-	key: string;
-	lines: ReadonlyArray<string>;
-}
-
-/** Splits frontmatter lines into top-level `key:` blocks, each carrying its indented continuation lines. */
-function groupFrontmatterBlocks(lines: ReadonlyArray<string>): ReadonlyArray<FrontmatterBlock> {
-	const blocks: Array<FrontmatterBlock> = [];
-
-	for (const line of lines) {
-		const topLevelKey = line.match(/^([A-Za-z]+):/)?.[1];
-		if (topLevelKey !== undefined) {
-			blocks.push({ key: topLevelKey, lines: [line] });
-			continue;
-		}
-
-		const lastBlock = blocks[blocks.length - 1];
-		if (lastBlock === undefined) throw new Error(`Frontmatter continuation with no key: ${line}`);
-		(lastBlock.lines as Array<string>).push(line);
-	}
-
-	return blocks;
 }
 
 /** Parses a `props:` block's `- name: … / path: … / heading: …` list items, in file order. */
@@ -206,11 +181,12 @@ function discoverComponentNames(groupDir: string): ReadonlyArray<string> {
 	const names = new Set<string>();
 
 	for (const entry of readdirSync(groupDir, { withFileTypes: true })) {
-		if (entry.isDirectory()) {
-			names.add(entry.name);
-		} else if (entry.name.endsWith('.mdx')) {
-			names.add(entry.name.slice(0, -'.mdx'.length));
-		}
+		if (entry.isDirectory()) names.add(entry.name);
+	}
+
+	for (const file of findMdxFiles(groupDir)) {
+		if (dirname(file) !== groupDir) continue;
+		names.add(basename(file, '.mdx'));
 	}
 
 	return [...names].sort();

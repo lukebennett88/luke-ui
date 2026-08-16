@@ -16,7 +16,8 @@
 		"strict": true,
 		"target": "esnext",
 		"types": ["vite-plus/client"],
-		"verbatimModuleSyntax": true
+		"verbatimModuleSyntax": true,
+		"allowImportingTsExtensions": true
 	},
 	"include": ["**/*.ts", "**/*.tsx"]
 }

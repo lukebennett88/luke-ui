@@ -1,16 +1,10 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { extname, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { expect, test } from 'vite-plus/test';
+import { findMdxFiles } from './docs-mdx-files.js';
+import { docsPageFile } from './markdown-page-path.js';
 
 const contentDir = resolve(import.meta.dirname, '../../content/docs');
-
-function findAllMdxFiles(directory: string): Array<string> {
-	return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-		const path = resolve(directory, entry.name);
-		if (entry.isDirectory()) return findAllMdxFiles(path);
-		return extname(entry.name) === '.mdx' ? [path] : [];
-	});
-}
 
 function docsLinks(contents: string): Array<string> {
 	const links: Array<string> = [];
@@ -34,25 +28,12 @@ function docsLinks(contents: string): Array<string> {
 		});
 }
 
-function docsLinkTargetExists(pathname: string): boolean {
-	const segments = pathname.split('/').filter((segment) => segment !== '');
-	// `/` is the landing route, not an MDX page — no docs page links to it.
-	if (segments.length === 0) return false;
-
-	const base = resolve(contentDir, ...segments);
-	return (
-		existsSync(`${base}.mdx`) ||
-		existsSync(resolve(base, 'index.mdx')) ||
-		existsSync(resolve(base, 'props.mdx'))
-	);
-}
-
 test('every internal link on the docs pages resolves', () => {
-	for (const file of findAllMdxFiles(contentDir)) {
+	for (const file of findMdxFiles(contentDir)) {
 		const contents = readFileSync(file, 'utf8');
 
 		for (const link of docsLinks(contents)) {
-			expect(docsLinkTargetExists(link)).toBe(true);
+			expect(docsPageFile(contentDir, link)).not.toBeNull();
 		}
 	}
 });

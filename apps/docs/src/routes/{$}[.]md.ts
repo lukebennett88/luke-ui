@@ -1,13 +1,13 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { getLLMText } from '../lib/get-llm-text';
+import { slugsFromMarkdownRequest } from '../lib/markdown-page-path.js';
 import { source } from '../lib/source';
 
 export const Route = createFileRoute('/{$}.md')({
 	server: {
 		handlers: {
 			GET: async ({ params }) => {
-				const slugs = (params._splat ?? '').split('/').filter(Boolean);
-				const page = source.getPage(slugs.length === 1 && slugs[0] === 'index' ? [] : slugs);
+				const page = source.getPage(slugsFromMarkdownRequest(params._splat ?? ''));
 				if (!page) throw notFound();
 
 				return new Response(await getLLMText(page), {
