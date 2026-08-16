@@ -10,7 +10,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { playgroundRuntimeSpecifierList } from '../src/lib/playground-runtime-specifiers.js';
+import { playgroundRuntimeSpecifierList } from '../src/lib/playground-runtime-specifiers.ts';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const outputPath = resolve(scriptDir, '../src/generated/playground-scope.generated.ts');
