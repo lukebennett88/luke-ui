@@ -2,13 +2,12 @@
  * The private 12-step colour scale generator. `generateFamily` produces a Radix-shaped OKLCH family
  * (steps 1-12 plus a `contrast` on-solid colour) from a family character `source`, the canvas
  * `background`, a colour `mode`, and a semantic `role`. It owns the constrained solid-anchor (step-9)
- * search and the capability-based role guarantees; it is calibrated to testable scale properties
- * rather than to exact Radix reproduction.
+ * search; it is calibrated to testable scale properties rather than to exact Radix reproduction.
  *
  * It also owns {@link passesOnSolidGate}, the on-solid accessibility gate. `defineTheme`'s accent
  * pre-conditioner calls it rather than reimplementing it. It reuses the dependency-free colour math in
- * `color.ts` and the shared thresholds in `contrast-policy.ts`, and never distorts a family to satisfy
- * a guarantee the public contract does not consume.
+ * `color.ts` and the shared thresholds in `contrast-policy.ts`. Every semantic role's solid and hover
+ * must clear 4.5:1 against on-solid text — that invariant lives next to `SEMANTIC_ROLES` there.
  */
 
 import type { Oklch } from './color.js';
@@ -24,49 +23,6 @@ export type FamilyRole = (typeof SEMANTIC_ROLES)[number];
 export type ScaleStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
 type ColorMode = 'light' | 'dark';
-
-/**
- * The capabilities a role's family must guarantee, driven by what the public colour contract
- * actually consumes (not by hue). Named for capabilities so the flags do not leak token names.
- */
-export interface FamilyRequirements {
-	/** Step 7: UI border and focus ring. */
-	needsBorder: boolean;
-	/** `contrast` clears WCAG AA text contrast against steps 9 and 10. */
-	needsOnSolid: boolean;
-	/** Steps 9-10: solid surface and its hover. */
-	needsSolidStates: boolean;
-	/** Steps 3-5: component surface trio (normal / hover / active). */
-	needsSubtleStates: boolean;
-	/** Step 11 low-contrast text (neutral additionally uses 12 / secondary / disabled). */
-	needsText: boolean;
-}
-
-/**
- * Every capability the public contract can consume. All six roles publish the same visual slots, so
- * every family must guarantee all capabilities. A role that opts out would publish an ungated solid.
- */
-const everyCapability = {
-	needsBorder: true,
-	needsOnSolid: true,
-	needsSolidStates: true,
-	needsSubtleStates: true,
-	needsText: true,
-} as const satisfies FamilyRequirements;
-
-/**
- * The locked capability matrix. Kept keyed per role rather than collapsed to one shared value: it is
- * what {@link FamilyDiagnostics} reports per family, and the exhaustive `Record<FamilyRole, …>` makes
- * a newly added role a type error here until its guarantees are stated.
- */
-export const FAMILY_REQUIREMENTS = {
-	accent: everyCapability,
-	danger: everyCapability,
-	info: everyCapability,
-	neutral: everyCapability,
-	success: everyCapability,
-	warning: everyCapability,
-} as const satisfies Record<FamilyRole, FamilyRequirements>;
 
 /**
  * A generated 12-step colour family plus its on-solid `contrast` colour. Step roles: 1-2 app/subtle
@@ -86,7 +42,7 @@ export interface ScaleFamily {
 	10: Oklch;
 	11: Oklch;
 	12: Oklch;
-	/** On-solid text: reads over steps 9 and 10 (guaranteed AA only when `needsOnSolid`). */
+	/** On-solid text: reads over steps 9 and 10, guaranteed WCAG AA. */
 	contrast: Oklch;
 }
 
@@ -96,17 +52,16 @@ export interface GenerateFamilyRequest {
 	background: Oklch;
 	/** The colour mode the family is generated for. */
 	mode: ColorMode;
-	/** The semantic role, which selects the capability guarantees. */
+	/** The semantic role. Neutral uses a curated solid band; other roles keep the source tone. */
 	role: FamilyRole;
 	/** The family's hue/chroma character. Its lightness anchors vibrant solids only. */
 	source: Oklch;
 }
 
 /**
- * Thrown when a family that must guarantee on-solid contrast (`needsOnSolid`) has no lightness in
- * its solid band where a near-white or near-black on-solid text clears WCAG AA across the solid and
- * its hover. Carries the `role` and `mode` so the caller can name the failing family, plus the best
- * attempt for diagnostics.
+ * Thrown when a family has no lightness in its solid band where a near-white or near-black
+ * on-solid text clears WCAG AA across the solid and its hover. Carries the `role` and `mode` so the
+ * caller can name the failing family, plus the best attempt for diagnostics.
  */
 export class ScaleGenerationError extends Error {
 	/** The role whose family could not be generated. */
@@ -275,7 +230,7 @@ export function onSolidGateRatio(request: OnSolidGateRequest): number {
 /**
  * Generates the 12-step OKLCH family plus its on-solid `contrast` colour for a role. Owns the
  * constrained solid-anchor search internally; throws {@link ScaleGenerationError} (carrying `role`
- * and `mode`) when a `needsOnSolid` role cannot reach an accessible solid.
+ * and `mode`) when the family cannot reach an accessible solid.
  */
 export function generateFamily(request: GenerateFamilyRequest): ScaleFamily {
 	return buildFamily(request).family;
@@ -305,7 +260,6 @@ function buildFamily(request: GenerateFamilyRequest): {
 	diagnostics: FamilyDiagnostics;
 } {
 	const { background, mode, role, source } = request;
-	const requirements = FAMILY_REQUIREMENTS[role];
 	const hue = source.h;
 	const direction = mode === 'light' ? -1 : 1;
 	const backgroundLightness = clampUnit(background.l);
@@ -343,8 +297,8 @@ function buildFamily(request: GenerateFamilyRequest): {
 	const step7 = mutedRung(6);
 	const step8 = mutedRung(7);
 
-	// Step 9: the solid anchor, searched only when the role must guarantee on-solid contrast.
-	const anchor = resolveSolidAnchor(request, requirements);
+	// Step 9: the solid anchor, searched so on-solid text clears AA across the solid and its hover.
+	const anchor = resolveSolidAnchor(request);
 	const solid = rung(9, anchor.lightness, source.c);
 	const solidHover = rung(10, anchor.lightness + direction * SOLID_HOVER_DELTA, source.c);
 
@@ -386,7 +340,7 @@ function buildFamily(request: GenerateFamilyRequest): {
 		onSolidRatioSolid: contrastRatio(onSolid.color, solid),
 		onSolidRatioSolidHover: contrastRatio(onSolid.color, solidHover),
 		resolvedLightness: anchor.lightness,
-		satisfied: !requirements.needsOnSolid || onSolid.minRatio >= TEXT_RATIO,
+		satisfied: onSolid.minRatio >= TEXT_RATIO,
 		targetLightness: anchor.target,
 	};
 
@@ -400,7 +354,6 @@ function buildFamily(request: GenerateFamilyRequest): {
 			ratioSolid: solidAnchor.onSolidRatioSolid,
 			ratioSolidHover: solidAnchor.onSolidRatioSolidHover,
 		},
-		requirements,
 		role,
 		solidAnchor,
 		source,
@@ -417,18 +370,12 @@ interface ResolvedAnchor {
 }
 
 /**
- * Resolves the step-9 solid lightness. A role that must guarantee on-solid contrast searches its
- * solid band for a lightness whose solid and hover both clear the on-solid gate, preferring the
- * lightness nearest the source (vibrant) or the curated target (neutral), and throwing when none
- * clears. Every semantic role guarantees on-solid today; the `needsOnSolid: false` path stays because
- * the requirement is a capability flag, not a role name — a family generated for a slot the contract
- * does not publish a solid for takes its source lightness verbatim rather than being distorted for a
- * guarantee nothing consumes.
+ * Resolves the step-9 solid lightness. Searches the solid band for a lightness whose solid and hover
+ * both clear the on-solid gate, preferring the lightness nearest the source (vibrant) or the curated
+ * target (neutral), and throwing when none clears. Every semantic role publishes a solid, so every
+ * family is searched.
  */
-function resolveSolidAnchor(
-	request: GenerateFamilyRequest,
-	requirements: FamilyRequirements,
-): ResolvedAnchor {
+function resolveSolidAnchor(request: GenerateFamilyRequest): ResolvedAnchor {
 	const { mode, role, source } = request;
 	const isNeutral = role === 'neutral';
 	const [rangeLow, rangeHigh] = VIBRANT_SOLID_RANGE;
@@ -442,11 +389,6 @@ function resolveSolidAnchor(
 				clamp(source.l + VIBRANT_SOLID_MAX_DEVIATION, rangeLow, rangeHigh),
 			];
 	const [low, high] = band;
-
-	if (!requirements.needsOnSolid) {
-		// Geometric anchor only: honour the source lightness exactly, gamut mapping aside.
-		return { adapted: false, band, lightness: clampUnit(source.l), target: source.l };
-	}
 
 	const preferred = clamp(target, low, high);
 	const gateRatio = (lightness: number): number => onSolidGateRatio({ lightness, mode, source });

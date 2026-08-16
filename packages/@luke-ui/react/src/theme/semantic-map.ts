@@ -16,8 +16,6 @@ import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 
-type ColorMode = 'light' | 'dark';
-
 /** Every generated colour contract leaf's CSS value, keyed by its dotted path (for example
  * `'color.text.primary'`), plus the passed-through `'color.scrim'`. */
 export type SemanticColorValues = Record<string, string>;
@@ -30,15 +28,13 @@ interface MapSemanticColorsRequest {
 	 * `surfaces.recessed` before this map runs, then this function passes it through verbatim.
 	 */
 	controlBorder: Oklch;
-	/** The generated scale family for each role, already resolved for `mode`. */
+	/** The generated scale family for each role, already mode-resolved. */
 	families: Record<FamilyRole, ScaleFamily>;
 	/** The authored keyboard-focus source colour. Defaults to the accent family's step 8. */
 	focus?: Oklch;
-	/** The colour mode the families and surfaces were resolved for. */
-	mode: ColorMode;
 	/** The authored scrim value, passed through verbatim (it may carry an alpha channel). */
 	scrim: string;
-	/** The generated elevation surface set, already resolved for `mode`. */
+	/** The generated elevation surface set, already mode-resolved. */
 	surfaces: GeneratedSurfaces;
 }
 

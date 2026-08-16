@@ -63,8 +63,8 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and the canonical
   semantic role list the generator, the compiler's validation matrix, and the semantic map all read.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
-  constrained step-9 solid-anchor search, the per-role capability guarantees, and
-  `passesOnSolidGate`, the on-solid accessibility gate.
+  constrained step-9 solid-anchor search and `passesOnSolidGate`, the on-solid accessibility gate.
+  Every semantic role's solid clears 4.5:1 against on-solid text.
 - `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
   `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
   no `--luke-motion-duration-*` custom property exists.
@@ -108,7 +108,7 @@ accessible. The raw `ThemeFoundation` object and `buildTheme` are internal only.
 
 Every colour token is generated from a private 12-step scale per role (neutral, accent, info,
 success, warning, danger) plus a mode-aware elevation surface set, then mapped onto the public
-colour contract. Every role gets the same background, foreground, on-solid, and border capabilities.
+colour contract. Every role gets the same background, foreground, on-solid, and border slots.
 See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border and accent
 contrast policies, and what changed when this generator replaced the original per-token solver.
 
