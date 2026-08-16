@@ -6,8 +6,9 @@
  */
 
 import type { Oklch } from './color.js';
-import { clampUnit, contrastRatio, gamutMapOklch } from './color.js';
-import { CONTRAST_SEARCH_STEP, RATIO_HEADROOM, UI_RATIO } from './contrast-policy.js';
+import { contrastRatio, gamutMapOklch } from './color.js';
+import { RATIO_HEADROOM, UI_RATIO } from './contrast-policy.js';
+import { lightnessCandidates } from './lightness-candidates.js';
 import type { ScaleFamily } from './scale.js';
 
 type ColorMode = 'light' | 'dark';
@@ -37,21 +38,27 @@ interface SolveControlBorderRequest {
 export function solveControlBorder(params: SolveControlBorderRequest): Oklch {
 	const { neutral, canvas, recessed, mode } = params;
 	const seed = neutral[7];
-	const direction = mode === 'light' ? -1 : 1;
 	const target = UI_RATIO + RATIO_HEADROOM;
 	const worstRatio = (candidate: Oklch) => {
 		return Math.min(contrastRatio(candidate, canvas), contrastRatio(candidate, recessed));
 	};
 
-	let lightness = seed.l;
-	for (;;) {
-		const clamped = clampUnit(lightness);
+	let resolved: Oklch | undefined;
+	for (const lightness of lightnessCandidates(seed.l, mode === 'light' ? 0 : 1)) {
 		const candidate = gamutMapOklch({
-			l: clamped,
+			l: lightness,
 			c: seed.c,
 			h: seed.h,
 		});
-		if (worstRatio(candidate) >= target || clamped === 0 || clamped === 1) return candidate;
-		lightness = clamped + direction * CONTRAST_SEARCH_STEP;
+		resolved = candidate;
+		if (worstRatio(candidate) >= target) return candidate;
 	}
+	return (
+		resolved ??
+		gamutMapOklch({
+			l: seed.l,
+			c: seed.c,
+			h: seed.h,
+		})
+	);
 }

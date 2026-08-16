@@ -13,8 +13,9 @@
 import type { Oklch } from './color.js';
 import { clampUnit, contrastRatio, gamutMapOklch } from './color.js';
 import type { SEMANTIC_ROLES } from './contrast-policy.js';
-import { CONTRAST_SEARCH_STEP, RATIO_HEADROOM, TEXT_RATIO } from './contrast-policy.js';
+import { RATIO_HEADROOM, TEXT_RATIO } from './contrast-policy.js';
 import type { FamilyDiagnostics, GamutReduction, SolidAnchorDiagnostics } from './diagnostics.js';
+import { lightnessCandidates } from './lightness-candidates.js';
 
 /** A scale family's semantic role. Derived from the canonical role list, never restated. */
 export type FamilyRole = (typeof SEMANTIC_ROLES)[number];
@@ -401,9 +402,7 @@ function resolveSolidAnchor(request: GenerateFamilyRequest): ResolvedAnchor {
 	let bestDistance = Number.POSITIVE_INFINITY;
 	let bestAttemptLightness = preferred;
 	let bestAttemptRatio = gateRatio(preferred);
-	const stepCount = Math.round((high - low) / CONTRAST_SEARCH_STEP);
-	for (let index = 0; index <= stepCount; index++) {
-		const lightness = low + index * CONTRAST_SEARCH_STEP;
+	for (const lightness of lightnessCandidates(low, high)) {
 		const ratio = gateRatio(lightness);
 		if (ratio > bestAttemptRatio) {
 			bestAttemptRatio = ratio;

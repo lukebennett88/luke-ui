@@ -8,11 +8,12 @@
 
 import { buildTheme, ThemeContrastError } from './build-theme.js';
 import type { Oklch } from './color.js';
-import { clampUnit, gamutMapOklch, parseColor } from './color.js';
-import { CONTRAST_SEARCH_STEP, TEXT_RATIO } from './contrast-policy.js';
+import { gamutMapOklch, parseColor } from './color.js';
+import { TEXT_RATIO } from './contrast-policy.js';
 import { resolveThemeInput } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import { defaultSourceColors } from './foundation.js';
+import { lightnessCandidates } from './lightness-candidates.js';
 import { passesOnSolidGate } from './scale.js';
 
 /**
@@ -440,8 +441,7 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 
 	let best: number | null = null;
 	let bestDistance = Number.POSITIVE_INFINITY;
-	for (let l = low; l <= high + 1e-9; l += CONTRAST_SEARCH_STEP) {
-		const candidate = clampUnit(l);
+	for (const candidate of lightnessCandidates(low, high)) {
 		if (!passes(candidate)) continue;
 		const distance = Math.abs(candidate - target);
 		if (distance < bestDistance) {
