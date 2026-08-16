@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readFrontmatter } from '../src/lib/docs-frontmatter.ts';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const componentsDir = resolve(scriptDir, '../content/docs/components');
@@ -103,45 +104,6 @@ function isSeparator(value: string): boolean {
 
 function readJson(path: string): unknown {
 	return JSON.parse(readFileSync(path, 'utf8'));
-}
-
-function readFrontmatter(contents: string): {
-	description?: string;
-	source?: string;
-	title?: string;
-} {
-	const frontmatter = contents.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
-
-	return {
-		description: readFrontmatterValue(frontmatter, 'description'),
-		source: readFrontmatterValue(frontmatter, 'source'),
-		title: readFrontmatterValue(frontmatter, 'title'),
-	};
-}
-
-function readFrontmatterValue(
-	frontmatter: string,
-	key: 'description' | 'source' | 'title',
-): string | undefined {
-	const lines = frontmatter.split('\n');
-	const keyPrefix = `${key}:`;
-
-	for (const [index, line] of lines.entries()) {
-		if (!line.startsWith(keyPrefix)) continue;
-
-		const inlineValue = line.slice(keyPrefix.length).trim();
-		if (inlineValue) return inlineValue;
-
-		const continuation: Array<string> = [];
-		for (const nextLine of lines.slice(index + 1)) {
-			if (!nextLine.startsWith(' ')) break;
-			continuation.push(nextLine.trim());
-		}
-
-		return continuation.join(' ');
-	}
-
-	return undefined;
 }
 
 function quote(text: string): string {

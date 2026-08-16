@@ -286,7 +286,10 @@ a page feel shorter.
 
 The hosted docs app in `apps/docs` is the primary docs surface for developers. Authored guides live
 under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component guides live under
-`apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
+`apps/docs/content/docs/components/`, at `/components/<group>/<name>`. Walking that tree, parsing
+frontmatter, extracting `<ExampleBlock>` `src` values, and mapping page URLs to files each have one
+owner in `apps/docs/src/lib/` (`docs-mdx-files.ts`, `docs-frontmatter.ts`,
+`example-block-sources.ts`, `markdown-page-path.ts`).
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
 

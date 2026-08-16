@@ -1,13 +1,13 @@
-import { join, relative, sep } from 'node:path';
+import { relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import netlify from '@netlify/vite-plugin-tanstack-start';
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackStart } from '@tanstack/react-start/plugin/vite';
 import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
-import { readdir } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { findMdxFiles } from './src/lib/docs-mdx-files.js';
 import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 import { getMarkdownPagePath } from './src/lib/markdown-page-path.js';
 
@@ -32,30 +32,15 @@ function staticFunctionBasePathPlugin(): Plugin {
 
 const contentDocsDir = fileURLToPath(new URL('./content/docs/', import.meta.url));
 
-async function getMarkdownPrerenderPages(): Promise<Array<{ path: string }>> {
-	const files: Array<string> = [];
-
-	async function collect(dir: string): Promise<void> {
-		const entries = await readdir(dir, { withFileTypes: true });
-		await Promise.all(
-			entries.map(async (entry) => {
-				const path = join(dir, entry.name);
-				if (entry.isDirectory()) return collect(path);
-				if (entry.isFile() && entry.name.endsWith('.mdx')) files.push(path);
-			}),
-		);
-	}
-
-	await collect(contentDocsDir);
-
-	return files.map((filePath) => {
+function getMarkdownPrerenderPages(): Array<{ path: string }> {
+	return findMdxFiles(contentDocsDir).map((filePath) => {
 		const relativePath = relative(contentDocsDir, filePath).split(sep).join('/');
 		return { path: getMarkdownPagePath(relativePath) };
 	});
 }
 
 export default defineConfig(async () => {
-	const markdownPrerenderPages = await getMarkdownPrerenderPages();
+	const markdownPrerenderPages = getMarkdownPrerenderPages();
 	const baseUrl = process.env.VITE_BASE_URL ?? '/';
 	const storybookPath = `${baseUrl.replace(/\/$/, '')}/storybook`;
 

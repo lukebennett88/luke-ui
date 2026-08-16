@@ -1,14 +1,12 @@
-import { readdirSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { basename, relative, resolve } from 'node:path';
+import type { DocsFrontmatter } from './docs-frontmatter.js';
+import { readFrontmatter } from './docs-frontmatter.js';
+import { findMdxFiles } from './docs-mdx-files.js';
+import { exampleBlockSources } from './example-block-sources.js';
 
 interface ComponentDocContractOptions {
 	docsDir: string;
-}
-
-interface Frontmatter {
-	description?: string;
-	source?: string;
-	title?: string;
 }
 
 const PLACEHOLDER_PATTERNS = [
@@ -42,7 +40,7 @@ export function findComponentDocContractIssues({
 		if (relativeGuidePath.startsWith('primitives/')) {
 			expectedExamples.push(`${componentName}-primitive/basic`);
 		}
-		const primaryExample = guide.match(/<ExampleBlock\b[\s\S]*?\bsrc=["']([^"']+)["']/)?.[1];
+		const primaryExample = exampleBlockSources(guide)[0];
 
 		if (primaryExample === undefined || !expectedExamples.includes(primaryExample)) {
 			issues.push(
@@ -58,7 +56,7 @@ function findPlaceholders(
 	issues: Array<string>,
 	file: string,
 	contents: string,
-	frontmatter: Frontmatter,
+	frontmatter: DocsFrontmatter,
 ): void {
 	if (
 		frontmatter.title !== undefined &&
@@ -74,55 +72,13 @@ function findPlaceholders(
 	}
 }
 
-function readFrontmatter(contents: string): Frontmatter {
-	const frontmatter = contents.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
-
-	return {
-		description: readFrontmatterValue(frontmatter, 'description'),
-		source: readFrontmatterValue(frontmatter, 'source'),
-		title: readFrontmatterValue(frontmatter, 'title'),
-	};
-}
-
-function readFrontmatterValue(frontmatter: string, key: keyof Frontmatter): string | undefined {
-	const lines = frontmatter.split('\n');
-	const keyPrefix = `${key}:`;
-
-	for (const [index, line] of lines.entries()) {
-		if (!line.startsWith(keyPrefix)) continue;
-
-		const inlineValue = line.slice(keyPrefix.length).trim();
-		if (inlineValue) return inlineValue;
-
-		const continuation: Array<string> = [];
-		for (const nextLine of lines.slice(index + 1)) {
-			if (!nextLine.startsWith(' ')) break;
-			continuation.push(nextLine.trim());
-		}
-
-		return continuation.join(' ');
-	}
-
-	return undefined;
-}
-
 /**
- * Discovers authored `*.mdx` files directly inside each group directory. Generated Props pages
- * live one level deeper as `<group>/<name>/props.mdx`, so they stay out. The caller skips files
+ * Authored guides are `<group>/<name>.mdx`. Generated Props pages live one level
+ * deeper as `<group>/<name>/props.mdx`, so they stay out. The caller skips files
  * that do not declare `source:`.
  */
 function findComponentGuides(directory: string): Array<string> {
-	const guides: Array<string> = [];
-
-	for (const group of readdirSync(directory, { withFileTypes: true })) {
-		if (!group.isDirectory()) continue;
-		const groupDir = resolve(directory, group.name);
-
-		for (const entry of readdirSync(groupDir, { withFileTypes: true })) {
-			if (!entry.isFile() || !entry.name.endsWith('.mdx')) continue;
-			guides.push(resolve(groupDir, entry.name));
-		}
-	}
-
-	return guides.sort();
+	return findMdxFiles(directory).filter(
+		(file) => relative(directory, file).split('/').length === 2,
+	);
 }
