@@ -9,8 +9,6 @@ import { LabelContext } from 'react-aria-components/Label';
 import { PopoverContext } from 'react-aria-components/Popover';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
-import type { FieldSlotProps } from '../field/compose-field.js';
-import { composeField } from '../field/compose-field.js';
 import { IconSizeProvider } from '../icon/icon-size-context.js';
 import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
@@ -30,6 +28,7 @@ import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/roo
 import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { comboboxRecipe } from '../primitives/combobox/styles.css.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
+import type { FieldSlotProps } from '../primitives/field/field.js';
 import { Field } from '../primitives/field/field.js';
 import { COMBOBOX_ICON_SIZE } from '../sizing/combobox-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -93,20 +92,23 @@ export type ComboboxFieldProps<T extends object> = Prettify<_ComboboxFieldProps<
 
 /** Composes `ComboboxRoot` with label, description, and error slots. */
 export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): JSX.Element {
-	const [fieldSlotProps, restProps] = composeField(props);
 	const {
 		children,
+		description,
+		errorMessage,
 		inputRef,
+		label,
 		listBoxProps,
 		loadMoreItem: loadMoreItemProp,
 		loadingState,
 		menuWidth,
+		necessityIndicator,
 		onLoadMore,
 		placeholder,
 		popoverProps,
 		size = 'medium',
 		...comboboxRootProps
-	} = restProps;
+	} = props;
 
 	const isMobileDevice = useIsMobileDevice();
 	const isAsync: boolean = loadingState != null;
@@ -183,7 +185,14 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 
 	return (
 		<ComboboxRoot size={size} {...comboboxRootProps}>
-			<Field {...fieldSlotProps}>{content}</Field>
+			<Field
+				description={description}
+				errorMessage={errorMessage}
+				label={label}
+				necessityIndicator={necessityIndicator}
+			>
+				{content}
+			</Field>
 		</ComboboxRoot>
 	);
 }
