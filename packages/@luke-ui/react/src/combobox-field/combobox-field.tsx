@@ -11,7 +11,6 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import type { FieldSlotProps } from '../field/compose-field.js';
 import { composeField } from '../field/compose-field.js';
-import { IconSizeProvider } from '../icon/icon-size-context.js';
 import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import { MobileOverlay } from '../overlays/mobile-overlay.js';
@@ -31,7 +30,6 @@ import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { comboboxRecipe } from '../primitives/combobox/styles.css.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import { Field } from '../primitives/field/field.js';
-import { FIELD_CONTROL_ICON_SIZE } from '../sizing/control-size.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/utils.js';
@@ -249,29 +247,27 @@ function MobileComboboxContent<T extends object>({
 	return (
 		<>
 			<ComboboxInputGroup>
-				<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-					<RacButton
-						aria-expanded={state.isOpen}
-						aria-haspopup="dialog"
-						aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
-						aria-labelledby={ariaLabelledBy}
-						className={comboboxStyles.mobileTrigger()}
-						isDisabled={isDisabled || isReadOnly}
-						onPress={() => {
-							if (isReadOnly) return;
+				<RacButton
+					aria-expanded={state.isOpen}
+					aria-haspopup="dialog"
+					aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
+					aria-labelledby={ariaLabelledBy}
+					className={comboboxStyles.mobileTrigger()}
+					isDisabled={isDisabled || isReadOnly}
+					onPress={() => {
+						if (isReadOnly) return;
 
-							state.open(null, 'manual');
-						}}
-						slot={null}
-					>
-						<ComboBoxValue
-							className={comboboxStyles.mobileValue()}
-							id={valueId}
-							placeholder={placeholder}
-						/>
-						<Icon aria-hidden name="chevronDown" />
-					</RacButton>
-				</IconSizeProvider>
+						state.open(null, 'manual');
+					}}
+					slot={null}
+				>
+					<ComboBoxValue
+						className={comboboxStyles.mobileValue()}
+						id={valueId}
+						placeholder={placeholder}
+					/>
+					<Icon aria-hidden name="chevronDown" />
+				</RacButton>
 			</ComboboxInputGroup>
 			<MobileOverlay
 				aria-label={labelContext?.['aria-label']}
@@ -307,18 +303,16 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 	if (state == null || state.inputValue === '') return null;
 
 	return (
-		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-			<RacButton
-				aria-label="Clear search"
-				className={comboboxRecipe({ size }).clearButton()}
-				onPress={() => {
-					state.setInputValue('');
-				}}
-				slot={null}
-			>
-				<Icon aria-hidden name="close" />
-			</RacButton>
-		</IconSizeProvider>
+		<RacButton
+			aria-label="Clear search"
+			className={comboboxRecipe({ size }).clearButton()}
+			onPress={() => {
+				state.setInputValue('');
+			}}
+			slot={null}
+		>
+			<Icon aria-hidden name="close" />
+		</RacButton>
 	);
 }
 

@@ -2,6 +2,8 @@ import type { JSX } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
 import { Group as RacGroup } from 'react-aria-components/Group';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { IconSizeProvider } from '../../icon/icon-size-context.js';
+import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
@@ -22,12 +24,15 @@ export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element 
 	const { size: sizeProp, ...groupProps } = props;
 	const size = useComboboxSize(sizeProp);
 
+	// Same icon size as `InputGroup`, including icons a caller puts in the group.
 	return (
-		<RacGroup
-			{...groupProps}
-			className={composeRenderProps(groupProps.className, (className) => {
-				return comboboxRecipe({ size }).inputGroup(className);
-			})}
-		/>
+		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
+			<RacGroup
+				{...groupProps}
+				className={composeRenderProps(groupProps.className, (className) => {
+					return comboboxRecipe({ size }).inputGroup(className);
+				})}
+			/>
+		</IconSizeProvider>
 	);
 }
