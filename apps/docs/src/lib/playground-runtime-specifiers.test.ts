@@ -16,10 +16,7 @@ test('treats a relative import as unresolvable in the playground', () => {
 		'',
 	].join('\n');
 
-	expect(importSpecifiersFromSource(source)).toEqual([
-		'@luke-ui/react/box',
-		'./decorative-box.js',
-	]);
+	expect(importSpecifiersFromSource(source)).toEqual(['@luke-ui/react/box', './decorative-box.js']);
 	expect(canRunInPlayground(source, specifiers)).toBe(false);
 });
 
