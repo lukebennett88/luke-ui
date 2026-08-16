@@ -27,10 +27,6 @@ export interface GenerateSurfacesRequest {
 	mode: ElevationMode;
 }
 
-// Surface roles encode usage directly: light wells use neutral white, dark wells sit below the
-// canvas, and detached surfaces separate more strongly without exposing generated palette steps.
-// This module owns the surface deltas outright — `build-theme.ts` consumes `generateSurfaces` rather
-// than re-deriving them, so there is a single source of truth for the elevation model.
 const LIGHT_RECESSED_SURFACE = {
 	l: 1,
 	c: 0,
@@ -45,12 +41,8 @@ const SURFACE_LIGHTNESS_DELTAS = {
 /**
  * Derives the mode-aware elevation surface set from a resolved background canvas anchor.
  * `surfaces.canvas` is always exactly the `background` input. `recessed`, `floating`, and
- * `overlay` are mode-aware lightness offsets from the canvas, preserving today's relationships:
- * dark mode separates surfaces by lightening them above the canvas (recessed is the one
- * exception, sitting slightly darker); light mode keeps `recessed` at neutral white and
- * separates `floating`/`overlay` from the canvas only slightly. Colour-only: does not read or
- * emit `depth`/`actionControlFinish` shadow strings, and does not alias onto any functional
- * colour scale.
+ * `overlay` are mode-aware lightness offsets from the canvas. Colour-only: does not read or
+ * emit `depth`/`actionControlFinish` shadow strings.
  */
 export function generateSurfaces(request: GenerateSurfacesRequest): GeneratedSurfaces {
 	const { background: canvas, mode } = request;

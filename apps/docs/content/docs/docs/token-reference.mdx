@@ -6,8 +6,8 @@ description: Public semantic CSS variables to build custom Luke UI elements.
 import { TokenExplorer } from '../../../src/components/token-explorer';
 
 `vars` is Luke UI's typed public token contract. Each path resolves to a stable `--luke-*` CSS
-variable. For example, `vars.color.background.danger.solid.hover` resolves to
-`var(--luke-color-background-danger-solid-hover)`.
+variable. For example, `vars.color.background.danger.solid` resolves to
+`var(--luke-color-background-danger-solid)`.
 
 Use these variables when a component API or layout utility cannot express a custom element. Some
 values vary by theme identity or colour mode, while others remain fixed. The token paths stay the
@@ -67,8 +67,10 @@ Depth describes how a surface sits above or within the interface.
 
 <ExampleBlock src="overview/depth" title="Token reference — Depth scale" />
 
-Pair each depth role with the matching surface role. For example, a menu can use `surface.floating`
-with `depth.floating`, while a dialog can use `surface.overlay` with `depth.overlay`.
+Pair each depth role with the matching surface role. A card might use `surface.floating` with
+`depth.floating`, while a dialog can use `surface.overlay` with `depth.overlay`.
+`color.overlay.backdrop` is the translucent layer behind that dialog. It is not a surface colour and
+not a shadow.
 
 Components already apply depth to their own states. Use these variables only for custom surfaces.
 

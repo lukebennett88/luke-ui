@@ -110,9 +110,9 @@ describe('buildTheme output', () => {
 			.filter(([path]) => path.startsWith('color.'))
 			.map(([, varName]) => varName);
 		for (const block of [blocks.baseLight, blocks.mediaDark]) {
-			const nonOklch = colorVarNames.filter(
-				(varName) => !extractValue(block, varName).startsWith('oklch('),
-			);
+			const nonOklch = colorVarNames.filter((varName) => {
+				return !extractValue(block, varName).startsWith('oklch(');
+			});
 			expect(nonOklch).toEqual([]);
 		}
 	});

@@ -5,11 +5,16 @@ import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
+import { interactionColor } from '../../theme/interaction-color.js';
 import { fieldMessageIcon, fieldMessageIndent } from '../field/recipe.css.js';
 
 const checkboxControlSize = createVar();
+const checkboxFill = createVar();
 const checkboxGlyphSize = createVar();
 const checkboxIndicatorSize = createVar();
+const checkboxStroke = createVar();
+
+const enabledInteraction = ':not([data-disabled="true"]):not([data-readonly="true"])';
 
 const checkboxConfig = {
 	slots: {
@@ -86,10 +91,10 @@ const checkboxConfig = {
 				},
 			},
 			alignItems: 'center',
-			backgroundColor: vars.color.surface.canvas,
+			backgroundColor: checkboxFill,
 			backgroundImage: vars.actionControlFinish.resting,
 			blockSize: checkboxIndicatorSize,
-			borderColor: vars.color.border.control,
+			borderColor: checkboxStroke,
 			borderRadius: vars.radius.detail,
 			borderStyle: 'solid',
 			borderWidth: '1px',
@@ -106,6 +111,10 @@ const checkboxConfig = {
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, background-image, border-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
+			vars: {
+				[checkboxFill]: vars.color.surface.canvas,
+				[checkboxStroke]: vars.color.border.control,
+			},
 			selectors: {
 				'&::after': {
 					content: '"✓"',
@@ -115,70 +124,48 @@ const checkboxConfig = {
 					opacity: vars.interaction.disabledOpacity,
 				},
 				'[data-focus-visible="true"] &': focusRing(vars.color.border.focus),
-				'[data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
-					backgroundImage: vars.actionControlFinish.raised,
-					borderColor: vars.color.border.accent,
-				},
-				'[data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &': {
-					backgroundImage: vars.actionControlFinish.recessed,
-					borderColor: vars.color.border.accent,
-				},
 				'[data-indeterminate="true"] &': {
-					backgroundColor: vars.color.background.accent.solid.rest,
-					borderColor: vars.color.background.accent.solid.rest,
+					vars: {
+						[checkboxFill]: vars.color.background.accent.solid,
+						[checkboxStroke]: vars.color.background.accent.solid,
+					},
 				},
 				'[data-indeterminate="true"] &::after': {
 					content: '"−"',
 					opacity: 1,
 				},
 				'[data-invalid="true"] &': {
-					borderColor: vars.color.background.danger.solid.rest,
+					vars: {
+						[checkboxStroke]: vars.color.background.danger.solid,
+					},
 				},
 				'[data-selected="true"] &': {
-					backgroundColor: vars.color.background.accent.solid.rest,
-					borderColor: vars.color.background.accent.solid.rest,
+					vars: {
+						[checkboxFill]: vars.color.background.accent.solid,
+						[checkboxStroke]: vars.color.background.accent.solid,
+					},
 				},
 				'[data-selected="true"] &::after': {
 					opacity: 1,
 				},
-				'[data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.accent.solid.hover,
-						borderColor: vars.color.background.accent.solid.hover,
-					},
-				'[data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.accent.solid.pressed,
-						borderColor: vars.color.background.accent.solid.pressed,
-					},
 				'[data-invalid="true"][data-selected="true"] &, [data-invalid="true"][data-indeterminate="true"] &':
 					{
-						backgroundColor: vars.color.background.danger.solid.rest,
-						borderColor: vars.color.background.danger.solid.rest,
 						color: vars.color.foreground.danger.onSolid,
+						vars: {
+							[checkboxFill]: vars.color.background.danger.solid,
+							[checkboxStroke]: vars.color.background.danger.solid,
+						},
 					},
-				'[data-invalid="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundImage: vars.actionControlFinish.raised,
-						borderColor: vars.color.background.danger.solid.hover,
-					},
-				'[data-invalid="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundImage: vars.actionControlFinish.recessed,
-						borderColor: vars.color.background.danger.solid.pressed,
-					},
-				'[data-invalid="true"][data-selected="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-hovered="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.danger.solid.hover,
-						borderColor: vars.color.background.danger.solid.hover,
-						color: vars.color.foreground.danger.onSolid,
-					},
-				'[data-invalid="true"][data-selected="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &, [data-invalid="true"][data-indeterminate="true"][data-pressed="true"]:not([data-disabled="true"]):not([data-readonly="true"]) &':
-					{
-						backgroundColor: vars.color.background.danger.solid.pressed,
-						borderColor: vars.color.background.danger.solid.pressed,
-						color: vars.color.foreground.danger.onSolid,
-					},
+				[`[data-hovered="true"]${enabledInteraction} &`]: {
+					backgroundColor: interactionColor(checkboxFill, 'hover'),
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: interactionColor(checkboxStroke, 'hover'),
+				},
+				[`[data-pressed="true"]${enabledInteraction} &`]: {
+					backgroundColor: checkboxFill,
+					backgroundImage: vars.actionControlFinish.recessed,
+					borderColor: checkboxStroke,
+				},
 			},
 		},
 	},

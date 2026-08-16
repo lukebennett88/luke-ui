@@ -11,13 +11,27 @@ mode. A component then stays consistent, because it does not need to know the un
 
 Surface roles describe where an element sits in the interface:
 
-- `canvas`: the page.
-- `recessed`: an inset area.
-- `floating`: elevated UI, such as menus and cards.
-- `overlay`: dialogs and other high-elevation surfaces.
+- `color.surface.canvas`: the page.
+- `color.surface.recessed`: an inset area.
+- `color.surface.floating`: elevated UI, such as menus and cards.
+- `color.surface.overlay`: dialogs and other high-elevation surfaces. This is an opaque colour.
 
-`scrim` dims the page behind an open overlay. Text uses `primary` and `secondary` roles. Borders
-distinguish decorative, control, and focus uses.
+`color.overlay.backdrop` dims content behind a modal. It is not a surface colour.
+
+Luke UI derives hover and pressed colours from the element's resting semantic colour. Selected,
+checked, invalid, danger, focus, and disabled stay persistent semantic states. Interaction feedback
+is calculated from those resting colours, so a selected option stays selected and an invalid control
+stays invalid.
+
+Do not use derived interaction colours for focus-visible or disabled. Focus keeps
+`color.border.focus`. Disabled is a state, not an interaction colour.
+
+Prefer a component's state API when the component has one. Built-in controls derive their own hover
+and pressed colours internally; that derivation is not a public token or function. When you style a
+custom interactive element, keep the semantic colour for meaning and author its hover and pressed
+feedback yourself.
+
+Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
@@ -54,33 +68,28 @@ stays constant, so only the role and mode change its colours.
 
 ### Background and foreground
 
-Each role has a `subtle` and a `solid` background ramp, and each ramp has `rest`, `hover`, and
-`pressed` states:
+Each role has a `subtle` and a `solid` background. Those fills are resting colours. Built-in
+controls derive their own hover and pressed colours from them internally; that derivation is not a
+public token or function.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
 
-vars.color.background.warning.subtle.rest;
-vars.color.background.warning.solid.hover;
+vars.color.background.warning.subtle;
+vars.color.background.warning.solid;
 ```
 
-`rest` is an explicit state rather than an implied default. A token path cannot be both a string
-leaf and the parent of `hover` and `pressed`, so resting values need their own name. `solid.pressed`
-deliberately reuses the `solid.hover` colour, because there is no third, deeper solid rung. A
-component carries a pressed look through depth, finish, or a transform. It does not invent another
-solid colour.
-
-Foreground gives each role a resting and a stronger interactive colour, plus a colour guaranteed to
-read against that role's solid backgrounds:
+Foreground gives each role an ordinary semantic colour, plus a colour guaranteed to read against
+that role's solid background:
 
 ```tsx
-vars.color.foreground.warning.rest;
-vars.color.foreground.warning.hover;
+vars.color.foreground.warning.default;
 vars.color.foreground.warning.onSolid;
 ```
 
-There is no foreground `pressed`. The background ramp and other cues carry a pressed look instead,
-so text and icons reuse `hover` for a pressed control.
+Not every control changes its foreground on hover or pressed. Button keeps its resting foreground
+and derives only the background. A control that does need stronger content feedback derives it from
+the resting foreground internally; there is no public token or function for this.
 
 ### Borders
 
@@ -109,25 +118,28 @@ variables to fall back on. If you upgrade from a release that had them, this tab
 reference. Move each usage to its `color.background` / `color.foreground` / `color.border`
 equivalent:
 
-| Old path                                    | New path                                 |
-| ------------------------------------------- | ---------------------------------------- |
-| `color.intent.<role>.surface.subtle`        | `color.background.<role>.subtle.rest`    |
-| `color.intent.<role>.surface.subtleHover`   | `color.background.<role>.subtle.hover`   |
-| `color.intent.<role>.surface.subtlePressed` | `color.background.<role>.subtle.pressed` |
-| `color.intent.<role>.surface.solid`         | `color.background.<role>.solid.rest`     |
-| `color.intent.<role>.surface.solidHover`    | `color.background.<role>.solid.hover`    |
-| `color.intent.<role>.surface.solidPressed`  | `color.background.<role>.solid.pressed`  |
-| `color.intent.<role>.text`                  | `color.foreground.<role>.rest`           |
-| `color.intent.<role>.textHover`             | `color.foreground.<role>.hover`          |
-| `color.intent.<role>.onSolid`               | `color.foreground.<role>.onSolid`        |
-| `color.intent.<role>.border`                | `color.border.<role>`                    |
+| Old path                                    | New path                          |
+| ------------------------------------------- | --------------------------------- |
+| `color.intent.<role>.surface.subtle`        | `color.background.<role>.subtle`  |
+| `color.intent.<role>.surface.subtleHover`   | No public equivalent — internal   |
+| `color.intent.<role>.surface.subtlePressed` | No public equivalent — internal   |
+| `color.intent.<role>.surface.solid`         | `color.background.<role>.solid`   |
+| `color.intent.<role>.surface.solidHover`    | No public equivalent — internal   |
+| `color.intent.<role>.surface.solidPressed`  | No public equivalent — internal   |
+| `color.intent.<role>.text`                  | `color.foreground.<role>.default` |
+| `color.intent.<role>.textHover`             | No public equivalent — internal   |
+| `color.intent.<role>.onSolid`               | `color.foreground.<role>.onSolid` |
+| `color.intent.<role>.border`                | `color.border.<role>`             |
 
-CSS variable names followed the same shape, so `--luke-color-intent-danger-surface-solid-hover`
-became `--luke-color-background-danger-solid-hover`.
+CSS variable names followed the same shape, so `--luke-color-intent-danger-surface-solid` became
+`--luke-color-background-danger-solid`. There are no `--luke-color-background-*-hover` or
+`--luke-color-background-*-pressed` variables.
 
 The current contract also carries capabilities `color.intent` never had. It adds a foreground and
-border for `neutral`. It also adds interactive backgrounds, hover foregrounds, and on-solid
-foregrounds for `info`, `success`, and `warning`.
+border for `neutral`. It also adds on-solid foregrounds for `info`, `success`, and `warning`. Hover
+and pressed background ramps from `color.intent` have no replacement leaves. Built-in controls
+derive that feedback internally; there is no public token or function for a custom element to
+reproduce it.
 
 ## Continue learning
 

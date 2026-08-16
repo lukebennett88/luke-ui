@@ -5,7 +5,7 @@ import {
 	splitBlocks,
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
-import { buildTheme, compileTheme, ThemeGenerationError } from './build-theme.js';
+import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
 import { contrastRatio, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { ThemeFoundation } from './foundation.js';
@@ -24,7 +24,7 @@ describe('buildTheme independent modes', () => {
 			name: 'green-purple',
 		};
 		const blocks = splitBlocks(buildTheme(greenPurpleFoundation));
-		const solidVar = '--luke-color-background-accent-solid-rest';
+		const solidVar = '--luke-color-background-accent-solid';
 		const lightSolid = parseColor(extractValue(blocks.baseLight, solidVar));
 		const darkSolid = parseColor(extractValue(blocks.mediaDark, solidVar));
 		expect(lightSolid.h).toBeCloseTo(150, 0);
@@ -35,79 +35,45 @@ describe('buildTheme independent modes', () => {
 	});
 });
 
-describe('buildTheme generation failures', () => {
-	function buildGenerationError(foundation: ThemeFoundation): ThemeGenerationError {
-		const caught = (() => {
-			try {
-				buildTheme(foundation);
-				return null;
-			} catch (error) {
-				return error;
-			}
-		})();
-		if (caught instanceof ThemeGenerationError) return caught;
-		throw new Error('expected buildTheme to throw ThemeGenerationError');
-	}
-
-	// Every semantic role publishes a solid, so every role must reach an accessible
-	// solid/on-solid pair — a status source in an on-solid dead zone is a build failure,
-	// not a silently unguaranteed solid. Status sources are used verbatim (only a
-	// single-value accent is pre-conditioned into an accessible band), so an authored
-	// one reaches the generator exactly as written.
-	it('throws ThemeGenerationError naming the role, mode, and achieved ratio for a dead-zone warning', () => {
-		const error = buildGenerationError({
-			...tactileFoundation,
-			light: {
-				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, warning: 'oklch(0.62 0.19 27)' },
-			},
-			name: 'bad-warning',
-		});
-
-		expect(error.role).toBe('warning');
-		expect(error.mode).toBe('light');
-		expect(error.bestAttempt.step).toBe(9);
-		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		expect(error.message).toContain('Cannot generate the light "warning" family');
-		expect(error.message).toContain(`${error.bestAttempt.onSolidRatio.toFixed(2)}:1`);
-		// Warning is generated fifth, so the four roles before it are reported and the last one is not.
-		expect(Object.keys(error.diagnostics.completedFamilies)).toEqual([
-			'neutral',
-			'accent',
-			'info',
-			'success',
-		]);
+describe('buildTheme mid-lightness sources', () => {
+	it('generates a mid-lightness warning by adapting the solid inside the tone window', () => {
+		expect(() => {
+			return buildTheme({
+				...tactileFoundation,
+				light: {
+					...tactileFoundation.light,
+					color: { ...tactileFoundation.light.color, warning: 'oklch(0.62 0.19 27)' },
+				},
+				name: 'mid-lightness-warning',
+			});
+		}).not.toThrow();
 	});
 
-	it('throws ThemeGenerationError for an accent no on-solid text can sit on', () => {
+	it('rejects an explicit mid-lightness accent when mixed interaction fills miss AA', () => {
 		const caught = (() => {
 			try {
-				// A mid-lightness tone whose whole solid window is an on-solid dead zone: neither near-white
-				// nor near-black on-solid text clears AA anywhere the search can reach.
 				buildTheme({
 					...tactileFoundation,
 					light: {
 						...tactileFoundation.light,
 						color: { ...tactileFoundation.light.color, accent: 'oklch(0.62 0.19 27)' },
 					},
-					name: 'bad-accent',
+					name: 'mid-accent',
 				});
 				return null;
 			} catch (error) {
 				return error;
 			}
 		})();
-		expect(caught).toBeInstanceOf(ThemeGenerationError);
-		const error = caught as ThemeGenerationError;
-		expect(error.role).toBe('accent');
-		expect(error.mode).toBe('light');
-		expect(error.bestAttempt.step).toBe(9);
-		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		// The partial diagnostics carry the failing role/mode and the families resolved before it.
-		expect(error.diagnostics.role).toBe('accent');
-		expect(error.diagnostics.mode).toBe('light');
-		expect(error.diagnostics.completedFamilies.neutral).toBeDefined();
-		expect(error.diagnostics.completedFamilies.accent).toBeUndefined();
+		expect(caught).toBeInstanceOf(ThemeContrastError);
+		const error = caught as ThemeContrastError;
+		expect(
+			error.failures.every(
+				(failure) =>
+					failure.background.startsWith('hover on ') ||
+					failure.background.startsWith('pressed on '),
+			),
+		).toBe(true);
 	});
 });
 
@@ -170,21 +136,13 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
 		});
 
-		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
-			// The subtle component surfaces (scale steps 3-5) ramp from the canvas independently of the
-			// elevation surfaces and aren't pinned apart from `floating`; what matters is that primary
-			// text stays legible on the hovered subtle surface. The neutral subtle hover is
-			// excluded here because that exact colour pair is already hard-gated under different names:
-			// `color.text.primary` and `color.foreground.neutral.hover` both alias neutral step 12, and
-			// `validateContrast` gates the latter against all three neutral subtle states at >=4.5:1.
-			// No hard-gated pair covers primary text on the *accent* subtle ramp, so that is the pair
-			// worth recomputing.
+		it(`${foundation.name} keeps dark accent subtle legible for primary text`, () => {
+			// Combobox selected options paint `text.primary` on `background.accent.subtle`. Contrast
+			// validation also gates the derived hover and pressed fills; this checks the resting pair.
 			const { mediaDark } = splitBlocks(buildTheme(foundation));
 			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
-			const subtleHover = parseColor(
-				extractValue(mediaDark, '--luke-color-background-accent-subtle-hover'),
-			);
-			expect(contrastRatio(textPrimary, subtleHover)).toBeGreaterThanOrEqual(4.5);
+			const subtle = parseColor(extractValue(mediaDark, '--luke-color-background-accent-subtle'));
+			expect(contrastRatio(textPrimary, subtle)).toBeGreaterThanOrEqual(4.5);
 		});
 
 		it(`${foundation.name} generates subtle, distinct semantic borders`, () => {
@@ -204,7 +162,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 					const minimumContrast = Math.min(
 						...surfaces.map((surface) => contrastRatio(border, surface)),
 					);
-					// The semantic borders alias the scale's step 7 (subtle UI border). They stay visibly
+					// The semantic borders alias the family's border rung. They stay visibly
 					// distinct from the base surfaces but sit below the 3:1 non-text gate by design: these
 					// are soft separators, not solved-contrast boundaries like `border.control`.
 					expect(minimumContrast).toBeGreaterThan(1.2);
@@ -222,7 +180,7 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 // latter is a tautology once the two colours are already known to differ, so it added no coverage.
 
 describe('buildTheme public motion surface', () => {
-	// The numbered duration scale in `motion.ts` is private in the same sense as the 12-step colour
+	// The numbered duration scale in `motion.ts` is private in the same sense as the colour family
 	// scale: resolved in TypeScript and never published as a custom property. Only the three
 	// role-named durations reach the stylesheet, so a numbered variable here is a leak.
 	it('emits the three role-named durations and no numbered duration step', () => {

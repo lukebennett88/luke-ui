@@ -1,5 +1,6 @@
 import { expect, test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
+import type { Locator } from 'vite-plus/test/context';
+import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import { ComboboxItem, ComboboxLoadMoreItem } from '../primitives/combobox/item.js';
@@ -145,18 +146,31 @@ test('interactive states', async () => {
 	await captureVisual(locator, 'combobox-field/hover');
 	await userEvent.unhover(input);
 	await userEvent.hover(clear);
-	await captureVisual(locator, 'combobox-field/clear-hover');
+	await captureVisual(clear, 'combobox-field/clear-hover');
 	await userEvent.unhover(clear);
 	await userEvent.hover(trigger);
-	await captureVisual(locator, 'combobox-field/trigger-hover');
+	await captureVisual(trigger, 'combobox-field/trigger-hover');
 	await userEvent.unhover(trigger);
 	await focusViaKeyboard(input);
 	await captureVisual(locator, 'combobox-field/focus-visible');
 	await userEvent.tab();
 	await captureVisual(locator, 'combobox-field/clear-focus-visible');
 	await userEvent.keyboard('{Space>}');
-	await captureVisual(locator, 'combobox-field/clear-pressed');
+	await captureVisual(clear, 'combobox-field/clear-pressed');
 	await userEvent.keyboard('{/Space}');
+});
+
+test('trigger hover in dark mode', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+		{ appearance: { mode: 'dark', theme: 'tactile' } },
+	);
+	const trigger = page.getByRole('button', { name: 'Toggle options' });
+
+	await userEvent.hover(trigger);
+	await captureVisual(trigger, 'combobox-field/trigger-hover-tactile-dark');
 });
 
 test('open option and selection states', async () => {
@@ -176,15 +190,71 @@ test('open option and selection states', async () => {
 			{renderCountryItem}
 		</ComboboxField>,
 	);
-	const input = page.getByRole('combobox', { name: 'Country' });
 
+	const input = page.getByRole('combobox', { name: 'Country' });
 	await userEvent.click(input);
 	await captureVisual(
 		page.elementLocator(document.body),
 		'combobox-field/open-selected-disabled-loading',
 	);
-	await userEvent.keyboard('{Home}');
-	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-keyboard-focus');
+});
+
+test('option keyboard focus', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	await captureVisual(await openFocusedComboboxOption(), 'combobox-field/option-keyboard-focus');
+});
+
+test('option pressed', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	const option = page.getByRole('option', { exact: true, name: 'Australia' });
+	await expect.element(option).toBeVisible();
+
+	const release = await pressComboboxOption(option);
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-pressed');
+	await release();
+});
+
+test('selected option pressed', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	// Selecting through the combobox itself (rather than a `defaultValue`) keeps DOM focus on the
+	// input the whole time. A fresh focus event on a combobox that already has a matching value only
+	// re-opens reliably right after page load; once another combobox has mounted and unmounted first,
+	// that reopen silently no-ops in this test environment. Staying selected-and-focused, then
+	// reopening with the keyboard, sidesteps that rather than depending on run order.
+	await withPopoverScrollStub(async () => {
+		const input = page.getByRole('combobox', { name: 'Country' });
+		await userEvent.tab();
+		await expect.element(input).toHaveFocus();
+		await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+		const canadaFocused = page.getByRole('option', { exact: true, name: 'Canada' });
+		await expect.poll(() => canadaFocused.element().getAttribute('data-focused')).toBe('true');
+		await userEvent.keyboard('{Enter}');
+		await expect.poll(() => input.element().getAttribute('aria-expanded')).toBe('false');
+
+		await userEvent.keyboard('{ArrowDown}');
+		const option = page.getByRole('option', { exact: true, name: 'Canada' });
+		await expect.element(option).toBeVisible();
+
+		const release = await pressComboboxOption(option);
+		await captureVisual(
+			page.elementLocator(document.body),
+			'combobox-field/option-selected-pressed',
+		);
+		await release();
+	});
 });
 
 test('option with leading icon at both sizes', async () => {
@@ -352,6 +422,76 @@ test('rich section title', async () => {
 		'combobox-field/section-title-rich-content',
 	);
 });
+
+/**
+ * Opens with a click, then moves keyboard focus onto the first option. React Aria closes the
+ * popover when an option is scrolled into view, so `scrollIntoView` is stubbed for that step.
+ * The page is captured rather than the option: Playwright's element screenshot also scrolls, which
+ * detaches the portalled list.
+ */
+async function withPopoverScrollStub<T>(run: () => Promise<T>): Promise<T> {
+	const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollIntoView');
+	if (descriptor == null) throw new Error('Expected Element.prototype.scrollIntoView');
+	Object.defineProperty(Element.prototype, 'scrollIntoView', {
+		...descriptor,
+		value: () => {},
+	});
+	try {
+		return await run();
+	} finally {
+		Object.defineProperty(Element.prototype, 'scrollIntoView', descriptor);
+	}
+}
+
+async function openFocusedComboboxOption() {
+	return withPopoverScrollStub(async () => {
+		await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+		await userEvent.keyboard('{ArrowDown}');
+		const option = page.getByRole('option', { exact: true, name: 'Australia' });
+		await expect.poll(() => option.element().getAttribute('data-focused')).toBe('true');
+		const popover = page.getByRole('listbox').element().parentElement;
+		if (popover == null) throw new Error('Expected the popover element.');
+		await waitForOverlayEnter(popover);
+		return page.elementLocator(document.body);
+	});
+}
+
+/**
+ * Presses an option with a raw CDP mouse event instead of `userEvent.hover`/`click`. Playwright's
+ * locator-level hover and click actions perform their own pre-action scroll-into-view check, which
+ * closes this component's popover the same way keyboard navigation's `scrollIntoView` does (see
+ * `withPopoverScrollStub`), except this scroll happens natively and cannot be stubbed from script.
+ * Dispatching the mouse event directly at the option's coordinates lands `data-hovered` and
+ * `data-pressed` without that pre-action scroll. Returns a callback that releases the mouse button;
+ * call it after capturing so the option's real `onPress` selection behaviour still runs.
+ */
+async function pressComboboxOption(option: Locator): Promise<() => Promise<void>> {
+	const rect = option.element().getBoundingClientRect();
+	const frameElement = (window as unknown as { frameElement?: Element }).frameElement;
+	const frameRect = frameElement?.getBoundingClientRect();
+	const x = (frameRect?.left ?? 0) + rect.left + rect.width / 2;
+	const y = (frameRect?.top ?? 0) + rect.top + rect.height / 2;
+
+	await cdp().send('Input.dispatchMouseEvent', { button: 'none', type: 'mouseMoved', x, y });
+	await cdp().send('Input.dispatchMouseEvent', {
+		button: 'left',
+		clickCount: 1,
+		type: 'mousePressed',
+		x,
+		y,
+	});
+	await expect.poll(() => option.element().getAttribute('data-pressed')).toBe('true');
+
+	return async () => {
+		await cdp().send('Input.dispatchMouseEvent', {
+			button: 'left',
+			clickCount: 1,
+			type: 'mouseReleased',
+			x,
+			y,
+		});
+	};
+}
 
 /**
  * Waits for the tray to finish opening before a capture. The screenshot owns the resting geometry,

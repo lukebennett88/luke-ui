@@ -41,18 +41,18 @@ describe('buildTheme foundation validation', () => {
 		);
 	});
 
-	it('rejects an unsafe scrim value with a message naming the field', () => {
-		const unsafeScrim: ThemeFoundation = {
+	it('rejects an unsafe backdrop value with a message naming the field', () => {
+		const unsafeBackdrop: ThemeFoundation = {
 			...tactileFoundation,
 			light: {
 				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, scrim: 'oklch(0 0 0 / 0.2); } .evil {' },
+				color: { ...tactileFoundation.light.color, backdrop: 'oklch(0 0 0 / 0.2); } .evil {' },
 			},
-			name: 'unsafe-scrim',
+			name: 'unsafe-backdrop',
 		};
 
-		expect(() => buildTheme(unsafeScrim)).toThrow(
-			'light.color.scrim: must be a non-empty CSS colour value',
+		expect(() => buildTheme(unsafeBackdrop)).toThrow(
+			'light.color.backdrop: must be a non-empty CSS colour value',
 		);
 	});
 

@@ -20,7 +20,7 @@ export default () => {
 					</Text>
 					<Box
 						style={{
-							backgroundColor: vars.color.background.accent.solid.rest,
+							backgroundColor: vars.color.background.accent.solid,
 							blockSize: '1.5rem',
 							borderRadius: vars.radius.detail,
 							inlineSize: vars.space[step],

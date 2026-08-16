@@ -5,7 +5,7 @@ import { vars } from '../theme/contract.css.js';
 /** Renders the `exclamationTriangle` icon as a CSS mask `::before`/`::after`, at `size`. */
 function invalidIconMask(size: string) {
 	return {
-		backgroundColor: vars.color.foreground.danger.rest,
+		backgroundColor: vars.color.foreground.danger.default,
 		blockSize: size,
 		content: '""',
 		flexShrink: 0,

@@ -30,8 +30,8 @@ type ContractVars<T> = {
 
 /**
  * Typed access to the semantic theme custom properties. Each path resolves to a stable global
- * `--luke-*` variable reference, for example `vars.color.background.danger.solid.hover` is
- * `var(--luke-color-background-danger-solid-hover)`. Emits no CSS; values are supplied by a
+ * `--luke-*` variable reference, for example `vars.color.background.danger.solid` is
+ * `var(--luke-color-background-danger-solid)`. Emits no CSS; values are supplied by a
  * theme stylesheet built with `buildTheme`.
  */
 export const vars = buildVars(themeContractTree) as ContractVars<typeof themeContractTree>;

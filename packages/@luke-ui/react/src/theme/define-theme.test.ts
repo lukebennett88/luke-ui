@@ -32,7 +32,7 @@ function extractValue(block: string, varName: string): string {
 	return match[1];
 }
 
-const ACCENT_SOLID = '--luke-color-background-accent-solid-rest';
+const ACCENT_SOLID = '--luke-color-background-accent-solid';
 
 describe('defineTheme colour-only authoring', () => {
 	// `defineTheme` compiles through `buildTheme`, whose `validateContrast` already hard-gates
@@ -127,7 +127,7 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 					mode,
 					reSearched: diagnostics.solidAnchor.adaptedForOnSolid,
 					solidMovedOffPreconditionedTone:
-						Math.abs(diagnostics.family[9].l - source.l) > 1e-9 ||
+						Math.abs(diagnostics.family.solid.l - source.l) > 1e-9 ||
 						Math.abs(diagnostics.solidAnchor.resolvedLightness - source.l) > 1e-9,
 				};
 			});
@@ -172,9 +172,9 @@ describe('defineTheme partial per-mode merges', () => {
 
 	it('defaults the omitted dark side of a partial colour without bleeding the light override', () => {
 		const infoVarNames = [
-			'--luke-color-foreground-info-rest',
+			'--luke-color-foreground-info-default',
 			'--luke-color-border-info',
-			'--luke-color-background-info-subtle-rest',
+			'--luke-color-background-info-subtle',
 		];
 		const overridden = splitBlocks(
 			defineTheme({ color: { accent: '#fff', info: { light: '#1d39c4' } }, name: 'partial-color' }),
@@ -197,16 +197,17 @@ describe('defineTheme partial per-mode merges', () => {
 	});
 });
 
-describe('defineTheme scrim validation', () => {
-	it('rejects an unsafe authored scrim value with a message naming the field', () => {
-		// The scrim is deliberately excluded from OKLCH colour parsing (its alpha channel does not fit
-		// that pattern) and emitted verbatim, so it needs its own shape check rather than none at all.
+describe('defineTheme backdrop validation', () => {
+	it('rejects an unsafe authored backdrop value with a message naming the field', () => {
+		// The backdrop is deliberately excluded from OKLCH colour parsing (its alpha channel does not
+		// fit that pattern) and emitted verbatim, so it needs its own shape check rather than none at
+		// all.
 		expect(() => {
 			return defineTheme({
-				color: { accent: '#3b82f6', scrim: 'oklch(0 0 0 / 0.2); } .evil {' },
-				name: 'unsafe-scrim',
+				color: { accent: '#3b82f6', backdrop: 'oklch(0 0 0 / 0.2); } .evil {' },
+				name: 'unsafe-backdrop',
 			});
-		}).toThrow('color.scrim: must be a non-empty CSS colour value');
+		}).toThrow('color.backdrop: must be a non-empty CSS colour value');
 	});
 });
 
@@ -299,37 +300,29 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 		const css = defineTheme(input);
 		const emitted = emittedVarNames(css);
 
-		it(`${name} emits exactly the contract variables, including scrim and disabled text`, () => {
+		it(`${name} emits exactly the contract variables, including overlay and disabled text`, () => {
 			// Derived from the contract, not hardcoded: `contract.test.ts` already asserts the typed
 			// `vars` tree has exactly as many leaves as `flattenThemeContract()`, so this only needs to
 			// check that a bundled theme's emitted CSS matches that same list, not restate its length.
 			expect(emitted.size).toBe(contractNames.length);
 			expect([...emitted].sort()).toEqual([...contractNames].sort());
-			expect(emitted.has('--luke-color-scrim')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-backdrop')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-hover')).toBe(false);
+			expect(emitted.has('--luke-color-overlay-pressed')).toBe(false);
+			expect(emitted.has('--luke-color-overlay-tint')).toBe(false);
+			expect(emitted.has('--luke-color-scrim')).toBe(false);
 			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
 		});
 
-		it(`${name} paints info, success, and warning with a real interactive ramp`, () => {
-			// The three feedback roles carry the same capabilities as every other role. The contract
-			// inventory cannot prove that each ramp is interactive because a flat colour still fills every
-			// leaf. These emitted values prove that each state stays distinct.
+		it(`${name} paints info, success, and warning with distinct subtle, solid, and foreground slots`, () => {
 			const blocks = splitBlocks(css);
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				for (const role of ['info', 'success', 'warning']) {
-					const ramp = [
-						`--luke-color-background-${role}-subtle-rest`,
-						`--luke-color-background-${role}-subtle-hover`,
-						`--luke-color-background-${role}-subtle-pressed`,
-						`--luke-color-background-${role}-solid-rest`,
-						`--luke-color-background-${role}-solid-hover`,
-					].map((varName) => extractValue(block, varName));
-					expect(new Set(ramp).size).toBe(ramp.length);
-					// Solid pressed deliberately reuses solid hover: depth and finish carry the press.
-					expect(extractValue(block, `--luke-color-background-${role}-solid-pressed`)).toBe(
-						extractValue(block, `--luke-color-background-${role}-solid-hover`),
+					expect(extractValue(block, `--luke-color-background-${role}-subtle`)).not.toBe(
+						extractValue(block, `--luke-color-background-${role}-solid`),
 					);
-					expect(extractValue(block, `--luke-color-foreground-${role}-rest`)).not.toBe(
-						extractValue(block, `--luke-color-foreground-${role}-hover`),
+					expect(extractValue(block, `--luke-color-foreground-${role}-default`)).not.toBe(
+						extractValue(block, `--luke-color-foreground-${role}-on-solid`),
 					);
 				}
 			}

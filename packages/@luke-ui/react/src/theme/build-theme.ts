@@ -190,18 +190,28 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 
 	const families = {} as Record<FamilyRole, ScaleFamily>;
 	const familyDiagnostics = {} as Record<FamilyRole, FamilyDiagnostics>;
+	// Neutral's own `highContrast` is the global interaction source `interaction-color.ts` always
+	// mixes toward at runtime, regardless of role (see `INTERACTION_SOURCE` there). Threading it into
+	// every other role's generation makes `resolveForeground`'s pressed-subtle contrast check measure
+	// the colour that is actually rendered, instead of each role's own tinted `highContrast`. Neutral
+	// is first in `SEMANTIC_ROLES`' canonical order, so its `highContrast` is captured before any
+	// other role needs it; `generateFamilyWithDiagnostics` falls back to a role's own `highContrast`
+	// when this is still `undefined`, which is exactly right for generating neutral itself.
+	let interactionSource: Oklch | undefined;
 	// Generated in canonical role order, so a build that fails part-way reports the families it had
 	// already resolved. Every role now guarantees on-solid, so any of the six can be the one that throws.
 	for (const role of SEMANTIC_ROLES) {
 		try {
 			const generated = generateFamilyWithDiagnostics({
 				background: canvasAnchor,
+				interactionSource,
 				mode,
 				role,
 				source: source[role],
 			});
 			families[role] = generated.family;
 			familyDiagnostics[role] = generated.diagnostics;
+			if (role === 'neutral') interactionSource = generated.family.highContrast;
 		} catch (error) {
 			if (error instanceof ScaleGenerationError) {
 				throw new ThemeGenerationError(error, {
@@ -222,10 +232,10 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		recessed: surfaces.recessed,
 	});
 	const colorValues = mapSemanticColors({
+		backdrop: modeFoundation.color.backdrop,
 		controlBorder,
 		families,
 		focus: source.focus,
-		scrim: modeFoundation.color.scrim,
 		surfaces,
 	});
 	return { colorValues, familyDiagnostics, surfaces };

@@ -69,7 +69,7 @@ export default () => {
 								gap="100"
 								padding="300"
 								style={{
-									backgroundColor: vars.color.background[role].subtle.rest,
+									backgroundColor: vars.color.background[role].subtle,
 									border: `1px solid ${vars.color.border[role]}`,
 									borderRadius: vars.radius.control,
 								}}
@@ -78,7 +78,7 @@ export default () => {
 									<Text
 										elementType="strong"
 										fontWeight="emphasis"
-										style={{ color: vars.color.foreground[role].rest }}
+										style={{ color: vars.color.foreground[role].default }}
 									>
 										Account status
 									</Text>
@@ -87,7 +87,7 @@ export default () => {
 										fontWeight="emphasis"
 										typography="caption"
 										style={{
-											backgroundColor: vars.color.background[role].solid.rest,
+											backgroundColor: vars.color.background[role].solid,
 											borderRadius: vars.radius.full,
 											color: vars.color.foreground[role].onSolid,
 											padding: `${vars.space[100]} ${vars.space[200]}`,
@@ -96,7 +96,7 @@ export default () => {
 										{roles[role]}
 									</Text>
 								</Box>
-								<Text style={{ color: vars.color.foreground[role].rest }}>
+								<Text style={{ color: vars.color.foreground[role].default }}>
 									This notice uses the selected semantic role.
 								</Text>
 							</Box>

@@ -17,6 +17,7 @@ import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
+import { interactionColor } from '../../theme/interaction-color.js';
 
 // Set per `size` variant on `inputGroup` below, from `FIELD_CONTROL_ICON_SIZE`, so the invalid
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
@@ -84,11 +85,11 @@ const comboboxActionStyles = {
 	selectors: {
 		'&[data-disabled="true"]': { cursor: 'not-allowed' },
 		'&[data-hovered="true"]:not([data-disabled="true"])': {
-			backgroundColor: vars.color.background.accent.subtle.hover,
+			backgroundColor: interactionColor('transparent', 'hover'),
 			color: vars.color.text.primary,
 		},
 		'&[data-pressed="true"]:not([data-disabled="true"])': {
-			backgroundColor: vars.color.background.accent.subtle.pressed,
+			backgroundColor: interactionColor('transparent', 'pressed'),
 			color: vars.color.text.primary,
 		},
 		[descendantDisabledSelector]: { color: vars.color.text.disabled },
@@ -188,13 +189,13 @@ const comboboxConfig = {
 				// be redundant. The gated danger colour is what satisfies the contrast
 				// requirement, and it is unchanged.
 				[invalid]: {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.background.danger.solid,
 				},
 				// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 				// here touches `::after`, so this already covers the focused case.
 				[`${invalid}::after`]: invalidIndicatorIcon(comboboxErrorIconSize),
 				[invalidFocusWithin]: {
-					borderColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.background.danger.solid,
 					...focusRing(vars.color.border.focus),
 				},
 				[readOnly]: {
@@ -358,10 +359,10 @@ const comboboxConfig = {
 			inlineSize: '100%',
 			minBlockSize: vars.controlSize.minTarget,
 			minInlineSize: 0,
-			outline: 'none',
+			...restingFocusRing('-2px'),
 			transform: 'none',
 			transitionDuration: vars.motion.duration.feedback,
-			transitionProperty: 'background-color, color, opacity',
+			transitionProperty: 'background-color, color, opacity, outline-color',
 			transitionTimingFunction: vars.motion.easing.standard,
 
 			selectors: {
@@ -370,21 +371,30 @@ const comboboxConfig = {
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'&[data-focused="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.neutral.subtle.rest,
+				'&[data-focused="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: interactionColor('transparent', 'hover'),
 				},
-				'&[data-hovered="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.neutral.subtle.hover,
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: interactionColor('transparent', 'hover'),
+				},
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: interactionColor('transparent', 'pressed'),
 				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.accent.subtle.hover,
+					outlineColor: vars.color.border.focus,
 				},
 				'&[data-selected="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.accent.subtle.rest,
+					backgroundColor: vars.color.background.accent.subtle,
 					fontWeight: vars.font.weight.label,
 				},
-				'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])': {
-					backgroundColor: vars.color.background.accent.subtle.pressed,
+				'&[data-focused="true"][data-selected="true"]:not([data-disabled="true"])': {
+					backgroundColor: interactionColor(vars.color.background.accent.subtle, 'hover'),
+				},
+				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])': {
+					backgroundColor: interactionColor(vars.color.background.accent.subtle, 'hover'),
+				},
+				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])': {
+					backgroundColor: interactionColor(vars.color.background.accent.subtle, 'pressed'),
 				},
 			},
 		},

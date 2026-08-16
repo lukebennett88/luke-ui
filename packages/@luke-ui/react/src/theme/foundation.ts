@@ -131,7 +131,7 @@ export interface ThemeSourceColors {
 	 * Modal-backdrop dimming colour, emitted verbatim (may carry an alpha channel). Required
 	 * internally: `defineTheme` always resolves it, from the author's value or a mode-aware default.
 	 */
-	scrim: string;
+	backdrop: string;
 	/** Source colour for the `success` role. Defaults to an accessible Luke UI green for the mode. */
 	success?: string;
 	/** Source colour for the `warning` role. Defaults to an accessible Luke UI amber for the mode. */
@@ -141,8 +141,8 @@ export interface ThemeSourceColors {
 /**
  * The per-mode source colour fields the compiler parses and resolves into OKLCH. `background` is the
  * resolved canvas anchor and `focus` is the authored keyboard-focus ring, both colours the
- * foundation must carry. `scrim` is deliberately absent, because it is emitted verbatim rather than
- * parsed.
+ * foundation must carry. `backdrop` is deliberately absent, because it is emitted verbatim rather
+ * than parsed.
  */
 export const SOURCE_COLOR_FIELDS = [
 	'neutral',

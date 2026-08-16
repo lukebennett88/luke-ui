@@ -1,9 +1,9 @@
 /**
  * The accessibility policy the theme layer is built to guarantee, declared once. Every module that
  * solves for or validates contrast reads its thresholds from here rather than restating them: the
- * scale generator's on-solid gate (`scale.ts`), the accent pre-conditioner (`define-theme.ts`), and
- * the build-time validation matrix (`contrast-validation.ts`) and `border.control` solver
- * (`control-border.ts`).
+ * scale generator's on-solid and foreground-vs-interaction gates (`scale.ts`), the accent
+ * pre-conditioner (`define-theme.ts`), and the build-time validation matrix
+ * (`contrast-validation.ts`) and `border.control` solver (`control-border.ts`).
  *
  * The one semantic role list lives here too, because it decides both which contract leaves the
  * semantic map emits (`semantic-map.ts`) and which pairs the validation matrix gates
@@ -43,9 +43,8 @@ export const CONTRAST_SEARCH_STEP = 0.0025;
  * restating a subset anywhere would reintroduce the asymmetry this module exists to prevent.
  * `FamilyRole` in `scale.ts` is derived from this, so the type cannot drift from the list either.
  *
- * Every role's solid (step 9) and its hover (step 10) must clear 4.5:1 against on-solid text. The
- * scale generator always searches for that contrast. `contrast-validation.ts` enforces it for all
- * six roles at compile time.
+ * Every role's solid must clear 4.5:1 against on-solid text. The scale generator always searches
+ * for that contrast. `contrast-validation.ts` enforces it for all six roles at compile time.
  */
 export const SEMANTIC_ROLES = [
 	'neutral',

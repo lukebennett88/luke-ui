@@ -70,15 +70,15 @@ describe('mapSemanticColors', () => {
 				const background = BACKGROUND[mode];
 				const families = buildFamilies(mode, background);
 				const surfaces = generateSurfaces({ background, mode });
-				const scrim = 'oklch(0 0 0 / 0.45)';
+				const backdrop = 'oklch(0 0 0 / 0.45)';
 				const focus = parseColor('oklch(0.6 0.2 260)');
 				const controlBorder = CONTROL_BORDER[mode];
 
 				const result = mapSemanticColors({
+					backdrop,
 					controlBorder,
 					families,
 					focus,
-					scrim,
 					surfaces,
 				});
 
@@ -87,54 +87,51 @@ describe('mapSemanticColors', () => {
 				expect(result['color.surface.recessed']).toBe(formatOklch(surfaces.recessed));
 				expect(result['color.surface.floating']).toBe(formatOklch(surfaces.floating));
 				expect(result['color.surface.overlay']).toBe(formatOklch(surfaces.overlay));
-				expect(result['color.scrim']).toBe(scrim);
-				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral[8]));
+				expect(result['color.overlay.backdrop']).toBe(backdrop);
+				expect(result['color.overlay.hover']).toBeUndefined();
+				expect(result['color.overlay.pressed']).toBeUndefined();
+				expect(result['color.overlay.tint']).toBeUndefined();
+				expect(result['color.loadingSkeleton']).toBe(formatOklch(families.neutral.mid));
 
-				// Global text and borders use the neutral family. `border.control` is a solved
-				// contrast boundary, not a scale-step alias, so it aliases the passed-through value.
-				expect(result['color.text.primary']).toBe(formatOklch(families.neutral[12]));
-				expect(result['color.text.secondary']).toBe(formatOklch(families.neutral[11]));
-				expect(result['color.text.disabled']).toBe(formatOklch(families.neutral[8]));
-				expect(result['color.border.decorative']).toBe(formatOklch(families.neutral[6]));
+				expect(result['color.text.primary']).toBe(formatOklch(families.neutral.highContrast));
+				expect(result['color.text.secondary']).toBe(formatOklch(families.neutral.foreground));
+				expect(result['color.text.disabled']).toBe(formatOklch(families.neutral.mid));
+				expect(result['color.border.decorative']).toBe(formatOklch(families.neutral.decorative));
 				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
 				expect(result['color.border.focus']).toBe(formatOklch(focus));
 
-				// The shared contract: identical steps for all six roles, keyed to the role's own family.
 				for (const role of SEMANTIC_ROLES) {
 					const family = families[role];
-					expect(result[`color.background.${role}.subtle.rest`]).toBe(formatOklch(family[3]));
-					expect(result[`color.background.${role}.subtle.hover`]).toBe(formatOklch(family[4]));
-					expect(result[`color.background.${role}.subtle.pressed`]).toBe(formatOklch(family[5]));
-					expect(result[`color.background.${role}.solid.rest`]).toBe(formatOklch(family[9]));
-					expect(result[`color.background.${role}.solid.hover`]).toBe(formatOklch(family[10]));
-					// Deliberate dup: pressed reuses the hover value.
-					expect(result[`color.background.${role}.solid.pressed`]).toBe(formatOklch(family[10]));
-					expect(result[`color.foreground.${role}.rest`]).toBe(formatOklch(family[11]));
-					expect(result[`color.foreground.${role}.hover`]).toBe(formatOklch(family[12]));
-					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.contrast));
-					expect(result[`color.border.${role}`]).toBe(formatOklch(family[7]));
+					expect(result[`color.background.${role}.subtle`]).toBe(formatOklch(family.subtle));
+					expect(result[`color.background.${role}.solid`]).toBe(formatOklch(family.solid));
+					expect(result[`color.background.${role}.subtle.hover`]).toBeUndefined();
+					expect(result[`color.background.${role}.solid.hover`]).toBeUndefined();
+					expect(result[`color.foreground.${role}.default`]).toBe(formatOklch(family.foreground));
+					expect(result[`color.foreground.${role}.hover`]).toBeUndefined();
+					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.onSolid));
+					expect(result[`color.border.${role}`]).toBe(formatOklch(family.border));
 				}
 			});
 
-			it(`defaults border.focus to the accent family's step 8 when focus is omitted (${mode})`, () => {
+			it(`defaults border.focus to the accent mid rung when focus is omitted (${mode})`, () => {
 				const background = BACKGROUND[mode];
 				const families = buildFamilies(mode, background);
 				const surfaces = generateSurfaces({ background, mode });
 
 				const result = mapSemanticColors({
+					backdrop: 'oklch(0 0 0 / 0.45)',
 					controlBorder: CONTROL_BORDER[mode],
 					families,
-					scrim: 'oklch(0 0 0 / 0.45)',
 					surfaces,
 				});
 
-				expect(result['color.border.focus']).toBe(formatOklch(families.accent[8]));
+				expect(result['color.border.focus']).toBe(formatOklch(families.accent.mid));
 			});
 		}
 	});
 
 	describe('completeness', () => {
-		// Every `color.*` leaf, including the passed-through `color.scrim`.
+		// Every `color.*` leaf, including the passed-through `color.overlay.backdrop`.
 		const colourPaths = flattenThemeContract()
 			.map(([path]) => path)
 			.filter((path) => path.startsWith('color.'));
@@ -146,9 +143,9 @@ describe('mapSemanticColors', () => {
 				const surfaces = generateSurfaces({ background, mode });
 
 				const result = mapSemanticColors({
+					backdrop: 'oklch(0 0 0 / 0.45)',
 					controlBorder: CONTROL_BORDER[mode],
 					families,
-					scrim: 'oklch(0 0 0 / 0.45)',
 					surfaces,
 				});
 
@@ -160,21 +157,46 @@ describe('mapSemanticColors', () => {
 		}
 	});
 
-	describe('scrim', () => {
-		it('passes the authored scrim value through verbatim, alpha channel included', () => {
+	describe('overlay', () => {
+		it('passes the authored backdrop value through verbatim, alpha channel included', () => {
 			const background = BACKGROUND.light;
 			const families = buildFamilies('light', background);
 			const surfaces = generateSurfaces({ background, mode: 'light' });
-			const scrim = 'oklch(0 0 0 / 0.5)';
+			const backdrop = 'oklch(0 0 0 / 0.5)';
 
 			const result = mapSemanticColors({
+				backdrop,
 				controlBorder: CONTROL_BORDER.light,
 				families,
-				scrim,
 				surfaces,
 			});
 
-			expect(result['color.scrim']).toBe(scrim);
+			expect(result['color.overlay.backdrop']).toBe(backdrop);
+		});
+
+		it('maps text.primary to the mode-resolved high-contrast neutral, not black or white', () => {
+			const primaryFor = (mode: 'light' | 'dark') => {
+				const background = BACKGROUND[mode];
+				const families = buildFamilies(mode, background);
+				const result = mapSemanticColors({
+					backdrop: 'oklch(0 0 0 / 0.5)',
+					controlBorder: CONTROL_BORDER[mode],
+					families,
+					surfaces: generateSurfaces({ background, mode }),
+				});
+				return {
+					primary: result['color.text.primary'],
+					highContrast: formatOklch(families.neutral.highContrast),
+				};
+			};
+
+			const light = primaryFor('light');
+			const dark = primaryFor('dark');
+			expect(light.primary).toBe(light.highContrast);
+			expect(dark.primary).toBe(dark.highContrast);
+			expect(light.highContrast).not.toBe('oklch(0 0 0)');
+			expect(dark.highContrast).not.toBe('oklch(1 0 0)');
+			expect(light.highContrast).not.toBe(dark.highContrast);
 		});
 	});
 });

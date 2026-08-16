@@ -14,7 +14,7 @@ import { getThemeClassName } from './theme-class-name.js';
  * Whether a value is unsafe to emit verbatim into the generated stylesheet: anything other than a
  * non-empty string, or a string containing a statement-breaking character (`;`, `{`, `}`). Shared by
  * every authored-but-unparsed CSS value — the depth box-shadow rungs, the action-control-finish
- * background-images, and the scrim colour (deliberately excluded from OKLCH colour parsing because
+ * background-images, and the backdrop colour (deliberately excluded from OKLCH colour parsing because
  * its alpha channel does not fit that pattern) — so the rule has one home. Checking `typeof value`
  * rather than assuming a string keeps this guard correct even when a caller other than `defineTheme`
  * hands `buildTheme` a foundation with a rung explicitly set to `undefined`.
@@ -45,8 +45,8 @@ export function validateFoundation(foundation: ThemeFoundation): void {
 				issues.push(`${mode}.color.${field}: ${errorMessage(error)}`);
 			}
 		}
-		if (isUnsafeCssValue(modeFoundation.color.scrim)) {
-			issues.push(`${mode}.color.scrim: must be a non-empty CSS colour value`);
+		if (isUnsafeCssValue(modeFoundation.color.backdrop)) {
+			issues.push(`${mode}.color.backdrop: must be a non-empty CSS colour value`);
 		}
 		for (const [name, value] of Object.entries(modeFoundation.depth)) {
 			if (isUnsafeCssValue(value)) {

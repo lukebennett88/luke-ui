@@ -3,6 +3,7 @@ import type { RecipeSelection } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
+import { interactionColor } from '../../theme/interaction-color.js';
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -150,17 +151,17 @@ export const buttonRecipe = recipe({
 			'accent',
 			'subtle',
 			vars.color.background.accent,
-			vars.color.foreground.accent.rest,
+			vars.color.foreground.accent.default,
 		),
 		...appearance(
 			'danger',
 			'subtle',
 			vars.color.background.danger,
-			vars.color.foreground.danger.rest,
+			vars.color.foreground.danger.default,
 		),
 		ghostAppearance('neutral', vars.color.text.primary),
-		ghostAppearance('accent', vars.color.foreground.accent.rest),
-		ghostAppearance('danger', vars.color.foreground.danger.rest),
+		ghostAppearance('accent', vars.color.foreground.accent.default),
+		ghostAppearance('danger', vars.color.foreground.danger.default),
 	],
 });
 
@@ -176,23 +177,23 @@ function appearance(
 	background: Background,
 	color: string,
 ) {
-	const ramp = background[appearance];
+	const fill = background[appearance];
 	return [
 		{
 			style: {
 				'@media': {
 					'(forced-colors: active)': { backgroundImage: 'none' },
 				},
-				backgroundColor: ramp.rest,
+				backgroundColor: fill,
 				backgroundImage: vars.actionControlFinish.resting,
 				color,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: ramp.hover,
+						backgroundColor: interactionColor(fill, 'hover'),
 						backgroundImage: vars.actionControlFinish.raised,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-						backgroundColor: ramp.pressed,
+						backgroundColor: interactionColor(fill, 'pressed'),
 						backgroundImage: vars.actionControlFinish.recessed,
 					},
 				},
@@ -203,7 +204,6 @@ function appearance(
 }
 
 function ghostAppearance(tone: Tone, color: string) {
-	const subtle = vars.color.background[tone].subtle;
 	return {
 		style: {
 			backgroundColor: 'transparent',
@@ -213,11 +213,11 @@ function ghostAppearance(tone: Tone, color: string) {
 			color,
 			selectors: {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: subtle.hover,
+					backgroundColor: interactionColor('transparent', 'hover'),
 					boxShadow: vars.depth.raised,
 				},
 				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-					backgroundColor: subtle.pressed,
+					backgroundColor: interactionColor('transparent', 'pressed'),
 					boxShadow: vars.depth.recessed,
 				},
 			},

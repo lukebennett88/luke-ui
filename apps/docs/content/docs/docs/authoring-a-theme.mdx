@@ -19,15 +19,17 @@ A basic theme authors an accent colour and a neutral character. Everything else 
 - optional `color.background` to separate the page canvas from the neutral family's hue and chroma
   character. It defaults to the resolved neutral canvas anchor.
 - optional `color.info`, `color.success`, `color.warning`, `color.danger`, `color.focus`, and
-  `color.scrim`
+  `color.backdrop`
 - optional `typography`, `radius`, `depth`, and `actionControlFinish` overrides
 
 Each colour accepts one string, adapted independently for light and dark, or an explicit
 `{ light, dark }` pair. Omit either side to fall back to that role's default. Luke UI supplies
-accessible mode-specific defaults for every optional colour. `radius` is a generative `base` and
-`multiplier` scale with explicit per-step overrides. `depth` and `actionControlFinish` are optional
-and deep-partial per mode over curated, extremely-subtle defaults. The typography styles and motion
-values are source-owned and are not authored.
+accessible mode-specific defaults for every optional colour. `color.backdrop` is the one colour that
+may include alpha, and Luke UI emits it verbatim. Hover and pressed colours are derived by
+first-party recipes, not authored. `radius` is a generative `base` and `multiplier` scale with
+explicit per-step overrides. `depth` and `actionControlFinish` are optional and deep-partial per
+mode over curated, extremely-subtle defaults. The typography styles and motion values are
+source-owned and are not authored.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
@@ -97,12 +99,15 @@ some only, and does not check one category.
 
 Every text/surface pair the compiler emits is a hard gate:
 
-- `color.text.primary` and `color.text.secondary` against all four elevation surfaces (`canvas`,
+- `color.text.primary` and `color.text.secondary` against the elevation surfaces (`canvas`,
   `recessed`, `floating`, `overlay`).
 - For each of the six semantic roles (`neutral`, `accent`, `info`, `success`, `warning`, `danger`),
-  its foreground `rest` and `hover` against `canvas`, `recessed`, and that role's own `subtle` rest,
-  hover, and pressed backgrounds.
-- Each role's `onSolid` foreground against its `solid` rest, hover, and pressed backgrounds.
+  its default foreground against `canvas`, `recessed`, and that role's own `subtle` background.
+- Each role's `onSolid` foreground against its `solid` background.
+- First-party hover and pressed colours derived from resting fills: ghost Button foregrounds on
+  canvas and recessed; solid and subtle Button tones; selected Combobox options on accent subtle;
+  unselected Combobox options on the floating popover; Link accent foregrounds on the elevation
+  surfaces.
 
 ### Guaranteed at 3:1
 
@@ -120,7 +125,7 @@ combination.
 `color.border.neutral` and `color.border.accent`. This applies to all six roles, but only as an
 advisory diagnostic. `defineTheme` records and reports a miss, but never throws it.
 
-These borders use the same subtle scale step as ordinary separators. An author can then choose a
+These borders use the same subtle family rung as ordinary separators. An author can then choose a
 neutral character whose role borders read as gentle separators rather than assertive boundaries.
 Diagnostics record whether each check is a hard gate or advisory-only (`ContrastCheck.hard`).
 Tooling can then tell the two apart without a guess from the token path.

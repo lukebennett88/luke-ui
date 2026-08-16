@@ -13,29 +13,21 @@ const typeStyle = {
 
 /**
  * The background capabilities every semantic role gets, spread once per role so the six roles cannot
- * drift apart. `rest` is an explicit leaf because a nested tree path cannot be both a string leaf and
- * the parent of `hover` and `pressed`.
+ * drift apart. Subtle and solid are resting fills. Hover and pressed colours are derived from those
+ * fills, not stored as extra leaves.
  */
 const roleBackground = {
-	subtle: {
-		rest: null,
-		hover: null,
-		pressed: null,
-	},
-	solid: {
-		rest: null,
-		hover: null,
-		pressed: null,
-	},
+	subtle: null,
+	solid: null,
 };
 
 /**
- * The content capabilities every semantic role gets. There is no `pressed` foreground: press is
- * carried by the background ramp and non-colour cues, so text and icons reuse `hover`.
+ * The content capabilities every semantic role gets. `default` is the ordinary semantic foreground.
+ * `onSolid` is the contrast-solved colour for that role's solid fill. Hover and pressed foregrounds
+ * are derived from `default` when a control needs them.
  */
 const roleForeground = {
-	rest: null,
-	hover: null,
+	default: null,
 	onSolid: null,
 };
 
@@ -138,7 +130,7 @@ export const themeContractTree = {
 	 * (`neutral`, `accent`, `info`, `success`, `warning`, `danger`).
 	 *
 	 * Organised by the property a token styles, not by the component that happens to use it: the
-	 * functional leaves (`surface`, `scrim`, `loadingSkeleton`, `text`, and the first three `border`
+	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first three `border`
 	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
 	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
 	 * so no role is a special case here.
@@ -150,8 +142,10 @@ export const themeContractTree = {
 			floating: null,
 			overlay: null,
 		},
-		/** Modal-backdrop dimming layer behind an overlay surface. */
-		scrim: null,
+		/** Translucent layer painted over other interface content, such as a modal backdrop. */
+		overlay: {
+			backdrop: null,
+		},
 		loadingSkeleton: null,
 		text: {
 			primary: null,
@@ -159,7 +153,7 @@ export const themeContractTree = {
 			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
 			disabled: null,
 		},
-		/** Subtle and solid background ramps, each with the shared rest / hover / pressed states. */
+		/** Subtle and solid resting backgrounds. Hover and pressed are derived from these fills. */
 		background: {
 			neutral: { ...roleBackground },
 			accent: { ...roleBackground },
@@ -168,7 +162,7 @@ export const themeContractTree = {
 			warning: { ...roleBackground },
 			danger: { ...roleBackground },
 		},
-		/** Resting and stronger interactive content colours, plus the guaranteed on-solid pairing. */
+		/** Ordinary semantic content colours, plus the guaranteed on-solid pairing. */
 		foreground: {
 			neutral: { ...roleForeground },
 			accent: { ...roleForeground },
@@ -280,7 +274,7 @@ export const themeContractTree = {
 
 /**
  * Flattens the semantic token tree into `[path, varName]` pairs, in tree order, for example
- * `['color.background.danger.solid.hover', '--luke-color-background-danger-solid-hover']`.
+ * `['color.background.danger.solid', '--luke-color-background-danger-solid']`.
  */
 export function flattenThemeContract(): Array<[path: string, varName: string]> {
 	const pairs: Array<[string, string]> = [];
