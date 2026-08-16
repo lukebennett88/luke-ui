@@ -1,5 +1,6 @@
 import { expect, test } from 'vite-plus/test';
-import { page, userEvent } from 'vite-plus/test/context';
+import type { Locator } from 'vite-plus/test/context';
+import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
 import { ComboboxItem, ComboboxLoadMoreItem } from '../primitives/combobox/item.js';
@@ -207,6 +208,55 @@ test('option keyboard focus', async () => {
 	await captureVisual(await openFocusedComboboxOption(), 'combobox-field/option-keyboard-focus');
 });
 
+test('option pressed', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	const option = page.getByRole('option', { exact: true, name: 'Australia' });
+	await expect.element(option).toBeVisible();
+
+	const release = await pressComboboxOption(option);
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-pressed');
+	await release();
+});
+
+test('selected option pressed', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	// Selecting through the combobox itself (rather than a `defaultValue`) keeps DOM focus on the
+	// input the whole time. A fresh focus event on a combobox that already has a matching value only
+	// re-opens reliably right after page load; once another combobox has mounted and unmounted first,
+	// that reopen silently no-ops in this test environment. Staying selected-and-focused, then
+	// reopening with the keyboard, sidesteps that rather than depending on run order.
+	await withPopoverScrollStub(async () => {
+		const input = page.getByRole('combobox', { name: 'Country' });
+		await userEvent.tab();
+		await expect.element(input).toHaveFocus();
+		await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+		const canadaFocused = page.getByRole('option', { exact: true, name: 'Canada' });
+		await expect.poll(() => canadaFocused.element().getAttribute('data-focused')).toBe('true');
+		await userEvent.keyboard('{Enter}');
+		await expect.poll(() => input.element().getAttribute('aria-expanded')).toBe('false');
+
+		await userEvent.keyboard('{ArrowDown}');
+		const option = page.getByRole('option', { exact: true, name: 'Canada' });
+		await expect.element(option).toBeVisible();
+
+		const release = await pressComboboxOption(option);
+		await captureVisual(
+			page.elementLocator(document.body),
+			'combobox-field/option-selected-pressed',
+		);
+		await release();
+	});
+});
+
 test('option with leading icon at both sizes', async () => {
 	render(
 		<Stack>
@@ -404,6 +454,43 @@ async function openFocusedComboboxOption() {
 		await waitForOverlayEnter(popover);
 		return page.elementLocator(document.body);
 	});
+}
+
+/**
+ * Presses an option with a raw CDP mouse event instead of `userEvent.hover`/`click`. Playwright's
+ * locator-level hover and click actions perform their own pre-action scroll-into-view check, which
+ * closes this component's popover the same way keyboard navigation's `scrollIntoView` does (see
+ * `withPopoverScrollStub`), except this scroll happens natively and cannot be stubbed from script.
+ * Dispatching the mouse event directly at the option's coordinates lands `data-hovered` and
+ * `data-pressed` without that pre-action scroll. Returns a callback that releases the mouse button;
+ * call it after capturing so the option's real `onPress` selection behaviour still runs.
+ */
+async function pressComboboxOption(option: Locator): Promise<() => Promise<void>> {
+	const rect = option.element().getBoundingClientRect();
+	const frameElement = (window as unknown as { frameElement?: Element }).frameElement;
+	const frameRect = frameElement?.getBoundingClientRect();
+	const x = (frameRect?.left ?? 0) + rect.left + rect.width / 2;
+	const y = (frameRect?.top ?? 0) + rect.top + rect.height / 2;
+
+	await cdp().send('Input.dispatchMouseEvent', { button: 'none', type: 'mouseMoved', x, y });
+	await cdp().send('Input.dispatchMouseEvent', {
+		button: 'left',
+		clickCount: 1,
+		type: 'mousePressed',
+		x,
+		y,
+	});
+	await expect.poll(() => option.element().getAttribute('data-pressed')).toBe('true');
+
+	return async () => {
+		await cdp().send('Input.dispatchMouseEvent', {
+			button: 'left',
+			clickCount: 1,
+			type: 'mouseReleased',
+			x,
+			y,
+		});
+	};
 }
 
 /**

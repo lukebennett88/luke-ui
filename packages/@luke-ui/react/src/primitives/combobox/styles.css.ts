@@ -377,6 +377,9 @@ const comboboxConfig = {
 				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
 					backgroundColor: interactionColor('transparent', 'hover'),
 				},
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: interactionColor('transparent', 'pressed'),
+				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 					outlineColor: vars.color.border.focus,
 				},
@@ -389,6 +392,9 @@ const comboboxConfig = {
 				},
 				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])': {
 					backgroundColor: interactionColor(vars.color.background.accent.subtle, 'hover'),
+				},
+				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])': {
+					backgroundColor: interactionColor(vars.color.background.accent.subtle, 'pressed'),
 				},
 			},
 		},
