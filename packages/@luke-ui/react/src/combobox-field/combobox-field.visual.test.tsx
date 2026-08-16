@@ -12,6 +12,7 @@ import {
 	emulateForcedColors,
 	focusViaKeyboard,
 	holdPress,
+	pointAt,
 	Stack,
 } from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
@@ -208,6 +209,20 @@ test('option keyboard focus', async () => {
 	await captureVisual(await openFocusedComboboxOption(), 'combobox-field/option-keyboard-focus');
 });
 
+test('option hover', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	const option = page.getByRole('option', { exact: true, name: 'Australia' });
+	await expect.element(option).toBeVisible();
+
+	await pointAt(option);
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-hover');
+});
+
 test('option pressed', async () => {
 	render(
 		<ComboboxField defaultItems={countryItems} label="Country" name="country">
@@ -223,6 +238,20 @@ test('option pressed', async () => {
 	await release();
 });
 
+test('selected option hover', async () => {
+	render(
+		<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	const option = page.getByRole('option', { exact: true, name: 'Canada' });
+	await expect.element(option).toBeVisible();
+
+	await pointAt(option);
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-selected-hover');
+});
+
 test('selected option pressed', async () => {
 	render(
 		<ComboboxField defaultItems={countryItems} label="Country" name="country">
@@ -230,11 +259,13 @@ test('selected option pressed', async () => {
 		</ComboboxField>,
 	);
 	await userEvent.tab();
-	await expect.element(page.getByRole('combobox', { name: 'Country' })).toHaveFocus();
+	const input = page.getByRole('combobox', { name: 'Country' });
+	await expect.element(input).toHaveFocus();
 	await userEvent.keyboard('{ArrowDown}{ArrowDown}');
 	const canada = page.getByRole('option', { exact: true, name: 'Canada' });
 	await expect.element(canada).toBeVisible();
 	await userEvent.keyboard('{Enter}');
+	await expect.poll(() => input.element().getAttribute('aria-expanded')).toBe('false');
 
 	await userEvent.keyboard('{ArrowDown}');
 	const option = page.getByRole('option', { exact: true, name: 'Canada' });

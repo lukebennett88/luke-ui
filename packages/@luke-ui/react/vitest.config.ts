@@ -104,6 +104,26 @@ export default defineConfig({
 				test: {
 					browser: {
 						api: { allowWrite: true },
+						commands: {
+							holdPointerDown: async ({ iframe, page }, selector: string) => {
+								const box = await iframe.locator(selector).boundingBox();
+								if (box == null) {
+									throw new Error(`Expected ${selector} to be on screen.`);
+								}
+								await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+								await page.mouse.down();
+							},
+							movePointerTo: async ({ iframe, page }, selector: string) => {
+								const box = await iframe.locator(selector).boundingBox();
+								if (box == null) {
+									throw new Error(`Expected ${selector} to be on screen.`);
+								}
+								await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+							},
+							releasePointer: async ({ page }) => {
+								await page.mouse.up();
+							},
+						},
 						enabled: true,
 						expect: {
 							toMatchScreenshot: {

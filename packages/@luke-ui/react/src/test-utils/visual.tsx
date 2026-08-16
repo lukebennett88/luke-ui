@@ -1,7 +1,8 @@
+import './browser-commands.js';
 import type { ComponentProps, ComponentType, CSSProperties, ReactNode } from 'react';
 import { expect } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
-import { cdp, page, userEvent } from 'vite-plus/test/context';
+import { cdp, commands, page, userEvent } from 'vite-plus/test/context';
 import type { VisualAppearance } from './render.js';
 
 const VISUAL_CAPTURE_ID_PATTERN = /^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -144,37 +145,19 @@ export async function focusViaKeyboard(target: Locator) {
 }
 
 /**
+ * Moves the pointer onto `target` without scrolling it into view. Playwright's hover scrolls first,
+ * which closes React Aria popovers.
+ */
+export async function pointAt(target: Locator): Promise<void> {
+	await commands.movePointerTo(target.selector);
+}
+
+/**
  * Holds the primary pointer button on `target` so a visual test can capture a pressed overlay
- * item. Playwright's default hover and click scroll the target into view first, which closes React
- * Aria popovers; `force` skips that check while still using `userEvent`.
+ * item. Playwright's hover and click scroll the target into view first, which closes React Aria
+ * popovers, so this moves onto the already-visible element's box and presses without scrolling.
  */
 export async function holdPress(target: Locator): Promise<() => Promise<void>> {
-	await userEvent.hover(target, { force: true } as never);
-	const element = target.element();
-	element.dispatchEvent(
-		new PointerEvent('pointerdown', {
-			bubbles: true,
-			button: 0,
-			buttons: 1,
-			cancelable: true,
-			composed: true,
-			isPrimary: true,
-			pointerId: 1,
-			pointerType: 'mouse',
-		}),
-	);
-	return async () => {
-		element.dispatchEvent(
-			new PointerEvent('pointerup', {
-				bubbles: true,
-				button: 0,
-				buttons: 0,
-				cancelable: true,
-				composed: true,
-				isPrimary: true,
-				pointerId: 1,
-				pointerType: 'mouse',
-			}),
-		);
-	};
+	await commands.holdPointerDown(target.selector);
+	return () => commands.releasePointer();
 }
