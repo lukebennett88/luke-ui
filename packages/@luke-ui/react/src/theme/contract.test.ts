@@ -109,7 +109,7 @@ describe('theme contract', () => {
 	it('exposes overlay backdrop only, and does not emit hover, pressed, tint, or scrim', () => {
 		const pairs = flattenThemeContract();
 		const byPath = new Map(pairs);
-		const paths = new Set(pairs.map(([path]) => path));
+		const paths = new Set<string>(pairs.map(([path]) => path));
 
 		expect(byPath.get('color.overlay.backdrop')).toBe('--luke-color-overlay-backdrop');
 		expect(byPath.get('color.surface.overlay')).toBe('--luke-color-surface-overlay');
