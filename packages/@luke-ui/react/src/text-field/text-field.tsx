@@ -4,8 +4,7 @@ import type {
 	TextFieldProps as RacTextFieldProps,
 } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
-import type { FieldSlotProps } from '../field/compose-field.js';
-import { composeField } from '../field/compose-field.js';
+import type { FieldSlotProps } from '../primitives/field/field.js';
 import { Field } from '../primitives/field/field.js';
 import {
 	InputGroup,
@@ -50,20 +49,28 @@ export type TextFieldProps = Prettify<_TextFieldProps>;
  * `InputGroupSuffix` children below.
  */
 export function TextField(props: TextFieldProps): JSX.Element {
-	const [fieldSlotProps, restProps] = composeField(props);
 	const {
+		description,
+		errorMessage,
 		inputClassName,
 		inputRef,
+		label,
+		necessityIndicator,
 		placeholder,
 		prefix,
 		size = 'medium',
 		suffix,
 		...textFieldProps
-	} = restProps;
+	} = props;
 
 	return (
 		<RacTextField {...textFieldProps}>
-			<Field {...fieldSlotProps}>
+			<Field
+				description={description}
+				errorMessage={errorMessage}
+				label={label}
+				necessityIndicator={necessityIndicator}
+			>
 				<InputGroup size={size}>
 					{prefix != null ? <InputGroupPrefix>{prefix}</InputGroupPrefix> : null}
 					<InputGroupInput className={inputClassName} placeholder={placeholder} ref={inputRef} />
