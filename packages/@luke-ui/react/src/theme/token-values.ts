@@ -10,7 +10,8 @@
 import appleSystemMetrics from '@capsizecss/metrics/appleSystem';
 import dMSansMetrics from '@capsizecss/metrics/dMSans';
 import interMetrics from '@capsizecss/metrics/inter';
-import { typeStyleMetricStep, type IdentityPath, type TypeStyle } from './contract.js';
+import { typeStyleMetricStep } from './contract.js';
+import type { IdentityPath, TypeStyle } from './contract.js';
 import { FONT_METRIC_SCALE } from './font-metric-scale.js';
 import { MOTION_DURATION_SCALE } from './motion.js';
 

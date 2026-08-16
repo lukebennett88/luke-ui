@@ -7,7 +7,8 @@ import { generateSurfaces } from './elevation.js';
 import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import { generateFamily } from './scale.js';
-import { mapSemanticColors, type SemanticColorValues } from './semantic-map.js';
+import { mapSemanticColors } from './semantic-map.js';
+import type { SemanticColorValues } from './semantic-map.js';
 
 type ColorMode = 'light' | 'dark';
 
