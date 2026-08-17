@@ -74,10 +74,10 @@ export const linkRecipe = recipe({
 				},
 			},
 			neutral: {
-				color: vars.color.text.secondary,
+				color: vars.color.foreground.neutral.rest,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						color: vars.color.text.primary,
+						color: vars.color.foreground.neutral.hover,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
 						color: vars.color.foreground.neutral.pressed,
