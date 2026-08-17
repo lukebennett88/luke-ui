@@ -1,15 +1,10 @@
 /**
  * The private 12-step colour scale generator. `generateFamily` produces a Radix-shaped OKLCH family
  * (steps 1-12 plus a `contrast` on-solid colour) from a family character `source`, the canvas
- * `background`, a colour `mode`, and a semantic `role`. It owns the constrained solid-anchor (step-9)
- * search; it is calibrated to testable scale properties rather than to exact Radix reproduction.
- *
- * It also owns {@link passesOnSolidGate}, the on-solid accessibility gate. `defineTheme`'s accent
- * pre-conditioner calls it rather than reimplementing it, with the same {@link highContrastText}
- * interaction source production generation uses. It reuses the dependency-free colour math in
- * `color.ts` and the shared thresholds in `contrast-policy.ts`. Every semantic role's solid rest,
- * hover, and pressed colours must clear 4.5:1 against on-solid text — that invariant lives next to
- * `SEMANTIC_ROLES` there.
+ * `background`, a colour `mode`, a semantic `role`, and the `text.primary` colour that public hover
+ * and pressed mix toward. It owns the constrained solid-anchor (step-9) search and
+ * {@link passesOnSolidGate}, which `defineTheme`'s accent pre-conditioner calls rather than
+ * reimplementing.
  */
 
 import type { Oklch } from './color.js';
@@ -30,7 +25,7 @@ type ColorMode = 'light' | 'dark';
 /**
  * A generated 12-step colour family plus its on-solid `contrast` colour. Step roles: 1-2 app/subtle
  * backgrounds, 3-5 component surface (normal / hover / active), 6-8 borders (subtle / UI+focus /
- * hover), 9-10 solid (9 = anchor, 10 = hover), 11-12 text (low / high contrast).
+ * hover), 9-10 solid (9 = public rest, 10 = private offset), 11-12 text (low / high contrast).
  */
 export interface ScaleFamily {
 	1: Oklch;
@@ -55,18 +50,14 @@ export const INTERACTION_HOVER_STRENGTH = 0.05;
 /** Share of `text.primary` mixed into a resting colour to produce the public pressed state. */
 export const INTERACTION_PRESSED_STRENGTH = 0.1;
 
-/**
- * Mixes a resting colour toward `text.primary` at a fixed strength, then maps the result into
- * sRGB. Theme generation uses this for public hover and pressed leaves.
- */
+/** Mixes a resting colour toward `toward` at `strength`, then maps the result into sRGB. */
 export function mixInteractionState(rest: Oklch, toward: Oklch, strength: number): Oklch {
 	return gamutMapOklch(mixOklab(rest, toward, strength));
 }
 
 /**
- * Neutral `text.primary` (step 12): the high-contrast text rung a family emits for `source` in
- * `mode`. Production computes this from the resolved neutral source before any solid-anchor search,
- * then every family — including neutral — gates and mixes toward that same colour.
+ * The high-contrast text rung (step 12) a family emits for `source` in `mode`. Neutral's rung is
+ * `text.primary`, computed before any solid-anchor search so every family can gate against it.
  */
 export function highContrastText(source: Oklch, mode: ColorMode): Oklch {
 	return gamutMapOklch(highContrastTextRequest(source, mode));
@@ -76,12 +67,8 @@ export function highContrastText(source: Oklch, mode: ColorMode): Oklch {
 export interface GenerateFamilyRequest {
 	/** The resolved canvas anchor. Steps 1-8 ramp away from it toward the solid. */
 	background: Oklch;
-	/**
-	 * Neutral `text.primary` (step 12). Public hover and pressed solids mix toward it. Production
-	 * always passes {@link highContrastText} of the resolved neutral source. Omit only in isolated
-	 * family tests; the gate then uses the mode's high-contrast text lightness.
-	 */
-	interactionSource?: Oklch;
+	/** The colour public hover and pressed mix toward. Production passes emitted `text.primary`. */
+	interactionSource: Oklch;
 	/** The colour mode the family is generated for. */
 	mode: ColorMode;
 	/** The semantic role. Neutral uses a curated solid band; other roles keep the source tone. */
@@ -172,9 +159,9 @@ const RAMP_SPEC = {
 	],
 } as const satisfies Record<ColorMode, ReadonlyArray<RampRungSpec>>;
 
-// The solid step 10 offset from step 9: darker in light mode, lighter in dark mode. Step 10 remains
-// a private family rung. Public hover and pressed mix the step-9 solid toward `text.primary`.
-const SOLID_HOVER_DELTA = 0.05;
+// Private step-10 lightness offset from the solid rest. Public hover and pressed mix step 9 toward
+// `text.primary`.
+const SOLID_STEP_10_DELTA = 0.05;
 
 interface SolidBand {
 	/** The inclusive lightness range the search may explore. */
@@ -211,9 +198,9 @@ const TEXT_HIGH_CHROMA_CAP = 0.1;
 
 function highContrastTextRequest(source: Oklch, mode: ColorMode): Oklch {
 	return {
+		l: clampUnit(TEXT_LIGHTNESS[mode].high),
 		c: Math.max(Math.min(source.c * TEXT_HIGH_CHROMA_FRACTION, TEXT_HIGH_CHROMA_CAP), 0),
 		h: source.h,
-		l: clampUnit(TEXT_LIGHTNESS[mode].high),
 	};
 }
 
@@ -224,48 +211,33 @@ const ON_SOLID_BLACK_CHROMA = 0.01;
 
 /** A candidate solid the on-solid gate is asked about. */
 export interface OnSolidGateRequest {
-	/**
-	 * Neutral `text.primary`. Public hover and pressed mix toward it. Production always passes
-	 * {@link highContrastText} of the resolved neutral source. Omit to use the mode's high-contrast
-	 * text lightness.
-	 */
-	interactionSource?: Oklch;
+	/** The colour public hover and pressed mix toward. Must match the colour `generateFamily` will use. */
+	interactionSource: Oklch;
 	/** The candidate step-9 solid lightness. */
 	lightness: number;
-	/** The colour mode, which sets the high-contrast text lightness used when `interactionSource` is omitted. */
-	mode: ColorMode;
 	/** The family character. Only its hue and chroma are read; `lightness` supplies the tone. */
 	source: Oklch;
 }
 
 /**
- * The one on-solid accessibility gate: whether the near-white or near-black on-solid text this
- * generator would choose clears the AA text ratio (plus the search headroom) across the public
- * solid rest, hover, and pressed colours a candidate lightness produces.
- *
- * `defineTheme`'s accent pre-conditioner calls this rather than reimplementing it, with the same
- * {@link highContrastText} interaction source production generation uses, so the pre-conditioner can
- * never be stricter than {@link generateFamily}'s solid-anchor search: a lightness it accepts is one
- * the search accepts too.
+ * Whether the near-white or near-black on-solid text this generator would choose clears the AA text
+ * ratio (plus the search headroom) across the public solid rest, hover, and pressed colours a
+ * candidate lightness produces. `defineTheme`'s accent pre-conditioner calls this rather than
+ * reimplementing it.
  */
 export function passesOnSolidGate(request: OnSolidGateRequest): boolean {
 	return onSolidGateRatio(request) >= ON_SOLID_TARGET;
 }
 
-/**
- * The contrast {@link passesOnSolidGate} measures: the better on-solid candidate's minimum ratio
- * across the candidate solid and its generated hover and pressed states. Exposed for the
- * solid-anchor search's best-attempt diagnostics.
- */
+/** The minimum on-solid ratio {@link passesOnSolidGate} compares to the AA target plus headroom. */
 export function onSolidGateRatio(request: OnSolidGateRequest): number {
-	const { lightness, mode, source } = request;
+	const { interactionSource, lightness, source } = request;
 	const solid = gamutMapOklch({
 		l: clampUnit(lightness),
 		c: source.c,
 		h: source.h,
 	});
-	return chooseOnSolid(source.h, publicSolidStates(solid, interactionToward(mode, request)))
-		.minRatio;
+	return chooseOnSolid(source.h, publicSolidStates(solid, interactionSource)).minRatio;
 }
 
 /**
@@ -279,8 +251,8 @@ export function generateFamily(request: GenerateFamilyRequest): ScaleFamily {
 
 /**
  * Generates a family together with its family-level {@link FamilyDiagnostics}: the resolved solid
- * anchor (authored vs resolved lightness, whether it was adapted for on-solid, achieved ratios),
- * the on-solid choice, and any gamut-driven chroma reductions.
+ * anchor, the on-solid colour and its rest/hover/pressed ratios, and any gamut-driven chroma
+ * reductions.
  */
 export function generateFamilyWithDiagnostics(request: GenerateFamilyRequest): {
 	family: ScaleFamily;
@@ -300,18 +272,17 @@ function buildFamily(request: GenerateFamilyRequest): {
 	family: ScaleFamily;
 	diagnostics: FamilyDiagnostics;
 } {
-	const { background, mode, role, source } = request;
+	const { background, interactionSource, mode, role, source } = request;
 	const hue = source.h;
 	const direction = mode === 'light' ? -1 : 1;
 	const backgroundLightness = clampUnit(background.l);
 	const reductions: Array<GamutReduction> = [];
-	const toward = interactionToward(mode, request);
 
 	const rung = (step: ScaleStep, lightness: number, requestedChroma: number): Oklch => {
 		const mapped = gamutMapOklch({
+			l: clampUnit(lightness),
 			c: Math.max(requestedChroma, 0),
 			h: hue,
-			l: clampUnit(lightness),
 		});
 		if (requestedChroma - mapped.c > GAMUT_REDUCTION_EPSILON) {
 			reductions.push({ requestedChroma, resolvedChroma: mapped.c, step });
@@ -342,21 +313,17 @@ function buildFamily(request: GenerateFamilyRequest): {
 	// Step 9: the solid anchor, searched so on-solid text clears AA across rest, hover, and pressed.
 	const anchor = resolveSolidAnchor(request);
 	const solid = rung(9, anchor.lightness, source.c);
-	const solidHover = rung(10, anchor.lightness + direction * SOLID_HOVER_DELTA, source.c);
-	const [solidRest, publicHover, publicPressed] = publicSolidStates(solid, toward);
+	const step10 = rung(10, anchor.lightness + direction * SOLID_STEP_10_DELTA, source.c);
+	const [solidRest, publicHover, publicPressed] = publicSolidStates(solid, interactionSource);
 
-	// The on-solid text: the better of near-white / near-black across the public solid states.
 	const onSolid = chooseOnSolid(hue, [solidRest, publicHover, publicPressed]);
 
-	// Steps 11-12: text rungs. Step 12 is a scale-quality rung, not a contract guarantee.
 	const text = TEXT_LIGHTNESS[mode];
 	const lowText = rung(
 		11,
 		text.low,
 		Math.min(source.c * TEXT_LOW_CHROMA_FRACTION, TEXT_LOW_CHROMA_CAP),
 	);
-	// Step 12 is independent of the solid-anchor search, so production can compute the emitted
-	// `text.primary` from the resolved neutral source and pass it as `interactionSource` first.
 	const highTextRequest = highContrastTextRequest(source, mode);
 	const highText = rung(12, highTextRequest.l, highTextRequest.c);
 
@@ -370,7 +337,7 @@ function buildFamily(request: GenerateFamilyRequest): {
 		7: step7,
 		8: step8,
 		9: solid,
-		10: solidHover,
+		10: step10,
 		11: lowText,
 		12: highText,
 		contrast: onSolid.color,
@@ -379,8 +346,6 @@ function buildFamily(request: GenerateFamilyRequest): {
 	const solidAnchor: SolidAnchorDiagnostics = {
 		adaptedForOnSolid: anchor.adapted,
 		band: anchor.band,
-		onSolidRatioSolid: contrastRatio(onSolid.color, solid),
-		onSolidRatioSolidHover: contrastRatio(onSolid.color, publicHover),
 		resolvedLightness: anchor.lightness,
 		satisfied: onSolid.minRatio >= TEXT_RATIO,
 		targetLightness: anchor.target,
@@ -393,8 +358,9 @@ function buildFamily(request: GenerateFamilyRequest): {
 		mode,
 		onSolid: {
 			color: onSolid.color,
-			ratioSolid: solidAnchor.onSolidRatioSolid,
-			ratioSolidHover: solidAnchor.onSolidRatioSolidHover,
+			ratioRest: contrastRatio(onSolid.color, solid),
+			ratioHover: contrastRatio(onSolid.color, publicHover),
+			ratioPressed: contrastRatio(onSolid.color, publicPressed),
 		},
 		role,
 		solidAnchor,
@@ -435,7 +401,6 @@ function resolveSolidAnchor(request: GenerateFamilyRequest): ResolvedAnchor {
 	const preferred = clamp(target, low, high);
 	const gateRequest = {
 		interactionSource: request.interactionSource,
-		mode,
 		source,
 	};
 	const gateRatio = (lightness: number): number => onSolidGateRatio({ ...gateRequest, lightness });
@@ -503,10 +468,6 @@ function chooseOnSolid(hue: number, solids: Array<Oklch>): { color: Oklch; minRa
 
 function minimumRatio(foreground: Oklch, backgrounds: Array<Oklch>): number {
 	return Math.min(...backgrounds.map((background) => contrastRatio(foreground, background)));
-}
-
-function interactionToward(mode: ColorMode, request: { interactionSource?: Oklch }): Oklch {
-	return request.interactionSource ?? { c: 0, h: 0, l: TEXT_LIGHTNESS[mode].high };
 }
 
 function publicSolidStates(solid: Oklch, toward: Oklch): [Oklch, Oklch, Oklch] {

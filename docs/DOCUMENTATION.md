@@ -50,9 +50,6 @@ Keep the detail that changes the reader's code:
 
 - `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
 - A field component takes no plain `ref`, so `inputRef` is the only way to reach the control.
-- Hover and pressed colours are public semantic tokens. Theme authors do not set them. Generated
-  themes expose them so a custom control can select `*.hover` and `*.pressed` the same way built-in
-  components do.
 
 Cut the detail that only explains the mechanism:
 

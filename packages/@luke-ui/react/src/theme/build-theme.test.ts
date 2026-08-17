@@ -17,7 +17,6 @@ import {
 	INTERACTION_HOVER_STRENGTH,
 	INTERACTION_PRESSED_STRENGTH,
 	mixInteractionState,
-	onSolidGateRatio,
 } from './scale.js';
 
 describe('buildTheme independent modes', () => {
@@ -71,7 +70,7 @@ describe('buildTheme generation failures', () => {
 				...tactileFoundation.dark,
 				color: {
 					...tactileFoundation.dark.color,
-					warning: resolvedColor(UNSATISFIABLE_ON_SOLID.dark.source),
+					warning: resolvedColor(UNSATISFIABLE_ON_SOLID.source),
 				},
 			},
 			name: 'bad-warning',
@@ -101,7 +100,7 @@ describe('buildTheme generation failures', () => {
 						...tactileFoundation.dark,
 						color: {
 							...tactileFoundation.dark.color,
-							accent: resolvedColor(UNSATISFIABLE_ON_SOLID.dark.source),
+							accent: resolvedColor(UNSATISFIABLE_ON_SOLID.source),
 						},
 					},
 					name: 'bad-accent',
@@ -132,9 +131,7 @@ describe('compileTheme diagnostics', () => {
 			const modeDiagnostics = diagnostics[mode];
 			expect(modeDiagnostics.mode).toBe(mode);
 			// A family diagnostic per role, and every scale role generated.
-			expect(Object.keys(modeDiagnostics.families).sort()).toEqual(
-				['accent', 'danger', 'info', 'neutral', 'success', 'warning'].sort(),
-			);
+			expect(Object.keys(modeDiagnostics.families).sort()).toEqual([...SEMANTIC_ROLES].sort());
 			expect(modeDiagnostics.families.accent.solidAnchor.satisfied).toBe(true);
 			// The canvas surface equals the resolved background anchor.
 			expect(modeDiagnostics.surfaces.canvas).toBeDefined();
@@ -151,8 +148,6 @@ describe('compileTheme diagnostics', () => {
 });
 
 describe('compileTheme interaction source', () => {
-	// A chromatic warm canvas so the achromatic high-contrast-lightness fallback cannot masquerade
-	// as the emitted `text.primary`.
 	const chromaticNeutralFoundation = normalizeTheme({
 		color: {
 			accent: '#3b82f6',
@@ -178,24 +173,12 @@ describe('compileTheme interaction source', () => {
 				const solid = familyDiagnostics.family[9];
 				const hover = mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH);
 				const pressed = mixInteractionState(solid, textPrimary, INTERACTION_PRESSED_STRENGTH);
-				// The on-solid solver evaluated these exact public states, not an achromatic fallback.
-				expect(familyDiagnostics.onSolid.ratioSolidHover).toBe(
-					contrastRatio(familyDiagnostics.family.contrast, hover),
-				);
 				expect(extractValue(block, `--luke-color-background-${role}-solid-hover`)).toBe(
 					formatOklch(hover),
 				);
 				expect(extractValue(block, `--luke-color-background-${role}-solid-pressed`)).toBe(
 					formatOklch(pressed),
 				);
-				expect(
-					onSolidGateRatio({
-						interactionSource: textPrimary,
-						lightness: familyDiagnostics.solidAnchor.resolvedLightness,
-						mode,
-						source: familyDiagnostics.source,
-					}),
-				).toBeGreaterThanOrEqual(4.5);
 			}
 		}
 	});

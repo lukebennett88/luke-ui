@@ -40,6 +40,9 @@ describe('buildTokenTree', () => {
 	});
 
 	it('nests the deepest semantic-role leaf under its full chain of contract path segments', () => {
+		// `color.background.<role>.subtle.rest` is the contract's deepest leaf: four group levels, which is
+		// exactly what `HEADING_TAGS` in token-board.tsx caps at. The board needs no role list of its own —
+		// walking the contract is what makes the six roles appear.
 		const tree = buildTokenTree();
 		const color = tree.children.color;
 		if (color?.kind !== 'group') throw new Error('expected a color group');

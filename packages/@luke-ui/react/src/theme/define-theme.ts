@@ -290,8 +290,6 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const { color } = input;
 	const defaults = defaultSourceColors[mode];
 	const neutral = resolveNeutral(color, mode);
-	// The same `text.primary` `buildModeColors` will gate every family against. Computed here so
-	// accent pre-conditioning cannot drift onto a different hover/pressed mix target.
 	const textPrimary = highContrastText(neutral, mode);
 	const colors: ThemeSourceColors = {
 		accent: resolveAdaptedRole(color.accent, mode, (source, mode, raw) => {
@@ -420,16 +418,11 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
 }
 
 /**
- * Adapts a single-value accent for one mode: preserve the source hue and chroma, then search the
- * vibrant band for a lightness that clears the scale generator's own on-solid gate
- * ({@link passesOnSolidGate}). Returns the lightness nearest the mode target, and throws when no
- * lightness in the band is accessible.
- *
- * The gate is the generator's, not a second copy of it, and it is asked about the same
- * `interactionSource` production generation uses. This pre-conditioner cannot be stricter than the
- * solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too, and the
- * accent it hands over is the one the generator emits. Its band is wider, which is what lets it
- * rescue accents the generator's tone-faithful window cannot reach.
+ * Adapts a single-value accent for one mode: preserve hue and chroma, then search the vibrant band
+ * for a lightness that clears {@link passesOnSolidGate} against the same `text.primary` production
+ * generation uses. Returns the lightness nearest the mode target. Throws when none in the band is
+ * accessible. The band is wider than the generator's tone-faithful window, which is what lets it
+ * rescue accents that window cannot reach.
  */
 function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSource: Oklch): Oklch {
 	const target = ACCENT_TARGET[mode];
@@ -442,7 +435,7 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSou
 		});
 	};
 	const passes = (l: number) => {
-		return passesOnSolidGate({ interactionSource, lightness: l, mode, source });
+		return passesOnSolidGate({ interactionSource, lightness: l, source });
 	};
 
 	if (passes(target)) return makeSolid(target);

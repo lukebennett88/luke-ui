@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import {
+	ADAPTABLE_MID_TONE,
 	chromaEnvelope,
 	HUE_STRESS_CORPUS,
 	lightnessEnvelope,
@@ -9,13 +10,12 @@ import {
 } from './__fixtures__/radix-scales.js';
 import type { Oklch } from './color.js';
 import { contrastRatio, parseColor } from './color.js';
-import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { SEMANTIC_ROLES, TEXT_RATIO } from './contrast-policy.js';
 import type { FamilyRole } from './scale.js';
 import {
 	generateFamily,
 	generateFamilyWithDiagnostics,
 	highContrastText,
-	INTERACTION_HOVER_STRENGTH,
 	INTERACTION_PRESSED_STRENGTH,
 	MIN_STATE_DELTA,
 	mixInteractionState,
@@ -33,15 +33,36 @@ const BACKGROUND: Record<ColorMode, Oklch> = {
 	light: parseColor('oklch(0.99 0.003 250)'),
 };
 
-const TEXT_RATIO = 4.5;
 const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
 // The one split is geometric rather than semantic: neutral's solid comes from its own
 // curated dark/light chip band instead of the source lightness, so it is the only role a dead-zone
 // source cannot make unsatisfiable.
 const SOURCE_TONED_ROLES = SEMANTIC_ROLES.filter((role) => role !== 'neutral');
 
+function toward(source: Oklch, mode: ColorMode): Oklch {
+	return highContrastText(source, mode);
+}
+
 function family(source: string, mode: ColorMode, role: FamilyRole) {
-	return generateFamily({ background: BACKGROUND[mode], mode, role, source: parseColor(source) });
+	const parsed = parseColor(source);
+	return generateFamily({
+		background: BACKGROUND[mode],
+		interactionSource: toward(parsed, mode),
+		mode,
+		role,
+		source: parsed,
+	});
+}
+
+function familyDiagnostics(source: string | Oklch, mode: ColorMode, role: FamilyRole) {
+	const parsed = typeof source === 'string' ? parseColor(source) : source;
+	return generateFamilyWithDiagnostics({
+		background: BACKGROUND[mode],
+		interactionSource: toward(parsed, mode),
+		mode,
+		role,
+		source: parsed,
+	});
 }
 
 describe('generateFamily shape', () => {
@@ -63,7 +84,7 @@ describe('component state distinctness', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
 				// The muted ramp is role-independent, but every role runs the solid-anchor search, so the
-				// corpus covers all six roles.
+				// corpus covers every semantic role.
 				for (const role of SEMANTIC_ROLES) {
 					const scale = family(entry.source, mode, role);
 					const delta34 = oklabDeltaE(scale[3], scale[4]);
@@ -84,29 +105,18 @@ describe('on-solid contrast guarantee', () => {
 	it('clears 4.5:1 against the public solid rest, hover, and pressed colours for every role across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
-				// Production mixes every role toward generated `text.primary`, which is the high-contrast
-				// text rung of the resolved neutral source — known before any solid-anchor search.
-				const textPrimary = highContrastText(parseColor(entry.source), mode);
 				for (const role of SEMANTIC_ROLES) {
-					const scale = generateFamily({
-						background: BACKGROUND[mode],
-						interactionSource: textPrimary,
-						mode,
-						role,
-						source: parseColor(entry.source),
-					});
-					const hover = mixInteractionState(scale[9], textPrimary, INTERACTION_HOVER_STRENGTH);
-					const pressed = mixInteractionState(scale[9], textPrimary, INTERACTION_PRESSED_STRENGTH);
+					const { diagnostics } = familyDiagnostics(entry.source, mode, role);
 					expect(
-						contrastRatio(scale.contrast, scale[9]),
+						diagnostics.onSolid.ratioRest,
 						`${entry.name} ${mode} ${role} contrast vs rest`,
 					).toBeGreaterThanOrEqual(TEXT_RATIO);
 					expect(
-						contrastRatio(scale.contrast, hover),
+						diagnostics.onSolid.ratioHover,
 						`${entry.name} ${mode} ${role} contrast vs hover`,
 					).toBeGreaterThanOrEqual(TEXT_RATIO);
 					expect(
-						contrastRatio(scale.contrast, pressed),
+						diagnostics.onSolid.ratioPressed,
 						`${entry.name} ${mode} ${role} contrast vs pressed`,
 					).toBeGreaterThanOrEqual(TEXT_RATIO);
 				}
@@ -115,15 +125,11 @@ describe('on-solid contrast guarantee', () => {
 	});
 
 	it('reports a satisfied on-solid anchor', () => {
-		const { diagnostics } = generateFamilyWithDiagnostics({
-			background: BACKGROUND.light,
-			mode: 'light',
-			role: 'accent',
-			source: parseColor('#0090ff'),
-		});
+		const { diagnostics } = familyDiagnostics('#0090ff', 'light', 'accent');
 		expect(diagnostics.solidAnchor.satisfied).toBe(true);
-		expect(diagnostics.solidAnchor.onSolidRatioSolid).toBeGreaterThanOrEqual(TEXT_RATIO);
-		expect(diagnostics.solidAnchor.onSolidRatioSolidHover).toBeGreaterThanOrEqual(TEXT_RATIO);
+		expect(diagnostics.onSolid.ratioRest).toBeGreaterThanOrEqual(TEXT_RATIO);
+		expect(diagnostics.onSolid.ratioHover).toBeGreaterThanOrEqual(TEXT_RATIO);
+		expect(diagnostics.onSolid.ratioPressed).toBeGreaterThanOrEqual(TEXT_RATIO);
 	});
 });
 
@@ -227,7 +233,7 @@ describe('step 12 is a scale-quality rung, not a contract guarantee', () => {
 			expect(
 				generateFamily({
 					background: BACKGROUND[mode],
-					interactionSource: { c: 0, h: 0, l: 0.5 },
+					interactionSource: { l: 0.5, c: 0, h: 0 },
 					mode,
 					role: 'neutral',
 					source,
@@ -239,24 +245,14 @@ describe('step 12 is a scale-quality rung, not a contract guarantee', () => {
 
 describe('solid-anchor search', () => {
 	it('honours the source lightness when it already clears the on-solid gate', () => {
-		const { diagnostics } = generateFamilyWithDiagnostics({
-			background: BACKGROUND.dark,
-			mode: 'dark',
-			role: 'accent',
-			source: parseColor('#0090ff'),
-		});
+		const { diagnostics } = familyDiagnostics('#0090ff', 'dark', 'accent');
 		expect(diagnostics.solidAnchor.adaptedForOnSolid).toBe(false);
 		expect(diagnostics.solidAnchor.resolvedLightness).toBeCloseTo(parseColor('#0090ff').l, 5);
 	});
 
 	it('nudges the solid off the source lightness when the source itself fails the gate', () => {
 		const source = parseColor('#3b82f6');
-		const { diagnostics } = generateFamilyWithDiagnostics({
-			background: BACKGROUND.light,
-			mode: 'light',
-			role: 'accent',
-			source,
-		});
+		const { diagnostics } = familyDiagnostics(source, 'light', 'accent');
 		expect(diagnostics.solidAnchor.adaptedForOnSolid).toBe(true);
 		expect(diagnostics.solidAnchor.resolvedLightness).not.toBeCloseTo(source.l, 3);
 		// The nudge stays within the tone-faithful window.
@@ -271,8 +267,7 @@ describe('solid-anchor search', () => {
 		// and an `info` badge equally able to render a solid.
 		const source = parseColor('oklch(0.51 0.19 150)');
 		const resolvedLightness = (mode: ColorMode, role: FamilyRole) => {
-			return generateFamilyWithDiagnostics({ background: BACKGROUND[mode], mode, role, source })
-				.diagnostics.solidAnchor.resolvedLightness;
+			return familyDiagnostics(source, mode, role).diagnostics.solidAnchor.resolvedLightness;
 		};
 		const anchors = MODES.flatMap((mode) => {
 			return SOURCE_TONED_ROLES.map((role) => [mode, role, resolvedLightness(mode, role)]);
@@ -289,35 +284,37 @@ describe('solid-anchor search', () => {
 
 	it('keeps the neutral solid accessible in both modes', () => {
 		for (const mode of MODES) {
-			const scale = family('oklch(0.99 0.003 250)', mode, 'neutral');
-			expect(contrastRatio(scale.contrast, scale[9]), `neutral ${mode}`).toBeGreaterThanOrEqual(
-				TEXT_RATIO,
-			);
-			expect(contrastRatio(scale.contrast, scale[10]), `neutral ${mode}`).toBeGreaterThanOrEqual(
+			const { diagnostics } = familyDiagnostics('oklch(0.99 0.003 250)', mode, 'neutral');
+			expect(diagnostics.onSolid.ratioRest, `neutral ${mode}`).toBeGreaterThanOrEqual(TEXT_RATIO);
+			expect(diagnostics.onSolid.ratioHover, `neutral ${mode}`).toBeGreaterThanOrEqual(TEXT_RATIO);
+			expect(diagnostics.onSolid.ratioPressed, `neutral ${mode}`).toBeGreaterThanOrEqual(
 				TEXT_RATIO,
 			);
 		}
 	});
 });
 
-describe('the one on-solid gate', () => {
-	// `passesOnSolidGate` is the single predicate for "can this solid carry readable text": the
-	// solid-anchor search below decides on it, and `defineTheme`'s accent pre-conditioner calls it
-	// rather than keeping a second copy. These tests pin the properties that copy had drifted on.
+describe('the on-solid gate', () => {
+	// `passesOnSolidGate` is the single predicate for whether a solid can carry readable text. The
+	// solid-anchor search decides on it, and `defineTheme`'s accent pre-conditioner calls it rather
+	// than keeping a second copy.
 
 	/** How the solid-anchor search resolved a source, or `null` when it found nothing in the band. */
 	function resolveAnchor(source: Oklch, mode: ColorMode) {
 		try {
-			return generateFamilyWithDiagnostics({
-				background: BACKGROUND[mode],
-				mode,
-				role: 'accent',
-				source,
-			}).diagnostics.solidAnchor;
+			return familyDiagnostics(source, mode, 'accent').diagnostics.solidAnchor;
 		} catch (error) {
 			if (error instanceof ScaleGenerationError) return null;
 			throw error;
 		}
+	}
+
+	function gate(source: Oklch, mode: ColorMode, lightness = source.l) {
+		return {
+			interactionSource: toward(source, mode),
+			lightness,
+			source,
+		};
 	}
 
 	it('accepts exactly the lightnesses the solid-anchor search honours verbatim', () => {
@@ -340,7 +337,7 @@ describe('the one on-solid gate', () => {
 							anchor !== null &&
 							!anchor.adaptedForOnSolid &&
 							Math.abs(anchor.resolvedLightness - lightness) < 1e-9;
-						const gated = passesOnSolidGate({ lightness, mode, source });
+						const gated = passesOnSolidGate(gate(source, mode));
 						if (gated === honoured) continue;
 						disagreements.push(
 							`${mode} oklch(${lightness.toFixed(2)} ${chroma} ${hue}): ` +
@@ -362,10 +359,10 @@ describe('the one on-solid gate', () => {
 			c: 0.01,
 			h: 0,
 		};
-		const ratio = onSolidGateRatio({ lightness: source.l, mode: 'light', source });
+		const ratio = onSolidGateRatio(gate(source, 'light'));
 		expect(ratio).toBeGreaterThan(TEXT_RATIO);
 		expect(ratio).toBeLessThan(TEXT_RATIO + 0.05);
-		expect(passesOnSolidGate({ lightness: source.l, mode: 'light', source })).toBe(false);
+		expect(passesOnSolidGate(gate(source, 'light'))).toBe(false);
 		// And the search agrees: it moves the anchor off this lightness rather than emitting it.
 		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(true);
 	});
@@ -376,24 +373,22 @@ describe('the one on-solid gate', () => {
 			c: 0,
 			h: 0,
 		};
-		const toward = { c: 0, h: 0, l: 0.3 };
-		const solid = { c: 0, h: 0, l: source.l };
-		const pressed = mixInteractionState(solid, toward, INTERACTION_PRESSED_STRENGTH);
-		const phantom = { c: 0, h: 0, l: source.l - 0.09 };
+		const towardText = toward(source, 'light');
+		const solid = { l: source.l, c: 0, h: 0 };
+		const pressed = mixInteractionState(solid, towardText, INTERACTION_PRESSED_STRENGTH);
+		const phantom = { l: source.l - 0.09, c: 0, h: 0 };
 		const onSolid = family('oklch(0.64 0 0)', 'light', 'accent').contrast;
 		expect(contrastRatio(onSolid, phantom)).toBeLessThan(TEXT_RATIO);
 		expect(contrastRatio(onSolid, pressed)).toBeGreaterThan(TEXT_RATIO);
-		expect(onSolidGateRatio({ lightness: source.l, mode: 'light', source })).toBeGreaterThan(
-			TEXT_RATIO,
-		);
-		expect(passesOnSolidGate({ lightness: source.l, mode: 'light', source })).toBe(true);
+		expect(onSolidGateRatio(gate(source, 'light'))).toBeGreaterThan(TEXT_RATIO);
+		expect(passesOnSolidGate(gate(source, 'light'))).toBe(true);
 		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(false);
 	});
 });
 
-describe('unsatisfiable input', () => {
+describe('dead-zone and adaptable sources', () => {
 	it('throws ScaleGenerationError carrying role and mode when a dark-mode source tone is a dead zone', () => {
-		const entry = UNSATISFIABLE_ON_SOLID.dark;
+		const entry = UNSATISFIABLE_ON_SOLID;
 		for (const role of SOURCE_TONED_ROLES) {
 			let thrown: unknown;
 			try {
@@ -410,34 +405,21 @@ describe('unsatisfiable input', () => {
 		}
 	});
 
-	it('adapts a light-mode mid-tone that used to sit in the step-10 dead zone', () => {
-		// Public hover and pressed mix less extremely than the private step-10 offset, so this
-		// light-mode red is now reachable by the solid-anchor search.
-		const { diagnostics } = generateFamilyWithDiagnostics({
-			background: BACKGROUND.light,
-			mode: 'light',
-			role: 'accent',
-			source: parseColor(UNSATISFIABLE_ON_SOLID.light.source),
-		});
+	it('adapts a reachable light-mode mid-tone into the tone-faithful window', () => {
+		const { diagnostics } = familyDiagnostics(ADAPTABLE_MID_TONE.source, 'light', 'accent');
 		expect(diagnostics.solidAnchor.adaptedForOnSolid).toBe(true);
 		expect(diagnostics.solidAnchor.satisfied).toBe(true);
 	});
 
 	it('does not throw for neutral, whose solid comes from a curated band rather than the source tone', () => {
-		for (const mode of MODES) {
-			expect(() => family(UNSATISFIABLE_ON_SOLID[mode].source, mode, 'neutral')).not.toThrow();
-		}
+		expect(() => family(UNSATISFIABLE_ON_SOLID.source, 'dark', 'neutral')).not.toThrow();
+		expect(() => family(ADAPTABLE_MID_TONE.source, 'light', 'neutral')).not.toThrow();
 	});
 });
 
 describe('gamut-reduction diagnostics', () => {
 	it('records the rungs whose chroma the sRGB gamut forced down for an out-of-gamut source', () => {
-		const { diagnostics } = generateFamilyWithDiagnostics({
-			background: BACKGROUND.light,
-			mode: 'light',
-			role: 'accent',
-			source: parseColor('oklch(0.7 0.4 195)'),
-		});
+		const { diagnostics } = familyDiagnostics('oklch(0.7 0.4 195)', 'light', 'accent');
 		expect(diagnostics.gamutReductions.length).toBeGreaterThan(0);
 		expect(diagnostics.gamutReductions.some((reduction) => reduction.step === 9)).toBe(true);
 		for (const reduction of diagnostics.gamutReductions) {
@@ -446,12 +428,7 @@ describe('gamut-reduction diagnostics', () => {
 	});
 
 	it('records no reduction for an in-gamut low-chroma neutral', () => {
-		const { diagnostics } = generateFamilyWithDiagnostics({
-			background: BACKGROUND.light,
-			mode: 'light',
-			role: 'neutral',
-			source: parseColor('oklch(0.99 0.003 250)'),
-		});
+		const { diagnostics } = familyDiagnostics('oklch(0.99 0.003 250)', 'light', 'neutral');
 		expect(diagnostics.gamutReductions).toEqual([]);
 	});
 });

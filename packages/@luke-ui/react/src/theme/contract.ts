@@ -350,7 +350,7 @@ export function partitionContractPairs(pairs: ReadonlyArray<readonly [string, st
 
 /**
  * Flattens the semantic token tree into `[path, varName]` pairs, in tree order, for example
- * `['color.background.danger.solid.rest', '--luke-color-background-danger-solid-rest']`.
+ * `['color.background.danger.solid.hover', '--luke-color-background-danger-solid-hover']`.
  */
 export function flattenThemeContract(): Array<[path: ContractPath, varName: string]> {
 	const pairs: Array<[ContractPath, string]> = [];

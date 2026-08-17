@@ -26,10 +26,6 @@ export interface SolidAnchorDiagnostics {
 	adaptedForOnSolid: boolean;
 	/** The lightness range the solid-anchor search was allowed to explore. */
 	band: [number, number];
-	/** The on-solid contrast achieved against the solid rest (step 9). */
-	onSolidRatioSolid: number;
-	/** The on-solid contrast achieved against the generated public solid hover. */
-	onSolidRatioSolidHover: number;
 	/** The lightness the solid anchor resolved to. */
 	resolvedLightness: number;
 	/** Whether on-solid text clears WCAG AA across the public solid rest, hover, and pressed colours. */
@@ -51,8 +47,8 @@ export interface FamilyDiagnostics {
 	gamutReductions: Array<GamutReduction>;
 	/** The colour mode the family was generated for. */
 	mode: 'light' | 'dark';
-	/** The chosen on-solid colour and the contrast it reaches over the public solid rest and hover. */
-	onSolid: { color: Oklch; ratioSolid: number; ratioSolidHover: number };
+	/** The chosen on-solid colour and the contrast it reaches over the public solid rest, hover, and pressed. */
+	onSolid: { color: Oklch; ratioRest: number; ratioHover: number; ratioPressed: number };
 	/** The semantic role the family was generated for. */
 	role: FamilyRole;
 	/** How the step-9 solid anchor was resolved. */

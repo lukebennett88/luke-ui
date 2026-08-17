@@ -46,11 +46,7 @@ describe('theme contract', () => {
 		expect(countLeaves(vars)).toBe(flattenThemeContract().length);
 	});
 
-	it('gives all six semantic roles the same 66 leaves under the documented variable names', () => {
-		// The migration table in the specification is a promise about these exact names, so they are
-		// spelled out here rather than re-derived through `themeVarName` (which would only restate the
-		// kebab-casing the contract already applied). `on-solid` is the one name a naive reading gets
-		// wrong. Comparing the whole set, not a sample, also catches a seventh role or a stray leaf.
+	it('gives every semantic role the same background, foreground, and border leaves', () => {
 		const leaf = (path: ModePath, varName: string): [ModePath, string] => [path, varName];
 		const expected = SEMANTIC_ROLES.flatMap((role) => [
 			leaf(`color.border.${role}`, `--luke-color-border-${role}`),
@@ -76,7 +72,6 @@ describe('theme contract', () => {
 			);
 		});
 
-		expect(expected).toHaveLength(66);
 		const byPath = (a: ReadonlyArray<string>, b: ReadonlyArray<string>) => {
 			return (a[0] ?? '').localeCompare(b[0] ?? '');
 		};

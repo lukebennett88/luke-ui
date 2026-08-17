@@ -70,9 +70,8 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/lightness-candidates.ts`: the shared lightness grid the accent pre-conditioner,
   solid-anchor search, and control-border solver walk.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
-  constrained step-9 solid-anchor search and `passesOnSolidGate`, the on-solid accessibility gate.
-  Every semantic role's solid rest, hover, and pressed colours clear 4.5:1 against on-solid text.
-  Public hover and pressed mix the resting colour toward `text.primary` at 5% and 10%.
+  constrained step-9 solid-anchor search and `passesOnSolidGate`. See
+  [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for interaction-state generation.
 - `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
   `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
   no `--luke-motion-duration-*` custom property exists.

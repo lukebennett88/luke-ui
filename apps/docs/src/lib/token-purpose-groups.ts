@@ -88,7 +88,7 @@ const PURPOSE_DEFINITIONS = [
 		title: 'Sizing',
 	},
 	{
-		description: 'State effects a control applies to its own material, such as disabled opacity.',
+		description: 'State effects a control applies to its own material, such as the disabled fade.',
 		id: 'interaction',
 		related: null,
 		showSamples: true,
@@ -127,6 +127,7 @@ const COLOR_SECTION_PURPOSES: Record<string, TokenPurposeId | undefined> = {
 	background: 'roles',
 	foreground: 'roles',
 	loadingSkeleton: 'content',
+	overlay: 'surfaces',
 	surface: 'surfaces',
 	text: 'content',
 };
@@ -139,7 +140,6 @@ function resolveColorPurpose(path: string): TokenPurposeId | undefined {
 	if (section === 'border') {
 		return leaf !== undefined && STRUCTURAL_BORDERS.has(leaf) ? 'borders' : 'roles';
 	}
-	if (section === 'overlay') return 'surfaces';
 	return COLOR_SECTION_PURPOSES[section];
 }
 

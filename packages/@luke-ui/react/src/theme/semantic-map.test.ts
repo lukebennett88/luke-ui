@@ -8,6 +8,7 @@ import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import {
 	generateFamily,
+	highContrastText,
 	INTERACTION_HOVER_STRENGTH,
 	INTERACTION_PRESSED_STRENGTH,
 	mixInteractionState,
@@ -57,8 +58,15 @@ const SOURCE: Record<ColorMode, Record<FamilyRole, string>> = {
 };
 
 function buildFamilies(mode: ColorMode, background: Oklch): Record<FamilyRole, ScaleFamily> {
+	const textPrimary = highContrastText(parseColor(SOURCE[mode].neutral), mode);
 	const family = (role: FamilyRole) => {
-		return generateFamily({ background, mode, role, source: parseColor(SOURCE[mode][role]) });
+		return generateFamily({
+			background,
+			interactionSource: textPrimary,
+			mode,
+			role,
+			source: parseColor(SOURCE[mode][role]),
+		});
 	};
 	return {
 		accent: family('accent'),
@@ -105,7 +113,7 @@ describe('mapSemanticColors', () => {
 				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
 				expect(result['color.border.focus']).toBe(formatOklch(FOCUS));
 
-				// The shared contract: identical rest / hover / pressed mapping for all six roles.
+				// The shared contract: identical rest / hover / pressed mapping for every semantic role.
 				for (const role of SEMANTIC_ROLES) {
 					const family = families[role];
 					const textPrimary = families.neutral[12];

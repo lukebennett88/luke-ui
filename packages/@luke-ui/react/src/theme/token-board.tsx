@@ -30,8 +30,8 @@ export type TokenTreeNode = TokenLeafNode | TokenGroupNode;
 /** One of the contract's own top-level branches, for example `color` or `motion`. */
 type Family = keyof typeof themeContractTree;
 
-// Capped at the contract's deepest group (`color.background.<role>.subtle`, four group levels
-// above the leaf); depths past this reuse the smallest heading.
+// Capped at the contract's deepest group (`color.background.<role>.subtle`, 4 group levels above the
+// leaf); depths past this reuse the smallest heading.
 const HEADING_TAGS = ['h2', 'h3', 'h4', 'h5'] as const;
 
 function headingTagAt(depth: number): (typeof HEADING_TAGS)[number] {
