@@ -21,10 +21,10 @@ with no class and no JS required. Neither step injects styles at runtime.
   a layer.
 - `styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
-- `styles/input-states.ts`: the shared field control-state selectors
-  (`composeInputStateSelectors`, `descendantDisabledSelector`) that field recipes compose. It is named
-  `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module composes its
-  plain data and functions.
+- `styles/input-states.ts`: the shared field control-state selectors (`composeInputStateSelectors`,
+  `descendantDisabledSelector`) that field recipes compose. It is named `.ts`, not `.css.ts`,
+  because it emits no CSS. Each field recipe's `.css.ts` module composes its plain data and
+  functions.
 - `styles/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
   CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is the
   in-control icon `primitives/combobox/styles.css.ts` applies under its own invalid selector's
