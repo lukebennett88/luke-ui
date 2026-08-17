@@ -109,8 +109,8 @@ catalog:
   typescript: ^7.0.2
   unbarrelify: ^1.1.2
   unist-util-visit: ^5.1.0
-  vite: npm:@voidzero-dev/vite-plus-core@0.2.7
-  vite-plus: 0.2.7
+  vite: npm:@voidzero-dev/vite-plus-core@0.2.9
+  vite-plus: 0.2.9
   vitest: 4.1.10
   zbsearch: ^3.3.4
   zod: ^4.4.3
