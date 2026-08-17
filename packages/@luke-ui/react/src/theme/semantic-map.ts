@@ -18,6 +18,7 @@ import type { GeneratedSurfaces } from './elevation.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
 import {
+	FAMILY_RUNG,
 	INTERACTION_HOVER_STRENGTH,
 	INTERACTION_PRESSED_STRENGTH,
 	mixInteractionState,
@@ -63,8 +64,9 @@ interface MapSemanticColorsRequest {
 /**
  * Resolves every colour contract leaf onto the private families and surfaces, per the locked
  * semantic mapping table. `families` and `surfaces` are already mode-resolved. `backdrop` passes
- * through verbatim. `focus` is the resolved keyboard-focus source colour. Neutral step 12 becomes
- * `text.primary` and is the colour hover and pressed states mix toward.
+ * through verbatim. `focus` is the resolved keyboard-focus source colour. Neutral
+ * {@link FAMILY_RUNG.textPrimary} becomes `text.primary` and is the colour hover and pressed states
+ * mix toward.
  */
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
 	return {
@@ -82,11 +84,11 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 		'color.surface.floating': formatOklch(surfaces.floating),
 		'color.surface.overlay': formatOklch(surfaces.overlay),
 		'color.overlay.backdrop': backdrop,
-		'color.loadingSkeleton': formatOklch(neutral[8]),
-		'color.text.primary': formatOklch(neutral[12]),
-		'color.text.secondary': formatOklch(neutral[11]),
-		'color.text.disabled': formatOklch(neutral[8]),
-		'color.border.decorative': formatOklch(neutral[6]),
+		'color.loadingSkeleton': formatOklch(neutral[FAMILY_RUNG.muted]),
+		'color.text.primary': formatOklch(neutral[FAMILY_RUNG.textPrimary]),
+		'color.text.secondary': formatOklch(neutral[FAMILY_RUNG.foreground]),
+		'color.text.disabled': formatOklch(neutral[FAMILY_RUNG.muted]),
+		'color.border.decorative': formatOklch(neutral[FAMILY_RUNG.decorative]),
 		'color.border.control': formatOklch(controlBorder),
 		'color.border.focus': formatOklch(focus),
 	};
@@ -95,13 +97,13 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
 	[Path in RoleColorPath]: string;
 } {
-	const textPrimary = families.neutral[12];
+	const textPrimary = families.neutral[FAMILY_RUNG.textPrimary];
 	return pathRecord(
 		SEMANTIC_ROLES.flatMap((role) => {
 			const family = families[role];
-			const subtle = interactionStates(family[3], textPrimary);
-			const solid = interactionStates(family[9], textPrimary);
-			const foreground = interactionStates(family[11], textPrimary);
+			const subtle = interactionStates(family[FAMILY_RUNG.subtle], textPrimary);
+			const solid = interactionStates(family[FAMILY_RUNG.solid], textPrimary);
+			const foreground = interactionStates(family[FAMILY_RUNG.foreground], textPrimary);
 			return [
 				pathEntry(`color.background.${role}.subtle.rest`, subtle.rest),
 				pathEntry(`color.background.${role}.subtle.hover`, subtle.hover),
@@ -113,7 +115,7 @@ function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
 				pathEntry(`color.foreground.${role}.hover`, foreground.hover),
 				pathEntry(`color.foreground.${role}.pressed`, foreground.pressed),
 				pathEntry(`color.foreground.${role}.onSolid`, formatOklch(family.contrast)),
-				pathEntry(`color.border.${role}`, formatOklch(family[7])),
+				pathEntry(`color.border.${role}`, formatOklch(family[FAMILY_RUNG.border])),
 			];
 		}),
 	);

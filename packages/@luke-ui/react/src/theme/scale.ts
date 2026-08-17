@@ -44,6 +44,21 @@ export interface ScaleFamily {
 	contrast: Oklch;
 }
 
+/**
+ * Semantic rungs of the private 12-step family. The generator stays ordinal; mapping and other
+ * consumers use these names instead of remembering what 3, 7, 9, 11, and 12 mean. Steps 4, 5, and
+ * 10 stay unnamed: they are private scale geometry, not public hover or pressed colours.
+ */
+export const FAMILY_RUNG = {
+	subtle: 3,
+	decorative: 6,
+	border: 7,
+	muted: 8,
+	solid: 9,
+	foreground: 11,
+	textPrimary: 12,
+} as const satisfies Record<string, ScaleStep>;
+
 /** Share of `text.primary` mixed into a resting colour to produce the public hover state. */
 export const INTERACTION_HOVER_STRENGTH = 0.05;
 

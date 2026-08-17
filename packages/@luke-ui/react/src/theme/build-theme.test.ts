@@ -13,6 +13,7 @@ import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
 import {
+	FAMILY_RUNG,
 	highContrastText,
 	INTERACTION_HOVER_STRENGTH,
 	INTERACTION_PRESSED_STRENGTH,
@@ -162,7 +163,7 @@ describe('compileTheme interaction source', () => {
 
 		for (const mode of ['light', 'dark'] as const) {
 			const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
-			const textPrimary = diagnostics[mode].families.neutral.family[12];
+			const textPrimary = diagnostics[mode].families.neutral.family[FAMILY_RUNG.textPrimary];
 			expect(textPrimary).toEqual(
 				highContrastText(chromaticNeutralFoundation[mode].color.neutral, mode),
 			);
@@ -170,7 +171,7 @@ describe('compileTheme interaction source', () => {
 
 			for (const role of SEMANTIC_ROLES) {
 				const familyDiagnostics = diagnostics[mode].families[role];
-				const solid = familyDiagnostics.family[9];
+				const solid = familyDiagnostics.family[FAMILY_RUNG.solid];
 				const hover = mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH);
 				const pressed = mixInteractionState(solid, textPrimary, INTERACTION_PRESSED_STRENGTH);
 				expect(extractValue(block, `--luke-color-background-${role}-solid-hover`)).toBe(

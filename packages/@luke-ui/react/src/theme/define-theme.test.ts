@@ -6,6 +6,7 @@ import { defaultBackdrop, defaultDepth, defineTheme, normalizeTheme } from './de
 import { defaultSourceColors } from './foundation.js';
 import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
+import { FAMILY_RUNG } from './scale.js';
 
 /**
  * Splits a generated stylesheet into its five rule blocks: identity, base light, media-query dark,
@@ -121,7 +122,7 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 					mode,
 					reSearched: familyDiagnostics.solidAnchor.adaptedForOnSolid,
 					solidMovedOffPreconditionedTone:
-						Math.abs(familyDiagnostics.family[9].l - source.l) > 1e-9 ||
+						Math.abs(familyDiagnostics.family[FAMILY_RUNG.solid].l - source.l) > 1e-9 ||
 						Math.abs(familyDiagnostics.solidAnchor.resolvedLightness - source.l) > 1e-9,
 				};
 			});
