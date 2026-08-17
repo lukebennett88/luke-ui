@@ -44,6 +44,11 @@ function interactionTarget(mode: ColorMode): Oklch {
 	return highContrastText(BACKGROUND[mode], mode);
 }
 
+/** Production mix target when the family under test is itself the resolved neutral source. */
+function neutralInteractionTarget(source: string | Oklch, mode: ColorMode): Oklch {
+	return highContrastText(typeof source === 'string' ? parseColor(source) : source, mode);
+}
+
 function family(source: string, mode: ColorMode, role: FamilyRole, interactionSource: Oklch) {
 	const parsed = parseColor(source);
 	return generateFamily({
@@ -85,13 +90,14 @@ describe('generateFamily shape', () => {
 	});
 });
 
-describe('component state distinctness', () => {
+describe('muted-ramp distinctness', () => {
 	it('keeps steps 3-4 and 4-5 at least MIN_STATE_DELTA apart across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
-				// The muted ramp is role-independent, but every role runs the solid-anchor search, so the
-				// corpus covers every semantic role.
-				for (const role of SEMANTIC_ROLES) {
+				// The muted ramp is role-independent. Source-toned roles still each run the solid-anchor
+				// search, so the corpus covers every role whose solid follows the source tone. Neutral
+				// derives its mix target from its own source and is covered separately.
+				for (const role of SOURCE_TONED_ROLES) {
 					const scale = family(entry.source, mode, role, interactionTarget(mode));
 					const delta34 = oklabDeltaE(scale[3], scale[4]);
 					const delta45 = oklabDeltaE(scale[4], scale[5]);
@@ -108,10 +114,10 @@ describe('component state distinctness', () => {
 });
 
 describe('on-solid contrast guarantee', () => {
-	it('clears 4.5:1 against the public solid rest, hover, and pressed colours for every role across the corpus', () => {
+	it('clears 4.5:1 against the public solid rest, hover, and pressed colours for every source-toned role across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
-				for (const role of SEMANTIC_ROLES) {
+				for (const role of SOURCE_TONED_ROLES) {
 					const { diagnostics } = familyDiagnostics(
 						entry.source,
 						mode,
@@ -179,7 +185,11 @@ describe('reference-envelope properties', () => {
 			it(`keeps ${testCase.name} background/border steps inside the ${mode} lightness envelope`, () => {
 				const source =
 					mode === 'light' ? testCase.source : shiftedForDark(testCase.source, testCase.role);
-				const scale = family(source, mode, testCase.role, interactionTarget(mode));
+				const interactionSource =
+					testCase.role === 'neutral'
+						? neutralInteractionTarget(source, mode)
+						: interactionTarget(mode);
+				const scale = family(source, mode, testCase.role, interactionSource);
 				const { chroma, lightness } = envelopes[mode];
 				for (let step = 1; step <= 8; step++) {
 					const rung = scale[step as 1];
@@ -230,12 +240,12 @@ describe('reference-envelope properties', () => {
 	});
 });
 
-describe('step 12 is a scale-quality rung, not a contract guarantee', () => {
-	it('is the more extreme text lightness but carries no contrast guarantee', () => {
+describe('high-contrast text rung', () => {
+	it('extends the text ramp past the low-contrast foreground', () => {
 		for (const mode of MODES) {
 			const scale = family('#0090ff', mode, 'accent', interactionTarget(mode));
 			// Light mode: high-contrast text is darker than low-contrast; dark mode: lighter. Either
-			// way step 12 sits further from the low-contrast rung, extending the ramp.
+			// way the high-contrast rung sits further from the low-contrast rung, extending the ramp.
 			const extension =
 				mode === 'light'
 					? scale[FAMILY_RUNG.foreground].l - scale[FAMILY_RUNG.textPrimary].l
@@ -244,17 +254,19 @@ describe('step 12 is a scale-quality rung, not a contract guarantee', () => {
 		}
 	});
 
-	it('matches highContrastText and does not depend on the interaction source', () => {
+	it('matches highContrastText(source) and is independent of the solid-anchor mix target', () => {
 		// Production computes `text.primary` from the resolved neutral source before the solid-anchor
-		// search. That is only valid if step 12 is independent of the mix target the search uses.
+		// search. That is only valid if the high-contrast rung does not depend on the mix target.
 		const source = parseColor('oklch(0.5 0.08 40)');
 		for (const mode of MODES) {
 			const expected = highContrastText(source, mode);
 			expect(
-				family('oklch(0.5 0.08 40)', mode, 'neutral', interactionTarget(mode))[
+				family('oklch(0.5 0.08 40)', mode, 'neutral', neutralInteractionTarget(source, mode))[
 					FAMILY_RUNG.textPrimary
 				],
 			).toEqual(expected);
+			// Deliberately mismatched mix target: the high-contrast rung must still equal
+			// `highContrastText(source)`, not the colour the solid-anchor search mixes toward.
 			expect(
 				generateFamily({
 					background: BACKGROUND[mode],
@@ -320,11 +332,12 @@ describe('solid-anchor search', () => {
 
 	it('keeps the neutral solid accessible in both modes', () => {
 		for (const mode of MODES) {
+			const source = mode === 'light' ? 'oklch(0.99 0.003 250)' : 'oklch(0.18 0.004 250)';
 			const { diagnostics } = familyDiagnostics(
-				'oklch(0.99 0.003 250)',
+				source,
 				mode,
 				'neutral',
-				interactionTarget(mode),
+				neutralInteractionTarget(source, mode),
 			);
 			expect(diagnostics.onSolid.ratioRest, `neutral ${mode}`).toBeGreaterThanOrEqual(TEXT_RATIO);
 			expect(diagnostics.onSolid.ratioHover, `neutral ${mode}`).toBeGreaterThanOrEqual(TEXT_RATIO);
@@ -465,10 +478,20 @@ describe('dead-zone and adaptable sources', () => {
 
 	it('does not throw for neutral, whose solid comes from a curated band rather than the source tone', () => {
 		expect(() => {
-			return family(UNSATISFIABLE_ON_SOLID.source, 'dark', 'neutral', interactionTarget('dark'));
+			return family(
+				UNSATISFIABLE_ON_SOLID.source,
+				'dark',
+				'neutral',
+				neutralInteractionTarget(UNSATISFIABLE_ON_SOLID.source, 'dark'),
+			);
 		}).not.toThrow();
 		expect(() => {
-			return family(ADAPTABLE_MID_TONE.source, 'light', 'neutral', interactionTarget('light'));
+			return family(
+				ADAPTABLE_MID_TONE.source,
+				'light',
+				'neutral',
+				neutralInteractionTarget(ADAPTABLE_MID_TONE.source, 'light'),
+			);
 		}).not.toThrow();
 	});
 });
@@ -491,11 +514,12 @@ describe('gamut-reduction diagnostics', () => {
 	});
 
 	it('records no reduction for an in-gamut low-chroma neutral', () => {
+		const source = 'oklch(0.99 0.003 250)';
 		const { diagnostics } = familyDiagnostics(
-			'oklch(0.99 0.003 250)',
+			source,
 			'light',
 			'neutral',
-			interactionTarget('light'),
+			neutralInteractionTarget(source, 'light'),
 		);
 		expect(diagnostics.gamutReductions).toEqual([]);
 	});

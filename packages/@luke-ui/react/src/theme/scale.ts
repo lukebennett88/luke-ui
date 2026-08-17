@@ -23,9 +23,11 @@ export type ScaleStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 type ColorMode = 'light' | 'dark';
 
 /**
- * A generated 12-step colour family plus its on-solid `contrast` colour. Step roles: 1-2 app/subtle
- * backgrounds, 3-5 component surface (normal / hover / active), 6-8 borders (subtle / UI+focus /
- * hover), 9-10 solid (9 = public rest, 10 = private offset), 11-12 text (low / high contrast).
+ * A generated 12-step colour family plus its on-solid `contrast` colour. Semantic consumers read
+ * named rungs via {@link FAMILY_RUNG}: step 3 is the public subtle rest, step 7 the semantic
+ * border, step 9 the public solid rest, step 11 the resting foreground, and neutral step 12 is
+ * `text.primary`. Unnamed steps are private scale geometry, not public hover or pressed colours.
+ * `contrast` is on-solid text that must read over solid rest, hover, and pressed.
  */
 export interface ScaleFamily {
 	1: Oklch;
@@ -135,13 +137,13 @@ export class ScaleGenerationError extends Error {
 const ON_SOLID_TARGET = TEXT_RATIO + RATIO_HEADROOM;
 
 /**
- * The OKLab ΔE floor between consecutive component states (steps 3-4 and 4-5). The muted ramp's
+ * The OKLab ΔE floor between consecutive muted-ramp rungs (steps 3-4 and 4-5). The muted ramp's
  * fixed lightness deltas clear this comfortably for every role, including near-achromatic neutrals.
  */
 export const MIN_STATE_DELTA = 0.015;
 
 // Steps 1-8 form a "muted ramp": lightness walks away from the background toward the solid by fixed
-// absolute offsets (so component-state distinctness never depends on the anchor lightness), while
+// absolute offsets (so consecutive rungs stay distinct independent of the anchor lightness), while
 // chroma grows from a faint tint to near the solid. `offset` is an absolute OKLCH lightness delta
 // from the background (its sign is set by the mode: darker in light mode, lighter in dark mode);
 // `chromaFraction` scales the source chroma and `chromaCap` caps it so the pale near-background
