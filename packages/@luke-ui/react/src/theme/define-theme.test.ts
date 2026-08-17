@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { compileTheme } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
 import { defaultBackdrop, defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
 import { defaultSourceColors } from './foundation.js';
 import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
-import { generateFamilyWithDiagnostics } from './scale.js';
+import { highContrastText, passesOnSolidGate } from './scale.js';
 
 /**
  * Splits a generated stylesheet into its five rule blocks: identity, base light, media-query dark,
@@ -110,31 +111,39 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 	];
 
 	it('hands the generator an accent the solid-anchor search honours verbatim in both modes', () => {
-		// The pre-conditioner gates on `passesOnSolidGate`, the same predicate the solid-anchor search
-		// decides on. It cannot be stricter than the solver, and the solver does not re-search the chosen
-		// tone: the emitted solid is the pre-conditioned accent.
+		// The pre-conditioner gates on `passesOnSolidGate` with the same `text.primary` production
+		// generation uses. It cannot be stricter than the solver, and the solver does not re-search the
+		// chosen tone: the emitted solid is the pre-conditioned accent.
 		const resolved = accents.flatMap((accent) => {
+			const foundation = normalizeTheme({ color: { accent }, name: 'accent-gate' });
+			const { diagnostics } = compileTheme(foundation);
 			return (['light', 'dark'] as const).map((mode) => {
-				const foundation = normalizeTheme({ color: { accent }, name: 'accent-gate' });
 				const source = foundation[mode].color.accent;
-				const { diagnostics } = generateFamilyWithDiagnostics({
-					background: foundation[mode].color.background,
-					mode,
-					role: 'accent',
-					source,
-				});
+				const familyDiagnostics = diagnostics[mode].families.accent;
+				const textPrimary = highContrastText(foundation[mode].color.neutral, mode);
 				return {
 					accent,
 					mode,
-					reSearched: diagnostics.solidAnchor.adaptedForOnSolid,
+					gatedAgainstProductionTextPrimary: passesOnSolidGate({
+						interactionSource: textPrimary,
+						lightness: source.l,
+						mode,
+						source,
+					}),
+					reSearched: familyDiagnostics.solidAnchor.adaptedForOnSolid,
 					solidMovedOffPreconditionedTone:
-						Math.abs(diagnostics.family[9].l - source.l) > 1e-9 ||
-						Math.abs(diagnostics.solidAnchor.resolvedLightness - source.l) > 1e-9,
+						Math.abs(familyDiagnostics.family[9].l - source.l) > 1e-9 ||
+						Math.abs(familyDiagnostics.solidAnchor.resolvedLightness - source.l) > 1e-9,
 				};
 			});
 		});
 		expect(
-			resolved.filter((entry) => entry.reSearched || entry.solidMovedOffPreconditionedTone),
+			resolved.filter(
+				(entry) =>
+					entry.reSearched ||
+					entry.solidMovedOffPreconditionedTone ||
+					!entry.gatedAgainstProductionTextPrimary,
+			),
 		).toEqual([]);
 	});
 });

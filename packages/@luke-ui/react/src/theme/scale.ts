@@ -5,7 +5,8 @@
  * search; it is calibrated to testable scale properties rather than to exact Radix reproduction.
  *
  * It also owns {@link passesOnSolidGate}, the on-solid accessibility gate. `defineTheme`'s accent
- * pre-conditioner calls it rather than reimplementing it. It reuses the dependency-free colour math in
+ * pre-conditioner calls it rather than reimplementing it, with the same {@link highContrastText}
+ * interaction source production generation uses. It reuses the dependency-free colour math in
  * `color.ts` and the shared thresholds in `contrast-policy.ts`. Every semantic role's solid rest,
  * hover, and pressed colours must clear 4.5:1 against on-solid text — that invariant lives next to
  * `SEMANTIC_ROLES` there.
@@ -62,13 +63,23 @@ export function mixInteractionState(rest: Oklch, toward: Oklch, strength: number
 	return gamutMapOklch(mixOklab(rest, toward, strength));
 }
 
+/**
+ * Neutral `text.primary` (step 12): the high-contrast text rung a family emits for `source` in
+ * `mode`. Production computes this from the resolved neutral source before any solid-anchor search,
+ * then every family — including neutral — gates and mixes toward that same colour.
+ */
+export function highContrastText(source: Oklch, mode: ColorMode): Oklch {
+	return gamutMapOklch(highContrastTextRequest(source, mode));
+}
+
 /** The inputs to {@link generateFamily}. */
 export interface GenerateFamilyRequest {
 	/** The resolved canvas anchor. Steps 1-8 ramp away from it toward the solid. */
 	background: Oklch;
 	/**
-	 * Neutral `text.primary` (step 12). Public hover and pressed solids mix toward it. Omit only in
-	 * isolated family tests; the gate then uses the mode's high-contrast text lightness.
+	 * Neutral `text.primary` (step 12). Public hover and pressed solids mix toward it. Production
+	 * always passes {@link highContrastText} of the resolved neutral source. Omit only in isolated
+	 * family tests; the gate then uses the mode's high-contrast text lightness.
 	 */
 	interactionSource?: Oklch;
 	/** The colour mode the family is generated for. */
@@ -198,6 +209,14 @@ const TEXT_LOW_CHROMA_CAP = 0.13;
 const TEXT_HIGH_CHROMA_FRACTION = 0.45;
 const TEXT_HIGH_CHROMA_CAP = 0.1;
 
+function highContrastTextRequest(source: Oklch, mode: ColorMode): Oklch {
+	return {
+		c: Math.max(Math.min(source.c * TEXT_HIGH_CHROMA_FRACTION, TEXT_HIGH_CHROMA_CAP), 0),
+		h: source.h,
+		l: clampUnit(TEXT_LIGHTNESS[mode].high),
+	};
+}
+
 // The near-white and near-black candidates the on-solid gate chooses between.
 const ON_SOLID_WHITE_LIGHTNESS = 0.985;
 const ON_SOLID_BLACK_LIGHTNESS = 0.18;
@@ -206,8 +225,9 @@ const ON_SOLID_BLACK_CHROMA = 0.01;
 /** A candidate solid the on-solid gate is asked about. */
 export interface OnSolidGateRequest {
 	/**
-	 * Neutral `text.primary`. Public hover and pressed mix toward it. Omit to use the mode's
-	 * high-contrast text lightness.
+	 * Neutral `text.primary`. Public hover and pressed mix toward it. Production always passes
+	 * {@link highContrastText} of the resolved neutral source. Omit to use the mode's high-contrast
+	 * text lightness.
 	 */
 	interactionSource?: Oklch;
 	/** The candidate step-9 solid lightness. */
@@ -223,9 +243,10 @@ export interface OnSolidGateRequest {
  * generator would choose clears the AA text ratio (plus the search headroom) across the public
  * solid rest, hover, and pressed colours a candidate lightness produces.
  *
- * `defineTheme`'s accent pre-conditioner calls this rather than reimplementing it, so the
- * pre-conditioner can never be stricter than {@link generateFamily}'s solid-anchor search: a
- * lightness it accepts is one the search accepts too.
+ * `defineTheme`'s accent pre-conditioner calls this rather than reimplementing it, with the same
+ * {@link highContrastText} interaction source production generation uses, so the pre-conditioner can
+ * never be stricter than {@link generateFamily}'s solid-anchor search: a lightness it accepts is one
+ * the search accepts too.
  */
 export function passesOnSolidGate(request: OnSolidGateRequest): boolean {
 	return onSolidGateRatio(request) >= ON_SOLID_TARGET;
@@ -334,11 +355,10 @@ function buildFamily(request: GenerateFamilyRequest): {
 		text.low,
 		Math.min(source.c * TEXT_LOW_CHROMA_FRACTION, TEXT_LOW_CHROMA_CAP),
 	);
-	const highText = rung(
-		12,
-		text.high,
-		Math.min(source.c * TEXT_HIGH_CHROMA_FRACTION, TEXT_HIGH_CHROMA_CAP),
-	);
+	// Step 12 is independent of the solid-anchor search, so production can compute the emitted
+	// `text.primary` from the resolved neutral source and pass it as `interactionSource` first.
+	const highTextRequest = highContrastTextRequest(source, mode);
+	const highText = rung(12, highTextRequest.l, highTextRequest.c);
 
 	const family: ScaleFamily = {
 		1: step1,

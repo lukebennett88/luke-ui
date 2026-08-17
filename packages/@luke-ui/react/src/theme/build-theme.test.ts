@@ -8,9 +8,17 @@ import {
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeGenerationError } from './build-theme.js';
-import { contrastRatio, parseColor } from './color.js';
+import { contrastRatio, formatOklch, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
+import {
+	highContrastText,
+	INTERACTION_HOVER_STRENGTH,
+	INTERACTION_PRESSED_STRENGTH,
+	mixInteractionState,
+	onSolidGateRatio,
+} from './scale.js';
 
 describe('buildTheme independent modes', () => {
 	it('derives each mode from its own sources rather than inverting light', () => {
@@ -138,6 +146,57 @@ describe('compileTheme diagnostics', () => {
 				(check) => check.required === 4.5,
 			);
 			expect(hardTextChecks.length).toBeGreaterThan(0);
+		}
+	});
+});
+
+describe('compileTheme interaction source', () => {
+	// A chromatic warm canvas so the achromatic high-contrast-lightness fallback cannot masquerade
+	// as the emitted `text.primary`.
+	const chromaticNeutralFoundation = normalizeTheme({
+		color: {
+			accent: '#3b82f6',
+			neutral: { dark: 'oklch(0.22 0.03 70)', light: 'oklch(0.985 0.03 70)' },
+		},
+		name: 'chromatic-neutral',
+	});
+
+	it('gates every family against the emitted neutral text.primary, including the neutral family', () => {
+		const { css, diagnostics } = compileTheme(chromaticNeutralFoundation);
+		const blocks = splitBlocks(css);
+
+		for (const mode of ['light', 'dark'] as const) {
+			const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
+			const textPrimary = diagnostics[mode].families.neutral.family[12];
+			expect(textPrimary).toEqual(
+				highContrastText(chromaticNeutralFoundation[mode].color.neutral, mode),
+			);
+			expect(extractValue(block, '--luke-color-text-primary')).toBe(formatOklch(textPrimary));
+
+			for (const role of SEMANTIC_ROLES) {
+				const familyDiagnostics = diagnostics[mode].families[role];
+				const solid = familyDiagnostics.family[9];
+				const hover = mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH);
+				const pressed = mixInteractionState(solid, textPrimary, INTERACTION_PRESSED_STRENGTH);
+				// The on-solid solver evaluated these exact public states, not an achromatic fallback.
+				expect(familyDiagnostics.onSolid.ratioSolidHover).toBe(
+					contrastRatio(familyDiagnostics.family.contrast, hover),
+				);
+				expect(extractValue(block, `--luke-color-background-${role}-solid-hover`)).toBe(
+					formatOklch(hover),
+				);
+				expect(extractValue(block, `--luke-color-background-${role}-solid-pressed`)).toBe(
+					formatOklch(pressed),
+				);
+				expect(
+					onSolidGateRatio({
+						interactionSource: textPrimary,
+						lightness: familyDiagnostics.solidAnchor.resolvedLightness,
+						mode,
+						source: familyDiagnostics.source,
+					}),
+				).toBeGreaterThanOrEqual(4.5);
+			}
 		}
 	});
 });

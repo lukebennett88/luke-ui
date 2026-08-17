@@ -14,7 +14,7 @@ import { generateSurfaces } from './elevation.js';
 import type { ThemeInheritance } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
-import { generateFamilyWithDiagnostics, ScaleGenerationError } from './scale.js';
+import { generateFamilyWithDiagnostics, highContrastText, ScaleGenerationError } from './scale.js';
 import type { SemanticColorValues } from './semantic-map.js';
 import { mapSemanticColors } from './semantic-map.js';
 import { assembleStylesheet } from './stylesheet.js';
@@ -187,13 +187,16 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 
 	const families = {} as Record<FamilyRole, ScaleFamily>;
 	const familyDiagnostics = {} as Record<FamilyRole, FamilyDiagnostics>;
+	// Step 12 does not depend on the solid-anchor search, so the emitted `text.primary` is known
+	// before any family is generated. Every role — including neutral — gates and mixes toward it.
+	const textPrimary = highContrastText(source.neutral, mode);
 	// Generated in canonical role order, so a build that fails part-way reports the families it had
 	// already resolved. Every role now guarantees on-solid, so any of the six can be the one that throws.
 	for (const role of SEMANTIC_ROLES) {
 		try {
 			const generated = generateFamilyWithDiagnostics({
 				background: canvasAnchor,
-				interactionSource: families.neutral?.[12],
+				interactionSource: textPrimary,
 				mode,
 				role,
 				source: source[role],

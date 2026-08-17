@@ -11,11 +11,13 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
 1. Takes the already-resolved source colours and canvas anchor (`background`, split from `neutral`'s
    hue/chroma character in `define-theme.ts`). Source colours cross the foundation as OKLCH values;
    `defineTheme` applies defaults and parses authoring strings once before `buildTheme` runs.
-2. Generates six private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`,
-   `danger`) with `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast`
-   on-solid colour. Every role publishes the same background, foreground, on-solid, and border
-   slots, and every role's solid clears 4.5:1 against on-solid text (see `SEMANTIC_ROLES` in
-   `contrast-policy.ts`).
+2. Computes the emitted `text.primary` from the resolved neutral source (`scale.ts`'s
+   `highContrastText`, the family's step-12 rung) *before* any solid-anchor search. Generates six
+   private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`, `danger`) with
+   `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast` on-solid colour.
+   Every role publishes the same background, foreground, on-solid, and border slots, and every
+   role's solid — including neutral — is searched and accessibility-gated against that same
+   `text.primary` (see `SEMANTIC_ROLES` in `contrast-policy.ts`).
 3. Derives the mode-aware elevation surfaces (`canvas`/`recessed`/`floating`/`overlay`) with
    `elevation.ts`'s `generateSurfaces`. `surfaces.canvas` is always exactly the resolved
    `background` — canvas IS the background, not a derived value.
@@ -97,7 +99,9 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 
 - A single-value accent (`accent: '#...'`) is pre-adapted by `defineTheme`'s `adaptAccent` into an
   accessible vibrant band before the scale generator sees it, so the common case never throws at
-  build time.
+  build time. The pre-conditioner calls `passesOnSolidGate` with the same neutral `text.primary`
+  interaction source `buildModeColors` will use, so it evaluates the hover and pressed states
+  generation will actually emit.
 - An explicit per-mode accent (`accent: { light, dark }`) is used verbatim because the author has
   chosen its lightness. If its whole tone band has no lightness where near-white or near-black
   on-solid text clears AA, `compileTheme` throws `ThemeGenerationError` naming the failing role and
@@ -113,7 +117,8 @@ pressed colours. Hover is a 5% OKLab mix of the resting solid toward `text.prima
 underlying rest colour rather than changing the mix.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
-copy. That gives two guarantees:
+copy, and it passes the same `text.primary` interaction source production generation uses. That
+gives two guarantees:
 
 - Any lightness the pre-conditioner accepts also passes the generator's solid-anchor search.
 - The generator emits the accent the pre-conditioner picks. The search honours it verbatim instead

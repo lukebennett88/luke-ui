@@ -14,7 +14,7 @@ import { resolveThemeInput } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import { defaultSourceColors } from './foundation.js';
 import { lightnessCandidates } from './lightness-candidates.js';
-import { passesOnSolidGate } from './scale.js';
+import { highContrastText, passesOnSolidGate } from './scale.js';
 
 /**
  * A colour value: one string (adapted independently for each mode) OR a per-mode object where
@@ -290,8 +290,13 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const { color } = input;
 	const defaults = defaultSourceColors[mode];
 	const neutral = resolveNeutral(color, mode);
+	// The same `text.primary` `buildModeColors` will gate every family against. Computed here so
+	// accent pre-conditioning cannot drift onto a different hover/pressed mix target.
+	const textPrimary = highContrastText(neutral, mode);
 	const colors: ThemeSourceColors = {
-		accent: resolveAdaptedRole(color.accent, mode, adaptAccent),
+		accent: resolveAdaptedRole(color.accent, mode, (source, mode, raw) => {
+			return adaptAccent(source, mode, raw, textPrimary);
+		}),
 		// The canvas anchor, split from `neutral`'s hue/chroma character: explicit per-mode value wins,
 		// a single value or the opposite side is adapted to the mode canvas lightness, and an entirely
 		// omitted `background` copies the resolved neutral canvas anchor exactly (not a second,
@@ -420,12 +425,13 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
  * ({@link passesOnSolidGate}). Returns the lightness nearest the mode target, and throws when no
  * lightness in the band is accessible.
  *
- * The gate is the generator's, not a second copy of it. This pre-conditioner cannot be stricter than
- * the solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too, and
- * the accent it hands over is the one the generator emits. Its band is wider, which
- * is what lets it rescue accents the generator's tone-faithful window cannot reach.
+ * The gate is the generator's, not a second copy of it, and it is asked about the same
+ * `interactionSource` production generation uses. This pre-conditioner cannot be stricter than the
+ * solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too, and the
+ * accent it hands over is the one the generator emits. Its band is wider, which is what lets it
+ * rescue accents the generator's tone-faithful window cannot reach.
  */
-function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
+function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSource: Oklch): Oklch {
 	const target = ACCENT_TARGET[mode];
 	const [low, high] = ACCENT_BAND[mode];
 	const makeSolid = (l: number) => {
@@ -435,7 +441,9 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 			h: source.h,
 		});
 	};
-	const passes = (l: number) => passesOnSolidGate({ lightness: l, mode, source });
+	const passes = (l: number) => {
+		return passesOnSolidGate({ interactionSource, lightness: l, mode, source });
+	};
 
 	if (passes(target)) return makeSolid(target);
 

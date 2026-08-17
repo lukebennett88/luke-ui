@@ -14,6 +14,7 @@ import type { FamilyRole } from './scale.js';
 import {
 	generateFamily,
 	generateFamilyWithDiagnostics,
+	highContrastText,
 	INTERACTION_HOVER_STRENGTH,
 	INTERACTION_PRESSED_STRENGTH,
 	MIN_STATE_DELTA,
@@ -83,9 +84,9 @@ describe('on-solid contrast guarantee', () => {
 	it('clears 4.5:1 against the public solid rest, hover, and pressed colours for every role across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
-				// Production mixes every role toward generated `text.primary`, which is the neutral
-				// family's step 12, not that role's own high-contrast text rung.
-				const textPrimary = family(entry.source, mode, 'neutral')[12];
+				// Production mixes every role toward generated `text.primary`, which is the high-contrast
+				// text rung of the resolved neutral source — known before any solid-anchor search.
+				const textPrimary = highContrastText(parseColor(entry.source), mode);
 				for (const role of SEMANTIC_ROLES) {
 					const scale = generateFamily({
 						background: BACKGROUND[mode],
@@ -213,6 +214,25 @@ describe('step 12 is a scale-quality rung, not a contract guarantee', () => {
 			// way step 12 sits further from the low-contrast rung, extending the ramp.
 			const extension = mode === 'light' ? scale[11].l - scale[12].l : scale[12].l - scale[11].l;
 			expect(extension).toBeGreaterThan(0);
+		}
+	});
+
+	it('matches highContrastText and does not depend on the interaction source', () => {
+		// Production computes `text.primary` from the resolved neutral source before the solid-anchor
+		// search. That is only valid if step 12 is independent of the mix target the search uses.
+		const source = parseColor('oklch(0.5 0.08 40)');
+		for (const mode of MODES) {
+			const expected = highContrastText(source, mode);
+			expect(family('oklch(0.5 0.08 40)', mode, 'neutral')[12]).toEqual(expected);
+			expect(
+				generateFamily({
+					background: BACKGROUND[mode],
+					interactionSource: { c: 0, h: 0, l: 0.5 },
+					mode,
+					role: 'neutral',
+					source,
+				})[12],
+			).toEqual(expected);
 		}
 	});
 });
