@@ -12,7 +12,7 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    hue/chroma character in `define-theme.ts`). Source colours cross the foundation as OKLCH values;
    `defineTheme` applies defaults and parses authoring strings once before `buildTheme` runs.
 2. Computes the emitted `text.primary` from the resolved neutral source (`scale.ts`'s
-   `highContrastText`, the family's step-12 rung) *before* any solid-anchor search. Generates six
+   `highContrastText`, the family's step-12 rung) before any solid-anchor search. Generates six
    private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`, `danger`) with
    `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast` on-solid colour.
    Every role publishes the same background, foreground, on-solid, and border slots, and every
