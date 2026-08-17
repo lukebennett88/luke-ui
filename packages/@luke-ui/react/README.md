@@ -45,7 +45,9 @@ AI agents can fetch documentation at:
 - Any docs URL with `.md` appended: per-page Markdown.
 
 Start with the normal component API. Use primitives from `@luke-ui/react/primitives/*` when you need
-a custom composition the component API does not cover.
+a custom composition the component API does not cover. Import a colocated recipe such as
+`buttonRecipe` from the same component entrypoint when you own the element and need that visual
+treatment. There is no `@luke-ui/react/recipes` barrel.
 
 ## License
 
