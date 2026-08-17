@@ -34,6 +34,13 @@ const BACKGROUND: Record<ColorMode, Oklch> = {
 	light: parseColor('oklch(0.99 0.003 250)'),
 };
 
+// Representative resolved neutral sources. Distinct from BACKGROUND: production derives
+// `text.primary` from the neutral source, not from the canvas.
+const NEUTRAL: Record<ColorMode, Oklch> = {
+	dark: parseColor('oklch(0.22 0.01 250)'),
+	light: parseColor('oklch(0.985 0.01 250)'),
+};
+
 const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
 // The one split is geometric rather than semantic: neutral's solid comes from its own
 // curated dark/light chip band instead of the source lightness, so it is the only role a dead-zone
@@ -41,7 +48,7 @@ const MODES: ReadonlyArray<ColorMode> = ['light', 'dark'];
 const SOURCE_TONED_ROLES = SEMANTIC_ROLES.filter((role) => role !== 'neutral');
 
 function interactionTarget(mode: ColorMode): Oklch {
-	return highContrastText(BACKGROUND[mode], mode);
+	return highContrastText(NEUTRAL[mode], mode);
 }
 
 /** Production mix target when the family under test is itself the resolved neutral source. */
