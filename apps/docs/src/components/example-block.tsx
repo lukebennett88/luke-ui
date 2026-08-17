@@ -202,18 +202,14 @@ function loadExample(component: string, name: string): Promise<ExampleResult> {
 
 	const [loadModule, loadHighlightedSource] = match;
 	const promise = Promise.all([loadModule(), loadHighlightedSource()])
-		.then(
-			([loadedComponent, loadedSource]): ExampleResult => ({
-				data: [loadedComponent, loadedSource],
-				ok: true,
-			}),
-		)
-		.catch(
-			(err): ExampleResult => ({
-				error: err instanceof Error ? err : new Error(String(err)),
-				ok: false,
-			}),
-		);
+		.then(([loadedComponent, loadedSource]): ExampleResult => ({
+			data: [loadedComponent, loadedSource],
+			ok: true,
+		}))
+		.catch((err): ExampleResult => ({
+			error: err instanceof Error ? err : new Error(String(err)),
+			ok: false,
+		}));
 
 	exampleCache.set(key, promise);
 	return promise;
