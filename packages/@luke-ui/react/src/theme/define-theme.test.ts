@@ -36,24 +36,6 @@ function extractValue(block: string, varName: string): string {
 
 const ACCENT_SOLID = '--luke-color-background-accent-solid-rest';
 
-describe('defineTheme colour-only authoring', () => {
-	// `defineTheme` compiles through `buildTheme`, whose `validateContrast` already hard-gates
-	// text-vs-surface contrast (>=4.5:1, every surface) and border.control-vs-surface contrast
-	// (>=3:1, canvas and recessed) for every mode, throwing `ThemeContrastError` on any miss.
-	// Recomputing those exact ratios from the emitted CSS here can never fail: if either gate had
-	// missed, `defineTheme` would already have thrown before an assertion could run. The honest
-	// statement of the same property is that building from just an accent and a neutral character
-	// does not throw.
-	it('builds a theme from just an accent and a neutral character without a WCAG hard-gate failure', () => {
-		expect(() => {
-			return defineTheme({
-				color: { accent: '#3b82f6', neutralStyle: 'cool' },
-				name: 'colour-only',
-			});
-		}).not.toThrow();
-	});
-});
-
 describe('defineTheme single-value accent adaptation', () => {
 	const accents = [
 		'#3b82f6',

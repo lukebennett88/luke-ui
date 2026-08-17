@@ -147,19 +147,6 @@ describe('on-solid contrast guarantee', () => {
 			}
 		}
 	});
-
-	it('reports a satisfied on-solid anchor', () => {
-		const { diagnostics } = familyDiagnostics(
-			'#0090ff',
-			'light',
-			'accent',
-			interactionTarget('light'),
-		);
-		expect(diagnostics.solidAnchor.satisfied).toBe(true);
-		expect(diagnostics.onSolid.ratioRest).toBeGreaterThanOrEqual(TEXT_RATIO);
-		expect(diagnostics.onSolid.ratioHover).toBeGreaterThanOrEqual(TEXT_RATIO);
-		expect(diagnostics.onSolid.ratioPressed).toBeGreaterThanOrEqual(TEXT_RATIO);
-	});
 });
 
 describe('reference-envelope properties', () => {

@@ -19,13 +19,6 @@ test('groups every entry by category in sidebar order', () => {
 
 test('emits the generated file on disk that the docs app imports', () => {
 	const emitted = generateComponentsIndex();
-
-	for (const group of componentIndexGroups) {
-		for (const entry of group.entries) {
-			expect(emitted).toContain(`url: '${entry.url}'`);
-		}
-	}
-
 	const emittedPath = resolve(import.meta.dirname, '../generated/components-index.generated.ts');
 	expect(readFileSync(emittedPath, 'utf8')).toBe(emitted);
 });

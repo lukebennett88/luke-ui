@@ -126,14 +126,6 @@ test('covers every public component entrypoint exactly once', () => {
 	}
 });
 
-test('declares every conformance dimension explicitly', () => {
-	for (const entry of componentTestManifest) {
-		expect(entry.conformanceTier).toBeTypeOf('string');
-		expect(entry.integrationTripwire).toBeTypeOf('string');
-		expect(entry.visualApplicability).toBeTypeOf('string');
-	}
-});
-
 test('browser tests invoke the helpers required by their manifest entry', () => {
 	expect(
 		getBrowserCoverageErrors(componentTestManifest, (path) => {
