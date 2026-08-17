@@ -39,7 +39,7 @@ describe('buildTokenTree', () => {
 		});
 	});
 
-	it('nests a flattened semantic-role background leaf under its contract path segments', () => {
+	it('nests the deepest semantic-role leaf under its full chain of contract path segments', () => {
 		const tree = buildTokenTree();
 		const color = tree.children.color;
 		if (color?.kind !== 'group') throw new Error('expected a color group');
@@ -47,11 +47,13 @@ describe('buildTokenTree', () => {
 		if (background?.kind !== 'group') throw new Error('expected a background group');
 		const danger = background.children.danger;
 		if (danger?.kind !== 'group') throw new Error('expected a danger group');
+		const subtle = danger.children.subtle;
+		if (subtle?.kind !== 'group') throw new Error('expected a subtle group');
 
-		expect(danger.children.subtle).toEqual({
+		expect(subtle.children.rest).toEqual({
 			kind: 'leaf',
-			path: 'color.background.danger.subtle',
-			varName: '--luke-color-background-danger-subtle',
+			path: 'color.background.danger.subtle.rest',
+			varName: '--luke-color-background-danger-subtle-rest',
 		});
 	});
 

@@ -89,13 +89,13 @@ const loadingSpinnerConfig = {
 	},
 	variants: {
 		color: {
-			accent: { root: { color: vars.color.foreground.accent.default } },
-			danger: { root: { color: vars.color.foreground.danger.default } },
-			info: { root: { color: vars.color.foreground.info.default } },
+			accent: { root: { color: vars.color.foreground.accent.rest } },
+			danger: { root: { color: vars.color.foreground.danger.rest } },
+			info: { root: { color: vars.color.foreground.info.rest } },
 			primary: { root: { color: vars.color.text.primary } },
 			secondary: { root: { color: vars.color.text.secondary } },
-			success: { root: { color: vars.color.foreground.success.default } },
-			warning: { root: { color: vars.color.foreground.warning.default } },
+			success: { root: { color: vars.color.foreground.success.rest } },
+			warning: { root: { color: vars.color.foreground.warning.rest } },
 		},
 		size: {
 			large: { root: iconSizeVariants.large },

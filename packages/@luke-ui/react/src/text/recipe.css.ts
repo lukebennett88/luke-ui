@@ -46,13 +46,13 @@ const base = styleInLayer('recipes', {
 });
 
 const colorVariants = {
-	accent: { color: vars.color.foreground.accent.default },
-	danger: { color: vars.color.foreground.danger.default },
-	info: { color: vars.color.foreground.info.default },
+	accent: { color: vars.color.foreground.accent.rest },
+	danger: { color: vars.color.foreground.danger.rest },
+	info: { color: vars.color.foreground.info.rest },
 	primary: { color: vars.color.text.primary },
 	secondary: { color: vars.color.text.secondary },
-	success: { color: vars.color.foreground.success.default },
-	warning: { color: vars.color.foreground.warning.default },
+	success: { color: vars.color.foreground.success.rest },
+	warning: { color: vars.color.foreground.warning.rest },
 } as const;
 
 const weightVariants = Object.fromEntries(

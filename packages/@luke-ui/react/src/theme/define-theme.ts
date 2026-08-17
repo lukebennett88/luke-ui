@@ -453,7 +453,7 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 		throw new Error(
 			`Theme accent "${raw}" has no accessible ${mode} lightness: no vibrant lightness lets ` +
 				`near-white or near-black on-solid text clear ${TEXT_RATIO}:1 across the solid and its ` +
-				'hover. Author an explicit { light, dark } accent instead.',
+				'generated hover and pressed states. Author an explicit { light, dark } accent instead.',
 		);
 	}
 	return makeSolid(best);

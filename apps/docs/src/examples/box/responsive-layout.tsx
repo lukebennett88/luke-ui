@@ -19,7 +19,7 @@ function Item() {
 			justifyContent="center"
 			padding="400"
 			style={{
-				backgroundColor: vars.color.background.neutral.solid,
+				backgroundColor: vars.color.background.neutral.solid.rest,
 				flex: 1,
 				minBlockSize: '4rem',
 			}}

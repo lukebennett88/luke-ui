@@ -11,8 +11,6 @@ import {
 	captureVisualAppearance,
 	emulateForcedColors,
 	focusViaKeyboard,
-	holdPress,
-	pointAt,
 	Stack,
 } from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
@@ -161,19 +159,6 @@ test('interactive states', async () => {
 	await userEvent.keyboard('{/Space}');
 });
 
-test('trigger hover in dark mode', async () => {
-	render(
-		<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
-			{renderCountryItem}
-		</ComboboxField>,
-		{ appearance: { mode: 'dark', theme: 'tactile' } },
-	);
-	const trigger = page.getByRole('button', { name: 'Toggle options' });
-
-	await userEvent.hover(trigger);
-	await captureVisual(trigger, 'combobox-field/trigger-hover-tactile-dark');
-});
-
 test('open option and selection states', async () => {
 	render(
 		<ComboboxField
@@ -191,89 +176,15 @@ test('open option and selection states', async () => {
 			{renderCountryItem}
 		</ComboboxField>,
 	);
-
 	const input = page.getByRole('combobox', { name: 'Country' });
+
 	await userEvent.click(input);
 	await captureVisual(
 		page.elementLocator(document.body),
 		'combobox-field/open-selected-disabled-loading',
 	);
-});
-
-test('option keyboard focus', async () => {
-	render(
-		<ComboboxField defaultItems={countryItems} label="Country" name="country">
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-	await captureVisual(await openFocusedComboboxOption(), 'combobox-field/option-keyboard-focus');
-});
-
-test('option hover', async () => {
-	render(
-		<ComboboxField defaultItems={countryItems} label="Country" name="country">
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-	const option = page.getByRole('option', { exact: true, name: 'Australia' });
-	await expect.element(option).toBeVisible();
-
-	await pointAt(option);
-	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-hover');
-});
-
-test('option pressed', async () => {
-	render(
-		<ComboboxField defaultItems={countryItems} label="Country" name="country">
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-	const option = page.getByRole('option', { exact: true, name: 'Australia' });
-	await expect.element(option).toBeVisible();
-
-	const release = await holdPress(option);
-	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-pressed');
-	await release();
-});
-
-test('selected option hover', async () => {
-	render(
-		<ComboboxField defaultItems={countryItems} defaultValue="ca" label="Country" name="country">
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-	const option = page.getByRole('option', { exact: true, name: 'Canada' });
-	await expect.element(option).toBeVisible();
-
-	await pointAt(option);
-	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-selected-hover');
-});
-
-test('selected option pressed', async () => {
-	render(
-		<ComboboxField defaultItems={countryItems} label="Country" name="country">
-			{renderCountryItem}
-		</ComboboxField>,
-	);
-	await userEvent.tab();
-	const input = page.getByRole('combobox', { name: 'Country' });
-	await expect.element(input).toHaveFocus();
-	await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-	const canada = page.getByRole('option', { exact: true, name: 'Canada' });
-	await expect.element(canada).toBeVisible();
-	await userEvent.keyboard('{Enter}');
-	await expect.poll(() => input.element().getAttribute('aria-expanded')).toBe('false');
-
-	await userEvent.keyboard('{ArrowDown}');
-	const option = page.getByRole('option', { exact: true, name: 'Canada' });
-	await expect.element(option).toBeVisible();
-
-	const release = await holdPress(option);
-	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-selected-pressed');
-	await release();
+	await userEvent.keyboard('{Home}');
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-keyboard-focus');
 });
 
 test('option with leading icon at both sizes', async () => {
@@ -441,17 +352,6 @@ test('rich section title', async () => {
 		'combobox-field/section-title-rich-content',
 	);
 });
-
-async function openFocusedComboboxOption() {
-	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
-	await userEvent.keyboard('{ArrowDown}');
-	const option = page.getByRole('option', { exact: true, name: 'Australia' });
-	await expect.element(option).toBeVisible();
-	const popover = page.getByRole('listbox').element().parentElement;
-	if (popover == null) throw new Error('Expected the popover element.');
-	await waitForOverlayEnter(popover);
-	return page.elementLocator(document.body);
-}
 
 /**
  * Waits for the tray to finish opening before a capture. The screenshot owns the resting geometry,

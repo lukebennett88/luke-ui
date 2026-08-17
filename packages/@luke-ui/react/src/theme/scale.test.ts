@@ -14,7 +14,9 @@ import type { FamilyRole } from './scale.js';
 import {
 	generateFamily,
 	generateFamilyWithDiagnostics,
+	INTERACTION_PRESSED_STRENGTH,
 	MIN_STATE_DELTA,
+	mixInteractionState,
 	oklabDeltaE,
 	onSolidGateRatio,
 	passesOnSolidGate,
@@ -316,8 +318,9 @@ describe('the one on-solid gate', () => {
 	});
 
 	it('solves past the AA text ratio, so a pair that only just clears 4.5:1 does not pass', () => {
-		// Light `oklch(0.5575 0.01 0)` reaches 4.53:1 across its solid and hover: enough for a plain 4.5
-		// check, short of the headroom the gate solves for so 4-decimal emission cannot round it under.
+		// Light `oklch(0.5575 0.01 0)` reaches just over 4.5:1 across its public solid states: enough
+		// for a plain 4.5 check, short of the headroom the gate solves for so 4-decimal emission cannot
+		// round it under.
 		const source: Oklch = {
 			l: 0.5575,
 			c: 0.01,
@@ -331,21 +334,19 @@ describe('the one on-solid gate', () => {
 		expect(resolveAnchor(source, 'light')?.adaptedForOnSolid).toBe(true);
 	});
 
-	it('tests only the private solid and its step-10 neighbour', () => {
-		// Light `oklch(0.64 0 0)` clears 4.58:1 across those two steps. A phantom third
-		// state 0.09 darker would drag it to 3.88:1 and fail. The gate must not invent one.
+	it('gates the public rest, hover, and pressed solids, not a phantom deeper lightness', () => {
 		const source: Oklch = {
 			l: 0.64,
 			c: 0,
 			h: 0,
 		};
-		const phantomPressed = {
-			l: source.l - 0.09,
-			c: 0,
-			h: 0,
-		};
+		const toward = { c: 0, h: 0, l: 0.3 };
+		const solid = { c: 0, h: 0, l: source.l };
+		const pressed = mixInteractionState(solid, toward, INTERACTION_PRESSED_STRENGTH);
+		const phantom = { c: 0, h: 0, l: source.l - 0.09 };
 		const onSolid = family('oklch(0.64 0 0)', 'light', 'accent').contrast;
-		expect(contrastRatio(onSolid, phantomPressed)).toBeLessThan(TEXT_RATIO);
+		expect(contrastRatio(onSolid, phantom)).toBeLessThan(TEXT_RATIO);
+		expect(contrastRatio(onSolid, pressed)).toBeGreaterThan(TEXT_RATIO);
 		expect(onSolidGateRatio({ lightness: source.l, mode: 'light', source })).toBeGreaterThan(
 			TEXT_RATIO,
 		);

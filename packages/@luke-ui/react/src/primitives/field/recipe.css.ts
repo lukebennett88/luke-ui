@@ -72,7 +72,7 @@ const fieldConfig = {
 				label: {
 					selectors: {
 						[`${dataRequiredSelector} &::after`]: {
-							color: vars.color.foreground.danger.default,
+							color: vars.color.foreground.danger.rest,
 							content: '"*"',
 							marginInlineStart: vars.space[100],
 						},
@@ -107,7 +107,7 @@ const fieldConfig = {
 							},
 						},
 					},
-					color: vars.color.foreground.danger.default,
+					color: vars.color.foreground.danger.rest,
 					// Hanging indent, not `flex`: `errorMessage` is typed `ReactNode` (rich
 					// content, e.g. `<>text <strong>emphasis</strong> text</>`) and RAC's
 					// `FieldError` also accepts a render-prop child, so this recipe cannot

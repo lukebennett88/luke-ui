@@ -6,7 +6,12 @@ import { SEMANTIC_ROLES } from './contrast-policy.js';
 import { generateSurfaces } from './elevation.js';
 import { defaultSourceColors } from './foundation.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
-import { generateFamily } from './scale.js';
+import {
+	generateFamily,
+	INTERACTION_HOVER_STRENGTH,
+	INTERACTION_PRESSED_STRENGTH,
+	mixInteractionState,
+} from './scale.js';
 import { mapSemanticColors } from './semantic-map.js';
 
 type ColorMode = 'light' | 'dark';
@@ -100,12 +105,31 @@ describe('mapSemanticColors', () => {
 				expect(result['color.border.control']).toBe(formatOklch(controlBorder));
 				expect(result['color.border.focus']).toBe(formatOklch(FOCUS));
 
-				// The shared contract: identical resting steps for all six roles, keyed to the role's own family.
+				// The shared contract: identical rest / hover / pressed mapping for all six roles.
 				for (const role of SEMANTIC_ROLES) {
 					const family = families[role];
-					expect(result[`color.background.${role}.subtle`]).toBe(formatOklch(family[3]));
-					expect(result[`color.background.${role}.solid`]).toBe(formatOklch(family[9]));
-					expect(result[`color.foreground.${role}.default`]).toBe(formatOklch(family[11]));
+					const textPrimary = families.neutral[12];
+					expect(result[`color.background.${role}.subtle.rest`]).toBe(formatOklch(family[3]));
+					expect(result[`color.background.${role}.subtle.hover`]).toBe(
+						formatOklch(mixInteractionState(family[3], textPrimary, INTERACTION_HOVER_STRENGTH)),
+					);
+					expect(result[`color.background.${role}.subtle.pressed`]).toBe(
+						formatOklch(mixInteractionState(family[3], textPrimary, INTERACTION_PRESSED_STRENGTH)),
+					);
+					expect(result[`color.background.${role}.solid.rest`]).toBe(formatOklch(family[9]));
+					expect(result[`color.background.${role}.solid.hover`]).toBe(
+						formatOklch(mixInteractionState(family[9], textPrimary, INTERACTION_HOVER_STRENGTH)),
+					);
+					expect(result[`color.background.${role}.solid.pressed`]).toBe(
+						formatOklch(mixInteractionState(family[9], textPrimary, INTERACTION_PRESSED_STRENGTH)),
+					);
+					expect(result[`color.foreground.${role}.rest`]).toBe(formatOklch(family[11]));
+					expect(result[`color.foreground.${role}.hover`]).toBe(
+						formatOklch(mixInteractionState(family[11], textPrimary, INTERACTION_HOVER_STRENGTH)),
+					);
+					expect(result[`color.foreground.${role}.pressed`]).toBe(
+						formatOklch(mixInteractionState(family[11], textPrimary, INTERACTION_PRESSED_STRENGTH)),
+					);
 					expect(result[`color.foreground.${role}.onSolid`]).toBe(formatOklch(family.contrast));
 					expect(result[`color.border.${role}`]).toBe(formatOklch(family[7]));
 				}

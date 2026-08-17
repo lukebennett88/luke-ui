@@ -33,7 +33,7 @@ function extractValue(block: string, varName: string): string {
 	return match[1];
 }
 
-const ACCENT_SOLID = '--luke-color-background-accent-solid';
+const ACCENT_SOLID = '--luke-color-background-accent-solid-rest';
 
 describe('defineTheme colour-only authoring', () => {
 	// `defineTheme` compiles through `buildTheme`, whose `validateContrast` already hard-gates
@@ -173,9 +173,9 @@ describe('defineTheme partial per-mode merges', () => {
 
 	it('defaults the omitted dark side of a partial colour without bleeding the light override', () => {
 		const infoVarNames = [
-			'--luke-color-foreground-info-default',
+			'--luke-color-foreground-info-rest',
 			'--luke-color-border-info',
-			'--luke-color-background-info-subtle',
+			'--luke-color-background-info-subtle-rest',
 		];
 		const overridden = splitBlocks(
 			defineTheme({ color: { accent: '#fff', info: { light: '#1d39c4' } }, name: 'partial-color' }),
@@ -347,15 +347,24 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
 		});
 
-		it(`${name} paints info, success, and warning with distinct subtle, solid, and foreground slots`, () => {
+		it(`${name} paints info, success, and warning with a real interactive ramp`, () => {
 			const blocks = splitBlocks(css);
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				for (const role of ['info', 'success', 'warning']) {
-					expect(extractValue(block, `--luke-color-background-${role}-subtle`)).not.toBe(
-						extractValue(block, `--luke-color-background-${role}-solid`),
+					const ramp = [
+						`--luke-color-background-${role}-subtle-rest`,
+						`--luke-color-background-${role}-subtle-hover`,
+						`--luke-color-background-${role}-subtle-pressed`,
+						`--luke-color-background-${role}-solid-rest`,
+						`--luke-color-background-${role}-solid-hover`,
+						`--luke-color-background-${role}-solid-pressed`,
+					].map((varName) => extractValue(block, varName));
+					expect(new Set(ramp).size).toBe(ramp.length);
+					expect(extractValue(block, `--luke-color-foreground-${role}-rest`)).not.toBe(
+						extractValue(block, `--luke-color-foreground-${role}-hover`),
 					);
-					expect(extractValue(block, `--luke-color-foreground-${role}-default`)).not.toBe(
-						extractValue(block, `--luke-color-foreground-${role}-on-solid`),
+					expect(extractValue(block, `--luke-color-foreground-${role}-hover`)).not.toBe(
+						extractValue(block, `--luke-color-foreground-${role}-pressed`),
 					);
 				}
 			}

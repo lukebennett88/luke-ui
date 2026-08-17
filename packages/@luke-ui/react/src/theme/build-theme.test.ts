@@ -25,7 +25,7 @@ describe('buildTheme independent modes', () => {
 			name: 'green-purple',
 		};
 		const blocks = splitBlocks(buildTheme(greenPurpleFoundation));
-		const solidVar = '--luke-color-background-accent-solid';
+		const solidVar = '--luke-color-background-accent-solid-rest';
 		const lightSolid = parseColor(extractValue(blocks.baseLight, solidVar));
 		const darkSolid = parseColor(extractValue(blocks.mediaDark, solidVar));
 		expect(lightSolid.h).toBeCloseTo(150, 0);
@@ -172,6 +172,23 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 				h: 0,
 			});
 			expect(darkCanvas.l - darkRecessed.l).toBeGreaterThanOrEqual(0.02);
+		});
+
+		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
+			// The subtle component surfaces (scale steps 3-5) ramp from the canvas independently of the
+			// elevation surfaces and aren't pinned apart from `floating`; what matters is that primary
+			// text stays legible on the hovered subtle surface. The neutral subtle hover is
+			// excluded here because that exact colour pair is already hard-gated under different names:
+			// `color.text.primary` and `color.foreground.neutral.hover` both alias neutral step 12, and
+			// `validateContrast` gates the latter against all three neutral subtle states at >=4.5:1.
+			// No hard-gated pair covers primary text on the *accent* subtle ramp, so that is the pair
+			// worth recomputing.
+			const { mediaDark } = splitBlocks(buildTheme(foundation));
+			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
+			const subtleHover = parseColor(
+				extractValue(mediaDark, '--luke-color-background-accent-subtle-hover'),
+			);
+			expect(contrastRatio(textPrimary, subtleHover)).toBeGreaterThanOrEqual(4.5);
 		});
 
 		it(`${foundation.name} generates subtle, distinct semantic borders`, () => {

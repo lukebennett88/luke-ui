@@ -193,6 +193,7 @@ function buildModeColors(mode: ColorMode, modeFoundation: ThemeModeFoundation): 
 		try {
 			const generated = generateFamilyWithDiagnostics({
 				background: canvasAnchor,
+				interactionSource: families.neutral?.[12],
 				mode,
 				role,
 				source: source[role],

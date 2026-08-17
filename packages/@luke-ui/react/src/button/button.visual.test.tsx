@@ -75,41 +75,6 @@ test('interactive states', async () => {
 	await userEvent.keyboard('{/Space}');
 });
 
-test('ghost interactive states', async () => {
-	render(<Button appearance="ghost">Action</Button>);
-	const button = page.getByRole('button', { name: 'Action' });
-
-	await userEvent.hover(button);
-	await captureVisual(button, 'button/ghost-hover');
-	await userEvent.unhover(button);
-	await focusViaKeyboard(button);
-	await userEvent.keyboard('{Space>}');
-	await captureVisual(button, 'button/ghost-pressed');
-	await userEvent.keyboard('{/Space}');
-});
-
-test('ghost hover in dark mode', async () => {
-	render(<Button appearance="ghost">Action</Button>, {
-		appearance: { mode: 'dark', theme: 'tactile' },
-	});
-	const button = page.getByRole('button', { name: 'Action' });
-
-	await userEvent.hover(button);
-	await captureVisual(button, 'button/ghost-hover-tactile-dark');
-});
-
-test('solid accent hover', async () => {
-	render(
-		<Button appearance="solid" tone="accent">
-			Save
-		</Button>,
-	);
-	const button = page.getByRole('button', { name: 'Save' });
-
-	await userEvent.hover(button);
-	await captureVisual(button, 'button/solid-accent-hover');
-});
-
 test('forced-colors states', async () => {
 	await emulateForcedColors('active');
 

@@ -3,7 +3,7 @@ import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 
 const rowStyle = {
-	backgroundColor: vars.color.background.neutral.subtle,
+	backgroundColor: vars.color.background.neutral.subtle.rest,
 } as const;
 
 export default () => {

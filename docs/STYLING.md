@@ -45,8 +45,9 @@ with no class and no JS required. Neither step injects styles at runtime.
   `Icon` owns its box, and `IconSizeProvider` (`FIELD_CONTROL_ICON_SIZE`) owns its per-size step —
   and gives the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control
   is not a plain `Group` with that state to hand, so it stays CSS-driven.
-- `overlays/mobile-overlay.css.ts`: the scrim, tray, and dialog styles `MobileOverlay` renders for
-  the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and `tray/index.css`.
+- `overlays/mobile-overlay.css.ts`: the backdrop, tray, and dialog styles `MobileOverlay` renders
+  for the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and
+  `tray/index.css`.
 - `overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
@@ -70,11 +71,8 @@ with no class and no JS required. Neither step injects styles at runtime.
   solid-anchor search, and control-border solver walk.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
   constrained step-9 solid-anchor search and `passesOnSolidGate`, the on-solid accessibility gate.
-  Every semantic role's solid clears 4.5:1 against on-solid text.
-- `theme/interaction-color.ts`: `interactionColor`, the package-internal hover and pressed
-  derivation recipes emit as CSS. It is not exported from `@luke-ui/react/theme`.
-- `theme/interaction-mix.ts`: `INTERACTION_STRENGTH` and `mixInteractionColor`, the shared hover and
-  pressed colour maths contrast validation uses. Recipes do not import this module.
+  Every semantic role's solid rest, hover, and pressed colours clear 4.5:1 against on-solid text.
+  Public hover and pressed mix the resting colour toward `text.primary` at 5% and 10%.
 - `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
   `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
   no `--luke-motion-duration-*` custom property exists.
@@ -85,7 +83,7 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
   `surfaces.canvas` is always exactly the resolved `background`.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
-  surfaces onto the colour contract's leaves.
+  surfaces onto the colour contract's leaves, including generated hover and pressed states.
 - `theme/diagnostics.ts`: the `compileTheme` diagnostics data model (family, surface, solid-anchor,
   and contrast-check detail) consumed by the "Theme/Diagnostics" Storybook story.
 - `theme/token-board.tsx`: the contract-driven "Theme/Token board" Storybook story, which renders

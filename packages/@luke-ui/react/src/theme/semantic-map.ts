@@ -1,8 +1,8 @@
 /**
  * The one default semantic colour mapping. `mapSemanticColors` aliases every generated colour
- * contract leaf onto a private scale family's step or a generated surface, per the locked mapping
- * table. It is a pure lookup. No colour math happens here, and it never distorts a family or
- * surface to make a leaf fit.
+ * contract leaf onto a private scale family's step, a generated surface, or a generated interaction
+ * state. Resting role colours are a lookup. Hover and pressed colours mix that rest colour toward
+ * `text.primary` at fixed strengths. The map never distorts a family or surface to make a leaf fit.
  *
  * The role list it keys off comes from `contrast-policy.ts`, which `build-theme.ts`'s validation
  * matrix reads too, so a role can never be emitted here without being gated there. Values are
@@ -17,6 +17,11 @@ import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
+import {
+	INTERACTION_HOVER_STRENGTH,
+	INTERACTION_PRESSED_STRENGTH,
+	mixInteractionState,
+} from './scale.js';
 
 /** Every generated colour contract leaf's CSS value, keyed by its dotted path. */
 export type SemanticColorValues = {
@@ -59,7 +64,7 @@ interface MapSemanticColorsRequest {
  * Resolves every colour contract leaf onto the private families and surfaces, per the locked
  * semantic mapping table. `families` and `surfaces` are already mode-resolved. `backdrop` passes
  * through verbatim. `focus` is the resolved keyboard-focus source colour. Neutral step 12 becomes
- * `text.primary` and is the interaction source recipes mix toward at runtime.
+ * `text.primary` and is the colour hover and pressed states mix toward.
  */
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
 	return {
@@ -90,16 +95,34 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
 	[Path in RoleColorPath]: string;
 } {
+	const textPrimary = families.neutral[12];
 	return pathRecord(
 		SEMANTIC_ROLES.flatMap((role) => {
 			const family = families[role];
+			const subtle = interactionStates(family[3], textPrimary);
+			const solid = interactionStates(family[9], textPrimary);
+			const foreground = interactionStates(family[11], textPrimary);
 			return [
-				pathEntry(`color.background.${role}.subtle`, formatOklch(family[3])),
-				pathEntry(`color.background.${role}.solid`, formatOklch(family[9])),
-				pathEntry(`color.foreground.${role}.default`, formatOklch(family[11])),
+				pathEntry(`color.background.${role}.subtle.rest`, subtle.rest),
+				pathEntry(`color.background.${role}.subtle.hover`, subtle.hover),
+				pathEntry(`color.background.${role}.subtle.pressed`, subtle.pressed),
+				pathEntry(`color.background.${role}.solid.rest`, solid.rest),
+				pathEntry(`color.background.${role}.solid.hover`, solid.hover),
+				pathEntry(`color.background.${role}.solid.pressed`, solid.pressed),
+				pathEntry(`color.foreground.${role}.rest`, foreground.rest),
+				pathEntry(`color.foreground.${role}.hover`, foreground.hover),
+				pathEntry(`color.foreground.${role}.pressed`, foreground.pressed),
 				pathEntry(`color.foreground.${role}.onSolid`, formatOklch(family.contrast)),
 				pathEntry(`color.border.${role}`, formatOklch(family[7])),
 			];
 		}),
 	);
+}
+
+function interactionStates(rest: Oklch, toward: Oklch) {
+	return {
+		rest: formatOklch(rest),
+		hover: formatOklch(mixInteractionState(rest, toward, INTERACTION_HOVER_STRENGTH)),
+		pressed: formatOklch(mixInteractionState(rest, toward, INTERACTION_PRESSED_STRENGTH)),
+	};
 }

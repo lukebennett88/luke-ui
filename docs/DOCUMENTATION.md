@@ -50,9 +50,9 @@ Keep the detail that changes the reader's code:
 
 - `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
 - A field component takes no plain `ref`, so `inputRef` is the only way to reach the control.
-- Hover and pressed colours are derived from the resting semantic colour internally, with no public
-  token or function for it, so a custom control authors its own hover and pressed feedback instead
-  of picking a different semantic background token per state.
+- Hover and pressed colours are public semantic tokens. Theme authors do not set them; generated
+  themes expose them so a custom control can select `*.hover` and `*.pressed` the same way built-in
+  components do.
 
 Cut the detail that only explains the mechanism:
 

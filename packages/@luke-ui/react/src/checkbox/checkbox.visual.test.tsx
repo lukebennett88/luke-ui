@@ -75,42 +75,40 @@ test('keyboard focus ring', async () => {
 	await captureVisual(locator, 'checkbox/focus-visible');
 });
 
-test('hover states', async () => {
+test('interactive states', async () => {
 	const { locator } = render(
 		<Stack>
-			<Checkbox name="default">Default</Checkbox>
-			<Checkbox defaultSelected name="selected">
-				Selected
+			<Checkbox isInvalid name="invalid-unchecked">
+				Invalid
+			</Checkbox>
+			<Checkbox defaultSelected isInvalid name="invalid-selected">
+				Invalid selected
+			</Checkbox>
+			<Checkbox isIndeterminate isInvalid name="invalid-indeterminate">
+				Invalid indeterminate
 			</Checkbox>
 		</Stack>,
 	);
-	const defaultLabel = checkboxLabel(page.getByRole('checkbox', { name: 'Default' }));
-	const selectedLabel = checkboxLabel(page.getByRole('checkbox', { name: 'Selected' }));
+	const unchecked = page.getByRole('checkbox', { exact: true, name: 'Invalid' });
+	const selected = page.getByRole('checkbox', { exact: true, name: 'Invalid selected' });
+	const indeterminate = page.getByRole('checkbox', {
+		exact: true,
+		name: 'Invalid indeterminate',
+	});
 
-	await userEvent.hover(defaultLabel);
-	await captureVisual(locator, 'checkbox/hover-default');
-	await userEvent.unhover(defaultLabel);
-
-	await userEvent.hover(selectedLabel);
-	await captureVisual(locator, 'checkbox/hover-selected');
-	await userEvent.unhover(selectedLabel);
-});
-
-test('invalid selected hover', async () => {
-	const { locator } = render(
-		<Checkbox defaultSelected isInvalid name="invalid-selected">
-			Invalid selected
-		</Checkbox>,
-	);
-	const checkbox = page.getByRole('checkbox', { name: 'Invalid selected' });
-	const label = checkboxLabel(checkbox);
-
-	await userEvent.hover(label);
-	await captureVisual(locator, 'checkbox/invalid-selected-hover');
-	await userEvent.unhover(label);
-	await pressCheckbox(checkbox);
-	await captureVisual(locator, 'checkbox/invalid-selected-pressed');
-	await userEvent.keyboard('{/Space}');
+	for (const [name, checkbox] of [
+		['unchecked', unchecked],
+		['selected', selected],
+		['indeterminate', indeterminate],
+	] as const) {
+		const label = checkboxLabel(checkbox);
+		await userEvent.hover(label);
+		await captureVisual(locator, `checkbox/invalid-hover-${name}`);
+		await userEvent.unhover(label);
+		await pressCheckbox(checkbox);
+		await captureVisual(locator, `checkbox/invalid-pressed-${name}`);
+		await userEvent.keyboard('{/Space}');
+	}
 });
 
 /** The clickable `<label>` carrying a checkbox's interactive data attributes. */

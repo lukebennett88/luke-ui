@@ -13,21 +13,30 @@ const typeStyle = {
 
 /**
  * The background capabilities every semantic role gets, spread once per role so the six roles cannot
- * drift apart. Subtle and solid are resting fills. Hover and pressed colours are derived from those
- * fills, not stored as extra leaves.
+ * drift apart. `rest` is an explicit leaf because a nested tree path cannot be both a string leaf
+ * and the parent of `hover` and `pressed`.
  */
 const roleBackground = {
-	subtle: null,
-	solid: null,
+	subtle: {
+		rest: null,
+		hover: null,
+		pressed: null,
+	},
+	solid: {
+		rest: null,
+		hover: null,
+		pressed: null,
+	},
 };
 
 /**
- * The content capabilities every semantic role gets. `default` is the ordinary semantic foreground.
- * `onSolid` is the contrast-solved colour for that role's solid fill. Hover and pressed foregrounds
- * are derived from `default` when a control needs them.
+ * The content capabilities every semantic role gets. `onSolid` is a single contrast-solved colour
+ * for that role's solid fill, not a state ramp.
  */
 const roleForeground = {
-	default: null,
+	rest: null,
+	hover: null,
+	pressed: null,
 	onSolid: null,
 };
 
@@ -133,7 +142,7 @@ export const themeContractTree = {
 	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first three `border`
 	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
 	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
-	 * so no role is a special case here.
+	 * so no role is a special case here. Hover and pressed leaves are generated, not authored.
 	 */
 	color: {
 		surface: {
@@ -153,7 +162,7 @@ export const themeContractTree = {
 			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
 			disabled: null,
 		},
-		/** Subtle and solid resting backgrounds. Hover and pressed are derived from these fills. */
+		/** Subtle and solid background ramps, each with generated rest / hover / pressed states. */
 		background: {
 			neutral: { ...roleBackground },
 			accent: { ...roleBackground },
@@ -162,7 +171,7 @@ export const themeContractTree = {
 			warning: { ...roleBackground },
 			danger: { ...roleBackground },
 		},
-		/** Ordinary semantic content colours, plus the guaranteed on-solid pairing. */
+		/** Resting, hover, and pressed content colours, plus the guaranteed on-solid pairing. */
 		foreground: {
 			neutral: { ...roleForeground },
 			accent: { ...roleForeground },
@@ -341,7 +350,7 @@ export function partitionContractPairs(pairs: ReadonlyArray<readonly [string, st
 
 /**
  * Flattens the semantic token tree into `[path, varName]` pairs, in tree order, for example
- * `['color.background.danger.solid', '--luke-color-background-danger-solid']`.
+ * `['color.background.danger.solid.rest', '--luke-color-background-danger-solid-rest']`.
  */
 export function flattenThemeContract(): Array<[path: ContractPath, varName: string]> {
 	const pairs: Array<[ContractPath, string]> = [];

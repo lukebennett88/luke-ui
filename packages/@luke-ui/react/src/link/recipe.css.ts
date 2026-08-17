@@ -2,7 +2,6 @@ import { styleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 import { vars } from '../theme/contract.css.js';
-import { interactionColor } from '../theme/interaction-color.js';
 
 const base = styleInLayer('recipes', {
 	'@media': {
@@ -20,7 +19,7 @@ const base = styleInLayer('recipes', {
 			transition: 'none',
 		},
 	},
-	color: vars.color.foreground.accent.default,
+	color: vars.color.foreground.accent.rest,
 	cursor: 'pointer',
 	font: 'inherit',
 	textDecoration: 'underline',
@@ -64,13 +63,13 @@ export const linkRecipe = recipe({
 		},
 		tone: {
 			accent: {
-				color: vars.color.foreground.accent.default,
+				color: vars.color.foreground.accent.rest,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						color: interactionColor(vars.color.foreground.accent.default, 'hover'),
+						color: vars.color.foreground.accent.hover,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: interactionColor(vars.color.foreground.accent.default, 'pressed'),
+						color: vars.color.foreground.accent.pressed,
 					},
 				},
 			},
@@ -81,7 +80,7 @@ export const linkRecipe = recipe({
 						color: vars.color.text.primary,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: vars.color.text.primary,
+						color: vars.color.foreground.neutral.pressed,
 					},
 				},
 			},

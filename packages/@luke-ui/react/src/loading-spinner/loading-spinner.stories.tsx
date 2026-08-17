@@ -49,7 +49,7 @@ const colors = ['primary', 'secondary', 'accent', 'info', 'success', 'warning', 
 export const Color = meta.story({
 	render: (props) => (
 		<div style={flexRowStyle}>
-			<div style={{ color: vars.color.foreground.accent.default }}>
+			<div style={{ color: vars.color.foreground.accent.rest }}>
 				<LoadingSpinner {...props} aria-label="Inherited accent" />
 			</div>
 			{colors.map((color) => (
