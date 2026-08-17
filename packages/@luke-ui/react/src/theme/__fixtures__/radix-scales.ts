@@ -345,9 +345,9 @@ export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
  */
 export const UNSATISFIABLE_ON_SOLID: Record<'light' | 'dark', CorpusEntry> = {
 	dark: {
-		name: 'dead-zone-blue-dark',
-		note: 'mid lightness; whole tone window is a dead zone',
-		source: 'oklch(0.55 0.2 258)',
+		name: 'dead-zone-red-dark',
+		note: 'mid lightness and high chroma; whole tone window is a dead zone',
+		source: 'oklch(0.58 0.28 0)',
 	},
 	light: {
 		name: 'dead-zone-red-light',

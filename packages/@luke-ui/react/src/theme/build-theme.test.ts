@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
 import {
 	extractValue,
 	paperFoundation,
@@ -60,7 +61,10 @@ describe('buildTheme generation failures', () => {
 			...tactileFoundation,
 			dark: {
 				...tactileFoundation.dark,
-				color: { ...tactileFoundation.dark.color, warning: resolvedColor('oklch(0.55 0.2 258)') },
+				color: {
+					...tactileFoundation.dark.color,
+					warning: resolvedColor(UNSATISFIABLE_ON_SOLID.dark.source),
+				},
 			},
 			name: 'bad-warning',
 		});
@@ -89,7 +93,7 @@ describe('buildTheme generation failures', () => {
 						...tactileFoundation.dark,
 						color: {
 							...tactileFoundation.dark.color,
-							accent: resolvedColor('oklch(0.55 0.2 258)'),
+							accent: resolvedColor(UNSATISFIABLE_ON_SOLID.dark.source),
 						},
 					},
 					name: 'bad-accent',
