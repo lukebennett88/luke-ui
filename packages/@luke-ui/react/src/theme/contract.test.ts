@@ -110,22 +110,12 @@ describe('theme contract', () => {
 		}
 	});
 
-	it('exposes overlay backdrop only, and does not emit hover, pressed, tint, or scrim', () => {
-		const pairs = flattenThemeContract();
-		const byPath = new Map(pairs);
-		const paths = new Set<string>(pairs.map(([path]) => path));
-
-		expect(byPath.get('color.overlay.backdrop')).toBe('--luke-color-overlay-backdrop');
-		expect(byPath.get('color.surface.overlay')).toBe('--luke-color-surface-overlay');
+	it('exposes overlay backdrop as the only overlay leaf, and no longer has scrim', () => {
+		const byPath = new Map(flattenThemeContract());
 		expect(vars.color.overlay).toEqual({
 			backdrop: 'var(--luke-color-overlay-backdrop)',
 		});
-		expect(paths.has('color.overlay.hover')).toBe(false);
-		expect(paths.has('color.overlay.pressed')).toBe(false);
-		expect(paths.has('color.overlay.tint')).toBe(false);
-		expect(pairs.some(([, varName]) => varName === '--luke-color-overlay-tint')).toBe(false);
-		expect(paths.has('color.scrim')).toBe(false);
-		expect(pairs.some(([, varName]) => varName === '--luke-color-scrim')).toBe(false);
+		expect(byPath.get('color.overlay.backdrop')).toBe('--luke-color-overlay-backdrop');
 		expect(Object.hasOwn(vars.color, 'scrim')).toBe(false);
 	});
 
