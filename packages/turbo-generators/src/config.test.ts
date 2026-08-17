@@ -18,7 +18,7 @@ describe('component generator prompts', () => {
 		}
 
 		expect({
-			conformanceTier: prompts.find((prompt) => prompt.name === 'conformanceTier')?.default,
+			conformance: prompts.find((prompt) => prompt.name === 'conformance')?.default,
 			integrationTripwire: prompts.find((prompt) => prompt.name === 'integrationTripwire')?.default,
 			visualCoverage: prompts.find((prompt) => prompt.name === 'visualCoverage')?.default,
 		}).toEqual(COMPONENT_DEFAULTS);

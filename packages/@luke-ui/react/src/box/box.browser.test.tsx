@@ -1,10 +1,10 @@
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { testUniversalConformance } from '../conformance/helpers.js';
+import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Box } from './index.js';
 
-testUniversalConformance({
+testConformance({
 	path: 'box',
 	getTarget: (result) => {
 		const target = result.container.firstElementChild;

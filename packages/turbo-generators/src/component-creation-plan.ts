@@ -1,15 +1,15 @@
 import * as z from 'zod';
 
-export const CONFORMANCE_TIERS = ['universal', 'field-shaped', 'none'] as const;
+export const CONFORMANCE_CONTRACTS = ['dom', 'field'] as const;
 export const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
 
 export const COMPONENT_DEFAULTS = {
-	conformanceTier: 'universal',
+	conformance: ['dom'],
 	integrationTripwire: false,
 	visualCoverage: true,
 } as const;
 
-export type ConformanceTier = (typeof CONFORMANCE_TIERS)[number];
+export type ConformanceContract = (typeof CONFORMANCE_CONTRACTS)[number];
 
 export interface PlanFile {
 	contents: string;
@@ -58,7 +58,7 @@ const CAMEL_BOUNDARY_RE = /([a-z0-9])([A-Z])/g;
 const NON_ALPHANUM_RE = /[^A-Za-z0-9-]/g;
 
 const componentAnswersSchema = z.object({
-	conformanceTier: z.enum(CONFORMANCE_TIERS).default(COMPONENT_DEFAULTS.conformanceTier),
+	conformance: z.array(z.enum(CONFORMANCE_CONTRACTS)).default([...COMPONENT_DEFAULTS.conformance]),
 	docsGroup: z.enum(DOC_GROUPS),
 	integrationTripwire: z.boolean().default(COMPONENT_DEFAULTS.integrationTripwire),
 	name: z.string(),
@@ -105,7 +105,9 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 	const recipeName = `${camelName}Recipe`;
 	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/${name}`;
-	const conformanceTier = input.conformanceTier;
+	const conformance = [...CONFORMANCE_CONTRACTS].filter((contract) =>
+		input.conformance.includes(contract),
+	);
 	const integrationTripwire = input.integrationTripwire ? 'required' : 'none';
 	const visualApplicability = input.visualCoverage ? 'applicable' : 'none';
 
@@ -131,7 +133,7 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 		},
 		{
 			contents: renderComponentTest({
-				conformanceTier,
+				conformance,
 				integrationTripwire,
 				name,
 				pascalName,
@@ -194,10 +196,9 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 			{
 				kind: 'text-insert',
 				lines: [
-					`\t['${pascalName}', '${name}', '${conformanceTier}', '${integrationTripwire}', '${visualApplicability}'],`,
+					`\t['${pascalName}', '${name}', ${formatConformanceList(conformance)}, '${integrationTripwire}', '${visualApplicability}'],`,
 				],
-				marker:
-					'].map(([name, path, conformanceTier, integrationTripwire, visualApplicability]) => ({',
+				marker: '].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({',
 				path: 'packages/@luke-ui/react/src/conformance/manifest.ts',
 			},
 		],
@@ -290,28 +291,29 @@ export default function Basic() {
 `;
 }
 
+function formatConformanceList(conformance: ReadonlyArray<ConformanceContract>): string {
+	if (conformance.length === 0) return '[]';
+	return `[${conformance.map((contract) => `'${contract}'`).join(', ')}]`;
+}
+
 function renderComponentTest(input: {
-	conformanceTier: ConformanceTier;
+	conformance: ReadonlyArray<ConformanceContract>;
 	integrationTripwire: 'none' | 'required';
 	name: string;
 	pascalName: string;
 }): string {
-	const conformanceHelper =
-		input.conformanceTier === 'universal'
-			? 'testUniversalConformance'
-			: input.conformanceTier === 'field-shaped'
-				? 'testFieldShapedConformance'
-				: undefined;
+	const hasDom = input.conformance.includes('dom');
+	const hasField = input.conformance.includes('field');
 	const helperImports = [
-		conformanceHelper,
+		hasDom || hasField ? 'testConformance' : undefined,
 		input.integrationTripwire === 'required' ? 'testIntegration' : undefined,
 	].filter((value): value is string => value != null);
 	const imports = [
 		...(input.integrationTripwire === 'required'
 			? ["import { expect } from 'vite-plus/test';"]
-			: input.conformanceTier === 'none'
-				? ["import { expect, test } from 'vite-plus/test';"]
-				: []),
+			: hasDom || hasField
+				? []
+				: ["import { expect, test } from 'vite-plus/test';"]),
 		...(helperImports.length > 0
 			? [`import { ${helperImports.join(', ')} } from '../conformance/helpers.js';`]
 			: []),
@@ -320,28 +322,30 @@ function renderComponentTest(input: {
 	];
 
 	const renderComponent = `render(<${input.pascalName} {...props}>Content</${input.pascalName}>)`;
-	const contract =
-		input.conformanceTier === 'universal'
-			? `testUniversalConformance({
-	path: '${input.name}',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
-		return target;
-	},
-	render: (props = {}) => ${renderComponent},
-});`
-			: input.conformanceTier === 'field-shaped'
-				? `testFieldShapedConformance({
-	path: '${input.name}',
-	getControl: (result) => {
+	const locators = [
+		hasField
+			? `	getControl: (result) => {
 		const control = result.container.querySelector('[name="conformance-field"]');
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a native field control.');
 		return control;
-	},
+	},`
+			: undefined,
+		hasDom
+			? `	getTarget: (result) => {
+		const target = result.container.firstElementChild;
+		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
+		return target;
+	},`
+			: undefined,
+	].filter((value): value is string => value != null);
+	const contract =
+		hasDom || hasField
+			? `testConformance({
+	path: '${input.name}',
+${locators.join('\n')}
 	render: (props = {}) => ${renderComponent},
 });`
-				: `test('${input.pascalName} renders its root element', () => {
+			: `test('${input.pascalName} renders its root element', () => {
 	const result = render(<${input.pascalName}>Content</${input.pascalName}>);
 	expect(result.locator.element().firstElementChild).toHaveTextContent('Content');
 });`;

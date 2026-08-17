@@ -1,7 +1,7 @@
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
+import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
 import { ComboboxInput } from '../primitives/combobox/input.js';
 import { ComboboxItem } from '../primitives/combobox/item.js';
@@ -23,7 +23,7 @@ const countryItems: Array<CountryItem> = [
 
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
-testFieldShapedConformance({
+testConformance({
 	path: 'combobox-field',
 	assertAssociation: (result) => {
 		// oxlint-disable-next-line vitest/no-standalone-expect
@@ -43,6 +43,11 @@ testFieldShapedConformance({
 		const control = result.locator.getByRole('combobox', { name: 'Country' }).element();
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
 		return control;
+	},
+	getTarget: (result) => {
+		const target = result.container.firstElementChild;
+		if (!(target instanceof HTMLElement)) throw new Error('Expected the ComboboxField root.');
+		return target;
 	},
 	render: (props = {}) => {
 		return render(

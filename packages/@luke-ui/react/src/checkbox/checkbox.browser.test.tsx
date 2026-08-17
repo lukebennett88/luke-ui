@@ -1,15 +1,20 @@
 import { expect, test } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
-import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
+import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Checkbox } from './index.js';
 
-testFieldShapedConformance({
+testConformance({
 	path: 'checkbox',
 	getControl: (result) => {
 		const control = result.locator.getByRole('checkbox', { name: 'Terms' }).element();
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a checkbox control.');
 		return control;
+	},
+	getTarget: (result) => {
+		const target = result.container.firstElementChild;
+		if (!(target instanceof HTMLElement)) throw new Error('Expected the Checkbox root.');
+		return target;
 	},
 	render: (props = {}) => {
 		return render(<Checkbox {...props}>Terms</Checkbox>);

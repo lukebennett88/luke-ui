@@ -4,16 +4,11 @@ import { componentTestManifest } from './manifest.js';
 
 type RenderComponent = (props?: Record<string, unknown>) => RenderResult;
 
-type UniversalConformanceOptions = {
-	path: string;
-	render: RenderComponent;
-	getTarget: (result: RenderResult) => HTMLElement;
-};
-
-type FieldConformanceOptions = {
+type ConformanceOptions = {
 	assertName?: (result: RenderResult, control: HTMLElement) => void;
-	getControl: (result: RenderResult) => HTMLElement;
+	getControl?: (result: RenderResult) => HTMLElement;
 	assertAssociation?: (result: RenderResult) => void;
+	getTarget?: (result: RenderResult) => HTMLElement;
 	path: string;
 	render: RenderComponent;
 };
@@ -28,14 +23,26 @@ function assertNativeName(_: RenderResult, control: HTMLElement) {
 	expect(control).toHaveAttribute('name', 'conformance-field');
 }
 
-export function testUniversalConformance(options: UniversalConformanceOptions) {
-	const { getTarget, path, render } = options;
-	const entry = getManifestEntry(path);
-	if (entry.conformanceTier !== 'universal') {
-		throw new Error(`Expected universal conformance for ${path}.`);
+function requireTarget(options: ConformanceOptions) {
+	if (options.getTarget == null) {
+		throw new Error(`Expected a getTarget locator for ${options.path}.`);
 	}
+	return options.getTarget;
+}
 
-	test(`${entry.name} forwards its universal DOM contract`, () => {
+function requireControl(options: ConformanceOptions) {
+	if (options.getControl == null) {
+		throw new Error(`Expected a getControl locator for ${options.path}.`);
+	}
+	return options.getControl;
+}
+
+function testDomContract(
+	name: string,
+	getTarget: (result: RenderResult) => HTMLElement,
+	render: RenderComponent,
+) {
+	test(`${name} forwards its DOM contract`, () => {
 		const ref = { current: null as HTMLElement | null };
 		const result = render({
 			className: 'conformance-class',
@@ -53,19 +60,14 @@ export function testUniversalConformance(options: UniversalConformanceOptions) {
 	});
 }
 
-export function testFieldShapedConformance(options: FieldConformanceOptions) {
-	const { assertAssociation, assertName, getControl, path, render } = options;
-	const entry = getManifestEntry(path);
-	if (entry.conformanceTier !== 'field-shaped') {
-		throw new Error(`Expected field-shaped conformance for ${path}.`);
-	}
-	test(`${entry.name} forwards its field contract`, async () => {
+function testFieldContract(options: ConformanceOptions, name: string) {
+	const { assertAssociation, assertName, render } = options;
+	const getControl = requireControl(options);
+
+	test(`${name} forwards its field contract`, async () => {
 		const inputRef = { current: null as HTMLElement | null };
 		let blurred = false;
 		const result = render({
-			className: 'conformance-class',
-			'data-conformance': 'true',
-			id: 'conformance-target',
 			inputRef,
 			name: 'conformance-field',
 			onBlur: () => {
@@ -106,7 +108,7 @@ export function testFieldShapedConformance(options: FieldConformanceOptions) {
 
 	// React Aria types `inputRef` as a ref object. Luke UI widens it to accept a
 	// callback so React Hook Form's `field.ref` works without an adapter.
-	test(`${entry.name} resolves a callback inputRef to the control`, () => {
+	test(`${name} resolves a callback inputRef to the control`, () => {
 		const resolved: Array<HTMLElement | null> = [];
 		const result = render({
 			inputRef: (node: HTMLElement | null) => {
@@ -119,6 +121,18 @@ export function testFieldShapedConformance(options: FieldConformanceOptions) {
 		expect(resolved.at(-1)).toBe(control);
 		result.unmount();
 	});
+}
+
+export function testConformance(options: ConformanceOptions) {
+	const { path, render } = options;
+	const entry = getManifestEntry(path);
+
+	if (entry.conformance.includes('dom')) {
+		testDomContract(entry.name, requireTarget(options), render);
+	}
+	if (entry.conformance.includes('field')) {
+		testFieldContract(options, entry.name);
+	}
 }
 
 export function testIntegration(path: string, run: () => void | Promise<void>) {
