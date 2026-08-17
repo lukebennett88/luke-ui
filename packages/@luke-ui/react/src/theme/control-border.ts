@@ -9,7 +9,8 @@ import type { Oklch } from './color.js';
 import { contrastRatio, gamutMapOklch } from './color.js';
 import { RATIO_HEADROOM, UI_RATIO } from './contrast-policy.js';
 import { lightnessCandidates } from './lightness-candidates.js';
-import { FAMILY_RUNG, type ScaleFamily } from './scale.js';
+import type { ScaleFamily } from './scale.js';
+import { FAMILY_RUNG } from './scale.js';
 
 type ColorMode = 'light' | 'dark';
 
