@@ -83,11 +83,19 @@ describe('on-solid contrast guarantee', () => {
 	it('clears 4.5:1 against the public solid rest, hover, and pressed colours for every role across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
+				// Production mixes every role toward generated `text.primary`, which is the neutral
+				// family's step 12, not that role's own high-contrast text rung.
+				const textPrimary = family(entry.source, mode, 'neutral')[12];
 				for (const role of SEMANTIC_ROLES) {
-					const scale = family(entry.source, mode, role);
-					const toward = scale[12];
-					const hover = mixInteractionState(scale[9], toward, INTERACTION_HOVER_STRENGTH);
-					const pressed = mixInteractionState(scale[9], toward, INTERACTION_PRESSED_STRENGTH);
+					const scale = generateFamily({
+						background: BACKGROUND[mode],
+						interactionSource: textPrimary,
+						mode,
+						role,
+						source: parseColor(entry.source),
+					});
+					const hover = mixInteractionState(scale[9], textPrimary, INTERACTION_HOVER_STRENGTH);
+					const pressed = mixInteractionState(scale[9], textPrimary, INTERACTION_PRESSED_STRENGTH);
 					expect(
 						contrastRatio(scale.contrast, scale[9]),
 						`${entry.name} ${mode} ${role} contrast vs rest`,
