@@ -179,9 +179,9 @@ const NEUTRAL_LIGHTNESS = { dark: 0.22, light: 0.985 } as const satisfies Record
 // The vibrant band a single-value accent is adapted into, and the lightness the search starts from.
 // Contrast for the on-solid text lives at the band edges (dark solids take near-white text, light
 // solids take near-black); the middle is a dead zone, so the search targets a vibrant lightness and
-// walks outward to the nearest lightness whose solid and hover both clear the on-solid gate. The band
-// is deliberately wider than the generator's own tone-faithful window, which is what lets it rescue
-// accents the generator alone could not reach.
+// walks outward to the nearest lightness whose solid rest, hover, and pressed clear the on-solid
+// gate. The band is deliberately wider than the generator's own tone-faithful window, which is what
+// lets it rescue accents the generator alone could not reach.
 const ACCENT_TARGET = { dark: 0.72, light: 0.5 } as const satisfies Record<ColorMode, number>;
 const ACCENT_BAND = {
 	dark: [0.6, 0.82],

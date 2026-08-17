@@ -43,7 +43,7 @@ export const CONTRAST_SEARCH_STEP = 0.0025;
  * restating a subset anywhere would reintroduce the asymmetry this module exists to prevent.
  * `FamilyRole` in `scale.ts` is derived from this, so the type cannot drift from the list either.
  *
- * Every role's solid (step 9) and its hover (step 10) must clear 4.5:1 against on-solid text. The
+ * Every role's solid rest, hover, and pressed colours must clear 4.5:1 against on-solid text. The
  * scale generator always searches for that contrast. `contrast-validation.ts` enforces it for all
  * six roles at compile time.
  */

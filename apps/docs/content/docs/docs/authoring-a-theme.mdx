@@ -24,12 +24,15 @@ A basic theme authors an accent colour and a neutral character. Everything else 
 
 Each colour accepts one string, adapted independently for light and dark, or an explicit
 `{ light, dark }` pair. Omit either side to fall back to that role's default. Luke UI supplies
-accessible mode-specific defaults for every optional colour. `color.backdrop` is the one colour that
-may include alpha, and Luke UI emits it as `color.overlay.backdrop`. Hover and pressed colours are
-generated from the resting semantic colours; do not author them. `radius` is a generative `base` and
-`multiplier` scale with explicit per-step overrides. `depth` and `actionControlFinish` are optional
-and deep-partial per mode over curated, extremely-subtle defaults. The typography styles and motion
-values are source-owned and are not authored.
+accessible mode-specific defaults for every optional colour.
+
+`color.backdrop` is the one colour that may include alpha. Luke UI emits it as
+`color.overlay.backdrop`. Hover and pressed colours are generated from the resting semantic colours.
+Do not author them.
+
+`radius` is a generative `base` and `multiplier` scale with explicit per-step overrides. `depth` and
+`actionControlFinish` are optional and deep-partial per mode over curated, extremely-subtle
+defaults. The typography styles and motion values are source-owned and are not authored.
 
 <auto-type-table path="packages/@luke-ui/react/src/theme/define-theme.ts" name="ThemeInput" />
 
