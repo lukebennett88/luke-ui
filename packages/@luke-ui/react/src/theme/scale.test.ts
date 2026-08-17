@@ -14,6 +14,7 @@ import type { FamilyRole } from './scale.js';
 import {
 	generateFamily,
 	generateFamilyWithDiagnostics,
+	INTERACTION_HOVER_STRENGTH,
 	INTERACTION_PRESSED_STRENGTH,
 	MIN_STATE_DELTA,
 	mixInteractionState,
@@ -79,18 +80,25 @@ describe('component state distinctness', () => {
 });
 
 describe('on-solid contrast guarantee', () => {
-	it('clears 4.5:1 against the solid (9) and its hover (10) for every role across the corpus', () => {
+	it('clears 4.5:1 against the public solid rest, hover, and pressed colours for every role across the corpus', () => {
 		for (const entry of HUE_STRESS_CORPUS) {
 			for (const mode of MODES) {
 				for (const role of SEMANTIC_ROLES) {
 					const scale = family(entry.source, mode, role);
+					const toward = scale[12];
+					const hover = mixInteractionState(scale[9], toward, INTERACTION_HOVER_STRENGTH);
+					const pressed = mixInteractionState(scale[9], toward, INTERACTION_PRESSED_STRENGTH);
 					expect(
 						contrastRatio(scale.contrast, scale[9]),
-						`${entry.name} ${mode} ${role} contrast vs 9`,
+						`${entry.name} ${mode} ${role} contrast vs rest`,
 					).toBeGreaterThanOrEqual(TEXT_RATIO);
 					expect(
-						contrastRatio(scale.contrast, scale[10]),
-						`${entry.name} ${mode} ${role} contrast vs 10`,
+						contrastRatio(scale.contrast, hover),
+						`${entry.name} ${mode} ${role} contrast vs hover`,
+					).toBeGreaterThanOrEqual(TEXT_RATIO);
+					expect(
+						contrastRatio(scale.contrast, pressed),
+						`${entry.name} ${mode} ${role} contrast vs pressed`,
 					).toBeGreaterThanOrEqual(TEXT_RATIO);
 				}
 			}
@@ -356,24 +364,35 @@ describe('the one on-solid gate', () => {
 });
 
 describe('unsatisfiable input', () => {
-	it('throws ScaleGenerationError carrying role and mode when a source tone is a dead zone', () => {
-		for (const mode of MODES) {
-			const entry = UNSATISFIABLE_ON_SOLID[mode];
-			for (const role of SOURCE_TONED_ROLES) {
-				let thrown: unknown;
-				try {
-					family(entry.source, mode, role);
-				} catch (error) {
-					thrown = error;
-				}
-				expect(thrown, `${entry.name} ${role}`).toBeInstanceOf(ScaleGenerationError);
-				const error = thrown as ScaleGenerationError;
-				expect(error.role).toBe(role);
-				expect(error.mode).toBe(mode);
-				expect(error.bestAttempt.step).toBe(9);
-				expect(error.bestAttempt.onSolidRatio).toBeLessThan(TEXT_RATIO);
+	it('throws ScaleGenerationError carrying role and mode when a dark-mode source tone is a dead zone', () => {
+		const entry = UNSATISFIABLE_ON_SOLID.dark;
+		for (const role of SOURCE_TONED_ROLES) {
+			let thrown: unknown;
+			try {
+				family(entry.source, 'dark', role);
+			} catch (error) {
+				thrown = error;
 			}
+			expect(thrown, `${entry.name} ${role}`).toBeInstanceOf(ScaleGenerationError);
+			const error = thrown as ScaleGenerationError;
+			expect(error.role).toBe(role);
+			expect(error.mode).toBe('dark');
+			expect(error.bestAttempt.step).toBe(9);
+			expect(error.bestAttempt.onSolidRatio).toBeLessThan(TEXT_RATIO);
 		}
+	});
+
+	it('adapts a light-mode mid-tone that used to sit in the step-10 dead zone', () => {
+		// Public hover and pressed mix less extremely than the private step-10 offset, so this
+		// light-mode red is now reachable by the solid-anchor search.
+		const { diagnostics } = generateFamilyWithDiagnostics({
+			background: BACKGROUND.light,
+			mode: 'light',
+			role: 'accent',
+			source: parseColor(UNSATISFIABLE_ON_SOLID.light.source),
+		});
+		expect(diagnostics.solidAnchor.adaptedForOnSolid).toBe(true);
+		expect(diagnostics.solidAnchor.satisfied).toBe(true);
 	});
 
 	it('does not throw for neutral, whose solid comes from a curated band rather than the source tone', () => {

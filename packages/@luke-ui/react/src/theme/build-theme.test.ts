@@ -58,18 +58,18 @@ describe('buildTheme generation failures', () => {
 	it('throws ThemeGenerationError naming the role, mode, and achieved ratio for a dead-zone warning', () => {
 		const error = buildGenerationError({
 			...tactileFoundation,
-			light: {
-				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, warning: resolvedColor('oklch(0.62 0.19 27)') },
+			dark: {
+				...tactileFoundation.dark,
+				color: { ...tactileFoundation.dark.color, warning: resolvedColor('oklch(0.55 0.2 258)') },
 			},
 			name: 'bad-warning',
 		});
 
 		expect(error.role).toBe('warning');
-		expect(error.mode).toBe('light');
+		expect(error.mode).toBe('dark');
 		expect(error.bestAttempt.step).toBe(9);
 		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		expect(error.message).toContain('Cannot generate the light "warning" family');
+		expect(error.message).toContain('Cannot generate the dark "warning" family');
 		expect(error.message).toContain(`${error.bestAttempt.onSolidRatio.toFixed(2)}:1`);
 		// Warning is generated fifth, so the four roles before it are reported and the last one is not.
 		expect(Object.keys(error.diagnostics.completedFamilies)).toEqual([
@@ -83,15 +83,13 @@ describe('buildTheme generation failures', () => {
 	it('throws ThemeGenerationError for an accent no on-solid text can sit on', () => {
 		const caught = (() => {
 			try {
-				// A mid-lightness tone whose whole solid window is an on-solid dead zone: neither near-white
-				// nor near-black on-solid text clears AA anywhere the search can reach.
 				buildTheme({
 					...tactileFoundation,
-					light: {
-						...tactileFoundation.light,
+					dark: {
+						...tactileFoundation.dark,
 						color: {
-							...tactileFoundation.light.color,
-							accent: resolvedColor('oklch(0.62 0.19 27)'),
+							...tactileFoundation.dark.color,
+							accent: resolvedColor('oklch(0.55 0.2 258)'),
 						},
 					},
 					name: 'bad-accent',
@@ -104,12 +102,11 @@ describe('buildTheme generation failures', () => {
 		expect(caught).toBeInstanceOf(ThemeGenerationError);
 		const error = caught as ThemeGenerationError;
 		expect(error.role).toBe('accent');
-		expect(error.mode).toBe('light');
+		expect(error.mode).toBe('dark');
 		expect(error.bestAttempt.step).toBe(9);
 		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		// The partial diagnostics carry the failing role/mode and the families resolved before it.
 		expect(error.diagnostics.role).toBe('accent');
-		expect(error.diagnostics.mode).toBe('light');
+		expect(error.diagnostics.mode).toBe('dark');
 		expect(error.diagnostics.completedFamilies.neutral).toBeDefined();
 		expect(error.diagnostics.completedFamilies.accent).toBeUndefined();
 	});

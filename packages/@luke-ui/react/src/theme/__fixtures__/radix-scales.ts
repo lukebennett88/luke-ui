@@ -338,8 +338,10 @@ export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 
 /**
  * Dead-zone sources: mid-lightness colours where neither near-white nor near-black on-solid text
- * clears AA across the solid and its hover, and whose authored tone the generator preserves. A
- * A source-toned role given one of these is genuinely unsatisfiable and throws.
+ * clears AA across the public solid rest, hover, and pressed colours, and whose authored tone the
+ * generator preserves. A source-toned role given a dark-mode entry is genuinely unsatisfiable.
+ * Light-mode public mixes are gentler than the private step-10 offset, so the light entry is now
+ * reachable by the solid-anchor search.
  */
 export const UNSATISFIABLE_ON_SOLID: Record<'light' | 'dark', CorpusEntry> = {
 	dark: {
@@ -349,7 +351,7 @@ export const UNSATISFIABLE_ON_SOLID: Record<'light' | 'dark', CorpusEntry> = {
 	},
 	light: {
 		name: 'dead-zone-red-light',
-		note: 'mid lightness; whole tone window is a dead zone',
+		note: 'mid lightness that used to miss AA on the private step-10 offset',
 		source: 'oklch(0.62 0.19 27)',
 	},
 };
