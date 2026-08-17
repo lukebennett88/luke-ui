@@ -29,7 +29,7 @@ code > * {
 	--color-fd-primary-foreground: var(--luke-color-foreground-accent-on-solid);
 	--color-fd-secondary: var(--luke-color-surface-recessed);
 	--color-fd-secondary-foreground: var(--luke-color-text-primary);
-	--color-fd-accent: var(--luke-color-background-neutral-subtle-rest);
+	--color-fd-accent: var(--luke-color-background-neutral-subtle-hover);
 	--color-fd-accent-foreground: var(--luke-color-text-primary);
 	--color-fd-ring: var(--luke-color-border-focus);
 	--color-fd-overlay: var(--luke-color-overlay-backdrop);
