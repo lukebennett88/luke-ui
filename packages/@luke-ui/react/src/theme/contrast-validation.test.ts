@@ -130,7 +130,11 @@ describe('contrast validation matrix', () => {
 		for (const background of BASE_SURFACES) {
 			hard.push({ background, foreground: 'color.border.focus', required: UI_RATIO });
 			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });
-			hard.push({ background, foreground: 'color.background.danger.solid.rest', required: UI_RATIO });
+			hard.push({
+				background,
+				foreground: 'color.background.danger.solid.rest',
+				required: UI_RATIO,
+			});
 		}
 		return { advisory, hard };
 	}
