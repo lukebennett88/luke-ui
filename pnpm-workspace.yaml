@@ -59,7 +59,7 @@ catalog:
   '@tanstack/start-static-server-functions': ^1.167.20
   '@turbo/gen': ^2.10.8
   '@types/mdx': ^2.0.14
-  '@types/node': ^26.1.2
+  '@types/node': ^26.2.0
   '@types/pngjs': ^6.0.5
   '@types/react': ^19.2.18
   '@types/react-dom': ^19.2.4
