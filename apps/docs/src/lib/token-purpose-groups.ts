@@ -22,7 +22,8 @@ export interface TokenPurposeGroup {
  */
 const PURPOSE_DEFINITIONS = [
 	{
-		description: 'Background layers, from the page canvas to the dimming layer behind an overlay.',
+		description:
+			'Background layers, from the page canvas to the translucent backdrop behind a dialog.',
 		id: 'surfaces',
 		related: { label: 'Colour', splat: 'color' },
 		showSamples: true,
@@ -126,7 +127,7 @@ const COLOR_SECTION_PURPOSES: Record<string, TokenPurposeId | undefined> = {
 	background: 'roles',
 	foreground: 'roles',
 	loadingSkeleton: 'content',
-	scrim: 'surfaces',
+	overlay: 'surfaces',
 	surface: 'surfaces',
 	text: 'content',
 };
@@ -136,8 +137,10 @@ const STRUCTURAL_BORDERS = new Set(['control', 'decorative', 'focus']);
 function resolveColorPurpose(path: string): TokenPurposeId | undefined {
 	const [, section, leaf] = path.split('.');
 	if (section === undefined) return undefined;
-	if (section !== 'border') return COLOR_SECTION_PURPOSES[section];
-	return leaf !== undefined && STRUCTURAL_BORDERS.has(leaf) ? 'borders' : 'roles';
+	if (section === 'border') {
+		return leaf !== undefined && STRUCTURAL_BORDERS.has(leaf) ? 'borders' : 'roles';
+	}
+	return COLOR_SECTION_PURPOSES[section];
 }
 
 function resolvePurpose(token: ThemeToken): TokenPurposeId | undefined {

@@ -2,8 +2,8 @@
  * The `defineTheme` authoring util: the sole public theme-authoring surface. It normalises a small,
  * curated-default {@link ThemeInput} into the internal per-mode {@link ThemeFoundation} and hands it
  * to the internal {@link buildTheme} value pipeline. It owns the single-value accent/neutral
- * adaptation and the one resolution of curated defaults (source colours, materials, radius, scrim)
- * into {@link Oklch} values the foundation carries.
+ * adaptation and the one resolution of curated defaults (source colours, materials, radius,
+ * backdrop) into {@link Oklch} values the foundation carries.
  */
 
 import { buildTheme, ThemeContrastError } from './build-theme.js';
@@ -14,13 +14,13 @@ import { resolveThemeInput } from './extend-theme.js';
 import type { ThemeFoundation, ThemeModeFoundation, ThemeSourceColors } from './foundation.js';
 import { defaultSourceColors } from './foundation.js';
 import { lightnessCandidates } from './lightness-candidates.js';
-import { passesOnSolidGate } from './scale.js';
+import { highContrastText, passesOnSolidGate } from './scale.js';
 
 /**
  * A colour value: one string (adapted independently for each mode) OR a per-mode object where
  * EITHER side may be omitted to fall back to that role's curated default / generation. Strings
- * accept `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` (lightness 0-1 or %, no alpha), except `scrim`,
- * which is used verbatim and may carry an alpha channel.
+ * accept `#rgb`, `#rrggbb`, or `oklch(<l> <c> <h>)` (lightness 0-1 or %, no alpha), except
+ * `backdrop`, which is used verbatim and may carry an alpha channel.
  */
 export type ColorInput = string | { light?: string; dark?: string };
 
@@ -139,7 +139,7 @@ export interface ThemeInput extends ThemeInputCommon {
 		/** Keyboard-focus ring colour, used verbatim after gamut mapping. Defaults per mode. */
 		focus?: ColorInput;
 		/** Modal-backdrop dimming colour, used verbatim; defaults to black at a mode-aware alpha. */
-		scrim?: ColorInput;
+		backdrop?: ColorInput;
 	};
 	/**
 	 * A theme to start from. Every value this theme leaves out comes from the base. `name` never
@@ -179,9 +179,9 @@ const NEUTRAL_LIGHTNESS = { dark: 0.22, light: 0.985 } as const satisfies Record
 // The vibrant band a single-value accent is adapted into, and the lightness the search starts from.
 // Contrast for the on-solid text lives at the band edges (dark solids take near-white text, light
 // solids take near-black); the middle is a dead zone, so the search targets a vibrant lightness and
-// walks outward to the nearest lightness whose solid and hover both clear the on-solid gate. The band
-// is deliberately wider than the generator's own tone-faithful window, which is what lets it rescue
-// accents the generator alone could not reach.
+// walks outward to the nearest lightness whose solid rest, hover, and pressed clear the on-solid
+// gate. The band is deliberately wider than the generator's own tone-faithful window, which is what
+// lets it rescue accents the generator alone could not reach.
 const ACCENT_TARGET = { dark: 0.72, light: 0.5 } as const satisfies Record<ColorMode, number>;
 const ACCENT_BAND = {
 	dark: [0.6, 0.82],
@@ -213,8 +213,8 @@ export const defaultControlFinish: ControlFinish = {
 	resting: 'none',
 };
 
-/** Curated modal-backdrop scrim applied when `scrim` is omitted, black at a mode-aware alpha. */
-export const defaultScrim: Record<ColorMode, string> = {
+/** Curated modal-backdrop colour applied when `backdrop` is omitted, black at a mode-aware alpha. */
+export const defaultBackdrop: Record<ColorMode, string> = {
 	dark: 'oklch(0 0 0 / 0.4)',
 	light: 'oklch(0 0 0 / 0.2)',
 };
@@ -290,8 +290,11 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 	const { color } = input;
 	const defaults = defaultSourceColors[mode];
 	const neutral = resolveNeutral(color, mode);
+	const textPrimary = highContrastText(neutral, mode);
 	const colors: ThemeSourceColors = {
-		accent: resolveAdaptedRole(color.accent, mode, adaptAccent),
+		accent: resolveAdaptedRole(color.accent, mode, (source, mode, raw) => {
+			return adaptAccent(source, mode, raw, textPrimary);
+		}),
 		// The canvas anchor, split from `neutral`'s hue/chroma character: explicit per-mode value wins,
 		// a single value or the opposite side is adapted to the mode canvas lightness, and an entirely
 		// omitted `background` copies the resolved neutral canvas anchor exactly (not a second,
@@ -301,7 +304,7 @@ function resolveColors(input: ThemeInput, mode: ColorMode): ThemeSourceColors {
 		neutral,
 		// Emitted verbatim; a single string applies to both modes, an omitted side falls back to the
 		// curated mode-aware default.
-		scrim: resolveVerbatimRole(color.scrim, mode, defaultScrim[mode]),
+		backdrop: resolveVerbatimRole(color.backdrop, mode, defaultBackdrop[mode]),
 		danger: resolveSourceRole(color.danger, mode, defaults.danger),
 		focus: resolveSourceRole(color.focus, mode, defaults.focus),
 		info: resolveSourceRole(color.info, mode, defaults.info),
@@ -415,17 +418,13 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
 }
 
 /**
- * Adapts a single-value accent for one mode: preserve the source hue and chroma, then search the
- * vibrant band for a lightness that clears the scale generator's own on-solid gate
- * ({@link passesOnSolidGate}). Returns the lightness nearest the mode target, and throws when no
- * lightness in the band is accessible.
- *
- * The gate is the generator's, not a second copy of it. This pre-conditioner cannot be stricter than
- * the solid-anchor search it feeds: a lightness it accepts is one `generateFamily` accepts too, and
- * the accent it hands over is the one the generator emits. Its band is wider, which
- * is what lets it rescue accents the generator's tone-faithful window cannot reach.
+ * Adapts a single-value accent for one mode: preserve hue and chroma, then search the vibrant band
+ * for a lightness that clears {@link passesOnSolidGate} against the same `text.primary` production
+ * generation uses. Returns the lightness nearest the mode target. Throws when none in the band is
+ * accessible. The band is wider than the generator's tone-faithful window, which is what lets it
+ * rescue accents that window cannot reach.
  */
-function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
+function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSource: Oklch): Oklch {
 	const target = ACCENT_TARGET[mode];
 	const [low, high] = ACCENT_BAND[mode];
 	const makeSolid = (l: number) => {
@@ -435,7 +434,9 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 			h: source.h,
 		});
 	};
-	const passes = (l: number) => passesOnSolidGate({ lightness: l, mode, source });
+	const passes = (l: number) => {
+		return passesOnSolidGate({ interactionSource, lightness: l, source });
+	};
 
 	if (passes(target)) return makeSolid(target);
 
@@ -453,7 +454,7 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string): Oklch {
 		throw new Error(
 			`Theme accent "${raw}" has no accessible ${mode} lightness: no vibrant lightness lets ` +
 				`near-white or near-black on-solid text clear ${TEXT_RATIO}:1 across the solid and its ` +
-				'hover. Author an explicit { light, dark } accent instead.',
+				'generated hover and pressed states. Author an explicit { light, dark } accent instead.',
 		);
 	}
 	return makeSolid(best);

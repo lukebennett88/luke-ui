@@ -68,21 +68,19 @@ export const linkRecipe = recipe({
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
 						color: vars.color.foreground.accent.hover,
 					},
-					// Press reuses the hover foreground: the shared contract carries no separate pressed
-					// content colour, so the stronger hover value covers both interactive states.
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: vars.color.foreground.accent.hover,
+						color: vars.color.foreground.accent.pressed,
 					},
 				},
 			},
 			neutral: {
-				color: vars.color.text.secondary,
+				color: vars.color.foreground.neutral.rest,
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						color: vars.color.text.primary,
+						color: vars.color.foreground.neutral.hover,
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: vars.color.text.primary,
+						color: vars.color.foreground.neutral.pressed,
 					},
 				},
 			},

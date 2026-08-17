@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { UNSATISFIABLE_ON_SOLID } from './__fixtures__/radix-scales.js';
 import {
 	extractValue,
 	paperFoundation,
@@ -7,9 +8,17 @@ import {
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeGenerationError } from './build-theme.js';
-import { contrastRatio, parseColor } from './color.js';
+import { contrastRatio, formatOklch, parseColor } from './color.js';
 import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { normalizeTheme } from './define-theme.js';
 import type { ThemeFoundation } from './foundation.js';
+import {
+	FAMILY_RUNG,
+	highContrastText,
+	INTERACTION_HOVER_STRENGTH,
+	INTERACTION_PRESSED_STRENGTH,
+	mixInteractionState,
+} from './scale.js';
 
 describe('buildTheme independent modes', () => {
 	it('derives each mode from its own sources rather than inverting light', () => {
@@ -58,18 +67,21 @@ describe('buildTheme generation failures', () => {
 	it('throws ThemeGenerationError naming the role, mode, and achieved ratio for a dead-zone warning', () => {
 		const error = buildGenerationError({
 			...tactileFoundation,
-			light: {
-				...tactileFoundation.light,
-				color: { ...tactileFoundation.light.color, warning: resolvedColor('oklch(0.62 0.19 27)') },
+			dark: {
+				...tactileFoundation.dark,
+				color: {
+					...tactileFoundation.dark.color,
+					warning: resolvedColor(UNSATISFIABLE_ON_SOLID.source),
+				},
 			},
 			name: 'bad-warning',
 		});
 
 		expect(error.role).toBe('warning');
-		expect(error.mode).toBe('light');
+		expect(error.mode).toBe('dark');
 		expect(error.bestAttempt.step).toBe(9);
 		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		expect(error.message).toContain('Cannot generate the light "warning" family');
+		expect(error.message).toContain('Cannot generate the dark "warning" family');
 		expect(error.message).toContain(`${error.bestAttempt.onSolidRatio.toFixed(2)}:1`);
 		// Warning is generated fifth, so the four roles before it are reported and the last one is not.
 		expect(Object.keys(error.diagnostics.completedFamilies)).toEqual([
@@ -83,15 +95,13 @@ describe('buildTheme generation failures', () => {
 	it('throws ThemeGenerationError for an accent no on-solid text can sit on', () => {
 		const caught = (() => {
 			try {
-				// A mid-lightness tone whose whole solid window is an on-solid dead zone: neither near-white
-				// nor near-black on-solid text clears AA anywhere the search can reach.
 				buildTheme({
 					...tactileFoundation,
-					light: {
-						...tactileFoundation.light,
+					dark: {
+						...tactileFoundation.dark,
 						color: {
-							...tactileFoundation.light.color,
-							accent: resolvedColor('oklch(0.62 0.19 27)'),
+							...tactileFoundation.dark.color,
+							accent: resolvedColor(UNSATISFIABLE_ON_SOLID.source),
 						},
 					},
 					name: 'bad-accent',
@@ -104,12 +114,11 @@ describe('buildTheme generation failures', () => {
 		expect(caught).toBeInstanceOf(ThemeGenerationError);
 		const error = caught as ThemeGenerationError;
 		expect(error.role).toBe('accent');
-		expect(error.mode).toBe('light');
+		expect(error.mode).toBe('dark');
 		expect(error.bestAttempt.step).toBe(9);
 		expect(error.bestAttempt.onSolidRatio).toBeLessThan(4.5);
-		// The partial diagnostics carry the failing role/mode and the families resolved before it.
 		expect(error.diagnostics.role).toBe('accent');
-		expect(error.diagnostics.mode).toBe('light');
+		expect(error.diagnostics.mode).toBe('dark');
 		expect(error.diagnostics.completedFamilies.neutral).toBeDefined();
 		expect(error.diagnostics.completedFamilies.accent).toBeUndefined();
 	});
@@ -123,9 +132,7 @@ describe('compileTheme diagnostics', () => {
 			const modeDiagnostics = diagnostics[mode];
 			expect(modeDiagnostics.mode).toBe(mode);
 			// A family diagnostic per role, and every scale role generated.
-			expect(Object.keys(modeDiagnostics.families).sort()).toEqual(
-				['accent', 'danger', 'info', 'neutral', 'success', 'warning'].sort(),
-			);
+			expect(Object.keys(modeDiagnostics.families).sort()).toEqual([...SEMANTIC_ROLES].sort());
 			expect(modeDiagnostics.families.accent.solidAnchor.satisfied).toBe(true);
 			// The canvas surface equals the resolved background anchor.
 			expect(modeDiagnostics.surfaces.canvas).toBeDefined();
@@ -137,6 +144,43 @@ describe('compileTheme diagnostics', () => {
 				(check) => check.required === 4.5,
 			);
 			expect(hardTextChecks.length).toBeGreaterThan(0);
+		}
+	});
+});
+
+describe('compileTheme interaction source', () => {
+	const chromaticNeutralFoundation = normalizeTheme({
+		color: {
+			accent: '#3b82f6',
+			neutral: { dark: 'oklch(0.22 0.03 70)', light: 'oklch(0.985 0.03 70)' },
+		},
+		name: 'chromatic-neutral',
+	});
+
+	it('gates every family against the emitted neutral text.primary, including the neutral family', () => {
+		const { css, diagnostics } = compileTheme(chromaticNeutralFoundation);
+		const blocks = splitBlocks(css);
+
+		for (const mode of ['light', 'dark'] as const) {
+			const block = mode === 'light' ? blocks.baseLight : blocks.mediaDark;
+			const textPrimary = diagnostics[mode].families.neutral.family[FAMILY_RUNG.textPrimary];
+			expect(textPrimary).toEqual(
+				highContrastText(chromaticNeutralFoundation[mode].color.neutral, mode),
+			);
+			expect(extractValue(block, '--luke-color-text-primary')).toBe(formatOklch(textPrimary));
+
+			for (const role of SEMANTIC_ROLES) {
+				const familyDiagnostics = diagnostics[mode].families[role];
+				const solid = familyDiagnostics.family[FAMILY_RUNG.solid];
+				const hover = mixInteractionState(solid, textPrimary, INTERACTION_HOVER_STRENGTH);
+				const pressed = mixInteractionState(solid, textPrimary, INTERACTION_PRESSED_STRENGTH);
+				expect(extractValue(block, `--luke-color-background-${role}-solid-hover`)).toBe(
+					formatOklch(hover),
+				);
+				expect(extractValue(block, `--luke-color-background-${role}-solid-pressed`)).toBe(
+					formatOklch(pressed),
+				);
+			}
 		}
 	});
 });
@@ -175,14 +219,8 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		});
 
 		it(`${foundation.name} keeps dark accent subtle-hover legible for primary text`, () => {
-			// The subtle component surfaces (scale steps 3-5) ramp from the canvas independently of the
-			// elevation surfaces and aren't pinned apart from `floating`; what matters is that primary
-			// text stays legible on the hovered subtle surface. The neutral subtle hover is
-			// excluded here because that exact colour pair is already hard-gated under different names:
-			// `color.text.primary` and `color.foreground.neutral.hover` both alias neutral step 12, and
-			// `validateContrast` gates the latter against all three neutral subtle states at >=4.5:1.
-			// No hard-gated pair covers primary text on the *accent* subtle ramp, so that is the pair
-			// worth recomputing.
+			// Subtle rest ramps from the canvas independently of the elevation surfaces. Primary text
+			// on generated accent subtle-hover is not a hard-gated pair, so recompute it here.
 			const { mediaDark } = splitBlocks(buildTheme(foundation));
 			const textPrimary = parseColor(extractValue(mediaDark, '--luke-color-text-primary'));
 			const subtleHover = parseColor(

@@ -50,13 +50,10 @@ Keep the detail that changes the reader's code:
 
 - `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
 - A field component takes no plain `ref`, so `inputRef` is the only way to reach the control.
-- `solid.pressed` reuses the `solid.hover` colour, so a custom pressed state needs depth, finish, or
-  a transform.
 
 Cut the detail that only explains the mechanism:
 
 - `Icon` renders an `<svg>` that references a symbol in the generated spritesheet.
-- A token path cannot be both a string leaf and the parent of `hover` and `pressed`.
 - Which internal modules a component imports.
 
 ### Other technologies

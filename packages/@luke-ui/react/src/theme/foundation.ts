@@ -1,7 +1,7 @@
 /**
  * The typed theme-foundation contract accepted by `buildTheme`, plus the curated defaults Luke UI
  * applies when optional foundation fields are omitted. Source colours that participate in generation
- * cross this boundary as {@link Oklch}; CSS-text values such as scrim stay strings.
+ * cross this boundary as {@link Oklch}; CSS-text values such as backdrop stay strings.
  */
 
 import type { Oklch } from './color.js';
@@ -103,7 +103,7 @@ interface ActionControlFinishFoundation {
 /**
  * Source colours for one mode, already resolved into {@link Oklch} for every role that participates
  * in generation. `defineTheme` applies curated defaults and parses authoring strings once;
- * `buildTheme` consumes these values as colours, not CSS text. `scrim` is the exception: it is
+ * `buildTheme` consumes these values as colours, not CSS text. `backdrop` is the exception: it is
  * emitted verbatim and may carry an alpha channel.
  */
 export interface ThemeSourceColors {
@@ -133,7 +133,7 @@ export interface ThemeSourceColors {
 	 * Modal-backdrop dimming colour, emitted verbatim (may carry an alpha channel). Required
 	 * internally: `defineTheme` always resolves it, from the author's value or a mode-aware default.
 	 */
-	scrim: string;
+	backdrop: string;
 	/** Source colour for the `success` role. */
 	success: Oklch;
 	/** Source colour for the `warning` role. */
@@ -142,7 +142,7 @@ export interface ThemeSourceColors {
 
 /**
  * The per-mode source colour fields that participate in generation as {@link Oklch}. `background` is
- * the resolved canvas anchor and `focus` is the authored keyboard-focus ring. `scrim` is
+ * the resolved canvas anchor and `focus` is the authored keyboard-focus ring. `backdrop` is
  * deliberately absent, because it is emitted as CSS text rather than parsed.
  */
 export const SOURCE_COLOR_FIELDS = [

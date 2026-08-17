@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { paperFoundation, resolvedColor, tactileFoundation } from './__fixtures__/theme-css.js';
+import { resolvedColor, tactileFoundation } from './__fixtures__/theme-css.js';
 import { buildTheme, compileTheme, ThemeContrastError } from './build-theme.js';
-import { SEMANTIC_ROLES } from './contrast-policy.js';
+import { SEMANTIC_ROLES, TEXT_RATIO, UI_RATIO } from './contrast-policy.js';
 import type { ThemeFoundation } from './foundation.js';
 
 describe('buildTheme contrast failures', () => {
@@ -42,10 +42,7 @@ describe('buildTheme contrast failures', () => {
 		);
 	});
 
-	it('rejects a pathological dark-mode canvas the fixed text anchors cannot clear', () => {
-		// v2 pins text lightness (neutral steps 11/12) per mode, so an unworkable neutral character no
-		// longer produces low-contrast text; the honest failure mode is instead a canvas whose lightness
-		// leaves the fixed text anchors below AA. A near-white dark canvas does exactly that.
+	it('rejects a dark-mode canvas the fixed text anchors cannot clear', () => {
 		const error = buildFailures({
 			...tactileFoundation,
 			dark: {
@@ -90,105 +87,88 @@ describe('buildTheme contrast failures', () => {
 });
 
 describe('contrast validation matrix', () => {
-	// The matrix is role-uniform by construction: each role contributes the same per-role hard
-	// and advisory counts below, plus a handful of hard checks that aren't per-role at all (see
-	// `validateContrast`). Deriving the totals from those pieces means adding a role, or changing
-	// a per-role count, updates the expectation automatically instead of needing a hand-edited
-	// number.
-	const PER_ROLE_HARD_HOVER = 5;
-	const PER_ROLE_HARD_ON_SOLID = 3;
-	const PER_ROLE_HARD_REST = 5;
-	const PER_ROLE_ADVISORY_BORDER = 2;
+	const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
+	const BASE_SURFACES = ['color.surface.canvas', 'color.surface.recessed'] as const;
+	const ELEVATION_SURFACES = [
+		...BASE_SURFACES,
+		'color.surface.floating',
+		'color.surface.overlay',
+	] as const;
 
-	// Hard checks `validateContrast` runs once, not per role: functional primary/secondary text
-	// against the 4 elevation surfaces (8), the focus ring and `border.control` boundaries
-	// against the 2 base surfaces (4), and `danger.solid.rest` against the 2 base surfaces (2).
-	const NON_PER_ROLE_HARD_CHECKS = 8 + 4 + 2;
-
-	const expectedHard =
-		SEMANTIC_ROLES.length * (PER_ROLE_HARD_HOVER + PER_ROLE_HARD_ON_SOLID + PER_ROLE_HARD_REST) +
-		NON_PER_ROLE_HARD_CHECKS;
-	const expectedAdvisory = SEMANTIC_ROLES.length * PER_ROLE_ADVISORY_BORDER;
-
-	for (const foundation of [tactileFoundation, paperFoundation]) {
-		it(`measures ${expectedHard} hard and ${expectedAdvisory} advisory checks per mode for ${foundation.name}, the same for every role`, () => {
-			// `compileTheme` returns only once every hard gate passed, so reaching these assertions is
-			// itself the proof that all hard checks pass for the bundled theme.
-			const { diagnostics } = compileTheme(foundation);
-			const summary = (['light', 'dark'] as const).map((mode) => {
-				const checks = diagnostics[mode].contrastChecks;
-				const countFor = (foreground: string, hard: boolean) => {
-					return checks.filter((check) => check.hard === hard && check.foreground === foreground)
-						.length;
-				};
-				return {
-					advisory: checks.filter((check) => !check.hard).length,
-					hard: checks.filter((check) => check.hard).length,
-					mode,
-					perRole: SEMANTIC_ROLES.map((role) => ({
-						advisoryBorder: countFor(`color.border.${role}`, false),
-						hardHover: countFor(`color.foreground.${role}.hover`, true),
-						hardOnSolid: countFor(`color.foreground.${role}.onSolid`, true),
-						hardRest: countFor(`color.foreground.${role}.rest`, true),
-						role,
-					})),
-				};
+	function expectedChecks() {
+		const hard: Array<{ background: string; foreground: string; required: number }> = [];
+		const advisory: Array<{ background: string; foreground: string; required: number }> = [];
+		for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
+			for (const surface of ELEVATION_SURFACES) {
+				hard.push({ background: surface, foreground: text, required: TEXT_RATIO });
+			}
+		}
+		for (const role of SEMANTIC_ROLES) {
+			const subtleBackgrounds = INTERACTION_STATES.map((state) => {
+				return `color.background.${role}.subtle.${state}`;
 			});
-			expect(summary).toEqual(
-				(['light', 'dark'] as const).map((mode) => ({
-					advisory: expectedAdvisory,
-					hard: expectedHard,
-					mode,
-					perRole: SEMANTIC_ROLES.map((role) => ({
-						advisoryBorder: PER_ROLE_ADVISORY_BORDER,
-						hardHover: PER_ROLE_HARD_HOVER,
-						hardOnSolid: PER_ROLE_HARD_ON_SOLID,
-						hardRest: PER_ROLE_HARD_REST,
-						role,
-					})),
-				})),
-			);
-		});
+			for (const state of INTERACTION_STATES) {
+				for (const background of [...BASE_SURFACES, ...subtleBackgrounds]) {
+					hard.push({
+						background,
+						foreground: `color.foreground.${role}.${state}`,
+						required: TEXT_RATIO,
+					});
+				}
+			}
+			for (const state of INTERACTION_STATES) {
+				hard.push({
+					background: `color.background.${role}.solid.${state}`,
+					foreground: `color.foreground.${role}.onSolid`,
+					required: TEXT_RATIO,
+				});
+			}
+			for (const background of BASE_SURFACES) {
+				advisory.push({ background, foreground: `color.border.${role}`, required: UI_RATIO });
+			}
+		}
+		for (const background of BASE_SURFACES) {
+			hard.push({ background, foreground: 'color.border.focus', required: UI_RATIO });
+			hard.push({ background, foreground: 'color.border.control', required: UI_RATIO });
+			hard.push({
+				background,
+				foreground: 'color.background.danger.solid.rest',
+				required: UI_RATIO,
+			});
+		}
+		return { advisory, hard };
 	}
 
-	it('records on each check whether missing its ratio fails the build', () => {
-		// Every text pair is a hard gate, and so are the two solved boundaries `border.focus` and
-		// `border.control`, plus `danger.solid.rest` vs the base surfaces (the only role fill gated —
-		// see `validateContrast` for why the other five roles are not). The six semantic borders are the
-		// only advisory checks. `color.border.decorative` is not measured. The "Theme/Diagnostics"
-		// inspector uses this flag instead of matching token paths.
+	it('records the semantic hard and advisory pairs', () => {
 		const { diagnostics } = compileTheme(tactileFoundation);
-		const advisoryBorders = SEMANTIC_ROLES.map((role) => `color.border.${role}`);
-		const summary = (['light', 'dark'] as const).map((mode) => {
+		const expected = expectedChecks();
+		const pairKey = (check: { background: string; foreground: string; required: number }) => {
+			return `${check.foreground} ${check.background} ${check.required}`;
+		};
+		for (const mode of ['light', 'dark'] as const) {
 			const checks = diagnostics[mode].contrastChecks;
-			const advisory = checks.filter((check) => !check.hard);
-			const hard = checks.filter((check) => check.hard);
-			return {
-				advisoryForegrounds: [...new Set(advisory.map((check) => check.foreground))].sort(),
-				// A hard gate that missed its ratio would throw before `compileTheme` returns. A recorded
-				// hard check that does not pass means the flag disagrees with the compiler.
-				everyHardGatePasses: hard.every((check) => check.passes),
-				hardBoundaryForegrounds: [
-					...new Set(hard.filter((check) => check.required === 3).map((check) => check.foreground)),
-				].sort(),
-				hardRatios: [...new Set(hard.map((check) => check.required))].sort((a, b) => a - b),
-				mode,
-				partitionsEveryCheck: hard.length + advisory.length === checks.length,
-			};
-		});
-		expect(summary).toEqual(
-			(['light', 'dark'] as const).map((mode) => ({
-				advisoryForegrounds: [...advisoryBorders].sort(),
-				everyHardGatePasses: true,
-				hardBoundaryForegrounds: [
-					'color.background.danger.solid.rest',
-					'color.border.control',
-					'color.border.focus',
-				].sort(),
-				hardRatios: [3, 4.5],
-				mode,
-				partitionsEveryCheck: true,
-			})),
-		);
+			const actualHard = checks
+				.filter((check) => check.hard)
+				.map((check) => {
+					return {
+						background: check.background,
+						foreground: check.foreground,
+						required: check.required,
+					};
+				});
+			const actualAdvisory = checks
+				.filter((check) => !check.hard)
+				.map((check) => {
+					return {
+						background: check.background,
+						foreground: check.foreground,
+						required: check.required,
+					};
+				});
+			expect([...actualHard].map(pairKey).sort()).toEqual([...expected.hard].map(pairKey).sort());
+			expect([...actualAdvisory].map(pairKey).sort()).toEqual(
+				[...expected.advisory].map(pairKey).sort(),
+			);
+		}
 	});
 });

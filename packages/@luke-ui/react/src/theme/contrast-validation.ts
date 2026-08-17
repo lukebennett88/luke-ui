@@ -34,19 +34,18 @@ interface ValidationResult {
 type ColorPath = keyof SemanticColorValues;
 
 /**
- * Runs the full semantic validation matrix over the emitted (rounded) colour values: 92 hard checks
- * and 12 advisory checks per mode. Every pair is recorded as a {@link ContrastCheck}, and the hard
- * ones populate `failures` (which `compileTheme` raises as a
- * {@link import('./build-theme.js').ThemeContrastError}).
+ * Runs the full semantic validation matrix over the emitted (rounded) colour values. Every pair is
+ * recorded as a {@link ContrastCheck}, and the hard ones populate `failures` (which `compileTheme`
+ * raises as a {@link import('./build-theme.js').ThemeContrastError}).
  *
  * Hard at the AA text ratio: functional primary and secondary text against all four elevation
- * surfaces; every role's resting and hover foreground against the base surfaces and that role's own
- * subtle ramp; and every role's on-solid foreground against its solid ramp. Hard at the non-text
- * ratio: the authored focus ring and `border.control`, which is `control-border.ts`'s solved
- * boundary rather than a scale-step alias; and `danger.solid.rest` against the base surfaces,
- * because it is the only role fill that carries a required state's boundary (the invalid field
- * boundary). This last gate is deliberately not extended to the other five roles: a role's solid
- * anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for
+ * surfaces; every role's rest, hover, and pressed foreground against the base surfaces and that
+ * role's own subtle ramp; and every role's on-solid foreground against its solid ramp. Hard at the
+ * non-text ratio: the authored focus ring and `border.control`, which is `control-border.ts`'s
+ * solved boundary rather than a scale-step alias; and `danger.solid.rest` against the base
+ * surfaces, because it is the only role fill that carries a required state's boundary (the invalid
+ * field boundary). This last gate is deliberately not extended to the other five roles: a role's
+ * solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for
  * `warning` that lands at only 2.43:1 against canvas in light mode.
  *
  * The six semantic borders alias step 7 of the 12-step scale, a subtle separator that deliberately
@@ -87,18 +86,17 @@ export function validateContrast(
 		'color.surface.recessed',
 	] as const satisfies ReadonlyArray<ColorPath>;
 
-	// Functional text vs every mapped elevation surface: 8 checks.
 	for (const text of ['color.text.primary', 'color.text.secondary'] as const) {
 		for (const surface of surfacePaths) check(text, surface, TEXT_RATIO, true);
 	}
-	// Per role: both foregrounds vs the base surfaces and that role's own subtle ramp (60 checks), and
-	// the on-solid foreground vs its solid ramp (18). The scale generator already guarantees on-solid;
-	// this revalidates it on the emitted, rounded values.
+	// Per role: rest, hover, and pressed foregrounds vs the base surfaces and that role's own
+	// subtle ramp, and the on-solid foreground vs its solid ramp. The scale generator already
+	// guarantees on-solid; this revalidates it on the emitted, rounded values.
 	for (const role of SEMANTIC_ROLES) {
 		const subtleBackgrounds = (['rest', 'hover', 'pressed'] as const).map((state) => {
 			return `color.background.${role}.subtle.${state}` as const;
 		});
-		for (const state of ['rest', 'hover'] as const) {
+		for (const state of ['rest', 'hover', 'pressed'] as const) {
 			for (const background of [...basePaths, ...subtleBackgrounds]) {
 				check(`color.foreground.${role}.${state}`, background, TEXT_RATIO, true);
 			}
@@ -113,18 +111,18 @@ export function validateContrast(
 		}
 	}
 	// The keyboard-focus ring is authored and focus-visibility critical, so it stays a hard 3:1 gate,
-	// and `border.control` is a solved boundary held to the same ratio: 4 checks.
+	// and `border.control` is a solved boundary held to the same ratio.
 	for (const background of basePaths) check('color.border.focus', background, UI_RATIO, true);
 	for (const background of basePaths) check('color.border.control', background, UI_RATIO, true);
-	// `danger.solid.rest` vs the base surfaces: 2 checks. It is the only role fill that carries a
-	// required state's boundary (the invalid field boundary), so it is held to the same hard
-	// non-text ratio as the focus ring and `border.control`. This is deliberately NOT a per-role
-	// loop: a role's solid anchor is solved for 4.5:1 on-solid text, not for 3:1 against the surface
-	// behind it, and for `warning` that lands at only 2.43:1 against canvas in light mode. Extending
-	// this gate to the other five roles throws `ThemeContrastError` on the bundled themes.
+	// `danger.solid.rest` is the only role fill that carries a required state's boundary (the invalid
+	// field boundary), so it is held to the same hard non-text ratio as the focus ring and
+	// `border.control`. This is deliberately not a per-role loop: a role's solid anchor is solved for
+	// 4.5:1 on-solid text, not for 3:1 against the surface behind it, and for `warning` that lands at
+	// only 2.43:1 against canvas in light mode. Extending this gate to the other five roles throws
+	// `ThemeContrastError` on the bundled themes.
 	for (const background of basePaths)
 		check('color.background.danger.solid.rest', background, UI_RATIO, true);
-	// The six semantic borders, measured and reported but not gated: 12 advisory checks.
+	// Semantic role borders are measured and reported but not gated.
 	for (const role of SEMANTIC_ROLES) {
 		for (const background of basePaths) {
 			check(`color.border.${role}`, background, UI_RATIO, false);

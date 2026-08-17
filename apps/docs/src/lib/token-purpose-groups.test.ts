@@ -44,7 +44,8 @@ test('splits the colour family across the purposes it serves', () => {
 	);
 
 	expect(purposeOf.get('color.surface.canvas')).toBe('surfaces');
-	expect(purposeOf.get('color.scrim')).toBe('surfaces');
+	expect(purposeOf.get('color.surface.overlay')).toBe('surfaces');
+	expect(purposeOf.get('color.overlay.backdrop')).toBe('surfaces');
 	expect(purposeOf.get('color.text.secondary')).toBe('content');
 	expect(purposeOf.get('color.loadingSkeleton')).toBe('content');
 	expect(purposeOf.get('color.border.focus')).toBe('borders');

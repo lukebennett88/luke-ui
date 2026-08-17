@@ -11,18 +11,20 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
 1. Takes the already-resolved source colours and canvas anchor (`background`, split from `neutral`'s
    hue/chroma character in `define-theme.ts`). Source colours cross the foundation as OKLCH values;
    `defineTheme` applies defaults and parses authoring strings once before `buildTheme` runs.
-2. Generates six private 12-step OKLCH families (`neutral`, `accent`, `info`, `success`, `warning`,
-   `danger`) with `scale.ts`'s `generateFamily`. Each family carries steps 1-12 plus a `contrast`
-   on-solid colour. Every role publishes the same background, foreground, on-solid, and border
-   slots, and every role's solid clears 4.5:1 against on-solid text (see `SEMANTIC_ROLES` in
-   `contrast-policy.ts`).
+2. Computes `text.primary` from the resolved neutral source (`highContrastText`, the family's
+   step-12 rung) before any solid-anchor search, then generates the six private 12-step OKLCH
+   families (`neutral`, `accent`, `info`, `success`, `warning`, `danger`). Every family is
+   accessibility-gated against that same `text.primary`.
 3. Derives the mode-aware elevation surfaces (`canvas`/`recessed`/`floating`/`overlay`) with
    `elevation.ts`'s `generateSurfaces`. `surfaces.canvas` is always exactly the resolved
    `background` — canvas IS the background, not a derived value.
 4. Applies the one default semantic mapping (`semantic-map.ts`'s `mapSemanticColors`) that aliases
-   every colour contract leaf onto a family step or a generated surface.
+   every colour contract leaf onto a family step, a generated surface, or a generated interaction
+   state, and passes the authored backdrop through. Neutral step 12 becomes `text.primary`.
 5. Runs the full WCAG 2.2 validation matrix (`validateContrast`), which stays authoritative and
-   throws `ThemeContrastError` on a hard-gate miss.
+   throws `ThemeContrastError` on a hard-gate miss. Validation measures semantic token
+   relationships, including each role's rest, hover, and pressed foregrounds against its subtle
+   ramp, and `onSolid` against solid rest, hover, and pressed.
 
 `compileTheme` returns `{ css, diagnostics }`; `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling. The
@@ -92,8 +94,8 @@ indicator. Advisory borders are not guaranteed to be visible enough on their own
 Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 
 - A single-value accent (`accent: '#...'`) is pre-adapted by `defineTheme`'s `adaptAccent` into an
-  accessible vibrant band before the scale generator sees it, so the common case never throws at
-  build time.
+  accessible vibrant band before the scale generator sees it. The pre-conditioner calls the same
+  `passesOnSolidGate` function the generator uses, with the same `text.primary`.
 - An explicit per-mode accent (`accent: { light, dark }`) is used verbatim because the author has
   chosen its lightness. If its whole tone band has no lightness where near-white or near-black
   on-solid text clears AA, `compileTheme` throws `ThemeGenerationError` naming the failing role and
@@ -103,34 +105,40 @@ Accent adaptation is forgiving but never sacrifices the AA on-solid guarantee:
 
 `scale.ts`'s `passesOnSolidGate` is the only function that decides whether a solid can carry
 readable text. It asks whether the near-white or near-black on-solid colour the generator would
-choose clears the AA text ratio plus the search headroom across both solid states the engine emits:
-step 9 and its step-10 hover. There is no third, deeper pressed state to test.
-`background.<role>.solid.pressed` reuses step 10 and carries the press through depth, finish, and
-transform instead.
+choose clears the AA text ratio plus the search headroom across the public solid rest, hover, and
+pressed colours.
 
 `defineTheme`'s `adaptAccent` pre-conditioner calls that same function rather than keeping its own
-copy. That gives two guarantees:
-
-- Any lightness the pre-conditioner accepts also passes the generator's solid-anchor search.
-- The generator emits the accent the pre-conditioner picks. The search honours it verbatim instead
-  of quietly resolving a different lightness.
+copy. Any lightness it accepts also passes the generator's solid-anchor search, and the generator
+emits the accent it picks.
 
 The pre-conditioner is necessary because its adaptation band is deliberately wider than the
 generator's tone-faithful window. It can rescue accents, such as a mid-lightness red, that the
-generator alone would report as unsatisfiable. Both searches walk the same lightness candidate grid,
-so a lightness the pre-conditioner accepts is one the solid-anchor search will visit too.
+generator alone would report as unsatisfiable. Both searches walk the same lightness candidate grid.
 
 `contrast-policy.ts` declares the shared thresholds: the 4.5 text ratio, the 3:1 non-text ratio, the
 search headroom, and the search step. `lightness-candidates.ts` is the one grid those searches walk.
 It also declares `SEMANTIC_ROLES`, the one canonical role list used by family generation, the
-semantic map, and the validation matrix. Previously, separate role lists allowed a role added only
-to the map to emit an ungated colour, while a role added only to the compiler threw an internal
-error. One list makes both sides move together.
+semantic map, and the validation matrix.
 
 ## `loadingSkeleton`
 
 `color.loadingSkeleton` maps to the neutral family's step 8, for better perceptibility of the
 loading state against typical surfaces.
+
+## Interaction states
+
+Hover and pressed colours are public semantic tokens, generated at theme compile time. Hover mixes
+the resting colour 5% toward `text.primary` in OKLab. Pressed mixes it 10% toward the same target.
+Those strengths are fixed. If a solid cannot carry readable on-solid text across the three states,
+the solid-anchor search adapts the resting colour rather than changing the mix strengths.
+
+Recipes select those tokens. They do not emit `color-mix()` or call a runtime helper. Theme authors
+do not author hover or pressed colours. There is no public overlay hover, pressed, or tint API.
+`color.overlay.backdrop` is the authored modal dimming layer; `color.surface.overlay` is the opaque
+high-elevation surface.
+
+`validateContrast` measures the emitted token pairs. It does not catalogue first-party components.
 
 ## Alpha is deferred
 

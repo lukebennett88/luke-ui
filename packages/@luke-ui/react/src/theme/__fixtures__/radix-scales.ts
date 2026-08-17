@@ -337,19 +337,20 @@ export const HUE_STRESS_CORPUS: ReadonlyArray<CorpusEntry> = [
 ];
 
 /**
- * Dead-zone sources: mid-lightness colours where neither near-white nor near-black on-solid text
- * clears AA across the solid and its hover, and whose authored tone the generator preserves. A
- * A source-toned role given one of these is genuinely unsatisfiable and throws.
+ * Dead-zone source: a mid-lightness colour whose whole tone-faithful window fails the on-solid gate
+ * for a source-toned role.
  */
-export const UNSATISFIABLE_ON_SOLID: Record<'light' | 'dark', CorpusEntry> = {
-	dark: {
-		name: 'dead-zone-blue-dark',
-		note: 'mid lightness; whole tone window is a dead zone',
-		source: 'oklch(0.55 0.2 258)',
-	},
-	light: {
-		name: 'dead-zone-red-light',
-		note: 'mid lightness; whole tone window is a dead zone',
-		source: 'oklch(0.62 0.19 27)',
-	},
+export const UNSATISFIABLE_ON_SOLID: CorpusEntry = {
+	name: 'dead-zone-red-dark',
+	note: 'mid lightness and high chroma; whole tone window is a dead zone',
+	source: 'oklch(0.58 0.28 0)',
+};
+
+/**
+ * Light-mode mid-tone the solid-anchor search adapts into its tone-faithful window.
+ */
+export const ADAPTABLE_MID_TONE: CorpusEntry = {
+	name: 'mid-tone-red-light',
+	note: 'light-mode mid lightness the solid-anchor search adapts',
+	source: 'oklch(0.62 0.19 27)',
 };

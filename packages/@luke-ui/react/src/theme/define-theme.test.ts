@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { compileTheme } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
-import { defaultDepth, defaultScrim, defineTheme, normalizeTheme } from './define-theme.js';
+import { defaultBackdrop, defaultDepth, defineTheme, normalizeTheme } from './define-theme.js';
 import { defaultSourceColors } from './foundation.js';
 import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
-import { generateFamilyWithDiagnostics } from './scale.js';
+import { FAMILY_RUNG } from './scale.js';
 
 /**
  * Splits a generated stylesheet into its five rule blocks: identity, base light, media-query dark,
@@ -110,26 +111,19 @@ describe('defineTheme accent pre-conditioning shares the generator gate', () => 
 	];
 
 	it('hands the generator an accent the solid-anchor search honours verbatim in both modes', () => {
-		// The pre-conditioner gates on `passesOnSolidGate`, the same predicate the solid-anchor search
-		// decides on. It cannot be stricter than the solver, and the solver does not re-search the chosen
-		// tone: the emitted solid is the pre-conditioned accent.
 		const resolved = accents.flatMap((accent) => {
+			const foundation = normalizeTheme({ color: { accent }, name: 'accent-gate' });
+			const { diagnostics } = compileTheme(foundation);
 			return (['light', 'dark'] as const).map((mode) => {
-				const foundation = normalizeTheme({ color: { accent }, name: 'accent-gate' });
 				const source = foundation[mode].color.accent;
-				const { diagnostics } = generateFamilyWithDiagnostics({
-					background: foundation[mode].color.background,
-					mode,
-					role: 'accent',
-					source,
-				});
+				const familyDiagnostics = diagnostics[mode].families.accent;
 				return {
 					accent,
 					mode,
-					reSearched: diagnostics.solidAnchor.adaptedForOnSolid,
+					reSearched: familyDiagnostics.solidAnchor.adaptedForOnSolid,
 					solidMovedOffPreconditionedTone:
-						Math.abs(diagnostics.family[9].l - source.l) > 1e-9 ||
-						Math.abs(diagnostics.solidAnchor.resolvedLightness - source.l) > 1e-9,
+						Math.abs(familyDiagnostics.family[FAMILY_RUNG.solid].l - source.l) > 1e-9 ||
+						Math.abs(familyDiagnostics.solidAnchor.resolvedLightness - source.l) > 1e-9,
 				};
 			});
 		});
@@ -198,16 +192,16 @@ describe('defineTheme partial per-mode merges', () => {
 	});
 });
 
-describe('defineTheme scrim validation', () => {
-	it('rejects an unsafe authored scrim value with a message naming the field', () => {
-		// The scrim is deliberately excluded from OKLCH colour parsing (its alpha channel does not fit
+describe('defineTheme backdrop validation', () => {
+	it('rejects an unsafe authored backdrop value with a message naming the field', () => {
+		// Backdrop is deliberately excluded from OKLCH colour parsing (its alpha channel does not fit
 		// that pattern) and emitted verbatim, so it needs its own shape check rather than none at all.
 		expect(() => {
 			return defineTheme({
-				color: { accent: '#3b82f6', scrim: 'oklch(0 0 0 / 0.2); } .evil {' },
-				name: 'unsafe-scrim',
+				color: { accent: '#3b82f6', backdrop: 'oklch(0 0 0 / 0.2); } .evil {' },
+				name: 'unsafe-backdrop',
 			});
-		}).toThrow('color.scrim: must be a non-empty CSS colour value');
+		}).toThrow('light.color.backdrop: must be a non-empty CSS colour value');
 	});
 });
 
@@ -292,7 +286,7 @@ describe('normalizeTheme resolves the source-tier `background` split from `neutr
 });
 
 describe('normalizeTheme resolves source colours once onto the foundation', () => {
-	it('carries generator colours as Oklch and scrim as CSS text, with defaults applied', () => {
+	it('carries generator colours as Oklch and backdrop as CSS text, with defaults applied', () => {
 		const foundation = normalizeTheme({
 			color: { accent: '#3b82f6' },
 			name: 'resolved-once',
@@ -306,8 +300,8 @@ describe('normalizeTheme resolves source colours once onto the foundation', () =
 		expect(light.warning).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.warning)));
 		expect(light.danger).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.danger)));
 		expect(light.focus).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.focus)));
-		expect(light.scrim).toBe(defaultScrim.light);
-		expect(typeof light.scrim).toBe('string');
+		expect(light.backdrop).toBe(defaultBackdrop.light);
+		expect(typeof light.backdrop).toBe('string');
 	});
 
 	it('keeps the adapted accent hue without a format-parse round trip', () => {
@@ -333,20 +327,21 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 		const css = defineTheme(input);
 		const emitted = emittedVarNames(css);
 
-		it(`${name} emits exactly the contract variables, including scrim and disabled text`, () => {
+		it(`${name} emits exactly the contract variables, including overlay backdrop and disabled text`, () => {
 			// Derived from the contract, not hardcoded: `contract.test.ts` already asserts the typed
 			// `vars` tree has exactly as many leaves as `flattenThemeContract()`, so this only needs to
 			// check that a bundled theme's emitted CSS matches that same list, not restate its length.
 			expect(emitted.size).toBe(contractNames.length);
 			expect([...emitted].sort()).toEqual([...contractNames].sort());
-			expect(emitted.has('--luke-color-scrim')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-backdrop')).toBe(true);
+			expect(emitted.has('--luke-color-overlay-hover')).toBe(false);
+			expect(emitted.has('--luke-color-overlay-pressed')).toBe(false);
+			expect(emitted.has('--luke-color-overlay-tint')).toBe(false);
+			expect(emitted.has('--luke-color-scrim')).toBe(false);
 			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
 		});
 
 		it(`${name} paints info, success, and warning with a real interactive ramp`, () => {
-			// The three feedback roles carry the same capabilities as every other role. The contract
-			// inventory cannot prove that each ramp is interactive because a flat colour still fills every
-			// leaf. These emitted values prove that each state stays distinct.
 			const blocks = splitBlocks(css);
 			for (const block of [blocks.baseLight, blocks.mediaDark]) {
 				for (const role of ['info', 'success', 'warning']) {
@@ -356,14 +351,14 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 						`--luke-color-background-${role}-subtle-pressed`,
 						`--luke-color-background-${role}-solid-rest`,
 						`--luke-color-background-${role}-solid-hover`,
+						`--luke-color-background-${role}-solid-pressed`,
 					].map((varName) => extractValue(block, varName));
 					expect(new Set(ramp).size).toBe(ramp.length);
-					// Solid pressed deliberately reuses solid hover: depth and finish carry the press.
-					expect(extractValue(block, `--luke-color-background-${role}-solid-pressed`)).toBe(
-						extractValue(block, `--luke-color-background-${role}-solid-hover`),
-					);
 					expect(extractValue(block, `--luke-color-foreground-${role}-rest`)).not.toBe(
 						extractValue(block, `--luke-color-foreground-${role}-hover`),
+					);
+					expect(extractValue(block, `--luke-color-foreground-${role}-hover`)).not.toBe(
+						extractValue(block, `--luke-color-foreground-${role}-pressed`),
 					);
 				}
 			}

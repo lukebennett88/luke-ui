@@ -36,7 +36,7 @@ const COLOR_ROLES = [
 	'warning',
 	'danger',
 	'focus',
-	'scrim',
+	'backdrop',
 ] as const satisfies ReadonlyArray<keyof ThemeInput['color']>;
 
 /** The two keys that spell one neutral decision. `inheritColor` inherits them together. */
@@ -140,7 +140,7 @@ function inheritColor(
 		info: own.info ?? base.info,
 		neutral: ownNeutral ? own.neutral : base.neutral,
 		neutralStyle: ownNeutral ? own.neutralStyle : base.neutralStyle,
-		scrim: own.scrim ?? base.scrim,
+		backdrop: own.backdrop ?? base.backdrop,
 		success: own.success ?? base.success,
 		warning: own.warning ?? base.warning,
 	};

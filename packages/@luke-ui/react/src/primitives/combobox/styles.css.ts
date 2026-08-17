@@ -370,11 +370,14 @@ const comboboxConfig = {
 					cursor: 'not-allowed',
 					opacity: vars.interaction.disabledOpacity,
 				},
-				'&[data-focused="true"]:not([data-disabled="true"])': {
+				'&[data-focused="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
 					backgroundColor: vars.color.background.neutral.subtle.rest,
 				},
-				'&[data-hovered="true"]:not([data-disabled="true"])': {
+				'&[data-hovered="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
 					backgroundColor: vars.color.background.neutral.subtle.hover,
+				},
+				'&[data-pressed="true"]:not([data-disabled="true"]):not([data-selected="true"])': {
+					backgroundColor: vars.color.background.neutral.subtle.pressed,
 				},
 				'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 					backgroundColor: vars.color.background.accent.subtle.hover,
@@ -382,6 +385,12 @@ const comboboxConfig = {
 				'&[data-selected="true"]:not([data-disabled="true"])': {
 					backgroundColor: vars.color.background.accent.subtle.rest,
 					fontWeight: vars.font.weight.label,
+				},
+				'&[data-hovered="true"][data-selected="true"]:not([data-disabled="true"])': {
+					backgroundColor: vars.color.background.accent.subtle.hover,
+				},
+				'&[data-pressed="true"][data-selected="true"]:not([data-disabled="true"])': {
+					backgroundColor: vars.color.background.accent.subtle.pressed,
 				},
 				'&[data-selected="true"][data-focus-visible="true"]:not([data-disabled="true"])': {
 					backgroundColor: vars.color.background.accent.subtle.pressed,

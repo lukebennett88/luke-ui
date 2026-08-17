@@ -11,13 +11,14 @@ mode. A component then stays consistent, because it does not need to know the un
 
 Surface roles describe where an element sits in the interface:
 
-- `canvas`: the page.
-- `recessed`: an inset area.
-- `floating`: elevated UI, such as menus and cards.
-- `overlay`: dialogs and other high-elevation surfaces.
+- `color.surface.canvas`: the page.
+- `color.surface.recessed`: an inset area.
+- `color.surface.floating`: elevated UI, such as menus and cards.
+- `color.surface.overlay`: dialogs and other high-elevation surfaces. This is an opaque colour.
 
-`scrim` dims the page behind an open overlay. Text uses `primary` and `secondary` roles. Borders
-distinguish decorative, control, and focus uses.
+`color.overlay.backdrop` dims content behind a modal. It is not a surface colour.
+
+Text uses `primary` and `secondary` roles. Borders distinguish decorative, control, and focus uses.
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
@@ -54,33 +55,35 @@ stays constant, so only the role and mode change its colours.
 
 ### Background and foreground
 
-Each role has a `subtle` and a `solid` background ramp, and each ramp has `rest`, `hover`, and
-`pressed` states:
+Each role has a `subtle` and a `solid` background ramp. Each ramp has `rest`, `hover`, and `pressed`
+states:
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
 
 vars.color.background.warning.subtle.rest;
+vars.color.background.warning.subtle.hover;
+vars.color.background.warning.subtle.pressed;
+vars.color.background.warning.solid.rest;
 vars.color.background.warning.solid.hover;
+vars.color.background.warning.solid.pressed;
 ```
 
-`rest` is an explicit state rather than an implied default. A token path cannot be both a string
-leaf and the parent of `hover` and `pressed`, so resting values need their own name. `solid.pressed`
-deliberately reuses the `solid.hover` colour, because there is no third, deeper solid rung. A
-component carries a pressed look through depth, finish, or a transform. It does not invent another
-solid colour.
-
-Foreground gives each role a resting and a stronger interactive colour, plus a colour guaranteed to
-read against that role's solid backgrounds:
+Foreground gives each role rest, hover, and pressed colours, plus a colour guaranteed to read
+against that role's solid backgrounds:
 
 ```tsx
 vars.color.foreground.warning.rest;
 vars.color.foreground.warning.hover;
+vars.color.foreground.warning.pressed;
 vars.color.foreground.warning.onSolid;
 ```
 
-There is no foreground `pressed`. The background ramp and other cues carry a pressed look instead,
-so text and icons reuse `hover` for a pressed control.
+`onSolid` is a single token, not a state ramp. It must read against `solid.rest`, `solid.hover`, and
+`solid.pressed`.
+
+Built-in controls select these tokens for hover and pressed. Custom interactive elements should do
+the same.
 
 ### Borders
 
@@ -126,8 +129,8 @@ CSS variable names followed the same shape, so `--luke-color-intent-danger-surfa
 became `--luke-color-background-danger-solid-hover`.
 
 The current contract also carries capabilities `color.intent` never had. It adds a foreground and
-border for `neutral`. It also adds interactive backgrounds, hover foregrounds, and on-solid
-foregrounds for `info`, `success`, and `warning`.
+border for `neutral`. It also adds interactive backgrounds, hover and pressed foregrounds, and
+on-solid foregrounds for `info`, `success`, and `warning`.
 
 ## Continue learning
 

@@ -1,8 +1,8 @@
 /**
  * The one default semantic colour mapping. `mapSemanticColors` aliases every generated colour
- * contract leaf onto a private scale family's step or a generated surface, per the locked mapping
- * table. It is a pure lookup. No colour math happens here, and it never distorts a family or
- * surface to make a leaf fit.
+ * contract leaf onto a private scale family's step, a generated surface, or a generated interaction
+ * state. Resting role colours are a lookup. Hover and pressed colours mix that rest colour toward
+ * `text.primary` at fixed strengths. The map never distorts a family or surface to make a leaf fit.
  *
  * The role list it keys off comes from `contrast-policy.ts`, which `build-theme.ts`'s validation
  * matrix reads too, so a role can never be emitted here without being gated there. Values are
@@ -17,6 +17,12 @@ import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { GeneratedSurfaces } from './elevation.js';
 import { pathEntry, pathRecord } from './path-record.js';
 import type { FamilyRole, ScaleFamily } from './scale.js';
+import {
+	FAMILY_RUNG,
+	INTERACTION_HOVER_STRENGTH,
+	INTERACTION_PRESSED_STRENGTH,
+	mixInteractionState,
+} from './scale.js';
 
 /** Every generated colour contract leaf's CSS value, keyed by its dotted path. */
 export type SemanticColorValues = {
@@ -37,6 +43,11 @@ type FunctionalColorValues = {
 /** The inputs to {@link mapSemanticColors}. */
 interface MapSemanticColorsRequest {
 	/**
+	 * `color.overlay.backdrop`'s authored value, passed through verbatim (it may carry an alpha
+	 * channel).
+	 */
+	backdrop: string;
+	/**
 	 * `color.border.control`'s solved value is a dedicated contrast boundary, not a scale-step alias.
 	 * `control-border.ts`'s `solveControlBorder` resolves it against `surfaces.canvas` and
 	 * `surfaces.recessed` before this map runs, then this function passes it through verbatim.
@@ -46,16 +57,16 @@ interface MapSemanticColorsRequest {
 	families: Record<FamilyRole, ScaleFamily>;
 	/** The resolved keyboard-focus source colour. */
 	focus: Oklch;
-	/** The authored scrim value, passed through verbatim (it may carry an alpha channel). */
-	scrim: string;
 	/** The generated elevation surface set, already mode-resolved. */
 	surfaces: GeneratedSurfaces;
 }
 
 /**
  * Resolves every colour contract leaf onto the private families and surfaces, per the locked
- * semantic mapping table. `families` and `surfaces` are already mode-resolved. `scrim` passes through
- * verbatim. `focus` is the resolved keyboard-focus source colour.
+ * semantic mapping table. `families` and `surfaces` are already mode-resolved. `backdrop` passes
+ * through verbatim. `focus` is the resolved keyboard-focus source colour. Neutral
+ * {@link FAMILY_RUNG.textPrimary} becomes `text.primary` and is the colour hover and pressed states
+ * mix toward.
  */
 export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticColorValues {
 	return {
@@ -65,19 +76,19 @@ export function mapSemanticColors(request: MapSemanticColorsRequest): SemanticCo
 }
 
 function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColorValues {
-	const { families, surfaces, scrim, focus, controlBorder } = request;
+	const { families, surfaces, backdrop, focus, controlBorder } = request;
 	const neutral = families.neutral;
 	return {
 		'color.surface.canvas': formatOklch(surfaces.canvas),
 		'color.surface.recessed': formatOklch(surfaces.recessed),
 		'color.surface.floating': formatOklch(surfaces.floating),
 		'color.surface.overlay': formatOklch(surfaces.overlay),
-		'color.scrim': scrim,
-		'color.loadingSkeleton': formatOklch(neutral[8]),
-		'color.text.primary': formatOklch(neutral[12]),
-		'color.text.secondary': formatOklch(neutral[11]),
-		'color.text.disabled': formatOklch(neutral[8]),
-		'color.border.decorative': formatOklch(neutral[6]),
+		'color.overlay.backdrop': backdrop,
+		'color.loadingSkeleton': formatOklch(neutral[FAMILY_RUNG.muted]),
+		'color.text.primary': formatOklch(neutral[FAMILY_RUNG.textPrimary]),
+		'color.text.secondary': formatOklch(neutral[FAMILY_RUNG.foreground]),
+		'color.text.disabled': formatOklch(neutral[FAMILY_RUNG.muted]),
+		'color.border.decorative': formatOklch(neutral[FAMILY_RUNG.decorative]),
 		'color.border.control': formatOklch(controlBorder),
 		'color.border.focus': formatOklch(focus),
 	};
@@ -86,23 +97,34 @@ function mapFunctionalColors(request: MapSemanticColorsRequest): FunctionalColor
 function mapRoleColorValues(families: Record<FamilyRole, ScaleFamily>): {
 	[Path in RoleColorPath]: string;
 } {
+	const textPrimary = families.neutral[FAMILY_RUNG.textPrimary];
 	return pathRecord(
 		SEMANTIC_ROLES.flatMap((role) => {
 			const family = families[role];
+			const subtle = interactionStates(family[FAMILY_RUNG.subtle], textPrimary);
+			const solid = interactionStates(family[FAMILY_RUNG.solid], textPrimary);
+			const foreground = interactionStates(family[FAMILY_RUNG.foreground], textPrimary);
 			return [
-				pathEntry(`color.background.${role}.subtle.rest`, formatOklch(family[3])),
-				pathEntry(`color.background.${role}.subtle.hover`, formatOklch(family[4])),
-				pathEntry(`color.background.${role}.subtle.pressed`, formatOklch(family[5])),
-				pathEntry(`color.background.${role}.solid.rest`, formatOklch(family[9])),
-				pathEntry(`color.background.${role}.solid.hover`, formatOklch(family[10])),
-				// Deliberate dup: the pressed solid is carried by depth.recessed /
-				// actionControlFinish.recessed / transform, not a third solid colour.
-				pathEntry(`color.background.${role}.solid.pressed`, formatOklch(family[10])),
-				pathEntry(`color.foreground.${role}.rest`, formatOklch(family[11])),
-				pathEntry(`color.foreground.${role}.hover`, formatOklch(family[12])),
+				pathEntry(`color.background.${role}.subtle.rest`, subtle.rest),
+				pathEntry(`color.background.${role}.subtle.hover`, subtle.hover),
+				pathEntry(`color.background.${role}.subtle.pressed`, subtle.pressed),
+				pathEntry(`color.background.${role}.solid.rest`, solid.rest),
+				pathEntry(`color.background.${role}.solid.hover`, solid.hover),
+				pathEntry(`color.background.${role}.solid.pressed`, solid.pressed),
+				pathEntry(`color.foreground.${role}.rest`, foreground.rest),
+				pathEntry(`color.foreground.${role}.hover`, foreground.hover),
+				pathEntry(`color.foreground.${role}.pressed`, foreground.pressed),
 				pathEntry(`color.foreground.${role}.onSolid`, formatOklch(family.contrast)),
-				pathEntry(`color.border.${role}`, formatOklch(family[7])),
+				pathEntry(`color.border.${role}`, formatOklch(family[FAMILY_RUNG.border])),
 			];
 		}),
 	);
+}
+
+function interactionStates(rest: Oklch, toward: Oklch) {
+	return {
+		rest: formatOklch(rest),
+		hover: formatOklch(mixInteractionState(rest, toward, INTERACTION_HOVER_STRENGTH)),
+		pressed: formatOklch(mixInteractionState(rest, toward, INTERACTION_PRESSED_STRENGTH)),
+	};
 }

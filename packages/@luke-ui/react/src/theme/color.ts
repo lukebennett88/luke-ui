@@ -40,6 +40,21 @@ export function parseColor(input: string): Oklch {
 }
 
 /**
+ * Mixes opaque `a` and `b` in OKLab, matching
+ * `color-mix(in oklab, a <100-N>%, b <N>%)` where `amountOfB` is `N / 100`.
+ */
+export function mixOklab(a: Oklch, b: Oklch, amountOfB: number): Oklch {
+	const t = clampUnit(amountOfB);
+	const from = oklchToOklab(a);
+	const to = oklchToOklab(b);
+	return oklabToOklch({
+		l: from.l * (1 - t) + to.l * t,
+		a: from.a * (1 - t) + to.a * t,
+		b: from.b * (1 - t) + to.b * t,
+	});
+}
+
+/**
  * WCAG 2.2 contrast ratio between two colours, computed on their sRGB-gamut-mapped equivalents.
  */
 export function contrastRatio(a: Oklch, b: Oklch): number {
@@ -115,6 +130,12 @@ function relativeLuminance(color: Oklch): number {
 	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
+interface Oklab {
+	l: number;
+	a: number;
+	b: number;
+}
+
 type SrgbTriple = [number, number, number];
 
 const HEX_PATTERN = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
@@ -156,13 +177,30 @@ function isInSrgbGamut(color: Oklch): boolean {
 	);
 }
 
-function oklchToLinearSrgb(color: Oklch): SrgbTriple {
+function oklchToOklab(color: Oklch): Oklab {
 	const hueRadians = (normalizeHue(color.h) * Math.PI) / 180;
-	const labA = color.c * Math.cos(hueRadians);
-	const labB = color.c * Math.sin(hueRadians);
-	const lCubeRoot = color.l + 0.3963377774 * labA + 0.2158037573 * labB;
-	const mCubeRoot = color.l - 0.1055613458 * labA - 0.0638541728 * labB;
-	const sCubeRoot = color.l - 0.0894841775 * labA - 1.291485548 * labB;
+	return {
+		l: color.l,
+		a: color.c * Math.cos(hueRadians),
+		b: color.c * Math.sin(hueRadians),
+	};
+}
+
+function oklabToOklch(color: Oklab): Oklch {
+	const c = Math.hypot(color.a, color.b);
+	const h = c < 0.000001 ? 0 : normalizeHue((Math.atan2(color.b, color.a) * 180) / Math.PI);
+	return {
+		l: color.l,
+		c,
+		h,
+	};
+}
+
+function oklchToLinearSrgb(color: Oklch): SrgbTriple {
+	const { l, a: labA, b: labB } = oklchToOklab(color);
+	const lCubeRoot = l + 0.3963377774 * labA + 0.2158037573 * labB;
+	const mCubeRoot = l - 0.1055613458 * labA - 0.0638541728 * labB;
+	const sCubeRoot = l - 0.0894841775 * labA - 1.291485548 * labB;
 	const lCone = lCubeRoot ** 3;
 	const mCone = mCubeRoot ** 3;
 	const sCone = sCubeRoot ** 3;
@@ -181,14 +219,9 @@ function linearSrgbToOklch(rgb: SrgbTriple): Oklch {
 	const lCubeRoot = Math.cbrt(lCone);
 	const mCubeRoot = Math.cbrt(mCone);
 	const sCubeRoot = Math.cbrt(sCone);
-	const l = 0.2104542553 * lCubeRoot + 0.793617785 * mCubeRoot - 0.0040720468 * sCubeRoot;
-	const labA = 1.9779984951 * lCubeRoot - 2.428592205 * mCubeRoot + 0.4505937099 * sCubeRoot;
-	const labB = 0.0259040371 * lCubeRoot + 0.7827717662 * mCubeRoot - 0.808675766 * sCubeRoot;
-	const c = Math.hypot(labA, labB);
-	const h = c < 0.000001 ? 0 : normalizeHue((Math.atan2(labB, labA) * 180) / Math.PI);
-	return {
-		l,
-		c,
-		h,
-	};
+	return oklabToOklch({
+		l: 0.2104542553 * lCubeRoot + 0.793617785 * mCubeRoot - 0.0040720468 * sCubeRoot,
+		a: 1.9779984951 * lCubeRoot - 2.428592205 * mCubeRoot + 0.4505937099 * sCubeRoot,
+		b: 0.0259040371 * lCubeRoot + 0.7827717662 * mCubeRoot - 0.808675766 * sCubeRoot,
+	});
 }

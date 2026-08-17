@@ -45,8 +45,9 @@ with no class and no JS required. Neither step injects styles at runtime.
   `Icon` owns its box, and `IconSizeProvider` (`FIELD_CONTROL_ICON_SIZE`) owns its per-size step —
   and gives the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control
   is not a plain `Group` with that state to hand, so it stays CSS-driven.
-- `overlays/mobile-overlay.css.ts`: the scrim, tray, and dialog styles `MobileOverlay` renders for
-  the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and `tray/index.css`.
+- `overlays/mobile-overlay.css.ts`: the backdrop, tray, and dialog styles `MobileOverlay` renders
+  for the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and
+  `tray/index.css`.
 - `overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
@@ -58,10 +59,10 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
   directly so it stays source-owned and free of styling-engine types.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
-  and the one resolution of curated defaults (source colours, materials, radius, scrim) into the
+  and the one resolution of curated defaults (source colours, materials, radius, backdrop) into the
   internal foundation.
 - `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into,
-  with generator source colours as OKLCH and CSS-text values such as scrim as strings, plus the
+  with generator source colours as OKLCH and CSS-text values such as backdrop as strings, plus the
   curated colour, radius, and typography defaults.
 - `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
 - `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and the canonical
@@ -69,8 +70,9 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/lightness-candidates.ts`: the shared lightness grid the accent pre-conditioner,
   solid-anchor search, and control-border solver walk.
 - `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
-  constrained step-9 solid-anchor search and `passesOnSolidGate`, the on-solid accessibility gate.
-  Every semantic role's solid clears 4.5:1 against on-solid text.
+  constrained step-9 solid-anchor search and `passesOnSolidGate`. Semantic consumers read named
+  rungs via `FAMILY_RUNG`. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for
+  interaction-state generation.
 - `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
   `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
   no `--luke-motion-duration-*` custom property exists.
@@ -81,7 +83,7 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
   `surfaces.canvas` is always exactly the resolved `background`.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
-  surfaces onto the colour contract's leaves.
+  surfaces onto the colour contract's leaves, including generated hover and pressed states.
 - `theme/diagnostics.ts`: the `compileTheme` diagnostics data model (family, surface, solid-anchor,
   and contrast-check detail) consumed by the "Theme/Diagnostics" Storybook story.
 - `theme/token-board.tsx`: the contract-driven "Theme/Token board" Storybook story, which renders

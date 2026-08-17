@@ -240,6 +240,20 @@ interface LeafPreviewProps {
 type PreviewRenderer = (props: LeafPreviewProps) => ReactNode;
 
 function ColorPreview({ path, varName }: LeafPreviewProps) {
+	if (path === 'color.overlay.backdrop') {
+		return (
+			<span
+				aria-label={`${path} sample`}
+				role="img"
+				style={{
+					...swatchBoxStyle,
+					backgroundColor: vars.color.surface.canvas,
+					backgroundImage: `linear-gradient(var(${varName}), var(${varName}))`,
+				}}
+			/>
+		);
+	}
+
 	return (
 		<span
 			aria-label={`${path} sample`}

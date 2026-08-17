@@ -13,8 +13,8 @@ const typeStyle = {
 
 /**
  * The background capabilities every semantic role gets, spread once per role so the six roles cannot
- * drift apart. `rest` is an explicit leaf because a nested tree path cannot be both a string leaf and
- * the parent of `hover` and `pressed`.
+ * drift apart. `rest` is an explicit leaf because a nested tree path cannot be both a string leaf
+ * and the parent of `hover` and `pressed`.
  */
 const roleBackground = {
 	subtle: {
@@ -30,12 +30,13 @@ const roleBackground = {
 };
 
 /**
- * The content capabilities every semantic role gets. There is no `pressed` foreground: press is
- * carried by the background ramp and non-colour cues, so text and icons reuse `hover`.
+ * The content capabilities every semantic role gets. `onSolid` is a single contrast-solved colour
+ * for that role's solid fill, not a state ramp.
  */
 const roleForeground = {
 	rest: null,
 	hover: null,
+	pressed: null,
 	onSolid: null,
 };
 
@@ -138,10 +139,10 @@ export const themeContractTree = {
 	 * (`neutral`, `accent`, `info`, `success`, `warning`, `danger`).
 	 *
 	 * Organised by the property a token styles, not by the component that happens to use it: the
-	 * functional leaves (`surface`, `scrim`, `loadingSkeleton`, `text`, and the first three `border`
+	 * functional leaves (`surface`, `overlay`, `loadingSkeleton`, `text`, and the first three `border`
 	 * leaves) come first, then `background` / `foreground` / the role leaves under `border` give all
 	 * six roles the same capabilities. A role's meaning never decides which visual slots it can fill,
-	 * so no role is a special case here.
+	 * so no role is a special case here. Hover and pressed leaves are generated, not authored.
 	 */
 	color: {
 		surface: {
@@ -150,8 +151,10 @@ export const themeContractTree = {
 			floating: null,
 			overlay: null,
 		},
-		/** Modal-backdrop dimming layer behind an overlay surface. */
-		scrim: null,
+		/** Translucent layer painted over other interface content, such as a modal backdrop. */
+		overlay: {
+			backdrop: null,
+		},
 		loadingSkeleton: null,
 		text: {
 			primary: null,
@@ -159,7 +162,7 @@ export const themeContractTree = {
 			/** Dedicated muted text (form fields), not opacity. Emits `--luke-color-text-disabled`. */
 			disabled: null,
 		},
-		/** Subtle and solid background ramps, each with the shared rest / hover / pressed states. */
+		/** Subtle and solid background ramps, each with generated rest / hover / pressed states. */
 		background: {
 			neutral: { ...roleBackground },
 			accent: { ...roleBackground },
@@ -168,7 +171,7 @@ export const themeContractTree = {
 			warning: { ...roleBackground },
 			danger: { ...roleBackground },
 		},
-		/** Resting and stronger interactive content colours, plus the guaranteed on-solid pairing. */
+		/** Resting, hover, and pressed content colours, plus the guaranteed on-solid pairing. */
 		foreground: {
 			neutral: { ...roleForeground },
 			accent: { ...roleForeground },
