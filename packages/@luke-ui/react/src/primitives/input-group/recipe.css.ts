@@ -2,7 +2,6 @@ import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
-	inputStates,
 } from '../../styles/input-states.js';
 import type { RecipeSelection, SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -10,7 +9,7 @@ import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
 
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
-	composeInputStateSelectors(inputStates);
+	composeInputStateSelectors();
 
 /**
  * Raw slotted config for the `InputGroup` primitive.

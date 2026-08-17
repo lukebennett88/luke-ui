@@ -21,8 +21,8 @@ with no class and no JS required. Neither step injects styles at runtime.
   a layer.
 - `styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
-- `styles/input-states.ts`: the shared field control-state selectors (`inputStates`,
-  `composeInputStateSelectors`, `descendantDisabledSelector`) field recipes compose. It is named
+- `styles/input-states.ts`: the shared field control-state selectors
+  (`composeInputStateSelectors`, `descendantDisabledSelector`) that field recipes compose. It is named
   `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module composes its
   plain data and functions.
 - `styles/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
@@ -291,19 +291,15 @@ with the recipe.
 "invalid", and "read-only" mean for a control, from `styles/input-states.ts`:
 
 ```ts
-import {
-	composeInputStateSelectors,
-	descendantDisabledSelector,
-	inputStates,
-} from './input-states.js';
+import { composeInputStateSelectors, descendantDisabledSelector } from './input-states.js';
 
-const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSelectors(inputStates);
+const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSelectors();
 ```
 
-`inputStates` is the base attribute/pseudo-class selector for each state.
-`composeInputStateSelectors` combines them into the mutually exclusive selectors a recipe applies to
-its styles (for example, `hover` deliberately excludes an element that is also focused or
-read-only). Both field recipes use these definitions unchanged.
+`composeInputStateSelectors` owns the shared attribute and pseudo-class matrix, then returns the
+mutually exclusive selectors a recipe applies to its styles (for example, `hover` deliberately
+excludes an element that is also focused or read-only). Both field recipes use these definitions
+unchanged. Control-specific selectors stay in the TextField and Combobox recipes.
 
 Resist widening a state to probe descendants with `:has()`. React Aria publishes `isDisabled` and
 `isInvalid` through `GroupContext`, so a control group already carries `data-disabled` and
