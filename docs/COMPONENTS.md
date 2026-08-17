@@ -29,6 +29,8 @@ Use the component generator for new normal component entrypoints:
 pnpm run generate:component --args <name> <docs-group>
 ```
 
+`--args` skips the remaining prompts and uses the defaults in `component-creation-plan.ts`.
+
 Primitive scaffolding is not handled by the component generator.
 
 Public subpath `index.ts` files are export-only. A component's implementation lives in a named

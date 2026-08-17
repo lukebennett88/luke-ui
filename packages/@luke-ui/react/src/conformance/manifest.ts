@@ -16,10 +16,12 @@ export const componentTestManifest = [
 	['Box', 'box', ['dom'], 'none', 'applicable'],
 	['Button', 'button', ['dom'], 'required', 'applicable'],
 	['Button primitive', 'primitives/button', [], 'none', 'none'],
-	['Checkbox', 'checkbox', ['dom', 'field'], 'required', 'applicable'],
+	// Fields take `inputRef` and RAC moves `id` onto the control, so they cannot satisfy `dom`.
+	['Checkbox', 'checkbox', ['field'], 'required', 'applicable'],
 	['Checkbox primitive', 'primitives/checkbox', [], 'none', 'none'],
 	['Code', 'code', [], 'none', 'none'],
-	['ComboboxField', 'combobox-field', ['dom', 'field'], 'required', 'applicable'],
+	// Fields take `inputRef` and RAC moves `id` onto the control, so they cannot satisfy `dom`.
+	['ComboboxField', 'combobox-field', ['field'], 'required', 'applicable'],
 	['Combobox primitive', 'primitives/combobox', [], 'none', 'none'],
 	['Em', 'em', [], 'none', 'none'],
 	['Emoji', 'emoji', [], 'none', 'applicable'],
@@ -36,7 +38,8 @@ export const componentTestManifest = [
 	['Quote', 'quote', [], 'none', 'none'],
 	['Strong', 'strong', [], 'none', 'none'],
 	['Text', 'text', [], 'none', 'applicable'],
-	['TextField', 'text-field', ['dom', 'field'], 'required', 'applicable'],
+	// Fields take `inputRef` and RAC moves `id` onto the control, so they cannot satisfy `dom`.
+	['TextField', 'text-field', ['field'], 'required', 'applicable'],
 	['Theme', 'theme', [], 'none', 'none'],
 	['VisuallyHidden', 'visually-hidden', [], 'none', 'none'],
 ].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({

@@ -11,11 +11,6 @@ testConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a checkbox control.');
 		return control;
 	},
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected the Checkbox root.');
-		return target;
-	},
 	render: (props = {}) => {
 		return render(<Checkbox {...props}>Terms</Checkbox>);
 	},

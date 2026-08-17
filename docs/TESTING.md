@@ -55,6 +55,10 @@ contracts are independent, and a component can hold both:
 - **Field**: object and callback `inputRef`, native `name`/form participation, `onBlur`, and label,
   description, and error association.
 
+A field component often cannot also hold `dom`. React Aria moves `id` onto the control, and Luke UI
+fields take `inputRef` instead of a plain `ref`, so no single element receives the full DOM
+contract.
+
 An empty list is an explicit exception for a component that does not satisfy either contract.
 
 The shared conformance helper tests these contracts once. A component's test file declares its

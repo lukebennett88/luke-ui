@@ -44,11 +44,6 @@ testConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
 		return control;
 	},
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected the ComboboxField root.');
-		return target;
-	},
 	render: (props = {}) => {
 		return render(
 			<ComboboxField<CountryItem>
