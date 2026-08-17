@@ -52,19 +52,19 @@ catalogs:
       specifier: ^4.3.3
       version: 4.3.3
     '@tanstack/react-form':
-      specifier: ^1.33.3
+      specifier: ^1.33.5
       version: 1.33.5
     '@tanstack/react-router':
-      specifier: ^1.170.19
+      specifier: ^1.170.27
       version: 1.170.27
     '@tanstack/react-start':
-      specifier: ^1.168.36
+      specifier: ^1.168.44
       version: 1.168.44
     '@tanstack/router-cli':
-      specifier: ^1.167.22
+      specifier: ^1.167.28
       version: 1.167.28
     '@tanstack/start-static-server-functions':
-      specifier: ^1.167.20
+      specifier: ^1.167.27
       version: 1.167.27
     '@turbo/gen':
       specifier: ^2.10.8
