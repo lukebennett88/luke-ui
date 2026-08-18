@@ -10,6 +10,7 @@ import {
 	VISUAL_SUMMARY_FILE,
 	visualPackageRoot,
 	visualRepoRootFromPackage,
+	visualViteFsAllow,
 } from './visual-regression-contract.js';
 
 const packageRoot = visualPackageRoot(import.meta.url);
@@ -39,4 +40,13 @@ test('workflow and docs use VISUAL_ARTIFACTS_DIR', () => {
 
 	expect(docs).toContain(VISUAL_REPORT_INDEX);
 	expect(docs).toContain(VISUAL_ARTIFACTS_DIR);
+});
+
+test('Vite fs.allow includes VISUAL_CAPTURE_DIR when the runner sets it', () => {
+	const packageRoot = '/repo/packages/@luke-ui/react';
+	expect(visualViteFsAllow(packageRoot, {})).toEqual(['/repo']);
+	expect(visualViteFsAllow(packageRoot, { VISUAL_CAPTURE_DIR: '/tmp/captures' })).toEqual([
+		'/repo',
+		'/tmp/captures',
+	]);
 });

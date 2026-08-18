@@ -7,13 +7,12 @@ import { playwright } from 'vite-plus/test/browser-playwright';
 import {
 	VISUAL_CAPTURE_DIR_ENV,
 	VISUAL_CAPTURE_FALLBACK_DIR,
-	visualRepoRootFromPackage,
+	visualViteFsAllow,
 } from './scripts/visual-regression-contract.js';
 
 const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.join(dirname, '.storybook');
-const repoRoot = visualRepoRootFromPackage(dirname);
 const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
 
 export default defineConfig({
@@ -30,7 +29,7 @@ export default defineConfig({
 	},
 	server: {
 		fs: {
-			allow: [repoRoot],
+			allow: visualViteFsAllow(dirname),
 		},
 	},
 	resolve: {

@@ -38,3 +38,15 @@ export function visualArtifactsRoot(repoRoot: string): string {
 export function visualReportIndex(repoRoot: string): string {
 	return path.join(repoRoot, ...VISUAL_REPORT_INDEX.split('/'));
 }
+
+/** Directories Vitest may write while capturing, including a runner-provided path outside a worktree. */
+export function visualViteFsAllow(
+	packageRoot: string,
+	env: NodeJS.ProcessEnv = process.env,
+): Array<string> {
+	const repoRoot = visualRepoRootFromPackage(packageRoot);
+	const captureDir = env[VISUAL_CAPTURE_DIR_ENV];
+	return captureDir === undefined || captureDir === ''
+		? [repoRoot]
+		: [repoRoot, path.resolve(captureDir)];
+}
