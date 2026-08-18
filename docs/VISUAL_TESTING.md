@@ -18,6 +18,8 @@ The command compares matching capture IDs and writes a self-contained report to
 directory are defined in `packages/@luke-ui/react/src/test-utils/visual-capture-id.ts` and
 `packages/@luke-ui/react/scripts/visual-regression-contract.ts`. GitHub Actions cannot import those
 modules. A unit test fails if the workflow lists a different harness file or artifact path.
+`vitest.config.ts` is copied into the base worktree, so it also cannot import those modules. A unit
+test fails if it drifts from the capture-dir literals.
 
 The first run installs and builds the comparison worktree. Later runs reuse its ignored cache while
 the base SHA, platform, architecture, browser, lockfile, and visual configuration remain unchanged.

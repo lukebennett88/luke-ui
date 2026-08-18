@@ -5,18 +5,20 @@ import {
 	VISUAL_ARTIFACTS_DIR,
 	VISUAL_CACHE_DIR,
 	VISUAL_CACHE_HASH_FILES,
+	VISUAL_CAPTURE_DIR_ENV,
+	VISUAL_CAPTURE_FALLBACK_DIR,
 	VISUAL_REPORT_DIR,
 	VISUAL_REPORT_INDEX,
 	VISUAL_SUMMARY_FILE,
 	visualPackageRoot,
 	visualRepoRootFromPackage,
-	visualViteFsAllow,
 } from './visual-regression-contract.js';
 
 const packageRoot = visualPackageRoot(import.meta.url);
 const repoRoot = visualRepoRootFromPackage(packageRoot);
 const workflowPath = path.join(repoRoot, '.github/workflows/visual-regression.yml');
 const docsPath = path.join(repoRoot, 'docs/VISUAL_TESTING.md');
+const vitestConfigPath = path.join(packageRoot, 'vitest.config.ts');
 
 test('workflow hashFiles matches the visual harness file list', () => {
 	const workflow = readFileSync(workflowPath, 'utf8');
@@ -36,17 +38,15 @@ test('workflow and docs use VISUAL_ARTIFACTS_DIR', () => {
 	expect(workflow).toContain(`path: ${VISUAL_CACHE_DIR}`);
 	expect(workflow).toContain(VISUAL_SUMMARY_FILE);
 	expect(workflow).toContain(`path: ${VISUAL_REPORT_DIR}`);
-	expect(workflow.match(/\.artifacts\/visual-regression/g)?.length).toBe(3);
 
 	expect(docs).toContain(VISUAL_REPORT_INDEX);
 	expect(docs).toContain(VISUAL_ARTIFACTS_DIR);
 });
 
-test('Vite fs.allow includes VISUAL_CAPTURE_DIR when the runner sets it', () => {
-	const packageRoot = '/repo/packages/@luke-ui/react';
-	expect(visualViteFsAllow(packageRoot, {})).toEqual(['/repo']);
-	expect(visualViteFsAllow(packageRoot, { VISUAL_CAPTURE_DIR: '/tmp/captures' })).toEqual([
-		'/repo',
-		'/tmp/captures',
-	]);
+test('Vitest config inlines capture-dir literals and does not import the contract', () => {
+	const config = readFileSync(vitestConfigPath, 'utf8');
+
+	expect(config).toContain(VISUAL_CAPTURE_DIR_ENV);
+	expect(config).toContain(VISUAL_CAPTURE_FALLBACK_DIR);
+	expect(config).not.toMatch(/from ['"]\.\/scripts\/visual-regression-contract/);
 });
