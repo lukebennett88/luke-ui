@@ -3,6 +3,10 @@ import path from 'node:path';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { PNG } from 'pngjs';
 import { expect, test } from 'vite-plus/test';
+import {
+	formatVisualCaptureName,
+	formatVisualViewport,
+} from '../src/test-utils/visual-capture-id.js';
 import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
 const png = (red: number) => {
@@ -55,6 +59,31 @@ const pngWithBand = (
 	return PNG.sync.write(image);
 };
 
+test('records the full viewport token produced by the capture-name helper', async () => {
+	const root = await mkdtemp(path.join(tmpdir(), 'visual-viewport-'));
+	const base = path.join(root, 'base');
+	const current = path.join(root, 'current');
+	await Promise.all([base, current].map((directory) => mkdir(directory)));
+	const captureName = formatVisualCaptureName('button/sink', formatVisualViewport(1024, 800));
+	const relativeFile = `${captureName}.png`;
+	await Promise.all(
+		[base, current].map((directory) =>
+			mkdir(path.join(directory, path.dirname(relativeFile)), { recursive: true }),
+		),
+	);
+	await Promise.all([
+		writeFile(path.join(base, relativeFile), png(0)),
+		writeFile(path.join(current, relativeFile), png(0)),
+	]);
+	const [result] = await compareCaptures(base, current, path.join(root, 'diff'));
+	expect(result).toMatchObject({
+		baseViewport: '1024x800',
+		currentViewport: '1024x800',
+		id: 'button/sink',
+		status: 'unchanged',
+	});
+});
+
 test('classifies matched, changed, added, and removed captures', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-regression-'));
 	const base = path.join(root, 'base');
@@ -99,8 +128,9 @@ test('counts anti-aliased pixels and flags a removed thin stroke as a change', a
 
 test('rejects a tall capture whose bottom decile never painted', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-painted-'));
+	const captureName = formatVisualCaptureName('tall', formatVisualViewport(1024, 800));
 	await writeFile(
-		path.join(root, 'tall__viewport-1024x800.png'),
+		path.join(root, `${captureName}.png`),
 		pngWithBand(1024, 900, [0, 0, 0, 255], [10, 10, 10, 255]),
 	);
 
@@ -123,7 +153,10 @@ test('accepts a tall capture whose bottom decile painted', async () => {
 			image.data.set(color, index);
 		}
 	}
-	await writeFile(path.join(root, 'tall__viewport-1024x800.png'), PNG.sync.write(image));
+	await writeFile(
+		path.join(root, `${formatVisualCaptureName('tall', formatVisualViewport(1024, 800))}.png`),
+		PNG.sync.write(image),
+	);
 
 	await expect(assertCapturesPainted(root)).resolves.toBeUndefined();
 });
@@ -131,7 +164,7 @@ test('accepts a tall capture whose bottom decile painted', async () => {
 test('ignores a capture that fits its viewport even with a uniform bottom decile', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-painted-'));
 	await writeFile(
-		path.join(root, 'fits__viewport-1024x800.png'),
+		path.join(root, `${formatVisualCaptureName('fits', formatVisualViewport(1024, 800))}.png`),
 		pngWithBand(1024, 720, [0, 0, 0, 255], [0, 0, 0, 255]),
 	);
 

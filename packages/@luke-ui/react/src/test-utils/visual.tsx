@@ -3,6 +3,7 @@ import { expect } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
 import type { VisualAppearance } from './render.js';
+import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
 
 const VISUAL_CAPTURE_ID_PATTERN = /^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -13,7 +14,7 @@ export async function captureVisual(locator: Locator, id: string) {
 	}
 	const viewportWidth = window.innerWidth;
 	const viewportHeight = window.innerHeight;
-	const viewport = `${viewportWidth}x${viewportHeight}`;
+	const viewport = formatVisualViewport(viewportWidth, viewportHeight);
 	const element = locator.element();
 	const fullHeight = element.scrollHeight;
 	const isTall = fullHeight > viewportHeight;
@@ -33,7 +34,7 @@ export async function captureVisual(locator: Locator, id: string) {
 		await page.viewport(viewportWidth, fullHeight);
 	}
 
-	await expect.element(locator).toMatchScreenshot(`${id}__viewport-${viewport}`);
+	await expect.element(locator).toMatchScreenshot(formatVisualCaptureName(id, viewport));
 
 	if (isTall) {
 		await page.viewport(viewportWidth, viewportHeight);
