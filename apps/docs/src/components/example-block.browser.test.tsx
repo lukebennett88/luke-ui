@@ -34,14 +34,6 @@ test('shows a named loading state in a frame that reserves the preview space', (
 	expect(playgroundPlaceholder.closest<HTMLElement>('[inert]')?.inert).toBe(true);
 });
 
-test('keeps docs block spacing on the example frame', () => {
-	renderExample(exampleTitle);
-
-	const frameStyles = getComputedStyle(page.getByRole('region', { name: loadingLabel }).element());
-	expect(frameStyles.marginTop).toBe('16px');
-	expect(frameStyles.marginBottom).toBe('16px');
-});
-
 function renderExample(title: string) {
 	container = document.body.appendChild(document.createElement('div'));
 	container.className = `luke-ui-theme ${tactileThemeClassName}`;

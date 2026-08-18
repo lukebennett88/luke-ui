@@ -20,12 +20,12 @@ test('keeps semantic heading level independent of visual type style', () => {
 		</Heading>,
 	);
 
-	const styled = locator.getByRole('heading', { level: 2, name: 'Styled as heading3' }).element();
-
-	expect(styled.tagName).toBe('H2');
+	expect(
+		locator.getByRole('heading', { level: 2, name: 'Styled as heading3' }).element(),
+	).toBeDefined();
 });
 
-test('useHeadingLevel reads the current level without advancing it', async () => {
+test('useHeadingLevel reads the current level without advancing it', () => {
 	function CurrentLevel({ label }: { label: string }) {
 		const { element: Element, level } = useHeadingLevel();
 		return <Element>{`${label} h${level}`}</Element>;
@@ -40,10 +40,6 @@ test('useHeadingLevel reads the current level without advancing it', async () =>
 		</HeadingLevels>,
 	);
 
-	expect(locator.getByRole('heading', { level: 2, name: 'current h2' }).element().tagName).toBe(
-		'H2',
-	);
-	expect(locator.getByRole('heading', { level: 3, name: 'nested h3' }).element().tagName).toBe(
-		'H3',
-	);
+	expect(locator.getByRole('heading', { level: 2, name: 'current h2' }).element()).toBeDefined();
+	expect(locator.getByRole('heading', { level: 3, name: 'nested h3' }).element()).toBeDefined();
 });

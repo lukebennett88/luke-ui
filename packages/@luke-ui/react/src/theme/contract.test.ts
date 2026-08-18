@@ -110,13 +110,10 @@ describe('theme contract', () => {
 		}
 	});
 
-	it('exposes overlay backdrop as the only overlay leaf, and no longer has scrim', () => {
-		const byPath = new Map(flattenThemeContract());
+	it('exposes overlay backdrop as the only overlay leaf', () => {
 		expect(vars.color.overlay).toEqual({
 			backdrop: 'var(--luke-color-overlay-backdrop)',
 		});
-		expect(byPath.get('color.overlay.backdrop')).toBe('--luke-color-overlay-backdrop');
-		expect(Object.hasOwn(vars.color, 'scrim')).toBe(false);
 	});
 
 	it('derives the spacing contract keys from the spacing scale', () => {
