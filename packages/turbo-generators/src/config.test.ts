@@ -19,7 +19,9 @@ describe('component generator prompts', () => {
 
 		const conformance = prompts.find((prompt) => prompt.name === 'conformance');
 		expect(conformance?.type).toBe('checkbox');
-		expect(conformance?.default).toEqual(expect.arrayContaining([...COMPONENT_DEFAULTS.conformance]));
+		expect(conformance?.default).toEqual(
+			expect.arrayContaining([...COMPONENT_DEFAULTS.conformance]),
+		);
 
 		expect({
 			conformance: conformance?.default,
