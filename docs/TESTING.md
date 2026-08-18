@@ -48,14 +48,21 @@ Do not test RAC's contract. RAC already owns focus management, keyboard navigati
 semantics, ARIA wiring, validation semantics, and disabled/read-only interaction blocking. Test the
 composition, prop plumbing, styling hooks, and behaviour that Luke UI adds or deliberately changes.
 
-Each component opts into the applicable tier in the component test manifest:
+Each component opts into the contracts it satisfies in the component test manifest. The two
+contracts are independent, and a component can hold both:
 
-- **Universal**: documented element, `ref`, `className`, `id`, and `data-*` forwarding.
-- **Field-shaped**: object and callback `inputRef`, native `name`/form participation, `onBlur`, and
-  label, description, and error association.
-- **None**: an explicit exception for a component that does not satisfy either contract.
+- **DOM**: documented element, `ref`, `className`, `id`, and `data-*` forwarding.
+- **Field**: object and callback `inputRef`, native `name`/form participation, `onBlur`, and label,
+  description, and error association.
 
-The shared conformance helpers test these contracts once. Do not repeat them in individual tests.
+A field component often cannot also hold `dom`. React Aria moves `id` onto the control, and Luke UI
+fields take `inputRef` instead of a plain `ref`, so no single element receives the full DOM
+contract.
+
+An empty list is an explicit exception for a component that does not satisfy either contract.
+
+The shared conformance helper tests these contracts once. A component's test file declares its
+locators and does not name which contracts run. Do not repeat the contracts in individual tests.
 
 Interactive RAC-backed components also register exactly one `testIntegration()` journey. It is an
 upgrade tripwire: perform one representative real-user workflow and assert only the result Luke UI

@@ -7,7 +7,7 @@ import { createComponent } from './apply-component-creation-plan.js';
 
 const roots: Array<string> = [];
 const MANIFEST_MARKER =
-	'].map(([name, path, conformanceTier, integrationTripwire, visualApplicability]) => ({';
+	'].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({';
 
 afterEach(async () => {
 	await Promise.all(roots.map((root) => rm(root, { force: true, recursive: true })));
@@ -56,8 +56,8 @@ describe('createComponent', () => {
 		expect(await readFile(join(root, manifestPath), 'utf8')).toBe(
 			[
 				'const entries = [',
-				"\t['Button', 'button', 'universal', 'required', 'applicable'],",
-				"\t['StatusBadge', 'status-badge', 'universal', 'none', 'applicable'],",
+				"\t['Button', 'button', ['dom'], 'required', 'applicable'],",
+				"\t['StatusBadge', 'status-badge', ['dom'], 'none', 'applicable'],",
 				MANIFEST_MARKER,
 				'\tname,',
 				'}));',
@@ -100,11 +100,11 @@ describe('createComponent', () => {
 		);
 	});
 
-	it('scaffolds field-shaped conformance on disk', async () => {
+	it('scaffolds field conformance on disk', async () => {
 		const root = await createRepositoryFixture();
 
 		await createComponent(root, {
-			conformanceTier: 'field-shaped',
+			conformance: ['field'],
 			docsGroup: 'forms',
 			name: 'DateField',
 		});
@@ -113,12 +113,54 @@ describe('createComponent', () => {
 			join(root, 'packages/@luke-ui/react/src/date-field/date-field.browser.test.tsx'),
 			'utf8',
 		);
-		expect(browserTest).toContain('testFieldShapedConformance');
+		expect(browserTest).toContain('testConformance');
 		expect(browserTest).toContain("path: 'date-field'");
+		expect(browserTest).toContain('getControl');
 		expect(browserTest).not.toContain('getTarget');
 		expect(browserTest).not.toContain("name: 'DateField'");
 		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['DateField', 'date-field', 'field-shaped', 'none', 'applicable']",
+			"['DateField', 'date-field', ['field'], 'none', 'applicable']",
+		);
+	});
+
+	it('scaffolds stacked DOM and field conformance on disk', async () => {
+		const root = await createRepositoryFixture();
+
+		await createComponent(root, {
+			conformance: ['field', 'dom'],
+			docsGroup: 'forms',
+			name: 'DateField',
+		});
+
+		const browserTest = await readFile(
+			join(root, 'packages/@luke-ui/react/src/date-field/date-field.browser.test.tsx'),
+			'utf8',
+		);
+		expect(browserTest).toContain('testConformance');
+		expect(browserTest).toContain('getControl');
+		expect(browserTest).toContain('getTarget');
+		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
+			"['DateField', 'date-field', ['dom', 'field'], 'none', 'applicable']",
+		);
+	});
+
+	it('scaffolds an empty conformance list on disk', async () => {
+		const root = await createRepositoryFixture();
+
+		await createComponent(root, {
+			conformance: [],
+			docsGroup: 'typography',
+			name: 'Mark',
+		});
+
+		const browserTest = await readFile(
+			join(root, 'packages/@luke-ui/react/src/mark/mark.browser.test.tsx'),
+			'utf8',
+		);
+		expect(browserTest).toContain("test('Mark renders its root element'");
+		expect(browserTest).not.toContain('testConformance');
+		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
+			"['Mark', 'mark', [], 'none', 'applicable']",
 		);
 	});
 
@@ -138,7 +180,7 @@ describe('createComponent', () => {
 			),
 		).toContain("testIntegration('action-chip', async");
 		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['ActionChip', 'action-chip', 'universal', 'required', 'applicable']",
+			"['ActionChip', 'action-chip', ['dom'], 'required', 'applicable']",
 		);
 	});
 
@@ -158,7 +200,7 @@ describe('createComponent', () => {
 			),
 		).rejects.toMatchObject({ code: 'ENOENT' });
 		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['DateField', 'date-field', 'universal', 'none', 'none']",
+			"['DateField', 'date-field', ['dom'], 'none', 'none']",
 		);
 	});
 
@@ -218,7 +260,7 @@ async function createRepositoryFixture(options?: { modulesRegistry?: string }): 
 		join(root, manifestPath),
 		[
 			'const entries = [',
-			"\t['Button', 'button', 'universal', 'required', 'applicable'],",
+			"\t['Button', 'button', ['dom'], 'required', 'applicable'],",
 			MANIFEST_MARKER,
 			'\tname,',
 			'}));',

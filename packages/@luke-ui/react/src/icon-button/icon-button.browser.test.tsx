@@ -1,9 +1,9 @@
 import { expect } from 'vite-plus/test';
-import { testIntegration, testUniversalConformance } from '../conformance/helpers.js';
+import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { IconButton } from './index.js';
 
-testUniversalConformance({
+testConformance({
 	path: 'icon-button',
 	getTarget: (result) => {
 		const target = result.locator.getByRole('button', { name: 'Add' }).element();

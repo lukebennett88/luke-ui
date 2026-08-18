@@ -1,7 +1,7 @@
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { testFieldShapedConformance, testIntegration } from '../conformance/helpers.js';
+import { testConformance, testIntegration } from '../conformance/helpers.js';
 import {
 	InputGroup,
 	InputGroupInput,
@@ -11,7 +11,7 @@ import {
 import { render } from '../test-utils/render.js';
 import { TextField } from './index.js';
 
-testFieldShapedConformance({
+testConformance({
 	path: 'text-field',
 	assertAssociation: (result) => {
 		const input = result.locator.getByRole('textbox', { name: 'Name' }).element();

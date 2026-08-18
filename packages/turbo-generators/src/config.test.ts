@@ -4,7 +4,7 @@ import { COMPONENT_DEFAULTS } from './component-creation-plan.js';
 
 describe('component generator prompts', () => {
 	it('uses the plan-owned defaults instead of choice order', () => {
-		let prompts: Array<{ default?: unknown; name?: string }> | undefined;
+		let prompts: Array<{ default?: unknown; name?: string; type?: string }> | undefined;
 		generator({
 			setGenerator(_name, config) {
 				if (!Array.isArray(config.prompts)) {
@@ -17,8 +17,14 @@ describe('component generator prompts', () => {
 			throw new Error('Expected the component generator to register prompts.');
 		}
 
+		const conformance = prompts.find((prompt) => prompt.name === 'conformance');
+		expect(conformance?.type).toBe('checkbox');
+		expect(conformance?.default).toEqual(
+			expect.arrayContaining([...COMPONENT_DEFAULTS.conformance]),
+		);
+
 		expect({
-			conformanceTier: prompts.find((prompt) => prompt.name === 'conformanceTier')?.default,
+			conformance: conformance?.default,
 			integrationTripwire: prompts.find((prompt) => prompt.name === 'integrationTripwire')?.default,
 			visualCoverage: prompts.find((prompt) => prompt.name === 'visualCoverage')?.default,
 		}).toEqual(COMPONENT_DEFAULTS);

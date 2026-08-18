@@ -1,9 +1,9 @@
 import { expect } from 'vite-plus/test';
-import { testIntegration, testUniversalConformance } from '../conformance/helpers.js';
+import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Link } from './index.js';
 
-testUniversalConformance({
+testConformance({
 	path: 'link',
 	getTarget: (result) => {
 		const target = result.locator.getByRole('link', { name: 'Settings' }).element();

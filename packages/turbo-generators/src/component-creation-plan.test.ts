@@ -116,4 +116,41 @@ describe('createComponentPlan', () => {
 		const parsed = parseSync(testFile.path, testFile.contents, { lang: 'tsx' });
 		expect(parsed.errors).toEqual([]);
 	});
+
+	it('generates a valid browser test for an empty conformance list', () => {
+		const plan = createComponentPlan({ ...validAnswers, conformance: [] });
+
+		const testFile = plan.files.find((file) => file.path.endsWith('.browser.test.tsx'));
+		if (testFile === undefined) throw new Error('Expected the scaffold to write a browser test.');
+
+		const parsed = parseSync(testFile.path, testFile.contents, { lang: 'tsx' });
+		expect(parsed.errors).toEqual([]);
+		expect(testFile.contents).toContain("test('StatusBadge renders its root element'");
+		expect(testFile.contents).not.toContain('testConformance');
+	});
+
+	it('generates a valid browser test for stacked DOM and field contracts', () => {
+		const plan = createComponentPlan({ ...validAnswers, conformance: ['field', 'dom'] });
+
+		const testFile = plan.files.find((file) => file.path.endsWith('.browser.test.tsx'));
+		if (testFile === undefined) throw new Error('Expected the scaffold to write a browser test.');
+
+		const parsed = parseSync(testFile.path, testFile.contents, { lang: 'tsx' });
+		expect(parsed.errors).toEqual([]);
+		expect(testFile.contents).toContain('testConformance');
+		expect(testFile.contents).toContain('getControl');
+		expect(testFile.contents).toContain('getTarget');
+	});
+
+	it('generates a conformance helper call from the default DOM contract', () => {
+		const plan = createComponentPlan(validAnswers);
+
+		const testFile = plan.files.find((file) => file.path.endsWith('.browser.test.tsx'));
+		if (testFile === undefined) throw new Error('Expected the scaffold to write a browser test.');
+
+		expect(testFile.contents).toContain('testConformance');
+		expect(testFile.contents).toContain('getTarget');
+		expect(testFile.contents).not.toContain('getControl');
+		expect(testFile.contents).not.toContain('testUniversalConformance');
+	});
 });

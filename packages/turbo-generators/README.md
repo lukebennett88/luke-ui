@@ -7,7 +7,8 @@ Custom generators for `turbo generate`.
 - `component`: Scaffolds `@luke-ui/react` components, colocated recipes, Storybook stories, hosted
   docs wrappers, hosted docs controls, and structural docs navigation.
 
-The component generator asks for name and docs group. Primitive scaffolding is tracked separately.
+The component generator asks for name, docs group, visual coverage, conformance contracts, and an
+integration tripwire. Primitive scaffolding is tracked separately.
 
 Generated component folders use a named implementation file and an export-only `index.ts` barrel.
 

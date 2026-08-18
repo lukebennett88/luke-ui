@@ -1,17 +1,16 @@
 import type { PlopTypes } from '@turbo/gen';
 import { createComponent } from './src/apply-component-creation-plan.js';
-import type { ConformanceTier } from './src/component-creation-plan.js';
+import type { ConformanceContract } from './src/component-creation-plan.js';
 import {
 	COMPONENT_DEFAULTS,
-	CONFORMANCE_TIERS,
+	CONFORMANCE_CONTRACTS,
 	DOC_GROUPS,
 	validateComponentName,
 } from './src/component-creation-plan.js';
 
-const CONFORMANCE_TIER_LABELS: Record<ConformanceTier, string> = {
-	'field-shaped': 'Field-shaped',
-	none: 'None',
-	universal: 'Universal',
+const CONFORMANCE_CONTRACT_LABELS: Record<ConformanceContract, string> = {
+	dom: 'DOM',
+	field: 'Field',
 };
 
 const YES_NO = [
@@ -49,14 +48,14 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				type: 'list',
 			},
 			{
-				choices: CONFORMANCE_TIERS.map((tier) => ({
-					name: CONFORMANCE_TIER_LABELS[tier],
-					value: tier,
+				choices: CONFORMANCE_CONTRACTS.map((contract) => ({
+					name: CONFORMANCE_CONTRACT_LABELS[contract],
+					value: contract,
 				})),
-				default: COMPONENT_DEFAULTS.conformanceTier,
-				message: 'Conformance tier:',
-				name: 'conformanceTier',
-				type: 'list',
+				default: [...COMPONENT_DEFAULTS.conformance],
+				message: 'Conformance contracts:',
+				name: 'conformance',
+				type: 'checkbox',
 			},
 			{
 				choices: YES_NO,

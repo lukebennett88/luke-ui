@@ -11,7 +11,7 @@ const packageRoot = resolve(sourceRoot, '..');
 
 // Public subpaths that are not normal component entrypoints, so they are exempt from the
 // conformance manifest. `theme` is deliberately absent from this set: it has its own manifest
-// entry (conformance tier `none`), so it must keep flowing through the normal check below. Keep
+// entry (empty conformance), so it must keep flowing through the normal check below. Keep
 // this list explicit and named rather than deriving it from the manifest itself, so a public
 // component entrypoint missing from the manifest fails this test instead of being silently
 // skipped.
@@ -92,19 +92,10 @@ function getBrowserCoverageErrors(
 ) {
 	const errors: Array<string> = [];
 	for (const entry of manifest) {
-		if (entry.conformanceTier === 'none' && entry.integrationTripwire === 'none') continue;
+		if (entry.conformance.length === 0 && entry.integrationTripwire === 'none') continue;
 		const source = readBrowserSource(entry.path);
-		if (
-			entry.conformanceTier !== 'none' &&
-			!hasHelperCall(
-				source,
-				entry.conformanceTier === 'universal'
-					? 'testUniversalConformance'
-					: 'testFieldShapedConformance',
-				entry.path,
-			)
-		) {
-			errors.push(`${entry.path} must invoke its ${entry.conformanceTier} conformance helper.`);
+		if (entry.conformance.length > 0 && !hasHelperCall(source, 'testConformance', entry.path)) {
+			errors.push(`${entry.path} must invoke its conformance helper.`);
 		}
 		if (
 			entry.integrationTripwire === 'required' &&
@@ -147,17 +138,17 @@ test('rejects helper calls for another manifest path and source lookalikes', () 
 	if (button == null) throw new Error('Expected the Button manifest entry.');
 
 	const wrongPathSource = `
-		// testUniversalConformance({ path: 'button' });
+		// testConformance({ path: 'button' });
 		const description = "testIntegration('button', async () => {})";
 		const fake = \`
-			testUniversalConformance({ path: 'button' });
+			testConformance({ path: 'button' });
 			testIntegration('button', async () => {});
 		\`;
-		testUniversalConformance({ path: 'link' });
+		testConformance({ path: 'link' });
 		testIntegration('link', async () => {});
 	`;
 	expect(getBrowserCoverageErrors([button], () => wrongPathSource)).toEqual([
-		'button must invoke its universal conformance helper.',
+		'button must invoke its conformance helper.',
 		'button must invoke its integration tripwire.',
 	]);
 });
@@ -167,7 +158,7 @@ test('accepts a conformance helper when path is not the first property', () => {
 	if (button == null) throw new Error('Expected the Button manifest entry.');
 
 	const source = `
-		testUniversalConformance({
+		testConformance({
 			render: () => render(<Button />),
 			path: 'button',
 			getTarget: (result) => result.locator.getByRole('button').element(),
@@ -182,7 +173,7 @@ test('accepts the generated helper shape', () => {
 	if (button == null) throw new Error('Expected the Button manifest entry.');
 
 	const source = `
-		testUniversalConformance({
+		testConformance({
 			path: 'button',
 			getTarget: (result) => {
 				const target = result.locator.getByRole('button').element();
