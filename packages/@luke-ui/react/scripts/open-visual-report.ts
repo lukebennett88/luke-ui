@@ -1,11 +1,13 @@
 import { execFileSync } from 'node:child_process';
 import { platform } from 'node:os';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { access } from 'node:fs/promises';
+import {
+	visualPackageRoot,
+	visualRepoRootFromPackage,
+	visualReportIndex,
+} from './visual-regression-contract.js';
 
-const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const report = path.resolve(packageRoot, '../../../.artifacts/visual-regression/report/index.html');
+const report = visualReportIndex(visualRepoRootFromPackage(visualPackageRoot(import.meta.url)));
 await access(report);
 
 if (platform() === 'darwin') execFileSync('open', [report], { stdio: 'inherit' });

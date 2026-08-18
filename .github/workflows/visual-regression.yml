@@ -36,6 +36,8 @@ jobs:
       - uses: actions/cache@v6
         with:
           path: .artifacts/visual-regression/cache
+          # File list must match VISUAL_CACHE_HASH_FILES in
+          # packages/@luke-ui/react/scripts/visual-regression-contract.ts.
           key:
             visual-main-${{ runner.os }}-${{ runner.arch }}-${{ github.event.pull_request.base.sha
             || github.event.before }}-${{ hashFiles('pnpm-lock.yaml',

@@ -1,4 +1,3 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
@@ -9,17 +8,15 @@ import { playwright } from 'vite-plus/test/browser-playwright';
 const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.join(dirname, '.storybook');
-
-function findAncestorDir(name: string, from = dirname): string | undefined {
-	let current = path.resolve(from);
-	do {
-		if (fs.existsSync(path.join(current, name))) return current;
-		current = path.dirname(current);
-	} while (current !== path.dirname(current));
-}
-
-const artifactsDir = findAncestorDir('.artifacts');
 const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
+// This file is copied into a git worktree at an older revision. It cannot import
+// TypeScript that does not exist there, so it has no relative imports of the
+// visual-regression contract. Keep the capture-dir literals below in sync with
+// `scripts/visual-regression-contract.ts`; a unit test fails if they drift.
+const repoRoot = path.resolve(dirname, '../../..');
+const captureDir = process.env.VISUAL_CAPTURE_DIR;
+const visualFsAllow =
+	captureDir === undefined || captureDir === '' ? [repoRoot] : [repoRoot, path.resolve(captureDir)];
 
 export default defineConfig({
 	optimizeDeps: {
@@ -35,7 +32,7 @@ export default defineConfig({
 	},
 	server: {
 		fs: {
-			allow: artifactsDir ? [artifactsDir] : undefined,
+			allow: visualFsAllow,
 		},
 	},
 	resolve: {
@@ -111,7 +108,7 @@ export default defineConfig({
 								// the page and the test iframe before capturing.
 								resolveScreenshotPath: ({ arg, ext, root }) => {
 									return path.join(
-										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
+										captureDir ?? path.join(root, '.visual-captures'),
 										`${arg}${ext}`,
 									);
 								},

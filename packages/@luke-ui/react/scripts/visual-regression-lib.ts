@@ -2,6 +2,7 @@ import path from 'node:path';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
+import { parseVisualCaptureIdentity } from '../src/test-utils/visual-capture-id.js';
 
 export type VisualResult = {
 	id: string;
@@ -22,10 +23,10 @@ type CaptureFile = { file: string; viewport?: string };
 async function listPngs(root: string) {
 	const result = new Map<string, CaptureFile>();
 	await walkPngs(root, (file, captureName) => {
-		const metadata = captureName.match(/^(.*)__viewport-(\d+x\d+)$/);
-		const id = metadata?.[1] ?? captureName;
+		const identity = parseVisualCaptureIdentity(captureName);
+		const id = identity?.id ?? captureName;
 		if (result.has(id)) throw new Error(`Duplicate visual capture ID: ${id}`);
-		result.set(id, { file, viewport: metadata?.[2] });
+		result.set(id, { file, viewport: identity?.viewport });
 	});
 	return result;
 }
@@ -60,11 +61,13 @@ async function walkPngs(root: string, visitor: (file: string, captureName: strin
 export async function assertCapturesPainted(directory: string) {
 	const viewportCaptures: Array<{ file: string; id: string; viewportHeight: number }> = [];
 	await walkPngs(directory, (file, captureName) => {
-		const metadata = captureName.match(/^(.*)__viewport-\d+x(\d+)$/);
-		const id = metadata?.[1];
-		const viewportHeight = metadata?.[2];
-		if (id === undefined || viewportHeight === undefined) return;
-		viewportCaptures.push({ file, id, viewportHeight: Number(viewportHeight) });
+		const identity = parseVisualCaptureIdentity(captureName);
+		if (identity === undefined) return;
+		viewportCaptures.push({
+			file,
+			id: identity.id,
+			viewportHeight: identity.viewportHeight,
+		});
 	});
 
 	const offenders: Array<string> = [];
