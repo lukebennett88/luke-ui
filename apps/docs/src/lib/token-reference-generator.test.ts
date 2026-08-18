@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { expect, test } from 'vite-plus/test';
 import { generateTokenReference } from '../../scripts/generate-token-reference.js';
 import { themeTokens } from '../generated/token-reference.generated.js';
@@ -20,9 +22,6 @@ test('declares the family union the token entries are keyed by', () => {
 
 test('emits the generated file on disk that the docs app imports', () => {
 	const emitted = generateTokenReference();
-
-	for (const token of themeTokens) {
-		expect(emitted).toContain(`path: '${token.path}'`);
-	}
-	expect(themeTokens.length).toBe(emitted.match(/\bvariable: '--luke-/g)?.length);
+	const emittedPath = resolve(import.meta.dirname, '../generated/token-reference.generated.ts');
+	expect(readFileSync(emittedPath, 'utf8')).toBe(emitted);
 });

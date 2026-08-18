@@ -187,17 +187,6 @@ describe('compileTheme interaction source', () => {
 
 describe('bundled themes meet WCAG 2.2 AA', () => {
 	for (const foundation of [tactileFoundation, paperFoundation]) {
-		// `validateContrast` in contrast-validation.ts already hard-gates text-vs-surface contrast
-		// (>=4.5:1, every surface) and border.control-vs-surface contrast (>=3:1, canvas and
-		// recessed) for every mode, throwing `ThemeContrastError` on any miss (exercised directly in
-		// `contrast-validation.test.ts`). Recomputing those exact ratios from the emitted CSS here can
-		// never fail: if either gate had missed, `buildTheme` would already have thrown before this
-		// assertion ran. The honest statement of the same property is that building the bundled theme
-		// does not throw.
-		it(`${foundation.name} compiles without a WCAG hard-gate failure`, () => {
-			expect(() => buildTheme(foundation)).not.toThrow();
-		});
-
 		it(`${foundation.name} keeps light canvas neutral, recessed surfaces white, and dark wells distinct`, () => {
 			const blocks = splitBlocks(buildTheme(foundation));
 			const lightCanvas = parseColor(extractValue(blocks.baseLight, '--luke-color-surface-canvas'));
@@ -256,12 +245,6 @@ describe('bundled themes meet WCAG 2.2 AA', () => {
 		});
 	}
 });
-
-// The loading-skeleton contrast gate lives in `loading-skeleton.browser.test.ts` ("keeps the
-// pulse's dimmest frame perceptible against every bundled theme's canvas"), which samples the real
-// animated pulse and requires >=1.4:1 at both its brightest and dimmest frame. That subsumes and is
-// stricter than a static "skeleton !== canvas and contrastRatio > 1" check would ever be — the
-// latter is a tautology once the two colours are already known to differ, so it added no coverage.
 
 describe('buildTheme public motion surface', () => {
 	// The numbered duration scale in `motion.ts` is private in the same sense as the 12-step colour

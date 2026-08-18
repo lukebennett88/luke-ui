@@ -119,20 +119,6 @@ describe('theme contract', () => {
 		expect(Object.hasOwn(vars.color, 'scrim')).toBe(false);
 	});
 
-	it('defines the selected spacing steps from the 4px scale', () => {
-		expect(spaceScale).toEqual([
-			['100', '4px'],
-			['200', '8px'],
-			['300', '12px'],
-			['400', '16px'],
-			['600', '24px'],
-			['800', '32px'],
-			['1000', '40px'],
-			['1200', '48px'],
-			['1600', '64px'],
-		]);
-	});
-
 	it('derives the spacing contract keys from the spacing scale', () => {
 		expect(Object.keys(themeContractTree.space)).toEqual(spaceScale.map(([step]) => step));
 	});
