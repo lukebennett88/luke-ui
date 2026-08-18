@@ -1,4 +1,4 @@
-import { test } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Heading, HeadingLevels, useHeadingLevel } from './index.js';
@@ -13,21 +13,19 @@ testConformance({
 	render: (props = {}) => render(<Heading {...props}>Section title</Heading>),
 });
 
-// `getByRole` throws when the heading is missing; `.element()` forces the query to run.
-// oxlint-disable-next-line vitest/expect-expect
-test('keeps semantic heading level independent of visual type style', () => {
+test('keeps semantic heading level independent of visual type style', async () => {
 	const { locator } = render(
 		<Heading level={2} typography="heading3">
 			Styled as heading3
 		</Heading>,
 	);
 
-	locator.getByRole('heading', { level: 2, name: 'Styled as heading3' }).element();
+	await expect
+		.element(locator.getByRole('heading', { level: 2, name: 'Styled as heading3' }))
+		.toBeVisible();
 });
 
-// Nested `HeadingLevels` must advance; `useHeadingLevel` must not.
-// oxlint-disable-next-line vitest/expect-expect
-test('useHeadingLevel reads the current level without advancing it', () => {
+test('useHeadingLevel reads the current level without advancing it', async () => {
 	function CurrentLevel({ label }: { label: string }) {
 		const { element: Element, level } = useHeadingLevel();
 		return <Element>{`${label} h${level}`}</Element>;
@@ -42,6 +40,10 @@ test('useHeadingLevel reads the current level without advancing it', () => {
 		</HeadingLevels>,
 	);
 
-	locator.getByRole('heading', { level: 2, name: 'current h2' }).element();
-	locator.getByRole('heading', { level: 3, name: 'nested h3' }).element();
+	await expect
+		.element(locator.getByRole('heading', { level: 2, name: 'current h2' }))
+		.toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 3, name: 'nested h3' }))
+		.toBeVisible();
 });
