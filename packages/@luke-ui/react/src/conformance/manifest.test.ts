@@ -86,13 +86,30 @@ function stringLiteral(node: Node | undefined): string | undefined {
 	if (node?.type === 'Literal' && typeof node.value === 'string') return node.value;
 }
 
+function readOptionalBrowserSource(
+	path: string,
+	readBrowserSource: (path: string) => string,
+): string | undefined {
+	try {
+		return readBrowserSource(path);
+	} catch {
+		return undefined;
+	}
+}
+
 function getBrowserCoverageErrors(
 	manifest: ReadonlyArray<ComponentTestManifestEntry>,
 	readBrowserSource: (path: string) => string,
 ) {
 	const errors: Array<string> = [];
 	for (const entry of manifest) {
-		if (entry.conformance.length === 0 && entry.integrationTripwire === 'none') continue;
+		if (entry.conformance.length === 0 && entry.integrationTripwire === 'none') {
+			const source = readOptionalBrowserSource(entry.path, readBrowserSource);
+			if (source !== undefined && hasHelperCall(source, 'testConformance', entry.path)) {
+				errors.push(`${entry.path} invokes its conformance helper with no contracts.`);
+			}
+			continue;
+		}
 		const source = readBrowserSource(entry.path);
 		if (entry.conformance.length > 0 && !hasHelperCall(source, 'testConformance', entry.path)) {
 			errors.push(`${entry.path} must invoke its conformance helper.`);
@@ -151,6 +168,29 @@ test('rejects helper calls for another manifest path and source lookalikes', () 
 		'button must invoke its conformance helper.',
 		'button must invoke its integration tripwire.',
 	]);
+});
+
+test('rejects a conformance helper when the manifest entry has no contracts', () => {
+	const [icon] = componentTestManifest.filter((entry) => entry.path === 'icon');
+	if (icon == null) throw new Error('Expected the Icon manifest entry.');
+
+	const source = `
+		testConformance({ path: 'icon' });
+	`;
+	expect(getBrowserCoverageErrors([icon], () => source)).toEqual([
+		'icon invokes its conformance helper with no contracts.',
+	]);
+});
+
+test('accepts a missing browser test when the manifest entry has no contracts', () => {
+	const [icon] = componentTestManifest.filter((entry) => entry.path === 'icon');
+	if (icon == null) throw new Error('Expected the Icon manifest entry.');
+
+	expect(
+		getBrowserCoverageErrors([icon], () => {
+			throw new Error('ENOENT: no such file or directory');
+		}),
+	).toEqual([]);
 });
 
 test('accepts a conformance helper when path is not the first property', () => {
