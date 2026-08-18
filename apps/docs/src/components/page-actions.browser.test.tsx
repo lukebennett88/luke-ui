@@ -122,15 +122,16 @@ test('does not claim success when the markdown fetch 404s', async () => {
 	}
 });
 
-test('does not announce the brand marks as separate content', async () => {
+test('does not announce the brand marks as separate content', () => {
 	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl, storybookUrl });
 
-	// Each pill's accessible name comes from its visible label alone — the
-	// brand mark inside it is `aria-hidden`, not a second named element.
-	await expect.element(page.getByRole('link', { name: 'Storybook' })).toBeVisible();
-	expect(page.getByRole('img', { name: /storybook/i })).not.toBeInTheDocument();
-	expect(page.getByRole('img', { name: /react aria/i })).not.toBeInTheDocument();
-	expect(page.getByRole('img', { name: /github/i })).not.toBeInTheDocument();
+	// These SVGs have no accessible name, so a named `img` query would still
+	// pass if `aria-hidden` were removed. The owned contract is the attribute.
+	for (const name of ['Storybook', 'React Aria', 'Source', 'Edit on GitHub']) {
+		const mark = page.getByRole('link', { name }).element().querySelector('svg');
+		if (mark == null) throw new Error(`Expected a brand mark inside the ${name} link.`);
+		expect(mark.getAttribute('aria-hidden')).toBe('true');
+	}
 });
 
 function renderActions(props: {
