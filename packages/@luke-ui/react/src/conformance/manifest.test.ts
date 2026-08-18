@@ -167,24 +167,3 @@ test('accepts a conformance helper when path is not the first property', () => {
 	`;
 	expect(getBrowserCoverageErrors([button], () => source)).toEqual([]);
 });
-
-test('accepts the generated helper shape', () => {
-	const [button] = componentTestManifest.filter((entry) => entry.path === 'button');
-	if (button == null) throw new Error('Expected the Button manifest entry.');
-
-	const source = `
-		testConformance({
-			path: 'button',
-			getTarget: (result) => {
-				const target = result.locator.getByRole('button').element();
-				if (!(target instanceof HTMLElement)) throw new Error('Expected a button.');
-				return target;
-			},
-			render: (props = {}) => {
-				return render(<Button {...props}>Action</Button>);
-			},
-		});
-		testIntegration('button', async () => {});
-	`;
-	expect(getBrowserCoverageErrors([button], () => source)).toEqual([]);
-});

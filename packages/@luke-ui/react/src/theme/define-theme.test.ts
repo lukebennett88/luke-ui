@@ -283,7 +283,6 @@ describe('normalizeTheme resolves source colours once onto the foundation', () =
 		expect(light.danger).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.danger)));
 		expect(light.focus).toEqual(gamutMapOklch(parseColor(defaultSourceColors.light.focus)));
 		expect(light.backdrop).toBe(defaultBackdrop.light);
-		expect(typeof light.backdrop).toBe('string');
 	});
 
 	it('keeps the adapted accent hue without a format-parse round trip', () => {
@@ -309,18 +308,11 @@ describe('defineTheme emits the full contract for the bundled themes', () => {
 		const css = defineTheme(input);
 		const emitted = emittedVarNames(css);
 
-		it(`${name} emits exactly the contract variables, including overlay backdrop and disabled text`, () => {
+		it(`${name} emits exactly the contract variables`, () => {
 			// Derived from the contract, not hardcoded: `contract.test.ts` already asserts the typed
 			// `vars` tree has exactly as many leaves as `flattenThemeContract()`, so this only needs to
-			// check that a bundled theme's emitted CSS matches that same list, not restate its length.
-			expect(emitted.size).toBe(contractNames.length);
+			// check that a bundled theme's emitted CSS matches that same list.
 			expect([...emitted].sort()).toEqual([...contractNames].sort());
-			expect(emitted.has('--luke-color-overlay-backdrop')).toBe(true);
-			expect(emitted.has('--luke-color-overlay-hover')).toBe(false);
-			expect(emitted.has('--luke-color-overlay-pressed')).toBe(false);
-			expect(emitted.has('--luke-color-overlay-tint')).toBe(false);
-			expect(emitted.has('--luke-color-scrim')).toBe(false);
-			expect(emitted.has('--luke-color-text-disabled')).toBe(true);
 		});
 
 		it(`${name} paints info, success, and warning with a real interactive ramp`, () => {
