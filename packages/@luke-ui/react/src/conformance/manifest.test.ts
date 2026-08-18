@@ -86,14 +86,19 @@ function stringLiteral(node: Node | undefined): string | undefined {
 	if (node?.type === 'Literal' && typeof node.value === 'string') return node.value;
 }
 
+function isEnoent(error: unknown): boolean {
+	return error instanceof Error && 'code' in error && error.code === 'ENOENT';
+}
+
 function readOptionalBrowserSource(
 	path: string,
 	readBrowserSource: (path: string) => string,
 ): string | undefined {
 	try {
 		return readBrowserSource(path);
-	} catch {
-		return undefined;
+	} catch (error) {
+		if (isEnoent(error)) return undefined;
+		throw error;
 	}
 }
 
@@ -188,11 +193,28 @@ test('accepts a missing browser test when the manifest entry has no contracts', 
 	const [icon] = componentTestManifest.filter((entry) => entry.path === 'icon');
 	if (icon == null) throw new Error('Expected the Icon manifest entry.');
 
+	const missing: NodeJS.ErrnoException = new Error('ENOENT: no such file or directory');
+	missing.code = 'ENOENT';
+
 	expect(
 		getBrowserCoverageErrors([icon], () => {
-			throw new Error('ENOENT: no such file or directory');
+			throw missing;
 		}),
 	).toEqual([]);
+});
+
+test('does not swallow a non-ENOENT error when reading an empty-contract browser test', () => {
+	const [icon] = componentTestManifest.filter((entry) => entry.path === 'icon');
+	if (icon == null) throw new Error('Expected the Icon manifest entry.');
+
+	const denied: NodeJS.ErrnoException = new Error('EACCES: permission denied');
+	denied.code = 'EACCES';
+
+	expect(() =>
+		getBrowserCoverageErrors([icon], () => {
+			throw denied;
+		}),
+	).toThrow(denied);
 });
 
 test('rejects a conformance helper with no contracts even when an integration tripwire is required', () => {
