@@ -122,6 +122,18 @@ test('does not claim success when the markdown fetch 404s', async () => {
 	}
 });
 
+test('does not announce the brand marks as separate content', () => {
+	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl, storybookUrl });
+
+	// These SVGs have no accessible name, so a named `img` query would still
+	// pass if `aria-hidden` were removed. The owned contract is the attribute.
+	for (const name of ['Storybook', 'React Aria', 'Source', 'Edit on GitHub']) {
+		const mark = page.getByRole('link', { name }).element().querySelector('svg');
+		if (mark == null) throw new Error(`Expected a brand mark inside the ${name} link.`);
+		expect(mark.getAttribute('aria-hidden')).toBe('true');
+	}
+});
+
 function renderActions(props: {
 	githubUrl: string;
 	markdownUrl: string;
