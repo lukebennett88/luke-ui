@@ -8,8 +8,7 @@ Custom generators for `turbo generate`.
   docs wrappers, hosted docs controls, and structural docs navigation.
 
 The component generator asks for name, docs group, visual coverage, conformance contracts, and an
-integration tripwire. `--args <name> <docs-group>` skips the remaining prompts and uses the plan
-defaults. Primitive scaffolding is tracked separately.
+integration tripwire. Primitive scaffolding is tracked separately.
 
 Generated component folders use a named implementation file and an export-only `index.ts` barrel.
 
