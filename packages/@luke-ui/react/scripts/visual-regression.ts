@@ -2,14 +2,20 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { arch, platform } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { VISUAL_CACHE_HASH_FILES, VISUAL_HARNESS_FILES } from './visual-regression-contract.js';
+import {
+	VISUAL_CACHE_HASH_FILES,
+	VISUAL_CAPTURE_DIR_ENV,
+	VISUAL_HARNESS_FILES,
+	visualArtifactsRoot,
+	visualPackageRoot,
+	visualRepoRootFromPackage,
+} from './visual-regression-contract.js';
 import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
-const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const repoRoot = path.resolve(packageRoot, '../../..');
-const artifacts = path.join(repoRoot, '.artifacts/visual-regression');
+const packageRoot = visualPackageRoot(import.meta.url);
+const repoRoot = visualRepoRootFromPackage(packageRoot);
+const artifacts = visualArtifactsRoot(repoRoot);
 
 async function main() {
 	const configuredBaseSha = process.env.VISUAL_BASE_SHA?.trim();
@@ -104,7 +110,7 @@ async function capture(worktree: string, target: string) {
 			'--update',
 		],
 		worktree,
-		{ ...process.env, VISUAL_CAPTURE_DIR: target },
+		{ ...process.env, [VISUAL_CAPTURE_DIR_ENV]: target },
 	);
 }
 

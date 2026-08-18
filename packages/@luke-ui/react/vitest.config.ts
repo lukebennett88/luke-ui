@@ -1,24 +1,19 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
+import {
+	VISUAL_CAPTURE_DIR_ENV,
+	VISUAL_CAPTURE_FALLBACK_DIR,
+	visualRepoRootFromPackage,
+} from './scripts/visual-regression-contract.js';
 
 const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.join(dirname, '.storybook');
-
-function findAncestorDir(name: string, from = dirname): string | undefined {
-	let current = path.resolve(from);
-	do {
-		if (fs.existsSync(path.join(current, name))) return current;
-		current = path.dirname(current);
-	} while (current !== path.dirname(current));
-}
-
-const artifactsDir = findAncestorDir('.artifacts');
+const repoRoot = visualRepoRootFromPackage(dirname);
 const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
 
 export default defineConfig({
@@ -35,7 +30,7 @@ export default defineConfig({
 	},
 	server: {
 		fs: {
-			allow: artifactsDir ? [artifactsDir] : undefined,
+			allow: [repoRoot],
 		},
 	},
 	resolve: {
@@ -111,7 +106,8 @@ export default defineConfig({
 								// the page and the test iframe before capturing.
 								resolveScreenshotPath: ({ arg, ext, root }) => {
 									return path.join(
-										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
+										process.env[VISUAL_CAPTURE_DIR_ENV] ??
+											path.join(root, VISUAL_CAPTURE_FALLBACK_DIR),
 										`${arg}${ext}`,
 									);
 								},
