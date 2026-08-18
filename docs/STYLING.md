@@ -209,7 +209,8 @@ recipes should add their own `@media (prefers-reduced-motion: reduce)` override.
 
 Public recipes export from the component or primitive entrypoint that owns the styling contract, for
 example `buttonRecipe` from `@luke-ui/react/button` or `inputGroupRecipe` from
-`@luke-ui/react/primitives/input-group`.
+`@luke-ui/react/primitives/input-group`. The hosted Styling page documents when a developer imports
+one, the `buttonRecipe` / `ButtonRecipeVariants` names, and single-part versus slotted calls.
 
 Recipes are component-specific. Keep them separate from general layout utilities.
 

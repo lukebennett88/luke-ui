@@ -1,7 +1,8 @@
 ---
 title: Styling
 description:
-  Choose component props, layout utilities, variables, or themes. Do not override internals.
+  Choose component props, recipes, layout utilities, variables, or themes. Do not override
+  internals.
 ---
 
 Luke UI ships static CSS. It does not inject styles at runtime. Import the shared stylesheet and a
@@ -36,6 +37,41 @@ behaviour. The active identity supplies semantic colours, font roles, radii, and
 defines its type and spacing steps in source.
 
 <SourceCodeBlock src="styling/component-props" />
+
+### Apply a component recipe
+
+Import a recipe when you own the element and need that component's visual treatment. Use the
+component when you want its behaviour as well.
+
+Each recipe lives on the component or primitive entrypoint that owns it. Import `buttonRecipe` from
+`@luke-ui/react/button`. There is no `@luke-ui/react/recipes` barrel.
+
+Recipes follow a fixed name. The function is the component in camel case plus `Recipe`. The variants
+type is the component in Pascal case plus `RecipeVariants`.
+
+<ExampleBlock src="styling/button-recipe" title="Styling — Apply a component recipe" />
+
+A single-part recipe such as `buttonRecipe` returns one class string. Pass the same variant names
+the component accepts.
+
+```tsx
+import { buttonRecipe, type ButtonRecipeVariants } from '@luke-ui/react/button';
+
+const variants: ButtonRecipeVariants = { appearance: 'subtle', tone: 'neutral' };
+const className = buttonRecipe(variants);
+```
+
+A slotted recipe such as `inputGroupRecipe` returns one function per part. Call the part you are
+styling.
+
+```tsx
+import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
+
+const { group, control } = inputGroupRecipe({ size: 'medium' });
+```
+
+Do not import a recipe to restyle a Luke UI component from the outside. Use the component's props
+for supported variation.
 
 ### Use layout utilities for structure
 
