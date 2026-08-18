@@ -18,7 +18,7 @@ describe('buildTokenTree', () => {
 			let node: TokenTreeNode = tree;
 			for (const segment of segments.slice(0, -1)) {
 				if (node.kind !== 'group') throw new Error(`expected a group on the way to ${path}`);
-				const next = node.children[segment];
+				const next: TokenTreeNode | undefined = node.children[segment];
 				if (next == null) throw new Error(`missing ${segment} for ${path}`);
 				node = next;
 			}
