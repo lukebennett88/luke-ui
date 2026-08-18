@@ -103,13 +103,15 @@ function getBrowserCoverageErrors(
 ) {
 	const errors: Array<string> = [];
 	for (const entry of manifest) {
-		if (entry.conformance.length === 0 && entry.integrationTripwire === 'none') {
+		if (entry.conformance.length === 0) {
 			const source = readOptionalBrowserSource(entry.path, readBrowserSource);
 			if (source !== undefined && hasHelperCall(source, 'testConformance', entry.path)) {
 				errors.push(`${entry.path} invokes its conformance helper with no contracts.`);
 			}
-			continue;
 		}
+
+		if (entry.conformance.length === 0 && entry.integrationTripwire === 'none') continue;
+
 		const source = readBrowserSource(entry.path);
 		if (entry.conformance.length > 0 && !hasHelperCall(source, 'testConformance', entry.path)) {
 			errors.push(`${entry.path} must invoke its conformance helper.`);
@@ -191,6 +193,23 @@ test('accepts a missing browser test when the manifest entry has no contracts', 
 			throw new Error('ENOENT: no such file or directory');
 		}),
 	).toEqual([]);
+});
+
+test('rejects a conformance helper with no contracts even when an integration tripwire is required', () => {
+	const entry: ComponentTestManifestEntry = {
+		conformance: [],
+		integrationTripwire: 'required',
+		name: 'Example',
+		path: 'example',
+		visualApplicability: 'none',
+	};
+	const source = `
+		testConformance({ path: 'example' });
+		testIntegration('example', async () => {});
+	`;
+	expect(getBrowserCoverageErrors([entry], () => source)).toEqual([
+		'example invokes its conformance helper with no contracts.',
+	]);
 });
 
 test('accepts a conformance helper when path is not the first property', () => {
