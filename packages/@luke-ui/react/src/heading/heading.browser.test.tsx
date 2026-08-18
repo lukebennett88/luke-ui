@@ -1,6 +1,17 @@
 import { expect, test } from 'vite-plus/test';
+import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Heading, HeadingLevels, useHeadingLevel } from './index.js';
+
+testConformance({
+	path: 'heading',
+	getTarget: (result) => {
+		const target = result.locator.getByRole('heading').element();
+		if (!(target instanceof HTMLElement)) throw new Error('Expected a Heading element.');
+		return target;
+	},
+	render: (props = {}) => render(<Heading {...props}>Section title</Heading>),
+});
 
 test('keeps semantic heading level independent of visual type style', () => {
 	const { locator } = render(
