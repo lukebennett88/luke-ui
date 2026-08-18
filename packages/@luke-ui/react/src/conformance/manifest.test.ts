@@ -86,13 +86,37 @@ function stringLiteral(node: Node | undefined): string | undefined {
 	if (node?.type === 'Literal' && typeof node.value === 'string') return node.value;
 }
 
+function isEnoent(error: unknown): boolean {
+	return error instanceof Error && 'code' in error && error.code === 'ENOENT';
+}
+
+function readOptionalBrowserSource(
+	path: string,
+	readBrowserSource: (path: string) => string,
+): string | undefined {
+	try {
+		return readBrowserSource(path);
+	} catch (error) {
+		if (isEnoent(error)) return undefined;
+		throw error;
+	}
+}
+
 function getBrowserCoverageErrors(
 	manifest: ReadonlyArray<ComponentTestManifestEntry>,
 	readBrowserSource: (path: string) => string,
 ) {
 	const errors: Array<string> = [];
 	for (const entry of manifest) {
+		if (entry.conformance.length === 0) {
+			const source = readOptionalBrowserSource(entry.path, readBrowserSource);
+			if (source !== undefined && hasHelperCall(source, 'testConformance', entry.path)) {
+				errors.push(`${entry.path} invokes its conformance helper with no contracts.`);
+			}
+		}
+
 		if (entry.conformance.length === 0 && entry.integrationTripwire === 'none') continue;
+
 		const source = readBrowserSource(entry.path);
 		if (entry.conformance.length > 0 && !hasHelperCall(source, 'testConformance', entry.path)) {
 			errors.push(`${entry.path} must invoke its conformance helper.`);
@@ -150,6 +174,63 @@ test('rejects helper calls for another manifest path and source lookalikes', () 
 	expect(getBrowserCoverageErrors([button], () => wrongPathSource)).toEqual([
 		'button must invoke its conformance helper.',
 		'button must invoke its integration tripwire.',
+	]);
+});
+
+test('rejects a conformance helper when the manifest entry has no contracts', () => {
+	const [icon] = componentTestManifest.filter((entry) => entry.path === 'icon');
+	if (icon == null) throw new Error('Expected the Icon manifest entry.');
+
+	const source = `
+		testConformance({ path: 'icon' });
+	`;
+	expect(getBrowserCoverageErrors([icon], () => source)).toEqual([
+		'icon invokes its conformance helper with no contracts.',
+	]);
+});
+
+test('accepts a missing browser test when the manifest entry has no contracts', () => {
+	const [icon] = componentTestManifest.filter((entry) => entry.path === 'icon');
+	if (icon == null) throw new Error('Expected the Icon manifest entry.');
+
+	const missing: NodeJS.ErrnoException = new Error('ENOENT: no such file or directory');
+	missing.code = 'ENOENT';
+
+	expect(
+		getBrowserCoverageErrors([icon], () => {
+			throw missing;
+		}),
+	).toEqual([]);
+});
+
+test('does not swallow a non-ENOENT error when reading an empty-contract browser test', () => {
+	const [icon] = componentTestManifest.filter((entry) => entry.path === 'icon');
+	if (icon == null) throw new Error('Expected the Icon manifest entry.');
+
+	const denied: NodeJS.ErrnoException = new Error('EACCES: permission denied');
+	denied.code = 'EACCES';
+
+	expect(() =>
+		getBrowserCoverageErrors([icon], () => {
+			throw denied;
+		}),
+	).toThrow(denied);
+});
+
+test('rejects a conformance helper with no contracts even when an integration tripwire is required', () => {
+	const entry: ComponentTestManifestEntry = {
+		conformance: [],
+		integrationTripwire: 'required',
+		name: 'Example',
+		path: 'example',
+		visualApplicability: 'none',
+	};
+	const source = `
+		testConformance({ path: 'example' });
+		testIntegration('example', async () => {});
+	`;
+	expect(getBrowserCoverageErrors([entry], () => source)).toEqual([
+		'example invokes its conformance helper with no contracts.',
 	]);
 });
 
