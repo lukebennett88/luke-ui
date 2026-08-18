@@ -4,22 +4,12 @@ import { arch, platform } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { VISUAL_CACHE_HASH_FILES, VISUAL_HARNESS_FILES } from './visual-regression-contract.js';
 import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = path.resolve(packageRoot, '../../..');
 const artifacts = path.join(repoRoot, '.artifacts/visual-regression');
-
-// Files that shape how a capture renders. Copied into the base worktree so both
-// revisions render under the same harness, and hashed into the cache key so a
-// change to any of them invalidates cached baselines. Keep this list in sync with
-// the `hashFiles` list in .github/workflows/visual-regression.yml.
-const HARNESS_FILES = [
-	'packages/@luke-ui/react/vitest.config.ts',
-	'packages/@luke-ui/react/src/test-utils/render-setup.ts',
-	'packages/@luke-ui/react/src/test-utils/render.tsx',
-	'packages/@luke-ui/react/src/test-utils/visual-setup.ts',
-];
 
 async function main() {
 	const configuredBaseSha = process.env.VISUAL_BASE_SHA?.trim();
@@ -27,7 +17,7 @@ async function main() {
 	const baseSha = configuredBaseSha || output(['rev-parse', baseRef]);
 	const current = process.env.GITHUB_SHA ?? 'working tree';
 	const hashedFiles = await Promise.all(
-		['pnpm-lock.yaml', ...HARNESS_FILES].map((file) => readFile(path.join(repoRoot, file))),
+		VISUAL_CACHE_HASH_FILES.map((file) => readFile(path.join(repoRoot, file))),
 	);
 	const hash = createHash('sha256');
 	for (const contents of hashedFiles) hash.update(contents);
@@ -84,7 +74,9 @@ async function main() {
 async function capture(worktree: string, target: string) {
 	if (worktree !== repoRoot) {
 		await Promise.all(
-			HARNESS_FILES.map((file) => copyFile(path.join(repoRoot, file), path.join(worktree, file))),
+			VISUAL_HARNESS_FILES.map((file) =>
+				copyFile(path.join(repoRoot, file), path.join(worktree, file)),
+			),
 		);
 	}
 	await rm(target, { force: true, recursive: true });
