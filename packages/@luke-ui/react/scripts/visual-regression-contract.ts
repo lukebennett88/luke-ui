@@ -6,6 +6,7 @@ export const VISUAL_LOCKFILE = 'pnpm-lock.yaml';
 /** Files that shape how a capture renders. Hashed into the cache key and copied into the base worktree. */
 export const VISUAL_HARNESS_FILES = [
 	'packages/@luke-ui/react/vitest.config.ts',
+	'packages/@luke-ui/react/scripts/visual-regression-contract.ts',
 	'packages/@luke-ui/react/src/test-utils/render-setup.ts',
 	'packages/@luke-ui/react/src/test-utils/render.tsx',
 	'packages/@luke-ui/react/src/test-utils/visual-setup.ts',
