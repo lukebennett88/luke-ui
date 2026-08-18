@@ -6,7 +6,7 @@
  * itself and contains a single `input`. Anatomies with more parts extend
  * these when their anatomy has more parts.
  */
-export const inputStates = {
+const inputStates = {
 	disabled:
 		'[data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])',
 	focusWithin: '[data-focus-within="true"], :focus-within',
@@ -26,20 +26,18 @@ export const inputStates = {
 	readOnly: '[data-readonly="true"], :has(input:read-only)',
 };
 
-export type InputStates = Record<keyof typeof inputStates, string>;
-
-/** Composes state definitions into selectors shared by field control recipes. */
-export function composeInputStateSelectors(states: InputStates) {
-	const notDisabled = `:not(:where(${states.disabled}))`;
+/** Composes the shared field-state selectors used by TextField and Combobox recipes. */
+export function composeInputStateSelectors() {
+	const notDisabled = `:not(:where(${inputStates.disabled}))`;
 
 	return {
-		disabled: `&:where(${states.disabled})`,
-		focusWithin: `&:where(${states.focusWithin})${notDisabled}`,
-		hover: `&:where(${states.hover})${notDisabled}:not(:where(${states.focusWithin})):not(:where(${states.readOnly}))`,
-		invalid: `&:where(${states.invalid})${notDisabled}`,
-		invalidFocusWithin: `&:where(${states.invalid}):where(${states.focusWithin})${notDisabled}`,
-		readOnly: `&:where(${states.readOnly})${notDisabled}`,
-		readOnlyFocusWithin: `&:where(${states.readOnly}):where(${states.focusWithin})${notDisabled}`,
+		disabled: `&:where(${inputStates.disabled})`,
+		focusWithin: `&:where(${inputStates.focusWithin})${notDisabled}`,
+		hover: `&:where(${inputStates.hover})${notDisabled}:not(:where(${inputStates.focusWithin})):not(:where(${inputStates.readOnly}))`,
+		invalid: `&:where(${inputStates.invalid})${notDisabled}`,
+		invalidFocusWithin: `&:where(${inputStates.invalid}):where(${inputStates.focusWithin})${notDisabled}`,
+		readOnly: `&:where(${inputStates.readOnly})${notDisabled}`,
+		readOnlyFocusWithin: `&:where(${inputStates.readOnly}):where(${inputStates.focusWithin})${notDisabled}`,
 	};
 }
 

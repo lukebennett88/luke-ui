@@ -5,7 +5,6 @@ import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
-	inputStates,
 } from '../../styles/input-states.js';
 import {
 	invalidIndicatorIcon,
@@ -25,7 +24,7 @@ const comboboxErrorIconSize = createVar();
 // React Aria's `ComboBox` publishes `isDisabled`/`isInvalid` through `GroupContext`, which
 // `Group` writes onto the group element, so no `:has()` probing of descendants is needed.
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
-	composeInputStateSelectors(inputStates);
+	composeInputStateSelectors();
 
 const comboboxActionStyles = {
 	'@media': {

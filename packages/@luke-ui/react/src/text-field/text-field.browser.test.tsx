@@ -8,7 +8,6 @@ import {
 	InputGroupPrefix,
 	InputGroupSuffix,
 } from '../primitives/input-group/index.js';
-import { inputGroupRecipe } from '../primitives/input-group/recipe.css.js';
 import { render } from '../test-utils/render.js';
 import { TextField } from './index.js';
 
@@ -52,18 +51,14 @@ function groupFor(name: string): HTMLElement {
 	return group;
 }
 
-// `inputGroupRecipe().invalidIndicator()` returns one stable class list regardless of `size`
-// (the slot's `marginInlineEnd` is a constant, see `primitives/input-group/recipe.css.ts`), but the lookup
-// still keys on the first token only, matching the other slot lookups in this file.
-const invalidIndicatorClass = inputGroupRecipe().invalidIndicator().split(' ')[0];
-
 /**
  * The invalid indicator `InputGroup` renders itself, if it is present. Matched by the
- * recipe's own slot class rather than by tag name: a prefix or suffix can hold an
- * `<svg>` of its own.
+ * public `exclamationTriangle` icon, not a generated recipe class. A prefix or suffix
+ * can hold an `<svg>` of its own.
  */
 function indicatorFor(name: string): SVGSVGElement | null {
-	return groupFor(name).querySelector<SVGSVGElement>(`.${invalidIndicatorClass}`);
+	const glyph = groupFor(name).querySelector('use[href$="#exclamationTriangle"]');
+	return glyph?.closest('svg') ?? null;
 }
 
 // The invalid icon must land before a trailing suffix, not after it. The suffix's
@@ -125,7 +120,7 @@ test('InputGroupInput resolves object and callback refs to the input element', a
 	expect(callbackResolved.at(-1)).toBe(callbackInput.element());
 });
 
-// `inputStates.invalid` must not match `:has(:invalid)`: that matches a required,
+// The shared invalid selector must not match `:has(:invalid)`: that matches a required,
 // empty input from first render — before any interaction or submit — while
 // `aria-invalid` stays null, painting an untouched required field invalid even
 // though assistive technology is told it's fine. Guard that the group only picks
