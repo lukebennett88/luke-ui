@@ -43,7 +43,5 @@ test('useHeadingLevel reads the current level without advancing it', async () =>
 	await expect
 		.element(locator.getByRole('heading', { level: 2, name: 'current h2' }))
 		.toBeVisible();
-	await expect
-		.element(locator.getByRole('heading', { level: 3, name: 'nested h3' }))
-		.toBeVisible();
+	await expect.element(locator.getByRole('heading', { level: 3, name: 'nested h3' })).toBeVisible();
 });
