@@ -108,7 +108,7 @@ export default defineConfig({
 								// the page and the test iframe before capturing.
 								resolveScreenshotPath: ({ arg, ext, root }) => {
 									return path.join(
-										process.env.VISUAL_CAPTURE_DIR ?? path.join(root, '.visual-captures'),
+										captureDir ?? path.join(root, '.visual-captures'),
 										`${arg}${ext}`,
 									);
 								},
