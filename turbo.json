@@ -42,6 +42,7 @@
 		"check": {
 			"dependsOn": [
 				"check:barrels",
+				"check:docs",
 				"check:format",
 				"//#check:format-root",
 				"check:lint",
@@ -52,6 +53,10 @@
 		},
 		"check:barrels": {
 			"dependsOn": ["generate"]
+		},
+		"check:docs": {
+			"cache": true,
+			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/**"]
 		},
 		"check:format": {
 			"dependsOn": ["generate"]

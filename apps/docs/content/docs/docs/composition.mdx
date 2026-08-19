@@ -57,39 +57,32 @@ type. Return one DOM root. Custom wrappers must pass the supplied `ref` to that 
 The second `render` argument contains interaction state such as `isPressed`.
 
 For `Box`, use `elementType` for a supported structural element. It does not change Box's accepted
-DOM props.
+DOM props. Use Box's `render` prop when the callback must own the element and its DOM attributes. Do
+not combine `render` with `elementType`. Use `Link` and `Button` when you need their behaviour.
 
-<ExampleBlock src="box/semantic-element" title="Composition and customisation — Semantic element" />
-
-Use Box's `render` prop when the callback must own the element and its DOM attributes. Do not
-combine `render` with `elementType`. Use `Link` and `Button` when you need their behaviour.
-
-<ExampleBlock
-	src="box/render-element"
-	title="Composition and customisation — Own the rendered element"
-/>
-
-Read the [Box documentation](/components/layout/box) for its full prop contract.
+Read the [Box documentation](/components/layout/box) for the supported elements and the `render`
+callback's resolved props.
 
 ## Style the new pattern
 
 Use public semantic variables from `@luke-ui/react/theme` for custom surfaces, typography, colour,
-radius, and depth. They follow the active theme and colour mode. They do not couple the component to
-selectors, generated palette values, or theme implementation details.
+radius, and depth. They follow the active theme and colour mode. Read
+[Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when to use `vars`, and the
+[token reference](/docs/token-reference) for the contract.
 
-```tsx
-import { vars } from '@luke-ui/react/theme';
+Read the [primitive documentation](/components/primitives/button) before you build a custom
+component from a specific primitive.
 
-<aside
-	style={{
-		backgroundColor: vars.color.surface.floating,
-		borderRadius: vars.radius.surface,
-		boxShadow: vars.depth.floating,
-		color: vars.color.text.primary,
-	}}
-/>;
-```
+## Continue learning
 
-Read [Styling](/docs/styling) for semantic variables, layout utilities, and component recipes. Read
-the [primitive documentation](/components/primitives/button) before you build a custom component
-from a specific primitive.
+<Cards>
+	<Card href="/docs/styling" title="Styling">
+		Choose component props, recipes, layout utilities, or semantic variables.
+	</Card>
+	<Card href="/components/layout/box" title="Box">
+		See Box's elementType and render contract.
+	</Card>
+	<Card href="/components/primitives/button" title="Button primitive">
+		Build a custom button layout on the documented primitive.
+	</Card>
+</Cards>

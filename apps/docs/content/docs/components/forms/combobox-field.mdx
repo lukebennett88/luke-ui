@@ -16,8 +16,7 @@ an input, label, description, validation message, popover, and listbox.
 ## Items and selection
 
 Use `defaultItems` for a static collection. Use `items` with `loadingState` when results load or
-filter asynchronously. `ComboboxField` supports one selected value. Use another component for
-multiple selection.
+filter asynchronously. `ComboboxField` supports one selected value.
 
 ## Choose and clear an option
 
@@ -41,8 +40,9 @@ beside the label.
 
 ## Validation
 
-Pass `errorMessage` with `isInvalid` to report a problem. Always pass both. An invalid field with no
-message leaves someone who cannot see the border colour with no way to know what is wrong.
+Pass `errorMessage` with `isInvalid` to report a problem. Always pass both. Read
+[Validation](/docs/validation#always-pair-an-invalid-field-with-a-message) for why the message is
+required.
 
 <ExampleBlock src="combobox-field/validation" title="Combobox Field — Validation" />
 
@@ -91,7 +91,7 @@ preferences.
 Provide a visible `label` where possible. The field passes React Aria combobox interactions and form
 semantics to its input, trigger, listbox, and validation message.
 
-## Primitive
+## Related components
 
 Use the [combobox primitives](/components/primitives/combobox) when you need a custom combobox
 layout.

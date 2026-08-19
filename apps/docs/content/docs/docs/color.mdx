@@ -103,35 +103,6 @@ and accessibility as well as colour. Disabled is a state, not a palette: interac
 with reduced opacity, and only field text recolours, through the public `text.disabled` role. The
 public `loadingSkeleton` role is available when you build an equivalent custom element.
 
-## Migrate from `color.intent`
-
-`color.intent` was the previous asymmetric contract. `neutral`, `accent`, and `danger` rendered a
-full interactive ramp, while `info`, `success`, and `warning` rendered only a static subtle kit.
-Luke UI removed `color.intent`. There are no `color.intent` paths and no `--luke-color-intent-*`
-variables to fall back on. If you upgrade from a release that had them, this table is the old-to-new
-reference. Move each usage to its `color.background` / `color.foreground` / `color.border`
-equivalent:
-
-| Old path                                    | New path                                 |
-| ------------------------------------------- | ---------------------------------------- |
-| `color.intent.<role>.surface.subtle`        | `color.background.<role>.subtle.rest`    |
-| `color.intent.<role>.surface.subtleHover`   | `color.background.<role>.subtle.hover`   |
-| `color.intent.<role>.surface.subtlePressed` | `color.background.<role>.subtle.pressed` |
-| `color.intent.<role>.surface.solid`         | `color.background.<role>.solid.rest`     |
-| `color.intent.<role>.surface.solidHover`    | `color.background.<role>.solid.hover`    |
-| `color.intent.<role>.surface.solidPressed`  | `color.background.<role>.solid.pressed`  |
-| `color.intent.<role>.text`                  | `color.foreground.<role>.rest`           |
-| `color.intent.<role>.textHover`             | `color.foreground.<role>.hover`          |
-| `color.intent.<role>.onSolid`               | `color.foreground.<role>.onSolid`        |
-| `color.intent.<role>.border`                | `color.border.<role>`                    |
-
-CSS variable names followed the same shape, so `--luke-color-intent-danger-surface-solid-hover`
-became `--luke-color-background-danger-solid-hover`.
-
-The current contract also carries capabilities `color.intent` never had. It adds a foreground and
-border for `neutral`. It also adds interactive backgrounds, hover and pressed foregrounds, and
-on-solid foregrounds for `info`, `success`, and `warning`.
-
 ## Continue learning
 
 <Cards>

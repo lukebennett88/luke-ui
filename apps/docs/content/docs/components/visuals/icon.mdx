@@ -10,24 +10,10 @@ props:
 `Icon` renders a symbol from the generated Luke UI spritesheet. It needs an
 `IconSpritesheetProvider` ancestor so it can resolve the spritesheet URL.
 
-To find an icon, or to set up the spritesheet, see [Iconography](/docs/iconography).
+To find an icon, set its size or colour, or set up the spritesheet, see
+[Iconography](/docs/iconography).
 
 <ExampleBlock src="icon/basic" title="Icon — Basic" />
-
-## Use an icon
-
-`Icon` renders an `<svg>` that references a symbol in the generated spritesheet with
-`<use href="..." />`. `Icon` restricts `name` to the generated icon set. Use `size` to choose
-`xsmall`, `small`, `medium`, or `large`.
-
-- `name` chooses the symbol id.
-- The sprite URL comes from `IconSpritesheetProvider`.
-- `viewBox` defaults to the generated icon viewBox.
-- Icon fill follows `currentColor`.
-
-```tsx
-<Icon name="add" className="myIcon" style={{ color: 'tomato' }} />
-```
 
 ## Create a custom icon
 
@@ -39,14 +25,10 @@ with the same sizing and accessibility behaviour as `Icon`.
 ## Accessibility
 
 Pass `title` when an icon conveys meaning without adjacent text, such as a standalone status icon.
-`Icon` then exposes it to assistive technology with `role="img"`.
+`Icon` then exposes it to assistive technology with `role="img"`. When `title` is omitted, the icon
+is decorative.
 
-When `title` is omitted, `aria-hidden` defaults to `true`. An icon renders either
-`aria-hidden="true"` or no `aria-hidden` attribute at all — never `aria-hidden="false"`, which is
-not a meaningful state for an icon. Passing `aria-hidden={false}` therefore has no effect; pass
-`title` to expose an icon to assistive technology.
-
-<ExampleBlock src="icon/decorative" title="Icon — Decorative" />
+Read [Iconography](/docs/iconography#accessibility) for decorative and informative examples.
 
 ## Related components
 

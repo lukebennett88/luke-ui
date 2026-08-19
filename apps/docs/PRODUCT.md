@@ -18,7 +18,7 @@ accurate, runnable examples.
 
 ## Positioning
 
-Luke UI combines accessible React Aria behavior with statically generated styling and a themable
+Luke UI combines accessible React Aria behaviour with statically generated styling and a themable
 component system. Themes may intentionally have substantially different visual identities.
 
 ## Operating Context

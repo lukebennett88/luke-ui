@@ -34,15 +34,14 @@ percentages, units, and compact values. Use `Emoji` when an emoji needs a reliab
 
 `Text` defaults to `body`. `Heading` selects a style from its level, and accepts `typography` when
 the visual hierarchy needs a deliberate override. An `h2` can use `heading3` visually without
-changing its semantic level. There is no `heading5` or `heading6` style; those HTML levels reuse
+changing its semantic level. There is no `heading5` or `heading6` style. Those HTML levels reuse
 `lead` and `body` with heading weight.
 
 ## Capsize trims
 
 Each style includes Capsize trim values for the active font family. A line box normally reserves
-space above and below its letters. Trim removes that extra space from a block text element.
-
-<ExampleBlock src="text/trim" title="Text — Capsize trim" />
+space above and below its letters. Trim removes that extra space from a block text element. Read
+[Text](/components/typography/text#trimming) for how `Text` infers trim from the element type.
 
 ## Weight and colour
 
@@ -59,3 +58,17 @@ Text also accepts semantic `color` values such as `primary`, `secondary`, `accen
 
 Applications load any font files required by a custom theme. The theme then assigns that typeface to
 the shared styles and weight roles. Luke UI computes trim values from that font's metrics.
+
+## Continue learning
+
+<Cards>
+	<Card href="/components/typography/text" title="Text">
+		Apply typography styles, trim, and colour on body copy.
+	</Card>
+	<Card href="/components/typography/heading" title="Heading">
+		Manage heading levels and pair them with typography styles.
+	</Card>
+	<Card href="/docs/styling" title="Styling">
+		See where typography sits beside layout utilities and tokens.
+	</Card>
+</Cards>

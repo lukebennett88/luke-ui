@@ -10,6 +10,7 @@
 *.local
 *.log
 apps/docs/.story/
+# Generated Props pages and Fumadocs folder meta. `docs#generate` writes these.
 apps/docs/content/docs/components/*/*/
 apps/docs/src/generated/
 apps/docs/src/routeTree.gen.ts

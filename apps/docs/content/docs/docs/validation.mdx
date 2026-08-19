@@ -23,7 +23,9 @@ Pass `validationBehavior="native"` to block submission until every field passes.
 default.
 
 Pass `validationBehavior="aria"` to mark an invalid field for assistive technology. The form still
-submits.
+submits. Set this on every field a form library wraps, so the library stays the only thing deciding
+whether the form is valid. Native behaviour calls `setCustomValidity` on a rejected field, so the
+browser blocks the submit event and the library never runs.
 
 ## Add your own rule
 
@@ -116,3 +118,20 @@ An error message has two jobs: name the problem, and name the fix.
 - Describe what is wrong with the value. Do not blame the reader. "Enter a date after today" rather
   than "You entered an invalid date".
 - Repeat anything someone needs from `description`. They may never look back up.
+
+## Continue learning
+
+<Cards>
+	<Card href="/docs/forms" title="Forms">
+		Build a native form from Luke UI fields.
+	</Card>
+	<Card href="/docs/react-hook-form" title="React Hook Form">
+		Hand validity to React Hook Form with validationBehavior.
+	</Card>
+	<Card href="/docs/tanstack-form" title="TanStack Form">
+		Hand validity to TanStack Form with validationBehavior.
+	</Card>
+	<Card href="/components/forms/text-field" title="Text Field">
+		See labels, required markers, and error messages on a field.
+	</Card>
+</Cards>

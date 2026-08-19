@@ -9,7 +9,7 @@ solver. Read [STYLING.md](STYLING.md) first for the theme module layout.
 Per colour mode, `compileTheme` (in `build-theme.ts`):
 
 1. Takes the already-resolved source colours and canvas anchor (`background`, split from `neutral`'s
-   hue/chroma character in `define-theme.ts`). Source colours cross the foundation as OKLCH values;
+   hue/chroma character in `define-theme.ts`). Source colours cross the foundation as OKLCH values.
    `defineTheme` applies defaults and parses authoring strings once before `buildTheme` runs.
 2. Computes `text.primary` from the resolved neutral source (`highContrastText`, the family's
    step-12 rung) before any solid-anchor search, then generates the six private 12-step OKLCH
@@ -26,7 +26,7 @@ Per colour mode, `compileTheme` (in `build-theme.ts`):
    relationships, including each role's rest, hover, and pressed foregrounds against its subtle
    ramp, and `onSolid` against solid rest, hover, and pressed.
 
-`compileTheme` returns `{ css, diagnostics }`; `ThemeDiagnostics` records everything the pipeline
+`compileTheme` returns `{ css, diagnostics }`. `ThemeDiagnostics` records everything the pipeline
 resolved (both modes' families, surfaces, solid-anchor search, and contrast checks) for tooling. The
 Storybook "Theme/Diagnostics" story is a read-only inspector over this data model, and "Theme/Token
 board" renders every contract leaf (driven off `flattenThemeContract()`) for both bundled themes and
@@ -135,7 +135,7 @@ the solid-anchor search adapts the resting colour rather than changing the mix s
 
 Recipes select those tokens. They do not emit `color-mix()` or call a runtime helper. Theme authors
 do not author hover or pressed colours. There is no public overlay hover, pressed, or tint API.
-`color.overlay.backdrop` is the authored modal dimming layer; `color.surface.overlay` is the opaque
+`color.overlay.backdrop` is the authored modal dimming layer. `color.surface.overlay` is the opaque
 high-elevation surface.
 
 `validateContrast` measures the emitted token pairs. It does not catalogue first-party components.

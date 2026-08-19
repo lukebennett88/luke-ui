@@ -4,6 +4,21 @@ This is the only normative documentation guide for the repository. It covers MDX
 docs app, JSDoc, code comments, READMEs, and the internal guides in `docs/`. Package-level
 `AGENTS.md` files must not restate these rules. Point here instead.
 
+## Authoring checklist
+
+- Follow
+  [`apps/docs/content/docs/components/actions/button.mdx`](../apps/docs/content/docs/components/actions/button.mdx)
+  as the exemplar for a component guide.
+- Run `pnpm run check` from the repo root. It includes `check:docs`.
+- Update or delete docs that describe code in the same change as the code.
+- Generated docs output comes from the docs `generate` script in `apps/docs/package.json`. Do not
+  hand-edit those files.
+- Schema-owned files such as `apps/docs/PRODUCT.md` keep the headings the schema requires. Edit the
+  body. Leave those headings in place.
+
+The rest of this guide is the editorial reference behind that checklist. `check:docs` owns the
+mechanical rules. This page explains why they exist.
+
 ## Surfaces
 
 Luke UI has two documentation audiences, and they need different content:
@@ -95,9 +110,9 @@ contributor do the work the guide is for.
 
 ## Writing style
 
-These rules cover public MDX, JSDoc, code comments, and package READMEs. Internal guides in `docs/`
-follow the shared editorial rules under Surfaces. They are not bound to the terminology table or
-punctuation rules below.
+These rules cover public MDX, JSDoc, code comments, package READMEs, and the internal guides in
+`docs/`. The public and internal surfaces still differ in scope. They share voice, terminology, and
+punctuation so a contributor does not have to remember two styles.
 
 Write short, plain sentences. Split a sentence that carries two ideas rather than trimming the words
 that carry meaning.
@@ -113,38 +128,40 @@ that carry meaning.
   heading or a title, as in "Choosing a scale".
 - Break up a stack of nouns when the relationship between them is unclear. Add a preposition.
 - Write positively. Avoid a double negative, such as "not uncommon".
-- State what a thing does. Do not write "can be used to", "allows you to", or "enables you to".
+- State what a thing does. Name the action. Do not describe it as a capability the reader is
+  granted.
 - Use "you can" only to grant permission or present a real choice. When the reader should do
   something, tell them to do it.
-- Address the reader as "you". Never write "we", "us", "let's", or "I".
-- Cut empty promotional filler: "simply", "just", "note that", "it is important to", and adjectives
-  used only for praise, such as "powerful", "flexible", "seamless", or "robust". Keep a word when it
-  names a real property. "Flexible" is fine when the point is that a value accepts more than one
-  shape.
+- Address the reader as "you".
+- Cut empty promotional filler and adjectives used only for praise. Keep a word when it names a real
+  property.
 
 **One term per concept.** Do not use different words for the same concept. Use the same word every
-time.
+time. `check:docs` flags the forbidden synonyms so this table can stay a glossary of the preferred
+terms.
 
-| Term                   | Definition                                                                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `someone`              | The person who uses an interface built with Luke UI. Never write "a person", "people", "users", or "the user".                                   |
-| `developer`            | The reader of public documentation.                                                                                                              |
-| `assistive technology` | A singular, uncountable term. Never write "assistive technologies". Write "screen reader" only when the behaviour is specific to screen readers. |
-| `control`              | An interactive element.                                                                                                                          |
-| `field`                | A label, control, description, and validation message together.                                                                                  |
-| `set`                  | Use `set` for a boolean prop.                                                                                                                    |
-| `pass`                 | Use `pass` for a value or node prop.                                                                                                             |
-| `choose`               | Use `choose` when someone picks from options.                                                                                                    |
-| `select`               | Use `select` only for a control's selection state.                                                                                               |
+| Term                   | Definition                                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------------------- |
+| `someone`              | Who uses an interface built with Luke UI.                                                          |
+| `developer`            | Who reads public documentation.                                                                    |
+| `assistive technology` | A singular, uncountable term. Write "screen reader" only for behaviour specific to screen readers. |
+| `control`              | An interactive element.                                                                            |
+| `field`                | A label, control, description, and validation message together.                                    |
+| `set`                  | Use `set` for a boolean prop.                                                                      |
+| `pass`                 | Use `pass` for a value or node prop.                                                               |
+| `choose`               | Use `choose` when someone picks from options.                                                      |
+| `select`               | Use `select` only for a control's selection state.                                                 |
 
 **Spelling and punctuation.** Spell words in Australian English. Write headings in sentence case,
-and capitalise only proper nouns and product names. Do not use a semicolon in prose. An em dash is
-fine when it has a space on each side, as in `foo — bar`. Do not write `foo—bar`. The em dash inside
-an `<ExampleBlock title>` already follows that form: `<page or component> — <qualifier>`.
+and capitalise only proper nouns and product names. Split a sentence rather than joining two ideas
+with a semicolon. An em dash is fine when it has a space on each side, as in `foo — bar`. The em
+dash inside an `<ExampleBlock title>` already follows that form:
+`<page or component> — <qualifier>`.
 
 **Say it once.** Cut a sentence whose only content restates its heading, a prop name, or the example
 below it. Do not summarise a section at the end of it. When more than one page needs the same rule,
-explain it on the page that owns the topic and link to it from the others.
+explain it on the page that owns the topic and link to it from the others. An example may appear on
+exactly one page, because that is the mechanical handle on "say it once".
 
 ## Comments and JSDoc
 
@@ -283,10 +300,11 @@ a page feel shorter.
 
 The hosted docs app in `apps/docs` is the primary docs surface for developers. Authored guides live
 under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component guides live under
-`apps/docs/content/docs/components/`, at `/components/<group>/<name>`. Walking that tree, parsing
-frontmatter, extracting `<ExampleBlock>` `src` values, and mapping page URLs to files each have one
-owner in `apps/docs/src/lib/` (`docs-mdx-files.ts`, `docs-frontmatter.ts`,
-`example-block-sources.ts`, `markdown-page-path.ts`).
+`apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
+
+Generated files come from the docs `generate` script in `apps/docs/package.json`. Do not hand-edit
+them. Walking the docs tree, parsing frontmatter, extracting `<ExampleBlock>` `src` values, and
+mapping page URLs to files each have one owner in `apps/docs/src/lib/`.
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
 
@@ -302,11 +320,8 @@ The package README links to the hosted docs. Fumadocs provides:
 Components get hosted docs pages in the primary component navigation.
 
 The components landing page at `/components` lists every component guide, grouped by category. The
-list is generated from the guides themselves. `scripts/generate-components-index.ts` reads each
-guide's frontmatter and emits `src/generated/components-index.generated.ts`. The docs app renders
-that file through `src/components/components-index.tsx`. A new component appears on the landing page
-with no further edit. `components-index-generator.test.ts` fails when the generated file drifts from
-the guides on disk.
+list is generated from the guides themselves as part of `generate`. A new component appears on the
+landing page with no further edit.
 
 Primitives are public API. Document every primitive export path in hosted docs. Primitive pages live
 in the "Primitives" section under components.
@@ -319,12 +334,11 @@ fit. Keep primitive pages at the end of the Components area.
 `<group>/<name>.mdx` is the authored component guide. It keeps the `/components/<group>/<name>` URL.
 
 `<group>/<name>/props.mdx` and `<group>/<name>/meta.json` are generated from the guide's `props`
-frontmatter by `scripts/generate-props-pages.ts`. `props.mdx` is the API reference at
-`/components/<group>/<name>/props`. `meta.json` uses `"pages": ["!props"]` and
-`"collapsible": false` so the component stays one ordinary sidebar link. It sets
-`"pagesIndex": "../<name>"` so the folder's sidebar entry points to the sibling guide. The shared
-docs route remaps a Props pathname to its Guide URL for Fumadocs' sidebar tree matching, so Guide
-and Props share the Components sidebar.
+frontmatter. `props.mdx` is the API reference at `/components/<group>/<name>/props`. `meta.json`
+uses `"pages": ["!props"]` and `"collapsible": false` so the component stays one ordinary sidebar
+link. It sets `"pagesIndex": "../<name>"` so the folder's sidebar entry points to the sibling guide.
+The shared docs route remaps a Props pathname to its Guide URL for Fumadocs' sidebar tree matching,
+so Guide and Props share the Components sidebar.
 
 Keep the guide and Props frontmatter titles and descriptions identical. The component generator
 leaves editorial descriptions out instead of adding placeholder copy. Add one useful description to
@@ -333,19 +347,27 @@ both pages when you write the guide.
 The page header adds Guide and Props links from these routes. Keep that navigation in the shared
 docs route rather than duplicating it in MDX.
 
-Use this order for component guide pages:
+Use this order for component guide pages. Follow
+[`button.mdx`](../apps/docs/content/docs/components/actions/button.mdx) when the heading names or
+order are unclear.
 
 1. Frontmatter.
 2. Short usage lead-in.
 3. Primary example.
 4. `## Best practices`, when the component needs explicit guidance.
-5. Feature sections, ordered by importance to a consumer.
-6. `## Accessibility`, when the component has user-facing accessibility behaviour worth calling out.
-7. Related-component sections.
+5. Feature sections, ordered by importance to a consumer. Primitive guides may include `## Anatomy`.
+6. `## Accessibility`. Required for actions, forms, and feedback. Optional elsewhere.
+7. `## Related components`, when the page needs to point at another component or primitive.
+
+A closed heading vocabulary keeps related content on the same kind of page findable. Feature
+sections stay free. The fixed sections stay in that order so a reader scanning headings always meets
+practices, then features, then accessibility, then related links.
+
+Authored guides under `/docs` stay free-form apart from a closing `## Continue learning` section
+that contains `<Cards>`. That heading is the way off the page. Component guides must not use it.
 
 Add only the sections that help a developer use the component. The generated guide ships with the
-primary example and no placeholder prose, and `component-doc-contract` fails on a leftover
-placeholder.
+primary example and no placeholder prose, and `check:docs` fails on a leftover placeholder.
 
 Keep cross-reference sections near the end. Put only the `## Props` section and its
 `<auto-type-table>` content on `props.mdx`.
@@ -395,14 +417,10 @@ Examples that import a relative module, or anything else the preview cannot `req
 button.
 
 User code compiles in the browser with sucrase and can import `react` and any `@luke-ui/react/*`
-subpath. The import map and editor types are generated by `apps/docs/scripts/`
-(`generate-playground-scope.ts`, `generate-playground-types.ts`) into the gitignored
-`apps/docs/src/generated/` directory as part of `docs#generate`, so new component subpaths in
-`@luke-ui/react`'s `exports` map are picked up automatically. The pre-hydration skeleton script
-(`editor-skeleton-script.ts`) is compiled into the same directory by `vp pack` (configured under
-`pack` in `apps/docs/vite.config.ts`) in the same task. The preview iframe only accepts messages
-from its parent. Readiness and replay live in `playground-handshake.ts`; compilation, the URL hash,
-and debounce stay in the route and runner.
+subpath. The import map, editor types, and pre-hydration skeleton are generated as part of
+`generate`. New component subpaths in `@luke-ui/react`'s `exports` map are picked up automatically.
+The preview iframe only accepts messages from its parent. Readiness and replay live in
+`playground-handshake.ts`. Compilation, the URL hash, and debounce stay in the route and runner.
 
 ## Keeping docs current
 

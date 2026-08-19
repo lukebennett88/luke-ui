@@ -111,7 +111,7 @@ normalises a small, curated `ThemeInput` — a required `color.accent`, an optio
 and optional materials — into static stylesheet text. It is pure and Node-compatible. It generates
 the full semantic contract in OKLCH and throws a `ThemeContrastError` naming each failing mode and
 token pair when a generated pair misses WCAG 2.2 AA contrast. A single-value accent or neutral is
-adapted per mode through a lightness search; it throws when no lightness in the vibrant band is
+adapted per mode through a lightness search. It throws when no lightness in the vibrant band is
 accessible. The raw `ThemeFoundation` object and `buildTheme` are internal only.
 
 Every colour token is generated from a private 12-step scale per role (neutral, accent, info,
@@ -124,7 +124,7 @@ The semantic contract includes `font.caption` through `font.display` type styles
 its font family, size, weight, line height, letter spacing, and per-font Capsize trims so components
 cannot combine unrelated values. `font.family.body` is selected from the curated Inter, Apple
 System, or DM Sans metrics and `buildTheme` computes the matching trims. `font.family.code` is a
-fixed neutral monospace stack for code and keyboard input; it is not a brand-family or Capsize
+fixed neutral monospace stack for code and keyboard input. It is not a brand-family or Capsize
 choice. Icon sizes carry forward the `xsmall`, `small`, `medium`, and `large` scale at 16px, 20px,
 24px, and 32px.
 
@@ -304,7 +304,7 @@ unchanged. Control-specific selectors stay in the TextField and Combobox recipes
 
 Resist widening a state to probe descendants with `:has()`. React Aria publishes `isDisabled` and
 `isInvalid` through `GroupContext`, so a control group already carries `data-disabled` and
-`data-invalid`; probing cannot distinguish a control that is disabled from one that merely contains
+`data-invalid`. Probing cannot distinguish a control that is disabled from one that merely contains
 a disabled button. `descendantDisabledSelector` styles a part (a prefix, suffix, or trigger) when an
 ancestor control is disabled.
 
