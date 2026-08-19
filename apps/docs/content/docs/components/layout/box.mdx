@@ -19,9 +19,6 @@ Box supports display, logical margin and padding, inline and block sizing, posit
 gap, flex, and grid-child properties. It does not set grid container properties. Keep grid-template
 rules in the application CSS or a component that owns that layout.
 
-Use logical properties such as `paddingInline`, `marginBlockStart`, and `maxInlineSize`. They adapt
-to the writing direction without left and right variants.
-
 ```tsx
 <Box display="flex" alignItems="center" gap="300" maxInlineSize="42rem" paddingInline="600">
 	{children}
@@ -30,28 +27,14 @@ to the writing direction without left and right variants.
 
 ## Responsive values
 
-Pass a direct value when it does not change. Use an object keyed by breakpoint when it does. Values
-cascade upward from `initial`, so only specify the changes.
-
-<ExampleBlock src="box/responsive-layout" title="Box — Responsive layout" />
-
-```tsx
-<Box
-	display="flex"
-	flexDirection={{ initial: 'column', medium: 'row' }}
-	gap={{ initial: '200', medium: '600' }}
->
-	{children}
-</Box>
-```
-
-See [Layout](/docs/layout) for the available keys and fixed thresholds.
+Pass a direct value when it does not change. Use an object keyed by breakpoint when it does. Read
+[Layout](/docs/layout#responsive-values) for the breakpoint list, the cascade from `initial`, and a
+worked example.
 
 ## Spacing values
 
-Padding, gap, and margin accept `0` and the semantic steps `100`, `200`, `300`, `400`, `600`, `800`,
-`1000`, `1200`, and `1600`. Margin also accepts `auto`. Sizing, inset, flex-basis, order, and
-grid-placement properties accept their CSS values.
+Padding, gap, and margin accept the Luke UI spacing steps. Read
+[Layout](/docs/layout#spacing-and-sizing) for the full scale and for logical property names.
 
 ## Choose the rendered element
 
@@ -75,18 +58,12 @@ Do not combine `render` with `elementType`. Use `Link` or `Button` when you need
 
 <ExampleBlock src="box/render-element" title="Box — Own the rendered element" />
 
+Read [Composition](/docs/composition#render-a-different-dom-component) for the general `elementType`
+and `render` rule.
+
 ## Visual styles
 
 Box only covers layout. Use a component API for visual states and typography. When a custom element
-needs a colour, radius, or depth value, use the public variables from `@luke-ui/react/theme`.
-
-```tsx
-import { vars } from '@luke-ui/react/theme';
-
-<Box
-	padding="600"
-	style={{ backgroundColor: vars.color.surface.recessed, borderRadius: vars.radius.surface }}
->
-	Account summary
-</Box>;
-```
+needs a colour, radius, or depth value, use `vars` from `@luke-ui/react/theme`. Read
+[Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when to reach for `vars`, and the
+[token reference](/docs/token-reference) for the contract.

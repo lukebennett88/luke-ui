@@ -72,7 +72,7 @@ intermediate state in this test.
 
 ### Assertions
 
-An authored assertion should fail if, and only if, an intention we own is not met.
+An authored assertion should fail if, and only if, an intention Luke UI owns is not met.
 
 - Assert observable outcomes through public APIs, roles, accessible names, and user interactions.
 - Prefer role and accessible-name queries. Use label or visible text when no role fits. Do not
@@ -85,7 +85,7 @@ An authored assertion should fail if, and only if, an intention we own is not me
   matrices are different: finite, valid combinations should remain separate cases or rows when
   exhaustive contract coverage is useful. Exclude forbidden or meaningless combinations.
 - Keep setup local and explicit. Avoid shared mutable state and `beforeEach` setup. Use cleanup
-  hooks only for real cleanup; the shared renderer cleans up its own mounts automatically.
+  hooks only for real cleanup. The shared renderer cleans up its own mounts automatically.
 
 Do not test TypeScript guarantees, private functions, call counts inside repository modules,
 generated class names, selector text, incidental copy, or low-value bugs unlikely to recur.
@@ -108,18 +108,18 @@ fixture.
 
 Each component with a meaningful visual surface gets one kitchen-sink fixture:
 
-- derive declared variant coverage with `variantValuesFor` or `PropOptions`;
+- derive declared variant coverage with `variantValuesFor` or `PropOptions`
 - explicitly add semantic/rendering states not represented by variants, such as disabled, invalid,
-  pending, loading, prefixes, suffixes, and long content;
-- generate the finite valid matrix, but do not generate meaningless or forbidden combinations;
-- expand the kitchen-sink capture across the four shared Tactile/Paper and light/dark appearances;
-- add state-specific captures only for material states that cannot be represented declaratively;
-  those use one canonical appearance by default;
-- add a dark-mode state capture only for a concrete mode-specific implementation or regression.
+  pending, loading, prefixes, suffixes, and long content
+- generate the finite valid matrix, but do not generate meaningless or forbidden combinations
+- expand the kitchen-sink capture across the four shared Tactile/Paper and light/dark appearances
+- add state-specific captures only for material states that cannot be represented declaratively.
+  Those use one canonical appearance by default
+- add a dark-mode state capture only for a concrete mode-specific implementation or regression
 
 Do not capture a state already covered by the kitchen sink. Visual tests own appearance. Do not
 assert resolved token values, colours, shadows, opacity, border colours, or focus-ring colours in a
-component test. Never import the theme contract merely to assert an appearance; the lint rule is a
+component test. Never import the theme contract merely to assert an appearance. The lint rule is a
 deliberately simple proxy and rare structural uses may suppress it with a reason.
 
 Computed-style assertions are allowed only when browser-computed layout is itself the contract and
@@ -143,4 +143,4 @@ when the shared conformance suite, one integration journey, or visual fixture al
 same intention.
 
 The acceptance test for this strategy is not a case count. Every surviving assertion should protect
-an intention we own, and a new regression should normally have one obvious place for its test.
+an intention Luke UI owns, and a new regression should normally have one obvious place for its test.

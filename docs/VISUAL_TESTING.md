@@ -62,7 +62,7 @@ and commit.
 
 Rendering both revisions on the same device avoids platform-specific baselines and the usual
 macOS-to-Linux update loop. It also keeps forks simple and avoids binary repository growth. The
-tradeoff is that each comparison renders two revisions; the disposable base cache limits repeated
+tradeoff is that each comparison renders two revisions. The disposable base cache limits repeated
 work.
 
 See [`TESTING.md`](./TESTING.md#visual-regression-tests) for how to write a visual test.

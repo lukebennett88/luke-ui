@@ -13,7 +13,7 @@ Two entries are not plain versions:
 - `vite` is an alias for `@voidzero-dev/vite-plus-core`, pinned to the same version as `vite-plus`.
   `overrides` forces one copy of `vite` and `vitest` across the workspace, so they only resolve if
   they move together. Renovate groups them.
-- `playwright` is `*`. Renovate cannot upgrade a wildcard and skips it; the version is decided by
+- `playwright` is `*`. Renovate cannot upgrade a wildcard and skips it. The version is decided by
   the browser install step in CI.
 
 ## The release quarantine
@@ -32,7 +32,7 @@ only bites when a lockfile is generated, never on a plain `pnpm install --frozen
 ## The exclude lists
 
 `minimumReleaseAgeExclude` and `trustPolicyExclude` stay hand maintained. Renovate has no manager
-for these keys; catalog entries are the only part of `pnpm-workspace.yaml` it reads and writes. It
+for these keys. Catalog entries are the only part of `pnpm-workspace.yaml` it reads and writes. It
 cannot add an entry, and it cannot prune one.
 
 This is the intended release valve. When a pull request fails to install because a version is too
@@ -43,7 +43,8 @@ is older than the quarantine the exemption grants nothing. Pruning is optional h
 an entry, run `pnpm install`, and keep the deletion if the install succeeds.
 
 `peerDependencyRules`, `overrides`, and `allowBuilds` are hand maintained for the same reason. An
-update can make an entry unnecessary or wrong, and only a person reading the failure will notice.
+update can make an entry unnecessary or wrong, and only a maintainer reading the failure will
+notice.
 
 ## Changesets
 

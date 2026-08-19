@@ -22,10 +22,6 @@ option whose child options are only partly selected.
 
 <ExampleBlock src="checkbox/states" title="Checkbox — States" />
 
-Disabled checkboxes cannot receive focus, and their value cannot change. Read-only checkboxes remain
-focusable, so someone who uses a keyboard or assistive technology can still perceive their state.
-Keyboard navigation shows a focus ring. Pointer focus does not.
-
 <ExampleBlock src="checkbox/controlled" title="Checkbox — Controlled" />
 
 ## Size
@@ -37,9 +33,9 @@ default. Use `small` in compact layouts and `large` where a larger control impro
 
 ## Validation
 
-Pass `errorMessage` with `isInvalid` when the choice blocks submission. Always pass both. An invalid
-field with no message leaves someone who cannot see the border colour with no way to know what is
-wrong.
+Pass `errorMessage` with `isInvalid` when the choice blocks submission. Always pass both. Read
+[Validation](/docs/validation#always-pair-an-invalid-field-with-a-message) for why the message is
+required.
 
 <ExampleBlock src="checkbox/validation" title="Checkbox — Validation" />
 
@@ -53,7 +49,16 @@ wraps. Outside `Text`, it uses the normal compact control size.
 
 <ExampleBlock src="checkbox/first-line-alignment" title="Checkbox — First-line alignment" />
 
-## Primitive
+## Accessibility
+
+Pass a visible label as `Checkbox` children. Use `aria-label` only when surrounding content already
+names the control.
+
+Disabled checkboxes cannot receive focus, and their value cannot change. Read-only checkboxes remain
+focusable, so someone who uses a keyboard or assistive technology can still perceive their state.
+Keyboard navigation shows a focus ring. Pointer focus does not.
+
+## Related components
 
 Use the [Checkbox primitive](/components/primitives/checkbox) to arrange the clickable content,
 control, indicator, description, and error slots yourself.

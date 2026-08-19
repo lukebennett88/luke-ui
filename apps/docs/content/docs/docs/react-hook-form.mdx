@@ -61,13 +61,9 @@ Read the message from `fieldState.error` and pass `fieldState.invalid` to `isInv
 />
 ```
 
-Set `validationBehavior="aria"` on every field a `Controller` wraps, so React Hook Form stays the
-only thing deciding whether the form is valid. Fields default to `validationBehavior="native"`,
-which hands each field's error state to the browser. React Aria then calls `setCustomValidity` on a
-field the resolver rejected, so the browser blocks the form before the `submit` event fires and
-pressing the button does nothing.
-
-Read [Validation](/docs/validation) for the other `validationBehavior` options.
+Set `validationBehavior="aria"` on every field a `Controller` wraps. Read
+[Validation](/docs/validation#let-the-browser-validate) for why native behaviour blocks the submit
+event before the library can run.
 
 ## Focus the first invalid field
 
@@ -85,3 +81,17 @@ with the values.
 ```tsx
 <form onSubmit={form.handleSubmit((values) => saveAccount(values))}>
 ```
+
+## Continue learning
+
+<Cards>
+	<Card href="/docs/validation" title="Validation">
+		Choose validationBehavior and write the error message.
+	</Card>
+	<Card href="/docs/forms" title="Forms">
+		Build the same form with native submit and reset.
+	</Card>
+	<Card href="/docs/tanstack-form" title="TanStack Form">
+		See the same pattern with form.Field.
+	</Card>
+</Cards>

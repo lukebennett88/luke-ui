@@ -1,7 +1,19 @@
 import * as z from 'zod';
 
 export const CONFORMANCE_CONTRACTS = ['dom', 'field'] as const;
-export const DOC_GROUPS = ['actions', 'feedback', 'forms', 'typography', 'visuals'] as const;
+/**
+ * Docs groups the component generator can place a guide in. `primitives` stays out: primitive
+ * pages are authored by hand under `components/primitives`, not scaffolded with a normal
+ * component.
+ */
+export const DOC_GROUPS = [
+	'actions',
+	'feedback',
+	'forms',
+	'layout',
+	'typography',
+	'visuals',
+] as const;
 
 export const COMPONENT_DEFAULTS = {
 	conformance: ['dom'],

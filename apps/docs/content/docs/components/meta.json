@@ -15,6 +15,7 @@
 		"forms/text-field",
 		"---Layout---",
 		"layout/box",
+		"layout/visually-hidden",
 		"---Typography---",
 		"typography/blockquote",
 		"typography/code",
@@ -33,8 +34,7 @@
 		"primitives/checkbox",
 		"primitives/field",
 		"primitives/input-group",
-		"primitives/combobox",
-		"primitives/visually-hidden"
+		"primitives/combobox"
 	],
 	"pagesIndex": "index"
 }

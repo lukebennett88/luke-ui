@@ -67,7 +67,8 @@ props:
 	expect(page.indexOf('### Field')).toBeLessThan(page.indexOf('### FieldLabel'));
 });
 
-test('every component guide declaring props has a generated Props page on disk', () => {
+test('the generator has written a Props page for every guide that declares props', () => {
+	// Proof `generate:props` ran, not a git drift check. Generated files are gitignored.
 	for (const group of readdirSync(componentsDir, { withFileTypes: true })) {
 		if (!group.isDirectory()) continue;
 		const groupDir = resolve(componentsDir, group.name);

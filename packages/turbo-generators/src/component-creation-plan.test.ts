@@ -18,7 +18,15 @@ const validAnswers = {
 
 describe('parseComponentAnswers', () => {
 	it('rejects invalid docs group answers', () => {
-		expect(() => parseComponentAnswers({ ...validAnswers, docsGroup: 'layout' })).toThrow(ZodError);
+		expect(() => parseComponentAnswers({ ...validAnswers, docsGroup: 'primitives' })).toThrow(
+			ZodError,
+		);
+	});
+
+	it('accepts layout as a docs group', () => {
+		expect(parseComponentAnswers({ ...validAnswers, docsGroup: 'layout' }).docsGroup).toBe(
+			'layout',
+		);
 	});
 
 	it('defaults test applicability for omitted answers', () => {

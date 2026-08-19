@@ -1,4 +1,4 @@
 {
 	"title": "Layout",
-	"pages": ["box"]
+	"pages": ["box", "visually-hidden"]
 }

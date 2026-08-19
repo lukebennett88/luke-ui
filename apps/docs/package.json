@@ -9,6 +9,7 @@
 	"sideEffects": false,
 	"scripts": {
 		"build": "vp build",
+		"check:docs": "tsx scripts/check-docs.ts",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "fumadocs-mdx && tsc --noEmit",
@@ -74,6 +75,7 @@
 		"serve": "catalog:",
 		"shiki": "catalog:",
 		"tailwindcss": "catalog:",
+		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"unist-util-visit": "catalog:",
 		"vite-plus": "catalog:",
