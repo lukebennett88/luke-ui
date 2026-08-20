@@ -8,6 +8,7 @@ import {
 	InputGroupPrefix,
 	InputGroupSuffix,
 } from '../primitives/input-group/index.js';
+import { getDescribedText } from '../test-utils/get-described-text.js';
 import { render } from '../test-utils/render.js';
 import { TextField } from './index.js';
 
@@ -125,7 +126,9 @@ test('InputGroupInput resolves object and callback refs to the input element', a
 // `aria-invalid` stays null, painting an untouched required field invalid even
 // though assistive technology is told it's fine. Guard that the group only picks
 // up the invalid treatment once React Aria has recorded a real validation
-// failure. The in-control icon is the invalid cue Luke UI owns.
+// failure, and that native required validation stays in charge without an
+// `errorMessage`: `aria-invalid` is absent before submit and `'true'` after.
+// The in-control icon is the invalid cue Luke UI owns.
 test('a required field is painted invalid only after a real submit fails validation', async () => {
 	// A plain `<form>`, not react-aria-components' `Form`: the latter fails to
 	// resolve in this browser test environment. React Aria's own field
@@ -140,9 +143,82 @@ test('a required field is painted invalid only after a real submit fails validat
 
 	const input = page.getByRole('textbox', { name: 'Email' });
 	await expect.element(input).toBeVisible();
+	await expect.element(input).not.toHaveAttribute('aria-invalid');
 	expect(indicatorFor('Email')).toBe(null);
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
 	await expect.poll(() => indicatorFor('Email')).not.toBe(null);
+	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
+});
+
+test('an errorMessage alone marks the field invalid', async () => {
+	render(<TextField errorMessage="Enter a valid email." label="Email" name="email" />);
+
+	const input = page.getByRole('textbox', { name: 'Email' });
+	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
+	await expect.element(page.getByText('Enter a valid email.')).toBeVisible();
+});
+
+test('with no errorMessage, a failing validate call reports only after submit', async () => {
+	render(
+		<form>
+			<TextField
+				defaultValue="ab"
+				label="Username"
+				name="username"
+				validate={(value) => (value.length < 3 ? 'Must be at least 3 characters.' : null)}
+			/>
+			<button type="submit">Submit</button>
+		</form>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Username' });
+	await expect.element(input).not.toHaveAttribute('aria-invalid');
+	expect(indicatorFor('Username')).toBe(null);
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
+
+	await expect.poll(() => indicatorFor('Username')).not.toBe(null);
+	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
+	await expect.poll(() => getDescribedText(input.element())).toBe('Must be at least 3 characters.');
+});
+
+test('a rich errorMessage marks the field invalid and renders its markup', async () => {
+	render(
+		<TextField
+			errorMessage={
+				<>
+					See the <strong>terms</strong> for details.
+				</>
+			}
+			label="Email"
+			name="email"
+		/>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Email' });
+	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
+	const term = page.getByText('terms');
+	await expect.element(term).toBeVisible();
+	expect(term.element().tagName).toBe('STRONG');
+});
+
+test("a falsy errorMessage does not suppress React Aria's own validation message", async () => {
+	render(
+		<form>
+			<TextField errorMessage={false} isRequired label="Email" name="email" />
+			<button type="submit">Submit</button>
+		</form>,
+	);
+
+	const input = page.getByRole('textbox', { name: 'Email' });
+	await expect.element(input).toBeVisible();
+	expect(indicatorFor('Email')).toBe(null);
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
+
+	await expect.poll(() => indicatorFor('Email')).not.toBe(null);
+	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
+	await expect.poll(() => getDescribedText(input.element()).length).toBeGreaterThan(0);
 });

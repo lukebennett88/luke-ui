@@ -48,7 +48,6 @@ export default () => {
 						{(field) => (
 							<TextField
 								errorMessage={field.state.meta.errors[0]?.message}
-								isInvalid={!field.state.meta.isValid}
 								label="Name"
 								onBlur={field.handleBlur}
 								onChange={field.handleChange}
@@ -61,7 +60,6 @@ export default () => {
 						{(field) => (
 							<TextField
 								errorMessage={field.state.meta.errors[0]?.message}
-								isInvalid={!field.state.meta.isValid}
 								label="Email"
 								onBlur={field.handleBlur}
 								onChange={field.handleChange}

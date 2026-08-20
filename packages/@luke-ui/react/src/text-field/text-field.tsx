@@ -5,7 +5,11 @@ import type {
 } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
 import type { FieldSlotProps } from '../primitives/field/field.js';
-import { Field } from '../primitives/field/field.js';
+import {
+	Field,
+	isInvalidFromErrorMessage,
+	normalizeErrorMessage,
+} from '../primitives/field/field.js';
 import {
 	InputGroup,
 	InputGroupInput,
@@ -17,9 +21,14 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 
-type _TextFieldOmit = DistributiveOmit<RacTextFieldProps, 'children' | keyof DocumentedInputProps>;
+type _TextFieldOmit = DistributiveOmit<
+	RacTextFieldProps,
+	'children' | 'isInvalid' | keyof DocumentedInputProps
+>;
 
 interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
+	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
+	errorMessage?: ReactNode;
 	/** Class name forwarded to the inner input element. */
 	inputClassName?: RacInputProps['className'];
 	/**
@@ -63,11 +72,13 @@ export function TextField(props: TextFieldProps): JSX.Element {
 		...textFieldProps
 	} = props;
 
+	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
+
 	return (
-		<RacTextField {...textFieldProps}>
+		<RacTextField {...textFieldProps} isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}>
 			<Field
 				description={description}
-				errorMessage={errorMessage}
+				errorMessage={normalizedErrorMessage}
 				label={label}
 				necessityIndicator={necessityIndicator}
 			>

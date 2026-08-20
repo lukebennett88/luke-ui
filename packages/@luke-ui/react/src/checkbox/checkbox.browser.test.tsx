@@ -1,6 +1,7 @@
 import { expect, test } from 'vite-plus/test';
-import { cdp, page } from 'vite-plus/test/context';
+import { cdp, page, userEvent } from 'vite-plus/test/context';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
+import { getDescribedText } from '../test-utils/get-described-text.js';
 import { render } from '../test-utils/render.js';
 import { Checkbox } from './index.js';
 
@@ -31,7 +32,7 @@ testIntegration('checkbox', async () => {
 // of the hang-indent calc trips this the moment the two texts stop lining up.
 test('the error message text aligns with the label text, not the icon', async () => {
 	render(
-		<Checkbox errorMessage="Choose an option." isInvalid name="invalid-alignment">
+		<Checkbox errorMessage="Choose an option." name="invalid-alignment">
 			Invalid
 		</Checkbox>,
 	);
@@ -67,7 +68,7 @@ test('the error message text aligns with the label text, not the icon', async ()
 // browser in edge cases.
 test('the icon indicator stays out of the accessible name', async () => {
 	render(
-		<Checkbox defaultSelected isInvalid name="invalid">
+		<Checkbox defaultSelected errorMessage="Choose an option." name="invalid">
 			Invalid
 		</Checkbox>,
 	);
@@ -83,6 +84,27 @@ test('the icon indicator stays out of the accessible name', async () => {
 	const axNode = await getAccessibilityNode(inputNode.nodeId);
 	expect(axNode.role?.value).toBe('checkbox');
 	expect(axNode.name?.value).toBe('Invalid');
+});
+
+test('with no errorMessage, native required validation stays in charge', async () => {
+	// Use a plain form because React Aria's Form does not resolve in this browser environment.
+	render(
+		<form>
+			<Checkbox isRequired name="terms">
+				I accept the terms
+			</Checkbox>
+			<button type="submit">Continue</button>
+		</form>,
+	);
+
+	const checkbox = page.getByRole('checkbox', { name: 'I accept the terms' });
+	await expect.element(checkbox).not.toHaveAttribute('aria-invalid', 'true');
+	expect(getDescribedText(checkbox.element())).toBe('');
+
+	await userEvent.click(page.getByRole('button', { name: 'Continue' }));
+
+	await expect.element(checkbox).toHaveAttribute('aria-invalid', 'true');
+	await expect.poll(() => getDescribedText(checkbox.element()).length).toBeGreaterThan(0);
 });
 
 /** A `Range` spanning `node`'s own content, for measuring rendered text geometry. */

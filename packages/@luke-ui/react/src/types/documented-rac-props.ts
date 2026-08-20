@@ -29,8 +29,6 @@ export interface DocumentedInputProps {
 	defaultValue?: RacTextFieldProps['defaultValue'];
 	/** Whether the field is disabled. */
 	isDisabled?: RacTextFieldProps['isDisabled'];
-	/** Whether the field has a validation error. */
-	isInvalid?: RacTextFieldProps['isInvalid'];
 	/** Whether the field is read-only. */
 	isReadOnly?: RacTextFieldProps['isReadOnly'];
 	/** Called when the value changes. */

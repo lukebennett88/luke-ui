@@ -33,9 +33,10 @@ default. Use `small` in compact layouts and `large` where a larger control impro
 
 ## Validation
 
-Pass `errorMessage` with `isInvalid` when the choice blocks submission. Always pass both. Read
-[Validation](/docs/validation#always-pair-an-invalid-field-with-a-message) for why the message is
-required.
+Set `isRequired` to require the choice. `Checkbox` shows its validation message after validation
+fails. Pass `errorMessage` only for an error you already have, such as one from a form library or
+your server. A non-empty message marks the checkbox invalid. Read [Validation](/docs/validation) for
+where each message comes from.
 
 <ExampleBlock src="checkbox/validation" title="Checkbox — Validation" />
 

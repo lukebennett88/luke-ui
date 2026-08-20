@@ -40,7 +40,8 @@ as `ComboboxInput`, takes `field.ref` on `ref`.
 
 ## Validation
 
-Read the message from `fieldState.error` and pass `fieldState.invalid` to `isInvalid`.
+Read the message from `fieldState.error` and pass it to `errorMessage`. The message marks the field
+invalid.
 
 ```tsx
 <Controller
@@ -50,7 +51,6 @@ Read the message from `fieldState.error` and pass `fieldState.invalid` to `isInv
 		<TextField
 			errorMessage={fieldState.error?.message}
 			inputRef={field.ref}
-			isInvalid={fieldState.invalid}
 			label="Email"
 			onBlur={field.onBlur}
 			onChange={field.onChange}

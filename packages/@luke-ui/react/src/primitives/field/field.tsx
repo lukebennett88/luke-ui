@@ -5,18 +5,28 @@ import type { FieldDescriptionProps } from './description.js';
 import { FieldDescription } from './description.js';
 import type { FieldErrorProps } from './error.js';
 import { FieldError } from './error.js';
+import {
+	isInvalidFromErrorMessage,
+	normalizeErrorMessage,
+} from './is-invalid-from-error-message.js';
 import type { FieldLabelProps, FieldNecessityIndicator } from './label.js';
 import { FieldLabel } from './label.js';
 import { Field as PrimitiveField } from './root.js';
 
 export type { FieldDescriptionProps, FieldErrorProps, FieldLabelProps, FieldNecessityIndicator };
-export { FieldDescription, FieldError, FieldLabel };
+export {
+	FieldDescription,
+	FieldError,
+	FieldLabel,
+	isInvalidFromErrorMessage,
+	normalizeErrorMessage,
+};
 
 /** Label, description, and error props shared by field compositions. */
 export interface FieldSlotProps {
 	/** Optional helper text shown below the control. */
 	description?: ReactNode;
-	/** Error content passed to `FieldError`. */
+	/** Error content passed to `FieldError`. Accepts React Aria's render-prop form. */
 	errorMessage?: FieldErrorProps['children'];
 	/** Label content shown above the control. */
 	label?: ReactNode;

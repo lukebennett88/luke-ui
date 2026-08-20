@@ -28,7 +28,6 @@ export default () => {
 							<TextField
 								errorMessage={fieldState.error?.message}
 								inputRef={field.ref}
-								isInvalid={fieldState.invalid}
 								label="Name"
 								onBlur={field.onBlur}
 								onChange={field.onChange}
@@ -44,7 +43,6 @@ export default () => {
 							<TextField
 								errorMessage={fieldState.error?.message}
 								inputRef={field.ref}
-								isInvalid={fieldState.invalid}
 								label="Email"
 								onBlur={field.onBlur}
 								onChange={field.onChange}

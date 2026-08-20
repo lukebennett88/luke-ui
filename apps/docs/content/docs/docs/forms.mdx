@@ -85,7 +85,8 @@ Luke UI supports browser validation, custom validation, and server validation. T
 
 - Set native constraints such as `isRequired`, `minLength`, `pattern`, or `type="email"` for browser
   validation.
-- Pass `validate` for a custom rule. Pass `isInvalid` and `errorMessage` for controlled feedback.
+- Pass `validate` for a custom rule. Pass a controlled `errorMessage` for feedback that must update
+  on every keystroke.
 - Pass `validationErrors` to React Aria's `Form` for server errors. Key each error by the field
   `name`.
 

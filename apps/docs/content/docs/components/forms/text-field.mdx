@@ -36,9 +36,10 @@ Set `isRequired` for required fields. `necessityIndicator="icon"` adds a visual 
 
 ## Validation
 
-Pass `errorMessage` with `isInvalid` to report a problem. Always pass both. Read
-[Validation](/docs/validation#always-pair-an-invalid-field-with-a-message) for why the message is
-required.
+Set `isRequired`, `type`, or `pattern`, or pass `validate` to check the value. `TextField` shows its
+validation message after validation fails. Pass `errorMessage` only for an error you already have,
+such as one from a form library or your server. A non-empty message marks the field invalid. Read
+[Validation](/docs/validation) for where each message comes from.
 
 <ExampleBlock src="text-field/validation" title="Text Field — Validation" />
 

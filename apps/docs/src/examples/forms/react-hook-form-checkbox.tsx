@@ -29,7 +29,6 @@ export default () => {
 							<Checkbox
 								errorMessage={fieldState.error?.message}
 								inputRef={field.ref}
-								isInvalid={fieldState.invalid}
 								isSelected={field.value}
 								onBlur={field.onBlur}
 								onChange={field.onChange}

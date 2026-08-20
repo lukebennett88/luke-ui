@@ -43,15 +43,12 @@ test('kitchen sink', async () => {
 				<TextField
 					defaultValue="nope"
 					errorMessage="Please enter a valid email."
-					isInvalid
 					label="Invalid"
 					name="invalid"
 				/>
-				<TextField isInvalid label="Invalid, no message" name="invalid-no-message" />
 				<TextField
 					defaultValue="nope"
 					errorMessage="Please enter a valid email."
-					isInvalid
 					label="Invalid small"
 					name="invalid-small"
 					size="small"
@@ -59,7 +56,6 @@ test('kitchen sink', async () => {
 				<TextField
 					defaultValue="0.00"
 					errorMessage="Enter a valid amount."
-					isInvalid
 					label="Invalid with a suffix"
 					name="invalid-suffix"
 					placeholder="0.00"
@@ -146,7 +142,6 @@ test('forced-colors states', async () => {
 				<TextField
 					defaultValue="nope"
 					errorMessage="Please enter a valid email."
-					isInvalid
 					label="Invalid"
 					name="invalid"
 				/>
