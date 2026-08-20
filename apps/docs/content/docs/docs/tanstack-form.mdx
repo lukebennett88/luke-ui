@@ -40,14 +40,14 @@ A checkbox reads its value from `isSelected`.
 
 ## Validation
 
-Read the message from `field.state.meta.errors` and pass `field.state.meta.isValid` to `isInvalid`.
+Read the message from `field.state.meta.errors` and pass it to `errorMessage`. The message marks the
+field invalid.
 
 ```tsx
 <form.Field name="email">
 	{(field) => (
 		<TextField
 			errorMessage={field.state.meta.errors[0]?.message}
-			isInvalid={!field.state.meta.isValid}
 			label="Email"
 			onBlur={field.handleBlur}
 			onChange={field.handleChange}

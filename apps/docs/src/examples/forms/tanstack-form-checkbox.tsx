@@ -49,7 +49,6 @@ export default () => {
 						{(field) => (
 							<Checkbox
 								errorMessage={field.state.meta.errors[0]?.message}
-								isInvalid={!field.state.meta.isValid}
 								isSelected={field.state.value}
 								onBlur={field.handleBlur}
 								onChange={field.handleChange}

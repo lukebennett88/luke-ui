@@ -1,5 +1,5 @@
 import { useObjectRef } from '@react-aria/utils';
-import type { CSSProperties, JSX, Ref } from 'react';
+import type { CSSProperties, JSX, ReactNode, Ref } from 'react';
 import { useContext, useEffect, useId } from 'react';
 import { SelectableCollectionContext } from 'react-aria-components/Autocomplete';
 import { Button as RacButton } from 'react-aria-components/Button';
@@ -28,7 +28,11 @@ import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { comboboxRecipe } from '../primitives/combobox/styles.css.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import type { FieldSlotProps } from '../primitives/field/field.js';
-import { Field } from '../primitives/field/field.js';
+import {
+	Field,
+	isInvalidFromErrorMessage,
+	normalizeErrorMessage,
+} from '../primitives/field/field.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { cx } from '../utils/utils.js';
@@ -46,13 +50,16 @@ interface ComboboxFieldRedeclaredRACProps {
 
 type _ComboboxFieldOmit<T extends object> = DistributiveOmit<
 	ComboboxRootProps<T>,
-	'children' | keyof ComboboxFieldRedeclaredRACProps
+	'children' | 'isInvalid' | keyof ComboboxFieldRedeclaredRACProps
 >;
 
 interface _ComboboxFieldProps<T extends object>
 	extends _ComboboxFieldOmit<T>, ComboboxFieldRedeclaredRACProps, FieldSlotProps {
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
+
+	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
+	errorMessage?: ReactNode;
 
 	/**
 	 * Targets the persistent combobox input on desktop. On mobile it targets the tray search input
@@ -107,6 +114,8 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		size = 'medium',
 		...comboboxRootProps
 	} = props;
+
+	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
 
 	const isMobileDevice = useIsMobileDevice();
 	const isAsync: boolean = loadingState != null;
@@ -182,10 +191,14 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 	})();
 
 	return (
-		<ComboboxRoot size={size} {...comboboxRootProps}>
+		<ComboboxRoot
+			size={size}
+			{...comboboxRootProps}
+			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
+		>
 			<Field
 				description={description}
-				errorMessage={errorMessage}
+				errorMessage={normalizedErrorMessage}
 				label={label}
 				necessityIndicator={necessityIndicator}
 			>

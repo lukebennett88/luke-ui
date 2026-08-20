@@ -39,7 +39,6 @@ export default () => {
 			<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
 				<TextField
 					errorMessage={errors.email}
-					isInvalid={errors.email != null}
 					label="Email address"
 					name="emailAddress"
 					placeholder="you@example.com"
@@ -47,14 +46,13 @@ export default () => {
 				<ComboboxField
 					defaultItems={countries}
 					errorMessage={errors.country}
-					isInvalid={errors.country != null}
 					label="Work location"
 					name="country"
 					placeholder="Choose a country"
 				>
 					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 				</ComboboxField>
-				<Checkbox errorMessage={errors.terms} isInvalid={errors.terms != null} name="terms">
+				<Checkbox errorMessage={errors.terms} name="terms">
 					I accept the terms of service
 				</Checkbox>
 				<Box>

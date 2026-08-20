@@ -118,21 +118,20 @@ export const InputGroupInvalid = meta.story({
 });
 
 /**
- * Validation supports both static text and render-function signatures via
- * `errorMessage`.
+ * Shows constraint and custom validation messages after submission.
  */
 export const Validation = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
+
 		await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
 	},
 	render: () => (
 		<Form>
 			<div style={stackStyle}>
-				<TextField errorMessage="Please enter an email." isRequired label="Email" name="email" />
+				<TextField isRequired label="Email" name="email" />
 				<TextField
 					defaultValue="ab"
-					errorMessage={(validation) => validation.validationErrors.join(' ')}
 					label="Username"
 					name="username"
 					validate={(value) => (value.length < 3 ? 'Must be at least 3 characters.' : null)}
@@ -144,17 +143,21 @@ export const Validation = meta.story({
 });
 
 /**
- * Server-provided validation errors flow through `FieldError` when
- * `errorMessage` uses the render-function signature.
+ * Shows an error supplied by form state or a server.
+ */
+export const ControlledError = meta.story({
+	render: () => (
+		<TextField errorMessage="This username is not available." label="Username" name="username" />
+	),
+});
+
+/**
+ * Shows a server error passed through the form.
  */
 export const ServerValidation = meta.story({
 	render: () => (
 		<Form validationErrors={{ username: 'This username is not available.' }}>
-			<TextField
-				errorMessage={(validation) => validation.validationErrors.join(' ')}
-				label="Username"
-				name="username"
-			/>
+			<TextField label="Username" name="username" />
 		</Form>
 	),
 });

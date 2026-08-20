@@ -84,18 +84,18 @@ export const DisabledAndReadOnly = meta.story({
 });
 
 /**
- * Required checkbox validation uses the browser and React Aria form semantics,
- * with `errorMessage` rendered only after validation fails.
+ * Shows the validation message after a required checkbox fails submission.
  */
 export const Validation = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
+
 		await userEvent.click(canvas.getByRole('button', { name: 'Continue' }));
 	},
 	render: () => (
 		<Form>
 			<div style={stackStyle}>
-				<Checkbox errorMessage="Accept the terms to continue." isRequired name="terms">
+				<Checkbox isRequired name="terms">
 					I accept the terms
 				</Checkbox>
 				<button type="submit">Continue</button>

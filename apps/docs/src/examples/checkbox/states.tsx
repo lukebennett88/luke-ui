@@ -11,9 +11,7 @@ export default () => {
 			<Checkbox defaultSelected isDisabled>
 				Disabled and checked
 			</Checkbox>
-			<Checkbox errorMessage="Accept the terms of service before you continue." isInvalid>
-				Invalid
-			</Checkbox>
+			<Checkbox errorMessage="Accept the terms of service before you continue.">Invalid</Checkbox>
 		</Box>
 	);
 };

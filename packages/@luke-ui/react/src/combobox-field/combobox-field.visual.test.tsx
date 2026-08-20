@@ -2,8 +2,15 @@ import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { Icon } from '../icon/index.js';
 import { LoadingSpinner } from '../loading-spinner/index.js';
+import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
+import { ComboboxInput } from '../primitives/combobox/input.js';
 import { ComboboxItem, ComboboxLoadMoreItem } from '../primitives/combobox/item.js';
+import { ComboboxListBox } from '../primitives/combobox/listbox.js';
+import { ComboboxPopover } from '../primitives/combobox/popover.js';
+import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { ComboboxSection } from '../primitives/combobox/section.js';
+import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
+import { Field } from '../primitives/field/field.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
@@ -71,7 +78,6 @@ test('kitchen sink', async () => {
 				<ComboboxField
 					defaultItems={countryItems}
 					errorMessage="Choose a valid country."
-					isInvalid
 					label="Invalid"
 					name="invalid"
 				>
@@ -81,25 +87,28 @@ test('kitchen sink', async () => {
 					defaultItems={countryItems}
 					defaultValue="ca"
 					errorMessage="Choose a different country."
-					isInvalid
 					label="Invalid with a selection"
 					name="invalid-with-selection"
 				>
 					{renderCountryItem}
 				</ComboboxField>
-				<ComboboxField
-					defaultItems={countryItems}
-					isInvalid
-					label="Invalid, no message"
-					name="invalid-no-message"
-				>
-					{renderCountryItem}
-				</ComboboxField>
+				<ComboboxRoot defaultItems={countryItems} isInvalid name="invalid-no-message">
+					<Field label="Invalid, no message">
+						<ComboboxInputGroup>
+							<ComboboxInput placeholder="Select a country..." />
+							<ComboboxTrigger aria-label="Toggle options">
+								<Icon aria-hidden name="chevronDown" />
+							</ComboboxTrigger>
+						</ComboboxInputGroup>
+						<ComboboxPopover offset={4}>
+							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
+						</ComboboxPopover>
+					</Field>
+				</ComboboxRoot>
 				<ComboboxField
 					defaultItems={countryItems}
 					defaultValue="ca"
 					errorMessage="Choose a different country."
-					isInvalid
 					label="Invalid small"
 					name="invalid-small"
 					size="small"
@@ -299,7 +308,6 @@ test('forced-colors states', async () => {
 				<ComboboxField
 					defaultItems={countryItems}
 					errorMessage="Choose a valid country."
-					isInvalid
 					label="Invalid"
 					name="invalid"
 				>

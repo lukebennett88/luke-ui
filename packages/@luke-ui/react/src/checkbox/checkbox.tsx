@@ -8,12 +8,16 @@ import {
 	CheckboxIndicator,
 	Checkbox as PrimitiveCheckbox,
 } from '../primitives/checkbox/checkbox.js';
-import type { FieldErrorProps } from '../primitives/field/field.js';
-import { FieldDescription, FieldError } from '../primitives/field/field.js';
+import {
+	FieldDescription,
+	FieldError,
+	isInvalidFromErrorMessage,
+	normalizeErrorMessage,
+} from '../primitives/field/field.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
-type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children' | 'inputRef'>;
+type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children' | 'inputRef' | 'isInvalid'>;
 
 interface _CheckboxProps extends _CheckboxOmit {
 	/** Checkbox label content. */
@@ -22,8 +26,8 @@ interface _CheckboxProps extends _CheckboxOmit {
 	defaultSelected?: PrimitiveCheckboxProps['defaultSelected'];
 	/** Supporting text shown beneath the checkbox label. */
 	description?: ReactNode;
-	/** Validation message shown when the checkbox is invalid. */
-	errorMessage?: FieldErrorProps['children'];
+	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
+	errorMessage?: ReactNode;
 	/**
 	 * Forwarded to the underlying `<input type="checkbox">` element.
 	 *
@@ -38,8 +42,6 @@ interface _CheckboxProps extends _CheckboxOmit {
 	isDisabled?: PrimitiveCheckboxProps['isDisabled'];
 	/** Whether the checkbox displays a mixed selection state. */
 	isIndeterminate?: PrimitiveCheckboxProps['isIndeterminate'];
-	/** Whether the checkbox is invalid. */
-	isInvalid?: PrimitiveCheckboxProps['isInvalid'];
 	/** Whether the checkbox can be read but not changed. */
 	isReadOnly?: PrimitiveCheckboxProps['isReadOnly'];
 	/** Whether the checkbox is required before the form can submit. */
@@ -66,9 +68,14 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 	// error even though it would work: RAC merges the ref itself. `useObjectRef` gives
 	// the declared type what it asks for rather than leaning on that internal detail.
 	const objectInputRef = useObjectRef(inputRef);
+	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
 
 	return (
-		<PrimitiveCheckbox {...checkboxProps} inputRef={objectInputRef}>
+		<PrimitiveCheckbox
+			{...checkboxProps}
+			inputRef={objectInputRef}
+			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
+		>
 			<CheckboxContent>
 				<CheckboxControl>
 					<CheckboxIndicator />
@@ -76,7 +83,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 				{children}
 			</CheckboxContent>
 			{description != null ? <FieldDescription>{description}</FieldDescription> : null}
-			<FieldError>{errorMessage}</FieldError>
+			<FieldError>{normalizedErrorMessage}</FieldError>
 		</PrimitiveCheckbox>
 	);
 }

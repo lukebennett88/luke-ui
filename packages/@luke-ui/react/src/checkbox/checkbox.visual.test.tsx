@@ -27,7 +27,7 @@ test('kitchen sink', async () => {
 				<Checkbox defaultSelected isDisabled name="disabled">
 					Disabled
 				</Checkbox>
-				<Checkbox defaultSelected errorMessage="Choose an option." isInvalid name="invalid">
+				<Checkbox defaultSelected errorMessage="Choose an option." name="invalid">
 					Invalid
 				</Checkbox>
 				{typeStyles.map((typography) => (
@@ -38,14 +38,13 @@ test('kitchen sink', async () => {
 					</Text>
 				))}
 				<Checkbox name="standalone">Standalone control</Checkbox>
-				<Checkbox defaultSelected isInvalid name="invalid-wrapping">
+				<Checkbox defaultSelected errorMessage="Choose an option." name="invalid-wrapping">
 					This label wraps onto a second line so the control should sit on the first line, not float
 					at the row's top edge.
 				</Checkbox>
 				<Checkbox
 					defaultSelected
 					errorMessage="This error message wraps onto a second and third line so the icon should sit on the first line, not centre itself against the whole block."
-					isInvalid
 					name="invalid-wrapping-message"
 				>
 					Accept the terms
@@ -57,7 +56,6 @@ test('kitchen sink', async () => {
 							Please accept the <strong>updated terms</strong> before continuing.
 						</>
 					}
-					isInvalid
 					name="invalid-rich-message"
 				>
 					Accept the terms
@@ -78,13 +76,13 @@ test('keyboard focus ring', async () => {
 test('interactive states', async () => {
 	const { locator } = render(
 		<Stack>
-			<Checkbox isInvalid name="invalid-unchecked">
+			<Checkbox errorMessage="Choose an option." name="invalid-unchecked">
 				Invalid
 			</Checkbox>
-			<Checkbox defaultSelected isInvalid name="invalid-selected">
+			<Checkbox defaultSelected errorMessage="Choose an option." name="invalid-selected">
 				Invalid selected
 			</Checkbox>
-			<Checkbox isIndeterminate isInvalid name="invalid-indeterminate">
+			<Checkbox errorMessage="Choose an option." isIndeterminate name="invalid-indeterminate">
 				Invalid indeterminate
 			</Checkbox>
 		</Stack>,
@@ -140,7 +138,7 @@ test('forced-colors states', async () => {
 				<Checkbox defaultSelected isDisabled name="disabled">
 					Disabled
 				</Checkbox>
-				<Checkbox defaultSelected isInvalid name="invalid">
+				<Checkbox defaultSelected errorMessage="Choose an option." name="invalid">
 					Invalid
 				</Checkbox>
 			</Stack>,

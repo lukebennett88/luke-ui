@@ -331,6 +331,7 @@ export const DisabledKeys = meta.story({
 export const Validation = meta.story({
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
+
 		await userEvent.click(canvas.getByRole('button', { name: 'Submit' }));
 
 		// Native validation focuses the invalid combobox and opens its listbox. Close the listbox so
@@ -341,13 +342,7 @@ export const Validation = meta.story({
 		return (
 			<Form>
 				<div style={stackStyle}>
-					<ComboboxField
-						defaultItems={countryItems}
-						errorMessage="Please select a country."
-						isRequired
-						label="Country"
-						name="country"
-					>
+					<ComboboxField defaultItems={countryItems} isRequired label="Country" name="country">
 						{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 					</ComboboxField>
 					<Button type="submit">Submit</Button>

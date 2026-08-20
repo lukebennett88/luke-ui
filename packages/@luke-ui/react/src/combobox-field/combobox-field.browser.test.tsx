@@ -6,6 +6,7 @@ import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
 import { ComboboxInput } from '../primitives/combobox/input.js';
 import { ComboboxItem } from '../primitives/combobox/item.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
+import { getDescribedText } from '../test-utils/get-described-text.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
@@ -133,8 +134,7 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		await userEvent.click(trigger);
 		await expect.element(dialog).toBeVisible();
 		expect(inputRef.current).toBe(searchbox.element());
-		// Luke UI deliberately moved this overlay from a non-modal popover to a modal, so the page
-		// behind the tray must stop scrolling while it is open.
+		// The tray is a modal overlay, so the page behind it must stop scrolling while it is open.
 		expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
 
 		const modal = dialog.element().parentElement;
@@ -202,7 +202,12 @@ test('the control group carries its own disabled and invalid attributes', async 
 			<ComboboxField defaultItems={countryItems} isDisabled label="Disabled" name="disabled">
 				{renderCountryItem}
 			</ComboboxField>
-			<ComboboxField defaultItems={countryItems} isInvalid label="Invalid" name="invalid">
+			<ComboboxField
+				defaultItems={countryItems}
+				errorMessage="Choose a valid country."
+				label="Invalid"
+				name="invalid"
+			>
 				{renderCountryItem}
 			</ComboboxField>
 			<ComboboxField defaultItems={countryItems} label="Resting" name="resting">
@@ -276,6 +281,30 @@ test('ComboboxInput resolves object and callback refs to the input element', asy
 
 	expect(objectRef.current).toBe(objectInput.element());
 	expect(callbackResolved.at(-1)).toBe(callbackInput.element());
+});
+
+test('with no errorMessage, native required validation stays in charge', async () => {
+	// Use a plain form because React Aria's Form does not resolve in this browser environment.
+	render(
+		<form>
+			<ComboboxField defaultItems={countryItems} isRequired label="Country">
+				{renderCountryItem}
+			</ComboboxField>
+			<button type="submit">Submit</button>
+		</form>,
+	);
+
+	const input = page.getByRole('combobox', { name: 'Country' }).element();
+	expect(getControl('Country').dataset.invalid).toBeUndefined();
+	expect(getDescribedText(input)).toBe('');
+
+	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
+
+	// Submission opens the invalid combobox. Close it to restore the page's accessibility tree.
+	await userEvent.keyboard('{Escape}');
+
+	await expect.poll(() => getControl('Country').dataset.invalid).toBe('true');
+	await expect.poll(() => getDescribedText(input).length).toBeGreaterThan(0);
 });
 
 /** The control group wrapping the combobox input labelled `name`. */
