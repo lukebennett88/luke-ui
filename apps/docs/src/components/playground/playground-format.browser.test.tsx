@@ -61,11 +61,11 @@ test('monaco fills the editor pane and format updates source through onChange', 
 		.toContain(formatted);
 
 	await userEvent.click(monacoEditor()!);
-	await userEvent.keyboard('{Control>}z{/Control}');
+	await userEvent.keyboard(ctrlCmd('z'));
 	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain('playgroundFormatTest=(x)=>x');
 }, 60_000);
 
-test('Ctrl+S formats through the Monaco provider and onChange', async () => {
+test('the save shortcut formats through the Monaco provider and onChange', async () => {
 	const onChangeCalls: Array<string> = [];
 	renderPlayground(badlyFormatted, (code) => onChangeCalls.push(code));
 
@@ -78,7 +78,7 @@ test('Ctrl+S formats through the Monaco provider and onChange', async () => {
 		(document.querySelector('.view-lines')?.textContent ?? '').replace(/\u00a0/g, ' ');
 
 	await userEvent.click(monacoEditor()!);
-	await userEvent.keyboard('{Control>}s{/Control}');
+	await userEvent.keyboard(ctrlCmd('s'));
 
 	await expect.poll(() => viewText(), { timeout: 10_000 }).toContain(formatted);
 	await expect
@@ -108,4 +108,11 @@ function Harness({
 			<PlaygroundEditor defaultValue={defaultValue} onChange={onChange} showLoadingPill={false} />
 		</div>
 	);
+}
+
+// Monaco maps its CtrlCmd modifier to Cmd on macOS and Ctrl everywhere else, so
+// a test that hardcodes one of them passes on a single platform.
+function ctrlCmd(key: string): string {
+	const modifier = navigator.userAgent.includes('Macintosh') ? 'Meta' : 'Control';
+	return `{${modifier}>}${key}{/${modifier}}`;
 }
