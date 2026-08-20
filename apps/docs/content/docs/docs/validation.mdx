@@ -19,8 +19,8 @@ Set `isRequired` on `TextField`, `ComboboxField`, or `Checkbox` to require a val
 submits. Pass `minLength`, `maxLength`, or `pattern` on `TextField` to state a rule for the text.
 Pass `type="email"` or `type="url"` to check the value's format.
 
-Leave out `errorMessage`. The field renders the message the constraint produces. The browser checks
-the value on blur and on submit.
+Leave out `errorMessage`. The field renders the message the constraint produces. It appears on blur
+or on submit.
 
 <ExampleBlock src="forms/constraint-validation" title="Validation — Constraint validation" />
 
@@ -46,8 +46,8 @@ messages, but the field does not render them as a list. It joins them with a spa
 a single run-on sentence, and even two short messages can fill two lines in a 288px-wide form
 column.
 
-The field runs `validate` when someone commits the value, for example on blur, not on every
-keystroke.
+With the default validation behaviour, the field shows the validation message when someone commits
+the value, for example on blur or submit, rather than between keystrokes.
 
 ## Realtime validation
 
@@ -69,8 +69,8 @@ const isTooShort = password.length > 0 && password.length < 12;
 />;
 ```
 
-This is the exception. Constraint validation and `validate` wait until the value is committed. This
-does not distract someone while they type.
+This is the exception. Constraint and `validate` messages normally appear after the value is
+committed. This does not distract someone while they type.
 
 ## Form libraries
 

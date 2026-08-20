@@ -126,7 +126,9 @@ test('InputGroupInput resolves object and callback refs to the input element', a
 // `aria-invalid` stays null, painting an untouched required field invalid even
 // though assistive technology is told it's fine. Guard that the group only picks
 // up the invalid treatment once React Aria has recorded a real validation
-// failure. The in-control icon is the invalid cue Luke UI owns.
+// failure, and that native required validation stays in charge without an
+// `errorMessage`: `aria-invalid` is absent before submit and `'true'` after.
+// The in-control icon is the invalid cue Luke UI owns.
 test('a required field is painted invalid only after a real submit fails validation', async () => {
 	// A plain `<form>`, not react-aria-components' `Form`: the latter fails to
 	// resolve in this browser test environment. React Aria's own field
@@ -141,11 +143,13 @@ test('a required field is painted invalid only after a real submit fails validat
 
 	const input = page.getByRole('textbox', { name: 'Email' });
 	await expect.element(input).toBeVisible();
+	await expect.element(input).not.toHaveAttribute('aria-invalid');
 	expect(indicatorFor('Email')).toBe(null);
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
 	await expect.poll(() => indicatorFor('Email')).not.toBe(null);
+	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
 });
 
 test('an errorMessage alone marks the field invalid', async () => {
@@ -154,24 +158,6 @@ test('an errorMessage alone marks the field invalid', async () => {
 	const input = page.getByRole('textbox', { name: 'Email' });
 	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
 	await expect.element(page.getByText('Enter a valid email.')).toBeVisible();
-});
-
-test('with no errorMessage, native required validation stays in charge', async () => {
-	render(
-		<form>
-			<TextField isRequired label="Email" name="email" />
-			<button type="submit">Submit</button>
-		</form>,
-	);
-
-	const input = page.getByRole('textbox', { name: 'Email' });
-	await expect.element(input).not.toHaveAttribute('aria-invalid');
-	expect(indicatorFor('Email')).toBe(null);
-
-	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
-
-	await expect.poll(() => indicatorFor('Email')).not.toBe(null);
-	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
 });
 
 test('with no errorMessage, a failing validate call reports only after submit', async () => {
