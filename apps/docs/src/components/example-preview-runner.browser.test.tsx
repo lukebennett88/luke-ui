@@ -5,8 +5,9 @@ import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
+import ComboboxExample from '../examples/combobox-primitive/basic.js';
 import { isExamplePreviewPreviewMessage } from '../lib/example-preview-protocol.js';
-import { ExamplePreviewRunner } from './example-preview-runner.js';
+import { ExamplePreviewDocument } from './example-preview-runner.js';
 import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
@@ -60,7 +61,7 @@ function renderPreview() {
 		root?.render(
 			<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
 				<DocsThemeRoot>
-					<ExamplePreviewRunner src="combobox-primitive/basic" />
+					<ExamplePreviewDocument PreviewComponent={ComboboxExample} />
 				</DocsThemeRoot>
 			</ThemeProvider>,
 		);

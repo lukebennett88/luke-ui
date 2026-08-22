@@ -204,6 +204,7 @@ function measurePreviewHeight(content: HTMLElement, wrapper: HTMLElement): numbe
 	for (const overlay of getPortalledOverlayElements()) {
 		const rect = overlay.getBoundingClientRect();
 		bottom = Math.max(bottom, rect.bottom);
+		if (rect.top < 0) bottom = Math.max(bottom, window.innerHeight - rect.top);
 	}
 	if (
 		document.body.querySelector(':scope > [data-rac]:not([data-placement]):has([role="dialog"])')
