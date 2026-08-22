@@ -126,6 +126,7 @@ export default defineConfig(async () => {
 					{ path: '/llms-full.txt' },
 					// The preview page is loaded via an iframe src, which the link
 					// crawler does not follow, so it must be prerendered explicitly.
+					{ path: '/examples/preview' },
 					{ path: '/playground/preview' },
 					...markdownPrerenderPages,
 				],
