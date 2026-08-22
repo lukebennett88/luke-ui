@@ -67,8 +67,8 @@ test('fits the preview inside viewports narrower than its desktop minimum', asyn
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
-test('keeps portalled combobox options visible and usable inside the preview', async () => {
-	renderExampleBlock('combobox-primitive/basic');
+test('keeps every portalled combobox option visible and usable inside the preview', async () => {
+	renderExampleBlock('combobox-field/basic');
 
 	const iframe = getPreviewIframe();
 	previewFixtureUrl = createPreviewFixtureUrl(mountExamplePreview);
@@ -80,18 +80,23 @@ test('keeps portalled combobox options visible and usable inside the preview', a
 	if (!previewDocument) throw new Error('expected the example preview document');
 
 	previewDocument.querySelector<HTMLButtonElement>('[aria-label="Toggle options"]')?.click();
+	await expect.poll(() => previewDocument.querySelectorAll('[role="option"]').length).toBe(4);
+
 	await expect
-		.poll(() => previewDocument.querySelector('[role="option"]')?.textContent)
-		.toBe('Australia');
+		.poll(() => {
+			const previewHeight = iframe.contentWindow?.innerHeight ?? 0;
+			return Array.from(previewDocument.querySelectorAll<HTMLElement>('[role="option"]')).every(
+				(option) =>
+					option.getBoundingClientRect().top >= 0 &&
+					option.getBoundingClientRect().bottom <= previewHeight,
+			);
+		})
+		.toBe(true);
 
-	const option = previewDocument.querySelector<HTMLElement>('[role="option"]');
-	if (!option) throw new Error('expected the combobox option');
-	await expect.poll(() => iframe.clientHeight >= option.getBoundingClientRect().bottom).toBe(true);
-
-	option.click();
+	previewDocument.querySelector<HTMLElement>('[role="option"]')?.click();
 	await expect
 		.poll(() => previewDocument.querySelector<HTMLInputElement>('input')?.value)
-		.toBe('Australia');
+		.toBe('Apple');
 });
 
 function renderExample(title: string) {

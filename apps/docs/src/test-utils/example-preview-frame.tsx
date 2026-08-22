@@ -4,7 +4,7 @@ import { ThemeProvider } from 'next-themes';
 import { createRoot } from 'react-dom/client';
 import { ExamplePreviewDocument } from '../components/example-preview-runner.js';
 import { DocsThemeRoot } from '../components/theme-controls.js';
-import ComboboxExample from '../examples/combobox-primitive/basic.js';
+import ComboboxExample from '../examples/combobox-field/basic.js';
 
 export function mountExamplePreview(container: HTMLElement): void {
 	createRoot(container).render(
