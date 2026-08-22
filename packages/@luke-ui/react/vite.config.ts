@@ -1,9 +1,10 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { babel } from '@rollup/plugin-babel';
 import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
 import { readdir, rm } from 'node:fs/promises';
+import { transformSync } from 'oxc-transform-react';
+import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
 
@@ -19,6 +20,54 @@ const assetExports = [
 	'./themes/tactile/stylesheet.css',
 	'./themes/paper/stylesheet.css',
 ];
+
+const transformableExtensions: Record<string, 'js' | 'jsx' | 'ts' | 'tsx'> = {
+	'.js': 'js',
+	'.jsx': 'jsx',
+	'.ts': 'ts',
+	'.tsx': 'tsx',
+};
+
+function reactCompilerPlugin(): Plugin {
+	return {
+		name: 'react-compiler',
+		transform(code, id) {
+			// Vanilla Extract virtual modules carry a `\0` prefix and/or query strings, and its
+			// `.css.ts` files have already been compiled to plain style declarations by the time
+			// they reach here. Skip both, along with anything Oxc has no business compiling.
+			const filename = id.split('?')[0] ?? id;
+			if (filename.startsWith('\0') || filename.includes('node_modules')) return null;
+			if (filename.endsWith('.css.ts')) return null;
+
+			const extension = filename.slice(filename.lastIndexOf('.'));
+			const lang = transformableExtensions[extension];
+			if (!lang) return null;
+
+			const result = transformSync(filename, code, {
+				lang,
+				reactCompiler: { target: '19' },
+				sourcemap: true,
+				sourceType: 'module',
+				jsx: 'preserve',
+			});
+
+			if (result.fatal) {
+				const errorMessages = result.errors
+					.filter((error) => error.severity === 'Error')
+					.map((error) => error.codeframe ?? error.message)
+					.join('\n\n');
+				throw new Error(`Failed to compile ${filename}:\n\n${errorMessages}`);
+			}
+
+			for (const error of result.errors) {
+				if (error.severity === 'Advice') continue;
+				this.warn(`${filename}: ${error.codeframe ?? error.message}`);
+			}
+
+			return { code: result.code, map: result.map };
+		},
+	};
+}
 
 async function cleanDistExceptPreservedFiles() {
 	let entries: Array<string>;
@@ -85,15 +134,7 @@ export default defineConfig({
 				extract: { name: 'stylesheet.css', sourcemap: true },
 				identifiers: 'short',
 			}),
-			babel({
-				babelHelpers: 'bundled',
-				extensions: ['.js', '.jsx', '.ts', '.tsx'],
-				parserOpts: {
-					plugins: ['jsx', 'typescript'],
-					sourceType: 'module',
-				},
-				plugins: ['babel-plugin-react-compiler'],
-			}),
+			reactCompilerPlugin(),
 			// @ts-expect-error Vite plugin compatibility
 			react({ fastRefresh: true }),
 		],
