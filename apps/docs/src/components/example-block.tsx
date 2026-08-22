@@ -8,14 +8,15 @@ import type { JSX, ReactNode } from 'react';
 import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { withBasePath } from '../lib/base-path.js';
-import {
-	EXAMPLE_PREVIEW_MINIMUM_HEIGHT,
-	isExamplePreviewHeightMessage,
-} from '../lib/example-preview-protocol.js';
+import { createExamplePreviewPageSession } from '../lib/example-preview-handshake.js';
+import { EXAMPLE_PREVIEW_MINIMUM_HEIGHT } from '../lib/example-preview-protocol.js';
+import type { ExamplePreviewAppearanceMessage } from '../lib/example-preview-protocol.js';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { DocsLink } from './docs-link.js';
+import { useHydratedColorModeSelection } from './playground/color-mode-toggle.js';
 import { useIsDesktop } from './playground/use-is-desktop.js';
+import { useDocsThemeIdentity } from './theme-controls.js';
 
 type ExampleBlockProps = {
 	src: string;
@@ -123,9 +124,7 @@ export function ExamplePreview({
 	src: string;
 }) {
 	const isDesktop = useIsDesktop();
-	const preview = <ExampleIframe isCodeShown={isCodeShown} mode={mode} src={src} />;
-
-	if (!isDesktop) return preview;
+	const preview = <ExampleIframe isCodeShown={isCodeShown} key={src} mode={mode} src={src} />;
 
 	return (
 		<Group
@@ -134,12 +133,12 @@ export function ExamplePreview({
 			resizeTargetMinimumSize={EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE}
 			style={{ overflow: 'visible' }}
 		>
-			<Panel defaultSize="100%" minSize={320}>
+			<Panel defaultSize="100%" minSize={isDesktop ? 320 : 0}>
 				{preview}
 			</Panel>
 			<Separator
 				aria-label="Resize example preview"
-				className="relative z-10 shrink-0 inline-px after:absolute after:block-16 after:inline-1.5 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[calc(100%+0.5rem)] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65"
+				className="relative z-10 hidden shrink-0 inline-px after:absolute after:block-16 after:inline-1.5 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[calc(100%+0.5rem)] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:block"
 			/>
 			<Panel defaultSize={0} minSize={0} />
 		</Group>
@@ -151,42 +150,67 @@ function ExampleIframe({
 	mode,
 	src,
 }: Pick<ExampleBlockProps, 'mode' | 'src'> & { isCodeShown: boolean }) {
+	const colorMode = useHydratedColorModeSelection();
+	const { themeIdentity } = useDocsThemeIdentity();
 	const iframeRef = useRef<HTMLIFrameElement>(null);
+	const sessionRef = useRef(createExamplePreviewPageSession());
+	const appearanceRef = useRef<Omit<ExamplePreviewAppearanceMessage, 'type'> | null>(null);
 	const [height, setHeight] = useState(EXAMPLE_PREVIEW_MINIMUM_HEIGHT);
+	const [error, setError] = useState<string | null>(null);
 	const search = new URLSearchParams({ mode: mode ?? 'inset', src });
 	const previewUrl = withBasePath('/examples/preview', import.meta.env.BASE_URL);
+	const ports = () => ({
+		origin: window.location.origin,
+		previewWindow: iframeRef.current?.contentWindow ?? null,
+	});
 
 	useEffect(() => {
+		const session = sessionRef.current;
 		const onMessage = (event: MessageEvent) => {
-			if (
-				event.origin !== window.location.origin ||
-				event.source !== iframeRef.current?.contentWindow ||
-				!isExamplePreviewHeightMessage(event.data)
-			) {
-				return;
-			}
-
-			setHeight((previousHeight) =>
-				previousHeight === event.data.height ? previousHeight : event.data.height,
-			);
+			session.handlePreviewMessage(event, ports(), {
+				appearance: appearanceRef.current,
+				onError: setError,
+				onHeight: (nextHeight) => {
+					setHeight((previousHeight) =>
+						previousHeight === nextHeight ? previousHeight : nextHeight,
+					);
+				},
+			});
 		};
 
 		window.addEventListener('message', onMessage);
+		session.requestHeight(ports());
 		return () => window.removeEventListener('message', onMessage);
 	}, []);
 
+	useEffect(() => {
+		const appearance = colorMode === null ? null : { colorMode, themeIdentity };
+		appearanceRef.current = appearance;
+		if (appearance !== null) sessionRef.current.postAppearance(appearance, ports());
+	}, [colorMode, themeIdentity]);
+
 	return (
 		<div
-			className={`overflow-hidden bg-fd-muted${isCodeShown ? '' : ' rounded-b-[7px]'}`}
+			className={`relative overflow-hidden bg-fd-muted${isCodeShown ? '' : ' rounded-b-[7px]'}`}
 			data-example-preview-canvas
 			style={{ height }}
 		>
 			<iframe
 				ref={iframeRef}
 				className="block size-full border-0 [[data-group]:has([data-separator=active])_&]:pointer-events-none [[data-group]:has([data-separator=hover])_&]:pointer-events-none"
+				loading="lazy"
+				onLoad={() => sessionRef.current.requestHeight(ports())}
 				src={`${previewUrl}?${search}`}
 				title={`Preview of ${src}`}
 			/>
+			{error === null ? null : (
+				<div
+					className="absolute inset-0 z-20 flex items-center justify-center bg-fd-card p-4 text-center text-fd-destructive text-sm"
+					role="alert"
+				>
+					Failed to render example: {error}
+				</div>
+			)}
 		</div>
 	);
 }
