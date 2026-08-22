@@ -34,6 +34,20 @@ export default defineConfig({
 				test: {
 					browser: {
 						commands: {
+							clickExamplePreviewButton: async ({ iframe }, name: string) => {
+								await iframe
+									.locator('iframe[title^="Preview of "]')
+									.contentFrame()
+									.getByRole('button', { name })
+									.click();
+							},
+							clickExamplePreviewOption: async ({ iframe }, name: string) => {
+								await iframe
+									.locator('iframe[title^="Preview of "]')
+									.contentFrame()
+									.getByRole('option', { name })
+									.click();
+							},
 							dragFromSeparator: async ({ iframe, page }, offsetX: number, dragBy: number) => {
 								const box = await iframe.locator('[role="separator"]').boundingBox();
 								if (!box) throw new Error('separator not found');
