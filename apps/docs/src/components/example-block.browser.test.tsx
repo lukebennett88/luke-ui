@@ -71,7 +71,7 @@ test('keeps portalled combobox options visible and usable inside the preview', a
 	renderExampleBlock('combobox-primitive/basic');
 
 	const iframe = getPreviewIframe();
-	previewFixtureUrl = createPreviewFixtureUrl(mountExamplePreview.name);
+	previewFixtureUrl = createPreviewFixtureUrl(mountExamplePreview);
 	iframe.src = previewFixtureUrl;
 	await expect
 		.poll(() => iframe.contentDocument?.querySelector('[aria-label="Toggle options"]') !== null)
@@ -138,7 +138,7 @@ function getPreviewIframe(): HTMLIFrameElement {
 	return iframe;
 }
 
-function createPreviewFixtureUrl(mount: string): string {
+function createPreviewFixtureUrl(_mount: typeof mountExamplePreview): string {
 	return URL.createObjectURL(
 		new Blob(
 			[
@@ -146,8 +146,8 @@ function createPreviewFixtureUrl(mount: string): string {
 		<base href="${window.location.origin}/">
 		<div id="root"></div>
 		<script type="module">
-			import { ${mount} } from '/src/test-utils/example-preview-frame.tsx';
-			${mount}(document.querySelector('#root'));
+			import { mountExamplePreview } from '/src/test-utils/example-preview-frame.tsx';
+			mountExamplePreview(document.querySelector('#root'));
 		</script>
 	`,
 			],
