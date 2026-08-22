@@ -9,7 +9,6 @@ import { Suspense, use, useEffect, useId, useRef, useState } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { withBasePath } from '../lib/base-path.js';
 import { createExamplePreviewPageSession } from '../lib/example-preview-handshake.js';
-import { EXAMPLE_PREVIEW_MINIMUM_HEIGHT } from '../lib/example-preview-protocol.js';
 import type { ExamplePreviewAppearanceMessage } from '../lib/example-preview-protocol.js';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
@@ -113,6 +112,7 @@ export function ExampleLoadingState({ mode, title }: Pick<ExampleBlockProps, 'mo
 }
 
 const EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE = { coarse: 32, fine: 32 };
+const EXAMPLE_PREVIEW_VIEWPORT_MINIMUM_HEIGHT = 320;
 
 export function ExamplePreview({
 	isCodeShown,
@@ -155,7 +155,7 @@ function ExampleIframe({
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 	const sessionRef = useRef(createExamplePreviewPageSession());
 	const appearanceRef = useRef<Omit<ExamplePreviewAppearanceMessage, 'type'> | null>(null);
-	const [height, setHeight] = useState(EXAMPLE_PREVIEW_MINIMUM_HEIGHT);
+	const [height, setHeight] = useState(EXAMPLE_PREVIEW_VIEWPORT_MINIMUM_HEIGHT);
 	const [error, setError] = useState<string | null>(null);
 	const search = new URLSearchParams({ mode: mode ?? 'inset', src });
 	const previewUrl = withBasePath('/examples/preview', import.meta.env.BASE_URL);
@@ -171,8 +171,9 @@ function ExampleIframe({
 				appearance: appearanceRef.current,
 				onError: setError,
 				onHeight: (nextHeight) => {
+					const nextViewportHeight = Math.max(EXAMPLE_PREVIEW_VIEWPORT_MINIMUM_HEIGHT, nextHeight);
 					setHeight((previousHeight) =>
-						previousHeight === nextHeight ? previousHeight : nextHeight,
+						previousHeight === nextViewportHeight ? previousHeight : nextViewportHeight,
 					);
 				},
 			});
@@ -201,7 +202,7 @@ function ExampleIframe({
 				loading="lazy"
 				onLoad={() => sessionRef.current.requestHeight(ports())}
 				src={`${previewUrl}?${search}`}
-				style={{ minBlockSize: 'max(20rem, 100dvh)' }}
+				style={{ minBlockSize: `${EXAMPLE_PREVIEW_VIEWPORT_MINIMUM_HEIGHT}px` }}
 				title={`Preview of ${src}`}
 			/>
 			{error === null ? null : (
