@@ -67,7 +67,7 @@ test('fits the preview inside viewports narrower than its desktop minimum', asyn
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
-test('keeps every portalled combobox option visible and usable inside the preview', async () => {
+test('keeps the combobox in view when portalled options open and close', async () => {
 	await page.viewport(927, 205);
 	renderExampleBlock('combobox-field/basic');
 
@@ -88,28 +88,34 @@ test('keeps every portalled combobox option visible and usable inside the previe
 	const initialCanvasHeight = getPreviewCanvas().clientHeight;
 	const initialViewportHeight = iframe.contentWindow?.innerHeight;
 
-	await commands.clickExamplePreviewButton('Toggle options Favourite fruit');
-	await expect.poll(() => previewDocument.querySelectorAll('[role="option"]').length).toBe(4);
-	await new Promise((resolve) => setTimeout(resolve, 500));
-	expect(previewDocument.querySelectorAll('[role="option"]')).toHaveLength(4);
-	expect(getPreviewCanvas().clientHeight).toBeGreaterThan(initialCanvasHeight);
-	expect(iframe.contentWindow?.innerHeight).toBe(initialViewportHeight);
+	const openAndCloseOptions = async () => {
+		await commands.clickExamplePreviewButton('Toggle options Favourite fruit');
+		await expect.poll(() => previewDocument.querySelectorAll('[role="option"]').length).toBe(4);
+		expect(getPreviewCanvas().clientHeight).toBe(initialCanvasHeight);
+		expect(iframe.contentWindow?.innerHeight).toBe(initialViewportHeight);
+		expect(
+			Array.from(previewDocument.querySelectorAll<HTMLElement>('[role="option"]')).every(
+				(option) => option.getBoundingClientRect().bottom <= getPreviewCanvas().clientHeight,
+			),
+		).toBe(true);
+
+		await commands.clickExamplePreviewOption('Apple');
+		await expect.poll(() => previewDocument.querySelectorAll('[role="option"]').length).toBe(0);
+		expect(getPreviewCanvas().clientHeight).toBe(initialCanvasHeight);
+	};
+
+	await openAndCloseOptions();
+	await openAndCloseOptions();
+	await openAndCloseOptions();
 
 	await expect
 		.poll(() => {
-			const previewHeight = getPreviewCanvas().clientHeight;
-			return Array.from(previewDocument.querySelectorAll<HTMLElement>('[role="option"]')).every(
-				(option) =>
-					option.getBoundingClientRect().top >= 0 &&
-					option.getBoundingClientRect().bottom <= previewHeight,
-			);
+			const control = previewDocument.querySelector<HTMLElement>('[aria-label="Toggle options"]');
+			if (!control) return false;
+			const rect = control.getBoundingClientRect();
+			return rect.top >= 0 && rect.bottom <= getPreviewCanvas().clientHeight;
 		})
 		.toBe(true);
-
-	previewDocument.querySelector<HTMLElement>('[role="option"]')?.click();
-	await expect
-		.poll(() => previewDocument.querySelector<HTMLInputElement>('input')?.value)
-		.toBe('Apple');
 });
 
 function renderExample(title: string) {

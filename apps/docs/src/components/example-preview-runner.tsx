@@ -1,3 +1,4 @@
+import { vars } from '@luke-ui/react/theme';
 import { useTheme } from 'next-themes';
 import type { ComponentType } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -88,6 +89,16 @@ export function ExamplePreviewDocument({
 	});
 
 	useEffect(() => {
+		const root = document.documentElement;
+		const backgroundColor = root.style.backgroundColor;
+		root.style.backgroundColor = vars.color.surface.canvas;
+
+		return () => {
+			root.style.backgroundColor = backgroundColor;
+		};
+	}, []);
+
+	useEffect(() => {
 		errorRef.current = error;
 		if (error !== null) postToParent({ message: error, type: 'example-preview:error' });
 	}, [error]);
@@ -176,20 +187,11 @@ function useExamplePreviewBridge({
 		const resizeObserver = new ResizeObserver(scheduleObservedHeightReport);
 		resizeObserver.observe(content);
 		resizeObserver.observe(wrapper);
-		const mutationObserver = new MutationObserver(() => {
-			observePortalledOverlays(resizeObserver);
-			scheduleHeightReport();
-		});
-		mutationObserver.observe(document.body, {
-			childList: true,
-			subtree: true,
-		});
 		window.addEventListener('resize', scheduleObservedHeightReport);
 		scheduleHeightReport();
 
 		return () => {
 			if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
-			mutationObserver.disconnect();
 			resizeObserver.disconnect();
 			window.removeEventListener('resize', scheduleObservedHeightReport);
 			reportHeightRef.current = () => {};
@@ -199,30 +201,10 @@ function useExamplePreviewBridge({
 
 function measurePreviewHeight(content: HTMLElement, wrapper: HTMLElement): number {
 	const wrapperRect = wrapper.getBoundingClientRect();
-	let bottom = wrapperRect.top + wrapper.scrollHeight;
-
-	for (const overlay of getPortalledOverlayElements()) {
-		const rect = overlay.getBoundingClientRect();
-		bottom = Math.max(bottom, rect.bottom);
-		if (rect.top < 0) bottom = Math.max(bottom, window.innerHeight - rect.top);
-	}
-	if (
-		document.body.querySelector(':scope > [data-rac]:not([data-placement]):has([role="dialog"])')
-	) {
-		bottom = Math.max(bottom, window.parent.innerHeight);
-	}
-
-	return Math.max(EXAMPLE_PREVIEW_MINIMUM_HEIGHT, Math.ceil(window.scrollY + bottom));
-}
-
-function getPortalledOverlayElements(): Array<HTMLElement> {
-	return Array.from(
-		document.body.querySelectorAll<HTMLElement>(':scope > [data-rac], [data-rac][data-placement]'),
+	return Math.max(
+		EXAMPLE_PREVIEW_MINIMUM_HEIGHT,
+		Math.ceil(window.scrollY + wrapperRect.top + wrapper.scrollHeight),
 	);
-}
-
-function observePortalledOverlays(resizeObserver: ResizeObserver): void {
-	for (const overlay of getPortalledOverlayElements()) resizeObserver.observe(overlay);
 }
 
 function postToParent(message: ExamplePreviewPreviewMessage): void {
