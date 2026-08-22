@@ -58,6 +58,9 @@ those pull requests `needs-changeset` instead, using an explicit package list in
 
 Development dependency bumps do not need a changeset. Nothing about the published package changes.
 
+Luke UI has not cut a 1.0.0, so every changeset uses `patch`. There is no minor or major release
+until then, whatever the size of the change.
+
 `react` and `react-dom` use `rangeStrategy: 'replace'` rather than `bump`, so the catalog range only
 widens when the caret stops covering the new version. The catalog range is what gets published as
 the peer range, and bumping it on every minor would narrow what consumers can satisfy.

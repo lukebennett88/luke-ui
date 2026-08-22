@@ -22,14 +22,16 @@ export function resolvedColor(input: string): Oklch {
 }
 
 /**
- * Splits the generated stylesheet into its five rule blocks: identity, base light, media-query
- * dark, explicit light, and explicit dark.
+ * Splits the generated stylesheet into its seven blocks: the banner comment, the root-only
+ * containment rule, identity, base light, media-query dark, explicit light, and explicit dark.
  */
 export function splitBlocks(css: string) {
 	const blocks = css.split('\n\n').filter((block) => block.trim() !== '');
-	if (blocks.length !== 5) throw new Error(`expected 5 rule blocks, found ${blocks.length}`);
-	const [identity, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
+	if (blocks.length !== 7) throw new Error(`expected 7 rule blocks, found ${blocks.length}`);
+	const [banner, containment, identity, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
 	if (
+		banner === undefined ||
+		containment === undefined ||
 		identity === undefined ||
 		baseLight === undefined ||
 		mediaDark === undefined ||
@@ -38,7 +40,7 @@ export function splitBlocks(css: string) {
 	) {
 		throw new Error('expected every generated theme rule block to be defined');
 	}
-	return { baseLight, explicitDark, explicitLight, identity, mediaDark };
+	return { banner, baseLight, containment, explicitDark, explicitLight, identity, mediaDark };
 }
 
 /** Reads one declared custom property's value out of a rule block. */

@@ -27,16 +27,26 @@ element needs the same responsive layout properties without wrapping it in a `Bo
 ## Responsive values
 
 Properties passed to `Box` and Sprinkles accept a direct value when a layout property stays
-constant, or an object keyed by breakpoint when it changes at a named viewport width.
+constant, or an object keyed by breakpoint when it changes at a named container width.
 
-| Breakpoint | Minimum viewport width |
-| ---------- | ---------------------- |
-| `initial`  | 0px (base)             |
-| `small`    | 640px                  |
-| `medium`   | 768px                  |
-| `large`    | 1024px                 |
-| `xlarge`   | 1280px                 |
-| `xxlarge`  | 1536px                 |
+A responsive value resolves against the nearest ancestor size container, not the browser viewport.
+Most of the time that container is the document root: Luke UI establishes an unnamed container
+there, so a component behaves as it always has unless something narrower sits between it and the
+root. Wrap an element in its own `container-type: inline-size` box to make responsive values inside
+it respond to that element's own width instead.
+
+A body-level portal — a combobox popover, a mobile tray — renders outside its trigger's position in
+the DOM and so crosses out of any local container. Responsive values inside a portal fall back to
+the document root, the same as everywhere else without a nearer container of its own.
+
+| Breakpoint | Minimum container width |
+| ---------- | ----------------------- |
+| `initial`  | 0px (base)              |
+| `small`    | 640px                   |
+| `medium`   | 768px                   |
+| `large`    | 1024px                  |
+| `xlarge`   | 1280px                  |
+| `xxlarge`  | 1536px                  |
 
 Each breakpoint is a fixed constant, not a theme token. A custom theme cannot change these widths.
 Every breakpoint is a minimum width, so there is no maximum width or range condition. A value set at

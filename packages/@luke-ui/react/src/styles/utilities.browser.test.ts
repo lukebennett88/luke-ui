@@ -46,6 +46,21 @@ test('applies every retained breakpoint responsively', async () => {
 	}
 });
 
+test('resolves against a nearer explicit container instead of the viewport', async () => {
+	await page.viewport(1024, 800);
+
+	const wrapper = document.body.appendChild(document.createElement('div'));
+	mounted.push(wrapper);
+	wrapper.style.containerType = 'inline-size';
+	wrapper.style.inlineSize = `${breakpoints.small - 1}px`;
+
+	const generated = createSprinkles({ padding: { initial: '100', small: '200' } });
+	const element = mount(generated, wrapper);
+
+	const computedStyle = getComputedStyle(element);
+	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-100').trim());
+});
+
 test('returns class and style output that merges with consumer props', () => {
 	const generated = createSprinkles({
 		display: 'grid',
@@ -65,8 +80,11 @@ test('returns class and style output that merges with consumer props', () => {
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
 
-function mount(props: { className?: string; style?: Record<string, unknown> }): HTMLElement {
-	const element = document.body.appendChild(document.createElement('div'));
+function mount(
+	props: { className?: string; style?: Record<string, unknown> },
+	parent: HTMLElement = document.body,
+): HTMLElement {
+	const element = parent.appendChild(document.createElement('div'));
 	mounted.push(element);
 	element.className = `${tactileThemeClassName} ${props.className ?? ''}`;
 	Object.assign(element.style, props.style);
