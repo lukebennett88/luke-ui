@@ -104,7 +104,6 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
-		"@rollup/plugin-babel": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
 		"@storybook/addon-docs": "catalog:",
 		"@storybook/addon-vitest": "catalog:",
@@ -119,9 +118,9 @@
 		"@vitest/browser-playwright": "catalog:",
 		"@vitest/coverage-v8": "catalog:",
 		"@vitest/ui": "catalog:",
-		"babel-plugin-react-compiler": "catalog:",
 		"node-html-parser": "catalog:",
 		"oxc-parser": "catalog:",
+		"oxc-transform-react": "catalog:",
 		"pixelmatch": "catalog:",
 		"playwright": "catalog:",
 		"pngjs": "catalog:",
