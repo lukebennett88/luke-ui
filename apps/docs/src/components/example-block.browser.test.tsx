@@ -67,16 +67,24 @@ test('fits the preview inside viewports narrower than its desktop minimum', asyn
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
+test('sizes a simple example to its content on one continuous surface', async () => {
+	renderExampleBlock('button/basic');
+
+	const iframe = getPreviewIframe();
+	await loadPreviewFixture(iframe, 'button');
+	await expect
+		.poll(() => iframe.contentDocument?.querySelector('button')?.textContent)
+		.toBe('Save changes');
+	await expect.poll(() => getPreviewCanvas().clientHeight).toBeLessThan(320);
+	expectPreviewSurfaceToFillViewport(iframe);
+});
+
 test('keeps the combobox in view when portalled options open and close', async () => {
 	await page.viewport(927, 205);
 	renderExampleBlock('combobox-field/basic');
 
 	const iframe = getPreviewIframe();
-	previewFixtureUrl = createPreviewFixtureUrl(mountExamplePreview);
-	const fixtureLoaded = new Promise<void>((resolve) => {
-		iframe.addEventListener('load', () => resolve(), { once: true });
-	});
-	iframe.src = previewFixtureUrl;
+	const fixtureLoaded = loadPreviewFixture(iframe, 'combobox');
 	iframe.scrollIntoView({ block: 'center' });
 	await fixtureLoaded;
 	await expect
@@ -84,9 +92,10 @@ test('keeps the combobox in view when portalled options open and close', async (
 		.toBe(true);
 	const previewDocument = iframe.contentDocument;
 	if (!previewDocument) throw new Error('expected the example preview document');
-	await expect.poll(() => iframe.contentWindow?.innerHeight ?? 0).toBeGreaterThan(96);
+	await expect.poll(() => getPreviewCanvas().clientHeight).toBeGreaterThanOrEqual(320);
 	const initialCanvasHeight = getPreviewCanvas().clientHeight;
 	const initialViewportHeight = iframe.contentWindow?.innerHeight;
+	expectPreviewSurfaceToFillViewport(iframe);
 
 	const openAndCloseOptions = async () => {
 		await commands.clickExamplePreviewButton('Toggle options Favourite fruit');
@@ -95,7 +104,10 @@ test('keeps the combobox in view when portalled options open and close', async (
 		expect(iframe.contentWindow?.innerHeight).toBe(initialViewportHeight);
 		expect(
 			Array.from(previewDocument.querySelectorAll<HTMLElement>('[role="option"]')).every(
-				(option) => option.getBoundingClientRect().bottom <= getPreviewCanvas().clientHeight,
+				(option) => {
+					const rect = option.getBoundingClientRect();
+					return rect.top >= 0 && rect.bottom <= getPreviewCanvas().clientHeight;
+				},
 			),
 		).toBe(true);
 
@@ -165,7 +177,34 @@ function getPreviewIframe(): HTMLIFrameElement {
 	return iframe;
 }
 
-function createPreviewFixtureUrl(_mount: typeof mountExamplePreview): string {
+function expectPreviewSurfaceToFillViewport(iframe: HTMLIFrameElement): void {
+	const previewDocument = iframe.contentDocument;
+	const previewWindow = iframe.contentWindow;
+	if (!previewDocument || !previewWindow) throw new Error('expected the example preview document');
+	const preview = previewDocument.querySelector<HTMLElement>('[data-example-preview]');
+	const surfaceAtBottom = previewDocument.elementFromPoint(1, previewWindow.innerHeight - 1);
+	if (!preview?.parentElement || !surfaceAtBottom) throw new Error('expected the preview surface');
+	expect(previewWindow.getComputedStyle(surfaceAtBottom).backgroundColor).toBe(
+		previewWindow.getComputedStyle(preview.parentElement).backgroundColor,
+	);
+}
+
+async function loadPreviewFixture(
+	iframe: HTMLIFrameElement,
+	example: 'button' | 'combobox',
+): Promise<void> {
+	previewFixtureUrl = createPreviewFixtureUrl(mountExamplePreview, example);
+	const fixtureLoaded = new Promise<void>((resolve) => {
+		iframe.addEventListener('load', () => resolve(), { once: true });
+	});
+	iframe.src = previewFixtureUrl;
+	await fixtureLoaded;
+}
+
+function createPreviewFixtureUrl(
+	_mount: typeof mountExamplePreview,
+	example: 'button' | 'combobox',
+): string {
 	return URL.createObjectURL(
 		new Blob(
 			[
@@ -174,7 +213,7 @@ function createPreviewFixtureUrl(_mount: typeof mountExamplePreview): string {
 		<div id="root"></div>
 		<script type="module">
 			import { mountExamplePreview } from '/src/test-utils/example-preview-frame.tsx';
-			mountExamplePreview(document.querySelector('#root'));
+			mountExamplePreview(document.querySelector('#root'), '${example}');
 		</script>
 	`,
 			],
