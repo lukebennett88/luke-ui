@@ -68,23 +68,36 @@ test('fits the preview inside viewports narrower than its desktop minimum', asyn
 });
 
 test('keeps every portalled combobox option visible and usable inside the preview', async () => {
+	await page.viewport(927, 205);
 	renderExampleBlock('combobox-field/basic');
 
 	const iframe = getPreviewIframe();
 	previewFixtureUrl = createPreviewFixtureUrl(mountExamplePreview);
+	const fixtureLoaded = new Promise<void>((resolve) => {
+		iframe.addEventListener('load', () => resolve(), { once: true });
+	});
 	iframe.src = previewFixtureUrl;
+	iframe.scrollIntoView({ block: 'center' });
+	await fixtureLoaded;
 	await expect
 		.poll(() => iframe.contentDocument?.querySelector('[aria-label="Toggle options"]') !== null)
 		.toBe(true);
 	const previewDocument = iframe.contentDocument;
 	if (!previewDocument) throw new Error('expected the example preview document');
+	await expect.poll(() => iframe.contentWindow?.innerHeight ?? 0).toBeGreaterThan(96);
+	const initialCanvasHeight = getPreviewCanvas().clientHeight;
+	const initialViewportHeight = iframe.contentWindow?.innerHeight;
 
-	previewDocument.querySelector<HTMLButtonElement>('[aria-label="Toggle options"]')?.click();
+	await commands.clickExamplePreviewButton('Toggle options Favourite fruit');
 	await expect.poll(() => previewDocument.querySelectorAll('[role="option"]').length).toBe(4);
+	await new Promise((resolve) => setTimeout(resolve, 500));
+	expect(previewDocument.querySelectorAll('[role="option"]')).toHaveLength(4);
+	expect(getPreviewCanvas().clientHeight).toBeGreaterThan(initialCanvasHeight);
+	expect(iframe.contentWindow?.innerHeight).toBe(initialViewportHeight);
 
 	await expect
 		.poll(() => {
-			const previewHeight = iframe.contentWindow?.innerHeight ?? 0;
+			const previewHeight = getPreviewCanvas().clientHeight;
 			return Array.from(previewDocument.querySelectorAll<HTMLElement>('[role="option"]')).every(
 				(option) =>
 					option.getBoundingClientRect().top >= 0 &&
@@ -131,10 +144,13 @@ function renderExampleBlock(src = 'box/responsive-layout', inlineSize = '800px')
 }
 
 function previewWidth() {
-	return (
-		container?.querySelector<HTMLElement>('[data-example-preview-canvas]')?.getBoundingClientRect()
-			.width ?? 0
-	);
+	return getPreviewCanvas().getBoundingClientRect().width;
+}
+
+function getPreviewCanvas(): HTMLElement {
+	const canvas = container?.querySelector<HTMLElement>('[data-example-preview-canvas]');
+	if (!canvas) throw new Error('expected the example preview canvas');
+	return canvas;
 }
 
 function getPreviewIframe(): HTMLIFrameElement {
