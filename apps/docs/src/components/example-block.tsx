@@ -201,6 +201,7 @@ function ExampleIframe({
 				loading="lazy"
 				onLoad={() => sessionRef.current.requestHeight(ports())}
 				src={`${previewUrl}?${search}`}
+				style={{ minBlockSize: 'max(20rem, 100dvh)' }}
 				title={`Preview of ${src}`}
 			/>
 			{error === null ? null : (
