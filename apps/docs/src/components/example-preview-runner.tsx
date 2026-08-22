@@ -12,6 +12,7 @@ import { useDocsThemeIdentity } from './theme-controls.js';
 const exampleModules = import.meta.glob<{ default: ComponentType }>('../examples/*/*.tsx');
 
 const exampleSourcePattern = /^[a-z0-9-]+\/[a-z0-9-]+$/;
+const EXAMPLE_PREVIEW_POPUP_MINIMUM_HEIGHT = 320;
 
 type ExamplePreviewRunnerProps = {
 	mode?: 'inset' | 'full-bleed';
@@ -89,16 +90,6 @@ export function ExamplePreviewDocument({
 	});
 
 	useEffect(() => {
-		const root = document.documentElement;
-		const backgroundColor = root.style.backgroundColor;
-		root.style.backgroundColor = vars.color.surface.canvas;
-
-		return () => {
-			root.style.backgroundColor = backgroundColor;
-		};
-	}, []);
-
-	useEffect(() => {
 		errorRef.current = error;
 		if (error !== null) postToParent({ message: error, type: 'example-preview:error' });
 	}, [error]);
@@ -106,13 +97,15 @@ export function ExamplePreviewDocument({
 	if (!PreviewComponent) return null;
 
 	return (
-		<StoryWrapper mode={mode} overflow="visible">
-			<ErrorBoundary fallback={null} onError={reportError}>
-				<div data-example-preview ref={contentRef}>
-					<PreviewComponent />
-				</div>
-			</ErrorBoundary>
-		</StoryWrapper>
+		<div className="min-h-dvh" style={{ backgroundColor: vars.color.surface.canvas }}>
+			<StoryWrapper mode={mode} overflow="visible">
+				<ErrorBoundary fallback={null} onError={reportError}>
+					<div data-example-preview ref={contentRef}>
+						<PreviewComponent />
+					</div>
+				</ErrorBoundary>
+			</StoryWrapper>
+		</div>
 	);
 }
 
@@ -201,8 +194,11 @@ function useExamplePreviewBridge({
 
 function measurePreviewHeight(content: HTMLElement, wrapper: HTMLElement): number {
 	const wrapperRect = wrapper.getBoundingClientRect();
+	const minimumHeight = content.querySelector('[aria-haspopup]:not([aria-haspopup="false"])')
+		? EXAMPLE_PREVIEW_POPUP_MINIMUM_HEIGHT
+		: EXAMPLE_PREVIEW_MINIMUM_HEIGHT;
 	return Math.max(
-		EXAMPLE_PREVIEW_MINIMUM_HEIGHT,
+		minimumHeight,
 		Math.ceil(window.scrollY + wrapperRect.top + wrapper.scrollHeight),
 	);
 }
