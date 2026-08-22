@@ -13,8 +13,7 @@
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "tsc --noEmit -p tsconfig.json",
 		"fix:format": "vp fmt . --write",
-		"fix:lint": "vp lint . --type-aware --fix",
-		"test": "vp test run"
+		"fix:lint": "vp lint . --type-aware --fix"
 	},
 	"dependencies": {
 		"@vanilla-extract/css": "catalog:",
@@ -23,7 +22,6 @@
 	"devDependencies": {
 		"@types/node": "catalog:",
 		"csstype": "catalog:",
-		"typescript": "catalog:",
-		"vite-plus": "catalog:"
+		"typescript": "catalog:"
 	}
 }

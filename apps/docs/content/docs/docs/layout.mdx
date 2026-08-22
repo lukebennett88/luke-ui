@@ -29,15 +29,15 @@ element needs the same responsive layout properties without wrapping it in a `Bo
 Properties passed to `Box` and Sprinkles accept a direct value when a layout property stays
 constant, or an object keyed by breakpoint when it changes at a named container width.
 
-A responsive value resolves against the nearest ancestor size container, not the browser viewport.
-Most of the time that container is the document root: Luke UI establishes an unnamed container
-there, so a component behaves as it always has unless something narrower sits between it and the
-root. Wrap an element in its own `container-type: inline-size` box to make responsive values inside
-it respond to that element's own width instead.
+Responsive values resolve against the nearest ancestor size container. Luke UI uses the document
+root as the fallback. Add `container-type: inline-size` to a nearer ancestor when descendants should
+respond to that element instead.
 
-A body-level portal — a combobox popover, a mobile tray — renders outside its trigger's position in
-the DOM and so crosses out of any local container. Responsive values inside a portal fall back to
-the document root, the same as everywhere else without a nearer container of its own.
+Portalled content leaves local containers and falls back to the root.
+
+The root container measures its own content box, which can differ from the browser viewport width by
+the width of a visible scrollbar. A breakpoint set exactly at the viewport width can miss by a few
+pixels when a scrollbar is present.
 
 | Breakpoint | Minimum container width |
 | ---------- | ----------------------- |

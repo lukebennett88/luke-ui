@@ -22,15 +22,16 @@ export function resolvedColor(input: string): Oklch {
 }
 
 /**
- * Splits the generated stylesheet into its seven blocks: the banner comment, the root-only
- * containment rule, identity, base light, media-query dark, explicit light, and explicit dark.
+ * Splits the generated stylesheet into its six rule blocks: the root-only containment rule,
+ * identity, base light, media-query dark, explicit light, and explicit dark. Strips the leading
+ * banner comment first, so the split models emitted CSS rules only.
  */
 export function splitBlocks(css: string) {
-	const blocks = css.split('\n\n').filter((block) => block.trim() !== '');
-	if (blocks.length !== 7) throw new Error(`expected 7 rule blocks, found ${blocks.length}`);
-	const [banner, containment, identity, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
+	const withoutBanner = css.replace(/^\/\*.*\*\/\n\n/, '');
+	const blocks = withoutBanner.split('\n\n').filter((block) => block.trim() !== '');
+	if (blocks.length !== 6) throw new Error(`expected 6 rule blocks, found ${blocks.length}`);
+	const [containment, identity, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
 	if (
-		banner === undefined ||
 		containment === undefined ||
 		identity === undefined ||
 		baseLight === undefined ||
@@ -40,7 +41,7 @@ export function splitBlocks(css: string) {
 	) {
 		throw new Error('expected every generated theme rule block to be defined');
 	}
-	return { banner, baseLight, containment, explicitDark, explicitLight, identity, mediaDark };
+	return { baseLight, containment, explicitDark, explicitLight, identity, mediaDark };
 }
 
 /** Reads one declared custom property's value out of a rule block. */

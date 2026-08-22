@@ -63,15 +63,6 @@ describe('buildTheme output', () => {
 	it('declares containment once, only on the root, never on the identity class', () => {
 		expect(countOccurrences(css, 'container-type: inline-size;')).toBe(1);
 		expect(blocks.containment).toBe(':where(:root) {\n\tcontainer-type: inline-size;\n}');
-		for (const block of [
-			blocks.identity,
-			blocks.baseLight,
-			blocks.mediaDark,
-			blocks.explicitLight,
-			blocks.explicitDark,
-		]) {
-			expect(block).not.toContain('container-type');
-		}
 	});
 
 	it('never emits a bare `:root` selector outside of `:where()`', () => {

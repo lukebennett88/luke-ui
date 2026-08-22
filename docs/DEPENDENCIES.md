@@ -50,10 +50,6 @@ notice.
 
 `@luke-ui/react` publishes. `apps/docs` and `@luke-ui/rainbow-sprinkles` are private.
 
-Luke UI has not cut a 1.0.0 yet, so nothing needs a changeset until the first release. Decisions
-made before then get revised or reverted, and a backlog of changesets describing them is noise. The
-rules below take effect once the package starts publishing.
-
 A pull request that moves a runtime or peer dependency of `@luke-ui/react` needs a changeset,
 because the published package's own dependency ranges change. Renovate cannot write one. It labels
 those pull requests `needs-changeset` instead, using an explicit package list in
