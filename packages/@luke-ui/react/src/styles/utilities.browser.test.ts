@@ -46,7 +46,7 @@ test('applies every retained breakpoint responsively', async () => {
 	}
 });
 
-test('resolves against a nearer explicit container instead of the viewport', async () => {
+test('resolves against a nearer explicit container instead of the root', async () => {
 	await page.viewport(1024, 800);
 
 	const wrapper = document.body.appendChild(document.createElement('div'));

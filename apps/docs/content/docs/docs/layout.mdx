@@ -33,7 +33,8 @@ Responsive values resolve against the nearest ancestor size container. Luke UI u
 root as the fallback. Add `container-type: inline-size` to a nearer ancestor when descendants should
 respond to that element instead.
 
-Portalled content leaves local containers and falls back to the root.
+Portalled content leaves containers around its trigger and resolves against the nearest size
+container at its portal location, falling back to the root when there is none.
 
 The root container measures its own content box, which can differ from the browser viewport width by
 the width of a visible scrollbar. A breakpoint set exactly at the viewport width can miss by a few
@@ -48,10 +49,10 @@ pixels when a scrollbar is present.
 | `xlarge`   | 1280px                        |
 | `xxlarge`  | 1536px                        |
 
-Each breakpoint is a fixed constant, not a theme token. A custom theme cannot change these widths.
-Every breakpoint is a minimum width, so there is no maximum width or range condition. A value set at
-`small` also applies at `medium` and above, unless a later breakpoint overrides it. Values cascade
-up from `initial`, so specify only the points where the layout changes.
+Each breakpoint is a fixed constant, not a theme token. A custom theme cannot change these sizes.
+Every breakpoint is a minimum inline size, so there is no maximum size or range condition. A value
+set at `small` also applies at `medium` and above, unless a later breakpoint overrides it. Values
+cascade up from `initial`, so specify only the points where the layout changes.
 
 ```tsx
 <Box display="flex" flexDirection={{ initial: 'column', medium: 'row' }}>
