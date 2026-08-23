@@ -1,5 +1,4 @@
 import { Box } from '@luke-ui/react/box';
-import type { BoxProps } from '@luke-ui/react/box';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { vars } from '@luke-ui/react/theme';
@@ -25,13 +24,12 @@ const modeToBoxProps = {
 type StoryWrapperProps = {
 	children: ReactNode;
 	mode?: Mode;
-	overflow?: BoxProps['overflow'];
 };
 
-export function StoryWrapper({ children, mode = 'inset', overflow = 'auto' }: StoryWrapperProps) {
+export function StoryWrapper({ children, mode = 'inset' }: StoryWrapperProps) {
 	const boxProps = modeToBoxProps[mode];
 	return (
-		<Box overflow={overflow} {...boxProps}>
+		<Box overflow="auto" {...boxProps}>
 			<IconSpritesheetProvider href={spriteSheetHref}>{children}</IconSpritesheetProvider>
 		</Box>
 	);
