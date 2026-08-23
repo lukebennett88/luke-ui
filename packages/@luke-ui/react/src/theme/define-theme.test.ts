@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { splitBlocks } from './__fixtures__/theme-css.js';
 import { compileTheme } from './build-theme.js';
 import { gamutMapOklch, parseColor } from './color.js';
 import { flattenThemeContract } from './contract.js';
@@ -7,26 +8,6 @@ import { defaultSourceColors } from './foundation.js';
 import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
 import { FAMILY_RUNG } from './scale.js';
-
-/**
- * Splits a generated stylesheet into its five rule blocks: identity, base light, media-query dark,
- * explicit light, and explicit dark.
- */
-function splitBlocks(css: string) {
-	const blocks = css.split('\n\n').filter((block) => block.trim() !== '');
-	if (blocks.length !== 5) throw new Error(`expected 5 rule blocks, found ${blocks.length}`);
-	const [identity, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
-	if (
-		identity === undefined ||
-		baseLight === undefined ||
-		mediaDark === undefined ||
-		explicitLight === undefined ||
-		explicitDark === undefined
-	) {
-		throw new Error('expected every generated theme rule block to be defined');
-	}
-	return { baseLight, explicitDark, explicitLight, identity, mediaDark };
-}
 
 function extractValue(block: string, varName: string): string {
 	const match = new RegExp(`${varName}: ([^;]+);`).exec(block);

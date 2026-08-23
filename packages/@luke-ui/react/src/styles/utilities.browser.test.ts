@@ -46,6 +46,37 @@ test('applies every retained breakpoint responsively', async () => {
 	}
 });
 
+test('resolves against a nearer explicit container instead of the root', async () => {
+	await page.viewport(1024, 800);
+
+	const wrapper = document.body.appendChild(document.createElement('div'));
+	mounted.push(wrapper);
+	wrapper.style.containerType = 'inline-size';
+	wrapper.style.inlineSize = `${breakpoints.small - 1}px`;
+
+	const generated = createSprinkles({ padding: { initial: '100', small: '200' } });
+	const element = mount(generated, wrapper);
+
+	const computedStyle = getComputedStyle(element);
+	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-100').trim());
+});
+
+test('resolves against the root content box, not the viewport width', async () => {
+	// A scrollbar takes its width out of the root's content box, so the root container's inline
+	// size measures narrower than the viewport. Root padding reproduces that narrowing without
+	// depending on the headless browser rendering a scrollbar.
+	await page.viewport(breakpoints.small, 800);
+	const rootStyle = document.head.appendChild(document.createElement('style'));
+	rootStyle.textContent = ':root { padding-inline-end: 17px; }';
+
+	const generated = createSprinkles({ padding: { initial: '100', small: '200' } });
+	const element = mount(generated);
+
+	const computedStyle = getComputedStyle(element);
+	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-100').trim());
+	rootStyle.remove();
+});
+
 test('returns class and style output that merges with consumer props', () => {
 	const generated = createSprinkles({
 		display: 'grid',
@@ -65,8 +96,11 @@ test('returns class and style output that merges with consumer props', () => {
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
 
-function mount(props: { className?: string; style?: Record<string, unknown> }): HTMLElement {
-	const element = document.body.appendChild(document.createElement('div'));
+function mount(
+	props: { className?: string; style?: Record<string, unknown> },
+	parent: HTMLElement = document.body,
+): HTMLElement {
+	const element = parent.appendChild(document.createElement('div'));
 	mounted.push(element);
 	element.className = `${tactileThemeClassName} ${props.className ?? ''}`;
 	Object.assign(element.style, props.style);

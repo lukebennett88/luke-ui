@@ -5,7 +5,7 @@ import { vars } from '../theme/contract.css.js';
 import { layers } from './layers.css.js';
 
 function fromBreakpoint(minimumWidth: number) {
-	return { '@media': `screen and (width >= ${minimumWidth}px)` };
+	return { '@container': `(inline-size >= ${minimumWidth}px)` };
 }
 
 const responsiveConditions = {

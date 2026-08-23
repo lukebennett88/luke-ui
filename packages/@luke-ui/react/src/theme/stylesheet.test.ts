@@ -60,6 +60,11 @@ describe('buildTheme output', () => {
 		}
 	});
 
+	it('declares containment once, only on the root, never on the identity class', () => {
+		expect(countOccurrences(css, 'container-type: inline-size;')).toBe(1);
+		expect(blocks.containment).toBe(':where(:root) {\n\tcontainer-type: inline-size;\n}');
+	});
+
 	it('never emits a bare `:root` selector outside of `:where()`', () => {
 		const rootIndexes = [...css.matchAll(/:root/g)].map((match) => match.index);
 		expect(rootIndexes.length).toBeGreaterThan(0);
