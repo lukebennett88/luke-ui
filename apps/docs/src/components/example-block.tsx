@@ -3,6 +3,7 @@ import { Button, buttonRecipe } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { deriveNestedRadius, vars } from '@luke-ui/react/theme';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useId, useState } from 'react';
@@ -11,6 +12,11 @@ import type { HighlightedSource } from '../lib/highlighted-source.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { DocsLink } from './docs-link.js';
 import { useIsDesktop } from './playground/use-is-desktop.js';
+
+// The frame, header, preview, and code block nest one border's gap inside
+// `OUTER_RADIUS`, so their corners stay concentric with the frame's own.
+const OUTER_RADIUS = vars.radius.control;
+const INNER_RADIUS = deriveNestedRadius(OUTER_RADIUS, '1px');
 
 type ExampleBlockProps = {
 	src: string;
@@ -73,11 +79,15 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 			}
 			title={title}
 		>
-			<ExamplePreview isCodeShown={showCode} mode={mode}>
+			<ExamplePreview isCodeShown={showCode} mode={mode} title={title}>
 				<PreviewComponent />
 			</ExamplePreview>
 			{showCode ? (
-				<Box className="overflow-hidden rounded-b-[7px]" id={codeId}>
+				<Box
+					className="overflow-hidden"
+					id={codeId}
+					style={{ borderEndEndRadius: INNER_RADIUS, borderEndStartRadius: INNER_RADIUS }}
+				>
 					<CodeBlock className="my-0 rounded-none border-x-0 border-b-0 shadow-none">
 						{/* Shiki escapes the source before the Vite plugin generates this HTML. */}
 						<Pre dangerouslySetInnerHTML={{ __html: highlightedSource.html }} />
@@ -110,14 +120,16 @@ export function ExampleLoadingState({ mode, title }: Pick<ExampleBlockProps, 'mo
 
 const EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE = { coarse: 32, fine: 32 };
 
-function ExamplePreview({
+export function ExamplePreview({
 	children,
 	isCodeShown,
 	mode,
+	title,
 }: {
 	children: ReactNode;
 	isCodeShown: boolean;
 	mode?: ExampleBlockProps['mode'];
+	title: string;
 }) {
 	const isDesktop = useIsDesktop();
 
@@ -138,14 +150,18 @@ function ExamplePreview({
 					grip can sit outside this panel's edge and still be clickable.
 				*/}
 				<div
-					className={`overflow-hidden${isCodeShown ? '' : ' rounded-b-[7px]'}`}
-					style={{ containerType: 'inline-size' }}
+					className="overflow-hidden"
+					style={{
+						borderEndEndRadius: isCodeShown ? undefined : INNER_RADIUS,
+						borderEndStartRadius: isCodeShown ? undefined : INNER_RADIUS,
+						containerType: 'inline-size',
+					}}
 				>
 					<StoryWrapper mode={mode}>{children}</StoryWrapper>
 				</div>
 			</Panel>
 			<Separator
-				aria-label="Resize example preview"
+				aria-label={`${title} preview`}
 				className="relative z-10 hidden shrink-0 inline-px after:absolute after:block-16 after:inline-1.5 after:rounded-full after:bg-fd-muted-foreground/50 after:transition-colors after:-translate-y-1/2 after:inset-bs-[50%] after:inset-s-[calc(100%+0.5rem)] after:content-[''] data-[separator=active]:after:bg-fd-muted-foreground/80 data-[separator=focus]:after:bg-fd-muted-foreground/80 data-[separator=hover]:after:bg-fd-muted-foreground/65 md:block"
 			/>
 			<Panel defaultSize={0} minSize={0} />
@@ -186,10 +202,14 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 			// `overflow-visible` here lets the resize separator's grip sit
 			// outside the frame's right edge; the header and preview below
 			// clip and round their own corners instead.
-			className="not-prose my-4 overflow-visible rounded-lg border border-fd-border"
+			className="not-prose my-4 overflow-visible border border-fd-border"
 			role={ariaLabel ? 'region' : undefined}
+			style={{ borderRadius: OUTER_RADIUS }}
 		>
-			<Box className="flex items-center justify-between gap-2 overflow-hidden rounded-t-[7px] border-fd-border border-b bg-fd-card px-4 py-2">
+			<Box
+				className="flex items-center justify-between gap-2 overflow-hidden border-fd-border border-b bg-fd-card px-4 py-2"
+				style={{ borderStartEndRadius: INNER_RADIUS, borderStartStartRadius: INNER_RADIUS }}
+			>
 				<span className="text-fd-muted-foreground text-sm">{title}</span>
 				{actions}
 			</Box>

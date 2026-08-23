@@ -9,7 +9,7 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { commands, page } from 'vite-plus/test/context';
-import { ExampleBlock, ExampleLoadingState } from './example-block';
+import { ExampleBlock, ExampleLoadingState, ExamplePreview } from './example-block';
 import { DocsThemeRoot } from './theme-controls.js';
 
 let container: HTMLElement | undefined;
@@ -38,7 +38,7 @@ test('shows a named loading state in a frame that reserves the preview space', (
 
 test('resizes a desktop preview from its external grip down to its minimum width', async () => {
 	await page.viewport(1000, 800);
-	await renderExampleBlock();
+	renderPreviewHarness();
 
 	const widthBefore = previewWidth();
 
@@ -51,6 +51,8 @@ test('resizes a desktop preview from its external grip down to its minimum width
 
 	await commands.dragFromSeparator(0, -1000);
 	await expect.poll(previewWidth).toBeGreaterThanOrEqual(320);
+	await expect.poll(previewWidth).toBeLessThanOrEqual(322);
+	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
 test('narrowing the preview panel flips a responsive example below its container breakpoint', async () => {
@@ -59,7 +61,7 @@ test('narrowing the preview panel flips a responsive example below its container
 
 	// The example's `medium` breakpoint is 768px; starting above it puts the
 	// items in a row.
-	expect(flexDirection()).toBe('row');
+	await expect.poll(flexDirection).toBe('row');
 
 	await commands.dragFromSeparator(0, -500);
 	await expect.poll(previewWidth).toBeLessThan(768);
@@ -75,6 +77,27 @@ function renderExample(title: string) {
 			<IconSpritesheetProvider href={spriteSheetHref}>
 				<ExampleLoadingState mode="full-bleed" title={title} />
 			</IconSpritesheetProvider>,
+		);
+	});
+}
+
+// Renders `ExamplePreview` directly with a static child instead of going
+// through `ExampleBlock`'s lazily-loaded example module, so the resize
+// mechanics under test do not depend on a Suspense boundary resolving.
+function renderPreviewHarness() {
+	container = document.body.appendChild(document.createElement('div'));
+	container.className = `luke-ui-theme ${tactileThemeClassName}`;
+	// Leaves headroom to the right of the viewport for the grip, which sits
+	// outside the panel's own edge.
+	container.style.inlineSize = '800px';
+	root = createRoot(container);
+	act(() => {
+		root?.render(
+			<DocsThemeRoot>
+				<ExamplePreview isCodeShown={false} title="Resize harness">
+					<div style={{ blockSize: '4rem' }} />
+				</ExamplePreview>
+			</DocsThemeRoot>,
 		);
 	});
 }
@@ -97,7 +120,18 @@ async function renderExampleBlock() {
 			</ThemeProvider>,
 		);
 	});
-	await expect.poll(previewWidth).toBeGreaterThan(0);
+	// The example module loads lazily behind Suspense. Poll inside repeated
+	// `act` calls so the render React performs when the module resolves stays
+	// wrapped, rather than waiting for it outside `act` and racing React's own
+	// microtask continuation.
+	while (!container.querySelector('[data-panel]')) {
+		// Each iteration must wait for the previous one before checking again,
+		// so the resolution this polls for stays wrapped in `act`.
+		// oxlint-disable-next-line no-await-in-loop
+		await act(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		});
+	}
 }
 
 function getPreviewPanel(): HTMLElement {
