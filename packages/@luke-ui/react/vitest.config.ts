@@ -77,6 +77,24 @@ export default defineConfig({
 			{
 				extends: true,
 				plugins: [
+					// Required for .css.ts processing in unit tests.
+					vanillaExtractPlugin(),
+				],
+				test: {
+					// These tests import emitted declarations from `dist`; run `pnpm run build` first.
+					environment: 'node',
+					include: ['src/**/*.test-d.ts'],
+					name: 'types',
+					typecheck: {
+						enabled: true,
+						include: ['src/**/*.test-d.ts'],
+						tsconfig: './tsconfig.json',
+					},
+				},
+			},
+			{
+				extends: true,
+				plugins: [
 					// Required for .css.ts processing in Vitest browser mode.
 					vanillaExtractPlugin(),
 					// Runs tests for stories defined in Storybook config.

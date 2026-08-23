@@ -22,7 +22,7 @@
 		"generate:components-index": "node scripts/generate-components-index.ts",
 		"generate:playground": "node scripts/generate-playground-scope.ts && node scripts/generate-playground-types.ts && vp pack",
 		"generate:props": "node scripts/generate-props-pages.ts",
-		"generate:token-reference": "node scripts/generate-token-reference.ts",
+		"generate:token-reference": "tsx scripts/generate-token-reference.ts",
 		"postinstall": "fumadocs-mdx",
 		"preview": "vp preview",
 		"routes:generate": "tsr generate",

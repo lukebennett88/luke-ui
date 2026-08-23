@@ -1,4 +1,16 @@
+import { SEMANTIC_ROLES } from './contrast-policy.js';
 import type { FontMetricStep } from './font-metric-scale.js';
+
+/**
+ * Gives all six semantic roles the same contract shape, so a role can never be added to one visual
+ * slot and forgotten in another. `leaf()` builds a fresh sub-tree per role, because two roles sharing
+ * one object would make them the same node.
+ */
+function perRole<Leaf>(leaf: () => Leaf) {
+	return Object.fromEntries(SEMANTIC_ROLES.map((role) => [role, leaf()])) as {
+		readonly [Role in (typeof SEMANTIC_ROLES)[number]]: Leaf;
+	};
+}
 
 /** Leaves shared by every public type style. */
 const typeStyle = {
@@ -163,35 +175,16 @@ export const themeContractTree = {
 			disabled: null,
 		},
 		/** Subtle and solid background ramps, each with generated rest / hover / pressed states. */
-		background: {
-			neutral: { ...roleBackground },
-			accent: { ...roleBackground },
-			info: { ...roleBackground },
-			success: { ...roleBackground },
-			warning: { ...roleBackground },
-			danger: { ...roleBackground },
-		},
+		background: perRole(() => ({ ...roleBackground })),
 		/** Resting, hover, and pressed content colours, plus the guaranteed on-solid pairing. */
-		foreground: {
-			neutral: { ...roleForeground },
-			accent: { ...roleForeground },
-			info: { ...roleForeground },
-			success: { ...roleForeground },
-			warning: { ...roleForeground },
-			danger: { ...roleForeground },
-		},
+		foreground: perRole(() => ({ ...roleForeground })),
 		border: {
 			decorative: null,
 			control: null,
 			focus: null,
 			// The shared semantic borders. State-free on purpose: the token carries the meaning and the
 			// component decides when to apply it.
-			neutral: null,
-			accent: null,
-			info: null,
-			success: null,
-			warning: null,
-			danger: null,
+			...perRole(() => null),
 		},
 	},
 	/** Composite box-shadow values for the shared depth ladder. */

@@ -321,10 +321,14 @@ The tradeoff is that some values are applied through inline `style`, which raise
 is acceptable because styling utilities are already the highest-priority escape hatch.
 
 `Box` from `@luke-ui/react/box` applies these utilities. See the
-[Box documentation](/components/layout/box) for its element and render contracts.
+[Box documentation](/components/layout/box) for its element and render contracts. Its utilities
+cover layout (flex, grid, spacing, sizing, position) and appearance (`backgroundColor`,
+`borderColor`, `borderWidth`, `borderStyle`, `borderRadius`, `boxShadow`). Use `Box` as the escape
+hatch for both. It deliberately excludes typography and text colour. Use `Text`/`Heading` for those.
 
-Do not add style props to every component. Component props should stay focused on component-specific
-variants and behaviour.
+Do not add style props to every other component. Component props should stay focused on
+component-specific variants and behaviour. Reach for `Box` when a component's own props are too
+narrow instead of growing an ad-hoc style prop on that component.
 
 ## `createSprinkles()`
 

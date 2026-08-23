@@ -3,6 +3,8 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
+// `tsx` resolves the library source's `.js` specifiers to the `.ts` files on disk. Node's type
+// stripping does not remap them.
 const contractPath = resolve(scriptDir, '../../../packages/@luke-ui/react/src/theme/contract.ts');
 const outputPath = resolve(scriptDir, '../src/generated/token-reference.generated.ts');
 const { flattenThemeContract } = (await import(contractPath)) as {
