@@ -63,7 +63,18 @@ const responsiveProperties = defineProperties({
 			normal: 'normal',
 			stretch: 'stretch',
 		},
+		backgroundColor: true,
 		blockSize: true,
+		borderColor: true,
+		borderRadius: {
+			detail: vars.radius.detail,
+			control: vars.radius.control,
+			surface: vars.radius.surface,
+			overlay: vars.radius.overlay,
+			full: vars.radius.full,
+		},
+		borderStyle: true,
+		borderWidth: true,
 		columnGap: spaceScale,
 		display: {
 			block: 'block',
