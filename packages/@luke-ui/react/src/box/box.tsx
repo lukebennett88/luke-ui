@@ -71,19 +71,20 @@ interface _BoxPresentationProps
 	ref?: Ref<HTMLElement>;
 }
 
-type _BoxResolvedRenderOmit = DistributiveOmit<_BoxPresentationProps, 'ref' | keyof SprinklesProps>;
-
-interface _BoxResolvedRenderProps extends _BoxResolvedRenderOmit {
+type _BoxResolvedRenderProps = DistributiveOmit<
+	_BoxPresentationProps,
+	'ref' | keyof SprinklesProps
+> & {
 	ref: RefCallback<HTMLElement>;
-}
-
-type BoxResolvedRenderProps = Prettify<_BoxResolvedRenderProps>;
+};
 
 interface _BoxRenderProps extends _BoxPresentationProps {
 	/** Use `elementType` instead of `render` for a supported structural element. */
 	elementType?: never;
 	/** Passes Box's content and presentation props to a caller-owned element. */
-	render: (props: BoxResolvedRenderProps) => ReactElement;
+	render: (props: {
+		[K in keyof _BoxResolvedRenderProps]: _BoxResolvedRenderProps[K];
+	}) => ReactElement;
 }
 
 const sprinklesProperties: ReadonlySet<PropertyKey> = createSprinkles.properties;
