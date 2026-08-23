@@ -27,7 +27,7 @@ element needs the same responsive layout properties without wrapping it in a `Bo
 ## Responsive values
 
 Properties passed to `Box` and Sprinkles accept a direct value when a layout property stays
-constant, or an object keyed by breakpoint when it changes at a named container width.
+constant, or an object keyed by breakpoint when it changes at a named container inline size.
 
 Responsive values resolve against the nearest ancestor size container. Luke UI uses the document
 root as the fallback. Add `container-type: inline-size` to a nearer ancestor when descendants should
@@ -39,14 +39,14 @@ The root container measures its own content box, which can differ from the brows
 the width of a visible scrollbar. A breakpoint set exactly at the viewport width can miss by a few
 pixels when a scrollbar is present.
 
-| Breakpoint | Minimum container width |
-| ---------- | ----------------------- |
-| `initial`  | 0px (base)              |
-| `small`    | 640px                   |
-| `medium`   | 768px                   |
-| `large`    | 1024px                  |
-| `xlarge`   | 1280px                  |
-| `xxlarge`  | 1536px                  |
+| Breakpoint | Minimum container inline size |
+| ---------- | ----------------------------- |
+| `initial`  | 0px (base)                    |
+| `small`    | 640px                         |
+| `medium`   | 768px                         |
+| `large`    | 1024px                        |
+| `xlarge`   | 1280px                        |
+| `xxlarge`  | 1536px                        |
 
 Each breakpoint is a fixed constant, not a theme token. A custom theme cannot change these widths.
 Every breakpoint is a minimum width, so there is no maximum width or range condition. A value set at

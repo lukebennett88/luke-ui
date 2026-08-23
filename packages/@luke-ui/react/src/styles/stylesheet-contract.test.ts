@@ -105,6 +105,15 @@ for (const [name, mutate] of stylesheetMutations) {
 	});
 }
 
+test('queries responsive conditions on the logical inline axis', async () => {
+	const stylesheet = await readFile(new URL('../../dist/stylesheet.css', import.meta.url), 'utf8');
+
+	// The containers are `container-type: inline-size`, which answers inline-axis queries. A
+	// physical `width` query only agrees with that in a horizontal writing mode.
+	expect(stylesheet).toContain('@container (inline-size >=');
+	expect(stylesheet).not.toContain('@container (width >=');
+});
+
 test('recognises escaped class identifiers', () => {
 	expect(() => {
 		return assertStylesheetContract(

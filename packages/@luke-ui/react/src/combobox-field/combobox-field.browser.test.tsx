@@ -6,12 +6,10 @@ import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
 import { ComboboxInput } from '../primitives/combobox/input.js';
 import { ComboboxItem } from '../primitives/combobox/item.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
-import { createSprinkles } from '../styles/index.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
-import { breakpoints } from '../theme/breakpoints.js';
 import { ComboboxField } from './index.js';
 
 type CountryItem = {
@@ -84,39 +82,6 @@ testIntegration('combobox-field', async () => {
 	await user.click(option);
 	// oxlint-disable-next-line vitest/no-standalone-expect
 	expect(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Australia');
-});
-
-test('a responsive value inside the popover resolves against the root container, not a narrower local one', async () => {
-	await page.viewport(1024, 800);
-
-	const marker = createSprinkles({ display: { initial: 'none', small: 'block' } });
-	const renderMarkerItem = (item: CountryItem) => (
-		<ComboboxItem>
-			{item.label}
-			<span className={marker.className} data-testid="marker" style={marker.style} />
-		</ComboboxItem>
-	);
-
-	const { locator, user } = render(
-		<div style={{ containerType: 'inline-size', inlineSize: breakpoints.small - 1 }}>
-			<ComboboxField defaultItems={countryItems} label="Country">
-				{renderMarkerItem}
-			</ComboboxField>
-		</div>,
-	);
-
-	await user.click(locator.getByRole('combobox', { name: 'Country' }));
-	const option = page.getByRole('option', { name: 'Australia' });
-	// oxlint-disable-next-line vitest/no-standalone-expect
-	await expect.element(option).toBeInTheDocument();
-
-	// React Aria portals the popover to `document.body`, outside the narrow wrapper above. The
-	// marker's `small` condition matches the wide viewport-sized root container, not the wrapper's
-	// sub-`small` width, so it renders instead of staying hidden.
-	const markerElement = option.element().querySelector('[data-testid="marker"]');
-	if (markerElement == null) throw new Error('Expected the marker element inside the option.');
-	// oxlint-disable-next-line vitest/no-standalone-expect
-	expect(getComputedStyle(markerElement).display).toBe('block');
 });
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {

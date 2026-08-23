@@ -62,8 +62,8 @@ test('resolves against a nearer explicit container instead of the viewport', asy
 });
 
 test('resolves against the root content box, not the viewport width', async () => {
-	// A scrollbar takes its width out of the root's content box, so the root container
-	// measures narrower than the viewport. Root padding reproduces that narrowing without
+	// A scrollbar takes its width out of the root's content box, so the root container's inline
+	// size measures narrower than the viewport. Root padding reproduces that narrowing without
 	// depending on the headless browser rendering a scrollbar.
 	await page.viewport(breakpoints.small, 800);
 	const rootStyle = document.head.appendChild(document.createElement('style'));
