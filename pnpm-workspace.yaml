@@ -69,9 +69,9 @@ catalog:
   '@vanilla-extract/rollup-plugin': ^1.5.4
   '@vanilla-extract/vite-plugin': ^5.2.6
   '@vitejs/plugin-react': ^6.0.5
-  '@vitest/browser-playwright': 4.1.11
-  '@vitest/coverage-v8': 4.1.11
-  '@vitest/ui': 4.1.11
+  '@vitest/browser-playwright': 4.1.10
+  '@vitest/coverage-v8': 4.1.10
+  '@vitest/ui': 4.1.10
   babel-plugin-react-compiler: ^1.0.0
   csstype: ^3.2.3
   eslint-plugin-react-hooks: ^7.1.1
@@ -111,6 +111,6 @@ catalog:
   unist-util-visit: ^5.1.0
   vite: npm:@voidzero-dev/vite-plus-core@0.2.9
   vite-plus: 0.2.9
-  vitest: 4.1.11
+  vitest: 4.1.10
   zbsearch: ^4.0.0
   zod: ^4.4.3
