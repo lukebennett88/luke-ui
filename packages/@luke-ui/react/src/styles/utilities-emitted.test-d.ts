@@ -105,7 +105,7 @@ test('constrained appearance props do not accept arbitrary CSS values', async ()
 	expect(propertyType(declaration, 'borderStyle')).toContain('solid');
 });
 
-test('responsive conditions expose the theme breakpoints in inline-size order', async () => {
+test('responsive conditions preserve breakpoint declaration order', async () => {
 	const declaration = await readUtilitiesDeclaration();
 	// Conditions are matched by name and checked in declaration order.
 	const expected = ['initial', ...Object.keys(breakpoints)];
