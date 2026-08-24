@@ -105,23 +105,18 @@ test('constrained appearance props do not accept arbitrary CSS values', async ()
 	expect(propertyType(declaration, 'borderStyle')).toContain('solid');
 });
 
-/** Declaration emit quotes a numeric-string key (`'640'`) but leaves an identifier key bare. */
-function declaredCondition(name: string): RegExp {
-	return /^\d+$/.test(name) ? new RegExp(`readonly '${name}':`) : new RegExp(`readonly ${name}:`);
-}
-
-test('responsive conditions expose the theme breakpoints in width order', async () => {
+test('responsive conditions expose the theme breakpoints in inline-size order', async () => {
 	const declaration = await readUtilitiesDeclaration();
 	// Conditions are matched by name and checked in declaration order.
 	const expected = ['initial', ...Object.keys(breakpoints)];
 	const emittedOrder = expected
-		.map((name) => ({ index: declaredCondition(name).exec(declaration)?.index, name }))
+		.map((name) => ({ index: new RegExp(`readonly ${name}:`).exec(declaration)?.index, name }))
 		.sort((a, b) => (a.index ?? -1) - (b.index ?? -1))
 		.map(({ name }) => name);
 
 	for (const name of expected) {
 		expect(declaration, `condition "${name}" is missing from the emitted config`).toMatch(
-			declaredCondition(name),
+			new RegExp(`readonly ${name}:`),
 		);
 	}
 	// Declaration order controls editor completion order.

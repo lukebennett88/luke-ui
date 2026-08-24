@@ -26,7 +26,7 @@ function subscribe(onStoreChange: StoreListener): StoreListener {
 }
 
 function getSnapshot(): boolean {
-	return window.screen.width < breakpoints['640'];
+	return window.screen.width < breakpoints.bp640;
 }
 
 function getServerSnapshot(): boolean {

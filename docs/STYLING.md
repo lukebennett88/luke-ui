@@ -76,10 +76,11 @@ with no class and no JS required. Neither step injects styles at runtime.
 - `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
   `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
   no `--luke-motion-duration-*` custom property exists.
-- `theme/breakpoints.ts`: the private responsive breakpoint widths, in pixels. Like `motion.ts`, it
-  is a plain module with no Vanilla Extract import, resolved in TypeScript and never emitted as a
-  custom property, because a media query cannot read one. The styling utilities turn the widths into
-  media queries, and `useIsMobileDevice` reads the same values for its mobile threshold.
+- `theme/breakpoints.ts`: the private responsive breakpoint inline sizes, in pixels. Like
+  `motion.ts`, it is a plain module with no Vanilla Extract import, resolved in TypeScript and never
+  emitted as a custom property, because a container query cannot read one. The styling utilities
+  turn the inline sizes into container queries, and `useIsMobileDevice` reads the same values for
+  its mobile threshold.
 - `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
   `surfaces.canvas` is always exactly the resolved `background`.
 - `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
@@ -363,13 +364,13 @@ only overrides need to be specified.
 ```tsx
 const responsive = createSprinkles({
 	display: 'flex',
-	flexDirection: { initial: 'column', medium: 'row' },
-	gap: { initial: '300', medium: '600' },
+	flexDirection: { initial: 'column', bp768: 'row' },
+	gap: { initial: '300', bp768: '600' },
 });
 ```
 
-The retained breakpoints are `initial` (base), `small` (640px), `medium` (768px), `large` (1024px),
-`xlarge` (1280px), and `xxlarge` (1536px).
+The retained breakpoints are `initial` (base), `bp640` (640px), `bp768` (768px), `bp1024` (1024px),
+`bp1280` (1280px), and `bp1536` (1536px).
 
 ## React Aria `render` prop
 

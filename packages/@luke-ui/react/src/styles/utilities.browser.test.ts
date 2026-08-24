@@ -20,27 +20,27 @@ test('applies every retained breakpoint responsively', async () => {
 		createSprinkles({
 			padding: {
 				initial: '100',
-				'640': '200',
-				'768': '300',
-				'1024': '400',
-				'1280': '600',
-				'1536': '800',
+				bp640: '200',
+				bp768: '300',
+				bp1024: '400',
+				bp1280: '600',
+				bp1536: '800',
 			},
 		}),
 	);
 
 	const viewports = [
-		{ width: 320, property: '--luke-space-100' },
-		{ width: breakpoints['640'], property: '--luke-space-200' },
-		{ width: breakpoints['768'], property: '--luke-space-300' },
-		{ width: breakpoints['1024'], property: '--luke-space-400' },
-		{ width: breakpoints['1280'], property: '--luke-space-600' },
-		{ width: breakpoints['1536'], property: '--luke-space-800' },
+		{ inlineSize: 320, property: '--luke-space-100' },
+		{ inlineSize: breakpoints.bp640, property: '--luke-space-200' },
+		{ inlineSize: breakpoints.bp768, property: '--luke-space-300' },
+		{ inlineSize: breakpoints.bp1024, property: '--luke-space-400' },
+		{ inlineSize: breakpoints.bp1280, property: '--luke-space-600' },
+		{ inlineSize: breakpoints.bp1536, property: '--luke-space-800' },
 	] as const;
 
 	for (const viewport of viewports) {
 		// eslint-disable-next-line no-await-in-loop -- viewport changes must be observed in order
-		await page.viewport(viewport.width, 800);
+		await page.viewport(viewport.inlineSize, 800);
 		const computedStyle = getComputedStyle(element);
 		expect(computedStyle.padding).toBe(computedStyle.getPropertyValue(viewport.property).trim());
 	}
@@ -52,9 +52,9 @@ test('resolves against a nearer explicit container instead of the root', async (
 	const wrapper = document.body.appendChild(document.createElement('div'));
 	mounted.push(wrapper);
 	wrapper.style.containerType = 'inline-size';
-	wrapper.style.inlineSize = `${breakpoints['640'] - 1}px`;
+	wrapper.style.inlineSize = `${breakpoints.bp640 - 1}px`;
 
-	const generated = createSprinkles({ padding: { initial: '100', '640': '200' } });
+	const generated = createSprinkles({ padding: { initial: '100', bp640: '200' } });
 	const element = mount(generated, wrapper);
 
 	const computedStyle = getComputedStyle(element);
@@ -65,11 +65,11 @@ test('resolves against the root content box, not the viewport width', async () =
 	// A scrollbar takes its width out of the root's content box, so the root container's inline
 	// size measures narrower than the viewport. Root padding reproduces that narrowing without
 	// depending on the headless browser rendering a scrollbar.
-	await page.viewport(breakpoints['640'], 800);
+	await page.viewport(breakpoints.bp640, 800);
 	const rootStyle = document.head.appendChild(document.createElement('style'));
 	rootStyle.textContent = ':root { padding-inline-end: 17px; }';
 
-	const generated = createSprinkles({ padding: { initial: '100', '640': '200' } });
+	const generated = createSprinkles({ padding: { initial: '100', bp640: '200' } });
 	const element = mount(generated);
 
 	const computedStyle = getComputedStyle(element);

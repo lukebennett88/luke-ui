@@ -20,9 +20,9 @@ export const Default = meta.story({
 			</>
 		),
 		display: 'flex',
-		flexDirection: { initial: 'column', '768': 'row' },
-		gap: { initial: '200', '768': '600' },
-		padding: { initial: '300', '768': '600' },
+		flexDirection: { initial: 'column', bp768: 'row' },
+		gap: { initial: '200', bp768: '600' },
+		padding: { initial: '300', bp768: '600' },
 		style: { backgroundColor: vars.color.surface.recessed },
 	} satisfies Partial<BoxProps>,
 });

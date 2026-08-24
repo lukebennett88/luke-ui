@@ -7,17 +7,17 @@ import { SEMANTIC_ROLES } from '../theme/contrast-policy.js';
 import { typedEntries } from '../utils/index.js';
 import { layers } from './layers.css.js';
 
-function fromBreakpoint(minimumWidth: number) {
-	return { '@container': `(inline-size >= ${minimumWidth}px)` };
+function fromBreakpoint(minimumInlineSize: number) {
+	return { '@container': `(inline-size >= ${minimumInlineSize}px)` };
 }
 
 const responsiveConditions = {
 	initial: {},
-	'640': fromBreakpoint(breakpoints['640']),
-	'768': fromBreakpoint(breakpoints['768']),
-	'1024': fromBreakpoint(breakpoints['1024']),
-	'1280': fromBreakpoint(breakpoints['1280']),
-	'1536': fromBreakpoint(breakpoints['1536']),
+	bp640: fromBreakpoint(breakpoints.bp640),
+	bp768: fromBreakpoint(breakpoints.bp768),
+	bp1024: fromBreakpoint(breakpoints.bp1024),
+	bp1280: fromBreakpoint(breakpoints.bp1280),
+	bp1536: fromBreakpoint(breakpoints.bp1536),
 } as const;
 
 /** Space steps plus `0`, written explicitly so declaration emit preserves string keys. */

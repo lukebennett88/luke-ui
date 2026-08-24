@@ -59,7 +59,7 @@ test('narrowing the preview panel flips a responsive example below its container
 	await page.viewport(1000, 800);
 	await renderExampleBlock();
 
-	// The example's `medium` breakpoint is 768px; starting above it puts the
+	// The example's `bp768` breakpoint is 768px; starting above it puts the
 	// items in a row.
 	await expect.poll(flexDirection).toBe('row');
 

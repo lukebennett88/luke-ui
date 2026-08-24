@@ -1,6 +1,7 @@
 ---
 title: Layout
-description: Build responsive structure with Box, layout utilities, and width-keyed breakpoints.
+description:
+  Build responsive structure with Box, layout utilities, and inline-size-keyed breakpoints.
 ---
 
 ## Box
@@ -10,7 +11,7 @@ Box is the layout component. Use it to:
 - Provide spacing to child elements.
 - Impose sizing constraints on content.
 - Control layout behaviour within flex and grid containers.
-- Hide content at a screen size with its responsive display prop.
+- Hide content at a container inline size with its responsive display prop.
 
 ```tsx
 import { Box } from '@luke-ui/react/box';
@@ -43,24 +44,24 @@ pixels when a scrollbar is present.
 | Breakpoint | Minimum container inline size |
 | ---------- | ----------------------------- |
 | `initial`  | 0px (base)                    |
-| `640`      | 640px                         |
-| `768`      | 768px                         |
-| `1024`     | 1024px                        |
-| `1280`     | 1280px                        |
-| `1536`     | 1536px                        |
+| `bp640`    | 640px                         |
+| `bp768`    | 768px                         |
+| `bp1024`   | 1024px                        |
+| `bp1280`   | 1280px                        |
+| `bp1536`   | 1536px                        |
 
 Each breakpoint is a fixed constant, not a theme token. A custom theme cannot change these sizes.
 Every breakpoint is a minimum inline size, so there is no maximum size or range condition. A value
-set at `640` also applies at `768` and above, unless a later breakpoint overrides it. Values cascade
-up from `initial`, so specify only the points where the layout changes.
+set at `bp640` also applies at `bp768` and above, unless a later breakpoint overrides it. Values
+cascade up from `initial`, so specify only the points where the layout changes.
 
 ```tsx
-<Box display="flex" flexDirection={{ initial: 'column', '768': 'row' }}>
+<Box display="flex" flexDirection={{ initial: 'column', bp768: 'row' }}>
 	{children}
 </Box>
 ```
 
-This example stacks the children by default, then places them in a row from `768`.
+This example stacks the children by default, then places them in a row from `bp768`.
 
 <ExampleBlock src="box/responsive-layout" title="Layout — Responsive values" />
 
