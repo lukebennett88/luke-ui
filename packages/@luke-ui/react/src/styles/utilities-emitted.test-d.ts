@@ -63,9 +63,10 @@ test('the zero space key stays a quoted string in declaration emit', async () =>
 	for (const property of ['gap', 'padding'] as const) {
 		const emitted = propertyType(declaration, property);
 		expect(emitted.includes("'0':"), `${property} lost a quoted zero key`).toBe(true);
-		expect(new RegExp(`(^|[{;\\s])0:`).test(emitted), `${property} emitted a numeric zero key`).toBe(
-			false,
-		);
+		expect(
+			new RegExp(`(^|[{;\\s])0:`).test(emitted),
+			`${property} emitted a numeric zero key`,
+		).toBe(false);
 	}
 });
 

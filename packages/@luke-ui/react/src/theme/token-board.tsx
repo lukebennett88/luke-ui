@@ -377,9 +377,7 @@ function MotionPreview({ path, segments, varName }: LeafPreviewProps) {
 	const easing = axis === 'easing' ? `var(${varName})` : fallbackMotionEasing;
 
 	return (
-		<span
-			style={{ ...previewFrameStyle, justifyContent: 'center', paddingInline: vars.space.sp4 }}
-		>
+		<span style={{ ...previewFrameStyle, justifyContent: 'center', paddingInline: vars.space.sp4 }}>
 			<span
 				aria-label={`${path} sample`}
 				data-token-board-motion
