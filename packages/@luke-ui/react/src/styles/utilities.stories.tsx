@@ -59,7 +59,7 @@ export const Layout = meta.story({
 });
 
 /**
- * Responsive values use object notation keyed by minimum container inline size. Values
+ * Responsive values use object notation keyed by breakpoint. Values
  * cascade from smaller to larger breakpoints, so only changes need to be
  * specified.
  */

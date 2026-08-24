@@ -30,17 +30,17 @@ test('applies every retained breakpoint responsively', async () => {
 	);
 
 	const viewports = [
-		{ inlineSize: 320, property: '--luke-space-100' },
-		{ inlineSize: breakpoints.bp640, property: '--luke-space-200' },
-		{ inlineSize: breakpoints.bp768, property: '--luke-space-300' },
-		{ inlineSize: breakpoints.bp1024, property: '--luke-space-400' },
-		{ inlineSize: breakpoints.bp1280, property: '--luke-space-600' },
-		{ inlineSize: breakpoints.bp1536, property: '--luke-space-800' },
+		{ width: 320, property: '--luke-space-100' },
+		{ width: breakpoints.bp640, property: '--luke-space-200' },
+		{ width: breakpoints.bp768, property: '--luke-space-300' },
+		{ width: breakpoints.bp1024, property: '--luke-space-400' },
+		{ width: breakpoints.bp1280, property: '--luke-space-600' },
+		{ width: breakpoints.bp1536, property: '--luke-space-800' },
 	] as const;
 
 	for (const viewport of viewports) {
 		// eslint-disable-next-line no-await-in-loop -- viewport changes must be observed in order
-		await page.viewport(viewport.inlineSize, 800);
+		await page.viewport(viewport.width, 800);
 		const computedStyle = getComputedStyle(element);
 		expect(computedStyle.padding).toBe(computedStyle.getPropertyValue(viewport.property).trim());
 	}

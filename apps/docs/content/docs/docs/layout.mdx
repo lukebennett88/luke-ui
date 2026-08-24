@@ -1,7 +1,6 @@
 ---
 title: Layout
-description:
-  Build responsive structure with Box, layout utilities, and inline-size-keyed breakpoints.
+description: Build responsive structure with Box, layout utilities, and responsive breakpoints.
 ---
 
 ## Box
@@ -11,7 +10,7 @@ Box is the layout component. Use it to:
 - Provide spacing to child elements.
 - Impose sizing constraints on content.
 - Control layout behaviour within flex and grid containers.
-- Hide content at a container inline size with its responsive display prop.
+- Hide content responsively.
 
 ```tsx
 import { Box } from '@luke-ui/react/box';
@@ -27,8 +26,8 @@ element needs the same responsive layout properties without wrapping it in a `Bo
 
 ## Responsive values
 
-Properties passed to `Box` and Sprinkles accept a direct value when a layout property stays
-constant, or an object keyed by breakpoint when it changes at a given container inline size.
+Properties passed to `Box` and Sprinkles accept either a direct value or an object keyed by
+breakpoint.
 
 Responsive values resolve against the nearest ancestor size container. Luke UI uses the document
 root as the fallback. Add `container-type: inline-size` to a nearer ancestor when descendants should
