@@ -83,6 +83,8 @@ export default defineConfig({
 				test: {
 					// These tests read emitted declarations from `dist`. The `test:types` script runs
 					// `generate` and `build` first, so it provisions its own `dist` however it is invoked.
+					// `test:ci` runs it before the other projects, which makes it the single build step
+					// for the whole chain, so nothing else should build the package again.
 					environment: 'node',
 					include: ['src/**/*.test-d.ts'],
 					name: 'types',
