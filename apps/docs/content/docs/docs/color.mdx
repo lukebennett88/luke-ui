@@ -55,6 +55,9 @@ stays constant, so only the role and mode change its colours.
 
 ### Background and foreground
 
+Background varies by the weight of the surface. Foreground varies by what the content sits on. This
+is why a role has two background ramps, but one foreground ramp and a separate `onSolid` colour.
+
 Each role has a `subtle` and a `solid` background ramp. Each ramp has `rest`, `hover`, and `pressed`
 states:
 
@@ -95,6 +98,12 @@ Luke UI measures a semantic border for contrast, but does not guarantee it reach
 [contrast validation](/docs/authoring-a-theme#contrast-validation). Never rely on one alone to
 communicate a required state such as selected, invalid, or checked. Pair it with text, an icon, or
 another cue that is separately contrast-gated.
+
+### The numeric scale is private
+
+Behind each role, the theme generator builds a numeric colour scale. This scale is an internal
+implementation detail. It is never emitted as CSS and has no public token. Use the semantic roles in
+your application, and use `defineTheme` with source colours to author a theme.
 
 ## Disabled and loading states
 
