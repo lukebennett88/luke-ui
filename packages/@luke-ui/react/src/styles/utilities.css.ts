@@ -13,11 +13,11 @@ function fromBreakpoint(minimumWidth: number) {
 
 const responsiveConditions = {
 	initial: {},
-	small: fromBreakpoint(breakpoints.small),
-	medium: fromBreakpoint(breakpoints.medium),
-	large: fromBreakpoint(breakpoints.large),
-	xlarge: fromBreakpoint(breakpoints.xlarge),
-	xxlarge: fromBreakpoint(breakpoints.xxlarge),
+	'640': fromBreakpoint(breakpoints['640']),
+	'768': fromBreakpoint(breakpoints['768']),
+	'1024': fromBreakpoint(breakpoints['1024']),
+	'1280': fromBreakpoint(breakpoints['1280']),
+	'1536': fromBreakpoint(breakpoints['1536']),
 } as const;
 
 /** Space steps plus `0`, written explicitly so declaration emit preserves string keys. */

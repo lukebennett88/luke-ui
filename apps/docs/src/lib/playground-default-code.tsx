@@ -49,8 +49,8 @@ export default () => {
 			// Utility props take an object keyed by breakpoint. Breakpoints are
 			// container queries resolved against the theme root, so this follows the
 			// preview width.
-			paddingBlock={{ initial: '800', medium: '1600' }}
-			paddingInline={{ initial: '600', medium: '1200' }}
+			paddingBlock={{ initial: '800', '768': '1600' }}
+			paddingInline={{ initial: '600', '768': '1200' }}
 			render={(props) => <form {...props} onSubmit={handleSubmit} />}
 		>
 			<Heading level={2}>Sign in</Heading>

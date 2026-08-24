@@ -7,7 +7,7 @@ import { breakpoints } from '../theme/breakpoints.js';
  *
  * This reads the device screen width on purpose, not the viewport width. Narrowing
  * a desktop browser window must not swap the overlay architecture underneath the
- * user. Mobile means a screen below the shared `small` breakpoint.
+ * user. Mobile means a screen narrower than the shared 640px breakpoint.
  *
  * Based on Apache-2.0 `packages/@adobe/react-spectrum/src/utils/useIsMobileDevice.ts`.
  */
@@ -26,7 +26,7 @@ function subscribe(onStoreChange: StoreListener): StoreListener {
 }
 
 function getSnapshot(): boolean {
-	return window.screen.width < breakpoints.small;
+	return window.screen.width < breakpoints['640'];
 }
 
 function getServerSnapshot(): boolean {
