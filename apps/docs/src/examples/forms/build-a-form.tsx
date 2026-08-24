@@ -16,9 +16,9 @@ export default () => {
 	}
 
 	return (
-		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="22rem">
+		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="22rem">
 			<form onReset={() => setSubmittedEmail('')} onSubmit={handleSubmit}>
-				<Box display="flex" flexDirection="column" gap="400">
+				<Box display="flex" flexDirection="column" gap="sp16">
 					<TextField
 						description="We will send the receipt to this address."
 						isRequired
@@ -26,7 +26,7 @@ export default () => {
 						name="email"
 						type="email"
 					/>
-					<Box display="flex" gap="200">
+					<Box display="flex" gap="sp8">
 						<Button type="submit">Submit</Button>
 						<Button appearance="subtle" type="reset">
 							Reset

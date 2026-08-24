@@ -16,8 +16,8 @@ export function ComponentsIndex(): JSX.Element {
 				className="not-prose"
 				display="flex"
 				flexDirection="column"
-				gap="800"
-				marginBlockStart="800"
+				gap="sp32"
+				marginBlockStart="sp32"
 			>
 				{componentIndexGroups.map((group) => (
 					<CategoryGroup group={group} key={group.title} />
@@ -33,8 +33,8 @@ function CategoryGroup({ group }: { group: ComponentIndexGroup }) {
 			display="flex"
 			elementType="section"
 			flexDirection="column"
-			gap="400"
-			marginBlockStart="400"
+			gap="sp16"
+			marginBlockStart="sp16"
 		>
 			<Heading typography="heading4">{group.title}</Heading>
 			<Cards>

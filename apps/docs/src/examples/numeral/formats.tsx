@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="200">
+		<Box display="flex" flexDirection="column" gap="sp8">
 			<Text>
 				Conversion rate: <Numeral format="percent" value={0.125} />
 			</Text>

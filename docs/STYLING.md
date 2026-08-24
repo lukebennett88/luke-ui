@@ -52,12 +52,12 @@ with no class and no JS required. Neither step injects styles at runtime.
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
 - `styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
-- `theme/contract.ts`: the semantic token tree, the mode-family declaration, `--luke-*` variable
+- `theme/contract.ts`: the theme token tree, the mode-family declaration, `--luke-*` variable
   naming, and the source-owned `typeStyles` typography keys.
 - `theme/path-record.ts`: the typed `[path, value]` record constructor value producers use so
   `Object.fromEntries` cannot hide a missing contract path.
-- `theme/contract.css.ts`: the typed `vars` contract, built by walking the semantic token tree
-  directly so it stays source-owned and free of styling-engine types.
+- `theme/contract.css.ts`: the typed `vars` contract, built by walking the theme token tree directly
+  so it stays source-owned and free of styling-engine types.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
   and the one resolution of curated defaults (source colours, materials, radius, backdrop) into the
   internal foundation.
@@ -340,8 +340,8 @@ import { createSprinkles } from '@luke-ui/react/styles';
 
 const layout = createSprinkles({
 	display: 'flex',
-	gap: '400',
-	padding: '600',
+	gap: 'sp16',
+	padding: 'sp24',
 });
 
 return (
@@ -351,8 +351,8 @@ return (
 );
 ```
 
-Spacing and gap properties use `0` or the semantic space steps `100`, `200`, `300`, `400`, `600`,
-`800`, `1000`, `1200`, and `1600`. Margin also accepts `auto`. Enum-like properties use CSS-native
+Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Each key matches
+its pixel value, so `sp16` is 16px. Margin also accepts `auto`. Enum-like properties use CSS-native
 values, for example `display: 'flex'`. Sizing, inset, flex-basis, order, and grid-placement values
 accept their CSS property values.
 
@@ -365,7 +365,7 @@ only overrides need to be specified.
 const responsive = createSprinkles({
 	display: 'flex',
 	flexDirection: { initial: 'column', bp768: 'row' },
-	gap: { initial: '300', bp768: '600' },
+	gap: { initial: 'sp12', bp768: 'sp24' },
 });
 ```
 
@@ -381,7 +381,7 @@ Aria Components' `render` prop. Use `mergeProps` from `@luke-ui/react/utils` so 
 ```tsx
 import { mergeProps } from '@luke-ui/react/utils';
 
-const buttonBox = createSprinkles({ padding: '400' });
+const buttonBox = createSprinkles({ padding: 'sp16' });
 
 <Button
 	render={(props) => (

@@ -12,13 +12,13 @@ export default () => {
 	return (
 		<Box
 			display="grid"
-			gap="400"
+			gap="sp16"
 			inlineSize="100%"
 			maxInlineSize="48rem"
 			style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(8rem, 1fr))' }}
 		>
 			{variants.map((variant) => (
-				<Box display="grid" gap="200" key={variant.value}>
+				<Box display="grid" gap="sp8" key={variant.value}>
 					<Text color="secondary" typography="caption">
 						{variant.label}
 					</Text>

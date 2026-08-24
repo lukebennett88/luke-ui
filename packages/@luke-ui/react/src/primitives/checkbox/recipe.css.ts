@@ -16,7 +16,7 @@ const checkboxConfig = {
 		root: {
 			display: 'flex',
 			flexDirection: 'column',
-			gap: vars.space[100],
+			gap: vars.space.sp4,
 			minInlineSize: 0,
 			// Checkbox's own box has no room for an in-control invalid icon without it
 			// floating past the label (see `indicator` below), so its icon renders on
@@ -32,7 +32,7 @@ const checkboxConfig = {
 			cursor: 'pointer',
 			display: 'inline-flex',
 			font: 'inherit',
-			gap: vars.space[200],
+			gap: vars.space.sp8,
 			minInlineSize: 0,
 			selectors: {
 				'&[data-disabled="true"]': {
@@ -193,7 +193,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: FONT_METRIC_SCALE[20].lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.small,
 						[checkboxIndicatorSize]: vars.iconSize.medium,
-						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
+						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space.sp8})`,
 					},
 				},
 			},
@@ -203,7 +203,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: FONT_METRIC_SCALE[16].lineHeight,
 						[checkboxGlyphSize]: vars.iconSize.xsmall,
 						[checkboxIndicatorSize]: vars.iconSize.small,
-						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
+						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space.sp8})`,
 					},
 				},
 			},
@@ -213,7 +213,7 @@ const checkboxConfig = {
 						[checkboxControlSize]: vars.iconSize.small,
 						[checkboxGlyphSize]: FONT_METRIC_SCALE[12].fontSize,
 						[checkboxIndicatorSize]: vars.iconSize.xsmall,
-						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space[200]})`,
+						[fieldMessageIndent]: `calc(${checkboxControlSize} + ${vars.space.sp8})`,
 					},
 				},
 			},

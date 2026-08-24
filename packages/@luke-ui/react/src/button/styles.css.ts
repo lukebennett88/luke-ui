@@ -16,7 +16,7 @@ export const buttonLabel = recipe({
 	base: {
 		alignItems: 'center',
 		display: 'inline-flex',
-		gap: vars.space[200],
+		gap: vars.space.sp8,
 		minInlineSize: 0,
 	},
 	defaultVariants: {

@@ -20,7 +20,7 @@ gap, flex, and grid-child properties. It does not set grid container properties.
 rules in the application CSS or a component that owns that layout.
 
 ```tsx
-<Box display="flex" alignItems="center" gap="300" maxInlineSize="42rem" paddingInline="600">
+<Box display="flex" alignItems="center" gap="sp12" maxInlineSize="42rem" paddingInline="sp24">
 	{children}
 </Box>
 ```
@@ -33,7 +33,7 @@ worked example.
 
 ## Spacing values
 
-Padding, gap, and margin accept the Luke UI spacing steps. Read
+Padding, gap, and margin accept value-based spacing keys. Read
 [Layout](/docs/layout#spacing-and-sizing) for the full scale and for logical property names.
 
 ## Choose the rendered element

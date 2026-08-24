@@ -93,8 +93,8 @@ generated class names, selector text, incidental copy, or low-value bugs unlikel
 This targets low-value tests of internal TypeScript guarantees. Emitted declarations in
 `dist/*.d.ts` are part of the public consumer contract, not an internal guarantee, so a type test is
 warranted when a declaration-emit regression would change what consumers can assign or what their
-editor autocompletes, such as a numeric-looking space-step key widening from `'400'` to `number`, or
-a token union widening to an index signature or `string`. These live in `*.test-d.ts` and run via
+editor autocompletes, such as a numeric-looking key like `'0'` widening from a string to `number`,
+or a token union widening to an index signature or `string`. These live in `*.test-d.ts` and run via
 the `types` project.
 
 ## Stories

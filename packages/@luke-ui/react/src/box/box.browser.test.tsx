@@ -23,7 +23,7 @@ test('renders a responsive layout at the retained breakpoints', async () => {
 		<Box
 			display="flex"
 			flexDirection={{ initial: 'column', bp768: 'row' }}
-			gap={{ initial: '200', bp768: '600' }}
+			gap={{ initial: 'sp8', bp768: 'sp24' }}
 		>
 			<span>First item</span>
 			<span>Second item</span>

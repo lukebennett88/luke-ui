@@ -201,7 +201,7 @@ export const Truncate = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: '400',
+			gap: 'sp16',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',
@@ -226,7 +226,7 @@ export const MiddleTruncation = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: '400',
+			gap: 'sp16',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',
@@ -258,7 +258,7 @@ export const LineClamp = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: '400',
+			gap: 'sp16',
 			inlineSize: '100%',
 			maxInlineSize: '20rem',
 			minInlineSize: '0',

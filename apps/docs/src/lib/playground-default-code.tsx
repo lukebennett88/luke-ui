@@ -42,19 +42,19 @@ export default () => {
 			boxShadow="raised"
 			display="flex"
 			flexDirection="column"
-			gap="600"
+			gap="sp24"
 			inlineSize="100%"
 			marginInline="auto"
 			maxInlineSize="26rem"
 			// Utility props take an object keyed by breakpoint. Breakpoints are
 			// container queries resolved against the theme root, so this follows the
 			// preview's inline size.
-			paddingBlock={{ initial: '800', bp768: '1600' }}
-			paddingInline={{ initial: '600', bp768: '1200' }}
+			paddingBlock={{ initial: 'sp32', bp768: 'sp64' }}
+			paddingInline={{ initial: 'sp24', bp768: 'sp48' }}
 			render={(props) => <form {...props} onSubmit={handleSubmit} />}
 		>
 			<Heading level={2}>Sign in</Heading>
-			<Box display="flex" flexDirection="column" gap="400">
+			<Box display="flex" flexDirection="column" gap="sp16">
 				<Controller
 					control={form.control}
 					name="email"
@@ -97,7 +97,7 @@ export default () => {
 					)}
 				/>
 			</Box>
-			<Box display="flex" gap="300" justifyContent="flex-end">
+			<Box display="flex" gap="sp12" justifyContent="flex-end">
 				<Button appearance="subtle" type="button">
 					Create an account
 				</Button>
@@ -106,7 +106,7 @@ export default () => {
 				</Button>
 			</Box>
 			{signedInAs && (
-				<Box backgroundColor="success.subtle.rest" borderRadius="control" padding="300">
+				<Box backgroundColor="success.subtle.rest" borderRadius="control" padding="sp12">
 					<Text elementType="p">Signed in as {signedInAs}</Text>
 				</Box>
 			)}

@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="200">
+		<Box display="flex" flexDirection="column" gap="sp8">
 			<Text>
 				Fixed: <Numeral precision={2} value={98.7654} />
 			</Text>

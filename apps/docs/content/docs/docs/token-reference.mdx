@@ -1,6 +1,6 @@
 ---
 title: Token reference
-description: Public semantic CSS variables to build custom Luke UI elements.
+description: Public CSS variables to build custom Luke UI elements.
 ---
 
 import { TokenExplorer } from '../../../src/components/token-explorer';
@@ -23,12 +23,14 @@ background and foreground.
 
 ## Choosing a scale
 
-Choose a token by the job it performs. Spacing uses numbered steps. Radius and depth use semantic
-roles. Use the public variable instead of copying its resolved CSS value.
+Token families use different naming models. Spacing uses value-based keys such as `sp16` and `sp24`.
+Radius and depth use semantic roles. Use the public variable instead of copying its resolved CSS
+value.
 
 ### Spacing
 
-Spacing provides one scale for `gap`, `padding`, and `margin`.
+Spacing provides one scale for `gap`, `padding`, and `margin`. Each key matches its pixel value, so
+`sp16` is 16px.
 
 <ExampleBlock src="overview/spacing-scale" title="Token reference — Spacing scale" />
 
@@ -52,7 +54,7 @@ space between them, usually the wrapper's padding. This keeps their corners conc
 ```tsx
 import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
 
-const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space[200]);
+const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space.sp8);
 ```
 
 ### Depth

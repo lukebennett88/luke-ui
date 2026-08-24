@@ -11,18 +11,18 @@ export default () => {
 		<Box
 			data-color-mode={parentMode}
 			display="grid"
-			gap="400"
-			padding="600"
+			gap="sp16"
+			padding="sp24"
 			style={{
 				backgroundColor: vars.color.surface.canvas,
 				color: vars.color.text.primary,
 			}}
 		>
-			<Box display="grid" gap="200">
+			<Box display="grid" gap="sp8">
 				<Text elementType="strong" fontWeight="emphasis">
 					Parent colour mode
 				</Text>
-				<Box aria-label="Parent colour mode" display="flex" gap="200" role="group">
+				<Box aria-label="Parent colour mode" display="flex" gap="sp8" role="group">
 					{(['light', 'dark'] as const).map((option) => (
 						<Button
 							appearance={parentMode === option ? 'solid' : 'subtle'}
@@ -37,7 +37,7 @@ export default () => {
 				</Box>
 			</Box>
 			<Box
-				padding="400"
+				padding="sp16"
 				style={{
 					backgroundColor: vars.color.surface.floating,
 					border: `1px solid ${vars.color.border.decorative}`,
@@ -49,7 +49,7 @@ export default () => {
 			</Box>
 			<Box
 				data-color-mode="dark"
-				padding="400"
+				padding="sp16"
 				style={{
 					backgroundColor: vars.color.surface.floating,
 					border: `1px solid ${vars.color.border.decorative}`,

@@ -18,9 +18,9 @@ export default () => {
 	});
 
 	return (
-		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 			<form onSubmit={form.handleSubmit(() => undefined)}>
-				<Box display="flex" flexDirection="column" gap="400">
+				<Box display="flex" flexDirection="column" gap="sp16">
 					<Controller
 						control={form.control}
 						name="name"

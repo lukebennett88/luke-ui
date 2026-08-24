@@ -21,8 +21,8 @@ export default () => {
 	const [role, setRole] = useState<Role>('warning');
 
 	return (
-		<Box display="grid" gap="400">
-			<Box aria-label="Semantic role" display="flex" flexWrap="wrap" gap="200" role="group">
+		<Box display="grid" gap="sp16">
+			<Box aria-label="Semantic role" display="flex" flexWrap="wrap" gap="sp8" role="group">
 				{(Object.keys(roles) as Array<Role>).map((option) => (
 					<Button
 						appearance={role === option ? 'solid' : 'subtle'}
@@ -36,16 +36,16 @@ export default () => {
 			</Box>
 			<Box
 				display="grid"
-				gap="300"
+				gap="sp12"
 				style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(min(16rem, 100%), 1fr))' }}
 			>
 				{modes.map((mode) => (
 					<Box
 						data-color-mode={mode}
 						display="grid"
-						gap="200"
+						gap="sp8"
 						key={mode}
-						padding="300"
+						padding="sp12"
 						style={{
 							backgroundColor: vars.color.surface.canvas,
 							borderRadius: vars.radius.surface,
@@ -56,8 +56,8 @@ export default () => {
 						</Text>
 						<Box
 							display="grid"
-							gap="200"
-							padding="200"
+							gap="sp8"
+							padding="sp8"
 							style={{
 								backgroundColor: vars.color.surface.floating,
 								border: `1px solid ${vars.color.border.decorative}`,
@@ -66,15 +66,15 @@ export default () => {
 						>
 							<Box
 								display="grid"
-								gap="100"
-								padding="300"
+								gap="sp4"
+								padding="sp12"
 								style={{
 									backgroundColor: vars.color.background[role].subtle.rest,
 									border: `1px solid ${vars.color.border[role]}`,
 									borderRadius: vars.radius.control,
 								}}
 							>
-								<Box alignItems="center" display="flex" flexWrap="wrap" gap="100">
+								<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp4">
 									<Text
 										elementType="strong"
 										fontWeight="emphasis"
@@ -90,7 +90,7 @@ export default () => {
 											backgroundColor: vars.color.background[role].solid.rest,
 											borderRadius: vars.radius.full,
 											color: vars.color.foreground[role].onSolid,
-											padding: `${vars.space[100]} ${vars.space[200]}`,
+											padding: `${vars.space.sp4} ${vars.space.sp8}`,
 										}}
 									>
 										{roles[role]}

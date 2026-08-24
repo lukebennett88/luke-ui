@@ -25,13 +25,13 @@ export const Layout = meta.story({
 		const container = createSprinkles({
 			display: 'flex',
 			flexDirection: 'column',
-			gap: '400',
-			padding: '600',
+			gap: 'sp16',
+			padding: 'sp24',
 		});
 		const row = createSprinkles({
 			alignItems: 'center',
 			display: 'flex',
-			gap: '300',
+			gap: 'sp12',
 		});
 		return (
 			<div {...mergeProps({ style: panelStyle }, container)}>
@@ -39,7 +39,7 @@ export const Layout = meta.story({
 					<div
 						{...mergeProps(
 							{ style: { background: vars.color.surface.recessed } },
-							createSprinkles({ inlineSize: '100%', minInlineSize: '0', padding: '400' }),
+							createSprinkles({ inlineSize: '100%', minInlineSize: '0', padding: 'sp16' }),
 						)}
 					>
 						Row item 1
@@ -47,7 +47,7 @@ export const Layout = meta.story({
 					<div
 						{...mergeProps(
 							{ style: { background: vars.color.surface.recessed } },
-							createSprinkles({ flexGrow: '1', padding: '400' }),
+							createSprinkles({ flexGrow: '1', padding: 'sp16' }),
 						)}
 					>
 						Row item 2 (grows)
@@ -68,8 +68,8 @@ export const Responsive = meta.story({
 		const responsive = createSprinkles({
 			display: 'flex',
 			flexDirection: { initial: 'column', bp768: 'row' },
-			gap: { initial: '300', bp768: '600' },
-			padding: { initial: '300', bp1024: '800' },
+			gap: { initial: 'sp12', bp768: 'sp24' },
+			padding: { initial: 'sp12', bp1024: 'sp32' },
 		});
 		return (
 			<div {...mergeProps({ style: panelStyle }, responsive)}>
@@ -102,7 +102,7 @@ export const Responsive = meta.story({
 export const WithRenderProp = meta.story({
 	render: () => {
 		const buttonBox = createSprinkles({
-			padding: '400',
+			padding: 'sp16',
 		});
 		const customStyle = mergeProps(buttonBox, {
 			style: { backgroundColor: vars.color.background.accent.solid.rest },

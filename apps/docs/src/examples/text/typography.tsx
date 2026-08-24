@@ -5,12 +5,12 @@ import { Fragment } from 'react';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="300">
+		<Box display="flex" flexDirection="column" gap="sp12">
 			<Box
 				alignItems="flex-end"
 				display="grid"
 				elementType="dl"
-				gap="300"
+				gap="sp12"
 				style={{ gridTemplateColumns: 'max-content minmax(0, 1fr)' }}
 			>
 				{typeStyles.map((typography) => (

@@ -21,8 +21,8 @@ export const Default = meta.story({
 		),
 		display: 'flex',
 		flexDirection: { initial: 'column', bp768: 'row' },
-		gap: { initial: '200', bp768: '600' },
-		padding: { initial: '300', bp768: '600' },
+		gap: { initial: 'sp8', bp768: 'sp24' },
+		padding: { initial: 'sp12', bp768: 'sp24' },
 		style: { backgroundColor: vars.color.surface.recessed },
 	} satisfies Partial<BoxProps>,
 });
@@ -33,7 +33,7 @@ export const Section = meta.story({
 		children: 'Account summary content',
 		display: 'flex',
 		elementType: 'section',
-		padding: '400',
+		padding: 'sp16',
 		style: { backgroundColor: vars.color.surface.recessed },
 	} satisfies Partial<BoxProps>,
 });
@@ -42,7 +42,7 @@ export const CustomDiv = meta.story({
 	args: {
 		children: 'Account summary content',
 		className: 'consumer-class',
-		padding: '400',
+		padding: 'sp16',
 		ref: (element) => element?.setAttribute('data-box-ref', 'received'),
 		render: (resolvedProps) => (
 			<MotionDiv aria-label="Account summary" id="account-summary" {...resolvedProps} />

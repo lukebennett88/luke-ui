@@ -36,7 +36,7 @@ export default () => {
 	});
 
 	return (
-		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 			<form
 				onSubmit={(event) => {
 					event.preventDefault();
@@ -44,7 +44,7 @@ export default () => {
 				}}
 				ref={formRef}
 			>
-				<Box display="flex" flexDirection="column" gap="400">
+				<Box display="flex" flexDirection="column" gap="sp16">
 					<form.Field name="terms">
 						{(field) => (
 							<Checkbox

@@ -118,19 +118,18 @@ const fontStyleContract = Object.fromEntries(
 ) as { readonly [Style in TypeStyle]: typeof typeStyle };
 
 /**
- * The fixed spacing steps shared by the built-in themes. Each value is a selected step from the
- * 4px linear scale.
+ * Fixed spacing values selected from a 4px scale. Keys encode their pixel value.
  */
 export const spaceScale = [
-	['100', '4px'],
-	['200', '8px'],
-	['300', '12px'],
-	['400', '16px'],
-	['600', '24px'],
-	['800', '32px'],
-	['1000', '40px'],
-	['1200', '48px'],
-	['1600', '64px'],
+	['sp4', '4px'],
+	['sp8', '8px'],
+	['sp12', '12px'],
+	['sp16', '16px'],
+	['sp24', '24px'],
+	['sp32', '32px'],
+	['sp40', '40px'],
+	['sp48', '48px'],
+	['sp64', '64px'],
 ] as const;
 
 /** A spacing step key accepted by the layout APIs. */
@@ -141,7 +140,7 @@ const spaceContract = Object.fromEntries(spaceScale.map(([step]) => [step, null]
 };
 
 /**
- * The semantic token tree shared by the public `vars` contract and `buildTheme`, so typed paths and
+ * The theme token tree shared by the public `vars` contract and `buildTheme`, so typed paths and
  * emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one stable
  * `--luke-*` custom property.
  */
@@ -228,7 +227,7 @@ export const themeContractTree = {
 		overlay: null,
 		full: null,
 	},
-	/** The semantic spacing scale used by components and layout utilities. */
+	/** The fixed spacing scale used by components and layout utilities. */
 	space: spaceContract,
 	/** Structural block sizes for small and medium controls, plus the shared minimum tap target. */
 	controlSize: {
@@ -342,7 +341,7 @@ export function partitionContractPairs(pairs: ReadonlyArray<readonly [string, st
 }
 
 /**
- * Flattens the semantic token tree into `[path, varName]` pairs, in tree order, for example
+ * Flattens the theme token tree into `[path, varName]` pairs, in tree order, for example
  * `['color.background.danger.solid.hover', '--luke-color-background-danger-solid-hover']`.
  */
 export function flattenThemeContract(): Array<[path: ContractPath, varName: string]> {

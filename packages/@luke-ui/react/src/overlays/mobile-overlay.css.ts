@@ -7,7 +7,7 @@ const trayPaddingBlockEnd = createVar();
 
 // The scrim strip left above the tray. It is sized to be a comfortable tap target,
 // since tapping it is how a pointer user dismisses the sheet.
-const trayInsetBlockStart = vars.space[1200];
+const trayInsetBlockStart = vars.space.sp48;
 
 const trayBorderWidth = '1px';
 

@@ -3,7 +3,7 @@ import { TextField } from '@luke-ui/react/text-field';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 			<TextField label="Search" name="smallSearch" placeholder="Search" size="small" />
 			<TextField label="Search" name="mediumSearch" placeholder="Search" size="medium" />
 		</Box>

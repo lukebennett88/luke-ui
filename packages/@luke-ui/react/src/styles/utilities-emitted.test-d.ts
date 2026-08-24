@@ -3,8 +3,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import { breakpoints } from '../theme/breakpoints.js';
-import type { SpaceStep } from '../theme/contract.js';
-import { spaceScale } from '../theme/contract.js';
 import { SEMANTIC_ROLES } from '../theme/contrast-policy.js';
 
 /** Reads the content-hashed declaration chunk referenced by `box/index.d.ts`. */
@@ -37,25 +35,19 @@ function propertyType(declaration: string, property: string): string {
 	throw new Error(`Could not read the emitted type for "${property}"`);
 }
 
-const spaceSteps: ReadonlyArray<SpaceStep> = spaceScale.map(([step]) => step);
 const spaceScaleProperties = ['gap', 'padding', 'margin', 'columnGap', 'rowGap'] as const;
 
-test('space-scale props keep quoted string keys for every step', async () => {
+test('the zero space key stays a quoted string in declaration emit', async () => {
 	const declaration = await readUtilitiesDeclaration();
+	const missing: Array<string> = [];
 
-	// Collect all regressions so one failure reports every property and step.
-	const unquoted: Array<string> = [];
 	for (const property of spaceScaleProperties) {
 		const emitted = propertyType(declaration, property);
-		for (const step of spaceSteps) {
-			// An unquoted `400:` makes `keyof` numeric.
-			const isQuoted = emitted.includes(`'${step}':`);
-			const isNumeric = new RegExp(`(^|[{;\\s])${step}:`).test(emitted);
-			if (!isQuoted || isNumeric) unquoted.push(`${property}.${step}`);
-		}
+		if (!emitted.includes("'0':")) missing.push(`${property}.quoted`);
+		if (new RegExp(`(^|[{;\\s])0:`).test(emitted)) missing.push(`${property}.numeric`);
 	}
 
-	expect(unquoted).toEqual([]);
+	expect(missing).toEqual([]);
 });
 
 test('backgroundColor is keyed by tokens, not by an index signature', async () => {

@@ -8,10 +8,10 @@ export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Box display="grid" gap="400">
+		<Box display="grid" gap="sp16">
 			<LoadingSkeletonProvider isLoading={isLoading}>
-				<Box display="flex" flexWrap="wrap" gap="400">
-					<Box display="grid" gap="100">
+				<Box display="flex" flexWrap="wrap" gap="sp16">
+					<Box display="grid" gap="sp4">
 						<Text color="secondary" typography="caption">
 							No local prop
 						</Text>
@@ -19,7 +19,7 @@ export default () => {
 							<LoadingSkeleton>Account balance: $1,240.00</LoadingSkeleton>
 						</Text>
 					</Box>
-					<Box display="grid" gap="100">
+					<Box display="grid" gap="sp4">
 						<Text color="secondary" typography="caption">
 							isLoading
 						</Text>
@@ -27,7 +27,7 @@ export default () => {
 							<LoadingSkeleton isLoading>Next payment: 21 August</LoadingSkeleton>
 						</Text>
 					</Box>
-					<Box display="grid" gap="100">
+					<Box display="grid" gap="sp4">
 						<Text color="secondary" typography="caption">
 							{'isLoading={false}'}
 						</Text>

@@ -44,7 +44,7 @@ const diagnosticsByTheme: Record<BundledThemeKey, ThemeDiagnostics> = {
 
 const pageStyle = {
 	display: 'grid',
-	gap: vars.space[1000],
+	gap: vars.space.sp40,
 	inlineSize: '100%',
 	marginInline: 'auto',
 	maxInlineSize: '80rem',
@@ -52,19 +52,19 @@ const pageStyle = {
 
 const themeSwitchStyle = {
 	display: 'flex',
-	gap: vars.space[400],
+	gap: vars.space.sp16,
 } as const satisfies CSSProperties;
 
 const themeOptionStyle = {
 	alignItems: 'center',
 	display: 'flex',
-	gap: vars.space[100],
+	gap: vars.space.sp4,
 	textTransform: 'capitalize',
 } as const satisfies CSSProperties;
 
 const modeSectionStyle = {
 	display: 'grid',
-	gap: vars.space[600],
+	gap: vars.space.sp24,
 } as const satisfies CSSProperties;
 
 const modeHeadingStyle = {
@@ -72,12 +72,12 @@ const modeHeadingStyle = {
 	borderBlockEndStyle: 'solid',
 	borderBlockEndWidth: 1,
 	margin: 0,
-	paddingBlockEnd: vars.space[200],
+	paddingBlockEnd: vars.space.sp8,
 } as const satisfies CSSProperties;
 
 const sectionCardStyle = {
 	display: 'grid',
-	gap: vars.space[300],
+	gap: vars.space.sp12,
 } as const satisfies CSSProperties;
 
 const sectionHeadingStyle = {
@@ -86,7 +86,7 @@ const sectionHeadingStyle = {
 
 const familyRowStyle = {
 	display: 'grid',
-	gap: vars.space[100],
+	gap: vars.space.sp4,
 } as const satisfies CSSProperties;
 
 const familyRoleStyle = {
@@ -96,12 +96,12 @@ const familyRoleStyle = {
 const rampRowStyle = {
 	display: 'flex',
 	flexWrap: 'wrap',
-	gap: vars.space[100],
+	gap: vars.space.sp4,
 } as const satisfies CSSProperties;
 
 const stepCardStyle = {
 	display: 'grid',
-	gap: vars.space[100],
+	gap: vars.space.sp4,
 	inlineSize: '4.5rem',
 	justifyItems: 'start',
 } as const satisfies CSSProperties;
@@ -122,7 +122,7 @@ const stepLabelStyle = {
 const swatchRowStyle = {
 	display: 'flex',
 	flexWrap: 'wrap',
-	gap: vars.space[300],
+	gap: vars.space.sp12,
 } as const satisfies CSSProperties;
 
 const tableWrapStyle = {
@@ -141,8 +141,8 @@ const headerCellStyle = {
 	borderBlockEndColor: vars.color.border.decorative,
 	borderBlockEndStyle: 'solid',
 	borderBlockEndWidth: 1,
-	paddingBlock: vars.space[100],
-	paddingInline: vars.space[300],
+	paddingBlock: vars.space.sp4,
+	paddingInline: vars.space.sp12,
 	textAlign: 'start',
 } as const satisfies CSSProperties;
 
@@ -150,8 +150,8 @@ const cellStyle = {
 	borderBlockEndColor: vars.color.border.decorative,
 	borderBlockEndStyle: 'solid',
 	borderBlockEndWidth: 1,
-	paddingBlock: vars.space[100],
-	paddingInline: vars.space[300],
+	paddingBlock: vars.space.sp4,
+	paddingInline: vars.space.sp12,
 	verticalAlign: 'middle',
 } as const satisfies CSSProperties;
 
@@ -168,7 +168,7 @@ const captionStyle = {
 
 const groupStackStyle = {
 	display: 'grid',
-	gap: vars.space[100],
+	gap: vars.space.sp4,
 } as const satisfies CSSProperties;
 
 export function ThemeDiagnosticsInspector() {

@@ -13,7 +13,7 @@ const modeToBoxProps = {
 		display: 'flex',
 		justifyContent: 'center',
 		minBlockSize: '6rem',
-		padding: '800',
+		padding: 'sp32',
 		style: {
 			backgroundColor: vars.color.surface.canvas,
 			color: vars.color.text.primary,
