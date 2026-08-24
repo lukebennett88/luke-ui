@@ -10,6 +10,9 @@
 		"@luke-ui/react#fix:lint": {
 			"dependsOn": ["build", "generate"]
 		},
+		"@luke-ui/react#test": {
+			"dependsOn": ["build", "generate"]
+		},
 		"//#check:cycles": {
 			"cache": true,
 			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]

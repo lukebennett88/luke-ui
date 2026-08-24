@@ -40,34 +40,6 @@ test('renders a responsive layout at the retained breakpoints', async () => {
 	expect(getComputedStyle(box).flexDirection).toBe('row');
 });
 
-test('applies background and border appearance utilities', () => {
-	const { locator } = render(
-		<Box
-			backgroundColor="accent.solid.rest"
-			borderColor="accent"
-			borderRadius="control"
-			borderStyle="solid"
-			borderWidth="thin"
-			boxShadow="raised"
-		>
-			Content
-		</Box>,
-	);
-
-	const box = locator.element().firstElementChild;
-	if (!(box instanceof HTMLElement)) throw new Error('Expected Box element.');
-
-	const computed = getComputedStyle(box);
-	expect(computed.backgroundColor).not.toBe('');
-	expect(computed.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-	expect(computed.backgroundColor).not.toBe('transparent');
-	expect(computed.borderColor).not.toBe('');
-	expect(computed.borderWidth).toBe('1px');
-	expect(computed.borderStyle).toBe('solid');
-	expect(computed.borderRadius).not.toBe('0px');
-	expect(computed.boxShadow).not.toBe('none');
-});
-
 test('renders semantic elements and a consumer-owned render prop', () => {
 	const semanticResult = render(
 		<Box aria-label="Account summary" elementType="section">

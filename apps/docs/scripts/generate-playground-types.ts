@@ -16,7 +16,7 @@ import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const docsPackageJsonPath = resolve(scriptDir, '../package.json');

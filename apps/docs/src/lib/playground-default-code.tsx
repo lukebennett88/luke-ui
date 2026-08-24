@@ -1,13 +1,34 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Heading } from '@luke-ui/react/heading';
+import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
-import type { SubmitEvent } from 'react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import * as z from 'zod';
+
+const DIGIT_PATTERN = /\d/;
+
+const schema = z.object({
+	email: z.email('Enter an email address in the form you@example.com.'),
+	password: z.string().refine((value) => value.length >= 8 && DIGIT_PATTERN.test(value), {
+		message: 'At least 8 characters, including a number.',
+	}),
+});
 
 export default () => {
-	function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
-		event.preventDefault();
-	}
+	const form = useForm({
+		defaultValues: { email: '', password: '' },
+		resolver: zodResolver(schema),
+	});
+
+	const handleSubmit = form.handleSubmit((values) => {
+		setSignedInAs(values.email);
+	});
+
+	// Set on a valid submit only, so the confirmation never tracks keystrokes.
+	const [signedInAs, setSignedInAs] = useState<string | null>(null);
 
 	return (
 		<Box
@@ -22,6 +43,7 @@ export default () => {
 			display="flex"
 			flexDirection="column"
 			gap="600"
+			inlineSize="100%"
 			marginInline="auto"
 			maxInlineSize="26rem"
 			// Utility props take an object keyed by breakpoint. Breakpoints are
@@ -33,32 +55,46 @@ export default () => {
 		>
 			<Heading level={2}>Sign in</Heading>
 			<Box display="flex" flexDirection="column" gap="400">
-				<TextField
-					autoComplete="email"
-					isRequired
-					label="Email"
+				<Controller
+					control={form.control}
 					name="email"
-					placeholder="Enter your email address"
-					type="email"
+					render={({ field, fieldState }) => (
+						<TextField
+							autoComplete="email"
+							errorMessage={fieldState.error?.message}
+							inputRef={field.ref}
+							isRequired
+							label="Email"
+							name="email"
+							onBlur={field.onBlur}
+							onChange={field.onChange}
+							placeholder="Enter your email address"
+							type="email"
+							validationBehavior="aria"
+							value={field.value}
+						/>
+					)}
 				/>
-				<TextField
-					autoComplete="current-password"
-					description="At least 8 characters, including a number."
-					isRequired
-					label="Password"
-					minLength={8}
+				<Controller
+					control={form.control}
 					name="password"
-					type="password"
-					validate={
-						// `validate` is for a rule the browser cannot check on its own. The constraint
-						// props below (`isRequired`, `type="email"`, `minLength`) already generate their
-						// own messages, so they need no `validate`.
-						(value) => {
-							if (!/\d/.test(value)) {
-								return 'Passwords need at least one number.';
-							}
-						}
-					}
+					render={({ field, fieldState }) => (
+						<TextField
+							autoComplete="current-password"
+							description="At least 8 characters, including a number."
+							errorMessage={fieldState.error?.message}
+							inputRef={field.ref}
+							isRequired
+							label="Password"
+							minLength={8}
+							name="password"
+							onBlur={field.onBlur}
+							onChange={field.onChange}
+							type="password"
+							validationBehavior="aria"
+							value={field.value}
+						/>
+					)}
 				/>
 			</Box>
 			<Box display="flex" gap="300" justifyContent="flex-end">
@@ -69,6 +105,11 @@ export default () => {
 					Sign in
 				</Button>
 			</Box>
+			{signedInAs && (
+				<Box backgroundColor="success.subtle.rest" borderRadius="control" padding="300">
+					<Text elementType="p">Signed in as {signedInAs}</Text>
+				</Box>
+			)}
 		</Box>
 	);
 };

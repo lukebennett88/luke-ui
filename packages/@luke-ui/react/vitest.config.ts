@@ -81,7 +81,8 @@ export default defineConfig({
 					vanillaExtractPlugin(),
 				],
 				test: {
-					// These tests import emitted declarations from `dist`; run `pnpm run build` first.
+					// These tests read emitted declarations from `dist`. The `test:types` script runs
+					// `generate` and `build` first, so it provisions its own `dist` however it is invoked.
 					environment: 'node',
 					include: ['src/**/*.test-d.ts'],
 					name: 'types',
