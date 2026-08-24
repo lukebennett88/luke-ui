@@ -351,10 +351,10 @@ return (
 );
 ```
 
-Spacing and gap properties use `0` or the space steps `sp4`, `sp8`, `sp12`, `sp16`, `sp24`, `sp32`,
-`sp40`, `sp48`, and `sp64`. Margin also accepts `auto`. Enum-like properties use CSS-native values,
-for example `display: 'flex'`. Sizing, inset, flex-basis, order, and grid-placement values accept
-their CSS property values.
+Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Each key matches
+its pixel value, so `sp16` is 16px. Margin also accepts `auto`. Enum-like properties use CSS-native
+values, for example `display: 'flex'`. Sizing, inset, flex-basis, order, and grid-placement values
+accept their CSS property values.
 
 ## Responsive values
 

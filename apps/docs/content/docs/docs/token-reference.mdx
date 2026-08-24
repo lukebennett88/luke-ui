@@ -23,12 +23,14 @@ background and foreground.
 
 ## Choosing a scale
 
-Choose a token by the job it performs. Spacing uses `sp`-prefixed pixel sizes. Radius and depth use
-semantic roles. Use the public variable instead of copying its resolved CSS value.
+Choose a token by the job it performs. Spacing uses value-based keys such as `sp16` and `sp24`.
+Radius and depth use semantic roles. Use the public variable instead of copying its resolved CSS
+value.
 
 ### Spacing
 
-Spacing provides one scale for `gap`, `padding`, and `margin`.
+Spacing provides one scale for `gap`, `padding`, and `margin`. Each key matches its pixel value, so
+`sp16` is 16px.
 
 <ExampleBlock src="overview/spacing-scale" title="Token reference — Spacing scale" />
 

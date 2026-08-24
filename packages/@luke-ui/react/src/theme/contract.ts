@@ -118,8 +118,7 @@ const fontStyleContract = Object.fromEntries(
 ) as { readonly [Style in TypeStyle]: typeof typeStyle };
 
 /**
- * The fixed spacing steps shared by the built-in themes. Keys are `sp`-prefixed pixel sizes from
- * the 4px linear scale.
+ * Fixed spacing values selected from a 4px scale. Keys encode their pixel value.
  */
 export const spaceScale = [
 	['sp4', '4px'],
