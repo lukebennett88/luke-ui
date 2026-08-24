@@ -22,8 +22,8 @@ test('renders a responsive layout at the retained breakpoints', async () => {
 	const { locator } = render(
 		<Box
 			display="flex"
-			flexDirection={{ initial: 'column', medium: 'row' }}
-			gap={{ initial: '200', medium: '600' }}
+			flexDirection={{ initial: 'column', bp768: 'row' }}
+			gap={{ initial: '200', bp768: '600' }}
 		>
 			<span>First item</span>
 			<span>Second item</span>

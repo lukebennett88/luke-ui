@@ -1,16 +1,11 @@
 /**
- * The private responsive breakpoint widths, in pixels. A container query cannot read a custom
- * property, so these are never emitted as one and are resolved in TypeScript instead.
- *
- * The styling utilities turn them into minimum container inline sizes, and `useIsMobileDevice`
- * treats a device screen below `small` as mobile.
+ * Responsive breakpoint inline sizes in CSS pixels.
+ * Kept in TypeScript because container query conditions cannot use custom properties.
  */
-
-/** The retained breakpoint widths, from the narrowest to the widest. */
 export const breakpoints = {
-	small: 640,
-	medium: 768,
-	large: 1024,
-	xlarge: 1280,
-	xxlarge: 1536,
+	bp640: 640,
+	bp768: 768,
+	bp1024: 1024,
+	bp1280: 1280,
+	bp1536: 1536,
 } as const;

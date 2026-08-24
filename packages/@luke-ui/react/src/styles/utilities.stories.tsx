@@ -59,7 +59,7 @@ export const Layout = meta.story({
 });
 
 /**
- * Responsive values use object notation keyed by breakpoint names. Values
+ * Responsive values use object notation keyed by breakpoint. Values
  * cascade from smaller to larger breakpoints, so only changes need to be
  * specified.
  */
@@ -67,9 +67,9 @@ export const Responsive = meta.story({
 	render: () => {
 		const responsive = createSprinkles({
 			display: 'flex',
-			flexDirection: { initial: 'column', medium: 'row' },
-			gap: { initial: '300', medium: '600' },
-			padding: { initial: '300', large: '800' },
+			flexDirection: { initial: 'column', bp768: 'row' },
+			gap: { initial: '300', bp768: '600' },
+			padding: { initial: '300', bp1024: '800' },
 		});
 		return (
 			<div {...mergeProps({ style: panelStyle }, responsive)}>

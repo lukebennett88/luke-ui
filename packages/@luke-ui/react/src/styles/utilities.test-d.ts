@@ -70,8 +70,8 @@ test('border props stay constrained to the design system vocabulary', () => {
 });
 
 test('responsive objects are keyed by the theme breakpoints', () => {
-	assertType<UtilityProps['padding']>({ initial: '100', medium: '400' });
-	assertType<UtilityProps['display']>({ initial: 'block', xxlarge: 'flex' });
+	assertType<UtilityProps['padding']>({ initial: '100', bp768: '400' });
+	assertType<UtilityProps['display']>({ initial: 'block', bp1536: 'flex' });
 
 	// @ts-expect-error — not a breakpoint
 	assertType<UtilityProps['padding']>({ initial: '100', tablet: '400' });

@@ -20,22 +20,22 @@ test('applies every retained breakpoint responsively', async () => {
 		createSprinkles({
 			padding: {
 				initial: '100',
-				large: '400',
-				medium: '300',
-				small: '200',
-				xlarge: '600',
-				xxlarge: '800',
+				bp640: '200',
+				bp768: '300',
+				bp1024: '400',
+				bp1280: '600',
+				bp1536: '800',
 			},
 		}),
 	);
 
 	const viewports = [
 		{ width: 320, property: '--luke-space-100' },
-		{ width: breakpoints.small, property: '--luke-space-200' },
-		{ width: breakpoints.medium, property: '--luke-space-300' },
-		{ width: breakpoints.large, property: '--luke-space-400' },
-		{ width: breakpoints.xlarge, property: '--luke-space-600' },
-		{ width: breakpoints.xxlarge, property: '--luke-space-800' },
+		{ width: breakpoints.bp640, property: '--luke-space-200' },
+		{ width: breakpoints.bp768, property: '--luke-space-300' },
+		{ width: breakpoints.bp1024, property: '--luke-space-400' },
+		{ width: breakpoints.bp1280, property: '--luke-space-600' },
+		{ width: breakpoints.bp1536, property: '--luke-space-800' },
 	] as const;
 
 	for (const viewport of viewports) {
@@ -52,9 +52,9 @@ test('resolves against a nearer explicit container instead of the root', async (
 	const wrapper = document.body.appendChild(document.createElement('div'));
 	mounted.push(wrapper);
 	wrapper.style.containerType = 'inline-size';
-	wrapper.style.inlineSize = `${breakpoints.small - 1}px`;
+	wrapper.style.inlineSize = `${breakpoints.bp640 - 1}px`;
 
-	const generated = createSprinkles({ padding: { initial: '100', small: '200' } });
+	const generated = createSprinkles({ padding: { initial: '100', bp640: '200' } });
 	const element = mount(generated, wrapper);
 
 	const computedStyle = getComputedStyle(element);
@@ -65,11 +65,11 @@ test('resolves against the root content box, not the viewport width', async () =
 	// A scrollbar takes its width out of the root's content box, so the root container's inline
 	// size measures narrower than the viewport. Root padding reproduces that narrowing without
 	// depending on the headless browser rendering a scrollbar.
-	await page.viewport(breakpoints.small, 800);
+	await page.viewport(breakpoints.bp640, 800);
 	const rootStyle = document.head.appendChild(document.createElement('style'));
 	rootStyle.textContent = ':root { padding-inline-end: 17px; }';
 
-	const generated = createSprinkles({ padding: { initial: '100', small: '200' } });
+	const generated = createSprinkles({ padding: { initial: '100', bp640: '200' } });
 	const element = mount(generated);
 
 	const computedStyle = getComputedStyle(element);
