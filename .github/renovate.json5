@@ -112,11 +112,22 @@
 			groupName: 'github actions',
 			automerge: false,
 		},
+		// The Node major is declared twice: `mise.toml` selects the version this repo runs on, and the
+		// root `engines.node` warns anyone installing with a package manager instead of mise. Both name a
+		// major only, so both need `replace` to stay that way. They take a rule each because the managers
+		// differ — mise reads one, npm the other — and share a `groupName` so a new LTS line moves them in
+		// a single PR. Covering only mise is what let the top-level `bump` rewrite `24.x` to an exact
+		// `24.19.0`, and it landed in the non-major group rather than a Node one.
 		{
-			// mise pins the Node major only, and Renovate's node versioning treats odd majors as unstable,
-			// so this stays quiet until the next LTS line opens. The top-level `bump` would instead
-			// rewrite `24` to an exact `24.18.1` and then raise a PR for every Node patch.
 			matchManagers: ['mise'],
+			groupName: 'node',
+			rangeStrategy: 'replace',
+			automerge: false,
+		},
+		{
+			matchManagers: ['npm'],
+			matchDepTypes: ['engines'],
+			matchDepNames: ['node'],
 			groupName: 'node',
 			rangeStrategy: 'replace',
 			automerge: false,
