@@ -5,16 +5,16 @@ import type { BoxProps } from '../../dist/box/index.js';
 
 type UtilityProps = NonNullable<BoxProps>;
 
-test('space steps assign as strings, not numbers', () => {
+test('spacing utilities accept spacing keys and zero', () => {
 	expectTypeOf<'sp16'>().toExtend<UtilityProps['gap']>();
 	expectTypeOf<'0'>().toExtend<UtilityProps['padding']>();
 	expectTypeOf<'sp64'>().toExtend<UtilityProps['marginBlock']>();
 	expectTypeOf<UtilityProps['gap']>().not.toBeAny();
 
 	assertType<UtilityProps['gap']>('sp16');
-	// @ts-expect-error — a raw CSS length is not a space step
+	// @ts-expect-error — a raw CSS length is not a spacing key
 	assertType<UtilityProps['gap']>('16px');
-	// @ts-expect-error — the step keys are strings, so the number must not assign
+	// @ts-expect-error — spacing keys are strings, so a number must not assign
 	assertType<UtilityProps['gap']>(16);
 });
 

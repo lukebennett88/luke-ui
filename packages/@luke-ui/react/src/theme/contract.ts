@@ -140,7 +140,7 @@ const spaceContract = Object.fromEntries(spaceScale.map(([step]) => [step, null]
 };
 
 /**
- * The semantic token tree shared by the public `vars` contract and `buildTheme`, so typed paths and
+ * The theme token tree shared by the public `vars` contract and `buildTheme`, so typed paths and
  * emitted CSS variable names can never diverge. Leaves are `null`; every path maps to one stable
  * `--luke-*` custom property.
  */
@@ -227,7 +227,7 @@ export const themeContractTree = {
 		overlay: null,
 		full: null,
 	},
-	/** The semantic spacing scale used by components and layout utilities. */
+	/** The fixed spacing scale used by components and layout utilities. */
 	space: spaceContract,
 	/** Structural block sizes for small and medium controls, plus the shared minimum tap target. */
 	controlSize: {
@@ -341,7 +341,7 @@ export function partitionContractPairs(pairs: ReadonlyArray<readonly [string, st
 }
 
 /**
- * Flattens the semantic token tree into `[path, varName]` pairs, in tree order, for example
+ * Flattens the theme token tree into `[path, varName]` pairs, in tree order, for example
  * `['color.background.danger.solid.hover', '--luke-color-background-danger-solid-hover']`.
  */
 export function flattenThemeContract(): Array<[path: ContractPath, varName: string]> {

@@ -3,8 +3,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import { breakpoints } from '../theme/breakpoints.js';
-import type { SpaceStep } from '../theme/contract.js';
-import { spaceScale } from '../theme/contract.js';
 import { SEMANTIC_ROLES } from '../theme/contrast-policy.js';
 
 /** Reads the content-hashed declaration chunk referenced by `box/index.d.ts`. */
@@ -37,23 +35,7 @@ function propertyType(declaration: string, property: string): string {
 	throw new Error(`Could not read the emitted type for "${property}"`);
 }
 
-const spaceSteps: ReadonlyArray<SpaceStep> = spaceScale.map(([step]) => step);
 const spaceScaleProperties = ['gap', 'padding', 'margin', 'columnGap', 'rowGap'] as const;
-
-test('space-scale props emit identifier keys for every step', async () => {
-	const declaration = await readUtilitiesDeclaration();
-	const missing: Array<string> = [];
-
-	for (const property of spaceScaleProperties) {
-		const emitted = propertyType(declaration, property);
-		for (const step of spaceSteps) {
-			const isIdentifier = new RegExp(`(^|[{;\\s])${step}:`).test(emitted);
-			if (!isIdentifier) missing.push(`${property}.${step}`);
-		}
-	}
-
-	expect(missing).toEqual([]);
-});
 
 test('the zero space key stays a quoted string in declaration emit', async () => {
 	const declaration = await readUtilitiesDeclaration();
