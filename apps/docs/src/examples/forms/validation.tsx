@@ -36,7 +36,7 @@ export default () => {
 
 	return (
 		<form noValidate onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 				<TextField
 					errorMessage={errors.email}
 					label="Email address"

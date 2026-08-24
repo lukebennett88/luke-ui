@@ -29,7 +29,7 @@ function invalidIconMask(size: string) {
 export function invalidIndicatorIcon(size: string) {
 	return {
 		...invalidIconMask(size),
-		marginInlineEnd: vars.space[100],
+		marginInlineEnd: vars.space.sp4,
 	} satisfies StyleRule;
 }
 
@@ -43,7 +43,7 @@ export const invalidIndicatorIconForcedColors = {
 } satisfies StyleRule;
 
 /** Gap between `invalidMessageIcon` and the message text that follows it. */
-const invalidMessageIconGap = vars.space[200];
+const invalidMessageIconGap = vars.space.sp8;
 
 /**
  * Leading icon for the shared `Field` error message (`primitives/field/recipe.css.ts`'s `message`

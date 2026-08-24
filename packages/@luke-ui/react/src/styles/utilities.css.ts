@@ -20,19 +20,19 @@ const responsiveConditions = {
 	bp1536: fromBreakpoint(breakpoints.bp1536),
 } as const;
 
-/** Space steps plus `0`, written explicitly so declaration emit preserves string keys. */
+/** Space steps plus `0`. `'0'` is quoted so declaration emit keeps it a string key. */
 const spaceScale = {
 	'0': '0',
-	'100': vars.space[100],
-	'200': vars.space[200],
-	'300': vars.space[300],
-	'400': vars.space[400],
-	'600': vars.space[600],
-	'800': vars.space[800],
-	'1000': vars.space[1000],
-	'1200': vars.space[1200],
-	'1600': vars.space[1600],
-} as const satisfies Record<`${SpaceStep}` | '0', string>;
+	sp4: vars.space.sp4,
+	sp8: vars.space.sp8,
+	sp12: vars.space.sp12,
+	sp16: vars.space.sp16,
+	sp24: vars.space.sp24,
+	sp32: vars.space.sp32,
+	sp40: vars.space.sp40,
+	sp48: vars.space.sp48,
+	sp64: vars.space.sp64,
+} as const satisfies Record<SpaceStep | '0', string>;
 
 const marginScale = { ...spaceScale, auto: 'auto' } as const;
 

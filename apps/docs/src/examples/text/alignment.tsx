@@ -8,7 +8,7 @@ const rowStyle = {
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="200" inlineSize="100%">
+		<Box display="flex" flexDirection="column" gap="sp8" inlineSize="100%">
 			<Text elementType="p" style={rowStyle} textAlign="start">
 				Start aligned
 			</Text>

@@ -42,7 +42,7 @@ const fieldConfig = {
 		root: {
 			display: 'flex',
 			flexDirection: 'column',
-			gap: vars.space[100],
+			gap: vars.space.sp4,
 			minInlineSize: 0,
 		},
 		label: {
@@ -74,7 +74,7 @@ const fieldConfig = {
 						[`${dataRequiredSelector} &::after`]: {
 							color: vars.color.foreground.danger.rest,
 							content: '"*"',
-							marginInlineStart: vars.space[100],
+							marginInlineStart: vars.space.sp4,
 						},
 					},
 				},
@@ -86,7 +86,7 @@ const fieldConfig = {
 							color: vars.color.text.secondary,
 							content: '"(required)"',
 							fontWeight: vars.font.weight.body,
-							marginInlineStart: vars.space[100],
+							marginInlineStart: vars.space.sp4,
 						},
 					},
 				},

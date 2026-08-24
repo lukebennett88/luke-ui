@@ -6,15 +6,15 @@ export default () => {
 	return (
 		<Box
 			display="grid"
-			gap="300"
-			padding="400"
+			gap="sp12"
+			padding="sp16"
 			style={{
 				gridTemplateColumns: 'repeat(auto-fit, minmax(6rem, 1fr))',
 				inlineSize: '100%',
 			}}
 		>
 			{Object.entries(vars.depth).map(([name, depth]) => (
-				<Box display="grid" gap="200" key={name}>
+				<Box display="grid" gap="sp8" key={name}>
 					<Box
 						style={{
 							backgroundColor: vars.color.surface.floating,

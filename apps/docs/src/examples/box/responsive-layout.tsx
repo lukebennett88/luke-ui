@@ -4,7 +4,7 @@ import { vars } from '@luke-ui/react/theme';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection={{ initial: 'column', bp768: 'row' }} gap="300">
+		<Box display="flex" flexDirection={{ initial: 'column', bp768: 'row' }} gap="sp12">
 			<Item />
 			<Item />
 		</Box>
@@ -17,7 +17,7 @@ function Item() {
 			alignItems="center"
 			display="flex"
 			justifyContent="center"
-			padding="400"
+			padding="sp16"
 			style={{
 				backgroundColor: vars.color.background.neutral.solid.rest,
 				flex: 1,

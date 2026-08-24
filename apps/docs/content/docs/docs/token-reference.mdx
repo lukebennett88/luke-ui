@@ -23,8 +23,8 @@ background and foreground.
 
 ## Choosing a scale
 
-Choose a token by the job it performs. Spacing uses numbered steps. Radius and depth use semantic
-roles. Use the public variable instead of copying its resolved CSS value.
+Choose a token by the job it performs. Spacing uses `sp`-prefixed pixel sizes. Radius and depth use
+semantic roles. Use the public variable instead of copying its resolved CSS value.
 
 ### Spacing
 
@@ -52,7 +52,7 @@ space between them, usually the wrapper's padding. This keeps their corners conc
 ```tsx
 import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
 
-const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space[200]);
+const wrapperRadius = deriveConcentricRadius(vars.radius.control, vars.space.sp8);
 ```
 
 ### Depth

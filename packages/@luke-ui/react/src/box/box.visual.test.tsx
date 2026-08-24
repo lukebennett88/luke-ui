@@ -10,8 +10,8 @@ for (const appearance of visualAppearances) {
 			<Box
 				display="flex"
 				flexDirection="column"
-				gap="200"
-				padding="400"
+				gap="sp8"
+				padding="sp16"
 				style={{
 					backgroundColor: vars.color.surface.recessed,
 					borderRadius: vars.radius.surface,
@@ -20,7 +20,7 @@ for (const appearance of visualAppearances) {
 				}}
 			>
 				<Box>Account</Box>
-				<Box display="flex" gap="200">
+				<Box display="flex" gap="sp8">
 					<Box>Profile</Box>
 					<Box>Security</Box>
 				</Box>

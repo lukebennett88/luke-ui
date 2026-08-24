@@ -5,7 +5,7 @@ import { vars } from '../theme/contract.css.js';
 
 const base = styleInLayer('recipes', {
 	borderInlineStart: `3px solid ${vars.color.border.decorative}`,
-	paddingInlineStart: vars.space[400],
+	paddingInlineStart: vars.space.sp16,
 });
 
 /** Vanilla-extract recipe for the `Blockquote` component's left-border accent. */

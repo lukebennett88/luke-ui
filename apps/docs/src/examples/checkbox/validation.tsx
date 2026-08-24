@@ -10,7 +10,7 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 				<Checkbox description="We record the date you accepted." isRequired>
 					I accept the terms of service
 				</Checkbox>

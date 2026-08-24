@@ -7,10 +7,10 @@ export default () => {
 	return (
 		<Box
 			alignItems="center"
-			columnGap="400"
+			columnGap="sp16"
 			display="grid"
 			overflowX="auto"
-			rowGap="300"
+			rowGap="sp12"
 			style={{ gridTemplateColumns: 'auto 1fr', inlineSize: '100%' }}
 		>
 			{spaceScale.map(([step, value]) => (

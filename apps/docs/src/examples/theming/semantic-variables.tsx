@@ -6,7 +6,7 @@ export default () => {
 	return (
 		<Box
 			display="grid"
-			gap="300"
+			gap="sp12"
 			style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(14rem, 1fr))' }}
 		>
 			<SemanticSurface mode="light" />
@@ -19,7 +19,7 @@ function SemanticSurface({ mode }: { mode: 'light' | 'dark' }) {
 	return (
 		<Box
 			data-color-mode={mode}
-			padding="400"
+			padding="sp16"
 			style={{
 				backgroundColor: vars.color.surface.floating,
 				color: vars.color.text.primary,

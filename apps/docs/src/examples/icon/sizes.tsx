@@ -5,7 +5,7 @@ import type { PropsWithChildren } from 'react';
 
 export default () => {
 	return (
-		<Box alignItems="flex-end" display="flex" gap="400">
+		<Box alignItems="flex-end" display="flex" gap="sp16">
 			<FlexCol>
 				<Icon name="search" size="xsmall" />
 				<Text color="secondary">xsmall</Text>
@@ -28,7 +28,7 @@ export default () => {
 
 function FlexCol({ children }: PropsWithChildren) {
 	return (
-		<Box alignItems="center" display="flex" flexDirection="column" gap="100">
+		<Box alignItems="center" display="flex" flexDirection="column" gap="sp4">
 			{children}
 		</Box>
 	);

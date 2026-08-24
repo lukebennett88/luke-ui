@@ -37,7 +37,7 @@ export default definePreview({
 							color: vars.color.text.primary,
 							inlineSize: '100%',
 							minBlockSize: isStoryView ? '100vh' : undefined,
-							padding: vars.space[800],
+							padding: vars.space.sp32,
 						}}
 					>
 						<Story />

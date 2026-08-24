@@ -15,20 +15,20 @@ export default () => {
 	return (
 		<Box
 			display="grid"
-			gap="400"
+			gap="sp16"
 			style={{
 				gridTemplateColumns: 'repeat(auto-fit, minmax(5rem, 1fr))',
 				inlineSize: '100%',
 			}}
 		>
 			{radiusRoles.map((role) => (
-				<Box display="grid" gap="200" key={role.label}>
+				<Box display="grid" gap="sp8" key={role.label}>
 					<DecorativeBox
 						alignItems="center"
 						display="flex"
 						flexGrow="1"
 						justifyContent="center"
-						padding="200"
+						padding="sp8"
 						style={{
 							blockSize: '5rem',
 							borderRadius: role.value,

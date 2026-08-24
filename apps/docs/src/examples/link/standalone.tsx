@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="400">
+		<Box display="flex" flexDirection="column" gap="sp16">
 			<Text elementType="p">
 				Read the <Link href="#release-notes">release notes</Link> before updating your workspace.
 			</Text>

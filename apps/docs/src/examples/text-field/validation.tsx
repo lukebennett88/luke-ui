@@ -10,7 +10,7 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 				<TextField isRequired label="Email address" name="emailAddress" type="email" />
 				<Box>
 					<Button type="submit">Create account</Button>

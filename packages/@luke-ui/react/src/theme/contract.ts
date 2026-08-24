@@ -118,19 +118,19 @@ const fontStyleContract = Object.fromEntries(
 ) as { readonly [Style in TypeStyle]: typeof typeStyle };
 
 /**
- * The fixed spacing steps shared by the built-in themes. Each value is a selected step from the
- * 4px linear scale.
+ * The fixed spacing steps shared by the built-in themes. Keys are `sp`-prefixed pixel sizes from
+ * the 4px linear scale.
  */
 export const spaceScale = [
-	['100', '4px'],
-	['200', '8px'],
-	['300', '12px'],
-	['400', '16px'],
-	['600', '24px'],
-	['800', '32px'],
-	['1000', '40px'],
-	['1200', '48px'],
-	['1600', '64px'],
+	['sp4', '4px'],
+	['sp8', '8px'],
+	['sp12', '12px'],
+	['sp16', '16px'],
+	['sp24', '24px'],
+	['sp32', '32px'],
+	['sp40', '40px'],
+	['sp48', '48px'],
+	['sp64', '64px'],
 ] as const;
 
 /** A spacing step key accepted by the layout APIs. */

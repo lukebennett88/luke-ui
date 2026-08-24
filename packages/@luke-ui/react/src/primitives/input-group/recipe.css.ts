@@ -178,7 +178,7 @@ const inputGroupConfig = {
 		// No `marginInlineStart` here: the `control` slot's own `paddingInlineEnd`
 		// already supplies the gap between the value text and the icon, so a margin
 		// stacked on top of it would make the leading gap bigger than the trailing one.
-		// `marginInlineEnd` is a constant `space[200]`, not a per-size value: it matches
+		// `marginInlineEnd` is a constant `space.sp8`, not a per-size value: it matches
 		// `ComboboxField`'s chevron, the system's existing trailing-glyph inset, which is
 		// itself constant across sizes rather than scaling with the control's padding.
 		// Matching it here means a `TextField` and a `ComboboxField` read the same trailing
@@ -190,7 +190,7 @@ const inputGroupConfig = {
 				},
 			},
 			color: vars.color.foreground.danger.rest,
-			marginInlineEnd: vars.space[200],
+			marginInlineEnd: vars.space.sp8,
 		},
 	},
 	defaultVariants: {
@@ -205,18 +205,18 @@ const inputGroupConfig = {
 				},
 				control: {
 					blockSize: vars.controlSize.medium,
-					paddingInlineEnd: vars.space[300],
-					paddingInlineStart: vars.space[300],
+					paddingInlineEnd: vars.space.sp12,
+					paddingInlineStart: vars.space.sp12,
 				},
 				prefix: {
 					lineHeight: FONT_METRIC_SCALE[16].lineHeight,
-					paddingInlineEnd: vars.space[300],
-					paddingInlineStart: vars.space[300],
+					paddingInlineEnd: vars.space.sp12,
+					paddingInlineStart: vars.space.sp12,
 				},
 				suffix: {
 					lineHeight: FONT_METRIC_SCALE[16].lineHeight,
-					paddingInlineEnd: vars.space[300],
-					paddingInlineStart: vars.space[300],
+					paddingInlineEnd: vars.space.sp12,
+					paddingInlineStart: vars.space.sp12,
 				},
 			},
 			small: {
@@ -228,18 +228,18 @@ const inputGroupConfig = {
 				},
 				control: {
 					blockSize: vars.controlSize.small,
-					paddingInlineEnd: vars.space[200],
-					paddingInlineStart: vars.space[200],
+					paddingInlineEnd: vars.space.sp8,
+					paddingInlineStart: vars.space.sp8,
 				},
 				prefix: {
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-					paddingInlineEnd: vars.space[200],
-					paddingInlineStart: vars.space[200],
+					paddingInlineEnd: vars.space.sp8,
+					paddingInlineStart: vars.space.sp8,
 				},
 				suffix: {
 					lineHeight: FONT_METRIC_SCALE[14].lineHeight,
-					paddingInlineEnd: vars.space[200],
-					paddingInlineStart: vars.space[200],
+					paddingInlineEnd: vars.space.sp8,
+					paddingInlineStart: vars.space.sp8,
 				},
 			},
 		},

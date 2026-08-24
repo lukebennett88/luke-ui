@@ -13,11 +13,11 @@ export default () => {
 	const [isTrimmed, setIsTrimmed] = useState(true);
 
 	return (
-		<Box display="flex" flexDirection="column" gap="400">
+		<Box display="flex" flexDirection="column" gap="sp16">
 			<Checkbox isSelected={isTrimmed} onChange={setIsTrimmed}>
 				Trim text
 			</Checkbox>
-			<Box paddingInline="300" style={lineBoxStyle}>
+			<Box paddingInline="sp12" style={lineBoxStyle}>
 				<Text elementType="div" shouldDisableTrim={!isTrimmed} typography="display">
 					Aa
 				</Text>

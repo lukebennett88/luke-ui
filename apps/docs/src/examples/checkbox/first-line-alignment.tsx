@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box display="grid" gap="400" maxInlineSize="18rem">
+		<Box display="grid" gap="sp16" maxInlineSize="18rem">
 			<Text elementType="div" typography="caption">
 				<Checkbox>A longer label keeps its control aligned when it wraps.</Checkbox>
 			</Text>

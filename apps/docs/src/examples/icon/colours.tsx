@@ -5,7 +5,7 @@ import type { PropsWithChildren } from 'react';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" gap="400">
+		<Box alignItems="center" display="flex" gap="sp16">
 			<FlexCol>
 				<Text color="accent">
 					<Icon name="checkCircle" title="Accent" />
@@ -36,7 +36,7 @@ export default () => {
 
 function FlexCol({ children }: PropsWithChildren) {
 	return (
-		<Box alignItems="center" display="flex" flexDirection="column" gap="100">
+		<Box alignItems="center" display="flex" flexDirection="column" gap="sp4">
 			{children}
 		</Box>
 	);

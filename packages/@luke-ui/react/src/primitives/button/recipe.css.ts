@@ -108,16 +108,16 @@ export const buttonRecipe = recipe({
 			medium: {
 				blockSize: vars.controlSize.medium,
 				fontSize: FONT_METRIC_SCALE[14].fontSize,
-				gap: vars.space[200],
-				paddingInline: vars.space[400],
+				gap: vars.space.sp8,
+				paddingInline: vars.space.sp16,
 			},
 			small: {
 				blockSize: vars.controlSize.small,
 				fontSize: FONT_METRIC_SCALE[12].fontSize,
-				gap: vars.space[100],
+				gap: vars.space.sp4,
 				letterSpacing: FONT_METRIC_SCALE[12].letterSpacing,
 				lineHeight: FONT_METRIC_SCALE[12].lineHeight,
-				paddingInline: vars.space[300],
+				paddingInline: vars.space.sp12,
 			},
 		},
 		tone: {

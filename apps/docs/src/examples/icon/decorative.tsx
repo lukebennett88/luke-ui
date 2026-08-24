@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" gap="100">
+		<Box alignItems="center" display="flex" gap="sp4">
 			<Text>Continue</Text>
 			<Icon aria-hidden name="externalLink" size="xsmall" />
 		</Box>

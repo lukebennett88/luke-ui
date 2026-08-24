@@ -20,7 +20,7 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 				<TextField
 					defaultValue="admin"
 					label="Username"

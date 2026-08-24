@@ -6,17 +6,16 @@ import type { BoxProps } from '../../dist/box/index.js';
 type UtilityProps = NonNullable<BoxProps>;
 
 test('space steps assign as strings, not numbers', () => {
-	// Numeric-looking keys must remain strings after declaration emit.
-	expectTypeOf<'400'>().toExtend<UtilityProps['gap']>();
+	expectTypeOf<'sp16'>().toExtend<UtilityProps['gap']>();
 	expectTypeOf<'0'>().toExtend<UtilityProps['padding']>();
-	expectTypeOf<'1600'>().toExtend<UtilityProps['marginBlock']>();
+	expectTypeOf<'sp64'>().toExtend<UtilityProps['marginBlock']>();
 	expectTypeOf<UtilityProps['gap']>().not.toBeAny();
 
-	assertType<UtilityProps['gap']>('400');
+	assertType<UtilityProps['gap']>('sp16');
 	// @ts-expect-error — a raw CSS length is not a space step
 	assertType<UtilityProps['gap']>('16px');
 	// @ts-expect-error — the step keys are strings, so the number must not assign
-	assertType<UtilityProps['gap']>(400);
+	assertType<UtilityProps['gap']>(16);
 });
 
 test('margin keeps auto alongside the space steps', () => {
@@ -70,11 +69,11 @@ test('border props stay constrained to the design system vocabulary', () => {
 });
 
 test('responsive objects are keyed by the theme breakpoints', () => {
-	assertType<UtilityProps['padding']>({ initial: '100', bp768: '400' });
+	assertType<UtilityProps['padding']>({ initial: 'sp4', bp768: 'sp16' });
 	assertType<UtilityProps['display']>({ initial: 'block', bp1536: 'flex' });
 
 	// @ts-expect-error — not a breakpoint
-	assertType<UtilityProps['padding']>({ initial: '100', tablet: '400' });
+	assertType<UtilityProps['padding']>({ initial: 'sp4', tablet: 'sp16' });
 	// @ts-expect-error — the value must still be a space step at every breakpoint
 	assertType<UtilityProps['padding']>({ initial: '16px' });
 });

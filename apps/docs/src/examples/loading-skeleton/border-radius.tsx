@@ -8,7 +8,7 @@ export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 			<LoadingSkeleton isLoading={isLoading} radius="control">
 				<TextField label="Email address" name="email" placeholder="you@example.com" />
 			</LoadingSkeleton>

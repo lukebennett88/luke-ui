@@ -40,22 +40,33 @@ function propertyType(declaration: string, property: string): string {
 const spaceSteps: ReadonlyArray<SpaceStep> = spaceScale.map(([step]) => step);
 const spaceScaleProperties = ['gap', 'padding', 'margin', 'columnGap', 'rowGap'] as const;
 
-test('space-scale props keep quoted string keys for every step', async () => {
+test('space-scale props emit identifier keys for every step', async () => {
 	const declaration = await readUtilitiesDeclaration();
 
 	// Collect all regressions so one failure reports every property and step.
-	const unquoted: Array<string> = [];
+	const missing: Array<string> = [];
 	for (const property of spaceScaleProperties) {
 		const emitted = propertyType(declaration, property);
 		for (const step of spaceSteps) {
-			// An unquoted `400:` makes `keyof` numeric.
-			const isQuoted = emitted.includes(`'${step}':`);
-			const isNumeric = new RegExp(`(^|[{;\\s])${step}:`).test(emitted);
-			if (!isQuoted || isNumeric) unquoted.push(`${property}.${step}`);
+			// Identifier keys (`sp4:`) keep `keyof` a string.
+			const isIdentifier = new RegExp(`(^|[{;\\s])${step}:`).test(emitted);
+			if (!isIdentifier) missing.push(`${property}.${step}`);
 		}
 	}
 
-	expect(unquoted).toEqual([]);
+	expect(missing).toEqual([]);
+});
+
+test('the zero space key stays a quoted string in declaration emit', async () => {
+	const declaration = await readUtilitiesDeclaration();
+
+	for (const property of ['gap', 'padding'] as const) {
+		const emitted = propertyType(declaration, property);
+		expect(emitted.includes("'0':"), `${property} lost a quoted zero key`).toBe(true);
+		expect(new RegExp(`(^|[{;\\s])0:`).test(emitted), `${property} emitted a numeric zero key`).toBe(
+			false,
+		);
+	}
 });
 
 test('backgroundColor is keyed by tokens, not by an index signature', async () => {

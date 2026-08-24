@@ -4,7 +4,7 @@ import { Icon } from '@luke-ui/react/icon';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" gap="400">
+		<Box alignItems="center" display="flex" gap="sp16">
 			<Button size="small" startIcon={<Icon name="edit" />}>
 				Edit profile
 			</Button>

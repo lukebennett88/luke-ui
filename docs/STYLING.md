@@ -340,8 +340,8 @@ import { createSprinkles } from '@luke-ui/react/styles';
 
 const layout = createSprinkles({
 	display: 'flex',
-	gap: '400',
-	padding: '600',
+	gap: 'sp16',
+	padding: 'sp24',
 });
 
 return (
@@ -351,8 +351,8 @@ return (
 );
 ```
 
-Spacing and gap properties use `0` or the semantic space steps `100`, `200`, `300`, `400`, `600`,
-`800`, `1000`, `1200`, and `1600`. Margin also accepts `auto`. Enum-like properties use CSS-native
+Spacing and gap properties use `0` or the space steps `sp4`, `sp8`, `sp12`, `sp16`, `sp24`, `sp32`,
+`sp40`, `sp48`, and `sp64`. Margin also accepts `auto`. Enum-like properties use CSS-native
 values, for example `display: 'flex'`. Sizing, inset, flex-basis, order, and grid-placement values
 accept their CSS property values.
 
@@ -365,7 +365,7 @@ only overrides need to be specified.
 const responsive = createSprinkles({
 	display: 'flex',
 	flexDirection: { initial: 'column', bp768: 'row' },
-	gap: { initial: '300', bp768: '600' },
+	gap: { initial: 'sp12', bp768: 'sp24' },
 });
 ```
 
@@ -381,7 +381,7 @@ Aria Components' `render` prop. Use `mergeProps` from `@luke-ui/react/utils` so 
 ```tsx
 import { mergeProps } from '@luke-ui/react/utils';
 
-const buttonBox = createSprinkles({ padding: '400' });
+const buttonBox = createSprinkles({ padding: 'sp16' });
 
 <Button
 	render={(props) => (

@@ -104,7 +104,7 @@ const comboboxActionSizeClassName = styleInLayer('recipes', {
 
 // Medium stays above the tap-target floor so the trailing chevron keeps the same 8px
 // inset as `InputGroup`'s invalid indicator: (28 − 20px icon) ÷ 2 plus the 4px
-// `space[100]` trigger gap. Shrinking to the 24px floor would pull it to 6px and break
+// `space.sp4` trigger gap. Shrinking to the 24px floor would pull it to 6px and break
 // that cross-control alignment. Tokenised as `controlSize.comboboxAction` so the sizing
 // flows from the theme contract rather than a recipe-local literal.
 const comboboxActionSizeClassNameMedium = styleInLayer('recipes', {
@@ -231,7 +231,7 @@ const comboboxConfig = {
 		},
 		trigger: [
 			comboboxActionClassName,
-			{ marginInlineEnd: vars.space[100], marginInlineStart: vars.space[100] },
+			{ marginInlineEnd: vars.space.sp4, marginInlineStart: vars.space.sp4 },
 		],
 		clearButton: comboboxActionClassName,
 		itemCheck: {
@@ -290,7 +290,7 @@ const comboboxConfig = {
 			minBlockSize: 0,
 			outline: 'none',
 			overflow: 'auto',
-			padding: vars.space[100],
+			padding: vars.space.sp4,
 		},
 		loadMoreItem: {
 			alignItems: 'center',
@@ -303,8 +303,8 @@ const comboboxConfig = {
 		section: {
 			display: 'flex',
 			flexDirection: 'column',
-			gap: vars.space[100],
-			paddingBlock: vars.space[200],
+			gap: vars.space.sp4,
+			paddingBlock: vars.space.sp8,
 
 			selectors: {
 				'& + &': { borderBlockStart: `1px solid ${vars.color.border.decorative}` },
@@ -313,9 +313,9 @@ const comboboxConfig = {
 		sectionHeading: {
 			color: vars.color.text.secondary,
 			...vars.font.label,
-			paddingBlockEnd: vars.space[100],
+			paddingBlockEnd: vars.space.sp4,
 			paddingBlockStart: 0,
-			paddingInline: vars.space[300],
+			paddingInline: vars.space.sp12,
 		},
 		emptyState: {
 			alignItems: 'center',
@@ -323,8 +323,8 @@ const comboboxConfig = {
 			display: 'flex',
 			...vars.font.support,
 			justifyContent: 'center',
-			paddingBlock: vars.space[600],
-			paddingInline: vars.space[300],
+			paddingBlock: vars.space.sp24,
+			paddingInline: vars.space.sp12,
 			textAlign: 'center',
 		},
 		item: {
@@ -353,7 +353,7 @@ const comboboxConfig = {
 			color: vars.color.text.primary,
 			cursor: 'default',
 			display: 'flex',
-			gap: vars.space[200],
+			gap: vars.space.sp8,
 			inlineSize: '100%',
 			minBlockSize: vars.controlSize.minTarget,
 			minInlineSize: 0,
@@ -399,8 +399,8 @@ const comboboxConfig = {
 		mobileInputGroup: {
 			flexShrink: 0,
 			inlineSize: 'auto',
-			marginBlock: vars.space[300],
-			marginInline: vars.space[300],
+			marginBlock: vars.space.sp12,
+			marginInline: vars.space.sp12,
 		},
 		mobileListBox: {
 			maxBlockSize: 'none',
@@ -439,25 +439,25 @@ const comboboxConfig = {
 				},
 				textInput: {
 					blockSize: vars.controlSize.medium,
-					paddingInlineEnd: vars.space[300],
-					paddingInlineStart: vars.space[300],
+					paddingInlineEnd: vars.space.sp12,
+					paddingInlineStart: vars.space.sp12,
 				},
 				trigger: comboboxActionSizeClassNameMedium,
 				clearButton: comboboxActionSizeClassNameMedium,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.medium,
-					paddingBlock: vars.space[200],
-					paddingInline: vars.space[300],
+					paddingBlock: vars.space.sp8,
+					paddingInline: vars.space.sp12,
 				},
 				mobileTrigger: {
-					paddingInlineEnd: vars.space[300],
-					paddingInlineStart: vars.space[300],
+					paddingInlineEnd: vars.space.sp12,
+					paddingInlineStart: vars.space.sp12,
 				},
 				item: {
 					...vars.font.support,
 					minBlockSize: vars.controlSize.medium,
-					paddingBlock: vars.space[200],
-					paddingInline: vars.space[300],
+					paddingBlock: vars.space.sp8,
+					paddingInline: vars.space.sp12,
 				},
 			},
 			small: {
@@ -470,25 +470,25 @@ const comboboxConfig = {
 				},
 				textInput: {
 					blockSize: vars.controlSize.small,
-					paddingInlineEnd: vars.space[200],
-					paddingInlineStart: vars.space[200],
+					paddingInlineEnd: vars.space.sp8,
+					paddingInlineStart: vars.space.sp8,
 				},
 				trigger: comboboxActionSizeClassName,
 				clearButton: comboboxActionSizeClassName,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.small,
-					paddingBlock: vars.space[100],
-					paddingInline: vars.space[200],
+					paddingBlock: vars.space.sp4,
+					paddingInline: vars.space.sp8,
 				},
 				mobileTrigger: {
-					paddingInlineEnd: vars.space[200],
-					paddingInlineStart: vars.space[200],
+					paddingInlineEnd: vars.space.sp8,
+					paddingInlineStart: vars.space.sp8,
 				},
 				item: {
 					...vars.font.support,
 					minBlockSize: vars.controlSize.small,
-					paddingBlock: vars.space[100],
-					paddingInline: vars.space[300],
+					paddingBlock: vars.space.sp4,
+					paddingInline: vars.space.sp12,
 				},
 			},
 		},

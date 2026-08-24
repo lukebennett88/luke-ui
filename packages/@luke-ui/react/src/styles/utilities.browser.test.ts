@@ -19,23 +19,23 @@ test('applies every retained breakpoint responsively', async () => {
 	const element = mount(
 		createSprinkles({
 			padding: {
-				initial: '100',
-				bp640: '200',
-				bp768: '300',
-				bp1024: '400',
-				bp1280: '600',
-				bp1536: '800',
+				initial: 'sp4',
+				bp640: 'sp8',
+				bp768: 'sp12',
+				bp1024: 'sp16',
+				bp1280: 'sp24',
+				bp1536: 'sp32',
 			},
 		}),
 	);
 
 	const viewports = [
-		{ width: 320, property: '--luke-space-100' },
-		{ width: breakpoints.bp640, property: '--luke-space-200' },
-		{ width: breakpoints.bp768, property: '--luke-space-300' },
-		{ width: breakpoints.bp1024, property: '--luke-space-400' },
-		{ width: breakpoints.bp1280, property: '--luke-space-600' },
-		{ width: breakpoints.bp1536, property: '--luke-space-800' },
+		{ width: 320, property: '--luke-space-sp4' },
+		{ width: breakpoints.bp640, property: '--luke-space-sp8' },
+		{ width: breakpoints.bp768, property: '--luke-space-sp12' },
+		{ width: breakpoints.bp1024, property: '--luke-space-sp16' },
+		{ width: breakpoints.bp1280, property: '--luke-space-sp24' },
+		{ width: breakpoints.bp1536, property: '--luke-space-sp32' },
 	] as const;
 
 	for (const viewport of viewports) {
@@ -54,11 +54,11 @@ test('resolves against a nearer explicit container instead of the root', async (
 	wrapper.style.containerType = 'inline-size';
 	wrapper.style.inlineSize = `${breakpoints.bp640 - 1}px`;
 
-	const generated = createSprinkles({ padding: { initial: '100', bp640: '200' } });
+	const generated = createSprinkles({ padding: { initial: 'sp4', bp640: 'sp8' } });
 	const element = mount(generated, wrapper);
 
 	const computedStyle = getComputedStyle(element);
-	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-100').trim());
+	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-sp4').trim());
 });
 
 test('resolves against the root content box, not the viewport width', async () => {
@@ -69,11 +69,11 @@ test('resolves against the root content box, not the viewport width', async () =
 	const rootStyle = document.head.appendChild(document.createElement('style'));
 	rootStyle.textContent = ':root { padding-inline-end: 17px; }';
 
-	const generated = createSprinkles({ padding: { initial: '100', bp640: '200' } });
+	const generated = createSprinkles({ padding: { initial: 'sp4', bp640: 'sp8' } });
 	const element = mount(generated);
 
 	const computedStyle = getComputedStyle(element);
-	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-100').trim());
+	expect(computedStyle.padding).toBe(computedStyle.getPropertyValue('--luke-space-sp4').trim());
 	rootStyle.remove();
 });
 
@@ -81,7 +81,7 @@ test('returns class and style output that merges with consumer props', () => {
 	const generated = createSprinkles({
 		display: 'grid',
 		inlineSize: 'calc(100% - 2rem)',
-		padding: '400',
+		padding: 'sp16',
 	});
 	const props = mergeProps(generated, {
 		className: 'consumer-class',

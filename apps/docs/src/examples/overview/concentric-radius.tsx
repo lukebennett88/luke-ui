@@ -4,13 +4,13 @@ import { deriveConcentricRadius, vars } from '@luke-ui/react/theme';
 import { DecorativeBox } from './decorative-box.js';
 
 export default () => {
-	const controlGap = vars.space[200];
+	const controlGap = vars.space.sp8;
 
 	return (
-		<Box display="grid" gap="200">
+		<Box display="grid" gap="sp8">
 			<DecorativeBox
 				display="grid"
-				padding="200"
+				padding="sp8"
 				style={{
 					borderRadius: deriveConcentricRadius(vars.radius.control, controlGap),
 				}}

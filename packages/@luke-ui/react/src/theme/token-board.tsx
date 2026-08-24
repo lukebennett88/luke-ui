@@ -46,12 +46,12 @@ function humanizeSegment(segment: string): string {
 
 const boardStyle = {
 	display: 'grid',
-	gap: vars.space[800],
+	gap: vars.space.sp32,
 } as const satisfies CSSProperties;
 
 const groupSectionStyle = {
 	display: 'grid',
-	gap: vars.space[300],
+	gap: vars.space.sp12,
 } as const satisfies CSSProperties;
 
 const headingStyle = {
@@ -62,12 +62,12 @@ const headingStyle = {
 const swatchGridStyle = {
 	display: 'flex',
 	flexWrap: 'wrap',
-	gap: vars.space[300],
+	gap: vars.space.sp12,
 } as const satisfies CSSProperties;
 
 const swatchCardStyle = {
 	display: 'grid',
-	gap: vars.space[100],
+	gap: vars.space.sp4,
 	inlineSize: '9rem',
 	justifyItems: 'start',
 } as const satisfies CSSProperties;
@@ -313,7 +313,7 @@ function SpacePreview({ path, varName }: LeafPreviewProps) {
 				role="img"
 				style={{
 					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: vars.space[300],
+					blockSize: vars.space.sp12,
 					display: 'inline-block',
 					inlineSize: `var(${varName})`,
 				}}
@@ -358,7 +358,7 @@ function InteractionPreview({ path, varName }: LeafPreviewProps) {
 	} as const satisfies CSSProperties;
 
 	return (
-		<span style={{ ...previewFrameStyle, gap: vars.space[300] }}>
+		<span style={{ ...previewFrameStyle, gap: vars.space.sp12 }}>
 			<span aria-hidden={true} style={swatch} />
 			<span
 				aria-label={`${path} sample`}
@@ -378,7 +378,7 @@ function MotionPreview({ path, segments, varName }: LeafPreviewProps) {
 
 	return (
 		<span
-			style={{ ...previewFrameStyle, justifyContent: 'center', paddingInline: vars.space[100] }}
+			style={{ ...previewFrameStyle, justifyContent: 'center', paddingInline: vars.space.sp4 }}
 		>
 			<span
 				aria-label={`${path} sample`}
@@ -458,9 +458,9 @@ function TrimSample({
 				role="img"
 				style={{
 					backgroundColor: vars.color.background.accent.solid.rest,
-					blockSize: vars.space[300],
+					blockSize: vars.space.sp12,
 					display: 'inline-block',
-					inlineSize: vars.space[600],
+					inlineSize: vars.space.sp24,
 					[marginProperty]: `var(${varName})`,
 				}}
 			/>

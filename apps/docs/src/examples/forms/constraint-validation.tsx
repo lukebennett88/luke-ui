@@ -5,7 +5,7 @@ import { TextField } from '@luke-ui/react/text-field';
 export default () => {
 	return (
 		<form>
-			<Box display="flex" flexDirection="column" gap="400" maxInlineSize="20rem">
+			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 				<TextField isRequired label="Email address" name="emailAddress" type="email" />
 				<Box>
 					<Button type="submit">Create account</Button>
