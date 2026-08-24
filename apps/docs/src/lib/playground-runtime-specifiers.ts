@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { z } from 'zod';
+import * as z from 'zod';
 
 /** Specifiers the playground always resolves, besides `@luke-ui/react/*` subpaths. */
 const PLAYGROUND_BASE_SPECIFIERS = [
@@ -82,7 +82,8 @@ export function importSpecifiersFromSource(source: string): Array<string> {
 let defaultSpecifiers: ReadonlySet<string> | undefined;
 
 function defaultPlaygroundSpecifiers(): ReadonlySet<string> {
-	return (defaultSpecifiers ??= new Set(playgroundRuntimeSpecifierList()));
+	defaultSpecifiers ??= new Set(playgroundRuntimeSpecifierList());
+	return defaultSpecifiers;
 }
 
 export function canRunInPlayground(

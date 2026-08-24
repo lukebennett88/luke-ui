@@ -90,6 +90,13 @@ An authored assertion should fail if, and only if, an intention Luke UI owns is 
 Do not test TypeScript guarantees, private functions, call counts inside repository modules,
 generated class names, selector text, incidental copy, or low-value bugs unlikely to recur.
 
+This targets low-value tests of internal TypeScript guarantees. Emitted declarations in
+`dist/*.d.ts` are part of the public consumer contract, not an internal guarantee, so a type test is
+warranted when a declaration-emit regression would change what consumers can assign or what their
+editor autocompletes, such as a numeric-looking space-step key widening from `'400'` to `number`, or
+a token union widening to an index signature or `string`. These live in `*.test-d.ts` and run via
+the `types` project.
+
 ## Stories
 
 Every story is a render-smoke test and an accessibility fixture. Keep stories curated: show

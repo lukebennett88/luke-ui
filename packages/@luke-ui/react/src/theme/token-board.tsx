@@ -534,6 +534,7 @@ const familyPreviews: Record<Family, PreviewRenderer> = {
 
 function TokenPreview({ path, varName }: { path: string; varName: string }) {
 	const segments = path.split('.');
+	// `path` comes from `flattenThemeContract()`, so its first segment is always a contract family.
 	const family = segments[0] as Family;
 	const Preview = familyPreviews[family];
 	return <Preview path={path} segments={segments} varName={varName} />;

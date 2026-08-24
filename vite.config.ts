@@ -161,7 +161,16 @@ export default defineConfig({
 			'vite-plus/prefer-vite-plus-imports': 'error',
 			'vitest/expect-expect': [
 				'error',
-				{ assertFunctionNames: ['captureVisual', 'captureVisualAppearance', 'expect'] },
+				{
+					// Type tests use these assertion helpers, which the rule does not recognise by default.
+					assertFunctionNames: [
+						'assertType',
+						'captureVisual',
+						'captureVisualAppearance',
+						'expect',
+						'expectTypeOf',
+					],
+				},
 			],
 		},
 	},

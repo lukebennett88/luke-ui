@@ -2,6 +2,9 @@ import type { SprinklesFn } from '@luke-ui/rainbow-sprinkles';
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
 import { breakpoints } from '../theme/breakpoints.js';
 import { vars } from '../theme/contract.css.js';
+import type { SpaceStep } from '../theme/contract.js';
+import { SEMANTIC_ROLES } from '../theme/contrast-policy.js';
+import { typedEntries } from '../utils/index.js';
 import { layers } from './layers.css.js';
 
 function fromBreakpoint(minimumWidth: number) {
@@ -17,6 +20,7 @@ const responsiveConditions = {
 	xxlarge: fromBreakpoint(breakpoints.xxlarge),
 } as const;
 
+/** Space steps plus `0`, written explicitly so declaration emit preserves string keys. */
 const spaceScale = {
 	'0': '0',
 	'100': vars.space[100],
@@ -28,9 +32,38 @@ const spaceScale = {
 	'1000': vars.space[1000],
 	'1200': vars.space[1200],
 	'1600': vars.space[1600],
-} as const;
+} as const satisfies Record<`${SpaceStep}` | '0', string>;
 
 const marginScale = { ...spaceScale, auto: 'auto' } as const;
+
+/** Border widths offered by the design system. */
+const borderWidthScale = { none: '0', thin: '1px', thick: '2px' } as const;
+
+const PROMINENCE_LEVELS = ['subtle', 'solid'] as const;
+const INTERACTION_STATES = ['rest', 'hover', 'pressed'] as const;
+
+type SemanticRole = (typeof SEMANTIC_ROLES)[number];
+type ProminenceLevel = (typeof PROMINENCE_LEVELS)[number];
+type InteractionState = (typeof INTERACTION_STATES)[number];
+
+/** Background tokens, excluding the translucent backdrop. */
+type BackgroundColorToken =
+	| `${SemanticRole}.${ProminenceLevel}.${InteractionState}`
+	| `surface.${keyof typeof vars.color.surface}`;
+
+/** Background tokens for semantic roles and elevation surfaces. */
+const backgroundColorScale = Object.fromEntries([
+	...SEMANTIC_ROLES.flatMap((role) => {
+		return PROMINENCE_LEVELS.flatMap((prominence) => {
+			return INTERACTION_STATES.map((state): [BackgroundColorToken, string] => {
+				return [`${role}.${prominence}.${state}`, vars.color.background[role][prominence][state]];
+			});
+		});
+	}),
+	...typedEntries(vars.color.surface).map(([surface, value]): [BackgroundColorToken, string] => {
+		return [`surface.${surface}`, value];
+	}),
+]) as Record<BackgroundColorToken, string>;
 
 const responsiveProperties = defineProperties({
 	'@layer': layers.utilities,
@@ -63,7 +96,25 @@ const responsiveProperties = defineProperties({
 			normal: 'normal',
 			stretch: 'stretch',
 		},
+		backgroundColor: backgroundColorScale,
 		blockSize: true,
+		borderColor: vars.color.border,
+		borderRadius: {
+			detail: vars.radius.detail,
+			control: vars.radius.control,
+			surface: vars.radius.surface,
+			overlay: vars.radius.overlay,
+			full: vars.radius.full,
+		},
+		borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },
+		borderWidth: borderWidthScale,
+		boxShadow: {
+			recessed: vars.depth.recessed,
+			resting: vars.depth.resting,
+			raised: vars.depth.raised,
+			floating: vars.depth.floating,
+			overlay: vars.depth.overlay,
+		},
 		columnGap: spaceScale,
 		display: {
 			block: 'block',
@@ -180,7 +231,8 @@ const responsiveProperties = defineProperties({
 	},
 });
 
-export const createSprinkles: SprinklesFn<[typeof responsiveProperties]> =
-	defineSprinkles(responsiveProperties);
+type CreateSprinkles = SprinklesFn<[typeof responsiveProperties]>;
+
+export const createSprinkles: CreateSprinkles = defineSprinkles(responsiveProperties);
 
 export type SprinklesProps = Parameters<typeof createSprinkles>[0];

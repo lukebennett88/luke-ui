@@ -20,6 +20,9 @@ export type FamilyRole = (typeof SEMANTIC_ROLES)[number];
 /** A step index in the 12-step scale. */
 export type ScaleStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
+/** Maps a muted-rung array index to its 1-based scale step, without widening through arithmetic. */
+const MUTED_RUNG_STEP = [1, 2, 3, 4, 5, 6, 7, 8] as const satisfies ReadonlyArray<ScaleStep>;
+
 type ColorMode = 'light' | 'dark';
 
 /**
@@ -313,7 +316,7 @@ function buildFamily(request: GenerateFamilyRequest): {
 	const mutedRung = (index: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7): Oklch => {
 		const spec = RAMP_SPEC[mode][index];
 		return rung(
-			(index + 1) as ScaleStep,
+			MUTED_RUNG_STEP[index],
 			backgroundLightness + direction * spec.offset,
 			Math.min(source.c * spec.chromaFraction, spec.chromaCap),
 		);
