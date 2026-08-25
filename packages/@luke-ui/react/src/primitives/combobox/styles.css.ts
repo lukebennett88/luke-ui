@@ -321,7 +321,7 @@ const comboboxConfig = {
 			alignItems: 'center',
 			color: vars.color.text.secondary,
 			display: 'flex',
-			...vars.font.support,
+			...vars.font.label,
 			justifyContent: 'center',
 			paddingBlock: vars.space.sp24,
 			paddingInline: vars.space.sp12,
@@ -454,7 +454,8 @@ const comboboxConfig = {
 					paddingInlineStart: vars.space.sp12,
 				},
 				item: {
-					...vars.font.support,
+					...vars.font.label,
+					fontWeight: vars.font.weight.body,
 					minBlockSize: vars.controlSize.medium,
 					paddingBlock: vars.space.sp8,
 					paddingInline: vars.space.sp12,
@@ -485,7 +486,8 @@ const comboboxConfig = {
 					paddingInlineStart: vars.space.sp8,
 				},
 				item: {
-					...vars.font.support,
+					...vars.font.label,
+					fontWeight: vars.font.weight.body,
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space.sp4,
 					paddingInline: vars.space.sp12,

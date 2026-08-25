@@ -20,15 +20,14 @@ percentages, units, and compact values. Use `Emoji` when an emoji needs a reliab
 
 `Text` and `Heading` use these styles, from smallest to largest:
 
-| Style                 | Intended use                                                              |
-| --------------------- | ------------------------------------------------------------------------- |
-| `caption`             | Ancillary text at the smallest size                                       |
-| `support`             | Secondary UI copy at label size with body weight — messages and list text |
-| `label`               | Terse UI and control text at the same size with label weight              |
-| `body`                | Normal body copy                                                          |
-| `lead`                | Larger introductory body copy                                             |
-| `heading4`–`heading1` | Visual heading hierarchy                                                  |
-| `display`             | Oversized editorial or marketing moments                                  |
+| Style                 | Intended use                                              |
+| --------------------- | --------------------------------------------------------- |
+| `caption`             | Ancillary text at the smallest size                       |
+| `label`               | Terse UI and control text at label size with label weight |
+| `body`                | Normal body copy                                          |
+| `lead`                | Larger introductory body copy                             |
+| `heading4`–`heading1` | Visual heading hierarchy                                  |
+| `display`             | Oversized editorial or marketing moments                  |
 
 <ExampleBlock src="text/typography" title="Typography — Styles" />
 
@@ -51,7 +50,7 @@ Text also accepts semantic `color` values such as `primary`, `secondary`, `accen
 `success`, `warning`, and `danger`.
 
 ```tsx
-<Text color="secondary" typography="support">
+<Text color="secondary" typography="label">
 	Last updated 12 minutes ago
 </Text>
 ```
