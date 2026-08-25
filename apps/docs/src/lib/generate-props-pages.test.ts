@@ -11,11 +11,8 @@ import {
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterEach, expect, test } from 'vite-plus/test';
-import {
-	generatePropsPages,
-	parseComponentFrontmatter,
-	renderPropsPage,
-} from '../../scripts/generate-props-pages.js';
+import { generatePropsPages, renderPropsPage } from '../../scripts/generate-props-pages.js';
+import { parseComponentFrontmatter } from './docs-frontmatter.js';
 
 const componentsDir = resolve(import.meta.dirname, '../../content/docs/components');
 

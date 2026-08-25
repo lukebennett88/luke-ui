@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, expect, test } from 'vite-plus/test';
+import type { DocsCheckPaths } from '../../scripts/check-docs.js';
 import {
 	diffAgainstBaseline,
 	findDocsIssues,
@@ -513,16 +514,146 @@ test('finds no extra docs issues in the docs app beyond the baseline', () => {
 	expect(diffAgainstBaseline(issues, baseline)).toEqual({ extra: [], stale: [] });
 });
 
+const INVENTORY_GUIDE = `---
+title: Button
+source: packages/@luke-ui/react/src/button
+---
+
+<ExampleBlock src="button/basic" title="Button — Basic" />
+
+## Accessibility
+
+The visible label is the accessible name.
+`;
+
+function inventoryFixture(overrides: {
+	components?: Record<string, string>;
+	metadata?: Record<string, unknown>;
+	packageExports?: ReadonlyArray<string>;
+	sourceDirs?: ReadonlyArray<string>;
+}): DocsCheckPaths {
+	return createDocsFixture({
+		components: overrides.components ?? { 'actions/button.mdx': INVENTORY_GUIDE },
+		metadata: overrides.metadata ?? {
+			'actions/meta.json': { pages: ['button'], title: 'Actions' },
+			'meta.json': { pages: ['---Actions---', 'actions/button'], root: true, title: 'Components' },
+		},
+		packageExports: overrides.packageExports ?? ['./button'],
+		sourceDirs: overrides.sourceDirs ?? ['button'],
+	});
+}
+
+test('accepts a guide that the root and category metadata both list', () => {
+	expect(findDocsIssues(inventoryFixture({}))).toEqual([]);
+});
+
+test('reports a guide that is absent from the root component metadata', () => {
+	const paths = inventoryFixture({
+		metadata: {
+			'actions/meta.json': { pages: [], title: 'Actions' },
+			'meta.json': { pages: ['---Actions---'], root: true, title: 'Components' },
+		},
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'component-guide-inventory: actions/button.mdx: guide is absent from the root component metadata (expected entry "actions/button")',
+	]);
+});
+
+test('reports a root metadata entry that has no guide', () => {
+	const paths = inventoryFixture({
+		metadata: {
+			'actions/meta.json': { pages: ['button', 'link'], title: 'Actions' },
+			'meta.json': {
+				pages: ['---Actions---', 'actions/button', 'actions/link'],
+				root: true,
+				title: 'Components',
+			},
+		},
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'component-guide-inventory: components/meta.json: entry "actions/link" has no guide (expected actions/link.mdx)',
+	]);
+});
+
+test('reports a repeated root metadata entry', () => {
+	const paths = inventoryFixture({
+		metadata: {
+			'actions/meta.json': { pages: ['button', 'button'], title: 'Actions' },
+			'meta.json': {
+				pages: ['---Actions---', 'actions/button', 'actions/button'],
+				root: true,
+				title: 'Components',
+			},
+		},
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'component-guide-inventory: components/meta.json: entry "actions/button" is repeated',
+	]);
+});
+
+test('reports category metadata that does not match the root metadata', () => {
+	const paths = inventoryFixture({
+		metadata: {
+			'actions/meta.json': { pages: ['link', 'button'], title: 'Actions' },
+			'meta.json': {
+				pages: ['---Actions---', 'actions/button', 'actions/link'],
+				root: true,
+				title: 'Components',
+			},
+		},
+		components: {
+			'actions/button.mdx': INVENTORY_GUIDE,
+			'actions/link.mdx': `---
+title: Link
+source: packages/@luke-ui/react/src/link
+---
+
+<ExampleBlock src="link/basic" title="Link — Basic" />
+
+## Accessibility
+
+The visible label is the accessible name.
+`,
+		},
+		packageExports: ['./button', './link'],
+		sourceDirs: ['button', 'link'],
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'component-guide-inventory: actions/meta.json: pages [link, button] do not match the root metadata (expected [button, link])',
+	]);
+});
+
+test('reports a guide source that is not a public package entry point', () => {
+	const paths = inventoryFixture({ packageExports: ['./link'] });
+
+	expect(findDocsIssues(paths)).toEqual([
+		'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/button" is not a public package entry point (expected export "./button" in @luke-ui/react)',
+	]);
+});
+
+test('reports a source directory with no index.ts', () => {
+	const paths = inventoryFixture({ sourceDirs: [] });
+
+	expect(findDocsIssues(paths)).toEqual([
+		'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/button" has no packages/@luke-ui/react/src/button/index.ts',
+	]);
+});
+
 function createDocsFixture(input: {
 	authored?: Record<string, string>;
 	components?: Record<string, string>;
 	internal?: Record<string, string>;
-}): {
-	authoredDocsDir: string;
-	componentsDir: string;
-	contentDir: string;
-	internalDocsDir: string;
-} {
+	/** Root and category `meta.json` files, keyed by their path under the components directory. */
+	metadata?: Record<string, unknown>;
+	/** Export keys for the fake `@luke-ui/react` manifest. */
+	packageExports?: ReadonlyArray<string>;
+	/** Subpaths under the fake package `src` that get an `index.ts`. */
+	sourceDirs?: ReadonlyArray<string>;
+}): DocsCheckPaths {
 	const directory = mkdtempSync(join(tmpdir(), 'luke-ui-check-docs-'));
 	testDirectories.push(directory);
 
@@ -530,9 +661,11 @@ function createDocsFixture(input: {
 	const componentsDir = join(contentDir, 'components');
 	const authoredDocsDir = join(contentDir, 'docs');
 	const internalDocsDir = join(directory, 'internal-docs');
+	const reactPackageDir = join(directory, 'react-package');
 	mkdirSync(componentsDir, { recursive: true });
 	mkdirSync(authoredDocsDir, { recursive: true });
 	mkdirSync(internalDocsDir, { recursive: true });
+	mkdirSync(reactPackageDir, { recursive: true });
 
 	writeGuides(componentsDir, input.components ?? {});
 	writeGuides(authoredDocsDir, input.authored ?? {});
@@ -540,7 +673,39 @@ function createDocsFixture(input: {
 		writeFileSync(join(internalDocsDir, name), contents);
 	}
 
-	return { authoredDocsDir, componentsDir, contentDir, internalDocsDir };
+	const guidePaths = Object.keys(input.components ?? {});
+	for (const [relativePath, contents] of Object.entries(
+		input.metadata ?? defaultMetadata(guidePaths),
+	)) {
+		const path = join(componentsDir, relativePath);
+		mkdirSync(join(path, '..'), { recursive: true });
+		writeFileSync(path, JSON.stringify(contents));
+	}
+
+	const guideSources = guidePaths.map((path) => guideSourceSubpath(input.components?.[path] ?? ''));
+	const exports = Object.fromEntries(
+		(input.packageExports ?? guideSources.map((subpath) => `./${subpath}`)).map((key) => [
+			key,
+			`./dist${key.slice(1)}/index.js`,
+		]),
+	);
+	const reactPackageJsonPath = join(reactPackageDir, 'package.json');
+	writeFileSync(reactPackageJsonPath, JSON.stringify({ exports, name: '@luke-ui/react' }));
+
+	for (const subpath of input.sourceDirs ?? guideSources) {
+		const sourceDir = join(reactPackageDir, 'src', subpath);
+		mkdirSync(sourceDir, { recursive: true });
+		writeFileSync(join(sourceDir, 'index.ts'), 'export {};\n');
+	}
+
+	return {
+		authoredDocsDir,
+		componentsDir,
+		contentDir,
+		internalDocsDir,
+		reactPackageDir,
+		reactPackageJsonPath,
+	};
 }
 
 function writeGuides(root: string, files: Record<string, string>): void {
@@ -549,4 +714,36 @@ function writeGuides(root: string, files: Record<string, string>): void {
 		mkdirSync(join(path, '..'), { recursive: true });
 		writeFileSync(path, contents);
 	}
+}
+
+/** Root and category metadata that lists exactly the guides a fixture wrote, in that order. */
+function defaultMetadata(guidePaths: ReadonlyArray<string>): Record<string, unknown> {
+	const slugs = guidePaths.map((path) => path.replace(/\.mdx$/, ''));
+	const groups = [...new Set(slugs.map((slug) => slug.split('/')[0] ?? ''))];
+	const metadata: Record<string, unknown> = {};
+
+	for (const group of groups) {
+		metadata[`${group}/meta.json`] = {
+			pages: slugs
+				.filter((slug) => slug.startsWith(`${group}/`))
+				.map((slug) => slug.slice(group.length + 1)),
+			title: group,
+		};
+	}
+
+	metadata['meta.json'] = {
+		pages: groups.flatMap((group) => [
+			`---${group}---`,
+			...slugs.filter((slug) => slug.startsWith(`${group}/`)),
+		]),
+		root: true,
+		title: 'Components',
+	};
+
+	return metadata;
+}
+
+function guideSourceSubpath(contents: string): string {
+	const source = contents.match(/^source:\s*(.+)$/m)?.[1]?.trim() ?? '';
+	return source.replace('packages/@luke-ui/react/src/', '');
 }

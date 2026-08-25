@@ -329,6 +329,13 @@ in the "Primitives" section under components.
 Component pages may link to their related primitive pages when the normal component API does not
 fit. Keep primitive pages at the end of the Components area.
 
+`apps/docs/content/docs/components/meta.json` is the source for component category and order. List
+every component guide there once. Each category `meta.json` must list the same components as its
+slice of that file, in the same order. A guide's `source` must name a public entry point in
+`packages/@luke-ui/react/package.json`, and that directory needs an `index.ts`. `check:docs`
+enforces all of this, so a guide cannot leave the navigation or point at a path a developer cannot
+import.
+
 ## MDX page structure
 
 `<group>/<name>.mdx` is the authored component guide. It keeps the `/components/<group>/<name>` URL.

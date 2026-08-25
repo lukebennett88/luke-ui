@@ -2,6 +2,13 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { findComponentDocContractIssues } from '../src/lib/component-doc-contract.js';
+import {
+	buildComponentGuideInventory,
+	findCategoryMetadataIssues,
+	findGuideNavigationIssues,
+	findGuideSourceIssues,
+	findRepeatedMetadataIssues,
+} from '../src/lib/component-guide-inventory.js';
 import { readFrontmatter } from '../src/lib/docs-frontmatter.js';
 import { findMdxFiles } from '../src/lib/docs-mdx-files.js';
 import { exampleBlockSources } from '../src/lib/example-block-sources.js';
@@ -13,6 +20,8 @@ const contentDir = resolve(docsAppRoot, 'content/docs');
 const componentsDir = resolve(contentDir, 'components');
 const authoredDocsDir = resolve(contentDir, 'docs');
 const internalDocsDir = resolve(repoRoot, 'docs');
+const reactPackageDir = resolve(repoRoot, 'packages/@luke-ui/react');
+const reactPackageJsonPath = resolve(reactPackageDir, 'package.json');
 const baselinePath = resolve(scriptDir, 'check-docs.baseline.txt');
 
 const GROUPS_REQUIRING_ACCESSIBILITY = new Set(['actions', 'feedback', 'forms']);
@@ -54,6 +63,8 @@ export interface DocsCheckPaths {
 	componentsDir: string;
 	contentDir: string;
 	internalDocsDir: string;
+	reactPackageDir: string;
+	reactPackageJsonPath: string;
 }
 
 export const defaultDocsCheckPaths: DocsCheckPaths = {
@@ -61,6 +72,8 @@ export const defaultDocsCheckPaths: DocsCheckPaths = {
 	componentsDir,
 	contentDir,
 	internalDocsDir,
+	reactPackageDir,
+	reactPackageJsonPath,
 };
 
 /** One mechanically checkable docs convention violation. */
@@ -81,6 +94,21 @@ export function findDocsIssues(paths: DocsCheckPaths = defaultDocsCheckPaths): A
 	for (const file of findAuthoredGuideFiles(paths.authoredDocsDir)) {
 		issues.push(...findContinueLearningIssues(file));
 	}
+
+	const inventory = buildComponentGuideInventory({
+		componentsDir: paths.componentsDir,
+		guides: componentGuides,
+		reactPackageJsonPath: paths.reactPackageJsonPath,
+	});
+
+	issues.push(
+		...[
+			...findGuideNavigationIssues(inventory),
+			...findRepeatedMetadataIssues(inventory),
+			...findCategoryMetadataIssues(inventory, paths.componentsDir),
+			...findGuideSourceIssues(inventory, paths.reactPackageDir),
+		].map((issue) => `component-guide-inventory: ${issue}`),
+	);
 
 	issues.push(...findSharedExampleIssues(paths.contentDir));
 	issues.push(...findProseIssues(paths));

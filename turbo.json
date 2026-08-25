@@ -56,7 +56,13 @@
 		},
 		"check:docs": {
 			"cache": true,
-			"inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/docs/**"]
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				"$TURBO_ROOT$/docs/**",
+				"$TURBO_ROOT$/packages/@luke-ui/react/package.json",
+				"$TURBO_ROOT$/packages/@luke-ui/react/src/*/index.ts",
+				"$TURBO_ROOT$/packages/@luke-ui/react/src/primitives/*/index.ts"
+			]
 		},
 		"check:format": {
 			"dependsOn": ["generate"]
