@@ -20,7 +20,7 @@ interface _CheckboxProps extends _CheckboxOmit {
 	children: RacCheckboxFieldProps['children'];
 	/** Initial selection state for an uncontrolled checkbox. */
 	defaultSelected?: RacCheckboxFieldProps['defaultSelected'];
-	/** Whether the checkbox is unavailable. */
+	/** Whether the checkbox is disabled. */
 	isDisabled?: RacCheckboxFieldProps['isDisabled'];
 	/** Whether the checkbox displays a mixed selection state. */
 	isIndeterminate?: RacCheckboxFieldProps['isIndeterminate'];

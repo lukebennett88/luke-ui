@@ -38,7 +38,7 @@ interface _CheckboxProps extends _CheckboxOmit {
 	 * callback ref (what form libraries hand out) is accepted too.
 	 */
 	inputRef?: Ref<HTMLInputElement>;
-	/** Whether the checkbox is unavailable. */
+	/** Whether the checkbox is disabled. */
 	isDisabled?: PrimitiveCheckboxProps['isDisabled'];
 	/** Whether the checkbox displays a mixed selection state. */
 	isIndeterminate?: PrimitiveCheckboxProps['isIndeterminate'];
