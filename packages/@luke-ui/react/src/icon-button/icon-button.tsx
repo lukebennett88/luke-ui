@@ -21,7 +21,10 @@ interface IconButtonStyleProps {
 	size?: IconButtonRecipeProps['size'];
 }
 
-type _IconButtonOmit = DistributiveOmit<PrimitiveButtonProps, 'size' | keyof DocumentedPressProps>;
+type _IconButtonOmit = DistributiveOmit<
+	PrimitiveButtonProps,
+	'isBlock' | 'size' | keyof DocumentedPressProps
+>;
 
 interface _IconButtonProps extends _IconButtonOmit, IconButtonStyleProps, DocumentedPressProps {
 	/** Icon name from the generated icon set. */
