@@ -11,6 +11,10 @@ export interface ProseProps extends ComponentProps<'div'> {}
  * content management system, and its headings, paragraphs, lists, tables, and rules space
  * themselves.
  *
+ * Every gap belongs to the block that follows it, so nothing inside carries a trailing margin:
+ * no space escapes the wrapper, and the rhythm is the same whether the box lays out as block,
+ * grid, or flex.
+ *
  * `Prose` styles block layout only. Font, size, weight, and colour still come from the
  * components that own them, so a Luke UI component inside it keeps its own appearance.
  */

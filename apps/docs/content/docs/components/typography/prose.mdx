@@ -31,8 +31,16 @@ heading opens a larger gap above itself than below it, so it groups with the sec
 The rhythm is fixed and takes no props. One document rhythm across a site keeps two pages from
 drifting apart.
 
-`Prose` adds no space above its first block or below its last one, so it composes into a page layout
-without doubling a gap the surrounding layout already set.
+Every gap belongs to the block below it. A block sets the space above itself and never below, so the
+distance between two blocks is whatever the second one asks for. Nothing inside `Prose` carries a
+trailing margin, which has two consequences worth relying on:
+
+- `Prose` adds no space above its first block or below its last one, so it composes into a page
+  layout without doubling a gap the surrounding layout already set. This holds however deeply the
+  last block is nested, including a trailing list or description list.
+- The rhythm does not depend on margins collapsing, so it is identical whether the wrapper lays out
+  as block, grid, or flex. Setting `display: grid` on `Prose` or on anything inside it leaves every
+  gap unchanged.
 
 ## Restoring list markers
 
@@ -47,6 +55,9 @@ nested list the conventional alternate marker.
 Every rule `Prose` sets carries zero specificity, so a plain class on the element wins without
 `!important` or a longer selector. Use this to adjust one block in a document rather than to reshape
 the whole rhythm.
+
+Set `margin-block-start` to change a gap, since that is the side `Prose` uses. A `margin-block-end`
+competes with nothing and leaves the gap below the element as the next block set it.
 
 ```tsx
 <Prose>
