@@ -1,7 +1,7 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
-import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
+import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -169,7 +169,6 @@ const comboboxConfig = {
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
-			...restingFocusRing('0px'),
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, color',

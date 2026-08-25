@@ -1,5 +1,5 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
-import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
+import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection, SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 import { textLineHeight } from '../../text/recipe.css.js';
@@ -102,7 +102,6 @@ const checkboxConfig = {
 			inlineSize: checkboxIndicatorSize,
 			justifyContent: 'center',
 			lineHeight: 1,
-			...restingFocusRing(),
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, background-image, border-color, color, opacity',
 			transitionTimingFunction: vars.motion.easing.standard,
