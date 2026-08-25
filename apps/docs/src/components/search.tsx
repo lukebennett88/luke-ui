@@ -12,7 +12,6 @@ import {
 	SearchDialogList,
 	SearchDialogOverlay,
 } from 'fumadocs-ui/components/dialog/search';
-import { useI18n } from 'fumadocs-ui/contexts/i18n';
 import { create } from 'zbsearch';
 
 function initDB() {
@@ -23,10 +22,8 @@ function initDB() {
 }
 
 export default function DefaultSearchDialog(props: SharedProps) {
-	const { locale } = useI18n(); // (optional) for i18n
-
 	const { search, setSearch, query } = useDocsSearch({
-		client: staticClient({ initDB, ...(locale === undefined ? {} : { locale }) }),
+		client: staticClient({ initDB }),
 	});
 
 	return (
