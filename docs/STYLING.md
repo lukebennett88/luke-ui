@@ -306,7 +306,9 @@ unchanged. Control-specific selectors stay in the TextField and Combobox recipes
 Combobox's well focus ring is one of those control-specific selectors. The shared `focusWithin`
 matches the whole group, including the clear and trigger buttons. Those buttons already draw the
 reset ring, so the well ring appends `:has(input:focus)` and only paints while the text input is
-focused.
+focused. React Aria also copies `data-focus-visible` onto the group for those descendants, which
+would paint the reset ring on the well. The combobox input-group slot sets `outline: none` so that
+reset ring does not appear.
 
 Resist widening a state to probe descendants with `:has()`. React Aria publishes `isDisabled` and
 `isInvalid` through `GroupContext`, so a control group already carries `data-disabled` and

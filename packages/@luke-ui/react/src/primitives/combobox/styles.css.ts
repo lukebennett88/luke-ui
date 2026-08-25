@@ -28,7 +28,9 @@ const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, rea
 
 // The well ring is for the text input. `:focus-within` also matches the clear and
 // trigger buttons, which already draw the reset ring, so a second well ring would
-// appear around the field at the same time.
+// appear around the field at the same time. The group also receives
+// `data-focus-visible` from React Aria for those same descendants, which would
+// paint the reset ring on the well; the slot sets `outline: none` to stop that.
 const inputFocus = `${focusWithin}:has(input:focus)`;
 const invalidInputFocus = `${invalidFocusWithin}:has(input:focus)`;
 const readOnlyInputFocus = `${readOnlyFocusWithin}:has(input:focus)`;
@@ -176,6 +178,11 @@ const comboboxConfig = {
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
+			// The reset paints a ring on `[data-focus-visible]`. React Aria copies
+			// that attribute onto the group when any descendant is keyboard-focused,
+			// including the clear and trigger buttons. Suppress it here; `inputFocus`
+			// restores the well ring only while the text input is focused.
+			outline: 'none',
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, color',

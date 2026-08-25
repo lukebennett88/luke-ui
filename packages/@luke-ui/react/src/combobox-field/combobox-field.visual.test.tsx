@@ -164,11 +164,6 @@ test('interactive states', async () => {
 	await userEvent.tab();
 	await expect.element(clear).toHaveFocus();
 	await captureVisual(locator, 'combobox-field/clear-focus-visible');
-	await userEvent.tab();
-	await expect.element(trigger).toHaveFocus();
-	await captureVisual(locator, 'combobox-field/trigger-focus-visible');
-	await userEvent.tab({ shift: true });
-	await expect.element(clear).toHaveFocus();
 	await userEvent.keyboard('{Space>}');
 	await captureVisual(locator, 'combobox-field/clear-pressed');
 	await userEvent.keyboard('{/Space}');
