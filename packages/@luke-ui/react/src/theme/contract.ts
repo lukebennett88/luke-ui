@@ -59,7 +59,6 @@ const roleForeground = {
  */
 export const typeStyles = [
 	'caption',
-	'support',
 	'label',
 	'body',
 	'lead',
@@ -85,7 +84,6 @@ export type FontWeightRole = (typeof fontWeightRoles)[number];
  */
 export const typeStyleMetricStep = {
 	caption: 12,
-	support: 14,
 	label: 14,
 	body: 16,
 	lead: 18,
@@ -102,7 +100,6 @@ export const typeStyleMetricStep = {
  */
 export const typeStyleWeightRole = {
 	caption: 'body',
-	support: 'body',
 	label: 'label',
 	body: 'body',
 	lead: 'body',

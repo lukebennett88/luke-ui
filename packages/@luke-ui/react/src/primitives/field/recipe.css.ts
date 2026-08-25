@@ -57,7 +57,8 @@ const fieldConfig = {
 			},
 		},
 		message: {
-			...vars.font.support,
+			...vars.font.label,
+			fontWeight: vars.font.weight.body,
 			minInlineSize: 0,
 			paddingInlineStart: messageIndent,
 		},
