@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { readFrontmatter } from './docs-frontmatter.js';
+import { parseComponentFrontmatter, readFrontmatter } from './docs-frontmatter.js';
 
 const SOURCE_PREFIX = 'packages/@luke-ui/react/src/';
 const CATEGORY_SEPARATOR = /^---(.+)---$/;
@@ -9,6 +9,7 @@ const CATEGORY_SEPARATOR = /^---(.+)---$/;
 interface ComponentGuide {
 	group: string;
 	name: string;
+	props: ReadonlyArray<{ name: string; path: string }>;
 	relativePath: string;
 	slug: string;
 	source: string | undefined;
@@ -46,6 +47,7 @@ export function buildComponentGuideInventory(
 	return {
 		categories,
 		guides: input.guides.map((guide) => {
+			const frontmatter = parseComponentFrontmatter(guide.source);
 			const name =
 				guide.relativePath
 					.replace(/\.mdx$/, '')
@@ -56,6 +58,7 @@ export function buildComponentGuideInventory(
 				name,
 				relativePath: guide.relativePath,
 				slug: `${guide.group}/${name}`,
+				props: frontmatter.props,
 				source: readFrontmatter(guide.source).source,
 			};
 		}),
