@@ -455,6 +455,7 @@ const comboboxConfig = {
 				},
 				item: {
 					...vars.font.label,
+					fontWeight: vars.font.weight.body,
 					minBlockSize: vars.controlSize.medium,
 					paddingBlock: vars.space.sp8,
 					paddingInline: vars.space.sp12,
@@ -486,6 +487,7 @@ const comboboxConfig = {
 				},
 				item: {
 					...vars.font.label,
+					fontWeight: vars.font.weight.body,
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space.sp4,
 					paddingInline: vars.space.sp12,
