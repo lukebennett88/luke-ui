@@ -76,12 +76,12 @@ grid-placement properties accept their CSS values.
 Use logical properties such as `paddingInline`, `marginBlockStart`, and `maxInlineSize`. They work
 in both writing directions without a second layout rule.
 
-## Use visual styles elsewhere
+## Visual styles
 
-The layout APIs exclude semantic colour, typography, and interaction states. Choose a component API
-for those concerns. When a custom element needs a visual token, use `vars` from
-`@luke-ui/react/theme`. Semantic values follow the active identity and colour mode, while Luke UI
-defines its spacing scale and typography styles in source.
+The layout properties include background, border, and depth values from the theme scale. Typography
+and interaction states stay with a component API. When a custom element that is not a Box needs a
+visual token, use `vars` from `@luke-ui/react/theme`. Semantic values follow the active identity and
+colour mode, while Luke UI defines its spacing scale and typography styles in source.
 
 ## Continue learning
 

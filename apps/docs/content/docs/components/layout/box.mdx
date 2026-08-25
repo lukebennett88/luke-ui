@@ -16,8 +16,9 @@ normal `div` when no supported layout property applies.
 ## Layout properties
 
 Box supports display, logical margin and padding, inline and block sizing, positioning, overflow,
-gap, flex, and grid-child properties. It does not set grid container properties. Keep grid-template
-rules in the application CSS or a component that owns that layout.
+gap, flex, and grid-child properties. It also supports `backgroundColor`, `borderColor`,
+`borderRadius`, `borderStyle`, `borderWidth`, and `boxShadow`. It does not set grid container
+properties. Keep grid-template rules in the application CSS or a component that owns that layout.
 
 ```tsx
 <Box display="flex" alignItems="center" gap="sp12" maxInlineSize="42rem" paddingInline="sp24">
@@ -63,7 +64,10 @@ and `render` rule.
 
 ## Visual styles
 
-Box only covers layout. Use a component API for visual states and typography. When a custom element
-needs a colour, radius, or depth value, use `vars` from `@luke-ui/react/theme`. Read
+Box takes background, border, and depth values from the theme scale. Use a component API for
+interaction states and typography. When a custom element that is not a Box needs a colour, radius,
+or depth value, use `vars` from `@luke-ui/react/theme`. Read
 [Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when to reach for `vars`, and the
 [token reference](/docs/token-reference) for the contract.
+
+<ExampleBlock src="box/visual-styles" title="Box — Visual styles" />
