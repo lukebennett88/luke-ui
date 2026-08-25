@@ -1,0 +1,62 @@
+---
+title: Prose
+description: Vertical rhythm and list structure for long-form content.
+source: packages/@luke-ui/react/src/exports/prose.ts
+props:
+  - name: ProseProps
+    path: packages/@luke-ui/react/src/core/prose/prose.tsx
+---
+
+`Prose` spaces a block of long-form content. Wrap markup you do not author element by element, such
+as rendered Markdown or the output of a content management system, and its headings, paragraphs,
+lists, quotations, tables, and rules space themselves.
+
+<ExampleBlock src="prose/basic" title="Prose — Basic" />
+
+## Best practices
+
+| Practice                                     | Why                                                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Wrap a whole document, not a single element. | The rhythm comes from the relationship between blocks. One paragraph on its own needs no wrapper.                        |
+| Keep interface layout outside `Prose`.       | A card, a form, or a toolbar has its own spacing. Nesting it in a document rhythm fights that spacing.                   |
+| Constrain the measure on an ancestor.        | `Prose` sets no width, so give it a container narrow enough to keep a line readable.                                     |
+| Let the components inside keep their styles. | `Prose` sets no font, size, weight, or colour, so a Luke UI component inside it looks the same as it does anywhere else. |
+
+## What Prose spaces
+
+`Prose` sets spacing on the block elements a document is built from: `p`, `h1` through `h6`, `ul`,
+`ol`, `li`, `blockquote`, `pre`, `table`, `figure`, `figcaption`, `dl`, `dt`, `dd`, and `hr`. A
+heading opens a larger gap above itself than below it, so it groups with the section it introduces.
+
+The rhythm is fixed and takes no props. One document rhythm across a site keeps two pages from
+drifting apart.
+
+`Prose` adds no space above its first block or below its last one, so it composes into a page layout
+without doubling a gap the surrounding layout already set.
+
+## Restoring list markers
+
+The Luke UI reset strips markers and indent from every `ol` and `ul`, because most lists in an
+interface are menus and navigation. `Prose` puts them back for the lists inside it, and gives a
+nested list the conventional alternate marker.
+
+<ExampleBlock src="prose/lists" title="Prose — Lists" />
+
+## Overriding the rhythm
+
+Every rule `Prose` sets carries zero specificity, so a plain class on the element wins without
+`!important` or a longer selector. Use this to adjust one block in a document rather than to reshape
+the whole rhythm.
+
+```tsx
+<Prose>
+	<figure className={styles.fullBleedFigure}>
+		<img alt="" src="/diagram.png" />
+	</figure>
+</Prose>
+```
+
+## Related components
+
+Use [Text](/components/typography/text) and [Heading](/components/typography/heading) directly when
+you author the markup and want to choose each gap yourself.

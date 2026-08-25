@@ -40,6 +40,7 @@ export const componentTestManifest = [
 	['LoadingSkeleton', 'loading-skeleton', ['dom'], 'none', 'applicable'],
 	['LoadingSpinner', 'loading-spinner', ['dom'], 'none', 'applicable'],
 	['Numeral', 'numeral', ['dom'], 'none', 'applicable'],
+	['Prose', 'prose', ['dom'], 'none', 'applicable'],
 	['Quote', 'quote', ['dom'], 'none', 'none'],
 	['Strong', 'strong', ['dom'], 'none', 'none'],
 	['Text', 'text', ['dom'], 'none', 'applicable'],
