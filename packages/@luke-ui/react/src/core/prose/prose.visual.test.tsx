@@ -7,11 +7,9 @@ import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { Text } from '../text/text.js';
 import { Prose } from './prose.js';
 
-/**
- * `Prose` has no variants, so the kitchen sink is one long-form document covering every block
- * element it spaces. The four appearances stay in because the rule between sections takes its
- * colour from the theme.
- */
+const swatch =
+	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
+
 const document = (
 	<Prose>
 		<Heading level={2}>Choosing a spacing scale</Heading>
@@ -37,6 +35,21 @@ const document = (
 			<li>Use that step everywhere the same relationship appears.</li>
 		</ol>
 
+		<Heading level={4}>Rounding in practice</Heading>
+		<ul>
+			<li>
+				<Text elementType="p">A loose item holds more than one paragraph.</Text>
+				<Text elementType="p">The second takes a tighter gap than a document paragraph.</Text>
+			</li>
+			<li>
+				<Text elementType="p">Each item keeps the list rhythm.</Text>
+			</li>
+		</ul>
+		<ol type="a">
+			<li>An explicit list type keeps its own marker.</li>
+			<li>The reset does not force it back to decimal.</li>
+		</ol>
+
 		<Blockquote>
 			Perfect typography is certainly the most elusive of all arts. Sculpture in stone alone comes
 			near it in obstinacy.
@@ -46,6 +59,11 @@ const document = (
 		<Text elementType="pre">
 			<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
 		</Text>
+		<img alt="" height={64} src={swatch} width={320} />
+		<picture>
+			<img alt="" height={64} src={swatch} width={320} />
+		</picture>
+		<video aria-label="Spacing scale animation" height={64} muted poster={swatch} width={320} />
 
 		<table>
 			<thead>
@@ -93,10 +111,7 @@ const document = (
 		</dl>
 
 		<figure>
-			<ul>
-				<li>Four pixels apart reads as one group.</li>
-				<li>Twenty-four pixels apart reads as two.</li>
-			</ul>
+			<img alt="" height={64} src={swatch} width={320} />
 			<figcaption>
 				<Text color="secondary" elementType="span" typography="caption">
 					Grouping changes with distance alone.

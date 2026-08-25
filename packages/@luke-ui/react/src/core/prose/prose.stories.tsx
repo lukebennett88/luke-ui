@@ -11,11 +11,9 @@ const meta = preview.meta({
 	title: 'Typography/Prose',
 });
 
-/**
- * A long-form document exercising the block elements `Prose` spaces: headings, paragraphs,
- * both list types with a nested level, a quotation, a code block, a table, a rule, a figure,
- * and a description list.
- */
+const swatch =
+	"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='64'%3E%3Crect width='320' height='64' fill='%23888'/%3E%3C/svg%3E";
+
 export const Default = meta.story({
 	render: (props) => (
 		<div style={{ maxInlineSize: '40rem' }}>
@@ -43,6 +41,21 @@ export const Default = meta.story({
 					<li>Use that step everywhere the same relationship appears.</li>
 				</ol>
 
+				<Heading level={4}>Rounding in practice</Heading>
+				<ul>
+					<li>
+						<Text elementType="p">A loose item holds more than one paragraph.</Text>
+						<Text elementType="p">The second takes a tighter gap than a document paragraph.</Text>
+					</li>
+					<li>
+						<Text elementType="p">Each item keeps the list rhythm.</Text>
+					</li>
+				</ul>
+				<ol type="a">
+					<li>An explicit list type keeps its own marker.</li>
+					<li>The reset does not force it back to decimal.</li>
+				</ol>
+
 				<Blockquote>
 					Perfect typography is certainly the most elusive of all arts. Sculpture in stone alone
 					comes near it in obstinacy.
@@ -56,6 +69,11 @@ export const Default = meta.story({
 				<Text elementType="pre">
 					<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
 				</Text>
+				<img alt="" height={64} src={swatch} width={320} />
+				<picture>
+					<img alt="" height={64} src={swatch} width={320} />
+				</picture>
+				<video aria-label="Spacing scale animation" height={64} muted poster={swatch} width={320} />
 
 				<table>
 					<caption>
@@ -112,10 +130,7 @@ export const Default = meta.story({
 				</dl>
 
 				<figure>
-					<ul>
-						<li>Four pixels apart reads as one group.</li>
-						<li>Twenty-four pixels apart reads as two.</li>
-					</ul>
+					<img alt="" height={64} src={swatch} width={320} />
 					<figcaption>
 						<Text color="secondary" elementType="span" typography="caption">
 							Grouping changes with distance alone.

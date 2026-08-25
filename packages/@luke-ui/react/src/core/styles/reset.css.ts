@@ -19,7 +19,8 @@ globalStyleInLayer('reset', `${root} :where(h1, h2, h3, h4, h5, h6)`, {
 	margin: 0,
 });
 
-globalStyleInLayer('reset', `${root} :where(ol, ul)`, {
+// A typed ordered list keeps its native marker semantics.
+globalStyleInLayer('reset', `${root} :where(ol:not([type]), ul)`, {
 	listStyle: 'none',
 	margin: 0,
 	padding: 0,
