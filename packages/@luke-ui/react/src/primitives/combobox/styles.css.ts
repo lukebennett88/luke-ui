@@ -22,9 +22,16 @@ import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
 const comboboxErrorIconSize = createVar();
 
 // React Aria's `ComboBox` publishes `isDisabled`/`isInvalid` through `GroupContext`, which
-// `Group` writes onto the group element, so no `:has()` probing of descendants is needed.
+// `Group` writes onto the group element, so those states do not probe descendants with `:has()`.
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
 	composeInputStateSelectors();
+
+// The well ring is for the text input. `:focus-within` also matches the clear and
+// trigger buttons, which already draw the reset ring, so a second well ring would
+// appear around the field at the same time.
+const inputFocus = `${focusWithin}:has(input:focus)`;
+const invalidInputFocus = `${invalidFocusWithin}:has(input:focus)`;
+const readOnlyInputFocus = `${readOnlyFocusWithin}:has(input:focus)`;
 
 const comboboxActionStyles = {
 	'@media': {
@@ -144,8 +151,8 @@ const comboboxConfig = {
 					forcedColorAdjust: 'auto',
 					selectors: {
 						[disabled]: { borderColor: 'GrayText', color: 'GrayText', opacity: 1 },
-						[focusWithin]: { outlineColor: 'Highlight' },
-						[invalidFocusWithin]: { outlineColor: 'Highlight' },
+						[inputFocus]: { outlineColor: 'Highlight' },
+						[invalidInputFocus]: { outlineColor: 'Highlight' },
 						// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 						// here touches `::after`, so this already covers the focused case.
 						[`${invalid}::after`]: invalidIndicatorIconForcedColors,
@@ -176,7 +183,7 @@ const comboboxConfig = {
 
 			selectors: {
 				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
-				[focusWithin]: {
+				[inputFocus]: {
 					borderColor: vars.color.border.accent,
 					...focusRing(vars.color.border.focus),
 				},
@@ -191,7 +198,7 @@ const comboboxConfig = {
 				// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 				// here touches `::after`, so this already covers the focused case.
 				[`${invalid}::after`]: invalidIndicatorIcon(comboboxErrorIconSize),
-				[invalidFocusWithin]: {
+				[invalidInputFocus]: {
 					borderColor: vars.color.background.danger.solid.rest,
 					...focusRing(vars.color.border.focus),
 				},
@@ -200,7 +207,7 @@ const comboboxConfig = {
 					borderColor: vars.color.border.decorative,
 					boxShadow: 'none',
 				},
-				[readOnlyFocusWithin]: { ...focusRing(vars.color.border.focus) },
+				[readOnlyInputFocus]: { ...focusRing(vars.color.border.focus) },
 			},
 		},
 		textInput: {
