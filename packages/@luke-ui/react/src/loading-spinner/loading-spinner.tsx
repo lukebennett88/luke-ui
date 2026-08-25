@@ -19,7 +19,10 @@ interface LoadingSpinnerVariantProps extends NonNullable<LoadingSpinnerRecipeVar
 interface LoadingSpinnerStyleProps {
 	/** Sets a semantic content color. Omit to inherit the surrounding content color. */
 	color?: LoadingSpinnerVariantProps['color'];
-	/** Sets the spinner size. */
+	/**
+	 * Sets the spinner size.
+	 * @default 'medium'
+	 */
 	size?: LoadingSpinnerVariantProps['size'];
 }
 

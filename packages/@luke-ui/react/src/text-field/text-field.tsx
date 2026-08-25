@@ -42,7 +42,7 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	placeholder?: string;
 	/** Element shown before the input value. */
 	prefix?: ReactNode;
-	/** Control size. Defaults to `'medium'`. */
+	/** Control size. @default 'medium' */
 	size?: InputGroupSize;
 	/** Element shown after the input value. */
 	suffix?: ReactNode;
