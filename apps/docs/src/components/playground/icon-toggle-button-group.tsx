@@ -1,4 +1,5 @@
 import { buttonRecipe } from '@luke-ui/react/button';
+import type { ButtonRecipeVariants } from '@luke-ui/react/button';
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import { cx } from '@luke-ui/react/utils';
@@ -14,8 +15,7 @@ type IconToggleItem<Value extends string> = {
 };
 
 type IconToggleButtonGroupProps<Value extends string> = {
-	/** Renders the controls on the parent surface instead of in a recessed well. */
-	isFlush?: boolean;
+	appearance?: ToggleButtonAppearance;
 	label: string;
 	onChange: (value: Value) => void;
 	options: ReadonlyArray<IconToggleItem<Value>>;
@@ -27,36 +27,23 @@ type TextToggleItem<Value extends string> = {
 	value: Value;
 };
 
+type ToggleButtonAppearance = Extract<ButtonRecipeVariants['appearance'], 'subtle' | 'ghost'>;
+
 type TextToggleButtonGroupProps<Value extends string> = {
-	/** Renders the controls on the parent surface instead of in a recessed well. */
-	isFlush?: boolean;
+	appearance?: ToggleButtonAppearance;
 	label: string;
 	onChange: (value: Value) => void;
 	options: ReadonlyArray<TextToggleItem<Value>>;
 	value: Value;
 };
 
-const GROUP_CLASS_NAME = 'flex items-center gap-2';
-const GROUP_WELL_CLASS_NAME = 'bg-fd-secondary p-0.5';
-
-function groupClassName(isFlush: boolean | undefined) {
-	return cx(GROUP_CLASS_NAME, !isFlush && GROUP_WELL_CLASS_NAME);
-}
-
-function toggleButtonClassName(isFlush: boolean | undefined) {
-	return buttonRecipe({
-		appearance: isFlush ? 'ghost' : 'subtle',
-		size: 'small',
-		tone: 'neutral',
-	});
-}
-
 /**
  * A round icon-only pill group for choices with well-known glyphs such as light, dark, and system.
- * It renders in a recessed well by default. Set `isFlush` for controls on a shared surface.
+ * It uses the `subtle` button appearance by default. Set `appearance` to `ghost` for controls on a
+ * shared surface.
  */
 export function IconToggleButtonGroup<Value extends string>({
-	isFlush,
+	appearance = 'subtle',
 	label,
 	onChange,
 	options,
@@ -65,7 +52,7 @@ export function IconToggleButtonGroup<Value extends string>({
 	return (
 		<ToggleButtonGroup
 			aria-label={label}
-			className={groupClassName(isFlush)}
+			className={groupClassName(appearance)}
 			disallowEmptySelection={value !== null}
 			onSelectionChange={toSelectionChangeHandler(options, onChange)}
 			orientation="horizontal"
@@ -75,7 +62,7 @@ export function IconToggleButtonGroup<Value extends string>({
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
 					aria-label={optionLabel}
-					className={toggleButtonClassName(isFlush)}
+					className={toggleButtonClassName(appearance)}
 					id={optionValue}
 					key={optionValue}
 					render={renderToggleButton}
@@ -89,11 +76,12 @@ export function IconToggleButtonGroup<Value extends string>({
 
 /**
  * A round pill group with visible text labels for choices without an established glyph, such as a
- * named theme identity. It renders in a recessed well by default. Set `isFlush` for controls on a
- * shared surface. Matches `IconToggleButtonGroup` in height, radius, and focus treatment.
+ * named theme identity. It uses the `subtle` button appearance by default. Set `appearance` to
+ * `ghost` for controls on a shared surface. Matches `IconToggleButtonGroup` in height, radius, and
+ * focus treatment.
  */
 export function TextToggleButtonGroup<Value extends string>({
-	isFlush,
+	appearance = 'subtle',
 	label,
 	onChange,
 	options,
@@ -102,7 +90,7 @@ export function TextToggleButtonGroup<Value extends string>({
 	return (
 		<ToggleButtonGroup
 			aria-label={label}
-			className={groupClassName(isFlush)}
+			className={groupClassName(appearance)}
 			disallowEmptySelection
 			onSelectionChange={toSelectionChangeHandler(options, onChange)}
 			orientation="horizontal"
@@ -111,7 +99,7 @@ export function TextToggleButtonGroup<Value extends string>({
 		>
 			{options.map(({ label: optionLabel, value: optionValue }) => (
 				<ToggleButton
-					className={toggleButtonClassName(isFlush)}
+					className={toggleButtonClassName(appearance)}
 					id={optionValue}
 					key={optionValue}
 					render={renderToggleButton}
@@ -121,6 +109,21 @@ export function TextToggleButtonGroup<Value extends string>({
 			))}
 		</ToggleButtonGroup>
 	);
+}
+
+const GROUP_CLASS_NAME = 'flex items-center gap-2';
+const GROUP_WELL_CLASS_NAME = 'bg-fd-secondary p-0.5';
+
+function groupClassName(appearance: ToggleButtonAppearance) {
+	return cx(GROUP_CLASS_NAME, appearance === 'subtle' && GROUP_WELL_CLASS_NAME);
+}
+
+function toggleButtonClassName(appearance: ToggleButtonAppearance) {
+	return buttonRecipe({
+		appearance,
+		size: 'small',
+		tone: 'neutral',
+	});
 }
 
 type RenderToggleButton = ComponentProps<typeof ToggleButton>['render'];
