@@ -21,8 +21,8 @@ import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
 
-// React Aria's `ComboBox` publishes `isDisabled`/`isInvalid` through `GroupContext`, which
-// `Group` writes onto the group element, so no `:has()` probing of descendants is needed.
+// React Aria publishes disabled and invalid state on the group, so those states
+// do not need to probe descendants.
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
 	composeInputStateSelectors();
 
@@ -174,6 +174,7 @@ const comboboxConfig = {
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
+			// Suppress the reset ring React Aria exposes on the group when an inner action is focus-visible.
 			outline: 'none',
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
