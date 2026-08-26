@@ -117,6 +117,128 @@ test('requires contracts re-exported through an intermediate local module', () =
 	]);
 });
 
+test('follows aliased values and types through an intermediate re-export', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonProps } from './public.js';\n",
+		files: {
+			'public.ts':
+				"export { InternalButton as Button, type InternalProps as ButtonProps } from './impl.js';\n",
+			'impl.ts':
+				'export interface InternalProps {}\nexport function InternalButton(props: InternalProps) {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "ButtonProps" in props frontmatter',
+	]);
+});
+
+test('follows an aliased value through an intermediate re-export', () => {
+	const fixture = createFixture({
+		entry: "export { Button } from './public.js';\n",
+		files: {
+			'public.ts': "export { InternalButton as Button } from './impl.js';\n",
+			'impl.ts': 'export declare const InternalButton: () => unknown;\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" has an unsupported exported signature "Button"',
+	]);
+});
+
+test('follows an aliased type through an intermediate re-export', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonProps } from './public.js';\n",
+		files: {
+			'public.ts':
+				"export { type InternalProps as ButtonProps } from './impl.js';\nexport function Button(props: ButtonProps) {}\n",
+			'impl.ts': 'export interface InternalProps {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "ButtonProps" in props frontmatter',
+	]);
+});
+
+test('follows aliased values and types through multiple local re-exports', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonProps } from './public.js';\n",
+		files: {
+			'public.ts':
+				"export { InternalButton as Button, type InternalProps as ButtonProps } from './bridge.js';\n",
+			'bridge.ts':
+				"export { ImplButton as InternalButton, type ImplProps as InternalProps } from './impl.js';\n",
+			'impl.ts': 'export interface ImplProps {}\nexport function ImplButton(props: ImplProps) {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "ButtonProps" in props frontmatter',
+	]);
+});
+
+test('requires a public imported type from another local module', () => {
+	const fixture = createFixture({
+		entry:
+			"export { Button } from './button.js';\nexport type { ButtonProps } from './types.js';\n",
+		files: {
+			'button.ts':
+				"import type { ButtonProps } from './types.js';\nexport function Button(props: ButtonProps) {}\n",
+			'types.ts': 'export interface ButtonProps {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "ButtonProps" in props frontmatter',
+	]);
+});
+
+test('uses the public alias for an imported type from another local module', () => {
+	const fixture = createFixture({
+		entry:
+			"export { Button } from './button.js';\nexport type { InternalProps as ButtonProps } from './types.js';\nexport { Item } from './item.js';\n",
+		files: {
+			'button.ts':
+				"import type { InternalProps } from './types.js';\nexport function Button(props: InternalProps) {}\n",
+			'types.ts': 'export interface InternalProps {}\n',
+			'item.ts':
+				"export type InternalProps = 'small' | 'large';\nexport function Item(size: InternalProps) {}\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "ButtonProps" in props frontmatter',
+	]);
+});
+
+test('excludes a public imported leaf type from another local module', () => {
+	const fixture = createFixture({
+		entry: "export { Button } from './button.js';\nexport type { ButtonSize } from './types.js';\n",
+		files: {
+			'button.ts':
+				"import type { ButtonSize } from './types.js';\nexport function Button(size: ButtonSize) {}\n",
+			'types.ts': "export type ButtonSize = 'small' | 'large';\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
+test('excludes an imported object type that is not publicly exported', () => {
+	const fixture = createFixture({
+		entry: "export { Button } from './button.js';\n",
+		files: {
+			'button.ts':
+				"import type { PrivateProps } from './types.js';\nexport function Button(props: PrivateProps) {}\n",
+			'types.ts': 'export interface PrivateProps {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
 test('excludes a recipe variant type', () => {
 	const fixture = createFixture({
 		entry: "export { buttonRecipe, type ButtonRecipeVariants } from './recipe.css.js';\n",

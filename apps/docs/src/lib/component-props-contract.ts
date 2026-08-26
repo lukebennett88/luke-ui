@@ -55,19 +55,18 @@ function findGuideIssues(
 
 	const modules = localContractModules(entryModule);
 	const publicTypes = publicTypeNames(modules);
+	const modulesByPath = new Map(modules.map((module) => [module.module.path, module]));
 	const required = new Set<string>();
 	const unsupported = new Set<string>();
 
-	for (const { module, types, values } of modules) {
-		const declarations = typeDeclarations(module);
+	for (const { module, values } of modules) {
 		for (const signature of exportedSignatures(module.program, values)) {
 			if (signature.unsupported) {
 				for (const name of values.get(signature.name) ?? []) unsupported.add(name);
 				continue;
 			}
 			for (const type of signature.types) {
-				if (!isPublicObjectType(type, types, declarations)) continue;
-				for (const name of types.get(type) ?? []) required.add(name);
+				for (const name of publicObjectContract(module, type, modulesByPath)) required.add(name);
 			}
 		}
 	}
@@ -216,9 +215,11 @@ function addReexportedName(
 	statement: AstNode,
 ): void {
 	const local = identifierName(specifier.local);
-	if (local === undefined) return;
+	const exported = identifierName(specifier.exported);
+	if (local === undefined || exported === undefined) return;
 	const kind = exportKind(statement, specifier);
-	const names = kind === 'type' ? publicExports.types.get(local) : publicExports.values.get(local);
+	const provenance = kind === 'type' ? publicExports.types : publicExports.values;
+	const names = provenance.get(exported) ?? provenance.get(local);
 	if (names === undefined) return;
 
 	const reexport = reexports.get(path) ?? { path, types: new Map(), values: new Map() };
@@ -320,14 +321,77 @@ function publicTypeNames(modules: ReadonlyArray<PublicExports>): Set<string> {
 	return names;
 }
 
-function isPublicObjectType(
+function publicObjectContract(
+	module: ParsedModule,
 	name: string,
-	publicTypes: ReadonlyMap<string, ReadonlySet<string>>,
-	declarations: ReadonlyMap<string, AstNode>,
-): boolean {
-	if (!publicTypes.has(name)) return false;
+	modules: ReadonlyMap<string, { module: ParsedModule } & PublicExports>,
+	seen: Set<string> = new Set(),
+): ReadonlySet<string> {
+	const key = `${module.path}:${name}`;
+	if (seen.has(key)) return new Set();
+	seen.add(key);
+
+	const publicNames = modules.get(module.path)?.types.get(name);
+	const declarations = typeDeclarations(module);
 	const declaration = declarations.get(name);
-	return declaration !== undefined && isObjectType(declaration, name, declarations);
+	if (publicNames !== undefined && declaration !== undefined) {
+		return isObjectType(declaration, name, declarations) ? publicNames : new Set();
+	}
+
+	const imported = importedType(module, name);
+	if (imported !== undefined) {
+		const target = modules.get(resolveLocalModule(module.path, imported.source));
+		if (target !== undefined)
+			return publicObjectContract(target.module, imported.name, modules, seen);
+	}
+
+	const reexported = reexportedType(module, name);
+	if (reexported !== undefined) {
+		const target = modules.get(resolveLocalModule(module.path, reexported.source));
+		if (target !== undefined)
+			return publicObjectContract(target.module, reexported.name, modules, seen);
+	}
+
+	return new Set();
+}
+
+function importedType(
+	module: ParsedModule,
+	name: string,
+): { name: string; source: string } | undefined {
+	for (const statement of body(module.program)) {
+		if (statement.type !== 'ImportDeclaration') continue;
+		const source = literalString(statement.source);
+		if (source === undefined || !source.startsWith('.')) continue;
+
+		for (const specifier of nodes(statement.specifiers)) {
+			if (identifierName(specifier.local) !== name) continue;
+			const imported = identifierName(specifier.imported);
+			if (imported !== undefined) return { name: imported, source };
+		}
+	}
+}
+
+function reexportedType(
+	module: ParsedModule,
+	name: string,
+): { name: string; source: string } | undefined {
+	for (const statement of body(module.program)) {
+		if (statement.type !== 'ExportNamedDeclaration') continue;
+		const source = literalString(statement.source);
+		if (source === undefined || !source.startsWith('.')) continue;
+
+		for (const specifier of nodes(statement.specifiers)) {
+			if (
+				exportKind(statement, specifier) !== 'type' ||
+				identifierName(specifier.exported) !== name
+			) {
+				continue;
+			}
+			const local = identifierName(specifier.local);
+			if (local !== undefined) return { name: local, source };
+		}
+	}
 }
 
 function typeDeclarations(module: ParsedModule): Map<string, AstNode> {
