@@ -176,6 +176,75 @@ test('requires an indirect alias that resolves to an object type', () => {
 	]);
 });
 
+test('excludes a parameterised leaf alias of a union', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonSize } from './button.js';\n",
+		files: {
+			'button.ts':
+				"type Choice<T> = T;\nexport type ButtonSize = Choice<'small' | 'large'>;\nexport function Button(size: ButtonSize) {}\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
+test('requires a parameterised alias that resolves to an object type', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonProps } from './button.js';\n",
+		files: {
+			'button.ts':
+				'type Wrap<T> = T;\nexport type ButtonProps = Wrap<{ value: string }>;\nexport function Button(props: ButtonProps) {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "ButtonProps" in props frontmatter',
+	]);
+});
+
+test('excludes a chained parameterised leaf alias', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonSize } from './button.js';\n",
+		files: {
+			'button.ts':
+				"type Identity<T> = T;\ntype Choice<T> = Identity<T>;\nexport type ButtonSize = Choice<'small' | 'large'>;\nexport function Button(size: ButtonSize) {}\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
+test('requires a chained parameterised alias that resolves to an object type', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonProps } from './button.js';\n",
+		files: {
+			'button.ts':
+				'type Identity<T> = T;\ntype Wrap<T> = Identity<T>;\nexport type ButtonProps = Wrap<{ value: string }>;\nexport function Button(props: ButtonProps) {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "ButtonProps" in props frontmatter',
+	]);
+});
+
+test('classifies private aliases using the module that declared them', () => {
+	const fixture = createFixture({
+		entry:
+			"export { Root, type RootProps } from './root.js';\nexport { Item, type ItemProps } from './item.js';\n",
+		files: {
+			'root.ts':
+				'type Alias = { value: string };\nexport type RootProps = Alias;\nexport function Root(props: RootProps) {}\n',
+			'item.ts':
+				"type Alias = 'small' | 'large';\nexport type ItemProps = Alias;\nexport function Item(size: ItemProps) {}\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "RootProps" in props frontmatter',
+	]);
+});
+
 test('reports an unsupported relevant exported signature', () => {
 	const fixture = createFixture({
 		entry: "export { Button, type ButtonProps } from './button.js';\n",

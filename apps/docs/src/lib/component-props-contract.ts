@@ -233,10 +233,10 @@ function exportedNames(program: AstNode, kind: 'type' | 'value'): Set<string> {
 }
 
 function objectTypeNames(modules: ReadonlyArray<ParsedModule>): Set<string> {
-	const declarations = typeDeclarations(modules);
 	const names = new Set<string>();
 
 	for (const module of modules) {
+		const declarations = typeDeclarations(module);
 		for (const statement of body(module.program)) {
 			if (statement.type !== 'ExportNamedDeclaration') continue;
 			const declaration = astNode(statement.declaration);
@@ -249,17 +249,15 @@ function objectTypeNames(modules: ReadonlyArray<ParsedModule>): Set<string> {
 	return names;
 }
 
-function typeDeclarations(modules: ReadonlyArray<ParsedModule>): Map<string, AstNode> {
+function typeDeclarations(module: ParsedModule): Map<string, AstNode> {
 	const declarations = new Map<string, AstNode>();
 
-	for (const module of modules) {
-		for (const statement of body(module.program)) {
-			const declaration =
-				statement.type === 'ExportNamedDeclaration' ? astNode(statement.declaration) : statement;
-			if (declaration === undefined || declarationKind(declaration) !== 'type') continue;
-			const name = declarationName(declaration);
-			if (name !== undefined) declarations.set(name, declaration);
-		}
+	for (const statement of body(module.program)) {
+		const declaration =
+			statement.type === 'ExportNamedDeclaration' ? astNode(statement.declaration) : statement;
+		if (declaration === undefined || declarationKind(declaration) !== 'type') continue;
+		const name = declarationName(declaration);
+		if (name !== undefined) declarations.set(name, declaration);
 	}
 
 	return declarations;
@@ -270,6 +268,7 @@ function isObjectType(
 	name: string,
 	declarations: ReadonlyMap<string, AstNode>,
 	seen: Set<string> = new Set(),
+	substitutions: ReadonlyMap<string, AstNode> = new Map(),
 ): boolean {
 	if (name.endsWith('RecipeVariants')) return false;
 	if (declaration.type === 'TSInterfaceDeclaration') return true;
@@ -277,25 +276,94 @@ function isObjectType(
 	if (seen.has(name)) return false;
 	seen.add(name);
 
-	const annotation = astNode(declaration.typeAnnotation);
+	return isObjectAnnotation(
+		astNode(declaration.typeAnnotation),
+		declarations,
+		substitutions,
+		seen,
+	);
+}
+
+// Follow a local alias, substituting type parameters. Names outside this module stay object-shaped.
+function isObjectAnnotation(
+	annotation: AstNode | undefined,
+	declarations: ReadonlyMap<string, AstNode>,
+	substitutions: ReadonlyMap<string, AstNode>,
+	seen: Set<string>,
+): boolean {
+	if (annotation === undefined) return false;
 	if (
-		annotation?.type === 'TSTypeLiteral' ||
-		annotation?.type === 'TSIntersectionType' ||
-		annotation?.type === 'TSMappedType'
+		annotation.type === 'TSTypeLiteral' ||
+		annotation.type === 'TSIntersectionType' ||
+		annotation.type === 'TSMappedType'
 	) {
 		return true;
 	}
+	if (annotation.type !== 'TSTypeReference') return false;
 
-	if (annotation?.type !== 'TSTypeReference') return false;
-	// Follow a simple local alias. Parameterized references and names outside the
-	// scanned modules stay object-shaped.
-	if (hasTypeArguments(annotation)) return true;
+	const name = identifierName(annotation.typeName);
+	if (name === undefined) return true;
 
-	const referenced = identifierName(annotation.typeName);
-	if (referenced === undefined) return true;
-	const target = declarations.get(referenced);
+	if (!hasTypeArguments(annotation)) {
+		const substituted = substitutions.get(name);
+		if (substituted !== undefined) {
+			return isObjectAnnotation(substituted, declarations, substitutions, seen);
+		}
+	}
+
+	const target = declarations.get(name);
 	if (target === undefined) return true;
-	return isObjectType(target, referenced, declarations, seen);
+	return isObjectType(
+		target,
+		name,
+		declarations,
+		seen,
+		bindTypeParameters(target, annotation, substitutions),
+	);
+}
+
+function bindTypeParameters(
+	declaration: AstNode,
+	reference: AstNode,
+	substitutions: ReadonlyMap<string, AstNode>,
+): Map<string, AstNode> {
+	const names = typeParameterNames(declaration);
+	const args = nodes(astNode(reference.typeArguments)?.params);
+	const bound = new Map<string, AstNode>();
+
+	for (const [index, name] of names.entries()) {
+		const argument = args[index];
+		if (argument === undefined) continue;
+		bound.set(name, resolveSubstitutions(argument, substitutions));
+	}
+
+	return bound;
+}
+
+function typeParameterNames(declaration: AstNode): ReadonlyArray<string> {
+	return nodes(astNode(declaration.typeParameters)?.params).flatMap((parameter) => {
+		const name = identifierName(parameter.name);
+		return name === undefined ? [] : [name];
+	});
+}
+
+function resolveSubstitutions(
+	annotation: AstNode,
+	substitutions: ReadonlyMap<string, AstNode>,
+): AstNode {
+	const seen = new Set<string>();
+	let current = annotation;
+
+	while (current.type === 'TSTypeReference' && !hasTypeArguments(current)) {
+		const name = identifierName(current.typeName);
+		if (name === undefined || seen.has(name)) break;
+		seen.add(name);
+		const next = substitutions.get(name);
+		if (next === undefined) break;
+		current = next;
+	}
+
+	return current;
 }
 
 function hasTypeArguments(node: AstNode): boolean {
