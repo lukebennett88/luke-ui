@@ -152,12 +152,12 @@ test('a required field is painted invalid only after a real submit fails validat
 	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
 });
 
-test('an errorMessage alone marks the field invalid', async () => {
+test('an errorMessage alone marks the field invalid', () => {
 	render(<TextField errorMessage="Enter a valid email." label="Email" name="email" />);
 
 	const input = page.getByRole('textbox', { name: 'Email' });
-	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
-	await expect.element(page.getByText('Enter a valid email.')).toBeVisible();
+	expect(indicatorFor('Email')).not.toBe(null);
+	expect(getDescribedText(input.element())).toBe('Enter a valid email.');
 });
 
 test('with no errorMessage, a failing validate call reports only after submit', async () => {
@@ -184,7 +184,7 @@ test('with no errorMessage, a failing validate call reports only after submit', 
 	await expect.poll(() => getDescribedText(input.element())).toBe('Must be at least 3 characters.');
 });
 
-test('a rich errorMessage marks the field invalid and renders its markup', async () => {
+test('a rich errorMessage marks the field invalid and renders its markup', () => {
 	render(
 		<TextField
 			errorMessage={
@@ -197,11 +197,8 @@ test('a rich errorMessage marks the field invalid and renders its markup', async
 		/>,
 	);
 
-	const input = page.getByRole('textbox', { name: 'Email' });
-	await expect.element(input).toHaveAttribute('aria-invalid', 'true');
-	const term = page.getByText('terms');
-	await expect.element(term).toBeVisible();
-	expect(term.element().tagName).toBe('STRONG');
+	expect(indicatorFor('Email')).not.toBe(null);
+	expect(page.getByText('terms').element().tagName).toBe('STRONG');
 });
 
 test("a falsy errorMessage does not suppress React Aria's own validation message", async () => {

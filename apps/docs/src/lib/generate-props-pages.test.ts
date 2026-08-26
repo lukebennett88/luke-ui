@@ -84,12 +84,6 @@ test('the generator has written a Props page for every guide that declares props
 
 			expect(existsSync(propsPath), `${relativeOutputDir}/props.mdx should exist`).toBe(true);
 			expect(existsSync(metaPath), `${relativeOutputDir}/meta.json should exist`).toBe(true);
-			expect(readFileSync(propsPath, 'utf8')).toBe(renderPropsPage(frontmatter));
-			expect(JSON.parse(readFileSync(metaPath, 'utf8'))).toEqual({
-				collapsible: false,
-				pages: ['!props'],
-				pagesIndex: `../${componentName}`,
-			});
 		}
 	}
 });

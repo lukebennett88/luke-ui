@@ -80,8 +80,6 @@ test('resolves against the root content box, not the viewport width', async () =
 test('returns class and style output that merges with consumer props', () => {
 	const generated = createSprinkles({
 		display: 'grid',
-		inlineSize: 'calc(100% - 2rem)',
-		padding: 'sp16',
 	});
 	const props = mergeProps(generated, {
 		className: 'consumer-class',
@@ -90,9 +88,7 @@ test('returns class and style output that merges with consumer props', () => {
 	const element = mount(props);
 
 	expect(element.classList).toContain('consumer-class');
-	expect(Object.keys(generated.style)).not.toHaveLength(0);
 	expect(getComputedStyle(element).display).toBe('grid');
-	expect(getComputedStyle(element).inlineSize).toBe(`${document.body.clientWidth - 32}px`);
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
 

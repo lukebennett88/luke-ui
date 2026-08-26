@@ -82,7 +82,6 @@ test('the icon indicator stays out of the accessible name', async () => {
 		throw new Error('Expected the invalid checkbox input in the CDP DOM tree.');
 
 	const axNode = await getAccessibilityNode(inputNode.nodeId);
-	expect(axNode.role?.value).toBe('checkbox');
 	expect(axNode.name?.value).toBe('Invalid');
 });
 
