@@ -11,15 +11,12 @@ import {
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterEach, expect, test } from 'vite-plus/test';
-import {
-	generatePropsPages,
-	parseComponentFrontmatter,
-	renderPropsPage,
-} from '../../scripts/generate-props-pages.js';
+import { generatePropsPages, renderPropsPage } from '../../scripts/generate-props-pages.js';
+import { parseComponentFrontmatter } from './docs-frontmatter.js';
 
 const componentsDir = resolve(import.meta.dirname, '../../content/docs/components');
 
-test('renders a single-entry Props page with no sub-headings', () => {
+test('renders a single-entry Props page without a type heading', () => {
 	const frontmatter = parseComponentFrontmatter(`---
 title: Button
 description: A labelled control for actions in an interface.
@@ -49,22 +46,20 @@ source: packages/@luke-ui/react/src/primitives/field
 props:
   - name: FieldProps
     path: packages/@luke-ui/react/src/primitives/field/field.tsx
-    heading: Field
   - name: FieldLabelProps
     path: packages/@luke-ui/react/src/primitives/field/label.tsx
-    heading: FieldLabel
 ---
 `);
 
 	const page = renderPropsPage(frontmatter);
 	expect(page).toContain('## Props');
-	expect(page).toContain('### Field');
-	expect(page).toContain('### FieldLabel');
+	expect(page).toContain('### FieldProps');
+	expect(page).toContain('### FieldLabelProps');
 	expect(page).toContain(
 		'<auto-type-table path="packages/@luke-ui/react/src/primitives/field/field.tsx" name="FieldProps" />',
 	);
 	expect(page).toContain('name="FieldLabelProps"');
-	expect(page.indexOf('### Field')).toBeLessThan(page.indexOf('### FieldLabel'));
+	expect(page.indexOf('### FieldProps')).toBeLessThan(page.indexOf('### FieldLabelProps'));
 });
 
 test('the generator has written a Props page for every guide that declares props', () => {

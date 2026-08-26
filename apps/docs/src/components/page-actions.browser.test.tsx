@@ -78,7 +78,9 @@ test('reports the copied state after Copy Markdown succeeds', async () => {
 		storybookUrl: null,
 	});
 
-	await userEvent.click(page.getByRole('button', { name: 'Copy Markdown' }));
+	await act(async () => {
+		await userEvent.click(page.getByRole('button', { name: 'Copy Markdown' }));
+	});
 
 	await expect.element(page.getByRole('button', { name: 'Copied' })).toBeVisible();
 	expect(writeText).toHaveBeenCalledWith('# Example');
