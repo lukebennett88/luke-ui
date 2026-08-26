@@ -61,7 +61,6 @@ function readFrontmatterValue(contents: string, key: keyof DocsFrontmatter): str
 }
 
 export interface PropsEntry {
-	heading?: string;
 	name: string;
 	path: string;
 }
@@ -97,7 +96,7 @@ export function parseComponentFrontmatter(contents: string): ComponentFrontmatte
 	return { copiedLines, props };
 }
 
-/** Parses a `props:` block's `- name: … / path: … / heading: …` list items, in file order. */
+/** Parses a `props:` block's `- name: … / path: …` list items, in file order. */
 function parsePropsEntries(lines: ReadonlyArray<string>): ReadonlyArray<PropsEntry> {
 	const entries: Array<Partial<PropsEntry>> = [];
 
@@ -120,6 +119,6 @@ function parsePropsEntries(lines: ReadonlyArray<string>): ReadonlyArray<PropsEnt
 	return entries.map((entry) => {
 		if (entry.name === undefined) throw new Error('props entry is missing name');
 		if (entry.path === undefined) throw new Error('props entry is missing path');
-		return { heading: entry.heading, name: entry.name, path: entry.path };
+		return { name: entry.name, path: entry.path };
 	});
 }

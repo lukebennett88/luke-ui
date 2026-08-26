@@ -24,8 +24,6 @@ export const docs = defineDocs({
 			props: z
 				.array(
 					z.object({
-						/** Heading text for entries backed by more than one type, e.g. `CheckboxContent`. */
-						heading: z.string().optional(),
 						/** Exported type name to render, e.g. `ButtonProps`. */
 						name: z.string(),
 						/** Repo-relative path to the file exporting `name`, e.g. `packages/@luke-ui/react/src/button/button.tsx`. */

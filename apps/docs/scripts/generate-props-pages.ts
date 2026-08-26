@@ -86,8 +86,7 @@ export function renderPropsPage(frontmatter: ComponentFrontmatter): string {
 	const frontmatterBlock = frontmatter.copiedLines.join('\n');
 	const entries = frontmatter.props
 		.map((entry) => {
-			const heading = entry.heading === undefined ? '' : `### ${entry.heading}\n\n`;
-			return `${heading}${renderAutoTypeTable(entry)}`;
+			return `### ${entry.name}\n\n${renderAutoTypeTable(entry)}`;
 		})
 		.join('\n\n');
 

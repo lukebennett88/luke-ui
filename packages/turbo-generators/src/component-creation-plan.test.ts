@@ -103,7 +103,6 @@ describe('createComponentPlan', () => {
 		const frontmatter = parseComponentFrontmatter(guide);
 		expect(frontmatter.props).toEqual([
 			{
-				heading: undefined,
 				name: 'StatusBadgeProps',
 				path: 'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
 			},

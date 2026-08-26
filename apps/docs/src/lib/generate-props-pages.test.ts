@@ -16,7 +16,7 @@ import { parseComponentFrontmatter } from './docs-frontmatter.js';
 
 const componentsDir = resolve(import.meta.dirname, '../../content/docs/components');
 
-test('renders a single-entry Props page with no sub-headings', () => {
+test('renders a single-entry Props page with a type heading', () => {
 	const frontmatter = parseComponentFrontmatter(`---
 title: Button
 description: A labelled control for actions in an interface.
@@ -30,7 +30,7 @@ props:
 
 	const page = renderPropsPage(frontmatter);
 	expect(page).toContain('## Props');
-	expect(page).not.toContain('### ');
+	expect(page).toContain('### ButtonProps');
 	expect(page).toContain(
 		'<auto-type-table path="packages/@luke-ui/react/src/button/button.tsx" name="ButtonProps" />',
 	);
@@ -46,22 +46,20 @@ source: packages/@luke-ui/react/src/primitives/field
 props:
   - name: FieldProps
     path: packages/@luke-ui/react/src/primitives/field/field.tsx
-    heading: Field
   - name: FieldLabelProps
     path: packages/@luke-ui/react/src/primitives/field/label.tsx
-    heading: FieldLabel
 ---
 `);
 
 	const page = renderPropsPage(frontmatter);
 	expect(page).toContain('## Props');
-	expect(page).toContain('### Field');
-	expect(page).toContain('### FieldLabel');
+	expect(page).toContain('### FieldProps');
+	expect(page).toContain('### FieldLabelProps');
 	expect(page).toContain(
 		'<auto-type-table path="packages/@luke-ui/react/src/primitives/field/field.tsx" name="FieldProps" />',
 	);
 	expect(page).toContain('name="FieldLabelProps"');
-	expect(page.indexOf('### Field')).toBeLessThan(page.indexOf('### FieldLabel'));
+	expect(page.indexOf('### FieldProps')).toBeLessThan(page.indexOf('### FieldLabelProps'));
 });
 
 test('the generator has written a Props page for every guide that declares props', () => {
@@ -92,27 +90,6 @@ test('the generator has written a Props page for every guide that declares props
 				pages: ['!props'],
 				pagesIndex: `../${componentName}`,
 			});
-		}
-	}
-});
-
-test('requires headings for every entry on a multi-entry authored Props page', () => {
-	for (const group of readdirSync(componentsDir, { withFileTypes: true })) {
-		if (!group.isDirectory()) continue;
-		const groupDir = resolve(componentsDir, group.name);
-
-		for (const entry of readdirSync(groupDir, { withFileTypes: true })) {
-			if (!entry.isFile() || !entry.name.endsWith('.mdx')) continue;
-			const relativePath = `${group.name}/${entry.name}`;
-			const frontmatter = parseComponentFrontmatter(
-				readFileSync(resolve(groupDir, entry.name), 'utf8'),
-			);
-			if (frontmatter.props.length < 2) continue;
-
-			expect(
-				frontmatter.props.every((prop) => prop.heading?.trim().length),
-				`${relativePath} must give every Props entry a heading`,
-			).toBeTruthy();
 		}
 	}
 });
