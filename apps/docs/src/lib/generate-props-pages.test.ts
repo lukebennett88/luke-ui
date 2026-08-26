@@ -96,6 +96,27 @@ test('the generator has written a Props page for every guide that declares props
 	}
 });
 
+test('requires headings for every entry on a multi-entry authored Props page', () => {
+	for (const group of readdirSync(componentsDir, { withFileTypes: true })) {
+		if (!group.isDirectory()) continue;
+		const groupDir = resolve(componentsDir, group.name);
+
+		for (const entry of readdirSync(groupDir, { withFileTypes: true })) {
+			if (!entry.isFile() || !entry.name.endsWith('.mdx')) continue;
+			const relativePath = `${group.name}/${entry.name}`;
+			const frontmatter = parseComponentFrontmatter(
+				readFileSync(resolve(groupDir, entry.name), 'utf8'),
+			);
+			if (frontmatter.props.length < 2) continue;
+
+			expect(
+				frontmatter.props.every((prop) => prop.heading?.trim().length),
+				`${relativePath} must give every Props entry a heading`,
+			).toBeTruthy();
+		}
+	}
+});
+
 let scratchDir: string | undefined;
 
 afterEach(() => {
