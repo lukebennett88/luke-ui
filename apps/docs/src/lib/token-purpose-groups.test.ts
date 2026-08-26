@@ -34,7 +34,7 @@ test('routes colour families across surfaces, content, borders, and roles', () =
 		}),
 	);
 
-	for (const [path, purpose] of COLOR_PURPOSE_ROUTES) {
-		expect(purposeOf.get(path), path).toBe(purpose);
-	}
+	expect(
+		Object.fromEntries(COLOR_PURPOSE_ROUTES.map(([path]) => [path, purposeOf.get(path)])),
+	).toEqual(Object.fromEntries(COLOR_PURPOSE_ROUTES));
 });
