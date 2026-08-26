@@ -1,6 +1,6 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { buildComponentGuideInventory } from './component-guide-inventory.js';
 import { findComponentPropsContractIssues } from './component-props-contract.js';
@@ -101,6 +101,22 @@ test('requires contracts from a multipart entry point', () => {
 	]);
 });
 
+test('requires contracts re-exported through an intermediate local module', () => {
+	const fixture = createFixture({
+		entry: "export { FieldLabel, type FieldLabelProps } from './field.js';\n",
+		files: {
+			'field.ts':
+				"import type { FieldLabelProps } from './label.js';\nimport { FieldLabel } from './label.js';\nexport type { FieldLabelProps };\nexport { FieldLabel };\n",
+			'label.ts':
+				'export interface FieldLabelProps {}\nexport function FieldLabel(props: FieldLabelProps) {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "FieldLabelProps" in props frontmatter',
+	]);
+});
+
 test('excludes a recipe variant type', () => {
 	const fixture = createFixture({
 		entry: "export { buttonRecipe, type ButtonRecipeVariants } from './recipe.css.js';\n",
@@ -134,6 +150,33 @@ test('reports an unsupported relevant exported signature', () => {
 	expect(issues(fixture)).toEqual([
 		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" has an unsupported exported signature "Button"',
 	]);
+});
+
+test('does not treat a typed data constant as an unsupported signature', () => {
+	const fixture = createFixture({
+		entry: "export { iconNames, iconViewBoxes } from './icon.js';\n",
+		files: {
+			'icon.ts':
+				"export const iconNames = ['add'] as const;\nexport const iconViewBoxes: Record<string, string> = { add: '0 0 24 24' };\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
+test('does not follow public re-exports outside the entry directory', () => {
+	const fixture = createFixture({
+		entry: "export { Icon, iconNames, type IconProps } from './icon.js';\n",
+		files: {
+			'icon.ts':
+				"import { iconNames } from '../generated/icon-data.js';\nexport { iconNames };\nexport interface IconProps {}\nexport function Icon(props: IconProps) {}\n",
+			'../generated/icon-data.ts':
+				'export declare const iconNames: (props: IconProps) => unknown;\n',
+		},
+		props: ['IconProps'],
+	});
+
+	expect(issues(fixture)).toEqual([]);
 });
 
 test('reports frontmatter props that the entry point does not export', () => {
@@ -173,7 +216,9 @@ function createFixture(input: {
 	writeFileSync(join(sourceDir, 'index.ts'), input.entry);
 
 	for (const [path, contents] of Object.entries(input.files)) {
-		writeFileSync(join(sourceDir, path), contents);
+		const filePath = join(sourceDir, path);
+		mkdirSync(dirname(filePath), { recursive: true });
+		writeFileSync(filePath, contents);
 	}
 
 	const props = input.props ?? [];

@@ -1,10 +1,8 @@
 import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vite-plus/test';
 import { ZodError } from 'zod';
-import {
-	parseComponentFrontmatter,
-	renderPropsPage,
-} from '../../../apps/docs/scripts/generate-props-pages.js';
+import { renderPropsPage } from '../../../apps/docs/scripts/generate-props-pages.js';
+import { parseComponentFrontmatter } from '../../../apps/docs/src/lib/docs-frontmatter.js';
 import {
 	COMPONENT_DEFAULTS,
 	createComponentPlan,
