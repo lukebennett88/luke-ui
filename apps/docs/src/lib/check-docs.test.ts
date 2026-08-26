@@ -589,6 +589,22 @@ test('reports stale category metadata when the root category disappears', () => 
 	]);
 });
 
+test('reports leftover category metadata when no guide remains in that category', () => {
+	const paths = inventoryFixture({
+		components: {},
+		metadata: {
+			'actions/meta.json': { pages: ['button'], title: 'Actions' },
+			'meta.json': { pages: [], root: true, title: 'Components' },
+		},
+		packageExports: [],
+		sourceDirs: [],
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'component-guide-inventory: actions/meta.json: pages [button] do not match the root metadata (expected [])',
+	]);
+});
+
 test('reports a root metadata entry that has no guide', () => {
 	const paths = inventoryFixture({
 		metadata: {

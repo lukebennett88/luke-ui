@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseComponentFrontmatter, readFrontmatter } from './docs-frontmatter.js';
 
@@ -120,6 +120,12 @@ export function findCategoryMetadataIssues(
 		if (!expectedByGroup.has(group)) expectedByGroup.set(group, []);
 	}
 
+	// Leftover <group>/meta.json files are otherwise invisible once the root
+	// metadata and the guides no longer mention that category.
+	for (const group of categoryDirectories(componentsDir)) {
+		if (!expectedByGroup.has(group)) expectedByGroup.set(group, []);
+	}
+
 	for (const [group, expected] of expectedByGroup) {
 		const metaPath = resolve(componentsDir, group, 'meta.json');
 
@@ -139,6 +145,16 @@ export function findCategoryMetadataIssues(
 	}
 
 	return issues;
+}
+
+function categoryDirectories(componentsDir: string): Array<string> {
+	if (!existsSync(componentsDir)) return [];
+
+	return readdirSync(componentsDir, { withFileTypes: true }).flatMap((entry) => {
+		if (!entry.isDirectory()) return [];
+		if (!existsSync(resolve(componentsDir, entry.name, 'meta.json'))) return [];
+		return [entry.name];
+	});
 }
 
 /**
