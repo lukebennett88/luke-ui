@@ -388,7 +388,8 @@ the wordmark, the primary destinations, search, and the appearance controls. The
 `/`, the landing page. Docs opens `/docs/installation`. Components opens `/components`. The
 destination list and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`, so
 the nav and the docs layout navigate to the same places. Appearance controls belong to the nav on
-every surface, not to the docs sidebar footer.
+every surface, not to the docs sidebar footer. They use flush ghost toggles so they sit on the
+header's translucent background instead of painting an opaque well.
 
 The landing page at `/` renders `SiteNav` with no docs sidebar. It has no active destination.
 
@@ -404,6 +405,10 @@ they never appear twice. It also keeps the bar on one row at exactly `h-14`, whi
 `--fd-header-height` is declared to match, so changing the bar's height means changing both.
 Surfaces with no sidebar keep the destinations at every width, moving them to a second nav row below
 `md`.
+
+The notebook article and each example frame use `isolation: isolate` so in-flow stacking, such as
+example resize grips, cannot paint over the sticky header. Do not raise the header `z-index` to
+compete with page content.
 
 ## Playground
 

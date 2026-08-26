@@ -39,3 +39,12 @@ code > * {
 .luke-ui-theme #nd-notebook-layout article h1:first-of-type {
 	line-height: 36px;
 }
+
+/*
+ * Contain in-flow stacking (example resize grips, code copy controls) so
+ * descendants cannot paint over the sticky header. Isolation rather than a
+ * higher header z-index.
+ */
+.luke-ui-theme #nd-notebook-layout article {
+	isolation: isolate;
+}

@@ -10,12 +10,14 @@ const COLOR_MODES = [
 
 type ColorMode = (typeof COLOR_MODES)[number]['value'];
 
+/** Lets someone choose the light, dark, or system colour mode. */
 export function ColorModeToggle() {
 	const { setTheme } = useTheme();
 	const colorMode = useHydratedColorModeSelection();
 
 	return (
 		<IconToggleButtonGroup
+			appearance="ghost"
 			label="Colour mode"
 			onChange={setTheme}
 			options={COLOR_MODES}
