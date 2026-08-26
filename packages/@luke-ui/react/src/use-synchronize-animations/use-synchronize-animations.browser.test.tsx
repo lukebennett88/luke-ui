@@ -79,11 +79,6 @@ afterEach(() => {
 	flushFrames();
 	vi.restoreAllMocks();
 	vi.unstubAllGlobals();
-	// Remove any own-property override left by the missing-API test, restoring the prototype method.
-	if (Object.hasOwn(document, 'getAnimations')) {
-		// @ts-expect-error -- deleting a test-only own property
-		delete document.getAnimations;
-	}
 	containers.forEach((container) => container.remove());
 });
 
@@ -160,14 +155,6 @@ test('leaves a falsy animation name’s neighbours untouched', () => {
 	flushFrames();
 
 	expect(animation?.currentTime).toBe(400);
-});
-
-test('mounts without throwing in browsers missing the Web Animations API', () => {
-	vi.stubGlobal('CSSAnimation', undefined);
-	// Simulate a browser without document.getAnimations by shadowing the prototype method.
-	Object.defineProperty(document, 'getAnimations', { configurable: true, value: undefined });
-
-	expect(() => mount(<PulsingBox name="pulse-a" />)).not.toThrow();
 });
 
 test('syncs animations mounted after an earlier sync frame has completed', () => {

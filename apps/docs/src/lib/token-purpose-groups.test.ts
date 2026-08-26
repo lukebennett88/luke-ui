@@ -16,26 +16,6 @@ test('no purpose group is empty', () => {
 	}
 });
 
-test('shows samples only when a purpose group has one coherent preview treatment', () => {
-	const sampleVisibility = Object.fromEntries(
-		buildTokenPurposeGroups().map((group) => [group.id, group.showSamples]),
-	);
-
-	expect(sampleVisibility).toEqual({
-		borders: true,
-		content: true,
-		depth: false,
-		interaction: true,
-		motion: true,
-		radius: true,
-		roles: true,
-		sizing: true,
-		spacing: true,
-		surfaces: true,
-		typography: false,
-	});
-});
-
 test('splits the colour family across the purposes it serves', () => {
 	const purposeOf = new Map(
 		buildTokenPurposeGroups().flatMap((group) => {

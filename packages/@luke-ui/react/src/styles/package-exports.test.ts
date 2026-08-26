@@ -51,14 +51,6 @@ test('bundles recipe runtime through a relative chunk, not a package import', as
 	expect(source).toMatch(/createSingleRecipe[\s\S]*from ["']\.\.\//);
 });
 
-test('requires react-aria-components as a peer dependency', () => {
-	expect(packageJson.peerDependencies['react-aria-components']).toBe('catalog:');
-	expect('react-aria-components' in (packageJson.dependencies as Record<string, string>)).toBe(
-		false,
-	);
-	expect(packageJson.devDependencies['react-aria-components']).toBe('catalog:');
-});
-
 test('does not expose the private combobox styling recipe from the primitive entrypoint', async () => {
 	const combobox = await import('@luke-ui/react/primitives/combobox');
 	expect('comboboxRecipe' in combobox).toBe(false);

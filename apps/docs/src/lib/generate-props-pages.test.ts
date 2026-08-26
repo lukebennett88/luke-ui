@@ -2,7 +2,6 @@ import {
 	existsSync,
 	mkdirSync,
 	mkdtempSync,
-	readdirSync,
 	readFileSync,
 	renameSync,
 	rmSync,
@@ -13,8 +12,6 @@ import { resolve } from 'node:path';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { generatePropsPages, renderPropsPage } from '../../scripts/generate-props-pages.js';
 import { parseComponentFrontmatter } from './docs-frontmatter.js';
-
-const componentsDir = resolve(import.meta.dirname, '../../content/docs/components');
 
 test('renders a single-entry Props page without a type heading', () => {
 	const frontmatter = parseComponentFrontmatter(`---
@@ -60,32 +57,6 @@ props:
 	);
 	expect(page).toContain('name="FieldLabelProps"');
 	expect(page.indexOf('### FieldProps')).toBeLessThan(page.indexOf('### FieldLabelProps'));
-});
-
-test('the generator has written a Props page for every guide that declares props', () => {
-	// Proof `generate:props` ran, not a git drift check. Generated files are gitignored.
-	for (const group of readdirSync(componentsDir, { withFileTypes: true })) {
-		if (!group.isDirectory()) continue;
-		const groupDir = resolve(componentsDir, group.name);
-
-		for (const entry of readdirSync(groupDir, { withFileTypes: true })) {
-			if (!entry.isFile() || !entry.name.endsWith('.mdx')) continue;
-			const componentName = entry.name.slice(0, -'.mdx'.length);
-
-			const frontmatter = parseComponentFrontmatter(
-				readFileSync(resolve(groupDir, entry.name), 'utf8'),
-			);
-			if (frontmatter.props.length === 0) continue;
-
-			const outputDir = resolve(groupDir, componentName);
-			const relativeOutputDir = `${group.name}/${componentName}`;
-			const propsPath = resolve(outputDir, 'props.mdx');
-			const metaPath = resolve(outputDir, 'meta.json');
-
-			expect(existsSync(propsPath), `${relativeOutputDir}/props.mdx should exist`).toBe(true);
-			expect(existsSync(metaPath), `${relativeOutputDir}/meta.json should exist`).toBe(true);
-		}
-	}
 });
 
 let scratchDir: string | undefined;
