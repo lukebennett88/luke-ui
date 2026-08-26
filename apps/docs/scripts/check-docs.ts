@@ -9,6 +9,7 @@ import {
 	findGuideSourceIssues,
 	findRepeatedMetadataIssues,
 } from '../src/lib/component-guide-inventory.js';
+import { findComponentPropsContractIssues } from '../src/lib/component-props-contract.js';
 import { readFrontmatter } from '../src/lib/docs-frontmatter.js';
 import { findMdxFiles } from '../src/lib/docs-mdx-files.js';
 import { exampleBlockSources } from '../src/lib/example-block-sources.js';
@@ -86,7 +87,6 @@ export function findDocsIssues(paths: DocsCheckPaths = defaultDocsCheckPaths): A
 			(issue) => `component-doc-contract: ${issue}`,
 		),
 	);
-
 	for (const guide of componentGuides) {
 		issues.push(...findComponentHeadingIssues(guide));
 	}
@@ -108,6 +108,11 @@ export function findDocsIssues(paths: DocsCheckPaths = defaultDocsCheckPaths): A
 			...findCategoryMetadataIssues(inventory, paths.componentsDir),
 			...findGuideSourceIssues(inventory, paths.reactPackageDir),
 		].map((issue) => `component-guide-inventory: ${issue}`),
+	);
+	issues.push(
+		...findComponentPropsContractIssues(inventory, paths.reactPackageDir).map(
+			(issue) => `component-props-contract: ${issue}`,
+		),
 	);
 
 	issues.push(...findSharedExampleIssues(paths.contentDir));
