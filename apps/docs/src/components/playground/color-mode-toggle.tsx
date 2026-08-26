@@ -10,12 +10,13 @@ const COLOR_MODES = [
 
 type ColorMode = (typeof COLOR_MODES)[number]['value'];
 
-export function ColorModeToggle() {
+export function ColorModeToggle({ isFlush }: { isFlush?: boolean }) {
 	const { setTheme } = useTheme();
 	const colorMode = useHydratedColorModeSelection();
 
 	return (
 		<IconToggleButtonGroup
+			isFlush={isFlush}
 			label="Colour mode"
 			onChange={setTheme}
 			options={COLOR_MODES}

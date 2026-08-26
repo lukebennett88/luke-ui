@@ -388,7 +388,8 @@ the wordmark, the primary destinations, search, and the appearance controls. The
 `/`, the landing page. Docs opens `/docs/installation`. Components opens `/components`. The
 destination list and its active-route matching live in `apps/docs/src/lib/site-destinations.ts`, so
 the nav and the docs layout navigate to the same places. Appearance controls belong to the nav on
-every surface, not to the docs sidebar footer.
+every surface, not to the docs sidebar footer. They use flush ghost toggles so they sit on the
+header's translucent background instead of painting an opaque well.
 
 The landing page at `/` renders `SiteNav` with no docs sidebar. It has no active destination.
 

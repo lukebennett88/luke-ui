@@ -68,12 +68,13 @@ export function ThemeControls({ className, ...props }: ComponentProps<'div'>) {
 	return (
 		<div {...props} className={cx('flex items-center gap-1', className)}>
 			<TextToggleButtonGroup
+				isFlush
 				label="Theme profile"
 				onChange={setThemeIdentity}
 				options={THEME_IDENTITIES}
 				value={themeIdentity}
 			/>
-			<ColorModeToggle />
+			<ColorModeToggle isFlush />
 		</div>
 	);
 }
