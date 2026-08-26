@@ -1,7 +1,7 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { createVar } from '@vanilla-extract/css';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
-import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
+import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -21,10 +21,15 @@ import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
 // `::after` icon matches the trigger/clear chevrons at each size instead of a constant.
 const comboboxErrorIconSize = createVar();
 
-// React Aria's `ComboBox` publishes `isDisabled`/`isInvalid` through `GroupContext`, which
-// `Group` writes onto the group element, so no `:has()` probing of descendants is needed.
+// React Aria publishes disabled and invalid state on the group, so those states
+// do not need to probe descendants.
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
 	composeInputStateSelectors();
+
+// The well ring tracks the text input so inner actions do not paint a second ring.
+const inputFocus = `${focusWithin}:has(input:focus)`;
+const invalidInputFocus = `${invalidFocusWithin}:has(input:focus)`;
+const readOnlyInputFocus = `${readOnlyFocusWithin}:has(input:focus)`;
 
 const comboboxActionStyles = {
 	'@media': {
@@ -144,8 +149,8 @@ const comboboxConfig = {
 					forcedColorAdjust: 'auto',
 					selectors: {
 						[disabled]: { borderColor: 'GrayText', color: 'GrayText', opacity: 1 },
-						[focusWithin]: { outlineColor: 'Highlight' },
-						[invalidFocusWithin]: { outlineColor: 'Highlight' },
+						[inputFocus]: { outlineColor: 'Highlight' },
+						[invalidInputFocus]: { outlineColor: 'Highlight' },
 						// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 						// here touches `::after`, so this already covers the focused case.
 						[`${invalid}::after`]: invalidIndicatorIconForcedColors,
@@ -169,7 +174,8 @@ const comboboxConfig = {
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
-			...restingFocusRing('0px'),
+			// Suppress the reset ring React Aria exposes on the group when an inner action is focus-visible.
+			outline: 'none',
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, color',
@@ -177,7 +183,7 @@ const comboboxConfig = {
 
 			selectors: {
 				[disabled]: { cursor: 'not-allowed', opacity: vars.interaction.disabledOpacity },
-				[focusWithin]: {
+				[inputFocus]: {
 					borderColor: vars.color.border.accent,
 					...focusRing(vars.color.border.focus),
 				},
@@ -192,7 +198,7 @@ const comboboxConfig = {
 				// `invalidFocusWithin` is a strict subset of `invalid` and nothing else
 				// here touches `::after`, so this already covers the focused case.
 				[`${invalid}::after`]: invalidIndicatorIcon(comboboxErrorIconSize),
-				[invalidFocusWithin]: {
+				[invalidInputFocus]: {
 					borderColor: vars.color.background.danger.solid.rest,
 					...focusRing(vars.color.border.focus),
 				},
@@ -201,7 +207,7 @@ const comboboxConfig = {
 					borderColor: vars.color.border.decorative,
 					boxShadow: 'none',
 				},
-				[readOnlyFocusWithin]: { ...focusRing(vars.color.border.focus) },
+				[readOnlyInputFocus]: { ...focusRing(vars.color.border.focus) },
 			},
 		},
 		textInput: {

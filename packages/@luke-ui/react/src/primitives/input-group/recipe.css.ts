@@ -1,4 +1,4 @@
-import { focusRing, restingFocusRing } from '../../styles/focus-ring.js';
+import { focusRing } from '../../styles/focus-ring.js';
 import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
@@ -58,7 +58,6 @@ const inputGroupConfig = {
 			letterSpacing: FONT_METRIC_SCALE[16].letterSpacing,
 			lineHeight: FONT_METRIC_SCALE[16].lineHeight,
 			minInlineSize: 0,
-			...restingFocusRing('0px'),
 			overflow: 'visible',
 			transitionDuration: vars.motion.duration.feedback,
 			transitionProperty: 'background-color, border-color, color',
