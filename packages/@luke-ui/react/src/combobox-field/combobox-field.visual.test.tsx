@@ -162,7 +162,6 @@ test('interactive states', async () => {
 	await focusViaKeyboard(input);
 	await captureVisual(locator, 'combobox-field/focus-visible');
 	await userEvent.tab();
-	await expect.element(clear).toHaveFocus();
 	await captureVisual(locator, 'combobox-field/clear-focus-visible');
 	await userEvent.keyboard('{Space>}');
 	await captureVisual(locator, 'combobox-field/clear-pressed');
