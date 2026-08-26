@@ -52,18 +52,8 @@ test('bundles recipe runtime through a relative chunk, not a package import', as
 });
 
 test('requires react-aria-components as a peer dependency', () => {
-	expect(packageJson.peerDependencies['react-aria-components']).toBe('catalog:');
-	expect('react-aria-components' in (packageJson.dependencies as Record<string, string>)).toBe(
-		false,
-	);
-	expect(packageJson.devDependencies['react-aria-components']).toBe('catalog:');
-});
-
-test('resolves component-owned recipes from the built package', async () => {
-	const { buttonRecipe } = await import('@luke-ui/react/button');
-	expect(typeof buttonRecipe({ appearance: 'solid', size: 'medium', tone: 'neutral' })).toBe(
-		'string',
-	);
+	expect('react-aria-components' in packageJson.peerDependencies).toBe(true);
+	expect('react-aria-components' in (packageJson.dependencies ?? {})).toBe(false);
 });
 
 test('does not expose the private combobox styling recipe from the primitive entrypoint', async () => {

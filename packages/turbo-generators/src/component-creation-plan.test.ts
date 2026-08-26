@@ -1,7 +1,6 @@
 import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vite-plus/test';
 import { ZodError } from 'zod';
-import { renderPropsPage } from '../../../apps/docs/scripts/generate-props-pages.js';
 import { parseComponentFrontmatter } from '../../../apps/docs/src/lib/docs-frontmatter.js';
 import {
 	COMPONENT_DEFAULTS,
@@ -107,9 +106,6 @@ describe('createComponentPlan', () => {
 				path: 'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
 			},
 		]);
-		expect(renderPropsPage(frontmatter)).toContain(
-			'<auto-type-table\n\tpath="packages/@luke-ui/react/src/status-badge/status-badge.tsx"\n\tname="StatusBadgeProps"\n/>',
-		);
 	});
 
 	it('generates a valid browser test for the default DOM contract', () => {

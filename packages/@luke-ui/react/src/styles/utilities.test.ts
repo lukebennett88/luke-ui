@@ -14,14 +14,13 @@ test('exposes the responsive layout and appearance property surface', () => {
 });
 
 test('resolves backgroundColor and borderColor tokens to their theme variables', () => {
-	const { className, style } = createSprinkles({
+	const { style } = createSprinkles({
 		backgroundColor: 'accent.solid.rest',
 		borderColor: 'focus',
 	});
 
-	expect(className).toBeTruthy();
-	// Asserting the `var(--luke-*)` references rather than mere truthiness: an unregistered token
-	// still yields a class, with the raw string assigned as the custom property value.
+	// An unregistered token still yields a class, with the raw string assigned as the custom
+	// property value, so the contract is the `var(--luke-*)` references.
 	expect(Object.values(style ?? {}).sort()).toEqual([
 		'var(--luke-color-background-accent-solid-rest)',
 		'var(--luke-color-border-focus)',

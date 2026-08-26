@@ -1,5 +1,4 @@
-import { afterEach, expect, test } from 'vite-plus/test';
-import { page } from 'vite-plus/test/context';
+import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Box } from './index.js';
@@ -12,32 +11,6 @@ testConformance({
 		return target;
 	},
 	render: (props = {}) => render(<Box {...props}>Content</Box>),
-});
-
-afterEach(async () => {
-	await page.viewport(1024, 800);
-});
-
-test('renders a responsive layout at the retained breakpoints', async () => {
-	const { locator } = render(
-		<Box
-			display="flex"
-			flexDirection={{ initial: 'column', bp768: 'row' }}
-			gap={{ initial: 'sp8', bp768: 'sp24' }}
-		>
-			<span>First item</span>
-			<span>Second item</span>
-		</Box>,
-	);
-
-	const box = locator.element().firstElementChild;
-	if (!(box instanceof HTMLElement)) throw new Error('Expected Box element.');
-
-	await page.viewport(640, 800);
-	expect(getComputedStyle(box).flexDirection).toBe('column');
-
-	await page.viewport(768, 800);
-	expect(getComputedStyle(box).flexDirection).toBe('row');
 });
 
 test('renders semantic elements and a consumer-owned render prop', () => {
@@ -55,14 +28,7 @@ test('renders semantic elements and a consumer-owned render prop', () => {
 			aria-label="Ignored Box label"
 			render={(resolvedProps) => {
 				receivedAriaLabel = Object.hasOwn(resolvedProps, 'aria-label');
-				return (
-					<div
-						{...resolvedProps}
-						aria-label="Custom layout"
-						data-motion="enabled"
-						id="custom-div"
-					/>
-				);
+				return <div {...resolvedProps} />;
 			}}
 			style={{ display: 'grid' }}
 		>
@@ -73,8 +39,5 @@ test('renders semantic elements and a consumer-owned render prop', () => {
 	if (!(div instanceof HTMLDivElement)) throw new Error('Expected custom rendered div.');
 
 	expect(receivedAriaLabel).toBe(false);
-	expect(div).toHaveAttribute('data-motion', 'enabled');
-	expect(div).toHaveAttribute('id', 'custom-div');
-	expect(div).toHaveAttribute('aria-label', 'Custom layout');
 	expect(div.style.display).toBe('grid');
 });

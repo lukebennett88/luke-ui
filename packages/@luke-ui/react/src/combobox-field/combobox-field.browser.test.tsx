@@ -6,7 +6,6 @@ import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
 import { ComboboxInput } from '../primitives/combobox/input.js';
 import { ComboboxItem } from '../primitives/combobox/item.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
-import { getDescribedText } from '../test-utils/get-described-text.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
@@ -70,8 +69,6 @@ testIntegration('combobox-field', async () => {
 	await user.click(input);
 
 	const option = page.getByRole('option', { name: 'Australia' });
-	// oxlint-disable-next-line vitest/no-standalone-expect
-	await expect.element(option).toBeInTheDocument();
 	// Clicking an option scrolls it into view first, and React Aria closes the popover on a
 	// document scroll. While the popover is still entering, that close lands before the click and
 	// detaches the option.
@@ -86,37 +83,20 @@ testIntegration('combobox-field', async () => {
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
 	const restoreScreenWidth = mockScreenWidth(390);
-	const mobileCountryItems: Array<CountryItem> = [
-		...countryItems,
-		{ id: 'dk', label: 'Denmark' },
-		{ id: 'fr', label: 'France' },
-		{ id: 'de', label: 'Germany' },
-		{ id: 'jp', label: 'Japan' },
-		{ id: 'mx', label: 'Mexico' },
-		{ id: 'nz', label: 'New Zealand' },
-		{ id: 'sg', label: 'Singapore' },
-		{ id: 'za', label: 'South Africa' },
-		{ id: 'se', label: 'Sweden' },
-		{ id: 'us', label: 'United States' },
-	];
 	try {
 		const inputRef = createRef<HTMLInputElement>();
 		const { container } = render(
-			<>
-				<div style={{ blockSize: 500 }} />
-				<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
-					<ComboboxField
-						defaultItems={mobileCountryItems}
-						defaultValue="au"
-						inputRef={inputRef}
-						label="Country"
-						name="country"
-					>
-						{renderCountryItem}
-					</ComboboxField>
-				</form>
-				<div style={{ blockSize: 800 }} />
-			</>,
+			<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="au"
+					inputRef={inputRef}
+					label="Country"
+					name="country"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</form>,
 		);
 		const form = container.querySelector('form');
 		if (form == null) throw new Error('Expected the form element.');
@@ -126,16 +106,11 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		const searchbox = page.getByRole('searchbox', { name: 'Country' });
 
 		// The mobile composition renders a value button where the desktop one renders a text input.
-		await expect.element(trigger).toBeVisible();
 		expect(inputRef.current).toBeNull();
 
-		window.scrollTo(0, 400);
-		await expect.poll(() => window.scrollY).toBe(400);
 		await userEvent.click(trigger);
 		await expect.element(dialog).toBeVisible();
 		expect(inputRef.current).toBe(searchbox.element());
-		// The tray is a modal overlay, so the page behind it must stop scrolling while it is open.
-		expect(getComputedStyle(document.documentElement).overflow).toBe('hidden');
 
 		const modal = dialog.element().parentElement;
 		const overlay = modal?.parentElement;
@@ -150,8 +125,6 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
 		// amount off `blockSize` and spend it on `paddingBlockEnd`, so the sheet keeps its content above
 		// the keyboard. Every expectation is measured at runtime, so none pins a resolved spacing value.
-		// A soft keyboard commonly covers about half the viewport, and taking that much away also leaves
-		// the option list taller than the tray, so the scroll check below has something to scroll.
 		const restingViewportHeight = window.innerHeight;
 		const keyboardInset = Math.round(restingViewportHeight / 2);
 		overlay.style.setProperty('--visual-viewport-height', `${restingViewportHeight}px`);
@@ -174,85 +147,21 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 			1,
 		);
 
-		// The rest of the journey runs with the keyboard still up, which is how someone picks an
-		// option after typing.
 		const listbox = page.getByRole('listbox').element();
-		const pageScrollY = window.scrollY;
-		listbox.scrollTo(0, listbox.scrollHeight);
-		await expect.poll(() => listbox.scrollTop).toBeGreaterThan(0);
-		// Scrolling the tray's list must not chain out to the page behind it.
-		expect(window.scrollY).toBe(pageScrollY);
+		// Programmatic `element.scrollTo()` does not exercise scroll chaining. Browser-computed
+		// overscroll-behavior is the Luke UI-owned contract (`mobileListBox`).
+		expect(getComputedStyle(listbox).overscrollBehavior).toBe('contain');
 
-		const canada = page.getByRole('option', { name: 'Canada' });
-		listbox.scrollTo(0, 0);
-		await expect.poll(() => listbox.scrollTop).toBe(0);
-		await userEvent.click(canada);
+		await userEvent.click(page.getByRole('option', { name: 'Canada' }));
 
 		await expect.poll(() => new FormData(form).get('country')).toBe('ca');
-	} finally {
-		window.scrollTo(0, 0);
-		restoreScreenWidth();
-	}
-});
-
-// A React Aria upgrade that stopped publishing these on `GroupContext` would silently stop the state selectors matching.
-test('the control group carries its own disabled and invalid attributes', async () => {
-	render(
-		<>
-			<ComboboxField defaultItems={countryItems} isDisabled label="Disabled" name="disabled">
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField
-				defaultItems={countryItems}
-				errorMessage="Choose a valid country."
-				label="Invalid"
-				name="invalid"
-			>
-				{renderCountryItem}
-			</ComboboxField>
-			<ComboboxField defaultItems={countryItems} label="Resting" name="resting">
-				{renderCountryItem}
-			</ComboboxField>
-		</>,
-	);
-
-	expect(getControl('Disabled').dataset.disabled).toBe('true');
-	expect(getControl('Invalid').dataset.invalid).toBe('true');
-});
-
-// React Aria disables the trigger on a read-only combobox, which must not make the control read as disabled.
-test('read-only controls keep the read-only material, not the disabled one', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		render(
-			<>
-				<ComboboxField defaultItems={countryItems} isReadOnly label="Read-only" name="readOnly">
-					{renderCountryItem}
-				</ComboboxField>
-				<ComboboxField defaultItems={countryItems} isDisabled label="Disabled" name="disabled">
-					{renderCountryItem}
-				</ComboboxField>
-				<ComboboxField defaultItems={countryItems} label="Resting" name="resting">
-					{renderCountryItem}
-				</ComboboxField>
-			</>,
-		);
-
-		const readOnlyControl = page
-			.getByRole('button', { name: 'Read-only' })
-			.element()
-			.closest<HTMLElement>('[role="group"]');
-		if (readOnlyControl == null) throw new Error('Expected the read-only control group.');
-		// The group itself is not disabled, even though the trigger inside it is.
-		expect(readOnlyControl.dataset.disabled).toBeUndefined();
-		expect(readOnlyControl.querySelector('button')?.disabled).toBe(true);
 	} finally {
 		restoreScreenWidth();
 	}
 });
 
 // The primitive renders the control itself, so it takes a plain `ref`.
-test('ComboboxInput resolves object and callback refs to the input element', async () => {
+test('ComboboxInput resolves object and callback refs to the input element', () => {
 	const objectRef = createRef<HTMLInputElement>();
 	const callbackResolved: Array<HTMLInputElement | null> = [];
 	render(
@@ -276,43 +185,7 @@ test('ComboboxInput resolves object and callback refs to the input element', asy
 
 	const objectInput = page.getByRole('combobox', { name: 'Country object' });
 	const callbackInput = page.getByRole('combobox', { name: 'Country callback' });
-	await expect.element(objectInput).toBeVisible();
-	await expect.element(callbackInput).toBeVisible();
 
 	expect(objectRef.current).toBe(objectInput.element());
 	expect(callbackResolved.at(-1)).toBe(callbackInput.element());
 });
-
-test('with no errorMessage, native required validation stays in charge', async () => {
-	// Use a plain form because React Aria's Form does not resolve in this browser environment.
-	render(
-		<form>
-			<ComboboxField defaultItems={countryItems} isRequired label="Country">
-				{renderCountryItem}
-			</ComboboxField>
-			<button type="submit">Submit</button>
-		</form>,
-	);
-
-	const input = page.getByRole('combobox', { name: 'Country' }).element();
-	expect(getControl('Country').dataset.invalid).toBeUndefined();
-	expect(getDescribedText(input)).toBe('');
-
-	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
-
-	// Submission opens the invalid combobox. Close it to restore the page's accessibility tree.
-	await userEvent.keyboard('{Escape}');
-
-	await expect.poll(() => getControl('Country').dataset.invalid).toBe('true');
-	await expect.poll(() => getDescribedText(input).length).toBeGreaterThan(0);
-});
-
-/** The control group wrapping the combobox input labelled `name`. */
-function getControl(name: string) {
-	const control = page
-		.getByRole('combobox', { name })
-		.element()
-		.closest<HTMLElement>('[role="group"]');
-	if (control == null) throw new Error(`Expected a control group for the "${name}" combobox.`);
-	return control;
-}

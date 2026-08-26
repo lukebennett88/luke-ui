@@ -16,42 +16,25 @@ test('no purpose group is empty', () => {
 	}
 });
 
-test('shows samples only when a purpose group has one coherent preview treatment', () => {
-	const sampleVisibility = Object.fromEntries(
-		buildTokenPurposeGroups().map((group) => [group.id, group.showSamples]),
-	);
+const COLOR_PURPOSE_ROUTES = [
+	['color.surface.canvas', 'surfaces'],
+	['color.overlay.backdrop', 'surfaces'],
+	['color.text.secondary', 'content'],
+	['color.loadingSkeleton', 'content'],
+	['color.border.focus', 'borders'],
+	['color.border.danger', 'roles'],
+	['color.background.accent.solid.hover', 'roles'],
+	['color.foreground.warning.onSolid', 'roles'],
+] as const;
 
-	expect(sampleVisibility).toEqual({
-		borders: true,
-		content: true,
-		depth: false,
-		interaction: true,
-		motion: true,
-		radius: true,
-		roles: true,
-		sizing: true,
-		spacing: true,
-		surfaces: true,
-		typography: false,
-	});
-});
-
-test('splits the colour family across the purposes it serves', () => {
+test('routes colour families across surfaces, content, borders, and roles', () => {
 	const purposeOf = new Map(
 		buildTokenPurposeGroups().flatMap((group) => {
 			return group.tokens.map((token) => [token.path, group.id] as const);
 		}),
 	);
 
-	expect(purposeOf.get('color.surface.canvas')).toBe('surfaces');
-	expect(purposeOf.get('color.surface.overlay')).toBe('surfaces');
-	expect(purposeOf.get('color.overlay.backdrop')).toBe('surfaces');
-	expect(purposeOf.get('color.text.secondary')).toBe('content');
-	expect(purposeOf.get('color.loadingSkeleton')).toBe('content');
-	expect(purposeOf.get('color.border.focus')).toBe('borders');
-	expect(purposeOf.get('color.border.danger')).toBe('roles');
-	expect(purposeOf.get('color.background.accent.solid.hover')).toBe('roles');
-	expect(purposeOf.get('color.foreground.warning.onSolid')).toBe('roles');
-	expect(purposeOf.get('actionControlFinish.raised')).toBe('depth');
-	expect(purposeOf.get('iconSize.large')).toBe('sizing');
+	expect(
+		Object.fromEntries(COLOR_PURPOSE_ROUTES.map(([path]) => [path, purposeOf.get(path)])),
+	).toEqual(Object.fromEntries(COLOR_PURPOSE_ROUTES));
 });

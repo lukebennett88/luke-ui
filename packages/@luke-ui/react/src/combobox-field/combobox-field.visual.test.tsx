@@ -133,6 +133,19 @@ test('kitchen sink', async () => {
 				>
 					{renderCountryItem}
 				</ComboboxField>
+				<ComboboxRoot defaultItems={countryItems} name="small-group-medium-trigger" size="small">
+					<Field label="Small group, medium trigger">
+						<ComboboxInputGroup>
+							<ComboboxInput placeholder="Select a country..." />
+							<ComboboxTrigger aria-label="Toggle medium trigger" size="medium">
+								<Icon aria-hidden name="chevronDown" />
+							</ComboboxTrigger>
+						</ComboboxInputGroup>
+						<ComboboxPopover offset={4}>
+							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
+						</ComboboxPopover>
+					</Field>
+				</ComboboxRoot>
 			</Stack>,
 			{ appearance },
 		);
