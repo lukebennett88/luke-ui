@@ -16,7 +16,7 @@ import { parseComponentFrontmatter } from './docs-frontmatter.js';
 
 const componentsDir = resolve(import.meta.dirname, '../../content/docs/components');
 
-test('renders a single-entry Props page with a type heading', () => {
+test('renders a single-entry Props page without a type heading', () => {
 	const frontmatter = parseComponentFrontmatter(`---
 title: Button
 description: A labelled control for actions in an interface.
@@ -30,7 +30,7 @@ props:
 
 	const page = renderPropsPage(frontmatter);
 	expect(page).toContain('## Props');
-	expect(page).toContain('### ButtonProps');
+	expect(page).not.toContain('### ');
 	expect(page).toContain(
 		'<auto-type-table path="packages/@luke-ui/react/src/button/button.tsx" name="ButtonProps" />',
 	);

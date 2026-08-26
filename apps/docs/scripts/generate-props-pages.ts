@@ -84,9 +84,11 @@ export function generatePropsPages(rootDir: string = componentsDir): {
 
 export function renderPropsPage(frontmatter: ComponentFrontmatter): string {
 	const frontmatterBlock = frontmatter.copiedLines.join('\n');
+	const withTypeHeadings = frontmatter.props.length > 1;
 	const entries = frontmatter.props
 		.map((entry) => {
-			return `### ${entry.name}\n\n${renderAutoTypeTable(entry)}`;
+			const table = renderAutoTypeTable(entry);
+			return withTypeHeadings ? `### ${entry.name}\n\n${table}` : table;
 		})
 		.join('\n\n');
 

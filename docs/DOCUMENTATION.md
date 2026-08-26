@@ -377,7 +377,8 @@ Add only the sections that help a developer use the component. The generated gui
 primary example and no placeholder prose, and `check:docs` fails on a leftover placeholder.
 
 Keep cross-reference sections near the end. Put only the `## Props` section and its
-`<auto-type-table>` content on `props.mdx`.
+`<auto-type-table>` content on `props.mdx`. A page with one table has no extra heading. A page with
+several tables uses the type name as a heading above each one.
 
 ## API reference
 
