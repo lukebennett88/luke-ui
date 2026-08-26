@@ -14,7 +14,7 @@ type IconToggleItem<Value extends string> = {
 };
 
 type IconToggleButtonGroupProps<Value extends string> = {
-	/** Sit on the parent surface with no well. Used on the translucent site nav. */
+	/** Renders the controls on the parent surface instead of in a recessed well. */
 	isFlush?: boolean;
 	label: string;
 	onChange: (value: Value) => void;
@@ -28,7 +28,7 @@ type TextToggleItem<Value extends string> = {
 };
 
 type TextToggleButtonGroupProps<Value extends string> = {
-	/** Sit on the parent surface with no well. Used on the translucent site nav. */
+	/** Renders the controls on the parent surface instead of in a recessed well. */
 	isFlush?: boolean;
 	label: string;
 	onChange: (value: Value) => void;
@@ -51,7 +51,10 @@ function toggleButtonClassName(isFlush: boolean | undefined) {
 	});
 }
 
-/** A round icon-only pill group, for choices with well-known glyphs such as light/dark/system. */
+/**
+ * A round icon-only pill group for choices with well-known glyphs such as light, dark, and system.
+ * It renders in a recessed well by default. Set `isFlush` for controls on a shared surface.
+ */
 export function IconToggleButtonGroup<Value extends string>({
 	isFlush,
 	label,
@@ -85,8 +88,9 @@ export function IconToggleButtonGroup<Value extends string>({
 }
 
 /**
- * A round pill group with visible text labels, for choices without an established glyph, such as
- * a named theme identity. Matches `IconToggleButtonGroup` in height, radius, and focus treatment.
+ * A round pill group with visible text labels for choices without an established glyph, such as a
+ * named theme identity. It renders in a recessed well by default. Set `isFlush` for controls on a
+ * shared surface. Matches `IconToggleButtonGroup` in height, radius, and focus treatment.
  */
 export function TextToggleButtonGroup<Value extends string>({
 	isFlush,

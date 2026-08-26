@@ -116,17 +116,21 @@ function renderPreviewHarness({ withStickyHeader = false }: { withStickyHeader?:
 	act(() => {
 		root?.render(
 			<DocsThemeRoot>
-				{withStickyHeader ? (
-					<header className="sticky top-0 z-10 bg-fd-background" style={{ blockSize: '3.5rem' }}>
-						Page header
-					</header>
-				) : null}
-				<div style={withStickyHeader ? { paddingInlineEnd: '4rem' } : undefined}>
-					<ExamplePreview isCodeShown={false} title="Resize harness">
-						<div style={{ blockSize: withStickyHeader ? '16rem' : '4rem' }} />
-					</ExamplePreview>
+				<div id={withStickyHeader ? 'nd-notebook-layout' : undefined}>
+					{withStickyHeader ? (
+						<header className="sticky top-0 z-10 bg-fd-background" style={{ blockSize: '3.5rem' }}>
+							Page header
+						</header>
+					) : null}
+					<article>
+						<div style={withStickyHeader ? { paddingInlineEnd: '4rem' } : undefined}>
+							<ExamplePreview isCodeShown={false} title="Resize harness">
+								<div style={{ blockSize: withStickyHeader ? '16rem' : '4rem' }} />
+							</ExamplePreview>
+						</div>
+					</article>
+					{withStickyHeader ? <div style={{ blockSize: '100vh' }} /> : null}
 				</div>
-				{withStickyHeader ? <div style={{ blockSize: '100vh' }} /> : null}
 			</DocsThemeRoot>,
 		);
 	});

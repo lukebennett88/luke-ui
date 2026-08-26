@@ -10,7 +10,13 @@ const COLOR_MODES = [
 
 type ColorMode = (typeof COLOR_MODES)[number]['value'];
 
-export function ColorModeToggle({ isFlush }: { isFlush?: boolean }) {
+type ColorModeToggleProps = {
+	/** Renders the controls on the parent surface instead of in a recessed well. */
+	isFlush?: boolean;
+};
+
+/** Lets someone choose the light, dark, or system colour mode. */
+export function ColorModeToggle({ isFlush }: ColorModeToggleProps) {
 	const { setTheme } = useTheme();
 	const colorMode = useHydratedColorModeSelection();
 
