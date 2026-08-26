@@ -15,7 +15,7 @@ interface ParsedModule {
 	program: AstNode;
 }
 
-/** Checks Props frontmatter against object contracts in a public component entry point. */
+/** Checks Props frontmatter against object contracts from a public entry point and its local re-export chain. */
 export function findComponentPropsContractIssues(
 	inventory: ComponentGuideInventory,
 	reactPackageDir: string,
@@ -48,9 +48,10 @@ function findGuideIssues(
 	const entryModule = parseModule(entryPath);
 	if (entryModule === undefined) return [];
 
-	const modules = [entryModule, ...localExportModules(entryModule)];
 	const publicTypes = publicTypeNames(entryModule.program);
 	const publicValues = publicValueNames(entryModule.program);
+	const publicNames = new Set([...publicTypes, ...publicValues]);
+	const modules = [entryModule, ...localContractModules(entryModule, publicNames)];
 	const objectTypes = objectTypeNames(modules);
 	const required = new Set<string>();
 	const unsupported = new Set<string>();
@@ -94,24 +95,90 @@ function findGuideIssues(
 	return issues;
 }
 
-function localExportModules(entryModule: ParsedModule): Array<ParsedModule> {
+// Public names may be imported and re-exported by an intermediate file. Follow those local
+// modules so the callable signature that is inspected is the one consumers actually import.
+function localContractModules(
+	entryModule: ParsedModule,
+	publicNames: ReadonlySet<string>,
+): Array<ParsedModule> {
 	const modules: Array<ParsedModule> = [];
-	const paths = new Set<string>();
+	const seen = new Set<string>([entryModule.path]);
+	const pending: Array<ParsedModule> = [entryModule];
 
-	for (const statement of body(entryModule.program)) {
-		if (statement.type !== 'ExportNamedDeclaration') continue;
-		const source = literalString(statement.source);
-		if (source === undefined || !source.startsWith('.')) continue;
+	while (pending.length > 0) {
+		const current = pending.pop();
+		if (current === undefined) continue;
 
-		const path = resolveLocalModule(entryModule.path, source);
-		if (paths.has(path)) continue;
-		paths.add(path);
+		for (const path of localReexportPaths(current, publicNames)) {
+			if (seen.has(path) || path.endsWith('.css.ts')) continue;
+			seen.add(path);
 
-		const module = parseModule(path);
-		if (module !== undefined && !module.path.endsWith('.css.ts')) modules.push(module);
+			const module = parseModule(path);
+			if (module === undefined) continue;
+			modules.push(module);
+			pending.push(module);
+		}
 	}
 
 	return modules;
+}
+
+function localReexportPaths(module: ParsedModule, publicNames: ReadonlySet<string>): Array<string> {
+	const importedLocals = new Map<string, string>();
+
+	for (const statement of body(module.program)) {
+		if (statement.type !== 'ImportDeclaration') continue;
+		const source = literalString(statement.source);
+		if (source === undefined || !source.startsWith('.')) continue;
+
+		for (const specifier of nodes(statement.specifiers)) {
+			const local = identifierName(specifier.local);
+			if (local !== undefined) importedLocals.set(local, source);
+		}
+	}
+
+	const paths = new Set<string>();
+
+	for (const statement of body(module.program)) {
+		if (statement.type !== 'ExportNamedDeclaration') continue;
+		const source = literalString(statement.source);
+
+		if (source !== undefined) {
+			if (!source.startsWith('.')) continue;
+			if (exportsPublicName(statement, publicNames)) {
+				paths.add(resolveLocalModule(module.path, source));
+			}
+			continue;
+		}
+
+		for (const specifier of nodes(statement.specifiers)) {
+			if (!exportsPublicSpecifier(specifier, publicNames)) continue;
+			const local = identifierName(specifier.local);
+			if (local === undefined) continue;
+			const importSource = importedLocals.get(local);
+			if (importSource !== undefined) {
+				paths.add(resolveLocalModule(module.path, importSource));
+			}
+		}
+	}
+
+	return [...paths];
+}
+
+function exportsPublicName(statement: AstNode, publicNames: ReadonlySet<string>): boolean {
+	for (const specifier of nodes(statement.specifiers)) {
+		if (exportsPublicSpecifier(specifier, publicNames)) return true;
+	}
+	return false;
+}
+
+function exportsPublicSpecifier(specifier: AstNode, publicNames: ReadonlySet<string>): boolean {
+	const exported = identifierName(specifier.exported);
+	const local = identifierName(specifier.local);
+	return (
+		(exported !== undefined && publicNames.has(exported)) ||
+		(local !== undefined && publicNames.has(local))
+	);
 }
 
 function resolveLocalModule(entryPath: string, specifier: string): string {

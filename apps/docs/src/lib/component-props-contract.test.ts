@@ -101,6 +101,22 @@ test('requires contracts from a multipart entry point', () => {
 	]);
 });
 
+test('requires contracts re-exported through an intermediate local module', () => {
+	const fixture = createFixture({
+		entry: "export { FieldLabel, type FieldLabelProps } from './field.js';\n",
+		files: {
+			'field.ts':
+				"import type { FieldLabelProps } from './label.js';\nimport { FieldLabel } from './label.js';\nexport type { FieldLabelProps };\nexport { FieldLabel };\n",
+			'label.ts':
+				'export interface FieldLabelProps {}\nexport function FieldLabel(props: FieldLabelProps) {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "FieldLabelProps" in props frontmatter',
+	]);
+});
+
 test('excludes a recipe variant type', () => {
 	const fixture = createFixture({
 		entry: "export { buttonRecipe, type ButtonRecipeVariants } from './recipe.css.js';\n",
