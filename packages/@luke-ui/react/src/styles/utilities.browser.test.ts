@@ -78,8 +78,12 @@ test('resolves against the root content box, not the viewport width', async () =
 });
 
 test('returns class and style output that merges with consumer props', () => {
+	// `display` is a static class. `inlineSize` is a dynamic property, so Sprinkles emits inline
+	// style for it. A consumer style-only fixture would still pass if `mergeProps` dropped the
+	// generated `style`.
 	const generated = createSprinkles({
 		display: 'grid',
+		inlineSize: '400px',
 	});
 	const props = mergeProps(generated, {
 		className: 'consumer-class',
@@ -87,8 +91,10 @@ test('returns class and style output that merges with consumer props', () => {
 	});
 	const element = mount(props);
 
+	expect(Object.keys(generated.style ?? {})).not.toHaveLength(0);
 	expect(element.classList).toContain('consumer-class');
 	expect(getComputedStyle(element).display).toBe('grid');
+	expect(getComputedStyle(element).inlineSize).toBe('400px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
 

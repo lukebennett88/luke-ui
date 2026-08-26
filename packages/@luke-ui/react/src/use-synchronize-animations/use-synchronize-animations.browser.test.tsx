@@ -157,6 +157,17 @@ test('leaves a falsy animation name’s neighbours untouched', () => {
 	expect(animation?.currentTime).toBe(400);
 });
 
+test('mounts without throwing in browsers missing the Web Animations API', () => {
+	vi.stubGlobal('CSSAnimation', undefined);
+	Object.defineProperty(document, 'getAnimations', { configurable: true, value: undefined });
+
+	try {
+		expect(() => mount(<PulsingBox name="pulse-a" />)).not.toThrow();
+	} finally {
+		Reflect.deleteProperty(document, 'getAnimations');
+	}
+});
+
 test('syncs animations mounted after an earlier sync frame has completed', () => {
 	mount(<PulsingBox name="pulse-a" />);
 	const [first] = cssAnimationsNamed('pulse-a');

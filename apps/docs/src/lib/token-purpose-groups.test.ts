@@ -15,3 +15,26 @@ test('no purpose group is empty', () => {
 		expect(group.tokens.length, `${group.id} has no tokens`).toBeGreaterThan(0);
 	}
 });
+
+const COLOR_PURPOSE_ROUTES = [
+	['color.surface.canvas', 'surfaces'],
+	['color.overlay.backdrop', 'surfaces'],
+	['color.text.secondary', 'content'],
+	['color.loadingSkeleton', 'content'],
+	['color.border.focus', 'borders'],
+	['color.border.danger', 'roles'],
+	['color.background.accent.solid.hover', 'roles'],
+	['color.foreground.warning.onSolid', 'roles'],
+] as const;
+
+test('routes colour families across surfaces, content, borders, and roles', () => {
+	const purposeOf = new Map(
+		buildTokenPurposeGroups().flatMap((group) => {
+			return group.tokens.map((token) => [token.path, group.id] as const);
+		}),
+	);
+
+	for (const [path, purpose] of COLOR_PURPOSE_ROUTES) {
+		expect(purposeOf.get(path), path).toBe(purpose);
+	}
+});
