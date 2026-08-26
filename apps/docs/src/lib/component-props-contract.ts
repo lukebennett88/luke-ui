@@ -233,6 +233,7 @@ function exportedNames(program: AstNode, kind: 'type' | 'value'): Set<string> {
 }
 
 function objectTypeNames(modules: ReadonlyArray<ParsedModule>): Set<string> {
+	const declarations = typeDeclarations(modules);
 	const names = new Set<string>();
 
 	for (const module of modules) {
@@ -241,25 +242,65 @@ function objectTypeNames(modules: ReadonlyArray<ParsedModule>): Set<string> {
 			const declaration = astNode(statement.declaration);
 			if (declaration === undefined || declarationKind(declaration) !== 'type') continue;
 			const name = declarationName(declaration);
-			if (name !== undefined && isObjectType(declaration, name)) names.add(name);
+			if (name !== undefined && isObjectType(declaration, name, declarations)) names.add(name);
 		}
 	}
 
 	return names;
 }
 
-function isObjectType(declaration: AstNode, name: string): boolean {
+function typeDeclarations(modules: ReadonlyArray<ParsedModule>): Map<string, AstNode> {
+	const declarations = new Map<string, AstNode>();
+
+	for (const module of modules) {
+		for (const statement of body(module.program)) {
+			const declaration =
+				statement.type === 'ExportNamedDeclaration' ? astNode(statement.declaration) : statement;
+			if (declaration === undefined || declarationKind(declaration) !== 'type') continue;
+			const name = declarationName(declaration);
+			if (name !== undefined) declarations.set(name, declaration);
+		}
+	}
+
+	return declarations;
+}
+
+function isObjectType(
+	declaration: AstNode,
+	name: string,
+	declarations: ReadonlyMap<string, AstNode>,
+	seen: Set<string> = new Set(),
+): boolean {
 	if (name.endsWith('RecipeVariants')) return false;
 	if (declaration.type === 'TSInterfaceDeclaration') return true;
 	if (declaration.type !== 'TSTypeAliasDeclaration') return false;
+	if (seen.has(name)) return false;
+	seen.add(name);
 
 	const annotation = astNode(declaration.typeAnnotation);
-	return (
+	if (
 		annotation?.type === 'TSTypeLiteral' ||
 		annotation?.type === 'TSIntersectionType' ||
-		annotation?.type === 'TSTypeReference' ||
 		annotation?.type === 'TSMappedType'
-	);
+	) {
+		return true;
+	}
+
+	if (annotation?.type !== 'TSTypeReference') return false;
+	// Follow a simple local alias. Parameterized references and names outside the
+	// scanned modules stay object-shaped.
+	if (hasTypeArguments(annotation)) return true;
+
+	const referenced = identifierName(annotation.typeName);
+	if (referenced === undefined) return true;
+	const target = declarations.get(referenced);
+	if (target === undefined) return true;
+	return isObjectType(target, referenced, declarations, seen);
+}
+
+function hasTypeArguments(node: AstNode): boolean {
+	const typeArguments = astNode(node.typeArguments);
+	return typeArguments !== undefined && nodes(typeArguments.params).length > 0;
 }
 
 function exportedSignatures(

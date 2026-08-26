@@ -138,6 +138,44 @@ test('excludes a leaf type', () => {
 	expect(issues(fixture)).toEqual([]);
 });
 
+test('excludes a leaf alias of a union', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonSize } from './button.js';\n",
+		files: {
+			'button.ts':
+				"type Size = 'small' | 'large';\nexport type ButtonSize = Size;\nexport function Button(size: ButtonSize) {}\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
+test('excludes an indirect leaf alias', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonSize } from './button.js';\n",
+		files: {
+			'button.ts':
+				"type Size = 'small' | 'large';\ntype Alias = Size;\nexport type ButtonSize = Alias;\nexport function Button(size: ButtonSize) {}\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
+test('requires an indirect alias that resolves to an object type', () => {
+	const fixture = createFixture({
+		entry: "export { Button, type ButtonProps } from './button.js';\n",
+		files: {
+			'button.ts':
+				'type Inner = { value: string };\ntype Alias = Inner;\nexport type ButtonProps = Alias;\nexport function Button(props: ButtonProps) {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "ButtonProps" in props frontmatter',
+	]);
+});
+
 test('reports an unsupported relevant exported signature', () => {
 	const fixture = createFixture({
 		entry: "export { Button, type ButtonProps } from './button.js';\n",
