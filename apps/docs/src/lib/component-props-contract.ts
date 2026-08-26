@@ -276,12 +276,7 @@ function isObjectType(
 	if (seen.has(name)) return false;
 	seen.add(name);
 
-	return isObjectAnnotation(
-		astNode(declaration.typeAnnotation),
-		declarations,
-		substitutions,
-		seen,
-	);
+	return isObjectAnnotation(astNode(declaration.typeAnnotation), declarations, substitutions, seen);
 }
 
 // Follow a local alias, substituting type parameters. Names outside this module stay object-shaped.
