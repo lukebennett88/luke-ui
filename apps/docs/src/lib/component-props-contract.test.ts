@@ -152,7 +152,7 @@ test('follows an aliased type through an intermediate re-export', () => {
 		entry: "export { Button, type ButtonProps } from './public.js';\n",
 		files: {
 			'public.ts':
-				"export { type InternalProps as ButtonProps } from './impl.js';\nexport function Button(props: ButtonProps) {}\n",
+				"import type { InternalProps as ButtonProps } from './impl.js';\nexport { type InternalProps as ButtonProps } from './impl.js';\nexport function Button(props: ButtonProps) {}\n",
 			'impl.ts': 'export interface InternalProps {}\n',
 		},
 	});
