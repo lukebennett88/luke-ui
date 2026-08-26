@@ -3,22 +3,13 @@ import { resolve } from 'node:path';
 import { parseComponentFrontmatter, readFrontmatter } from './docs-frontmatter.js';
 
 const SOURCE_PREFIX = 'packages/@luke-ui/react/src/';
-const CATEGORY_SEPARATOR = /^---(.+)---$/;
 
-/** One authored component guide, keyed by the `<group>/<name>` slug the navigation uses. */
+/** One authored component guide, keyed by the slug the navigation uses. */
 interface ComponentGuide {
-	group: string;
-	name: string;
 	props: ReadonlyArray<{ name: string; path: string }>;
 	relativePath: string;
 	slug: string;
 	source: string | undefined;
-}
-
-/** A category separator and the guide slugs listed under it in the root metadata. */
-interface MetadataCategory {
-	label: string;
-	slugs: ReadonlyArray<string>;
 }
 
 /**
@@ -26,7 +17,6 @@ interface MetadataCategory {
  * check re-reads the guides or the root metadata.
  */
 export interface ComponentGuideInventory {
-	categories: ReadonlyArray<MetadataCategory>;
 	guides: ReadonlyArray<ComponentGuide>;
 	metadataEntries: ReadonlyArray<string>;
 	packageExports: ReadonlyArray<string>;
@@ -42,10 +32,9 @@ export interface ComponentGuideInventoryInput {
 export function buildComponentGuideInventory(
 	input: ComponentGuideInventoryInput,
 ): ComponentGuideInventory {
-	const { categories, metadataEntries } = readRootMetadata(input.componentsDir);
+	const metadataEntries = readRootMetadata(input.componentsDir);
 
 	return {
-		categories,
 		guides: input.guides.map((guide) => {
 			const frontmatter = parseComponentFrontmatter(guide.source);
 			const name =
@@ -54,8 +43,6 @@ export function buildComponentGuideInventory(
 					.split('/')
 					.at(-1) ?? '';
 			return {
-				group: guide.group,
-				name,
 				relativePath: guide.relativePath,
 				slug: `${guide.group}/${name}`,
 				props: frontmatter.props,
@@ -116,29 +103,38 @@ export function findCategoryMetadataIssues(
 	componentsDir: string,
 ): Array<string> {
 	const issues: Array<string> = [];
+	const expectedByGroup = new Map<string, Array<string>>();
 
-	for (const category of inventory.categories) {
-		const groups = new Set(category.slugs.map((slug) => slug.split('/')[0]));
-		for (const group of groups) {
-			if (group === undefined) continue;
-			const metaPath = resolve(componentsDir, group, 'meta.json');
-			const expected = category.slugs
-				.filter((slug) => slug.startsWith(`${group}/`))
-				.map((slug) => slug.slice(group.length + 1));
+	for (const slug of inventory.metadataEntries) {
+		const separator = slug.indexOf('/');
+		if (separator === -1) continue;
+		const group = slug.slice(0, separator);
+		const pages = expectedByGroup.get(group) ?? [];
+		pages.push(slug.slice(separator + 1));
+		expectedByGroup.set(group, pages);
+	}
 
-			if (!existsSync(metaPath)) {
-				issues.push(
-					`${group}/meta.json: missing category metadata (expected pages ${formatList(expected)})`,
-				);
-				continue;
-			}
+	for (const guide of inventory.guides) {
+		const group = guide.slug.split('/')[0];
+		if (group === undefined) continue;
+		if (!expectedByGroup.has(group)) expectedByGroup.set(group, []);
+	}
 
-			const pages = readMetaPages(metaPath);
-			if (!sameOrder(pages, expected)) {
-				issues.push(
-					`${group}/meta.json: pages ${formatList(pages)} do not match the root metadata (expected ${formatList(expected)})`,
-				);
-			}
+	for (const [group, expected] of expectedByGroup) {
+		const metaPath = resolve(componentsDir, group, 'meta.json');
+
+		if (!existsSync(metaPath)) {
+			issues.push(
+				`${group}/meta.json: missing category metadata (expected pages ${formatList(expected)})`,
+			);
+			continue;
+		}
+
+		const pages = readMetaPages(metaPath);
+		if (!sameOrder(pages, expected)) {
+			issues.push(
+				`${group}/meta.json: pages ${formatList(pages)} do not match the root metadata (expected ${formatList(expected)})`,
+			);
 		}
 	}
 
@@ -184,31 +180,18 @@ export function findGuideSourceIssues(
 	return issues;
 }
 
-function readRootMetadata(componentsDir: string): {
-	categories: Array<MetadataCategory>;
-	metadataEntries: Array<string>;
-} {
-	const categories: Array<MetadataCategory> = [];
+function readRootMetadata(componentsDir: string): Array<string> {
 	const metadataEntries: Array<string> = [];
 	const metaPath = resolve(componentsDir, 'meta.json');
-	if (!existsSync(metaPath)) return { categories, metadataEntries };
+	if (!existsSync(metaPath)) return metadataEntries;
 
 	for (const page of readMetaPages(metaPath)) {
-		const label = page.match(CATEGORY_SEPARATOR)?.[1];
-		if (label !== undefined) {
-			categories.push({ label, slugs: [] });
-			continue;
-		}
 		if (page.startsWith('!') || !page.includes('/')) continue;
 
 		metadataEntries.push(page);
-		const category = categories.at(-1);
-		if (category !== undefined) {
-			(category.slugs as Array<string>).push(page);
-		}
 	}
 
-	return { categories, metadataEntries };
+	return metadataEntries;
 }
 
 function readMetaPages(metaPath: string): Array<string> {

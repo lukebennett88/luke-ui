@@ -560,6 +560,35 @@ test('reports a guide that is absent from the root component metadata', () => {
 	]);
 });
 
+test('validates category metadata for root entries before the first separator', () => {
+	const paths = inventoryFixture({
+		metadata: {
+			'actions/meta.json': { pages: ['button'], title: 'Actions' },
+			'meta.json': {
+				pages: ['actions/button', '---Actions---'],
+				root: true,
+				title: 'Components',
+			},
+		},
+	});
+
+	expect(findDocsIssues(paths)).toEqual([]);
+});
+
+test('reports stale category metadata when the root category disappears', () => {
+	const paths = inventoryFixture({
+		metadata: {
+			'actions/meta.json': { pages: ['button'], title: 'Actions' },
+			'meta.json': { pages: [], root: true, title: 'Components' },
+		},
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'component-guide-inventory: actions/button.mdx: guide is absent from the root component metadata (expected entry "actions/button")',
+		'component-guide-inventory: actions/meta.json: pages [button] do not match the root metadata (expected [])',
+	]);
+});
+
 test('reports a root metadata entry that has no guide', () => {
 	const paths = inventoryFixture({
 		metadata: {
