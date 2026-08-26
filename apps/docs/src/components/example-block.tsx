@@ -135,7 +135,8 @@ export function ExamplePreview({
 
 	return (
 		<Group
-			className="flex"
+			// Isolate so the separator's z-index cannot paint over the sticky page header.
+			className="isolate flex"
 			orientation="horizontal"
 			resizeTargetMinimumSize={EXAMPLE_RESIZE_TARGET_MINIMUM_SIZE}
 			style={{ overflow: 'visible' }}
@@ -199,10 +200,10 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 	return (
 		<Box
 			aria-label={ariaLabel}
-			// `overflow-visible` here lets the resize separator's grip sit
-			// outside the frame's right edge; the header and preview below
-			// clip and round their own corners instead.
-			className="not-prose my-4 overflow-visible border border-fd-border"
+			// `overflow-visible` lets the resize grip sit outside the frame.
+			// `isolate` keeps that grip's stacking inside this card so it
+			// cannot paint over the sticky page header.
+			className="not-prose isolate my-4 overflow-visible border border-fd-border"
 			role={ariaLabel ? 'region' : undefined}
 			style={{ borderRadius: OUTER_RADIUS }}
 		>

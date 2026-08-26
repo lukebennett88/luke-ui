@@ -55,6 +55,30 @@ test('resizes a desktop preview from its external grip down to its minimum width
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
+test('keeps the preview resize grip below a sticky page header', async () => {
+	await page.viewport(1000, 800);
+	renderPreviewHarness({ withStickyHeader: true });
+
+	const header = container?.querySelector('header');
+	if (!header) throw new Error('expected the sticky page header');
+	const separator = page.getByRole('separator', { name: 'Resize harness preview' }).element();
+
+	separator.scrollIntoView({ block: 'center' });
+	const separatorCenterY =
+		separator.getBoundingClientRect().top + separator.getBoundingClientRect().height / 2;
+	const headerBefore = header.getBoundingClientRect();
+	window.scrollBy(0, separatorCenterY - (headerBefore.top + headerBefore.height / 2));
+
+	const headerBox = header.getBoundingClientRect();
+	const separatorBox = separator.getBoundingClientRect();
+	const overlapX = separatorBox.right + 12;
+	const overlapY = headerBox.top + headerBox.height / 2;
+
+	expect(overlapY).toBeGreaterThanOrEqual(headerBox.top);
+	expect(overlapY).toBeLessThanOrEqual(headerBox.bottom);
+	expect(document.elementFromPoint(overlapX, overlapY)).toBe(header);
+});
+
 test('narrowing the preview panel flips a responsive example below its container breakpoint', async () => {
 	await page.viewport(1000, 800);
 	await renderExampleBlock();
@@ -82,19 +106,27 @@ function renderExample(title: string) {
 // Renders `ExamplePreview` directly with a static child instead of going
 // through `ExampleBlock`'s lazily-loaded example module, so the resize
 // mechanics under test do not depend on a Suspense boundary resolving.
-function renderPreviewHarness() {
+function renderPreviewHarness({ withStickyHeader = false }: { withStickyHeader?: boolean } = {}) {
 	container = document.body.appendChild(document.createElement('div'));
 	container.className = `luke-ui-theme ${tactileThemeClassName}`;
 	// Leaves headroom to the right of the viewport for the grip, which sits
 	// outside the panel's own edge.
-	container.style.inlineSize = '800px';
+	container.style.inlineSize = withStickyHeader ? '100%' : '800px';
 	root = createRoot(container);
 	act(() => {
 		root?.render(
 			<DocsThemeRoot>
-				<ExamplePreview isCodeShown={false} title="Resize harness">
-					<div style={{ blockSize: '4rem' }} />
-				</ExamplePreview>
+				{withStickyHeader ? (
+					<header className="sticky top-0 z-10 bg-fd-background" style={{ blockSize: '3.5rem' }}>
+						Page header
+					</header>
+				) : null}
+				<div style={withStickyHeader ? { paddingInlineEnd: '4rem' } : undefined}>
+					<ExamplePreview isCodeShown={false} title="Resize harness">
+						<div style={{ blockSize: withStickyHeader ? '16rem' : '4rem' }} />
+					</ExamplePreview>
+				</div>
+				{withStickyHeader ? <div style={{ blockSize: '100vh' }} /> : null}
 			</DocsThemeRoot>,
 		);
 	});

@@ -405,6 +405,10 @@ they never appear twice. It also keeps the bar on one row at exactly `h-14`, whi
 Surfaces with no sidebar keep the destinations at every width, moving them to a second nav row below
 `md`.
 
+The notebook article and each example frame use `isolation: isolate` so in-flow stacking, such as
+example resize grips, cannot paint over the sticky header. Do not raise the header `z-index` to
+compete with page content.
+
 ## Playground
 
 The docs site has a live playground at `/playground`: a Monaco editor with TypeScript IntelliSense
