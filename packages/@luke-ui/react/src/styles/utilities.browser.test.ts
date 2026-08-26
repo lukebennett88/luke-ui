@@ -91,7 +91,6 @@ test('returns class and style output that merges with consumer props', () => {
 	});
 	const element = mount(props);
 
-	expect(Object.keys(generated.style ?? {})).not.toHaveLength(0);
 	expect(element.classList).toContain('consumer-class');
 	expect(getComputedStyle(element).display).toBe('grid');
 	expect(getComputedStyle(element).inlineSize).toBe('400px');

@@ -83,37 +83,20 @@ testIntegration('combobox-field', async () => {
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
 	const restoreScreenWidth = mockScreenWidth(390);
-	const mobileCountryItems: Array<CountryItem> = [
-		...countryItems,
-		{ id: 'dk', label: 'Denmark' },
-		{ id: 'fr', label: 'France' },
-		{ id: 'de', label: 'Germany' },
-		{ id: 'jp', label: 'Japan' },
-		{ id: 'mx', label: 'Mexico' },
-		{ id: 'nz', label: 'New Zealand' },
-		{ id: 'sg', label: 'Singapore' },
-		{ id: 'za', label: 'South Africa' },
-		{ id: 'se', label: 'Sweden' },
-		{ id: 'us', label: 'United States' },
-	];
 	try {
 		const inputRef = createRef<HTMLInputElement>();
 		const { container } = render(
-			<>
-				<div style={{ blockSize: 500 }} />
-				<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
-					<ComboboxField
-						defaultItems={mobileCountryItems}
-						defaultValue="au"
-						inputRef={inputRef}
-						label="Country"
-						name="country"
-					>
-						{renderCountryItem}
-					</ComboboxField>
-				</form>
-				<div style={{ blockSize: 800 }} />
-			</>,
+			<form aria-label="Country form" style={{ inlineSize: 'max-content' }}>
+				<ComboboxField
+					defaultItems={countryItems}
+					defaultValue="au"
+					inputRef={inputRef}
+					label="Country"
+					name="country"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</form>,
 		);
 		const form = container.querySelector('form');
 		if (form == null) throw new Error('Expected the form element.');
@@ -125,8 +108,6 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		// The mobile composition renders a value button where the desktop one renders a text input.
 		expect(inputRef.current).toBeNull();
 
-		window.scrollTo(0, 400);
-		await expect.poll(() => window.scrollY).toBe(400);
 		await userEvent.click(trigger);
 		await expect.element(dialog).toBeVisible();
 		expect(inputRef.current).toBe(searchbox.element());
@@ -144,8 +125,6 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
 		// amount off `blockSize` and spend it on `paddingBlockEnd`, so the sheet keeps its content above
 		// the keyboard. Every expectation is measured at runtime, so none pins a resolved spacing value.
-		// A soft keyboard commonly covers about half the viewport, and taking that much away also leaves
-		// the option list taller than the tray, so the overscroll check below has something to scroll.
 		const restingViewportHeight = window.innerHeight;
 		const keyboardInset = Math.round(restingViewportHeight / 2);
 		overlay.style.setProperty('--visual-viewport-height', `${restingViewportHeight}px`);
@@ -169,21 +148,14 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		);
 
 		const listbox = page.getByRole('listbox').element();
-		const pageScrollY = window.scrollY;
-		listbox.scrollTo(0, listbox.scrollHeight);
-		await expect.poll(() => listbox.scrollTop).toBeGreaterThan(0);
-		// `mobileListBox` sets `overscrollBehavior: contain` so list scrolling must not chain to
-		// the page behind the tray.
-		expect(window.scrollY).toBe(pageScrollY);
+		// Programmatic `element.scrollTo()` does not exercise scroll chaining. Browser-computed
+		// overscroll-behavior is the Luke UI-owned contract (`mobileListBox`).
+		expect(getComputedStyle(listbox).overscrollBehavior).toBe('contain');
 
-		const canada = page.getByRole('option', { name: 'Canada' });
-		listbox.scrollTo(0, 0);
-		await expect.poll(() => listbox.scrollTop).toBe(0);
-		await userEvent.click(canada);
+		await userEvent.click(page.getByRole('option', { name: 'Canada' }));
 
 		await expect.poll(() => new FormData(form).get('country')).toBe('ca');
 	} finally {
-		window.scrollTo(0, 0);
 		restoreScreenWidth();
 	}
 });
