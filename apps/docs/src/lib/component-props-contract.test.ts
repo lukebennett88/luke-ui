@@ -1,6 +1,6 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { buildComponentGuideInventory } from './component-guide-inventory.js';
 import { findComponentPropsContractIssues } from './component-props-contract.js';
@@ -152,6 +152,33 @@ test('reports an unsupported relevant exported signature', () => {
 	]);
 });
 
+test('does not treat a typed data constant as an unsupported signature', () => {
+	const fixture = createFixture({
+		entry: "export { iconNames, iconViewBoxes } from './icon.js';\n",
+		files: {
+			'icon.ts':
+				"export const iconNames = ['add'] as const;\nexport const iconViewBoxes: Record<string, string> = { add: '0 0 24 24' };\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
+test('does not follow public re-exports outside the entry directory', () => {
+	const fixture = createFixture({
+		entry: "export { Icon, iconNames, type IconProps } from './icon.js';\n",
+		files: {
+			'icon.ts':
+				"import { iconNames } from '../generated/icon-data.js';\nexport { iconNames };\nexport interface IconProps {}\nexport function Icon(props: IconProps) {}\n",
+			'../generated/icon-data.ts':
+				'export declare const iconNames: (props: IconProps) => unknown;\n',
+		},
+		props: ['IconProps'],
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
 test('reports frontmatter props that the entry point does not export', () => {
 	const fixture = createFixture({
 		entry: "export { Button, type ButtonProps } from './button.js';\n",
@@ -189,7 +216,9 @@ function createFixture(input: {
 	writeFileSync(join(sourceDir, 'index.ts'), input.entry);
 
 	for (const [path, contents] of Object.entries(input.files)) {
-		writeFileSync(join(sourceDir, path), contents);
+		const filePath = join(sourceDir, path);
+		mkdirSync(dirname(filePath), { recursive: true });
+		writeFileSync(filePath, contents);
 	}
 
 	const props = input.props ?? [];

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { dirname, resolve, sep } from 'node:path';
 import { parseSync } from 'oxc-parser';
 import type { ComponentGuideInventory } from './component-guide-inventory.js';
 
@@ -97,6 +97,7 @@ function findGuideIssues(
 
 // Public names may be imported and re-exported by an intermediate file. Follow those local
 // modules so the callable signature that is inspected is the one consumers actually import.
+// Stay inside the entry directory so generated data modules are not scanned.
 function localContractModules(
 	entryModule: ParsedModule,
 	publicNames: ReadonlySet<string>,
@@ -104,14 +105,16 @@ function localContractModules(
 	const modules: Array<ParsedModule> = [];
 	const seen = new Set<string>([entryModule.path]);
 	const pending: Array<ParsedModule> = [entryModule];
+	const entryDir = dirname(entryModule.path);
 
 	while (pending.length > 0) {
 		const current = pending.pop();
 		if (current === undefined) continue;
 
 		for (const path of localReexportPaths(current, publicNames)) {
-			if (seen.has(path) || path.endsWith('.css.ts')) continue;
+			if (seen.has(path)) continue;
 			seen.add(path);
+			if (path.endsWith('.css.ts') || !isInsideDirectory(path, entryDir)) continue;
 
 			const module = parseModule(path);
 			if (module === undefined) continue;
@@ -292,7 +295,7 @@ function exportedSignatures(
 				initializer?.type === 'FunctionExpression'
 			) {
 				signatures.push({ name, types: signatureTypeNames(initializer), unsupported: false });
-			} else if (astNode(declarator.id)?.typeAnnotation !== undefined) {
+			} else if (isFunctionType(typeAnnotation(astNode(declarator.id)))) {
 				signatures.push({ name, types: new Set(), unsupported: true });
 			}
 		}
@@ -313,6 +316,16 @@ function signatureTypeNames(signature: AstNode): Set<string> {
 	addTypeReferences(names, typeAnnotation(astNode(signature.returnType)));
 
 	return names;
+}
+
+function isFunctionType(node: AstNode | undefined): boolean {
+	return node?.type === 'TSFunctionType' || node?.type === 'TSConstructorType';
+}
+
+function isInsideDirectory(filePath: string, directory: string): boolean {
+	const dir = resolve(directory);
+	const file = resolve(filePath);
+	return file === dir || file.startsWith(`${dir}${sep}`);
 }
 
 function typeAnnotation(node: AstNode | undefined): AstNode | undefined {
