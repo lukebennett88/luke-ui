@@ -15,6 +15,11 @@ interface ParsedModule {
 	program: AstNode;
 }
 
+interface PublicExports {
+	types: Map<string, Set<string>>;
+	values: Map<string, Set<string>>;
+}
+
 /** Checks Props frontmatter against object contracts from a public entry point and its local re-export chain. */
 export function findComponentPropsContractIssues(
 	inventory: ComponentGuideInventory,
@@ -48,22 +53,21 @@ function findGuideIssues(
 	const entryModule = parseModule(entryPath);
 	if (entryModule === undefined) return [];
 
-	const publicTypes = publicTypeNames(entryModule.program);
-	const publicValues = publicValueNames(entryModule.program);
-	const publicNames = new Set([...publicTypes, ...publicValues]);
-	const modules = [entryModule, ...localContractModules(entryModule, publicNames)];
-	const objectTypes = objectTypeNames(modules);
+	const modules = localContractModules(entryModule);
+	const publicTypes = publicTypeNames(modules);
 	const required = new Set<string>();
 	const unsupported = new Set<string>();
 
-	for (const module of modules) {
-		for (const signature of exportedSignatures(module.program, publicValues)) {
+	for (const { module, types, values } of modules) {
+		const declarations = typeDeclarations(module);
+		for (const signature of exportedSignatures(module.program, values)) {
 			if (signature.unsupported) {
-				unsupported.add(signature.name);
+				for (const name of values.get(signature.name) ?? []) unsupported.add(name);
 				continue;
 			}
 			for (const type of signature.types) {
-				if (publicTypes.has(type) && objectTypes.has(type)) required.add(type);
+				if (!isPublicObjectType(type, types, declarations)) continue;
+				for (const name of types.get(type) ?? []) required.add(name);
 			}
 		}
 	}
@@ -100,34 +104,45 @@ function findGuideIssues(
 // Stay inside the entry directory so generated data modules are not scanned.
 function localContractModules(
 	entryModule: ParsedModule,
-	publicNames: ReadonlySet<string>,
-): Array<ParsedModule> {
-	const modules: Array<ParsedModule> = [];
-	const seen = new Set<string>([entryModule.path]);
-	const pending: Array<ParsedModule> = [entryModule];
+): Array<{ module: ParsedModule } & PublicExports> {
+	const modules = new Map<string, { module: ParsedModule } & PublicExports>();
+	const entryExports = exportedNames(entryModule.program);
+	modules.set(entryModule.path, { module: entryModule, ...entryExports });
+	const pending = [entryModule.path];
 	const entryDir = dirname(entryModule.path);
 
 	while (pending.length > 0) {
-		const current = pending.pop();
+		const path = pending.pop();
+		if (path === undefined) continue;
+		const current = modules.get(path);
 		if (current === undefined) continue;
 
-		for (const path of localReexportPaths(current, publicNames)) {
-			if (seen.has(path)) continue;
-			seen.add(path);
-			if (path.endsWith('.css.ts') || !isInsideDirectory(path, entryDir)) continue;
+		for (const target of localReexports(current.module, current)) {
+			if (modules.has(target.path)) {
+				const existing = modules.get(target.path);
+				if (existing !== undefined && mergePublicExports(existing, target))
+					pending.push(target.path);
+				continue;
+			}
 
-			const module = parseModule(path);
+			const targetPath = target.path;
+			if (targetPath.endsWith('.css.ts') || !isInsideDirectory(targetPath, entryDir)) continue;
+
+			const module = parseModule(targetPath);
 			if (module === undefined) continue;
-			modules.push(module);
-			pending.push(module);
+			modules.set(targetPath, { module, types: target.types, values: target.values });
+			pending.push(targetPath);
 		}
 	}
 
-	return modules;
+	return [...modules.values()];
 }
 
-function localReexportPaths(module: ParsedModule, publicNames: ReadonlySet<string>): Array<string> {
-	const importedLocals = new Map<string, string>();
+function localReexports(
+	module: ParsedModule,
+	publicExports: PublicExports,
+): Array<{ path: string } & PublicExports> {
+	const importedLocals = new Map<string, { name: string; source: string }>();
 
 	for (const statement of body(module.program)) {
 		if (statement.type !== 'ImportDeclaration') continue;
@@ -136,11 +151,14 @@ function localReexportPaths(module: ParsedModule, publicNames: ReadonlySet<strin
 
 		for (const specifier of nodes(statement.specifiers)) {
 			const local = identifierName(specifier.local);
-			if (local !== undefined) importedLocals.set(local, source);
+			const imported = identifierName(specifier.imported);
+			if (local !== undefined && imported !== undefined) {
+				importedLocals.set(local, { name: imported, source });
+			}
 		}
 	}
 
-	const paths = new Set<string>();
+	const reexports = new Map<string, { path: string } & PublicExports>();
 
 	for (const statement of body(module.program)) {
 		if (statement.type !== 'ExportNamedDeclaration') continue;
@@ -148,40 +166,65 @@ function localReexportPaths(module: ParsedModule, publicNames: ReadonlySet<strin
 
 		if (source !== undefined) {
 			if (!source.startsWith('.')) continue;
-			if (exportsPublicName(statement, publicNames)) {
-				paths.add(resolveLocalModule(module.path, source));
-			}
+			addReexportedNames(
+				reexports,
+				resolveLocalModule(module.path, source),
+				statement,
+				publicExports,
+			);
 			continue;
 		}
 
 		for (const specifier of nodes(statement.specifiers)) {
-			if (!exportsPublicSpecifier(specifier, publicNames)) continue;
 			const local = identifierName(specifier.local);
 			if (local === undefined) continue;
-			const importSource = importedLocals.get(local);
-			if (importSource !== undefined) {
-				paths.add(resolveLocalModule(module.path, importSource));
-			}
+			const imported = importedLocals.get(local);
+			if (imported === undefined) continue;
+			addReexportedName(
+				reexports,
+				resolveLocalModule(module.path, imported.source),
+				imported.name,
+				specifier,
+				publicExports,
+				statement,
+			);
 		}
 	}
 
-	return [...paths];
+	return [...reexports.values()];
 }
 
-function exportsPublicName(statement: AstNode, publicNames: ReadonlySet<string>): boolean {
+function addReexportedNames(
+	reexports: Map<string, { path: string } & PublicExports>,
+	path: string,
+	statement: AstNode,
+	publicExports: PublicExports,
+): void {
 	for (const specifier of nodes(statement.specifiers)) {
-		if (exportsPublicSpecifier(specifier, publicNames)) return true;
+		const local = identifierName(specifier.local);
+		if (local === undefined) continue;
+		addReexportedName(reexports, path, local, specifier, publicExports, statement);
 	}
-	return false;
 }
 
-function exportsPublicSpecifier(specifier: AstNode, publicNames: ReadonlySet<string>): boolean {
-	const exported = identifierName(specifier.exported);
+function addReexportedName(
+	reexports: Map<string, { path: string } & PublicExports>,
+	path: string,
+	targetName: string,
+	specifier: AstNode,
+	publicExports: PublicExports,
+	statement: AstNode,
+): void {
 	const local = identifierName(specifier.local);
-	return (
-		(exported !== undefined && publicNames.has(exported)) ||
-		(local !== undefined && publicNames.has(local))
-	);
+	if (local === undefined) return;
+	const kind = exportKind(statement, specifier);
+	const names = kind === 'type' ? publicExports.types.get(local) : publicExports.values.get(local);
+	if (names === undefined) return;
+
+	const reexport = reexports.get(path) ?? { path, types: new Map(), values: new Map() };
+	for (const name of names)
+		addPublicName(reexport[kind === 'type' ? 'types' : 'values'], targetName, name);
+	reexports.set(path, reexport);
 }
 
 function resolveLocalModule(entryPath: string, specifier: string): string {
@@ -193,6 +236,43 @@ function resolveLocalModule(entryPath: string, specifier: string): string {
 	return `${base}.ts`;
 }
 
+function mergePublicExports(target: PublicExports, source: PublicExports): boolean {
+	const typesChanged = mergePublicNames(target.types, source.types);
+	const valuesChanged = mergePublicNames(target.values, source.values);
+	return typesChanged || valuesChanged;
+}
+
+function mergePublicNames(
+	target: Map<string, Set<string>>,
+	source: ReadonlyMap<string, ReadonlySet<string>>,
+): boolean {
+	let changed = false;
+	for (const [local, exported] of source) {
+		for (const name of exported) {
+			if (addPublicName(target, local, name)) changed = true;
+		}
+	}
+	return changed;
+}
+
+function addPublicName(names: Map<string, Set<string>>, local: string, exported: string): boolean {
+	const existing = names.get(local);
+	if (existing !== undefined) {
+		if (existing.has(exported)) return false;
+		existing.add(exported);
+		return true;
+	}
+	names.set(local, new Set([exported]));
+	return true;
+}
+
+function exportKind(statement: AstNode, specifier: AstNode): 'type' | 'value' {
+	return stringValue(statement.exportKind) === 'type' ||
+		stringValue(specifier.exportKind) === 'type'
+		? 'type'
+		: 'value';
+}
+
 function parseModule(path: string): ParsedModule | undefined {
 	if (!existsSync(path)) return undefined;
 	const result = parseSync(path, readFileSync(path, 'utf8'));
@@ -200,53 +280,54 @@ function parseModule(path: string): ParsedModule | undefined {
 	return { path, program: result.program as unknown as AstNode };
 }
 
-function publicTypeNames(program: AstNode): Set<string> {
-	return exportedNames(program, 'type');
-}
-
-function publicValueNames(program: AstNode): Set<string> {
-	return exportedNames(program, 'value');
-}
-
-function exportedNames(program: AstNode, kind: 'type' | 'value'): Set<string> {
-	const names = new Set<string>();
+function exportedNames(program: AstNode): PublicExports {
+	const types = new Map<string, Set<string>>();
+	const values = new Map<string, Set<string>>();
 
 	for (const statement of body(program)) {
 		if (statement.type !== 'ExportNamedDeclaration') continue;
 
 		const declaration = astNode(statement.declaration);
-		if (declaration !== undefined && declarationKind(declaration) === kind) {
+		if (declaration !== undefined) {
 			const name = declarationName(declaration);
-			if (name !== undefined) names.add(name);
+			if (name !== undefined)
+				addPublicName(declarationKind(declaration) === 'type' ? types : values, name, name);
 		}
 
 		for (const specifier of nodes(statement.specifiers)) {
-			const exportKind =
-				stringValue(statement.exportKind) === 'type' ? 'type' : stringValue(specifier.exportKind);
-			if ((exportKind === 'type') !== (kind === 'type')) continue;
-			const name = identifierName(specifier.exported);
-			if (name !== undefined) names.add(name);
+			const local = identifierName(specifier.local);
+			const exported = identifierName(specifier.exported);
+			if (local !== undefined && exported !== undefined) {
+				addPublicName(
+					exportKind(statement, specifier) === 'type' ? types : values,
+					local,
+					exported,
+				);
+			}
 		}
 	}
 
+	return { types, values };
+}
+
+function publicTypeNames(modules: ReadonlyArray<PublicExports>): Set<string> {
+	const names = new Set<string>();
+	for (const { types } of modules) {
+		for (const exported of types.values()) {
+			for (const name of exported) names.add(name);
+		}
+	}
 	return names;
 }
 
-function objectTypeNames(modules: ReadonlyArray<ParsedModule>): Set<string> {
-	const names = new Set<string>();
-
-	for (const module of modules) {
-		const declarations = typeDeclarations(module);
-		for (const statement of body(module.program)) {
-			if (statement.type !== 'ExportNamedDeclaration') continue;
-			const declaration = astNode(statement.declaration);
-			if (declaration === undefined || declarationKind(declaration) !== 'type') continue;
-			const name = declarationName(declaration);
-			if (name !== undefined && isObjectType(declaration, name, declarations)) names.add(name);
-		}
-	}
-
-	return names;
+function isPublicObjectType(
+	name: string,
+	publicTypes: ReadonlyMap<string, ReadonlySet<string>>,
+	declarations: ReadonlyMap<string, AstNode>,
+): boolean {
+	if (!publicTypes.has(name)) return false;
+	const declaration = declarations.get(name);
+	return declaration !== undefined && isObjectType(declaration, name, declarations);
 }
 
 function typeDeclarations(module: ParsedModule): Map<string, AstNode> {
@@ -368,7 +449,7 @@ function hasTypeArguments(node: AstNode): boolean {
 
 function exportedSignatures(
 	program: AstNode,
-	publicValues: ReadonlySet<string>,
+	publicValues: ReadonlyMap<string, ReadonlySet<string>>,
 ): Array<{
 	name: string;
 	types: ReadonlySet<string>;

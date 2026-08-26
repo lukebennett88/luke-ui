@@ -245,6 +245,53 @@ test('classifies private aliases using the module that declared them', () => {
 	]);
 });
 
+test('does not require an object type with the same name as a public leaf type', () => {
+	const fixture = createFixture({
+		entry:
+			"export { Root, type SharedProps } from './root.js';\nexport { Item } from './item.js';\n",
+		files: {
+			'root.ts':
+				"export type SharedProps = 'small' | 'large';\nexport function Root(props: SharedProps) {}\n",
+			'item.ts':
+				'export type SharedProps = { value: string };\nexport function Item(props: SharedProps) {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([]);
+});
+
+test('requires a public object type when a local leaf type has the same name', () => {
+	const fixture = createFixture({
+		entry:
+			"export { Root, type SharedProps } from './root.js';\nexport { Item } from './item.js';\n",
+		files: {
+			'root.ts':
+				'export type SharedProps = { value: string };\nexport function Root(props: SharedProps) {}\n',
+			'item.ts':
+				"export type SharedProps = 'small' | 'large';\nexport function Item(props: SharedProps) {}\n",
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "SharedProps" in props frontmatter',
+	]);
+});
+
+test('inspects only the re-exported callable when local modules share a value name', () => {
+	const fixture = createFixture({
+		entry: "export { Root, type RootProps } from './root.js';\nexport { Item } from './item.js';\n",
+		files: {
+			'root.ts': 'export interface RootProps {}\nexport function Root(props: RootProps) {}\n',
+			'item.ts':
+				'export declare const Root: (props: RootProps) => unknown;\nexport function Item() {}\n',
+		},
+	});
+
+	expect(issues(fixture)).toEqual([
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/button/index.ts" requires public object contract "RootProps" in props frontmatter',
+	]);
+});
+
 test('reports an unsupported relevant exported signature', () => {
 	const fixture = createFixture({
 		entry: "export { Button, type ButtonProps } from './button.js';\n",
