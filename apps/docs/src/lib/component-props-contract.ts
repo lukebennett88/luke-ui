@@ -3,7 +3,7 @@ import { dirname, resolve, sep } from 'node:path';
 import { parseSync } from 'oxc-parser';
 import type { ComponentGuideInventory } from './component-guide-inventory.js';
 
-const SOURCE_PREFIX = 'packages/@luke-ui/react/src/';
+const EXPORTS_PREFIX = 'packages/@luke-ui/react/src/exports/';
 
 interface AstNode {
 	readonly type: string;
@@ -28,13 +28,13 @@ export function findComponentPropsContractIssues(
 	const issues: Array<string> = [];
 
 	for (const guide of inventory.guides) {
-		if (guide.source === undefined || !guide.source.startsWith(SOURCE_PREFIX)) continue;
+		if (guide.source === undefined || !guide.source.startsWith(EXPORTS_PREFIX)) continue;
 
 		const entryPath = resolve(
 			reactPackageDir,
 			'src',
-			guide.source.slice(SOURCE_PREFIX.length),
-			'index.ts',
+			'exports',
+			guide.source.slice(EXPORTS_PREFIX.length),
 		);
 		if (!existsSync(entryPath)) continue;
 
@@ -71,7 +71,7 @@ function findGuideIssues(
 		}
 	}
 
-	const entryPoint = `${source}/index.ts`;
+	const entryPoint = source;
 	const documented = new Set(frontmatterProps.map((entry) => entry.name));
 	const issues: Array<string> = [];
 
@@ -98,9 +98,21 @@ function findGuideIssues(
 	return issues;
 }
 
-// Public names may be imported and re-exported by an intermediate file. Follow those local
-// modules so the callable signature that is inspected is the one consumers actually import.
-// Stay inside the entry directory so generated data modules are not scanned.
+// Entries live under `src/exports/` (some nested, such as `src/exports/primitives/button.ts`), so
+// the traversal boundary is the `src/core` directory that sits alongside `exports` in the source
+// tree, found by walking up from the entry module to the `exports` segment.
+function srcDir(entryPath: string): string {
+	const segments = entryPath.split(sep);
+	const exportsIndex = segments.lastIndexOf('exports');
+	if (exportsIndex === -1) {
+		throw new Error(`Expected an entry path under "src/exports/", received "${entryPath}".`);
+	}
+	return segments.slice(0, exportsIndex).join(sep);
+}
+
+// Public names may be imported and re-exported by an intermediate file. Follow the public module
+// and implementation modules so the callable signature that is inspected is the one consumers
+// actually import. Do not follow other local modules such as generated data.
 function localContractModules(
 	entryModule: ParsedModule,
 ): Array<{ module: ParsedModule } & PublicExports> {
@@ -108,7 +120,7 @@ function localContractModules(
 	const entryExports = exportedNames(entryModule.program);
 	modules.set(entryModule.path, { module: entryModule, ...entryExports });
 	const pending = [entryModule.path];
-	const entryDir = dirname(entryModule.path);
+	const coreDir = resolve(srcDir(entryModule.path), 'core');
 
 	while (pending.length > 0) {
 		const path = pending.pop();
@@ -125,7 +137,7 @@ function localContractModules(
 			}
 
 			const targetPath = target.path;
-			if (targetPath.endsWith('.css.ts') || !isInsideDirectory(targetPath, entryDir)) continue;
+			if (targetPath.endsWith('.css.ts') || !isInsideDirectory(targetPath, coreDir)) continue;
 
 			const module = parseModule(targetPath);
 			if (module === undefined) continue;
@@ -160,6 +172,12 @@ function localReexports(
 	const reexports = new Map<string, { path: string } & PublicExports>();
 
 	for (const statement of body(module.program)) {
+		if (statement.type === 'ExportAllDeclaration') {
+			const source = literalString(statement.source);
+			if (source === undefined || !source.startsWith('.')) continue;
+			addWildcardReexport(reexports, resolveLocalModule(module.path, source));
+			continue;
+		}
 		if (statement.type !== 'ExportNamedDeclaration') continue;
 		const source = literalString(statement.source);
 
@@ -191,6 +209,19 @@ function localReexports(
 	}
 
 	return [...reexports.values()];
+}
+
+function addWildcardReexport(
+	reexports: Map<string, { path: string } & PublicExports>,
+	path: string,
+): void {
+	const module = parseModule(path);
+	if (module === undefined) return;
+
+	const exported = exportedNames(module.program);
+	const reexport = reexports.get(path) ?? { path, types: new Map(), values: new Map() };
+	mergePublicExports(reexport, exported);
+	reexports.set(path, reexport);
 }
 
 function addReexportedNames(

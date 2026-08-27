@@ -133,15 +133,15 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 				recipeName,
 				variantsType,
 			}),
-			path: `packages/@luke-ui/react/src/${name}/${name}.tsx`,
+			path: `packages/@luke-ui/react/src/core/${name}/${name}.tsx`,
 		},
 		{
-			contents: renderComponentBarrel({ name, pascalName, recipeName, variantsType }),
-			path: `packages/@luke-ui/react/src/${name}/index.ts`,
+			contents: renderPackageExport({ name, pascalName, recipeName, variantsType }),
+			path: `packages/@luke-ui/react/src/exports/${name}.ts`,
 		},
 		{
 			contents: renderRecipe({ recipeName, variantsType }),
-			path: `packages/@luke-ui/react/src/${name}/recipe.css.ts`,
+			path: `packages/@luke-ui/react/src/core/${name}/recipe.css.ts`,
 		},
 		{
 			contents: renderComponentTest({
@@ -150,11 +150,11 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 				name,
 				pascalName,
 			}),
-			path: `packages/@luke-ui/react/src/${name}/${name}.browser.test.tsx`,
+			path: `packages/@luke-ui/react/src/core/${name}/${name}.browser.test.tsx`,
 		},
 		{
 			contents: renderPackageStory({ docsGroup, name, pascalName }),
-			path: `packages/@luke-ui/react/src/${name}/${name}.stories.tsx`,
+			path: `packages/@luke-ui/react/src/core/${name}/${name}.stories.tsx`,
 		},
 		{
 			contents: renderHostedExample({ name, pascalName }),
@@ -169,7 +169,7 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 	if (input.visualCoverage) {
 		files.push({
 			contents: renderVisualTest({ name, pascalName }),
-			path: `packages/@luke-ui/react/src/${name}/${name}.visual.test.tsx`,
+			path: `packages/@luke-ui/react/src/core/${name}/${name}.visual.test.tsx`,
 		});
 	}
 
@@ -201,7 +201,7 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 			{
 				kind: 'sorted-import',
 				line: `import '../${name}/recipe.css.js';`,
-				path: 'packages/@luke-ui/react/src/styles/modules.css.ts',
+				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
 			},
 		],
 		textFileInserts: [
@@ -211,7 +211,7 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 					`\t['${pascalName}', '${name}', ${formatConformanceList(conformance)}, '${integrationTripwire}', '${visualApplicability}'],`,
 				],
 				marker: '].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({',
-				path: 'packages/@luke-ui/react/src/conformance/manifest.ts',
+				path: 'packages/@luke-ui/react/src/core/conformance/manifest.ts',
 			},
 		],
 	};
@@ -247,7 +247,7 @@ function renderComponentSource(input: {
 	variantsType: string;
 }): string {
 	return `import type { ComponentProps, JSX } from 'react';
-import { cx } from '../utils/utils.js';
+import { cx } from '../../shared/utils/utils.js';
 import { ${input.recipeName} } from './recipe.css.js';
 
 /** Props for \`${input.pascalName}\`. */
@@ -261,14 +261,14 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 `;
 }
 
-function renderComponentBarrel(input: {
+function renderPackageExport(input: {
 	name: string;
 	pascalName: string;
 	recipeName: string;
 	variantsType: string;
 }): string {
-	return `export { ${input.pascalName}, type ${input.pascalName}Props } from './${input.name}.js';
-export { ${input.recipeName}, type ${input.variantsType} } from './recipe.css.js';
+	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../core/${input.name}/${input.name}.js';
+export { type ${input.variantsType}, ${input.recipeName} } from '../core/${input.name}/recipe.css.js';
 `;
 }
 
@@ -278,7 +278,7 @@ function renderPackageStory(input: {
 	pascalName: string;
 }): string {
 	return `import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
-import preview from '../../.storybook/preview.js';
+import preview from '../../../.storybook/preview.js';
 
 const meta = preview.meta({
 	component: ${input.pascalName},
@@ -330,7 +330,7 @@ function renderComponentTest(input: {
 			? [`import { ${helperImports.join(', ')} } from '../conformance/helpers.js';`]
 			: []),
 		"import { render } from '../test-utils/render.js';",
-		`import { ${input.pascalName} } from './index.js';`,
+		`import { ${input.pascalName} } from './${input.name}.js';`,
 	];
 
 	const renderComponent = `render(<${input.pascalName} {...props}>Content</${input.pascalName}>)`;
@@ -386,7 +386,7 @@ function renderVisualTest(input: { name: string; pascalName: string }): string {
 	return `import { test } from 'vite-plus/test';
 import { render } from '../test-utils/render.js';
 import { captureVisual, Grid } from '../test-utils/visual.js';
-import { ${input.pascalName} } from './index.js';
+import { ${input.pascalName} } from './${input.name}.js';
 
 test('kitchen sink', async () => {
 	const { locator } = render(
@@ -408,10 +408,10 @@ function renderHostedDocsPage(input: {
 }): string {
 	return `---
 title: ${input.displayName}
-source: packages/@luke-ui/react/src/${input.name}
+source: packages/@luke-ui/react/src/exports/${input.name}.ts
 props:
   - name: ${input.pascalName}Props
-    path: packages/@luke-ui/react/src/${input.name}/${input.name}.tsx
+    path: packages/@luke-ui/react/src/core/${input.name}/${input.name}.tsx
 ---
 
 <ExampleBlock

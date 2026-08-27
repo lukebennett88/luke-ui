@@ -26,14 +26,14 @@ export const docs = defineDocs({
 					z.object({
 						/** Exported type name to render, e.g. `ButtonProps`. */
 						name: z.string(),
-						/** Repo-relative path to the file exporting `name`, e.g. `packages/@luke-ui/react/src/button/button.tsx`. */
+						/** Repo-relative path to the file exporting `name`, e.g. `packages/@luke-ui/react/src/core/button/button.tsx`. */
 						path: z.string(),
 					}),
 				)
 				.optional(),
 			/** Full URL to this component's React Aria Components docs page, when it genuinely wraps one. */
 			reactAria: z.string().optional(),
-			/** Repo-relative path to this component's source, e.g. `packages/@luke-ui/react/src/button`. */
+			/** Repo-relative path to this component's public module, e.g. `packages/@luke-ui/react/src/exports/button.ts`. */
 			source: z.string().optional(),
 		}),
 	},

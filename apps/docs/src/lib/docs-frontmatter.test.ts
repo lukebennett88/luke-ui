@@ -8,14 +8,14 @@ title: Button
 description:
   A labelled control
   for actions.
-source: packages/@luke-ui/react/src/button
+source: packages/@luke-ui/react/src/exports/button.ts
 ---
 
 Body.
 `),
 	).toEqual({
 		description: 'A labelled control for actions.',
-		source: 'packages/@luke-ui/react/src/button',
+		source: 'packages/@luke-ui/react/src/exports/button.ts',
 		title: 'Button',
 	});
 });

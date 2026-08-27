@@ -1,0 +1,125 @@
+import { Heading } from '@luke-ui/react/heading';
+import type { NumeralProps } from '@luke-ui/react/numeral';
+import { Numeral } from '@luke-ui/react/numeral';
+import { Text } from '@luke-ui/react/text';
+import type { CSSProperties } from 'react';
+import preview from '../../../.storybook/preview.js';
+
+const meta = preview.meta({
+	component: Numeral,
+	tags: ['typography'],
+	title: 'Typography/Numeral',
+});
+
+const rowStyle = {
+	display: 'flex',
+	gap: '1.5rem',
+} as const satisfies CSSProperties;
+
+const stackStyle = {
+	display: 'flex',
+	flexDirection: 'column',
+	gap: '1rem',
+	maxInlineSize: '40rem',
+} as const satisfies CSSProperties;
+
+const baseArgs = {
+	value: 120_000,
+} satisfies Pick<NumeralProps, 'value'>;
+
+export const Default = meta.story({
+	args: baseArgs,
+});
+
+/**
+ * `format="percent"` applies percent formatting rules, which scale by 100.
+ */
+export const Format = meta.story({
+	args: baseArgs,
+	render: (props) => (
+		<div style={rowStyle}>
+			<Numeral {...props} format="decimal" value={3_500} />
+			<Numeral {...props} format="percent" value={3_500} />
+		</div>
+	),
+});
+
+export const Currency = meta.story({
+	args: baseArgs,
+	render: (props) => <Numeral {...props} currency="AUD" value={98.7654} />,
+});
+
+export const Units = meta.story({
+	args: baseArgs,
+	render: (props) => <Numeral {...props} unit="kilometer-per-hour" value={98} />,
+});
+
+/**
+ * Use compact notation when interfaces have limited space.
+ */
+export const Abbreviations = meta.story({
+	args: baseArgs,
+	render: (props) => (
+		<div style={rowStyle}>
+			<Numeral {...props} abbreviate value={12_345} />
+			<Numeral {...props} abbreviate="long" value={123_456} />
+			<Numeral {...props} abbreviate currency="EUR" value={1_234_567} />
+		</div>
+	),
+});
+
+export const Precision = meta.story({
+	args: baseArgs,
+	render: (props) => (
+		<div style={rowStyle}>
+			<Numeral {...props} precision={2} value={1_234} />
+			<Numeral {...props} precision={[0, 2]} value={1_234} />
+			<Numeral {...props} precision={[0, 2]} value={1_234.5678} />
+		</div>
+	),
+});
+
+export const Composition = meta.story({
+	args: baseArgs,
+	render: (props) => (
+		<div style={stackStyle}>
+			<Heading level={2}>
+				Acme Corporation shares hit{' '}
+				<Numeral {...props} color="danger" fontVariantNumeric="tabular-nums" value={1_456_789} />{' '}
+				today
+			</Heading>
+			<Text>
+				We asked investors which private company&apos;s stock they would most like to own. More than{' '}
+				<Numeral {...props} format="percent" value={0.80123} /> of respondents picked Acme Corp.
+			</Text>
+			<Text>
+				Hooli, Acme&apos;s parent component, went public earlier in the year. The median commitment
+				was <Numeral {...props} currency="AUD" precision={0} value={1_000} /> though the average was
+				significantly higher.
+			</Text>
+		</div>
+	),
+});
+
+/**
+ * Locale defaults come from the React Aria internationalisation context. Pass `locale` to override it for one numeral.
+ */
+export const Locale = meta.story({
+	args: baseArgs,
+	render: () => (
+		<div style={stackStyle}>
+			<Heading level={2}>
+				Acme Corporation shares hit <Numeral abbreviate value={1_456_789} /> today
+			</Heading>
+			<Text>
+				We asked investors which private company’s stock they would most like to own. More than{' '}
+				<Numeral format="percent" value={0.80123} /> of respondents picked Acme Corp.
+			</Text>
+			<Text>
+				Hooli, Acme’s parent component, went public earlier in the year. The median commitment was{' '}
+				<Numeral currency="AUD" precision={0} value={1_000} /> though the average was significantly
+				higher.
+			</Text>
+		</div>
+	),
+});

@@ -77,8 +77,8 @@ export default defineConfig({
 			{
 				excludeFiles: [
 					'packages/@luke-ui/react/src/theme/**',
-					'packages/@luke-ui/react/src/styles/**',
-					'packages/@luke-ui/react/src/use-synchronize-animations/**',
+					'packages/@luke-ui/react/src/core/styles/**',
+					'packages/@luke-ui/react/src/core/use-synchronize-animations/**',
 				],
 				files: ['packages/@luke-ui/react/src/**/*.browser.test.tsx'],
 				rules: {
@@ -87,7 +87,7 @@ export default defineConfig({
 						{
 							paths: [
 								{
-									message: 'Mount components through src/test-utils/render.tsx.',
+									message: 'Mount components through src/core/test-utils/render.tsx.',
 									name: 'react-dom/client',
 								},
 								{
@@ -110,8 +110,59 @@ export default defineConfig({
 						{
 							paths: [
 								{
-									message: 'Mount components through src/test-utils/render.tsx.',
+									message: 'Mount components through src/core/test-utils/render.tsx.',
 									name: 'react-dom/client',
+								},
+							],
+						},
+					],
+				},
+			},
+			{
+				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				files: ['packages/@luke-ui/react/src/core/**/*.{ts,tsx}'],
+				rules: {
+					'no-restricted-imports': [
+						'error',
+						{
+							patterns: [
+								{
+									group: ['**/exports/**'],
+									message: 'Core modules must not import public export modules.',
+								},
+							],
+						},
+					],
+				},
+			},
+			{
+				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				files: ['packages/@luke-ui/react/src/theme/**/*.{ts,tsx}'],
+				rules: {
+					'no-restricted-imports': [
+						'error',
+						{
+							patterns: [
+								{
+									group: ['**/core/**', '**/exports/**'],
+									message: 'Theme modules must not import from core or exports.',
+								},
+							],
+						},
+					],
+				},
+			},
+			{
+				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				files: ['packages/@luke-ui/react/src/shared/**/*.{ts,tsx}'],
+				rules: {
+					'no-restricted-imports': [
+						'error',
+						{
+							patterns: [
+								{
+									group: ['**/core/**', '**/theme/**', '**/exports/**'],
+									message: 'Shared modules must not import from core, theme, or exports.',
 								},
 							],
 						},

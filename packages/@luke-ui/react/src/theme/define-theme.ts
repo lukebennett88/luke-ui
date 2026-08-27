@@ -6,7 +6,7 @@
  * backdrop) into {@link Oklch} values the foundation carries.
  */
 
-import { typedEntries, typedFromEntries } from '../utils/index.js';
+import { typedEntries, typedFromEntries } from '../shared/utils/utils.js';
 import { buildTheme, ThemeContrastError } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { gamutMapOklch, parseColor } from './color.js';

@@ -7,6 +7,7 @@ import {
 	VISUAL_CACHE_HASH_FILES,
 	VISUAL_CAPTURE_DIR_ENV,
 	VISUAL_HARNESS_FILES,
+	VISUAL_HARNESS_LAYOUT_FILE,
 	visualArtifactsRoot,
 	visualPackageRoot,
 	visualRepoRootFromPackage,
@@ -130,7 +131,7 @@ export async function runVisualRegression(io: VisualRegressionIo = createVisualR
 }
 
 async function capture(io: VisualRegressionIo, worktree: string, target: string) {
-	if (worktree !== io.repoRoot) {
+	if (worktree !== io.repoRoot && (await hasCurrentVisualHarnessLayout(io, worktree))) {
 		await Promise.all(
 			VISUAL_HARNESS_FILES.map(async (file) => {
 				const destination = path.join(worktree, file);
@@ -166,4 +167,16 @@ async function capture(io: VisualRegressionIo, worktree: string, target: string)
 		worktree,
 		{ ...io.env, [VISUAL_CAPTURE_DIR_ENV]: target },
 	);
+}
+
+async function hasCurrentVisualHarnessLayout(
+	io: VisualRegressionIo,
+	worktree: string,
+): Promise<boolean> {
+	try {
+		await io.readFile(path.join(worktree, VISUAL_HARNESS_LAYOUT_FILE));
+		return true;
+	} catch {
+		return false;
+	}
 }

@@ -6,7 +6,7 @@ test('links component guides to their Storybook docs', () => {
 		getStorybookStoryUrl(
 			'components/actions/icon-button.mdx',
 			'/',
-			'packages/@luke-ui/react/src/icon-button',
+			'packages/@luke-ui/react/src/exports/icon-button.ts',
 		),
 	).toBe('http://localhost:6006/?path=/docs/actions-iconbutton--docs');
 });
@@ -20,7 +20,7 @@ test('does not link component props pages to Storybook', () => {
 		getStorybookStoryUrl(
 			'components/actions/icon-button/props.mdx',
 			'/',
-			'packages/@luke-ui/react/src/icon-button',
+			'packages/@luke-ui/react/src/exports/icon-button.ts',
 		),
 	).toBeNull();
 });

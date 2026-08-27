@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { useState } from 'react';
-import { typedKeys } from '../utils/index.js';
+import { typedKeys } from '../shared/utils/utils.js';
 import { compileTheme } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';

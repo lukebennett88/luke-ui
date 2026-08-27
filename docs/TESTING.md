@@ -18,7 +18,7 @@ Use the smallest surface that can falsify the intention.
 
 Do not add a new test flavour for a component. Recipe tests are infrastructure tests, not a
 component-testing category. If a recipe implementation needs a browser to test its own machinery,
-keep that test under `src/styles/` and exclude it from these component rules.
+keep that test under `src/core/styles/` and exclude it from these component rules.
 
 ## Component tests
 
@@ -109,8 +109,8 @@ menu, focus a control, or reveal a loading state for documentation or an accessi
 
 ## Visual tests
 
-Visual tests use `render()` from `src/test-utils/render.tsx` and capture helpers from
-`src/test-utils/visual.tsx`. The visual test is not a story and does not reuse a story as its
+Visual tests use `render()` from `src/core/test-utils/render.tsx` and capture helpers from
+`src/core/test-utils/visual.tsx`. The visual test is not a story and does not reuse a story as its
 fixture.
 
 Each component with a meaningful visual surface gets one kitchen-sink fixture:

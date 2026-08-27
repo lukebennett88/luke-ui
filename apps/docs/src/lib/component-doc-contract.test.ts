@@ -18,7 +18,7 @@ test('accepts a focused component-doc scaffold without placeholder prose', () =>
 	const docsDir = createDocsFixture({
 		guide: `---
 title: Status Badge
-source: packages/@luke-ui/react/src/status-badge
+source: packages/@luke-ui/react/src/exports/status-badge.ts
 ---
 
 <ExampleBlock src="status-badge/basic" title="Status Badge — Basic" />
@@ -33,7 +33,7 @@ test('reports placeholders and the wrong primary example', () => {
 		guide: `---
 title: Status Badge
 description: Status Badge component.
-source: packages/@luke-ui/react/src/status-badge
+source: packages/@luke-ui/react/src/exports/status-badge.ts
 ---
 
 \`StatusBadge\` from \`@luke-ui/react/status-badge\`.

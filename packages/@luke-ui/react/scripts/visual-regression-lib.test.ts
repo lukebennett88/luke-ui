@@ -6,7 +6,7 @@ import { expect, test } from 'vite-plus/test';
 import {
 	formatVisualCaptureName,
 	formatVisualViewport,
-} from '../src/test-utils/visual-capture-id.js';
+} from '../src/core/test-utils/visual-capture-id.js';
 import { assertCapturesPainted, compareCaptures, renderReport } from './visual-regression-lib.js';
 
 const png = (red: number) => {

@@ -1,5 +1,5 @@
-import { lukeUiClassNames } from '../styles/class-names.js';
-import { cx } from '../utils/utils.js';
+import { lukeUiClassNames } from '../shared/class-names.js';
+import { cx } from '../shared/utils/utils.js';
 
 /**
  * Applies the descendant CSS reset and the base Luke UI typography and theme layer. It carries no

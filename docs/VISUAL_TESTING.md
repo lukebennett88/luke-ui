@@ -15,7 +15,7 @@ current working tree, including uncommitted changes. Fetch before running when y
 remote commit. Set `VISUAL_BASE_REF` to use another local ref, such as `upstream/main` in a fork.
 The command compares matching capture IDs and writes a self-contained report to
 `.artifacts/visual-regression/report/index.html`. Capture identity, harness files, and that artifact
-directory are defined in `packages/@luke-ui/react/src/test-utils/visual-capture-id.ts` and
+directory are defined in `packages/@luke-ui/react/src/core/test-utils/visual-capture-id.ts` and
 `packages/@luke-ui/react/scripts/visual-regression-contract.ts`. GitHub Actions cannot import those
 modules. A unit test fails if the workflow lists a different harness file or artifact path.
 `vitest.config.ts` is copied into the base worktree, so it also cannot import those modules. A unit

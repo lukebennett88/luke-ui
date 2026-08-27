@@ -3,12 +3,16 @@ import { fileURLToPath } from 'node:url';
 
 export const VISUAL_LOCKFILE = 'pnpm-lock.yaml';
 
-/** Files that shape how a capture renders. Hashed into the cache key and copied into the base worktree. */
+/** Marks a baseline worktree that can accept the current visual harness. */
+export const VISUAL_HARNESS_LAYOUT_FILE = 'packages/@luke-ui/react/src/core/stylesheet.css.ts';
+
+/** Files that shape how a capture renders. Hashed into the cache key and copied into compatible base worktrees. */
 export const VISUAL_HARNESS_FILES = [
 	'packages/@luke-ui/react/vitest.config.ts',
-	'packages/@luke-ui/react/src/test-utils/render-setup.ts',
-	'packages/@luke-ui/react/src/test-utils/render.tsx',
-	'packages/@luke-ui/react/src/test-utils/visual-setup.ts',
+	VISUAL_HARNESS_LAYOUT_FILE,
+	'packages/@luke-ui/react/src/core/test-utils/render-setup.ts',
+	'packages/@luke-ui/react/src/core/test-utils/render.tsx',
+	'packages/@luke-ui/react/src/core/test-utils/visual-setup.ts',
 ] as const;
 
 export const VISUAL_CACHE_HASH_FILES = [VISUAL_LOCKFILE, ...VISUAL_HARNESS_FILES];

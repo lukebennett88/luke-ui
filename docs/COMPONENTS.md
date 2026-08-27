@@ -31,8 +31,10 @@ pnpm run generate:component --args <name> <docs-group>
 
 Primitive scaffolding is not handled by the component generator.
 
-Public subpath `index.ts` files are export-only. A component's implementation lives in a named
-sibling file. Support modules and multi-part primitives each keep their own file.
+Public subpath modules live under `src/exports/`. Single-segment subpaths use a flat module such as
+`src/exports/button.ts`. Grouped subpaths use nested modules such as
+`src/exports/primitives/button.ts`. A component's implementation lives under `src/core/`. Support
+modules and multi-part primitives each keep their own file.
 
 The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`.
 That module owns component-name validation, documentation groups, conformance contracts, and

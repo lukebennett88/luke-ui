@@ -10,48 +10,51 @@ with no class and no JS required. Neither step injects styles at runtime.
 
 ## Structure
 
-- `styles/index.css.ts`: stylesheet graph in cascade order — layers, reset, theme root, style
+Paths below are rooted in `packages/@luke-ui/react/src/`. Core style, primitive, overlay, and
+utility modules live under `core/`. Theme modules live under `theme/`.
+
+- `core/styles/index.css.ts`: stylesheet graph in cascade order — layers, reset, theme root, style
   modules, utilities.
-- `styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
-- `styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
-- `styles/modules.css.ts`: the committed stylesheet registry. It explicitly imports every colocated
-  `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet, plus primitive
-  and overlay style modules. Keep the list in code-point order by path for deterministic output.
-  Named layers make cross-layer priority explicit. Specificity and source order still matter within
-  a layer.
-- `styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
+- `core/styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
+- `core/styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
+- `core/styles/modules.css.ts`: the committed stylesheet registry. It explicitly imports every
+  colocated `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet, plus
+  primitive and overlay style modules. Keep the list in code-point order by path for deterministic
+  output. Named layers make cross-layer priority explicit. Specificity and source order still matter
+  within a layer.
+- `core/styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
-- `styles/input-states.ts`: the shared field control-state selectors (`composeInputStateSelectors`,
-  `descendantDisabledSelector`) that field recipes compose. It is named `.ts`, not `.css.ts`,
-  because it emits no CSS. Each field recipe's `.css.ts` module composes its plain data and
-  functions.
-- `styles/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered as a
-  CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is the
-  in-control icon `primitives/combobox/styles.css.ts` applies under its own invalid selector's
-  `::after` — the border stays at its resting 1px there, since the icon is already the non-colour
-  cue. It renders as the pseudo-element's own last DOM child, so the style gives its trailing
-  affordances (the combobox clear button and trigger) a flex `order` ahead of the icon's default
-  `order: 0`, so it lands right after the field's text content and before them, matching the
+- `core/styles/input-states.ts`: the shared field control-state selectors
+  (`composeInputStateSelectors`, `descendantDisabledSelector`) that field recipes compose. It is
+  named `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module composes
+  its plain data and functions.
+- `core/styles/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered
+  as a CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is
+  the in-control icon `core/primitives/combobox/styles.css.ts` applies under its own invalid
+  selector's `::after` — the border stays at its resting 1px there, since the icon is already the
+  non-colour cue. It renders as the pseudo-element's own last DOM child, so the style gives its
+  trailing affordances (the combobox clear button and trigger) a flex `order` ahead of the icon's
+  default `order: 0`, so it lands right after the field's text content and before them, matching the
   Spectrum reference this ordering is drawn from. `invalidMessageIcon` is the smaller,
-  message-leading variant `primitives/field/recipe.css.ts` draws on its `message` slot, switched on
-  by `primitives/checkbox/recipe.css.ts` alone: `Checkbox`'s own box has no room for an in-control
-  icon without floating past the label, so its icon moves to the message and its box keeps a `2px`
-  border as its own non-colour cue instead. Named `.ts` for the same reason as `input-states.ts`: it
-  emits no CSS of its own, only plain style-rule data each recipe composes.
-- `primitives/input-group/recipe.css.ts` draws the same glyph, but as a real `Icon` element on its
-  own `invalidIndicator` slot rather than a mask: `InputGroup` (`primitives/input-group/`) reads
-  React Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid control
-  cannot be composed without a non-colour cue. The recipe owns only the icon's colour and margins —
-  `Icon` owns its box, and `IconSizeProvider` (`FIELD_CONTROL_ICON_SIZE`) owns its per-size step —
-  and gives the `suffix` slot the same `order: 1` for the same Spectrum ordering. Combobox's control
-  is not a plain `Group` with that state to hand, so it stays CSS-driven.
-- `overlays/mobile-overlay.css.ts`: the backdrop, tray, and dialog styles `MobileOverlay` renders
-  for the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and
+  message-leading variant `core/primitives/field/recipe.css.ts` draws on its `message` slot,
+  switched on by `core/primitives/checkbox/recipe.css.ts` alone: `Checkbox`'s own box has no room
+  for an in-control icon without floating past the label, so its icon moves to the message and its
+  box keeps a `2px` border as its own non-colour cue instead. Named `.ts` for the same reason as
+  `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
+- `core/primitives/input-group/recipe.css.ts` draws the same glyph, but as a real `Icon` element on
+  its own `invalidIndicator` slot rather than a mask: `InputGroup` (`core/primitives/input-group/`)
+  reads React Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid
+  control cannot be composed without a non-colour cue. The recipe owns only the icon's colour and
+  margins — `Icon` owns its box, and `IconSizeProvider` (`FIELD_CONTROL_ICON_SIZE`) owns its
+  per-size step — and gives the `suffix` slot the same `order: 1` for the same Spectrum ordering.
+  Combobox's control is not a plain `Group` with that state to hand, so it stays CSS-driven.
+- `core/overlays/mobile-overlay.css.ts`: the backdrop, tray, and dialog styles `MobileOverlay`
+  renders for the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and
   `tray/index.css`.
-- `overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
+- `core/overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
-- `styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
+- `core/styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
 - `theme/contract.ts`: the theme token tree, the mode-family declaration, `--luke-*` variable
   naming, and the source-owned `typeStyles` typography keys.
 - `theme/path-record.ts`: the typed `[path, value]` record constructor value producers use so
@@ -96,12 +99,12 @@ with no class and no JS required. Neither step injects styles at runtime.
   class never drags in the compiler or a foundation.
 - `theme/foundations/tactile.ts` and `theme/foundations/paper.ts`: each bundled theme's
   `defineTheme(...)` input, kept as separate leaf modules so importing one never pulls in the other.
-- `themes/tactile/` and `themes/paper/`: each theme's public entrypoint, exported from
+- `theme/bundles/tactile/` and `theme/bundles/paper/`: each theme's public entrypoint, exported from
   `@luke-ui/react/themes/tactile` and `@luke-ui/react/themes/paper`. Each exports its own
   `themeClassName` identity class and its `theme` (the public `ThemeInput` a consumer can read,
   copy, or spread). The class comes from a per-theme `theme-class-name.ts` leaf holding the name as
   a literal, so importing the class alone leaves the foundation out of a consumer's bundle.
-  `themes/theme-bundle.test.ts` proves that with a real bundler run.
+  `theme/bundles/theme-bundle.test.ts` proves that with a real bundler run.
 - `scripts/build-themes.ts`: writes the bundled theme stylesheets to
   `dist/themes/<name>/stylesheet.css`, alongside the entrypoint `vp pack` emits there.
 
@@ -180,13 +183,13 @@ Specificity and source order still decide conflicts within a layer.
 | `recipes`   | Component styles, variants, and compound variants.  |
 | `utilities` | One-off layout and override escape hatches.         |
 
-Use `styleInLayer` and `globalStyleInLayer` from `styles/layered-style.css.ts` to place a plain
+Use `styleInLayer` and `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain
 Vanilla Extract style for a recipe with no variants in a named layer (see
-`loading-skeleton/styles.css.ts`). A variant-driven recipe instead calls `recipe()` from
-`styles/recipe.ts`, which wraps every base, variant, and compound-variant style it is given in the
-`recipes` layer. A recipe can still pre-build a static `base` with `styleInLayer('recipes', …)` and
-hand the resulting class string to `recipe()`, which passes a string value through unchanged rather
-than wrapping it again.
+`core/loading-skeleton/styles.css.ts`). A variant-driven recipe instead calls `recipe()` from
+`core/styles/recipe.ts`, which wraps every base, variant, and compound-variant style it is given in
+the `recipes` layer. A recipe can still pre-build a static `base` with `styleInLayer('recipes', …)`
+and hand the resulting class string to `recipe()`, which passes a string value through unchanged
+rather than wrapping it again.
 
 Text's Capsize trim declarations use logical properties for the pseudo-element margins and are
 authored as one of the Text recipe's `recipe()` compound-variant styles, so they remain owned by
@@ -220,10 +223,10 @@ Colocate recipe files beside their owner:
 - `recipe.css.ts` — public recipe contract
 - `styles.css.ts` — private implementation styling
 
-Every recipe is built with the internal `recipe()` engine from `styles/recipe.ts`. It is not part of
-the public package entry. Component authors inside `@luke-ui/react` use it to define a new recipe.
-Consumers call the built recipe functions it returns (`buttonRecipe`, `textRecipe`, and so on).
-`recipe()` wraps every base, variant, and compound-variant style it is given in the `recipes`
+Every recipe is built with the internal `recipe()` engine from `core/styles/recipe.ts`. It is not
+part of the public package entry. Component authors inside `@luke-ui/react` use it to define a new
+recipe. Consumers call the built recipe functions it returns (`buttonRecipe`, `textRecipe`, and so
+on). `recipe()` wraps every base, variant, and compound-variant style it is given in the `recipes`
 cascade layer itself, so a recipe author does not add layering by hand.
 
 ### Single-part recipes
@@ -244,7 +247,7 @@ export const buttonRecipe = recipe({
 });
 ```
 
-See `primitives/button/recipe.css.ts` for the full recipe this abbreviates.
+See `core/primitives/button/recipe.css.ts` for the full recipe this abbreviates.
 
 ### Slotted recipes
 
@@ -265,7 +268,7 @@ const { label, message, root } = fieldRecipe({ tone: 'description' });
 </div>;
 ```
 
-See `primitives/field/recipe.css.ts` for a complete public slotted recipe. Apply
+See `core/primitives/field/recipe.css.ts` for a complete public slotted recipe. Apply
 `as const satisfies SlottedConfigInput` at the definition site: `as const` preserves the literal
 slot names and variant values `recipe()` infers, and `satisfies` type-checks every slot and variant
 style against `StyleRule` where it is written.
@@ -288,9 +291,9 @@ with the recipe.
 
 ### Shared input-state selectors
 
-`InputGroup` and Combobox styling (`primitives/input-group/recipe.css.ts`,
-`primitives/combobox/styles.css.ts`) share one definition of what "hovered", "focused", "disabled",
-"invalid", and "read-only" mean for a control, from `styles/input-states.ts`:
+`InputGroup` and Combobox styling (`core/primitives/input-group/recipe.css.ts`,
+`core/primitives/combobox/styles.css.ts`) share one definition of what "hovered", "focused",
+"disabled", "invalid", and "read-only" mean for a control, from `core/styles/input-states.ts`:
 
 ```ts
 import { composeInputStateSelectors, descendantDisabledSelector } from './input-states.js';

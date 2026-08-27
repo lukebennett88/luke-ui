@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { themeClassName as paperThemeClassName } from '../themes/paper/index.js';
-import { themeClassName as tactileThemeClassName } from '../themes/tactile/index.js';
 import {
 	extractValue,
 	paperFoundation,
@@ -8,6 +6,8 @@ import {
 	tactileFoundation,
 } from './__fixtures__/theme-css.js';
 import { buildTheme } from './build-theme.js';
+import { themeClassName as paperThemeClassName } from './bundles/paper/index.js';
+import { themeClassName as tactileThemeClassName } from './bundles/tactile/index.js';
 import {
 	flattenThemeContract,
 	partitionContractPairs,

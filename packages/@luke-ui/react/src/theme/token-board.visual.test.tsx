@@ -1,6 +1,6 @@
 import { expect, test } from 'vite-plus/test';
-import { render, visualAppearances } from '../test-utils/render.js';
-import { captureVisualAppearance } from '../test-utils/visual.js';
+import { render, visualAppearances } from '../core/test-utils/render.js';
+import { captureVisualAppearance } from '../core/test-utils/visual.js';
 import { TokenBoard } from './token-board.js';
 
 // Captures every contract leaf, colour and non-colour alike, for both bundled themes and
