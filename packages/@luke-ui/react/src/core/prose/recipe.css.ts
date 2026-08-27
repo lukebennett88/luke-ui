@@ -1,7 +1,7 @@
+import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer, styleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
-import { vars } from '../../theme/contract.css.js';
 
 const base = styleInLayer('recipes', {}, 'prose');
 
