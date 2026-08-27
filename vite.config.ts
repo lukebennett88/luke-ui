@@ -152,6 +152,23 @@ export default defineConfig({
 					],
 				},
 			},
+			{
+				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				files: ['packages/@luke-ui/react/src/shared/**/*.{ts,tsx}'],
+				rules: {
+					'no-restricted-imports': [
+						'error',
+						{
+							patterns: [
+								{
+									group: ['**/core/**', '**/theme/**', '**/exports/**'],
+									message: 'Shared modules must not import from core, theme, or exports.',
+								},
+							],
+						},
+					],
+				},
+			},
 		],
 		plugins: ['import', 'jsx-a11y', 'react', 'typescript', 'vitest'],
 		rules: {

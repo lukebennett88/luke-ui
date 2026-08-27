@@ -28,6 +28,7 @@ Useful repo commands:
 
 - Theme contract and compiler: `packages/@luke-ui/react/src/theme/`.
 - Styles: `packages/@luke-ui/react/src/core/styles/`.
+- Shared low-level primitives: `packages/@luke-ui/react/src/shared/`.
 - Build output: `packages/@luke-ui/react/dist/stylesheet.css`.
 
 ## Docs

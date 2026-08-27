@@ -21,9 +21,12 @@
   stories, and fixtures.
 - `src/exports/` holds the thin public modules that pack publishes for each package subpath.
 - `src/theme/` holds the theme compiler, foundations, and bundled themes in `bundles/`.
+- `src/shared/` holds low-level primitives with no domain of their own, shared by two or more of the
+  other zones. It stays deliberately small. Do not put component code, theme compiler logic,
+  recipes, or other domain-specific implementation there.
 
-Core may import theme tokens. Theme modules must not import core modules, and core modules must not
-import public export modules.
+`exports` may import from `core` and `theme`. `core` may import from `theme` and `shared`. `theme`
+may import from `shared`. `shared` must not import from `core`, `theme`, or `exports`.
 
 ## Component structure
 
