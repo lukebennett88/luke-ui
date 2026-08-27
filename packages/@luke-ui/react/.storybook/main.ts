@@ -36,7 +36,7 @@ export default defineMain({
 		config.resolve.alias = [
 			{
 				find: '#recipe-engine',
-				replacement: resolve(srcDir, 'styles/recipe-engine.ts'),
+				replacement: resolve(srcDir, 'core/styles/recipe-engine.ts'),
 			},
 			{
 				find: /^@luke-ui\/react\/spritesheet\.svg(\?.*)?$/,
@@ -44,11 +44,11 @@ export default defineMain({
 			},
 			{
 				find: /^@luke-ui\/react\/stylesheet\.css(\?.*)?$/,
-				replacement: `${resolve(srcDir, 'stylesheet.css.ts')}$1`,
+				replacement: `${resolve(srcDir, 'core/stylesheet.css.ts')}$1`,
 			},
 			{
 				find: /^@luke-ui\/react\/(.+?)(\?.*)?$/,
-				replacement: `${srcDir}/$1$2`,
+				replacement: `${resolve(srcDir, 'exports')}/$1$2`,
 			},
 			...existingAliases,
 		];

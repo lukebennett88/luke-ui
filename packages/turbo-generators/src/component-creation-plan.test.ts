@@ -48,12 +48,13 @@ describe('createComponentPlan', () => {
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/feedback/status-badge.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
-			'packages/@luke-ui/react/src/status-badge/index.ts',
-			'packages/@luke-ui/react/src/status-badge/recipe.css.ts',
-			'packages/@luke-ui/react/src/status-badge/status-badge.browser.test.tsx',
-			'packages/@luke-ui/react/src/status-badge/status-badge.stories.tsx',
-			'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
-			'packages/@luke-ui/react/src/status-badge/status-badge.visual.test.tsx',
+			'packages/@luke-ui/react/src/core/status-badge/index.ts',
+			'packages/@luke-ui/react/src/core/status-badge/recipe.css.ts',
+			'packages/@luke-ui/react/src/core/status-badge/status-badge.browser.test.tsx',
+			'packages/@luke-ui/react/src/core/status-badge/status-badge.stories.tsx',
+			'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx',
+			'packages/@luke-ui/react/src/core/status-badge/status-badge.visual.test.tsx',
+			'packages/@luke-ui/react/src/exports/status-badge.ts',
 		]);
 		expect(plan).not.toHaveProperty('jsonEdits');
 		expect(plan).not.toHaveProperty('sortedImportEdits');
@@ -103,7 +104,7 @@ describe('createComponentPlan', () => {
 		expect(frontmatter.props).toEqual([
 			{
 				name: 'StatusBadgeProps',
-				path: 'packages/@luke-ui/react/src/status-badge/status-badge.tsx',
+				path: 'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx',
 			},
 		]);
 	});

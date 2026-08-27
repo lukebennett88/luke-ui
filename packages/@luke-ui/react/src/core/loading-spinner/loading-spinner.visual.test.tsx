@@ -1,0 +1,114 @@
+import type { CSSProperties, ReactNode } from 'react';
+import { test } from 'vite-plus/test';
+import { vars } from '../../theme/index.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	Stack,
+	variantValuesFor,
+} from '../test-utils/visual.js';
+import { LoadingSpinner } from './index.js';
+
+const rowStyle = {
+	alignItems: 'center',
+	display: 'flex',
+	gap: '1rem',
+} satisfies CSSProperties;
+
+const sizes = variantValuesFor<typeof LoadingSpinner, 'size'>()(['small', 'medium', 'large']);
+const colors = variantValuesFor<typeof LoadingSpinner, 'color'>()(['primary', 'info', 'danger']);
+
+const fixedChildStyle = {
+	blockSize: '2.5rem',
+	inlineSize: '8rem',
+} satisfies CSSProperties;
+
+test('sizes and colors', async () => {
+	const { locator } = render(
+		<Stack>
+			<div style={rowStyle}>
+				{sizes.map((size) => (
+					<LoadingSpinner aria-label={`${size} spinner`} key={size} size={size} />
+				))}
+			</div>
+			<div style={rowStyle}>
+				{colors.map((color) => (
+					<LoadingSpinner aria-label={`${color} spinner`} color={color} key={color} />
+				))}
+			</div>
+			<div style={rowStyle}>
+				<LoadingSpinner aria-label="loading fixed size button">
+					<button style={fixedChildStyle} type="button">
+						Save
+					</button>
+				</LoadingSpinner>
+				<LoadingSpinner aria-label="loaded fixed size button" isLoading={false}>
+					<button style={fixedChildStyle} type="button">
+						Save
+					</button>
+				</LoadingSpinner>
+			</div>
+		</Stack>,
+	);
+
+	await captureVisual(locator, 'loading-spinner/sizes-and-colors');
+});
+
+for (const appearance of visualAppearances) {
+	test(`theme matrix: ${appearance.theme} ${appearance.mode}`, async () => {
+		const oppositeMode = appearance.mode === 'light' ? 'dark' : 'light';
+		const { locator: scene } = render(
+			<div style={themeMatrixStyle}>
+				<ThemeMatrixScope label="Root scope">
+					<LoadingSpinner aria-label="Root theme pending" style={spinnerStyle} />
+				</ThemeMatrixScope>
+				<ThemeMatrixScope label="Opposite mode" mode={oppositeMode}>
+					<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} />
+				</ThemeMatrixScope>
+			</div>,
+			{ appearance },
+		);
+
+		await captureVisualAppearance(scene, 'loading-spinner/theme-matrix', appearance);
+	});
+}
+
+const themeMatrixStyle = {
+	backgroundColor: vars.color.surface.canvas,
+	display: 'flex',
+	gap: '1rem',
+	padding: '1rem',
+} satisfies CSSProperties;
+
+const spinnerStyle = {
+	color: vars.color.foreground.accent.rest,
+} satisfies CSSProperties;
+
+function ThemeMatrixScope({
+	children,
+	label,
+	mode,
+}: {
+	children: ReactNode;
+	label: string;
+	mode?: 'light' | 'dark';
+}) {
+	return (
+		<div
+			data-color-mode={mode}
+			style={{
+				alignItems: 'center',
+				backgroundColor: vars.color.surface.recessed,
+				border: `1px solid ${vars.color.border.decorative}`,
+				color: vars.color.text.primary,
+				display: 'flex',
+				gap: '0.5rem',
+				padding: '1rem',
+			}}
+		>
+			{children}
+			<span>{label}</span>
+		</div>
+	);
+}

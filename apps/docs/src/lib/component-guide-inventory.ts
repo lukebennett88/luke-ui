@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parseComponentFrontmatter, readFrontmatter } from './docs-frontmatter.js';
 
-const SOURCE_PREFIX = 'packages/@luke-ui/react/src/';
+const EXPORTS_PREFIX = 'packages/@luke-ui/react/src/exports/';
 
 /** One authored component guide, keyed by the slug the navigation uses. */
 interface ComponentGuide {
@@ -158,8 +158,8 @@ function categoryDirectories(componentsDir: string): Array<string> {
 }
 
 /**
- * A guide `source` must name a public package entry point and a real source directory with an
- * `index.ts`, so a documented component is one a developer can import.
+ * A guide `source` must name a public package entry point and its exports module, so a documented
+ * component is one a developer can import.
  */
 export function findGuideSourceIssues(
 	inventory: ComponentGuideInventory,
@@ -172,14 +172,20 @@ export function findGuideSourceIssues(
 		const { relativePath, source } = guide;
 		if (source === undefined) continue;
 
-		if (!source.startsWith(SOURCE_PREFIX)) {
+		if (!source.startsWith(EXPORTS_PREFIX)) {
 			issues.push(
-				`${relativePath}: source "${source}" is not a public package entry point (expected a path under ${SOURCE_PREFIX})`,
+				`${relativePath}: source "${source}" is not a public package entry point (expected a path under ${EXPORTS_PREFIX})`,
 			);
 			continue;
 		}
 
-		const subpath = source.slice(SOURCE_PREFIX.length);
+		const exportPath = source.slice(EXPORTS_PREFIX.length);
+		if (!exportPath.endsWith('.ts')) {
+			issues.push(`${relativePath}: source "${source}" must name an exports .ts module`);
+			continue;
+		}
+
+		const subpath = exportPath.slice(0, -'.ts'.length);
 		if (!exportSet.has(`./${subpath}`)) {
 			issues.push(
 				`${relativePath}: source "${source}" is not a public package entry point (expected export "./${subpath}" in @luke-ui/react)`,
@@ -187,9 +193,9 @@ export function findGuideSourceIssues(
 			continue;
 		}
 
-		const indexPath = resolve(reactPackageDir, 'src', subpath, 'index.ts');
-		if (!existsSync(indexPath)) {
-			issues.push(`${relativePath}: source "${source}" has no ${source}/index.ts`);
+		const sourcePath = resolve(reactPackageDir, 'src', 'exports', exportPath);
+		if (!existsSync(sourcePath)) {
+			issues.push(`${relativePath}: source "${source}" does not exist`);
 		}
 	}
 

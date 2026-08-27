@@ -23,7 +23,7 @@ describe('createComponent', () => {
 		await createComponent(root, answers);
 
 		await expect(
-			readFile(join(root, 'packages/@luke-ui/react/src/status-badge/index.ts'), 'utf8'),
+			readFile(join(root, 'packages/@luke-ui/react/src/core/status-badge/index.ts'), 'utf8'),
 		).resolves.toBe(
 			[
 				"export { StatusBadge, type StatusBadgeProps } from './status-badge.js';",
@@ -32,7 +32,10 @@ describe('createComponent', () => {
 			].join('\n'),
 		);
 		await expect(
-			readFile(join(root, 'packages/@luke-ui/react/src/status-badge/status-badge.tsx'), 'utf8'),
+			readFile(
+				join(root, 'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx'),
+				'utf8',
+			),
 		).resolves.toContain('export function StatusBadge');
 		await expect(readJson(root, 'apps/docs/content/docs/components/meta.json')).resolves.toEqual({
 			pages: ['actions', 'feedback'],
@@ -66,7 +69,7 @@ describe('createComponent', () => {
 		);
 		await expect(
 			readFile(
-				join(root, 'packages/@luke-ui/react/src/status-badge/component-test-registration.ts'),
+				join(root, 'packages/@luke-ui/react/src/core/status-badge/component-test-registration.ts'),
 				'utf8',
 			),
 		).rejects.toMatchObject({ code: 'ENOENT' });
@@ -110,7 +113,7 @@ describe('createComponent', () => {
 		});
 
 		const browserTest = await readFile(
-			join(root, 'packages/@luke-ui/react/src/date-field/date-field.browser.test.tsx'),
+			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
 			'utf8',
 		);
 		expect(browserTest).toContain('testConformance');
@@ -133,7 +136,7 @@ describe('createComponent', () => {
 		});
 
 		const browserTest = await readFile(
-			join(root, 'packages/@luke-ui/react/src/date-field/date-field.browser.test.tsx'),
+			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
 			'utf8',
 		);
 		expect(browserTest).toContain('testConformance');
@@ -154,7 +157,7 @@ describe('createComponent', () => {
 		});
 
 		const browserTest = await readFile(
-			join(root, 'packages/@luke-ui/react/src/mark/mark.browser.test.tsx'),
+			join(root, 'packages/@luke-ui/react/src/core/mark/mark.browser.test.tsx'),
 			'utf8',
 		);
 		expect(browserTest).toContain("test('Mark renders its root element'");
@@ -175,7 +178,7 @@ describe('createComponent', () => {
 
 		expect(
 			await readFile(
-				join(root, 'packages/@luke-ui/react/src/action-chip/action-chip.browser.test.tsx'),
+				join(root, 'packages/@luke-ui/react/src/core/action-chip/action-chip.browser.test.tsx'),
 				'utf8',
 			),
 		).toContain("testIntegration('action-chip', async");
@@ -195,7 +198,7 @@ describe('createComponent', () => {
 
 		await expect(
 			readFile(
-				join(root, 'packages/@luke-ui/react/src/date-field/date-field.visual.test.tsx'),
+				join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.visual.test.tsx'),
 				'utf8',
 			),
 		).rejects.toMatchObject({ code: 'ENOENT' });
@@ -229,16 +232,16 @@ describe('createComponent', () => {
 	});
 });
 
-const modulesRegistryPath = 'packages/@luke-ui/react/src/styles/modules.css.ts';
-const manifestPath = 'packages/@luke-ui/react/src/conformance/manifest.ts';
+const modulesRegistryPath = 'packages/@luke-ui/react/src/core/styles/modules.css.ts';
+const manifestPath = 'packages/@luke-ui/react/src/core/conformance/manifest.ts';
 
 async function createRepositoryFixture(options?: { modulesRegistry?: string }): Promise<string> {
 	const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
 	roots.push(root);
 
 	await mkdir(join(root, 'apps/docs/content/docs/components'), { recursive: true });
-	await mkdir(join(root, 'packages/@luke-ui/react/src/styles'), { recursive: true });
-	await mkdir(join(root, 'packages/@luke-ui/react/src/conformance'), { recursive: true });
+	await mkdir(join(root, 'packages/@luke-ui/react/src/core/styles'), { recursive: true });
+	await mkdir(join(root, 'packages/@luke-ui/react/src/core/conformance'), { recursive: true });
 
 	await writeFile(
 		join(root, 'apps/docs/content/docs/components/meta.json'),

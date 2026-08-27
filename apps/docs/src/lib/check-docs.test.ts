@@ -44,7 +44,7 @@ Run the install command.
 		components: {
 			'actions/button.mdx': `---
 title: Button
-source: packages/@luke-ui/react/src/button
+source: packages/@luke-ui/react/src/exports/button.ts
 ---
 
 <ExampleBlock src="button/basic" title="Button — Basic" />
@@ -76,7 +76,7 @@ test('reports heading vocabulary, order, and required Accessibility issues', () 
 		components: {
 			'actions/button.mdx': `---
 title: Button
-source: packages/@luke-ui/react/src/button
+source: packages/@luke-ui/react/src/exports/button.ts
 ---
 
 <ExampleBlock src="button/basic" title="Button — Basic" />
@@ -95,7 +95,7 @@ Use Button for actions.
 `,
 			'visuals/icon.mdx': `---
 title: Icon
-source: packages/@luke-ui/react/src/icon
+source: packages/@luke-ui/react/src/exports/icon.ts
 ---
 
 <ExampleBlock src="icon/basic" title="Icon — Basic" />
@@ -159,7 +159,7 @@ title: Layout
 		components: {
 			'layout/box.mdx': `---
 title: Box
-source: packages/@luke-ui/react/src/box
+source: packages/@luke-ui/react/src/exports/box.ts
 ---
 
 <ExampleBlock src="box/basic" title="Box — Basic" />
@@ -179,7 +179,7 @@ test('does not report a shared-example issue for a page referencing the same exa
 		components: {
 			'layout/box.mdx': `---
 title: Box
-source: packages/@luke-ui/react/src/box
+source: packages/@luke-ui/react/src/exports/box.ts
 ---
 
 <ExampleBlock src="box/basic" title="Box — Basic" />
@@ -516,7 +516,7 @@ test('finds no extra docs issues in the docs app beyond the baseline', () => {
 
 const INVENTORY_GUIDE = `---
 title: Button
-source: packages/@luke-ui/react/src/button
+source: packages/@luke-ui/react/src/exports/button.ts
 ---
 
 <ExampleBlock src="button/basic" title="Button — Basic" />
@@ -653,7 +653,7 @@ test('reports category metadata that does not match the root metadata', () => {
 			'actions/button.mdx': INVENTORY_GUIDE,
 			'actions/link.mdx': `---
 title: Link
-source: packages/@luke-ui/react/src/link
+source: packages/@luke-ui/react/src/exports/link.ts
 ---
 
 <ExampleBlock src="link/basic" title="Link — Basic" />
@@ -676,15 +676,15 @@ test('reports a guide source that is not a public package entry point', () => {
 	const paths = inventoryFixture({ packageExports: ['./link'] });
 
 	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/button" is not a public package entry point (expected export "./button" in @luke-ui/react)',
+		'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/exports/button.ts" is not a public package entry point (expected export "./button" in @luke-ui/react)',
 	]);
 });
 
-test('reports a source directory with no index.ts', () => {
+test('reports a missing exports module', () => {
 	const paths = inventoryFixture({ sourceDirs: [] });
 
 	expect(findDocsIssues(paths)).toEqual([
-		'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/button" has no packages/@luke-ui/react/src/button/index.ts',
+		'component-guide-inventory: actions/button.mdx: source "packages/@luke-ui/react/src/exports/button.ts" does not exist',
 	]);
 });
 
@@ -696,7 +696,7 @@ function createDocsFixture(input: {
 	metadata?: Record<string, unknown>;
 	/** Export keys for the fake `@luke-ui/react` manifest. */
 	packageExports?: ReadonlyArray<string>;
-	/** Subpaths under the fake package `src` that get an `index.ts`. */
+	/** Subpaths under the fake package `src/exports` that get a `.ts` module. */
 	sourceDirs?: ReadonlyArray<string>;
 }): DocsCheckPaths {
 	const directory = mkdtempSync(join(tmpdir(), 'luke-ui-check-docs-'));
@@ -738,9 +738,9 @@ function createDocsFixture(input: {
 	writeFileSync(reactPackageJsonPath, JSON.stringify({ exports, name: '@luke-ui/react' }));
 
 	for (const subpath of input.sourceDirs ?? guideSources) {
-		const sourceDir = join(reactPackageDir, 'src', subpath);
-		mkdirSync(sourceDir, { recursive: true });
-		writeFileSync(join(sourceDir, 'index.ts'), 'export {};\n');
+		const sourcePath = join(reactPackageDir, 'src', 'exports', `${subpath}.ts`);
+		mkdirSync(join(sourcePath, '..'), { recursive: true });
+		writeFileSync(sourcePath, 'export {};\n');
 	}
 
 	return {
@@ -790,5 +790,5 @@ function defaultMetadata(guidePaths: ReadonlyArray<string>): Record<string, unkn
 
 function guideSourceSubpath(contents: string): string {
 	const source = contents.match(/^source:\s*(.+)$/m)?.[1]?.trim() ?? '';
-	return source.replace('packages/@luke-ui/react/src/', '');
+	return source.replace('packages/@luke-ui/react/src/exports/', '').replace(/\.ts$/, '');
 }

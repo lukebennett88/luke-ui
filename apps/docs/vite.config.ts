@@ -145,7 +145,10 @@ export default defineConfig(async () => {
 		resolve: {
 			alias: {
 				'#recipe-engine': fileURLToPath(
-					new URL('../../packages/@luke-ui/react/src/styles/recipe-engine.ts', import.meta.url),
+					new URL(
+						'../../packages/@luke-ui/react/src/core/styles/recipe-engine.ts',
+						import.meta.url,
+					),
 				),
 			},
 			tsconfigPaths: true,

@@ -7,7 +7,9 @@ import { readdir, rm } from 'node:fs/promises';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
 
-const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
+const recipeEngineSource = fileURLToPath(
+	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
+);
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
 const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
@@ -57,10 +59,10 @@ export default defineConfig({
 		},
 		dts: true,
 		entry: {
-			stylesheet: 'src/stylesheet.css.ts',
-			'*': ['src/*/index.ts'],
-			'primitives/*': ['src/primitives/*/index.ts'],
-			'themes/*': ['src/themes/*/index.ts'],
+			stylesheet: 'src/core/stylesheet.css.ts',
+			'*': ['src/exports/*.ts'],
+			'primitives/*': ['src/exports/primitives/*.ts'],
+			'themes/*': ['src/exports/themes/*.ts'],
 		},
 		exports: {
 			customExports: Object.fromEntries(

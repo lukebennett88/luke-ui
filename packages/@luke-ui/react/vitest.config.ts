@@ -8,7 +8,9 @@ import { playwright } from 'vite-plus/test/browser-playwright';
 const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.join(dirname, '.storybook');
-const recipeEngineSource = fileURLToPath(new URL('./src/styles/recipe-engine.ts', import.meta.url));
+const recipeEngineSource = fileURLToPath(
+	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
+);
 // This file is copied into a git worktree at an older revision. It cannot import
 // TypeScript that does not exist there, so it has no relative imports of the
 // visual-regression contract. Keep the capture-dir literals below in sync with
@@ -71,7 +73,7 @@ export default defineConfig({
 					},
 					include: ['src/**/*.browser.test.{ts,tsx}'],
 					name: 'browser',
-					setupFiles: ['./src/test-utils/render-setup.ts'],
+					setupFiles: ['./src/core/test-utils/render-setup.ts'],
 				},
 			},
 			{
@@ -146,7 +148,10 @@ export default defineConfig({
 					},
 					include: ['src/**/*.visual.test.{ts,tsx}'],
 					name: 'visual',
-					setupFiles: ['./src/test-utils/render-setup.ts', './src/test-utils/visual-setup.ts'],
+					setupFiles: [
+						'./src/core/test-utils/render-setup.ts',
+						'./src/core/test-utils/visual-setup.ts',
+					],
 				},
 			},
 		],

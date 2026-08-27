@@ -17,11 +17,11 @@ test('renders a single-entry Props page without a type heading', () => {
 	const frontmatter = parseComponentFrontmatter(`---
 title: Button
 description: A labelled control for actions in an interface.
-source: packages/@luke-ui/react/src/button
+source: packages/@luke-ui/react/src/exports/button.ts
 reactAria: https://react-spectrum.adobe.com/react-aria/Button.html
 props:
   - name: ButtonProps
-    path: packages/@luke-ui/react/src/button/button.tsx
+    path: packages/@luke-ui/react/src/core/button/button.tsx
 ---
 `);
 
@@ -29,9 +29,9 @@ props:
 	expect(page).toContain('## Props');
 	expect(page).not.toContain('### ');
 	expect(page).toContain(
-		'<auto-type-table path="packages/@luke-ui/react/src/button/button.tsx" name="ButtonProps" />',
+		'<auto-type-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />',
 	);
-	expect(page).toContain('source: packages/@luke-ui/react/src/button');
+	expect(page).toContain('source: packages/@luke-ui/react/src/exports/button.ts');
 	expect(page).not.toContain('props:');
 });
 
@@ -39,12 +39,12 @@ test('renders a multi-entry Props page with a heading per entry', () => {
 	const frontmatter = parseComponentFrontmatter(`---
 title: Field primitive
 description: Shared label, description, and validation parts for custom fields.
-source: packages/@luke-ui/react/src/primitives/field
+source: packages/@luke-ui/react/src/exports/primitives/field.ts
 props:
   - name: FieldProps
-    path: packages/@luke-ui/react/src/primitives/field/field.tsx
+    path: packages/@luke-ui/react/src/core/primitives/field/field.tsx
   - name: FieldLabelProps
-    path: packages/@luke-ui/react/src/primitives/field/label.tsx
+    path: packages/@luke-ui/react/src/core/primitives/field/label.tsx
 ---
 `);
 
@@ -52,9 +52,7 @@ props:
 	expect(page).toContain('## Props');
 	expect(page).toContain('### FieldProps');
 	expect(page).toContain('### FieldLabelProps');
-	expect(page).toContain(
-		'<auto-type-table path="packages/@luke-ui/react/src/primitives/field/field.tsx" name="FieldProps" />',
-	);
+	expect(page).toContain('\tpath="packages/@luke-ui/react/src/core/primitives/field/field.tsx"');
 	expect(page).toContain('name="FieldLabelProps"');
 	expect(page.indexOf('### FieldProps')).toBeLessThan(page.indexOf('### FieldLabelProps'));
 });
@@ -95,7 +93,7 @@ const SCRATCH_GUIDE = `---
 title: Button
 props:
   - name: ButtonProps
-    path: packages/@luke-ui/react/src/button/button.tsx
+    path: packages/@luke-ui/react/src/core/button/button.tsx
 ---
 
 Guide body.

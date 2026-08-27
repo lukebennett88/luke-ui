@@ -2,7 +2,7 @@ import path from 'node:path';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
-import { parseVisualCaptureIdentity } from '../src/test-utils/visual-capture-id.js';
+import { parseVisualCaptureIdentity } from '../src/core/test-utils/visual-capture-id.js';
 
 export type VisualResult = {
 	id: string;

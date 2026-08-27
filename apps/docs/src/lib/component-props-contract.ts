@@ -3,7 +3,7 @@ import { dirname, resolve, sep } from 'node:path';
 import { parseSync } from 'oxc-parser';
 import type { ComponentGuideInventory } from './component-guide-inventory.js';
 
-const SOURCE_PREFIX = 'packages/@luke-ui/react/src/';
+const EXPORTS_PREFIX = 'packages/@luke-ui/react/src/exports/';
 
 interface AstNode {
 	readonly type: string;
@@ -28,17 +28,25 @@ export function findComponentPropsContractIssues(
 	const issues: Array<string> = [];
 
 	for (const guide of inventory.guides) {
-		if (guide.source === undefined || !guide.source.startsWith(SOURCE_PREFIX)) continue;
+		if (guide.source === undefined || !guide.source.startsWith(EXPORTS_PREFIX)) continue;
 
 		const entryPath = resolve(
 			reactPackageDir,
 			'src',
-			guide.source.slice(SOURCE_PREFIX.length),
-			'index.ts',
+			'exports',
+			guide.source.slice(EXPORTS_PREFIX.length),
 		);
 		if (!existsSync(entryPath)) continue;
 
-		issues.push(...findGuideIssues(guide.relativePath, guide.props, guide.source, entryPath));
+		issues.push(
+			...findGuideIssues(
+				guide.relativePath,
+				guide.props,
+				guide.source,
+				entryPath,
+				resolve(reactPackageDir, 'src', 'core'),
+			),
+		);
 	}
 
 	return issues;
@@ -49,11 +57,12 @@ function findGuideIssues(
 	frontmatterProps: ReadonlyArray<{ name: string }>,
 	source: string,
 	entryPath: string,
+	coreDir: string,
 ): Array<string> {
 	const entryModule = parseModule(entryPath);
 	if (entryModule === undefined) return [];
 
-	const modules = localContractModules(entryModule);
+	const modules = localContractModules(entryModule, coreDir);
 	const publicTypes = publicTypeNames(modules);
 	const modulesByPath = new Map(modules.map((module) => [module.module.path, module]));
 	const required = new Set<string>();
@@ -71,7 +80,7 @@ function findGuideIssues(
 		}
 	}
 
-	const entryPoint = `${source}/index.ts`;
+	const entryPoint = source;
 	const documented = new Set(frontmatterProps.map((entry) => entry.name));
 	const issues: Array<string> = [];
 
@@ -98,11 +107,12 @@ function findGuideIssues(
 	return issues;
 }
 
-// Public names may be imported and re-exported by an intermediate file. Follow those local
-// modules so the callable signature that is inspected is the one consumers actually import.
-// Stay inside the entry directory so generated data modules are not scanned.
+// Public names may be imported and re-exported by an intermediate file. Follow the public module
+// and implementation modules so the callable signature that is inspected is the one consumers
+// actually import. Do not follow other local modules such as generated data.
 function localContractModules(
 	entryModule: ParsedModule,
+	coreDir: string,
 ): Array<{ module: ParsedModule } & PublicExports> {
 	const modules = new Map<string, { module: ParsedModule } & PublicExports>();
 	const entryExports = exportedNames(entryModule.program);
@@ -125,7 +135,11 @@ function localContractModules(
 			}
 
 			const targetPath = target.path;
-			if (targetPath.endsWith('.css.ts') || !isInsideDirectory(targetPath, entryDir)) continue;
+			if (
+				targetPath.endsWith('.css.ts') ||
+				(!isInsideDirectory(targetPath, entryDir) && !isInsideDirectory(targetPath, coreDir))
+			)
+				continue;
 
 			const module = parseModule(targetPath);
 			if (module === undefined) continue;
@@ -160,6 +174,12 @@ function localReexports(
 	const reexports = new Map<string, { path: string } & PublicExports>();
 
 	for (const statement of body(module.program)) {
+		if (statement.type === 'ExportAllDeclaration') {
+			const source = literalString(statement.source);
+			if (source === undefined || !source.startsWith('.')) continue;
+			addWildcardReexport(reexports, resolveLocalModule(module.path, source));
+			continue;
+		}
 		if (statement.type !== 'ExportNamedDeclaration') continue;
 		const source = literalString(statement.source);
 
@@ -191,6 +211,19 @@ function localReexports(
 	}
 
 	return [...reexports.values()];
+}
+
+function addWildcardReexport(
+	reexports: Map<string, { path: string } & PublicExports>,
+	path: string,
+): void {
+	const module = parseModule(path);
+	if (module === undefined) return;
+
+	const exported = exportedNames(module.program);
+	const reexport = reexports.get(path) ?? { path, types: new Map(), values: new Map() };
+	mergePublicExports(reexport, exported);
+	reexports.set(path, reexport);
 }
 
 function addReexportedNames(

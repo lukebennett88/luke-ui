@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { useState } from 'react';
-import { typedKeys } from '../utils/index.js';
 import { compileTheme } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
@@ -187,7 +186,7 @@ export function ThemeDiagnosticsInspector() {
 			</header>
 
 			<div aria-label="Bundled theme" role="radiogroup" style={themeSwitchStyle}>
-				{typedKeys(BUNDLED_THEMES).map((key) => (
+				{(Object.keys(BUNDLED_THEMES) as Array<BundledThemeKey>).map((key) => (
 					<label key={key} style={themeOptionStyle}>
 						<input
 							checked={themeKey === key}
