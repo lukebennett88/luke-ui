@@ -2,9 +2,9 @@ import '../../../dist/themes/tactile/stylesheet.css';
 import '../stylesheet.css.js';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
+import { mergeProps } from '../../shared/utils/utils.js';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
-import { mergeProps } from '../utils/index.js';
 import { createSprinkles } from './utilities.css.js';
 
 const mounted: Array<HTMLElement> = [];

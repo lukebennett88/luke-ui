@@ -1,9 +1,9 @@
 import type { HTMLAttributes, JSX, ReactElement, Ref, RefCallback } from 'react';
+import { mergeProps } from '../../shared/utils/utils.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import { createSprinkles } from '../styles/utilities.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { mergeProps } from '../utils/utils.js';
 
 /** Props for `Box`. */
 export type BoxProps = Prettify<_BoxElementProps | _BoxRenderProps>;

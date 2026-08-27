@@ -1,9 +1,9 @@
 import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
+import { cx } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
-import { cx } from '../utils/utils.js';
 import {
 	loadingSkeletonClassName,
 	skeletonAnimationName,

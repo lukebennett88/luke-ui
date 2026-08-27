@@ -1,8 +1,8 @@
 import { Text as RacText } from 'react-aria-components/Text';
+import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/contract.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { cx } from '../utils/utils.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
 

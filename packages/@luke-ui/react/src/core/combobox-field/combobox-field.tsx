@@ -9,6 +9,7 @@ import { LabelContext } from 'react-aria-components/Label';
 import { PopoverContext } from 'react-aria-components/Popover';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { cx } from '../../shared/utils/utils.js';
 import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import { MobileOverlay } from '../overlays/mobile-overlay.js';
@@ -35,7 +36,6 @@ import {
 } from '../primitives/field/field.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { cx } from '../utils/utils.js';
 
 type ComboboxLoadingState = 'error' | 'filtering' | 'idle' | 'loading' | 'loadingMore' | 'sorting';
 

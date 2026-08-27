@@ -38,15 +38,7 @@ export function findComponentPropsContractIssues(
 		);
 		if (!existsSync(entryPath)) continue;
 
-		issues.push(
-			...findGuideIssues(
-				guide.relativePath,
-				guide.props,
-				guide.source,
-				entryPath,
-				resolve(reactPackageDir, 'src', 'core'),
-			),
-		);
+		issues.push(...findGuideIssues(guide.relativePath, guide.props, guide.source, entryPath));
 	}
 
 	return issues;
@@ -57,12 +49,11 @@ function findGuideIssues(
 	frontmatterProps: ReadonlyArray<{ name: string }>,
 	source: string,
 	entryPath: string,
-	coreDir: string,
 ): Array<string> {
 	const entryModule = parseModule(entryPath);
 	if (entryModule === undefined) return [];
 
-	const modules = localContractModules(entryModule, coreDir);
+	const modules = localContractModules(entryModule);
 	const publicTypes = publicTypeNames(modules);
 	const modulesByPath = new Map(modules.map((module) => [module.module.path, module]));
 	const required = new Set<string>();
@@ -107,18 +98,29 @@ function findGuideIssues(
 	return issues;
 }
 
+// Entries live under `src/exports/` (some nested, such as `src/exports/primitives/button.ts`), so
+// the traversal boundary is the `src/core` directory that sits alongside `exports` in the source
+// tree, found by walking up from the entry module to the `exports` segment.
+function srcDir(entryPath: string): string {
+	const segments = entryPath.split(sep);
+	const exportsIndex = segments.lastIndexOf('exports');
+	if (exportsIndex === -1) {
+		throw new Error(`Expected an entry path under "src/exports/", received "${entryPath}".`);
+	}
+	return segments.slice(0, exportsIndex).join(sep);
+}
+
 // Public names may be imported and re-exported by an intermediate file. Follow the public module
 // and implementation modules so the callable signature that is inspected is the one consumers
 // actually import. Do not follow other local modules such as generated data.
 function localContractModules(
 	entryModule: ParsedModule,
-	coreDir: string,
 ): Array<{ module: ParsedModule } & PublicExports> {
 	const modules = new Map<string, { module: ParsedModule } & PublicExports>();
 	const entryExports = exportedNames(entryModule.program);
 	modules.set(entryModule.path, { module: entryModule, ...entryExports });
 	const pending = [entryModule.path];
-	const entryDir = dirname(entryModule.path);
+	const coreDir = resolve(srcDir(entryModule.path), 'core');
 
 	while (pending.length > 0) {
 		const path = pending.pop();
@@ -135,11 +137,7 @@ function localContractModules(
 			}
 
 			const targetPath = target.path;
-			if (
-				targetPath.endsWith('.css.ts') ||
-				(!isInsideDirectory(targetPath, entryDir) && !isInsideDirectory(targetPath, coreDir))
-			)
-				continue;
+			if (targetPath.endsWith('.css.ts') || !isInsideDirectory(targetPath, coreDir)) continue;
 
 			const module = parseModule(targetPath);
 			if (module === undefined) continue;

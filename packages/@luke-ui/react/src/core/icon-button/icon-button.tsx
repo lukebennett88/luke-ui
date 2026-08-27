@@ -1,5 +1,6 @@
 import type { JSX } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { cx } from '../../shared/utils/utils.js';
 import type { IconName } from '../icon/icon.js';
 import { Icon } from '../icon/icon.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
@@ -7,7 +8,6 @@ import { Button } from '../primitives/button/button.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import { cx } from '../utils/utils.js';
 import type { IconButtonRecipeVariants } from './recipe.css.js';
 import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.js';
 

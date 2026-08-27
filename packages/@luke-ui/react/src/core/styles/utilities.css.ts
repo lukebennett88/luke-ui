@@ -1,10 +1,10 @@
 import type { SprinklesFn } from '@luke-ui/rainbow-sprinkles';
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
+import { typedEntries } from '../../shared/utils/utils.js';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { vars } from '../../theme/contract.css.js';
 import type { SpaceStep } from '../../theme/contract.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
-import { typedEntries } from '../utils/index.js';
 import { layers } from './layers.css.js';
 
 function fromBreakpoint(minimumInlineSize: number) {

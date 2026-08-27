@@ -1,1 +1,1 @@
-export * from '../core/utils/index.js';
+export * from '../shared/utils/utils.js';

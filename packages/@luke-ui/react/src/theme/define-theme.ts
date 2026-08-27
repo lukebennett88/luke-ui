@@ -6,6 +6,7 @@
  * backdrop) into {@link Oklch} values the foundation carries.
  */
 
+import { typedEntries, typedFromEntries } from '../shared/utils/utils.js';
 import { buildTheme, ThemeContrastError } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { gamutMapOklch, parseColor } from './color.js';
@@ -280,9 +281,9 @@ function buildModeFoundation(input: ThemeInput, mode: ColorMode): ThemeModeFound
  * default it is merged over.
  */
 function omitUndefined<T extends Record<string, unknown>>(record: T): Partial<T> {
-	return Object.fromEntries(
-		Object.entries(record).filter(([, value]) => value !== undefined),
-	) as Partial<T>;
+	return typedFromEntries<Partial<T>>(
+		typedEntries(record).filter(([, value]) => value !== undefined),
+	);
 }
 
 /** Resolves every source-colour role for one mode into the {@link Oklch} values `buildTheme` accepts. */

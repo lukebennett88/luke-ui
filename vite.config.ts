@@ -144,8 +144,8 @@ export default defineConfig({
 						{
 							patterns: [
 								{
-									group: ['**/core/**'],
-									message: 'Theme modules must not import from core.',
+									group: ['**/core/**', '**/exports/**'],
+									message: 'Theme modules must not import from core or exports.',
 								},
 							],
 						},

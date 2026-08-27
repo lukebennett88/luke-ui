@@ -251,7 +251,7 @@ function renderComponentSource(input: {
 	variantsType: string;
 }): string {
 	return `import type { ComponentProps, JSX } from 'react';
-import { cx } from '../utils/utils.js';
+import { cx } from '../../shared/utils/utils.js';
 import { ${input.recipeName} } from './recipe.css.js';
 
 /** Props for \`${input.pascalName}\`. */

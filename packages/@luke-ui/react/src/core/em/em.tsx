@@ -1,8 +1,8 @@
+import { cx } from '../../shared/utils/utils.js';
 import type { TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { cx } from '../utils/utils.js';
 import { em } from './styles.css.js';
 
 interface EmStyleProps {

@@ -1,6 +1,6 @@
+import { cx } from '../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { cx } from '../utils/utils.js';
 import { codeRecipe } from './recipe.css.js';
 
 type _CodeOmit = DistributiveOmit<React.ComponentProps<'code'>, never>;

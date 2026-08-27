@@ -2,10 +2,10 @@ import type { JSX } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import type { Prettify } from '../../types/prettify.js';
-import { cx } from '../../utils/utils.js';
 import type { ButtonRecipeVariants } from './recipe.css.js';
 import { buttonRecipe } from './recipe.css.js';
 
