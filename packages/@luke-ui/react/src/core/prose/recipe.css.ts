@@ -46,9 +46,9 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 });
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
-// Revert restores the UA marker, including native `type` on `ol`. Do not restate type in CSS:
-// HTML attribute matching for `type` is case-insensitive in Chromium and Safari.
-proseStyle('ol', { listStyleType: 'revert', paddingInlineStart: vars.space.sp24 });
+// Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply.
+proseStyle('ol:not([type])', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
+proseStyle('ol[type]', { paddingInlineStart: vars.space.sp24 });
 
 proseStyle('hr', {
 	blockSize: 0,
