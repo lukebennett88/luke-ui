@@ -119,6 +119,7 @@ export default defineConfig({
 				},
 			},
 			{
+				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
 				files: ['packages/@luke-ui/react/src/core/**/*.{ts,tsx}'],
 				rules: {
 					'no-restricted-imports': [
