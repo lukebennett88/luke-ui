@@ -8,7 +8,7 @@ import {
 	Stack,
 	variantValuesFor,
 } from '../test-utils/visual.js';
-import { Icon } from './index.js';
+import { Icon } from './icon.js';
 
 const rowStyle = {
 	alignItems: 'center',

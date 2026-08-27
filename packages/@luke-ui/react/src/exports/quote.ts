@@ -1,1 +1,1 @@
-export * from '../core/quote/index.js';
+export { Quote, type QuoteProps } from '../core/quote/quote.js';

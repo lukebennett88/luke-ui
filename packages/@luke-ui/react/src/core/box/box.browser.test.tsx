@@ -1,7 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Box } from './index.js';
+import { Box } from './box.js';
 
 testConformance({
 	path: 'box',

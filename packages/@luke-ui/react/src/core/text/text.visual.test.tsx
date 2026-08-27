@@ -3,7 +3,7 @@ import { test } from 'vite-plus/test';
 import { typeStyles } from '../../theme/contract.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
-import { Text } from './index.js';
+import { Text } from './text.js';
 
 const rowStyle = {
 	alignItems: 'baseline',

@@ -31,13 +31,14 @@
 
 ## Component structure
 
-A component directory contains:
+`src/exports/` is the only barrel layer in the package. A component directory holds implementation,
+styles, tests, and stories, and its matching `src/exports/` module re-exports directly from those
+files. A component directory contains:
 
 - `[component].stories.tsx`: Storybook documentation and render/a11y fixtures
 - `[component].browser.test.tsx`: component behaviour, conformance, and the integration tripwire
 - `[component].visual.test.tsx`: visual regression captures when the component has a visual surface
 - `<component>.tsx`: component implementation
-- `index.ts`: internal implementation barrel re-exported by its matching `src/exports/` module
 - `recipe.css.ts`: public recipe contract (scaffolded by the generator)
 - `styles.css.ts`: private implementation styling when needed
 

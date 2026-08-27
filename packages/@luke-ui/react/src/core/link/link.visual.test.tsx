@@ -9,7 +9,7 @@ import {
 	Grid,
 	Stack,
 } from '../test-utils/visual.js';
-import { Link } from './index.js';
+import { Link } from './link.js';
 
 test('kitchen sink', async () => {
 	for (const appearance of visualAppearances) {

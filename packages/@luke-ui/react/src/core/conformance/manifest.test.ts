@@ -138,13 +138,12 @@ test('covers every public component entrypoint exactly once', () => {
 	expect(new Set(paths).size).toBe(paths.length);
 	expect([...paths].sort()).toEqual(getExportPaths());
 	for (const path of paths) {
-		expect(existsSync(implementationIndex(path))).toBe(true);
+		expect(existsSync(packageExportModule(path))).toBe(true);
 	}
 });
 
-function implementationIndex(path: string): string {
-	if (path === 'theme') return resolve(packageRoot, 'src/theme/index.ts');
-	return resolve(coreRoot, path, 'index.ts');
+function packageExportModule(path: string): string {
+	return resolve(exportsRoot, `${path}.ts`);
 }
 
 test('browser tests invoke the helpers required by their manifest entry', () => {

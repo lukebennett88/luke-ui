@@ -1,7 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Heading, HeadingLevels, useHeadingLevel } from './index.js';
+import { Heading, HeadingLevels, useHeadingLevel } from './heading.js';
 
 testConformance({
 	path: 'heading',

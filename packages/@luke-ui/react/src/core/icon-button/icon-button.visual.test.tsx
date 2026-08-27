@@ -8,7 +8,7 @@ import {
 	focusViaKeyboard,
 	Grid,
 } from '../test-utils/visual.js';
-import { IconButton } from './index.js';
+import { IconButton } from './icon-button.js';
 
 test('kitchen sink', async () => {
 	for (const appearance of visualAppearances) {

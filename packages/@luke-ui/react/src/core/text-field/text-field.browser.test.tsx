@@ -2,10 +2,10 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
-import { InputGroup, InputGroupInput } from '../primitives/input-group/index.js';
+import { InputGroup, InputGroupInput } from '../primitives/input-group/input-group.js';
 import { getDescribedText } from '../test-utils/get-described-text.js';
 import { render } from '../test-utils/render.js';
-import { TextField } from './index.js';
+import { TextField } from './text-field.js';
 
 testConformance({
 	path: 'text-field',

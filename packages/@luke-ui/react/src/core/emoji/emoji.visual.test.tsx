@@ -2,8 +2,8 @@ import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
-import { Text } from '../text/index.js';
-import { Emoji } from './index.js';
+import { Text } from '../text/text.js';
+import { Emoji } from './emoji.js';
 
 const stackStyle = {
 	display: 'flex',

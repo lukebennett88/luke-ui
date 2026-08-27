@@ -6,7 +6,7 @@ import {
 	Stack,
 	variantValuesFor,
 } from '../test-utils/visual.js';
-import { Heading } from './index.js';
+import { Heading } from './heading.js';
 
 const levels = variantValuesFor<typeof Heading, 'level'>()([1, 2, 3, 4, 5, 6]);
 

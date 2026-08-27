@@ -1,1 +1,1 @@
-export * from '../core/strong/index.js';
+export { Strong, type StrongProps } from '../core/strong/strong.js';

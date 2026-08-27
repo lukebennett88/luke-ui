@@ -5,7 +5,7 @@ import { VisuallyHidden as VisuallyHiddenText } from '@luke-ui/react/visually-hi
 import type { CSSProperties } from 'react';
 import preview from '../../../.storybook/preview.js';
 import { typeStyles, vars } from '../../theme/index.js';
-import { createSprinkles } from '../styles/index.js';
+import { createSprinkles } from '../styles/utilities.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 
 const meta = preview.meta({

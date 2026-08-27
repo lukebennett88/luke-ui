@@ -8,7 +8,7 @@ import {
 	Stack,
 	variantValuesFor,
 } from '../test-utils/visual.js';
-import { LoadingSpinner } from './index.js';
+import { LoadingSpinner } from './loading-spinner.js';
 
 const rowStyle = {
 	alignItems: 'center',

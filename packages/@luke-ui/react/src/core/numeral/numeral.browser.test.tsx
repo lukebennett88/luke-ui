@@ -1,6 +1,6 @@
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Numeral } from './index.js';
+import { Numeral } from './numeral.js';
 
 testConformance({
 	path: 'numeral',

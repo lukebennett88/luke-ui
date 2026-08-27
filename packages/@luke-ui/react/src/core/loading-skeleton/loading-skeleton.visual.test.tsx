@@ -1,10 +1,10 @@
 import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
-import { Button } from '../button/index.js';
+import { Button } from '../button/button.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
-import { TextField } from '../text-field/index.js';
-import { LoadingSkeleton } from './index.js';
+import { TextField } from '../text-field/text-field.js';
+import { LoadingSkeleton } from './loading-skeleton.js';
 
 test('text and component placeholders', async () => {
 	const { locator } = render(

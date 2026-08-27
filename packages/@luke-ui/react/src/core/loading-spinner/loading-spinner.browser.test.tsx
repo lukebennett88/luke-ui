@@ -1,6 +1,6 @@
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { LoadingSpinner } from './index.js';
+import { LoadingSpinner } from './loading-spinner.js';
 
 testConformance({
 	path: 'loading-spinner',

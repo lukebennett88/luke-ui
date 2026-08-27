@@ -1,6 +1,6 @@
 import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { Icon } from '../icon/index.js';
+import { Icon } from '../icon/icon.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -10,7 +10,7 @@ import {
 	Grid,
 	variantValuesFor,
 } from '../test-utils/visual.js';
-import { Button } from './index.js';
+import { Button } from './button.js';
 
 const tones = variantValuesFor<typeof Button, 'tone'>()(['neutral', 'accent', 'danger']);
 const appearances = variantValuesFor<typeof Button, 'appearance'>()(['solid', 'subtle', 'ghost']);

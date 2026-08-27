@@ -2,7 +2,7 @@ import { test } from 'vite-plus/test';
 import { vars } from '../../theme/index.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
-import { Box } from './index.js';
+import { Box } from './box.js';
 
 for (const appearance of visualAppearances) {
 	test(`layout: ${appearance.theme} ${appearance.mode}`, async () => {

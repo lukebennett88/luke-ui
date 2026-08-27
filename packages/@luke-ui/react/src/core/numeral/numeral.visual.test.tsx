@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
-import { Numeral } from './index.js';
+import { Numeral } from './numeral.js';
 
 const rowStyle = {
 	display: 'flex',

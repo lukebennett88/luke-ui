@@ -136,11 +136,7 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 			path: `packages/@luke-ui/react/src/core/${name}/${name}.tsx`,
 		},
 		{
-			contents: renderCoreBarrel({ name, pascalName, recipeName, variantsType }),
-			path: `packages/@luke-ui/react/src/core/${name}/index.ts`,
-		},
-		{
-			contents: renderPackageExport({ name }),
+			contents: renderPackageExport({ name, pascalName, recipeName, variantsType }),
 			path: `packages/@luke-ui/react/src/exports/${name}.ts`,
 		},
 		{
@@ -265,19 +261,14 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 `;
 }
 
-function renderCoreBarrel(input: {
+function renderPackageExport(input: {
 	name: string;
 	pascalName: string;
 	recipeName: string;
 	variantsType: string;
 }): string {
-	return `export { ${input.pascalName}, type ${input.pascalName}Props } from './${input.name}.js';
-export { ${input.recipeName}, type ${input.variantsType} } from './recipe.css.js';
-`;
-}
-
-function renderPackageExport(input: { name: string }): string {
-	return `export * from '../core/${input.name}/index.js';
+	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../core/${input.name}/${input.name}.js';
+export { type ${input.variantsType}, ${input.recipeName} } from '../core/${input.name}/recipe.css.js';
 `;
 }
 
@@ -339,7 +330,7 @@ function renderComponentTest(input: {
 			? [`import { ${helperImports.join(', ')} } from '../conformance/helpers.js';`]
 			: []),
 		"import { render } from '../test-utils/render.js';",
-		`import { ${input.pascalName} } from './index.js';`,
+		`import { ${input.pascalName} } from './${input.name}.js';`,
 	];
 
 	const renderComponent = `render(<${input.pascalName} {...props}>Content</${input.pascalName}>)`;
@@ -395,7 +386,7 @@ function renderVisualTest(input: { name: string; pascalName: string }): string {
 	return `import { test } from 'vite-plus/test';
 import { render } from '../test-utils/render.js';
 import { captureVisual, Grid } from '../test-utils/visual.js';
-import { ${input.pascalName} } from './index.js';
+import { ${input.pascalName} } from './${input.name}.js';
 
 test('kitchen sink', async () => {
 	const { locator } = render(

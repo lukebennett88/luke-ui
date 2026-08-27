@@ -23,14 +23,20 @@ describe('createComponent', () => {
 		await createComponent(root, answers);
 
 		await expect(
-			readFile(join(root, 'packages/@luke-ui/react/src/core/status-badge/index.ts'), 'utf8'),
+			readFile(join(root, 'packages/@luke-ui/react/src/exports/status-badge.ts'), 'utf8'),
 		).resolves.toBe(
 			[
-				"export { StatusBadge, type StatusBadgeProps } from './status-badge.js';",
-				"export { statusBadgeRecipe, type StatusBadgeRecipeVariants } from './recipe.css.js';",
+				"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",
+				'export {',
+				'\ttype StatusBadgeRecipeVariants,',
+				'\tstatusBadgeRecipe,',
+				"} from '../core/status-badge/recipe.css.js';",
 				'',
 			].join('\n'),
 		);
+		await expect(
+			readFile(join(root, 'packages/@luke-ui/react/src/core/status-badge/index.ts'), 'utf8'),
+		).rejects.toMatchObject({ code: 'ENOENT' });
 		await expect(
 			readFile(
 				join(root, 'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx'),

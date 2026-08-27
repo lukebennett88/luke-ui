@@ -53,7 +53,6 @@ describe('createComponentPlan', () => {
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/feedback/status-badge.mdx',
 			'apps/docs/src/examples/status-badge/basic.tsx',
-			'packages/@luke-ui/react/src/core/status-badge/index.ts',
 			'packages/@luke-ui/react/src/core/status-badge/recipe.css.ts',
 			'packages/@luke-ui/react/src/core/status-badge/status-badge.browser.test.tsx',
 			'packages/@luke-ui/react/src/core/status-badge/status-badge.stories.tsx',
@@ -61,6 +60,9 @@ describe('createComponentPlan', () => {
 			'packages/@luke-ui/react/src/core/status-badge/status-badge.visual.test.tsx',
 			'packages/@luke-ui/react/src/exports/status-badge.ts',
 		]);
+		expect(plan.files.map((file) => file.path)).not.toContainEqual(
+			expect.stringMatching(/core\/status-badge\/index\.ts$/),
+		);
 		expect(plan).not.toHaveProperty('jsonEdits');
 		expect(plan).not.toHaveProperty('sortedImportEdits');
 		expect(plan).not.toHaveProperty('textFileInserts');
@@ -68,20 +70,21 @@ describe('createComponentPlan', () => {
 		const recipeSource = plan.files.find((file) =>
 			file.path.endsWith('/status-badge/recipe.css.ts'),
 		)?.contents;
-		const indexSource = plan.files.find((file) =>
+		const componentSource = plan.files.find((file) =>
 			file.path.endsWith('/status-badge/status-badge.tsx'),
 		)?.contents;
-		const barrelSource = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/index.ts'),
+		const packageExportSource = plan.files.find((file) =>
+			file.path.endsWith('/exports/status-badge.ts'),
 		)?.contents;
 
-		expect(indexSource).not.toContain('export { statusBadgeRecipe');
-		expect(barrelSource).toContain(
-			"export { StatusBadge, type StatusBadgeProps } from './status-badge.js';",
+		expect(componentSource).not.toContain('export { statusBadgeRecipe');
+		expect(packageExportSource).toContain(
+			"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",
 		);
-		expect(barrelSource).toContain(
-			"export { statusBadgeRecipe, type StatusBadgeRecipeVariants } from './recipe.css.js';",
+		expect(packageExportSource).toContain(
+			"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../core/status-badge/recipe.css.js';",
 		);
+		expect(packageExportSource).not.toContain("from './index.js'");
 		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
 		expect(recipeSource).toContain(
 			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
@@ -96,6 +99,31 @@ describe('createComponentPlan', () => {
 		).flat();
 
 		expect(violations).toEqual([]);
+	});
+
+	it('plans no core barrel and names implementation modules directly', () => {
+		const plan = createComponentPlan(validAnswers);
+
+		expect(plan.files.map((file) => file.path)).not.toContainEqual(
+			expect.stringMatching(/\/core\/status-badge\/index\.ts$/),
+		);
+
+		const packageExportSource = plan.files.find((file) =>
+			file.path.endsWith('/exports/status-badge.ts'),
+		)?.contents;
+		if (packageExportSource === undefined) {
+			throw new Error('Expected the scaffold to write a package export module.');
+		}
+		expect(packageExportSource).toContain("from '../core/status-badge/status-badge.js'");
+		expect(packageExportSource).toContain("from '../core/status-badge/recipe.css.js'");
+		expect(packageExportSource).not.toContain('index.js');
+
+		for (const testPath of ['status-badge.browser.test.tsx', 'status-badge.visual.test.tsx']) {
+			const testSource = plan.files.find((file) => file.path.endsWith(testPath))?.contents;
+			if (testSource === undefined) throw new Error(`Expected the scaffold to write ${testPath}.`);
+			expect(testSource).toContain("from './status-badge.js'");
+			expect(testSource).not.toContain("from './index.js'");
+		}
 	});
 
 	it('rejects invalid component names before file writes', () => {

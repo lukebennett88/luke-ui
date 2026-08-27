@@ -1,6 +1,6 @@
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Strong } from './index.js';
+import { Strong } from './strong.js';
 
 testConformance({
 	path: 'strong',

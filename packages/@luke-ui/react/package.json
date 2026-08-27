@@ -63,7 +63,7 @@
 		"build": "pnpm run build:tsdown",
 		"build:storybook": "storybook build",
 		"build:tsdown": "vp pack",
-		"check:barrels": "unbarrelify --check --skip 'src/core/*/index.ts' --skip 'src/core/primitives/*/index.ts' --skip 'src/exports/**/*.ts' --skip 'src/theme/index.ts' --skip 'src/theme/bundles/*/index.ts'",
+		"check:barrels": "unbarrelify --check --skip 'src/exports/**/*.ts' --skip 'src/theme/index.ts' --skip 'src/theme/bundles/*/index.ts'",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:story-plays": "tsx scripts/check-story-plays.ts",

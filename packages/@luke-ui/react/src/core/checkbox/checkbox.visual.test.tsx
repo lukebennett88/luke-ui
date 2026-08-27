@@ -10,8 +10,8 @@ import {
 	focusViaKeyboard,
 	Stack,
 } from '../test-utils/visual.js';
-import { Text } from '../text/index.js';
-import { Checkbox } from './index.js';
+import { Text } from '../text/text.js';
+import { Checkbox } from './checkbox.js';
 
 test('kitchen sink', async () => {
 	for (const appearance of visualAppearances) {

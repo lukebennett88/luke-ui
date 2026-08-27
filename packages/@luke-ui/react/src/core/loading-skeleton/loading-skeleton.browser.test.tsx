@@ -1,6 +1,6 @@
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { LoadingSkeleton } from './index.js';
+import { LoadingSkeleton } from './loading-skeleton.js';
 
 testConformance({
 	path: 'loading-skeleton',

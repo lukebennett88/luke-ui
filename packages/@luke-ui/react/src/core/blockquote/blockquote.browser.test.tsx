@@ -1,6 +1,6 @@
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Blockquote } from './index.js';
+import { Blockquote } from './blockquote.js';
 
 testConformance({
 	path: 'blockquote',

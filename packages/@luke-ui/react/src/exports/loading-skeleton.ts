@@ -1,1 +1,6 @@
-export * from '../core/loading-skeleton/index.js';
+export {
+	LoadingSkeleton,
+	type LoadingSkeletonProps,
+	LoadingSkeletonProvider,
+	type LoadingSkeletonProviderProps,
+} from '../core/loading-skeleton/loading-skeleton.js';

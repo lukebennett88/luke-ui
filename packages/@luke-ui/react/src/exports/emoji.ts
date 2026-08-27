@@ -1,1 +1,1 @@
-export * from '../core/emoji/index.js';
+export { Emoji, type EmojiProps } from '../core/emoji/emoji.js';

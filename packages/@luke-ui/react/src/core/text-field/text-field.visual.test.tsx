@@ -1,13 +1,13 @@
 import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { Button } from '../button/index.js';
-import { Icon } from '../icon/index.js';
+import { Button } from '../button/button.js';
+import { Icon } from '../icon/icon.js';
 import {
 	InputGroup,
 	InputGroupInput,
 	InputGroupPrefix,
 	InputGroupSuffix,
-} from '../primitives/input-group/index.js';
+} from '../primitives/input-group/input-group.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -16,7 +16,7 @@ import {
 	focusViaKeyboard,
 	Stack,
 } from '../test-utils/visual.js';
-import { TextField } from './index.js';
+import { TextField } from './text-field.js';
 
 test('kitchen sink', async () => {
 	for (const appearance of visualAppearances) {

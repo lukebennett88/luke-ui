@@ -9,7 +9,7 @@ import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
-import { ComboboxField } from './index.js';
+import { ComboboxField } from './combobox-field.js';
 
 type CountryItem = {
 	id: string;

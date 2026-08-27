@@ -16,7 +16,7 @@ import spritesheetHref from '../../../dist/spritesheet.svg?url';
 import { themeClassName as paperThemeClassName } from '../../theme/bundles/paper/index.js';
 import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
 import { rootClassName, vars } from '../../theme/index.js';
-import { IconSpritesheetProvider } from '../icon/index.js';
+import { IconSpritesheetProvider } from '../icon/icon.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
 

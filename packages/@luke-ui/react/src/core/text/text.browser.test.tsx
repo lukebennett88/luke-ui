@@ -1,6 +1,6 @@
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Text } from './index.js';
+import { Text } from './text.js';
 
 testConformance({
 	path: 'text',

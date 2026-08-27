@@ -1,6 +1,6 @@
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Emoji } from './index.js';
+import { Emoji } from './emoji.js';
 
 testConformance({
 	path: 'emoji',

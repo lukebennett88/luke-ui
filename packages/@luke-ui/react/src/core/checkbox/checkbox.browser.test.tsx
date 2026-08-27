@@ -2,7 +2,7 @@ import { expect, test } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Checkbox } from './index.js';
+import { Checkbox } from './checkbox.js';
 
 testConformance({
 	path: 'checkbox',

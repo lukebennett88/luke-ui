@@ -4,9 +4,9 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
-import { Button } from '../core/button/index.js';
-import { ComboboxField } from '../core/combobox-field/index.js';
-import { IconSpritesheetProvider } from '../core/icon/index.js';
+import { Button } from '../core/button/button.js';
+import { ComboboxField } from '../core/combobox-field/combobox-field.js';
+import { IconSpritesheetProvider } from '../core/icon/icon.js';
 import { ComboboxItem } from '../core/primitives/combobox/item.js';
 import { themeClassName as tactileThemeClassName } from './bundles/tactile/index.js';
 

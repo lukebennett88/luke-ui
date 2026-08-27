@@ -1,1 +1,1 @@
-export * from '../core/combobox-field/index.js';
+export { ComboboxField, type ComboboxFieldProps } from '../core/combobox-field/combobox-field.js';

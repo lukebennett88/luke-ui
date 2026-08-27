@@ -1,6 +1,6 @@
 import { testConformance } from '../../conformance/helpers.js';
 import { render } from '../../test-utils/render.js';
-import { Button } from './index.js';
+import { Button } from './button.js';
 
 testConformance({
 	path: 'primitives/button',
