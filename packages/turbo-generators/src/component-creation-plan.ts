@@ -251,7 +251,7 @@ function renderComponentSource(input: {
 	variantsType: string;
 }): string {
 	return `import type { ComponentProps, JSX } from 'react';
-import { cx } from '../../utils/utils.js';
+import { cx } from '../utils/utils.js';
 import { ${input.recipeName} } from './recipe.css.js';
 
 /** Props for \`${input.pascalName}\`. */
@@ -336,9 +336,9 @@ function renderComponentTest(input: {
 				? []
 				: ["import { expect, test } from 'vite-plus/test';"]),
 		...(helperImports.length > 0
-			? [`import { ${helperImports.join(', ')} } from '../../conformance/helpers.js';`]
+			? [`import { ${helperImports.join(', ')} } from '../conformance/helpers.js';`]
 			: []),
-		"import { render } from '../../test-utils/render.js';",
+		"import { render } from '../test-utils/render.js';",
 		`import { ${input.pascalName} } from './index.js';`,
 	];
 
@@ -393,8 +393,8 @@ ${contract}${integration}
 
 function renderVisualTest(input: { name: string; pascalName: string }): string {
 	return `import { test } from 'vite-plus/test';
-import { render } from '../../test-utils/render.js';
-import { captureVisual, Grid } from '../../test-utils/visual.js';
+import { render } from '../test-utils/render.js';
+import { captureVisual, Grid } from '../test-utils/visual.js';
 import { ${input.pascalName} } from './index.js';
 
 test('kitchen sink', async () => {
@@ -431,8 +431,8 @@ props:
 }
 
 function renderRecipe(input: { recipeName: string; variantsType: string }): string {
-	return `import type { RecipeSelection } from '../../styles/recipe.js';
-import { recipe } from '../../styles/recipe.js';
+	return `import type { RecipeSelection } from '../styles/recipe.js';
+import { recipe } from '../styles/recipe.js';
 
 export const ${input.recipeName} = recipe({
 	base: {
