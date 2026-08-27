@@ -20,9 +20,15 @@ globalStyleInLayer('reset', `${root} :where(h1, h2, h3, h4, h5, h6)`, {
 });
 
 globalStyleInLayer('reset', `${root} :where(ol, ul)`, {
-	listStyle: 'none',
 	margin: 0,
 	padding: 0,
+});
+
+// Typed ordered lists keep native marker semantics via HTML presentational hints. Author
+// `list-style` would override those hints, and CSS cannot restate `type` case-sensitively in
+// Chromium or Safari.
+globalStyleInLayer('reset', `${root} :where(ol:not([type]), ul)`, {
+	listStyle: 'none',
 });
 
 globalStyleInLayer('reset', `${root} :where(table)`, {

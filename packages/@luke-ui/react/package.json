@@ -40,6 +40,7 @@
 		"./primitives/combobox": "./dist/primitives/combobox.js",
 		"./primitives/field": "./dist/primitives/field.js",
 		"./primitives/input-group": "./dist/primitives/input-group.js",
+		"./prose": "./dist/prose.js",
 		"./quote": "./dist/quote.js",
 		"./strong": "./dist/strong.js",
 		"./styles": "./dist/styles.js",

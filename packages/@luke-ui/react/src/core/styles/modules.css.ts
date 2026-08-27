@@ -16,6 +16,7 @@ import '../primitives/checkbox/recipe.css.js';
 import '../primitives/combobox/styles.css.js';
 import '../primitives/field/recipe.css.js';
 import '../primitives/input-group/recipe.css.js';
+import '../prose/recipe.css.js';
 import '../strong/styles.css.js';
 import '../text/recipe.css.js';
 import '../visually-hidden/recipe.css.js';
