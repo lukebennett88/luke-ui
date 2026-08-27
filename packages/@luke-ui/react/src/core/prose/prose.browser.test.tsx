@@ -79,3 +79,39 @@ test('normalises a nested pre margin', () => {
 			query(root, 'blockquote').getBoundingClientRect().top,
 	).toBeCloseTo(0, 0);
 });
+
+// Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.
+test('preserves native ordered-list type markers', () => {
+	const { locator } = render(
+		<Prose>
+			<ol>
+				<li>default</li>
+			</ol>
+			<ol type="1">
+				<li>one</li>
+			</ol>
+			<ol type="a">
+				<li>a</li>
+			</ol>
+			<ol type="A">
+				<li>A</li>
+			</ol>
+			<ol type="i">
+				<li>i</li>
+			</ol>
+			<ol type="I">
+				<li>I</li>
+			</ol>
+		</Prose>,
+	);
+	const ols = [...locator.element().querySelectorAll('ol')];
+
+	expect(ols.map((ol) => getComputedStyle(ol).listStyleType)).toEqual([
+		'decimal',
+		'decimal',
+		'lower-alpha',
+		'upper-alpha',
+		'lower-roman',
+		'upper-roman',
+	]);
+});

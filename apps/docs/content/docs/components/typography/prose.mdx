@@ -8,8 +8,11 @@ props:
 ---
 
 `Prose` applies a fixed document rhythm to rendered Markdown, MDX, or content management system
-output. It restores document list structure. It sets no typography, colour, weight, type scale, or
-width, and adds no space outside itself. Constrain the measure on a surrounding layout.
+output. It restores document list structure and owns vertical spacing between blocks. It does not
+apply typography, text colour, weight, type scale, or width. Raw headings and paragraphs keep their
+default text styles unless you wrap them in components such as
+[Heading](/components/typography/heading) or [Text](/components/typography/text). Constrain the
+measure on a surrounding layout. `Prose` adds no space outside itself.
 
 <ExampleBlock src="prose/basic" title="Prose — Basic" />
 

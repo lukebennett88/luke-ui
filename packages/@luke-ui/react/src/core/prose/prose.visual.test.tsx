@@ -45,9 +45,20 @@ const document = (
 				<Text elementType="p">Each item keeps the list rhythm.</Text>
 			</li>
 		</ul>
+		<ol type="1">
+			<li>Decimal markers.</li>
+		</ol>
 		<ol type="a">
-			<li>Lower-alpha markers stay lower-alpha.</li>
-			<li>Native list types keep their own semantics.</li>
+			<li>Lower-alpha markers.</li>
+		</ol>
+		<ol type="A">
+			<li>Upper-alpha markers.</li>
+		</ol>
+		<ol type="i">
+			<li>Lower-roman markers.</li>
+		</ol>
+		<ol type="I">
+			<li>Upper-roman markers.</li>
 		</ol>
 
 		<Blockquote>

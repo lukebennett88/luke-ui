@@ -46,17 +46,9 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 });
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
-proseStyle('ol', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
-// Native `type` values; the `s` forms keep case-sensitive matching where the engine supports it.
-proseStyle('ol[type="1"]', { listStyleType: 'decimal' });
-proseStyle('ol[type="A"]', { listStyleType: 'upper-alpha' });
-proseStyle('ol[type="a"]', { listStyleType: 'lower-alpha' });
-proseStyle('ol[type="A" s]', { listStyleType: 'upper-alpha' });
-proseStyle('ol[type="a" s]', { listStyleType: 'lower-alpha' });
-proseStyle('ol[type="I"]', { listStyleType: 'upper-roman' });
-proseStyle('ol[type="i"]', { listStyleType: 'lower-roman' });
-proseStyle('ol[type="I" s]', { listStyleType: 'upper-roman' });
-proseStyle('ol[type="i" s]', { listStyleType: 'lower-roman' });
+// Revert restores the UA marker, including native `type` on `ol`. Do not restate type in CSS:
+// HTML attribute matching for `type` is case-insensitive in Chromium and Safari.
+proseStyle('ol', { listStyleType: 'revert', paddingInlineStart: vars.space.sp24 });
 
 proseStyle('hr', {
 	blockSize: 0,
