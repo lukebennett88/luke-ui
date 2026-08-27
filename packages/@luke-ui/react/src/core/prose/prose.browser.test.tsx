@@ -38,6 +38,10 @@ function renderSection(style?: CSSProperties) {
 	return gapBetween(query(root, 'p'), query(root, 'h2'));
 }
 
+function listStyleTypes(root: ParentNode) {
+	return [...root.querySelectorAll('ol')].map((ol) => getComputedStyle(ol).listStyleType);
+}
+
 // A two-sided model collapses in block flow but sums in a grid.
 test('keeps the rhythm when the root is a grid', () => {
 	expect(renderSection({ display: 'grid' })).toBeCloseTo(renderSection(), 0);
@@ -81,7 +85,7 @@ test('normalises a nested pre margin', () => {
 });
 
 // Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.
-test('preserves native ordered-list type markers', () => {
+test('preserves native ordered-list type markers inside Prose', () => {
 	const { locator } = render(
 		<Prose>
 			<ol>
@@ -104,9 +108,8 @@ test('preserves native ordered-list type markers', () => {
 			</ol>
 		</Prose>,
 	);
-	const ols = [...locator.element().querySelectorAll('ol')];
 
-	expect(ols.map((ol) => getComputedStyle(ol).listStyleType)).toEqual([
+	expect(listStyleTypes(locator.element())).toEqual([
 		'decimal',
 		'decimal',
 		'lower-alpha',
@@ -114,4 +117,29 @@ test('preserves native ordered-list type markers', () => {
 		'lower-roman',
 		'upper-roman',
 	]);
+});
+
+// Typed ols outside Prose stay on the ordinary markerless reset.
+test('keeps typed ordered lists markerless outside Prose', () => {
+	const { container } = render(
+		<div>
+			<ol type="a">
+				<li>a</li>
+			</ol>
+			<ol type="A">
+				<li>A</li>
+			</ol>
+			<ol type="i">
+				<li>i</li>
+			</ol>
+			<ol type="I">
+				<li>I</li>
+			</ol>
+			<ol>
+				<li>one</li>
+			</ol>
+		</div>,
+	);
+
+	expect(listStyleTypes(container)).toEqual(['none', 'none', 'none', 'none', 'none']);
 });

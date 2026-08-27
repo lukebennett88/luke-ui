@@ -1,4 +1,4 @@
-import { lukeUiClassNames } from '../../shared/class-names.js';
+import { lukeUiClassNames, lukeUiProseRootAttribute } from '../../shared/class-names.js';
 import { vars } from '../../theme/contract.css.js';
 import { classSelector } from './class-selector.js';
 import { focusRing } from './focus-ring.js';
@@ -24,12 +24,15 @@ globalStyleInLayer('reset', `${root} :where(ol, ul)`, {
 	padding: 0,
 });
 
-// Typed ordered lists keep native marker semantics via HTML presentational hints. Author
-// `list-style` would override those hints, and CSS cannot restate `type` case-sensitively in
-// Chromium or Safari.
-globalStyleInLayer('reset', `${root} :where(ol:not([type]), ul)`, {
-	listStyle: 'none',
-});
+// Strip markers from interface lists. Typed ols inside Prose keep native markers via HTML
+// presentational hints — see `lukeUiProseRootAttribute`.
+globalStyleInLayer(
+	'reset',
+	`${root} :where(ul, ol:not([type]), ol[type]:not([${lukeUiProseRootAttribute}] *))`,
+	{
+		listStyle: 'none',
+	},
+);
 
 globalStyleInLayer('reset', `${root} :where(table)`, {
 	borderCollapse: 'collapse',

@@ -1,14 +1,14 @@
 ---
 title: Prose
-description: Vertical rhythm and list structure for long-form content.
+description: Vertical rhythm and list styling for long-form content.
 source: packages/@luke-ui/react/src/exports/prose.ts
 props:
   - name: ProseProps
     path: packages/@luke-ui/react/src/core/prose/prose.tsx
 ---
 
-`Prose` adds vertical rhythm and list styling to long-form content, such as rendered Markdown, MDX,
-or CMS content. It does not style text or constrain the content width.
+`Prose` adds vertical rhythm and list styling to long-form content. Use it with Luke UI typography
+components, or map rendered Markdown and CMS elements to those components.
 
 <ExampleBlock src="prose/basic" title="Prose — Basic" />
 
@@ -24,10 +24,16 @@ Add a class to an element inside `Prose` to override its spacing.
 
 ```tsx
 <Prose>
-	<figure className={styles.fullBleedFigure}>
+	<figure className={styles.tightFigure}>
 		<img alt="" src="/diagram.png" />
 	</figure>
 </Prose>
+```
+
+```css
+.tightFigure {
+	margin-block-start: var(--luke-space-sp16);
+}
 ```
 
 ## Related components

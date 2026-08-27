@@ -46,7 +46,8 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 });
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
-// Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply.
+// Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply
+// inside Prose; the reset leaves those ols alone via `lukeUiProseRootAttribute`.
 proseStyle('ol:not([type])', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
 proseStyle('ol[type]', { paddingInlineStart: vars.space.sp24 });
 
