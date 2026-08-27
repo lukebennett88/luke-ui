@@ -1,20 +1,18 @@
 import { Prose } from '@luke-ui/react/prose';
-import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
 		<Prose>
-			<Text elementType="p">Run the release in order.</Text>
 			<ol>
-				<li>Tag the commit.</li>
+				<li>Prepare the release.</li>
 				<li>
-					Publish each package.
+					Publish the packages.
 					<ul>
-						<li>Check the changelog first.</li>
-						<li>Publish the theme packages last.</li>
+						<li>Publish dependencies first.</li>
+						<li>Publish the React package last.</li>
 					</ul>
 				</li>
-				<li>Announce the release.</li>
+				<li>Verify the release.</li>
 			</ol>
 		</Prose>
 	);

@@ -7,26 +7,20 @@ props:
     path: packages/@luke-ui/react/src/core/prose/prose.tsx
 ---
 
-`Prose` applies a fixed document rhythm to rendered Markdown, MDX, or content management system
-output. It restores document list structure and owns vertical spacing between blocks. It does not
-apply typography, text colour, weight, type scale, or width. Raw headings and paragraphs keep their
-default text styles unless you wrap them in components such as
-[Heading](/components/typography/heading) or [Text](/components/typography/text). Constrain the
-measure on a surrounding layout. `Prose` adds no space outside itself.
+`Prose` adds vertical rhythm and list styling to long-form content, such as rendered Markdown, MDX,
+or CMS content. It does not style text or constrain the content width.
 
 <ExampleBlock src="prose/basic" title="Prose — Basic" />
 
 ## Lists
 
-The Luke UI reset strips markers and indent from lists because interface lists are often menus.
-`Prose` restores them for documents, including nested lists.
+Lists inside `Prose` include markers and indentation, including nested lists.
 
 <ExampleBlock src="prose/lists" title="Prose — Lists" />
 
-## Overriding the rhythm
+## Custom spacing
 
-Every rule has zero specificity, so a plain class on an element inside `Prose` can adjust one block
-without `!important` or a longer selector.
+Add a class to an element inside `Prose` to override its spacing.
 
 ```tsx
 <Prose>
@@ -38,5 +32,5 @@ without `!important` or a longer selector.
 
 ## Related components
 
-Use [Text](/components/typography/text) and [Heading](/components/typography/heading) directly when
-you author the markup and want to choose each gap yourself.
+Use [Text](/components/typography/text) and [Heading](/components/typography/heading) when you control
+the markup and spacing directly.
