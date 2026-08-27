@@ -46,8 +46,8 @@ const document = (
 			</li>
 		</ul>
 		<ol type="a">
-			<li>An explicit list type keeps its own marker.</li>
-			<li>The reset does not force it back to decimal.</li>
+			<li>Lower-alpha markers stay lower-alpha.</li>
+			<li>Native list types keep their own semantics.</li>
 		</ol>
 
 		<Blockquote>

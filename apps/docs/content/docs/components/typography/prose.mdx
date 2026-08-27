@@ -7,25 +7,16 @@ props:
     path: packages/@luke-ui/react/src/core/prose/prose.tsx
 ---
 
-`Prose` applies fixed vertical rhythm and document list structure to rendered Markdown, MDX, or
-content management system output. It sets no typography, colour, weight, type scale, or width, and
-adds no space outside itself.
+`Prose` applies a fixed document rhythm to rendered Markdown, MDX, or content management system
+output. It restores document list structure. It sets no typography, colour, weight, type scale, or
+width, and adds no space outside itself. Constrain the measure on a surrounding layout.
 
 <ExampleBlock src="prose/basic" title="Prose — Basic" />
-
-## Best practices
-
-| Practice                               | Why                                                                |
-| -------------------------------------- | ------------------------------------------------------------------ |
-| Wrap a whole document.                 | One element has no rhythm to manage.                               |
-| Keep interface layout outside `Prose`. | Cards, forms, and toolbars own their own spacing.                  |
-| Constrain the measure on an ancestor.  | `Prose` sets no width, so the surrounding layout owns line length. |
 
 ## Lists
 
 The Luke UI reset strips markers and indent from lists because interface lists are often menus.
-`Prose` restores them for documents, including nested markers. An `ol` keeps a valid `type`
-attribute such as `<ol type="a">`.
+`Prose` restores them for documents, including nested lists.
 
 <ExampleBlock src="prose/lists" title="Prose — Lists" />
 

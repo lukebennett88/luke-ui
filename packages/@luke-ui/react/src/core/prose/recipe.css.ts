@@ -32,33 +32,38 @@ proseStyle('* + figcaption, li > ul, li > ol, li > p + p', {
 	marginBlockStart: vars.space.sp12,
 });
 
-// Tailwind Typography resets the next block after headings; h1 has its own 32px bottom margin.
 proseStyle('h1 + *', { marginBlockStart: vars.space.sp32 });
 proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space.sp48 });
 proseStyle('h2 + *', { marginBlockStart: vars.space.sp24 });
 proseStyle('h3 + *', { marginBlockStart: vars.space.sp12 });
 proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp8 });
+// A rule is a section break on both sides.
 proseStyle('hr + *', { marginBlockStart: vars.space.sp48 });
 
-proseStyle('picture', { display: 'block' });
+proseStyle('img, picture, video', { display: 'block' });
 proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 	marginBlockStart: 0,
 });
 
-proseStyle('ul', { listStyle: 'disc', paddingInlineStart: vars.space.sp24 });
-proseStyle('ol', { paddingInlineStart: vars.space.sp24 });
-proseStyle('ol:not([type])', { listStyleType: 'decimal' });
-proseStyle('ul ul', { listStyleType: 'circle' });
-proseStyle('ul ul ul', { listStyleType: 'square' });
-proseStyle('ol ol:not([type])', { listStyleType: 'lower-alpha' });
-proseStyle('ol ol ol:not([type])', { listStyleType: 'lower-roman' });
+proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
+proseStyle('ol', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
+// Native `type` values; the `s` forms keep case-sensitive matching where the engine supports it.
+proseStyle('ol[type="1"]', { listStyleType: 'decimal' });
+proseStyle('ol[type="A"]', { listStyleType: 'upper-alpha' });
+proseStyle('ol[type="a"]', { listStyleType: 'lower-alpha' });
+proseStyle('ol[type="A" s]', { listStyleType: 'upper-alpha' });
+proseStyle('ol[type="a" s]', { listStyleType: 'lower-alpha' });
+proseStyle('ol[type="I"]', { listStyleType: 'upper-roman' });
+proseStyle('ol[type="i"]', { listStyleType: 'lower-roman' });
+proseStyle('ol[type="I" s]', { listStyleType: 'upper-roman' });
+proseStyle('ol[type="i" s]', { listStyleType: 'lower-roman' });
 
-// A rule is a section break; table cells need padding after the reset removes it.
 proseStyle('hr', {
 	blockSize: 0,
 	border: 'none',
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
+// Table cells need padding after the reset removes it.
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
 proseStyle('th', { textAlign: 'start' });
 proseStyle('thead th', { borderBlockEnd: `1px solid ${vars.color.border.decorative}` });
