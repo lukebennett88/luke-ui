@@ -87,7 +87,7 @@ export default defineConfig({
 						{
 							paths: [
 								{
-									message: 'Mount components through src/test-utils/render.tsx.',
+									message: 'Mount components through src/core/test-utils/render.tsx.',
 									name: 'react-dom/client',
 								},
 								{
@@ -110,7 +110,7 @@ export default defineConfig({
 						{
 							paths: [
 								{
-									message: 'Mount components through src/test-utils/render.tsx.',
+									message: 'Mount components through src/core/test-utils/render.tsx.',
 									name: 'react-dom/client',
 								},
 							],
