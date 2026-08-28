@@ -24,7 +24,7 @@ export function Box(props: BoxProps): JSX.Element {
 		});
 
 		// The render owner must receive Box's ref with its presentation props.
-		// oxlint-disable-next-line react-hooks-js/refs
+		// oxlint-disable-next-line react/refs
 		return render({ ...renderProps, ref: callbackRef });
 	}
 
