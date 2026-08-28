@@ -22,73 +22,11 @@ const assetExports = [
 	'./themes/paper/stylesheet.css',
 ];
 
-function reactCompilerPlugin(): Plugin {
-	return {
-		name: 'react-compiler',
-		transform: {
-			filter: {
-				id: {
-					include: makeIdFiltersToMatchWithQuery([/\.[cm]?[jt]sx?$/]),
-					// `.css.ts` files are already-compiled Vanilla Extract style declarations by the
-					// time they reach here; running the compiler on them would just be wasted work.
-					exclude: makeIdFiltersToMatchWithQuery([/\.css\.ts$/, /\/node_modules\//]),
-				},
-			},
-			handler(code, id) {
-				// Oxc infers the language from the filename, so a query suffix has to be stripped
-				// or parsing fails. Vanilla Extract appends one to the ids it emits.
-				const filename = id.split('?')[0] ?? id;
-
-				// Passing `lang` is redundant for the JS output, which is byte-identical without
-				// it, but omitting it makes `vp pack` emit hollow `.d.ts` chunks. Keep it set.
-				const lang = filename.endsWith('x') ? 'tsx' : 'ts';
-
-				const result = transformSync(filename, code, {
-					lang,
-					reactCompiler: { target: '19' },
-					sourcemap: true,
-					jsx: 'preserve',
-				});
-
-				if (result.fatal) {
-					const errorMessages = result.errors
-						.filter((error) => error.severity === 'Error')
-						.map((error) => error.codeframe ?? error.message)
-						.join('\n\n');
-					throw new Error(`Failed to compile ${filename}:\n\n${errorMessages}`);
-				}
-
-				for (const error of result.errors) {
-					if (error.severity === 'Advice') continue;
-					this.warn(`${filename}: ${error.codeframe ?? error.message}`);
-				}
-
-				return { code: result.code, map: result.map };
-			},
-		},
-	};
-}
-
-async function cleanDistExceptPreservedFiles() {
-	let entries: Array<string>;
-
-	try {
-		entries = await readdir(distDir);
-	} catch (error) {
-		if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-			return;
-		}
-
-		throw error;
-	}
-
-	await Promise.all(
-		entries.flatMap((entry) => {
-			if (preservedDistFiles.has(entry)) return [];
-			return [rm(join(distDir, entry), { force: true, recursive: true })];
-		}),
-	);
-}
+/** Any JS or TS module the React Compiler can read, including `.mjs`/`.cts` variants. */
+const sourceModule = /\.[cm]?[jt]sx?$/;
+/** Vanilla Extract compiles these to plain style declarations before the plugin sees them. */
+const vanillaExtractStyles = /\.css\.ts$/;
+const dependency = /\/node_modules\//;
 
 export default defineConfig({
 	pack: {
@@ -142,3 +80,70 @@ export default defineConfig({
 		sourcemap: true,
 	},
 });
+
+function reactCompilerPlugin(): Plugin {
+	return {
+		name: 'react-compiler',
+		transform: {
+			filter: {
+				id: {
+					include: makeIdFiltersToMatchWithQuery([sourceModule]),
+					exclude: makeIdFiltersToMatchWithQuery([vanillaExtractStyles, dependency]),
+				},
+			},
+			handler(code, id) {
+				// Oxc infers the language from the filename, so a query suffix has to be stripped
+				// or parsing fails. Vanilla Extract appends one to the ids it emits.
+				const filename = id.split('?')[0] ?? id;
+
+				// Passing `lang` is redundant for the JS output, which is byte-identical without
+				// it, but omitting it makes `vp pack` emit hollow `.d.ts` chunks. Keep it set.
+				const lang = filename.endsWith('x') ? 'tsx' : 'ts';
+
+				const result = transformSync(filename, code, {
+					lang,
+					reactCompiler: { target: '19' },
+					sourcemap: true,
+					jsx: 'preserve',
+				});
+
+				if (result.fatal) {
+					const errorMessages = result.errors.flatMap((error) => {
+						if (error.severity !== 'Error') return [];
+
+						return [error.codeframe ?? error.message];
+					});
+					throw new Error(`Failed to compile ${filename}:\n\n${errorMessages.join('\n\n')}`);
+				}
+
+				for (const error of result.errors) {
+					if (error.severity === 'Advice') continue;
+					this.warn(`${filename}: ${error.codeframe ?? error.message}`);
+				}
+
+				return { code: result.code, map: result.map };
+			},
+		},
+	};
+}
+
+async function cleanDistExceptPreservedFiles() {
+	let entries: Array<string>;
+
+	try {
+		entries = await readdir(distDir);
+	} catch (error) {
+		if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+			return;
+		}
+
+		throw error;
+	}
+
+	await Promise.all(
+		entries.flatMap((entry) => {
+			if (preservedDistFiles.has(entry)) return [];
+			return [rm(join(distDir, entry), { force: true, recursive: true })];
+		}),
+	);
+}
