@@ -1,5 +1,6 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { makeIdFiltersToMatchWithQuery } from '@rolldown/pluginutils';
 import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
 import { readdir, rm } from 'node:fs/promises';
@@ -21,50 +22,49 @@ const assetExports = [
 	'./themes/paper/stylesheet.css',
 ];
 
-const transformableExtensions: Record<string, 'js' | 'jsx' | 'ts' | 'tsx'> = {
-	'.js': 'js',
-	'.jsx': 'jsx',
-	'.ts': 'ts',
-	'.tsx': 'tsx',
-};
-
 function reactCompilerPlugin(): Plugin {
 	return {
 		name: 'react-compiler',
-		transform(code, id) {
-			// Vanilla Extract virtual modules carry a `\0` prefix and/or query strings, and its
-			// `.css.ts` files have already been compiled to plain style declarations by the time
-			// they reach here. Skip both, along with anything Oxc has no business compiling.
-			const filename = id.split('?')[0] ?? id;
-			if (filename.startsWith('\0') || filename.includes('node_modules')) return null;
-			if (filename.endsWith('.css.ts')) return null;
+		transform: {
+			filter: {
+				id: {
+					include: makeIdFiltersToMatchWithQuery([/\.[cm]?[jt]sx?$/]),
+					// `.css.ts` files are already-compiled Vanilla Extract style declarations by the
+					// time they reach here; running the compiler on them would just be wasted work.
+					exclude: makeIdFiltersToMatchWithQuery([/\.css\.ts$/, /\/node_modules\//]),
+				},
+			},
+			handler(code, id) {
+				// Oxc infers the language from the filename, so a query suffix has to be stripped
+				// or parsing fails. Vanilla Extract appends one to the ids it emits.
+				const filename = id.split('?')[0] ?? id;
 
-			const extension = filename.slice(filename.lastIndexOf('.'));
-			const lang = transformableExtensions[extension];
-			if (!lang) return null;
+				// Passing `lang` is redundant for the JS output, which is byte-identical without
+				// it, but omitting it makes `vp pack` emit hollow `.d.ts` chunks. Keep it set.
+				const lang = filename.endsWith('x') ? 'tsx' : 'ts';
 
-			const result = transformSync(filename, code, {
-				lang,
-				reactCompiler: { target: '19' },
-				sourcemap: true,
-				sourceType: 'module',
-				jsx: 'preserve',
-			});
+				const result = transformSync(filename, code, {
+					lang,
+					reactCompiler: { target: '19' },
+					sourcemap: true,
+					jsx: 'preserve',
+				});
 
-			if (result.fatal) {
-				const errorMessages = result.errors
-					.filter((error) => error.severity === 'Error')
-					.map((error) => error.codeframe ?? error.message)
-					.join('\n\n');
-				throw new Error(`Failed to compile ${filename}:\n\n${errorMessages}`);
-			}
+				if (result.fatal) {
+					const errorMessages = result.errors
+						.filter((error) => error.severity === 'Error')
+						.map((error) => error.codeframe ?? error.message)
+						.join('\n\n');
+					throw new Error(`Failed to compile ${filename}:\n\n${errorMessages}`);
+				}
 
-			for (const error of result.errors) {
-				if (error.severity === 'Advice') continue;
-				this.warn(`${filename}: ${error.codeframe ?? error.message}`);
-			}
+				for (const error of result.errors) {
+					if (error.severity === 'Advice') continue;
+					this.warn(`${filename}: ${error.codeframe ?? error.message}`);
+				}
 
-			return { code: result.code, map: result.map };
+				return { code: result.code, map: result.map };
+			},
 		},
 	};
 }

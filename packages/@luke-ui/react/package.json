@@ -106,6 +106,7 @@
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
+		"@rolldown/pluginutils": "catalog:",
 		"@storybook/addon-a11y": "catalog:",
 		"@storybook/addon-docs": "catalog:",
 		"@storybook/addon-vitest": "catalog:",
