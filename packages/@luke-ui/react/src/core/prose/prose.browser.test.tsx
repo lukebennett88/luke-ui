@@ -3,6 +3,7 @@ import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Prose } from './prose.js';
+import { proseRecipe } from './recipe.css.js';
 
 testConformance({
 	path: 'prose',
@@ -142,4 +143,35 @@ test('keeps typed ordered lists markerless outside Prose', () => {
 	);
 
 	expect(listStyleTypes(container)).toEqual(['none', 'none', 'none', 'none', 'none']);
+});
+
+// `proseRecipe` is public, so the scope must ride the recipe class, not the component.
+test('preserves native ordered-list type markers under proseRecipe alone', () => {
+	const { locator } = render(
+		<div className={proseRecipe()}>
+			<ol type="1">
+				<li>1</li>
+			</ol>
+			<ol type="a">
+				<li>a</li>
+			</ol>
+			<ol type="A">
+				<li>A</li>
+			</ol>
+			<ol type="i">
+				<li>i</li>
+			</ol>
+			<ol type="I">
+				<li>I</li>
+			</ol>
+		</div>,
+	);
+
+	expect(listStyleTypes(locator.element())).toEqual([
+		'decimal',
+		'lower-alpha',
+		'upper-alpha',
+		'lower-roman',
+		'upper-roman',
+	]);
 });

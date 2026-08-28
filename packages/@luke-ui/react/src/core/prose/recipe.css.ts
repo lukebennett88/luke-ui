@@ -8,6 +8,13 @@ const base = styleInLayer('recipes', {}, 'prose');
 /** Vanilla-extract recipe for a fixed long-form document rhythm. */
 export const proseRecipe = recipe({ base });
 
+/**
+ * The Prose scope class. Every Prose rule is scoped to it, and the reset uses it to leave typed
+ * ordered-list markers alone inside Prose. It rides `proseRecipe()`, so recipe-only usage and the
+ * `Prose` component scope identically.
+ */
+export const proseScopeClassName = base;
+
 export type ProseRecipeVariants = RecipeSelection<typeof proseRecipe>;
 
 // Wrapping the root and matched element keeps every rule at 0-0-0.
@@ -47,7 +54,7 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
 // Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply
-// inside Prose; the reset leaves those ols alone via `lukeUiProseRootAttribute`.
+// inside Prose; the reset leaves those ols alone via `proseScopeClassName`.
 proseStyle('ol:not([type])', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
 proseStyle('ol[type]', { paddingInlineStart: vars.space.sp24 });
 
