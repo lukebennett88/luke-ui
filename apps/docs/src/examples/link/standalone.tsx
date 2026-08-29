@@ -6,11 +6,10 @@ export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="sp16">
 			<Text elementType="p">
-				Set up the package by following the{' '}
-				<Link href="/docs/installation">installation guide</Link>.
+				An inline <Link href="#example-destination">example link</Link> sits within a sentence.
 			</Text>
-			<Link href="/components" isStandalone>
-				Browse all components
+			<Link href="#example-destination" isStandalone>
+				Standalone example link
 			</Link>
 		</Box>
 	);

@@ -9,40 +9,40 @@ export default () => {
 				<Text color="secondary" typography="caption">
 					Unchecked
 				</Text>
-				<Checkbox>Email notifications</Checkbox>
+				<Checkbox>Example checkbox</Checkbox>
 			</Box>
 			<Box display="grid" gap="sp4">
 				<Text color="secondary" typography="caption">
 					Checked
 				</Text>
-				<Checkbox defaultSelected>Email notifications</Checkbox>
+				<Checkbox defaultSelected>Example checkbox</Checkbox>
 			</Box>
 			<Box display="grid" gap="sp4">
 				<Text color="secondary" typography="caption">
 					Indeterminate
 				</Text>
-				<Checkbox isIndeterminate>Email notifications</Checkbox>
+				<Checkbox isIndeterminate>Example checkbox</Checkbox>
 			</Box>
 			<Box display="grid" gap="sp4">
 				<Text color="secondary" typography="caption">
 					Disabled
 				</Text>
-				<Checkbox isDisabled>Email notifications</Checkbox>
+				<Checkbox isDisabled>Example checkbox</Checkbox>
 			</Box>
 			<Box display="grid" gap="sp4">
 				<Text color="secondary" typography="caption">
 					Disabled and checked
 				</Text>
 				<Checkbox defaultSelected isDisabled>
-					Email notifications
+					Example checkbox
 				</Checkbox>
 			</Box>
 			<Box display="grid" gap="sp4">
 				<Text color="secondary" typography="caption">
 					Invalid
 				</Text>
-				<Checkbox errorMessage="Choose whether to receive email notifications.">
-					Email notifications
+				<Checkbox errorMessage="Select this example checkbox to continue.">
+					Example checkbox
 				</Checkbox>
 			</Box>
 		</Box>
