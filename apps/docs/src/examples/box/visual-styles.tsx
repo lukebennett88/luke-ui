@@ -15,8 +15,8 @@ export default () => {
 			gap="sp8"
 			padding="sp16"
 		>
-			<Text fontWeight="label">Payment confirmed</Text>
-			<Text>Your receipt is on its way to your inbox.</Text>
+			<Text fontWeight="label">Card heading</Text>
+			<Text>Background, border, radius, and depth values applied together.</Text>
 		</Box>
 	);
 };
