@@ -66,16 +66,12 @@ interface _InputGroupInputProps extends _InputGroupInputOmit, InputGroupPartStyl
 /** Props for the input group's editable control. */
 export type InputGroupInputProps = Prettify<_InputGroupInputProps>;
 
-type _InputGroupPrefixOmit = DistributiveOmit<ComponentProps<'span'>, never>;
-
-interface _InputGroupPrefixProps extends _InputGroupPrefixOmit, InputGroupPartStyleProps {}
+interface _InputGroupPrefixProps extends ComponentProps<'span'>, InputGroupPartStyleProps {}
 
 /** Props for the input group's leading part. */
 export type InputGroupPrefixProps = Prettify<_InputGroupPrefixProps>;
 
-type _InputGroupSuffixOmit = DistributiveOmit<ComponentProps<'span'>, never>;
-
-interface _InputGroupSuffixProps extends _InputGroupSuffixOmit, InputGroupPartStyleProps {}
+interface _InputGroupSuffixProps extends ComponentProps<'span'>, InputGroupPartStyleProps {}
 
 /** Props for the input group's trailing part. */
 export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;

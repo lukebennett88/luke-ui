@@ -47,8 +47,19 @@ Lower-level composition APIs live under `src/core/primitives/*` and export from
 
 ## Exported prop types
 
-Define exported component props with an interface extending a named `DistributiveOmit` alias, then
-wrap it with `Prettify`:
+Define exported component props with an internal interface, then wrap the exported type with
+`Prettify`.
+
+When the component inherits the whole source surface, extend it directly:
+
+```ts
+interface _CodeProps extends React.ComponentProps<'code'> {}
+
+export type CodeProps = Prettify<_CodeProps>;
+```
+
+When inherited props need to be removed, create a named `DistributiveOmit` alias first — interfaces
+cannot extend conditional types directly — then extend that alias and any local style props:
 
 ```ts
 type _ComponentOmit = DistributiveOmit<SourceType, OmittedKeys>;
@@ -67,19 +78,9 @@ Rules:
   clearly in IDE tooltips and extend naturally.
 - Wrap the exported type with `Prettify` from `../types/prettify.js` so consumers see a flat,
   readable type in their IDE.
-- Use `DistributiveOmit` from `../types/distributive-omit.js` for prop omission. Its strict key
-  constraint validates and autocompletes omitted keys, so misspelled or obsolete keys cannot pass
-  silently. Define a named alias because interfaces cannot extend conditional types directly.
-- Use `DistributiveOmit` only when props actually need to be removed. Do not write
-  `DistributiveOmit<SourceType, never>`. When a component inherits a complete prop surface with
-  nothing to omit, extend the source type directly:
-
-```ts
-interface _CodeProps extends React.ComponentProps<'code'> {}
-
-export type CodeProps = Prettify<_CodeProps>;
-```
-
+- Use `DistributiveOmit` from `../types/distributive-omit.js` only when props actually need to be
+  removed. Its strict key constraint validates and autocompletes omitted keys, so misspelled or
+  obsolete keys cannot pass silently. Do not write `DistributiveOmit<SourceType, never>`.
 - Name the internal interface `_ComponentProps` (underscore prefix) and export the Prettified
   version as `ComponentProps`.
 
