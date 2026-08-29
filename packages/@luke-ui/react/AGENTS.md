@@ -50,7 +50,8 @@ Lower-level composition APIs live under `src/core/primitives/*` and export from
 Define exported component props with an internal interface, then wrap the exported type with
 `Prettify`.
 
-When the component inherits the whole source surface, extend it directly:
+When the component inherits the whole source surface and the source type can be extended directly,
+extend it directly:
 
 ```ts
 interface _CodeProps extends React.ComponentProps<'code'> {}
