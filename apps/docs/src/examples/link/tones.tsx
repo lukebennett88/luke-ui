@@ -1,13 +1,24 @@
 import { Box } from '@luke-ui/react/box';
 import { Link } from '@luke-ui/react/link';
+import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp16">
-			<Link href="#view-report">View report</Link>
-			<Link href="#view-report" tone="neutral">
-				View report
-			</Link>
+		<Box display="flex" flexWrap="wrap" gap="sp16">
+			<Box display="grid" gap="sp4">
+				<Text color="secondary" typography="caption">
+					Accent
+				</Text>
+				<Link href="#example-destination">Example destination</Link>
+			</Box>
+			<Box display="grid" gap="sp4">
+				<Text color="secondary" typography="caption">
+					Neutral
+				</Text>
+				<Link href="#example-destination" tone="neutral">
+					Example destination
+				</Link>
+			</Box>
 		</Box>
 	);
 };

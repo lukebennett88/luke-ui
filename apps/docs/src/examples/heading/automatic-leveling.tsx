@@ -5,11 +5,11 @@ export default () => {
 	return (
 		<HeadingLevels base={1}>
 			<Box display="flex" flexDirection="column" gap="sp12">
-				<Heading>Product roadmap</Heading>
+				<Heading>Top-level heading (h1)</Heading>
 				<HeadingLevels>
-					<Heading>Objectives</Heading>
+					<Heading>Nested heading (h2)</Heading>
 					<HeadingLevels>
-						<Heading>First quarter</Heading>
+						<Heading>Nested again (h3)</Heading>
 					</HeadingLevels>
 				</HeadingLevels>
 			</Box>

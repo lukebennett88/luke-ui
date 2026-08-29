@@ -6,10 +6,10 @@ export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="sp16">
 			<Text elementType="p">
-				Read the <Link href="#release-notes">release notes</Link> before updating your workspace.
+				An inline <Link href="#example-destination">example link</Link> sits within a sentence.
 			</Text>
-			<Link href="#manage-members" isStandalone>
-				Manage members
+			<Link href="#example-destination" isStandalone>
+				Standalone example link
 			</Link>
 		</Box>
 	);

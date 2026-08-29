@@ -199,8 +199,21 @@ the code first.
 
 ### What to show
 
-- Show one realistic thing a developer might write. Use values such as "Save changes" and
-  "you@example.com", never `foo`, `bar`, or lorem ipsum.
+- Use content that makes the component or behaviour easy to understand. Do not introduce application
+  context that the example does not need.
+- When content exists only so the component has something to render, prefer neutral or
+  self-referential copy, such as "Example checkbox" or "Example destination".
+- Use application-specific content only when its meaning helps explain the component or behaviour.
+  "Save changes" can clarify a button action. An account or workspace does not clarify a checkbox
+  state. Avoid invented accounts, workspaces, billing details, characters, or other surrounding
+  application details.
+- In comparison examples, content may name the value being demonstrated when the content is only a
+  specimen label, such as "Small", "Medium", and "Large". Keep those names in a caption beside the
+  control, not in the control's own label.
+- Do not use API terms as labels for interactive controls. When the control's purpose is incidental,
+  use a neutral or self-referential label instead.
+- When an example needs extended text, choose a subject that helps explain why the component
+  contains that structure. Do not invent an application scenario just to fill the example.
 - Let the example make the behaviour obvious. A reader should see what the section describes without
   hunting for it.
 - Keep the example as small as it can be without becoming artificial.
@@ -208,8 +221,6 @@ the code first.
   result.
 - Do not demonstrate every value a prop accepts. Show the values a reader chooses between, and leave
   the full list to the Props page.
-- Do not label example UI with prop names. A checkbox labelled "Invalid" documents the API. Label it
-  "Email me a receipt" instead.
 
 Exhaustive variant and state coverage belongs in the visual test kitchen sink, not in a docs
 example. See [TESTING.md](TESTING.md).

@@ -5,10 +5,12 @@ export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
 			<Text elementType="div" lineClamp>
-				The weekly product update includes changes to reports, permissions, and saved views.
+				Short lines are easier to scan than long ones, which is why well-set text rarely stretches
+				edge to edge on a wide screen, no matter how much room is available.
 			</Text>
 			<Text elementType="div" lineClamp={2}>
-				The weekly product update includes changes to reports, permissions, and saved views.
+				Short lines are easier to scan than long ones, which is why well-set text rarely stretches
+				edge to edge on a wide screen, no matter how much room is available.
 			</Text>
 		</Box>
 	);

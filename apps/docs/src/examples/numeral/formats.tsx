@@ -9,7 +9,7 @@ export default () => {
 				Conversion rate: <Numeral format="percent" value={0.125} />
 			</Text>
 			<Text>
-				Monthly spend: <Numeral currency="AUD" value={98.76} />
+				Ticket price: <Numeral currency="AUD" value={98.76} />
 			</Text>
 			<Text>
 				Wind speed: <Numeral unit="kilometer-per-hour" value={98} />
