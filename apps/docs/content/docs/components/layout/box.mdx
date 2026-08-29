@@ -63,7 +63,10 @@ and `render` rule.
 
 ## Visual styles
 
-Box only covers layout. Use a component API for visual states and typography. When a custom element
-needs a colour, radius, or depth value, use `vars` from `@luke-ui/react/theme`. Read
-[Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when to reach for `vars`, and the
-[token reference](/docs/token-reference) for the contract.
+Box accepts theme-backed background, border colour, radius, and depth values, plus fixed border
+width and style values. Use a component API for interaction states and typography. When a custom
+element that is not a Box needs a colour, radius, or depth value, use `vars` from
+`@luke-ui/react/theme`. Read [Styling](/docs/styling#use-semantic-variables-for-custom-ui) for when
+to reach for `vars`, and the [token reference](/docs/token-reference) for the contract.
+
+<ExampleBlock src="box/visual-styles" title="Box — Visual styles" />
