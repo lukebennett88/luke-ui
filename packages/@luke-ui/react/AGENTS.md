@@ -73,6 +73,34 @@ Rules:
 - Name the internal interface `_ComponentProps` (underscore prefix) and export the Prettified
   version as `ComponentProps`.
 
+### Source-parsing tools
+
+Some components inherit every prop through `DistributiveOmit` and add none of their own. Their
+interface body is empty:
+
+```ts
+type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType'>;
+
+interface _BlockquoteProps extends _BlockquoteOmit {}
+
+export type BlockquoteProps = Prettify<_BlockquoteProps>;
+```
+
+A tool that reads source files without running the TypeScript compiler cannot resolve conditional
+types such as `DistributiveOmit`. That tool reports zero props for these components even though the
+types are correct.
+
+Nine exports have this shape today:
+
+- `Blockquote`, `Code`, `Kbd`, and `VisuallyHidden`
+- `CheckboxControl` and `CheckboxIndicator`, in `src/core/primitives/checkbox`
+- `FieldDescription` and `FieldError`, in `src/core/primitives/field`
+
+Do not duplicate inherited props in the interface body to satisfy such tools. The duplication can
+drift from `DistributiveOmit`, and it weakens the editor tooltip that these rules exist to provide.
+The docs app compiles TypeScript (`apps/docs/scripts/generate-props-pages.ts`), so props pages stay
+complete. IDEs use the TypeScript language service and show the full prop list.
+
 ## Documentation
 
 JSDoc and TypeScript types drive the docs app. The normative documentation rules — what to document,
