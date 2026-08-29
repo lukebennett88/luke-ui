@@ -32,11 +32,27 @@ interface MdxJsxElementNode {
 const docsAppRoot = fileURLToPath(new URL('../..', import.meta.url));
 const repoRoot = resolve(docsAppRoot, '..', '..');
 
+export type ExampleTagName = 'ExampleBlock' | 'SourceCodeBlock';
+
 // Repo-relative directory each tag's `src` prop resolves against.
-const SOURCE_DIRS_BY_TAG: Readonly<Record<string, string>> = {
+const SOURCE_DIRS_BY_TAG: Readonly<Record<ExampleTagName, string>> = {
 	ExampleBlock: 'src/examples',
 	SourceCodeBlock: 'src/samples',
 };
+
+/** Repo-relative path and trimmed source contents for one inlined example block. */
+export function expectedInlinedExampleBlock(
+	tagName: ExampleTagName,
+	src: string,
+): { content: string; repoRelativePath: string } {
+	const sourceDir = SOURCE_DIRS_BY_TAG[tagName];
+	const repoRelativePath = `apps/docs/${sourceDir}/${src}.tsx`;
+
+	return {
+		repoRelativePath,
+		content: readSourceFile(repoRelativePath, tagName, src),
+	};
+}
 
 const fileContentsCache = new Map<string, string>();
 
@@ -54,11 +70,9 @@ export function inlineExampleSource(node: MdastNode): string | undefined {
 	const src = readSrcAttribute(node);
 	if (src === undefined) return undefined;
 
-	const sourceDir = SOURCE_DIRS_BY_TAG[tagName];
-	const repoRelativePath = `apps/docs/${sourceDir}/${src}.tsx`;
-	const contents = readSourceFile(repoRelativePath, tagName, src);
+	const { content, repoRelativePath } = expectedInlinedExampleBlock(tagName, src);
 
-	return `${repoRelativePath}\n\n\`\`\`tsx\n${contents}\n\`\`\``;
+	return `${repoRelativePath}\n\n\`\`\`tsx\n${content}\n\`\`\``;
 }
 
 function isMdxJsxElement(node: MdastNode): node is MdxJsxElementNode {
