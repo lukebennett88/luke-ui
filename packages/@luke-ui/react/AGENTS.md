@@ -70,43 +70,18 @@ Rules:
 - Use `DistributiveOmit` from `../types/distributive-omit.js` for prop omission. Its strict key
   constraint validates and autocompletes omitted keys, so misspelled or obsolete keys cannot pass
   silently. Define a named alias because interfaces cannot extend conditional types directly.
-- Name the internal interface `_ComponentProps` (underscore prefix) and export the Prettified
-  version as `ComponentProps`.
-
-### Source-parsing tools
-
-Some components inherit every prop and add none of their own. Their exported prop type has no
-locally declared members — an empty `interface extends` body, a `DistributiveOmit` alias, or a
-`Prettify` wrap around a third-party type:
+- Use `DistributiveOmit` only when props actually need to be removed. Do not write
+  `DistributiveOmit<SourceType, never>`. When a component inherits a complete prop surface with
+  nothing to omit, extend the source type directly:
 
 ```ts
-type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType'>;
+interface _CodeProps extends React.ComponentProps<'code'> {}
 
-interface _BlockquoteProps extends _BlockquoteOmit {}
-
-export type BlockquoteProps = Prettify<_BlockquoteProps>;
+export type CodeProps = Prettify<_CodeProps>;
 ```
 
-A tool that reads source files without running the TypeScript compiler cannot resolve conditional
-types such as `DistributiveOmit`, or utility types such as `ComponentProps`. That tool may report
-zero props even though the types are correct.
-
-Nine component exports are affected today:
-
-- `Blockquote`, `Code`, `Kbd`, `Prose`, and `VisuallyHidden`
-- `CheckboxControl` and `CheckboxIndicator`, in `src/core/primitives/checkbox`
-- `FieldDescription` and `FieldError`, in `src/core/primitives/field`
-
-Do not duplicate inherited props in the interface body to satisfy such tools. A partial prop list
-looks authoritative while hiding most of the real surface — including DOM attributes, event
-handlers, and React Aria props — and can drift when upstream types change. Keep prop types optimised
-for correctness and editor tooltips. The docs app compiles TypeScript
-(`apps/docs/scripts/generate-props-pages.ts`), so props pages stay complete. IDEs use the TypeScript
-language service and show the full prop list.
-
-If machine-readable API metadata becomes a product requirement, generate it from the same
-TypeScript-aware machinery rather than encoding extractor-specific prop subsets into component
-source.
+- Name the internal interface `_ComponentProps` (underscore prefix) and export the Prettified
+  version as `ComponentProps`.
 
 ## Documentation
 

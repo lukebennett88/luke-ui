@@ -55,16 +55,12 @@ interface _CheckboxContentProps extends _CheckboxContentOmit {
 /** Props for the Checkbox primitive's clickable content. */
 export type CheckboxContentProps = Prettify<_CheckboxContentProps>;
 
-type _CheckboxControlOmit = DistributiveOmit<ComponentProps<'span'>, never>;
-
-interface _CheckboxControlProps extends _CheckboxControlOmit {}
+interface _CheckboxControlProps extends ComponentProps<'span'> {}
 
 /** Props for the Checkbox primitive's control wrapper. */
 export type CheckboxControlProps = Prettify<_CheckboxControlProps>;
 
-type _CheckboxIndicatorOmit = DistributiveOmit<ComponentProps<'span'>, never>;
-
-interface _CheckboxIndicatorProps extends _CheckboxIndicatorOmit {}
+interface _CheckboxIndicatorProps extends ComponentProps<'span'> {}
 
 /** Props for the Checkbox primitive's visual indicator. */
 export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
