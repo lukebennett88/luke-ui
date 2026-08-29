@@ -6,10 +6,11 @@ export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="sp16">
 			<Text elementType="p">
-				A link like <Link href="#example">this one</Link> can sit inline within a sentence.
+				Set up the package by following the{' '}
+				<Link href="/docs/installation">installation guide</Link>.
 			</Text>
-			<Link href="#example" isStandalone>
-				It can also stand on its own
+			<Link href="/components" isStandalone>
+				Browse all components
 			</Link>
 		</Box>
 	);

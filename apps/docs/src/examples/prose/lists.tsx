@@ -4,15 +4,15 @@ export default () => {
 	return (
 		<Prose>
 			<ol>
-				<li>Read the heading first.</li>
+				<li>An ordered list numbers each item, so the order carries meaning.</li>
 				<li>
-					Read the paragraph that follows it.
+					An item can hold a nested list of its own.
 					<ul>
-						<li>Note any terms introduced there.</li>
-						<li>Notice how it sets up the list below.</li>
+						<li>A nested list is indented from its parent item.</li>
+						<li>An unordered list marks items with bullets instead of numbers.</li>
 					</ul>
 				</li>
-				<li>Work through the list in order.</li>
+				<li>Spacing between items stays even at every level.</li>
 			</ol>
 		</Prose>
 	);

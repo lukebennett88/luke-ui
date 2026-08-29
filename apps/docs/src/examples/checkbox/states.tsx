@@ -41,7 +41,7 @@ export default () => {
 				<Text color="secondary" typography="caption">
 					Invalid
 				</Text>
-				<Checkbox errorMessage="Accept the terms of service before you continue.">
+				<Checkbox errorMessage="Choose whether to receive email notifications.">
 					Email notifications
 				</Checkbox>
 			</Box>
