@@ -75,9 +75,8 @@ Rules:
 
 ### Source-parsing tools
 
-Some components inherit every prop through `DistributiveOmit` and add none of their own. An empty
-interface body hides those props from a tool that reads source files without running the TypeScript
-compiler:
+Some components inherit every prop through `DistributiveOmit` and add none of their own. Their
+interface body is empty:
 
 ```ts
 type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType'>;
@@ -87,23 +86,20 @@ interface _BlockquoteProps extends _BlockquoteOmit {}
 export type BlockquoteProps = Prettify<_BlockquoteProps>;
 ```
 
-When a component adds no props of its own, declare the inherited props the tool should surface in a
-documented props interface and extend it from the omit alias. Use indexed access from the source
-type so the declaration stays aligned with the resolved type:
+A tool that reads source files without running the TypeScript compiler cannot resolve conditional
+types such as `DistributiveOmit`. That tool reports zero props for these components even though the
+types are correct.
 
-```ts
-interface BlockquoteStyleProps {
-	children?: TextProps['children'];
-	className?: TextProps['className'];
-	typography?: TextProps['typography'];
-}
+Nine exports have this shape today:
 
-interface _BlockquoteProps extends _BlockquoteOmit, BlockquoteStyleProps {}
-```
+- `Blockquote`, `Code`, `Kbd`, and `VisuallyHidden`
+- `CheckboxControl` and `CheckboxIndicator`, in `src/core/primitives/checkbox`
+- `FieldDescription` and `FieldError`, in `src/core/primitives/field`
 
-Shared lists live in `documented-rac-props.ts` and `documented-intrinsic-props.ts`. See
-`DocumentedPressProps` and `CheckboxProps` for the same pattern. Keep `DistributiveOmit` and
-`Prettify` — they preserve the editor tooltip these rules exist to provide.
+Do not duplicate inherited props in the interface body to satisfy such tools. The duplication can
+drift from `DistributiveOmit`, and it weakens the editor tooltip that these rules exist to provide.
+The docs app compiles TypeScript (`apps/docs/scripts/generate-props-pages.ts`), so props pages stay
+complete. IDEs use the TypeScript language service and show the full prop list.
 
 ## Documentation
 

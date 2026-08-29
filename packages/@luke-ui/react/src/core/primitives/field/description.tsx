@@ -2,13 +2,10 @@ import type { JSX } from 'react';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
-import type { DocumentedRacTextProps } from '../../types/documented-rac-props.js';
 import type { Prettify } from '../../types/prettify.js';
 import { fieldRecipe } from './recipe.css.js';
 
-type _FieldDescriptionOmit = DistributiveOmit<RacTextProps, 'slot' | keyof DocumentedRacTextProps>;
-
-interface _FieldDescriptionProps extends _FieldDescriptionOmit, DocumentedRacTextProps {}
+type _FieldDescriptionProps = DistributiveOmit<RacTextProps, 'slot'>;
 
 /** Props for `FieldDescription`. */
 export type FieldDescriptionProps = Prettify<_FieldDescriptionProps>;

@@ -1,7 +1,5 @@
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
-import type { FieldErrorProps as RacFieldErrorProps } from 'react-aria-components/FieldError';
 import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
-import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import type { TextFieldProps as RacTextFieldProps } from 'react-aria-components/TextField';
 
 export interface DocumentedPressProps {
@@ -24,22 +22,6 @@ export interface DocumentedLinkProps {
 	 * @default false
 	 */
 	isDisabled?: RacLinkProps['isDisabled'];
-}
-
-export interface DocumentedRacTextProps {
-	/** Content rendered inside the text element. */
-	children?: RacTextProps['children'];
-	className?: RacTextProps['className'];
-	/** HTML element type to render. */
-	elementType?: RacTextProps['elementType'];
-	id?: RacTextProps['id'];
-	style?: RacTextProps['style'];
-}
-
-export interface DocumentedFieldErrorProps {
-	/** Validation message content. Accepts React Aria's render-prop form. */
-	children?: RacFieldErrorProps['children'];
-	className?: RacFieldErrorProps['className'];
 }
 
 export interface DocumentedInputProps {

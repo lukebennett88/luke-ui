@@ -9,7 +9,6 @@ import {
 } from 'react-aria-components/Checkbox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
-import type { DocumentedSpanElementProps } from '../../types/documented-intrinsic-props.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { CheckboxRecipeVariants } from './recipe.css.js';
 import { checkboxRecipe } from './recipe.css.js';
@@ -58,14 +57,14 @@ export type CheckboxContentProps = Prettify<_CheckboxContentProps>;
 
 type _CheckboxControlOmit = DistributiveOmit<ComponentProps<'span'>, never>;
 
-interface _CheckboxControlProps extends _CheckboxControlOmit, DocumentedSpanElementProps {}
+interface _CheckboxControlProps extends _CheckboxControlOmit {}
 
 /** Props for the Checkbox primitive's control wrapper. */
 export type CheckboxControlProps = Prettify<_CheckboxControlProps>;
 
 type _CheckboxIndicatorOmit = DistributiveOmit<ComponentProps<'span'>, never>;
 
-interface _CheckboxIndicatorProps extends _CheckboxIndicatorOmit, DocumentedSpanElementProps {}
+interface _CheckboxIndicatorProps extends _CheckboxIndicatorOmit {}
 
 /** Props for the Checkbox primitive's visual indicator. */
 export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
