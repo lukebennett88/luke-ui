@@ -7,6 +7,7 @@ import {
 	remarkAutoTypeTable,
 } from 'fumadocs-typescript';
 import * as z from 'zod';
+import { inlineExampleSource } from './src/lib/inline-example-source';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
 
@@ -14,7 +15,11 @@ export const docs = defineDocs({
 	dir: 'content/docs',
 	docs: {
 		postprocess: {
-			includeProcessedMarkdown: true,
+			// `stringify` inlines `<ExampleBlock>`/`<SourceCodeBlock>` source into the LLM-facing
+			// markdown text only; it never touches the AST rendered pages use.
+			includeProcessedMarkdown: {
+				stringify: inlineExampleSource,
+			},
 		},
 		schema: pageSchema.extend({
 			/**

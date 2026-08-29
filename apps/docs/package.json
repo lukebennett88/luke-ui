@@ -12,6 +12,7 @@
 		"check:docs": "tsx scripts/check-docs.ts",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
+		"check:llms": "tsx scripts/check-llms-output.ts",
 		"check:types": "fumadocs-mdx && tsc --noEmit",
 		"clean": "rm -rf .source .tanstack .turbo .output dist src/routeTree.gen.ts",
 		"dev": "vp dev",

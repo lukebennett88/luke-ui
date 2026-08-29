@@ -46,6 +46,7 @@
 				"check:format",
 				"//#check:format-root",
 				"check:lint",
+				"check:llms",
 				"check:story-plays",
 				"check:test-suffixes",
 				"check:types"
@@ -70,6 +71,7 @@
 		"check:lint": {
 			"dependsOn": ["generate", "^build"]
 		},
+		"check:llms": {},
 		"check:story-plays": {
 			"dependsOn": ["generate"]
 		},
@@ -102,6 +104,9 @@
 		},
 		"docs#check:lint": {
 			"dependsOn": ["docs#generate", "^build"]
+		},
+		"docs#check:llms": {
+			"dependsOn": ["docs#build"]
 		},
 		"docs#check:types": {
 			"dependsOn": ["docs#generate", "^build"]
