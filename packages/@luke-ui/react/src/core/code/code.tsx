@@ -1,11 +1,12 @@
 import { cx } from '../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { DocumentedCodeElementProps } from '../types/documented-intrinsic-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { codeRecipe } from './recipe.css.js';
 
 type _CodeOmit = DistributiveOmit<React.ComponentProps<'code'>, never>;
 
-interface _CodeProps extends _CodeOmit {}
+interface _CodeProps extends _CodeOmit, DocumentedCodeElementProps {}
 
 /** Props for the `Code` component. */
 export type CodeProps = Prettify<_CodeProps>;
