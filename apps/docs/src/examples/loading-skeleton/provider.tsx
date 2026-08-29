@@ -16,7 +16,7 @@ export default () => {
 							No local prop
 						</Text>
 						<Text>
-							<LoadingSkeleton>Account balance: $1,240.00</LoadingSkeleton>
+							<LoadingSkeleton>Three items match your search.</LoadingSkeleton>
 						</Text>
 					</Box>
 					<Box display="grid" gap="sp4">
@@ -24,7 +24,7 @@ export default () => {
 							isLoading
 						</Text>
 						<Text>
-							<LoadingSkeleton isLoading>Next payment: 21 August</LoadingSkeleton>
+							<LoadingSkeleton isLoading>Results updated a moment ago.</LoadingSkeleton>
 						</Text>
 					</Box>
 					<Box display="grid" gap="sp4">
@@ -32,7 +32,7 @@ export default () => {
 							{'isLoading={false}'}
 						</Text>
 						<Text>
-							<LoadingSkeleton isLoading={false}>Visa ending in 4242</LoadingSkeleton>
+							<LoadingSkeleton isLoading={false}>Nothing else to show.</LoadingSkeleton>
 						</Text>
 					</Box>
 				</Box>

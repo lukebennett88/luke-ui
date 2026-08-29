@@ -10,12 +10,10 @@ export default () => {
 	return (
 		<Box display="grid" gap="sp16" maxInlineSize="32rem">
 			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
-				isLoading
+				Show loading state
 			</Checkbox>
 			<Text>
-				<LoadingSkeleton isLoading={isLoading}>
-					Three projects are ready for review.
-				</LoadingSkeleton>
+				<LoadingSkeleton isLoading={isLoading}>Three items match your search.</LoadingSkeleton>
 			</Text>
 		</Box>
 	);

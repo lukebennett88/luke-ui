@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 export default () => {
 	return (
 		<Text>
-			<Strong>Save your recovery code</Strong> before continuing.
+			<Strong>Read this part carefully</Strong> before continuing.
 		</Text>
 	);
 };

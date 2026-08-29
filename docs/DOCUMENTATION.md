@@ -199,8 +199,18 @@ the code first.
 
 ### What to show
 
-- Show one realistic thing a developer might write. Use values such as "Save changes" and
-  "you@example.com", never `foo`, `bar`, or lorem ipsum.
+- Use content that makes the component or behaviour easy to understand. Do not introduce application
+  context that the example does not need.
+- Use realistic labels when the label describes what an interactive control does, such as "Save
+  changes" or "Email notifications".
+- In comparison examples, content may name the value being demonstrated when the content is only a
+  specimen label, such as "Small", "Medium", and "Large".
+- Do not use API terms as labels for interactive controls. A checkbox labelled "Invalid" describes
+  the prop instead of what selecting the checkbox does.
+- Keep example content neutral when its subject is incidental. Avoid invented accounts, workspaces,
+  billing details, characters, or other surrounding application details.
+- When an example needs extended text, choose a subject that helps explain why the component
+  contains that structure. Do not invent an application scenario just to fill the example.
 - Let the example make the behaviour obvious. A reader should see what the section describes without
   hunting for it.
 - Keep the example as small as it can be without becoming artificial.
@@ -208,8 +218,6 @@ the code first.
   result.
 - Do not demonstrate every value a prop accepts. Show the values a reader chooses between, and leave
   the full list to the Props page.
-- Do not label example UI with prop names. A checkbox labelled "Invalid" documents the API. Label it
-  "Email me a receipt" instead.
 
 Exhaustive variant and state coverage belongs in the visual test kitchen sink, not in a docs
 example. See [TESTING.md](TESTING.md).

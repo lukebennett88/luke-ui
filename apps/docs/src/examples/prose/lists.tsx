@@ -4,15 +4,15 @@ export default () => {
 	return (
 		<Prose>
 			<ol>
-				<li>Prepare the release.</li>
+				<li>Read the heading first.</li>
 				<li>
-					Publish the packages.
+					Read the paragraph that follows it.
 					<ul>
-						<li>Publish dependencies first.</li>
-						<li>Publish the React package last.</li>
+						<li>Note any terms introduced there.</li>
+						<li>Notice how it sets up the list below.</li>
 					</ul>
 				</li>
-				<li>Verify the release.</li>
+				<li>Work through the list in order.</li>
 			</ol>
 		</Prose>
 	);

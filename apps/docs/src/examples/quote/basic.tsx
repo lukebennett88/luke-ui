@@ -4,7 +4,7 @@ import { Text } from '@luke-ui/react/text';
 export default () => {
 	return (
 		<Text>
-			She described the interface as <Quote>calm and clear</Quote>.
+			A short phrase can appear as <Quote>quoted material</Quote> within a sentence.
 		</Text>
 	);
 };
