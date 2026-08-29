@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
+import { Code } from '../code/code.js';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Prose } from './prose.js';
@@ -174,4 +175,46 @@ test('preserves native ordered-list type markers under proseRecipe alone', () =>
 		'lower-roman',
 		'upper-roman',
 	]);
+});
+
+// Wide content must scroll inside its own box instead of clipping or widening the document.
+test('gives wide code blocks and tables their own horizontal scroll', () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: '20rem' }}>
+			<pre>
+				<code>{'const value = '.repeat(40)}</code>
+			</pre>
+			<table>
+				<tbody>
+					<tr>
+						{Array.from({ length: 30 }, (_, column) => (
+							<td key={column}>Column {column}</td>
+						))}
+					</tr>
+				</tbody>
+			</table>
+		</Prose>,
+	);
+	const root = locator.element();
+	const wide = [query(root, 'pre'), query(root, 'table')];
+
+	// Each overflows its own box, and that box scrolls rather than clipping.
+	expect(wide.map((element) => element.scrollWidth > element.clientWidth)).toEqual([true, true]);
+	expect(wide.map((element) => getComputedStyle(element).overflowX)).toEqual(['auto', 'auto']);
+	// The root itself must not gain a scrollbar or stretch past its own width.
+	expect(root.scrollWidth).toBe(root.clientWidth);
+});
+
+// A scroll container coerces `overflow-y` to match, so the box must fit its own line box.
+test('does not clip a code block vertically', () => {
+	const { locator } = render(
+		<Prose>
+			<pre>
+				<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
+			</pre>
+		</Prose>,
+	);
+	const pre = query(locator.element(), 'pre');
+
+	expect(pre.scrollHeight).toBe(pre.clientHeight);
 });

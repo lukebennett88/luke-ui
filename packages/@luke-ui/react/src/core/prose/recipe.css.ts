@@ -55,6 +55,13 @@ proseStyle('hr', {
 	border: 'none',
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
+// Wide content scrolls inside its own box instead of clipping or widening the document. A scroll
+// container cannot keep `overflow-y: visible`, so the box must fit its own content: an inline
+// `Code` child adds block padding on top of the line box, which would clip its descenders here.
+proseStyle('pre', { overflowX: 'auto', paddingBlock: vars.space.sp4 });
+// `overflow` has no effect on `display: table`, which shrink-wraps to content; make it a block
+// so the overflow rule applies and the table stays within the root's width.
+proseStyle('table', { display: 'block', overflowX: 'auto' });
 // Table cells need padding after the reset removes it.
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
 proseStyle('th', { textAlign: 'start' });

@@ -70,6 +70,15 @@ const document = (
 		<Text elementType="pre">
 			<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
 		</Text>
+		{/* A line past the frame: the block scrolls on its own rather than clipping. `tabIndex`
+		 and a name keep that scroll container keyboard-reachable until #527 lands. */}
+		<Text aria-label="Grid template columns example" elementType="pre" tabIndex={0}>
+			<Code>
+				{
+					'grid-template-columns: [full-start] minmax(var(--luke-space-sp24), 1fr) [content-start] minmax(0, 60rem) [content-end] minmax(var(--luke-space-sp24), 1fr) [full-end];'
+				}
+			</Code>
+		</Text>
 		<img alt="" height={64} src={swatch} width={320} />
 		<picture>
 			<img alt="" height={64} src={swatch} width={320} />
@@ -95,6 +104,26 @@ const document = (
 						<Code>sp24</Code>
 					</td>
 					<td>24px</td>
+				</tr>
+			</tbody>
+		</table>
+
+		{/* More columns than the frame holds: the table scrolls without widening the document. */}
+		<table>
+			<thead>
+				<tr>
+					{['Step', 'Value', 'Gap', 'Inset', 'Stack', 'Inline', 'Block', 'Gutter'].map((column) => (
+						<th key={column} scope="col">
+							{column}
+						</th>
+					))}
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					{['sp8', '8px', '8px', '8px', '8px', '8px', '8px', '8px'].map((cell, index) => (
+						<td key={index}>{cell}</td>
+					))}
 				</tr>
 			</tbody>
 		</table>
