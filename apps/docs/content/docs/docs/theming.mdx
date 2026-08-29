@@ -31,9 +31,15 @@ appearance, size, and interaction behaviour. The theme supplies the semantic val
 choices.
 
 ```tsx
-<Button appearance="solid" tone="accent">
-	Save changes
-</Button>
+import { Button } from '@luke-ui/react/button';
+
+function SaveButton() {
+	return (
+		<Button appearance="solid" tone="accent">
+			Save changes
+		</Button>
+	);
+}
 ```
 
 Prefer component props over custom CSS. Author a theme when the product needs a different visual
