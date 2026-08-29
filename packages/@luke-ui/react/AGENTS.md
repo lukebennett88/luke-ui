@@ -75,8 +75,9 @@ Rules:
 
 ### Source-parsing tools
 
-Some components inherit every prop through `DistributiveOmit` and add none of their own. Their
-interface body is empty:
+Some components inherit every prop and add none of their own. Their exported prop type has no
+locally declared members — an empty `interface extends` body, a `DistributiveOmit` alias, or a
+`Prettify` wrap around a third-party type:
 
 ```ts
 type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType'>;
@@ -87,19 +88,25 @@ export type BlockquoteProps = Prettify<_BlockquoteProps>;
 ```
 
 A tool that reads source files without running the TypeScript compiler cannot resolve conditional
-types such as `DistributiveOmit`. That tool reports zero props for these components even though the
-types are correct.
+types such as `DistributiveOmit`, or utility types such as `ComponentProps`. That tool may report
+zero props even though the types are correct.
 
-Nine exports have this shape today:
+Nine component exports are affected today:
 
-- `Blockquote`, `Code`, `Kbd`, and `VisuallyHidden`
+- `Blockquote`, `Code`, `Kbd`, `Prose`, and `VisuallyHidden`
 - `CheckboxControl` and `CheckboxIndicator`, in `src/core/primitives/checkbox`
 - `FieldDescription` and `FieldError`, in `src/core/primitives/field`
 
-Do not duplicate inherited props in the interface body to satisfy such tools. The duplication can
-drift from `DistributiveOmit`, and it weakens the editor tooltip that these rules exist to provide.
-The docs app compiles TypeScript (`apps/docs/scripts/generate-props-pages.ts`), so props pages stay
-complete. IDEs use the TypeScript language service and show the full prop list.
+Do not duplicate inherited props in the interface body to satisfy such tools. A partial prop list
+looks authoritative while hiding most of the real surface — including DOM attributes, event
+handlers, and React Aria props — and can drift when upstream types change. Keep prop types optimised
+for correctness and editor tooltips. The docs app compiles TypeScript
+(`apps/docs/scripts/generate-props-pages.ts`), so props pages stay complete. IDEs use the TypeScript
+language service and show the full prop list.
+
+If machine-readable API metadata becomes a product requirement, generate it from the same
+TypeScript-aware machinery rather than encoding extractor-specific prop subsets into component
+source.
 
 ## Documentation
 
