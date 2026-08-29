@@ -138,7 +138,7 @@ function TokenNodeView({
 }) {
 	// A heading tag chosen by tree depth is rendered with `createElement` rather than a capitalised
 	// JSX tag: assigning the dynamic tag to a variable and rendering it as `<Heading>` reads as a
-	// component declared during render (react-hooks-js/static-components), which this is not — it is
+	// component declared during render (react/static-components), which this is not — it is
 	// a plain host element whose tag name varies.
 	const heading = createElement(
 		headingTagAt(depth),

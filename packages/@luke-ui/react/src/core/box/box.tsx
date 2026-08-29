@@ -1,4 +1,4 @@
-import type { HTMLAttributes, JSX, ReactElement, Ref, RefCallback } from 'react';
+import type { HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
 import { mergeProps } from '../../shared/utils/utils.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import { createSprinkles } from '../styles/utilities.css.js';
@@ -10,11 +10,10 @@ export type BoxProps = Prettify<_BoxElementProps | _BoxRenderProps>;
 
 /** Applies layout properties to a supported structural element or an element returned by `render`. */
 export function Box(props: BoxProps): JSX.Element {
-	const { children, className, elementType = 'div', ref, render, style, ...restProps } = props;
-	const callbackRef: RefCallback<HTMLElement> = (element) => {
-		if (typeof ref === 'function') return ref(element);
-		if (ref) ref.current = element;
-	};
+	// `ref` is left out of this destructure and read via `restProps.ref` below: the
+	// compiler only tracks a ref through a named binding, and bails out of memoising
+	// Box if it sees one destructured or passed on.
+	const { children, className, elementType = 'div', render, style, ...restProps } = props;
 
 	if (render) {
 		const renderProps = mergeProps(createSprinkles(retainSprinklesProps(restProps)), {
@@ -24,13 +23,20 @@ export function Box(props: BoxProps): JSX.Element {
 		});
 
 		// The render owner must receive Box's ref with its presentation props.
-		// oxlint-disable-next-line react-hooks-js/refs
-		return render({ ...renderProps, ref: callbackRef });
+		return render({ ...renderProps, ref: toCallbackRef(restProps.ref) });
 	}
 
 	const Element = elementType;
-	const domProps = mergeProps(createSprinkles(restProps), { children, className, style });
-	return <Element {...domProps} ref={callbackRef} />;
+	// `restProps` still carries `ref`; createSprinkles passes unknown keys through
+	// unchanged, so it reaches the element without being named here. `normaliseRef`
+	// swaps it for a callback: a `RefObject<HTMLElement>` can't spread onto a
+	// narrower concrete element (`current` is invariant), but a callback ref can.
+	const domProps = mergeProps(createSprinkles(normaliseRef(restProps)), {
+		children,
+		className,
+		style,
+	});
+	return <Element {...domProps} />;
 }
 
 type BoxElementType = keyof Pick<
@@ -71,11 +77,13 @@ interface _BoxPresentationProps
 	ref?: Ref<HTMLElement>;
 }
 
+type BoxRef = NonNullable<Exclude<Ref<HTMLElement>, RefObject<HTMLElement | null>>>;
+
 type _BoxResolvedRenderProps = DistributiveOmit<
 	_BoxPresentationProps,
 	'ref' | keyof SprinklesProps
 > & {
-	ref: RefCallback<HTMLElement>;
+	ref: BoxRef;
 };
 
 interface _BoxRenderProps extends _BoxPresentationProps {
@@ -85,6 +93,21 @@ interface _BoxRenderProps extends _BoxPresentationProps {
 	render: (props: {
 		[K in keyof _BoxResolvedRenderProps]: _BoxResolvedRenderProps[K];
 	}) => ReactElement;
+}
+
+/** Normalises Box's `ref` so `render` can spread it onto a concrete element. */
+function toCallbackRef(ref: Ref<HTMLElement> | undefined): BoxRef {
+	return (element) => {
+		if (typeof ref === 'function') return ref(element);
+		if (ref) ref.current = element;
+	};
+}
+
+/** Replaces `props.ref` with a callback ref so the result can spread onto a concrete element. */
+function normaliseRef<Props extends { ref?: Ref<HTMLElement> }>(
+	props: Props,
+): Omit<Props, 'ref'> & { ref: BoxRef } {
+	return { ...props, ref: toCallbackRef(props.ref) };
 }
 
 const sprinklesProperties: ReadonlySet<PropertyKey> = createSprinkles.properties;
