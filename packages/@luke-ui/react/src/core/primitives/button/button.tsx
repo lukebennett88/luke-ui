@@ -5,6 +5,8 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
+import type { DistributiveOmit } from '../../types/distributive-omit.js';
+import type { DocumentedPressProps } from '../../types/documented-rac-props.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ButtonRecipeVariants } from './recipe.css.js';
 import { buttonRecipe } from './recipe.css.js';
@@ -34,7 +36,9 @@ interface ButtonStyleProps {
 	tone?: ButtonRecipeProps['tone'];
 }
 
-interface _ButtonProps extends RacButtonProps, ButtonStyleProps {}
+type _ButtonOmit = DistributiveOmit<RacButtonProps, keyof DocumentedPressProps>;
+
+interface _ButtonProps extends _ButtonOmit, ButtonStyleProps, DocumentedPressProps {}
 
 /** Props for the button primitive. */
 export type ButtonProps = Prettify<_ButtonProps>;

@@ -9,6 +9,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
+import { ComponentPropsTable } from '../components/component-props-table.js';
 import { DocsTreePathnameProvider } from '../components/docs-tree-pathname-provider.js';
 import { ExampleBlock } from '../components/example-block';
 import { IconGallery } from '../components/icon-gallery';
@@ -28,6 +29,7 @@ const GITHUB_TREE_URL = `${GITHUB_REPO_URL}/tree/main`;
 // `remarkAutoTypeTable` converts `<auto-type-table>` to a static `<TypeTable>` during MDX compilation.
 const mdxComponents = {
 	...defaultMdxComponents,
+	ComponentPropsTable,
 	ExampleBlock,
 	IconGallery,
 	SourceCodeBlock,

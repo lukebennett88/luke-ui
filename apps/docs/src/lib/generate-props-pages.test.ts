@@ -28,13 +28,39 @@ props:
 	const page = renderPropsPage(frontmatter);
 	expect(page).toContain('## Props');
 	expect(page).not.toContain('### ');
-	expect(page).toContain(
-		'<auto-type-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />',
-	);
+	expect(page).toContain('name="ButtonProps"');
+	expect(page).toContain('path="packages/@luke-ui/react/src/core/button/button.tsx"');
+	expect(page).toContain('<component-props-table');
 	expect(page).toContain('source: packages/@luke-ui/react/src/exports/button.ts');
 	expect(page).not.toContain('props:');
 });
 
+test('renders the native props note only for DOM-forwarding types on multi-entry pages', () => {
+	const frontmatter = parseComponentFrontmatter(`---
+title: Heading
+props:
+  - name: HeadingProps
+    path: packages/@luke-ui/react/src/core/heading/heading.tsx
+  - name: HeadingLevelsProps
+    path: packages/@luke-ui/react/src/core/heading/heading-context.tsx
+---
+`);
+
+	const page = renderPropsPage(
+		frontmatter,
+		new Map([
+			['HeadingProps', true],
+			['HeadingLevelsProps', false],
+		]),
+	);
+
+	expect(page).toContain(
+		'`HeadingProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
+	);
+	expect(page).not.toContain(
+		'`HeadingLevelsProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
+	);
+});
 test('renders a multi-entry Props page with a heading per entry', () => {
 	const frontmatter = parseComponentFrontmatter(`---
 title: Field primitive
@@ -99,10 +125,10 @@ props:
 Guide body.
 `;
 
-test('generates props.mdx and meta.json under <group>/<name>/ from the <group>/<name>.mdx guide', () => {
+test('generates props.mdx and meta.json under <group>/<name>/ from the <group>/<name>.mdx guide', async () => {
 	const { metaPath, outputDir, propsPath, rootDir } = writeScratchGuide('button', SCRATCH_GUIDE);
 
-	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
+	expect(await generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
 	expect(existsSync(propsPath)).toBe(true);
 	expect(existsSync(metaPath)).toBe(true);
 	expect(resolve(propsPath, '..')).toBe(outputDir);
@@ -113,51 +139,51 @@ test('generates props.mdx and meta.json under <group>/<name>/ from the <group>/<
 	});
 });
 
-test('removes generated output and the empty output directory once the guide is removed', () => {
+test('removes generated output and the empty output directory once the guide is removed', async () => {
 	const { guidePath, metaPath, outputDir, propsPath, rootDir } = writeScratchGuide(
 		'button',
 		SCRATCH_GUIDE,
 	);
 
-	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
+	expect(await generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
 	expect(existsSync(outputDir)).toBe(true);
 
 	// Deleting or renaming the guide must not leave an orphaned Props page behind. It would keep
 	// serving stale content from a route that is gitignored, so review would never surface it.
 	rmSync(guidePath);
 
-	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 0, removedCount: 2 });
+	expect(await generatePropsPages(rootDir)).toEqual({ componentCount: 0, removedCount: 2 });
 	expect(existsSync(propsPath)).toBe(false);
 	expect(existsSync(metaPath)).toBe(false);
 	expect(existsSync(outputDir)).toBe(false);
 });
 
-test('removes generated output for the old name once a guide is renamed', () => {
+test('removes generated output for the old name once a guide is renamed', async () => {
 	const { guidePath, metaPath, outputDir, propsPath, rootDir } = writeScratchGuide(
 		'button',
 		SCRATCH_GUIDE,
 	);
 
-	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
+	expect(await generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
 
 	renameSync(guidePath, resolve(rootDir, 'actions/icon-button.mdx'));
 
-	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 2 });
+	expect(await generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 2 });
 	expect(existsSync(propsPath)).toBe(false);
 	expect(existsSync(metaPath)).toBe(false);
 	expect(existsSync(outputDir)).toBe(false);
 	expect(existsSync(resolve(rootDir, 'actions/icon-button/props.mdx'))).toBe(true);
 });
 
-test('leaves the output directory in place when it still holds files the generator does not own', () => {
+test('leaves the output directory in place when it still holds files the generator does not own', async () => {
 	const { outputDir, rootDir } = writeScratchGuide('button', SCRATCH_GUIDE);
 
-	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
+	expect(await generatePropsPages(rootDir)).toEqual({ componentCount: 1, removedCount: 0 });
 
 	writeFileSync(resolve(outputDir, 'notes.txt'), 'kept by hand');
 	rmSync(resolve(rootDir, 'actions/button.mdx'));
 
-	expect(generatePropsPages(rootDir)).toEqual({ componentCount: 0, removedCount: 2 });
+	expect(await generatePropsPages(rootDir)).toEqual({ componentCount: 0, removedCount: 2 });
 	expect(existsSync(outputDir)).toBe(true);
 	expect(existsSync(resolve(outputDir, 'notes.txt'))).toBe(true);
 });

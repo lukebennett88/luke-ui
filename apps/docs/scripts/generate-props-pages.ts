@@ -9,12 +9,22 @@ import {
 } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createProject } from 'fumadocs-typescript';
+import type { PropProject } from '../src/lib/component-prop-documentation.ts';
+import {
+	renderNativePropsNote,
+	typeForwardsDomPropsForExport,
+} from '../src/lib/component-prop-documentation.ts';
 import type { ComponentFrontmatter, PropsEntry } from '../src/lib/docs-frontmatter.ts';
 import { parseComponentFrontmatter } from '../src/lib/docs-frontmatter.ts';
 import { findMdxFiles } from '../src/lib/docs-mdx-files.ts';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(scriptDir, '../../..');
 const componentsDir = resolve(scriptDir, '../content/docs/components');
+const docsTsconfigPath = resolve(scriptDir, '../tsconfig.json');
+
+let typeAnalysisProject: Awaited<ReturnType<typeof createProject>> | undefined;
 
 /**
  * Fumadocs joins `pagesIndex` to this folder. `../<name>` is the sibling authored guide, which
@@ -39,12 +49,13 @@ function renderMetaJson(componentName: string): string {
  * Only writes files whose content changed, and removes generator-owned output for components that
  * do not declare `props` or whose guide is missing.
  */
-export function generatePropsPages(rootDir: string = componentsDir): {
+export async function generatePropsPages(rootDir: string = componentsDir): Promise<{
 	componentCount: number;
 	removedCount: number;
-} {
+}> {
 	let componentCount = 0;
 	let removedCount = 0;
+	const project = await getTypeAnalysisProjectAsync();
 
 	for (const group of readdirSync(rootDir, { withFileTypes: true })) {
 		if (!group.isDirectory()) continue;
@@ -74,7 +85,10 @@ export function generatePropsPages(rootDir: string = componentsDir): {
 
 			componentCount++;
 			mkdirSync(outputDir, { recursive: true });
-			writeIfChanged(propsPath, renderPropsPage(frontmatter));
+			writeIfChanged(
+				propsPath,
+				renderPropsPage(frontmatter, buildNativePropsNotes(project, frontmatter.props)),
+			);
 			writeIfChanged(metaPath, renderMetaJson(componentName));
 		}
 	}
@@ -82,13 +96,31 @@ export function generatePropsPages(rootDir: string = componentsDir): {
 	return { componentCount, removedCount };
 }
 
-export function renderPropsPage(frontmatter: ComponentFrontmatter): string {
+function buildNativePropsNotes(
+	project: Awaited<ReturnType<typeof createProject>>,
+	props: ReadonlyArray<PropsEntry>,
+): ReadonlyMap<string, boolean> {
+	return new Map(
+		props.map((entry) => [
+			entry.name,
+			typeForwardsDomPropsForExport(project as PropProject, repoRoot, entry.path, entry.name),
+		]),
+	);
+}
+
+export function renderPropsPage(
+	frontmatter: ComponentFrontmatter,
+	nativePropsNotes: ReadonlyMap<string, boolean> = new Map(),
+): string {
 	const frontmatterBlock = frontmatter.copiedLines.join('\n');
 	const withTypeHeadings = frontmatter.props.length > 1;
 	const entries = frontmatter.props
 		.map((entry) => {
-			const table = renderAutoTypeTable(entry);
-			return withTypeHeadings ? `### ${entry.name}\n\n${table}` : table;
+			const table = renderComponentPropsTable(entry);
+			const nativePropsNote =
+				nativePropsNotes.get(entry.name) === true ? renderNativePropsNote(entry.name) : '';
+			const block = `${nativePropsNote}${table}`.trim();
+			return withTypeHeadings ? `### ${entry.name}\n\n${block}` : block;
 		})
 		.join('\n\n');
 
@@ -104,11 +136,21 @@ ${entries}
 `;
 }
 
-function renderAutoTypeTable(entry: PropsEntry): string {
-	const inline = `<auto-type-table path="${entry.path}" name="${entry.name}" />`;
+async function getTypeAnalysisProjectAsync(): Promise<Awaited<ReturnType<typeof createProject>>> {
+	typeAnalysisProject ??= await createProject({ tsconfigPath: docsTsconfigPath });
+	return typeAnalysisProject;
+}
+
+/** Initializes the TypeScript project used to detect DOM-forwarding prop types during generation. */
+export async function initializePropsPageGeneration(): Promise<void> {
+	await getTypeAnalysisProjectAsync();
+}
+
+function renderComponentPropsTable(entry: PropsEntry): string {
+	const inline = `<component-props-table path="${entry.path}" name="${entry.name}" />`;
 	if (inline.length <= 100) return inline;
 
-	return `<auto-type-table\n\tpath="${entry.path}"\n\tname="${entry.name}"\n/>`;
+	return `<component-props-table\n\tpath="${entry.path}"\n\tname="${entry.name}"\n/>`;
 }
 
 /**
@@ -156,7 +198,8 @@ function removeDirIfEmpty(dirPath: string): void {
 
 if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 	mkdirSync(componentsDir, { recursive: true });
-	const { componentCount, removedCount } = generatePropsPages();
+	await initializePropsPageGeneration();
+	const { componentCount, removedCount } = await generatePropsPages();
 	// oxlint-disable-next-line no-console
 	console.log(
 		`generate-props-pages: wrote props pages for ${componentCount} components${removedCount > 0 ? `, removed ${removedCount} stale files` : ''}`,

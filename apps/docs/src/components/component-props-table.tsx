@@ -1,0 +1,110 @@
+'use client';
+
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import type { TypeNode } from 'fumadocs-ui/components/type-table';
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from 'fumadocs-ui/components/ui/collapsible';
+import type { ComponentProps } from 'react';
+import { groupPropNames } from '../lib/component-prop-documentation.js';
+
+/** Grouped prop tables for generated component Props pages. */
+export function ComponentPropsTable({
+	className,
+	id,
+	type,
+	...props
+}: {
+	id: string;
+	type: Record<string, TypeNode>;
+} & ComponentProps<'div'>) {
+	const groups = groupPropNames(Object.keys(type));
+
+	return (
+		<div
+			className={['my-6 flex flex-col gap-3', className].filter(Boolean).join(' ')}
+			id={id}
+			{...props}
+		>
+			{groups.map((group) => (
+				<PropGroup
+					group={group}
+					id={id}
+					key={group.name}
+					type={pickGroupProps(type, new Set(group.props))}
+				/>
+			))}
+		</div>
+	);
+}
+
+function PropGroup({
+	group,
+	id,
+	type,
+}: {
+	group: { defaultOpen: boolean; name: string; props: ReadonlyArray<string> };
+	id: string;
+	type: Record<string, TypeNode>;
+}) {
+	const groupId = `${id}-${slugify(group.name)}`;
+
+	if (group.defaultOpen) {
+		return (
+			<section aria-labelledby={groupId}>
+				<h3 className="not-prose mb-2 font-medium text-fd-foreground text-sm" id={groupId}>
+					{group.name}
+				</h3>
+				<TypeTable id={groupId} type={type} />
+			</section>
+		);
+	}
+
+	return (
+		<Collapsible className="rounded-2xl border bg-fd-card" defaultOpen={false}>
+			<CollapsibleTrigger
+				className="group flex w-full items-center justify-between px-4 py-3 text-start not-prose"
+				id={groupId}
+			>
+				<span className="font-medium text-fd-foreground text-sm">{group.name}</span>
+				<ChevronIcon />
+			</CollapsibleTrigger>
+			<CollapsibleContent className="border-fd-border border-t px-1 pb-1">
+				<TypeTable id={groupId} type={type} />
+			</CollapsibleContent>
+		</Collapsible>
+	);
+}
+
+function ChevronIcon() {
+	return (
+		<svg
+			aria-hidden
+			className="size-4 text-fd-muted-foreground transition-transform group-data-[state=open]:rotate-180"
+			fill="none"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="2"
+			viewBox="0 0 24 24"
+		>
+			<path d="m6 9 6 6 6-6" />
+		</svg>
+	);
+}
+
+function pickGroupProps(
+	type: Record<string, TypeNode>,
+	names: ReadonlySet<string>,
+): Record<string, TypeNode> {
+	return Object.fromEntries(Object.entries(type).filter(([name]) => names.has(name)));
+}
+
+function slugify(value: string): string {
+	return value
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-|-$/g, '');
+}

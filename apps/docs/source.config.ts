@@ -7,6 +7,7 @@ import {
 	remarkAutoTypeTable,
 } from 'fumadocs-typescript';
 import * as z from 'zod';
+import { createComponentPropsGenerator } from './src/lib/create-component-props-generator.js';
 import { inlineExampleSource } from './src/lib/inline-example-source';
 import { remarkValidateExamples } from './src/lib/remark-validate-examples';
 import { SHIKI_THEMES } from './src/lib/shiki-theme.js';
@@ -50,6 +51,10 @@ const generator = createGenerator({
 	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
 });
 
+const componentPropsGenerator = createComponentPropsGenerator({
+	cache: createFileSystemGeneratorCache('.source/fumadocs-typescript'),
+});
+
 export default defineConfig({
 	mdxOptions: {
 		// MDX fences and source modules use the same themes.
@@ -59,6 +64,15 @@ export default defineConfig({
 		remarkPlugins: (v) => [
 			...v,
 			[remarkAutoTypeTable, { generator, options: { basePath: repoRoot } }],
+			[
+				remarkAutoTypeTable,
+				{
+					generator: componentPropsGenerator,
+					name: 'component-props-table',
+					options: { basePath: repoRoot },
+					outputName: 'ComponentPropsTable',
+				},
+			],
 			remarkValidateExamples,
 		],
 	},
