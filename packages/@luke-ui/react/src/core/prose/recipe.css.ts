@@ -1,25 +1,17 @@
 import { vars } from '../../theme/contract.css.js';
-import { globalStyleInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { globalStyleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
-
-const base = styleInLayer('recipes', {}, 'prose');
+import { proseScopeClassName } from './scope.css.js';
 
 /** Vanilla-extract recipe for a fixed long-form document rhythm. */
-export const proseRecipe = recipe({ base });
-
-/**
- * The Prose scope class. Every Prose rule is scoped to it, and the reset uses it to leave typed
- * ordered-list markers alone inside Prose. It rides `proseRecipe()`, so recipe-only usage and the
- * `Prose` component scope identically.
- */
-export const proseScopeClassName = base;
+export const proseRecipe = recipe({ base: proseScopeClassName });
 
 export type ProseRecipeVariants = RecipeSelection<typeof proseRecipe>;
 
 // Wrapping the root and matched element keeps every rule at 0-0-0.
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
-	globalStyleInLayer('recipes', `:where(.${base}) :where(${selector})`, rule);
+	globalStyleInLayer('recipes', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
 }
 
 // Each gap is the following block's start margin. No block-end margin can collapse or escape.
@@ -54,7 +46,7 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
 // Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply
-// inside Prose; the reset leaves those ols alone via `proseScopeClassName`.
+// inside Prose; the reset leaves those ols alone via `proseScopeClassName` from `./scope.css.js`.
 proseStyle('ol:not([type])', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
 proseStyle('ol[type]', { paddingInlineStart: vars.space.sp24 });
 
