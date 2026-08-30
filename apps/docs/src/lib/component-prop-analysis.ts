@@ -4,13 +4,17 @@ import type { GeneratedDoc } from 'fumadocs-typescript';
 import { createProject } from 'fumadocs-typescript';
 
 export interface PropProject {
-	createSourceFile(path: string, content: string, options: { overwrite: boolean }): PropSourceFile;
-	getSourceFile(path: string): PropSourceFile | undefined;
+	createSourceFile: (
+		path: string,
+		content: string,
+		options: { overwrite: boolean },
+	) => PropSourceFile;
+	getSourceFile: (path: string) => PropSourceFile | undefined;
 }
 
 interface PropSourceFile {
-	getExportedDeclarations(): ReadonlyMap<string, ReadonlyArray<PropDeclaration>>;
-	getFilePath(): string;
+	getExportedDeclarations: () => ReadonlyMap<string, ReadonlyArray<PropDeclaration>>;
+	getFilePath: () => string;
 }
 
 /**
@@ -19,20 +23,20 @@ interface PropSourceFile {
  * renders, and the syntax tree beneath it for *how* each prop got there.
  */
 interface PropDeclaration extends SyntaxNode {
-	getType(): PropType;
+	getType: () => PropType;
 }
 
 /** A resolved type. `getUnionTypes` is empty unless `isUnion()`. */
 interface PropType {
-	getProperties(): ReadonlyArray<PropSymbol>;
-	getUnionTypes(): ReadonlyArray<PropType>;
-	isUnion(): boolean;
+	getProperties: () => ReadonlyArray<PropSymbol>;
+	getUnionTypes: () => ReadonlyArray<PropType>;
+	isUnion: () => boolean;
 }
 
 interface PropSymbol {
-	getAliasedSymbol?(): PropSymbol | undefined;
-	getDeclarations(): ReadonlyArray<SyntaxNode>;
-	getName(): string;
+	getAliasedSymbol?: () => PropSymbol | undefined;
+	getDeclarations: () => ReadonlyArray<SyntaxNode>;
+	getName: () => string;
 }
 
 /**
@@ -46,26 +50,26 @@ interface SyntaxNode {
 	 * `getExtends`, returning a single clause or `undefined`, so the return type covers both and the
 	 * walk normalises it — only interfaces are ever walked here in practice.
 	 */
-	getExtends?(): ReadonlyArray<SyntaxNode> | SyntaxNode | undefined;
+	getExtends?: () => ReadonlyArray<SyntaxNode> | SyntaxNode | undefined;
 	/** `ExpressionWithTypeArguments` only: the referenced name, e.g. `Pick` in `extends Pick<…>`. */
-	getExpression?(): SyntaxNode;
-	getKindName(): string;
+	getExpression?: () => SyntaxNode;
+	getKindName: () => string;
 	/** `InterfaceDeclaration` and `TypeLiteral`: own (syntactically declared) members. */
-	getMembers?(): ReadonlyArray<SyntaxNode>;
+	getMembers?: () => ReadonlyArray<SyntaxNode>;
 	/** `InterfaceDeclaration` only. */
-	getName?(): string | undefined;
-	getSourceFile(): PropSourceFile;
-	getStart(): number;
-	getSymbol?(): PropSymbol | undefined;
-	getText(): string;
+	getName?: () => string | undefined;
+	getSourceFile: () => PropSourceFile;
+	getStart: () => number;
+	getSymbol?: () => PropSymbol | undefined;
+	getText: () => string;
 	/** `TypeReference` and `ExpressionWithTypeArguments`: the `<…>` arguments. */
-	getTypeArguments?(): ReadonlyArray<SyntaxNode>;
+	getTypeArguments?: () => ReadonlyArray<SyntaxNode>;
 	/** `TypeAliasDeclaration` and `ParenthesizedType`: the type on the right of the `=`. */
-	getTypeNode?(): SyntaxNode | undefined;
+	getTypeNode?: () => SyntaxNode | undefined;
 	/** `TypeReference` only: the referenced name, e.g. `Prettify` in `Prettify<X>`. */
-	getTypeName?(): SyntaxNode;
+	getTypeName?: () => SyntaxNode;
 	/** `UnionType` and `IntersectionType`: the constituents. */
-	getTypeNodes?(): ReadonlyArray<SyntaxNode>;
+	getTypeNodes?: () => ReadonlyArray<SyntaxNode>;
 }
 
 const sharedProjects = new Map<string, Promise<Awaited<ReturnType<typeof createProject>>>>();
@@ -429,7 +433,7 @@ function markResolvedElementBags(referenceNode: SyntaxNode, origins: StructuralO
 }
 
 interface WithParent {
-	getParent(): SyntaxNode | undefined;
+	getParent: () => SyntaxNode | undefined;
 }
 
 function declarationParent(declaration: SyntaxNode): SyntaxNode | undefined {
