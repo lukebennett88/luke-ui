@@ -34,8 +34,8 @@ proseStyle('* + figcaption, li > ul, li > ol, li > p + p', {
 proseStyle('h1 + *', { marginBlockStart: vars.space.sp32 });
 proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space.sp48 });
 proseStyle('h2 + *', { marginBlockStart: vars.space.sp24 });
-proseStyle('h3 + *', { marginBlockStart: vars.space.sp12 });
-proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp8 });
+proseStyle('h3 + *', { marginBlockStart: vars.space.sp16 });
+proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp12 });
 // A rule is a section break on both sides.
 proseStyle('hr + *', { marginBlockStart: vars.space.sp48 });
 
@@ -59,9 +59,6 @@ proseStyle('hr', {
 // container cannot keep `overflow-y: visible`, so the box must fit its own content: an inline
 // `Code` child adds block padding on top of the line box, which would clip its descenders here.
 proseStyle('pre', { overflowX: 'auto', paddingBlock: vars.space.sp4 });
-// `overflow` has no effect on `display: table`, which shrink-wraps to content; make it a block
-// so the overflow rule applies and the table stays within the root's width.
-proseStyle('table', { display: 'block', overflowX: 'auto' });
 // Table cells need padding after the reset removes it.
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
 proseStyle('th', { textAlign: 'start' });

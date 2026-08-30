@@ -108,26 +108,6 @@ const document = (
 			</tbody>
 		</table>
 
-		{/* More columns than the frame holds: the table scrolls without widening the document. */}
-		<table>
-			<thead>
-				<tr>
-					{['Step', 'Value', 'Gap', 'Inset', 'Stack', 'Inline', 'Block', 'Gutter'].map((column) => (
-						<th key={column} scope="col">
-							{column}
-						</th>
-					))}
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					{['sp8', '8px', '8px', '8px', '8px', '8px', '8px', '8px'].map((cell, index) => (
-						<td key={index}>{cell}</td>
-					))}
-				</tr>
-			</tbody>
-		</table>
-
 		<hr />
 
 		<Heading level={3}>Terms</Heading>

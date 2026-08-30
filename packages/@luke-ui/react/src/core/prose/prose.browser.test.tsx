@@ -3,6 +3,7 @@ import { expect, test } from 'vite-plus/test';
 import { Code } from '../code/code.js';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
+import { Text } from '../text/text.js';
 import { Prose } from './prose.js';
 import { proseRecipe } from './recipe.css.js';
 
@@ -178,12 +179,25 @@ test('preserves native ordered-list type markers under proseRecipe alone', () =>
 });
 
 // Wide content must scroll inside its own box instead of clipping or widening the document.
-test('gives wide code blocks and tables their own horizontal scroll', () => {
+test('gives wide code blocks their own horizontal scroll', () => {
 	const { locator } = render(
 		<Prose style={{ inlineSize: '20rem' }}>
 			<pre>
 				<code>{'const value = '.repeat(40)}</code>
 			</pre>
+		</Prose>,
+	);
+	const root = locator.element();
+	const pre = query(root, 'pre');
+
+	expect(pre.scrollWidth).toBeGreaterThan(pre.clientWidth);
+	expect(getComputedStyle(pre).overflowX).toBe('auto');
+	expect(root.scrollWidth).toBe(root.clientWidth);
+});
+
+test('does not turn tables into inaccessible scroll containers', () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: '20rem' }}>
 			<table>
 				<tbody>
 					<tr>
@@ -195,14 +209,25 @@ test('gives wide code blocks and tables their own horizontal scroll', () => {
 			</table>
 		</Prose>,
 	);
-	const root = locator.element();
-	const wide = [query(root, 'pre'), query(root, 'table')];
+	const table = query(locator.element(), 'table');
 
-	// Each overflows its own box, and that box scrolls rather than clipping.
-	expect(wide.map((element) => element.scrollWidth > element.clientWidth)).toEqual([true, true]);
-	expect(wide.map((element) => getComputedStyle(element).overflowX)).toEqual(['auto', 'auto']);
-	// The root itself must not gain a scrollbar or stretch past its own width.
-	expect(root.scrollWidth).toBe(root.clientWidth);
+	expect(getComputedStyle(table).overflowX).not.toBe('auto');
+	expect(getComputedStyle(table).display).not.toBe('block');
+});
+
+test('reaches a wide code block by keyboard when tabIndex is set', async () => {
+	const { locator, user } = render(
+		<Prose style={{ inlineSize: '20rem' }}>
+			<p>Before the code block.</p>
+			<Text aria-label="Example code" elementType="pre" tabIndex={0}>
+				<Code>{'const value = '.repeat(40)}</Code>
+			</Text>
+		</Prose>,
+	);
+	const pre = query(locator.element(), 'pre');
+
+	await user.tab();
+	expect(document.activeElement).toBe(pre);
 });
 
 // A scroll container coerces `overflow-y` to match, so the box must fit its own line box.

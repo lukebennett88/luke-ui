@@ -48,21 +48,16 @@ export const Default = meta.story({
 	),
 });
 
-/**
- * A full document in one frame, including the wide code block and wide table that must scroll
- * inside their own box rather than clip or widen the page.
- */
+/** Heading rhythm, lists, typed markers, and a keyboard-reachable wide code block. */
 export const StressTest = meta.story({
 	render: (props) => (
 		<div style={{ maxInlineSize: '40rem' }}>
 			<Prose {...props}>
 				<Heading level={2}>Spacing in long-form content</Heading>
-				<Text elementType="p">
-					Prose sets vertical rhythm and list styling. Typography components carry the visual
-					hierarchy, so a heading takes its size and weight from <Code>Heading</Code>.
-				</Text>
+				<Text elementType="p">A paragraph after the section heading.</Text>
 
 				<Heading level={3}>Ordering a procedure</Heading>
+				<Text elementType="p">A paragraph after the subsection heading.</Text>
 				<ol>
 					<li>Measure the smallest gap in the design.</li>
 					<li>
@@ -83,21 +78,11 @@ export const StressTest = meta.story({
 					<li>Upper-roman markers come from the same hint.</li>
 				</ol>
 
-				<Blockquote>
-					Perfect typography is certainly the most elusive of all arts. Sculpture in stone alone
-					comes near it in obstinacy.
-				</Blockquote>
-
-				<Heading level={3}>Wide content</Heading>
+				<Heading level={3}>Wide code</Heading>
 				<Text elementType="p">
-					A long line and a wide table each scroll on their own axis. Neither adds a scrollbar to
-					the document.
+					A long line scrolls inside its own box. Add <Code>tabIndex</Code> and a name so keyboard
+					users can reach the scroll container until #527 lands.
 				</Text>
-				{/*
-				 * Prose scrolls a wide code block, but only markup can make that scroll container
-				 * reachable by keyboard, so a consumer supplies `tabIndex` and a name until Prose
-				 * ships a `Pre` component that does it for them (#527).
-				 */}
 				<Text aria-label="Grid template columns example" elementType="pre" tabIndex={0}>
 					<Code>
 						{
@@ -105,49 +90,9 @@ export const StressTest = meta.story({
 						}
 					</Code>
 				</Text>
-				<table>
-					<thead>
-						<tr>
-							{['Step', 'Value', 'Gap', 'Inset', 'Stack', 'Inline', 'Block', 'Gutter'].map(
-								(column) => (
-									<th key={column} scope="col">
-										{column}
-									</th>
-								),
-							)}
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							{['sp8', '8px', '8px', '8px', '8px', '8px', '8px', '8px'].map((cell, index) => (
-								<td key={index}>{cell}</td>
-							))}
-						</tr>
-					</tbody>
-				</table>
 
-				<hr />
-
-				<Heading level={3}>Terms</Heading>
-				<dl>
-					<dt>
-						<Text elementType="span" fontWeight="emphasis">
-							Step
-						</Text>
-					</dt>
-					<dd>
-						<Text elementType="span">One named value on the scale.</Text>
-					</dd>
-				</dl>
-
-				<figure>
-					<img alt="" height={64} src={swatch} width={320} />
-					<figcaption>
-						<Text color="secondary" elementType="span" typography="caption">
-							Grouping changes with distance alone.
-						</Text>
-					</figcaption>
-				</figure>
+				<Heading level={3}>After wide content</Heading>
+				<Text elementType="p">Rhythm continues below the scroll region.</Text>
 			</Prose>
 		</div>
 	),
