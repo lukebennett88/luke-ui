@@ -1,28 +1,18 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
-import { Text } from '@luke-ui/react/text';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp16">
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Solid
-				</Text>
+		<Comparison>
+			<ComparisonItem label="Solid">
 				<Button appearance="solid">Example button</Button>
-			</Box>
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Subtle
-				</Text>
+			</ComparisonItem>
+			<ComparisonItem label="Subtle">
 				<Button appearance="subtle">Example button</Button>
-			</Box>
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Ghost
-				</Text>
+			</ComparisonItem>
+			<ComparisonItem label="Ghost">
 				<Button appearance="ghost">Example button</Button>
-			</Box>
-		</Box>
+			</ComparisonItem>
+		</Comparison>
 	);
 };

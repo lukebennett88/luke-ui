@@ -7,6 +7,7 @@ import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
+import toneSource from '../../examples/button/tones.tsx?raw';
 import type { PlaygroundPreviewMessage } from '../../lib/playground-protocol.js';
 import { isPlaygroundPreviewMessage } from '../../lib/playground-protocol.js';
 import { DocsThemeRoot } from '../theme-controls.js';
@@ -92,6 +93,20 @@ test('compiles parent playground code and posts success', async () => {
 	await expect
 		.poll(() => messages.find((message) => message.type === 'playground:success'))
 		.toEqual({ type: 'playground:success' });
+});
+
+test('runs the Button tone example with the docs comparison helper', async () => {
+	const messages = collectParentPreviewMessages();
+	await mountPreview();
+
+	await act(async () => {
+		postFromParent({ code: toneSource, type: 'playground:code' });
+	});
+
+	await expect
+		.poll(() => messages.find((message) => message.type === 'playground:success'))
+		.toEqual({ type: 'playground:success' });
+	expect(container).toHaveTextContent('Neutral');
 });
 
 test('posts the compileComponent error when parent playground code is invalid', async () => {

@@ -3,27 +3,51 @@ import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
 import type { PropsWithChildren } from 'react';
 
-const colours = [
-	{ label: 'Primary', color: 'primary' },
-	{ label: 'Secondary', color: 'secondary' },
-	{ label: 'Accent', color: 'accent' },
-	{ label: 'Info', color: 'info' },
-	{ label: 'Success', color: 'success' },
-	{ label: 'Warning', color: 'warning' },
-	{ label: 'Danger', color: 'danger' },
-] as const;
-
 export default () => {
 	return (
 		<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp16">
-			{colours.map(({ color, label }) => (
-				<FlexCol key={color}>
-					<Text color={color}>
-						<Icon name="checkCircle" title="Example icon" />
-					</Text>
-					<Text color="secondary">{label}</Text>
-				</FlexCol>
-			))}
+			<FlexCol>
+				<Text color="primary">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Primary</Text>
+			</FlexCol>
+			<FlexCol>
+				<Text color="secondary">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Secondary</Text>
+			</FlexCol>
+			<FlexCol>
+				<Text color="accent">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Accent</Text>
+			</FlexCol>
+			<FlexCol>
+				<Text color="info">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Info</Text>
+			</FlexCol>
+			<FlexCol>
+				<Text color="success">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Success</Text>
+			</FlexCol>
+			<FlexCol>
+				<Text color="warning">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Warning</Text>
+			</FlexCol>
+			<FlexCol>
+				<Text color="danger">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Danger</Text>
+			</FlexCol>
 		</Box>
 	);
 };

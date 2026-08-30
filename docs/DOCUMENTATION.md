@@ -210,6 +210,8 @@ the code first.
 - In comparison examples, content may name the value being demonstrated when the content is only a
   specimen label, such as "Small", "Medium", and "Large". Keep those names in a caption beside the
   control, not in the control's own label.
+- Use a docs-only comparison helper when repeated caption and layout markup would hide the component
+  JSX. Keep each demonstrated component and its prop values visible in the example.
 - Do not use API terms as labels for interactive controls. When the control's purpose is incidental,
   use a neutral or self-referential label instead.
 - When an example needs extended text, choose a subject that helps explain why the component

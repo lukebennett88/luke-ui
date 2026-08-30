@@ -1,34 +1,33 @@
-import { Box } from '@luke-ui/react/box';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import type { LoadingSpinnerProps } from '@luke-ui/react/loading-spinner';
-import { Text } from '@luke-ui/react/text';
-
-const colours: Array<{ label: string; color?: LoadingSpinnerProps['color'] }> = [
-	{ label: 'Inherited' },
-	{ label: 'Primary', color: 'primary' },
-	{ label: 'Secondary', color: 'secondary' },
-	{ label: 'Accent', color: 'accent' },
-	{ label: 'Info', color: 'info' },
-	{ label: 'Success', color: 'success' },
-	{ label: 'Warning', color: 'warning' },
-	{ label: 'Danger', color: 'danger' },
-] as const;
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp16">
-			{colours.map(({ color, label }) => (
-				<Box alignItems="center" display="grid" gap="sp4" key={label}>
-					<Text color="secondary" typography="caption">
-						{label}
-					</Text>
-					{color ? (
-						<LoadingSpinner aria-label="Loading" color={color} />
-					) : (
-						<LoadingSpinner aria-label="Loading" />
-					)}
-				</Box>
-			))}
-		</Box>
+		<Comparison>
+			<ComparisonItem label="Inherited">
+				<LoadingSpinner aria-label="Loading" />
+			</ComparisonItem>
+			<ComparisonItem label="Primary">
+				<LoadingSpinner aria-label="Loading" color="primary" />
+			</ComparisonItem>
+			<ComparisonItem label="Secondary">
+				<LoadingSpinner aria-label="Loading" color="secondary" />
+			</ComparisonItem>
+			<ComparisonItem label="Accent">
+				<LoadingSpinner aria-label="Loading" color="accent" />
+			</ComparisonItem>
+			<ComparisonItem label="Info">
+				<LoadingSpinner aria-label="Loading" color="info" />
+			</ComparisonItem>
+			<ComparisonItem label="Success">
+				<LoadingSpinner aria-label="Loading" color="success" />
+			</ComparisonItem>
+			<ComparisonItem label="Warning">
+				<LoadingSpinner aria-label="Loading" color="warning" />
+			</ComparisonItem>
+			<ComparisonItem label="Danger">
+				<LoadingSpinner aria-label="Loading" color="danger" />
+			</ComparisonItem>
+		</Comparison>
 	);
 };

@@ -21,12 +21,16 @@ test('treats a relative import as unresolvable in the playground', () => {
 });
 
 test('treats an example that only imports playground specifiers as runnable', () => {
-	const source = "import { Button } from '@luke-ui/react/button';\n";
+	const source = [
+		"import { Button } from '@luke-ui/react/button';",
+		"import { Comparison } from '#docs/comparison';",
+		'',
+	].join('\n');
 
 	expect(canRunInPlayground(source, specifiers)).toBe(true);
 });
 
-test('documented examples that the playground cannot resolve are the known relative-import pair', () => {
+test('documented examples that the playground cannot resolve use unsupported relative imports', () => {
 	const docsDir = resolve(import.meta.dirname, '../../content/docs');
 	const examplesDir = resolve(import.meta.dirname, '../examples');
 	const unrunnable = documentedExampleSources(docsDir)

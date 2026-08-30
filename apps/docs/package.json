@@ -7,6 +7,9 @@
 	},
 	"type": "module",
 	"sideEffects": false,
+	"imports": {
+		"#docs/comparison": "./src/examples/comparison.tsx"
+	},
 	"scripts": {
 		"build": "vp build",
 		"check:docs": "tsx scripts/check-docs.ts",

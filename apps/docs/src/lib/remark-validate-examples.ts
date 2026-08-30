@@ -104,14 +104,16 @@ function findDocumentedExamples(docsDir: string, examplesDir: string): Set<strin
 
 function findImportedExamples(examplePath: string, examplesDir: string): Array<string> {
 	const importedExamples: Array<string> = [];
-	const importPattern = /\bfrom\s+["'](\.[^"']+)["']/g;
+	const importPattern = /\bfrom\s+["']((?:\.|#docs\/)[^"']+)["']/g;
 	const contents = readFileSync(examplePath, 'utf8');
 
 	for (const match of contents.matchAll(importPattern)) {
 		const importPath = match[1];
 		if (!importPath) continue;
 
-		const resolvedImportPath = resolve(examplePath, '..', importPath);
+		const resolvedImportPath = importPath.startsWith('#docs/')
+			? resolve(examplesDir, importPath.slice('#docs/'.length))
+			: resolve(examplePath, '..', importPath);
 		const importedPath = extname(resolvedImportPath)
 			? resolvedImportPath.replace(/\.js$/, '.tsx')
 			: `${resolvedImportPath}.tsx`;

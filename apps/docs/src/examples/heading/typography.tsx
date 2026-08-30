@@ -1,30 +1,44 @@
-import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
-import { Text } from '@luke-ui/react/text';
-
-const typographyStyles = [
-	'body',
-	'lead',
-	'heading4',
-	'heading3',
-	'heading2',
-	'heading1',
-	'display',
-] as const;
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box display="grid" gap="sp12">
-			{typographyStyles.map((typography) => (
-				<Box alignItems="baseline" display="grid" gap="sp8" key={typography}>
-					<Text color="secondary" typography="caption">
-						{typography}
-					</Text>
-					<Heading level={2} typography={typography}>
-						Example heading
-					</Heading>
-				</Box>
-			))}
-		</Box>
+		<Comparison direction="vertical">
+			<ComparisonItem label="body">
+				<Heading level={2} typography="body">
+					Example heading
+				</Heading>
+			</ComparisonItem>
+			<ComparisonItem label="lead">
+				<Heading level={2} typography="lead">
+					Example heading
+				</Heading>
+			</ComparisonItem>
+			<ComparisonItem label="heading4">
+				<Heading level={2} typography="heading4">
+					Example heading
+				</Heading>
+			</ComparisonItem>
+			<ComparisonItem label="heading3">
+				<Heading level={2} typography="heading3">
+					Example heading
+				</Heading>
+			</ComparisonItem>
+			<ComparisonItem label="heading2">
+				<Heading level={2} typography="heading2">
+					Example heading
+				</Heading>
+			</ComparisonItem>
+			<ComparisonItem label="heading1">
+				<Heading level={2} typography="heading1">
+					Example heading
+				</Heading>
+			</ComparisonItem>
+			<ComparisonItem label="display">
+				<Heading level={2} typography="display">
+					Example heading
+				</Heading>
+			</ComparisonItem>
+		</Comparison>
 	);
 };

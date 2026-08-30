@@ -104,6 +104,7 @@ typescriptDefaults.setCompilerOptions({
 	module: monaco.typescript.ModuleKind.ESNext,
 	moduleResolution: bundlerModuleResolution,
 	paths: {
+		'#docs/comparison': ['file:///docs/comparison.tsx'],
 		'@luke-ui/react/*': ['file:///node_modules/@luke-ui/react/dist/*/index.d.ts'],
 	},
 	strict: true,
