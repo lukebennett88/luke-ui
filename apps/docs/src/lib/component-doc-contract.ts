@@ -73,9 +73,8 @@ function findPlaceholders(
 }
 
 /**
- * Authored guides are `<group>/<name>.mdx`. Generated Props pages live one level
- * deeper as `<group>/<name>/props.mdx`, so they stay out. The caller skips files
- * that do not declare `source:`.
+ * Authored guides are `<group>/<name>.mdx`. The caller skips files that do not
+ * declare `source:`.
  */
 function findComponentGuides(directory: string): Array<string> {
 	return findMdxFiles(directory).filter((file) => dirname(dirname(file)) === directory);

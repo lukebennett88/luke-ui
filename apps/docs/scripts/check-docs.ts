@@ -10,6 +10,7 @@ import {
 	findRepeatedMetadataIssues,
 } from '../src/lib/component-guide-inventory.js';
 import { findComponentPropsContractIssues } from '../src/lib/component-props-contract.js';
+import { findComponentPropsTableTags } from '../src/lib/component-props-table-tags.js';
 import { readFrontmatter } from '../src/lib/docs-frontmatter.js';
 import { findMdxFiles } from '../src/lib/docs-mdx-files.js';
 import { exampleBlockSources } from '../src/lib/example-block-sources.js';
@@ -31,6 +32,7 @@ const BEST_PRACTICES = 'Best practices';
 const ANATOMY = 'Anatomy';
 const ACCESSIBILITY = 'Accessibility';
 const RELATED_COMPONENTS = 'Related components';
+const API = 'API';
 const CONTINUE_LEARNING = 'Continue learning';
 
 const FORBIDDEN_COMPONENT_HEADINGS: Readonly<Record<string, string>> = {
@@ -186,6 +188,7 @@ function findComponentHeadingIssues(guide: {
 	let seenFeature = false;
 	let seenAccessibility = false;
 	let seenRelated = false;
+	let seenApi = false;
 
 	for (const heading of headings) {
 		const replacement = FORBIDDEN_COMPONENT_HEADINGS[heading];
@@ -196,6 +199,15 @@ function findComponentHeadingIssues(guide: {
 
 		if (heading === ANATOMY && !isPrimitive) {
 			issues.push(`${guide.relativePath}: "${ANATOMY}" is only allowed on primitive guides`);
+		}
+
+		if (seenApi) {
+			issues.push(`${guide.relativePath}: "${API}" must be the last heading`);
+		}
+
+		if (heading === API) {
+			seenApi = true;
+			continue;
 		}
 
 		if (heading === BEST_PRACTICES) {
@@ -242,7 +254,31 @@ function findComponentHeadingIssues(guide: {
 		issues.push(`${guide.relativePath}: missing required "${ACCESSIBILITY}" heading`);
 	}
 
+	issues.push(...findApiSectionIssues(guide));
+
 	return issues;
+}
+
+/**
+ * A component guide always declares `source:`, so it must document its public API: an `## API`
+ * heading holding at least one `<component-props-table>` tag, and no such tag outside that section.
+ */
+function findApiSectionIssues(guide: { relativePath: string; source: string }): Array<string> {
+	const headings = markdownH2s(guide.source);
+	const tagsInApiSection = findComponentPropsTableTags(guide.source);
+	const tagsAnywhere = [...guide.source.matchAll(/<component-props-table\b/g)];
+
+	if (!headings.includes(API) || tagsInApiSection.length === 0) {
+		return [
+			`${guide.relativePath}: missing required "${API}" section with a component-props-table`,
+		];
+	}
+
+	if (tagsAnywhere.length !== tagsInApiSection.length) {
+		return [`${guide.relativePath}: component-props-table must sit under "${API}"`];
+	}
+
+	return [];
 }
 
 function findContinueLearningIssues(file: { relativePath: string; source: string }): Array<string> {
@@ -313,7 +349,7 @@ function matchProsePatterns(relativePath: string, source: string): Array<string>
 }
 
 function authoredMdxFiles(docsContentDir: string): Array<string> {
-	return findMdxFiles(docsContentDir).filter((file) => basename(file) !== 'props.mdx');
+	return findMdxFiles(docsContentDir);
 }
 
 /** H2 titles in document order, ignoring fenced code. */

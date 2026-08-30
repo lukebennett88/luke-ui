@@ -98,11 +98,6 @@ export function typeForwardsDomPropsForExport(
 	return typeForwardsDomProps(declaration, lukeUiReactSrcDir(repoRoot));
 }
 
-/** Markdown note shown under a DOM-forwarding prop type heading. */
-export function renderNativePropsNote(typeName: string): string {
-	return `\`${typeName}\` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.\n\n`;
-}
-
 function readSourceFile(project: PropProject, absolutePath: string): PropSourceFile {
 	return project.createSourceFile(absolutePath, readFileSync(absolutePath, 'utf8'), {
 		overwrite: true,

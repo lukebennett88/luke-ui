@@ -31,6 +31,6 @@ export function docsPageFile(contentDir: string, pathname: string): string | nul
 	if (segments.length === 0) return null;
 
 	const base = resolve(contentDir, ...segments);
-	const candidates = [`${base}.mdx`, resolve(base, 'index.mdx'), resolve(base, 'props.mdx')];
+	const candidates = [`${base}.mdx`, resolve(base, 'index.mdx')];
 	return candidates.find((file) => existsSync(file)) ?? null;
 }

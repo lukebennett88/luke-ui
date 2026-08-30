@@ -8,9 +8,9 @@ import {
 	CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import type { ComponentProps } from 'react';
-import { groupPropNames } from '../lib/component-prop-groups.js';
+import { groupPropNames, NATIVE_PROPS_FORWARDING_KEY } from '../lib/component-prop-groups.js';
 
-/** Grouped prop tables for generated component Props pages. */
+/** Grouped prop tables for a component guide's `## API` section. */
 export function ComponentPropsTable({
 	className,
 	id,
@@ -21,6 +21,7 @@ export function ComponentPropsTable({
 	type: Record<string, TypeNode>;
 } & ComponentProps<'div'>) {
 	const groups = groupPropNames(Object.keys(type));
+	const nativePropsNote = type[NATIVE_PROPS_FORWARDING_KEY]?.description;
 
 	return (
 		<div
@@ -28,6 +29,9 @@ export function ComponentPropsTable({
 			id={id}
 			{...props}
 		>
+			{nativePropsNote !== undefined ? (
+				<div className="text-fd-muted-foreground text-sm">{nativePropsNote}</div>
+			) : null}
 			{groups.map((group) => (
 				<PropGroup
 					group={group}

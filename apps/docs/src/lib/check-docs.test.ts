@@ -9,6 +9,7 @@ import {
 	markdownH2s,
 	readBaseline,
 } from '../../scripts/check-docs.js';
+import { findComponentPropsTableTags } from './component-props-table-tags.js';
 
 const testDirectories: Array<string> = [];
 
@@ -64,6 +65,10 @@ The visible label is the accessible name.
 ## Related components
 
 Use Link for navigation.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />
 `,
 		},
 	});
@@ -92,6 +97,10 @@ Use the button primitive.
 ## Best practices
 
 Use Button for actions.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />
 `,
 			'visuals/icon.mdx': `---
 title: Icon
@@ -103,6 +112,10 @@ source: packages/@luke-ui/react/src/exports/icon.ts
 ## Anatomy
 
 Icons reference the spritesheet.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/icon/icon.tsx" name="IconProps" />
 `,
 		},
 	});
@@ -112,6 +125,62 @@ Icons reference the spritesheet.
 		'actions/button.mdx: "Best practices" must come before feature sections',
 		'actions/button.mdx: missing required "Accessibility" heading',
 		'visuals/icon.mdx: "Anatomy" is only allowed on primitive guides',
+	]);
+});
+
+test('reports a guide with no API section, an API section that is not last, and a tag outside it', () => {
+	const paths = createDocsFixture({
+		components: {
+			'actions/button.mdx': `---
+title: Button
+source: packages/@luke-ui/react/src/exports/button.ts
+---
+
+<ExampleBlock src="button/basic" title="Button — Basic" />
+
+## Accessibility
+
+The visible label is the accessible name.
+`,
+			'actions/icon-button.mdx': `---
+title: Icon Button
+source: packages/@luke-ui/react/src/exports/icon-button.ts
+---
+
+<ExampleBlock src="icon-button/basic" title="Icon Button — Basic" />
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/icon-button/icon-button.tsx" name="IconButtonProps" />
+
+## Accessibility
+
+The visible label is the accessible name.
+`,
+			'actions/link.mdx': `---
+title: Link
+source: packages/@luke-ui/react/src/exports/link.ts
+---
+
+<component-props-table path="packages/@luke-ui/react/src/core/link/link.tsx" name="LinkProps" />
+
+<ExampleBlock src="link/basic" title="Link — Basic" />
+
+## Accessibility
+
+The visible label is the accessible name.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/link/link.tsx" name="LinkProps" />
+`,
+		},
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'actions/button.mdx: missing required "API" section with a component-props-table',
+		'actions/icon-button.mdx: "API" must be the last heading',
+		'actions/link.mdx: component-props-table must sit under "API"',
 	]);
 });
 
@@ -165,6 +234,10 @@ source: packages/@luke-ui/react/src/exports/box.ts
 <ExampleBlock src="box/basic" title="Box — Basic" />
 
 <ExampleBlock src="box/responsive-layout" title="Box — Responsive layout" />
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/box/box.tsx" name="BoxProps" />
 `,
 		},
 	});
@@ -185,6 +258,10 @@ source: packages/@luke-ui/react/src/exports/box.ts
 <ExampleBlock src="box/basic" title="Box — Basic" />
 
 <ExampleBlock src="box/basic" title="Box — Basic again" />
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/box/box.tsx" name="BoxProps" />
 `,
 		},
 	});
@@ -398,6 +475,10 @@ source: packages/@luke-ui/react/src/exports/button.ts
 ## Accessibility
 
 The visible label is the accessible name.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />
 `;
 
 function inventoryFixture(overrides: {
@@ -520,6 +601,10 @@ source: packages/@luke-ui/react/src/exports/link.ts
 ## Accessibility
 
 The visible label is the accessible name.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/link/link.tsx" name="LinkProps" />
 `,
 		},
 		packageExports: ['./button', './link'],
@@ -596,10 +681,17 @@ function createDocsFixture(input: {
 	const reactPackageJsonPath = join(reactPackageDir, 'package.json');
 	writeFileSync(reactPackageJsonPath, JSON.stringify({ exports, name: '@luke-ui/react' }));
 
+	const propsTypesBySubpath = new Map(
+		guidePaths.map((path) => [
+			guideSourceSubpath(input.components?.[path] ?? ''),
+			guidePropsTypeNames(input.components?.[path] ?? ''),
+		]),
+	);
+
 	for (const subpath of input.sourceDirs ?? guideSources) {
 		const sourcePath = join(reactPackageDir, 'src', 'exports', `${subpath}.ts`);
 		mkdirSync(join(sourcePath, '..'), { recursive: true });
-		writeFileSync(sourcePath, 'export {};\n');
+		writeFileSync(sourcePath, renderExportsModule(propsTypesBySubpath.get(subpath) ?? []));
 	}
 
 	return {
@@ -650,4 +742,15 @@ function defaultMetadata(guidePaths: ReadonlyArray<string>): Record<string, unkn
 function guideSourceSubpath(contents: string): string {
 	const source = contents.match(/^source:\s*(.+)$/m)?.[1]?.trim() ?? '';
 	return source.replace('packages/@luke-ui/react/src/exports/', '').replace(/\.ts$/, '');
+}
+
+/** Type names a guide's `## API` component-props-table tags document. */
+function guidePropsTypeNames(contents: string): Array<string> {
+	return findComponentPropsTableTags(contents).map((entry) => entry.name);
+}
+
+/** A fake `src/exports/<subpath>.ts` module that exports every documented props type as an empty interface. */
+function renderExportsModule(typeNames: ReadonlyArray<string>): string {
+	if (typeNames.length === 0) return 'export {};\n';
+	return typeNames.map((name) => `export interface ${name} {}\n`).join('');
 }

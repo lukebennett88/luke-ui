@@ -119,12 +119,7 @@
 		"docs#generate": {
 			"cache": true,
 			"dependsOn": ["^build"],
-			"outputs": [
-				"src/routeTree.gen.ts",
-				"src/generated/**",
-				"content/docs/components/*/*/props.mdx",
-				"content/docs/components/*/*/meta.json"
-			]
+			"outputs": ["src/routeTree.gen.ts", "src/generated/**"]
 		},
 		"fix": {
 			"cache": false,

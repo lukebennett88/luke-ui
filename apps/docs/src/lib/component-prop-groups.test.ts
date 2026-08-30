@@ -1,5 +1,11 @@
 import { expect, test } from 'vite-plus/test';
-import { classifyPropGroup, groupPropNames, PROP_GROUP_ORDER } from './component-prop-groups.js';
+import {
+	classifyPropGroup,
+	groupPropNames,
+	NATIVE_PROPS_FORWARDING_KEY,
+	PROP_GROUP_ORDER,
+	renderNativePropsNote,
+} from './component-prop-groups.js';
 
 test('groups visible prop names for ComponentPropsTable rendering', () => {
 	const groups = groupPropNames(['appearance', 'onPress', 'isDisabled', 'className']);
@@ -38,4 +44,17 @@ test('uses the shared group order constant', () => {
 		'Accessibility',
 		'Advanced',
 	]);
+});
+
+test('omits the native-props marker from every group', () => {
+	const groups = groupPropNames(['appearance', NATIVE_PROPS_FORWARDING_KEY]);
+
+	expect(groups.map((group) => group.name)).toEqual(['Component props']);
+	expect(groups[0]?.props).toEqual(['appearance']);
+});
+
+test('renders the native props note with the exported type name', () => {
+	expect(renderNativePropsNote('HeadingProps')).toBe(
+		'`HeadingProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
+	);
 });

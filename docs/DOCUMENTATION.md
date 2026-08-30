@@ -165,7 +165,7 @@ exactly one page, because that is the mechanical handle on "say it once".
 
 ## Comments and JSDoc
 
-JSDoc on a public type is published documentation. The generated Props pages render it, so the
+JSDoc on a public type is published documentation. A guide's `## API` section renders it, so the
 public documentation rules above apply to it. JSDoc and TypeScript types drive the docs app.
 
 When adding or changing a component:
@@ -220,7 +220,7 @@ the code first.
 - Choose one approach and show it. Do not present several interchangeable ways to reach the same
   result.
 - Do not demonstrate every value a prop accepts. Show the values a reader chooses between, and leave
-  the full list to the Props page.
+  the full list to the `## API` section.
 
 Exhaustive variant and state coverage belongs in the visual test kitchen sink, not in a docs
 example. See [TESTING.md](TESTING.md).
@@ -350,21 +350,8 @@ the navigation or point at a path a developer cannot import.
 
 ## MDX page structure
 
-`<group>/<name>.mdx` is the authored component guide. It keeps the `/components/<group>/<name>` URL.
-
-`<group>/<name>/props.mdx` and `<group>/<name>/meta.json` are generated from the guide's `props`
-frontmatter. `props.mdx` is the API reference at `/components/<group>/<name>/props`. `meta.json`
-uses `"pages": ["!props"]` and `"collapsible": false` so the component stays one ordinary sidebar
-link. It sets `"pagesIndex": "../<name>"` so the folder's sidebar entry points to the sibling guide.
-The shared docs route remaps a Props pathname to its Guide URL for Fumadocs' sidebar tree matching,
-so Guide and Props share the Components sidebar.
-
-Keep the guide and Props frontmatter titles and descriptions identical. The component generator
-leaves editorial descriptions out instead of adding placeholder copy. Add one useful description to
-both pages when you write the guide.
-
-The page header adds Guide and Props links from these routes. Keep that navigation in the shared
-docs route rather than duplicating it in MDX.
+`<group>/<name>.mdx` is the authored component guide, the only hosted page for that component. It
+keeps the `/components/<group>/<name>` URL. There is no separate Props route.
 
 Use this order for component guide pages. Follow
 [`button.mdx`](../apps/docs/content/docs/components/actions/button.mdx) when the heading names or
@@ -377,10 +364,11 @@ order are unclear.
 5. Feature sections, ordered by importance to a consumer. Primitive guides may include `## Anatomy`.
 6. `## Accessibility`. Required for actions, forms, and feedback. Optional elsewhere.
 7. `## Related components`, when the page needs to point at another component or primitive.
+8. `## API`, the last section on every guide that declares `source:`.
 
 A closed heading vocabulary keeps related content on the same kind of page findable. Feature
 sections stay free. The fixed sections stay in that order so a reader scanning headings always meets
-practices, then features, then accessibility, then related links.
+practices, then features, then accessibility, related links, then the API reference.
 
 Authored guides under `/docs` stay free-form apart from a closing `## Continue learning` section
 that contains `<Cards>`. That heading is the way off the page. Component guides must not use it.
@@ -388,18 +376,23 @@ that contains `<Cards>`. That heading is the way off the page. Component guides 
 Add only the sections that help a developer use the component. The generated guide ships with the
 primary example and no placeholder prose, and `check:docs` fails on a leftover placeholder.
 
-Keep cross-reference sections near the end. Put only the `## Props` section and its
-`<auto-type-table>` content on `props.mdx`. A page with one table has no extra heading. A page with
-several tables uses the type name as a heading above each one.
-
 ## API reference
 
-Hosted component guide files contain prose and example blocks. Their generated `props.mdx` files
-contain `<auto-type-table>` API references generated from TypeScript types. Hidden props pages stay
-in the docs source collection so direct routes, search, and full-text docs exports can include them.
+You write the `## API` section yourself, the same as every other heading on a guide. Add a
+`<component-props-table path="…" name="…" />` tag for each exported prop type, where `path` is the
+repo-relative file that exports it and `name` is the exported type name, for example `ButtonProps`.
+`remarkAutoTypeTable` expands the tag into the rendered table at MDX compile time, so it stays
+accurate to the type without a generation step. A guide with one table has no extra heading above
+it. A guide with several tables adds a `### <TypeName>` heading above each one, in the order they
+appear.
 
-The prose on a Props page comes from JSDoc in the component's source, so the prop is documented
-where it is declared.
+The prose on a table comes from JSDoc in the component's source, so a prop is documented where it is
+declared. When a type still accepts arbitrary DOM and ARIA attributes and event handlers, the table
+renders that note automatically. Do not write the note by hand.
+
+`check:docs` requires `## API` to be the last heading on a guide that declares `source:`, requires
+at least one `component-props-table` tag inside it, and rejects a tag placed anywhere else on the
+page.
 
 ## Site chrome
 

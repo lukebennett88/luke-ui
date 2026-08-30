@@ -2,11 +2,6 @@
 title: Loading Skeleton
 description: Replaces content with a placeholder that keeps its shape while it loads.
 source: packages/@luke-ui/react/src/exports/loading-skeleton.ts
-props:
-  - name: LoadingSkeletonProps
-    path: packages/@luke-ui/react/src/core/loading-skeleton/loading-skeleton.tsx
-  - name: LoadingSkeletonProviderProps
-    path: packages/@luke-ui/react/src/core/loading-skeleton/loading-skeleton.tsx
 ---
 
 Use `LoadingSkeleton` when content is loading but its layout is known. Wrap the content that will
@@ -60,3 +55,19 @@ element, such as an `li` inside a list.
 
 While loading, `LoadingSkeleton` hides content from assistive technology, removes it from the tab
 order, and blocks pointer input. It becomes available again when `isLoading` is `false`.
+
+## API
+
+### LoadingSkeletonProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/loading-skeleton/loading-skeleton.tsx"
+	name="LoadingSkeletonProps"
+/>
+
+### LoadingSkeletonProviderProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/loading-skeleton/loading-skeleton.tsx"
+	name="LoadingSkeletonProviderProps"
+/>

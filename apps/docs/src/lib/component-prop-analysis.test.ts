@@ -7,7 +7,6 @@ import {
 	filterGeneratedDoc,
 	loadExportedPropDeclaration,
 	lukeUiReactSrcDir,
-	renderNativePropsNote,
 	typeForwardsDomProps,
 	typeForwardsDomPropsForExport,
 } from './component-prop-analysis.js';
@@ -114,12 +113,6 @@ test('detects native DOM forwarding per exported prop type on multi-type pages',
 			'HeadingLevelsRenderProps',
 		),
 	).toBe(false);
-});
-
-test('renders the native props note with the exported type name', () => {
-	expect(renderNativePropsNote('HeadingProps')).toBe(
-		'`HeadingProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.\n\n',
-	);
 });
 
 test('does not mark object-only provider props as DOM forwarding types', async () => {
