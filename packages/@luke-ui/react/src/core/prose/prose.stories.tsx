@@ -46,37 +46,3 @@ export const Default = meta.story({
 		</div>
 	),
 });
-
-/** Heading rhythm, nested lists, and typed ordered-list markers. */
-export const StressTest = meta.story({
-	render: (props) => (
-		<div style={{ maxInlineSize: '40rem' }}>
-			<Prose {...props}>
-				<Heading level={2}>Spacing in long-form content</Heading>
-				<Text elementType="p">A paragraph after the section heading.</Text>
-
-				<Heading level={3}>Ordering a procedure</Heading>
-				<Text elementType="p">A paragraph after the subsection heading.</Text>
-				<ol>
-					<li>Measure the smallest gap in the design.</li>
-					<li>
-						Round it to the nearest step.
-						<ul>
-							<li>Round down inside a control.</li>
-							<li>Round up between sections.</li>
-						</ul>
-					</li>
-					<li>Use that step everywhere the same relationship appears.</li>
-				</ol>
-
-				<Heading level={4}>Typed markers</Heading>
-				<ol type="a">
-					<li>Lower-alpha markers come from the HTML type attribute.</li>
-				</ol>
-				<ol type="I">
-					<li>Upper-roman markers come from the same hint.</li>
-				</ol>
-			</Prose>
-		</div>
-	),
-});
