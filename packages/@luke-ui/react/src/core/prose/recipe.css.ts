@@ -2,7 +2,6 @@ import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
-import { prosePreScrollClassName } from './prose-pre.css.js';
 import { proseScopeClassName } from './scope.css.js';
 
 /** Vanilla-extract recipe for a fixed long-form document rhythm. */
@@ -25,9 +24,7 @@ proseStyle('* + h2, * + hr', { marginBlockStart: vars.space.sp48 });
 proseStyle('* + h3, * + blockquote, * + table, * + figure, * + img, * + picture, * + video', {
 	marginBlockStart: vars.space.sp32,
 });
-proseStyle(`* + h4, * + h5, * + h6, * + pre, * + .${prosePreScrollClassName}`, {
-	marginBlockStart: vars.space.sp24,
-});
+proseStyle('* + h4, * + h5, * + h6, * + pre', { marginBlockStart: vars.space.sp24 });
 proseStyle('* + li, * + dd', { marginBlockStart: vars.space.sp8 });
 proseStyle('* + dt', { marginBlockStart: vars.space.sp24 });
 proseStyle('* + figcaption, li > ul, li > ol, li > p + p', {
@@ -58,10 +55,6 @@ proseStyle('hr', {
 	border: 'none',
 	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
 });
-// `ProsePre` owns horizontal scroll for wide code. A scroll container cannot keep
-// `overflow-y: visible`, so the wrapper must fit its own content: an inline `Code` child adds block
-// padding on top of the line box, which would clip its descenders once overflow applies.
-proseStyle(`.${prosePreScrollClassName}`, { overflowX: 'auto', paddingBlock: vars.space.sp4 });
 // Table cells need padding after the reset removes it.
 proseStyle('th, td', { paddingBlock: vars.space.sp8, paddingInline: vars.space.sp12 });
 proseStyle('th', { textAlign: 'start' });

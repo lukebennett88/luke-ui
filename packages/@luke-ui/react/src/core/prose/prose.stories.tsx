@@ -1,7 +1,6 @@
 import { Blockquote } from '@luke-ui/react/blockquote';
-import { Code } from '@luke-ui/react/code';
 import { Heading } from '@luke-ui/react/heading';
-import { Prose, ProsePre } from '@luke-ui/react/prose';
+import { Prose } from '@luke-ui/react/prose';
 import { Text } from '@luke-ui/react/text';
 import preview from '../../../.storybook/preview.js';
 
@@ -48,7 +47,7 @@ export const Default = meta.story({
 	),
 });
 
-/** Heading rhythm, lists, typed markers, and a wide code block. */
+/** Heading rhythm, nested lists, and typed ordered-list markers. */
 export const StressTest = meta.story({
 	render: (props) => (
 		<div style={{ maxInlineSize: '40rem' }}>
@@ -77,22 +76,6 @@ export const StressTest = meta.story({
 				<ol type="I">
 					<li>Upper-roman markers come from the same hint.</li>
 				</ol>
-
-				<Heading level={3}>Wide code</Heading>
-				<Text elementType="p">
-					A long line scrolls inside <Code>ProsePre</Code>, a keyboard-focusable region with a valid
-					accessible name.
-				</Text>
-				<ProsePre aria-label="Grid template columns example">
-					<Code>
-						{
-							'grid-template-columns: [full-start] minmax(var(--luke-space-sp24), 1fr) [content-start] minmax(0, 60rem) [content-end] minmax(var(--luke-space-sp24), 1fr) [full-end];'
-						}
-					</Code>
-				</ProsePre>
-
-				<Heading level={3}>After wide content</Heading>
-				<Text elementType="p">Rhythm continues below the scroll region.</Text>
 			</Prose>
 		</div>
 	),

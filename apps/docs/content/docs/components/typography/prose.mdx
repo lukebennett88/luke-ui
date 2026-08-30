@@ -5,16 +5,11 @@ source: packages/@luke-ui/react/src/exports/prose.ts
 props:
   - name: ProseProps
     path: packages/@luke-ui/react/src/core/prose/prose.tsx
-  - name: ProsePreProps
-    path: packages/@luke-ui/react/src/core/prose/prose-pre.tsx
 ---
 
 `Prose` adds vertical rhythm and list styling to long-form content. Pair it with
 [Heading](/components/typography/heading) and [Text](/components/typography/text) for visual
 hierarchy, or map rendered Markdown and CMS elements to those components.
-
-Use [ProsePre](/components/typography/prose#wide-code-blocks) for block code that may overflow
-horizontally.
 
 <ExampleBlock src="prose/basic" title="Prose — Basic" />
 
@@ -23,14 +18,6 @@ horizontally.
 Lists inside `Prose` include markers and indentation, including nested lists.
 
 <ExampleBlock src="prose/lists" title="Prose — Lists" />
-
-## Wide code blocks
-
-`ProsePre` wraps a `<pre>` in a keyboard-focusable scroll region with a required accessible name.
-Use it for block code that may overflow horizontally, including when mapping Markdown or CMS
-`<pre><code>` output.
-
-<ExampleBlock src="prose/wide-code" title="Prose — Wide code" />
 
 ## Custom spacing
 

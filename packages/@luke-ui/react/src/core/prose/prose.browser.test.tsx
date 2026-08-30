@@ -1,9 +1,7 @@
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { Code } from '../code/code.js';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { ProsePre } from './prose-pre.js';
 import { Prose } from './prose.js';
 import { proseRecipe } from './recipe.css.js';
 
@@ -191,22 +189,6 @@ test('does not make bare pre a horizontal scroll container', () => {
 	expect(getComputedStyle(pre).overflowX).not.toBe('auto');
 });
 
-test('scrolls wide code inside ProsePre without widening the document', () => {
-	const { locator } = render(
-		<Prose style={{ inlineSize: '20rem' }}>
-			<ProsePre aria-label="Example code">
-				<Code>{'const value = '.repeat(40)}</Code>
-			</ProsePre>
-		</Prose>,
-	);
-	const root = locator.element();
-	const scrollRegion = query(root, '[role="region"]');
-
-	expect(scrollRegion.scrollWidth).toBeGreaterThan(scrollRegion.clientWidth);
-	expect(getComputedStyle(scrollRegion).overflowX).toBe('auto');
-	expect(root.scrollWidth).toBe(root.clientWidth);
-});
-
 test('does not turn tables into inaccessible scroll containers', () => {
 	const { locator } = render(
 		<Prose style={{ inlineSize: '20rem' }}>
@@ -225,18 +207,4 @@ test('does not turn tables into inaccessible scroll containers', () => {
 
 	expect(getComputedStyle(table).overflowX).not.toBe('auto');
 	expect(getComputedStyle(table).display).not.toBe('block');
-});
-
-// A scroll container coerces `overflow-y` to match, so the wrapper must fit its own line box.
-test('does not clip ProsePre content vertically', () => {
-	const { locator } = render(
-		<Prose>
-			<ProsePre aria-label="Padding example">
-				<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
-			</ProsePre>
-		</Prose>,
-	);
-	const scrollRegion = query(locator.element(), '[role="region"]');
-
-	expect(scrollRegion.scrollHeight).toBe(scrollRegion.clientHeight);
 });

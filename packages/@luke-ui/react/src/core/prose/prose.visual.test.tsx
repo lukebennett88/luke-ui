@@ -5,7 +5,6 @@ import { Heading } from '../heading/heading.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { Text } from '../text/text.js';
-import { ProsePre } from './prose-pre.js';
 import { Prose } from './prose.js';
 
 const swatch =
@@ -71,13 +70,6 @@ const document = (
 		<Text elementType="pre">
 			<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
 		</Text>
-		<ProsePre aria-label="Grid template columns example">
-			<Code>
-				{
-					'grid-template-columns: [full-start] minmax(var(--luke-space-sp24), 1fr) [content-start] minmax(0, 60rem) [content-end] minmax(var(--luke-space-sp24), 1fr) [full-end];'
-				}
-			</Code>
-		</ProsePre>
 		<img alt="" height={64} src={swatch} width={320} />
 		<picture>
 			<img alt="" height={64} src={swatch} width={320} />
