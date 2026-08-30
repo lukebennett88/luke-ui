@@ -3,7 +3,7 @@ import { expect, test } from 'vite-plus/test';
 import { Code } from '../code/code.js';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Text } from '../text/text.js';
+import { ProsePre } from './prose-pre.js';
 import { Prose } from './prose.js';
 import { proseRecipe } from './recipe.css.js';
 
@@ -178,8 +178,7 @@ test('preserves native ordered-list type markers under proseRecipe alone', () =>
 	]);
 });
 
-// Wide content must scroll inside its own box instead of clipping or widening the document.
-test('gives wide code blocks their own horizontal scroll', () => {
+test('does not make bare pre a horizontal scroll container', () => {
 	const { locator } = render(
 		<Prose style={{ inlineSize: '20rem' }}>
 			<pre>
@@ -187,11 +186,24 @@ test('gives wide code blocks their own horizontal scroll', () => {
 			</pre>
 		</Prose>,
 	);
-	const root = locator.element();
-	const pre = query(root, 'pre');
+	const pre = query(locator.element(), 'pre');
 
-	expect(pre.scrollWidth).toBeGreaterThan(pre.clientWidth);
-	expect(getComputedStyle(pre).overflowX).toBe('auto');
+	expect(getComputedStyle(pre).overflowX).not.toBe('auto');
+});
+
+test('scrolls wide code inside ProsePre without widening the document', () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: '20rem' }}>
+			<ProsePre aria-label="Example code">
+				<Code>{'const value = '.repeat(40)}</Code>
+			</ProsePre>
+		</Prose>,
+	);
+	const root = locator.element();
+	const scrollRegion = query(root, '[role="region"]');
+
+	expect(scrollRegion.scrollWidth).toBeGreaterThan(scrollRegion.clientWidth);
+	expect(getComputedStyle(scrollRegion).overflowX).toBe('auto');
 	expect(root.scrollWidth).toBe(root.clientWidth);
 });
 
@@ -215,31 +227,16 @@ test('does not turn tables into inaccessible scroll containers', () => {
 	expect(getComputedStyle(table).display).not.toBe('block');
 });
 
-test('reaches a wide code block by keyboard when tabIndex is set', async () => {
-	const { locator, user } = render(
-		<Prose style={{ inlineSize: '20rem' }}>
-			<p>Before the code block.</p>
-			<Text aria-label="Example code" elementType="pre" tabIndex={0}>
-				<Code>{'const value = '.repeat(40)}</Code>
-			</Text>
-		</Prose>,
-	);
-	const pre = query(locator.element(), 'pre');
-
-	await user.tab();
-	expect(document.activeElement).toBe(pre);
-});
-
-// A scroll container coerces `overflow-y` to match, so the box must fit its own line box.
-test('does not clip a code block vertically', () => {
+// A scroll container coerces `overflow-y` to match, so the wrapper must fit its own line box.
+test('does not clip ProsePre content vertically', () => {
 	const { locator } = render(
 		<Prose>
-			<pre>
+			<ProsePre aria-label="Padding example">
 				<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
-			</pre>
+			</ProsePre>
 		</Prose>,
 	);
-	const pre = query(locator.element(), 'pre');
+	const scrollRegion = query(locator.element(), '[role="region"]');
 
-	expect(pre.scrollHeight).toBe(pre.clientHeight);
+	expect(scrollRegion.scrollHeight).toBe(scrollRegion.clientHeight);
 });

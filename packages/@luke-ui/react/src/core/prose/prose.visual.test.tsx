@@ -5,6 +5,7 @@ import { Heading } from '../heading/heading.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { Text } from '../text/text.js';
+import { ProsePre } from './prose-pre.js';
 import { Prose } from './prose.js';
 
 const swatch =
@@ -70,15 +71,13 @@ const document = (
 		<Text elementType="pre">
 			<Code>{'padding-inline: var(--luke-space-sp16);'}</Code>
 		</Text>
-		{/* A line past the frame: the block scrolls on its own rather than clipping. `tabIndex`
-		 and a name keep that scroll container keyboard-reachable until #527 lands. */}
-		<Text aria-label="Grid template columns example" elementType="pre" tabIndex={0}>
+		<ProsePre aria-label="Grid template columns example">
 			<Code>
 				{
 					'grid-template-columns: [full-start] minmax(var(--luke-space-sp24), 1fr) [content-start] minmax(0, 60rem) [content-end] minmax(var(--luke-space-sp24), 1fr) [full-end];'
 				}
 			</Code>
-		</Text>
+		</ProsePre>
 		<img alt="" height={64} src={swatch} width={320} />
 		<picture>
 			<img alt="" height={64} src={swatch} width={320} />
