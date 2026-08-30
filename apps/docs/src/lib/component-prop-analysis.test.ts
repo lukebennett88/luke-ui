@@ -302,6 +302,29 @@ test(
 );
 
 test(
+	"keeps InputGroupInput's documented aria-label and inputMode visible while hiding generic DOM props",
+	async () => {
+		const names = await visiblePropNames(
+			'packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx',
+			'InputGroupInputProps',
+		);
+		for (const prop of ['aria-label', 'className', 'inputMode', 'ref', 'size'] as const) {
+			expect(names).toContain(prop);
+		}
+		for (const prop of [...GENERIC_DOM_NOISE, 'key'] as const) {
+			expect(names).not.toContain(prop);
+		}
+
+		const { declaration } = await loadDoc(
+			'packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx',
+			'InputGroupInputProps',
+		);
+		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(true);
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
+test(
 	'keeps a pure native wrapper empty while still forwarding DOM props',
 	async () => {
 		const names = await visiblePropNames(
@@ -384,6 +407,31 @@ const AUDITED_TYPES: ReadonlyArray<{
 		visible: ['aria-label', 'children', 'color', 'isLoading', 'size'],
 	},
 	{
+		// The guide teaches `aria-label` and `inputMode` on `InputGroupInput` for standalone inputs.
+		forwardsDomProps: true,
+		name: 'InputGroupInputProps',
+		path: 'packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx',
+		visible: [
+			'aria-label',
+			'className',
+			'inputMode',
+			'onHoverChange',
+			'onHoverEnd',
+			'onHoverStart',
+			'placeholder',
+			'ref',
+			'render',
+			'size',
+		],
+	},
+	{
+		// The guide teaches `cite` for the quoted source URL.
+		forwardsDomProps: true,
+		name: 'QuoteProps',
+		path: 'packages/@luke-ui/react/src/core/quote/quote.tsx',
+		visible: ['cite', 'lineClamp', 'textWrap'],
+	},
+	{
 		// The field guide teaches `FieldDescription` as helper text placed under a field. It wraps RAC's
 		// `Text`, whose one documented addition over a plain element is `elementType`, plus `render`.
 		forwardsDomProps: true,
@@ -423,7 +471,13 @@ test.each(AUDITED_TYPES)(
 		for (const prop of visible) {
 			expect(names, `${name} should document ${prop}`).toContain(prop);
 		}
-		for (const prop of [...GENERIC_DOM_NOISE, 'key', 'ref', ...hidden]) {
+		const hiddenProps = [
+			...GENERIC_DOM_NOISE,
+			'key',
+			...(visible.includes('ref') ? [] : (['ref'] as const)),
+			...hidden,
+		];
+		for (const prop of hiddenProps) {
 			expect(names, `${name} should hide ${prop}`).not.toContain(prop);
 		}
 
@@ -582,6 +636,23 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		name: 'LoadingSpinnerProps',
 		path: 'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
 		props: ['aria-label', 'children', 'color', 'isLoading', 'size'],
+	},
+	{
+		exportName: 'InputGroupInputProps',
+		name: 'InputGroupInputProps',
+		path: 'packages/@luke-ui/react/src/core/primitives/input-group/input-group.tsx',
+		props: [
+			'aria-label',
+			'className',
+			'inputMode',
+			'onHoverChange',
+			'onHoverEnd',
+			'onHoverStart',
+			'placeholder',
+			'ref',
+			'render',
+			'size',
+		],
 	},
 	{
 		// The five button-shaped types below all inherit `AriaBaseButtonProps` (react-aria's

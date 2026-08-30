@@ -51,11 +51,18 @@ interface _InputGroupProps extends _InputGroupOmit {
 /** Props for the input group root. */
 export type InputGroupProps = Prettify<_InputGroupProps>;
 
-type _InputGroupInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
+type _InputGroupInputOmit = DistributiveOmit<
+	RacInputProps,
+	'aria-label' | 'className' | 'inputMode' | 'size'
+>;
 
 interface _InputGroupInputProps extends _InputGroupInputOmit, InputGroupPartStyleProps {
+	/** Accessible name for the input when no visible label is connected. */
+	'aria-label'?: RacInputProps['aria-label'];
 	/** Class name for the input element. */
 	className?: RacInputProps['className'];
+	/** Hints which input mechanism is most appropriate for the entered content. */
+	inputMode?: RacInputProps['inputMode'];
 	/**
 	 * Forwarded to the underlying `<input>` element. Accepts a callback ref or a ref
 	 * object, so form libraries that hand out callback refs work without a bridge.
