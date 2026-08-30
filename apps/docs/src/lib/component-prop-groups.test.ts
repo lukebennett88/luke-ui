@@ -1,0 +1,41 @@
+import { expect, test } from 'vite-plus/test';
+import { classifyPropGroup, groupPropNames, PROP_GROUP_ORDER } from './component-prop-groups.js';
+
+test('groups visible prop names for ComponentPropsTable rendering', () => {
+	const groups = groupPropNames(['appearance', 'onPress', 'isDisabled', 'className']);
+
+	expect(groups.map((group) => group.name)).toEqual([
+		'Component props',
+		'Events',
+		'Styling',
+		'Forms',
+	]);
+	expect(groups[0]?.defaultOpen).toBe(true);
+	expect(groups.slice(1).every((group) => group.defaultOpen === false)).toBe(true);
+});
+
+test('classifies styling, accessibility, and advanced props into shared groups', () => {
+	expect(classifyPropGroup('appearance')).toBe('Component props');
+	expect(classifyPropGroup('onPress')).toBe('Events');
+	expect(classifyPropGroup('className')).toBe('Styling');
+	expect(classifyPropGroup('value')).toBe('Forms');
+	expect(classifyPropGroup('aria-label')).toBe('Accessibility');
+	expect(classifyPropGroup('children')).toBe('Advanced');
+});
+
+test('omits groups that no visible prop falls into', () => {
+	const groups = groupPropNames(['appearance', 'onPress']);
+
+	expect(groups.map((group) => group.name)).toEqual(['Component props', 'Events']);
+});
+
+test('uses the shared group order constant', () => {
+	expect(PROP_GROUP_ORDER).toEqual([
+		'Component props',
+		'Events',
+		'Styling',
+		'Forms',
+		'Accessibility',
+		'Advanced',
+	]);
+});

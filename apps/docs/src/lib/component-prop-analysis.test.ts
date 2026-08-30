@@ -2,18 +2,15 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
-import type { PropProject } from './component-prop-documentation.js';
+import type { PropProject } from './component-prop-analysis.js';
 import {
-	classifyPropGroup,
 	filterGeneratedDoc,
-	groupPropNames,
 	loadExportedPropDeclaration,
 	lukeUiReactSrcDir,
-	PROP_GROUP_ORDER,
 	renderNativePropsNote,
 	typeForwardsDomProps,
 	typeForwardsDomPropsForExport,
-} from './component-prop-documentation.js';
+} from './component-prop-analysis.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
@@ -31,12 +28,11 @@ async function loadDoc(path: string, name: string) {
 	if (doc === undefined || declaration === undefined) {
 		throw new Error(`Missing documentation for ${name} in ${path}`);
 	}
-	return { declaration, doc, project };
+	return { declaration, doc };
 }
 
 async function visiblePropNames(path: string, name: string): Promise<Array<string>> {
-	const { declaration, doc, project } = await loadDoc(path, name);
-	void project;
+	const { declaration, doc } = await loadDoc(path, name);
 	return filterGeneratedDoc(doc, declaration, reactSrcDir).entries.map((entry) => entry.name);
 }
 
@@ -120,43 +116,10 @@ test('detects native DOM forwarding per exported prop type on multi-type pages',
 	).toBe(false);
 });
 
-test('groups visible prop names for ComponentPropsTable rendering', () => {
-	const groups = groupPropNames(['appearance', 'onPress', 'isDisabled', 'className']);
-
-	expect(groups.map((group) => group.name)).toEqual([
-		'Component props',
-		'Events',
-		'Styling',
-		'Forms',
-	]);
-	expect(groups[0]?.defaultOpen).toBe(true);
-	expect(groups.slice(1).every((group) => group.defaultOpen === false)).toBe(true);
-});
-
-test('classifies styling, accessibility, and advanced props into shared groups', () => {
-	expect(classifyPropGroup('appearance')).toBe('Component props');
-	expect(classifyPropGroup('onPress')).toBe('Events');
-	expect(classifyPropGroup('className')).toBe('Styling');
-	expect(classifyPropGroup('value')).toBe('Forms');
-	expect(classifyPropGroup('aria-label')).toBe('Accessibility');
-	expect(classifyPropGroup('children')).toBe('Advanced');
-});
-
 test('renders the native props note with the exported type name', () => {
 	expect(renderNativePropsNote('HeadingProps')).toBe(
 		'`HeadingProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.\n\n',
 	);
-});
-
-test('uses the shared group order constant', () => {
-	expect(PROP_GROUP_ORDER).toEqual([
-		'Component props',
-		'Events',
-		'Styling',
-		'Forms',
-		'Accessibility',
-		'Advanced',
-	]);
 });
 
 test('does not mark object-only provider props as DOM forwarding types', async () => {

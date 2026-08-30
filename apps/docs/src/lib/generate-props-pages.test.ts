@@ -46,13 +46,7 @@ props:
 ---
 `);
 
-	const page = renderPropsPage(
-		frontmatter,
-		new Map([
-			['HeadingProps', true],
-			['HeadingLevelsProps', false],
-		]),
-	);
+	const page = renderPropsPage(frontmatter, new Set(['HeadingProps']));
 
 	expect(page).toContain(
 		'`HeadingProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',

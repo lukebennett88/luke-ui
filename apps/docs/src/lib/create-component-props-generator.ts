@@ -1,11 +1,12 @@
 import type { Generator, GeneratorOptions } from 'fumadocs-typescript';
-import { createGenerator, createProject } from 'fumadocs-typescript';
-import type { PropProject } from './component-prop-documentation.js';
+import { createGenerator } from 'fumadocs-typescript';
+import type { PropProject } from './component-prop-analysis.js';
 import {
 	filterGeneratedDoc,
+	getSharedPropProject,
 	loadExportedPropDeclaration,
 	lukeUiReactSrcDir,
-} from './component-prop-documentation.js';
+} from './component-prop-analysis.js';
 
 interface GenerateDocumentationOptions {
 	basePath?: string;
@@ -24,7 +25,7 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 		}
 
 		const repoRoot = basePath;
-		const project = await getSharedProject(repoRoot);
+		const project = await getSharedPropProject(repoRoot);
 		const declaration = loadExportedPropDeclaration(
 			project as PropProject,
 			repoRoot,
@@ -38,18 +39,6 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 	};
 
 	return generator;
-}
-
-let sharedProject: Awaited<ReturnType<typeof createProject>> | undefined;
-
-async function getSharedProject(
-	repoRoot: string,
-): Promise<Awaited<ReturnType<typeof createProject>>> {
-	const project = await createProject({
-		tsconfigPath: `${repoRoot}/apps/docs/tsconfig.json`,
-	});
-	sharedProject ??= project;
-	return project;
 }
 
 function relativeRepoPath(repoRoot: string, absolutePath: string): string {

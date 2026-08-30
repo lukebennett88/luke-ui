@@ -8,7 +8,7 @@ import {
 	CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import type { ComponentProps } from 'react';
-import { groupPropNames } from '../lib/component-prop-documentation.js';
+import { groupPropNames } from '../lib/component-prop-groups.js';
 
 /** Grouped prop tables for generated component Props pages. */
 export function ComponentPropsTable({
@@ -49,30 +49,22 @@ function PropGroup({
 	id: string;
 	type: Record<string, TypeNode>;
 }) {
-	const groupId = `${id}-${slugify(group.name)}`;
-
-	if (group.defaultOpen) {
-		return (
-			<section aria-labelledby={groupId}>
-				<h3 className="not-prose mb-2 font-medium text-fd-foreground text-sm" id={groupId}>
-					{group.name}
-				</h3>
-				<TypeTable id={groupId} type={type} />
-			</section>
-		);
-	}
+	const headingId = `${id}-${slugify(group.name)}-heading`;
+	const tableId = `${id}-${slugify(group.name)}-table`;
 
 	return (
-		<Collapsible className="rounded-2xl border bg-fd-card" defaultOpen={false}>
-			<CollapsibleTrigger
-				className="group flex w-full items-center justify-between px-4 py-3 text-start not-prose"
-				id={groupId}
-			>
-				<span className="font-medium text-fd-foreground text-sm">{group.name}</span>
-				<ChevronIcon />
-			</CollapsibleTrigger>
+		<Collapsible className="rounded-2xl border bg-fd-card" defaultOpen={group.defaultOpen}>
+			<h3 className="not-prose contents">
+				<CollapsibleTrigger
+					className="group flex w-full items-center justify-between px-4 py-3 text-start"
+					id={headingId}
+				>
+					<span className="font-medium text-fd-foreground text-sm">{group.name}</span>
+					<ChevronIcon />
+				</CollapsibleTrigger>
+			</h3>
 			<CollapsibleContent className="border-fd-border border-t px-1 pb-1">
-				<TypeTable id={groupId} type={type} />
+				<TypeTable id={tableId} type={type} />
 			</CollapsibleContent>
 		</Collapsible>
 	);
