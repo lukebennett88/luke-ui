@@ -2,6 +2,7 @@ import { Text as RacText } from 'react-aria-components/Text';
 import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/contract.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { TextRecipeVariants } from './recipe.css.js';
 import { textRecipe } from './recipe.css.js';
@@ -69,8 +70,11 @@ interface TextStyleProps {
 	typography?: TextVariantProps['typography'];
 }
 
-type _TextOmit = DistributiveOmit<React.ComponentProps<typeof RacText>, 'color'>;
-interface _TextProps extends _TextOmit, TextStyleProps {}
+type _TextOmit = DistributiveOmit<
+	React.ComponentProps<typeof RacText>,
+	'color' | keyof DocumentedElementTypeProps
+>;
+interface _TextProps extends _TextOmit, TextStyleProps, DocumentedElementTypeProps {}
 
 /** Props for the `Text` component. */
 export type TextProps = Prettify<_TextProps>;

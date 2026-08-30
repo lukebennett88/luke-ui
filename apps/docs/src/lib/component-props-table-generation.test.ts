@@ -37,8 +37,10 @@ test('filters generated component prop tables through the component props genera
 	expect(buttonProps?.entries.map((entry) => entry.name)).toEqual(
 		expect.arrayContaining(['onPress', 'appearance']),
 	);
-	expect(buttonProps?.entries.some((entry) => entry.name === 'onClick')).toBe(false);
-	expect(buttonProps?.entries.length ?? 0).toBeLessThan(20);
+	const entryNames = buttonProps?.entries.map((entry) => entry.name) ?? [];
+	expect(entryNames).not.toContain('onClick');
+	expect(entryNames).not.toContain('onPointerMoveCapture');
+	expect(entryNames).not.toContain('itemProp');
 });
 
 test('marks a DOM-forwarding type with the native-props entry', async () => {

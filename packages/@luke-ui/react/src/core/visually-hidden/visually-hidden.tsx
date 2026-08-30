@@ -1,10 +1,17 @@
 import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
 import { cx } from '../../shared/utils/utils.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import { visuallyHiddenRecipe } from './recipe.css.js';
 
-type _VisuallyHiddenProps = ComponentPropsWithRef<typeof RacText>;
+type _VisuallyHiddenOmit = DistributiveOmit<
+	ComponentPropsWithRef<typeof RacText>,
+	keyof DocumentedElementTypeProps
+>;
+
+interface _VisuallyHiddenProps extends _VisuallyHiddenOmit, DocumentedElementTypeProps {}
 
 /** Props for `VisuallyHidden`. */
 export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;

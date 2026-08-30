@@ -10,6 +10,31 @@ import { comboboxRecipe } from './styles.css.js';
 
 export type { ComboboxSize };
 
+/** RAC combobox props redeclared here with useful JSDoc; kept local since this is the only combobox primitive that documents them. */
+interface ComboboxRootRedeclaredRACProps<T extends object> {
+	/** Whether the combobox should receive focus on render. */
+	autoFocus?: RacComboBoxProps<T, 'single'>['autoFocus'];
+	/** The `<form>` element to associate the combobox with, by id. */
+	form?: RacComboBoxProps<T, 'single'>['form'];
+	/** Whether the combobox is disabled. */
+	isDisabled?: RacComboBoxProps<T, 'single'>['isDisabled'];
+	/** Marks the combobox invalid, e.g. after failed validation. */
+	isInvalid?: RacComboBoxProps<T, 'single'>['isInvalid'];
+	/** Whether the combobox can be read but not changed. */
+	isReadOnly?: RacComboBoxProps<T, 'single'>['isReadOnly'];
+	/** Whether the combobox is required before the form can submit. */
+	isRequired?: RacComboBoxProps<T, 'single'>['isRequired'];
+	/** The name of the combobox's hidden input, used when submitting an HTML form. */
+	name?: RacComboBoxProps<T, 'single'>['name'];
+	/** Custom validation function run against the current value. Return a message, or `true`/`null` when valid. */
+	validate?: RacComboBoxProps<T, 'single'>['validate'];
+	/**
+	 * When native HTML form validation runs.
+	 * @default 'native'
+	 */
+	validationBehavior?: RacComboBoxProps<T, 'single'>['validationBehavior'];
+}
+
 type _ComboboxRootOmit<T extends object> = DistributiveOmit<
 	RacComboBoxProps<T, 'single'>,
 	| 'defaultSelectedKey'
@@ -20,9 +45,11 @@ type _ComboboxRootOmit<T extends object> = DistributiveOmit<
 	| 'selectedKey'
 	| 'selectionMode'
 	| 'value'
+	| keyof ComboboxRootRedeclaredRACProps<T>
 >;
 
-interface _ComboboxRootProps<T extends object> extends _ComboboxRootOmit<T> {
+interface _ComboboxRootProps<T extends object>
+	extends _ComboboxRootOmit<T>, ComboboxRootRedeclaredRACProps<T> {
 	/** The initially selected key (uncontrolled). */
 	defaultValue?: Key | null;
 
