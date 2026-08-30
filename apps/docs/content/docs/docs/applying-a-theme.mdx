@@ -73,8 +73,10 @@ selects on, and throws when the name is not kebab-case.
 
 <SourceCodeBlock src="theming/multi-theme-app" />
 
-Theme identities do not nest. Never place one identity class inside another identity's subtree,
-because the two resolve at equal precedence and stylesheet order decides the winner.
+Theme identities do not nest. Never place one identity class inside another identity's subtree. A
+nested identity resolves its own radius, space, and type values correctly. Its colour, depth, and
+action-control-finish values resolve at equal precedence with the ancestor identity, so stylesheet
+order decides the winner.
 
 ## Continue learning
 

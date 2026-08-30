@@ -16,7 +16,9 @@ to an element you already own, such as the application shell.
 
 Each theme includes light and dark colour values. The active colour mode chooses between them. An
 explicit `data-color-mode` is optional. Without one, the theme follows the system preference.
-Colour-mode scopes nest freely. Theme identities do not.
+Colour-mode scopes nest freely. Theme identities do not. A nested theme identity resolves its own
+radius, space, and type values correctly, but its colour, depth, and action-control-finish values
+resolve at equal precedence with the ancestor identity, so stylesheet order decides the winner.
 
 Loading more than one theme in the same document needs an explicit identity class, so one theme wins
 over the other's `:root` fallback.
