@@ -1,11 +1,22 @@
 import { Box } from '@luke-ui/react/box';
 import { IconButton } from '@luke-ui/react/icon-button';
+import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" gap="sp16">
-			<IconButton aria-label="Search" icon="search" size="small" />
-			<IconButton aria-label="Search" icon="search" />
+		<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp16">
+			<Box display="grid" gap="sp4">
+				<Text color="secondary" typography="caption">
+					Small
+				</Text>
+				<IconButton aria-label="Example action" icon="search" size="small" />
+			</Box>
+			<Box display="grid" gap="sp4">
+				<Text color="secondary" typography="caption">
+					Medium
+				</Text>
+				<IconButton aria-label="Example action" icon="search" size="medium" />
+			</Box>
 		</Box>
 	);
 };

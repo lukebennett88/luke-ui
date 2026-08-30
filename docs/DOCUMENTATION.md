@@ -219,14 +219,14 @@ the code first.
 - Keep the example as small as it can be without becoming artificial.
 - Choose one approach and show it. Do not present several interchangeable ways to reach the same
   result.
-- Do not demonstrate every value a prop accepts. Show the values a reader chooses between, and leave
-  the full list to the `## API` section.
+- Show all values of one prop when readers need to compare the values or select one. Give all other
+  props the same value.
+- Combine values from two props only when the combination changes the result. Show only the
+  combinations that explain the change.
+- Do not show all prop combinations only to provide coverage. The Props page lists all available
+  props and values. Visual tests cover all valid combinations.
 
-Exhaustive variant and state coverage belongs in the visual test kitchen sink, not in a docs
-example. See [TESTING.md](TESTING.md).
-
-A reference page is the exception. A token, typography, or icon page enumerates on purpose, because
-the enumeration is the content.
+A reference page can show a full scale or catalogue when the page is about that scale or catalogue.
 
 ### Prose around an example
 

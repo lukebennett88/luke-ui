@@ -9,7 +9,9 @@ export default () => {
 				<Text color="secondary" typography="caption">
 					Accent
 				</Text>
-				<Link href="#example-destination">Example destination</Link>
+				<Link href="#example-destination" tone="accent">
+					Example destination
+				</Link>
 			</Box>
 			<Box display="grid" gap="sp4">
 				<Text color="secondary" typography="caption">

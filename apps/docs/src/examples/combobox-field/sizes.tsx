@@ -1,37 +1,46 @@
 import { Box } from '@luke-ui/react/box';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
+import { Text } from '@luke-ui/react/text';
 
-type Fruit = { id: string; label: string };
+type Option = { id: string; label: string };
 
-const fruits: Array<Fruit> = [
-	{ id: 'apple', label: 'Apple' },
-	{ id: 'orange', label: 'Orange' },
-	{ id: 'banana', label: 'Banana' },
-	{ id: 'grape', label: 'Grape' },
+const options: Array<Option> = [
+	{ id: 'one', label: 'Example option' },
+	{ id: 'two', label: 'Another option' },
 ];
 
 export default () => {
 	return (
 		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
-			<ComboboxField
-				defaultItems={fruits}
-				label="Favourite fruit"
-				name="smallFruit"
-				placeholder="Choose a fruit"
-				size="small"
-			>
-				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-			</ComboboxField>
-			<ComboboxField
-				defaultItems={fruits}
-				label="Favourite fruit"
-				name="mediumFruit"
-				placeholder="Choose a fruit"
-				size="medium"
-			>
-				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-			</ComboboxField>
+			<Box display="grid" gap="sp4">
+				<Text color="secondary" typography="caption">
+					Small
+				</Text>
+				<ComboboxField
+					defaultItems={options}
+					label="Example field"
+					name="example"
+					placeholder="Choose an option"
+					size="small"
+				>
+					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+				</ComboboxField>
+			</Box>
+			<Box display="grid" gap="sp4">
+				<Text color="secondary" typography="caption">
+					Medium
+				</Text>
+				<ComboboxField
+					defaultItems={options}
+					label="Example field"
+					name="example"
+					placeholder="Choose an option"
+					size="medium"
+				>
+					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+				</ComboboxField>
+			</Box>
 		</Box>
 	);
 };
