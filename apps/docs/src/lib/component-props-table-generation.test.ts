@@ -43,6 +43,28 @@ test('filters generated component prop tables through the component props genera
 	expect(entryNames).not.toContain('itemProp');
 });
 
+test('marks a pure native wrapper with the native-props entry and no visible props', async () => {
+	const [codeProps] = await componentPropsGenerator.generateTypeTable(
+		{
+			path: 'packages/@luke-ui/react/src/core/code/code.tsx',
+			name: 'CodeProps',
+		},
+		{ basePath: repoRoot },
+	);
+
+	expect(
+		codeProps?.entries
+			.map((entry) => entry.name)
+			.filter((name) => name !== NATIVE_PROPS_FORWARDING_KEY),
+	).toEqual([]);
+	const nativePropsEntry = codeProps?.entries.find(
+		(entry) => entry.name === NATIVE_PROPS_FORWARDING_KEY,
+	);
+	expect(nativePropsEntry?.description).toBe(
+		'`CodeProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
+	);
+});
+
 test('marks a DOM-forwarding type with the native-props entry', async () => {
 	const [headingProps] = await componentPropsGenerator.generateTypeTable(
 		{

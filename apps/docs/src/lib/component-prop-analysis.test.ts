@@ -276,6 +276,52 @@ test(
 	TS_MORPH_TEST_TIMEOUT,
 );
 
+test(
+	"keeps LoadingSpinner's documented aria-label visible while hiding generic DOM props",
+	async () => {
+		const names = await visiblePropNames(
+			'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
+			'LoadingSpinnerProps',
+		);
+		expect(names).toContain('aria-label');
+		expect(names).toContain('isLoading');
+		expect(names).toContain('size');
+		expect(names).not.toContain('onClick');
+		expect(names).not.toContain('onPointerMoveCapture');
+		expect(names).not.toContain('itemProp');
+		expect(names).not.toContain('key');
+		expect(names).not.toContain('ref');
+
+		const { declaration } = await loadDoc(
+			'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
+			'LoadingSpinnerProps',
+		);
+		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(true);
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
+test(
+	'keeps a pure native wrapper empty while still forwarding DOM props',
+	async () => {
+		const names = await visiblePropNames(
+			'packages/@luke-ui/react/src/core/code/code.tsx',
+			'CodeProps',
+		);
+		expect(names).toEqual([]);
+		for (const prop of [...GENERIC_DOM_NOISE, 'key', 'ref'] as const) {
+			expect(names).not.toContain(prop);
+		}
+
+		const { declaration } = await loadDoc(
+			'packages/@luke-ui/react/src/core/code/code.tsx',
+			'CodeProps',
+		);
+		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(true);
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
 /**
  * Representative generic DOM noise. None of it is a documented Luke UI prop, and every entry
  * reaches a component type only by inheriting a React element attribute bag wholesale, so no table
@@ -289,9 +335,9 @@ const GENERIC_DOM_NOISE = ['itemProp', 'onClick', 'onPointerMoveCapture', 'tabIn
  *
  * `Code`, `Kbd`, `Prose` and the two checkbox anatomy parts are pure element wrappers: their guides
  * teach only that they render a native element with the component's own styling, and their source
- * is a bare `extends ComponentProps<'code' | 'kbd' | 'div' | 'span'>`. They genuinely document
- * nothing beyond React's element contract, so the assertion is that they still expose that contract
- * — `ref` for the rendered node and `key` for lists — instead of an empty table.
+ * is a bare `extends ComponentProps<'code' | 'kbd' | 'div' | 'span'>`. They document no Luke UI
+ * contract beyond pass-through DOM props, so their filtered tables are intentionally empty and rely
+ * on the native-props note alone.
  */
 const AUDITED_TYPES: ReadonlyArray<{
 	forwardsDomProps: boolean;
@@ -304,31 +350,38 @@ const AUDITED_TYPES: ReadonlyArray<{
 		forwardsDomProps: true,
 		name: 'CodeProps',
 		path: 'packages/@luke-ui/react/src/core/code/code.tsx',
-		visible: ['key', 'ref'],
+		visible: [],
 	},
 	{
 		forwardsDomProps: true,
 		name: 'KbdProps',
 		path: 'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
-		visible: ['key', 'ref'],
+		visible: [],
 	},
 	{
 		forwardsDomProps: true,
 		name: 'ProseProps',
 		path: 'packages/@luke-ui/react/src/core/prose/prose.tsx',
-		visible: ['key', 'ref'],
+		visible: [],
 	},
 	{
 		forwardsDomProps: true,
 		name: 'CheckboxControlProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx',
-		visible: ['key', 'ref'],
+		visible: [],
 	},
 	{
 		forwardsDomProps: true,
 		name: 'CheckboxIndicatorProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx',
-		visible: ['key', 'ref'],
+		visible: [],
+	},
+	{
+		// The guide teaches `aria-label` in Accessibility for naming the loading status region.
+		forwardsDomProps: true,
+		name: 'LoadingSpinnerProps',
+		path: 'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
+		visible: ['aria-label', 'children', 'color', 'isLoading', 'size'],
 	},
 	{
 		// The field guide teaches `FieldDescription` as helper text placed under a field. It wraps RAC's
@@ -350,7 +403,7 @@ const AUDITED_TYPES: ReadonlyArray<{
 		forwardsDomProps: true,
 		name: 'VisuallyHiddenProps',
 		path: 'packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx',
-		visible: ['elementType', 'key', 'ref', 'render'],
+		visible: ['elementType', 'render'],
 	},
 	{
 		// Icon picks five SVG props by name and forwards nothing else, so its table is closed.
@@ -370,7 +423,7 @@ test.each(AUDITED_TYPES)(
 		for (const prop of visible) {
 			expect(names, `${name} should document ${prop}`).toContain(prop);
 		}
-		for (const prop of [...GENERIC_DOM_NOISE, ...hidden]) {
+		for (const prop of [...GENERIC_DOM_NOISE, 'key', 'ref', ...hidden]) {
 			expect(names, `${name} should hide ${prop}`).not.toContain(prop);
 		}
 
@@ -392,6 +445,7 @@ test(
 		);
 		// From the element branch, which the render branch does not declare.
 		expect(names).toContain('elementType');
+		expect(names).toContain('ref');
 		// From the render branch, which the element branch types as `never`.
 		expect(names).toContain('render');
 		// Shared layout props from both branches' `SprinklesProps`.
@@ -505,9 +559,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'fontVariantNumeric',
 			'fontWeight',
 			'isVisuallyHidden',
-			'key',
 			'lineClamp',
-			'ref',
 			'render',
 			'shouldDisableTrim',
 			'shouldInheritFont',
@@ -519,11 +571,17 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		],
 	},
 	{
-		// A bare `extends ComponentProps<'code'>`: React's element contract and nothing else.
+		// A bare `extends ComponentProps<'code'>`: no Luke UI contract props, only pass-through DOM.
 		exportName: 'CodeProps',
 		name: 'CodeProps',
 		path: 'packages/@luke-ui/react/src/core/code/code.tsx',
-		props: ['key', 'ref'],
+		props: [],
+	},
+	{
+		exportName: 'LoadingSpinnerProps',
+		name: 'LoadingSpinnerProps',
+		path: 'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
+		props: ['aria-label', 'children', 'color', 'isLoading', 'size'],
 	},
 	{
 		// The five button-shaped types below all inherit `AriaBaseButtonProps` (react-aria's

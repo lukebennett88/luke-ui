@@ -264,17 +264,17 @@ interface StructuralOrigins {
 }
 
 /**
- * True when an interface is one of React's element attribute families: `AriaAttributes`,
- * `DOMAttributes<T>`, `HTMLAttributes<T>`, `SVGAttributes<T>`, and the per-tag
- * `<Tag>HTMLAttributes<T>` interfaces. These exist to describe the attributes any DOM element
- * accepts, so a type that inherits one wholesale has said nothing about its own contract.
- * `Attributes` (`key`) and `RefAttributes` (`ref`) share the suffix but are React's element identity
- * contract rather than a DOM attribute bag, and stay documented.
+ * True when an interface is one of React's generic element prop families: `Attributes` (`key`),
+ * `RefAttributes` (`ref`), `AriaAttributes`, `DOMAttributes<T>`, `HTMLAttributes<T>`,
+ * `SVGAttributes<T>`, and the per-tag `<Tag>HTMLAttributes<T>` interfaces. These describe what any
+ * element accepts rather than a component's own contract, so a type that inherits one wholesale has
+ * said nothing about its documented API. Redeclare a prop on a Luke UI type when the guide teaches
+ * it as intentional behaviour — for example `BoxProps['ref']` or `LoadingSpinnerProps['aria-label']`.
  */
 function isElementAttributeBag(node: SyntaxNode): boolean {
 	const name = node.getName?.();
 	if (name === undefined) return false;
-	return name.endsWith('Attributes') && name !== 'Attributes' && name !== 'RefAttributes';
+	return name === 'Attributes' || name === 'RefAttributes' || name.endsWith('Attributes');
 }
 
 /** The `extends` clauses of a declaration, as a list whichever shape the node reports them in. */
@@ -418,8 +418,8 @@ function walkReference(
 /**
  * Marks the element attribute bags a `ComponentProps<'code'>`-style reference resolves through. The
  * alias is a conditional type, so there is no syntax to follow; the resolved property set is read
- * instead and only the attribute-bag declaration sites are marked, which keeps `key` and `ref` — the
- * React element contract, declared on `Attributes`/`RefAttributes` — documented.
+ * instead and every generic attribute-bag declaration site — including `Attributes` and
+ * `RefAttributes` — is marked broad.
  */
 function markResolvedElementBags(referenceNode: SyntaxNode, origins: StructuralOrigins): void {
 	for (const prop of (referenceNode as PropDeclaration).getType().getProperties()) {

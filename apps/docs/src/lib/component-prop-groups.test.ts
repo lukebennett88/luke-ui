@@ -46,6 +46,10 @@ test('uses the shared group order constant', () => {
 	]);
 });
 
+test('returns no groups when no visible props are documented', () => {
+	expect(groupPropNames([])).toEqual([]);
+});
+
 test('omits the native-props marker from every group', () => {
 	const groups = groupPropNames(['appearance', NATIVE_PROPS_FORWARDING_KEY]);
 
