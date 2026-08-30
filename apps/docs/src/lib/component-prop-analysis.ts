@@ -3,12 +3,6 @@ import { resolve } from 'node:path';
 import type { GeneratedDoc } from 'fumadocs-typescript';
 import { createProject } from 'fumadocs-typescript';
 
-interface PropDeclaration {
-	getType(): {
-		getProperties(): ReadonlyArray<PropSymbol>;
-	};
-}
-
 export interface PropProject {
 	createSourceFile(path: string, content: string, options: { overwrite: boolean }): PropSourceFile;
 	getSourceFile(path: string): PropSourceFile | undefined;
@@ -19,27 +13,59 @@ interface PropSourceFile {
 	getFilePath(): string;
 }
 
+/**
+ * The exported declaration a `<component-props-table>` tag names — always a `type` alias or an
+ * `interface`. The analysis reads it two ways: `getType()` for the flattened prop list the table
+ * renders, and the syntax tree beneath it for *how* each prop got there.
+ */
+interface PropDeclaration extends SyntaxNode {
+	getType(): PropType;
+}
+
+/** A resolved type. `getUnionTypes` is empty unless `isUnion()`. */
+interface PropType {
+	getProperties(): ReadonlyArray<PropSymbol>;
+	getUnionTypes(): ReadonlyArray<PropType>;
+	isUnion(): boolean;
+}
+
 interface PropSymbol {
-	getDeclarations(): ReadonlyArray<PropSymbolDeclaration>;
+	getAliasedSymbol?(): PropSymbol | undefined;
+	getDeclarations(): ReadonlyArray<SyntaxNode>;
 	getName(): string;
 }
 
 /**
- * The syntax node that declares one flattened prop, e.g. the `interface` or type literal a property
- * signature belongs to. Its own `getMembers` count (own-declared members, not inherited ones) is
- * what tells a curated `Pick` apart from a wholesale-inherited DOM attribute bag; see
- * `isWholesaleExternalNode` below.
+ * The subset of the ts-morph `Node` surface the structural walk uses. Every accessor beyond
+ * `getKindName`/`getStart`/`getSourceFile` is optional because it exists on only some kinds; the
+ * walk switches on `getKindName()` before reaching for the rest.
  */
-interface PropSymbolDeclaration {
-	getParent(): PropDeclaringNode | undefined;
+interface SyntaxNode {
+	/**
+	 * `InterfaceDeclaration`: the `extends A, B` heritage clauses. A `ClassDeclaration` also carries
+	 * `getExtends`, returning a single clause or `undefined`, so the return type covers both and the
+	 * walk normalises it — only interfaces are ever walked here in practice.
+	 */
+	getExtends?(): ReadonlyArray<SyntaxNode> | SyntaxNode | undefined;
+	/** `ExpressionWithTypeArguments` only: the referenced name, e.g. `Pick` in `extends Pick<…>`. */
+	getExpression?(): SyntaxNode;
+	getKindName(): string;
+	/** `InterfaceDeclaration` and `TypeLiteral`: own (syntactically declared) members. */
+	getMembers?(): ReadonlyArray<SyntaxNode>;
+	/** `InterfaceDeclaration` only. */
+	getName?(): string | undefined;
 	getSourceFile(): PropSourceFile;
-}
-
-interface PropDeclaringNode {
-	/** Present on `InterfaceDeclaration` and `TypeLiteralNode`; absent on other parent kinds. */
-	getMembers?(): ReadonlyArray<unknown>;
-	/** Used only as a cache key to group declarations by the same syntax node; never called. */
 	getStart(): number;
+	getSymbol?(): PropSymbol | undefined;
+	getText(): string;
+	/** `TypeReference` and `ExpressionWithTypeArguments`: the `<…>` arguments. */
+	getTypeArguments?(): ReadonlyArray<SyntaxNode>;
+	/** `TypeAliasDeclaration` and `ParenthesizedType`: the type on the right of the `=`. */
+	getTypeNode?(): SyntaxNode | undefined;
+	/** `TypeReference` only: the referenced name, e.g. `Prettify` in `Prettify<X>`. */
+	getTypeName?(): SyntaxNode;
+	/** `UnionType` and `IntersectionType`: the constituents. */
+	getTypeNodes?(): ReadonlyArray<SyntaxNode>;
 }
 
 const sharedProjects = new Map<string, Promise<Awaited<ReturnType<typeof createProject>>>>();
@@ -74,11 +100,14 @@ export function filterGeneratedDoc(
 	};
 }
 
-/** True when a prop type still accepts pass-through DOM or ARIA attributes at runtime. */
+/**
+ * True when a prop type still accepts pass-through DOM or ARIA attributes at runtime — that is, when
+ * some prop it flattens in reaches it through a generic element attribute bag and so is not
+ * documented in its table.
+ */
 export function typeForwardsDomProps(declaration: PropDeclaration, reactSrcDir: string): boolean {
-	const props = declaration.getType().getProperties();
 	const visibleNames = visiblePropNameSet(declaration, reactSrcDir);
-	return props.some((prop) => !visibleNames.has(prop.getName()));
+	return flattenedProps(declaration).some((prop) => !visibleNames.has(prop.getName()));
 }
 
 /** Loads an exported prop declaration from a repo-relative TypeScript path. */
@@ -114,112 +143,374 @@ function readSourceFile(project: PropProject, absolutePath: string): PropSourceF
 }
 
 /**
- * An interface below this many own (syntactically declared, not inherited) members is treated as a
- * small, named semantic contract — e.g. React Aria's `PressEvents` (3 members) or `AriaLabelingProps`
- * (4 members) — and always stays visible, regardless of how much of it a type includes.
- * `ComboBoxProps`'s own body (12 members) sits just under this floor; `AriaBaseButtonProps` (16 own
- * members, mostly generic `aria-*`/`form*` passthrough) sits just over it. The floor has to clear
- * `TextInputDOMEvents` (9 members, a real input-event contract that types like `TextFieldProps`
- * include wholesale) while still catching `ListBoxProps` (13 members, mostly DOM/RAC passthrough).
+ * Generic aliases whose payload sits in a type argument rather than in their own body. Following
+ * argument 0 is what lets the walk see through the wrappers Luke UI puts on nearly every prop type;
+ * without this, `Prettify<_ButtonProps>` looks like an opaque mapped type and nothing below it is
+ * reachable. `Omit`/`DistributiveOmit` subtract names but leave the rest of the source in place, so
+ * whatever the source is — a curated interface or a DOM bag — the remaining props keep its nature.
  */
-const SMALL_INTERFACE_OWN_MEMBERS = 12;
+const TYPE_ARGUMENT_ALIASES = new Set([
+	'DistributiveOmit',
+	'Exclude',
+	'NonNullable',
+	'Omit',
+	'Partial',
+	'Prettify',
+	'Readonly',
+	'Required',
+]);
 
 /**
- * Once an interface is large enough to fail the size check above, a prop only counts as
- * wholesale-inherited (and so gets hidden) when the type includes at least half of that interface's
- * own members. `IconProps` includes 4 of `SVGAttributes`' 263 own members (a deliberate `Pick`, ratio
- * 0.02) and must stay visible; `AriaBaseButtonProps` contributes 15 of its 16 own members to
- * `ButtonProps` (ratio 0.94, true wholesale inheritance) and must hide. The measured data has a wide
- * gap between the two (0.04 vs 0.55+), so the exact cut only has to land inside that gap.
+ * React helpers that resolve to the *entire* props object of a DOM element or component — a generic
+ * element attribute bag reached without naming a single prop. They are conditional types, so the
+ * syntax below them leads nowhere and the walk has to read their resolved property set instead.
  */
-const WHOLESALE_COVERAGE_THRESHOLD = 0.5;
+const ELEMENT_PROPS_ALIASES = new Set([
+	'ComponentProps',
+	'ComponentPropsWithRef',
+	'ComponentPropsWithoutRef',
+	'HTMLProps',
+	'IntrinsicElements',
+	'JSX.IntrinsicElements',
+]);
 
 /**
- * Prop names that stay treated as native DOM pass-through even inside a small external interface
- * that is otherwise kept visible (see `isWholesaleExternalNode`). Every RAC component interface
- * carries `className`/`style` as the same generic styling escape hatch (already classified as
- * `STYLING_PROPS` in `component-prop-groups.ts`, never as a component's distinguishing contract).
- * `onClick` is React Aria's own documented DOM-compatibility alias for `onPress`, declared directly
- * alongside it on the tiny `PressEvents` interface — the one case where a single native-named prop
- * sits inside an otherwise-genuine semantic contract. This set intentionally excludes ARIA and focus
- * names (`aria-label`, `onFocus`, …): those ARE the documented contract on interfaces such as
- * `AriaLabelingProps`/`FocusEvents`, even though the names also happen to exist on plain elements.
+ * Prop names that stay treated as native DOM pass-through even when they arrive on an interface that
+ * is otherwise a documented contract. Every React Aria component interface carries `className`/`style`
+ * as the same generic styling escape hatch (already classified as `STYLING_PROPS` in
+ * `component-prop-groups.ts`, never as a component's distinguishing contract). `onClick` is React
+ * Aria's own documented DOM-compatibility alias for `onPress`, declared directly alongside it on the
+ * tiny `PressEvents` interface. These three are not recoverable from structure: they sit on the same
+ * syntax nodes as the props they must be told apart from, so a name rule is the only mechanism left.
+ * A prop a type names explicitly through `Pick` overrides this — `Icon` picks `className` and `style`
+ * on purpose, and that deliberate choice wins over the generic default.
  */
 const NATIVE_PASSTHROUGH_PROP_NAMES = new Set(['className', 'style', 'onClick']);
 
 /**
- * Computes the set of flattened prop names that belong to the Luke UI contract: every prop declared
- * in Luke UI source, plus every externally-declared prop that is not part of a large interface
- * inherited wholesale (a generic DOM or ARIA attribute bag) rather than a small semantic contract or
- * a curated `Pick`.
+ * True when an interface is the one fixed accessibility-labeling contract React Aria repeats,
+ * verbatim, across nearly every component: `AriaLabelingProps` in `@react-types/shared`
+ * (`aria-label`, `aria-labelledby`, `aria-describedby`, `aria-details`). It is small, named, and never
+ * changes shape, so Luke UI treats props declared directly on it as always-documented even when a
+ * component inherits it externally without redeclaring it — the same way `docs/DOCUMENTATION.md`
+ * expects `aria-label` to remain reachable everywhere without requiring every component to redeclare
+ * it by hand. This is a structural check on the *interface*, not a name check on the prop: `aria-label`
+ * also arrives through React's own `AriaAttributes` (folded into `HTMLAttributes`/`SVGAttributes`), and
+ * there it must stay hidden like the rest of that bag — `Code`'s bare `extends ComponentProps<'code'>`
+ * has no business documenting `aria-label` just because the name matches.
  */
-function visiblePropNameSet(declaration: PropDeclaration, reactSrcDir: string): Set<string> {
-	const props = declaration.getType().getProperties();
-
-	// Group each prop's *external* declaration sites by the syntax node that declares them (their
-	// interface or type literal), so wholesale inheritance can be measured against that node's own
-	// member count rather than per-prop. Grouped by node identity (`getStart` + source file), not by
-	// name, since two different interfaces can share a name (e.g. multiple `ButtonProps`).
-	const externalNodes = new Map<string, { includedNames: Set<string>; node: PropDeclaringNode }>();
-
-	for (const prop of props) {
-		for (const propDeclaration of prop.getDeclarations()) {
-			const sourceFile = propDeclaration.getSourceFile();
-			if (sourceFile.getFilePath().startsWith(reactSrcDir)) continue;
-
-			const parent = propDeclaration.getParent();
-			if (parent === undefined) continue;
-
-			const key = `${sourceFile.getFilePath()}:${parent.getStart()}`;
-			const group = externalNodes.get(key) ?? { includedNames: new Set<string>(), node: parent };
-			group.includedNames.add(prop.getName());
-			externalNodes.set(key, group);
-		}
-	}
-
-	const wholesaleExternalNames = new Set<string>();
-	for (const { includedNames, node } of externalNodes.values()) {
-		for (const name of includedNames) {
-			if (isWholesaleExternalNode(node, includedNames.size, name)) wholesaleExternalNames.add(name);
-		}
-	}
-
-	const visibleNames = new Set<string>();
-	for (const prop of props) {
-		const name = prop.getName();
-		const isLukeDeclared = prop
-			.getDeclarations()
-			.some((propDeclaration) =>
-				propDeclaration.getSourceFile().getFilePath().startsWith(reactSrcDir),
-			);
-		if (isLukeDeclared || !wholesaleExternalNames.has(name)) visibleNames.add(name);
-	}
-	return visibleNames;
+function isAriaLabelingContract(node: SyntaxNode): boolean {
+	return node.getName?.() === 'AriaLabelingProps';
 }
 
 /**
- * True when a prop declared on an external node should be hidden: either the node is a large bag
- * that the consuming type inherits most or all of (true wholesale inheritance — see
- * `SMALL_INTERFACE_OWN_MEMBERS` and `WHOLESALE_COVERAGE_THRESHOLD` above), or the node is small but
- * this specific prop's name is a native pass-through kept only for DOM compatibility (see
- * `NATIVE_PASSTHROUGH_PROP_NAMES`). `includedCount` is how many of the node's own members the
- * consuming type actually flattens in.
+ * Name shapes that mark a prop as React Aria's own long-tail HTML pass-through — `aria-*` state and
+ * relationship attributes beyond the fixed labeling contract above, and the `<form>`-submission
+ * attributes (`form`, `formAction`, `formEncType`, `formMethod`, `formNoValidate`, `formTarget`, plus
+ * the sibling `name`/`value` pair submitted alongside them). React Aria interfaces such as
+ * `AriaBaseButtonProps` declare these directly on the *same* interface body as genuinely documented
+ * props (`type`, `isDisabled`'s siblings), reached through a plain `extends` rather than a `Pick` or an
+ * `Attributes`-suffixed bag — so there is no syntax that separates the two groups; only the name shape
+ * does. A prop matching this shape is long-tail unless Luke UI redeclares it itself (see
+ * `documented-rac-props.ts` and `ComboboxRootRedeclaredRACProps`), which is what keeps `form`/`name`
+ * visible on `ComboboxRootProps` while hiding them on `ButtonProps`.
  */
-function isWholesaleExternalNode(
-	node: PropDeclaringNode,
-	includedCount: number,
-	propName: string,
-): boolean {
-	const ownMembers = node.getMembers?.();
-	// A node without syntactic members (e.g. a generic interface whose body is empty and whose props
-	// all come through `extends`) can't be measured this way; treat it as external noise rather than
-	// risk mis-measuring its coverage.
-	if (ownMembers === undefined) return true;
+const ARIA_FORM_LONG_TAIL_PROP_NAMES = new Set([
+	'aria-controls',
+	'aria-current',
+	'aria-disabled',
+	'aria-expanded',
+	'aria-haspopup',
+	'aria-pressed',
+	'excludeFromTabOrder',
+	'form',
+	'formAction',
+	'formEncType',
+	'formMethod',
+	'formNoValidate',
+	'formTarget',
+	'name',
+	'preventFocusOnPress',
+	'value',
+]);
 
-	const ownMemberCount = ownMembers.length;
-	if (ownMemberCount <= SMALL_INTERFACE_OWN_MEMBERS)
-		return NATIVE_PASSTHROUGH_PROP_NAMES.has(propName);
+/** What one structural walk of a prop type learned about where its props come from. */
+interface StructuralOrigins {
+	/**
+	 * Syntax-node keys (`file:start`) of the `AriaLabelingProps` interface declarations the type
+	 * reaches. `AriaLabelingProps` (react-aria's `@react-types/shared`) is a distinct interface from
+	 * React's own `AriaAttributes`, which declares similarly-named props but is an `Attributes`-suffixed
+	 * bag and stays broad as normal — so this set only ever picks up the small, named, documented
+	 * contract, never the DOM attribute bag that happens to share a naming convention.
+	 */
+	ariaLabelingNodeKeys: Set<string>;
+	/**
+	 * Syntax-node keys (`file:start`) of interfaces the type reaches through broad structural
+	 * inheritance of a generic element attribute bag. Props declared on these are undocumented
+	 * pass-through.
+	 */
+	broadNodeKeys: Set<string>;
+	/**
+	 * Prop names the type brings in through `Pick<Source, 'a' | 'b'>`. `Pick` erases at the symbol
+	 * level — the picked props still report React's own declaration site — so the *only* record that
+	 * they were chosen deliberately is this syntax. Reading it is what keeps `Icon`'s five curated
+	 * SVG props visible.
+	 */
+	selectedNames: Set<string>;
+}
 
-	const coverage = Math.min(includedCount / ownMemberCount, 1);
-	return coverage >= WHOLESALE_COVERAGE_THRESHOLD;
+/**
+ * True when an interface is one of React's element attribute families: `AriaAttributes`,
+ * `DOMAttributes<T>`, `HTMLAttributes<T>`, `SVGAttributes<T>`, and the per-tag
+ * `<Tag>HTMLAttributes<T>` interfaces. These exist to describe the attributes any DOM element
+ * accepts, so a type that inherits one wholesale has said nothing about its own contract.
+ * `Attributes` (`key`) and `RefAttributes` (`ref`) share the suffix but are React's element identity
+ * contract rather than a DOM attribute bag, and stay documented.
+ */
+function isElementAttributeBag(node: SyntaxNode): boolean {
+	const name = node.getName?.();
+	if (name === undefined) return false;
+	return name.endsWith('Attributes') && name !== 'Attributes' && name !== 'RefAttributes';
+}
+
+/** The `extends` clauses of a declaration, as a list whichever shape the node reports them in. */
+function heritageClauses(node: SyntaxNode): ReadonlyArray<SyntaxNode> {
+	const clauses = node.getExtends?.();
+	if (clauses === undefined) return [];
+	return Array.isArray(clauses) ? clauses : [clauses as SyntaxNode];
+}
+
+/** Stable identity for a syntax node, used both as a walk seen-key and to match declaration sites. */
+function nodeKey(node: SyntaxNode): string {
+	return `${node.getSourceFile().getFilePath()}:${node.getStart()}`;
+}
+
+/**
+ * Resolves the declarations a referenced name points at, crossing `ImportSpecifier` nodes. A
+ * re-exported interface resolves to its import specifier first; `getAliasedSymbol` walks that alias
+ * through to the real `InterfaceDeclaration`.
+ */
+function referencedDeclarations(nameNode: SyntaxNode): ReadonlyArray<SyntaxNode> {
+	const symbol = nameNode.getSymbol?.();
+	if (symbol === undefined) return [];
+	return (symbol.getAliasedSymbol?.() ?? symbol).getDeclarations();
+}
+
+/** The string literals in a `Pick`'s key argument, whether a single literal or a union of them. */
+function literalKeyNames(node: SyntaxNode | undefined): ReadonlyArray<string> {
+	if (node === undefined) return [];
+	const kind = node.getKindName();
+	if (kind === 'LiteralType') return [node.getText().replace(/^['"`]|['"`]$/g, '')];
+	if (kind === 'UnionType') return (node.getTypeNodes?.() ?? []).flatMap(literalKeyNames);
+	return [];
+}
+
+/**
+ * Walks the syntax below an exported prop type to record where its props come from. `isBroad` tracks
+ * whether the current path has already passed through a generic element attribute bag, so an
+ * interface that merely sits *below* `HTMLAttributes` in an `extends` chain inherits its broadness.
+ *
+ * The seen-set is keyed on the node's source file, start offset and the broadness it was visited
+ * with: the same interface can legitimately be reached both selectively and broadly, and only
+ * re-visiting under a repeated key would loop.
+ */
+function walkOrigins(
+	node: SyntaxNode | undefined,
+	isBroad: boolean,
+	origins: StructuralOrigins,
+	seen: Set<string>,
+	reactSrcDir: string,
+): void {
+	if (node === undefined) return;
+
+	const key = `${nodeKey(node)}:${node.getKindName()}:${isBroad}`;
+	if (seen.has(key)) return;
+	seen.add(key);
+
+	const recurse = (child: SyntaxNode | undefined, broad = isBroad): void =>
+		walkOrigins(child, broad, origins, seen, reactSrcDir);
+
+	switch (node.getKindName()) {
+		case 'TypeAliasDeclaration':
+		case 'ParenthesizedType':
+			recurse(node.getTypeNode?.());
+			return;
+
+		case 'IntersectionType':
+		case 'UnionType':
+			// A union documents everything any constituent documents, so both branches are walked with
+			// the same broadness and their findings merge into one set of origins.
+			for (const member of node.getTypeNodes?.() ?? []) recurse(member);
+			return;
+
+		case 'TypeReference': {
+			const name = node.getTypeName?.();
+			if (name !== undefined) {
+				walkReference(node, name, isBroad, origins, seen, reactSrcDir);
+			}
+			return;
+		}
+
+		case 'ExpressionWithTypeArguments': {
+			const name = node.getExpression?.();
+			if (name !== undefined) {
+				walkReference(node, name, isBroad, origins, seen, reactSrcDir);
+			}
+			return;
+		}
+
+		case 'InterfaceDeclaration': {
+			const isExternal = !node.getSourceFile().getFilePath().startsWith(reactSrcDir);
+			const isBroadHere = isExternal && (isBroad || isElementAttributeBag(node));
+			if (isBroadHere) origins.broadNodeKeys.add(nodeKey(node));
+			if (isExternal && isAriaLabelingContract(node))
+				origins.ariaLabelingNodeKeys.add(nodeKey(node));
+			for (const heritage of heritageClauses(node)) recurse(heritage, isBroadHere);
+			return;
+		}
+
+		default:
+			return;
+	}
+}
+
+/** Handles a `Foo<…>` reference, whether written as a type reference or in a heritage clause. */
+function walkReference(
+	referenceNode: SyntaxNode,
+	nameNode: SyntaxNode,
+	isBroad: boolean,
+	origins: StructuralOrigins,
+	seen: Set<string>,
+	reactSrcDir: string,
+): void {
+	const fullName = nameNode.getText();
+	const simpleName = fullName.split('.').at(-1) ?? fullName;
+	const typeArguments = referenceNode.getTypeArguments?.() ?? [];
+	const recurse = (child: SyntaxNode | undefined, broad = isBroad): void =>
+		walkOrigins(child, broad, origins, seen, reactSrcDir);
+
+	if (simpleName === 'Pick') {
+		// `Pick<Source, Keys>` is the one construct that names props deliberately. Record the keys, then
+		// keep walking the source so any bag underneath is still marked broad for everything *not* named.
+		for (const name of literalKeyNames(typeArguments[1])) origins.selectedNames.add(name);
+		recurse(typeArguments[0]);
+		return;
+	}
+
+	if (ELEMENT_PROPS_ALIASES.has(simpleName) || ELEMENT_PROPS_ALIASES.has(fullName)) {
+		markResolvedElementBags(referenceNode, origins);
+		return;
+	}
+
+	if (TYPE_ARGUMENT_ALIASES.has(simpleName)) {
+		recurse(typeArguments[0]);
+		return;
+	}
+
+	for (const declaration of referencedDeclarations(nameNode)) recurse(declaration);
+	for (const argument of typeArguments) recurse(argument);
+}
+
+/**
+ * Marks the element attribute bags a `ComponentProps<'code'>`-style reference resolves through. The
+ * alias is a conditional type, so there is no syntax to follow; the resolved property set is read
+ * instead and only the attribute-bag declaration sites are marked, which keeps `key` and `ref` — the
+ * React element contract, declared on `Attributes`/`RefAttributes` — documented.
+ */
+function markResolvedElementBags(referenceNode: SyntaxNode, origins: StructuralOrigins): void {
+	for (const prop of (referenceNode as PropDeclaration).getType().getProperties()) {
+		for (const declaration of prop.getDeclarations()) {
+			const parent = declarationParent(declaration);
+			if (parent === undefined || parent.getKindName() !== 'InterfaceDeclaration') continue;
+			if (!isElementAttributeBag(parent)) continue;
+			origins.broadNodeKeys.add(nodeKey(parent));
+		}
+	}
+}
+
+interface WithParent {
+	getParent(): SyntaxNode | undefined;
+}
+
+function declarationParent(declaration: SyntaxNode): SyntaxNode | undefined {
+	return (declaration as unknown as WithParent).getParent();
+}
+
+/**
+ * Every prop a type accepts, across all of a union's constituents. TypeScript's own
+ * `getProperties()` on a union returns only the props common to *all* branches, which would hide
+ * `Box`'s entire element branch behind its render branch.
+ */
+function flattenedProps(declaration: PropDeclaration): ReadonlyArray<PropSymbol> {
+	const type = declaration.getType();
+	const constituents = type.isUnion() ? type.getUnionTypes() : [type];
+
+	const props = new Map<string, PropSymbol>();
+	for (const constituent of constituents) {
+		for (const prop of constituent.getProperties()) {
+			if (!props.has(prop.getName())) props.set(prop.getName(), prop);
+		}
+	}
+	return [...props.values()];
+}
+
+/**
+ * The flattened prop names that belong to the Luke UI contract. A prop is documented when Luke UI
+ * declares it, when the type names it deliberately through a `Pick`, or when it is declared directly on
+ * the small named `AriaLabelingProps` contract. A prop is hidden when it only ever arrives through a
+ * generic element attribute bag — `HTMLAttributes`, `SVGAttributes`, `AriaAttributes`, `DOMAttributes`,
+ * a `ComponentProps<'div'>` expansion, or anything that inherits one of those wholesale — when it is
+ * one of the three native pass-through names above, or when it is an external `aria-*`/`form*`
+ * long-tail prop Luke UI never redeclared.
+ *
+ * The long-tail check exists because structure alone cannot separate it from a legitimate small
+ * contract: React Aria interfaces like `AriaBaseButtonProps` declare `aria-pressed`, `formMethod`,
+ * `name`, `preventFocusOnPress` and friends directly alongside genuinely documented siblings (`type`,
+ * the props `DocumentedPressProps` redeclares) on the very same interface body, reached through a plain
+ * `extends` rather than any syntax a walk could single out. Only the prop's own name shape tells them
+ * apart, so `ARIA_FORM_LONG_TAIL_PROP_NAMES` is the one place that decision is made explicitly.
+ */
+function visiblePropNameSet(declaration: PropDeclaration, reactSrcDir: string): Set<string> {
+	const origins: StructuralOrigins = {
+		ariaLabelingNodeKeys: new Set<string>(),
+		broadNodeKeys: new Set<string>(),
+		selectedNames: new Set<string>(),
+	};
+	walkOrigins(declaration, false, origins, new Set<string>(), reactSrcDir);
+
+	const visibleNames = new Set<string>();
+	for (const prop of flattenedProps(declaration)) {
+		const name = prop.getName();
+		const declarations = prop.getDeclarations();
+
+		const isLukeDeclared = declarations.some((propDeclaration) =>
+			propDeclaration.getSourceFile().getFilePath().startsWith(reactSrcDir),
+		);
+		if (isLukeDeclared || origins.selectedNames.has(name)) {
+			visibleNames.add(name);
+			continue;
+		}
+
+		const isFromAriaLabelingContract = declarations.some((propDeclaration) => {
+			const parent = declarationParent(propDeclaration);
+			return parent !== undefined && origins.ariaLabelingNodeKeys.has(nodeKey(parent));
+		});
+		if (isFromAriaLabelingContract) {
+			visibleNames.add(name);
+			continue;
+		}
+
+		if (NATIVE_PASSTHROUGH_PROP_NAMES.has(name) || ARIA_FORM_LONG_TAIL_PROP_NAMES.has(name))
+			continue;
+
+		const isFromBroadBag = declarations.some((propDeclaration) => {
+			const parent = declarationParent(propDeclaration);
+			// A prop with no declaring syntax node can't be traced to a contract; treat it as pass-through
+			// rather than claim it as documented.
+			if (parent === undefined) return true;
+			return origins.broadNodeKeys.has(nodeKey(parent));
+		});
+		if (!isFromBroadBag) visibleNames.add(name);
+	}
+	return visibleNames;
 }
