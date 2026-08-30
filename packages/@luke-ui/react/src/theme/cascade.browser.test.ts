@@ -3,9 +3,13 @@
  * the whole document with no class applied. An explicit identity class always wins over another
  * loaded theme's fallback. Both hold regardless of the order the stylesheets load in.
  *
- * Nested identity classes still collide: an ancestor's `.X [data-color-mode='M']` rule and a nested
- * identity's own rule share specificity (0,2,0), so they resolve by stylesheet order. Nested
- * identities are unsupported and guarded elsewhere, and this file does not test that case.
+ * Nested identity classes do not collide by default: a nested identity resolves its own
+ * identity-owned values, and it also resolves its own colour, depth, and action-control-finish
+ * values correctly under the system-controlled mode, because those are declared directly on the
+ * identity class by the base-light and media-dark blocks. The collision happens only when an
+ * explicit `data-color-mode` scope sits on or inside the nested identity: then the ancestor's
+ * `.X [data-color-mode='M']` rule and the nested identity's own `.Y[data-color-mode='M']` rule share
+ * specificity (0,2,0), so stylesheet order decides the winner. This file covers both cases.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
@@ -173,6 +177,31 @@ for (const order of stylesheetOrders) {
 				expect(readVar(target, scenario.varName)).toBe(scenario.expected);
 			});
 		}
+
+		it("resolves paper's light canvas on a div.luke-ui-theme-paper nested inside <html class='luke-ui-theme-tactile'>, under system light, with no explicit data-color-mode anywhere", async () => {
+			await emulateColorScheme('light');
+			document.documentElement.className = tactileThemeClassName;
+			const paperDiv = createDiv(document.body);
+			paperDiv.className = paperThemeClassName;
+			expect(readVar(paperDiv, '--luke-color-surface-canvas')).toBe(paperLightCanvas);
+		});
+
+		it("resolves paper's dark canvas on a div.luke-ui-theme-paper nested inside <html class='luke-ui-theme-tactile'>, under system dark, with no explicit data-color-mode anywhere", async () => {
+			await emulateColorScheme('dark');
+			document.documentElement.className = tactileThemeClassName;
+			const paperDiv = createDiv(document.body);
+			paperDiv.className = paperThemeClassName;
+			expect(readVar(paperDiv, '--luke-color-surface-canvas')).toBe(paperDarkCanvas);
+		});
+
+		it(`resolves the dark canvas of whichever theme's stylesheet loaded last (${order[1]}) when data-color-mode='dark' sits on a nested div.luke-ui-theme-paper inside <html class='luke-ui-theme-tactile'>`, () => {
+			document.documentElement.className = tactileThemeClassName;
+			const paperDiv = createDiv(document.body);
+			paperDiv.className = paperThemeClassName;
+			paperDiv.dataset.colorMode = 'dark';
+			const expected = order[1] === 'paper' ? paperDarkCanvas : tactileDarkCanvas;
+			expect(readVar(paperDiv, '--luke-color-surface-canvas')).toBe(expected);
+		});
 	});
 }
 

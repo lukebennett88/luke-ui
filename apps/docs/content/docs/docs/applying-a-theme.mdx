@@ -74,9 +74,10 @@ selects on, and throws when the name is not kebab-case.
 <SourceCodeBlock src="theming/multi-theme-app" />
 
 Theme identities do not nest. Never place one identity class inside another identity's subtree. A
-nested identity resolves its own radius, space, and type values correctly. Its colour, depth, and
-action-control-finish values resolve at equal precedence with the ancestor identity, so stylesheet
-order decides the winner.
+nested identity resolves its own identity-owned values correctly, and its colour, depth, and
+action-control-finish values also resolve correctly under the system-controlled mode. But an
+explicit `data-color-mode` scope on or inside the nested identity makes those mode-dependent values
+compete with the ancestor identity at equal precedence, so stylesheet order decides the winner.
 
 ## Continue learning
 
