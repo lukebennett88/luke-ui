@@ -32,17 +32,11 @@ const stylexLayerConfig = {
 } as const;
 
 function buildAuthoritativeLayerOrder(priorityLayers: Array<string>): string {
-	const quotedPriorityLayers = priorityLayers.map(quoteLayerNameIfNeeded);
-	return `@layer ${[...stylexLayerConfig.before, ...quotedPriorityLayers, ...stylexLayerConfig.after].join(', ')};`;
+	return `@layer ${[...stylexLayerConfig.before, ...priorityLayers, ...stylexLayerConfig.after].join(', ')};`;
 }
 
-/** Dotted idents are nested layer paths; quote them so StyleX priority layers stay flat. */
-function quoteLayerNameIfNeeded(layerName: string): string {
-	return layerName.includes('.') ? `"${layerName}"` : layerName;
-}
-
-function quoteStylexLayerNames(stylexCss: string): string {
-	return stylexCss.replace(/@layer (luke\.sx\.priority\d+)/g, '@layer "$1"');
+function stripRedundantEmptyLayerStatements(css: string): string {
+	return css.replace(/^@layer [^,{]+;\n/gm, '');
 }
 
 function splitStylexLayerHeader(stylexCss: string): {
@@ -56,12 +50,12 @@ function splitStylexLayerHeader(stylexCss: string): {
 
 	const priorityLayers = match[1]
 		.split(',')
-		.map((name) => name.trim().replaceAll(/^"|"$/g, ''))
+		.map((name) => name.trim())
 		.filter((name) => name.startsWith(`${stylexLayerConfig.prefix}.priority`));
 
 	return {
 		authoritativeLayerOrder: buildAuthoritativeLayerOrder(priorityLayers),
-		stylexBody: quoteStylexLayerNames(stylexCss.slice(match[0].length).replace(/^\n/, '')),
+		stylexBody: stylexCss.slice(match[0].length).replace(/^\n/, ''),
 	};
 }
 
@@ -189,7 +183,7 @@ function stylexPlugin(): Plugin {
 			if (stylesheet?.type !== 'asset') return;
 
 			const rules = [...stylexRules.values()].flat();
-			const vanillaCss = stylesheet.source.toString();
+			const vanillaCss = stripRedundantEmptyLayerStatements(stylesheet.source.toString());
 
 			if (rules.length === 0) {
 				stylesheet.source = `${buildAuthoritativeLayerOrder([])}\n${vanillaCss}`;

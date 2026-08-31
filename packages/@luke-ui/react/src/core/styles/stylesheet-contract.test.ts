@@ -56,8 +56,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'reordered authoritative layer declarations',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, (?:"luke\.sx\.priority\d+"|luke\.sx\.priority\d+)(?:, (?:"luke\.sx\.priority\d+"|luke\.sx\.priority\d+))*, recipes, structural, utilities;/m,
-				'@layer theme, reset, "luke.sx.priority1", recipes, structural, utilities;',
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/m,
+				'@layer theme, reset, luke.sx.priority1, recipes, structural, utilities;',
 			);
 		},
 	],
@@ -65,8 +65,17 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early individual layer declarations before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, (?:"luke\.sx\.priority\d+"|luke\.sx\.priority\d+)(?:, (?:"luke\.sx\.priority\d+"|luke\.sx\.priority\d+))*, recipes, structural, utilities;\n/m,
-				'@layer reset;\n@layer theme;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, "luke.sx.priority1", recipes, structural, utilities;\n',
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
+				'@layer reset;\n@layer theme;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;\n',
+			);
+		},
+	],
+	[
+		'early layer block before authoritative order',
+		(css: string) => {
+			return css.replace(
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
+				'@layer recipes { .early {} }\n@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;\n',
 			);
 		},
 	],
@@ -108,8 +117,13 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		},
 	],
 	[
-		'unquoted StyleX priority layer blocks',
-		(css: string) => css.replaceAll('"luke.sx.priority', 'luke.sx.priority'),
+		'redundant empty layer statements after authoritative order',
+		(css: string) => {
+			return css.replace(
+				/^(@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n)/m,
+				'$1@layer recipes;\n',
+			);
+		},
 	],
 	[
 		'empty transitional recipes layer',
@@ -172,8 +186,8 @@ function assertStylesheetContract(
 	const root = parse(stylesheet);
 
 	assertEffectiveLayerCreationOrder(root);
+	assertNoRedundantEmptyLayerStatements(stylesheet);
 	assertAuthoritativeLayerOrder(getAuthoritativeLayerOrder(root));
-	assertQuotedStylexPriorityLayers(stylesheet);
 	assertLayerNames(root);
 	assertRootNodes(root);
 	assertStableSelectors(root);
@@ -268,14 +282,10 @@ function getAuthoritativeLayerOrder(root: Root): Array<string> {
 		const params = node.params.trim();
 		if (!params.includes(',')) continue;
 
-		return params.split(',').map((name) => normalizeLayerName(name.trim()));
+		return params.split(',').map((name) => name.trim());
 	}
 
 	throw new Error('Expected an authoritative combined cascade-layer order statement.');
-}
-
-function normalizeLayerName(layerName: string): string {
-	return layerName.replaceAll(/^"|"$/g, '');
 }
 
 function assertEffectiveLayerCreationOrder(root: Root): void {
@@ -298,7 +308,7 @@ function assertEffectiveLayerCreationOrder(root: Root): void {
 			);
 		}
 
-		if (!sawAuthoritativeOrder && !node.nodes && !params.includes(',')) {
+		if (!sawAuthoritativeOrder) {
 			throw new Error(
 				`Layer "${params}" was created before the authoritative combined cascade-layer order statement.`,
 			);
@@ -310,18 +320,13 @@ function assertEffectiveLayerCreationOrder(root: Root): void {
 	}
 }
 
-function assertQuotedStylexPriorityLayers(stylesheet: string): void {
-	for (const match of stylesheet.matchAll(/@layer ([^;{]+)/g)) {
-		const layerList = match[1];
-		if (layerList == null) continue;
-		const layerNames = layerList.split(',').map((name) => name.trim());
-		for (const layerName of layerNames) {
-			if (!stylexPriorityLayerPattern.test(normalizeLayerName(layerName))) continue;
-			if (!layerName.startsWith('"')) {
-				throw new Error(
-					`StyleX priority layer ${layerName} must be quoted so dotted names are not treated as nested layers.`,
-				);
-			}
+function assertNoRedundantEmptyLayerStatements(stylesheet: string): void {
+	const lines = stylesheet.split('\n');
+	for (let index = 1; index < lines.length; index++) {
+		const line = lines[index]?.trim();
+		if (line == null || line === '') continue;
+		if (/^@layer [^,{]+;$/.test(line)) {
+			throw new Error(`Redundant empty layer statement after authoritative order: ${line}`);
 		}
 	}
 }
@@ -358,7 +363,7 @@ function getLayerNames(atRule: AtRule): Array<string> {
 	const params = atRule.params.trim();
 	if (!params) throw atRule.error('Anonymous cascade layers are not allowed.');
 
-	return params.split(',').map((name) => normalizeLayerName(name.trim()));
+	return params.split(',').map((name) => name.trim());
 }
 
 function assertRootNodes(root: Root): void {
@@ -518,15 +523,13 @@ function hasPseudo(rule: Rule, pseudo: string): boolean {
 function getOwningLayer(rule: Rule): string | undefined {
 	let parent = rule.parent;
 	while (parent && parent.type !== 'root') {
-		if (parent.type === 'atrule' && parent.name === 'layer') {
-			return normalizeLayerName(parent.params.trim());
-		}
+		if (parent.type === 'atrule' && parent.name === 'layer') return parent.params.trim();
 		parent = parent.parent;
 	}
 	return undefined;
 }
 
-const validStylesheetFixture = `@layer reset, theme, "luke.sx.priority1", recipes, structural, utilities;
+const validStylesheetFixture = `@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
 }
@@ -546,7 +549,7 @@ const validStylesheetFixture = `@layer reset, theme, "luke.sx.priority1", recipe
 @layer utilities {
   .utility-class { display: grid; }
 }
-@layer "luke.sx.priority1" {
+@layer luke.sx.priority1 {
   .stylex-class { outline-color: transparent; }
 }
 @keyframes generated-animation {

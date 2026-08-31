@@ -193,8 +193,8 @@ While Vanilla Extract recipes remain, the `recipes` layer is transitional. The s
 requires it to contain at least one rule until the last recipe moves to StyleX.
 
 The public `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every
-Luke-owned layer before any rules create them. StyleX priority layers use quoted names (for example
-`"luke.sx.priority1"`) so dotted identifiers are flat layer names, not nested layer paths.
+Luke-owned layer before any rules create them. StyleX priority layers use dotted nested names such
+as `luke.sx.priority1`, which sit between `theme` and `recipes` in the required precedence order.
 
 The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
 `themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The

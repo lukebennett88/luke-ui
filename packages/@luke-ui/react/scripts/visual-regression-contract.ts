@@ -11,6 +11,7 @@ export const VISUAL_HARNESS_FILES = [
 	'packages/@luke-ui/react/vitest.config.ts',
 	VISUAL_HARNESS_LAYOUT_FILE,
 	'packages/@luke-ui/react/src/core/test-utils/render-setup.ts',
+	'packages/@luke-ui/react/src/core/test-utils/render-mount-state.ts',
 	'packages/@luke-ui/react/src/core/test-utils/render.tsx',
 	'packages/@luke-ui/react/src/core/test-utils/visual-setup.ts',
 ] as const;
