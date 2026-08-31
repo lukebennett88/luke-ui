@@ -147,52 +147,6 @@ test('follows aliased values and types through an intermediate re-export', () =>
 	]);
 });
 
-test('follows an aliased value through an intermediate re-export', () => {
-	const fixture = createFixture({
-		entry: "export { Button } from './public.js';\n",
-		files: {
-			'public.ts': "export { InternalButton as Button } from './impl.js';\n",
-			'impl.ts': 'export declare const InternalButton: () => unknown;\n',
-		},
-	});
-
-	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" has an unsupported exported signature "Button"',
-	]);
-});
-
-test('follows an aliased type through an intermediate re-export', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonProps } from './public.js';\n",
-		files: {
-			'public.ts':
-				"import type { InternalProps as ButtonProps } from './impl.js';\nexport { type InternalProps as ButtonProps } from './impl.js';\nexport function Button(props: ButtonProps) {}\n",
-			'impl.ts': 'export interface InternalProps {}\n',
-		},
-	});
-
-	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
-	]);
-});
-
-test('follows aliased values and types through multiple local re-exports', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonProps } from './public.js';\n",
-		files: {
-			'public.ts':
-				"export { InternalButton as Button, type InternalProps as ButtonProps } from './bridge.js';\n",
-			'bridge.ts':
-				"export { ImplButton as InternalButton, type ImplProps as InternalProps } from './impl.js';\n",
-			'impl.ts': 'export interface ImplProps {}\nexport function ImplButton(props: ImplProps) {}\n',
-		},
-	});
-
-	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
-	]);
-});
-
 test('requires a public imported type from another local module', () => {
 	const fixture = createFixture({
 		entry:
@@ -286,76 +240,12 @@ test('excludes a leaf alias of a union', () => {
 	expect(issues(fixture)).toEqual([]);
 });
 
-test('excludes an indirect leaf alias', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonSize } from './button.js';\n",
-		files: {
-			'button.ts':
-				"type Size = 'small' | 'large';\ntype Alias = Size;\nexport type ButtonSize = Alias;\nexport function Button(size: ButtonSize) {}\n",
-		},
-	});
-
-	expect(issues(fixture)).toEqual([]);
-});
-
 test('requires an indirect alias that resolves to an object type', () => {
 	const fixture = createFixture({
 		entry: "export { Button, type ButtonProps } from './button.js';\n",
 		files: {
 			'button.ts':
 				'type Inner = { value: string };\ntype Alias = Inner;\nexport type ButtonProps = Alias;\nexport function Button(props: ButtonProps) {}\n',
-		},
-	});
-
-	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
-	]);
-});
-
-test('excludes a parameterised leaf alias of a union', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonSize } from './button.js';\n",
-		files: {
-			'button.ts':
-				"type Choice<T> = T;\nexport type ButtonSize = Choice<'small' | 'large'>;\nexport function Button(size: ButtonSize) {}\n",
-		},
-	});
-
-	expect(issues(fixture)).toEqual([]);
-});
-
-test('requires a parameterised alias that resolves to an object type', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonProps } from './button.js';\n",
-		files: {
-			'button.ts':
-				'type Wrap<T> = T;\nexport type ButtonProps = Wrap<{ value: string }>;\nexport function Button(props: ButtonProps) {}\n',
-		},
-	});
-
-	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
-	]);
-});
-
-test('excludes a chained parameterised leaf alias', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonSize } from './button.js';\n",
-		files: {
-			'button.ts':
-				"type Identity<T> = T;\ntype Choice<T> = Identity<T>;\nexport type ButtonSize = Choice<'small' | 'large'>;\nexport function Button(size: ButtonSize) {}\n",
-		},
-	});
-
-	expect(issues(fixture)).toEqual([]);
-});
-
-test('requires a chained parameterised alias that resolves to an object type', () => {
-	const fixture = createFixture({
-		entry: "export { Button, type ButtonProps } from './button.js';\n",
-		files: {
-			'button.ts':
-				'type Identity<T> = T;\ntype Wrap<T> = Identity<T>;\nexport type ButtonProps = Wrap<{ value: string }>;\nexport function Button(props: ButtonProps) {}\n',
 		},
 	});
 

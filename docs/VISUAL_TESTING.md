@@ -45,8 +45,8 @@ diff images to review each result. Run `pnpm --filter @luke-ui/react run test:vi
 the latest local report.
 
 A diff small enough to keep the capture-wide ratio under 0.1% can be missed, so keep a direct
-assertion for intent the visual gate cannot promise. The LoadingSkeleton rounding fix in #225, for
-example, stays guarded by a `getComputedStyle` assertion.
+assertion for intent the visual gate cannot promise. Prose grid rhythm and Combobox keyboard-inset
+geometry, for example, stay guarded by computed-layout assertions.
 
 ## CI review
 

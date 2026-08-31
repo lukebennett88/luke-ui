@@ -12,7 +12,7 @@ type PrettierModules = {
 	typescript: typeof TypeScriptPlugin;
 };
 
-export function createPrettierLoader(
+function createPrettierLoader(
 	load: () => Promise<PrettierModules>,
 ): () => Promise<PrettierModules> {
 	let modulesPromise: Promise<PrettierModules> | undefined;

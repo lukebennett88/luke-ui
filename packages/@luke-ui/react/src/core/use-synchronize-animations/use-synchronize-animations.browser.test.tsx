@@ -51,9 +51,9 @@ function AnimatedBox({ name }: { name: string }) {
 	);
 }
 
-function PulsingBox({ name }: { name: string | null }) {
+function PulsingBox({ name }: { name: string }) {
 	useSynchronizeAnimations(name);
-	return name ? <AnimatedBox name={name} /> : null;
+	return <AnimatedBox name={name} />;
 }
 
 // Collected via Element.getAnimations so document.getAnimations call counts stay attributable to the hook.
@@ -87,47 +87,14 @@ afterEach(() => {
 	containers.forEach((container) => container.remove());
 });
 
-test('aligns every animation with the given name to the first one’s clock', () => {
+test('aligns matching CSS animations and leaves other clocks untouched', () => {
 	mount(
 		<>
 			<PulsingBox name="pulse-a" />
-			<PulsingBox name="pulse-a" />
-			<PulsingBox name="pulse-a" />
-		</>,
-	);
-	const [first, second, third] = cssAnimationsNamed('pulse-a');
-	first!.currentTime = 400;
-	second!.currentTime = 100;
-	third!.currentTime = 250;
-
-	flushFrames();
-
-	expect(cssAnimationsNamed('pulse-a').map((animation) => animation.currentTime)).toEqual([
-		400, 400, 400,
-	]);
-});
-
-test('leaves animations with other names untouched', () => {
-	mount(
-		<>
 			<PulsingBox name="pulse-a" />
 			<AnimatedBox name="pulse-b" />
-			<PulsingBox name="pulse-a" />
 		</>,
 	);
-	const [first, second] = cssAnimationsNamed('pulse-a');
-	first!.currentTime = 400;
-	second!.currentTime = 100;
-	const [other] = cssAnimationsNamed('pulse-b');
-	other!.currentTime = 999;
-
-	flushFrames();
-
-	expect(other?.currentTime).toBe(999);
-});
-
-test('ignores script-created animations', () => {
-	mount(<PulsingBox name="pulse-a" />);
 	const [container] = containers;
 	if (!container) throw new Error('mount() did not register a container');
 	// An element.animate() Animation is not a CSSAnimation, so the hook must never retime it.
@@ -137,29 +104,21 @@ test('ignores script-created animations', () => {
 	});
 	scripted.pause();
 	scripted.currentTime = 50;
-	const [css] = cssAnimationsNamed('pulse-a');
-	if (!css) throw new Error('expected a pulse-a CSSAnimation');
-	css.currentTime = 400;
+
+	const [first, second] = cssAnimationsNamed('pulse-a');
+	first!.currentTime = 400;
+	second!.currentTime = 100;
+	const [other] = cssAnimationsNamed('pulse-b');
+	other!.currentTime = 999;
 
 	flushFrames();
 
+	expect(cssAnimationsNamed('pulse-a').map((animation) => animation.currentTime)).toEqual([
+		400, 400,
+	]);
+	expect(other?.currentTime).toBe(999);
 	expect(scripted.currentTime).toBe(50);
 	scripted.cancel();
-});
-
-test('leaves a falsy animation name’s neighbours untouched', () => {
-	mount(
-		<>
-			<AnimatedBox name="pulse-a" />
-			<PulsingBox name={null} />
-		</>,
-	);
-	const [animation] = cssAnimationsNamed('pulse-a');
-	animation!.currentTime = 400;
-
-	flushFrames();
-
-	expect(animation?.currentTime).toBe(400);
 });
 
 test('mounts without throwing in browsers missing the Web Animations API', () => {

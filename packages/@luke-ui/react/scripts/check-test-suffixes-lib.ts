@@ -15,7 +15,7 @@ function alternationPattern(options: Array<string>) {
 	return `(?:${options.join('|')})`;
 }
 
-export function globToRegExp(glob: string): RegExp {
+function globToRegExp(glob: string): RegExp {
 	let pattern = '';
 	let index = 0;
 	while (index < glob.length) {

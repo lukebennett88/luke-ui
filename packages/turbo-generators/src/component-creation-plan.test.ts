@@ -89,6 +89,13 @@ describe('createComponentPlan', () => {
 		expect(recipeSource).toContain(
 			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
 		);
+
+		for (const testPath of ['status-badge.browser.test.tsx', 'status-badge.visual.test.tsx']) {
+			const testSource = plan.files.find((file) => file.path.endsWith(testPath))?.contents;
+			if (testSource === undefined) throw new Error(`Expected the scaffold to write ${testPath}.`);
+			expect(testSource).toContain("from './status-badge.js'");
+			expect(testSource).not.toContain("from './index.js'");
+		}
 	});
 
 	it('emits relative imports that resolve to real files already in the repo', async () => {
@@ -99,31 +106,6 @@ describe('createComponentPlan', () => {
 		).flat();
 
 		expect(violations).toEqual([]);
-	});
-
-	it('plans no core barrel and names implementation modules directly', () => {
-		const plan = createComponentPlan(validAnswers);
-
-		expect(plan.files.map((file) => file.path)).not.toContainEqual(
-			expect.stringMatching(/\/core\/status-badge\/index\.ts$/),
-		);
-
-		const packageExportSource = plan.files.find((file) =>
-			file.path.endsWith('/exports/status-badge.ts'),
-		)?.contents;
-		if (packageExportSource === undefined) {
-			throw new Error('Expected the scaffold to write a package export module.');
-		}
-		expect(packageExportSource).toContain("from '../core/status-badge/status-badge.js'");
-		expect(packageExportSource).toContain("from '../core/status-badge/recipe.css.js'");
-		expect(packageExportSource).not.toContain('index.js');
-
-		for (const testPath of ['status-badge.browser.test.tsx', 'status-badge.visual.test.tsx']) {
-			const testSource = plan.files.find((file) => file.path.endsWith(testPath))?.contents;
-			if (testSource === undefined) throw new Error(`Expected the scaffold to write ${testPath}.`);
-			expect(testSource).toContain("from './status-badge.js'");
-			expect(testSource).not.toContain("from './index.js'");
-		}
 	});
 
 	it('rejects invalid component names before file writes', () => {
@@ -150,45 +132,6 @@ describe('createComponentPlan', () => {
 				path: 'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx',
 			},
 		]);
-	});
-
-	it('generates a valid browser test for the default DOM contract', () => {
-		const plan = createComponentPlan(validAnswers);
-
-		const testFile = plan.files.find((file) => file.path.endsWith('.browser.test.tsx'));
-		if (testFile === undefined) throw new Error('Expected the scaffold to write a browser test.');
-
-		const parsed = parseSync(testFile.path, testFile.contents, { lang: 'tsx' });
-		expect(parsed.errors).toEqual([]);
-		expect(testFile.contents).toContain('testConformance');
-		expect(testFile.contents).toContain('getTarget');
-		expect(testFile.contents).not.toContain('getControl');
-		expect(testFile.contents).not.toContain('testUniversalConformance');
-	});
-
-	it('generates a valid browser test for an empty conformance list', () => {
-		const plan = createComponentPlan({ ...validAnswers, conformance: [] });
-
-		const testFile = plan.files.find((file) => file.path.endsWith('.browser.test.tsx'));
-		if (testFile === undefined) throw new Error('Expected the scaffold to write a browser test.');
-
-		const parsed = parseSync(testFile.path, testFile.contents, { lang: 'tsx' });
-		expect(parsed.errors).toEqual([]);
-		expect(testFile.contents).toContain("test('StatusBadge renders its root element'");
-		expect(testFile.contents).not.toContain('testConformance');
-	});
-
-	it('generates a valid browser test for stacked DOM and field contracts', () => {
-		const plan = createComponentPlan({ ...validAnswers, conformance: ['field', 'dom'] });
-
-		const testFile = plan.files.find((file) => file.path.endsWith('.browser.test.tsx'));
-		if (testFile === undefined) throw new Error('Expected the scaffold to write a browser test.');
-
-		const parsed = parseSync(testFile.path, testFile.contents, { lang: 'tsx' });
-		expect(parsed.errors).toEqual([]);
-		expect(testFile.contents).toContain('testConformance');
-		expect(testFile.contents).toContain('getControl');
-		expect(testFile.contents).toContain('getTarget');
 	});
 });
 

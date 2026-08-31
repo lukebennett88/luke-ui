@@ -91,7 +91,8 @@ test('InputGroupInput resolves object and callback refs to the input element', (
 // `aria-invalid` stays null, painting an untouched required field invalid even
 // though assistive technology is told it's fine. Guard that the group only picks
 // up the invalid treatment once React Aria has recorded a real validation
-// failure. The in-control icon is the invalid cue Luke UI owns.
+// failure. `errorMessage={false}` must not suppress that cue. The in-control
+// icon is the invalid cue Luke UI owns.
 test('a required field is painted invalid only after a real submit fails validation', async () => {
 	// A plain `<form>`, not react-aria-components' `Form`: the latter fails to
 	// resolve in this browser test environment. React Aria's own field
@@ -100,26 +101,24 @@ test('a required field is painted invalid only after a real submit fails validat
 	render(
 		<form>
 			<TextField isRequired label="Email" name="email" />
+			<TextField errorMessage={false} isRequired label="Username" name="username" />
 			<button type="submit">Submit</button>
 		</form>,
 	);
 
 	expect(indicatorFor('Email')).toBe(null);
+	expect(indicatorFor('Username')).toBe(null);
 
 	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
 
 	await expect.poll(() => indicatorFor('Email')).not.toBe(null);
+	await expect.poll(() => indicatorFor('Username')).not.toBe(null);
+	await expect
+		.poll(() => getDescribedText(page.getByRole('textbox', { name: 'Username' }).element()).length)
+		.toBeGreaterThan(0);
 });
 
-test('an errorMessage alone marks the field invalid', () => {
-	render(<TextField errorMessage="Enter a valid email." label="Email" name="email" />);
-
-	const input = page.getByRole('textbox', { name: 'Email' });
-	expect(indicatorFor('Email')).not.toBe(null);
-	expect(getDescribedText(input.element())).toBe('Enter a valid email.');
-});
-
-test('a rich errorMessage marks the field invalid and renders its markup', () => {
+test('an errorMessage marks the field invalid and renders its markup', () => {
 	render(
 		<TextField
 			errorMessage={
@@ -134,22 +133,4 @@ test('a rich errorMessage marks the field invalid and renders its markup', () =>
 
 	expect(indicatorFor('Email')).not.toBe(null);
 	expect(page.getByText('terms').element().tagName).toBe('STRONG');
-});
-
-test("a falsy errorMessage does not suppress React Aria's own validation message", async () => {
-	render(
-		<form>
-			<TextField errorMessage={false} isRequired label="Email" name="email" />
-			<button type="submit">Submit</button>
-		</form>,
-	);
-
-	expect(indicatorFor('Email')).toBe(null);
-
-	await userEvent.click(page.getByRole('button', { name: 'Submit' }));
-
-	await expect.poll(() => indicatorFor('Email')).not.toBe(null);
-	await expect
-		.poll(() => getDescribedText(page.getByRole('textbox', { name: 'Email' }).element()).length)
-		.toBeGreaterThan(0);
 });
