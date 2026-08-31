@@ -148,16 +148,15 @@
 			automerge: true,
 		},
 		{
-			// Runtime and peer dependencies of the published @luke-ui/react. Bumping one changes what
-			// consumers install, so the PR needs a changeset, and Renovate cannot write one.
-			// Keep in step with `dependencies` and `peerDependencies` in
-			// packages/@luke-ui/react/package.json.
+			// Runtime and peer dependencies of @luke-ui/react. The package is unpublished at 0.0.0, so
+			// none of these needs a changeset yet; the label is advance notice that a bump here will
+			// change what consumers install once 1.0.0 ships. The StyleX migration deliberately has no
+			// entry: the Vanilla Extract packages it removes are gone from this list, and the StyleX and
+			// Babel packages it adds are never added to it. Re-sync the list against
+			// `dependencies` and `peerDependencies` in packages/@luke-ui/react/package.json at 1.0.0.
 			matchPackageNames: [
 				'@capsizecss/metrics',
-				'@capsizecss/vanilla-extract',
 				'@react-aria/utils',
-				'@vanilla-extract/css',
-				'@vanilla-extract/recipes',
 				'react',
 				'react-aria-components',
 				'react-dom',

@@ -5,6 +5,7 @@ import selectorParser from 'postcss-selector-parser';
 import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
+import { stylexBoundary } from './stylex-boundary.js';
 
 const retainedLayerNames = ['reset', 'theme', 'recipes', 'utilities'] as const;
 const retainedLayerNameSet = new Set<string>(retainedLayerNames);
@@ -17,10 +18,7 @@ type LineClampClasses = {
 };
 
 test('builds the public stylesheet with the retained layer contract', async () => {
-	const stylesheet = await readFile(
-		new URL('../../../dist/stylesheet.css', import.meta.url),
-		'utf8',
-	);
+	const stylesheet = await readVanillaExtractStylesheet();
 	const icon = await import('@luke-ui/react/icon');
 	const text = await import('@luke-ui/react/text');
 	const styles = await import('@luke-ui/react/styles');
@@ -109,10 +107,7 @@ for (const [name, mutate] of stylesheetMutations) {
 }
 
 test('queries responsive conditions on the logical inline axis', async () => {
-	const stylesheet = await readFile(
-		new URL('../../../dist/stylesheet.css', import.meta.url),
-		'utf8',
-	);
+	const stylesheet = await readVanillaExtractStylesheet();
 
 	// The containers are `container-type: inline-size`, which answers inline-axis queries. A
 	// physical `width` query only agrees with that in a horizontal writing mode.
@@ -131,6 +126,20 @@ test('recognises escaped class identifiers', () => {
 		);
 	}).not.toThrow();
 });
+
+/**
+ * The layer contract below describes the Vanilla Extract stylesheet. The package build appends
+ * StyleX's unlayered rules after it, so read only the portion before that boundary. #536 brings
+ * StyleX under the layer contract and retires this split.
+ */
+async function readVanillaExtractStylesheet(): Promise<string> {
+	const stylesheet = await readFile(
+		new URL('../../../dist/stylesheet.css', import.meta.url),
+		'utf8',
+	);
+
+	return stylesheet.split(stylexBoundary)[0] ?? stylesheet;
+}
 
 function assertStylesheetContract(
 	stylesheet: string,

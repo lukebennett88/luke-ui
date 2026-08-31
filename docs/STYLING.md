@@ -8,6 +8,11 @@ import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from `@luke-ui/
 `@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes the whole document from `:root`,
 with no class and no JS required. Neither step injects styles at runtime.
 
+The package build compiles two styling engines. Vanilla Extract produces the stylesheet, and a
+StyleX extraction pass runs before the React Compiler and appends its rules to the same
+`dist/stylesheet.css`, so consumers still import one file. Every production component style is
+Vanilla Extract. StyleX is build plumbing only, exercised by a single internal fixture.
+
 ## Structure
 
 Paths below are rooted in `packages/@luke-ui/react/src/`. Core style, primitive, overlay, and
@@ -22,6 +27,10 @@ utility modules live under `core/`. Theme modules live under `theme/`.
   primitive and overlay style modules. Keep the list in code-point order by path for deterministic
   output. Named layers make cross-layer priority explicit. Specificity and source order still matter
   within a layer.
+- `core/styles/stylex-fixture.ts`: a non-exported fixture holding one `stylex.create` rule, built as
+  its own pack entry so the StyleX extraction pass always has something to compile. It styles
+  nothing. `core/styles/stylex-boundary.ts` holds the comment the build writes between the two
+  engines' output.
 - `core/styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
 - `core/styles/input-states.ts`: the shared field control-state selectors
