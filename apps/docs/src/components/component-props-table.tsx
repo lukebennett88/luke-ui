@@ -53,20 +53,18 @@ function PropGroup({
 	id: string;
 	type: Record<string, TypeNode>;
 }) {
-	const headingId = `${id}-${slugify(group.name)}-heading`;
+	const triggerId = `${id}-${slugify(group.name)}-trigger`;
 	const tableId = `${id}-${slugify(group.name)}-table`;
 
 	return (
 		<Collapsible className="rounded-2xl border bg-fd-card" defaultOpen={group.defaultOpen}>
-			<h3 className="not-prose contents">
-				<CollapsibleTrigger
-					className="group flex w-full items-center justify-between px-4 py-3 text-start"
-					id={headingId}
-				>
-					<span className="font-medium text-fd-foreground text-sm">{group.name}</span>
-					<ChevronIcon />
-				</CollapsibleTrigger>
-			</h3>
+			<CollapsibleTrigger
+				className="group flex w-full items-center justify-between px-4 py-3 text-start"
+				id={triggerId}
+			>
+				<span className="font-medium text-fd-foreground text-sm">{group.name}</span>
+				<ChevronIcon />
+			</CollapsibleTrigger>
 			<CollapsibleContent className="border-fd-border border-t px-1 pb-1">
 				<TypeTable id={tableId} type={type} />
 			</CollapsibleContent>

@@ -36,6 +36,7 @@ const FORM_PROPS = new Set([
 	'formTarget',
 	'inputMode',
 	'isDisabled',
+	'isInvalid',
 	'isReadOnly',
 	'isRequired',
 	'max',
@@ -46,6 +47,7 @@ const FORM_PROPS = new Set([
 	'pattern',
 	'step',
 	'type',
+	'validate',
 	'validationBehavior',
 	'value',
 ]);

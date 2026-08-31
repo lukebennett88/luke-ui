@@ -62,3 +62,18 @@ test('renders the native props note with the exported type name', () => {
 		'`HeadingProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
 	);
 });
+
+test('classifies every ComboboxRootProps form/validation prop as Forms', () => {
+	// ComboboxRootProps (packages/@luke-ui/react/src/core/primitives/combobox/root.tsx)
+	// redeclares these nine RAC props as its form/validation contract. Naming them literally
+	// here means upstream drift, or a future edit to FORM_PROPS, fails this test loudly.
+	expect(classifyPropGroup('autoFocus')).toBe('Forms');
+	expect(classifyPropGroup('form')).toBe('Forms');
+	expect(classifyPropGroup('isDisabled')).toBe('Forms');
+	expect(classifyPropGroup('isInvalid')).toBe('Forms');
+	expect(classifyPropGroup('isReadOnly')).toBe('Forms');
+	expect(classifyPropGroup('isRequired')).toBe('Forms');
+	expect(classifyPropGroup('name')).toBe('Forms');
+	expect(classifyPropGroup('validate')).toBe('Forms');
+	expect(classifyPropGroup('validationBehavior')).toBe('Forms');
+});
