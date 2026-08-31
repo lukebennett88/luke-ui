@@ -2,7 +2,10 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
-import { loadComponentGuideInventory } from './component-guide-inventory.js';
+import {
+	buildComponentGuideInventory,
+	findComponentGuideFiles,
+} from './component-guide-inventory.js';
 import {
 	filterGeneratedDoc,
 	getSharedPropProject,
@@ -11,12 +14,14 @@ import {
 } from './component-prop-analysis.js';
 import type { PropProject } from './component-prop-analysis.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
-import { GUIDE_TAUGHT_PROPS, tableKey } from './guide-prop-audit-data.js';
+import { GUIDE_TAUGHT_PROPS, guideTableKey } from './guide-prop-audit-data.js';
 
 const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const reactSrcDir = lukeUiReactSrcDir(repoRoot);
-const inventory = loadComponentGuideInventory({
-	componentsDir: resolve(repoRoot, 'apps/docs/content/docs/components'),
+const componentsDir = resolve(repoRoot, 'apps/docs/content/docs/components');
+const inventory = buildComponentGuideInventory({
+	componentsDir,
+	guides: findComponentGuideFiles(componentsDir),
 	reactPackageJsonPath: resolve(repoRoot, 'packages/@luke-ui/react/package.json'),
 });
 const authoredTables = inventory.guides.flatMap((guide) =>
@@ -46,8 +51,10 @@ test('every component guide declares at least one API table', () => {
 	).toEqual([]);
 });
 
-test('every authored API table has curated taught-prop metadata', () => {
-	const authoredKeys = new Set(authoredTables.map((table) => tableKey(table.path, table.name)));
+test('every authored guide/table pair has curated taught-prop metadata', () => {
+	const authoredKeys = new Set(
+		authoredTables.map((table) => guideTableKey(table.guide, table.path, table.name)),
+	);
 	const auditKeys = new Set(Object.keys(GUIDE_TAUGHT_PROPS));
 
 	expect({
@@ -58,7 +65,7 @@ test('every authored API table has curated taught-prop metadata', () => {
 
 test.each(
 	authoredTables.flatMap((table) => {
-		const props = GUIDE_TAUGHT_PROPS[tableKey(table.path, table.name)];
+		const props = GUIDE_TAUGHT_PROPS[guideTableKey(table.guide, table.path, table.name)];
 		if (props === undefined || props.length === 0) return [];
 		return [{ ...table, props }];
 	}),

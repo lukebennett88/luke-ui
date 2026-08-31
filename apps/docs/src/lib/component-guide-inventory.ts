@@ -30,11 +30,6 @@ export interface ComponentGuideInventoryInput {
 	reactPackageJsonPath: string;
 }
 
-export interface LoadComponentGuideInventoryInput {
-	componentsDir: string;
-	reactPackageJsonPath: string;
-}
-
 /** Component guides with a public `source` frontmatter entry, in the same shape `check:docs` uses. */
 export function findComponentGuideFiles(componentsDir: string): Array<{
 	group: string;
@@ -57,17 +52,6 @@ export function findComponentGuideFiles(componentsDir: string): Array<{
 				source,
 			},
 		];
-	});
-}
-
-/** Builds the shared component-guide inventory from on-disk guides. */
-export function loadComponentGuideInventory(
-	input: LoadComponentGuideInventoryInput,
-): ComponentGuideInventory {
-	return buildComponentGuideInventory({
-		componentsDir: input.componentsDir,
-		guides: findComponentGuideFiles(input.componentsDir),
-		reactPackageJsonPath: input.reactPackageJsonPath,
 	});
 }
 
