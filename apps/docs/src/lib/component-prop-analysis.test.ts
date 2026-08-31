@@ -433,12 +433,18 @@ const AUDITED_TYPES: ReadonlyArray<{
 		visible: ['cite', 'lineClamp', 'textWrap'],
 	},
 	{
-		// The field guide teaches `FieldDescription` as helper text placed under a field. It wraps RAC's
-		// `Text`, whose one documented addition over a plain element is `elementType`, plus `render`.
+		// The field guide teaches connecting labels with `htmlFor`.
+		forwardsDomProps: true,
+		name: 'FieldLabelProps',
+		path: 'packages/@luke-ui/react/src/core/primitives/field/label.tsx',
+		visible: ['elementType', 'htmlFor', 'necessityIndicator', 'render'],
+	},
+	{
+		// The field guide teaches connecting helper text with `id` and `aria-describedby`.
 		forwardsDomProps: true,
 		name: 'FieldDescriptionProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/field/description.tsx',
-		visible: ['elementType', 'render'],
+		visible: ['elementType', 'id', 'render'],
 	},
 	{
 		// `FieldError` styles RAC's field error slot, so it documents the same element-choice contract.
