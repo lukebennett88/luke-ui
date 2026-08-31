@@ -5,13 +5,13 @@ import { findComponentDocContractIssues } from '../src/lib/component-doc-contrac
 import {
 	buildComponentGuideInventory,
 	findCategoryMetadataIssues,
+	findComponentGuideFiles,
 	findGuideNavigationIssues,
 	findGuideSourceIssues,
 	findRepeatedMetadataIssues,
 } from '../src/lib/component-guide-inventory.js';
 import { findComponentPropsContractIssues } from '../src/lib/component-props-contract.js';
 import { findComponentPropsTableTags } from '../src/lib/component-props-table-tags.js';
-import { readFrontmatter } from '../src/lib/docs-frontmatter.js';
 import { findMdxFiles } from '../src/lib/docs-mdx-files.js';
 import { exampleBlockSources } from '../src/lib/example-block-sources.js';
 
@@ -141,29 +141,6 @@ export function diffAgainstBaseline(
 		extra: issues.filter((issue) => !baselineSet.has(issue)),
 		stale: baseline.filter((issue) => !issueSet.has(issue)),
 	};
-}
-
-function findComponentGuideFiles(docsDir: string): Array<{
-	group: string;
-	relativePath: string;
-	source: string;
-}> {
-	if (!existsSync(docsDir)) return [];
-	const resolvedDocsDir = resolve(docsDir);
-	const files: Array<{ group: string; relativePath: string; source: string }> = [];
-
-	for (const file of findMdxFiles(resolvedDocsDir)) {
-		if (dirname(dirname(file)) !== resolvedDocsDir) continue;
-		const source = readFileSync(file, 'utf8');
-		if (readFrontmatter(source).source === undefined) continue;
-		files.push({
-			group: basename(dirname(file)),
-			relativePath: posixRelative(resolvedDocsDir, file),
-			source,
-		});
-	}
-
-	return files;
 }
 
 function findAuthoredGuideFiles(docsDir: string): Array<{ relativePath: string; source: string }> {

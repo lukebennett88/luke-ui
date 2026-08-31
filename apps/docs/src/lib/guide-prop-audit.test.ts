@@ -1,7 +1,8 @@
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
+import { loadComponentGuideInventory } from './component-guide-inventory.js';
 import {
 	filterGeneratedDoc,
 	getSharedPropProject,
@@ -10,19 +11,20 @@ import {
 } from './component-prop-analysis.js';
 import type { PropProject } from './component-prop-analysis.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
-import { GUIDE_PROP_AUDIT } from './guide-prop-audit-data.js';
-import {
-	discoverComponentGuides,
-	findGuideCoverageMismatches,
-	findGuideTableMismatches,
-	flattenAuditedTypes,
-	readGuideComponentPropsTables,
-} from './guide-prop-audit.js';
+import { GUIDE_TAUGHT_PROPS, tableKey } from './guide-prop-audit-data.js';
 
-const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
+const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 const reactSrcDir = lukeUiReactSrcDir(repoRoot);
-const docsComponentsDir = resolve(repoRoot, 'apps/docs/content/docs/components');
-const discoveredGuides = discoverComponentGuides(docsComponentsDir);
+const inventory = loadComponentGuideInventory({
+	componentsDir: resolve(repoRoot, 'apps/docs/content/docs/components'),
+	reactPackageJsonPath: resolve(repoRoot, 'packages/@luke-ui/react/package.json'),
+});
+const authoredTables = inventory.guides.flatMap((guide) =>
+	guide.props.map((table) => ({
+		guide: guide.relativePath,
+		...table,
+	})),
+);
 const generator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache(resolve(repoRoot, 'apps/docs/.source/fumadocs-typescript')),
 });
@@ -38,47 +40,29 @@ async function visiblePropNames(path: string, name: string): Promise<Array<strin
 	return filterGeneratedDoc(doc, declaration, reactSrcDir).entries.map((entry) => entry.name);
 }
 
-test('every main component guide is represented exactly once in the prop audit', () => {
-	const { duplicateAuditGuides, missingAuditGuides, staleAuditGuides } =
-		findGuideCoverageMismatches(discoveredGuides, GUIDE_PROP_AUDIT);
-
+test('every component guide declares at least one API table', () => {
 	expect(
-		{
-			discoveredGuides,
-			duplicateAuditGuides,
-			missingAuditGuides,
-			staleAuditGuides,
-		},
-		'guide coverage must match the on-disk component guides',
-	).toEqual({
-		discoveredGuides,
-		duplicateAuditGuides: [],
-		missingAuditGuides: [],
-		staleAuditGuides: [],
-	});
+		inventory.guides.filter((guide) => guide.props.length === 0).map((guide) => guide.relativePath),
+	).toEqual([]);
 });
 
-test('every audited API table matches an authored component-props-table tag', () => {
-	const missingAuditedTables: Array<string> = [];
-	const staleAuditedTables: Array<string> = [];
+test('every authored API table has curated taught-prop metadata', () => {
+	const authoredKeys = new Set(authoredTables.map((table) => tableKey(table.path, table.name)));
+	const auditKeys = new Set(Object.keys(GUIDE_TAUGHT_PROPS));
 
-	for (const entry of GUIDE_PROP_AUDIT) {
-		const authoredTables = readGuideComponentPropsTables(docsComponentsDir, entry.guide);
-		const mismatches = findGuideTableMismatches(entry.guide, authoredTables, entry.types);
-		missingAuditedTables.push(...mismatches.missingAuditedTables);
-		staleAuditedTables.push(...mismatches.staleAuditedTables);
-	}
-
-	expect(
-		{ missingAuditedTables, staleAuditedTables },
-		'audit metadata must mirror each guide’s authored API tables',
-	).toEqual({
-		missingAuditedTables: [],
-		staleAuditedTables: [],
-	});
+	expect({
+		missing: [...authoredKeys].filter((key) => !auditKeys.has(key)),
+		stale: [...auditKeys].filter((key) => !authoredKeys.has(key)),
+	}).toEqual({ missing: [], stale: [] });
 });
 
-test.each(flattenAuditedTypes(GUIDE_PROP_AUDIT).filter(({ props }) => props.length > 0))(
+test.each(
+	authoredTables.flatMap((table) => {
+		const props = GUIDE_TAUGHT_PROPS[tableKey(table.path, table.name)];
+		if (props === undefined || props.length === 0) return [];
+		return [{ ...table, props }];
+	}),
+)(
 	'$guide teaches documented props on $name',
 	async ({ guide, name, path, props }) => {
 		const names = await visiblePropNames(path, name);
@@ -88,66 +72,3 @@ test.each(flattenAuditedTypes(GUIDE_PROP_AUDIT).filter(({ props }) => props.leng
 	},
 	TS_MORPH_TEST_TIMEOUT,
 );
-
-test('guide prop audit completeness fails when a guide entry is removed', () => {
-	const incompleteAudit = GUIDE_PROP_AUDIT.slice(1);
-	const { missingAuditGuides } = findGuideCoverageMismatches(discoveredGuides, incompleteAudit);
-	expect(missingAuditGuides.length).toBeGreaterThan(0);
-});
-
-test('guide prop audit metadata fails when an audited API table no longer exists in a guide', () => {
-	const comboboxEntry = GUIDE_PROP_AUDIT.find((entry) => entry.guide === 'primitives/combobox.mdx');
-	if (comboboxEntry === undefined) {
-		throw new Error('Expected combobox guide audit entry');
-	}
-
-	const staleAuditTypes = [
-		...comboboxEntry.types,
-		{
-			name: 'RemovedComboboxProps',
-			path: 'packages/@luke-ui/react/src/core/primitives/combobox/trigger.tsx',
-			props: [],
-		},
-	];
-
-	const { staleAuditedTables } = findGuideTableMismatches(
-		comboboxEntry.guide,
-		readGuideComponentPropsTables(docsComponentsDir, comboboxEntry.guide),
-		staleAuditTypes,
-	);
-	expect(staleAuditedTables.length).toBeGreaterThan(0);
-});
-
-test('guide prop audit metadata fails when a guide API table is missing from the audit', () => {
-	const comboboxEntry = GUIDE_PROP_AUDIT.find((entry) => entry.guide === 'primitives/combobox.mdx');
-	if (comboboxEntry === undefined) {
-		throw new Error('Expected combobox guide audit entry');
-	}
-
-	const incompleteAuditTypes = comboboxEntry.types.filter(
-		(type) => type.name !== 'ComboboxTriggerProps',
-	);
-
-	const { missingAuditedTables } = findGuideTableMismatches(
-		comboboxEntry.guide,
-		readGuideComponentPropsTables(docsComponentsDir, comboboxEntry.guide),
-		incompleteAuditTypes,
-	);
-	expect(missingAuditedTables.length).toBeGreaterThan(0);
-});
-
-test('prop visibility check fails when a taught prop disappears from generated output', () => {
-	const taught = ['cite', 'lineClamp', 'textWrap'];
-	const visibleWithoutCite = ['lineClamp', 'textWrap'];
-	const missing = taught.filter((prop) => !visibleWithoutCite.includes(prop));
-	expect(missing).toEqual(['cite']);
-});
-
-/** Every main component guide (not legacy `/props` pages) declares at least one API table. */
-test('every main component guide declares a component-props-table', () => {
-	const missing = discoveredGuides.filter((guide) => {
-		const tables = readGuideComponentPropsTables(docsComponentsDir, guide);
-		return tables.length === 0;
-	});
-	expect(missing).toEqual([]);
-});
