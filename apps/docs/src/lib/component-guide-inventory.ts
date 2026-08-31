@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { basename, dirname, relative, resolve } from 'node:path';
 import { findComponentPropsTableTags } from './component-props-table-tags.js';
 import { readFrontmatter } from './docs-frontmatter.js';
+import { findMdxFiles } from './docs-mdx-files.js';
 
 const EXPORTS_PREFIX = 'packages/@luke-ui/react/src/exports/';
 
@@ -27,6 +28,31 @@ export interface ComponentGuideInventoryInput {
 	componentsDir: string;
 	guides: ReadonlyArray<{ group: string; relativePath: string; source: string }>;
 	reactPackageJsonPath: string;
+}
+
+/** Component guides with a public `source` frontmatter entry, in the same shape `check:docs` uses. */
+export function findComponentGuideFiles(componentsDir: string): Array<{
+	group: string;
+	relativePath: string;
+	source: string;
+}> {
+	if (!existsSync(componentsDir)) return [];
+
+	const resolvedComponentsDir = resolve(componentsDir);
+	return findMdxFiles(resolvedComponentsDir).flatMap((file) => {
+		if (dirname(dirname(file)) !== resolvedComponentsDir) return [];
+
+		const source = readFileSync(file, 'utf8');
+		if (readFrontmatter(source).source === undefined) return [];
+
+		return [
+			{
+				group: basename(dirname(file)),
+				relativePath: posixRelative(resolvedComponentsDir, file),
+				source,
+			},
+		];
+	});
 }
 
 /** Reads the root metadata and the package manifest once, alongside the already-read guides. */
@@ -241,4 +267,8 @@ function sameOrder(actual: ReadonlyArray<string>, expected: ReadonlyArray<string
 
 function formatList(pages: ReadonlyArray<string>): string {
 	return `[${pages.join(', ')}]`;
+}
+
+function posixRelative(from: string, to: string): string {
+	return relative(from, to).split('\\').join('/');
 }
