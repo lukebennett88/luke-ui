@@ -5,22 +5,30 @@ import type { PropsWithChildren } from 'react';
 
 export default () => {
 	return (
-		<Box alignItems="flex-end" display="flex" gap="sp16">
+		<Box alignItems="flex-end" display="flex" flexWrap="wrap" gap="sp16">
 			<FlexCol>
 				<Icon name="search" size="xsmall" />
-				<Text color="secondary">xsmall</Text>
+				<Text color="secondary" typography="caption">
+					X-small
+				</Text>
 			</FlexCol>
 			<FlexCol>
 				<Icon name="search" size="small" />
-				<Text color="secondary">small</Text>
+				<Text color="secondary" typography="caption">
+					Small
+				</Text>
 			</FlexCol>
 			<FlexCol>
 				<Icon name="search" size="medium" />
-				<Text color="secondary">medium</Text>
+				<Text color="secondary" typography="caption">
+					Medium
+				</Text>
 			</FlexCol>
 			<FlexCol>
 				<Icon name="search" size="large" />
-				<Text color="secondary">large</Text>
+				<Text color="secondary" typography="caption">
+					Large
+				</Text>
 			</FlexCol>
 		</Box>
 	);

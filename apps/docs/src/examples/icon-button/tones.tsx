@@ -1,12 +1,18 @@
-import { Box } from '@luke-ui/react/box';
 import { IconButton } from '@luke-ui/react/icon-button';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp16">
-			<IconButton aria-label="Search" icon="search" />
-			<IconButton aria-label="Add item" icon="add" tone="accent" />
-			<IconButton aria-label="Delete item" icon="delete" tone="danger" />
-		</Box>
+		<Comparison>
+			<ComparisonItem label="Neutral">
+				<IconButton aria-label="Example action" icon="search" tone="neutral" />
+			</ComparisonItem>
+			<ComparisonItem label="Accent">
+				<IconButton aria-label="Example action" icon="search" tone="accent" />
+			</ComparisonItem>
+			<ComparisonItem label="Danger">
+				<IconButton aria-label="Example action" icon="search" tone="danger" />
+			</ComparisonItem>
+		</Comparison>
 	);
 };

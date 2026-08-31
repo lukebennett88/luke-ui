@@ -23,6 +23,9 @@ const PLAYGROUND_THIRD_PARTY_SPECIFIERS = [
 	'zod',
 ] as const;
 
+/** Docs-only helpers that documented examples can import in the playground. */
+const PLAYGROUND_DOCS_SPECIFIERS = ['#docs/comparison'] as const;
+
 const packageJsonSchema = z.object({
 	exports: z.record(z.string(), z.string()),
 });
@@ -60,6 +63,7 @@ export function playgroundRuntimeSpecifierList(
 		...lukeUiPlaygroundSpecifiers(reactExports),
 		...PLAYGROUND_BASE_SPECIFIERS,
 		...PLAYGROUND_THIRD_PARTY_SPECIFIERS,
+		...PLAYGROUND_DOCS_SPECIFIERS,
 	];
 }
 

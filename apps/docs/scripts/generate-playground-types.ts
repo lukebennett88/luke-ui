@@ -20,9 +20,11 @@ import * as z from 'zod';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const docsPackageJsonPath = resolve(scriptDir, '../package.json');
+const docsExamplesDir = resolve(scriptDir, '../src/examples');
 const reactPackageDir = resolve(scriptDir, '../../../packages/@luke-ui/react');
 const rainbowSprinklesDir = resolve(scriptDir, '../../../packages/@luke-ui/rainbow-sprinkles');
 const outputPath = resolve(scriptDir, '../src/generated/playground-types.generated.json');
+const docsComparisonVirtualPath = 'file:///docs/comparison.tsx';
 
 const files: Record<string, string> = {};
 
@@ -32,6 +34,10 @@ function virtualPath(packageName: string, relativePath: string): string {
 
 function addFile(packageName: string, packageDir: string, filePath: string): void {
 	files[virtualPath(packageName, relative(packageDir, filePath))] = readFileSync(filePath, 'utf8');
+}
+
+function addDocsFile(virtualPath: string, filePath: string): void {
+	files[virtualPath] = readFileSync(filePath, 'utf8');
 }
 
 function walk(dir: string, visit: (filePath: string) => void): void {
@@ -150,6 +156,8 @@ const externalTypePackages: Array<[string, string]> = [
 for (const [packageName, packageDir] of externalTypePackages) {
 	addTypesPackage(packageName, packageDir);
 }
+
+addDocsFile(docsComparisonVirtualPath, join(docsExamplesDir, 'comparison.tsx'));
 
 const output = JSON.stringify(files);
 mkdirSync(dirname(outputPath), { recursive: true });

@@ -29,6 +29,7 @@ test('finds examples that are neither documented nor imported by another example
 	writeFileSync(
 		join(examplesDir, 'profile/basic.tsx'),
 		[
+			"import { Comparison } from '#docs/comparison';",
 			"import { Preferences } from './preferences';",
 			"import { ProfileDetails } from './profile-details.js';",
 			'',
@@ -44,6 +45,10 @@ test('finds examples that are neither documented nor imported by another example
 	writeFileSync(
 		join(examplesDir, 'profile/preferences.tsx'),
 		'export function Preferences() { return null; }\n',
+	);
+	writeFileSync(
+		join(examplesDir, 'comparison.tsx'),
+		'export function Comparison() { return null; }\n',
 	);
 	writeFileSync(
 		join(examplesDir, 'profile/obsolete.tsx'),

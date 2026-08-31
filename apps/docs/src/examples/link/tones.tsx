@@ -1,24 +1,19 @@
-import { Box } from '@luke-ui/react/box';
 import { Link } from '@luke-ui/react/link';
-import { Text } from '@luke-ui/react/text';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box display="flex" flexWrap="wrap" gap="sp16">
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Accent
-				</Text>
-				<Link href="#example-destination">Example destination</Link>
-			</Box>
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Neutral
-				</Text>
+		<Comparison>
+			<ComparisonItem label="Accent">
+				<Link href="#example-destination" tone="accent">
+					Example destination
+				</Link>
+			</ComparisonItem>
+			<ComparisonItem label="Neutral">
 				<Link href="#example-destination" tone="neutral">
 					Example destination
 				</Link>
-			</Box>
-		</Box>
+			</ComparisonItem>
+		</Comparison>
 	);
 };

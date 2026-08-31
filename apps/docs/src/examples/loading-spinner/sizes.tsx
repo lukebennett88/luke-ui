@@ -1,13 +1,21 @@
-import { Box } from '@luke-ui/react/box';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" gap="sp16">
-			<LoadingSpinner aria-label="Loading inline content" size="xsmall" />
-			<LoadingSpinner aria-label="Loading compact control" size="small" />
-			<LoadingSpinner aria-label="Loading content" size="medium" />
-			<LoadingSpinner aria-label="Loading prominent content" size="large" />
-		</Box>
+		<Comparison>
+			<ComparisonItem label="X-small">
+				<LoadingSpinner aria-label="Loading" size="xsmall" />
+			</ComparisonItem>
+			<ComparisonItem label="Small">
+				<LoadingSpinner aria-label="Loading" size="small" />
+			</ComparisonItem>
+			<ComparisonItem label="Medium">
+				<LoadingSpinner aria-label="Loading" size="medium" />
+			</ComparisonItem>
+			<ComparisonItem label="Large">
+				<LoadingSpinner aria-label="Loading" size="large" />
+			</ComparisonItem>
+		</Comparison>
 	);
 };

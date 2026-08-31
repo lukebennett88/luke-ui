@@ -1,18 +1,24 @@
-import { Box } from '@luke-ui/react/box';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box display="grid" gap="sp12">
-			<Checkbox defaultSelected size="small">
-				Small
-			</Checkbox>
-			<Checkbox defaultSelected size="medium">
-				Medium
-			</Checkbox>
-			<Checkbox defaultSelected size="large">
-				Large
-			</Checkbox>
-		</Box>
+		<Comparison direction="vertical">
+			<ComparisonItem label="Small">
+				<Checkbox defaultSelected size="small">
+					Example checkbox
+				</Checkbox>
+			</ComparisonItem>
+			<ComparisonItem label="Medium">
+				<Checkbox defaultSelected size="medium">
+					Example checkbox
+				</Checkbox>
+			</ComparisonItem>
+			<ComparisonItem label="Large">
+				<Checkbox defaultSelected size="large">
+					Example checkbox
+				</Checkbox>
+			</ComparisonItem>
+		</Comparison>
 	);
 };

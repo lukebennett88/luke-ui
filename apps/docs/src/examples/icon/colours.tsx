@@ -5,30 +5,48 @@ import type { PropsWithChildren } from 'react';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" gap="sp16">
+		<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp16">
+			<FlexCol>
+				<Text color="primary">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Primary</Text>
+			</FlexCol>
+			<FlexCol>
+				<Text color="secondary">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Secondary</Text>
+			</FlexCol>
 			<FlexCol>
 				<Text color="accent">
-					<Icon name="checkCircle" title="Accent" />
+					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">accent</Text>
+				<Text color="secondary">Accent</Text>
+			</FlexCol>
+			<FlexCol>
+				<Text color="info">
+					<Icon name="checkCircle" />
+				</Text>
+				<Text color="secondary">Info</Text>
 			</FlexCol>
 			<FlexCol>
 				<Text color="success">
-					<Icon name="checkCircle" title="Success" />
+					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">success</Text>
+				<Text color="secondary">Success</Text>
 			</FlexCol>
 			<FlexCol>
 				<Text color="warning">
-					<Icon name="exclamationTriangle" title="Warning" />
+					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">warning</Text>
+				<Text color="secondary">Warning</Text>
 			</FlexCol>
 			<FlexCol>
 				<Text color="danger">
-					<Icon name="closeCircle" title="Danger" />
+					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">danger</Text>
+				<Text color="secondary">Danger</Text>
 			</FlexCol>
 		</Box>
 	);

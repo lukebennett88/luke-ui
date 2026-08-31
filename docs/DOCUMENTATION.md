@@ -210,6 +210,8 @@ the code first.
 - In comparison examples, content may name the value being demonstrated when the content is only a
   specimen label, such as "Small", "Medium", and "Large". Keep those names in a caption beside the
   control, not in the control's own label.
+- Use a docs-only comparison helper when repeated caption and layout markup would hide the component
+  JSX. Keep each demonstrated component and its prop values visible in the example.
 - Do not use API terms as labels for interactive controls. When the control's purpose is incidental,
   use a neutral or self-referential label instead.
 - When an example needs extended text, choose a subject that helps explain why the component
@@ -219,14 +221,14 @@ the code first.
 - Keep the example as small as it can be without becoming artificial.
 - Choose one approach and show it. Do not present several interchangeable ways to reach the same
   result.
-- Do not demonstrate every value a prop accepts. Show the values a reader chooses between, and leave
-  the full list to the `## API` section.
+- Show all values of one prop when readers need to compare the values or select one. Give all other
+  props the same value.
+- Combine values from two props only when the combination changes the result. Show only the
+  combinations that explain the change.
+- Do not show all prop combinations only to provide coverage. The Props page lists all available
+  props and values. Visual tests cover all valid combinations.
 
-Exhaustive variant and state coverage belongs in the visual test kitchen sink, not in a docs
-example. See [TESTING.md](TESTING.md).
-
-A reference page is the exception. A token, typography, or icon page enumerates on purpose, because
-the enumeration is the content.
+A reference page can show a full scale or catalogue when the page is about that scale or catalogue.
 
 ### Prose around an example
 
