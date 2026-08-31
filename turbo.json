@@ -111,6 +111,9 @@
 		"docs#check:types": {
 			"dependsOn": ["docs#generate", "^build"]
 		},
+		"docs#clean:generated-props": {
+			"cache": false
+		},
 		"docs#dev": {
 			"cache": false,
 			"dependsOn": ["docs#generate", "^build"],
@@ -118,13 +121,8 @@
 		},
 		"docs#generate": {
 			"cache": true,
-			"dependsOn": ["^build"],
-			"outputs": [
-				"src/routeTree.gen.ts",
-				"src/generated/**",
-				"content/docs/components/*/*/props.mdx",
-				"content/docs/components/*/*/meta.json"
-			]
+			"dependsOn": ["docs#clean:generated-props", "^build"],
+			"outputs": ["src/routeTree.gen.ts", "src/generated/**"]
 		},
 		"fix": {
 			"cache": false,

@@ -4,7 +4,7 @@ import { access } from 'node:fs/promises';
 import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vite-plus/test';
 import { ZodError } from 'zod';
-import { parseComponentFrontmatter } from '../../../apps/docs/src/lib/docs-frontmatter.js';
+import { findComponentPropsTableTags } from '../../../apps/docs/src/lib/component-props-table-tags.js';
 import {
 	COMPONENT_DEFAULTS,
 	createComponentPlan,
@@ -117,7 +117,7 @@ describe('createComponentPlan', () => {
 		}).toThrow('Use letters/numbers/hyphens. Start with a letter.');
 	});
 
-	it('scaffolds a <group>/<name>.mdx guide that generate:props can turn into a props.mdx', () => {
+	it('scaffolds a <group>/<name>.mdx guide with a hand-authored API section', () => {
 		const plan = createComponentPlan(validAnswers);
 
 		const guide = plan.files.find((file) => {
@@ -125,8 +125,7 @@ describe('createComponentPlan', () => {
 		})?.contents;
 		if (guide === undefined) throw new Error('Expected the scaffold to write the guide.');
 
-		const frontmatter = parseComponentFrontmatter(guide);
-		expect(frontmatter.props).toEqual([
+		expect(findComponentPropsTableTags(guide)).toEqual([
 			{
 				name: 'StatusBadgeProps',
 				path: 'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx',

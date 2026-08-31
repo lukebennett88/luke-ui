@@ -406,19 +406,34 @@ function renderHostedDocsPage(input: {
 	name: string;
 	pascalName: string;
 }): string {
+	const propsPath = `packages/@luke-ui/react/src/core/${input.name}/${input.name}.tsx`;
+	const propsTable = renderComponentPropsTable({
+		name: `${input.pascalName}Props`,
+		path: propsPath,
+	});
+
 	return `---
 title: ${input.displayName}
 source: packages/@luke-ui/react/src/exports/${input.name}.ts
-props:
-  - name: ${input.pascalName}Props
-    path: packages/@luke-ui/react/src/core/${input.name}/${input.name}.tsx
 ---
 
 <ExampleBlock
 	src="${input.name}/basic"
 	title="${input.displayName} — Basic"
 />
+
+## API
+
+${propsTable}
 `;
+}
+
+/** Matches `component-props-table` formatting in hosted component guides — inline under 100 characters, tab-indented otherwise. */
+function renderComponentPropsTable(entry: { name: string; path: string }): string {
+	const inline = `<component-props-table path="${entry.path}" name="${entry.name}" />`;
+	if (inline.length <= 100) return inline;
+
+	return `<component-props-table\n\tpath="${entry.path}"\n\tname="${entry.name}"\n/>`;
 }
 
 function renderRecipe(input: { recipeName: string; variantsType: string }): string {

@@ -20,7 +20,7 @@ interface PublicExports {
 	values: Map<string, Set<string>>;
 }
 
-/** Checks Props frontmatter against object contracts from a public entry point and its local re-export chain. */
+/** Checks a guide's `## API` component-props-table tags against object contracts from a public entry point and its local re-export chain. */
 export function findComponentPropsContractIssues(
 	inventory: ComponentGuideInventory,
 	reactPackageDir: string,
@@ -46,7 +46,7 @@ export function findComponentPropsContractIssues(
 
 function findGuideIssues(
 	guidePath: string,
-	frontmatterProps: ReadonlyArray<{ name: string }>,
+	documentedProps: ReadonlyArray<{ name: string }>,
 	source: string,
 	entryPath: string,
 ): Array<string> {
@@ -72,20 +72,20 @@ function findGuideIssues(
 	}
 
 	const entryPoint = source;
-	const documented = new Set(frontmatterProps.map((entry) => entry.name));
+	const documented = new Set(documentedProps.map((entry) => entry.name));
 	const issues: Array<string> = [];
 
 	for (const type of required) {
 		if (documented.has(type)) continue;
 		issues.push(
-			`${guidePath}: entry point "${entryPoint}" requires public object contract "${type}" in props frontmatter`,
+			`${guidePath}: entry point "${entryPoint}" requires public object contract "${type}" in the API section`,
 		);
 	}
 
 	for (const type of documented) {
 		if (publicTypes.has(type)) continue;
 		issues.push(
-			`${guidePath}: entry point "${entryPoint}" does not export props frontmatter type "${type}"`,
+			`${guidePath}: entry point "${entryPoint}" does not export API section type "${type}"`,
 		);
 	}
 

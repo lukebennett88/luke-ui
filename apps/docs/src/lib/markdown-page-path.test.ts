@@ -15,12 +15,6 @@ test('maps a component guide to the guide Markdown URL', () => {
 	);
 });
 
-test('keeps the props segment in the props Markdown URL', () => {
-	expect(getMarkdownPagePath('components/actions/button/props.mdx')).toBe(
-		'/components/actions/button/props.md',
-	);
-});
-
 test('collapses a genuine index page to its parent Markdown URL', () => {
 	expect(getMarkdownPagePath('components/index.mdx')).toBe('/components.md');
 });
@@ -46,15 +40,11 @@ test('treats /index.md as the landing page slugs', () => {
 test('resolves a docs pathname to an MDX file under a content directory', () => {
 	const directory = mkdtempSync(join(tmpdir(), 'luke-ui-markdown-page-path-'));
 	try {
-		mkdirSync(join(directory, 'components', 'actions', 'button'), { recursive: true });
+		mkdirSync(join(directory, 'components', 'actions'), { recursive: true });
 		writeFileSync(join(directory, 'components', 'actions', 'button.mdx'), '# Button\n');
-		writeFileSync(join(directory, 'components', 'actions', 'button', 'props.mdx'), '# Props\n');
 
 		expect(docsPageFile(directory, '/components/actions/button')).toBe(
 			join(directory, 'components', 'actions', 'button.mdx'),
-		);
-		expect(docsPageFile(directory, '/components/actions/button/props')).toBe(
-			join(directory, 'components', 'actions', 'button', 'props.mdx'),
 		);
 		expect(docsPageFile(directory, '/')).toBeNull();
 		expect(docsPageFile(directory, '/missing')).toBeNull();

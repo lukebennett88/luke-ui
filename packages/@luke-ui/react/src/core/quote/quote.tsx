@@ -15,9 +15,12 @@ interface QuoteStyleProps {
 	textWrap?: TextProps['textWrap'];
 }
 
-type _QuoteOmit = DistributiveOmit<React.ComponentProps<'q'>, 'color'>;
+type _QuoteOmit = DistributiveOmit<React.ComponentProps<'q'>, 'cite' | 'color'>;
 
-interface _QuoteProps extends _QuoteOmit, QuoteStyleProps {}
+interface _QuoteProps extends _QuoteOmit, QuoteStyleProps {
+	/** URL of the quoted source. */
+	cite?: React.ComponentProps<'q'>['cite'];
+}
 
 /** Props for the `Quote` component. */
 export type QuoteProps = Prettify<_QuoteProps>;

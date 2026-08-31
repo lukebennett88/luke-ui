@@ -26,9 +26,17 @@ interface LoadingSpinnerStyleProps {
 	size?: LoadingSpinnerVariantProps['size'];
 }
 
-type _LoadingSpinnerOmit = DistributiveOmit<ComponentProps<'span'>, 'color' | 'role'>;
+type _LoadingSpinnerOmit = DistributiveOmit<
+	ComponentProps<'span'>,
+	'color' | 'role' | 'aria-label'
+>;
 
 interface _LoadingSpinnerProps extends _LoadingSpinnerOmit, LoadingSpinnerStyleProps {
+	/**
+	 * Accessible name for the loading status region.
+	 * @default 'loading'
+	 */
+	'aria-label'?: ComponentProps<'span'>['aria-label'];
 	/** Content to show once loading finishes. While loading, the spinner replaces it in place. */
 	children?: ReactNode;
 	/**

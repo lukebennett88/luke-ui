@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { parseComponentFrontmatter, readFrontmatter } from './docs-frontmatter.js';
+import { findComponentPropsTableTags } from './component-props-table-tags.js';
+import { readFrontmatter } from './docs-frontmatter.js';
 
 const EXPORTS_PREFIX = 'packages/@luke-ui/react/src/exports/';
 
@@ -36,7 +37,6 @@ export function buildComponentGuideInventory(
 
 	return {
 		guides: input.guides.map((guide) => {
-			const frontmatter = parseComponentFrontmatter(guide.source);
 			const name =
 				guide.relativePath
 					.replace(/\.mdx$/, '')
@@ -45,7 +45,7 @@ export function buildComponentGuideInventory(
 			return {
 				relativePath: guide.relativePath,
 				slug: `${guide.group}/${name}`,
-				props: frontmatter.props,
+				props: findComponentPropsTableTags(guide.source),
 				source: readFrontmatter(guide.source).source,
 			};
 		}),

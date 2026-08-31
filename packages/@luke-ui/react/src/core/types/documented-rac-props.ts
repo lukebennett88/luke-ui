@@ -1,5 +1,6 @@
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
+import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import type { TextFieldProps as RacTextFieldProps } from 'react-aria-components/TextField';
 
 export interface DocumentedPressProps {
@@ -35,4 +36,12 @@ export interface DocumentedInputProps {
 	onChange?: RacTextFieldProps['onChange'];
 	/** Controlled input value. */
 	value?: RacTextFieldProps['value'];
+}
+
+export interface DocumentedElementTypeProps {
+	/**
+	 * Renders a different element type in place of the default. Use it to choose a semantic element
+	 * without changing the visual or accessibility treatment.
+	 */
+	elementType?: RacTextProps['elementType'];
 }

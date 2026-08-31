@@ -24,7 +24,7 @@ test('requires component props from an exported component parameter', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in the API section',
 	]);
 });
 
@@ -38,7 +38,7 @@ test('follows an export-all module into core', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in the API section',
 	]);
 });
 
@@ -52,7 +52,7 @@ test('requires provider props from an exported provider parameter', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ProviderProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ProviderProps" in the API section',
 	]);
 });
 
@@ -67,8 +67,8 @@ test('requires factory options and the factory return type', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "CreateThingOptions" in props frontmatter',
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "CreatedThing" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "CreateThingOptions" in the API section',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "CreatedThing" in the API section',
 	]);
 });
 
@@ -82,7 +82,7 @@ test('requires a render callback value', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "RenderProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "RenderProps" in the API section',
 	]);
 });
 
@@ -96,7 +96,7 @@ test('requires a named object generic constraint', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ThingProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ThingProps" in the API section',
 	]);
 });
 
@@ -110,8 +110,8 @@ test('requires contracts from a multipart entry point', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "RootProps" in props frontmatter',
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ItemProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "RootProps" in the API section',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ItemProps" in the API section',
 	]);
 });
 
@@ -127,7 +127,7 @@ test('requires contracts re-exported through an intermediate local module', () =
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "FieldLabelProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "FieldLabelProps" in the API section',
 	]);
 });
 
@@ -143,7 +143,7 @@ test('follows aliased values and types through an intermediate re-export', () =>
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in the API section',
 	]);
 });
 
@@ -159,7 +159,7 @@ test('requires a public imported type from another local module', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in the API section',
 	]);
 });
 
@@ -177,7 +177,7 @@ test('uses the public alias for an imported type from another local module', () 
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in the API section',
 	]);
 });
 
@@ -250,7 +250,7 @@ test('requires an indirect alias that resolves to an object type', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in the API section',
 	]);
 });
 
@@ -267,7 +267,7 @@ test('classifies private aliases using the module that declared them', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "RootProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "RootProps" in the API section',
 	]);
 });
 
@@ -299,7 +299,7 @@ test('requires a public object type when a local leaf type has the same name', (
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "SharedProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "SharedProps" in the API section',
 	]);
 });
 
@@ -314,7 +314,7 @@ test('inspects only the re-exported callable when local modules share a value na
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "RootProps" in props frontmatter',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "RootProps" in the API section',
 	]);
 });
 
@@ -370,8 +370,8 @@ test('reports frontmatter props that the entry point does not export', () => {
 	});
 
 	expect(issues(fixture)).toEqual([
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in props frontmatter',
-		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" does not export props frontmatter type "MissingProps"',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" requires public object contract "ButtonProps" in the API section',
+		'actions/button.mdx: entry point "packages/@luke-ui/react/src/exports/button.ts" does not export API section type "MissingProps"',
 	]);
 });
 
@@ -404,7 +404,7 @@ function createFixture(input: {
 	}
 
 	const props = input.props ?? [];
-	const guide = `---\ntitle: Button\nsource: packages/@luke-ui/react/src/exports/button.ts\n${renderProps(props)}---\n`;
+	const guide = `---\ntitle: Button\nsource: packages/@luke-ui/react/src/exports/button.ts\n---\n\n${renderApiSection(props)}`;
 	return {
 		inventory: buildComponentGuideInventory({
 			componentsDir,
@@ -415,9 +415,15 @@ function createFixture(input: {
 	};
 }
 
-function renderProps(props: ReadonlyArray<string>): string {
+function renderApiSection(props: ReadonlyArray<string>): string {
 	if (props.length === 0) return '';
-	return `props:\n${props.map((name) => `  - name: ${name}\n    path: packages/@luke-ui/react/src/core/button/button.ts`).join('\n')}\n`;
+	const tables = props
+		.map(
+			(name) =>
+				`<component-props-table path="packages/@luke-ui/react/src/core/button/button.ts" name="${name}" />`,
+		)
+		.join('\n\n');
+	return `## API\n\n${tables}\n`;
 }
 
 function issues(fixture: {

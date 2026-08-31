@@ -210,6 +210,11 @@ export default defineConfig({
 				'error',
 				{ fixStyle: 'separate-type-imports', prefer: 'type-imports' },
 			],
+			// A method signature is bivariant in its parameters, so it accepts an argument the
+			// declaration rules out. `strict` does not cover this: `strictFunctionTypes` exempts method
+			// shorthand by design. It matters most where a hand-written interface models an external
+			// API and a cast asserts the match, as the docs prop analysis does with ts-morph.
+			'typescript/method-signature-style': ['error', 'property'],
 			'vite-plus/prefer-vite-plus-imports': 'error',
 			'vitest/expect-expect': [
 				'error',

@@ -13,6 +13,8 @@ export default {
 				'scripts/**/*.ts',
 				// Compiled to an inline-able IIFE by the `pack` config in vite.config.ts.
 				'src/components/playground/editor-skeleton-script.ts',
+				// Read by path, not imported: the prop analysis loads source files through ts-morph.
+				'src/lib/__fixtures__/**/*.ts',
 				'src/routes/**/*.ts',
 				'src/routes/**/*.tsx',
 				'src/examples/**/*',
