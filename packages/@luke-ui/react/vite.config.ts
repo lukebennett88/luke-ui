@@ -50,7 +50,7 @@ export default defineConfig({
 		dts: true,
 		entry: {
 			stylesheet: 'src/core/stylesheet.css.ts',
-			'stylex-fixture': 'src/core/styles/stylex-fixture.ts',
+			'stylex-bundle': 'src/core/styles/stylex-bundle.ts',
 			'*': ['src/exports/*.ts'],
 			'primitives/*': ['src/exports/primitives/*.ts'],
 			'themes/*': ['src/exports/themes/*.ts'],
@@ -60,7 +60,7 @@ export default defineConfig({
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
 			// Built for extraction; not consumer subpaths.
-			exclude: ['stylesheet', 'stylex-fixture'],
+			exclude: ['stylesheet', 'stylex-bundle'],
 		},
 		format: ['esm'],
 		hooks: {
@@ -154,8 +154,11 @@ function stylexPlugin(): Plugin {
 			}
 
 			const stylexCss = stylexBabelPlugin.processStylexRules(rules, {
-				// Unlayered until StyleX joins the cascade-layer contract.
-				useLayers: false,
+				useLayers: {
+					before: ['reset', 'theme'],
+					after: ['recipes', 'structural', 'utilities'],
+					prefix: 'luke.sx',
+				},
 			});
 
 			stylesheet.source = `${stylesheet.source.toString()}\n/* stylex */\n${stylexCss}`;

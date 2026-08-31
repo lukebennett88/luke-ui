@@ -8,9 +8,12 @@ const dist = (file: string) => new URL(`../../../dist/${file}`, import.meta.url)
 
 test('ships Vanilla Extract and StyleX rules in one stylesheet', async () => {
 	const stylesheet = await readFile(dist('stylesheet.css'), 'utf8');
-	const [vanillaExtract, stylex] = stylesheet.split('/* stylex */');
-	expect(vanillaExtract).toContain('@layer reset');
-	expect(stylex).toMatch(/outline-color:\s*transparent/);
+	expect(stylesheet).toContain('@layer reset');
+	expect(stylesheet).toMatch(
+		/@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/,
+	);
+	expect(stylesheet).toMatch(/outline-color:\s*transparent/);
+	expect(stylesheet).toMatch(/padding:\s*var\(--luke-space-sp16\)/);
 });
 
 test('appends StyleX rules to the shared stylesheet instead of a second file', () => {
@@ -20,7 +23,7 @@ test('appends StyleX rules to the shared stylesheet instead of a second file', (
 
 test('emits compiled StyleX JavaScript that loads in plain Node', () => {
 	expect(() => {
-		execFileSync(process.execPath, [fileURLToPath(dist('stylex-fixture.js'))], {
+		execFileSync(process.execPath, [fileURLToPath(dist('stylex-bundle.js'))], {
 			encoding: 'utf8',
 		});
 	}).not.toThrow();

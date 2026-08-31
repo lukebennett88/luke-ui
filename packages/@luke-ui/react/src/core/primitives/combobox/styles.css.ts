@@ -311,10 +311,6 @@ const comboboxConfig = {
 			flexDirection: 'column',
 			gap: vars.space.sp4,
 			paddingBlock: vars.space.sp8,
-
-			selectors: {
-				'& + &': { borderBlockStart: `1px solid ${vars.color.border.decorative}` },
-			},
 		},
 		sectionHeading: {
 			color: vars.color.text.secondary,

@@ -11,7 +11,7 @@ export type ProseRecipeVariants = RecipeSelection<typeof proseRecipe>;
 
 // Wrapping the root and matched element keeps every rule at 0-0-0.
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
-	globalStyleInLayer('recipes', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
+	globalStyleInLayer('structural', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
 }
 
 // Each gap is the following block's start margin. No block-end margin can collapse or escape.

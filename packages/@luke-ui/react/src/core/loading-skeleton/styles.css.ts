@@ -79,7 +79,7 @@ export const loadingSkeletonClassName = styleInLayer('recipes', {
 // The child's own background is forced flat and pulses in sync with the `::after` overlay below,
 // so at a rounded corner its square edge would otherwise show through the overlay's rounded
 // recess. Give it the same radius so both surfaces agree on the visible shape.
-globalStyleInLayer('recipes', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > *`, {
+globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > *`, {
 	...surface,
 	...pulse,
 	borderRadius: `var(${skeletonRadiusVar}, 0px)`,
@@ -87,7 +87,7 @@ globalStyleInLayer('recipes', `${loadingSkeletonClassName}:not([data-skeleton-in
 	position: 'relative !important' as 'relative',
 });
 
-globalStyleInLayer('recipes', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > * *`, {
+globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > * *`, {
 	'@media': {
 		'(forced-colors: active)': forcedColorsSurface,
 	},
@@ -97,7 +97,7 @@ globalStyleInLayer('recipes', `${loadingSkeletonClassName}:not([data-skeleton-in
 // A pseudo-element painted over the child covers visuals the forced styles can't reach (nested backgrounds,
 // rounded corners); `inset: -1px` also covers the child's border box edges.
 globalStyleInLayer(
-	'recipes',
+	'structural',
 	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > *::after`,
 	{
 		...surface,
