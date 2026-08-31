@@ -56,8 +56,17 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'reordered authoritative layer declarations',
 		(css: string) => {
 			return css.replace(
-				/@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/,
-				'@layer theme, reset, luke.sx.priority1, recipes, structural, utilities;',
+				/^@layer reset, theme, (?:"luke\.sx\.priority\d+"|luke\.sx\.priority\d+)(?:, (?:"luke\.sx\.priority\d+"|luke\.sx\.priority\d+))*, recipes, structural, utilities;/m,
+				'@layer theme, reset, "luke.sx.priority1", recipes, structural, utilities;',
+			);
+		},
+	],
+	[
+		'early individual layer declarations before authoritative order',
+		(css: string) => {
+			return css.replace(
+				/^@layer reset, theme, (?:"luke\.sx\.priority\d+"|luke\.sx\.priority\d+)(?:, (?:"luke\.sx\.priority\d+"|luke\.sx\.priority\d+))*, recipes, structural, utilities;\n/m,
+				'@layer reset;\n@layer theme;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, "luke.sx.priority1", recipes, structural, utilities;\n',
 			);
 		},
 	],
@@ -97,6 +106,10 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 				'[data-class=".recipe-class"] { display: inline-flex; }',
 			);
 		},
+	],
+	[
+		'unquoted StyleX priority layer blocks',
+		(css: string) => css.replaceAll('"luke.sx.priority', 'luke.sx.priority'),
 	],
 	[
 		'empty transitional recipes layer',
@@ -158,7 +171,9 @@ function assertStylesheetContract(
 ): void {
 	const root = parse(stylesheet);
 
+	assertEffectiveLayerCreationOrder(root);
 	assertAuthoritativeLayerOrder(getAuthoritativeLayerOrder(root));
+	assertQuotedStylexPriorityLayers(stylesheet);
 	assertLayerNames(root);
 	assertRootNodes(root);
 	assertStableSelectors(root);
@@ -253,10 +268,62 @@ function getAuthoritativeLayerOrder(root: Root): Array<string> {
 		const params = node.params.trim();
 		if (!params.includes(',')) continue;
 
-		return params.split(',').map((name) => name.trim());
+		return params.split(',').map((name) => normalizeLayerName(name.trim()));
 	}
 
 	throw new Error('Expected an authoritative combined cascade-layer order statement.');
+}
+
+function normalizeLayerName(layerName: string): string {
+	return layerName.replaceAll(/^"|"$/g, '');
+}
+
+function assertEffectiveLayerCreationOrder(root: Root): void {
+	let sawAuthoritativeOrder = false;
+
+	for (const node of root.nodes) {
+		if (node.type !== 'atrule' || node.name !== 'layer') continue;
+
+		const params = node.params.trim();
+		const isCombinedOrder = !node.nodes && params.includes(',');
+
+		if (isCombinedOrder) {
+			if (!sawAuthoritativeOrder) {
+				sawAuthoritativeOrder = true;
+				continue;
+			}
+
+			throw new Error(
+				'Expected a single authoritative combined cascade-layer order statement at the start of the stylesheet.',
+			);
+		}
+
+		if (!sawAuthoritativeOrder && !node.nodes && !params.includes(',')) {
+			throw new Error(
+				`Layer "${params}" was created before the authoritative combined cascade-layer order statement.`,
+			);
+		}
+	}
+
+	if (!sawAuthoritativeOrder) {
+		throw new Error('Expected an authoritative combined cascade-layer order statement.');
+	}
+}
+
+function assertQuotedStylexPriorityLayers(stylesheet: string): void {
+	for (const match of stylesheet.matchAll(/@layer ([^;{]+)/g)) {
+		const layerList = match[1];
+		if (layerList == null) continue;
+		const layerNames = layerList.split(',').map((name) => name.trim());
+		for (const layerName of layerNames) {
+			if (!stylexPriorityLayerPattern.test(normalizeLayerName(layerName))) continue;
+			if (!layerName.startsWith('"')) {
+				throw new Error(
+					`StyleX priority layer ${layerName} must be quoted so dotted names are not treated as nested layers.`,
+				);
+			}
+		}
+	}
 }
 
 function assertAuthoritativeLayerOrder(order: Array<string>): void {
@@ -291,7 +358,7 @@ function getLayerNames(atRule: AtRule): Array<string> {
 	const params = atRule.params.trim();
 	if (!params) throw atRule.error('Anonymous cascade layers are not allowed.');
 
-	return params.split(',').map((name) => name.trim());
+	return params.split(',').map((name) => normalizeLayerName(name.trim()));
 }
 
 function assertRootNodes(root: Root): void {
@@ -451,18 +518,15 @@ function hasPseudo(rule: Rule, pseudo: string): boolean {
 function getOwningLayer(rule: Rule): string | undefined {
 	let parent = rule.parent;
 	while (parent && parent.type !== 'root') {
-		if (parent.type === 'atrule' && parent.name === 'layer') return parent.params.trim();
+		if (parent.type === 'atrule' && parent.name === 'layer') {
+			return normalizeLayerName(parent.params.trim());
+		}
 		parent = parent.parent;
 	}
 	return undefined;
 }
 
-const validStylesheetFixture = `@layer reset;
-@layer theme;
-@layer recipes;
-@layer structural;
-@layer utilities;
-@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;
+const validStylesheetFixture = `@layer reset, theme, "luke.sx.priority1", recipes, structural, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
 }
@@ -482,7 +546,7 @@ const validStylesheetFixture = `@layer reset;
 @layer utilities {
   .utility-class { display: grid; }
 }
-@layer luke.sx.priority1 {
+@layer "luke.sx.priority1" {
   .stylex-class { outline-color: transparent; }
 }
 @keyframes generated-animation {

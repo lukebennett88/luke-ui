@@ -8,10 +8,11 @@ const dist = (file: string) => new URL(`../../../dist/${file}`, import.meta.url)
 
 test('ships Vanilla Extract and StyleX rules in one stylesheet', async () => {
 	const stylesheet = await readFile(dist('stylesheet.css'), 'utf8');
-	expect(stylesheet).toContain('@layer reset');
+	expect(stylesheet.startsWith('@layer reset, theme, "luke.sx.priority')).toBe(true);
 	expect(stylesheet).toMatch(
-		/@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/,
+		/^@layer reset, theme, "luke\.sx\.priority\d+"(?:, "luke\.sx\.priority\d+")*, recipes, structural, utilities;/m,
 	);
+	expect(stylesheet).toMatch(/@layer "luke\.sx\.priority\d+"/);
 	expect(stylesheet).toMatch(/outline-color:\s*transparent/);
 	expect(stylesheet).toMatch(/padding:\s*var\(--luke-space-sp16\)/);
 });

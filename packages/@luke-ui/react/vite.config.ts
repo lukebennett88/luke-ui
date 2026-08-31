@@ -25,6 +25,46 @@ const assetExports = [
 	'./themes/paper/stylesheet.css',
 ];
 
+const stylexLayerConfig = {
+	before: ['reset', 'theme'],
+	after: ['recipes', 'structural', 'utilities'],
+	prefix: 'luke.sx',
+} as const;
+
+function buildAuthoritativeLayerOrder(priorityLayers: Array<string>): string {
+	const quotedPriorityLayers = priorityLayers.map(quoteLayerNameIfNeeded);
+	return `@layer ${[...stylexLayerConfig.before, ...quotedPriorityLayers, ...stylexLayerConfig.after].join(', ')};`;
+}
+
+/** Dotted idents are nested layer paths; quote them so StyleX priority layers stay flat. */
+function quoteLayerNameIfNeeded(layerName: string): string {
+	return layerName.includes('.') ? `"${layerName}"` : layerName;
+}
+
+function quoteStylexLayerNames(stylexCss: string): string {
+	return stylexCss.replace(/@layer (luke\.sx\.priority\d+)/g, '@layer "$1"');
+}
+
+function splitStylexLayerHeader(stylexCss: string): {
+	authoritativeLayerOrder: string;
+	stylexBody: string;
+} {
+	const match = stylexCss.match(/^\n?@layer ([^;]+);/);
+	if (match == null || match[1] == null) {
+		throw new Error('Expected StyleX to emit a combined cascade-layer order statement.');
+	}
+
+	const priorityLayers = match[1]
+		.split(',')
+		.map((name) => name.trim().replaceAll(/^"|"$/g, ''))
+		.filter((name) => name.startsWith(`${stylexLayerConfig.prefix}.priority`));
+
+	return {
+		authoritativeLayerOrder: buildAuthoritativeLayerOrder(priorityLayers),
+		stylexBody: quoteStylexLayerNames(stylexCss.slice(match[0].length).replace(/^\n/, '')),
+	};
+}
+
 /** Any JS or TS module the React Compiler can read, including `.mjs`/`.cts` variants. */
 const sourceModule = /\.[cm]?[jt]sx?$/;
 /** Vanilla Extract compiles these to plain style declarations before the plugin sees them. */
@@ -145,23 +185,23 @@ function stylexPlugin(): Plugin {
 			return { code: result.code, map: result.map, meta };
 		},
 		generateBundle(_options, bundle) {
-			const rules = [...stylexRules.values()].flat();
-			if (rules.length === 0) return;
-
 			const stylesheet = bundle['stylesheet.css'];
-			if (stylesheet?.type !== 'asset') {
-				throw new Error('Expected a `stylesheet.css` asset to append StyleX rules to.');
+			if (stylesheet?.type !== 'asset') return;
+
+			const rules = [...stylexRules.values()].flat();
+			const vanillaCss = stylesheet.source.toString();
+
+			if (rules.length === 0) {
+				stylesheet.source = `${buildAuthoritativeLayerOrder([])}\n${vanillaCss}`;
+				return;
 			}
 
 			const stylexCss = stylexBabelPlugin.processStylexRules(rules, {
-				useLayers: {
-					before: ['reset', 'theme'],
-					after: ['recipes', 'structural', 'utilities'],
-					prefix: 'luke.sx',
-				},
+				useLayers: stylexLayerConfig,
 			});
+			const { authoritativeLayerOrder, stylexBody } = splitStylexLayerHeader(stylexCss);
 
-			stylesheet.source = `${stylesheet.source.toString()}\n/* stylex */\n${stylexCss}`;
+			stylesheet.source = `${authoritativeLayerOrder}\n${vanillaCss}\n/* stylex */\n${stylexBody}`;
 		},
 	};
 }

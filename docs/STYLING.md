@@ -192,6 +192,10 @@ Specificity and source order still decide conflicts within a layer.
 While Vanilla Extract recipes remain, the `recipes` layer is transitional. The stylesheet contract
 requires it to contain at least one rule until the last recipe moves to StyleX.
 
+The public `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every
+Luke-owned layer before any rules create them. StyleX priority layers use quoted names (for example
+`"luke.sx.priority1"`) so dotted identifiers are flat layer names, not nested layer paths.
+
 The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
 `themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The
 public `vars` object and theme stylesheets remain the sole authorities on token values.
