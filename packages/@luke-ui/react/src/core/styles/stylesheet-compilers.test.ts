@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
 const dist = (file: string) => new URL(`../../../dist/${file}`, import.meta.url);
@@ -19,7 +19,9 @@ test('appends StyleX rules to the shared stylesheet instead of a second file', (
 });
 
 test('emits compiled StyleX JavaScript that loads in plain Node', () => {
-	execFileSync(process.execPath, [fileURLToPath(dist('stylex-fixture.js'))], {
-		encoding: 'utf8',
-	});
+	expect(() => {
+		execFileSync(process.execPath, [fileURLToPath(dist('stylex-fixture.js'))], {
+			encoding: 'utf8',
+		});
+	}).not.toThrow();
 });
