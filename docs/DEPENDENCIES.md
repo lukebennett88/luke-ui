@@ -50,17 +50,11 @@ notice.
 
 `@luke-ui/react` is unpublished at version `0.0.0`. `apps/docs` and `@luke-ui/rainbow-sprinkles` are
 private. Before `1.0.0` no pull request needs a changeset, including one that moves a runtime or
-peer dependency. Nothing is published, so there is no version entry to write.
+peer dependency.
 
-The StyleX migration in particular adds no changeset. Nothing about it reaches a consumer, because
-nothing is published while it runs.
-
-The `needs-changeset` label in `.github/renovate.json5` survives as advance notice rather than as a
-requirement. It marks the packages that will be runtime or peer dependencies of the published
-package at `1.0.0`, so a bump is looked at rather than waved through. The StyleX migration has no
-entry in that list: the Vanilla Extract packages it removes were taken out, and the StyleX and Babel
-packages it adds were never put in. Re-sync the list against `dependencies` and `peerDependencies`
-in `packages/@luke-ui/react/package.json` at `1.0.0`, when a changeset starts to mean something.
+The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
+will be runtime or peer dependencies of the published package at `1.0.0`. Re-sync that list against
+`dependencies` and `peerDependencies` in `packages/@luke-ui/react/package.json` at `1.0.0`.
 
 `react` and `react-dom` use `rangeStrategy: 'replace'` rather than `bump`, so the catalog range only
 widens when the caret stops covering the new version. The catalog range is what gets published as

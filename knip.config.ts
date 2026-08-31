@@ -29,7 +29,7 @@ export default {
 				'src/exports/**/*.ts',
 				'src/core/stylesheet.css.ts',
 				'src/core/styles/index.css.ts',
-				// Its own `pack` entry in vite.config.ts, so nothing in `src/` imports it.
+				// Pack entry; nothing in `src/` imports it.
 				'src/core/styles/stylex-fixture.ts',
 				'scripts/**/*.ts',
 			],

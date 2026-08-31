@@ -148,12 +148,9 @@
 			automerge: true,
 		},
 		{
-			// Runtime and peer dependencies of @luke-ui/react. The package is unpublished at 0.0.0, so
-			// none of these needs a changeset yet; the label is advance notice that a bump here will
-			// change what consumers install once 1.0.0 ships. The StyleX migration deliberately has no
-			// entry: the Vanilla Extract packages it removes are gone from this list, and the StyleX and
-			// Babel packages it adds are never added to it. Re-sync the list against
-			// `dependencies` and `peerDependencies` in packages/@luke-ui/react/package.json at 1.0.0.
+			// Runtime and peer dependencies of unpublished @luke-ui/react. The label is advance notice
+			// until 1.0.0, when a bump here needs a changeset. Keep in step with `dependencies` and
+			// `peerDependencies` in packages/@luke-ui/react/package.json.
 			matchPackageNames: [
 				'@capsizecss/metrics',
 				'@react-aria/utils',

@@ -7,18 +7,6 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
 const require = createRequire(import.meta.url);
-
-// This is the check for luke-ui#534's "no StyleX compiler" requirement: `npm pack` the real
-// tarball, install it into a throwaway directory outside the workspace (so it can only resolve
-// what this test wires up, not workspace `node_modules`), and render a component in a plain
-// `node` subprocess with no Babel, StyleX, or Vanilla Extract build step in front of it. The
-// `@stylexjs/stylex` runtime throws `Unexpected 'stylex.create' call at runtime` when it evaluates
-// an uncompiled `stylex.create`, so this fails loudly if the package build ever stops compiling
-// StyleX into static CSS/classnames before publish.
-//
-// The runtime dependencies below (react, react-dom, react-aria-components, plus the package's own
-// `dependencies`) are symlinked in from the workspace's existing pnpm store rather than fetched,
-// so the test needs no network access and no new devDependency.
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
 
 const runtimeDependencies = [
@@ -86,15 +74,13 @@ test(
 
 			const markup = execFileSync('node', [renderScript], {
 				cwd: consumerDir,
-				// Isolate from the workspace: no NODE_PATH, no ambient config that could smuggle in a
-				// compiler. The subprocess only sees what was symlinked into consumerDir/node_modules.
 				encoding: 'utf8',
+				// No NODE_PATH or workspace config that could smuggle in a compiler.
 				env: { PATH: process.env.PATH ?? '' },
 			});
 
 			expect(markup).toContain('<blockquote');
 			expect(markup).toContain('Hello world');
-			expect(markup.length).toBeGreaterThan(0);
 		} finally {
 			await rm(tarballDir, { force: true, recursive: true });
 			await rm(consumerDir, { force: true, recursive: true });

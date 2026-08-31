@@ -14,9 +14,8 @@
   documentation and render/a11y fixtures, not assertion files.
 - React Compiler is enabled. Do not use `useCallback` or `useMemo` unless there is a specific reason
   the compiler cannot handle.
-- The package build runs a StyleX extraction pass before the React Compiler, which needs the
-  original `stylex.create` calls, and appends the extracted rules to `dist/stylesheet.css`. All
-  production component styles stay on Vanilla Extract; StyleX is build plumbing kept alive by
+- The package build extracts StyleX before the React Compiler and appends those rules to
+  `dist/stylesheet.css`. Production styles stay on Vanilla Extract. Keep StyleX alive with
   `src/core/styles/stylex-fixture.ts`. Do not move a component onto StyleX.
 
 ## Source structure

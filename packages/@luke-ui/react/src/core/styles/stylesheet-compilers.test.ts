@@ -1,30 +1,25 @@
-import { access, readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { expect, test } from 'vite-plus/test';
-import { stylexBoundary } from './stylex-boundary.js';
 
-async function exists(url: URL): Promise<boolean> {
-	try {
-		await access(url);
-		return true;
-	} catch {
-		return false;
-	}
-}
+const dist = (file: string) => new URL(`../../../dist/${file}`, import.meta.url);
 
 test('ships Vanilla Extract and StyleX rules in one stylesheet', async () => {
-	const stylesheet = await readFile(
-		new URL('../../../dist/stylesheet.css', import.meta.url),
-		'utf8',
-	);
-
-	// Vanilla Extract emits the named cascade layers; StyleX emits its own atomic class after
-	// the boundary comment the build writes between them.
-	const [vanillaExtract, stylex] = stylesheet.split(stylexBoundary);
+	const stylesheet = await readFile(dist('stylesheet.css'), 'utf8');
+	const [vanillaExtract, stylex] = stylesheet.split('/* stylex */');
 	expect(vanillaExtract).toContain('@layer reset');
 	expect(stylex).toMatch(/outline-color:\s*transparent/);
 });
 
-test('appends StyleX rules to the shared stylesheet instead of a second file', async () => {
-	expect(await exists(new URL('../../../dist/stylesheet2.css', import.meta.url))).toBe(false);
-	expect(await exists(new URL('../../../dist/stylex.css', import.meta.url))).toBe(false);
+test('appends StyleX rules to the shared stylesheet instead of a second file', () => {
+	expect(existsSync(dist('stylesheet2.css'))).toBe(false);
+	expect(existsSync(dist('stylex.css'))).toBe(false);
+});
+
+test('emits compiled StyleX JavaScript that loads in plain Node', () => {
+	execFileSync(process.execPath, [fileURLToPath(dist('stylex-fixture.js'))], {
+		encoding: 'utf8',
+	});
 });

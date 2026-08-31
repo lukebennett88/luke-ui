@@ -11,7 +11,6 @@ import { transformSync } from 'oxc-transform-react';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
-import { stylexBoundary } from './src/core/styles/stylex-boundary.js';
 
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
@@ -60,8 +59,7 @@ export default defineConfig({
 			customExports: Object.fromEntries(
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
-			// Build the stylesheet for CSS extraction, and the StyleX fixture so the extraction
-			// pass has something to compile. Neither is a consumer package subpath.
+			// Built for extraction; not consumer subpaths.
 			exclude: ['stylesheet', 'stylex-fixture'],
 		},
 		format: ['esm'],
@@ -90,11 +88,6 @@ export default defineConfig({
 	},
 });
 
-/**
- * Compiles StyleX declarations with the Babel plugin and folds the rules it extracts into the
- * Vanilla Extract stylesheet. Production component styles stay on Vanilla Extract; this exists
- * so both compilers can coexist in one package build.
- */
 function stylexPlugin(): Plugin {
 	let stylexRules = new Map<string, Array<Rule>>();
 
@@ -133,8 +126,6 @@ function stylexPlugin(): Plugin {
 						unstable_moduleResolution: { type: 'commonJS', rootDir: workspaceRoot },
 					}),
 				],
-				// Babel's map covers its own rewrite only; later plugins in the chain compose over
-				// it, so the CSS side of the mapping stays approximate. Accepted.
 				sourceMaps: true,
 			});
 
@@ -163,15 +154,11 @@ function stylexPlugin(): Plugin {
 			}
 
 			const stylexCss = stylexBabelPlugin.processStylexRules(rules, {
-				// Flipping this to layered output belongs to the ticket that rewrites
-				// `stylesheet-contract.test.ts` (#536), not here.
+				// Unlayered until StyleX joins the cascade-layer contract.
 				useLayers: false,
 			});
 
-			// The marker gives `stylesheet-contract.test.ts` a boundary to assert the Vanilla
-			// Extract layer contract against, since unlayered StyleX output would otherwise read
-			// as a contract violation. #536 folds StyleX into the layer contract properly.
-			stylesheet.source = `${stylesheet.source.toString()}\n${stylexBoundary}\n${stylexCss}`;
+			stylesheet.source = `${stylesheet.source.toString()}\n/* stylex */\n${stylexCss}`;
 		},
 	};
 }

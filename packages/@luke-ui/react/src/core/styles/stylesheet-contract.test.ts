@@ -5,7 +5,6 @@ import selectorParser from 'postcss-selector-parser';
 import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
-import { stylexBoundary } from './stylex-boundary.js';
 
 const retainedLayerNames = ['reset', 'theme', 'recipes', 'utilities'] as const;
 const retainedLayerNameSet = new Set<string>(retainedLayerNames);
@@ -127,18 +126,14 @@ test('recognises escaped class identifiers', () => {
 	}).not.toThrow();
 });
 
-/**
- * The layer contract below describes the Vanilla Extract stylesheet. The package build appends
- * StyleX's unlayered rules after it, so read only the portion before that boundary. #536 brings
- * StyleX under the layer contract and retires this split.
- */
+// Unlayered StyleX output follows this comment; the layer contract covers Vanilla Extract only.
 async function readVanillaExtractStylesheet(): Promise<string> {
 	const stylesheet = await readFile(
 		new URL('../../../dist/stylesheet.css', import.meta.url),
 		'utf8',
 	);
 
-	return stylesheet.split(stylexBoundary)[0] ?? stylesheet;
+	return stylesheet.split('/* stylex */')[0] ?? stylesheet;
 }
 
 function assertStylesheetContract(
