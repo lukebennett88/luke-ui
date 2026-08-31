@@ -148,16 +148,12 @@
 			automerge: true,
 		},
 		{
-			// Runtime and peer dependencies of the published @luke-ui/react. Bumping one changes what
-			// consumers install, so the PR needs a changeset, and Renovate cannot write one.
-			// Keep in step with `dependencies` and `peerDependencies` in
-			// packages/@luke-ui/react/package.json.
+			// Runtime and peer dependencies of unpublished @luke-ui/react. The label is advance notice
+			// until 1.0.0, when a bump here needs a changeset. Keep in step with `dependencies` and
+			// `peerDependencies` in packages/@luke-ui/react/package.json.
 			matchPackageNames: [
 				'@capsizecss/metrics',
-				'@capsizecss/vanilla-extract',
 				'@react-aria/utils',
-				'@vanilla-extract/css',
-				'@vanilla-extract/recipes',
 				'react',
 				'react-aria-components',
 				'react-dom',

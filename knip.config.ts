@@ -29,6 +29,8 @@ export default {
 				'src/exports/**/*.ts',
 				'src/core/stylesheet.css.ts',
 				'src/core/styles/index.css.ts',
+				// Pack entry; nothing in `src/` imports it.
+				'src/core/styles/stylex-fixture.ts',
 				'scripts/**/*.ts',
 			],
 			project: ['src/**/*.{ts,tsx}'],

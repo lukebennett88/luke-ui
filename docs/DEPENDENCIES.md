@@ -48,15 +48,13 @@ notice.
 
 ## Changesets
 
-`@luke-ui/react` publishes. `apps/docs` and `@luke-ui/rainbow-sprinkles` are private.
+`@luke-ui/react` is unpublished at version `0.0.0`. `apps/docs` and `@luke-ui/rainbow-sprinkles` are
+private. Before `1.0.0` no pull request needs a changeset, including one that moves a runtime or
+peer dependency.
 
-A pull request that moves a runtime or peer dependency of `@luke-ui/react` needs a changeset,
-because the published package's own dependency ranges change. Renovate cannot write one. It labels
-those pull requests `needs-changeset` instead, using an explicit package list in
-`.github/renovate.json5` that has to be kept in step with `dependencies` and `peerDependencies` in
-`packages/@luke-ui/react/package.json`.
-
-Development dependency bumps do not need a changeset. Nothing about the published package changes.
+The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
+will be runtime or peer dependencies of the published package at `1.0.0`. Re-sync that list against
+`dependencies` and `peerDependencies` in `packages/@luke-ui/react/package.json` at `1.0.0`.
 
 `react` and `react-dom` use `rangeStrategy: 'replace'` rather than `bump`, so the catalog range only
 widens when the caret stops covering the new version. The catalog range is what gets published as

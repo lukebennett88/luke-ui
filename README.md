@@ -47,4 +47,5 @@ Useful repo commands:
 
 Run `pnpm run check` before committing.
 
-Use `pnpm changeset` when a change needs a package version entry.
+`@luke-ui/react` is not published before `1.0.0`, so changes do not need a changeset. See
+[docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) for the full rule.

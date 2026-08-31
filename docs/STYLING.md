@@ -8,6 +8,9 @@ import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from `@luke-ui/
 `@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes the whole document from `:root`,
 with no class and no JS required. Neither step injects styles at runtime.
 
+The package build also extracts StyleX and appends those rules to `dist/stylesheet.css`. Production
+component styles stay on Vanilla Extract.
+
 ## Structure
 
 Paths below are rooted in `packages/@luke-ui/react/src/`. Core style, primitive, overlay, and

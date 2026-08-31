@@ -38,6 +38,7 @@ trustPolicyExclude:
 
 catalog:
   '@arethetypeswrong/core': ^0.18.5
+  '@babel/core': ^7.29.7
   '@capsizecss/metrics': ^4.2.0
   '@capsizecss/vanilla-extract': ^2.0.4
   '@catppuccin/palette': ^1.8.0
@@ -51,6 +52,8 @@ catalog:
   '@storybook/addon-docs': ^10.5.10
   '@storybook/addon-vitest': ^10.5.10
   '@storybook/react-vite': ^10.5.10
+  '@stylexjs/babel-plugin': 0.19.0
+  '@stylexjs/stylex': 0.19.0
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-form': ^1.33.5
   '@tanstack/react-router': ^1.170.32
@@ -58,6 +61,7 @@ catalog:
   '@tanstack/router-cli': ^1.167.33
   '@tanstack/start-static-server-functions': ^1.167.32
   '@turbo/gen': ^2.10.12
+  '@types/babel__core': ^7.20.5
   '@types/mdx': ^2.0.14
   '@types/node': ^26.3.0
   '@types/pngjs': ^6.0.5

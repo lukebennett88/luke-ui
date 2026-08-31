@@ -17,10 +17,7 @@ type LineClampClasses = {
 };
 
 test('builds the public stylesheet with the retained layer contract', async () => {
-	const stylesheet = await readFile(
-		new URL('../../../dist/stylesheet.css', import.meta.url),
-		'utf8',
-	);
+	const stylesheet = await readVanillaExtractStylesheet();
 	const icon = await import('@luke-ui/react/icon');
 	const text = await import('@luke-ui/react/text');
 	const styles = await import('@luke-ui/react/styles');
@@ -109,10 +106,7 @@ for (const [name, mutate] of stylesheetMutations) {
 }
 
 test('queries responsive conditions on the logical inline axis', async () => {
-	const stylesheet = await readFile(
-		new URL('../../../dist/stylesheet.css', import.meta.url),
-		'utf8',
-	);
+	const stylesheet = await readVanillaExtractStylesheet();
 
 	// The containers are `container-type: inline-size`, which answers inline-axis queries. A
 	// physical `width` query only agrees with that in a horizontal writing mode.
@@ -131,6 +125,16 @@ test('recognises escaped class identifiers', () => {
 		);
 	}).not.toThrow();
 });
+
+// Unlayered StyleX output follows this comment; the layer contract covers Vanilla Extract only.
+async function readVanillaExtractStylesheet(): Promise<string> {
+	const stylesheet = await readFile(
+		new URL('../../../dist/stylesheet.css', import.meta.url),
+		'utf8',
+	);
+
+	return stylesheet.split('/* stylex */')[0] ?? stylesheet;
+}
 
 function assertStylesheetContract(
 	stylesheet: string,
