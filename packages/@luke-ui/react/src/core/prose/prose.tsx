@@ -7,7 +7,7 @@ export interface ProseProps extends ComponentProps<'div'> {}
 
 /**
  * Adds vertical rhythm and list styling to long-form content such as rendered Markdown, MDX, or
- * CMS content.
+ * CMS content. Pair it with Luke UI typography components for visual hierarchy.
  */
 export function Prose(props: ProseProps): JSX.Element {
 	const { className, ...divProps } = props;

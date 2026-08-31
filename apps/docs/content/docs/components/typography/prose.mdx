@@ -1,14 +1,16 @@
 ---
 title: Prose
-description: Vertical rhythm and list structure for long-form content.
+description: Vertical rhythm and list styling for long-form content.
 source: packages/@luke-ui/react/src/exports/prose.ts
 props:
   - name: ProseProps
     path: packages/@luke-ui/react/src/core/prose/prose.tsx
 ---
 
-`Prose` adds vertical rhythm and list styling to long-form content, such as rendered Markdown, MDX,
-or CMS content. It does not style text or constrain the content width.
+`Prose` adds vertical rhythm and list styling to long-form content. It does not constrain content
+width. Pair it with [Heading](/components/typography/heading) and
+[Text](/components/typography/text) for visual hierarchy, or map rendered Markdown and CMS elements
+to those components.
 
 <ExampleBlock src="prose/basic" title="Prose — Basic" />
 
@@ -18,19 +20,7 @@ Lists inside `Prose` include markers and indentation, including nested lists.
 
 <ExampleBlock src="prose/lists" title="Prose — Lists" />
 
-## Custom spacing
-
-Add a class to an element inside `Prose` to override its spacing.
-
-```tsx
-<Prose>
-	<figure className={styles.fullBleedFigure}>
-		<img alt="" src="/diagram.png" />
-	</figure>
-</Prose>
-```
-
 ## Related components
 
-Use [Text](/components/typography/text) and [Heading](/components/typography/heading) when you
-control the markup and spacing directly.
+[Heading](/components/typography/heading) and [Text](/components/typography/text) own typography and
+visual hierarchy. Use them inside `Prose` when you need styled headings and body text.

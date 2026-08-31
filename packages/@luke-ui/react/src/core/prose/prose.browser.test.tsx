@@ -3,6 +3,7 @@ import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Prose } from './prose.js';
+import { proseRecipe } from './recipe.css.js';
 
 testConformance({
 	path: 'prose',
@@ -36,6 +37,10 @@ function renderSection(style?: CSSProperties) {
 	const root = locator.element();
 
 	return gapBetween(query(root, 'p'), query(root, 'h2'));
+}
+
+function listStyleTypes(root: ParentNode) {
+	return [...root.querySelectorAll('ol')].map((ol) => getComputedStyle(ol).listStyleType);
 }
 
 // A two-sided model collapses in block flow but sums in a grid.
@@ -81,7 +86,7 @@ test('normalises a nested pre margin', () => {
 });
 
 // Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.
-test('preserves native ordered-list type markers', () => {
+test('preserves native ordered-list type markers inside Prose', () => {
 	const { locator } = render(
 		<Prose>
 			<ol>
@@ -104,9 +109,8 @@ test('preserves native ordered-list type markers', () => {
 			</ol>
 		</Prose>,
 	);
-	const ols = [...locator.element().querySelectorAll('ol')];
 
-	expect(ols.map((ol) => getComputedStyle(ol).listStyleType)).toEqual([
+	expect(listStyleTypes(locator.element())).toEqual([
 		'decimal',
 		'decimal',
 		'lower-alpha',
@@ -114,4 +118,93 @@ test('preserves native ordered-list type markers', () => {
 		'lower-roman',
 		'upper-roman',
 	]);
+});
+
+// Typed ols outside Prose stay on the ordinary markerless reset.
+test('keeps typed ordered lists markerless outside Prose', () => {
+	const { container } = render(
+		<div>
+			<ol type="a">
+				<li>a</li>
+			</ol>
+			<ol type="A">
+				<li>A</li>
+			</ol>
+			<ol type="i">
+				<li>i</li>
+			</ol>
+			<ol type="I">
+				<li>I</li>
+			</ol>
+			<ol>
+				<li>one</li>
+			</ol>
+		</div>,
+	);
+
+	expect(listStyleTypes(container)).toEqual(['none', 'none', 'none', 'none', 'none']);
+});
+
+// `proseRecipe` is public, so the scope must ride the recipe class, not the component.
+test('preserves native ordered-list type markers under proseRecipe alone', () => {
+	const { locator } = render(
+		<div className={proseRecipe()}>
+			<ol type="1">
+				<li>1</li>
+			</ol>
+			<ol type="a">
+				<li>a</li>
+			</ol>
+			<ol type="A">
+				<li>A</li>
+			</ol>
+			<ol type="i">
+				<li>i</li>
+			</ol>
+			<ol type="I">
+				<li>I</li>
+			</ol>
+		</div>,
+	);
+
+	expect(listStyleTypes(locator.element())).toEqual([
+		'decimal',
+		'lower-alpha',
+		'upper-alpha',
+		'lower-roman',
+		'upper-roman',
+	]);
+});
+
+test('does not make bare pre a horizontal scroll container', () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: '20rem' }}>
+			<pre>
+				<code>{'const value = '.repeat(40)}</code>
+			</pre>
+		</Prose>,
+	);
+	const pre = query(locator.element(), 'pre');
+
+	expect(getComputedStyle(pre).overflowX).not.toBe('auto');
+});
+
+test('does not turn tables into inaccessible scroll containers', () => {
+	const { locator } = render(
+		<Prose style={{ inlineSize: '20rem' }}>
+			<table>
+				<tbody>
+					<tr>
+						{Array.from({ length: 30 }, (_, column) => (
+							<td key={column}>Column {column}</td>
+						))}
+					</tr>
+				</tbody>
+			</table>
+		</Prose>,
+	);
+	const table = query(locator.element(), 'table');
+
+	expect(getComputedStyle(table).overflowX).not.toBe('auto');
+	expect(getComputedStyle(table).display).not.toBe('block');
 });

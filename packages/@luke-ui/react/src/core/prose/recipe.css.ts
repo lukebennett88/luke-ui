@@ -1,18 +1,17 @@
 import { vars } from '../../theme/contract.css.js';
-import { globalStyleInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { globalStyleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
-
-const base = styleInLayer('recipes', {}, 'prose');
+import { proseScopeClassName } from './scope.css.js';
 
 /** Vanilla-extract recipe for a fixed long-form document rhythm. */
-export const proseRecipe = recipe({ base });
+export const proseRecipe = recipe({ base: proseScopeClassName });
 
 export type ProseRecipeVariants = RecipeSelection<typeof proseRecipe>;
 
 // Wrapping the root and matched element keeps every rule at 0-0-0.
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
-	globalStyleInLayer('recipes', `:where(.${base}) :where(${selector})`, rule);
+	globalStyleInLayer('recipes', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
 }
 
 // Each gap is the following block's start margin. No block-end margin can collapse or escape.
@@ -35,8 +34,8 @@ proseStyle('* + figcaption, li > ul, li > ol, li > p + p', {
 proseStyle('h1 + *', { marginBlockStart: vars.space.sp32 });
 proseStyle('h1 + h2, h1 + hr', { marginBlockStart: vars.space.sp48 });
 proseStyle('h2 + *', { marginBlockStart: vars.space.sp24 });
-proseStyle('h3 + *', { marginBlockStart: vars.space.sp12 });
-proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp8 });
+proseStyle('h3 + *', { marginBlockStart: vars.space.sp16 });
+proseStyle('h4 + *, h5 + *, h6 + *', { marginBlockStart: vars.space.sp12 });
 // A rule is a section break on both sides.
 proseStyle('hr + *', { marginBlockStart: vars.space.sp48 });
 
@@ -46,7 +45,8 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 });
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
-// Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply.
+// Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply
+// inside Prose; the reset leaves those ols alone via `proseScopeClassName` from `./scope.css.js`.
 proseStyle('ol:not([type])', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
 proseStyle('ol[type]', { paddingInlineStart: vars.space.sp24 });
 
