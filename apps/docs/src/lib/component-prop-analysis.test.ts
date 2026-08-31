@@ -9,7 +9,6 @@ import {
 	loadExportedPropDeclaration,
 	lukeUiReactSrcDir,
 	typeForwardsDomProps,
-	typeForwardsDomPropsForExport,
 } from './component-prop-analysis.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 
@@ -43,6 +42,12 @@ async function loadDoc(path: string, name: string) {
 async function visiblePropNames(path: string, name: string): Promise<Array<string>> {
 	const { declaration, doc } = await loadDoc(path, name);
 	return filterGeneratedDoc(doc, declaration, reactSrcDir).entries.map((entry) => entry.name);
+}
+
+function forwardsDomPropsForExport(project: PropProject, path: string, name: string): boolean {
+	const declaration = loadExportedPropDeclaration(project, repoRoot, path, name);
+	if (declaration === undefined) return false;
+	return typeForwardsDomProps(declaration, reactSrcDir);
 }
 
 test(
@@ -157,25 +162,22 @@ test(
 		const project = await getSharedPropProject(repoRoot);
 
 		expect(
-			typeForwardsDomPropsForExport(
+			forwardsDomPropsForExport(
 				project as PropProject,
-				repoRoot,
 				'packages/@luke-ui/react/src/core/heading/heading.tsx',
 				'HeadingProps',
 			),
 		).toBe(true);
 		expect(
-			typeForwardsDomPropsForExport(
+			forwardsDomPropsForExport(
 				project as PropProject,
-				repoRoot,
 				'packages/@luke-ui/react/src/core/heading/heading-context.tsx',
 				'HeadingLevelsProps',
 			),
 		).toBe(false);
 		expect(
-			typeForwardsDomPropsForExport(
+			forwardsDomPropsForExport(
 				project as PropProject,
-				repoRoot,
 				'packages/@luke-ui/react/src/core/heading/heading-context.tsx',
 				'HeadingLevelsRenderProps',
 			),
@@ -221,9 +223,8 @@ test(
 		);
 		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(false);
 		expect(
-			typeForwardsDomPropsForExport(
+			forwardsDomPropsForExport(
 				await getSharedPropProject(repoRoot),
-				repoRoot,
 				'packages/@luke-ui/react/src/core/icon/icon.tsx',
 				'IconProps',
 			),
@@ -524,21 +525,11 @@ test(
 		// A union of two plain object types forwards nothing, even though the union-aware walk visits
 		// both constituents.
 		expect(
-			typeForwardsDomPropsForExport(
-				project as PropProject,
-				repoRoot,
-				UNION_FIXTURE_PATH,
-				'PlainUnionProps',
-			),
+			forwardsDomPropsForExport(project as PropProject, UNION_FIXTURE_PATH, 'PlainUnionProps'),
 		).toBe(false);
 		// One DOM-forwarding constituent is enough for the whole union to forward.
 		expect(
-			typeForwardsDomPropsForExport(
-				project as PropProject,
-				repoRoot,
-				UNION_FIXTURE_PATH,
-				'MixedUnionProps',
-			),
+			forwardsDomPropsForExport(project as PropProject, UNION_FIXTURE_PATH, 'MixedUnionProps'),
 		).toBe(true);
 	},
 	TS_MORPH_TEST_TIMEOUT,

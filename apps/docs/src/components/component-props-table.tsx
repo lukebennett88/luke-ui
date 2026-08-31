@@ -35,7 +35,6 @@ export function ComponentPropsTable({
 			{groups.map((group) => (
 				<PropGroup
 					group={group}
-					id={id}
 					key={group.name}
 					type={pickGroupProps(type, new Set(group.props))}
 				/>
@@ -46,27 +45,19 @@ export function ComponentPropsTable({
 
 function PropGroup({
 	group,
-	id,
 	type,
 }: {
 	group: { defaultOpen: boolean; name: string; props: ReadonlyArray<string> };
-	id: string;
 	type: Record<string, TypeNode>;
 }) {
-	const triggerId = `${id}-${slugify(group.name)}-trigger`;
-	const tableId = `${id}-${slugify(group.name)}-table`;
-
 	return (
 		<Collapsible className="rounded-2xl border bg-fd-card" defaultOpen={group.defaultOpen}>
-			<CollapsibleTrigger
-				className="group flex w-full items-center justify-between px-4 py-3 text-start"
-				id={triggerId}
-			>
+			<CollapsibleTrigger className="group flex w-full items-center justify-between px-4 py-3 text-start">
 				<span className="font-medium text-fd-foreground text-sm">{group.name}</span>
 				<ChevronIcon />
 			</CollapsibleTrigger>
 			<CollapsibleContent className="border-fd-border border-t px-1 pb-1">
-				<TypeTable id={tableId} type={type} />
+				<TypeTable type={type} />
 			</CollapsibleContent>
 		</Collapsible>
 	);
@@ -94,11 +85,4 @@ function pickGroupProps(
 	names: ReadonlySet<string>,
 ): Record<string, TypeNode> {
 	return Object.fromEntries(Object.entries(type).filter(([name]) => names.has(name)));
-}
-
-function slugify(value: string): string {
-	return value
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-|-$/g, '');
 }

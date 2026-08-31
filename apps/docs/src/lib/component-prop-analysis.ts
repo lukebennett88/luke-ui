@@ -128,18 +128,6 @@ export function loadExportedPropDeclaration(
 	return file.getExportedDeclarations().get(exportName)?.[0];
 }
 
-/** Checks whether an exported prop type forwards native DOM props for docs generation. */
-export function typeForwardsDomPropsForExport(
-	project: PropProject,
-	repoRoot: string,
-	repoRelativePath: string,
-	exportName: string,
-): boolean {
-	const declaration = loadExportedPropDeclaration(project, repoRoot, repoRelativePath, exportName);
-	if (declaration === undefined) return false;
-	return typeForwardsDomProps(declaration, lukeUiReactSrcDir(repoRoot));
-}
-
 function readSourceFile(project: PropProject, absolutePath: string): PropSourceFile {
 	return project.createSourceFile(absolutePath, readFileSync(absolutePath, 'utf8'), {
 		overwrite: true,
@@ -474,7 +462,7 @@ function flattenedProps(declaration: PropDeclaration): ReadonlyArray<PropSymbol>
  * `extends` rather than any syntax a walk could single out. Only the prop's own name shape tells them
  * apart, so `ARIA_FORM_LONG_TAIL_PROP_NAMES` is the one place that decision is made explicitly.
  */
-function visiblePropNameSet(declaration: PropDeclaration, reactSrcDir: string): Set<string> {
+function computeVisiblePropNameSet(declaration: PropDeclaration, reactSrcDir: string): Set<string> {
 	const origins: StructuralOrigins = {
 		ariaLabelingNodeKeys: new Set<string>(),
 		broadNodeKeys: new Set<string>(),
@@ -517,4 +505,30 @@ function visiblePropNameSet(declaration: PropDeclaration, reactSrcDir: string): 
 		if (!isFromBroadBag) visibleNames.add(name);
 	}
 	return visibleNames;
+}
+
+/**
+ * Caches `computeVisiblePropNameSet` results per `(declaration, reactSrcDir)` pair. Both
+ * `filterGeneratedDoc` and `typeForwardsDomProps` are called once per documented type with the same
+ * declaration, and the structural walk (`walkOrigins`) is the expensive part of the computation — this
+ * cache lets the second call reuse the first's result instead of re-walking the same syntax tree. The
+ * key combines `reactSrcDir` with the declaration's `nodeKey` using a space, which cannot appear inside
+ * a `nodeKey` (a `file:start` pair), so two different declarations or the same declaration analysed
+ * against a different `reactSrcDir` never collide. The cache lives for the process lifetime: within a
+ * single build or test run the source files on disk don't change mid-run, so a stale entry surviving a
+ * `readSourceFile` re-read (via `overwrite: true`) is not a concern here.
+ */
+const visiblePropNameSetCache = new Map<string, ReadonlySet<string>>();
+
+function visiblePropNameSet(
+	declaration: PropDeclaration,
+	reactSrcDir: string,
+): ReadonlySet<string> {
+	const key = `${reactSrcDir} ${nodeKey(declaration)}`;
+	const cached = visiblePropNameSetCache.get(key);
+	if (cached !== undefined) return cached;
+
+	const computed = computeVisiblePropNameSet(declaration, reactSrcDir);
+	visiblePropNameSetCache.set(key, computed);
+	return computed;
 }
