@@ -1,9 +1,6 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { transformAsync } from '@babel/core';
 import { makeIdFiltersToMatchWithQuery } from '@rolldown/pluginutils';
-import stylexBabelPlugin from '@stylexjs/babel-plugin';
-import type { Rule } from '@stylexjs/babel-plugin';
 import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
 import { readdir, rm } from 'node:fs/promises';
@@ -11,6 +8,7 @@ import { transformSync } from 'oxc-transform-react';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
+import { stylexPlugin } from './scripts/stylex-plugin.js';
 
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
@@ -50,7 +48,6 @@ export default defineConfig({
 		dts: true,
 		entry: {
 			stylesheet: 'src/core/stylesheet.css.ts',
-			'stylex-fixture': 'src/core/styles/stylex-fixture.ts',
 			'*': ['src/exports/*.ts'],
 			'primitives/*': ['src/exports/primitives/*.ts'],
 			'themes/*': ['src/exports/themes/*.ts'],
@@ -59,8 +56,8 @@ export default defineConfig({
 			customExports: Object.fromEntries(
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
-			// Built for extraction; not consumer subpaths.
-			exclude: ['stylesheet', 'stylex-fixture'],
+			// Built for extraction; not a consumer subpath.
+			exclude: ['stylesheet'],
 		},
 		format: ['esm'],
 		hooks: {
@@ -78,7 +75,7 @@ export default defineConfig({
 			}),
 			// StyleX runs before the React Compiler: it needs the original `stylex.create` calls,
 			// which the compiler's output would have already rewritten past recognition.
-			stylexPlugin(),
+			stylexPlugin(workspaceRoot),
 			reactCompilerPlugin(),
 			// @ts-expect-error Vite plugin compatibility
 			react({ fastRefresh: true }),
@@ -87,81 +84,6 @@ export default defineConfig({
 		sourcemap: true,
 	},
 });
-
-function stylexPlugin(): Plugin {
-	let stylexRules = new Map<string, Array<Rule>>();
-
-	return {
-		name: 'stylex',
-		buildStart() {
-			stylexRules = new Map();
-		},
-		shouldTransformCachedModule({ id, meta }) {
-			// A watch rebuild skips `transform` for unchanged modules, so their rules have to be
-			// read back off the cached metadata or they vanish from the stylesheet.
-			const { stylex } = meta as { stylex?: Array<Rule> };
-			if (stylex !== undefined) stylexRules.set(id, stylex);
-			return false;
-		},
-		async transform(code, id) {
-			// Cheap gate: parsing every module through Babel to find the few that use StyleX
-			// would roughly double build time.
-			if (id.endsWith('.d.ts') || !code.includes('@stylexjs/stylex')) return null;
-
-			const filename = id.split('?')[0] ?? id;
-
-			const result = await transformAsync(code, {
-				babelrc: false,
-				configFile: false,
-				filename,
-				parserOpts: {
-					plugins:
-						filename.endsWith('.tsx') || filename.endsWith('.jsx')
-							? ['typescript', 'jsx']
-							: ['typescript'],
-				},
-				plugins: [
-					stylexBabelPlugin.withOptions({
-						dev: false,
-						unstable_moduleResolution: { type: 'commonJS', rootDir: workspaceRoot },
-					}),
-				],
-				sourceMaps: true,
-			});
-
-			if (result?.code == null) {
-				throw new Error(
-					`StyleX could not compile ${filename}. Every \`stylex\` declaration must be statically extractable.`,
-				);
-			}
-
-			const meta = result.metadata as { stylex?: Array<Rule> };
-
-			// Drop the entry when a module stops producing rules, so a watch rebuild replaces its
-			// contribution instead of leaving the previous rules stranded in the map.
-			if (meta.stylex === undefined) stylexRules.delete(id);
-			else stylexRules.set(id, meta.stylex);
-
-			return { code: result.code, map: result.map, meta };
-		},
-		generateBundle(_options, bundle) {
-			const rules = [...stylexRules.values()].flat();
-			if (rules.length === 0) return;
-
-			const stylesheet = bundle['stylesheet.css'];
-			if (stylesheet?.type !== 'asset') {
-				throw new Error('Expected a `stylesheet.css` asset to append StyleX rules to.');
-			}
-
-			const stylexCss = stylexBabelPlugin.processStylexRules(rules, {
-				// Unlayered until StyleX joins the cascade-layer contract.
-				useLayers: false,
-			});
-
-			stylesheet.source = `${stylesheet.source.toString()}\n/* stylex */\n${stylexCss}`;
-		},
-	};
-}
 
 function reactCompilerPlugin(): Plugin {
 	return {

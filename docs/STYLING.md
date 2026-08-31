@@ -25,8 +25,6 @@ utility modules live under `core/`. Theme modules live under `theme/`.
   primitive and overlay style modules. Keep the list in code-point order by path for deterministic
   output. Named layers make cross-layer priority explicit. Specificity and source order still matter
   within a layer.
-- `core/styles/stylex-fixture.ts`: internal StyleX declaration so the package build extracts StyleX.
-  Not a public export.
 - `core/styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
 - `core/styles/input-states.ts`: the shared field control-state selectors

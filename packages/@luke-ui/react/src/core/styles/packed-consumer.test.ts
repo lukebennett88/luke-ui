@@ -3,24 +3,11 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
 const require = createRequire(import.meta.url);
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
-
-const runtimeDependencies = [
-	'react',
-	'react-dom',
-	'react-aria-components',
-	'@capsizecss/metrics',
-	'@capsizecss/vanilla-extract',
-	'@luke-ui/rainbow-sprinkles',
-	'@react-aria/utils',
-	'@stylexjs/stylex',
-	'@vanilla-extract/css',
-	'@vanilla-extract/recipes',
-] as const;
 
 test(
 	'renders a component from the packed tarball in a plain node process, with no StyleX compiler',
@@ -37,15 +24,27 @@ test(
 			const tarballPath = path.join(tarballDir, tarballName);
 
 			execFileSync('tar', ['-xzf', tarballPath, '-C', consumerDir]);
+			const packedPackageRoot = path.join(consumerDir, 'package');
+			const packedPackageJson: unknown = JSON.parse(
+				await readFile(path.join(packedPackageRoot, 'package.json'), 'utf8'),
+			);
+			if (
+				!isRecord(packedPackageJson) ||
+				!isRecord(packedPackageJson.dependencies) ||
+				!isRecord(packedPackageJson.peerDependencies)
+			) {
+				throw new Error('Expected packed package.json to define dependency objects.');
+			}
+			const runtimeDependencies = new Set([
+				...Object.keys(packedPackageJson.dependencies),
+				...Object.keys(packedPackageJson.peerDependencies),
+			]);
 			const consumerNodeModules = path.join(consumerDir, 'node_modules');
 			await mkdir(path.join(consumerNodeModules, '@luke-ui'), { recursive: true });
-			await symlink(
-				path.join(consumerDir, 'package'),
-				path.join(consumerNodeModules, '@luke-ui', 'react'),
-			);
+			await symlink(packedPackageRoot, path.join(consumerNodeModules, '@luke-ui', 'react'));
 
 			await Promise.all(
-				runtimeDependencies.map(async (dependency) => {
+				[...runtimeDependencies].map(async (dependency) => {
 					const dependencyDir = path.dirname(
 						require.resolve(`${dependency}/package.json`, { paths: [packageRoot] }),
 					);
@@ -87,3 +86,7 @@ test(
 		}
 	},
 );
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null;
+}
