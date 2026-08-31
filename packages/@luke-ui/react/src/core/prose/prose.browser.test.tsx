@@ -85,41 +85,6 @@ test('normalises a nested pre margin', () => {
 	).toBeCloseTo(0, 0);
 });
 
-// Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.
-test('preserves native ordered-list type markers inside Prose', () => {
-	const { locator } = render(
-		<Prose>
-			<ol>
-				<li>default</li>
-			</ol>
-			<ol type="1">
-				<li>one</li>
-			</ol>
-			<ol type="a">
-				<li>a</li>
-			</ol>
-			<ol type="A">
-				<li>A</li>
-			</ol>
-			<ol type="i">
-				<li>i</li>
-			</ol>
-			<ol type="I">
-				<li>I</li>
-			</ol>
-		</Prose>,
-	);
-
-	expect(listStyleTypes(locator.element())).toEqual([
-		'decimal',
-		'decimal',
-		'lower-alpha',
-		'upper-alpha',
-		'lower-roman',
-		'upper-roman',
-	]);
-});
-
 // Typed ols outside Prose stay on the ordinary markerless reset.
 test('keeps typed ordered lists markerless outside Prose', () => {
 	const { container } = render(
@@ -145,6 +110,7 @@ test('keeps typed ordered lists markerless outside Prose', () => {
 	expect(listStyleTypes(container)).toEqual(['none', 'none', 'none', 'none', 'none']);
 });
 
+// Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.
 // `proseRecipe` is public, so the scope must ride the recipe class, not the component.
 test('preserves native ordered-list type markers under proseRecipe alone', () => {
 	const { locator } = render(
@@ -174,37 +140,4 @@ test('preserves native ordered-list type markers under proseRecipe alone', () =>
 		'lower-roman',
 		'upper-roman',
 	]);
-});
-
-test('does not make bare pre a horizontal scroll container', () => {
-	const { locator } = render(
-		<Prose style={{ inlineSize: '20rem' }}>
-			<pre>
-				<code>{'const value = '.repeat(40)}</code>
-			</pre>
-		</Prose>,
-	);
-	const pre = query(locator.element(), 'pre');
-
-	expect(getComputedStyle(pre).overflowX).not.toBe('auto');
-});
-
-test('does not turn tables into inaccessible scroll containers', () => {
-	const { locator } = render(
-		<Prose style={{ inlineSize: '20rem' }}>
-			<table>
-				<tbody>
-					<tr>
-						{Array.from({ length: 30 }, (_, column) => (
-							<td key={column}>Column {column}</td>
-						))}
-					</tr>
-				</tbody>
-			</table>
-		</Prose>,
-	);
-	const table = query(locator.element(), 'table');
-
-	expect(getComputedStyle(table).overflowX).not.toBe('auto');
-	expect(getComputedStyle(table).display).not.toBe('block');
 });

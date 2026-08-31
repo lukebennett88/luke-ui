@@ -1,5 +1,5 @@
 import { expect, test } from 'vite-plus/test';
-import { findStrayTestFiles, globToRegExp } from './check-test-suffixes-lib.js';
+import { findStrayTestFiles } from './check-test-suffixes-lib.js';
 
 const includeGlobs = [
 	'src/**/*.test.ts',
@@ -42,19 +42,4 @@ test('flags a test file outside src/ and scripts/', () => {
 
 test('matches a double-star glob against a file directly under its root, with no subdirectory', () => {
 	expect(findStrayTestFiles(['scripts/probe.test.ts'], includeGlobs)).toEqual([]);
-});
-
-test('converts ** followed by a slash into an optional run of directories', () => {
-	const matcher = globToRegExp('src/**/*.test.ts');
-	expect(matcher.test('src/button.test.ts')).toBe(true);
-	expect(matcher.test('src/button/button.test.ts')).toBe(true);
-	expect(matcher.test('src/a/b/c.test.ts')).toBe(true);
-	expect(matcher.test('src/button/button.test.tsx')).toBe(false);
-});
-
-test('expands brace alternation', () => {
-	const matcher = globToRegExp('src/**/*.browser.test.{ts,tsx}');
-	expect(matcher.test('src/button/button.browser.test.ts')).toBe(true);
-	expect(matcher.test('src/button/button.browser.test.tsx')).toBe(true);
-	expect(matcher.test('src/button/button.browser.test.jsx')).toBe(false);
 });

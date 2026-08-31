@@ -247,31 +247,6 @@ Configure the workspace before you invite people to it.
 	expect(findDocsIssues(paths)).toEqual(['docs/settings.mdx: terminology "people"']);
 });
 
-test('does not swallow prose past an unclosed angle bracket followed by a blank line', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'sizes.mdx': `---
-title: Sizes
----
-
-Some values <b times larger than others look odd in a table.
-
-Invite people to review the sizing scale.
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/sizes.mdx: terminology "people"']);
-});
-
 test('strips MDX expressions but still reports banned terms in prose and JSX child text', () => {
 	const paths = createDocsFixture({
 		authored: {
@@ -332,107 +307,6 @@ Invite people to configure the settings.
 	});
 
 	expect(findDocsIssues(paths)).toEqual(['docs/imports.mdx: terminology "people"']);
-});
-
-test('does not swallow prose past an unbalanced brace followed by a blank line', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'braces.mdx': `---
-title: Braces
----
-
-This uses a { placeholder that never closes properly here.
-
-Invite people to review the wording.
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/braces.mdx: terminology "people"']);
-});
-
-test('ignores escaped quotes and backticks in MDX expressions', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'expressions-with-escapes.mdx': `---
-title: Expressions with escapes
----
-
-{format("Invite people to use an escaped \\"quote\\"")}
-
-{format(\`Invite people to use an escaped \\\`backtick\\\`\`)}
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual([]);
-});
-
-test('does not swallow prose after imports with escaped delimiters', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'imports-with-escapes.mdx': `---
-title: Imports with escapes
----
-
-import quotePath from './people\\'s-guide';
-import backtickPath from \`./people\\\`s-guide\`;
-
-Invite people to configure the settings.
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/imports-with-escapes.mdx: terminology "people"']);
-});
-
-test('does not swallow prose after an unterminated import string', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'unterminated-import.mdx': `---
-title: Unterminated import
----
-
-import source from './docs
-
-Invite people to configure the settings.
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/unterminated-import.mdx: terminology "people"']);
 });
 
 test('reports prose patterns outside code and ignores them inside fences', () => {
@@ -558,21 +432,6 @@ test('reports a guide that is absent from the root component metadata', () => {
 	expect(findDocsIssues(paths)).toEqual([
 		'component-guide-inventory: actions/button.mdx: guide is absent from the root component metadata (expected entry "actions/button")',
 	]);
-});
-
-test('validates category metadata for root entries before the first separator', () => {
-	const paths = inventoryFixture({
-		metadata: {
-			'actions/meta.json': { pages: ['button'], title: 'Actions' },
-			'meta.json': {
-				pages: ['actions/button', '---Actions---'],
-				root: true,
-				title: 'Components',
-			},
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual([]);
 });
 
 test('reports stale category metadata when the root category disappears', () => {

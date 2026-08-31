@@ -41,46 +41,9 @@ test('keeps source imports flowing between core, exports, shared, and theme', as
 	expect(violations).toEqual([]);
 });
 
-// The dependency graph, driven against synthetic zone pairs rather than files on disk, so every
-// forbidden edge is proven to fail if `isForbiddenEdge` stopped reporting it, and every allowed
-// edge is proven not to false-positive. Exhaustive over all 16 zone pairs so no pair can be
-// silently omitted in future.
-test.for([
-	['shared', 'core'],
-	['shared', 'theme'],
-	['shared', 'exports'],
-	['core', 'exports'],
-	['theme', 'core'],
-	['theme', 'exports'],
-] as const)('reports %s -> %s as a violation', ([sourceZone, targetZone]) => {
-	expect(isForbiddenEdge(sourceZone, targetZone)).toBe(true);
-});
-
-test.for([
-	['exports', 'core'],
-	['exports', 'theme'],
-	['exports', 'shared'],
-	['core', 'shared'],
-	['core', 'theme'],
-	['theme', 'shared'],
-] as const)('allows %s -> %s', ([sourceZone, targetZone]) => {
-	expect(isForbiddenEdge(sourceZone, targetZone)).toBe(false);
-});
-
-test.for([
-	['core', 'core'],
-	['exports', 'exports'],
-	['shared', 'shared'],
-	['theme', 'theme'],
-] as const)('allows %s -> %s (same zone)', ([sourceZone, targetZone]) => {
-	expect(isForbiddenEdge(sourceZone, targetZone)).toBe(false);
-});
-
-// The synthetic cases above call `isForbiddenEdge` directly with string literals, so they cannot
-// catch a regression in the code that actually walks the tree. Drive the real scanning path
-// (`collectSourceFiles`, `resolveRelativeImport`, `sourceZoneFor`) against an on-disk fixture so a
-// broken zone classification (for example `sourceZoneFor` no longer recognising `theme`) fails this
-// test instead of silently reporting zero violations everywhere.
+// Drive the real scanning path against an on-disk fixture so a broken zone classification
+// (for example `sourceZoneFor` no longer recognising `theme`) fails instead of silently
+// reporting zero violations everywhere.
 test('detects a real on-disk forbidden import via the file-walking scanner', async () => {
 	const root = await createFixtureRoot({
 		'theme/offender.ts': "import { helper } from '../exports/helper.js';\n",

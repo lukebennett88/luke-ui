@@ -21,22 +21,13 @@ test('text and component placeholders', async () => {
 			<LoadingSkeleton radius="control">
 				<TextField label="Email" name="email" placeholder="Email address" />
 			</LoadingSkeleton>
-		</Stack>,
-	);
-
-	await captureVisual(locator, 'loading-skeleton/placeholders');
-});
-
-test('loaded content', async () => {
-	const { locator } = render(
-		<Stack align="flex-start">
 			<LoadingSkeleton isLoading={false}>
 				<Button>Submit</Button>
 			</LoadingSkeleton>
 		</Stack>,
 	);
 
-	await captureVisual(locator, 'loading-skeleton/loaded');
+	await captureVisual(locator, 'loading-skeleton/placeholders');
 });
 
 for (const appearance of visualAppearances) {
