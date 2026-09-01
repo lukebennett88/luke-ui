@@ -1,4 +1,6 @@
 import * as z from 'zod';
+import type { CreationWork, PlanFile } from './creation-plan-types.js';
+import { toCamelCase, toDisplayName, toKebabCase, validateScaffoldName } from './naming.js';
 
 export const CONFORMANCE_CONTRACTS = ['dom', 'field'] as const;
 /**
@@ -23,11 +25,6 @@ export const COMPONENT_DEFAULTS = {
 
 export type ConformanceContract = (typeof CONFORMANCE_CONTRACTS)[number];
 
-export interface PlanFile {
-	contents: string;
-	path: string;
-}
-
 export interface ComponentCreationPlan {
 	expected: {
 		hostedDocsPath: string;
@@ -38,36 +35,7 @@ export interface ComponentCreationPlan {
 	files: Array<PlanFile>;
 }
 
-interface JsonArrayAddSortedEdit {
-	key: 'pages';
-	kind: 'array-add-sorted';
-	path: string;
-	title: string;
-	value: string;
-}
-
-interface TextFileInsertEdit {
-	kind: 'text-insert';
-	lines: Array<string>;
-	marker: string;
-	path: string;
-}
-
-interface SortedImportEdit {
-	kind: 'sorted-import';
-	line: string;
-	path: string;
-}
-
-interface ComponentCreationWork extends ComponentCreationPlan {
-	jsonEdits: Array<JsonArrayAddSortedEdit>;
-	sortedImportEdits: Array<SortedImportEdit>;
-	textFileInserts: Array<TextFileInsertEdit>;
-}
-
-const COMPONENT_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
-const CAMEL_BOUNDARY_PATTERN = /([a-z0-9])([A-Z])/g;
-const NON_ALPHANUM_PATTERN = /[^A-Za-z0-9-]/g;
+interface ComponentCreationWork extends ComponentCreationPlan, CreationWork {}
 
 const componentAnswersSchema = z.object({
 	conformance: z.array(z.enum(CONFORMANCE_CONTRACTS)).default([...COMPONENT_DEFAULTS.conformance]),
@@ -81,17 +49,7 @@ export type CreateComponentInput = z.input<typeof componentAnswersSchema>;
 type ParsedComponentAnswers = z.output<typeof componentAnswersSchema>;
 
 export function validateComponentName(value: unknown): true | string {
-	if (typeof value !== 'string') {
-		return 'Component name required.';
-	}
-	const trimmed = value.trim();
-	if (!trimmed) {
-		return 'Component name required.';
-	}
-	if (!COMPONENT_NAME_PATTERN.test(trimmed)) {
-		return 'Use letters/numbers/hyphens. Start with a letter.';
-	}
-	return true;
+	return validateScaffoldName(value);
 }
 
 export function parseComponentAnswers(answers: unknown): ParsedComponentAnswers {
@@ -215,30 +173,6 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 			},
 		],
 	};
-}
-
-function toKebabCase(value: string): string {
-	return value
-		.trim()
-		.replaceAll(CAMEL_BOUNDARY_PATTERN, '$1-$2')
-		.replaceAll(NON_ALPHANUM_PATTERN, '-')
-		.toLowerCase();
-}
-
-function toDisplayName(value: string): string {
-	return toKebabCase(value)
-		.split('-')
-		.flatMap((part) => {
-			if (!part) return [];
-
-			return [`${part.charAt(0).toUpperCase()}${part.slice(1)}`];
-		})
-		.join(' ');
-}
-
-function toCamelCase(value: string): string {
-	const [first = '', ...rest] = toKebabCase(value).split('-').filter(Boolean);
-	return `${first}${rest.map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`).join('')}`;
 }
 
 function renderComponentSource(input: {

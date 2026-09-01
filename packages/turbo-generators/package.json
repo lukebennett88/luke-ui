@@ -8,6 +8,7 @@
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
 		"generate:component": "tsx scripts/generate-component.ts",
+		"generate:primitive": "tsx scripts/generate-primitive.ts",
 		"test": "vp test run"
 	},
 	"dependencies": {},

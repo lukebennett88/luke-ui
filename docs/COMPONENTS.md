@@ -29,23 +29,28 @@ Use the component generator for new normal component entrypoints:
 pnpm run generate:component --args <name> <docs-group>
 ```
 
-Primitive scaffolding is not handled by the component generator.
+Use the primitive generator for new `@luke-ui/react/primitives/*` entrypoints:
 
-Public subpath modules live under `src/exports/`. Single-segment subpaths use a flat module such as
-`src/exports/button.ts`. Grouped subpaths use nested modules such as
-`src/exports/primitives/button.ts`. A component's implementation lives under `src/core/`. Support
-modules and multi-part primitives each keep their own file.
+```sh
+pnpm run generate:primitive --args <name>
+```
 
-The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`.
-That module owns component-name validation, documentation groups, conformance contracts, and
-defaults. Turbo and Plop collect answers and invoke that flow. Keep new creation rules in the plan
-module so tests can prove the files, exports, stories, docs, and checks a component needs.
+The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`. The
+primitive creation rules live in `packages/turbo-generators/src/primitive-creation-plan.ts`. Those
+modules own name validation, documentation groups, conformance contracts, and defaults. Turbo and
+Plop collect answers and invoke that flow. Keep new creation rules in the plan module so tests can
+prove the files, exports, stories, docs, and checks a component or primitive needs.
 
 The generator creates the component guide's primary `apps/docs/src/examples/<component>/basic.tsx`
 example and references it with `ExampleBlock`. Replace the placeholder content with one focused,
 renderable use of the component.
 
 Do not move creation rules into one-off generator code.
+
+Public subpath modules live under `src/exports/`. Single-segment subpaths use a flat module such as
+`src/exports/button.ts`. Grouped subpaths use nested modules such as
+`src/exports/primitives/button.ts`. A component's implementation lives under `src/core/`. Support
+modules and multi-part primitives each keep their own file.
 
 ## Icons
 

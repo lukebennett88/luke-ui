@@ -3,8 +3,9 @@ import { pathToFileURL } from 'node:url';
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import type * as ViteFmt from 'vite-plus/fmt';
 import * as z from 'zod';
-import type { ComponentCreationPlan, PlanFile } from './component-creation-plan.js';
 import { createComponentWork, parseComponentAnswers } from './component-creation-plan.js';
+import type { ComponentCreationPlan } from './component-creation-plan.js';
+import type { CreationWork, PlanFile } from './creation-plan-types.js';
 
 // `config.ts` (this module's ultimate importer) is loaded by `@turbo/gen` through an esbuild
 // bundle (bundle:true, format:'cjs'). Two things break once that bundler actually traces into
@@ -71,21 +72,17 @@ async function formatGeneratedContent(target: string, raw: string): Promise<stri
 }
 
 const docsMetaSchema = z.record(z.string(), z.unknown());
-type ComponentCreationWork = ReturnType<typeof createComponentWork>;
 
 export async function createComponent(
 	root: string,
 	answers: unknown,
 ): Promise<ComponentCreationPlan> {
 	const work = createComponentWork(parseComponentAnswers(answers));
-	await applyComponentCreationPlan(root, work);
+	await applyCreationPlan(root, work);
 	return { expected: work.expected, files: work.files };
 }
 
-async function applyComponentCreationPlan(
-	root: string,
-	plan: ComponentCreationWork,
-): Promise<void> {
+export async function applyCreationPlan(root: string, plan: CreationWork): Promise<void> {
 	await Promise.all(plan.files.map((file) => writePlanFile(root, file)));
 	await Promise.all(plan.jsonEdits.map((edit) => applyJsonEdit(root, edit)));
 	await Promise.all(plan.textFileInserts.map((edit) => applyTextInsertEdit(root, edit)));
@@ -99,10 +96,7 @@ async function writePlanFile(root: string, file: PlanFile): Promise<void> {
 	await writeFile(target, formatted, 'utf8');
 }
 
-async function applyJsonEdit(
-	root: string,
-	edit: ComponentCreationWork['jsonEdits'][number],
-): Promise<void> {
+async function applyJsonEdit(root: string, edit: CreationWork['jsonEdits'][number]): Promise<void> {
 	const target = join(root, edit.path);
 	await mkdir(dirname(target), { recursive: true });
 	const data = await readJson(target, edit.title);
@@ -129,7 +123,7 @@ async function readJson(path: string, title: string): Promise<Record<string, unk
 
 async function applySortedImportEdit(
 	root: string,
-	edit: ComponentCreationWork['sortedImportEdits'][number],
+	edit: CreationWork['sortedImportEdits'][number],
 ): Promise<void> {
 	const target = join(root, edit.path);
 	await mkdir(dirname(target), { recursive: true });
@@ -170,7 +164,7 @@ function insertSortedImport(content: string, line: string): string {
 
 async function applyTextInsertEdit(
 	root: string,
-	edit: ComponentCreationWork['textFileInserts'][number],
+	edit: CreationWork['textFileInserts'][number],
 ): Promise<void> {
 	const target = join(root, edit.path);
 	const content = await readFile(target, 'utf8');

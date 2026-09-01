@@ -11,6 +11,7 @@
   Package-local scripts can skip Turbo `generate` dependencies, which can leave generated files
   missing.
 - Scaffold components non-interactively: `pnpm run generate:component --args <name> <docs-group>`.
+- Scaffold primitives non-interactively: `pnpm run generate:primitive --args <name>`.
 - When you change code, update or delete the docs that describe it in the same change. This includes
   comments, JSDoc, MDX files in `apps/docs/content/docs/`, `README.md`, package READMEs, and files
   in `docs/`. See [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md#keeping-docs-current).
