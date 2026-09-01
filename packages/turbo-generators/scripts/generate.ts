@@ -3,6 +3,12 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const generatorName = process.argv[2];
+if (generatorName !== 'component' && generatorName !== 'primitive') {
+	console.error('Usage: tsx scripts/generate.ts <component|primitive> [turbo args...]');
+	process.exit(1);
+}
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../../..');
 const rootRequire = createRequire(path.join(root, 'package.json'));
@@ -19,10 +25,10 @@ const child = spawn(
 	[
 		turboBin,
 		'generate',
-		'primitive',
+		generatorName,
 		'--config',
 		'packages/turbo-generators/config.ts',
-		...process.argv.slice(2),
+		...process.argv.slice(3),
 	],
 	{ cwd: root, env, stdio: 'inherit' },
 );

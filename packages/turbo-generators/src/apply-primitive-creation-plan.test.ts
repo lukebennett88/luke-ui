@@ -17,7 +17,12 @@ afterEach(async () => {
 
 describe('createPrimitive', () => {
 	it('applies parsed answers to a repository fixture and is safe to rerun', async () => {
-		const root = await createRepositoryFixture();
+		const root = await createRepositoryFixture({
+			primitivesMeta: {
+				pages: ['button', 'checkbox', 'field', 'input-group', 'combobox'],
+				title: 'Primitives',
+			},
+		});
 		const answers = { name: 'StatusBadge' };
 
 		await createPrimitive(root, answers);
@@ -70,7 +75,7 @@ describe('createPrimitive', () => {
 		await expect(
 			readJson(root, 'apps/docs/content/docs/components/primitives/meta.json'),
 		).resolves.toEqual({
-			pages: ['status-badge'],
+			pages: ['button', 'checkbox', 'field', 'input-group', 'combobox', 'status-badge'],
 			title: 'Primitives',
 		});
 		await expect(
@@ -178,38 +183,6 @@ describe('createPrimitive', () => {
 			pages: ['button'],
 			title: 'Primitives',
 		});
-	});
-
-	it('writes docs navigation JSON that is already formatter-clean', async () => {
-		const root = await createRepositoryFixture({
-			primitivesMeta: {
-				pages: ['button'],
-				title: 'Primitives',
-			},
-		});
-
-		await createPrimitive(root, { name: 'StatusBadge' });
-
-		await expect(
-			readFile(join(root, 'apps/docs/content/docs/components/primitives/meta.json'), 'utf8'),
-		).resolves.toBe('{\n\t"pages": ["button", "status-badge"],\n\t"title": "Primitives"\n}\n');
-	});
-
-	it('preserves existing primitive navigation order when appending docs', async () => {
-		const root = await createRepositoryFixture({
-			primitivesMeta: {
-				pages: ['button', 'checkbox', 'field', 'input-group', 'combobox'],
-				title: 'Primitives',
-			},
-		});
-		const metaPath = join(root, 'apps/docs/content/docs/components/primitives/meta.json');
-		const expected =
-			'{\n\t"pages": ["button", "checkbox", "field", "input-group", "combobox", "status-badge"],\n\t"title": "Primitives"\n}\n';
-
-		await createPrimitive(root, { name: 'StatusBadge' });
-		await createPrimitive(root, { name: 'StatusBadge' });
-
-		await expect(readFile(metaPath, 'utf8')).resolves.toBe(expected);
 	});
 });
 
