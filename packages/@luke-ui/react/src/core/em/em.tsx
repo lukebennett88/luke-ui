@@ -1,9 +1,10 @@
-import { cx } from '../../shared/utils/utils.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { resolveXStyleClassName } from '../styles/xstyle.js';
 import type { TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { em } from './styles.css.js';
+import { emRecipe } from './recipe.js';
 
 interface EmStyleProps {
 	/**
@@ -15,6 +16,12 @@ interface EmStyleProps {
 	 * @default 'unset'
 	 */
 	textWrap?: TextProps['textWrap'];
+	/**
+	 * Escape hatch for styling properties `Em`'s own styles do not set, as one or more
+	 * `stylex.create(...)` style objects. Applied after `Em`'s own styles and before `className`, so
+	 * a consumer `className` still beats it.
+	 */
+	xstyle?: XStyleProp;
 }
 
 type _EmOmit = DistributiveOmit<React.ComponentProps<'em'>, 'color'>;
@@ -29,11 +36,11 @@ export type EmProps = Prettify<_EmProps>;
  * Composes `Text`, inherits surrounding typography, and applies italic styling.
  */
 export function Em(props: EmProps) {
-	const { className, lineClamp, textWrap, ...elementProps } = props;
+	const { className, lineClamp, textWrap, xstyle, ...elementProps } = props;
 	return (
 		<Text
 			{...elementProps}
-			className={cx(em, className)}
+			className={resolveXStyleClassName(emRecipe(), xstyle, className)}
 			elementType="em"
 			lineClamp={lineClamp}
 			shouldInheritFont

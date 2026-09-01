@@ -326,13 +326,13 @@ test(
 );
 
 test(
-	'keeps a pure native wrapper empty while still forwarding DOM props',
+	'keeps the native wrapper styling contract while still forwarding DOM props',
 	async () => {
 		const names = await visiblePropNames(
 			'packages/@luke-ui/react/src/core/code/code.tsx',
 			'CodeProps',
 		);
-		expect(names).toEqual([]);
+		expect(names).toEqual(['xstyle']);
 		for (const prop of [...GENERIC_DOM_NOISE, 'key', 'ref'] as const) {
 			expect(names).not.toContain(prop);
 		}
@@ -357,11 +357,9 @@ const GENERIC_DOM_NOISE = ['itemProp', 'onClick', 'onPointerMoveCapture', 'tabIn
  * The types whose tables were empty before this analysis existed, now audited against what each
  * component's guide actually teaches rather than against whatever the analysis happens to emit.
  *
- * `Code`, `Kbd`, `Prose` and the two checkbox anatomy parts are pure element wrappers: their guides
- * teach only that they render a native element with the component's own styling, and their source
- * is a bare `extends ComponentProps<'code' | 'kbd' | 'div' | 'span'>`. They document no Luke UI
- * contract beyond pass-through DOM props, so their filtered tables are intentionally empty and rely
- * on the native-props note alone.
+ * The migrated typography components document `xstyle` as their StyleX customisation target. The
+ * checkbox anatomy parts remain pure element wrappers with no Luke UI contract beyond pass-through
+ * DOM props, so their filtered tables are intentionally empty and rely on the native-props note.
  */
 const AUDITED_TYPES: ReadonlyArray<{
 	forwardsDomProps: boolean;
@@ -372,21 +370,39 @@ const AUDITED_TYPES: ReadonlyArray<{
 }> = [
 	{
 		forwardsDomProps: true,
+		name: 'BlockquoteProps',
+		path: 'packages/@luke-ui/react/src/core/blockquote/blockquote.tsx',
+		visible: ['xstyle'],
+	},
+	{
+		forwardsDomProps: true,
 		name: 'CodeProps',
 		path: 'packages/@luke-ui/react/src/core/code/code.tsx',
-		visible: [],
+		visible: ['xstyle'],
+	},
+	{
+		forwardsDomProps: true,
+		name: 'EmProps',
+		path: 'packages/@luke-ui/react/src/core/em/em.tsx',
+		visible: ['xstyle'],
 	},
 	{
 		forwardsDomProps: true,
 		name: 'KbdProps',
 		path: 'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
-		visible: [],
+		visible: ['xstyle'],
 	},
 	{
 		forwardsDomProps: true,
 		name: 'ProseProps',
 		path: 'packages/@luke-ui/react/src/core/prose/prose.tsx',
-		visible: [],
+		visible: ['xstyle'],
+	},
+	{
+		forwardsDomProps: true,
+		name: 'StrongProps',
+		path: 'packages/@luke-ui/react/src/core/strong/strong.tsx',
+		visible: ['xstyle'],
 	},
 	{
 		forwardsDomProps: true,
@@ -454,11 +470,11 @@ const AUDITED_TYPES: ReadonlyArray<{
 		visible: ['elementType', 'render'],
 	},
 	{
-		// The guide teaches `<VisuallyHidden elementType="h2">` for a screen-reader-only heading.
+		// The guide teaches elementType for a screen-reader-only heading and xstyle for customisation.
 		forwardsDomProps: true,
 		name: 'VisuallyHiddenProps',
 		path: 'packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx',
-		visible: ['elementType', 'render'],
+		visible: ['elementType', 'render', 'xstyle'],
 	},
 	{
 		// Icon picks five SVG props by name and forwards nothing else, so its table is closed.
@@ -619,14 +635,15 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'textTransform',
 			'textWrap',
 			'typography',
+			'xstyle',
 		],
 	},
 	{
-		// A bare `extends ComponentProps<'code'>`: no Luke UI contract props, only pass-through DOM.
+		// Code exposes its StyleX customisation target alongside pass-through DOM props.
 		exportName: 'CodeProps',
 		name: 'CodeProps',
 		path: 'packages/@luke-ui/react/src/core/code/code.tsx',
-		props: [],
+		props: ['xstyle'],
 	},
 	{
 		exportName: 'LoadingSpinnerProps',

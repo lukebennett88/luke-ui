@@ -313,17 +313,16 @@ with the recipe.
 
 ### StyleX recipes
 
-A migrated component (`Text`, `VisuallyHidden`) uses `recipe()` from `core/styles/stylex-recipe.ts`
-instead of the Vanilla Extract engine above. Its public contract is identical — single-part
-`(selection?) => string`, slotted `(selection?) => Record<Slot, (extra?) => string>`, and
-`RecipeSelection<typeof recipeFn>` for the derived variant type — but the caller performs its own
-`stylex.create(...)` call, because `stylex.create` requires every key and value to be statically
-extractable: a recipe cannot build its variant map with `Object.fromEntries` or `Array.map` the way
-`typographyVariants` in the old Vanilla Extract `textRecipe` did. Write out each variant and
-compound-variant style as a literal `stylex.create` key instead. See `core/text/recipe.ts` for the
-full expansion this produces. A migrated recipe file is named `recipe.ts`, not `recipe.css.ts`
-(Vanilla Extract's `.css.ts` naming is wrong for a StyleX module and would be picked up by the VE
-plugin).
+A migrated component uses `recipe()` from `core/styles/stylex-recipe.ts` instead of the Vanilla
+Extract engine above. Its public contract is identical — single-part `(selection?) => string`,
+slotted `(selection?) => Record<Slot, (extra?) => string>`, and `RecipeSelection<typeof recipeFn>`
+for the derived variant type — but the caller performs its own `stylex.create(...)` call, because
+`stylex.create` requires every key and value to be statically extractable: a recipe cannot build its
+variant map with `Object.fromEntries` or `Array.map` the way `typographyVariants` in the old Vanilla
+Extract `textRecipe` did. Write out each variant and compound-variant style as a literal
+`stylex.create` key instead. See `core/text/recipe.ts` for the full expansion this produces. A
+migrated recipe file is named `recipe.ts`, not `recipe.css.ts` (Vanilla Extract's `.css.ts` naming
+is wrong for a StyleX module and would be picked up by the VE plugin).
 
 ### `xstyle`
 

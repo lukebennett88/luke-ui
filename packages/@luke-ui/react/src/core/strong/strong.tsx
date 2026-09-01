@@ -1,9 +1,10 @@
-import { cx } from '../../shared/utils/utils.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { resolveXStyleClassName } from '../styles/xstyle.js';
 import type { TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { strong } from './styles.css.js';
+import { strongRecipe } from './recipe.js';
 
 interface StrongStyleProps {
 	/**
@@ -15,6 +16,12 @@ interface StrongStyleProps {
 	 * @default 'unset'
 	 */
 	textWrap?: TextProps['textWrap'];
+	/**
+	 * Escape hatch for styling properties `Strong`'s own styles do not set, as one or more
+	 * `stylex.create(...)` style objects. Applied after `Strong`'s own styles and before
+	 * `className`, so a consumer `className` still beats it.
+	 */
+	xstyle?: XStyleProp;
 }
 
 type _StrongOmit = DistributiveOmit<React.ComponentProps<'strong'>, 'color'>;
@@ -29,11 +36,11 @@ export type StrongProps = Prettify<_StrongProps>;
  * Composes `Text`, inherits surrounding typography, and applies the emphasis weight.
  */
 export function Strong(props: StrongProps) {
-	const { className, lineClamp, textWrap, ...elementProps } = props;
+	const { className, lineClamp, textWrap, xstyle, ...elementProps } = props;
 	return (
 		<Text
 			{...elementProps}
-			className={cx(strong, className)}
+			className={resolveXStyleClassName(strongRecipe(), xstyle, className)}
 			elementType="strong"
 			lineClamp={lineClamp}
 			shouldInheritFont

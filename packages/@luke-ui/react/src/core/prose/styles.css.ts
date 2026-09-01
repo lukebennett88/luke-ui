@@ -1,15 +1,7 @@
 import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
-import type { RecipeSelection } from '../styles/recipe.js';
-import { recipe } from '../styles/recipe.js';
-import { proseScopeClassName } from './scope.css.js';
+import { proseScopeClassName } from './scope.js';
 
-/** Vanilla-extract recipe for a fixed long-form document rhythm. */
-export const proseRecipe = recipe({ base: proseScopeClassName });
-
-export type ProseRecipeVariants = RecipeSelection<typeof proseRecipe>;
-
-// Wrapping the root and matched element keeps every rule at 0-0-0.
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
 	globalStyleInLayer('structural', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
 }
@@ -46,7 +38,7 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
 // Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply
-// inside Prose; the reset leaves those ols alone via `proseScopeClassName` from `./scope.css.js`.
+// inside Prose; the reset leaves those ols alone via `proseScopeClassName` from `./scope.js`.
 proseStyle('ol:not([type])', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
 proseStyle('ol[type]', { paddingInlineStart: vars.space.sp24 });
 

@@ -43,7 +43,7 @@ test('filters generated component prop tables through the component props genera
 	expect(entryNames).not.toContain('itemProp');
 });
 
-test('marks a pure native wrapper with the native-props entry and no visible props', async () => {
+test('marks a native wrapper with its documented xstyle and the native-props entry', async () => {
 	const [codeProps] = await componentPropsGenerator.generateTypeTable(
 		{
 			path: 'packages/@luke-ui/react/src/core/code/code.tsx',
@@ -58,7 +58,7 @@ test('marks a pure native wrapper with the native-props entry and no visible pro
 
 			return [entry.name];
 		}),
-	).toEqual([]);
+	).toEqual(['xstyle']);
 	const nativePropsEntry = codeProps?.entries.find(
 		(entry) => entry.name === NATIVE_PROPS_FORWARDING_KEY,
 	);

@@ -3,7 +3,7 @@ import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Prose } from './prose.js';
-import { proseRecipe } from './recipe.css.js';
+import { proseRecipe } from './recipe.js';
 
 testConformance({
 	path: 'prose',
