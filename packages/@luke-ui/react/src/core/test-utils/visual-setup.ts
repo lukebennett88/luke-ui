@@ -8,6 +8,11 @@
 // Overlays skip enter transitions under `prefers-reduced-motion: reduce`. Emulate that
 // media feature so zeroed transition durations do not leave `[data-entering]` trays at
 // opacity 0 for visual captures.
+//
+// Load the shared styles during setup so portal layout is ready before a test waits on it.
+import '../stylesheet.css.js';
+import '@luke-ui/react/themes/paper/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { cdp } from 'vite-plus/test/context';
 
 await cdp().send('Emulation.setEmulatedMedia', {

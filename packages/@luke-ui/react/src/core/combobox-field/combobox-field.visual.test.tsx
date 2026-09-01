@@ -234,6 +234,7 @@ test('option with leading icon at both sizes', async () => {
 });
 
 test('mobile tray', async () => {
+	await page.viewport(390, 700);
 	const restoreScreenWidth = mockScreenWidth(390);
 	try {
 		render(
@@ -254,10 +255,12 @@ test('mobile tray', async () => {
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
 	} finally {
 		restoreScreenWidth();
+		await page.viewport(1024, 800);
 	}
 });
 
 test('mobile tray short list', async () => {
+	await page.viewport(390, 700);
 	const restoreScreenWidth = mockScreenWidth(390);
 	try {
 		render(
@@ -278,6 +281,7 @@ test('mobile tray short list', async () => {
 		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-short');
 	} finally {
 		restoreScreenWidth();
+		await page.viewport(1024, 800);
 	}
 });
 
@@ -375,11 +379,17 @@ test('rich section title', async () => {
  * so nothing here measures a position.
  */
 async function waitForMobileTrayToSettle() {
-	await expect.poll(() => page.getByRole('dialog').query()).not.toBeNull();
-
 	const dialog = page.getByRole('dialog');
-	const overlay = dialog.element().parentElement?.parentElement;
-	if (overlay == null) throw new Error('Expected the mobile modal structure.');
+	await expect.element(dialog).toBeInTheDocument();
+	const modal = dialog.element().parentElement;
+	const overlay = modal?.parentElement;
+	if (modal == null || overlay == null) throw new Error('Expected the mobile modal structure.');
 
 	await waitForOverlayEnter(overlay);
+	await expect.element(page.elementLocator(overlay)).toBeVisible();
+	expect(window.innerWidth).toBe(390);
+	expect(window.innerHeight).toBe(700);
+	expect(window.matchMedia('(width > 450px)').matches).toBe(false);
+	expect(getComputedStyle(modal).borderEndStartRadius).toBe('0px');
+	expect(getComputedStyle(modal).borderEndEndRadius).toBe('0px');
 }

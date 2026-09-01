@@ -21,6 +21,7 @@ import {
 	getAppliedIdentityClassName,
 	setAppliedIdentityClassName,
 	trackMountedRender,
+	untrackMountedRender,
 } from './render-mount-state.js';
 
 export type VisualAppearance = {
@@ -84,6 +85,7 @@ export function render(node: ReactNode, options?: { appearance?: VisualAppearanc
 }
 
 function unmount(container: HTMLElement, root: Root) {
+	untrackMountedRender(container);
 	act(() => root.unmount());
 	container.remove();
 }

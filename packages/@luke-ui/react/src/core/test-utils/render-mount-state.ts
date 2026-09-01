@@ -10,6 +10,11 @@ export function trackMountedRender(container: HTMLElement, root: Root): void {
 	mounted.push({ container, root });
 }
 
+export function untrackMountedRender(container: HTMLElement): void {
+	const index = mounted.findIndex((entry) => entry.container === container);
+	if (index !== -1) mounted.splice(index, 1);
+}
+
 export function setAppliedIdentityClassName(className: string | undefined): void {
 	appliedIdentityClassName = className;
 }

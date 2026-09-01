@@ -1,6 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import { themeClassName as paperThemeClassName } from '../../theme/bundles/paper/index.js';
 import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
+import { cleanupMountedRenders } from './render-mount-state.js';
 import { render, visualAppearances } from './render.js';
 
 test('renders every bundled identity and explicit colour mode independently', () => {
@@ -33,4 +34,12 @@ test('allows a nested scope to select the opposite colour mode', () => {
 
 	expect(getComputedStyle(locator.element()).colorScheme).toBe('dark');
 	expect(getComputedStyle(nestedScope).colorScheme).toBe('light');
+});
+
+test('does not clean up an individually unmounted render twice', () => {
+	const { container, unmount } = render(<span>Unmount contract</span>);
+
+	unmount();
+	expect(container).not.toBeInTheDocument();
+	expect(() => cleanupMountedRenders()).not.toThrow();
 });
