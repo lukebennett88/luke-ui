@@ -39,8 +39,11 @@ files. A component directory contains:
 - `[component].browser.test.tsx`: component behaviour, conformance, and the integration tripwire
 - `[component].visual.test.tsx`: visual regression captures when the component has a visual surface
 - `<component>.tsx`: component implementation
-- `recipe.css.ts`: public recipe contract (scaffolded by the generator)
-- `styles.css.ts`: private implementation styling when needed
+- `recipe.ts`: public StyleX recipe contract (scaffolded by the generator). Not `recipe.css.ts`: the
+  build routes every `.css.ts` module to the Vanilla Extract plugin and excludes it from the React
+  Compiler pass, so a StyleX module under that name reaches the wrong compiler.
+- `styles.css.ts`: private Vanilla Extract structural styling when a combinator or descendant
+  selector cannot live in StyleX
 
 Lower-level composition APIs live under `src/core/primitives/*` and export from
 `@luke-ui/react/primitives/*`. See [`docs/COMPONENTS.md`](../../docs/COMPONENTS.md).

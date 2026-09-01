@@ -11,7 +11,10 @@ import { typeStyles } from '../../theme/contract.js';
 
 const lukeOwnedLayerNames = ['reset', 'theme', 'structural', 'utilities'] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
-const stylexPriorityLayerPattern = /^luke\.sx\.priority\d+$/;
+const STYLEX_PRIORITY_LAYER_PATTERN = /^luke\.sx\.priority\d+$/;
+
+/** The stylesheet's leading `@layer ...;` order statement. */
+const LAYER_ORDER_STATEMENT_PATTERN = /^@layer [^;]+;/m;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
@@ -194,7 +197,7 @@ test(
 );
 
 function layerOrder(stylesheet: string): string {
-	const order = stylesheet.match(/^@layer [^;]+;/m)?.[0];
+	const order = stylesheet.match(LAYER_ORDER_STATEMENT_PATTERN)?.[0];
 	if (order === undefined) throw new Error('Expected a cascade-layer order statement.');
 	return order;
 }
@@ -203,8 +206,8 @@ async function readPublicStylesheet(): Promise<string> {
 	return readFile(new URL('../../../dist/stylesheet.css', import.meta.url), 'utf8');
 }
 
-const stylexEligibleModule = /(?<!\.d)\.[cm]?[jt]sx?$/;
-const generatedOrTestModule = /\.(?:browser|visual|test)\.[cm]?[jt]sx?$/;
+const STYLEX_ELIGIBLE_MODULE_PATTERN = /(?<!\.d)\.[cm]?[jt]sx?$/;
+const GENERATED_OR_TEST_MODULE_PATTERN = /\.(?:browser|visual|test)\.[cm]?[jt]sx?$/;
 
 async function findMigratedStylexSources(directory: string): Promise<Array<string>> {
 	const entries = await readdir(directory, { withFileTypes: true });
@@ -212,9 +215,9 @@ async function findMigratedStylexSources(directory: string): Promise<Array<strin
 		entries.map(async (entry) => {
 			const filename = join(directory, entry.name);
 			if (entry.isDirectory()) return findMigratedStylexSources(filename);
-			if (!stylexEligibleModule.test(filename)) return [];
+			if (!STYLEX_ELIGIBLE_MODULE_PATTERN.test(filename)) return [];
 			if (filename.endsWith('.css.ts')) return [];
-			if (generatedOrTestModule.test(filename)) return [];
+			if (GENERATED_OR_TEST_MODULE_PATTERN.test(filename)) return [];
 			const source = await readFile(filename, 'utf8');
 			if (!source.includes('@stylexjs/stylex') || !source.includes('stylex.create')) return [];
 			return [filename];
@@ -267,7 +270,7 @@ function assertPrivateStylesheetSentinel(root: Root): void {
 	expect(rules.length).toBeGreaterThan(0);
 	for (const rule of rules) {
 		const layer = getOwningLayer(rule);
-		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+		expect(layer !== undefined && STYLEX_PRIORITY_LAYER_PATTERN.test(layer)).toBe(true);
 	}
 	expect(
 		rules.some((rule) => {
@@ -391,7 +394,7 @@ function assertAuthoritativeLayerOrder(order: Array<string>): void {
 	expect(order[0]).toBe('reset');
 	expect(order[1]).toBe('theme');
 
-	const priorityLayers = order.slice(2).filter((name) => stylexPriorityLayerPattern.test(name));
+	const priorityLayers = order.slice(2).filter((name) => STYLEX_PRIORITY_LAYER_PATTERN.test(name));
 	expect(priorityLayers.length).toBeGreaterThan(0);
 	expect(priorityLayers.every((name, index) => name === `luke.sx.priority${index + 1}`)).toBe(true);
 
@@ -409,7 +412,7 @@ function assertLayerNames(root: Root): void {
 		}
 
 		for (const name of names) {
-			if (lukeOwnedLayerNameSet.has(name) || stylexPriorityLayerPattern.test(name)) continue;
+			if (lukeOwnedLayerNameSet.has(name) || STYLEX_PRIORITY_LAYER_PATTERN.test(name)) continue;
 			throw atRule.error(`Unexpected cascade layer: ${name}`);
 		}
 	});
@@ -479,7 +482,7 @@ function assertStylexClassOwnership(root: Root, className: string): void {
 	expect(rules.length).toBeGreaterThan(0);
 	for (const rule of rules) {
 		const layer = getOwningLayer(rule);
-		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+		expect(layer !== undefined && STYLEX_PRIORITY_LAYER_PATTERN.test(layer)).toBe(true);
 	}
 	expect(rules.some((rule) => rule.nodes.some((node) => node.type === 'decl'))).toBe(true);
 }
@@ -546,7 +549,7 @@ function assertStylexDeclaration(rules: Array<Rule>, property: string, value: st
 	expect(matchingRules.length).toBeGreaterThan(0);
 	for (const rule of matchingRules) {
 		const layer = getOwningLayer(rule);
-		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+		expect(layer !== undefined && STYLEX_PRIORITY_LAYER_PATTERN.test(layer)).toBe(true);
 	}
 }
 
@@ -580,7 +583,7 @@ function assertPseudoDeclaration(
 	expect(matchingRules.length).toBeGreaterThan(0);
 	for (const rule of matchingRules) {
 		const layer = getOwningLayer(rule);
-		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+		expect(layer !== undefined && STYLEX_PRIORITY_LAYER_PATTERN.test(layer)).toBe(true);
 	}
 }
 
@@ -588,7 +591,7 @@ function comboboxStylexClassesFromStylesheet(root: Root): Array<string> {
 	const classNames = new Set<string>();
 	root.walkRules((rule) => {
 		const layer = getOwningLayer(rule);
-		if (layer === undefined || !stylexPriorityLayerPattern.test(layer)) return;
+		if (layer === undefined || !STYLEX_PRIORITY_LAYER_PATTERN.test(layer)) return;
 		const isComboboxClosedTriggerFloor = rule.nodes.some(
 			(node) =>
 				node.type === 'decl' &&

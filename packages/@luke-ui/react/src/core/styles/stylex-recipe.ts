@@ -104,11 +104,9 @@ export function createSlottedRecipe<
 	resolveStyles: (selection?: SlotVariantSelection<Variants>) => Record<Slot, Array<StyleXStyle>>;
 } {
 	const slotNames = Object.keys(config.slots) as Array<Slot>;
-	const slotGroups: Record<string, Array<string>> = {};
 	const slotVariants: Record<string, VariantGroups> = {};
 
 	for (const slotName of slotNames) {
-		const groups: Array<string> = [];
 		const variants: VariantGroups = {};
 
 		if (config.variants !== undefined) {
@@ -124,14 +122,10 @@ export function createSlottedRecipe<
 					}
 				}
 
-				if (usesSlot) {
-					variants[group] = perValue;
-					groups.push(group);
-				}
+				if (usesSlot) variants[group] = perValue;
 			}
 		}
 
-		slotGroups[slotName] = groups;
 		slotVariants[slotName] = variants;
 	}
 
@@ -142,12 +136,13 @@ export function createSlottedRecipe<
 		const resolved = {} as Record<Slot, Array<StyleXStyle>>;
 
 		for (const slotName of slotNames) {
-			const narrowed = pickGroups(selected, slotGroups[slotName] ?? []);
+			// `resolveSinglePartStyles` iterates the slot's own variant groups, so a group this slot
+			// declares no style for is never read out of `selected`. No per-slot narrowing needed.
 			resolved[slotName] = resolveSinglePartStyles(
 				config.slots[slotName],
 				slotVariants[slotName],
 				undefined,
-				narrowed,
+				selected,
 			);
 		}
 
@@ -211,17 +206,6 @@ function resolveSinglePartStyles<Variants extends VariantGroups>(
 	}
 
 	return styles;
-}
-
-function pickGroups(
-	selection: Record<string, unknown>,
-	groups: ReadonlyArray<string>,
-): Record<string, unknown> {
-	const picked: Record<string, unknown> = {};
-	for (const group of groups) {
-		if (group in selection) picked[group] = selection[group];
-	}
-	return picked;
 }
 
 function resolveClassName(styles: Array<StyleXStyle>): string {

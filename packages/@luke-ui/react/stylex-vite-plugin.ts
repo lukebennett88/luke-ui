@@ -28,19 +28,34 @@ const stylexLayerConfig = {
 	prefix: 'luke.sx',
 } as const;
 
+/** An `@layer name;` statement on its own line, which StyleX re-emits per chunk. */
+const EMPTY_LAYER_STATEMENT_PATTERN = /^@layer [^,{]+;\n/gm;
+
+/** The combined cascade-layer order statement StyleX emits at the head of its output. */
+const LAYER_HEADER_PATTERN = /^\n?@layer ([^;]+);/;
+
+/** A single leading newline. */
+const LEADING_NEWLINE_PATTERN = /^\n/;
+
+/** A `.ts`/`.tsx`/`.js`/`.jsx` module, excluding declaration files. Mirrors `vite.config.ts`'s `sourceModule`. */
+const STYLEX_ELIGIBLE_MODULE_PATTERN = /(?<!\.d)\.[cm]?[jt]sx?$/;
+
+/** A browser, visual, or unit test module. */
+const TEST_MODULE_PATTERN = /\.(?:browser|visual|test)\.[cm]?[jt]sx?$/;
+
 function buildAuthoritativeLayerOrder(priorityLayers: Array<string>): string {
 	return `@layer ${[...stylexLayerConfig.before, ...priorityLayers, ...stylexLayerConfig.after].join(', ')};`;
 }
 
 function stripRedundantEmptyLayerStatements(css: string): string {
-	return css.replace(/^@layer [^,{]+;\n/gm, '');
+	return css.replace(EMPTY_LAYER_STATEMENT_PATTERN, '');
 }
 
 function splitStylexLayerHeader(stylexCss: string): {
 	authoritativeLayerOrder: string;
 	stylexBody: string;
 } {
-	const match = stylexCss.match(/^\n?@layer ([^;]+);/);
+	const match = stylexCss.match(LAYER_HEADER_PATTERN);
 	if (match == null || match[1] == null) {
 		throw new Error('Expected StyleX to emit a combined cascade-layer order statement.');
 	}
@@ -53,7 +68,7 @@ function splitStylexLayerHeader(stylexCss: string): {
 
 	return {
 		authoritativeLayerOrder: buildAuthoritativeLayerOrder(priorityLayers),
-		stylexBody: stylexCss.slice(match[0].length).replace(/^\n/, ''),
+		stylexBody: stylexCss.slice(match[0].length).replace(LEADING_NEWLINE_PATTERN, ''),
 	};
 }
 
@@ -70,9 +85,6 @@ function processRules(rules: ReadonlyArray<Rule>): {
 	});
 	return splitStylexLayerHeader(stylexCss);
 }
-
-/** A `.ts`/`.tsx`/`.js`/`.jsx` module, excluding declaration files. Mirrors `vite.config.ts`'s `sourceModule`. */
-const stylexEligibleModule = /(?<!\.d)\.[cm]?[jt]sx?$/;
 
 /**
  * Runs the StyleX Babel transform on `code` and returns both the transformed module and the
@@ -92,7 +104,7 @@ async function transformStylex(
 	// Babel to find the few that use StyleX would roughly double build time, hence the substring
 	// check before ever invoking Babel.
 	if (
-		!stylexEligibleModule.test(filename) ||
+		!STYLEX_ELIGIBLE_MODULE_PATTERN.test(filename) ||
 		id.includes('/node_modules/') ||
 		!code.includes('@stylexjs/stylex')
 	) {
@@ -154,8 +166,8 @@ async function findSourceModules(directory: string, includeTests: boolean): Prom
 		entries.map(async (entry) => {
 			const filename = join(directory, entry.name);
 			if (entry.isDirectory()) return findSourceModules(filename, includeTests);
-			if (!stylexEligibleModule.test(filename)) return [];
-			if (!includeTests && /\.(?:browser|visual|test)\.[cm]?[jt]sx?$/.test(filename)) return [];
+			if (!STYLEX_ELIGIBLE_MODULE_PATTERN.test(filename)) return [];
+			if (!includeTests && TEST_MODULE_PATTERN.test(filename)) return [];
 			return [filename];
 		}),
 	);
