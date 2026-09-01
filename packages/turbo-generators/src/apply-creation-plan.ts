@@ -91,11 +91,19 @@ async function applyJsonEdit(root: string, edit: CreationWork['jsonEdits'][numbe
 	const data = await readJson(target, edit.title);
 	const current = data[edit.key];
 	const currentPages = Array.isArray(current) ? current.filter(isString) : [];
-	const pages = [...new Set([...currentPages, edit.value])].sort((a, b) => a.localeCompare(b));
+	const pages =
+		edit.kind === 'array-add-sorted'
+			? [...new Set([...currentPages, edit.value])].sort((a, b) => a.localeCompare(b))
+			: appendUniquePage(currentPages, edit.value);
 	data[edit.key] = pages;
 	const raw = `${JSON.stringify(data, null, '\t')}\n`;
 	const formatted = await formatGeneratedContent(target, raw);
 	await writeFile(target, formatted, 'utf8');
+}
+
+function appendUniquePage(pages: Array<string>, value: string): Array<string> {
+	if (pages.includes(value)) return pages;
+	return [...pages, value];
 }
 
 async function readJson(path: string, title: string): Promise<Record<string, unknown>> {

@@ -122,7 +122,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 			? [
 					{
 						key: 'pages',
-						kind: 'array-add-sorted',
+						kind: 'array-add-append-unique',
 						path: 'apps/docs/content/docs/components/primitives/meta.json',
 						title: 'Primitives',
 						value: name,
@@ -204,9 +204,9 @@ function renderHostedExample(input: {
 }): string {
 	return `import { ${input.pascalName} } from '${input.packagePath}';
 
-export default function Basic() {
+export default () => {
 	return <${input.pascalName}>${input.pascalName}</${input.pascalName}>;
-}
+};
 `;
 }
 

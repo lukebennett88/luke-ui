@@ -11,6 +11,16 @@ interface JsonArrayAddSortedEdit {
 	value: string;
 }
 
+interface JsonArrayAppendUniqueEdit {
+	key: 'pages';
+	kind: 'array-add-append-unique';
+	path: string;
+	title: string;
+	value: string;
+}
+
+type JsonEdit = JsonArrayAddSortedEdit | JsonArrayAppendUniqueEdit;
+
 interface TextFileInsertEdit {
 	kind: 'text-insert';
 	lines: Array<string>;
@@ -26,7 +36,7 @@ interface SortedImportEdit {
 
 export interface CreationWork {
 	files: Array<PlanFile>;
-	jsonEdits: Array<JsonArrayAddSortedEdit>;
+	jsonEdits: Array<JsonEdit>;
 	sortedImportEdits: Array<SortedImportEdit>;
 	textFileInserts: Array<TextFileInsertEdit>;
 }

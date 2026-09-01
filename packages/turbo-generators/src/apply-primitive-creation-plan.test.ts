@@ -75,7 +75,16 @@ describe('createPrimitive', () => {
 		});
 		await expect(
 			readFile(join(root, 'apps/docs/src/examples/status-badge-primitive/basic.tsx'), 'utf8'),
-		).resolves.toContain("from '@luke-ui/react/primitives/status-badge'");
+		).resolves.toBe(
+			[
+				"import { StatusBadge } from '@luke-ui/react/primitives/status-badge';",
+				'',
+				'export default () => {',
+				'\treturn <StatusBadge>StatusBadge</StatusBadge>;',
+				'};',
+				'',
+			].join('\n'),
+		);
 		await expect(
 			readFile(join(root, 'apps/docs/content/docs/components/primitives/status-badge.mdx'), 'utf8'),
 		).resolves.toContain('src="status-badge-primitive/basic"');
@@ -162,6 +171,23 @@ describe('createPrimitive', () => {
 		await expect(
 			readFile(join(root, 'apps/docs/content/docs/components/primitives/meta.json'), 'utf8'),
 		).resolves.toBe('{\n\t"pages": ["button", "status-badge"],\n\t"title": "Primitives"\n}\n');
+	});
+
+	it('preserves existing primitive navigation order when appending docs', async () => {
+		const root = await createRepositoryFixture({
+			primitivesMeta: {
+				pages: ['button', 'checkbox', 'field', 'input-group', 'combobox'],
+				title: 'Primitives',
+			},
+		});
+		const metaPath = join(root, 'apps/docs/content/docs/components/primitives/meta.json');
+		const expected =
+			'{\n\t"pages": ["button", "checkbox", "field", "input-group", "combobox", "status-badge"],\n\t"title": "Primitives"\n}\n';
+
+		await createPrimitive(root, { name: 'StatusBadge' });
+		await createPrimitive(root, { name: 'StatusBadge' });
+
+		await expect(readFile(metaPath, 'utf8')).resolves.toBe(expected);
 	});
 });
 

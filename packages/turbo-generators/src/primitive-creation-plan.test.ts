@@ -93,6 +93,8 @@ describe('createPrimitivePlan', () => {
 		expect(browserTestSource).not.toContain('testConformance');
 		expect(browserTestSource).toContain("from './status-badge.js'");
 		expect(example).toContain("from '@luke-ui/react/primitives/status-badge'");
+		expect(example).toContain('export default () => {');
+		expect(example).not.toContain('export default function Basic');
 		if (guide === undefined) throw new Error('Expected the scaffold to write the guide.');
 		expect(findComponentPropsTableTags(guide)).toEqual([
 			{
