@@ -2,10 +2,9 @@ import { gzipSync } from 'node:zlib';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
-// Measured from commit e600563c at 10264 gzip bytes (level 9). The test fixture and visual workflow
-// changes do not alter stylesheet source. Ceiling leaves
-// headroom for the remaining component migrations. If this fails, investigate what grew; don't raise the
-// ceiling without a reason.
+// Measured from the pull request merge commit 7518d094 at 10259 gzip bytes (level 9), per the
+// measurement procedure in issue #550. Ceiling leaves headroom for the remaining component
+// migrations. If this fails, investigate what grew; don't raise the ceiling without a reason.
 const maximumGzipBytes = 12_500;
 
 test('keeps the public stylesheet within its size budget', async () => {
