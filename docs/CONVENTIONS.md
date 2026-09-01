@@ -61,7 +61,8 @@ not as inline string constants.
 - Extract multi-step object construction into its own function only when the construction would
   otherwise mix with unrelated logic.
 - Define every static regex as a named module-scope `SCREAMING_SNAKE_CASE` constant with a
-  `_PATTERN` suffix, including trivial or one-use regexes.
+  `_PATTERN` suffix, including trivial or one-use regexes. Regexes with `g` or `y` are stateful when
+  used with `.test()` or `.exec()`, because they mutate `lastIndex`.
 
 ## Testing
 

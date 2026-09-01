@@ -441,18 +441,21 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSou
 
 	if (passes(target)) return makeSolid(target);
 
-	const best = (() => {
-		let best: number | null = null;
+	const best: number | null = (() => {
+		let bestInner: number | null = null;
 		let bestDistance = Number.POSITIVE_INFINITY;
+
 		for (const candidate of lightnessCandidates(low, high)) {
 			if (!passes(candidate)) continue;
+
 			const distance = Math.abs(candidate - target);
 			if (distance < bestDistance) {
 				bestDistance = distance;
-				best = candidate;
+				bestInner = candidate;
 			}
 		}
-		return best;
+
+		return bestInner;
 	})();
 	if (best === null) {
 		throw new Error(
