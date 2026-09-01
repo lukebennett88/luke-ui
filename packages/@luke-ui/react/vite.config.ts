@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transformAsync } from '@babel/core';
+import type { FileResult } from '@babel/core';
 import { makeIdFiltersToMatchWithQuery } from '@rolldown/pluginutils';
 import stylexBabelPlugin from '@stylexjs/babel-plugin';
 import type { Rule } from '@stylexjs/babel-plugin';
@@ -48,10 +49,11 @@ function splitStylexLayerHeader(stylexCss: string): {
 		throw new Error('Expected StyleX to emit a combined cascade-layer order statement.');
 	}
 
-	const priorityLayers = match[1]
-		.split(',')
-		.map((name) => name.trim())
-		.filter((name) => name.startsWith(`${stylexLayerConfig.prefix}.priority`));
+	const priorityLayers = match[1].split(',').flatMap((layer) => {
+		const name = layer.trim();
+		if (!name.startsWith(`${stylexLayerConfig.prefix}.priority`)) return [];
+		return [name];
+	});
 
 	return {
 		authoritativeLayerOrder: buildAuthoritativeLayerOrder(priorityLayers),
@@ -176,7 +178,7 @@ function stylexPlugin(): Plugin {
 			if (meta.stylex === undefined) stylexRules.delete(id);
 			else stylexRules.set(id, meta.stylex);
 
-			return { code: result.code, map: result.map, meta };
+			return { code: result.code, map: toRolldownSourceMap(result.map), meta };
 		},
 		generateBundle(_options, bundle) {
 			const stylesheet = bundle['stylesheet.css'];
@@ -197,6 +199,35 @@ function stylexPlugin(): Plugin {
 
 			stylesheet.source = `${authoritativeLayerOrder}\n${vanillaCss}\n/* stylex */\n${stylexBody}`;
 		},
+	};
+}
+
+/**
+ * `Plugin['transform']` is an `ObjectHook`, i.e. the handler function or an object wrapping it;
+ * this pulls out the function form so its return type's `map` field can be reused below. `vite-plus`
+ * exports an unrelated dev-server `TransformResult` under the same name, so it can't be imported directly.
+ */
+type TransformHandler = Extract<NonNullable<Plugin['transform']>, (...args: never) => unknown>;
+type TransformHookResult = Awaited<ReturnType<TransformHandler>>;
+type TransformSourceMap = Exclude<TransformHookResult, string | null | undefined | void>['map'];
+
+/**
+ * Babel's sourcemap types its array fields as `readonly` and names the ignore-list field
+ * differently, neither of which rolldown's `ExistingRawSourceMap` accepts; copy the fields
+ * across into that shape with plain mutable arrays.
+ */
+function toRolldownSourceMap(map: FileResult['map']): TransformSourceMap {
+	if (map === null) return null;
+
+	return {
+		file: map.file,
+		mappings: map.mappings,
+		names: [...map.names],
+		sourceRoot: map.sourceRoot,
+		sources: [...map.sources],
+		sourcesContent: map.sourcesContent === undefined ? undefined : [...map.sourcesContent],
+		version: map.version,
+		x_google_ignoreList: map.ignoreList === undefined ? undefined : [...map.ignoreList],
 	};
 }
 
