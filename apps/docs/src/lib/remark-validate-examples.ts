@@ -4,6 +4,10 @@ import { visit } from 'unist-util-visit';
 import { findMdxFiles } from './docs-mdx-files.js';
 import { exampleBlockSources } from './example-block-sources.js';
 
+const IMPORT_PATTERN = /\bfrom\s+["']((?:\.|#docs\/)[^"']+)["']/g;
+
+const JS_EXTENSION_PATTERN = /\.js$/;
+
 interface Position {
 	start: { line: number; column: number };
 }
@@ -76,8 +80,9 @@ export function findOrphanedExamples({
 	}
 
 	return findExampleFiles(resolvedExamplesDir)
-		.filter((examplePath) => !reachableExamples.has(examplePath))
-		.map((examplePath) => relative(resolvedExamplesDir, examplePath))
+		.flatMap((examplePath) =>
+			!reachableExamples.has(examplePath) ? [relative(resolvedExamplesDir, examplePath)] : [],
+		)
 		.sort();
 }
 
@@ -104,10 +109,9 @@ function findDocumentedExamples(docsDir: string, examplesDir: string): Set<strin
 
 function findImportedExamples(examplePath: string, examplesDir: string): Array<string> {
 	const importedExamples: Array<string> = [];
-	const importPattern = /\bfrom\s+["']((?:\.|#docs\/)[^"']+)["']/g;
 	const contents = readFileSync(examplePath, 'utf8');
 
-	for (const match of contents.matchAll(importPattern)) {
+	for (const match of contents.matchAll(IMPORT_PATTERN)) {
 		const importPath = match[1];
 		if (!importPath) continue;
 
@@ -115,7 +119,7 @@ function findImportedExamples(examplePath: string, examplesDir: string): Array<s
 			? resolve(examplesDir, importPath.slice('#docs/'.length))
 			: resolve(examplePath, '..', importPath);
 		const importedPath = extname(resolvedImportPath)
-			? resolvedImportPath.replace(/\.js$/, '.tsx')
+			? resolvedImportPath.replace(JS_EXTENSION_PATTERN, '.tsx')
 			: `${resolvedImportPath}.tsx`;
 
 		if (importedPath.startsWith(`${examplesDir}/`) && existsSync(importedPath)) {

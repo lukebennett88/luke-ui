@@ -47,7 +47,7 @@ async function visiblePropNames(path: string, name: string): Promise<Array<strin
 
 test('every component guide declares at least one API table', () => {
 	expect(
-		inventory.guides.filter((guide) => guide.props.length === 0).map((guide) => guide.relativePath),
+		inventory.guides.flatMap((guide) => (guide.props.length === 0 ? [guide.relativePath] : [])),
 	).toEqual([]);
 });
 

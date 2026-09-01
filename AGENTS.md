@@ -16,6 +16,8 @@
   in `docs/`. See [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md#keeping-docs-current).
 - [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md) is the only normative documentation guide. It
   decides what belongs in documentation as well as how to word MDX prose, JSDoc, and code comments.
+- Follow the code-style rules in [docs/CONVENTIONS.md#code-style](docs/CONVENTIONS.md#code-style)
+  for control flow, collections, and regex.
 
 ## Dev loop
 

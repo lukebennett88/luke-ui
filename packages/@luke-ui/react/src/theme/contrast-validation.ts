@@ -65,14 +65,14 @@ export function validateContrast(
 		if (value === undefined) throw new Error(`buildTheme did not generate "${path}"`);
 		return parseColor(value);
 	};
-	const check = (foreground: ColorPath, background: ColorPath, required: number, hard: boolean) => {
+	function check(foreground: ColorPath, background: ColorPath, required: number, hard: boolean) {
 		const ratio = contrastRatio(colorAt(foreground), colorAt(background));
 		const passes = ratio >= required;
 		// `hard` is recorded on the check itself, so tooling reads the compiler's own decision rather
 		// than re-deriving it from token paths.
 		checks.push({ background, foreground, hard, passes, ratio, required });
 		if (hard && !passes) failures.push({ background, foreground, mode, ratio, required });
-	};
+	}
 
 	// v2 validates only against surfaces consumers can reference (the hidden `resting` rung is gone).
 	const surfacePaths = [

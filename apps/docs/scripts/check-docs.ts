@@ -11,9 +11,19 @@ import {
 	findRepeatedMetadataIssues,
 } from '../src/lib/component-guide-inventory.js';
 import { findComponentPropsContractIssues } from '../src/lib/component-props-contract.js';
-import { findComponentPropsTableTags } from '../src/lib/component-props-table-tags.js';
+import {
+	findComponentPropsTableTags,
+	PROPS_TABLE_TAG_PATTERN,
+} from '../src/lib/component-props-table-tags.js';
 import { findMdxFiles } from '../src/lib/docs-mdx-files.js';
 import { exampleBlockSources } from '../src/lib/example-block-sources.js';
+
+const MARKDOWN_H2_PATTERN = /^##\s+(.+?)\s*$/;
+const IMPORT_EXPORT_PATTERN = /^(?:import|export)(?:[^A-Za-z0-9_]|$)/;
+const FRONTMATTER_STRIP_PATTERN = /^---\n[\s\S]*?\n---\n/;
+const FENCED_CODE_PATTERN = /```[\s\S]*?```/g;
+const INLINE_CODE_PATTERN = /`[^`]*`/g;
+const JSX_TAG_CHAR_PATTERN = /[A-Za-z/]/;
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const docsAppRoot = resolve(scriptDir, '..');
@@ -127,8 +137,10 @@ export function readBaseline(path: string = baselinePath): Array<string> {
 	if (!existsSync(path)) return [];
 	return readFileSync(path, 'utf8')
 		.split('\n')
-		.map((line) => line.trim())
-		.filter((line) => line.length > 0 && !line.startsWith('#'));
+		.flatMap((line) => {
+			const trimmed = line.trim();
+			return trimmed.length > 0 && !trimmed.startsWith('#') ? [trimmed] : [];
+		});
 }
 
 export function diffAgainstBaseline(
@@ -146,12 +158,16 @@ export function diffAgainstBaseline(
 function findAuthoredGuideFiles(docsDir: string): Array<{ relativePath: string; source: string }> {
 	if (!existsSync(docsDir)) return [];
 	const resolvedDocsDir = resolve(docsDir);
-	return findMdxFiles(resolvedDocsDir)
-		.filter((file) => dirname(file) === resolvedDocsDir)
-		.map((file) => ({
-			relativePath: `docs/${basename(file)}`,
-			source: readFileSync(file, 'utf8'),
-		}));
+	return findMdxFiles(resolvedDocsDir).flatMap((file) =>
+		dirname(file) === resolvedDocsDir
+			? [
+					{
+						relativePath: `docs/${basename(file)}`,
+						source: readFileSync(file, 'utf8'),
+					},
+				]
+			: [],
+	);
 }
 
 function findComponentHeadingIssues(guide: {
@@ -243,7 +259,7 @@ function findComponentHeadingIssues(guide: {
 function findApiSectionIssues(guide: { relativePath: string; source: string }): Array<string> {
 	const headings = markdownH2s(guide.source);
 	const tagsInApiSection = findComponentPropsTableTags(guide.source);
-	const tagsAnywhere = [...guide.source.matchAll(/<component-props-table\b/g)];
+	const tagsAnywhere = [...guide.source.matchAll(PROPS_TABLE_TAG_PATTERN)];
 
 	if (!headings.includes(API) || tagsInApiSection.length === 0) {
 		return [
@@ -333,7 +349,7 @@ function authoredMdxFiles(docsContentDir: string): Array<string> {
 export function markdownH2s(source: string): Array<string> {
 	const headings: Array<string> = [];
 	for (const line of stripFencedCode(source).split('\n')) {
-		const match = /^##\s+(.+?)\s*$/.exec(line);
+		const match = MARKDOWN_H2_PATTERN.exec(line);
 		if (match?.[1] !== undefined) headings.push(match[1]);
 	}
 	return headings;
@@ -388,7 +404,7 @@ function stripImportLines(source: string): string {
 
 	while (index < length) {
 		const atLineStart = index === 0 || source[index - 1] === '\n';
-		if (atLineStart && /^(?:import|export)(?:[^A-Za-z0-9_]|$)/.test(source.slice(index))) {
+		if (atLineStart && IMPORT_EXPORT_PATTERN.test(source.slice(index))) {
 			const end = skipImportExportStatement(source, index);
 			if (end !== undefined) {
 				index = end;
@@ -464,15 +480,15 @@ function skipImportExportStatement(source: string, start: number): number | unde
 }
 
 function stripFrontmatter(source: string): string {
-	return source.replace(/^---\n[\s\S]*?\n---\n/, '');
+	return source.replace(FRONTMATTER_STRIP_PATTERN, '');
 }
 
 function stripFencedCode(source: string): string {
-	return source.replace(/```[\s\S]*?```/g, '');
+	return source.replace(FENCED_CODE_PATTERN, '');
 }
 
 function stripInlineCode(source: string): string {
-	return source.replace(/`[^`]*`/g, '');
+	return source.replace(INLINE_CODE_PATTERN, '');
 }
 
 /**
@@ -492,7 +508,7 @@ function stripJsxTags(source: string): string {
 		const char = source[index];
 		const next = source[index + 1];
 
-		if (char === '<' && next !== undefined && /[A-Za-z/]/.test(next)) {
+		if (char === '<' && next !== undefined && JSX_TAG_CHAR_PATTERN.test(next)) {
 			const end = skipJsxTag(source, index);
 			if (end !== undefined) {
 				index = end;

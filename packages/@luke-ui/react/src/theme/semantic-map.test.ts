@@ -161,9 +161,9 @@ describe('mapSemanticColors', () => {
 
 	describe('completeness', () => {
 		// Every `color.*` leaf, including the passed-through `color.overlay.backdrop`.
-		const colourPaths = flattenThemeContract()
-			.map(([path]) => path)
-			.filter((path) => path.startsWith('color.'));
+		const colourPaths = flattenThemeContract().flatMap(([path]) =>
+			path.startsWith('color.') ? [path] : [],
+		);
 
 		for (const mode of MODES) {
 			it(`assigns every colour leaf exactly once, and nothing else (${mode})`, () => {

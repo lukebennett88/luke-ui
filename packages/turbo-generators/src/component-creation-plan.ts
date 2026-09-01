@@ -65,9 +65,9 @@ interface ComponentCreationWork extends ComponentCreationPlan {
 	textFileInserts: Array<TextFileInsertEdit>;
 }
 
-const COMPONENT_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
-const CAMEL_BOUNDARY_RE = /([a-z0-9])([A-Z])/g;
-const NON_ALPHANUM_RE = /[^A-Za-z0-9-]/g;
+const COMPONENT_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
+const CAMEL_BOUNDARY_PATTERN = /([a-z0-9])([A-Z])/g;
+const NON_ALPHANUM_PATTERN = /[^A-Za-z0-9-]/g;
 
 const componentAnswersSchema = z.object({
 	conformance: z.array(z.enum(CONFORMANCE_CONTRACTS)).default([...COMPONENT_DEFAULTS.conformance]),
@@ -88,7 +88,7 @@ export function validateComponentName(value: unknown): true | string {
 	if (!trimmed) {
 		return 'Component name required.';
 	}
-	if (!COMPONENT_NAME_RE.test(trimmed)) {
+	if (!COMPONENT_NAME_PATTERN.test(trimmed)) {
 		return 'Use letters/numbers/hyphens. Start with a letter.';
 	}
 	return true;
@@ -220,16 +220,15 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 function toKebabCase(value: string): string {
 	return value
 		.trim()
-		.replaceAll(CAMEL_BOUNDARY_RE, '$1-$2')
-		.replaceAll(NON_ALPHANUM_RE, '-')
+		.replaceAll(CAMEL_BOUNDARY_PATTERN, '$1-$2')
+		.replaceAll(NON_ALPHANUM_PATTERN, '-')
 		.toLowerCase();
 }
 
 function toDisplayName(value: string): string {
 	return toKebabCase(value)
 		.split('-')
-		.filter(Boolean)
-		.map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+		.flatMap((part) => (part ? [`${part.charAt(0).toUpperCase()}${part.slice(1)}`] : []))
 		.join(' ');
 }
 

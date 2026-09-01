@@ -6,6 +6,8 @@ import { findMdxFiles } from './docs-mdx-files.js';
 
 const EXPORTS_PREFIX = 'packages/@luke-ui/react/src/exports/';
 
+const MDX_EXTENSION_PATTERN = /\.mdx$/;
+
 /** One authored component guide, keyed by the slug the navigation uses. */
 interface ComponentGuide {
 	props: ReadonlyArray<{ name: string; path: string }>;
@@ -63,11 +65,7 @@ export function buildComponentGuideInventory(
 
 	return {
 		guides: input.guides.map((guide) => {
-			const name =
-				guide.relativePath
-					.replace(/\.mdx$/, '')
-					.split('/')
-					.at(-1) ?? '';
+			const name = guide.relativePath.replace(MDX_EXTENSION_PATTERN, '').split('/').at(-1) ?? '';
 			return {
 				relativePath: guide.relativePath,
 				slug: `${guide.group}/${name}`,

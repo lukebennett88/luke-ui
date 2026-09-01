@@ -110,9 +110,9 @@ describe('buildTheme output', () => {
 	}
 
 	it('emits every colour value in OKLCH', () => {
-		const colorVarNames = pairs
-			.filter(([path]) => path.startsWith('color.'))
-			.map(([, varName]) => varName);
+		const colorVarNames = pairs.flatMap(([path, varName]) =>
+			path.startsWith('color.') ? [varName] : [],
+		);
 		for (const block of [blocks.baseLight, blocks.mediaDark]) {
 			const nonOklch = colorVarNames.filter(
 				(varName) => !extractValue(block, varName).startsWith('oklch('),

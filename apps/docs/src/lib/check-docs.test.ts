@@ -720,9 +720,9 @@ function defaultMetadata(guidePaths: ReadonlyArray<string>): Record<string, unkn
 
 	for (const group of groups) {
 		metadata[`${group}/meta.json`] = {
-			pages: slugs
-				.filter((slug) => slug.startsWith(`${group}/`))
-				.map((slug) => slug.slice(group.length + 1)),
+			pages: slugs.flatMap((slug) =>
+				slug.startsWith(`${group}/`) ? [slug.slice(group.length + 1)] : [],
+			),
 			title: group,
 		};
 	}

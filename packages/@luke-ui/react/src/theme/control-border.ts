@@ -41,9 +41,9 @@ export function solveControlBorder(params: SolveControlBorderRequest): Oklch {
 	const { neutral, canvas, recessed, mode } = params;
 	const seed = neutral[FAMILY_RUNG.border];
 	const target = UI_RATIO + RATIO_HEADROOM;
-	const worstRatio = (candidate: Oklch) => {
+	function worstRatio(candidate: Oklch) {
 		return Math.min(contrastRatio(candidate, canvas), contrastRatio(candidate, recessed));
-	};
+	}
 
 	let resolved: Oklch | undefined;
 	for (const lightness of lightnessCandidates(seed.l, mode === 'light' ? 0 : 1)) {

@@ -53,9 +53,9 @@ test('marks a pure native wrapper with the native-props entry and no visible pro
 	);
 
 	expect(
-		codeProps?.entries
-			.map((entry) => entry.name)
-			.filter((name) => name !== NATIVE_PROPS_FORWARDING_KEY),
+		codeProps?.entries.flatMap((entry) =>
+			entry.name !== NATIVE_PROPS_FORWARDING_KEY ? [entry.name] : [],
+		),
 	).toEqual([]);
 	const nativePropsEntry = codeProps?.entries.find(
 		(entry) => entry.name === NATIVE_PROPS_FORWARDING_KEY,

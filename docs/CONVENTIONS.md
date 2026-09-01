@@ -33,6 +33,23 @@ not as inline string constants.
 - CSS: `*.css.ts`.
 - Stories: `*.stories.tsx`.
 
+## Code style
+
+- Use early returns over nested `else`. Order files by importance with the exported entry first and
+  `function` helpers below. Helpers are hoisted `function` declarations, not `const` arrows.
+- Keep branching assignments `const` via an inline IIFE or a `Record` lookup. Isolate multi-step
+  object construction in one owning function.
+- When three or more cases test one value with different logic use `switch`. For a pure key to value
+  mapping use a `Record` lookup. Otherwise use `if`/`else`.
+- For side-effect iteration use `for...of` instead of `.forEach`. For multi-step transforms use one
+  `for...of` pass or a single `.flatMap` where you return `[]` to drop an item. Do not use
+  `.filter().map()` or `.map().filter()` chains.
+- For repeated lookup or dedupe by key use `Map` or `Set`. Do not re-scan arrays inside loops.
+- For complex aggregates use an explicit loop instead of a clever `.reduce`. Use at most one
+  ternary, otherwise use `if`/`else` or a lookup.
+- Define regex as `const SCREAMING_SNAKE_PATTERN` (or `_REGEX`) at module scope. Cache dynamic
+  `new RegExp` values via `Map` and hoist regex out of loops.
+
 ## Testing
 
 See [TESTING.md](TESTING.md) for test type, placement, and writing rules.

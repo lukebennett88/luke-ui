@@ -260,10 +260,11 @@ function envelope(
 	select: (step: Oklch) => number,
 ): Array<[number, number]> {
 	return Array.from({ length: 12 }, (_unused, index) => {
-		const values = scales
-			.map((scale) => scale.steps[index])
-			.filter((step): step is Oklch => step !== undefined)
-			.map(select);
+		const values: Array<number> = [];
+		for (const scale of scales) {
+			const step = scale.steps[index];
+			if (step !== undefined) values.push(select(step));
+		}
 		return [Math.min(...values), Math.max(...values)] as [number, number];
 	});
 }

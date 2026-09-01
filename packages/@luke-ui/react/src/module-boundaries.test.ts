@@ -4,11 +4,16 @@ import { fileURLToPath } from 'node:url';
 import { access, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { afterEach, expect, test } from 'vite-plus/test';
 
+const QUERY_HASH_PATTERN = /[?#]/;
+const JS_EXTENSION_PATTERN = /\.js$/;
+const SOURCE_FILE_PATTERN = /\.(?:ts|tsx)$/;
+const EXCLUDED_SOURCE_PATTERN = /(?:\.test\.|\.stories\.|__fixtures__)/;
+const RELATIVE_IMPORT_PATTERN = /(?:from\s+|import\s+)(['"])(\.\.?\/[^'"]+)\1/g;
 const sourceRoot = fileURLToPath(new URL('./', import.meta.url));
 const sourceZones = new Set(['core', 'exports', 'shared', 'theme']);
-const sourceFilePattern = /\.(?:ts|tsx)$/;
-const excludedSourcePattern = /(?:\.test\.|\.stories\.|__fixtures__)/;
-const relativeImportPattern = /(?:from\s+|import\s+)(['"])(\.\.?\/[^'"]+)\1/g;
+const sourceFilePattern = SOURCE_FILE_PATTERN;
+const excludedSourcePattern = EXCLUDED_SOURCE_PATTERN;
+const relativeImportPattern = RELATIVE_IMPORT_PATTERN;
 
 type SourceZone = 'core' | 'exports' | 'shared' | 'theme';
 
@@ -139,10 +144,17 @@ async function resolveRelativeImport(
 	sourceFile: string,
 	specifier: string,
 ): Promise<string> {
-	const target = path.resolve(path.dirname(sourceFile), specifier.split(/[?#]/)[0] ?? specifier);
+	const target = path.resolve(
+		path.dirname(sourceFile),
+		specifier.split(QUERY_HASH_PATTERN)[0] ?? specifier,
+	);
 	if (!target.startsWith(`${root}${path.sep}`)) return target;
 
-	const candidates = [target, target.replace(/\.js$/, '.ts'), target.replace(/\.js$/, '.tsx')];
+	const candidates = [
+		target,
+		target.replace(JS_EXTENSION_PATTERN, '.ts'),
+		target.replace(JS_EXTENSION_PATTERN, '.tsx'),
+	];
 
 	const resolvedCandidates = await Promise.all(
 		candidates.map(async (candidate) => {

@@ -9,8 +9,19 @@ import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
 import { FAMILY_RUNG } from './scale.js';
 
+const VAR_VALUE_PATTERN_CACHE = new Map<string, RegExp>();
+
+function getVarValuePattern(varName: string): RegExp {
+	let pattern = VAR_VALUE_PATTERN_CACHE.get(varName);
+	if (pattern === undefined) {
+		pattern = new RegExp(`${varName}: ([^;]+);`);
+		VAR_VALUE_PATTERN_CACHE.set(varName, pattern);
+	}
+	return pattern;
+}
+
 function extractValue(block: string, varName: string): string {
-	const match = new RegExp(`${varName}: ([^;]+);`).exec(block);
+	const match = getVarValuePattern(varName).exec(block);
 	if (match === null || match[1] === undefined) throw new Error(`missing ${varName} in block`);
 	return match[1];
 }

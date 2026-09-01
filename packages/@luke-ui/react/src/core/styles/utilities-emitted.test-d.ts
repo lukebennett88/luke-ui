@@ -5,10 +5,25 @@ import { expect, test } from 'vite-plus/test';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 
+const UTILITIES_CSS_PATTERN = /utilities\.css-[A-Za-z0-9_-]+/;
+const INDEX_SIGNATURE_PATTERN = /\[\s*\w+\s*:\s*string\s*\]/;
+const BACKGROUND_COLOR_TOKEN_PATTERN = /type BackgroundColorToken = ([^;]+);/;
+const NUMERIC_ZERO_PATTERN = /(^|[{;\s])0:/;
+const READONLY_PROPERTY_PATTERN_CACHE = new Map<string, RegExp>();
+
+function getReadonlyPropertyPattern(property: string): RegExp {
+	let pattern = READONLY_PROPERTY_PATTERN_CACHE.get(property);
+	if (pattern === undefined) {
+		pattern = new RegExp(`readonly ${property}:`);
+		READONLY_PROPERTY_PATTERN_CACHE.set(property, pattern);
+	}
+	return pattern;
+}
+
 /** Reads the content-hashed declaration chunk referenced by `box.d.ts`. */
 async function readUtilitiesDeclaration(): Promise<string> {
 	const boxDeclaration = await readFile(new URL('../../../dist/box.d.ts', import.meta.url), 'utf8');
-	const chunk = /utilities\.css-[A-Za-z0-9_-]+/.exec(boxDeclaration)?.[0];
+	const chunk = UTILITIES_CSS_PATTERN.exec(boxDeclaration)?.[0];
 	if (chunk === undefined) {
 		throw new Error('Could not find the utilities declaration chunk from dist/box.d.ts');
 	}
@@ -17,7 +32,7 @@ async function readUtilitiesDeclaration(): Promise<string> {
 
 /** Extracts one property's declared type while balancing braces. */
 function propertyType(declaration: string, property: string): string {
-	const marker = new RegExp(`readonly ${property}:`).exec(declaration);
+	const marker = getReadonlyPropertyPattern(property).exec(declaration);
 	if (marker?.index === undefined) {
 		throw new Error(`Property "${property}" is not present in the emitted declaration`);
 	}
@@ -41,7 +56,7 @@ test('the zero space key stays a quoted string in declaration emit', async () =>
 	for (const property of spaceScaleProperties) {
 		const emitted = propertyType(declaration, property);
 		if (!emitted.includes("'0':")) missing.push(`${property}.quoted`);
-		if (new RegExp(`(^|[{;\\s])0:`).test(emitted)) missing.push(`${property}.numeric`);
+		if (NUMERIC_ZERO_PATTERN.test(emitted)) missing.push(`${property}.numeric`);
 	}
 
 	expect(missing).toEqual([]);
@@ -52,12 +67,12 @@ test('backgroundColor is keyed by tokens, not by an index signature', async () =
 	const emitted = propertyType(declaration, 'backgroundColor');
 
 	expect(emitted, 'backgroundColor widened to an index signature').not.toMatch(
-		/\[\s*\w+\s*:\s*string\s*\]/,
+		INDEX_SIGNATURE_PATTERN,
 	);
 	expect(emitted.trim()).not.toBe('true');
 
 	// Declaration emit may inline the type or retain its alias.
-	const alias = /type BackgroundColorToken = ([^;]+);/.exec(declaration)?.[1] ?? '';
+	const alias = BACKGROUND_COLOR_TOKEN_PATTERN.exec(declaration)?.[1] ?? '';
 	const tokenSource = emitted.includes('"') ? emitted : alias;
 	expect(tokenSource, 'no token vocabulary found for backgroundColor').toBeTruthy();
 
@@ -99,13 +114,13 @@ test('responsive conditions preserve breakpoint declaration order', async () => 
 	// Conditions are matched by name and checked in declaration order.
 	const expected = ['initial', ...Object.keys(breakpoints)];
 	const emittedOrder = expected
-		.map((name) => ({ index: new RegExp(`readonly ${name}:`).exec(declaration)?.index, name }))
+		.map((name) => ({ index: getReadonlyPropertyPattern(name).exec(declaration)?.index, name }))
 		.sort((a, b) => (a.index ?? -1) - (b.index ?? -1))
 		.map(({ name }) => name);
 
 	for (const name of expected) {
 		expect(declaration, `condition "${name}" is missing from the emitted config`).toMatch(
-			new RegExp(`readonly ${name}:`),
+			getReadonlyPropertyPattern(name),
 		);
 	}
 	// Declaration order controls editor completion order.

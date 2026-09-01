@@ -55,7 +55,9 @@ const SURFACE_LIGHTNESS_DELTAS = {
 export function generateSurfaces(request: GenerateSurfacesRequest): GeneratedSurfaces {
 	const { background: canvas, mode } = request;
 	const isLight = mode === 'light';
-	const surfaceAt = (delta: number) => gamutMapOklch({ ...canvas, l: clampUnit(canvas.l + delta) });
+	function surfaceAt(delta: number) {
+		return gamutMapOklch({ ...canvas, l: clampUnit(canvas.l + delta) });
+	}
 	const deltas = SURFACE_LIGHTNESS_DELTAS[mode];
 	return {
 		canvas,
