@@ -27,6 +27,7 @@
 		"fix:unsafe": "turbo run fix:unsafe",
 		"fix:unused": "knip --fix",
 		"generate:component": "pnpm --filter=@luke-ui/turbo-generators run generate:component",
+		"generate:primitive": "pnpm --filter=@luke-ui/turbo-generators run generate:primitive",
 		"release": "turbo run build --filter=docs^... && changeset publish",
 		"test": "turbo run test",
 		"test:visual": "pnpm --filter=@luke-ui/react run test:visual",
