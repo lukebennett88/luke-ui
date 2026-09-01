@@ -1,11 +1,12 @@
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/contract.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { resolveXStyleClassName } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import type { TextRecipeVariants } from './recipe.css.js';
-import { textRecipe } from './recipe.css.js';
+import type { TextRecipeVariants } from './recipe.js';
+import { textRecipe } from './recipe.js';
 
 interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
 
@@ -68,6 +69,14 @@ interface TextStyleProps {
 	 * @default 'body'
 	 */
 	typography?: TextVariantProps['typography'];
+	/**
+	 * Escape hatch for styling properties `Text`'s own props do not expose, as one or more
+	 * `stylex.create(...)` style objects. Applied after every variant prop above and before
+	 * `className`, so a consumer `className` still beats it. Use it to set a property `Text` never
+	 * declares (for example `outlineStyle`); it is not a reliable way to override a property a
+	 * variant prop such as `color` already sets — use that prop instead.
+	 */
+	xstyle?: XStyleProp;
 }
 
 type _TextOmit = DistributiveOmit<
@@ -116,6 +125,7 @@ export function Text(props: TextProps) {
 		textTransform,
 		textWrap,
 		typography,
+		xstyle,
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
@@ -130,7 +140,7 @@ export function Text(props: TextProps) {
 	return (
 		<RacText
 			{...racProps}
-			className={cx(
+			className={resolveXStyleClassName(
 				textRecipe({
 					color,
 					fontVariantNumeric,
@@ -147,6 +157,7 @@ export function Text(props: TextProps) {
 					textWrap,
 					typography: resolvedTypography,
 				}),
+				xstyle,
 				className,
 			)}
 			elementType={elementType}

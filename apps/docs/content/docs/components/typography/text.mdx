@@ -68,6 +68,13 @@ rendered text only, so avoid using uppercase styling as a substitute for a clear
 
 <ExampleBlock src="text/transform" title="Text — Transform and decoration" />
 
+## Custom styling
+
+Pass `xstyle` to style a property `Text`'s own props do not expose, as one or more
+`stylex.create(...)` style objects. It applies after every prop above and before `className`, so a
+consumer `className` still beats it. It is not a reliable way to override a property a prop such as
+`color` or `typography` already sets — use that prop instead.
+
 ## Related components
 
 Use [Heading](/components/typography/heading) for a section heading. It manages heading levels for

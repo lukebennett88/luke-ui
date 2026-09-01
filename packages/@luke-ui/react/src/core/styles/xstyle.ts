@@ -25,6 +25,16 @@ export type XStyleProp<CSS extends Record<string, unknown> = Record<string, unkn
  *
  * `style` is never touched here — pass it through to the element untouched, unmerged with
  * anything StyleX resolves, matching `recipe()`'s own string-only contract.
+ *
+ * This ordering is a reliable guarantee for step 4 (`className` and `style` are structurally
+ * outside StyleX's cascade-layer system, so they always win) but not for step 3 against step 2:
+ * StyleX assigns each `luke.sx.priorityN` cascade layer purely by CSS property identity, the same
+ * way for every `stylex.create` call, so `xstyle` and a component's own recipe land in the *same*
+ * layer whenever they set the *same* property, and that collision resolves by a StyleX-internal
+ * sort with no "xstyle wins" guarantee (see the precedence tests in `xstyle.browser.test.tsx` for
+ * a worked example and its consequence). `xstyle` reliably applies for a property the component's
+ * own recipe does not otherwise set; treat overriding a property the recipe already declares as
+ * unsupported.
  */
 export function resolveXStyleClassName(
 	recipeClass: string,

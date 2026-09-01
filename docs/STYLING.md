@@ -10,7 +10,8 @@ with no class and no JS required. Neither step injects styles at runtime.
 
 The package build also extracts StyleX and appends those rules to `dist/stylesheet.css`. StyleX
 rules live in generated `luke.sx.priorityN` cascade layers between the theme and recipes layers.
-Production component styles stay on Vanilla Extract until their migration slices land.
+`Text` and `VisuallyHidden` are StyleX. Every other component stays on Vanilla Extract until its own
+migration slice lands.
 
 ## Structure
 
@@ -208,9 +209,12 @@ the `recipes` layer. A recipe can still pre-build a static `base` with `styleInL
 and hand the resulting class string to `recipe()`, which passes a string value through unchanged
 rather than wrapping it again.
 
-Text's Capsize trim declarations use logical properties for the pseudo-element margins and are
-authored as one of the Text recipe's `recipe()` compound-variant styles, so they remain owned by
-`recipes` through that same layering rather than a dedicated helper.
+`Text`'s Capsize trim declarations use logical properties for the pseudo-element margins and are
+authored as one of the StyleX `textRecipe`'s compound-variant styles (see `core/text/recipe.ts`), so
+they live in a `luke.sx.priorityN` layer through that same compound-variant mechanism rather than a
+dedicated helper. StyleX compiles the logical `marginBlockEnd`/`marginBlockStart` properties to
+physical `margin-bottom`/`margin-top` at build time — block-axis margins do not flip under RTL, so
+this is a safe, direction-agnostic rewrite, not a departure from the logical-properties rule below.
 
 Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
@@ -290,8 +294,9 @@ See `core/primitives/field/recipe.css.ts` for a complete public slotted recipe. 
 slot names and variant values `recipe()` infers, and `satisfies` type-checks every slot and variant
 style against `StyleRule` where it is written.
 
-Compound variants are single-part only: `buttonRecipe` and `textRecipe` both use `compoundVariants`
-on their single-part config. A slotted config has no `compoundVariants` field.
+Compound variants are single-part only: `buttonRecipe` (Vanilla Extract) and `textRecipe` (StyleX)
+both use `compoundVariants` on their single-part config. A slotted config has no `compoundVariants`
+field.
 
 ### Deriving variant types
 
@@ -305,6 +310,45 @@ export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
 Do not cast a hand-written variant interface onto a recipe's selection parameter. If the exported
 type and the recipe definition can drift, something is wrong with how the type was produced, not
 with the recipe.
+
+### StyleX recipes
+
+A migrated component (`Text`, `VisuallyHidden`) uses `recipe()` from `core/styles/stylex-recipe.ts`
+instead of the Vanilla Extract engine above. Its public contract is identical — single-part
+`(selection?) => string`, slotted `(selection?) => Record<Slot, (extra?) => string>`, and
+`RecipeSelection<typeof recipeFn>` for the derived variant type — but the caller performs its own
+`stylex.create(...)` call, because `stylex.create` requires every key and value to be statically
+extractable: a recipe cannot build its variant map with `Object.fromEntries` or `Array.map` the way
+`typographyVariants` in the old Vanilla Extract `textRecipe` did. Write out each variant and
+compound-variant style as a literal `stylex.create` key instead. See `core/text/recipe.ts` for the
+full expansion this produces. A migrated recipe file is named `recipe.ts`, not `recipe.css.ts`
+(Vanilla Extract's `.css.ts` naming is wrong for a StyleX module and would be picked up by the VE
+plugin).
+
+### `xstyle`
+
+Every StyleX-migrated component accepts an `xstyle` prop: an escape hatch for styling a CSS property
+the component's own props do not expose, typed `XStyleProp` and resolved with
+`resolveXStyleClassName` (both from `core/styles/xstyle.ts`). Pass one or more compiled
+`stylex.create(...)` style objects, the same way `stylex.props` itself accepts them:
+
+```tsx
+import * as stylex from '@stylexjs/stylex';
+
+const styles = stylex.create({ emphasis: { outlineStyle: 'dashed' } });
+
+<Text xstyle={styles.emphasis}>Custom outline</Text>;
+```
+
+A component resolves its class string in this order: internal defaults, then its own variant props,
+then `xstyle`, then a consumer `className`, then inline `style`. `className` and `style` reliably
+beat `xstyle` — they sit structurally outside StyleX's cascade-layer system, so an unlayered
+consumer class or an inline style always wins. `xstyle` reliably applies for a property the
+component's own recipe does not otherwise set. It is not a reliable way to override a property a
+variant prop already sets: StyleX assigns each `luke.sx.priorityN` cascade layer purely by CSS
+property identity, so `xstyle` and a component's own recipe class land in the _same_ layer whenever
+they set the _same_ property, and that collision resolves by a StyleX-internal sort with no
+"`xstyle` wins" guarantee. Use the component's own prop for a property it already exposes.
 
 ### Shared input-state selectors
 

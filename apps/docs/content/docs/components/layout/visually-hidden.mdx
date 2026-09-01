@@ -25,6 +25,12 @@ element.
 <VisuallyHidden elementType="h2">Search results</VisuallyHidden>
 ```
 
+## Custom styling
+
+Pass `xstyle` to style a property `VisuallyHidden`'s own styles do not set, as one or more
+`stylex.create(...)` style objects. It applies after `VisuallyHidden`'s own styles and before
+`className`, so a consumer `className` still beats it.
+
 ## API
 
 <component-props-table

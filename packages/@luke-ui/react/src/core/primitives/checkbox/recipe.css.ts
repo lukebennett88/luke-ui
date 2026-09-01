@@ -4,7 +4,7 @@ import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { focusRing } from '../../styles/focus-ring.js';
 import type { RecipeSelection, SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
-import { textLineHeight } from '../../text/recipe.css.js';
+import { textLineHeight } from '../../text/text-line-height.js';
 import { fieldMessageIcon, fieldMessageIndent } from '../field/recipe.css.js';
 
 const checkboxControlSize = createVar();

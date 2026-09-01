@@ -1,8 +1,10 @@
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transformAsync } from '@babel/core';
 import type { FileResult } from '@babel/core';
 import stylexBabelPlugin from '@stylexjs/babel-plugin';
 import type { Rule } from '@stylexjs/babel-plugin';
+import { readFile, readdir } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 
 /**
@@ -127,6 +129,42 @@ async function transformStylex(
 	return { code: result.code, map: toRolldownSourceMap(result.map), rules: meta.stylex };
 }
 
+/** A rule produced by `stylex.defineConsts` (or its nested variant): carries `constKey`/`constVal` rather than a `ltr` declaration body. */
+function isConstantRule(rule: Rule): boolean {
+	return rule[1].constKey != null && rule[1].constVal != null;
+}
+
+/**
+ * Finds every `*.stylex.ts` theming module under `theme/` — the one place a `stylex.defineConsts`
+ * (or `unstable_defineConstsNested`) call is allowed to live — and transforms each once, returning
+ * only the constant rules it produces.
+ *
+ * `createStylexDevPlugin` needs this independent of Vite's own module graph: a consumer module's
+ * per-file CSS companion (see below) can be requested before Vite has transformed the theming
+ * module the consumer imports its constants from, purely because a virtual side-import has no
+ * ordering guarantee relative to the module's other imports. Reading and transforming the theming
+ * module directly here, once, sidesteps that ordering entirely rather than depending on it.
+ */
+async function loadConstantRules(): Promise<Array<Rule>> {
+	const themeDir = join(workspaceRoot, 'packages/@luke-ui/react/src/theme');
+	const entries = await readdir(themeDir, { withFileTypes: true }).catch(() => []);
+	const themingFilenames = entries
+		.filter((entry) => entry.isFile() && entry.name.endsWith('.stylex.ts'))
+		.map((entry) => join(themeDir, entry.name));
+
+	const perFileConstantRules = await Promise.all(
+		themingFilenames.map(async (filename) => {
+			const code = await readFile(filename, 'utf8');
+			if (!code.includes('@stylexjs/stylex')) return [];
+
+			const result = await transformStylex(code, filename);
+			return result?.rules === undefined ? [] : result.rules.filter(isConstantRule);
+		}),
+	);
+
+	return perFileConstantRules.flat();
+}
+
 // ---------------------------------------------------------------------------
 // Pack-time plugin (production build; appends to the emitted `stylesheet.css` asset)
 // ---------------------------------------------------------------------------
@@ -199,6 +237,14 @@ const OWN_RULES_QUERY = 'luke-stylex-own-rules';
  * import. Vite's module graph then orders that CSS import exactly like any other import: it loads
  * before the importing module's body runs, every time, with no shared aggregation to race against.
  *
+ * Every companion also prepends the constant rules `loadConstantRules` collects directly from the
+ * `*.stylex.ts` theming modules (see that function): a `stylex.create` call that references a
+ * `stylex.defineConsts` constant emits an atomic class naming the constant's generated
+ * `var(--hash)`, but never the constant's own defining declaration, so a companion whose module
+ * uses a constant must carry that constant's definition itself, from wherever it is calculated,
+ * not from Vite's own transform order (which offers no ordering guarantee for a virtual
+ * side-import relative to the importing module's other imports).
+ *
  * `virtual:luke-stylex.css` itself (no query) stays available as a fallback entrypoint a setup
  * file can import unconditionally; on its own it only carries the authoritative `@layer` order
  * (no priority layers yet), matching an empty stylesheet before anything has transformed.
@@ -207,6 +253,8 @@ export function createStylexDevPlugin(): Plugin {
 	// Per-module rules, so each module's own companion emits only its own CSS — never another
 	// module's, and never stale CSS for a module that stopped producing rules.
 	const stylexRulesByModule = new Map<string, Array<Rule>>();
+	// Computed once and reused for every companion — see `loadConstantRules`.
+	let constantRules: Promise<Array<Rule>> | undefined;
 
 	// The PUBLIC specifier a module's source code imports. Only `resolveId`'s return value gets
 	// the `\0` prefix marking it pre-resolved; a source-level import specifier never does — Vite's
@@ -223,14 +271,27 @@ export function createStylexDevPlugin(): Plugin {
 			}
 			return null;
 		},
-		load(id) {
+		async load(id) {
 			if (!id.startsWith(RESOLVED_STYLEX_VIRTUAL_CSS_ID)) return null;
 
 			const ownRulesFor = new URL(id.slice(1), 'file:').searchParams.get(OWN_RULES_QUERY);
-			const rules = ownRulesFor === null ? [] : (stylexRulesByModule.get(ownRulesFor) ?? []);
-			if (rules.length === 0) return `${buildAuthoritativeLayerOrder([])}\n`;
+			const ownRules = ownRulesFor === null ? [] : (stylexRulesByModule.get(ownRulesFor) ?? []);
+			if (ownRules.length === 0) return `${buildAuthoritativeLayerOrder([])}\n`;
 
-			const { authoritativeLayerOrder, stylexBody } = processRules(rules);
+			constantRules ??= loadConstantRules();
+			// Constants this module's own rules already carry (it may itself be a theming module)
+			// are excluded from the prepended set so they are not duplicated.
+			const ownConstantKeys = new Set(
+				ownRules.filter(isConstantRule).map((rule) => rule[1].constKey),
+			);
+			const prependedConstantRules = (await constantRules).filter(
+				(rule) => !ownConstantKeys.has(rule[1].constKey),
+			);
+
+			const { authoritativeLayerOrder, stylexBody } = processRules([
+				...prependedConstantRules,
+				...ownRules,
+			]);
 			return `${authoritativeLayerOrder}\n/* stylex */\n${stylexBody}`;
 		},
 		shouldTransformCachedModule({ id, meta }) {
@@ -244,12 +305,9 @@ export function createStylexDevPlugin(): Plugin {
 
 			// Drop the entry when a module stops producing rules, so a watch rebuild replaces its
 			// contribution instead of leaving the previous rules stranded in the map.
-			if (result.rules === undefined) {
-				stylexRulesByModule.delete(id);
-				return { code: result.code, map: result.map, meta: { stylex: result.rules } };
-			}
+			if (result.rules === undefined) stylexRulesByModule.delete(id);
+			else stylexRulesByModule.set(id, result.rules);
 
-			stylexRulesByModule.set(id, result.rules);
 			// Append the module's own CSS companion as a side-effecting import, so Vite's graph
 			// loads it before this module's body runs — no shared aggregation to race against.
 			const code_ = `${result.code}\nimport ${JSON.stringify(ownRulesVirtualId(id))};\n`;

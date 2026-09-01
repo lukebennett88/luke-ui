@@ -131,10 +131,30 @@ export function recipe(config: AnyMultiPartConfig | SinglePartConfig<VariantGrou
 
 function buildSinglePart(config: SinglePartConfig<VariantGroups>): SinglePartRecipe<VariantGroups> {
 	return (selection) => {
-		const selected = { ...config.defaultVariants, ...selection };
+		const selected = mergeSelection(config.defaultVariants, selection);
 		const styles = resolveStyles(config.base, config.variants, config.compoundVariants, selected);
 		return resolveClassName(styles);
 	};
+}
+
+/**
+ * Merges a caller's selection over the recipe's defaults, matching the Vanilla Extract engine's
+ * contract: a key the caller explicitly sets to `undefined` (a common pattern when a component
+ * spreads a partly-optional prop object straight into its recipe call, as `Text` does) still falls
+ * through to the recipe's default for that key, rather than a plain object spread's own behaviour
+ * of letting an explicit `undefined` overwrite an already-present default.
+ */
+function mergeSelection(
+	defaultVariants: Record<string, unknown> | undefined,
+	selection: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+	const merged: Record<string, unknown> = { ...defaultVariants };
+	if (selection === undefined) return merged;
+
+	for (const [group, value] of Object.entries(selection)) {
+		if (value !== undefined) merged[group] = value;
+	}
+	return merged;
 }
 
 /**
@@ -178,7 +198,7 @@ function buildSlotted(
 	}
 
 	return (selection) => {
-		const selected = { ...config.defaultVariants, ...selection };
+		const selected = mergeSelection(config.defaultVariants, selection);
 		const slots: Record<string, SlotFn> = {};
 
 		for (const slotName of slotNames) {

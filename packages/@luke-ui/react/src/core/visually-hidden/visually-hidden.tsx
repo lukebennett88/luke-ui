@@ -1,17 +1,25 @@
 import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { resolveXStyleClassName } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import { visuallyHiddenRecipe } from './recipe.css.js';
+import { visuallyHiddenRecipe } from './recipe.js';
 
 type _VisuallyHiddenOmit = DistributiveOmit<
 	ComponentPropsWithRef<typeof RacText>,
 	keyof DocumentedElementTypeProps
 >;
 
-interface _VisuallyHiddenProps extends _VisuallyHiddenOmit, DocumentedElementTypeProps {}
+interface _VisuallyHiddenProps extends _VisuallyHiddenOmit, DocumentedElementTypeProps {
+	/**
+	 * Escape hatch for styling properties `VisuallyHidden`'s own styles do not set, as one or more
+	 * `stylex.create(...)` style objects. Applied after `VisuallyHidden`'s own styles and before
+	 * `className`, so a consumer `className` still beats it.
+	 */
+	xstyle?: XStyleProp;
+}
 
 /** Props for `VisuallyHidden`. */
 export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
@@ -29,6 +37,11 @@ export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
  * (for example `elementType="h2"` for a screen-reader-only section heading).
  */
 export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
-	const { className, ...racProps } = props;
-	return <RacText {...racProps} className={cx(visuallyHiddenRecipe(), className)} />;
+	const { className, xstyle, ...racProps } = props;
+	return (
+		<RacText
+			{...racProps}
+			className={resolveXStyleClassName(visuallyHiddenRecipe(), xstyle, className)}
+		/>
+	);
 }

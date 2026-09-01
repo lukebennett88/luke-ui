@@ -72,8 +72,13 @@ export const typeStyles = [
 /** A public semantic type style key. */
 export type TypeStyle = (typeof typeStyles)[number];
 
-/** Theme weight roles available on `vars.font.weight` and as `Text`/`Heading` overrides. */
-export const fontWeightRoles = ['body', 'label', 'heading', 'emphasis'] as const;
+/**
+ * Theme weight roles available on `vars.font.weight` and as `Text`/`Heading` overrides. Not
+ * exported as a value: every consumer needs the `FontWeightRole` type it derives, not the runtime
+ * array (StyleX-migrated `text/recipe.ts` cannot build its variant map dynamically from this list —
+ * `stylex.create` requires literal keys — so it writes each role out by hand instead).
+ */
+const fontWeightRoles = ['body', 'label', 'heading', 'emphasis'] as const;
 
 /** A theme font-weight role key. */
 export type FontWeightRole = (typeof fontWeightRoles)[number];

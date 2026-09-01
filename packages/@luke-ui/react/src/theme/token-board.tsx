@@ -432,7 +432,7 @@ function TextSample({
 
 /**
  * `baselineTrim` and `capHeightTrim` are capsize margin offsets applied to a `::before`/`::after`
- * pair in `text/recipe.css.ts`; a plain swatch cannot show a margin, so this applies the trim
+ * pair in `text/recipe.ts`; a plain swatch cannot show a margin, so this applies the trim
  * directly to a bar's block-start or block-end margin instead.
  */
 function TrimSample({

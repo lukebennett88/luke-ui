@@ -426,6 +426,16 @@ function assertClassOwnership(root: Root, className: string, layerName: string):
 	expect(rules.some((rule) => rule.nodes.some((node) => node.type === 'decl'))).toBe(true);
 }
 
+/**
+ * Text is StyleX-migrated (#551): its trim and line-clamp classes live in a `luke.sx.priorityN`
+ * layer, not the transitional `recipes` layer that still holds other components' Vanilla Extract
+ * output. `assertTextTrimOwnership` and `assertLineClampOwnership` below assert that StyleX
+ * ownership directly, instead of reusing `assertClassOwnership`'s single fixed `recipes` layer.
+ * StyleX also resolves the logical `marginBlockEnd`/`marginBlockStart` properties Text's recipe
+ * authors to their physical `margin-bottom`/`margin-top` equivalents at compile time (block-axis
+ * margins do not flip under RTL, so this is a safe, direction-agnostic rewrite), which is why the
+ * expected property names below differ from the logical properties `text/recipe.ts` writes.
+ */
 function assertTextTrimOwnership(
 	root: Root,
 	textClassesByTypography: TextClassesByTypography,
@@ -437,13 +447,13 @@ function assertTextTrimOwnership(
 		assertPseudoDeclaration(
 			rules,
 			'::before',
-			'margin-block-end',
+			'margin-bottom',
 			`var(--luke-font-${typography}-cap-height-trim)`,
 		);
 		assertPseudoDeclaration(
 			rules,
 			'::after',
-			'margin-block-start',
+			'margin-top',
 			`var(--luke-font-${typography}-baseline-trim)`,
 		);
 	}
@@ -451,27 +461,30 @@ function assertTextTrimOwnership(
 
 function assertLineClampOwnership(root: Root, { numeric, singleLine }: LineClampClasses): void {
 	const singleLineRules = singleLine.flatMap((className) => getRulesForClass(root, className));
-	assertDeclaration(singleLineRules, 'display', 'block');
-	assertDeclaration(singleLineRules, 'text-overflow', 'ellipsis');
-	assertDeclaration(singleLineRules, 'white-space', 'nowrap');
+	assertStylexDeclaration(singleLineRules, 'display', 'block');
+	assertStylexDeclaration(singleLineRules, 'text-overflow', 'ellipsis');
+	assertStylexDeclaration(singleLineRules, 'white-space', 'nowrap');
 
 	for (const lineClamp of numericLineClampVariants) {
 		const rules = numeric[lineClamp].flatMap((className) => getRulesForClass(root, className));
-		assertDeclaration(rules, 'display', '-webkit-box');
-		assertDeclaration(rules, '-webkit-box-orient', 'vertical');
-		assertDeclaration(rules, '-webkit-line-clamp', String(lineClamp));
-		assertDeclaration(rules, 'line-clamp', String(lineClamp));
+		assertStylexDeclaration(rules, 'display', '-webkit-box');
+		assertStylexDeclaration(rules, '-webkit-box-orient', 'vertical');
+		assertStylexDeclaration(rules, '-webkit-line-clamp', String(lineClamp));
+		assertStylexDeclaration(rules, 'line-clamp', String(lineClamp));
 	}
 }
 
-function assertDeclaration(rules: Array<Rule>, property: string, value: string): void {
+function assertStylexDeclaration(rules: Array<Rule>, property: string, value: string): void {
 	const matchingRules = rules.filter((rule) => {
 		return rule.nodes.some(
 			(node) => node.type === 'decl' && node.prop === property && node.value === value,
 		);
 	});
 	expect(matchingRules.length).toBeGreaterThan(0);
-	for (const rule of matchingRules) expect(getOwningLayer(rule)).toBe('recipes');
+	for (const rule of matchingRules) {
+		const layer = getOwningLayer(rule);
+		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+	}
 }
 
 function assertPseudoDeclaration(
@@ -489,7 +502,10 @@ function assertPseudoDeclaration(
 		);
 	});
 	expect(matchingRules.length).toBeGreaterThan(0);
-	for (const rule of matchingRules) expect(getOwningLayer(rule)).toBe('recipes');
+	for (const rule of matchingRules) {
+		const layer = getOwningLayer(rule);
+		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+	}
 }
 
 function getRulesForClass(root: Root, className: string): Array<Rule> {

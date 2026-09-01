@@ -53,6 +53,14 @@ test('resolves base and default variants', () => {
 	expect(computed.color).toBe('rgb(4, 5, 6)');
 });
 
+test('an explicit undefined in the selection falls through to the default, like the Vanilla Extract engine', () => {
+	// A component that spreads a partly-optional prop object straight into its recipe call (as
+	// `Text` does) can pass an explicit `undefined` for an unset prop, not omit the key entirely.
+	const computed = computedFor(button({ size: undefined, tone: undefined }));
+	expect(computed.fontSize).toBe('12px');
+	expect(computed.color).toBe('rgb(4, 5, 6)');
+});
+
 test('a later variant group wins over an earlier one for the same property', () => {
 	const computed = computedFor(button({ size: 'large' }));
 	expect(computed.fontSize).toBe('20px');
