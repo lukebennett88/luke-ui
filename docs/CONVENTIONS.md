@@ -38,8 +38,8 @@ not as inline string constants.
 - Prefer `.map()` for one-to-one transforms. Prefer `.filter()` for selection. Prefer `.flatMap()`
   when filtering and mapping are combined. In `.flatMap()`, use an early return for the filtering
   case unless a ternary is clearly easier to read.
-- Prefer `for...of` when a transform needs more explicit control or mutation. Prefer `for...of`
-  over `.reduce`. Use `.reduce` only when it makes the operation substantially clearer.
+- Prefer `for...of` when a transform needs more explicit control or mutation. Prefer `for...of` over
+  `.reduce`. Use `.reduce` only when it makes the operation substantially clearer.
 - Prefer `Map` or `Set` for repeated lookup or deduplication. Do not repeatedly scan arrays inside
   loops.
 - Prefer `function` declarations for named helpers. Use an arrow when a short implicit return is
