@@ -36,10 +36,11 @@ pnpm run generate:primitive --args <name>
 ```
 
 The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`. The
-primitive creation rules live in `packages/turbo-generators/src/primitive-creation-plan.ts`. Those
-modules own name validation, documentation groups, conformance contracts, and defaults. Turbo and
-Plop collect answers and invoke that flow. Keep new creation rules in the plan module so tests can
-prove the files, exports, stories, docs, and checks a component or primitive needs.
+primitive creation rules live in `packages/turbo-generators/src/primitive-creation-plan.ts`. Each
+plan owns its generator's validation, defaults, and scaffold rules; documentation groups and
+Storybook stories belong to the component plan only. Turbo and Plop collect answers and invoke the
+shared apply flow. Keep new creation rules in the plan module so tests can prove the files, exports,
+docs, and registrations each generator needs.
 
 The component generator creates the component guide's primary
 `apps/docs/src/examples/<component>/basic.tsx` example and references it with `ExampleBlock`. The
