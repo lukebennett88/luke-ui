@@ -11,6 +11,18 @@ import { normalizeTheme } from '../define-theme.js';
 import { paperTheme } from '../foundations/paper.js';
 import { tactileTheme } from '../foundations/tactile.js';
 
+const COMMENT_HEADER_PATTERN = /^\/\*.*\*\/\n\n/;
+const VAR_VALUE_PATTERN_CACHE = new Map<string, RegExp>();
+
+function getVarValuePattern(varName: string): RegExp {
+	let pattern = VAR_VALUE_PATTERN_CACHE.get(varName);
+	if (pattern === undefined) {
+		pattern = new RegExp(`${varName}: ([^;]+);`);
+		VAR_VALUE_PATTERN_CACHE.set(varName, pattern);
+	}
+	return pattern;
+}
+
 // The bundled themes are authored as `defineTheme` inputs; these engine tests exercise the raw
 // `buildTheme` pipeline directly, so resolve each input into the foundation `buildTheme` consumes.
 export const tactileFoundation = normalizeTheme(tactileTheme);
@@ -27,7 +39,7 @@ export function resolvedColor(input: string): Oklch {
  * banner comment first, so the split models emitted CSS rules only.
  */
 export function splitBlocks(css: string) {
-	const withoutBanner = css.replace(/^\/\*.*\*\/\n\n/, '');
+	const withoutBanner = css.replace(COMMENT_HEADER_PATTERN, '');
 	const blocks = withoutBanner.split('\n\n').filter((block) => block.trim() !== '');
 	if (blocks.length !== 6) throw new Error(`expected 6 rule blocks, found ${blocks.length}`);
 	const [containment, identity, baseLight, mediaDark, explicitLight, explicitDark] = blocks;
@@ -46,7 +58,7 @@ export function splitBlocks(css: string) {
 
 /** Reads one declared custom property's value out of a rule block. */
 export function extractValue(block: string, varName: string): string {
-	const match = new RegExp(`${varName}: ([^;]+);`).exec(block);
+	const match = getVarValuePattern(varName).exec(block);
 	if (match === null || match[1] === undefined) {
 		throw new Error(`missing ${varName} in block`);
 	}

@@ -27,6 +27,8 @@ export interface TokenGroupNode {
 
 export type TokenTreeNode = TokenLeafNode | TokenGroupNode;
 
+const CAMEL_BOUNDARY_SPACE_PATTERN = /([a-z0-9])([A-Z])/g;
+
 /** One of the contract's own top-level branches, for example `color` or `motion`. */
 type Family = keyof typeof themeContractTree;
 
@@ -41,7 +43,7 @@ function headingTagAt(depth: number): (typeof HEADING_TAGS)[number] {
 
 /** `actionControlFinish` reads as one word; splits it (and others like it) into heading-sized words. */
 function humanizeSegment(segment: string): string {
-	return segment.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+	return segment.replace(CAMEL_BOUNDARY_SPACE_PATTERN, '$1 $2');
 }
 
 const boardStyle = {
@@ -120,9 +122,9 @@ export function TokenBoard() {
 	return (
 		<div style={boardStyle}>
 			<style>{motionKeyframesStyle}</style>
-			{Object.entries(tree.children).map(([key, node]) => (
-				<TokenNodeView depth={1} key={key} name={key} node={node} />
-			))}
+			{Object.entries(tree.children).map(([key, node]) => {
+				return <TokenNodeView depth={1} key={key} name={key} node={node} />;
+			})}
 		</div>
 	);
 }
@@ -549,20 +551,20 @@ export function buildTokenTree(): TokenGroupNode {
 	for (const [path, varName] of flattenThemeContract()) {
 		const segments = path.split('.');
 		let cursor = root;
-		segments.forEach((segment, index) => {
+		for (const [index, segment] of segments.entries()) {
 			if (index === segments.length - 1) {
 				cursor.children[segment] = { kind: 'leaf', path, varName };
-				return;
+				continue;
 			}
 			const existing = cursor.children[segment];
 			if (existing?.kind === 'group') {
 				cursor = existing;
-				return;
+				continue;
 			}
 			const next: TokenGroupNode = { children: {}, kind: 'group' };
 			cursor.children[segment] = next;
 			cursor = next;
-		});
+		}
 	}
 	return root;
 }

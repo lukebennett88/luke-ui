@@ -4,11 +4,13 @@ import { fileURLToPath } from 'node:url';
 import { access, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { afterEach, expect, test } from 'vite-plus/test';
 
+const QUERY_HASH_PATTERN = /[?#]/;
+const JS_EXTENSION_PATTERN = /\.js$/;
+const SOURCE_FILE_PATTERN = /\.(?:ts|tsx)$/;
+const EXCLUDED_SOURCE_PATTERN = /(?:\.test\.|\.stories\.|__fixtures__)/;
+const RELATIVE_IMPORT_PATTERN = /(?:from\s+|import\s+)(['"])(\.\.?\/[^'"]+)\1/g;
 const sourceRoot = fileURLToPath(new URL('./', import.meta.url));
 const sourceZones = new Set(['core', 'exports', 'shared', 'theme']);
-const sourceFilePattern = /\.(?:ts|tsx)$/;
-const excludedSourcePattern = /(?:\.test\.|\.stories\.|__fixtures__)/;
-const relativeImportPattern = /(?:from\s+|import\s+)(['"])(\.\.?\/[^'"]+)\1/g;
 
 type SourceZone = 'core' | 'exports' | 'shared' | 'theme';
 
@@ -100,7 +102,7 @@ async function findBoundaryViolations(root: string, sourceFile: string): Promise
 	if (sourceZone === undefined) return [];
 
 	const source = await readFile(sourceFile, 'utf8');
-	const imports = [...source.matchAll(relativeImportPattern)].flatMap((match) => {
+	const imports = [...source.matchAll(RELATIVE_IMPORT_PATTERN)].flatMap((match) => {
 		const specifier = match[2];
 		return specifier === undefined ? [] : [specifier];
 	});
@@ -126,7 +128,8 @@ async function collectSourceFiles(directory: string): Promise<Array<string>> {
 		entries.map(async (entry) => {
 			const entryPath = path.join(directory, entry.name);
 			if (entry.isDirectory()) return collectSourceFiles(entryPath);
-			if (!sourceFilePattern.test(entry.name) || excludedSourcePattern.test(entryPath)) return [];
+			if (!SOURCE_FILE_PATTERN.test(entry.name) || EXCLUDED_SOURCE_PATTERN.test(entryPath))
+				return [];
 			return [entryPath];
 		}),
 	);
@@ -139,10 +142,17 @@ async function resolveRelativeImport(
 	sourceFile: string,
 	specifier: string,
 ): Promise<string> {
-	const target = path.resolve(path.dirname(sourceFile), specifier.split(/[?#]/)[0] ?? specifier);
+	const target = path.resolve(
+		path.dirname(sourceFile),
+		specifier.split(QUERY_HASH_PATTERN)[0] ?? specifier,
+	);
 	if (!target.startsWith(`${root}${path.sep}`)) return target;
 
-	const candidates = [target, target.replace(/\.js$/, '.ts'), target.replace(/\.js$/, '.tsx')];
+	const candidates = [
+		target,
+		target.replace(JS_EXTENSION_PATTERN, '.ts'),
+		target.replace(JS_EXTENSION_PATTERN, '.tsx'),
+	];
 
 	const resolvedCandidates = await Promise.all(
 		candidates.map(async (candidate) => {

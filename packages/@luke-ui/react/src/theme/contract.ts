@@ -284,6 +284,8 @@ export const modeFamilies = [
 /** A top-level contract family that varies by colour mode. */
 type ModeFamily = (typeof modeFamilies)[number];
 
+const CAMEL_BOUNDARY_PATTERN = /([a-z0-9])([A-Z])/g;
+
 /** A top-level contract family that belongs to the theme identity, not a colour mode. */
 type IdentityFamily = Exclude<keyof typeof themeContractTree, ModeFamily>;
 
@@ -352,7 +354,7 @@ export function flattenThemeContract(): Array<[path: ContractPath, varName: stri
  * kebab-cased segments with `-` under the `luke-` prefix yields the CSS variable name.
  */
 function kebabCaseSegment(segment: string): string {
-	return segment.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+	return segment.replace(CAMEL_BOUNDARY_PATTERN, '$1-$2').toLowerCase();
 }
 
 function visitContractNode(

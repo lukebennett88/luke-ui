@@ -149,9 +149,12 @@ async function findUnresolvedImports(file: {
 	const generatedDirectory = path.dirname(path.join(repoRoot, file.path));
 	const lang = file.path.endsWith('.tsx') ? 'tsx' : 'ts';
 	const parsed = parseSync(file.path, file.contents, { lang });
-	const specifiers = parsed.module.staticImports
-		.map((staticImport) => staticImport.moduleRequest.value)
-		.filter((specifier) => specifier.startsWith('.'));
+	const specifiers = parsed.module.staticImports.flatMap((staticImport) => {
+		const specifier = staticImport.moduleRequest.value;
+		if (!specifier.startsWith('.')) return [];
+
+		return [specifier];
+	});
 
 	const resolutions = await Promise.all(
 		specifiers.map(async (specifier) => {

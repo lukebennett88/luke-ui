@@ -21,11 +21,12 @@ function docsLinks(contents: string): Array<string> {
 		if (link !== undefined) links.push(link);
 	}
 
-	return links
-		.map((link) => link.split('#')[0])
-		.filter((link): link is string => {
-			return link !== undefined && link.startsWith('/') && !link.startsWith('//');
-		});
+	return links.flatMap((link) => {
+		const base = link.split('#')[0];
+		if (base === undefined || !base.startsWith('/') || base.startsWith('//')) return [];
+
+		return [base];
+	});
 }
 
 test('every internal link on the docs pages resolves', () => {

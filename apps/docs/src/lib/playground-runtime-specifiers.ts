@@ -35,8 +35,8 @@ const reactPackageJsonPath = resolve(
 	'../../../../packages/@luke-ui/react/package.json',
 );
 
-const importSpecifierPattern = /\bfrom\s+["']([^"']+)["']/g;
-const sideEffectImportPattern = /^import\s+["']([^"']+)["']/gm;
+const IMPORT_SPECIFIER_PATTERN = /\bfrom\s+["']([^"']+)["']/g;
+const SIDE_EFFECT_IMPORT_PATTERN = /^import\s+["']([^"']+)["']/gm;
 
 function readLukeUiReactExports(): Record<string, string> {
 	return packageJsonSchema.parse(JSON.parse(readFileSync(reactPackageJsonPath, 'utf8'))).exports;
@@ -70,12 +70,12 @@ export function playgroundRuntimeSpecifierList(
 export function importSpecifiersFromSource(source: string): Array<string> {
 	const specifiers: Array<string> = [];
 
-	for (const match of source.matchAll(importSpecifierPattern)) {
+	for (const match of source.matchAll(IMPORT_SPECIFIER_PATTERN)) {
 		const specifier = match[1];
 		if (specifier !== undefined) specifiers.push(specifier);
 	}
 
-	for (const match of source.matchAll(sideEffectImportPattern)) {
+	for (const match of source.matchAll(SIDE_EFFECT_IMPORT_PATTERN)) {
 		const specifier = match[1];
 		if (specifier !== undefined) specifiers.push(specifier);
 	}

@@ -428,29 +428,35 @@ function sideOf(input: ColorInput, mode: ColorMode): string | undefined {
 function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSource: Oklch): Oklch {
 	const target = ACCENT_TARGET[mode];
 	const [low, high] = ACCENT_BAND[mode];
-	const makeSolid = (l: number) => {
+	function makeSolid(l: number) {
 		return gamutMapOklch({
 			l,
 			c: source.c,
 			h: source.h,
 		});
-	};
-	const passes = (l: number) => {
+	}
+	function passes(l: number) {
 		return passesOnSolidGate({ interactionSource, lightness: l, source });
-	};
+	}
 
 	if (passes(target)) return makeSolid(target);
 
-	let best: number | null = null;
-	let bestDistance = Number.POSITIVE_INFINITY;
-	for (const candidate of lightnessCandidates(low, high)) {
-		if (!passes(candidate)) continue;
-		const distance = Math.abs(candidate - target);
-		if (distance < bestDistance) {
-			bestDistance = distance;
-			best = candidate;
+	const best: number | null = (() => {
+		let bestInner: number | null = null;
+		let bestDistance = Number.POSITIVE_INFINITY;
+
+		for (const candidate of lightnessCandidates(low, high)) {
+			if (!passes(candidate)) continue;
+
+			const distance = Math.abs(candidate - target);
+			if (distance < bestDistance) {
+				bestDistance = distance;
+				bestInner = candidate;
+			}
 		}
-	}
+
+		return bestInner;
+	})();
 	if (best === null) {
 		throw new Error(
 			`Theme accent "${raw}" has no accessible ${mode} lightness: no vibrant lightness lets ` +

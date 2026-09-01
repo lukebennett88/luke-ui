@@ -9,9 +9,12 @@ export interface DocsFrontmatter {
 	title?: string;
 }
 
+const FRONTMATTER_PATTERN = /^---\n([\s\S]*?)\n---/;
+const FRONTMATTER_KEY_PATTERN = /^([A-Za-z]+):/;
+
 /** Splits a document's YAML fence into top-level `key:` blocks. */
 export function parseFrontmatterBlocks(contents: string): ReadonlyArray<FrontmatterBlock> | null {
-	const match = contents.match(/^---\n([\s\S]*?)\n---/);
+	const match = contents.match(FRONTMATTER_PATTERN);
 	if (!match?.[1]) return null;
 
 	return groupFrontmatterBlocks(match[1].split('\n'));
@@ -30,7 +33,7 @@ function groupFrontmatterBlocks(lines: ReadonlyArray<string>): ReadonlyArray<Fro
 	const blocks: Array<{ key: string; lines: Array<string> }> = [];
 
 	for (const line of lines) {
-		const topLevelKey = line.match(/^([A-Za-z]+):/)?.[1];
+		const topLevelKey = line.match(FRONTMATTER_KEY_PATTERN)?.[1];
 		if (topLevelKey !== undefined) {
 			blocks.push({ key: topLevelKey, lines: [line] });
 			continue;
