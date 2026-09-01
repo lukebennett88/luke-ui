@@ -69,8 +69,8 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 	const pascalName = displayName.replaceAll(' ', '');
 	const camelName = toCamelCase(name);
 	const recipeName = `${camelName}Recipe`;
+	const resolveStylesName = `resolve${pascalName}RecipeStyles`;
 	const variantsType = `${pascalName}RecipeVariants`;
-	const packagePath = `@luke-ui/react/${name}`;
 	const conformance = [...CONFORMANCE_CONTRACTS].filter((contract) =>
 		input.conformance.includes(contract),
 	);
@@ -80,12 +80,8 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 	const files: Array<PlanFile> = [
 		{
 			contents: renderComponentSource({
-				camelName,
-				name,
-				packagePath,
 				pascalName,
-				recipeName,
-				variantsType,
+				resolveStylesName,
 			}),
 			path: `packages/@luke-ui/react/src/core/${name}/${name}.tsx`,
 		},
@@ -94,8 +90,8 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 			path: `packages/@luke-ui/react/src/exports/${name}.ts`,
 		},
 		{
-			contents: renderRecipe({ recipeName, variantsType }),
-			path: `packages/@luke-ui/react/src/core/${name}/recipe.css.ts`,
+			contents: renderRecipe({ pascalName, recipeName, resolveStylesName, variantsType }),
+			path: `packages/@luke-ui/react/src/core/${name}/recipe.ts`,
 		},
 		{
 			contents: renderComponentTest({
@@ -151,13 +147,7 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 				value: name,
 			},
 		],
-		sortedImportEdits: [
-			{
-				kind: 'sorted-import',
-				line: `import '../${name}/recipe.css.js';`,
-				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
-			},
-		],
+		sortedImportEdits: [],
 		textFileInserts: [
 			{
 				kind: 'text-insert',
@@ -171,25 +161,20 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 	};
 }
 
-function renderComponentSource(input: {
-	camelName: string;
-	name: string;
-	packagePath: string;
-	pascalName: string;
-	recipeName: string;
-	variantsType: string;
-}): string {
+function renderComponentSource(input: { pascalName: string; resolveStylesName: string }): string {
 	return `import type { ComponentProps, JSX } from 'react';
-import { cx } from '../../shared/utils/utils.js';
-import { ${input.recipeName} } from './recipe.css.js';
+import type { XStyleProps } from '../styles/xstyle.js';
+import { resolveXStyleProps } from '../styles/xstyle.js';
+import { ${input.resolveStylesName} } from './recipe.js';
 
 /** Props for \`${input.pascalName}\`. */
-export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
+export interface ${input.pascalName}Props extends ComponentProps<'div'>, XStyleProps {}
 
 /** ${input.pascalName} component. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
-	const { className, ...divProps } = props;
-	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;
+	const { className, style, xstyle, ...divProps } = props;
+	const stylexProps = resolveXStyleProps(${input.resolveStylesName}(), xstyle, className, style);
+	return <div {...divProps} {...stylexProps} />;
 }
 `;
 }
@@ -201,7 +186,7 @@ function renderPackageExport(input: {
 	variantsType: string;
 }): string {
 	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../core/${input.name}/${input.name}.js';
-export { type ${input.variantsType}, ${input.recipeName} } from '../core/${input.name}/recipe.css.js';
+export { type ${input.variantsType}, ${input.recipeName} } from '../core/${input.name}/recipe.js';
 `;
 }
 
@@ -356,15 +341,27 @@ ${propsTable}
 `;
 }
 
-function renderRecipe(input: { recipeName: string; variantsType: string }): string {
-	return `import type { RecipeSelection } from '../styles/recipe.js';
-import { recipe } from '../styles/recipe.js';
+function renderRecipe(input: {
+	pascalName: string;
+	recipeName: string;
+	resolveStylesName: string;
+	variantsType: string;
+}): string {
+	return `import * as stylex from '@stylexjs/stylex';
+import type { RecipeSelection } from '../styles/stylex-recipe.js';
+import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
-export const ${input.recipeName} = recipe({
-	base: {
+const styles = stylex.create({
+	root: {
 		display: 'inline-flex',
 	},
 });
+
+/** Recipe for the \`${input.pascalName}\` component. */
+export const { recipe: ${input.recipeName}, resolveStyles: ${input.resolveStylesName} } =
+	createSingleRecipe({
+		base: styles.root,
+	});
 
 export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
 `;

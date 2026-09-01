@@ -42,7 +42,7 @@ describe('createPrimitive', () => {
 				'export {',
 				'\ttype StatusBadgeRecipeVariants,',
 				'\tstatusBadgeRecipe,',
-				"} from '../../core/primitives/status-badge/recipe.css.js';",
+				"} from '../../core/primitives/status-badge/recipe.js';",
 				'',
 			].join('\n'),
 		);
@@ -56,7 +56,6 @@ describe('createPrimitive', () => {
 			[
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../button/recipe.css.js';",
-				"import '../primitives/status-badge/recipe.css.js';",
 				"import '../text/recipe.css.js';",
 				'',
 			].join('\n'),
@@ -95,7 +94,7 @@ describe('createPrimitive', () => {
 		).resolves.toContain('src="status-badge-primitive/basic"');
 	});
 
-	it('inserts a generated recipe import in code-point order', async () => {
+	it('leaves the Vanilla Extract stylesheet registry untouched', async () => {
 		const root = await createRepositoryFixture({
 			modulesRegistry: [
 				'// Style-producing modules in the shipped stylesheet.',
@@ -114,7 +113,6 @@ describe('createPrimitive', () => {
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../button/recipe.css.js';",
 				"import '../primitives/field/recipe.css.js';",
-				"import '../primitives/input-addon/recipe.css.js';",
 				"import '../text/recipe.css.js';",
 				'',
 			].join('\n'),

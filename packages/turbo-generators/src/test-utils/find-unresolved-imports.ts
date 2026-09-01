@@ -7,7 +7,7 @@ const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
 
 /**
  * Resolves each relative import in a generated file against the repo tree and reports the ones
- * that don't exist. Imports from the generated file's own directory (`./index.js`, `./recipe.css.js`,
+ * that don't exist. Imports from the generated file's own directory (`./index.js`, `./recipe.js`,
  * and similar) are skipped since the plan writes those files together; every other relative import
  * must already resolve to a real file on disk.
  */

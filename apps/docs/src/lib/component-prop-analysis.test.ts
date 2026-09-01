@@ -611,7 +611,17 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		exportName: 'IconProps',
 		name: 'IconProps',
 		path: 'packages/@luke-ui/react/src/core/icon/icon.tsx',
-		props: ['aria-hidden', 'className', 'id', 'name', 'size', 'style', 'title', 'viewBox'],
+		props: [
+			'aria-hidden',
+			'className',
+			'id',
+			'name',
+			'size',
+			'style',
+			'title',
+			'viewBox',
+			'xstyle',
+		],
 	},
 	{
 		// `Text` omits RAC's `Text` props it redeclares and adds its own typography contract. Everything
@@ -648,7 +658,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		exportName: 'LoadingSpinnerProps',
 		name: 'LoadingSpinnerProps',
 		path: 'packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx',
-		props: ['aria-label', 'children', 'color', 'isLoading', 'size'],
+		props: ['aria-label', 'children', 'color', 'isLoading', 'size', 'xstyle'],
 	},
 	{
 		exportName: 'InputGroupInputProps',
@@ -665,6 +675,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'ref',
 			'render',
 			'size',
+			'xstyle',
 		],
 	},
 	{
@@ -706,6 +717,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'startIcon',
 			'tone',
 			'type',
+			'xstyle',
 		],
 	},
 	{
@@ -742,6 +754,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'slot',
 			'tone',
 			'type',
+			'xstyle',
 		],
 	},
 	{
@@ -778,6 +791,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'slot',
 			'tone',
 			'type',
+			'xstyle',
 		],
 	},
 	{
@@ -812,6 +826,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'size',
 			'slot',
 			'type',
+			'xstyle',
 		],
 	},
 	{
@@ -845,6 +860,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'render',
 			'size',
 			'type',
+			'xstyle',
 		],
 	},
 ];

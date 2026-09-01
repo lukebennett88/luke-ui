@@ -27,10 +27,7 @@ describe('createComponent', () => {
 		).resolves.toBe(
 			[
 				"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",
-				'export {',
-				'\ttype StatusBadgeRecipeVariants,',
-				'\tstatusBadgeRecipe,',
-				"} from '../core/status-badge/recipe.css.js';",
+				"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../core/status-badge/recipe.js';",
 				'',
 			].join('\n'),
 		);
@@ -57,7 +54,6 @@ describe('createComponent', () => {
 			[
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../button/recipe.css.js';",
-				"import '../status-badge/recipe.css.js';",
 				"import '../text/recipe.css.js';",
 				'',
 			].join('\n'),
@@ -81,7 +77,7 @@ describe('createComponent', () => {
 		).rejects.toMatchObject({ code: 'ENOENT' });
 	});
 
-	it('inserts a generated recipe import in code-point order', async () => {
+	it('leaves the Vanilla Extract stylesheet registry untouched', async () => {
 		const root = await createRepositoryFixture({
 			modulesRegistry: [
 				'// Style-producing modules in the shipped stylesheet.',
@@ -101,7 +97,6 @@ describe('createComponent', () => {
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../Icon/recipe.css.js';",
 				"import '../button/recipe.css.js';",
-				"import '../icon-button/recipe.css.js';",
 				"import '../icon/recipe.css.js';",
 				"import '../text/recipe.css.js';",
 				'',

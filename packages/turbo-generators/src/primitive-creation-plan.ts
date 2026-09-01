@@ -56,6 +56,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	const pascalName = displayName.replaceAll(' ', '');
 	const camelName = toCamelCase(name);
 	const recipeName = `${camelName}Recipe`;
+	const resolveStylesName = `resolve${pascalName}RecipeStyles`;
 	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/primitives/${name}`;
 	const docsTitle = `${displayName} primitive`;
@@ -67,7 +68,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	// both when the real primitive shape is known.
 	const files: Array<PlanFile> = [
 		{
-			contents: renderPrimitiveSource({ pascalName, recipeName }),
+			contents: renderPrimitiveSource({ pascalName, resolveStylesName }),
 			path: `packages/@luke-ui/react/src/core/primitives/${name}/${name}.tsx`,
 		},
 		{
@@ -75,8 +76,8 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 			path: `packages/@luke-ui/react/src/exports/primitives/${name}.ts`,
 		},
 		{
-			contents: renderRecipe({ recipeName, variantsType }),
-			path: `packages/@luke-ui/react/src/core/primitives/${name}/recipe.css.ts`,
+			contents: renderRecipe({ pascalName, recipeName, resolveStylesName, variantsType }),
+			path: `packages/@luke-ui/react/src/core/primitives/${name}/recipe.ts`,
 		},
 	];
 
@@ -116,13 +117,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 					},
 				]
 			: [],
-		sortedImportEdits: [
-			{
-				kind: 'sorted-import',
-				line: `import '../primitives/${name}/recipe.css.js';`,
-				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
-			},
-		],
+		sortedImportEdits: [],
 		textFileInserts: [
 			{
 				kind: 'text-insert',
@@ -136,18 +131,20 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	};
 }
 
-function renderPrimitiveSource(input: { pascalName: string; recipeName: string }): string {
+function renderPrimitiveSource(input: { pascalName: string; resolveStylesName: string }): string {
 	return `import type { ComponentProps, JSX } from 'react';
-import { cx } from '../../../shared/utils/utils.js';
-import { ${input.recipeName} } from './recipe.css.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
+import { resolveXStyleProps } from '../../styles/xstyle.js';
+import { ${input.resolveStylesName} } from './recipe.js';
 
 /** Props for the \`${input.pascalName}\` primitive. */
-export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
+export interface ${input.pascalName}Props extends ComponentProps<'div'>, XStyleProps {}
 
 /** Primitive \`${input.pascalName}\`. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
-	const { className, ...divProps } = props;
-	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;
+	const { className, style, xstyle, ...divProps } = props;
+	const stylexProps = resolveXStyleProps(${input.resolveStylesName}(), xstyle, className, style);
+	return <div {...divProps} {...stylexProps} />;
 }
 `;
 }
@@ -159,17 +156,29 @@ function renderPackageExport(input: {
 	variantsType: string;
 }): string {
 	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../../core/primitives/${input.name}/${input.name}.js';
-export { type ${input.variantsType}, ${input.recipeName} } from '../../core/primitives/${input.name}/recipe.css.js';
+export { type ${input.variantsType}, ${input.recipeName} } from '../../core/primitives/${input.name}/recipe.js';
 `;
 }
 
-function renderRecipe(input: { recipeName: string; variantsType: string }): string {
-	return `import type { RecipeSelection } from '../../styles/recipe.js';
-import { recipe } from '../../styles/recipe.js';
+function renderRecipe(input: {
+	pascalName: string;
+	recipeName: string;
+	resolveStylesName: string;
+	variantsType: string;
+}): string {
+	return `import * as stylex from '@stylexjs/stylex';
+import type { RecipeSelection } from '../../styles/stylex-recipe.js';
+import { createSingleRecipe } from '../../styles/stylex-recipe.js';
 
-export const ${input.recipeName} = recipe({
-	base: {},
+const styles = stylex.create({
+	root: {},
 });
+
+/** Recipe for the \`${input.pascalName}\` primitive. */
+export const { recipe: ${input.recipeName}, resolveStyles: ${input.resolveStylesName} } =
+	createSingleRecipe({
+		base: styles.root,
+	});
 
 export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
 `;

@@ -51,7 +51,7 @@ describe('createPrimitivePlan', () => {
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/primitives/status-badge.mdx',
 			'apps/docs/src/examples/status-badge-primitive/basic.tsx',
-			'packages/@luke-ui/react/src/core/primitives/status-badge/recipe.css.ts',
+			'packages/@luke-ui/react/src/core/primitives/status-badge/recipe.ts',
 			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx',
 			'packages/@luke-ui/react/src/exports/primitives/status-badge.ts',
 		]);
@@ -63,7 +63,7 @@ describe('createPrimitivePlan', () => {
 		expect(plan).not.toHaveProperty('textFileInserts');
 
 		const recipeSource = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/recipe.css.ts'),
+			file.path.endsWith('/status-badge/recipe.ts'),
 		)?.contents;
 		const primitiveSource = plan.files.find((file) =>
 			file.path.endsWith('/status-badge/status-badge.tsx'),
@@ -79,14 +79,19 @@ describe('createPrimitivePlan', () => {
 		)?.contents;
 
 		expect(primitiveSource).toContain('export function StatusBadge');
-		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
-		expect(recipeSource).toContain('base: {},');
+		expect(primitiveSource).toContain("import type { XStyleProps } from '../../styles/xstyle.js';");
+		expect(primitiveSource).toContain('resolveStatusBadgeRecipeStyles');
+		expect(recipeSource).toContain(
+			'export const { recipe: statusBadgeRecipe, resolveStyles: resolveStatusBadgeRecipeStyles } =',
+		);
+		expect(recipeSource).toContain('createSingleRecipe({');
+		expect(recipeSource).toContain('root: {},');
 		expect(recipeSource).not.toContain('inline-flex');
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../../core/primitives/status-badge/status-badge.js';",
 		);
 		expect(packageExportSource).toContain(
-			"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../../core/primitives/status-badge/recipe.css.js';",
+			"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../../core/primitives/status-badge/recipe.js';",
 		);
 		expect(example).toContain("from '@luke-ui/react/primitives/status-badge'");
 		expect(example).toContain('export default () => {');
