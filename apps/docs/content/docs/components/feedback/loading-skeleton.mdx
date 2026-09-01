@@ -51,6 +51,13 @@ element, such as an `li` inside a list.
 
 <ExampleBlock src="loading-skeleton/element" title="Loading Skeleton — List item" />
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `LoadingSkeleton` does
+not set, or to override a same-property style it does set. Styles apply in this order:
+`LoadingSkeleton`'s own styles, then `xstyle`, then `className`, then inline `style`. A
+same-property `xstyle` value wins over the component's styles. `className` still beats `xstyle`.
+
 ## Accessibility
 
 While loading, `LoadingSkeleton` hides content from assistive technology, removes it from the tab

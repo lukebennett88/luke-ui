@@ -46,6 +46,13 @@ Set `size` on `ComboboxRoot` to give the control and option primitives a shared 
 `ComboboxLoadMoreItem` components can override that size when necessary. `ComboboxInputGroup` sizes
 a nested `Icon` the same way `InputGroup` does at the same control size.
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles a combobox part's own
+props do not cover. Styles apply in this order: the part's own styles, then its variant props, then
+`xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a variant
+such as `size`. `className` still beats `xstyle`.
+
 ## Loading and empty results
 
 Use `ComboboxLoadMoreItem` as the listbox's load-more sentinel. Use `ComboboxEmptyState` for custom

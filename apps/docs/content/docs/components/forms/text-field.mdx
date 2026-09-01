@@ -55,6 +55,12 @@ default. The HTML numeric `size` attribute is unavailable because `size` is the 
 
 <ExampleBlock src="text-field/sizes" title="Text Field — Size" />
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `TextField`'s own props
+do not cover. Styles apply in this order: `xstyle`, then `className`, then inline `style`.
+`className` still beats `xstyle`.
+
 ## Accessibility
 
 Give the field a visible `label` where possible. A placeholder is not a reliable accessible name.

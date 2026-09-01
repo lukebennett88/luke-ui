@@ -8,14 +8,33 @@ import {
 	CheckboxField as RacCheckboxField,
 } from 'react-aria-components/Checkbox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import type { XStyleProp } from '../../styles/xstyle.js';
+import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import type { CheckboxRecipeVariants } from './recipe.css.js';
-import { checkboxRecipe } from './recipe.css.js';
+import type { CheckboxRecipeVariants } from './recipe.js';
+import { resolveCheckboxRecipeStyles } from './recipe.js';
 
 type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
 
-interface _CheckboxProps extends _CheckboxOmit {
+interface CheckboxRecipeProps extends NonNullable<CheckboxRecipeVariants> {}
+
+interface CheckboxStyleProps {
+	/**
+	 * Visual size of the checkbox control.
+	 *
+	 * @default 'medium'
+	 */
+	size?: CheckboxRecipeProps['size'];
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
+}
+
+interface _CheckboxProps extends _CheckboxOmit, CheckboxStyleProps {
 	/** Checkbox anatomy, including clickable `CheckboxContent`. */
 	children: RacCheckboxFieldProps['children'];
 	/** Initial selection state for an uncontrolled checkbox. */
@@ -34,12 +53,6 @@ interface _CheckboxProps extends _CheckboxOmit {
 	isSelected?: RacCheckboxFieldProps['isSelected'];
 	/** Called when the selection changes. */
 	onChange?: RacCheckboxFieldProps['onChange'];
-	/**
-	 * Visual size of the checkbox control.
-	 *
-	 * @default 'medium'
-	 */
-	size?: CheckboxRecipeVariants['size'];
 }
 
 /** Props for the Checkbox primitive root. */
@@ -47,7 +60,16 @@ export type CheckboxProps = Prettify<_CheckboxProps>;
 
 type _CheckboxContentOmit = DistributiveOmit<RacCheckboxButtonProps, 'children'>;
 
-interface _CheckboxContentProps extends _CheckboxContentOmit {
+interface CheckboxPartStyleProps {
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after this part's own styles
+	 * and before `className`. A same-property `xstyle` value wins over those styles. A consumer
+	 * `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
+}
+
+interface _CheckboxContentProps extends _CheckboxContentOmit, CheckboxPartStyleProps {
 	/** The control, indicator, and visible checkbox label. */
 	children: RacCheckboxButtonProps['children'];
 }
@@ -55,23 +77,31 @@ interface _CheckboxContentProps extends _CheckboxContentOmit {
 /** Props for the Checkbox primitive's clickable content. */
 export type CheckboxContentProps = Prettify<_CheckboxContentProps>;
 
-interface _CheckboxControlProps extends ComponentProps<'span'> {}
+interface _CheckboxControlProps extends ComponentProps<'span'>, CheckboxPartStyleProps {}
 
 /** Props for the Checkbox primitive's control wrapper. */
 export type CheckboxControlProps = Prettify<_CheckboxControlProps>;
 
-interface _CheckboxIndicatorProps extends ComponentProps<'span'> {}
+interface _CheckboxIndicatorProps extends ComponentProps<'span'>, CheckboxPartStyleProps {}
 
 /** Props for the Checkbox primitive's visual indicator. */
 export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
 
 /** Clickable content that keeps the checkbox input and label associated. */
 export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
+	const { className, style, xstyle, ...restProps } = props;
+	const recipeStyles = resolveCheckboxRecipeStyles().content;
+
 	return (
 		<RacCheckboxButton
-			{...props}
-			className={composeRenderProps(props.className, (className) => {
-				return checkboxRecipe().content(className);
+			{...restProps}
+			className={composeRenderProps(className, (resolvedClassName) => {
+				return (
+					resolveXStyleProps(recipeStyles, xstyle, resolvedClassName, undefined).className ?? ''
+				);
+			})}
+			style={composeRenderProps(style, (resolvedStyle) => {
+				return resolveXStyleProps(recipeStyles, xstyle, undefined, resolvedStyle).style;
 			})}
 		/>
 	);
@@ -79,25 +109,42 @@ export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 
 /** Line-height-sized wrapper that centres the fixed visual checkbox affordance. */
 export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
-	const { className, ...restProps } = props;
-	return <span {...restProps} className={checkboxRecipe().control(className)} />;
+	const { className, style, xstyle, ...restProps } = props;
+	return (
+		<span
+			{...restProps}
+			{...resolveXStyleProps(resolveCheckboxRecipeStyles().control, xstyle, className, style)}
+		/>
+	);
 }
 
 /** Visual square that reflects selected, indeterminate, disabled, and invalid states. */
 export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
-	const { className, ...restProps } = props;
-	return <span {...restProps} aria-hidden className={checkboxRecipe().indicator(className)} />;
+	const { className, style, xstyle, ...restProps } = props;
+	return (
+		<span
+			{...restProps}
+			aria-hidden
+			{...resolveXStyleProps(resolveCheckboxRecipeStyles().indicator, xstyle, className, style)}
+		/>
+	);
 }
 
 /** Checkbox field primitive for custom composition. */
 export function Checkbox(props: CheckboxProps): JSX.Element {
-	const { className, size, ...restProps } = props;
+	const { className, size, style, xstyle, ...restProps } = props;
+	const recipeStyles = resolveCheckboxRecipeStyles({ size }).root;
 
 	return (
 		<RacCheckboxField
 			{...restProps}
-			className={composeRenderProps(className, (className) => {
-				return checkboxRecipe({ size }).root(className);
+			className={composeRenderProps(className, (resolvedClassName) => {
+				return (
+					resolveXStyleProps(recipeStyles, xstyle, resolvedClassName, undefined).className ?? ''
+				);
+			})}
+			style={composeRenderProps(style, (resolvedStyle) => {
+				return resolveXStyleProps(recipeStyles, xstyle, undefined, resolvedStyle).style;
 			})}
 		/>
 	);

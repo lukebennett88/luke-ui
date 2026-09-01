@@ -24,7 +24,7 @@ export const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url)
 
 const stylexLayerConfig = {
 	before: ['reset', 'theme'],
-	after: ['recipes', 'structural', 'utilities'],
+	after: ['structural', 'utilities'],
 	prefix: 'luke.sx',
 } as const;
 

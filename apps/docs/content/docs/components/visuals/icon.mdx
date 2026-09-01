@@ -19,6 +19,13 @@ with the same sizing and accessibility behaviour as `Icon`.
 
 <ExampleBlock src="icon/custom" title="Icon — Custom" />
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `Icon`'s own props do
+not cover, or to override a same-property variant. Styles apply in this order: variant props, then
+`xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a variant
+such as `size`. `className` still beats `xstyle`.
+
 ## Accessibility
 
 Pass `title` when an icon conveys meaning without adjacent text, such as a standalone status icon.

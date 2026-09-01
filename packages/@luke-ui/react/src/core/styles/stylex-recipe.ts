@@ -89,13 +89,20 @@ export function createSingleRecipe<const Variants extends VariantGroups>(
 }
 
 /**
- * Builds a slotted string recipe. Slots have no public raw StyleX surface: this factory only
- * exposes their string functions, retaining the same public recipe contract as Vanilla Extract.
+ * Builds a slotted recipe with two deliberately separate internal views. `recipe` keeps the public
+ * string API; `resolveStyles` is package-private composition input for a component to pass a slot's
+ * compiled styles into `stylex.props` before its public `xstyle` value. Slot extra classes stay
+ * appended last on the string functions.
  */
 export function createSlottedRecipe<
 	const Slot extends string,
 	const Variants extends SlotVariantGroups<Slot>,
->(config: MultiPartConfig<Slot, Variants>): MultiPartRecipe<Slot, Variants> {
+>(
+	config: MultiPartConfig<Slot, Variants>,
+): {
+	recipe: MultiPartRecipe<Slot, Variants>;
+	resolveStyles: (selection?: SlotVariantSelection<Variants>) => Record<Slot, Array<StyleXStyle>>;
+} {
 	const slotNames = Object.keys(config.slots) as Array<Slot>;
 	const slotGroups: Record<string, Array<string>> = {};
 	const slotVariants: Record<string, VariantGroups> = {};
@@ -128,24 +135,38 @@ export function createSlottedRecipe<
 		slotVariants[slotName] = variants;
 	}
 
-	return (selection) => {
+	function resolveStyles(
+		selection?: SlotVariantSelection<Variants>,
+	): Record<Slot, Array<StyleXStyle>> {
 		const selected = mergeSelection(config.defaultVariants, selection);
-		const slots = {} as Record<Slot, SlotFn>;
+		const resolved = {} as Record<Slot, Array<StyleXStyle>>;
 
 		for (const slotName of slotNames) {
-			slots[slotName] = (extraClass) => {
-				const narrowed = pickGroups(selected, slotGroups[slotName] ?? []);
-				const styles = resolveSinglePartStyles(
-					config.slots[slotName],
-					slotVariants[slotName],
-					undefined,
-					narrowed,
-				);
-				return cx(resolveClassName(styles), extraClass);
-			};
+			const narrowed = pickGroups(selected, slotGroups[slotName] ?? []);
+			resolved[slotName] = resolveSinglePartStyles(
+				config.slots[slotName],
+				slotVariants[slotName],
+				undefined,
+				narrowed,
+			);
 		}
 
-		return slots;
+		return resolved;
+	}
+
+	return {
+		recipe: (selection) => {
+			const resolved = resolveStyles(selection);
+			const slots = {} as Record<Slot, SlotFn>;
+
+			for (const slotName of slotNames) {
+				slots[slotName] = (extraClass) =>
+					cx(resolveClassName(resolved[slotName] ?? []), extraClass);
+			}
+
+			return slots;
+		},
+		resolveStyles,
 	};
 }
 

@@ -57,6 +57,12 @@ default.
 
 <ExampleBlock src="combobox-field/sizes" title="Combobox Field — Size" />
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `ComboboxField`'s own
+props do not cover. Styles apply in this order: `xstyle`, then `className`, then inline `style`.
+`className` still beats `xstyle`.
+
 ## Async results
 
 Pass `items` and `loadingState` when results load or filter asynchronously. If the list is empty

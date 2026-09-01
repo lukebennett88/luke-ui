@@ -9,7 +9,7 @@ import { createStylexStylesheet } from '../../../stylex-vite-plugin.js';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
 
-const lukeOwnedLayerNames = ['reset', 'theme', 'recipes', 'structural', 'utilities'] as const;
+const lukeOwnedLayerNames = ['reset', 'theme', 'structural', 'utilities'] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
 const stylexPriorityLayerPattern = /^luke\.sx\.priority\d+$/;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
@@ -25,10 +25,11 @@ test(
 	{ timeout: 30_000 },
 	async () => {
 		const stylesheet = await readPublicStylesheet();
-		const icon = await import('@luke-ui/react/icon');
 		const text = await import('@luke-ui/react/text');
 		const styles = await import('@luke-ui/react/styles');
-		const recipeClasses = [...icon.iconRecipe({ size: 'medium' }).split(' ')];
+		const root = parse(stylesheet);
+		const recipeClasses = comboboxStylexClassesFromStylesheet(root);
+		expect(recipeClasses.length).toBeGreaterThan(0);
 		const textClassesByTypography = Object.fromEntries(
 			typeStyles.map((typography) => [typography, text.textRecipe({ typography }).split(' ')]),
 		) as TextClassesByTypography;
@@ -43,16 +44,13 @@ test(
 			singleLine: text.textRecipe({ lineClamp: true }).split(' '),
 		};
 
-		expect(() => {
-			const root = parse(stylesheet);
-			assertPrivateStylesheetSentinel(root);
-			return assertStylesheetContract(stylesheet, {
-				lineClampClasses,
-				recipeClasses,
-				textClassesByTypography,
-				utilityClasses,
-			});
-		}).not.toThrow();
+		assertPrivateStylesheetSentinel(root);
+		assertStylesheetContract(stylesheet, {
+			lineClampClasses,
+			recipeClasses,
+			textClassesByTypography,
+			utilityClasses,
+		});
 	},
 );
 
@@ -81,8 +79,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'reordered authoritative layer declarations',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/m,
-				'@layer theme, reset, luke.sx.priority1, recipes, structural, utilities;',
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, structural, utilities;/m,
+				'@layer theme, reset, luke.sx.priority1, structural, utilities;',
 			);
 		},
 	],
@@ -90,8 +88,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early individual layer declarations before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
-				'@layer reset;\n@layer theme;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;\n',
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, structural, utilities;\n/m,
+				'@layer reset;\n@layer theme;\n@layer structural;\n@layer utilities;\n@layer reset, theme, luke.sx.priority1, structural, utilities;\n',
 			);
 		},
 	],
@@ -99,22 +97,22 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early layer block before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
-				'@layer recipes { .early {} }\n@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;\n',
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, structural, utilities;\n/m,
+				'@layer structural { .early {} }\n@layer reset, theme, luke.sx.priority1, structural, utilities;\n',
 			);
 		},
 	],
 	['anonymous layer statement', (css: string) => `${css}\n@layer;`],
 	['anonymous layer block', (css: string) => `${css}\n@layer { .anonymous {} }`],
 	['unknown layer', (css: string) => `${css}\n@layer components;`],
-	['nested layer', (css: string) => `${css}\n@layer recipes { @layer utilities {} }`],
+	['nested layer', (css: string) => `${css}\n@layer structural { @layer utilities {} }`],
 	['root qualified rule', (css: string) => `${css}\n.root-rule { color: red; }`],
 	['lookalike layer at-rule', (css: string) => `${css}\n@layered {}`],
 	[
-		'representative recipe class moved to the wrong layer',
+		'representative StyleX class moved to the wrong layer',
 		(css: string) => {
 			return css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
+				'@layer luke.sx.priority1 {\n  .recipe-class { display: inline-flex; }\n}',
 				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n}',
 			);
 		},
@@ -124,7 +122,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		(css: string) => {
 			return css.replace(
 				'@layer utilities {\n  .utility-class { display: grid; }\n}',
-				'@layer recipes {\n  .utility-class { display: grid; }\n}',
+				'@layer structural {\n  .utility-class { display: grid; }\n}',
 			);
 		},
 	],
@@ -145,18 +143,10 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'redundant empty layer statements after authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^(@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n)/m,
-				'$1@layer recipes;\n',
+				/^(@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, structural, utilities;\n)/m,
+				'$1@layer structural;\n',
 			);
 		},
-	],
-	[
-		'empty transitional recipes layer',
-		(css: string) =>
-			css.replace(
-				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
-				'@layer recipes {}',
-			),
 	],
 ];
 
@@ -255,7 +245,6 @@ function assertStylesheetContract(
 	assertLayerNames(root);
 	assertRootNodes(root);
 	assertStableSelectors(root);
-	assertRecipesLayerHasRules(root);
 	assertSentinel(root, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
 	assertSentinel(root, 'luke-ui-theme', 'theme', 'color', 'var(--luke-color-text-primary)');
 	assertSentinel(
@@ -267,7 +256,7 @@ function assertStylesheetContract(
 	);
 	assertSentinel(root, 'luke-ui-theme', 'theme', 'font-size', 'var(--luke-font-body-font-size)');
 
-	for (const className of recipeClasses) assertClassOwnership(root, className, 'recipes');
+	for (const className of recipeClasses) assertStylexClassOwnership(root, className);
 	for (const className of utilityClasses) assertClassOwnership(root, className, 'utilities');
 	if (textClassesByTypography) assertTextTrimOwnership(root, textClassesByTypography);
 	if (lineClampClasses) assertLineClampOwnership(root, lineClampClasses);
@@ -276,7 +265,10 @@ function assertStylesheetContract(
 function assertPrivateStylesheetSentinel(root: Root): void {
 	const rules = collectSkeletonInlineRules(root);
 	expect(rules.length).toBeGreaterThan(0);
-	for (const rule of rules) expect(getOwningLayer(rule)).toBe('recipes');
+	for (const rule of rules) {
+		const layer = getOwningLayer(rule);
+		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+	}
 	expect(
 		rules.some((rule) => {
 			return rule.nodes.some(
@@ -403,7 +395,7 @@ function assertAuthoritativeLayerOrder(order: Array<string>): void {
 	expect(priorityLayers.length).toBeGreaterThan(0);
 	expect(priorityLayers.every((name, index) => name === `luke.sx.priority${index + 1}`)).toBe(true);
 
-	expect(order.slice(2 + priorityLayers.length)).toEqual(['recipes', 'structural', 'utilities']);
+	expect(order.slice(2 + priorityLayers.length)).toEqual(['structural', 'utilities']);
 }
 
 function assertLayerNames(root: Root): void {
@@ -433,7 +425,10 @@ function getLayerNames(atRule: AtRule): Array<string> {
 function assertRootNodes(root: Root): void {
 	for (const node of root.nodes) {
 		if (node.type === 'comment') continue;
-		if (node.type === 'rule') throw node.error('Root qualified rules are not allowed.');
+		if (node.type === 'rule') {
+			if (isStylexCustomPropertyRule(node)) continue;
+			throw node.error('Root qualified rules are not allowed.');
+		}
 		if (node.type !== 'atrule') throw node.error('Unexpected root stylesheet node.');
 		if (node.name === 'layer') continue;
 		if (node.name === 'property') continue;
@@ -443,14 +438,10 @@ function assertRootNodes(root: Root): void {
 	}
 }
 
-function assertRecipesLayerHasRules(root: Root): void {
-	let hasRecipeRule = false;
-	root.walkRules((rule) => {
-		if (getOwningLayer(rule) === 'recipes' && rule.nodes.some((node) => node.type === 'decl')) {
-			hasRecipeRule = true;
-		}
-	});
-	if (!hasRecipeRule) throw new Error('Expected the transitional recipes layer to contain a rule.');
+/** StyleX emits custom-property atoms outside cascade layers. */
+function isStylexCustomPropertyRule(rule: Rule): boolean {
+	if (rule.nodes.length === 0) return false;
+	return rule.nodes.every((node) => node.type === 'decl' && node.prop.startsWith('--'));
 }
 
 function assertStableSelectors(root: Root): void {
@@ -483,6 +474,16 @@ function assertSentinel(
 	).toBe(true);
 }
 
+function assertStylexClassOwnership(root: Root, className: string): void {
+	const rules = getRulesForClass(root, className);
+	expect(rules.length).toBeGreaterThan(0);
+	for (const rule of rules) {
+		const layer = getOwningLayer(rule);
+		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+	}
+	expect(rules.some((rule) => rule.nodes.some((node) => node.type === 'decl'))).toBe(true);
+}
+
 function assertClassOwnership(root: Root, className: string, layerName: string): void {
 	const rules = getRulesForClass(root, className);
 	expect(rules.length).toBeGreaterThan(0);
@@ -491,11 +492,10 @@ function assertClassOwnership(root: Root, className: string, layerName: string):
 }
 
 /**
- * Text is StyleX-migrated (#551): its trim and line-clamp classes live in a `luke.sx.priorityN`
- * layer, not the transitional `recipes` layer that still holds other components' Vanilla Extract
- * output. `assertTextTrimOwnership` and `assertLineClampOwnership` below assert that StyleX
- * ownership directly, instead of reusing `assertClassOwnership`'s single fixed `recipes` layer.
- * Text uses quoted logical CSS keys, which StyleX emits without lowering to physical properties.
+ * Text is StyleX-migrated: its trim and line-clamp classes live in a `luke.sx.priorityN`
+ * layer. `assertTextTrimOwnership` and `assertLineClampOwnership` below assert that StyleX
+ * ownership directly. Text uses quoted logical CSS keys, which StyleX emits without lowering
+ * to physical properties.
  */
 function assertTextTrimOwnership(
 	root: Root,
@@ -584,6 +584,24 @@ function assertPseudoDeclaration(
 	}
 }
 
+function comboboxStylexClassesFromStylesheet(root: Root): Array<string> {
+	const classNames = new Set<string>();
+	root.walkRules((rule) => {
+		const layer = getOwningLayer(rule);
+		if (layer === undefined || !stylexPriorityLayerPattern.test(layer)) return;
+		const isComboboxClosedTriggerFloor = rule.nodes.some(
+			(node) =>
+				node.type === 'decl' &&
+				node.prop === 'min-inline-size' &&
+				node.value.includes('20ch') &&
+				node.value.includes('--luke-control-size-combobox-action'),
+		);
+		if (!isComboboxClosedTriggerFloor) return;
+		for (const className of getClassNames(rule)) classNames.add(className);
+	});
+	return [...classNames];
+}
+
 function getRulesForClass(root: Root, className: string): Array<Rule> {
 	const rules: Array<Rule> = [];
 	root.walkRules((rule) => {
@@ -621,7 +639,7 @@ function getOwningLayer(rule: Rule): string | undefined {
 	return undefined;
 }
 
-const validStylesheetFixture = `@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;
+const validStylesheetFixture = `@layer reset, theme, luke.sx.priority1, structural, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
 }
@@ -632,14 +650,14 @@ const validStylesheetFixture = `@layer reset, theme, luke.sx.priority1, recipes,
     font-size: var(--luke-font-body-font-size);
   }
 }
-@layer recipes {
-  .recipe-class { display: inline-flex; }
-}
 @layer structural {
   .structural-class { margin-block-start: 1px; }
 }
 @layer utilities {
   .utility-class { display: grid; }
+}
+@layer luke.sx.priority1 {
+  .recipe-class { display: inline-flex; }
 }
 @layer luke.sx.priority1 {
   .stylex-class { outline-color: transparent; }

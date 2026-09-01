@@ -3,11 +3,13 @@ import { useContext } from 'react';
 import type { InputProps as RacInputProps } from 'react-aria-components/ComboBox';
 import { ComboBoxStateContext, Input as RacInput } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import type { XStyleProp } from '../../styles/xstyle.js';
+import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import type { ComboboxSize } from './root.js';
+import type { ComboboxSize } from './recipe.js';
+import { resolveComboboxRecipeStyles } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
-import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
 interface _ComboboxInputProps extends _ComboboxInputOmit {
@@ -18,6 +20,12 @@ interface _ComboboxInputProps extends _ComboboxInputOmit {
 	 */
 	ref?: Ref<HTMLInputElement>;
 	size?: ComboboxSize;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for the styled combobox text input. */
@@ -25,9 +33,10 @@ export type ComboboxInputProps = Prettify<_ComboboxInputProps>;
 
 /** Text input used within `ComboboxInputGroup` for combobox behavior. */
 export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
-	const { onClick, size: sizeProp, ...inputProps } = props;
+	const { onClick, size: sizeProp, style, xstyle, ...inputProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
+	const recipeStyles = resolveComboboxRecipeStyles({ size }).textInput;
 
 	const handleClick = (event: React.MouseEvent<HTMLInputElement>) => {
 		onClick?.(event);
@@ -40,9 +49,12 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 		<RacInput
 			{...inputProps}
 			className={composeRenderProps(inputProps.className, (className) => {
-				return comboboxRecipe({ size }).textInput(className);
+				return resolveXStyleProps(recipeStyles, xstyle, className, undefined).className ?? '';
 			})}
 			onClick={handleClick}
+			style={composeRenderProps(style, (value) => {
+				return resolveXStyleProps(recipeStyles, xstyle, undefined, value).style;
+			})}
 		/>
 	);
 }

@@ -5,9 +5,9 @@ import { createSingleRecipe } from '../styles/stylex-recipe.js';
 import { visuallyHiddenStyle } from '../visually-hidden/recipe.js';
 
 // The custom-property name literal `'--text-line-height'` is repeated below rather than imported
-// from `text-line-height.ts` (its shared source of truth, consumed directly by
-// `primitives/checkbox/recipe.css.ts`), because StyleX's Babel plugin only resolves a computed
-// `stylex.create` key through an imported identifier when that identifier comes from a
+// from `text-line-height.ts` (its shared source of truth; Checkbox's StyleX recipe reads
+// `var(--text-line-height, 1lh)` the same way), because StyleX's Babel plugin only resolves a
+// computed `stylex.create` key through an imported identifier when that identifier comes from a
 // `.stylex.ts` theming module — see the note on `text-line-height.ts`.
 
 const styles = stylex.create({

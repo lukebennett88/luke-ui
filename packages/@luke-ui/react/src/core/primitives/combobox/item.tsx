@@ -12,25 +12,34 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import type { XStyleProp } from '../../styles/xstyle.js';
+import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import type { ComboboxSize } from './root.js';
+import type { ComboboxSize } from './recipe.js';
+import { comboboxRecipe, resolveComboboxRecipeStyles } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
-import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
 
 interface _ComboboxItemProps<T extends object> extends _ComboboxItemOmit<T> {
 	className?: RacListBoxItemProps<T>['className'];
 	size?: ComboboxSize;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for a combobox list item. */
 export type ComboboxItemProps<T extends object> = Prettify<_ComboboxItemProps<T>>;
 
 export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX.Element {
-	const { size: sizeProp, ...itemProps } = props;
+	const { size: sizeProp, style, xstyle, ...itemProps } = props;
 	const size = useComboboxSize(sizeProp);
+	const recipeStyles = resolveComboboxRecipeStyles({ size }).item;
 
 	return (
 		<RacListBoxItem
@@ -39,7 +48,10 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 			textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
 			{...itemProps}
 			className={composeRenderProps(itemProps.className, (className) => {
-				return comboboxRecipe({ size }).item(className);
+				return resolveXStyleProps(recipeStyles, xstyle, className, undefined).className ?? '';
+			})}
+			style={composeRenderProps(style, (value) => {
+				return resolveXStyleProps(recipeStyles, xstyle, undefined, value).style;
 			})}
 		>
 			{composeRenderProps(itemProps.children, (children, { isSelected }) => {
@@ -67,19 +79,30 @@ type _ComboboxLoadMoreItemOmit = DistributiveOmit<RacListBoxLoadMoreItemProps, '
 interface _ComboboxLoadMoreItemProps extends _ComboboxLoadMoreItemOmit {
 	className?: RacListBoxLoadMoreItemProps['className'];
 	size?: ComboboxSize;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for the combobox load-more sentinel item. */
 export type ComboboxLoadMoreItemProps = Prettify<_ComboboxLoadMoreItemProps>;
 
 export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Element {
-	const { size: sizeProp, ...loadMoreItemProps } = props;
+	const { className, size: sizeProp, style, xstyle, ...loadMoreItemProps } = props;
 	const size = useComboboxSize(sizeProp);
 
 	return (
 		<RacListBoxLoadMoreItem
 			{...loadMoreItemProps}
-			className={comboboxRecipe({ size }).loadMoreItem(loadMoreItemProps.className)}
+			{...resolveXStyleProps(
+				resolveComboboxRecipeStyles({ size }).loadMoreItem,
+				xstyle,
+				className,
+				style,
+			)}
 		/>
 	);
 }

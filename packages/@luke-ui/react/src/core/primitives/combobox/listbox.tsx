@@ -5,9 +5,11 @@ import { ListBox as RacListBox } from 'react-aria-components/ComboBox';
 import { ListBoxContext } from 'react-aria-components/ListBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import type { XStyleProp } from '../../styles/xstyle.js';
+import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { comboboxRecipe } from './styles.css.js';
+import { resolveComboboxRecipeStyles } from './recipe.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	RacListBoxProps<T>,
@@ -23,6 +25,12 @@ interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T
 	items?: Iterable<T>;
 	/** Optional content appended after the main collection, e.g. a load-more sentinel. */
 	loadMoreItem?: ReactNode;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `ComboboxListBox`'s
+	 * own styles and before `className`. A same-property `xstyle` value wins over those styles. A
+	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for the styled listbox. */
@@ -30,9 +38,10 @@ export type ComboboxListBoxProps<T extends object> = Prettify<_ComboboxListBoxPr
 
 /** Styled listbox for combobox options. */
 export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>): JSX.Element {
-	const { children, dependencies, items, loadMoreItem, ...listBoxProps } = props;
+	const { children, dependencies, items, loadMoreItem, style, xstyle, ...listBoxProps } = props;
 	const listBoxContext = useSlottedContext(ListBoxContext);
 	const collectionItems = items ?? listBoxContext?.items;
+	const recipeStyles = resolveComboboxRecipeStyles().listBox;
 	const listBoxChildren =
 		typeof children === 'function' ? (
 			<Collection<T> dependencies={dependencies} items={collectionItems}>
@@ -46,7 +55,10 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 		<RacListBox
 			{...listBoxProps}
 			className={composeRenderProps(listBoxProps.className, (className) => {
-				return comboboxRecipe().listBox(className);
+				return resolveXStyleProps(recipeStyles, xstyle, className, undefined).className ?? '';
+			})}
+			style={composeRenderProps(style, (value) => {
+				return resolveXStyleProps(recipeStyles, xstyle, undefined, value).style;
 			})}
 		>
 			{listBoxChildren}

@@ -1,5 +1,5 @@
 import { vars } from '../../theme/contract.css.js';
-import { comboboxSectionScopeClassName } from '../primitives/combobox/section-scope.css.js';
+import { comboboxSectionScopeClassName } from '../primitives/combobox/section-scope.js';
 import { classSelector } from './class-selector.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 

@@ -357,9 +357,8 @@ const GENERIC_DOM_NOISE = ['itemProp', 'onClick', 'onPointerMoveCapture', 'tabIn
  * The types whose tables were empty before this analysis existed, now audited against what each
  * component's guide actually teaches rather than against whatever the analysis happens to emit.
  *
- * The migrated typography components document `xstyle` as their StyleX customisation target. The
- * checkbox anatomy parts remain pure element wrappers with no Luke UI contract beyond pass-through
- * DOM props, so their filtered tables are intentionally empty and rely on the native-props note.
+ * The migrated typography components and Checkbox anatomy parts document `xstyle` as their StyleX
+ * customisation target.
  */
 const AUDITED_TYPES: ReadonlyArray<{
 	forwardsDomProps: boolean;
@@ -408,13 +407,13 @@ const AUDITED_TYPES: ReadonlyArray<{
 		forwardsDomProps: true,
 		name: 'CheckboxControlProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx',
-		visible: [],
+		visible: ['xstyle'],
 	},
 	{
 		forwardsDomProps: true,
 		name: 'CheckboxIndicatorProps',
 		path: 'packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx',
-		visible: [],
+		visible: ['xstyle'],
 	},
 	{
 		// The guide teaches `aria-label` in Accessibility for naming the loading status region.

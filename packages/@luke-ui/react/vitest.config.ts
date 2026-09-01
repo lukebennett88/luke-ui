@@ -9,6 +9,9 @@ import { createStylexDevPlugin } from './stylex-vite-plugin.js';
 const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 const configDir = path.join(dirname, '.storybook');
+// Visual regression copies this file onto older worktrees that still import
+// `#recipe-engine` from Vanilla Extract recipes. Resolve relative to this
+// config so the alias lands on that worktree's `recipe-engine.ts`.
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );

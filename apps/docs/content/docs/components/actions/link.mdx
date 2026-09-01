@@ -34,6 +34,13 @@ focus or respond to activation. Explain why nearby when someone needs that infor
 
 <ExampleBlock src="link/disabled" title="Link — Disabled" />
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `Link`'s own props do
+not cover, or to override a same-property variant. Styles apply in this order: variant props, then
+`xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a variant
+such as `tone`. `className` still beats `xstyle`.
+
 ## Accessibility
 
 Write link text that names the destination and makes sense outside its surrounding sentence. Avoid

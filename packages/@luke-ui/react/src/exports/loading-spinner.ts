@@ -5,4 +5,4 @@ export {
 export {
 	type LoadingSpinnerRecipeVariants,
 	loadingSpinnerRecipe,
-} from '../core/loading-spinner/recipe.css.js';
+} from '../core/loading-spinner/recipe.js';

@@ -36,6 +36,13 @@ required, so set the required state on the control separately.
 Use `errorMessage` for validation feedback. `FieldError` is styled for the field error slot and
 works with the validation state from the surrounding React Aria form control.
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles a field part's own
+props do not cover, or to override a same-property variant. Styles apply in this order: variant
+props, then `xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins
+over a variant such as `necessityIndicator`. `className` still beats `xstyle`.
+
 ## API
 
 ### FieldProps

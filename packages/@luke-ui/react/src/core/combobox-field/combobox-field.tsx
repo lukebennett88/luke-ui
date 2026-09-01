@@ -7,7 +7,6 @@ import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/Co
 import { ComboBoxStateContext, ComboBoxValue } from 'react-aria-components/ComboBox';
 import { LabelContext } from 'react-aria-components/Label';
 import { PopoverContext } from 'react-aria-components/Popover';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../shared/utils/utils.js';
 import { Icon } from '../icon/icon.js';
@@ -24,9 +23,9 @@ import type { ComboboxListBoxProps } from '../primitives/combobox/listbox.js';
 import { ComboboxListBox } from '../primitives/combobox/listbox.js';
 import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
 import { ComboboxPopover } from '../primitives/combobox/popover.js';
+import { resolveComboboxRecipeStyles } from '../primitives/combobox/recipe.js';
 import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
-import { comboboxRecipe } from '../primitives/combobox/styles.css.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import type { FieldSlotProps } from '../primitives/field/field.js';
 import {
@@ -34,6 +33,8 @@ import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
@@ -90,6 +91,12 @@ interface _ComboboxFieldProps<T extends object>
 
 	/** Control size. @default 'medium' */
 	size?: ComboboxSize;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `ComboboxField`'s own
+	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
+	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for `ComboboxField` (searchable single-select). */
@@ -112,6 +119,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		placeholder,
 		popoverProps,
 		size = 'medium',
+		xstyle,
 		...comboboxRootProps
 	} = props;
 
@@ -195,6 +203,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 			size={size}
 			{...comboboxRootProps}
 			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
+			xstyle={xstyle}
 		>
 			<Field
 				description={description}
@@ -236,20 +245,16 @@ function MobileComboboxContent<T extends object>({
 	const valueId = useId();
 
 	const ariaLabelledBy = labelContext?.id == null ? undefined : cx(labelContext.id, valueId);
-	const comboboxStyles = comboboxRecipe({ size });
-
-	const mobileListBoxClassName = composeRenderProps(listBoxProps?.className, (className) => {
-		return comboboxStyles.mobileListBox(className);
-	});
+	const comboboxStyles = resolveComboboxRecipeStyles({ size });
 
 	const listBox = (
 		<SelectableCollectionContext.Provider value={mobileListBoxContextValue}>
 			<ComboboxListBox<T>
 				{...listBoxProps}
-				className={mobileListBoxClassName}
 				loadMoreItem={loadMoreItem}
 				renderEmptyState={renderEmptyState}
 				shouldSelectOnPressUp={false}
+				xstyle={[...comboboxStyles.mobileListBox, listBoxProps?.xstyle] as XStyleProp}
 			>
 				{children}
 			</ComboboxListBox>
@@ -274,7 +279,10 @@ function MobileComboboxContent<T extends object>({
 					aria-haspopup="dialog"
 					aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
 					aria-labelledby={ariaLabelledBy}
-					className={comboboxStyles.mobileTrigger()}
+					className={
+						resolveXStyleProps(comboboxStyles.mobileTrigger, undefined, undefined, undefined)
+							.className
+					}
 					isDisabled={isDisabled || isReadOnly}
 					onPress={() => {
 						if (isReadOnly) return;
@@ -284,7 +292,10 @@ function MobileComboboxContent<T extends object>({
 					slot={null}
 				>
 					<ComboBoxValue
-						className={comboboxStyles.mobileValue()}
+						className={
+							resolveXStyleProps(comboboxStyles.mobileValue, undefined, undefined, undefined)
+								.className
+						}
 						id={valueId}
 						placeholder={placeholder}
 					/>
@@ -303,7 +314,7 @@ function MobileComboboxContent<T extends object>({
 				}}
 				ref={popoverContext?.ref}
 			>
-				<ComboboxInputGroup className={comboboxStyles.mobileInputGroup()}>
+				<ComboboxInputGroup xstyle={comboboxStyles.mobileInputGroup as XStyleProp}>
 					<ComboboxInput
 						aria-expanded={undefined}
 						aria-haspopup="listbox"
@@ -327,7 +338,14 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 	return (
 		<RacButton
 			aria-label="Clear search"
-			className={comboboxRecipe({ size }).clearButton()}
+			className={
+				resolveXStyleProps(
+					resolveComboboxRecipeStyles({ size }).clearButton,
+					undefined,
+					undefined,
+					undefined,
+				).className
+			}
 			onPress={() => {
 				state.setInputValue('');
 			}}

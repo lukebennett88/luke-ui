@@ -10,7 +10,7 @@ test('ships Vanilla Extract and StyleX rules in one stylesheet', async () => {
 	const stylesheet = await readFile(dist('stylesheet.css'), 'utf8');
 	expect(stylesheet.startsWith('@layer reset, theme, luke.sx.priority')).toBe(true);
 	expect(stylesheet).toMatch(
-		/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/m,
+		/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, structural, utilities;/m,
 	);
 	expect(stylesheet).toMatch(/@layer luke\.sx\.priority\d+/);
 	expect(stylesheet).toMatch(/outline-color:\s*transparent/);

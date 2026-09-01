@@ -73,6 +73,13 @@ respond to presses.
 
 <ExampleBlock src="button/disabled" title="Button — Disabled" />
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `Button`'s own props do
+not cover, or to override a same-property variant. Styles apply in this order: variant props, then
+`xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a variant
+such as `tone`. `className` still beats `xstyle`.
+
 ## Accessibility
 
 The visible label provides the accessible name, so most buttons do not need `aria-label`. Write a

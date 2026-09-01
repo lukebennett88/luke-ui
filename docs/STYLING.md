@@ -2,16 +2,17 @@
 
 ## Setup
 
-Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities. Consumers
-import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from `@luke-ui/react/theme` to
-`<body>`, `<main>`, or an app shell. Import one bundled theme stylesheet, for example
-`@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes the whole document from `:root`,
-with no class and no JS required. Neither step injects styles at runtime.
+Luke UI ships one static stylesheet for its reset, theme root, component styles, and utilities.
+Consumers import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from
+`@luke-ui/react/theme` to `<body>`, `<main>`, or an app shell. Import one bundled theme stylesheet,
+for example `@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes the whole document
+from `:root`, with no class and no JS required. Neither step injects styles at runtime.
 
 The package build also extracts StyleX and appends those rules to `dist/stylesheet.css`. StyleX
-rules live in generated `luke.sx.priorityN` cascade layers between the theme and recipes layers.
-`Text` and `VisuallyHidden` are StyleX. Every other component stays on Vanilla Extract until its own
-migration slice lands.
+rules live in generated `luke.sx.priorityN` cascade layers between the theme and structural layers.
+Public visual components author StyleX recipes. `LoadingSkeleton`'s descendant masks, Prose
+descendant rhythm, and Combobox adjacent-section borders stay in the `structural` Vanilla Extract
+layer. `Box` and Rainbow Sprinkles utilities stay on Vanilla Extract.
 
 ## Structure
 
@@ -23,39 +24,25 @@ utility modules live under `core/`. Theme modules live under `theme/`.
 - `core/styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
 - `core/styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
 - `core/styles/modules.css.ts`: the committed stylesheet registry. It explicitly imports every
-  colocated `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet, plus
-  primitive and overlay style modules. Keep the list in code-point order by path for deterministic
+  colocated Vanilla Extract `styles.css.ts` that participates in the shipped stylesheet (Prose and
+  LoadingSkeleton structural rules). Keep the list in code-point order by path for deterministic
   output. Named layers make cross-layer priority explicit. Specificity and source order still matter
-  within a layer.
-- `core/styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
-  `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
-- `core/styles/input-states.ts`: the shared field control-state selectors
-  (`composeInputStateSelectors`, `descendantDisabledSelector`) that field recipes compose. It is
-  named `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module composes
-  its plain data and functions.
-- `core/styles/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered
-  as a CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is
-  the in-control icon `core/primitives/combobox/styles.css.ts` applies under its own invalid
-  selector's `::after` — the border stays at its resting 1px there, since the icon is already the
-  non-colour cue. It renders as the pseudo-element's own last DOM child, so the style gives its
-  trailing affordances (the combobox clear button and trigger) a flex `order` ahead of the icon's
-  default `order: 0`, so it lands right after the field's text content and before them, matching the
-  Spectrum reference this ordering is drawn from. `invalidMessageIcon` is the smaller,
-  message-leading variant `core/primitives/field/recipe.css.ts` draws on its `message` slot,
-  switched on by `core/primitives/checkbox/recipe.css.ts` alone: `Checkbox`'s own box has no room
-  for an in-control icon without floating past the label, so its icon moves to the message and its
-  box keeps a `2px` border as its own non-colour cue instead. Named `.ts` for the same reason as
-  `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
-- `core/primitives/input-group/recipe.css.ts` draws the same glyph, but as a real `Icon` element on
-  its own `invalidIndicator` slot rather than a mask: `InputGroup` (`core/primitives/input-group/`)
+  within a layer. StyleX component styles are extracted by the StyleX Vite plugin, not this
+  registry.
+- `core/styles/stylex-recipe.ts`: the internal StyleX `createSingleRecipe` / `createSlottedRecipe`
+  engine, plus the `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
+- `core/primitives/input-group/recipe.ts` draws the invalid glyph as a real `Icon` element on its
+  own `invalidIndicator` slot rather than a mask: `InputGroup` (`core/primitives/input-group/`)
   reads React Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid
   control cannot be composed without a non-colour cue. The recipe owns only the icon's colour and
   margins — `Icon` owns its box, and `IconSizeProvider` (`FIELD_CONTROL_ICON_SIZE`) owns its
   per-size step — and gives the `suffix` slot the same `order: 1` for the same Spectrum ordering.
-  Combobox's control is not a plain `Group` with that state to hand, so it stays CSS-driven.
-- `core/overlays/mobile-overlay.css.ts`: the backdrop, tray, and dialog styles `MobileOverlay`
-  renders for the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and
-  `tray/index.css`.
+  Combobox's control is not a plain `Group` with that state to hand, so its invalid icon stays
+  CSS-driven on `inputGroup`'s `::after`.
+- `core/overlays/mobile-overlay.tsx`: the backdrop, tray, and dialog styles `MobileOverlay` renders
+  for the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and
+  `tray/index.css`. The tray keeps a documented physical `top`/`bottom` pair so StyleX does not
+  break an intended over-constraint.
 - `core/overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
   `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
   device screen width, not the viewport width, to decide when a combobox switches to it.
@@ -186,33 +173,26 @@ Specificity and source order still decide conflicts within a layer.
 | `reset`             | Browser defaults, box sizing, and margins.                              |
 | `theme`             | Design token custom properties and base typography.                     |
 | `luke.sx.priorityN` | StyleX atoms, ordered by internal priority.                             |
-| `recipes`           | Component styles, variants, and compound variants.                      |
 | `structural`        | Retained descendant rhythm, skeleton masking, and combinator selectors. |
 | `utilities`         | One-off layout and override escape hatches.                             |
 
-While Vanilla Extract recipes remain, the `recipes` layer is transitional. The stylesheet contract
-requires it to contain at least one rule until the last recipe moves to StyleX.
-
 The public `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every
 Luke-owned layer before any rules create them. StyleX priority layers use dotted nested names such
-as `luke.sx.priority1`, which sit between `theme` and `recipes` in the required precedence order.
+as `luke.sx.priority1`, which sit between `theme` and `structural` in the required precedence order.
 
 The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
 `themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The
 public `vars` object and theme stylesheets remain the sole authorities on token values.
 
-Use `styleInLayer` and `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain
-Vanilla Extract style for a recipe with no variants in a named layer (see
-`core/loading-skeleton/styles.css.ts`). A variant-driven recipe instead calls `recipe()` from
-`core/styles/recipe.ts`, which wraps every base, variant, and compound-variant style it is given in
-the `recipes` layer. A recipe can still pre-build a static `base` with `styleInLayer('recipes', …)`
-and hand the resulting class string to `recipe()`, which passes a string value through unchanged
-rather than wrapping it again.
+Use `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain Vanilla Extract
+global rule in a named layer. Structural combinators such as Combobox's adjacent-section border live
+here, not in StyleX: StyleX cannot express a `+` sibling rule, so `structural.css.ts` interpolates
+the stable `combobox-section` class from `primitives/combobox/section-scope.ts`.
 
 `Text` authors quoted logical CSS keys for its Capsize pseudo-element margins, so StyleX emits
 `margin-block-end` and `margin-block-start` without lowering them to physical properties.
 
-Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
+Overrides that should beat component styles belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
 
 `LoadingSkeleton` uses `!important` inside the `structural` layer because it must force placeholder
@@ -222,8 +202,8 @@ below `utilities`, so a `utilities`-layer `!important` override from a consumer 
 skeleton.
 
 Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
-in the `reset` layer, so it cannot disable animations declared in `recipes` or `utilities`. Animated
-recipes should add their own `@media (prefers-reduced-motion: reduce)` override. See
+in the `reset` layer, so it cannot disable animations declared in StyleX or `utilities`. Animated
+components should add their own `@media (prefers-reduced-motion: reduce)` override. See
 `loading-skeleton/styles.css.ts` for an example.
 
 ## Recipes
@@ -237,34 +217,21 @@ Recipes are component-specific. Keep them separate from general layout utilities
 
 Colocate recipe files beside their owner:
 
-- `recipe.css.ts` — public recipe contract
-- `styles.css.ts` — private implementation styling
+- `recipe.ts` — StyleX public recipe contract
+- `styles.css.ts` — private Vanilla Extract structural styling when a combinator or descendant
+  selector cannot live in StyleX
 
-Every recipe is built with the internal `recipe()` engine from `core/styles/recipe.ts`. It is not
-part of the public package entry. Component authors inside `@luke-ui/react` use it to define a new
-recipe. Consumers call the built recipe functions it returns (`buttonRecipe`, `textRecipe`, and so
-on). `recipe()` wraps every base, variant, and compound-variant style it is given in the `recipes`
-cascade layer itself, so a recipe author does not add layering by hand.
+Every public recipe is built with `createSingleRecipe` or `createSlottedRecipe` from
+`core/styles/stylex-recipe.ts`. It is not part of the public package entry. Component authors inside
+`@luke-ui/react` use it to define a new recipe. Consumers call the built recipe functions it returns
+(`buttonRecipe`, `textRecipe`, and so on). `comboboxRecipe` is private: it is not exported from
+`@luke-ui/react/primitives/combobox`.
 
 ### Single-part recipes
 
 A single-part recipe takes `base`, `variants`, `defaultVariants`, and `compoundVariants`, and
-returns a function that takes a variant selection and returns one class string:
-
-```ts
-export const buttonRecipe = recipe({
-	base,
-	defaultVariants: { appearance: 'solid', size: 'medium', tone: 'neutral' },
-	variants: {
-		appearance: { ghost: {}, solid: {}, subtle: {} },
-		size: {/* … */},
-		tone: { accent: {}, danger: {}, neutral: {} },
-	},
-	compoundVariants: [/* … */],
-});
-```
-
-See `core/primitives/button/recipe.css.ts` for the full recipe this abbreviates.
+returns a function that takes a variant selection and returns one class string. See
+`core/primitives/button/recipe.ts` for the StyleX expansion.
 
 ### Slotted recipes
 
@@ -273,26 +240,17 @@ value maps to per-slot styles, and the built recipe takes a variant selection an
 function per slot, each accepting an optional extra class to merge:
 
 ```tsx
-export const fieldRecipe = recipe({
-	slots: { label: {}, message: {}, root: {} },
-	variants: { tone: { description: { message: {} } } },
-} as const satisfies SlottedConfigInput);
-
-const { label, message, root } = fieldRecipe({ tone: 'description' });
-<div className={root()}>
-	<label className={label()}>Email</label>
-	<p className={message(extraClassName)}>We will send your receipt here.</p>
+const { group, control } = inputGroupRecipe({ size: 'medium' });
+<div className={group()}>
+	<input className={control()} />
 </div>;
 ```
 
-See `core/primitives/field/recipe.css.ts` for a complete public slotted recipe. Apply
-`as const satisfies SlottedConfigInput` at the definition site: `as const` preserves the literal
-slot names and variant values `recipe()` infers, and `satisfies` type-checks every slot and variant
-style against `StyleRule` where it is written.
+See `core/primitives/checkbox/recipe.ts`, `core/primitives/field/recipe.ts`, or the private
+`core/primitives/combobox/recipe.ts` for StyleX slotted recipes.
 
-Compound variants are single-part only: `buttonRecipe` (Vanilla Extract) and `textRecipe` (StyleX)
-both use `compoundVariants` on their single-part config. A slotted config has no `compoundVariants`
-field.
+Compound variants are single-part only: `buttonRecipe` and `textRecipe` use `compoundVariants` on
+their single-part config. A slotted config has no `compoundVariants` field.
 
 ### Deriving variant types
 
@@ -309,16 +267,15 @@ with the recipe.
 
 ### StyleX recipes
 
-A migrated component uses `recipe()` from `core/styles/stylex-recipe.ts` instead of the Vanilla
-Extract engine above. Its public contract is identical — single-part `(selection?) => string`,
-slotted `(selection?) => Record<Slot, (extra?) => string>`, and `RecipeSelection<typeof recipeFn>`
-for the derived variant type — but the caller performs its own `stylex.create(...)` call, because
-`stylex.create` requires every key and value to be statically extractable: a recipe cannot build its
-variant map with `Object.fromEntries` or `Array.map` the way `typographyVariants` in the old Vanilla
-Extract `textRecipe` did. Write out each variant and compound-variant style as a literal
-`stylex.create` key instead. See `core/text/recipe.ts` for the full expansion this produces. A
-migrated recipe file is named `recipe.ts`, not `recipe.css.ts` (Vanilla Extract's `.css.ts` naming
-is wrong for a StyleX module and would be picked up by the VE plugin).
+A migrated component uses `createSingleRecipe` / `createSlottedRecipe` from
+`core/styles/stylex-recipe.ts`. Its public contract is identical — single-part
+`(selection?) => string`, slotted `(selection?) => Record<Slot, (extra?) => string>`, and
+`RecipeSelection<typeof recipeFn>` for the derived variant type — but the caller performs its own
+`stylex.create(...)` call, because `stylex.create` requires every key and value to be statically
+extractable. Write out each variant and compound-variant style as a literal `stylex.create` key
+instead. See `core/text/recipe.ts` for the full expansion this produces. A recipe file is named
+`recipe.ts`, not `recipe.css.ts` (Vanilla Extract's `.css.ts` naming is wrong for a StyleX module
+and would be picked up by the VE plugin).
 
 ### `xstyle`
 
@@ -342,26 +299,19 @@ unlayered consumer class and an inline style still win.
 
 ### Shared input-state selectors
 
-`InputGroup` and Combobox styling (`core/primitives/input-group/recipe.css.ts`,
-`core/primitives/combobox/styles.css.ts`) share one definition of what "hovered", "focused",
-"disabled", "invalid", and "read-only" mean for a control, from `core/styles/input-states.ts`:
-
-```ts
-import { composeInputStateSelectors, descendantDisabledSelector } from './input-states.js';
-
-const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSelectors();
-```
-
-`composeInputStateSelectors` owns the shared attribute and pseudo-class matrix, then returns the
-mutually exclusive selectors a recipe applies to its styles (for example, `hover` deliberately
-excludes an element that is also focused or read-only). Both field recipes use these definitions
-unchanged. Control-specific selectors stay in the TextField and Combobox recipes.
+Field control recipes expand competing ancestor and state conditions into mutually exclusive nested
+selector literals inside `stylex.create`. `InputGroup` and `Combobox` share that matrix (hovered,
+focused, disabled, invalid, read-only). Combobox additionally gates the well ring on
+`:has(input:focus)` so inner actions do not paint a second ring. `Checkbox`'s indicator recipe does
+the same for ancestor `data-*` conditions on its clickable content (`:is([data-disabled="true"] *)`
+and mutually exclusive selected / hover / pressed / invalid combinations). Control-specific
+selectors stay in each recipe.
 
 Resist widening a state to probe descendants with `:has()`. React Aria publishes `isDisabled` and
 `isInvalid` through `GroupContext`, so a control group already carries `data-disabled` and
 `data-invalid`. Probing cannot distinguish a control that is disabled from one that merely contains
-a disabled button. `descendantDisabledSelector` styles a part (a prefix, suffix, or trigger) when an
-ancestor control is disabled.
+a disabled button. Prefix, suffix, and trigger parts style themselves as descendants of a disabled
+ancestor with `:is([data-disabled="true"] *, [aria-disabled="true"] *)`.
 
 ## Styling utilities
 

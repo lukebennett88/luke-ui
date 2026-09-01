@@ -2,11 +2,13 @@ import type { JSX, Ref } from 'react';
 import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import type { XStyleProp } from '../../styles/xstyle.js';
+import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import type { ComboboxSize } from './recipe.js';
+import { resolveComboboxRecipeStyles } from './recipe.js';
 import { ComboboxSizeProvider } from './size-context.js';
-import type { ComboboxSize } from './styles.css.js';
-import { comboboxRecipe } from './styles.css.js';
 
 export type { ComboboxSize };
 
@@ -71,23 +73,43 @@ interface _ComboboxRootProps<T extends object>
 	size?: ComboboxSize;
 	/** The currently selected key (controlled). Pass `null` for no selection. */
 	value?: Key | null;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `ComboboxRoot`'s own
+	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
+	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for the primitive combobox root. */
 export type ComboboxRootProps<T extends object> = Prettify<_ComboboxRootProps<T>>;
 
 export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
-	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
+	const {
+		className,
+		menuTrigger = 'focus',
+		ref,
+		size = 'medium',
+		style,
+		xstyle,
+		...comboboxProps
+	} = props;
+	const recipeStyles = resolveComboboxRecipeStyles({ size }).root;
 
 	return (
 		<ComboboxSizeProvider size={size}>
 			<RacComboBox
 				{...comboboxProps}
 				className={composeRenderProps(className, (renderedClassName) => {
-					return comboboxRecipe().root(renderedClassName);
+					return (
+						resolveXStyleProps(recipeStyles, xstyle, renderedClassName, undefined).className ?? ''
+					);
 				})}
 				menuTrigger={menuTrigger}
 				ref={ref}
+				style={composeRenderProps(style, (renderedStyle) => {
+					return resolveXStyleProps(recipeStyles, xstyle, undefined, renderedStyle).style;
+				})}
 			/>
 		</ComboboxSizeProvider>
 	);

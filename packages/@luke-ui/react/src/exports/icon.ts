@@ -11,4 +11,4 @@ export {
 	iconNames,
 	iconViewBoxes,
 } from '../core/icon/icon.js';
-export { type IconRecipeVariants, iconRecipe } from '../core/icon/recipe.css.js';
+export { type IconRecipeVariants, iconRecipe } from '../core/icon/recipe.js';

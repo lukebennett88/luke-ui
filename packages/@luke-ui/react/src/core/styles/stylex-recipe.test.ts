@@ -18,7 +18,7 @@ const styles = stylex.create({
 	},
 });
 
-const track = createSlottedRecipe({
+const { recipe: track, resolveStyles } = createSlottedRecipe({
 	slots: {
 		root: styles.rootBase,
 		track: styles.trackBase,
@@ -53,6 +53,12 @@ test('slot functions merge an optional extra class, appended last', () => {
 	const slots = track();
 	expect(slots.root('extra-class').split(' ')).toContain('extra-class');
 	expect(slots.root('extra-class').endsWith('extra-class')).toBe(true);
+});
+
+test('resolveStyles returns per-slot compiled style arrays', () => {
+	const resolved = resolveStyles({ size: 'large' });
+	expect(resolved.root).toEqual([styles.rootBase, styles.rootLarge]);
+	expect(resolved.track).toEqual([styles.trackBase, styles.trackLarge]);
 });
 
 test('RecipeSelection derives the outer variant selection type', () => {

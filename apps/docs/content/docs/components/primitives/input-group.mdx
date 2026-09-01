@@ -52,6 +52,11 @@ describe it. Always give an invalid composition an error message. See
 applies to the input. Use these hooks when you compose the primitive with other controls. Give a
 standalone `InputGroupInput` an accessible name with `aria-label` or a connected label.
 
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles a part's own props do
+not cover, or to override a same-property variant. Styles apply in this order: variant props, then
+`xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a variant
+such as `size`. `className` still beats `xstyle`.
+
 ## API
 
 ### InputGroupProps

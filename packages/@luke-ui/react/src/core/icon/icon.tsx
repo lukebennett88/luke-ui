@@ -1,13 +1,14 @@
 import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../../.generated/icon-data.js';
-import { cx } from '../../shared/utils/utils.js';
 import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useIconSizeContext } from './icon-size-context.js';
-import type { IconRecipeVariants } from './recipe.css.js';
-import { iconRecipe } from './recipe.css.js';
+import type { IconRecipeVariants } from './recipe.js';
+import { resolveIconRecipeStyles } from './recipe.js';
 
 export type { IconName } from '../../../.generated/icon-data.js';
 export { IconSizeProvider } from './icon-size-context.js';
@@ -23,6 +24,12 @@ interface IconStyleProps {
 	 * @default 'medium'
 	 */
 	size?: IconVariantProps['size'];
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for `IconSpritesheetProvider`. */
@@ -70,7 +77,16 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 	viewBox: defaultViewBox = ICON_VIEWBOX,
 }: CreateIconOptions<TProps>): (props: TProps) => JSX.Element {
 	return function Icon(props: TProps): JSX.Element {
-		const { 'aria-hidden': ariaHiddenProp, className, id, size, style, title, viewBox } = props;
+		const {
+			'aria-hidden': ariaHiddenProp,
+			className,
+			id,
+			size,
+			style,
+			title,
+			viewBox,
+			xstyle,
+		} = props;
 		// `aria-hidden={false}` and `aria-hidden="false"` are accepted by the prop
 		// type but must never reach the DOM, so any non-`true` value is treated as
 		// unset.
@@ -82,16 +98,21 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 		const resolvedPath = typeof path === 'function' ? path(props) : path;
 		const contextSize = useIconSizeContext();
 		const resolvedSize = size ?? contextSize ?? 'medium';
+		const stylexProps = resolveXStyleProps(
+			resolveIconRecipeStyles({ size: resolvedSize }),
+			xstyle,
+			className,
+			style,
+		);
 
 		const svgProps: React.SVGProps<SVGSVGElement> = {
 			'aria-hidden': ariaHidden,
-			className: cx(iconRecipe({ size: resolvedSize }), className),
 			fill: 'currentColor',
 			focusable: false,
 			id,
 			role,
-			style,
 			viewBox: resolvedViewBox,
+			...stylexProps,
 		};
 
 		return (

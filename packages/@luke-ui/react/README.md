@@ -16,8 +16,8 @@ Import the component stylesheet and one bundled theme stylesheet. Importing a th
 themes the whole document from `:root`, so no identity class is needed for a single theme. Apply
 `rootClassName` to an element you own for the reset and base typography.
 
-The shared stylesheet owns reset, theme-root, recipe, and utility rules in `reset`, `theme`,
-`recipes`, `utilities` order.
+The shared stylesheet owns reset, theme-root, StyleX component styles, structural rules, and utility
+rules in `reset`, `theme`, `luke.sx.priorityN`, `structural`, `utilities` order.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';

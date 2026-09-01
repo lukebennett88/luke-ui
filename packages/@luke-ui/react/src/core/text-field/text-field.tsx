@@ -4,6 +4,7 @@ import type {
 	TextFieldProps as RacTextFieldProps,
 } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { FieldSlotProps } from '../primitives/field/field.js';
 import {
 	Field,
@@ -16,7 +17,9 @@ import {
 	InputGroupPrefix,
 	InputGroupSuffix,
 } from '../primitives/input-group/input-group.js';
-import type { InputGroupSize } from '../primitives/input-group/recipe.css.js';
+import type { InputGroupSize } from '../primitives/input-group/recipe.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -46,6 +49,12 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	size?: InputGroupSize;
 	/** Element shown after the input value. */
 	suffix?: ReactNode;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `TextField`'s own
+	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
+	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for `TextField`. */
@@ -59,6 +68,7 @@ export type TextFieldProps = Prettify<_TextFieldProps>;
  */
 export function TextField(props: TextFieldProps): JSX.Element {
 	const {
+		className,
 		description,
 		errorMessage,
 		inputClassName,
@@ -68,14 +78,25 @@ export function TextField(props: TextFieldProps): JSX.Element {
 		placeholder,
 		prefix,
 		size = 'medium',
+		style,
 		suffix,
+		xstyle,
 		...textFieldProps
 	} = props;
 
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
 
 	return (
-		<RacTextField {...textFieldProps} isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}>
+		<RacTextField
+			{...textFieldProps}
+			className={composeRenderProps(className, (resolvedClassName) => {
+				return resolveXStyleProps([], xstyle, resolvedClassName, undefined).className ?? '';
+			})}
+			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
+			style={composeRenderProps(style, (resolvedStyle) => {
+				return resolveXStyleProps([], xstyle, undefined, resolvedStyle).style;
+			})}
+		>
 			<Field
 				description={description}
 				errorMessage={normalizedErrorMessage}

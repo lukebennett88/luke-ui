@@ -45,6 +45,13 @@ wraps. Outside `Text`, it uses the normal compact control size.
 
 <ExampleBlock src="checkbox/first-line-alignment" title="Checkbox — First-line alignment" />
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `Checkbox`'s own props
+do not cover, or to override a same-property variant. Styles apply in this order: variant props,
+then `xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a
+variant such as `size`. `className` still beats `xstyle`.
+
 ## Accessibility
 
 Pass a visible label as `Checkbox` children. Use `aria-label` only when surrounding content already

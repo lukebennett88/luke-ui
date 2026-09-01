@@ -1,15 +1,23 @@
 import type { JSX } from 'react';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
+import type { XStyleProp } from '../../styles/xstyle.js';
+import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { fieldRecipe } from './recipe.css.js';
+import { resolveFieldRecipeStyles } from './recipe.js';
 
 type _FieldDescriptionOmit = DistributiveOmit<RacTextProps, 'id' | 'slot'>;
 
 interface _FieldDescriptionProps extends _FieldDescriptionOmit {
 	/** Element id referenced by `aria-describedby` on the control. */
 	id?: RacTextProps['id'];
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `FieldDescription`'s
+	 * own styles and before `className`. A same-property `xstyle` value wins over those styles. A
+	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for `FieldDescription`. */
@@ -17,12 +25,17 @@ export type FieldDescriptionProps = Prettify<_FieldDescriptionProps>;
 
 /** Styled helper text shown under a field. */
 export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
-	const { className, ...restProps } = props;
+	const { className, style, xstyle, ...restProps } = props;
 
 	return (
 		<RacText
 			{...restProps}
-			className={fieldRecipe({ tone: 'description' }).message(className)}
+			{...resolveXStyleProps(
+				resolveFieldRecipeStyles({ tone: 'description' }).message,
+				xstyle,
+				className,
+				style,
+			)}
 			slot="description"
 		/>
 	);

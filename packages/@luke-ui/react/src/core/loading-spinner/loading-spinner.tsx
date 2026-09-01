@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import type { ComponentProps, ReactNode } from 'react';
 import { useId } from 'react';
 import { useIconSizeContext } from '../icon/icon-size-context.js';
@@ -7,12 +8,19 @@ import {
 	SPINNER_CIRCLE_RADIUS,
 	SPINNER_STROKE_WIDTH,
 } from '../sizing/icon-sizing.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { VisuallyHidden } from '../visually-hidden/visually-hidden.js';
-import type { LoadingSpinnerRecipeVariants } from './recipe.css.js';
-import { loadingSpinnerRecipe, rubberBandAnimationName, spinAnimationName } from './recipe.css.js';
+import type { LoadingSpinnerRecipeVariants } from './recipe.js';
+import {
+	loadingSpinnerRecipe,
+	resolveLoadingSpinnerRecipeStyles,
+	rubberBandAnimationName,
+	spinAnimationName,
+} from './recipe.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<LoadingSpinnerRecipeVariants> {}
 
@@ -24,6 +32,12 @@ interface LoadingSpinnerStyleProps {
 	 * @default 'medium'
 	 */
 	size?: LoadingSpinnerVariantProps['size'];
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `color`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 type _LoadingSpinnerOmit = DistributiveOmit<
@@ -59,6 +73,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 		isLoading = true,
 		size,
 		style,
+		xstyle,
 		...spanProps
 	} = props;
 
@@ -75,6 +90,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 			color={color}
 			size={resolvedSize}
 			style={style}
+			xstyle={xstyle}
 		/>
 	);
 
@@ -100,27 +116,28 @@ function SpinnerElement({
 	color,
 	size,
 	style,
+	xstyle,
 	...spanProps
 }: SpinnerElementProps) {
 	useSynchronizeAnimations(spinAnimationName);
 	useSynchronizeAnimations(rubberBandAnimationName);
 
 	const labelId = useId();
-	const slots = loadingSpinnerRecipe({ color, size });
+	const slotStyles = resolveLoadingSpinnerRecipeStyles({ color, size });
+	const stylexProps = resolveXStyleProps(slotStyles.root, xstyle, className, style);
 	const viewBoxCenter = ICON_VIEWBOX_SIZE / 2;
 
 	return (
-		<span
-			{...spanProps}
-			aria-labelledby={labelId}
-			className={slots.root(className)}
-			role="status"
-			style={style}
-		>
+		<span {...spanProps} {...stylexProps} aria-labelledby={labelId} role="status">
 			<VisuallyHidden id={labelId}>{ariaLabel}</VisuallyHidden>
-			<svg aria-hidden="true" className={slots.svg()} fill="none" viewBox={ICON_VIEWBOX}>
+			<svg
+				aria-hidden="true"
+				className={stylex.props(...slotStyles.svg).className}
+				fill="none"
+				viewBox={ICON_VIEWBOX}
+			>
 				<circle
-					className={slots.indicator()}
+					className={stylex.props(...slotStyles.indicator).className}
 					cx={viewBoxCenter}
 					cy={viewBoxCenter}
 					fill="none"

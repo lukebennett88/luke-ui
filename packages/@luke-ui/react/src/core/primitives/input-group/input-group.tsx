@@ -8,10 +8,12 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import type { XStyleProp } from '../../styles/xstyle.js';
+import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import type { InputGroupSize } from './recipe.css.js';
-import { inputGroupRecipe } from './recipe.css.js';
+import type { InputGroupSize } from './recipe.js';
+import { inputGroupRecipe, resolveInputGroupRecipeStyles } from './recipe.js';
 
 const InputGroupSizeContext = createContext<InputGroupSize | null>(null);
 
@@ -30,6 +32,12 @@ interface InputGroupPartStyleProps {
 	 * @default 'medium'
 	 */
 	size?: InputGroupSize;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 type _InputGroupOmit = DistributiveOmit<RacGroupProps, 'children' | 'className'>;
@@ -46,6 +54,12 @@ interface _InputGroupProps extends _InputGroupOmit {
 	 * @default 'medium'
 	 */
 	size?: InputGroupSize;
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
 }
 
 /** Props for the input group root. */
@@ -106,7 +120,8 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
  * carries the meaning.
  */
 export function InputGroup(props: InputGroupProps): JSX.Element {
-	const { children, className, size = 'medium', ...groupProps } = props;
+	const { children, className, size = 'medium', style, xstyle, ...groupProps } = props;
+	const recipeStyles = resolveInputGroupRecipeStyles({ size });
 	const slots = inputGroupRecipe({ size });
 
 	return (
@@ -121,7 +136,10 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 				<RacGroup
 					{...groupProps}
 					className={composeRenderProps(className, (value) => {
-						return slots.group(value);
+						return resolveXStyleProps(recipeStyles.group, xstyle, value, undefined).className ?? '';
+					})}
+					style={composeRenderProps(style, (value) => {
+						return resolveXStyleProps(recipeStyles.group, xstyle, undefined, value).style;
 					})}
 				>
 					{composeRenderProps(children, (renderedChildren, { isInvalid }) => {
@@ -146,14 +164,18 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 
 /** The editable control inside an `InputGroup`. */
 export function InputGroupInput(props: InputGroupInputProps): JSX.Element {
-	const { className, size: sizeProp, ...inputProps } = props;
+	const { className, size: sizeProp, style, xstyle, ...inputProps } = props;
 	const size = useInputGroupSize(sizeProp);
+	const recipeStyles = resolveInputGroupRecipeStyles({ size }).control;
 
 	return (
 		<RacInput
 			{...inputProps}
 			className={composeRenderProps(className, (value) => {
-				return inputGroupRecipe({ size }).control(value);
+				return resolveXStyleProps(recipeStyles, xstyle, value, undefined).className ?? '';
+			})}
+			style={composeRenderProps(style, (value) => {
+				return resolveXStyleProps(recipeStyles, xstyle, undefined, value).style;
 			})}
 		/>
 	);
@@ -161,10 +183,20 @@ export function InputGroupInput(props: InputGroupInputProps): JSX.Element {
 
 /** Content shown at the leading end of an `InputGroup`, such as a currency symbol. */
 export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
-	const { className, size: sizeProp, ...spanProps } = props;
+	const { className, size: sizeProp, style, xstyle, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={inputGroupRecipe({ size }).prefix(className)} />;
+	return (
+		<span
+			{...spanProps}
+			{...resolveXStyleProps(
+				resolveInputGroupRecipeStyles({ size }).prefix,
+				xstyle,
+				className,
+				style,
+			)}
+		/>
+	);
 }
 
 /**
@@ -172,8 +204,18 @@ export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
  * always follows the group's own invalid indicator, whatever its document position.
  */
 export function InputGroupSuffix(props: InputGroupSuffixProps): JSX.Element {
-	const { className, size: sizeProp, ...spanProps } = props;
+	const { className, size: sizeProp, style, xstyle, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={inputGroupRecipe({ size }).suffix(className)} />;
+	return (
+		<span
+			{...spanProps}
+			{...resolveXStyleProps(
+				resolveInputGroupRecipeStyles({ size }).suffix,
+				xstyle,
+				className,
+				style,
+			)}
+		/>
+	);
 }

@@ -10,9 +10,6 @@ import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
 import { createStylexPackPlugin, workspaceRoot } from './stylex-vite-plugin.js';
 
-const recipeEngineSource = fileURLToPath(
-	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
-);
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
 const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
 const assetExports = [
@@ -30,11 +27,6 @@ const dependency = /\/node_modules\//;
 
 export default defineConfig({
 	pack: {
-		alias: {
-			// Vanilla Extract serializes recipes to `#recipe-engine`; resolve it to source so pack
-			// can bundle a relative runtime chunk.
-			'#recipe-engine': recipeEngineSource,
-		},
 		attw: {
 			// Exclude static asset exports. CSS/SVG files do not need type definitions.
 			excludeEntrypoints: assetExports,

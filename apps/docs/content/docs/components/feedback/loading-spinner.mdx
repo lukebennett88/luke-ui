@@ -38,6 +38,14 @@ button while the action runs.
 
 <ExampleBlock src="loading-spinner/button" title="Loading Spinner — With a button" />
 
+## Custom styling
+
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `LoadingSpinner`'s own
+props do not cover, or to override a same-property variant. Styles apply in this order: variant
+props, then `xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins
+over a variant such as `color`. `className` still beats `xstyle`. `xstyle` applies to the spinner
+itself, not the in-place content wrapper.
+
 ## Accessibility
 
 The spinner is a polite status region. Its accessible name defaults to `loading`. Provide an
