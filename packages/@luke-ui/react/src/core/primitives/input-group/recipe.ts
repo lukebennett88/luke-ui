@@ -3,6 +3,40 @@ import { tokens } from '../../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../../styles/stylex-recipe.js';
 import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
 
+/*
+ * ## Why these state selectors are spelled out in full, twice
+ *
+ * The selector fragments below (disabled / hover / focus-within / invalid / read-only, each
+ * `:not()`-excluding the others) are identical to the ones in the sibling recipe, and were once a
+ * shared `composeInputStateSelectors()` helper. StyleX has no seam for them:
+ *
+ * - A plain `.ts` module of string constants cannot be imported into a `stylex.create` file at all
+ *   ("Could not resolve the path to the imported file") — the compiler skips any module that does
+ *   not import `@stylexjs/stylex`.
+ * - `stylex.defineConsts` in a `*.stylex.ts` file imports fine and compiles in the dev/test
+ *   pipeline, but silently corrupts the packed stylesheet. `processStylexRules` substitutes a const
+ *   by string-replacing `var(--<hash>)` in the rule text, then rewrites any leftover `--<hash>:`
+ *   into the target property name. A const spliced into a *selector* carries the bare `--<hash>`
+ *   without the `var()` wrapper, so the first replace misses and the second mangles the selector —
+ *   `:where(--x6a4wab))…` became `ar(--x6a4wab))…`, emitting 53 broken rules that no test caught
+ *   because unit and browser tests use the dev pipeline. `defineConsts` is safe as a declaration
+ *   *value* only, never inside a selector key.
+ *
+ *
+ * ## What the state fragments mean
+ *
+ * The invalid state deliberately avoids `:has(:invalid)`. Native `:invalid` matches an empty
+ * required input from first render — before any interaction or submit — while React Aria's
+ * `data-invalid`/`aria-invalid` stay null until validation actually runs. Styling on
+ * `:has(:invalid)` would paint an untouched required field invalid while telling assistive
+ * technology it is fine.
+ *
+ * `:read-only` is scoped to `input` for the same kind of reason: bare `:read-only` matches any
+ * non-editable element (spans, buttons), so `:has(:read-only)` would match any control that
+ * contains a prefix, suffix, or trigger.
+ *
+ * `input-states.test.ts` pins these selectors so the two recipes cannot drift apart unnoticed.
+ */
 const styles = stylex.create({
 	control: {
 		appearance: 'none',

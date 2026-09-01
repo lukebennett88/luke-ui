@@ -1,11 +1,71 @@
 import * as stylex from '@stylexjs/stylex';
 import { tokens } from '../../../theme/tokens.stylex.js';
+import { invalidIndicator } from '../../styles/invalid-indicator.stylex.js';
 import type { RecipeSelection } from '../../styles/stylex-recipe.js';
 import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
 
-const invalidIndicatorMaskImage =
-	'url("data:image/svg+xml,%3Csvg%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20viewBox%3D%220%200%2024%2024%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20%3E%0A%20%20%3Cpath%20d%3D%22M12%209v3.75m-9.303%203.376c-.866%201.5.217%203.374%201.948%203.374h14.71c1.73%200%202.813-1.874%201.948-3.374L13.949%203.378c-.866-1.5-3.032-1.5-3.898%200L2.697%2016.126ZM12%2015.75h.007v.008H12v-.008Z%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20%2F%3E%0A%3C%2Fsvg%3E%0A")';
+/**
+ * The in-control invalid icon, rendered as an `::after` on the control and reordered ahead of the
+ * trailing affordances (`clearButton`/`trigger`) with flex `order` below. No `margin-inline-start`:
+ * the control's own `padding-inline-end` already supplies the leading gap, so a margin here would
+ * double it. The size follows the `small`/`medium` control-size variants through the
+ * `--luke-combobox-error-icon-size` custom property they set.
+ *
+ * A file-local object rather than a shared export: StyleX only inlines a spread it can resolve
+ * statically in the same module, so the declarations cannot cross a module boundary. The mask URL
+ * itself does travel, as a `defineConsts` value.
+ */
+const invalidIndicatorIcon = {
+	backgroundColor: tokens.colorForegroundDangerRest,
+	'block-size': 'var(--luke-combobox-error-icon-size)',
+	content: "''",
+	flexShrink: 0,
+	'inline-size': 'var(--luke-combobox-error-icon-size)',
+	'margin-inline-end': tokens.spaceSp4,
+	maskImage: invalidIndicator.maskImage,
+	maskPosition: 'center',
+	maskRepeat: 'no-repeat',
+	maskSize: 'contain',
+} as const;
 
+/*
+ * ## Why these state selectors are spelled out in full, twice
+ *
+ * The selector fragments below (disabled / hover / focus-within / invalid / read-only, each
+ * `:not()`-excluding the others) are identical to the ones in the sibling recipe, and were once a
+ * shared `composeInputStateSelectors()` helper. StyleX has no seam for them:
+ *
+ * - A plain `.ts` module of string constants cannot be imported into a `stylex.create` file at all
+ *   ("Could not resolve the path to the imported file") — the compiler skips any module that does
+ *   not import `@stylexjs/stylex`.
+ * - `stylex.defineConsts` in a `*.stylex.ts` file imports fine and compiles in the dev/test
+ *   pipeline, but silently corrupts the packed stylesheet. `processStylexRules` substitutes a const
+ *   by string-replacing `var(--<hash>)` in the rule text, then rewrites any leftover `--<hash>:`
+ *   into the target property name. A const spliced into a *selector* carries the bare `--<hash>`
+ *   without the `var()` wrapper, so the first replace misses and the second mangles the selector —
+ *   `:where(--x6a4wab))…` became `ar(--x6a4wab))…`, emitting 53 broken rules that no test caught
+ *   because unit and browser tests use the dev pipeline. `defineConsts` is safe as a declaration
+ *   *value* only, never inside a selector key.
+ *
+ * ## What the state fragments mean
+ *
+ * The invalid state deliberately avoids `:has(:invalid)`. Native `:invalid` matches an empty
+ * required input from first render — before any interaction or submit — while React Aria's
+ * `data-invalid`/`aria-invalid` stay null until validation actually runs. Styling on
+ * `:has(:invalid)` would paint an untouched required field invalid while telling assistive
+ * technology it is fine.
+ *
+ * `:read-only` is scoped to `input` for the same kind of reason: bare `:read-only` matches any
+ * non-editable element (spans, buttons), so `:has(:read-only)` would match any control that
+ * contains a prefix, suffix, or trigger.
+ *
+ * `input-states.test.ts` pins these selectors so the two recipes cannot drift apart unnoticed.
+ *
+ * One intentional difference from `InputGroup`: every focus-within clause here also requires
+ * `:has(input:focus)`. The combobox anatomy puts a trigger and a clear button inside the group, so
+ * plain `:focus-within` would also match when one of those buttons holds focus; `InputGroup` has no
+ * such buttons and uses the bare condition.
+ */
 const styles = stylex.create({
 	root: {
 		display: 'flex',
@@ -57,18 +117,7 @@ const styles = stylex.create({
 		':where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within):has(input:focus)):not(:where([data-readonly="true"], :has(input:read-only)))':
 			{
 				borderColor: tokens.colorBackgroundDangerSolidRest,
-				'::after': {
-					backgroundColor: tokens.colorForegroundDangerRest,
-					'block-size': 'var(--luke-combobox-error-icon-size)',
-					content: "''",
-					flexShrink: 0,
-					'inline-size': 'var(--luke-combobox-error-icon-size)',
-					'margin-inline-end': tokens.spaceSp4,
-					maskImage: invalidIndicatorMaskImage,
-					maskPosition: 'center',
-					maskRepeat: 'no-repeat',
-					maskSize: 'contain',
-				},
+				'::after': invalidIndicatorIcon,
 			},
 		':where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])):where([data-focus-within="true"], :focus-within):has(input:focus):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-readonly="true"], :has(input:read-only)))':
 			{
@@ -77,18 +126,7 @@ const styles = stylex.create({
 				outlineOffset: '2px',
 				outlineStyle: 'solid',
 				outlineWidth: '2px',
-				'::after': {
-					backgroundColor: tokens.colorForegroundDangerRest,
-					'block-size': 'var(--luke-combobox-error-icon-size)',
-					content: "''",
-					flexShrink: 0,
-					'inline-size': 'var(--luke-combobox-error-icon-size)',
-					'margin-inline-end': tokens.spaceSp4,
-					maskImage: invalidIndicatorMaskImage,
-					maskPosition: 'center',
-					maskRepeat: 'no-repeat',
-					maskSize: 'contain',
-				},
+				'::after': invalidIndicatorIcon,
 			},
 		':where([data-readonly="true"], :has(input:read-only)):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within):has(input:focus))':
 			{
@@ -131,7 +169,7 @@ const styles = stylex.create({
 				{
 					borderColor: 'FieldText',
 					'::after': {
-						backgroundColor: 'CanvasText',
+						backgroundColor: invalidIndicator.forcedColorsBackgroundColor,
 					},
 				},
 			':where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])):where([data-focus-within="true"], :focus-within):has(input:focus):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-readonly="true"], :has(input:read-only)))':
@@ -139,7 +177,7 @@ const styles = stylex.create({
 					borderColor: 'FieldText',
 					outlineColor: 'Highlight',
 					'::after': {
-						backgroundColor: 'CanvasText',
+						backgroundColor: invalidIndicator.forcedColorsBackgroundColor,
 					},
 				},
 			':where([data-readonly="true"], :has(input:read-only)):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within):has(input:focus))':

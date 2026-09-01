@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { tokens } from '../../theme/tokens.stylex.js';
 import { iconSizeStyles } from '../icon/recipe.js';
+import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSlottedRecipe } from '../styles/stylex-recipe.js';
 
@@ -70,13 +71,6 @@ const styles = stylex.create({
 		'@media (forced-colors: active)': { animationName: 'none' },
 		'@media (prefers-reduced-motion: reduce)': { animationName: 'none' },
 	},
-	spinnerOverlay: {
-		alignItems: 'center',
-		display: 'flex',
-		inset: 0,
-		justifyContent: 'center',
-		position: 'absolute',
-	},
 	svg: {
 		'block-size': '100%',
 		display: 'block',
@@ -102,7 +96,7 @@ export const { recipe: loadingSpinnerRecipe, resolveStyles: resolveLoadingSpinne
 			hiddenChildren: styles.hiddenChildren,
 			indicator: styles.indicator,
 			root: styles.root,
-			spinnerOverlay: styles.spinnerOverlay,
+			spinnerOverlay: spinnerOverlayBase,
 			svg: styles.svg,
 		},
 		variants: {
