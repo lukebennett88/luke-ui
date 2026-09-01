@@ -5,7 +5,7 @@ import { ListBox as RacListBox } from 'react-aria-components/ComboBox';
 import { ListBoxContext } from 'react-aria-components/ListBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
-import type { XStyleProp } from '../../styles/xstyle.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -16,7 +16,7 @@ type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	'dependencies' | 'items'
 >;
 
-interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T> {
+interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T>, XStyleProps {
 	/** Item content for the listbox (render prop or static children). */
 	children?: RacListBoxProps<T>['children'];
 	/** Values that should invalidate the dynamic item cache. */
@@ -25,12 +25,6 @@ interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T
 	items?: Iterable<T>;
 	/** Optional content appended after the main collection, e.g. a load-more sentinel. */
 	loadMoreItem?: ReactNode;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `ComboboxListBox`'s
-	 * own styles and before `className`. A same-property `xstyle` value wins over those styles. A
-	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for the styled listbox. */

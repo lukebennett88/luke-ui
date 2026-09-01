@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
@@ -12,14 +12,8 @@ type _VisuallyHiddenOmit = DistributiveOmit<
 	keyof DocumentedElementTypeProps
 >;
 
-interface _VisuallyHiddenProps extends _VisuallyHiddenOmit, DocumentedElementTypeProps {
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `VisuallyHidden`'s own
-	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
-	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
-}
+interface _VisuallyHiddenProps
+	extends _VisuallyHiddenOmit, DocumentedElementTypeProps, XStyleProps {}
 
 /** Props for `VisuallyHidden`. */
 export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;

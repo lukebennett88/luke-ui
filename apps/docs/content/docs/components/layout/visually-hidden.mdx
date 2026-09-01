@@ -27,10 +27,9 @@ element.
 
 ## Custom styling
 
-Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `VisuallyHidden` does
-not set, or to override a same-property style it does set. Styles apply in this order:
-`VisuallyHidden`'s own styles, then `xstyle`, then `className`, then inline `style`. A same-property
-`xstyle` value wins over the component's styles. `className` still beats `xstyle`.
+Pass `xstyle` to set a CSS property `VisuallyHidden` does not set itself. See
+[Styling](/docs/styling#override-a-single-property-with-xstyle) for how `xstyle` resolves against
+variants, `className`, and inline `style`.
 
 ## API
 

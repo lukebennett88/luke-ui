@@ -12,7 +12,7 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
-import type { XStyleProp } from '../../styles/xstyle.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -22,15 +22,9 @@ import { useComboboxSize } from './size-context.js';
 
 type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
 
-interface _ComboboxItemProps<T extends object> extends _ComboboxItemOmit<T> {
+interface _ComboboxItemProps<T extends object> extends _ComboboxItemOmit<T>, XStyleProps {
 	className?: RacListBoxItemProps<T>['className'];
 	size?: ComboboxSize;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for a combobox list item. */
@@ -76,15 +70,9 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 }
 
 type _ComboboxLoadMoreItemOmit = DistributiveOmit<RacListBoxLoadMoreItemProps, 'className'>;
-interface _ComboboxLoadMoreItemProps extends _ComboboxLoadMoreItemOmit {
+interface _ComboboxLoadMoreItemProps extends _ComboboxLoadMoreItemOmit, XStyleProps {
 	className?: RacListBoxLoadMoreItemProps['className'];
 	size?: ComboboxSize;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for the combobox load-more sentinel item. */

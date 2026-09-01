@@ -38,6 +38,29 @@ defines its type and spacing scale in source.
 
 <SourceCodeBlock src="styling/component-props" />
 
+### Override a single property with `xstyle`
+
+Use `xstyle` when a component's props do not cover the CSS property you need, or when you need to
+replace the value a variant sets. It takes one or more compiled `stylex.create(...)` objects, the
+same way `stylex.props` accepts them.
+
+Styles resolve in this order, from lowest priority to highest:
+
+1. the component's own internal styles
+2. its variant props, such as `tone` or `size`
+3. `xstyle`
+4. `className`
+5. inline `style`
+
+Because `xstyle` resolves after the component's own styles and variants, a same-property `xstyle`
+value replaces theirs before either reaches the DOM. A consumer `className` still beats `xstyle`,
+and inline `style` beats `className`.
+
+`xstyle` targets the component's public presentation element, not its internal DOM. A component with
+more than one styled part exposes a separate target per part, and its own guide names which part
+receives `xstyle`. Do not use `xstyle` to reach inside a component's anatomy or to target generated
+selectors.
+
 ### Apply a component recipe
 
 Import a recipe when you own the element and need that component's visual treatment. Use the

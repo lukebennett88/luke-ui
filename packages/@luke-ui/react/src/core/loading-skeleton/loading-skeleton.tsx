@@ -3,7 +3,7 @@ import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import { cx } from '../../shared/utils/utils.js';
 import { tokens } from '../../theme/tokens.stylex.js';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
@@ -72,7 +72,7 @@ export function LoadingSkeletonProvider(props: LoadingSkeletonProviderProps): JS
 	);
 }
 
-interface _LoadingSkeletonProps extends ComponentProps<'span'> {
+interface _LoadingSkeletonProps extends ComponentProps<'span'>, XStyleProps {
 	/**
 	 * Element rendered while loading.
 	 * @default 'span'
@@ -88,12 +88,6 @@ interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	 * radius of its own but a visual descendant does (e.g. wrapping a `TextField`).
 	 */
 	radius?: keyof typeof skeletonRadiusTokens;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `LoadingSkeleton`'s own
-	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
-	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for `LoadingSkeleton`. */

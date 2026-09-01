@@ -8,6 +8,22 @@ export type XStyleProp<CSS extends Record<string, unknown> = Record<string, unkn
 	StyleXStyles<CSS>;
 
 /**
+ * The shared `xstyle` contract. A component whose styling target needs no further qualification
+ * extends this instead of redeclaring the prop, so the published description is written once. A
+ * component that targets a specific part of its own anatomy declares `xstyle` itself and says which
+ * element receives it.
+ */
+export interface XStyleProps {
+	/**
+	 * Extra styles as one or more `stylex.create(...)` objects, for a CSS property the component's
+	 * own props do not expose. Applied after the component's own styles and variants, and before
+	 * `className`, so a same-property `xstyle` value replaces a competing default or variant. A
+	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 */
+	xstyle?: XStyleProp;
+}
+
+/**
  * Resolves a component's compiled styles and public override in the one `stylex.props` call that
  * defines their precedence. `stylex.props` retains only the last value for a CSS property, so an
  * `xstyle` atom replaces a competing default or variant atom before either reaches the DOM.

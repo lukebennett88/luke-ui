@@ -3,7 +3,7 @@ import type { ListBoxSectionProps as RacListBoxSectionProps } from 'react-aria-c
 import { ListBoxSection as RacListBoxSection } from 'react-aria-components/ComboBox';
 import { Header as RacHeader } from 'react-aria-components/Header';
 import { cx } from '../../../shared/utils/utils.js';
-import type { XStyleProp } from '../../styles/xstyle.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -15,15 +15,9 @@ type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
 	'className'
 >;
 
-interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T> {
+interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T>, XStyleProps {
 	className?: RacListBoxSectionProps<T>['className'];
 	title?: ReactNode;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `ComboboxSection`'s
-	 * own styles and before `className`. A same-property `xstyle` value wins over those styles. A
-	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for a combobox section grouping. */

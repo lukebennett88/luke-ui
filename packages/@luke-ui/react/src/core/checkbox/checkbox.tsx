@@ -14,13 +14,13 @@ import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
 type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children' | 'inputRef' | 'isInvalid'>;
 
-interface _CheckboxProps extends _CheckboxOmit {
+interface _CheckboxProps extends _CheckboxOmit, XStyleProps {
 	/** Checkbox label content. */
 	children: ReactNode;
 	/** Initial selection state for an uncontrolled checkbox. */
@@ -57,12 +57,6 @@ interface _CheckboxProps extends _CheckboxOmit {
 	 * @default 'medium'
 	 */
 	size?: PrimitiveCheckboxProps['size'];
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for `Checkbox`. */

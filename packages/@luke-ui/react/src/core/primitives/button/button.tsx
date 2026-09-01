@@ -5,7 +5,7 @@ import { Button as RacButton } from 'react-aria-components/Button';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
-import type { XStyleProp } from '../../styles/xstyle.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../../types/documented-rac-props.js';
@@ -15,7 +15,7 @@ import { resolveButtonRecipeStyles } from './recipe.js';
 
 interface ButtonRecipeProps extends NonNullable<ButtonRecipeVariants> {}
 
-interface ButtonStyleProps {
+interface ButtonStyleProps extends XStyleProps {
 	/**
 	 * Visual emphasis.
 	 * @default 'solid'
@@ -36,12 +36,6 @@ interface ButtonStyleProps {
 	 * @default 'neutral'
 	 */
 	tone?: ButtonRecipeProps['tone'];
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `tone`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 type _ButtonOmit = DistributiveOmit<RacButtonProps, keyof DocumentedPressProps>;

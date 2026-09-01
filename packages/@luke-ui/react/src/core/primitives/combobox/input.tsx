@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import type { InputProps as RacInputProps } from 'react-aria-components/ComboBox';
 import { ComboBoxStateContext, Input as RacInput } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import type { XStyleProp } from '../../styles/xstyle.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -12,7 +12,7 @@ import { resolveComboboxRecipeStyles } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
 
 type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
-interface _ComboboxInputProps extends _ComboboxInputOmit {
+interface _ComboboxInputProps extends _ComboboxInputOmit, XStyleProps {
 	className?: RacInputProps['className'];
 	/**
 	 * Forwarded to the underlying `<input>` element. Accepts a callback ref or a ref
@@ -20,12 +20,6 @@ interface _ComboboxInputProps extends _ComboboxInputOmit {
 	 */
 	ref?: Ref<HTMLInputElement>;
 	size?: ComboboxSize;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for the styled combobox text input. */

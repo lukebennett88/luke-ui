@@ -18,7 +18,7 @@ import {
 	InputGroupSuffix,
 } from '../primitives/input-group/input-group.js';
 import type { InputGroupSize } from '../primitives/input-group/recipe.js';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
@@ -29,7 +29,8 @@ type _TextFieldOmit = DistributiveOmit<
 	'children' | 'isInvalid' | keyof DocumentedInputProps
 >;
 
-interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
+interface _TextFieldProps
+	extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps, XStyleProps {
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 	/** Class name forwarded to the inner input element. */
@@ -49,12 +50,6 @@ interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlo
 	size?: InputGroupSize;
 	/** Element shown after the input value. */
 	suffix?: ReactNode;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `TextField`'s own
-	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
-	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for `TextField`. */

@@ -47,10 +47,9 @@ wraps. Outside `Text`, it uses the normal compact control size.
 
 ## Custom styling
 
-Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `Checkbox`'s own props
-do not cover, or to override a same-property variant. Styles apply in this order: variant props,
-then `xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a
-variant such as `size`. `className` still beats `xstyle`.
+Pass `xstyle` to set a CSS property `Checkbox`'s own props do not cover. See
+[Styling](/docs/styling#override-a-single-property-with-xstyle) for how `xstyle` resolves against
+variants, `className`, and inline `style`.
 
 ## Accessibility
 

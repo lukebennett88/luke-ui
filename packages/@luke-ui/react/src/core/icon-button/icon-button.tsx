@@ -3,7 +3,7 @@ import type { IconName } from '../icon/icon.js';
 import { Icon } from '../icon/icon.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { renderButton } from '../primitives/button/button.js';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -16,18 +16,12 @@ import {
 
 interface IconButtonRecipeProps extends NonNullable<IconButtonRecipeVariants> {}
 
-interface IconButtonStyleProps {
+interface IconButtonStyleProps extends XStyleProps {
 	/**
 	 * Sets the button size.
 	 * @default 'medium'
 	 */
 	size?: IconButtonRecipeProps['size'];
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 type _IconButtonOmit = DistributiveOmit<

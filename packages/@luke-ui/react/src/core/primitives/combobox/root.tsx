@@ -2,7 +2,7 @@ import type { JSX, Ref } from 'react';
 import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import type { XStyleProp } from '../../styles/xstyle.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -51,7 +51,7 @@ type _ComboboxRootOmit<T extends object> = DistributiveOmit<
 >;
 
 interface _ComboboxRootProps<T extends object>
-	extends _ComboboxRootOmit<T>, ComboboxRootRedeclaredRACProps<T> {
+	extends _ComboboxRootOmit<T>, ComboboxRootRedeclaredRACProps<T>, XStyleProps {
 	/** The initially selected key (uncontrolled). */
 	defaultValue?: Key | null;
 
@@ -73,12 +73,6 @@ interface _ComboboxRootProps<T extends object>
 	size?: ComboboxSize;
 	/** The currently selected key (controlled). Pass `null` for no selection. */
 	value?: Key | null;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `ComboboxRoot`'s own
-	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
-	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for the primitive combobox root. */

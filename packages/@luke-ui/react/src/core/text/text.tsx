@@ -1,7 +1,7 @@
 import type { CompiledStyles } from '@stylexjs/stylex';
 import { Text as RacText } from 'react-aria-components/Text';
 import { typeStyleWeightRole } from '../../theme/contract.js';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
@@ -11,7 +11,7 @@ import { resolveTextRecipeStyles } from './recipe.js';
 
 interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
 
-interface TextStyleProps {
+interface TextStyleProps extends XStyleProps {
 	/**
 	 * Sets text colour.
 	 * @default 'primary'
@@ -70,12 +70,6 @@ interface TextStyleProps {
 	 * @default 'body'
 	 */
 	typography?: TextVariantProps['typography'];
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `color`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 type _TextOmit = DistributiveOmit<

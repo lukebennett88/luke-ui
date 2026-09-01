@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import type { ComponentProps, JSX, Ref } from 'react';
 import { createContext, use } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
@@ -8,12 +9,12 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
-import type { XStyleProp } from '../../styles/xstyle.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { InputGroupSize } from './recipe.js';
-import { inputGroupRecipe, resolveInputGroupRecipeStyles } from './recipe.js';
+import { resolveInputGroupRecipeStyles } from './recipe.js';
 
 const InputGroupSizeContext = createContext<InputGroupSize | null>(null);
 
@@ -26,23 +27,17 @@ function useInputGroupSize(size?: InputGroupSize): InputGroupSize {
 	return size ?? use(InputGroupSizeContext) ?? 'medium';
 }
 
-interface InputGroupPartStyleProps {
+interface InputGroupPartStyleProps extends XStyleProps {
 	/**
 	 * Overrides the size inherited from the enclosing `InputGroup`.
 	 * @default 'medium'
 	 */
 	size?: InputGroupSize;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 type _InputGroupOmit = DistributiveOmit<RacGroupProps, 'children' | 'className'>;
 
-interface _InputGroupProps extends _InputGroupOmit {
+interface _InputGroupProps extends _InputGroupOmit, XStyleProps {
 	/** The group's parts. Position follows document order. */
 	children?: RacGroupProps['children'];
 	/** Class name for the group element. */
@@ -54,12 +49,6 @@ interface _InputGroupProps extends _InputGroupOmit {
 	 * @default 'medium'
 	 */
 	size?: InputGroupSize;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for the input group root. */
@@ -122,7 +111,6 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
 export function InputGroup(props: InputGroupProps): JSX.Element {
 	const { children, className, size = 'medium', style, xstyle, ...groupProps } = props;
 	const recipeStyles = resolveInputGroupRecipeStyles({ size });
-	const slots = inputGroupRecipe({ size });
 
 	return (
 		<InputGroupSizeContext.Provider value={size}>
@@ -149,7 +137,7 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 								{isInvalid ? (
 									<Icon
 										aria-hidden
-										className={slots.invalidIndicator()}
+										className={stylex.props(...recipeStyles.invalidIndicator).className}
 										name="exclamationTriangle"
 									/>
 								) : null}

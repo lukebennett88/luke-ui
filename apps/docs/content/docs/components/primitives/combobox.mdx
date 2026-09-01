@@ -48,10 +48,9 @@ a nested `Icon` the same way `InputGroup` does at the same control size.
 
 ## Custom styling
 
-Pass `xstyle` with one or more `stylex.create(...)` style objects for styles a combobox part's own
-props do not cover. Styles apply in this order: the part's own styles, then its variant props, then
-`xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a variant
-such as `size`. `className` still beats `xstyle`.
+Each combobox part takes its own `xstyle`, applied to that part's element. See
+[Styling](/docs/styling#override-a-single-property-with-xstyle) for how `xstyle` resolves against
+variants, `className`, and inline `style`.
 
 ## Loading and empty results
 

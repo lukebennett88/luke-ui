@@ -38,10 +38,9 @@ works with the validation state from the surrounding React Aria form control.
 
 ## Custom styling
 
-Pass `xstyle` with one or more `stylex.create(...)` style objects for styles a field part's own
-props do not cover, or to override a same-property variant. Styles apply in this order: variant
-props, then `xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins
-over a variant such as `necessityIndicator`. `className` still beats `xstyle`.
+Each field part takes its own `xstyle`, applied to that part's element. See
+[Styling](/docs/styling#override-a-single-property-with-xstyle) for how `xstyle` resolves against
+variants, `className`, and inline `style`.
 
 ## API
 

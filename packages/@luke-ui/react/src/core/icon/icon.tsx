@@ -2,7 +2,7 @@ import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../../.generated/icon-data.js';
 import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -18,18 +18,12 @@ const IconSpritesheetContext = createContext<string | null>(null);
 
 interface IconVariantProps extends NonNullable<IconRecipeVariants> {}
 
-interface IconStyleProps {
+interface IconStyleProps extends XStyleProps {
 	/**
 	 * Sets the icon size.
 	 * @default 'medium'
 	 */
 	size?: IconVariantProps['size'];
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for `IconSpritesheetProvider`. */

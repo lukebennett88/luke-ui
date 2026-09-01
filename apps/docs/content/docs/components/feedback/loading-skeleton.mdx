@@ -53,10 +53,9 @@ element, such as an `li` inside a list.
 
 ## Custom styling
 
-Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `LoadingSkeleton` does
-not set, or to override a same-property style it does set. Styles apply in this order:
-`LoadingSkeleton`'s own styles, then `xstyle`, then `className`, then inline `style`. A
-same-property `xstyle` value wins over the component's styles. `className` still beats `xstyle`.
+Pass `xstyle` to set a CSS property `LoadingSkeleton` does not set itself. See
+[Styling](/docs/styling#override-a-single-property-with-xstyle) for how `xstyle` resolves against
+variants, `className`, and inline `style`.
 
 ## Accessibility
 

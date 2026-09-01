@@ -3,7 +3,7 @@ import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button as PrimitiveButton } from '../primitives/button/button.js';
 import type { ButtonRecipeVariants as PrimitiveButtonRecipeVariants } from '../primitives/button/recipe.js';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
@@ -15,7 +15,7 @@ interface ButtonLabelRecipeProps extends NonNullable<ButtonLabelVariants> {}
 
 interface PrimitiveButtonRecipeProps extends NonNullable<PrimitiveButtonRecipeVariants> {}
 
-interface ButtonStyleProps {
+interface ButtonStyleProps extends XStyleProps {
 	/**
 	 * Visual emphasis.
 	 * @default 'solid'
@@ -49,12 +49,6 @@ interface ButtonStyleProps {
 	 * @default 'neutral'
 	 */
 	tone?: PrimitiveButtonRecipeProps['tone'];
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `tone`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 type _ButtonOmit = DistributiveOmit<

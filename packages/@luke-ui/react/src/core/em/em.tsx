@@ -1,11 +1,11 @@
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import type { TextProps } from '../text/text.js';
 import { renderText } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { resolveEmRecipeStyles } from './recipe.js';
 
-interface EmStyleProps {
+interface EmStyleProps extends XStyleProps {
 	/**
 	 * Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5.
 	 */
@@ -15,12 +15,6 @@ interface EmStyleProps {
 	 * @default 'unset'
 	 */
 	textWrap?: TextProps['textWrap'];
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `Em`'s own styles and
-	 * before `className`. A same-property `xstyle` value wins over those styles. A consumer
-	 * `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 type _EmOmit = DistributiveOmit<React.ComponentProps<'em'>, 'color'>;

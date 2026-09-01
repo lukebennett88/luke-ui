@@ -8,7 +8,7 @@ import {
 	CheckboxField as RacCheckboxField,
 } from 'react-aria-components/Checkbox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import type { XStyleProp } from '../../styles/xstyle.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -19,19 +19,13 @@ type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
 
 interface CheckboxRecipeProps extends NonNullable<CheckboxRecipeVariants> {}
 
-interface CheckboxStyleProps {
+interface CheckboxStyleProps extends XStyleProps {
 	/**
 	 * Visual size of the checkbox control.
 	 *
 	 * @default 'medium'
 	 */
 	size?: CheckboxRecipeProps['size'];
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
-	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
-	 * `size`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 interface _CheckboxProps extends _CheckboxOmit, CheckboxStyleProps {
@@ -60,14 +54,7 @@ export type CheckboxProps = Prettify<_CheckboxProps>;
 
 type _CheckboxContentOmit = DistributiveOmit<RacCheckboxButtonProps, 'children'>;
 
-interface CheckboxPartStyleProps {
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after this part's own styles
-	 * and before `className`. A same-property `xstyle` value wins over those styles. A consumer
-	 * `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
-}
+interface CheckboxPartStyleProps extends XStyleProps {}
 
 interface _CheckboxContentProps extends _CheckboxContentOmit, CheckboxPartStyleProps {
 	/** The control, indicator, and visible checkbox label. */

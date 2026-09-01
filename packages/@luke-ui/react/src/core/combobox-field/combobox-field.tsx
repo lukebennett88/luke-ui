@@ -33,7 +33,7 @@ import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
-import type { XStyleProp } from '../styles/xstyle.js';
+import type { XStyleProp, XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -55,7 +55,7 @@ type _ComboboxFieldOmit<T extends object> = DistributiveOmit<
 >;
 
 interface _ComboboxFieldProps<T extends object>
-	extends _ComboboxFieldOmit<T>, ComboboxFieldRedeclaredRACProps, FieldSlotProps {
+	extends _ComboboxFieldOmit<T>, ComboboxFieldRedeclaredRACProps, FieldSlotProps, XStyleProps {
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 
@@ -91,12 +91,6 @@ interface _ComboboxFieldProps<T extends object>
 
 	/** Control size. @default 'medium' */
 	size?: ComboboxSize;
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `ComboboxField`'s own
-	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
-	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
-	 */
-	xstyle?: XStyleProp;
 }
 
 /** Props for `ComboboxField` (searchable single-select). */
