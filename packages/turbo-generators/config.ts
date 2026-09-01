@@ -8,7 +8,11 @@ import {
 } from './src/component-creation-plan.js';
 import type { ConformanceContract } from './src/generator-shared.js';
 import { CONFORMANCE_CONTRACTS } from './src/generator-shared.js';
-import { PRIMITIVE_DEFAULTS, validatePrimitiveName } from './src/primitive-creation-plan.js';
+import {
+	PRIMITIVE_CONFORMANCE_CONTRACTS,
+	PRIMITIVE_DEFAULTS,
+	validatePrimitiveName,
+} from './src/primitive-creation-plan.js';
 
 const CONFORMANCE_CONTRACT_LABELS: Record<ConformanceContract, string> = {
 	dom: 'DOM',
@@ -91,7 +95,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				type: 'list',
 			},
 			{
-				choices: CONFORMANCE_CONTRACTS.map((contract) => ({
+				choices: PRIMITIVE_CONFORMANCE_CONTRACTS.map((contract) => ({
 					name: CONFORMANCE_CONTRACT_LABELS[contract],
 					value: contract,
 				})),

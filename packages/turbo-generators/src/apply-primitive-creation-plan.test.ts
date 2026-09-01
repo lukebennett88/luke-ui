@@ -123,17 +123,39 @@ describe('createPrimitive', () => {
 			name: 'FieldRoot',
 		});
 
+		await expect(
+			readFile(
+				join(
+					root,
+					'packages/@luke-ui/react/src/core/primitives/field-root/field-root.browser.test.tsx',
+				),
+				'utf8',
+			),
+		).rejects.toMatchObject({ code: 'ENOENT' });
+		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
+			"['Field Root primitive', 'primitives/field-root', [], 'none', 'none']",
+		);
+	});
+
+	it('scaffolds a DOM conformance test when requested', async () => {
+		const root = await createRepositoryFixture();
+
+		await createPrimitive(root, {
+			conformance: ['dom'],
+			name: 'ActionChip',
+		});
+
 		const browserTest = await readFile(
 			join(
 				root,
-				'packages/@luke-ui/react/src/core/primitives/field-root/field-root.browser.test.tsx',
+				'packages/@luke-ui/react/src/core/primitives/action-chip/action-chip.browser.test.tsx',
 			),
 			'utf8',
 		);
-		expect(browserTest).toContain("test('FieldRoot renders its root element'");
-		expect(browserTest).not.toContain('testConformance');
+		expect(browserTest).toContain('testConformance');
+		expect(browserTest).toContain("path: 'primitives/action-chip'");
 		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['Field Root primitive', 'primitives/field-root', [], 'none', 'none']",
+			"['Action Chip primitive', 'primitives/action-chip', ['dom'], 'none', 'none']",
 		);
 	});
 

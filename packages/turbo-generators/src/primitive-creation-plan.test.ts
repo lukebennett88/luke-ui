@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { access } from 'node:fs/promises';
 import { parseSync } from 'oxc-parser';
 import { describe, expect, it } from 'vite-plus/test';
+import { ZodError } from 'zod';
 import { findComponentPropsTableTags } from '../../../apps/docs/src/lib/component-props-table-tags.js';
 import {
 	PRIMITIVE_DEFAULTS,
@@ -30,6 +31,12 @@ describe('parsePrimitiveAnswers', () => {
 			'Use letters/numbers/hyphens. Start with a letter.',
 		);
 	});
+
+	it('rejects unsupported field conformance', () => {
+		expect(() => parsePrimitiveAnswers({ conformance: ['field'], name: 'StatusBadge' })).toThrow(
+			ZodError,
+		);
+	});
 });
 
 describe('validatePrimitiveName', () => {
@@ -40,23 +47,22 @@ describe('validatePrimitiveName', () => {
 });
 
 describe('createPrimitivePlan', () => {
-	it('plans a primitive with docs, a colocated recipe, and a public export module', () => {
+	it('plans invariant wiring with hosted docs and a minimal placeholder implementation', () => {
 		const plan = createPrimitivePlan(validAnswers);
 
 		expect(plan.expected).toEqual({
-			exampleSlug: 'status-badge-primitive/basic',
-			hostedDocsPath: 'components/primitives/status-badge',
-			packageDocsSlug: 'primitives/status-badge',
 			packageExportPath: './primitives/status-badge',
 		});
 		expect(plan.files.map((file) => file.path).sort()).toEqual([
 			'apps/docs/content/docs/components/primitives/status-badge.mdx',
 			'apps/docs/src/examples/status-badge-primitive/basic.tsx',
 			'packages/@luke-ui/react/src/core/primitives/status-badge/recipe.css.ts',
-			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
 			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx',
 			'packages/@luke-ui/react/src/exports/primitives/status-badge.ts',
 		]);
+		expect(plan.files.map((file) => file.path)).not.toContain(
+			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
+		);
 		expect(plan).not.toHaveProperty('jsonEdits');
 		expect(plan).not.toHaveProperty('sortedImportEdits');
 		expect(plan).not.toHaveProperty('textFileInserts');
@@ -70,9 +76,6 @@ describe('createPrimitivePlan', () => {
 		const packageExportSource = plan.files.find((file) =>
 			file.path.endsWith('/exports/primitives/status-badge.ts'),
 		)?.contents;
-		const browserTestSource = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/status-badge.browser.test.tsx'),
-		)?.contents;
 		const guide = plan.files.find((file) =>
 			file.path.endsWith('primitives/status-badge.mdx'),
 		)?.contents;
@@ -82,16 +85,14 @@ describe('createPrimitivePlan', () => {
 
 		expect(primitiveSource).toContain('export function StatusBadge');
 		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
-		expect(recipeSource).toContain("import { recipe } from '../../styles/recipe.js';");
+		expect(recipeSource).toContain('base: {},');
+		expect(recipeSource).not.toContain('inline-flex');
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../../core/primitives/status-badge/status-badge.js';",
 		);
 		expect(packageExportSource).toContain(
 			"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../../core/primitives/status-badge/recipe.css.js';",
 		);
-		expect(browserTestSource).toContain("test('StatusBadge renders its root element'");
-		expect(browserTestSource).not.toContain('testConformance');
-		expect(browserTestSource).toContain("from './status-badge.js'");
 		expect(example).toContain("from '@luke-ui/react/primitives/status-badge'");
 		expect(example).toContain('export default () => {');
 		expect(example).not.toContain('export default function Basic');
@@ -109,7 +110,6 @@ describe('createPrimitivePlan', () => {
 		const plan = createPrimitivePlan({ docs: false, name: 'StatusBadge' });
 
 		expect(plan.expected).toEqual({
-			packageDocsSlug: 'primitives/status-badge',
 			packageExportPath: './primitives/status-badge',
 		});
 		expect(plan.files.map((file) => file.path)).not.toEqual(
@@ -130,9 +130,14 @@ describe('createPrimitivePlan', () => {
 		expect(violations).toEqual([]);
 	});
 
-	it('scaffolds dom conformance when requested', () => {
-		const plan = createPrimitivePlan({ conformance: ['dom'], name: 'StatusBadge' });
-		const browserTestSource = plan.files.find((file) =>
+	it('scaffolds a DOM conformance test only when requested', () => {
+		const withoutDom = createPrimitivePlan(validAnswers);
+		expect(withoutDom.files.map((file) => file.path)).not.toContain(
+			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
+		);
+
+		const withDom = createPrimitivePlan({ conformance: ['dom'], name: 'StatusBadge' });
+		const browserTestSource = withDom.files.find((file) =>
 			file.path.endsWith('/status-badge/status-badge.browser.test.tsx'),
 		)?.contents;
 		if (browserTestSource === undefined) {
@@ -140,7 +145,8 @@ describe('createPrimitivePlan', () => {
 		}
 
 		expect(browserTestSource).toContain('testConformance');
-		expect(browserTestSource).not.toContain("test('StatusBadge renders its root element'");
+		expect(browserTestSource).toContain("path: 'primitives/status-badge'");
+		expect(browserTestSource).not.toContain('getControl');
 	});
 });
 

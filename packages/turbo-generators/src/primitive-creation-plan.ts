@@ -1,9 +1,11 @@
 import * as z from 'zod';
 import { renderComponentPropsTable } from './creation-plan-docs.js';
 import type { CreationWork, PlanFile } from './creation-plan-types.js';
-import { CONFORMANCE_CONTRACTS, formatConformanceList } from './generator-shared.js';
-import type { ConformanceContract } from './generator-shared.js';
+import { formatConformanceList } from './generator-shared.js';
 import { toCamelCase, toDisplayName, toKebabCase, validateScaffoldName } from './naming.js';
+
+/** Conformance contracts the primitive scaffold can satisfy today. */
+export const PRIMITIVE_CONFORMANCE_CONTRACTS = ['dom'] as const;
 
 export const PRIMITIVE_DEFAULTS = {
 	conformance: [],
@@ -12,9 +14,6 @@ export const PRIMITIVE_DEFAULTS = {
 
 export interface PrimitiveCreationPlan {
 	expected: {
-		exampleSlug?: string;
-		hostedDocsPath?: string;
-		packageDocsSlug: string;
 		packageExportPath: string;
 	};
 	files: Array<PlanFile>;
@@ -23,7 +22,9 @@ export interface PrimitiveCreationPlan {
 interface PrimitiveCreationWork extends PrimitiveCreationPlan, CreationWork {}
 
 const primitiveAnswersSchema = z.object({
-	conformance: z.array(z.enum(CONFORMANCE_CONTRACTS)).default([...PRIMITIVE_DEFAULTS.conformance]),
+	conformance: z
+		.array(z.enum(PRIMITIVE_CONFORMANCE_CONTRACTS))
+		.default([...PRIMITIVE_DEFAULTS.conformance]),
 	docs: z.boolean().default(PRIMITIVE_DEFAULTS.docs),
 	name: z.string(),
 });
@@ -57,22 +58,16 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	const recipeName = `${camelName}Recipe`;
 	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/primitives/${name}`;
-	const exampleSlug = `${name}-primitive/basic`;
 	const docsTitle = `${displayName} primitive`;
-	const conformance = [...CONFORMANCE_CONTRACTS].filter((contract) =>
-		input.conformance.includes(contract),
-	);
+	const hasDomConformance = input.conformance.includes('dom');
+	const conformance = hasDomConformance ? (['dom'] as const) : ([] as const);
 
+	// Most primitives on main are multi-part compositions without a single root. The scaffold keeps
+	// a minimal div and recipe so the public export and stylesheet registration can build; replace
+	// both when the real primitive shape is known.
 	const files: Array<PlanFile> = [
 		{
-			contents: renderPrimitiveSource({
-				camelName,
-				name,
-				packagePath,
-				pascalName,
-				recipeName,
-				variantsType,
-			}),
+			contents: renderPrimitiveSource({ pascalName, recipeName }),
 			path: `packages/@luke-ui/react/src/core/primitives/${name}/${name}.tsx`,
 		},
 		{
@@ -83,24 +78,23 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 			contents: renderRecipe({ recipeName, variantsType }),
 			path: `packages/@luke-ui/react/src/core/primitives/${name}/recipe.css.ts`,
 		},
-		{
-			contents: renderPrimitiveTest({
-				conformance,
-				name,
-				pascalName,
-			}),
-			path: `packages/@luke-ui/react/src/core/primitives/${name}/${name}.browser.test.tsx`,
-		},
 	];
+
+	if (hasDomConformance) {
+		files.push({
+			contents: renderDomConformanceTest({ name, pascalName }),
+			path: `packages/@luke-ui/react/src/core/primitives/${name}/${name}.browser.test.tsx`,
+		});
+	}
 
 	if (input.docs) {
 		files.push(
 			{
-				contents: renderHostedExample({ name, pascalName, packagePath }),
+				contents: renderHostedExample({ packagePath, pascalName }),
 				path: `apps/docs/src/examples/${name}-primitive/basic.tsx`,
 			},
 			{
-				contents: renderHostedDocsPage({ docsTitle, exampleSlug, name, pascalName }),
+				contents: renderHostedDocsPage({ docsTitle, name, pascalName }),
 				path: `apps/docs/content/docs/components/primitives/${name}.mdx`,
 			},
 		);
@@ -108,13 +102,6 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 
 	return {
 		expected: {
-			...(input.docs
-				? {
-						exampleSlug,
-						hostedDocsPath: `components/primitives/${name}`,
-					}
-				: {}),
-			packageDocsSlug: `primitives/${name}`,
 			packageExportPath: `./primitives/${name}`,
 		},
 		files,
@@ -149,14 +136,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	};
 }
 
-function renderPrimitiveSource(input: {
-	camelName: string;
-	name: string;
-	packagePath: string;
-	pascalName: string;
-	recipeName: string;
-	variantsType: string;
-}): string {
+function renderPrimitiveSource(input: { pascalName: string; recipeName: string }): string {
 	return `import type { ComponentProps, JSX } from 'react';
 import { cx } from '../../../shared/utils/utils.js';
 import { ${input.recipeName} } from './recipe.css.js';
@@ -188,20 +168,14 @@ function renderRecipe(input: { recipeName: string; variantsType: string }): stri
 import { recipe } from '../../styles/recipe.js';
 
 export const ${input.recipeName} = recipe({
-	base: {
-		display: 'inline-flex',
-	},
+	base: {},
 });
 
 export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
 `;
 }
 
-function renderHostedExample(input: {
-	name: string;
-	packagePath: string;
-	pascalName: string;
-}): string {
+function renderHostedExample(input: { packagePath: string; pascalName: string }): string {
 	return `import { ${input.pascalName} } from '${input.packagePath}';
 
 export default () => {
@@ -212,10 +186,10 @@ export default () => {
 
 function renderHostedDocsPage(input: {
 	docsTitle: string;
-	exampleSlug: string;
 	name: string;
 	pascalName: string;
 }): string {
+	const exampleSlug = `${input.name}-primitive/basic`;
 	const propsPath = `packages/@luke-ui/react/src/core/primitives/${input.name}/${input.name}.tsx`;
 	const propsTable = renderComponentPropsTable({
 		name: `${input.pascalName}Props`,
@@ -228,7 +202,7 @@ source: packages/@luke-ui/react/src/exports/primitives/${input.name}.ts
 ---
 
 <ExampleBlock
-	src="${input.exampleSlug}"
+	src="${exampleSlug}"
 	title="${input.docsTitle} — Basic"
 />
 
@@ -238,55 +212,19 @@ ${propsTable}
 `;
 }
 
-function renderPrimitiveTest(input: {
-	conformance: ReadonlyArray<ConformanceContract>;
-	name: string;
-	pascalName: string;
-}): string {
-	const hasDom = input.conformance.includes('dom');
-	const hasField = input.conformance.includes('field');
-	const helperImports = [hasDom || hasField ? 'testConformance' : undefined].filter(
-		(value): value is string => value != null,
-	);
-	const imports = [
-		...(helperImports.length > 0
-			? [`import { ${helperImports.join(', ')} } from '../../conformance/helpers.js';`]
-			: ["import { expect, test } from 'vite-plus/test';"]),
-		"import { render } from '../../test-utils/render.js';",
-		`import { ${input.pascalName} } from './${input.name}.js';`,
-	];
+function renderDomConformanceTest(input: { name: string; pascalName: string }): string {
+	return `import { testConformance } from '../../conformance/helpers.js';
+import { render } from '../../test-utils/render.js';
+import { ${input.pascalName} } from './${input.name}.js';
 
-	const renderComponent = `render(<${input.pascalName} {...props}>Content</${input.pascalName}>)`;
-	const locators = [
-		hasField
-			? `	getControl: (result) => {
-		const control = result.container.querySelector('[name="conformance-field"]');
-		if (!(control instanceof HTMLElement)) throw new Error('Expected a native field control.');
-		return control;
-	},`
-			: undefined,
-		hasDom
-			? `	getTarget: (result) => {
+testConformance({
+	path: 'primitives/${input.name}',
+	getTarget: (result) => {
 		const target = result.container.firstElementChild;
 		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
 		return target;
-	},`
-			: undefined,
-	].filter((value): value is string => value != null);
-	const contract =
-		hasDom || hasField
-			? `testConformance({
-	path: 'primitives/${input.name}',
-${locators.join('\n')}
-	render: (props = {}) => ${renderComponent},
-});`
-			: `test('${input.pascalName} renders its root element', () => {
-	const result = render(<${input.pascalName}>Content</${input.pascalName}>);
-	expect(result.locator.element().firstElementChild).toHaveTextContent('Content');
-});`;
-
-	return `${imports.join('\n')}
-
-${contract}
+	},
+	render: (props = {}) => render(<${input.pascalName} {...props}>Content</${input.pascalName}>),
+});
 `;
 }
