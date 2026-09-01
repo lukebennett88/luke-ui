@@ -1,13 +1,11 @@
 import * as z from 'zod';
+import { renderComponentPropsTable } from './creation-plan-docs.js';
 import type { CreationWork, PlanFile } from './creation-plan-types.js';
+import { CONFORMANCE_CONTRACTS, formatConformanceList } from './generator-shared.js';
+import type { ConformanceContract } from './generator-shared.js';
 import { toCamelCase, toDisplayName, toKebabCase, validateScaffoldName } from './naming.js';
 
-export const CONFORMANCE_CONTRACTS = ['dom', 'field'] as const;
-/**
- * Docs groups the component generator can place a guide in. `primitives` stays out: primitive
- * pages are authored by hand under `components/primitives`, not scaffolded with a normal
- * component.
- */
+/** Docs groups the component generator can place a guide in. */
 export const DOC_GROUPS = [
 	'actions',
 	'feedback',
@@ -22,8 +20,6 @@ export const COMPONENT_DEFAULTS = {
 	integrationTripwire: false,
 	visualCoverage: true,
 } as const;
-
-export type ConformanceContract = (typeof CONFORMANCE_CONTRACTS)[number];
 
 export interface ComponentCreationPlan {
 	expected: {
@@ -49,7 +45,7 @@ export type CreateComponentInput = z.input<typeof componentAnswersSchema>;
 type ParsedComponentAnswers = z.output<typeof componentAnswersSchema>;
 
 export function validateComponentName(value: unknown): true | string {
-	return validateScaffoldName(value);
+	return validateScaffoldName(value, 'component');
 }
 
 export function parseComponentAnswers(answers: unknown): ParsedComponentAnswers {
@@ -240,11 +236,6 @@ export default function Basic() {
 `;
 }
 
-function formatConformanceList(conformance: ReadonlyArray<ConformanceContract>): string {
-	if (conformance.length === 0) return '[]';
-	return `[${conformance.map((contract) => `'${contract}'`).join(', ')}]`;
-}
-
 function renderComponentTest(input: {
 	conformance: ReadonlyArray<ConformanceContract>;
 	integrationTripwire: 'none' | 'required';
@@ -363,14 +354,6 @@ source: packages/@luke-ui/react/src/exports/${input.name}.ts
 
 ${propsTable}
 `;
-}
-
-/** Matches `component-props-table` formatting in hosted component guides — inline under 100 characters, tab-indented otherwise. */
-function renderComponentPropsTable(entry: { name: string; path: string }): string {
-	const inline = `<component-props-table path="${entry.path}" name="${entry.name}" />`;
-	if (inline.length <= 100) return inline;
-
-	return `<component-props-table\n\tpath="${entry.path}"\n\tname="${entry.name}"\n/>`;
 }
 
 function renderRecipe(input: { recipeName: string; variantsType: string }): string {

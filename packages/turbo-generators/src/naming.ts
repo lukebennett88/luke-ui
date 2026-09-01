@@ -1,16 +1,23 @@
-const COMPONENT_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
+const SCAFFOLD_NAME_PATTERN = /^[A-Za-z][A-Za-z0-9-]*$/;
 const CAMEL_BOUNDARY_PATTERN = /([a-z0-9])([A-Z])/g;
 const NON_ALPHANUM_PATTERN = /[^A-Za-z0-9-]/g;
 
-export function validateScaffoldName(value: unknown): true | string {
+export type ScaffoldNoun = 'component' | 'primitive';
+
+function scaffoldNameLabel(noun: ScaffoldNoun): string {
+	return noun === 'component' ? 'Component' : 'Primitive';
+}
+
+export function validateScaffoldName(value: unknown, noun: ScaffoldNoun): true | string {
+	const label = scaffoldNameLabel(noun);
 	if (typeof value !== 'string') {
-		return 'Component name required.';
+		return `${label} name required.`;
 	}
 	const trimmed = value.trim();
 	if (!trimmed) {
-		return 'Component name required.';
+		return `${label} name required.`;
 	}
-	if (!COMPONENT_NAME_PATTERN.test(trimmed)) {
+	if (!SCAFFOLD_NAME_PATTERN.test(trimmed)) {
 		return 'Use letters/numbers/hyphens. Start with a letter.';
 	}
 	return true;

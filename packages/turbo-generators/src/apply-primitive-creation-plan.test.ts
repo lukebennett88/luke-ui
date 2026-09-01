@@ -2,6 +2,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
+import * as z from 'zod';
+import { createComponent } from './apply-component-creation-plan.js';
 import { createPrimitive } from './apply-primitive-creation-plan.js';
 
 const roots: Array<string> = [];
@@ -58,13 +60,25 @@ describe('createPrimitive', () => {
 			[
 				'const entries = [',
 				"\t['Button', 'button', ['dom'], 'required', 'applicable'],",
-				"\t['Status Badge primitive', 'primitives/status-badge', ['dom'], 'none', 'none'],",
+				"\t['Status Badge primitive', 'primitives/status-badge', [], 'none', 'none'],",
 				MANIFEST_MARKER,
 				'\tname,',
 				'}));',
 				'',
 			].join('\n'),
 		);
+		await expect(
+			readJson(root, 'apps/docs/content/docs/components/primitives/meta.json'),
+		).resolves.toEqual({
+			pages: ['status-badge'],
+			title: 'Primitives',
+		});
+		await expect(
+			readFile(join(root, 'apps/docs/src/examples/status-badge-primitive/basic.tsx'), 'utf8'),
+		).resolves.toContain("from '@luke-ui/react/primitives/status-badge'");
+		await expect(
+			readFile(join(root, 'apps/docs/content/docs/components/primitives/status-badge.mdx'), 'utf8'),
+		).resolves.toContain('src="status-badge-primitive/basic"');
 	});
 
 	it('inserts a generated recipe import in code-point order', async () => {
@@ -93,11 +107,10 @@ describe('createPrimitive', () => {
 		);
 	});
 
-	it('scaffolds empty conformance on disk', async () => {
+	it('scaffolds empty conformance on disk by default', async () => {
 		const root = await createRepositoryFixture();
 
 		await createPrimitive(root, {
-			conformance: [],
 			name: 'FieldRoot',
 		});
 
@@ -114,18 +127,90 @@ describe('createPrimitive', () => {
 			"['Field Root primitive', 'primitives/field-root', [], 'none', 'none']",
 		);
 	});
+
+	it('omits hosted docs when docs are disabled', async () => {
+		const root = await createRepositoryFixture({
+			primitivesMeta: {
+				pages: ['button'],
+				title: 'Primitives',
+			},
+		});
+
+		await createPrimitive(root, { docs: false, name: 'StatusBadge' });
+
+		await expect(
+			readFile(join(root, 'apps/docs/content/docs/components/primitives/status-badge.mdx'), 'utf8'),
+		).rejects.toMatchObject({ code: 'ENOENT' });
+		await expect(
+			readJson(root, 'apps/docs/content/docs/components/primitives/meta.json'),
+		).resolves.toEqual({
+			pages: ['button'],
+			title: 'Primitives',
+		});
+	});
+
+	it('writes docs navigation JSON that is already formatter-clean', async () => {
+		const root = await createRepositoryFixture({
+			primitivesMeta: {
+				pages: ['button'],
+				title: 'Primitives',
+			},
+		});
+
+		await createPrimitive(root, { name: 'StatusBadge' });
+
+		await expect(
+			readFile(join(root, 'apps/docs/content/docs/components/primitives/meta.json'), 'utf8'),
+		).resolves.toBe('{\n\t"pages": ["button", "status-badge"],\n\t"title": "Primitives"\n}\n');
+	});
+});
+
+describe('shared creation-plan application', () => {
+	it('applies component and primitive plans through the same machinery', async () => {
+		const root = await createRepositoryFixture({
+			primitivesMeta: {
+				pages: [],
+				title: 'Primitives',
+			},
+		});
+		await mkdir(join(root, 'apps/docs/content/docs/components/feedback'), { recursive: true });
+		await writeFile(
+			join(root, 'apps/docs/content/docs/components/meta.json'),
+			`${JSON.stringify({ pages: ['actions'], title: 'Components' }, null, '\t')}\n`,
+			'utf8',
+		);
+
+		await createComponent(root, { docsGroup: 'feedback', name: 'StatusBadge' });
+		await createPrimitive(root, { name: 'InputAddon' });
+
+		await expect(
+			readFile(join(root, 'packages/@luke-ui/react/src/exports/status-badge.ts'), 'utf8'),
+		).resolves.toContain('StatusBadge');
+		await expect(
+			readFile(join(root, 'packages/@luke-ui/react/src/exports/primitives/input-addon.ts'), 'utf8'),
+		).resolves.toContain('export {');
+	});
 });
 
 const modulesRegistryPath = 'packages/@luke-ui/react/src/core/styles/modules.css.ts';
 const manifestPath = 'packages/@luke-ui/react/src/core/conformance/manifest.ts';
 
-async function createRepositoryFixture(options?: { modulesRegistry?: string }): Promise<string> {
+async function createRepositoryFixture(options?: {
+	modulesRegistry?: string;
+	primitivesMeta?: { pages: Array<string>; title: string };
+}): Promise<string> {
 	const root = await mkdtemp(join(tmpdir(), 'primitive-plan-'));
 	roots.push(root);
 
+	await mkdir(join(root, 'apps/docs/content/docs/components/primitives'), { recursive: true });
 	await mkdir(join(root, 'packages/@luke-ui/react/src/core/styles'), { recursive: true });
 	await mkdir(join(root, 'packages/@luke-ui/react/src/core/conformance'), { recursive: true });
 
+	await writeFile(
+		join(root, 'apps/docs/content/docs/components/primitives/meta.json'),
+		`${JSON.stringify(options?.primitivesMeta ?? { pages: [], title: 'Primitives' }, null, '\t')}\n`,
+		'utf8',
+	);
 	await writeFile(
 		join(root, modulesRegistryPath),
 		options?.modulesRegistry ??
@@ -151,4 +236,8 @@ async function createRepositoryFixture(options?: { modulesRegistry?: string }): 
 	);
 
 	return root;
+}
+
+async function readJson(root: string, path: string): Promise<unknown> {
+	return z.unknown().parse(JSON.parse(await readFile(join(root, path), 'utf8')));
 }

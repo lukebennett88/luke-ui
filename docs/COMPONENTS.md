@@ -41,9 +41,11 @@ modules own name validation, documentation groups, conformance contracts, and de
 Plop collect answers and invoke that flow. Keep new creation rules in the plan module so tests can
 prove the files, exports, stories, docs, and checks a component or primitive needs.
 
-The generator creates the component guide's primary `apps/docs/src/examples/<component>/basic.tsx`
-example and references it with `ExampleBlock`. Replace the placeholder content with one focused,
-renderable use of the component.
+The component generator creates the component guide's primary
+`apps/docs/src/examples/<component>/basic.tsx` example and references it with `ExampleBlock`. The
+primitive generator creates `apps/docs/src/examples/<name>-primitive/basic.tsx`, the matching MDX
+page under `components/primitives/`, and updates `components/primitives/meta.json`. Replace the
+placeholder content with one focused, renderable use of the component or primitive.
 
 Do not move creation rules into one-off generator code.
 

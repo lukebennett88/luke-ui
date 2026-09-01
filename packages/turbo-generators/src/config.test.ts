@@ -54,5 +54,6 @@ describe('primitive generator prompts', () => {
 		expect(conformance?.default).toEqual(
 			expect.arrayContaining([...PRIMITIVE_DEFAULTS.conformance]),
 		);
+		expect(prompts.find((prompt) => prompt.name === 'docs')?.default).toBe(PRIMITIVE_DEFAULTS.docs);
 	});
 });

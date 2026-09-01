@@ -1,13 +1,13 @@
 import type { PlopTypes } from '@turbo/gen';
 import { createComponent } from './src/apply-component-creation-plan.js';
 import { createPrimitive } from './src/apply-primitive-creation-plan.js';
-import type { ConformanceContract } from './src/component-creation-plan.js';
 import {
 	COMPONENT_DEFAULTS,
-	CONFORMANCE_CONTRACTS,
 	DOC_GROUPS,
 	validateComponentName,
 } from './src/component-creation-plan.js';
+import type { ConformanceContract } from './src/generator-shared.js';
+import { CONFORMANCE_CONTRACTS } from './src/generator-shared.js';
 import { PRIMITIVE_DEFAULTS, validatePrimitiveName } from './src/primitive-creation-plan.js';
 
 const CONFORMANCE_CONTRACT_LABELS: Record<ConformanceContract, string> = {
@@ -82,6 +82,13 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				name: 'name',
 				type: 'input',
 				validate: validatePrimitiveName,
+			},
+			{
+				choices: YES_NO,
+				default: PRIMITIVE_DEFAULTS.docs,
+				message: 'Add hosted docs?',
+				name: 'docs',
+				type: 'list',
 			},
 			{
 				choices: CONFORMANCE_CONTRACTS.map((contract) => ({

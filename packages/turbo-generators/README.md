@@ -10,7 +10,7 @@ Custom generators for `turbo generate`.
   module registry, and conformance manifest entries.
 
 The component generator asks for name, docs group, visual coverage, conformance contracts, and an
-integration tripwire. The primitive generator asks for name and conformance contracts.
+integration tripwire. The primitive generator asks for name, hosted docs, and conformance contracts.
 
 Generated component and primitive folders use a named implementation file. Public modules live in
 `src/exports/`.
@@ -27,5 +27,6 @@ pnpm generate:primitive
 - `config.ts`: Turbo/Plop adapter that collects answers and invokes the creation flow.
 - `src/component-creation-plan.ts`: Component generator rules, answer parsing, and planned files.
 - `src/primitive-creation-plan.ts`: Primitive generator rules, answer parsing, and planned files.
+- `src/apply-creation-plan.ts`: Applies parsed creation plans to the repository.
 - `src/apply-component-creation-plan.ts`: Applies a parsed component scaffold to the repository.
 - `src/apply-primitive-creation-plan.ts`: Applies a parsed primitive scaffold to the repository.

@@ -1,4 +1,4 @@
-import { applyCreationPlan } from './apply-component-creation-plan.js';
+import { applyCreationPlan } from './apply-creation-plan.js';
 import type { PrimitiveCreationPlan } from './primitive-creation-plan.js';
 import { createPrimitiveWork, parsePrimitiveAnswers } from './primitive-creation-plan.js';
 

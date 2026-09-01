@@ -1,15 +1,19 @@
 import * as z from 'zod';
-import { CONFORMANCE_CONTRACTS } from './component-creation-plan.js';
-import type { ConformanceContract } from './component-creation-plan.js';
+import { renderComponentPropsTable } from './creation-plan-docs.js';
 import type { CreationWork, PlanFile } from './creation-plan-types.js';
+import { CONFORMANCE_CONTRACTS, formatConformanceList } from './generator-shared.js';
+import type { ConformanceContract } from './generator-shared.js';
 import { toCamelCase, toDisplayName, toKebabCase, validateScaffoldName } from './naming.js';
 
 export const PRIMITIVE_DEFAULTS = {
-	conformance: ['dom'],
+	conformance: [],
+	docs: true,
 } as const;
 
 export interface PrimitiveCreationPlan {
 	expected: {
+		exampleSlug?: string;
+		hostedDocsPath?: string;
 		packageDocsSlug: string;
 		packageExportPath: string;
 	};
@@ -20,6 +24,7 @@ interface PrimitiveCreationWork extends PrimitiveCreationPlan, CreationWork {}
 
 const primitiveAnswersSchema = z.object({
 	conformance: z.array(z.enum(CONFORMANCE_CONTRACTS)).default([...PRIMITIVE_DEFAULTS.conformance]),
+	docs: z.boolean().default(PRIMITIVE_DEFAULTS.docs),
 	name: z.string(),
 });
 
@@ -27,7 +32,7 @@ export type CreatePrimitiveInput = z.input<typeof primitiveAnswersSchema>;
 type ParsedPrimitiveAnswers = z.output<typeof primitiveAnswersSchema>;
 
 export function validatePrimitiveName(value: unknown): true | string {
-	return validateScaffoldName(value);
+	return validateScaffoldName(value, 'primitive');
 }
 
 export function parsePrimitiveAnswers(answers: unknown): ParsedPrimitiveAnswers {
@@ -52,6 +57,8 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	const recipeName = `${camelName}Recipe`;
 	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/primitives/${name}`;
+	const exampleSlug = `${name}-primitive/basic`;
+	const docsTitle = `${displayName} primitive`;
 	const conformance = [...CONFORMANCE_CONTRACTS].filter((contract) =>
 		input.conformance.includes(contract),
 	);
@@ -86,13 +93,42 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 		},
 	];
 
+	if (input.docs) {
+		files.push(
+			{
+				contents: renderHostedExample({ name, pascalName, packagePath }),
+				path: `apps/docs/src/examples/${name}-primitive/basic.tsx`,
+			},
+			{
+				contents: renderHostedDocsPage({ docsTitle, exampleSlug, name, pascalName }),
+				path: `apps/docs/content/docs/components/primitives/${name}.mdx`,
+			},
+		);
+	}
+
 	return {
 		expected: {
+			...(input.docs
+				? {
+						exampleSlug,
+						hostedDocsPath: `components/primitives/${name}`,
+					}
+				: {}),
 			packageDocsSlug: `primitives/${name}`,
 			packageExportPath: `./primitives/${name}`,
 		},
 		files,
-		jsonEdits: [],
+		jsonEdits: input.docs
+			? [
+					{
+						key: 'pages',
+						kind: 'array-add-sorted',
+						path: 'apps/docs/content/docs/components/primitives/meta.json',
+						title: 'Primitives',
+						value: name,
+					},
+				]
+			: [],
 		sortedImportEdits: [
 			{
 				kind: 'sorted-import',
@@ -104,18 +140,13 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 			{
 				kind: 'text-insert',
 				lines: [
-					`\t['${displayName} primitive', 'primitives/${name}', ${formatConformanceList(conformance)}, 'none', 'none'],`,
+					`\t['${docsTitle}', 'primitives/${name}', ${formatConformanceList(conformance)}, 'none', 'none'],`,
 				],
 				marker: '].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({',
 				path: 'packages/@luke-ui/react/src/core/conformance/manifest.ts',
 			},
 		],
 	};
-}
-
-function formatConformanceList(conformance: ReadonlyArray<ConformanceContract>): string {
-	if (conformance.length === 0) return '[]';
-	return `[${conformance.map((contract) => `'${contract}'`).join(', ')}]`;
 }
 
 function renderPrimitiveSource(input: {
@@ -163,6 +194,47 @@ export const ${input.recipeName} = recipe({
 });
 
 export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
+`;
+}
+
+function renderHostedExample(input: {
+	name: string;
+	packagePath: string;
+	pascalName: string;
+}): string {
+	return `import { ${input.pascalName} } from '${input.packagePath}';
+
+export default function Basic() {
+	return <${input.pascalName}>${input.pascalName}</${input.pascalName}>;
+}
+`;
+}
+
+function renderHostedDocsPage(input: {
+	docsTitle: string;
+	exampleSlug: string;
+	name: string;
+	pascalName: string;
+}): string {
+	const propsPath = `packages/@luke-ui/react/src/core/primitives/${input.name}/${input.name}.tsx`;
+	const propsTable = renderComponentPropsTable({
+		name: `${input.pascalName}Props`,
+		path: propsPath,
+	});
+
+	return `---
+title: ${input.docsTitle}
+source: packages/@luke-ui/react/src/exports/primitives/${input.name}.ts
+---
+
+<ExampleBlock
+	src="${input.exampleSlug}"
+	title="${input.docsTitle} — Basic"
+/>
+
+## API
+
+${propsTable}
 `;
 }
 
