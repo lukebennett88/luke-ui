@@ -1,8 +1,11 @@
-import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { readdir, readFile } from 'node:fs/promises';
 import type { AtRule, Root, Rule } from 'postcss';
 import { parse } from 'postcss';
 import selectorParser from 'postcss-selector-parser';
 import { expect, test } from 'vite-plus/test';
+import { createStylexStylesheet } from '../../../stylex-vite-plugin.js';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
 
@@ -17,36 +20,58 @@ type LineClampClasses = {
 	numeric: Record<NumericLineClampVariant, Array<string>>;
 };
 
-test('builds the public stylesheet with the retained layer contract', async () => {
-	const stylesheet = await readPublicStylesheet();
-	const icon = await import('@luke-ui/react/icon');
-	const text = await import('@luke-ui/react/text');
-	const styles = await import('@luke-ui/react/styles');
-	const recipeClasses = [...icon.iconRecipe({ size: 'medium' }).split(' ')];
-	const textClassesByTypography = Object.fromEntries(
-		typeStyles.map((typography) => [typography, text.textRecipe({ typography }).split(' ')]),
-	) as TextClassesByTypography;
-	const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
-	const lineClampClasses: LineClampClasses = {
-		numeric: Object.fromEntries(
-			numericLineClampVariants.map((lineClamp) => [
-				lineClamp,
-				text.textRecipe({ lineClamp }).split(' '),
-			]),
-		) as Record<NumericLineClampVariant, Array<string>>,
-		singleLine: text.textRecipe({ lineClamp: true }).split(' '),
-	};
+test(
+	'builds the public stylesheet with the retained layer contract',
+	{ timeout: 30_000 },
+	async () => {
+		const stylesheet = await readPublicStylesheet();
+		const icon = await import('@luke-ui/react/icon');
+		const text = await import('@luke-ui/react/text');
+		const styles = await import('@luke-ui/react/styles');
+		const recipeClasses = [...icon.iconRecipe({ size: 'medium' }).split(' ')];
+		const textClassesByTypography = Object.fromEntries(
+			typeStyles.map((typography) => [typography, text.textRecipe({ typography }).split(' ')]),
+		) as TextClassesByTypography;
+		const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
+		const lineClampClasses: LineClampClasses = {
+			numeric: Object.fromEntries(
+				numericLineClampVariants.map((lineClamp) => [
+					lineClamp,
+					text.textRecipe({ lineClamp }).split(' '),
+				]),
+			) as Record<NumericLineClampVariant, Array<string>>,
+			singleLine: text.textRecipe({ lineClamp: true }).split(' '),
+		};
 
-	expect(() => {
-		const root = parse(stylesheet);
-		assertPrivateStylesheetSentinel(root);
-		return assertStylesheetContract(stylesheet, {
-			lineClampClasses,
-			recipeClasses,
-			textClassesByTypography,
-			utilityClasses,
-		});
-	}).not.toThrow();
+		expect(() => {
+			const root = parse(stylesheet);
+			assertPrivateStylesheetSentinel(root);
+			return assertStylesheetContract(stylesheet, {
+				lineClampClasses,
+				recipeClasses,
+				textClassesByTypography,
+				utilityClasses,
+			});
+		}).not.toThrow();
+	},
+);
+
+const camelCaseLogicalPropertyKey =
+	/\b(?:(?:min|max)?(?:Inline|Block)Size|(?:margin|padding|inset|border)(?:Block|Inline)(?:Start|End)?)\s*:/;
+
+test('migrated StyleX source keeps quoted logical keys that StyleX would otherwise lower', async () => {
+	const sourceRoot = fileURLToPath(new URL('../..', import.meta.url));
+	const filenames = await findMigratedStylexSources(sourceRoot);
+	expect(filenames.length).toBeGreaterThan(0);
+
+	const sources = await Promise.all(
+		filenames.map(async (filename) => ({ filename, source: await readFile(filename, 'utf8') })),
+	);
+	for (const { filename, source } of sources) {
+		const match = source.match(camelCaseLogicalPropertyKey);
+		if (match === null) continue;
+		throw new Error(`${filename} uses camelCase logical StyleX key "${match[0].trim()}"`);
+	}
 });
 
 const stylesheetMutations: Array<[string, (css: string) => string]> = [
@@ -165,8 +190,47 @@ test('recognises escaped class identifiers', () => {
 	}).not.toThrow();
 });
 
+test(
+	'declares the complete production layer order before dev StyleX rules load',
+	{ timeout: 30_000 },
+	async () => {
+		const [builtStylesheet, devStylesheet] = await Promise.all([
+			readPublicStylesheet(),
+			createStylexStylesheet(false),
+		]);
+
+		expect(layerOrder(devStylesheet)).toBe(layerOrder(builtStylesheet));
+	},
+);
+
+function layerOrder(stylesheet: string): string {
+	const order = stylesheet.match(/^@layer [^;]+;/m)?.[0];
+	if (order === undefined) throw new Error('Expected a cascade-layer order statement.');
+	return order;
+}
+
 async function readPublicStylesheet(): Promise<string> {
 	return readFile(new URL('../../../dist/stylesheet.css', import.meta.url), 'utf8');
+}
+
+const stylexEligibleModule = /(?<!\.d)\.[cm]?[jt]sx?$/;
+const generatedOrTestModule = /\.(?:browser|visual|test)\.[cm]?[jt]sx?$/;
+
+async function findMigratedStylexSources(directory: string): Promise<Array<string>> {
+	const entries = await readdir(directory, { withFileTypes: true });
+	const filenames = await Promise.all(
+		entries.map(async (entry) => {
+			const filename = join(directory, entry.name);
+			if (entry.isDirectory()) return findMigratedStylexSources(filename);
+			if (!stylexEligibleModule.test(filename)) return [];
+			if (filename.endsWith('.css.ts')) return [];
+			if (generatedOrTestModule.test(filename)) return [];
+			const source = await readFile(filename, 'utf8');
+			if (!source.includes('@stylexjs/stylex') || !source.includes('stylex.create')) return [];
+			return [filename];
+		}),
+	);
+	return filenames.flat();
 }
 
 function assertStylesheetContract(
@@ -431,10 +495,7 @@ function assertClassOwnership(root: Root, className: string, layerName: string):
  * layer, not the transitional `recipes` layer that still holds other components' Vanilla Extract
  * output. `assertTextTrimOwnership` and `assertLineClampOwnership` below assert that StyleX
  * ownership directly, instead of reusing `assertClassOwnership`'s single fixed `recipes` layer.
- * StyleX also resolves the logical `marginBlockEnd`/`marginBlockStart` properties Text's recipe
- * authors to their physical `margin-bottom`/`margin-top` equivalents at compile time (block-axis
- * margins do not flip under RTL, so this is a safe, direction-agnostic rewrite), which is why the
- * expected property names below differ from the logical properties `text/recipe.ts` writes.
+ * Text uses quoted logical CSS keys, which StyleX emits without lowering to physical properties.
  */
 function assertTextTrimOwnership(
 	root: Root,
@@ -447,15 +508,17 @@ function assertTextTrimOwnership(
 		assertPseudoDeclaration(
 			rules,
 			'::before',
-			'margin-bottom',
+			'margin-block-end',
 			`var(--luke-font-${typography}-cap-height-trim)`,
 		);
 		assertPseudoDeclaration(
 			rules,
 			'::after',
-			'margin-top',
+			'margin-block-start',
 			`var(--luke-font-${typography}-baseline-trim)`,
 		);
+		assertNoPhysicalTrimMargins(rules, '::before');
+		assertNoPhysicalTrimMargins(rules, '::after');
 	}
 }
 
@@ -484,6 +547,19 @@ function assertStylexDeclaration(rules: Array<Rule>, property: string, value: st
 	for (const rule of matchingRules) {
 		const layer = getOwningLayer(rule);
 		expect(layer !== undefined && stylexPriorityLayerPattern.test(layer)).toBe(true);
+	}
+}
+
+function assertNoPhysicalTrimMargins(rules: Array<Rule>, pseudo: string): void {
+	for (const rule of rules) {
+		if (!hasPseudo(rule, pseudo)) continue;
+		for (const node of rule.nodes) {
+			if (node.type !== 'decl') continue;
+			if (node.prop !== 'margin-top' && node.prop !== 'margin-bottom') continue;
+			throw new Error(
+				`Text trim ${pseudo} emitted physical ${node.prop}; expected margin-block-* keys.`,
+			);
+		}
 	}
 }
 

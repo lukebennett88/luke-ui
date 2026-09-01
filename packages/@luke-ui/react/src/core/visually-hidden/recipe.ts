@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { recipe } from '../styles/stylex-recipe.js';
+import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 /**
  * WCAG-standard "visually hidden" style: keeps content in the layout and the
@@ -16,10 +16,10 @@ import { recipe } from '../styles/stylex-recipe.js';
  */
 const styles = stylex.create({
 	visuallyHidden: {
-		blockSize: '1px', // 1px, not 0: zero dimensions trip screen-reader bugs
+		'block-size': '1px', // 1px, not 0: zero dimensions trip screen-reader bugs
 		clip: 'rect(1px, 1px, 1px, 1px)', // legacy fallback for clip-path
 		clipPath: 'inset(100%)',
-		inlineSize: '1px',
+		'inline-size': '1px',
 		overflow: 'hidden',
 		position: 'absolute',
 		whiteSpace: 'nowrap', // stop text wrapping inside the 1px box
@@ -30,6 +30,7 @@ const styles = stylex.create({
 export const visuallyHiddenStyle = styles.visuallyHidden;
 
 /** Recipe for content hidden visually but kept available to assistive technology. */
-export const visuallyHiddenRecipe = recipe({
-	base: visuallyHiddenStyle,
-});
+export const { recipe: visuallyHiddenRecipe, resolveStyles: resolveVisuallyHiddenRecipeStyles } =
+	createSingleRecipe({
+		base: visuallyHiddenStyle,
+	});

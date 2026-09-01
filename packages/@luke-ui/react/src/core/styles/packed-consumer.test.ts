@@ -3,6 +3,8 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { transformAsync } from '@babel/core';
+import stylexBabelPlugin from '@stylexjs/babel-plugin';
 import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 
@@ -80,6 +82,72 @@ test(
 
 			expect(markup).toContain('<blockquote');
 			expect(markup).toContain('Hello world');
+
+			const consumerSource = [
+				"import * as stylex from '@stylexjs/stylex';",
+				"export const consumerStyles = stylex.create({ override: { color: 'rgb(9, 9, 9)' } });",
+			].join('\n');
+			const transformedConsumer = await transformAsync(consumerSource, {
+				babelrc: false,
+				configFile: false,
+				filename: path.join(consumerDir, 'consumer-style.ts'),
+				plugins: [
+					stylexBabelPlugin.withOptions({
+						dev: false,
+						unstable_moduleResolution: { type: 'commonJS', rootDir: consumerDir },
+					}),
+				],
+			});
+			if (transformedConsumer?.code == null)
+				throw new Error('Expected the consumer StyleX transform.');
+			const consumerRules = (
+				transformedConsumer.metadata as {
+					stylex?: Parameters<typeof stylexBabelPlugin.processStylexRules>[0];
+				}
+			).stylex;
+			if (consumerRules === undefined) throw new Error('Expected consumer StyleX rules.');
+			const consumerCss = stylexBabelPlugin.processStylexRules(consumerRules);
+			expect(consumerCss).not.toContain('@layer');
+			expect(consumerCss).toMatch(/color:rgb\(9,\s*9,\s*9\)/);
+			await writeFile(path.join(consumerDir, 'consumer-style.mjs'), transformedConsumer.code);
+
+			await writeFile(
+				renderScript,
+				[
+					"import { createElement } from 'react';",
+					"import { renderToStaticMarkup } from 'react-dom/server';",
+					"import * as stylex from '@stylexjs/stylex';",
+					"import { Text, textRecipe } from '@luke-ui/react/text';",
+					"import { consumerStyles } from './consumer-style.mjs';",
+					'',
+					"const markup = renderToStaticMarkup(createElement(Text, { color: 'accent', xstyle: consumerStyles.override }, 'Hello world'));",
+					'process.stdout.write(JSON.stringify({',
+					'  markup,',
+					"  accentClasses: textRecipe({ color: 'accent' }),",
+					'  defaultClasses: textRecipe(),',
+					'  overrideClass: stylex.props(consumerStyles.override).className,',
+					'}));',
+				].join('\n'),
+			);
+			const output = JSON.parse(
+				execFileSync('node', [renderScript], {
+					cwd: consumerDir,
+					encoding: 'utf8',
+					env: { PATH: process.env.PATH ?? '' },
+				}),
+			) as {
+				accentClasses: string;
+				defaultClasses: string;
+				markup: string;
+				overrideClass: string;
+			};
+			const defaultClassSet = new Set(output.defaultClasses.split(' '));
+			const competingColorClass = output.accentClasses
+				.split(' ')
+				.find((className) => className !== '' && !defaultClassSet.has(className));
+			expect(competingColorClass).toBeDefined();
+			expect(output.markup).toContain(output.overrideClass);
+			expect(output.markup).not.toContain(competingColorClass);
 		} finally {
 			await rm(tarballDir, { force: true, recursive: true });
 			await rm(consumerDir, { force: true, recursive: true });

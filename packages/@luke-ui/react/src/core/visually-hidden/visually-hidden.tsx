@@ -1,11 +1,11 @@
 import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
 import type { XStyleProp } from '../styles/xstyle.js';
-import { resolveXStyleClassName } from '../styles/xstyle.js';
+import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import { visuallyHiddenRecipe } from './recipe.js';
+import { resolveVisuallyHiddenRecipeStyles } from './recipe.js';
 
 type _VisuallyHiddenOmit = DistributiveOmit<
 	ComponentPropsWithRef<typeof RacText>,
@@ -14,9 +14,9 @@ type _VisuallyHiddenOmit = DistributiveOmit<
 
 interface _VisuallyHiddenProps extends _VisuallyHiddenOmit, DocumentedElementTypeProps {
 	/**
-	 * Escape hatch for styling properties `VisuallyHidden`'s own styles do not set, as one or more
-	 * `stylex.create(...)` style objects. Applied after `VisuallyHidden`'s own styles and before
-	 * `className`, so a consumer `className` still beats it.
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `VisuallyHidden`'s own
+	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
+	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }
@@ -37,11 +37,12 @@ export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
  * (for example `elementType="h2"` for a screen-reader-only section heading).
  */
 export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
-	const { className, xstyle, ...racProps } = props;
-	return (
-		<RacText
-			{...racProps}
-			className={resolveXStyleClassName(visuallyHiddenRecipe(), xstyle, className)}
-		/>
+	const { className, style, xstyle, ...racProps } = props;
+	const stylexProps = resolveXStyleProps(
+		resolveVisuallyHiddenRecipeStyles(),
+		xstyle,
+		className,
+		style,
 	);
+	return <RacText {...racProps} {...stylexProps} />;
 }

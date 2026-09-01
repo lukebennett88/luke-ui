@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { tokens } from '../../theme/tokens.stylex.js';
-import { recipe } from '../styles/stylex-recipe.js';
+import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
@@ -8,6 +8,6 @@ const styles = stylex.create({
 	},
 });
 
-export const strongRecipe = recipe({
+export const { resolveStyles: resolveStrongRecipeStyles } = createSingleRecipe({
 	base: styles.root,
 });

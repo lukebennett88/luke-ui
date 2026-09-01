@@ -1,46 +1,26 @@
-import type { StyleXStyles } from '@stylexjs/stylex';
+import type { CompiledStyles, StyleXStyles } from '@stylexjs/stylex';
 import * as stylex from '@stylexjs/stylex';
+import type { CSSProperties } from 'react';
 import { cx } from '../../shared/utils/utils.js';
 
-/**
- * The type StyleX-migrated components use for their `xstyle` prop: an escape hatch that accepts
- * one or more compiled `stylex.create(...)` style objects (as `stylex.props` itself accepts —
- * `false`, `null`, and `undefined` included, so a caller's conditional expression composes
- * directly), authored against a component's own CSS property surface `CSS`.
- */
+/** Public `xstyle` input accepted by every StyleX-migrated visual component. */
 export type XStyleProp<CSS extends Record<string, unknown> = Record<string, unknown>> =
 	StyleXStyles<CSS>;
 
 /**
- * Merges a component's resolved recipe class, its `xstyle` escape hatch, and the consumer's own
- * `className` into one class string, in the precedence StyleX-migrated components apply:
- *
- *   1. internal defaults and 2. component variants — already folded into `recipeClass` by the
- *      component's own `recipe()` call, before this function ever sees it
- *   3. `xstyle` — folded through `stylex.props` here, so it participates in StyleX's cascade
- *      layering (see #550/#536) the same way the recipe's own classes do
- *   4. `className` — appended last, so an unlayered consumer class beats every layered Luke UI
- *      atom by cascade-layer precedence, regardless of the source-order position this function
- *      places it in
- *
- * `style` is never touched here — pass it through to the element untouched, unmerged with
- * anything StyleX resolves, matching `recipe()`'s own string-only contract.
- *
- * This ordering is a reliable guarantee for step 4 (`className` and `style` are structurally
- * outside StyleX's cascade-layer system, so they always win) but not for step 3 against step 2:
- * StyleX assigns each `luke.sx.priorityN` cascade layer purely by CSS property identity, the same
- * way for every `stylex.create` call, so `xstyle` and a component's own recipe land in the *same*
- * layer whenever they set the *same* property, and that collision resolves by a StyleX-internal
- * sort with no "xstyle wins" guarantee (see the precedence tests in `xstyle.browser.test.tsx` for
- * a worked example and its consequence). `xstyle` reliably applies for a property the component's
- * own recipe does not otherwise set; treat overriding a property the recipe already declares as
- * unsupported.
+ * Resolves a component's compiled styles and public override in the one `stylex.props` call that
+ * defines their precedence. `stylex.props` retains only the last value for a CSS property, so an
+ * `xstyle` atom replaces a competing default or variant atom before either reaches the DOM.
  */
-export function resolveXStyleClassName(
-	recipeClass: string,
+export function resolveXStyleProps(
+	styles: ReadonlyArray<CompiledStyles>,
 	xstyle: XStyleProp | undefined,
 	className: string | undefined,
-): string {
-	const xstyleClassName = xstyle === undefined ? undefined : stylex.props(xstyle).className;
-	return cx(recipeClass, xstyleClassName, className);
+	inlineStyle: CSSProperties | undefined,
+): { className: string | undefined; style: CSSProperties | undefined } {
+	const resolved = stylex.props(...styles, xstyle);
+	return {
+		className: cx(resolved.className, className),
+		style: resolved.style === undefined ? inlineStyle : { ...resolved.style, ...inlineStyle },
+	};
 }

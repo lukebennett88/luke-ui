@@ -70,10 +70,10 @@ rendered text only, so avoid using uppercase styling as a substitute for a clear
 
 ## Custom styling
 
-Pass `xstyle` to style a property `Text`'s own props do not expose, as one or more
-`stylex.create(...)` style objects. It applies after every prop above and before `className`, so a
-consumer `className` still beats it. It is not a reliable way to override a property a prop such as
-`color` or `typography` already sets — use that prop instead.
+Pass `xstyle` with one or more `stylex.create(...)` style objects for styles `Text`'s own props do
+not cover, or to override a same-property variant. Styles apply in this order: variant props, then
+`xstyle`, then `className`, then inline `style`. A same-property `xstyle` value wins over a variant
+such as `color`. `className` still beats `xstyle`.
 
 ## Related components
 

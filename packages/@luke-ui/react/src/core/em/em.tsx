@@ -1,10 +1,9 @@
 import type { XStyleProp } from '../styles/xstyle.js';
-import { resolveXStyleClassName } from '../styles/xstyle.js';
 import type { TextProps } from '../text/text.js';
-import { Text } from '../text/text.js';
+import { renderText } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { emRecipe } from './recipe.js';
+import { resolveEmRecipeStyles } from './recipe.js';
 
 interface EmStyleProps {
 	/**
@@ -17,9 +16,9 @@ interface EmStyleProps {
 	 */
 	textWrap?: TextProps['textWrap'];
 	/**
-	 * Escape hatch for styling properties `Em`'s own styles do not set, as one or more
-	 * `stylex.create(...)` style objects. Applied after `Em`'s own styles and before `className`, so
-	 * a consumer `className` still beats it.
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `Em`'s own styles and
+	 * before `className`. A same-property `xstyle` value wins over those styles. A consumer
+	 * `className` still beats `xstyle`, and inline `style` beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }
@@ -37,14 +36,16 @@ export type EmProps = Prettify<_EmProps>;
  */
 export function Em(props: EmProps) {
 	const { className, lineClamp, textWrap, xstyle, ...elementProps } = props;
-	return (
-		<Text
-			{...elementProps}
-			className={resolveXStyleClassName(emRecipe(), xstyle, className)}
-			elementType="em"
-			lineClamp={lineClamp}
-			shouldInheritFont
-			textWrap={textWrap}
-		/>
+	return renderText(
+		{
+			...elementProps,
+			className,
+			elementType: 'em',
+			lineClamp,
+			shouldInheritFont: true,
+			textWrap,
+			xstyle,
+		},
+		resolveEmRecipeStyles(),
 	);
 }

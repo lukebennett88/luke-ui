@@ -46,10 +46,14 @@ test('publishes only the final styling entrypoints', () => {
 	expect('imports' in packageJson).toBe(false);
 });
 
-test('bundles recipe runtime through a relative chunk, not a package import', async () => {
+test('bundles StyleX recipes as string wrappers without a package recipe-engine import', async () => {
 	const source = await readFile(new URL('../../../dist/blockquote.js', import.meta.url), 'utf8');
 	expect(source).not.toContain('#recipe-engine');
-	expect(source).toMatch(/createSingleRecipe[\s\S]*from ["']\.\//);
+	expect(source).toMatch(/from ["']\.\/stylex-recipe-/);
+	expect(source).toMatch(/recipe:\s*blockquoteRecipe/);
+	expect(source).toMatch(/export \{ Blockquote, blockquoteRecipe \}/);
+	expect(source).not.toMatch(/export \{[^}]*resolveBlockquoteRecipeStyles/);
+	expect(source).not.toMatch(/export \{[^}]*resolveStyles/);
 });
 
 test('requires react-aria-components as a peer dependency', () => {

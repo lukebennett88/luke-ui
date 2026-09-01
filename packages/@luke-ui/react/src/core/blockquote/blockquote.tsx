@@ -1,18 +1,17 @@
 import type { XStyleProp } from '../styles/xstyle.js';
-import { resolveXStyleClassName } from '../styles/xstyle.js';
 import type { TextProps } from '../text/text.js';
-import { Text } from '../text/text.js';
+import { renderText } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { blockquoteRecipe } from './recipe.js';
+import { resolveBlockquoteRecipeStyles } from './recipe.js';
 
 type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType' | 'xstyle'>;
 
 interface _BlockquoteProps extends _BlockquoteOmit {
 	/**
-	 * Escape hatch for styling properties `Blockquote`'s own styles do not set, as one or more
-	 * `stylex.create(...)` style objects. Applied after `Blockquote`'s own styles and before
-	 * `className`, so a consumer `className` still beats it.
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `Blockquote`'s own
+	 * styles and before `className`. A same-property `xstyle` value wins over those styles. A
+	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }
@@ -26,13 +25,8 @@ export type BlockquoteProps = Prettify<_BlockquoteProps>;
  */
 export function Blockquote(props: BlockquoteProps) {
 	const { children, className, xstyle, ...textProps } = props;
-	return (
-		<Text
-			{...textProps}
-			className={resolveXStyleClassName(blockquoteRecipe(), xstyle, className)}
-			elementType="blockquote"
-		>
-			{children}
-		</Text>
+	return renderText(
+		{ ...textProps, children, className, elementType: 'blockquote', xstyle },
+		resolveBlockquoteRecipeStyles(),
 	);
 }

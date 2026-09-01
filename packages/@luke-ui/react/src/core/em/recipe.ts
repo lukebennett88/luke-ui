@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { recipe } from '../styles/stylex-recipe.js';
+import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
@@ -7,6 +7,6 @@ const styles = stylex.create({
 	},
 });
 
-export const emRecipe = recipe({
+export const { resolveStyles: resolveEmRecipeStyles } = createSingleRecipe({
 	base: styles.root,
 });

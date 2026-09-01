@@ -1,12 +1,13 @@
+import type { CompiledStyles } from '@stylexjs/stylex';
 import { Text as RacText } from 'react-aria-components/Text';
 import { typeStyleWeightRole } from '../../theme/contract.js';
 import type { XStyleProp } from '../styles/xstyle.js';
-import { resolveXStyleClassName } from '../styles/xstyle.js';
+import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { TextRecipeVariants } from './recipe.js';
-import { textRecipe } from './recipe.js';
+import { resolveTextRecipeStyles } from './recipe.js';
 
 interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
 
@@ -70,11 +71,9 @@ interface TextStyleProps {
 	 */
 	typography?: TextVariantProps['typography'];
 	/**
-	 * Escape hatch for styling properties `Text`'s own props do not expose, as one or more
-	 * `stylex.create(...)` style objects. Applied after every variant prop above and before
-	 * `className`, so a consumer `className` still beats it. Use it to set a property `Text` never
-	 * declares (for example `outlineStyle`); it is not a reliable way to override a property a
-	 * variant prop such as `color` already sets — use that prop instead.
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after every variant prop
+	 * above and before `className`. A same-property `xstyle` value wins over a variant such as
+	 * `color`. A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }
@@ -109,6 +108,11 @@ const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
  * trim.
  */
 export function Text(props: TextProps) {
+	return renderText(props);
+}
+
+/** Package-private Text renderer for wrappers that contribute their own compiled styles. */
+export function renderText(props: TextProps, internalStyles: ReadonlyArray<CompiledStyles> = []) {
 	const {
 		children,
 		className,
@@ -124,6 +128,7 @@ export function Text(props: TextProps) {
 		textDecoration,
 		textTransform,
 		textWrap,
+		style,
 		typography,
 		xstyle,
 		...racProps
@@ -136,32 +141,33 @@ export function Text(props: TextProps) {
 		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
 		return !blockTextElementTypes.has(elementType);
 	})();
+	const stylexProps = resolveXStyleProps(
+		[
+			...resolveTextRecipeStyles({
+				color,
+				fontVariantNumeric,
+				...(shouldInheritFont
+					? {}
+					: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
+				isVisuallyHidden,
+				lineClamp,
+				shouldDisableTrim: resolvedShouldDisableTrim,
+				shouldInheritFont,
+				textAlign,
+				textDecoration,
+				textTransform,
+				textWrap,
+				typography: resolvedTypography,
+			}),
+			...internalStyles,
+		],
+		xstyle,
+		className,
+		style,
+	);
 
 	return (
-		<RacText
-			{...racProps}
-			className={resolveXStyleClassName(
-				textRecipe({
-					color,
-					fontVariantNumeric,
-					...(shouldInheritFont
-						? {}
-						: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
-					isVisuallyHidden,
-					lineClamp,
-					shouldDisableTrim: resolvedShouldDisableTrim,
-					shouldInheritFont,
-					textAlign,
-					textDecoration,
-					textTransform,
-					textWrap,
-					typography: resolvedTypography,
-				}),
-				xstyle,
-				className,
-			)}
-			elementType={elementType}
-		>
+		<RacText {...racProps} {...stylexProps} elementType={elementType}>
 			{children}
 		</RacText>
 	);

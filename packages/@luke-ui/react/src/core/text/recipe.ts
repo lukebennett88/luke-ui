@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { tokens } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { recipe } from '../styles/stylex-recipe.js';
+import { createSingleRecipe } from '../styles/stylex-recipe.js';
 import { visuallyHiddenStyle } from '../visually-hidden/recipe.js';
 
 // The custom-property name literal `'--text-line-height'` is repeated below rather than imported
@@ -14,7 +14,7 @@ const styles = stylex.create({
 	base: {
 		color: tokens.colorTextPrimary,
 		fontFamily: tokens.fontFamilyBody,
-		minInlineSize: 0,
+		'min-inline-size': 0,
 		overflowWrap: 'break-word',
 	},
 
@@ -55,7 +55,7 @@ const styles = stylex.create({
 		WebkitLineClamp: 2,
 		display: '-webkit-box',
 		lineClamp: 2,
-		minInlineSize: 0,
+		'min-inline-size': 0,
 		overflow: 'hidden',
 	},
 	lineClampMultiLine3: {
@@ -63,7 +63,7 @@ const styles = stylex.create({
 		WebkitLineClamp: 3,
 		display: '-webkit-box',
 		lineClamp: 3,
-		minInlineSize: 0,
+		'min-inline-size': 0,
 		overflow: 'hidden',
 	},
 	lineClampMultiLine4: {
@@ -71,7 +71,7 @@ const styles = stylex.create({
 		WebkitLineClamp: 4,
 		display: '-webkit-box',
 		lineClamp: 4,
-		minInlineSize: 0,
+		'min-inline-size': 0,
 		overflow: 'hidden',
 	},
 	lineClampMultiLine5: {
@@ -79,12 +79,12 @@ const styles = stylex.create({
 		WebkitLineClamp: 5,
 		display: '-webkit-box',
 		lineClamp: 5,
-		minInlineSize: 0,
+		'min-inline-size': 0,
 		overflow: 'hidden',
 	},
 	lineClampSingleLine: {
 		display: 'block',
-		minInlineSize: 0,
+		'min-inline-size': 0,
 		overflowX: 'clip',
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap',
@@ -220,11 +220,15 @@ const styles = stylex.create({
 	// ordering, not source order within this `stylex.create` call.
 	// ---------------------------------------------------------------------------
 	typographyTrimBody: {
-		'::after': { content: "''", display: 'table', marginBlockStart: tokens.fontBodyBaselineTrim },
+		'::after': {
+			content: "''",
+			display: 'table',
+			'margin-block-start': tokens.fontBodyBaselineTrim,
+		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontBodyCapHeightTrim,
+			'margin-block-end': tokens.fontBodyCapHeightTrim,
 		},
 		fontSize: tokens.fontBodyFontSize,
 		lineHeight: tokens.fontBodyLineHeight,
@@ -233,12 +237,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			marginBlockStart: tokens.fontCaptionBaselineTrim,
+			'margin-block-start': tokens.fontCaptionBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontCaptionCapHeightTrim,
+			'margin-block-end': tokens.fontCaptionCapHeightTrim,
 		},
 		fontSize: tokens.fontCaptionFontSize,
 		lineHeight: tokens.fontCaptionLineHeight,
@@ -247,12 +251,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			marginBlockStart: tokens.fontDisplayBaselineTrim,
+			'margin-block-start': tokens.fontDisplayBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontDisplayCapHeightTrim,
+			'margin-block-end': tokens.fontDisplayCapHeightTrim,
 		},
 		fontSize: tokens.fontDisplayFontSize,
 		lineHeight: tokens.fontDisplayLineHeight,
@@ -261,12 +265,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			marginBlockStart: tokens.fontHeading1BaselineTrim,
+			'margin-block-start': tokens.fontHeading1BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontHeading1CapHeightTrim,
+			'margin-block-end': tokens.fontHeading1CapHeightTrim,
 		},
 		fontSize: tokens.fontHeading1FontSize,
 		lineHeight: tokens.fontHeading1LineHeight,
@@ -275,12 +279,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			marginBlockStart: tokens.fontHeading2BaselineTrim,
+			'margin-block-start': tokens.fontHeading2BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontHeading2CapHeightTrim,
+			'margin-block-end': tokens.fontHeading2CapHeightTrim,
 		},
 		fontSize: tokens.fontHeading2FontSize,
 		lineHeight: tokens.fontHeading2LineHeight,
@@ -289,12 +293,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			marginBlockStart: tokens.fontHeading3BaselineTrim,
+			'margin-block-start': tokens.fontHeading3BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontHeading3CapHeightTrim,
+			'margin-block-end': tokens.fontHeading3CapHeightTrim,
 		},
 		fontSize: tokens.fontHeading3FontSize,
 		lineHeight: tokens.fontHeading3LineHeight,
@@ -303,12 +307,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			marginBlockStart: tokens.fontHeading4BaselineTrim,
+			'margin-block-start': tokens.fontHeading4BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontHeading4CapHeightTrim,
+			'margin-block-end': tokens.fontHeading4CapHeightTrim,
 		},
 		fontSize: tokens.fontHeading4FontSize,
 		lineHeight: tokens.fontHeading4LineHeight,
@@ -317,22 +321,26 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			marginBlockStart: tokens.fontLabelBaselineTrim,
+			'margin-block-start': tokens.fontLabelBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontLabelCapHeightTrim,
+			'margin-block-end': tokens.fontLabelCapHeightTrim,
 		},
 		fontSize: tokens.fontLabelFontSize,
 		lineHeight: tokens.fontLabelLineHeight,
 	},
 	typographyTrimLead: {
-		'::after': { content: "''", display: 'table', marginBlockStart: tokens.fontLeadBaselineTrim },
+		'::after': {
+			content: "''",
+			display: 'table',
+			'margin-block-start': tokens.fontLeadBaselineTrim,
+		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			marginBlockEnd: tokens.fontLeadCapHeightTrim,
+			'margin-block-end': tokens.fontLeadCapHeightTrim,
 		},
 		fontSize: tokens.fontLeadFontSize,
 		lineHeight: tokens.fontLeadLineHeight,
@@ -340,7 +348,7 @@ const styles = stylex.create({
 });
 
 /** Public recipe for the `Text` component's styles. */
-export const textRecipe = recipe({
+export const { recipe: textRecipe, resolveStyles: resolveTextRecipeStyles } = createSingleRecipe({
 	base: styles.base,
 	compoundVariants: [
 		// `shouldInheritFont: true` asks the browser to resolve font size and line height from the

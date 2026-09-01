@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { expect, expectTypeOf, test } from 'vite-plus/test';
-import { recipe } from './stylex-recipe.js';
+import { createSlottedRecipe } from './stylex-recipe.js';
 import type { RecipeSelection } from './stylex-recipe.js';
 
 const styles = stylex.create({
@@ -18,7 +18,7 @@ const styles = stylex.create({
 	},
 });
 
-const track = recipe({
+const track = createSlottedRecipe({
 	slots: {
 		root: styles.rootBase,
 		track: styles.trackBase,

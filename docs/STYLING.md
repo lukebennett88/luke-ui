@@ -209,12 +209,8 @@ the `recipes` layer. A recipe can still pre-build a static `base` with `styleInL
 and hand the resulting class string to `recipe()`, which passes a string value through unchanged
 rather than wrapping it again.
 
-`Text`'s Capsize trim declarations use logical properties for the pseudo-element margins and are
-authored as one of the StyleX `textRecipe`'s compound-variant styles (see `core/text/recipe.ts`), so
-they live in a `luke.sx.priorityN` layer through that same compound-variant mechanism rather than a
-dedicated helper. StyleX compiles the logical `marginBlockEnd`/`marginBlockStart` properties to
-physical `margin-bottom`/`margin-top` at build time — block-axis margins do not flip under RTL, so
-this is a safe, direction-agnostic rewrite, not a departure from the logical-properties rule below.
+`Text` authors quoted logical CSS keys for its Capsize pseudo-element margins, so StyleX emits
+`margin-block-end` and `margin-block-start` without lowering them to physical properties.
 
 Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
@@ -327,9 +323,9 @@ is wrong for a StyleX module and would be picked up by the VE plugin).
 ### `xstyle`
 
 Every StyleX-migrated component accepts an `xstyle` prop: an escape hatch for styling a CSS property
-the component's own props do not expose, typed `XStyleProp` and resolved with
-`resolveXStyleClassName` (both from `core/styles/xstyle.ts`). Pass one or more compiled
-`stylex.create(...)` style objects, the same way `stylex.props` itself accepts them:
+the component's own props do not expose, typed `XStyleProp` and resolved with `resolveXStyleProps`
+(both from `core/styles/xstyle.ts`). Pass one or more compiled `stylex.create(...)` style objects,
+the same way `stylex.props` itself accepts them:
 
 ```tsx
 import * as stylex from '@stylexjs/stylex';
@@ -339,15 +335,10 @@ const styles = stylex.create({ emphasis: { outlineStyle: 'dashed' } });
 <Text xstyle={styles.emphasis}>Custom outline</Text>;
 ```
 
-A component resolves its class string in this order: internal defaults, then its own variant props,
-then `xstyle`, then a consumer `className`, then inline `style`. `className` and `style` reliably
-beat `xstyle` — they sit structurally outside StyleX's cascade-layer system, so an unlayered
-consumer class or an inline style always wins. `xstyle` reliably applies for a property the
-component's own recipe does not otherwise set. It is not a reliable way to override a property a
-variant prop already sets: StyleX assigns each `luke.sx.priorityN` cascade layer purely by CSS
-property identity, so `xstyle` and a component's own recipe class land in the _same_ layer whenever
-they set the _same_ property, and that collision resolves by a StyleX-internal sort with no
-"`xstyle` wins" guarantee. Use the component's own prop for a property it already exposes.
+A component resolves styles in this order: internal defaults, then its own variant props, then
+`xstyle`, then a consumer `className`, then inline `style`. Internal styles and `xstyle` are folded
+through one `stylex.props` call, so `xstyle` reliably replaces a same-property component atom. An
+unlayered consumer class and an inline style still win.
 
 ### Shared input-state selectors
 

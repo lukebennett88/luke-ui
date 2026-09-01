@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { tokens } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { recipe } from '../styles/stylex-recipe.js';
+import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
@@ -16,16 +16,16 @@ const styles = stylex.create({
 		fontFamily: tokens.fontFamilyCode,
 		fontSize: '12px',
 		fontWeight: tokens.fontWeightBody,
-		inlineSize: 'fit-content',
+		'inline-size': 'fit-content',
 		lineHeight: 1,
-		paddingBlock: '0.1em',
-		paddingInline: '0.35em',
+		'padding-block': '0.1em',
+		'padding-inline': '0.35em',
 		whiteSpace: 'nowrap',
 	},
 });
 
 /** Recipe for the `Kbd` component's inline keyboard-key appearance. */
-export const kbdRecipe = recipe({
+export const { recipe: kbdRecipe, resolveStyles: resolveKbdRecipeStyles } = createSingleRecipe({
 	base: styles.root,
 });
 

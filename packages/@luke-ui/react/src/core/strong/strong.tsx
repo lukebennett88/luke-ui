@@ -1,10 +1,9 @@
 import type { XStyleProp } from '../styles/xstyle.js';
-import { resolveXStyleClassName } from '../styles/xstyle.js';
 import type { TextProps } from '../text/text.js';
-import { Text } from '../text/text.js';
+import { renderText } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { strongRecipe } from './recipe.js';
+import { resolveStrongRecipeStyles } from './recipe.js';
 
 interface StrongStyleProps {
 	/**
@@ -17,9 +16,9 @@ interface StrongStyleProps {
 	 */
 	textWrap?: TextProps['textWrap'];
 	/**
-	 * Escape hatch for styling properties `Strong`'s own styles do not set, as one or more
-	 * `stylex.create(...)` style objects. Applied after `Strong`'s own styles and before
-	 * `className`, so a consumer `className` still beats it.
+	 * Extra styles as one or more `stylex.create(...)` objects. Applied after `Strong`'s own styles
+	 * and before `className`. A same-property `xstyle` value wins over those styles. A consumer
+	 * `className` still beats `xstyle`, and inline `style` beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }
@@ -37,14 +36,16 @@ export type StrongProps = Prettify<_StrongProps>;
  */
 export function Strong(props: StrongProps) {
 	const { className, lineClamp, textWrap, xstyle, ...elementProps } = props;
-	return (
-		<Text
-			{...elementProps}
-			className={resolveXStyleClassName(strongRecipe(), xstyle, className)}
-			elementType="strong"
-			lineClamp={lineClamp}
-			shouldInheritFont
-			textWrap={textWrap}
-		/>
+	return renderText(
+		{
+			...elementProps,
+			className,
+			elementType: 'strong',
+			lineClamp,
+			shouldInheritFont: true,
+			textWrap,
+			xstyle,
+		},
+		resolveStrongRecipeStyles(),
 	);
 }
