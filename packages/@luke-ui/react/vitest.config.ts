@@ -4,6 +4,7 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
+import { createStylexDevPlugin } from './stylex-vite-plugin.js';
 
 const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
@@ -50,6 +51,8 @@ export default defineConfig({
 				plugins: [
 					// Required for .css.ts processing in unit tests.
 					vanillaExtractPlugin(),
+					// Serves `virtual:luke-stylex.css` so StyleX-styled components render styled.
+					createStylexDevPlugin(),
 				],
 				test: {
 					environment: 'node',
@@ -63,6 +66,8 @@ export default defineConfig({
 				plugins: [
 					// Required for .css.ts processing in Vitest browser mode.
 					vanillaExtractPlugin(),
+					// Serves `virtual:luke-stylex.css` so StyleX-styled components render styled.
+					createStylexDevPlugin(),
 				],
 				test: {
 					browser: {
@@ -102,6 +107,8 @@ export default defineConfig({
 				plugins: [
 					// Required for .css.ts processing in Vitest browser mode.
 					vanillaExtractPlugin(),
+					// Serves `virtual:luke-stylex.css` so StyleX-styled components render styled.
+					createStylexDevPlugin(),
 					// Runs tests for stories defined in Storybook config.
 					storybookTest({ configDir }),
 				],
@@ -120,6 +127,8 @@ export default defineConfig({
 				plugins: [
 					// Required for .css.ts processing in Vitest browser mode.
 					vanillaExtractPlugin(),
+					// Serves `virtual:luke-stylex.css` so StyleX-styled components render styled.
+					createStylexDevPlugin(),
 				],
 				test: {
 					browser: {

@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react';
 import mdx from 'fumadocs-mdx/vite';
 import type { Plugin } from 'vite-plus';
 import { defineConfig, lazyPlugins } from 'vite-plus';
+import { createStylexDevPlugin } from '../../packages/@luke-ui/react/stylex-vite-plugin.js';
 import { findMdxFiles } from './src/lib/docs-mdx-files.js';
 import { highlightSourcePlugin } from './src/lib/highlight-source-plugin.js';
 import { getMarkdownPagePath } from './src/lib/markdown-page-path.js';
@@ -117,6 +118,9 @@ export default defineConfig(async () => {
 		plugins: lazyPlugins(async () => [
 			staticFunctionBasePathPlugin(),
 			highlightSourcePlugin(),
+			// `@luke-ui/react`'s own StyleX rules ship pre-extracted in the `dist/stylesheet.css` docs
+			// imports; this only matters if a doc example ever authors its own `stylex.create` call.
+			createStylexDevPlugin(),
 			mdx(await import('./source.config')),
 			tailwindcss(),
 			tanstackStart({

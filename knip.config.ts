@@ -34,7 +34,9 @@ export default {
 				'src/core/styles/stylex-fixture.ts',
 				'scripts/**/*.ts',
 			],
-			project: ['src/**/*.{ts,tsx}'],
+			// `stylex-vite-plugin.ts` lives at package root, beside `vite.config.ts`/`vitest.config.ts`
+			// (which knip auto-detects as entries), so it needs an explicit project glob to be seen.
+			project: ['src/**/*.{ts,tsx}', 'stylex-vite-plugin.ts'],
 		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],

@@ -4,6 +4,9 @@
 import '../stylesheet.css.js';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
+// Loads StyleX rules collected from the modules the dev/test build has transformed so far. The
+// `stylex-dev` Vite plugin (`../../../stylex-vite-plugin.js`) serves this virtual module.
+import 'virtual:luke-stylex.css';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';

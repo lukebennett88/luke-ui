@@ -9,6 +9,7 @@ export const VISUAL_HARNESS_LAYOUT_FILE = 'packages/@luke-ui/react/src/core/styl
 /** Files that shape how a capture renders. Hashed into the cache key and copied into compatible base worktrees. */
 export const VISUAL_HARNESS_FILES = [
 	'packages/@luke-ui/react/vitest.config.ts',
+	'packages/@luke-ui/react/stylex-vite-plugin.ts',
 	VISUAL_HARNESS_LAYOUT_FILE,
 	'packages/@luke-ui/react/src/core/test-utils/render-setup.ts',
 	'packages/@luke-ui/react/src/core/test-utils/render-mount-state.ts',
