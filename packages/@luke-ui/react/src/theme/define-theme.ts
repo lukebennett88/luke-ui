@@ -441,7 +441,7 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSou
 
 	if (passes(target)) return makeSolid(target);
 
-	const { best } = (() => {
+	const best = (() => {
 		let best: number | null = null;
 		let bestDistance = Number.POSITIVE_INFINITY;
 		for (const candidate of lightnessCandidates(low, high)) {
@@ -452,7 +452,7 @@ function adaptAccent(source: Oklch, mode: ColorMode, raw: string, interactionSou
 				best = candidate;
 			}
 		}
-		return { best };
+		return best;
 	})();
 	if (best === null) {
 		throw new Error(

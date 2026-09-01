@@ -11,10 +11,7 @@ import {
 	findRepeatedMetadataIssues,
 } from '../src/lib/component-guide-inventory.js';
 import { findComponentPropsContractIssues } from '../src/lib/component-props-contract.js';
-import {
-	findComponentPropsTableTags,
-	PROPS_TABLE_TAG_PATTERN,
-} from '../src/lib/component-props-table-tags.js';
+import { findComponentPropsTableTags } from '../src/lib/component-props-table-tags.js';
 import { findMdxFiles } from '../src/lib/docs-mdx-files.js';
 import { exampleBlockSources } from '../src/lib/example-block-sources.js';
 
@@ -24,6 +21,7 @@ const FRONTMATTER_STRIP_PATTERN = /^---\n[\s\S]*?\n---\n/;
 const FENCED_CODE_PATTERN = /```[\s\S]*?```/g;
 const INLINE_CODE_PATTERN = /`[^`]*`/g;
 const JSX_TAG_CHAR_PATTERN = /[A-Za-z/]/;
+const PROPS_TABLE_TAG_OPEN_PATTERN = /<component-props-table\b/g;
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const docsAppRoot = resolve(scriptDir, '..');
@@ -139,7 +137,9 @@ export function readBaseline(path: string = baselinePath): Array<string> {
 		.split('\n')
 		.flatMap((line) => {
 			const trimmed = line.trim();
-			return trimmed.length > 0 && !trimmed.startsWith('#') ? [trimmed] : [];
+			if (trimmed.length === 0 || trimmed.startsWith('#')) return [];
+
+			return [trimmed];
 		});
 }
 
@@ -158,16 +158,16 @@ export function diffAgainstBaseline(
 function findAuthoredGuideFiles(docsDir: string): Array<{ relativePath: string; source: string }> {
 	if (!existsSync(docsDir)) return [];
 	const resolvedDocsDir = resolve(docsDir);
-	return findMdxFiles(resolvedDocsDir).flatMap((file) =>
-		dirname(file) === resolvedDocsDir
-			? [
-					{
-						relativePath: `docs/${basename(file)}`,
-						source: readFileSync(file, 'utf8'),
-					},
-				]
-			: [],
-	);
+	return findMdxFiles(resolvedDocsDir).flatMap((file) => {
+		if (dirname(file) !== resolvedDocsDir) return [];
+
+		return [
+			{
+				relativePath: `docs/${basename(file)}`,
+				source: readFileSync(file, 'utf8'),
+			},
+		];
+	});
 }
 
 function findComponentHeadingIssues(guide: {
@@ -259,7 +259,7 @@ function findComponentHeadingIssues(guide: {
 function findApiSectionIssues(guide: { relativePath: string; source: string }): Array<string> {
 	const headings = markdownH2s(guide.source);
 	const tagsInApiSection = findComponentPropsTableTags(guide.source);
-	const tagsAnywhere = [...guide.source.matchAll(PROPS_TABLE_TAG_PATTERN)];
+	const tagsAnywhere = [...guide.source.matchAll(PROPS_TABLE_TAG_OPEN_PATTERN)];
 
 	if (!headings.includes(API) || tagsInApiSection.length === 0) {
 		return [

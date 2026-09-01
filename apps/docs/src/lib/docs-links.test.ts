@@ -23,7 +23,9 @@ function docsLinks(contents: string): Array<string> {
 
 	return links.flatMap((link) => {
 		const base = link.split('#')[0];
-		return base !== undefined && base.startsWith('/') && !base.startsWith('//') ? [base] : [];
+		if (base === undefined || !base.startsWith('/') || base.startsWith('//')) return [];
+
+		return [base];
 	});
 }
 

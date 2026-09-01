@@ -11,9 +11,6 @@ const EXCLUDED_SOURCE_PATTERN = /(?:\.test\.|\.stories\.|__fixtures__)/;
 const RELATIVE_IMPORT_PATTERN = /(?:from\s+|import\s+)(['"])(\.\.?\/[^'"]+)\1/g;
 const sourceRoot = fileURLToPath(new URL('./', import.meta.url));
 const sourceZones = new Set(['core', 'exports', 'shared', 'theme']);
-const sourceFilePattern = SOURCE_FILE_PATTERN;
-const excludedSourcePattern = EXCLUDED_SOURCE_PATTERN;
-const relativeImportPattern = RELATIVE_IMPORT_PATTERN;
 
 type SourceZone = 'core' | 'exports' | 'shared' | 'theme';
 
@@ -105,7 +102,7 @@ async function findBoundaryViolations(root: string, sourceFile: string): Promise
 	if (sourceZone === undefined) return [];
 
 	const source = await readFile(sourceFile, 'utf8');
-	const imports = [...source.matchAll(relativeImportPattern)].flatMap((match) => {
+	const imports = [...source.matchAll(RELATIVE_IMPORT_PATTERN)].flatMap((match) => {
 		const specifier = match[2];
 		return specifier === undefined ? [] : [specifier];
 	});
@@ -131,7 +128,8 @@ async function collectSourceFiles(directory: string): Promise<Array<string>> {
 		entries.map(async (entry) => {
 			const entryPath = path.join(directory, entry.name);
 			if (entry.isDirectory()) return collectSourceFiles(entryPath);
-			if (!sourceFilePattern.test(entry.name) || excludedSourcePattern.test(entryPath)) return [];
+			if (!SOURCE_FILE_PATTERN.test(entry.name) || EXCLUDED_SOURCE_PATTERN.test(entryPath))
+				return [];
 			return [entryPath];
 		}),
 	);

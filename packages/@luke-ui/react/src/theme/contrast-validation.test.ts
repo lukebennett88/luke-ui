@@ -147,28 +147,28 @@ describe('contrast validation matrix', () => {
 		};
 		for (const mode of ['light', 'dark'] as const) {
 			const checks = diagnostics[mode].contrastChecks;
-			const actualHard = checks.flatMap((check) =>
-				check.hard
-					? [
-							{
-								background: check.background,
-								foreground: check.foreground,
-								required: check.required,
-							},
-						]
-					: [],
-			);
-			const actualAdvisory = checks.flatMap((check) =>
-				!check.hard
-					? [
-							{
-								background: check.background,
-								foreground: check.foreground,
-								required: check.required,
-							},
-						]
-					: [],
-			);
+			const actualHard = checks.flatMap((check) => {
+				if (!check.hard) return [];
+
+				return [
+					{
+						background: check.background,
+						foreground: check.foreground,
+						required: check.required,
+					},
+				];
+			});
+			const actualAdvisory = checks.flatMap((check) => {
+				if (check.hard) return [];
+
+				return [
+					{
+						background: check.background,
+						foreground: check.foreground,
+						required: check.required,
+					},
+				];
+			});
 			expect([...actualHard].map(pairKey).sort()).toEqual([...expected.hard].map(pairKey).sort());
 			expect([...actualAdvisory].map(pairKey).sort()).toEqual(
 				[...expected.advisory].map(pairKey).sort(),

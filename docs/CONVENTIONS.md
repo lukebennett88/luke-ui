@@ -35,20 +35,33 @@ not as inline string constants.
 
 ## Code style
 
-- Use early returns over nested `else`. Order files by importance with the exported entry first and
-  `function` helpers below. Helpers are hoisted `function` declarations, not `const` arrows.
-- Keep branching assignments `const` via an inline IIFE or a `Record` lookup. Isolate multi-step
-  object construction in one owning function.
-- When three or more cases test one value with different logic use `switch`. For a pure key to value
-  mapping use a `Record` lookup. Otherwise use `if`/`else`.
-- For side-effect iteration use `for...of` instead of `.forEach`. For multi-step transforms use one
-  `for...of` pass or a single `.flatMap` where you return `[]` to drop an item. Do not use
-  `.filter().map()` or `.map().filter()` chains.
-- For repeated lookup or dedupe by key use `Map` or `Set`. Do not re-scan arrays inside loops.
-- For complex aggregates use an explicit loop instead of a clever `.reduce`. Use at most one
-  ternary, otherwise use `if`/`else` or a lookup.
-- Define regex as `const SCREAMING_SNAKE_PATTERN` (or `_REGEX`) at module scope. Cache dynamic
-  `new RegExp` values via `Map` and hoist regex out of loops.
+- Prefer `.map()` for one-to-one transforms. Prefer `.filter()` for selection. Prefer `.flatMap()`
+  when filtering and mapping are combined. In `.flatMap()`, use an early return for the filtering
+  case unless a ternary is clearly easier to read.
+- Prefer `for...of` when a transform needs more explicit control or mutation. Prefer `for...of`
+  over `.reduce`. Use `.reduce` only when it makes the operation substantially clearer.
+- Prefer `Map` or `Set` for repeated lookup or deduplication. Do not repeatedly scan arrays inside
+  loops.
+- Prefer `function` declarations for named helpers. Use an arrow when a short implicit return is
+  clearer, or when assigning a named function type. Prefer an explicit `return` when an arrow body
+  wraps across multiple lines.
+- Prefer early returns when a branch finishes the current function.
+- Prefer a ternary for a simple two-way branching assignment. Do not nest ternaries. Multiple
+  independent simple ternaries are fine.
+- For three or more branches on the same value, use `switch` when it makes the branches easier to
+  scan. Flat early returns are also fine. For a pure key-to-value mapping, use a `Record` or lookup
+  object. Consider whether a value modelled as a boolean should actually be a union, in which case a
+  lookup object is often the better design.
+- Prefer `for...of` over `.forEach` for side-effect iteration, especially when `break`, `continue`,
+  or early exit helps.
+- Put the exported entry point first. Put supporting constants and helpers below it. If a helper
+  uses a non-hoisted constant, place that constant before the helper.
+- Keep branching or search mutation scoped with an inline IIFE when that improves locality. If only
+  one value escapes, return that value directly. If multiple values escape, return an object.
+- Extract multi-step object construction into its own function only when the construction would
+  otherwise mix with unrelated logic.
+- Define every static regex as a named module-scope `SCREAMING_SNAKE_CASE` constant with a
+  `_PATTERN` suffix, including trivial or one-use regexes.
 
 ## Testing
 

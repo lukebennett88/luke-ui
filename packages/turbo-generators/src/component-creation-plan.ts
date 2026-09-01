@@ -228,7 +228,11 @@ function toKebabCase(value: string): string {
 function toDisplayName(value: string): string {
 	return toKebabCase(value)
 		.split('-')
-		.flatMap((part) => (part ? [`${part.charAt(0).toUpperCase()}${part.slice(1)}`] : []))
+		.flatMap((part) => {
+			if (!part) return [];
+
+			return [`${part.charAt(0).toUpperCase()}${part.slice(1)}`];
+		})
 		.join(' ');
 }
 

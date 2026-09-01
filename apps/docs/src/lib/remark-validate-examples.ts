@@ -80,9 +80,11 @@ export function findOrphanedExamples({
 	}
 
 	return findExampleFiles(resolvedExamplesDir)
-		.flatMap((examplePath) =>
-			!reachableExamples.has(examplePath) ? [relative(resolvedExamplesDir, examplePath)] : [],
-		)
+		.flatMap((examplePath) => {
+			if (reachableExamples.has(examplePath)) return [];
+
+			return [relative(resolvedExamplesDir, examplePath)];
+		})
 		.sort();
 }
 

@@ -1,6 +1,6 @@
 const API_HEADING_PATTERN = /^##\s+API\s*$/m;
 const HEADING_PATTERN = /^##\s+.+$/gm;
-export const PROPS_TABLE_TAG_PATTERN = /<component-props-table\b[^>]*\/>/g;
+const PROPS_TABLE_TAG_PATTERN = /<component-props-table\b[^>]*\/>/g;
 const PATH_ATTRIBUTE_PATTERN = /\bpath\s*=\s*["']([^"']+)["']/;
 const NAME_ATTRIBUTE_PATTERN = /\bname\s*=\s*["']([^"']+)["']/;
 

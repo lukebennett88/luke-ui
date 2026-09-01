@@ -88,7 +88,7 @@ export function assembleStylesheet(
 		'',
 		'@media (prefers-color-scheme: dark) {',
 		...rootAndIdentitySelector.map(indent),
-		...darkDeclarations.map((declaration) => indent(indent(declaration))),
+		...darkDeclarations.map(indent).map(indent),
 		indent('}'),
 		'}',
 		'',
