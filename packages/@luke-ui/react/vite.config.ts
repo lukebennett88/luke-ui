@@ -25,6 +25,40 @@ const assetExports = [
 	'./themes/paper/stylesheet.css',
 ];
 
+const stylexLayerConfig = {
+	before: ['reset', 'theme'],
+	after: ['recipes', 'structural', 'utilities'],
+	prefix: 'luke.sx',
+} as const;
+
+function buildAuthoritativeLayerOrder(priorityLayers: Array<string>): string {
+	return `@layer ${[...stylexLayerConfig.before, ...priorityLayers, ...stylexLayerConfig.after].join(', ')};`;
+}
+
+function stripRedundantEmptyLayerStatements(css: string): string {
+	return css.replace(/^@layer [^,{]+;\n/gm, '');
+}
+
+function splitStylexLayerHeader(stylexCss: string): {
+	authoritativeLayerOrder: string;
+	stylexBody: string;
+} {
+	const match = stylexCss.match(/^\n?@layer ([^;]+);/);
+	if (match == null || match[1] == null) {
+		throw new Error('Expected StyleX to emit a combined cascade-layer order statement.');
+	}
+
+	const priorityLayers = match[1]
+		.split(',')
+		.map((name) => name.trim())
+		.filter((name) => name.startsWith(`${stylexLayerConfig.prefix}.priority`));
+
+	return {
+		authoritativeLayerOrder: buildAuthoritativeLayerOrder(priorityLayers),
+		stylexBody: stylexCss.slice(match[0].length).replace(/^\n/, ''),
+	};
+}
+
 /** Any JS or TS module the React Compiler can read, including `.mjs`/`.cts` variants. */
 const sourceModule = /\.[cm]?[jt]sx?$/;
 /** Vanilla Extract compiles these to plain style declarations before the plugin sees them. */
@@ -50,7 +84,7 @@ export default defineConfig({
 		dts: true,
 		entry: {
 			stylesheet: 'src/core/stylesheet.css.ts',
-			'stylex-fixture': 'src/core/styles/stylex-fixture.ts',
+			'stylex-bundle': 'src/core/styles/stylex-bundle.ts',
 			'*': ['src/exports/*.ts'],
 			'primitives/*': ['src/exports/primitives/*.ts'],
 			'themes/*': ['src/exports/themes/*.ts'],
@@ -60,7 +94,7 @@ export default defineConfig({
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
 			// Built for extraction; not consumer subpaths.
-			exclude: ['stylesheet', 'stylex-fixture'],
+			exclude: ['stylesheet', 'stylex-bundle'],
 		},
 		format: ['esm'],
 		hooks: {
@@ -145,20 +179,23 @@ function stylexPlugin(): Plugin {
 			return { code: result.code, map: result.map, meta };
 		},
 		generateBundle(_options, bundle) {
-			const rules = [...stylexRules.values()].flat();
-			if (rules.length === 0) return;
-
 			const stylesheet = bundle['stylesheet.css'];
-			if (stylesheet?.type !== 'asset') {
-				throw new Error('Expected a `stylesheet.css` asset to append StyleX rules to.');
+			if (stylesheet?.type !== 'asset') return;
+
+			const rules = [...stylexRules.values()].flat();
+			const vanillaCss = stripRedundantEmptyLayerStatements(stylesheet.source.toString());
+
+			if (rules.length === 0) {
+				stylesheet.source = `${buildAuthoritativeLayerOrder([])}\n${vanillaCss}`;
+				return;
 			}
 
 			const stylexCss = stylexBabelPlugin.processStylexRules(rules, {
-				// Unlayered until StyleX joins the cascade-layer contract.
-				useLayers: false,
+				useLayers: stylexLayerConfig,
 			});
+			const { authoritativeLayerOrder, stylexBody } = splitStylexLayerHeader(stylexCss);
 
-			stylesheet.source = `${stylesheet.source.toString()}\n/* stylex */\n${stylexCss}`;
+			stylesheet.source = `${authoritativeLayerOrder}\n${vanillaCss}\n/* stylex */\n${stylexBody}`;
 		},
 	};
 }

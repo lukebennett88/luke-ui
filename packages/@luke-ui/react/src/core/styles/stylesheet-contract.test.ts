@@ -6,8 +6,9 @@ import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
 
-const retainedLayerNames = ['reset', 'theme', 'recipes', 'utilities'] as const;
-const retainedLayerNameSet = new Set<string>(retainedLayerNames);
+const lukeOwnedLayerNames = ['reset', 'theme', 'recipes', 'structural', 'utilities'] as const;
+const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
+const stylexPriorityLayerPattern = /^luke\.sx\.priority\d+$/;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
@@ -17,7 +18,7 @@ type LineClampClasses = {
 };
 
 test('builds the public stylesheet with the retained layer contract', async () => {
-	const stylesheet = await readVanillaExtractStylesheet();
+	const stylesheet = await readPublicStylesheet();
 	const icon = await import('@luke-ui/react/icon');
 	const text = await import('@luke-ui/react/text');
 	const styles = await import('@luke-ui/react/styles');
@@ -52,8 +53,31 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 	['missing stable selector', (css: string) => css.replace('.luke-ui-theme', '.theme-root')],
 	['extra stable selector', (css: string) => `${css}\n@layer theme { .luke-ui-extra {} }`],
 	[
-		'reordered initial layer declarations',
-		(css: string) => css.replace('@layer reset;\n@layer theme;', '@layer theme;\n@layer reset;'),
+		'reordered authoritative layer declarations',
+		(css: string) => {
+			return css.replace(
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/m,
+				'@layer theme, reset, luke.sx.priority1, recipes, structural, utilities;',
+			);
+		},
+	],
+	[
+		'early individual layer declarations before authoritative order',
+		(css: string) => {
+			return css.replace(
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
+				'@layer reset;\n@layer theme;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;\n',
+			);
+		},
+	],
+	[
+		'early layer block before authoritative order',
+		(css: string) => {
+			return css.replace(
+				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
+				'@layer recipes { .early {} }\n@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;\n',
+			);
+		},
 	],
 	['anonymous layer statement', (css: string) => `${css}\n@layer;`],
 	['anonymous layer block', (css: string) => `${css}\n@layer { .anonymous {} }`],
@@ -92,6 +116,23 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 			);
 		},
 	],
+	[
+		'redundant empty layer statements after authoritative order',
+		(css: string) => {
+			return css.replace(
+				/^(@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n)/m,
+				'$1@layer recipes;\n',
+			);
+		},
+	],
+	[
+		'empty transitional recipes layer',
+		(css: string) =>
+			css.replace(
+				'@layer recipes {\n  .recipe-class { display: inline-flex; }\n}',
+				'@layer recipes {}',
+			),
+	],
 ];
 
 for (const [name, mutate] of stylesheetMutations) {
@@ -106,10 +147,8 @@ for (const [name, mutate] of stylesheetMutations) {
 }
 
 test('queries responsive conditions on the logical inline axis', async () => {
-	const stylesheet = await readVanillaExtractStylesheet();
+	const stylesheet = await readPublicStylesheet();
 
-	// The containers are `container-type: inline-size`, which answers inline-axis queries. A
-	// physical `width` query only agrees with that in a horizontal writing mode.
 	expect(stylesheet).toContain('@container (inline-size >=');
 	expect(stylesheet).not.toContain('@container (width >=');
 });
@@ -126,14 +165,8 @@ test('recognises escaped class identifiers', () => {
 	}).not.toThrow();
 });
 
-// Unlayered StyleX output follows this comment; the layer contract covers Vanilla Extract only.
-async function readVanillaExtractStylesheet(): Promise<string> {
-	const stylesheet = await readFile(
-		new URL('../../../dist/stylesheet.css', import.meta.url),
-		'utf8',
-	);
-
-	return stylesheet.split('/* stylex */')[0] ?? stylesheet;
+async function readPublicStylesheet(): Promise<string> {
+	return readFile(new URL('../../../dist/stylesheet.css', import.meta.url), 'utf8');
 }
 
 function assertStylesheetContract(
@@ -152,10 +185,13 @@ function assertStylesheetContract(
 ): void {
 	const root = parse(stylesheet);
 
-	expect(getInitialLayerOrder(root)).toEqual(retainedLayerNames);
+	assertEffectiveLayerCreationOrder(root);
+	assertNoRedundantEmptyLayerStatements(stylesheet);
+	assertAuthoritativeLayerOrder(getAuthoritativeLayerOrder(root));
 	assertLayerNames(root);
 	assertRootNodes(root);
 	assertStableSelectors(root);
+	assertRecipesLayerHasRules(root);
 	assertSentinel(root, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
 	assertSentinel(root, 'luke-ui-theme', 'theme', 'color', 'var(--luke-color-text-primary)');
 	assertSentinel(
@@ -188,12 +224,36 @@ function assertPrivateStylesheetSentinel(root: Root): void {
 			);
 		}),
 	).toBe(true);
+
+	const maskRules = collectSkeletonDescendantMaskRules(root);
+	expect(maskRules.length).toBeGreaterThan(0);
+	for (const rule of maskRules) expect(getOwningLayer(rule)).toBe('structural');
 }
 
 function collectSkeletonInlineRules(root: Root): Array<Rule> {
 	const rules: Array<Rule> = [];
 	root.walkRules((rule) => {
 		if (hasAttributeSelector(rule, 'data-skeleton-inline')) rules.push(rule);
+	});
+	return rules;
+}
+
+function collectSkeletonDescendantMaskRules(root: Root): Array<Rule> {
+	const rules: Array<Rule> = [];
+	root.walkRules((rule) => {
+		if (!rule.selector.includes('data-skeleton-inline')) return;
+		if (!rule.selector.includes('> *')) return;
+		if (
+			rule.nodes.some(
+				(node) =>
+					node.type === 'decl' &&
+					node.prop === 'background-color' &&
+					node.value === 'var(--luke-color-loading-skeleton)' &&
+					node.important,
+			)
+		) {
+			rules.push(rule);
+		}
 	});
 	return rules;
 }
@@ -216,14 +276,70 @@ function hasAttributeSelector(rule: Rule, attribute: string): boolean {
 	return matches;
 }
 
-function getInitialLayerOrder(root: Root): Array<string> {
-	return root.nodes.slice(0, retainedLayerNames.length).map((node) => {
-		if (node.type !== 'atrule' || node.name !== 'layer' || node.nodes) {
-			throw new Error('Expected the stylesheet to begin with layer statements.');
+function getAuthoritativeLayerOrder(root: Root): Array<string> {
+	for (const node of root.nodes) {
+		if (node.type !== 'atrule' || node.name !== 'layer' || node.nodes) continue;
+		const params = node.params.trim();
+		if (!params.includes(',')) continue;
+
+		return params.split(',').map((name) => name.trim());
+	}
+
+	throw new Error('Expected an authoritative combined cascade-layer order statement.');
+}
+
+function assertEffectiveLayerCreationOrder(root: Root): void {
+	let sawAuthoritativeOrder = false;
+
+	for (const node of root.nodes) {
+		if (node.type !== 'atrule' || node.name !== 'layer') continue;
+
+		const params = node.params.trim();
+		const isCombinedOrder = !node.nodes && params.includes(',');
+
+		if (isCombinedOrder) {
+			if (!sawAuthoritativeOrder) {
+				sawAuthoritativeOrder = true;
+				continue;
+			}
+
+			throw new Error(
+				'Expected a single authoritative combined cascade-layer order statement at the start of the stylesheet.',
+			);
 		}
 
-		return node.params.trim();
-	});
+		if (!sawAuthoritativeOrder) {
+			throw new Error(
+				`Layer "${params}" was created before the authoritative combined cascade-layer order statement.`,
+			);
+		}
+	}
+
+	if (!sawAuthoritativeOrder) {
+		throw new Error('Expected an authoritative combined cascade-layer order statement.');
+	}
+}
+
+function assertNoRedundantEmptyLayerStatements(stylesheet: string): void {
+	const lines = stylesheet.split('\n');
+	for (let index = 1; index < lines.length; index++) {
+		const line = lines[index]?.trim();
+		if (line == null || line === '') continue;
+		if (/^@layer [^,{]+;$/.test(line)) {
+			throw new Error(`Redundant empty layer statement after authoritative order: ${line}`);
+		}
+	}
+}
+
+function assertAuthoritativeLayerOrder(order: Array<string>): void {
+	expect(order[0]).toBe('reset');
+	expect(order[1]).toBe('theme');
+
+	const priorityLayers = order.slice(2).filter((name) => stylexPriorityLayerPattern.test(name));
+	expect(priorityLayers.length).toBeGreaterThan(0);
+	expect(priorityLayers.every((name, index) => name === `luke.sx.priority${index + 1}`)).toBe(true);
+
+	expect(order.slice(2 + priorityLayers.length)).toEqual(['recipes', 'structural', 'utilities']);
 }
 
 function assertLayerNames(root: Root): void {
@@ -237,7 +353,8 @@ function assertLayerNames(root: Root): void {
 		}
 
 		for (const name of names) {
-			if (!retainedLayerNameSet.has(name)) throw atRule.error(`Unexpected cascade layer: ${name}`);
+			if (lukeOwnedLayerNameSet.has(name) || stylexPriorityLayerPattern.test(name)) continue;
+			throw atRule.error(`Unexpected cascade layer: ${name}`);
 		}
 	});
 }
@@ -255,10 +372,21 @@ function assertRootNodes(root: Root): void {
 		if (node.type === 'rule') throw node.error('Root qualified rules are not allowed.');
 		if (node.type !== 'atrule') throw node.error('Unexpected root stylesheet node.');
 		if (node.name === 'layer') continue;
+		if (node.name === 'property') continue;
 		if (node.name === 'keyframes' && node.nodes) continue;
 
 		throw node.error(`Unexpected root at-rule: @${node.name}`);
 	}
+}
+
+function assertRecipesLayerHasRules(root: Root): void {
+	let hasRecipeRule = false;
+	root.walkRules((rule) => {
+		if (getOwningLayer(rule) === 'recipes' && rule.nodes.some((node) => node.type === 'decl')) {
+			hasRecipeRule = true;
+		}
+	});
+	if (!hasRecipeRule) throw new Error('Expected the transitional recipes layer to contain a rule.');
 }
 
 function assertStableSelectors(root: Root): void {
@@ -401,10 +529,7 @@ function getOwningLayer(rule: Rule): string | undefined {
 	return undefined;
 }
 
-const validStylesheetFixture = `@layer reset;
-@layer theme;
-@layer recipes;
-@layer utilities;
+const validStylesheetFixture = `@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
 }
@@ -418,8 +543,14 @@ const validStylesheetFixture = `@layer reset;
 @layer recipes {
   .recipe-class { display: inline-flex; }
 }
+@layer structural {
+  .structural-class { margin-block-start: 1px; }
+}
 @layer utilities {
   .utility-class { display: grid; }
+}
+@layer luke.sx.priority1 {
+  .stylex-class { outline-color: transparent; }
 }
 @keyframes generated-animation {
   from { opacity: 0; }

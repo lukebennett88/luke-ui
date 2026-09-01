@@ -13,7 +13,7 @@ const absentExportPaths = [
 	'./icon-size-context',
 	'./styles/recipe-engine',
 	'./stylesheet',
-	'./stylex-fixture',
+	'./stylex-bundle',
 	'./primitives',
 	'./tokens',
 ] as const;

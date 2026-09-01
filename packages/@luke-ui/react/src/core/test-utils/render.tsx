@@ -17,11 +17,12 @@ import { themeClassName as paperThemeClassName } from '../../theme/bundles/paper
 import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
 import { rootClassName, vars } from '../../theme/index.js';
 import { IconSpritesheetProvider } from '../icon/icon.js';
-
-const mounted: Array<{ container: HTMLElement; root: Root }> = [];
-
-/** The identity class currently applied to `document.documentElement`, if any. */
-let appliedIdentityClassName: string | undefined;
+import {
+	getAppliedIdentityClassName,
+	setAppliedIdentityClassName,
+	trackMountedRender,
+	untrackMountedRender,
+} from './render-mount-state.js';
 
 export type VisualAppearance = {
 	mode: 'light' | 'dark';
@@ -57,18 +58,19 @@ export type RenderResult = {
 export function render(node: ReactNode, options?: { appearance?: VisualAppearance }): RenderResult {
 	const appearance = options?.appearance ?? defaultVisualAppearance;
 	const identityClassName = identityClassNameFor(appearance.theme);
+	const appliedIdentityClassName = getAppliedIdentityClassName();
 	if (appliedIdentityClassName != null) {
 		document.documentElement.classList.remove(appliedIdentityClassName);
 	}
 	document.documentElement.classList.add(identityClassName);
-	appliedIdentityClassName = identityClassName;
+	setAppliedIdentityClassName(identityClassName);
 	document.documentElement.dataset.colorMode = appearance.mode;
 
 	const container = document.body.appendChild(document.createElement('div'));
 	container.className = rootClassName;
 	container.style.backgroundColor = vars.color.surface.canvas;
 	const root = createRoot(container);
-	mounted.push({ container, root });
+	trackMountedRender(container, root);
 
 	act(() => {
 		root.render(<IconSpritesheetProvider href={spritesheetHref}>{node}</IconSpritesheetProvider>);
@@ -83,30 +85,11 @@ export function render(node: ReactNode, options?: { appearance?: VisualAppearanc
 }
 
 function unmount(container: HTMLElement, root: Root) {
-	const index = mounted.findIndex((entry) => entry.container === container);
-	if (index !== -1) mounted.splice(index, 1);
+	untrackMountedRender(container);
 	act(() => root.unmount());
 	container.remove();
 }
 
 function identityClassNameFor(theme: VisualAppearance['theme']) {
 	return theme === 'tactile' ? tactileThemeClassName : paperThemeClassName;
-}
-
-/**
- * Unmounts everything rendered by `render`. Registered globally, for both the
- * `browser` and `visual` Vitest projects, in `render-setup.ts`.
- */
-export function cleanupMountedRenders() {
-	for (const { container, root } of mounted) {
-		act(() => root.unmount());
-		container.remove();
-	}
-	mounted.length = 0;
-
-	if (appliedIdentityClassName != null) {
-		document.documentElement.classList.remove(appliedIdentityClassName);
-		appliedIdentityClassName = undefined;
-	}
-	delete document.documentElement.dataset.colorMode;
 }

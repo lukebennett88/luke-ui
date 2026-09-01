@@ -8,8 +8,9 @@ import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from `@luke-ui/
 `@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes the whole document from `:root`,
 with no class and no JS required. Neither step injects styles at runtime.
 
-The package build also extracts StyleX and appends those rules to `dist/stylesheet.css`. Production
-component styles stay on Vanilla Extract.
+The package build also extracts StyleX and appends those rules to `dist/stylesheet.css`. StyleX
+rules live in generated `luke.sx.priorityN` cascade layers between the theme and recipes layers.
+Production component styles stay on Vanilla Extract until their migration slices land.
 
 ## Structure
 
@@ -179,12 +180,25 @@ explicit mode.
 All styles live in named CSS cascade layers. Layer order makes cross-layer priority explicit.
 Specificity and source order still decide conflicts within a layer.
 
-| Layer       | Purpose                                             |
-| ----------- | --------------------------------------------------- |
-| `reset`     | Browser defaults, box sizing, and margins.          |
-| `theme`     | Design token custom properties and base typography. |
-| `recipes`   | Component styles, variants, and compound variants.  |
-| `utilities` | One-off layout and override escape hatches.         |
+| Layer               | Purpose                                                                 |
+| ------------------- | ----------------------------------------------------------------------- |
+| `reset`             | Browser defaults, box sizing, and margins.                              |
+| `theme`             | Design token custom properties and base typography.                     |
+| `luke.sx.priorityN` | StyleX atoms, ordered by internal priority.                             |
+| `recipes`           | Component styles, variants, and compound variants.                      |
+| `structural`        | Retained descendant rhythm, skeleton masking, and combinator selectors. |
+| `utilities`         | One-off layout and override escape hatches.                             |
+
+While Vanilla Extract recipes remain, the `recipes` layer is transitional. The stylesheet contract
+requires it to contain at least one rule until the last recipe moves to StyleX.
+
+The public `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every
+Luke-owned layer before any rules create them. StyleX priority layers use dotted nested names such
+as `luke.sx.priority1`, which sit between `theme` and `recipes` in the required precedence order.
+
+The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
+`themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The
+public `vars` object and theme stylesheets remain the sole authorities on token values.
 
 Use `styleInLayer` and `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain
 Vanilla Extract style for a recipe with no variants in a named layer (see
@@ -201,9 +215,9 @@ authored as one of the Text recipe's `recipe()` compound-variant styles, so they
 Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
 
-`LoadingSkeleton` uses `!important` inside the `recipes` layer because it must force placeholder
+`LoadingSkeleton` uses `!important` inside the `structural` layer because it must force placeholder
 styles onto arbitrary wrapped children. Moving `!important` to a lower layer does not weaken the
-mask — in the `!important` cascade, lower layers win over higher layers. The `recipes` layer is
+mask — in the `!important` cascade, lower layers win over higher layers. The `structural` layer is
 below `utilities`, so a `utilities`-layer `!important` override from a consumer cannot beat the
 skeleton.
 

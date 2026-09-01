@@ -44,6 +44,7 @@ jobs:
             'packages/@luke-ui/react/vitest.config.ts',
             'packages/@luke-ui/react/src/core/stylesheet.css.ts',
             'packages/@luke-ui/react/src/core/test-utils/render-setup.ts',
+            'packages/@luke-ui/react/src/core/test-utils/render-mount-state.ts',
             'packages/@luke-ui/react/src/core/test-utils/render.tsx',
             'packages/@luke-ui/react/src/core/test-utils/visual-setup.ts') }}
       - name: Compare visual captures

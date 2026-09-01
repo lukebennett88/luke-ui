@@ -1,5 +1,5 @@
 import { afterEach } from 'vite-plus/test';
-import { cleanupMountedRenders } from './render.js';
+import { cleanupMountedRenders } from './render-mount-state.js';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 

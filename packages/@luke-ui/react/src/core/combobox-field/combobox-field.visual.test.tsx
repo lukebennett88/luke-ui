@@ -380,10 +380,16 @@ test('rich section title', async () => {
  */
 async function waitForMobileTrayToSettle() {
 	const dialog = page.getByRole('dialog');
-	await expect.element(dialog).toBeVisible();
-
-	const overlay = dialog.element().parentElement?.parentElement;
-	if (overlay == null) throw new Error('Expected the mobile modal structure.');
+	await expect.element(dialog).toBeInTheDocument();
+	const modal = dialog.element().parentElement;
+	const overlay = modal?.parentElement;
+	if (modal == null || overlay == null) throw new Error('Expected the mobile modal structure.');
 
 	await waitForOverlayEnter(overlay);
+	await expect.element(page.elementLocator(overlay)).toBeVisible();
+	expect(window.innerWidth).toBe(390);
+	expect(window.innerHeight).toBe(700);
+	expect(window.matchMedia('(width > 450px)').matches).toBe(false);
+	expect(getComputedStyle(modal).borderEndStartRadius).toBe('0px');
+	expect(getComputedStyle(modal).borderEndEndRadius).toBe('0px');
 }

@@ -1,7 +1,7 @@
 # @luke-ui/react agent guide
 
 - Do not hand-edit `.generated/entries.ts` or `package.json#exports`. `vp pack` generates entries
-  and updates exports during build. The `stylesheet` and `stylex-fixture` build entries are excluded
+  and updates exports during build. The `stylesheet` and `stylex-bundle` build entries are excluded
   from the public export map via `exports.exclude` in `vite.config.ts`. Vanilla Extract serializes
   recipes to `#recipe-engine`; pack, Vitest, Storybook, and the docs app alias that specifier to
   `src/core/styles/recipe-engine.ts`. Pack then bundles a relative runtime chunk. The specifier is
