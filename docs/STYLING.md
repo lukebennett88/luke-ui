@@ -9,9 +9,9 @@ for example `@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes th
 from `:root`, with no class and no JS required. Neither step injects styles at runtime.
 
 The package build also extracts StyleX and appends those rules to `dist/stylesheet.css`. StyleX
-rules live in generated `luke.sx.priorityN` cascade layers between the theme and structural layers.
-Public visual components author StyleX recipes. `LoadingSkeleton`'s descendant masks, Prose
-descendant rhythm, and Combobox adjacent-section borders stay in the `structural` Vanilla Extract
+rules live in generated `recipes.sx.priorityN` cascade layers between the base and components
+layers. Public visual components author StyleX recipes. `LoadingSkeleton`'s descendant masks, Prose
+descendant rhythm, and Combobox adjacent-section borders stay in the `components` Vanilla Extract
 layer. `Box` and Rainbow Sprinkles utilities stay on Vanilla Extract.
 
 ## Structure
@@ -25,7 +25,7 @@ utility modules live under `core/`. Theme modules live under `theme/`.
 - `core/styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
 - `core/styles/modules.css.ts`: the committed stylesheet registry. It explicitly imports every
   colocated Vanilla Extract `styles.css.ts` that participates in the shipped stylesheet (Prose and
-  LoadingSkeleton structural rules). Keep the list in code-point order by path for deterministic
+  LoadingSkeleton component rules). Keep the list in code-point order by path for deterministic
   output. Named layers make cross-layer priority explicit. Specificity and source order still matter
   within a layer. StyleX component styles are extracted by the StyleX Vite plugin, not this
   registry.
@@ -168,17 +168,20 @@ explicit mode.
 All styles live in named CSS cascade layers. Layer order makes cross-layer priority explicit.
 Specificity and source order still decide conflicts within a layer.
 
-| Layer               | Purpose                                                                 |
-| ------------------- | ----------------------------------------------------------------------- |
-| `reset`             | Browser defaults, box sizing, and margins.                              |
-| `theme`             | Design token custom properties and base typography.                     |
-| `luke.sx.priorityN` | StyleX atoms, ordered by internal priority.                             |
-| `structural`        | Retained descendant rhythm, skeleton masking, and combinator selectors. |
-| `utilities`         | One-off layout and override escape hatches.                             |
+| Layer                  | Purpose                                                                 |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `reset`                | Browser defaults, box sizing, and margins.                              |
+| `theme`                | Design token custom properties and base typography.                     |
+| `base`                 | Application element defaults, below the recipe layers.                  |
+| `recipes.sx.priorityN` | StyleX atoms, ordered by internal priority.                             |
+| `components`           | Retained descendant rhythm, skeleton masking, and combinator selectors. |
+| `utilities`            | One-off layout and override escape hatches.                             |
 
-The public `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every
-Luke-owned layer before any rules create them. StyleX priority layers use dotted nested names such
-as `luke.sx.priority1`, which sit between `theme` and `structural` in the required precedence order.
+Layer names describe purpose, not package ownership, so a consumer declares the same set. The public
+`dist/stylesheet.css` starts with one combined `@layer` order statement that lists every layer
+before any rules create them. StyleX priority layers use dotted nested names such as
+`recipes.sx.priority1`, which sit between `base` and `components` in the required precedence order.
+A consumer declares only the stable `recipes` parent layer, never the priority count.
 
 The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
 `themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The
@@ -186,7 +189,7 @@ public `vars` object and theme stylesheets remain the sole authorities on token 
 
 Use `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain Vanilla Extract
 global rule in a named layer. Structural combinators such as Combobox's adjacent-section border live
-here, not in StyleX: StyleX cannot express a `+` sibling rule, so `structural.css.ts` interpolates
+here, not in StyleX: StyleX cannot express a `+` sibling rule, so `components.css.ts` interpolates
 the stable `combobox-section` class from `primitives/combobox/section-scope.ts`.
 
 `Text` authors quoted logical CSS keys for its Capsize pseudo-element margins, so StyleX emits
@@ -195,9 +198,9 @@ the stable `combobox-section` class from `primitives/combobox/section-scope.ts`.
 Overrides that should beat component styles belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
 
-`LoadingSkeleton` uses `!important` inside the `structural` layer because it must force placeholder
+`LoadingSkeleton` uses `!important` inside the `components` layer because it must force placeholder
 styles onto arbitrary wrapped children. Moving `!important` to a lower layer does not weaken the
-mask — in the `!important` cascade, lower layers win over higher layers. The `structural` layer is
+mask — in the `!important` cascade, lower layers win over higher layers. The `components` layer is
 below `utilities`, so a `utilities`-layer `!important` override from a consumer cannot beat the
 skeleton.
 

@@ -23,9 +23,9 @@ import type { Plugin } from 'vite-plus';
 export const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
 const stylexLayerConfig = {
-	before: ['reset', 'theme'],
-	after: ['structural', 'utilities'],
-	prefix: 'luke.sx',
+	before: ['reset', 'theme', 'base'],
+	after: ['components', 'utilities'],
+	prefix: 'recipes.sx',
 } as const;
 
 /** An `@layer name;` statement on its own line, which StyleX re-emits per chunk. */

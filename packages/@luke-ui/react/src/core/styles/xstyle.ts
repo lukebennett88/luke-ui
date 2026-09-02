@@ -19,7 +19,9 @@ export interface XStyleProps {
 	 * Extra styles as one or more `stylex.create(...)` objects, for a CSS property the component's
 	 * own props do not expose. Applied after the component's own styles and variants, and before
 	 * `className`, so a same-property `xstyle` value replaces a competing default or variant. A
-	 * consumer `className` still beats `xstyle`, and inline `style` beats `className`.
+	 * consumer `className` still beats `xstyle` when its rule sits in `components`, in `utilities`,
+	 * or outside every layer; a class in a lower layer such as `base` does not. Inline `style`
+	 * beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }

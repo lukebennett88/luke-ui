@@ -3,7 +3,7 @@ import { globalStyleInLayer } from '../styles/layered-style.css.js';
 import { proseScopeClassName } from './scope.js';
 
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
-	globalStyleInLayer('structural', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
+	globalStyleInLayer('components', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
 }
 
 // Each gap is the following block's start margin. No block-end margin can collapse or escape.

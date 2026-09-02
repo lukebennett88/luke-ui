@@ -53,8 +53,9 @@ Styles resolve in this order, from lowest priority to highest:
 5. inline `style`
 
 Because `xstyle` resolves after the component's own styles and variants, a same-property `xstyle`
-value replaces theirs before either reaches the DOM. A consumer `className` still beats `xstyle`,
-and inline `style` beats `className`.
+value replaces theirs before either reaches the DOM. A consumer `className` still beats `xstyle`
+when its rule sits in `components`, in `utilities`, or outside every layer. A class you define in a
+lower layer, such as `base`, does not. Inline `style` beats `className`.
 
 `xstyle` targets the component's public presentation element, not its internal DOM. A component with
 more than one styled part exposes a separate target per part, and its own guide names which part
@@ -131,22 +132,22 @@ Read [Installation](/docs/installation) for the first-run path. Read
 ## Use application CSS alongside Luke UI
 
 Luke UI's static CSS uses cascade layers, ordered from lowest to highest priority: `reset`, `theme`,
-a `luke` layer that holds its StyleX component styles, `structural`, and `utilities`. That internal
-order is stable regardless of stylesheet import order. The reset normalises only the subtree that
-carries `rootClassName`.
+`base`, `recipes`, `components`, and `utilities`. Each name describes a purpose, not an owner. Your
+application and Luke UI share the same layers and form one styling system. `recipes` holds component
+recipe styles. `components` holds the component rules that a recipe cannot express, such as
+descendant and adjacent-sibling selectors. That order is stable regardless of stylesheet import
+order. The reset normalises only the subtree that carries `rootClassName`.
 
-If your application also uses cascade layers, declare its layer order before you import stylesheets,
-and name both `luke` and `structural` in that declaration. Place your application's `base` or reset
-layer below `luke`, so broad element resets (such as Tailwind Preflight) cannot override Luke UI
-component internals. Place `components` and `utilities` above `luke` and `structural`, so deliberate
-application overrides still win. You do not need to know how Luke UI organises styles inside `luke`,
-only that `luke` is its name.
+If your application also uses cascade layers, declare this layer order before you import
+stylesheets. Your `base` layer then sits below `recipes`, so broad element resets (such as Tailwind
+Preflight) cannot override component styles. `components` and `utilities` stay above `recipes`, so
+deliberate application overrides still win.
 
-Name both. A layer you leave out is appended after the layers you declared, which puts it above your
-application layers instead of below them and reverses the override order you expect.
+Name every layer. A layer you leave out is appended after the layers you declared, which puts it
+above your application layers instead of below them and reverses the override order you expect.
 
 ```css
-@layer reset, theme, base, luke, structural, components, utilities;
+@layer reset, theme, base, recipes, components, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';

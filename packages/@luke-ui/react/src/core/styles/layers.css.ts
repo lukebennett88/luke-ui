@@ -5,7 +5,9 @@ import { globalLayer } from '@vanilla-extract/css';
  *
  * - **reset** — Normalize browser defaults (box-sizing, margins, form elements).
  * - **theme** — Design token custom properties and base typographic defaults.
- * - **structural** — Descendant rhythm, skeleton masking, and other retained global selectors.
+ * - **base** — Application element defaults, below the component recipe layers.
+ * - **components** — Retained component rules that are not StyleX: Prose descendant rhythm,
+ *   LoadingSkeleton descendant masks, and Combobox adjacent-section selectors.
  * - **utilities** — One-off overrides; highest-priority layer for escape hatches.
  *
  * `globalLayer()` keeps Vanilla Extract's layer wiring consistent. The authoritative
@@ -15,7 +17,8 @@ import { globalLayer } from '@vanilla-extract/css';
 export const layers = {
 	reset: globalLayer('reset'),
 	theme: globalLayer('theme'),
-	structural: globalLayer('structural'),
+	base: globalLayer('base'),
+	components: globalLayer('components'),
 	utilities: globalLayer('utilities'),
 } as const;
 
