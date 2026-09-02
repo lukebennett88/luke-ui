@@ -121,6 +121,33 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 	expect(getComputedStyle(element).paddingTop).toBe('16px');
 });
 
+test('the documented consumer layer declaration keeps consumer CSS above Luke UI StyleX styles', () => {
+	// This is the exact declaration published in the Styling guide
+	// (apps/docs/content/docs/docs/styling.mdx, "Use application CSS alongside Luke UI"). Keep the
+	// two in sync: if this literal changes, update the docs too, and vice versa.
+	const documentedLayerDeclaration = '@layer reset, theme, luke, base, components, utilities;';
+
+	const paddingClass = stylexPaddingClass(stylesheetCss);
+	const element = mountProbe(paddingClass);
+
+	expect(getComputedStyle(element).paddingTop).toBe('16px');
+
+	// A browser registers layer order from the first `@layer` statement it encounters, and a later
+	// statement cannot reorder layers that are already registered. The built stylesheet's own
+	// `@layer` statement was already injected in `beforeAll`, so the consumer declaration must be
+	// inserted ahead of it in `document.head` to reproduce the documented, realistic setup where a
+	// consumer declares its layer order before importing Luke UI's stylesheet.
+	const consumerStyle = document.createElement('style');
+	consumerStyle.dataset.layerOrderProbe = 'true';
+	consumerStyle.textContent = `
+${documentedLayerDeclaration}
+@layer components { .${paddingClass} { padding-top: 40px; } }
+`;
+	document.head.insertBefore(consumerStyle, document.head.firstChild);
+
+	expect(getComputedStyle(element).paddingTop).toBe('40px');
+});
+
 test('LoadingSkeleton structural !important beats utilities-layer !important overrides', () => {
 	const element = document.body.appendChild(document.createElement('div'));
 	mounted.push(element);

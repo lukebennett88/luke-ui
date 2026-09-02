@@ -131,13 +131,19 @@ Read [Installation](/docs/installation) for the first-run path. Read
 ## Use application CSS alongside Luke UI
 
 Luke UI's static CSS uses cascade layers, ordered from lowest to highest priority: `reset`, `theme`,
-`luke.sx.priorityN`, `structural`, and `utilities`. That internal order is stable regardless of
-stylesheet import order. The reset normalises only the subtree that carries `rootClassName`.
+a `luke` layer that holds its StyleX component styles, `structural`, and `utilities`. That internal
+order is stable regardless of stylesheet import order. The reset normalises only the subtree that
+carries `rootClassName`.
 
-If your application also uses cascade layers, declare its layer order before you import stylesheets.
+If your application also uses cascade layers, declare its layer order before you import stylesheets,
+and name `luke` in that declaration. Place it below the application layers that should override Luke
+UI, such as `components` and `utilities`. You do not need to know how Luke UI organises styles
+inside that layer, only that `luke` is its name. If you omit `luke`, the browser appends it after
+your declared layers the first time Luke UI's stylesheet registers it, and Luke UI's component
+styles then beat your `components` and `utilities` rules instead of losing to them.
 
 ```css
-@layer reset, theme, base, components, utilities;
+@layer reset, theme, luke, base, components, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';
