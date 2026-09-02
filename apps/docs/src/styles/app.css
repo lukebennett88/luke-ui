@@ -1,4 +1,4 @@
-@layer reset, theme, luke, structural, base, recipes, components, utilities;
+@layer reset, theme, luke, structural, base, components, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';
