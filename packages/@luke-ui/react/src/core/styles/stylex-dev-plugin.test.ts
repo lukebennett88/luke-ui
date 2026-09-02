@@ -7,6 +7,8 @@ type DevPlugin = ReturnType<typeof createStylexDevPlugin>;
 type LoadHandler = Extract<NonNullable<DevPlugin['load']>, (...args: never) => unknown>;
 type HotUpdateHandler = Extract<NonNullable<DevPlugin['hotUpdate']>, (...args: never) => unknown>;
 type HotUpdateThis = ThisParameterType<HotUpdateHandler>;
+type HotUpdateModuleGraph = HotUpdateThis['environment']['moduleGraph'];
+type HotUpdateModule = Parameters<HotUpdateHandler>[0]['modules'][number];
 type HotUpdateServer = Parameters<HotUpdateHandler>[0]['server'];
 
 const RESOLVED_STYLEX_VIRTUAL_CSS_ID = '\0virtual:luke-stylex.css';
@@ -28,10 +30,14 @@ export const hmrProbeStyles = stylex.create({
 }
 
 /**
- * Neither `load` nor `hotUpdate` on this plugin reads anything off `this`, so an empty object
- * stands in for the `PluginContext` both hooks are typed to receive.
+ * `load` reads nothing off `this`; `hotUpdate` reads only `this.environment.moduleGraph`, which each
+ * test supplies through `environment` below.
  */
-const pluginContext = {} as ThisParameterType<LoadHandler> & HotUpdateThis;
+function pluginContext(
+	moduleGraph?: HotUpdateModuleGraph,
+): ThisParameterType<LoadHandler> & HotUpdateThis {
+	return { environment: { moduleGraph } } as ThisParameterType<LoadHandler> & HotUpdateThis;
+}
 
 test('invalidates cached StyleX CSS when an eligible source module changes', async () => {
 	await writeFile(probeFile, probeSource('rgb(11,22,33)'), 'utf8');
@@ -44,7 +50,7 @@ test('invalidates cached StyleX CSS when an eligible source module changes', asy
 			throw new Error('Expected `load` and `hotUpdate` to be plain functions on the dev plugin.');
 		}
 
-		const firstCss = await load.call(pluginContext, RESOLVED_STYLEX_VIRTUAL_CSS_ID);
+		const firstCss = await load.call(pluginContext(), RESOLVED_STYLEX_VIRTUAL_CSS_ID);
 		expect(typeof firstCss).toBe('string');
 		expect(firstCss as string).toContain('rgb(11,22,33)');
 		expect(firstCss as string).not.toContain('rgb(44,55,66)');
@@ -55,27 +61,34 @@ test('invalidates cached StyleX CSS when an eligible source module changes', asy
 		await writeFile(probeFile, probeSource('rgb(44,55,66)'), 'utf8');
 
 		let invalidatedModule: unknown;
-		const fakeServer = {
-			moduleGraph: {
-				getModuleById: (id: string) => (id === RESOLVED_STYLEX_VIRTUAL_CSS_ID ? { id } : undefined),
-				invalidateModule: (mod: unknown) => {
-					invalidatedModule = mod;
-				},
+		const virtualModule = { id: RESOLVED_STYLEX_VIRTUAL_CSS_ID } as unknown as HotUpdateModule;
+		const moduleGraph = {
+			getModuleById: (id: string) =>
+				id === RESOLVED_STYLEX_VIRTUAL_CSS_ID ? virtualModule : undefined,
+			invalidateModule: (mod: unknown) => {
+				invalidatedModule = mod;
 			},
-		} as unknown as HotUpdateServer;
+		} as unknown as HotUpdateModuleGraph;
 
-		await hotUpdate.call(pluginContext, {
+		const affectedModule = { id: probeFile } as unknown as HotUpdateModule;
+
+		const result = await hotUpdate.call(pluginContext(moduleGraph), {
 			type: 'update',
 			file: probeFile,
 			timestamp: Date.now(),
-			modules: [],
+			modules: [affectedModule],
 			read: async () => probeSource('rgb(44,55,66)'),
-			server: fakeServer,
+			server: {} as unknown as HotUpdateServer,
 		});
 
-		expect(invalidatedModule).toEqual({ id: RESOLVED_STYLEX_VIRTUAL_CSS_ID });
+		expect(invalidatedModule).toBe(virtualModule);
 
-		const secondCss = await load.call(pluginContext, RESOLVED_STYLEX_VIRTUAL_CSS_ID);
+		// Vite propagates the returned array to the client as the update set; returning `void` instead
+		// would leave the browser on the stylesheet it already loaded.
+		expect(result).toContain(virtualModule);
+		expect(result).toContain(affectedModule);
+
+		const secondCss = await load.call(pluginContext(), RESOLVED_STYLEX_VIRTUAL_CSS_ID);
 		expect(secondCss as string).toContain('rgb(44,55,66)');
 		expect(secondCss as string).not.toContain('rgb(11,22,33)');
 	} finally {
@@ -91,29 +104,28 @@ test('does not invalidate for a file the StyleX transform never touches', async 
 		throw new Error('Expected `load` and `hotUpdate` to be plain functions on the dev plugin.');
 	}
 
-	await load.call(pluginContext, RESOLVED_STYLEX_VIRTUAL_CSS_ID);
+	await load.call(pluginContext(), RESOLVED_STYLEX_VIRTUAL_CSS_ID);
 
 	let invalidateCalled = false;
-	const fakeServer = {
-		moduleGraph: {
-			getModuleById: () => {
-				invalidateCalled = true;
-				return undefined;
-			},
-			invalidateModule: () => {
-				invalidateCalled = true;
-			},
+	const moduleGraph = {
+		getModuleById: () => {
+			invalidateCalled = true;
+			return undefined;
 		},
-	} as unknown as HotUpdateServer;
+		invalidateModule: () => {
+			invalidateCalled = true;
+		},
+	} as unknown as HotUpdateModuleGraph;
 
-	await hotUpdate.call(pluginContext, {
+	const result = await hotUpdate.call(pluginContext(moduleGraph), {
 		type: 'update',
 		file: join(workspaceRoot, 'packages/@luke-ui/react/README.md'),
 		timestamp: Date.now(),
 		modules: [],
 		read: async () => '',
-		server: fakeServer,
+		server: {} as unknown as HotUpdateServer,
 	});
 
 	expect(invalidateCalled).toBe(false);
+	expect(result).toBeUndefined();
 });

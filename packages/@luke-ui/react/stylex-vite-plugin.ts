@@ -224,9 +224,9 @@ const RESOLVED_STYLEX_VIRTUAL_CSS_ID = `\0${STYLEX_VIRTUAL_CSS_ID}`;
  * Dev/test StyleX plugin: transforms JS the same way the pack plugin does, and serves the complete
  * extracted CSS — including the same authoritative `@layer` order — from `virtual:luke-stylex.css`.
  * Layer names and StyleX rules come from a full source scan (`loadSourceRules`), cached after the
- * first request. `hotUpdate` drops that cache and invalidates the virtual module whenever a
- * StyleX-eligible source file changes, so editing a `stylex.create()` call re-scans on the next
- * request instead of serving CSS left over from before the edit.
+ * first request. `hotUpdate` drops that cache and returns the virtual module in the update set
+ * whenever a StyleX-eligible source file changes, so editing a `stylex.create()` call re-scans and
+ * the browser re-fetches the stylesheet instead of keeping the CSS it loaded before the edit.
  */
 export function createStylexDevPlugin(): Plugin {
 	let sourceRules: Promise<Array<Rule>> | undefined;
@@ -248,7 +248,7 @@ export function createStylexDevPlugin(): Plugin {
 			if (result === null) return null;
 			return { code: result.code, map: result.map };
 		},
-		hotUpdate({ file, server }) {
+		hotUpdate({ file, modules }) {
 			// Only a StyleX-eligible source module can change the rule set the virtual stylesheet
 			// serves; a change to anything else (e.g. a `.md` doc) leaves `sourceRules` valid, so
 			// re-scanning the whole source tree on every save would be wasted work.
@@ -256,8 +256,14 @@ export function createStylexDevPlugin(): Plugin {
 
 			sourceRules = undefined;
 
-			const virtualModule = server.moduleGraph.getModuleById(RESOLVED_STYLEX_VIRTUAL_CSS_ID);
-			if (virtualModule !== undefined) server.moduleGraph.invalidateModule(virtualModule);
+			const moduleGraph = this.environment.moduleGraph;
+			const virtualModule = moduleGraph.getModuleById(RESOLVED_STYLEX_VIRTUAL_CSS_ID);
+			if (virtualModule === undefined) return;
+
+			moduleGraph.invalidateModule(virtualModule);
+			// Nothing that changed imports the virtual module, so Vite never collects it into
+			// `modules` on its own.
+			return [...modules, virtualModule];
 		},
 	};
 }
