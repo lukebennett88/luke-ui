@@ -136,14 +136,22 @@ order is stable regardless of stylesheet import order. The reset normalises only
 carries `rootClassName`.
 
 If your application also uses cascade layers, declare its layer order before you import stylesheets,
-and name `luke` in that declaration. Place it below the application layers that should override Luke
-UI, such as `components` and `utilities`. You do not need to know how Luke UI organises styles
-inside that layer, only that `luke` is its name. If you omit `luke`, the browser appends it after
-your declared layers the first time Luke UI's stylesheet registers it, and Luke UI's component
-styles then beat your `components` and `utilities` rules instead of losing to them.
+and name both `luke` and `structural` in that declaration. Place them below the application layers
+that should override Luke UI, such as `components` and `utilities`. You do not need to know how Luke
+UI organises styles inside `luke`, only that `luke` is its name. If you omit `luke`, the browser
+appends it after your declared layers the first time Luke UI's stylesheet registers it, and Luke
+UI's component styles then beat your `components` and `utilities` rules instead of losing to them.
+
+`structural` needs the same treatment, for a different reason. If you omit it, the browser appends
+it after your declared layers too, which puts it above `utilities` instead of below it.
+`LoadingSkeleton` relies on `structural` sitting below `utilities`, because it uses `!important`
+there so its placeholder styles win over wrapped children. Cascade-layer priority reverses for
+`!important` declarations, so a lower layer's `!important` rule beats a higher layer's. If
+`structural` ends up above `utilities`, a `utilities`-layer `!important` rule from your application
+would beat it instead of losing to it.
 
 ```css
-@layer reset, theme, luke, base, components, utilities;
+@layer reset, theme, luke, structural, base, components, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';

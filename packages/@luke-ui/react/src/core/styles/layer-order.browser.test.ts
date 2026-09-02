@@ -121,11 +121,12 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 	expect(getComputedStyle(element).paddingTop).toBe('16px');
 });
 
-test('the documented consumer layer declaration keeps consumer CSS above Luke UI StyleX styles', () => {
+test('the documented consumer layer declaration preserves Luke UI and consumer override ordering', () => {
 	// This is the exact declaration published in the Styling guide
 	// (apps/docs/content/docs/docs/styling.mdx, "Use application CSS alongside Luke UI"). Keep the
 	// two in sync: if this literal changes, update the docs too, and vice versa.
-	const documentedLayerDeclaration = '@layer reset, theme, luke, base, components, utilities;';
+	const documentedLayerDeclaration =
+		'@layer reset, theme, luke, structural, base, components, utilities;';
 
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
@@ -145,7 +146,36 @@ ${documentedLayerDeclaration}
 `;
 	document.head.insertBefore(consumerStyle, document.head.firstChild);
 
+	// Relationship 1: consumer `components` CSS beats Luke UI's StyleX component styles.
 	expect(getComputedStyle(element).paddingTop).toBe('40px');
+
+	// Relationships 2 and 3 probe `structural` and `utilities` directly, since the documented
+	// declaration is what fixes their relative order (an omitted `structural` would otherwise be
+	// appended after `utilities` once the built stylesheet registers it). A distinct probe class
+	// keeps these rules off the StyleX padding class used above.
+	const orderingProbeClass = 'documented-declaration-ordering-probe';
+	const orderingElement = mountProbe(orderingProbeClass);
+
+	const normalOrderingStyle = document.head.appendChild(document.createElement('style'));
+	normalOrderingStyle.dataset.layerOrderProbe = 'true';
+	normalOrderingStyle.textContent = `
+@layer structural { .${orderingProbeClass} { color: rgb(1, 1, 1); } }
+@layer utilities { .${orderingProbeClass} { color: rgb(2, 2, 2); } }
+`;
+
+	// Relationship 2: a normal `utilities` rule beats a normal `structural` rule.
+	expect(getComputedStyle(orderingElement).color).toBe('rgb(2, 2, 2)');
+
+	const importantOrderingStyle = document.head.appendChild(document.createElement('style'));
+	importantOrderingStyle.dataset.layerOrderProbe = 'true';
+	importantOrderingStyle.textContent = `
+@layer structural { .${orderingProbeClass} { margin-top: 5px !important; } }
+@layer utilities { .${orderingProbeClass} { margin-top: 9px !important; } }
+`;
+
+	// Relationship 3: a `structural !important` rule beats a `utilities !important` rule, because
+	// cascade-layer priority reverses for `!important` declarations.
+	expect(getComputedStyle(orderingElement).marginTop).toBe('5px');
 });
 
 test('LoadingSkeleton structural !important beats utilities-layer !important overrides', () => {
