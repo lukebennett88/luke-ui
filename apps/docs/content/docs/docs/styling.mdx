@@ -136,15 +136,17 @@ order is stable regardless of stylesheet import order. The reset normalises only
 carries `rootClassName`.
 
 If your application also uses cascade layers, declare its layer order before you import stylesheets,
-and name both `luke` and `structural` in that declaration. Place them below the application layers
-that should override Luke UI, such as `components` and `utilities`. You do not need to know how Luke
-UI organises styles inside `luke`, only that `luke` is its name.
+and name both `luke` and `structural` in that declaration. Place your application's `base` or reset
+layer below `luke`, so broad element resets (such as Tailwind Preflight) cannot override Luke UI
+component internals. Place `components` and `utilities` above `luke` and `structural`, so deliberate
+application overrides still win. You do not need to know how Luke UI organises styles inside `luke`,
+only that `luke` is its name.
 
 Name both. A layer you leave out is appended after the layers you declared, which puts it above your
 application layers instead of below them and reverses the override order you expect.
 
 ```css
-@layer reset, theme, luke, structural, base, components, utilities;
+@layer reset, theme, base, luke, structural, components, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';

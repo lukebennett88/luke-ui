@@ -38,6 +38,15 @@ function stylexPaddingClass(stylesheet: string): string {
 	return paddingClass;
 }
 
+function stylexInlineFlexClass(stylesheet: string): string {
+	const stylexSection = stylesheet.split('/* stylex */')[1] ?? '';
+	const inlineFlexClass = stylexSection.match(/\.([a-z0-9]+)\{display:inline-flex\}/)?.[1];
+	if (inlineFlexClass == null) {
+		throw new Error('Expected StyleX inline-flex fixture class in the built stylesheet.');
+	}
+	return inlineFlexClass;
+}
+
 function mountProbe(className: string): HTMLDivElement {
 	const element = document.body.appendChild(document.createElement('div'));
 	mounted.push(element);
@@ -126,7 +135,7 @@ test('the documented consumer layer declaration preserves Luke UI and consumer o
 	// (apps/docs/content/docs/docs/styling.mdx, "Use application CSS alongside Luke UI"). Keep the
 	// two in sync: if this literal changes, update the docs too, and vice versa.
 	const documentedLayerDeclaration =
-		'@layer reset, theme, luke, structural, base, components, utilities;';
+		'@layer reset, theme, base, luke, structural, components, utilities;';
 
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
@@ -176,6 +185,47 @@ ${documentedLayerDeclaration}
 	// Relationship 3: a `structural !important` rule beats a `utilities !important` rule, because
 	// cascade-layer priority reverses for `!important` declarations.
 	expect(getComputedStyle(orderingElement).marginTop).toBe('5px');
+});
+
+test('application base-layer element resets do not override Luke UI component styles', () => {
+	// This is the exact declaration published in the Styling guide
+	// (apps/docs/content/docs/docs/styling.mdx, "Use application CSS alongside Luke UI"). Keep the
+	// two in sync: if this literal changes, update the docs too, and vice versa.
+	const documentedLayerDeclaration =
+		'@layer reset, theme, base, luke, structural, components, utilities;';
+
+	const inlineFlexClass = stylexInlineFlexClass(stylesheetCss);
+
+	// A browser registers layer order from the first `@layer` statement it encounters, and a later
+	// statement cannot reorder layers that are already registered. The built stylesheet's own
+	// `@layer` statement was already injected in `beforeAll`, so the consumer declaration must be
+	// inserted ahead of it in `document.head` to reproduce the documented, realistic setup where a
+	// consumer declares its layer order before importing Luke UI's stylesheet.
+	const consumerStyle = document.createElement('style');
+	consumerStyle.dataset.layerOrderProbe = 'true';
+	consumerStyle.textContent = `
+${documentedLayerDeclaration}
+@layer base { svg { display: block; } }
+`;
+	document.head.insertBefore(consumerStyle, document.head.firstChild);
+
+	const element = document.body.appendChild(
+		document.createElementNS('http://www.w3.org/2000/svg', 'svg'),
+	);
+	mounted.push(element as unknown as HTMLElement);
+	element.setAttribute('class', inlineFlexClass);
+
+	// A Tailwind-Preflight-shaped `base` layer rule (`svg { display: block }`) must not beat Luke
+	// UI's StyleX component styles (`display: inline-flex`), because `base` sits below `luke`.
+	expect(getComputedStyle(element).display).toBe('inline-flex');
+
+	const componentsOverrideStyle = document.head.appendChild(document.createElement('style'));
+	componentsOverrideStyle.dataset.layerOrderProbe = 'true';
+	componentsOverrideStyle.textContent = `@layer components { .${inlineFlexClass} { display: flex; } }`;
+
+	// A deliberate application `components` override still wins, because `components` sits above
+	// `luke`.
+	expect(getComputedStyle(element).display).toBe('flex');
 });
 
 test('LoadingSkeleton structural !important beats utilities-layer !important overrides', () => {
