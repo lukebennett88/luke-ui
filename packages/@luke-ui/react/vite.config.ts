@@ -39,7 +39,6 @@ export default defineConfig({
 		dts: true,
 		entry: {
 			stylesheet: 'src/core/stylesheet.css.ts',
-			'stylex-bundle': 'src/core/styles/stylex-bundle.ts',
 			'*': ['src/exports/*.ts'],
 			'primitives/*': ['src/exports/primitives/*.ts'],
 			'themes/*': ['src/exports/themes/*.ts'],
@@ -48,8 +47,8 @@ export default defineConfig({
 			customExports: Object.fromEntries(
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
-			// Built for extraction; not consumer subpaths.
-			exclude: ['stylesheet', 'stylex-bundle'],
+			// Built for extraction; not a consumer subpath.
+			exclude: ['stylesheet'],
 		},
 		format: ['esm'],
 		hooks: {

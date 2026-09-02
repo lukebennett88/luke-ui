@@ -27,22 +27,24 @@ afterEach(() => {
 	for (const style of document.querySelectorAll('style[data-layer-order-probe]')) style.remove();
 });
 
+/** The `Button` recipe's `sizeMedium` variant emits this as an isolated atomic declaration. */
 function stylexPaddingClass(stylesheet: string): string {
 	const stylexSection = stylesheet.split('/* stylex */')[1] ?? '';
 	const paddingClass = stylexSection.match(
-		/\.([a-z0-9]+)\{padding:var\(--luke-space-sp16\)\}/,
+		/\.([a-z0-9]+)\{padding-inline:var\(--luke-space-sp16\)\}/,
 	)?.[1];
 	if (paddingClass == null) {
-		throw new Error('Expected StyleX padding fixture class in the built stylesheet.');
+		throw new Error('Expected StyleX padding class in the built stylesheet.');
 	}
 	return paddingClass;
 }
 
+/** Several real recipes (Icon, Kbd, Checkbox, and others) share this isolated atomic declaration. */
 function stylexInlineFlexClass(stylesheet: string): string {
 	const stylexSection = stylesheet.split('/* stylex */')[1] ?? '';
 	const inlineFlexClass = stylexSection.match(/\.([a-z0-9]+)\{display:inline-flex\}/)?.[1];
 	if (inlineFlexClass == null) {
-		throw new Error('Expected StyleX inline-flex fixture class in the built stylesheet.');
+		throw new Error('Expected StyleX inline-flex class in the built stylesheet.');
 	}
 	return inlineFlexClass;
 }
@@ -58,57 +60,57 @@ test('components beats the recipe layers in the built stylesheet cascade', () =>
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 
 	const componentsStyle = document.head.appendChild(document.createElement('style'));
 	componentsStyle.dataset.layerOrderProbe = 'true';
-	componentsStyle.textContent = `@layer components { .${paddingClass} { padding-top: 10px; } }`;
+	componentsStyle.textContent = `@layer components { .${paddingClass} { padding-inline: 10px; } }`;
 
-	expect(getComputedStyle(element).paddingTop).toBe('10px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('10px');
 });
 
 test('utilities beat the recipe layers in the built stylesheet cascade', () => {
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 
 	const utilityStyle = document.head.appendChild(document.createElement('style'));
 	utilityStyle.dataset.layerOrderProbe = 'true';
-	utilityStyle.textContent = `@layer utilities { .${paddingClass} { padding-top: 20px; } }`;
+	utilityStyle.textContent = `@layer utilities { .${paddingClass} { padding-inline: 20px; } }`;
 
-	expect(getComputedStyle(element).paddingTop).toBe('20px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('20px');
 });
 
 test('utilities beat components in the built stylesheet cascade', () => {
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 
 	const componentsStyle = document.head.appendChild(document.createElement('style'));
 	componentsStyle.dataset.layerOrderProbe = 'true';
-	componentsStyle.textContent = `@layer components { .${paddingClass} { padding-top: 10px; } }`;
-	expect(getComputedStyle(element).paddingTop).toBe('10px');
+	componentsStyle.textContent = `@layer components { .${paddingClass} { padding-inline: 10px; } }`;
+	expect(getComputedStyle(element).paddingInlineStart).toBe('10px');
 
 	const utilityStyle = document.head.appendChild(document.createElement('style'));
 	utilityStyle.dataset.layerOrderProbe = 'true';
-	utilityStyle.textContent = `@layer utilities { .${paddingClass} { padding-top: 20px; } }`;
+	utilityStyle.textContent = `@layer utilities { .${paddingClass} { padding-inline: 20px; } }`;
 
-	expect(getComputedStyle(element).paddingTop).toBe('20px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('20px');
 });
 
 test('unlayered consumer CSS beats the recipe layers', () => {
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 
 	const consumerStyle = document.head.appendChild(document.createElement('style'));
 	consumerStyle.dataset.layerOrderProbe = 'true';
-	consumerStyle.textContent = `.${paddingClass} { padding-top: 30px; }`;
+	consumerStyle.textContent = `.${paddingClass} { padding-inline: 30px; }`;
 
-	expect(getComputedStyle(element).paddingTop).toBe('30px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('30px');
 });
 
 test('reproduces the invalid early layer-declaration failure mode', () => {
@@ -120,14 +122,14 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 @layer probe-components;
 @layer probe-utilities;
 @layer probe-reset, probe-theme, probe-recipes.sx.priority1, probe-components, probe-utilities;
-@layer probe-recipes.sx.priority1 { .probe-invalid { padding-top: 16px; } }
-@layer probe-components { .probe-invalid { padding-top: 10px; } }
-@layer probe-utilities { .probe-invalid { padding-top: 20px; } }
+@layer probe-recipes.sx.priority1 { .probe-invalid { padding-inline: 16px; } }
+@layer probe-components { .probe-invalid { padding-inline: 10px; } }
+@layer probe-utilities { .probe-invalid { padding-inline: 20px; } }
 `;
 
 	const element = mountProbe('probe-invalid');
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 });
 
 test('the documented consumer layer declaration preserves Luke UI and consumer override ordering', () => {
@@ -139,7 +141,7 @@ test('the documented consumer layer declaration preserves Luke UI and consumer o
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 
 	// A browser registers layer order from the first `@layer` statement it encounters, and a later
 	// statement cannot reorder layers that are already registered. The built stylesheet's own
@@ -150,13 +152,13 @@ test('the documented consumer layer declaration preserves Luke UI and consumer o
 	consumerStyle.dataset.layerOrderProbe = 'true';
 	consumerStyle.textContent = `
 ${documentedLayerDeclaration}
-@layer components { .${paddingClass} { padding-top: 40px; } }
+@layer components { .${paddingClass} { padding-inline: 40px; } }
 `;
 	document.head.insertBefore(consumerStyle, document.head.firstChild);
 
 	// Relationship 1: consumer `components` CSS beats Luke UI's StyleX recipe styles, which sit in
 	// the `recipes` layer below it.
-	expect(getComputedStyle(element).paddingTop).toBe('40px');
+	expect(getComputedStyle(element).paddingInlineStart).toBe('40px');
 
 	// Relationships 2 and 3 probe `components` and `utilities` directly, since the documented
 	// declaration is what fixes their relative order. A distinct probe class keeps these rules off

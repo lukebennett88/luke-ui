@@ -40,8 +40,8 @@ const LEADING_NEWLINE_PATTERN = /^\n/;
 /** A `.ts`/`.tsx`/`.js`/`.jsx` module, excluding declaration files. Mirrors `vite.config.ts`'s `sourceModule`. */
 const STYLEX_ELIGIBLE_MODULE_PATTERN = /(?<!\.d)\.[cm]?[jt]sx?$/;
 
-/** A browser, visual, or unit test module. */
-const TEST_MODULE_PATTERN = /\.(?:browser|visual|test)\.[cm]?[jt]sx?$/;
+/** A browser, visual, or unit test module, or a Storybook story: never a production module. */
+const NON_PRODUCTION_MODULE_PATTERN = /\.(?:browser|visual|test|stories)\.[cm]?[jt]sx?$/;
 
 function buildAuthoritativeLayerOrder(priorityLayers: Array<string>): string {
 	return `@layer ${[...stylexLayerConfig.before, ...priorityLayers, ...stylexLayerConfig.after].join(', ')};`;
@@ -167,7 +167,7 @@ async function findSourceModules(directory: string, includeTests: boolean): Prom
 			const filename = join(directory, entry.name);
 			if (entry.isDirectory()) return findSourceModules(filename, includeTests);
 			if (!STYLEX_ELIGIBLE_MODULE_PATTERN.test(filename)) return [];
-			if (!includeTests && TEST_MODULE_PATTERN.test(filename)) return [];
+			if (!includeTests && NON_PRODUCTION_MODULE_PATTERN.test(filename)) return [];
 			return [filename];
 		}),
 	);

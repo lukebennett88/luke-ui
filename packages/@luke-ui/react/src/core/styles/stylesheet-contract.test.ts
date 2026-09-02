@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readdir, readFile } from 'node:fs/promises';
+import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import type { AtRule, Root, Rule } from 'postcss';
 import { parse } from 'postcss';
 import selectorParser from 'postcss-selector-parser';
@@ -193,6 +193,42 @@ test(
 		]);
 
 		expect(layerOrder(devStylesheet)).toBe(layerOrder(builtStylesheet));
+	},
+);
+
+test(
+	'excludes a Storybook story from the production StyleX scan but includes it in dev',
+	{ timeout: 30_000 },
+	async () => {
+		// A unique atom and class name so this test cannot pass against rules another module in
+		// `src` happens to emit.
+		const storyFilename = fileURLToPath(
+			new URL('./stylesheet-contract-story-probe.stories.tsx', import.meta.url),
+		);
+		const storySource = `
+import * as stylex from '@stylexjs/stylex';
+
+const styles = stylex.create({
+	storyProbe: {
+		textDecorationStyle: 'wavy',
+	},
+});
+
+export const storyProbeClassName = stylex.props(styles.storyProbe).className;
+`;
+
+		await writeFile(storyFilename, storySource, 'utf8');
+		try {
+			const [productionStylesheet, devStylesheet] = await Promise.all([
+				createStylexStylesheet(false),
+				createStylexStylesheet(true),
+			]);
+
+			expect(productionStylesheet).not.toMatch(/text-decoration-style:\s*wavy/);
+			expect(devStylesheet).toMatch(/text-decoration-style:\s*wavy/);
+		} finally {
+			await rm(storyFilename);
+		}
 	},
 );
 

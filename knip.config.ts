@@ -29,9 +29,6 @@ export default {
 				'src/exports/**/*.ts',
 				'src/core/stylesheet.css.ts',
 				'src/core/styles/index.css.ts',
-				// Pack entry; nothing in `src/` imports it.
-				'src/core/styles/stylex-bundle.ts',
-				'src/core/styles/stylex-fixture.ts',
 				'scripts/**/*.ts',
 			],
 			// `stylex-vite-plugin.ts` lives at package root, beside `vite.config.ts`/`vitest.config.ts`
