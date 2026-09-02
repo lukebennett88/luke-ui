@@ -223,8 +223,10 @@ const RESOLVED_STYLEX_VIRTUAL_CSS_ID = `\0${STYLEX_VIRTUAL_CSS_ID}`;
 /**
  * Dev/test StyleX plugin: transforms JS the same way the pack plugin does, and serves the complete
  * extracted CSS — including the same authoritative `@layer` order — from `virtual:luke-stylex.css`.
- * Layer names and StyleX rules come from a full source scan (`loadSourceRules`), not from modules
- * Vite has happened to transform so far.
+ * Layer names and StyleX rules come from a full source scan (`loadSourceRules`), cached after the
+ * first request. `hotUpdate` drops that cache and invalidates the virtual module whenever a
+ * StyleX-eligible source file changes, so editing a `stylex.create()` call re-scans on the next
+ * request instead of serving CSS left over from before the edit.
  */
 export function createStylexDevPlugin(): Plugin {
 	let sourceRules: Promise<Array<Rule>> | undefined;
@@ -245,6 +247,17 @@ export function createStylexDevPlugin(): Plugin {
 			const result = await transformStylex(code, id);
 			if (result === null) return null;
 			return { code: result.code, map: result.map };
+		},
+		hotUpdate({ file, server }) {
+			// Only a StyleX-eligible source module can change the rule set the virtual stylesheet
+			// serves; a change to anything else (e.g. a `.md` doc) leaves `sourceRules` valid, so
+			// re-scanning the whole source tree on every save would be wasted work.
+			if (!STYLEX_ELIGIBLE_MODULE_PATTERN.test(file)) return;
+
+			sourceRules = undefined;
+
+			const virtualModule = server.moduleGraph.getModuleById(RESOLVED_STYLEX_VIRTUAL_CSS_ID);
+			if (virtualModule !== undefined) server.moduleGraph.invalidateModule(virtualModule);
 		},
 	};
 }
