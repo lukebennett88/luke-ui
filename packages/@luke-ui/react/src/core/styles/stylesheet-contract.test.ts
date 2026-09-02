@@ -1,6 +1,8 @@
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import type { Node } from 'oxc-parser';
+import { parseSync } from 'oxc-parser';
 import type { AtRule, Root, Rule } from 'postcss';
 import { parse } from 'postcss';
 import selectorParser from 'postcss-selector-parser';
@@ -57,22 +59,48 @@ test(
 	},
 );
 
-const camelCaseLogicalPropertyKey =
-	/\b(?:(?:min|max)?(?:Inline|Block)Size|(?:margin|padding|inset|border)(?:Block|Inline)(?:Start|End)?)\s*:/;
-
-test('migrated StyleX source keeps quoted logical keys that StyleX would otherwise lower', async () => {
-	const sourceRoot = fileURLToPath(new URL('../..', import.meta.url));
+test('authors logical camelCase property keys in StyleX styles', async () => {
+	const sourceRoot = fileURLToPath(STYLEX_SOURCE_ROOT);
 	const filenames = await findMigratedStylexSources(sourceRoot);
 	expect(filenames.length).toBeGreaterThan(0);
 
 	const sources = await Promise.all(
 		filenames.map(async (filename) => ({ filename, source: await readFile(filename, 'utf8') })),
 	);
+	const errors: Array<string> = [];
 	for (const { filename, source } of sources) {
-		const match = source.match(camelCaseLogicalPropertyKey);
-		if (match === null) continue;
-		throw new Error(`${filename} uses camelCase logical StyleX key "${match[0].trim()}"`);
+		const relativeFilename = toSourceRelativePath(filename);
+		const allowedPhysicalProperties = PHYSICAL_PROPERTY_EXCEPTIONS.get(relativeFilename);
+		for (const key of collectStylexPropertyKeys(filename, source)) {
+			if (PHYSICAL_PROPERTIES_WITH_LOGICAL_COUNTERPART.has(key)) {
+				if (allowedPhysicalProperties?.has(key)) continue;
+				errors.push(
+					`${relativeFilename} uses physical StyleX key "${key}"; author its logical counterpart instead.`,
+				);
+			}
+		}
 	}
+	expect(errors).toEqual([]);
+});
+
+test('uses no quoted kebab-case property keys in StyleX styles', async () => {
+	const sourceRoot = fileURLToPath(STYLEX_SOURCE_ROOT);
+	const filenames = await findMigratedStylexSources(sourceRoot);
+	expect(filenames.length).toBeGreaterThan(0);
+
+	const sources = await Promise.all(
+		filenames.map(async (filename) => ({ filename, source: await readFile(filename, 'utf8') })),
+	);
+	const errors: Array<string> = [];
+	for (const { filename, source } of sources) {
+		for (const key of collectStylexStringPropertyKeys(filename, source)) {
+			if (isStylexStyleObjectKey(key)) continue;
+			errors.push(
+				`${toSourceRelativePath(filename)} uses quoted property key "${key}"; StyleX treats a quoted kebab-case key as an unknown property, so author the camelCase key instead.`,
+			);
+		}
+	}
+	expect(errors).toEqual([]);
 });
 
 const stylesheetMutations: Array<[string, (css: string) => string]> = [
@@ -171,6 +199,55 @@ test('queries responsive conditions on the logical inline axis', async () => {
 	expect(stylesheet).not.toContain('@container (width >=');
 });
 
+/**
+ * StyleX lowers a bidi-insensitive logical property to its physical equivalent, so
+ * `blockSize` emits `height` and `marginBlockStart` emits `margin-top`. Those are equivalent
+ * under the horizontal writing modes the design system supports, so this guard permits them
+ * and asserts only on the direction-sensitive properties StyleX leaves logical. Emitting one
+ * of those physically would mirror the wrong way round under `direction: rtl`.
+ *
+ * The guard is scoped to the StyleX priority layers because the same stylesheet retains
+ * Vanilla Extract output and deliberately physical CSS, neither of which this contract owns.
+ */
+test('emits no physical direction-sensitive declarations from StyleX', async () => {
+	const stylesheet = await readPublicStylesheet();
+	const root = parse(stylesheet);
+	const errors: Array<string> = [];
+
+	root.walkRules((rule) => {
+		const layer = getOwningLayer(rule);
+		if (layer === undefined || !STYLEX_PRIORITY_LAYER_PATTERN.test(layer)) return;
+
+		rule.walkDecls((declaration) => {
+			const value = declaration.value.trim();
+			if (PHYSICAL_DIRECTION_SENSITIVE_PROPERTIES.has(declaration.prop)) {
+				errors.push(`${layer} ${rule.selector} emits physical "${declaration.prop}".`);
+			}
+			if (PHYSICAL_DIRECTION_SENSITIVE_VALUES.get(declaration.prop)?.has(value)) {
+				errors.push(`${layer} ${rule.selector} emits physical "${declaration.prop}: ${value}".`);
+			}
+		});
+	});
+
+	expect(errors).toEqual([]);
+});
+
+test('emits direction-sensitive properties logically from StyleX', async () => {
+	const root = parse(await readPublicStylesheet());
+	const properties = new Set<string>();
+
+	root.walkRules((rule) => {
+		const layer = getOwningLayer(rule);
+		if (layer === undefined || !STYLEX_PRIORITY_LAYER_PATTERN.test(layer)) return;
+		rule.walkDecls((declaration) => {
+			properties.add(declaration.prop);
+		});
+	});
+
+	expect(properties).toContain('padding-inline-start');
+	expect(properties).toContain('inset-inline-start');
+});
+
 test('recognises escaped class identifiers', () => {
 	expect(() => {
 		return assertStylesheetContract(
@@ -260,6 +337,229 @@ async function findMigratedStylexSources(directory: string): Promise<Array<strin
 		}),
 	);
 	return filenames.flat();
+}
+
+/** Physical authoring keys that have a direct logical counterpart to author instead. */
+const PHYSICAL_PROPERTIES_WITH_LOGICAL_COUNTERPART = new Set([
+	'width',
+	'height',
+	'minWidth',
+	'minHeight',
+	'maxWidth',
+	'maxHeight',
+	'marginTop',
+	'marginBottom',
+	'marginLeft',
+	'marginRight',
+	'paddingTop',
+	'paddingBottom',
+	'paddingLeft',
+	'paddingRight',
+	'top',
+	'bottom',
+	'left',
+	'right',
+	'borderTopWidth',
+	'borderTopStyle',
+	'borderTopColor',
+	'borderBottomWidth',
+	'borderBottomStyle',
+	'borderBottomColor',
+	'borderLeftWidth',
+	'borderLeftStyle',
+	'borderLeftColor',
+	'borderRightWidth',
+	'borderRightStyle',
+	'borderRightColor',
+	'borderTopLeftRadius',
+	'borderTopRightRadius',
+	'borderBottomLeftRadius',
+	'borderBottomRightRadius',
+	'scrollMarginTop',
+	'scrollMarginBottom',
+	'scrollMarginLeft',
+	'scrollMarginRight',
+	'scrollPaddingTop',
+	'scrollPaddingBottom',
+	'scrollPaddingLeft',
+	'scrollPaddingRight',
+]);
+
+/**
+ * Modules permitted to author a specific physical property, keyed by their path relative to
+ * `src`. Each entry needs a comment naming the reason the physical property is correct, and
+ * the call site itself needs the same explanation. Adding an entry here is a deliberate
+ * exception to the logical-authoring contract, never a way to quieten the test.
+ */
+const PHYSICAL_PROPERTY_EXCEPTIONS = new Map<string, Set<string>>([
+	// The tray pairs `top` and `bottom` to preserve an intended over-constraint that logical
+	// block insets would resolve from the wrong edge on a content-box element.
+	['core/overlays/mobile-overlay.tsx', new Set(['top', 'bottom'])],
+]);
+
+/** Physical direction-sensitive properties StyleX leaves logical, so emitting one is a bug. */
+const PHYSICAL_DIRECTION_SENSITIVE_PROPERTIES = new Set([
+	'margin-left',
+	'margin-right',
+	'padding-left',
+	'padding-right',
+	'left',
+	'right',
+	'border-left-width',
+	'border-left-style',
+	'border-left-color',
+	'border-right-width',
+	'border-right-style',
+	'border-right-color',
+	'border-top-left-radius',
+	'border-top-right-radius',
+	'border-bottom-left-radius',
+	'border-bottom-right-radius',
+	'scroll-margin-left',
+	'scroll-margin-right',
+	'scroll-padding-left',
+	'scroll-padding-right',
+]);
+
+/** Physical direction-sensitive *values*, which mirror the wrong way round under `direction: rtl`. */
+const PHYSICAL_DIRECTION_SENSITIVE_VALUES = new Map<string, Set<string>>([
+	['text-align', new Set(['left', 'right'])],
+	['float', new Set(['left', 'right'])],
+	['clear', new Set(['left', 'right'])],
+]);
+
+/** The scanned source root, matching the directory `findMigratedStylexSources` walks. */
+const STYLEX_SOURCE_ROOT = new URL('../..', import.meta.url);
+
+function toSourceRelativePath(filename: string): string {
+	return relative(fileURLToPath(STYLEX_SOURCE_ROOT), filename);
+}
+
+/** Every property key authored inside a `stylex.create()` style object, quoted or not. */
+function collectStylexPropertyKeys(filename: string, source: string): Array<string> {
+	return collectStylexKeys(filename, source).map(({ name }) => name);
+}
+
+/** Only the string-literal property keys, which is where a quoted kebab-case key would appear. */
+function collectStylexStringPropertyKeys(filename: string, source: string): Array<string> {
+	return collectStylexKeys(filename, source)
+		.filter(({ quoted }) => quoted)
+		.map(({ name }) => name);
+}
+
+interface StylexPropertyKey {
+	name: string;
+	quoted: boolean;
+}
+
+/**
+ * Walks the module for `stylex.create()` calls and returns the property keys of the style
+ * objects inside them, including keys nested under a selector, at-rule, or conditional value
+ * object. Keys elsewhere in the module — component props, recipe variant maps, Vanilla Extract
+ * definitions — are deliberately out of scope.
+ */
+function collectStylexKeys(filename: string, source: string): Array<StylexPropertyKey> {
+	const parsed = parseSync(filename, source, { lang: 'tsx' });
+	if (parsed.errors.length > 0) {
+		throw new Error(`Could not parse ${filename}: ${parsed.errors[0]?.message}`);
+	}
+
+	const keys: Array<StylexPropertyKey> = [];
+	for (const call of findStylexCreateCalls(parsed.program)) {
+		for (const argument of call.arguments) {
+			if (argument.type !== 'ObjectExpression') continue;
+			// The argument maps namespace names to style objects, so its own keys are namespace
+			// names rather than CSS properties. Only the style objects below it are inspected.
+			for (const namespace of argument.properties) {
+				if (namespace.type !== 'Property') continue;
+				for (const styleObject of styleObjects(namespace.value)) {
+					collectStyleObjectKeys(styleObject, keys);
+				}
+			}
+		}
+	}
+	return keys;
+}
+
+function findStylexCreateCalls(program: Node): Array<Extract<Node, { type: 'CallExpression' }>> {
+	const calls: Array<Extract<Node, { type: 'CallExpression' }>> = [];
+	walkNodes(program, (node) => {
+		if (node.type !== 'CallExpression') return;
+		const { callee } = node;
+		if (callee.type !== 'MemberExpression' || callee.computed) return;
+		if (callee.object.type !== 'Identifier' || callee.object.name !== 'stylex') return;
+		if (callee.property.type !== 'Identifier' || callee.property.name !== 'create') return;
+		calls.push(node);
+	});
+	return calls;
+}
+
+/** A namespace value is either a style object or a dynamic style returning one. */
+function styleObjects(node: Node): Array<Extract<Node, { type: 'ObjectExpression' }>> {
+	if (node.type === 'ObjectExpression') return [node];
+	if (node.type === 'ArrowFunctionExpression' || node.type === 'FunctionExpression') {
+		const body = node.body;
+		if (body === null) return [];
+		const objects: Array<Extract<Node, { type: 'ObjectExpression' }>> = [];
+		walkNodes(body, (descendant) => {
+			if (descendant.type === 'ObjectExpression') objects.push(descendant);
+		});
+		return objects;
+	}
+	return [];
+}
+
+function collectStyleObjectKeys(
+	object: Extract<Node, { type: 'ObjectExpression' }>,
+	keys: Array<StylexPropertyKey>,
+): void {
+	for (const property of object.properties) {
+		if (property.type !== 'Property') continue;
+		const key = stylexPropertyKey(property.key, property.computed);
+		if (key !== undefined) keys.push(key);
+		// A selector, at-rule, or conditional value object nests more property keys.
+		if (property.value.type === 'ObjectExpression') {
+			collectStyleObjectKeys(property.value, keys);
+		}
+	}
+}
+
+function stylexPropertyKey(key: Node, computed: boolean): StylexPropertyKey | undefined {
+	if (computed) return undefined;
+	if (key.type === 'Identifier') return { name: key.name, quoted: false };
+	if (key.type === 'Literal' && typeof key.value === 'string') {
+		return { name: key.value, quoted: true };
+	}
+}
+
+const KEYFRAME_SELECTOR_PATTERN = /^(?:from|to|\d+(?:\.\d+)?%)$/;
+
+/** True for a quoted key that names something other than a CSS property. */
+function isStylexStyleObjectKey(key: string): boolean {
+	if (key.startsWith('--')) return true;
+	if (key.startsWith('@')) return true;
+	if (key.startsWith(':') || key.startsWith('&') || key.startsWith('[')) return true;
+	if (key.includes('::')) return true;
+	return KEYFRAME_SELECTOR_PATTERN.test(key);
+}
+
+function walkNodes(node: Node, visit: (node: Node) => void): void {
+	visit(node);
+	for (const value of Object.values(node)) {
+		if (Array.isArray(value)) {
+			for (const item of value) {
+				if (isNode(item)) walkNodes(item, visit);
+			}
+			continue;
+		}
+		if (isNode(value)) walkNodes(value, visit);
+	}
+}
+
+function isNode(value: unknown): value is Node {
+	return (
+		typeof value === 'object' && value !== null && typeof Reflect.get(value, 'type') === 'string'
+	);
 }
 
 function assertStylesheetContract(
@@ -536,8 +836,9 @@ function assertClassOwnership(root: Root, className: string, layerName: string):
 /**
  * Text is StyleX-migrated: its trim and line-clamp classes live in a `recipes.sx.priorityN`
  * layer. `assertTextTrimOwnership` and `assertLineClampOwnership` below assert that StyleX
- * ownership directly. Text uses quoted logical CSS keys, which StyleX emits without lowering
- * to physical properties.
+ * ownership directly. Text authors the logical `marginBlockStart`/`marginBlockEnd` keys, which
+ * StyleX canonicalises to `margin-top`/`margin-bottom`. Both are bidi-insensitive, so the
+ * physical output is equivalent under the horizontal writing modes the design system supports.
  */
 function assertTextTrimOwnership(
 	root: Root,
@@ -550,17 +851,15 @@ function assertTextTrimOwnership(
 		assertPseudoDeclaration(
 			rules,
 			'::before',
-			'margin-block-end',
+			'margin-bottom',
 			`var(--luke-font-${typography}-cap-height-trim)`,
 		);
 		assertPseudoDeclaration(
 			rules,
 			'::after',
-			'margin-block-start',
+			'margin-top',
 			`var(--luke-font-${typography}-baseline-trim)`,
 		);
-		assertNoPhysicalTrimMargins(rules, '::before');
-		assertNoPhysicalTrimMargins(rules, '::after');
 	}
 }
 
@@ -589,19 +888,6 @@ function assertStylexDeclaration(rules: Array<Rule>, property: string, value: st
 	for (const rule of matchingRules) {
 		const layer = getOwningLayer(rule);
 		expect(layer !== undefined && STYLEX_PRIORITY_LAYER_PATTERN.test(layer)).toBe(true);
-	}
-}
-
-function assertNoPhysicalTrimMargins(rules: Array<Rule>, pseudo: string): void {
-	for (const rule of rules) {
-		if (!hasPseudo(rule, pseudo)) continue;
-		for (const node of rule.nodes) {
-			if (node.type !== 'decl') continue;
-			if (node.prop !== 'margin-top' && node.prop !== 'margin-bottom') continue;
-			throw new Error(
-				`Text trim ${pseudo} emitted physical ${node.prop}; expected margin-block-* keys.`,
-			);
-		}
 	}
 }
 
@@ -634,9 +920,7 @@ function comboboxStylexClassesFromStylesheet(root: Root): Array<string> {
 		const isComboboxClosedTriggerFloor = rule.nodes.some(
 			(node) =>
 				node.type === 'decl' &&
-				node.prop === 'min-inline-size' &&
-				node.value.includes('20ch') &&
-				node.value.includes('--luke-control-size-combobox-action'),
+				node.value === 'calc(20ch + var(--luke-control-size-combobox-action))',
 		);
 		if (!isComboboxClosedTriggerFloor) return;
 		for (const className of getClassNames(rule)) classNames.add(className);

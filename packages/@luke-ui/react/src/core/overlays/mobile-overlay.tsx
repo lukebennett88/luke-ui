@@ -10,9 +10,9 @@ import { vars } from '../../theme/tokens.stylex.js';
 const styles = stylex.create({
 	overlay: {
 		backgroundColor: vars.colorOverlayBackdrop,
-		'block-size': '100dvh',
-		'inset-inline-end': 0,
-		'inset-inline-start': 0,
+		blockSize: '100dvh',
+		insetInlineEnd: 0,
+		insetInlineStart: 0,
 		position: 'absolute',
 		transitionDuration: vars.motionDurationEnter,
 		transitionProperty: 'opacity',
@@ -47,11 +47,11 @@ const styles = stylex.create({
 		'--luke-tray-padding-block-end':
 			'calc(max(calc(100dvh - var(--visual-viewport-height)), env(safe-area-inset-bottom, 0px)) + 100vh)',
 		backgroundColor: vars.colorSurfaceFloating,
-		'block-size': 'calc(var(--visual-viewport-height) - var(--luke-space-sp48))',
-		'border-end-end-radius': 0,
-		'border-end-start-radius': 0,
-		'border-start-end-radius': vars.radiusOverlay,
-		'border-start-start-radius': vars.radiusOverlay,
+		blockSize: 'calc(var(--visual-viewport-height) - var(--luke-space-sp48))',
+		borderEndEndRadius: 0,
+		borderEndStartRadius: 0,
+		borderStartEndRadius: vars.radiusOverlay,
+		borderStartStartRadius: vars.radiusOverlay,
 		borderStyle: 'solid',
 		borderWidth: '1px',
 		// Physical on purpose, paired with `top` below. The two preserve an intended over-constraint
@@ -61,15 +61,15 @@ const styles = stylex.create({
 		boxSizing: 'content-box',
 		display: 'flex',
 		flexDirection: 'column',
-		'inset-inline-end': 0,
-		'inset-inline-start': 0,
+		insetInlineEnd: 0,
+		insetInlineStart: 0,
 		// The tray is absolutely positioned, so auto inline margins centre it against the
 		// zero inline insets once the cap starts clamping its width.
-		'margin-inline-end': 'auto',
-		'margin-inline-start': 'auto',
-		'max-inline-size': '448px',
+		marginInlineEnd: 'auto',
+		marginInlineStart: 'auto',
+		maxInlineSize: '448px',
 		overflow: 'hidden',
-		'padding-block-end': 'var(--luke-tray-padding-block-end)',
+		paddingBlockEnd: 'var(--luke-tray-padding-block-end)',
 		position: 'absolute',
 		// Physical on purpose, paired with `bottom` above. See the note there.
 		top: vars.spaceSp48,
@@ -113,15 +113,15 @@ const styles = stylex.create({
 		// no longer flush and have to be rounded like the top ones. `450px` is the border-box
 		// cap; `max-inline-size` is the content-box equivalent (450px − 1px × 2).
 		'@media (width > 450px)': {
-			'border-end-end-radius': vars.radiusOverlay,
-			'border-end-start-radius': vars.radiusOverlay,
+			borderEndEndRadius: vars.radiusOverlay,
+			borderEndStartRadius: vars.radiusOverlay,
 		},
 	},
 	dialog: {
 		display: 'flex',
 		flex: 1,
 		flexDirection: 'column',
-		'min-block-size': 0,
+		minBlockSize: 0,
 		overflow: 'hidden',
 		outlineColor: 'transparent',
 		outlineStyle: 'none',

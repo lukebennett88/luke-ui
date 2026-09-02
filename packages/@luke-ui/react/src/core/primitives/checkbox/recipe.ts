@@ -11,7 +11,7 @@ const styles = stylex.create({
 		display: 'inline-flex',
 		font: 'inherit',
 		gap: vars.spaceSp8,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		'[data-disabled="true"]': {
 			color: vars.colorTextDisabled,
 			cursor: 'not-allowed',
@@ -27,17 +27,17 @@ const styles = stylex.create({
 	},
 	control: {
 		alignItems: 'center',
-		'block-size': 'var(--text-line-height, 1lh)',
+		blockSize: 'var(--text-line-height, 1lh)',
 		display: 'inline-flex',
 		flexShrink: 0,
-		'inline-size': 'var(--checkbox-control-size)',
+		inlineSize: 'var(--checkbox-control-size)',
 		justifyContent: 'center',
 	},
 	indicator: {
 		alignItems: 'center',
 		backgroundColor: vars.colorSurfaceCanvas,
 		backgroundImage: vars.actionControlFinishResting,
-		'block-size': 'var(--checkbox-indicator-size)',
+		blockSize: 'var(--checkbox-indicator-size)',
 		borderColor: vars.colorBorderControl,
 		borderRadius: vars.radiusDetail,
 		borderStyle: 'solid',
@@ -48,7 +48,7 @@ const styles = stylex.create({
 		display: 'inline-flex',
 		fontSize: 'var(--checkbox-glyph-size)',
 		fontWeight: vars.fontWeightHeading,
-		'inline-size': 'var(--checkbox-indicator-size)',
+		inlineSize: 'var(--checkbox-indicator-size)',
 		justifyContent: 'center',
 		lineHeight: 1,
 		transitionDuration: vars.motionDurationFeedback,
@@ -175,7 +175,7 @@ const styles = stylex.create({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: vars.spaceSp4,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		// Checkbox's own box has no room for an in-control invalid icon without it
 		// floating past the label (see `indicator` below), so its icon renders on
 		// the error message instead — Field's `message` slot draws it,

@@ -17,7 +17,7 @@ const styles = stylex.create({
 		fontWeight: vars.fontLabelFontWeight,
 		letterSpacing: vars.fontLabelLetterSpacing,
 		lineHeight: vars.fontLabelLineHeight,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		// Marker for a disabled RAC field ancestor (`[data-disabled]` lives on the field, not the
 		// label). `:is([data-disabled="true"] *)` keeps this competing with the resting colour at
 		// equal specificity rather than raising it.
@@ -30,7 +30,7 @@ const styles = stylex.create({
 			'::after': {
 				color: vars.colorForegroundDangerRest,
 				content: '"*"',
-				'margin-inline-start': vars.spaceSp4,
+				marginInlineStart: vars.spaceSp4,
 			},
 		},
 	},
@@ -40,7 +40,7 @@ const styles = stylex.create({
 				color: vars.colorTextSecondary,
 				content: '"(required)"',
 				fontWeight: vars.fontWeightBody,
-				'margin-inline-start': vars.spaceSp4,
+				marginInlineStart: vars.spaceSp4,
 			},
 		},
 	},
@@ -50,8 +50,8 @@ const styles = stylex.create({
 		fontWeight: vars.fontWeightBody,
 		letterSpacing: vars.fontLabelLetterSpacing,
 		lineHeight: vars.fontLabelLineHeight,
-		'min-inline-size': 0,
-		'padding-inline-start': 'var(--luke-field-message-indent, 0px)',
+		minInlineSize: 0,
+		paddingInlineStart: 'var(--luke-field-message-indent, 0px)',
 	},
 	messageDescription: {
 		color: vars.colorTextSecondary,
@@ -65,17 +65,17 @@ const styles = stylex.create({
 		// line, then `textIndent` pulls the first line back by that same amount so the icon sits in
 		// it. Wrapped lines keep the padding, so they hang aligned with the text rather than tucking
 		// under the icon.
-		'padding-inline-start': 'var(--luke-field-message-indent, 0px)',
+		paddingInlineStart: 'var(--luke-field-message-indent, 0px)',
 		textIndent: 'calc(-1 * var(--luke-field-message-indent, 0px))',
 		'::before': {
 			backgroundColor: vars.colorForegroundDangerRest,
-			'block-size': vars.iconSizeXsmall,
+			blockSize: vars.iconSizeXsmall,
 			content: "''",
 			display: 'var(--luke-field-message-icon, none)',
 			flexShrink: 0,
-			'inline-size':
+			inlineSize:
 				'max(calc(var(--luke-field-message-indent, 0px) - var(--luke-space-sp8)), var(--luke-icon-size-xsmall))',
-			'margin-inline-end': vars.spaceSp8,
+			marginInlineEnd: vars.spaceSp8,
 			maskImage: invalidIndicator.maskImage,
 			maskPosition: 'center',
 			maskRepeat: 'no-repeat',
@@ -93,7 +93,7 @@ const styles = stylex.create({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: vars.spaceSp4,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 	},
 });
 

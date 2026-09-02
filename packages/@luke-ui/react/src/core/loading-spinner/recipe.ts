@@ -72,9 +72,9 @@ const styles = stylex.create({
 		'@media (prefers-reduced-motion: reduce)': { animationName: 'none' },
 	},
 	svg: {
-		'block-size': '100%',
+		blockSize: '100%',
 		display: 'block',
-		'inline-size': '100%',
+		inlineSize: '100%',
 		transform: 'rotate(-90deg)',
 	},
 });

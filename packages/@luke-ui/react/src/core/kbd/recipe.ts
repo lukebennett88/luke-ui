@@ -16,10 +16,10 @@ const styles = stylex.create({
 		fontFamily: vars.fontFamilyCode,
 		fontSize: '12px',
 		fontWeight: vars.fontWeightBody,
-		'inline-size': 'fit-content',
+		inlineSize: 'fit-content',
 		lineHeight: 1,
-		'padding-block': '0.1em',
-		'padding-inline': '0.35em',
+		paddingBlock: '0.1em',
+		paddingInline: '0.35em',
 		whiteSpace: 'nowrap',
 	},
 });

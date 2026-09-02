@@ -14,7 +14,7 @@ const styles = stylex.create({
 	base: {
 		color: vars.colorTextPrimary,
 		fontFamily: vars.fontFamilyBody,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		overflowWrap: 'break-word',
 	},
 
@@ -55,7 +55,7 @@ const styles = stylex.create({
 		WebkitLineClamp: 2,
 		display: '-webkit-box',
 		lineClamp: 2,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		overflow: 'hidden',
 	},
 	lineClampMultiLine3: {
@@ -63,7 +63,7 @@ const styles = stylex.create({
 		WebkitLineClamp: 3,
 		display: '-webkit-box',
 		lineClamp: 3,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		overflow: 'hidden',
 	},
 	lineClampMultiLine4: {
@@ -71,7 +71,7 @@ const styles = stylex.create({
 		WebkitLineClamp: 4,
 		display: '-webkit-box',
 		lineClamp: 4,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		overflow: 'hidden',
 	},
 	lineClampMultiLine5: {
@@ -79,12 +79,12 @@ const styles = stylex.create({
 		WebkitLineClamp: 5,
 		display: '-webkit-box',
 		lineClamp: 5,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		overflow: 'hidden',
 	},
 	lineClampSingleLine: {
 		display: 'block',
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		overflowX: 'clip',
 		textOverflow: 'ellipsis',
 		whiteSpace: 'nowrap',
@@ -223,12 +223,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontBodyBaselineTrim,
+			marginBlockStart: vars.fontBodyBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontBodyCapHeightTrim,
+			marginBlockEnd: vars.fontBodyCapHeightTrim,
 		},
 		fontSize: vars.fontBodyFontSize,
 		lineHeight: vars.fontBodyLineHeight,
@@ -237,12 +237,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontCaptionBaselineTrim,
+			marginBlockStart: vars.fontCaptionBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontCaptionCapHeightTrim,
+			marginBlockEnd: vars.fontCaptionCapHeightTrim,
 		},
 		fontSize: vars.fontCaptionFontSize,
 		lineHeight: vars.fontCaptionLineHeight,
@@ -251,12 +251,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontDisplayBaselineTrim,
+			marginBlockStart: vars.fontDisplayBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontDisplayCapHeightTrim,
+			marginBlockEnd: vars.fontDisplayCapHeightTrim,
 		},
 		fontSize: vars.fontDisplayFontSize,
 		lineHeight: vars.fontDisplayLineHeight,
@@ -265,12 +265,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontHeading1BaselineTrim,
+			marginBlockStart: vars.fontHeading1BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontHeading1CapHeightTrim,
+			marginBlockEnd: vars.fontHeading1CapHeightTrim,
 		},
 		fontSize: vars.fontHeading1FontSize,
 		lineHeight: vars.fontHeading1LineHeight,
@@ -279,12 +279,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontHeading2BaselineTrim,
+			marginBlockStart: vars.fontHeading2BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontHeading2CapHeightTrim,
+			marginBlockEnd: vars.fontHeading2CapHeightTrim,
 		},
 		fontSize: vars.fontHeading2FontSize,
 		lineHeight: vars.fontHeading2LineHeight,
@@ -293,12 +293,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontHeading3BaselineTrim,
+			marginBlockStart: vars.fontHeading3BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontHeading3CapHeightTrim,
+			marginBlockEnd: vars.fontHeading3CapHeightTrim,
 		},
 		fontSize: vars.fontHeading3FontSize,
 		lineHeight: vars.fontHeading3LineHeight,
@@ -307,12 +307,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontHeading4BaselineTrim,
+			marginBlockStart: vars.fontHeading4BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontHeading4CapHeightTrim,
+			marginBlockEnd: vars.fontHeading4CapHeightTrim,
 		},
 		fontSize: vars.fontHeading4FontSize,
 		lineHeight: vars.fontHeading4LineHeight,
@@ -321,12 +321,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontLabelBaselineTrim,
+			marginBlockStart: vars.fontLabelBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontLabelCapHeightTrim,
+			marginBlockEnd: vars.fontLabelCapHeightTrim,
 		},
 		fontSize: vars.fontLabelFontSize,
 		lineHeight: vars.fontLabelLineHeight,
@@ -335,12 +335,12 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': vars.fontLeadBaselineTrim,
+			marginBlockStart: vars.fontLeadBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': vars.fontLeadCapHeightTrim,
+			marginBlockEnd: vars.fontLeadCapHeightTrim,
 		},
 		fontSize: vars.fontLeadFontSize,
 		lineHeight: vars.fontLeadLineHeight,

@@ -13,9 +13,10 @@ test('ships Vanilla Extract and StyleX rules in one stylesheet', async () => {
 	expect(stylesheet).toMatch(/@layer recipes\.sx\.priority\d+/);
 	// These two declarations come from Blockquote's real StyleX recipe (`blockquote/recipe.ts`),
 	// not a fixture: a plain declaration and one that resolves to a `var(--luke-*)` token.
-	expect(stylesheet).toMatch(
-		/border-inline-start:\s*3px solid var\(--luke-color-border-decorative\)/,
-	);
+	// (StyleX doesn't support the `borderInlineStart` shorthand, so the recipe authors it as
+	// longhands; `border-inline-start-width` is the plain declaration here.)
+	expect(stylesheet).toMatch(/border-inline-start-width:\s*3px/);
+	expect(stylesheet).toMatch(/border-inline-start-color:\s*var\(--luke-color-border-decorative\)/);
 	expect(stylesheet).toMatch(/padding-inline-start:\s*var\(--luke-space-sp16\)/);
 });
 

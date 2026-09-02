@@ -244,8 +244,9 @@ global rule in a named layer. Structural combinators such as Combobox's adjacent
 here, not in StyleX: StyleX cannot express a `+` sibling rule, so `components.css.ts` interpolates
 the stable `combobox-section` class from `primitives/combobox/section-scope.ts`.
 
-`Text` authors quoted logical CSS keys for its Capsize pseudo-element margins, so StyleX emits
-`margin-block-end` and `margin-block-start` without lowering them to physical properties.
+`Text` authors camelCase `marginBlockStart` and `marginBlockEnd` for its Capsize pseudo-element
+margins. StyleX canonicalises these to `margin-top` and `margin-bottom`, which is equivalent under
+the horizontal writing modes Luke UI supports.
 
 Overrides that should beat component styles belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
@@ -495,9 +496,23 @@ return (
 );
 ```
 
+## Writing mode support
+
+Luke UI supports `direction: ltr` and `direction: rtl` under `writing-mode: horizontal-tb`. It does
+not support vertical or sideways writing modes.
+
 ## Implementation rules
 
-- Use CSS logical properties such as `margin-inline-start`, `block-size`, and `inset-inline`.
-- Do not use physical properties such as `margin-left`, `height`, `left`, or `right`.
+- Author CSS logical properties with camelCase StyleX keys, such as `marginInlineStart`,
+  `blockSize`, and `insetInline`, whenever the intended meaning is flow-relative.
+- Use a physical property only when the meaning is genuinely physical, such as the `top` and
+  `bottom` pinning in `MobileOverlay`, and comment the exception at the call site.
+- Do not author quoted kebab-case property keys in `stylex.create`. StyleX treats them as unknown
+  keys. They bypass unsupported-shorthand checks and do not compose with the equivalent camelCase
+  key as one property. Quoted keys remain correct for selectors, at-rules, keyframe selectors and
+  custom properties.
+- StyleX canonicalises some bidi-insensitive logical properties to physical CSS, such as
+  `inlineSize` to `width` and `marginBlockStart` to `margin-top`. This is expected: Luke UI supports
+  horizontal writing modes. Direction-sensitive declarations must stay logical in the emitted CSS.
 - Align variant names with public props, such as `size` and `tone`.
 - Boolean props use `is*` or `should*`.

@@ -16,10 +16,10 @@ import { createSingleRecipe } from '../styles/stylex-recipe.js';
  */
 const styles = stylex.create({
 	visuallyHidden: {
-		'block-size': '1px', // 1px, not 0: zero dimensions trip screen-reader bugs
+		blockSize: '1px', // 1px, not 0: zero dimensions trip screen-reader bugs
 		clip: 'rect(1px, 1px, 1px, 1px)', // legacy fallback for clip-path
 		clipPath: 'inset(100%)',
-		'inline-size': '1px',
+		inlineSize: '1px',
 		overflow: 'hidden',
 		position: 'absolute',
 		whiteSpace: 'nowrap', // stop text wrapping inside the 1px box

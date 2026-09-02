@@ -7,30 +7,30 @@ const styles = stylex.create({
 	iconPendingFalse: {},
 	iconPendingTrue: { opacity: 0 },
 	reset: {
-		'padding-inline': 0,
+		paddingInline: 0,
 		'[data-pending="true"]::after': {
-			'block-size': vars.iconSizeXsmall,
-			'border-inline-end-color': 'transparent',
+			blockSize: vars.iconSizeXsmall,
+			borderInlineEndColor: 'transparent',
 			borderColor: 'currentColor',
 			borderRadius: vars.radiusFull,
 			borderStyle: 'solid',
 			borderWidth: '2px',
 			content: "''",
-			'inline-size': vars.iconSizeXsmall,
+			inlineSize: vars.iconSizeXsmall,
 			position: 'absolute',
 		},
 		'@media (forced-colors: active)': {
 			'[data-pending="true"]::after': {
-				'border-inline-end-color': 'transparent',
+				borderInlineEndColor: 'transparent',
 				borderColor: 'ButtonText',
 			},
 		},
 	},
 	sizeMedium: {
-		'inline-size': vars.controlSizeMedium,
+		inlineSize: vars.controlSizeMedium,
 	},
 	sizeSmall: {
-		'inline-size': vars.controlSizeSmall,
+		inlineSize: vars.controlSizeSmall,
 	},
 });
 

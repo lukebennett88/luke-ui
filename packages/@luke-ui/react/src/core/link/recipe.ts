@@ -33,8 +33,8 @@ const styles = stylex.create({
 	isStandaloneTrue: {
 		alignItems: 'center',
 		display: 'inline-flex',
-		'min-block-size': vars.controlSizeMinTarget,
-		'min-inline-size': vars.controlSizeMinTarget,
+		minBlockSize: vars.controlSizeMinTarget,
+		minInlineSize: vars.controlSizeMinTarget,
 		textDecoration: 'none',
 		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
 			textDecoration: 'underline',

@@ -124,6 +124,7 @@ async function transformStylex(
 		plugins: [
 			stylexBabelPlugin.withOptions({
 				dev: false,
+				propertyValidationMode: 'throw',
 				unstable_moduleResolution: { type: 'commonJS', rootDir: workspaceRoot },
 			}),
 		],

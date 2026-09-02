@@ -11,8 +11,8 @@ const styles = stylex.create({
 		fontFamily: vars.fontFamilyCode,
 		fontSize: '0.8125em',
 		lineHeight: 1,
-		'padding-block': '0.15em',
-		'padding-inline': '0.3em',
+		paddingBlock: '0.15em',
+		paddingInline: '0.3em',
 		whiteSpace: 'nowrap',
 	},
 });

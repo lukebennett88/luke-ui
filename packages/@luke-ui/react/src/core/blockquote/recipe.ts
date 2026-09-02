@@ -5,8 +5,10 @@ import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
-		'border-inline-start': `3px solid ${vars.colorBorderDecorative}`,
-		'padding-inline-start': vars.spaceSp16,
+		borderInlineStartColor: vars.colorBorderDecorative,
+		borderInlineStartStyle: 'solid',
+		borderInlineStartWidth: '3px',
+		paddingInlineStart: vars.spaceSp16,
 	},
 });
 

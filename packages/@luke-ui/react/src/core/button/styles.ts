@@ -8,14 +8,14 @@ const styles = stylex.create({
 	content: {
 		alignItems: 'center',
 		display: 'inline-flex',
-		'min-inline-size': 0,
+		minInlineSize: 0,
 		position: 'relative',
 	},
 	label: {
 		alignItems: 'center',
 		display: 'inline-flex',
 		gap: vars.spaceSp8,
-		'min-inline-size': 0,
+		minInlineSize: 0,
 	},
 	labelPendingFalse: {},
 	labelPendingTrue: {
