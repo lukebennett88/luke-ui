@@ -33,10 +33,10 @@ interface LoadingSpinnerStyleProps {
 	 */
 	size?: LoadingSpinnerVariantProps['size'];
 	/**
-	 * Extra styles as one or more `stylex.create(...)` objects, targeting the spinner itself — not
-	 * the wrapper that positions `children` in place while loading. See
-	 * {@link import('../styles/xstyle.js').XStyleProps.xstyle} for precedence against variant props,
-	 * `className`, and inline `style`.
+	 * Extra styles as one or more `stylex.create(...)` objects, targeting the spinner itself, not
+	 * the wrapper that positions `children` in place while loading. Applied after the variant props
+	 * above and before `className`, so a same-property `xstyle` value replaces a competing variant.
+	 * A consumer `className` still beats `xstyle`, and inline `style` beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }
