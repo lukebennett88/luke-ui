@@ -348,7 +348,7 @@ const styles = stylex.create({
 });
 
 /** Public recipe for the `Text` component's styles. */
-export const { recipe: textRecipe, resolveStyles: resolveTextRecipeStyles } = createSingleRecipe({
+export const [textRecipe, resolveTextRecipeStyles] = createSingleRecipe({
 	base: styles.base,
 	compoundVariants: [
 		// `shouldInheritFont: true` asks the browser to resolve font size and line height from the

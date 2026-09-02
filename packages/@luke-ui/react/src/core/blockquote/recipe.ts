@@ -11,9 +11,8 @@ const styles = stylex.create({
 });
 
 /** Recipe for the `Blockquote` component's left-border accent. */
-export const { recipe: blockquoteRecipe, resolveStyles: resolveBlockquoteRecipeStyles } =
-	createSingleRecipe({
-		base: styles.root,
-	});
+export const [blockquoteRecipe, resolveBlockquoteRecipeStyles] = createSingleRecipe({
+	base: styles.root,
+});
 
 export type BlockquoteRecipeVariants = RecipeSelection<typeof blockquoteRecipe>;

@@ -70,33 +70,30 @@ export type RecipeSelection<Fn> = Fn extends (selection?: infer Selection) => un
 	: never;
 
 /**
- * Builds a single-part recipe with two deliberately separate internal views. `recipe` keeps the
- * public string API; `resolveStyles` is package-private composition input for a component to pass
- * into `stylex.props` before its public `xstyle` value.
+ * Builds a single-part recipe as two deliberately separate internal views. The first tuple element
+ * keeps the public string API; the second, `resolveStyles`, is package-private composition input
+ * for a component to pass into `stylex.props` before its public `xstyle` value.
  */
 export function createSingleRecipe<const Variants extends VariantGroups>(
 	config: SinglePartConfig<Variants>,
-): {
-	recipe: SinglePartRecipe<Variants>;
-	resolveStyles: (selection?: VariantSelection<Variants>) => Array<StyleXStyle>;
-} {
+): readonly [
+	recipe: SinglePartRecipe<Variants>,
+	resolveStyles: (selection?: VariantSelection<Variants>) => Array<StyleXStyle>,
+] {
 	function resolveStyles(selection?: VariantSelection<Variants>): Array<StyleXStyle> {
 		const selected = mergeSelection(config.defaultVariants, selection);
 		return resolveSinglePartStyles(config.base, config.variants, config.compoundVariants, selected);
 	}
 
-	return {
-		recipe: (selection) => resolveClassName(resolveStyles(selection)),
-		resolveStyles,
-	};
+	return [(selection) => resolveClassName(resolveStyles(selection)), resolveStyles];
 }
 
 /**
  * Builds a slotted recipe around one canonical per-slot resolution operation
  * (`resolveSlotStyles`), so a component that renders a single slot — a repeated `ComboboxItem`
- * among Combobox's seventeen — never pays to resolve the other sixteen. `recipe` and
- * `resolveStyles` are both thin views over that same operation, not a second algorithm: `recipe`
- * keeps the public string API (slot extra classes appended last), and `resolveStyles` is
+ * among Combobox's seventeen — never pays to resolve the other sixteen. The two tuple elements are
+ * both thin views over that same operation, not a second algorithm: the first, `recipe`, keeps the
+ * public string API (slot extra classes appended last), and the second, `resolveSlotStyles`, is
  * package-private composition input for a component to pass a slot's compiled styles into
  * `stylex.props` before its public `xstyle` value.
  */
@@ -105,14 +102,13 @@ export function createSlottedRecipe<
 	const Variants extends SlotVariantGroups<Slot>,
 >(
 	config: MultiPartConfig<Slot, Variants>,
-): {
-	recipe: MultiPartRecipe<Slot, Variants>;
+): readonly [
+	recipe: MultiPartRecipe<Slot, Variants>,
 	resolveSlotStyles: (
 		slotName: Slot,
 		selection?: SlotVariantSelection<Variants>,
-	) => Array<StyleXStyle>;
-	resolveStyles: (selection?: SlotVariantSelection<Variants>) => Record<Slot, Array<StyleXStyle>>;
-} {
+	) => Array<StyleXStyle>,
+] {
 	const slotNames = Object.keys(config.slots) as Array<Slot>;
 
 	function resolveSlotStyles(
@@ -128,16 +124,8 @@ export function createSlottedRecipe<
 		);
 	}
 
-	function resolveStyles(
-		selection?: SlotVariantSelection<Variants>,
-	): Record<Slot, Array<StyleXStyle>> {
-		const resolved = {} as Record<Slot, Array<StyleXStyle>>;
-		for (const slotName of slotNames) resolved[slotName] = resolveSlotStyles(slotName, selection);
-		return resolved;
-	}
-
-	return {
-		recipe: (selection) => {
+	return [
+		(selection) => {
 			const slots = {} as Record<Slot, SlotFn>;
 
 			for (const slotName of slotNames) {
@@ -148,8 +136,7 @@ export function createSlottedRecipe<
 			return slots;
 		},
 		resolveSlotStyles,
-		resolveStyles,
-	};
+	];
 }
 
 function resolveSlotVariants<Slot extends string>(

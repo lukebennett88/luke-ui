@@ -82,7 +82,7 @@ describe('createPrimitivePlan', () => {
 		expect(primitiveSource).toContain("import type { XStyleProps } from '../../styles/xstyle.js';");
 		expect(primitiveSource).toContain('resolveStatusBadgeRecipeStyles');
 		expect(recipeSource).toContain(
-			'export const { recipe: statusBadgeRecipe, resolveStyles: resolveStatusBadgeRecipeStyles } =',
+			'export const [statusBadgeRecipe, resolveStatusBadgeRecipeStyles] = createSingleRecipe({',
 		);
 		expect(recipeSource).toContain('createSingleRecipe({');
 		expect(recipeSource).toContain('root: {},');

@@ -5,7 +5,7 @@ import { proseScopeClassName } from './scope.js';
 
 // Prose's only styles are the approved structural descendant rules in `styles.css.ts`. The recipe
 // still uses the StyleX recipe adapter so its public string-returning API stays uniform.
-const { recipe: stylexRecipe, resolveStyles: resolveProseRecipeStyles } = createSingleRecipe({});
+const [stylexRecipe, resolveProseRecipeStyles] = createSingleRecipe({});
 
 export { resolveProseRecipeStyles };
 

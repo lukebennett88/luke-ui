@@ -24,7 +24,7 @@ const styles = stylex.create({
 	},
 });
 
-const { recipe: button, resolveStyles } = createSingleRecipe({
+const [button, resolveStyles] = createSingleRecipe({
 	base: styles.base,
 	compoundVariants: [
 		{

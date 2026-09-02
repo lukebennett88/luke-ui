@@ -207,25 +207,24 @@ const styles = stylex.create({
  *
  * `checkboxRecipe({ size }).root() / .content() / .control() / .indicator()`.
  */
-export const { recipe: checkboxRecipe, resolveSlotStyles: resolveCheckboxRecipeSlotStyles } =
-	createSlottedRecipe({
-		defaultVariants: {
-			size: 'medium',
+export const [checkboxRecipe, resolveCheckboxRecipeSlotStyles] = createSlottedRecipe({
+	defaultVariants: {
+		size: 'medium',
+	},
+	slots: {
+		content: styles.content,
+		control: styles.control,
+		indicator: styles.indicator,
+		root: styles.root,
+	},
+	variants: {
+		size: {
+			large: { root: styles.rootSizeLarge },
+			medium: { root: styles.rootSizeMedium },
+			small: { root: styles.rootSizeSmall },
 		},
-		slots: {
-			content: styles.content,
-			control: styles.control,
-			indicator: styles.indicator,
-			root: styles.root,
-		},
-		variants: {
-			size: {
-				large: { root: styles.rootSizeLarge },
-				medium: { root: styles.rootSizeMedium },
-				small: { root: styles.rootSizeSmall },
-			},
-		},
-	});
+	},
+});
 
 /** Outer variant selection for the Checkbox recipe. */
 export type CheckboxRecipeVariants = RecipeSelection<typeof checkboxRecipe>;

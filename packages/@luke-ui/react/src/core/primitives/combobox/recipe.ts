@@ -520,53 +520,52 @@ const styles = stylex.create({
  *
  * `comboboxRecipe({ size }).root() / .inputGroup() / …`.
  */
-export const { recipe: comboboxRecipe, resolveSlotStyles: resolveComboboxRecipeSlotStyles } =
-	createSlottedRecipe({
-		defaultVariants: {
-			size: 'medium',
-		},
-		slots: {
-			root: styles.root,
-			inputGroup: [styles.inputGroup, ...comboboxInputStates, styles.inputGroupInvalidIcon],
-			textInput: styles.textInput,
-			trigger: styles.action,
-			clearButton: styles.action,
-			itemCheck: styles.itemCheck,
-			popover: styles.popover,
-			listBox: styles.listBox,
-			loadMoreItem: styles.loadMoreItem,
-			section: styles.section,
-			sectionHeading: styles.sectionHeading,
-			emptyState: styles.emptyState,
-			item: styles.item,
-			mobileInputGroup: styles.mobileInputGroup,
-			mobileListBox: styles.mobileListBox,
-			mobileTrigger: styles.mobileTrigger,
-			mobileValue: styles.mobileValue,
-		},
-		variants: {
-			size: {
-				medium: {
-					inputGroup: styles.inputGroupSizeMedium,
-					textInput: styles.textInputSizeMedium,
-					trigger: styles.triggerSizeMedium,
-					clearButton: styles.actionSizeMedium,
-					loadMoreItem: styles.loadMoreItemSizeMedium,
-					mobileTrigger: styles.mobileTriggerSizeMedium,
-					item: styles.itemSizeMedium,
-				},
-				small: {
-					inputGroup: styles.inputGroupSizeSmall,
-					textInput: styles.textInputSizeSmall,
-					trigger: styles.triggerSizeSmall,
-					clearButton: styles.actionSizeSmall,
-					loadMoreItem: styles.loadMoreItemSizeSmall,
-					mobileTrigger: styles.mobileTriggerSizeSmall,
-					item: styles.itemSizeSmall,
-				},
+export const [comboboxRecipe, resolveComboboxRecipeSlotStyles] = createSlottedRecipe({
+	defaultVariants: {
+		size: 'medium',
+	},
+	slots: {
+		root: styles.root,
+		inputGroup: [styles.inputGroup, ...comboboxInputStates, styles.inputGroupInvalidIcon],
+		textInput: styles.textInput,
+		trigger: styles.action,
+		clearButton: styles.action,
+		itemCheck: styles.itemCheck,
+		popover: styles.popover,
+		listBox: styles.listBox,
+		loadMoreItem: styles.loadMoreItem,
+		section: styles.section,
+		sectionHeading: styles.sectionHeading,
+		emptyState: styles.emptyState,
+		item: styles.item,
+		mobileInputGroup: styles.mobileInputGroup,
+		mobileListBox: styles.mobileListBox,
+		mobileTrigger: styles.mobileTrigger,
+		mobileValue: styles.mobileValue,
+	},
+	variants: {
+		size: {
+			medium: {
+				inputGroup: styles.inputGroupSizeMedium,
+				textInput: styles.textInputSizeMedium,
+				trigger: styles.triggerSizeMedium,
+				clearButton: styles.actionSizeMedium,
+				loadMoreItem: styles.loadMoreItemSizeMedium,
+				mobileTrigger: styles.mobileTriggerSizeMedium,
+				item: styles.itemSizeMedium,
+			},
+			small: {
+				inputGroup: styles.inputGroupSizeSmall,
+				textInput: styles.textInputSizeSmall,
+				trigger: styles.triggerSizeSmall,
+				clearButton: styles.actionSizeSmall,
+				loadMoreItem: styles.loadMoreItemSizeSmall,
+				mobileTrigger: styles.mobileTriggerSizeSmall,
+				item: styles.itemSizeSmall,
 			},
 		},
-	});
+	},
+});
 
 /** Allowed `size` values for the combobox recipe. */
 export type ComboboxSize = NonNullable<RecipeSelection<typeof comboboxRecipe>['size']>;

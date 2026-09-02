@@ -102,28 +102,27 @@ const styles = stylex.create({
  *
  * `fieldRecipe({ necessityIndicator, tone }).root() / .label() / .message()`.
  */
-export const { recipe: fieldRecipe, resolveSlotStyles: resolveFieldRecipeSlotStyles } =
-	createSlottedRecipe({
-		defaultVariants: {
-			necessityIndicator: 'icon',
-			tone: 'description',
+export const [fieldRecipe, resolveFieldRecipeSlotStyles] = createSlottedRecipe({
+	defaultVariants: {
+		necessityIndicator: 'icon',
+		tone: 'description',
+	},
+	slots: {
+		label: styles.label,
+		message: styles.message,
+		root: styles.root,
+	},
+	variants: {
+		necessityIndicator: {
+			icon: { label: styles.labelNecessityIcon },
+			label: { label: styles.labelNecessityLabel },
 		},
-		slots: {
-			label: styles.label,
-			message: styles.message,
-			root: styles.root,
+		tone: {
+			description: { message: styles.messageDescription },
+			error: { message: styles.messageError },
 		},
-		variants: {
-			necessityIndicator: {
-				icon: { label: styles.labelNecessityIcon },
-				label: { label: styles.labelNecessityLabel },
-			},
-			tone: {
-				description: { message: styles.messageDescription },
-				error: { message: styles.messageError },
-			},
-		},
-	});
+	},
+});
 
 /** Outer variant selection for the `Field` recipe. */
 export type FieldRecipeVariants = RecipeSelection<typeof fieldRecipe>;

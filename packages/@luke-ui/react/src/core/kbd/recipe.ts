@@ -25,7 +25,7 @@ const styles = stylex.create({
 });
 
 /** Recipe for the `Kbd` component's inline keyboard-key appearance. */
-export const { recipe: kbdRecipe, resolveStyles: resolveKbdRecipeStyles } = createSingleRecipe({
+export const [kbdRecipe, resolveKbdRecipeStyles] = createSingleRecipe({
 	base: styles.root,
 });
 

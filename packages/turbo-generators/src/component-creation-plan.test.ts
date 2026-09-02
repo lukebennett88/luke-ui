@@ -83,7 +83,7 @@ describe('createComponentPlan', () => {
 		);
 		expect(packageExportSource).not.toContain("from './index.js'");
 		expect(recipeSource).toContain(
-			'export const { recipe: statusBadgeRecipe, resolveStyles: resolveStatusBadgeRecipeStyles } =',
+			'export const [statusBadgeRecipe, resolveStatusBadgeRecipeStyles] = createSingleRecipe({',
 		);
 		expect(recipeSource).toContain('createSingleRecipe({');
 		expect(recipeSource).toContain(

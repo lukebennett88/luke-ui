@@ -241,46 +241,45 @@ const styles = stylex.create({
 });
 
 /** Semantic appearance and material recipe shared by Button and IconButton. */
-export const { recipe: buttonRecipe, resolveStyles: resolveButtonRecipeStyles } =
-	createSingleRecipe({
-		base: styles.base,
-		compoundVariants: [
-			{ style: styles.compoundSolidNeutral, variants: { appearance: 'solid', tone: 'neutral' } },
-			{ style: styles.compoundSolidAccent, variants: { appearance: 'solid', tone: 'accent' } },
-			{ style: styles.compoundSolidDanger, variants: { appearance: 'solid', tone: 'danger' } },
-			{ style: styles.compoundSubtleNeutral, variants: { appearance: 'subtle', tone: 'neutral' } },
-			{ style: styles.compoundSubtleAccent, variants: { appearance: 'subtle', tone: 'accent' } },
-			{ style: styles.compoundSubtleDanger, variants: { appearance: 'subtle', tone: 'danger' } },
-			{ style: styles.compoundGhostNeutral, variants: { appearance: 'ghost', tone: 'neutral' } },
-			{ style: styles.compoundGhostAccent, variants: { appearance: 'ghost', tone: 'accent' } },
-			{ style: styles.compoundGhostDanger, variants: { appearance: 'ghost', tone: 'danger' } },
-		],
-		defaultVariants: {
-			appearance: 'solid',
-			isBlock: false,
-			size: 'medium',
-			tone: 'neutral',
+export const [buttonRecipe, resolveButtonRecipeStyles] = createSingleRecipe({
+	base: styles.base,
+	compoundVariants: [
+		{ style: styles.compoundSolidNeutral, variants: { appearance: 'solid', tone: 'neutral' } },
+		{ style: styles.compoundSolidAccent, variants: { appearance: 'solid', tone: 'accent' } },
+		{ style: styles.compoundSolidDanger, variants: { appearance: 'solid', tone: 'danger' } },
+		{ style: styles.compoundSubtleNeutral, variants: { appearance: 'subtle', tone: 'neutral' } },
+		{ style: styles.compoundSubtleAccent, variants: { appearance: 'subtle', tone: 'accent' } },
+		{ style: styles.compoundSubtleDanger, variants: { appearance: 'subtle', tone: 'danger' } },
+		{ style: styles.compoundGhostNeutral, variants: { appearance: 'ghost', tone: 'neutral' } },
+		{ style: styles.compoundGhostAccent, variants: { appearance: 'ghost', tone: 'accent' } },
+		{ style: styles.compoundGhostDanger, variants: { appearance: 'ghost', tone: 'danger' } },
+	],
+	defaultVariants: {
+		appearance: 'solid',
+		isBlock: false,
+		size: 'medium',
+		tone: 'neutral',
+	},
+	variants: {
+		appearance: {
+			ghost: styles.appearanceGhost,
+			solid: styles.appearanceSolid,
+			subtle: styles.appearanceSubtle,
 		},
-		variants: {
-			appearance: {
-				ghost: styles.appearanceGhost,
-				solid: styles.appearanceSolid,
-				subtle: styles.appearanceSubtle,
-			},
-			isBlock: {
-				false: styles.isBlockFalse,
-				true: styles.isBlockTrue,
-			},
-			size: {
-				medium: styles.sizeMedium,
-				small: styles.sizeSmall,
-			},
-			tone: {
-				accent: styles.toneAccent,
-				danger: styles.toneDanger,
-				neutral: styles.toneNeutral,
-			},
+		isBlock: {
+			false: styles.isBlockFalse,
+			true: styles.isBlockTrue,
 		},
-	});
+		size: {
+			medium: styles.sizeMedium,
+			small: styles.sizeSmall,
+		},
+		tone: {
+			accent: styles.toneAccent,
+			danger: styles.toneDanger,
+			neutral: styles.toneNeutral,
+		},
+	},
+});
 
 export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;

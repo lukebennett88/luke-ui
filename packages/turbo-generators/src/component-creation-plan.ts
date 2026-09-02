@@ -358,10 +358,9 @@ const styles = stylex.create({
 });
 
 /** Recipe for the \`${input.pascalName}\` component. */
-export const { recipe: ${input.recipeName}, resolveStyles: ${input.resolveStylesName} } =
-	createSingleRecipe({
-		base: styles.root,
-	});
+export const [${input.recipeName}, ${input.resolveStylesName}] = createSingleRecipe({
+	base: styles.root,
+});
 
 export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
 `;

@@ -8,6 +8,6 @@ const styles = stylex.create({
 	},
 });
 
-export const { resolveStyles: resolveStrongRecipeStyles } = createSingleRecipe({
+export const [, resolveStrongRecipeStyles] = createSingleRecipe({
 	base: styles.root,
 });

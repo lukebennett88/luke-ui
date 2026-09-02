@@ -64,7 +64,7 @@ const styles = stylex.create({
 });
 
 /** Recipe for the `Link` component's styles. */
-export const { recipe: linkRecipe, resolveStyles: resolveLinkRecipeStyles } = createSingleRecipe({
+export const [linkRecipe, resolveLinkRecipeStyles] = createSingleRecipe({
 	base: styles.base,
 	defaultVariants: {
 		isStandalone: false,

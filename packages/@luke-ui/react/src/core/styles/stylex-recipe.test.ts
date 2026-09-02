@@ -18,7 +18,7 @@ const styles = stylex.create({
 	},
 });
 
-const { recipe: track, resolveStyles } = createSlottedRecipe({
+const [track, resolveSlotStyles] = createSlottedRecipe({
 	slots: {
 		root: styles.rootBase,
 		track: styles.trackBase,
@@ -46,7 +46,7 @@ test('each slot only carries the classes it declares a style for', () => {
 test('a slot only reads the variant groups that target it', () => {
 	// `root` and `track` both declare a `size` style, but a group no slot declares must not
 	// contribute a class to any of them, and must not throw when selected.
-	const { recipe: rootOnly } = createSlottedRecipe({
+	const [rootOnly] = createSlottedRecipe({
 		slots: {
 			root: styles.rootBase,
 			track: styles.trackBase,
@@ -80,8 +80,11 @@ test('slot functions merge an optional extra class, appended last', () => {
 	expect(slots.root('extra-class').endsWith('extra-class')).toBe(true);
 });
 
-test('resolveStyles returns per-slot compiled style arrays', () => {
-	const resolved = resolveStyles({ size: 'large' });
+test('resolveSlotStyles builds the same record as calling it per slot', () => {
+	const resolved = {
+		root: resolveSlotStyles('root', { size: 'large' }),
+		track: resolveSlotStyles('track', { size: 'large' }),
+	};
 	expect(resolved.root).toEqual([styles.rootBase, styles.rootLarge]);
 	expect(resolved.track).toEqual([styles.trackBase, styles.trackLarge]);
 });
@@ -96,7 +99,7 @@ test("resolving one slot never reads another slot's variant style", () => {
 		},
 	};
 
-	const { recipe: tricky, resolveSlotStyles } = createSlottedRecipe({
+	const [tricky, resolveSlotStyles] = createSlottedRecipe({
 		slots: {
 			root: styles.rootBase,
 			track: styles.trackBase,
@@ -121,7 +124,7 @@ test("resolving one slot never reads another slot's variant style", () => {
 });
 
 test('createSlottedRecipe exposes resolveSlotStyles as the same operation recipe() uses', () => {
-	const { recipe: track2, resolveSlotStyles } = createSlottedRecipe({
+	const [track2, resolveSlotStyles] = createSlottedRecipe({
 		slots: {
 			root: styles.rootBase,
 			track: styles.trackBase,
@@ -146,7 +149,7 @@ test('createSlottedRecipe exposes resolveSlotStyles as the same operation recipe
 
 test('a compound variant with no conditions always applies', () => {
 	// An empty condition set matches every selection.
-	const { recipe: always } = createSingleRecipe({
+	const [always] = createSingleRecipe({
 		base: styles.rootBase,
 		compoundVariants: [{ style: styles.rootLarge, variants: {} }],
 	});
@@ -157,7 +160,7 @@ test('a compound variant with no conditions always applies', () => {
 });
 
 test('base accepts an array of unconditional styles, applied in order', () => {
-	const { recipe: always } = createSingleRecipe({
+	const [always] = createSingleRecipe({
 		base: [styles.rootBase, styles.rootLarge],
 	});
 

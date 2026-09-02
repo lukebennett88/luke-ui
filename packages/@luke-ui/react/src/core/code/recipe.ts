@@ -18,7 +18,7 @@ const styles = stylex.create({
 });
 
 /** Recipe for the `Code` component's inline code appearance. */
-export const { recipe: codeRecipe, resolveStyles: resolveCodeRecipeStyles } = createSingleRecipe({
+export const [codeRecipe, resolveCodeRecipeStyles] = createSingleRecipe({
 	base: styles.root,
 });
 

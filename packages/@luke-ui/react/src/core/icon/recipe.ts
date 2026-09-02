@@ -38,7 +38,7 @@ export const iconSizeStyles = {
 } as const;
 
 /** Recipe for the `Icon` component's styles. */
-export const { recipe: iconRecipe, resolveStyles: resolveIconRecipeStyles } = createSingleRecipe({
+export const [iconRecipe, resolveIconRecipeStyles] = createSingleRecipe({
 	base: styles.base,
 	defaultVariants: {
 		size: 'medium',

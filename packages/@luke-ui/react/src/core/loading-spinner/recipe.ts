@@ -86,10 +86,7 @@ const styles = stylex.create({
  * itself, and `.childrenWrapper() / .hiddenChildren() / .spinnerOverlay()` for the
  * in-place children overlay.
  */
-export const {
-	recipe: loadingSpinnerRecipe,
-	resolveSlotStyles: resolveLoadingSpinnerRecipeSlotStyles,
-} = createSlottedRecipe({
+export const [loadingSpinnerRecipe, resolveLoadingSpinnerRecipeSlotStyles] = createSlottedRecipe({
 	defaultVariants: {
 		size: 'medium',
 	},

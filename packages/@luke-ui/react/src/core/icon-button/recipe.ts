@@ -35,11 +35,11 @@ const styles = stylex.create({
 });
 
 /** Reset styles that square the control and draw the pending cue on `::after`. */
-export const { resolveStyles: resolveIconButtonResetStyles } = createSingleRecipe({
+export const [, resolveIconButtonResetStyles] = createSingleRecipe({
 	base: styles.reset,
 });
 
-export const { recipe: iconButtonIcon } = createSingleRecipe({
+export const [iconButtonIcon] = createSingleRecipe({
 	defaultVariants: { isPending: false },
 	variants: {
 		isPending: {
@@ -50,15 +50,14 @@ export const { recipe: iconButtonIcon } = createSingleRecipe({
 });
 
 /** Recipe for the `IconButton` component's size styles. */
-export const { recipe: iconButtonRecipe, resolveStyles: resolveIconButtonRecipeStyles } =
-	createSingleRecipe({
-		variants: {
-			size: {
-				medium: styles.sizeMedium,
-				small: styles.sizeSmall,
-			},
+export const [iconButtonRecipe, resolveIconButtonRecipeStyles] = createSingleRecipe({
+	variants: {
+		size: {
+			medium: styles.sizeMedium,
+			small: styles.sizeSmall,
 		},
-	});
+	},
+});
 
 /** Variant type for the `IconButton` recipe. */
 export type IconButtonRecipeVariants = RecipeSelection<typeof iconButtonRecipe>;

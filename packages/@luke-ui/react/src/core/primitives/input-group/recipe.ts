@@ -145,35 +145,34 @@ const styles = stylex.create({
  * `inputGroupRecipe({ size }).group() / .control() / .prefix() / .suffix() /
  * .invalidIndicator()`.
  */
-export const { recipe: inputGroupRecipe, resolveSlotStyles: resolveInputGroupRecipeSlotStyles } =
-	createSlottedRecipe({
-		defaultVariants: {
-			size: 'medium',
-		},
-		slots: {
-			control: styles.control,
-			group: [styles.group, ...inputGroupInputStates],
-			invalidIndicator: styles.invalidIndicator,
-			prefix: styles.prefix,
-			suffix: styles.suffix,
-		},
-		variants: {
-			size: {
-				medium: {
-					control: styles.controlSizeMedium,
-					group: styles.groupSizeMedium,
-					prefix: styles.prefixSizeMedium,
-					suffix: styles.suffixSizeMedium,
-				},
-				small: {
-					control: styles.controlSizeSmall,
-					group: styles.groupSizeSmall,
-					prefix: styles.prefixSizeSmall,
-					suffix: styles.suffixSizeSmall,
-				},
+export const [inputGroupRecipe, resolveInputGroupRecipeSlotStyles] = createSlottedRecipe({
+	defaultVariants: {
+		size: 'medium',
+	},
+	slots: {
+		control: styles.control,
+		group: [styles.group, ...inputGroupInputStates],
+		invalidIndicator: styles.invalidIndicator,
+		prefix: styles.prefix,
+		suffix: styles.suffix,
+	},
+	variants: {
+		size: {
+			medium: {
+				control: styles.controlSizeMedium,
+				group: styles.groupSizeMedium,
+				prefix: styles.prefixSizeMedium,
+				suffix: styles.suffixSizeMedium,
+			},
+			small: {
+				control: styles.controlSizeSmall,
+				group: styles.groupSizeSmall,
+				prefix: styles.prefixSizeSmall,
+				suffix: styles.suffixSizeSmall,
 			},
 		},
-	});
+	},
+});
 
 /** Outer variant selection for the `inputGroup` recipe. */
 export type InputGroupRecipeVariants = RecipeSelection<typeof inputGroupRecipe>;

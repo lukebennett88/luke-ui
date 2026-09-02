@@ -31,11 +31,11 @@ const styles = stylex.create({
 	},
 });
 
-export const { recipe: buttonContent } = createSingleRecipe({
+export const [buttonContent] = createSingleRecipe({
 	base: styles.content,
 });
 
-export const { recipe: buttonLabel } = createSingleRecipe({
+export const [buttonLabel] = createSingleRecipe({
 	base: styles.label,
 	defaultVariants: {
 		isPending: false,
@@ -50,6 +50,6 @@ export const { recipe: buttonLabel } = createSingleRecipe({
 
 export type ButtonLabelVariants = RecipeSelection<typeof buttonLabel>;
 
-export const { recipe: spinnerOverlay } = createSingleRecipe({
+export const [spinnerOverlay] = createSingleRecipe({
 	base: [spinnerOverlayBase, styles.spinnerOverlayForcedColors],
 });

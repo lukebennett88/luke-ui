@@ -30,7 +30,6 @@ const styles = stylex.create({
 export const visuallyHiddenStyle = styles.visuallyHidden;
 
 /** Recipe for content hidden visually but kept available to assistive technology. */
-export const { recipe: visuallyHiddenRecipe, resolveStyles: resolveVisuallyHiddenRecipeStyles } =
-	createSingleRecipe({
-		base: visuallyHiddenStyle,
-	});
+export const [visuallyHiddenRecipe, resolveVisuallyHiddenRecipeStyles] = createSingleRecipe({
+	base: visuallyHiddenStyle,
+});

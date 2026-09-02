@@ -7,6 +7,6 @@ const styles = stylex.create({
 	},
 });
 
-export const { resolveStyles: resolveEmRecipeStyles } = createSingleRecipe({
+export const [, resolveEmRecipeStyles] = createSingleRecipe({
 	base: styles.root,
 });
