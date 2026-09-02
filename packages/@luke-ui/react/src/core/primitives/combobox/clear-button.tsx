@@ -2,15 +2,14 @@ import type { JSX } from 'react';
 import { useContext } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/ComboBox';
 import { ComboBoxStateContext, Button as RacButton } from 'react-aria-components/ComboBox';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveXStyleProps } from '../../styles/xstyle.js';
+import { resolveRacXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './recipe.js';
-import { resolveComboboxRecipeStyles } from './recipe.js';
+import { resolveComboboxRecipeSlotStyles } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
 
 type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'slot'>;
@@ -28,7 +27,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
 	const hasValue = Array.isArray(state?.value) ? state.value.length > 0 : state?.value != null;
-	const recipeStyles = resolveComboboxRecipeStyles({ size }).clearButton;
+	const recipeStyles = resolveComboboxRecipeSlotStyles('clearButton', { size });
 
 	if (state == null || !hasValue) {
 		return null;
@@ -39,9 +38,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacButton
 				{...buttonProps}
-				className={composeRenderProps(buttonProps.className, (className) => {
-					return resolveXStyleProps(recipeStyles, xstyle, className, undefined).className ?? '';
-				})}
+				{...resolveRacXStyleProps(recipeStyles, xstyle, buttonProps.className, style)}
 				onPress={(event) => {
 					state.setValue(Array.isArray(state.value) ? [] : null);
 					state.setInputValue('');
@@ -50,9 +47,6 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 				// Opt out of the ComboBox button slot so pressing clears the selection
 				// instead of toggling the popover.
 				slot={null}
-				style={composeRenderProps(style, (value) => {
-					return resolveXStyleProps(recipeStyles, xstyle, undefined, value).style;
-				})}
 			/>
 		</IconSizeProvider>
 	);

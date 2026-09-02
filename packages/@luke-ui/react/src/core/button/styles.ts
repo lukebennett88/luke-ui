@@ -23,7 +23,7 @@ const styles = stylex.create({
 	},
 	// Button's only addition to the shared overlay base. It stays a separate entry because
 	// StyleX cannot spread an imported compiled style into `stylex.create` ("Could not resolve
-	// the path to the imported file"), so the two are composed at the recipe instead.
+	// the path to the imported file"), so the two are composed as the recipe's base array instead.
 	spinnerOverlayForcedColors: {
 		'@media (forced-colors: active)': {
 			color: 'ButtonText',
@@ -51,8 +51,5 @@ export const { recipe: buttonLabel } = createSingleRecipe({
 export type ButtonLabelVariants = RecipeSelection<typeof buttonLabel>;
 
 export const { recipe: spinnerOverlay } = createSingleRecipe({
-	base: spinnerOverlayBase,
-	// A compound with no variant conditions always matches, which is how a single-part recipe
-	// appends a second unconditional style to its base.
-	compoundVariants: [{ style: styles.spinnerOverlayForcedColors, variants: {} }],
+	base: [spinnerOverlayBase, styles.spinnerOverlayForcedColors],
 });

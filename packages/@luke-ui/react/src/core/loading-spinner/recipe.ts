@@ -86,37 +86,39 @@ const styles = stylex.create({
  * itself, and `.childrenWrapper() / .hiddenChildren() / .spinnerOverlay()` for the
  * in-place children overlay.
  */
-export const { recipe: loadingSpinnerRecipe, resolveStyles: resolveLoadingSpinnerRecipeStyles } =
-	createSlottedRecipe({
-		defaultVariants: {
-			size: 'medium',
+export const {
+	recipe: loadingSpinnerRecipe,
+	resolveSlotStyles: resolveLoadingSpinnerRecipeSlotStyles,
+} = createSlottedRecipe({
+	defaultVariants: {
+		size: 'medium',
+	},
+	slots: {
+		childrenWrapper: styles.childrenWrapper,
+		hiddenChildren: styles.hiddenChildren,
+		indicator: styles.indicator,
+		root: styles.root,
+		spinnerOverlay: spinnerOverlayBase,
+		svg: styles.svg,
+	},
+	variants: {
+		color: {
+			accent: { root: styles.colorAccent },
+			danger: { root: styles.colorDanger },
+			info: { root: styles.colorInfo },
+			primary: { root: styles.colorPrimary },
+			secondary: { root: styles.colorSecondary },
+			success: { root: styles.colorSuccess },
+			warning: { root: styles.colorWarning },
 		},
-		slots: {
-			childrenWrapper: styles.childrenWrapper,
-			hiddenChildren: styles.hiddenChildren,
-			indicator: styles.indicator,
-			root: styles.root,
-			spinnerOverlay: spinnerOverlayBase,
-			svg: styles.svg,
+		size: {
+			large: { root: iconSizeStyles.large },
+			medium: { root: iconSizeStyles.medium },
+			small: { root: iconSizeStyles.small },
+			xsmall: { root: iconSizeStyles.xsmall },
 		},
-		variants: {
-			color: {
-				accent: { root: styles.colorAccent },
-				danger: { root: styles.colorDanger },
-				info: { root: styles.colorInfo },
-				primary: { root: styles.colorPrimary },
-				secondary: { root: styles.colorSecondary },
-				success: { root: styles.colorSuccess },
-				warning: { root: styles.colorWarning },
-			},
-			size: {
-				large: { root: iconSizeStyles.large },
-				medium: { root: iconSizeStyles.medium },
-				small: { root: iconSizeStyles.small },
-				xsmall: { root: iconSizeStyles.xsmall },
-			},
-		},
-	});
+	},
+});
 
 /** Outer variant selection for the `LoadingSpinner` recipe. */
 export type LoadingSpinnerRecipeVariants = RecipeSelection<typeof loadingSpinnerRecipe>;

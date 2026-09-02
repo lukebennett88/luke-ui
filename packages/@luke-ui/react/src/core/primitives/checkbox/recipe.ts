@@ -207,7 +207,7 @@ const styles = stylex.create({
  *
  * `checkboxRecipe({ size }).root() / .content() / .control() / .indicator()`.
  */
-export const { recipe: checkboxRecipe, resolveStyles: resolveCheckboxRecipeStyles } =
+export const { recipe: checkboxRecipe, resolveSlotStyles: resolveCheckboxRecipeSlotStyles } =
 	createSlottedRecipe({
 		defaultVariants: {
 			size: 'medium',

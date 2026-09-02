@@ -4,7 +4,6 @@ import type {
 	TextFieldProps as RacTextFieldProps,
 } from 'react-aria-components/TextField';
 import { TextField as RacTextField } from 'react-aria-components/TextField';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { FieldSlotProps } from '../primitives/field/field.js';
 import {
 	Field,
@@ -19,7 +18,7 @@ import {
 } from '../primitives/input-group/input-group.js';
 import type { InputGroupSize } from '../primitives/input-group/recipe.js';
 import type { XStyleProps } from '../styles/xstyle.js';
-import { resolveXStyleProps } from '../styles/xstyle.js';
+import { resolveRacXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -84,13 +83,8 @@ export function TextField(props: TextFieldProps): JSX.Element {
 	return (
 		<RacTextField
 			{...textFieldProps}
-			className={composeRenderProps(className, (resolvedClassName) => {
-				return resolveXStyleProps([], xstyle, resolvedClassName, undefined).className ?? '';
-			})}
+			{...resolveRacXStyleProps([], xstyle, className, style)}
 			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
-			style={composeRenderProps(style, (resolvedStyle) => {
-				return resolveXStyleProps([], xstyle, undefined, resolvedStyle).style;
-			})}
 		>
 			<Field
 				description={description}

@@ -1,9 +1,8 @@
 import type { JSX } from 'react';
 import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
 import { Link as RacLink } from 'react-aria-components/Link';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { XStyleProps } from '../styles/xstyle.js';
-import { resolveXStyleProps } from '../styles/xstyle.js';
+import { resolveRacXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedLinkProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -32,16 +31,6 @@ export function Link(props: LinkProps): JSX.Element {
 	const recipeStyles = resolveLinkRecipeStyles({ isStandalone, tone });
 
 	return (
-		<RacLink
-			{...restProps}
-			className={composeRenderProps(className, (resolvedClassName) => {
-				return (
-					resolveXStyleProps(recipeStyles, xstyle, resolvedClassName, undefined).className ?? ''
-				);
-			})}
-			style={composeRenderProps(style, (resolvedStyle) => {
-				return resolveXStyleProps(recipeStyles, xstyle, undefined, resolvedStyle).style;
-			})}
-		/>
+		<RacLink {...restProps} {...resolveRacXStyleProps(recipeStyles, xstyle, className, style)} />
 	);
 }

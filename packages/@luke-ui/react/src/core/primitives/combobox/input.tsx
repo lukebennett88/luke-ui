@@ -2,13 +2,12 @@ import type { JSX, Ref } from 'react';
 import { useContext } from 'react';
 import type { InputProps as RacInputProps } from 'react-aria-components/ComboBox';
 import { ComboBoxStateContext, Input as RacInput } from 'react-aria-components/ComboBox';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveXStyleProps } from '../../styles/xstyle.js';
+import { resolveRacXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './recipe.js';
-import { resolveComboboxRecipeStyles } from './recipe.js';
+import { resolveComboboxRecipeSlotStyles } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
 
 type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
@@ -30,7 +29,7 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 	const { onClick, size: sizeProp, style, xstyle, ...inputProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
-	const recipeStyles = resolveComboboxRecipeStyles({ size }).textInput;
+	const recipeStyles = resolveComboboxRecipeSlotStyles('textInput', { size });
 
 	const handleClick = (event: React.MouseEvent<HTMLInputElement>) => {
 		onClick?.(event);
@@ -42,13 +41,8 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 	return (
 		<RacInput
 			{...inputProps}
-			className={composeRenderProps(inputProps.className, (className) => {
-				return resolveXStyleProps(recipeStyles, xstyle, className, undefined).className ?? '';
-			})}
+			{...resolveRacXStyleProps(recipeStyles, xstyle, inputProps.className, style)}
 			onClick={handleClick}
-			style={composeRenderProps(style, (value) => {
-				return resolveXStyleProps(recipeStyles, xstyle, undefined, value).style;
-			})}
 		/>
 	);
 }

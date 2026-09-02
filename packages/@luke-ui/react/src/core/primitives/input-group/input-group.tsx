@@ -10,11 +10,11 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveXStyleProps } from '../../styles/xstyle.js';
+import { resolveRacXStyleProps, resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { InputGroupSize } from './recipe.js';
-import { resolveInputGroupRecipeStyles } from './recipe.js';
+import { resolveInputGroupRecipeSlotStyles } from './recipe.js';
 
 const InputGroupSizeContext = createContext<InputGroupSize | null>(null);
 
@@ -110,7 +110,7 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
  */
 export function InputGroup(props: InputGroupProps): JSX.Element {
 	const { children, className, size = 'medium', style, xstyle, ...groupProps } = props;
-	const recipeStyles = resolveInputGroupRecipeStyles({ size });
+	const groupRecipeStyles = resolveInputGroupRecipeSlotStyles('group', { size });
 
 	return (
 		<InputGroupSizeContext.Provider value={size}>
@@ -123,12 +123,7 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 			<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 				<RacGroup
 					{...groupProps}
-					className={composeRenderProps(className, (value) => {
-						return resolveXStyleProps(recipeStyles.group, xstyle, value, undefined).className ?? '';
-					})}
-					style={composeRenderProps(style, (value) => {
-						return resolveXStyleProps(recipeStyles.group, xstyle, undefined, value).style;
-					})}
+					{...resolveRacXStyleProps(groupRecipeStyles, xstyle, className, style)}
 				>
 					{composeRenderProps(children, (renderedChildren, { isInvalid }) => {
 						return (
@@ -137,7 +132,11 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 								{isInvalid ? (
 									<Icon
 										aria-hidden
-										className={stylex.props(...recipeStyles.invalidIndicator).className}
+										className={
+											stylex.props(
+												...resolveInputGroupRecipeSlotStyles('invalidIndicator', { size }),
+											).className
+										}
 										name="exclamationTriangle"
 									/>
 								) : null}
@@ -154,18 +153,10 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 export function InputGroupInput(props: InputGroupInputProps): JSX.Element {
 	const { className, size: sizeProp, style, xstyle, ...inputProps } = props;
 	const size = useInputGroupSize(sizeProp);
-	const recipeStyles = resolveInputGroupRecipeStyles({ size }).control;
+	const recipeStyles = resolveInputGroupRecipeSlotStyles('control', { size });
 
 	return (
-		<RacInput
-			{...inputProps}
-			className={composeRenderProps(className, (value) => {
-				return resolveXStyleProps(recipeStyles, xstyle, value, undefined).className ?? '';
-			})}
-			style={composeRenderProps(style, (value) => {
-				return resolveXStyleProps(recipeStyles, xstyle, undefined, value).style;
-			})}
-		/>
+		<RacInput {...inputProps} {...resolveRacXStyleProps(recipeStyles, xstyle, className, style)} />
 	);
 }
 
@@ -178,7 +169,7 @@ export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
 		<span
 			{...spanProps}
 			{...resolveXStyleProps(
-				resolveInputGroupRecipeStyles({ size }).prefix,
+				resolveInputGroupRecipeSlotStyles('prefix', { size }),
 				xstyle,
 				className,
 				style,
@@ -199,7 +190,7 @@ export function InputGroupSuffix(props: InputGroupSuffixProps): JSX.Element {
 		<span
 			{...spanProps}
 			{...resolveXStyleProps(
-				resolveInputGroupRecipeStyles({ size }).suffix,
+				resolveInputGroupRecipeSlotStyles('suffix', { size }),
 				xstyle,
 				className,
 				style,

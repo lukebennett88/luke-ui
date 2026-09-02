@@ -5,7 +5,7 @@ import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { resolveFieldRecipeStyles } from './recipe.js';
+import { resolveFieldRecipeSlotStyles } from './recipe.js';
 
 type _FieldDescriptionOmit = DistributiveOmit<RacTextProps, 'id' | 'slot'>;
 
@@ -25,7 +25,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 		<RacText
 			{...restProps}
 			{...resolveXStyleProps(
-				resolveFieldRecipeStyles({ tone: 'description' }).message,
+				resolveFieldRecipeSlotStyles('message', { tone: 'description' }),
 				xstyle,
 				className,
 				style,

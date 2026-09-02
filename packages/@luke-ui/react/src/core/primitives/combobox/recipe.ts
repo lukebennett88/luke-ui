@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { tokens } from '../../../theme/tokens.stylex.js';
+import { comboboxInputStates } from '../../styles/input-states.js';
 import { invalidIndicator } from '../../styles/invalid-indicator.stylex.js';
 import type { RecipeSelection } from '../../styles/stylex-recipe.js';
 import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
@@ -28,43 +29,15 @@ const invalidIndicatorIcon = {
 	maskSize: 'contain',
 } as const;
 
-/*
- * ## Why these state selectors are spelled out in full, twice
+/**
+ * The disabled / hover / focus-within / invalid / read-only state styling on `inputGroup` lives in
+ * `../../styles/input-states.ts`, shared with the sibling `InputGroup` recipe — see that module's
+ * block comment for why StyleX forced this into its own module rather than a plain shared helper,
+ * and for the one intentional difference (`Combobox` narrows focus-within to `:has(input:focus)`,
+ * because its anatomy puts a trigger and clear button inside the group).
  *
- * The selector fragments below (disabled / hover / focus-within / invalid / read-only, each
- * `:not()`-excluding the others) are identical to the ones in the sibling recipe, and were once a
- * shared `composeInputStateSelectors()` helper. StyleX has no seam for them:
- *
- * - A plain `.ts` module of string constants cannot be imported into a `stylex.create` file at all
- *   ("Could not resolve the path to the imported file") — the compiler skips any module that does
- *   not import `@stylexjs/stylex`.
- * - `stylex.defineConsts` in a `*.stylex.ts` file imports fine and compiles in the dev/test
- *   pipeline, but silently corrupts the packed stylesheet. `processStylexRules` substitutes a const
- *   by string-replacing `var(--<hash>)` in the rule text, then rewrites any leftover `--<hash>:`
- *   into the target property name. A const spliced into a *selector* carries the bare `--<hash>`
- *   without the `var()` wrapper, so the first replace misses and the second mangles the selector —
- *   `:where(--x6a4wab))…` became `ar(--x6a4wab))…`, emitting 53 broken rules that no test caught
- *   because unit and browser tests use the dev pipeline. `defineConsts` is safe as a declaration
- *   *value* only, never inside a selector key.
- *
- * ## What the state fragments mean
- *
- * The invalid state deliberately avoids `:has(:invalid)`. Native `:invalid` matches an empty
- * required input from first render — before any interaction or submit — while React Aria's
- * `data-invalid`/`aria-invalid` stay null until validation actually runs. Styling on
- * `:has(:invalid)` would paint an untouched required field invalid while telling assistive
- * technology it is fine.
- *
- * `:read-only` is scoped to `input` for the same kind of reason: bare `:read-only` matches any
- * non-editable element (spans, buttons), so `:has(:read-only)` would match any control that
- * contains a prefix, suffix, or trigger.
- *
- * `input-states.test.ts` pins these selectors so the two recipes cannot drift apart unnoticed.
- *
- * One intentional difference from `InputGroup`: every focus-within clause here also requires
- * `:has(input:focus)`. The combobox anatomy puts a trigger and a clear button inside the group, so
- * plain `:focus-within` would also match when one of those buttons holds focus; `InputGroup` has no
- * such buttons and uses the bare condition.
+ * The in-control invalid `::after` icon stays local, below: it is Combobox's own anatomy, not a
+ * state InputGroup shares, so it composes as a second style keyed on the same invalid selectors.
  */
 const styles = stylex.create({
 	root: {
@@ -97,104 +70,38 @@ const styles = stylex.create({
 		transitionDuration: tokens.motionDurationFeedback,
 		transitionProperty: 'background-color, border-color, color',
 		transitionTimingFunction: tokens.motionEasingStandard,
-		':where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))':
-			{
-				cursor: 'not-allowed',
-				opacity: tokens.interactionDisabledOpacity,
-			},
-		':where([data-hovered="true"], :hover):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within)):not(:where([data-readonly="true"], :has(input:read-only))):not(:where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])))':
-			{
-				borderColor: tokens.colorBorderAccent,
-			},
-		':where([data-focus-within="true"], :focus-within):has(input:focus):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"]))):not(:where([data-readonly="true"], :has(input:read-only)))':
-			{
-				borderColor: tokens.colorBorderAccent,
-				outlineColor: tokens.colorBorderFocus,
-				outlineOffset: '2px',
-				outlineStyle: 'solid',
-				outlineWidth: '2px',
-			},
+		'@media (prefers-reduced-motion: reduce)': {
+			transitionDuration: '0s',
+			transitionProperty: 'none',
+		},
+	},
+	/**
+	 * The in-control invalid `::after` icon, added on top of `input-states.ts`'s shared invalid
+	 * state. Kept separate so the icon's light/forced-colors treatment sits next to the icon
+	 * definition, not interleaved with the state matrix that now lives in the shared module.
+	 */
+	inputGroupInvalidIcon: {
 		':where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within):has(input:focus)):not(:where([data-readonly="true"], :has(input:read-only)))':
 			{
-				borderColor: tokens.colorBackgroundDangerSolidRest,
 				'::after': invalidIndicatorIcon,
 			},
 		':where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])):where([data-focus-within="true"], :focus-within):has(input:focus):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-readonly="true"], :has(input:read-only)))':
 			{
-				borderColor: tokens.colorBackgroundDangerSolidRest,
-				outlineColor: tokens.colorBorderFocus,
-				outlineOffset: '2px',
-				outlineStyle: 'solid',
-				outlineWidth: '2px',
 				'::after': invalidIndicatorIcon,
 			},
-		':where([data-readonly="true"], :has(input:read-only)):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within):has(input:focus))':
-			{
-				backgroundColor: tokens.colorSurfaceCanvas,
-				borderColor: tokens.colorBorderDecorative,
-				boxShadow: 'none',
-			},
-		':where([data-readonly="true"], :has(input:read-only)):where([data-focus-within="true"], :focus-within):has(input:focus):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
-			{
-				backgroundColor: tokens.colorSurfaceCanvas,
-				borderColor: tokens.colorBorderDecorative,
-				boxShadow: 'none',
-				outlineColor: tokens.colorBorderFocus,
-				outlineOffset: '2px',
-				outlineStyle: 'solid',
-				outlineWidth: '2px',
-			},
 		'@media (forced-colors: active)': {
-			backgroundColor: 'Field',
-			borderColor: 'FieldText',
-			boxShadow: 'none',
-			color: 'FieldText',
-			forcedColorAdjust: 'auto',
-			':where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))':
-				{
-					borderColor: 'GrayText',
-					color: 'GrayText',
-					opacity: 1,
-				},
-			':where([data-hovered="true"], :hover):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within)):not(:where([data-readonly="true"], :has(input:read-only))):not(:where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])))':
-				{
-					borderColor: 'FieldText',
-				},
-			':where([data-focus-within="true"], :focus-within):has(input:focus):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"]))):not(:where([data-readonly="true"], :has(input:read-only)))':
-				{
-					borderColor: 'FieldText',
-					outlineColor: 'Highlight',
-				},
 			':where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within):has(input:focus)):not(:where([data-readonly="true"], :has(input:read-only)))':
 				{
-					borderColor: 'FieldText',
 					'::after': {
 						backgroundColor: invalidIndicator.forcedColorsBackgroundColor,
 					},
 				},
 			':where([data-invalid="true"], [aria-invalid="true"], :has(input[aria-invalid="true"])):where([data-focus-within="true"], :focus-within):has(input:focus):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-readonly="true"], :has(input:read-only)))':
 				{
-					borderColor: 'FieldText',
-					outlineColor: 'Highlight',
 					'::after': {
 						backgroundColor: invalidIndicator.forcedColorsBackgroundColor,
 					},
 				},
-			':where([data-readonly="true"], :has(input:read-only)):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"]))):not(:where([data-focus-within="true"], :focus-within):has(input:focus))':
-				{
-					backgroundColor: 'Field',
-					borderColor: 'FieldText',
-				},
-			':where([data-readonly="true"], :has(input:read-only)):where([data-focus-within="true"], :focus-within):has(input:focus):not(:where([data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])))':
-				{
-					backgroundColor: 'Field',
-					borderColor: 'FieldText',
-					outlineColor: 'Highlight',
-				},
-		},
-		'@media (prefers-reduced-motion: reduce)': {
-			transitionDuration: '0s',
-			transitionProperty: 'none',
 		},
 	},
 	inputGroupSizeMedium: {
@@ -613,14 +520,14 @@ const styles = stylex.create({
  *
  * `comboboxRecipe({ size }).root() / .inputGroup() / …`.
  */
-export const { recipe: comboboxRecipe, resolveStyles: resolveComboboxRecipeStyles } =
+export const { recipe: comboboxRecipe, resolveSlotStyles: resolveComboboxRecipeSlotStyles } =
 	createSlottedRecipe({
 		defaultVariants: {
 			size: 'medium',
 		},
 		slots: {
 			root: styles.root,
-			inputGroup: styles.inputGroup,
+			inputGroup: [styles.inputGroup, ...comboboxInputStates, styles.inputGroupInvalidIcon],
 			textInput: styles.textInput,
 			trigger: styles.action,
 			clearButton: styles.action,

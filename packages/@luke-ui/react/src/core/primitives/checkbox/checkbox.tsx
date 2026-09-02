@@ -7,13 +7,12 @@ import {
 	CheckboxButton as RacCheckboxButton,
 	CheckboxField as RacCheckboxField,
 } from 'react-aria-components/Checkbox';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveXStyleProps } from '../../styles/xstyle.js';
+import { resolveRacXStyleProps, resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { CheckboxRecipeVariants } from './recipe.js';
-import { resolveCheckboxRecipeStyles } from './recipe.js';
+import { resolveCheckboxRecipeSlotStyles } from './recipe.js';
 
 type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
 
@@ -77,19 +76,12 @@ export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
 /** Clickable content that keeps the checkbox input and label associated. */
 export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 	const { className, style, xstyle, ...restProps } = props;
-	const recipeStyles = resolveCheckboxRecipeStyles().content;
+	const recipeStyles = resolveCheckboxRecipeSlotStyles('content');
 
 	return (
 		<RacCheckboxButton
 			{...restProps}
-			className={composeRenderProps(className, (resolvedClassName) => {
-				return (
-					resolveXStyleProps(recipeStyles, xstyle, resolvedClassName, undefined).className ?? ''
-				);
-			})}
-			style={composeRenderProps(style, (resolvedStyle) => {
-				return resolveXStyleProps(recipeStyles, xstyle, undefined, resolvedStyle).style;
-			})}
+			{...resolveRacXStyleProps(recipeStyles, xstyle, className, style)}
 		/>
 	);
 }
@@ -100,7 +92,7 @@ export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	return (
 		<span
 			{...restProps}
-			{...resolveXStyleProps(resolveCheckboxRecipeStyles().control, xstyle, className, style)}
+			{...resolveXStyleProps(resolveCheckboxRecipeSlotStyles('control'), xstyle, className, style)}
 		/>
 	);
 }
@@ -112,7 +104,12 @@ export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 		<span
 			{...restProps}
 			aria-hidden
-			{...resolveXStyleProps(resolveCheckboxRecipeStyles().indicator, xstyle, className, style)}
+			{...resolveXStyleProps(
+				resolveCheckboxRecipeSlotStyles('indicator'),
+				xstyle,
+				className,
+				style,
+			)}
 		/>
 	);
 }
@@ -120,19 +117,12 @@ export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 /** Checkbox field primitive for custom composition. */
 export function Checkbox(props: CheckboxProps): JSX.Element {
 	const { className, size, style, xstyle, ...restProps } = props;
-	const recipeStyles = resolveCheckboxRecipeStyles({ size }).root;
+	const recipeStyles = resolveCheckboxRecipeSlotStyles('root', { size });
 
 	return (
 		<RacCheckboxField
 			{...restProps}
-			className={composeRenderProps(className, (resolvedClassName) => {
-				return (
-					resolveXStyleProps(recipeStyles, xstyle, resolvedClassName, undefined).className ?? ''
-				);
-			})}
-			style={composeRenderProps(style, (resolvedStyle) => {
-				return resolveXStyleProps(recipeStyles, xstyle, undefined, resolvedStyle).style;
-			})}
+			{...resolveRacXStyleProps(recipeStyles, xstyle, className, style)}
 		/>
 	);
 }

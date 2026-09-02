@@ -2,7 +2,7 @@ import type { CSSProperties, JSX, ReactNode } from 'react';
 import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { Prettify } from '../../types/prettify.js';
-import { resolveComboboxRecipeStyles } from './recipe.js';
+import { resolveComboboxRecipeSlotStyles } from './recipe.js';
 
 interface _ComboboxEmptyStateProps extends XStyleProps {
 	children: ReactNode;
@@ -18,7 +18,12 @@ export function ComboboxEmptyState(props: ComboboxEmptyStateProps): JSX.Element 
 
 	return (
 		<div
-			{...resolveXStyleProps(resolveComboboxRecipeStyles().emptyState, xstyle, className, style)}
+			{...resolveXStyleProps(
+				resolveComboboxRecipeSlotStyles('emptyState'),
+				xstyle,
+				className,
+				style,
+			)}
 		>
 			{children}
 		</div>

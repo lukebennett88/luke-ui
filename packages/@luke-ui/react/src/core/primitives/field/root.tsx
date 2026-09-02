@@ -1,7 +1,7 @@
 import type { ComponentProps, JSX } from 'react';
 import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
-import { resolveFieldRecipeStyles } from './recipe.js';
+import { resolveFieldRecipeSlotStyles } from './recipe.js';
 
 /** Props for the primitive field container. */
 export type FieldRootProps = ComponentProps<'div'> & XStyleProps;
@@ -13,7 +13,7 @@ export function Field(props: FieldRootProps): JSX.Element {
 	return (
 		<div
 			{...restProps}
-			{...resolveXStyleProps(resolveFieldRecipeStyles().root, xstyle, className, style)}
+			{...resolveXStyleProps(resolveFieldRecipeSlotStyles('root'), xstyle, className, style)}
 		/>
 	);
 }

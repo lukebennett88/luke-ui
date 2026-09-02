@@ -23,7 +23,7 @@ import type { ComboboxListBoxProps } from '../primitives/combobox/listbox.js';
 import { ComboboxListBox } from '../primitives/combobox/listbox.js';
 import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
 import { ComboboxPopover } from '../primitives/combobox/popover.js';
-import { resolveComboboxRecipeStyles } from '../primitives/combobox/recipe.js';
+import { resolveComboboxRecipeSlotStyles } from '../primitives/combobox/recipe.js';
 import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
@@ -239,7 +239,7 @@ function MobileComboboxContent<T extends object>({
 	const valueId = useId();
 
 	const ariaLabelledBy = labelContext?.id == null ? undefined : cx(labelContext.id, valueId);
-	const comboboxStyles = resolveComboboxRecipeStyles({ size });
+	const mobileListBoxStyles = resolveComboboxRecipeSlotStyles('mobileListBox', { size });
 
 	const listBox = (
 		<SelectableCollectionContext.Provider value={mobileListBoxContextValue}>
@@ -248,7 +248,7 @@ function MobileComboboxContent<T extends object>({
 				loadMoreItem={loadMoreItem}
 				renderEmptyState={renderEmptyState}
 				shouldSelectOnPressUp={false}
-				xstyle={[...comboboxStyles.mobileListBox, listBoxProps?.xstyle] as XStyleProp}
+				xstyle={[...mobileListBoxStyles, listBoxProps?.xstyle] as XStyleProp}
 			>
 				{children}
 			</ComboboxListBox>
@@ -265,6 +265,10 @@ function MobileComboboxContent<T extends object>({
 	// RAC builds the collection before it provides state.
 	if (state == null) return listBox;
 
+	const mobileInputGroupStyles = resolveComboboxRecipeSlotStyles('mobileInputGroup', { size });
+	const mobileTriggerStyles = resolveComboboxRecipeSlotStyles('mobileTrigger', { size });
+	const mobileValueStyles = resolveComboboxRecipeSlotStyles('mobileValue', { size });
+
 	return (
 		<>
 			<ComboboxInputGroup>
@@ -274,8 +278,7 @@ function MobileComboboxContent<T extends object>({
 					aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
 					aria-labelledby={ariaLabelledBy}
 					className={
-						resolveXStyleProps(comboboxStyles.mobileTrigger, undefined, undefined, undefined)
-							.className
+						resolveXStyleProps(mobileTriggerStyles, undefined, undefined, undefined).className
 					}
 					isDisabled={isDisabled || isReadOnly}
 					onPress={() => {
@@ -287,8 +290,7 @@ function MobileComboboxContent<T extends object>({
 				>
 					<ComboBoxValue
 						className={
-							resolveXStyleProps(comboboxStyles.mobileValue, undefined, undefined, undefined)
-								.className
+							resolveXStyleProps(mobileValueStyles, undefined, undefined, undefined).className
 						}
 						id={valueId}
 						placeholder={placeholder}
@@ -308,7 +310,7 @@ function MobileComboboxContent<T extends object>({
 				}}
 				ref={popoverContext?.ref}
 			>
-				<ComboboxInputGroup xstyle={comboboxStyles.mobileInputGroup as XStyleProp}>
+				<ComboboxInputGroup xstyle={mobileInputGroupStyles as XStyleProp}>
 					<ComboboxInput
 						aria-expanded={undefined}
 						aria-haspopup="listbox"
@@ -334,7 +336,7 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 			aria-label="Clear search"
 			className={
 				resolveXStyleProps(
-					resolveComboboxRecipeStyles({ size }).clearButton,
+					resolveComboboxRecipeSlotStyles('clearButton', { size }),
 					undefined,
 					undefined,
 					undefined,

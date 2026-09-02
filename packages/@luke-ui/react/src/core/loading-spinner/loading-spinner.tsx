@@ -16,8 +16,7 @@ import { useSynchronizeAnimations } from '../use-synchronize-animations/use-sync
 import { VisuallyHidden } from '../visually-hidden/visually-hidden.js';
 import type { LoadingSpinnerRecipeVariants } from './recipe.js';
 import {
-	loadingSpinnerRecipe,
-	resolveLoadingSpinnerRecipeStyles,
+	resolveLoadingSpinnerRecipeSlotStyles,
 	rubberBandAnimationName,
 	spinAnimationName,
 } from './recipe.js';
@@ -97,14 +96,16 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 
 	if (!children) return spinnerElement;
 
-	const slots = loadingSpinnerRecipe();
+	const childrenWrapperStyles = resolveLoadingSpinnerRecipeSlotStyles('childrenWrapper');
+	const hiddenChildrenStyles = resolveLoadingSpinnerRecipeSlotStyles('hiddenChildren');
+	const spinnerOverlayStyles = resolveLoadingSpinnerRecipeSlotStyles('spinnerOverlay');
 
 	return (
-		<span className={slots.childrenWrapper()}>
-			<span aria-hidden className={slots.hiddenChildren()} inert>
+		<span className={stylex.props(...childrenWrapperStyles).className}>
+			<span aria-hidden className={stylex.props(...hiddenChildrenStyles).className} inert>
 				{children}
 			</span>
-			<span className={slots.spinnerOverlay()}>{spinnerElement}</span>
+			<span className={stylex.props(...spinnerOverlayStyles).className}>{spinnerElement}</span>
 		</span>
 	);
 }
@@ -124,8 +125,10 @@ function SpinnerElement({
 	useSynchronizeAnimations(rubberBandAnimationName);
 
 	const labelId = useId();
-	const slotStyles = resolveLoadingSpinnerRecipeStyles({ color, size });
-	const stylexProps = resolveXStyleProps(slotStyles.root, xstyle, className, style);
+	const rootStyles = resolveLoadingSpinnerRecipeSlotStyles('root', { color, size });
+	const svgStyles = resolveLoadingSpinnerRecipeSlotStyles('svg', { color, size });
+	const indicatorStyles = resolveLoadingSpinnerRecipeSlotStyles('indicator', { color, size });
+	const stylexProps = resolveXStyleProps(rootStyles, xstyle, className, style);
 	const viewBoxCenter = ICON_VIEWBOX_SIZE / 2;
 
 	return (
@@ -133,12 +136,12 @@ function SpinnerElement({
 			<VisuallyHidden id={labelId}>{ariaLabel}</VisuallyHidden>
 			<svg
 				aria-hidden="true"
-				className={stylex.props(...slotStyles.svg).className}
+				className={stylex.props(...svgStyles).className}
 				fill="none"
 				viewBox={ICON_VIEWBOX}
 			>
 				<circle
-					className={stylex.props(...slotStyles.indicator).className}
+					className={stylex.props(...indicatorStyles).className}
 					cx={viewBoxCenter}
 					cy={viewBoxCenter}
 					fill="none"

@@ -3,13 +3,12 @@ import { Collection } from 'react-aria-components/Collection';
 import type { ListBoxProps as RacListBoxProps } from 'react-aria-components/ComboBox';
 import { ListBox as RacListBox } from 'react-aria-components/ComboBox';
 import { ListBoxContext } from 'react-aria-components/ListBox';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveXStyleProps } from '../../styles/xstyle.js';
+import { resolveRacXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { resolveComboboxRecipeStyles } from './recipe.js';
+import { resolveComboboxRecipeSlotStyles } from './recipe.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	RacListBoxProps<T>,
@@ -35,7 +34,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 	const { children, dependencies, items, loadMoreItem, style, xstyle, ...listBoxProps } = props;
 	const listBoxContext = useSlottedContext(ListBoxContext);
 	const collectionItems = items ?? listBoxContext?.items;
-	const recipeStyles = resolveComboboxRecipeStyles().listBox;
+	const recipeStyles = resolveComboboxRecipeSlotStyles('listBox');
 	const listBoxChildren =
 		typeof children === 'function' ? (
 			<Collection<T> dependencies={dependencies} items={collectionItems}>
@@ -48,12 +47,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 	return (
 		<RacListBox
 			{...listBoxProps}
-			className={composeRenderProps(listBoxProps.className, (className) => {
-				return resolveXStyleProps(recipeStyles, xstyle, className, undefined).className ?? '';
-			})}
-			style={composeRenderProps(style, (value) => {
-				return resolveXStyleProps(recipeStyles, xstyle, undefined, value).style;
-			})}
+			{...resolveRacXStyleProps(recipeStyles, xstyle, listBoxProps.className, style)}
 		>
 			{listBoxChildren}
 			{loadMoreItem}

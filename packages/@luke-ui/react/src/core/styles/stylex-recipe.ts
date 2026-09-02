@@ -5,6 +5,9 @@ import { cx } from '../../shared/utils/utils.js';
 /** A compiled StyleX style returned by a `stylex.create(...)` entry. */
 type StyleXStyle = CompiledStyles;
 
+/** One or more compiled styles, applied together as an unconditional base. */
+type StyleXStyleList = StyleXStyle | ReadonlyArray<StyleXStyle>;
+
 /** Maps the string variant keys `'true'`/`'false'` onto `boolean` for selection. */
 type BooleanMap<T> = T extends 'true' | 'false' ? boolean : T;
 
@@ -24,7 +27,7 @@ interface CompoundVariant<Variants extends VariantGroups> {
 
 /** Single-part recipe config. */
 interface SinglePartConfig<Variants extends VariantGroups> {
-	base?: StyleXStyle;
+	base?: StyleXStyleList;
 	compoundVariants?: Array<CompoundVariant<Variants>>;
 	defaultVariants?: VariantSelection<Variants>;
 	variants?: Variants;
@@ -35,7 +38,7 @@ type SinglePartRecipe<Variants extends VariantGroups> = (
 	selection?: VariantSelection<Variants>,
 ) => string;
 
-/** A per-slot style map: slot name to compiled style for that slot. */
+/** A per-slot style map: slot name to compiled style(s) for that slot. */
 type SlotStyles<Slot extends string> = Partial<Record<Slot, StyleXStyle>>;
 
 /** Variant groups for a slotted recipe: group to value to per-slot styles. */
@@ -49,7 +52,7 @@ type SlotVariantSelection<Variants extends SlotVariantGroups<string>> = {
 /** Slotted recipe config. */
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
 	defaultVariants?: SlotVariantSelection<Variants>;
-	slots: Record<Slot, StyleXStyle>;
+	slots: Record<Slot, StyleXStyleList>;
 	variants?: Variants;
 }
 
@@ -89,10 +92,13 @@ export function createSingleRecipe<const Variants extends VariantGroups>(
 }
 
 /**
- * Builds a slotted recipe with two deliberately separate internal views. `recipe` keeps the public
- * string API; `resolveStyles` is package-private composition input for a component to pass a slot's
- * compiled styles into `stylex.props` before its public `xstyle` value. Slot extra classes stay
- * appended last on the string functions.
+ * Builds a slotted recipe around one canonical per-slot resolution operation
+ * (`resolveSlotStyles`), so a component that renders a single slot — a repeated `ComboboxItem`
+ * among Combobox's seventeen — never pays to resolve the other sixteen. `recipe` and
+ * `resolveStyles` are both thin views over that same operation, not a second algorithm: `recipe`
+ * keeps the public string API (slot extra classes appended last), and `resolveStyles` is
+ * package-private composition input for a component to pass a slot's compiled styles into
+ * `stylex.props` before its public `xstyle` value.
  */
 export function createSlottedRecipe<
 	const Slot extends string,
@@ -101,68 +107,70 @@ export function createSlottedRecipe<
 	config: MultiPartConfig<Slot, Variants>,
 ): {
 	recipe: MultiPartRecipe<Slot, Variants>;
+	resolveSlotStyles: (
+		slotName: Slot,
+		selection?: SlotVariantSelection<Variants>,
+	) => Array<StyleXStyle>;
 	resolveStyles: (selection?: SlotVariantSelection<Variants>) => Record<Slot, Array<StyleXStyle>>;
 } {
 	const slotNames = Object.keys(config.slots) as Array<Slot>;
-	const slotVariants: Record<string, VariantGroups> = {};
 
-	for (const slotName of slotNames) {
-		const variants: VariantGroups = {};
-
-		if (config.variants !== undefined) {
-			for (const [group, values] of Object.entries(config.variants)) {
-				const perValue: Record<string, StyleXStyle> = {};
-				let usesSlot = false;
-
-				for (const [value, slotStyles] of Object.entries(values)) {
-					const style = slotStyles[slotName];
-					if (style !== undefined) {
-						perValue[value] = style;
-						usesSlot = true;
-					}
-				}
-
-				if (usesSlot) variants[group] = perValue;
-			}
-		}
-
-		slotVariants[slotName] = variants;
+	function resolveSlotStyles(
+		slotName: Slot,
+		selection?: SlotVariantSelection<Variants>,
+	): Array<StyleXStyle> {
+		const selected = mergeSelection(config.defaultVariants, selection);
+		return resolveSinglePartStyles(
+			config.slots[slotName],
+			resolveSlotVariants(slotName, config.variants),
+			undefined,
+			selected,
+		);
 	}
 
 	function resolveStyles(
 		selection?: SlotVariantSelection<Variants>,
 	): Record<Slot, Array<StyleXStyle>> {
-		const selected = mergeSelection(config.defaultVariants, selection);
 		const resolved = {} as Record<Slot, Array<StyleXStyle>>;
-
-		for (const slotName of slotNames) {
-			// `resolveSinglePartStyles` iterates the slot's own variant groups, so a group this slot
-			// declares no style for is never read out of `selected`. No per-slot narrowing needed.
-			resolved[slotName] = resolveSinglePartStyles(
-				config.slots[slotName],
-				slotVariants[slotName],
-				undefined,
-				selected,
-			);
-		}
-
+		for (const slotName of slotNames) resolved[slotName] = resolveSlotStyles(slotName, selection);
 		return resolved;
 	}
 
 	return {
 		recipe: (selection) => {
-			const resolved = resolveStyles(selection);
 			const slots = {} as Record<Slot, SlotFn>;
 
 			for (const slotName of slotNames) {
 				slots[slotName] = (extraClass) =>
-					cx(resolveClassName(resolved[slotName] ?? []), extraClass);
+					cx(resolveClassName(resolveSlotStyles(slotName, selection)), extraClass);
 			}
 
 			return slots;
 		},
+		resolveSlotStyles,
 		resolveStyles,
 	};
+}
+
+function resolveSlotVariants<Slot extends string>(
+	slotName: Slot,
+	variantGroups: SlotVariantGroups<Slot> | undefined,
+): VariantGroups | undefined {
+	if (variantGroups === undefined) return undefined;
+
+	const resolved: VariantGroups = {};
+	for (const [group, values] of Object.entries(variantGroups)) {
+		const perValue: Record<string, StyleXStyle> = {};
+
+		for (const [value, slotStyles] of Object.entries(values)) {
+			const style = slotStyles[slotName];
+			if (style !== undefined) perValue[value] = style;
+		}
+
+		if (Object.keys(perValue).length > 0) resolved[group] = perValue;
+	}
+
+	return resolved;
 }
 
 function mergeSelection(
@@ -179,13 +187,13 @@ function mergeSelection(
 }
 
 function resolveSinglePartStyles<Variants extends VariantGroups>(
-	base: StyleXStyle | undefined,
+	base: StyleXStyleList | undefined,
 	variants: Variants | undefined,
 	compoundVariants: Array<CompoundVariant<Variants>> | undefined,
 	selected: Record<string, unknown>,
 ): Array<StyleXStyle> {
 	const styles: Array<StyleXStyle> = [];
-	if (base !== undefined) styles.push(base);
+	if (base !== undefined) styles.push(...(Array.isArray(base) ? base : [base]));
 
 	if (variants !== undefined) {
 		for (const [group, values] of Object.entries(variants)) {

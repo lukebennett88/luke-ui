@@ -86,12 +86,79 @@ test('resolveStyles returns per-slot compiled style arrays', () => {
 	expect(resolved.track).toEqual([styles.trackBase, styles.trackLarge]);
 });
 
+test("resolving one slot never reads another slot's variant style", () => {
+	let trackVariantReads = 0;
+	const largeStyles = {
+		root: styles.rootLarge,
+		get track(): typeof styles.trackLarge {
+			trackVariantReads += 1;
+			return styles.trackLarge;
+		},
+	};
+
+	const { recipe: tricky, resolveSlotStyles } = createSlottedRecipe({
+		slots: {
+			root: styles.rootBase,
+			track: styles.trackBase,
+		},
+		variants: {
+			size: {
+				large: largeStyles,
+			},
+		},
+	});
+
+	expect(trackVariantReads).toBe(0);
+
+	const slots = tricky({ size: 'large' });
+	slots.root();
+	resolveSlotStyles('root', { size: 'large' });
+
+	expect(trackVariantReads).toBe(0);
+
+	slots.track();
+	expect(trackVariantReads).toBe(1);
+});
+
+test('createSlottedRecipe exposes resolveSlotStyles as the same operation recipe() uses', () => {
+	const { recipe: track2, resolveSlotStyles } = createSlottedRecipe({
+		slots: {
+			root: styles.rootBase,
+			track: styles.trackBase,
+		},
+		variants: {
+			size: {
+				large: {
+					root: styles.rootLarge,
+					track: styles.trackLarge,
+				},
+			},
+		},
+	});
+
+	const fromSlotFn = track2({ size: 'large' }).track();
+	const fromResolveSlotStyles = stylex.props(
+		...resolveSlotStyles('track', { size: 'large' }),
+	).className;
+
+	expect(fromSlotFn).toBe(fromResolveSlotStyles);
+});
+
 test('a compound variant with no conditions always applies', () => {
-	// `button/styles.ts` relies on this to append a second unconditional style to a single-part
-	// base, because StyleX cannot spread an imported compiled style into `stylex.create`.
+	// An empty condition set matches every selection.
 	const { recipe: always } = createSingleRecipe({
 		base: styles.rootBase,
 		compoundVariants: [{ style: styles.rootLarge, variants: {} }],
+	});
+
+	expect(always().split(' ')).toEqual(
+		stylex.props(styles.rootBase, styles.rootLarge).className?.split(' ') ?? [],
+	);
+});
+
+test('base accepts an array of unconditional styles, applied in order', () => {
+	const { recipe: always } = createSingleRecipe({
+		base: [styles.rootBase, styles.rootLarge],
 	});
 
 	expect(always().split(' ')).toEqual(

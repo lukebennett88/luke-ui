@@ -2,11 +2,10 @@ import type { CompiledStyles } from '@stylexjs/stylex';
 import type { JSX } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { Button as RacButton } from 'react-aria-components/Button';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveXStyleProps } from '../../styles/xstyle.js';
+import { resolveRacXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../../types/documented-rac-props.js';
 import type { Prettify } from '../../types/prettify.js';
@@ -77,16 +76,9 @@ export function renderButton(
 		<IconSizeProvider size={BUTTON_ICON_SIZE}>
 			<RacButton
 				{...restProps}
-				className={composeRenderProps(className, (resolvedClassName) => {
-					return (
-						resolveXStyleProps(recipeStyles, xstyle, resolvedClassName, undefined).className ?? ''
-					);
-				})}
+				{...resolveRacXStyleProps(recipeStyles, xstyle, className, style)}
 				isDisabled={isDisabled}
 				isPending={isPending}
-				style={composeRenderProps(style, (resolvedStyle) => {
-					return resolveXStyleProps(recipeStyles, xstyle, undefined, resolvedStyle).style;
-				})}
 			>
 				{children}
 			</RacButton>

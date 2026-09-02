@@ -6,7 +6,7 @@ import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { FieldNecessityIndicator } from './recipe.js';
-import { resolveFieldRecipeStyles } from './recipe.js';
+import { resolveFieldRecipeSlotStyles } from './recipe.js';
 
 /** Allowed `necessityIndicator` values for `FieldLabel`. */
 export type { FieldNecessityIndicator };
@@ -34,7 +34,7 @@ export function FieldLabel(props: FieldLabelProps): JSX.Element {
 		<RacLabel
 			{...restProps}
 			{...resolveXStyleProps(
-				resolveFieldRecipeStyles({ necessityIndicator }).label,
+				resolveFieldRecipeSlotStyles('label', { necessityIndicator }),
 				xstyle,
 				className,
 				style,
