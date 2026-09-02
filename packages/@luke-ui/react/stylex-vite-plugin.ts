@@ -256,11 +256,11 @@ export function createStylexDevPlugin(): Plugin {
 
 			sourceRules = undefined;
 
-			const moduleGraph = this.environment.moduleGraph;
-			const virtualModule = moduleGraph.getModuleById(RESOLVED_STYLEX_VIRTUAL_CSS_ID);
+			const virtualModule = this.environment.moduleGraph.getModuleById(
+				RESOLVED_STYLEX_VIRTUAL_CSS_ID,
+			);
 			if (virtualModule === undefined) return;
 
-			moduleGraph.invalidateModule(virtualModule);
 			// Nothing that changed imports the virtual module, so Vite never collects it into
 			// `modules` on its own.
 			return [...modules, virtualModule];

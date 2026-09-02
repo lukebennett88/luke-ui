@@ -56,18 +56,14 @@ test('invalidates cached StyleX CSS when an eligible source module changes', asy
 		expect(firstCss as string).not.toContain('rgb(44,55,66)');
 
 		// Change the probe module's StyleX rule to a new distinctive value, then simulate Vite's
-		// hot-update hook firing for that file. Without invalidation, the next `load` would keep
-		// serving the CSS captured above — still `rgb(11,22,33)`, never the new value.
+		// hot-update hook firing for that file. Without clearing the cache, the next `load` would
+		// keep serving the CSS captured above — still `rgb(11,22,33)`, never the new value.
 		await writeFile(probeFile, probeSource('rgb(44,55,66)'), 'utf8');
 
-		let invalidatedModule: unknown;
 		const virtualModule = { id: RESOLVED_STYLEX_VIRTUAL_CSS_ID } as unknown as HotUpdateModule;
 		const moduleGraph = {
 			getModuleById: (id: string) =>
 				id === RESOLVED_STYLEX_VIRTUAL_CSS_ID ? virtualModule : undefined,
-			invalidateModule: (mod: unknown) => {
-				invalidatedModule = mod;
-			},
 		} as unknown as HotUpdateModuleGraph;
 
 		const affectedModule = { id: probeFile } as unknown as HotUpdateModule;
@@ -80,8 +76,6 @@ test('invalidates cached StyleX CSS when an eligible source module changes', asy
 			read: async () => probeSource('rgb(44,55,66)'),
 			server: {} as unknown as HotUpdateServer,
 		});
-
-		expect(invalidatedModule).toBe(virtualModule);
 
 		// Vite propagates the returned array to the client as the update set; returning `void` instead
 		// would leave the browser on the stylesheet it already loaded.
@@ -96,7 +90,7 @@ test('invalidates cached StyleX CSS when an eligible source module changes', asy
 	}
 });
 
-test('does not invalidate for a file the StyleX transform never touches', async () => {
+test('does not re-scan for a file the StyleX transform never touches', async () => {
 	const plugin = createStylexDevPlugin();
 	const load = plugin.load;
 	const hotUpdate = plugin.hotUpdate;
@@ -106,14 +100,11 @@ test('does not invalidate for a file the StyleX transform never touches', async 
 
 	await load.call(pluginContext(), RESOLVED_STYLEX_VIRTUAL_CSS_ID);
 
-	let invalidateCalled = false;
+	let moduleGraphTouched = false;
 	const moduleGraph = {
 		getModuleById: () => {
-			invalidateCalled = true;
+			moduleGraphTouched = true;
 			return undefined;
-		},
-		invalidateModule: () => {
-			invalidateCalled = true;
 		},
 	} as unknown as HotUpdateModuleGraph;
 
@@ -126,6 +117,6 @@ test('does not invalidate for a file the StyleX transform never touches', async 
 		server: {} as unknown as HotUpdateServer,
 	});
 
-	expect(invalidateCalled).toBe(false);
+	expect(moduleGraphTouched).toBe(false);
 	expect(result).toBeUndefined();
 });
