@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
@@ -14,7 +14,7 @@ const styles = stylex.create({
 	label: {
 		alignItems: 'center',
 		display: 'inline-flex',
-		gap: tokens.spaceSp8,
+		gap: vars.spaceSp8,
 		'min-inline-size': 0,
 	},
 	labelPendingFalse: {},

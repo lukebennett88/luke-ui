@@ -3,7 +3,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 /** Compiler-facing StyleX token surface. Each value is a live `var(--luke-*)` reference. */
-export const tokens = stylex.defineConsts({
+export const vars = stylex.defineConsts({
 	colorSurfaceCanvas: 'var(--luke-color-surface-canvas)',
 	colorSurfaceRecessed: 'var(--luke-color-surface-recessed)',
 	colorSurfaceFloating: 'var(--luke-color-surface-floating)',

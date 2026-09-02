@@ -5,18 +5,18 @@ import { Dialog, OverlayTriggerStateContext } from 'react-aria-components/Dialog
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
 import { cx } from '../../shared/utils/utils.js';
 import { rootClassName } from '../../theme/theme.js';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 
 const styles = stylex.create({
 	overlay: {
-		backgroundColor: tokens.colorOverlayBackdrop,
+		backgroundColor: vars.colorOverlayBackdrop,
 		'block-size': '100dvh',
 		'inset-inline-end': 0,
 		'inset-inline-start': 0,
 		position: 'absolute',
-		transitionDuration: tokens.motionDurationEnter,
+		transitionDuration: vars.motionDurationEnter,
 		transitionProperty: 'opacity',
-		transitionTimingFunction: tokens.motionEasingStandard,
+		transitionTimingFunction: vars.motionEasingStandard,
 		// Nothing else in this package sets a competing z-index, so this is not calibrated
 		// against anything of ours. It is a floor meant to sit above consumer page content.
 		zIndex: 100,
@@ -25,8 +25,8 @@ const styles = stylex.create({
 		},
 		'[data-exiting]': {
 			opacity: 0,
-			transitionDuration: tokens.motionDurationExit,
-			transitionTimingFunction: tokens.motionEasingExit,
+			transitionDuration: vars.motionDurationExit,
+			transitionTimingFunction: vars.motionEasingExit,
 		},
 		'@media (prefers-reduced-motion: reduce)': {
 			transitionDuration: '0s',
@@ -46,18 +46,18 @@ const styles = stylex.create({
 	modal: {
 		'--luke-tray-padding-block-end':
 			'calc(max(calc(100dvh - var(--visual-viewport-height)), env(safe-area-inset-bottom, 0px)) + 100vh)',
-		backgroundColor: tokens.colorSurfaceFloating,
+		backgroundColor: vars.colorSurfaceFloating,
 		'block-size': 'calc(var(--visual-viewport-height) - var(--luke-space-sp48))',
 		'border-end-end-radius': 0,
 		'border-end-start-radius': 0,
-		'border-start-end-radius': tokens.radiusOverlay,
-		'border-start-start-radius': tokens.radiusOverlay,
+		'border-start-end-radius': vars.radiusOverlay,
+		'border-start-start-radius': vars.radiusOverlay,
 		borderStyle: 'solid',
 		borderWidth: '1px',
 		// Physical on purpose, paired with `top` below. The two preserve an intended over-constraint
 		// that logical block insets would resolve from the wrong edge on a content-box element.
 		bottom: '-100vh',
-		boxShadow: tokens.depthFloating,
+		boxShadow: vars.depthFloating,
 		boxSizing: 'content-box',
 		display: 'flex',
 		flexDirection: 'column',
@@ -72,10 +72,10 @@ const styles = stylex.create({
 		'padding-block-end': 'var(--luke-tray-padding-block-end)',
 		position: 'absolute',
 		// Physical on purpose, paired with `bottom` above. See the note there.
-		top: tokens.spaceSp48,
-		transitionDuration: tokens.motionDurationEnter,
+		top: vars.spaceSp48,
+		transitionDuration: vars.motionDurationEnter,
 		transitionProperty: 'opacity, translate',
-		transitionTimingFunction: tokens.motionEasingStandard,
+		transitionTimingFunction: vars.motionEasingStandard,
 		translate: 'none',
 		'[data-entering]': {
 			opacity: 0,
@@ -83,8 +83,8 @@ const styles = stylex.create({
 		},
 		'[data-exiting]': {
 			opacity: 0,
-			transitionDuration: tokens.motionDurationExit,
-			transitionTimingFunction: tokens.motionEasingExit,
+			transitionDuration: vars.motionDurationExit,
+			transitionTimingFunction: vars.motionEasingExit,
 			translate: '0 calc(100% - 100vh)',
 		},
 		'@media (forced-colors: active)': {
@@ -113,8 +113,8 @@ const styles = stylex.create({
 		// no longer flush and have to be rounded like the top ones. `450px` is the border-box
 		// cap; `max-inline-size` is the content-box equivalent (450px − 1px × 2).
 		'@media (width > 450px)': {
-			'border-end-end-radius': tokens.radiusOverlay,
-			'border-end-start-radius': tokens.radiusOverlay,
+			'border-end-end-radius': vars.radiusOverlay,
+			'border-end-start-radius': vars.radiusOverlay,
 		},
 	},
 	dialog: {

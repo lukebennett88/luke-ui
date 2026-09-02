@@ -1,6 +1,6 @@
 import type { CompiledStyles } from '@stylexjs/stylex';
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 
 /*
  * StyleX cannot safely substitute `defineConsts` values into selector keys in packed output.
@@ -40,10 +40,10 @@ const shared = stylex.create({
 	base: {
 		[`:where(${disabled})`]: {
 			cursor: 'not-allowed',
-			opacity: tokens.interactionDisabledOpacity,
+			opacity: vars.interactionDisabledOpacity,
 		},
 		[`:where(${hovered})${notDisabled}:not(:where(${focusWithin}))${notReadOnly}${notInvalid}`]: {
-			borderColor: tokens.colorBorderAccent,
+			borderColor: vars.colorBorderAccent,
 		},
 		'@media (forced-colors: active)': {
 			backgroundColor: 'Field',
@@ -70,8 +70,8 @@ const combobox = stylex.create({
 	},
 	focusWithin: {
 		[`${comboboxFocusWithin}${notDisabled}${notInvalid}${notReadOnly}`]: {
-			borderColor: tokens.colorBorderAccent,
-			outlineColor: tokens.colorBorderFocus,
+			borderColor: vars.colorBorderAccent,
+			outlineColor: vars.colorBorderFocus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -85,11 +85,11 @@ const combobox = stylex.create({
 	},
 	invalid: {
 		[`:where(${invalid})${notDisabled}:not(${comboboxFocusWithin})${notReadOnly}`]: {
-			borderColor: tokens.colorBackgroundDangerSolidRest,
+			borderColor: vars.colorBackgroundDangerSolidRest,
 		},
 		[`:where(${invalid}):where(${focusWithin}):has(input:focus)${notDisabled}${notReadOnly}`]: {
-			borderColor: tokens.colorBackgroundDangerSolidRest,
-			outlineColor: tokens.colorBorderFocus,
+			borderColor: vars.colorBackgroundDangerSolidRest,
+			outlineColor: vars.colorBorderFocus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -106,15 +106,15 @@ const combobox = stylex.create({
 	},
 	readOnly: {
 		[`:where(${readOnly})${notDisabled}:not(${comboboxFocusWithin})`]: {
-			backgroundColor: tokens.colorSurfaceCanvas,
-			borderColor: tokens.colorBorderDecorative,
+			backgroundColor: vars.colorSurfaceCanvas,
+			borderColor: vars.colorBorderDecorative,
 			boxShadow: 'none',
 		},
 		[`:where(${readOnly}):where(${focusWithin}):has(input:focus)${notDisabled}`]: {
-			backgroundColor: tokens.colorSurfaceCanvas,
-			borderColor: tokens.colorBorderDecorative,
+			backgroundColor: vars.colorSurfaceCanvas,
+			borderColor: vars.colorBorderDecorative,
 			boxShadow: 'none',
-			outlineColor: tokens.colorBorderFocus,
+			outlineColor: vars.colorBorderFocus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -136,8 +136,8 @@ const combobox = stylex.create({
 const inputGroup = stylex.create({
 	focusWithin: {
 		[`${inputGroupFocusWithin}${notDisabled}${notInvalid}${notReadOnly}`]: {
-			borderColor: tokens.colorBorderAccent,
-			outlineColor: tokens.colorBorderFocus,
+			borderColor: vars.colorBorderAccent,
+			outlineColor: vars.colorBorderFocus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -150,11 +150,11 @@ const inputGroup = stylex.create({
 	},
 	invalid: {
 		[`:where(${invalid})${notDisabled}:not(${inputGroupFocusWithin})${notReadOnly}`]: {
-			borderColor: tokens.colorBackgroundDangerSolidRest,
+			borderColor: vars.colorBackgroundDangerSolidRest,
 		},
 		[`:where(${invalid}):where(${focusWithin})${notDisabled}${notReadOnly}`]: {
-			borderColor: tokens.colorBackgroundDangerSolidRest,
-			outlineColor: tokens.colorBorderFocus,
+			borderColor: vars.colorBackgroundDangerSolidRest,
+			outlineColor: vars.colorBorderFocus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -162,15 +162,15 @@ const inputGroup = stylex.create({
 	},
 	readOnly: {
 		[`:where(${readOnly})${notDisabled}:not(${inputGroupFocusWithin})`]: {
-			backgroundColor: tokens.colorSurfaceCanvas,
-			borderColor: tokens.colorBorderDecorative,
+			backgroundColor: vars.colorSurfaceCanvas,
+			borderColor: vars.colorBorderDecorative,
 			boxShadow: 'none',
 		},
 		[`:where(${readOnly}):where(${focusWithin})${notDisabled}`]: {
-			backgroundColor: tokens.colorSurfaceCanvas,
-			borderColor: tokens.colorBorderDecorative,
+			backgroundColor: vars.colorSurfaceCanvas,
+			borderColor: vars.colorBorderDecorative,
 			boxShadow: 'none',
-			outlineColor: tokens.colorBorderFocus,
+			outlineColor: vars.colorBorderFocus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',

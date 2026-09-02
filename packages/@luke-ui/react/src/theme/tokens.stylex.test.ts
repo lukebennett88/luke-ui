@@ -12,6 +12,7 @@ describe('StyleX tokens', () => {
 			expect(source).toContain(`${camelKey}: 'var(${variable})'`);
 		}
 
+		expect(source).toContain('export const vars = stylex.defineConsts({');
 		expect(source.match(/defineConsts\(\{/g)?.length).toBe(1);
 		expect(source).not.toMatch(/--luke-[^:]+:\s*#[0-9a-f]{3,8}/i);
 	});

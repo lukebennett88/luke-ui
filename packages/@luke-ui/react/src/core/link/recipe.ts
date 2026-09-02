@@ -1,21 +1,21 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	base: {
-		color: tokens.colorForegroundAccentRest,
+		color: vars.colorForegroundAccentRest,
 		cursor: 'pointer',
 		font: 'inherit',
 		textDecoration: 'underline',
 		textDecorationColor: 'currentColor',
-		transitionDuration: tokens.motionDurationFeedback,
+		transitionDuration: vars.motionDurationFeedback,
 		transitionProperty: 'color, text-decoration-color',
-		transitionTimingFunction: tokens.motionEasingStandard,
+		transitionTimingFunction: vars.motionEasingStandard,
 		'[data-disabled="true"]': {
 			cursor: 'not-allowed',
-			opacity: tokens.interactionDisabledOpacity,
+			opacity: vars.interactionDisabledOpacity,
 		},
 		'@media (forced-colors: active)': {
 			color: 'LinkText',
@@ -33,8 +33,8 @@ const styles = stylex.create({
 	isStandaloneTrue: {
 		alignItems: 'center',
 		display: 'inline-flex',
-		'min-block-size': tokens.controlSizeMinTarget,
-		'min-inline-size': tokens.controlSizeMinTarget,
+		'min-block-size': vars.controlSizeMinTarget,
+		'min-inline-size': vars.controlSizeMinTarget,
 		textDecoration: 'none',
 		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
 			textDecoration: 'underline',
@@ -44,21 +44,21 @@ const styles = stylex.create({
 		},
 	},
 	toneAccent: {
-		color: tokens.colorForegroundAccentRest,
+		color: vars.colorForegroundAccentRest,
 		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
-			color: tokens.colorForegroundAccentHover,
+			color: vars.colorForegroundAccentHover,
 		},
 		'[data-pressed="true"]:not([data-disabled="true"])': {
-			color: tokens.colorForegroundAccentPressed,
+			color: vars.colorForegroundAccentPressed,
 		},
 	},
 	toneNeutral: {
-		color: tokens.colorForegroundNeutralRest,
+		color: vars.colorForegroundNeutralRest,
 		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
-			color: tokens.colorForegroundNeutralHover,
+			color: vars.colorForegroundNeutralHover,
 		},
 		'[data-pressed="true"]:not([data-disabled="true"])': {
-			color: tokens.colorForegroundNeutralPressed,
+			color: vars.colorForegroundNeutralPressed,
 		},
 	},
 });

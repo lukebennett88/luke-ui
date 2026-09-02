@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import { cx } from '../../shared/utils/utils.js';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { Prettify } from '../types/prettify.js';
@@ -22,7 +22,7 @@ const loadingSkeletonStyles = stylex.create({
 			animationDuration: '2s',
 			animationIterationCount: 'infinite',
 			animationName: skeletonPulseAnimationName,
-			animationTimingFunction: tokens.motionEasingStandard,
+			animationTimingFunction: vars.motionEasingStandard,
 			backgroundClip: 'border-box !important',
 			backgroundColor: 'var(--luke-color-loading-skeleton) !important',
 			backgroundImage: 'none !important',
@@ -50,11 +50,11 @@ const loadingSkeletonStyles = stylex.create({
 const LoadingSkeletonContext = createContext<boolean | null>(null);
 
 const skeletonRadiusTokens = {
-	control: tokens.radiusControl,
-	detail: tokens.radiusDetail,
-	full: tokens.radiusFull,
-	overlay: tokens.radiusOverlay,
-	surface: tokens.radiusSurface,
+	control: vars.radiusControl,
+	detail: vars.radiusDetail,
+	full: vars.radiusFull,
+	overlay: vars.radiusOverlay,
+	surface: vars.radiusSurface,
 } as const;
 
 /** Props for `LoadingSkeletonProvider`. */

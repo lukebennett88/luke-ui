@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../../theme/tokens.stylex.js';
+import { vars } from '../../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../../styles/stylex-recipe.js';
 import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
 
@@ -10,10 +10,10 @@ const styles = stylex.create({
 		cursor: 'pointer',
 		display: 'inline-flex',
 		font: 'inherit',
-		gap: tokens.spaceSp8,
+		gap: vars.spaceSp8,
 		'min-inline-size': 0,
 		'[data-disabled="true"]': {
-			color: tokens.colorTextDisabled,
+			color: vars.colorTextDisabled,
 			cursor: 'not-allowed',
 		},
 		// The reset default ring would otherwise paint both this clickable row and the
@@ -35,31 +35,31 @@ const styles = stylex.create({
 	},
 	indicator: {
 		alignItems: 'center',
-		backgroundColor: tokens.colorSurfaceCanvas,
-		backgroundImage: tokens.actionControlFinishResting,
+		backgroundColor: vars.colorSurfaceCanvas,
+		backgroundImage: vars.actionControlFinishResting,
 		'block-size': 'var(--checkbox-indicator-size)',
-		borderColor: tokens.colorBorderControl,
-		borderRadius: tokens.radiusDetail,
+		borderColor: vars.colorBorderControl,
+		borderRadius: vars.radiusDetail,
 		borderStyle: 'solid',
 		borderWidth: '1px',
 		boxShadow: 'none',
 		boxSizing: 'border-box',
-		color: tokens.colorForegroundAccentOnSolid,
+		color: vars.colorForegroundAccentOnSolid,
 		display: 'inline-flex',
 		fontSize: 'var(--checkbox-glyph-size)',
-		fontWeight: tokens.fontWeightHeading,
+		fontWeight: vars.fontWeightHeading,
 		'inline-size': 'var(--checkbox-indicator-size)',
 		justifyContent: 'center',
 		lineHeight: 1,
-		transitionDuration: tokens.motionDurationFeedback,
+		transitionDuration: vars.motionDurationFeedback,
 		transitionProperty: 'background-color, background-image, border-color, color, opacity',
-		transitionTimingFunction: tokens.motionEasingStandard,
+		transitionTimingFunction: vars.motionEasingStandard,
 		'::after': {
 			content: '"✓"',
 			opacity: 0,
 		},
 		':is([data-focus-visible="true"] *)': {
-			outlineColor: tokens.colorBorderFocus,
+			outlineColor: vars.colorBorderFocus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -80,68 +80,68 @@ const styles = stylex.create({
 		// would win inside forced-colors unless the two palettes are mutually exclusive.
 		'@media not (forced-colors: active)': {
 			':is([data-disabled="true"] *)': {
-				opacity: tokens.interactionDisabledOpacity,
+				opacity: vars.interactionDisabledOpacity,
 			},
 			':is([data-hovered="true"] *):not(:is([data-pressed="true"] *)):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-invalid="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundImage: tokens.actionControlFinishRaised,
-					borderColor: tokens.colorBorderAccent,
+					backgroundImage: vars.actionControlFinishRaised,
+					borderColor: vars.colorBorderAccent,
 				},
 			':is([data-pressed="true"] *):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-invalid="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundImage: tokens.actionControlFinishRecessed,
-					borderColor: tokens.colorBorderAccent,
+					backgroundImage: vars.actionControlFinishRecessed,
+					borderColor: vars.colorBorderAccent,
 				},
 			':is([data-selected="true"] *, [data-indeterminate="true"] *):not(:is([data-hovered="true"] *)):not(:is([data-pressed="true"] *)):not(:is([data-invalid="true"] *))':
 				{
-					backgroundColor: tokens.colorBackgroundAccentSolidRest,
-					borderColor: tokens.colorBackgroundAccentSolidRest,
+					backgroundColor: vars.colorBackgroundAccentSolidRest,
+					borderColor: vars.colorBackgroundAccentSolidRest,
 				},
 			':is([data-selected="true"] *, [data-indeterminate="true"] *):is([data-hovered="true"] *):not(:is([data-pressed="true"] *)):not(:is([data-invalid="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundColor: tokens.colorBackgroundAccentSolidHover,
-					backgroundImage: tokens.actionControlFinishRaised,
-					borderColor: tokens.colorBackgroundAccentSolidHover,
+					backgroundColor: vars.colorBackgroundAccentSolidHover,
+					backgroundImage: vars.actionControlFinishRaised,
+					borderColor: vars.colorBackgroundAccentSolidHover,
 				},
 			':is([data-selected="true"] *, [data-indeterminate="true"] *):is([data-pressed="true"] *):not(:is([data-invalid="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundColor: tokens.colorBackgroundAccentSolidPressed,
-					backgroundImage: tokens.actionControlFinishRecessed,
-					borderColor: tokens.colorBackgroundAccentSolidPressed,
+					backgroundColor: vars.colorBackgroundAccentSolidPressed,
+					backgroundImage: vars.actionControlFinishRecessed,
+					borderColor: vars.colorBackgroundAccentSolidPressed,
 				},
 			':is([data-invalid="true"] *):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-hovered="true"] *)):not(:is([data-pressed="true"] *))':
 				{
-					borderColor: tokens.colorBackgroundDangerSolidRest,
+					borderColor: vars.colorBackgroundDangerSolidRest,
 				},
 			':is([data-invalid="true"] *):is([data-hovered="true"] *):not(:is([data-pressed="true"] *)):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundImage: tokens.actionControlFinishRaised,
-					borderColor: tokens.colorBackgroundDangerSolidHover,
+					backgroundImage: vars.actionControlFinishRaised,
+					borderColor: vars.colorBackgroundDangerSolidHover,
 				},
 			':is([data-invalid="true"] *):is([data-pressed="true"] *):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundImage: tokens.actionControlFinishRecessed,
-					borderColor: tokens.colorBackgroundDangerSolidPressed,
+					backgroundImage: vars.actionControlFinishRecessed,
+					borderColor: vars.colorBackgroundDangerSolidPressed,
 				},
 			':is([data-invalid="true"] *):is([data-selected="true"] *, [data-indeterminate="true"] *):not(:is([data-hovered="true"] *)):not(:is([data-pressed="true"] *))':
 				{
-					backgroundColor: tokens.colorBackgroundDangerSolidRest,
-					borderColor: tokens.colorBackgroundDangerSolidRest,
-					color: tokens.colorForegroundDangerOnSolid,
+					backgroundColor: vars.colorBackgroundDangerSolidRest,
+					borderColor: vars.colorBackgroundDangerSolidRest,
+					color: vars.colorForegroundDangerOnSolid,
 				},
 			':is([data-invalid="true"] *):is([data-selected="true"] *, [data-indeterminate="true"] *):is([data-hovered="true"] *):not(:is([data-pressed="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundColor: tokens.colorBackgroundDangerSolidHover,
-					backgroundImage: tokens.actionControlFinishRaised,
-					borderColor: tokens.colorBackgroundDangerSolidHover,
-					color: tokens.colorForegroundDangerOnSolid,
+					backgroundColor: vars.colorBackgroundDangerSolidHover,
+					backgroundImage: vars.actionControlFinishRaised,
+					borderColor: vars.colorBackgroundDangerSolidHover,
+					color: vars.colorForegroundDangerOnSolid,
 				},
 			':is([data-invalid="true"] *):is([data-selected="true"] *, [data-indeterminate="true"] *):is([data-pressed="true"] *):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundColor: tokens.colorBackgroundDangerSolidPressed,
-					backgroundImage: tokens.actionControlFinishRecessed,
-					borderColor: tokens.colorBackgroundDangerSolidPressed,
-					color: tokens.colorForegroundDangerOnSolid,
+					backgroundColor: vars.colorBackgroundDangerSolidPressed,
+					backgroundImage: vars.actionControlFinishRecessed,
+					borderColor: vars.colorBackgroundDangerSolidPressed,
+					color: vars.colorForegroundDangerOnSolid,
 				},
 		},
 		'@media (forced-colors: active)': {
@@ -174,7 +174,7 @@ const styles = stylex.create({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: tokens.spaceSp4,
+		gap: vars.spaceSp4,
 		'min-inline-size': 0,
 		// Checkbox's own box has no room for an in-control invalid icon without it
 		// floating past the label (see `indicator` below), so its icon renders on

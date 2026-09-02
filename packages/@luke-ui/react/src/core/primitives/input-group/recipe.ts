@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../../theme/tokens.stylex.js';
+import { vars } from '../../../theme/tokens.stylex.js';
 import { inputGroupInputStates } from '../../styles/input-states.js';
 import type { RecipeSelection } from '../../styles/stylex-recipe.js';
 import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
@@ -16,7 +16,7 @@ const styles = stylex.create({
 		borderColor: 'transparent',
 		borderStyle: 'none',
 		borderWidth: 0,
-		color: tokens.colorTextPrimary,
+		color: vars.colorTextPrimary,
 		cursor: 'text',
 		flex: 1,
 		fontFamily: 'inherit',
@@ -32,90 +32,90 @@ const styles = stylex.create({
 		'padding-block-end': 0,
 		'padding-block-start': 0,
 		'::placeholder': {
-			color: tokens.colorTextSecondary,
+			color: vars.colorTextSecondary,
 			opacity: 1,
 		},
 		':where([data-disabled="true"], :disabled)': {
-			color: tokens.colorTextDisabled,
+			color: vars.colorTextDisabled,
 			cursor: 'not-allowed',
 		},
 	},
 	controlSizeMedium: {
-		'block-size': tokens.controlSizeMedium,
-		'padding-inline-end': tokens.spaceSp12,
-		'padding-inline-start': tokens.spaceSp12,
+		'block-size': vars.controlSizeMedium,
+		'padding-inline-end': vars.spaceSp12,
+		'padding-inline-start': vars.spaceSp12,
 	},
 	controlSizeSmall: {
-		'block-size': tokens.controlSizeSmall,
-		'padding-inline-end': tokens.spaceSp8,
-		'padding-inline-start': tokens.spaceSp8,
+		'block-size': vars.controlSizeSmall,
+		'padding-inline-end': vars.spaceSp8,
+		'padding-inline-start': vars.spaceSp8,
 	},
 	group: {
 		alignItems: 'center',
-		backgroundColor: tokens.colorSurfaceRecessed,
-		borderColor: tokens.colorBorderControl,
-		borderRadius: tokens.radiusControl,
+		backgroundColor: vars.colorSurfaceRecessed,
+		borderColor: vars.colorBorderControl,
+		borderRadius: vars.radiusControl,
 		borderStyle: 'solid',
 		borderWidth: '1px',
-		boxShadow: tokens.depthRecessed,
+		boxShadow: vars.depthRecessed,
 		cursor: 'text',
 		display: 'inline-flex',
-		fontFamily: tokens.fontFamilyBody,
+		fontFamily: vars.fontFamilyBody,
 		'inline-size': '100%',
 		isolation: 'isolate',
 		letterSpacing: '0',
 		lineHeight: '24px',
 		'min-inline-size': 0,
 		overflow: 'visible',
-		transitionDuration: tokens.motionDurationFeedback,
+		transitionDuration: vars.motionDurationFeedback,
 		transitionProperty: 'background-color, border-color, color',
-		transitionTimingFunction: tokens.motionEasingStandard,
+		transitionTimingFunction: vars.motionEasingStandard,
 	},
 	groupSizeMedium: {
-		'block-size': tokens.controlSizeMedium,
+		'block-size': vars.controlSizeMedium,
 		fontSize: '16px',
 	},
 	groupSizeSmall: {
-		'block-size': tokens.controlSizeSmall,
+		'block-size': vars.controlSizeSmall,
 		fontSize: '14px',
 		letterSpacing: '0',
 		lineHeight: '20px',
 	},
 	invalidIndicator: {
-		color: tokens.colorForegroundDangerRest,
-		'margin-inline-end': tokens.spaceSp8,
+		color: vars.colorForegroundDangerRest,
+		'margin-inline-end': vars.spaceSp8,
 		'@media (forced-colors: active)': {
 			color: 'CanvasText',
 		},
 	},
 	prefix: {
 		alignItems: 'center',
-		'border-inline-end-color': tokens.colorBorderControl,
+		'border-inline-end-color': vars.colorBorderControl,
 		'border-inline-end-style': 'solid',
 		'border-inline-end-width': '1px',
-		color: tokens.colorTextSecondary,
+		color: vars.colorTextSecondary,
 		display: 'inline-flex',
 		flexShrink: 0,
 		':is([data-disabled="true"] *, [aria-disabled="true"] *)': {
-			color: tokens.colorTextDisabled,
+			color: vars.colorTextDisabled,
 		},
 	},
 	prefixSizeMedium: {
 		lineHeight: '24px',
-		'padding-inline-end': tokens.spaceSp12,
-		'padding-inline-start': tokens.spaceSp12,
+		'padding-inline-end': vars.spaceSp12,
+		'padding-inline-start': vars.spaceSp12,
 	},
 	prefixSizeSmall: {
 		lineHeight: '20px',
-		'padding-inline-end': tokens.spaceSp8,
-		'padding-inline-start': tokens.spaceSp8,
+		'padding-inline-end': vars.spaceSp8,
+		'padding-inline-start': vars.spaceSp8,
 	},
 	suffix: {
 		alignItems: 'center',
-		'border-inline-start-color': tokens.colorBorderControl,
+		'border-inline-start-color': vars.colorBorderControl,
 		'border-inline-start-style': 'solid',
 		'border-inline-start-width': '1px',
-		color: tokens.colorTextSecondary,
+		color: vars.colorTextSecondary,
 		display: 'inline-flex',
 		flexShrink: 0,
 		// `InputGroup` appends the invalid indicator after its children, so the icon is the group's
@@ -124,18 +124,18 @@ const styles = stylex.create({
 		// document order.
 		order: 1,
 		':is([data-disabled="true"] *, [aria-disabled="true"] *)': {
-			color: tokens.colorTextDisabled,
+			color: vars.colorTextDisabled,
 		},
 	},
 	suffixSizeMedium: {
 		lineHeight: '24px',
-		'padding-inline-end': tokens.spaceSp12,
-		'padding-inline-start': tokens.spaceSp12,
+		'padding-inline-end': vars.spaceSp12,
+		'padding-inline-start': vars.spaceSp12,
 	},
 	suffixSizeSmall: {
 		lineHeight: '20px',
-		'padding-inline-end': tokens.spaceSp8,
-		'padding-inline-start': tokens.spaceSp8,
+		'padding-inline-end': vars.spaceSp8,
+		'padding-inline-start': vars.spaceSp8,
 	},
 });
 

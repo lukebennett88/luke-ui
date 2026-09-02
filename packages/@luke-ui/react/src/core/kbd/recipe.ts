@@ -1,21 +1,21 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
 		alignItems: 'center',
-		backgroundColor: tokens.colorSurfaceRecessed,
-		borderColor: tokens.colorBorderDecorative,
-		borderRadius: tokens.radiusControl,
+		backgroundColor: vars.colorSurfaceRecessed,
+		borderColor: vars.colorBorderDecorative,
+		borderRadius: vars.radiusControl,
 		borderStyle: 'solid',
 		borderWidth: '1px',
-		color: tokens.colorTextPrimary,
+		color: vars.colorTextPrimary,
 		display: 'inline-flex',
-		fontFamily: tokens.fontFamilyCode,
+		fontFamily: vars.fontFamilyCode,
 		fontSize: '12px',
-		fontWeight: tokens.fontWeightBody,
+		fontWeight: vars.fontWeightBody,
 		'inline-size': 'fit-content',
 		lineHeight: 1,
 		'padding-block': '0.1em',

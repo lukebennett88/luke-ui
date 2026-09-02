@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
 import { visuallyHiddenStyle } from '../visually-hidden/recipe.js';
@@ -12,8 +12,8 @@ import { visuallyHiddenStyle } from '../visually-hidden/recipe.js';
 
 const styles = stylex.create({
 	base: {
-		color: tokens.colorTextPrimary,
-		fontFamily: tokens.fontFamilyBody,
+		color: vars.colorTextPrimary,
+		fontFamily: vars.fontFamilyBody,
 		'min-inline-size': 0,
 		overflowWrap: 'break-word',
 	},
@@ -21,13 +21,13 @@ const styles = stylex.create({
 	// ---------------------------------------------------------------------------
 	// color
 	// ---------------------------------------------------------------------------
-	colorAccent: { color: tokens.colorForegroundAccentRest },
-	colorDanger: { color: tokens.colorForegroundDangerRest },
-	colorInfo: { color: tokens.colorForegroundInfoRest },
-	colorPrimary: { color: tokens.colorTextPrimary },
-	colorSecondary: { color: tokens.colorTextSecondary },
-	colorSuccess: { color: tokens.colorForegroundSuccessRest },
-	colorWarning: { color: tokens.colorForegroundWarningRest },
+	colorAccent: { color: vars.colorForegroundAccentRest },
+	colorDanger: { color: vars.colorForegroundDangerRest },
+	colorInfo: { color: vars.colorForegroundInfoRest },
+	colorPrimary: { color: vars.colorTextPrimary },
+	colorSecondary: { color: vars.colorTextSecondary },
+	colorSuccess: { color: vars.colorForegroundSuccessRest },
+	colorWarning: { color: vars.colorForegroundWarningRest },
 
 	// ---------------------------------------------------------------------------
 	// fontVariantNumeric
@@ -41,10 +41,10 @@ const styles = stylex.create({
 	// ---------------------------------------------------------------------------
 	// fontWeight
 	// ---------------------------------------------------------------------------
-	fontWeightBody: { fontWeight: tokens.fontWeightBody },
-	fontWeightEmphasis: { fontWeight: tokens.fontWeightEmphasis },
-	fontWeightHeading: { fontWeight: tokens.fontWeightHeading },
-	fontWeightLabel: { fontWeight: tokens.fontWeightLabel },
+	fontWeightBody: { fontWeight: vars.fontWeightBody },
+	fontWeightEmphasis: { fontWeight: vars.fontWeightEmphasis },
+	fontWeightHeading: { fontWeight: vars.fontWeightHeading },
+	fontWeightLabel: { fontWeight: vars.fontWeightLabel },
 
 	// ---------------------------------------------------------------------------
 	// lineClamp
@@ -146,67 +146,67 @@ const styles = stylex.create({
 	// typography
 	// ---------------------------------------------------------------------------
 	typographyBody: {
-		'--text-line-height': tokens.fontBodyLineHeight,
-		fontFamily: tokens.fontBodyFontFamily,
-		fontSize: tokens.fontBodyFontSize,
-		letterSpacing: tokens.fontBodyLetterSpacing,
-		lineHeight: tokens.fontBodyLineHeight,
+		'--text-line-height': vars.fontBodyLineHeight,
+		fontFamily: vars.fontBodyFontFamily,
+		fontSize: vars.fontBodyFontSize,
+		letterSpacing: vars.fontBodyLetterSpacing,
+		lineHeight: vars.fontBodyLineHeight,
 	},
 	typographyCaption: {
-		'--text-line-height': tokens.fontCaptionLineHeight,
-		fontFamily: tokens.fontCaptionFontFamily,
-		fontSize: tokens.fontCaptionFontSize,
-		letterSpacing: tokens.fontCaptionLetterSpacing,
-		lineHeight: tokens.fontCaptionLineHeight,
+		'--text-line-height': vars.fontCaptionLineHeight,
+		fontFamily: vars.fontCaptionFontFamily,
+		fontSize: vars.fontCaptionFontSize,
+		letterSpacing: vars.fontCaptionLetterSpacing,
+		lineHeight: vars.fontCaptionLineHeight,
 	},
 	typographyDisplay: {
-		'--text-line-height': tokens.fontDisplayLineHeight,
-		fontFamily: tokens.fontDisplayFontFamily,
-		fontSize: tokens.fontDisplayFontSize,
-		letterSpacing: tokens.fontDisplayLetterSpacing,
-		lineHeight: tokens.fontDisplayLineHeight,
+		'--text-line-height': vars.fontDisplayLineHeight,
+		fontFamily: vars.fontDisplayFontFamily,
+		fontSize: vars.fontDisplayFontSize,
+		letterSpacing: vars.fontDisplayLetterSpacing,
+		lineHeight: vars.fontDisplayLineHeight,
 	},
 	typographyHeading1: {
-		'--text-line-height': tokens.fontHeading1LineHeight,
-		fontFamily: tokens.fontHeading1FontFamily,
-		fontSize: tokens.fontHeading1FontSize,
-		letterSpacing: tokens.fontHeading1LetterSpacing,
-		lineHeight: tokens.fontHeading1LineHeight,
+		'--text-line-height': vars.fontHeading1LineHeight,
+		fontFamily: vars.fontHeading1FontFamily,
+		fontSize: vars.fontHeading1FontSize,
+		letterSpacing: vars.fontHeading1LetterSpacing,
+		lineHeight: vars.fontHeading1LineHeight,
 	},
 	typographyHeading2: {
-		'--text-line-height': tokens.fontHeading2LineHeight,
-		fontFamily: tokens.fontHeading2FontFamily,
-		fontSize: tokens.fontHeading2FontSize,
-		letterSpacing: tokens.fontHeading2LetterSpacing,
-		lineHeight: tokens.fontHeading2LineHeight,
+		'--text-line-height': vars.fontHeading2LineHeight,
+		fontFamily: vars.fontHeading2FontFamily,
+		fontSize: vars.fontHeading2FontSize,
+		letterSpacing: vars.fontHeading2LetterSpacing,
+		lineHeight: vars.fontHeading2LineHeight,
 	},
 	typographyHeading3: {
-		'--text-line-height': tokens.fontHeading3LineHeight,
-		fontFamily: tokens.fontHeading3FontFamily,
-		fontSize: tokens.fontHeading3FontSize,
-		letterSpacing: tokens.fontHeading3LetterSpacing,
-		lineHeight: tokens.fontHeading3LineHeight,
+		'--text-line-height': vars.fontHeading3LineHeight,
+		fontFamily: vars.fontHeading3FontFamily,
+		fontSize: vars.fontHeading3FontSize,
+		letterSpacing: vars.fontHeading3LetterSpacing,
+		lineHeight: vars.fontHeading3LineHeight,
 	},
 	typographyHeading4: {
-		'--text-line-height': tokens.fontHeading4LineHeight,
-		fontFamily: tokens.fontHeading4FontFamily,
-		fontSize: tokens.fontHeading4FontSize,
-		letterSpacing: tokens.fontHeading4LetterSpacing,
-		lineHeight: tokens.fontHeading4LineHeight,
+		'--text-line-height': vars.fontHeading4LineHeight,
+		fontFamily: vars.fontHeading4FontFamily,
+		fontSize: vars.fontHeading4FontSize,
+		letterSpacing: vars.fontHeading4LetterSpacing,
+		lineHeight: vars.fontHeading4LineHeight,
 	},
 	typographyLabel: {
-		'--text-line-height': tokens.fontLabelLineHeight,
-		fontFamily: tokens.fontLabelFontFamily,
-		fontSize: tokens.fontLabelFontSize,
-		letterSpacing: tokens.fontLabelLetterSpacing,
-		lineHeight: tokens.fontLabelLineHeight,
+		'--text-line-height': vars.fontLabelLineHeight,
+		fontFamily: vars.fontLabelFontFamily,
+		fontSize: vars.fontLabelFontSize,
+		letterSpacing: vars.fontLabelLetterSpacing,
+		lineHeight: vars.fontLabelLineHeight,
 	},
 	typographyLead: {
-		'--text-line-height': tokens.fontLeadLineHeight,
-		fontFamily: tokens.fontLeadFontFamily,
-		fontSize: tokens.fontLeadFontSize,
-		letterSpacing: tokens.fontLeadLetterSpacing,
-		lineHeight: tokens.fontLeadLineHeight,
+		'--text-line-height': vars.fontLeadLineHeight,
+		fontFamily: vars.fontLeadFontFamily,
+		fontSize: vars.fontLeadFontSize,
+		letterSpacing: vars.fontLeadLetterSpacing,
+		lineHeight: vars.fontLeadLineHeight,
 	},
 
 	// ---------------------------------------------------------------------------
@@ -223,127 +223,127 @@ const styles = stylex.create({
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontBodyBaselineTrim,
+			'margin-block-start': vars.fontBodyBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontBodyCapHeightTrim,
+			'margin-block-end': vars.fontBodyCapHeightTrim,
 		},
-		fontSize: tokens.fontBodyFontSize,
-		lineHeight: tokens.fontBodyLineHeight,
+		fontSize: vars.fontBodyFontSize,
+		lineHeight: vars.fontBodyLineHeight,
 	},
 	typographyTrimCaption: {
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontCaptionBaselineTrim,
+			'margin-block-start': vars.fontCaptionBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontCaptionCapHeightTrim,
+			'margin-block-end': vars.fontCaptionCapHeightTrim,
 		},
-		fontSize: tokens.fontCaptionFontSize,
-		lineHeight: tokens.fontCaptionLineHeight,
+		fontSize: vars.fontCaptionFontSize,
+		lineHeight: vars.fontCaptionLineHeight,
 	},
 	typographyTrimDisplay: {
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontDisplayBaselineTrim,
+			'margin-block-start': vars.fontDisplayBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontDisplayCapHeightTrim,
+			'margin-block-end': vars.fontDisplayCapHeightTrim,
 		},
-		fontSize: tokens.fontDisplayFontSize,
-		lineHeight: tokens.fontDisplayLineHeight,
+		fontSize: vars.fontDisplayFontSize,
+		lineHeight: vars.fontDisplayLineHeight,
 	},
 	typographyTrimHeading1: {
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontHeading1BaselineTrim,
+			'margin-block-start': vars.fontHeading1BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontHeading1CapHeightTrim,
+			'margin-block-end': vars.fontHeading1CapHeightTrim,
 		},
-		fontSize: tokens.fontHeading1FontSize,
-		lineHeight: tokens.fontHeading1LineHeight,
+		fontSize: vars.fontHeading1FontSize,
+		lineHeight: vars.fontHeading1LineHeight,
 	},
 	typographyTrimHeading2: {
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontHeading2BaselineTrim,
+			'margin-block-start': vars.fontHeading2BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontHeading2CapHeightTrim,
+			'margin-block-end': vars.fontHeading2CapHeightTrim,
 		},
-		fontSize: tokens.fontHeading2FontSize,
-		lineHeight: tokens.fontHeading2LineHeight,
+		fontSize: vars.fontHeading2FontSize,
+		lineHeight: vars.fontHeading2LineHeight,
 	},
 	typographyTrimHeading3: {
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontHeading3BaselineTrim,
+			'margin-block-start': vars.fontHeading3BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontHeading3CapHeightTrim,
+			'margin-block-end': vars.fontHeading3CapHeightTrim,
 		},
-		fontSize: tokens.fontHeading3FontSize,
-		lineHeight: tokens.fontHeading3LineHeight,
+		fontSize: vars.fontHeading3FontSize,
+		lineHeight: vars.fontHeading3LineHeight,
 	},
 	typographyTrimHeading4: {
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontHeading4BaselineTrim,
+			'margin-block-start': vars.fontHeading4BaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontHeading4CapHeightTrim,
+			'margin-block-end': vars.fontHeading4CapHeightTrim,
 		},
-		fontSize: tokens.fontHeading4FontSize,
-		lineHeight: tokens.fontHeading4LineHeight,
+		fontSize: vars.fontHeading4FontSize,
+		lineHeight: vars.fontHeading4LineHeight,
 	},
 	typographyTrimLabel: {
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontLabelBaselineTrim,
+			'margin-block-start': vars.fontLabelBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontLabelCapHeightTrim,
+			'margin-block-end': vars.fontLabelCapHeightTrim,
 		},
-		fontSize: tokens.fontLabelFontSize,
-		lineHeight: tokens.fontLabelLineHeight,
+		fontSize: vars.fontLabelFontSize,
+		lineHeight: vars.fontLabelLineHeight,
 	},
 	typographyTrimLead: {
 		'::after': {
 			content: "''",
 			display: 'table',
-			'margin-block-start': tokens.fontLeadBaselineTrim,
+			'margin-block-start': vars.fontLeadBaselineTrim,
 		},
 		'::before': {
 			content: "''",
 			display: 'table',
-			'margin-block-end': tokens.fontLeadCapHeightTrim,
+			'margin-block-end': vars.fontLeadCapHeightTrim,
 		},
-		fontSize: tokens.fontLeadFontSize,
-		lineHeight: tokens.fontLeadLineHeight,
+		fontSize: vars.fontLeadFontSize,
+		lineHeight: vars.fontLeadLineHeight,
 	},
 });
 

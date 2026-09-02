@@ -1,12 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
-		'border-inline-start': `3px solid ${tokens.colorBorderDecorative}`,
-		'padding-inline-start': tokens.spaceSp16,
+		'border-inline-start': `3px solid ${vars.colorBorderDecorative}`,
+		'padding-inline-start': vars.spaceSp16,
 	},
 });
 

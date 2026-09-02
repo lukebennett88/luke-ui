@@ -1,10 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
-		fontWeight: tokens.fontWeightEmphasis,
+		fontWeight: vars.fontWeightEmphasis,
 	},
 });
 

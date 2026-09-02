@@ -234,9 +234,10 @@ inline `style` overriding both. `xstyle.browser.test.tsx` covers only the in-rep
 (its `stylex.create()` call is compiled by this package's own `createStylexDevPlugin`, landing in
 Luke UI's own `recipes.sx.*` layers) and does not by itself prove the public contract.
 
-The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
-`themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The
-public `vars` object and theme stylesheets remain the sole authorities on token values.
+The compiler-facing StyleX surface `src/theme/tokens.stylex.ts` exports `vars`, generated from
+`themeContractTree` with `defineConsts`. Each key is a live `var(--luke-*)` reference. This compiler
+`vars` is distinct from the public `vars` in `src/theme/contract.css.ts` (exported via
+`src/theme/index.ts`), which holds the actual token values alongside the theme stylesheets.
 
 Use `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain Vanilla Extract
 global rule in a named layer. Structural combinators such as Combobox's adjacent-section border live

@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
@@ -9,14 +9,14 @@ const styles = stylex.create({
 	reset: {
 		'padding-inline': 0,
 		'[data-pending="true"]::after': {
-			'block-size': tokens.iconSizeXsmall,
+			'block-size': vars.iconSizeXsmall,
 			'border-inline-end-color': 'transparent',
 			borderColor: 'currentColor',
-			borderRadius: tokens.radiusFull,
+			borderRadius: vars.radiusFull,
 			borderStyle: 'solid',
 			borderWidth: '2px',
 			content: "''",
-			'inline-size': tokens.iconSizeXsmall,
+			'inline-size': vars.iconSizeXsmall,
 			position: 'absolute',
 		},
 		'@media (forced-colors: active)': {
@@ -27,10 +27,10 @@ const styles = stylex.create({
 		},
 	},
 	sizeMedium: {
-		'inline-size': tokens.controlSizeMedium,
+		'inline-size': vars.controlSizeMedium,
 	},
 	sizeSmall: {
-		'inline-size': tokens.controlSizeSmall,
+		'inline-size': vars.controlSizeSmall,
 	},
 });
 

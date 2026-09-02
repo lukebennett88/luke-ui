@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import { iconSizeStyles } from '../icon/recipe.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
@@ -32,13 +32,13 @@ const styles = stylex.create({
 		justifyContent: 'center',
 		position: 'relative',
 	},
-	colorAccent: { color: tokens.colorForegroundAccentRest },
-	colorDanger: { color: tokens.colorForegroundDangerRest },
-	colorInfo: { color: tokens.colorForegroundInfoRest },
-	colorPrimary: { color: tokens.colorTextPrimary },
-	colorSecondary: { color: tokens.colorTextSecondary },
-	colorSuccess: { color: tokens.colorForegroundSuccessRest },
-	colorWarning: { color: tokens.colorForegroundWarningRest },
+	colorAccent: { color: vars.colorForegroundAccentRest },
+	colorDanger: { color: vars.colorForegroundDangerRest },
+	colorInfo: { color: vars.colorForegroundInfoRest },
+	colorPrimary: { color: vars.colorTextPrimary },
+	colorSecondary: { color: vars.colorTextSecondary },
+	colorSuccess: { color: vars.colorForegroundSuccessRest },
+	colorWarning: { color: vars.colorForegroundWarningRest },
 	hiddenChildren: {
 		display: 'contents',
 		visibility: 'hidden',

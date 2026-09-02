@@ -1,14 +1,14 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
-		backgroundColor: tokens.colorSurfaceRecessed,
-		borderRadius: tokens.radiusControl,
-		color: tokens.colorTextPrimary,
-		fontFamily: tokens.fontFamilyCode,
+		backgroundColor: vars.colorSurfaceRecessed,
+		borderRadius: vars.radiusControl,
+		color: vars.colorTextPrimary,
+		fontFamily: vars.fontFamilyCode,
 		fontSize: '0.8125em',
 		lineHeight: 1,
 		'padding-block': '0.15em',

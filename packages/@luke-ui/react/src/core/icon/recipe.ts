@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { tokens } from '../../theme/tokens.stylex.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
 import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
@@ -9,20 +9,20 @@ const styles = stylex.create({
 		flexShrink: 0,
 	},
 	sizeLarge: {
-		'block-size': tokens.iconSizeLarge,
-		'inline-size': tokens.iconSizeLarge,
+		'block-size': vars.iconSizeLarge,
+		'inline-size': vars.iconSizeLarge,
 	},
 	sizeMedium: {
-		'block-size': tokens.iconSizeMedium,
-		'inline-size': tokens.iconSizeMedium,
+		'block-size': vars.iconSizeMedium,
+		'inline-size': vars.iconSizeMedium,
 	},
 	sizeSmall: {
-		'block-size': tokens.iconSizeSmall,
-		'inline-size': tokens.iconSizeSmall,
+		'block-size': vars.iconSizeSmall,
+		'inline-size': vars.iconSizeSmall,
 	},
 	sizeXsmall: {
-		'block-size': tokens.iconSizeXsmall,
-		'inline-size': tokens.iconSizeXsmall,
+		'block-size': vars.iconSizeXsmall,
+		'inline-size': vars.iconSizeXsmall,
 	},
 });
 
