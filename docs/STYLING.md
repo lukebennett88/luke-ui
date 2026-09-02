@@ -183,6 +183,57 @@ before any rules create them. StyleX priority layers use dotted nested names suc
 `recipes.sx.priority1`, which sit between `base` and `components` in the required precedence order.
 A consumer declares only the stable `recipes` parent layer, never the priority count.
 
+### The `xstyle` layer contract
+
+The public `xstyle` prop only overrides a same-property recipe/variant atom reliably. Whether it
+also loses to a consumer `className` is a cascade-layer question, not a resolution-order question,
+and it depends entirely on how the consumer compiles their own StyleX.
+
+Measured ground truth (verified with `@stylexjs/babel-plugin`'s `processStylexRules` and a real
+Chromium, see `packed-consumer.test.ts`):
+
+- **StyleX's default output is unlayered.** `processStylexRules(rules)` with no `useLayers` option
+  emits plain rules with no `@layer` at all. An unlayered rule beats every layered rule in the
+  document, so an unlayered consumer `xstyle` beats even a layered consumer `className` — the
+  documented `className > xstyle` step is false for a consumer who never configures `useLayers`.
+- **`useLayers` must be an object, not a bare boolean/positional argument.** Passing the layer
+  config as a bare second positional argument (rather than `{ useLayers: {...} }`) is silently
+  ignored and still emits unlayered CSS.
+- **Nesting consumer StyleX under the `recipes` parent layer is non-deterministic.** If a consumer
+  compiles their `xstyle` into `recipes.<their-prefix>.priorityN`, the winner between that and Luke
+  UI's own `recipes.sx.priorityN` atoms depends entirely on which stylesheet registers its sub-layer
+  first, that is, import order. Do not recommend or rely on this.
+- **A dedicated sibling `xstyle` layer is the one configuration that works, order-independent.**
+  With the declared combined order
+  `@layer reset, theme, base, recipes, xstyle, components, utilities;` and the consumer compiling
+  with `useLayers: { before, after, prefix: 'xstyle' }` (the `before`/`after` arrays matching
+  everything on each side of `xstyle` in that declared order), the consumer's `xstyle` atoms beat
+  Luke UI's recipe/variant atoms in both registration orders, and the consumer's own
+  `components`/`utilities` rules beat `xstyle`. This is the minimum supported consumer configuration
+  for the published precedence, and it is what the hosted Styling guide documents.
+- **The combined `@layer` order statement must be declared before anything else mentions any of
+  those layer names.** CSS gives a layer its position from wherever it is _first_ mentioned in the
+  document. If the shipped `dist/stylesheet.css` (which already lists
+  `recipes.sx.priorityN, components, utilities` in its own opening `@layer` statement) loads before
+  the consumer's combined-order statement, `xstyle` — mentioned for the first time only in the
+  consumer's own compiled CSS — gets appended after `utilities` instead of sitting between `recipes`
+  and `components`. Declaring the full order up front, before any stylesheet import, is what fixes
+  the position.
+- **`@stylexjs/stylex` is a runtime dependency, but `@stylexjs/babel-plugin` is not shipped to
+  consumers.** `@stylexjs/stylex` is a `dependency` of `@luke-ui/react` because `stylex.props` runs
+  at runtime. `@stylexjs/babel-plugin` is only a devDependency of this package — a consumer who
+  wants to author `xstyle` installs and configures their own StyleX compiler.
+
+`packed-consumer.test.ts` is the test that backs this contract: it packs the real tarball, symlinks
+only the package's declared runtime dependencies into a throwaway consumer directory, has the
+consumer compile its own `stylex.create()` call with its own `@babel/core` +
+`@stylexjs/babel-plugin` invocation (never through `createStylexDevPlugin`) using the documented
+`useLayers` configuration, then drives a real Playwright Chromium instance to assert
+`getComputedStyle` outcomes for xstyle overriding a variant, `className` overriding `xstyle`, and
+inline `style` overriding both. `xstyle.browser.test.tsx` covers only the in-repo/dev-compiled path
+(its `stylex.create()` call is compiled by this package's own `createStylexDevPlugin`, landing in
+Luke UI's own `recipes.sx.*` layers) and does not by itself prove the public contract.
+
 The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
 `themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The
 public `vars` object and theme stylesheets remain the sole authorities on token values.
@@ -297,8 +348,14 @@ const styles = stylex.create({ emphasis: { outlineStyle: 'dashed' } });
 
 A component resolves styles in this order: internal defaults, then its own variant props, then
 `xstyle`, then a consumer `className`, then inline `style`. Internal styles and `xstyle` are folded
-through one `stylex.props` call, so `xstyle` reliably replaces a same-property component atom. An
-unlayered consumer class and an inline style still win.
+through one `stylex.props` call, so `xstyle` reliably replaces a same-property component atom. That
+part of the contract is guaranteed by resolution order alone.
+
+The `xstyle < className` step is not — it is a cascade-layer guarantee, and only holds when the
+consumer compiles `xstyle` into the dedicated `xstyle` layer described below. See "The `xstyle`
+layer contract" under [Cascade layers](#cascade-layers) for the full, measured account of what a
+consumer must configure, and what happens without it. Inline `style` always wins, because it sits
+outside the layered cascade entirely.
 
 ### Shared input-state selectors
 

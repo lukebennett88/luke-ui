@@ -18,10 +18,20 @@ export interface XStyleProps {
 	/**
 	 * Extra styles as one or more `stylex.create(...)` objects, for a CSS property the component's
 	 * own props do not expose. Applied after the component's own styles and variants, and before
-	 * `className`, so a same-property `xstyle` value replaces a competing default or variant. A
-	 * consumer `className` still beats `xstyle` when its rule sits in `components`, in `utilities`,
-	 * or outside every layer; a class in a lower layer such as `base` does not. Inline `style`
-	 * beats `className`.
+	 * `className`, so a same-property `xstyle` value replaces a competing default or variant.
+	 *
+	 * The `xstyle < className` step of this contract depends on how the consumer's own StyleX
+	 * output is layered — resolution order alone does not decide it, CSS cascade layers do.
+	 * Compiling `xstyle` requires the consumer's own StyleX compiler (`@stylexjs/babel-plugin` or
+	 * an equivalent bundler integration); this package's `@stylexjs/stylex` runtime dependency is
+	 * not enough on its own. A consumer `className` reliably beats `xstyle` only when the consumer
+	 * compiles their StyleX into a dedicated `xstyle` layer that sits above `recipes` and below
+	 * `components`/`utilities`, and declares the combined layer order —
+	 * `@layer reset, theme, base, recipes, xstyle, components, utilities;` — before any stylesheet
+	 * import. With StyleX's default (unlayered) output, an unlayered `xstyle` rule beats even a
+	 * layered `className`, so the documented precedence does not hold without that configuration.
+	 * See the "Override a single property with `xstyle`" and "Cascade layers" sections of the
+	 * Styling guide. Inline `style` beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }

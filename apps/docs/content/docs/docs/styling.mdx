@@ -44,6 +44,12 @@ Use `xstyle` when a component's props do not cover the CSS property you need, or
 replace the value a variant sets. It takes one or more compiled `stylex.create(...)` objects, the
 same way `stylex.props` accepts them.
 
+`xstyle` requires your own StyleX compiler. `@stylexjs/stylex` is already a runtime dependency of
+Luke UI, but authoring `stylex.create(...)` needs compilation, and Luke UI's own compiler only
+processes its own source. Install `@stylexjs/babel-plugin`, or the StyleX bundler integration your
+build already uses, and configure it the way the next section describes. If your application never
+uses `xstyle`, it needs no StyleX compiler at all.
+
 Styles resolve in this order, from lowest priority to highest:
 
 1. the component's own internal styles
@@ -53,9 +59,16 @@ Styles resolve in this order, from lowest priority to highest:
 5. inline `style`
 
 Because `xstyle` resolves after the component's own styles and variants, a same-property `xstyle`
-value replaces theirs before either reaches the DOM. A consumer `className` still beats `xstyle`
-when its rule sits in `components`, in `utilities`, or outside every layer. A class you define in a
-lower layer, such as `base`, does not. Inline `style` beats `className`.
+value replaces theirs before either reaches the DOM.
+
+The `xstyle` / `className` step is a cascade-layer guarantee, not something resolution order decides
+on its own. It holds only when your StyleX compiler emits `xstyle` into a dedicated layer sitting
+above `recipes` and below `components` and `utilities`, using the combined order this package
+publishes. Read "Use application CSS alongside Luke UI" below for the required layer declaration and
+compiler configuration. With a plain, unconfigured StyleX compiler your `xstyle` styles are
+unlayered, and an unlayered rule beats every layered rule in the document — including your own
+`className` — so `className` will not reliably win without that configuration. Inline `style` always
+beats `className`, because it is not part of the layered cascade at all.
 
 `xstyle` targets the component's public presentation element, not its internal DOM. A component with
 more than one styled part exposes a separate target per part, and its own guide names which part
@@ -144,7 +157,10 @@ Preflight) cannot override component styles. `components` and `utilities` stay a
 deliberate application overrides still win.
 
 Name every layer. A layer you leave out is appended after the layers you declared, which puts it
-above your application layers instead of below them and reverses the override order you expect.
+above your application layers instead of below them and reverses the override order you expect. This
+also applies to any layer name that appears for the first time somewhere else in your document, such
+as a compiled `xstyle` layer — declare the combined order once, up front, before anything else
+mentions any of those names.
 
 ```css
 @layer reset, theme, base, recipes, components, utilities;
@@ -157,6 +173,42 @@ Tailwind utilities, CSS Modules, and application CSS work well for application-o
 custom elements. Put Tailwind classes on surrounding elements or `Box`. Use CSS Modules or
 application styles with public semantic variables for custom UI. Unlayered application CSS sits
 outside Luke UI's layers, so do not use it to reach into a component's internal DOM.
+
+### Give `xstyle` its own layer
+
+If you author `xstyle`, add one more layer, `xstyle`, between `recipes` and `components`, and
+compile your StyleX styles into it:
+
+```css
+@layer reset, theme, base, recipes, xstyle, components, utilities;
+
+@import '@luke-ui/react/stylesheet.css';
+```
+
+Configure your StyleX compiler to emit that layer with `useLayers`. With `@stylexjs/babel-plugin`,
+pass it to `processStylexRules`:
+
+```ts
+processStylexRules(rules, {
+	useLayers: {
+		before: ['reset', 'theme', 'base', 'recipes'],
+		after: ['components', 'utilities'],
+		prefix: 'xstyle',
+	},
+});
+```
+
+A bundler plugin built on the same compiler exposes the equivalent option under its own name — check
+its `useLayers` (or layer-prefix) setting. This is the minimum configuration the published
+`xstyle < className` precedence requires. Two other configurations do not give you that guarantee,
+so avoid them:
+
+- **Default (unlayered) StyleX output.** Without `useLayers`, StyleX emits plain, unlayered rules.
+  An unlayered rule beats every layered rule in the document, so unlayered `xstyle` would beat even
+  a deliberately layered `className` — the opposite of the documented order.
+- **Nesting your StyleX under the `recipes` layer.** This makes the outcome depend on which
+  stylesheet is imported first, which is not something your application code controls reliably. Use
+  the dedicated `xstyle` layer instead.
 
 ```tsx
 import { Box } from '@luke-ui/react/box';

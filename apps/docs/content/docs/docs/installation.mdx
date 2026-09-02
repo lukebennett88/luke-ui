@@ -38,6 +38,22 @@ treatment. Switch which theme stylesheet you import to change the theme.
 Set `data-color-mode="light"` or `data-color-mode="dark"` on a themed element when the application
 must use a specific mode. Without it, Luke UI follows the system preference.
 
+## Optional: set up `xstyle`
+
+`xstyle` is optional. Skip this step if you never override a component style beyond its supported
+props — you need no StyleX compiler at all.
+
+If you do use `xstyle`, install a StyleX compiler in your own build:
+
+```bash
+pnpm add -D @stylexjs/babel-plugin
+```
+
+Then declare a dedicated `xstyle` cascade layer, positioned between `recipes` and `components`, and
+configure your compiler's `useLayers` option to emit into it. Read
+[Styling](/docs/styling#use-application-css-alongside-luke-ui) for the required layer order and
+compiler configuration, and when `xstyle` overrides a `className` you also define.
+
 ## Continue learning
 
 <Cards>
