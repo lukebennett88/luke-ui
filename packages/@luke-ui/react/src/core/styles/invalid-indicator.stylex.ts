@@ -9,7 +9,7 @@ import * as stylex from '@stylexjs/stylex';
  * the compiler needs a statically known value at build time, and a `Record<IconName, string>`
  * imported from a plain generated `.ts` module is neither resolvable by the plugin (it has no
  * `@stylexjs/stylex` import, so the plugin skips it) nor statically indexable. The value is
- * therefore mirrored here as a `defineConsts` literal. `invalid-indicator.test.ts` asserts it
+ * therefore mirrored here as a `defineConsts` literal. `input-states.test.ts` asserts it
  * still matches `iconMaskUrls.exclamationTriangle`, so a regenerated icon set cannot drift from
  * this copy without failing a test.
  */

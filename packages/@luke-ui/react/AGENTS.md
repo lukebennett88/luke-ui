@@ -1,8 +1,8 @@
 # @luke-ui/react agent guide
 
 - Do not hand-edit `.generated/entries.ts` or `package.json#exports`. `vp pack` generates entries
-  and updates exports during build. The `stylesheet` and `stylex-bundle` build entries are excluded
-  from the public export map via `exports.exclude` in `vite.config.ts`.
+  and updates exports during build. The `stylesheet` build entry is excluded from the public export
+  map via `exports.exclude` in `vite.config.ts`.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
   files by hand. The generator updates the style-module registry, conformance manifest, and docs
   wiring.

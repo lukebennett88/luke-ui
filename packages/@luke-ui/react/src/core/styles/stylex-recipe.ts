@@ -5,7 +5,14 @@ import { cx } from '../../shared/utils/utils.js';
 /** A compiled StyleX style returned by a `stylex.create(...)` entry. */
 type StyleXStyle = CompiledStyles;
 
-/** One or more compiled styles, applied together as an unconditional base. */
+/**
+ * One or more compiled styles, applied together as an unconditional base.
+ *
+ * A `base` array is spread exactly one level — it is not flattened recursively. The predecessor
+ * Vanilla Extract engine did flatten nested arrays; this one deliberately does not, because every
+ * call site passes a flat list and `stylex.props` takes its arguments flat anyway. Keep the array
+ * flat rather than reintroducing recursion.
+ */
 type StyleXStyleList = StyleXStyle | ReadonlyArray<StyleXStyle>;
 
 /** Maps the string variant keys `'true'`/`'false'` onto `boolean` for selection. */
