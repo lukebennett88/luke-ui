@@ -6,8 +6,8 @@ import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promis
 import { build, createServer } from 'vite';
 import type { InlineConfig, ViteDevServer } from 'vite';
 import { expect, test } from 'vite-plus/test';
-import { lukeUi, STYLESHEET_IMPORT } from './index.js';
 import packageJson from '../package.json' with { type: 'json' };
+import { lukeUi, STYLESHEET_IMPORT } from './index.js';
 
 const require = createRequire(import.meta.url);
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));

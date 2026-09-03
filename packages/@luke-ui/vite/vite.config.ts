@@ -1,6 +1,6 @@
-import { copyFile, mkdir, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { copyFile, mkdir, readdir, rm } from 'node:fs/promises';
 import { defineConfig } from 'vite-plus';
 
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
