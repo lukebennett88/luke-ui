@@ -54,7 +54,6 @@ jobs:
           # changed, so it must run unscoped. Running it via turbo (rather than the
           # bare `knip` script) pulls in its generate dependencies first.
           corepack pnpm exec turbo run check:cycles check:unused
-          # turbo-generators has no workspace-package dependencies, so its tests need
-          # no browser and no build:packages step, unlike the storybook.yml test jobs —
-          # they belong here, next to the other fast, dependency-free checks.
-          corepack pnpm exec turbo run test --filter=@luke-ui/turbo-generators
+          # turbo-generators and @luke-ui/vite have no browser or package-build prerequisites,
+          # unlike the storybook.yml test jobs — they belong here, next to the other fast checks.
+          corepack pnpm exec turbo run test --filter=@luke-ui/turbo-generators --filter=@luke-ui/vite
