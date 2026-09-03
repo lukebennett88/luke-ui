@@ -44,11 +44,11 @@ Use `xstyle` when a component's props do not cover the CSS property you need, or
 replace the value a variant sets. It takes one or more compiled `stylex.create(...)` objects, the
 same way `stylex.props` accepts them.
 
-`xstyle` requires your own StyleX compiler. `@stylexjs/stylex` is already a runtime dependency of
-Luke UI, but authoring `stylex.create(...)` needs compilation, and Luke UI's own compiler only
-processes its own source. Install `@stylexjs/babel-plugin`, or the StyleX bundler integration your
-build already uses, and configure it the way the next section describes. If your application never
-uses `xstyle`, it needs no StyleX compiler at all.
+`xstyle` requires your own StyleX compiler. Luke UI's compiler processes only Luke UI source.
+Install `@stylexjs/stylex` as an application dependency and add a StyleX compiler to your build.
+Read [Installation](/docs/installation#optional-set-up-xstyle) for the packages, then read "Give
+`xstyle` its own layer" below for the compiler configuration. If your application never uses
+`xstyle`, it needs no StyleX compiler at all.
 
 Styles resolve in this order, from lowest priority to highest:
 
@@ -170,45 +170,7 @@ mentions any of those names.
 ```
 
 Tailwind utilities, CSS Modules, and application CSS work well for application-owned layout and
-custom elements. Put Tailwind classes on surrounding elements or `Box`. Use CSS Modules or
-application styles with public semantic variables for custom UI. Unlayered application CSS sits
-outside Luke UI's layers, so do not use it to reach into a component's internal DOM.
-
-### Give `xstyle` its own layer
-
-If you author `xstyle`, add one more layer, `xstyle`, between `recipes` and `components`, and
-compile your StyleX styles into it:
-
-```css
-@layer reset, theme, base, recipes, xstyle, components, utilities;
-
-@import '@luke-ui/react/stylesheet.css';
-```
-
-Configure your StyleX compiler to emit that layer with `useLayers`. With `@stylexjs/babel-plugin`,
-pass it to `processStylexRules`:
-
-```ts
-processStylexRules(rules, {
-	useLayers: {
-		before: ['reset', 'theme', 'base', 'recipes'],
-		after: ['components', 'utilities'],
-		prefix: 'xstyle',
-	},
-});
-```
-
-A bundler plugin built on the same compiler exposes the equivalent option under its own name — check
-its `useLayers` (or layer-prefix) setting. This is the minimum configuration the published
-`xstyle < className` precedence requires. Two other configurations do not give you that guarantee,
-so avoid them:
-
-- **Default (unlayered) StyleX output.** Without `useLayers`, StyleX emits plain, unlayered rules.
-  An unlayered rule beats every layered rule in the document, so unlayered `xstyle` would beat even
-  a deliberately layered `className` — the opposite of the documented order.
-- **Nesting your StyleX under the `recipes` layer.** This makes the outcome depend on which
-  stylesheet is imported first, which is not something your application code controls reliably. Use
-  the dedicated `xstyle` layer instead.
+custom elements. Put Tailwind classes on surrounding elements or `Box`:
 
 ```tsx
 import { Box } from '@luke-ui/react/box';
@@ -217,6 +179,142 @@ import { Box } from '@luke-ui/react/box';
 	{children}
 </Box>;
 ```
+
+Use CSS Modules or application styles with public semantic variables for custom UI. Unlayered
+application CSS sits outside Luke UI's layers, so do not use it to reach into a component's internal
+DOM.
+
+### Give `xstyle` its own layer
+
+If you author `xstyle`, add an `xstyle` layer between `recipes` and `components`, and compile your
+StyleX styles into it. Configure your StyleX compiler to emit that layer with `useLayers`. The
+option must be an object with `before`, `after`, and `prefix`. The official `@stylexjs/unplugin` and
+`@stylexjs/postcss-plugin` integrations expose `useCSSLayers` only as a boolean. This emits
+unprefixed `@layer priorityN` rules and cannot produce the required `xstyle` sibling layer. Use a
+small Vite plugin built on `@babel/core` and `@stylexjs/babel-plugin`.
+
+During development, the plugin can emit the collected CSS when the virtual module loads. During a
+production build, Rollup loads the virtual module before it traverses the rest of the module graph,
+so not all rules are collected. The plugin emits a placeholder during `load` and replaces it with
+the CSS in `generateBundle`:
+
+```js
+// vite-plugin-stylex.js
+import { transformAsync } from '@babel/core';
+import stylexBabelPlugin from '@stylexjs/babel-plugin';
+
+const VIRTUAL_ID = 'virtual:stylex.css';
+const RESOLVED_ID = '\0virtual:stylex.css';
+const LAYER_CONFIG = {
+	before: ['reset', 'theme', 'base', 'recipes'],
+	after: ['components', 'utilities'],
+	prefix: 'xstyle',
+};
+// The plugin replaces this in `generateBundle`. The declaration prevents Vite's CSS
+// minifier from removing it first.
+const PLACEHOLDER = '.stylex-placeholder{--stylex-placeholder:0}';
+const PLACEHOLDER_PATTERN = /\.stylex-placeholder\s*\{[^}]*\}/;
+
+export function stylex({ rootDir }) {
+	const rulesByFile = new Map();
+	let isDevServer = false;
+
+	function collectedCss() {
+		return stylexBabelPlugin.processStylexRules([...rulesByFile.values()].flat(), {
+			useLayers: LAYER_CONFIG,
+		});
+	}
+
+	return {
+		name: 'stylex',
+		configResolved(config) {
+			isDevServer = config.command === 'serve';
+		},
+		resolveId(id) {
+			if (id === VIRTUAL_ID) return RESOLVED_ID;
+		},
+		load(id) {
+			if (id !== RESOLVED_ID) return;
+			// A build has not traversed the module graph yet, so not all rules are
+			// collected. Emit a placeholder and replace it in `generateBundle`.
+			return isDevServer ? collectedCss() : PLACEHOLDER;
+		},
+		async transform(code, id) {
+			const filename = id.split('?')[0] ?? id;
+			if (!/\.[cm]?[jt]sx?$/.test(filename)) return;
+			if (filename.includes('/node_modules/')) return;
+			if (!code.includes('@stylexjs/stylex')) return;
+			const result = await transformAsync(code, {
+				babelrc: false,
+				configFile: false,
+				filename,
+				parserOpts: { plugins: ['typescript', 'jsx'] },
+				plugins: [
+					stylexBabelPlugin.withOptions({
+						dev: false,
+						unstable_moduleResolution: { type: 'commonJS', rootDir },
+					}),
+				],
+				sourceMaps: true,
+			});
+			if (result?.code == null) return;
+			const rules = result.metadata?.stylex;
+			if (rules?.length) rulesByFile.set(id, rules);
+			else rulesByFile.delete(id);
+			return { code: result.code, map: result.map };
+		},
+		generateBundle(_options, bundle) {
+			const css = collectedCss();
+			for (const asset of Object.values(bundle)) {
+				if (asset.type !== 'asset' || typeof asset.source !== 'string') continue;
+				if (!PLACEHOLDER_PATTERN.test(asset.source)) continue;
+				asset.source = asset.source.replace(PLACEHOLDER_PATTERN, css);
+			}
+		},
+	};
+}
+```
+
+This assumes a normal Vite application with an HTML entry. With a bare JavaScript entry and
+`cssCodeSplit: false`, the CSS asset is not part of `generateBundle`'s bundle, and the substitution
+does not run.
+
+Add the plugin to `vite.config.ts`. In your application entry, import the layer declaration, the
+virtual stylesheet, and Luke UI's stylesheet in that order. CSS gives a layer its position when it
+is first mentioned:
+
+```ts
+// vite.config.ts
+import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vite';
+import { stylex } from './vite-plugin-stylex.js';
+
+export default defineConfig({
+	plugins: [stylex({ rootDir: fileURLToPath(new URL('.', import.meta.url)) })],
+});
+```
+
+```ts
+// main.ts
+import './layers.css';
+import 'virtual:stylex.css';
+import '@luke-ui/react/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
+```
+
+```css
+/* layers.css */
+@layer reset, theme, base, recipes, xstyle, components, utilities;
+```
+
+This configuration gives the published `xstyle < className` precedence. Avoid these configurations:
+
+- **Default (unlayered) StyleX output.** Without `useLayers`, StyleX emits plain, unlayered rules.
+  An unlayered rule beats every layered rule in the document, so unlayered `xstyle` would beat even
+  a deliberately layered `className` — the opposite of the documented order.
+- **Nesting your StyleX under the `recipes` layer.** This makes the outcome depend on which
+  stylesheet is imported first, which is not something your application code controls reliably. Use
+  the dedicated `xstyle` layer instead.
 
 When a CSS Module or application stylesheet needs a token, use the stable `--luke-*` variable listed
 in the [token reference](/docs/token-reference). Do not couple application CSS to undocumented

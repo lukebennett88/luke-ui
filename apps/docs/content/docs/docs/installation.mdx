@@ -43,16 +43,21 @@ must use a specific mode. Without it, Luke UI follows the system preference.
 `xstyle` is optional. Skip this step if you never override a component style beyond its supported
 props — you need no StyleX compiler at all.
 
-If you do use `xstyle`, install a StyleX compiler in your own build:
+If you use `xstyle`, install `@stylexjs/stylex` as a dependency and a StyleX compiler as a dev
+dependency. Your application imports `@stylexjs/stylex` directly, and pnpm isolates dependencies, so
+it cannot use the copy Luke UI installs for its own runtime. Declare it yourself. The full install
+for an application that authors `xstyle` is:
 
 ```bash
-pnpm add -D @stylexjs/babel-plugin
+pnpm add @luke-ui/react react-aria-components @stylexjs/stylex
+pnpm add -D @babel/core @stylexjs/babel-plugin
 ```
 
-Then declare a dedicated `xstyle` cascade layer, positioned between `recipes` and `components`, and
-configure your compiler's `useLayers` option to emit into it. Read
-[Styling](/docs/styling#use-application-css-alongside-luke-ui) for the required layer order and
-compiler configuration, and when `xstyle` overrides a `className` you also define.
+The compiler alone does not complete the setup. Your build must run the transform, collect the
+extracted rules, emit them into a dedicated `xstyle` cascade layer between `recipes` and
+`components`, and declare the combined layer order before loading the stylesheets. Read
+[Styling](/docs/styling#give-xstyle-its-own-layer) for the bundler integration and the required
+layer order.
 
 ## Continue learning
 

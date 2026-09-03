@@ -225,11 +225,26 @@ Chromium, see `packed-consumer.test.ts`):
 - **`@stylexjs/stylex` is a runtime dependency, but `@stylexjs/babel-plugin` is not shipped to
   consumers.** `@stylexjs/stylex` is a `dependency` of `@luke-ui/react` because `stylex.props` runs
   at runtime. `@stylexjs/babel-plugin` is only a devDependency of this package — a consumer who
-  wants to author `xstyle` installs and configures their own StyleX compiler.
+  wants to author `xstyle` installs and configures their own StyleX compiler. Consumers must also
+  declare `@stylexjs/stylex`: pnpm isolates dependencies, so a consumer that imports only
+  `@luke-ui/react` cannot resolve Luke UI's transitive copy for its own
+  `import * as stylex from '@stylexjs/stylex'` call. `packed-consumer.test.ts` covers this. An
+  undeclared `@stylexjs/stylex` import fails in the throwaway consumer, while Luke UI's own
+  resolution still succeeds.
+- **The official StyleX bundler integrations cannot emit the `xstyle` sibling layer.**
+  `@stylexjs/unplugin` and `@stylexjs/postcss-plugin` at 0.19.0 both expose `useCSSLayers` only as a
+  boolean. Both pass that value to `processStylexRules(rules, { useLayers: <boolean> })`. With
+  `useLayers: true`, StyleX emits bare, unprefixed top-level layers
+  (`@layer priority1, priority2;`). It cannot declare the combined order or emit a prefixed
+  `xstyle.priorityN` sibling layer. Only the object form, `useLayers: { before, after, prefix }`,
+  produces that output. This was confirmed by running `processStylexRules` directly. The hosted
+  Styling guide documents a small Vite plugin built on `@babel/core` and `@stylexjs/babel-plugin`.
 
-`packed-consumer.test.ts` is the test that backs this contract: it packs the real tarball, symlinks
-only the package's declared runtime dependencies into a throwaway consumer directory, has the
-consumer compile its own `stylex.create()` call with its own `@babel/core` +
+`packed-consumer.test.ts` is the test that backs this contract: it packs the real tarball into a
+throwaway consumer directory laid out the way pnpm would install it — Luke UI's own `dependencies`
+symlinked nested under `@luke-ui/react/node_modules` so they stay private to Luke UI, its
+`peerDependencies` plus anything the fixture consumer declares for itself at the consumer's top
+level — has the consumer compile its own `stylex.create()` call with its own `@babel/core` +
 `@stylexjs/babel-plugin` invocation (never through `createStylexDevPlugin`) using the documented
 `useLayers` configuration, then drives a real Playwright Chromium instance to assert
 `getComputedStyle` outcomes for xstyle overriding a variant, `className` overriding `xstyle`, and
@@ -242,6 +257,14 @@ Luke UI's own `recipes.sx.*` layers) and does not by itself prove the public con
 tree exactly, for example `vars.color.background.danger.solid.hover`, and each leaf is a live
 `var(--luke-*)` reference. StyleX recipes import it directly. `src/theme/index.ts` re-exports the
 same `vars` as the public `@luke-ui/react/theme` token surface.
+
+This is one surface, not two. Issues #537 and #550 were written while the public `vars` was a
+separate plain object built by `src/theme/contract.css.ts`, and they ask to "keep the public `vars`
+API unchanged" against that arrangement. The public API _is_ unchanged — the same nested paths and
+the same `--luke-*` custom property names — but it is now produced by the StyleX const surface
+rather than mirrored by a second object, and `contract.css.ts` is deleted. Read those tickets' "do
+not change `vars`" wording as a promise about the public shape, not a requirement to keep two
+implementations.
 
 Use `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain Vanilla Extract
 global rule in a named layer. Structural combinators such as Combobox's adjacent-section border live
