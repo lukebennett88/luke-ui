@@ -143,8 +143,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'representative StyleX class moved to the wrong layer',
 		(css: string) => {
 			return css.replace(
-				'@layer recipes.sx.priority1 {\n  .recipe-class { display: inline-flex; }\n}',
-				'@layer utilities {\n  .recipe-class { display: inline-flex; }\n}',
+				'@layer recipes.sx.priority1 {\n  .xrecipe1a { display: inline-flex; }\n}',
+				'@layer utilities {\n  .xrecipe1a { display: inline-flex; }\n}',
 			);
 		},
 	],
@@ -152,21 +152,21 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'representative utility class moved to the wrong layer',
 		(css: string) => {
 			return css.replace(
-				'@layer utilities {\n  .utility-class { display: grid; }\n}',
-				'@layer components {\n  .utility-class { display: grid; }\n}',
+				'@layer utilities {\n  ._utility1a { display: grid; }\n}',
+				'@layer components {\n  ._utility1a { display: grid; }\n}',
 			);
 		},
 	],
 	[
 		'representative retained-layer content removed',
-		(css: string) => css.replace('  .recipe-class { display: inline-flex; }\n', ''),
+		(css: string) => css.replace('  .xrecipe1a { display: inline-flex; }\n', ''),
 	],
 	[
 		'class-like text in an attribute value',
 		(css: string) => {
 			return css.replace(
-				'.recipe-class { display: inline-flex; }',
-				'[data-class=".recipe-class"] { display: inline-flex; }',
+				'.xrecipe1a { display: inline-flex; }',
+				'[data-class=".xrecipe1a"] { display: inline-flex; }',
 			);
 		},
 	],
@@ -179,14 +179,23 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 			);
 		},
 	],
+	['generic global class', (css: string) => `${css}\n@layer components { .prose {} }`],
+	[
+		'loading-skeleton global class',
+		(css: string) => `${css}\n@layer components { .loading-skeleton {} }`,
+	],
+	[
+		'combobox-section global class',
+		(css: string) => `${css}\n@layer components { .combobox-section {} }`,
+	],
 ];
 
 for (const [name, mutate] of stylesheetMutations) {
 	test(`rejects a stylesheet with a ${name}`, () => {
 		expect(() => {
 			return assertStylesheetContract(mutate(validStylesheetFixture), {
-				recipeClasses: ['recipe-class'],
-				utilityClasses: ['utility-class'],
+				recipeClasses: ['xrecipe1a'],
+				utilityClasses: ['_utility1a'],
 			});
 		}).toThrow(/.+/);
 	});
@@ -250,11 +259,13 @@ test('emits direction-sensitive properties logically from StyleX', async () => {
 
 test('recognises escaped class identifiers', () => {
 	expect(() => {
+		// `\61 ` is the CSS escape for `a`, so this authors `.xrecipea1a` with one character
+		// escaped. The selector parser must decode it to recognise the class as a StyleX atom.
 		return assertStylesheetContract(
-			validStylesheetFixture.replaceAll('recipe-class', 'recipe\\:class'),
+			validStylesheetFixture.replaceAll('xrecipe1a', 'xrecipe\\61 1a'),
 			{
-				recipeClasses: ['recipe:class'],
-				utilityClasses: ['utility-class'],
+				recipeClasses: ['xrecipea1a'],
+				utilityClasses: ['_utility1a'],
 			},
 		);
 	}).not.toThrow();
@@ -789,20 +800,35 @@ function isStylexCustomPropertyRule(rule: Rule): boolean {
 /** Every unhashed class name the built stylesheet is allowed to ship. */
 const STABLE_SELECTORS = ['.luke-ui-prose', '.luke-ui-reset', '.luke-ui-theme'];
 
+/** A StyleX atom class, e.g. `x3wd24` or `xcooxot`. StyleX does not hyphenate or capitalise these. */
+const STYLEX_ATOM_CLASS_PATTERN = /^x[a-z0-9]+$/;
+
+/** A Vanilla Extract class hash, e.g. `_64ob06` or `_64ob01i`. */
+const VANILLA_EXTRACT_HASH_CLASS_PATTERN = /^_[a-z0-9]+$/;
+
 function assertStableSelectors(root: Root): void {
 	const selectors = new Set<string>();
 	root.walkRules((rule) => {
 		for (const className of getClassNames(rule)) {
-			if (className.startsWith('luke-ui-')) selectors.add(`.${className}`);
+			if (STYLEX_ATOM_CLASS_PATTERN.test(className)) continue;
+			if (VANILLA_EXTRACT_HASH_CLASS_PATTERN.test(className)) continue;
+			selectors.add(`.${className}`);
 		}
 	});
 
-	// The only unhashed classes the stylesheet may ship. `luke-ui-reset` and `luke-ui-theme` are
-	// the documented roots a consumer applies; `luke-ui-prose` is a private marker bridging Prose's
-	// public class-string recipe to its retained rules, so it can be neither hashed nor an
-	// attribute. Adding a name here makes it part of the shipped selector surface, so it must be a
-	// deliberate choice. Asserted as a subset because fixtures exercise only some of these.
-	for (const selector of selectors) expect(STABLE_SELECTORS).toContain(selector);
+	// Every class StyleX and Vanilla Extract hash is exempt, because a build tool renaming its own
+	// hash cannot break a consumer. Anything left over is unhashed and therefore part of the
+	// stylesheet's shipped stable-selector surface, so it must appear in `STABLE_SELECTORS` above.
+	// `luke-ui-reset` and `luke-ui-theme` are the documented roots a consumer applies; `luke-ui-prose`
+	// is a private marker bridging Prose's public class-string recipe to its retained rules, so it
+	// can be neither hashed nor an attribute. Adding a name here makes it part of the shipped
+	// selector surface, so it must be a deliberate choice. Asserted as a subset because fixtures
+	// exercise only some of these.
+	for (const selector of selectors) {
+		expect(STABLE_SELECTORS, `Unexpected unhashed selector shipped: ${selector}`).toContain(
+			selector,
+		);
+	}
 }
 
 function assertSentinel(
@@ -985,16 +1011,16 @@ const validStylesheetFixture = `@layer reset, theme, base, recipes.sx.priority1,
   }
 }
 @layer components {
-  .components-class { margin-block-start: 1px; }
+  ._components1a { margin-block-start: 1px; }
 }
 @layer utilities {
-  .utility-class { display: grid; }
+  ._utility1a { display: grid; }
 }
 @layer recipes.sx.priority1 {
-  .recipe-class { display: inline-flex; }
+  .xrecipe1a { display: inline-flex; }
 }
 @layer recipes.sx.priority1 {
-  .stylex-class { outline-color: transparent; }
+  .xstylex1a { outline-color: transparent; }
 }
 @keyframes generated-animation {
   from { opacity: 0; }
