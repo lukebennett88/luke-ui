@@ -1,14 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
-import { cx } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/tokens.stylex.js';
 import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
+import { loadingSkeletonScopeAttribute } from './scope.js';
 
-const loadingSkeletonScopeClassName = 'loading-skeleton';
 const skeletonRadiusVar = '--luke-loading-skeleton-radius';
 const skeletonPulseAnimationName = 'luke-loading-skeleton-pulse';
 
@@ -131,7 +130,7 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 			{...spanProps}
 			{...stylexProps}
 			aria-hidden
-			className={cx(loadingSkeletonScopeClassName, stylexProps.className)}
+			{...{ [loadingSkeletonScopeAttribute]: '' }}
 			data-skeleton-inline={isInline ? '' : undefined}
 			inert
 			tabIndex={-1}

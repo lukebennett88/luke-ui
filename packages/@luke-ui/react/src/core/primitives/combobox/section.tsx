@@ -3,13 +3,12 @@ import type { JSX, ReactNode } from 'react';
 import type { ListBoxSectionProps as RacListBoxSectionProps } from 'react-aria-components/ComboBox';
 import { ListBoxSection as RacListBoxSection } from 'react-aria-components/ComboBox';
 import { Header as RacHeader } from 'react-aria-components/Header';
-import { cx } from '../../../shared/utils/utils.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { resolveComboboxRecipeSlotStyles } from './recipe.js';
-import { comboboxSectionScopeClassName } from './section-scope.js';
+import { comboboxSectionScopeAttribute } from './section-scope.js';
 
 type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
 	RacListBoxSectionProps<T>,
@@ -32,18 +31,26 @@ export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>
 		className,
 		style,
 	);
-	const sectionClassName = cx(comboboxSectionScopeClassName, resolved.className);
-
 	if (typeof children === 'function') {
 		return (
-			<RacListBoxSection {...sectionProps} className={sectionClassName} style={resolved.style}>
+			<RacListBoxSection
+				{...sectionProps}
+				{...{ [comboboxSectionScopeAttribute]: '' }}
+				className={resolved.className}
+				style={resolved.style}
+			>
 				{children}
 			</RacListBoxSection>
 		);
 	}
 
 	return (
-		<RacListBoxSection {...sectionProps} className={sectionClassName} style={resolved.style}>
+		<RacListBoxSection
+			{...sectionProps}
+			{...{ [comboboxSectionScopeAttribute]: '' }}
+			className={resolved.className}
+			style={resolved.style}
+		>
 			{title != null ? (
 				<RacHeader
 					className={stylex.props(...resolveComboboxRecipeSlotStyles('sectionHeading')).className}

@@ -1,10 +1,10 @@
 import { vars } from '../../theme/contract.css.js';
-import { comboboxSectionScopeClassName } from '../primitives/combobox/section-scope.js';
-import { classSelector } from './class-selector.js';
+import { comboboxSectionScopeAttribute } from '../primitives/combobox/section-scope.js';
 import { globalStyleInLayer } from './layered-style.css.js';
+import { attributeSelector } from './selectors.js';
 
 globalStyleInLayer(
 	'components',
-	`${classSelector(comboboxSectionScopeClassName)} + ${classSelector(comboboxSectionScopeClassName)}`,
+	`${attributeSelector(comboboxSectionScopeAttribute)} + ${attributeSelector(comboboxSectionScopeAttribute)}`,
 	{ borderBlockStart: `1px solid ${vars.color.border.decorative}` },
 );

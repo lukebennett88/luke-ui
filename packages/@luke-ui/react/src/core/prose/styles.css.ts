@@ -1,9 +1,13 @@
+import { lukeUiClassNames } from '../../shared/class-names.js';
 import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
-import { proseScopeClassName } from './scope.js';
 
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
-	globalStyleInLayer('components', `:where(.${proseScopeClassName}) :where(${selector})`, rule);
+	globalStyleInLayer(
+		'components',
+		`:where(.${lukeUiClassNames.proseScope}) :where(${selector})`,
+		rule,
+	);
 }
 
 // Each gap is the following block's start margin. No block-end margin can collapse or escape.
@@ -38,7 +42,7 @@ proseStyle('figure > img, figure > picture, figure > video, picture > img', {
 
 proseStyle('ul', { listStyleType: 'disc', paddingInlineStart: vars.space.sp24 });
 // Untyped ols restore decimal. Typed ols omit list-style-type so HTML presentational hints apply
-// inside Prose; the reset leaves those ols alone via `proseScopeClassName` from `./scope.js`.
+// inside Prose; the reset leaves those ols alone via `lukeUiClassNames.proseScope`.
 proseStyle('ol:not([type])', { listStyleType: 'decimal', paddingInlineStart: vars.space.sp24 });
 proseStyle('ol[type]', { paddingInlineStart: vars.space.sp24 });
 

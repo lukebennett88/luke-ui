@@ -1,11 +1,12 @@
 import '../../../dist/themes/tactile/stylesheet.css';
 import { afterAll, afterEach, beforeAll, expect, test } from 'vite-plus/test';
 import builtStylesheetCss from '../../../dist/stylesheet.css?inline';
+import { loadingSkeletonScopeAttribute } from '../loading-skeleton/scope.js';
 
-// Literal from `loading-skeleton/styles.css.ts`. Do not import that module: VE `globalLayer()`
-// would create components/utilities before this file injects the dist stylesheet, and the combined
-// `@layer` order cannot then place StyleX priority layers ahead of them.
-const loadingSkeletonScopeClassName = 'loading-skeleton';
+// `scope.ts` is side-effect-free, so it's safe to import here. Do not import
+// `loading-skeleton/styles.css.ts` itself: VE `globalLayer()` would create components/utilities
+// before this file injects the dist stylesheet, and the combined `@layer` order cannot then place
+// StyleX priority layers ahead of them.
 
 const mounted: Array<HTMLElement> = [];
 const STYLESHEET_ELEMENT_ID = 'luke-ui-layer-order-stylesheet';
@@ -238,12 +239,12 @@ ${documentedLayerDeclaration}
 test('LoadingSkeleton components !important beats utilities-layer !important overrides', () => {
 	const element = document.body.appendChild(document.createElement('div'));
 	mounted.push(element);
-	element.className = loadingSkeletonScopeClassName;
+	element.setAttribute(loadingSkeletonScopeAttribute, '');
 	element.innerHTML = '<span>child</span>';
 
 	const utilityStyle = document.head.appendChild(document.createElement('style'));
 	utilityStyle.dataset.layerOrderProbe = 'true';
-	utilityStyle.textContent = `@layer utilities { .${loadingSkeletonScopeClassName}:not([data-skeleton-inline]) > * { background-color: red !important; } }`;
+	utilityStyle.textContent = `@layer utilities { [${loadingSkeletonScopeAttribute}]:not([data-skeleton-inline]) > * { background-color: red !important; } }`;
 
 	expect(getComputedStyle(element.firstElementChild!).backgroundColor).not.toBe('rgb(255, 0, 0)');
 });

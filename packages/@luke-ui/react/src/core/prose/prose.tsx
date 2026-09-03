@@ -1,9 +1,9 @@
 import type { ComponentProps, JSX } from 'react';
+import { lukeUiClassNames } from '../../shared/class-names.js';
 import { cx } from '../../shared/utils/utils.js';
 import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import { resolveProseRecipeStyles } from './recipe.js';
-import { proseScopeClassName } from './scope.js';
 
 /** Props for `Prose`. */
 export interface ProseProps extends ComponentProps<'div'>, XStyleProps {}
@@ -19,7 +19,7 @@ export function Prose(props: ProseProps): JSX.Element {
 		<div
 			{...divProps}
 			{...stylexProps}
-			className={cx(proseScopeClassName, stylexProps.className, className)}
+			className={cx(lukeUiClassNames.proseScope, stylexProps.className, className)}
 		/>
 	);
 }

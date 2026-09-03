@@ -1,11 +1,9 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { globalKeyframes } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
-import { classSelector } from '../styles/class-selector.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
-
-/** The class that scopes LoadingSkeleton's approved structural descendant masks. */
-const loadingSkeletonScopeClassName = 'loading-skeleton';
+import { attributeSelector } from '../styles/selectors.js';
+import { loadingSkeletonScopeAttribute } from './scope.js';
 
 /** @internal */
 const skeletonRadiusVar = '--luke-loading-skeleton-radius';
@@ -64,7 +62,7 @@ const pulse = {
 	},
 } as const satisfies StyleRule;
 
-const blockChild = `${classSelector(loadingSkeletonScopeClassName)}:not([data-skeleton-inline]) > *`;
+const blockChild = `${attributeSelector(loadingSkeletonScopeAttribute)}:not([data-skeleton-inline]) > *`;
 
 // The child's own background is forced flat and pulses in sync with the `::after` overlay below,
 // so at a rounded corner its square edge would otherwise show through the overlay's rounded
