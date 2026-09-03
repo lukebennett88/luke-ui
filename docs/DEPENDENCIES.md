@@ -49,8 +49,8 @@ notice.
 ## Changesets
 
 `@luke-ui/react` and `@luke-ui/vite` are unpublished at version `0.0.0`. `apps/docs` and
-`@luke-ui/rainbow-sprinkles` are private. Before `1.0.0` no pull request needs a changeset, including
-one that moves a runtime or peer dependency.
+`@luke-ui/rainbow-sprinkles` are private. Before `1.0.0` no pull request needs a changeset,
+including one that moves a runtime or peer dependency.
 
 The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
 will be runtime or peer dependencies of the published packages at `1.0.0`. Re-sync that list against

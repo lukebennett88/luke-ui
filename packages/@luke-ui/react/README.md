@@ -11,9 +11,9 @@ pnpm add @luke-ui/react react-aria-components
 
 Luke UI expects the application to provide a compatible shared `react-aria-components` instance.
 
-An application that authors `xstyle` overrides also installs `@stylexjs/stylex` and
-`@luke-ui/vite`. See the [Installation guide](https://lukebennett88.github.io/luke-ui/docs/installation)
-for the one-time Vite setup.
+An application that authors `xstyle` overrides also installs `@stylexjs/stylex` and `@luke-ui/vite`.
+See the [Installation guide](https://lukebennett88.github.io/luke-ui/docs/installation) for the
+one-time Vite setup.
 
 ## Setup
 

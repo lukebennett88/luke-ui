@@ -206,7 +206,8 @@ Internally `@luke-ui/vite`:
 - Compiles application StyleX with `useLayers: { before, after, prefix: 'xstyle' }`, which is the
   only StyleX layer form that emits a dedicated sibling `xstyle` layer. Boolean `useLayers` /
   `useCSSLayers` emits bare `priorityN` layers and cannot satisfy this contract — that is why the
-  package exists instead of pointing consumers at `@stylexjs/unplugin` or `@stylexjs/postcss-plugin`.
+  package exists instead of pointing consumers at `@stylexjs/unplugin` or
+  `@stylexjs/postcss-plugin`.
 - In development, scans application source before the first stylesheet load so the CSS is complete
   without waiting for Vite to transform every StyleX module, and invalidates the stylesheet on
   StyleX-eligible HMR updates.
@@ -227,11 +228,11 @@ Measured ground truth that motivates this design (verified with `@stylexjs/babel
 `@stylexjs/stylex` is a `dependency` of `@luke-ui/react` because `stylex.props` runs at runtime.
 Consumers who author `xstyle` must still declare `@stylexjs/stylex` themselves: pnpm isolates
 dependencies, so an application cannot resolve Luke UI's transitive copy. `@luke-ui/vite` owns
-`@babel/core` and `@stylexjs/babel-plugin` so consumers do not install those. `packed-consumer.test.ts`
-covers the isolation regression. Real Vite build/dev coverage for the public plugin lives in
-`@luke-ui/vite`. `xstyle.browser.test.tsx` covers only the in-repo/dev-compiled path (compiled by
-this package's `createStylexDevPlugin` into `recipes.sx.*`) and does not by itself prove the public
-consumer contract.
+`@babel/core` and `@stylexjs/babel-plugin` so consumers do not install those.
+`packed-consumer.test.ts` covers the isolation regression. Real Vite build/dev coverage for the
+public plugin lives in `@luke-ui/vite`. `xstyle.browser.test.tsx` covers only the
+in-repo/dev-compiled path (compiled by this package's `createStylexDevPlugin` into `recipes.sx.*`)
+and does not by itself prove the public consumer contract.
 
 `src/theme/tokens.stylex.ts` exports the one `vars` token interface, generated from
 `themeContractTree` with `stylex.unstable_defineConstsNested`. Its nested shape mirrors the contract
@@ -362,10 +363,10 @@ A component resolves styles in this order: internal defaults, then its own varia
 through one `stylex.props` call, so `xstyle` reliably replaces a same-property component atom. That
 part of the contract is guaranteed by resolution order alone.
 
-The `xstyle < className` step is not — it is a cascade-layer guarantee, and only holds when
-`xstyle` is compiled into the dedicated `xstyle` layer. `@luke-ui/vite` does that for Vite
-consumers. See "The `xstyle` layer contract" under [Cascade layers](#cascade-layers). Inline `style`
-always wins, because it sits outside the layered cascade entirely.
+The `xstyle < className` step is not — it is a cascade-layer guarantee, and only holds when `xstyle`
+is compiled into the dedicated `xstyle` layer. `@luke-ui/vite` does that for Vite consumers. See
+"The `xstyle` layer contract" under [Cascade layers](#cascade-layers). Inline `style` always wins,
+because it sits outside the layered cascade entirely.
 
 ### Shared input-state selectors
 
