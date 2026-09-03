@@ -786,6 +786,9 @@ function isStylexCustomPropertyRule(rule: Rule): boolean {
 	return rule.nodes.every((node) => node.type === 'decl' && node.prop.startsWith('--'));
 }
 
+/** Every unhashed class name the built stylesheet is allowed to ship. */
+const STABLE_SELECTORS = ['.luke-ui-prose', '.luke-ui-reset', '.luke-ui-theme'];
+
 function assertStableSelectors(root: Root): void {
 	const selectors = new Set<string>();
 	root.walkRules((rule) => {
@@ -794,7 +797,12 @@ function assertStableSelectors(root: Root): void {
 		}
 	});
 
-	expect(selectors).toEqual(new Set(['.luke-ui-reset', '.luke-ui-theme']));
+	// The only unhashed classes the stylesheet may ship. `luke-ui-reset` and `luke-ui-theme` are
+	// the documented roots a consumer applies; `luke-ui-prose` is a private marker bridging Prose's
+	// public class-string recipe to its retained rules, so it can be neither hashed nor an
+	// attribute. Adding a name here makes it part of the shipped selector surface, so it must be a
+	// deliberate choice. Asserted as a subset because fixtures exercise only some of these.
+	for (const selector of selectors) expect(STABLE_SELECTORS).toContain(selector);
 }
 
 function assertSentinel(
