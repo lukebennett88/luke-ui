@@ -577,6 +577,37 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.12)(typescript@7.0.2)(yaml@2.9.0))
 
+  packages/@luke-ui/vite:
+    dependencies:
+      '@babel/core':
+        specifier: 'catalog:'
+        version: 8.0.1
+      '@stylexjs/babel-plugin':
+        specifier: 'catalog:'
+        version: 0.19.0(supports-color@7.2.0)
+      vite:
+        specifier: npm:@voidzero-dev/vite-plus-core@0.3.0
+        version: '@voidzero-dev/vite-plus-core@0.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.12)(typescript@7.0.2)(yaml@2.9.0)'
+    devDependencies:
+      '@stylexjs/stylex':
+        specifier: 'catalog:'
+        version: 0.19.0
+      '@types/babel__core':
+        specifier: 'catalog:'
+        version: 7.20.5
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.4.0
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vite-plus:
+        specifier: 'catalog:'
+        version: 0.3.0(@arethetypeswrong/core@0.18.5)(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.12)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.12)(typescript@7.0.2)(yaml@2.9.0)
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.4.0)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.12)(typescript@7.0.2)(yaml@2.9.0))
+
   packages/turbo-generators:
     devDependencies:
       '@types/node':

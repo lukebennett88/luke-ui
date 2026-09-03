@@ -39,6 +39,10 @@ export default {
 			// package currently has no docs pages of its own.
 			project: ['src/**/*.{ts,tsx,mdx}', 'stylex-vite-plugin.ts'],
 		},
+		'packages/@luke-ui/vite': {
+			entry: ['src/index.ts', 'src/stylesheet.css'],
+			project: ['src/**/*.{ts,css}'],
+		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],
 			project: ['**/*.ts'],

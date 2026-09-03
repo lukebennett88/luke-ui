@@ -10,6 +10,11 @@ packages:
 
 catalogMode: strict
 
+# Ranges published to npm for packages that must not advertise the workspace Vite Plus alias.
+catalogs:
+  publish:
+    vite: ^6.0.0 || ^7.0.0 || ^8.0.0
+
 peerDependencyRules:
   allowedVersions:
     '@joshwooding/vite-plugin-react-docgen-typescript>vite': ^8.0.0

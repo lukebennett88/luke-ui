@@ -190,71 +190,48 @@ A consumer declares only the stable `recipes` parent layer, never the priority c
 
 The public `xstyle` prop only overrides a same-property recipe/variant atom reliably. Whether it
 also loses to a consumer `className` is a cascade-layer question, not a resolution-order question,
-and it depends entirely on how the consumer compiles their own StyleX.
+and it depends entirely on how consumer StyleX is compiled.
 
-Measured ground truth (verified with `@stylexjs/babel-plugin`'s `processStylexRules` and a real
-Chromium, see `packed-consumer.test.ts`):
+`@luke-ui/vite` owns that compilation for Vite applications. Consumers install `@luke-ui/vite`, add
+`lukeUi()` to their Vite config, and import `@luke-ui/vite/stylesheet.css` before the Luke UI
+stylesheet. The hosted Installation and Styling guides document only that public API. They do not
+contain a copy-paste plugin, Babel configuration, or virtual-module details.
 
-- **StyleX's default output is unlayered.** `processStylexRules(rules)` with no `useLayers` option
-  emits plain rules with no `@layer` at all. An unlayered rule beats every layered rule in the
-  document, so an unlayered consumer `xstyle` beats even a layered consumer `className` — the
-  documented `className > xstyle` step is false for a consumer who never configures `useLayers`.
-- **`useLayers` must be an object, not a bare boolean/positional argument.** Passing the layer
-  config as a bare second positional argument (rather than `{ useLayers: {...} }`) is silently
-  ignored and still emits unlayered CSS.
-- **Nesting consumer StyleX under the `recipes` parent layer is non-deterministic.** If a consumer
-  compiles their `xstyle` into `recipes.<their-prefix>.priorityN`, the winner between that and Luke
-  UI's own `recipes.sx.priorityN` atoms depends entirely on which stylesheet registers its sub-layer
-  first, that is, import order. Do not recommend or rely on this.
-- **A dedicated sibling `xstyle` layer is the one configuration that works, order-independent.**
-  With the declared combined order
-  `@layer reset, theme, base, recipes, xstyle, components, utilities;` and the consumer compiling
-  with `useLayers: { before, after, prefix: 'xstyle' }` (the `before`/`after` arrays matching
-  everything on each side of `xstyle` in that declared order), the consumer's `xstyle` atoms beat
-  Luke UI's recipe/variant atoms in both registration orders, and the consumer's own
-  `components`/`utilities` rules beat `xstyle`. This is the minimum supported consumer configuration
-  for the published precedence, and it is what the hosted Styling guide documents.
-- **The combined `@layer` order statement must be declared before anything else mentions any of
-  those layer names.** CSS gives a layer its position from wherever it is _first_ mentioned in the
-  document. If the shipped `dist/stylesheet.css` (which already lists
-  `recipes.sx.priorityN, components, utilities` in its own opening `@layer` statement) loads before
-  the consumer's combined-order statement, `xstyle` — mentioned for the first time only in the
-  consumer's own compiled CSS — gets appended after `utilities` instead of sitting between `recipes`
-  and `components`. Declaring the full order up front, before any stylesheet import, is what fixes
-  the position.
-- **`@stylexjs/stylex` is a runtime dependency, but `@stylexjs/babel-plugin` is not shipped to
-  consumers.** `@stylexjs/stylex` is a `dependency` of `@luke-ui/react` because `stylex.props` runs
-  at runtime. `@stylexjs/babel-plugin` is only a devDependency of this package — a consumer who
-  wants to author `xstyle` installs and configures their own StyleX compiler. Consumers must also
-  declare `@stylexjs/stylex`: pnpm isolates dependencies, so a consumer that imports only
-  `@luke-ui/react` cannot resolve Luke UI's transitive copy for its own
-  `import * as stylex from '@stylexjs/stylex'` call. `packed-consumer.test.ts` covers this. An
-  undeclared `@stylexjs/stylex` import fails in the throwaway consumer, while Luke UI's own
-  resolution still succeeds.
-- **The official StyleX bundler integrations cannot emit the `xstyle` sibling layer.**
-  `@stylexjs/unplugin` and `@stylexjs/postcss-plugin` at 0.19.0 both expose `useCSSLayers` only as a
-  boolean. Both pass that value to `processStylexRules(rules, { useLayers: <boolean> })`. With
-  `useLayers: true`, StyleX emits bare, unprefixed top-level layers
-  (`@layer priority1, priority2;`). It cannot declare the combined order or emit a prefixed
-  `xstyle.priorityN` sibling layer. Only the object form, `useLayers: { before, after, prefix }`,
-  produces that output. This was confirmed by running `processStylexRules` directly. The hosted
-  Styling guide documents a small Vite plugin built on `@babel/core` and `@stylexjs/babel-plugin`.
-  In development that plugin scans the application source before serving `virtual:stylex.css`, then
-  returns the virtual stylesheet from `hotUpdate` when a StyleX-eligible file changes, so the first
-  load is complete and later edits reload the CSS. `xstyle-consumer-vite-plugin.test.ts` drives the
-  documented plugin through Vite's `build` and `createServer` APIs.
+Internally `@luke-ui/vite`:
 
-`packed-consumer.test.ts` is the test that backs this contract: it packs the real tarball into a
-throwaway consumer directory laid out the way pnpm would install it — Luke UI's own `dependencies`
-symlinked nested under `@luke-ui/react/node_modules` so they stay private to Luke UI, its
-`peerDependencies` plus anything the fixture consumer declares for itself at the consumer's top
-level — has the consumer compile its own `stylex.create()` call with its own `@babel/core` +
-`@stylexjs/babel-plugin` invocation (never through `createStylexDevPlugin`) using the documented
-`useLayers` configuration, then drives a real Playwright Chromium instance to assert
-`getComputedStyle` outcomes for xstyle overriding a variant, `className` overriding `xstyle`, and
-inline `style` overriding both. `xstyle.browser.test.tsx` covers only the in-repo/dev-compiled path
-(its `stylex.create()` call is compiled by this package's own `createStylexDevPlugin`, landing in
-Luke UI's own `recipes.sx.*` layers) and does not by itself prove the public contract.
+- Declares the combined layer order
+  `@layer reset, theme, base, recipes, xstyle, components, utilities;` in the public stylesheet
+  subpath, so `xstyle` is positioned before Luke UI's shipped stylesheet mentions `components` /
+  `utilities`.
+- Compiles application StyleX with `useLayers: { before, after, prefix: 'xstyle' }`, which is the
+  only StyleX layer form that emits a dedicated sibling `xstyle` layer. Boolean `useLayers` /
+  `useCSSLayers` emits bare `priorityN` layers and cannot satisfy this contract — that is why the
+  package exists instead of pointing consumers at `@stylexjs/unplugin` or `@stylexjs/postcss-plugin`.
+- In development, scans application source before the first stylesheet load so the CSS is complete
+  without waiting for Vite to transform every StyleX module, and invalidates the stylesheet on
+  StyleX-eligible HMR updates.
+- In production, uses a placeholder during `load` and substitutes the collected CSS in
+  `generateBundle`, because Rollup loads the stylesheet before the rest of the module graph is
+  traversed.
+
+Measured ground truth that motivates this design (verified with `@stylexjs/babel-plugin`'s
+`processStylexRules` and Chromium in `packed-consumer.test.ts`):
+
+- StyleX's default output is unlayered. An unlayered rule beats every layered rule, so unlayered
+  `xstyle` would beat a layered consumer `className`.
+- Nesting consumer StyleX under the `recipes` parent layer is import-order dependent against Luke
+  UI's own `recipes.sx.priorityN` atoms. Do not rely on it.
+- A dedicated sibling `xstyle` layer between `recipes` and `components`/`utilities` is the
+  order-independent configuration that matches the published precedence.
+
+`@stylexjs/stylex` is a `dependency` of `@luke-ui/react` because `stylex.props` runs at runtime.
+Consumers who author `xstyle` must still declare `@stylexjs/stylex` themselves: pnpm isolates
+dependencies, so an application cannot resolve Luke UI's transitive copy. `@luke-ui/vite` owns
+`@babel/core` and `@stylexjs/babel-plugin` so consumers do not install those. `packed-consumer.test.ts`
+covers the isolation regression. Real Vite build/dev coverage for the public plugin lives in
+`@luke-ui/vite`. `xstyle.browser.test.tsx` covers only the in-repo/dev-compiled path (compiled by
+this package's `createStylexDevPlugin` into `recipes.sx.*`) and does not by itself prove the public
+consumer contract.
 
 `src/theme/tokens.stylex.ts` exports the one `vars` token interface, generated from
 `themeContractTree` with `stylex.unstable_defineConstsNested`. Its nested shape mirrors the contract
@@ -385,11 +362,10 @@ A component resolves styles in this order: internal defaults, then its own varia
 through one `stylex.props` call, so `xstyle` reliably replaces a same-property component atom. That
 part of the contract is guaranteed by resolution order alone.
 
-The `xstyle < className` step is not — it is a cascade-layer guarantee, and only holds when the
-consumer compiles `xstyle` into the dedicated `xstyle` layer described below. See "The `xstyle`
-layer contract" under [Cascade layers](#cascade-layers) for the full, measured account of what a
-consumer must configure, and what happens without it. Inline `style` always wins, because it sits
-outside the layered cascade entirely.
+The `xstyle < className` step is not — it is a cascade-layer guarantee, and only holds when
+`xstyle` is compiled into the dedicated `xstyle` layer. `@luke-ui/vite` does that for Vite
+consumers. See "The `xstyle` layer contract" under [Cascade layers](#cascade-layers). Inline `style`
+always wins, because it sits outside the layered cascade entirely.
 
 ### Shared input-state selectors
 

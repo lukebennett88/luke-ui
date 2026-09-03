@@ -48,13 +48,18 @@ notice.
 
 ## Changesets
 
-`@luke-ui/react` is unpublished at version `0.0.0`. `apps/docs` and `@luke-ui/rainbow-sprinkles` are
-private. Before `1.0.0` no pull request needs a changeset, including one that moves a runtime or
-peer dependency.
+`@luke-ui/react` and `@luke-ui/vite` are unpublished at version `0.0.0`. `apps/docs` and
+`@luke-ui/rainbow-sprinkles` are private. Before `1.0.0` no pull request needs a changeset, including
+one that moves a runtime or peer dependency.
 
 The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
-will be runtime or peer dependencies of the published package at `1.0.0`. Re-sync that list against
-`dependencies` and `peerDependencies` in `packages/@luke-ui/react/package.json` at `1.0.0`.
+will be runtime or peer dependencies of the published packages at `1.0.0`. Re-sync that list against
+`dependencies` and `peerDependencies` in `packages/@luke-ui/react/package.json` and
+`packages/@luke-ui/vite/package.json` at `1.0.0`.
+
+`@luke-ui/vite` publishes a Vite peer from the named `publish` catalog (`catalog:publish`) so the
+npm peer range describes ordinary Vite compatibility. The default catalog's `vite` entry remains the
+workspace Vite Plus alias and must not appear in a published peer.
 
 `react` and `react-dom` use `rangeStrategy: 'replace'` rather than `bump`, so the catalog range only
 widens when the caret stops covering the new version. The catalog range is what gets published as

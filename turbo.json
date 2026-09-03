@@ -62,7 +62,9 @@
 				"$TURBO_ROOT$/docs/**",
 				"$TURBO_ROOT$/packages/@luke-ui/react/package.json",
 				"$TURBO_ROOT$/packages/@luke-ui/react/src/**/*.ts",
-				"$TURBO_ROOT$/packages/@luke-ui/react/src/**/*.tsx"
+				"$TURBO_ROOT$/packages/@luke-ui/react/src/**/*.tsx",
+				"$TURBO_ROOT$/packages/@luke-ui/vite/package.json",
+				"$TURBO_ROOT$/packages/@luke-ui/vite/src/**/*.ts"
 			]
 		},
 		"check:format": {

@@ -40,24 +40,35 @@ must use a specific mode. Without it, Luke UI follows the system preference.
 
 ## Optional: set up `xstyle`
 
-`xstyle` is optional. Skip this step if you never override a component style beyond its supported
-props — you need no StyleX compiler at all.
+Skip this step if you never override a component style beyond its supported props.
 
-If you use `xstyle`, install `@stylexjs/stylex` as a dependency and a StyleX compiler as a dev
-dependency. Your application imports `@stylexjs/stylex` directly, and pnpm isolates dependencies, so
-it cannot use the copy Luke UI installs for its own runtime. Declare it yourself. The full install
-for an application that authors `xstyle` is:
+If you use `xstyle`, install StyleX and the Luke UI Vite plugin:
 
 ```bash
-pnpm add @luke-ui/react react-aria-components @stylexjs/stylex
-pnpm add -D @babel/core @stylexjs/babel-plugin
+pnpm add @stylexjs/stylex
+pnpm add -D @luke-ui/vite
 ```
 
-The compiler alone does not complete the setup. Your build must run the transform, collect the
-extracted rules, emit them into a dedicated `xstyle` cascade layer between `recipes` and
-`components`, and declare the combined layer order before loading the stylesheets. Read
-[Styling](/docs/styling#give-xstyle-its-own-layer) for the bundler integration and the required
-layer order.
+Add the plugin to your Vite config:
+
+```ts
+import { lukeUi } from '@luke-ui/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+	plugins: [lukeUi()],
+});
+```
+
+Import `@luke-ui/vite/stylesheet.css` before the Luke UI stylesheet:
+
+```ts
+import '@luke-ui/vite/stylesheet.css';
+import '@luke-ui/react/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
+```
+
+Read [Styling](/docs/styling) for how to use `xstyle`.
 
 ## Continue learning
 

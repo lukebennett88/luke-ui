@@ -281,33 +281,27 @@ test(
 	},
 );
 
-// The documented consumer layer configuration for authoring `xstyle` (see the "Cascade layers"
-// section of the Styling guide and `docs/STYLING.md`): a dedicated `xstyle` sibling layer that
-// sits above `recipes` but below `components` and `utilities`. This is the MINIMUM supported
-// consumer configuration for the published `xstyle < className` precedence — with StyleX's
-// default unlayered output, an unlayered consumer `xstyle` beats even a layered consumer
-// `className`, and nesting consumer StyleX under the `recipes` parent layer is import-order
-// dependent, so this test asserts the one configuration the docs actually recommend.
-const DOCUMENTED_XSTYLE_LAYERS_BEFORE = ['reset', 'theme', 'base', 'recipes'];
-const DOCUMENTED_XSTYLE_LAYERS_AFTER = ['components', 'utilities'];
-const DOCUMENTED_XSTYLE_LAYER_PREFIX = 'xstyle';
+// The `xstyle` sibling-layer configuration `@luke-ui/vite` applies when extracting consumer StyleX.
+// This file proves the cascade contract against a packed `@luke-ui/react` tarball. Vite build/dev
+// coverage for the public plugin lives in `@luke-ui/vite`.
+const XSTYLE_LAYERS_BEFORE = ['reset', 'theme', 'base', 'recipes'];
+const XSTYLE_LAYERS_AFTER = ['components', 'utilities'];
+const XSTYLE_LAYER_PREFIX = 'xstyle';
 
 test(
 	'a real consumer StyleX compile proves the published xstyle precedence against real cascade resolution',
 	{ timeout: 60_000 },
 	async () => {
-		// Mirrors the documented install command: an application authoring `xstyle` installs
-		// `@stylexjs/stylex` directly, and does not rely on Luke UI's transitive copy.
+		// An application authoring `xstyle` installs `@stylexjs/stylex` directly and does not rely
+		// on Luke UI's transitive copy.
 		const { cleanup, consumerDir, packedPackageRoot } = await packAndLinkConsumer({
 			consumerDependencies: ['@stylexjs/stylex'],
 		});
 		let browser: Awaited<ReturnType<typeof chromium.launch>> | undefined;
 		try {
-			// The consumer authors its own `stylex.create()` value and compiles it with its OWN
-			// `@babel/core` + `@stylexjs/babel-plugin` invocation — never through Luke UI's
-			// `createStylexDevPlugin` — using the documented `useLayers` configuration. This is what
-			// makes the coverage prove the PUBLIC contract rather than the in-repo dev-compiled path
-			// `xstyle.browser.test.tsx` covers.
+			// Compiles consumer StyleX with the same layer configuration `@luke-ui/vite` uses, without
+			// going through this package's `createStylexDevPlugin`, so the cascade assertion covers the
+			// public layer contract rather than the in-repo recipe-layer path.
 			const consumerSource = [
 				"import * as stylex from '@stylexjs/stylex';",
 				"export const consumerStyles = stylex.create({ override: { color: 'rgb(9, 9, 9)' } });",
@@ -334,15 +328,12 @@ test(
 
 			const consumerStylexCss = stylexBabelPlugin.processStylexRules(consumerRules, {
 				useLayers: {
-					after: DOCUMENTED_XSTYLE_LAYERS_AFTER,
-					before: DOCUMENTED_XSTYLE_LAYERS_BEFORE,
-					prefix: DOCUMENTED_XSTYLE_LAYER_PREFIX,
+					after: XSTYLE_LAYERS_AFTER,
+					before: XSTYLE_LAYERS_BEFORE,
+					prefix: XSTYLE_LAYER_PREFIX,
 				},
 			});
-			// Confirms the compile actually produced the documented `xstyle.priorityN` sibling layer,
-			// not an unlayered or differently-prefixed rule — a false pass here would silently stop
-			// proving the documented configuration.
-			expect(consumerStylexCss).toContain(`@layer ${DOCUMENTED_XSTYLE_LAYER_PREFIX}.priority1`);
+			expect(consumerStylexCss).toContain(`@layer ${XSTYLE_LAYER_PREFIX}.priority1`);
 			await writeFile(
 				path.join(consumerDir, 'xstyle-consumer-style.mjs'),
 				transformedConsumer.code,
@@ -387,28 +378,14 @@ test(
 			expect(withClassNameMarkup).toContain('consumer-class');
 			expect(withInlineStyleMarkup).toContain('color:rgb(70, 80, 90)');
 
-			// The real shipped stylesheet plus a real bundled theme, exactly as `layer-order.browser
-			// .test.ts` verifies the in-repo build's layer order — read from the PACKED tarball, not
-			// the workspace `dist`, so this proves what actually ships.
 			const [lukeStylesheetCss, lukeThemeCss] = await Promise.all([
 				readFile(path.join(packedPackageRoot, 'dist/stylesheet.css'), 'utf8'),
 				readFile(path.join(packedPackageRoot, 'dist/themes/tactile/stylesheet.css'), 'utf8'),
 			]);
 
-			// The consumer's own `className` rule, declared in the `components` layer — a stand-in
-			// for Tailwind, CSS Modules, or hand-authored application CSS placed in the layer the docs
-			// recommend. It must beat `xstyle` (a sibling layer below `components`) but must itself
-			// lose to inline `style`.
 			const consumerClassNameCss =
 				'@layer components { .consumer-class { color: rgb(40, 50, 60); } }';
 
-			// The documented combined `@layer` order statement, declared before any stylesheet is
-			// imported (see the "Cascade layers" section of the Styling guide). Without this, CSS's
-			// own rule for cascade layers applies: a layer name gets its position from where it is
-			// FIRST mentioned across the whole document, so `xstyle` — mentioned for the first time
-			// only in the consumer's own compiled CSS, after the shipped stylesheet has already
-			// registered `components` and `utilities` — would be appended after them instead of
-			// between `recipes` and `components`. This statement is the reason that doesn't happen.
 			const declaredLayerOrder =
 				'@layer reset, theme, base, recipes, xstyle, components, utilities;';
 
@@ -420,9 +397,6 @@ test(
 				consumerClassNameCss,
 			].join('\n');
 
-			// Sanity-checks the fixture itself: the Tactile theme's accent foreground must actually
-			// resolve to something other than the consumer override colour, otherwise "xstyle beats
-			// the variant" would be a no-op instead of a real cascade override.
 			const themedAccentOnlyCss = [lukeThemeCss, lukeStylesheetCss].join('\n');
 			const noXstyleMarkup = withClassNameMarkup.replace(' class="consumer-class"', '');
 
@@ -435,7 +409,6 @@ test(
 			);
 			expect(variantOnlyColor).not.toBe('rgb(9, 9, 9)');
 
-			// 1. xstyle overrides the component variant.
 			const xstyleOverVariantCss = [lukeThemeCss, lukeStylesheetCss, consumerStylexCss].join('\n');
 			await page.setContent(`<style>${xstyleOverVariantCss}</style>${xstyleOnlyMarkup}`);
 			const xstyleOnlyColor = await page.evaluate(
@@ -443,15 +416,12 @@ test(
 			);
 			expect(xstyleOnlyColor).toBe('rgb(9, 9, 9)');
 
-			// 2. consumer className overrides xstyle, because the documented `xstyle` layer sits
-			// below `components`.
 			await page.setContent(`<style>${documentCss}</style>${withClassNameMarkup}`);
 			const withClassNameColor = await page.evaluate(
 				() => getComputedStyle(document.querySelector('[class]')!).color,
 			);
 			expect(withClassNameColor).toBe('rgb(40, 50, 60)');
 
-			// 3. inline style overrides both className and xstyle.
 			await page.setContent(`<style>${documentCss}</style>${withInlineStyleMarkup}`);
 			const withInlineStyleColor = await page.evaluate(
 				() => getComputedStyle(document.querySelector('[class]')!).color,
@@ -465,105 +435,6 @@ test(
 		}
 	},
 );
-
-// Matches the first declared `@layer` order statement in a stylesheet, e.g.
-// `@layer reset, theme, base;`. Captures the comma-separated layer name list.
-const LAYER_ORDER_STATEMENT_PATTERN = /@layer\s+([^{};]+);/;
-
-// Matches a `prefix.priorityN` layer name, e.g. `xstyle.priority1`.
-const XSTYLE_PRIORITY_LAYER_NAME_PATTERN = new RegExp(
-	`^${DOCUMENTED_XSTYLE_LAYER_PREFIX}\\.priority\\d+$`,
-);
-
-// Pins the layer configuration the Styling guide's documented consumer Vite plugin declares (see
-// the "Give `xstyle` its own layer" section) against the real StyleX compiler, so the published
-// snippet and the cascade contract this repo ships cannot drift apart silently. The end-to-end
-// cascade behaviour itself — that a consumer's `xstyle` really does sit between `recipes` and
-// `components` in real browser resolution — is covered by the test above; this test only proves
-// that `LAYER_CONFIG` as documented produces the expected layer names and rule wrapping.
-test('the documented consumer Vite plugin layer config emits the xstyle sibling layer', async () => {
-	const consumerSource = [
-		"import * as stylex from '@stylexjs/stylex';",
-		'export const consumerStyles = stylex.create({',
-		"  override: { color: 'rgb(9, 9, 9)', paddingBlockStart: '4px' },",
-		'});',
-	].join('\n');
-	const transformedConsumer = await transformAsync(consumerSource, {
-		babelrc: false,
-		configFile: false,
-		filename: path.join(packageRoot, 'xstyle-layer-config-consumer-style.ts'),
-		plugins: [
-			stylexBabelPlugin.withOptions({
-				dev: false,
-				unstable_moduleResolution: { type: 'commonJS', rootDir: packageRoot },
-			}),
-		],
-	});
-	if (transformedConsumer?.code == null) throw new Error('Expected the consumer StyleX transform.');
-	const consumerRules = (
-		transformedConsumer.metadata as {
-			stylex?: Parameters<typeof stylexBabelPlugin.processStylexRules>[0];
-		}
-	).stylex;
-	if (consumerRules === undefined) throw new Error('Expected consumer StyleX rules.');
-
-	const layeredCss = stylexBabelPlugin.processStylexRules(consumerRules, {
-		useLayers: {
-			after: DOCUMENTED_XSTYLE_LAYERS_AFTER,
-			before: DOCUMENTED_XSTYLE_LAYERS_BEFORE,
-			prefix: DOCUMENTED_XSTYLE_LAYER_PREFIX,
-		},
-	});
-
-	const layerOrderMatch = LAYER_ORDER_STATEMENT_PATTERN.exec(layeredCss);
-	const layerOrderNameList = layerOrderMatch?.[1];
-	if (layerOrderNameList === undefined) {
-		throw new Error(`Expected a "@layer ...;" order statement in:\n${layeredCss}`);
-	}
-	const layerNames = layerOrderNameList.split(',').map((name) => name.trim());
-
-	const xstyleLayerNames = layerNames.filter((name) =>
-		XSTYLE_PRIORITY_LAYER_NAME_PATTERN.test(name),
-	);
-	const beforeNames = layerNames.slice(0, DOCUMENTED_XSTYLE_LAYERS_BEFORE.length);
-	const afterNames = layerNames.slice(layerNames.length - DOCUMENTED_XSTYLE_LAYERS_AFTER.length);
-	const middleNames = layerNames.slice(
-		DOCUMENTED_XSTYLE_LAYERS_BEFORE.length,
-		layerNames.length - DOCUMENTED_XSTYLE_LAYERS_AFTER.length,
-	);
-
-	expect(beforeNames).toEqual(DOCUMENTED_XSTYLE_LAYERS_BEFORE);
-	expect(afterNames).toEqual(DOCUMENTED_XSTYLE_LAYERS_AFTER);
-	expect(middleNames.length).toBeGreaterThan(0);
-	for (const name of middleNames) {
-		expect(name.startsWith(`${DOCUMENTED_XSTYLE_LAYER_PREFIX}.priority`)).toBe(true);
-	}
-	// Proves the prefix applies across more than one StyleX priority, not just the first.
-	expect(xstyleLayerNames.length).toBeGreaterThanOrEqual(2);
-
-	// Every rule block is wrapped in the prefixed sibling layer, not left unlayered and not nested
-	// under `recipes`.
-	for (const xstyleLayerName of xstyleLayerNames) {
-		expect(layeredCss).toContain(`@layer ${xstyleLayerName}{`);
-	}
-
-	// Guards against a vacuous pass: the plain boolean `useLayers: true` form — what
-	// `@stylexjs/unplugin` and `@stylexjs/postcss-plugin` use — does NOT produce the `xstyle`
-	// prefix. It emits bare `@layer priorityN` names instead, which is exactly why those official
-	// integrations cannot satisfy this contract and the docs point at a hand-rolled plugin instead.
-	const unprefixedCss = stylexBabelPlugin.processStylexRules(consumerRules, { useLayers: true });
-	expect(unprefixedCss).not.toContain(DOCUMENTED_XSTYLE_LAYER_PREFIX);
-	const unprefixedLayerOrderMatch = LAYER_ORDER_STATEMENT_PATTERN.exec(unprefixedCss);
-	const unprefixedLayerOrderNameList = unprefixedLayerOrderMatch?.[1];
-	if (unprefixedLayerOrderNameList === undefined) {
-		throw new Error(`Expected a "@layer ...;" order statement in:\n${unprefixedCss}`);
-	}
-	const unprefixedLayerNames = unprefixedLayerOrderNameList.split(',').map((name) => name.trim());
-	expect(unprefixedLayerNames.length).toBeGreaterThanOrEqual(2);
-	for (const name of unprefixedLayerNames) {
-		expect(name.startsWith('priority')).toBe(true);
-	}
-});
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === 'object' && value !== null;

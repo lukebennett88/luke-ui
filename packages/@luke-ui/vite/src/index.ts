@@ -5,35 +5,47 @@ import type { Rule } from '@stylexjs/babel-plugin';
 import { readdir, readFile } from 'node:fs/promises';
 import type { Plugin } from 'vite';
 
-const VIRTUAL_ID = 'virtual:stylex.css';
-const RESOLVED_ID = '\0virtual:stylex.css';
+/** Public stylesheet subpath consumers import for the `xstyle` layer order and extracted CSS. */
+export const STYLESHEET_IMPORT = '@luke-ui/vite/stylesheet.css';
+
+const RESOLVED_STYLESHEET_ID = '\0luke-ui-vite:stylesheet.css';
+const LAYER_ORDER = '@layer reset, theme, base, recipes, xstyle, components, utilities;';
 const LAYER_CONFIG = {
 	before: ['reset', 'theme', 'base', 'recipes'],
 	after: ['components', 'utilities'],
 	prefix: 'xstyle',
 } as const;
-// The plugin replaces this in `generateBundle`. The declaration prevents Vite's CSS
-// minifier from removing it first.
+/** Replaced in `generateBundle`. The declaration keeps Vite's CSS minifier from dropping it. */
 const PLACEHOLDER = '.stylex-placeholder{--stylex-placeholder:0}';
 const PLACEHOLDER_PATTERN = /\.stylex-placeholder\s*\{[^}]*\}/;
 /** A `.ts`/`.tsx`/`.js`/`.jsx` module, excluding declaration files. */
 const STYLEX_ELIGIBLE_MODULE_PATTERN = /(?<!\.d)\.[cm]?[jt]sx?$/;
 const SKIP_DIRECTORY_NAMES = new Set(['dist', '.git', 'node_modules']);
+const PACKAGE_STYLESHEET_PATH_PATTERN =
+	/[/\\]@luke-ui[/\\]vite[/\\](?:(?:dist|src)[/\\])?stylesheet\.css$/;
 
-export function stylex({ rootDir }: { rootDir: string }): Plugin {
+/**
+ * Vite plugin for applications that author Luke UI `xstyle` values.
+ *
+ * Add `lukeUi()` to the Vite config and import `@luke-ui/vite/stylesheet.css` before the Luke UI
+ * stylesheet. No options are required for the normal case.
+ */
+export function lukeUi(): Plugin {
 	const rulesByFile = new Map<string, Array<Rule>>();
 	let isDevServer = false;
+	let rootDir = '';
 	let sourceRules: Promise<Array<Rule>> | undefined;
 
 	function collectedCss(rules: ReadonlyArray<Rule>): string {
-		return stylexBabelPlugin.processStylexRules([...rules], {
+		const stylexCss = stylexBabelPlugin.processStylexRules([...rules], {
 			useLayers: LAYER_CONFIG,
 		});
+		return `${LAYER_ORDER}\n${stylexCss}`;
 	}
 
 	async function transformStylex(code: string, filename: string) {
 		if (!STYLEX_ELIGIBLE_MODULE_PATTERN.test(filename)) return null;
-		if (filename.includes('/node_modules/')) return null;
+		if (filename.includes('/node_modules/') || filename.includes('\\node_modules\\')) return null;
 		if (!code.includes('@stylexjs/stylex')) return null;
 		const result = await transformAsync(code, {
 			babelrc: false,
@@ -65,18 +77,20 @@ export function stylex({ rootDir }: { rootDir: string }): Plugin {
 	}
 
 	return {
-		name: 'stylex',
+		name: 'luke-ui',
+		enforce: 'pre',
 		configResolved(config) {
+			rootDir = config.root;
 			isDevServer = config.command === 'serve';
 		},
 		resolveId(id) {
-			if (id === VIRTUAL_ID) return RESOLVED_ID;
+			if (isStylesheetImport(id)) return RESOLVED_STYLESHEET_ID;
 		},
 		async load(id) {
-			if (id !== RESOLVED_ID) return;
+			if (id !== RESOLVED_STYLESHEET_ID) return;
 			// A build has not traversed the module graph yet, so not all rules are
 			// collected. Emit a placeholder and replace it in `generateBundle`.
-			if (!isDevServer) return PLACEHOLDER;
+			if (!isDevServer) return `${LAYER_ORDER}\n${PLACEHOLDER}`;
 			// Dev does not wait for `transform` either. Scan the application source
 			// so the first stylesheet already contains every StyleX rule.
 			sourceRules ??= collectSourceRules();
@@ -93,21 +107,27 @@ export function stylex({ rootDir }: { rootDir: string }): Plugin {
 		hotUpdate({ file, modules }) {
 			if (!STYLEX_ELIGIBLE_MODULE_PATTERN.test(file)) return;
 			sourceRules = undefined;
-			const virtualModule = this.environment.moduleGraph.getModuleById(RESOLVED_ID);
-			if (virtualModule === undefined) return;
-			// Nothing that changed imports the virtual module, so Vite never collects
+			const stylesheetModule = this.environment.moduleGraph.getModuleById(RESOLVED_STYLESHEET_ID);
+			if (stylesheetModule === undefined) return;
+			// Nothing that changed imports the stylesheet module, so Vite never collects
 			// it into `modules` on its own.
-			return [...modules, virtualModule];
+			return [...modules, stylesheetModule];
 		},
 		generateBundle(_options, bundle) {
 			const css = collectedCss([...rulesByFile.values()].flat());
 			for (const asset of Object.values(bundle)) {
 				if (asset.type !== 'asset' || typeof asset.source !== 'string') continue;
 				if (!PLACEHOLDER_PATTERN.test(asset.source)) continue;
-				asset.source = asset.source.replace(PLACEHOLDER_PATTERN, css);
+				asset.source = asset.source.replace(PLACEHOLDER_PATTERN, css.slice(LAYER_ORDER.length + 1));
 			}
 		},
 	};
+}
+
+function isStylesheetImport(id: string): boolean {
+	if (id === STYLESHEET_IMPORT) return true;
+	if (PACKAGE_STYLESHEET_PATH_PATTERN.test(id)) return true;
+	return false;
 }
 
 async function findSourceModules(directory: string): Promise<Array<string>> {

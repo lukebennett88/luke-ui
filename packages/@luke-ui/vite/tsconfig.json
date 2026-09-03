@@ -1,0 +1,20 @@
+{
+	"compilerOptions": {
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"lib": ["ES2022"],
+		"module": "preserve",
+		"moduleDetection": "force",
+		"noEmit": true,
+		"noImplicitOverride": true,
+		"noUncheckedIndexedAccess": true,
+		"noUncheckedSideEffectImports": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "esnext",
+		"types": ["node"],
+		"verbatimModuleSyntax": true
+	},
+	"include": ["src/**/*.ts", "vite.config.ts", "vitest.config.ts"]
+}
