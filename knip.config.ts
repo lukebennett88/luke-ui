@@ -41,7 +41,7 @@ export default {
 		},
 		'packages/@luke-ui/vite': {
 			entry: ['src/index.ts', 'src/stylesheet.css'],
-			project: ['src/**/*.{ts,css}'],
+			project: ['src/**/*.ts'],
 		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],
