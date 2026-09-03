@@ -9,14 +9,14 @@ const styles = stylex.create({
 	reset: {
 		paddingInline: 0,
 		'[data-pending="true"]::after': {
-			blockSize: vars.iconSizeXsmall,
+			blockSize: vars.iconSize.xsmall,
 			borderInlineEndColor: 'transparent',
 			borderColor: 'currentColor',
-			borderRadius: vars.radiusFull,
+			borderRadius: vars.radius.full,
 			borderStyle: 'solid',
 			borderWidth: '2px',
 			content: "''",
-			inlineSize: vars.iconSizeXsmall,
+			inlineSize: vars.iconSize.xsmall,
 			position: 'absolute',
 		},
 		'@media (forced-colors: active)': {
@@ -27,10 +27,10 @@ const styles = stylex.create({
 		},
 	},
 	sizeMedium: {
-		inlineSize: vars.controlSizeMedium,
+		inlineSize: vars.controlSize.medium,
 	},
 	sizeSmall: {
-		inlineSize: vars.controlSizeSmall,
+		inlineSize: vars.controlSize.small,
 	},
 });
 

@@ -2,7 +2,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineMain } from '@storybook/react-vite/node';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
-import { createStylexDevPlugin } from '../stylex-vite-plugin.js';
+import { createStylexDevPlugin, stylexVanillaExtractPluginFilter } from '../stylex-vite-plugin.js';
 
 function getAbsolutePath(value: string) {
 	return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
@@ -33,7 +33,7 @@ export default defineMain({
 	viteFinal(config) {
 		config.plugins = [
 			...(config.plugins ?? []),
-			...vanillaExtractPlugin(),
+			...vanillaExtractPlugin({ unstable_pluginFilter: stylexVanillaExtractPluginFilter }),
 			createStylexDevPlugin(),
 		];
 		config.resolve ??= {};

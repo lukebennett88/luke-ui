@@ -1,5 +1,5 @@
 import { lukeUiClassNames } from '../../shared/class-names.js';
-import { vars } from '../../theme/contract.css.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import { focusRing } from './focus-ring.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 import { classSelector } from './selectors.js';

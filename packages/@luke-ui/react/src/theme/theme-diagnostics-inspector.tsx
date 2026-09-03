@@ -4,7 +4,6 @@ import { typedKeys } from '../shared/utils/utils.js';
 import { compileTheme } from './build-theme.js';
 import type { Oklch } from './color.js';
 import { formatOklch } from './color.js';
-import { vars } from './contract.css.js';
 import type { ThemeInput } from './define-theme.js';
 import { normalizeTheme } from './define-theme.js';
 import type {
@@ -17,6 +16,7 @@ import type { GeneratedSurfaces } from './elevation.js';
 import { paperTheme } from './foundations/paper.js';
 import { tactileTheme } from './foundations/tactile.js';
 import type { FamilyRole, ScaleFamily, ScaleStep } from './scale.js';
+import { vars } from './tokens.stylex.js';
 
 type BundledThemeKey = 'tactile' | 'paper';
 

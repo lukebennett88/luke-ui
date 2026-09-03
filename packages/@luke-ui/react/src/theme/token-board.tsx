@@ -10,9 +10,9 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 import { createElement, useLayoutEffect, useRef, useState } from 'react';
-import { vars } from './contract.css.js';
 import type { themeContractTree } from './contract.js';
 import { flattenThemeContract, themeVarName } from './contract.js';
+import { vars } from './tokens.stylex.js';
 
 interface TokenLeafNode {
 	kind: 'leaf';

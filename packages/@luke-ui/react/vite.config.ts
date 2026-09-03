@@ -8,7 +8,11 @@ import { transformSync } from 'oxc-transform-react';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
-import { createStylexPackPlugin, workspaceRoot } from './stylex-vite-plugin.js';
+import {
+	createStylexEsbuildPlugin,
+	createStylexPackPlugin,
+	workspaceRoot,
+} from './stylex-vite-plugin.js';
 
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
 const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
@@ -61,6 +65,7 @@ export default defineConfig({
 		plugins: [
 			vanillaExtractPlugin({
 				cwd: workspaceRoot,
+				esbuildOptions: { plugins: [createStylexEsbuildPlugin()] },
 				extract: { name: 'stylesheet.css', sourcemap: true },
 				identifiers: 'short',
 			}),

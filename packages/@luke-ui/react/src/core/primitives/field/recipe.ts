@@ -11,53 +11,53 @@ export const fieldMessageIcon = '--luke-field-message-icon' as const;
 
 const styles = stylex.create({
 	label: {
-		color: vars.colorTextPrimary,
-		fontFamily: vars.fontLabelFontFamily,
-		fontSize: vars.fontLabelFontSize,
-		fontWeight: vars.fontLabelFontWeight,
-		letterSpacing: vars.fontLabelLetterSpacing,
-		lineHeight: vars.fontLabelLineHeight,
+		color: vars.color.text.primary,
+		fontFamily: vars.font.label.fontFamily,
+		fontSize: vars.font.label.fontSize,
+		fontWeight: vars.font.label.fontWeight,
+		letterSpacing: vars.font.label.letterSpacing,
+		lineHeight: vars.font.label.lineHeight,
 		minInlineSize: 0,
 		// Marker for a disabled RAC field ancestor (`[data-disabled]` lives on the field, not the
 		// label). `:is([data-disabled="true"] *)` keeps this competing with the resting colour at
 		// equal specificity rather than raising it.
 		':is([data-disabled="true"] *)': {
-			color: vars.colorTextDisabled,
+			color: vars.color.text.disabled,
 		},
 	},
 	labelNecessityIcon: {
 		':is([data-required="true"] *)': {
 			'::after': {
-				color: vars.colorForegroundDangerRest,
+				color: vars.color.foreground.danger.rest,
 				content: '"*"',
-				marginInlineStart: vars.spaceSp4,
+				marginInlineStart: vars.space.sp4,
 			},
 		},
 	},
 	labelNecessityLabel: {
 		':is([data-required="true"] *)': {
 			'::after': {
-				color: vars.colorTextSecondary,
+				color: vars.color.text.secondary,
 				content: '"(required)"',
-				fontWeight: vars.fontWeightBody,
-				marginInlineStart: vars.spaceSp4,
+				fontWeight: vars.font.weight.body,
+				marginInlineStart: vars.space.sp4,
 			},
 		},
 	},
 	message: {
-		fontFamily: vars.fontLabelFontFamily,
-		fontSize: vars.fontLabelFontSize,
-		fontWeight: vars.fontWeightBody,
-		letterSpacing: vars.fontLabelLetterSpacing,
-		lineHeight: vars.fontLabelLineHeight,
+		fontFamily: vars.font.label.fontFamily,
+		fontSize: vars.font.label.fontSize,
+		fontWeight: vars.font.weight.body,
+		letterSpacing: vars.font.label.letterSpacing,
+		lineHeight: vars.font.label.lineHeight,
 		minInlineSize: 0,
 		paddingInlineStart: 'var(--luke-field-message-indent, 0px)',
 	},
 	messageDescription: {
-		color: vars.colorTextSecondary,
+		color: vars.color.text.secondary,
 	},
 	messageError: {
-		color: vars.colorForegroundDangerRest,
+		color: vars.color.foreground.danger.rest,
 		// Hanging indent, not `flex`: `errorMessage` is typed `ReactNode` (rich content) and RAC's
 		// `FieldError` also accepts a render-prop child, so this recipe cannot wrap the message in a
 		// span of its own. `padding-inline-start` reserves `--luke-field-message-indent` (`0px`
@@ -68,18 +68,18 @@ const styles = stylex.create({
 		paddingInlineStart: 'var(--luke-field-message-indent, 0px)',
 		textIndent: 'calc(-1 * var(--luke-field-message-indent, 0px))',
 		'::before': {
-			backgroundColor: vars.colorForegroundDangerRest,
-			blockSize: vars.iconSizeXsmall,
+			backgroundColor: vars.color.foreground.danger.rest,
+			blockSize: vars.iconSize.xsmall,
 			content: "''",
 			display: 'var(--luke-field-message-icon, none)',
 			flexShrink: 0,
 			inlineSize:
 				'max(calc(var(--luke-field-message-indent, 0px) - var(--luke-space-sp8)), var(--luke-icon-size-xsmall))',
-			marginInlineEnd: vars.spaceSp8,
+			marginInlineEnd: vars.space.sp8,
 			maskImage: invalidIndicator.maskImage,
 			maskPosition: 'center',
 			maskRepeat: 'no-repeat',
-			maskSize: vars.iconSizeXsmall,
+			maskSize: vars.iconSize.xsmall,
 			textIndent: 0,
 			verticalAlign: 'middle',
 		},
@@ -92,7 +92,7 @@ const styles = stylex.create({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: vars.spaceSp4,
+		gap: vars.space.sp4,
 		minInlineSize: 0,
 	},
 });

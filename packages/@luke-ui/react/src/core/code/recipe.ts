@@ -5,10 +5,10 @@ import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
-		backgroundColor: vars.colorSurfaceRecessed,
-		borderRadius: vars.radiusControl,
-		color: vars.colorTextPrimary,
-		fontFamily: vars.fontFamilyCode,
+		backgroundColor: vars.color.surface.recessed,
+		borderRadius: vars.radius.control,
+		color: vars.color.text.primary,
+		fontFamily: vars.font.family.code,
 		fontSize: '0.8125em',
 		lineHeight: 1,
 		paddingBlock: '0.15em',

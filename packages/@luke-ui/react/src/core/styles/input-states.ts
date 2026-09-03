@@ -40,10 +40,10 @@ const shared = stylex.create({
 	base: {
 		[`:where(${disabled})`]: {
 			cursor: 'not-allowed',
-			opacity: vars.interactionDisabledOpacity,
+			opacity: vars.interaction.disabledOpacity,
 		},
 		[`:where(${hovered})${notDisabled}:not(:where(${focusWithin}))${notReadOnly}${notInvalid}`]: {
-			borderColor: vars.colorBorderAccent,
+			borderColor: vars.color.border.accent,
 		},
 		'@media (forced-colors: active)': {
 			backgroundColor: 'Field',
@@ -70,8 +70,8 @@ const combobox = stylex.create({
 	},
 	focusWithin: {
 		[`${comboboxFocusWithin}${notDisabled}${notInvalid}${notReadOnly}`]: {
-			borderColor: vars.colorBorderAccent,
-			outlineColor: vars.colorBorderFocus,
+			borderColor: vars.color.border.accent,
+			outlineColor: vars.color.border.focus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -85,11 +85,11 @@ const combobox = stylex.create({
 	},
 	invalid: {
 		[`:where(${invalid})${notDisabled}:not(${comboboxFocusWithin})${notReadOnly}`]: {
-			borderColor: vars.colorBackgroundDangerSolidRest,
+			borderColor: vars.color.background.danger.solid.rest,
 		},
 		[`:where(${invalid}):where(${focusWithin}):has(input:focus)${notDisabled}${notReadOnly}`]: {
-			borderColor: vars.colorBackgroundDangerSolidRest,
-			outlineColor: vars.colorBorderFocus,
+			borderColor: vars.color.background.danger.solid.rest,
+			outlineColor: vars.color.border.focus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -106,15 +106,15 @@ const combobox = stylex.create({
 	},
 	readOnly: {
 		[`:where(${readOnly})${notDisabled}:not(${comboboxFocusWithin})`]: {
-			backgroundColor: vars.colorSurfaceCanvas,
-			borderColor: vars.colorBorderDecorative,
+			backgroundColor: vars.color.surface.canvas,
+			borderColor: vars.color.border.decorative,
 			boxShadow: 'none',
 		},
 		[`:where(${readOnly}):where(${focusWithin}):has(input:focus)${notDisabled}`]: {
-			backgroundColor: vars.colorSurfaceCanvas,
-			borderColor: vars.colorBorderDecorative,
+			backgroundColor: vars.color.surface.canvas,
+			borderColor: vars.color.border.decorative,
 			boxShadow: 'none',
-			outlineColor: vars.colorBorderFocus,
+			outlineColor: vars.color.border.focus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -136,8 +136,8 @@ const combobox = stylex.create({
 const inputGroup = stylex.create({
 	focusWithin: {
 		[`${inputGroupFocusWithin}${notDisabled}${notInvalid}${notReadOnly}`]: {
-			borderColor: vars.colorBorderAccent,
-			outlineColor: vars.colorBorderFocus,
+			borderColor: vars.color.border.accent,
+			outlineColor: vars.color.border.focus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -150,11 +150,11 @@ const inputGroup = stylex.create({
 	},
 	invalid: {
 		[`:where(${invalid})${notDisabled}:not(${inputGroupFocusWithin})${notReadOnly}`]: {
-			borderColor: vars.colorBackgroundDangerSolidRest,
+			borderColor: vars.color.background.danger.solid.rest,
 		},
 		[`:where(${invalid}):where(${focusWithin})${notDisabled}${notReadOnly}`]: {
-			borderColor: vars.colorBackgroundDangerSolidRest,
-			outlineColor: vars.colorBorderFocus,
+			borderColor: vars.color.background.danger.solid.rest,
+			outlineColor: vars.color.border.focus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -162,15 +162,15 @@ const inputGroup = stylex.create({
 	},
 	readOnly: {
 		[`:where(${readOnly})${notDisabled}:not(${inputGroupFocusWithin})`]: {
-			backgroundColor: vars.colorSurfaceCanvas,
-			borderColor: vars.colorBorderDecorative,
+			backgroundColor: vars.color.surface.canvas,
+			borderColor: vars.color.border.decorative,
 			boxShadow: 'none',
 		},
 		[`:where(${readOnly}):where(${focusWithin})${notDisabled}`]: {
-			backgroundColor: vars.colorSurfaceCanvas,
-			borderColor: vars.colorBorderDecorative,
+			backgroundColor: vars.color.surface.canvas,
+			borderColor: vars.color.border.decorative,
 			boxShadow: 'none',
-			outlineColor: vars.colorBorderFocus,
+			outlineColor: vars.color.border.focus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',

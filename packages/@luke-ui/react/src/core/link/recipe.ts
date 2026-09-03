@@ -5,17 +5,17 @@ import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	base: {
-		color: vars.colorForegroundAccentRest,
+		color: vars.color.foreground.accent.rest,
 		cursor: 'pointer',
 		font: 'inherit',
 		textDecoration: 'underline',
 		textDecorationColor: 'currentColor',
-		transitionDuration: vars.motionDurationFeedback,
+		transitionDuration: vars.motion.duration.feedback,
 		transitionProperty: 'color, text-decoration-color',
-		transitionTimingFunction: vars.motionEasingStandard,
+		transitionTimingFunction: vars.motion.easing.standard,
 		'[data-disabled="true"]': {
 			cursor: 'not-allowed',
-			opacity: vars.interactionDisabledOpacity,
+			opacity: vars.interaction.disabledOpacity,
 		},
 		'@media (forced-colors: active)': {
 			color: 'LinkText',
@@ -33,8 +33,8 @@ const styles = stylex.create({
 	isStandaloneTrue: {
 		alignItems: 'center',
 		display: 'inline-flex',
-		minBlockSize: vars.controlSizeMinTarget,
-		minInlineSize: vars.controlSizeMinTarget,
+		minBlockSize: vars.controlSize.minTarget,
+		minInlineSize: vars.controlSize.minTarget,
 		textDecoration: 'none',
 		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
 			textDecoration: 'underline',
@@ -44,21 +44,21 @@ const styles = stylex.create({
 		},
 	},
 	toneAccent: {
-		color: vars.colorForegroundAccentRest,
+		color: vars.color.foreground.accent.rest,
 		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
-			color: vars.colorForegroundAccentHover,
+			color: vars.color.foreground.accent.hover,
 		},
 		'[data-pressed="true"]:not([data-disabled="true"])': {
-			color: vars.colorForegroundAccentPressed,
+			color: vars.color.foreground.accent.pressed,
 		},
 	},
 	toneNeutral: {
-		color: vars.colorForegroundNeutralRest,
+		color: vars.color.foreground.neutral.rest,
 		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
-			color: vars.colorForegroundNeutralHover,
+			color: vars.color.foreground.neutral.hover,
 		},
 		'[data-pressed="true"]:not([data-disabled="true"])': {
-			color: vars.colorForegroundNeutralPressed,
+			color: vars.color.foreground.neutral.pressed,
 		},
 	},
 });

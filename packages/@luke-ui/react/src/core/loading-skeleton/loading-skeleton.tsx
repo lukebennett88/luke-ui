@@ -21,7 +21,7 @@ const loadingSkeletonStyles = stylex.create({
 			animationDuration: '2s',
 			animationIterationCount: 'infinite',
 			animationName: skeletonPulseAnimationName,
-			animationTimingFunction: vars.motionEasingStandard,
+			animationTimingFunction: vars.motion.easing.standard,
 			backgroundClip: 'border-box !important',
 			backgroundColor: 'var(--luke-color-loading-skeleton) !important',
 			backgroundImage: 'none !important',
@@ -52,11 +52,11 @@ const loadingSkeletonStyles = stylex.create({
 const LoadingSkeletonContext = createContext<boolean | null>(null);
 
 const skeletonRadiusTokens = {
-	control: vars.radiusControl,
-	detail: vars.radiusDetail,
-	full: vars.radiusFull,
-	overlay: vars.radiusOverlay,
-	surface: vars.radiusSurface,
+	control: vars.radius.control,
+	detail: vars.radius.detail,
+	full: vars.radius.full,
+	overlay: vars.radius.overlay,
+	surface: vars.radius.surface,
 } as const;
 
 /** Props for `LoadingSkeletonProvider`. */

@@ -10,10 +10,10 @@ const styles = stylex.create({
 		cursor: 'pointer',
 		display: 'inline-flex',
 		font: 'inherit',
-		gap: vars.spaceSp8,
+		gap: vars.space.sp8,
 		minInlineSize: 0,
 		'[data-disabled="true"]': {
-			color: vars.colorTextDisabled,
+			color: vars.color.text.disabled,
 			cursor: 'not-allowed',
 		},
 		// The reset default ring would otherwise paint both this clickable row and the
@@ -35,31 +35,31 @@ const styles = stylex.create({
 	},
 	indicator: {
 		alignItems: 'center',
-		backgroundColor: vars.colorSurfaceCanvas,
-		backgroundImage: vars.actionControlFinishResting,
+		backgroundColor: vars.color.surface.canvas,
+		backgroundImage: vars.actionControlFinish.resting,
 		blockSize: 'var(--checkbox-indicator-size)',
-		borderColor: vars.colorBorderControl,
-		borderRadius: vars.radiusDetail,
+		borderColor: vars.color.border.control,
+		borderRadius: vars.radius.detail,
 		borderStyle: 'solid',
 		borderWidth: '1px',
 		boxShadow: 'none',
 		boxSizing: 'border-box',
-		color: vars.colorForegroundAccentOnSolid,
+		color: vars.color.foreground.accent.onSolid,
 		display: 'inline-flex',
 		fontSize: 'var(--checkbox-glyph-size)',
-		fontWeight: vars.fontWeightHeading,
+		fontWeight: vars.font.weight.heading,
 		inlineSize: 'var(--checkbox-indicator-size)',
 		justifyContent: 'center',
 		lineHeight: 1,
-		transitionDuration: vars.motionDurationFeedback,
+		transitionDuration: vars.motion.duration.feedback,
 		transitionProperty: 'background-color, background-image, border-color, color, opacity',
-		transitionTimingFunction: vars.motionEasingStandard,
+		transitionTimingFunction: vars.motion.easing.standard,
 		'::after': {
 			content: '"✓"',
 			opacity: 0,
 		},
 		':is([data-focus-visible="true"] *)': {
-			outlineColor: vars.colorBorderFocus,
+			outlineColor: vars.color.border.focus,
 			outlineOffset: '2px',
 			outlineStyle: 'solid',
 			outlineWidth: '2px',
@@ -80,68 +80,68 @@ const styles = stylex.create({
 		// would win inside forced-colors unless the two palettes are mutually exclusive.
 		'@media not (forced-colors: active)': {
 			':is([data-disabled="true"] *)': {
-				opacity: vars.interactionDisabledOpacity,
+				opacity: vars.interaction.disabledOpacity,
 			},
 			':is([data-hovered="true"] *):not(:is([data-pressed="true"] *)):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-invalid="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundImage: vars.actionControlFinishRaised,
-					borderColor: vars.colorBorderAccent,
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: vars.color.border.accent,
 				},
 			':is([data-pressed="true"] *):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-invalid="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundImage: vars.actionControlFinishRecessed,
-					borderColor: vars.colorBorderAccent,
+					backgroundImage: vars.actionControlFinish.recessed,
+					borderColor: vars.color.border.accent,
 				},
 			':is([data-selected="true"] *, [data-indeterminate="true"] *):not(:is([data-hovered="true"] *)):not(:is([data-pressed="true"] *)):not(:is([data-invalid="true"] *))':
 				{
-					backgroundColor: vars.colorBackgroundAccentSolidRest,
-					borderColor: vars.colorBackgroundAccentSolidRest,
+					backgroundColor: vars.color.background.accent.solid.rest,
+					borderColor: vars.color.background.accent.solid.rest,
 				},
 			':is([data-selected="true"] *, [data-indeterminate="true"] *):is([data-hovered="true"] *):not(:is([data-pressed="true"] *)):not(:is([data-invalid="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundColor: vars.colorBackgroundAccentSolidHover,
-					backgroundImage: vars.actionControlFinishRaised,
-					borderColor: vars.colorBackgroundAccentSolidHover,
+					backgroundColor: vars.color.background.accent.solid.hover,
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: vars.color.background.accent.solid.hover,
 				},
 			':is([data-selected="true"] *, [data-indeterminate="true"] *):is([data-pressed="true"] *):not(:is([data-invalid="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundColor: vars.colorBackgroundAccentSolidPressed,
-					backgroundImage: vars.actionControlFinishRecessed,
-					borderColor: vars.colorBackgroundAccentSolidPressed,
+					backgroundColor: vars.color.background.accent.solid.pressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+					borderColor: vars.color.background.accent.solid.pressed,
 				},
 			':is([data-invalid="true"] *):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-hovered="true"] *)):not(:is([data-pressed="true"] *))':
 				{
-					borderColor: vars.colorBackgroundDangerSolidRest,
+					borderColor: vars.color.background.danger.solid.rest,
 				},
 			':is([data-invalid="true"] *):is([data-hovered="true"] *):not(:is([data-pressed="true"] *)):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundImage: vars.actionControlFinishRaised,
-					borderColor: vars.colorBackgroundDangerSolidHover,
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: vars.color.background.danger.solid.hover,
 				},
 			':is([data-invalid="true"] *):is([data-pressed="true"] *):not(:is([data-selected="true"] *, [data-indeterminate="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundImage: vars.actionControlFinishRecessed,
-					borderColor: vars.colorBackgroundDangerSolidPressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+					borderColor: vars.color.background.danger.solid.pressed,
 				},
 			':is([data-invalid="true"] *):is([data-selected="true"] *, [data-indeterminate="true"] *):not(:is([data-hovered="true"] *)):not(:is([data-pressed="true"] *))':
 				{
-					backgroundColor: vars.colorBackgroundDangerSolidRest,
-					borderColor: vars.colorBackgroundDangerSolidRest,
-					color: vars.colorForegroundDangerOnSolid,
+					backgroundColor: vars.color.background.danger.solid.rest,
+					borderColor: vars.color.background.danger.solid.rest,
+					color: vars.color.foreground.danger.onSolid,
 				},
 			':is([data-invalid="true"] *):is([data-selected="true"] *, [data-indeterminate="true"] *):is([data-hovered="true"] *):not(:is([data-pressed="true"] *)):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundColor: vars.colorBackgroundDangerSolidHover,
-					backgroundImage: vars.actionControlFinishRaised,
-					borderColor: vars.colorBackgroundDangerSolidHover,
-					color: vars.colorForegroundDangerOnSolid,
+					backgroundColor: vars.color.background.danger.solid.hover,
+					backgroundImage: vars.actionControlFinish.raised,
+					borderColor: vars.color.background.danger.solid.hover,
+					color: vars.color.foreground.danger.onSolid,
 				},
 			':is([data-invalid="true"] *):is([data-selected="true"] *, [data-indeterminate="true"] *):is([data-pressed="true"] *):not(:is([data-disabled="true"] *, [data-readonly="true"] *))':
 				{
-					backgroundColor: vars.colorBackgroundDangerSolidPressed,
-					backgroundImage: vars.actionControlFinishRecessed,
-					borderColor: vars.colorBackgroundDangerSolidPressed,
-					color: vars.colorForegroundDangerOnSolid,
+					backgroundColor: vars.color.background.danger.solid.pressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+					borderColor: vars.color.background.danger.solid.pressed,
+					color: vars.color.foreground.danger.onSolid,
 				},
 		},
 		'@media (forced-colors: active)': {
@@ -174,7 +174,7 @@ const styles = stylex.create({
 	root: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: vars.spaceSp4,
+		gap: vars.space.sp4,
 		minInlineSize: 0,
 		// Checkbox's own box has no room for an in-control invalid icon without it
 		// floating past the label (see `indicator` below), so its icon renders on

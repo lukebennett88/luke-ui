@@ -1,11 +1,24 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transformAsync } from '@babel/core';
-import type { FileResult } from '@babel/core';
+import type { FileResult, PluginItem } from '@babel/core';
 import stylexBabelPlugin from '@stylexjs/babel-plugin';
 import type { Rule } from '@stylexjs/babel-plugin';
+import type { Options as RollupOptions } from '@vanilla-extract/rollup-plugin';
 import { readFile, readdir } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
+
+/**
+ * `esbuild` is a transitive dependency (via `vite`/`@vanilla-extract/rollup-plugin`), not a direct
+ * one, so its types aren't safe to import by name. `@vanilla-extract/rollup-plugin`'s own `Options`
+ * type re-exports the exact esbuild shape this module needs to build, so borrow it from there
+ * instead of adding an undeclared dependency.
+ */
+type StylexEsbuildPlugin = NonNullable<RollupOptions['esbuildOptions']>['plugins'] extends
+	| ReadonlyArray<infer EsbuildPlugin>
+	| undefined
+	? EsbuildPlugin
+	: never;
 
 /**
  * Shared StyleX handling for every pipeline that resolves `@luke-ui/react` to source: `vp pack`
@@ -42,6 +55,25 @@ const STYLEX_ELIGIBLE_MODULE_PATTERN = /(?<!\.d)\.[cm]?[jt]sx?$/;
 
 /** A browser, visual, or unit test module, or a Storybook story: never a production module. */
 const NON_PRODUCTION_MODULE_PATTERN = /\.(?:browser|visual|test|stories)\.[cm]?[jt]sx?$/;
+
+/** A StyleX const/token module, e.g. `tokens.stylex.ts`. */
+const STYLEX_TOKENS_MODULE_PATTERN = /\.stylex\.ts$/;
+
+/**
+ * The single, authoritative set of options passed to `stylexBabelPlugin.withOptions`, shared by
+ * `transformStylex` (every Vite/Rollup pipeline below) and `createStylexEsbuildPlugin` (Vanilla
+ * Extract's own esbuild pass). Both transform the same source files and must produce identical
+ * output — the same `dev`/`propertyValidationMode`/`unstable_moduleResolution` values — or a class
+ * name or resolved value could silently drift between the two. Kept as a function (not a plugin
+ * instance) because a `withOptions` plugin instance is single-use per Babel call.
+ */
+function stylexBabelOptions(): PluginItem {
+	return stylexBabelPlugin.withOptions({
+		dev: false,
+		propertyValidationMode: 'throw',
+		unstable_moduleResolution: { type: 'commonJS', rootDir: workspaceRoot },
+	});
+}
 
 function buildAuthoritativeLayerOrder(priorityLayers: Array<string>): string {
 	return `@layer ${[...stylexLayerConfig.before, ...priorityLayers, ...stylexLayerConfig.after].join(', ')};`;
@@ -121,13 +153,7 @@ async function transformStylex(
 					? ['typescript', 'jsx']
 					: ['typescript'],
 		},
-		plugins: [
-			stylexBabelPlugin.withOptions({
-				dev: false,
-				propertyValidationMode: 'throw',
-				unstable_moduleResolution: { type: 'commonJS', rootDir: workspaceRoot },
-			}),
-		],
+		plugins: [stylexBabelOptions()],
 		sourceMaps: true,
 	});
 
@@ -176,6 +202,53 @@ async function findSourceModules(directory: string, includeTests: boolean): Prom
 }
 
 // ---------------------------------------------------------------------------
+// Vanilla Extract esbuild plugin (compiles StyleX token modules inside VE's own bundle-and-run step)
+// ---------------------------------------------------------------------------
+
+/**
+ * `vp pack`'s `@vanilla-extract/rollup-plugin` compiles every `.css.ts` file and its whole static
+ * import graph through Vanilla Extract's own esbuild-based bundle-and-run step (`compile()`), not
+ * through the project's normal Rollup plugin pipeline — so `esbuildOptions.plugins` is the only
+ * hook available for that step. (`@vanilla-extract/vite-plugin`, the counterpart used by Vitest and
+ * Storybook, has a parallel problem with a different fix: see `stylexVanillaExtractPluginFilter`.)
+ * That esbuild pass never runs the StyleX Babel transform, so when the import graph reaches
+ * `tokens.stylex.ts`, it evaluates the raw source: StyleX's runtime `unstable_defineConstsNested` is
+ * a stub that throws by design, because it expects `@stylexjs/babel-plugin` to have already
+ * rewritten the call away.
+ *
+ * This plugin closes that gap by transforming `.stylex.ts` files with the same Babel options
+ * `transformStylex` uses, before esbuild ever sees the runtime call. Only `.stylex.ts` (not the
+ * broader `STYLEX_ELIGIBLE_MODULE_PATTERN`) needs it: `tokens.stylex.ts` is the only module in a
+ * `.css.ts` import graph that calls a StyleX define function at module scope, so it's the only one
+ * whose evaluation trips the stub. Ordinary `stylex.create()` call sites in component modules
+ * aren't reached by this pass at all — VE's `.css.ts` graphs never import them.
+ */
+export function createStylexEsbuildPlugin(): StylexEsbuildPlugin {
+	return {
+		name: 'stylex-for-vanilla-extract',
+		setup(build) {
+			build.onLoad({ filter: STYLEX_TOKENS_MODULE_PATTERN }, async (args: { path: string }) => {
+				const code = await readFile(args.path, 'utf8');
+				const result = await transformAsync(code, {
+					babelrc: false,
+					configFile: false,
+					filename: args.path,
+					parserOpts: { plugins: ['typescript'] },
+					plugins: [stylexBabelOptions()],
+					sourceMaps: false,
+				});
+
+				if (result?.code == null) {
+					throw new Error(`StyleX could not compile ${args.path} for Vanilla Extract.`);
+				}
+
+				return { contents: result.code, loader: 'ts' };
+			});
+		},
+	};
+}
+
+// ---------------------------------------------------------------------------
 // Pack-time plugin (production build; appends to the emitted `stylesheet.css` asset)
 // ---------------------------------------------------------------------------
 
@@ -221,6 +294,24 @@ export function createStylexPackPlugin(): Plugin {
 const STYLEX_VIRTUAL_CSS_ID = 'virtual:luke-stylex.css';
 const RESOLVED_STYLEX_VIRTUAL_CSS_ID = `\0${STYLEX_VIRTUAL_CSS_ID}`;
 
+/** Name of the plugin `createStylexDevPlugin` returns, for `stylexVanillaExtractPluginFilter`. */
+const STYLEX_DEV_PLUGIN_NAME = 'stylex-dev';
+
+/**
+ * `@vanilla-extract/vite-plugin` compiles `.css.ts` files inside its own internal Vite server (see
+ * `createStylexEsbuildPlugin`'s doc comment for why that matters), built by re-reading the *config
+ * file's own top-level* `plugins` array — never a Vitest project's or a Storybook `viteFinal`'s
+ * per-project plugins — and filtering it down to a hardcoded allowlist, by default just
+ * `vite-tsconfig-paths`. So `createStylexDevPlugin()` has to be declared in that top-level array
+ * too (in `vitest.config.ts`, alongside `test.projects`; Storybook's `viteFinal` already mutates a
+ * single flat `config.plugins`, so it needs no separate top-level entry), and this filter passed as
+ * `unstable_pluginFilter` so the plugin survives the allowlist and transforms `tokens.stylex.ts`
+ * before the internal server evaluates it.
+ */
+export function stylexVanillaExtractPluginFilter(plugin: { name: string }): boolean {
+	return plugin.name === STYLEX_DEV_PLUGIN_NAME;
+}
+
 /**
  * Dev/test StyleX plugin: transforms JS the same way the pack plugin does, and serves the complete
  * extracted CSS — including the same authoritative `@layer` order — from `virtual:luke-stylex.css`.
@@ -233,7 +324,7 @@ export function createStylexDevPlugin(): Plugin {
 	let sourceRules: Promise<Array<Rule>> | undefined;
 
 	return {
-		name: 'stylex-dev',
+		name: STYLEX_DEV_PLUGIN_NAME,
 		resolveId(id) {
 			if (id === STYLEX_VIRTUAL_CSS_ID) return RESOLVED_STYLEX_VIRTUAL_CSS_ID;
 			return null;

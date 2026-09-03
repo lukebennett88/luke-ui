@@ -1,5 +1,5 @@
 import { lukeUiClassNames } from '../../shared/class-names.js';
-import { vars } from '../../theme/contract.css.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
 
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {

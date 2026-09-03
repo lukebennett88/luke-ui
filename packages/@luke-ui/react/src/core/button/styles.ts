@@ -14,7 +14,7 @@ const styles = stylex.create({
 	label: {
 		alignItems: 'center',
 		display: 'inline-flex',
-		gap: vars.spaceSp8,
+		gap: vars.space.sp8,
 		minInlineSize: 0,
 	},
 	labelPendingFalse: {},

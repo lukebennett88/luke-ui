@@ -51,8 +51,11 @@ utility modules live under `core/`. Theme modules live under `theme/`.
   naming, and the source-owned `typeStyles` typography keys.
 - `theme/path-record.ts`: the typed `[path, value]` record constructor value producers use so
   `Object.fromEntries` cannot hide a missing contract path.
-- `theme/contract.css.ts`: the typed `vars` contract, built by walking the theme token tree directly
-  so it stays source-owned and free of styling-engine types.
+- `theme/tokens.stylex.ts`: the generated, typed `vars` contract.
+  `scripts/generate-stylex-tokens.ts` walks the theme token tree to build a nested
+  `stylex.unstable_defineConstsNested` object literal, so it stays source-owned and matches
+  `themeContractTree`'s shape exactly. StyleX recipes, the remaining Vanilla Extract styles, and the
+  public `@luke-ui/react/theme` export all read this one `vars`.
 - `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
   and the one resolution of curated defaults (source colours, materials, radius, backdrop) into the
   internal foundation.
@@ -234,10 +237,11 @@ inline `style` overriding both. `xstyle.browser.test.tsx` covers only the in-rep
 (its `stylex.create()` call is compiled by this package's own `createStylexDevPlugin`, landing in
 Luke UI's own `recipes.sx.*` layers) and does not by itself prove the public contract.
 
-The compiler-facing StyleX surface `src/theme/tokens.stylex.ts` exports `vars`, generated from
-`themeContractTree` with `defineConsts`. Each key is a live `var(--luke-*)` reference. This compiler
-`vars` is distinct from the public `vars` in `src/theme/contract.css.ts` (exported via
-`src/theme/index.ts`), which holds the actual token values alongside the theme stylesheets.
+`src/theme/tokens.stylex.ts` exports the one `vars` token interface, generated from
+`themeContractTree` with `stylex.unstable_defineConstsNested`. Its nested shape mirrors the contract
+tree exactly, for example `vars.color.background.danger.solid.hover`, and each leaf is a live
+`var(--luke-*)` reference. StyleX recipes import it directly. `src/theme/index.ts` re-exports the
+same `vars` as the public `@luke-ui/react/theme` token surface.
 
 Use `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain Vanilla Extract
 global rule in a named layer. Structural combinators such as Combobox's adjacent-section border live

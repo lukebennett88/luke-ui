@@ -1,4 +1,4 @@
-import { vars } from '../../theme/contract.css.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import { comboboxSectionScopeAttribute } from '../primitives/combobox/section-scope.js';
 import { globalStyleInLayer } from './layered-style.css.js';
 import { attributeSelector } from './selectors.js';

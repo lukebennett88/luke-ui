@@ -9,20 +9,20 @@ const styles = stylex.create({
 		flexShrink: 0,
 	},
 	sizeLarge: {
-		blockSize: vars.iconSizeLarge,
-		inlineSize: vars.iconSizeLarge,
+		blockSize: vars.iconSize.large,
+		inlineSize: vars.iconSize.large,
 	},
 	sizeMedium: {
-		blockSize: vars.iconSizeMedium,
-		inlineSize: vars.iconSizeMedium,
+		blockSize: vars.iconSize.medium,
+		inlineSize: vars.iconSize.medium,
 	},
 	sizeSmall: {
-		blockSize: vars.iconSizeSmall,
-		inlineSize: vars.iconSizeSmall,
+		blockSize: vars.iconSize.small,
+		inlineSize: vars.iconSize.small,
 	},
 	sizeXsmall: {
-		blockSize: vars.iconSizeXsmall,
-		inlineSize: vars.iconSizeXsmall,
+		blockSize: vars.iconSize.xsmall,
+		inlineSize: vars.iconSize.xsmall,
 	},
 });
 

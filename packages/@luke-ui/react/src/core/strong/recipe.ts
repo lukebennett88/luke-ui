@@ -4,7 +4,7 @@ import { createSingleRecipe } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
-		fontWeight: vars.fontWeightEmphasis,
+		fontWeight: vars.font.weight.emphasis,
 	},
 });
 

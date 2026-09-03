@@ -1,6 +1,6 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { globalKeyframes } from '@vanilla-extract/css';
-import { vars } from '../../theme/contract.css.js';
+import { vars } from '../../theme/tokens.stylex.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
 import { attributeSelector } from '../styles/selectors.js';
 import { loadingSkeletonScopeAttribute } from './scope.js';
