@@ -239,6 +239,10 @@ Chromium, see `packed-consumer.test.ts`):
   `xstyle.priorityN` sibling layer. Only the object form, `useLayers: { before, after, prefix }`,
   produces that output. This was confirmed by running `processStylexRules` directly. The hosted
   Styling guide documents a small Vite plugin built on `@babel/core` and `@stylexjs/babel-plugin`.
+  In development that plugin scans the application source before serving `virtual:stylex.css`, then
+  returns the virtual stylesheet from `hotUpdate` when a StyleX-eligible file changes, so the first
+  load is complete and later edits reload the CSS. `xstyle-consumer-vite-plugin.test.ts` drives the
+  documented plugin through Vite's `build` and `createServer` APIs.
 
 `packed-consumer.test.ts` is the test that backs this contract: it packs the real tarball into a
 throwaway consumer directory laid out the way pnpm would install it — Luke UI's own `dependencies`
@@ -269,7 +273,8 @@ implementations.
 Use `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain Vanilla Extract
 global rule in a named layer. Structural combinators such as Combobox's adjacent-section border live
 here, not in StyleX: StyleX cannot express a `+` sibling rule, so `components.css.ts` interpolates
-the stable `combobox-section` class from `primitives/combobox/section-scope.ts`.
+the private `data-luke-combobox-section` attribute from `primitives/combobox/section-scope.ts`. That
+marker is an implementation detail, not a public styling hook.
 
 `Text` authors camelCase `marginBlockStart` and `marginBlockEnd` for its Capsize pseudo-element
 margins. StyleX canonicalises these to `margin-top` and `margin-bottom`, which is equivalent under
