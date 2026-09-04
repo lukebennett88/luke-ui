@@ -9,36 +9,54 @@ import * as stylex from '@stylexjs/stylex';
  * and `token-values.ts` can import it under `tsx` without a Babel step, so the scale is
  * flattened and mirrored here at generation time instead of imported directly.
  *
- * Flat `<metric><step>` keys (e.g. `fontSize12`, `letterSpacing12`, `lineHeight12`) rather than
- * a nested `fontMetrics[12].fontSize` shape, because StyleX's compiler needs a statically
- * indexable member expression and cannot resolve a computed numeric key.
+ * Keys are prefixed with `step` (e.g. `step12`, `step14`) rather than left as bare numbers,
+ * because a numeric key would force bracket access (`fontMetrics[12].fontSize`) — the prefix
+ * keeps every read plain dot notation, matching the authored scale's own metric-step vocabulary.
  */
-export const fontMetrics = stylex.defineConsts({
-	fontSize12: '12px',
-	letterSpacing12: '0.0025em',
-	lineHeight12: '16px',
-	fontSize14: '14px',
-	letterSpacing14: '0',
-	lineHeight14: '20px',
-	fontSize16: '16px',
-	letterSpacing16: '0',
-	lineHeight16: '24px',
-	fontSize18: '18px',
-	letterSpacing18: '-0.0025em',
-	lineHeight18: '26px',
-	fontSize20: '20px',
-	letterSpacing20: '-0.005em',
-	lineHeight20: '28px',
-	fontSize24: '24px',
-	letterSpacing24: '-0.00625em',
-	lineHeight24: '30px',
-	fontSize28: '28px',
-	letterSpacing28: '-0.0075em',
-	lineHeight28: '36px',
-	fontSize35: '35px',
-	letterSpacing35: '-0.01em',
-	lineHeight35: '40px',
-	fontSize60: '60px',
-	letterSpacing60: '-0.025em',
-	lineHeight60: '60px',
+export const fontMetrics = stylex.unstable_defineConstsNested({
+	step12: {
+		fontSize: '12px',
+		letterSpacing: '0.0025em',
+		lineHeight: '16px',
+	},
+	step14: {
+		fontSize: '14px',
+		letterSpacing: '0',
+		lineHeight: '20px',
+	},
+	step16: {
+		fontSize: '16px',
+		letterSpacing: '0',
+		lineHeight: '24px',
+	},
+	step18: {
+		fontSize: '18px',
+		letterSpacing: '-0.0025em',
+		lineHeight: '26px',
+	},
+	step20: {
+		fontSize: '20px',
+		letterSpacing: '-0.005em',
+		lineHeight: '28px',
+	},
+	step24: {
+		fontSize: '24px',
+		letterSpacing: '-0.00625em',
+		lineHeight: '30px',
+	},
+	step28: {
+		fontSize: '28px',
+		letterSpacing: '-0.0075em',
+		lineHeight: '36px',
+	},
+	step35: {
+		fontSize: '35px',
+		letterSpacing: '-0.01em',
+		lineHeight: '40px',
+	},
+	step60: {
+		fontSize: '60px',
+		letterSpacing: '-0.025em',
+		lineHeight: '60px',
+	},
 });

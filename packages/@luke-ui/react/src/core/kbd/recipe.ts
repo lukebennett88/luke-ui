@@ -15,7 +15,7 @@ const styles = stylex.create({
 		color: vars.color.text.primary,
 		display: 'inline-flex',
 		fontFamily: vars.font.family.code,
-		fontSize: fontMetrics.fontSize12,
+		fontSize: fontMetrics.step12.fontSize,
 		fontWeight: vars.font.weight.body,
 		inlineSize: 'fit-content',
 		lineHeight: 1,

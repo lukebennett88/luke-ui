@@ -194,20 +194,20 @@ const styles = stylex.create({
 		'--luke-field-message-icon': 'inline-block',
 	},
 	rootSizeLarge: {
-		[checkboxControlSize]: fontMetrics.lineHeight20,
+		[checkboxControlSize]: fontMetrics.step20.lineHeight,
 		[checkboxGlyphSize]: 'var(--luke-icon-size-small)',
 		[checkboxIndicatorSize]: 'var(--luke-icon-size-medium)',
 		'--luke-field-message-indent': `calc(var(${checkboxControlSize}) + var(--luke-space-sp8))`,
 	},
 	rootSizeMedium: {
-		[checkboxControlSize]: fontMetrics.lineHeight16,
+		[checkboxControlSize]: fontMetrics.step16.lineHeight,
 		[checkboxGlyphSize]: 'var(--luke-icon-size-xsmall)',
 		[checkboxIndicatorSize]: 'var(--luke-icon-size-small)',
 		'--luke-field-message-indent': `calc(var(${checkboxControlSize}) + var(--luke-space-sp8))`,
 	},
 	rootSizeSmall: {
 		[checkboxControlSize]: 'var(--luke-icon-size-small)',
-		[checkboxGlyphSize]: fontMetrics.fontSize12,
+		[checkboxGlyphSize]: fontMetrics.step12.fontSize,
 		[checkboxIndicatorSize]: 'var(--luke-icon-size-xsmall)',
 		'--luke-field-message-indent': `calc(var(${checkboxControlSize}) + var(--luke-space-sp8))`,
 	},

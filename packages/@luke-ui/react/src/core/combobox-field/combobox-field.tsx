@@ -36,7 +36,6 @@ import {
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
 import type { XStyleProps } from '../styles/xstyle.js';
-import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
@@ -337,21 +336,19 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 
 	if (state == null || state.inputValue === '') return null;
 
+	const clearButtonProps = stylex.props(
+		...resolveComboboxRecipeSlotStyles('clearButton', { size }),
+	);
+
 	return (
 		<RacButton
 			aria-label="Clear search"
-			className={
-				resolveXStyleProps(
-					resolveComboboxRecipeSlotStyles('clearButton', { size }),
-					undefined,
-					undefined,
-					undefined,
-				).className
-			}
+			className={clearButtonProps.className}
 			onPress={() => {
 				state.setInputValue('');
 			}}
 			slot={null}
+			style={clearButtonProps.style}
 		>
 			<Icon aria-hidden name="close" />
 		</RacButton>

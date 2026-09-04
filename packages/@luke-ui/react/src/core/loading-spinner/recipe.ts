@@ -5,10 +5,6 @@ import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 import type { SlotRecipeSelection } from '../styles/stylex-recipe.js';
 import { createSlottedRecipe, createSlottedRecipeStyles } from '../styles/stylex-recipe.js';
 
-const rotationDuration = '1.2s';
-const rubberBandDuration = '2s';
-const rubberBandEasing = 'cubic-bezier(0.42, 0, 0.58, 1)';
-
 /**
  * @internal
  */
@@ -44,10 +40,10 @@ const styles = stylex.create({
 		visibility: 'hidden',
 	},
 	indicator: {
-		animationDuration: rubberBandDuration,
+		animationDuration: '2s',
 		animationIterationCount: 'infinite',
 		animationName: rubberBandAnimationName,
-		animationTimingFunction: rubberBandEasing,
+		animationTimingFunction: 'cubic-bezier(0.42, 0, 0.58, 1)',
 		strokeDasharray: '100 100',
 		'@media (forced-colors: active)': {
 			animationName: 'none',
@@ -61,7 +57,7 @@ const styles = stylex.create({
 		},
 	},
 	root: {
-		animationDuration: rotationDuration,
+		animationDuration: '1.2s',
 		animationIterationCount: 'infinite',
 		animationName: spinAnimationName,
 		animationTimingFunction: 'linear',

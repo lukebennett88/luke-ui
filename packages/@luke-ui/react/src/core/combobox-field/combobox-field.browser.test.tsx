@@ -125,6 +125,12 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		// Measuring the tray only means anything once it has stopped sliding up.
 		await waitForOverlayEnter(overlay);
 
+		// `MobileOverlay` positions the fixed overlay at the current scroll offset through a plain
+		// `style` object rather than a render-prop callback (the callback ignored its render-state
+		// argument). RAC reads a static object at a different point in its render than it would call
+		// a function, so assert the resolved offset here rather than assuming the swap is inert.
+		expect(getComputedStyle(overlay).top).toBe(`${window.scrollY}px`);
+
 		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so overriding it
 		// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
 		// amount off `blockSize` and spend it on `paddingBlockEnd`, so the sheet keeps its content above

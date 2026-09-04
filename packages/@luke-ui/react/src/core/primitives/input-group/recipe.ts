@@ -64,8 +64,8 @@ const styles = stylex.create({
 		fontFamily: vars.font.family.body,
 		inlineSize: '100%',
 		isolation: 'isolate',
-		letterSpacing: fontMetrics.letterSpacing16,
-		lineHeight: fontMetrics.lineHeight16,
+		letterSpacing: fontMetrics.step16.letterSpacing,
+		lineHeight: fontMetrics.step16.lineHeight,
 		minInlineSize: 0,
 		overflow: 'visible',
 		transitionDuration: vars.motion.duration.feedback,
@@ -74,13 +74,13 @@ const styles = stylex.create({
 	},
 	groupSizeMedium: {
 		blockSize: vars.controlSize.medium,
-		fontSize: fontMetrics.fontSize16,
+		fontSize: fontMetrics.step16.fontSize,
 	},
 	groupSizeSmall: {
 		blockSize: vars.controlSize.small,
-		fontSize: fontMetrics.fontSize14,
-		letterSpacing: fontMetrics.letterSpacing14,
-		lineHeight: fontMetrics.lineHeight14,
+		fontSize: fontMetrics.step14.fontSize,
+		letterSpacing: fontMetrics.step14.letterSpacing,
+		lineHeight: fontMetrics.step14.lineHeight,
 	},
 	invalidIndicator: {
 		color: vars.color.foreground.danger.rest,
@@ -102,12 +102,12 @@ const styles = stylex.create({
 		},
 	},
 	prefixSizeMedium: {
-		lineHeight: fontMetrics.lineHeight16,
+		lineHeight: fontMetrics.step16.lineHeight,
 		paddingInlineEnd: vars.space.sp12,
 		paddingInlineStart: vars.space.sp12,
 	},
 	prefixSizeSmall: {
-		lineHeight: fontMetrics.lineHeight14,
+		lineHeight: fontMetrics.step14.lineHeight,
 		paddingInlineEnd: vars.space.sp8,
 		paddingInlineStart: vars.space.sp8,
 	},
@@ -129,12 +129,12 @@ const styles = stylex.create({
 		},
 	},
 	suffixSizeMedium: {
-		lineHeight: fontMetrics.lineHeight16,
+		lineHeight: fontMetrics.step16.lineHeight,
 		paddingInlineEnd: vars.space.sp12,
 		paddingInlineStart: vars.space.sp12,
 	},
 	suffixSizeSmall: {
-		lineHeight: fontMetrics.lineHeight14,
+		lineHeight: fontMetrics.step14.lineHeight,
 		paddingInlineEnd: vars.space.sp8,
 		paddingInlineStart: vars.space.sp8,
 	},

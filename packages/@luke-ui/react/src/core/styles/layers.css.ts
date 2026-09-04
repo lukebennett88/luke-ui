@@ -14,6 +14,10 @@ import { globalLayer } from '@vanilla-extract/css';
  *   this retained CSS reliably override StyleX recipe output; the relationship reverses for
  *   `!important` declarations, so retained rules in this layer must never use `!important` — see
  *   `stylesheet-contract.test.ts`'s guard against `!important` in `recipes.priorityN`.
+ * - **overrides** — Consumer-authored StyleX (the `xstyle` prop and application styles), compiled
+ *   into this layer by `@luke-ui/vite`. Luke UI itself never writes CSS here, which is why this
+ *   layer has no `globalLayer()` entry below; it is declared in the combined order emitted by
+ *   `@luke-ui/vite` so consumer overrides reliably out-rank `recipes`.
  * - **utilities** — One-off overrides; highest-priority layer for escape hatches.
  *
  * `globalLayer()` keeps Vanilla Extract's layer wiring consistent. The authoritative
