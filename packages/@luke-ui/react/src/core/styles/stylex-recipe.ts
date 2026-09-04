@@ -99,12 +99,13 @@ type SlotVariantGroups<Slot extends string> = Record<
  * `Record<string, never>`, so neither omitted `variants` nor an authored `variants: {}` accepts a
  * fake key.
  */
-type SlotVariantSelection<Variants extends SlotVariantGroups<string>> =
-	[keyof Variants] extends [never]
-		? Record<string, never>
-		: {
-				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
-			};
+type SlotVariantSelection<Variants extends SlotVariantGroups<string>> = [keyof Variants] extends [
+	never,
+]
+	? Record<string, never>
+	: {
+			-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
+		};
 
 /** Slotted recipe config. */
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
