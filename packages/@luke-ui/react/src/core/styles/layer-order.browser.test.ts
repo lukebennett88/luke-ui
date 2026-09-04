@@ -4,9 +4,9 @@ import builtStylesheetCss from '../../../dist/stylesheet.css?inline';
 import { loadingSkeletonScopeAttribute } from '../loading-skeleton/scope.js';
 
 // `scope.ts` is side-effect-free, so it's safe to import here. Do not import
-// `loading-skeleton/styles.css.ts` itself: VE `globalLayer()` would create components/utilities
-// before this file injects the dist stylesheet, and the combined `@layer` order cannot then place
-// StyleX priority layers ahead of them.
+// `loading-skeleton/styles.css.ts` itself: VE `globalLayer()` would create the `recipes`/`utilities`
+// layers before this file injects the dist stylesheet, and the combined `@layer` order cannot then
+// place StyleX priority layers ahead of them.
 
 const mounted: Array<HTMLElement> = [];
 const STYLESHEET_ELEMENT_ID = 'luke-ui-layer-order-stylesheet';
@@ -57,15 +57,18 @@ function mountProbe(className: string): HTMLDivElement {
 	return element;
 }
 
-test('components beats the recipe layers in the built stylesheet cascade', () => {
+test('a direct recipes-layer rule beats the recipe sublayers in the built stylesheet cascade', () => {
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
 
 	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 
-	const componentsStyle = document.head.appendChild(document.createElement('style'));
-	componentsStyle.dataset.layerOrderProbe = 'true';
-	componentsStyle.textContent = `@layer components { .${paddingClass} { padding-inline: 10px; } }`;
+	// Written directly into `@layer recipes`, not a nested `recipes.priorityN` sublayer — the same
+	// shape retained CSS (Prose rhythm, LoadingSkeleton's forced surface, Combobox's section
+	// border) uses to reliably override StyleX recipe output. See `layers.css.ts`.
+	const recipesStyle = document.head.appendChild(document.createElement('style'));
+	recipesStyle.dataset.layerOrderProbe = 'true';
+	recipesStyle.textContent = `@layer recipes { .${paddingClass} { padding-inline: 10px; } }`;
 
 	expect(getComputedStyle(element).paddingInlineStart).toBe('10px');
 });
@@ -83,15 +86,15 @@ test('utilities beat the recipe layers in the built stylesheet cascade', () => {
 	expect(getComputedStyle(element).paddingInlineStart).toBe('20px');
 });
 
-test('utilities beat components in the built stylesheet cascade', () => {
+test('utilities beat a direct recipes-layer rule in the built stylesheet cascade', () => {
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
 
 	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 
-	const componentsStyle = document.head.appendChild(document.createElement('style'));
-	componentsStyle.dataset.layerOrderProbe = 'true';
-	componentsStyle.textContent = `@layer components { .${paddingClass} { padding-inline: 10px; } }`;
+	const recipesStyle = document.head.appendChild(document.createElement('style'));
+	recipesStyle.dataset.layerOrderProbe = 'true';
+	recipesStyle.textContent = `@layer recipes { .${paddingClass} { padding-inline: 10px; } }`;
 	expect(getComputedStyle(element).paddingInlineStart).toBe('10px');
 
 	const utilityStyle = document.head.appendChild(document.createElement('style'));
@@ -120,11 +123,9 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 	style.textContent = `
 @layer probe-reset;
 @layer probe-theme;
-@layer probe-components;
 @layer probe-utilities;
-@layer probe-reset, probe-theme, probe-recipes.sx.priority1, probe-components, probe-utilities;
-@layer probe-recipes.sx.priority1 { .probe-invalid { padding-inline: 16px; } }
-@layer probe-components { .probe-invalid { padding-inline: 10px; } }
+@layer probe-reset, probe-theme, probe-recipes.priority1, probe-utilities;
+@layer probe-recipes.priority1 { .probe-invalid { padding-inline: 16px; } }
 @layer probe-utilities { .probe-invalid { padding-inline: 20px; } }
 `;
 
@@ -137,7 +138,7 @@ test('the documented consumer layer declaration preserves Luke UI and consumer o
 	// This is the exact declaration published in the Styling guide
 	// (apps/docs/content/docs/docs/styling.mdx, "Use application CSS alongside Luke UI"). Keep the
 	// two in sync: if this literal changes, update the docs too, and vice versa.
-	const documentedLayerDeclaration = '@layer reset, theme, base, recipes, components, utilities;';
+	const documentedLayerDeclaration = '@layer reset, theme, base, recipes, overrides, utilities;';
 
 	const paddingClass = stylexPaddingClass(stylesheetCss);
 	const element = mountProbe(paddingClass);
@@ -153,15 +154,16 @@ test('the documented consumer layer declaration preserves Luke UI and consumer o
 	consumerStyle.dataset.layerOrderProbe = 'true';
 	consumerStyle.textContent = `
 ${documentedLayerDeclaration}
-@layer components { .${paddingClass} { padding-inline: 40px; } }
+@layer recipes { .${paddingClass} { padding-inline: 40px; } }
 `;
 	document.head.insertBefore(consumerStyle, document.head.firstChild);
 
-	// Relationship 1: consumer `components` CSS beats Luke UI's StyleX recipe styles, which sit in
-	// the `recipes` layer below it.
+	// Relationship 1: a direct `@layer recipes` rule beats Luke UI's StyleX recipe styles, which
+	// sit in a nested `recipes.priorityN` sublayer. This is the mechanism retained CSS (Prose
+	// rhythm, LoadingSkeleton's forced surface, Combobox's section border) relies on.
 	expect(getComputedStyle(element).paddingInlineStart).toBe('40px');
 
-	// Relationships 2 and 3 probe `components` and `utilities` directly, since the documented
+	// Relationships 2 and 3 probe `overrides` and `utilities` directly, since the documented
 	// declaration is what fixes their relative order. A distinct probe class keeps these rules off
 	// the StyleX padding class used above.
 	const orderingProbeClass = 'documented-declaration-ordering-probe';
@@ -170,21 +172,21 @@ ${documentedLayerDeclaration}
 	const normalOrderingStyle = document.head.appendChild(document.createElement('style'));
 	normalOrderingStyle.dataset.layerOrderProbe = 'true';
 	normalOrderingStyle.textContent = `
-@layer components { .${orderingProbeClass} { color: rgb(1, 1, 1); } }
+@layer overrides { .${orderingProbeClass} { color: rgb(1, 1, 1); } }
 @layer utilities { .${orderingProbeClass} { color: rgb(2, 2, 2); } }
 `;
 
-	// Relationship 2: a normal `utilities` rule beats a normal `components` rule.
+	// Relationship 2: a normal `utilities` rule beats a normal `overrides` rule.
 	expect(getComputedStyle(orderingElement).color).toBe('rgb(2, 2, 2)');
 
 	const importantOrderingStyle = document.head.appendChild(document.createElement('style'));
 	importantOrderingStyle.dataset.layerOrderProbe = 'true';
 	importantOrderingStyle.textContent = `
-@layer components { .${orderingProbeClass} { margin-top: 5px !important; } }
+@layer overrides { .${orderingProbeClass} { margin-top: 5px !important; } }
 @layer utilities { .${orderingProbeClass} { margin-top: 9px !important; } }
 `;
 
-	// Relationship 3: a `components !important` rule beats a `utilities !important` rule, because
+	// Relationship 3: an `overrides !important` rule beats a `utilities !important` rule, because
 	// cascade-layer priority reverses for `!important` declarations.
 	expect(getComputedStyle(orderingElement).marginTop).toBe('5px');
 
@@ -200,7 +202,7 @@ test('application base-layer element resets do not override Luke UI component st
 	// This is the exact declaration published in the Styling guide
 	// (apps/docs/content/docs/docs/styling.mdx, "Use application CSS alongside Luke UI"). Keep the
 	// two in sync: if this literal changes, update the docs too, and vice versa.
-	const documentedLayerDeclaration = '@layer reset, theme, base, recipes, components, utilities;';
+	const documentedLayerDeclaration = '@layer reset, theme, base, recipes, overrides, utilities;';
 
 	const inlineFlexClass = stylexInlineFlexClass(stylesheetCss);
 
@@ -227,16 +229,16 @@ ${documentedLayerDeclaration}
 	// UI's StyleX recipe styles (`display: inline-flex`), because `base` sits below `recipes`.
 	expect(getComputedStyle(element).display).toBe('inline-flex');
 
-	const componentsOverrideStyle = document.head.appendChild(document.createElement('style'));
-	componentsOverrideStyle.dataset.layerOrderProbe = 'true';
-	componentsOverrideStyle.textContent = `@layer components { .${inlineFlexClass} { display: flex; } }`;
+	const overridesStyle = document.head.appendChild(document.createElement('style'));
+	overridesStyle.dataset.layerOrderProbe = 'true';
+	overridesStyle.textContent = `@layer overrides { .${inlineFlexClass} { display: flex; } }`;
 
-	// A deliberate application `components` override still wins, because `components` sits above
+	// A deliberate application `overrides` override still wins, because `overrides` sits above
 	// `recipes`.
 	expect(getComputedStyle(element).display).toBe('flex');
 });
 
-test('LoadingSkeleton components !important beats utilities-layer !important overrides', () => {
+test('LoadingSkeleton recipes !important beats utilities-layer !important overrides', () => {
 	const element = document.body.appendChild(document.createElement('div'));
 	mounted.push(element);
 	element.setAttribute(loadingSkeletonScopeAttribute, '');

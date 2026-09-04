@@ -1,4 +1,5 @@
 import { useObjectRef } from '@react-aria/utils';
+import * as stylex from '@stylexjs/stylex';
 import type { CSSProperties, JSX, ReactNode, Ref } from 'react';
 import { useContext, useEffect, useId } from 'react';
 import { SelectableCollectionContext } from 'react-aria-components/Autocomplete';
@@ -23,6 +24,7 @@ import type { ComboboxListBoxProps } from '../primitives/combobox/listbox.js';
 import { ComboboxListBox } from '../primitives/combobox/listbox.js';
 import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
 import { ComboboxPopover } from '../primitives/combobox/popover.js';
+import { ComboboxPresentationProvider } from '../primitives/combobox/presentation-context.js';
 import { resolveComboboxRecipeSlotStyles } from '../primitives/combobox/recipe.js';
 import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
@@ -33,7 +35,7 @@ import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
-import type { XStyleProp, XStyleProps } from '../styles/xstyle.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -239,20 +241,23 @@ function MobileComboboxContent<T extends object>({
 	const valueId = useId();
 
 	const ariaLabelledBy = labelContext?.id == null ? undefined : cx(labelContext.id, valueId);
-	const mobileListBoxStyles = resolveComboboxRecipeSlotStyles('mobileListBox', { size });
 
+	// The listbox always renders inside the tray, so it always resolves tray presentation styling
+	// — including this early-return path, where RAC has built the collection but not yet provided
+	// combobox state.
 	const listBox = (
-		<SelectableCollectionContext.Provider value={mobileListBoxContextValue}>
-			<ComboboxListBox<T>
-				{...listBoxProps}
-				loadMoreItem={loadMoreItem}
-				renderEmptyState={renderEmptyState}
-				shouldSelectOnPressUp={false}
-				xstyle={[...mobileListBoxStyles, listBoxProps?.xstyle] as XStyleProp}
-			>
-				{children}
-			</ComboboxListBox>
-		</SelectableCollectionContext.Provider>
+		<ComboboxPresentationProvider presentation="tray">
+			<SelectableCollectionContext.Provider value={mobileListBoxContextValue}>
+				<ComboboxListBox<T>
+					{...listBoxProps}
+					loadMoreItem={loadMoreItem}
+					renderEmptyState={renderEmptyState}
+					shouldSelectOnPressUp={false}
+				>
+					{children}
+				</ComboboxListBox>
+			</SelectableCollectionContext.Provider>
+		</ComboboxPresentationProvider>
 	);
 
 	// Focus the tray search input when the tray opens
@@ -265,9 +270,10 @@ function MobileComboboxContent<T extends object>({
 	// RAC builds the collection before it provides state.
 	if (state == null) return listBox;
 
-	const mobileInputGroupStyles = resolveComboboxRecipeSlotStyles('mobileInputGroup', { size });
-	const mobileTriggerStyles = resolveComboboxRecipeSlotStyles('mobileTrigger', { size });
-	const mobileValueStyles = resolveComboboxRecipeSlotStyles('mobileValue', { size });
+	const trayTriggerProps = stylex.props(
+		...resolveComboboxRecipeSlotStyles('trayTrigger', { size }),
+	);
+	const trayValueProps = stylex.props(...resolveComboboxRecipeSlotStyles('trayValue'));
 
 	return (
 		<>
@@ -277,9 +283,7 @@ function MobileComboboxContent<T extends object>({
 					aria-haspopup="dialog"
 					aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
 					aria-labelledby={ariaLabelledBy}
-					className={
-						resolveXStyleProps(mobileTriggerStyles, undefined, undefined, undefined).className
-					}
+					className={trayTriggerProps.className}
 					isDisabled={isDisabled || isReadOnly}
 					onPress={() => {
 						if (isReadOnly) return;
@@ -287,13 +291,13 @@ function MobileComboboxContent<T extends object>({
 						state.open(null, 'manual');
 					}}
 					slot={null}
+					style={trayTriggerProps.style}
 				>
 					<ComboBoxValue
-						className={
-							resolveXStyleProps(mobileValueStyles, undefined, undefined, undefined).className
-						}
+						className={trayValueProps.className}
 						id={valueId}
 						placeholder={placeholder}
+						style={trayValueProps.style}
 					/>
 					<Icon aria-hidden name="chevronDown" />
 				</RacButton>
@@ -310,16 +314,18 @@ function MobileComboboxContent<T extends object>({
 				}}
 				ref={popoverContext?.ref}
 			>
-				<ComboboxInputGroup xstyle={mobileInputGroupStyles as XStyleProp}>
-					<ComboboxInput
-						aria-expanded={undefined}
-						aria-haspopup="listbox"
-						placeholder={placeholder}
-						ref={mobileInputRef}
-						role="searchbox"
-					/>
-					<MobileComboboxClearButton size={size} />
-				</ComboboxInputGroup>
+				<ComboboxPresentationProvider presentation="tray">
+					<ComboboxInputGroup>
+						<ComboboxInput
+							aria-expanded={undefined}
+							aria-haspopup="listbox"
+							placeholder={placeholder}
+							ref={mobileInputRef}
+							role="searchbox"
+						/>
+						<MobileComboboxClearButton size={size} />
+					</ComboboxInputGroup>
+				</ComboboxPresentationProvider>
 				{listBox}
 			</MobileOverlay>
 		</>

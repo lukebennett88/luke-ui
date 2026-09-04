@@ -7,6 +7,7 @@ import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveRacXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { useComboboxPresentation } from './presentation-context.js';
 import type { ComboboxSize } from './recipe.js';
 import { resolveComboboxRecipeSlotStyles } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
@@ -24,7 +25,8 @@ export type ComboboxInputGroupProps = Prettify<_ComboboxInputGroupProps>;
 export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element {
 	const { size: sizeProp, style, xstyle, ...groupProps } = props;
 	const size = useComboboxSize(sizeProp);
-	const recipeStyles = resolveComboboxRecipeSlotStyles('inputGroup', { size });
+	const presentation = useComboboxPresentation();
+	const recipeStyles = resolveComboboxRecipeSlotStyles('inputGroup', { presentation, size });
 
 	// Same icon size as `InputGroup`, including icons a caller puts in the group.
 	return (

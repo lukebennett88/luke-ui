@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createSingleRecipe } from '../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	base: {
@@ -29,7 +29,6 @@ const styles = stylex.create({
 			transition: 'none',
 		},
 	},
-	isStandaloneFalse: {},
 	isStandaloneTrue: {
 		alignItems: 'center',
 		display: 'inline-flex',
@@ -63,8 +62,8 @@ const styles = stylex.create({
 	},
 });
 
-/** Recipe for the `Link` component's styles. */
-export const [linkRecipe, resolveLinkRecipeStyles] = createSingleRecipe({
+/** Canonical resolver for the `Link` component's styles. */
+export const resolveLinkRecipeStyles = createRecipeStyles({
 	base: styles.base,
 	defaultVariants: {
 		isStandalone: false,
@@ -72,7 +71,7 @@ export const [linkRecipe, resolveLinkRecipeStyles] = createSingleRecipe({
 	},
 	variants: {
 		isStandalone: {
-			false: styles.isStandaloneFalse,
+			false: null,
 			true: styles.isStandaloneTrue,
 		},
 		tone: {
@@ -82,5 +81,8 @@ export const [linkRecipe, resolveLinkRecipeStyles] = createSingleRecipe({
 	},
 });
 
+/** Recipe for the `Link` component's styles. */
+export const linkRecipe = createRecipe(resolveLinkRecipeStyles);
+
 /** Variant type for the `Link` recipe. */
-export type LinkRecipeVariants = RecipeSelection<typeof linkRecipe>;
+export type LinkRecipeVariants = RecipeSelection<typeof resolveLinkRecipeStyles>;

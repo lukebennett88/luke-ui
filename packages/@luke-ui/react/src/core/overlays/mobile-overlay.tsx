@@ -7,6 +7,14 @@ import { cx } from '../../shared/utils/utils.js';
 import { rootClassName } from '../../theme/theme.js';
 import { vars } from '../../theme/tokens.stylex.js';
 
+/**
+ * Private custom property carrying the tray's bottom safe-area padding, referenced both as a
+ * computed key (set) and inside a `var(...)` (read) below. Module-local: StyleX's static analysis
+ * requires custom-property names used as object keys to resolve within the same module, so an
+ * imported constant does not compile here.
+ */
+const trayPaddingBlockEnd = '--luke-tray-padding-block-end';
+
 const styles = stylex.create({
 	overlay: {
 		backgroundColor: vars.color.overlay.backdrop,
@@ -44,7 +52,7 @@ const styles = stylex.create({
 		},
 	},
 	modal: {
-		'--luke-tray-padding-block-end':
+		[trayPaddingBlockEnd]:
 			'calc(max(calc(100dvh - var(--visual-viewport-height)), env(safe-area-inset-bottom, 0px)) + 100vh)',
 		backgroundColor: vars.color.surface.floating,
 		blockSize: 'calc(var(--visual-viewport-height) - var(--luke-space-sp48))',
@@ -69,7 +77,7 @@ const styles = stylex.create({
 		marginInlineStart: 'auto',
 		maxInlineSize: '448px',
 		overflow: 'hidden',
-		paddingBlockEnd: 'var(--luke-tray-padding-block-end)',
+		paddingBlockEnd: `var(${trayPaddingBlockEnd})`,
 		position: 'absolute',
 		// Physical on purpose, paired with `bottom` above. See the note there.
 		top: vars.space.sp48,
@@ -169,10 +177,10 @@ export function MobileOverlay({
 				// The overlay is absolutely positioned, so it has to track the document scroll
 				// position to sit at the top of the viewport. Scroll is locked while the tray is
 				// open, so this value never has to update.
-				style={() => ({
+				style={{
 					...overlay.style,
 					top: typeof window === 'undefined' ? 0 : window.scrollY,
-				})}
+				}}
 			>
 				<Modal className={modal.className} style={modal.style}>
 					<Dialog

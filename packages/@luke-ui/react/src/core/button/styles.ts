@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createSingleRecipe } from '../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	content: {
@@ -17,7 +17,6 @@ const styles = stylex.create({
 		gap: vars.space.sp8,
 		minInlineSize: 0,
 	},
-	labelPendingFalse: {},
 	labelPendingTrue: {
 		opacity: 0,
 	},
@@ -31,25 +30,31 @@ const styles = stylex.create({
 	},
 });
 
-export const [buttonContent] = createSingleRecipe({
+const resolveButtonContentStyles = createRecipeStyles({
 	base: styles.content,
 });
 
-export const [buttonLabel] = createSingleRecipe({
+export const buttonContent = createRecipe(resolveButtonContentStyles);
+
+const resolveButtonLabelStyles = createRecipeStyles({
 	base: styles.label,
 	defaultVariants: {
 		isPending: false,
 	},
 	variants: {
 		isPending: {
-			false: styles.labelPendingFalse,
+			false: null,
 			true: styles.labelPendingTrue,
 		},
 	},
 });
 
-export type ButtonLabelVariants = RecipeSelection<typeof buttonLabel>;
+export const buttonLabel = createRecipe(resolveButtonLabelStyles);
 
-export const [spinnerOverlay] = createSingleRecipe({
+export type ButtonLabelVariants = RecipeSelection<typeof resolveButtonLabelStyles>;
+
+const resolveSpinnerOverlayStyles = createRecipeStyles({
 	base: [spinnerOverlayBase, styles.spinnerOverlayForcedColors],
 });
+
+export const spinnerOverlay = createRecipe(resolveSpinnerOverlayStyles);

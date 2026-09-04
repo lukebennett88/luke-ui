@@ -1,8 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
+import { fontMetrics } from '../../../theme/font-metric-scale.stylex.js';
 import { vars } from '../../../theme/tokens.stylex.js';
 import { inputGroupInputStates } from '../../styles/input-states.js';
-import type { RecipeSelection } from '../../styles/stylex-recipe.js';
-import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
+import type { SlotRecipeSelection } from '../../styles/stylex-recipe.js';
+import { createSlottedRecipe, createSlottedRecipeStyles } from '../../styles/stylex-recipe.js';
 
 /**
  * The disabled / hover / focus-within / invalid / read-only state styling on `group` lives in
@@ -63,8 +64,8 @@ const styles = stylex.create({
 		fontFamily: vars.font.family.body,
 		inlineSize: '100%',
 		isolation: 'isolate',
-		letterSpacing: '0',
-		lineHeight: '24px',
+		letterSpacing: fontMetrics.letterSpacing16,
+		lineHeight: fontMetrics.lineHeight16,
 		minInlineSize: 0,
 		overflow: 'visible',
 		transitionDuration: vars.motion.duration.feedback,
@@ -73,13 +74,13 @@ const styles = stylex.create({
 	},
 	groupSizeMedium: {
 		blockSize: vars.controlSize.medium,
-		fontSize: '16px',
+		fontSize: fontMetrics.fontSize16,
 	},
 	groupSizeSmall: {
 		blockSize: vars.controlSize.small,
-		fontSize: '14px',
-		letterSpacing: '0',
-		lineHeight: '20px',
+		fontSize: fontMetrics.fontSize14,
+		letterSpacing: fontMetrics.letterSpacing14,
+		lineHeight: fontMetrics.lineHeight14,
 	},
 	invalidIndicator: {
 		color: vars.color.foreground.danger.rest,
@@ -101,12 +102,12 @@ const styles = stylex.create({
 		},
 	},
 	prefixSizeMedium: {
-		lineHeight: '24px',
+		lineHeight: fontMetrics.lineHeight16,
 		paddingInlineEnd: vars.space.sp12,
 		paddingInlineStart: vars.space.sp12,
 	},
 	prefixSizeSmall: {
-		lineHeight: '20px',
+		lineHeight: fontMetrics.lineHeight14,
 		paddingInlineEnd: vars.space.sp8,
 		paddingInlineStart: vars.space.sp8,
 	},
@@ -128,24 +129,18 @@ const styles = stylex.create({
 		},
 	},
 	suffixSizeMedium: {
-		lineHeight: '24px',
+		lineHeight: fontMetrics.lineHeight16,
 		paddingInlineEnd: vars.space.sp12,
 		paddingInlineStart: vars.space.sp12,
 	},
 	suffixSizeSmall: {
-		lineHeight: '20px',
+		lineHeight: fontMetrics.lineHeight14,
 		paddingInlineEnd: vars.space.sp8,
 		paddingInlineStart: vars.space.sp8,
 	},
 });
 
-/**
- * Slotted recipe for the `InputGroup` primitive.
- *
- * `inputGroupRecipe({ size }).group() / .control() / .prefix() / .suffix() /
- * .invalidIndicator()`.
- */
-export const [inputGroupRecipe, resolveInputGroupRecipeSlotStyles] = createSlottedRecipe({
+const inputGroupRecipeStyles = createSlottedRecipeStyles({
 	defaultVariants: {
 		size: 'medium',
 	},
@@ -174,8 +169,20 @@ export const [inputGroupRecipe, resolveInputGroupRecipeSlotStyles] = createSlott
 	},
 });
 
+/** Canonical per-slot resolver for the `InputGroup` primitive. */
+export const resolveInputGroupRecipeSlotStyles = inputGroupRecipeStyles.resolveSlotStyles;
+
+/**
+ * Slotted recipe for the `InputGroup` primitive.
+ *
+ * `inputGroupRecipe({ size }).group / .control / .prefix / .suffix / .invalidIndicator`.
+ */
+export const inputGroupRecipe = createSlottedRecipe(inputGroupRecipeStyles);
+
 /** Outer variant selection for the `inputGroup` recipe. */
-export type InputGroupRecipeVariants = RecipeSelection<typeof inputGroupRecipe>;
+export type InputGroupRecipeVariants = SlotRecipeSelection<
+	typeof resolveInputGroupRecipeSlotStyles
+>;
 
 /** Allowed `size` values for the `inputGroup` recipe. */
 export type InputGroupSize = NonNullable<InputGroupRecipeVariants['size']>;

@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createSingleRecipe } from '../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	base: {
@@ -37,8 +37,8 @@ export const iconSizeStyles = {
 	xsmall: styles.sizeXsmall,
 } as const;
 
-/** Recipe for the `Icon` component's styles. */
-export const [iconRecipe, resolveIconRecipeStyles] = createSingleRecipe({
+/** Canonical resolver for the `Icon` component's styles. */
+export const resolveIconRecipeStyles = createRecipeStyles({
 	base: styles.base,
 	defaultVariants: {
 		size: 'medium',
@@ -48,5 +48,8 @@ export const [iconRecipe, resolveIconRecipeStyles] = createSingleRecipe({
 	},
 });
 
+/** Recipe for the `Icon` component's styles. */
+export const iconRecipe = createRecipe(resolveIconRecipeStyles);
+
 /** Variant type for the `Icon` recipe. */
-export type IconRecipeVariants = RecipeSelection<typeof iconRecipe>;
+export type IconRecipeVariants = RecipeSelection<typeof resolveIconRecipeStyles>;

@@ -61,8 +61,8 @@ export function IconToggleButtonGroup<Value extends string>({
 		>
 			{options.map(({ icon, label: optionLabel, value: optionValue }) => (
 				<ToggleButton
+					{...toggleButtonStyles(appearance)}
 					aria-label={optionLabel}
-					className={toggleButtonClassName(appearance)}
 					id={optionValue}
 					key={optionValue}
 					render={renderToggleButton}
@@ -99,7 +99,7 @@ export function TextToggleButtonGroup<Value extends string>({
 		>
 			{options.map(({ label: optionLabel, value: optionValue }) => (
 				<ToggleButton
-					className={toggleButtonClassName(appearance)}
+					{...toggleButtonStyles(appearance)}
 					id={optionValue}
 					key={optionValue}
 					render={renderToggleButton}
@@ -118,7 +118,7 @@ function groupClassName(appearance: ToggleButtonAppearance) {
 	return cx(GROUP_CLASS_NAME, appearance === 'subtle' && GROUP_WELL_CLASS_NAME);
 }
 
-function toggleButtonClassName(appearance: ToggleButtonAppearance) {
+function toggleButtonStyles(appearance: ToggleButtonAppearance) {
 	return buttonRecipe({
 		appearance,
 		size: 'small',

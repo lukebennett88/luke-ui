@@ -89,18 +89,19 @@ type is the component in Pascal case plus `RecipeVariants`.
 
 <ExampleBlock src="styling/button-recipe" title="Styling — Apply a component recipe" />
 
-A single-part recipe such as `buttonRecipe` returns one class string. Pass the same variant names
-the component accepts.
+A single-part recipe such as `buttonRecipe` returns spreadable element props (`className`, `style`,
+and `data-style-src`, mirroring `stylex.props(...)`), not a bare class string. Pass the same variant
+names the component accepts, then spread the result onto the element.
 
 ```tsx
 import { buttonRecipe, type ButtonRecipeVariants } from '@luke-ui/react/button';
 
 const variants: ButtonRecipeVariants = { appearance: 'subtle', tone: 'neutral' };
-const className = buttonRecipe(variants);
+const props = buttonRecipe(variants);
 ```
 
-A slotted recipe such as `inputGroupRecipe` returns one function per part. Call the part you are
-styling.
+A slotted recipe such as `inputGroupRecipe` returns one props object per part. Spread the part you
+are styling.
 
 ```tsx
 import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
@@ -146,19 +147,20 @@ Read [Installation](/docs/installation) for the first-run path. Read
 ## Use application CSS alongside Luke UI
 
 Luke UI's static CSS uses cascade layers. When you use `xstyle`, import
-`@luke-ui/vite/stylesheet.css` before the Luke UI stylesheet so the layer order includes `xstyle`:
+`@luke-ui/vite/stylesheet.css` before the Luke UI stylesheet so the layer order includes
+`overrides`, the layer your compiled `xstyle` values land in:
 
 ```css
-@layer reset, theme, base, recipes, xstyle, components, utilities;
+@layer reset, theme, base, recipes, overrides, utilities;
 ```
 
-Without `xstyle`, the same layers apply except `xstyle`. Name every layer you use. A layer you leave
-out is appended after the layers you declared, which reverses the override order you expect.
+Without `xstyle`, the same layers apply except `overrides`. Name every layer you use. A layer you
+leave out is appended after the layers you declared, which reverses the override order you expect.
 
 Keep application base styles in `base`, below component recipes. Put deliberate overrides in
-`components` or `utilities`, or use ordinary unlayered application CSS. Tailwind utilities, CSS
-Modules, and application CSS work well for application-owned layout and custom elements. Put
-Tailwind classes on surrounding elements or `Box`:
+`utilities`, or use ordinary unlayered application CSS. Tailwind utilities, CSS Modules, and
+application CSS work well for application-owned layout and custom elements. Put Tailwind classes on
+surrounding elements or `Box`:
 
 ```tsx
 import { Box } from '@luke-ui/react/box';

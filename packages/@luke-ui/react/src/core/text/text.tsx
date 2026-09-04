@@ -1,4 +1,3 @@
-import type { CompiledStyles } from '@stylexjs/stylex';
 import { Text as RacText } from 'react-aria-components/Text';
 import { typeStyleWeightRole } from '../../theme/contract.js';
 import type { XStyleProps } from '../styles/xstyle.js';
@@ -102,11 +101,6 @@ const blockTextElementTypes = new Set<NonNullable<TextProps['elementType']>>([
  * trim.
  */
 export function Text(props: TextProps) {
-	return renderText(props);
-}
-
-/** Package-private Text renderer for wrappers that contribute their own compiled styles. */
-export function renderText(props: TextProps, internalStyles: ReadonlyArray<CompiledStyles> = []) {
 	const {
 		children,
 		className,
@@ -136,25 +130,22 @@ export function renderText(props: TextProps, internalStyles: ReadonlyArray<Compi
 		return !blockTextElementTypes.has(elementType);
 	})();
 	const stylexProps = resolveXStyleProps(
-		[
-			...resolveTextRecipeStyles({
-				color,
-				fontVariantNumeric,
-				...(shouldInheritFont
-					? {}
-					: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
-				isVisuallyHidden,
-				lineClamp,
-				shouldDisableTrim: resolvedShouldDisableTrim,
-				shouldInheritFont,
-				textAlign,
-				textDecoration,
-				textTransform,
-				textWrap,
-				typography: resolvedTypography,
-			}),
-			...internalStyles,
-		],
+		resolveTextRecipeStyles({
+			color,
+			fontVariantNumeric,
+			...(shouldInheritFont
+				? {}
+				: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
+			isVisuallyHidden,
+			lineClamp,
+			shouldDisableTrim: resolvedShouldDisableTrim,
+			shouldInheritFont,
+			textAlign,
+			textDecoration,
+			textTransform,
+			textWrap,
+			typography: resolvedTypography,
+		}),
 		xstyle,
 		className,
 		style,

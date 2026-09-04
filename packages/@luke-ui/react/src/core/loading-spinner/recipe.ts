@@ -2,8 +2,8 @@ import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
 import { iconSizeStyles } from '../icon/recipe.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
-import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createSlottedRecipe } from '../styles/stylex-recipe.js';
+import type { SlotRecipeSelection } from '../styles/stylex-recipe.js';
+import { createSlottedRecipe, createSlottedRecipeStyles } from '../styles/stylex-recipe.js';
 
 const rotationDuration = '1.2s';
 const rubberBandDuration = '2s';
@@ -86,7 +86,7 @@ const styles = stylex.create({
  * itself, and `.childrenWrapper() / .hiddenChildren() / .spinnerOverlay()` for the
  * in-place children overlay.
  */
-export const [loadingSpinnerRecipe, resolveLoadingSpinnerRecipeSlotStyles] = createSlottedRecipe({
+const loadingSpinnerRecipeStyles = createSlottedRecipeStyles({
 	defaultVariants: {
 		size: 'medium',
 	},
@@ -117,5 +117,13 @@ export const [loadingSpinnerRecipe, resolveLoadingSpinnerRecipeSlotStyles] = cre
 	},
 });
 
+/** Canonical per-slot resolver for the `LoadingSpinner` primitive. */
+export const resolveLoadingSpinnerRecipeSlotStyles = loadingSpinnerRecipeStyles.resolveSlotStyles;
+
+/** Slotted recipe for the `LoadingSpinner` primitive. */
+export const loadingSpinnerRecipe = createSlottedRecipe(loadingSpinnerRecipeStyles);
+
 /** Outer variant selection for the `LoadingSpinner` recipe. */
-export type LoadingSpinnerRecipeVariants = RecipeSelection<typeof loadingSpinnerRecipe>;
+export type LoadingSpinnerRecipeVariants = SlotRecipeSelection<
+	typeof resolveLoadingSpinnerRecipeSlotStyles
+>;

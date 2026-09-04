@@ -1,7 +1,18 @@
 import * as stylex from '@stylexjs/stylex';
+import { fontMetrics } from '../../../theme/font-metric-scale.stylex.js';
 import { vars } from '../../../theme/tokens.stylex.js';
-import type { RecipeSelection } from '../../styles/stylex-recipe.js';
-import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
+import type { SlotRecipeSelection } from '../../styles/stylex-recipe.js';
+import { createSlottedRecipe, createSlottedRecipeStyles } from '../../styles/stylex-recipe.js';
+
+/**
+ * Private custom properties private to this recipe, each set by a `root` size variant and read by
+ * `control`/`indicator`. Module-local: StyleX's static analysis requires custom-property names
+ * used as object keys to resolve within the same module, so an imported constant does not compile
+ * here.
+ */
+const checkboxControlSize = '--checkbox-control-size';
+const checkboxIndicatorSize = '--checkbox-indicator-size';
+const checkboxGlyphSize = '--checkbox-glyph-size';
 
 const styles = stylex.create({
 	content: {
@@ -30,14 +41,14 @@ const styles = stylex.create({
 		blockSize: 'var(--text-line-height, 1lh)',
 		display: 'inline-flex',
 		flexShrink: 0,
-		inlineSize: 'var(--checkbox-control-size)',
+		inlineSize: `var(${checkboxControlSize})`,
 		justifyContent: 'center',
 	},
 	indicator: {
 		alignItems: 'center',
 		backgroundColor: vars.color.surface.canvas,
 		backgroundImage: vars.actionControlFinish.resting,
-		blockSize: 'var(--checkbox-indicator-size)',
+		blockSize: `var(${checkboxIndicatorSize})`,
 		borderColor: vars.color.border.control,
 		borderRadius: vars.radius.detail,
 		borderStyle: 'solid',
@@ -46,9 +57,9 @@ const styles = stylex.create({
 		boxSizing: 'border-box',
 		color: vars.color.foreground.accent.onSolid,
 		display: 'inline-flex',
-		fontSize: 'var(--checkbox-glyph-size)',
+		fontSize: `var(${checkboxGlyphSize})`,
 		fontWeight: vars.font.weight.heading,
-		inlineSize: 'var(--checkbox-indicator-size)',
+		inlineSize: `var(${checkboxIndicatorSize})`,
 		justifyContent: 'center',
 		lineHeight: 1,
 		transitionDuration: vars.motion.duration.feedback,
@@ -183,31 +194,26 @@ const styles = stylex.create({
 		'--luke-field-message-icon': 'inline-block',
 	},
 	rootSizeLarge: {
-		'--checkbox-control-size': '28px',
-		'--checkbox-glyph-size': 'var(--luke-icon-size-small)',
-		'--checkbox-indicator-size': 'var(--luke-icon-size-medium)',
-		'--luke-field-message-indent': 'calc(var(--checkbox-control-size) + var(--luke-space-sp8))',
+		[checkboxControlSize]: fontMetrics.lineHeight20,
+		[checkboxGlyphSize]: 'var(--luke-icon-size-small)',
+		[checkboxIndicatorSize]: 'var(--luke-icon-size-medium)',
+		'--luke-field-message-indent': `calc(var(${checkboxControlSize}) + var(--luke-space-sp8))`,
 	},
 	rootSizeMedium: {
-		'--checkbox-control-size': '24px',
-		'--checkbox-glyph-size': 'var(--luke-icon-size-xsmall)',
-		'--checkbox-indicator-size': 'var(--luke-icon-size-small)',
-		'--luke-field-message-indent': 'calc(var(--checkbox-control-size) + var(--luke-space-sp8))',
+		[checkboxControlSize]: fontMetrics.lineHeight16,
+		[checkboxGlyphSize]: 'var(--luke-icon-size-xsmall)',
+		[checkboxIndicatorSize]: 'var(--luke-icon-size-small)',
+		'--luke-field-message-indent': `calc(var(${checkboxControlSize}) + var(--luke-space-sp8))`,
 	},
 	rootSizeSmall: {
-		'--checkbox-control-size': 'var(--luke-icon-size-small)',
-		'--checkbox-glyph-size': '12px',
-		'--checkbox-indicator-size': 'var(--luke-icon-size-xsmall)',
-		'--luke-field-message-indent': 'calc(var(--checkbox-control-size) + var(--luke-space-sp8))',
+		[checkboxControlSize]: 'var(--luke-icon-size-small)',
+		[checkboxGlyphSize]: fontMetrics.fontSize12,
+		[checkboxIndicatorSize]: 'var(--luke-icon-size-xsmall)',
+		'--luke-field-message-indent': `calc(var(${checkboxControlSize}) + var(--luke-space-sp8))`,
 	},
 });
 
-/**
- * Slotted recipe for the Checkbox primitive anatomy.
- *
- * `checkboxRecipe({ size }).root() / .content() / .control() / .indicator()`.
- */
-export const [checkboxRecipe, resolveCheckboxRecipeSlotStyles] = createSlottedRecipe({
+const checkboxRecipeStyles = createSlottedRecipeStyles({
 	defaultVariants: {
 		size: 'medium',
 	},
@@ -226,5 +232,15 @@ export const [checkboxRecipe, resolveCheckboxRecipeSlotStyles] = createSlottedRe
 	},
 });
 
+/** Canonical per-slot resolver for the Checkbox primitive anatomy. */
+export const resolveCheckboxRecipeSlotStyles = checkboxRecipeStyles.resolveSlotStyles;
+
+/**
+ * Slotted recipe for the Checkbox primitive anatomy.
+ *
+ * `checkboxRecipe({ size }).root / .content / .control / .indicator`.
+ */
+export const checkboxRecipe = createSlottedRecipe(checkboxRecipeStyles);
+
 /** Outer variant selection for the Checkbox recipe. */
-export type CheckboxRecipeVariants = RecipeSelection<typeof checkboxRecipe>;
+export type CheckboxRecipeVariants = SlotRecipeSelection<typeof resolveCheckboxRecipeSlotStyles>;

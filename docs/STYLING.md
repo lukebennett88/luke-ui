@@ -9,10 +9,13 @@ for example `@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes th
 from `:root`, with no class and no JS required. Neither step injects styles at runtime.
 
 The package build also extracts StyleX and appends those rules to `dist/stylesheet.css`. StyleX
-rules live in generated `recipes.sx.priorityN` cascade layers between the base and components
-layers. Public visual components author StyleX recipes. `LoadingSkeleton`'s descendant masks, Prose
-descendant rhythm, and Combobox adjacent-section borders stay in the `components` Vanilla Extract
-layer. `Box` and Rainbow Sprinkles utilities stay on Vanilla Extract.
+rules live in generated `recipes.priorityN` cascade layers, nested inside `recipes`, between `base`
+and `utilities`. Public visual components author StyleX recipes. `LoadingSkeleton`'s forced surface
+and descendant masks, Prose descendant rhythm, and Combobox adjacent-section borders are retained
+Vanilla Extract rules written DIRECTLY into `recipes` (not a numbered sublayer) — a direct
+parent-layer rule beats a nested sublayer for normal declarations, which is what lets this retained
+CSS reliably override generated recipe output. `Box` and Rainbow Sprinkles utilities stay on Vanilla
+Extract.
 
 ## Structure
 
@@ -171,20 +174,33 @@ explicit mode.
 All styles live in named CSS cascade layers. Layer order makes cross-layer priority explicit.
 Specificity and source order still decide conflicts within a layer.
 
-| Layer                  | Purpose                                                                 |
-| ---------------------- | ----------------------------------------------------------------------- |
-| `reset`                | Browser defaults, box sizing, and margins.                              |
-| `theme`                | Design token custom properties and base typography.                     |
-| `base`                 | Application element defaults, below the recipe layers.                  |
-| `recipes.sx.priorityN` | StyleX atoms, ordered by internal priority.                             |
-| `components`           | Retained descendant rhythm, skeleton masking, and combinator selectors. |
-| `utilities`            | One-off layout and override escape hatches.                             |
+| Layer       | Purpose                                                                                                                                                                                                              |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reset`     | Browser defaults, box sizing, and margins.                                                                                                                                                                           |
+| `theme`     | Design token custom properties and base typography.                                                                                                                                                                  |
+| `base`      | Application element defaults, below the recipe layers.                                                                                                                                                               |
+| `recipes`   | Component styles: StyleX atoms nested in `recipes.priorityN` sublayers, plus retained descendant rhythm, forced-surface masking, and combinator selectors written DIRECTLY into `recipes` (not a numbered sublayer). |
+| `overrides` | Consumer `xstyle` values, compiled by `@luke-ui/vite`. Absent for a consumer that does not author `xstyle`.                                                                                                          |
+| `utilities` | One-off layout and override escape hatches.                                                                                                                                                                          |
 
 Layer names describe purpose, not package ownership, so a consumer declares the same set. The public
 `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every layer
 before any rules create them. StyleX priority layers use dotted nested names such as
-`recipes.sx.priority1`, which sit between `base` and `components` in the required precedence order.
-A consumer declares only the stable `recipes` parent layer, never the priority count.
+`recipes.priority1`, nested inside the `recipes` parent layer. A consumer declares only the stable
+`recipes` parent layer, never the priority count.
+
+A direct `@layer recipes { ... }` rule beats a nested `recipes.priorityN` sublayer rule for a normal
+declaration — that is what lets the retained CSS described above reliably override generated StyleX
+recipe output, and it is why deleting the old separate `components` layer was possible: retained
+rules moved straight into `recipes` instead of a layer above it. That relationship REVERSES for
+`!important`: a nested sublayer's `!important` declaration beats its direct parent layer's
+`!important` declaration. Consequently a `recipes.priorityN` sublayer must never emit `!important` —
+`stylesheet-contract.test.ts` guards this by parsing the compiled stylesheet — because such a
+declaration would rank above both the direct-`recipes` retained CSS and a consumer's
+`overrides`-layer `!important` override, silently inverting the whole cascade contract.
+`LoadingSkeleton`'s forced surface is the component that needed a `!important` override strong
+enough to beat arbitrary wrapped content, which is why it lives in retained CSS rather than
+`stylex.create` — see `core/loading-skeleton/styles.css.ts`.
 
 ### The `xstyle` layer contract
 
@@ -199,12 +215,11 @@ contain a copy-paste plugin, Babel configuration, or virtual-module details.
 
 Internally `@luke-ui/vite`:
 
-- Declares the combined layer order
-  `@layer reset, theme, base, recipes, xstyle, components, utilities;` in the public stylesheet
-  subpath, so `xstyle` is positioned before Luke UI's shipped stylesheet mentions `components` /
-  `utilities`.
-- Compiles application StyleX with `useLayers: { before, after, prefix: 'xstyle' }`, which is the
-  only StyleX layer form that emits a dedicated sibling `xstyle` layer. Boolean `useLayers` /
+- Declares the combined layer order `@layer reset, theme, base, recipes, overrides, utilities;` in
+  the public stylesheet subpath, so `overrides` — the layer compiled `xstyle` values land in — is
+  positioned before Luke UI's shipped stylesheet mentions `utilities`.
+- Compiles application StyleX with `useLayers: { before, after, prefix: 'overrides' }`, which is the
+  only StyleX layer form that emits a dedicated sibling `overrides` layer. Boolean `useLayers` /
   `useCSSLayers` emits bare `priorityN` layers and cannot satisfy this contract — that is why the
   package exists instead of pointing consumers at `@stylexjs/unplugin` or
   `@stylexjs/postcss-plugin`.
@@ -221,9 +236,9 @@ Measured ground truth that motivates this design (verified with `@stylexjs/babel
 - StyleX's default output is unlayered. An unlayered rule beats every layered rule, so unlayered
   `xstyle` would beat a layered consumer `className`.
 - Nesting consumer StyleX under the `recipes` parent layer is import-order dependent against Luke
-  UI's own `recipes.sx.priorityN` atoms. Do not rely on it.
-- A dedicated sibling `xstyle` layer between `recipes` and `components`/`utilities` is the
-  order-independent configuration that matches the published precedence.
+  UI's own `recipes.priorityN` atoms. Do not rely on it.
+- A dedicated sibling `overrides` layer between `recipes` and `utilities` is the order-independent
+  configuration that matches the published precedence.
 
 `@stylexjs/stylex` is a `dependency` of `@luke-ui/react` because `stylex.props` runs at runtime.
 Consumers who author `xstyle` must still declare `@stylexjs/stylex` themselves: pnpm isolates
@@ -231,8 +246,8 @@ dependencies, so an application cannot resolve Luke UI's transitive copy. `@luke
 `@babel/core` and `@stylexjs/babel-plugin` so consumers do not install those.
 `packed-consumer.test.ts` covers the isolation regression. Real Vite build/dev coverage for the
 public plugin lives in `@luke-ui/vite`. `xstyle.browser.test.tsx` covers only the
-in-repo/dev-compiled path (compiled by this package's `createStylexDevPlugin` into `recipes.sx.*`)
-and does not by itself prove the public consumer contract.
+in-repo/dev-compiled path (compiled by this package's `createStylexDevPlugin` into `recipes.*`) and
+does not by itself prove the public consumer contract.
 
 `src/theme/tokens.stylex.ts` exports the one `vars` token interface, generated from
 `themeContractTree` with `stylex.unstable_defineConstsNested`. Its nested shape mirrors the contract
@@ -249,10 +264,11 @@ not change `vars`" wording as a promise about the public shape, not a requiremen
 implementations.
 
 Use `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain Vanilla Extract
-global rule in a named layer. Structural combinators such as Combobox's adjacent-section border live
-here, not in StyleX: StyleX cannot express a `+` sibling rule, so `components.css.ts` interpolates
-the private `data-luke-combobox-section` attribute from `primitives/combobox/section-scope.ts`. That
-marker is an implementation detail, not a public styling hook.
+global rule directly in the `recipes` layer (never a numbered sublayer — see "Cascade layers"
+above). Structural combinators such as Combobox's adjacent-section border live here, not in StyleX:
+StyleX cannot express a `+` sibling rule, so `components.css.ts` interpolates the private
+`data-luke-combobox-section` attribute from `primitives/combobox/section-scope.ts`. That marker is
+an implementation detail, not a public styling hook.
 
 `Text` authors camelCase `marginBlockStart` and `marginBlockEnd` for its Capsize pseudo-element
 margins. StyleX canonicalises these to `margin-top` and `margin-bottom`, which is equivalent under
@@ -261,11 +277,13 @@ the horizontal writing modes Luke UI supports.
 Overrides that should beat component styles belong in the `utilities` layer. Use `!important` only
 when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
 
-`LoadingSkeleton` uses `!important` inside the `components` layer because it must force placeholder
-styles onto arbitrary wrapped children. Moving `!important` to a lower layer does not weaken the
-mask — in the `!important` cascade, lower layers win over higher layers. The `components` layer is
-below `utilities`, so a `utilities`-layer `!important` override from a consumer cannot beat the
-skeleton.
+`LoadingSkeleton` uses `!important` in retained CSS written directly into the `recipes` layer (never
+inside a `recipes.priorityN` sublayer — see "Cascade layers" above) because it must force
+placeholder styles onto arbitrary wrapped children. Moving `!important` to a lower layer does not
+weaken the mask — in the `!important` cascade, lower layers win over higher layers. Direct `recipes`
+sits below `utilities`, so a `utilities`-layer `!important` override from a consumer cannot beat the
+skeleton. But it must stay OUT of a `recipes.priorityN` sublayer, because a nested sublayer's
+`!important` would rank above direct `recipes` — the opposite of what normal declarations do.
 
 Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
 in the `reset` layer, so it cannot disable animations declared in StyleX or `utilities`. Animated
@@ -364,7 +382,7 @@ through one `stylex.props` call, so `xstyle` reliably replaces a same-property c
 part of the contract is guaranteed by resolution order alone.
 
 The `xstyle < className` step is not — it is a cascade-layer guarantee, and only holds when `xstyle`
-is compiled into the dedicated `xstyle` layer. `@luke-ui/vite` does that for Vite consumers. See
+is compiled into the dedicated `overrides` layer. `@luke-ui/vite` does that for Vite consumers. See
 "The `xstyle` layer contract" under [Cascade layers](#cascade-layers). Inline `style` always wins,
 because it sits outside the layered cascade entirely.
 

@@ -45,11 +45,12 @@ test('publishes only the final styling entrypoints', () => {
 	expect('imports' in packageJson).toBe(false);
 });
 
-test('bundles StyleX recipes as string wrappers without a package recipe-engine import', async () => {
+test('bundles StyleX recipes as the composable resolver/adapter pair without a package recipe-engine import', async () => {
 	const source = await readFile(new URL('../../../dist/blockquote.js', import.meta.url), 'utf8');
 	expect(source).not.toContain('#recipe-engine');
 	expect(source).toMatch(/from ["']\.\/stylex-recipe-/);
-	expect(source).toMatch(/const \[blockquoteRecipe, resolveBlockquoteRecipeStyles\]/);
+	expect(source).toMatch(/const resolveBlockquoteRecipeStyles = createRecipeStyles\(/);
+	expect(source).toMatch(/const blockquoteRecipe = createRecipe\(resolveBlockquoteRecipeStyles\)/);
 	expect(source).toMatch(/export \{ Blockquote, blockquoteRecipe \}/);
 	expect(source).not.toMatch(/export \{[^}]*resolveBlockquoteRecipeStyles/);
 	expect(source).not.toMatch(/export \{[^}]*resolveStyles/);

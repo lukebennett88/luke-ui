@@ -6,45 +6,26 @@ import type { XStyleProps } from '../styles/xstyle.js';
 import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
-import { loadingSkeletonScopeAttribute } from './scope.js';
+import {
+	loadingSkeletonScopeAttribute,
+	skeletonPulseAnimationName,
+	skeletonRadiusVar,
+} from './scope.js';
 
-const skeletonRadiusVar = '--luke-loading-skeleton-radius';
-const skeletonPulseAnimationName = 'luke-loading-skeleton-pulse';
-
+// Only ordinary, non-`!important` styling lives here. The forced `!important` surface (background,
+// border, color, cursor, pointer-events, user-select, forced-colors override) and the pulse
+// animation itself are retained CSS in `styles.css.ts`, applied directly to this same
+// `[data-skeleton-inline]` root via the shared `loadingSkeletonScopeAttribute` — see that file's
+// `surface`/`pulse` comment for why `!important` cannot live in a StyleX `recipes.priorityN`
+// sublayer here. `borderRadius` and `display` stay in StyleX because they're ordinary
+// declarations with no need to out-rank anything.
 const loadingSkeletonStyles = stylex.create({
 	root: {
 		':not([data-skeleton-inline])': {
 			display: 'contents',
 		},
 		'[data-skeleton-inline]': {
-			animationDelay: '0.5s',
-			animationDuration: '2s',
-			animationIterationCount: 'infinite',
-			animationName: skeletonPulseAnimationName,
-			animationTimingFunction: vars.motion.easing.standard,
-			backgroundClip: 'border-box !important',
-			backgroundColor: 'var(--luke-color-loading-skeleton) !important',
-			backgroundImage: 'none !important',
-			borderColor: 'transparent !important',
-			borderImageSource: 'none !important',
 			borderRadius: 'var(--luke-loading-skeleton-radius, var(--luke-radius-detail))',
-			borderStyle: 'none !important',
-			borderWidth: '0 !important',
-			boxDecorationBreak: 'clone !important',
-			boxShadow: 'none !important',
-			color: 'transparent !important',
-			cursor: 'default !important',
-			outline: 'none !important',
-			pointerEvents: 'none !important',
-			userSelect: 'none !important',
-			'@media (forced-colors: active)': {
-				animationName: 'none',
-				backgroundColor: 'CanvasText !important',
-				forcedColorAdjust: 'none !important',
-			},
-			'@media (prefers-reduced-motion: reduce)': {
-				animationName: 'none',
-			},
 		},
 	},
 }).root;

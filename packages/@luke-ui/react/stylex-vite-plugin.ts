@@ -37,8 +37,8 @@ export const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url)
 
 const stylexLayerConfig = {
 	before: ['reset', 'theme', 'base'],
-	after: ['components', 'utilities'],
-	prefix: 'recipes.sx',
+	after: ['utilities'],
+	prefix: 'recipes',
 } as const;
 
 /** An `@layer name;` statement on its own line, which StyleX re-emits per chunk. */

@@ -1,9 +1,9 @@
 import type { XStyleProps } from '../styles/xstyle.js';
+import { Text } from '../text/text.js';
 import type { TextProps } from '../text/text.js';
-import { renderText } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { resolveBlockquoteRecipeStyles } from './recipe.js';
+import { styles } from './recipe.js';
 
 type _BlockquoteOmit = DistributiveOmit<TextProps, 'color' | 'elementType' | 'xstyle'>;
 
@@ -18,8 +18,14 @@ export type BlockquoteProps = Prettify<_BlockquoteProps>;
  */
 export function Blockquote(props: BlockquoteProps) {
 	const { children, className, xstyle, ...textProps } = props;
-	return renderText(
-		{ ...textProps, children, className, elementType: 'blockquote', xstyle },
-		resolveBlockquoteRecipeStyles(),
+	return (
+		<Text
+			{...textProps}
+			className={className}
+			elementType="blockquote"
+			xstyle={[styles.root, xstyle]}
+		>
+			{children}
+		</Text>
 	);
 }

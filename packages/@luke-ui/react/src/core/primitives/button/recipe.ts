@@ -1,12 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
+import { fontMetrics } from '../../../theme/font-metric-scale.stylex.js';
 import { vars } from '../../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../../styles/stylex-recipe.js';
-import { createSingleRecipe } from '../../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../../styles/stylex-recipe.js';
 
 const styles = stylex.create({
-	appearanceGhost: {},
-	appearanceSolid: {},
-	appearanceSubtle: {},
 	base: {
 		alignItems: 'center',
 		appearance: 'none',
@@ -22,8 +20,8 @@ const styles = stylex.create({
 		fontWeight: vars.font.weight.label,
 		isolation: 'isolate',
 		justifyContent: 'center',
-		letterSpacing: '0',
-		lineHeight: '20px',
+		letterSpacing: fontMetrics.letterSpacing14,
+		lineHeight: fontMetrics.lineHeight14,
 		minBlockSize: vars.controlSize.minTarget,
 		minInlineSize: vars.controlSize.minTarget,
 		position: 'relative',
@@ -219,29 +217,25 @@ const styles = stylex.create({
 		},
 		'@media (forced-colors: active)': { backgroundImage: 'none' },
 	},
-	isBlockFalse: {},
 	isBlockTrue: { inlineSize: '100%' },
 	sizeMedium: {
 		blockSize: vars.controlSize.medium,
-		fontSize: '14px',
+		fontSize: fontMetrics.fontSize14,
 		gap: vars.space.sp8,
 		paddingInline: vars.space.sp16,
 	},
 	sizeSmall: {
 		blockSize: vars.controlSize.small,
-		fontSize: '12px',
+		fontSize: fontMetrics.fontSize12,
 		gap: vars.space.sp4,
-		letterSpacing: '0.0025em',
-		lineHeight: '16px',
+		letterSpacing: fontMetrics.letterSpacing12,
+		lineHeight: fontMetrics.lineHeight12,
 		paddingInline: vars.space.sp12,
 	},
-	toneAccent: {},
-	toneDanger: {},
-	toneNeutral: {},
 });
 
-/** Semantic appearance and material recipe shared by Button and IconButton. */
-export const [buttonRecipe, resolveButtonRecipeStyles] = createSingleRecipe({
+/** Canonical resolver for the semantic appearance and material recipe shared by Button and IconButton. */
+export const resolveButtonRecipeStyles = createRecipeStyles({
 	base: styles.base,
 	compoundVariants: [
 		{ style: styles.compoundSolidNeutral, variants: { appearance: 'solid', tone: 'neutral' } },
@@ -262,12 +256,12 @@ export const [buttonRecipe, resolveButtonRecipeStyles] = createSingleRecipe({
 	},
 	variants: {
 		appearance: {
-			ghost: styles.appearanceGhost,
-			solid: styles.appearanceSolid,
-			subtle: styles.appearanceSubtle,
+			ghost: null,
+			solid: null,
+			subtle: null,
 		},
 		isBlock: {
-			false: styles.isBlockFalse,
+			false: null,
 			true: styles.isBlockTrue,
 		},
 		size: {
@@ -275,11 +269,14 @@ export const [buttonRecipe, resolveButtonRecipeStyles] = createSingleRecipe({
 			small: styles.sizeSmall,
 		},
 		tone: {
-			accent: styles.toneAccent,
-			danger: styles.toneDanger,
-			neutral: styles.toneNeutral,
+			accent: null,
+			danger: null,
+			neutral: null,
 		},
 	},
 });
 
-export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
+/** Semantic appearance and material recipe shared by Button and IconButton. */
+export const buttonRecipe = createRecipe(resolveButtonRecipeStyles);
+
+export type ButtonRecipeVariants = RecipeSelection<typeof resolveButtonRecipeStyles>;

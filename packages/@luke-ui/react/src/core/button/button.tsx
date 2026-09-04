@@ -71,13 +71,13 @@ export function Button(props: ButtonProps): JSX.Element {
 	return (
 		<PrimitiveButton {...restProps} isPending={isPending} size={size} xstyle={xstyle}>
 			{(renderProps) => (
-				<span className={buttonContent()}>
+				<span {...buttonContent()}>
 					{isPending && (
-						<span aria-hidden className={spinnerOverlay()}>
+						<span aria-hidden {...spinnerOverlay()}>
 							<LoadingSpinner aria-hidden />
 						</span>
 					)}
-					<span className={buttonLabel({ isPending })}>
+					<span {...buttonLabel({ isPending })}>
 						{startIcon}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}

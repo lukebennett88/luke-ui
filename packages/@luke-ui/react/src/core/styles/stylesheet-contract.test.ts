@@ -11,9 +11,9 @@ import { createStylexStylesheet } from '../../../stylex-vite-plugin.js';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
 
-const lukeOwnedLayerNames = ['reset', 'theme', 'base', 'components', 'utilities'] as const;
+const lukeOwnedLayerNames = ['reset', 'theme', 'base', 'recipes', 'utilities'] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
-const STYLEX_PRIORITY_LAYER_PATTERN = /^recipes\.sx\.priority\d+$/;
+const STYLEX_PRIORITY_LAYER_PATTERN = /^recipes\.priority\d+$/;
 
 /** The stylesheet's leading `@layer ...;` order statement. */
 const LAYER_ORDER_STATEMENT_PATTERN = /^@layer [^;]+;/m;
@@ -36,17 +36,20 @@ test(
 		const recipeClasses = comboboxStylexClassesFromStylesheet(root);
 		expect(recipeClasses.length).toBeGreaterThan(0);
 		const textClassesByTypography = Object.fromEntries(
-			typeStyles.map((typography) => [typography, text.textRecipe({ typography }).split(' ')]),
+			typeStyles.map((typography) => [
+				typography,
+				text.textRecipe({ typography }).className?.split(' ') ?? [],
+			]),
 		) as TextClassesByTypography;
 		const utilityClasses = styles.createSprinkles({ display: 'grid' }).className?.split(' ') ?? [];
 		const lineClampClasses: LineClampClasses = {
 			numeric: Object.fromEntries(
 				numericLineClampVariants.map((lineClamp) => [
 					lineClamp,
-					text.textRecipe({ lineClamp }).split(' '),
+					text.textRecipe({ lineClamp }).className?.split(' ') ?? [],
 				]),
 			) as Record<NumericLineClampVariant, Array<string>>,
-			singleLine: text.textRecipe({ lineClamp: true }).split(' '),
+			singleLine: text.textRecipe({ lineClamp: true }).className?.split(' ') ?? [],
 		};
 
 		assertPrivateStylesheetSentinel(root);
@@ -110,8 +113,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'reordered authoritative layer declarations',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, base, recipes\.sx\.priority\d+(?:, recipes\.sx\.priority\d+)*, components, utilities;/m,
-				'@layer theme, reset, base, recipes.sx.priority1, components, utilities;',
+				/^@layer reset, theme, base, recipes\.priority\d+(?:, recipes\.priority\d+)*, utilities;/m,
+				'@layer theme, reset, base, recipes.priority1, utilities;',
 			);
 		},
 	],
@@ -119,8 +122,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early individual layer declarations before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, base, recipes\.sx\.priority\d+(?:, recipes\.sx\.priority\d+)*, components, utilities;\n/m,
-				'@layer reset;\n@layer theme;\n@layer components;\n@layer utilities;\n@layer reset, theme, base, recipes.sx.priority1, components, utilities;\n',
+				/^@layer reset, theme, base, recipes\.priority\d+(?:, recipes\.priority\d+)*, utilities;\n/m,
+				'@layer reset;\n@layer theme;\n@layer recipes;\n@layer utilities;\n@layer reset, theme, base, recipes.priority1, utilities;\n',
 			);
 		},
 	],
@@ -128,22 +131,22 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early layer block before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, base, recipes\.sx\.priority\d+(?:, recipes\.sx\.priority\d+)*, components, utilities;\n/m,
-				'@layer components { .early {} }\n@layer reset, theme, base, recipes.sx.priority1, components, utilities;\n',
+				/^@layer reset, theme, base, recipes\.priority\d+(?:, recipes\.priority\d+)*, utilities;\n/m,
+				'@layer recipes { .early {} }\n@layer reset, theme, base, recipes.priority1, utilities;\n',
 			);
 		},
 	],
 	['anonymous layer statement', (css: string) => `${css}\n@layer;`],
 	['anonymous layer block', (css: string) => `${css}\n@layer { .anonymous {} }`],
 	['unknown layer', (css: string) => `${css}\n@layer overlays;`],
-	['nested layer', (css: string) => `${css}\n@layer components { @layer utilities {} }`],
+	['nested layer', (css: string) => `${css}\n@layer recipes { @layer utilities {} }`],
 	['root qualified rule', (css: string) => `${css}\n.root-rule { color: red; }`],
 	['lookalike layer at-rule', (css: string) => `${css}\n@layered {}`],
 	[
 		'representative StyleX class moved to the wrong layer',
 		(css: string) => {
 			return css.replace(
-				'@layer recipes.sx.priority1 {\n  .xrecipe1a { display: inline-flex; }\n}',
+				'@layer recipes.priority1 {\n  .xrecipe1a { display: inline-flex; }\n}',
 				'@layer utilities {\n  .xrecipe1a { display: inline-flex; }\n}',
 			);
 		},
@@ -153,7 +156,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		(css: string) => {
 			return css.replace(
 				'@layer utilities {\n  ._utility1a { display: grid; }\n}',
-				'@layer components {\n  ._utility1a { display: grid; }\n}',
+				'@layer recipes {\n  ._utility1a { display: grid; }\n}',
 			);
 		},
 	],
@@ -174,19 +177,19 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'redundant empty layer statements after authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^(@layer reset, theme, base, recipes\.sx\.priority\d+(?:, recipes\.sx\.priority\d+)*, components, utilities;\n)/m,
-				'$1@layer components;\n',
+				/^(@layer reset, theme, base, recipes\.priority\d+(?:, recipes\.priority\d+)*, utilities;\n)/m,
+				'$1@layer recipes;\n',
 			);
 		},
 	],
-	['generic global class', (css: string) => `${css}\n@layer components { .prose {} }`],
+	['generic global class', (css: string) => `${css}\n@layer recipes { .prose {} }`],
 	[
 		'loading-skeleton global class',
-		(css: string) => `${css}\n@layer components { .loading-skeleton {} }`,
+		(css: string) => `${css}\n@layer recipes { .loading-skeleton {} }`,
 	],
 	[
 		'combobox-section global class',
-		(css: string) => `${css}\n@layer components { .combobox-section {} }`,
+		(css: string) => `${css}\n@layer recipes { .combobox-section {} }`,
 	],
 ];
 
@@ -319,6 +322,54 @@ export const storyProbeClassName = stylex.props(styles.storyProbe).className;
 		}
 	},
 );
+
+test('never emits !important from a recipes.priorityN sublayer', { timeout: 30_000 }, async () => {
+	// Cascade-layer priority reverses for `!important` declarations: a nested sublayer (like
+	// StyleX's own `recipes.priorityN`) beats its direct parent layer for `!important`, which
+	// is the OPPOSITE of the normal-declaration ordering the rest of this cascade relies on
+	// (a direct `@layer recipes` rule beating a nested `recipes.priorityN` rule). Retained CSS
+	// that needs to forcibly win — LoadingSkeleton's forced surface, for instance — depends on
+	// being written directly into `@layer recipes` rather than into a StyleX sublayer, and on a
+	// consumer's `overrides` layer being able to out-rank it in turn. If a `recipes.priorityN`
+	// sublayer ever emits `!important`, that declaration would rank ABOVE both the direct
+	// `@layer recipes` retained CSS and a consumer's `@layer overrides !important` override,
+	// silently inverting the whole override contract. See `styles.css.ts` in
+	// `core/loading-skeleton` for the retained CSS this invariant protects.
+	const stylesheet = await readPublicStylesheet();
+	const root = parse(stylesheet);
+
+	// `recipes.priorityN` can appear as more than one block in the built stylesheet (StyleX
+	// emits per-source-chunk blocks that share a layer name), so every block for a given
+	// layer name must be aggregated rather than stopping at the first match.
+	const importantDeclarationsByLayer = new Map<string, Array<string>>();
+
+	root.walkAtRules('layer', (atRule) => {
+		const name = atRule.params.trim();
+		if (!STYLEX_PRIORITY_LAYER_PATTERN.test(name)) return;
+
+		atRule.walkDecls((declaration) => {
+			if (!declaration.important) return;
+			const descriptions = importantDeclarationsByLayer.get(name) ?? [];
+			descriptions.push(`${declaration.prop}: ${declaration.value} !important`);
+			importantDeclarationsByLayer.set(name, descriptions);
+		});
+	});
+
+	const summary = [...importantDeclarationsByLayer.entries()]
+		.map(([layer, declarations]) => `  @layer ${layer}: ${declarations.join(', ')}`)
+		.join('\n');
+
+	// A failure here means a `recipes.priorityN` sublayer emitted `!important`. Cascade-layer
+	// `!important` priority is the reverse of normal-declaration priority: a nested sublayer beats
+	// its direct parent layer for `!important`, while a direct parent layer beats a nested sublayer
+	// for normal declarations. Luke UI relies on the normal-declaration ordering to let retained CSS,
+	// written directly into `@layer recipes` (not a StyleX sublayer), reliably override generated
+	// recipe output — and to let a consumer's `@layer overrides` reliably override Luke UI's own
+	// `@layer recipes`. Any `!important` inside a `recipes.priorityN` sublayer would rank ABOVE both,
+	// inverting the override contract. Move the forced style into retained CSS (a
+	// `globalStyleInLayer('recipes', ...)` call) instead of authoring it in `stylex.create`.
+	expect(summary).toBe('');
+});
 
 function layerOrder(stylesheet: string): string {
 	const order = stylesheet.match(LAYER_ORDER_STATEMENT_PATTERN)?.[0];
@@ -612,15 +663,34 @@ function assertStylesheetContract(
 	if (lineClampClasses) assertLineClampOwnership(root, lineClampClasses);
 }
 
+/**
+ * LoadingSkeleton's inline root (`[data-skeleton-inline]`) carries TWO rules: an ordinary,
+ * non-`!important` StyleX rule (`borderRadius`, in a `recipes.priorityN` sublayer) and a retained
+ * forced `!important` surface written directly into `@layer recipes` (see
+ * `core/loading-skeleton/styles.css.ts`). Both are asserted here; the forced surface must NOT be
+ * in a StyleX sublayer, because a `!important` declaration in `recipes.priorityN` would rank above
+ * this direct-`recipes` retained CSS — see the `!important`-in-`recipes.priorityN` guard test.
+ */
 function assertPrivateStylesheetSentinel(root: Root): void {
-	const rules = collectSkeletonInlineRules(root);
-	expect(rules.length).toBeGreaterThan(0);
-	for (const rule of rules) {
+	const inlineRules = collectSkeletonInlineRules(root);
+	expect(inlineRules.length).toBeGreaterThan(0);
+
+	// Partition by owning layer, not by declaration content: the retained forced surface splits
+	// across more than one rule (the base surface, the forced-colors override, and the
+	// reduced-motion override each land in their own `@media`-scoped rule), and only the base
+	// surface rule carries the forced background-color declaration a content sniff could match.
+	const directRecipesRules = inlineRules.filter((rule) => getOwningLayer(rule) === 'recipes');
+	const stylexSublayerRules = inlineRules.filter((rule) => {
 		const layer = getOwningLayer(rule);
-		expect(layer !== undefined && STYLEX_PRIORITY_LAYER_PATTERN.test(layer)).toBe(true);
-	}
+		return layer !== undefined && STYLEX_PRIORITY_LAYER_PATTERN.test(layer);
+	});
+	expect(directRecipesRules.length + stylexSublayerRules.length).toBe(inlineRules.length);
+
+	// The retained forced `!important` surface lives directly in `@layer recipes`, never a
+	// `recipes.priorityN` sublayer.
+	expect(directRecipesRules.length).toBeGreaterThan(0);
 	expect(
-		rules.some((rule) => {
+		directRecipesRules.some((rule) => {
 			return rule.nodes.some(
 				(node) =>
 					node.type === 'decl' &&
@@ -631,9 +701,13 @@ function assertPrivateStylesheetSentinel(root: Root): void {
 		}),
 	).toBe(true);
 
+	// The ordinary, non-`!important` StyleX styling (e.g. `borderRadius`) stays in a
+	// `recipes.priorityN` sublayer.
+	expect(stylexSublayerRules.length).toBeGreaterThan(0);
+
 	const maskRules = collectSkeletonDescendantMaskRules(root);
 	expect(maskRules.length).toBeGreaterThan(0);
-	for (const rule of maskRules) expect(getOwningLayer(rule)).toBe('components');
+	for (const rule of maskRules) expect(getOwningLayer(rule)).toBe('recipes');
 }
 
 function collectSkeletonInlineRules(root: Root): Array<Rule> {
@@ -744,11 +818,9 @@ function assertAuthoritativeLayerOrder(order: Array<string>): void {
 
 	const priorityLayers = order.slice(3).filter((name) => STYLEX_PRIORITY_LAYER_PATTERN.test(name));
 	expect(priorityLayers.length).toBeGreaterThan(0);
-	expect(priorityLayers.every((name, index) => name === `recipes.sx.priority${index + 1}`)).toBe(
-		true,
-	);
+	expect(priorityLayers.every((name, index) => name === `recipes.priority${index + 1}`)).toBe(true);
 
-	expect(order.slice(3 + priorityLayers.length)).toEqual(['components', 'utilities']);
+	expect(order.slice(3 + priorityLayers.length)).toEqual(['utilities']);
 }
 
 function assertLayerNames(root: Root): void {
@@ -868,7 +940,7 @@ function assertClassOwnership(root: Root, className: string, layerName: string):
 }
 
 /**
- * Text is StyleX-migrated: its trim and line-clamp classes live in a `recipes.sx.priorityN`
+ * Text is StyleX-migrated: its trim and line-clamp classes live in a `recipes.priorityN`
  * layer. `assertTextTrimOwnership` and `assertLineClampOwnership` below assert that StyleX
  * ownership directly. Text authors the logical `marginBlockStart`/`marginBlockEnd` keys, which
  * StyleX canonicalises to `margin-top`/`margin-bottom`. Both are bidi-insensitive, so the
@@ -999,7 +1071,7 @@ function getOwningLayer(rule: Rule): string | undefined {
 	return undefined;
 }
 
-const validStylesheetFixture = `@layer reset, theme, base, recipes.sx.priority1, components, utilities;
+const validStylesheetFixture = `@layer reset, theme, base, recipes.priority1, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
 }
@@ -1010,16 +1082,16 @@ const validStylesheetFixture = `@layer reset, theme, base, recipes.sx.priority1,
     font-size: var(--luke-font-body-font-size);
   }
 }
-@layer components {
-  ._components1a { margin-block-start: 1px; }
+@layer recipes {
+  ._recipes1a { margin-block-start: 1px; }
 }
 @layer utilities {
   ._utility1a { display: grid; }
 }
-@layer recipes.sx.priority1 {
+@layer recipes.priority1 {
   .xrecipe1a { display: inline-flex; }
 }
-@layer recipes.sx.priority1 {
+@layer recipes.priority1 {
   .xstylex1a { outline-color: transparent; }
 }
 @keyframes generated-animation {

@@ -1,7 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
+import { fontMetrics } from '../../theme/font-metric-scale.stylex.js';
 import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createSingleRecipe } from '../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
@@ -14,7 +15,7 @@ const styles = stylex.create({
 		color: vars.color.text.primary,
 		display: 'inline-flex',
 		fontFamily: vars.font.family.code,
-		fontSize: '12px',
+		fontSize: fontMetrics.fontSize12,
 		fontWeight: vars.font.weight.body,
 		inlineSize: 'fit-content',
 		lineHeight: 1,
@@ -24,9 +25,12 @@ const styles = stylex.create({
 	},
 });
 
-/** Recipe for the `Kbd` component's inline keyboard-key appearance. */
-export const [kbdRecipe, resolveKbdRecipeStyles] = createSingleRecipe({
+/** Canonical resolver for the `Kbd` component's inline keyboard-key appearance. */
+export const resolveKbdRecipeStyles = createRecipeStyles({
 	base: styles.root,
 });
 
-export type KbdRecipeVariants = RecipeSelection<typeof kbdRecipe>;
+/** Recipe for the `Kbd` component's inline keyboard-key appearance. */
+export const kbdRecipe = createRecipe(resolveKbdRecipeStyles);
+
+export type KbdRecipeVariants = RecipeSelection<typeof resolveKbdRecipeStyles>;

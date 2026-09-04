@@ -8,6 +8,7 @@ import type { XStyleProps } from '../../styles/xstyle.js';
 import { resolveRacXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { useComboboxPresentation } from './presentation-context.js';
 import { resolveComboboxRecipeSlotStyles } from './recipe.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
@@ -34,7 +35,8 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 	const { children, dependencies, items, loadMoreItem, style, xstyle, ...listBoxProps } = props;
 	const listBoxContext = useSlottedContext(ListBoxContext);
 	const collectionItems = items ?? listBoxContext?.items;
-	const recipeStyles = resolveComboboxRecipeSlotStyles('listBox');
+	const presentation = useComboboxPresentation();
+	const recipeStyles = resolveComboboxRecipeSlotStyles('listBox', { presentation });
 	const listBoxChildren =
 		typeof children === 'function' ? (
 			<Collection<T> dependencies={dependencies} items={collectionItems}>

@@ -134,7 +134,7 @@ test('does not apply Prose rhythm to an unrelated element literally classed "pro
 // `proseRecipe` is public, so the scope must ride the recipe class, not the component.
 test('preserves native ordered-list type markers under proseRecipe alone', () => {
 	const { locator } = render(
-		<div className={proseRecipe()}>
+		<div {...proseRecipe()}>
 			<ol type="1">
 				<li>1</li>
 			</ol>

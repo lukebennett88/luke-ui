@@ -1,4 +1,3 @@
-import type { CompiledStyles } from '@stylexjs/stylex';
 import type { JSX } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { Button as RacButton } from 'react-aria-components/Button';
@@ -46,14 +45,6 @@ export type ButtonProps = Prettify<_ButtonProps>;
 
 /** Primitive button. See `ButtonProps`. */
 export function Button(props: ButtonProps): JSX.Element {
-	return renderButton(props);
-}
-
-/** Package-private Button renderer for wrappers that contribute their own compiled styles. */
-export function renderButton(
-	props: ButtonProps,
-	internalStyles: ReadonlyArray<CompiledStyles> = [],
-): JSX.Element {
 	const {
 		appearance = 'solid',
 		children,
@@ -67,10 +58,7 @@ export function renderButton(
 		xstyle,
 		...restProps
 	} = props;
-	const recipeStyles = [
-		...resolveButtonRecipeStyles({ appearance, isBlock, size, tone }),
-		...internalStyles,
-	];
+	const recipeStyles = resolveButtonRecipeStyles({ appearance, isBlock, size, tone });
 
 	return (
 		<IconSizeProvider size={BUTTON_ICON_SIZE}>

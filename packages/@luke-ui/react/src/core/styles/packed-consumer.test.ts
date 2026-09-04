@@ -181,8 +181,8 @@ test(
 					"const markup = renderToStaticMarkup(createElement(Text, { color: 'accent', xstyle: consumerStyles.override }, 'Hello world'));",
 					'process.stdout.write(JSON.stringify({',
 					'  markup,',
-					"  accentClasses: textRecipe({ color: 'accent' }),",
-					'  defaultClasses: textRecipe(),',
+					"  accentClasses: textRecipe({ color: 'accent' }).className,",
+					'  defaultClasses: textRecipe().className,',
 					'  overrideClass: stylex.props(consumerStyles.override).className,',
 					'}));',
 				].join('\n'),
@@ -281,12 +281,12 @@ test(
 	},
 );
 
-// The `xstyle` sibling-layer configuration `@luke-ui/vite` applies when extracting consumer StyleX.
-// This file proves the cascade contract against a packed `@luke-ui/react` tarball. Vite build/dev
-// coverage for the public plugin lives in `@luke-ui/vite`.
-const XSTYLE_LAYERS_BEFORE = ['reset', 'theme', 'base', 'recipes'];
-const XSTYLE_LAYERS_AFTER = ['components', 'utilities'];
-const XSTYLE_LAYER_PREFIX = 'xstyle';
+// The `overrides` sibling-layer configuration `@luke-ui/vite` applies when extracting consumer
+// StyleX for the `xstyle` prop. This file proves the cascade contract against a packed
+// `@luke-ui/react` tarball. Vite build/dev coverage for the public plugin lives in `@luke-ui/vite`.
+const OVERRIDES_LAYERS_BEFORE = ['reset', 'theme', 'base', 'recipes'];
+const OVERRIDES_LAYERS_AFTER = ['utilities'];
+const OVERRIDES_LAYER_PREFIX = 'overrides';
 
 test(
 	'a real consumer StyleX compile proves the published xstyle precedence against real cascade resolution',
@@ -328,12 +328,12 @@ test(
 
 			const consumerStylexCss = stylexBabelPlugin.processStylexRules(consumerRules, {
 				useLayers: {
-					after: XSTYLE_LAYERS_AFTER,
-					before: XSTYLE_LAYERS_BEFORE,
-					prefix: XSTYLE_LAYER_PREFIX,
+					after: OVERRIDES_LAYERS_AFTER,
+					before: OVERRIDES_LAYERS_BEFORE,
+					prefix: OVERRIDES_LAYER_PREFIX,
 				},
 			});
-			expect(consumerStylexCss).toContain(`@layer ${XSTYLE_LAYER_PREFIX}.priority1`);
+			expect(consumerStylexCss).toContain(`@layer ${OVERRIDES_LAYER_PREFIX}.priority1`);
 			await writeFile(
 				path.join(consumerDir, 'xstyle-consumer-style.mjs'),
 				transformedConsumer.code,
@@ -384,10 +384,9 @@ test(
 			]);
 
 			const consumerClassNameCss =
-				'@layer components { .consumer-class { color: rgb(40, 50, 60); } }';
+				'@layer utilities { .consumer-class { color: rgb(40, 50, 60); } }';
 
-			const declaredLayerOrder =
-				'@layer reset, theme, base, recipes, xstyle, components, utilities;';
+			const declaredLayerOrder = '@layer reset, theme, base, recipes, overrides, utilities;';
 
 			const documentCss = [
 				declaredLayerOrder,

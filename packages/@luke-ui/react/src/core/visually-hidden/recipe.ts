@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { createSingleRecipe } from '../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
 
 /**
  * WCAG-standard "visually hidden" style: keeps content in the layout and the
@@ -29,7 +29,10 @@ const styles = stylex.create({
 /** StyleX style for content hidden visually but kept available to assistive technology. */
 export const visuallyHiddenStyle = styles.visuallyHidden;
 
-/** Recipe for content hidden visually but kept available to assistive technology. */
-export const [visuallyHiddenRecipe, resolveVisuallyHiddenRecipeStyles] = createSingleRecipe({
+/** Canonical resolver for content hidden visually but kept available to assistive technology. */
+export const resolveVisuallyHiddenRecipeStyles = createRecipeStyles({
 	base: visuallyHiddenStyle,
 });
+
+/** Recipe for content hidden visually but kept available to assistive technology. */
+export const visuallyHiddenRecipe = createRecipe(resolveVisuallyHiddenRecipeStyles);

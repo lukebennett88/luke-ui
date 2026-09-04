@@ -17,7 +17,7 @@ export function NotFound() {
 					The page you are looking for might have been removed, had its name changed, or is
 					temporarily unavailable.
 				</Text>
-				<DocsLink className={buttonRecipe({ tone: 'accent' })} to="/">
+				<DocsLink {...buttonRecipe({ tone: 'accent' })} to="/">
 					Back to Home
 				</DocsLink>
 			</main>

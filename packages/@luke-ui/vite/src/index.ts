@@ -5,15 +5,15 @@ import type { Rule } from '@stylexjs/babel-plugin';
 import { readdir, readFile } from 'node:fs/promises';
 import type { Plugin } from 'vite';
 
-/** Public stylesheet subpath consumers import for the `xstyle` layer order and extracted CSS. */
+/** Public stylesheet subpath consumers import for the `overrides` layer order and extracted CSS. */
 export const STYLESHEET_IMPORT = '@luke-ui/vite/stylesheet.css';
 
 const RESOLVED_STYLESHEET_ID = '\0luke-ui-vite:stylesheet.css';
-const LAYER_ORDER = '@layer reset, theme, base, recipes, xstyle, components, utilities;';
+const LAYER_ORDER = '@layer reset, theme, base, recipes, overrides, utilities;';
 const LAYER_CONFIG = {
 	before: ['reset', 'theme', 'base', 'recipes'],
-	after: ['components', 'utilities'],
-	prefix: 'xstyle',
+	after: ['utilities'],
+	prefix: 'overrides',
 } as const;
 /** Replaced in `generateBundle`. The declaration keeps Vite's CSS minifier from dropping it. */
 const PLACEHOLDER = '.stylex-placeholder{--stylex-placeholder:0}';

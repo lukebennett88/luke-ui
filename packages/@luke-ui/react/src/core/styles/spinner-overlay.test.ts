@@ -18,12 +18,12 @@ test('the shared overlay base compiles to at least one class', () => {
 });
 
 test('LoadingSpinner uses the shared base verbatim', () => {
-	const slotClasses = loadingSpinnerRecipe().spinnerOverlay().split(' ');
+	const slotClasses = loadingSpinnerRecipe().spinnerOverlay.className?.split(' ') ?? [];
 	expect(new Set(slotClasses)).toEqual(baseClasses);
 });
 
 test('Button layers its forced-colors rule on top of the same base', () => {
-	const buttonClasses = spinnerOverlay().split(' ');
+	const buttonClasses = spinnerOverlay().className?.split(' ') ?? [];
 
 	// Every base class survives, so the two components position their spinner identically…
 	for (const baseClass of baseClasses) {

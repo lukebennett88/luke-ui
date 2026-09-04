@@ -25,13 +25,13 @@ export interface XStyleProps {
 	 * Compiling `xstyle` requires the consumer's own StyleX compiler (`@stylexjs/babel-plugin` or
 	 * an equivalent bundler integration); this package's `@stylexjs/stylex` runtime dependency is
 	 * not enough on its own. A consumer `className` reliably beats `xstyle` only when the consumer
-	 * compiles their StyleX into a dedicated `xstyle` layer that sits above `recipes` and below
-	 * `components`/`utilities`, and declares the combined layer order —
-	 * `@layer reset, theme, base, recipes, xstyle, components, utilities;` — before any stylesheet
-	 * import. With StyleX's default (unlayered) output, an unlayered `xstyle` rule beats even a
-	 * layered `className`, so the documented precedence does not hold without that configuration.
-	 * See the "Override a single property with `xstyle`" and "Cascade layers" sections of the
-	 * Styling guide. Inline `style` beats `className`.
+	 * compiles their StyleX into a dedicated `overrides` layer that sits above `recipes` and below
+	 * `utilities`, and declares the combined layer order —
+	 * `@layer reset, theme, base, recipes, overrides, utilities;` — before any stylesheet import.
+	 * `@luke-ui/vite` sets this up. With StyleX's default (unlayered) output, an unlayered `xstyle`
+	 * rule beats even a layered `className`, so the documented precedence does not hold without
+	 * that configuration. See the "Override a single property with `xstyle`" and "Cascade layers"
+	 * sections of the Styling guide. Inline `style` beats `className`.
 	 */
 	xstyle?: XStyleProp;
 }

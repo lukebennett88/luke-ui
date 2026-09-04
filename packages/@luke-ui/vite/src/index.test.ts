@@ -16,9 +16,9 @@ const repoRoot = path.resolve(packageRoot, '../../..');
 const INITIAL_COLOR = 'rgb(11,22,33)';
 const UPDATED_COLOR = 'rgb(44,55,66)';
 const ADDED_COLOR = 'rgb(77,88,99)';
-const LAYER_ORDER = '@layer reset, theme, base, recipes, xstyle, components, utilities;';
+const LAYER_ORDER = '@layer reset, theme, base, recipes, overrides, utilities;';
 const LAYER_ORDER_PATTERN =
-	/@layer reset,\s*theme,\s*base,\s*recipes,\s*xstyle\.priority\d+(?:,\s*xstyle\.priority\d+)*,\s*components,\s*utilities;/;
+	/@layer reset,\s*theme,\s*base,\s*recipes,\s*overrides\.priority\d+(?:,\s*overrides\.priority\d+)*,\s*utilities;/;
 
 const FIXTURE_TIMEOUT_MS = 60_000;
 
@@ -62,7 +62,7 @@ test('hosted Styling docs no longer publish a copy-paste Vite plugin', async () 
 });
 
 test(
-	'vite build emits application StyleX rules into the xstyle layer',
+	'vite build emits application StyleX rules into the overrides layer',
 	{ timeout: FIXTURE_TIMEOUT_MS },
 	async () => {
 		const fixture = await createConsumerViteFixture(INITIAL_COLOR);
@@ -87,7 +87,7 @@ test(
 			const result = await build(viteConfig(fixture.fixtureDir, { command: 'build' }));
 			const css = cssFromBuild(result);
 			expect(css.startsWith(LAYER_ORDER) || css.includes(LAYER_ORDER)).toBe(true);
-			expect(css).toContain('@layer xstyle.priority');
+			expect(css).toContain('@layer overrides.priority');
 		} finally {
 			await fixture.cleanup();
 		}
@@ -192,7 +192,7 @@ export const styles = stylex.create({
 function expectDocumentedStylexCss(css: string, color: string): void {
 	expect(css).toMatch(LAYER_ORDER_PATTERN);
 	expect(css).toContain(color);
-	expect(css).toContain('@layer xstyle.priority');
+	expect(css).toContain('@layer overrides.priority');
 }
 
 function moduleIds(environment: ViteDevServer['environments']['client']): Array<string> {

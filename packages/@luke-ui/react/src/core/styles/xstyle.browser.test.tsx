@@ -4,7 +4,7 @@ import { render } from '../test-utils/render.js';
 import { Text } from '../text/text.js';
 
 // This file's `stylex.create()` call is compiled by Luke UI's OWN `createStylexDevPlugin`
-// (`vitest.config.ts`), so its atom lands in Luke UI's `recipes.sx.*` layers alongside the
+// (`vitest.config.ts`), so its atom lands in Luke UI's `recipes.*` layers alongside the
 // component's own styles. That covers the in-repo/dev-compiled path — the resolution order
 // `resolveXStyleProps` applies within one `stylex.props` call — but it cannot prove the public
 // `xstyle < className` cascade contract, because a real consumer compiles `xstyle` with THEIR
@@ -25,7 +25,7 @@ test('applies same-property xstyle after a Text variant', () => {
 	expect(computedColor({ color: 'accent', xstyle: styles.xstyleColor })).toBe('rgb(9, 9, 9)');
 });
 
-// Here `xstyle` lands in a `recipes.sx.*` layer (via `createStylexDevPlugin`) and `className` is
+// Here `xstyle` lands in a `recipes.*` layer (via `createStylexDevPlugin`) and `className` is
 // unlayered, so `className` wins on source order, not on a general layer guarantee — see the
 // module comment above for why this does not stand in for the public contract.
 test('lets an unlayered className and then inline style override xstyle', () => {

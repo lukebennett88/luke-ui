@@ -1,9 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
+import { fontMetrics } from '../../../theme/font-metric-scale.stylex.js';
 import { vars } from '../../../theme/tokens.stylex.js';
 import { comboboxInputStates } from '../../styles/input-states.js';
 import { invalidIndicator } from '../../styles/invalid-indicator.stylex.js';
-import type { RecipeSelection } from '../../styles/stylex-recipe.js';
-import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
+import type { SlotRecipeSelection } from '../../styles/stylex-recipe.js';
+import { createSlottedRecipe, createSlottedRecipeStyles } from '../../styles/stylex-recipe.js';
 
 /**
  * The in-control invalid icon, rendered as an `::after` on the control and reordered ahead of the
@@ -60,8 +61,8 @@ const styles = stylex.create({
 		fontFamily: vars.font.family.body,
 		inlineSize: '100%',
 		isolation: 'isolate',
-		letterSpacing: '0',
-		lineHeight: '24px',
+		letterSpacing: fontMetrics.letterSpacing16,
+		lineHeight: fontMetrics.lineHeight16,
 		minInlineSize: 0,
 		outlineColor: 'transparent',
 		outlineStyle: 'none',
@@ -107,14 +108,14 @@ const styles = stylex.create({
 	inputGroupSizeMedium: {
 		'--luke-combobox-error-icon-size': vars.iconSize.small,
 		blockSize: vars.controlSize.medium,
-		fontSize: '16px',
+		fontSize: fontMetrics.fontSize16,
 	},
 	inputGroupSizeSmall: {
 		'--luke-combobox-error-icon-size': vars.iconSize.xsmall,
 		blockSize: vars.controlSize.small,
-		fontSize: '14px',
-		letterSpacing: '0',
-		lineHeight: '20px',
+		fontSize: fontMetrics.fontSize14,
+		letterSpacing: fontMetrics.letterSpacing14,
+		lineHeight: fontMetrics.lineHeight14,
 	},
 	textInput: {
 		appearance: 'none',
@@ -474,7 +475,11 @@ const styles = stylex.create({
 		paddingInlineEnd: vars.space.sp12,
 		paddingInlineStart: vars.space.sp12,
 	},
-	mobileInputGroup: {
+	/**
+	 * `inputGroup`'s tray presentation: the search field row inside the mobile tray, laid out with
+	 * margins instead of filling the control the way the popover's `inputGroup` does.
+	 */
+	inputGroupPresentationTray: {
 		flexShrink: 0,
 		inlineSize: 'auto',
 		marginBlockEnd: vars.space.sp12,
@@ -482,11 +487,17 @@ const styles = stylex.create({
 		marginInlineEnd: vars.space.sp12,
 		marginInlineStart: vars.space.sp12,
 	},
-	mobileListBox: {
+	/** `listBox`'s tray presentation: fills the tray instead of capping at a popover's max height. */
+	listBoxPresentationTray: {
 		maxBlockSize: 'none',
 		overscrollBehavior: 'contain',
 	},
-	mobileTrigger: {
+	/**
+	 * The trigger control that opens the tray. A distinct structural role from `trigger` (the
+	 * in-popover chevron button): it lives outside the tray, renders the combobox's current value,
+	 * and is the only pressable surface in the mobile composition's trigger row.
+	 */
+	trayTrigger: {
 		alignItems: 'center',
 		blockSize: '100%',
 		color: vars.color.text.primary,
@@ -497,15 +508,16 @@ const styles = stylex.create({
 		marginInlineStart: 0,
 		minInlineSize: 'calc(20ch + var(--luke-control-size-combobox-action))',
 	},
-	mobileTriggerSizeMedium: {
+	trayTriggerSizeMedium: {
 		paddingInlineEnd: vars.space.sp12,
 		paddingInlineStart: vars.space.sp12,
 	},
-	mobileTriggerSizeSmall: {
+	trayTriggerSizeSmall: {
 		paddingInlineEnd: vars.space.sp8,
 		paddingInlineStart: vars.space.sp8,
 	},
-	mobileValue: {
+	/** The current value rendered inside `trayTrigger`. No size dependency. */
+	trayValue: {
 		flex: 1,
 		minInlineSize: 0,
 		overflow: 'hidden',
@@ -515,13 +527,9 @@ const styles = stylex.create({
 	},
 });
 
-/**
- * Slotted recipe for the combobox anatomy. Internal — not exported from a public entrypoint.
- *
- * `comboboxRecipe({ size }).root() / .inputGroup() / …`.
- */
-export const [comboboxRecipe, resolveComboboxRecipeSlotStyles] = createSlottedRecipe({
+const comboboxRecipeStyles = createSlottedRecipeStyles({
 	defaultVariants: {
+		presentation: 'popover',
 		size: 'medium',
 	},
 	slots: {
@@ -538,12 +546,19 @@ export const [comboboxRecipe, resolveComboboxRecipeSlotStyles] = createSlottedRe
 		sectionHeading: styles.sectionHeading,
 		emptyState: styles.emptyState,
 		item: styles.item,
-		mobileInputGroup: styles.mobileInputGroup,
-		mobileListBox: styles.mobileListBox,
-		mobileTrigger: styles.mobileTrigger,
-		mobileValue: styles.mobileValue,
+		trayTrigger: styles.trayTrigger,
+		trayValue: styles.trayValue,
 	},
 	variants: {
+		presentation: {
+			// `null` marks a valid variant value that contributes no style, rather than a fake
+			// empty style object: the popover presentation is the recipe's unqualified base.
+			popover: null,
+			tray: {
+				inputGroup: styles.inputGroupPresentationTray,
+				listBox: styles.listBoxPresentationTray,
+			},
+		},
 		size: {
 			medium: {
 				inputGroup: styles.inputGroupSizeMedium,
@@ -551,7 +566,7 @@ export const [comboboxRecipe, resolveComboboxRecipeSlotStyles] = createSlottedRe
 				trigger: styles.triggerSizeMedium,
 				clearButton: styles.actionSizeMedium,
 				loadMoreItem: styles.loadMoreItemSizeMedium,
-				mobileTrigger: styles.mobileTriggerSizeMedium,
+				trayTrigger: styles.trayTriggerSizeMedium,
 				item: styles.itemSizeMedium,
 			},
 			small: {
@@ -560,12 +575,24 @@ export const [comboboxRecipe, resolveComboboxRecipeSlotStyles] = createSlottedRe
 				trigger: styles.triggerSizeSmall,
 				clearButton: styles.actionSizeSmall,
 				loadMoreItem: styles.loadMoreItemSizeSmall,
-				mobileTrigger: styles.mobileTriggerSizeSmall,
+				trayTrigger: styles.trayTriggerSizeSmall,
 				item: styles.itemSizeSmall,
 			},
 		},
 	},
 });
 
+/** Canonical per-slot resolver for the combobox anatomy. */
+export const resolveComboboxRecipeSlotStyles = comboboxRecipeStyles.resolveSlotStyles;
+
+/**
+ * Slotted recipe for the combobox anatomy. Internal — not exported from a public entrypoint.
+ *
+ * `comboboxRecipe({ size }).root / .inputGroup / …`.
+ */
+export const comboboxRecipe = createSlottedRecipe(comboboxRecipeStyles);
+
 /** Allowed `size` values for the combobox recipe. */
-export type ComboboxSize = NonNullable<RecipeSelection<typeof comboboxRecipe>['size']>;
+export type ComboboxSize = NonNullable<
+	SlotRecipeSelection<typeof resolveComboboxRecipeSlotStyles>['size']
+>;

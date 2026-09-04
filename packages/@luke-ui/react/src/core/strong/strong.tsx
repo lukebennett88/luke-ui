@@ -1,9 +1,9 @@
 import type { XStyleProps } from '../styles/xstyle.js';
+import { Text } from '../text/text.js';
 import type { TextProps } from '../text/text.js';
-import { renderText } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { resolveStrongRecipeStyles } from './recipe.js';
+import { styles } from './recipe.js';
 
 interface StrongStyleProps extends XStyleProps {
 	/**
@@ -30,16 +30,15 @@ export type StrongProps = Prettify<_StrongProps>;
  */
 export function Strong(props: StrongProps) {
 	const { className, lineClamp, textWrap, xstyle, ...elementProps } = props;
-	return renderText(
-		{
-			...elementProps,
-			className,
-			elementType: 'strong',
-			lineClamp,
-			shouldInheritFont: true,
-			textWrap,
-			xstyle,
-		},
-		resolveStrongRecipeStyles(),
+	return (
+		<Text
+			{...elementProps}
+			className={className}
+			elementType="strong"
+			lineClamp={lineClamp}
+			shouldInheritFont
+			textWrap={textWrap}
+			xstyle={[styles.root, xstyle]}
+		/>
 	);
 }

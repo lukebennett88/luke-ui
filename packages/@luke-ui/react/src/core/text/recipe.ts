@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createSingleRecipe } from '../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
 import { visuallyHiddenStyle } from '../visually-hidden/recipe.js';
 
 // The custom-property name literal `'--text-line-height'` is repeated below rather than imported
@@ -49,7 +49,6 @@ const styles = stylex.create({
 	// ---------------------------------------------------------------------------
 	// lineClamp
 	// ---------------------------------------------------------------------------
-	lineClampFalse: {},
 	lineClampMultiLine2: {
 		WebkitBoxOrient: 'vertical',
 		WebkitLineClamp: 2,
@@ -91,15 +90,8 @@ const styles = stylex.create({
 	},
 
 	// ---------------------------------------------------------------------------
-	// shouldDisableTrim (no styling of its own — see the typography compound variants below)
-	// ---------------------------------------------------------------------------
-	shouldDisableTrimFalse: {},
-	shouldDisableTrimTrue: {},
-
-	// ---------------------------------------------------------------------------
 	// shouldInheritFont
 	// ---------------------------------------------------------------------------
-	shouldInheritFontFalse: {},
 	shouldInheritFontTrue: {
 		'--text-line-height': '1lh',
 		color: 'inherit',
@@ -140,7 +132,6 @@ const styles = stylex.create({
 	// ---------------------------------------------------------------------------
 	textWrapBalance: { textWrap: 'balance' },
 	textWrapPretty: { textWrap: 'pretty' },
-	textWrapUnset: {},
 
 	// ---------------------------------------------------------------------------
 	// typography
@@ -347,8 +338,8 @@ const styles = stylex.create({
 	},
 });
 
-/** Public recipe for the `Text` component's styles. */
-export const [textRecipe, resolveTextRecipeStyles] = createSingleRecipe({
+/** Canonical resolver for the `Text` component's styles. */
+export const resolveTextRecipeStyles = createRecipeStyles({
 	base: styles.base,
 	compoundVariants: [
 		// `shouldInheritFont: true` asks the browser to resolve font size and line height from the
@@ -418,7 +409,7 @@ export const [textRecipe, resolveTextRecipeStyles] = createSingleRecipe({
 			unset: styles.fontVariantNumericUnset,
 		},
 		isVisuallyHidden: {
-			false: {},
+			false: null,
 			true: visuallyHiddenStyle,
 		},
 		lineClamp: {
@@ -427,12 +418,12 @@ export const [textRecipe, resolveTextRecipeStyles] = createSingleRecipe({
 			3: styles.lineClampMultiLine3,
 			4: styles.lineClampMultiLine4,
 			5: styles.lineClampMultiLine5,
-			false: styles.lineClampFalse,
+			false: null,
 			true: styles.lineClampSingleLine,
 		},
 		shouldDisableTrim: {
-			false: styles.shouldDisableTrimFalse,
-			true: styles.shouldDisableTrimTrue,
+			false: null,
+			true: null,
 		},
 		textAlign: {
 			center: styles.textAlignCenter,
@@ -455,7 +446,7 @@ export const [textRecipe, resolveTextRecipeStyles] = createSingleRecipe({
 		textWrap: {
 			balance: styles.textWrapBalance,
 			pretty: styles.textWrapPretty,
-			unset: styles.textWrapUnset,
+			unset: null,
 		},
 		typography: {
 			body: styles.typographyBody,
@@ -475,7 +466,7 @@ export const [textRecipe, resolveTextRecipeStyles] = createSingleRecipe({
 			label: styles.fontWeightLabel,
 		},
 		shouldInheritFont: {
-			false: styles.shouldInheritFontFalse,
+			false: null,
 			true: styles.shouldInheritFontTrue,
 		},
 		color: {
@@ -490,5 +481,8 @@ export const [textRecipe, resolveTextRecipeStyles] = createSingleRecipe({
 	},
 });
 
+/** Public recipe for the `Text` component's styles. */
+export const textRecipe = createRecipe(resolveTextRecipeStyles);
+
 /** Aggregate variant type for the `Text` recipe. */
-export type TextRecipeVariants = RecipeSelection<typeof textRecipe>;
+export type TextRecipeVariants = RecipeSelection<typeof resolveTextRecipeStyles>;

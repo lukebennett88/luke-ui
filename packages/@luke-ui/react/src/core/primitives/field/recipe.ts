@@ -1,8 +1,8 @@
 import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../../theme/tokens.stylex.js';
 import { invalidIndicator } from '../../styles/invalid-indicator.stylex.js';
-import type { RecipeSelection } from '../../styles/stylex-recipe.js';
-import { createSlottedRecipe } from '../../styles/stylex-recipe.js';
+import type { SlotRecipeSelection } from '../../styles/stylex-recipe.js';
+import { createSlottedRecipe, createSlottedRecipeStyles } from '../../styles/stylex-recipe.js';
 
 /** Custom-property names shared by Field's message slot and Checkbox's root styles. */
 export const fieldMessageIndent = '--luke-field-message-indent' as const;
@@ -97,12 +97,7 @@ const styles = stylex.create({
 	},
 });
 
-/**
- * Slotted recipe for the `Field` primitive.
- *
- * `fieldRecipe({ necessityIndicator, tone }).root() / .label() / .message()`.
- */
-export const [fieldRecipe, resolveFieldRecipeSlotStyles] = createSlottedRecipe({
+const fieldRecipeStyles = createSlottedRecipeStyles({
 	defaultVariants: {
 		necessityIndicator: 'icon',
 		tone: 'description',
@@ -124,8 +119,18 @@ export const [fieldRecipe, resolveFieldRecipeSlotStyles] = createSlottedRecipe({
 	},
 });
 
+/** Canonical per-slot resolver for the `Field` primitive. */
+export const resolveFieldRecipeSlotStyles = fieldRecipeStyles.resolveSlotStyles;
+
+/**
+ * Slotted recipe for the `Field` primitive.
+ *
+ * `fieldRecipe({ necessityIndicator, tone }).root / .label / .message`.
+ */
+export const fieldRecipe = createSlottedRecipe(fieldRecipeStyles);
+
 /** Outer variant selection for the `Field` recipe. */
-export type FieldRecipeVariants = RecipeSelection<typeof fieldRecipe>;
+export type FieldRecipeVariants = SlotRecipeSelection<typeof resolveFieldRecipeSlotStyles>;
 
 /** Allowed `necessityIndicator` values for the field label. */
 export type FieldNecessityIndicator = NonNullable<FieldRecipeVariants['necessityIndicator']>;

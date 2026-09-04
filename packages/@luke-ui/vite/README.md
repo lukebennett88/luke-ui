@@ -31,5 +31,5 @@ import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
 ```
 
-See the [Installation](https://lukebennett88.github.io/luke-ui/docs/installation) and
-[Styling](https://lukebennett88.github.io/luke-ui/docs/styling) guides for usage.
+See the [Installation](../../../apps/docs/content/docs/docs/installation.mdx) and
+[Styling](../../../apps/docs/content/docs/docs/styling.mdx) guides for usage.

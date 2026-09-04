@@ -1,9 +1,9 @@
 import type { XStyleProps } from '../styles/xstyle.js';
+import { Text } from '../text/text.js';
 import type { TextProps } from '../text/text.js';
-import { renderText } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { resolveEmRecipeStyles } from './recipe.js';
+import { styles } from './recipe.js';
 
 interface EmStyleProps extends XStyleProps {
 	/**
@@ -30,16 +30,15 @@ export type EmProps = Prettify<_EmProps>;
  */
 export function Em(props: EmProps) {
 	const { className, lineClamp, textWrap, xstyle, ...elementProps } = props;
-	return renderText(
-		{
-			...elementProps,
-			className,
-			elementType: 'em',
-			lineClamp,
-			shouldInheritFont: true,
-			textWrap,
-			xstyle,
-		},
-		resolveEmRecipeStyles(),
+	return (
+		<Text
+			{...elementProps}
+			className={className}
+			elementType="em"
+			lineClamp={lineClamp}
+			shouldInheritFont
+			textWrap={textWrap}
+			xstyle={[styles.root, xstyle]}
+		/>
 	);
 }

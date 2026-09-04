@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
 import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createSingleRecipe } from '../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {
@@ -17,9 +17,12 @@ const styles = stylex.create({
 	},
 });
 
-/** Recipe for the `Code` component's inline code appearance. */
-export const [codeRecipe, resolveCodeRecipeStyles] = createSingleRecipe({
+/** Canonical resolver for the `Code` component's inline code appearance. */
+export const resolveCodeRecipeStyles = createRecipeStyles({
 	base: styles.root,
 });
 
-export type CodeRecipeVariants = RecipeSelection<typeof codeRecipe>;
+/** Recipe for the `Code` component's inline code appearance. */
+export const codeRecipe = createRecipe(resolveCodeRecipeStyles);
+
+export type CodeRecipeVariants = RecipeSelection<typeof resolveCodeRecipeStyles>;
