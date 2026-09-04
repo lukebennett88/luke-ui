@@ -32,8 +32,12 @@ utility modules live under `core/`. Theme modules live under `theme/`.
   output. Named layers make cross-layer priority explicit. Specificity and source order still matter
   within a layer. StyleX component styles are extracted by the StyleX Vite plugin, not this
   registry.
-- `core/styles/stylex-recipe.ts`: the internal StyleX `createSingleRecipe` / `createSlottedRecipe`
-  engine, plus the `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
+- `core/styles/stylex-recipe.ts`: the internal StyleX recipe engine, in two stages.
+  `createRecipeStyles` / `createSlottedRecipeStyles` build the canonical resolver (selection in,
+  ordered compiled styles out). `createRecipe` / `createSlottedRecipe` adapt a resolver into the
+  public recipe, which returns full `stylex.props(...)` output rather than a class string.
+  `RecipeSelection<typeof resolveFn>` and `SlotRecipeSelection<typeof resolveSlotFn>` derive a
+  recipe's variant type from its resolver.
 - `core/primitives/input-group/recipe.ts` draws the invalid glyph as a real `Icon` element on its
   own `invalidIndicator` slot rather than a mask: `InputGroup` (`core/primitives/input-group/`)
   reads React Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid
@@ -305,7 +309,8 @@ Colocate recipe files beside their owner:
 - `styles.css.ts` — private Vanilla Extract structural styling when a combinator or descendant
   selector cannot live in StyleX
 
-Every public recipe is built with `createSingleRecipe` or `createSlottedRecipe` from
+Every public recipe is built with `createRecipeStyles` + `createRecipe` (single-part) or
+`createSlottedRecipeStyles` + `createSlottedRecipe` (slotted), all from
 `core/styles/stylex-recipe.ts`. It is not part of the public package entry. Component authors inside
 `@luke-ui/react` use it to define a new recipe. Consumers call the built recipe functions it returns
 (`buttonRecipe`, `textRecipe`, and so on). `comboboxRecipe` is private: it is not exported from
@@ -313,20 +318,20 @@ Every public recipe is built with `createSingleRecipe` or `createSlottedRecipe` 
 
 ### Single-part recipes
 
-A single-part recipe takes `base`, `variants`, `defaultVariants`, and `compoundVariants`, and
-returns a function that takes a variant selection and returns one class string. See
-`core/primitives/button/recipe.ts` for the StyleX expansion.
+A single-part recipe takes `base`, `variants`, `defaultVariants`, and `compoundVariants`. The built
+recipe takes a variant selection and returns the full `stylex.props(...)` output — spreadable
+element props, not a class string. See `core/primitives/button/recipe.ts` for the StyleX expansion.
 
 ### Slotted recipes
 
 A recipe whose component has multiple styled parts takes `slots` instead of `base`. Each variant
 value maps to per-slot styles, and the built recipe takes a variant selection and returns one
-function per slot, each accepting an optional extra class to merge:
+`stylex.props(...)` result per slot — spreadable element props, not a function that returns a class:
 
 ```tsx
 const { group, control } = inputGroupRecipe({ size: 'medium' });
-<div className={group()}>
-	<input className={control()} />
+<div {...group}>
+	<input {...control} />
 </div>;
 ```
 
@@ -338,11 +343,17 @@ their single-part config. A slotted config has no `compoundVariants` field.
 
 ### Deriving variant types
 
-Never hand-maintain a recipe's variant type. Derive it from the built recipe with
-`RecipeSelection<typeof recipeFn>`:
+Never hand-maintain a recipe's variant type. Derive it from the resolver, not the public recipe
+function: `RecipeSelection<typeof resolveFn>` for single-part,
+`SlotRecipeSelection<typeof resolveSlotFn>` for slotted. A single structural helper cannot cover
+both shapes — a slotted resolver's selection is its second parameter, after the slot name, so it
+needs its own helper:
 
 ```ts
-export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
+export type ButtonRecipeVariants = RecipeSelection<typeof resolveButtonRecipeStyles>;
+export type InputGroupRecipeVariants = SlotRecipeSelection<
+	typeof resolveInputGroupRecipeSlotStyles
+>;
 ```
 
 Do not cast a hand-written variant interface onto a recipe's selection parameter. If the exported
@@ -351,10 +362,13 @@ with the recipe.
 
 ### StyleX recipes
 
-A migrated component uses `createSingleRecipe` / `createSlottedRecipe` from
-`core/styles/stylex-recipe.ts`. Its public contract is identical — single-part
-`(selection?) => string`, slotted `(selection?) => Record<Slot, (extra?) => string>`, and
-`RecipeSelection<typeof recipeFn>` for the derived variant type — but the caller performs its own
+A migrated component uses `createRecipeStyles` + `createRecipe` (single-part) or
+`createSlottedRecipeStyles` + `createSlottedRecipe` (slotted) from `core/styles/stylex-recipe.ts`.
+Its public contract is a full `stylex.props(...)` result — single-part
+`(selection?) => ReturnType<typeof stylex.props>`, slotted
+`(selection?) => Record<Slot, ReturnType<typeof stylex.props>>` — spreadable element props in both
+cases, never a class string or a function that returns one. Variant types derive from the resolver,
+not the public recipe function (see "Deriving variant types" above). The caller performs its own
 `stylex.create(...)` call, because `stylex.create` requires every key and value to be statically
 extractable. Write out each variant and compound-variant style as a literal `stylex.create` key
 instead. See `core/text/recipe.ts` for the full expansion this produces. A recipe file is named

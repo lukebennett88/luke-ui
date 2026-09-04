@@ -27,12 +27,16 @@ globalKeyframes(skeletonPulseAnimationName, {
 // sublayer for normal declarations, but that relationship REVERSES for `!important`: a StyleX
 // `recipes.priorityN` sublayer rule with `!important` beats a direct `@layer recipes` rule with
 // `!important`. StyleX's own recipe/override sublayers sit inside `recipes`, so a `!important`
-// forced surface authored there would rank ABOVE this layer's retained CSS and, worse, above a
-// consumer's `overrides`-layer `!important` — silently un-inverting the override contract. Direct
-// `@layer recipes` is the only place in this layer stack where `!important` sorts the way this
-// component needs. Do not move this back into `stylex.create` without re-deriving that ordering;
-// see `stylesheet-contract.test.ts`'s guard against `!important` in `recipes.priorityN`, and the
-// cascade tests in `layer-order.browser.test.ts`.
+// forced surface authored there would rank ABOVE this layer's retained CSS, inverting the
+// contract. Direct `@layer recipes` is also what lets this forced surface outrank a consumer's
+// `overrides`/`utilities`-layer `!important`: top-level cascade-layer order reverses for
+// `!important` too, so an earlier layer (`recipes`) beats a later one (`overrides`, `utilities`)
+// for `!important` declarations — see `'LoadingSkeleton recipes !important beats
+// utilities-layer !important overrides'` in `layer-order.browser.test.ts`. Direct `@layer
+// recipes` is the only place in this layer stack where `!important` sorts the way this component
+// needs on both counts. Do not move this back into `stylex.create` without re-deriving that
+// ordering; see `stylesheet-contract.test.ts`'s guard against `!important` in
+// `recipes.priorityN`.
 //
 // The casts silence csstype on keyword-only properties, which don't admit the `!important` suffix
 // in their type.

@@ -81,12 +81,19 @@ describe('createPrimitivePlan', () => {
 		expect(primitiveSource).toContain('export function StatusBadge');
 		expect(primitiveSource).toContain("import type { XStyleProps } from '../../styles/xstyle.js';");
 		expect(primitiveSource).toContain('resolveStatusBadgeRecipeStyles');
+		expect(recipeSource).toContain('import { createRecipe, createRecipeStyles }');
 		expect(recipeSource).toContain(
-			'export const [statusBadgeRecipe, resolveStatusBadgeRecipeStyles] = createSingleRecipe({',
+			'export const resolveStatusBadgeRecipeStyles = createRecipeStyles({',
 		);
-		expect(recipeSource).toContain('createSingleRecipe({');
+		expect(recipeSource).toContain(
+			'export const statusBadgeRecipe = createRecipe(resolveStatusBadgeRecipeStyles);',
+		);
+		expect(recipeSource).toContain(
+			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof resolveStatusBadgeRecipeStyles>;',
+		);
 		expect(recipeSource).toContain('root: {},');
 		expect(recipeSource).not.toContain('inline-flex');
+		expect(recipeSource).not.toContain('createSingleRecipe');
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../../core/primitives/status-badge/status-badge.js';",
 		);

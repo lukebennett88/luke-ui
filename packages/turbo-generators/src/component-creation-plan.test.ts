@@ -82,13 +82,17 @@ describe('createComponentPlan', () => {
 			"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../core/status-badge/recipe.js';",
 		);
 		expect(packageExportSource).not.toContain("from './index.js'");
+		expect(recipeSource).toContain('import { createRecipe, createRecipeStyles }');
 		expect(recipeSource).toContain(
-			'export const [statusBadgeRecipe, resolveStatusBadgeRecipeStyles] = createSingleRecipe({',
+			'export const resolveStatusBadgeRecipeStyles = createRecipeStyles({',
 		);
-		expect(recipeSource).toContain('createSingleRecipe({');
 		expect(recipeSource).toContain(
-			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
+			'export const statusBadgeRecipe = createRecipe(resolveStatusBadgeRecipeStyles);',
 		);
+		expect(recipeSource).toContain(
+			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof resolveStatusBadgeRecipeStyles>;',
+		);
+		expect(recipeSource).not.toContain('createSingleRecipe');
 
 		for (const testPath of ['status-badge.browser.test.tsx', 'status-badge.visual.test.tsx']) {
 			const testSource = plan.files.find((file) => file.path.endsWith(testPath))?.contents;

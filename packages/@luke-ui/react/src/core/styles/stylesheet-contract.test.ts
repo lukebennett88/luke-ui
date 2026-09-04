@@ -329,12 +329,16 @@ test('never emits !important from a recipes.priorityN sublayer', { timeout: 30_0
 	// is the OPPOSITE of the normal-declaration ordering the rest of this cascade relies on
 	// (a direct `@layer recipes` rule beating a nested `recipes.priorityN` rule). Retained CSS
 	// that needs to forcibly win — LoadingSkeleton's forced surface, for instance — depends on
-	// being written directly into `@layer recipes` rather than into a StyleX sublayer, and on a
-	// consumer's `overrides` layer being able to out-rank it in turn. If a `recipes.priorityN`
-	// sublayer ever emits `!important`, that declaration would rank ABOVE both the direct
-	// `@layer recipes` retained CSS and a consumer's `@layer overrides !important` override,
-	// silently inverting the whole override contract. See `styles.css.ts` in
-	// `core/loading-skeleton` for the retained CSS this invariant protects.
+	// being written directly into `@layer recipes` rather than into a StyleX sublayer, precisely
+	// because that direct placement is what lets it outrank both other components' StyleX output
+	// AND a consumer's `overrides`/`utilities`-layer `!important` (top-level layer order also
+	// reverses for `!important`, so an earlier layer like `recipes` beats a later one like
+	// `overrides` — see `layer-order.browser.test.ts`'s `'LoadingSkeleton recipes !important
+	// beats utilities-layer !important overrides'` test). If a `recipes.priorityN` sublayer ever
+	// emits `!important`, that declaration would rank ABOVE the direct `@layer recipes` retained
+	// CSS it shares a parent layer with, silently inverting the override contract that retained
+	// CSS relies on. See `styles.css.ts` in `core/loading-skeleton` for the retained CSS this
+	// invariant protects.
 	const stylesheet = await readPublicStylesheet();
 	const root = parse(stylesheet);
 
@@ -364,10 +368,13 @@ test('never emits !important from a recipes.priorityN sublayer', { timeout: 30_0
 	// its direct parent layer for `!important`, while a direct parent layer beats a nested sublayer
 	// for normal declarations. Luke UI relies on the normal-declaration ordering to let retained CSS,
 	// written directly into `@layer recipes` (not a StyleX sublayer), reliably override generated
-	// recipe output — and to let a consumer's `@layer overrides` reliably override Luke UI's own
-	// `@layer recipes`. Any `!important` inside a `recipes.priorityN` sublayer would rank ABOVE both,
-	// inverting the override contract. Move the forced style into retained CSS (a
-	// `globalStyleInLayer('recipes', ...)` call) instead of authoring it in `stylex.create`.
+	// recipe output. Any `!important` inside a `recipes.priorityN` sublayer would rank ABOVE that
+	// direct-`@layer recipes` retained CSS, inverting the override contract it depends on — including
+	// LoadingSkeleton's forced surface, which relies on its direct-`recipes` placement to in turn
+	// outrank a consumer's `overrides`/`utilities`-layer `!important` (top-level layer order also
+	// reverses for `!important`; see `layer-order.browser.test.ts`). Move the forced style into
+	// retained CSS (a `globalStyleInLayer('recipes', ...)` call) instead of authoring it in
+	// `stylex.create`.
 	expect(summary).toBe('');
 });
 

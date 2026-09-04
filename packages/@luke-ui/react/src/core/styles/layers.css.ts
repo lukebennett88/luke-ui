@@ -11,9 +11,12 @@ import { globalLayer } from '@vanilla-extract/css';
  *   forced surface and descendant masks, Combobox adjacent-section selectors) are written
  *   DIRECTLY into this layer via `globalStyleInLayer('recipes', ...)`, not into a sublayer. A
  *   direct parent-layer rule beats a nested sublayer for normal declarations, which is what lets
- *   this retained CSS reliably override StyleX recipe output; the relationship reverses for
- *   `!important` declarations, so retained rules in this layer must never use `!important` — see
- *   `stylesheet-contract.test.ts`'s guard against `!important` in `recipes.priorityN`.
+ *   this retained CSS reliably override StyleX recipe output. That relationship reverses for
+ *   `!important`: a nested `recipes.priorityN` sublayer's `!important` declaration would outrank
+ *   this layer's own direct retained CSS, so a `recipes.priorityN` sublayer must never emit
+ *   `!important` — `stylesheet-contract.test.ts` guards against it. Direct retained CSS written
+ *   into this layer is not under that restriction and may use `!important` when a forced
+ *   invariant requires it, as LoadingSkeleton's forced surface deliberately does.
  * - **overrides** — Consumer-authored StyleX (the `xstyle` prop and application styles), compiled
  *   into this layer by `@luke-ui/vite`. Luke UI itself never writes CSS here, which is why this
  *   layer has no `globalLayer()` entry below; it is declared in the combined order emitted by

@@ -168,18 +168,21 @@ function renderRecipe(input: {
 }): string {
 	return `import * as stylex from '@stylexjs/stylex';
 import type { RecipeSelection } from '../../styles/stylex-recipe.js';
-import { createSingleRecipe } from '../../styles/stylex-recipe.js';
+import { createRecipe, createRecipeStyles } from '../../styles/stylex-recipe.js';
 
 const styles = stylex.create({
 	root: {},
 });
 
-/** Recipe for the \`${input.pascalName}\` primitive. */
-export const [${input.recipeName}, ${input.resolveStylesName}] = createSingleRecipe({
+/** Canonical resolver for the \`${input.pascalName}\` primitive's recipe. */
+export const ${input.resolveStylesName} = createRecipeStyles({
 	base: styles.root,
 });
 
-export type ${input.variantsType} = RecipeSelection<typeof ${input.recipeName}>;
+/** Recipe for the \`${input.pascalName}\` primitive. */
+export const ${input.recipeName} = createRecipe(${input.resolveStylesName});
+
+export type ${input.variantsType} = RecipeSelection<typeof ${input.resolveStylesName}>;
 `;
 }
 
