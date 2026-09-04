@@ -17,21 +17,26 @@ export type XStyleProp<CSS extends Record<string, unknown> = Record<string, unkn
 export interface XStyleProps {
 	/**
 	 * Extra styles as one or more `stylex.create(...)` objects, for a CSS property the component's
-	 * own props do not expose. Applied after the component's own styles and variants, and before
-	 * `className`, so a same-property `xstyle` value replaces a competing default or variant.
+	 * own props do not expose.
 	 *
-	 * The `xstyle < className` step of this contract depends on how the consumer's own StyleX
-	 * output is layered — resolution order alone does not decide it, CSS cascade layers do.
-	 * Compiling `xstyle` requires the consumer's own StyleX compiler (`@stylexjs/babel-plugin` or
-	 * an equivalent bundler integration); this package's `@stylexjs/stylex` runtime dependency is
-	 * not enough on its own. A consumer `className` reliably beats `xstyle` only when the consumer
-	 * compiles their StyleX into a dedicated `overrides` layer that sits above `recipes` and below
-	 * `utilities`, and declares the combined layer order —
-	 * `@layer reset, theme, base, recipes, overrides, utilities;` — before any stylesheet import.
-	 * `@luke-ui/vite` sets this up. With StyleX's default (unlayered) output, an unlayered `xstyle`
-	 * rule beats even a layered `className`, so the documented precedence does not hold without
-	 * that configuration. See the "Override a single property with `xstyle`" and "Cascade layers"
-	 * sections of the Styling guide. Inline `style` beats `className`.
+	 * The one relationship this prop guarantees is `component recipe/variant styles < xstyle`: both
+	 * are resolved inside a single `stylex.props(...)` call, and StyleX keeps only the last value
+	 * for a given CSS property, so a same-property `xstyle` value always replaces a competing
+	 * default or variant.
+	 *
+	 * `xstyle` versus a consumer `className` is decided by the ordinary CSS cascade — cascade
+	 * layer, then specificity, then source order, then `!important` — not by the order props are
+	 * passed or resolved. Appending a class to the rendered `class` attribute does not create
+	 * precedence; DOM class token order is irrelevant to the cascade. A class compiled into a
+	 * higher-priority layer such as `utilities`, or ordinary unlayered application CSS, can beat
+	 * `xstyle`. A class compiled into a lower-priority layer such as `base` still loses to it.
+	 * Inline `style` always wins over any class-based styling.
+	 *
+	 * Compiling `xstyle` requires the consumer's own StyleX compiler. `@luke-ui/vite` is the
+	 * supported way to set this up for a Vite app; an equivalent StyleX bundler integration works
+	 * too, but this package's `@stylexjs/stylex` runtime dependency alone is not enough. See the
+	 * "Override a single property with `xstyle`" and "Cascade layers" sections of the Styling
+	 * guide for the layer setup and full precedence walkthrough.
 	 */
 	xstyle?: XStyleProp;
 }
@@ -63,9 +68,11 @@ export function resolveXStyleProps(
 type RacRenderPropValue<T, V> = V | ((renderProps: T) => V);
 
 /**
- * Resolves `className` and `style` for a React Aria component in one pass, enforcing the same
- * precedence as `resolveXStyleProps`: internal styles and variants < `xstyle` < consumer
- * `className` < inline `style`.
+ * Resolves `className` and `style` for a React Aria component in one pass, applying the same
+ * `xstyle` contract as `resolveXStyleProps`: component recipe/variant styles < `xstyle`,
+ * guaranteed by resolving both in one `stylex.props(...)` call. Where a consumer `className` or
+ * inline `style` lands relative to that is decided separately — the CSS cascade for `className`,
+ * always-wins for inline `style`. See `XStyleProps#xstyle` for the full precedence contract.
  *
  * React Aria Components lets `className` and `style` be plain values or functions of the
  * component's render props (`composeRenderProps`), so a RAC element cannot resolve both props

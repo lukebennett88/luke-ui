@@ -64,8 +64,8 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	const conformance = hasDomConformance ? (['dom'] as const) : ([] as const);
 
 	// Most primitives on main are multi-part compositions without a single root. The scaffold keeps
-	// a minimal div and recipe so the public export and stylesheet registration can build; replace
-	// both when the real primitive shape is known.
+	// a minimal div and StyleX recipe so the public export can build; replace both when the real
+	// primitive shape is known.
 	const files: Array<PlanFile> = [
 		{
 			contents: renderPrimitiveSource({ pascalName, resolveStylesName }),

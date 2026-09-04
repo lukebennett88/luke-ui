@@ -4,11 +4,11 @@
   and updates exports during build. The `stylesheet` build entry is excluded from the public export
   map via `exports.exclude` in `vite.config.ts`.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
-  files by hand. The generator updates the style-module registry, conformance manifest, and docs
-  wiring.
+  files by hand. The generator scaffolds the component, its StyleX recipe, and public export module,
+  and updates the conformance manifest and docs wiring.
 - When adding a primitive, use `pnpm generate:primitive` from the repo root. Do not create primitive
-  files by hand. The generator updates the style-module registry, conformance manifest, and public
-  export module.
+  files by hand. The generator scaffolds the primitive, its StyleX recipe, and public export module,
+  and updates the conformance manifest.
 - Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests. It is
   the only normative testing guide. Component tests use the shared browser renderer; stories are
   documentation and render/a11y fixtures, not assertion files.

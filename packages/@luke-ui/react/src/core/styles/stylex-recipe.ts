@@ -29,6 +29,24 @@ type BooleanMap<T> = T extends 'true' | 'false' ? boolean : T;
 /** Variant groups for a single-part recipe: group name to value name to compiled style. */
 type VariantGroups = Record<string, Record<string, VariantValue>>;
 
+/**
+ * The variant map of a recipe that declares no `variants` at all.
+ *
+ * Every factory below defaults its `Variants` type parameter to this. `variants` is optional in
+ * both configs, so a base-only recipe gives inference no site to read `Variants` from; without a
+ * default, TypeScript falls back to the *constraint* (`Record<string, Record<string,
+ * VariantValue>>`) and the resulting selection accepts arbitrary keys — `codeRecipe({ size:
+ * 'small' })` would silently type-check.
+ *
+ * The groups are keyed by `string` on purpose, and each group has no values. That makes the mapped
+ * selection `{ [group: string]?: never }`, so *any* key is rejected while a bare `resolver()` or
+ * `codeRecipe()` (and an empty `{}` selection) stays valid. An empty object type (`{}`, or its
+ * spelling `Record<never, never>`) does not work here: a target type with no properties at all
+ * triggers neither excess-property nor weak-type checking, so `codeRecipe({ size: 'small' })`
+ * would still compile.
+ */
+type NoVariants = Record<string, Record<never, never>>;
+
 /** Outer selection for a single-part recipe. */
 type VariantSelection<Variants extends VariantGroups> = {
 	-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
@@ -124,7 +142,7 @@ export type RecipeProps = ReturnType<typeof stylex.props>;
  * one recipe never pays to also format that recipe as class-name/style props it will not use.
  * `createRecipe` below adapts this same resolver into that formatted, public-facing shape.
  */
-export function createRecipeStyles<const Variants extends VariantGroups>(
+export function createRecipeStyles<const Variants extends VariantGroups = NoVariants>(
 	config: SinglePartConfig<Variants>,
 ): SinglePartResolver<Variants> {
 	return function resolveStyles(selection?: VariantSelection<Variants>): Array<StyleXStyle> {
@@ -139,7 +157,7 @@ export function createRecipeStyles<const Variants extends VariantGroups>(
  * class string. It preserves the resolver's own selection parameter, so `buttonRecipe({ size:
  * 'small' })` still type-checks against the resolver's variant groups.
  */
-export function createRecipe<Variants extends VariantGroups>(
+export function createRecipe<const Variants extends VariantGroups = NoVariants>(
 	resolver: SinglePartResolver<Variants>,
 ): (selection?: VariantSelection<Variants>) => RecipeProps {
 	return (selection) => stylex.props(...resolver(selection));
@@ -153,7 +171,7 @@ export function createRecipe<Variants extends VariantGroups>(
  */
 export function createSlottedRecipeStyles<
 	const Slot extends string,
-	const Variants extends SlotVariantGroups<Slot>,
+	const Variants extends SlotVariantGroups<Slot> = NoVariants,
 >(config: MultiPartConfig<Slot, Variants>): SlottedRecipeStyles<Slot, Variants> {
 	const slotNames = Object.keys(config.slots) as Array<Slot>;
 
@@ -183,7 +201,10 @@ export function createSlottedRecipeStyles<
  * slot — a repeated `ComboboxItem` among Combobox's seventeen — still never pays to format the
  * other sixteen as `stylex.props(...)` output, matching the canonical resolver's own laziness.
  */
-export function createSlottedRecipe<Slot extends string, Variants extends SlotVariantGroups<Slot>>(
+export function createSlottedRecipe<
+	const Slot extends string,
+	const Variants extends SlotVariantGroups<Slot> = NoVariants,
+>(
 	recipeStyles: SlottedRecipeStyles<Slot, Variants>,
 ): (selection?: SlotVariantSelection<Variants>) => Record<Slot, RecipeProps> {
 	return (selection) => {
