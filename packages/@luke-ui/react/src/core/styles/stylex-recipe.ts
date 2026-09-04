@@ -38,19 +38,29 @@ type VariantGroups = Record<string, Record<string, VariantValue>>;
  * VariantValue>>`) and the resulting selection accepts arbitrary keys — `codeRecipe({ size:
  * 'small' })` would silently type-check.
  *
- * The groups are keyed by `string` on purpose, and each group has no values. That makes the mapped
- * selection `{ [group: string]?: never }`, so *any* key is rejected while a bare `resolver()` or
- * `codeRecipe()` (and an empty `{}` selection) stays valid. An empty object type (`{}`, or its
- * spelling `Record<never, never>`) does not work here: a target type with no properties at all
- * triggers neither excess-property nor weak-type checking, so `codeRecipe({ size: 'small' })`
- * would still compile.
+ * This is an empty object type (`Record<never, never>`), not a string-indexed map. The empty case
+ * is handled in `VariantSelection` / `SlotVariantSelection` themselves: when `keyof Variants` is
+ * `never` — whether from this default or from an authored `variants: {}` — the selection becomes
+ * `Record<string, never>`, which rejects every key (including `undefined` values) while still
+ * accepting a bare call or `{}`.
  */
-type NoVariants = Record<string, Record<never, never>>;
+type NoVariants = Record<never, never>;
 
-/** Outer selection for a single-part recipe. */
-type VariantSelection<Variants extends VariantGroups> = {
-	-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
-};
+/**
+ * Outer selection for a single-part recipe.
+ *
+ * When `Variants` has no groups (`keyof Variants` is `never`), the selection is
+ * `Record<string, never>` rather than a mapped type over zero keys. A mapped type over an empty
+ * object collapses to `{}`, and TypeScript does not reject arbitrary keys against that target; an
+ * optional mapped property over a string index (`{ [key: string]?: never }`) still accepts
+ * `{ madeUp: undefined }`. `Record<string, never>` closes both holes for omitted `variants` and
+ * for an authored `variants: {}`.
+ */
+type VariantSelection<Variants extends VariantGroups> = [keyof Variants] extends [never]
+	? Record<string, never>
+	: {
+			-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
+		};
 
 /** A compound variant for a single-part recipe. */
 interface CompoundVariant<Variants extends VariantGroups> {
@@ -84,10 +94,17 @@ type SlotVariantGroups<Slot extends string> = Record<
 	Record<string, SlotStyles<Slot> | null>
 >;
 
-/** Outer selection for a slotted recipe. */
-type SlotVariantSelection<Variants extends SlotVariantGroups<string>> = {
-	-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
-};
+/**
+ * Outer selection for a slotted recipe. Same empty-map rule as `VariantSelection`: no groups means
+ * `Record<string, never>`, so neither omitted `variants` nor an authored `variants: {}` accepts a
+ * fake key.
+ */
+type SlotVariantSelection<Variants extends SlotVariantGroups<string>> =
+	[keyof Variants] extends [never]
+		? Record<string, never>
+		: {
+				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
+			};
 
 /** Slotted recipe config. */
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {

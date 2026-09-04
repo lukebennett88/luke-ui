@@ -74,7 +74,8 @@ Styles resolve from lowest priority to highest:
 
 `xstyle` replaces a same-property recipe value. Application styles in a higher layer, or normal
 unlayered application CSS, can override `xstyle`. A class authored in a lower-priority layer such as
-`base` still loses. Inline `style` always wins.
+`base` still loses. For normal declarations, inline `style` wins over class-based styling. An author
+`!important` declaration can override a normal inline style.
 
 ### Apply a component recipe
 

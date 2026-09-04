@@ -397,8 +397,9 @@ part of the contract is guaranteed by resolution order alone.
 
 The `xstyle < className` step is not — it is a cascade-layer guarantee, and only holds when `xstyle`
 is compiled into the dedicated `overrides` layer. `@luke-ui/vite` does that for Vite consumers. See
-"The `xstyle` layer contract" under [Cascade layers](#cascade-layers). Inline `style` always wins,
-because it sits outside the layered cascade entirely.
+"The `xstyle` layer contract" under [Cascade layers](#cascade-layers). For normal declarations,
+inline `style` wins over class-based styling because it sits outside the layered cascade. An author
+`!important` declaration can override a normal inline style.
 
 ### Shared input-state selectors
 

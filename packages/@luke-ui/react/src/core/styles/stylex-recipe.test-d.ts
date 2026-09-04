@@ -34,16 +34,49 @@ test('a single-part recipe with no variants rejects arbitrary selection keys', (
 	noVariantStyles({});
 	// @ts-expect-error a recipe with no variants accepts no selection
 	noVariantStyles({ completelyMadeUpVariant: 'whatever' });
+	// @ts-expect-error a recipe with no variants rejects undefined values on fake keys
+	noVariantStyles({ completelyMadeUpVariant: undefined });
 
 	const noVariantRecipe = createRecipe(noVariantStyles);
 	noVariantRecipe();
 	noVariantRecipe({});
 	// @ts-expect-error a recipe with no variants accepts no selection
 	noVariantRecipe({ size: 'small' });
+	// @ts-expect-error a recipe with no variants rejects undefined values on fake keys
+	noVariantRecipe({ size: undefined });
 
 	type Selection = RecipeSelection<typeof noVariantStyles>;
 	// @ts-expect-error a no-variant recipe's derived selection rejects any key
 	assertType<Selection>({ size: 'small' });
+	// @ts-expect-error a no-variant recipe's derived selection rejects undefined on fake keys
+	assertType<Selection>({ size: undefined });
+});
+
+test('a single-part recipe with an empty variants map rejects arbitrary selection keys', () => {
+	const emptyVariantsStyles = createRecipeStyles({
+		base: styles.rootBase,
+		variants: {},
+	});
+	emptyVariantsStyles();
+	emptyVariantsStyles({});
+	// @ts-expect-error an empty variants map accepts no selection keys
+	emptyVariantsStyles({ completelyMadeUpVariant: 'whatever' });
+	// @ts-expect-error an empty variants map rejects undefined values on fake keys
+	emptyVariantsStyles({ completelyMadeUpVariant: undefined });
+
+	const emptyVariantsRecipe = createRecipe(emptyVariantsStyles);
+	emptyVariantsRecipe();
+	emptyVariantsRecipe({});
+	// @ts-expect-error an empty variants map accepts no selection keys
+	emptyVariantsRecipe({ size: 'small' });
+	// @ts-expect-error an empty variants map rejects undefined values on fake keys
+	emptyVariantsRecipe({ size: undefined });
+
+	type Selection = RecipeSelection<typeof emptyVariantsStyles>;
+	// @ts-expect-error an empty variants map's derived selection rejects any key
+	assertType<Selection>({ size: 'small' });
+	// @ts-expect-error an empty variants map's derived selection rejects undefined on fake keys
+	assertType<Selection>({ size: undefined });
 });
 
 test('a slotted recipe with no variants rejects arbitrary selection keys', () => {
@@ -54,16 +87,49 @@ test('a slotted recipe with no variants rejects arbitrary selection keys', () =>
 	noVariantSlottedStyles.resolveSlotStyles('root', {});
 	// @ts-expect-error a recipe with no variants accepts no selection
 	noVariantSlottedStyles.resolveSlotStyles('root', { bogus: 'x' });
+	// @ts-expect-error a recipe with no variants rejects undefined values on fake keys
+	noVariantSlottedStyles.resolveSlotStyles('root', { bogus: undefined });
 
 	const noVariantSlotted = createSlottedRecipe(noVariantSlottedStyles);
 	noVariantSlotted();
 	noVariantSlotted({});
 	// @ts-expect-error a recipe with no variants accepts no selection
 	noVariantSlotted({ bogus: 'x' });
+	// @ts-expect-error a recipe with no variants rejects undefined values on fake keys
+	noVariantSlotted({ bogus: undefined });
 
 	type Selection = SlotRecipeSelection<typeof noVariantSlottedStyles.resolveSlotStyles>;
 	// @ts-expect-error a no-variant slotted recipe's derived selection rejects any key
 	assertType<Selection>({ bogus: 'x' });
+	// @ts-expect-error a no-variant slotted recipe's derived selection rejects undefined on fake keys
+	assertType<Selection>({ bogus: undefined });
+});
+
+test('a slotted recipe with an empty variants map rejects arbitrary selection keys', () => {
+	const emptyVariantsSlottedStyles = createSlottedRecipeStyles({
+		slots: { root: styles.rootBase },
+		variants: {},
+	});
+	emptyVariantsSlottedStyles.resolveSlotStyles('root');
+	emptyVariantsSlottedStyles.resolveSlotStyles('root', {});
+	// @ts-expect-error an empty variants map accepts no selection keys
+	emptyVariantsSlottedStyles.resolveSlotStyles('root', { bogus: 'x' });
+	// @ts-expect-error an empty variants map rejects undefined values on fake keys
+	emptyVariantsSlottedStyles.resolveSlotStyles('root', { bogus: undefined });
+
+	const emptyVariantsSlotted = createSlottedRecipe(emptyVariantsSlottedStyles);
+	emptyVariantsSlotted();
+	emptyVariantsSlotted({});
+	// @ts-expect-error an empty variants map accepts no selection keys
+	emptyVariantsSlotted({ bogus: 'x' });
+	// @ts-expect-error an empty variants map rejects undefined values on fake keys
+	emptyVariantsSlotted({ bogus: undefined });
+
+	type Selection = SlotRecipeSelection<typeof emptyVariantsSlottedStyles.resolveSlotStyles>;
+	// @ts-expect-error an empty variants map's derived selection rejects any key
+	assertType<Selection>({ bogus: 'x' });
+	// @ts-expect-error an empty variants map's derived selection rejects undefined on fake keys
+	assertType<Selection>({ bogus: undefined });
 });
 
 test('exact literal unions are accepted and undeclared values or groups are rejected', () => {

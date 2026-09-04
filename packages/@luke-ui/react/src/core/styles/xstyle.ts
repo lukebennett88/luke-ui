@@ -24,13 +24,14 @@ export interface XStyleProps {
 	 * for a given CSS property, so a same-property `xstyle` value always replaces a competing
 	 * default or variant.
 	 *
-	 * `xstyle` versus a consumer `className` is decided by the ordinary CSS cascade — cascade
-	 * layer, then specificity, then source order, then `!important` — not by the order props are
-	 * passed or resolved. Appending a class to the rendered `class` attribute does not create
-	 * precedence; DOM class token order is irrelevant to the cascade. A class compiled into a
-	 * higher-priority layer such as `utilities`, or ordinary unlayered application CSS, can beat
-	 * `xstyle`. A class compiled into a lower-priority layer such as `base` still loses to it.
-	 * Inline `style` always wins over any class-based styling.
+	 * `xstyle` versus a consumer `className` is decided by the CSS cascade, including importance,
+	 * cascade layers, specificity, and source order — not by the order props are passed or
+	 * resolved. Appending a class to the rendered `class` attribute does not create precedence;
+	 * DOM class token order is irrelevant to the cascade. A class compiled into a higher-priority
+	 * layer such as `utilities`, or ordinary unlayered application CSS, can beat `xstyle`. A class
+	 * compiled into a lower-priority layer such as `base` still loses to it. For normal
+	 * declarations, inline `style` wins over class-based styling. An author `!important`
+	 * declaration can override a normal inline style.
 	 *
 	 * Compiling `xstyle` requires the consumer's own StyleX compiler. `@luke-ui/vite` is the
 	 * supported way to set this up for a Vite app; an equivalent StyleX bundler integration works
@@ -71,8 +72,10 @@ type RacRenderPropValue<T, V> = V | ((renderProps: T) => V);
  * Resolves `className` and `style` for a React Aria component in one pass, applying the same
  * `xstyle` contract as `resolveXStyleProps`: component recipe/variant styles < `xstyle`,
  * guaranteed by resolving both in one `stylex.props(...)` call. Where a consumer `className` or
- * inline `style` lands relative to that is decided separately — the CSS cascade for `className`,
- * always-wins for inline `style`. See `XStyleProps#xstyle` for the full precedence contract.
+ * inline `style` lands relative to that is decided separately — the CSS cascade for `className`
+ * (including importance, layers, specificity, and source order); for normal declarations, inline
+ * `style` wins over class-based styling, though an author `!important` can override a normal
+ * inline style. See `XStyleProps#xstyle` for the full precedence contract.
  *
  * React Aria Components lets `className` and `style` be plain values or functions of the
  * component's render props (`composeRenderProps`), so a RAC element cannot resolve both props
