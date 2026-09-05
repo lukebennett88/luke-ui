@@ -7,7 +7,6 @@ import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/Co
 import { ComboBoxStateContext, ComboBoxValue } from 'react-aria-components/ComboBox';
 import { LabelContext } from 'react-aria-components/Label';
 import { PopoverContext } from 'react-aria-components/Popover';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { cx } from '../../shared/utils/utils.js';
 import { Icon } from '../icon/icon.js';
@@ -24,9 +23,10 @@ import type { ComboboxListBoxProps } from '../primitives/combobox/listbox.js';
 import { ComboboxListBox } from '../primitives/combobox/listbox.js';
 import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
 import { ComboboxPopover } from '../primitives/combobox/popover.js';
+import { ComboboxPresentationProvider } from '../primitives/combobox/presentation-context.js';
+import { comboboxRecipe } from '../primitives/combobox/recipe.js';
 import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
-import { comboboxRecipe } from '../primitives/combobox/styles.css.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import type { FieldSlotProps } from '../primitives/field/field.js';
 import {
@@ -34,6 +34,8 @@ import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
+import { resolveRecipeSlotProps } from '../styles/recipe-authoring.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
@@ -54,7 +56,7 @@ type _ComboboxFieldOmit<T extends object> = DistributiveOmit<
 >;
 
 interface _ComboboxFieldProps<T extends object>
-	extends _ComboboxFieldOmit<T>, ComboboxFieldRedeclaredRACProps, FieldSlotProps {
+	extends _ComboboxFieldOmit<T>, ComboboxFieldRedeclaredRACProps, FieldSlotProps, XStyleProps {
 	/** Item content for the listbox (render prop or static children). */
 	children: ComboboxListBoxProps<T>['children'];
 
@@ -112,6 +114,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		placeholder,
 		popoverProps,
 		size = 'medium',
+		xstyle,
 		...comboboxRootProps
 	} = props;
 
@@ -195,6 +198,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 			size={size}
 			{...comboboxRootProps}
 			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
+			xstyle={xstyle}
 		>
 			<Field
 				description={description}
@@ -236,24 +240,23 @@ function MobileComboboxContent<T extends object>({
 	const valueId = useId();
 
 	const ariaLabelledBy = labelContext?.id == null ? undefined : cx(labelContext.id, valueId);
-	const comboboxStyles = comboboxRecipe({ size });
 
-	const mobileListBoxClassName = composeRenderProps(listBoxProps?.className, (className) => {
-		return comboboxStyles.mobileListBox(className);
-	});
-
+	// The listbox always renders inside the tray, so it always resolves tray presentation styling
+	// — including this early-return path, where RAC has built the collection but not yet provided
+	// combobox state.
 	const listBox = (
-		<SelectableCollectionContext.Provider value={mobileListBoxContextValue}>
-			<ComboboxListBox<T>
-				{...listBoxProps}
-				className={mobileListBoxClassName}
-				loadMoreItem={loadMoreItem}
-				renderEmptyState={renderEmptyState}
-				shouldSelectOnPressUp={false}
-			>
-				{children}
-			</ComboboxListBox>
-		</SelectableCollectionContext.Provider>
+		<ComboboxPresentationProvider presentation="tray">
+			<SelectableCollectionContext.Provider value={mobileListBoxContextValue}>
+				<ComboboxListBox<T>
+					{...listBoxProps}
+					loadMoreItem={loadMoreItem}
+					renderEmptyState={renderEmptyState}
+					shouldSelectOnPressUp={false}
+				>
+					{children}
+				</ComboboxListBox>
+			</SelectableCollectionContext.Provider>
+		</ComboboxPresentationProvider>
 	);
 
 	// Focus the tray search input when the tray opens
@@ -266,15 +269,18 @@ function MobileComboboxContent<T extends object>({
 	// RAC builds the collection before it provides state.
 	if (state == null) return listBox;
 
+	const trayTriggerProps = resolveRecipeSlotProps(comboboxRecipe, 'trayTrigger', { size });
+	const trayValueProps = resolveRecipeSlotProps(comboboxRecipe, 'trayValue');
+
 	return (
 		<>
 			<ComboboxInputGroup>
 				<RacButton
+					{...trayTriggerProps}
 					aria-expanded={state.isOpen}
 					aria-haspopup="dialog"
 					aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
 					aria-labelledby={ariaLabelledBy}
-					className={comboboxStyles.mobileTrigger()}
 					isDisabled={isDisabled || isReadOnly}
 					onPress={() => {
 						if (isReadOnly) return;
@@ -283,11 +289,7 @@ function MobileComboboxContent<T extends object>({
 					}}
 					slot={null}
 				>
-					<ComboBoxValue
-						className={comboboxStyles.mobileValue()}
-						id={valueId}
-						placeholder={placeholder}
-					/>
+					<ComboBoxValue {...trayValueProps} id={valueId} placeholder={placeholder} />
 					<Icon aria-hidden name="chevronDown" />
 				</RacButton>
 			</ComboboxInputGroup>
@@ -303,16 +305,18 @@ function MobileComboboxContent<T extends object>({
 				}}
 				ref={popoverContext?.ref}
 			>
-				<ComboboxInputGroup className={comboboxStyles.mobileInputGroup()}>
-					<ComboboxInput
-						aria-expanded={undefined}
-						aria-haspopup="listbox"
-						placeholder={placeholder}
-						ref={mobileInputRef}
-						role="searchbox"
-					/>
-					<MobileComboboxClearButton size={size} />
-				</ComboboxInputGroup>
+				<ComboboxPresentationProvider presentation="tray">
+					<ComboboxInputGroup>
+						<ComboboxInput
+							aria-expanded={undefined}
+							aria-haspopup="listbox"
+							placeholder={placeholder}
+							ref={mobileInputRef}
+							role="searchbox"
+						/>
+						<MobileComboboxClearButton size={size} />
+					</ComboboxInputGroup>
+				</ComboboxPresentationProvider>
 				{listBox}
 			</MobileOverlay>
 		</>
@@ -324,10 +328,12 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 
 	if (state == null || state.inputValue === '') return null;
 
+	const clearButtonProps = resolveRecipeSlotProps(comboboxRecipe, 'clearButton', { size });
+
 	return (
 		<RacButton
+			{...clearButtonProps}
 			aria-label="Clear search"
-			className={comboboxRecipe({ size }).clearButton()}
 			onPress={() => {
 				state.setInputValue('');
 			}}

@@ -16,7 +16,9 @@ import {
 	InputGroupPrefix,
 	InputGroupSuffix,
 } from '../primitives/input-group/input-group.js';
-import type { InputGroupSize } from '../primitives/input-group/recipe.css.js';
+import type { InputGroupSize } from '../primitives/input-group/recipe.js';
+import type { XStyleProps } from '../styles/xstyle.js';
+import { resolveRacXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedInputProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -26,7 +28,8 @@ type _TextFieldOmit = DistributiveOmit<
 	'children' | 'isInvalid' | keyof DocumentedInputProps
 >;
 
-interface _TextFieldProps extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps {
+interface _TextFieldProps
+	extends _TextFieldOmit, DocumentedInputProps, FieldSlotProps, XStyleProps {
 	/** Validation message for a controlled error. A non-empty message marks the field invalid. */
 	errorMessage?: ReactNode;
 	/** Class name forwarded to the inner input element. */
@@ -59,6 +62,7 @@ export type TextFieldProps = Prettify<_TextFieldProps>;
  */
 export function TextField(props: TextFieldProps): JSX.Element {
 	const {
+		className,
 		description,
 		errorMessage,
 		inputClassName,
@@ -68,14 +72,20 @@ export function TextField(props: TextFieldProps): JSX.Element {
 		placeholder,
 		prefix,
 		size = 'medium',
+		style,
 		suffix,
+		xstyle,
 		...textFieldProps
 	} = props;
 
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
 
 	return (
-		<RacTextField {...textFieldProps} isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}>
+		<RacTextField
+			{...textFieldProps}
+			{...resolveRacXStyleProps([], xstyle, className, style)}
+			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
+		>
 			<Field
 				description={description}
 				errorMessage={normalizedErrorMessage}

@@ -1,0 +1,57 @@
+{
+	"name": "@luke-ui/vite",
+	"version": "0.0.0",
+	"description": "Vite plugin for Luke UI xstyle StyleX extraction.",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/lukebennett88/luke-ui.git",
+		"directory": "packages/@luke-ui/vite"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"type": "module",
+	"sideEffects": [
+		"./dist/stylesheet.css"
+	],
+	"exports": {
+		".": "./dist/index.mjs",
+		"./package.json": "./package.json",
+		"./stylesheet.css": "./dist/stylesheet.css"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "vp pack",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
+		"check:types": "tsc --noEmit -p tsconfig.json",
+		"clean": "rm -rf .turbo dist",
+		"dev": "vp pack --watch",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix",
+		"fix:unsafe": "vp lint . --type-aware --fix-dangerously",
+		"test": "vp test run",
+		"test:unit": "vp test run"
+	},
+	"dependencies": {
+		"@babel/core": "catalog:",
+		"@stylexjs/babel-plugin": "catalog:"
+	},
+	"devDependencies": {
+		"@stylexjs/stylex": "catalog:",
+		"@types/babel__core": "catalog:",
+		"@types/node": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vite-plus": "catalog:"
+	},
+	"peerDependencies": {
+		"@stylexjs/stylex": "catalog:",
+		"vite": "catalog:publish"
+	}
+}

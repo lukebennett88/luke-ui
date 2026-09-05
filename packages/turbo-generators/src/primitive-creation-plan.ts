@@ -63,8 +63,8 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	const conformance = hasDomConformance ? (['dom'] as const) : ([] as const);
 
 	// Most primitives on main are multi-part compositions without a single root. The scaffold keeps
-	// a minimal div and recipe so the public export and stylesheet registration can build; replace
-	// both when the real primitive shape is known.
+	// a minimal div and StyleX recipe so the public export can build; replace both when the real
+	// primitive shape is known.
 	const files: Array<PlanFile> = [
 		{
 			contents: renderPrimitiveSource({ pascalName, recipeName }),
@@ -75,8 +75,8 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 			path: `packages/@luke-ui/react/src/exports/primitives/${name}.ts`,
 		},
 		{
-			contents: renderRecipe({ recipeName, variantsType }),
-			path: `packages/@luke-ui/react/src/core/primitives/${name}/recipe.css.ts`,
+			contents: renderRecipe({ pascalName, recipeName, variantsType }),
+			path: `packages/@luke-ui/react/src/core/primitives/${name}/recipe.ts`,
 		},
 	];
 
@@ -116,13 +116,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 					},
 				]
 			: [],
-		sortedImportEdits: [
-			{
-				kind: 'sorted-import',
-				line: `import '../primitives/${name}/recipe.css.js';`,
-				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
-			},
-		],
+		sortedImportEdits: [],
 		textFileInserts: [
 			{
 				kind: 'text-insert',
@@ -139,15 +133,25 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 function renderPrimitiveSource(input: { pascalName: string; recipeName: string }): string {
 	return `import type { ComponentProps, JSX } from 'react';
 import { cx } from '../../../shared/utils/utils.js';
-import { ${input.recipeName} } from './recipe.css.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
+import { ${input.recipeName} } from './recipe.js';
 
 /** Props for the \`${input.pascalName}\` primitive. */
-export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
+export interface ${input.pascalName}Props extends ComponentProps<'div'>, XStyleProps {}
 
 /** Primitive \`${input.pascalName}\`. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
-	const { className, ...divProps } = props;
-	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;
+	const { className, style, xstyle, ...elementProps } = props;
+	const recipeProps = ${input.recipeName}({ xstyle });
+
+	return (
+		<div
+			{...elementProps}
+			{...recipeProps}
+			className={cx(recipeProps.className, className)}
+			style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
+		/>
+	);
 }
 `;
 }
@@ -159,14 +163,19 @@ function renderPackageExport(input: {
 	variantsType: string;
 }): string {
 	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../../core/primitives/${input.name}/${input.name}.js';
-export { type ${input.variantsType}, ${input.recipeName} } from '../../core/primitives/${input.name}/recipe.css.js';
+export { type ${input.variantsType}, ${input.recipeName} } from '../../core/primitives/${input.name}/recipe.js';
 `;
 }
 
-function renderRecipe(input: { recipeName: string; variantsType: string }): string {
-	return `import type { RecipeSelection } from '../../styles/recipe.js';
-import { recipe } from '../../styles/recipe.js';
+function renderRecipe(input: {
+	pascalName: string;
+	recipeName: string;
+	variantsType: string;
+}): string {
+	return `import type { RecipeSelection } from '../../styles/recipe-authoring.js';
+import { recipe } from '../../styles/recipe-authoring.js';
 
+/** Recipe for the \`${input.pascalName}\` primitive. */
 export const ${input.recipeName} = recipe({
 	base: {},
 });

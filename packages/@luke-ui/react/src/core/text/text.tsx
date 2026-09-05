@@ -1,15 +1,16 @@
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/contract.js';
+import type { XStyleProps } from '../styles/xstyle.js';
+import { composeRecipeProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import type { TextRecipeVariants } from './recipe.css.js';
-import { textRecipe } from './recipe.css.js';
+import type { TextRecipeVariants } from './recipe.js';
+import { textRecipe } from './recipe.js';
 
 interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
 
-interface TextStyleProps {
+interface TextStyleProps extends XStyleProps {
 	/**
 	 * Sets text colour.
 	 * @default 'primary'
@@ -115,7 +116,9 @@ export function Text(props: TextProps) {
 		textDecoration,
 		textTransform,
 		textWrap,
+		style,
 		typography,
+		xstyle,
 		...racProps
 	} = props;
 	const hasLineClamp = lineClamp !== undefined && lineClamp !== false;
@@ -126,29 +129,28 @@ export function Text(props: TextProps) {
 		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
 		return !blockTextElementTypes.has(elementType);
 	})();
+	const recipeProps = textRecipe({
+		color,
+		fontVariantNumeric,
+		...(shouldInheritFont
+			? {}
+			: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
+		isVisuallyHidden,
+		lineClamp,
+		shouldDisableTrim: resolvedShouldDisableTrim,
+		shouldInheritFont,
+		textAlign,
+		textDecoration,
+		textTransform,
+		textWrap,
+		typography: resolvedTypography,
+		xstyle,
+	});
 
 	return (
 		<RacText
 			{...racProps}
-			className={cx(
-				textRecipe({
-					color,
-					fontVariantNumeric,
-					...(shouldInheritFont
-						? {}
-						: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
-					isVisuallyHidden,
-					lineClamp,
-					shouldDisableTrim: resolvedShouldDisableTrim,
-					shouldInheritFont,
-					textAlign,
-					textDecoration,
-					textTransform,
-					textWrap,
-					typography: resolvedTypography,
-				}),
-				className,
-			)}
+			{...composeRecipeProps(recipeProps, { className, style })}
 			elementType={elementType}
 		>
 			{children}

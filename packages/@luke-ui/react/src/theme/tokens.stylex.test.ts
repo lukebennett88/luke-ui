@@ -1,18 +1,39 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vite-plus/test';
 import { flattenThemeContract } from './contract.js';
+import { vars as publicVars } from './index.js';
+import { vars } from './tokens.stylex.js';
+
+function resolvePath(node: unknown, path: string): unknown {
+	let value = node;
+	for (const segment of path.split('.')) {
+		if (typeof value !== 'object' || value === null) {
+			throw new Error(`expected an object before "${segment}" in "${path}"`);
+		}
+		value = (value as Record<string, unknown>)[segment];
+	}
+	return value;
+}
 
 describe('StyleX tokens', () => {
-	it('covers every theme contract leaf with a live var(--luke-*) reference', async () => {
-		const source = await readFile(new URL('./tokens.stylex.ts', import.meta.url), 'utf8');
+	it('covers every theme contract leaf with a live var(--luke-*) reference at its nested path', () => {
 		const pairs = flattenThemeContract();
+		expect(pairs.length).toBe(183);
 
 		for (const [path, variable] of pairs) {
-			const camelKey = toCamelCaseKey(path);
-			expect(source).toContain(`${camelKey}: 'var(${variable})'`);
+			expect(resolvePath(vars, path)).toBe(`var(${variable})`);
 		}
+	});
 
-		expect(source.match(/defineConsts\(\{/g)?.length).toBe(1);
+	it('is the same object as the public theme export', () => {
+		expect(publicVars).toBe(vars);
+	});
+
+	it('generates a single statically-analyzable nested object literal', async () => {
+		const source = await readFile(new URL('./tokens.stylex.ts', import.meta.url), 'utf8');
+
+		expect(source).toContain('export const vars = stylex.unstable_defineConstsNested({');
+		expect(source.match(/unstable_defineConstsNested\(\{/g)?.length).toBe(1);
 		expect(source).not.toMatch(/--luke-[^:]+:\s*#[0-9a-f]{3,8}/i);
 	});
 
@@ -25,9 +46,3 @@ describe('StyleX tokens', () => {
 		expect(stylexSection).not.toMatch(/:root[^{]*\{[^}]*--luke-/);
 	});
 });
-
-function toCamelCaseKey(path: string): string {
-	const [first, ...rest] = path.split('.');
-	if (first === undefined) throw new Error(`Theme contract path "${path}" is empty`);
-	return first + rest.map((segment) => segment[0]?.toUpperCase() + segment.slice(1)).join('');
-}

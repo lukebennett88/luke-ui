@@ -12,4 +12,4 @@ export {
 	type InputGroupRecipeVariants,
 	type InputGroupSize,
 	inputGroupRecipe,
-} from '../../core/primitives/input-group/recipe.css.js';
+} from '../../core/primitives/input-group/recipe.js';

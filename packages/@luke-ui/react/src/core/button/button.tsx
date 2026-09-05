@@ -2,19 +2,20 @@ import type { JSX, ReactNode } from 'react';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button as PrimitiveButton } from '../primitives/button/button.js';
-import type * as primitiveStyles from '../primitives/button/recipe.css.js';
+import type { ButtonRecipeVariants as PrimitiveButtonRecipeVariants } from '../primitives/button/recipe.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import type { ButtonLabelVariants } from './styles.css.js';
-import { buttonContent, buttonLabel, spinnerOverlay } from './styles.css.js';
+import type { ButtonLabelVariants } from './styles.js';
+import { buttonContent, buttonLabel, spinnerOverlay } from './styles.js';
 
 interface ButtonLabelRecipeProps extends NonNullable<ButtonLabelVariants> {}
 
-interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonRecipeVariants> {}
+interface PrimitiveButtonRecipeProps extends NonNullable<PrimitiveButtonRecipeVariants> {}
 
-interface ButtonStyleProps {
+interface ButtonStyleProps extends XStyleProps {
 	/**
 	 * Visual emphasis.
 	 * @default 'solid'
@@ -52,7 +53,7 @@ interface ButtonStyleProps {
 
 type _ButtonOmit = DistributiveOmit<
 	PrimitiveButtonProps,
-	'appearance' | 'isBlock' | 'isPending' | 'size' | 'tone' | keyof DocumentedPressProps
+	'appearance' | 'isBlock' | 'isPending' | 'size' | 'tone' | 'xstyle' | keyof DocumentedPressProps
 >;
 
 interface _ButtonProps extends _ButtonOmit, ButtonStyleProps, DocumentedPressProps {}
@@ -65,18 +66,18 @@ export type ButtonProps = Prettify<_ButtonProps>;
  * Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`.
  */
 export function Button(props: ButtonProps): JSX.Element {
-	const { children, endIcon, isPending, size = 'medium', startIcon, ...restProps } = props;
+	const { children, endIcon, isPending, size = 'medium', startIcon, xstyle, ...restProps } = props;
 
 	return (
-		<PrimitiveButton {...restProps} isPending={isPending} size={size}>
+		<PrimitiveButton {...restProps} isPending={isPending} size={size} xstyle={xstyle}>
 			{(renderProps) => (
-				<span className={buttonContent()}>
+				<span {...buttonContent()}>
 					{isPending && (
-						<span aria-hidden className={spinnerOverlay()}>
+						<span aria-hidden {...spinnerOverlay()}>
 							<LoadingSpinner aria-hidden />
 						</span>
 					)}
-					<span className={buttonLabel({ isPending })}>
+					<span {...buttonLabel({ isPending })}>
 						{startIcon}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}

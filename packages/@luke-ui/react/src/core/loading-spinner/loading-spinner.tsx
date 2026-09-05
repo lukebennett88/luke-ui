@@ -7,12 +7,14 @@ import {
 	SPINNER_CIRCLE_RADIUS,
 	SPINNER_STROKE_WIDTH,
 } from '../sizing/icon-sizing.js';
+import type { XStyleProp } from '../styles/xstyle.js';
+import { composeRecipeProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { VisuallyHidden } from '../visually-hidden/visually-hidden.js';
-import type { LoadingSpinnerRecipeVariants } from './recipe.css.js';
-import { loadingSpinnerRecipe, rubberBandAnimationName, spinAnimationName } from './recipe.css.js';
+import type { LoadingSpinnerRecipeVariants } from './recipe.js';
+import { loadingSpinnerRecipe, rubberBandAnimationName, spinAnimationName } from './recipe.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<LoadingSpinnerRecipeVariants> {}
 
@@ -24,6 +26,8 @@ interface LoadingSpinnerStyleProps {
 	 * @default 'medium'
 	 */
 	size?: LoadingSpinnerVariantProps['size'];
+	/** Extra `stylex.create(...)` styles for the spinner, applied after variants and before `className`. */
+	xstyle?: XStyleProp;
 }
 
 type _LoadingSpinnerOmit = DistributiveOmit<
@@ -59,6 +63,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 		isLoading = true,
 		size,
 		style,
+		xstyle,
 		...spanProps
 	} = props;
 
@@ -75,19 +80,20 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 			color={color}
 			size={resolvedSize}
 			style={style}
+			xstyle={xstyle}
 		/>
 	);
 
 	if (!children) return spinnerElement;
 
-	const slots = loadingSpinnerRecipe();
+	const parts = loadingSpinnerRecipe();
 
 	return (
-		<span className={slots.childrenWrapper()}>
-			<span aria-hidden className={slots.hiddenChildren()} inert>
+		<span {...parts.childrenWrapper}>
+			<span aria-hidden {...parts.hiddenChildren} inert>
 				{children}
 			</span>
-			<span className={slots.spinnerOverlay()}>{spinnerElement}</span>
+			<span {...parts.spinnerOverlay}>{spinnerElement}</span>
 		</span>
 	);
 }
@@ -100,27 +106,27 @@ function SpinnerElement({
 	color,
 	size,
 	style,
+	xstyle,
 	...spanProps
 }: SpinnerElementProps) {
 	useSynchronizeAnimations(spinAnimationName);
 	useSynchronizeAnimations(rubberBandAnimationName);
 
 	const labelId = useId();
-	const slots = loadingSpinnerRecipe({ color, size });
+	const parts = loadingSpinnerRecipe({ color, size, xstyle: { root: xstyle } });
 	const viewBoxCenter = ICON_VIEWBOX_SIZE / 2;
 
 	return (
 		<span
 			{...spanProps}
+			{...composeRecipeProps(parts.root, { className, style })}
 			aria-labelledby={labelId}
-			className={slots.root(className)}
 			role="status"
-			style={style}
 		>
 			<VisuallyHidden id={labelId}>{ariaLabel}</VisuallyHidden>
-			<svg aria-hidden="true" className={slots.svg()} fill="none" viewBox={ICON_VIEWBOX}>
+			<svg {...parts.svg} aria-hidden="true" fill="none" viewBox={ICON_VIEWBOX}>
 				<circle
-					className={slots.indicator()}
+					{...parts.indicator}
 					cx={viewBoxCenter}
 					cy={viewBoxCenter}
 					fill="none"

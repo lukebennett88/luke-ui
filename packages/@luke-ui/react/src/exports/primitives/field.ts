@@ -9,4 +9,4 @@ export {
 	type FieldNecessityIndicator,
 	type FieldProps,
 } from '../../core/primitives/field/field.js';
-export { type FieldRecipeVariants, fieldRecipe } from '../../core/primitives/field/recipe.css.js';
+export { type FieldRecipeVariants, fieldRecipe } from '../../core/primitives/field/recipe.js';

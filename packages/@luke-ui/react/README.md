@@ -1,6 +1,7 @@
 # @luke-ui/react
 
-Luke UI is a React design system built on `react-aria-components` and `vanilla-extract`.
+Luke UI is a React design system built on `react-aria-components`, with component styles compiled
+through StyleX.
 
 ## Install
 
@@ -10,14 +11,21 @@ pnpm add @luke-ui/react react-aria-components
 
 Luke UI expects the application to provide a compatible shared `react-aria-components` instance.
 
+An application that authors `xstyle` overrides also installs `@stylexjs/stylex` and `@luke-ui/vite`.
+`@luke-ui/vite` configures the StyleX compiler and cascade layer order. See its
+[README](../vite/README.md) and the
+[Installation guide](../../../apps/docs/content/docs/docs/installation.mdx) for the one-time setup.
+
 ## Setup
 
 Import the component stylesheet and one bundled theme stylesheet. Importing a theme stylesheet
 themes the whole document from `:root`, so no identity class is needed for a single theme. Apply
 `rootClassName` to an element you own for the reset and base typography.
 
-The shared stylesheet owns reset, theme-root, recipe, and utility rules in `reset`, `theme`,
-`recipes`, `utilities` order.
+The shared stylesheet owns reset, theme-root, StyleX recipe styles, retained component rules, and
+utility rules, layered in `reset`, `theme`, `base`, `recipes`, `overrides`, `utilities` order. An
+application's own `xstyle` overrides compile into the `overrides` layer, above `recipes` and below
+`utilities` — see the [Styling guide](../../../apps/docs/content/docs/docs/styling.mdx).
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
@@ -35,14 +43,8 @@ theme wins. Import it from that theme's own entrypoint, for example
 
 ## Components and docs
 
-Full component documentation, interactive examples, and API reference are at
-[lukebennett88.github.io/luke-ui](https://lukebennett88.github.io/luke-ui).
-
-AI agents can fetch documentation at:
-
-- [llms.txt](https://lukebennett88.github.io/luke-ui/llms.txt): component index.
-- [llms-full.txt](https://lukebennett88.github.io/luke-ui/llms-full.txt): full docs.
-- Any docs URL with `.md` appended: per-page Markdown.
+Component documentation, interactive examples, and API reference live in this repo under
+`apps/docs/content/docs`.
 
 Start with the normal component API. Use primitives from `@luke-ui/react/primitives/*` when you need
 a custom composition the component API does not cover. Import a colocated recipe such as

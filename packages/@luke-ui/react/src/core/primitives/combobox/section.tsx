@@ -2,18 +2,20 @@ import type { JSX, ReactNode } from 'react';
 import type { ListBoxSectionProps as RacListBoxSectionProps } from 'react-aria-components/ComboBox';
 import { ListBoxSection as RacListBoxSection } from 'react-aria-components/ComboBox';
 import { Header as RacHeader } from 'react-aria-components/Header';
-import { cx } from '../../../shared/utils/utils.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { comboboxSectionScopeClassName } from './section-scope.css.js';
-import { comboboxRecipe } from './styles.css.js';
+import { comboboxRecipe } from './recipe.js';
+import { comboboxSectionScopeAttribute } from './section-scope.js';
 
 type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
 	RacListBoxSectionProps<T>,
 	'className'
 >;
 
-interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T> {
+interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T>, XStyleProps {
 	className?: RacListBoxSectionProps<T>['className'];
 	title?: ReactNode;
 }
@@ -22,22 +24,27 @@ interface _ComboboxSectionProps<T extends object> extends _ComboboxSectionOmit<T
 export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionProps<T>>;
 
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
-	const { children, className, title, ...sectionProps } = props;
-
-	const sectionClassName = cx(comboboxSectionScopeClassName, comboboxRecipe().section(className));
-
+	const { children, className, style, title, xstyle, ...sectionProps } = props;
+	const resolved = composeRecipeProps(
+		resolveRecipeSlotProps(comboboxRecipe, 'section', undefined, xstyle),
+		{ className, style },
+	);
 	if (typeof children === 'function') {
 		return (
-			<RacListBoxSection {...sectionProps} className={sectionClassName}>
+			<RacListBoxSection
+				{...sectionProps}
+				{...{ [comboboxSectionScopeAttribute]: '' }}
+				{...resolved}
+			>
 				{children}
 			</RacListBoxSection>
 		);
 	}
 
 	return (
-		<RacListBoxSection {...sectionProps} className={sectionClassName}>
+		<RacListBoxSection {...sectionProps} {...{ [comboboxSectionScopeAttribute]: '' }} {...resolved}>
 			{title != null ? (
-				<RacHeader className={comboboxRecipe().sectionHeading()}>{title}</RacHeader>
+				<RacHeader {...resolveRecipeSlotProps(comboboxRecipe, 'sectionHeading')}>{title}</RacHeader>
 			) : null}
 			{children}
 		</RacListBoxSection>

@@ -8,10 +8,13 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps, composeRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import type { InputGroupSize } from './recipe.css.js';
-import { inputGroupRecipe } from './recipe.css.js';
+import type { InputGroupSize } from './recipe.js';
+import { inputGroupRecipe } from './recipe.js';
 
 const InputGroupSizeContext = createContext<InputGroupSize | null>(null);
 
@@ -24,7 +27,7 @@ function useInputGroupSize(size?: InputGroupSize): InputGroupSize {
 	return size ?? use(InputGroupSizeContext) ?? 'medium';
 }
 
-interface InputGroupPartStyleProps {
+interface InputGroupPartStyleProps extends XStyleProps {
 	/**
 	 * Overrides the size inherited from the enclosing `InputGroup`.
 	 * @default 'medium'
@@ -34,7 +37,7 @@ interface InputGroupPartStyleProps {
 
 type _InputGroupOmit = DistributiveOmit<RacGroupProps, 'children' | 'className'>;
 
-interface _InputGroupProps extends _InputGroupOmit {
+interface _InputGroupProps extends _InputGroupOmit, XStyleProps {
 	/** The group's parts. Position follows document order. */
 	children?: RacGroupProps['children'];
 	/** Class name for the group element. */
@@ -106,8 +109,8 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
  * carries the meaning.
  */
 export function InputGroup(props: InputGroupProps): JSX.Element {
-	const { children, className, size = 'medium', ...groupProps } = props;
-	const slots = inputGroupRecipe({ size });
+	const { children, className, size = 'medium', style, xstyle, ...groupProps } = props;
+	const recipeProps = resolveRecipeSlotProps(inputGroupRecipe, 'group', { size }, xstyle);
 
 	return (
 		<InputGroupSizeContext.Provider value={size}>
@@ -118,12 +121,7 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 			 * `Button` (`BUTTON_ICON_SIZE`) and the field controls (`FIELD_CONTROL_ICON_SIZE`).
 			 */}
 			<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-				<RacGroup
-					{...groupProps}
-					className={composeRenderProps(className, (value) => {
-						return slots.group(value);
-					})}
-				>
+				<RacGroup {...groupProps} {...composeRacRecipeProps(recipeProps, className, style)}>
 					{composeRenderProps(children, (renderedChildren, { isInvalid }) => {
 						return (
 							<>
@@ -131,7 +129,7 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 								{isInvalid ? (
 									<Icon
 										aria-hidden
-										className={slots.invalidIndicator()}
+										{...resolveRecipeSlotProps(inputGroupRecipe, 'invalidIndicator', { size })}
 										name="exclamationTriangle"
 									/>
 								) : null}
@@ -146,25 +144,27 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 
 /** The editable control inside an `InputGroup`. */
 export function InputGroupInput(props: InputGroupInputProps): JSX.Element {
-	const { className, size: sizeProp, ...inputProps } = props;
+	const { className, size: sizeProp, style, xstyle, ...inputProps } = props;
 	const size = useInputGroupSize(sizeProp);
+	const recipeProps = resolveRecipeSlotProps(inputGroupRecipe, 'control', { size }, xstyle);
 
-	return (
-		<RacInput
-			{...inputProps}
-			className={composeRenderProps(className, (value) => {
-				return inputGroupRecipe({ size }).control(value);
-			})}
-		/>
-	);
+	return <RacInput {...inputProps} {...composeRacRecipeProps(recipeProps, className, style)} />;
 }
 
 /** Content shown at the leading end of an `InputGroup`, such as a currency symbol. */
 export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
-	const { className, size: sizeProp, ...spanProps } = props;
+	const { className, size: sizeProp, style, xstyle, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={inputGroupRecipe({ size }).prefix(className)} />;
+	return (
+		<span
+			{...spanProps}
+			{...composeRecipeProps(resolveRecipeSlotProps(inputGroupRecipe, 'prefix', { size }, xstyle), {
+				className,
+				style,
+			})}
+		/>
+	);
 }
 
 /**
@@ -172,8 +172,16 @@ export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
  * always follows the group's own invalid indicator, whatever its document position.
  */
 export function InputGroupSuffix(props: InputGroupSuffixProps): JSX.Element {
-	const { className, size: sizeProp, ...spanProps } = props;
+	const { className, size: sizeProp, style, xstyle, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={inputGroupRecipe({ size }).suffix(className)} />;
+	return (
+		<span
+			{...spanProps}
+			{...composeRecipeProps(resolveRecipeSlotProps(inputGroupRecipe, 'suffix', { size }, xstyle), {
+				className,
+				style,
+			})}
+		/>
+	);
 }

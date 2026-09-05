@@ -1,11 +1,11 @@
-import { cx } from '../../shared/utils/utils.js';
-import type { TextProps } from '../text/text.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { Text } from '../text/text.js';
+import type { TextProps } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { strong } from './styles.css.js';
+import { styles } from './recipe.js';
 
-interface StrongStyleProps {
+interface StrongStyleProps extends XStyleProps {
 	/**
 	 * Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5.
 	 */
@@ -29,15 +29,16 @@ export type StrongProps = Prettify<_StrongProps>;
  * Composes `Text`, inherits surrounding typography, and applies the emphasis weight.
  */
 export function Strong(props: StrongProps) {
-	const { className, lineClamp, textWrap, ...elementProps } = props;
+	const { className, lineClamp, textWrap, xstyle, ...elementProps } = props;
 	return (
 		<Text
 			{...elementProps}
-			className={cx(strong, className)}
+			className={className}
 			elementType="strong"
 			lineClamp={lineClamp}
 			shouldInheritFont
 			textWrap={textWrap}
+			xstyle={[styles.root, xstyle]}
 		/>
 	);
 }

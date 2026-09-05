@@ -1,12 +1,15 @@
 import type { StyleRule } from '@vanilla-extract/css';
-import { fallbackVar, keyframes } from '@vanilla-extract/css';
-import { vars } from '../../theme/contract.css.js';
-import { globalStyleInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { globalKeyframes } from '@vanilla-extract/css';
+import { vars } from '../../theme/tokens.stylex.js';
+import { globalStyleInLayer } from '../styles/layered-style.css.js';
+import { attributeSelector } from '../styles/selectors.js';
+import {
+	loadingSkeletonScopeAttribute,
+	skeletonPulseAnimationName,
+	skeletonRadiusVar,
+} from './scope.js';
 
-/**
- * @internal
- */
-export const skeletonAnimationName = keyframes({
+globalKeyframes(skeletonPulseAnimationName, {
 	'0%': { filter: 'brightness(1)' },
 	'10%': { filter: 'brightness(1)' },
 	'50%': { filter: 'brightness(0.88)' },
@@ -14,13 +17,13 @@ export const skeletonAnimationName = keyframes({
 	'100%': { filter: 'brightness(1)' },
 });
 
-/** @internal */
-export const skeletonRadiusVar = '--luke-loading-skeleton-radius';
-
-// Forced onto every skeleton surface so an arbitrary wrapped component reads as a flat placeholder shape.
-// `!important` is deliberate: cascade layers alone can't beat consumers' un-layered or inline styles, and the
-// skeleton must always win over its children. The casts silence csstype on keyword-only properties, which don't
-// admit the `!important` suffix in their type.
+// Force a flat placeholder surface on the root and all block descendants. Keep these rules in the
+// direct `recipes` layer: a nested StyleX sublayer would outrank it for `!important` declarations,
+// while the direct layer must outrank consumer `overrides` and `utilities` declarations. The
+// stylesheet contract test rejects `!important` in `recipes.priorityN`.
+//
+// The casts silence csstype on keyword-only properties, which don't admit the `!important` suffix
+// in their type.
 const surface = {
 	backgroundClip: 'border-box !important',
 	backgroundColor: `${vars.color.loadingSkeleton} !important`,
@@ -46,7 +49,7 @@ const pulse = {
 	animationDelay: '0.5s',
 	animationDuration: '2s',
 	animationIterationCount: 'infinite',
-	animationName: skeletonAnimationName,
+	animationName: skeletonPulseAnimationName,
 	animationTimingFunction: vars.motion.easing.standard,
 	'@media': {
 		'(forced-colors: active)': {
@@ -60,26 +63,19 @@ const pulse = {
 	},
 } as const satisfies StyleRule;
 
-/** Vanilla-extract class for the `LoadingSkeleton` component's styles. */
-export const loadingSkeletonClassName = styleInLayer('recipes', {
-	selectors: {
-		// Inline mode: the element itself is the skeleton (used when wrapping text).
-		'&[data-skeleton-inline]': {
-			...surface,
-			...pulse,
-			borderRadius: fallbackVar(`var(${skeletonRadiusVar})`, vars.radius.detail),
-		},
-		// Block mode: the wrapper is invisible; skeleton styles apply to its direct children.
-		'&:not([data-skeleton-inline])': {
-			display: 'contents',
-		},
-	},
-});
+const scopeSelector = attributeSelector(loadingSkeletonScopeAttribute);
+const inlineRoot = `${scopeSelector}[data-skeleton-inline]`;
+const blockChild = `${scopeSelector}:not([data-skeleton-inline]) > *`;
+
+// Inline mode (wrapping text or other non-element children): the scope attribute's own element is
+// the surface. `borderRadius` and `display` stay in StyleX (`loading-skeleton.tsx`) — ordinary,
+// non-`!important` styling with no need to out-rank consumer or descendant CSS.
+globalStyleInLayer('recipes', inlineRoot, { ...surface, ...pulse });
 
 // The child's own background is forced flat and pulses in sync with the `::after` overlay below,
 // so at a rounded corner its square edge would otherwise show through the overlay's rounded
 // recess. Give it the same radius so both surfaces agree on the visible shape.
-globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > *`, {
+globalStyleInLayer('recipes', blockChild, {
 	...surface,
 	...pulse,
 	borderRadius: `var(${skeletonRadiusVar}, 0px)`,
@@ -87,7 +83,7 @@ globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton
 	position: 'relative !important' as 'relative',
 });
 
-globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > * *`, {
+globalStyleInLayer('recipes', `${blockChild} *`, {
 	'@media': {
 		'(forced-colors: active)': forcedColorsSurface,
 	},
@@ -96,15 +92,11 @@ globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton
 
 // A pseudo-element painted over the child covers visuals the forced styles can't reach (nested backgrounds,
 // rounded corners); `inset: -1px` also covers the child's border box edges.
-globalStyleInLayer(
-	'structural',
-	`${loadingSkeletonClassName}:not([data-skeleton-inline]) > *::after`,
-	{
-		...surface,
-		...pulse,
-		borderRadius: `var(${skeletonRadiusVar}, 0px)`,
-		content: '""',
-		inset: '-1px',
-		position: 'absolute',
-	},
-);
+globalStyleInLayer('recipes', `${blockChild}::after`, {
+	...surface,
+	...pulse,
+	borderRadius: `var(${skeletonRadiusVar}, 0px)`,
+	content: '""',
+	inset: '-1px',
+	position: 'absolute',
+});

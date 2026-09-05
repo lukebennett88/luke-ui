@@ -3,7 +3,7 @@ import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Prose } from './prose.js';
-import { proseRecipe } from './recipe.css.js';
+import { proseRecipe } from './recipe.js';
 
 testConformance({
 	path: 'prose',
@@ -110,11 +110,31 @@ test('keeps typed ordered lists markerless outside Prose', () => {
 	expect(listStyleTypes(container)).toEqual(['none', 'none', 'none', 'none', 'none']);
 });
 
+// A consumer's own generic `class="prose"` (e.g. a Tailwind Typography convention) must not pick
+// up Luke UI's rhythm rules. The scope class is the private, namespaced `luke-ui-prose` literal
+// (`lukeUiClassNames.proseScope`), not the collision-prone `prose` — this fails if that regresses.
+test('does not apply Prose rhythm to an unrelated element literally classed "prose"', () => {
+	const { locator: unrelated } = render(
+		<div className="prose">
+			<p>Paragraph.</p>
+			<h2>Section</h2>
+		</div>,
+	);
+	const unrelatedRoot = unrelated.element();
+	const unrelatedGap = gapBetween(query(unrelatedRoot, 'p'), query(unrelatedRoot, 'h2'));
+
+	// Proves the assertion isn't vacuous: the same markup under a real `<Prose>` does get the gap.
+	const proseGap = renderSection();
+
+	expect(unrelatedGap).toBeCloseTo(0, 0);
+	expect(proseGap).toBeGreaterThan(0);
+});
+
 // Chromium and Safari match `type` case-insensitively, so CSS must not restate A/a or I/i.
 // `proseRecipe` is public, so the scope must ride the recipe class, not the component.
 test('preserves native ordered-list type markers under proseRecipe alone', () => {
 	const { locator } = render(
-		<div className={proseRecipe()}>
+		<div {...proseRecipe()}>
 			<ol type="1">
 				<li>1</li>
 			</ol>

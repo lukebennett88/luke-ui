@@ -1,10 +1,6 @@
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { transformAsync } from '@babel/core';
-import type { FileResult } from '@babel/core';
 import { makeIdFiltersToMatchWithQuery } from '@rolldown/pluginutils';
-import stylexBabelPlugin from '@stylexjs/babel-plugin';
-import type { Rule } from '@stylexjs/babel-plugin';
 import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
 import { readdir, rm } from 'node:fs/promises';
@@ -12,11 +8,12 @@ import { transformSync } from 'oxc-transform-react';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
+import {
+	createStylexEsbuildPlugin,
+	createStylexPackPlugin,
+	workspaceRoot,
+} from './stylex-vite-plugin.js';
 
-const recipeEngineSource = fileURLToPath(
-	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
-);
-const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const distDir = fileURLToPath(new URL('dist/', import.meta.url));
 const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
 const assetExports = [
@@ -26,41 +23,6 @@ const assetExports = [
 	'./themes/paper/stylesheet.css',
 ];
 
-const stylexLayerConfig = {
-	before: ['reset', 'theme'],
-	after: ['recipes', 'structural', 'utilities'],
-	prefix: 'luke.sx',
-} as const;
-
-function buildAuthoritativeLayerOrder(priorityLayers: Array<string>): string {
-	return `@layer ${[...stylexLayerConfig.before, ...priorityLayers, ...stylexLayerConfig.after].join(', ')};`;
-}
-
-function stripRedundantEmptyLayerStatements(css: string): string {
-	return css.replace(/^@layer [^,{]+;\n/gm, '');
-}
-
-function splitStylexLayerHeader(stylexCss: string): {
-	authoritativeLayerOrder: string;
-	stylexBody: string;
-} {
-	const match = stylexCss.match(/^\n?@layer ([^;]+);/);
-	if (match == null || match[1] == null) {
-		throw new Error('Expected StyleX to emit a combined cascade-layer order statement.');
-	}
-
-	const priorityLayers = match[1].split(',').flatMap((layer) => {
-		const name = layer.trim();
-		if (!name.startsWith(`${stylexLayerConfig.prefix}.priority`)) return [];
-		return [name];
-	});
-
-	return {
-		authoritativeLayerOrder: buildAuthoritativeLayerOrder(priorityLayers),
-		stylexBody: stylexCss.slice(match[0].length).replace(/^\n/, ''),
-	};
-}
-
 /** Any JS or TS module the React Compiler can read, including `.mjs`/`.cts` variants. */
 const sourceModule = /\.[cm]?[jt]sx?$/;
 /** Vanilla Extract compiles these to plain style declarations before the plugin sees them. */
@@ -69,11 +31,6 @@ const dependency = /\/node_modules\//;
 
 export default defineConfig({
 	pack: {
-		alias: {
-			// Vanilla Extract serializes recipes to `#recipe-engine`; resolve it to source so pack
-			// can bundle a relative runtime chunk.
-			'#recipe-engine': recipeEngineSource,
-		},
 		attw: {
 			// Exclude static asset exports. CSS/SVG files do not need type definitions.
 			excludeEntrypoints: assetExports,
@@ -86,7 +43,6 @@ export default defineConfig({
 		dts: true,
 		entry: {
 			stylesheet: 'src/core/stylesheet.css.ts',
-			'stylex-bundle': 'src/core/styles/stylex-bundle.ts',
 			'*': ['src/exports/*.ts'],
 			'primitives/*': ['src/exports/primitives/*.ts'],
 			'themes/*': ['src/exports/themes/*.ts'],
@@ -95,8 +51,8 @@ export default defineConfig({
 			customExports: Object.fromEntries(
 				assetExports.map((path) => [path, `./dist/${path.slice(2)}`]),
 			),
-			// Built for extraction; not consumer subpaths.
-			exclude: ['stylesheet', 'stylex-bundle'],
+			// Built for extraction; not a consumer subpath.
+			exclude: ['stylesheet'],
 		},
 		format: ['esm'],
 		hooks: {
@@ -109,12 +65,13 @@ export default defineConfig({
 		plugins: [
 			vanillaExtractPlugin({
 				cwd: workspaceRoot,
+				esbuildOptions: { plugins: [createStylexEsbuildPlugin()] },
 				extract: { name: 'stylesheet.css', sourcemap: true },
 				identifiers: 'short',
 			}),
 			// StyleX runs before the React Compiler: it needs the original `stylex.create` calls,
 			// which the compiler's output would have already rewritten past recognition.
-			stylexPlugin(),
+			createStylexPackPlugin(),
 			reactCompilerPlugin(),
 			// @ts-expect-error Vite plugin compatibility
 			react({ fastRefresh: true }),
@@ -123,113 +80,6 @@ export default defineConfig({
 		sourcemap: true,
 	},
 });
-
-function stylexPlugin(): Plugin {
-	let stylexRules = new Map<string, Array<Rule>>();
-
-	return {
-		name: 'stylex',
-		buildStart() {
-			stylexRules = new Map();
-		},
-		shouldTransformCachedModule({ id, meta }) {
-			// A watch rebuild skips `transform` for unchanged modules, so their rules have to be
-			// read back off the cached metadata or they vanish from the stylesheet.
-			const { stylex } = meta as { stylex?: Array<Rule> };
-			if (stylex !== undefined) stylexRules.set(id, stylex);
-			return false;
-		},
-		async transform(code, id) {
-			// Cheap gate: parsing every module through Babel to find the few that use StyleX
-			// would roughly double build time.
-			if (id.endsWith('.d.ts') || !code.includes('@stylexjs/stylex')) return null;
-
-			const filename = id.split('?')[0] ?? id;
-
-			const result = await transformAsync(code, {
-				babelrc: false,
-				configFile: false,
-				filename,
-				parserOpts: {
-					plugins:
-						filename.endsWith('.tsx') || filename.endsWith('.jsx')
-							? ['typescript', 'jsx']
-							: ['typescript'],
-				},
-				plugins: [
-					stylexBabelPlugin.withOptions({
-						dev: false,
-						unstable_moduleResolution: { type: 'commonJS', rootDir: workspaceRoot },
-					}),
-				],
-				sourceMaps: true,
-			});
-
-			if (result?.code == null) {
-				throw new Error(
-					`StyleX could not compile ${filename}. Every \`stylex\` declaration must be statically extractable.`,
-				);
-			}
-
-			const meta = result.metadata as { stylex?: Array<Rule> };
-
-			// Drop the entry when a module stops producing rules, so a watch rebuild replaces its
-			// contribution instead of leaving the previous rules stranded in the map.
-			if (meta.stylex === undefined) stylexRules.delete(id);
-			else stylexRules.set(id, meta.stylex);
-
-			return { code: result.code, map: toRolldownSourceMap(result.map), meta };
-		},
-		generateBundle(_options, bundle) {
-			const stylesheet = bundle['stylesheet.css'];
-			if (stylesheet?.type !== 'asset') return;
-
-			const rules = [...stylexRules.values()].flat();
-			const vanillaCss = stripRedundantEmptyLayerStatements(stylesheet.source.toString());
-
-			if (rules.length === 0) {
-				stylesheet.source = `${buildAuthoritativeLayerOrder([])}\n${vanillaCss}`;
-				return;
-			}
-
-			const stylexCss = stylexBabelPlugin.processStylexRules(rules, {
-				useLayers: stylexLayerConfig,
-			});
-			const { authoritativeLayerOrder, stylexBody } = splitStylexLayerHeader(stylexCss);
-
-			stylesheet.source = `${authoritativeLayerOrder}\n${vanillaCss}\n/* stylex */\n${stylexBody}`;
-		},
-	};
-}
-
-/**
- * `Plugin['transform']` is an `ObjectHook`, i.e. the handler function or an object wrapping it;
- * this pulls out the function form so its return type's `map` field can be reused below. `vite-plus`
- * exports an unrelated dev-server `TransformResult` under the same name, so it can't be imported directly.
- */
-type TransformHandler = Extract<NonNullable<Plugin['transform']>, (...args: never) => unknown>;
-type TransformHookResult = Awaited<ReturnType<TransformHandler>>;
-type TransformSourceMap = Exclude<TransformHookResult, string | null | undefined | void>['map'];
-
-/**
- * Babel's sourcemap types its array fields as `readonly` and names the ignore-list field
- * differently, neither of which rolldown's `ExistingRawSourceMap` accepts; copy the fields
- * across into that shape with plain mutable arrays.
- */
-function toRolldownSourceMap(map: FileResult['map']): TransformSourceMap {
-	if (map === null) return null;
-
-	return {
-		file: map.file,
-		mappings: map.mappings,
-		names: [...map.names],
-		sourceRoot: map.sourceRoot,
-		sources: [...map.sources],
-		sourcesContent: map.sourcesContent === undefined ? undefined : [...map.sourcesContent],
-		version: map.version,
-		x_google_ignoreList: map.ignoreList === undefined ? undefined : [...map.ignoreList],
-	};
-}
 
 function reactCompilerPlugin(): Plugin {
 	return {

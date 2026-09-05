@@ -87,7 +87,7 @@ function PageActionLink({
 }) {
 	return (
 		<Link
-			className={buttonRecipe(buttonAppearanceOptions)}
+			{...buttonRecipe(buttonAppearanceOptions)}
 			href={href}
 			rel="noreferrer noopener"
 			target="_blank"

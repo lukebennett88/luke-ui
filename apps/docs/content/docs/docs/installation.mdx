@@ -38,6 +38,38 @@ treatment. Switch which theme stylesheet you import to change the theme.
 Set `data-color-mode="light"` or `data-color-mode="dark"` on a themed element when the application
 must use a specific mode. Without it, Luke UI follows the system preference.
 
+## Optional: set up `xstyle`
+
+Skip this step if you never override a component style beyond its supported props.
+
+If you use `xstyle`, install StyleX and the Luke UI Vite plugin:
+
+```bash
+pnpm add @stylexjs/stylex
+pnpm add -D @luke-ui/vite
+```
+
+Add the plugin to your Vite config:
+
+```ts
+import { lukeUi } from '@luke-ui/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+	plugins: [lukeUi()],
+});
+```
+
+Import `@luke-ui/vite/stylesheet.css` before the Luke UI stylesheet:
+
+```ts
+import '@luke-ui/vite/stylesheet.css';
+import '@luke-ui/react/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
+```
+
+Read [Styling](/docs/styling) for how to use `xstyle`.
+
 ## Continue learning
 
 <Cards>

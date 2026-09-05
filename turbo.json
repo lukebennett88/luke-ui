@@ -48,6 +48,7 @@
 				"check:lint",
 				"check:llms",
 				"check:story-plays",
+				"check:style-composition",
 				"check:test-suffixes",
 				"check:types"
 			]
@@ -62,7 +63,9 @@
 				"$TURBO_ROOT$/docs/**",
 				"$TURBO_ROOT$/packages/@luke-ui/react/package.json",
 				"$TURBO_ROOT$/packages/@luke-ui/react/src/**/*.ts",
-				"$TURBO_ROOT$/packages/@luke-ui/react/src/**/*.tsx"
+				"$TURBO_ROOT$/packages/@luke-ui/react/src/**/*.tsx",
+				"$TURBO_ROOT$/packages/@luke-ui/vite/package.json",
+				"$TURBO_ROOT$/packages/@luke-ui/vite/src/**/*.ts"
 			]
 		},
 		"check:format": {
@@ -73,6 +76,9 @@
 		},
 		"check:llms": {},
 		"check:story-plays": {
+			"dependsOn": ["generate"]
+		},
+		"check:style-composition": {
 			"dependsOn": ["generate"]
 		},
 		"check:test-suffixes": {

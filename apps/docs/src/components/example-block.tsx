@@ -56,7 +56,7 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 				<Box className="flex items-center gap-1">
 					{highlightedSource.playgroundHash != null ? (
 						<DocsLink
-							className={buttonRecipe({ appearance: 'ghost', size: 'small' })}
+							{...buttonRecipe({ appearance: 'ghost', size: 'small' })}
 							hash={highlightedSource.playgroundHash}
 							target="_blank"
 							to="/playground"
@@ -174,7 +174,7 @@ function ExampleLoadingActions() {
 	return (
 		<Box aria-hidden className="flex items-center gap-1" inert>
 			<LoadingSkeleton radius="control">
-				<span className={buttonRecipe({ appearance: 'ghost', size: 'small' })}>
+				<span {...buttonRecipe({ appearance: 'ghost', size: 'small' })}>
 					<Icon aria-hidden className="size-4" name="externalLink" />
 					Open in playground
 				</span>

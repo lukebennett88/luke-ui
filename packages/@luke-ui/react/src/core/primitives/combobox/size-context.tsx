@@ -1,6 +1,6 @@
 import type { JSX, ReactNode } from 'react';
 import { createContext, use } from 'react';
-import type { ComboboxSize } from './root.js';
+import type { ComboboxSize } from './recipe.js';
 
 const ComboboxSizeContext = createContext<ComboboxSize | null>(null);
 

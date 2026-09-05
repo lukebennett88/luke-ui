@@ -1,15 +1,17 @@
 import type { JSX, Ref } from 'react';
 import type { PopoverProps as RacPopoverProps } from 'react-aria-components/ComboBox';
 import { Popover as RacPopover } from 'react-aria-components/ComboBox';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { cx } from '../../../shared/utils/utils.js';
 import { rootClassName } from '../../../theme/theme.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { comboboxRecipe } from './styles.css.js';
+import { comboboxRecipe } from './recipe.js';
 
 type _ComboboxPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;
-interface _ComboboxPopoverProps extends _ComboboxPopoverOmit {
+interface _ComboboxPopoverProps extends _ComboboxPopoverOmit, XStyleProps {
 	/** Forwarded to the popover's DOM element. */
 	ref?: Ref<HTMLElement>;
 }
@@ -23,14 +25,18 @@ export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
  * mode scoped below `<html>` does not reach the portal.
  */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
-	const { ref, ...restProps } = props;
+	const { className, ref, style, xstyle, ...restProps } = props;
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'popover', undefined, xstyle);
+	const racProps = composeRacRecipeProps(recipeProps, className, style);
 
 	return (
 		<RacPopover
 			{...restProps}
-			className={composeRenderProps(restProps.className, (className) => {
-				return cx(rootClassName, comboboxRecipe().popover(className));
-			})}
+			{...racProps}
+			// The portal renders outside the themed subtree, so it carries the theme root class
+			// itself. It leads the class list because it sets inherited values the popover's own
+			// styles then override, and it takes no part in the `xstyle` precedence chain.
+			className={(renderProps) => cx(rootClassName, racProps.className(renderProps))}
 			ref={ref}
 		/>
 	);

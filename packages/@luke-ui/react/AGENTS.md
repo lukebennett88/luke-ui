@@ -1,17 +1,14 @@
 # @luke-ui/react agent guide
 
 - Do not hand-edit `.generated/entries.ts` or `package.json#exports`. `vp pack` generates entries
-  and updates exports during build. The `stylesheet` and `stylex-bundle` build entries are excluded
-  from the public export map via `exports.exclude` in `vite.config.ts`. Vanilla Extract serializes
-  recipes to `#recipe-engine`; pack, Vitest, Storybook, and the docs app alias that specifier to
-  `src/core/styles/recipe-engine.ts`. Pack then bundles a relative runtime chunk. The specifier is
-  not a public package subpath.
+  and updates exports during build. The `stylesheet` build entry is excluded from the public export
+  map via `exports.exclude` in `vite.config.ts`.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
-  files by hand. The generator updates the style-module registry, conformance manifest, and docs
-  wiring.
+  files by hand. The generator scaffolds the component, its StyleX recipe, and public export module,
+  and updates the conformance manifest and docs wiring.
 - When adding a primitive, use `pnpm generate:primitive` from the repo root. Do not create primitive
-  files by hand. The generator updates the style-module registry, conformance manifest, and public
-  export module.
+  files by hand. The generator scaffolds the primitive, its StyleX recipe, and public export module,
+  and updates the conformance manifest.
 - Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests. It is
   the only normative testing guide. Component tests use the shared browser renderer; stories are
   documentation and render/a11y fixtures, not assertion files.
@@ -42,8 +39,11 @@ files. A component directory contains:
 - `[component].browser.test.tsx`: component behaviour, conformance, and the integration tripwire
 - `[component].visual.test.tsx`: visual regression captures when the component has a visual surface
 - `<component>.tsx`: component implementation
-- `recipe.css.ts`: public recipe contract (scaffolded by the generator)
-- `styles.css.ts`: private implementation styling when needed
+- `recipe.ts`: public StyleX recipe contract (scaffolded by the generator). Not `recipe.css.ts`: the
+  build routes every `.css.ts` module to the Vanilla Extract plugin and excludes it from the React
+  Compiler pass, so a StyleX module under that name reaches the wrong compiler.
+- `styles.css.ts`: private Vanilla Extract structural styling when a combinator or descendant
+  selector cannot live in StyleX
 
 Lower-level composition APIs live under `src/core/primitives/*` and export from
 `@luke-ui/react/primitives/*`. See [`docs/COMPONENTS.md`](../../docs/COMPONENTS.md).

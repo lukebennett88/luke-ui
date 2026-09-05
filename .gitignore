@@ -24,3 +24,6 @@ packages/@luke-ui/react/src/generated/icons.tsx
 public/dist/
 server/dist/
 storybook-static/
+
+# Local execution handoffs and drafts, not tracked.
+plans/

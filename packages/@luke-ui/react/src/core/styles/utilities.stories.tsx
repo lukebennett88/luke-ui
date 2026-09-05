@@ -1,6 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { createSprinkles } from '@luke-ui/react/styles';
-import { mergeProps } from '@luke-ui/react/utils';
+import { mergeStyleProps } from '@luke-ui/react/utils';
 import type { CSSProperties } from 'react';
 import preview from '../../../.storybook/preview.js';
 import { vars } from '../../theme/index.js';
@@ -34,10 +34,10 @@ export const Layout = meta.story({
 			gap: 'sp12',
 		});
 		return (
-			<div {...mergeProps({ style: panelStyle }, container)}>
+			<div {...mergeStyleProps({ style: panelStyle }, container)}>
 				<div {...row}>
 					<div
-						{...mergeProps(
+						{...mergeStyleProps(
 							{ style: { background: vars.color.surface.recessed } },
 							createSprinkles({ inlineSize: '100%', minInlineSize: '0', padding: 'sp16' }),
 						)}
@@ -45,7 +45,7 @@ export const Layout = meta.story({
 						Row item 1
 					</div>
 					<div
-						{...mergeProps(
+						{...mergeStyleProps(
 							{ style: { background: vars.color.surface.recessed } },
 							createSprinkles({ flexGrow: '1', padding: 'sp16' }),
 						)}
@@ -72,7 +72,7 @@ export const Responsive = meta.story({
 			padding: { initial: 'sp12', bp1024: 'sp32' },
 		});
 		return (
-			<div {...mergeProps({ style: panelStyle }, responsive)}>
+			<div {...mergeStyleProps({ style: panelStyle }, responsive)}>
 				<div
 					style={{
 						background: vars.color.surface.recessed,
@@ -97,20 +97,20 @@ export const Responsive = meta.story({
 /**
  * Combine `createSprinkles` with React Aria Components' `render` prop to style the
  * underlying DOM element while preserving its behaviour and accessibility.
- * Use `mergeProps` to merge the provided DOM props with `createSprinkles()` output.
+ * Use `mergeStyleProps` to merge the provided DOM props with `createSprinkles()` output.
  */
 export const WithRenderProp = meta.story({
 	render: () => {
 		const buttonBox = createSprinkles({
 			padding: 'sp16',
 		});
-		const customStyle = mergeProps(buttonBox, {
+		const customStyle = mergeStyleProps(buttonBox, {
 			style: { backgroundColor: vars.color.background.accent.solid.rest },
 		});
 		return (
 			<Button
 				render={(props) => (
-					<button {...mergeProps(props, customStyle)} type="button">
+					<button {...mergeStyleProps(props, customStyle)} type="button">
 						Button with createSprinkles utilities
 					</button>
 				)}
@@ -134,7 +134,7 @@ export const OverflowAndSizing = meta.story({
 			minInlineSize: '0',
 			overflowX: 'hidden',
 		});
-		const truncateText = mergeProps(truncate, {
+		const truncateText = mergeStyleProps(truncate, {
 			style: { textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
 		});
 		return (

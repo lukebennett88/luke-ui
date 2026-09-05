@@ -1,12 +1,15 @@
 import type { ComponentProps, JSX } from 'react';
-import { fieldRecipe } from './recipe.css';
+import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRecipeProps } from '../../styles/xstyle.js';
+import { fieldRecipe } from './recipe.js';
 
 /** Props for the primitive field container. */
-type FieldProps = ComponentProps<'div'>;
+export type FieldRootProps = ComponentProps<'div'> & XStyleProps;
 
 /** Simple wrapper used by field primitives. */
-export function Field(props: FieldProps): JSX.Element {
-	const { className, ...restProps } = props;
+export function Field(props: FieldRootProps): JSX.Element {
+	const { className, style, xstyle, ...restProps } = props;
+	const recipeProps = fieldRecipe({ xstyle: { root: xstyle } }).root;
 
-	return <div {...restProps} className={fieldRecipe().root(className)} />;
+	return <div {...restProps} {...composeRecipeProps(recipeProps, { className, style })} />;
 }

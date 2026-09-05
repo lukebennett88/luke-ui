@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const generatorName = process.argv[2];
 if (generatorName !== 'component' && generatorName !== 'primitive') {
+	// oxlint-disable-next-line no-console
 	console.error('Usage: tsx scripts/generate.ts <component|primitive> [turbo args...]');
 	process.exit(1);
 }

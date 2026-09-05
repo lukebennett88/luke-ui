@@ -3,6 +3,9 @@
 import '../dist/themes/paper/stylesheet.css';
 import '../dist/themes/tactile/stylesheet.css';
 import '@luke-ui/react/stylesheet.css';
+// Loads StyleX rules collected from the modules the dev build has transformed so far. The
+// `stylex-dev` Vite plugin (`../stylex-vite-plugin.ts`, wired in `.storybook/main.ts`) serves it.
+import 'virtual:luke-stylex.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { rootClassName, vars } from '@luke-ui/react/theme';

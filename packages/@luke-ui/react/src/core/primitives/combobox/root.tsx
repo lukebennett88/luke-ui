@@ -1,12 +1,14 @@
 import type { JSX, Ref } from 'react';
 import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import type { ComboboxSize } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 import { ComboboxSizeProvider } from './size-context.js';
-import type { ComboboxSize } from './styles.css.js';
-import { comboboxRecipe } from './styles.css.js';
 
 export type { ComboboxSize };
 
@@ -49,7 +51,7 @@ type _ComboboxRootOmit<T extends object> = DistributiveOmit<
 >;
 
 interface _ComboboxRootProps<T extends object>
-	extends _ComboboxRootOmit<T>, ComboboxRootRedeclaredRACProps<T> {
+	extends _ComboboxRootOmit<T>, ComboboxRootRedeclaredRACProps<T>, XStyleProps {
 	/** The initially selected key (uncontrolled). */
 	defaultValue?: Key | null;
 
@@ -77,15 +79,22 @@ interface _ComboboxRootProps<T extends object>
 export type ComboboxRootProps<T extends object> = Prettify<_ComboboxRootProps<T>>;
 
 export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
-	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
+	const {
+		className,
+		menuTrigger = 'focus',
+		ref,
+		size = 'medium',
+		style,
+		xstyle,
+		...comboboxProps
+	} = props;
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'root', { size }, xstyle);
 
 	return (
 		<ComboboxSizeProvider size={size}>
 			<RacComboBox
 				{...comboboxProps}
-				className={composeRenderProps(className, (renderedClassName) => {
-					return comboboxRecipe().root(renderedClassName);
-				})}
+				{...composeRacRecipeProps(recipeProps, className, style)}
 				menuTrigger={menuTrigger}
 				ref={ref}
 			/>

@@ -1,11 +1,11 @@
-import { cx } from '../../shared/utils/utils.js';
-import type { TextProps } from '../text/text.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import { Text } from '../text/text.js';
+import type { TextProps } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { em } from './styles.css.js';
+import { styles } from './recipe.js';
 
-interface EmStyleProps {
+interface EmStyleProps extends XStyleProps {
 	/**
 	 * Clamps text lines. `true` clamps to 1 line; numeric values clamp to 1–5.
 	 */
@@ -29,15 +29,16 @@ export type EmProps = Prettify<_EmProps>;
  * Composes `Text`, inherits surrounding typography, and applies italic styling.
  */
 export function Em(props: EmProps) {
-	const { className, lineClamp, textWrap, ...elementProps } = props;
+	const { className, lineClamp, textWrap, xstyle, ...elementProps } = props;
 	return (
 		<Text
 			{...elementProps}
-			className={cx(em, className)}
+			className={className}
 			elementType="em"
 			lineClamp={lineClamp}
 			shouldInheritFont
 			textWrap={textWrap}
+			xstyle={[styles.root, xstyle]}
 		/>
 	);
 }

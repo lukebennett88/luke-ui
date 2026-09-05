@@ -2,6 +2,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineMain } from '@storybook/react-vite/node';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
+import { createStylexDevPlugin, stylexVanillaExtractPluginFilter } from '../stylex-vite-plugin.js';
 
 function getAbsolutePath(value: string) {
 	return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
@@ -30,14 +31,14 @@ export default defineMain({
 	// directly. Without this, Storybook reads the prebuilt `dist/` and won't pick
 	// up changes until the dev server is restarted.
 	viteFinal(config) {
-		config.plugins = [...(config.plugins ?? []), ...vanillaExtractPlugin()];
+		config.plugins = [
+			...(config.plugins ?? []),
+			...vanillaExtractPlugin({ unstable_pluginFilter: stylexVanillaExtractPluginFilter }),
+			createStylexDevPlugin(),
+		];
 		config.resolve ??= {};
 		const existingAliases = Array.isArray(config.resolve.alias) ? config.resolve.alias : [];
 		config.resolve.alias = [
-			{
-				find: '#recipe-engine',
-				replacement: resolve(srcDir, 'core/styles/recipe-engine.ts'),
-			},
 			{
 				find: /^@luke-ui\/react\/spritesheet\.svg(\?.*)?$/,
 				replacement: `${resolve(distDir, 'spritesheet.svg')}$1`,

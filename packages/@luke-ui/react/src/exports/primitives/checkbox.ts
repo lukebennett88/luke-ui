@@ -11,4 +11,4 @@ export {
 export {
 	type CheckboxRecipeVariants,
 	checkboxRecipe,
-} from '../../core/primitives/checkbox/recipe.css.js';
+} from '../../core/primitives/checkbox/recipe.js';

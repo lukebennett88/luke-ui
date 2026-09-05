@@ -3,18 +3,21 @@ import { Collection } from 'react-aria-components/Collection';
 import type { ListBoxProps as RacListBoxProps } from 'react-aria-components/ComboBox';
 import { ListBox as RacListBox } from 'react-aria-components/ComboBox';
 import { ListBoxContext } from 'react-aria-components/ListBox';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
+import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { comboboxRecipe } from './styles.css.js';
+import { useComboboxPresentation } from './presentation-context.js';
+import { comboboxRecipe } from './recipe.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	RacListBoxProps<T>,
 	'dependencies' | 'items'
 >;
 
-interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T> {
+interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T>, XStyleProps {
 	/** Item content for the listbox (render prop or static children). */
 	children?: RacListBoxProps<T>['children'];
 	/** Values that should invalidate the dynamic item cache. */
@@ -30,9 +33,11 @@ export type ComboboxListBoxProps<T extends object> = Prettify<_ComboboxListBoxPr
 
 /** Styled listbox for combobox options. */
 export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>): JSX.Element {
-	const { children, dependencies, items, loadMoreItem, ...listBoxProps } = props;
+	const { children, dependencies, items, loadMoreItem, style, xstyle, ...listBoxProps } = props;
 	const listBoxContext = useSlottedContext(ListBoxContext);
 	const collectionItems = items ?? listBoxContext?.items;
+	const presentation = useComboboxPresentation();
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'listBox', { presentation }, xstyle);
 	const listBoxChildren =
 		typeof children === 'function' ? (
 			<Collection<T> dependencies={dependencies} items={collectionItems}>
@@ -45,9 +50,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 	return (
 		<RacListBox
 			{...listBoxProps}
-			className={composeRenderProps(listBoxProps.className, (className) => {
-				return comboboxRecipe().listBox(className);
-			})}
+			{...composeRacRecipeProps(recipeProps, listBoxProps.className, style)}
 		>
 			{listBoxChildren}
 			{loadMoreItem}

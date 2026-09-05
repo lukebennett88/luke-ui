@@ -1,17 +1,19 @@
 import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
+import type { XStyleProps } from '../styles/xstyle.js';
+import { composeRecipeProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
-import { visuallyHiddenRecipe } from './recipe.css.js';
+import { visuallyHiddenRecipe } from './recipe.js';
 
 type _VisuallyHiddenOmit = DistributiveOmit<
 	ComponentPropsWithRef<typeof RacText>,
 	keyof DocumentedElementTypeProps
 >;
 
-interface _VisuallyHiddenProps extends _VisuallyHiddenOmit, DocumentedElementTypeProps {}
+interface _VisuallyHiddenProps
+	extends _VisuallyHiddenOmit, DocumentedElementTypeProps, XStyleProps {}
 
 /** Props for `VisuallyHidden`. */
 export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
@@ -29,6 +31,8 @@ export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
  * (for example `elementType="h2"` for a screen-reader-only section heading).
  */
 export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
-	const { className, ...racProps } = props;
-	return <RacText {...racProps} className={cx(visuallyHiddenRecipe(), className)} />;
+	const { className, style, xstyle, ...racProps } = props;
+	const recipeProps = visuallyHiddenRecipe({ xstyle });
+
+	return <RacText {...racProps} {...composeRecipeProps(recipeProps, { className, style })} />;
 }

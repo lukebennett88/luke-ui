@@ -38,6 +38,49 @@ defines its type and spacing scale in source.
 
 <SourceCodeBlock src="styling/component-props" />
 
+### Override a single property with `xstyle`
+
+Use `xstyle` when a component does not expose a prop for the CSS property you need.
+
+```tsx
+import * as stylex from '@stylexjs/stylex';
+import { Button } from '@luke-ui/react/button';
+
+const styles = stylex.create({
+	button: {
+		inlineSize: '100%',
+	},
+});
+
+<Button xstyle={styles.button}>Save</Button>;
+```
+
+Set up StyleX and `@luke-ui/vite` once. Read
+[Installation](/docs/installation#optional-set-up-xstyle) for that setup. Skip it if you never use
+`xstyle`.
+
+`xstyle` targets the component's public presentation element, not its internal DOM. A component with
+more than one styled part exposes a separate target per part, and its own guide names which part
+receives `xstyle`.
+
+### Understand override priority
+
+Styles resolve from lowest priority to highest:
+
+1. component recipe defaults and variants
+2. `xstyle`
+3. application CSS in `utilities`, or ordinary unlayered application CSS
+4. inline `style`
+
+`xstyle` replaces a same-property recipe value. One current exception: a `padding` or
+`paddingInline` value in `xstyle` does not replace a component's `paddingInlineStart` or
+`paddingInlineEnd` — override those with the same logical property instead. This is an upstream
+StyleX limitation specific to inline padding. The `margin`, `inset`, `borderWidth`, and
+`borderRadius` shorthands all replace their logical longhands as expected. Application styles in a
+higher layer, or normal unlayered application CSS, can override `xstyle`. A class authored in a
+lower-priority layer such as `base` still loses. For normal declarations, inline `style` wins over
+class-based styling. An author `!important` declaration can override a normal inline style.
+
 ### Apply a component recipe
 
 Import a recipe when you own the element and need that component's visual treatment. Use the
@@ -51,23 +94,39 @@ type is the component in Pascal case plus `RecipeVariants`.
 
 <ExampleBlock src="styling/button-recipe" title="Styling — Apply a component recipe" />
 
-A single-part recipe such as `buttonRecipe` returns one class string. Pass the same variant names
-the component accepts.
+A single-part recipe such as `buttonRecipe` returns spreadable element props (`className`, `style`,
+and `data-style-src`, mirroring `stylex.props(...)`), not a bare class string. Pass the same variant
+names the component accepts, then spread the result onto the element.
 
 ```tsx
 import { buttonRecipe, type ButtonRecipeVariants } from '@luke-ui/react/button';
 
 const variants: ButtonRecipeVariants = { appearance: 'subtle', tone: 'neutral' };
-const className = buttonRecipe(variants);
+const props = buttonRecipe(variants);
 ```
 
-A slotted recipe such as `inputGroupRecipe` returns one function per part. Call the part you are
-styling.
+A slotted recipe such as `inputGroupRecipe` returns one props object per part. Spread the part you
+are styling.
 
 ```tsx
 import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
 
 const { group, control } = inputGroupRecipe({ size: 'medium' });
+```
+
+Pass a partial slot map to `xstyle` when only one part needs an override.
+
+```tsx
+import * as stylex from '@stylexjs/stylex';
+import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
+
+const styles = stylex.create({ prefix: { color: 'rebeccapurple' } });
+const props = inputGroupRecipe({ xstyle: { prefix: styles.prefix } });
+return (
+	<div {...props.group}>
+		<span {...props.prefix}>Name</span>
+	</div>
+);
 ```
 
 Do not import a recipe to restyle a Luke UI component from the outside. Use the component's props
@@ -107,23 +166,21 @@ Read [Installation](/docs/installation) for the first-run path. Read
 
 ## Use application CSS alongside Luke UI
 
-Luke UI's static CSS uses four cascade layers, ordered from lowest to highest priority: `reset`,
-`theme`, `recipes`, and `utilities`. That internal order is stable regardless of stylesheet import
-order. The reset normalises only the subtree that carries `rootClassName`.
-
-If your application also uses cascade layers, declare its layer order before you import stylesheets.
+Luke UI's static CSS uses cascade layers. When you use `xstyle`, import
+`@luke-ui/vite/stylesheet.css` before the Luke UI stylesheet so the layer order includes
+`overrides`, the layer your compiled `xstyle` values land in:
 
 ```css
-@layer reset, theme, base, recipes, components, utilities;
-
-@import '@luke-ui/react/stylesheet.css';
-@import 'tailwindcss';
+@layer reset, theme, base, recipes, overrides, utilities;
 ```
 
-Tailwind utilities, CSS Modules, and application CSS work well for application-owned layout and
-custom elements. Put Tailwind classes on surrounding elements or `Box`. Use CSS Modules or
-application styles with public semantic variables for custom UI. Unlayered application CSS sits
-outside Luke UI's layers, so do not use it to reach into a component's internal DOM.
+Without `xstyle`, the same layers apply except `overrides`. Name every layer you use. An omitted
+layer is appended after the layers you declare, which changes the override order.
+
+Keep application base styles in `base`, below component recipes. Put overrides in `utilities`, or
+use ordinary unlayered application CSS. Tailwind utilities, CSS Modules, and application CSS work
+well for application-owned layout and custom elements. Put Tailwind classes on surrounding elements
+or `Box`:
 
 ```tsx
 import { Box } from '@luke-ui/react/box';
@@ -133,9 +190,9 @@ import { Box } from '@luke-ui/react/box';
 </Box>;
 ```
 
-When a CSS Module or application stylesheet needs a token, use the stable `--luke-*` variable listed
-in the [token reference](/docs/token-reference). Do not couple application CSS to undocumented
-selectors or implementation attributes.
+Use CSS Modules or application styles with public semantic variables for custom UI. Do not use
+application CSS to reach into a component's internal DOM. When a stylesheet needs a token, use the
+stable `--luke-*` variable listed in the [token reference](/docs/token-reference).
 
 ## Continue learning
 

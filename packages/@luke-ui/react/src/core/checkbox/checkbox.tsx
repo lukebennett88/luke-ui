@@ -14,12 +14,13 @@ import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
+import type { XStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
 type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children' | 'inputRef' | 'isInvalid'>;
 
-interface _CheckboxProps extends _CheckboxOmit {
+interface _CheckboxProps extends _CheckboxOmit, XStyleProps {
 	/** Checkbox label content. */
 	children: ReactNode;
 	/** Initial selection state for an uncontrolled checkbox. */
@@ -63,7 +64,7 @@ export type CheckboxProps = Prettify<_CheckboxProps>;
 
 /** A labelled checkbox with optional description and validation message. */
 export function Checkbox(props: CheckboxProps): JSX.Element {
-	const { children, description, errorMessage, inputRef, ...checkboxProps } = props;
+	const { children, description, errorMessage, inputRef, xstyle, ...checkboxProps } = props;
 	// React Aria types its own `inputRef` as a ref object, so a callback ref is a type
 	// error even though it would work: RAC merges the ref itself. `useObjectRef` gives
 	// the declared type what it asks for rather than leaning on that internal detail.
@@ -75,6 +76,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 			{...checkboxProps}
 			inputRef={objectInputRef}
 			isInvalid={isInvalidFromErrorMessage(normalizedErrorMessage)}
+			xstyle={xstyle}
 		>
 			<CheckboxContent>
 				<CheckboxControl>
