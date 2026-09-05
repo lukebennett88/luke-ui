@@ -165,8 +165,6 @@ Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Sett
 inside the subtree forces that mode, and nested scopes can override it. Every scope also sets native
 `color-scheme` so form controls and scrollbars agree.
 
-Components move to the semantic contract in the component-family migration slices.
-
 Luke UI's portalled Combobox popover inherits the document's theme. It carries no theme identity or
 colour mode propagation logic of its own, because a loaded theme stylesheet already themes the whole
 document from `:root`. A colour mode scoped to a nested element below `<html>` does not reach a
@@ -195,8 +193,7 @@ before any rules create them. StyleX priority layers use dotted nested names suc
 
 A direct `@layer recipes { ... }` rule beats a nested `recipes.priorityN` sublayer rule for a normal
 declaration — that is what lets the retained CSS described above reliably override generated StyleX
-recipe output, and it is why deleting the old separate `components` layer was possible: retained
-rules moved straight into `recipes` instead of a layer above it. That relationship REVERSES for
+recipe output without needing a layer of its own above `recipes`. That relationship REVERSES for
 `!important`: a nested sublayer's `!important` declaration beats its direct parent layer's
 `!important` declaration. Consequently a `recipes.priorityN` sublayer must never emit `!important` —
 `stylesheet-contract.test.ts` guards this by parsing the compiled stylesheet — because such a
@@ -259,13 +256,8 @@ tree exactly, for example `vars.color.background.danger.solid.hover`, and each l
 `var(--luke-*)` reference. StyleX recipes import it directly. `src/theme/index.ts` re-exports the
 same `vars` as the public `@luke-ui/react/theme` token surface.
 
-This is one surface, not two. Issues #537 and #550 were written while the public `vars` was a
-separate plain object built by `src/theme/contract.css.ts`, and they ask to "keep the public `vars`
-API unchanged" against that arrangement. The public API _is_ unchanged — the same nested paths and
-the same `--luke-*` custom property names — but it is now produced by the StyleX const surface
-rather than mirrored by a second object, and `contract.css.ts` is deleted. Read those tickets' "do
-not change `vars`" wording as a promise about the public shape, not a requirement to keep two
-implementations.
+This is one surface, not two: the StyleX const surface produces `vars` directly rather than a second
+object mirroring it.
 
 Use `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain Vanilla Extract
 global rule directly in the `recipes` layer (never a numbered sublayer — see "Cascade layers"
