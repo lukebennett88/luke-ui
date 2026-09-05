@@ -152,6 +152,11 @@ test(
 				plugins: [
 					stylexBabelPlugin.withOptions({
 						dev: false,
+						// Matches the real `@luke-ui/vite` consumer compile (`application-order`), so this
+						// fixture proves the same resolution mode a real consumer gets — the mode that
+						// makes a shorthand's compiled style tombstone the longhand keys it overlaps (see
+						// `stylex-layer-contract.md`), not just a config value with no runtime effect.
+						styleResolution: 'application-order',
 						unstable_moduleResolution: { type: 'commonJS', rootDir: consumerDir },
 					}),
 				],
@@ -302,9 +307,15 @@ test(
 			// Compiles consumer StyleX with the same layer configuration `@luke-ui/vite` uses, without
 			// going through this package's `createStylexDevPlugin`, so the cascade assertion covers the
 			// public layer contract rather than the in-repo recipe-layer path.
+			// `paddingLonghand`/`paddingShorthand` back the shorthand/longhand overlap assertions below,
+			// proving the real published contract (not just the color-only `override` case).
 			const consumerSource = [
 				"import * as stylex from '@stylexjs/stylex';",
-				"export const consumerStyles = stylex.create({ override: { color: 'rgb(9, 9, 9)' } });",
+				'export const consumerStyles = stylex.create({',
+				"  override: { color: 'rgb(9, 9, 9)' },",
+				"  paddingLonghand: { paddingInlineStart: '4px' },",
+				"  paddingShorthand: { padding: '20px' },",
+				'});',
 			].join('\n');
 			const transformedConsumer = await transformAsync(consumerSource, {
 				babelrc: false,
@@ -313,6 +324,11 @@ test(
 				plugins: [
 					stylexBabelPlugin.withOptions({
 						dev: false,
+						// Matches the real `@luke-ui/vite` consumer compile (`application-order`), so this
+						// fixture proves the same resolution mode a real consumer gets — the mode that
+						// makes a shorthand's compiled style tombstone the longhand keys it overlaps (see
+						// `stylex-layer-contract.md`), not just a config value with no runtime effect.
+						styleResolution: 'application-order',
 						unstable_moduleResolution: { type: 'commonJS', rootDir: consumerDir },
 					}),
 				],
@@ -426,6 +442,61 @@ test(
 				() => getComputedStyle(document.querySelector('[class]')!).color,
 			);
 			expect(withInlineStyleColor).toBe('rgb(70, 80, 90)');
+
+			// Real consumer-compiled shorthand/LOGICAL-longhand overlap, resolved by a real browser
+			// against the same `overrides` layer configuration `@luke-ui/vite` emits. `paddingLonghand`
+			// is `paddingInlineStart`, so this proves the published contract's real shape for that
+			// pairing: a later logical longhand wins over an earlier shorthand (tombstoned, as normal),
+			// but the reverse does not hold — see `recipe-authoring.browser.test.tsx` for the in-repo proof
+			// of the same StyleX 0.19.0 missing-tombstone defect, and its physical-longhand control case
+			// that proves `application-order` otherwise does work in both directions.
+			const overlapRenderScript = path.join(consumerDir, 'render-overlap.mjs');
+			await writeFile(
+				overlapRenderScript,
+				[
+					"import * as stylex from '@stylexjs/stylex';",
+					"import { consumerStyles } from './xstyle-consumer-style.mjs';",
+					'',
+					'process.stdout.write(JSON.stringify({',
+					'  longhandLastMarkup: stylex.props(consumerStyles.paddingShorthand, consumerStyles.paddingLonghand).className,',
+					'  shorthandLastMarkup: stylex.props(consumerStyles.paddingLonghand, consumerStyles.paddingShorthand).className,',
+					'}));',
+				].join('\n'),
+			);
+			const { longhandLastMarkup, shorthandLastMarkup } = JSON.parse(
+				execFileSync('node', [overlapRenderScript], {
+					cwd: consumerDir,
+					encoding: 'utf8',
+					env: { PATH: process.env.PATH ?? '' },
+				}),
+			) as {
+				longhandLastMarkup: string;
+				shorthandLastMarkup: string;
+			};
+
+			await page.setContent(
+				`<style>${consumerStylexCss}</style><div class="${longhandLastMarkup}"></div>`,
+			);
+			const longhandLastPadding = await page.evaluate(
+				() => getComputedStyle(document.querySelector('[class]')!).paddingLeft,
+			);
+			// A later logical longhand wins over an earlier overlapping shorthand: `padding`'s
+			// tombstone set covers the physical `paddingLeft`/`paddingRight` keys, styleq drops the
+			// earlier shorthand's class, and the surviving logical longhand class applies unopposed.
+			expect(longhandLastPadding).toBe('4px');
+
+			await page.setContent(
+				`<style>${consumerStylexCss}</style><div class="${shorthandLastMarkup}"></div>`,
+			);
+			const shorthandLastPadding = await page.evaluate(
+				() => getComputedStyle(document.querySelector('[class]')!).paddingLeft,
+			);
+			// StyleX 0.19 does not emit a tombstone for `paddingInlineStart`, so styleq keeps both
+			// classes and the priority tier returns `4px` instead of the correct `20px`. Related
+			// regressions are covered by `test.fails` in `recipe-authoring.browser.test.tsx`.
+			// REMOVAL CONDITION: when StyleX emits that tombstone, this assertion starts failing —
+			// change the expected value to '20px' and delete this comment.
+			expect(shorthandLastPadding).toBe('4px');
 
 			await page.close();
 		} finally {

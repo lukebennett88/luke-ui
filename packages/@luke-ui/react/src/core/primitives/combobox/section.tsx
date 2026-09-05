@@ -1,13 +1,13 @@
-import * as stylex from '@stylexjs/stylex';
+import { mergeProps } from '@react-aria/utils';
 import type { JSX, ReactNode } from 'react';
 import type { ListBoxSectionProps as RacListBoxSectionProps } from 'react-aria-components/ComboBox';
 import { ListBoxSection as RacListBoxSection } from 'react-aria-components/ComboBox';
 import { Header as RacHeader } from 'react-aria-components/Header';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { resolveComboboxRecipeSlotStyles } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 import { comboboxSectionScopeAttribute } from './section-scope.js';
 
 type _ComboboxSectionOmit<T extends object> = DistributiveOmit<
@@ -25,19 +25,16 @@ export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionPr
 
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
 	const { children, className, style, title, xstyle, ...sectionProps } = props;
-	const resolved = resolveXStyleProps(
-		resolveComboboxRecipeSlotStyles('section'),
-		xstyle,
-		className,
-		style,
+	const resolved = mergeProps(
+		resolveRecipeSlotProps(comboboxRecipe, 'section', undefined, xstyle),
+		{ className, style },
 	);
 	if (typeof children === 'function') {
 		return (
 			<RacListBoxSection
 				{...sectionProps}
 				{...{ [comboboxSectionScopeAttribute]: '' }}
-				className={resolved.className}
-				style={resolved.style}
+				{...resolved}
 			>
 				{children}
 			</RacListBoxSection>
@@ -45,18 +42,9 @@ export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>
 	}
 
 	return (
-		<RacListBoxSection
-			{...sectionProps}
-			{...{ [comboboxSectionScopeAttribute]: '' }}
-			className={resolved.className}
-			style={resolved.style}
-		>
+		<RacListBoxSection {...sectionProps} {...{ [comboboxSectionScopeAttribute]: '' }} {...resolved}>
 			{title != null ? (
-				<RacHeader
-					className={stylex.props(...resolveComboboxRecipeSlotStyles('sectionHeading')).className}
-				>
-					{title}
-				</RacHeader>
+				<RacHeader {...resolveRecipeSlotProps(comboboxRecipe, 'sectionHeading')}>{title}</RacHeader>
 			) : null}
 			{children}
 		</RacListBoxSection>

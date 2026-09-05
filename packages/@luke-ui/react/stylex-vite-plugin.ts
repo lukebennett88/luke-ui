@@ -7,6 +7,7 @@ import type { Rule } from '@stylexjs/babel-plugin';
 import type { Options as RollupOptions } from '@vanilla-extract/rollup-plugin';
 import { readFile, readdir } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
+import { recipeAuthoringBabelPlugin } from './recipe-authoring-babel-plugin.js';
 
 /**
  * `esbuild` is a transitive dependency (via `vite`/`@vanilla-extract/rollup-plugin`), not a direct
@@ -20,8 +21,6 @@ type StylexEsbuildPlugin = NonNullable<RollupOptions['esbuildOptions']>['plugins
 	? EsbuildPlugin
 	: never;
 
-/** Shared StyleX transforms and cascade-layer handling for package builds and dev tools. */
-
 export const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
 const stylexLayerConfig = {
@@ -30,29 +29,29 @@ const stylexLayerConfig = {
 	prefix: 'recipes',
 } as const;
 
-/** An `@layer name;` statement on its own line, which StyleX re-emits per chunk. */
+/** Standalone layer statements StyleX repeats for each chunk. */
 const EMPTY_LAYER_STATEMENT_PATTERN = /^@layer [^,{]+;\n/gm;
 
-/** The combined cascade-layer order statement StyleX emits at the head of its output. */
+/** StyleX's combined layer-order statement. */
 const LAYER_HEADER_PATTERN = /^\n?@layer ([^;]+);/;
 
-/** A single leading newline. */
 const LEADING_NEWLINE_PATTERN = /^\n/;
 
-/** A `.ts`/`.tsx`/`.js`/`.jsx` module, excluding declaration files. Mirrors `vite.config.ts`'s `sourceModule`. */
+/** Source modules, excluding declaration files. */
 const STYLEX_ELIGIBLE_MODULE_PATTERN = /(?<!\.d)\.[cm]?[jt]sx?$/;
 
-/** A browser, visual, or unit test module, or a Storybook story: never a production module. */
+/** Test and Storybook modules excluded from production CSS. */
 const NON_PRODUCTION_MODULE_PATTERN = /\.(?:browser|visual|test|stories)\.[cm]?[jt]sx?$/;
 
-/** A StyleX const/token module, e.g. `tokens.stylex.ts`. */
 const STYLEX_TOKENS_MODULE_PATTERN = /\.stylex\.ts$/;
 
-/** Return the shared StyleX Babel options for each transform call. */
 function stylexBabelOptions(): PluginItem {
 	return stylexBabelPlugin.withOptions({
 		dev: false,
 		propertyValidationMode: 'throw',
+		// Match the consumer compiler. `application-order` gives later declarations precedence when
+		// StyleX emits tombstones; logical shorthand/longhand gaps are covered by browser tests.
+		styleResolution: 'application-order',
 		unstable_moduleResolution: { type: 'commonJS', rootDir: workspaceRoot },
 	});
 }
@@ -86,10 +85,7 @@ function splitStylexLayerHeader(stylexCss: string): {
 	};
 }
 
-/**
- * Extracts CSS for a set of collected rules, in the shared cascade-layer config, split into the
- * authoritative `@layer` order statement and the StyleX rule body it precedes.
- */
+/** Extract CSS and split its layer order statement from the rule body. */
 function processRules(rules: ReadonlyArray<Rule>): {
 	authoritativeLayerOrder: string;
 	stylexBody: string;
@@ -110,11 +106,11 @@ async function transformStylex(
 ): Promise<{ code: string; map: TransformSourceMap; rules: Array<Rule> | undefined } | null> {
 	const filename = id.split('?')[0] ?? id;
 
-	// Skip non-source files, dependencies, and files that do not import StyleX before parsing.
+	// Recipe modules can rely on the authoring transform to add the StyleX import.
 	if (
 		!STYLEX_ELIGIBLE_MODULE_PATTERN.test(filename) ||
 		id.includes('/node_modules/') ||
-		!code.includes('@stylexjs/stylex')
+		(!code.includes('@stylexjs/stylex') && !code.includes('recipe-authoring.js'))
 	) {
 		return null;
 	}
@@ -129,7 +125,7 @@ async function transformStylex(
 					? ['typescript', 'jsx']
 					: ['typescript'],
 		},
-		plugins: [stylexBabelOptions()],
+		plugins: [recipeAuthoringBabelPlugin, stylexBabelOptions()],
 		sourceMaps: true,
 	});
 
@@ -144,7 +140,6 @@ async function transformStylex(
 	return { code: result.code, map: toRolldownSourceMap(result.map), rules: meta.stylex };
 }
 
-/** Collects the complete StyleX rule set before any virtual stylesheet is served. */
 async function loadSourceRules(includeTests: boolean): Promise<Array<Rule>> {
 	const sourceRoot = join(workspaceRoot, 'packages/@luke-ui/react/src');
 	const filenames = await findSourceModules(sourceRoot, includeTests);
@@ -177,28 +172,7 @@ async function findSourceModules(directory: string, includeTests: boolean): Prom
 	return filenames.flat();
 }
 
-// ---------------------------------------------------------------------------
-// Vanilla Extract esbuild plugin (compiles StyleX token modules inside VE's own bundle-and-run step)
-// ---------------------------------------------------------------------------
-
-/**
- * `vp pack`'s `@vanilla-extract/rollup-plugin` compiles every `.css.ts` file and its whole static
- * import graph through Vanilla Extract's own esbuild-based bundle-and-run step (`compile()`), not
- * through the project's normal Rollup plugin pipeline — so `esbuildOptions.plugins` is the only
- * hook available for that step. (`@vanilla-extract/vite-plugin`, the counterpart used by Vitest and
- * Storybook, has a parallel problem with a different fix: see `stylexVanillaExtractPluginFilter`.)
- * That esbuild pass never runs the StyleX Babel transform, so when the import graph reaches
- * `tokens.stylex.ts`, it evaluates the raw source: StyleX's runtime `unstable_defineConstsNested` is
- * a stub that throws by design, because it expects `@stylexjs/babel-plugin` to have already
- * rewritten the call away.
- *
- * This plugin closes that gap by transforming `.stylex.ts` files with the same Babel options
- * `transformStylex` uses, before esbuild ever sees the runtime call. Only `.stylex.ts` (not the
- * broader `STYLEX_ELIGIBLE_MODULE_PATTERN`) needs it: `tokens.stylex.ts` is the only module in a
- * `.css.ts` import graph that calls a StyleX define function at module scope, so it's the only one
- * whose evaluation trips the stub. Ordinary `stylex.create()` call sites in component modules
- * aren't reached by this pass at all — VE's `.css.ts` graphs never import them.
- */
+/** Transform StyleX token modules before Vanilla Extract evaluates them with esbuild. */
 export function createStylexEsbuildPlugin(): StylexEsbuildPlugin {
 	return {
 		name: 'stylex-for-vanilla-extract',
@@ -224,14 +198,7 @@ export function createStylexEsbuildPlugin(): StylexEsbuildPlugin {
 	};
 }
 
-// ---------------------------------------------------------------------------
-// Pack-time plugin (production build; appends to the emitted `stylesheet.css` asset)
-// ---------------------------------------------------------------------------
-
-/**
- * Pack-time StyleX plugin: transforms every module that uses `@stylexjs/stylex`, then appends CSS
- * from a complete source scan to the `stylesheet.css` asset Vanilla Extract emits.
- */
+/** Transform StyleX modules and append their CSS to the production stylesheet. */
 export function createStylexPackPlugin(): Plugin {
 	let sourceRules: Promise<Array<Rule>>;
 
@@ -262,10 +229,6 @@ export function createStylexPackPlugin(): Plugin {
 		},
 	};
 }
-
-// ---------------------------------------------------------------------------
-// Dev/test plugin (Vitest, Storybook, docs; serves `virtual:luke-stylex.css`)
-// ---------------------------------------------------------------------------
 
 const STYLEX_VIRTUAL_CSS_ID = 'virtual:luke-stylex.css';
 const RESOLVED_STYLEX_VIRTUAL_CSS_ID = `\0${STYLEX_VIRTUAL_CSS_ID}`;
@@ -300,7 +263,6 @@ export function createStylexDevPlugin(): Plugin {
 			return { code: result.code, map: result.map };
 		},
 		hotUpdate({ file, modules }) {
-			// Documentation and other non-StyleX files do not change the extracted rules.
 			if (!STYLEX_ELIGIBLE_MODULE_PATTERN.test(file)) return;
 
 			sourceRules = undefined;
@@ -310,7 +272,6 @@ export function createStylexDevPlugin(): Plugin {
 			);
 			if (virtualModule === undefined) return;
 
-			// The changed module does not import the virtual stylesheet, so add it explicitly.
 			return [...modules, virtualModule];
 		},
 	};

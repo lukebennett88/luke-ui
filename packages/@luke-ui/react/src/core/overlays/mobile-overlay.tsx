@@ -165,6 +165,7 @@ export function MobileOverlay({
 		// labelling behaviour to that state instead of this tray's own `Modal` state.
 		<OverlayTriggerStateContext.Provider value={null}>
 			<ModalOverlay
+				{...overlay}
 				className={cx(rootClassName, overlay.className)}
 				isDismissable
 				isOpen={isOpen}
@@ -177,8 +178,9 @@ export function MobileOverlay({
 					top: typeof window === 'undefined' ? 0 : window.scrollY,
 				}}
 			>
-				<Modal className={modal.className} style={modal.style}>
+				<Modal {...modal} className={modal.className} style={modal.style}>
 					<Dialog
+						{...dialog}
 						aria-describedby={ariaDescribedBy}
 						aria-label={ariaLabel}
 						aria-labelledby={ariaLabelledBy}

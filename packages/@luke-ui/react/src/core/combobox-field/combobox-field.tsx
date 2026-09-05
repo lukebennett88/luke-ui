@@ -1,5 +1,4 @@
 import { useObjectRef } from '@react-aria/utils';
-import * as stylex from '@stylexjs/stylex';
 import type { CSSProperties, JSX, ReactNode, Ref } from 'react';
 import { useContext, useEffect, useId } from 'react';
 import { SelectableCollectionContext } from 'react-aria-components/Autocomplete';
@@ -25,7 +24,7 @@ import { ComboboxListBox } from '../primitives/combobox/listbox.js';
 import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
 import { ComboboxPopover } from '../primitives/combobox/popover.js';
 import { ComboboxPresentationProvider } from '../primitives/combobox/presentation-context.js';
-import { resolveComboboxRecipeSlotStyles } from '../primitives/combobox/recipe.js';
+import { comboboxRecipe } from '../primitives/combobox/recipe.js';
 import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
@@ -35,6 +34,7 @@ import {
 	isInvalidFromErrorMessage,
 	normalizeErrorMessage,
 } from '../primitives/field/field.js';
+import { resolveRecipeSlotProps } from '../styles/recipe-authoring.js';
 import type { XStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -269,20 +269,18 @@ function MobileComboboxContent<T extends object>({
 	// RAC builds the collection before it provides state.
 	if (state == null) return listBox;
 
-	const trayTriggerProps = stylex.props(
-		...resolveComboboxRecipeSlotStyles('trayTrigger', { size }),
-	);
-	const trayValueProps = stylex.props(...resolveComboboxRecipeSlotStyles('trayValue'));
+	const trayTriggerProps = resolveRecipeSlotProps(comboboxRecipe, 'trayTrigger', { size });
+	const trayValueProps = resolveRecipeSlotProps(comboboxRecipe, 'trayValue');
 
 	return (
 		<>
 			<ComboboxInputGroup>
 				<RacButton
+					{...trayTriggerProps}
 					aria-expanded={state.isOpen}
 					aria-haspopup="dialog"
 					aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
 					aria-labelledby={ariaLabelledBy}
-					className={trayTriggerProps.className}
 					isDisabled={isDisabled || isReadOnly}
 					onPress={() => {
 						if (isReadOnly) return;
@@ -290,14 +288,8 @@ function MobileComboboxContent<T extends object>({
 						state.open(null, 'manual');
 					}}
 					slot={null}
-					style={trayTriggerProps.style}
 				>
-					<ComboBoxValue
-						className={trayValueProps.className}
-						id={valueId}
-						placeholder={placeholder}
-						style={trayValueProps.style}
-					/>
+					<ComboBoxValue {...trayValueProps} id={valueId} placeholder={placeholder} />
 					<Icon aria-hidden name="chevronDown" />
 				</RacButton>
 			</ComboboxInputGroup>
@@ -336,19 +328,16 @@ function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Elemen
 
 	if (state == null || state.inputValue === '') return null;
 
-	const clearButtonProps = stylex.props(
-		...resolveComboboxRecipeSlotStyles('clearButton', { size }),
-	);
+	const clearButtonProps = resolveRecipeSlotProps(comboboxRecipe, 'clearButton', { size });
 
 	return (
 		<RacButton
+			{...clearButtonProps}
 			aria-label="Clear search"
-			className={clearButtonProps.className}
 			onPress={() => {
 				state.setInputValue('');
 			}}
 			slot={null}
-			style={clearButtonProps.style}
 		>
 			<Icon aria-hidden name="close" />
 		</RacButton>

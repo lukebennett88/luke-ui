@@ -14,15 +14,21 @@ export interface XStyleProps {
 	xstyle?: XStyleProp;
 }
 
+type ResolvedStyleXProps = Omit<ReturnType<typeof stylex.props>, 'className' | 'style'> & {
+	className?: string;
+	style?: CSSProperties;
+};
+
 /** Resolves component styles and `xstyle` in one `stylex.props` call. */
 export function resolveXStyleProps(
 	styles: ReadonlyArray<CompiledStyles>,
 	xstyle: XStyleProp | undefined,
 	className: string | undefined,
 	inlineStyle: CSSProperties | undefined,
-): { className: string | undefined; style: CSSProperties | undefined } {
+): ResolvedStyleXProps {
 	const resolved = stylex.props(...styles, xstyle);
 	return {
+		...resolved,
 		className: cx(resolved.className, className),
 		style: resolved.style === undefined ? inlineStyle : { ...resolved.style, ...inlineStyle },
 	};
@@ -31,33 +37,35 @@ export function resolveXStyleProps(
 /** A React Aria prop value or a function that returns one. */
 type RacRenderPropValue<T, V> = V | ((renderProps: T) => V);
 
-/**
- * Resolves `className` and `style` for a React Aria component in one pass, applying the same
- * `xstyle` contract as `resolveXStyleProps`: component recipe/variant styles < `xstyle`,
- * guaranteed by resolving both in one `stylex.props(...)` call. Where a consumer `className` or
- * inline `style` lands relative to that is decided separately — the CSS cascade for `className`
- * (including importance, layers, specificity, and source order); for normal declarations, inline
- * `style` wins over class-based styling, though an author `!important` can override a normal
- * inline style. See `XStyleProps#xstyle` for the full precedence contract.
- *
- * React Aria Components lets `className` and `style` be plain values or functions of the
- * component's render props (`composeRenderProps`), so a RAC element cannot resolve both props
- * from one `resolveXStyleProps` call the way a plain element does. This helper hoists the
- * `stylex.props(...)` call so it runs once per render instead of once per prop, then wraps each
- * RAC prop in its own `composeRenderProps` closure that reuses that result. The returned object
- * spreads directly onto the RAC element.
- *
- * `className` and `style` take separate type parameters because RAC's own render props differ
- * between the two: the `className` function additionally receives `defaultClassName`, and the
- * `style` function receives `defaultStyle`, so unifying them under one type parameter would
- * reject either the `Button` or the `Group` render-prop shapes RAC actually produces.
- */
+/** Composes resolved recipe props with React Aria's function-valued className and style props. */
+export function composeRacRecipeProps<ClassNameRenderProps, StyleRenderProps>(
+	recipeProps: ResolvedStyleXProps,
+	className: RacRenderPropValue<ClassNameRenderProps, string> | undefined,
+	style: RacRenderPropValue<StyleRenderProps, CSSProperties | undefined> | undefined,
+): Omit<ResolvedStyleXProps, 'className' | 'style'> & {
+	className: (renderProps: ClassNameRenderProps) => string;
+	style: (renderProps: StyleRenderProps) => CSSProperties | undefined;
+} {
+	return {
+		...recipeProps,
+		className: composeRenderProps(className, (resolvedClassName) => {
+			return cx(recipeProps.className, resolvedClassName);
+		}),
+		style: composeRenderProps(style, (resolvedStyle) => {
+			return recipeProps.style === undefined
+				? resolvedStyle
+				: { ...recipeProps.style, ...resolvedStyle };
+		}),
+	};
+}
+
+/** Resolves styles once and composes them with React Aria's function-valued props. */
 export function resolveRacXStyleProps<ClassNameRenderProps, StyleRenderProps>(
 	styles: ReadonlyArray<CompiledStyles>,
 	xstyle: XStyleProp | undefined,
 	className: RacRenderPropValue<ClassNameRenderProps, string> | undefined,
 	style: RacRenderPropValue<StyleRenderProps, CSSProperties | undefined> | undefined,
-): {
+): Omit<ResolvedStyleXProps, 'className' | 'style'> & {
 	className: (renderProps: ClassNameRenderProps) => string;
 	style: (renderProps: StyleRenderProps) => CSSProperties | undefined;
 } {
@@ -66,6 +74,7 @@ export function resolveRacXStyleProps<ClassNameRenderProps, StyleRenderProps>(
 	const resolved = stylex.props(...styles, xstyle);
 
 	return {
+		...resolved,
 		className: composeRenderProps(className, (resolvedClassName) => {
 			return cx(resolved.className, resolvedClassName);
 		}),

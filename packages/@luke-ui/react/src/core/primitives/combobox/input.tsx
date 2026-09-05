@@ -2,12 +2,13 @@ import type { JSX, Ref } from 'react';
 import { useContext } from 'react';
 import type { InputProps as RacInputProps } from 'react-aria-components/ComboBox';
 import { ComboBoxStateContext, Input as RacInput } from 'react-aria-components/ComboBox';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './recipe.js';
-import { resolveComboboxRecipeSlotStyles } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
 
 type _ComboboxInputOmit = DistributiveOmit<RacInputProps, 'className' | 'size'>;
@@ -29,7 +30,7 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 	const { onClick, size: sizeProp, style, xstyle, ...inputProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
-	const recipeStyles = resolveComboboxRecipeSlotStyles('textInput', { size });
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'textInput', { size }, xstyle);
 
 	const handleClick = (event: React.MouseEvent<HTMLInputElement>) => {
 		onClick?.(event);
@@ -41,7 +42,7 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 	return (
 		<RacInput
 			{...inputProps}
-			{...resolveRacXStyleProps(recipeStyles, xstyle, inputProps.className, style)}
+			{...composeRacRecipeProps(recipeProps, inputProps.className, style)}
 			onClick={handleClick}
 		/>
 	);

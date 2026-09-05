@@ -1,11 +1,11 @@
 import type { JSX } from 'react';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
+import { cx } from '../../../shared/utils/utils.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveXStyleProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { resolveFieldRecipeSlotStyles } from './recipe.js';
+import { fieldRecipe } from './recipe.js';
 
 type _FieldDescriptionOmit = DistributiveOmit<RacTextProps, 'id' | 'slot'>;
 
@@ -20,16 +20,14 @@ export type FieldDescriptionProps = Prettify<_FieldDescriptionProps>;
 /** Styled helper text shown under a field. */
 export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	const { className, style, xstyle, ...restProps } = props;
+	const recipeProps = fieldRecipe({ tone: 'description', xstyle: { message: xstyle } }).message;
 
 	return (
 		<RacText
 			{...restProps}
-			{...resolveXStyleProps(
-				resolveFieldRecipeSlotStyles('message', { tone: 'description' }),
-				xstyle,
-				className,
-				style,
-			)}
+			{...recipeProps}
+			className={cx(recipeProps.className, className)}
+			style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
 			slot="description"
 		/>
 	);

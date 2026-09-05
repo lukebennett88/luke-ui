@@ -1,11 +1,11 @@
-import * as stylex from '@stylexjs/stylex';
 import { fontMetrics } from '../../theme/font-metric-scale.stylex.js';
 import { vars } from '../../theme/tokens.stylex.js';
-import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
+import type { RecipeSelection } from '../styles/recipe-authoring.js';
+import { recipe } from '../styles/recipe-authoring.js';
 
-const styles = stylex.create({
-	root: {
+/** Recipe for the `Kbd` component's inline keyboard-key appearance. */
+export const kbdRecipe = recipe({
+	base: {
 		alignItems: 'center',
 		backgroundColor: vars.color.surface.recessed,
 		borderColor: vars.color.border.decorative,
@@ -25,12 +25,5 @@ const styles = stylex.create({
 	},
 });
 
-/** Canonical resolver for the `Kbd` component's inline keyboard-key appearance. */
-export const resolveKbdRecipeStyles = createRecipeStyles({
-	base: styles.root,
-});
-
-/** Recipe for the `Kbd` component's inline keyboard-key appearance. */
-export const kbdRecipe = createRecipe(resolveKbdRecipeStyles);
-
-export type KbdRecipeVariants = RecipeSelection<typeof resolveKbdRecipeStyles>;
+/** Variant type for the `Kbd` recipe. */
+export type KbdRecipeVariants = RecipeSelection<typeof kbdRecipe>;

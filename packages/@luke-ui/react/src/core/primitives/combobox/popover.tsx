@@ -3,11 +3,12 @@ import type { PopoverProps as RacPopoverProps } from 'react-aria-components/Comb
 import { Popover as RacPopover } from 'react-aria-components/ComboBox';
 import { cx } from '../../../shared/utils/utils.js';
 import { rootClassName } from '../../../theme/theme.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
-import { resolveComboboxRecipeSlotStyles } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 
 type _ComboboxPopoverOmit = DistributiveOmit<RacPopoverProps, 'UNSTABLE_portalContainer'>;
 interface _ComboboxPopoverProps extends _ComboboxPopoverOmit, XStyleProps {
@@ -25,8 +26,8 @@ export type ComboboxPopoverProps = Prettify<_ComboboxPopoverProps>;
  */
 export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 	const { className, ref, style, xstyle, ...restProps } = props;
-	const recipeStyles = resolveComboboxRecipeSlotStyles('popover');
-	const racProps = resolveRacXStyleProps(recipeStyles, xstyle, className, style);
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'popover', undefined, xstyle);
+	const racProps = composeRacRecipeProps(recipeProps, className, style);
 
 	return (
 		<RacPopover

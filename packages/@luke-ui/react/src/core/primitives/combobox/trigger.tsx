@@ -3,12 +3,13 @@ import type { ButtonProps as RacButtonProps } from 'react-aria-components/ComboB
 import { Button as RacButton } from 'react-aria-components/ComboBox';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './recipe.js';
-import { resolveComboboxRecipeSlotStyles } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
 
 type _ComboboxTriggerOmit = DistributiveOmit<RacButtonProps, 'className'>;
@@ -24,14 +25,14 @@ export type ComboboxTriggerProps = Prettify<_ComboboxTriggerProps>;
 export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 	const { size: sizeProp, style, xstyle, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
-	const recipeStyles = resolveComboboxRecipeSlotStyles('trigger', { size });
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'trigger', { size }, xstyle);
 
 	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
 		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacButton
 				{...buttonProps}
-				{...resolveRacXStyleProps(recipeStyles, xstyle, buttonProps.className, style)}
+				{...composeRacRecipeProps(recipeProps, buttonProps.className, style)}
 			/>
 		</IconSizeProvider>
 	);

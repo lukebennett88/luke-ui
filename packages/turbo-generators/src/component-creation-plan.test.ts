@@ -74,7 +74,12 @@ describe('createComponentPlan', () => {
 
 		expect(componentSource).not.toContain('export { statusBadgeRecipe');
 		expect(componentSource).toContain("import type { XStyleProps } from '../styles/xstyle.js';");
-		expect(componentSource).toContain('resolveStatusBadgeRecipeStyles');
+		expect(componentSource).toContain('statusBadgeRecipe({ xstyle })');
+		expect(componentSource).toContain('{...recipeProps}');
+		expect(componentSource).toContain('className={cx(recipeProps.className, className)}');
+		expect(componentSource).toContain(
+			'style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}',
+		);
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",
 		);
@@ -82,15 +87,11 @@ describe('createComponentPlan', () => {
 			"export { type StatusBadgeRecipeVariants, statusBadgeRecipe } from '../core/status-badge/recipe.js';",
 		);
 		expect(packageExportSource).not.toContain("from './index.js'");
-		expect(recipeSource).toContain('import { createRecipe, createRecipeStyles }');
+		expect(recipeSource).toContain("import { recipe } from '../styles/recipe-authoring.js';");
+		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
+		expect(recipeSource).toContain('base: {');
 		expect(recipeSource).toContain(
-			'export const resolveStatusBadgeRecipeStyles = createRecipeStyles({',
-		);
-		expect(recipeSource).toContain(
-			'export const statusBadgeRecipe = createRecipe(resolveStatusBadgeRecipeStyles);',
-		);
-		expect(recipeSource).toContain(
-			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof resolveStatusBadgeRecipeStyles>;',
+			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
 		);
 		expect(recipeSource).not.toContain('createSingleRecipe');
 

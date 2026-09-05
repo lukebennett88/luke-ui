@@ -1,9 +1,12 @@
-import * as stylex from '@stylexjs/stylex';
+// This module is fully-inline authoring: it never writes `stylex` itself. The authoring transform
+// expands `recipe()` into a `stylex.create(...)` call and inserts the namespace import that call
+// needs, so no import or lint suppression has to be kept here for the compiled output's sake.
 import { vars } from '../../theme/tokens.stylex.js';
-import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
+import type { RecipeSelection } from '../styles/recipe-authoring.js';
+import { recipe } from '../styles/recipe-authoring.js';
 
-const styles = stylex.create({
+/** Recipe for the `Link` component's styles. */
+export const linkRecipe = recipe({
 	base: {
 		color: vars.color.foreground.accent.rest,
 		cursor: 'pointer',
@@ -29,42 +32,6 @@ const styles = stylex.create({
 			transition: 'none',
 		},
 	},
-	isStandaloneTrue: {
-		alignItems: 'center',
-		display: 'inline-flex',
-		minBlockSize: vars.controlSize.minTarget,
-		minInlineSize: vars.controlSize.minTarget,
-		textDecoration: 'none',
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
-			textDecoration: 'underline',
-		},
-		'[data-pressed="true"]:not([data-disabled="true"])': {
-			textDecoration: 'underline',
-		},
-	},
-	toneAccent: {
-		color: vars.color.foreground.accent.rest,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
-			color: vars.color.foreground.accent.hover,
-		},
-		'[data-pressed="true"]:not([data-disabled="true"])': {
-			color: vars.color.foreground.accent.pressed,
-		},
-	},
-	toneNeutral: {
-		color: vars.color.foreground.neutral.rest,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
-			color: vars.color.foreground.neutral.hover,
-		},
-		'[data-pressed="true"]:not([data-disabled="true"])': {
-			color: vars.color.foreground.neutral.pressed,
-		},
-	},
-});
-
-/** Canonical resolver for the `Link` component's styles. */
-export const resolveLinkRecipeStyles = createRecipeStyles({
-	base: styles.base,
 	defaultVariants: {
 		isStandalone: false,
 		tone: 'accent',
@@ -72,17 +39,42 @@ export const resolveLinkRecipeStyles = createRecipeStyles({
 	variants: {
 		isStandalone: {
 			false: null,
-			true: styles.isStandaloneTrue,
+			true: {
+				alignItems: 'center',
+				display: 'inline-flex',
+				minBlockSize: vars.controlSize.minTarget,
+				minInlineSize: vars.controlSize.minTarget,
+				textDecoration: 'none',
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
+					textDecoration: 'underline',
+				},
+				'[data-pressed="true"]:not([data-disabled="true"])': {
+					textDecoration: 'underline',
+				},
+			},
 		},
 		tone: {
-			accent: styles.toneAccent,
-			neutral: styles.toneNeutral,
+			accent: {
+				color: vars.color.foreground.accent.rest,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
+					color: vars.color.foreground.accent.hover,
+				},
+				'[data-pressed="true"]:not([data-disabled="true"])': {
+					color: vars.color.foreground.accent.pressed,
+				},
+			},
+			neutral: {
+				color: vars.color.foreground.neutral.rest,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"])': {
+					color: vars.color.foreground.neutral.hover,
+				},
+				'[data-pressed="true"]:not([data-disabled="true"])': {
+					color: vars.color.foreground.neutral.pressed,
+				},
+			},
 		},
 	},
 });
 
-/** Recipe for the `Link` component's styles. */
-export const linkRecipe = createRecipe(resolveLinkRecipeStyles);
-
 /** Variant type for the `Link` recipe. */
-export type LinkRecipeVariants = RecipeSelection<typeof resolveLinkRecipeStyles>;
+export type LinkRecipeVariants = RecipeSelection<typeof linkRecipe>;

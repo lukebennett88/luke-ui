@@ -55,6 +55,8 @@ export function lukeUi(): Plugin {
 			plugins: [
 				stylexBabelPlugin.withOptions({
 					dev: false,
+					// Match the resolution mode used when compiling `@luke-ui/react`.
+					styleResolution: 'application-order',
 					unstable_moduleResolution: { type: 'commonJS', rootDir },
 				}),
 			],
@@ -88,11 +90,9 @@ export function lukeUi(): Plugin {
 		},
 		async load(id) {
 			if (id !== RESOLVED_STYLESHEET_ID) return;
-			// A build has not traversed the module graph yet, so not all rules are
-			// collected. Emit a placeholder and replace it in `generateBundle`.
+			// Replace this placeholder with collected rules in `generateBundle`.
 			if (!isDevServer) return `${LAYER_ORDER}\n${PLACEHOLDER}`;
-			// Dev does not wait for `transform` either. Scan the application source
-			// so the first stylesheet already contains every StyleX rule.
+			// Scan application source so the first stylesheet contains every rule.
 			sourceRules ??= collectSourceRules();
 			return collectedCss(await sourceRules);
 		},
@@ -109,8 +109,6 @@ export function lukeUi(): Plugin {
 			sourceRules = undefined;
 			const stylesheetModule = this.environment.moduleGraph.getModuleById(RESOLVED_STYLESHEET_ID);
 			if (stylesheetModule === undefined) return;
-			// Nothing that changed imports the stylesheet module, so Vite never collects
-			// it into `modules` on its own.
 			return [...modules, stylesheetModule];
 		},
 		generateBundle(_options, bundle) {
@@ -125,9 +123,7 @@ export function lukeUi(): Plugin {
 }
 
 function isStylesheetImport(id: string): boolean {
-	if (id === STYLESHEET_IMPORT) return true;
-	if (PACKAGE_STYLESHEET_PATH_PATTERN.test(id)) return true;
-	return false;
+	return id === STYLESHEET_IMPORT || PACKAGE_STYLESHEET_PATH_PATTERN.test(id);
 }
 
 async function findSourceModules(directory: string): Promise<Array<string>> {

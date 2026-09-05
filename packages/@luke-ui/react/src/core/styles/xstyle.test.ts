@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { expect, test } from 'vite-plus/test';
-import { resolveRacXStyleProps } from './xstyle.js';
+import { composeRacRecipeProps, resolveRacXStyleProps } from './xstyle.js';
 
 const styles = stylex.create({
 	base: { color: 'red' },
@@ -67,4 +67,20 @@ test('resolves function-valued className and style, passing render props through
 		...stylex.props(styles.base, xstyle).style,
 		opacity: 0.5,
 	});
+});
+
+test('preserves extra stylex props when composing recipe results', () => {
+	const resolved = composeRacRecipeProps(
+		{
+			className: 'recipe-class',
+			style: { color: 'red' },
+			'data-style-src': 'recipe.ts:1',
+		},
+		'consumer-class',
+		{ opacity: 0.5 },
+	);
+
+	expect(resolved['data-style-src']).toBe('recipe.ts:1');
+	expect(resolved.className({})).toBe('recipe-class consumer-class');
+	expect(resolved.style({})).toEqual({ color: 'red', opacity: 0.5 });
 });

@@ -1,8 +1,8 @@
 import type { ComponentProps } from 'react';
+import { cx } from '../../shared/utils/utils.js';
 import type { XStyleProps } from '../styles/xstyle.js';
-import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { Prettify } from '../types/prettify.js';
-import { resolveKbdRecipeStyles } from './recipe.js';
+import { kbdRecipe } from './recipe.js';
 
 interface _KbdProps extends ComponentProps<'kbd'>, XStyleProps {}
 
@@ -14,6 +14,14 @@ export type KbdProps = Prettify<_KbdProps>;
  */
 export function Kbd(props: KbdProps) {
 	const { className, style, xstyle, ...elementProps } = props;
-	const stylexProps = resolveXStyleProps(resolveKbdRecipeStyles(), xstyle, className, style);
-	return <kbd {...elementProps} {...stylexProps} />;
+	const recipeProps = kbdRecipe({ xstyle });
+
+	return (
+		<kbd
+			{...elementProps}
+			{...recipeProps}
+			className={cx(recipeProps.className, className)}
+			style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
+		/>
+	);
 }

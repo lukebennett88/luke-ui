@@ -1,4 +1,4 @@
-import * as stylex from '@stylexjs/stylex';
+import { mergeProps } from '@react-aria/utils';
 import type { JSX } from 'react';
 import type {
 	ListBoxItemProps as RacListBoxItemProps,
@@ -13,12 +13,13 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps, resolveXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './recipe.js';
-import { resolveComboboxRecipeSlotStyles } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
 
 type _ComboboxItemOmit<T extends object> = DistributiveOmit<RacListBoxItemProps<T>, 'className'>;
@@ -34,7 +35,7 @@ export type ComboboxItemProps<T extends object> = Prettify<_ComboboxItemProps<T>
 export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX.Element {
 	const { size: sizeProp, style, xstyle, ...itemProps } = props;
 	const size = useComboboxSize(sizeProp);
-	const recipeStyles = resolveComboboxRecipeSlotStyles('item', { size });
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'item', { size }, xstyle);
 
 	return (
 		<RacListBoxItem
@@ -42,7 +43,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 			// own string-children textValue inference — so re-derive it here.
 			textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
 			{...itemProps}
-			{...resolveRacXStyleProps(recipeStyles, xstyle, itemProps.className, style)}
+			{...composeRacRecipeProps(recipeProps, itemProps.className, style)}
 		>
 			{composeRenderProps(itemProps.children, (children, { isSelected }) => {
 				// RAC renders item content outside this component's original tree.
@@ -53,7 +54,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 						{isSelected ? (
 							<Icon
 								aria-hidden
-								className={stylex.props(...resolveComboboxRecipeSlotStyles('itemCheck')).className}
+								{...resolveRecipeSlotProps(comboboxRecipe, 'itemCheck')}
 								name="check"
 								size={COMBOBOX_CHECK_ICON_SIZE}
 							/>
@@ -81,12 +82,10 @@ export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Elem
 	return (
 		<RacListBoxLoadMoreItem
 			{...loadMoreItemProps}
-			{...resolveXStyleProps(
-				resolveComboboxRecipeSlotStyles('loadMoreItem', { size }),
-				xstyle,
+			{...mergeProps(resolveRecipeSlotProps(comboboxRecipe, 'loadMoreItem', { size }, xstyle), {
 				className,
 				style,
-			)}
+			})}
 		/>
 	);
 }

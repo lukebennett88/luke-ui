@@ -189,6 +189,48 @@ export const styles = stylex.create({
 `;
 }
 
+// The fixture's `main.ts` imports a `styles` binding, so the overlap fixture keeps that name even
+// though the values are unrelated to `stylesSource`'s single-property case.
+const OVERLAP_STYLES_SOURCE = `import * as stylex from '@stylexjs/stylex';
+export const styles = stylex.create({
+	paddingLonghand: { paddingInlineStart: '4px' },
+	paddingShorthand: { padding: '20px' },
+});
+`;
+
+test(
+	'compiles application StyleX with the documented styleResolution, matching @luke-ui/react',
+	{ timeout: FIXTURE_TIMEOUT_MS },
+	async () => {
+		// `@luke-ui/vite` must compile consumer `xstyle` with the same `styleResolution` as
+		// `@luke-ui/react`'s own recipe styles (`stylex-vite-plugin.ts`). `application-order` makes a
+		// shorthand's COMPILED JS OBJECT carry `null` tombstones for the longhand keys it overlaps —
+		// that is invisible in the emitted CSS text (which stays the same shape under either
+		// resolution mode), but it changes how `stylex.props()` resolves an overlap at runtime (see
+		// `stylex-layer-contract.md`). If the two compile sites disagreed on this option, a shorthand
+		// compiled by one could carry tombstones the other's matching longhand doesn't expect,
+		// silently changing which of two overlapping `xstyle`/recipe declarations wins.
+		const fixture = await createConsumerViteFixture(INITIAL_COLOR);
+		try {
+			await writeFile(fixture.stylesPath, OVERLAP_STYLES_SOURCE, 'utf8');
+			const result = await build(viteConfig(fixture.fixtureDir, { command: 'build' }));
+			const css = cssFromBuild(result);
+			// The shorthand and the overlapping longhand land in different `overrides.priority*`
+			// layers — the same shape `@luke-ui/react`'s own compile produces for the identical
+			// overlap (`recipe-authoring.browser.test.tsx`). This only proves the CSS this compiler
+			// emits (layer grouping, not the tombstones carried on the compiled JS object); the real
+			// runtime cascade outcome is `packed-consumer.test.ts`'s job, against a packed tarball.
+			expect(css).toMatch(/overrides\.priority1, overrides\.priority2, utilities;/);
+			const priority1Layer = css.match(/@layer overrides\.priority1\{\n([^}]*)\}/)?.[1];
+			const priority2Layer = css.match(/@layer overrides\.priority2\{\n([^}]*)\}/)?.[1];
+			expect(priority1Layer).toContain('padding:20px');
+			expect(priority2Layer).toContain('padding-inline-start:4px');
+		} finally {
+			await fixture.cleanup();
+		}
+	},
+);
+
 function expectDocumentedStylexCss(css: string, color: string): void {
 	expect(css).toMatch(LAYER_ORDER_PATTERN);
 	expect(css).toContain(color);

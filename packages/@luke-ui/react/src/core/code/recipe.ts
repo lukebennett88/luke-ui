@@ -1,10 +1,10 @@
-import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
-import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
+import type { RecipeSelection } from '../styles/recipe-authoring.js';
+import { recipe } from '../styles/recipe-authoring.js';
 
-const styles = stylex.create({
-	root: {
+/** Recipe for the `Code` component's inline code appearance. */
+export const codeRecipe = recipe({
+	base: {
 		backgroundColor: vars.color.surface.recessed,
 		borderRadius: vars.radius.control,
 		color: vars.color.text.primary,
@@ -17,12 +17,5 @@ const styles = stylex.create({
 	},
 });
 
-/** Canonical resolver for the `Code` component's inline code appearance. */
-export const resolveCodeRecipeStyles = createRecipeStyles({
-	base: styles.root,
-});
-
-/** Recipe for the `Code` component's inline code appearance. */
-export const codeRecipe = createRecipe(resolveCodeRecipeStyles);
-
-export type CodeRecipeVariants = RecipeSelection<typeof resolveCodeRecipeStyles>;
+/** Variant type for the `Code` recipe. */
+export type CodeRecipeVariants = RecipeSelection<typeof codeRecipe>;

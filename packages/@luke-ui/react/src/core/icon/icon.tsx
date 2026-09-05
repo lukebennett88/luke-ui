@@ -1,14 +1,14 @@
 import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../../.generated/icon-data.js';
+import { cx } from '../../shared/utils/utils.js';
 import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
 import type { XStyleProps } from '../styles/xstyle.js';
-import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useIconSizeContext } from './icon-size-context.js';
 import type { IconRecipeVariants } from './recipe.js';
-import { resolveIconRecipeStyles } from './recipe.js';
+import { iconRecipe } from './recipe.js';
 
 export type { IconName } from '../../../.generated/icon-data.js';
 export { IconSizeProvider } from './icon-size-context.js';
@@ -92,12 +92,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 		const resolvedPath = typeof path === 'function' ? path(props) : path;
 		const contextSize = useIconSizeContext();
 		const resolvedSize = size ?? contextSize ?? 'medium';
-		const stylexProps = resolveXStyleProps(
-			resolveIconRecipeStyles({ size: resolvedSize }),
-			xstyle,
-			className,
-			style,
-		);
+		const recipeProps = iconRecipe({ size: resolvedSize, xstyle });
 
 		const svgProps: React.SVGProps<SVGSVGElement> = {
 			'aria-hidden': ariaHidden,
@@ -106,7 +101,9 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 			id,
 			role,
 			viewBox: resolvedViewBox,
-			...stylexProps,
+			...recipeProps,
+			className: cx(recipeProps.className, className),
+			style: recipeProps.style === undefined ? style : { ...recipeProps.style, ...style },
 		};
 
 		return (

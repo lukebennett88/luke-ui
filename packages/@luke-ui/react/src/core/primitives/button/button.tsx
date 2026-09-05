@@ -4,12 +4,12 @@ import { Button as RacButton } from 'react-aria-components/Button';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../../types/documented-rac-props.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ButtonRecipeVariants } from './recipe.js';
-import { resolveButtonRecipeStyles } from './recipe.js';
+import { buttonRecipe } from './recipe.js';
 
 interface ButtonRecipeProps extends NonNullable<ButtonRecipeVariants> {}
 
@@ -58,13 +58,13 @@ export function Button(props: ButtonProps): JSX.Element {
 		xstyle,
 		...restProps
 	} = props;
-	const recipeStyles = resolveButtonRecipeStyles({ appearance, isBlock, size, tone });
+	const recipeProps = buttonRecipe({ appearance, isBlock, size, tone, xstyle });
 
 	return (
 		<IconSizeProvider size={BUTTON_ICON_SIZE}>
 			<RacButton
 				{...restProps}
-				{...resolveRacXStyleProps(recipeStyles, xstyle, className, style)}
+				{...composeRacRecipeProps(recipeProps, className, style)}
 				isDisabled={isDisabled}
 				isPending={isPending}
 			>

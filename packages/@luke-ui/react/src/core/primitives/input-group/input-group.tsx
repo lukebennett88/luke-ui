@@ -1,4 +1,4 @@
-import * as stylex from '@stylexjs/stylex';
+import { mergeProps } from '@react-aria/utils';
 import type { ComponentProps, JSX, Ref } from 'react';
 import { createContext, use } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
@@ -9,12 +9,13 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { Icon } from '../../icon/icon.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps, resolveXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { InputGroupSize } from './recipe.js';
-import { resolveInputGroupRecipeSlotStyles } from './recipe.js';
+import { inputGroupRecipe } from './recipe.js';
 
 const InputGroupSizeContext = createContext<InputGroupSize | null>(null);
 
@@ -110,7 +111,7 @@ export type InputGroupSuffixProps = Prettify<_InputGroupSuffixProps>;
  */
 export function InputGroup(props: InputGroupProps): JSX.Element {
 	const { children, className, size = 'medium', style, xstyle, ...groupProps } = props;
-	const groupRecipeStyles = resolveInputGroupRecipeSlotStyles('group', { size });
+	const recipeProps = resolveRecipeSlotProps(inputGroupRecipe, 'group', { size }, xstyle);
 
 	return (
 		<InputGroupSizeContext.Provider value={size}>
@@ -121,10 +122,7 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 			 * `Button` (`BUTTON_ICON_SIZE`) and the field controls (`FIELD_CONTROL_ICON_SIZE`).
 			 */}
 			<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-				<RacGroup
-					{...groupProps}
-					{...resolveRacXStyleProps(groupRecipeStyles, xstyle, className, style)}
-				>
+				<RacGroup {...groupProps} {...composeRacRecipeProps(recipeProps, className, style)}>
 					{composeRenderProps(children, (renderedChildren, { isInvalid }) => {
 						return (
 							<>
@@ -132,11 +130,7 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 								{isInvalid ? (
 									<Icon
 										aria-hidden
-										className={
-											stylex.props(
-												...resolveInputGroupRecipeSlotStyles('invalidIndicator', { size }),
-											).className
-										}
+										{...resolveRecipeSlotProps(inputGroupRecipe, 'invalidIndicator', { size })}
 										name="exclamationTriangle"
 									/>
 								) : null}
@@ -153,11 +147,9 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 export function InputGroupInput(props: InputGroupInputProps): JSX.Element {
 	const { className, size: sizeProp, style, xstyle, ...inputProps } = props;
 	const size = useInputGroupSize(sizeProp);
-	const recipeStyles = resolveInputGroupRecipeSlotStyles('control', { size });
+	const recipeProps = resolveRecipeSlotProps(inputGroupRecipe, 'control', { size }, xstyle);
 
-	return (
-		<RacInput {...inputProps} {...resolveRacXStyleProps(recipeStyles, xstyle, className, style)} />
-	);
+	return <RacInput {...inputProps} {...composeRacRecipeProps(recipeProps, className, style)} />;
 }
 
 /** Content shown at the leading end of an `InputGroup`, such as a currency symbol. */
@@ -168,12 +160,10 @@ export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
 	return (
 		<span
 			{...spanProps}
-			{...resolveXStyleProps(
-				resolveInputGroupRecipeSlotStyles('prefix', { size }),
-				xstyle,
+			{...mergeProps(resolveRecipeSlotProps(inputGroupRecipe, 'prefix', { size }, xstyle), {
 				className,
 				style,
-			)}
+			})}
 		/>
 	);
 }
@@ -189,12 +179,10 @@ export function InputGroupSuffix(props: InputGroupSuffixProps): JSX.Element {
 	return (
 		<span
 			{...spanProps}
-			{...resolveXStyleProps(
-				resolveInputGroupRecipeSlotStyles('suffix', { size }),
-				xstyle,
+			{...mergeProps(resolveRecipeSlotProps(inputGroupRecipe, 'suffix', { size }, xstyle), {
 				className,
 				style,
-			)}
+			})}
 		/>
 	);
 }

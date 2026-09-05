@@ -43,6 +43,7 @@ jobs:
             || github.event.before }}-${{ hashFiles('pnpm-lock.yaml',
             'packages/@luke-ui/react/vitest.config.ts',
             'packages/@luke-ui/react/stylex-vite-plugin.ts',
+            'packages/@luke-ui/react/recipe-authoring-babel-plugin.ts',
             'packages/@luke-ui/react/src/core/stylesheet.css.ts',
             'packages/@luke-ui/react/src/core/test-utils/render-setup.ts',
             'packages/@luke-ui/react/src/core/test-utils/render-mount-state.ts',

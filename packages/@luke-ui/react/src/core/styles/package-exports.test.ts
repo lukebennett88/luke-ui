@@ -1,4 +1,3 @@
-import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import packageJson from '../../../package.json' with { type: 'json' };
 
@@ -45,15 +44,12 @@ test('publishes only the final styling entrypoints', () => {
 	expect('imports' in packageJson).toBe(false);
 });
 
-test('bundles StyleX recipes as the composable resolver/adapter pair without a package recipe-engine import', async () => {
-	const source = await readFile(new URL('../../../dist/blockquote.js', import.meta.url), 'utf8');
-	expect(source).not.toContain('#recipe-engine');
-	expect(source).toMatch(/from ["']\.\/stylex-recipe-/);
-	expect(source).toMatch(/const resolveBlockquoteRecipeStyles = createRecipeStyles\(/);
-	expect(source).toMatch(/const blockquoteRecipe = createRecipe\(resolveBlockquoteRecipeStyles\)/);
-	expect(source).toMatch(/export \{ Blockquote, blockquoteRecipe \}/);
-	expect(source).not.toMatch(/export \{[^}]*resolveBlockquoteRecipeStyles/);
-	expect(source).not.toMatch(/export \{[^}]*resolveStyles/);
+test('publishes a component entrypoint with only its public exports', async () => {
+	const blockquote = await import('@luke-ui/react/blockquote');
+
+	expect(Object.keys(blockquote).sort()).toEqual(['Blockquote', 'blockquoteRecipe']);
+	expect(typeof blockquote.Blockquote).toBe('function');
+	expect(typeof blockquote.blockquoteRecipe).toBe('function');
 });
 
 test('requires react-aria-components as a peer dependency', () => {
@@ -64,4 +60,10 @@ test('requires react-aria-components as a peer dependency', () => {
 test('does not expose the private combobox styling recipe from the primitive entrypoint', async () => {
 	const combobox = await import('@luke-ui/react/primitives/combobox');
 	expect('comboboxRecipe' in combobox).toBe(false);
+});
+
+test('rejects the private recipe engine package path', async () => {
+	const privatePath: string = '@luke-ui/react/styles/recipe-engine';
+
+	await expect(import(privatePath)).rejects.toThrow(/exports|package subpath/i);
 });

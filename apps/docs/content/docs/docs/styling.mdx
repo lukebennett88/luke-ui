@@ -72,10 +72,14 @@ Styles resolve from lowest priority to highest:
 3. application CSS in `utilities`, or ordinary unlayered application CSS
 4. inline `style`
 
-`xstyle` replaces a same-property recipe value. Application styles in a higher layer, or normal
-unlayered application CSS, can override `xstyle`. A class authored in a lower-priority layer such as
-`base` still loses. For normal declarations, inline `style` wins over class-based styling. An author
-`!important` declaration can override a normal inline style.
+`xstyle` replaces a same-property recipe value. One current exception: a `padding` or
+`paddingInline` value in `xstyle` does not replace a component's `paddingInlineStart` or
+`paddingInlineEnd` — override those with the same logical property instead. This is an upstream
+StyleX limitation specific to inline padding. The `margin`, `inset`, `borderWidth`, and
+`borderRadius` shorthands all replace their logical longhands as expected. Application styles in a
+higher layer, or normal unlayered application CSS, can override `xstyle`. A class authored in a
+lower-priority layer such as `base` still loses. For normal declarations, inline `style` wins over
+class-based styling. An author `!important` declaration can override a normal inline style.
 
 ### Apply a component recipe
 
@@ -108,6 +112,21 @@ are styling.
 import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
 
 const { group, control } = inputGroupRecipe({ size: 'medium' });
+```
+
+Pass a partial slot map to `xstyle` when only one part needs an override.
+
+```tsx
+import * as stylex from '@stylexjs/stylex';
+import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
+
+const styles = stylex.create({ prefix: { color: 'rebeccapurple' } });
+const props = inputGroupRecipe({ xstyle: { prefix: styles.prefix } });
+return (
+	<div {...props.group}>
+		<span {...props.prefix}>Name</span>
+	</div>
+);
 ```
 
 Do not import a recipe to restyle a Luke UI component from the outside. Use the component's props

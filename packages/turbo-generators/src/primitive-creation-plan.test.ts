@@ -80,18 +80,18 @@ describe('createPrimitivePlan', () => {
 
 		expect(primitiveSource).toContain('export function StatusBadge');
 		expect(primitiveSource).toContain("import type { XStyleProps } from '../../styles/xstyle.js';");
-		expect(primitiveSource).toContain('resolveStatusBadgeRecipeStyles');
-		expect(recipeSource).toContain('import { createRecipe, createRecipeStyles }');
-		expect(recipeSource).toContain(
-			'export const resolveStatusBadgeRecipeStyles = createRecipeStyles({',
+		expect(primitiveSource).toContain('statusBadgeRecipe({ xstyle })');
+		expect(primitiveSource).toContain('{...recipeProps}');
+		expect(primitiveSource).toContain('className={cx(recipeProps.className, className)}');
+		expect(primitiveSource).toContain(
+			'style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}',
 		);
+		expect(recipeSource).toContain("import { recipe } from '../../styles/recipe-authoring.js';");
+		expect(recipeSource).toContain('export const statusBadgeRecipe = recipe({');
+		expect(recipeSource).toContain('base: {},');
 		expect(recipeSource).toContain(
-			'export const statusBadgeRecipe = createRecipe(resolveStatusBadgeRecipeStyles);',
+			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
 		);
-		expect(recipeSource).toContain(
-			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof resolveStatusBadgeRecipeStyles>;',
-		);
-		expect(recipeSource).toContain('root: {},');
 		expect(recipeSource).not.toContain('inline-flex');
 		expect(recipeSource).not.toContain('createSingleRecipe');
 		expect(packageExportSource).toContain(

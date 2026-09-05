@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
-import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
+import type { RecipeSelection } from '../styles/recipe-authoring.js';
+import { recipe } from '../styles/recipe-authoring.js';
 
 export const styles = stylex.create({
 	iconPending: { opacity: 0 },
@@ -43,15 +43,15 @@ export const sizeStyles = {
 	small: styles.sizeSmall,
 } as const;
 
-/** Canonical resolver for the `IconButton` component's size styles. */
-const resolveIconButtonRecipeStyles = createRecipeStyles({
+/** Recipe for the `IconButton` component's size styles. */
+export const iconButtonRecipe = recipe({
 	variants: {
-		size: sizeStyles,
+		size: {
+			medium: sizeStyles.medium,
+			small: sizeStyles.small,
+		},
 	},
 });
 
-/** Recipe for the `IconButton` component's size styles. */
-export const iconButtonRecipe = createRecipe(resolveIconButtonRecipeStyles);
-
 /** Variant type for the `IconButton` recipe. */
-export type IconButtonRecipeVariants = RecipeSelection<typeof resolveIconButtonRecipeStyles>;
+export type IconButtonRecipeVariants = RecipeSelection<typeof iconButtonRecipe>;

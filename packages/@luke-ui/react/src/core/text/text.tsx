@@ -1,12 +1,12 @@
 import { Text as RacText } from 'react-aria-components/Text';
+import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/contract.js';
 import type { XStyleProps } from '../styles/xstyle.js';
-import { resolveXStyleProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { TextRecipeVariants } from './recipe.js';
-import { resolveTextRecipeStyles } from './recipe.js';
+import { textRecipe } from './recipe.js';
 
 interface TextVariantProps extends NonNullable<TextRecipeVariants> {}
 
@@ -129,30 +129,32 @@ export function Text(props: TextProps) {
 		if (shouldDisableTrim !== undefined) return shouldDisableTrim;
 		return !blockTextElementTypes.has(elementType);
 	})();
-	const stylexProps = resolveXStyleProps(
-		resolveTextRecipeStyles({
-			color,
-			fontVariantNumeric,
-			...(shouldInheritFont
-				? {}
-				: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
-			isVisuallyHidden,
-			lineClamp,
-			shouldDisableTrim: resolvedShouldDisableTrim,
-			shouldInheritFont,
-			textAlign,
-			textDecoration,
-			textTransform,
-			textWrap,
-			typography: resolvedTypography,
-		}),
+	const recipeProps = textRecipe({
+		color,
+		fontVariantNumeric,
+		...(shouldInheritFont
+			? {}
+			: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
+		isVisuallyHidden,
+		lineClamp,
+		shouldDisableTrim: resolvedShouldDisableTrim,
+		shouldInheritFont,
+		textAlign,
+		textDecoration,
+		textTransform,
+		textWrap,
+		typography: resolvedTypography,
 		xstyle,
-		className,
-		style,
-	);
+	});
 
 	return (
-		<RacText {...racProps} {...stylexProps} elementType={elementType}>
+		<RacText
+			{...racProps}
+			{...recipeProps}
+			className={cx(recipeProps.className, className)}
+			elementType={elementType}
+			style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
+		>
 			{children}
 		</RacText>
 	);

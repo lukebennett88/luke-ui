@@ -1,60 +1,43 @@
-import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
+import type { RecipeSelection } from '../styles/recipe-authoring.js';
+import { compiledStyle, recipe } from '../styles/recipe-authoring.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
-import type { RecipeSelection } from '../styles/stylex-recipe.js';
-import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
 
-const styles = stylex.create({
-	content: {
+export const buttonContent = recipe({
+	base: {
 		alignItems: 'center',
 		display: 'inline-flex',
 		minInlineSize: 0,
 		position: 'relative',
 	},
-	label: {
+});
+
+export const buttonLabel = recipe({
+	base: {
 		alignItems: 'center',
 		display: 'inline-flex',
 		gap: vars.space.sp8,
 		minInlineSize: 0,
 	},
-	labelPendingTrue: {
-		opacity: 0,
-	},
-	// Button's only addition to the shared overlay base. It stays a separate entry because
-	// StyleX cannot spread an imported compiled style into `stylex.create` ("Could not resolve
-	// the path to the imported file"), so the two are composed as the recipe's base array instead.
-	spinnerOverlayForcedColors: {
-		'@media (forced-colors: active)': {
-			color: 'ButtonText',
-		},
-	},
-});
-
-const resolveButtonContentStyles = createRecipeStyles({
-	base: styles.content,
-});
-
-export const buttonContent = createRecipe(resolveButtonContentStyles);
-
-const resolveButtonLabelStyles = createRecipeStyles({
-	base: styles.label,
 	defaultVariants: {
 		isPending: false,
 	},
 	variants: {
 		isPending: {
 			false: null,
-			true: styles.labelPendingTrue,
+			true: { opacity: 0 },
 		},
 	},
 });
 
-export const buttonLabel = createRecipe(resolveButtonLabelStyles);
+export type ButtonLabelVariants = RecipeSelection<typeof buttonLabel>;
 
-export type ButtonLabelVariants = RecipeSelection<typeof resolveButtonLabelStyles>;
-
-const resolveSpinnerOverlayStyles = createRecipeStyles({
-	base: [spinnerOverlayBase, styles.spinnerOverlayForcedColors],
+// Button's only addition to the shared overlay base. It stays a separate array entry because
+// StyleX cannot spread an imported compiled style into `stylex.create` ("Could not resolve the
+// path to the imported file"), so the two are composed as the recipe's base array instead.
+export const spinnerOverlay = recipe({
+	base: [
+		compiledStyle(spinnerOverlayBase),
+		{ '@media (forced-colors: active)': { color: 'ButtonText' } },
+	],
 });
-
-export const spinnerOverlay = createRecipe(resolveSpinnerOverlayStyles);

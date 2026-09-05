@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
+import { recipe } from '../styles/recipe-authoring.js';
 
 /**
  * WCAG-standard "visually hidden" style: keeps content in the layout and the
@@ -8,11 +8,9 @@ import { createRecipe, createRecipeStyles } from '../styles/stylex-recipe.js';
  * `clip-path: circle(0)` (which leaves a full-size layout box and has
  * questionable Safari focus-ring support).
  *
- * Shared by the `visuallyHidden` recipe and Text's `isVisuallyHidden` variant. Unlike a Vanilla
- * Extract style object, a compiled StyleX style (the `styles.visuallyHidden` result below) is an
- * ordinary value: a recipe's `variants` map can reference it directly without spreading or
- * recompiling it, so Text's `isVisuallyHidden: true` variant imports this same compiled style
- * instead of declaring the properties a second time.
+ * Declared with `stylex.create` rather than inline in the recipe below because Text's
+ * `isVisuallyHidden` variant references the compiled style directly, so these declarations are
+ * authored and extracted once rather than repeated in a second recipe.
  */
 const styles = stylex.create({
 	visuallyHidden: {
@@ -29,10 +27,7 @@ const styles = stylex.create({
 /** StyleX style for content hidden visually but kept available to assistive technology. */
 export const visuallyHiddenStyle = styles.visuallyHidden;
 
-/** Canonical resolver for content hidden visually but kept available to assistive technology. */
-export const resolveVisuallyHiddenRecipeStyles = createRecipeStyles({
+/** Recipe for content hidden visually but kept available to assistive technology. */
+export const visuallyHiddenRecipe = recipe({
 	base: visuallyHiddenStyle,
 });
-
-/** Recipe for content hidden visually but kept available to assistive technology. */
-export const visuallyHiddenRecipe = createRecipe(resolveVisuallyHiddenRecipeStyles);

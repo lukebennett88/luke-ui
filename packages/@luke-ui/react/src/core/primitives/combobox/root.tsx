@@ -1,12 +1,13 @@
 import type { JSX, Ref } from 'react';
 import type { Key, ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { ComboBox as RacComboBox } from 'react-aria-components/ComboBox';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './recipe.js';
-import { resolveComboboxRecipeSlotStyles } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 import { ComboboxSizeProvider } from './size-context.js';
 
 export type { ComboboxSize };
@@ -87,13 +88,13 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 		xstyle,
 		...comboboxProps
 	} = props;
-	const recipeStyles = resolveComboboxRecipeSlotStyles('root', { size });
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'root', { size }, xstyle);
 
 	return (
 		<ComboboxSizeProvider size={size}>
 			<RacComboBox
 				{...comboboxProps}
-				{...resolveRacXStyleProps(recipeStyles, xstyle, className, style)}
+				{...composeRacRecipeProps(recipeProps, className, style)}
 				menuTrigger={menuTrigger}
 				ref={ref}
 			/>

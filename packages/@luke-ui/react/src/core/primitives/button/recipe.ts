@@ -1,10 +1,10 @@
-import * as stylex from '@stylexjs/stylex';
 import { fontMetrics } from '../../../theme/font-metric-scale.stylex.js';
 import { vars } from '../../../theme/tokens.stylex.js';
-import type { RecipeSelection } from '../../styles/stylex-recipe.js';
-import { createRecipe, createRecipeStyles } from '../../styles/stylex-recipe.js';
+import type { RecipeSelection } from '../../styles/recipe-authoring.js';
+import { recipe } from '../../styles/recipe-authoring.js';
 
-const styles = stylex.create({
+/** Semantic appearance and material recipe shared by Button and IconButton. */
+export const buttonRecipe = recipe({
 	base: {
 		alignItems: 'center',
 		appearance: 'none',
@@ -79,174 +79,181 @@ const styles = stylex.create({
 			},
 		},
 	},
-	compoundGhostAccent: {
-		backgroundColor: 'transparent',
-		backgroundImage: 'none',
-		borderColor: 'transparent',
-		boxShadow: 'none',
-		color: vars.color.foreground.accent.rest,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.accent.subtle.hover,
-				boxShadow: vars.depth.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.accent.subtle.pressed,
-			boxShadow: vars.depth.recessed,
-		},
-	},
-	compoundGhostDanger: {
-		backgroundColor: 'transparent',
-		backgroundImage: 'none',
-		borderColor: 'transparent',
-		boxShadow: 'none',
-		color: vars.color.foreground.danger.rest,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.danger.subtle.hover,
-				boxShadow: vars.depth.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.danger.subtle.pressed,
-			boxShadow: vars.depth.recessed,
-		},
-	},
-	compoundGhostNeutral: {
-		backgroundColor: 'transparent',
-		backgroundImage: 'none',
-		borderColor: 'transparent',
-		boxShadow: 'none',
-		color: vars.color.text.primary,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.neutral.subtle.hover,
-				boxShadow: vars.depth.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.neutral.subtle.pressed,
-			boxShadow: vars.depth.recessed,
-		},
-	},
-	compoundSolidAccent: {
-		backgroundColor: vars.color.background.accent.solid.rest,
-		backgroundImage: vars.actionControlFinish.resting,
-		color: vars.color.foreground.accent.onSolid,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.accent.solid.hover,
-				backgroundImage: vars.actionControlFinish.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.accent.solid.pressed,
-			backgroundImage: vars.actionControlFinish.recessed,
-		},
-		'@media (forced-colors: active)': { backgroundImage: 'none' },
-	},
-	compoundSolidDanger: {
-		backgroundColor: vars.color.background.danger.solid.rest,
-		backgroundImage: vars.actionControlFinish.resting,
-		color: vars.color.foreground.danger.onSolid,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.danger.solid.hover,
-				backgroundImage: vars.actionControlFinish.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.danger.solid.pressed,
-			backgroundImage: vars.actionControlFinish.recessed,
-		},
-		'@media (forced-colors: active)': { backgroundImage: 'none' },
-	},
-	compoundSolidNeutral: {
-		backgroundColor: vars.color.background.neutral.solid.rest,
-		backgroundImage: vars.actionControlFinish.resting,
-		color: vars.color.foreground.neutral.onSolid,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.neutral.solid.hover,
-				backgroundImage: vars.actionControlFinish.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.neutral.solid.pressed,
-			backgroundImage: vars.actionControlFinish.recessed,
-		},
-		'@media (forced-colors: active)': { backgroundImage: 'none' },
-	},
-	compoundSubtleAccent: {
-		backgroundColor: vars.color.background.accent.subtle.rest,
-		backgroundImage: vars.actionControlFinish.resting,
-		color: vars.color.foreground.accent.rest,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.accent.subtle.hover,
-				backgroundImage: vars.actionControlFinish.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.accent.subtle.pressed,
-			backgroundImage: vars.actionControlFinish.recessed,
-		},
-		'@media (forced-colors: active)': { backgroundImage: 'none' },
-	},
-	compoundSubtleDanger: {
-		backgroundColor: vars.color.background.danger.subtle.rest,
-		backgroundImage: vars.actionControlFinish.resting,
-		color: vars.color.foreground.danger.rest,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.danger.subtle.hover,
-				backgroundImage: vars.actionControlFinish.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.danger.subtle.pressed,
-			backgroundImage: vars.actionControlFinish.recessed,
-		},
-		'@media (forced-colors: active)': { backgroundImage: 'none' },
-	},
-	compoundSubtleNeutral: {
-		backgroundColor: vars.color.background.neutral.subtle.rest,
-		backgroundImage: vars.actionControlFinish.resting,
-		color: vars.color.text.primary,
-		'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
-			{
-				backgroundColor: vars.color.background.neutral.subtle.hover,
-				backgroundImage: vars.actionControlFinish.raised,
-			},
-		'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
-			backgroundColor: vars.color.background.neutral.subtle.pressed,
-			backgroundImage: vars.actionControlFinish.recessed,
-		},
-		'@media (forced-colors: active)': { backgroundImage: 'none' },
-	},
-	isBlockTrue: { inlineSize: '100%' },
-	sizeMedium: {
-		blockSize: vars.controlSize.medium,
-		fontSize: fontMetrics.step14.fontSize,
-		gap: vars.space.sp8,
-		paddingInline: vars.space.sp16,
-	},
-	sizeSmall: {
-		blockSize: vars.controlSize.small,
-		fontSize: fontMetrics.step12.fontSize,
-		gap: vars.space.sp4,
-		letterSpacing: fontMetrics.step12.letterSpacing,
-		lineHeight: fontMetrics.step12.lineHeight,
-		paddingInline: vars.space.sp12,
-	},
-});
-
-/** Canonical resolver for the semantic appearance and material recipe shared by Button and IconButton. */
-export const resolveButtonRecipeStyles = createRecipeStyles({
-	base: styles.base,
 	compoundVariants: [
-		{ style: styles.compoundSolidNeutral, variants: { appearance: 'solid', tone: 'neutral' } },
-		{ style: styles.compoundSolidAccent, variants: { appearance: 'solid', tone: 'accent' } },
-		{ style: styles.compoundSolidDanger, variants: { appearance: 'solid', tone: 'danger' } },
-		{ style: styles.compoundSubtleNeutral, variants: { appearance: 'subtle', tone: 'neutral' } },
-		{ style: styles.compoundSubtleAccent, variants: { appearance: 'subtle', tone: 'accent' } },
-		{ style: styles.compoundSubtleDanger, variants: { appearance: 'subtle', tone: 'danger' } },
-		{ style: styles.compoundGhostNeutral, variants: { appearance: 'ghost', tone: 'neutral' } },
-		{ style: styles.compoundGhostAccent, variants: { appearance: 'ghost', tone: 'accent' } },
-		{ style: styles.compoundGhostDanger, variants: { appearance: 'ghost', tone: 'danger' } },
+		{
+			appearance: 'solid',
+			style: {
+				backgroundColor: vars.color.background.neutral.solid.rest,
+				backgroundImage: vars.actionControlFinish.resting,
+				color: vars.color.foreground.neutral.onSolid,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.neutral.solid.hover,
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.neutral.solid.pressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
+				'@media (forced-colors: active)': { backgroundImage: 'none' },
+			},
+			tone: 'neutral',
+		},
+		{
+			appearance: 'solid',
+			style: {
+				backgroundColor: vars.color.background.accent.solid.rest,
+				backgroundImage: vars.actionControlFinish.resting,
+				color: vars.color.foreground.accent.onSolid,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.accent.solid.hover,
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.accent.solid.pressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
+				'@media (forced-colors: active)': { backgroundImage: 'none' },
+			},
+			tone: 'accent',
+		},
+		{
+			appearance: 'solid',
+			style: {
+				backgroundColor: vars.color.background.danger.solid.rest,
+				backgroundImage: vars.actionControlFinish.resting,
+				color: vars.color.foreground.danger.onSolid,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.danger.solid.hover,
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.danger.solid.pressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
+				'@media (forced-colors: active)': { backgroundImage: 'none' },
+			},
+			tone: 'danger',
+		},
+		{
+			appearance: 'subtle',
+			style: {
+				backgroundColor: vars.color.background.neutral.subtle.rest,
+				backgroundImage: vars.actionControlFinish.resting,
+				color: vars.color.text.primary,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.neutral.subtle.hover,
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.neutral.subtle.pressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
+				'@media (forced-colors: active)': { backgroundImage: 'none' },
+			},
+			tone: 'neutral',
+		},
+		{
+			appearance: 'subtle',
+			style: {
+				backgroundColor: vars.color.background.accent.subtle.rest,
+				backgroundImage: vars.actionControlFinish.resting,
+				color: vars.color.foreground.accent.rest,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.accent.subtle.hover,
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.accent.subtle.pressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
+				'@media (forced-colors: active)': { backgroundImage: 'none' },
+			},
+			tone: 'accent',
+		},
+		{
+			appearance: 'subtle',
+			style: {
+				backgroundColor: vars.color.background.danger.subtle.rest,
+				backgroundImage: vars.actionControlFinish.resting,
+				color: vars.color.foreground.danger.rest,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.danger.subtle.hover,
+						backgroundImage: vars.actionControlFinish.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.danger.subtle.pressed,
+					backgroundImage: vars.actionControlFinish.recessed,
+				},
+				'@media (forced-colors: active)': { backgroundImage: 'none' },
+			},
+			tone: 'danger',
+		},
+		{
+			appearance: 'ghost',
+			style: {
+				backgroundColor: 'transparent',
+				backgroundImage: 'none',
+				borderColor: 'transparent',
+				boxShadow: 'none',
+				color: vars.color.text.primary,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.neutral.subtle.hover,
+						boxShadow: vars.depth.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.neutral.subtle.pressed,
+					boxShadow: vars.depth.recessed,
+				},
+			},
+			tone: 'neutral',
+		},
+		{
+			appearance: 'ghost',
+			style: {
+				backgroundColor: 'transparent',
+				backgroundImage: 'none',
+				borderColor: 'transparent',
+				boxShadow: 'none',
+				color: vars.color.foreground.accent.rest,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.accent.subtle.hover,
+						boxShadow: vars.depth.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.accent.subtle.pressed,
+					boxShadow: vars.depth.recessed,
+				},
+			},
+			tone: 'accent',
+		},
+		{
+			appearance: 'ghost',
+			style: {
+				backgroundColor: 'transparent',
+				backgroundImage: 'none',
+				borderColor: 'transparent',
+				boxShadow: 'none',
+				color: vars.color.foreground.danger.rest,
+				'[data-hovered="true"]:not([data-pressed="true"]):not([data-disabled="true"]):not([data-pending="true"])':
+					{
+						backgroundColor: vars.color.background.danger.subtle.hover,
+						boxShadow: vars.depth.raised,
+					},
+				'[data-pressed="true"]:not([data-disabled="true"]):not([data-pending="true"])': {
+					backgroundColor: vars.color.background.danger.subtle.pressed,
+					boxShadow: vars.depth.recessed,
+				},
+			},
+			tone: 'danger',
+		},
 	],
 	defaultVariants: {
 		appearance: 'solid',
@@ -262,11 +269,23 @@ export const resolveButtonRecipeStyles = createRecipeStyles({
 		},
 		isBlock: {
 			false: null,
-			true: styles.isBlockTrue,
+			true: { inlineSize: '100%' },
 		},
 		size: {
-			medium: styles.sizeMedium,
-			small: styles.sizeSmall,
+			medium: {
+				blockSize: vars.controlSize.medium,
+				fontSize: fontMetrics.step14.fontSize,
+				gap: vars.space.sp8,
+				paddingInline: vars.space.sp16,
+			},
+			small: {
+				blockSize: vars.controlSize.small,
+				fontSize: fontMetrics.step12.fontSize,
+				gap: vars.space.sp4,
+				letterSpacing: fontMetrics.step12.letterSpacing,
+				lineHeight: fontMetrics.step12.lineHeight,
+				paddingInline: vars.space.sp12,
+			},
 		},
 		tone: {
 			accent: null,
@@ -276,7 +295,5 @@ export const resolveButtonRecipeStyles = createRecipeStyles({
 	},
 });
 
-/** Semantic appearance and material recipe shared by Button and IconButton. */
-export const buttonRecipe = createRecipe(resolveButtonRecipeStyles);
-
-export type ButtonRecipeVariants = RecipeSelection<typeof resolveButtonRecipeStyles>;
+/** Variant type for the `Button` recipe. */
+export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;

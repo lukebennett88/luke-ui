@@ -1,6 +1,13 @@
+import * as stylex from '@stylexjs/stylex';
 import { expect, test } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
+import {
+	CheckboxContent,
+	CheckboxControl,
+	CheckboxIndicator,
+	Checkbox as PrimitiveCheckbox,
+} from '../primitives/checkbox/checkbox.js';
 import { fieldMessageIcon, fieldMessageIndent } from '../primitives/field/recipe.js';
 import { render } from '../test-utils/render.js';
 import { textLineHeight } from '../text/text-line-height.js';
@@ -27,6 +34,70 @@ testIntegration('checkbox', async () => {
 	await user.click(locator.getByText('Terms'));
 	// oxlint-disable-next-line vitest/no-standalone-expect
 	expect(selected).toBe(true);
+});
+
+test('an indicator outside content receives the field state', () => {
+	const selected = render(
+		<PrimitiveCheckbox isSelected>
+			<CheckboxContent>Selected</CheckboxContent>
+			<CheckboxControl>
+				<CheckboxIndicator />
+			</CheckboxControl>
+		</PrimitiveCheckbox>,
+	);
+	const unselected = render(
+		<PrimitiveCheckbox>
+			<CheckboxContent>Unselected</CheckboxContent>
+			<CheckboxControl>
+				<CheckboxIndicator />
+			</CheckboxControl>
+		</PrimitiveCheckbox>,
+	);
+
+	const selectedIndicator = selected.container.querySelector('[aria-hidden="true"]');
+	const unselectedIndicator = unselected.container.querySelector('[aria-hidden="true"]');
+	if (!(selectedIndicator instanceof HTMLElement)) throw new Error('Expected selected indicator.');
+	if (!(unselectedIndicator instanceof HTMLElement))
+		throw new Error('Expected unselected indicator.');
+	expect(getComputedStyle(selectedIndicator).backgroundColor).not.toBe(
+		getComputedStyle(unselectedIndicator).backgroundColor,
+	);
+});
+
+test('content render receives merged recipe and consumer props', () => {
+	const xstyle = stylex.create({ content: { letterSpacing: '0.1px' } }).content;
+	const expectedXStyleClass = stylex.props(xstyle).className;
+	let receivedClassName = '';
+	let receivedOpacity: unknown;
+	let receivedSelected: boolean | undefined;
+
+	const { container } = render(
+		<PrimitiveCheckbox>
+			<CheckboxContent
+				className="consumer-content"
+				style={{ opacity: 0.5 }}
+				xstyle={xstyle}
+				render={(domProps, renderProps) => {
+					receivedClassName = domProps.className ?? '';
+					receivedOpacity = domProps.style?.opacity;
+					receivedSelected = renderProps.isSelected;
+					// The hidden input is part of the children in domProps.
+					// oxlint-disable-next-line jsx-a11y/label-has-associated-control
+					return <label {...domProps} data-custom-render />;
+				}}
+			>
+				Custom render
+			</CheckboxContent>
+		</PrimitiveCheckbox>,
+	);
+
+	const content = checkboxContent(container);
+	if (expectedXStyleClass == null) throw new Error('Expected the xstyle class.');
+	expect(content.hasAttribute('data-custom-render')).toBe(true);
+	expect(receivedClassName).toContain(expectedXStyleClass);
+	expect(receivedClassName).toContain('consumer-content');
+	expect(receivedOpacity).toBe(0.5);
+	expect(receivedSelected).toBe(false);
 });
 
 test('selected hover uses the filled hover fill, not the unselected hover border', async () => {
@@ -204,10 +275,6 @@ function checkboxIndicator(container: HTMLElement): HTMLElement {
 	return indicator;
 }
 
-function applyPointerState(content: HTMLElement, state: IndicatorState): void {
-	if (state.hovered === true) content.setAttribute('data-hovered', 'true');
-}
-
 async function indicatorComputedStyle(state: IndicatorState) {
 	const { container, user } = render(
 		<Checkbox
@@ -221,7 +288,6 @@ async function indicatorComputedStyle(state: IndicatorState) {
 	);
 	const content = checkboxContent(container);
 	if (state.hovered === true) await user.hover(content);
-	applyPointerState(content, state);
 	const style = getComputedStyle(checkboxIndicator(container));
 	return {
 		backgroundColor: style.backgroundColor,

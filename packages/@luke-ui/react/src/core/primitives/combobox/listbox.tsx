@@ -4,12 +4,13 @@ import type { ListBoxProps as RacListBoxProps } from 'react-aria-components/Comb
 import { ListBox as RacListBox } from 'react-aria-components/ComboBox';
 import { ListBoxContext } from 'react-aria-components/ListBox';
 import { useSlottedContext } from 'react-aria-components/slots';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { useComboboxPresentation } from './presentation-context.js';
-import { resolveComboboxRecipeSlotStyles } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
 	RacListBoxProps<T>,
@@ -36,7 +37,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 	const listBoxContext = useSlottedContext(ListBoxContext);
 	const collectionItems = items ?? listBoxContext?.items;
 	const presentation = useComboboxPresentation();
-	const recipeStyles = resolveComboboxRecipeSlotStyles('listBox', { presentation });
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'listBox', { presentation }, xstyle);
 	const listBoxChildren =
 		typeof children === 'function' ? (
 			<Collection<T> dependencies={dependencies} items={collectionItems}>
@@ -49,7 +50,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 	return (
 		<RacListBox
 			{...listBoxProps}
-			{...resolveRacXStyleProps(recipeStyles, xstyle, listBoxProps.className, style)}
+			{...composeRacRecipeProps(recipeProps, listBoxProps.className, style)}
 		>
 			{listBoxChildren}
 			{loadMoreItem}

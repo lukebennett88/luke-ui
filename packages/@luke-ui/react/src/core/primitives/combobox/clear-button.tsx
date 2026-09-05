@@ -4,12 +4,13 @@ import type { ButtonProps as RacButtonProps } from 'react-aria-components/ComboB
 import { ComboBoxStateContext, Button as RacButton } from 'react-aria-components/ComboBox';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './recipe.js';
-import { resolveComboboxRecipeSlotStyles } from './recipe.js';
+import { comboboxRecipe } from './recipe.js';
 import { useComboboxSize } from './size-context.js';
 
 type _ComboboxClearButtonOmit = DistributiveOmit<RacButtonProps, 'className' | 'slot'>;
@@ -27,7 +28,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
 	const hasValue = Array.isArray(state?.value) ? state.value.length > 0 : state?.value != null;
-	const recipeStyles = resolveComboboxRecipeSlotStyles('clearButton', { size });
+	const recipeProps = resolveRecipeSlotProps(comboboxRecipe, 'clearButton', { size }, xstyle);
 
 	if (state == null || !hasValue) {
 		return null;
@@ -38,7 +39,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacButton
 				{...buttonProps}
-				{...resolveRacXStyleProps(recipeStyles, xstyle, buttonProps.className, style)}
+				{...composeRacRecipeProps(recipeProps, buttonProps.className, style)}
 				onPress={(event) => {
 					state.setValue(Array.isArray(state.value) ? [] : null);
 					state.setInputValue('');

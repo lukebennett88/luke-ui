@@ -1,4 +1,5 @@
-import type { ComponentProps, JSX } from 'react';
+import { useMemo } from 'react';
+import type { ComponentProps, JSX, ReactNode } from 'react';
 import type {
 	CheckboxButtonProps as RacCheckboxButtonProps,
 	CheckboxFieldProps as RacCheckboxFieldProps,
@@ -7,16 +8,61 @@ import {
 	CheckboxButton as RacCheckboxButton,
 	CheckboxField as RacCheckboxField,
 } from 'react-aria-components/Checkbox';
+import { composeRenderProps } from 'react-aria-components/composeRenderProps';
+import { mergeProps } from '../../../shared/utils/utils.js';
+import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { resolveRacXStyleProps, resolveXStyleProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import type { CheckboxState } from './context.js';
+import { CheckboxStateContext, useCheckboxState } from './context.js';
 import type { CheckboxRecipeVariants } from './recipe.js';
-import { resolveCheckboxRecipeSlotStyles } from './recipe.js';
+import { checkboxStateRecipe } from './recipe.js';
 
 type _CheckboxOmit = DistributiveOmit<RacCheckboxFieldProps, 'children'>;
 
-interface CheckboxRecipeProps extends NonNullable<CheckboxRecipeVariants> {}
+interface CheckboxStateProviderProps extends CheckboxState {
+	children: ReactNode;
+}
+
+function CheckboxStateProvider({
+	children,
+	isDisabled,
+	isFocusVisible,
+	isHovered,
+	isIndeterminate,
+	isInvalid,
+	isPressed,
+	isReadOnly,
+	isSelected,
+}: CheckboxStateProviderProps): JSX.Element {
+	const value = useMemo(
+		() => ({
+			isDisabled,
+			isFocusVisible,
+			isHovered,
+			isIndeterminate,
+			isInvalid,
+			isPressed,
+			isReadOnly,
+			isSelected,
+		}),
+		[
+			isDisabled,
+			isFocusVisible,
+			isHovered,
+			isIndeterminate,
+			isInvalid,
+			isPressed,
+			isReadOnly,
+			isSelected,
+		],
+	);
+	return <CheckboxStateContext.Provider value={value}>{children}</CheckboxStateContext.Provider>;
+}
+
+type CheckboxRecipeProps = NonNullable<CheckboxRecipeVariants>;
 
 interface CheckboxStyleProps extends XStyleProps {
 	/**
@@ -53,9 +99,7 @@ export type CheckboxProps = Prettify<_CheckboxProps>;
 
 type _CheckboxContentOmit = DistributiveOmit<RacCheckboxButtonProps, 'children'>;
 
-interface CheckboxPartStyleProps extends XStyleProps {}
-
-interface _CheckboxContentProps extends _CheckboxContentOmit, CheckboxPartStyleProps {
+interface _CheckboxContentProps extends _CheckboxContentOmit, XStyleProps {
 	/** The control, indicator, and visible checkbox label. */
 	children: RacCheckboxButtonProps['children'];
 }
@@ -63,26 +107,61 @@ interface _CheckboxContentProps extends _CheckboxContentOmit, CheckboxPartStyleP
 /** Props for the Checkbox primitive's clickable content. */
 export type CheckboxContentProps = Prettify<_CheckboxContentProps>;
 
-interface _CheckboxControlProps extends ComponentProps<'span'>, CheckboxPartStyleProps {}
+interface _CheckboxControlProps extends ComponentProps<'span'>, XStyleProps {}
 
 /** Props for the Checkbox primitive's control wrapper. */
 export type CheckboxControlProps = Prettify<_CheckboxControlProps>;
 
-interface _CheckboxIndicatorProps extends ComponentProps<'span'>, CheckboxPartStyleProps {}
+interface _CheckboxIndicatorProps extends ComponentProps<'span'>, XStyleProps {}
 
 /** Props for the Checkbox primitive's visual indicator. */
 export type CheckboxIndicatorProps = Prettify<_CheckboxIndicatorProps>;
 
 /** Clickable content that keeps the checkbox input and label associated. */
 export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
-	const { className, style, xstyle, ...restProps } = props;
-	const recipeStyles = resolveCheckboxRecipeSlotStyles('content');
+	const { className, render, style, xstyle, ...restProps } = props;
 
 	return (
 		<RacCheckboxButton
 			{...restProps}
-			{...resolveRacXStyleProps(recipeStyles, xstyle, className, style)}
-		/>
+			className={className}
+			style={style}
+			render={(domProps, renderProps) => {
+				const recipeProps = resolveRecipeSlotProps(
+					checkboxStateRecipe,
+					'content',
+					{
+						isDisabled: renderProps.isDisabled,
+						isFocusVisible: renderProps.isFocusVisible,
+						isHovered: renderProps.isHovered,
+						isIndeterminate: renderProps.isIndeterminate,
+						isInvalid: renderProps.isInvalid,
+						isPressed: renderProps.isPressed,
+						isReadOnly: renderProps.isReadOnly,
+						isSelected: renderProps.isSelected,
+					},
+					xstyle,
+				);
+				const mergedProps = mergeProps(recipeProps, domProps) as typeof domProps;
+				// The hidden input is part of the children in domProps.
+				// oxlint-disable-next-line jsx-a11y/label-has-associated-control
+				return render ? render(mergedProps, renderProps) : <label {...mergedProps} />;
+			}}
+		>
+			{composeRenderProps(restProps.children, (children, renderProps) => {
+				const state = {
+					isDisabled: renderProps.isDisabled,
+					isFocusVisible: renderProps.isFocusVisible,
+					isHovered: renderProps.isHovered,
+					isIndeterminate: renderProps.isIndeterminate,
+					isInvalid: renderProps.isInvalid,
+					isPressed: renderProps.isPressed,
+					isReadOnly: renderProps.isReadOnly,
+					isSelected: renderProps.isSelected,
+				};
+				return <CheckboxStateProvider {...state}>{children}</CheckboxStateProvider>;
+			})}
+		</RacCheckboxButton>
 	);
 }
 
@@ -92,7 +171,10 @@ export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	return (
 		<span
 			{...restProps}
-			{...resolveXStyleProps(resolveCheckboxRecipeSlotStyles('control'), xstyle, className, style)}
+			{...mergeProps(resolveRecipeSlotProps(checkboxStateRecipe, 'control', undefined, xstyle), {
+				className,
+				style,
+			})}
 		/>
 	);
 }
@@ -100,29 +182,45 @@ export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 /** Visual square that reflects selected, indeterminate, disabled, and invalid states. */
 export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 	const { className, style, xstyle, ...restProps } = props;
-	return (
-		<span
-			{...restProps}
-			aria-hidden
-			{...resolveXStyleProps(
-				resolveCheckboxRecipeSlotStyles('indicator'),
-				xstyle,
-				className,
-				style,
-			)}
-		/>
+	const state = useCheckboxState();
+	const recipeProps = resolveRecipeSlotProps(
+		checkboxStateRecipe,
+		'indicator',
+		{
+			isDisabled: state.isDisabled,
+			isFocusVisible: state.isFocusVisible,
+			isHovered: state.isHovered,
+			isIndeterminate: state.isIndeterminate,
+			isInvalid: state.isInvalid,
+			isPressed: state.isPressed,
+			isReadOnly: state.isReadOnly,
+			isSelected: state.isSelected,
+		},
+		xstyle,
 	);
+	return <span {...restProps} aria-hidden {...mergeProps(recipeProps, { className, style })} />;
 }
 
 /** Checkbox field primitive for custom composition. */
 export function Checkbox(props: CheckboxProps): JSX.Element {
 	const { className, size, style, xstyle, ...restProps } = props;
-	const recipeStyles = resolveCheckboxRecipeSlotStyles('root', { size });
+	const recipeProps = resolveRecipeSlotProps(checkboxStateRecipe, 'root', { size }, xstyle);
 
 	return (
-		<RacCheckboxField
-			{...restProps}
-			{...resolveRacXStyleProps(recipeStyles, xstyle, className, style)}
-		/>
+		<RacCheckboxField {...restProps} {...composeRacRecipeProps(recipeProps, className, style)}>
+			{composeRenderProps(restProps.children, (children, renderProps) => {
+				const state = {
+					isDisabled: renderProps.isDisabled,
+					isFocusVisible: false,
+					isHovered: false,
+					isIndeterminate: renderProps.isIndeterminate,
+					isInvalid: renderProps.isInvalid,
+					isPressed: false,
+					isReadOnly: renderProps.isReadOnly,
+					isSelected: renderProps.isSelected,
+				};
+				return <CheckboxStateProvider {...state}>{children}</CheckboxStateProvider>;
+			})}
+		</RacCheckboxField>
 	);
 }
