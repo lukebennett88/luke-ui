@@ -9,10 +9,10 @@ import {
 	CheckboxField as RacCheckboxField,
 } from 'react-aria-components/Checkbox';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { mergeProps } from '../../../shared/utils/utils.js';
+import { mergeStyleProps } from '../../../shared/utils/utils.js';
 import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { composeRacRecipeProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps, composeRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { CheckboxState } from './context.js';
@@ -142,7 +142,12 @@ export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 					},
 					xstyle,
 				);
-				const mergedProps = mergeProps(recipeProps, domProps) as typeof domProps;
+				// `domProps` is RAC's full prop bag, not a `{ className, style }` literal, so
+				// `composeRecipeProps` (which expects that narrower shape) doesn't fit here.
+				// `mergeStyleProps` still applies: className concatenates, style shallow-merges,
+				// and every other RAC-supplied key (event handlers, aria-*, the hidden input)
+				// passes through unchanged rather than chaining.
+				const mergedProps = mergeStyleProps(recipeProps, domProps) as typeof domProps;
 				// The hidden input is part of the children in domProps.
 				// oxlint-disable-next-line jsx-a11y/label-has-associated-control
 				return render ? render(mergedProps, renderProps) : <label {...mergedProps} />;
@@ -171,10 +176,13 @@ export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	return (
 		<span
 			{...restProps}
-			{...mergeProps(resolveRecipeSlotProps(checkboxStateRecipe, 'control', undefined, xstyle), {
-				className,
-				style,
-			})}
+			{...composeRecipeProps(
+				resolveRecipeSlotProps(checkboxStateRecipe, 'control', undefined, xstyle),
+				{
+					className,
+					style,
+				},
+			)}
 		/>
 	);
 }
@@ -198,7 +206,9 @@ export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 		},
 		xstyle,
 	);
-	return <span {...restProps} aria-hidden {...mergeProps(recipeProps, { className, style })} />;
+	return (
+		<span {...restProps} aria-hidden {...composeRecipeProps(recipeProps, { className, style })} />
+	);
 }
 
 /** Checkbox field primitive for custom composition. */

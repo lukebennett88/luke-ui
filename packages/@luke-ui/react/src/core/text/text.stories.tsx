@@ -1,6 +1,6 @@
 import type { TextProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
-import { mergeProps } from '@luke-ui/react/utils';
+import { mergeStyleProps } from '@luke-ui/react/utils';
 import { VisuallyHidden as VisuallyHiddenText } from '@luke-ui/react/visually-hidden';
 import type { CSSProperties } from 'react';
 import preview from '../../../.storybook/preview.js';
@@ -59,7 +59,12 @@ function MiddleTruncatedIdentifier(props: MiddleTruncatedIdentifierProps) {
 	const fixed = createSprinkles({ flexBasis: 'auto', flexGrow: '0', flexShrink: '0' });
 
 	return (
-		<Text {...mergeProps(textProps, row)} elementType="div" shouldDisableTrim title={identifier}>
+		<Text
+			{...mergeStyleProps(textProps, row)}
+			elementType="div"
+			shouldDisableTrim
+			title={identifier}
+		>
 			<VisuallyHiddenText>{identifier}</VisuallyHiddenText>
 			<Text aria-hidden elementType="span" lineClamp shouldInheritFont {...prefixStyle}>
 				{prefix}

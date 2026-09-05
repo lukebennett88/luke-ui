@@ -68,6 +68,7 @@
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:story-plays": "tsx scripts/check-story-plays.ts",
+		"check:style-composition": "tsx scripts/check-style-composition.ts",
 		"check:test-suffixes": "tsx scripts/check-test-suffixes.ts",
 		"check:types": "pnpm run check:types:storybook && pnpm run check:types:browser && pnpm run check:types:node",
 		"check:types:browser": "tsc --noEmit -p tsconfig.json",

@@ -1,4 +1,3 @@
-import { mergeProps } from '@react-aria/utils';
 import type { JSX } from 'react';
 import type {
 	ListBoxItemProps as RacListBoxItemProps,
@@ -15,7 +14,7 @@ import { COMBOBOX_CHECK_ICON_SIZE } from '../../sizing/combobox-sizing.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { composeRacRecipeProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps, composeRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './recipe.js';
@@ -82,10 +81,13 @@ export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Elem
 	return (
 		<RacListBoxLoadMoreItem
 			{...loadMoreItemProps}
-			{...mergeProps(resolveRecipeSlotProps(comboboxRecipe, 'loadMoreItem', { size }, xstyle), {
-				className,
-				style,
-			})}
+			{...composeRecipeProps(
+				resolveRecipeSlotProps(comboboxRecipe, 'loadMoreItem', { size }, xstyle),
+				{
+					className,
+					style,
+				},
+			)}
 		/>
 	);
 }

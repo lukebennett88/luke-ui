@@ -1,7 +1,7 @@
-import { mergeProps } from '@react-aria/utils';
 import type { CSSProperties, JSX, ReactNode } from 'react';
 import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRecipeProps } from '../../styles/xstyle.js';
 import type { Prettify } from '../../types/prettify.js';
 import { comboboxRecipe } from './recipe.js';
 
@@ -19,10 +19,13 @@ export function ComboboxEmptyState(props: ComboboxEmptyStateProps): JSX.Element 
 
 	return (
 		<div
-			{...mergeProps(resolveRecipeSlotProps(comboboxRecipe, 'emptyState', undefined, xstyle), {
-				className,
-				style,
-			})}
+			{...composeRecipeProps(
+				resolveRecipeSlotProps(comboboxRecipe, 'emptyState', undefined, xstyle),
+				{
+					className,
+					style,
+				},
+			)}
 		>
 			{children}
 		</div>

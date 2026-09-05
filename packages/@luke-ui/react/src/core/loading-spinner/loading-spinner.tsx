@@ -1,6 +1,5 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { useId } from 'react';
-import { cx } from '../../shared/utils/utils.js';
 import { useIconSizeContext } from '../icon/icon-size-context.js';
 import {
 	ICON_VIEWBOX,
@@ -9,6 +8,7 @@ import {
 	SPINNER_STROKE_WIDTH,
 } from '../sizing/icon-sizing.js';
 import type { XStyleProp } from '../styles/xstyle.js';
+import { composeRecipeProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
@@ -119,11 +119,9 @@ function SpinnerElement({
 	return (
 		<span
 			{...spanProps}
-			{...parts.root}
+			{...composeRecipeProps(parts.root, { className, style })}
 			aria-labelledby={labelId}
-			className={cx(parts.root.className, className)}
 			role="status"
-			style={parts.root.style === undefined ? style : { ...parts.root.style, ...style }}
 		>
 			<VisuallyHidden id={labelId}>{ariaLabel}</VisuallyHidden>
 			<svg {...parts.svg} aria-hidden="true" fill="none" viewBox={ICON_VIEWBOX}>

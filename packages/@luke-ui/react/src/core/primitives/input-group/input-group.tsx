@@ -1,4 +1,3 @@
-import { mergeProps } from '@react-aria/utils';
 import type { ComponentProps, JSX, Ref } from 'react';
 import { createContext, use } from 'react';
 import type { GroupProps as RacGroupProps } from 'react-aria-components/Group';
@@ -11,7 +10,7 @@ import { Icon } from '../../icon/icon.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
-import { composeRacRecipeProps } from '../../styles/xstyle.js';
+import { composeRacRecipeProps, composeRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { InputGroupSize } from './recipe.js';
@@ -160,7 +159,7 @@ export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
 	return (
 		<span
 			{...spanProps}
-			{...mergeProps(resolveRecipeSlotProps(inputGroupRecipe, 'prefix', { size }, xstyle), {
+			{...composeRecipeProps(resolveRecipeSlotProps(inputGroupRecipe, 'prefix', { size }, xstyle), {
 				className,
 				style,
 			})}
@@ -179,7 +178,7 @@ export function InputGroupSuffix(props: InputGroupSuffixProps): JSX.Element {
 	return (
 		<span
 			{...spanProps}
-			{...mergeProps(resolveRecipeSlotProps(inputGroupRecipe, 'suffix', { size }, xstyle), {
+			{...composeRecipeProps(resolveRecipeSlotProps(inputGroupRecipe, 'suffix', { size }, xstyle), {
 				className,
 				style,
 			})}

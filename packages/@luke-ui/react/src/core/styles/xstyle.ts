@@ -2,7 +2,7 @@ import type { CompiledStyles, StyleXStyles } from '@stylexjs/stylex';
 import * as stylex from '@stylexjs/stylex';
 import type { CSSProperties } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { cx, mergeProps } from '../../shared/utils/utils.js';
+import { cx, mergeStyleProps } from '../../shared/utils/utils.js';
 
 /** Public `xstyle` input accepted by every StyleX-migrated visual component. */
 export type XStyleProp<CSS extends Record<string, unknown> = Record<string, unknown>> =
@@ -44,19 +44,19 @@ export function resolveXStyleProps(
  * style last — restated at every element, where it could drift. It is also the plain-element
  * counterpart to `composeRacRecipeProps`, so both rendering paths compose the same way.
  *
- * Delegates the actual merge to the shared `mergeProps`, which has identical semantics
+ * Delegates the actual merge to the shared `mergeStyleProps`, which has identical semantics
  * (`className` concatenated, `style` shallow-merged with the later value winning per property,
- * other keys overwritten). `mergeProps` assigns `className` and `style` unconditionally though, so
- * merging onto recipe props with no styles at all would produce `className: ''` and `style: {}` —
- * which render as literal empty `class=""` and `style` attributes on the DOM. Falling back to
- * `undefined` here restores the previous behaviour of omitting both attributes entirely when there
- * is nothing to render.
+ * other keys overwritten). `mergeStyleProps` assigns `className` and `style` unconditionally
+ * though, so merging onto recipe props with no styles at all would produce `className: ''` and
+ * `style: {}` — which render as literal empty `class=""` and `style` attributes on the DOM.
+ * Falling back to `undefined` here restores the previous behaviour of omitting both attributes
+ * entirely when there is nothing to render.
  */
 export function composeRecipeProps(
 	recipeProps: ResolvedStyleXProps,
 	consumerProps: ConsumerDomProps,
 ): ResolvedStyleXProps {
-	const merged = mergeProps(recipeProps, consumerProps);
+	const merged = mergeStyleProps(recipeProps, consumerProps);
 	return {
 		...merged,
 		className: merged.className === '' ? undefined : merged.className,

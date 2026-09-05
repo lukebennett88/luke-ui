@@ -1,10 +1,10 @@
-import { mergeProps } from '@react-aria/utils';
 import type { JSX, ReactNode } from 'react';
 import type { ListBoxSectionProps as RacListBoxSectionProps } from 'react-aria-components/ComboBox';
 import { ListBoxSection as RacListBoxSection } from 'react-aria-components/ComboBox';
 import { Header as RacHeader } from 'react-aria-components/Header';
 import { resolveRecipeSlotProps } from '../../styles/recipe-authoring.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { comboboxRecipe } from './recipe.js';
@@ -25,7 +25,7 @@ export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionPr
 
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
 	const { children, className, style, title, xstyle, ...sectionProps } = props;
-	const resolved = mergeProps(
+	const resolved = composeRecipeProps(
 		resolveRecipeSlotProps(comboboxRecipe, 'section', undefined, xstyle),
 		{ className, style },
 	);

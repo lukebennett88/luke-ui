@@ -135,11 +135,11 @@ kebab-case property keys. StyleX lowers bidi-insensitive logical properties such
 dynamic values in `style` are preserved. Use responsive objects with `initial`, `bp640`, `bp768`,
 `bp1024`, `bp1280`, or `bp1536`. Each name selects a container-query breakpoint.
 
-When composing utility output with other props, use `mergeProps` from `@luke-ui/react/utils`. It
-concatenates `className`, shallow-merges `style`, and lets the later props overwrite other keys. At
-a React Aria `render` boundary, pass the resolved DOM props through to the element and merge them
-with utility output. Use React Aria Components' `mergeProps` when that composition also needs its
-event-handler behaviour.
+When composing utility output with other props, use `mergeStyleProps` from `@luke-ui/react/utils`.
+It concatenates `className`, shallow-merges `style`, and lets the later props overwrite other keys —
+it does not chain event handlers. At a React Aria `render` boundary, pass the resolved DOM props
+through to the element and merge them with utility output. Use React Aria Components' `mergeProps`
+when that composition also needs its event-handler chaining behaviour.
 
 ## Static styles and tokens
 

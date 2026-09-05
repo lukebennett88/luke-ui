@@ -113,7 +113,7 @@ test('keeps the recipe style intact when the consumer passes no inline style', (
 });
 
 test('omits empty className and style attributes when nothing resolves any styles', () => {
-	// `mergeProps` assigns `className` and `style` unconditionally, which would otherwise produce
+	// `mergeStyleProps` assigns `className` and `style` unconditionally, which would otherwise produce
 	// `className: ''` and `style: {}` here — rendering as empty `class=""` and `style` attributes.
 	const resolved = composeRecipeProps({}, { className: undefined, style: undefined });
 
