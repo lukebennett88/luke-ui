@@ -235,8 +235,43 @@ export const checkboxStateRecipe = recipe({
 			},
 		},
 		{
+			isSelected: false,
+			isIndeterminate: true,
+			isHovered: true,
+			isPressed: false,
+			isInvalid: false,
+			isDisabled: false,
+			isReadOnly: false,
+			style: {
+				indicator: {
+					'@media not (forced-colors: active)': {
+						backgroundColor: vars.color.background.accent.solid.hover,
+						backgroundImage: vars.actionControlFinish.raised,
+						borderColor: vars.color.background.accent.solid.hover,
+					},
+				},
+			},
+		},
+		{
 			isSelected: true,
 			isIndeterminate: false,
+			isPressed: true,
+			isInvalid: false,
+			isDisabled: false,
+			isReadOnly: false,
+			style: {
+				indicator: {
+					'@media not (forced-colors: active)': {
+						backgroundColor: vars.color.background.accent.solid.pressed,
+						backgroundImage: vars.actionControlFinish.recessed,
+						borderColor: vars.color.background.accent.solid.pressed,
+					},
+				},
+			},
+		},
+		{
+			isSelected: false,
+			isIndeterminate: true,
 			isPressed: true,
 			isInvalid: false,
 			isDisabled: false,

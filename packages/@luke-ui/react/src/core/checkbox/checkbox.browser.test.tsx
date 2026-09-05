@@ -108,6 +108,32 @@ test('selected hover uses the filled hover fill, not the unselected hover border
 	expect(selectedHover.borderColor).not.toBe(unselectedHover.borderColor);
 });
 
+// An indeterminate checkbox paints the same filled affordance as a selected one, so it must take
+// the same hover and pressed fills. The state matrix previously covered these for the invalid
+// palette but not the valid one, which left a hovered indeterminate box falling back to the
+// unselected hover treatment.
+test('indeterminate hover matches selected hover, not the unselected hover border', async () => {
+	const indeterminateRest = await indicatorComputedStyle({ indeterminate: true });
+	const indeterminateHover = await indicatorComputedStyle({ hovered: true, indeterminate: true });
+	const selectedHover = await indicatorComputedStyle({ hovered: true, selected: true });
+	const unselectedHover = await indicatorComputedStyle({ hovered: true });
+
+	// Computed colours are composited over the `raised` gradient, so two visually identical
+	// treatments can still differ in the fourth decimal. Compare rounded channels: close enough
+	// proves the same token, while the regression this guards swapped a filled accent fill for the
+	// unfilled hover border — a difference far larger than compositing noise.
+	expect(roundColor(indeterminateHover.borderColor)).toBe(roundColor(selectedHover.borderColor));
+	expect(roundColor(indeterminateHover.backgroundColor)).toBe(
+		roundColor(selectedHover.backgroundColor),
+	);
+	expect(roundColor(indeterminateHover.borderColor)).not.toBe(
+		roundColor(unselectedHover.borderColor),
+	);
+	expect(roundColor(indeterminateHover.backgroundColor)).not.toBe(
+		roundColor(indeterminateRest.backgroundColor),
+	);
+});
+
 test('invalid selected uses the danger fill, not the accent fill', async () => {
 	const accent = await indicatorComputedStyle({ selected: true });
 	const danger = await indicatorComputedStyle({ invalid: true, selected: true });
@@ -259,9 +285,15 @@ async function getAccessibilityNode(nodeId: DomNode['nodeId']) {
 type IndicatorState = {
 	disabled?: boolean;
 	hovered?: boolean;
+	indeterminate?: boolean;
 	invalid?: boolean;
 	selected?: boolean;
 };
+
+/** Rounds each numeric channel so sub-pixel gradient compositing cannot fail an equality check. */
+function roundColor(value: string): string {
+	return value.replace(/-?\d+\.\d+/g, (channel) => Number(channel).toFixed(2));
+}
 
 function checkboxContent(container: HTMLElement): HTMLElement {
 	const content = container.querySelector('label');
@@ -280,6 +312,7 @@ async function indicatorComputedStyle(state: IndicatorState) {
 		<Checkbox
 			errorMessage={state.invalid === true ? 'Choose an option.' : undefined}
 			isDisabled={state.disabled}
+			isIndeterminate={state.indeterminate}
 			isSelected={state.selected}
 			name="competing"
 		>
