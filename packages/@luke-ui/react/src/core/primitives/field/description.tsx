@@ -25,7 +25,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	return (
 		<RacText
 			{...restProps}
-			{...composeRecipeProps(recipeProps, className, style)}
+			{...composeRecipeProps(recipeProps, { className, style })}
 			slot="description"
 		/>
 	);

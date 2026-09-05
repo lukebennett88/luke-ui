@@ -16,5 +16,5 @@ export function Kbd(props: KbdProps) {
 	const { className, style, xstyle, ...elementProps } = props;
 	const recipeProps = kbdRecipe({ xstyle });
 
-	return <kbd {...elementProps} {...composeRecipeProps(recipeProps, className, style)} />;
+	return <kbd {...elementProps} {...composeRecipeProps(recipeProps, { className, style })} />;
 }

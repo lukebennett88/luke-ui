@@ -92,8 +92,7 @@ test('composes plain element recipe props with a consumer className and style', 
 			style: { color: 'red', opacity: 1 },
 			'data-style-src': 'recipe.ts:1',
 		},
-		'consumer-class',
-		{ opacity: 0.5 },
+		{ className: 'consumer-class', style: { opacity: 0.5 } },
 	);
 
 	// A consumer class name is appended last, so it wins the cascade, and a consumer inline style
@@ -106,10 +105,18 @@ test('composes plain element recipe props with a consumer className and style', 
 test('keeps the recipe style intact when the consumer passes no inline style', () => {
 	const resolved = composeRecipeProps(
 		{ className: 'recipe-class', style: { color: 'red' } },
-		undefined,
-		undefined,
+		{ className: undefined, style: undefined },
 	);
 
 	expect(resolved.className).toBe('recipe-class');
 	expect(resolved.style).toEqual({ color: 'red' });
+});
+
+test('omits empty className and style attributes when nothing resolves any styles', () => {
+	// `mergeProps` assigns `className` and `style` unconditionally, which would otherwise produce
+	// `className: ''` and `style: {}` here — rendering as empty `class=""` and `style` attributes.
+	const resolved = composeRecipeProps({}, { className: undefined, style: undefined });
+
+	expect(resolved.className).toBeUndefined();
+	expect(resolved.style).toBeUndefined();
 });

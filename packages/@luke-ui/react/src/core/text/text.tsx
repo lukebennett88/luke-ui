@@ -150,7 +150,7 @@ export function Text(props: TextProps) {
 	return (
 		<RacText
 			{...racProps}
-			{...composeRecipeProps(recipeProps, className, style)}
+			{...composeRecipeProps(recipeProps, { className, style })}
 			elementType={elementType}
 		>
 			{children}

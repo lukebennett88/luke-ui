@@ -31,5 +31,5 @@ export function FieldLabel(props: FieldLabelProps): JSX.Element {
 	const { className, necessityIndicator = 'icon', style, xstyle, ...restProps } = props;
 	const recipeProps = fieldRecipe({ necessityIndicator, xstyle: { label: xstyle } }).label;
 
-	return <RacLabel {...restProps} {...composeRecipeProps(recipeProps, className, style)} />;
+	return <RacLabel {...restProps} {...composeRecipeProps(recipeProps, { className, style })} />;
 }

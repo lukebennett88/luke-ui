@@ -34,5 +34,5 @@ export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
 	const { className, style, xstyle, ...racProps } = props;
 	const recipeProps = visuallyHiddenRecipe({ xstyle });
 
-	return <RacText {...racProps} {...composeRecipeProps(recipeProps, className, style)} />;
+	return <RacText {...racProps} {...composeRecipeProps(recipeProps, { className, style })} />;
 }

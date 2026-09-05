@@ -16,5 +16,5 @@ export function Code(props: CodeProps) {
 	const { className, style, xstyle, ...elementProps } = props;
 	const recipeProps = codeRecipe({ xstyle });
 
-	return <code {...elementProps} {...composeRecipeProps(recipeProps, className, style)} />;
+	return <code {...elementProps} {...composeRecipeProps(recipeProps, { className, style })} />;
 }

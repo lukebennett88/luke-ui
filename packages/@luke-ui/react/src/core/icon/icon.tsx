@@ -101,7 +101,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 			id,
 			role,
 			viewBox: resolvedViewBox,
-			...composeRecipeProps(recipeProps, className, style),
+			...composeRecipeProps(recipeProps, { className, style }),
 		};
 
 		return (

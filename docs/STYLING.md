@@ -107,7 +107,7 @@ override. Pass it to the recipe, then compose the recipe result with the consume
 const { className, style, xstyle, ...elementProps } = props;
 const recipeProps = buttonRecipe({ xstyle });
 
-return <button {...elementProps} {...composeRecipeProps(recipeProps, className, style)} />;
+return <button {...elementProps} {...composeRecipeProps(recipeProps, { className, style })} />;
 ```
 
 `composeRecipeProps` appends the consumer's `className` after the recipe's and lets the consumer's

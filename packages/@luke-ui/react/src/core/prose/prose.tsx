@@ -14,5 +14,5 @@ export function Prose(props: ProseProps): JSX.Element {
 	const { className, style, xstyle, ...divProps } = props;
 	const recipeProps = proseRecipe({ xstyle });
 
-	return <div {...divProps} {...composeRecipeProps(recipeProps, className, style)} />;
+	return <div {...divProps} {...composeRecipeProps(recipeProps, { className, style })} />;
 }

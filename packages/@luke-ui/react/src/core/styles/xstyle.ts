@@ -2,7 +2,7 @@ import type { CompiledStyles, StyleXStyles } from '@stylexjs/stylex';
 import * as stylex from '@stylexjs/stylex';
 import type { CSSProperties } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { cx } from '../../shared/utils/utils.js';
+import { cx, mergeProps } from '../../shared/utils/utils.js';
 
 /** Public `xstyle` input accepted by every StyleX-migrated visual component. */
 export type XStyleProp<CSS extends Record<string, unknown> = Record<string, unknown>> =
@@ -19,6 +19,12 @@ type ResolvedStyleXProps = Omit<ReturnType<typeof stylex.props>, 'className' | '
 	style?: CSSProperties;
 };
 
+/** A consumer's plain `className` and `style`, composed onto resolved recipe props. */
+interface ConsumerDomProps {
+	className: string | undefined;
+	style: CSSProperties | undefined;
+}
+
 /** Resolves component styles and `xstyle` in one `stylex.props` call. */
 export function resolveXStyleProps(
 	styles: ReadonlyArray<CompiledStyles>,
@@ -26,7 +32,7 @@ export function resolveXStyleProps(
 	className: string | undefined,
 	inlineStyle: CSSProperties | undefined,
 ): ResolvedStyleXProps {
-	return composeRecipeProps(stylex.props(...styles, xstyle), className, inlineStyle);
+	return composeRecipeProps(stylex.props(...styles, xstyle), { className, style: inlineStyle });
 }
 
 /**
@@ -37,16 +43,24 @@ export function resolveXStyleProps(
  * immediately overwrite it. That kept the merge order — recipe classes first, consumer inline
  * style last — restated at every element, where it could drift. It is also the plain-element
  * counterpart to `composeRacRecipeProps`, so both rendering paths compose the same way.
+ *
+ * Delegates the actual merge to the shared `mergeProps`, which has identical semantics
+ * (`className` concatenated, `style` shallow-merged with the later value winning per property,
+ * other keys overwritten). `mergeProps` assigns `className` and `style` unconditionally though, so
+ * merging onto recipe props with no styles at all would produce `className: ''` and `style: {}` —
+ * which render as literal empty `class=""` and `style` attributes on the DOM. Falling back to
+ * `undefined` here restores the previous behaviour of omitting both attributes entirely when there
+ * is nothing to render.
  */
 export function composeRecipeProps(
 	recipeProps: ResolvedStyleXProps,
-	className: string | undefined,
-	style: CSSProperties | undefined,
+	consumerProps: ConsumerDomProps,
 ): ResolvedStyleXProps {
+	const merged = mergeProps(recipeProps, consumerProps);
 	return {
-		...recipeProps,
-		className: cx(recipeProps.className, className),
-		style: recipeProps.style === undefined ? style : { ...recipeProps.style, ...style },
+		...merged,
+		className: merged.className === '' ? undefined : merged.className,
+		style: Object.keys(merged.style).length === 0 ? undefined : merged.style,
 	};
 }
 
