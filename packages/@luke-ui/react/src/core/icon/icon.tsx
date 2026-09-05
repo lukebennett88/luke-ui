@@ -1,9 +1,9 @@
 import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../../.generated/icon-data.js';
-import { cx } from '../../shared/utils/utils.js';
 import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
 import type { XStyleProps } from '../styles/xstyle.js';
+import { composeRecipeProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useIconSizeContext } from './icon-size-context.js';
@@ -101,9 +101,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 			id,
 			role,
 			viewBox: resolvedViewBox,
-			...recipeProps,
-			className: cx(recipeProps.className, className),
-			style: recipeProps.style === undefined ? style : { ...recipeProps.style, ...style },
+			...composeRecipeProps(recipeProps, className, style),
 		};
 
 		return (

@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 import { expect, test } from 'vite-plus/test';
-import { composeRacRecipeProps, resolveRacXStyleProps } from './xstyle.js';
+import { composeRacRecipeProps, composeRecipeProps, resolveRacXStyleProps } from './xstyle.js';
 
 const styles = stylex.create({
 	base: { color: 'red' },
@@ -83,4 +83,33 @@ test('preserves extra stylex props when composing recipe results', () => {
 	expect(resolved['data-style-src']).toBe('recipe.ts:1');
 	expect(resolved.className({})).toBe('recipe-class consumer-class');
 	expect(resolved.style({})).toEqual({ color: 'red', opacity: 0.5 });
+});
+
+test('composes plain element recipe props with a consumer className and style', () => {
+	const resolved = composeRecipeProps(
+		{
+			className: 'recipe-class',
+			style: { color: 'red', opacity: 1 },
+			'data-style-src': 'recipe.ts:1',
+		},
+		'consumer-class',
+		{ opacity: 0.5 },
+	);
+
+	// A consumer class name is appended last, so it wins the cascade, and a consumer inline style
+	// wins per property while leaving the recipe's other declarations in place.
+	expect(resolved.className).toBe('recipe-class consumer-class');
+	expect(resolved.style).toEqual({ color: 'red', opacity: 0.5 });
+	expect(resolved['data-style-src']).toBe('recipe.ts:1');
+});
+
+test('keeps the recipe style intact when the consumer passes no inline style', () => {
+	const resolved = composeRecipeProps(
+		{ className: 'recipe-class', style: { color: 'red' } },
+		undefined,
+		undefined,
+	);
+
+	expect(resolved.className).toBe('recipe-class');
+	expect(resolved.style).toEqual({ color: 'red' });
 });

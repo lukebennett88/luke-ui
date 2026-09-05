@@ -100,22 +100,19 @@ property.
 ## `xstyle`
 
 Expose `xstyle?: XStyleProps['xstyle']` on a component when consumers need a supported one-property
-override. Pass it to the recipe and merge the consumer's `className` and `style` after spreading the
-recipe result:
+override. Pass it to the recipe, then compose the recipe result with the consumer's `className` and
+`style`:
 
 ```tsx
 const { className, style, xstyle, ...elementProps } = props;
 const recipeProps = buttonRecipe({ xstyle });
 
-return (
-	<button
-		{...elementProps}
-		{...recipeProps}
-		className={cx(recipeProps.className, className)}
-		style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
-	/>
-);
+return <button {...elementProps} {...composeRecipeProps(recipeProps, className, style)} />;
 ```
+
+`composeRecipeProps` appends the consumer's `className` after the recipe's and lets the consumer's
+inline `style` win per property. Use `composeRacRecipeProps` instead when the element is a React
+Aria Component, so its function-valued `className` and `style` render props still resolve.
 
 For a slotted component, pass a partial map such as `{ label: labelStyle }` to the recipe and spread
 the returned props on the matching elements. Keep `xstyle` on the public presentation element. Do

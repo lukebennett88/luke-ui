@@ -1,6 +1,6 @@
 import type { ComponentProps, JSX } from 'react';
-import { cx } from '../../shared/utils/utils.js';
 import type { XStyleProps } from '../styles/xstyle.js';
+import { composeRecipeProps } from '../styles/xstyle.js';
 import { proseRecipe } from './recipe.js';
 
 /** Props for `Prose`. */
@@ -14,12 +14,5 @@ export function Prose(props: ProseProps): JSX.Element {
 	const { className, style, xstyle, ...divProps } = props;
 	const recipeProps = proseRecipe({ xstyle });
 
-	return (
-		<div
-			{...divProps}
-			{...recipeProps}
-			className={cx(recipeProps.className, className)}
-			style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
-		/>
-	);
+	return <div {...divProps} {...composeRecipeProps(recipeProps, className, style)} />;
 }

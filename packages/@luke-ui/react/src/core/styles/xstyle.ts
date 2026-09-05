@@ -26,11 +26,27 @@ export function resolveXStyleProps(
 	className: string | undefined,
 	inlineStyle: CSSProperties | undefined,
 ): ResolvedStyleXProps {
-	const resolved = stylex.props(...styles, xstyle);
+	return composeRecipeProps(stylex.props(...styles, xstyle), className, inlineStyle);
+}
+
+/**
+ * Composes resolved recipe props with a consumer's plain `className` and `style`.
+ *
+ * The result is one spreadable object, so a call site is a single `{...composeRecipeProps(...)}`
+ * instead of a recipe spread followed by hand-written `className` and `style` props that
+ * immediately overwrite it. That kept the merge order — recipe classes first, consumer inline
+ * style last — restated at every element, where it could drift. It is also the plain-element
+ * counterpart to `composeRacRecipeProps`, so both rendering paths compose the same way.
+ */
+export function composeRecipeProps(
+	recipeProps: ResolvedStyleXProps,
+	className: string | undefined,
+	style: CSSProperties | undefined,
+): ResolvedStyleXProps {
 	return {
-		...resolved,
-		className: cx(resolved.className, className),
-		style: resolved.style === undefined ? inlineStyle : { ...resolved.style, ...inlineStyle },
+		...recipeProps,
+		className: cx(recipeProps.className, className),
+		style: recipeProps.style === undefined ? style : { ...recipeProps.style, ...style },
 	};
 }
 

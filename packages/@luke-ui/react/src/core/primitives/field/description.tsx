@@ -1,8 +1,8 @@
 import type { JSX } from 'react';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../../shared/utils/utils.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import { fieldRecipe } from './recipe.js';
@@ -25,9 +25,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	return (
 		<RacText
 			{...restProps}
-			{...recipeProps}
-			className={cx(recipeProps.className, className)}
-			style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
+			{...composeRecipeProps(recipeProps, className, style)}
 			slot="description"
 		/>
 	);

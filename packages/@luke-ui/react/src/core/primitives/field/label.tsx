@@ -1,8 +1,8 @@
 import type { JSX } from 'react';
 import type { LabelProps as RacLabelProps } from 'react-aria-components/Label';
 import { Label as RacLabel } from 'react-aria-components/Label';
-import { cx } from '../../../shared/utils/utils.js';
 import type { XStyleProps } from '../../styles/xstyle.js';
+import { composeRecipeProps } from '../../styles/xstyle.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
 import type { FieldNecessityIndicator } from './recipe.js';
@@ -31,12 +31,5 @@ export function FieldLabel(props: FieldLabelProps): JSX.Element {
 	const { className, necessityIndicator = 'icon', style, xstyle, ...restProps } = props;
 	const recipeProps = fieldRecipe({ necessityIndicator, xstyle: { label: xstyle } }).label;
 
-	return (
-		<RacLabel
-			{...restProps}
-			{...recipeProps}
-			className={cx(recipeProps.className, className)}
-			style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
-		/>
-	);
+	return <RacLabel {...restProps} {...composeRecipeProps(recipeProps, className, style)} />;
 }

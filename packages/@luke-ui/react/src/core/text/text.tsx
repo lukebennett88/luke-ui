@@ -1,7 +1,7 @@
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/contract.js';
 import type { XStyleProps } from '../styles/xstyle.js';
+import { composeRecipeProps } from '../styles/xstyle.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -150,10 +150,8 @@ export function Text(props: TextProps) {
 	return (
 		<RacText
 			{...racProps}
-			{...recipeProps}
-			className={cx(recipeProps.className, className)}
+			{...composeRecipeProps(recipeProps, className, style)}
 			elementType={elementType}
-			style={recipeProps.style === undefined ? style : { ...recipeProps.style, ...style }}
 		>
 			{children}
 		</RacText>
