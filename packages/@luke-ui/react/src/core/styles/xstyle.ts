@@ -8,45 +8,13 @@ import { cx } from '../../shared/utils/utils.js';
 export type XStyleProp<CSS extends Record<string, unknown> = Record<string, unknown>> =
 	StyleXStyles<CSS>;
 
-/**
- * The shared `xstyle` contract. A component whose styling target needs no further qualification
- * extends this instead of redeclaring the prop, so the published description is written once. A
- * component that targets a specific part of its own anatomy declares `xstyle` itself and says which
- * element receives it.
- */
+/** Shared `xstyle` props for components with a single styling target. */
 export interface XStyleProps {
-	/**
-	 * Extra styles as one or more `stylex.create(...)` objects, for a CSS property the component's
-	 * own props do not expose.
-	 *
-	 * The one relationship this prop guarantees is `component recipe/variant styles < xstyle`: both
-	 * are resolved inside a single `stylex.props(...)` call, and StyleX keeps only the last value
-	 * for a given CSS property, so a same-property `xstyle` value always replaces a competing
-	 * default or variant.
-	 *
-	 * `xstyle` versus a consumer `className` is decided by the CSS cascade, including importance,
-	 * cascade layers, specificity, and source order — not by the order props are passed or
-	 * resolved. Appending a class to the rendered `class` attribute does not create precedence;
-	 * DOM class token order is irrelevant to the cascade. A class compiled into a higher-priority
-	 * layer such as `utilities`, or ordinary unlayered application CSS, can beat `xstyle`. A class
-	 * compiled into a lower-priority layer such as `base` still loses to it. For normal
-	 * declarations, inline `style` wins over class-based styling. An author `!important`
-	 * declaration can override a normal inline style.
-	 *
-	 * Compiling `xstyle` requires the consumer's own StyleX compiler. `@luke-ui/vite` is the
-	 * supported way to set this up for a Vite app; an equivalent StyleX bundler integration works
-	 * too, but this package's `@stylexjs/stylex` runtime dependency alone is not enough. See the
-	 * "Override a single property with `xstyle`" and "Cascade layers" sections of the Styling
-	 * guide for the layer setup and full precedence walkthrough.
-	 */
+	/** Extra `stylex.create(...)` styles for properties not exposed by the component. */
 	xstyle?: XStyleProp;
 }
 
-/**
- * Resolves a component's compiled styles and public override in the one `stylex.props` call that
- * defines their precedence. `stylex.props` retains only the last value for a CSS property, so an
- * `xstyle` atom replaces a competing default or variant atom before either reaches the DOM.
- */
+/** Resolves component styles and `xstyle` in one `stylex.props` call. */
 export function resolveXStyleProps(
 	styles: ReadonlyArray<CompiledStyles>,
 	xstyle: XStyleProp | undefined,
@@ -60,12 +28,7 @@ export function resolveXStyleProps(
 	};
 }
 
-/**
- * A React Aria render-prop value: either a plain value, or a function of the component's
- * render props that returns one. Matches RAC's own `ClassNameOrFunction<T>` /
- * `StyleOrFunction<T>` shapes closely enough to accept both without importing them, so this
- * stays a plain styles helper rather than a dependency of the RAC type surface.
- */
+/** A React Aria prop value or a function that returns one. */
 type RacRenderPropValue<T, V> = V | ((renderProps: T) => V);
 
 /**

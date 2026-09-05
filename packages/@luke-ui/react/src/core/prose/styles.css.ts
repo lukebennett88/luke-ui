@@ -2,9 +2,8 @@ import { lukeUiClassNames } from '../../shared/class-names.js';
 import { vars } from '../../theme/tokens.stylex.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
 
-// Written directly into the `recipes` layer (not a StyleX `recipes.priorityN` sublayer): a direct
-// parent-layer rule beats a nested sublayer for normal declarations, which is what lets this
-// retained descendant rhythm reliably override Text's StyleX trim margins. See `layers.css.ts`.
+// Keep retained descendant rhythm in the direct `recipes` layer so it overrides Text's nested
+// StyleX trim rules.
 function proseStyle(selector: string, rule: Parameters<typeof globalStyleInLayer>[2]) {
 	globalStyleInLayer(
 		'recipes',

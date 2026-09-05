@@ -2,24 +2,10 @@ import type { CompiledStyles } from '@stylexjs/stylex';
 import * as stylex from '@stylexjs/stylex';
 import { vars } from '../../theme/tokens.stylex.js';
 
-/*
- * StyleX cannot safely substitute `defineConsts` values into selector keys in packed output.
- * Author the selector keys in this module and share only the compiled styles across recipes.
- *
- * The invalid state deliberately avoids `:has(:invalid)`. Native `:invalid` matches an empty
- * required input from first render — before any interaction or submit — while React Aria's
- * `data-invalid`/`aria-invalid` stay null until validation actually runs. Styling on
- * `:has(:invalid)` would paint an untouched required field invalid while telling assistive
- * technology it is fine.
- *
- * `:read-only` is scoped to `input` for the same kind of reason: bare `:read-only` matches any
- * non-editable element (spans, buttons), so `:has(:read-only)` would match any control that
- * contains a prefix, suffix, or trigger.
- *
- * Combobox narrows the focus condition to `:has(input:focus)` because its group also contains a
- * trigger and clear button. InputGroup uses bare `:focus-within`. This difference affects the
- * focus, invalid, and read-only rules. Disabled and hover remain identical and share one style.
- */
+/* Keep selector keys local because StyleX cannot substitute imported consts in packed output. */
+/* Scope native `:invalid` and `:read-only` to inputs so untouched or non-input descendants do not
+ * receive field state styles. Combobox also limits focus styles to its text input because its group
+ * contains a trigger and clear button. */
 const disabled =
 	'[data-disabled="true"], [aria-disabled="true"], :has(input:disabled), :has(input[aria-disabled="true"])';
 const hovered = '[data-hovered="true"], :hover';

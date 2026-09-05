@@ -135,9 +135,7 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 });
 
 test('the documented consumer layer declaration preserves Luke UI and consumer override ordering', () => {
-	// This is the exact declaration published in the Styling guide
-	// (apps/docs/content/docs/docs/styling.mdx, "Use application CSS alongside Luke UI"). Keep the
-	// two in sync: if this literal changes, update the docs too, and vice versa.
+	// Keep this declaration in sync with the Styling guide.
 	const documentedLayerDeclaration = '@layer reset, theme, base, recipes, overrides, utilities;';
 
 	const paddingClass = stylexPaddingClass(stylesheetCss);
@@ -145,11 +143,7 @@ test('the documented consumer layer declaration preserves Luke UI and consumer o
 
 	expect(getComputedStyle(element).paddingInlineStart).toBe('16px');
 
-	// A browser registers layer order from the first `@layer` statement it encounters, and a later
-	// statement cannot reorder layers that are already registered. The built stylesheet's own
-	// `@layer` statement was already injected in `beforeAll`, so the consumer declaration must be
-	// inserted ahead of it in `document.head` to reproduce the documented, realistic setup where a
-	// consumer declares its layer order before importing Luke UI's stylesheet.
+	// Insert the consumer declaration first because browsers keep the first layer order they see.
 	const consumerStyle = document.createElement('style');
 	consumerStyle.dataset.layerOrderProbe = 'true';
 	consumerStyle.textContent = `
@@ -158,14 +152,10 @@ ${documentedLayerDeclaration}
 `;
 	document.head.insertBefore(consumerStyle, document.head.firstChild);
 
-	// Relationship 1: a direct `@layer recipes` rule beats Luke UI's StyleX recipe styles, which
-	// sit in a nested `recipes.priorityN` sublayer. This is the mechanism retained CSS (Prose
-	// rhythm, LoadingSkeleton's forced surface, Combobox's section border) relies on.
+	// A direct `recipes` rule beats StyleX's nested recipe layers.
 	expect(getComputedStyle(element).paddingInlineStart).toBe('40px');
 
-	// Relationships 2 and 3 probe `overrides` and `utilities` directly, since the documented
-	// declaration is what fixes their relative order. A distinct probe class keeps these rules off
-	// the StyleX padding class used above.
+	// Use a separate class to probe `overrides` and `utilities`.
 	const orderingProbeClass = 'documented-declaration-ordering-probe';
 	const orderingElement = mountProbe(orderingProbeClass);
 
@@ -186,8 +176,7 @@ ${documentedLayerDeclaration}
 @layer utilities { .${orderingProbeClass} { margin-top: 9px !important; } }
 `;
 
-	// Relationship 3: an `overrides !important` rule beats a `utilities !important` rule, because
-	// cascade-layer priority reverses for `!important` declarations.
+	// Layer priority reverses for `!important` declarations.
 	expect(getComputedStyle(orderingElement).marginTop).toBe('5px');
 
 	// Relationship 4: unlayered consumer CSS beats every layered normal declaration.
@@ -199,18 +188,12 @@ ${documentedLayerDeclaration}
 });
 
 test('application base-layer element resets do not override Luke UI component styles', () => {
-	// This is the exact declaration published in the Styling guide
-	// (apps/docs/content/docs/docs/styling.mdx, "Use application CSS alongside Luke UI"). Keep the
-	// two in sync: if this literal changes, update the docs too, and vice versa.
+	// Keep this declaration in sync with the Styling guide.
 	const documentedLayerDeclaration = '@layer reset, theme, base, recipes, overrides, utilities;';
 
 	const inlineFlexClass = stylexInlineFlexClass(stylesheetCss);
 
-	// A browser registers layer order from the first `@layer` statement it encounters, and a later
-	// statement cannot reorder layers that are already registered. The built stylesheet's own
-	// `@layer` statement was already injected in `beforeAll`, so the consumer declaration must be
-	// inserted ahead of it in `document.head` to reproduce the documented, realistic setup where a
-	// consumer declares its layer order before importing Luke UI's stylesheet.
+	// Insert the consumer declaration first because browsers keep the first layer order they see.
 	const consumerStyle = document.createElement('style');
 	consumerStyle.dataset.layerOrderProbe = 'true';
 	consumerStyle.textContent = `

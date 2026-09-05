@@ -155,13 +155,13 @@ Luke UI's static CSS uses cascade layers. When you use `xstyle`, import
 @layer reset, theme, base, recipes, overrides, utilities;
 ```
 
-Without `xstyle`, the same layers apply except `overrides`. Name every layer you use. A layer you
-leave out is appended after the layers you declared, which reverses the override order you expect.
+Without `xstyle`, the same layers apply except `overrides`. Name every layer you use. An omitted
+layer is appended after the layers you declare, which changes the override order.
 
-Keep application base styles in `base`, below component recipes. Put deliberate overrides in
-`utilities`, or use ordinary unlayered application CSS. Tailwind utilities, CSS Modules, and
-application CSS work well for application-owned layout and custom elements. Put Tailwind classes on
-surrounding elements or `Box`:
+Keep application base styles in `base`, below component recipes. Put overrides in `utilities`, or
+use ordinary unlayered application CSS. Tailwind utilities, CSS Modules, and application CSS work
+well for application-owned layout and custom elements. Put Tailwind classes on surrounding elements
+or `Box`:
 
 ```tsx
 import { Box } from '@luke-ui/react/box';

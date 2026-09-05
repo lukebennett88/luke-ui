@@ -3,9 +3,8 @@ import { comboboxSectionScopeAttribute } from '../primitives/combobox/section-sc
 import { globalStyleInLayer } from './layered-style.css.js';
 import { attributeSelector } from './selectors.js';
 
-// Written directly into the `recipes` layer (not a StyleX `recipes.priorityN` sublayer): a direct
-// parent-layer rule beats a nested sublayer for normal declarations, which is what lets this
-// retained selector reliably override Combobox's StyleX section recipe. See `layers.css.ts`.
+// Keep this retained selector in the direct `recipes` layer so it overrides Combobox's nested
+// StyleX section recipe.
 globalStyleInLayer(
 	'recipes',
 	`${attributeSelector(comboboxSectionScopeAttribute)} + ${attributeSelector(comboboxSectionScopeAttribute)}`,

@@ -1,4 +1,4 @@
-/** Private attribute bridging LoadingSkeleton's StyleX root to its retained descendant masks. Implementation detail — not a public styling hook. */
+/** Private attribute that connects the StyleX root to retained descendant masks. */
 export const loadingSkeletonScopeAttribute = 'data-luke-loading-skeleton';
 
 /**

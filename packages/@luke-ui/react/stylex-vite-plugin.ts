@@ -20,18 +20,7 @@ type StylexEsbuildPlugin = NonNullable<RollupOptions['esbuildOptions']>['plugins
 	? EsbuildPlugin
 	: never;
 
-/**
- * Shared StyleX handling for every pipeline that resolves `@luke-ui/react` to source: `vp pack`
- * (production build), Vitest (unit/browser/visual), Storybook, and the docs app. Each pipeline
- * runs the same Babel transform over the same source files, so this module is the one place the
- * transform options and the cascade-layer config live.
- *
- * `createStylexPackPlugin` appends the extracted StyleX CSS to the emitted `stylesheet.css` asset
- * in `generateBundle`. `createStylexDevPlugin` is the dev/test counterpart: those pipelines have
- * no `stylesheet.css` asset to append to, so they serve the same extracted CSS through
- * `virtual:luke-stylex.css`. Both declare the complete authoritative `@layer` order from a full
- * source scan, not from incrementally discovered modules.
- */
+/** Shared StyleX transforms and cascade-layer handling for package builds and dev tools. */
 
 export const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
@@ -59,14 +48,7 @@ const NON_PRODUCTION_MODULE_PATTERN = /\.(?:browser|visual|test|stories)\.[cm]?[
 /** A StyleX const/token module, e.g. `tokens.stylex.ts`. */
 const STYLEX_TOKENS_MODULE_PATTERN = /\.stylex\.ts$/;
 
-/**
- * The single, authoritative set of options passed to `stylexBabelPlugin.withOptions`, shared by
- * `transformStylex` (every Vite/Rollup pipeline below) and `createStylexEsbuildPlugin` (Vanilla
- * Extract's own esbuild pass). Both transform the same source files and must produce identical
- * output — the same `dev`/`propertyValidationMode`/`unstable_moduleResolution` values — or a class
- * name or resolved value could silently drift between the two. Kept as a function (not a plugin
- * instance) because a `withOptions` plugin instance is single-use per Babel call.
- */
+/** Return the shared StyleX Babel options for each transform call. */
 function stylexBabelOptions(): PluginItem {
 	return stylexBabelPlugin.withOptions({
 		dev: false,
@@ -128,13 +110,7 @@ async function transformStylex(
 ): Promise<{ code: string; map: TransformSourceMap; rules: Array<Rule> | undefined } | null> {
 	const filename = id.split('?')[0] ?? id;
 
-	// Cheap gates, cheapest first: a non-JS/TS file (e.g. `package.json`, which itself lists
-	// `@stylexjs/stylex` as a dependency) is never eligible; `node_modules` is excluded because a
-	// dev server's optimized-deps chunk for `@stylexjs/stylex` itself contains that string (its
-	// own module specifier), which would otherwise wrongly feed Vite's pre-bundled dependency
-	// output back through the StyleX Babel plugin; and parsing every remaining module through
-	// Babel to find the few that use StyleX would roughly double build time, hence the substring
-	// check before ever invoking Babel.
+	// Skip non-source files, dependencies, and files that do not import StyleX before parsing.
 	if (
 		!STYLEX_ELIGIBLE_MODULE_PATTERN.test(filename) ||
 		id.includes('/node_modules/') ||
@@ -297,29 +273,12 @@ const RESOLVED_STYLEX_VIRTUAL_CSS_ID = `\0${STYLEX_VIRTUAL_CSS_ID}`;
 /** Name of the plugin `createStylexDevPlugin` returns, for `stylexVanillaExtractPluginFilter`. */
 const STYLEX_DEV_PLUGIN_NAME = 'stylex-dev';
 
-/**
- * `@vanilla-extract/vite-plugin` compiles `.css.ts` files inside its own internal Vite server (see
- * `createStylexEsbuildPlugin`'s doc comment for why that matters), built by re-reading the *config
- * file's own top-level* `plugins` array — never a Vitest project's or a Storybook `viteFinal`'s
- * per-project plugins — and filtering it down to a hardcoded allowlist, by default just
- * `vite-tsconfig-paths`. So `createStylexDevPlugin()` has to be declared in that top-level array
- * too (in `vitest.config.ts`, alongside `test.projects`; Storybook's `viteFinal` already mutates a
- * single flat `config.plugins`, so it needs no separate top-level entry), and this filter passed as
- * `unstable_pluginFilter` so the plugin survives the allowlist and transforms `tokens.stylex.ts`
- * before the internal server evaluates it.
- */
+/** Keep the StyleX plugin in Vanilla Extract's internal Vite plugin list. */
 export function stylexVanillaExtractPluginFilter(plugin: { name: string }): boolean {
 	return plugin.name === STYLEX_DEV_PLUGIN_NAME;
 }
 
-/**
- * Dev/test StyleX plugin: transforms JS the same way the pack plugin does, and serves the complete
- * extracted CSS — including the same authoritative `@layer` order — from `virtual:luke-stylex.css`.
- * Layer names and StyleX rules come from a full source scan (`loadSourceRules`), cached after the
- * first request. `hotUpdate` drops that cache and returns the virtual module in the update set
- * whenever a StyleX-eligible source file changes, so editing a `stylex.create()` call re-scans and
- * the browser re-fetches the stylesheet instead of keeping the CSS it loaded before the edit.
- */
+/** Transform StyleX modules and serve the extracted CSS in dev and test builds. */
 export function createStylexDevPlugin(): Plugin {
 	let sourceRules: Promise<Array<Rule>> | undefined;
 
@@ -341,9 +300,7 @@ export function createStylexDevPlugin(): Plugin {
 			return { code: result.code, map: result.map };
 		},
 		hotUpdate({ file, modules }) {
-			// Only a StyleX-eligible source module can change the rule set the virtual stylesheet
-			// serves; a change to anything else (e.g. a `.md` doc) leaves `sourceRules` valid, so
-			// re-scanning the whole source tree on every save would be wasted work.
+			// Documentation and other non-StyleX files do not change the extracted rules.
 			if (!STYLEX_ELIGIBLE_MODULE_PATTERN.test(file)) return;
 
 			sourceRules = undefined;
@@ -353,27 +310,18 @@ export function createStylexDevPlugin(): Plugin {
 			);
 			if (virtualModule === undefined) return;
 
-			// Nothing that changed imports the virtual module, so Vite never collects it into
-			// `modules` on its own.
+			// The changed module does not import the virtual stylesheet, so add it explicitly.
 			return [...modules, virtualModule];
 		},
 	};
 }
 
-/**
- * `Plugin['transform']` is an `ObjectHook`, i.e. the handler function or an object wrapping it;
- * this pulls out the function form so its return type's `map` field can be reused below. `vite-plus`
- * exports an unrelated dev-server `TransformResult` under the same name, so it can't be imported directly.
- */
+/** Extract the transform handler type without importing Vite Plus's unrelated result type. */
 type TransformHandler = Extract<NonNullable<Plugin['transform']>, (...args: never) => unknown>;
 type TransformHookResult = Awaited<ReturnType<TransformHandler>>;
 type TransformSourceMap = Exclude<TransformHookResult, string | null | undefined | void>['map'];
 
-/**
- * Babel's sourcemap types its array fields as `readonly` and names the ignore-list field
- * differently, neither of which rolldown's `ExistingRawSourceMap` accepts; copy the fields
- * across into that shape with plain mutable arrays.
- */
+/** Convert Babel's source-map shape to the mutable shape expected by Rolldown. */
 function toRolldownSourceMap(map: FileResult['map']): TransformSourceMap {
 	if (map === null) return null;
 

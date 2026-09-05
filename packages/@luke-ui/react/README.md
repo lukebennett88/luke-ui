@@ -12,7 +12,7 @@ pnpm add @luke-ui/react react-aria-components
 Luke UI expects the application to provide a compatible shared `react-aria-components` instance.
 
 An application that authors `xstyle` overrides also installs `@stylexjs/stylex` and `@luke-ui/vite`.
-`@luke-ui/vite` wires up the StyleX compiler and the cascade layer order — see its
+`@luke-ui/vite` configures the StyleX compiler and cascade layer order. See its
 [README](../vite/README.md) and the
 [Installation guide](../../../apps/docs/content/docs/docs/installation.mdx) for the one-time setup.
 

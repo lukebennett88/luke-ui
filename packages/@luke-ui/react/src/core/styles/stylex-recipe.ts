@@ -4,23 +4,10 @@ import * as stylex from '@stylexjs/stylex';
 /** A compiled StyleX style returned by a `stylex.create(...)` entry. */
 type StyleXStyle = CompiledStyles;
 
-/**
- * A single variant value's compiled style, or `null` for a variant value that is valid but
- * contributes no style of its own (the old Vanilla Extract engine's no-op `{}` entries). `null` is
- * a real selectable value, distinct from an unselected group — resolution skips it the same way it
- * skips an absent style, but its presence in a variant map keeps the value in the public union.
- * Never use `undefined` for this meaning: `undefined` already means "this group was not selected".
- */
+/** A compiled style, or `null` for a valid variant value with no styles. */
 type VariantValue = StyleXStyle | null;
 
-/**
- * One or more compiled styles, applied together as an unconditional base.
- *
- * A `base` array is spread exactly one level — it is not flattened recursively. The predecessor
- * Vanilla Extract engine did flatten nested arrays; this one deliberately does not, because every
- * call site passes a flat list and `stylex.props` takes its arguments flat anyway. Keep the array
- * flat rather than reintroducing recursion.
- */
+/** One or more compiled styles applied as an unconditional base. Base arrays are one level deep. */
 type StyleXStyleList = StyleXStyle | ReadonlyArray<StyleXStyle>;
 
 /** Maps the string variant keys `'true'`/`'false'` onto `boolean` for selection. */
@@ -81,7 +68,7 @@ type SinglePartResolver<Variants extends VariantGroups> = (
 	selection?: VariantSelection<Variants>,
 ) => Array<StyleXStyle>;
 
-/** A per-slot style map: slot name to a variant value for that slot. Unaffected slots are omitted — a partial slot map is not padded with `null` entries for the slots it does not style. */
+/** Maps slot names to styles. Unaffected slots are omitted. */
 type SlotStyles<Slot extends string> = Partial<Record<Slot, VariantValue>>;
 
 /**
@@ -132,13 +119,7 @@ export type RecipeSelection<Fn> = Fn extends (selection?: infer Selection) => un
 	? NonNullable<Selection>
 	: never;
 
-/**
- * Derives the outer variant selection type for a slotted recipe from its canonical
- * `resolveSlotStyles` resolver, whose selection is the second parameter (after the slot name). A
- * single, structural `RecipeSelection<Fn>` cannot cover both shapes: a one-parameter resolver is
- * itself assignable to a two-parameter function type, so a shared conditional would silently widen
- * a single-part resolver's selection to `{}` instead of failing to match.
- */
+/** Derives the outer selection type from a slotted resolver's second parameter. */
 export type SlotRecipeSelection<Fn> = Fn extends (
 	slotName: never,
 	selection?: infer Selection,
@@ -146,20 +127,10 @@ export type SlotRecipeSelection<Fn> = Fn extends (
 	? NonNullable<Selection>
 	: never;
 
-/** The full `stylex.props(...)` output — spreadable element props — that a public recipe returns. */
+/** The spreadable `stylex.props(...)` output returned by a public recipe. */
 export type RecipeProps = ReturnType<typeof stylex.props>;
 
-/**
- * Builds the canonical resolver for a single-part recipe: selection in, the ordered list of
- * compiled styles it resolves to out. Owns default variants, simple variant selection, compound
- * variants, and their relative ordering (base, then simple variants in config order, then matching
- * compound variants) — the same resolution algorithm the predecessor tuple-returning factory used.
- *
- * A component composes this resolver's output into its own `stylex.props` call (see
- * `resolveXStyleProps` in `xstyle.ts`) before its public `xstyle` value, so a component rendering
- * one recipe never pays to also format that recipe as class-name/style props it will not use.
- * `createRecipe` below adapts this same resolver into that formatted, public-facing shape.
- */
+/** Resolves a single-part recipe to an ordered list of compiled styles. */
 export function createRecipeStyles<const Variants extends VariantGroups = NoVariants>(
 	config: SinglePartConfig<Variants>,
 ): SinglePartResolver<Variants> {
@@ -169,24 +140,14 @@ export function createRecipeStyles<const Variants extends VariantGroups = NoVari
 	};
 }
 
-/**
- * Adapts a single-part canonical resolver into a public recipe: a function that takes the same
- * selection and returns the full `stylex.props(...)` output (spreadable element props), not a bare
- * class string. It preserves the resolver's own selection parameter, so `buttonRecipe({ size:
- * 'small' })` still type-checks against the resolver's variant groups.
- */
+/** Adapts a single-part resolver into a public recipe. */
 export function createRecipe<const Variants extends VariantGroups = NoVariants>(
 	resolver: SinglePartResolver<Variants>,
 ): (selection?: VariantSelection<Variants>) => RecipeProps {
 	return (selection) => stylex.props(...resolver(selection));
 }
 
-/**
- * Builds the canonical resolver for a slotted recipe around one operation, `resolveSlotStyles`, so
- * a component that renders a single slot — a repeated `ComboboxItem` among Combobox's seventeen —
- * never pays to resolve the other sixteen. `slotNames` travels alongside it so `createSlottedRecipe`
- * can build one function per slot without a caller re-listing the recipe's own anatomy.
- */
+/** Builds a resolver for a slotted recipe and records its slot names. */
 export function createSlottedRecipeStyles<
 	const Slot extends string,
 	const Variants extends SlotVariantGroups<Slot> = NoVariants,
@@ -209,16 +170,7 @@ export function createSlottedRecipeStyles<
 	return { resolveSlotStyles, slotNames };
 }
 
-/**
- * Adapts a slotted canonical resolver into a public recipe: a function that takes the outer
- * selection and returns one `stylex.props(...)` result per slot. Reads its anatomy from
- * `slotNames` on the resolver object, so a caller never re-lists the slot names the resolver
- * config already declared.
- *
- * Each slot is defined as a lazy getter, not resolved eagerly: a component that renders a single
- * slot — a repeated `ComboboxItem` among Combobox's seventeen — still never pays to format the
- * other sixteen as `stylex.props(...)` output, matching the canonical resolver's own laziness.
- */
+/** Adapts a slotted resolver into a public recipe with lazy per-slot props. */
 export function createSlottedRecipe<
 	const Slot extends string,
 	const Variants extends SlotVariantGroups<Slot> = NoVariants,
@@ -250,15 +202,13 @@ function resolveSlotVariants<Slot extends string>(
 		const perValue: Record<string, VariantValue> = {};
 
 		for (const [value, slotStyles] of Object.entries(values)) {
-			// A whole variant value may be `null`: valid, styles no slot at all.
+			// `null` is valid and styles no slot.
 			if (slotStyles === null) {
 				perValue[value] = null;
 				continue;
 			}
 
-			// A partial slot map omits the slots a variant value does not style — that omission
-			// (`undefined`) is different from styling a slot with `null` (a real, no-op value), so
-			// only `undefined` is filtered out here.
+			// Omitted slots are `undefined`; `null` is a valid no-op value.
 			const style = slotStyles[slotName];
 			if (style !== undefined) perValue[value] = style;
 		}
@@ -296,9 +246,7 @@ function resolveSinglePartStyles<Variants extends VariantGroups>(
 			const chosen = selected[group];
 			if (chosen === undefined) continue;
 			const style = values[toVariantKey(chosen)];
-			// `null` is a valid variant value that contributes no style — resolution skips it, the
-			// same way it skips an absent style, without ever pushing it into the styles array
-			// `stylex.props` receives.
+			// `null` is a valid variant value with no style.
 			if (style !== undefined && style !== null) styles.push(style);
 		}
 	}

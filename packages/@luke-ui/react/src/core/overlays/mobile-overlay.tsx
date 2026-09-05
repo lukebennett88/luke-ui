@@ -25,8 +25,7 @@ const styles = stylex.create({
 		transitionDuration: vars.motion.duration.enter,
 		transitionProperty: 'opacity',
 		transitionTimingFunction: vars.motion.easing.standard,
-		// Nothing else in this package sets a competing z-index, so this is not calibrated
-		// against anything of ours. It is a floor meant to sit above consumer page content.
+		// Keep the overlay above consumer page content.
 		zIndex: 100,
 		'[data-entering]': {
 			opacity: 0,
@@ -62,8 +61,7 @@ const styles = stylex.create({
 		borderStartStartRadius: vars.radius.overlay,
 		borderStyle: 'solid',
 		borderWidth: '1px',
-		// Physical on purpose, paired with `top` below. The two preserve an intended over-constraint
-		// that logical block insets would resolve from the wrong edge on a content-box element.
+		// Physical insets preserve the intended over-constraint for this content-box tray.
 		bottom: '-100vh',
 		boxShadow: vars.depth.floating,
 		boxSizing: 'content-box',
@@ -71,15 +69,14 @@ const styles = stylex.create({
 		flexDirection: 'column',
 		insetInlineEnd: 0,
 		insetInlineStart: 0,
-		// The tray is absolutely positioned, so auto inline margins centre it against the
-		// zero inline insets once the cap starts clamping its width.
+		// Auto inline margins centre the absolutely positioned tray when its width is capped.
 		marginInlineEnd: 'auto',
 		marginInlineStart: 'auto',
 		maxInlineSize: '448px',
 		overflow: 'hidden',
 		paddingBlockEnd: `var(${trayPaddingBlockEnd})`,
 		position: 'absolute',
-		// Physical on purpose, paired with `bottom` above. See the note there.
+		// Physical inset paired with `bottom` above.
 		top: vars.space.sp48,
 		transitionDuration: vars.motion.duration.enter,
 		transitionProperty: 'opacity, translate',
@@ -117,9 +114,7 @@ const styles = stylex.create({
 				translate: 'none',
 			},
 		},
-		// Past the cap the tray is inset from the viewport edges, so its bottom corners are
-		// no longer flush and have to be rounded like the top ones. `450px` is the border-box
-		// cap; `max-inline-size` is the content-box equivalent (450px − 1px × 2).
+		// Above the cap, the tray is inset from the viewport edges and needs bottom corners.
 		'@media (width > 450px)': {
 			borderEndEndRadius: vars.radius.overlay,
 			borderEndStartRadius: vars.radius.overlay,

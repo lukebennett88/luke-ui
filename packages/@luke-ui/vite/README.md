@@ -9,8 +9,8 @@ pnpm add @stylexjs/stylex
 pnpm add -D @luke-ui/vite
 ```
 
-Install `@stylexjs/stylex` because application source imports it directly. `@luke-ui/vite` owns the
-compiler packages used to extract StyleX CSS.
+Install `@stylexjs/stylex` because application source imports it directly. `@luke-ui/vite` provides
+the compiler packages that extract StyleX CSS.
 
 ## Setup
 

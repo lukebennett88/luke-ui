@@ -324,27 +324,12 @@ export const storyProbeClassName = stylex.props(styles.storyProbe).className;
 );
 
 test('never emits !important from a recipes.priorityN sublayer', { timeout: 30_000 }, async () => {
-	// Cascade-layer priority reverses for `!important` declarations: a nested sublayer (like
-	// StyleX's own `recipes.priorityN`) beats its direct parent layer for `!important`, which
-	// is the OPPOSITE of the normal-declaration ordering the rest of this cascade relies on
-	// (a direct `@layer recipes` rule beating a nested `recipes.priorityN` rule). Retained CSS
-	// that needs to forcibly win — LoadingSkeleton's forced surface, for instance — depends on
-	// being written directly into `@layer recipes` rather than into a StyleX sublayer, precisely
-	// because that direct placement is what lets it outrank both other components' StyleX output
-	// AND a consumer's `overrides`/`utilities`-layer `!important` (top-level layer order also
-	// reverses for `!important`, so an earlier layer like `recipes` beats a later one like
-	// `overrides` — see `layer-order.browser.test.ts`'s `'LoadingSkeleton recipes !important
-	// beats utilities-layer !important overrides'` test). If a `recipes.priorityN` sublayer ever
-	// emits `!important`, that declaration would rank ABOVE the direct `@layer recipes` retained
-	// CSS it shares a parent layer with, silently inverting the override contract that retained
-	// CSS relies on. See `styles.css.ts` in `core/loading-skeleton` for the retained CSS this
-	// invariant protects.
+	// Nested recipe layers must not emit `!important`: nested layers outrank their parent for
+	// important declarations and would override retained CSS in the direct `recipes` layer.
 	const stylesheet = await readPublicStylesheet();
 	const root = parse(stylesheet);
 
-	// `recipes.priorityN` can appear as more than one block in the built stylesheet (StyleX
-	// emits per-source-chunk blocks that share a layer name), so every block for a given
-	// layer name must be aggregated rather than stopping at the first match.
+	// StyleX can emit several blocks with the same layer name. Aggregate them all.
 	const importantDeclarationsByLayer = new Map<string, Array<string>>();
 
 	root.walkAtRules('layer', (atRule) => {
@@ -363,18 +348,7 @@ test('never emits !important from a recipes.priorityN sublayer', { timeout: 30_0
 		.map(([layer, declarations]) => `  @layer ${layer}: ${declarations.join(', ')}`)
 		.join('\n');
 
-	// A failure here means a `recipes.priorityN` sublayer emitted `!important`. Cascade-layer
-	// `!important` priority is the reverse of normal-declaration priority: a nested sublayer beats
-	// its direct parent layer for `!important`, while a direct parent layer beats a nested sublayer
-	// for normal declarations. Luke UI relies on the normal-declaration ordering to let retained CSS,
-	// written directly into `@layer recipes` (not a StyleX sublayer), reliably override generated
-	// recipe output. Any `!important` inside a `recipes.priorityN` sublayer would rank ABOVE that
-	// direct-`@layer recipes` retained CSS, inverting the override contract it depends on — including
-	// LoadingSkeleton's forced surface, which relies on its direct-`recipes` placement to in turn
-	// outrank a consumer's `overrides`/`utilities`-layer `!important` (top-level layer order also
-	// reverses for `!important`; see `layer-order.browser.test.ts`). Move the forced style into
-	// retained CSS (a `globalStyleInLayer('recipes', ...)` call) instead of authoring it in
-	// `stylex.create`.
+	// A failure means a StyleX recipe layer contains `!important`; move that rule to retained CSS.
 	expect(summary).toBe('');
 });
 

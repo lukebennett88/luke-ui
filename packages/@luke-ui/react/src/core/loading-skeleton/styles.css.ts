@@ -17,26 +17,10 @@ globalKeyframes(skeletonPulseAnimationName, {
 	'100%': { filter: 'brightness(1)' },
 });
 
-// Forced onto every skeleton surface — the inline root and every block descendant — so an
-// arbitrary wrapped component reads as a flat placeholder shape. `!important` is deliberate:
-// cascade layers alone can't beat consumers' un-layered or inline styles, and the skeleton must
-// always win over its children.
-//
-// This lives here, in retained CSS written DIRECTLY into the `recipes` layer, and not in
-// `stylex.create` (see `loading-skeleton.tsx`), because a direct parent-layer rule beats a nested
-// sublayer for normal declarations, but that relationship REVERSES for `!important`: a StyleX
-// `recipes.priorityN` sublayer rule with `!important` beats a direct `@layer recipes` rule with
-// `!important`. StyleX's own recipe/override sublayers sit inside `recipes`, so a `!important`
-// forced surface authored there would rank ABOVE this layer's retained CSS, inverting the
-// contract. Direct `@layer recipes` is also what lets this forced surface outrank a consumer's
-// `overrides`/`utilities`-layer `!important`: top-level cascade-layer order reverses for
-// `!important` too, so an earlier layer (`recipes`) beats a later one (`overrides`, `utilities`)
-// for `!important` declarations — see `'LoadingSkeleton recipes !important beats
-// utilities-layer !important overrides'` in `layer-order.browser.test.ts`. Direct `@layer
-// recipes` is the only place in this layer stack where `!important` sorts the way this component
-// needs on both counts. Do not move this back into `stylex.create` without re-deriving that
-// ordering; see `stylesheet-contract.test.ts`'s guard against `!important` in
-// `recipes.priorityN`.
+// Force a flat placeholder surface on the root and all block descendants. Keep these rules in the
+// direct `recipes` layer: a nested StyleX sublayer would outrank it for `!important` declarations,
+// while the direct layer must outrank consumer `overrides` and `utilities` declarations. The
+// stylesheet contract test rejects `!important` in `recipes.priorityN`.
 //
 // The casts silence csstype on keyword-only properties, which don't admit the `!important` suffix
 // in their type.

@@ -1,32 +1,6 @@
 import { globalLayer } from '@vanilla-extract/css';
 
-/**
- * CSS cascade layers, ordered from lowest to highest priority.
- *
- * - **reset** — Normalize browser defaults (box-sizing, margins, form elements).
- * - **theme** — Design token custom properties and base typographic defaults.
- * - **base** — Application element defaults, below the component recipe layers.
- * - **recipes** — Component styles. StyleX itself creates numbered `recipes.priorityN`
- *   sublayers here; retained rules that are not StyleX (Prose descendant rhythm, LoadingSkeleton
- *   forced surface and descendant masks, Combobox adjacent-section selectors) are written
- *   DIRECTLY into this layer via `globalStyleInLayer('recipes', ...)`, not into a sublayer. A
- *   direct parent-layer rule beats a nested sublayer for normal declarations, which is what lets
- *   this retained CSS reliably override StyleX recipe output. That relationship reverses for
- *   `!important`: a nested `recipes.priorityN` sublayer's `!important` declaration would outrank
- *   this layer's own direct retained CSS, so a `recipes.priorityN` sublayer must never emit
- *   `!important` — `stylesheet-contract.test.ts` guards against it. Direct retained CSS written
- *   into this layer is not under that restriction and may use `!important` when a forced
- *   invariant requires it, as LoadingSkeleton's forced surface deliberately does.
- * - **overrides** — Consumer-authored StyleX (the `xstyle` prop and application styles), compiled
- *   into this layer by `@luke-ui/vite`. Luke UI itself never writes CSS here, which is why this
- *   layer has no `globalLayer()` entry below; it is declared in the combined order emitted by
- *   `@luke-ui/vite` so consumer overrides reliably out-rank `recipes`.
- * - **utilities** — One-off overrides; highest-priority layer for escape hatches.
- *
- * `globalLayer()` keeps Vanilla Extract's layer wiring consistent. The authoritative
- * combined order is prepended at build time before other CSS; redundant empty
- * `@layer name;` declarations are stripped so they cannot reorder already-created layers.
- */
+/** CSS cascade layers. The build prepends the combined order before other CSS. */
 export const layers = {
 	reset: globalLayer('reset'),
 	theme: globalLayer('theme'),

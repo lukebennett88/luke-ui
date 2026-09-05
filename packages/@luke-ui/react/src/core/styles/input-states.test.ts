@@ -175,9 +175,8 @@ test(
 );
 
 test('the shared invalid-indicator mask tracks the generated icon set', () => {
-	// The mask URL is the one piece of the invalid indicator that does cross a module boundary, as
-	// a `defineConsts` value. `.generated/icon-mask-data.ts` is its canonical source; StyleX cannot
-	// read that file, so this asserts the mirrored copy has not drifted from a regenerated icon set.
+	// StyleX uses a local `defineConsts` copy because it cannot read the generated module. Check that
+	// copy against the generated icon set.
 	expect(invalidIndicator.maskImage).toBe(iconMaskUrls.exclamationTriangle);
 });
 
