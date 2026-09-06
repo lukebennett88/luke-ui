@@ -147,15 +147,22 @@ export const checkboxStateRecipe = recipe({
 			},
 		},
 	},
+	// `isSelected` and `isIndeterminate` are independent: React Aria reports both as true for a
+	// checkbox that is selected and showing a mixed state, so neither flag implies the other is
+	// false. Selected and indeterminate compounds therefore test only their own flag, and each
+	// pair sets the identical fill so either or both matching paints the same result. Only the
+	// compounds describing the genuine third state — neither flag set — spell out both as false.
+	//
+	// The minus glyph wins over the checkmark for free: it comes from the `isIndeterminate`
+	// variant, which resolves before any compound, and the checkmark compound only ever touches
+	// `opacity`, never `content`.
 	compoundVariants: [
 		{
 			isSelected: true,
-			isIndeterminate: false,
 			style: { indicator: { '::after': { opacity: 1 } } },
 		},
 		{
 			isSelected: true,
-			isIndeterminate: false,
 			isHovered: false,
 			isPressed: false,
 			isInvalid: false,
@@ -169,7 +176,6 @@ export const checkboxStateRecipe = recipe({
 			},
 		},
 		{
-			isSelected: false,
 			isIndeterminate: true,
 			isHovered: false,
 			isPressed: false,
@@ -218,7 +224,6 @@ export const checkboxStateRecipe = recipe({
 		},
 		{
 			isSelected: true,
-			isIndeterminate: false,
 			isHovered: true,
 			isPressed: false,
 			isInvalid: false,
@@ -235,7 +240,6 @@ export const checkboxStateRecipe = recipe({
 			},
 		},
 		{
-			isSelected: false,
 			isIndeterminate: true,
 			isHovered: true,
 			isPressed: false,
@@ -254,7 +258,6 @@ export const checkboxStateRecipe = recipe({
 		},
 		{
 			isSelected: true,
-			isIndeterminate: false,
 			isPressed: true,
 			isInvalid: false,
 			isDisabled: false,
@@ -270,7 +273,6 @@ export const checkboxStateRecipe = recipe({
 			},
 		},
 		{
-			isSelected: false,
 			isIndeterminate: true,
 			isPressed: true,
 			isInvalid: false,
@@ -336,7 +338,6 @@ export const checkboxStateRecipe = recipe({
 		{
 			isInvalid: true,
 			isSelected: true,
-			isIndeterminate: false,
 			isHovered: false,
 			isPressed: false,
 			style: {
@@ -351,7 +352,6 @@ export const checkboxStateRecipe = recipe({
 		},
 		{
 			isInvalid: true,
-			isSelected: false,
 			isIndeterminate: true,
 			isHovered: false,
 			isPressed: false,
@@ -368,7 +368,6 @@ export const checkboxStateRecipe = recipe({
 		{
 			isInvalid: true,
 			isSelected: true,
-			isIndeterminate: false,
 			isHovered: true,
 			isPressed: false,
 			isDisabled: false,
@@ -386,7 +385,6 @@ export const checkboxStateRecipe = recipe({
 		},
 		{
 			isInvalid: true,
-			isSelected: false,
 			isIndeterminate: true,
 			isHovered: true,
 			isPressed: false,
@@ -406,7 +404,6 @@ export const checkboxStateRecipe = recipe({
 		{
 			isInvalid: true,
 			isSelected: true,
-			isIndeterminate: false,
 			isPressed: true,
 			isDisabled: false,
 			isReadOnly: false,
@@ -423,7 +420,6 @@ export const checkboxStateRecipe = recipe({
 		},
 		{
 			isInvalid: true,
-			isSelected: false,
 			isIndeterminate: true,
 			isPressed: true,
 			isDisabled: false,
@@ -468,7 +464,6 @@ export const checkboxStateRecipe = recipe({
 		},
 		{
 			isSelected: true,
-			isIndeterminate: false,
 			style: {
 				indicator: {
 					'@media (forced-colors: active)': {
@@ -480,7 +475,6 @@ export const checkboxStateRecipe = recipe({
 			},
 		},
 		{
-			isSelected: false,
 			isIndeterminate: true,
 			style: {
 				indicator: {

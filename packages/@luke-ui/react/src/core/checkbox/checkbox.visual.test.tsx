@@ -24,6 +24,9 @@ test('kitchen sink', async () => {
 				<Checkbox isIndeterminate name="indeterminate">
 					Indeterminate
 				</Checkbox>
+				<Checkbox defaultSelected isIndeterminate name="selected-and-indeterminate">
+					Selected and indeterminate
+				</Checkbox>
 				<Checkbox defaultSelected isDisabled name="disabled">
 					Disabled
 				</Checkbox>
@@ -85,6 +88,14 @@ test('interactive states', async () => {
 			<Checkbox errorMessage="Choose an option." isIndeterminate name="invalid-indeterminate">
 				Invalid indeterminate
 			</Checkbox>
+			<Checkbox
+				defaultSelected
+				errorMessage="Choose an option."
+				isIndeterminate
+				name="invalid-selected-and-indeterminate"
+			>
+				Invalid selected and indeterminate
+			</Checkbox>
 		</Stack>,
 	);
 	const unchecked = page.getByRole('checkbox', { exact: true, name: 'Invalid' });
@@ -93,11 +104,16 @@ test('interactive states', async () => {
 		exact: true,
 		name: 'Invalid indeterminate',
 	});
+	const selectedAndIndeterminate = page.getByRole('checkbox', {
+		exact: true,
+		name: 'Invalid selected and indeterminate',
+	});
 
 	for (const [name, checkbox] of [
 		['unchecked', unchecked],
 		['selected', selected],
 		['indeterminate', indeterminate],
+		['selected-and-indeterminate', selectedAndIndeterminate],
 	] as const) {
 		const label = checkboxLabel(checkbox);
 		await userEvent.hover(label);
@@ -134,6 +150,9 @@ test('forced-colors states', async () => {
 				</Checkbox>
 				<Checkbox isIndeterminate name="indeterminate">
 					Indeterminate
+				</Checkbox>
+				<Checkbox defaultSelected isIndeterminate name="selected-and-indeterminate">
+					Selected and indeterminate
 				</Checkbox>
 				<Checkbox defaultSelected isDisabled name="disabled">
 					Disabled

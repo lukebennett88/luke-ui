@@ -15,7 +15,9 @@ Use `Checkbox` when someone can choose an option independently of nearby control
 
 Use `defaultSelected` for an uncontrolled initial value, or pair `isSelected` with `onChange` when
 application state owns the selection. `isIndeterminate` communicates a mixed state, such as a parent
-option whose child options are only partly selected.
+option whose child options are only partly selected. `isSelected` and `isIndeterminate` are
+independent: a parent checkbox can be selected and indeterminate at once, such as while its children
+are still being fetched, and the indeterminate mark takes precedence over the checkmark.
 
 <ExampleBlock src="checkbox/states" title="Checkbox — States" />
 
