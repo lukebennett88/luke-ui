@@ -48,7 +48,6 @@ export const buttonRecipe = recipe({
 		borderStyle: 'solid',
 		borderWidth: '1px',
 		boxShadow: vars.depth.resting,
-		boxSizing: 'border-box',
 		cursor: 'default',
 		display: 'inline-flex',
 		fontFamily: vars.font.family.body,

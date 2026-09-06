@@ -267,7 +267,6 @@ const comboboxConfig = {
 			},
 		},
 		listBox: {
-			boxSizing: 'border-box',
 			flex: 1,
 			inlineSize: '100%',
 			listStyle: 'none',

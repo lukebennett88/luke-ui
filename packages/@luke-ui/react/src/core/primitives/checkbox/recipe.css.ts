@@ -94,7 +94,6 @@ const checkboxConfig = {
 			borderStyle: 'solid',
 			borderWidth: '1px',
 			boxShadow: 'none',
-			boxSizing: 'border-box',
 			color: vars.color.foreground.accent.onSolid,
 			display: 'inline-flex',
 			fontSize: checkboxGlyphSize,
