@@ -1,4 +1,4 @@
-import { styleInLayer } from './layered-style.css.js';
+import { style } from './layered-style.css.js';
 import { recipe } from './recipe.js';
 
 // Test-only fixtures for recipe.browser.test.ts and recipe.test-d.ts. Not exported
@@ -8,8 +8,8 @@ import { recipe } from './recipe.js';
 // plain `.ts` (such as a `.test-d.ts`) cannot call `recipe()` at module scope, so
 // every fixture recipe lives here and is imported by name instead.
 
-export const nestedArrayFixtureClassA = styleInLayer('recipes', { color: 'rgb(1, 2, 3)' });
-export const nestedArrayFixtureClassB = styleInLayer('recipes', { fontWeight: 700 });
+export const nestedArrayFixtureClassA = style({ color: 'rgb(1, 2, 3)' });
+export const nestedArrayFixtureClassB = style({ fontWeight: 700 });
 
 export const nestedArrayFixtureRecipe = recipe({
 	base: [[nestedArrayFixtureClassA, nestedArrayFixtureClassB], { backgroundColor: 'rgb(4, 5, 6)' }],

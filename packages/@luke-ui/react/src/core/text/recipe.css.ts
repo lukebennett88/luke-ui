@@ -3,7 +3,6 @@ import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/contract.js';
 import { fontWeightRoles, typeStyles } from '../../theme/contract.js';
-import { styleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 import { visuallyHiddenStyle } from '../visually-hidden/recipe.css.js';
@@ -37,13 +36,6 @@ const lineClampVariants = {
 	4: lineClampMultiLine(4),
 	5: lineClampMultiLine(5),
 } as const;
-
-const base = styleInLayer('recipes', {
-	color: vars.color.text.primary,
-	fontFamily: vars.font.family.body,
-	minInlineSize: 0,
-	overflowWrap: 'break-word',
-});
 
 const colorVariants = {
 	accent: { color: vars.color.foreground.accent.rest },
@@ -124,7 +116,12 @@ function createLayeredTextStyle({
 
 /** Vanilla-extract recipe for the `Text` component's styles. */
 export const textRecipe = recipe({
-	base,
+	base: {
+		color: vars.color.text.primary,
+		fontFamily: vars.font.family.body,
+		minInlineSize: 0,
+		overflowWrap: 'break-word',
+	},
 	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
 		fontVariantNumeric: 'unset',

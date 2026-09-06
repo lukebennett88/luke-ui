@@ -121,6 +121,9 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		// Measuring the tray only means anything once it has stopped sliding up.
 		await waitForOverlayEnter(overlay);
 
+		// The tray tracks the document scroll position so it sits at the top of the viewport.
+		expect(getComputedStyle(overlay).top).toBe(`${window.scrollY}px`);
+
 		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so overriding it
 		// stands in for the keyboard shrinking the visual viewport. `mobileModal` must take the shrunk
 		// amount off `blockSize` and spend it on `paddingBlockEnd`, so the sheet keeps its content above

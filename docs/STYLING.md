@@ -199,13 +199,25 @@ its own `@layer base`) can then safely target `base` and know its rules will los
 component recipe, instead of the layer being created last — and therefore outranking everything —
 the first time the consumer's CSS references it.
 
-Use `styleInLayer` and `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain
-Vanilla Extract style for a recipe with no variants in a named layer (see
-`core/loading-skeleton/styles.css.ts`). A variant-driven recipe instead calls `recipe()` from
-`core/styles/recipe.ts`, which wraps every base, variant, and compound-variant style it is given in
-the `recipes` layer. A recipe can still pre-build a static `base` with `styleInLayer('recipes', …)`
-and hand the resulting class string to `recipe()`, which passes a string value through unchanged
-rather than wrapping it again.
+Three helpers author component CSS. Pick by what the class is for, not by whether it has variants:
+
+- `recipe()` from `core/styles/recipe.ts` authors a component's visual treatment with recipe
+  semantics: a selection function, optional variants, and a derived `…RecipeVariants` type. A
+  base-only recipe such as `codeRecipe` is still a recipe. `recipe()` wraps every base, variant, and
+  compound-variant style in the `recipes` layer itself, so do not pre-wrap styles before passing
+  them in.
+- `style()` from `core/styles/layered-style.css.ts` authors one standalone private class in the
+  `recipes` layer: a simple wrapper such as `Em`, a marker or scope class, or an implementation
+  class a component applies directly. Use it when there is no selection to expose. It also fits a
+  class that several recipe slots share, since `recipe()` passes a pre-built class string through
+  unchanged.
+- `globalStyleInLayer()` from the same module authors a global selector in an explicit layer. Use it
+  only where the layer choice is meaningful: the reset and theme root, and `structural` rules such
+  as Prose descendant rhythm and the `LoadingSkeleton` masks in
+  `core/loading-skeleton/styles.css.ts`.
+
+Component authors never name the `recipes` layer. Only `globalStyleInLayer()` takes a layer, and it
+rejects `base`, which is reserved for the consuming application.
 
 Text's Capsize trim declarations use logical properties for the pseudo-element margins and are
 authored as one of the Text recipe's `recipe()` compound-variant styles, so they remain owned by
@@ -252,7 +264,7 @@ returns a function that takes a variant selection and returns one class string:
 
 ```ts
 export const buttonRecipe = recipe({
-	base,
+	base: {/* … */},
 	defaultVariants: { appearance: 'solid', size: 'medium', tone: 'neutral' },
 	variants: {
 		appearance: { ghost: {}, solid: {}, subtle: {} },

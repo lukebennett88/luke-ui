@@ -1,43 +1,40 @@
 import { vars } from '../../theme/contract.css.js';
-import { styleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 
-const base = styleInLayer('recipes', {
-	'@media': {
-		'(forced-colors: active)': {
-			color: 'LinkText',
-			forcedColorAdjust: 'auto',
-			selectors: {
-				'&[data-disabled="true"]': {
-					color: 'GrayText',
-					opacity: 1,
-				},
-			},
-		},
-		'(prefers-reduced-motion: reduce)': {
-			transition: 'none',
-		},
-	},
-	color: vars.color.foreground.accent.rest,
-	cursor: 'pointer',
-	font: 'inherit',
-	textDecoration: 'underline',
-	textDecorationColor: 'currentColor',
-	transitionDuration: vars.motion.duration.feedback,
-	transitionProperty: 'color, text-decoration-color',
-	transitionTimingFunction: vars.motion.easing.standard,
-	selectors: {
-		'&[data-disabled="true"]': {
-			cursor: 'not-allowed',
-			opacity: vars.interaction.disabledOpacity,
-		},
-	},
-});
-
 /** Vanilla-extract recipe for the `Link` component's styles. */
 export const linkRecipe = recipe({
-	base,
+	base: {
+		'@media': {
+			'(forced-colors: active)': {
+				color: 'LinkText',
+				forcedColorAdjust: 'auto',
+				selectors: {
+					'&[data-disabled="true"]': {
+						color: 'GrayText',
+						opacity: 1,
+					},
+				},
+			},
+			'(prefers-reduced-motion: reduce)': {
+				transition: 'none',
+			},
+		},
+		color: vars.color.foreground.accent.rest,
+		cursor: 'pointer',
+		font: 'inherit',
+		textDecoration: 'underline',
+		textDecorationColor: 'currentColor',
+		transitionDuration: vars.motion.duration.feedback,
+		transitionProperty: 'color, text-decoration-color',
+		transitionTimingFunction: vars.motion.easing.standard,
+		selectors: {
+			'&[data-disabled="true"]': {
+				cursor: 'not-allowed',
+				opacity: vars.interaction.disabledOpacity,
+			},
+		},
+	},
 	defaultVariants: {
 		isStandalone: false,
 		tone: 'accent',

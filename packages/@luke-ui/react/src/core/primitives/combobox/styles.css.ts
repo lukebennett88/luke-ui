@@ -12,7 +12,7 @@ import {
 	invalidIndicatorIcon,
 	invalidIndicatorIconForcedColors,
 } from '../../styles/invalid-indicator.js';
-import { styleInLayer } from '../../styles/layered-style.css.js';
+import { style } from '../../styles/layered-style.css.js';
 import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -99,9 +99,9 @@ const comboboxActionStyles = {
 	},
 } satisfies StyleRule;
 
-const comboboxActionClassName = styleInLayer('recipes', comboboxActionStyles);
+const comboboxActionClassName = style(comboboxActionStyles);
 
-const comboboxActionSizeClassName = styleInLayer('recipes', {
+const comboboxActionSizeClassName = style({
 	blockSize: vars.controlSize.minTarget,
 	inlineSize: vars.controlSize.minTarget,
 	paddingInline: 0,
@@ -112,7 +112,7 @@ const comboboxActionSizeClassName = styleInLayer('recipes', {
 // `space.sp4` trigger gap. Shrinking to the 24px floor would pull it to 6px and break
 // that cross-control alignment. Tokenised as `controlSize.comboboxAction` so the sizing
 // flows from the theme contract rather than a recipe-local literal.
-const comboboxActionSizeClassNameMedium = styleInLayer('recipes', {
+const comboboxActionSizeClassNameMedium = style({
 	blockSize: vars.controlSize.comboboxAction,
 	inlineSize: vars.controlSize.comboboxAction,
 	paddingInline: 0,

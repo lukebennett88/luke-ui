@@ -1,6 +1,6 @@
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
-import { styleInLayer } from '../styles/layered-style.css.js';
+import { style } from '../styles/layered-style.css.js';
 import { overlayEnterTransition, overlayExitTransition } from '../styles/overlay-motion.js';
 
 const trayPaddingBlockEnd = createVar();
@@ -33,7 +33,7 @@ const trayTransition = overlayEnterTransition(['opacity', 'translate']);
 const trayExitTransition = overlayExitTransition(['opacity', 'translate']);
 
 /** Based on Apache-2.0 React Spectrum `Tray.tsx` and `tray/index.css`. */
-export const mobileOverlay = styleInLayer('recipes', {
+export const mobileOverlay = style({
 	backgroundColor: vars.color.overlay.backdrop,
 	blockSize: '100dvh',
 	insetInline: 0,
@@ -65,7 +65,7 @@ export const mobileOverlay = styleInLayer('recipes', {
 	},
 });
 
-export const mobileModal = styleInLayer('recipes', {
+export const mobileModal = style({
 	backgroundColor: vars.color.surface.floating,
 	blockSize: `calc(var(--visual-viewport-height) - ${trayInsetBlockStart})`,
 	borderEndEndRadius: 0,
@@ -134,7 +134,7 @@ export const mobileModal = styleInLayer('recipes', {
 	},
 });
 
-export const mobileDialog = styleInLayer('recipes', {
+export const mobileDialog = style({
 	display: 'flex',
 	flex: 1,
 	flexDirection: 'column',

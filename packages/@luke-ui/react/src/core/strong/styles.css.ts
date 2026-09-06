@@ -1,6 +1,6 @@
 import { vars } from '../../theme/contract.css.js';
-import { styleInLayer } from '../styles/layered-style.css.js';
+import { style } from '../styles/layered-style.css.js';
 
-export const strong = styleInLayer('recipes', {
+export const strong = style({
 	fontWeight: vars.font.weight.emphasis,
 });

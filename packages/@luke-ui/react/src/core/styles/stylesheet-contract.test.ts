@@ -95,6 +95,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 	['unknown layer', (css: string) => `${css}\n@layer components;`],
 	['nested layer', (css: string) => `${css}\n@layer recipes { @layer utilities {} }`],
 	['root qualified rule', (css: string) => `${css}\n.root-rule { color: red; }`],
+	['base layer rule', (css: string) => `${css}\n@layer base { .consumer-default { color: red; } }`],
 	['lookalike layer at-rule', (css: string) => `${css}\n@layered {}`],
 	[
 		'representative recipe class moved to the wrong layer',
@@ -202,6 +203,7 @@ function assertStylesheetContract(
 	assertNoRedundantEmptyLayerStatements(stylesheet);
 	assertAuthoritativeLayerOrder(getAuthoritativeLayerOrder(root));
 	assertLayerNames(root);
+	assertNoBaseLayerDeclarations(root);
 	assertRootNodes(root);
 	assertStableSelectors(root);
 	assertRecipesLayerHasRules(root);
@@ -370,6 +372,23 @@ function getLayerNames(atRule: AtRule): Array<string> {
 	if (!params) throw atRule.error('Anonymous cascade layers are not allowed.');
 
 	return params.split(',').map((name) => name.trim());
+}
+
+/**
+ * The `base` layer is reserved for a consuming application's own element defaults. Luke UI
+ * declares it so its rank is fixed, but must never emit declarations into it.
+ */
+function assertNoBaseLayerDeclarations(root: Root): void {
+	const offenders = new Set<string>();
+	root.walkRules((rule) => {
+		if (getOwningLayer(rule) === 'base') offenders.add(rule.selector);
+	});
+
+	if (offenders.size > 0) {
+		throw new Error(
+			`Luke UI must not emit declarations into @layer base: ${[...offenders].join(', ')}`,
+		);
+	}
 }
 
 function assertRootNodes(root: Root): void {

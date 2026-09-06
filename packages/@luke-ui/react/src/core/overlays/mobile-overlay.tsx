@@ -42,7 +42,7 @@ export function MobileOverlay({
 				// The overlay is absolutely positioned, so it has to track the document scroll
 				// position to sit at the top of the viewport. Scroll is locked while the tray is
 				// open, so this value never has to update.
-				style={() => ({ top: typeof window === 'undefined' ? 0 : window.scrollY })}
+				style={{ top: typeof window === 'undefined' ? 0 : window.scrollY }}
 			>
 				<Modal className={mobileModal}>
 					<Dialog
