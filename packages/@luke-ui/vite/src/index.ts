@@ -5,6 +5,14 @@ import type { Rule } from '@stylexjs/babel-plugin';
 import { readdir, readFile } from 'node:fs/promises';
 import type { Plugin } from 'vite';
 
+/**
+ * The `load` hook's `this`. Derived from the plugin type, because Vite does not export
+ * `PluginContext` and the walk below needs `this.load` and `this.getModuleIds`.
+ */
+type LoadPluginContext = ThisParameterType<
+	Extract<NonNullable<Plugin['load']>, (...args: never) => unknown>
+>;
+
 /** Public stylesheet subpath consumers import for the `overrides` layer order and extracted CSS. */
 export const STYLESHEET_IMPORT = '@luke-ui/vite/stylesheet.css';
 
@@ -15,11 +23,10 @@ const LAYER_CONFIG = {
 	after: ['utilities'],
 	prefix: 'overrides',
 } as const;
-/** Replaced in `generateBundle`. The declaration keeps Vite's CSS minifier from dropping it. */
-const PLACEHOLDER = '.stylex-placeholder{--stylex-placeholder:0}';
-const PLACEHOLDER_PATTERN = /\.stylex-placeholder\s*\{[^}]*\}/;
 /** A `.ts`/`.tsx`/`.js`/`.jsx` module, excluding declaration files. */
 const STYLEX_ELIGIBLE_MODULE_PATTERN = /(?<!\.d)\.[cm]?[jt]sx?$/;
+/** An HTML entry. `this.load` on one deadlocks, because it is the loading stylesheet's ancestor. */
+const HTML_MODULE_PATTERN = /\.html$/;
 const SKIP_DIRECTORY_NAMES = new Set(['dist', '.git', 'node_modules']);
 const PACKAGE_STYLESHEET_PATH_PATTERN =
 	/[/\\]@luke-ui[/\\]vite[/\\](?:(?:dist|src)[/\\])?stylesheet\.css$/;
@@ -31,7 +38,8 @@ const PACKAGE_STYLESHEET_PATH_PATTERN =
  * stylesheet. No options are required for the normal case.
  */
 export function lukeUi(): Plugin {
-	const rulesByFile = new Map<string, Array<Rule>>();
+	/** Rules keyed by module id, filled in by `transform` and read back by the build's graph walk. */
+	const rulesByModule = new Map<string, Array<Rule>>();
 	let isDevServer = false;
 	let rootDir = '';
 	let sourceRules: Promise<Array<Rule>> | undefined;
@@ -66,6 +74,42 @@ export function lukeUi(): Plugin {
 		return { code: result.code, rules };
 	}
 
+	/**
+	 * Collect the rules of every module the build actually reaches.
+	 *
+	 * Vite hashes a CSS asset from the text the stylesheet module produced, so the rules have to be
+	 * in it by the time `load` returns: `generateBundle` runs after the hashed filename is fixed, and
+	 * a `load` that waits for `buildEnd` deadlocks, because the build cannot finish a module graph
+	 * that still holds a loading module. `this.load` does resolve inside `load`, even for the
+	 * in-flight modules that import this one, so walking the graph is possible that early.
+	 *
+	 * The walk starts from the modules already discovered rather than from the configured input,
+	 * because an HTML entry is this module's own ancestor and `this.load` on it never settles. Every
+	 * importer of this stylesheet is already discovered by the time it loads, so their subtrees cover
+	 * the whole reachable graph.
+	 */
+	async function collectGraphRules(context: LoadPluginContext): Promise<Array<Rule>> {
+		const visited = new Set<string>([RESOLVED_STYLESHEET_ID]);
+		const reached: Array<string> = [];
+
+		async function crawl(moduleId: string): Promise<void> {
+			if (visited.has(moduleId)) return;
+			visited.add(moduleId);
+			// `this.load` runs the module through `transform`, which is what records its rules. It
+			// hands back the transformed code, so the rules cannot be recompiled from `info.code` —
+			// the `stylex.create` calls are already gone by then.
+			const info = await context.load({ id: moduleId });
+			reached.push(moduleId);
+			await Promise.all(
+				[...info.importedIds, ...info.dynamicallyImportedIds].map((id) => crawl(id)),
+			);
+		}
+
+		const roots = [...context.getModuleIds()].filter((id) => !HTML_MODULE_PATTERN.test(id));
+		await Promise.all(roots.map((id) => crawl(id)));
+		return reached.flatMap((moduleId) => rulesByModule.get(moduleId) ?? []);
+	}
+
 	async function collectSourceRules(): Promise<Array<Rule>> {
 		const filenames = await findSourceModules(rootDir);
 		const perFileRules = await Promise.all(
@@ -90,9 +134,10 @@ export function lukeUi(): Plugin {
 		},
 		async load(id) {
 			if (id !== RESOLVED_STYLESHEET_ID) return;
-			// Replace this placeholder with collected rules in `generateBundle`.
-			if (!isDevServer) return `${LAYER_ORDER}\n${PLACEHOLDER}`;
-			// Scan application source so the first stylesheet contains every rule.
+			// A dev server has no complete graph on the first request, so it scans source instead. A
+			// build has one, and only the graph tells apart a module the application imports from a
+			// file that merely sits under the root.
+			if (!isDevServer) return collectedCss(await collectGraphRules(this));
 			sourceRules ??= collectSourceRules();
 			return collectedCss(await sourceRules);
 		},
@@ -100,8 +145,8 @@ export function lukeUi(): Plugin {
 			const filename = id.split('?')[0] ?? id;
 			const result = await transformStylex(code, filename);
 			if (result === null) return;
-			if (result.rules?.length) rulesByFile.set(id, result.rules);
-			else rulesByFile.delete(id);
+			if (result.rules?.length) rulesByModule.set(id, result.rules);
+			else rulesByModule.delete(id);
 			return { code: result.code };
 		},
 		hotUpdate({ file, modules }) {
@@ -110,14 +155,6 @@ export function lukeUi(): Plugin {
 			const stylesheetModule = this.environment.moduleGraph.getModuleById(RESOLVED_STYLESHEET_ID);
 			if (stylesheetModule === undefined) return;
 			return [...modules, stylesheetModule];
-		},
-		generateBundle(_options, bundle) {
-			const css = collectedCss([...rulesByFile.values()].flat());
-			for (const asset of Object.values(bundle)) {
-				if (asset.type !== 'asset' || typeof asset.source !== 'string') continue;
-				if (!PLACEHOLDER_PATTERN.test(asset.source)) continue;
-				asset.source = asset.source.replace(PLACEHOLDER_PATTERN, css.slice(LAYER_ORDER.length + 1));
-			}
 		},
 	};
 }

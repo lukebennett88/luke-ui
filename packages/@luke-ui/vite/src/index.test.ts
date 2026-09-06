@@ -16,9 +16,12 @@ const repoRoot = path.resolve(packageRoot, '../../..');
 const INITIAL_COLOR = 'rgb(11,22,33)';
 const UPDATED_COLOR = 'rgb(44,55,66)';
 const ADDED_COLOR = 'rgb(77,88,99)';
+const OUTSIDE_ROOT_COLOR = 'rgb(100,110,120)';
 const LAYER_ORDER = '@layer reset, theme, base, recipes, overrides, utilities;';
 const LAYER_ORDER_PATTERN =
 	/@layer reset,\s*theme,\s*base,\s*recipes,\s*overrides\.priority\d+(?:,\s*overrides\.priority\d+)*,\s*utilities;/;
+/** A default Vite asset name, so a build that stopped hashing fails rather than passing silently. */
+const HASHED_CSS_ASSET_PATTERN = /^assets\/index-[\w-]{8}\.css$/;
 
 const FIXTURE_TIMEOUT_MS = 60_000;
 
@@ -155,6 +158,126 @@ export const styles = stylex.create({
 	},
 );
 
+test(
+	'hashes the emitted CSS asset from the extracted StyleX rules',
+	{ timeout: FIXTURE_TIMEOUT_MS },
+	async () => {
+		// The extracted CSS has to be in the stylesheet module before Vite names the asset. When it
+		// was filled in afterwards, two builds whose StyleX differed shared one hashed filename, so a
+		// cached deployment served the previous build's CSS against the new build's class names.
+		const initial = await buildHashedCss(INITIAL_COLOR);
+		const updated = await buildHashedCss(UPDATED_COLOR);
+
+		expect(initial.source).toContain(INITIAL_COLOR);
+		expect(updated.source).toContain(UPDATED_COLOR);
+		expect(initial.fileName).toMatch(HASHED_CSS_ASSET_PATTERN);
+		expect(updated.fileName).toMatch(HASHED_CSS_ASSET_PATTERN);
+		expect(updated.fileName).not.toBe(initial.fileName);
+		// Every generated reference has to follow the asset, or the page loads a filename that the
+		// deployment does not have.
+		expect(initial.html).toContain(initial.fileName);
+		expect(updated.html).toContain(updated.fileName);
+	},
+);
+
+test(
+	'extracts StyleX from an imported module that lives outside the Vite root',
+	{ timeout: FIXTURE_TIMEOUT_MS },
+	async () => {
+		// A monorepo application imports shared code from above its own Vite root. Collection has to
+		// follow the build's module graph, because anything scoped to the root directory misses that
+		// module and ships compiled class names with no rule behind them — silently unstyled UI.
+		const fixture = await createConsumerViteFixture(INITIAL_COLOR, {
+			extraImports: `import { shared } from '../shared';\nvoid shared;\n`,
+			nested: true,
+		});
+		try {
+			await writeFile(
+				path.join(fixture.parentDir, 'shared.ts'),
+				`import * as stylex from '@stylexjs/stylex';
+export const shared = stylex.create({
+	box: { color: '${OUTSIDE_ROOT_COLOR}' },
+});
+`,
+				'utf8',
+			);
+			const result = await build(viteConfig(fixture.fixtureDir, { command: 'build' }));
+			const css = cssFromBuild(result);
+			expect(css).toContain(OUTSIDE_ROOT_COLOR);
+			expectDocumentedStylexCss(css, INITIAL_COLOR);
+		} finally {
+			await fixture.cleanup();
+		}
+	},
+);
+
+test(
+	'ignores a file under the Vite root that nothing imports',
+	{ timeout: FIXTURE_TIMEOUT_MS },
+	async () => {
+		// StyleX rejects a value it cannot evaluate at compile time. An unreferenced file is not part
+		// of the build, so compiling it would fail a build that Vite itself has no reason to fail.
+		const fixture = await createConsumerViteFixture(INITIAL_COLOR);
+		try {
+			await writeFile(
+				path.join(fixture.fixtureDir, 'orphan.ts'),
+				`import * as stylex from '@stylexjs/stylex';
+const runtimeColor = String(Math.random());
+export const orphan = stylex.create({
+	box: { color: runtimeColor },
+});
+`,
+				'utf8',
+			);
+			const result = await build(viteConfig(fixture.fixtureDir, { command: 'build' }));
+			const css = cssFromBuild(result);
+			expectDocumentedStylexCss(css, INITIAL_COLOR);
+			expect(css).not.toContain('orphan');
+		} finally {
+			await fixture.cleanup();
+		}
+	},
+);
+
+async function buildHashedCss(color: string): Promise<{
+	fileName: string;
+	html: string;
+	source: string;
+}> {
+	const fixture = await createConsumerViteFixture(color);
+	try {
+		// Unlike `viteConfig`, this keeps Vite's default hashed asset names so the filename itself is
+		// the assertion. Minification stays off only so the colour reads back verbatim — Vite would
+		// otherwise rewrite `rgb(11,22,33)` to `#0b1621` — and hashing is independent of it.
+		const result = await build({
+			build: { cssMinify: false, minify: false, write: false },
+			configFile: false,
+			logLevel: 'silent',
+			optimizeDeps: { include: [], noDiscovery: true },
+			plugins: [lukeUi()],
+			root: fixture.fixtureDir,
+		});
+		const outputs = (Array.isArray(result) ? result : [result]).flatMap((entry) => {
+			return 'output' in entry ? [entry.output] : [];
+		});
+		const assets = outputs.flat().flatMap((chunk) => {
+			if (chunk.type !== 'asset') return [];
+			const source =
+				typeof chunk.source === 'string'
+					? chunk.source
+					: Buffer.from(chunk.source).toString('utf8');
+			return [{ fileName: chunk.fileName, source }];
+		});
+		const css = assets.find((asset) => asset.fileName.endsWith('.css'));
+		const html = assets.find((asset) => asset.fileName.endsWith('.html'));
+		if (css === undefined) throw new Error('Expected the Vite build to emit a CSS asset.');
+		if (html === undefined) throw new Error('Expected the Vite build to emit an HTML asset.');
+		return { fileName: css.fileName, html: html.source, source: css.source };
+	} finally {
+		await fixture.cleanup();
+	}
+}
+
 function viteConfig(root: string, options: { command: 'build' | 'serve' }): InlineConfig {
 	return {
 		build: {
@@ -281,12 +404,23 @@ function cssFromBuild(result: Awaited<ReturnType<typeof build>>): string {
 	return css;
 }
 
-async function createConsumerViteFixture(color: string): Promise<{
+async function createConsumerViteFixture(
+	color: string,
+	options: {
+		/** Extra imports `main.ts` adds, so a test can pull in a module of its own. */
+		extraImports?: string;
+		/** Put the Vite root in a subdirectory, so `../` resolves inside the fixture. */
+		nested?: boolean;
+	} = {},
+): Promise<{
 	cleanup: () => Promise<void>;
 	fixtureDir: string;
+	parentDir: string;
 	stylesPath: string;
 }> {
-	const fixtureDir = await mkdtemp(path.join(tmpdir(), 'luke-ui-vite-'));
+	const parentDir = await mkdtemp(path.join(tmpdir(), 'luke-ui-vite-'));
+	const fixtureDir = options.nested ? path.join(parentDir, 'app') : parentDir;
+	if (options.nested) await mkdir(fixtureDir, { recursive: true });
 	const stylesPath = path.join(fixtureDir, 'styles.ts');
 	const stylexPackageDir = path.dirname(
 		require.resolve('@stylexjs/stylex/package.json', { paths: [packageRoot] }),
@@ -303,16 +437,17 @@ async function createConsumerViteFixture(color: string): Promise<{
 		),
 		writeFile(
 			path.join(fixtureDir, 'main.ts'),
-			`import '${STYLESHEET_IMPORT}';\nimport { styles } from './styles';\nvoid styles;\n`,
+			`import '${STYLESHEET_IMPORT}';\nimport { styles } from './styles';\nvoid styles;\n${options.extraImports ?? ''}`,
 		),
 		writeFile(stylesPath, stylesSource(color)),
 	]);
 
 	return {
 		cleanup: async () => {
-			await rm(fixtureDir, { force: true, recursive: true });
+			await rm(parentDir, { force: true, recursive: true });
 		},
 		fixtureDir,
+		parentDir,
 		stylesPath,
 	};
 }
