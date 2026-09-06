@@ -1,5 +1,5 @@
 import type { HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
-import { mergeProps } from '../../shared/utils/utils.js';
+import { mergeStyleProps } from '../../shared/utils/utils.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import { createSprinkles } from '../styles/utilities.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -16,7 +16,7 @@ export function Box(props: BoxProps): JSX.Element {
 	const { children, className, elementType = 'div', render, style, ...restProps } = props;
 
 	if (render) {
-		const renderProps = mergeProps(createSprinkles(retainSprinklesProps(restProps)), {
+		const renderProps = mergeStyleProps(createSprinkles(retainSprinklesProps(restProps)), {
 			children,
 			className,
 			style,
@@ -31,7 +31,7 @@ export function Box(props: BoxProps): JSX.Element {
 	// unchanged, so it reaches the element without being named here. `normaliseRef`
 	// swaps it for a callback: a `RefObject<HTMLElement>` can't spread onto a
 	// narrower concrete element (`current` is invariant), but a callback ref can.
-	const domProps = mergeProps(createSprinkles(normaliseRef(restProps)), {
+	const domProps = mergeStyleProps(createSprinkles(normaliseRef(restProps)), {
 		children,
 		className,
 		style,

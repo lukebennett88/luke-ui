@@ -403,17 +403,17 @@ The retained breakpoints are `initial` (base), `bp640` (640px), `bp768` (768px),
 ## React Aria `render` prop
 
 When you need to style the underlying DOM element directly, combine `createSprinkles` with React
-Aria Components' `render` prop. Use `mergeProps` from `@luke-ui/react/utils` so `className` and
+Aria Components' `render` prop. Use `mergeStyleProps` from `@luke-ui/react/utils` so `className` and
 `style` are merged correctly.
 
 ```tsx
-import { mergeProps } from '@luke-ui/react/utils';
+import { mergeStyleProps } from '@luke-ui/react/utils';
 
 const buttonBox = createSprinkles({ padding: 'sp16' });
 
 <Button
 	render={(props) => (
-		<button {...mergeProps(props, buttonBox)} type="button">
+		<button {...mergeStyleProps(props, buttonBox)} type="button">
 			Save
 		</button>
 	)}

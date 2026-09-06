@@ -32,9 +32,11 @@ type MergeableProps = {
 /**
  * Merges two prop objects, concatenating `className` with `cx` and shallowly
  * merging `style` objects (later props win). All other properties are overwritten
- * by the later object. Useful for combining component props with `createSprinkles()` output.
+ * by the later object, including `on*` handlers — unlike React Aria's `mergeProps`,
+ * this does not chain event handlers. Useful for combining component props with
+ * `createSprinkles()` output.
  */
-export function mergeProps<A extends object, B extends object>(a: A, b: B): Merged<A, B> {
+export function mergeStyleProps<A extends object, B extends object>(a: A, b: B): Merged<A, B> {
 	const result = { ...a } as Record<string, unknown>;
 	const aProps = a as MergeableProps;
 	const bProps = b as MergeableProps;
