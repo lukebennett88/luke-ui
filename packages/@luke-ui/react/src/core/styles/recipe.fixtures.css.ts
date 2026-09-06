@@ -134,6 +134,44 @@ export const conditionalSlotsBaseRecipe = recipe({
 	],
 });
 
+/**
+ * A pre-built class declared above the recipes that reference it, so its CSS source
+ * position is fixed before any `recipe()` below emits anything.
+ *
+ * A slotted recipe cannot move that position into the `compoundSlots` precedence order,
+ * so `SlottedStyleRule` rejects this form; `recipe.test-d.ts` proves the rejection, and
+ * `prebuiltClassSinglePartRecipe` below proves single-part recipes still accept it.
+ */
+export const prebuiltVariantClass = style({ color: 'rgb(41, 41, 41)' });
+
+/**
+ * Single-part recipe composing a pre-built class as a variant style. Single-part recipes
+ * reorder nothing, so this stays supported.
+ */
+export const prebuiltClassSinglePartRecipe = recipe({
+	base: { color: 'rgb(40, 40, 40)' },
+	variants: {
+		emphasis: { strong: prebuiltVariantClass },
+	},
+});
+
+/**
+ * The style-object equivalent of the rejected pre-built-class case: a slot variant that
+ * `recipe()` emits itself keeps the documented precedence, outranking an unconditional
+ * `compoundSlots` entry and losing to a conditional one.
+ */
+export const slotVariantPrecedenceRecipe = recipe({
+	slots: { root: { color: 'rgb(40, 40, 40)' } },
+	variants: {
+		emphasis: { strong: { root: { color: 'rgb(41, 41, 41)' } } },
+		tone: { accent: {}, neutral: {} },
+	},
+	compoundSlots: [
+		{ slots: ['root'], style: { color: 'rgb(42, 42, 42)' } },
+		{ slots: ['root'], style: { color: 'rgb(43, 43, 43)' }, variants: { tone: 'accent' } },
+	],
+});
+
 export const compoundSlotsOrderRecipe = recipe({
 	slots: { first: {}, second: {} },
 	variants: { tone: { accent: {} } },

@@ -18,6 +18,14 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
  * slotted recipes emit the same CSS as hand-written per-slot recipes in declaration
  * order. Shared compound styles emit once, with source order controlling precedence.
  *
+ * That precedence — slot base, then unconditional `compoundSlots`, then slot variants,
+ * then conditional `compoundSlots` — is achieved by emitting each group's CSS in turn,
+ * so it only holds for styles `recipe()` emits itself. A pre-built class name already
+ * carries the source position it was first emitted at, which `recipe()` cannot move, so
+ * a slotted recipe's slots, slot variant styles, and `compoundSlots` styles accept style
+ * objects only (`SlottedStyleRule`). Single-part recipes reorder nothing and still accept
+ * a pre-built class or an array composing several.
+ *
  * Layer wrapping lives here because importing the function-exporting `layered-style.css.ts`
  * would create a failing Vanilla Extract serialization boundary. The function serializer
  * registers `createRecipe` and `createSingleRecipe` to rebuild the recipes at runtime.
@@ -37,6 +45,19 @@ type RecipeStylePart = DistributiveOmit<StyleRule, '@layer'> | ClassNames;
 type RecipeStyleRule =
 	| RecipeStylePart
 	| ReadonlyArray<DistributiveOmit<StyleRule, '@layer'> | ClassNames>;
+
+/**
+ * A style rule authored anywhere a slotted recipe reorders CSS emission: slot bases,
+ * slot variant styles, and `compoundSlots` styles.
+ *
+ * Style objects only. A pre-built class name is deliberately excluded here: it already
+ * holds a CSS source position from wherever it was first emitted, so `recipe()` cannot
+ * move it into the documented `compoundSlots` precedence order. Single-part recipes,
+ * which never reorder anything, still accept the pre-built forms via `RecipeStyleRule`.
+ */
+type SlottedStyleRule =
+	| DistributiveOmit<StyleRule, '@layer'>
+	| ReadonlyArray<DistributiveOmit<StyleRule, '@layer'>>;
 
 /** Maps the string variant keys `'true'`/`'false'` onto `boolean` for selection. */
 type BooleanMap<T> = T extends 'true' | 'false' ? boolean : T;
@@ -104,7 +125,7 @@ interface SinglePartConfig<Variants extends VariantGroups> {
 type SinglePartRecipe<Variants extends VariantGroups> = (input?: RecipeInput<Variants>) => string;
 
 /** A per-slot style map: slot name to style for that slot. */
-type SlotStyles<Slot extends string> = Partial<Record<Slot, RecipeStyleRule>>;
+type SlotStyles<Slot extends string> = Partial<Record<Slot, SlottedStyleRule>>;
 
 /** Variant groups for a slotted recipe: group to value to per-slot styles. */
 type SlotVariantGroups<Slot extends string> = Record<string, Record<string, SlotStyles<Slot>>>;
@@ -137,7 +158,7 @@ type SlotVariantSelection<Variants extends SlotVariantGroups<string>> =
  */
 interface CompoundSlot<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
 	slots: ReadonlyArray<NoInfer<Slot>>;
-	style: RecipeStyleRule;
+	style: SlottedStyleRule;
 	variants?: NoInfer<SlotVariantSelection<Variants>>;
 }
 
@@ -145,7 +166,7 @@ interface CompoundSlot<Slot extends string, Variants extends SlotVariantGroups<S
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
 	compoundSlots?: Array<CompoundSlot<Slot, Variants>>;
 	defaultVariants?: SlotVariantSelection<Variants>;
-	slots: Record<Slot, RecipeStyleRule>;
+	slots: Record<Slot, SlottedStyleRule>;
 	variants?: Variants;
 }
 
@@ -171,12 +192,12 @@ type AnyMultiPartConfig = MultiPartConfig<string, SlotVariantGroups<string>>;
 export interface SlottedConfigInput {
 	compoundSlots?: Array<{
 		slots: ReadonlyArray<string>;
-		style: RecipeStyleRule;
+		style: SlottedStyleRule;
 		variants?: Record<string, string | number | boolean>;
 	}>;
 	defaultVariants?: Record<string, string | number | boolean>;
-	slots: Record<string, RecipeStyleRule>;
-	variants?: Record<string, Record<string, Record<string, RecipeStyleRule>>>;
+	slots: Record<string, SlottedStyleRule>;
+	variants?: Record<string, Record<string, Record<string, SlottedStyleRule>>>;
 }
 
 /**

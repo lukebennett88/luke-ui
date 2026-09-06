@@ -10,7 +10,10 @@ import {
 	nestedArrayFixtureClassB,
 	nestedArrayFixtureRecipe,
 	omittedVariantsRecipe,
+	prebuiltClassSinglePartRecipe,
+	prebuiltVariantClass,
 	realVariantsRecipe,
+	slotVariantPrecedenceRecipe,
 } from './recipe.fixtures.css.js';
 
 // Field and input-group recipes export from their primitive entrypoints.
@@ -172,6 +175,24 @@ test('variants override unconditional shared styles and conditional shared style
 	expect(getComputedStyle(neutral).fontWeight).toBe('400');
 	expect(getComputedStyle(accent).fontWeight).toBe('500');
 	expect(getComputedStyle(accent).color).toBe('rgb(3, 3, 3)');
+});
+
+test('a slot variant style outranks an unconditional shared style and loses to a conditional one', () => {
+	const neutral = mountProbe(
+		slotVariantPrecedenceRecipe({ emphasis: 'strong', tone: 'neutral' }).root(),
+	);
+	const accent = mountProbe(
+		slotVariantPrecedenceRecipe({ emphasis: 'strong', tone: 'accent' }).root(),
+	);
+
+	expect(getComputedStyle(neutral).color).toBe('rgb(41, 41, 41)');
+	expect(getComputedStyle(accent).color).toBe('rgb(43, 43, 43)');
+});
+
+test('a single-part recipe still composes a pre-built class as a variant style', () => {
+	const className = prebuiltClassSinglePartRecipe({ emphasis: 'strong' });
+
+	expect(className.split(' ')).toContain(prebuiltVariantClass);
 });
 
 test('shared styles follow entry order regardless of slot declaration order', () => {

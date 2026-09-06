@@ -7,6 +7,8 @@ import {
 	emptyVariantsRecipe,
 	omittedVariantsRecipe,
 	omittedVariantsSlottedRecipe,
+	prebuiltClassSinglePartRecipe,
+	prebuiltVariantClass,
 	realVariantsRecipe,
 	realVariantsSlottedRecipe,
 } from './recipe.fixtures.css.js';
@@ -198,4 +200,33 @@ test('compoundSlots naming a slot or variant group that does not exist is a type
 	assertType<CompoundSlotCondition>({ color: 'red' });
 	// @ts-expect-error — `large` is not a declared value of the `size` group
 	assertType<CompoundSlotCondition>({ size: 'large' });
+});
+
+// ---------------------------------------------------------------------------
+// Pre-built classes: rejected wherever a slotted recipe reorders CSS emission
+// ---------------------------------------------------------------------------
+
+/** A `compoundSlots` entry's style, as accepted by `CompoundSlotEntry`. */
+type CompoundSlotStyle = CompoundSlotEntry['style'];
+
+/** The slot map of a single-slot recipe config, as accepted by `recipe()`. */
+type SlotStyleMap = Parameters<typeof recipe<'a', Record<string, never>>>[0]['slots'];
+
+test('a slotted recipe accepts a style object wherever compoundSlots reorders emission', () => {
+	assertType<CompoundSlotStyle>({ color: 'rgb(1, 1, 1)' });
+	assertType<CompoundSlotStyle>([{ color: 'rgb(1, 1, 1)' }, { fontWeight: 500 }]);
+	assertType<SlotStyleMap>({ a: { color: 'rgb(1, 1, 1)' } });
+});
+
+test('a pre-built class in a slotted recipe position is a type error', () => {
+	// @ts-expect-error — a pre-built class keeps its own source position, so `compoundSlots` cannot order it
+	assertType<CompoundSlotStyle>(prebuiltVariantClass);
+	// @ts-expect-error — nor can it order an array composing one
+	assertType<CompoundSlotStyle>([prebuiltVariantClass]);
+	// @ts-expect-error — a slot base is reordered ahead of unconditional shared styles
+	assertType<SlotStyleMap>({ a: prebuiltVariantClass });
+});
+
+test('a single-part recipe still accepts a pre-built class as a variant style', () => {
+	assertType<string>(prebuiltClassSinglePartRecipe({ emphasis: 'strong' }));
 });

@@ -324,7 +324,11 @@ slots, with an optional variant condition.
 
 For overlapping properties, precedence runs from the slot base to unconditional `compoundSlots`,
 then slot variants, then conditional `compoundSlots`. Entries within each compound category follow
-array order: a later entry wins.
+array order: a later entry wins. This order is set by emitting each group's CSS in turn, so it holds
+only for style objects `recipe()` emits itself. Pass style objects (or arrays of style objects) for
+slotted `slots`, slot variant styles, and `compoundSlots` styles. A pre-built class string keeps the
+source position where it was first emitted, which `recipe()` cannot move. Single-part recipes
+reorder nothing and still accept a pre-built class or an array composing several.
 
 ### Deriving variant types
 

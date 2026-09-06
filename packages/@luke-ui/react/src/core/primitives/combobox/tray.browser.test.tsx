@@ -94,6 +94,38 @@ test('ComboboxTray opens from the trigger, focuses the search field, and dismiss
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 });
 
+test("ComboboxTray search field does not inherit the combobox trigger role's ARIA", async () => {
+	render(<TrayCombobox />);
+	await openTray();
+
+	const searchbox = page.getByRole('searchbox', { name: 'Country' });
+	const searchboxElement = searchbox.element();
+
+	// It is a searchbox, not a combobox trigger.
+	expect(searchboxElement).toHaveAttribute('role', 'searchbox');
+	expect(searchboxElement).toHaveAttribute('aria-haspopup', 'listbox');
+	// `aria-expanded` belongs to the combobox trigger button, not a searchbox: React Aria's
+	// `InputContext` inside a tray carries the full `useComboBox` `inputProps`, and this asserts
+	// it has been filtered out rather than merged onto the rendered element.
+	expect(searchboxElement).not.toHaveAttribute('aria-expanded');
+});
+
+test('ComboboxTray search field does not toggle or close the tray on click or touch', async () => {
+	render(<TrayCombobox />);
+	await openTray();
+
+	const searchbox = page.getByRole('searchbox', { name: 'Country' });
+	const searchboxElement = searchbox.element();
+
+	// React Aria's combobox `inputProps` include a touch handler that toggles the popover; if it
+	// leaked through, clicking/touching the search field while the tray is open would close it.
+	await userEvent.click(searchbox);
+	searchboxElement.dispatchEvent(new TouchEvent('touchend', { bubbles: true, cancelable: true }));
+
+	await expect.element(page.getByRole('dialog')).toBeVisible();
+	await expect.element(searchbox).toHaveFocus();
+});
+
 test('ComboboxTray keeps focus on the search field while arrow keys move the active option', async () => {
 	render(<TrayCombobox />);
 	await openTray();
@@ -155,4 +187,19 @@ test('ComboboxTrayTrigger uses an explicit accessible name', async () => {
 	render(<TrayCombobox defaultValue="au" triggerLabel="Destination" />);
 
 	await expect.element(page.getByRole('button', { name: 'Destination' })).toBeVisible();
+});
+
+test('ComboboxTray collection-building pass does not leak duplicate structure', async () => {
+	render(<TrayCombobox />);
+
+	// While closed, the only render of the tray subtree is React Aria's hidden collection-building
+	// pass. Hideable tray-only controls must not surface in the accessible tree from that pass.
+	expect(page.getByRole('searchbox').elements()).toHaveLength(0);
+	expect(page.getByRole('button', { name: 'Clear search' }).elements()).toHaveLength(0);
+
+	await openTray();
+
+	// If the hidden pass had duplicated collection items, the listbox would report more than the
+	// two fixture options once the tray is actually open.
+	expect(page.getByRole('option').elements()).toHaveLength(countryItems.length);
 });

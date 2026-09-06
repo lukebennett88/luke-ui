@@ -39,7 +39,11 @@ export function ComboboxTray(props: ComboboxTrayProps): JSX.Element {
 		</ComboboxPresentationProvider>
 	);
 
-	// React Aria reads the collection before providing combobox state.
+	// Before combobox state exists, React Aria is running its collection-building pass: it renders
+	// this subtree hidden inside a `<template>` to read the listbox's options, not to display them.
+	// Hideable components (the search input, the clear button) render nothing during that pass, and
+	// only collection items contribute nodes — so returning the whole subtree here, rather than just
+	// the listbox, adds no extra interactive elements and no duplicate collection structure.
 	if (state == null) return content;
 
 	return (

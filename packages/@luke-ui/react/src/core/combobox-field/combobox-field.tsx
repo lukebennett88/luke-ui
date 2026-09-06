@@ -149,11 +149,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 			return (
 				<>
 					<ComboboxInputGroup>
-						<ComboboxTrayTrigger
-							isDisabled={comboboxRootProps.isDisabled}
-							isReadOnly={comboboxRootProps.isReadOnly}
-							placeholder={placeholder}
-						>
+						<ComboboxTrayTrigger placeholder={placeholder}>
 							<Icon aria-hidden name="chevronDown" />
 						</ComboboxTrayTrigger>
 					</ComboboxInputGroup>
