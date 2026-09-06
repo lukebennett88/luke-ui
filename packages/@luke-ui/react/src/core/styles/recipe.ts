@@ -45,10 +45,27 @@ type BooleanMap<T> = T extends 'true' | 'false' ? boolean : T;
 /** Variant groups for a single-part recipe: group name to value name to style rule. */
 type VariantGroups = Record<string, Record<string, RecipeStyleRule>>;
 
+/**
+ * True when `Variants` carries no authored variant groups: either `keyof Variants`
+ * is `never` (an explicit `variants: {}`), or inference had no `variants` property
+ * to read at all and fell back to the bare `VariantGroups` constraint, whose key
+ * type is the unconstrained `string`. A real recipe's variant groups are always
+ * literal keys, so `string extends keyof Variants` only ever holds in that
+ * fallback case.
+ */
+type HasNoVariants<Variants extends VariantGroups> = [keyof Variants] extends [never]
+	? true
+	: string extends keyof Variants
+		? true
+		: false;
+
 /** Outer selection for a single-part recipe. */
-type VariantSelection<Variants extends VariantGroups> = {
-	-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
-};
+type VariantSelection<Variants extends VariantGroups> =
+	HasNoVariants<Variants> extends true
+		? Record<string, never>
+		: {
+				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
+			};
 
 /** A compound variant for a single-part recipe. */
 interface CompoundVariant<Variants extends VariantGroups> {
@@ -75,10 +92,25 @@ type SlotStyles<Slot extends string> = Partial<Record<Slot, RecipeStyleRule>>;
 /** Variant groups for a slotted recipe: group to value to per-slot styles. */
 type SlotVariantGroups<Slot extends string> = Record<string, Record<string, SlotStyles<Slot>>>;
 
+/**
+ * True when `Variants` carries no authored variant groups. See `HasNoVariants`
+ * above — same reasoning, generalised to a slotted recipe's variant groups.
+ */
+type HasNoSlotVariants<Variants extends SlotVariantGroups<string>> = [keyof Variants] extends [
+	never,
+]
+	? true
+	: string extends keyof Variants
+		? true
+		: false;
+
 /** Outer selection for a slotted recipe. */
-type SlotVariantSelection<Variants extends SlotVariantGroups<string>> = {
-	-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
-};
+type SlotVariantSelection<Variants extends SlotVariantGroups<string>> =
+	HasNoSlotVariants<Variants> extends true
+		? Record<string, never>
+		: {
+				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
+			};
 
 /** Slotted recipe config. */
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
