@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import type { AtRule, Root, Rule } from 'postcss';
 import { parse } from 'postcss';
@@ -15,7 +16,10 @@ const lukeOwnedLayerNames = [
 	'utilities',
 ] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
-const stylexPriorityLayerPattern = /^luke\.sx\.priority\d+$/;
+const AUTHORITATIVE_LAYER_ORDER_PATTERN =
+	/^@layer reset, theme, base, recipes, structural, utilities;/m;
+const AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN =
+	/^@layer reset, theme, base, recipes, structural, utilities;\n/m;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
 const numericLineClampVariants = [2, 3, 4, 5] as const;
 type NumericLineClampVariant = (typeof numericLineClampVariants)[number];
@@ -63,8 +67,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'reordered authoritative layer declarations',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, base, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/m,
-				'@layer theme, reset, base, luke.sx.priority1, recipes, structural, utilities;',
+				AUTHORITATIVE_LAYER_ORDER_PATTERN,
+				'@layer theme, reset, base, recipes, structural, utilities;',
 			);
 		},
 	],
@@ -72,8 +76,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early individual layer declarations before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, base, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
-				'@layer reset;\n@layer theme;\n@layer base;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, base, luke.sx.priority1, recipes, structural, utilities;\n',
+				AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN,
+				'@layer reset;\n@layer theme;\n@layer base;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, base, recipes, structural, utilities;\n',
 			);
 		},
 	],
@@ -81,8 +85,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early layer block before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, base, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
-				'@layer recipes { .early {} }\n@layer reset, theme, base, luke.sx.priority1, recipes, structural, utilities;\n',
+				AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN,
+				'@layer recipes { .early {} }\n@layer reset, theme, base, recipes, structural, utilities;\n',
 			);
 		},
 	],
@@ -125,12 +129,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 	],
 	[
 		'redundant empty layer statements after authoritative order',
-		(css: string) => {
-			return css.replace(
-				/^(@layer reset, theme, base, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n)/m,
-				'$1@layer recipes;\n',
-			);
-		},
+		(css: string) => css.replace(AUTHORITATIVE_LAYER_ORDER_LINE_PATTERN, '$&@layer recipes;\n'),
 	],
 	[
 		'empty transitional recipes layer',
@@ -152,6 +151,13 @@ for (const [name, mutate] of stylesheetMutations) {
 		}).toThrow(/.+/);
 	});
 }
+
+test('ships every style rule in one stylesheet', () => {
+	const dist = (file: string) => new URL(`../../../dist/${file}`, import.meta.url);
+
+	expect(existsSync(dist('stylesheet.css'))).toBe(true);
+	expect(existsSync(dist('stylesheet2.css'))).toBe(false);
+});
 
 test('queries responsive conditions on the logical inline axis', async () => {
 	const stylesheet = await readPublicStylesheet();
@@ -339,29 +345,7 @@ function assertNoRedundantEmptyLayerStatements(stylesheet: string): void {
 }
 
 function assertAuthoritativeLayerOrder(order: Array<string>): void {
-	const priorityLayers = order.filter((name) => stylexPriorityLayerPattern.test(name));
-	expect(priorityLayers.length).toBeGreaterThan(0);
-	expect(priorityLayers.every((name, index) => name === `luke.sx.priority${index + 1}`)).toBe(true);
-
-	const nonPriorityLayers = order.filter((name) => !stylexPriorityLayerPattern.test(name));
-	expect(nonPriorityLayers).toEqual([
-		'reset',
-		'theme',
-		'base',
-		'recipes',
-		'structural',
-		'utilities',
-	]);
-
-	// StyleX priority layers must sit between `base` and `recipes` in the required precedence
-	// order, so the full authoritative order is `reset, theme, base, <priority...>, recipes, ...`.
-	const baseIndex = order.indexOf('base');
-	expect(order.slice(baseIndex + 1, baseIndex + 1 + priorityLayers.length)).toEqual(priorityLayers);
-	expect(order.slice(baseIndex + 1 + priorityLayers.length)).toEqual([
-		'recipes',
-		'structural',
-		'utilities',
-	]);
+	expect(order).toEqual([...lukeOwnedLayerNames]);
 }
 
 function assertLayerNames(root: Root): void {
@@ -375,7 +359,7 @@ function assertLayerNames(root: Root): void {
 		}
 
 		for (const name of names) {
-			if (lukeOwnedLayerNameSet.has(name) || stylexPriorityLayerPattern.test(name)) continue;
+			if (lukeOwnedLayerNameSet.has(name)) continue;
 			throw atRule.error(`Unexpected cascade layer: ${name}`);
 		}
 	});
@@ -551,7 +535,7 @@ function getOwningLayer(rule: Rule): string | undefined {
 	return undefined;
 }
 
-const validStylesheetFixture = `@layer reset, theme, base, luke.sx.priority1, recipes, structural, utilities;
+const validStylesheetFixture = `@layer reset, theme, base, recipes, structural, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
 }
@@ -570,9 +554,6 @@ const validStylesheetFixture = `@layer reset, theme, base, luke.sx.priority1, re
 }
 @layer utilities {
   .utility-class { display: grid; }
-}
-@layer luke.sx.priority1 {
-  .stylex-class { outline-color: transparent; }
 }
 @keyframes generated-animation {
   from { opacity: 0; }

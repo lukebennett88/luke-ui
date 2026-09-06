@@ -8,10 +8,6 @@ import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from `@luke-ui/
 `@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes the whole document from `:root`,
 with no class and no JS required. Neither step injects styles at runtime.
 
-The package build also extracts StyleX and appends those rules to `dist/stylesheet.css`. StyleX
-rules live in generated `luke.sx.priorityN` cascade layers between the theme and recipes layers.
-Production component styles stay on Vanilla Extract until their migration slices land.
-
 ## Structure
 
 Paths below are rooted in `packages/@luke-ui/react/src/`. Core style, primitive, overlay, and
@@ -180,22 +176,21 @@ explicit mode.
 All styles live in named CSS cascade layers. Layer order makes cross-layer priority explicit.
 Specificity and source order still decide conflicts within a layer.
 
-| Layer               | Purpose                                                                                                                                 |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `reset`             | Browser defaults, box sizing, and margins.                                                                                              |
-| `theme`             | Design token custom properties and base typography.                                                                                     |
-| `base`              | Reserved for a consuming application's own element defaults or resets (e.g. Tailwind Preflight). Luke UI emits nothing into this layer. |
-| `luke.sx.priorityN` | StyleX atoms, ordered by internal priority.                                                                                             |
-| `recipes`           | Component styles, variants, and compound variants.                                                                                      |
-| `structural`        | Retained descendant rhythm, skeleton masking, and combinator selectors.                                                                 |
-| `utilities`         | One-off layout and override escape hatches.                                                                                             |
-
-While Vanilla Extract recipes remain, the `recipes` layer is transitional. The stylesheet contract
-requires it to contain at least one rule until the last recipe moves to StyleX.
+| Layer        | Purpose                                                                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `reset`      | Browser defaults, box sizing, and margins.                                                                                              |
+| `theme`      | Design token custom properties and base typography.                                                                                     |
+| `base`       | Reserved for a consuming application's own element defaults or resets (e.g. Tailwind Preflight). Luke UI emits nothing into this layer. |
+| `recipes`    | Component styles, variants, and compound variants.                                                                                      |
+| `structural` | Retained descendant rhythm, skeleton masking, and combinator selectors.                                                                 |
+| `utilities`  | One-off layout and override escape hatches.                                                                                             |
 
 The public `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every
-Luke-owned layer before any rules create them. StyleX priority layers use dotted nested names such
-as `luke.sx.priority1`, which sit between `base` and `recipes` in the required precedence order.
+Luke-owned layer, in exactly that order, before any rules create them:
+
+```css
+@layer reset, theme, base, recipes, structural, utilities;
+```
 
 The package declares the `base` layer but never writes to it. Declaring it up front — rather than
 leaving it for a consumer's own CSS to create implicitly — fixes its rank between `theme` and
@@ -203,10 +198,6 @@ leaving it for a consumer's own CSS to create implicitly — fixes its rank betw
 its own `@layer base`) can then safely target `base` and know its rules will lose to every Luke UI
 component recipe, instead of the layer being created last — and therefore outranking everything —
 the first time the consumer's CSS references it.
-
-The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
-`themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The
-public `vars` object and theme stylesheets remain the sole authorities on token values.
 
 Use `styleInLayer` and `globalStyleInLayer` from `core/styles/layered-style.css.ts` to place a plain
 Vanilla Extract style for a recipe with no variants in a named layer (see
