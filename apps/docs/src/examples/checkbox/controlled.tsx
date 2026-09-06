@@ -6,7 +6,7 @@ export default () => {
 
 	return (
 		<Checkbox isSelected={isSelected} onChange={setIsSelected}>
-			Weekly summary
+			{isSelected ? 'Checked' : 'Unchecked'}
 		</Checkbox>
 	);
 };
