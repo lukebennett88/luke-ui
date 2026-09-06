@@ -180,21 +180,29 @@ explicit mode.
 All styles live in named CSS cascade layers. Layer order makes cross-layer priority explicit.
 Specificity and source order still decide conflicts within a layer.
 
-| Layer               | Purpose                                                                 |
-| ------------------- | ----------------------------------------------------------------------- |
-| `reset`             | Browser defaults, box sizing, and margins.                              |
-| `theme`             | Design token custom properties and base typography.                     |
-| `luke.sx.priorityN` | StyleX atoms, ordered by internal priority.                             |
-| `recipes`           | Component styles, variants, and compound variants.                      |
-| `structural`        | Retained descendant rhythm, skeleton masking, and combinator selectors. |
-| `utilities`         | One-off layout and override escape hatches.                             |
+| Layer               | Purpose                                                                                                                                 |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `reset`             | Browser defaults, box sizing, and margins.                                                                                              |
+| `theme`             | Design token custom properties and base typography.                                                                                     |
+| `base`              | Reserved for a consuming application's own element defaults or resets (e.g. Tailwind Preflight). Luke UI emits nothing into this layer. |
+| `luke.sx.priorityN` | StyleX atoms, ordered by internal priority.                                                                                             |
+| `recipes`           | Component styles, variants, and compound variants.                                                                                      |
+| `structural`        | Retained descendant rhythm, skeleton masking, and combinator selectors.                                                                 |
+| `utilities`         | One-off layout and override escape hatches.                                                                                             |
 
 While Vanilla Extract recipes remain, the `recipes` layer is transitional. The stylesheet contract
 requires it to contain at least one rule until the last recipe moves to StyleX.
 
 The public `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every
 Luke-owned layer before any rules create them. StyleX priority layers use dotted nested names such
-as `luke.sx.priority1`, which sit between `theme` and `recipes` in the required precedence order.
+as `luke.sx.priority1`, which sit between `base` and `recipes` in the required precedence order.
+
+The package declares the `base` layer but never writes to it. Declaring it up front — rather than
+leaving it for a consumer's own CSS to create implicitly — fixes its rank between `theme` and
+`recipes`. A consumer stylesheet (e.g. Tailwind Preflight, which writes element-selector resets into
+its own `@layer base`) can then safely target `base` and know its rules will lose to every Luke UI
+component recipe, instead of the layer being created last — and therefore outranking everything —
+the first time the consumer's CSS references it.
 
 The compiler-facing StyleX token surface is `src/theme/tokens.stylex.ts`, generated from
 `themeContractTree` with `defineConsts`. Each key resolves to a live `var(--luke-*)` reference. The

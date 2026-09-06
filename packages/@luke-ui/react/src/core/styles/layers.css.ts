@@ -5,6 +5,11 @@ import { globalLayer } from '@vanilla-extract/css';
  *
  * - **reset** — Normalize browser defaults (box-sizing, margins, form elements).
  * - **theme** — Design token custom properties and base typographic defaults.
+ * - **base** — Reserved for a consuming application's own element defaults or resets (e.g.
+ *   Tailwind Preflight). Luke UI itself emits nothing into this layer; it declares the layer
+ *   so a consumer's base-level styles rank correctly below component recipes instead of being
+ *   created implicitly last (and therefore outranking everything) the first time the consumer
+ *   writes to it.
  * - **recipes** — Component styles (variants, compound variants).
  * - **structural** — Descendant rhythm, skeleton masking, and other retained global selectors.
  * - **utilities** — One-off overrides; highest-priority layer for escape hatches.
@@ -16,6 +21,7 @@ import { globalLayer } from '@vanilla-extract/css';
 export const layers = {
 	reset: globalLayer('reset'),
 	theme: globalLayer('theme'),
+	base: globalLayer('base'),
 	recipes: globalLayer('recipes'),
 	structural: globalLayer('structural'),
 	utilities: globalLayer('utilities'),

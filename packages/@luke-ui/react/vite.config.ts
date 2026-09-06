@@ -27,7 +27,7 @@ const assetExports = [
 ];
 
 const stylexLayerConfig = {
-	before: ['reset', 'theme'],
+	before: ['reset', 'theme', 'base'],
 	after: ['recipes', 'structural', 'utilities'],
 	prefix: 'luke.sx',
 } as const;

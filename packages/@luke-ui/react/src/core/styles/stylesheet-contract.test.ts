@@ -6,7 +6,14 @@ import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
 
-const lukeOwnedLayerNames = ['reset', 'theme', 'recipes', 'structural', 'utilities'] as const;
+const lukeOwnedLayerNames = [
+	'reset',
+	'theme',
+	'base',
+	'recipes',
+	'structural',
+	'utilities',
+] as const;
 const lukeOwnedLayerNameSet = new Set<string>(lukeOwnedLayerNames);
 const stylexPriorityLayerPattern = /^luke\.sx\.priority\d+$/;
 type TextClassesByTypography = Record<TypeStyle, Array<string>>;
@@ -56,8 +63,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'reordered authoritative layer declarations',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/m,
-				'@layer theme, reset, luke.sx.priority1, recipes, structural, utilities;',
+				/^@layer reset, theme, base, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;/m,
+				'@layer theme, reset, base, luke.sx.priority1, recipes, structural, utilities;',
 			);
 		},
 	],
@@ -65,8 +72,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early individual layer declarations before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
-				'@layer reset;\n@layer theme;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;\n',
+				/^@layer reset, theme, base, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
+				'@layer reset;\n@layer theme;\n@layer base;\n@layer recipes;\n@layer structural;\n@layer utilities;\n@layer reset, theme, base, luke.sx.priority1, recipes, structural, utilities;\n',
 			);
 		},
 	],
@@ -74,8 +81,8 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'early layer block before authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
-				'@layer recipes { .early {} }\n@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;\n',
+				/^@layer reset, theme, base, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n/m,
+				'@layer recipes { .early {} }\n@layer reset, theme, base, luke.sx.priority1, recipes, structural, utilities;\n',
 			);
 		},
 	],
@@ -120,7 +127,7 @@ const stylesheetMutations: Array<[string, (css: string) => string]> = [
 		'redundant empty layer statements after authoritative order',
 		(css: string) => {
 			return css.replace(
-				/^(@layer reset, theme, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n)/m,
+				/^(@layer reset, theme, base, luke\.sx\.priority\d+(?:, luke\.sx\.priority\d+)*, recipes, structural, utilities;\n)/m,
 				'$1@layer recipes;\n',
 			);
 		},
@@ -332,14 +339,29 @@ function assertNoRedundantEmptyLayerStatements(stylesheet: string): void {
 }
 
 function assertAuthoritativeLayerOrder(order: Array<string>): void {
-	expect(order[0]).toBe('reset');
-	expect(order[1]).toBe('theme');
-
-	const priorityLayers = order.slice(2).filter((name) => stylexPriorityLayerPattern.test(name));
+	const priorityLayers = order.filter((name) => stylexPriorityLayerPattern.test(name));
 	expect(priorityLayers.length).toBeGreaterThan(0);
 	expect(priorityLayers.every((name, index) => name === `luke.sx.priority${index + 1}`)).toBe(true);
 
-	expect(order.slice(2 + priorityLayers.length)).toEqual(['recipes', 'structural', 'utilities']);
+	const nonPriorityLayers = order.filter((name) => !stylexPriorityLayerPattern.test(name));
+	expect(nonPriorityLayers).toEqual([
+		'reset',
+		'theme',
+		'base',
+		'recipes',
+		'structural',
+		'utilities',
+	]);
+
+	// StyleX priority layers must sit between `base` and `recipes` in the required precedence
+	// order, so the full authoritative order is `reset, theme, base, <priority...>, recipes, ...`.
+	const baseIndex = order.indexOf('base');
+	expect(order.slice(baseIndex + 1, baseIndex + 1 + priorityLayers.length)).toEqual(priorityLayers);
+	expect(order.slice(baseIndex + 1 + priorityLayers.length)).toEqual([
+		'recipes',
+		'structural',
+		'utilities',
+	]);
 }
 
 function assertLayerNames(root: Root): void {
@@ -529,7 +551,7 @@ function getOwningLayer(rule: Rule): string | undefined {
 	return undefined;
 }
 
-const validStylesheetFixture = `@layer reset, theme, luke.sx.priority1, recipes, structural, utilities;
+const validStylesheetFixture = `@layer reset, theme, base, luke.sx.priority1, recipes, structural, utilities;
 @layer reset {
   .luke-ui-reset { box-sizing: border-box; }
 }
