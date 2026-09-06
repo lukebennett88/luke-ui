@@ -7,6 +7,7 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { useComboboxPresentation } from './presentation-context.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
@@ -20,14 +21,22 @@ interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {
 /** Props for the combobox clear button. */
 export type ComboboxClearButtonProps = Prettify<_ComboboxClearButtonProps>;
 
-/** Clears the combobox selection. Renders nothing while no option is selected. */
+/**
+ * Clears the selection beside a persistent input and hides when no option is selected. Inside a
+ * `ComboboxTray`, clears the search text and hides while the search is empty.
+ */
 export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Element | null {
 	const { size: sizeProp, ...buttonProps } = props;
+	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
 	const state = useContext(ComboBoxStateContext);
-	const hasValue = Array.isArray(state?.value) ? state.value.length > 0 : state?.value != null;
 
-	if (state == null || !hasValue) {
+	if (state == null) return null;
+
+	const clearsSearch = presentation === 'tray';
+	const hasValue = Array.isArray(state.value) ? state.value.length > 0 : state.value != null;
+
+	if (clearsSearch ? state.inputValue === '' : !hasValue) {
 		return null;
 	}
 
@@ -40,7 +49,9 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 					return comboboxRecipe({ size }).clearButton({ className });
 				})}
 				onPress={(event) => {
-					state.setValue(Array.isArray(state.value) ? [] : null);
+					if (!clearsSearch) {
+						state.setValue(Array.isArray(state.value) ? [] : null);
+					}
 					state.setInputValue('');
 					buttonProps.onPress?.(event);
 				}}

@@ -52,11 +52,41 @@ Use `ComboboxLoadMoreItem` as the listbox's load-more sentinel. Use `ComboboxEmp
 empty content, including a loading message or spinner. `ComboboxField` supplies common loading and
 empty-state handling when its built-in composition is enough.
 
+## Tray presentation
+
+`ComboboxTray` presents the options in a full-screen tray instead of a popover. Pair it with
+`ComboboxTrayTrigger`, which replaces the persistent text input with a button showing the current
+selection. The trigger opens the tray. Both take their accessible name from the label connected to
+`ComboboxRoot`.
+
+```tsx
+<ComboboxRoot defaultItems={countries} aria-label="Country">
+	<ComboboxInputGroup>
+		<ComboboxTrayTrigger placeholder="Select a country..." />
+	</ComboboxInputGroup>
+	<ComboboxTray>
+		<ComboboxInputGroup>
+			<ComboboxInput />
+			<ComboboxClearButton aria-label="Clear search" />
+		</ComboboxInputGroup>
+		<ComboboxListBox>{(item) => <ComboboxItem>{item.label}</ComboboxItem>}</ComboboxListBox>
+	</ComboboxTray>
+</ComboboxRoot>
+```
+
+The parts inside a `ComboboxTray` adapt to it. `ComboboxInput` becomes the tray's search field and
+takes focus as the tray opens. `ComboboxClearButton` clears that search text and hides while the
+search is empty. `ComboboxListBox` fills the tray and contains its scrolling. Arrow keys move
+through options while focus stays in the search field.
+
+Render the tray only on devices where it belongs. `ComboboxField` already chooses between the tray
+and the popover for you.
+
 ## Popover and accessibility
 
 `ComboboxPopover` preserves the active Luke UI theme identity and explicit colour mode when it
-portals the listbox. It portals a desktop-style positioned popover and never becomes a mobile tray.
-`ComboboxField` owns the modal mobile pattern.
+portals the listbox. It portals a desktop-style positioned popover and never becomes a tray. Use
+`ComboboxTray` for the tray presentation.
 
 Give `ComboboxRoot` an accessible name with `aria-label` or a connected label. Keep the
 root/control/input/listbox structure so React Aria's combobox semantics and keyboard behaviour
@@ -104,6 +134,20 @@ remain intact.
 <component-props-table
 	path="packages/@luke-ui/react/src/core/primitives/combobox/popover.tsx"
 	name="ComboboxPopoverProps"
+/>
+
+### ComboboxTrayTriggerProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/combobox/tray-trigger.tsx"
+	name="ComboboxTrayTriggerProps"
+/>
+
+### ComboboxTrayProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/primitives/combobox/tray.tsx"
+	name="ComboboxTrayProps"
 />
 
 ### ComboboxListBoxProps

@@ -1,18 +1,7 @@
-import { useObjectRef } from '@react-aria/utils';
 import type { CSSProperties, JSX, ReactNode, Ref } from 'react';
-import { useContext, useEffect, useId } from 'react';
-import { SelectableCollectionContext } from 'react-aria-components/Autocomplete';
-import { Button as RacButton } from 'react-aria-components/Button';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
-import { ComboBoxStateContext, ComboBoxValue } from 'react-aria-components/ComboBox';
-import { LabelContext } from 'react-aria-components/Label';
-import { PopoverContext } from 'react-aria-components/Popover';
-import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { useSlottedContext } from 'react-aria-components/slots';
-import { cx } from '../../shared/utils/utils.js';
 import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
-import { MobileOverlay } from '../overlays/mobile-overlay.js';
 import { useIsMobileDevice } from '../overlays/use-is-mobile-device.js';
 import { ComboboxClearButton } from '../primitives/combobox/clear-button.js';
 import { ComboboxEmptyState } from '../primitives/combobox/empty-state.js';
@@ -26,7 +15,8 @@ import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
 import { ComboboxPopover } from '../primitives/combobox/popover.js';
 import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
-import { comboboxRecipe } from '../primitives/combobox/styles.css.js';
+import { ComboboxTrayTrigger } from '../primitives/combobox/tray-trigger.js';
+import { ComboboxTray } from '../primitives/combobox/tray.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import type { FieldSlotProps } from '../primitives/field/field.js';
 import {
@@ -38,8 +28,6 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 
 type ComboboxLoadingState = 'error' | 'filtering' | 'idle' | 'loading' | 'loadingMore' | 'sorting';
-
-const mobileListBoxContextValue = { shouldUseVirtualFocus: true };
 
 interface ComboboxFieldRedeclaredRACProps {
 	/** Whether the combobox is disabled. */
@@ -146,21 +134,39 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 		return Object.assign({}, popoverProps?.style, { width: menuWidth });
 	})();
 
+	const listBox = (
+		<ComboboxListBox<T>
+			{...listBoxProps}
+			loadMoreItem={loadMoreItem}
+			renderEmptyState={resolvedEmptyState}
+		>
+			{children}
+		</ComboboxListBox>
+	);
+
 	const content = (() => {
 		if (isMobileDevice) {
 			return (
-				<MobileComboboxContent<T>
-					inputRef={inputRef}
-					isDisabled={comboboxRootProps.isDisabled === true}
-					isReadOnly={comboboxRootProps.isReadOnly === true}
-					listBoxProps={listBoxProps}
-					loadMoreItem={loadMoreItem}
-					placeholder={placeholder}
-					renderEmptyState={resolvedEmptyState}
-					size={size}
-				>
-					{children}
-				</MobileComboboxContent>
+				<>
+					<ComboboxInputGroup>
+						<ComboboxTrayTrigger
+							isDisabled={comboboxRootProps.isDisabled}
+							isReadOnly={comboboxRootProps.isReadOnly}
+							placeholder={placeholder}
+						>
+							<Icon aria-hidden name="chevronDown" />
+						</ComboboxTrayTrigger>
+					</ComboboxInputGroup>
+					<ComboboxTray>
+						<ComboboxInputGroup>
+							<ComboboxInput placeholder={placeholder} ref={inputRef} />
+							<ComboboxClearButton aria-label="Clear search">
+								<Icon aria-hidden name="close" />
+							</ComboboxClearButton>
+						</ComboboxInputGroup>
+						{listBox}
+					</ComboboxTray>
+				</>
 			);
 		}
 
@@ -178,13 +184,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 					</ComboboxTrigger>
 				</ComboboxInputGroup>
 				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>
-					<ComboboxListBox<T>
-						{...listBoxProps}
-						loadMoreItem={loadMoreItem}
-						renderEmptyState={resolvedEmptyState}
-					>
-						{children}
-					</ComboboxListBox>
+					{listBox}
 				</ComboboxPopover>
 			</>
 		);
@@ -205,136 +205,6 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 				{content}
 			</Field>
 		</ComboboxRoot>
-	);
-}
-
-function MobileComboboxContent<T extends object>({
-	children,
-	inputRef,
-	isDisabled,
-	isReadOnly,
-	listBoxProps,
-	loadMoreItem,
-	placeholder,
-	renderEmptyState,
-	size,
-}: {
-	children: ComboboxListBoxProps<T>['children'];
-	isDisabled: boolean;
-	isReadOnly: boolean;
-	inputRef: Ref<HTMLInputElement> | undefined;
-	listBoxProps: ComboboxFieldProps<T>['listBoxProps'];
-	loadMoreItem: ComboboxListBoxProps<T>['loadMoreItem'];
-	placeholder: string | undefined;
-	renderEmptyState: ComboboxListBoxProps<T>['renderEmptyState'];
-	size: ComboboxSize;
-}): JSX.Element | null {
-	const mobileInputRef = useObjectRef(inputRef);
-	const labelContext = useSlottedContext(LabelContext);
-	const popoverContext = useSlottedContext(PopoverContext);
-	const state = useContext(ComboBoxStateContext);
-	const valueId = useId();
-
-	const ariaLabelledBy = labelContext?.id == null ? undefined : cx(labelContext.id, valueId);
-	const comboboxStyles = comboboxRecipe({ size });
-
-	const mobileListBoxClassName = composeRenderProps(listBoxProps?.className, (className) => {
-		return comboboxStyles.mobileListBox({ className });
-	});
-
-	const listBox = (
-		<SelectableCollectionContext.Provider value={mobileListBoxContextValue}>
-			<ComboboxListBox<T>
-				{...listBoxProps}
-				className={mobileListBoxClassName}
-				loadMoreItem={loadMoreItem}
-				renderEmptyState={renderEmptyState}
-				shouldSelectOnPressUp={false}
-			>
-				{children}
-			</ComboboxListBox>
-		</SelectableCollectionContext.Provider>
-	);
-
-	// Focus the tray search input when the tray opens
-	useEffect(() => {
-		if (state?.isOpen !== true) return;
-
-		mobileInputRef.current?.focus({ preventScroll: true });
-	}, [mobileInputRef, state?.isOpen]);
-
-	// RAC builds the collection before it provides state.
-	if (state == null) return listBox;
-
-	return (
-		<>
-			<ComboboxInputGroup>
-				<RacButton
-					aria-expanded={state.isOpen}
-					aria-haspopup="dialog"
-					aria-label={labelContext?.id == null ? labelContext?.['aria-label'] : undefined}
-					aria-labelledby={ariaLabelledBy}
-					className={comboboxStyles.mobileTrigger()}
-					isDisabled={isDisabled || isReadOnly}
-					onPress={() => {
-						if (isReadOnly) return;
-
-						state.open(null, 'manual');
-					}}
-					slot={null}
-				>
-					<ComboBoxValue
-						className={comboboxStyles.mobileValue()}
-						id={valueId}
-						placeholder={placeholder}
-					/>
-					<Icon aria-hidden name="chevronDown" />
-				</RacButton>
-			</ComboboxInputGroup>
-			<MobileOverlay
-				aria-label={labelContext?.['aria-label']}
-				aria-labelledby={labelContext?.id}
-				isOpen={state.isOpen}
-				onOpenChange={(isOpen) => {
-					if (isOpen) return;
-
-					state.setFocused(false);
-					state.close();
-				}}
-				ref={popoverContext?.ref}
-			>
-				<ComboboxInputGroup className={comboboxStyles.mobileInputGroup()}>
-					<ComboboxInput
-						aria-expanded={undefined}
-						aria-haspopup="listbox"
-						placeholder={placeholder}
-						ref={mobileInputRef}
-						role="searchbox"
-					/>
-					<MobileComboboxClearButton size={size} />
-				</ComboboxInputGroup>
-				{listBox}
-			</MobileOverlay>
-		</>
-	);
-}
-
-function MobileComboboxClearButton({ size }: { size: ComboboxSize }): JSX.Element | null {
-	const state = useContext(ComboBoxStateContext);
-
-	if (state == null || state.inputValue === '') return null;
-
-	return (
-		<RacButton
-			aria-label="Clear search"
-			className={comboboxRecipe({ size }).clearButton()}
-			onPress={() => {
-				state.setInputValue('');
-			}}
-			slot={null}
-		>
-			<Icon aria-hidden name="close" />
-		</RacButton>
 	);
 }
 

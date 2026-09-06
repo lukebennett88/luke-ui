@@ -1,4 +1,5 @@
 import type { StyleRule } from '@vanilla-extract/css';
+import { style as vanillaStyle } from '@vanilla-extract/css';
 import { addFunctionSerializer } from '@vanilla-extract/css/functionSerializer';
 import { recipe as vanillaRecipe } from '@vanilla-extract/recipes';
 import { cx } from '../../shared/utils/utils.js';
@@ -13,16 +14,13 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
  * `className` and returns the finished class string. A multi-part recipe returns
  * one function per slot, each taking optional `{ className }` to append.
  *
- * `recipe()` runs at build time inside a `.css.ts` module. It splits a slotted
- * config into one recipe per slot, in declaration order, so its generated CSS and
- * class names match hand-written per-slot recipes byte-for-byte, and it wraps every
- * emitted style in the `recipes` cascade layer inline. Vanilla Extract only serialises `.css.ts`
- * exports, and a plain `.ts` helper cannot import a value from a function-exporting
- * `.css.ts` (such as `layered-style`) without turning that module into a failing
- * serialization boundary, so the `recipes`-layer wrapping is applied here directly
- * over `layers.recipes`. The returned function is registered with Vanilla Extract's
- * function serializer so it survives the `.css.ts` build boundary, and
- * `createRecipe`/`createSingleRecipe` rebuild it at runtime.
+ * `recipe()` runs at build time inside a `.css.ts` module. Without `compoundSlots`,
+ * slotted recipes emit the same CSS as hand-written per-slot recipes in declaration
+ * order. Shared compound styles emit once, with source order controlling precedence.
+ *
+ * Layer wrapping lives here because importing the function-exporting `layered-style.css.ts`
+ * would create a failing Vanilla Extract serialization boundary. The function serializer
+ * registers `createRecipe` and `createSingleRecipe` to rebuild the recipes at runtime.
  */
 
 // ---------------------------------------------------------------------------
@@ -131,8 +129,21 @@ type SlotVariantSelection<Variants extends SlotVariantGroups<string>> =
 				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
 			};
 
+/**
+ * A style shared across slots, with an optional variant condition.
+ *
+ * `NoInfer` keeps `config.slots` and `config.variants` as the inference sources. Otherwise, an
+ * invalid slot or variant here widens those types instead of producing an error.
+ */
+interface CompoundSlot<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
+	slots: ReadonlyArray<NoInfer<Slot>>;
+	style: RecipeStyleRule;
+	variants?: NoInfer<SlotVariantSelection<Variants>>;
+}
+
 /** Slotted recipe config. */
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
+	compoundSlots?: Array<CompoundSlot<Slot, Variants>>;
 	defaultVariants?: SlotVariantSelection<Variants>;
 	slots: Record<Slot, RecipeStyleRule>;
 	variants?: Variants;
@@ -158,6 +169,11 @@ type AnyMultiPartConfig = MultiPartConfig<string, SlotVariantGroups<string>>;
  * `recipe()`'s structural inference).
  */
 export interface SlottedConfigInput {
+	compoundSlots?: Array<{
+		slots: ReadonlyArray<string>;
+		style: RecipeStyleRule;
+		variants?: Record<string, string | number | boolean>;
+	}>;
 	defaultVariants?: Record<string, string | number | boolean>;
 	slots: Record<string, RecipeStyleRule>;
 	variants?: Record<string, Record<string, Record<string, RecipeStyleRule>>>;
@@ -236,11 +252,21 @@ function buildSinglePart(config: SinglePartConfig<VariantGroups>): BuiltRecipe {
 	});
 }
 
+/** Per-slot shape derived from the raw config, before any CSS is emitted. */
+interface SlotPlan {
+	groupsForSlot: Array<string>;
+	slotBase: RecipeStyleRule | undefined;
+	variants: Record<string, Record<string, RecipeStyleRule>>;
+}
+
 function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescriptor {
 	const slotNames = Object.keys(config.slots);
 	const slots: Record<string, BuiltRecipe> = {};
 	const slotGroups: Record<string, ReadonlyArray<string>> = {};
+	const compoundSlots = config.compoundSlots ?? [];
 
+	// Derive the slot plans before emitting CSS so slot styles precede shared compound styles.
+	const plans: Record<string, SlotPlan> = {};
 	for (const slotName of slotNames) {
 		const variants: Record<string, Record<string, RecipeStyleRule>> = {};
 		const groupsForSlot: Array<string> = [];
@@ -265,19 +291,102 @@ function buildSlottedDescriptor(config: AnyMultiPartConfig): SlottedRecipeDescri
 			}
 		}
 
+		// Keep groups used only by compound slots so `pickGroups` does not discard their selection.
+		for (const compound of compoundSlots) {
+			if (!compound.slots.includes(slotName)) continue;
+			if (compound.variants === undefined) continue;
+
+			for (const group of Object.keys(compound.variants)) {
+				if (!(group in variants)) variants[group] = {};
+				if (!groupsForSlot.includes(group)) groupsForSlot.push(group);
+			}
+		}
+
+		plans[slotName] = {
+			groupsForSlot,
+			slotBase: config.slots[slotName],
+			variants,
+		};
+	}
+
+	const targetedSlots = new Set(compoundSlots.flatMap((compound) => compound.slots));
+	const targetedPlans = Object.entries(plans)
+		.filter(([slotName]) => targetedSlots.has(slotName))
+		.map(([, plan]) => plan);
+
+	// CSS source order sets precedence: bases, unconditional compounds, variants, conditional compounds.
+	for (const plan of targetedPlans) {
+		if (plan.slotBase !== undefined) {
+			plan.slotBase = buildStyle(plan.slotBase);
+		}
+	}
+
+	const unconditionalCompounds = compoundSlots
+		.filter(
+			(compound) => compound.variants === undefined || Object.keys(compound.variants).length === 0,
+		)
+		.map((compound) => ({
+			...compound,
+			style: buildStyle(compound.style),
+		}));
+
+	for (const plan of targetedPlans) {
+		for (const values of Object.values(plan.variants)) {
+			for (const [value, styleRule] of Object.entries(values)) {
+				values[value] = buildStyle(styleRule);
+			}
+		}
+	}
+
+	const conditionalCompounds = compoundSlots
+		.filter(
+			(compound) => compound.variants !== undefined && Object.keys(compound.variants).length > 0,
+		)
+		.map((compound) => ({
+			...compound,
+			style: buildStyle(compound.style),
+		}));
+
+	// Compose the pre-built classes into each slot's recipe config.
+	for (const slotName of slotNames) {
+		const plan = plans[slotName];
+		if (plan === undefined) continue;
+
+		const { groupsForSlot, slotBase, variants } = plan;
+		const compoundVariantsForSlot = conditionalCompounds
+			.filter((compound) => compound.slots.includes(slotName))
+			.map((compound) => ({ style: compound.style, variants: compound.variants ?? {} }));
+		const unconditionalStyles = unconditionalCompounds
+			.filter((compound) => compound.slots.includes(slotName))
+			.map((compound) => compound.style);
+
 		const defaultVariants = pickGroups(config.defaultVariants, groupsForSlot);
 
+		// A slot an unconditional entry targets had its base pre-built into a class above, so both
+		// halves compose as plain class strings here.
+		const base =
+			unconditionalStyles.length > 0
+				? [...(typeof slotBase === 'string' ? [slotBase] : []), ...unconditionalStyles]
+				: slotBase;
+
 		slots[slotName] = recipeInRecipesLayer({
-			base: config.slots[slotName],
+			base,
 			...(groupsForSlot.length > 0 ? { variants } : {}),
 			...(defaultVariants !== undefined && Object.keys(defaultVariants).length > 0
 				? { defaultVariants }
 				: {}),
+			...(compoundVariantsForSlot.length > 0 ? { compoundVariants: compoundVariantsForSlot } : {}),
 		});
 		slotGroups[slotName] = groupsForSlot;
 	}
 
 	return { slotGroups, slots };
+}
+
+function buildStyle(styleRule: RecipeStyleRule): string {
+	return typeof styleRule === 'string'
+		? styleRule
+		: vanillaStyle(withLayerIfStyleRule(styleRule) as never);
 }
 
 // ---------------------------------------------------------------------------

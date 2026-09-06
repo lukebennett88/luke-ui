@@ -118,6 +118,10 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		['aria-label', 'defaultItems', 'size'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/section.tsx::ComboboxSectionProps':
 		['title'],
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/tray-trigger.tsx::ComboboxTrayTriggerProps':
+		['placeholder'],
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/tray.tsx::ComboboxTrayProps':
+		['children'],
 	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/trigger.tsx::ComboboxTriggerProps':
 		['aria-label', 'size'],
 	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/description.tsx::FieldDescriptionProps':

@@ -12,7 +12,6 @@ import {
 	invalidIndicatorIcon,
 	invalidIndicatorIconForcedColors,
 } from '../../styles/invalid-indicator.js';
-import { style } from '../../styles/layered-style.css.js';
 import { overlayEnterTransition, overlayExitTransition } from '../../styles/overlay-motion.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
@@ -99,25 +98,6 @@ const comboboxActionStyles = {
 	},
 } satisfies StyleRule;
 
-const comboboxActionClassName = style(comboboxActionStyles);
-
-const comboboxActionSizeClassName = style({
-	blockSize: vars.controlSize.minTarget,
-	inlineSize: vars.controlSize.minTarget,
-	paddingInline: 0,
-});
-
-// Medium stays above the tap-target floor so the trailing chevron keeps the same 8px
-// inset as `InputGroup`'s invalid indicator: (28 − 20px icon) ÷ 2 plus the 4px
-// `space.sp4` trigger gap. Shrinking to the 24px floor would pull it to 6px and break
-// that cross-control alignment. Tokenised as `controlSize.comboboxAction` so the sizing
-// flows from the theme contract rather than a recipe-local literal.
-const comboboxActionSizeClassNameMedium = style({
-	blockSize: vars.controlSize.comboboxAction,
-	inlineSize: vars.controlSize.comboboxAction,
-	paddingInline: 0,
-});
-
 // The popover is an overlay, so it takes the shared overlay motion roles. See
 // `styles/overlay-motion.ts` for the roles and the reduced-motion rule that follows from them.
 const popoverProperties = ['opacity', 'translate', 'box-shadow'];
@@ -129,7 +109,10 @@ const popoverExitTransition = overlayExitTransition(popoverProperties);
  *
  * Slots follow the anatomy top to bottom: `root`, `inputGroup`, `textInput`,
  * `trigger`, `clearButton`, `itemCheck`, `popover`, `listBox`, `loadMoreItem`,
- * `section`, `sectionHeading`, `emptyState`, `item`, then mobile-only slots.
+ * `section`, `sectionHeading`, `emptyState`, `item`, then the tray-only parts.
+ *
+ * `inputGroup` and `listBox` use a `presentation` variant for tray styles. `trayTrigger` and
+ * `trayValue` are tray-only slots.
  */
 const comboboxConfig = {
 	slots: {
@@ -235,11 +218,8 @@ const comboboxConfig = {
 				},
 			},
 		},
-		trigger: [
-			comboboxActionClassName,
-			{ marginInlineEnd: vars.space.sp4, marginInlineStart: vars.space.sp4 },
-		],
-		clearButton: comboboxActionClassName,
+		trigger: { marginInlineEnd: vars.space.sp4, marginInlineStart: vars.space.sp4 },
+		clearButton: {},
 		itemCheck: {
 			flexShrink: 0,
 			marginInlineStart: 'auto',
@@ -398,17 +378,7 @@ const comboboxConfig = {
 				},
 			},
 		},
-		mobileInputGroup: {
-			flexShrink: 0,
-			inlineSize: 'auto',
-			marginBlock: vars.space.sp12,
-			marginInline: vars.space.sp12,
-		},
-		mobileListBox: {
-			maxBlockSize: 'none',
-			overscrollBehavior: 'contain',
-		},
-		mobileTrigger: {
+		trayTrigger: {
 			alignItems: 'center',
 			blockSize: '100%',
 			color: vars.color.text.primary,
@@ -421,7 +391,7 @@ const comboboxConfig = {
 			// plus room for the trailing chevron.
 			minInlineSize: `calc(20ch + ${vars.controlSize.comboboxAction})`,
 		},
-		mobileValue: {
+		trayValue: {
 			flex: 1,
 			minInlineSize: 0,
 			overflow: 'hidden',
@@ -430,8 +400,23 @@ const comboboxConfig = {
 			whiteSpace: 'nowrap',
 		},
 	},
-	defaultVariants: { size: 'medium' },
+	defaultVariants: { presentation: 'popover', size: 'medium' },
 	variants: {
+		presentation: {
+			popover: {},
+			tray: {
+				inputGroup: {
+					flexShrink: 0,
+					inlineSize: 'auto',
+					marginBlock: vars.space.sp12,
+					marginInline: vars.space.sp12,
+				},
+				listBox: {
+					maxBlockSize: 'none',
+					overscrollBehavior: 'contain',
+				},
+			},
+		},
 		size: {
 			medium: {
 				inputGroup: {
@@ -444,14 +429,12 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space.sp12,
 					paddingInlineStart: vars.space.sp12,
 				},
-				trigger: comboboxActionSizeClassNameMedium,
-				clearButton: comboboxActionSizeClassNameMedium,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.medium,
 					paddingBlock: vars.space.sp8,
 					paddingInline: vars.space.sp12,
 				},
-				mobileTrigger: {
+				trayTrigger: {
 					paddingInlineEnd: vars.space.sp12,
 					paddingInlineStart: vars.space.sp12,
 				},
@@ -476,14 +459,12 @@ const comboboxConfig = {
 					paddingInlineEnd: vars.space.sp8,
 					paddingInlineStart: vars.space.sp8,
 				},
-				trigger: comboboxActionSizeClassName,
-				clearButton: comboboxActionSizeClassName,
 				loadMoreItem: {
 					minBlockSize: vars.controlSize.small,
 					paddingBlock: vars.space.sp4,
 					paddingInline: vars.space.sp8,
 				},
-				mobileTrigger: {
+				trayTrigger: {
 					paddingInlineEnd: vars.space.sp8,
 					paddingInlineStart: vars.space.sp8,
 				},
@@ -497,12 +478,39 @@ const comboboxConfig = {
 			},
 		},
 	},
+	compoundSlots: [
+		// The trigger and clear button share their action styles and sizes.
+		{ slots: ['trigger', 'clearButton'], style: comboboxActionStyles },
+		// The medium action size gives a 20px icon the same 8px inset as the invalid indicator:
+		// (28px − 20px) ÷ 2 + the 4px trigger gap.
+		{
+			slots: ['trigger', 'clearButton'],
+			style: {
+				blockSize: vars.controlSize.comboboxAction,
+				inlineSize: vars.controlSize.comboboxAction,
+				paddingInline: 0,
+			},
+			variants: { size: 'medium' },
+		},
+		{
+			slots: ['trigger', 'clearButton'],
+			style: {
+				blockSize: vars.controlSize.minTarget,
+				inlineSize: vars.controlSize.minTarget,
+				paddingInline: 0,
+			},
+			variants: { size: 'small' },
+		},
+	],
 } as const satisfies SlottedConfigInput;
 
 /**
  * Slotted recipe for the combobox anatomy. Internal — not exported from a public entrypoint.
  */
 export const comboboxRecipe = recipe(comboboxConfig);
+
+/** Allowed `presentation` values for the combobox recipe. */
+export type ComboboxPresentation = keyof typeof comboboxConfig.variants.presentation;
 
 /** Allowed `size` values for the combobox recipe. */
 export type ComboboxSize = keyof typeof comboboxConfig.variants.size;

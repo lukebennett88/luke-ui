@@ -181,7 +181,7 @@ Specificity and source order still decide conflicts within a layer.
 | `reset`      | Browser defaults, box sizing, and margins.                                                                                              |
 | `theme`      | Design token custom properties and base typography.                                                                                     |
 | `base`       | Reserved for a consuming application's own element defaults or resets (e.g. Tailwind Preflight). Luke UI emits nothing into this layer. |
-| `recipes`    | Component styles, variants, and compound variants.                                                                                      |
+| `recipes`    | Component styles, variants, compound variants, and shared compound-slot styles.                                                         |
 | `structural` | Retained descendant rhythm, skeleton masking, and combinator selectors.                                                                 |
 | `utilities`  | One-off layout and override escape hatches.                                                                                             |
 
@@ -202,19 +202,21 @@ the first time the consumer's CSS references it.
 Three helpers author component CSS. Pick by what the class is for, not by whether it has variants:
 
 - `recipe()` from `core/styles/recipe.ts` authors a component's visual treatment with recipe
-  semantics: a selection function, optional variants, and a derived `…RecipeVariants` type. A
-  base-only recipe such as `codeRecipe` is still a recipe. `recipe()` wraps every base, variant, and
-  compound-variant style in the `recipes` layer itself, so do not pre-wrap styles before passing
-  them in.
+  semantics: a selection function, optional variants, compound variants, and a derived
+  `…RecipeVariants` type. A base-only recipe such as `codeRecipe` is still a recipe. `recipe()`
+  wraps every base, variant, and compound-variant style in the `recipes` layer itself, so do not
+  pre-wrap styles before passing them in. Use `compoundSlots` to share one style across several
+  slots.
 - `style()` from `core/styles/layered-style.css.ts` authors one standalone private class in the
   `recipes` layer: a simple wrapper such as `Em`, a marker or scope class, or an implementation
-  class a component applies directly. Use it when there is no selection to expose. It also fits a
-  class that several recipe slots share, since `recipe()` passes a pre-built class string through
-  unchanged.
+  class a component applies directly. Use it when there is no selection to expose.
 - `globalStyleInLayer()` from the same module authors a global selector in an explicit layer. Use it
   only where the layer choice is meaningful: the reset and theme root, and `structural` rules such
   as Prose descendant rhythm and the `LoadingSkeleton` masks in
   `core/loading-skeleton/styles.css.ts`.
+
+A `compoundSlots` entry may include a variant condition. Its style is emitted once and composed into
+each target slot.
 
 Component authors never name the `recipes` layer. Only `globalStyleInLayer()` takes a layer, and it
 rejects `base`, which is reserved for the consuming application.
@@ -317,7 +319,12 @@ slot names and variant values `recipe()` infers, and `satisfies` type-checks eve
 style against `StyleRule` where it is written.
 
 Compound variants are single-part only: `buttonRecipe` and `textRecipe` both use `compoundVariants`
-on their single-part config. A slotted config has no `compoundVariants` field.
+on their single-part config. Slotted recipes use `compoundSlots` to share a style across named
+slots, with an optional variant condition.
+
+For overlapping properties, precedence runs from the slot base to unconditional `compoundSlots`,
+then slot variants, then conditional `compoundSlots`. Entries within each compound category follow
+array order: a later entry wins.
 
 ### Deriving variant types
 

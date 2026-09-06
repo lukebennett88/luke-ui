@@ -6,6 +6,7 @@ import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { FIELD_CONTROL_ICON_SIZE } from '../../sizing/control-size.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { useComboboxPresentation } from './presentation-context.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
@@ -19,9 +20,12 @@ interface _ComboboxInputGroupProps extends _ComboboxInputGroupOmit {
 /** Props for the styled combobox input group. */
 export type ComboboxInputGroupProps = Prettify<_ComboboxInputGroupProps>;
 
-/** Wrapper for combobox text input + trigger content. */
+/**
+ * Groups a combobox input and its controls. Inside a `ComboboxTray`, renders as an inset search bar.
+ */
 export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element {
 	const { size: sizeProp, ...groupProps } = props;
+	const presentation = useComboboxPresentation();
 	const size = useComboboxSize(sizeProp);
 
 	// Same icon size as `InputGroup`, including icons a caller puts in the group.
@@ -30,7 +34,7 @@ export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element 
 			<RacGroup
 				{...groupProps}
 				className={composeRenderProps(groupProps.className, (className) => {
-					return comboboxRecipe({ size }).inputGroup({ className });
+					return comboboxRecipe({ presentation, size }).inputGroup({ className });
 				})}
 			/>
 		</IconSizeProvider>

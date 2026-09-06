@@ -3,13 +3,14 @@
 import { assertType, test } from 'vite-plus/test';
 import { codeRecipe } from '../code/recipe.css.js';
 import {
+	compoundSlotsTypeFixtureRecipe,
 	emptyVariantsRecipe,
 	omittedVariantsRecipe,
 	omittedVariantsSlottedRecipe,
 	realVariantsRecipe,
 	realVariantsSlottedRecipe,
 } from './recipe.fixtures.css.js';
-import type { RecipeComposition, RecipeSelection } from './recipe.js';
+import type { recipe, RecipeComposition, RecipeSelection } from './recipe.js';
 
 /**
  * The input type a recipe function's first parameter accepts: its variant
@@ -163,4 +164,38 @@ test('a slotted recipe with variants accepts its real variants and rejects an ar
 	assertType<SelectionOf<typeof realVariantsSlottedRecipe>>({ size: 'large' });
 	// @ts-expect-error — an arbitrary key is rejected even for a recipe with real variants
 	assertType<SelectionOf<typeof realVariantsSlottedRecipe>>({ madeUp: 'x' });
+});
+
+// ---------------------------------------------------------------------------
+// compoundSlots
+// ---------------------------------------------------------------------------
+
+// Derive the entry type so TypeScript version changes cannot move an expected overload error.
+type CompoundSlotEntry = NonNullable<
+	Parameters<
+		typeof recipe<'a', { size: { medium: { a: { fontWeight: 500 } } } }>
+	>[0]['compoundSlots']
+>[number];
+
+/** A `compoundSlots` entry's `slots` list, as accepted by `CompoundSlotEntry`. */
+type CompoundSlotNames = CompoundSlotEntry['slots'];
+
+/** A `compoundSlots` entry's variant condition, as accepted by `CompoundSlotEntry`. */
+type CompoundSlotCondition = NonNullable<CompoundSlotEntry['variants']>;
+
+test('compoundSlots accepts a declared slot and a declared variant condition', () => {
+	assertType<CompoundSlotNames>(['a']);
+	assertType<CompoundSlotCondition>({ size: 'medium' });
+
+	// A valid entry still builds a working slot function.
+	assertType<string>(compoundSlotsTypeFixtureRecipe({ size: 'medium' }).a());
+});
+
+test('compoundSlots naming a slot or variant group that does not exist is a type error', () => {
+	// @ts-expect-error — `z` is not a declared slot
+	assertType<CompoundSlotNames>(['z']);
+	// @ts-expect-error — `color` is not a declared variant group
+	assertType<CompoundSlotCondition>({ color: 'red' });
+	// @ts-expect-error — `large` is not a declared value of the `size` group
+	assertType<CompoundSlotCondition>({ size: 'large' });
 });
