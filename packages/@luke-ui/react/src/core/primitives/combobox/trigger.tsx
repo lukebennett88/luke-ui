@@ -30,7 +30,7 @@ export function ComboboxTrigger(props: ComboboxTriggerProps): JSX.Element {
 			<RacButton
 				{...buttonProps}
 				className={composeRenderProps(buttonProps.className, (className) => {
-					return comboboxRecipe({ size }).trigger(className);
+					return comboboxRecipe({ size }).trigger({ className });
 				})}
 			/>
 		</IconSizeProvider>

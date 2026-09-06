@@ -24,7 +24,10 @@ export type ComboboxSectionProps<T extends object> = Prettify<_ComboboxSectionPr
 export function ComboboxSection<T extends object>(props: ComboboxSectionProps<T>): JSX.Element {
 	const { children, className, title, ...sectionProps } = props;
 
-	const sectionClassName = cx(comboboxSectionScopeClassName, comboboxRecipe().section(className));
+	const sectionClassName = cx(
+		comboboxSectionScopeClassName,
+		comboboxRecipe().section({ className }),
+	);
 
 	if (typeof children === 'function') {
 		return (

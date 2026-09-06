@@ -1,5 +1,4 @@
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/contract.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
@@ -130,25 +129,23 @@ export function Text(props: TextProps) {
 	return (
 		<RacText
 			{...racProps}
-			className={cx(
-				textRecipe({
-					color,
-					fontVariantNumeric,
-					...(shouldInheritFont
-						? {}
-						: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
-					isVisuallyHidden,
-					lineClamp,
-					shouldDisableTrim: resolvedShouldDisableTrim,
-					shouldInheritFont,
-					textAlign,
-					textDecoration,
-					textTransform,
-					textWrap,
-					typography: resolvedTypography,
-				}),
+			className={textRecipe({
 				className,
-			)}
+				color,
+				fontVariantNumeric,
+				...(shouldInheritFont
+					? {}
+					: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
+				isVisuallyHidden,
+				lineClamp,
+				shouldDisableTrim: resolvedShouldDisableTrim,
+				shouldInheritFont,
+				textAlign,
+				textDecoration,
+				textTransform,
+				textWrap,
+				typography: resolvedTypography,
+			})}
 			elementType={elementType}
 		>
 			{children}

@@ -113,7 +113,7 @@ function SpinnerElement({
 		<span
 			{...spanProps}
 			aria-labelledby={labelId}
-			className={slots.root(className)}
+			className={slots.root({ className })}
 			role="status"
 			style={style}
 		>

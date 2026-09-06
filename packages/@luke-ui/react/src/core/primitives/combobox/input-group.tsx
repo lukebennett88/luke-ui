@@ -30,7 +30,7 @@ export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element 
 			<RacGroup
 				{...groupProps}
 				className={composeRenderProps(groupProps.className, (className) => {
-					return comboboxRecipe({ size }).inputGroup(className);
+					return comboboxRecipe({ size }).inputGroup({ className });
 				})}
 			/>
 		</IconSizeProvider>

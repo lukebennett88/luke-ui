@@ -42,13 +42,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 		<Button
 			{...buttonProps}
 			className={composeRenderProps(props.className, (value) => {
-				return cx(
-					iconButtonReset,
-					iconButtonRecipe({
-						size,
-					}),
-					value,
-				);
+				return cx(iconButtonReset, iconButtonRecipe({ className: value, size }));
 			})}
 			isPending={isPending}
 			size={size}

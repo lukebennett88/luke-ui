@@ -8,5 +8,5 @@ type FieldProps = ComponentProps<'div'>;
 export function Field(props: FieldProps): JSX.Element {
 	const { className, ...restProps } = props;
 
-	return <div {...restProps} className={fieldRecipe().root(className)} />;
+	return <div {...restProps} className={fieldRecipe().root({ className })} />;
 }

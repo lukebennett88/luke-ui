@@ -51,23 +51,25 @@ type is the component in Pascal case plus `RecipeVariants`.
 
 <ExampleBlock src="styling/button-recipe" title="Styling — Apply a component recipe" />
 
-A single-part recipe such as `buttonRecipe` returns one class string. Pass the same variant names
-the component accepts.
+A single-part recipe such as `buttonRecipe` returns the finished class string. Pass the same variant
+names the component accepts, plus an optional `className` of your own. The recipe appends your class
+after its own, so do not wrap the result in another composition helper.
 
 ```tsx
 import { buttonRecipe, type ButtonRecipeVariants } from '@luke-ui/react/button';
 
 const variants: ButtonRecipeVariants = { appearance: 'subtle', tone: 'neutral' };
-const className = buttonRecipe(variants);
+const className = buttonRecipe({ ...variants, className: 'my-class' });
 ```
 
-A slotted recipe such as `inputGroupRecipe` returns one function per part. Call the part you are
-styling.
+A slotted recipe such as `inputGroupRecipe` returns one function per part. Choose variants once at
+the outer call, then call the part you are styling with an optional `{ className }`.
 
 ```tsx
 import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
 
 const { group, control } = inputGroupRecipe({ size: 'medium' });
+const groupClassName = group({ className: 'my-class' });
 ```
 
 Do not import a recipe to restyle a Luke UI component from the outside. Use the component's props

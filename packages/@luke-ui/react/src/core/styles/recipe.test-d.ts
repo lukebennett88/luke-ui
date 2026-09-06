@@ -9,19 +9,27 @@ import {
 	realVariantsRecipe,
 	realVariantsSlottedRecipe,
 } from './recipe.fixtures.css.js';
+import type { RecipeComposition, RecipeSelection } from './recipe.js';
 
 /**
- * The selection type a recipe function's first parameter accepts. Assigning
- * through `assertType` (rather than calling the recipe with a bad selection)
- * keeps rejection cases purely type-level — a real call with a key the recipe
- * never declared would reach Vanilla Extract's runtime `recipe()` function and
- * throw, since `@ts-expect-error` only suppresses the type error, not execution.
+ * The input type a recipe function's first parameter accepts: its variant
+ * selection plus composition options such as `className`. Assigning through
+ * `assertType` (rather than calling the recipe with a bad input) keeps rejection
+ * cases purely type-level — a real call with a key the recipe never declared would
+ * reach Vanilla Extract's runtime `recipe()` function and throw, since
+ * `@ts-expect-error` only suppresses the type error, not execution.
  *
  * Every rejection assertion below stays on one line: `@ts-expect-error` only
  * covers the very next line, and wrapping the object literal across lines would
  * move the reported error onto the property line instead of the call itself.
  */
 type SelectionOf<Fn> = Fn extends (selection?: infer Selection) => unknown ? Selection : never;
+
+/** True when `Key` is not a key of `T`. Used to prove `className` never leaks into a selection. */
+type Lacks<T, Key extends PropertyKey> = Key extends keyof T ? false : true;
+
+/** True when no key of `T` can hold a value, which is how a no-variant selection rejects every key. */
+type HoldsNothing<T> = [T[keyof T]] extends [never] ? true : false;
 
 // ---------------------------------------------------------------------------
 // Single-part, no variants
@@ -75,6 +83,64 @@ test('a real recipe keeps its exact variant values', () => {
 	assertType<SelectionOf<typeof realVariantsRecipe>>({ size: 'large' });
 	// @ts-expect-error — still rejects a key that was never declared
 	assertType<SelectionOf<typeof realVariantsRecipe>>({ madeUp: 'x' });
+});
+
+// ---------------------------------------------------------------------------
+// className composition
+// ---------------------------------------------------------------------------
+
+test('a base-only recipe accepts className alongside nothing else', () => {
+	assertType<string>(omittedVariantsRecipe({ className: 'mine' }));
+	assertType<string>(omittedVariantsRecipe({ className: undefined }));
+	assertType<string>(codeRecipe({ className: 'mine' }));
+
+	// @ts-expect-error — className must be a string
+	assertType<SelectionOf<typeof omittedVariantsRecipe>>({ className: 1 });
+	// @ts-expect-error — an undeclared key is still rejected next to className
+	assertType<SelectionOf<typeof omittedVariantsRecipe>>({ className: 'x', nonsense: true });
+	// @ts-expect-error — Luke UI is React-only, so no `class` alias exists
+	assertType<SelectionOf<typeof omittedVariantsRecipe>>({ class: 'x' });
+});
+
+test('a recipe with variants accepts className alongside its variants', () => {
+	assertType<string>(realVariantsRecipe({ className: 'mine', size: 'small' }));
+	assertType<string>(realVariantsRecipe({ className: 'mine' }));
+
+	// @ts-expect-error — className does not loosen variant value checking
+	assertType<SelectionOf<typeof realVariantsRecipe>>({ className: 'x', size: 'large' });
+	// @ts-expect-error — className does not loosen undeclared-key checking
+	assertType<SelectionOf<typeof realVariantsRecipe>>({ className: 'x', madeUp: true });
+});
+
+test('RecipeSelection describes only variants, never className', () => {
+	type RealSelection = RecipeSelection<typeof realVariantsRecipe>;
+	type NoVariantSelection = RecipeSelection<typeof omittedVariantsRecipe>;
+	type CodeSelection = RecipeSelection<typeof codeRecipe>;
+
+	assertType<Lacks<RealSelection, 'className'>>(true);
+	// A no-variant selection is `Record<string, never>`: every key exists but none can hold a value.
+	assertType<HoldsNothing<NoVariantSelection>>(true);
+	assertType<HoldsNothing<CodeSelection>>(true);
+
+	// Variant inference through RecipeSelection stays exact.
+	assertType<RealSelection>({ size: 'medium', true: false });
+	assertType<RealSelection['size']>('small');
+	// @ts-expect-error — not one of the declared `size` values
+	assertType<RealSelection>({ size: 'large' });
+	// @ts-expect-error — a no-variant selection still rejects an arbitrary key
+	assertType<NoVariantSelection>({ madeUp: 'x' });
+});
+
+test('slot functions accept only className', () => {
+	const composition: RecipeComposition = { className: 'mine' };
+	assertType<string>(realVariantsSlottedRecipe({ size: 'small' }).root(composition));
+	assertType<string>(omittedVariantsSlottedRecipe().root({}));
+
+	type SlotOptions = SelectionOf<ReturnType<typeof realVariantsSlottedRecipe>['root']>;
+	// @ts-expect-error — a slot call takes composition options, not a bare class string
+	assertType<SlotOptions>('mine');
+	// @ts-expect-error — variant selection happens at the outer recipe call, not per slot
+	assertType<SlotOptions>({ size: 'small' });
 });
 
 // ---------------------------------------------------------------------------

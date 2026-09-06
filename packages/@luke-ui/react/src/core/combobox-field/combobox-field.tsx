@@ -239,7 +239,7 @@ function MobileComboboxContent<T extends object>({
 	const comboboxStyles = comboboxRecipe({ size });
 
 	const mobileListBoxClassName = composeRenderProps(listBoxProps?.className, (className) => {
-		return comboboxStyles.mobileListBox(className);
+		return comboboxStyles.mobileListBox({ className });
 	});
 
 	const listBox = (

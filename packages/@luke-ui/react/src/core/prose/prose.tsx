@@ -1,5 +1,4 @@
 import type { ComponentProps, JSX } from 'react';
-import { cx } from '../../shared/utils/utils.js';
 import { proseRecipe } from './recipe.css.js';
 
 /** Props for `Prose`. */
@@ -11,5 +10,5 @@ export interface ProseProps extends ComponentProps<'div'> {}
  */
 export function Prose(props: ProseProps): JSX.Element {
 	const { className, ...divProps } = props;
-	return <div {...divProps} className={cx(proseRecipe(), className)} />;
+	return <div {...divProps} className={proseRecipe({ className })} />;
 }

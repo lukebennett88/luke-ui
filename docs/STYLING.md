@@ -257,10 +257,24 @@ recipe. Consumers call the built recipe functions it returns (`buttonRecipe`, `t
 on). `recipe()` wraps every base, variant, and compound-variant style it is given in the `recipes`
 cascade layer itself, so a recipe author does not add layering by hand.
 
+A built recipe also owns `className` composition. It accepts its variant selection plus an optional
+`className` and returns the complete class string, with the consumer class appended after its own:
+
+```tsx
+<blockquote className={blockquoteRecipe({ className })} />
+<button className={buttonRecipe({ appearance, className, size, tone })} />
+```
+
+Wrapping recipe output in `cx(recipe(…), className)` is not the normal pattern. Reach for `cx()`
+only to combine a recipe result with a class that is not the consumer's, such as a standalone
+`style()` class. `className` is composition, not a variant: it never reaches CSS, and it is only
+accepted under that name because Luke UI is React-only.
+
 ### Single-part recipes
 
 A single-part recipe takes `base`, `variants`, `defaultVariants`, and `compoundVariants`, and
-returns a function that takes a variant selection and returns one class string:
+returns a function that takes a variant selection plus optional `className` and returns one class
+string:
 
 ```ts
 export const buttonRecipe = recipe({
@@ -281,7 +295,8 @@ See `core/primitives/button/recipe.css.ts` for the full recipe this abbreviates.
 
 A recipe whose component has multiple styled parts takes `slots` instead of `base`. Each variant
 value maps to per-slot styles, and the built recipe takes a variant selection and returns one
-function per slot, each accepting an optional extra class to merge:
+function per slot. Variants are chosen once at the outer call, and each slot call accepts only
+`{ className }` to append. Slots evaluate lazily, so reading one does not compute the others:
 
 ```tsx
 export const fieldRecipe = recipe({
@@ -292,7 +307,7 @@ export const fieldRecipe = recipe({
 const { label, message, root } = fieldRecipe({ tone: 'description' });
 <div className={root()}>
 	<label className={label()}>Email</label>
-	<p className={message(extraClassName)}>We will send your receipt here.</p>
+	<p className={message({ className })}>We will send your receipt here.</p>
 </div>;
 ```
 
@@ -312,6 +327,9 @@ Never hand-maintain a recipe's variant type. Derive it from the built recipe wit
 ```ts
 export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
 ```
+
+`RecipeSelection` contains only variant keys. `className` is composition input to the built recipe,
+not a variant, so it never appears in the derived type.
 
 Do not cast a hand-written variant interface onto a recipe's selection parameter. If the exported
 type and the recipe definition can drift, something is wrong with how the type was produced, not

@@ -9,8 +9,9 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
  *
  * One helper builds both single-part and multi-part (slotted) recipes and emits
  * static CSS in the `recipes` cascade layer. You pick variants at the outer call.
- * A single-part recipe returns a class string. A multi-part recipe returns one
- * function per slot, each taking an optional extra class to merge.
+ * A single-part recipe takes its variant selection plus an optional consumer
+ * `className` and returns the finished class string. A multi-part recipe returns
+ * one function per slot, each taking optional `{ className }` to append.
  *
  * `recipe()` runs at build time inside a `.css.ts` module. It splits a slotted
  * config into one recipe per slot, in declaration order, so its generated CSS and
@@ -67,6 +68,26 @@ type VariantSelection<Variants extends VariantGroups> =
 				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
 			};
 
+/**
+ * Composition options a built recipe accepts alongside its variant selection. `className` is a
+ * consumer class appended to the recipe's own classes; it is not a variant and never reaches CSS.
+ */
+export interface RecipeComposition {
+	className?: string;
+}
+
+/**
+ * The full input a built single-part recipe accepts: its variant selection plus
+ * `RecipeComposition`. A no-variant recipe accepts only the composition options, typed as a weak
+ * object so an object literal with an undeclared key is still rejected.
+ */
+type RecipeInput<Variants extends VariantGroups> =
+	HasNoVariants<Variants> extends true
+		? RecipeComposition
+		: {
+				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
+			} & RecipeComposition;
+
 /** A compound variant for a single-part recipe. */
 interface CompoundVariant<Variants extends VariantGroups> {
 	style: RecipeStyleRule;
@@ -82,9 +103,7 @@ interface SinglePartConfig<Variants extends VariantGroups> {
 }
 
 /** The runtime function a single-part `recipe()` returns. */
-type SinglePartRecipe<Variants extends VariantGroups> = (
-	selection?: VariantSelection<Variants>,
-) => string;
+type SinglePartRecipe<Variants extends VariantGroups> = (input?: RecipeInput<Variants>) => string;
 
 /** A per-slot style map: slot name to style for that slot. */
 type SlotStyles<Slot extends string> = Partial<Record<Slot, RecipeStyleRule>>;
@@ -119,8 +138,8 @@ interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroup
 	variants?: Variants;
 }
 
-/** A single slot function: takes an optional extra class and returns a class string. */
-type SlotFn = (extraClass?: string) => string;
+/** A single slot function: takes optional composition options and returns a class string. */
+type SlotFn = (options?: RecipeComposition) => string;
 
 /** The runtime function a slotted `recipe()` returns. */
 type MultiPartRecipe<Slot extends string, Variants extends SlotVariantGroups<Slot>> = (
@@ -144,10 +163,17 @@ export interface SlottedConfigInput {
 	variants?: Record<string, Record<string, Record<string, RecipeStyleRule>>>;
 }
 
-/** Derives the outer variant selection type for a built recipe. */
-export type RecipeSelection<Fn> = Fn extends (selection?: infer Selection) => unknown
-	? NonNullable<Selection>
+/**
+ * Derives the outer variant selection type for a built recipe. `className` is composition, not a
+ * variant, so it is removed; a no-variant recipe derives `Record<string, never>`.
+ */
+export type RecipeSelection<Fn> = Fn extends (input?: infer Input) => unknown
+	? VariantKeysOf<NonNullable<Input>>
 	: never;
+
+type VariantKeysOf<Input> = [Exclude<keyof Input, keyof RecipeComposition>] extends [never]
+	? Record<string, never>
+	: Omit<Input, keyof RecipeComposition>;
 
 // ---------------------------------------------------------------------------
 // recipe (build time)
@@ -380,9 +406,23 @@ function pickGroups(
 }
 
 /**
+ * Splits a recipe input into the variant selection Vanilla Extract's built recipe reads and the
+ * consumer `className` appended afterwards. `className` must never reach the built recipe: it
+ * would be treated as an unknown variant.
+ */
+function splitInput(input: Record<string, unknown> | undefined): {
+	className: string | undefined;
+	selection: Record<string, unknown> | undefined;
+} {
+	if (input === undefined) return { className: undefined, selection: undefined };
+	const { className, ...selection } = input;
+	return { className: typeof className === 'string' ? className : undefined, selection };
+}
+
+/**
  * Rebuilds a slotted recipe: `recipe(selection)` returns one function per slot,
- * each taking an optional extra class. Slots evaluate lazily, so reading one slot
- * does not compute the others.
+ * each taking optional composition options. Slots evaluate lazily, so reading one
+ * slot does not compute the others.
  *
  * @public Imported by path string via Vanilla Extract's function serializer, so
  * the reference is invisible to static analysis.
@@ -394,18 +434,22 @@ export function createRecipe(descriptor: SlottedRecipeDescriptor) {
 		const slots: Record<string, SlotFn> = {};
 		for (const [slotName, built] of slotEntries) {
 			const groups = descriptor.slotGroups[slotName] ?? [];
-			slots[slotName] = (extraClass) => cx(built(pickGroups(selection, groups)), extraClass);
+			slots[slotName] = (options) => cx(built(pickGroups(selection, groups)), options?.className);
 		}
 		return slots;
 	};
 }
 
 /**
- * Rebuilds a single-part recipe: `recipe(selection)` returns a class string.
+ * Rebuilds a single-part recipe: `recipe(input)` returns the finished class string, with any
+ * consumer `className` appended after the recipe's own classes.
  *
  * @public Imported by path string via Vanilla Extract's function serializer, so
  * the reference is invisible to static analysis.
  */
 export function createSingleRecipe(built: BuiltRecipe) {
-	return (selection?: Record<string, unknown>): string => built(selection);
+	return (input?: Record<string, unknown>): string => {
+		const { className, selection } = splitInput(input);
+		return cx(built(selection), className);
+	};
 }

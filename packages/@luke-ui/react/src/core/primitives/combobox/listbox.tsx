@@ -46,7 +46,7 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 		<RacListBox
 			{...listBoxProps}
 			className={composeRenderProps(listBoxProps.className, (className) => {
-				return comboboxRecipe().listBox(className);
+				return comboboxRecipe().listBox({ className });
 			})}
 		>
 			{listBoxChildren}

@@ -1,5 +1,4 @@
 import type { ComponentProps } from 'react';
-import { cx } from '../../shared/utils/utils.js';
 import type { Prettify } from '../types/prettify.js';
 import { codeRecipe } from './recipe.css.js';
 
@@ -13,5 +12,5 @@ export type CodeProps = Prettify<_CodeProps>;
  */
 export function Code(props: CodeProps) {
 	const { className, ...elementProps } = props;
-	return <code {...elementProps} className={cx(codeRecipe(), className)} />;
+	return <code {...elementProps} className={codeRecipe({ className })} />;
 }

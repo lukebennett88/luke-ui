@@ -2,7 +2,6 @@ import type { JSX } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
-import { cx } from '../../../shared/utils/utils.js';
 import { IconSizeProvider } from '../../icon/icon-size-context.js';
 import { BUTTON_ICON_SIZE } from '../../sizing/button-sizing.js';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
@@ -61,7 +60,7 @@ export function Button(props: ButtonProps): JSX.Element {
 			<RacButton
 				{...restProps}
 				className={composeRenderProps(props.className, (className) => {
-					return cx(buttonRecipe({ appearance, isBlock, size, tone }), className);
+					return buttonRecipe({ appearance, className, isBlock, size, tone });
 				})}
 				isDisabled={isDisabled}
 				isPending={isPending}
