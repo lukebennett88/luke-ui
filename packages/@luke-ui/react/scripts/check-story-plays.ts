@@ -90,7 +90,7 @@ function isFunction(node: Node): boolean {
 function propertyName(node: Node): string | undefined {
 	if (node.type === 'Identifier') return node.name;
 	if (node.type === 'Literal' && typeof node.value === 'string') return node.value;
-	return undefined;
+	return;
 }
 
 function visit(node: Node, visitor: (node: Node) => void) {

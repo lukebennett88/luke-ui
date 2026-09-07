@@ -136,7 +136,7 @@ const STRUCTURAL_BORDERS = new Set(['control', 'decorative', 'focus']);
 
 function resolveColorPurpose(path: string): TokenPurposeId | undefined {
 	const [, section, leaf] = path.split('.');
-	if (section === undefined) return undefined;
+	if (section === undefined) return;
 	if (section === 'border') {
 		return leaf !== undefined && STRUCTURAL_BORDERS.has(leaf) ? 'borders' : 'roles';
 	}

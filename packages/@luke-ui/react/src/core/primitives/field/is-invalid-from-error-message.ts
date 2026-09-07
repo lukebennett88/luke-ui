@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
  */
 export function normalizeErrorMessage(errorMessage: ReactNode): ReactNode {
 	if (errorMessage == null || typeof errorMessage === 'boolean' || errorMessage === '') {
-		return undefined;
+		return;
 	}
 
 	return errorMessage;

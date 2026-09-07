@@ -69,7 +69,7 @@ function hasHelperCall(source: string, helperName: string, path: string): boolea
 
 function helperPath(argument: Node | undefined, helperName: string): string | undefined {
 	if (helperName === 'testIntegration') return stringLiteral(argument);
-	if (argument?.type !== 'ObjectExpression') return undefined;
+	if (argument?.type !== 'ObjectExpression') return;
 
 	for (const property of argument.properties) {
 		if (property.type !== 'Property' || property.computed) continue;
@@ -98,7 +98,7 @@ function readOptionalBrowserSource(
 	try {
 		return readBrowserSource(path);
 	} catch (error) {
-		if (isEnoent(error)) return undefined;
+		if (isEnoent(error)) return;
 		throw error;
 	}
 }

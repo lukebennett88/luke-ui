@@ -551,7 +551,7 @@ function getOwningLayer(rule: Rule): string | undefined {
 		if (parent.type === 'atrule' && parent.name === 'layer') return parent.params.trim();
 		parent = parent.parent;
 	}
-	return undefined;
+	return;
 }
 
 const validStylesheetFixture = `@layer reset, theme, base, recipes, structural, utilities;

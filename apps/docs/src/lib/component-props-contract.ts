@@ -306,9 +306,9 @@ function exportKind(statement: AstNode, specifier: AstNode): 'type' | 'value' {
 }
 
 function parseModule(path: string): ParsedModule | undefined {
-	if (!existsSync(path)) return undefined;
+	if (!existsSync(path)) return;
 	const result = parseSync(path, readFileSync(path, 'utf8'));
-	if (result.errors.length > 0) return undefined;
+	if (result.errors.length > 0) return;
 	return { path, program: result.program as unknown as AstNode };
 }
 
@@ -609,7 +609,7 @@ function isInsideDirectory(filePath: string, directory: string): boolean {
 }
 
 function typeAnnotation(node: AstNode | undefined): AstNode | undefined {
-	if (node === undefined) return undefined;
+	if (node === undefined) return;
 	if (node.type === 'AssignmentPattern') return typeAnnotation(astNode(node.left));
 	if (node.type === 'RestElement') return typeAnnotation(astNode(node.argument));
 	const annotation = astNode(node.typeAnnotation);
@@ -641,7 +641,7 @@ function declarationKind(declaration: AstNode): 'type' | 'value' {
 }
 
 function declarationName(declaration: AstNode): string | undefined {
-	if (declaration.type === 'VariableDeclaration') return undefined;
+	if (declaration.type === 'VariableDeclaration') return;
 	return identifierName(declaration.id);
 }
 
@@ -656,7 +656,7 @@ function nodes(value: unknown): ReadonlyArray<AstNode> {
 }
 
 function astNode(value: unknown): AstNode | undefined {
-	if (typeof value !== 'object' || value === null || !('type' in value)) return undefined;
+	if (typeof value !== 'object' || value === null || !('type' in value)) return;
 	const candidate = value as { type?: unknown };
 	return typeof candidate.type === 'string' ? (value as AstNode) : undefined;
 }
