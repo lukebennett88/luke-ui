@@ -1,6 +1,6 @@
 import { useObjectRef } from '@react-aria/utils';
 import type { JSX, Ref } from 'react';
-import { useContext, useEffect, useMemo } from 'react';
+import { useContext, useEffect } from 'react';
 import type { InputProps as RacInputProps } from 'react-aria-components/ComboBox';
 import { ComboBoxStateContext, Input as RacInput } from 'react-aria-components/ComboBox';
 import { InputContext } from 'react-aria-components/Input';
@@ -62,12 +62,12 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 	// context is the combobox's full `inputProps`, so filter out the trigger-only members before
 	// re-providing it: `aria-expanded` is not valid on `role="searchbox"`, and `onTouchEnd` is the
 	// combobox touch-to-toggle handler. List state such as `aria-controls`, `aria-autocomplete`,
-	// and `aria-activedescendant` passes through for virtual focus. Memoized because the lint rule
-	// `jsx-no-constructed-context-values` requires a stable provider value.
-	const trayContext = useMemo(() => {
-		const { 'aria-expanded': _ariaExpanded, onTouchEnd: _onTouchEnd, ...rest } = inputContext ?? {};
-		return rest;
-	}, [inputContext]);
+	// and `aria-activedescendant` passes through for virtual focus.
+	const {
+		'aria-expanded': _ariaExpanded,
+		onTouchEnd: _onTouchEnd,
+		...trayContext
+	} = inputContext ?? {};
 	const input = (
 		<RacInput
 			{...inputProps}
@@ -82,5 +82,7 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 
 	if (!isTraySearch) return input;
 
+	// The React Compiler memoizes this value.
+	// oxlint-disable-next-line react/jsx-no-constructed-context-values
 	return <InputContext.Provider value={trayContext}>{input}</InputContext.Provider>;
 }
