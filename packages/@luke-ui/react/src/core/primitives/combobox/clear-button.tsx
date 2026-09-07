@@ -22,8 +22,9 @@ interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {
 export type ComboboxClearButtonProps = Prettify<_ComboboxClearButtonProps>;
 
 /**
- * Clears the selection beside a persistent input and hides when no option is selected. Inside a
- * `ComboboxTray`, clears the search text and hides while the search is empty.
+ * Clears the selection and hides when no option is selected. Inside a `ComboboxTray`, hides while
+ * the search is empty; clearing the search also clears the selection, because an empty search has
+ * nothing left to select.
  */
 export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Element | null {
 	const { size: sizeProp, ...buttonProps } = props;
@@ -41,6 +42,8 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 			? {
 					isEmpty: state.inputValue === '',
 					onClear: () => {
+						// React Stately's own per-render effect clears the selection whenever the input
+						// value becomes empty, so this also empties what is selected.
 						state.setInputValue('');
 					},
 				}

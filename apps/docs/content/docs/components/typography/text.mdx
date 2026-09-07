@@ -66,6 +66,10 @@ ellipsis. It disables trimming automatically when you set `lineClamp`.
 Use `textTransform` and `textDecoration` when the content calls for them. These props affect the
 rendered text only, so avoid using uppercase styling as a substitute for a clear label.
 
+`Code`, `Em`, `Kbd`, and `Strong` build on `Text` and keep the transform and numeric glyph style of
+the text around them, so a word marked up inside uppercase or tabular-numeric text still matches it.
+Set `textTransform` or `fontVariantNumeric` on one of them to override what it inherits.
+
 <ExampleBlock src="text/transform" title="Text — Transform and decoration" />
 
 ## Related components

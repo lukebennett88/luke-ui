@@ -227,3 +227,15 @@ test('ComboboxTray collection-building pass does not leak duplicate structure', 
 	// two fixture options once the tray is actually open.
 	expect(page.getByRole('option').elements()).toHaveLength(countryItems.length);
 });
+
+test('ComboboxTray stays closed after an option is selected', async () => {
+	render(<TrayCombobox />);
+	await openTray();
+
+	// React Stately closes the menu itself whenever a single-select value changes, so selecting an
+	// option dismisses the tray with no help from Luke UI.
+	await userEvent.click(page.getByRole('option', { name: 'Australia' }));
+
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+	await expect.element(page.getByRole('button', { name: 'Country Australia' })).toBeVisible();
+});

@@ -1,4 +1,4 @@
-import type { JSX, ReactNode } from 'react';
+import type { JSX, ReactNode, Ref } from 'react';
 import { useContext, useId } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { Button as RacButton, ButtonContext } from 'react-aria-components/Button';
@@ -26,6 +26,8 @@ interface _ComboboxTrayTriggerProps extends _ComboboxTrayTriggerOmit {
 	className?: RacButtonProps['className'];
 	/** Text shown while nothing is selected. */
 	placeholder?: string;
+	/** Forwarded to the underlying trigger `<button>`. */
+	ref?: Ref<HTMLButtonElement>;
 	size?: ComboboxSize;
 }
 
@@ -34,7 +36,7 @@ export type ComboboxTrayTriggerProps = Prettify<_ComboboxTrayTriggerProps>;
 
 /** Shows the selected value and opens a sibling `ComboboxTray`. */
 export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Element | null {
-	const { children, isDisabled, placeholder, size: sizeProp, ...buttonProps } = props;
+	const { children, isDisabled, placeholder, ref, size: sizeProp, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const labelContext = useSlottedContext(LabelContext);
 	const buttonContext = useSlottedContext(ButtonContext);
@@ -74,6 +76,7 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 					return comboboxRecipe({ size }).trayTrigger({ className });
 				})}
 				isDisabled={resolvedIsDisabled}
+				ref={ref}
 				onPress={(event) => {
 					if (resolvedIsDisabled) return;
 

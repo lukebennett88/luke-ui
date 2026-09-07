@@ -118,8 +118,14 @@ export const textRecipe = recipe({
 	base: {
 		color: vars.color.text.primary,
 		fontFamily: vars.font.family.body,
+		// `Text` renders untransformed text with the font's default numerals unless asked otherwise.
+		// These sit in the base rather than in a default variant so `shouldInheritFont` can override
+		// them: a composed `Code`/`Em`/`Kbd`/`Strong` keeps the surrounding case and numeric styling,
+		// while a plain `Text` is still insulated from whatever the page sets around it.
+		fontVariantNumeric: 'normal',
 		minInlineSize: 0,
 		overflowWrap: 'break-word',
+		textTransform: 'none',
 	},
 	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
@@ -131,18 +137,11 @@ export const textRecipe = recipe({
 		shouldInheritFont: false,
 		textAlign: 'start',
 		textDecoration: 'none',
-		textTransform: 'none',
+		textTransform: 'default',
 		textWrap: 'default',
 		typography: 'body',
 	},
 	variants: {
-		fontVariantNumeric: {
-			'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
-			ordinal: { fontVariantNumeric: 'ordinal' },
-			'slashed-zero': { fontVariantNumeric: 'slashed-zero' },
-			'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
-			default: { fontVariantNumeric: 'normal' },
-		},
 		isVisuallyHidden: {
 			false: {},
 			true: visuallyHiddenStyle,
@@ -169,13 +168,6 @@ export const textRecipe = recipe({
 			none: { textDecoration: 'none' },
 			underline: { textDecoration: 'underline' },
 		},
-		textTransform: {
-			capitalize: { textTransform: 'capitalize' },
-			inherit: { textTransform: 'inherit' },
-			lowercase: { textTransform: 'lowercase' },
-			none: { textTransform: 'none' },
-			uppercase: { textTransform: 'uppercase' },
-		},
 		typography: typographyVariants,
 		shouldInheritFont: {
 			false: {},
@@ -184,19 +176,39 @@ export const textRecipe = recipe({
 				fontFamily: 'inherit',
 				fontSize: 'inherit',
 				fontStyle: 'inherit',
+				fontVariantNumeric: 'inherit',
 				fontWeight: 'inherit',
 				letterSpacing: 'inherit',
 				lineHeight: 'inherit',
+				textTransform: 'inherit',
 				vars: { [textLineHeight]: '1lh' },
 			},
 		},
-		// Keep both of these after `shouldInheritFont`. They must win over its `inherit` values, and
-		// that tie breaks on declaration order.
+		// Keep these after `shouldInheritFont`. They must win over its `inherit` values, and that tie
+		// breaks on declaration order. Each `default` emits nothing, so an unset prop leaves whatever
+		// came before it standing: the base reset for a plain `Text`, or the inherited value under
+		// `shouldInheritFont`.
 		fontWeight: weightVariants,
 		fontStyle: {
 			inherit: { fontStyle: 'inherit' },
 			italic: { fontStyle: 'italic' },
 			normal: { fontStyle: 'normal' },
+			default: {},
+		},
+		fontVariantNumeric: {
+			'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
+			normal: { fontVariantNumeric: 'normal' },
+			ordinal: { fontVariantNumeric: 'ordinal' },
+			'slashed-zero': { fontVariantNumeric: 'slashed-zero' },
+			'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
+			default: {},
+		},
+		textTransform: {
+			capitalize: { textTransform: 'capitalize' },
+			inherit: { textTransform: 'inherit' },
+			lowercase: { textTransform: 'lowercase' },
+			none: { textTransform: 'none' },
+			uppercase: { textTransform: 'uppercase' },
 			default: {},
 		},
 		color: colorVariants,

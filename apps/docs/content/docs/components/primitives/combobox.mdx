@@ -75,9 +75,10 @@ selection. The trigger opens the tray. Both take their accessible name from the 
 ```
 
 The parts inside a `ComboboxTray` adapt to it. `ComboboxInput` becomes the tray's search field and
-takes focus as the tray opens. `ComboboxClearButton` clears that search text and hides while the
-search is empty. `ComboboxListBox` fills the tray and contains its scrolling. Arrow keys move
-through options while focus stays in the search field.
+takes focus as the tray opens. `ComboboxClearButton` clears the search field and hides while the
+search is empty. Because the search field is the only way to choose an option in the tray, clearing
+it also clears the selection. `ComboboxListBox` fills the tray and contains its scrolling. Arrow
+keys move through options while focus stays in the search field.
 
 Render the tray only on devices where it belongs. `ComboboxField` already chooses between the tray
 and the popover for you.
