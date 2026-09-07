@@ -10,7 +10,7 @@ interface QuoteStyleProps {
 	lineClamp?: TextProps['lineClamp'];
 	/**
 	 * Sets text wrapping behavior.
-	 * @default 'unset'
+	 * @default 'default'
 	 */
 	textWrap?: TextProps['textWrap'];
 }

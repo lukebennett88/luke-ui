@@ -114,7 +114,6 @@ function createLayeredTextStyle({
 	} satisfies ComplexStyleRule;
 }
 
-/** Vanilla-extract recipe for the `Text` component's styles. */
 export const textRecipe = recipe({
 	base: {
 		color: vars.color.text.primary,
@@ -124,7 +123,9 @@ export const textRecipe = recipe({
 	},
 	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
-		fontVariantNumeric: 'unset',
+		fontFamily: 'default',
+		fontStyle: 'default',
+		fontVariantNumeric: 'default',
 		isVisuallyHidden: false,
 		lineClamp: false,
 		shouldDisableTrim: false,
@@ -132,7 +133,7 @@ export const textRecipe = recipe({
 		textAlign: 'start',
 		textDecoration: 'none',
 		textTransform: 'none',
-		textWrap: 'unset',
+		textWrap: 'default',
 		typography: 'body',
 	},
 	variants: {
@@ -141,7 +142,7 @@ export const textRecipe = recipe({
 			ordinal: { fontVariantNumeric: 'ordinal' },
 			'slashed-zero': { fontVariantNumeric: 'slashed-zero' },
 			'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
-			unset: { fontVariantNumeric: 'normal' },
+			default: { fontVariantNumeric: 'normal' },
 		},
 		isVisuallyHidden: {
 			false: {},
@@ -170,10 +171,9 @@ export const textRecipe = recipe({
 		textWrap: {
 			balance: { textWrap: 'balance' },
 			pretty: { textWrap: 'pretty' },
-			unset: {},
+			default: {},
 		},
 		typography: typographyVariants,
-		fontWeight: weightVariants,
 		shouldInheritFont: {
 			false: {},
 			true: {
@@ -186,6 +186,21 @@ export const textRecipe = recipe({
 				lineHeight: 'inherit',
 				vars: { [textLineHeight]: '1lh' },
 			},
+		},
+		// Keep these three after `shouldInheritFont`. They must win over its `inherit` values, and
+		// that tie breaks on declaration order.
+		fontWeight: weightVariants,
+		fontStyle: {
+			inherit: { fontStyle: 'inherit' },
+			italic: { fontStyle: 'italic' },
+			normal: { fontStyle: 'normal' },
+			default: {},
+		},
+		fontFamily: {
+			body: { fontFamily: vars.font.family.body },
+			code: { fontFamily: vars.font.family.code },
+			inherit: { fontFamily: 'inherit' },
+			default: {},
 		},
 		color: colorVariants,
 	},

@@ -135,6 +135,13 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 			packageExportPath: `./${name}`,
 		},
 		files,
+		importEdits: [
+			{
+				kind: 'import',
+				line: `import '../${name}/recipe.css.js';`,
+				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
+			},
+		],
 		jsonEdits: [
 			{
 				key: 'pages',
@@ -149,13 +156,6 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 				path: `apps/docs/content/docs/components/${docsGroup}/meta.json`,
 				title: toDisplayName(docsGroup),
 				value: name,
-			},
-		],
-		sortedImportEdits: [
-			{
-				kind: 'sorted-import',
-				line: `import '../${name}/recipe.css.js';`,
-				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
 			},
 		],
 		textFileInserts: [

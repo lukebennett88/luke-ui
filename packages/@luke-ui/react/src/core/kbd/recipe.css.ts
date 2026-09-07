@@ -3,7 +3,7 @@ import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 
-/** Vanilla-extract recipe for the `Kbd` component's inline keyboard-key appearance. */
+/** Self-contained key chip. `Kbd` sets its own size rather than inheriting one. */
 export const kbdRecipe = recipe({
 	base: {
 		alignItems: 'center',

@@ -44,26 +44,26 @@ test('filters generated component prop tables through the component props genera
 });
 
 test('marks a pure native wrapper with the native-props entry and no visible props', async () => {
-	const [codeProps] = await componentPropsGenerator.generateTypeTable(
+	const [kbdProps] = await componentPropsGenerator.generateTypeTable(
 		{
-			path: 'packages/@luke-ui/react/src/core/code/code.tsx',
-			name: 'CodeProps',
+			path: 'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
+			name: 'KbdProps',
 		},
 		{ basePath: repoRoot },
 	);
 
 	expect(
-		codeProps?.entries.flatMap((entry) => {
+		kbdProps?.entries.flatMap((entry) => {
 			if (entry.name === NATIVE_PROPS_FORWARDING_KEY) return [];
 
 			return [entry.name];
 		}),
 	).toEqual([]);
-	const nativePropsEntry = codeProps?.entries.find(
+	const nativePropsEntry = kbdProps?.entries.find(
 		(entry) => entry.name === NATIVE_PROPS_FORWARDING_KEY,
 	);
 	expect(nativePropsEntry?.description).toBe(
-		'`CodeProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
+		'`KbdProps` also accepts compatible DOM and ARIA attributes and event handlers for its rendered element.',
 	);
 });
 

@@ -56,8 +56,8 @@ describe('createPrimitive', () => {
 			[
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../button/recipe.css.js';",
-				"import '../primitives/status-badge/recipe.css.js';",
 				"import '../text/recipe.css.js';",
+				"import '../primitives/status-badge/recipe.css.js';",
 				'',
 			].join('\n'),
 		);
@@ -95,7 +95,7 @@ describe('createPrimitive', () => {
 		).resolves.toContain('src="status-badge-primitive/basic"');
 	});
 
-	it('inserts a generated recipe import in code-point order', async () => {
+	it('appends a generated recipe import after the existing imports', async () => {
 		const root = await createRepositoryFixture({
 			modulesRegistry: [
 				'// Style-producing modules in the shipped stylesheet.',
@@ -114,8 +114,33 @@ describe('createPrimitive', () => {
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../button/recipe.css.js';",
 				"import '../primitives/field/recipe.css.js';",
-				"import '../primitives/input-addon/recipe.css.js';",
 				"import '../text/recipe.css.js';",
+				"import '../primitives/input-addon/recipe.css.js';",
+				'',
+			].join('\n'),
+		);
+	});
+
+	it('preserves the registry dependency order and appends the new import last', async () => {
+		const root = await createRepositoryFixture({
+			modulesRegistry: [
+				'// Style-producing modules in the shipped stylesheet.',
+				"import '../text/recipe.css.js';",
+				"import '../blockquote/recipe.css.js';",
+				"import '../button/recipe.css.js';",
+				'',
+			].join('\n'),
+		});
+
+		await createPrimitive(root, { name: 'InputAddon' });
+
+		expect(await readFile(join(root, modulesRegistryPath), 'utf8')).toBe(
+			[
+				'// Style-producing modules in the shipped stylesheet.',
+				"import '../text/recipe.css.js';",
+				"import '../blockquote/recipe.css.js';",
+				"import '../button/recipe.css.js';",
+				"import '../primitives/input-addon/recipe.css.js';",
 				'',
 			].join('\n'),
 		);

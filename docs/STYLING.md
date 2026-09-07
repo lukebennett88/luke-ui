@@ -19,9 +19,12 @@ utility modules live under `core/`. Theme modules live under `theme/`.
 - `core/styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
 - `core/styles/modules.css.ts`: the committed stylesheet registry. It explicitly imports every
   colocated `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet, plus
-  primitive and overlay style modules. Keep the list in code-point order by path for deterministic
-  output. Named layers make cross-layer priority explicit. Specificity and source order still matter
-  within a layer.
+  primitive and overlay style modules. Named layers make cross-layer priority explicit, but
+  same-layer, same-specificity CSS still resolves by source order: later wins. List a module that
+  another one composes or overrides before that other module, so the later module's own styles win
+  the tie (e.g. `primitives/field` before `primitives/checkbox`, which reads `fieldMessageIcon` from
+  it and must override it). The component and primitive generators preserve this order. They append
+  new imports to the end and do not sort it.
 - `core/styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
 - `core/styles/input-states.ts`: the shared field control-state selectors
@@ -203,10 +206,10 @@ Three helpers author component CSS. Pick by what the class is for, not by whethe
 
 - `recipe()` from `core/styles/recipe.ts` authors a component's visual treatment with recipe
   semantics: a selection function, optional variants, compound variants, and a derived
-  `…RecipeVariants` type. A base-only recipe such as `codeRecipe` is still a recipe. `recipe()`
-  wraps every base, variant, and compound-variant style in the `recipes` layer itself, so do not
-  pre-wrap styles before passing them in. Use `compoundSlots` to share one style across several
-  slots.
+  `…RecipeVariants` type. A base-only recipe such as `blockquoteRecipe` is still a recipe.
+  `recipe()` wraps every base, variant, and compound-variant style in the `recipes` layer itself, so
+  do not pre-wrap styles before passing them in. Use `compoundSlots` to share one style across
+  several slots.
 - `style()` from `core/styles/layered-style.css.ts` authors one standalone private class in the
   `recipes` layer: a simple wrapper such as `Em`, a marker or scope class, or an implementation
   class a component applies directly. Use it when there is no selection to expose.

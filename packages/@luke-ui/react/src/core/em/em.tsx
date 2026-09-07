@@ -1,9 +1,7 @@
-import { cx } from '../../shared/utils/utils.js';
 import type { TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { em } from './styles.css.js';
 
 interface EmStyleProps {
 	/**
@@ -12,7 +10,7 @@ interface EmStyleProps {
 	lineClamp?: TextProps['lineClamp'];
 	/**
 	 * Sets text wrapping behavior.
-	 * @default 'unset'
+	 * @default 'default'
 	 */
 	textWrap?: TextProps['textWrap'];
 }
@@ -29,12 +27,12 @@ export type EmProps = Prettify<_EmProps>;
  * Composes `Text`, inherits surrounding typography, and applies italic styling.
  */
 export function Em(props: EmProps) {
-	const { className, lineClamp, textWrap, ...elementProps } = props;
+	const { lineClamp, textWrap, ...elementProps } = props;
 	return (
 		<Text
 			{...elementProps}
-			className={cx(em, className)}
 			elementType="em"
+			fontStyle="italic"
 			lineClamp={lineClamp}
 			shouldInheritFont
 			textWrap={textWrap}

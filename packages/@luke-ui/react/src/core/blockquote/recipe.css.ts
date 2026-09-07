@@ -2,7 +2,7 @@ import { vars } from '../../theme/contract.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 
-/** Vanilla-extract recipe for the `Blockquote` component's left-border accent. */
+/** Left-border accent. Type treatment comes from the composed `Text`. */
 export const blockquoteRecipe = recipe({
 	base: {
 		borderInlineStart: `3px solid ${vars.color.border.decorative}`,

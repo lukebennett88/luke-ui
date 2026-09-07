@@ -2,7 +2,6 @@ import { vars } from '../../theme/contract.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 
-/** Vanilla-extract recipe for the `Link` component's styles. */
 export const linkRecipe = recipe({
 	base: {
 		'@media': {

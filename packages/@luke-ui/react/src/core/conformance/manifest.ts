@@ -20,7 +20,7 @@ export const componentTestManifest = [
 	['Checkbox', 'checkbox', ['field'], 'required', 'applicable'],
 	// Multi-part field root. RAC moves `id` onto the control.
 	['Checkbox primitive', 'primitives/checkbox', [], 'none', 'none'],
-	['Code', 'code', ['dom'], 'none', 'none'],
+	['Code', 'code', ['dom'], 'none', 'applicable'],
 	// Fields take `inputRef` and RAC moves `id` onto the control, so they cannot satisfy `dom`.
 	['ComboboxField', 'combobox-field', ['field'], 'required', 'applicable'],
 	// Multi-part collection. No single root receives the public DOM props.

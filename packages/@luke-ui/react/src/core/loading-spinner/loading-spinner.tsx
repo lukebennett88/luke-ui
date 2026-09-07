@@ -54,11 +54,8 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 	const {
 		'aria-label': ariaLabel = 'loading',
 		children,
-		className,
-		color,
 		isLoading = true,
 		size,
-		style,
 		...spanProps
 	} = props;
 
@@ -68,14 +65,7 @@ export function LoadingSpinner(props: LoadingSpinnerProps): ReactNode {
 	if (!isLoading) return children;
 
 	const spinnerElement = (
-		<SpinnerElement
-			{...spanProps}
-			aria-label={ariaLabel}
-			className={className}
-			color={color}
-			size={resolvedSize}
-			style={style}
-		/>
+		<SpinnerElement {...spanProps} aria-label={ariaLabel} size={resolvedSize} />
 	);
 
 	if (!children) return spinnerElement;
@@ -99,7 +89,6 @@ function SpinnerElement({
 	className,
 	color,
 	size,
-	style,
 	...spanProps
 }: SpinnerElementProps) {
 	useSynchronizeAnimations(spinAnimationName);
@@ -115,7 +104,6 @@ function SpinnerElement({
 			aria-labelledby={labelId}
 			className={slots.root({ className })}
 			role="status"
-			style={style}
 		>
 			<VisuallyHidden id={labelId}>{ariaLabel}</VisuallyHidden>
 			<svg aria-hidden="true" className={slots.svg()} fill="none" viewBox={ICON_VIEWBOX}>

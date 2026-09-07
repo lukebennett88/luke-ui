@@ -28,15 +28,15 @@ interface TextFileInsertEdit {
 	path: string;
 }
 
-interface SortedImportEdit {
-	kind: 'sorted-import';
+interface ImportEdit {
+	kind: 'import';
 	line: string;
 	path: string;
 }
 
 export interface CreationWork {
 	files: Array<PlanFile>;
+	importEdits: Array<ImportEdit>;
 	jsonEdits: Array<JsonEdit>;
-	sortedImportEdits: Array<SortedImportEdit>;
 	textFileInserts: Array<TextFileInsertEdit>;
 }

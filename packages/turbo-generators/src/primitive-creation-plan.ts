@@ -105,6 +105,13 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 			packageExportPath: `./primitives/${name}`,
 		},
 		files,
+		importEdits: [
+			{
+				kind: 'import',
+				line: `import '../primitives/${name}/recipe.css.js';`,
+				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
+			},
+		],
 		jsonEdits: input.docs
 			? [
 					{
@@ -116,13 +123,6 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 					},
 				]
 			: [],
-		sortedImportEdits: [
-			{
-				kind: 'sorted-import',
-				line: `import '../primitives/${name}/recipe.css.js';`,
-				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
-			},
-		],
 		textFileInserts: [
 			{
 				kind: 'text-insert',

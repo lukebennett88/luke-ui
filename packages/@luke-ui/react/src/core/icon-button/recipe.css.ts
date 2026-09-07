@@ -40,7 +40,6 @@ export const iconButtonIcon = recipe({
 	},
 });
 
-/** Vanilla-extract recipe for the `IconButton` primitive's styles. */
 export const iconButtonRecipe = recipe({
 	variants: {
 		size: {

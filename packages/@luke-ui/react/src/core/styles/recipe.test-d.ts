@@ -1,6 +1,7 @@
 /** Type-level assertions against the variant selection `recipe()` accepts. */
 
 import { assertType, test } from 'vite-plus/test';
+import { blockquoteRecipe } from '../blockquote/recipe.css.js';
 import { codeRecipe } from '../code/recipe.css.js';
 import {
 	compoundSlotsTypeFixtureRecipe,
@@ -60,15 +61,15 @@ test('a recipe authored with variants: {} rejects an arbitrary key', () => {
 	assertType<SelectionOf<typeof emptyVariantsRecipe>>({ madeUp: undefined });
 });
 
-test('codeRecipe (a real no-variant recipe) rejects an arbitrary key', () => {
-	assertType<string>(codeRecipe());
-	assertType<string>(codeRecipe(undefined));
+test('blockquoteRecipe (a real no-variant recipe) rejects an arbitrary key', () => {
+	assertType<string>(blockquoteRecipe());
+	assertType<string>(blockquoteRecipe(undefined));
 
-	assertType<SelectionOf<typeof codeRecipe>>({});
-	// @ts-expect-error — `codeRecipe` is `recipe({ base })` with no variants
-	assertType<SelectionOf<typeof codeRecipe>>({ madeUp: 'x' });
+	assertType<SelectionOf<typeof blockquoteRecipe>>({});
+	// @ts-expect-error — `blockquoteRecipe` is `recipe({ base })` with no variants
+	assertType<SelectionOf<typeof blockquoteRecipe>>({ madeUp: 'x' });
 	// @ts-expect-error — an arbitrary key is rejected even when its value is undefined
-	assertType<SelectionOf<typeof codeRecipe>>({ madeUp: undefined });
+	assertType<SelectionOf<typeof blockquoteRecipe>>({ madeUp: undefined });
 });
 
 // ---------------------------------------------------------------------------
@@ -88,6 +89,14 @@ test('a real recipe keeps its exact variant values', () => {
 	assertType<SelectionOf<typeof realVariantsRecipe>>({ madeUp: 'x' });
 });
 
+test('codeRecipe keeps its exact shouldWrap values', () => {
+	assertType<string>(codeRecipe({ shouldWrap: true }));
+	assertType<string>(codeRecipe({ shouldWrap: false }));
+
+	// @ts-expect-error — not one of the declared `shouldWrap` values
+	assertType<SelectionOf<typeof codeRecipe>>({ shouldWrap: 'yes' });
+});
+
 // ---------------------------------------------------------------------------
 // className composition
 // ---------------------------------------------------------------------------
@@ -95,7 +104,7 @@ test('a real recipe keeps its exact variant values', () => {
 test('a base-only recipe accepts className alongside nothing else', () => {
 	assertType<string>(omittedVariantsRecipe({ className: 'mine' }));
 	assertType<string>(omittedVariantsRecipe({ className: undefined }));
-	assertType<string>(codeRecipe({ className: 'mine' }));
+	assertType<string>(blockquoteRecipe({ className: 'mine' }));
 
 	// @ts-expect-error — className must be a string
 	assertType<SelectionOf<typeof omittedVariantsRecipe>>({ className: 1 });
@@ -118,12 +127,12 @@ test('a recipe with variants accepts className alongside its variants', () => {
 test('RecipeSelection describes only variants, never className', () => {
 	type RealSelection = RecipeSelection<typeof realVariantsRecipe>;
 	type NoVariantSelection = RecipeSelection<typeof omittedVariantsRecipe>;
-	type CodeSelection = RecipeSelection<typeof codeRecipe>;
+	type BlockquoteSelection = RecipeSelection<typeof blockquoteRecipe>;
 
 	assertType<Lacks<RealSelection, 'className'>>(true);
 	// A no-variant selection is `Record<string, never>`: every key exists but none can hold a value.
 	assertType<HoldsNothing<NoVariantSelection>>(true);
-	assertType<HoldsNothing<CodeSelection>>(true);
+	assertType<HoldsNothing<BlockquoteSelection>>(true);
 
 	// Variant inference through RecipeSelection stays exact.
 	assertType<RealSelection>({ size: 'medium', true: false });

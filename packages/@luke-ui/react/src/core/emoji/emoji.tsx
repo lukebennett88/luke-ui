@@ -22,10 +22,10 @@ export type EmojiProps = Prettify<_EmojiProps>;
  * specific typography treatment.
  */
 export function Emoji(props: EmojiProps) {
-	const { className, emoji, label, ...elementProps } = props;
+	const { emoji, label, ...elementProps } = props;
 
 	return (
-		<Text {...elementProps} aria-label={label} className={className} role="img" shouldInheritFont>
+		<Text {...elementProps} aria-label={label} role="img" shouldInheritFont>
 			{emoji}
 		</Text>
 	);

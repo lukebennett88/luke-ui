@@ -59,7 +59,7 @@ describe('createPrimitivePlan', () => {
 			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
 		);
 		expect(plan).not.toHaveProperty('jsonEdits');
-		expect(plan).not.toHaveProperty('sortedImportEdits');
+		expect(plan).not.toHaveProperty('importEdits');
 		expect(plan).not.toHaveProperty('textFileInserts');
 
 		const recipeSource = plan.files.find((file) =>

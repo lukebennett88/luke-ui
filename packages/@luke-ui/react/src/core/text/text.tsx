@@ -15,8 +15,18 @@ interface TextStyleProps {
 	 */
 	color?: TextVariantProps['color'];
 	/**
+	 * Sets font family. Keeps the selected typography style's font size.
+	 * @default 'default'
+	 */
+	fontFamily?: TextVariantProps['fontFamily'];
+	/**
+	 * Sets font style.
+	 * @default 'default'
+	 */
+	fontStyle?: TextVariantProps['fontStyle'];
+	/**
 	 * Sets numeric glyph style.
-	 * @default 'unset'
+	 * @default 'default'
 	 */
 	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
 	/**
@@ -58,7 +68,7 @@ interface TextStyleProps {
 	textTransform?: TextVariantProps['textTransform'];
 	/**
 	 * Sets text wrapping behavior.
-	 * @default 'unset'
+	 * @default 'default'
 	 */
 	textWrap?: TextVariantProps['textWrap'];
 	/**
@@ -104,6 +114,8 @@ export function Text(props: TextProps) {
 		className,
 		color,
 		elementType = 'span',
+		fontFamily,
+		fontStyle,
 		fontVariantNumeric,
 		fontWeight,
 		isVisuallyHidden,
@@ -132,10 +144,11 @@ export function Text(props: TextProps) {
 			className={textRecipe({
 				className,
 				color,
+				fontFamily,
+				fontStyle,
 				fontVariantNumeric,
-				...(shouldInheritFont
-					? {}
-					: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
+				fontWeight:
+					fontWeight ?? (shouldInheritFont ? undefined : typeStyleWeightRole[resolvedTypography]),
 				isVisuallyHidden,
 				lineClamp,
 				shouldDisableTrim: resolvedShouldDisableTrim,
