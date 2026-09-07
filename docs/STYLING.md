@@ -21,10 +21,13 @@ utility modules live under `core/`. Theme modules live under `theme/`.
   colocated `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet, plus
   primitive and overlay style modules. Named layers make cross-layer priority explicit, but
   same-layer, same-specificity CSS still resolves by source order: later wins. List a module that
-  another one composes or overrides before that other module, so the later module's own styles win
-  the tie (e.g. `primitives/field` before `primitives/checkbox`, which reads `fieldMessageIcon` from
-  it and must override it). The component and primitive generators preserve this order. They append
-  new imports to the end and do not sort it.
+  sets concrete values another one must override before that other module, so the later module's
+  own styles win the tie (e.g. `text/recipe.css` before `code/recipe.css` and `kbd/recipe.css`:
+  `textRecipe`'s `shouldInheritFont` sets font properties to `inherit`, while `codeRecipe` and
+  `kbdRecipe` set concrete values at equal specificity in the same layer). Shared custom properties
+  that resolve through inheritance at computed-value time, such as `fieldMessageIcon` between field
+  and checkbox, do not depend on source order. The component and primitive generators preserve this
+  order. They append new imports to the end and do not sort it.
 - `core/styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
   `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
 - `core/styles/input-states.ts`: the shared field control-state selectors

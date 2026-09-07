@@ -24,7 +24,9 @@ the text input and trigger in `ComboboxInputGroup`. Put the listbox and its item
 		<ComboboxTrigger aria-label="Toggle options" />
 	</ComboboxInputGroup>
 	<ComboboxPopover>
-		<ComboboxListBox>{(item) => <ComboboxItem>{item.label}</ComboboxItem>}</ComboboxListBox>
+		<ComboboxListBox<{ id: string; label: string }>>
+			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+		</ComboboxListBox>
 	</ComboboxPopover>
 </ComboboxRoot>
 ```
@@ -54,10 +56,8 @@ empty-state handling when its built-in composition is enough.
 
 ## Tray presentation
 
-`ComboboxTray` presents the options in a full-screen tray instead of a popover. Pair it with
-`ComboboxTrayTrigger`, which replaces the persistent text input with a button showing the current
-selection. The trigger opens the tray. Both take their accessible name from the label connected to
-`ComboboxRoot`.
+`ComboboxTray` presents options in a full-screen tray. Pair it with `ComboboxTrayTrigger`, which
+shows the current selection and opens the tray.
 
 ```tsx
 <ComboboxRoot defaultItems={countries} aria-label="Country">
@@ -69,19 +69,15 @@ selection. The trigger opens the tray. Both take their accessible name from the 
 			<ComboboxInput />
 			<ComboboxClearButton aria-label="Clear search" />
 		</ComboboxInputGroup>
-		<ComboboxListBox>{(item) => <ComboboxItem>{item.label}</ComboboxItem>}</ComboboxListBox>
+		<ComboboxListBox<{ id: string; label: string }>>
+			{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+		</ComboboxListBox>
 	</ComboboxTray>
 </ComboboxRoot>
 ```
 
-The parts inside a `ComboboxTray` adapt to it. `ComboboxInput` becomes the tray's search field and
-takes focus as the tray opens. `ComboboxClearButton` clears the search field and hides while the
-search is empty. Because the search field is the only way to choose an option in the tray, clearing
-it also clears the selection. `ComboboxListBox` fills the tray and contains its scrolling. Arrow
-keys move through options while focus stays in the search field.
-
-Render the tray only on devices where it belongs. `ComboboxField` already chooses between the tray
-and the popover for you.
+Inside the tray, `ComboboxInput` is the search field and `ComboboxClearButton` clears both the
+search and the selection. `ComboboxField` chooses between the tray and the popover for you.
 
 ## Popover and accessibility
 
