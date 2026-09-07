@@ -192,3 +192,26 @@ test('ComboboxInput resolves object and callback refs to the input element', () 
 	expect(objectRef.current).toBe(objectInput.element());
 	expect(callbackResolved.at(-1)).toBe(callbackInput.element());
 });
+
+test('ComboboxField reopens the popover when the focused input is clicked again', async () => {
+	const { locator } = render(
+		<ComboboxField defaultItems={countryItems} label="Country">
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	// Query the element once and reuse the node: re-querying the locator after the popover
+	// opens and closes fails, because the surrounding DOM changes between queries.
+	const input = locator.getByRole('combobox', { name: 'Country' }).element() as HTMLElement;
+
+	await userEvent.click(input);
+	await expect.element(page.getByRole('option', { name: 'Australia' })).toBeVisible();
+
+	// Escape closes the popover but leaves focus on the input, so `menuTrigger="focus"` gets
+	// no further focus event to reopen from.
+	await userEvent.keyboard('{Escape}');
+	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
+	expect(document.activeElement).toBe(input);
+
+	await userEvent.click(input);
+	await expect.element(page.getByRole('option', { name: 'Australia' })).toBeVisible();
+});

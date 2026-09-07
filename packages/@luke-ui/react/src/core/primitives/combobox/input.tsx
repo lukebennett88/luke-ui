@@ -42,10 +42,9 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 
 	const handleClick = (event: React.MouseEvent<HTMLInputElement>) => {
 		onClick?.(event);
-		// The tray search input must never open anything itself: the trigger owns opening, and
-		// `state.open()` with no arguments is the popover's open path. `MobileOverlay` keeps this
-		// input mounted through its CSS exit transition, so there is a real window where
-		// `state.isOpen` is already false but the search input is still mounted and clickable.
+		// `menuTrigger="focus"` cannot reopen the menu when Escape closes it
+		// without moving focus, so handle a subsequent click explicitly.
+		// The tray search input never opens the combobox; its trigger owns that.
 		if (isTraySearch || state?.isOpen) return;
 		state?.open();
 	};
