@@ -189,6 +189,30 @@ test('ComboboxTrayTrigger uses an explicit accessible name', async () => {
 	await expect.element(page.getByRole('button', { name: 'Destination' })).toBeVisible();
 });
 
+test('ComboboxTray search field does not reopen the popover while the tray is exiting', async () => {
+	render(<TrayCombobox />);
+	await openTray();
+
+	const searchbox = page.getByRole('searchbox', { name: 'Country' });
+	const dialog = page.getByRole('dialog');
+	const overlay = dialog.element().parentElement?.parentElement;
+	if (overlay == null) throw new Error('Expected the tray overlay structure.');
+
+	// `MobileOverlay` keeps its children mounted through the CSS exit transition, so the
+	// search field is still in the DOM (and clickable) for a window after `Escape` closes
+	// the combobox. `state.isOpen` is already false in that window.
+	await userEvent.keyboard('{Escape}');
+	await expect.poll(() => overlay.hasAttribute('data-exiting')).toBe(true);
+
+	// Clicking the search field while it is exiting must not run the popover's open path.
+	// `userEvent.click` waits for Playwright's actionability check, which refuses to click an
+	// element mid-transition; dispatching the click event directly reproduces what a real
+	// pointer click delivers to the input without that wait.
+	searchbox.element().dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+});
+
 test('ComboboxTray collection-building pass does not leak duplicate structure', async () => {
 	render(<TrayCombobox />);
 
