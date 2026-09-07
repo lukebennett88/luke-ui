@@ -469,7 +469,7 @@ function skipImportExportStatement(source: string, start: number): number | unde
 				return index;
 			}
 			if (isBlankLineAt(source, index + 1)) {
-				return;
+				return undefined;
 			}
 		}
 
@@ -573,13 +573,13 @@ function skipJsxTag(source: string, start: number): number | undefined {
 		}
 
 		if (char === '\n' && braceDepth === 0 && isBlankLineAt(source, index + 1)) {
-			return;
+			return undefined;
 		}
 
 		index++;
 	}
 
-	return;
+	return undefined;
 }
 
 /** True if a blank line (only spaces/tabs, then a newline or end of string) starts at `index`. */
@@ -674,13 +674,13 @@ function skipJsxExpression(source: string, start: number): number | undefined {
 		}
 
 		if (char === '\n' && isBlankLineAt(source, index + 1)) {
-			return;
+			return undefined;
 		}
 
 		index++;
 	}
 
-	return;
+	return undefined;
 }
 
 function posixRelative(from: string, to: string): string {

@@ -123,7 +123,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 
 	const resolvedEmptyState: ComboboxListBoxProps<T>['renderEmptyState'] = (() => {
 		if (listBoxProps?.renderEmptyState != null) return listBoxProps.renderEmptyState;
-		if (!isAsync) return;
+		if (!isAsync) return undefined;
 
 		return () => <ComboboxEmptyStateContent loadingState={loadingState} />;
 	})();

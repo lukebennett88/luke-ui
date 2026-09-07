@@ -69,7 +69,7 @@ function domAttribute(node: DomNode, name: string): string | undefined {
 	for (let index = 0; index < attributes.length; index += 2) {
 		if (attributes[index] === name) return attributes[index + 1];
 	}
-	return;
+	return undefined;
 }
 
 /**
@@ -92,7 +92,7 @@ function findNodeIn(node: DomNode, attribute: string, value: string): DomNode | 
 		const found = findNodeIn(shadowRoot, attribute, value);
 		if (found != null) return found;
 	}
-	return;
+	return undefined;
 }
 
 async function findDomNodeByAttribute(

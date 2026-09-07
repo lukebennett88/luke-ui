@@ -50,7 +50,7 @@ function groupFrontmatterBlocks(lines: ReadonlyArray<string>): ReadonlyArray<Fro
 function readFrontmatterValue(contents: string, key: keyof DocsFrontmatter): string | undefined {
 	const blocks = parseFrontmatterBlocks(contents);
 	const block = blocks?.find((entry) => entry.key === key);
-	if (block === undefined) return;
+	if (block === undefined) return undefined;
 
 	const keyPrefix = `${key}:`;
 	const firstLine = block.lines[0] ?? '';

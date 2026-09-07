@@ -24,14 +24,14 @@ export function formatVisualCaptureName(id: string, viewport: string): string {
  */
 export function parseVisualCaptureIdentity(captureName: string): VisualCaptureIdentity | undefined {
 	const index = captureName.lastIndexOf(VIEWPORT_MARKER);
-	if (index === -1) return;
+	if (index === -1) return undefined;
 
 	const id = captureName.slice(0, index);
 	const viewport = captureName.slice(index + VIEWPORT_MARKER.length);
 	const size = viewport.match(VIEWPORT_SIZE);
 	const width = size?.[1];
 	const height = size?.[2];
-	if (width === undefined || height === undefined) return;
+	if (width === undefined || height === undefined) return undefined;
 
 	return {
 		id,

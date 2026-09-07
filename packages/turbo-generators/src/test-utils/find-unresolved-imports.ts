@@ -29,7 +29,7 @@ export async function findUnresolvedImports(file: {
 
 	const resolutions = await Promise.all(
 		specifiers.map(async (specifier) => {
-			if (specifier.startsWith('./')) return;
+			if (specifier.startsWith('./')) return undefined;
 
 			const target = path.resolve(generatedDirectory, specifier);
 			const candidates = [target, target.replace(/\.js$/, '.ts'), target.replace(/\.js$/, '.tsx')];
@@ -43,7 +43,7 @@ export async function findUnresolvedImports(file: {
 					}
 				}),
 			);
-			if (found.some(Boolean)) return;
+			if (found.some(Boolean)) return undefined;
 			return `${file.path} -> ${specifier}`;
 		}),
 	);

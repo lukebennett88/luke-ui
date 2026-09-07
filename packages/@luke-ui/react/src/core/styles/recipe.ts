@@ -569,7 +569,7 @@ function pickGroups<Value>(
 	selection: Record<string, Value | undefined> | undefined,
 	groups: ReadonlyArray<string>,
 ): Record<string, Value | undefined> | undefined {
-	if (selection === undefined) return;
+	if (selection === undefined) return undefined;
 
 	const picked: Record<string, Value | undefined> = {};
 	for (const group of groups) {

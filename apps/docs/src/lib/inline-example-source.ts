@@ -62,13 +62,13 @@ const fileContentsCache = new Map<string, string>();
  * Returns `undefined` for any other node so the default stringifier handles it.
  */
 export function inlineExampleSource(node: MdastNode): string | undefined {
-	if (!isMdxJsxElement(node)) return;
+	if (!isMdxJsxElement(node)) return undefined;
 
 	const tagName = node.name;
-	if (tagName !== 'ExampleBlock' && tagName !== 'SourceCodeBlock') return;
+	if (tagName !== 'ExampleBlock' && tagName !== 'SourceCodeBlock') return undefined;
 
 	const src = readSrcAttribute(node);
-	if (src === undefined) return;
+	if (src === undefined) return undefined;
 
 	const { content, repoRelativePath } = expectedInlinedExampleBlock(tagName, src);
 
@@ -84,7 +84,7 @@ function readSrcAttribute(node: MdxJsxElementNode): string | undefined {
 		return attr.type === 'mdxJsxAttribute' && attr.name === 'src';
 	});
 
-	if (!srcAttr || typeof srcAttr.value !== 'string') return;
+	if (!srcAttr || typeof srcAttr.value !== 'string') return undefined;
 	return srcAttr.value;
 }
 

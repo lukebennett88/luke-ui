@@ -160,7 +160,7 @@ async function resolveRelativeImport(
 				await access(candidate);
 				return candidate;
 			} catch {
-				return;
+				return undefined;
 			}
 		}),
 	);

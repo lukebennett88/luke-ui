@@ -190,7 +190,7 @@ function inheritKeys<Value>(
 	base: Readonly<Record<string, Value | undefined>> | undefined,
 	own: Readonly<Record<string, Value | undefined>> | undefined,
 ): Record<string, Value> | undefined {
-	if (base === undefined && own === undefined) return;
+	if (base === undefined && own === undefined) return undefined;
 	const merged: Record<string, Value> = {};
 	for (const key of new Set([...Object.keys(base ?? {}), ...Object.keys(own ?? {})])) {
 		const value = own?.[key] ?? base?.[key];

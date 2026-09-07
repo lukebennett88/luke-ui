@@ -122,7 +122,7 @@ export function loadExportedPropDeclaration(
 	exportName: string,
 ): PropDeclaration | undefined {
 	const absolutePath = resolve(repoRoot, repoRelativePath);
-	if (!existsSync(absolutePath)) return;
+	if (!existsSync(absolutePath)) return undefined;
 
 	const file = project.getSourceFile(absolutePath) ?? readSourceFile(project, absolutePath);
 	return file.getExportedDeclarations().get(exportName)?.[0];
