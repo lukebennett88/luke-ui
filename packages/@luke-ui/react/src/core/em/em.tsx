@@ -24,7 +24,7 @@ export type EmProps = Prettify<_EmProps>;
 
 /**
  * Marks text to stress emphasis, rendered as `<em>`.
- * Composes `Text`, inherits surrounding typography, and applies italic styling.
+ * Inherits surrounding typography and applies italic styling.
  */
 export function Em(props: EmProps) {
 	const { lineClamp, textWrap, ...elementProps } = props;

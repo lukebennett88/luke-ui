@@ -28,10 +28,9 @@ export type CodeProps = Prettify<_CodeProps>;
 
 /**
  * Marks a short fragment of computer code, rendered as `<code>`.
- * Composes `Text`, inherits surrounding typography and colour, and applies the code font family
- * with an optical size correction. Stays on one line unless `lineClamp` or `textWrap` needs the
- * text to wrap. Clamping to a single line wins over `textWrap`, so the text stays on one
- * truncated line.
+ * Inherits surrounding typography and colour, and applies the code font family with an optical
+ * size correction. Stays on one line unless `lineClamp` or `textWrap` needs the text to wrap.
+ * Clamping to a single line wins over `textWrap`, so the text stays on one truncated line.
  */
 export function Code(props: CodeProps) {
 	const { className, lineClamp, textWrap, ...elementProps } = props;

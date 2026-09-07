@@ -3,7 +3,10 @@ import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 
-/** Self-contained key chip. `Kbd` sets its own size rather than inheriting one. */
+/**
+ * Self-contained key chip. `Kbd` sets its own size rather than inheriting one. `letterSpacing` is
+ * left unset on purpose, so it keeps inheriting.
+ */
 export const kbdRecipe = recipe({
 	base: {
 		alignItems: 'center',

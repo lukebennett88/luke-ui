@@ -211,8 +211,9 @@ Three helpers author component CSS. Pick by what the class is for, not by whethe
   do not pre-wrap styles before passing them in. Use `compoundSlots` to share one style across
   several slots.
 - `style()` from `core/styles/layered-style.css.ts` authors one standalone private class in the
-  `recipes` layer: a simple wrapper such as `Em`, a marker or scope class, or an implementation
-  class a component applies directly. Use it when there is no selection to expose.
+  `recipes` layer: a scope or marker class such as `proseScopeClassName` in
+  `core/prose/scope.css.ts`, or an implementation class a component applies directly. Use it when
+  there is no selection to expose.
 - `globalStyleInLayer()` from the same module authors a global selector in an explicit layer. Use it
   only where the layer choice is meaningful: the reset and theme root, and `structural` rules such
   as Prose descendant rhythm and the `LoadingSkeleton` masks in

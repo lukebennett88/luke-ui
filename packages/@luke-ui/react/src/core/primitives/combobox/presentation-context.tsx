@@ -2,8 +2,6 @@ import type { JSX, ReactNode } from 'react';
 import { createContext, use } from 'react';
 import type { ComboboxPresentation } from './styles.css.js';
 
-export type { ComboboxPresentation };
-
 const ComboboxPresentationContext = createContext<ComboboxPresentation | null>(null);
 
 /** Returns the current combobox presentation. */

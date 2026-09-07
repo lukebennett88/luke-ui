@@ -24,8 +24,6 @@ interface _ComboboxTrayTriggerProps extends _ComboboxTrayTriggerOmit {
 	/** Trailing content rendered after the selected value, typically a chevron icon. */
 	children?: ReactNode;
 	className?: RacButtonProps['className'];
-	/** Whether pressing the trigger is prevented, matching the combobox's read-only state. */
-	isReadOnly?: boolean;
 	/** Text shown while nothing is selected. */
 	placeholder?: string;
 	size?: ComboboxSize;
@@ -36,7 +34,7 @@ export type ComboboxTrayTriggerProps = Prettify<_ComboboxTrayTriggerProps>;
 
 /** Shows the selected value and opens a sibling `ComboboxTray`. */
 export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Element | null {
-	const { children, isDisabled, isReadOnly, placeholder, size: sizeProp, ...buttonProps } = props;
+	const { children, isDisabled, placeholder, size: sizeProp, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
 	const labelContext = useSlottedContext(LabelContext);
 	const buttonContext = useSlottedContext(ButtonContext);
@@ -45,10 +43,9 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 
 	if (state == null) return null;
 
-	// `ButtonContext` carries React Aria's `isDisabled || isReadOnly` state for the combobox,
-	// so it covers both cases without the caller repeating either prop on the trigger.
-	const resolvedIsDisabled =
-		isDisabled === true || isReadOnly === true || buttonContext?.isDisabled === true;
+	// `ButtonContext` carries React Aria's combined `isDisabled || isReadOnly` state for the
+	// combobox, so this trigger needs no `isReadOnly` prop of its own.
+	const resolvedIsDisabled = isDisabled === true || buttonContext?.isDisabled === true;
 
 	// A caller-supplied name wins over the field label's default naming.
 	const { ariaLabel, ariaLabelledBy } = (() => {

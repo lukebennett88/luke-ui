@@ -27,7 +27,7 @@ export type QuoteProps = Prettify<_QuoteProps>;
 
 /**
  * Short inline quotation, rendered as `<q>`.
- * Composes `Text` and inherits surrounding typography.
+ * Inherits surrounding typography.
  */
 export function Quote(props: QuoteProps) {
 	const { lineClamp, textWrap, ...elementProps } = props;

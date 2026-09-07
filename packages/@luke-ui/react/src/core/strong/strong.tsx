@@ -24,7 +24,7 @@ export type StrongProps = Prettify<_StrongProps>;
 
 /**
  * Marks text with strong importance, rendered as `<strong>`.
- * Composes `Text`, inherits surrounding typography, and applies the emphasis weight.
+ * Inherits surrounding typography and applies the emphasis weight.
  */
 export function Strong(props: StrongProps) {
 	const { lineClamp, textWrap, ...elementProps } = props;
