@@ -8,6 +8,7 @@ import { transformSync } from 'oxc-transform-react';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import packageJson from './package.json' with { type: 'json' };
+import { cascadeLayerNames } from './src/core/styles/layer-names.js';
 
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
@@ -22,10 +23,8 @@ const assetExports = [
 	'./themes/paper/stylesheet.css',
 ];
 
-const cascadeLayerOrder = ['reset', 'theme', 'base', 'recipes', 'structural', 'utilities'] as const;
-
 function buildAuthoritativeLayerOrder(): string {
-	return `@layer ${cascadeLayerOrder.join(', ')};`;
+	return `@layer ${cascadeLayerNames.join(', ')};`;
 }
 
 function stripRedundantEmptyLayerStatements(css: string): string {

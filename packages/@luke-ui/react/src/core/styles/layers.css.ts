@@ -1,4 +1,5 @@
 import { globalLayer } from '@vanilla-extract/css';
+import { cascadeLayerNames } from './layer-names.js';
 
 /**
  * CSS cascade layers, ordered from lowest to highest priority.
@@ -17,14 +18,12 @@ import { globalLayer } from '@vanilla-extract/css';
  * `globalLayer()` keeps Vanilla Extract's layer wiring consistent. The authoritative
  * combined order is prepended at build time before other CSS; redundant empty
  * `@layer name;` declarations are stripped so they cannot reorder already-created layers.
+ *
+ * Built by mapping `cascadeLayerNames` in order — that tuple, not this object, is the source of
+ * truth for precedence, since `globalLayer()` call order is what establishes it.
  */
-export const layers = {
-	reset: globalLayer('reset'),
-	theme: globalLayer('theme'),
-	base: globalLayer('base'),
-	recipes: globalLayer('recipes'),
-	structural: globalLayer('structural'),
-	utilities: globalLayer('utilities'),
-} as const;
+export const layers = Object.fromEntries(
+	cascadeLayerNames.map((name) => [name, globalLayer(name)]),
+) as { [Name in (typeof cascadeLayerNames)[number]]: ReturnType<typeof globalLayer> };
 
 export type LayerName = keyof typeof layers;

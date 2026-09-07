@@ -4,6 +4,7 @@ import { addFunctionSerializer } from '@vanilla-extract/css/functionSerializer';
 import { recipe as vanillaRecipe } from '@vanilla-extract/recipes';
 import { cx } from '../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
+import { cascadeLayerNamesByName } from './layer-names.js';
 
 /**
  * `recipe()` styling helper for Vanilla Extract.
@@ -68,20 +69,25 @@ type VariantGroups = Record<string, Record<string, RecipeStyleRule>>;
 /**
  * True when `Variants` carries no authored variant groups: either `keyof Variants`
  * is `never` (an explicit `variants: {}`), or inference had no `variants` property
- * to read at all and fell back to the bare `VariantGroups` constraint, whose key
- * type is the unconstrained `string`. A real recipe's variant groups are always
- * literal keys, so `string extends keyof Variants` only ever holds in that
- * fallback case.
+ * to read at all and fell back to the bare constraint, whose key type is the
+ * unconstrained `string`. A real recipe's variant groups are always literal keys,
+ * so `string extends keyof Variants` only ever holds in that fallback case.
+ *
+ * Unconstrained on purpose: this reads nothing but `keyof Variants`, so it serves a
+ * single-part recipe's variant groups and a slotted recipe's alike.
  */
-type HasNoVariants<Variants extends VariantGroups> = [keyof Variants] extends [never]
+type HasNoGroups<Variants> = [keyof Variants] extends [never]
 	? true
 	: string extends keyof Variants
 		? true
 		: false;
 
-/** Outer selection for a single-part recipe. */
-type VariantSelection<Variants extends VariantGroups> =
-	HasNoVariants<Variants> extends true
+/**
+ * Outer variant selection for a built recipe. Shared by both recipe shapes: each reads its
+ * groups from its own config type, and the selection derived from them has the same form.
+ */
+type Selection<Variants> =
+	HasNoGroups<Variants> extends true
 		? Record<string, never>
 		: {
 				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
@@ -101,7 +107,7 @@ export interface RecipeComposition {
  * object so an object literal with an undeclared key is still rejected.
  */
 type RecipeInput<Variants extends VariantGroups> =
-	HasNoVariants<Variants> extends true
+	HasNoGroups<Variants> extends true
 		? RecipeComposition
 		: {
 				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
@@ -110,14 +116,14 @@ type RecipeInput<Variants extends VariantGroups> =
 /** A compound variant for a single-part recipe. */
 interface CompoundVariant<Variants extends VariantGroups> {
 	style: RecipeStyleRule;
-	variants: VariantSelection<Variants>;
+	variants: Selection<Variants>;
 }
 
 /** Single-part recipe config. */
 interface SinglePartConfig<Variants extends VariantGroups> {
 	base?: RecipeStyleRule;
 	compoundVariants?: Array<CompoundVariant<Variants>>;
-	defaultVariants?: VariantSelection<Variants>;
+	defaultVariants?: Selection<Variants>;
 	variants?: Variants;
 }
 
@@ -131,26 +137,6 @@ type SlotStyles<Slot extends string> = Partial<Record<Slot, SlottedStyleRule>>;
 type SlotVariantGroups<Slot extends string> = Record<string, Record<string, SlotStyles<Slot>>>;
 
 /**
- * True when `Variants` carries no authored variant groups. See `HasNoVariants`
- * above — same reasoning, generalised to a slotted recipe's variant groups.
- */
-type HasNoSlotVariants<Variants extends SlotVariantGroups<string>> = [keyof Variants] extends [
-	never,
-]
-	? true
-	: string extends keyof Variants
-		? true
-		: false;
-
-/** Outer selection for a slotted recipe. */
-type SlotVariantSelection<Variants extends SlotVariantGroups<string>> =
-	HasNoSlotVariants<Variants> extends true
-		? Record<string, never>
-		: {
-				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
-			};
-
-/**
  * A style shared across slots, with an optional variant condition.
  *
  * `NoInfer` keeps `config.slots` and `config.variants` as the inference sources. Otherwise, an
@@ -159,13 +145,13 @@ type SlotVariantSelection<Variants extends SlotVariantGroups<string>> =
 interface CompoundSlot<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
 	slots: ReadonlyArray<NoInfer<Slot>>;
 	style: SlottedStyleRule;
-	variants?: NoInfer<SlotVariantSelection<Variants>>;
+	variants?: NoInfer<Selection<Variants>>;
 }
 
 /** Slotted recipe config. */
 interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
 	compoundSlots?: Array<CompoundSlot<Slot, Variants>>;
-	defaultVariants?: SlotVariantSelection<Variants>;
+	defaultVariants?: Selection<Variants>;
 	slots: Record<Slot, SlottedStyleRule>;
 	variants?: Variants;
 }
@@ -175,7 +161,7 @@ type SlotFn = (options?: RecipeComposition) => string;
 
 /** The runtime function a slotted `recipe()` returns. */
 type MultiPartRecipe<Slot extends string, Variants extends SlotVariantGroups<Slot>> = (
-	selection?: SlotVariantSelection<Variants>,
+	selection?: Selection<Variants>,
 ) => Record<Slot, SlotFn>;
 
 /** A raw slotted config as accepted by `recipe`. Internal to this module. */
@@ -438,12 +424,7 @@ function buildStyle(styleRule: RecipeStyleRule): string {
 
 type LayeredStyleRule = DistributiveOmit<StyleRule, '@layer'>;
 
-// `layers.recipes` from `styles/layers.css.ts` resolves to this literal global
-// layer name. It is inlined rather than imported because importing a value from a
-// `.css.ts` into this plain `.ts` would turn `layers.css.ts` into a serialization
-// boundary and re-emit its `@layer` declarations. The byte-comparison build
-// proves this matches the shipped `@layer recipes { … }` wrapping.
-const RECIPES_LAYER = 'recipes';
+const RECIPES_LAYER = cascadeLayerNamesByName.recipes;
 
 /**
  * A variant selection as `vanillaRecipe` reads it. The dynamically-assembled config below gives
