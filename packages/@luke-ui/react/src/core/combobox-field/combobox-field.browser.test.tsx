@@ -276,8 +276,6 @@ test('ComboboxField clearing the tray search clears the selection', async () => 
 		await userEvent.click(trigger);
 		await expect.element(page.getByRole('dialog')).toBeVisible();
 
-		// The tray's clear button empties the search text, which also clears the selection: an
-		// empty search has nothing left to select.
 		await userEvent.click(page.getByRole('button', { name: 'Clear search' }).element());
 		await userEvent.keyboard('{Escape}');
 		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
@@ -286,6 +284,61 @@ test('ComboboxField clearing the tray search clears the selection', async () => 
 		// The trigger's accessible name is the label plus the selected value, so assert the value
 		// text itself: an exact name of "Country" still matches while a selection is displayed.
 		await expect.element(trigger).toHaveTextContent('');
+	} finally {
+		restoreScreenWidth();
+	}
+});
+
+test('ComboboxField tray clear clears a controlled selection and inputValue', async () => {
+	const restoreScreenWidth = mockScreenWidth(390);
+	try {
+		const changes: Array<Key | null> = [];
+		const inputChanges: Array<string> = [];
+
+		function ControlledTrayCombobox() {
+			const [value, setValue] = useState<Key | null>('au');
+			const [inputValue, setInputValue] = useState('Australia');
+			return (
+				<form aria-label="Country form">
+					<ComboboxField
+						defaultItems={countryItems}
+						inputValue={inputValue}
+						label="Country"
+						name="country"
+						onChange={(next) => {
+							changes.push(next);
+							setValue(next);
+						}}
+						onInputChange={(next) => {
+							inputChanges.push(next);
+							setInputValue(next);
+						}}
+						value={value}
+					>
+						{renderCountryItem}
+					</ComboboxField>
+				</form>
+			);
+		}
+
+		const { container } = render(<ControlledTrayCombobox />);
+		const form = container.querySelector('form');
+		if (form == null) throw new Error('Expected the form element.');
+
+		await userEvent.click(page.getByRole('button', { name: 'Country Australia' }).element());
+		await expect.element(page.getByRole('dialog')).toBeVisible();
+		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('Australia');
+
+		// Controlled inputValue does not clear the selection on its own — the clear button must.
+		await userEvent.click(page.getByRole('button', { name: 'Clear search' }).element());
+		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('');
+		await userEvent.keyboard('{Escape}');
+		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
+
+		expect(changes).toEqual([null]);
+		expect(inputChanges).toContain('');
+		expect(new FormData(form).get('country')).toBe('');
+		await expect.element(page.getByRole('button', { name: 'Country' })).toHaveTextContent('');
 	} finally {
 		restoreScreenWidth();
 	}

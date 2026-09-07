@@ -22,9 +22,8 @@ interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {
 export type ComboboxClearButtonProps = Prettify<_ComboboxClearButtonProps>;
 
 /**
- * Clears the selection and hides when no option is selected. Inside a `ComboboxTray`, hides while
- * the search is empty; clearing the search also clears the selection, because an empty search has
- * nothing left to select.
+ * Clears the selection and the input value. Beside a persistent input it hides when no option is
+ * selected. Inside a `ComboboxTray` it hides while the search is empty.
  */
 export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Element | null {
 	const { size: sizeProp, ...buttonProps } = props;
@@ -34,28 +33,17 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 
 	if (state == null) return null;
 
-	// Inside a tray the button clears the search text; beside a persistent input it clears the
-	// selection. Both what the button hides on and what pressing it does follow from that one
-	// choice, so derive them together rather than branching on it twice.
-	const clear =
+	// Visibility follows presentation: the tray button tracks the search text, the desktop button
+	// tracks the selection. Clearing always empties both — React Stately does not clear a
+	// controlled selection when only the input value is emptied.
+	const isEmpty =
 		presentation === 'tray'
-			? {
-					isEmpty: state.inputValue === '',
-					onClear: () => {
-						// React Stately's own per-render effect clears the selection whenever the input
-						// value becomes empty, so this also empties what is selected.
-						state.setInputValue('');
-					},
-				}
-			: {
-					isEmpty: Array.isArray(state.value) ? state.value.length === 0 : state.value == null,
-					onClear: () => {
-						state.setValue(Array.isArray(state.value) ? [] : null);
-						state.setInputValue('');
-					},
-				};
+			? state.inputValue === ''
+			: Array.isArray(state.value)
+				? state.value.length === 0
+				: state.value == null;
 
-	if (clear.isEmpty) return null;
+	if (isEmpty) return null;
 
 	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
@@ -66,7 +54,8 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 					return comboboxRecipe({ size }).clearButton({ className });
 				})}
 				onPress={(event) => {
-					clear.onClear();
+					state.setValue(Array.isArray(state.value) ? [] : null);
+					state.setInputValue('');
 					buttonProps.onPress?.(event);
 				}}
 				// Opt out of the ComboBox button slot so pressing clears the selection
