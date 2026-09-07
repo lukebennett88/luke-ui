@@ -4,7 +4,7 @@ import { addFunctionSerializer } from '@vanilla-extract/css/functionSerializer';
 import { recipe as vanillaRecipe } from '@vanilla-extract/recipes';
 import { cx } from '../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
-import { cascadeLayerNamesByName } from './layer-names.js';
+import { cascadeLayers } from './layer-names.js';
 
 /**
  * `recipe()` styling helper for Vanilla Extract.
@@ -424,7 +424,7 @@ function buildStyle(styleRule: RecipeStyleRule): string {
 
 type LayeredStyleRule = DistributiveOmit<StyleRule, '@layer'>;
 
-const RECIPES_LAYER = cascadeLayerNamesByName.recipes;
+const RECIPES_LAYER = cascadeLayers.recipes;
 
 /**
  * A variant selection as `vanillaRecipe` reads it. The dynamically-assembled config below gives

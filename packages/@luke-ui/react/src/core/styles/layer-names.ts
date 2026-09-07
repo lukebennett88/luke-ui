@@ -24,8 +24,10 @@ export const cascadeLayerNames = [
 
 export type CascadeLayerName = (typeof cascadeLayerNames)[number];
 
-/** Name-keyed lookup for a consumer that wants one layer name by identity rather than by
- * position in the ordered tuple. `cascadeLayerNames` remains the source of truth for order. */
-export const cascadeLayerNamesByName = Object.fromEntries(
+/**
+ * Named lookup derived from `cascadeLayerNames`. Prefer this when a consumer needs one layer by
+ * identity (for example `cascadeLayers.recipes`) rather than by position in the ordered tuple.
+ */
+export const cascadeLayers = Object.fromEntries(
 	cascadeLayerNames.map((name) => [name, name]),
 ) as { [Name in CascadeLayerName]: Name };
