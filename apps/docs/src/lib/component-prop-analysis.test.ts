@@ -611,7 +611,6 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		props: [
 			'color',
 			'elementType',
-			'fontFamily',
 			'fontStyle',
 			'fontVariantNumeric',
 			'fontWeight',

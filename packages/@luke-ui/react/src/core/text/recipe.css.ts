@@ -123,7 +123,6 @@ export const textRecipe = recipe({
 	},
 	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
-		fontFamily: 'default',
 		fontStyle: 'default',
 		fontVariantNumeric: 'default',
 		isVisuallyHidden: false,
@@ -148,6 +147,15 @@ export const textRecipe = recipe({
 			false: {},
 			true: visuallyHiddenStyle,
 		},
+		textWrap: {
+			balance: { textWrap: 'balance' },
+			pretty: { textWrap: 'pretty' },
+			default: {},
+		},
+		// Keep `lineClamp` after `textWrap`. A single-line clamp truncates to one line with an
+		// ellipsis, which needs its `white-space: nowrap` to win over `text-wrap: balance`/`pretty`
+		// — both set the `text-wrap-mode` longhand, and that tie breaks on declaration order. A
+		// multi-line clamp sets no wrapping property, so `textWrap` still applies under it.
 		lineClamp: lineClampVariants,
 		shouldDisableTrim: { false: {}, true: {} },
 		textAlign: {
@@ -168,11 +176,6 @@ export const textRecipe = recipe({
 			none: { textTransform: 'none' },
 			uppercase: { textTransform: 'uppercase' },
 		},
-		textWrap: {
-			balance: { textWrap: 'balance' },
-			pretty: { textWrap: 'pretty' },
-			default: {},
-		},
 		typography: typographyVariants,
 		shouldInheritFont: {
 			false: {},
@@ -187,19 +190,13 @@ export const textRecipe = recipe({
 				vars: { [textLineHeight]: '1lh' },
 			},
 		},
-		// Keep these three after `shouldInheritFont`. They must win over its `inherit` values, and
+		// Keep both of these after `shouldInheritFont`. They must win over its `inherit` values, and
 		// that tie breaks on declaration order.
 		fontWeight: weightVariants,
 		fontStyle: {
 			inherit: { fontStyle: 'inherit' },
 			italic: { fontStyle: 'italic' },
 			normal: { fontStyle: 'normal' },
-			default: {},
-		},
-		fontFamily: {
-			body: { fontFamily: vars.font.family.body },
-			code: { fontFamily: vars.font.family.code },
-			inherit: { fontFamily: 'inherit' },
 			default: {},
 		},
 		color: colorVariants,

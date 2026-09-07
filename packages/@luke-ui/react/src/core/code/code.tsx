@@ -1,3 +1,4 @@
+import { isWrappingLineClamp } from '../text/line-clamp.js';
 import type { TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -34,12 +35,12 @@ export type CodeProps = Prettify<_CodeProps>;
  */
 export function Code(props: CodeProps) {
 	const { className, lineClamp, textWrap, ...elementProps } = props;
-	// A single-line clamp truncates to one line, so it takes precedence: `Text` emits `textWrap`
-	// after `lineClamp`, and `balance`/`pretty` would otherwise let the clamped text wrap.
-	const isSingleLineClamp = lineClamp === true || lineClamp === 1;
-	const isWrappingLineClamp = typeof lineClamp === 'number' && lineClamp >= 2;
-	const isCustomWrap = textWrap === 'balance' || textWrap === 'pretty';
-	const shouldWrap = !isSingleLineClamp && (isWrappingLineClamp || isCustomWrap);
+	// `codeRecipe`'s own `white-space: nowrap` is what keeps inline code on one line by default.
+	// It is emitted after `textRecipe`, so it must step aside whenever anything asks the text to
+	// wrap and let `Text` resolve the rest. Clamping to a single line still wins over `textWrap`
+	// there, so that tie is not restated here.
+	const shouldWrap =
+		isWrappingLineClamp(lineClamp) || (textWrap !== undefined && textWrap !== 'default');
 
 	return (
 		<Text

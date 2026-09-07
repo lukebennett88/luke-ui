@@ -15,11 +15,6 @@ interface TextStyleProps {
 	 */
 	color?: TextVariantProps['color'];
 	/**
-	 * Sets font family. Keeps the selected typography style's font size.
-	 * @default 'default'
-	 */
-	fontFamily?: TextVariantProps['fontFamily'];
-	/**
 	 * Sets font style.
 	 * @default 'default'
 	 */
@@ -114,7 +109,6 @@ export function Text(props: TextProps) {
 		className,
 		color,
 		elementType = 'span',
-		fontFamily,
 		fontStyle,
 		fontVariantNumeric,
 		fontWeight,
@@ -144,7 +138,6 @@ export function Text(props: TextProps) {
 			className={textRecipe({
 				className,
 				color,
-				fontFamily,
 				fontStyle,
 				fontVariantNumeric,
 				fontWeight:
