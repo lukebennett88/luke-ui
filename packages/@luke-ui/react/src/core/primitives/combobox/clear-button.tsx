@@ -33,12 +33,26 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 
 	if (state == null) return null;
 
-	const clearsSearch = presentation === 'tray';
-	const hasValue = Array.isArray(state.value) ? state.value.length > 0 : state.value != null;
+	// Inside a tray the button clears the search text; beside a persistent input it clears the
+	// selection. Both what the button hides on and what pressing it does follow from that one
+	// choice, so derive them together rather than branching on it twice.
+	const clear =
+		presentation === 'tray'
+			? {
+					isEmpty: state.inputValue === '',
+					onClear: () => {
+						state.setInputValue('');
+					},
+				}
+			: {
+					isEmpty: Array.isArray(state.value) ? state.value.length === 0 : state.value == null,
+					onClear: () => {
+						state.setValue(Array.isArray(state.value) ? [] : null);
+						state.setInputValue('');
+					},
+				};
 
-	if (clearsSearch ? state.inputValue === '' : !hasValue) {
-		return null;
-	}
+	if (clear.isEmpty) return null;
 
 	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
@@ -49,10 +63,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 					return comboboxRecipe({ size }).clearButton({ className });
 				})}
 				onPress={(event) => {
-					if (!clearsSearch) {
-						state.setValue(Array.isArray(state.value) ? [] : null);
-					}
-					state.setInputValue('');
+					clear.onClear();
 					buttonProps.onPress?.(event);
 				}}
 				// Opt out of the ComboBox button slot so pressing clears the selection
