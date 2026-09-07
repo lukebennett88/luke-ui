@@ -107,6 +107,7 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
 
+	// Native validation focuses this trigger instead of the aria-hidden tray validation input.
 	const trayTriggerRef = useRef<HTMLButtonElement>(null);
 	const isMobileDevice = useIsMobileDevice();
 	const isAsync: boolean = loadingState != null;
