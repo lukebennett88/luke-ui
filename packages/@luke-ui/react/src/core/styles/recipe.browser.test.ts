@@ -14,6 +14,7 @@ import {
 	prebuiltVariantClass,
 	realVariantsRecipe,
 	slotVariantPrecedenceRecipe,
+	untargetedSlotPrecedenceRecipe,
 } from './recipe.fixtures.css.js';
 
 // Field and input-group recipes export from their primitive entrypoints.
@@ -193,6 +194,27 @@ test('a single-part recipe still composes a pre-built class as a variant style',
 	const className = prebuiltClassSinglePartRecipe({ emphasis: 'strong' });
 
 	expect(className.split(' ')).toContain(prebuiltVariantClass);
+});
+
+test('a slot no compoundSlots entry names keeps the documented precedence', () => {
+	const accent = untargetedSlotPrecedenceRecipe({ emphasis: 'strong', tone: 'accent' });
+	const neutral = untargetedSlotPrecedenceRecipe({ emphasis: 'strong', tone: 'neutral' });
+
+	// The conditional shared class is whatever `targeted` gains from selecting `tone: 'accent'`.
+	const neutralTargeted = neutral.targeted().split(' ');
+	const sharedConditionalClass = accent
+		.targeted()
+		.split(' ')
+		.find((name) => !neutralTargeted.includes(name));
+	expect(sharedConditionalClass).toBeDefined();
+
+	const targeted = mountProbe(accent.targeted());
+	// Compose the untargeted slot's own classes with the conditional shared class, so the resolved
+	// colour reports which of the two was emitted last.
+	const untargeted = mountProbe(`${neutral.untargeted()} ${sharedConditionalClass}`);
+
+	expect(getComputedStyle(targeted).color).toBe('rgb(52, 52, 52)');
+	expect(getComputedStyle(untargeted).color).toBe('rgb(52, 52, 52)');
 });
 
 test('shared styles follow entry order regardless of slot declaration order', () => {

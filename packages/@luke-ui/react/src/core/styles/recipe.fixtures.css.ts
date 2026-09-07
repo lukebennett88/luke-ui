@@ -172,6 +172,36 @@ export const slotVariantPrecedenceRecipe = recipe({
 	],
 });
 
+/**
+ * A slot no `compoundSlots` entry names must still follow the documented precedence.
+ *
+ * `targeted` is named by both entries, `untargeted` by neither. Both slots declare an
+ * `emphasis` variant setting `color`, which the conditional shared style also sets, so the
+ * relative CSS source position of a slot variant and the conditional shared style decides the
+ * resolved colour. The documented order puts every slot variant ahead of every conditional
+ * shared style regardless of which slot owns it, so composing `untargeted`'s classes with the
+ * shared conditional class must resolve the same way `targeted` does.
+ */
+export const untargetedSlotPrecedenceRecipe = recipe({
+	slots: {
+		targeted: { color: 'rgb(50, 50, 50)' },
+		untargeted: { color: 'rgb(50, 50, 50)' },
+	},
+	variants: {
+		emphasis: {
+			strong: {
+				targeted: { color: 'rgb(51, 51, 51)' },
+				untargeted: { color: 'rgb(51, 51, 51)' },
+			},
+		},
+		tone: { accent: {}, neutral: {} },
+	},
+	compoundSlots: [
+		{ slots: ['targeted'], style: { fontWeight: 600 } },
+		{ slots: ['targeted'], style: { color: 'rgb(52, 52, 52)' }, variants: { tone: 'accent' } },
+	],
+});
+
 export const compoundSlotsOrderRecipe = recipe({
 	slots: { first: {}, second: {} },
 	variants: { tone: { accent: {} } },
