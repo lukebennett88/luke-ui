@@ -21,8 +21,8 @@ utility modules live under `core/`. Theme modules live under `theme/`.
   colocated `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet, plus
   primitive and overlay style modules. Named layers make cross-layer priority explicit, but
   same-layer, same-specificity CSS still resolves by source order: later wins. List a module that
-  sets concrete values another one must override before that other module, so the later module's
-  own styles win the tie (e.g. `text/recipe.css` before `code/recipe.css` and `kbd/recipe.css`:
+  sets concrete values another one must override before that other module, so the later module's own
+  styles win the tie (e.g. `text/recipe.css` before `code/recipe.css` and `kbd/recipe.css`:
   `textRecipe`'s `shouldInheritFont` sets font properties to `inherit`, while `codeRecipe` and
   `kbdRecipe` set concrete values at equal specificity in the same layer). Shared custom properties
   that resolve through inheritance at computed-value time, such as `fieldMessageIcon` between field
