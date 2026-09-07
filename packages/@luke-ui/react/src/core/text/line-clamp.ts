@@ -17,7 +17,7 @@ type LineClampValue = NonNullable<NonNullable<TextRecipeVariants>['lineClamp']>;
  * a clamp step needs no change here; removing `true` or `1` from the recipe makes this a type
  * error rather than leaving it stale.
  */
-const singleLineClampValues = [true, 1] as const satisfies ReadonlyArray<LineClampValue>;
+const singleLineClampValues: ReadonlyArray<LineClampValue> = [true, 1];
 
 /**
  * True when `lineClamp` clamps to more than one line, so the text is allowed to wrap.
@@ -28,5 +28,5 @@ const singleLineClampValues = [true, 1] as const satisfies ReadonlyArray<LineCla
  */
 export function isWrappingLineClamp(lineClamp: LineClampValue | undefined): boolean {
 	if (lineClamp === undefined || lineClamp === false) return false;
-	return !(singleLineClampValues as ReadonlyArray<LineClampValue>).includes(lineClamp);
+	return !singleLineClampValues.includes(lineClamp);
 }
