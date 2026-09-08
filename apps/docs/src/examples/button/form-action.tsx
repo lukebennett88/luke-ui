@@ -20,7 +20,7 @@ function SubmitButton() {
 
 	return (
 		<Button isPending={pending} type="submit">
-			{pending ? 'Saving' : 'Save'}
+			Save
 		</Button>
 	);
 }

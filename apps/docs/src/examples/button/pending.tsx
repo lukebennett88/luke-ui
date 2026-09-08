@@ -1,11 +1,7 @@
 import { Button } from '@luke-ui/react/button';
 
 export default () => {
-	return (
-		<Button pressAction={save}>
-			{({ isPending }) => (isPending ? 'Saving changes' : 'Save changes')}
-		</Button>
-	);
+	return <Button pressAction={save}>Save changes</Button>;
 };
 
 async function save() {

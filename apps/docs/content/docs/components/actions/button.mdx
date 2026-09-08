@@ -74,8 +74,7 @@ Use `pressAction` for Button-owned operations that are not form submissions. Com
 with `type="submit"` is usually the wrong pattern, because both paths may run.
 
 `pressAction` creates pending state automatically. Explicit `isPending` shows a spinner immediately.
-An Action-owned spinner waits briefly so a fast Action never flashes one. Update the visible label
-when the status matters, for example from “Save” to “Saving”.
+An Action-owned spinner waits briefly so a fast Action never flashes one.
 
 <ExampleBlock src="button/pending" title="Button — Pending" />
 
@@ -102,8 +101,8 @@ The visible label provides the accessible name, so most buttons do not need `ari
 label that describes the action, such as “Save changes” or “Delete account”, rather than a vague
 label such as “OK”.
 
-The spinner is hidden from assistive technology. Change the label when assistive technology needs to
-announce the pending status.
+The spinner is hidden from assistive technology. Pending state is announced through the button’s
+pending semantics, so the label does not need to change while pending.
 
 ## Related components
 
