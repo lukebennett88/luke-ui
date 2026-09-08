@@ -1,4 +1,4 @@
-type ConformanceContract = 'dom' | 'field';
+type ConformanceContract = 'dom' | 'domProps' | 'field';
 type IntegrationTripwire = 'required' | 'none';
 type VisualApplicability = 'applicable' | 'none';
 
@@ -17,12 +17,12 @@ export const componentTestManifest = [
 	['Button', 'button', ['dom'], 'required', 'applicable'],
 	['Button primitive', 'primitives/button', ['dom'], 'none', 'none'],
 	// Fields take `inputRef` and RAC moves `id` onto the control, so they cannot satisfy `dom`.
-	['Checkbox', 'checkbox', ['field'], 'required', 'applicable'],
+	['Checkbox', 'checkbox', ['domProps', 'field'], 'required', 'applicable'],
 	// Multi-part field root. RAC moves `id` onto the control.
 	['Checkbox primitive', 'primitives/checkbox', [], 'none', 'none'],
 	['Code', 'code', ['dom'], 'none', 'applicable'],
 	// Fields take `inputRef` and RAC moves `id` onto the control, so they cannot satisfy `dom`.
-	['ComboboxField', 'combobox-field', ['field'], 'required', 'applicable'],
+	['ComboboxField', 'combobox-field', ['domProps', 'field'], 'required', 'applicable'],
 	// Multi-part collection. No single root receives the public DOM props.
 	['Combobox primitive', 'primitives/combobox', [], 'none', 'none'],
 	['Em', 'em', ['dom'], 'none', 'none'],
@@ -45,7 +45,7 @@ export const componentTestManifest = [
 	['Strong', 'strong', ['dom'], 'none', 'none'],
 	['Text', 'text', ['dom'], 'none', 'applicable'],
 	// Fields take `inputRef` and RAC moves `id` onto the control, so they cannot satisfy `dom`.
-	['TextField', 'text-field', ['field'], 'required', 'applicable'],
+	['TextField', 'text-field', ['domProps', 'field'], 'required', 'applicable'],
 	// Theme utilities, not a component with a rendered root.
 	['Theme', 'theme', [], 'none', 'none'],
 	['VisuallyHidden', 'visually-hidden', ['dom'], 'none', 'none'],

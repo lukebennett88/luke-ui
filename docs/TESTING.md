@@ -48,18 +48,20 @@ Do not test RAC's contract. RAC already owns focus management, keyboard navigati
 semantics, ARIA wiring, validation semantics, and disabled/read-only interaction blocking. Test the
 composition, prop plumbing, styling hooks, and behaviour that Luke UI adds or deliberately changes.
 
-Each component opts into the contracts it satisfies in the component test manifest. The two
-contracts are independent, and a component can hold both:
+Each component opts into the contracts it satisfies in the component test manifest. The three
+contracts are independent, and a component can hold more than one:
 
 - **DOM**: documented element, `ref`, `className`, `id`, and `data-*` forwarding.
-- **Field**: object and callback `inputRef`, native `name`/form participation, `onBlur`, and label,
-  description, and error association.
+- **DOM props**: `className`, `id`, and `data-*` forwarding for components that deliberately expose
+  no plain `ref`.
+- **Field**: object and callback `inputRef`, native `name`/form participation, `onBlur`, and field
+  association.
 
-A field component often cannot also hold `dom`. React Aria moves `id` onto the control, and Luke UI
-fields take `inputRef` instead of a plain `ref`, so no single element receives the full DOM
-contract.
+Field components often hold both `domProps` and `field`. They cannot hold `dom`: React Aria moves
+`id` onto the control, and Luke UI fields take `inputRef` instead of a plain `ref`, so no single
+element receives the full DOM contract.
 
-An empty list is an explicit exception for a component that does not satisfy either contract.
+An empty list is an explicit exception for a component that does not satisfy a named contract.
 
 The shared conformance helper tests these contracts once. A component's test file declares its
 locators and does not name which contracts run. Do not repeat the contracts in individual tests.

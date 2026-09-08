@@ -142,6 +142,16 @@ test('covers every public component entrypoint exactly once', () => {
 	}
 });
 
+const KNOWN_CONFORMANCE_CONTRACTS = new Set(['dom', 'domProps', 'field']);
+
+test('conformance entries use known contracts', () => {
+	for (const entry of componentTestManifest) {
+		for (const contract of entry.conformance) {
+			expect(KNOWN_CONFORMANCE_CONTRACTS.has(contract)).toBe(true);
+		}
+	}
+});
+
 function packageExportModule(path: string): string {
 	return resolve(exportsRoot, `${path}.ts`);
 }

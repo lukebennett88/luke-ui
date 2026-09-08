@@ -1,4 +1,4 @@
-export const CONFORMANCE_CONTRACTS = ['dom', 'field'] as const;
+export const CONFORMANCE_CONTRACTS = ['dom', 'domProps', 'field'] as const;
 
 export type ConformanceContract = (typeof CONFORMANCE_CONTRACTS)[number];
 
