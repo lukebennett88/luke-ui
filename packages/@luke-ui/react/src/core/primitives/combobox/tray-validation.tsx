@@ -12,8 +12,9 @@ interface ComboboxTrayValidationProps {
 }
 
 /**
- * Keeps constraint validation available while the tray is closed. On invalid submit, focuses the
- * trigger when this is the first invalid participating control in the form.
+ * Keeps constraint validation available while the tray is closed. Hidden while open so search
+ * keystrokes do not update an outside focus-scoped input. On invalid submit, focuses the trigger
+ * when this is the first invalid participating control in the form.
  */
 export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.Element | null {
 	const { triggerRef } = props;
@@ -47,6 +48,10 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 	}, [customError, value]);
 
 	if (state == null) return null;
+
+	// Only needed while the tray is closed. Updating this outside input on every search
+	// keystroke races the dismissible overlay's focus scope on slower runners.
+	if (state.isOpen) return null;
 
 	return (
 		<input

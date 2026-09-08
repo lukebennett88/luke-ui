@@ -99,6 +99,17 @@ async function openTray() {
 	await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveFocus();
 }
 
+/**
+ * Types into the focused tray search field. Prefer this over document-level keyboard entry so
+ * keystrokes stay on the input after `openTray` has waited for focus.
+ */
+async function enterTraySearch(text: string) {
+	const searchbox = page.getByRole('searchbox', { name: 'Country' });
+	await expect.element(searchbox).toHaveFocus();
+	await userEvent.type(searchbox.element(), text, { skipClick: true });
+	await expect.element(searchbox).toHaveValue(text);
+}
+
 test('ComboboxTray positions the overlay at the scroll offset each time it opens', async () => {
 	// `top` must match `scrollY` on every open. Compiler caching is covered elsewhere.
 	render(
@@ -198,8 +209,8 @@ test('ComboboxClearButton clears the search text inside a tray', async () => {
 
 	expect(page.getByRole('button', { name: 'Clear search' }).elements()).toHaveLength(0);
 
+	await enterTraySearch('Aus');
 	const searchbox = page.getByRole('searchbox', { name: 'Country' });
-	await userEvent.type(searchbox.element(), 'Aus');
 	await expect.element(searchbox).toHaveValue('Aus');
 
 	await userEvent.click(page.getByRole('button', { name: 'Clear search' }));
@@ -327,9 +338,7 @@ test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to s
 	);
 
 	await openTray();
-	const searchbox = page.getByRole('searchbox', { name: 'Country' });
-	await userEvent.type(searchbox.element(), 'Freedonia');
-	await expect.element(searchbox).toHaveValue('Freedonia');
+	await enterTraySearch('Freedonia');
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
@@ -475,9 +484,7 @@ test('ComboboxTrayTrigger submits custom text in text mode while the tray is clo
 	if (form == null) throw new Error('Expected the form element.');
 
 	await openTray();
-	const searchbox = page.getByRole('searchbox', { name: 'Country' });
-	await userEvent.type(searchbox.element(), 'Freedonia');
-	await expect.element(searchbox).toHaveValue('Freedonia');
+	await enterTraySearch('Freedonia');
 	expect(new FormData(form).getAll('country')).toEqual(['Freedonia']);
 
 	await userEvent.keyboard('{Escape}');
@@ -522,8 +529,7 @@ test('ComboboxTrayTrigger submits one text-mode value through an external form a
 	const searchbox = page.getByRole('searchbox', { name: 'Country' });
 	expect(searchbox.element()).not.toHaveAttribute('name');
 
-	await userEvent.type(searchbox.element(), 'Freedonia');
-	await expect.element(searchbox).toHaveValue('Freedonia');
+	await enterTraySearch('Freedonia');
 	expect(new FormData(form).getAll('country')).toEqual(['Freedonia']);
 
 	await userEvent.keyboard('{Escape}');
