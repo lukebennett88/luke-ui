@@ -55,10 +55,6 @@ export function usePressAction(options: UsePressActionOptions): UsePressActionRe
 	// Same-tick guard: pending state updates on the next render.
 	const isStartingActionRef = useRef(false);
 
-	if (actionError != null) {
-		throw actionError;
-	}
-
 	const isPendingState = isPending || isActionPending;
 	const showActionSpinner = useSpinDoctor(isActionPending, {
 		delay: ACTION_SPINNER_DELAY,
@@ -66,6 +62,11 @@ export function usePressAction(options: UsePressActionOptions): UsePressActionRe
 		showDuringHydration: false,
 	});
 	const showSpinner = isPending || showActionSpinner;
+
+	// Throw after every hook so Error Boundaries see Action failures without breaking hook order.
+	if (actionError != null) {
+		throw actionError;
+	}
 
 	// #region agent log
 	agentLog('A', 'use-press-action.ts:render', 'usePressAction render', {

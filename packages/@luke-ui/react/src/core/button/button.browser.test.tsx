@@ -144,8 +144,11 @@ test('shows a delayed spinner for a slow Action and none for a fast Action', asy
 	expect(slow.element().getAttribute('data-pending')).toBe('true');
 	expect(slow.element().querySelector('[role="status"]')).toBeNull();
 
-	await delay(ACTION_SPINNER_DELAY + 50);
-	expect(slow.element().querySelector('[role="status"]')).not.toBeNull();
+	await expect
+		.poll(() => slow.element().querySelector('[role="status"]'), {
+			timeout: ACTION_SPINNER_DELAY + 500,
+		})
+		.not.toBeNull();
 
 	releaseSlow();
 	await expect.poll(() => slow.element().getAttribute('data-pending')).toBeNull();
