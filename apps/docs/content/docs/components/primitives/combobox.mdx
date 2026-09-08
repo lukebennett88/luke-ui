@@ -64,6 +64,9 @@ current selection and open the tray.
 Inside the tray, `ComboboxInput` is the search field. `ComboboxClearButton` clears the search and
 the selection. `ComboboxField` chooses the tray or the popover for you.
 
+`ComboboxRoot` defaults `allowsEmptyCollection` to `true`, so typing a filter that matches no options
+keeps the tray open for empty states and custom values.
+
 While the tray is closed, `ComboboxTrayTrigger` keeps constraint validation and form submission
 working. Pass `isRequired`, `validationBehavior`, `isDisabled`, `isReadOnly`, `form`, and
 `allowsCustomValue` on the root.
