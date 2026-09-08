@@ -19,6 +19,11 @@ testConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a text input.');
 		return control;
 	},
+	getTarget: (result) => {
+		const target = result.container.firstElementChild;
+		if (!(target instanceof HTMLElement)) throw new Error('Expected a TextField root.');
+		return target;
+	},
 	render: (props = {}) => {
 		return render(<TextField {...props} description="Helpful context" label="Name" />);
 	},

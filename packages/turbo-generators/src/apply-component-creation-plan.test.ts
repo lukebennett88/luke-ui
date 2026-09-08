@@ -178,6 +178,27 @@ describe('createComponent', () => {
 		);
 	});
 
+	it('scaffolds stacked DOM props and field conformance on disk', async () => {
+		const root = await createRepositoryFixture();
+
+		await createComponent(root, {
+			conformance: ['domProps', 'field'],
+			docsGroup: 'forms',
+			name: 'DateField',
+		});
+
+		const browserTest = await readFile(
+			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
+			'utf8',
+		);
+		expect(browserTest).toContain('testConformance');
+		expect(browserTest).toContain('getControl');
+		expect(browserTest).toContain('getTarget');
+		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
+			"['DateField', 'date-field', ['domProps', 'field'], 'none', 'applicable']",
+		);
+	});
+
 	it('scaffolds an empty conformance list on disk', async () => {
 		const root = await createRepositoryFixture();
 

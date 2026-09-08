@@ -45,6 +45,15 @@ testConformance({
 		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
 		return control;
 	},
+	getTarget: (result) => {
+		// RAC mounts a collection `<template>` before the ComboBox root, so
+		// `container.firstElementChild` is not the className host. Resolve the
+		// element that received the forwarded `data-conformance` attribute from
+		// the shared `domProps` render instead of relying on RAC internals.
+		const target = result.container.querySelector('[data-conformance="true"]');
+		if (!(target instanceof HTMLElement)) throw new Error('Expected a ComboboxField root.');
+		return target;
+	},
 	render: (props = {}) => {
 		return render(
 			<ComboboxField<CountryItem>

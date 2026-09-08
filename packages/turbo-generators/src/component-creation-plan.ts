@@ -243,15 +243,17 @@ function renderComponentTest(input: {
 	pascalName: string;
 }): string {
 	const hasDom = input.conformance.includes('dom');
+	const hasDomProps = input.conformance.includes('domProps');
 	const hasField = input.conformance.includes('field');
+	const hasConformance = hasDom || hasDomProps || hasField;
 	const helperImports = [
-		hasDom || hasField ? 'testConformance' : undefined,
+		hasConformance ? 'testConformance' : undefined,
 		input.integrationTripwire === 'required' ? 'testIntegration' : undefined,
 	].filter((value): value is string => value != null);
 	const imports = [
 		...(input.integrationTripwire === 'required'
 			? ["import { expect } from 'vite-plus/test';"]
-			: hasDom || hasField
+			: hasConformance
 				? []
 				: ["import { expect, test } from 'vite-plus/test';"]),
 		...(helperImports.length > 0
@@ -270,7 +272,7 @@ function renderComponentTest(input: {
 		return control;
 	},`
 			: undefined,
-		hasDom
+		hasDom || hasDomProps
 			? `	getTarget: (result) => {
 		const target = result.container.firstElementChild;
 		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
@@ -278,14 +280,13 @@ function renderComponentTest(input: {
 	},`
 			: undefined,
 	].filter((value): value is string => value != null);
-	const contract =
-		hasDom || hasField
-			? `testConformance({
+	const contract = hasConformance
+		? `testConformance({
 	path: '${input.name}',
 ${locators.join('\n')}
 	render: (props = {}) => ${renderComponent},
 });`
-			: `test('${input.pascalName} renders its root element', () => {
+		: `test('${input.pascalName} renders its root element', () => {
 	const result = render(<${input.pascalName}>Content</${input.pascalName}>);
 	expect(result.locator.element().firstElementChild).toHaveTextContent('Content');
 });`;

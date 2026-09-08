@@ -16,6 +16,7 @@ import {
 
 const CONFORMANCE_CONTRACT_LABELS: Record<ConformanceContract, string> = {
 	dom: 'DOM',
+	domProps: 'DOM props',
 	field: 'Field',
 };
 

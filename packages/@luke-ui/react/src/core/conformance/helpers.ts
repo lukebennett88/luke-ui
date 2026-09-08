@@ -37,6 +37,11 @@ function requireControl(options: ConformanceOptions) {
 	return options.getControl;
 }
 
+function assertForwardedClassNameAndDataAttributes(target: HTMLElement) {
+	expect(target).toHaveClass('conformance-class');
+	expect(target).toHaveAttribute('data-conformance', 'true');
+}
+
 function testDomContract(
 	name: string,
 	getTarget: (result: RenderResult) => HTMLElement,
@@ -52,10 +57,33 @@ function testDomContract(
 		});
 		const target = getTarget(result);
 
-		expect(target).toHaveClass('conformance-class');
+		assertForwardedClassNameAndDataAttributes(target);
 		expect(target).toHaveAttribute('id', 'conformance-target');
-		expect(target).toHaveAttribute('data-conformance', 'true');
 		expect(ref.current).toBe(target);
+		result.unmount();
+	});
+}
+
+function testDomPropsContract(options: ConformanceOptions, name: string) {
+	const { render } = options;
+	const getTarget = requireTarget(options);
+
+	test(`${name} forwards its DOM props contract`, () => {
+		const result = render({
+			className: 'conformance-class',
+			'data-conformance': 'true',
+			id: 'conformance-target',
+		});
+		const target = getTarget(result);
+
+		assertForwardedClassNameAndDataAttributes(target);
+		// `id` may land on a different element than className/data-* (e.g. RAC
+		// field roots). Assert it reached the tree without consulting getControl.
+		const idHost = result.container.querySelector('#conformance-target');
+		if (!(idHost instanceof HTMLElement)) {
+			throw new Error('Expected the forwarded id to reach the DOM.');
+		}
+		expect(idHost).toHaveAttribute('id', 'conformance-target');
 		result.unmount();
 	});
 }
@@ -129,6 +157,9 @@ export function testConformance(options: ConformanceOptions) {
 
 	if (entry.conformance.includes('dom')) {
 		testDomContract(entry.name, requireTarget(options), render);
+	}
+	if (entry.conformance.includes('domProps')) {
+		testDomPropsContract(options, entry.name);
 	}
 	if (entry.conformance.includes('field')) {
 		testFieldContract(options, entry.name);
