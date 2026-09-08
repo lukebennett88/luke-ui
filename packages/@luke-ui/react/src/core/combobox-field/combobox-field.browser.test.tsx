@@ -46,20 +46,12 @@ testConformance({
 		return control;
 	},
 	getTarget: (result) => {
-		const control = result.locator.getByRole('combobox', { name: 'Country' }).element();
-		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
 		// RAC mounts a collection `<template>` before the ComboBox root, so
-		// `container.firstElementChild` is not the className host. Walk to the
-		// outermost `data-rac` ancestor of the control instead.
-		let target: HTMLElement | null = null;
-		for (
-			let node: HTMLElement | null = control;
-			node != null && node !== result.container;
-			node = node.parentElement
-		) {
-			if (node.hasAttribute('data-rac')) target = node;
-		}
-		if (target == null) throw new Error('Expected a ComboboxField root.');
+		// `container.firstElementChild` is not the className host. Resolve the
+		// element that received the forwarded `data-conformance` attribute from
+		// the shared `domProps` render instead of relying on RAC internals.
+		const target = result.container.querySelector('[data-conformance="true"]');
+		if (!(target instanceof HTMLElement)) throw new Error('Expected a ComboboxField root.');
 		return target;
 	},
 	render: (props = {}) => {

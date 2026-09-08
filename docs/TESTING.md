@@ -57,7 +57,7 @@ contracts are independent, and a component can hold more than one:
 - **Field**: object and callback `inputRef`, native `name`/form participation, `onBlur`, and field
   association.
 
-Field components often hold both `domProps` and `field`. They cannot hold `dom`: React Aria moves
+These field components hold both `domProps` and `field`. They cannot hold `dom`: React Aria moves
 `id` onto the control, and Luke UI fields take `inputRef` instead of a plain `ref`, so no single
 element receives the full DOM contract.
 
