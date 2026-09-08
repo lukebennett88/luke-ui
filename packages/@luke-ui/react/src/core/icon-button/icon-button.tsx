@@ -11,7 +11,7 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { PressAction } from '../use-press-action/use-press-action.js';
-import { PressActionError, usePressAction } from '../use-press-action/use-press-action.js';
+import { usePressAction } from '../use-press-action/use-press-action.js';
 import type { IconButtonRecipeVariants } from './recipe.css.js';
 import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.js';
 
@@ -20,14 +20,14 @@ interface IconButtonRecipeProps extends NonNullable<IconButtonRecipeVariants> {}
 interface IconButtonStyleProps {
 	/**
 	 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
-	 * immediately. Prefer `pressAction` for IconButton-owned async work.
+	 * immediately. Prefer `pressAction` for IconButton-owned work.
 	 * @default false
 	 */
 	isPending?: boolean;
 	/**
-	 * IconButton-owned async work run as a React Action. The button becomes pending automatically
-	 * until the Action settles. Use `onPress` for the synchronous interaction; use `pressAction` for
-	 * the resulting operation.
+	 * IconButton-owned work run as a React Action. The button becomes pending automatically until
+	 * the Action settles. Use `onPress` for the synchronous interaction; use `pressAction` for the
+	 * resulting operation.
 	 */
 	pressAction?: PressAction;
 	/**
@@ -54,7 +54,6 @@ export type IconButtonProps = Prettify<_IconButtonProps>;
 export function IconButton(props: IconButtonProps): JSX.Element {
 	const { icon, isPending = false, onPress, pressAction, size = 'medium', ...buttonProps } = props;
 	const {
-		actionError,
 		isPendingState,
 		onPress: handlePress,
 		showSpinner,
@@ -70,7 +69,6 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			onPress={handlePress}
 			size={size}
 		>
-			<PressActionError error={actionError} />
 			{showSpinner && (
 				<span aria-hidden className={pendingSpinnerOverlay()}>
 					<LoadingSpinner aria-hidden />
