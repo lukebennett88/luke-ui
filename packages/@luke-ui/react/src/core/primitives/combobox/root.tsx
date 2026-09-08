@@ -80,9 +80,8 @@ export type ComboboxRootProps<T extends object> = Prettify<_ComboboxRootProps<T>
 export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
 	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
 
-	// Published for the hidden validation and submission inputs `ComboboxTrayTrigger` renders:
-	// `ComboBoxStateContext` does not carry these, so a public tray composition needs them plumbed
-	// some other way.
+	// Published for the tray validation and submission inputs. `ComboBoxStateContext` does not
+	// carry these props.
 	// oxlint-disable-next-line react/jsx-no-constructed-context-values
 	const validationContextValue = {
 		allowsCustomValue: comboboxProps.allowsCustomValue ?? false,

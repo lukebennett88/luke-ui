@@ -11,9 +11,8 @@ interface _KbdProps extends _KbdOmit {}
 export type KbdProps = Prettify<_KbdProps>;
 
 /**
- * Represents keyboard input or a hotkey, rendered as `<kbd>`.
- * Inherits typography it does not set, such as letter-spacing. Sets its own code font, size,
- * weight, and line height, so the chip stays one size in any surrounding text.
+ * Represents keyboard input as `<kbd>`. Sets its own font, size, weight, and line height. Other
+ * typography, such as letter-spacing, inherits.
  */
 export function Kbd(props: KbdProps) {
 	const { className, ...elementProps } = props;

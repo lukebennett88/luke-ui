@@ -21,7 +21,8 @@ interface _ComboboxInputGroupProps extends _ComboboxInputGroupOmit {
 export type ComboboxInputGroupProps = Prettify<_ComboboxInputGroupProps>;
 
 /**
- * Groups a combobox input and its controls. Inside a `ComboboxTray`, renders as an inset search bar.
+ * Groups a combobox input and its controls. Inside a `ComboboxTray`, it renders as an inset search
+ * bar.
  */
 export function ComboboxInputGroup(props: ComboboxInputGroupProps): JSX.Element {
 	const { size: sizeProp, ...groupProps } = props;

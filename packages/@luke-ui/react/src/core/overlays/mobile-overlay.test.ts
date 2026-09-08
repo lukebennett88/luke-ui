@@ -3,15 +3,10 @@ import { readFile } from 'node:fs/promises';
 import { transformSync } from 'oxc-transform-react';
 import { expect, test } from 'vite-plus/test';
 
-// `vite.config.ts` compiles every source module with these options when it packs the package.
-// Vitest does not run the compiler, so this is the only place a compiled-output regression can
-// be caught.
+// Vitest does not run the React Compiler; pack does. This is the compiled-output check.
 const REACT_COMPILER_TARGET = '19';
 
-/**
- * A cache slot whose guard is the memo sentinel is evaluated exactly once, on the component's
- * first render, and reused for the rest of its lifetime.
- */
+/** Bodies of `memo_cache_sentinel` slots that run once on first render. */
 const SENTINEL_GUARDED_SLOT_PATTERN =
 	/if \(\$\[\d+\] === Symbol\.for\("react\.memo_cache_sentinel"\)\) \{(?<body>[\s\S]*?)\n\t\} else \{/g;
 
@@ -21,11 +16,8 @@ test('MobileOverlay does not cache its scroll offset for the component lifetime'
 	const compiled = await compileMobileOverlay();
 	const lifetimeCached = sentinelGuardedSlotBodies(compiled);
 
-	// The tray's scroll offset has to be re-read every time the tray opens. A read hoisted into a
-	// sentinel-guarded slot runs once while the tray is still closed, so a consumer who scrolls
-	// before opening gets the tray positioned at the offset the page had on first render.
+	// Do not cache `scrollY` or the inline `top` for the component lifetime.
 	expect(lifetimeCached).not.toContainEqual(expect.stringContaining('scrollY'));
-	// The same applies to the overlay's inline `top`, which is what carries the offset onto the DOM.
 	expect(lifetimeCached).not.toContainEqual(expect.stringContaining('top:'));
 });
 

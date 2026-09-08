@@ -7,29 +7,19 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { cascadeLayers } from './layer-names.js';
 
 /**
- * `recipe()` styling helper for Vanilla Extract.
+ * Builds single-part and slotted recipes. CSS lands in the `recipes` layer.
  *
- * One helper builds both single-part and multi-part (slotted) recipes and emits
- * static CSS in the `recipes` cascade layer. You pick variants at the outer call.
- * A single-part recipe takes its variant selection plus an optional consumer
- * `className` and returns the finished class string. A multi-part recipe returns
- * one function per slot, each taking optional `{ className }` to append.
+ * Call with a variant selection. A single-part recipe returns one class string, with an optional
+ * consumer `className`. A slotted recipe returns one function per slot, each taking optional
+ * `{ className }`.
  *
- * `recipe()` runs at build time inside a `.css.ts` module. Without `compoundSlots`,
- * slotted recipes emit the same CSS as hand-written per-slot recipes in declaration
- * order. Shared compound styles emit once, with source order controlling precedence.
+ * Slotted emission order is base, then unconditional `compoundSlots`, then variants, then
+ * conditional `compoundSlots`. Pre-built class names keep their original source position, so slotted
+ * styles must be style objects (`SlottedStyleRule`). Single-part recipes still accept pre-built
+ * classes.
  *
- * That precedence — slot base, then unconditional `compoundSlots`, then slot variants,
- * then conditional `compoundSlots` — is achieved by emitting each group's CSS in turn,
- * so it only holds for styles `recipe()` emits itself. A pre-built class name already
- * carries the source position it was first emitted at, which `recipe()` cannot move, so
- * a slotted recipe's slots, slot variant styles, and `compoundSlots` styles accept style
- * objects only (`SlottedStyleRule`). Single-part recipes reorder nothing and still accept
- * a pre-built class or an array composing several.
- *
- * Layer wrapping lives here because importing the function-exporting `layered-style.css.ts`
- * would create a failing Vanilla Extract serialization boundary. The function serializer
- * registers `createRecipe` and `createSingleRecipe` to rebuild the recipes at runtime.
+ * Layer wrapping is inline here. Importing `layered-style.css.ts` would break Vanilla Extract
+ * serialization. Runtime rebuild uses `createRecipe` and `createSingleRecipe`.
  */
 
 // ---------------------------------------------------------------------------
@@ -48,13 +38,8 @@ type RecipeStyleRule =
 	| ReadonlyArray<DistributiveOmit<StyleRule, '@layer'> | ClassNames>;
 
 /**
- * A style rule authored anywhere a slotted recipe reorders CSS emission: slot bases,
- * slot variant styles, and `compoundSlots` styles.
- *
- * Style objects only. A pre-built class name is deliberately excluded here: it already
- * holds a CSS source position from wherever it was first emitted, so `recipe()` cannot
- * move it into the documented `compoundSlots` precedence order. Single-part recipes,
- * which never reorder anything, still accept the pre-built forms via `RecipeStyleRule`.
+ * Style objects for slotted emission. Pre-built class names keep their source position, so they
+ * are rejected here. Single-part recipes still accept them via `RecipeStyleRule`.
  */
 type SlottedStyleRule =
 	| DistributiveOmit<StyleRule, '@layer'>
@@ -66,26 +51,14 @@ type BooleanMap<T> = T extends 'true' | 'false' ? boolean : T;
 /** Variant groups for a single-part recipe: group name to value name to style rule. */
 type VariantGroups = Record<string, Record<string, RecipeStyleRule>>;
 
-/**
- * True when `Variants` carries no authored variant groups: either `keyof Variants`
- * is `never` (an explicit `variants: {}`), or inference had no `variants` property
- * to read at all and fell back to the bare constraint, whose key type is the
- * unconstrained `string`. A real recipe's variant groups are always literal keys,
- * so `string extends keyof Variants` only ever holds in that fallback case.
- *
- * Unconstrained on purpose: this reads nothing but `keyof Variants`, so it serves a
- * single-part recipe's variant groups and a slotted recipe's alike.
- */
+/** True when there are no authored variant groups (`variants: {}` or missing `variants`). */
 type HasNoGroups<Variants> = [keyof Variants] extends [never]
 	? true
 	: string extends keyof Variants
 		? true
 		: false;
 
-/**
- * Outer variant selection for a built recipe. Shared by both recipe shapes: each reads its
- * groups from its own config type, and the selection derived from them has the same form.
- */
+/** Outer variant selection shared by single-part and slotted recipes. */
 type Selection<Variants> =
 	HasNoGroups<Variants> extends true
 		? Record<string, never>
@@ -93,19 +66,12 @@ type Selection<Variants> =
 				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
 			};
 
-/**
- * Composition options a built recipe accepts alongside its variant selection. `className` is a
- * consumer class appended to the recipe's own classes; it is not a variant and never reaches CSS.
- */
+/** An optional consumer `className`. Not a variant. */
 export interface RecipeComposition {
 	className?: string;
 }
 
-/**
- * The full input a built single-part recipe accepts: its variant selection plus
- * `RecipeComposition`. A no-variant recipe accepts only the composition options, typed as a weak
- * object so an object literal with an undeclared key is still rejected.
- */
+/** Variant selection plus optional `className`. */
 type RecipeInput<Variants extends VariantGroups> =
 	HasNoGroups<Variants> extends true
 		? RecipeComposition
@@ -137,10 +103,9 @@ type SlotStyles<Slot extends string> = Partial<Record<Slot, SlottedStyleRule>>;
 type SlotVariantGroups<Slot extends string> = Record<string, Record<string, SlotStyles<Slot>>>;
 
 /**
- * A style shared across slots, with an optional variant condition.
+ * Shared style across slots, with an optional variant condition.
  *
- * `NoInfer` keeps `config.slots` and `config.variants` as the inference sources. Otherwise, an
- * invalid slot or variant here widens those types instead of producing an error.
+ * `NoInfer` keeps `config.slots` / `config.variants` as the inference source so typos error here.
  */
 interface CompoundSlot<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
 	slots: ReadonlyArray<NoInfer<Slot>>;
@@ -168,12 +133,8 @@ type MultiPartRecipe<Slot extends string, Variants extends SlotVariantGroups<Slo
 type AnyMultiPartConfig = MultiPartConfig<string, SlotVariantGroups<string>>;
 
 /**
- * Authoring constraint for a slotted config. Apply it with
- * `{ … } as const satisfies SlottedConfigInput` at the definition site: `as const`
- * keeps the literal slot names and variant values that `recipe()` infers, while
- * `satisfies` type-checks every slot and variant style against `StyleRule` (so a
- * mistyped CSS property is caught where it is written, not silently accepted by
- * `recipe()`'s structural inference).
+ * `{ … } as const satisfies SlottedConfigInput` at the definition site keeps literal names and
+ * type-checks every style against `StyleRule`.
  */
 export interface SlottedConfigInput {
 	compoundSlots?: Array<{
@@ -186,10 +147,7 @@ export interface SlottedConfigInput {
 	variants?: Record<string, Record<string, Record<string, SlottedStyleRule>>>;
 }
 
-/**
- * Derives the outer variant selection type for a built recipe. `className` is composition, not a
- * variant, so it is removed; a no-variant recipe derives `Record<string, never>`.
- */
+/** Variant keys of a built recipe. Omits `className`. Empty recipes → `Record<string, never>`. */
 export type RecipeSelection<Fn> = Fn extends (input?: infer Input) => unknown
 	? VariantKeysOf<NonNullable<Input>>
 	: never;
@@ -236,11 +194,8 @@ const SERIALIZER_IMPORT_PATH = '#recipe-engine';
 type SerializerArgs = Parameters<typeof addFunctionSerializer>[1]['args'];
 
 /**
- * Registers a runtime constructor with Vanilla Extract's function serializer. The
- * args carry built recipe runtime functions (each marked by the serializer)
- * alongside plain descriptor data. They serialise correctly at build time even
- * though the `Serializable` arg type cannot express the recipe functions, so the
- * array is bridged to that type here.
+ * Registers a runtime constructor with Vanilla Extract's function serializer. Args include recipe
+ * runtime functions the `Serializable` type cannot express, so they are bridged here.
  */
 function registerSerializer(fn: object, importName: string, args: ReadonlyArray<unknown>): void {
 	addFunctionSerializer(fn, {
@@ -426,11 +381,7 @@ type LayeredStyleRule = DistributiveOmit<StyleRule, '@layer'>;
 
 const RECIPES_LAYER = cascadeLayers.recipes;
 
-/**
- * A variant selection as `vanillaRecipe` reads it. The dynamically-assembled config below gives
- * `vanillaRecipe` no literal variant map to infer value unions from, so every group's value is
- * the plain `string` a selection carries.
- */
+/** Selection shape `vanillaRecipe` sees when the variant map is assembled dynamically. */
 type LayeredVariantSelection = Record<string, string | undefined>;
 
 interface RecipeInLayerOptions {
@@ -448,11 +399,7 @@ function isClassNames(part: RecipeStylePart): part is ClassNames {
 	return Array.isArray(part) || typeof part === 'string';
 }
 
-/**
- * Vanilla Extract's own class-name form. The local `ClassNames` differs only in being deeply
- * `ReadonlyArray`, which no array method preserves, so a composed rule is rebuilt into a mutable
- * array on the way out rather than asserted across the difference.
- */
+/** Mutable class-name arrays for Vanilla Extract (local `ClassNames` is deeply readonly). */
 type VanillaClassNames = string | Array<VanillaClassNames>;
 
 function toVanillaClassNames(names: ClassNames): VanillaClassNames {
@@ -469,12 +416,8 @@ function withRecipesLayerIfObject(part: RecipeStylePart): StyleRule | VanillaCla
 }
 
 /**
- * Wraps every style object in a rule in the `recipes` layer, leaving pre-built class names alone,
- * and returns it as the `ComplexStyleRule` `vanillaStyle` accepts.
- *
- * Excluding a bare class string from the input is what keeps the result inside
- * `ComplexStyleRule`, which has no bare-string form: a lone class name is a finished class, never
- * a rule to emit, and its caller has already dealt with it.
+ * Wrap style objects in the `recipes` layer. Bare class strings are excluded — they are finished
+ * classes, not rules to emit.
  */
 function withLayerIfStyleRule(styleRule: Exclude<RecipeStyleRule, string>): ComplexStyleRule {
 	// Every array form — composed parts and a nested class-name array alike — goes through the
@@ -578,11 +521,7 @@ function pickGroups<Value>(
 	return picked;
 }
 
-/**
- * Splits a recipe input into the variant selection Vanilla Extract's built recipe reads and the
- * consumer `className` appended afterwards. `className` must never reach the built recipe: it
- * would be treated as an unknown variant.
- */
+/** Split recipe input into VE selection vs consumer `className` (never pass `className` to VE). */
 function splitInput(input: Record<string, unknown> | undefined): {
 	className: string | undefined;
 	selection: Record<string, unknown> | undefined;
@@ -593,12 +532,9 @@ function splitInput(input: Record<string, unknown> | undefined): {
 }
 
 /**
- * Rebuilds a slotted recipe: `recipe(selection)` returns one function per slot,
- * each taking optional composition options. Slots evaluate lazily, so reading one
- * slot does not compute the others.
+ * Runtime rebuild for a slotted recipe. Slots evaluate lazily.
  *
- * @public Imported by path string via Vanilla Extract's function serializer, so
- * the reference is invisible to static analysis.
+ * @public Path-imported by Vanilla Extract's function serializer.
  */
 export function createRecipe(descriptor: SlottedRecipeDescriptor) {
 	const slotEntries = Object.entries(descriptor.slots);
@@ -614,11 +550,9 @@ export function createRecipe(descriptor: SlottedRecipeDescriptor) {
 }
 
 /**
- * Rebuilds a single-part recipe: `recipe(input)` returns the finished class string, with any
- * consumer `className` appended after the recipe's own classes.
+ * Runtime rebuild for a single-part recipe. Appends consumer `className` after recipe classes.
  *
- * @public Imported by path string via Vanilla Extract's function serializer, so
- * the reference is invisible to static analysis.
+ * @public Path-imported by Vanilla Extract's function serializer.
  */
 export function createSingleRecipe(built: BuiltRecipe) {
 	return (input?: Record<string, unknown>): string => {

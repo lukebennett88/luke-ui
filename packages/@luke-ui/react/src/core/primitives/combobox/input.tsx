@@ -28,9 +28,9 @@ interface _ComboboxInputProps extends _ComboboxInputOmit {
 export type ComboboxInputProps = Prettify<_ComboboxInputProps>;
 
 /**
- * Text input for a combobox. Inside a `ComboboxTray`, acts as the search field and takes focus when
- * the tray opens. A tray search field never submits a form value of its own; `ComboboxTrayTrigger`
- * owns that, so the value keeps submitting once the tray closes.
+ * Text input for a combobox. Inside a `ComboboxTray`, this is the search field: it takes focus when
+ * the tray opens and does not submit a form value. `ComboboxTrayTrigger` owns submission while the
+ * tray is closed.
  */
 export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 	const { onClick, ref, size: sizeProp, ...inputProps } = props;
@@ -43,9 +43,7 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 
 	const handleClick = (event: React.MouseEvent<HTMLInputElement>) => {
 		onClick?.(event);
-		// `menuTrigger="focus"` cannot reopen the menu when Escape closes it
-		// without moving focus, so handle a subsequent click explicitly.
-		// The tray search input never opens the combobox; its trigger owns that.
+		// Escape leaves focus here, so `menuTrigger="focus"` will not reopen. The tray search never opens.
 		if (isTraySearch || state?.isOpen) return;
 		state?.open();
 	};
@@ -56,20 +54,12 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 		inputRef.current?.focus({ preventScroll: true });
 	}, [inputRef, isTraySearch]);
 
-	// The tray input searches the listbox; the trigger opens the dialog.
 	const trayInputProps = isTraySearch
 		? ({ 'aria-haspopup': 'listbox', role: 'searchbox' } as const)
 		: undefined;
 
-	// `RacInput` merges React Aria's `InputContext` underneath its props. Inside a tray that
-	// context is the combobox's full `inputProps`, so filter out the trigger-only members before
-	// re-providing it: `aria-expanded` is not valid on `role="searchbox"`, and `onTouchEnd` is the
-	// combobox touch-to-toggle handler. `name` is dropped because, when the combobox submits its
-	// text rather than its key, React Aria names this input instead of rendering a hidden input of
-	// its own — and inside a tray that input exists only while the tray is open, so
-	// `ComboboxTrayTrigger` owns the submitted value and this one must not submit a second entry.
-	// List state such as `aria-controls`, `aria-autocomplete`, and `aria-activedescendant` passes
-	// through for virtual focus.
+	// Strip trigger-only props from the tray `InputContext`: `aria-expanded`, `onTouchEnd` (popover
+	// toggle), and `name` (would double-submit in text mode). Keep listbox virtual-focus attributes.
 	const {
 		'aria-expanded': _ariaExpanded,
 		name: _name,
@@ -90,7 +80,6 @@ export function ComboboxInput(props: ComboboxInputProps): JSX.Element {
 
 	if (!isTraySearch) return input;
 
-	// The React Compiler memoizes this value.
 	// oxlint-disable-next-line react/jsx-no-constructed-context-values
 	return <InputContext.Provider value={trayContext}>{input}</InputContext.Provider>;
 }

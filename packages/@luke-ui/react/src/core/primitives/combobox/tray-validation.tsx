@@ -7,17 +7,13 @@ import { visuallyHiddenRecipe } from '../../visually-hidden/recipe.css.js';
 import { useComboboxValidation } from './validation-context.js';
 
 interface ComboboxTrayValidationProps {
-	/** Focused on invalid submit, when this control is the first invalid one in its form. */
+	/** Trigger to focus when this is the first invalid control in the form. */
 	triggerRef: RefObject<HTMLButtonElement | null>;
 }
 
 /**
- * Keeps native form validation available while the tray (and its text input) is closed. Rendered
- * by `ComboboxTrayTrigger`, since that is the part that exists exactly while the tray is closed.
- *
- * On invalid submit, focuses the tray trigger instead of this aria-hidden control — but only when
- * this control is the first invalid participating control in its owning form, so that multiple
- * invalid comboboxes in one form send focus to the first rather than the last.
+ * Keeps constraint validation available while the tray is closed. On invalid submit, focuses the
+ * trigger when this is the first invalid participating control in the form.
  */
 export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.Element | null {
 	const { triggerRef } = props;
@@ -26,13 +22,12 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 	const state = useContext(ComboBoxStateContext);
 	const ref = useRef<HTMLInputElement>(null);
 
-	// Match React Aria: field prop, then enclosing `<Form>`, then `'native'`.
+	// Resolve like React Aria: field prop, then enclosing `<Form>`, then `'native'`.
 	const formContext = useSlottedContext(FormContext);
 	const resolvedValidationBehavior =
 		validationBehavior ?? formContext?.validationBehavior ?? 'native';
 
-	// Disabled, read-only, and `validationBehavior: 'aria'` must leave constraint validation
-	// entirely — dropping `required` alone is not enough.
+	// Disabled, read-only, and `aria` must leave constraint validation entirely.
 	const isValidated =
 		resolvedValidationBehavior === 'native' && isDisabled !== true && isReadOnly !== true;
 
@@ -43,8 +38,7 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 	const selectedValue: string = Array.isArray(selected)
 		? selected.map(String).join(',')
 		: (selected?.toString() ?? '');
-	// With `allowsCustomValue`, typed text with no matching option is a valid value in its own
-	// right, so a `required` check must fall back to the input text once there is no selection.
+	// With `allowsCustomValue`, text with no selection still satisfies `required`.
 	const value =
 		allowsCustomValue && selectedValue === '' ? (state?.inputValue ?? '') : selectedValue;
 
@@ -87,10 +81,9 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 }
 
 /**
- * Whether `input` is the first invalid, participating control in its owning form, in document
- * order. `event.preventDefault()` in `onInvalid` suppresses the browser's own focusing of the
- * first invalid control, so this control decides for itself whether it should take focus instead.
- * With no owning form there is nothing to compare against, so it always counts as first.
+ * Whether `input` is the first invalid participating control in its form. `preventDefault` in
+ * `onInvalid` stops the browser focusing that control, so this decides instead. With no owning
+ * form, treat it as first.
  */
 function isFirstInvalidControl(input: HTMLInputElement): boolean {
 	const form = input.form;
@@ -110,7 +103,7 @@ function isFirstInvalidControl(input: HTMLInputElement): boolean {
 	return true;
 }
 
-/** Snapshot a live `ValidityState` into the plain object React Aria stores. */
+/** Snapshot of a live `ValidityState` for the plain object React Aria stores. */
 function toValidationDetails(validity: ValidityState): ValidityState {
 	return {
 		badInput: validity.badInput,

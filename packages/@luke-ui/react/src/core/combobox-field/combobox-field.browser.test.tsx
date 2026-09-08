@@ -122,7 +122,6 @@ test('ComboboxField uses a mobile modal to search and select an option', async (
 		// Measuring the tray only means anything once it has stopped sliding up.
 		await waitForOverlayEnter(overlay);
 
-		// The tray tracks the document scroll position so it sits at the top of the viewport.
 		expect(getComputedStyle(overlay).top).toBe(`${window.scrollY}px`);
 
 		// RAC's own `Modal` sets `--visual-viewport-height` from `useViewportSize`, so overriding it
@@ -200,15 +199,11 @@ test('ComboboxField reopens the popover when the focused input is clicked again'
 			{renderCountryItem}
 		</ComboboxField>,
 	);
-	// Query the element once and reuse the node: re-querying the locator after the popover
-	// opens and closes fails, because the surrounding DOM changes between queries.
 	const input = locator.getByRole('combobox', { name: 'Country' }).element() as HTMLElement;
 
 	await userEvent.click(input);
 	await expect.element(page.getByRole('option', { name: 'Australia' })).toBeVisible();
 
-	// Escape closes the popover but leaves focus on the input, so `menuTrigger="focus"` gets
-	// no further focus event to reopen from.
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('listbox')).not.toBeInTheDocument();
 	expect(document.activeElement).toBe(input);
@@ -239,8 +234,6 @@ test('ComboboxField clearing the tray search clears the selection', async () => 
 		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
 		expect(new FormData(form).get('country')).toBe('');
-		// The trigger's accessible name is the label plus the selected value, so assert the value
-		// text itself: an exact name of "Country" still matches while a selection is displayed.
 		await expect.element(trigger).toHaveTextContent('');
 	} finally {
 		restoreScreenWidth();
@@ -287,7 +280,6 @@ test('ComboboxField tray clear clears a controlled selection and inputValue', as
 		await expect.element(page.getByRole('dialog')).toBeVisible();
 		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('Australia');
 
-		// Controlled inputValue does not clear the selection on its own — the clear button must.
 		await userEvent.click(page.getByRole('button', { name: 'Clear search' }).element());
 		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('');
 		await userEvent.keyboard('{Escape}');
@@ -342,12 +334,10 @@ test('ComboboxField reports a selection the parent had already moved away from',
 		}
 		render(<ControlledCombobox />);
 
-		// The parent moves the selection on its own, without the combobox reporting anything.
 		await userEvent.click(page.getByRole('button', { name: 'Move selection' }).element());
 		await expect.element(page.getByRole('button', { name: 'Country Canada' })).toBeVisible();
 		expect(changes).toEqual([]);
 
-		// Selecting the key the combobox last *reported* is still a real change from 'ca'.
 		await userEvent.click(page.getByRole('button', { name: 'Country Canada' }).element());
 		await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
@@ -383,14 +373,11 @@ test('ComboboxField keeps a controlled selection cleared by the parent', async (
 		}
 		render(<ControlledCombobox />);
 
-		// A deliberate clear from the parent must stick rather than being resynced back to 'au'.
 		await userEvent.click(page.getByRole('button', { name: 'Reset from outside' }).element());
 		await expect
 			.element(page.getByRole('button', { name: 'Country Select a country' }))
 			.toBeVisible();
 
-		// Reopening must not resurrect the old selection, and the search starts empty rather than
-		// showing the option that was cleared.
 		await userEvent.click(page.getByRole('button', { name: 'Country Select a country' }).element());
 		await expect.element(page.getByRole('dialog')).toBeVisible();
 		await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('');
@@ -423,15 +410,12 @@ test('ComboboxField clears the selection when a query replaces it without pickin
 		const trigger = page.getByRole('button', { name: 'Country Australia' }).element();
 		await userEvent.click(trigger);
 		const search = page.getByRole('searchbox', { name: 'Country' }).element();
-		// Clearing the search first clears the selection, same as pressing the clear button.
-		// Typing a fresh query afterwards does not select anything on its own.
 		await userEvent.clear(search);
 		await userEvent.type(search, 'Can');
 		await userEvent.keyboard('{Escape}');
 		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
 		expect(changes).toEqual([null]);
-		// The abandoned query is not a selection, so the trigger shows no value text.
 		await expect.element(trigger).toHaveTextContent('');
 	} finally {
 		restoreScreenWidth();
@@ -447,7 +431,6 @@ test('ComboboxField leaves a consumer-controlled inputValue authoritative', asyn
 	const input = locator.getByRole('combobox', { name: 'Country' });
 	await expect.element(input).toHaveValue('Aus');
 
-	// Selecting an option cannot rewrite an input value the consumer owns.
 	await userEvent.click(page.getByRole('button', { name: 'Toggle options' }).element());
 	await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
 	await expect.element(input).toHaveValue('Aus');
@@ -473,7 +456,6 @@ test('ComboboxField clears the selection when the desktop input is emptied', asy
 	const input = locator.getByRole('combobox', { name: 'Country' });
 	await expect.element(input).toHaveValue('Australia');
 
-	// Here the input *is* the value display, so emptying it is how a user clears the selection.
 	await userEvent.clear(input.element());
 	await userEvent.keyboard('{Escape}');
 
@@ -489,6 +471,5 @@ test('ComboboxField seeds the desktop input from defaultInputValue', async () =>
 		</ComboboxField>,
 	);
 
-	// Nothing is selected, so the seeded query is the only thing that can fill the field.
 	await expect.element(locator.getByRole('combobox', { name: 'Country' })).toHaveValue('Aus');
 });

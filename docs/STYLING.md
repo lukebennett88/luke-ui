@@ -1,289 +1,148 @@
 # Styling
 
+How styling works in `@luke-ui/react`, for contributors who maintain it. Public usage docs live in
+the docs app MDX.
+
 ## Setup
 
-Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities. Consumers
-import `@luke-ui/react/stylesheet.css` and apply `rootClassName` from `@luke-ui/react/theme` to
-`<body>`, `<main>`, or an app shell. Import one bundled theme stylesheet, for example
-`@luke-ui/react/themes/tactile/stylesheet.css`. That alone themes the whole document from `:root`,
-with no class and no JS required. Neither step injects styles at runtime.
+Luke UI ships one static stylesheet for its reset, theme root, recipes, and utilities.
+
+1. Import `@luke-ui/react/stylesheet.css`.
+2. Apply `rootClassName` from `@luke-ui/react/theme` to `<body>`, `<main>`, or an app shell.
+3. Import one bundled theme stylesheet, for example `@luke-ui/react/themes/tactile/stylesheet.css`.
+
+The theme stylesheet themes the document from `:root`. It needs no class and no JS. None of these
+steps inject styles at runtime.
 
 ## Structure
 
-Paths below are rooted in `packages/@luke-ui/react/src/`. Core style, primitive, overlay, and
-utility modules live under `core/`. Theme modules live under `theme/`.
+Paths below are rooted in `packages/@luke-ui/react/src/`.
 
-- `core/styles/index.css.ts`: stylesheet graph in cascade order — layers, reset, theme root, style
-  modules, utilities.
-- `core/styles/reset.css.ts`: reset scoped to `.luke-ui-reset`.
-- `core/styles/theme-root.css.ts`: base typography and text colour scoped to `.luke-ui-theme`.
-- `core/styles/modules.css.ts`: the committed stylesheet registry. It explicitly imports every
-  colocated `recipe.css.ts` and `styles.css.ts` that participates in the shipped stylesheet, plus
-  primitive and overlay style modules. Named layers make cross-layer priority explicit, but
-  same-layer, same-specificity CSS still resolves by source order: later wins. List a module that
-  sets concrete values another one must override before that other module, so the later module's own
-  styles win the tie (e.g. `text/recipe.css` before `code/recipe.css` and `kbd/recipe.css`:
-  `textRecipe`'s `shouldInheritFont` sets font properties to `inherit`, while `codeRecipe` and
-  `kbdRecipe` set concrete values at equal specificity in the same layer). Shared custom properties
-  that resolve through inheritance at computed-value time, such as `fieldMessageIcon` between field
-  and checkbox, do not depend on source order. The component and primitive generators preserve this
-  order. They append new imports to the end and do not sort it.
-- `core/styles/recipe.ts`: the internal `recipe()` engine shared by every component recipe, plus the
-  `RecipeSelection<typeof recipeFn>` helper that derives a recipe's variant type.
-- `core/styles/input-states.ts`: the shared field control-state selectors
-  (`composeInputStateSelectors`, `descendantDisabledSelector`) that field recipes compose. It is
-  named `.ts`, not `.css.ts`, because it emits no CSS. Each field recipe's `.css.ts` module composes
-  its plain data and functions.
-- `core/styles/invalid-indicator.ts`: the shared invalid-state `exclamationTriangle` icon, rendered
-  as a CSS mask in two sizes. `invalidIndicatorIcon` (plus `invalidIndicatorIconForcedColors`) is
-  the in-control icon `core/primitives/combobox/styles.css.ts` applies under its own invalid
-  selector's `::after` — the border stays at its resting 1px there, since the icon is already the
-  non-colour cue. It renders as the pseudo-element's own last DOM child, so the style gives its
-  trailing affordances (the combobox clear button and trigger) a flex `order` ahead of the icon's
-  default `order: 0`, so it lands right after the field's text content and before them, matching the
-  Spectrum reference this ordering is drawn from. `invalidMessageIcon` is the smaller,
-  message-leading variant `core/primitives/field/recipe.css.ts` draws on its `message` slot,
-  switched on by `core/primitives/checkbox/recipe.css.ts` alone: `Checkbox`'s own box has no room
-  for an in-control icon without floating past the label, so its icon moves to the message and its
-  box keeps a `2px` border as its own non-colour cue instead. Named `.ts` for the same reason as
-  `input-states.ts`: it emits no CSS of its own, only plain style-rule data each recipe composes.
-- `core/primitives/input-group/recipe.css.ts` draws the same glyph, but as a real `Icon` element on
-  its own `invalidIndicator` slot rather than a mask: `InputGroup` (`core/primitives/input-group/`)
-  reads React Aria's `Group` `isInvalid` render prop and renders the icon itself, so an invalid
-  control cannot be composed without a non-colour cue. The recipe owns only the icon's colour and
-  margins — `Icon` owns its box, and `IconSizeProvider` (`FIELD_CONTROL_ICON_SIZE`) owns its
-  per-size step — and gives the `suffix` slot the same `order: 1` for the same Spectrum ordering.
-  Combobox's control is not a plain `Group` with that state to hand, so it stays CSS-driven.
-- `core/overlays/mobile-overlay.css.ts`: the backdrop, tray, and dialog styles `MobileOverlay`
-  renders for the mobile combobox tray, based on Apache-2.0 React Spectrum's `Tray.tsx` and
-  `tray/index.css`.
-- `core/overlays/`: the private mobile tray plumbing. `mobile-overlay.tsx` wraps React Aria's
-  `ModalOverlay`, `Modal`, and `Dialog` for the combobox tray. `use-is-mobile-device.ts` reads the
-  device screen width, not the viewport width, to decide when a combobox switches to it.
-- `core/styles/`: layout utilities, most exported from `@luke-ui/react/styles`.
-- `theme/contract.ts`: the theme token tree, the mode-family declaration, `--luke-*` variable
-  naming, and the source-owned `typeStyles` typography keys.
-- `theme/path-record.ts`: the typed `[path, value]` record constructor value producers use so
-  `Object.fromEntries` cannot hide a missing contract path.
-- `theme/contract.css.ts`: the typed `vars` contract, built by walking the theme token tree directly
-  so it stays source-owned and free of styling-engine types.
-- `theme/define-theme.ts`: the public `defineTheme(input)` authoring util, its typed `ThemeInput`,
-  and the one resolution of curated defaults (source colours, materials, radius, backdrop) into the
-  internal foundation.
-- `theme/foundation.ts`: the internal typed theme-foundation shape `defineTheme` normalises into,
-  with generator source colours as OKLCH and CSS-text values such as backdrop as strings, plus the
-  curated colour, radius, and typography defaults.
-- `theme/color.ts`: OKLCH colour math, sRGB gamut mapping, and WCAG contrast.
-- `theme/contrast-policy.ts`: the WCAG ratios, solver headroom and search step, and the canonical
-  semantic role list the generator, the compiler's validation matrix, and the semantic map all read.
-- `theme/lightness-candidates.ts`: the shared lightness grid the accent pre-conditioner,
-  solid-anchor search, and control-border solver walk.
-- `theme/scale.ts`: the private 12-step family generator (`generateFamily`), including the
-  constrained step-9 solid-anchor search and `passesOnSolidGate`. Semantic consumers read named
-  rungs via `FAMILY_RUNG`. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for
-  interaction-state generation.
-- `theme/motion.ts`: the private ordinal duration scale (`MOTION_DURATION_SCALE`) behind the public
-  `motion.duration` roles in `token-values.ts`. It is resolved in TypeScript and never emitted, so
-  no `--luke-motion-duration-*` custom property exists.
-- `theme/breakpoints.ts`: the private responsive breakpoint inline sizes, in pixels. Like
-  `motion.ts`, it is a plain module with no Vanilla Extract import, resolved in TypeScript and never
-  emitted as a custom property, because a container query cannot read one. The styling utilities
-  turn the inline sizes into container queries, and `useIsMobileDevice` reads the same values for
-  its mobile threshold.
-- `theme/elevation.ts`: the mode-aware elevation surface generator (`generateSurfaces`), where
-  `surfaces.canvas` is always exactly the resolved `background`.
-- `theme/semantic-map.ts`: the one default mapping (`mapSemanticColors`) from generated families and
-  surfaces onto the colour contract's leaves, including generated hover and pressed states.
-- `theme/diagnostics.ts`: the `compileTheme` diagnostics data model (family, surface, solid-anchor,
-  and contrast-check detail) consumed by the "Theme/Diagnostics" Storybook story.
-- `theme/token-board.tsx`: the contract-driven "Theme/Token board" Storybook story, which renders
-  every contract leaf for the active theme and colour mode.
-- `theme/build-theme.ts`: the internal `compileTheme(foundation) → { css, diagnostics }` value
-  pipeline, `buildTheme`, and contrast validation.
-- `theme/theme-class-name.ts`: `getThemeClassName(name)`, the one home for the identity class and
-  its kebab-case rule, exported from `@luke-ui/react/theme`. It imports nothing, so importing a
-  class never drags in the compiler or a foundation.
-- `theme/foundations/tactile.ts` and `theme/foundations/paper.ts`: each bundled theme's
-  `defineTheme(...)` input, kept as separate leaf modules so importing one never pulls in the other.
-- `theme/bundles/tactile/` and `theme/bundles/paper/`: each theme's public entrypoint, exported from
-  `@luke-ui/react/themes/tactile` and `@luke-ui/react/themes/paper`. Each exports its own
-  `themeClassName` identity class and its `theme` (the public `ThemeInput` a consumer can read,
-  copy, or spread). The class comes from a per-theme `theme-class-name.ts` leaf holding the name as
-  a literal, so importing the class alone leaves the foundation out of a consumer's bundle.
-  `theme/bundles/theme-bundle.test.ts` proves that with a real bundler run.
-- `scripts/build-themes.ts`: writes the bundled theme stylesheets to
-  `dist/themes/<name>/stylesheet.css`, alongside the entrypoint `vp pack` emits there.
+| Area | Role |
+| ---- | ---- |
+| `core/styles/` | Stylesheet graph, layers, reset, theme root, recipe engine, modules registry, utilities, and shared helpers that emit no CSS on their own |
+| Component and primitive folders under `core/` | Colocate `recipe.css.ts` (public) and `styles.css.ts` (private) beside the owner |
+| `theme/` | Token contract, `defineTheme`, foundations, bundles, and the build pipeline |
+| `scripts/build-themes.ts` | Writes `dist/themes/<name>/stylesheet.css` |
+
+Stable entry points:
+
+- Stylesheet graph: `core/styles/index.css.ts`
+- Modules registry: `core/styles/modules.css.ts`
+- Recipe engine: `core/styles/recipe.ts`
+- Layer helpers: `core/styles/layered-style.css.ts`
+- Token contract: `theme/contract.ts` and `theme/contract.css.ts`
+- Theme authoring: `theme/define-theme.ts`
+- Colour pipeline: [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md)
+
+`modules.css.ts` imports every shipped `recipe.css.ts` and `styles.css.ts`, plus primitive and
+overlay modules. Named layers set cross-layer priority. Within a layer, later equal-specificity
+rules win. Put overridden modules first — for example `text/recipe.css` before `code/recipe.css`
+and `kbd/recipe.css`. Generators append imports and do not sort this list. Inherited custom
+properties ignore source order.
 
 ## Themes
 
-`defineTheme(input)` from `@luke-ui/react/theme` is the sole public theme-authoring surface. It
-normalises a small, curated `ThemeInput` — a required `color.accent`, an optional neutral character,
-and optional materials — into static stylesheet text. It is pure and Node-compatible. It generates
-the full semantic contract in OKLCH and throws a `ThemeContrastError` naming each failing mode and
-token pair when a generated pair misses WCAG 2.2 AA contrast. A single-value accent or neutral is
-adapted per mode through a lightness search. It throws when no lightness in the vibrant band is
-accessible. The raw `ThemeFoundation` object and `buildTheme` are internal only.
+`defineTheme(input)` from `@luke-ui/react/theme` is the sole public theme-authoring surface. It is
+pure and Node-compatible. It normalises a curated `ThemeInput` into static CSS and throws
+`ThemeContrastError` when a pair misses WCAG 2.2 AA contrast. The raw `ThemeFoundation` object and
+`buildTheme` are internal.
 
-Every colour token is generated from a private 12-step scale per role (neutral, accent, info,
-success, warning, danger) plus a mode-aware elevation surface set, then mapped onto the public
-colour contract. Every role gets the same background, foreground, on-solid, and border slots. See
-[THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the pipeline, the border and accent
-contrast policies, and what changed when this generator replaced the original per-token solver.
+Colour tokens come from private 12-step scales and elevation surfaces, then map onto the semantic
+contract. See [THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for that pipeline.
 
-The semantic contract includes `font.caption` through `font.display` type styles. Each style groups
-its font family, size, weight, line height, letter spacing, and per-font Capsize trims so components
-cannot combine unrelated values. `font.family.body` is selected from the curated Inter, Apple
-System, or DM Sans metrics and `buildTheme` computes the matching trims. `font.family.code` is a
-fixed neutral monospace stack for code and keyboard input. It is not a brand-family or Capsize
-choice. Icon sizes carry forward the `xsmall`, `small`, `medium`, and `large` scale at 16px, 20px,
-24px, and 32px.
+Type styles are grouped from `font.caption` through `font.display`. Keep family, size, weight, line
+height, letter spacing, and Capsize trims together. `font.family.code` is a fixed monospace stack.
+Icon sizes are `xsmall`–`large` at 16px, 20px, 24px, and 32px.
 
-Each colour mode authors the final composite `box-shadow` for `depth.recessed`, `depth.resting`,
-`depth.raised`, `depth.floating`, and `depth.overlay`. Components select a semantic depth and do not
-branch on the theme identity. This keeps lower edges and exterior shadows visible in the foundation
-instead of deriving them from strength multipliers and hidden formulas.
+Author `depth.*` and `actionControlFinish.*` per mode as final CSS values. Components pick semantic
+tokens. They do not branch on theme identity.
 
-Each mode also authors final `background-image` values for `actionControlFinish.resting`,
-`actionControlFinish.raised`, and `actionControlFinish.recessed`. Button and IconButton layer this
-face lighting over their semantic surface colour. Ghost controls and forced-colours rendering do not
-use the authored finish.
+Use `deriveConcentricRadius(innerRadius, gap)` for nested radii. It returns a CSS `calc()` so both
+inputs can be semantic theme variables.
 
-Use `deriveConcentricRadius(innerRadius, gap)` for rounded elements nested inside another rounded
-surface. It returns a CSS `calc()` value for the outer radius, so both inputs can be semantic theme
-variables instead of theme-specific numbers.
+Bundled themes (`tactile`, `paper`) ship precompiled. Each stylesheet pairs `:where(:root)` with a
+`.luke-ui-theme-<name>` identity class. Apply `themeClassName` only when a document needs more than
+one theme at once. Authored themes use the same class mechanism through `getThemeClassName(name)`.
 
-The bundled themes ship precompiled. Import `@luke-ui/react/themes/tactile/stylesheet.css` or
-`@luke-ui/react/themes/paper/stylesheet.css` alone to theme the whole document from `:root`, with no
-class applied anywhere. Each stylesheet pairs a `:where(:root)` fallback with its own
-`.luke-ui-theme-<name>` identity class, so importing one theme never pulls in the other.
+Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Set
+`data-color-mode="light"` or `data-color-mode="dark"` to force a mode. Nested scopes can override it.
+Every scope also sets native `color-scheme`.
 
-Apply the theme's `themeClassName`, from `@luke-ui/react/themes/tactile` or
-`@luke-ui/react/themes/paper`, only when a document needs more than one theme active at once, for
-example a marketing page next to an app shell. Scope it to `<html>` or a subtree root alongside the
-matching stylesheet. An authored theme reaches the same class through `getThemeClassName(name)` from
-`@luke-ui/react/theme`, so a `defineTheme` theme is applied by exactly the mechanism a bundled one
-is.
-
-Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Setting
-`data-color-mode="light"` or `data-color-mode="dark"` on the theme root, an ancestor, or any element
-inside the subtree forces that mode, and nested scopes can override it. Every scope also sets native
-`color-scheme` so form controls and scrollbars agree.
-
-Components move to the semantic contract in the component-family migration slices.
-
-Luke UI's portalled Combobox popover inherits the document's theme. It carries no theme identity or
-colour mode propagation logic of its own, because a loaded theme stylesheet already themes the whole
-document from `:root`. A colour mode scoped to a nested element below `<html>` does not reach a
-body-level portal. Set `data-color-mode` on `<html>` itself when a portalled surface must follow an
-explicit mode.
+A colour mode scoped below `<html>` does not reach a body-level portal. Set `data-color-mode` on
+`<html>` when a portalled surface must follow an explicit mode.
 
 ## Cascade layers
 
-All styles live in named CSS cascade layers. Layer order makes cross-layer priority explicit.
-Specificity and source order still decide conflicts within a layer.
+All styles live in named CSS cascade layers. Layer order sets cross-layer priority. Specificity and
+source order still decide conflicts within a layer.
 
-| Layer        | Purpose                                                                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `reset`      | Browser defaults, box sizing, and margins.                                                                                              |
-| `theme`      | Design token custom properties and base typography.                                                                                     |
-| `base`       | Reserved for a consuming application's own element defaults or resets (e.g. Tailwind Preflight). Luke UI emits nothing into this layer. |
-| `recipes`    | Component styles, variants, compound variants, and shared compound-slot styles.                                                         |
-| `structural` | Retained descendant rhythm, skeleton masking, and combinator selectors.                                                                 |
-| `utilities`  | One-off layout and override escape hatches.                                                                                             |
+| Layer        | Purpose |
+| ------------ | ------- |
+| `reset`      | Browser defaults, box sizing, and margins |
+| `theme`      | Design token custom properties and base typography |
+| `base`       | Reserved for the consuming app (for example Tailwind Preflight). Luke UI emits nothing here |
+| `recipes`    | Component styles, variants, compound variants, and shared compound-slot styles |
+| `structural` | Retained descendant rhythm, skeleton masking, and combinator selectors |
+| `utilities`  | One-off layout and override escape hatches |
 
-The public `dist/stylesheet.css` starts with one combined `@layer` order statement that lists every
-Luke-owned layer, in exactly that order, before any rules create them:
+The public stylesheet starts with one combined order statement:
 
 ```css
 @layer reset, theme, base, recipes, structural, utilities;
 ```
 
-The package declares the `base` layer but never writes to it. Declaring it up front — rather than
-leaving it for a consumer's own CSS to create implicitly — fixes its rank between `theme` and
-`recipes`. A consumer stylesheet (e.g. Tailwind Preflight, which writes element-selector resets into
-its own `@layer base`) can then safely target `base` and know its rules will lose to every Luke UI
-component recipe, instead of the layer being created last — and therefore outranking everything —
-the first time the consumer's CSS references it.
+The package declares `base` but never writes to it. That pins its rank between `theme` and
+`recipes`. If a consumer's first `@layer base` write creates the layer instead, the browser places
+it last and it beats every component recipe.
 
-Three helpers author component CSS. Pick by what the class is for, not by whether it has variants:
+Author component CSS with one of:
 
-- `recipe()` from `core/styles/recipe.ts` authors a component's visual treatment with recipe
-  semantics: a selection function, optional variants, compound variants, and a derived
-  `…RecipeVariants` type. A base-only recipe such as `blockquoteRecipe` is still a recipe.
-  `recipe()` wraps every base, variant, and compound-variant style in the `recipes` layer itself, so
-  do not pre-wrap styles before passing them in. Use `compoundSlots` to share one style across
-  several slots.
-- `style()` from `core/styles/layered-style.css.ts` authors one standalone private class in the
-  `recipes` layer: a scope or marker class such as `proseScopeClassName` in
-  `core/prose/scope.css.ts`, or an implementation class a component applies directly. Use it when
-  there is no selection to expose.
-- `globalStyleInLayer()` from the same module authors a global selector in an explicit layer. Use it
-  only where the layer choice is meaningful: the reset and theme root, and `structural` rules such
-  as Prose descendant rhythm and the `LoadingSkeleton` masks in
-  `core/loading-skeleton/styles.css.ts`.
+- `recipe()` — component visuals with selection and variants. Styles go in the `recipes` layer.
+- `style()` — one private `recipes` class with no selection (scopes, markers, implementation
+  classes).
+- `globalStyleInLayer()` — a global selector in a chosen layer. Use for reset, theme root, and
+  `structural` rules.
 
-A `compoundSlots` entry may include a variant condition. Its style is emitted once and composed into
-each target slot.
+Authors never name the `recipes` layer. Only `globalStyleInLayer()` takes a layer, and it rejects
+`base`.
 
-Component authors never name the `recipes` layer. Only `globalStyleInLayer()` takes a layer, and it
-rejects `base`, which is reserved for the consuming application.
-
-Text's Capsize trim declarations use logical properties for the pseudo-element margins and are
-authored as one of the Text recipe's `recipe()` compound-variant styles, so they remain owned by
-`recipes` through that same layering rather than a dedicated helper.
-
-Overrides that should beat component recipes belong in the `utilities` layer. Use `!important` only
-when a style must also beat consumer un-layered styles or inline styles. Layers cannot beat those.
-
-`LoadingSkeleton` uses `!important` inside the `structural` layer because it must force placeholder
-styles onto arbitrary wrapped children. Moving `!important` to a lower layer does not weaken the
-mask — in the `!important` cascade, lower layers win over higher layers. The `structural` layer is
-below `utilities`, so a `utilities`-layer `!important` override from a consumer cannot beat the
-skeleton.
+Put overrides that must beat recipes in the `utilities` layer. Use `!important` only to beat
+un-layered or inline styles. Under `!important`, lower layers win over higher layers. Structural
+masks that must stick on wrapped children use `!important` in `structural` for that reason.
 
 Reduced-motion handling belongs near the animation. The global `prefers-reduced-motion` rule lives
-in the `reset` layer, so it cannot disable animations declared in `recipes` or `utilities`. Animated
-recipes should add their own `@media (prefers-reduced-motion: reduce)` override. See
-`loading-skeleton/styles.css.ts` for an example.
+in `reset`, so it cannot disable animations in `recipes` or `utilities`. Add a local
+`@media (prefers-reduced-motion: reduce)` override in any animated recipe.
 
 ## Recipes
 
-Public recipes export from the component or primitive entrypoint that owns the styling contract, for
-example `buttonRecipe` from `@luke-ui/react/button` or `inputGroupRecipe` from
-`@luke-ui/react/primitives/input-group`. The hosted Styling page documents when a developer imports
-one, the `buttonRecipe` / `ButtonRecipeVariants` names, and single-part versus slotted calls.
-
-Recipes are component-specific. Keep them separate from general layout utilities.
+Public recipes export from the owning component or primitive entrypoint. Keep them separate from
+layout utilities.
 
 Colocate recipe files beside their owner:
 
 - `recipe.css.ts` — public recipe contract
 - `styles.css.ts` — private implementation styling
 
-Every recipe is built with the internal `recipe()` engine from `core/styles/recipe.ts`. It is not
-part of the public package entry. Component authors inside `@luke-ui/react` use it to define a new
-recipe. Consumers call the built recipe functions it returns (`buttonRecipe`, `textRecipe`, and so
-on). `recipe()` wraps every base, variant, and compound-variant style it is given in the `recipes`
-cascade layer itself, so a recipe author does not add layering by hand.
+Build every recipe with the internal `recipe()` engine from `core/styles/recipe.ts`. It is not a
+public package entry. `recipe()` wraps every base, variant, and compound-variant style in the
+`recipes` layer.
 
-A built recipe also owns `className` composition. It accepts its variant selection plus an optional
-`className` and returns the complete class string, with the consumer class appended after its own:
+Pass optional `className` into the recipe. It appends after the recipe's own classes:
 
 ```tsx
 <blockquote className={blockquoteRecipe({ className })} />
 <button className={buttonRecipe({ appearance, className, size, tone })} />
 ```
 
-Wrapping recipe output in `cx(recipe(…), className)` is not the normal pattern. Reach for `cx()`
-only to combine a recipe result with a class that is not the consumer's, such as a standalone
-`style()` class. `className` is composition, not a variant: it never reaches CSS, and it is only
-accepted under that name because Luke UI is React-only.
+Do not wrap recipe output in `cx(recipe(…), className)`. Use `cx()` only to mix a recipe result with
+another non-consumer class, such as a `style()` class.
 
 ### Single-part recipes
 
-A single-part recipe takes `base`, `variants`, `defaultVariants`, and `compoundVariants`, and
-returns a function that takes a variant selection plus optional `className` and returns one class
-string:
+A single-part recipe takes `base`, `variants`, `defaultVariants`, and `compoundVariants`. It returns
+a function that takes a variant selection plus optional `className` and returns one class string:
 
 ```ts
 export const buttonRecipe = recipe({
@@ -298,14 +157,11 @@ export const buttonRecipe = recipe({
 });
 ```
 
-See `core/primitives/button/recipe.css.ts` for the full recipe this abbreviates.
-
 ### Slotted recipes
 
-A recipe whose component has multiple styled parts takes `slots` instead of `base`. Each variant
-value maps to per-slot styles, and the built recipe takes a variant selection and returns one
-function per slot. Variants are chosen once at the outer call, and each slot call accepts only
-`{ className }` to append. Slots evaluate lazily, so reading one does not compute the others:
+A multi-part recipe takes `slots` instead of `base`. Each variant value maps to per-slot styles. The
+built recipe returns one function per slot. Choose variants once at the outer call. Each slot call
+accepts only `{ className }`:
 
 ```tsx
 export const fieldRecipe = recipe({
@@ -320,44 +176,33 @@ const { label, message, root } = fieldRecipe({ tone: 'description' });
 </div>;
 ```
 
-See `core/primitives/field/recipe.css.ts` for a complete public slotted recipe. Apply
-`as const satisfies SlottedConfigInput` at the definition site: `as const` preserves the literal
-slot names and variant values `recipe()` infers, and `satisfies` type-checks every slot and variant
-style against `StyleRule` where it is written.
+Apply `as const satisfies SlottedConfigInput` at the definition site. `as const` preserves literal
+slot names and variant values. `satisfies` type-checks every style against `StyleRule`.
 
-Compound variants are single-part only: `buttonRecipe` and `textRecipe` both use `compoundVariants`
-on their single-part config. Slotted recipes use `compoundSlots` to share a style across named
-slots, with an optional variant condition.
+`compoundVariants` is single-part only. Slotted recipes use `compoundSlots` to share a style across
+named slots. A `compoundSlots` entry may include a variant condition.
 
 For overlapping properties, precedence runs from the slot base to unconditional `compoundSlots`,
-then slot variants, then conditional `compoundSlots`. Entries within each compound category follow
-array order: a later entry wins. This order is set by emitting each group's CSS in turn, so it holds
-only for style objects `recipe()` emits itself. Pass style objects (or arrays of style objects) for
-slotted `slots`, slot variant styles, and `compoundSlots` styles. A pre-built class string keeps the
-source position where it was first emitted, which `recipe()` cannot move. Single-part recipes
-reorder nothing and still accept a pre-built class or an array composing several.
+then slot variants, then conditional `compoundSlots`. Within each compound category, a later array
+entry wins. This order holds only for style objects `recipe()` emits. A pre-built class string keeps
+the source position where it was first emitted. Single-part recipes reorder nothing and still accept
+a pre-built class or an array.
 
 ### Deriving variant types
 
-Never hand-maintain a recipe's variant type. Derive it from the built recipe with
-`RecipeSelection<typeof recipeFn>`:
+Derive the variant type from the built recipe. Never hand-maintain it or cast a hand-written
+interface onto the selection parameter:
 
 ```ts
 export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
 ```
 
-`RecipeSelection` contains only variant keys. `className` is composition input to the built recipe,
-not a variant, so it never appears in the derived type.
-
-Do not cast a hand-written variant interface onto a recipe's selection parameter. If the exported
-type and the recipe definition can drift, something is wrong with how the type was produced, not
-with the recipe.
+`RecipeSelection` contains only variant keys. `className` is composition input, not a variant.
 
 ### Shared input-state selectors
 
-`InputGroup` and Combobox styling (`core/primitives/input-group/recipe.css.ts`,
-`core/primitives/combobox/styles.css.ts`) share one definition of what "hovered", "focused",
-"disabled", "invalid", and "read-only" mean for a control, from `core/styles/input-states.ts`:
+Field-control recipes share hover, focus, disabled, invalid, and read-only selectors from
+`core/styles/input-states.ts`:
 
 ```ts
 import { composeInputStateSelectors, descendantDisabledSelector } from './input-states.js';
@@ -365,42 +210,31 @@ import { composeInputStateSelectors, descendantDisabledSelector } from './input-
 const { disabled, focusWithin, hover, invalid, readOnly } = composeInputStateSelectors();
 ```
 
-`composeInputStateSelectors` owns the shared attribute and pseudo-class matrix, then returns the
-mutually exclusive selectors a recipe applies to its styles (for example, `hover` deliberately
-excludes an element that is also focused or read-only). Both field recipes use these definitions
-unchanged. Control-specific selectors stay in the TextField and Combobox recipes.
+`composeInputStateSelectors` owns the shared attribute and pseudo-class matrix. It returns mutually
+exclusive selectors. Control-specific selectors stay in the owning recipe.
 
-Resist widening a state to probe descendants with `:has()`. React Aria publishes `isDisabled` and
-`isInvalid` through `GroupContext`, so a control group already carries `data-disabled` and
-`data-invalid`. Probing cannot distinguish a control that is disabled from one that merely contains
-a disabled button. `descendantDisabledSelector` styles a part (a prefix, suffix, or trigger) when an
-ancestor control is disabled.
+Do not widen a state with `:has()` when the group already exposes data attributes such as
+`data-disabled` and `data-invalid`. Probing descendants cannot tell a disabled control from one that
+only contains a disabled button. Use `descendantDisabledSelector` to style a part when an ancestor
+control is disabled.
 
 ## Styling utilities
 
-Styling utilities are public and exported from `@luke-ui/react/styles`. They provide token-aware,
-type-safe layout helpers for cases where component props are too narrow.
+Styling utilities are public from `@luke-ui/react/styles`. Use them when component props are too
+narrow for layout or appearance.
 
-Luke UI uses Rainbow Sprinkles for this API. Rainbow Sprinkles emits dynamic CSS custom properties
-at runtime instead of generating a static class for every token and value pair. That keeps the CSS
-bundle smaller as the token scale grows.
+They use Rainbow Sprinkles. Values can land on inline `style`, which raises specificity. That
+tradeoff is acceptable because utilities are already the highest-priority escape hatch.
 
-The tradeoff is that some values are applied through inline `style`, which raises specificity. That
-is acceptable because styling utilities are already the highest-priority escape hatch.
+`Box` from `@luke-ui/react/box` applies these utilities. Use it as the escape hatch for layout and
+appearance. It excludes typography and text colour. Use `Text` or `Heading` for those.
 
-`Box` from `@luke-ui/react/box` applies these utilities. See the
-[Box documentation](/components/layout/box) for its element and render contracts. Its utilities
-cover layout (flex, grid, spacing, sizing, position) and appearance (`backgroundColor`,
-`borderColor`, `borderWidth`, `borderStyle`, `borderRadius`, `boxShadow`). Use `Box` as the escape
-hatch for both. It deliberately excludes typography and text colour. Use `Text`/`Heading` for those.
+Do not add style props to every component. Keep component props on variants and behaviour. Reach for
+`Box` when a component's own props are too narrow.
 
-Do not add style props to every other component. Component props should stay focused on
-component-specific variants and behaviour. Reach for `Box` when a component's own props are too
-narrow instead of growing an ad-hoc style prop on that component.
+### `createSprinkles()`
 
-## `createSprinkles()`
-
-`createSprinkles(props)` returns `{ className, style }`. Spread both onto the element.
+`createSprinkles(props)` returns `{ className, style }`. Spread both onto the element:
 
 ```tsx
 import { createSprinkles } from '@luke-ui/react/styles';
@@ -418,15 +252,12 @@ return (
 );
 ```
 
-Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Each key matches
-its pixel value, so `sp16` is 16px. Margin also accepts `auto`. Enum-like properties use CSS-native
-values, for example `display: 'flex'`. Sizing, inset, flex-basis, order, and grid-placement values
-accept their CSS property values.
+Spacing and gap properties use `0` or value-based keys such as `sp16` and `sp24`. Margin also
+accepts `auto`. Enum-like properties use CSS-native values.
 
-## Responsive values
+### Responsive values
 
-Use object notation keyed by breakpoint names. Values cascade from smaller to larger breakpoints, so
-only overrides need to be specified.
+Use object notation keyed by breakpoint names. Values cascade from smaller to larger breakpoints:
 
 ```tsx
 const responsive = createSprinkles({
@@ -436,14 +267,13 @@ const responsive = createSprinkles({
 });
 ```
 
-The retained breakpoints are `initial` (base), `bp640` (640px), `bp768` (768px), `bp1024` (1024px),
-`bp1280` (1280px), and `bp1536` (1536px).
+Breakpoints: `initial` (base), `bp640`, `bp768`, `bp1024`, `bp1280`, and `bp1536`.
 
-## React Aria `render` prop
+### React Aria `render` prop
 
-When you need to style the underlying DOM element directly, combine `createSprinkles` with React
-Aria Components' `render` prop. Use `mergeStyleProps` from `@luke-ui/react/utils` so `className` and
-`style` are merged correctly.
+Combine `createSprinkles` with React Aria's `render` prop when you need to style the underlying DOM
+element. Use `mergeStyleProps` from `@luke-ui/react/utils` so `className` and `style` merge
+correctly:
 
 ```tsx
 import { mergeStyleProps } from '@luke-ui/react/utils';
@@ -461,26 +291,14 @@ const buttonBox = createSprinkles({ padding: 'sp16' });
 </Button>;
 ```
 
-## Utility surface
+### Utility surface
 
-The v1 surface covers:
+The supported properties live in `core/styles/utilities.css.ts` and export from
+`@luke-ui/react/styles`. Use CSS-native values throughout, for example `flex-start` instead of
+`start`.
 
-- Layout: `display`.
-- Spacing: logical `margin*` and `padding*` properties.
-- Sizing: `inlineSize`, `blockSize`, `minInlineSize`, `minBlockSize`, `maxInlineSize`,
-  `maxBlockSize`.
-- Positioning: `position` and logical `inset*` properties.
-- Gaps: `gap`, `rowGap`, `columnGap`.
-- Overflow: `overflow`, `overflowX`, `overflowY`.
-- Flex: `flex`, `flexBasis`, `flexDirection`, `flexGrow`, `flexShrink`, `flexWrap`, `order`,
-  `alignContent`, `alignItems`, `alignSelf`, and `justifyContent`.
-- Grid children: `gridArea`, `gridColumn*`, `gridRow*`, `justifySelf`, and `placeSelf`.
-
-Use CSS-native values throughout, for example `flex-start` instead of `start`.
-
-Semantic colour, typography, and pseudo-state properties are deliberately excluded. Use component
-APIs where possible. Sanctioned custom styling uses the public typed `vars` from
-`@luke-ui/react/theme`, which resolve to stable `--luke-*` variables.
+Semantic colour, typography, and pseudo-state properties are excluded. For sanctioned custom
+styling, use typed `vars` from `@luke-ui/react/theme`:
 
 ```tsx
 import { vars } from '@luke-ui/react/theme';
@@ -497,7 +315,7 @@ return (
 );
 ```
 
-## Implementation rules
+### Implementation rules
 
 - Use CSS logical properties such as `margin-inline-start`, `block-size`, and `inset-inline`.
 - Do not use physical properties such as `margin-left`, `height`, `left`, or `right`.

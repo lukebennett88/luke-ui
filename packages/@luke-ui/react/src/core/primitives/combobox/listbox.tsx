@@ -30,8 +30,8 @@ interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T
 export type ComboboxListBoxProps<T extends object> = Prettify<_ComboboxListBoxProps<T>>;
 
 /**
- * Styled listbox for combobox options. Inside a `ComboboxTray`, fills the available space, contains
- * its scrolling, and selects options on press down.
+ * Styled listbox for combobox options. Inside a `ComboboxTray`, it fills the available space,
+ * contains its own scrolling, and selects options on press down.
  */
 export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>): JSX.Element {
 	const { children, dependencies, items, loadMoreItem, ...listBoxProps } = props;

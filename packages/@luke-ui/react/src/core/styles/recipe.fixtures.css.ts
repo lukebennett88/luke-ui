@@ -1,12 +1,7 @@
 import { style } from './layered-style.css.js';
 import { recipe } from './recipe.js';
 
-// Test-only fixtures for recipe.browser.test.ts and recipe.test-d.ts. Not exported
-// from the package's public entry points, so they never reach the built
-// stylesheet. `recipe()` calls a Vanilla Extract runtime that needs an active file
-// scope, which only a `.css.ts` module gets from the Vanilla Extract plugin — a
-// plain `.ts` (such as a `.test-d.ts`) cannot call `recipe()` at module scope, so
-// every fixture recipe lives here and is imported by name instead.
+// Test-only fixtures. They live in `.css.ts` because `recipe()` needs a Vanilla Extract file scope.
 
 export const nestedArrayFixtureClassA = style({ color: 'rgb(1, 2, 3)' });
 export const nestedArrayFixtureClassB = style({ fontWeight: 700 });
@@ -80,11 +75,11 @@ export const compoundSlotsRecipe = recipe({
 		},
 	},
 	compoundSlots: [
-		// Unconditional: overrides `a` and `b`'s base color, leaves `c` alone.
+		// Unconditional: overrides the base colour on `a` and `b`, and leaves `c` alone.
 		{ slots: ['a', 'b'], style: { color: 'rgb(100, 100, 100)' } },
 		// Second unconditional entry on `a` only, to prove declaration order.
 		{ slots: ['a'], style: { color: 'rgb(110, 110, 110)' } },
-		// Conditional on a group (`tone`) none of these slots otherwise use.
+		// Conditional on a group (`tone`) that none of these slots otherwise use.
 		{
 			slots: ['a', 'b'],
 			style: { backgroundColor: 'rgb(200, 200, 200)' },
@@ -134,20 +129,10 @@ export const conditionalSlotsBaseRecipe = recipe({
 	],
 });
 
-/**
- * A pre-built class declared above the recipes that reference it, so its CSS source
- * position is fixed before any `recipe()` below emits anything.
- *
- * A slotted recipe cannot move that position into the `compoundSlots` precedence order,
- * so `SlottedStyleRule` rejects this form; `recipe.test-d.ts` proves the rejection, and
- * `prebuiltClassSinglePartRecipe` below proves single-part recipes still accept it.
- */
+/** A pre-built class. Slotted recipes cannot reorder it; a single-part recipe can still use it. */
 export const prebuiltVariantClass = style({ color: 'rgb(41, 41, 41)' });
 
-/**
- * Single-part recipe composing a pre-built class as a variant style. Single-part recipes
- * reorder nothing, so this stays supported.
- */
+/** A single-part recipe with a pre-built class as a variant style. */
 export const prebuiltClassSinglePartRecipe = recipe({
 	base: { color: 'rgb(40, 40, 40)' },
 	variants: {
@@ -155,11 +140,7 @@ export const prebuiltClassSinglePartRecipe = recipe({
 	},
 });
 
-/**
- * The style-object equivalent of the rejected pre-built-class case: a slot variant that
- * `recipe()` emits itself keeps the documented precedence, outranking an unconditional
- * `compoundSlots` entry and losing to a conditional one.
- */
+/** A slot variant beats unconditional `compoundSlots` and loses to conditional ones. */
 export const slotVariantPrecedenceRecipe = recipe({
 	slots: { root: { color: 'rgb(40, 40, 40)' } },
 	variants: {
@@ -172,16 +153,7 @@ export const slotVariantPrecedenceRecipe = recipe({
 	],
 });
 
-/**
- * A slot no `compoundSlots` entry names must still follow the documented precedence.
- *
- * `targeted` is named by both entries, `untargeted` by neither. Both slots declare an
- * `emphasis` variant setting `color`, which the conditional shared style also sets, so the
- * relative CSS source position of a slot variant and the conditional shared style decides the
- * resolved colour. The documented order puts every slot variant ahead of every conditional
- * shared style regardless of which slot owns it, so composing `untargeted`'s classes with the
- * shared conditional class must resolve the same way `targeted` does.
- */
+/** Untargeted slots keep the same precedence as targeted ones. */
 export const untargetedSlotPrecedenceRecipe = recipe({
 	slots: {
 		targeted: { color: 'rgb(50, 50, 50)' },

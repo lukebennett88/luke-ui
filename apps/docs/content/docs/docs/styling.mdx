@@ -109,13 +109,13 @@ Read [Installation](/docs/installation) for the first-run path. Read
 
 ## Use application CSS alongside Luke UI
 
-Luke UI's static CSS uses six cascade layers, ordered from lowest to highest priority: `reset`,
-`theme`, `base`, `recipes`, `structural`, and `utilities`. That internal order is stable regardless
-of stylesheet import order. The reset normalises only the subtree that carries `rootClassName`. The
-`base` layer is reserved for application-owned element defaults such as Tailwind Preflight. Luke UI
-declares it so it ranks below `recipes`, but never writes to it. Component styles live in `recipes`,
-retained global selectors such as skeleton masking live in `structural`, and one-off overrides
-belong in `utilities`.
+Luke UI's stylesheet uses six cascade layers, from lowest to highest priority: `reset`, `theme`,
+`base`, `recipes`, `structural`, and `utilities`. That order does not change with stylesheet import
+order. The reset applies only under `rootClassName`.
+
+The `base` layer is reserved for application defaults such as Tailwind Preflight. Luke UI declares
+it empty so it stays below `recipes`. Put component styles in `recipes`, retained global selectors
+such as skeleton masks in `structural`, and one-off overrides in `utilities`.
 
 If your application also uses cascade layers, declare its layer order before you import stylesheets.
 

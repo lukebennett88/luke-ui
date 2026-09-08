@@ -22,8 +22,8 @@ interface _ComboboxClearButtonProps extends _ComboboxClearButtonOmit {
 export type ComboboxClearButtonProps = Prettify<_ComboboxClearButtonProps>;
 
 /**
- * Clears the selection and the input value. Beside a persistent input it hides when no option is
- * selected. Inside a `ComboboxTray` it hides while the search is empty.
+ * Clears the selection and the input value. Hidden when nothing is selected on desktop, or when the
+ * tray search is empty.
  */
 export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Element | null {
 	const { size: sizeProp, ...buttonProps } = props;
@@ -33,9 +33,8 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 
 	if (state == null) return null;
 
-	// Visibility follows presentation: the tray button tracks the search text, the desktop button
-	// tracks the selection. Clearing always empties both — React Stately does not clear a
-	// controlled selection when only the input value is emptied.
+	// In a tray, hide when the search is empty. On desktop, hide when nothing is selected. Always
+	// clear both: emptying a controlled input alone does not clear the selection.
 	const isEmpty: boolean = (() => {
 		if (presentation === 'tray') return state.inputValue === '';
 		if (Array.isArray(state.value)) return state.value.length === 0;
@@ -44,7 +43,6 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 
 	if (isEmpty) return null;
 
-	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
 		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
 			<RacButton
@@ -57,8 +55,7 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 					state.setInputValue('');
 					buttonProps.onPress?.(event);
 				}}
-				// Opt out of the ComboBox button slot so pressing clears the selection
-				// instead of toggling the popover.
+				// Opt out of the ComboBox button slot so this does not toggle the popover.
 				slot={null}
 			/>
 		</IconSizeProvider>

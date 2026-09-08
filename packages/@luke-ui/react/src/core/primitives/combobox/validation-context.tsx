@@ -2,26 +2,28 @@ import type { JSX, ReactNode } from 'react';
 import { createContext, use } from 'react';
 
 interface ComboboxValidationContextValue {
-	/** Whether the combobox allows a non-item matching input value to be set. */
+	/** Whether a value that matches no item is allowed. */
 	allowsCustomValue: boolean;
-	/** The `<form>` element to associate the combobox with, by id. */
+	/** The id of the `<form>` to associate with the combobox. */
 	form: string | undefined;
 	/**
-	 * Whether the selected item's text or its key is submitted. `allowsCustomValue` forces `'text'`,
-	 * since typed text that matches no item has no key to submit.
+	 * Whether the field submits the selected key or its text. `allowsCustomValue` forces `'text'`.
 	 */
 	formValue: 'key' | 'text' | undefined;
-	/** Whether the combobox is disabled, in which case it never blocks submission. */
+	/** Whether the combobox is disabled. A disabled field never blocks submission. */
 	isDisabled: boolean;
-	/** Whether the combobox is read-only, in which case it never blocks submission. */
+	/** Whether the combobox is read-only. A read-only field never blocks submission. */
 	isReadOnly: boolean;
-	/** Whether a selection (or, with `allowsCustomValue`, non-empty text) is required to submit. */
+	/**
+	 * Whether a selection is required to submit. With `allowsCustomValue`, non-empty text also
+	 * satisfies the requirement.
+	 */
 	isRequired: boolean;
-	/** The name submitted with the combobox's value. */
+	/** The name submitted with the combobox value. */
 	name: string | undefined;
 	/**
-	 * How the combobox reports validation. Only `'native'` takes part in constraint validation;
-	 * `'aria'` reports through ARIA alone and must never block submission.
+	 * How the combobox reports validation. `'native'` takes part in constraint validation.
+	 * `'aria'` reports through ARIA and never blocks submission.
 	 */
 	validationBehavior: 'aria' | 'native' | undefined;
 }
@@ -39,16 +41,12 @@ const defaultValidationContextValue: ComboboxValidationContextValue = {
 
 const ComboboxValidationContext = createContext<ComboboxValidationContextValue | null>(null);
 
-/** The root's validation-relevant props, not otherwise carried by `ComboBoxStateContext`. */
+/** Root validation props that `ComboBoxStateContext` does not carry. */
 export function useComboboxValidation(): ComboboxValidationContextValue {
 	return use(ComboboxValidationContext) ?? defaultValidationContextValue;
 }
 
-/**
- * Whether the combobox submits the input text rather than the selected key. React Aria forces text
- * mode under `allowsCustomValue`, and in text mode it names the visible text input instead of
- * rendering a hidden input of its own.
- */
+/** Whether the combobox submits text (`allowsCustomValue` or `formValue="text"`). */
 export function isTextFormValue(value: ComboboxValidationContextValue): boolean {
 	return value.allowsCustomValue || value.formValue === 'text';
 }

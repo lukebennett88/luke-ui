@@ -1,15 +1,8 @@
-// Style-producing modules in the shipped stylesheet. Named layers set cross-layer priority, but
-// same-layer, same-specificity CSS still resolves by source order: later wins. List a module
-// that sets concrete values another one must override before that other module, so the later
-// module's own styles win the tie — e.g. `text/recipe.css` before `kbd/recipe.css` and
-// `code/recipe.css`: `textRecipe`'s `shouldInheritFont` variant sets `fontFamily`/`fontSize`/
-// `fontWeight` to `inherit`, while `kbdRecipe`'s and `codeRecipe`'s base styles set those same
-// properties to concrete values, all in the `recipes` layer at equal specificity, so `text` must
-// come first for `kbd`/`code` to win the tie. (`primitives/field` before `primitives/checkbox`
-// is NOT such a pair: the `fieldMessageIcon` custom property they share resolves through CSS
-// inheritance at computed-value time, which does not depend on stylesheet source order.) The
-// component and primitive generators preserve this order. They append new imports to the end
-// and do not sort it.
+// Modules that produce the shipped stylesheet. Named layers set cross-layer priority. Within a
+// layer, later equal-specificity rules win. Put overridden modules first — for example
+// `text/recipe.css` before `code/recipe.css` and `kbd/recipe.css`, so their concrete fonts beat
+// `shouldInheritFont`'s `inherit`. Inherited custom properties (for example `fieldMessageIcon`)
+// ignore source order. Generators append imports; they do not sort this list.
 import '../primitives/button/recipe.css.js';
 import '../primitives/field/recipe.css.js';
 import '../primitives/checkbox/recipe.css.js';

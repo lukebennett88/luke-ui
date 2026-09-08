@@ -56,29 +56,29 @@ empty-state handling when its built-in composition is enough.
 
 ## Tray presentation
 
-`ComboboxTray` presents options in a full-screen tray. Pair it with `ComboboxTrayTrigger`, which
-shows the current selection and opens the tray.
+`ComboboxTray` shows options in a full-screen tray. Pair it with `ComboboxTrayTrigger` to show the
+current selection and open the tray.
 
 <ExampleBlock src="combobox-primitive/tray" title="Combobox primitives — Tray" />
 
-Inside the tray, `ComboboxInput` is the search field and `ComboboxClearButton` clears both the
-search and the selection. `ComboboxField` chooses between the tray and the popover for you.
+Inside the tray, `ComboboxInput` is the search field. `ComboboxClearButton` clears the search and
+the selection. `ComboboxField` chooses the tray or the popover for you.
 
-The tray holds the only text input, so `ComboboxTrayTrigger` keeps native form validation available
-while the tray stays closed. It reads `isRequired`, `validationBehavior`, `isDisabled`,
-`isReadOnly`, `form`, and `allowsCustomValue` from the root and applies the same constraint
-validation those props describe when the input is visible. A required combobox blocks submission
-until someone chooses a value, or, with `allowsCustomValue`, enters custom text. Set
-`validationBehavior="aria"` on the root to report validation through ARIA instead.
+While the tray is closed, `ComboboxTrayTrigger` keeps constraint validation and form submission
+working. Pass `isRequired`, `validationBehavior`, `isDisabled`, `isReadOnly`, `form`, and
+`allowsCustomValue` on the root.
 
-`ComboboxTrayTrigger` also keeps submitting the root's `name` while the tray stays closed. By
-default the combobox submits the selected key. Set `formValue="text"`, or set `allowsCustomValue`,
-to submit the text instead. With `allowsCustomValue`, typed text that matches no option has no key
-to submit. In text mode a selected option submits its text rather than its key, and the search field
-itself submits nothing, so a field submits exactly one value whether the tray is open or closed. A
-read-only or `validationBehavior="aria"` combobox still submits its value. In text mode a disabled
-combobox submits nothing, but in key mode React Aria's own hidden input keeps submitting the
-selected key even when the combobox is disabled.
+Set `isRequired` so a field blocks submit until someone chooses a value, or enters custom text when
+`allowsCustomValue` is set. Set `validationBehavior="aria"` on the root to report validation through
+ARIA instead of the constraint API.
+
+The field submits under the root's `name`. By default that value is the selected key. Set
+`formValue="text"`, or set `allowsCustomValue`, to submit text instead — including a selected
+option's label, or custom text that has no key. The search field does not submit, so the field sends
+one value whether the tray is open or closed.
+
+A read-only field still submits. So does a field with `validationBehavior="aria"`. A disabled field
+submits nothing in text mode. In key mode a disabled field still submits the selected key.
 
 ## Popover and accessibility
 

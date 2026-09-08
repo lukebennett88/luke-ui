@@ -38,10 +38,8 @@ interface _ComboboxTrayTriggerProps extends _ComboboxTrayTriggerOmit {
 export type ComboboxTrayTriggerProps = Prettify<_ComboboxTrayTriggerProps>;
 
 /**
- * Shows the selected value and opens a sibling `ComboboxTray`. Also renders the hidden inputs that
- * keep native form validation and form submission available while the tray (and its text input) is
- * closed — this trigger is the part that exists exactly then, so it is the natural home for those
- * controls and the focus target React Aria's own submit handling would otherwise miss.
+ * Shows the selected value and opens a sibling `ComboboxTray`. While the tray is closed, also
+ * renders the hidden validation and submission inputs.
  */
 export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Element | null {
 	const { children, isDisabled, placeholder, ref, size: sizeProp, ...buttonProps } = props;
@@ -54,11 +52,9 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 
 	if (state == null) return null;
 
-	// `ButtonContext` carries React Aria's combined `isDisabled || isReadOnly` state for the
-	// combobox, so this trigger needs no `isReadOnly` prop of its own.
+	// `ButtonContext.isDisabled` already includes the read-only state.
 	const resolvedIsDisabled = isDisabled === true || buttonContext?.isDisabled === true;
 
-	// A caller-supplied name wins over the field label's default naming.
 	const { ariaLabel, ariaLabelledBy } = (() => {
 		if (buttonProps['aria-labelledby'] != null) {
 			return { ariaLabel: undefined, ariaLabelledBy: buttonProps['aria-labelledby'] };
@@ -72,7 +68,6 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 		return { ariaLabel: labelContext?.['aria-label'], ariaLabelledBy: undefined };
 	})();
 
-	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
 		<>
 			<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
@@ -93,8 +88,7 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 						state.open(null, 'manual');
 						buttonProps.onPress?.(event);
 					}}
-					// Opt out of the ComboBox button slot: this trigger owns its own press behaviour
-					// and must not also be wired up as the popover toggle.
+					// Opt out of the ComboBox button slot so this does not also toggle the popover.
 					slot={null}
 				>
 					<ComboBoxValue

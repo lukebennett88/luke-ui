@@ -48,8 +48,7 @@ function iconBaseClassName(stylesheet: string): string {
 }
 
 test('a recipes-layer rule beats the layers below it in the built stylesheet cascade', () => {
-	// The Icon base class is a real `recipes`-layer rule from the shipped stylesheet, so it proves
-	// the cascade contract against production CSS rather than a synthetic probe.
+	// Use a real shipped Icon class as the production probe.
 	const iconClass = iconBaseClassName(stylesheetCss);
 	const element = mountProbe(iconClass);
 
@@ -105,9 +104,7 @@ test('unlayered consumer CSS beats every layer in the built stylesheet', () => {
 });
 
 test('reproduces the invalid early layer-declaration failure mode', () => {
-	// A layer named for the first time inside a block is created last, so declaring the individual
-	// layers up front — before the combined order statement — pins `probe-base` after
-	// `probe-utilities` and lets a `base`-layer rule outrank both `recipes` and `utilities`.
+	// Declaring individual `@layer` names before the order statement creates `base` last.
 	const style = document.head.appendChild(document.createElement('style'));
 	style.dataset.layerOrderProbe = 'true';
 	style.textContent = `
@@ -128,11 +125,7 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 });
 
 test('a consumer base-layer reset does not override component recipes', () => {
-	// Simulates an unprotected consumer: only the built stylesheet, plus a Tailwind-Preflight-shaped
-	// `@layer base` reset, with no consumer-authored authoritative layer-order declaration in front
-	// of either. If the package never declares `base` itself, this reset's `@layer base` block is
-	// the first thing to reference that name, so the browser creates it implicitly last — after
-	// `utilities` — which makes it outrank `recipes` and forces every Icon to `display: block`.
+	// A consumer `@layer base` alone would create the layer last and beat recipes.
 	const iconClass = iconBaseClassName(stylesheetCss);
 	const element = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 	element.setAttribute('class', iconClass);
