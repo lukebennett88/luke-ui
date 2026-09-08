@@ -1,6 +1,9 @@
 import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
 import { typeStyles } from '../../theme/contract.js';
+import { Em } from '../em/em.js';
+import { Kbd } from '../kbd/kbd.js';
+import { Strong } from '../strong/strong.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { Text } from './text.js';
@@ -54,6 +57,23 @@ for (const appearance of visualAppearances) {
 		await captureVisualAppearance(locator, 'text/type-scale', appearance);
 	});
 }
+
+test('Em, Strong, and Kbd inheritance', async () => {
+	const { locator } = render(
+		<Stack width="24rem">
+			<Text fontWeight="emphasis" typography="lead">
+				Read the <Em>full</Em> guide, mark the <Strong>required</Strong> steps, then run{' '}
+				<Kbd>Cmd+S</Kbd> to save.
+			</Text>
+			<Text typography="caption">
+				A caption sentence with <Em>emphasis</Em>, <Strong>importance</Strong>, and a <Kbd>Tab</Kbd>{' '}
+				key at a smaller size — the Kbd chip stays the same size as above.
+			</Text>
+		</Stack>,
+	);
+
+	await captureVisual(locator, 'text/em-strong-kbd-inheritance');
+});
 
 test('line clamp and transforms', async () => {
 	const { locator } = render(

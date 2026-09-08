@@ -1,4 +1,3 @@
-import { cx } from '../../shared/utils/utils.js';
 import type { TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -14,12 +13,12 @@ export type BlockquoteProps = Prettify<_BlockquoteProps>;
 
 /**
  * Block-level quotation from another source, rendered as `<blockquote>`.
- * Composes `Text` for typography styles and semantic font-weight controls.
+ * Accepts the typography and semantic font-weight props.
  */
 export function Blockquote(props: BlockquoteProps) {
 	const { children, className, ...textProps } = props;
 	return (
-		<Text {...textProps} className={cx(blockquoteRecipe(), className)} elementType="blockquote">
+		<Text {...textProps} className={blockquoteRecipe({ className })} elementType="blockquote">
 			{children}
 		</Text>
 	);

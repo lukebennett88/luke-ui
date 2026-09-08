@@ -1,6 +1,6 @@
 // This module must stay free of style rules: it exists solely so the reset can depend on the
 // Prose scope class without evaluating the Prose global-rule set in `recipe.css.ts`.
-import { styleInLayer } from '../styles/layered-style.css.js';
+import { style } from '../styles/layered-style.css.js';
 
 /**
  * The Prose scope class. Every Prose rule in `recipe.css.ts` is scoped to it, and `proseRecipe()`
@@ -8,4 +8,4 @@ import { styleInLayer } from '../styles/layered-style.css.js';
  * apart from `recipe.css.ts` so the reset can depend on the class without evaluating the Prose
  * global-rule set as a side effect of the import.
  */
-export const proseScopeClassName = styleInLayer('recipes', {}, 'prose');
+export const proseScopeClassName = style({}, 'prose');

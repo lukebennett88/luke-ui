@@ -59,7 +59,7 @@ describe('createComponentPlan', () => {
 			expect.stringMatching(/core\/status-badge\/index\.ts$/),
 		);
 		expect(plan).not.toHaveProperty('jsonEdits');
-		expect(plan).not.toHaveProperty('sortedImportEdits');
+		expect(plan).not.toHaveProperty('importEdits');
 		expect(plan).not.toHaveProperty('textFileInserts');
 
 		const recipeSource = plan.files.find((file) =>

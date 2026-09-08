@@ -39,7 +39,7 @@ export function ComboboxItem<T extends object>(props: ComboboxItemProps<T>): JSX
 			textValue={typeof itemProps.children === 'string' ? itemProps.children : undefined}
 			{...itemProps}
 			className={composeRenderProps(itemProps.className, (className) => {
-				return comboboxRecipe({ size }).item(className);
+				return comboboxRecipe({ size }).item({ className });
 			})}
 		>
 			{composeRenderProps(itemProps.children, (children, { isSelected }) => {
@@ -79,7 +79,7 @@ export function ComboboxLoadMoreItem(props: ComboboxLoadMoreItemProps): JSX.Elem
 	return (
 		<RacListBoxLoadMoreItem
 			{...loadMoreItemProps}
-			className={comboboxRecipe({ size }).loadMoreItem(loadMoreItemProps.className)}
+			className={comboboxRecipe({ size }).loadMoreItem({ className: loadMoreItemProps.className })}
 		/>
 	);
 }

@@ -1,50 +1,36 @@
-import { Box } from '@luke-ui/react/box';
 import { Checkbox } from '@luke-ui/react/checkbox';
-import { Text } from '@luke-ui/react/text';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box display="grid" gap="sp12">
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Unchecked
-				</Text>
+		<Comparison direction="vertical">
+			<ComparisonItem label="Unchecked">
 				<Checkbox>Example checkbox</Checkbox>
-			</Box>
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Checked
-				</Text>
+			</ComparisonItem>
+			<ComparisonItem label="Checked">
 				<Checkbox defaultSelected>Example checkbox</Checkbox>
-			</Box>
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Indeterminate
-				</Text>
+			</ComparisonItem>
+			<ComparisonItem label="Indeterminate">
 				<Checkbox isIndeterminate>Example checkbox</Checkbox>
-			</Box>
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Disabled
-				</Text>
+			</ComparisonItem>
+			<ComparisonItem label="Selected and indeterminate">
+				<Checkbox defaultSelected isIndeterminate>
+					Example checkbox
+				</Checkbox>
+			</ComparisonItem>
+			<ComparisonItem label="Disabled">
 				<Checkbox isDisabled>Example checkbox</Checkbox>
-			</Box>
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Disabled and checked
-				</Text>
+			</ComparisonItem>
+			<ComparisonItem label="Disabled and checked">
 				<Checkbox defaultSelected isDisabled>
 					Example checkbox
 				</Checkbox>
-			</Box>
-			<Box display="grid" gap="sp4">
-				<Text color="secondary" typography="caption">
-					Invalid
-				</Text>
+			</ComparisonItem>
+			<ComparisonItem label="Invalid">
 				<Checkbox errorMessage="Select this example checkbox to continue.">
 					Example checkbox
 				</Checkbox>
-			</Box>
-		</Box>
+			</ComparisonItem>
+		</Comparison>
 	);
 };

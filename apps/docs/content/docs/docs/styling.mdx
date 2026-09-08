@@ -51,23 +51,25 @@ type is the component in Pascal case plus `RecipeVariants`.
 
 <ExampleBlock src="styling/button-recipe" title="Styling — Apply a component recipe" />
 
-A single-part recipe such as `buttonRecipe` returns one class string. Pass the same variant names
-the component accepts.
+A single-part recipe such as `buttonRecipe` returns the finished class string. Pass the same variant
+names the component accepts, plus an optional `className` of your own. The recipe appends your class
+after its own, so do not wrap the result in another composition helper.
 
 ```tsx
 import { buttonRecipe, type ButtonRecipeVariants } from '@luke-ui/react/button';
 
 const variants: ButtonRecipeVariants = { appearance: 'subtle', tone: 'neutral' };
-const className = buttonRecipe(variants);
+const className = buttonRecipe({ ...variants, className: 'my-class' });
 ```
 
-A slotted recipe such as `inputGroupRecipe` returns one function per part. Call the part you are
-styling.
+A slotted recipe such as `inputGroupRecipe` returns one function per part. Choose variants once at
+the outer call, then call the part you are styling with an optional `{ className }`.
 
 ```tsx
 import { inputGroupRecipe } from '@luke-ui/react/primitives/input-group';
 
 const { group, control } = inputGroupRecipe({ size: 'medium' });
+const groupClassName = group({ className: 'my-class' });
 ```
 
 Do not import a recipe to restyle a Luke UI component from the outside. Use the component's props
@@ -107,14 +109,18 @@ Read [Installation](/docs/installation) for the first-run path. Read
 
 ## Use application CSS alongside Luke UI
 
-Luke UI's static CSS uses four cascade layers, ordered from lowest to highest priority: `reset`,
-`theme`, `recipes`, and `utilities`. That internal order is stable regardless of stylesheet import
-order. The reset normalises only the subtree that carries `rootClassName`.
+Luke UI's stylesheet uses six cascade layers, from lowest to highest priority: `reset`, `theme`,
+`base`, `recipes`, `structural`, and `utilities`. That order does not change with stylesheet import
+order. The reset applies only under `rootClassName`.
+
+The `base` layer is reserved for application defaults such as Tailwind Preflight. Luke UI declares
+it empty so it stays below `recipes`. Put component styles in `recipes`, retained global selectors
+such as skeleton masks in `structural`, and one-off overrides in `utilities`.
 
 If your application also uses cascade layers, declare its layer order before you import stylesheets.
 
 ```css
-@layer reset, theme, base, recipes, components, utilities;
+@layer reset, theme, base, recipes, structural, utilities;
 
 @import '@luke-ui/react/stylesheet.css';
 @import 'tailwindcss';

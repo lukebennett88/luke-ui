@@ -19,5 +19,9 @@ export type { ComboboxRootProps, ComboboxSize } from '../../core/primitives/comb
 export { ComboboxRoot } from '../../core/primitives/combobox/root.js';
 export type { ComboboxSectionProps } from '../../core/primitives/combobox/section.js';
 export { ComboboxSection } from '../../core/primitives/combobox/section.js';
+export type { ComboboxTrayProps } from '../../core/primitives/combobox/tray.js';
+export { ComboboxTray } from '../../core/primitives/combobox/tray.js';
+export type { ComboboxTrayTriggerProps } from '../../core/primitives/combobox/tray-trigger.js';
+export { ComboboxTrayTrigger } from '../../core/primitives/combobox/tray-trigger.js';
 export type { ComboboxTriggerProps } from '../../core/primitives/combobox/trigger.js';
 export { ComboboxTrigger } from '../../core/primitives/combobox/trigger.js';

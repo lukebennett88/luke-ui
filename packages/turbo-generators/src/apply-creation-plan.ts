@@ -75,7 +75,7 @@ export async function applyCreationPlan(root: string, plan: CreationWork): Promi
 	await Promise.all(plan.files.map((file) => writePlanFile(root, file)));
 	await Promise.all(plan.jsonEdits.map((edit) => applyJsonEdit(root, edit)));
 	await Promise.all(plan.textFileInserts.map((edit) => applyTextInsertEdit(root, edit)));
-	await Promise.all(plan.sortedImportEdits.map((edit) => applySortedImportEdit(root, edit)));
+	await Promise.all(plan.importEdits.map((edit) => applyImportEdit(root, edit)));
 }
 
 async function writePlanFile(root: string, file: PlanFile): Promise<void> {
@@ -118,17 +118,19 @@ async function readJson(path: string, title: string): Promise<Record<string, unk
 	}
 }
 
-async function applySortedImportEdit(
+async function applyImportEdit(
 	root: string,
-	edit: CreationWork['sortedImportEdits'][number],
+	edit: CreationWork['importEdits'][number],
 ): Promise<void> {
 	const target = join(root, edit.path);
 	await mkdir(dirname(target), { recursive: true });
 	const content = await readFile(target, 'utf8').catch(() => '');
-	await writeFile(target, insertSortedImport(content, edit.line), 'utf8');
+	await writeFile(target, insertImport(content, edit.line), 'utf8');
 }
 
-function insertSortedImport(content: string, line: string): string {
+// The registry this targets is in dependency order, not alphabetical order, so appending
+// preserves cascade precedence between same-layer, same-specificity modules.
+function insertImport(content: string, line: string): string {
 	const lines = content.endsWith('\n') ? content.slice(0, -1).split('\n') : content.split('\n');
 	if (lines.length === 1 && lines[0] === '') lines.pop();
 	if (lines.includes(line)) return `${lines.join('\n')}\n`;
@@ -154,7 +156,6 @@ function insertSortedImport(content: string, line: string): string {
 	}
 
 	imports.push(line);
-	imports.sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
 
 	return `${[...header, ...imports, ...footer].join('\n')}\n`;
 }

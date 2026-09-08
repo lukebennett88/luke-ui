@@ -121,7 +121,7 @@ export function InputGroup(props: InputGroupProps): JSX.Element {
 				<RacGroup
 					{...groupProps}
 					className={composeRenderProps(className, (value) => {
-						return slots.group(value);
+						return slots.group({ className: value });
 					})}
 				>
 					{composeRenderProps(children, (renderedChildren, { isInvalid }) => {
@@ -153,7 +153,7 @@ export function InputGroupInput(props: InputGroupInputProps): JSX.Element {
 		<RacInput
 			{...inputProps}
 			className={composeRenderProps(className, (value) => {
-				return inputGroupRecipe({ size }).control(value);
+				return inputGroupRecipe({ size }).control({ className: value });
 			})}
 		/>
 	);
@@ -164,7 +164,7 @@ export function InputGroupPrefix(props: InputGroupPrefixProps): JSX.Element {
 	const { className, size: sizeProp, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={inputGroupRecipe({ size }).prefix(className)} />;
+	return <span {...spanProps} className={inputGroupRecipe({ size }).prefix({ className })} />;
 }
 
 /**
@@ -175,5 +175,5 @@ export function InputGroupSuffix(props: InputGroupSuffixProps): JSX.Element {
 	const { className, size: sizeProp, ...spanProps } = props;
 	const size = useInputGroupSize(sizeProp);
 
-	return <span {...spanProps} className={inputGroupRecipe({ size }).suffix(className)} />;
+	return <span {...spanProps} className={inputGroupRecipe({ size }).suffix({ className })} />;
 }

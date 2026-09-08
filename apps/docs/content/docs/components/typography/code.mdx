@@ -5,14 +5,14 @@ source: packages/@luke-ui/react/src/exports/code.ts
 ---
 
 `Code` marks a short fragment of computer code. It renders a native `code` element, which conveys
-code semantics to assistive technology.
+code semantics to assistive technology, and applies the theme's monospace code font.
 
 <ExampleBlock src="code/basic" title="Code — Basic" />
 
 ## In context
 
-`Code` is inline, so it inherits the surrounding typography and sits in a sentence without breaking
-the line.
+`Code` is inline, so it inherits the surrounding size and colour and stays on one line by default.
+Pass `lineClamp` of 2 or more, or pass `textWrap`, when the content should wrap.
 
 <ExampleBlock src="code/in-context" title="Code — In context" />
 

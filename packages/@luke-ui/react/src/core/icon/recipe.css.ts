@@ -22,7 +22,6 @@ export const iconSizeVariants = {
 	},
 } as const;
 
-/** Vanilla-extract recipe for the `Icon` component's styles. */
 export const iconRecipe = recipe({
 	base: {
 		display: 'inline-flex',

@@ -19,6 +19,7 @@ describe('applyCreationPlan json edits', () => {
 
 		await applyCreationPlan(root, {
 			files: [],
+			importEdits: [],
 			jsonEdits: [
 				{
 					key: 'pages',
@@ -28,7 +29,6 @@ describe('applyCreationPlan json edits', () => {
 					value: 'status-badge',
 				},
 			],
-			sortedImportEdits: [],
 			textFileInserts: [],
 		});
 
@@ -45,6 +45,7 @@ describe('applyCreationPlan json edits', () => {
 		});
 		const edit = {
 			files: [],
+			importEdits: [],
 			jsonEdits: [
 				{
 					key: 'pages' as const,
@@ -54,7 +55,6 @@ describe('applyCreationPlan json edits', () => {
 					value: 'field',
 				},
 			],
-			sortedImportEdits: [],
 			textFileInserts: [],
 		};
 

@@ -329,8 +329,8 @@ test(
 	'keeps a pure native wrapper empty while still forwarding DOM props',
 	async () => {
 		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/code/code.tsx',
-			'CodeProps',
+			'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
+			'KbdProps',
 		);
 		expect(names).toEqual([]);
 		for (const prop of [...GENERIC_DOM_NOISE, 'key', 'ref'] as const) {
@@ -338,8 +338,8 @@ test(
 		}
 
 		const { declaration } = await loadDoc(
-			'packages/@luke-ui/react/src/core/code/code.tsx',
-			'CodeProps',
+			'packages/@luke-ui/react/src/core/kbd/kbd.tsx',
+			'KbdProps',
 		);
 		expect(typeForwardsDomProps(declaration, reactSrcDir)).toBe(true);
 	},
@@ -357,11 +357,15 @@ const GENERIC_DOM_NOISE = ['itemProp', 'onClick', 'onPointerMoveCapture', 'tabIn
  * The types whose tables were empty before this analysis existed, now audited against what each
  * component's guide actually teaches rather than against whatever the analysis happens to emit.
  *
- * `Code`, `Kbd`, `Prose` and the two checkbox anatomy parts are pure element wrappers: their guides
- * teach only that they render a native element with the component's own styling, and their source
- * is a bare `extends ComponentProps<'code' | 'kbd' | 'div' | 'span'>`. They document no Luke UI
- * contract beyond pass-through DOM props, so their filtered tables are intentionally empty and rely
- * on the native-props note alone.
+ * `Kbd`, `Prose` and the two checkbox anatomy parts are pure element wrappers: their guides teach
+ * only that they render a native element with the component's own styling, and their source is a
+ * bare `extends ComponentProps<'kbd' | 'div' | 'span'>`. They document no Luke UI contract beyond
+ * pass-through DOM props, so their filtered tables are intentionally empty and rely on the
+ * native-props note alone.
+ *
+ * `Code` composes `Text` and documents `lineClamp` and `textWrap` alongside its native `<code>`
+ * DOM forwarding, so its table is no longer empty — see the `QuoteProps` entry below for the same
+ * shape.
  */
 const AUDITED_TYPES: ReadonlyArray<{
 	forwardsDomProps: boolean;
@@ -374,7 +378,7 @@ const AUDITED_TYPES: ReadonlyArray<{
 		forwardsDomProps: true,
 		name: 'CodeProps',
 		path: 'packages/@luke-ui/react/src/core/code/code.tsx',
-		visible: [],
+		visible: ['lineClamp', 'textWrap'],
 	},
 	{
 		forwardsDomProps: true,
@@ -607,6 +611,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		props: [
 			'color',
 			'elementType',
+			'fontStyle',
 			'fontVariantNumeric',
 			'fontWeight',
 			'isVisuallyHidden',
@@ -622,11 +627,12 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		],
 	},
 	{
-		// A bare `extends ComponentProps<'code'>`: no Luke UI contract props, only pass-through DOM.
+		// `Code` composes `Text` and documents `lineClamp` and `textWrap`, while still forwarding
+		// native `<code>` DOM props.
 		exportName: 'CodeProps',
 		name: 'CodeProps',
 		path: 'packages/@luke-ui/react/src/core/code/code.tsx',
-		props: [],
+		props: ['lineClamp', 'textWrap'],
 	},
 	{
 		exportName: 'LoadingSpinnerProps',

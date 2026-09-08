@@ -33,7 +33,6 @@ export default definePreview({
 						data-color-mode={colorMode}
 						style={{
 							backgroundColor: vars.color.surface.canvas,
-							boxSizing: 'border-box',
 							color: vars.color.text.primary,
 							inlineSize: '100%',
 							minBlockSize: isStoryView ? '100vh' : undefined,

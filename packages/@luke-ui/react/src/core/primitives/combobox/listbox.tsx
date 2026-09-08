@@ -7,6 +7,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { useSlottedContext } from 'react-aria-components/slots';
 import type { DistributiveOmit } from '../../types/distributive-omit.js';
 import type { Prettify } from '../../types/prettify.js';
+import { useComboboxPresentation } from './presentation-context.js';
 import { comboboxRecipe } from './styles.css.js';
 
 type _ComboboxListBoxOmit<T extends object> = DistributiveOmit<
@@ -28,9 +29,13 @@ interface _ComboboxListBoxProps<T extends object> extends _ComboboxListBoxOmit<T
 /** Props for the styled listbox. */
 export type ComboboxListBoxProps<T extends object> = Prettify<_ComboboxListBoxProps<T>>;
 
-/** Styled listbox for combobox options. */
+/**
+ * Styled listbox for combobox options. Inside a `ComboboxTray`, it fills the available space,
+ * contains its own scrolling, and selects options on press down.
+ */
 export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>): JSX.Element {
 	const { children, dependencies, items, loadMoreItem, ...listBoxProps } = props;
+	const presentation = useComboboxPresentation();
 	const listBoxContext = useSlottedContext(ListBoxContext);
 	const collectionItems = items ?? listBoxContext?.items;
 	const listBoxChildren =
@@ -44,9 +49,11 @@ export function ComboboxListBox<T extends object>(props: ComboboxListBoxProps<T>
 
 	return (
 		<RacListBox
+			// Tray options select on press down. `listBoxProps` may override this default.
+			shouldSelectOnPressUp={presentation === 'tray' ? false : undefined}
 			{...listBoxProps}
 			className={composeRenderProps(listBoxProps.className, (className) => {
-				return comboboxRecipe().listBox(className);
+				return comboboxRecipe({ presentation }).listBox({ className });
 			})}
 		>
 			{listBoxChildren}

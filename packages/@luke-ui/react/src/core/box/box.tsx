@@ -1,5 +1,5 @@
 import type { HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
-import { mergeProps } from '../../shared/utils/utils.js';
+import { mergeStyleProps } from '../../shared/utils/utils.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import { createSprinkles } from '../styles/utilities.css.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -13,10 +13,10 @@ export function Box(props: BoxProps): JSX.Element {
 	// `ref` is left out of this destructure and read via `restProps.ref` below: the
 	// compiler only tracks a ref through a named binding, and bails out of memoising
 	// Box if it sees one destructured or passed on.
-	const { children, className, elementType = 'div', render, style, ...restProps } = props;
+	const { children, className, elementType: Element = 'div', render, style, ...restProps } = props;
 
 	if (render) {
-		const renderProps = mergeProps(createSprinkles(retainSprinklesProps(restProps)), {
+		const renderProps = mergeStyleProps(createSprinkles(retainSprinklesProps(restProps)), {
 			children,
 			className,
 			style,
@@ -26,12 +26,11 @@ export function Box(props: BoxProps): JSX.Element {
 		return render({ ...renderProps, ref: toCallbackRef(restProps.ref) });
 	}
 
-	const Element = elementType;
 	// `restProps` still carries `ref`; createSprinkles passes unknown keys through
 	// unchanged, so it reaches the element without being named here. `normaliseRef`
 	// swaps it for a callback: a `RefObject<HTMLElement>` can't spread onto a
 	// narrower concrete element (`current` is invariant), but a callback ref can.
-	const domProps = mergeProps(createSprinkles(normaliseRef(restProps)), {
+	const domProps = mergeStyleProps(createSprinkles(normaliseRef(restProps)), {
 		children,
 		className,
 		style,

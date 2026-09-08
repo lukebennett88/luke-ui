@@ -1,7 +1,6 @@
 import type { JSX, ReactNode, SVGAttributes } from 'react';
 import { createContext, useContext } from 'react';
 import { iconNames, iconViewBoxes } from '../../../.generated/icon-data.js';
-import { cx } from '../../shared/utils/utils.js';
 import { ICON_VIEWBOX } from '../sizing/icon-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
@@ -85,7 +84,7 @@ export function createIcon<TProps extends CustomIconProps = CustomIconProps>({
 
 		const svgProps: React.SVGProps<SVGSVGElement> = {
 			'aria-hidden': ariaHidden,
-			className: cx(iconRecipe({ size: resolvedSize }), className),
+			className: iconRecipe({ className, size: resolvedSize }),
 			fill: 'currentColor',
 			focusable: false,
 			id,

@@ -1,9 +1,7 @@
-import { cx } from '../../shared/utils/utils.js';
 import type { TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { strong } from './styles.css.js';
 
 interface StrongStyleProps {
 	/**
@@ -12,7 +10,7 @@ interface StrongStyleProps {
 	lineClamp?: TextProps['lineClamp'];
 	/**
 	 * Sets text wrapping behavior.
-	 * @default 'unset'
+	 * @default 'default'
 	 */
 	textWrap?: TextProps['textWrap'];
 }
@@ -26,15 +24,15 @@ export type StrongProps = Prettify<_StrongProps>;
 
 /**
  * Marks text with strong importance, rendered as `<strong>`.
- * Composes `Text`, inherits surrounding typography, and applies the emphasis weight.
+ * Inherits surrounding typography and applies the emphasis weight.
  */
 export function Strong(props: StrongProps) {
-	const { className, lineClamp, textWrap, ...elementProps } = props;
+	const { lineClamp, textWrap, ...elementProps } = props;
 	return (
 		<Text
 			{...elementProps}
-			className={cx(strong, className)}
 			elementType="strong"
+			fontWeight="emphasis"
 			lineClamp={lineClamp}
 			shouldInheritFont
 			textWrap={textWrap}

@@ -1,7 +1,7 @@
 import type { StyleRule } from '@vanilla-extract/css';
 import { fallbackVar, keyframes } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
-import { globalStyleInLayer, styleInLayer } from '../styles/layered-style.css.js';
+import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 
 /**
  * @internal
@@ -61,7 +61,7 @@ const pulse = {
 } as const satisfies StyleRule;
 
 /** Vanilla-extract class for the `LoadingSkeleton` component's styles. */
-export const loadingSkeletonClassName = styleInLayer('recipes', {
+export const loadingSkeletonClassName = style({
 	selectors: {
 		// Inline mode: the element itself is the skeleton (used when wrapping text).
 		'&[data-skeleton-inline]': {

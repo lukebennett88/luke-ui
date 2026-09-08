@@ -71,7 +71,7 @@ export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 		<RacCheckboxButton
 			{...props}
 			className={composeRenderProps(props.className, (className) => {
-				return checkboxRecipe().content(className);
+				return checkboxRecipe().content({ className });
 			})}
 		/>
 	);
@@ -80,13 +80,13 @@ export function CheckboxContent(props: CheckboxContentProps): JSX.Element {
 /** Line-height-sized wrapper that centres the fixed visual checkbox affordance. */
 export function CheckboxControl(props: CheckboxControlProps): JSX.Element {
 	const { className, ...restProps } = props;
-	return <span {...restProps} className={checkboxRecipe().control(className)} />;
+	return <span {...restProps} className={checkboxRecipe().control({ className })} />;
 }
 
 /** Visual square that reflects selected, indeterminate, disabled, and invalid states. */
 export function CheckboxIndicator(props: CheckboxIndicatorProps): JSX.Element {
 	const { className, ...restProps } = props;
-	return <span {...restProps} aria-hidden className={checkboxRecipe().indicator(className)} />;
+	return <span {...restProps} aria-hidden className={checkboxRecipe().indicator({ className })} />;
 }
 
 /** Checkbox field primitive for custom composition. */
@@ -97,7 +97,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
 		<RacCheckboxField
 			{...restProps}
 			className={composeRenderProps(className, (className) => {
-				return checkboxRecipe({ size }).root(className);
+				return checkboxRecipe({ size }).root({ className });
 			})}
 		/>
 	);

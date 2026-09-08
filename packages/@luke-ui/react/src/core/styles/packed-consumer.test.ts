@@ -10,7 +10,7 @@ const require = createRequire(import.meta.url);
 const packageRoot = fileURLToPath(new URL('../../..', import.meta.url));
 
 test(
-	'renders a component from the packed tarball in a plain node process, with no StyleX compiler',
+	'renders a component from the packed tarball in a plain node process, with no build-time compiler',
 	{ timeout: 60_000 },
 	async () => {
 		const tarballDir = await mkdtemp(path.join(tmpdir(), 'luke-ui-react-pack-'));

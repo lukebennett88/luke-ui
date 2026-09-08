@@ -22,17 +22,6 @@ afterEach(() => {
 	for (const style of document.querySelectorAll('style[data-layer-order-probe]')) style.remove();
 });
 
-function stylexPaddingClass(stylesheet: string): string {
-	const stylexSection = stylesheet.split('/* stylex */')[1] ?? '';
-	const paddingClass = stylexSection.match(
-		/\.([a-z0-9]+)\{padding:var\(--luke-space-sp16\)\}/,
-	)?.[1];
-	if (paddingClass == null) {
-		throw new Error('Expected StyleX padding fixture class in the built stylesheet.');
-	}
-	return paddingClass;
-}
-
 function mountProbe(className: string): HTMLDivElement {
 	const element = document.body.appendChild(document.createElement('div'));
 	mounted.push(element);
@@ -48,64 +37,74 @@ function loadingSkeletonClassName(stylesheet: string): string {
 	return match[1];
 }
 
-test('recipes beat StyleX priority layers in the built stylesheet cascade', () => {
-	const paddingClass = stylexPaddingClass(stylesheetCss);
-	const element = mountProbe(paddingClass);
+function iconBaseClassName(stylesheet: string): string {
+	const match = stylesheet.match(
+		/\.([a-z0-9]+) \{\n {4}display: inline-flex;\n {4}flex-shrink: 0;\n {2}\}/,
+	);
+	if (match == null || match[1] == null) {
+		throw new Error('Expected Icon base class in the built stylesheet.');
+	}
+	return match[1];
+}
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+test('a recipes-layer rule beats the layers below it in the built stylesheet cascade', () => {
+	// Use a real shipped Icon class as the production probe.
+	const iconClass = iconBaseClassName(stylesheetCss);
+	const element = mountProbe(iconClass);
 
-	const recipeStyle = document.head.appendChild(document.createElement('style'));
-	recipeStyle.dataset.layerOrderProbe = 'true';
-	recipeStyle.textContent = `@layer recipes { .${paddingClass} { padding-top: 10px; } }`;
+	expect(getComputedStyle(element).display).toBe('inline-flex');
 
-	expect(getComputedStyle(element).paddingTop).toBe('10px');
-});
+	const themeStyle = document.head.appendChild(document.createElement('style'));
+	themeStyle.dataset.layerOrderProbe = 'true';
+	themeStyle.textContent = `@layer theme { .${iconClass} { display: block; } }`;
 
-test('utilities beat StyleX priority layers in the built stylesheet cascade', () => {
-	const paddingClass = stylexPaddingClass(stylesheetCss);
-	const element = mountProbe(paddingClass);
+	expect(getComputedStyle(element).display).toBe('inline-flex');
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	const baseStyle = document.head.appendChild(document.createElement('style'));
+	baseStyle.dataset.layerOrderProbe = 'true';
+	baseStyle.textContent = `@layer base { .${iconClass} { display: grid; } }`;
 
-	const utilityStyle = document.head.appendChild(document.createElement('style'));
-	utilityStyle.dataset.layerOrderProbe = 'true';
-	utilityStyle.textContent = `@layer utilities { .${paddingClass} { padding-top: 20px; } }`;
-
-	expect(getComputedStyle(element).paddingTop).toBe('20px');
+	expect(getComputedStyle(element).display).toBe('inline-flex');
 });
 
 test('utilities beat recipes in the built stylesheet cascade', () => {
-	const paddingClass = stylexPaddingClass(stylesheetCss);
-	const element = mountProbe(paddingClass);
+	const iconClass = iconBaseClassName(stylesheetCss);
+	const element = mountProbe(iconClass);
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).display).toBe('inline-flex');
 
 	const recipeStyle = document.head.appendChild(document.createElement('style'));
 	recipeStyle.dataset.layerOrderProbe = 'true';
-	recipeStyle.textContent = `@layer recipes { .${paddingClass} { padding-top: 10px; } }`;
-	expect(getComputedStyle(element).paddingTop).toBe('10px');
+	recipeStyle.textContent = `@layer recipes { .${iconClass} { display: block; } }`;
+	expect(getComputedStyle(element).display).toBe('block');
 
 	const utilityStyle = document.head.appendChild(document.createElement('style'));
 	utilityStyle.dataset.layerOrderProbe = 'true';
-	utilityStyle.textContent = `@layer utilities { .${paddingClass} { padding-top: 20px; } }`;
+	utilityStyle.textContent = `@layer utilities { .${iconClass} { display: grid; } }`;
 
-	expect(getComputedStyle(element).paddingTop).toBe('20px');
+	expect(getComputedStyle(element).display).toBe('grid');
 });
 
-test('unlayered consumer CSS beats StyleX priority layers', () => {
-	const paddingClass = stylexPaddingClass(stylesheetCss);
-	const element = mountProbe(paddingClass);
+test('unlayered consumer CSS beats every layer in the built stylesheet', () => {
+	const iconClass = iconBaseClassName(stylesheetCss);
+	const element = mountProbe(iconClass);
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).display).toBe('inline-flex');
+
+	const utilityStyle = document.head.appendChild(document.createElement('style'));
+	utilityStyle.dataset.layerOrderProbe = 'true';
+	utilityStyle.textContent = `@layer utilities { .${iconClass} { display: grid; } }`;
+	expect(getComputedStyle(element).display).toBe('grid');
 
 	const consumerStyle = document.head.appendChild(document.createElement('style'));
 	consumerStyle.dataset.layerOrderProbe = 'true';
-	consumerStyle.textContent = `.${paddingClass} { padding-top: 30px; }`;
+	consumerStyle.textContent = `.${iconClass} { display: flow-root; }`;
 
-	expect(getComputedStyle(element).paddingTop).toBe('30px');
+	expect(getComputedStyle(element).display).toBe('flow-root');
 });
 
 test('reproduces the invalid early layer-declaration failure mode', () => {
+	// Declaring individual `@layer` names before the order statement creates `base` last.
 	const style = document.head.appendChild(document.createElement('style'));
 	style.dataset.layerOrderProbe = 'true';
 	style.textContent = `
@@ -114,15 +113,35 @@ test('reproduces the invalid early layer-declaration failure mode', () => {
 @layer probe-recipes;
 @layer probe-structural;
 @layer probe-utilities;
-@layer probe-reset, probe-theme, probe-luke.sx.priority1, probe-recipes, probe-structural, probe-utilities;
-@layer probe-luke.sx.priority1 { .probe-invalid { padding-top: 16px; } }
-@layer probe-recipes { .probe-invalid { padding-top: 10px; } }
-@layer probe-utilities { .probe-invalid { padding-top: 20px; } }
+@layer probe-reset, probe-theme, probe-base, probe-recipes, probe-structural, probe-utilities;
+@layer probe-recipes { .probe-invalid { display: inline-flex; } }
+@layer probe-utilities { .probe-invalid { display: grid; } }
+@layer probe-base { .probe-invalid { display: block; } }
 `;
 
 	const element = mountProbe('probe-invalid');
 
-	expect(getComputedStyle(element).paddingTop).toBe('16px');
+	expect(getComputedStyle(element).display).toBe('block');
+});
+
+test('a consumer base-layer reset does not override component recipes', () => {
+	// A consumer `@layer base` alone would create the layer last and beat recipes.
+	const iconClass = iconBaseClassName(stylesheetCss);
+	const element = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+	element.setAttribute('class', iconClass);
+	document.body.appendChild(element);
+	mounted.push(element as unknown as HTMLElement);
+
+	const preflightStyle = document.head.appendChild(document.createElement('style'));
+	preflightStyle.dataset.layerOrderProbe = 'true';
+	preflightStyle.textContent = `@layer base {
+  svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    vertical-align: middle;
+  }
+}`;
+
+	expect(getComputedStyle(element).display).toBe('inline-flex');
 });
 
 test('LoadingSkeleton structural !important beats utilities-layer !important overrides', () => {

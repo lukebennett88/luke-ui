@@ -1,5 +1,5 @@
 import { Button } from '@luke-ui/react/primitives/button';
-import { mergeProps } from '@luke-ui/react/utils';
+import { mergeStyleProps } from '@luke-ui/react/utils';
 
 export default () => {
 	return (
@@ -11,7 +11,7 @@ export default () => {
 					return 1;
 				})();
 
-				const buttonProps = mergeProps(domProps, {
+				const buttonProps = mergeStyleProps(domProps, {
 					style: {
 						transform: `scale(${scale})`,
 						transition: 'transform 100ms',

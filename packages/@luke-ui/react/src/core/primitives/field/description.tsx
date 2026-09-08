@@ -22,7 +22,7 @@ export function FieldDescription(props: FieldDescriptionProps): JSX.Element {
 	return (
 		<RacText
 			{...restProps}
-			className={fieldRecipe({ tone: 'description' }).message(className)}
+			className={fieldRecipe({ tone: 'description' }).message({ className })}
 			slot="description"
 		/>
 	);

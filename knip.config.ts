@@ -2,14 +2,12 @@ import type { KnipConfig } from 'knip';
 
 export default {
 	ignoreBinaries: ['xdg-open'],
-	ignoreDependencies: ['eslint-plugin-react-hooks'],
 	rules: {
 		cycles: 'error',
 	},
 	workspaces: {
 		'apps/docs': {
 			entry: [
-				'source.config.ts',
 				'scripts/**/*.ts',
 				// Compiled to an inline-able IIFE by the `pack` config in vite.config.ts.
 				'src/components/playground/editor-skeleton-script.ts',
@@ -21,7 +19,7 @@ export default {
 				'src/styles/app.css',
 				'content/**/*.mdx',
 			],
-			project: ['src/**/*.{ts,tsx}'],
+			project: ['src/**/*.{ts,tsx,css}', 'content/**/*.mdx'],
 		},
 		'packages/@luke-ui/react': {
 			entry: [
@@ -29,12 +27,12 @@ export default {
 				'src/exports/**/*.ts',
 				'src/core/stylesheet.css.ts',
 				'src/core/styles/index.css.ts',
-				// Pack entry; nothing in `src/` imports it.
-				'src/core/styles/stylex-bundle.ts',
-				'src/core/styles/stylex-fixture.ts',
 				'scripts/**/*.ts',
 			],
-			project: ['src/**/*.{ts,tsx}'],
+			// `.mdx` is included because Storybook's Knip plugin registers an MDX
+			// compiler for every workspace it detects, even though this package has
+			// no MDX stories.
+			project: ['src/**/*.{ts,tsx,mdx}'],
 		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],

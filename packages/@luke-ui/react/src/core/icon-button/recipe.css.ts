@@ -1,9 +1,9 @@
 import { vars } from '../../theme/contract.css.js';
-import { styleInLayer } from '../styles/layered-style.css.js';
+import { style } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 
-export const iconButtonReset = styleInLayer('recipes', {
+export const iconButtonReset = style({
 	'@media': {
 		'(forced-colors: active)': {
 			selectors: {
@@ -40,7 +40,6 @@ export const iconButtonIcon = recipe({
 	},
 });
 
-/** Vanilla-extract recipe for the `IconButton` primitive's styles. */
 export const iconButtonRecipe = recipe({
 	variants: {
 		size: {

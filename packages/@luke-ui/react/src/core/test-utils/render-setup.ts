@@ -1,3 +1,7 @@
+// Import the complete layer graph before component CSS so browser and visual tests use the built
+// stylesheet's layer order. Vite's dev server does not run `authoritativeLayerOrderPlugin`, and the
+// browser fixes layer order when a `<style>` tag first names each layer.
+import '../styles/index.css.js';
 import { afterEach } from 'vite-plus/test';
 import { cleanupMountedRenders } from './render-mount-state.js';
 

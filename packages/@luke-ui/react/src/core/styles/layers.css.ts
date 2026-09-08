@@ -1,24 +1,22 @@
 import { globalLayer } from '@vanilla-extract/css';
+import { cascadeLayerNames } from './layer-names.js';
 
 /**
- * CSS cascade layers, ordered from lowest to highest priority.
+ * Cascade layers, ordered from lowest to highest priority.
  *
- * - **reset** — Normalize browser defaults (box-sizing, margins, form elements).
- * - **theme** — Design token custom properties and base typographic defaults.
- * - **recipes** — Component styles (variants, compound variants).
- * - **structural** — Descendant rhythm, skeleton masking, and other retained global selectors.
- * - **utilities** — One-off overrides; highest-priority layer for escape hatches.
+ * - **reset** — Browser defaults (box-sizing, margins, form elements).
+ * - **theme** — Design tokens and base typography.
+ * - **base** — Reserved for the consuming application (for example Tailwind Preflight). Declared
+ *   empty so the first consumer write does not create the layer last and outrank `recipes`.
+ * - **recipes** — Component styles.
+ * - **structural** — Global selectors kept in the stylesheet (Prose rhythm, skeleton masks).
+ * - **utilities** — One-off overrides.
  *
- * `globalLayer()` keeps Vanilla Extract's layer wiring consistent. The authoritative
- * combined order is prepended at build time before other CSS; redundant empty
- * `@layer name;` declarations are stripped so they cannot reorder already-created layers.
+ * Precedence comes from the order of `cascadeLayerNames`. The build prepends the combined `@layer`
+ * order and strips empty `@layer name;` declarations that would reorder layers.
  */
-export const layers = {
-	reset: globalLayer('reset'),
-	theme: globalLayer('theme'),
-	recipes: globalLayer('recipes'),
-	structural: globalLayer('structural'),
-	utilities: globalLayer('utilities'),
-} as const;
+export const layers = Object.fromEntries(
+	cascadeLayerNames.map((name) => [name, globalLayer(name)]),
+) as { [Name in (typeof cascadeLayerNames)[number]]: ReturnType<typeof globalLayer> };
 
 export type LayerName = keyof typeof layers;

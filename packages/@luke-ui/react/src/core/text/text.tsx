@@ -1,5 +1,4 @@
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
 import { typeStyleWeightRole } from '../../theme/contract.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
@@ -16,8 +15,13 @@ interface TextStyleProps {
 	 */
 	color?: TextVariantProps['color'];
 	/**
+	 * Sets font style.
+	 * @default 'default'
+	 */
+	fontStyle?: TextVariantProps['fontStyle'];
+	/**
 	 * Sets numeric glyph style.
-	 * @default 'unset'
+	 * @default 'default'
 	 */
 	fontVariantNumeric?: TextVariantProps['fontVariantNumeric'];
 	/**
@@ -59,7 +63,7 @@ interface TextStyleProps {
 	textTransform?: TextVariantProps['textTransform'];
 	/**
 	 * Sets text wrapping behavior.
-	 * @default 'unset'
+	 * @default 'default'
 	 */
 	textWrap?: TextVariantProps['textWrap'];
 	/**
@@ -105,6 +109,7 @@ export function Text(props: TextProps) {
 		className,
 		color,
 		elementType = 'span',
+		fontStyle,
 		fontVariantNumeric,
 		fontWeight,
 		isVisuallyHidden,
@@ -130,25 +135,23 @@ export function Text(props: TextProps) {
 	return (
 		<RacText
 			{...racProps}
-			className={cx(
-				textRecipe({
-					color,
-					fontVariantNumeric,
-					...(shouldInheritFont
-						? {}
-						: { fontWeight: fontWeight ?? typeStyleWeightRole[resolvedTypography] }),
-					isVisuallyHidden,
-					lineClamp,
-					shouldDisableTrim: resolvedShouldDisableTrim,
-					shouldInheritFont,
-					textAlign,
-					textDecoration,
-					textTransform,
-					textWrap,
-					typography: resolvedTypography,
-				}),
+			className={textRecipe({
 				className,
-			)}
+				color,
+				fontStyle,
+				fontVariantNumeric,
+				fontWeight:
+					fontWeight ?? (shouldInheritFont ? undefined : typeStyleWeightRole[resolvedTypography]),
+				isVisuallyHidden,
+				lineClamp,
+				shouldDisableTrim: resolvedShouldDisableTrim,
+				shouldInheritFont,
+				textAlign,
+				textDecoration,
+				textTransform,
+				textWrap,
+				typography: resolvedTypography,
+			})}
 			elementType={elementType}
 		>
 			{children}

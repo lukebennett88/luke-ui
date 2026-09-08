@@ -3,7 +3,6 @@ import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/contract.js';
 import { fontWeightRoles, typeStyles } from '../../theme/contract.js';
-import { styleInLayer } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 import { visuallyHiddenStyle } from '../visually-hidden/recipe.css.js';
@@ -37,13 +36,6 @@ const lineClampVariants = {
 	4: lineClampMultiLine(4),
 	5: lineClampMultiLine(5),
 } as const;
-
-const base = styleInLayer('recipes', {
-	color: vars.color.text.primary,
-	fontFamily: vars.font.family.body,
-	minInlineSize: 0,
-	overflowWrap: 'break-word',
-});
 
 const colorVariants = {
 	accent: { color: vars.color.foreground.accent.rest },
@@ -122,34 +114,47 @@ function createLayeredTextStyle({
 	} satisfies ComplexStyleRule;
 }
 
-/** Vanilla-extract recipe for the `Text` component's styles. */
 export const textRecipe = recipe({
-	base,
+	base: {
+		color: vars.color.text.primary,
+		fontFamily: vars.font.family.body,
+		// `Text` renders untransformed text with the font's default numerals unless asked otherwise.
+		// These sit in the base rather than in a default variant so `shouldInheritFont` can override
+		// them: a composed `Code`/`Em`/`Kbd`/`Strong` keeps the surrounding case and numeric styling,
+		// while a plain `Text` is still insulated from whatever the page sets around it.
+		fontVariantNumeric: 'normal',
+		minInlineSize: 0,
+		overflowWrap: 'break-word',
+		textTransform: 'none',
+	},
 	compoundVariants: typographyCompoundVariants,
 	defaultVariants: {
-		fontVariantNumeric: 'unset',
+		fontStyle: 'default',
+		fontVariantNumeric: 'default',
 		isVisuallyHidden: false,
 		lineClamp: false,
 		shouldDisableTrim: false,
 		shouldInheritFont: false,
 		textAlign: 'start',
 		textDecoration: 'none',
-		textTransform: 'none',
-		textWrap: 'unset',
+		textTransform: 'default',
+		textWrap: 'default',
 		typography: 'body',
 	},
 	variants: {
-		fontVariantNumeric: {
-			'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
-			ordinal: { fontVariantNumeric: 'ordinal' },
-			'slashed-zero': { fontVariantNumeric: 'slashed-zero' },
-			'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
-			unset: { fontVariantNumeric: 'normal' },
-		},
 		isVisuallyHidden: {
 			false: {},
 			true: visuallyHiddenStyle,
 		},
+		textWrap: {
+			balance: { textWrap: 'balance' },
+			pretty: { textWrap: 'pretty' },
+			default: {},
+		},
+		// Keep `lineClamp` after `textWrap`. A single-line clamp truncates to one line with an
+		// ellipsis, which needs its `white-space: nowrap` to win over `text-wrap: balance`/`pretty`
+		// — both set the `text-wrap-mode` longhand, and that tie breaks on declaration order. A
+		// multi-line clamp sets no wrapping property, so `textWrap` still applies under it.
 		lineClamp: lineClampVariants,
 		shouldDisableTrim: { false: {}, true: {} },
 		textAlign: {
@@ -163,20 +168,7 @@ export const textRecipe = recipe({
 			none: { textDecoration: 'none' },
 			underline: { textDecoration: 'underline' },
 		},
-		textTransform: {
-			capitalize: { textTransform: 'capitalize' },
-			inherit: { textTransform: 'inherit' },
-			lowercase: { textTransform: 'lowercase' },
-			none: { textTransform: 'none' },
-			uppercase: { textTransform: 'uppercase' },
-		},
-		textWrap: {
-			balance: { textWrap: 'balance' },
-			pretty: { textWrap: 'pretty' },
-			unset: {},
-		},
 		typography: typographyVariants,
-		fontWeight: weightVariants,
 		shouldInheritFont: {
 			false: {},
 			true: {
@@ -184,11 +176,40 @@ export const textRecipe = recipe({
 				fontFamily: 'inherit',
 				fontSize: 'inherit',
 				fontStyle: 'inherit',
+				fontVariantNumeric: 'inherit',
 				fontWeight: 'inherit',
 				letterSpacing: 'inherit',
 				lineHeight: 'inherit',
+				textTransform: 'inherit',
 				vars: { [textLineHeight]: '1lh' },
 			},
+		},
+		// Keep these after `shouldInheritFont`. They must win over its `inherit` values, and that tie
+		// breaks on declaration order. Each `default` emits nothing, so an unset prop leaves whatever
+		// came before it standing: the base reset for a plain `Text`, or the inherited value under
+		// `shouldInheritFont`.
+		fontWeight: weightVariants,
+		fontStyle: {
+			inherit: { fontStyle: 'inherit' },
+			italic: { fontStyle: 'italic' },
+			normal: { fontStyle: 'normal' },
+			default: {},
+		},
+		fontVariantNumeric: {
+			'diagonal-fractions': { fontVariantNumeric: 'diagonal-fractions' },
+			normal: { fontVariantNumeric: 'normal' },
+			ordinal: { fontVariantNumeric: 'ordinal' },
+			'slashed-zero': { fontVariantNumeric: 'slashed-zero' },
+			'tabular-nums': { fontVariantNumeric: 'tabular-nums' },
+			default: {},
+		},
+		textTransform: {
+			capitalize: { textTransform: 'capitalize' },
+			inherit: { textTransform: 'inherit' },
+			lowercase: { textTransform: 'lowercase' },
+			none: { textTransform: 'none' },
+			uppercase: { textTransform: 'uppercase' },
+			default: {},
 		},
 		color: colorVariants,
 	},

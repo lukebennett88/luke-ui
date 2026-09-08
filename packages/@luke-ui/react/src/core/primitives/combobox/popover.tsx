@@ -29,7 +29,7 @@ export function ComboboxPopover(props: ComboboxPopoverProps): JSX.Element {
 		<RacPopover
 			{...restProps}
 			className={composeRenderProps(restProps.className, (className) => {
-				return cx(rootClassName, comboboxRecipe().popover(className));
+				return cx(rootClassName, comboboxRecipe().popover({ className }));
 			})}
 			ref={ref}
 		/>

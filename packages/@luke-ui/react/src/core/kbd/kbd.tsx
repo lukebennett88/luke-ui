@@ -1,17 +1,27 @@
-import type { ComponentProps } from 'react';
-import { cx } from '../../shared/utils/utils.js';
+import { Text } from '../text/text.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { kbdRecipe } from './recipe.css.js';
 
-interface _KbdProps extends ComponentProps<'kbd'> {}
+type _KbdOmit = DistributiveOmit<React.ComponentProps<'kbd'>, 'color'>;
+
+interface _KbdProps extends _KbdOmit {}
 
 /** Props for the `Kbd` component. */
 export type KbdProps = Prettify<_KbdProps>;
 
 /**
- * Represents keyboard input or a hotkey, rendered as `<kbd>`.
+ * Represents keyboard input as `<kbd>`. Sets its own font, size, weight, and line height. Other
+ * typography, such as letter-spacing, inherits.
  */
 export function Kbd(props: KbdProps) {
 	const { className, ...elementProps } = props;
-	return <kbd {...elementProps} className={cx(kbdRecipe(), className)} />;
+	return (
+		<Text
+			{...elementProps}
+			className={kbdRecipe({ className })}
+			elementType="kbd"
+			shouldInheritFont
+		/>
+	);
 }

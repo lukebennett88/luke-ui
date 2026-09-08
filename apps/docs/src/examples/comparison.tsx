@@ -3,6 +3,10 @@ import { Text } from '@luke-ui/react/text';
 import type { PropsWithChildren } from 'react';
 
 type ComparisonProps = PropsWithChildren<{
+	/**
+	 * The direction of the comparison
+	 * @default 'horizontal'
+	 */
 	direction?: 'horizontal' | 'vertical';
 }>;
 

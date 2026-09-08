@@ -1,6 +1,5 @@
 import type { ComponentPropsWithRef, JSX } from 'react';
 import { Text as RacText } from 'react-aria-components/Text';
-import { cx } from '../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedElementTypeProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -30,5 +29,5 @@ export type VisuallyHiddenProps = Prettify<_VisuallyHiddenProps>;
  */
 export function VisuallyHidden(props: VisuallyHiddenProps): JSX.Element {
 	const { className, ...racProps } = props;
-	return <RacText {...racProps} className={cx(visuallyHiddenRecipe(), className)} />;
+	return <RacText {...racProps} className={visuallyHiddenRecipe({ className })} />;
 }

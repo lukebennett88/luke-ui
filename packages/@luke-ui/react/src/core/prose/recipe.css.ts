@@ -4,7 +4,7 @@ import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 import { proseScopeClassName } from './scope.css.js';
 
-/** Vanilla-extract recipe for a fixed long-form document rhythm. */
+/** Scope class for the long-form rhythm applied by the global rules below. */
 export const proseRecipe = recipe({ base: proseScopeClassName });
 
 export type ProseRecipeVariants = RecipeSelection<typeof proseRecipe>;

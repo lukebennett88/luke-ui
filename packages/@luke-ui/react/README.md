@@ -16,8 +16,10 @@ Import the component stylesheet and one bundled theme stylesheet. Importing a th
 themes the whole document from `:root`, so no identity class is needed for a single theme. Apply
 `rootClassName` to an element you own for the reset and base typography.
 
-The shared stylesheet owns reset, theme-root, recipe, and utility rules in `reset`, `theme`,
-`recipes`, `utilities` order.
+The shared stylesheet uses the layer order
+`reset → theme → base → recipes → structural → utilities`. The `base` layer is reserved for
+application defaults such as Tailwind Preflight. Luke UI declares it empty so it stays below
+`recipes`.
 
 ```tsx
 import '@luke-ui/react/stylesheet.css';
@@ -35,14 +37,8 @@ theme wins. Import it from that theme's own entrypoint, for example
 
 ## Components and docs
 
-Full component documentation, interactive examples, and API reference are at
-[lukebennett88.github.io/luke-ui](https://lukebennett88.github.io/luke-ui).
-
-AI agents can fetch documentation at:
-
-- [llms.txt](https://lukebennett88.github.io/luke-ui/llms.txt): component index.
-- [llms-full.txt](https://lukebennett88.github.io/luke-ui/llms-full.txt): full docs.
-- Any docs URL with `.md` appended: per-page Markdown.
+Component documentation, interactive examples, and API reference live in this repo under
+`apps/docs/content/docs`.
 
 Start with the normal component API. Use primitives from `@luke-ui/react/primitives/*` when you need
 a custom composition the component API does not cover. Import a colocated recipe such as
