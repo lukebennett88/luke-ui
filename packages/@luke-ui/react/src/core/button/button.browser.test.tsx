@@ -3,8 +3,10 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { expect, test } from 'vite-plus/test';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { ACTION_SPINNER_DELAY } from '../use-press-action/use-press-action.js';
 import { Button } from './button.js';
+
+/** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
+const ACTION_SPINNER_DELAY_MS = 300;
 
 testConformance({
 	path: 'button',
@@ -118,7 +120,7 @@ test('shows no spinner for a fast Action', async () => {
 
 	await user.click(fast);
 	await expect.poll(() => fast.element().getAttribute('data-pending')).toBeNull();
-	await delay(ACTION_SPINNER_DELAY + 50);
+	await delay(ACTION_SPINNER_DELAY_MS + 100);
 	expect(fast.element().querySelector('[role="status"]')).toBeNull();
 });
 
@@ -143,7 +145,10 @@ test('shows a delayed spinner for a slow Action', async () => {
 	expect(slow.element().getAttribute('data-pending')).toBe('true');
 	expect(slow.element().querySelector('[role="status"]')).toBeNull();
 
-	await delay(ACTION_SPINNER_DELAY + 50);
+	await delay(ACTION_SPINNER_DELAY_MS - 50);
+	expect(slow.element().querySelector('[role="status"]')).toBeNull();
+
+	await delay(150);
 	expect(slow.element().querySelector('[role="status"]')).not.toBeNull();
 
 	releaseSlow();

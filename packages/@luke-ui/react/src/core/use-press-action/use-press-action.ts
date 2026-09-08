@@ -3,7 +3,7 @@ import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button
 import { useSpinDoctor } from 'spin-doctor';
 
 /** Delay before an Action-owned spinner appears. Explicit `isPending` shows immediately. */
-export const ACTION_SPINNER_DELAY = 300;
+const ACTION_SPINNER_DELAY = 300;
 
 type OnPress = NonNullable<RacButtonProps['onPress']>;
 
@@ -12,9 +12,9 @@ export type PressAction = () => void | Promise<void>;
 export interface UsePressActionOptions {
 	/** Externally owned pending state. */
 	isPending?: boolean;
-	/** Synchronous press handler. Runs before `pressAction` when both are set. */
+	/** Press handler. Runs before `pressAction` when both are set. */
 	onPress?: OnPress;
-	/** Button-owned work run as a React Action. */
+	/** Button-owned operation run as a React Action. */
 	pressAction?: PressAction;
 }
 

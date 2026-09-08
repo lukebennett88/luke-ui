@@ -35,14 +35,14 @@ interface ButtonStyleProps {
 	isBlock?: PrimitiveButtonRecipeProps['isBlock'];
 	/**
 	 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
-	 * immediately. Prefer `pressAction` for Button-owned work.
+	 * immediately. Prefer `pressAction` for Button-owned operations.
 	 * @default false
 	 */
 	isPending?: ButtonLabelRecipeProps['isPending'];
 	/**
-	 * Button-owned work run as a React Action. The button becomes pending automatically until the
-	 * Action settles. Use `onPress` for the synchronous interaction; use `pressAction` for the
-	 * resulting operation. Prefer a native `<form action>` when the work is a form submission.
+	 * Button-owned operation run as a React Action. The button becomes pending automatically until
+	 * the Action settles. `onPress` handles the interaction. `pressAction` performs the resulting
+	 * operation. Prefer a native `<form action>` when the operation is a form submission.
 	 */
 	pressAction?: PressAction;
 	/**

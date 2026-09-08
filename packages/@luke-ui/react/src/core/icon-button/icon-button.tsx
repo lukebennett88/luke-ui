@@ -20,13 +20,13 @@ interface IconButtonRecipeProps extends NonNullable<IconButtonRecipeVariants> {}
 interface IconButtonStyleProps {
 	/**
 	 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
-	 * immediately. Prefer `pressAction` for IconButton-owned work.
+	 * immediately. Prefer `pressAction` for IconButton-owned operations.
 	 * @default false
 	 */
 	isPending?: boolean;
 	/**
-	 * IconButton-owned work run as a React Action. The button becomes pending automatically until
-	 * the Action settles. Use `onPress` for the synchronous interaction; use `pressAction` for the
+	 * IconButton-owned operation run as a React Action. The button becomes pending automatically
+	 * until the Action settles. `onPress` handles the interaction. `pressAction` performs the
 	 * resulting operation.
 	 */
 	pressAction?: PressAction;

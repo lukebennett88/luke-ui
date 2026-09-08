@@ -57,17 +57,16 @@ badge, count, or keyboard hint. Nested interactive controls are unsupported. `Bu
 icons for you, so an `Icon` needs no `size` prop. Pass one only to override it. Use
 [`IconButton`](/components/actions/icon-button) only when the icon is familiar without a text label.
 
-<ExampleBlock src="button/icons" title="Button — Content slots" />
+<ExampleBlock src="button/content-slots" title="Button — Content slots" />
 
 ## Pending and Actions
 
-`onPress` handles the synchronous interaction. `pressAction` performs Button-owned work whose
-pending lifecycle the button manages automatically. When both are set, `onPress` runs first, then
-`pressAction`.
+`onPress` handles the interaction. `pressAction` performs the resulting operation. When both are
+set, `onPress` runs first, then `pressAction`.
 
-Prefer a native form Action when the work is naturally a form submission. Read pending state with
-[`useFormStatus`](https://react.dev/reference/react-dom/hooks/useFormStatus) from a child of the
-form, because the hook only works under a `<form>` that is submitting:
+Prefer a native form Action when the operation is a form submission. Pass the form’s pending state
+to `Button`; this example uses React’s
+[`useFormStatus`](https://react.dev/reference/react-dom/hooks/useFormStatus).
 
 <ExampleBlock src="button/form-action" title="Button — Form Action" />
 

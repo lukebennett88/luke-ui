@@ -4,6 +4,14 @@ import { Text } from '@luke-ui/react/text';
 import type { FallbackProps } from 'react-error-boundary';
 import { ErrorBoundary } from 'react-error-boundary';
 
+export default () => {
+	return (
+		<ErrorBoundary FallbackComponent={ErrorFallback}>
+			<Button pressAction={save}>Save changes</Button>
+		</ErrorBoundary>
+	);
+};
+
 async function save() {
 	await new Promise((resolve) => {
 		setTimeout(resolve, 400);
@@ -19,19 +27,9 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 			<Text color="danger" role="alert">
 				{message}
 			</Text>
-			<Button appearance="subtle" onPress={() => resetErrorBoundary()}>
+			<Button appearance="subtle" onPress={resetErrorBoundary}>
 				Try again
 			</Button>
 		</Box>
 	);
 }
-
-export default () => {
-	return (
-		<ErrorBoundary FallbackComponent={ErrorFallback}>
-			<Button pressAction={save} tone="danger">
-				Save changes
-			</Button>
-		</ErrorBoundary>
-	);
-};
