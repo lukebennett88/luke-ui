@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
 import { transform } from 'lightningcss';
+import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
@@ -262,7 +262,13 @@ function assertStylesheetContract(
 		'font-family',
 		'var(--luke-font-body-font-family)',
 	);
-	assertSentinel(analysis, 'luke-ui-theme', 'theme', 'font-size', 'var(--luke-font-body-font-size)');
+	assertSentinel(
+		analysis,
+		'luke-ui-theme',
+		'theme',
+		'font-size',
+		'var(--luke-font-body-font-size)',
+	);
 
 	for (const className of recipeClasses) assertClassOwnership(analysis, className, 'recipes');
 	for (const className of utilityClasses) assertClassOwnership(analysis, className, 'utilities');
@@ -360,7 +366,10 @@ function indexStyleRule(rule: StyleRule, owningLayer: string | undefined): Index
 				onAttribute(component.name, insideNot);
 			}
 
-			if (component.type === 'pseudo-element' && (component.kind === 'before' || component.kind === 'after')) {
+			if (
+				component.type === 'pseudo-element' &&
+				(component.kind === 'before' || component.kind === 'after')
+			) {
 				pseudos.add(component.kind);
 			}
 
@@ -410,24 +419,14 @@ function assertPrivateStylesheetSentinel(analysis: StylesheetAnalysis): void {
 	for (const rule of rules) expect(rule.owningLayer).toBe('recipes');
 	expect(
 		rules.some((rule) =>
-			declarationListHas(
-				rule,
-				'background-color',
-				'var(--luke-color-loading-skeleton)',
-				true,
-			),
+			declarationListHas(rule, 'background-color', 'var(--luke-color-loading-skeleton)', true),
 		),
 	).toBe(true);
 
 	const maskRules = analysis.styleRules.filter((rule) => {
 		if (!rule.mentionsAttribute('data-skeleton-inline')) return false;
 		if (!rule.hasChildUniversal) return false;
-		return declarationListHas(
-			rule,
-			'background-color',
-			'var(--luke-color-loading-skeleton)',
-			true,
-		);
+		return declarationListHas(rule, 'background-color', 'var(--luke-color-loading-skeleton)', true);
 	});
 	expect(maskRules.length).toBeGreaterThan(0);
 	for (const rule of maskRules) expect(rule.owningLayer).toBe('structural');
@@ -450,8 +449,7 @@ function assertEffectiveLayerCreationOrder(analysis: StylesheetAnalysis): void {
 	for (const rule of analysis.rootRules) {
 		if (rule.type !== 'layer-statement' && rule.type !== 'layer-block') continue;
 
-		const isCombinedOrder =
-			rule.type === 'layer-statement' && layerStatementNames(rule).length > 1;
+		const isCombinedOrder = rule.type === 'layer-statement' && layerStatementNames(rule).length > 1;
 
 		if (isCombinedOrder) {
 			if (!sawAuthoritativeOrder) {
@@ -575,7 +573,9 @@ function assertRootNodes(analysis: StylesheetAnalysis): void {
 			throw new Error('Root qualified rules are not allowed.');
 		}
 
-		throw new Error(`Unexpected root at-rule: @${rule.type === 'unknown' ? (rule.value.name as string) : rule.type}`);
+		throw new Error(
+			`Unexpected root at-rule: @${rule.type === 'unknown' ? (rule.value.name as string) : rule.type}`,
+		);
 	}
 }
 
@@ -662,11 +662,7 @@ function assertLineClampOwnership(
 	}
 }
 
-function assertDeclaration(
-	rules: Array<IndexedStyleRule>,
-	property: string,
-	value: string,
-): void {
+function assertDeclaration(rules: Array<IndexedStyleRule>, property: string, value: string): void {
 	const matchingRules = rules.filter((rule) => declarationListHas(rule, property, value));
 	expect(matchingRules.length).toBeGreaterThan(0);
 	for (const rule of matchingRules) expect(rule.owningLayer).toBe('recipes');
@@ -703,12 +699,11 @@ function declarationListHas(
 			? [rule.rule.declarations.importantDeclarations]
 			: important === false
 				? [rule.rule.declarations.declarations]
-				: [
-						rule.rule.declarations.declarations,
-						rule.rule.declarations.importantDeclarations,
-					];
+				: [rule.rule.declarations.declarations, rule.rule.declarations.importantDeclarations];
 
-	return lists.some((list) => list.some((declaration) => matchesDeclaration(declaration, property, value)));
+	return lists.some((list) =>
+		list.some((declaration) => matchesDeclaration(declaration, property, value)),
+	);
 }
 
 function matchesDeclaration(declaration: Declaration, property: string, value: string): boolean {
@@ -789,14 +784,12 @@ function matchesLineClamp(declaration: Declaration, property: string, value: str
 	};
 	if (custom.name !== property) return false;
 	const token = custom.value?.[0];
-	return token?.type === 'token' && token.value?.type === 'number' && String(token.value.value) === value;
+	return (
+		token?.type === 'token' && token.value?.type === 'number' && String(token.value.value) === value
+	);
 }
 
-function matchesVarDeclaration(
-	declaration: Declaration,
-	property: string,
-	value: string,
-): boolean {
+function matchesVarDeclaration(declaration: Declaration, property: string, value: string): boolean {
 	const ident = value.match(/^var\((--[^)]+)\)$/)?.[1];
 	if (ident == null) return false;
 

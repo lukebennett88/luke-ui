@@ -18,12 +18,12 @@ steps inject styles at runtime.
 
 Paths below are rooted in `packages/@luke-ui/react/src/`.
 
-| Area | Role |
-| ---- | ---- |
-| `core/styles/` | Stylesheet graph, layers, reset, theme root, recipe engine, modules registry, utilities, and shared helpers that emit no CSS on their own |
-| Component and primitive folders under `core/` | Colocate `recipe.css.ts` (public) and `styles.css.ts` (private) beside the owner |
-| `theme/` | Token contract, `defineTheme`, foundations, bundles, and the build pipeline |
-| `scripts/build-themes.ts` | Writes `dist/themes/<name>/stylesheet.css` |
+| Area                                          | Role                                                                                                                                      |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `core/styles/`                                | Stylesheet graph, layers, reset, theme root, recipe engine, modules registry, utilities, and shared helpers that emit no CSS on their own |
+| Component and primitive folders under `core/` | Colocate `recipe.css.ts` (public) and `styles.css.ts` (private) beside the owner                                                          |
+| `theme/`                                      | Token contract, `defineTheme`, foundations, bundles, and the build pipeline                                                               |
+| `scripts/build-themes.ts`                     | Writes `dist/themes/<name>/stylesheet.css`                                                                                                |
 
 Stable entry points:
 
@@ -37,9 +37,9 @@ Stable entry points:
 
 `modules.css.ts` imports every shipped `recipe.css.ts` and `styles.css.ts`, plus primitive and
 overlay modules. Named layers set cross-layer priority. Within a layer, later equal-specificity
-rules win. Put overridden modules first — for example `text/recipe.css` before `code/recipe.css`
-and `kbd/recipe.css`. Generators append imports and do not sort this list. Inherited custom
-properties ignore source order.
+rules win. Put overridden modules first — for example `text/recipe.css` before `code/recipe.css` and
+`kbd/recipe.css`. Generators append imports and do not sort this list. Inherited custom properties
+ignore source order.
 
 ## Themes
 
@@ -66,8 +66,8 @@ Bundled themes (`tactile`, `paper`) ship precompiled. Each stylesheet pairs `:wh
 one theme at once. Authored themes use the same class mechanism through `getThemeClassName(name)`.
 
 Without `data-color-mode`, a themed subtree follows `prefers-color-scheme`. Set
-`data-color-mode="light"` or `data-color-mode="dark"` to force a mode. Nested scopes can override it.
-Every scope also sets native `color-scheme`.
+`data-color-mode="light"` or `data-color-mode="dark"` to force a mode. Nested scopes can override
+it. Every scope also sets native `color-scheme`.
 
 A colour mode scoped below `<html>` does not reach a body-level portal. Set `data-color-mode` on
 `<html>` when a portalled surface must follow an explicit mode.
@@ -77,14 +77,14 @@ A colour mode scoped below `<html>` does not reach a body-level portal. Set `dat
 All styles live in named CSS cascade layers. Layer order sets cross-layer priority. Specificity and
 source order still decide conflicts within a layer.
 
-| Layer        | Purpose |
-| ------------ | ------- |
-| `reset`      | Browser defaults, box sizing, and margins |
-| `theme`      | Design token custom properties and base typography |
+| Layer        | Purpose                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------- |
+| `reset`      | Browser defaults, box sizing, and margins                                                   |
+| `theme`      | Design token custom properties and base typography                                          |
 | `base`       | Reserved for the consuming app (for example Tailwind Preflight). Luke UI emits nothing here |
-| `recipes`    | Component styles, variants, compound variants, and shared compound-slot styles |
-| `structural` | Retained descendant rhythm, skeleton masking, and combinator selectors |
-| `utilities`  | One-off layout and override escape hatches |
+| `recipes`    | Component styles, variants, compound variants, and shared compound-slot styles              |
+| `structural` | Retained descendant rhythm, skeleton masking, and combinator selectors                      |
+| `utilities`  | One-off layout and override escape hatches                                                  |
 
 The public stylesheet starts with one combined order statement:
 
