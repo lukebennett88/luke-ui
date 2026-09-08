@@ -132,6 +132,9 @@ catalogs:
     knip:
       specifier: ^6.34.0
       version: 6.34.0
+    lightningcss:
+      specifier: ^1.33.0
+      version: 1.33.0
     lz-string:
       specifier: ^1.5.0
       version: 1.5.0
@@ -159,12 +162,6 @@ catalogs:
     pngjs:
       specifier: ^7.0.0
       version: 7.0.0
-    postcss:
-      specifier: ^8.5.26
-      version: 8.5.26
-    postcss-selector-parser:
-      specifier: ^7.1.5
-      version: 7.1.5
     prettier:
       specifier: ^3.9.6
       version: 3.9.6
@@ -495,6 +492,9 @@ importers:
       '@vitest/ui':
         specifier: 'catalog:'
         version: 4.1.11(vitest@4.1.11)
+      lightningcss:
+        specifier: 'catalog:'
+        version: 1.33.0
       node-html-parser:
         specifier: 'catalog:'
         version: 9.0.2
@@ -513,12 +513,6 @@ importers:
       pngjs:
         specifier: 'catalog:'
         version: 7.0.0
-      postcss:
-        specifier: 'catalog:'
-        version: 8.5.26
-      postcss-selector-parser:
-        specifier: 'catalog:'
-        version: 7.1.5
       publint:
         specifier: 'catalog:'
         version: 0.3.24
@@ -5194,11 +5188,6 @@ packages:
   css.escape@1.5.1:
     resolution: {integrity: sha512-YUifsXXuknHlUsmlgyY0PKzgPOr7/FjCePfHNt0jxm83wHZi44VDMQ7/fGNkjY3/jV1MC+1CmZbaHzugyeRtpg==}
 
-  cssesc@3.0.0:
-    resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
-    engines: {node: '>=4'}
-    hasBin: true
-
   cssfilter@0.0.10:
     resolution: {integrity: sha512-FAaLDaplstoRsDR8XGYH51znUN0UY7nMc6Z9/fvE8EXGwvJE9hu7W2vHwx1+bd6gCYnln9nLbzxFTrcO9YQDZw==}
 
@@ -7408,10 +7397,6 @@ packages:
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
-
-  postcss-selector-parser@7.1.5:
-    resolution: {integrity: sha512-KvvtD7SrlBP7dlgkBghEE3r84CABm5SmV2aNcG4oCA+qDnJ/tvKonFVvwWAyyWUEwxuNawdfEAZKP9zM3oZ2Uw==}
-    engines: {node: '>=4'}
 
   postcss-values-parser@6.0.2:
     resolution: {integrity: sha512-YLJpK0N1brcNJrs9WatuJFtHaV9q5aAOj+S4DI5S7jgHlRfm0PIbDCAFRYMQD5SHq7Fy6xsDhyutgS0QOAs0qw==}
@@ -12899,8 +12884,6 @@ snapshots:
 
   css.escape@1.5.1: {}
 
-  cssesc@3.0.0: {}
-
   cssfilter@0.0.10: {}
 
   csso@5.0.5:
@@ -15680,11 +15663,6 @@ snapshots:
   pngjs@7.0.0: {}
 
   possible-typed-array-names@1.1.0: {}
-
-  postcss-selector-parser@7.1.5:
-    dependencies:
-      cssesc: 3.0.0
-      util-deprecate: 1.0.2
 
   postcss-values-parser@6.0.2(postcss@8.5.26):
     dependencies:

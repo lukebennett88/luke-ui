@@ -89,8 +89,7 @@ catalog:
   playwright: '^1.62.1'
   prettier: ^3.9.6
   pngjs: ^7.0.0
-  postcss: ^8.5.26
-  postcss-selector-parser: ^7.1.5
+  lightningcss: ^1.33.0
   publint: ^0.3.24
   react: ^19.2.8
   react-aria-components: ^1.21.0

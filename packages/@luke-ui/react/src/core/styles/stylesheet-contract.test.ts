@@ -1,8 +1,6 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import type { AtRule, Root, Rule } from 'postcss';
-import { parse } from 'postcss';
-import selectorParser from 'postcss-selector-parser';
+import { transform } from 'lightningcss';
 import { expect, test } from 'vite-plus/test';
 import type { TypeStyle } from '../../theme/contract.js';
 import { typeStyles } from '../../theme/contract.js';
@@ -28,6 +26,51 @@ type LineClampClasses = {
 	numeric: Record<NumericLineClampVariant, Array<string>>;
 };
 
+type CssRule = {
+	type: string;
+	value: Record<string, unknown>;
+};
+
+type StyleRule = {
+	selectors: Array<Array<SelectorComponent>>;
+	declarations: {
+		declarations: Array<Declaration>;
+		importantDeclarations: Array<Declaration>;
+	};
+	rules: Array<CssRule>;
+};
+
+type SelectorComponent = {
+	type: string;
+	name?: string;
+	kind?: string;
+	value?: string;
+	selectors?: Array<Array<SelectorComponent>>;
+};
+
+type Declaration = {
+	property: string;
+	value: unknown;
+	vendorPrefix?: Array<string>;
+};
+
+type IndexedStyleRule = {
+	rule: StyleRule;
+	owningLayer: string | undefined;
+	classNames: Set<string>;
+	hasAttribute: (attribute: string) => boolean;
+	mentionsAttribute: (attribute: string) => boolean;
+	hasChildUniversal: boolean;
+	hasPseudo: (pseudo: 'before' | 'after') => boolean;
+	hasDeclarations: boolean;
+};
+
+type StylesheetAnalysis = {
+	rootRules: Array<CssRule>;
+	styleRules: Array<IndexedStyleRule>;
+	rulesByClass: Map<string, Array<IndexedStyleRule>>;
+};
+
 test('builds the public stylesheet with the retained layer contract', async () => {
 	const stylesheet = await readPublicStylesheet();
 	const icon = await import('@luke-ui/react/icon');
@@ -49,9 +92,10 @@ test('builds the public stylesheet with the retained layer contract', async () =
 	};
 
 	expect(() => {
-		const root = parse(stylesheet);
-		assertPrivateStylesheetSentinel(root);
+		const analysis = analyzeStylesheet(stylesheet);
+		assertPrivateStylesheetSentinel(analysis);
 		return assertStylesheetContract(stylesheet, {
+			analysis,
 			lineClampClasses,
 			recipeClasses,
 			textClassesByTypography,
@@ -186,131 +230,228 @@ async function readPublicStylesheet(): Promise<string> {
 function assertStylesheetContract(
 	stylesheet: string,
 	{
+		analysis: providedAnalysis,
 		lineClampClasses,
 		recipeClasses,
 		textClassesByTypography,
 		utilityClasses,
 	}: {
+		analysis?: StylesheetAnalysis;
 		lineClampClasses?: LineClampClasses;
 		recipeClasses: Array<string>;
 		textClassesByTypography?: TextClassesByTypography;
 		utilityClasses: Array<string>;
 	},
 ): void {
-	const root = parse(stylesheet);
+	const analysis = providedAnalysis ?? analyzeStylesheet(stylesheet);
 
-	assertEffectiveLayerCreationOrder(root);
+	assertEffectiveLayerCreationOrder(analysis);
 	assertNoRedundantEmptyLayerStatements(stylesheet);
-	assertAuthoritativeLayerOrder(getAuthoritativeLayerOrder(root));
-	assertLayerNames(root);
-	assertNoBaseLayerDeclarations(root);
-	assertRootNodes(root);
-	assertStableSelectors(root);
-	assertRecipesLayerHasRules(root);
-	assertSentinel(root, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
-	assertSentinel(root, 'luke-ui-theme', 'theme', 'color', 'var(--luke-color-text-primary)');
+	assertAuthoritativeLayerOrder(getAuthoritativeLayerOrder(analysis));
+	assertLayerNames(analysis);
+	assertNoBaseLayerDeclarations(analysis);
+	assertRootNodes(analysis);
+	assertStableSelectors(analysis);
+	assertRecipesLayerHasRules(analysis);
+	assertSentinel(analysis, 'luke-ui-reset', 'reset', 'box-sizing', 'border-box');
+	assertSentinel(analysis, 'luke-ui-theme', 'theme', 'color', 'var(--luke-color-text-primary)');
 	assertSentinel(
-		root,
+		analysis,
 		'luke-ui-theme',
 		'theme',
 		'font-family',
 		'var(--luke-font-body-font-family)',
 	);
-	assertSentinel(root, 'luke-ui-theme', 'theme', 'font-size', 'var(--luke-font-body-font-size)');
+	assertSentinel(analysis, 'luke-ui-theme', 'theme', 'font-size', 'var(--luke-font-body-font-size)');
 
-	for (const className of recipeClasses) assertClassOwnership(root, className, 'recipes');
-	for (const className of utilityClasses) assertClassOwnership(root, className, 'utilities');
-	if (textClassesByTypography) assertTextTrimOwnership(root, textClassesByTypography);
-	if (lineClampClasses) assertLineClampOwnership(root, lineClampClasses);
+	for (const className of recipeClasses) assertClassOwnership(analysis, className, 'recipes');
+	for (const className of utilityClasses) assertClassOwnership(analysis, className, 'utilities');
+	if (textClassesByTypography) assertTextTrimOwnership(analysis, textClassesByTypography);
+	if (lineClampClasses) assertLineClampOwnership(analysis, lineClampClasses);
 }
 
-function assertPrivateStylesheetSentinel(root: Root): void {
-	const rules = collectSkeletonInlineRules(root);
-	expect(rules.length).toBeGreaterThan(0);
-	for (const rule of rules) expect(getOwningLayer(rule)).toBe('recipes');
-	expect(
-		rules.some((rule) => {
-			return rule.nodes.some(
-				(node) =>
-					node.type === 'decl' &&
-					node.prop === 'background-color' &&
-					node.value === 'var(--luke-color-loading-skeleton)' &&
-					node.important,
-			);
-		}),
-	).toBe(true);
+function analyzeStylesheet(stylesheet: string): StylesheetAnalysis {
+	let rootRules: Array<CssRule> | undefined;
 
-	const maskRules = collectSkeletonDescendantMaskRules(root);
-	expect(maskRules.length).toBeGreaterThan(0);
-	for (const rule of maskRules) expect(getOwningLayer(rule)).toBe('structural');
-}
-
-function collectSkeletonInlineRules(root: Root): Array<Rule> {
-	const rules: Array<Rule> = [];
-	root.walkRules((rule) => {
-		if (hasAttributeSelector(rule, 'data-skeleton-inline')) rules.push(rule);
+	transform({
+		filename: 'stylesheet.css',
+		code: Buffer.from(stylesheet),
+		visitor: {
+			StyleSheetExit(sheet) {
+				// Clone instead of returning — Lightning CSS fails to re-serialize some var() ASTs.
+				rootRules = structuredClone(sheet).rules as Array<CssRule>;
+			},
+		},
 	});
-	return rules;
-}
 
-function collectSkeletonDescendantMaskRules(root: Root): Array<Rule> {
-	const rules: Array<Rule> = [];
-	root.walkRules((rule) => {
-		if (!rule.selector.includes('data-skeleton-inline')) return;
-		if (!rule.selector.includes('> *')) return;
-		if (
-			rule.nodes.some(
-				(node) =>
-					node.type === 'decl' &&
-					node.prop === 'background-color' &&
-					node.value === 'var(--luke-color-loading-skeleton)' &&
-					node.important,
-			)
-		) {
-			rules.push(rule);
+	if (rootRules == null) throw new Error('Expected Lightning CSS to produce a stylesheet AST.');
+
+	const styleRules: Array<IndexedStyleRule> = [];
+	const rulesByClass = new Map<string, Array<IndexedStyleRule>>();
+	const layerStack: Array<string | undefined> = [];
+
+	walkRules(rootRules, layerStack, (rule, owningLayer) => {
+		const indexed = indexStyleRule(rule, owningLayer);
+		styleRules.push(indexed);
+		for (const className of indexed.classNames) {
+			const existing = rulesByClass.get(className);
+			if (existing) existing.push(indexed);
+			else rulesByClass.set(className, [indexed]);
 		}
 	});
-	return rules;
+
+	return { rootRules, styleRules, rulesByClass };
 }
 
-function hasAttributeSelector(rule: Rule, attribute: string): boolean {
-	let matches = false;
-	selectorParser((selectors) => {
-		selectors.walkAttributes((attributeNode) => {
-			if (attributeNode.attribute !== attribute) return;
+function walkRules(
+	rules: Array<CssRule>,
+	layerStack: Array<string | undefined>,
+	onStyle: (rule: StyleRule, owningLayer: string | undefined) => void,
+): void {
+	for (const rule of rules) {
+		if (rule.type === 'layer-block') {
+			const name = layerBlockName(rule);
+			layerStack.push(name);
+			walkRules((rule.value.rules as Array<CssRule>) ?? [], layerStack, onStyle);
+			layerStack.pop();
+			continue;
+		}
 
-			let parent = attributeNode.parent;
-			while (parent) {
-				if (parent.type === 'pseudo' && parent.value === ':not') return;
-				parent = parent.parent;
+		if (rule.type === 'style') {
+			onStyle(rule.value as unknown as StyleRule, layerStack.at(-1));
+			const nested = (rule.value.rules as Array<CssRule>) ?? [];
+			if (nested.length > 0) walkRules(nested, layerStack, onStyle);
+			continue;
+		}
+
+		if (rule.type === 'media' || rule.type === 'supports' || rule.type === 'container') {
+			const nested = (rule.value.rules as Array<CssRule>) ?? [];
+			if (nested.length > 0) walkRules(nested, layerStack, onStyle);
+		}
+	}
+}
+
+function layerBlockName(rule: CssRule): string | undefined {
+	const name = rule.value.name;
+	if (name == null) return undefined;
+	if (Array.isArray(name)) return name.join('.');
+	return undefined;
+}
+
+function indexStyleRule(rule: StyleRule, owningLayer: string | undefined): IndexedStyleRule {
+	const classNames = new Set<string>();
+	let hasChildUniversal = false;
+	const pseudos = new Set<'before' | 'after'>();
+
+	const visitComponents = (
+		components: Array<SelectorComponent>,
+		insideNot: boolean,
+		onAttribute: (name: string, insideNot: boolean) => void,
+	): void => {
+		for (let index = 0; index < components.length; index++) {
+			const component = components[index];
+			if (component == null) continue;
+
+			if (component.type === 'class' && component.name != null) {
+				classNames.add(component.name);
 			}
 
-			matches = true;
+			if (component.type === 'attribute' && component.name != null) {
+				onAttribute(component.name, insideNot);
+			}
+
+			if (component.type === 'pseudo-element' && (component.kind === 'before' || component.kind === 'after')) {
+				pseudos.add(component.kind);
+			}
+
+			if (
+				component.type === 'combinator' &&
+				component.value === 'child' &&
+				components[index + 1]?.type === 'universal'
+			) {
+				hasChildUniversal = true;
+			}
+
+			if (component.type === 'pseudo-class' && component.kind === 'not' && component.selectors) {
+				for (const nested of component.selectors) {
+					visitComponents(nested, true, onAttribute);
+				}
+			}
+		}
+	};
+
+	const positiveAttributes = new Set<string>();
+	const mentionedAttributes = new Set<string>();
+	for (const selector of rule.selectors) {
+		visitComponents(selector, false, (name, insideNot) => {
+			mentionedAttributes.add(name);
+			if (!insideNot) positiveAttributes.add(name);
 		});
-	}).processSync(rule.selector);
-	return matches;
+	}
+
+	const declarations = rule.declarations?.declarations ?? [];
+	const importantDeclarations = rule.declarations?.importantDeclarations ?? [];
+
+	return {
+		rule,
+		owningLayer,
+		classNames,
+		hasAttribute: (attribute) => positiveAttributes.has(attribute),
+		mentionsAttribute: (attribute) => mentionedAttributes.has(attribute),
+		hasChildUniversal,
+		hasPseudo: (pseudo) => pseudos.has(pseudo),
+		hasDeclarations: declarations.length > 0 || importantDeclarations.length > 0,
+	};
 }
 
-function getAuthoritativeLayerOrder(root: Root): Array<string> {
-	for (const node of root.nodes) {
-		if (node.type !== 'atrule' || node.name !== 'layer' || node.nodes) continue;
-		const params = node.params.trim();
-		if (!params.includes(',')) continue;
+function assertPrivateStylesheetSentinel(analysis: StylesheetAnalysis): void {
+	const rules = analysis.styleRules.filter((rule) => rule.hasAttribute('data-skeleton-inline'));
+	expect(rules.length).toBeGreaterThan(0);
+	for (const rule of rules) expect(rule.owningLayer).toBe('recipes');
+	expect(
+		rules.some((rule) =>
+			declarationListHas(
+				rule,
+				'background-color',
+				'var(--luke-color-loading-skeleton)',
+				true,
+			),
+		),
+	).toBe(true);
 
-		return params.split(',').map((name) => name.trim());
+	const maskRules = analysis.styleRules.filter((rule) => {
+		if (!rule.mentionsAttribute('data-skeleton-inline')) return false;
+		if (!rule.hasChildUniversal) return false;
+		return declarationListHas(
+			rule,
+			'background-color',
+			'var(--luke-color-loading-skeleton)',
+			true,
+		);
+	});
+	expect(maskRules.length).toBeGreaterThan(0);
+	for (const rule of maskRules) expect(rule.owningLayer).toBe('structural');
+}
+
+function getAuthoritativeLayerOrder(analysis: StylesheetAnalysis): Array<string> {
+	for (const rule of analysis.rootRules) {
+		if (rule.type !== 'layer-statement') continue;
+		const names = layerStatementNames(rule);
+		if (names.length < 2) continue;
+		return names;
 	}
 
 	throw new Error('Expected an authoritative combined cascade-layer order statement.');
 }
 
-function assertEffectiveLayerCreationOrder(root: Root): void {
+function assertEffectiveLayerCreationOrder(analysis: StylesheetAnalysis): void {
 	let sawAuthoritativeOrder = false;
 
-	for (const node of root.nodes) {
-		if (node.type !== 'atrule' || node.name !== 'layer') continue;
+	for (const rule of analysis.rootRules) {
+		if (rule.type !== 'layer-statement' && rule.type !== 'layer-block') continue;
 
-		const params = node.params.trim();
-		const isCombinedOrder = !node.nodes && params.includes(',');
+		const isCombinedOrder =
+			rule.type === 'layer-statement' && layerStatementNames(rule).length > 1;
 
 		if (isCombinedOrder) {
 			if (!sawAuthoritativeOrder) {
@@ -324,8 +465,12 @@ function assertEffectiveLayerCreationOrder(root: Root): void {
 		}
 
 		if (!sawAuthoritativeOrder) {
+			const label =
+				rule.type === 'layer-statement'
+					? layerStatementNames(rule).join(', ')
+					: (layerBlockName(rule) ?? '');
 			throw new Error(
-				`Layer "${params}" was created before the authoritative combined cascade-layer order statement.`,
+				`Layer "${label}" was created before the authoritative combined cascade-layer order statement.`,
 			);
 		}
 	}
@@ -350,39 +495,63 @@ function assertAuthoritativeLayerOrder(order: Array<string>): void {
 	expect(order).toEqual([...lukeOwnedLayerNames]);
 }
 
-function assertLayerNames(root: Root): void {
-	root.walkAtRules('layer', (atRule) => {
-		if (atRule.parent?.type !== 'root')
-			throw atRule.error('Nested cascade layers are not allowed.');
+function assertLayerNames(analysis: StylesheetAnalysis): void {
+	const visit = (rules: Array<CssRule>, depth: number): void => {
+		for (const rule of rules) {
+			if (rule.type === 'layer-statement') {
+				const names = layerStatementNames(rule);
+				if (names.length === 0) throw new Error('Anonymous cascade layers are not allowed.');
+				for (const name of names) {
+					if (lukeOwnedLayerNameSet.has(name)) continue;
+					throw new Error(`Unexpected cascade layer: ${name}`);
+				}
+				continue;
+			}
 
-		const names = getLayerNames(atRule);
-		if (atRule.nodes && names.length !== 1) {
-			throw atRule.error('Layer blocks must have exactly one name.');
-		}
+			if (rule.type === 'layer-block') {
+				if (depth > 0) throw new Error('Nested cascade layers are not allowed.');
+				const name = layerBlockName(rule);
+				if (name == null || name === '') {
+					throw new Error('Anonymous cascade layers are not allowed.');
+				}
+				if (!lukeOwnedLayerNameSet.has(name)) {
+					throw new Error(`Unexpected cascade layer: ${name}`);
+				}
+				visit((rule.value.rules as Array<CssRule>) ?? [], depth + 1);
+				continue;
+			}
 
-		for (const name of names) {
-			if (lukeOwnedLayerNameSet.has(name)) continue;
-			throw atRule.error(`Unexpected cascade layer: ${name}`);
+			if (
+				rule.type === 'media' ||
+				rule.type === 'supports' ||
+				rule.type === 'container' ||
+				rule.type === 'style'
+			) {
+				const nested = (rule.value.rules as Array<CssRule>) ?? [];
+				if (nested.length > 0) visit(nested, depth);
+			}
 		}
-	});
+	};
+
+	visit(analysis.rootRules, 0);
 }
 
-function getLayerNames(atRule: AtRule): Array<string> {
-	const params = atRule.params.trim();
-	if (!params) throw atRule.error('Anonymous cascade layers are not allowed.');
-
-	return params.split(',').map((name) => name.trim());
+function layerStatementNames(rule: CssRule): Array<string> {
+	const names = rule.value.names as Array<Array<string>> | undefined;
+	if (names == null) return [];
+	return names.map((parts) => parts.join('.'));
 }
 
 /**
  * The `base` layer is reserved for a consuming application's own element defaults. Luke UI
  * declares it so its rank is fixed, but must never emit declarations into it.
  */
-function assertNoBaseLayerDeclarations(root: Root): void {
+function assertNoBaseLayerDeclarations(analysis: StylesheetAnalysis): void {
 	const offenders = new Set<string>();
-	root.walkRules((rule) => {
-		if (getOwningLayer(rule) === 'base') offenders.add(rule.selector);
-	});
+	for (const rule of analysis.styleRules) {
+		if (rule.owningLayer !== 'base') continue;
+		offenders.add(formatPrimarySelector(rule));
+	}
 
 	if (offenders.size > 0) {
 		throw new Error(
@@ -391,97 +560,101 @@ function assertNoBaseLayerDeclarations(root: Root): void {
 	}
 }
 
-function assertRootNodes(root: Root): void {
-	for (const node of root.nodes) {
-		if (node.type === 'comment') continue;
-		if (node.type === 'rule') throw node.error('Root qualified rules are not allowed.');
-		if (node.type !== 'atrule') throw node.error('Unexpected root stylesheet node.');
-		if (node.name === 'layer') continue;
-		if (node.name === 'property') continue;
-		if (node.name === 'keyframes' && node.nodes) continue;
+function assertRootNodes(analysis: StylesheetAnalysis): void {
+	for (const rule of analysis.rootRules) {
+		if (
+			rule.type === 'layer-statement' ||
+			rule.type === 'layer-block' ||
+			rule.type === 'property' ||
+			rule.type === 'keyframes'
+		) {
+			continue;
+		}
 
-		throw node.error(`Unexpected root at-rule: @${node.name}`);
+		if (rule.type === 'style') {
+			throw new Error('Root qualified rules are not allowed.');
+		}
+
+		throw new Error(`Unexpected root at-rule: @${rule.type === 'unknown' ? (rule.value.name as string) : rule.type}`);
 	}
 }
 
-function assertRecipesLayerHasRules(root: Root): void {
-	let hasRecipeRule = false;
-	root.walkRules((rule) => {
-		if (getOwningLayer(rule) === 'recipes' && rule.nodes.some((node) => node.type === 'decl')) {
-			hasRecipeRule = true;
-		}
-	});
+function assertRecipesLayerHasRules(analysis: StylesheetAnalysis): void {
+	const hasRecipeRule = analysis.styleRules.some(
+		(rule) => rule.owningLayer === 'recipes' && rule.hasDeclarations,
+	);
 	if (!hasRecipeRule) throw new Error('Expected the transitional recipes layer to contain a rule.');
 }
 
-function assertStableSelectors(root: Root): void {
+function assertStableSelectors(analysis: StylesheetAnalysis): void {
 	const selectors = new Set<string>();
-	root.walkRules((rule) => {
-		for (const className of getClassNames(rule)) {
+	for (const rule of analysis.styleRules) {
+		for (const className of rule.classNames) {
 			if (className.startsWith('luke-ui-')) selectors.add(`.${className}`);
 		}
-	});
+	}
 
 	expect(selectors).toEqual(new Set(['.luke-ui-reset', '.luke-ui-theme']));
 }
 
 function assertSentinel(
-	root: Root,
+	analysis: StylesheetAnalysis,
 	className: string,
 	layerName: string,
 	property: string,
 	value: string,
 ): void {
-	const rules = getRulesForClass(root, className);
+	const rules = getRulesForClass(analysis, className);
 	expect(rules.length).toBeGreaterThan(0);
-	for (const rule of rules) expect(getOwningLayer(rule)).toBe(layerName);
-	expect(
-		rules.some((rule) => {
-			return rule.nodes.some(
-				(node) => node.type === 'decl' && node.prop === property && node.value === value,
-			);
-		}),
-	).toBe(true);
+	for (const rule of rules) expect(rule.owningLayer).toBe(layerName);
+	expect(rules.some((rule) => declarationListHas(rule, property, value))).toBe(true);
 }
 
-function assertClassOwnership(root: Root, className: string, layerName: string): void {
-	const rules = getRulesForClass(root, className);
+function assertClassOwnership(
+	analysis: StylesheetAnalysis,
+	className: string,
+	layerName: string,
+): void {
+	const rules = getRulesForClass(analysis, className);
 	expect(rules.length).toBeGreaterThan(0);
-	for (const rule of rules) expect(getOwningLayer(rule)).toBe(layerName);
-	expect(rules.some((rule) => rule.nodes.some((node) => node.type === 'decl'))).toBe(true);
+	for (const rule of rules) expect(rule.owningLayer).toBe(layerName);
+	expect(rules.some((rule) => rule.hasDeclarations)).toBe(true);
 }
 
 function assertTextTrimOwnership(
-	root: Root,
+	analysis: StylesheetAnalysis,
 	textClassesByTypography: TextClassesByTypography,
 ): void {
 	for (const typography of typeStyles) {
 		const rules = textClassesByTypography[typography].flatMap((className) =>
-			getRulesForClass(root, className),
+			getRulesForClass(analysis, className),
 		);
 		assertPseudoDeclaration(
 			rules,
-			'::before',
+			'before',
 			'margin-block-end',
 			`var(--luke-font-${typography}-cap-height-trim)`,
 		);
 		assertPseudoDeclaration(
 			rules,
-			'::after',
+			'after',
 			'margin-block-start',
 			`var(--luke-font-${typography}-baseline-trim)`,
 		);
 	}
 }
 
-function assertLineClampOwnership(root: Root, { numeric, singleLine }: LineClampClasses): void {
-	const singleLineRules = singleLine.flatMap((className) => getRulesForClass(root, className));
+function assertLineClampOwnership(
+	analysis: StylesheetAnalysis,
+	{ numeric, singleLine }: LineClampClasses,
+): void {
+	const singleLineRules = singleLine.flatMap((className) => getRulesForClass(analysis, className));
 	assertDeclaration(singleLineRules, 'display', 'block');
 	assertDeclaration(singleLineRules, 'text-overflow', 'ellipsis');
 	assertDeclaration(singleLineRules, 'white-space', 'nowrap');
 
 	for (const lineClamp of numericLineClampVariants) {
-		const rules = numeric[lineClamp].flatMap((className) => getRulesForClass(root, className));
+		const rules = numeric[lineClamp].flatMap((className) => getRulesForClass(analysis, className));
 		assertDeclaration(rules, 'display', '-webkit-box');
 		assertDeclaration(rules, '-webkit-box-orient', 'vertical');
 		assertDeclaration(rules, '-webkit-line-clamp', String(lineClamp));
@@ -489,69 +662,169 @@ function assertLineClampOwnership(root: Root, { numeric, singleLine }: LineClamp
 	}
 }
 
-function assertDeclaration(rules: Array<Rule>, property: string, value: string): void {
-	const matchingRules = rules.filter((rule) => {
-		return rule.nodes.some(
-			(node) => node.type === 'decl' && node.prop === property && node.value === value,
-		);
-	});
-	expect(matchingRules.length).toBeGreaterThan(0);
-	for (const rule of matchingRules) expect(getOwningLayer(rule)).toBe('recipes');
-}
-
-function assertPseudoDeclaration(
-	rules: Array<Rule>,
-	pseudo: string,
+function assertDeclaration(
+	rules: Array<IndexedStyleRule>,
 	property: string,
 	value: string,
 ): void {
-	const matchingRules = rules.filter((rule) => {
-		return (
-			hasPseudo(rule, pseudo) &&
-			rule.nodes.some(
-				(node) => node.type === 'decl' && node.prop === property && node.value === value,
-			)
-		);
-	});
+	const matchingRules = rules.filter((rule) => declarationListHas(rule, property, value));
 	expect(matchingRules.length).toBeGreaterThan(0);
-	for (const rule of matchingRules) expect(getOwningLayer(rule)).toBe('recipes');
+	for (const rule of matchingRules) expect(rule.owningLayer).toBe('recipes');
 }
 
-function getRulesForClass(root: Root, className: string): Array<Rule> {
-	const rules: Array<Rule> = [];
-	root.walkRules((rule) => {
-		if (getClassNames(rule).has(className)) rules.push(rule);
-	});
-	return rules;
+function assertPseudoDeclaration(
+	rules: Array<IndexedStyleRule>,
+	pseudo: 'before' | 'after',
+	property: string,
+	value: string,
+): void {
+	const matchingRules = rules.filter(
+		(rule) => rule.hasPseudo(pseudo) && declarationListHas(rule, property, value),
+	);
+	expect(matchingRules.length).toBeGreaterThan(0);
+	for (const rule of matchingRules) expect(rule.owningLayer).toBe('recipes');
 }
 
-function getClassNames(rule: Rule): Set<string> {
-	const classNames = new Set<string>();
-	selectorParser((selectors) => {
-		selectors.walkClasses((classNode) => {
-			classNames.add(classNode.value);
-		});
-	}).processSync(rule.selector);
-	return classNames;
+function getRulesForClass(
+	analysis: StylesheetAnalysis,
+	className: string,
+): Array<IndexedStyleRule> {
+	return analysis.rulesByClass.get(className) ?? [];
 }
 
-function hasPseudo(rule: Rule, pseudo: string): boolean {
-	let hasMatchingPseudo = false;
-	selectorParser((selectors) => {
-		selectors.walkPseudos((pseudoNode) => {
-			if (pseudoNode.value === pseudo) hasMatchingPseudo = true;
-		});
-	}).processSync(rule.selector);
-	return hasMatchingPseudo;
+function declarationListHas(
+	rule: IndexedStyleRule,
+	property: string,
+	value: string,
+	important?: boolean,
+): boolean {
+	const lists =
+		important === true
+			? [rule.rule.declarations.importantDeclarations]
+			: important === false
+				? [rule.rule.declarations.declarations]
+				: [
+						rule.rule.declarations.declarations,
+						rule.rule.declarations.importantDeclarations,
+					];
+
+	return lists.some((list) => list.some((declaration) => matchesDeclaration(declaration, property, value)));
 }
 
-function getOwningLayer(rule: Rule): string | undefined {
-	let parent = rule.parent;
-	while (parent && parent.type !== 'root') {
-		if (parent.type === 'atrule' && parent.name === 'layer') return parent.params.trim();
-		parent = parent.parent;
+function matchesDeclaration(declaration: Declaration, property: string, value: string): boolean {
+	if (property === 'box-sizing' && value === 'border-box') {
+		return declaration.property === 'box-sizing' && declaration.value === 'border-box';
 	}
-	return undefined;
+
+	if (property === 'text-overflow' && value === 'ellipsis') {
+		return declaration.property === 'text-overflow' && declaration.value === 'ellipsis';
+	}
+
+	if (property === 'white-space' && value === 'nowrap') {
+		return declaration.property === 'white-space' && declaration.value === 'nowrap';
+	}
+
+	if (property === '-webkit-box-orient' && value === 'vertical') {
+		return (
+			declaration.property === 'box-orient' &&
+			Array.isArray(declaration.vendorPrefix) &&
+			declaration.vendorPrefix.includes('webkit') &&
+			declaration.value === 'vertical'
+		);
+	}
+
+	if (property === 'display') {
+		return matchesDisplay(declaration, value);
+	}
+
+	if (property === '-webkit-line-clamp' || property === 'line-clamp') {
+		return matchesLineClamp(declaration, property, value);
+	}
+
+	if (value.startsWith('var(')) {
+		return matchesVarDeclaration(declaration, property, value);
+	}
+
+	return false;
+}
+
+function matchesDisplay(declaration: Declaration, value: string): boolean {
+	if (declaration.property !== 'display') return false;
+	const display = declaration.value as {
+		type?: string;
+		outside?: string;
+		inside?: { type?: string; vendorPrefix?: Array<string> };
+	};
+	if (display?.type !== 'pair') return false;
+
+	if (value === 'block') {
+		return display.outside === 'block' && display.inside?.type === 'flow';
+	}
+	if (value === 'grid') {
+		return display.outside === 'block' && display.inside?.type === 'grid';
+	}
+	if (value === '-webkit-box') {
+		return (
+			display.outside === 'block' &&
+			display.inside?.type === 'box' &&
+			Array.isArray(display.inside.vendorPrefix) &&
+			display.inside.vendorPrefix.includes('webkit')
+		);
+	}
+	if (value === 'inline-flex') {
+		return (
+			display.outside === 'inline' &&
+			display.inside?.type === 'flex' &&
+			Array.isArray(display.inside.vendorPrefix)
+		);
+	}
+	return false;
+}
+
+function matchesLineClamp(declaration: Declaration, property: string, value: string): boolean {
+	if (declaration.property !== 'custom') return false;
+	const custom = declaration.value as {
+		name?: string;
+		value?: Array<{ type?: string; value?: { type?: string; value?: number } }>;
+	};
+	if (custom.name !== property) return false;
+	const token = custom.value?.[0];
+	return token?.type === 'token' && token.value?.type === 'number' && String(token.value.value) === value;
+}
+
+function matchesVarDeclaration(
+	declaration: Declaration,
+	property: string,
+	value: string,
+): boolean {
+	const ident = value.match(/^var\((--[^)]+)\)$/)?.[1];
+	if (ident == null) return false;
+
+	if (declaration.property === 'unparsed') {
+		const unparsed = declaration.value as {
+			propertyId?: { property?: string };
+			value?: Array<{ type?: string; value?: { name?: { ident?: string } } }>;
+		};
+		if (unparsed.propertyId?.property !== property) return false;
+		const first = unparsed.value?.[0];
+		return first?.type === 'var' && first.value?.name?.ident === ident;
+	}
+
+	return false;
+}
+
+function formatPrimarySelector(rule: IndexedStyleRule): string {
+	const first = rule.rule.selectors[0] ?? [];
+	return first
+		.map((component) => {
+			if (component.type === 'class') return `.${component.name}`;
+			if (component.type === 'attribute') return `[${component.name}]`;
+			if (component.type === 'universal') return '*';
+			if (component.type === 'combinator' && component.value === 'child') return '>';
+			if (component.type === 'pseudo-element') return `::${component.kind}`;
+			return component.type;
+		})
+		.join(' ');
 }
 
 const validStylesheetFixture = `@layer reset, theme, base, recipes, structural, utilities;
