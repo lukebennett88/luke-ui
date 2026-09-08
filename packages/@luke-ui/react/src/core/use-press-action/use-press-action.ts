@@ -19,6 +19,8 @@ export interface UsePressActionOptions {
 }
 
 export interface UsePressActionResult {
+	/** Error thrown by `pressAction`, if any. Render `PressActionError` to surface it. */
+	actionError: unknown;
 	/** Resolved pending state from external `isPending` or an in-flight Action. */
 	isPendingState: boolean;
 	/** Composed press handler that runs `onPress` then starts `pressAction`. */
@@ -37,6 +39,16 @@ function agentLog(hypothesisId: string, location: string, message: string, data:
 // #endregion
 
 /**
+ * Rethrows a `pressAction` failure during render so the nearest Error Boundary can handle it.
+ */
+export function PressActionError(props: { error: unknown }): null {
+	if (props.error != null) {
+		throw props.error;
+	}
+	return null;
+}
+
+/**
  * Shared Action/pending plumbing for `Button` and `IconButton`.
  *
  * Runs `pressAction` as a React Action via `startTransition`, fires once while pending, and delays
@@ -45,7 +57,7 @@ function agentLog(hypothesisId: string, location: string, message: string, data:
  * Pending UI state is owned with `useState` rather than `useTransition().isPending`. React's
  * `isPending` can remain `true` after a fast-settling async Action promise completes (the thenable
  * finish update never commits), which left buttons stuck pending. Explicit state clears reliably
- * after `await`, and render-phase error rethrow preserves Error Boundary reporting.
+ * after `await`. Action failures are recorded and surfaced through `PressActionError`.
  */
 export function usePressAction(options: UsePressActionOptions): UsePressActionResult {
 	const { isPending = false, onPress, pressAction } = options;
@@ -62,11 +74,6 @@ export function usePressAction(options: UsePressActionOptions): UsePressActionRe
 		showDuringHydration: false,
 	});
 	const showSpinner = isPending || showActionSpinner;
-
-	// Throw after every hook so Error Boundaries see Action failures without breaking hook order.
-	if (actionError != null) {
-		throw actionError;
-	}
 
 	// #region agent log
 	agentLog('A', 'use-press-action.ts:render', 'usePressAction render', {
@@ -122,10 +129,10 @@ export function usePressAction(options: UsePressActionOptions): UsePressActionRe
 					elapsed: Date.now() - t0,
 				});
 				// #endregion
-				// Escape the Action microtask / act continuum so the render-phase rethrow commits.
-				setTimeout(() => {
+				// Defer past the Action thenable so the Error Boundary throw commits cleanly.
+				queueMicrotask(() => {
 					setActionError(error);
-				}, 0);
+				});
 			} finally {
 				isStartingActionRef.current = false;
 				setIsActionPending(false);
@@ -139,6 +146,7 @@ export function usePressAction(options: UsePressActionOptions): UsePressActionRe
 	}
 
 	return {
+		actionError,
 		isPendingState,
 		onPress: handlePress,
 		showSpinner,

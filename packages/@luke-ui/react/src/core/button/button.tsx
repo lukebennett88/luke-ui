@@ -9,7 +9,7 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { PressAction } from '../use-press-action/use-press-action.js';
-import { usePressAction } from '../use-press-action/use-press-action.js';
+import { PressActionError, usePressAction } from '../use-press-action/use-press-action.js';
 import type { ButtonLabelVariants } from './styles.css.js';
 import { buttonContent, buttonLabel } from './styles.css.js';
 
@@ -88,6 +88,7 @@ export function Button(props: ButtonProps): JSX.Element {
 		...restProps
 	} = props;
 	const {
+		actionError,
 		isPendingState,
 		onPress: handlePress,
 		showSpinner,
@@ -97,6 +98,7 @@ export function Button(props: ButtonProps): JSX.Element {
 		<PrimitiveButton {...restProps} isPending={isPendingState} onPress={handlePress} size={size}>
 			{(renderProps) => (
 				<span className={buttonContent()}>
+					<PressActionError error={actionError} />
 					{showSpinner && (
 						<span aria-hidden className={pendingSpinnerOverlay()}>
 							<LoadingSpinner aria-hidden />

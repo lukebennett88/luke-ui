@@ -11,7 +11,7 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { PressAction } from '../use-press-action/use-press-action.js';
-import { usePressAction } from '../use-press-action/use-press-action.js';
+import { PressActionError, usePressAction } from '../use-press-action/use-press-action.js';
 import type { IconButtonRecipeVariants } from './recipe.css.js';
 import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.js';
 
@@ -54,6 +54,7 @@ export type IconButtonProps = Prettify<_IconButtonProps>;
 export function IconButton(props: IconButtonProps): JSX.Element {
 	const { icon, isPending = false, onPress, pressAction, size = 'medium', ...buttonProps } = props;
 	const {
+		actionError,
 		isPendingState,
 		onPress: handlePress,
 		showSpinner,
@@ -69,6 +70,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 			onPress={handlePress}
 			size={size}
 		>
+			<PressActionError error={actionError} />
 			{showSpinner && (
 				<span aria-hidden className={pendingSpinnerOverlay()}>
 					<LoadingSpinner aria-hidden />
