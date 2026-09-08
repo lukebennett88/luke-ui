@@ -19,6 +19,7 @@ const PLAYGROUND_BASE_SPECIFIERS = [
 const PLAYGROUND_THIRD_PARTY_SPECIFIERS = [
 	'@hookform/resolvers/zod',
 	'@tanstack/react-form',
+	'react-error-boundary',
 	'react-hook-form',
 	'zod',
 ] as const;
