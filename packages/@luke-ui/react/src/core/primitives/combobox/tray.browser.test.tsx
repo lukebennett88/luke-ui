@@ -97,6 +97,11 @@ async function openTray() {
 	const overlay = dialog.element().parentElement?.parentElement;
 	if (overlay == null) throw new Error('Expected the tray overlay structure.');
 	await waitForOverlayEnter(overlay);
+
+	// React Aria moves focus to the search field asynchronously once the tray is open. Typing
+	// before that lands drops the leading keystrokes on a slow runner, so callers that type
+	// immediately after opening need focus to have settled first.
+	await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveFocus();
 }
 
 test('ComboboxTray positions the overlay at the scroll offset each time it opens', async () => {
