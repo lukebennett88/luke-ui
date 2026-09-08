@@ -61,30 +61,34 @@ icons for you, so an `Icon` needs no `size` prop. Pass one only to override it. 
 
 ## Pending and Actions
 
-`onPress` handles the synchronous interaction. `pressAction` performs Button-owned async work whose
+`onPress` handles the synchronous interaction. `pressAction` performs Button-owned work whose
 pending lifecycle the button manages automatically. When both are set, `onPress` runs first, then
 `pressAction`.
 
-Prefer a native form Action when the work is naturally a form submission:
+Prefer a native form Action when the work is naturally a form submission. Read pending state with
+[`useFormStatus`](https://react.dev/reference/react-dom/hooks/useFormStatus) from a child of the
+form, because the hook only works under a `<form>` that is submitting:
 
-```tsx
-<form action={save}>
-	<Button type="submit" isPending={isPending}>
-		Save
-	</Button>
-</form>
-```
+<ExampleBlock src="button/form-action" title="Button — Form Action" />
 
 Use `pressAction` for Button-owned operations that are not form submissions. Combining `pressAction`
 with `type="submit"` is usually the wrong pattern, because both paths may run.
 
-Set `isPending` for externally owned pending state, such as a parent mutation or router transition.
-Pending buttons stay focusable and ignore further presses. `pressAction` creates that pending state
-automatically. Explicit `isPending` shows a spinner immediately. An Action-owned spinner waits
-briefly so a fast Action never flashes one. Update the visible label when the status matters, for
-example from “Save” to “Saving”.
+`pressAction` creates pending state automatically. Explicit `isPending` shows a spinner immediately.
+An Action-owned spinner waits briefly so a fast Action never flashes one. Update the visible label
+when the status matters, for example from “Save” to “Saving”.
 
 <ExampleBlock src="button/pending" title="Button — Pending" />
+
+Set `isPending` for externally owned pending state, such as a parent mutation or router transition.
+Pending buttons stay focusable and ignore further presses.
+
+<ExampleBlock src="button/external-pending" title="Button — External pending" />
+
+Unexpected failures from `pressAction` use React’s normal Action and Error Boundary behaviour.
+Handle expected domain errors inside the Action.
+
+<ExampleBlock src="button/action-error" title="Button — Action error" />
 
 ## Disabled
 

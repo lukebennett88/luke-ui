@@ -1,6 +1,7 @@
 import type { ButtonProps } from '@luke-ui/react/button';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
+import { Kbd } from '@luke-ui/react/kbd';
 import type { CSSProperties } from 'react';
 import { fn } from 'storybook/test';
 import preview from '../../../.storybook/preview.js';
@@ -116,10 +117,10 @@ export const ContentSlots = meta.story({
 		<div style={stackStyle}>
 			<div style={rowStyle}>
 				<Button {...props} startContent={<Icon name="add" />}>
-					Start content
+					Add item
 				</Button>
-				<Button {...props} endContent={<Icon name="add" />}>
-					End content
+				<Button {...props} endContent={<Kbd>⌘S</Kbd>}>
+					Save
 				</Button>
 			</div>
 		</div>

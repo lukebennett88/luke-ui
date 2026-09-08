@@ -114,7 +114,7 @@ export const AllIcons = meta.story({
 					<Button
 						appearance="subtle"
 						isBlock
-						onPress={async () => {
+						pressAction={async () => {
 							await navigator.clipboard.writeText(name);
 						}}
 						startContent={<Icon {...props} name={name} title={name} />}
