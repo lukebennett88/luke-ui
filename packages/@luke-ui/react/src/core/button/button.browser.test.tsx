@@ -114,41 +114,39 @@ test('does not start pressAction when external isPending is already true', async
 	expect(started).toBe(false);
 });
 
-test('shows a delayed spinner for a slow Action and none for a fast Action', async () => {
+test('shows no spinner for a fast Action', async () => {
+	const { locator, user } = render(<Button pressAction={async () => {}}>Fast</Button>);
+	const fast = locator.getByRole('button', { name: 'Fast' });
+
+	await user.click(fast);
+	await expect.poll(() => fast.element().getAttribute('data-pending')).toBeNull();
+	await delay(ACTION_SPINNER_DELAY + 50);
+	expect(fast.element().querySelector('[role="status"]')).toBeNull();
+});
+
+test('shows a delayed spinner for a slow Action', async () => {
 	let releaseSlow!: () => void;
 	const slowGate = new Promise<void>((resolve) => {
 		releaseSlow = resolve;
 	});
 
 	const { locator, user } = render(
-		<>
-			<Button pressAction={async () => {}}>Fast</Button>
-			<Button
-				pressAction={async () => {
-					await slowGate;
-				}}
-			>
-				Slow
-			</Button>
-		</>,
+		<Button
+			pressAction={async () => {
+				await slowGate;
+			}}
+		>
+			Slow
+		</Button>,
 	);
-	const fast = locator.getByRole('button', { name: 'Fast' });
 	const slow = locator.getByRole('button', { name: 'Slow' });
-
-	await user.click(fast);
-	await expect.poll(() => fast.element().getAttribute('data-pending')).toBeNull();
-	await delay(ACTION_SPINNER_DELAY + 50);
-	expect(fast.element().querySelector('[role="status"]')).toBeNull();
 
 	await user.click(slow);
 	expect(slow.element().getAttribute('data-pending')).toBe('true');
 	expect(slow.element().querySelector('[role="status"]')).toBeNull();
 
-	await expect
-		.poll(() => slow.element().querySelector('[role="status"]'), {
-			timeout: ACTION_SPINNER_DELAY + 500,
-		})
-		.not.toBeNull();
+	await delay(ACTION_SPINNER_DELAY + 50);
+	expect(slow.element().querySelector('[role="status"]')).not.toBeNull();
 
 	releaseSlow();
 	await expect.poll(() => slow.element().getAttribute('data-pending')).toBeNull();

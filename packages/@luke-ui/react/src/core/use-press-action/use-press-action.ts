@@ -122,7 +122,10 @@ export function usePressAction(options: UsePressActionOptions): UsePressActionRe
 					elapsed: Date.now() - t0,
 				});
 				// #endregion
-				setActionError(error);
+				// Escape the Action microtask / act continuum so the render-phase rethrow commits.
+				setTimeout(() => {
+					setActionError(error);
+				}, 0);
 			} finally {
 				isStartingActionRef.current = false;
 				setIsActionPending(false);
