@@ -280,14 +280,13 @@ function renderComponentTest(input: {
 	},`
 			: undefined,
 	].filter((value): value is string => value != null);
-	const contract =
-		hasConformance
-			? `testConformance({
+	const contract = hasConformance
+		? `testConformance({
 	path: '${input.name}',
 ${locators.join('\n')}
 	render: (props = {}) => ${renderComponent},
 });`
-			: `test('${input.pascalName} renders its root element', () => {
+		: `test('${input.pascalName} renders its root element', () => {
 	const result = render(<${input.pascalName}>Content</${input.pascalName}>);
 	expect(result.locator.element().firstElementChild).toHaveTextContent('Content');
 });`;
