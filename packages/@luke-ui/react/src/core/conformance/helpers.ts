@@ -77,9 +77,12 @@ function testDomPropsContract(options: ConformanceOptions, name: string) {
 		const target = getTarget(result);
 
 		assertForwardedClassNameAndDataAttributes(target);
-		// Field roots move `id` onto the control. Use getControl when present;
-		// otherwise the target itself holds the id.
-		const idHost = options.getControl == null ? target : options.getControl(result);
+		// `id` may land on a different element than className/data-* (e.g. RAC
+		// field roots). Assert it reached the tree without consulting getControl.
+		const idHost = result.container.querySelector('#conformance-target');
+		if (!(idHost instanceof HTMLElement)) {
+			throw new Error('Expected the forwarded id to reach the DOM.');
+		}
 		expect(idHost).toHaveAttribute('id', 'conformance-target');
 		result.unmount();
 	});
