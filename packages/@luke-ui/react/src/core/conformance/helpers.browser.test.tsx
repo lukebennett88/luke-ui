@@ -1,9 +1,12 @@
 import type { FocusEventHandler, Ref } from 'react';
 import { expect, test, vi } from 'vite-plus/test';
 import { render } from '../test-utils/render.js';
+import type { ComponentTestManifestEntry } from './manifest.js';
 
 vi.mock('./manifest.js', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('./manifest.js')>();
+	const actual = (await importOriginal()) as {
+		componentTestManifest: ReadonlyArray<ComponentTestManifestEntry>;
+	};
 	return {
 		...actual,
 		componentTestManifest: [
@@ -14,7 +17,7 @@ vi.mock('./manifest.js', async (importOriginal) => {
 				name: 'DomPropsFieldFixture',
 				path: 'dom-props-field-fixture',
 				visualApplicability: 'none',
-			},
+			} satisfies ComponentTestManifestEntry,
 		],
 	};
 });
