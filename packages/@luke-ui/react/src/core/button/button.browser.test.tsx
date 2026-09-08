@@ -1,5 +1,6 @@
+import { Component } from 'react';
+import type { ErrorInfo, ReactNode } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { ACTION_SPINNER_DELAY } from '../use-press-action/use-press-action.js';
@@ -78,7 +79,12 @@ test('blocks a second Action start while one is pending', async () => {
 	const button = locator.getByRole('button', { name: 'Save' });
 
 	await user.click(button);
-	await user.click(button);
+	expect(button.element().getAttribute('data-pending')).toBe('true');
+	expect(button.element().getAttribute('aria-disabled')).toBe('true');
+	// RAC blocks pointer interaction while pending; do not use user.click (it waits for enabled).
+	button.element().dispatchEvent(
+		new MouseEvent('click', { bubbles: true, cancelable: true, view: window }),
+	);
 	expect(starts).toBe(1);
 
 	release();
@@ -87,7 +93,7 @@ test('blocks a second Action start while one is pending', async () => {
 
 test('does not start pressAction when external isPending is already true', async () => {
 	let started = false;
-	const { locator, user } = render(
+	const { locator } = render(
 		<Button
 			isPending
 			pressAction={() => {
@@ -97,8 +103,14 @@ test('does not start pressAction when external isPending is already true', async
 			Save
 		</Button>,
 	);
+	const button = locator.getByRole('button', { name: 'Save' });
 
-	await user.click(locator.getByRole('button', { name: 'Save' }));
+	expect(button.element().getAttribute('data-pending')).toBe('true');
+	expect(button.element().getAttribute('aria-disabled')).toBe('true');
+	// External pending disables the RAC button before press handlers run.
+	button.element().dispatchEvent(
+		new MouseEvent('click', { bubbles: true, cancelable: true, view: window }),
+	);
 	expect(started).toBe(false);
 });
 

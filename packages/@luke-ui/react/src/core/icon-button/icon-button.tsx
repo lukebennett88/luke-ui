@@ -52,14 +52,7 @@ export type IconButtonProps = Prettify<_IconButtonProps>;
 
 /** Button that renders only an icon. */
 export function IconButton(props: IconButtonProps): JSX.Element {
-	const {
-		icon,
-		isPending = false,
-		onPress,
-		pressAction,
-		size = 'medium',
-		...buttonProps
-	} = props;
+	const { icon, isPending = false, onPress, pressAction, size = 'medium', ...buttonProps } = props;
 	const {
 		isPendingState,
 		onPress: handlePress,

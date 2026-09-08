@@ -1,4 +1,4 @@
-import { expect } from 'vite-plus/test';
+import { expect, test } from 'vite-plus/test';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { ACTION_SPINNER_DELAY } from '../use-press-action/use-press-action.js';
