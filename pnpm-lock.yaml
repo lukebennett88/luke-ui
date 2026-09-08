@@ -629,6 +629,9 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.2.8(react@19.2.8)
+      react-error-boundary:
+        specifier: 'catalog:'
+        version: 6.1.4(@types/react@19.2.18)(react@19.2.8)
       storybook:
         specifier: 'catalog:'
         version: 10.5.10(@types/react@19.2.18)(prettier@3.9.6)(react@19.2.8)(vite-plus@0.3.0(@arethetypeswrong/core@0.18.5)(@opentelemetry/api@1.9.1)(@types/node@26.4.1)(@vitest/browser-playwright@4.1.11)(@vitest/coverage-v8@4.1.11)(@vitest/ui@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@arethetypeswrong/core@0.18.5)(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.13)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(tsx@4.23.13)(typescript@7.0.2)(yaml@2.9.0))

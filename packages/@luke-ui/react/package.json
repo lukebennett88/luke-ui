@@ -133,6 +133,7 @@
 		"react": "catalog:",
 		"react-aria-components": "catalog:",
 		"react-dom": "catalog:",
+		"react-error-boundary": "catalog:",
 		"storybook": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",

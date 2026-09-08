@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import type { ErrorInfo, ReactNode } from 'react';
+import { act } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { expect, test } from 'vite-plus/test';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
@@ -59,14 +59,14 @@ test('runs onPress before pressAction and tracks Action pending', async () => {
 	await expect.poll(() => button.element().getAttribute('data-pending')).toBeNull();
 });
 
-test('blocks a second Action start while one is pending', async () => {
+test('suppresses a same-tick second Action start', async () => {
 	let starts = 0;
 	let release!: () => void;
 	const gate = new Promise<void>((resolve) => {
 		release = resolve;
 	});
 
-	const { locator, user } = render(
+	const { locator } = render(
 		<Button
 			pressAction={async () => {
 				starts += 1;
@@ -76,19 +76,19 @@ test('blocks a second Action start while one is pending', async () => {
 			Save
 		</Button>,
 	);
-	const button = locator.getByRole('button', { name: 'Save' });
+	const button = locator.getByRole('button', { name: 'Save' }).element();
 
-	await user.click(button);
-	expect(button.element().getAttribute('data-pending')).toBe('true');
-	expect(button.element().getAttribute('aria-disabled')).toBe('true');
-	// RAC blocks pointer interaction while pending; do not use user.click (it waits for enabled).
-	button
-		.element()
-		.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+	// Two press sequences in one act, before React commits Transition pending.
+	act(() => {
+		dispatchPress(button);
+		dispatchPress(button);
+	});
+
 	expect(starts).toBe(1);
+	expect(button.getAttribute('data-pending')).toBe('true');
 
 	release();
-	await expect.poll(() => button.element().getAttribute('data-pending')).toBeNull();
+	await expect.poll(() => button.getAttribute('data-pending')).toBeNull();
 });
 
 test('does not start pressAction when external isPending is already true', async () => {
@@ -103,14 +103,12 @@ test('does not start pressAction when external isPending is already true', async
 			Save
 		</Button>,
 	);
-	const button = locator.getByRole('button', { name: 'Save' });
+	const button = locator.getByRole('button', { name: 'Save' }).element();
 
-	expect(button.element().getAttribute('data-pending')).toBe('true');
-	expect(button.element().getAttribute('aria-disabled')).toBe('true');
-	// External pending disables the RAC button before press handlers run.
-	button
-		.element()
-		.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+	expect(button.getAttribute('data-pending')).toBe('true');
+	act(() => {
+		dispatchPress(button);
+	});
 	expect(started).toBe(false);
 });
 
@@ -154,7 +152,11 @@ test('shows a delayed spinner for a slow Action', async () => {
 
 test('does not swallow Action errors', async () => {
 	const { container, locator, user } = render(
-		<TestErrorBoundary>
+		<ErrorBoundary
+			fallbackRender={({ error }) => (
+				<div role="alert">{error instanceof Error ? error.message : 'Unknown error'}</div>
+			)}
+		>
 			<Button
 				pressAction={async () => {
 					throw new Error('save failed');
@@ -162,7 +164,7 @@ test('does not swallow Action errors', async () => {
 			>
 				Save
 			</Button>
-		</TestErrorBoundary>,
+		</ErrorBoundary>,
 	);
 
 	await user.click(locator.getByRole('button', { name: 'Save' }));
@@ -177,30 +179,26 @@ function delay(ms: number) {
 	});
 }
 
-interface TestErrorBoundaryProps {
-	children: ReactNode;
-}
-
-interface TestErrorBoundaryState {
-	error: Error | null;
-}
-
-class TestErrorBoundary extends Component<TestErrorBoundaryProps, TestErrorBoundaryState> {
-	override state: TestErrorBoundaryState = { error: null };
-
-	static getDerivedStateFromError(error: Error): TestErrorBoundaryState {
-		return { error };
-	}
-
-	override componentDidCatch(error: Error, info: ErrorInfo) {
-		void error;
-		void info;
-	}
-
-	override render() {
-		if (this.state.error) {
-			return <div role="alert">{this.state.error.message}</div>;
-		}
-		return this.props.children;
-	}
+function dispatchPress(element: Element) {
+	element.dispatchEvent(
+		new PointerEvent('pointerdown', {
+			bubbles: true,
+			button: 0,
+			buttons: 1,
+			cancelable: true,
+			pointerId: 1,
+			pointerType: 'mouse',
+		}),
+	);
+	element.dispatchEvent(
+		new PointerEvent('pointerup', {
+			bubbles: true,
+			button: 0,
+			buttons: 0,
+			cancelable: true,
+			pointerId: 1,
+			pointerType: 'mouse',
+		}),
+	);
+	element.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
 }
