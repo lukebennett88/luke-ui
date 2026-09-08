@@ -198,8 +198,8 @@ test('ComboboxClearButton clears the search text inside a tray', async () => {
 
 	expect(page.getByRole('button', { name: 'Clear search' }).elements()).toHaveLength(0);
 
-	await userEvent.keyboard('Aus');
 	const searchbox = page.getByRole('searchbox', { name: 'Country' });
+	await userEvent.type(searchbox.element(), 'Aus');
 	await expect.element(searchbox).toHaveValue('Aus');
 
 	await userEvent.click(page.getByRole('button', { name: 'Clear search' }));
@@ -328,7 +328,7 @@ test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to s
 
 	await openTray();
 	const searchbox = page.getByRole('searchbox', { name: 'Country' });
-	await userEvent.keyboard('Freedonia');
+	await userEvent.type(searchbox.element(), 'Freedonia');
 	await expect.element(searchbox).toHaveValue('Freedonia');
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
@@ -337,7 +337,7 @@ test('ComboboxTrayTrigger allows a required combobox with allowsCustomValue to s
 	expect(submitCount).toBe(1);
 
 	await openTray();
-	await userEvent.clear(page.getByRole('searchbox', { name: 'Country' }));
+	await userEvent.clear(page.getByRole('searchbox', { name: 'Country' }).element());
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 
@@ -475,8 +475,9 @@ test('ComboboxTrayTrigger submits custom text in text mode while the tray is clo
 	if (form == null) throw new Error('Expected the form element.');
 
 	await openTray();
-	await userEvent.keyboard('Freedonia');
-	await expect.element(page.getByRole('searchbox', { name: 'Country' })).toHaveValue('Freedonia');
+	const searchbox = page.getByRole('searchbox', { name: 'Country' });
+	await userEvent.type(searchbox.element(), 'Freedonia');
+	await expect.element(searchbox).toHaveValue('Freedonia');
 	expect(new FormData(form).getAll('country')).toEqual(['Freedonia']);
 
 	await userEvent.keyboard('{Escape}');
@@ -484,7 +485,7 @@ test('ComboboxTrayTrigger submits custom text in text mode while the tray is clo
 	expect(new FormData(form).getAll('country')).toEqual(['Freedonia']);
 
 	await openTray();
-	await userEvent.clear(page.getByRole('searchbox', { name: 'Country' }));
+	await userEvent.clear(page.getByRole('searchbox', { name: 'Country' }).element());
 	await userEvent.keyboard('{Escape}');
 	await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
 	expect(new FormData(form).getAll('country')).toEqual(['']);
@@ -521,7 +522,7 @@ test('ComboboxTrayTrigger submits one text-mode value through an external form a
 	const searchbox = page.getByRole('searchbox', { name: 'Country' });
 	expect(searchbox.element()).not.toHaveAttribute('name');
 
-	await userEvent.keyboard('Freedonia');
+	await userEvent.type(searchbox.element(), 'Freedonia');
 	await expect.element(searchbox).toHaveValue('Freedonia');
 	expect(new FormData(form).getAll('country')).toEqual(['Freedonia']);
 
