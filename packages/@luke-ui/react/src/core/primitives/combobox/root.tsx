@@ -13,6 +13,12 @@ export type { ComboboxSize };
 
 /** RAC combobox props redeclared here with useful JSDoc; kept local since this is the only combobox primitive that documents them. */
 interface ComboboxRootRedeclaredRACProps<T extends object> {
+	/**
+	 * Whether the menu can stay open when filtering leaves no items. Tray search and empty states
+	 * need this so typing text that matches nothing does not dismiss the overlay.
+	 * @default true
+	 */
+	allowsEmptyCollection?: RacComboBoxProps<T, 'single'>['allowsEmptyCollection'];
 	/** Whether the combobox should receive focus on render. */
 	autoFocus?: RacComboBoxProps<T, 'single'>['autoFocus'];
 	/** The `<form>` element to associate the combobox with, by id. */
@@ -78,7 +84,14 @@ interface _ComboboxRootProps<T extends object>
 export type ComboboxRootProps<T extends object> = Prettify<_ComboboxRootProps<T>>;
 
 export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
-	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
+	const {
+		allowsEmptyCollection = true,
+		className,
+		menuTrigger = 'focus',
+		ref,
+		size = 'medium',
+		...comboboxProps
+	} = props;
 
 	// Published for the tray validation and submission inputs. `ComboBoxStateContext` does not
 	// carry these props.
@@ -99,6 +112,7 @@ export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX
 			<ComboboxValidationProvider value={validationContextValue}>
 				<RacComboBox
 					{...comboboxProps}
+					allowsEmptyCollection={allowsEmptyCollection}
 					className={composeRenderProps(className, (renderedClassName) => {
 						return comboboxRecipe().root({ className: renderedClassName });
 					})}
