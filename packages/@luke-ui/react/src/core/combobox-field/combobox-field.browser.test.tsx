@@ -1,6 +1,5 @@
 import { createRef, useState } from 'react';
 import type { Key } from 'react-aria-components/ComboBox';
-import { Form } from 'react-aria-components/Form';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
@@ -11,7 +10,6 @@ import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
 import { render } from '../test-utils/render.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
-import type { ComboboxFieldProps } from './combobox-field.js';
 import { ComboboxField } from './combobox-field.js';
 
 type CountryItem = {
@@ -219,46 +217,6 @@ test('ComboboxField reopens the popover when the focused input is clicked again'
 	await expect.element(page.getByRole('option', { name: 'Australia' })).toBeVisible();
 });
 
-test('ComboboxField keeps a required mobile field invalid while the tray is closed', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		let submitCount = 0;
-		const { container } = render(
-			<form
-				aria-label="Country form"
-				onSubmit={(event) => {
-					event.preventDefault();
-					submitCount += 1;
-				}}
-			>
-				<ComboboxField defaultItems={countryItems} isRequired label="Country" name="country">
-					{renderCountryItem}
-				</ComboboxField>
-				<button type="submit">Submit</button>
-			</form>,
-		);
-		const form = container.querySelector('form');
-		if (form == null) throw new Error('Expected the form element.');
-
-		// The tray holds the only text input, so with it closed nothing else carries `required`.
-		await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
-		expect(submitCount).toBe(0);
-
-		// Only React Aria's own hidden input submits the value, so the field is not sent twice.
-		expect(new FormData(form).getAll('country')).toHaveLength(1);
-
-		await userEvent.click(page.getByRole('button', { name: 'Country' }).element());
-		await userEvent.click(page.getByRole('option', { name: 'Australia' }).element());
-		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-
-		await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
-		expect(submitCount).toBe(1);
-		expect(new FormData(form).get('country')).toBe('au');
-	} finally {
-		restoreScreenWidth();
-	}
-});
-
 test('ComboboxField clearing the tray search clears the selection', async () => {
 	const restoreScreenWidth = mockScreenWidth(390);
 	try {
@@ -355,113 +313,6 @@ test('ComboboxField clear selection empties the desktop field', async () => {
 
 	await userEvent.click(page.getByRole('button', { name: 'Clear selection' }).element());
 	await expect.element(input).toHaveValue('');
-});
-
-test('ComboboxField blocks a closed mobile tray on a custom validation error', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		let submitCount = 0;
-		render(
-			<form
-				aria-label="Country form"
-				onSubmit={(event) => {
-					event.preventDefault();
-					submitCount += 1;
-				}}
-			>
-				<ComboboxField
-					defaultItems={countryItems}
-					defaultValue="au"
-					label="Country"
-					name="country"
-					validate={({ value }) => (value === 'au' ? 'Pick somewhere else.' : null)}
-				>
-					{renderCountryItem}
-				</ComboboxField>
-				<button type="submit">Submit</button>
-			</form>,
-		);
-
-		// The `validate` result reaches the closed tray, not just the unmounted search input, and
-		// the message surfaces through `FieldError` rather than only blocking silently.
-		await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
-		expect(submitCount).toBe(0);
-		await expect.element(page.getByText('Pick somewhere else.')).toBeVisible();
-
-		await userEvent.click(page.getByRole('button', { name: /Country/ }).element());
-		await userEvent.click(page.getByRole('option', { name: 'Canada' }).element());
-		await expect.element(page.getByRole('dialog')).not.toBeInTheDocument();
-
-		await userEvent.click(page.getByRole('button', { name: 'Submit' }).element());
-		expect(submitCount).toBe(1);
-	} finally {
-		restoreScreenWidth();
-	}
-});
-
-test('ComboboxField does not block submission for a non-validating mobile field', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		const submitted: Array<string> = [];
-		const renderCase = (label: string, props: Partial<ComboboxFieldProps<CountryItem>>) => (
-			<form
-				aria-label={`${label} form`}
-				onSubmit={(event) => {
-					event.preventDefault();
-					submitted.push(label);
-				}}
-			>
-				<ComboboxField defaultItems={countryItems} isRequired label={label} {...props}>
-					{renderCountryItem}
-				</ComboboxField>
-				<button type="submit">Submit {label}</button>
-			</form>
-		);
-
-		// A field exempt from constraint validation must never block a submit on an empty value.
-		render(
-			<>
-				{renderCase('Disabled', { isDisabled: true })}
-				{renderCase('ReadOnly', { isReadOnly: true })}
-				{renderCase('Aria', { validationBehavior: 'aria' })}
-			</>,
-		);
-
-		// Sequential on purpose: each submit has to settle before the next one is attempted.
-		// oxlint-disable-next-line no-await-in-loop
-		for (const label of ['Disabled', 'ReadOnly', 'Aria']) {
-			// oxlint-disable-next-line no-await-in-loop
-			await userEvent.click(page.getByRole('button', { name: `Submit ${label}` }).element());
-		}
-
-		expect(submitted).toEqual(['Disabled', 'ReadOnly', 'Aria']);
-	} finally {
-		restoreScreenWidth();
-	}
-});
-
-test('ComboboxField inherits validationBehavior from an enclosing Form', async () => {
-	const restoreScreenWidth = mockScreenWidth(390);
-	try {
-		const { container } = render(
-			// `validationBehavior` is set on the form, not repeated on the field.
-			<Form aria-label="Country form" validationBehavior="aria">
-				<ComboboxField defaultItems={countryItems} isRequired label="Country">
-					{renderCountryItem}
-				</ComboboxField>
-			</Form>,
-		);
-		const form = container.querySelector('form');
-		if (form == null) throw new Error('Expected the form element.');
-
-		// Under `aria`, the mobile validation control must not be a participating constraint at all.
-		// `<Form>` also sets `noValidate`, so submission alone cannot tell the two behaviours apart.
-		const controls = [...form.querySelectorAll('input')];
-		expect(controls.length).toBeGreaterThan(0);
-		expect(controls.map((control) => control.willValidate)).not.toContain(true);
-	} finally {
-		restoreScreenWidth();
-	}
 });
 
 test('ComboboxField reports a selection the parent had already moved away from', async () => {

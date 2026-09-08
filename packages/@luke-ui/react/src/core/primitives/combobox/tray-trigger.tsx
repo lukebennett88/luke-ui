@@ -1,3 +1,4 @@
+import { useObjectRef } from '@react-aria/utils';
 import type { JSX, ReactNode, Ref } from 'react';
 import { useContext, useId } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
@@ -14,6 +15,8 @@ import type { Prettify } from '../../types/prettify.js';
 import type { ComboboxSize } from './root.js';
 import { useComboboxSize } from './size-context.js';
 import { comboboxRecipe } from './styles.css.js';
+import { ComboboxTraySubmission } from './tray-submission.js';
+import { ComboboxTrayValidation } from './tray-validation.js';
 
 type _ComboboxTrayTriggerOmit = DistributiveOmit<
 	RacButtonProps,
@@ -34,7 +37,12 @@ interface _ComboboxTrayTriggerProps extends _ComboboxTrayTriggerOmit {
 /** Props for the combobox tray trigger. */
 export type ComboboxTrayTriggerProps = Prettify<_ComboboxTrayTriggerProps>;
 
-/** Shows the selected value and opens a sibling `ComboboxTray`. */
+/**
+ * Shows the selected value and opens a sibling `ComboboxTray`. Also renders the hidden inputs that
+ * keep native form validation and form submission available while the tray (and its text input) is
+ * closed — this trigger is the part that exists exactly then, so it is the natural home for those
+ * controls and the focus target React Aria's own submit handling would otherwise miss.
+ */
 export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Element | null {
 	const { children, isDisabled, placeholder, ref, size: sizeProp, ...buttonProps } = props;
 	const size = useComboboxSize(sizeProp);
@@ -42,6 +50,7 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 	const buttonContext = useSlottedContext(ButtonContext);
 	const state = useContext(ComboBoxStateContext);
 	const valueId = useId();
+	const triggerRef = useObjectRef(ref);
 
 	if (state == null) return null;
 
@@ -65,35 +74,39 @@ export function ComboboxTrayTrigger(props: ComboboxTrayTriggerProps): JSX.Elemen
 
 	// Nested icons follow this part's resolved size, including a local `size` override.
 	return (
-		<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
-			<RacButton
-				{...buttonProps}
-				aria-expanded={state.isOpen}
-				aria-haspopup="dialog"
-				aria-label={ariaLabel}
-				aria-labelledby={ariaLabelledBy}
-				className={composeRenderProps(buttonProps.className, (className) => {
-					return comboboxRecipe({ size }).trayTrigger({ className });
-				})}
-				isDisabled={resolvedIsDisabled}
-				ref={ref}
-				onPress={(event) => {
-					if (resolvedIsDisabled) return;
+		<>
+			<IconSizeProvider size={FIELD_CONTROL_ICON_SIZE[size]}>
+				<RacButton
+					{...buttonProps}
+					aria-expanded={state.isOpen}
+					aria-haspopup="dialog"
+					aria-label={ariaLabel}
+					aria-labelledby={ariaLabelledBy}
+					className={composeRenderProps(buttonProps.className, (className) => {
+						return comboboxRecipe({ size }).trayTrigger({ className });
+					})}
+					isDisabled={resolvedIsDisabled}
+					ref={triggerRef}
+					onPress={(event) => {
+						if (resolvedIsDisabled) return;
 
-					state.open(null, 'manual');
-					buttonProps.onPress?.(event);
-				}}
-				// Opt out of the ComboBox button slot: this trigger owns its own press behaviour
-				// and must not also be wired up as the popover toggle.
-				slot={null}
-			>
-				<ComboBoxValue
-					className={comboboxRecipe().trayValue()}
-					id={valueId}
-					placeholder={placeholder}
-				/>
-				{children}
-			</RacButton>
-		</IconSizeProvider>
+						state.open(null, 'manual');
+						buttonProps.onPress?.(event);
+					}}
+					// Opt out of the ComboBox button slot: this trigger owns its own press behaviour
+					// and must not also be wired up as the popover toggle.
+					slot={null}
+				>
+					<ComboBoxValue
+						className={comboboxRecipe().trayValue()}
+						id={valueId}
+						placeholder={placeholder}
+					/>
+					{children}
+				</RacButton>
+			</IconSizeProvider>
+			<ComboboxTraySubmission />
+			<ComboboxTrayValidation triggerRef={triggerRef} />
+		</>
 	);
 }

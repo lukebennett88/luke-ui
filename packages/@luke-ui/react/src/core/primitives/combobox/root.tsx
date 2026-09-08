@@ -7,6 +7,7 @@ import type { Prettify } from '../../types/prettify.js';
 import { ComboboxSizeProvider } from './size-context.js';
 import type { ComboboxSize } from './styles.css.js';
 import { comboboxRecipe } from './styles.css.js';
+import { ComboboxValidationProvider } from './validation-context.js';
 
 export type { ComboboxSize };
 
@@ -79,16 +80,33 @@ export type ComboboxRootProps<T extends object> = Prettify<_ComboboxRootProps<T>
 export function ComboboxRoot<T extends object>(props: ComboboxRootProps<T>): JSX.Element {
 	const { className, menuTrigger = 'focus', ref, size = 'medium', ...comboboxProps } = props;
 
+	// Published for the hidden validation and submission inputs `ComboboxTrayTrigger` renders:
+	// `ComboBoxStateContext` does not carry these, so a public tray composition needs them plumbed
+	// some other way.
+	// oxlint-disable-next-line react/jsx-no-constructed-context-values
+	const validationContextValue = {
+		allowsCustomValue: comboboxProps.allowsCustomValue ?? false,
+		form: comboboxProps.form,
+		formValue: comboboxProps.formValue,
+		isDisabled: comboboxProps.isDisabled ?? false,
+		isReadOnly: comboboxProps.isReadOnly ?? false,
+		isRequired: comboboxProps.isRequired ?? false,
+		name: comboboxProps.name,
+		validationBehavior: comboboxProps.validationBehavior,
+	};
+
 	return (
 		<ComboboxSizeProvider size={size}>
-			<RacComboBox
-				{...comboboxProps}
-				className={composeRenderProps(className, (renderedClassName) => {
-					return comboboxRecipe().root({ className: renderedClassName });
-				})}
-				menuTrigger={menuTrigger}
-				ref={ref}
-			/>
+			<ComboboxValidationProvider value={validationContextValue}>
+				<RacComboBox
+					{...comboboxProps}
+					className={composeRenderProps(className, (renderedClassName) => {
+						return comboboxRecipe().root({ className: renderedClassName });
+					})}
+					menuTrigger={menuTrigger}
+					ref={ref}
+				/>
+			</ComboboxValidationProvider>
 		</ComboboxSizeProvider>
 	);
 }

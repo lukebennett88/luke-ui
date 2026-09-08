@@ -1,5 +1,4 @@
 import type { CSSProperties, JSX, ReactNode, Ref } from 'react';
-import { useRef } from 'react';
 import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/ComboBox';
 import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
@@ -17,7 +16,6 @@ import { ComboboxPopover } from '../primitives/combobox/popover.js';
 import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
 import { ComboboxRoot } from '../primitives/combobox/root.js';
 import { ComboboxTrayTrigger } from '../primitives/combobox/tray-trigger.js';
-import { ComboboxTrayValidation } from '../primitives/combobox/tray-validation.js';
 import { ComboboxTray } from '../primitives/combobox/tray.js';
 import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import type { FieldSlotProps } from '../primitives/field/field.js';
@@ -107,8 +105,6 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 
 	const normalizedErrorMessage = normalizeErrorMessage(errorMessage);
 
-	// Native validation focuses this trigger instead of the aria-hidden tray validation input.
-	const trayTriggerRef = useRef<HTMLButtonElement>(null);
 	const isMobileDevice = useIsMobileDevice();
 	const isAsync: boolean = loadingState != null;
 	const isInteractive: boolean =
@@ -153,19 +149,10 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 			return (
 				<>
 					<ComboboxInputGroup>
-						<ComboboxTrayTrigger placeholder={placeholder} ref={trayTriggerRef}>
+						<ComboboxTrayTrigger placeholder={placeholder}>
 							<Icon aria-hidden name="chevronDown" />
 						</ComboboxTrayTrigger>
 					</ComboboxInputGroup>
-					{/* The tray owns the only text input, so validation needs a control that outlives it. */}
-					<ComboboxTrayValidation
-						form={comboboxRootProps.form}
-						isDisabled={comboboxRootProps.isDisabled}
-						isReadOnly={comboboxRootProps.isReadOnly}
-						isRequired={comboboxRootProps.isRequired}
-						triggerRef={trayTriggerRef}
-						validationBehavior={comboboxRootProps.validationBehavior}
-					/>
 					<ComboboxTray>
 						<ComboboxInputGroup>
 							<ComboboxInput placeholder={placeholder} ref={inputRef} />

@@ -4,31 +4,25 @@ import { ComboBoxStateContext } from 'react-aria-components/ComboBox';
 import { FormContext } from 'react-aria-components/Form';
 import { useSlottedContext } from 'react-aria-components/slots';
 import { visuallyHiddenRecipe } from '../../visually-hidden/recipe.css.js';
+import { useComboboxValidation } from './validation-context.js';
 
 interface ComboboxTrayValidationProps {
-	/** The `<form>` to associate with, by id, matching the combobox's own `form` prop. */
-	form?: string;
-	/** Whether the combobox is disabled, in which case it never blocks submission. */
-	isDisabled?: boolean;
-	/** Whether the combobox is read-only, in which case it never blocks submission. */
-	isReadOnly?: boolean;
-	/** Whether a selection is required before the form can submit. */
-	isRequired?: boolean;
-	/** Focuses the tray trigger when the browser reports this control as the first invalid field. */
+	/** Focused on invalid submit, when this control is the first invalid one in its form. */
 	triggerRef: RefObject<HTMLButtonElement | null>;
-	/**
-	 * How the combobox reports validation. Only `'native'` takes part in constraint validation;
-	 * `'aria'` reports through ARIA alone and must never block submission.
-	 */
-	validationBehavior?: 'aria' | 'native';
 }
 
 /**
- * Keeps native form validation available while the tray (and its text input) is closed.
- * Focuses `triggerRef` on invalid submit instead of this aria-hidden control.
+ * Keeps native form validation available while the tray (and its text input) is closed. Rendered
+ * by `ComboboxTrayTrigger`, since that is the part that exists exactly while the tray is closed.
+ *
+ * On invalid submit, focuses the tray trigger instead of this aria-hidden control — but only when
+ * this control is the first invalid participating control in its owning form, so that multiple
+ * invalid comboboxes in one form send focus to the first rather than the last.
  */
 export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.Element | null {
-	const { form, isDisabled, isReadOnly, isRequired, triggerRef, validationBehavior } = props;
+	const { triggerRef } = props;
+	const { allowsCustomValue, form, isDisabled, isReadOnly, isRequired, validationBehavior } =
+		useComboboxValidation();
 	const state = useContext(ComboBoxStateContext);
 	const ref = useRef<HTMLInputElement>(null);
 
@@ -46,9 +40,13 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 		? (state?.realtimeValidation.validationErrors.join(' ') ?? '')
 		: '';
 	const selected = state?.value ?? null;
-	const value: string = Array.isArray(selected)
+	const selectedValue: string = Array.isArray(selected)
 		? selected.map(String).join(',')
 		: (selected?.toString() ?? '');
+	// With `allowsCustomValue`, typed text with no matching option is a valid value in its own
+	// right, so a `required` check must fall back to the input text once there is no selection.
+	const value =
+		allowsCustomValue && selectedValue === '' ? (state?.inputValue ?? '') : selectedValue;
 
 	useEffect(() => {
 		ref.current?.setCustomValidity(customError);
@@ -76,14 +74,40 @@ export function ComboboxTrayValidation(props: ComboboxTrayValidationProps): JSX.
 				});
 				state.commitValidation();
 
-				triggerRef.current?.focus();
+				if (isFirstInvalidControl(event.currentTarget)) {
+					triggerRef.current?.focus();
+				}
 			}}
 			ref={ref}
-			required={isRequired === true}
+			required={isRequired}
 			tabIndex={-1}
 			value={value}
 		/>
 	);
+}
+
+/**
+ * Whether `input` is the first invalid, participating control in its owning form, in document
+ * order. `event.preventDefault()` in `onInvalid` suppresses the browser's own focusing of the
+ * first invalid control, so this control decides for itself whether it should take focus instead.
+ * With no owning form there is nothing to compare against, so it always counts as first.
+ */
+function isFirstInvalidControl(input: HTMLInputElement): boolean {
+	const form = input.form;
+	if (form == null) return true;
+
+	for (const element of form.elements) {
+		if (!(element instanceof HTMLElement)) continue;
+		if (!('willValidate' in element) || !('validity' in element)) continue;
+
+		const candidate = element as HTMLElement & { validity: ValidityState; willValidate: boolean };
+		if (!candidate.willValidate) continue;
+		if (candidate.validity.valid) continue;
+
+		return candidate === input;
+	}
+
+	return true;
 }
 
 /** Snapshot a live `ValidityState` into the plain object React Aria stores. */
