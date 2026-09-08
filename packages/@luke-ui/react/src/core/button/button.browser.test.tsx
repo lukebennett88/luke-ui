@@ -82,9 +82,9 @@ test('blocks a second Action start while one is pending', async () => {
 	expect(button.element().getAttribute('data-pending')).toBe('true');
 	expect(button.element().getAttribute('aria-disabled')).toBe('true');
 	// RAC blocks pointer interaction while pending; do not use user.click (it waits for enabled).
-	button.element().dispatchEvent(
-		new MouseEvent('click', { bubbles: true, cancelable: true, view: window }),
-	);
+	button
+		.element()
+		.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
 	expect(starts).toBe(1);
 
 	release();
@@ -108,9 +108,9 @@ test('does not start pressAction when external isPending is already true', async
 	expect(button.element().getAttribute('data-pending')).toBe('true');
 	expect(button.element().getAttribute('aria-disabled')).toBe('true');
 	// External pending disables the RAC button before press handlers run.
-	button.element().dispatchEvent(
-		new MouseEvent('click', { bubbles: true, cancelable: true, view: window }),
-	);
+	button
+		.element()
+		.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
 	expect(started).toBe(false);
 });
 
@@ -166,7 +166,9 @@ test('does not swallow Action errors', async () => {
 	);
 
 	await user.click(locator.getByRole('button', { name: 'Save' }));
-	await expect.poll(() => container.querySelector('[role="alert"]')?.textContent).toBe('save failed');
+	await expect
+		.poll(() => container.querySelector('[role="alert"]')?.textContent)
+		.toBe('save failed');
 });
 
 function delay(ms: number) {
