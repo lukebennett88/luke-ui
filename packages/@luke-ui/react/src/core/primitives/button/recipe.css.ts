@@ -20,10 +20,6 @@ export const buttonRecipe = recipe({
 						color: 'GrayText',
 						opacity: 1,
 					},
-					'&[data-pending="true"]::after': {
-						borderColor: 'ButtonText',
-						borderInlineEndColor: 'transparent',
-					},
 					'&[data-pending="true"]': {
 						opacity: 1,
 					},

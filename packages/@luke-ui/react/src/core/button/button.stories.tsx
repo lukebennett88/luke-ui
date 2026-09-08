@@ -109,17 +109,17 @@ export const Block = meta.story({
 });
 
 /**
- * Place icons before or after text. For icon-only buttons, use `IconButton`.
+ * Place non-interactive adornments before or after text. For icon-only buttons, use `IconButton`.
  */
-export const IconContent = meta.story({
+export const ContentSlots = meta.story({
 	render: (props) => (
 		<div style={stackStyle}>
 			<div style={rowStyle}>
-				<Button {...props} startIcon={<Icon name="add" />}>
-					Start icon
+				<Button {...props} startContent={<Icon name="add" />}>
+					Start content
 				</Button>
-				<Button {...props} endIcon={<Icon name="add" />}>
-					End icon
+				<Button {...props} endContent={<Icon name="add" />}>
+					End content
 				</Button>
 			</div>
 		</div>

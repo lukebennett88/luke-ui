@@ -1,6 +1,7 @@
 import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { Icon } from '../icon/icon.js';
+import { Kbd } from '../kbd/kbd.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -37,21 +38,8 @@ test('kitchen sink', async () => {
 				<Button>Default</Button>
 				<Button isDisabled>Disabled</Button>
 				<Button isPending>Pending</Button>
-				<Button startIcon={<Icon name="add" />}>With icon</Button>
-				<Button
-					endIcon={
-						<>
-							<Icon name="check" />
-							<Icon name="close" />
-						</>
-					}
-					startIcon={
-						<>
-							<Icon name="add" />
-							<Icon name="search" />
-						</>
-					}
-				>
+				<Button startContent={<Icon name="add" />}>With icon</Button>
+				<Button endContent={<Kbd>⌘S</Kbd>} startContent={<Icon name="add" />}>
 					New task
 				</Button>
 			</Grid>,

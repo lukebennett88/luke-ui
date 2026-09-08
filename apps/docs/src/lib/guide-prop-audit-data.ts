@@ -14,13 +14,14 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'isBlock',
 		'isDisabled',
 		'isPending',
+		'pressAction',
 		'size',
-		'startIcon',
-		'endIcon',
+		'startContent',
+		'endContent',
 		'tone',
 	],
 	'actions/icon-button.mdx::packages/@luke-ui/react/src/core/icon-button/icon-button.tsx::IconButtonProps':
-		['appearance', 'icon', 'isDisabled', 'isPending', 'size', 'tone'],
+		['appearance', 'icon', 'isDisabled', 'isPending', 'pressAction', 'size', 'tone'],
 	'actions/link.mdx::packages/@luke-ui/react/src/core/link/link.tsx::LinkProps': [
 		'href',
 		'isDisabled',

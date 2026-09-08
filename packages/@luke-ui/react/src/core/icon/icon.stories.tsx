@@ -117,7 +117,7 @@ export const AllIcons = meta.story({
 						onPress={async () => {
 							await navigator.clipboard.writeText(name);
 						}}
-						startIcon={<Icon {...props} name={name} title={name} />}
+						startContent={<Icon {...props} name={name} title={name} />}
 						tone="neutral"
 					>
 						{name}

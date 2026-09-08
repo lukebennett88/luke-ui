@@ -50,19 +50,39 @@ primary action at the end of a narrow form or panel.
 <Button isBlock>Continue</Button>
 ```
 
-## Icons
+## Content slots
 
-Use `startIcon` or `endIcon` with a visible label. `Button` sizes nested icons for you, so an `Icon`
-needs no `size` prop. Pass one only to override it. Use
+Use `startContent` or `endContent` for non-interactive adornments beside the label, such as an icon,
+badge, count, or keyboard hint. Nested interactive controls are unsupported. `Button` sizes nested
+icons for you, so an `Icon` needs no `size` prop. Pass one only to override it. Use
 [`IconButton`](/components/actions/icon-button) only when the icon is familiar without a text label.
 
-<ExampleBlock src="button/icons" title="Button — Icons" />
+<ExampleBlock src="button/icons" title="Button — Content slots" />
 
-## Pending
+## Pending and Actions
 
-Set `isPending` while an action runs. The button remains focusable, ignores further presses, and
-overlays its label with a spinner. Update the visible label when the status matters, for example
-from “Save” to “Saving”.
+`onPress` handles the synchronous interaction. `pressAction` performs Button-owned async work whose
+pending lifecycle the button manages automatically. When both are set, `onPress` runs first, then
+`pressAction`.
+
+Prefer a native form Action when the work is naturally a form submission:
+
+```tsx
+<form action={save}>
+	<Button type="submit" isPending={isPending}>
+		Save
+	</Button>
+</form>
+```
+
+Use `pressAction` for Button-owned operations that are not form submissions. Combining `pressAction`
+with `type="submit"` is usually the wrong pattern, because both paths may run.
+
+Set `isPending` for externally owned pending state, such as a parent mutation or router transition.
+Pending buttons stay focusable and ignore further presses. `pressAction` creates that pending state
+automatically. Explicit `isPending` shows a spinner immediately. An Action-owned spinner waits
+briefly so a fast Action never flashes one. Update the visible label when the status matters, for
+example from “Save” to “Saving”.
 
 <ExampleBlock src="button/pending" title="Button — Pending" />
 
@@ -85,7 +105,7 @@ announce the pending status.
 ## Related components
 
 `Button` is the normal component for application UI. It wraps its label for truncation, provides
-icon slots, and supplies the pending spinner. Use the
+content slots, and supplies the pending spinner. Use the
 [button primitive](/components/primitives/button) when you need to own the child layout or loading
 treatment.
 

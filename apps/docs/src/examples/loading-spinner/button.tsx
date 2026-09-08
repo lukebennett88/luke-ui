@@ -6,7 +6,7 @@ export default () => {
 	return (
 		<Button
 			isDisabled
-			startIcon={
+			startContent={
 				<LoadingSpinner aria-label="Saving changes">
 					<Icon aria-hidden name="check" />
 				</LoadingSpinner>

@@ -31,10 +31,12 @@ and `danger` marks a destructive one.
 
 <ExampleBlock src="icon-button/tones" title="Icon Button — Tone" />
 
-## Pending
+## Pending and Actions
 
-Set `isPending` while an action runs. The control remains focusable, ignores further presses, and
-replaces its icon with a busy cue.
+`IconButton` shares [`Button`](/components/actions/button)’s pending and Action behaviour. Use
+`pressAction` for IconButton-owned async work, and `isPending` for externally owned pending state.
+Pending controls stay focusable, ignore further presses, and show the same spinner timing as
+`Button`.
 
 <ExampleBlock src="icon-button/pending" title="Icon Button — Pending" />
 

@@ -175,7 +175,8 @@ When adding or changing a component:
 - Keep a straightforward prop description to one concise sentence. Add explanation when a
   constraint, choice, caveat, or non-obvious behaviour affects how the prop is used. Do not optimise
   JSDoc for line count.
-- Do not restate the prop name. `endIcon` needs "Icon shown after the label", not "The end icon".
+- Do not restate the prop name. `endContent` needs "Non-interactive adornment shown after the
+  label", not "The end content".
 - On components, redeclare important inherited `react-aria-components` props with useful JSDoc,
   using the passthrough pattern such as `isDisabled?: RacButtonProps['isDisabled']`. Redeclare only
   the props a developer is likely to reach for. Point a long-tail inherited prop at the upstream
