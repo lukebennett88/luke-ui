@@ -36,12 +36,11 @@ export function ComboboxClearButton(props: ComboboxClearButtonProps): JSX.Elemen
 	// Visibility follows presentation: the tray button tracks the search text, the desktop button
 	// tracks the selection. Clearing always empties both — React Stately does not clear a
 	// controlled selection when only the input value is emptied.
-	const isEmpty =
-		presentation === 'tray'
-			? state.inputValue === ''
-			: Array.isArray(state.value)
-				? state.value.length === 0
-				: state.value == null;
+	const isEmpty: boolean = (() => {
+		if (presentation === 'tray') return state.inputValue === '';
+		if (Array.isArray(state.value)) return state.value.length === 0;
+		return state.value == null;
+	})();
 
 	if (isEmpty) return null;
 
