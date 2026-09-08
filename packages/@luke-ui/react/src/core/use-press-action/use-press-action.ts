@@ -29,15 +29,6 @@ export interface UsePressActionResult {
 	showSpinner: boolean;
 }
 
-// #region agent log
-function agentLog(hypothesisId: string, location: string, message: string, data: Record<string, unknown>) {
-	const entry = { hypothesisId, location, message, data, timestamp: Date.now(), runId: 'post-fix' };
-	const g = globalThis as typeof globalThis & { __agentDebugLog?: Array<typeof entry> };
-	(g.__agentDebugLog ??= []).push(entry);
-	console.info('[agent-debug]', JSON.stringify(entry));
-}
-// #endregion
-
 /**
  * Rethrows a `pressAction` failure during render so the nearest Error Boundary can handle it.
  */
@@ -54,10 +45,8 @@ export function PressActionError(props: { error: unknown }): null {
  * Runs `pressAction` as a React Action via `startTransition`, fires once while pending, and delays
  * the Action-owned spinner so fast Actions never flash one.
  *
- * Pending UI state is owned with `useState` rather than `useTransition().isPending`. React's
- * `isPending` can remain `true` after a fast-settling async Action promise completes (the thenable
- * finish update never commits), which left buttons stuck pending. Explicit state clears reliably
- * after `await`. Action failures are recorded and surfaced through `PressActionError`.
+ * Pending UI uses explicit state instead of `useTransition().isPending`, which can stay `true` after
+ * a fast-settling async Action. Failures are recorded and rethrown through `PressActionError`.
  */
 export function usePressAction(options: UsePressActionOptions): UsePressActionResult {
 	const { isPending = false, onPress, pressAction } = options;
@@ -75,60 +64,18 @@ export function usePressAction(options: UsePressActionOptions): UsePressActionRe
 	});
 	const showSpinner = isPending || showActionSpinner;
 
-	// #region agent log
-	agentLog('A', 'use-press-action.ts:render', 'usePressAction render', {
-		isPending,
-		isActionPending,
-		isPendingState,
-		showSpinner,
-		isStarting: isStartingActionRef.current,
-		hasPressAction: Boolean(pressAction),
-		hasActionError: actionError != null,
-	});
-	// #endregion
-
 	function handlePress(...args: Parameters<OnPress>) {
-		const pressMeta = {
-			isPending,
-			isActionPending,
-			isStarting: isStartingActionRef.current,
-			hasPressAction: Boolean(pressAction),
-		};
-		// #region agent log
-		agentLog('B', 'use-press-action.ts:handlePress:entry', 'handlePress entry', pressMeta);
-		// #endregion
 		onPress?.(...args);
 
 		if (!pressAction) return;
-		if (isPending || isActionPending || isStartingActionRef.current) {
-			// #region agent log
-			agentLog('C', 'use-press-action.ts:handlePress:blocked', 'Action start blocked', pressMeta);
-			// #endregion
-			return;
-		}
+		if (isPending || isActionPending || isStartingActionRef.current) return;
 
 		isStartingActionRef.current = true;
 		setIsActionPending(true);
 		startTransition(async () => {
-			const t0 = Date.now();
-			// #region agent log
-			agentLog('D', 'use-press-action.ts:action:start', 'Action body start', { t0 });
-			// #endregion
 			try {
 				await pressAction();
-				// #region agent log
-				agentLog('D', 'use-press-action.ts:action:awaited', 'pressAction awaited ok', {
-					elapsed: Date.now() - t0,
-				});
-				// #endregion
 			} catch (error) {
-				// #region agent log
-				agentLog('E', 'use-press-action.ts:action:error', 'pressAction threw', {
-					name: error instanceof Error ? error.name : typeof error,
-					message: error instanceof Error ? error.message : String(error),
-					elapsed: Date.now() - t0,
-				});
-				// #endregion
 				// Defer past the Action thenable so the Error Boundary throw commits cleanly.
 				queueMicrotask(() => {
 					setActionError(error);
@@ -136,11 +83,6 @@ export function usePressAction(options: UsePressActionOptions): UsePressActionRe
 			} finally {
 				isStartingActionRef.current = false;
 				setIsActionPending(false);
-				// #region agent log
-				agentLog('D', 'use-press-action.ts:action:finally', 'Action finally', {
-					elapsed: Date.now() - t0,
-				});
-				// #endregion
 			}
 		});
 	}

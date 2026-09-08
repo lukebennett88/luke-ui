@@ -153,7 +153,7 @@ test('shows a delayed spinner for a slow Action', async () => {
 });
 
 test('does not swallow Action errors', async () => {
-	const { locator, user } = render(
+	const { container, locator, user } = render(
 		<TestErrorBoundary>
 			<Button
 				pressAction={async () => {
@@ -166,7 +166,7 @@ test('does not swallow Action errors', async () => {
 	);
 
 	await user.click(locator.getByRole('button', { name: 'Save' }));
-	await expect.element(locator.getByRole('alert')).toHaveTextContent('save failed');
+	await expect.poll(() => container.querySelector('[role="alert"]')?.textContent).toBe('save failed');
 });
 
 function delay(ms: number) {
