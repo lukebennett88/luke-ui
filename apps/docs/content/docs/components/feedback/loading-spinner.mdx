@@ -30,19 +30,15 @@ nearby semantic content.
 
 <ExampleBlock src="loading-spinner/colors" title="Loading Spinner — Colours" />
 
-## With buttons
-
-[`Button`](/components/actions/button) has its own `isPending` prop for a standard loading action.
-For a labelled button that keeps its text visible, wrap the icon in `LoadingSpinner`. Disable the
-button while the action runs.
-
-<ExampleBlock src="loading-spinner/button" title="Loading Spinner — With a button" />
-
 ## Accessibility
 
 The spinner is a polite status region. Its accessible name defaults to `loading`. Provide an
 `aria-label` that names the work, such as `Loading profile`. While loading, the spinner hides
 wrapped children from assistive technology and blocks focus and activation.
+
+For a standard loading control, prefer [`Button`](/components/actions/button) `pressAction` or
+`isPending`. Pending keeps the control focusable. Do not swap that behaviour for `isDisabled` with a
+hand-rolled spinner.
 
 ## API
 

@@ -3,12 +3,15 @@ import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button as PrimitiveButton } from '../primitives/button/button.js';
 import type * as primitiveStyles from '../primitives/button/recipe.css.js';
+import { pendingSpinnerOverlay } from '../styles/pending-spinner-overlay.css.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
+import type { PressAction } from '../use-press-action/use-press-action.js';
+import { usePressAction } from '../use-press-action/use-press-action.js';
 import type { ButtonLabelVariants } from './styles.css.js';
-import { buttonContent, buttonLabel, spinnerOverlay } from './styles.css.js';
+import { buttonContent, buttonLabel } from './styles.css.js';
 
 interface ButtonLabelRecipeProps extends NonNullable<ButtonLabelVariants> {}
 
@@ -21,28 +24,37 @@ interface ButtonStyleProps {
 	 */
 	appearance?: PrimitiveButtonRecipeProps['appearance'];
 	/**
-	 * Icon shown after the label.
+	 * Non-interactive adornment shown after the label, such as an icon, badge, count, or keyboard
+	 * hint. Nested interactive controls are unsupported.
 	 */
-	endIcon?: ReactNode;
+	endContent?: ReactNode;
 	/**
 	 * Whether the button takes up the full inline size of its container.
 	 * @default false
 	 */
 	isBlock?: PrimitiveButtonRecipeProps['isBlock'];
 	/**
-	 * Shows pending button styles. When true, a spinner overlays the label.
+	 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
+	 * immediately. Prefer `pressAction` for Button-owned operations.
 	 * @default false
 	 */
 	isPending?: ButtonLabelRecipeProps['isPending'];
+	/**
+	 * Button-owned operation run as a React Action. The button becomes pending automatically until
+	 * the Action settles. `onPress` handles the interaction. `pressAction` performs the resulting
+	 * operation. Prefer a native `<form action>` when the operation is a form submission.
+	 */
+	pressAction?: PressAction;
 	/**
 	 * Sets the button size.
 	 * @default 'medium'
 	 */
 	size?: PrimitiveButtonRecipeProps['size'];
 	/**
-	 * Icon shown before the label.
+	 * Non-interactive adornment shown before the label, such as an icon. Nested interactive controls
+	 * are unsupported.
 	 */
-	startIcon?: ReactNode;
+	startContent?: ReactNode;
 	/**
 	 * Visual tone. Controls colour scheme.
 	 * @default 'neutral'
@@ -62,26 +74,40 @@ export type ButtonProps = Prettify<_ButtonProps>;
 
 /**
  * Button with size, tone, appearance, pending, and block options.
- * Wraps children in a `Text` for ellipsis truncation. Shows a spinner when `isPending`.
+ * Wraps children in a `Text` for ellipsis truncation. Shows a spinner when pending.
  */
 export function Button(props: ButtonProps): JSX.Element {
-	const { children, endIcon, isPending, size = 'medium', startIcon, ...restProps } = props;
+	const {
+		children,
+		endContent,
+		isPending = false,
+		onPress,
+		pressAction,
+		size = 'medium',
+		startContent,
+		...restProps
+	} = props;
+	const {
+		isPendingState,
+		onPress: handlePress,
+		showSpinner,
+	} = usePressAction({ isPending, onPress, pressAction });
 
 	return (
-		<PrimitiveButton {...restProps} isPending={isPending} size={size}>
+		<PrimitiveButton {...restProps} isPending={isPendingState} onPress={handlePress} size={size}>
 			{(renderProps) => (
 				<span className={buttonContent()}>
-					{isPending && (
-						<span aria-hidden className={spinnerOverlay()}>
+					{showSpinner && (
+						<span aria-hidden className={pendingSpinnerOverlay()}>
 							<LoadingSpinner aria-hidden />
 						</span>
 					)}
-					<span className={buttonLabel({ isPending })}>
-						{startIcon}
+					<span className={buttonLabel({ isPending: showSpinner })}>
+						{startContent}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}
 						</Text>
-						{endIcon}
+						{endContent}
 					</span>
 				</span>
 			)}

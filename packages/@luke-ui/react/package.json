@@ -102,7 +102,8 @@
 		"@luke-ui/rainbow-sprinkles": "workspace:*",
 		"@react-aria/utils": "catalog:",
 		"@vanilla-extract/css": "catalog:",
-		"@vanilla-extract/recipes": "catalog:"
+		"@vanilla-extract/recipes": "catalog:",
+		"spin-doctor": "catalog:"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:",
@@ -132,6 +133,7 @@
 		"react": "catalog:",
 		"react-aria-components": "catalog:",
 		"react-dom": "catalog:",
+		"react-error-boundary": "catalog:",
 		"storybook": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",

@@ -1,7 +1,6 @@
 import { vars } from '../../theme/contract.css.js';
 import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
-import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 
 export const buttonContent = recipe({
 	base: {
@@ -33,14 +32,3 @@ export const buttonLabel = recipe({
 });
 
 export type ButtonLabelVariants = RecipeSelection<typeof buttonLabel>;
-
-export const spinnerOverlay = recipe({
-	base: {
-		'@media': {
-			'(forced-colors: active)': {
-				color: 'ButtonText',
-			},
-		},
-		...spinnerOverlayBase,
-	},
-});

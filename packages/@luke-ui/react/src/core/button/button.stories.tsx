@@ -1,6 +1,7 @@
 import type { ButtonProps } from '@luke-ui/react/button';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
+import { Kbd } from '@luke-ui/react/kbd';
 import type { CSSProperties } from 'react';
 import { fn } from 'storybook/test';
 import preview from '../../../.storybook/preview.js';
@@ -109,17 +110,17 @@ export const Block = meta.story({
 });
 
 /**
- * Place icons before or after text. For icon-only buttons, use `IconButton`.
+ * Place non-interactive adornments before or after text. For icon-only buttons, use `IconButton`.
  */
-export const IconContent = meta.story({
+export const ContentSlots = meta.story({
 	render: (props) => (
 		<div style={stackStyle}>
 			<div style={rowStyle}>
-				<Button {...props} startIcon={<Icon name="add" />}>
-					Start icon
+				<Button {...props} startContent={<Icon name="add" />}>
+					Add item
 				</Button>
-				<Button {...props} endIcon={<Icon name="add" />}>
-					End icon
+				<Button {...props} endContent={<Kbd>⌘S</Kbd>}>
+					Save
 				</Button>
 			</div>
 		</div>

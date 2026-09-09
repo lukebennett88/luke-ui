@@ -1,5 +1,5 @@
 /**
- * The in-place spinner overlay base shared by `Button` and `LoadingSpinner`. Both render an
+ * The in-place spinner overlay base shared by pending buttons and `LoadingSpinner`. Both render an
  * absolutely positioned, centred surface over their content while a pending state is shown.
  */
 export const spinnerOverlayBase = {

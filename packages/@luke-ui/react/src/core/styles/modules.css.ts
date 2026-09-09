@@ -20,4 +20,5 @@ import '../loading-skeleton/styles.css.js';
 import '../loading-spinner/recipe.css.js';
 import '../overlays/mobile-overlay.css.js';
 import '../prose/recipe.css.js';
+import '../styles/pending-spinner-overlay.css.js';
 import '../visually-hidden/recipe.css.js';

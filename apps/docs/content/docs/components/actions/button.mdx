@@ -50,21 +50,43 @@ primary action at the end of a narrow form or panel.
 <Button isBlock>Continue</Button>
 ```
 
-## Icons
+## Content slots
 
-Use `startIcon` or `endIcon` with a visible label. `Button` sizes nested icons for you, so an `Icon`
-needs no `size` prop. Pass one only to override it. Use
+Use `startContent` or `endContent` for non-interactive adornments beside the label, such as an icon,
+badge, count, or keyboard hint. Nested interactive controls are unsupported. `Button` sizes nested
+icons for you, so an `Icon` needs no `size` prop. Pass one only to override it. Use
 [`IconButton`](/components/actions/icon-button) only when the icon is familiar without a text label.
 
-<ExampleBlock src="button/icons" title="Button — Icons" />
+<ExampleBlock src="button/content-slots" title="Button — Content slots" />
 
-## Pending
+## Pending and Actions
 
-Set `isPending` while an action runs. The button remains focusable, ignores further presses, and
-overlays its label with a spinner. Update the visible label when the status matters, for example
-from “Save” to “Saving”.
+`onPress` handles the interaction. `pressAction` performs the resulting operation. When both are
+set, `onPress` runs first, then `pressAction`.
+
+Prefer a native form Action when the operation is a form submission. Pass the form’s pending state
+to `Button`. This example uses React’s
+[`useActionState`](https://react.dev/reference/react/useActionState).
+
+<ExampleBlock src="button/form-action" title="Button — Form Action" />
+
+Use `pressAction` for Button-owned operations that are not form submissions. Combining `pressAction`
+with `type="submit"` is usually the wrong pattern, because both paths may run.
+
+`pressAction` creates pending state automatically. Explicit `isPending` shows a spinner immediately.
+An Action-owned spinner waits briefly so a fast Action never flashes one.
 
 <ExampleBlock src="button/pending" title="Button — Pending" />
+
+Set `isPending` for externally owned pending state, such as a parent mutation or router transition.
+Pending buttons stay focusable and ignore further presses.
+
+<ExampleBlock src="button/external-pending" title="Button — External pending" />
+
+Unexpected failures from `pressAction` use React’s normal Action and Error Boundary behaviour.
+Handle expected domain errors inside the Action.
+
+<ExampleBlock src="button/action-error" title="Button — Action error" />
 
 ## Disabled
 
@@ -79,13 +101,13 @@ The visible label provides the accessible name, so most buttons do not need `ari
 label that describes the action, such as “Save changes” or “Delete account”, rather than a vague
 label such as “OK”.
 
-The spinner is hidden from assistive technology. Change the label when assistive technology needs to
-announce the pending status.
+The spinner is hidden from assistive technology. Pending state is announced through the button’s
+pending semantics, so the label does not need to change while pending.
 
 ## Related components
 
 `Button` is the normal component for application UI. It wraps its label for truncation, provides
-icon slots, and supplies the pending spinner. Use the
+content slots, and supplies the pending spinner. Use the
 [button primitive](/components/primitives/button) when you need to own the child layout or loading
 treatment.
 

@@ -4,30 +4,7 @@ import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 
 export const iconButtonReset = style({
-	'@media': {
-		'(forced-colors: active)': {
-			selectors: {
-				'&[data-pending="true"]::after': {
-					borderColor: 'ButtonText',
-					borderInlineEndColor: 'transparent',
-				},
-			},
-		},
-	},
 	paddingInline: 0,
-	selectors: {
-		'&[data-pending="true"]::after': {
-			blockSize: vars.iconSize.xsmall,
-			borderColor: 'currentColor',
-			borderInlineEndColor: 'transparent',
-			borderRadius: vars.radius.full,
-			borderStyle: 'solid',
-			borderWidth: '2px',
-			content: '',
-			inlineSize: vars.iconSize.xsmall,
-			position: 'absolute',
-		},
-	},
 });
 
 export const iconButtonIcon = recipe({

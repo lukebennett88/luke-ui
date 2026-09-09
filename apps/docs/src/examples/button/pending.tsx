@@ -1,5 +1,11 @@
 import { Button } from '@luke-ui/react/button';
 
 export default () => {
-	return <Button isPending>Save changes</Button>;
+	return <Button pressAction={save}>Save changes</Button>;
 };
+
+async function save() {
+	await new Promise((resolve) => {
+		setTimeout(resolve, 1200);
+	});
+}
