@@ -80,10 +80,8 @@ test('suppresses a same-tick second Action start', async () => {
 	);
 	const button = locator.getByRole('button', { name: 'Save' }).element();
 
-	// TESTING.md prefers userEvent, but user.dblClick / sequential clicks await between
-	// presses and let Transition pending commit. That only proves post-commit blocking.
-	// Two presses in one act keep the race before isPending renders, so removing
-	// isStartingActionRef fails this test (starts becomes 2).
+	// userEvent awaits between presses, allowing Transition pending to commit.
+	// Dispatch both presses in one act to exercise the pre-commit guard.
 	act(() => {
 		dispatchPress(button);
 		dispatchPress(button);
@@ -111,8 +109,7 @@ test('does not start pressAction when external isPending is already true', async
 	const button = locator.getByRole('button', { name: 'Save' });
 
 	expect(button.element().getAttribute('data-pending')).toBe('true');
-	// Pending sets aria-disabled, so Playwright user.click waits forever unless forced.
-	button.element().focus();
+	await user.tab();
 	await user.keyboard('{Enter}');
 	expect(started).toBe(false);
 });
