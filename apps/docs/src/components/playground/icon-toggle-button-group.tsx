@@ -103,7 +103,7 @@ const GROUP_CLASS_NAME = 'flex items-center gap-2';
 
 function toggleButtonClassName() {
 	return buttonRecipe({
-		appearance: 'ghost',
+		prominence: 'low',
 		size: 'small',
 		tone: 'neutral',
 	});

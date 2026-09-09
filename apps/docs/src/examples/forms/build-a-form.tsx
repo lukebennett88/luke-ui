@@ -28,9 +28,7 @@ export default () => {
 					/>
 					<Box display="flex" gap="sp8">
 						<Button type="submit">Submit</Button>
-						<Button appearance="subtle" type="reset">
-							Reset
-						</Button>
+						<Button type="reset">Reset</Button>
 					</Box>
 				</Box>
 			</form>

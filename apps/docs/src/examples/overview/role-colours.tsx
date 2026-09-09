@@ -25,10 +25,11 @@ export default () => {
 			<Box aria-label="Semantic role" display="flex" flexWrap="wrap" gap="sp8" role="group">
 				{(Object.keys(roles) as Array<Role>).map((option) => (
 					<Button
-						appearance={role === option ? 'solid' : 'subtle'}
 						aria-pressed={role === option}
 						key={option}
 						onPress={() => setRole(option)}
+						prominence={role === option ? 'high' : 'standard'}
+						tone="accent"
 					>
 						{roles[option]}
 					</Button>

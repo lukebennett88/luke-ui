@@ -1,5 +1,5 @@
 import { style } from './layered-style.css.js';
-import { recipe } from './recipe.js';
+import { recipe, withDefaultVariants } from './recipe.js';
 
 // Test-only fixtures. They live in `.css.ts` because `recipe()` needs a Vanilla Extract file scope.
 
@@ -34,6 +34,10 @@ export const realVariantsRecipe = recipe({
 			true: { opacity: 1 },
 		},
 	},
+});
+
+export const defaultedVariantsRecipe = withDefaultVariants(realVariantsRecipe, {
+	size: 'medium',
 });
 
 /** Slotted recipe with `variants` omitted entirely. */

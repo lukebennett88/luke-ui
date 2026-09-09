@@ -101,9 +101,7 @@ test('kitchen sink', async () => {
 						</InputGroupPrefix>
 						<InputGroupInput aria-label="Search input group" defaultValue="invoices" />
 						<InputGroupSuffix>
-							<Button appearance="subtle" size="small">
-								Clear
-							</Button>
+							<Button size="small">Clear</Button>
 						</InputGroupSuffix>
 					</InputGroup>
 					<InputGroup isInvalid size="small">

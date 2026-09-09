@@ -14,8 +14,8 @@ interface ButtonRecipeProps extends NonNullable<ButtonRecipeVariants> {}
 
 interface ButtonStyleProps {
 	/**
-	 * Visual emphasis.
-	 * @default 'solid'
+	 * Visual presentation.
+	 * @default 'button'
 	 */
 	appearance?: ButtonRecipeProps['appearance'];
 	/**
@@ -24,20 +24,24 @@ interface ButtonStyleProps {
 	 */
 	isBlock?: ButtonRecipeProps['isBlock'];
 	/**
+	 * Visual prominence.
+	 * @default 'standard'
+	 */
+	prominence?: ButtonRecipeProps['prominence'];
+	/**
 	 * Sets the button size.
 	 * @default 'medium'
 	 */
 	size?: ButtonRecipeProps['size'];
 	/**
-	 * Visual tone. Controls colour scheme.
+	 * Visual tone.
 	 * @default 'neutral'
 	 */
 	tone?: ButtonRecipeProps['tone'];
 }
 
 type _ButtonOmit = DistributiveOmit<RacButtonProps, keyof DocumentedPressProps>;
-
-interface _ButtonProps extends _ButtonOmit, ButtonStyleProps, DocumentedPressProps {}
+type _ButtonProps = _ButtonOmit & ButtonStyleProps & DocumentedPressProps;
 
 /** Props for the button primitive. */
 export type ButtonProps = Prettify<_ButtonProps>;
@@ -45,11 +49,12 @@ export type ButtonProps = Prettify<_ButtonProps>;
 /** Primitive button. See `ButtonProps`. */
 export function Button(props: ButtonProps): JSX.Element {
 	const {
-		appearance = 'solid',
+		appearance = 'button',
 		children,
 		isBlock = false,
 		isDisabled = false,
 		isPending = false,
+		prominence = 'standard',
 		size = 'medium',
 		tone = 'neutral',
 		...restProps
@@ -60,7 +65,7 @@ export function Button(props: ButtonProps): JSX.Element {
 			<RacButton
 				{...restProps}
 				className={composeRenderProps(props.className, (className) => {
-					return buttonRecipe({ appearance, className, isBlock, size, tone });
+					return buttonRecipe({ appearance, className, isBlock, prominence, size, tone });
 				})}
 				isDisabled={isDisabled}
 				isPending={isPending}

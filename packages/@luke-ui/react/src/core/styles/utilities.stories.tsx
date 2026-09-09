@@ -109,11 +109,13 @@ export const WithRenderProp = meta.story({
 		});
 		return (
 			<Button
+				prominence="high"
 				render={(props) => (
 					<button {...mergeStyleProps(props, customStyle)} type="button">
 						Button with createSprinkles utilities
 					</button>
 				)}
+				tone="accent"
 			>
 				Button with createSprinkles utilities
 			</Button>

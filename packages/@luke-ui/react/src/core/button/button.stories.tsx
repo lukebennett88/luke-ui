@@ -17,9 +17,6 @@ const baseArgs = {
 	children: 'Button',
 } satisfies Partial<ButtonProps>;
 
-const tones: Array<NonNullable<ButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
-const appearances: Array<NonNullable<ButtonProps['appearance']>> = ['solid', 'subtle', 'ghost'];
-
 const sizes: Array<NonNullable<ButtonProps['size']>> = ['small', 'medium'];
 
 const rowStyle = {
@@ -54,21 +51,27 @@ const truncationContainerStyle = {
 } as const satisfies CSSProperties;
 
 /**
- * Tone communicates intent. Appearance controls the action's visual emphasis.
+ * Tone communicates intent. Prominence controls visual emphasis.
  */
 export const ToneAndAppearance = meta.story({
 	args: baseArgs,
-	render: (props) => (
+	render: ({ children }) => (
 		<div style={stackStyle}>
-			{tones.map((tone) => (
-				<div key={tone} style={rowStyle}>
-					{appearances.map((appearance) => (
-						<Button appearance={appearance} key={appearance} tone={tone} {...props}>
-							{tone} {appearance}
-						</Button>
-					))}
-				</div>
-			))}
+			<div style={rowStyle}>
+				<Button prominence="low">{children}</Button>
+				<Button>{children}</Button>
+				<Button tone="accent">{children}</Button>
+				<Button prominence="high" tone="accent">
+					{children}
+				</Button>
+				<Button prominence="low" tone="critical">
+					{children}
+				</Button>
+				<Button tone="critical">{children}</Button>
+				<Button prominence="high" tone="critical">
+					{children}
+				</Button>
+			</div>
 		</div>
 	),
 });
@@ -78,10 +81,10 @@ export const ToneAndAppearance = meta.story({
  */
 export const Size = meta.story({
 	args: baseArgs,
-	render: (props) => (
+	render: () => (
 		<div style={rowStyle}>
 			{sizes.map((size) => (
-				<Button key={size} size={size} {...props}>
+				<Button key={size} size={size}>
 					{size}
 				</Button>
 			))}
@@ -95,15 +98,13 @@ export const Block = meta.story({
 		children: 'Block button',
 		isBlock: true,
 	} satisfies Partial<ButtonProps>,
-	render: (props) => (
+	render: ({ children, isBlock }) => (
 		<div style={blockContainerStyle}>
 			<div>
-				<Button {...props} />
+				<Button isBlock={isBlock}>{children}</Button>
 			</div>
 			<div>
-				<Button {...props} isBlock={false}>
-					Non-block button
-				</Button>
+				<Button isBlock={false}>Non-block button</Button>
 			</div>
 		</div>
 	),
@@ -113,15 +114,11 @@ export const Block = meta.story({
  * Place non-interactive adornments before or after text. For icon-only buttons, use `IconButton`.
  */
 export const ContentSlots = meta.story({
-	render: (props) => (
+	render: () => (
 		<div style={stackStyle}>
 			<div style={rowStyle}>
-				<Button {...props} startContent={<Icon name="add" />}>
-					Add item
-				</Button>
-				<Button {...props} endContent={<Kbd>⌘S</Kbd>}>
-					Save
-				</Button>
+				<Button startContent={<Icon name="add" />}>Add item</Button>
+				<Button endContent={<Kbd>⌘S</Kbd>}>Save</Button>
 			</div>
 		</div>
 	),
@@ -150,13 +147,15 @@ export const Disabled = meta.story({
 		...baseArgs,
 		isDisabled: true,
 	},
-	render: (props) => (
+	render: ({ isDisabled }) => (
 		<div style={rowStyle}>
-			{tones.map((tone) => (
-				<Button key={tone} tone={tone} {...props}>
-					{tone}
-				</Button>
-			))}
+			<Button isDisabled={isDisabled}>Neutral</Button>
+			<Button isDisabled={isDisabled} tone="accent">
+				Accent
+			</Button>
+			<Button isDisabled={isDisabled} tone="critical">
+				Critical
+			</Button>
 		</div>
 	),
 });

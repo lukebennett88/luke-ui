@@ -5,13 +5,13 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Neutral">
-				<Button tone="neutral">Example button</Button>
+				<Button tone="neutral">Save changes</Button>
 			</ComparisonItem>
 			<ComparisonItem label="Accent">
-				<Button tone="accent">Example button</Button>
+				<Button tone="accent">Continue</Button>
 			</ComparisonItem>
-			<ComparisonItem label="Danger">
-				<Button tone="danger">Example button</Button>
+			<ComparisonItem label="Critical">
+				<Button tone="critical">Delete draft</Button>
 			</ComparisonItem>
 		</Comparison>
 	);

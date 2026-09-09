@@ -27,9 +27,7 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 			<Text color="danger" role="alert">
 				{message}
 			</Text>
-			<Button appearance="subtle" onPress={resetErrorBoundary}>
-				Try again
-			</Button>
+			<Button onPress={resetErrorBoundary}>Try again</Button>
 		</Box>
 	);
 }

@@ -43,6 +43,10 @@ defines its type and spacing scale in source.
 Import a recipe when you own the element and need that component's visual treatment. Use the
 component when you want its behaviour as well.
 
+Prefer `Button` or `Link appearance="button"` first. Reach for `buttonRecipe` only when you must
+style an element you do not control, such as a router library's own `Link` component, which takes
+router props instead of `href` and cannot be replaced with Luke UI's `Link`.
+
 Each recipe lives on the component or primitive entrypoint that owns it. Import `buttonRecipe` from
 `@luke-ui/react/button`. There is no `@luke-ui/react/recipes` barrel.
 
@@ -58,7 +62,11 @@ after its own, so do not wrap the result in another composition helper.
 ```tsx
 import { buttonRecipe, type ButtonRecipeVariants } from '@luke-ui/react/button';
 
-const variants: ButtonRecipeVariants = { appearance: 'subtle', tone: 'neutral' };
+const variants: ButtonRecipeVariants = {
+	appearance: 'button',
+	prominence: 'standard',
+	tone: 'neutral',
+};
 const className = buttonRecipe({ ...variants, className: 'my-class' });
 ```
 

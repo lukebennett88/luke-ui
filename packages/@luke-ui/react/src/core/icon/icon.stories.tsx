@@ -112,7 +112,6 @@ export const AllIcons = meta.story({
 			{iconNames.map((name) => (
 				<li key={name} style={iconItemStyle}>
 					<Button
-						appearance="subtle"
 						isBlock
 						pressAction={async () => {
 							await navigator.clipboard.writeText(name);

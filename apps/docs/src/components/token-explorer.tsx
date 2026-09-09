@@ -399,7 +399,7 @@ function EmptyState({ onClear, query }: { onClear: () => void; query: string }) 
 	return (
 		<div className="flex flex-col items-center gap-3 rounded-xl border border-fd-border px-6 py-16 text-center">
 			<p className="text-fd-muted-foreground text-sm">No token matches &quot;{query}&quot;</p>
-			<LukeButton appearance="subtle" onPress={onClear} size="small">
+			<LukeButton onPress={onClear} size="small">
 				Clear filter
 			</LukeButton>
 		</div>

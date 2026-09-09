@@ -1,9 +1,8 @@
-import type { ButtonRecipeVariants } from '@luke-ui/react/button';
-import { Button, buttonRecipe } from '@luke-ui/react/button';
+import { Button } from '@luke-ui/react/button';
 import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
+import { Link } from '@luke-ui/react/link';
 import type { ReactNode } from 'react';
-import { Link } from 'react-aria-components/Link';
 import { useCopyButton } from '../lib/use-copy-button.js';
 import { GithubMark } from './github-mark.js';
 import { ReactAriaMark } from './react-aria-mark.js';
@@ -16,12 +15,6 @@ interface PageActionsProps {
 	sourceUrl: string | null;
 	storybookUrl: string | null;
 }
-
-const buttonAppearanceOptions = {
-	appearance: 'subtle',
-	size: 'small',
-	tone: 'neutral',
-} as const satisfies ButtonRecipeVariants;
 
 /**
  * Every destination a page offers sits inline under the title, as a row of
@@ -87,12 +80,15 @@ function PageActionLink({
 }) {
 	return (
 		<Link
-			className={buttonRecipe(buttonAppearanceOptions)}
+			appearance="button"
 			href={href}
+			prominence="low"
 			rel="noreferrer noopener"
+			size="small"
+			startContent={icon ?? (iconName ? <Icon aria-hidden name={iconName} /> : null)}
 			target="_blank"
+			tone="neutral"
 		>
-			{icon ?? (iconName ? <Icon aria-hidden className="size-4 shrink-0" name={iconName} /> : null)}
 			{label}
 		</Link>
 	);
@@ -114,8 +110,13 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 	});
 
 	return (
-		<Button {...buttonAppearanceOptions} onClick={onCopy}>
-			<Icon aria-hidden className="size-4 shrink-0" name={copied ? 'check' : 'copy'} />
+		<Button
+			onPress={onCopy}
+			prominence="low"
+			size="small"
+			startContent={<Icon name={copied ? 'check' : 'copy'} />}
+			tone="neutral"
+		>
 			{copied ? 'Copied' : 'Copy Markdown'}
 		</Button>
 	);

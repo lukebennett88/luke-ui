@@ -16,9 +16,6 @@ const baseArgs = {
 } satisfies Partial<IconButtonProps>;
 
 const sizes: Array<NonNullable<IconButtonProps['size']>> = ['small', 'medium'];
-const tones: Array<NonNullable<IconButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
-const appearances: Array<NonNullable<IconButtonProps['appearance']>> = ['solid', 'subtle', 'ghost'];
-
 const flexWrapStyle = {
 	display: 'flex',
 	flexWrap: 'wrap',
@@ -29,21 +26,13 @@ export const Default = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Add' },
 });
 
-export const Appearance = meta.story({
+export const Prominence = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Action' },
 	render: (props) => (
 		<div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(3, max-content)' }}>
-			{tones.flatMap((tone) => {
-				return appearances.map((appearance) => (
-					<IconButton
-						{...props}
-						appearance={appearance}
-						aria-label={`${tone} ${appearance}`}
-						key={`${tone}-${appearance}`}
-						tone={tone}
-					/>
-				));
-			})}
+			<IconButton {...props} aria-label="Low" prominence="low" />
+			<IconButton {...props} aria-label="Standard" />
+			<IconButton {...props} aria-label="High accent" prominence="high" tone="accent" />
 		</div>
 	),
 });

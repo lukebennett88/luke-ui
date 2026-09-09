@@ -14,6 +14,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'isBlock',
 		'isDisabled',
 		'isPending',
+		'prominence',
 		'pressAction',
 		'size',
 		'startContent',
@@ -21,12 +22,13 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'tone',
 	],
 	'actions/icon-button.mdx::packages/@luke-ui/react/src/core/icon-button/icon-button.tsx::IconButtonProps':
-		['appearance', 'icon', 'isDisabled', 'isPending', 'pressAction', 'size', 'tone'],
+		['appearance', 'icon', 'isDisabled', 'isPending', 'pressAction', 'prominence', 'size', 'tone'],
 	'actions/link.mdx::packages/@luke-ui/react/src/core/link/link.tsx::LinkProps': [
 		'href',
 		'isDisabled',
-		'isStandalone',
+		'appearance',
 		'tone',
+		'prominence',
 	],
 	'feedback/loading-skeleton.mdx::packages/@luke-ui/react/src/core/loading-skeleton/loading-skeleton.tsx::LoadingSkeletonProps':
 		['elementType', 'isLoading', 'radius'],

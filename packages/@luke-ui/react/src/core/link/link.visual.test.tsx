@@ -15,27 +15,36 @@ test('kitchen sink', async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(
 			<Stack align="flex-start">
-				<Link href="#">Accent link</Link>
-				<Link href="#" tone="neutral">
-					Neutral link
+				<Link href="#" prominence="low">
+					Text neutral low
 				</Link>
-				<Link href="#" isStandalone>
-					Standalone link
+				<Link href="#">Text neutral standard</Link>
+				<Link href="#" tone="accent">
+					Text accent standard
 				</Link>
-				<Link href="#" isDisabled>
-					Disabled link
+				<Link href="#" prominence="high" tone="accent">
+					Text accent high
 				</Link>
-				<Grid columns={3}>
-					<Link href="#" isStandalone>
-						Accent
+				<Grid columns={4}>
+					<Link appearance="button" href="#" prominence="low">
+						Button neutral low
 					</Link>
-					<Link href="#" isStandalone tone="neutral">
-						Neutral
+					<Link appearance="button" href="#">
+						Button neutral standard
 					</Link>
-					<Link href="#" isDisabled isStandalone>
-						Disabled
+					<Link appearance="button" href="#" tone="accent">
+						Button accent standard
+					</Link>
+					<Link appearance="button" href="#" prominence="high" tone="accent">
+						Button accent high
 					</Link>
 				</Grid>
+				<Link href="#" isDisabled>
+					Disabled text link
+				</Link>
+				<Link appearance="button" href="#" isDisabled tone="accent">
+					Disabled button link
+				</Link>
 			</Stack>,
 			{ appearance },
 		);
@@ -46,7 +55,7 @@ test('kitchen sink', async () => {
 test('interactive states', async () => {
 	const { locator } = render(
 		<Stack align="flex-start">
-			<Link href="#" isStandalone>
+			<Link href="#" prominence="low">
 				Destination
 			</Link>
 		</Stack>,
@@ -69,16 +78,16 @@ test('forced-colors states', async () => {
 	try {
 		const { locator } = render(
 			<Grid columns={4}>
-				<Link href="#" isStandalone>
+				<Link href="#" prominence="low">
 					Resting
 				</Link>
-				<Link href="#" isStandalone>
+				<Link href="#" prominence="low">
 					Hovered
 				</Link>
-				<Link href="#" isStandalone>
+				<Link href="#" prominence="low">
 					Pressed and focused
 				</Link>
-				<Link href="#" isDisabled isStandalone>
+				<Link href="#" isDisabled prominence="low">
 					Disabled
 				</Link>
 			</Grid>,

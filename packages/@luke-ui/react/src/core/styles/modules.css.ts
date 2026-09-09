@@ -15,7 +15,7 @@ import '../code/recipe.css.js';
 import '../icon-button/recipe.css.js';
 import '../icon/recipe.css.js';
 import '../kbd/recipe.css.js';
-import '../link/recipe.css.js';
+import '../link/styles.css.js';
 import '../loading-skeleton/styles.css.js';
 import '../loading-spinner/recipe.css.js';
 import '../overlays/mobile-overlay.css.js';

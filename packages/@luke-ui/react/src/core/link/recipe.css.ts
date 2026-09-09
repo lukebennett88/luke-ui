@@ -1,88 +1,18 @@
-import { vars } from '../../theme/contract.css.js';
-import type { RecipeSelection } from '../styles/recipe.js';
-import { recipe } from '../styles/recipe.js';
+import { buttonRecipe } from '../primitives/button/recipe.css.js';
+import type { ButtonRecipeVariants } from '../primitives/button/recipe.css.js';
+import { withDefaultVariants } from '../styles/recipe.js';
 
-export const linkRecipe = recipe({
-	base: {
-		'@media': {
-			'(forced-colors: active)': {
-				color: 'LinkText',
-				forcedColorAdjust: 'auto',
-				selectors: {
-					'&[data-disabled="true"]': {
-						color: 'GrayText',
-						opacity: 1,
-					},
-				},
-			},
-			'(prefers-reduced-motion: reduce)': {
-				transition: 'none',
-			},
-		},
-		color: vars.color.foreground.accent.rest,
-		cursor: 'pointer',
-		font: 'inherit',
-		textDecoration: 'underline',
-		textDecorationColor: 'currentColor',
-		transitionDuration: vars.motion.duration.feedback,
-		transitionProperty: 'color, text-decoration-color',
-		transitionTimingFunction: vars.motion.easing.standard,
-		selectors: {
-			'&[data-disabled="true"]': {
-				cursor: 'not-allowed',
-				opacity: vars.interaction.disabledOpacity,
-			},
-		},
-	},
-	defaultVariants: {
-		isStandalone: false,
-		tone: 'accent',
-	},
-	variants: {
-		isStandalone: {
-			false: {},
-			true: {
-				alignItems: 'center',
-				display: 'inline-flex',
-				minBlockSize: vars.controlSize.minTarget,
-				minInlineSize: vars.controlSize.minTarget,
-				selectors: {
-					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						textDecoration: 'underline',
-					},
-					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						textDecoration: 'underline',
-					},
-				},
-				textDecoration: 'none',
-			},
-		},
-		tone: {
-			accent: {
-				color: vars.color.foreground.accent.rest,
-				selectors: {
-					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						color: vars.color.foreground.accent.hover,
-					},
-					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: vars.color.foreground.accent.pressed,
-					},
-				},
-			},
-			neutral: {
-				color: vars.color.foreground.neutral.rest,
-				selectors: {
-					'&[data-hovered="true"]:not([data-disabled="true"])': {
-						color: vars.color.foreground.neutral.hover,
-					},
-					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: vars.color.foreground.neutral.pressed,
-					},
-				},
-			},
-		},
-	},
+/** Shared Button recipe with Link's text defaults. */
+export const linkRecipe = withDefaultVariants(buttonRecipe, {
+	appearance: 'text',
+	prominence: 'standard',
+	tone: 'neutral',
 });
 
-/** Variant type for the `Link` recipe. */
-export type LinkRecipeVariants = RecipeSelection<typeof linkRecipe>;
+/**
+ * Link's supported variant surface. Link shares `buttonRecipe` with Button, but never renders a
+ * `critical` tone in either appearance, so that value is narrowed out here rather than hand-written.
+ */
+export type LinkRecipeVariants = Omit<ButtonRecipeVariants, 'tone'> & {
+	tone?: Exclude<NonNullable<ButtonRecipeVariants>['tone'], 'critical'>;
+};

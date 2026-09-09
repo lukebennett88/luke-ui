@@ -4,14 +4,19 @@ import { Comparison, ComparisonItem } from '#docs/comparison';
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="Solid">
-				<IconButton appearance="solid" aria-label="Example action" icon="bookOpen" />
+			<ComparisonItem label="High">
+				<IconButton
+					aria-label="Open documentation"
+					icon="bookOpen"
+					prominence="high"
+					tone="accent"
+				/>
 			</ComparisonItem>
-			<ComparisonItem label="Subtle">
-				<IconButton appearance="subtle" aria-label="Example action" icon="bookOpen" />
+			<ComparisonItem label="Standard">
+				<IconButton aria-label="Open documentation" icon="bookOpen" />
 			</ComparisonItem>
-			<ComparisonItem label="Ghost">
-				<IconButton appearance="ghost" aria-label="Example action" icon="bookOpen" />
+			<ComparisonItem label="Low">
+				<IconButton aria-label="Open documentation" icon="bookOpen" prominence="low" />
 			</ComparisonItem>
 		</Comparison>
 	);

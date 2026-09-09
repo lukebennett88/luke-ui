@@ -90,7 +90,7 @@ export const InputGroupComposition = meta.story({
 						value={search}
 					/>
 					<InputGroupSuffix>
-						<Button appearance="subtle" onPress={() => setSearch('')} size="small">
+						<Button onPress={() => setSearch('')} size="small">
 							Clear
 						</Button>
 					</InputGroupSuffix>
