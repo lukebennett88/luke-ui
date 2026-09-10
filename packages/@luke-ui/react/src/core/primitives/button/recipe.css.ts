@@ -1,10 +1,9 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
-import type { RecipeSelection } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
 
 /** Shared presentation recipe for Button and button-shaped Link. */
-export const buttonRecipe = recipe({
+export const buttonRecipeInternal = recipe({
 	base: {
 		'@media': {
 			'(prefers-reduced-motion: reduce)': {
@@ -128,7 +127,6 @@ export const buttonRecipe = recipe({
 			small: {},
 		},
 		tone: {
-			accent: {},
 			critical: {},
 			neutral: {},
 		},
@@ -138,24 +136,20 @@ export const buttonRecipe = recipe({
 		buttonSize('small'),
 		...buttonAppearance('neutral', 'low', 'ghost', vars.color.text.primary),
 		...buttonAppearance('neutral', 'standard', 'subtle', vars.color.text.primary),
-		...buttonAppearance('accent', 'low', 'ghost', vars.color.foreground.accent.rest),
-		...buttonAppearance('accent', 'standard', 'subtle', vars.color.foreground.accent.rest),
-		...buttonAppearance('accent', 'high', 'solid', vars.color.foreground.accent.onSolid),
+		...buttonAppearance('neutral', 'high', 'solid', vars.color.foreground.accent.onSolid, 'accent'),
 		...buttonAppearance('critical', 'low', 'ghost', vars.color.foreground.danger.rest),
 		...buttonAppearance('critical', 'standard', 'subtle', vars.color.foreground.danger.rest),
 		...buttonAppearance('critical', 'high', 'solid', vars.color.foreground.danger.onSolid),
 		...textAppearance('neutral', 'low'),
 		...textAppearance('neutral', 'standard'),
-		...textAppearance('accent', 'standard'),
-		...textAppearance('accent', 'high'),
+		...textAppearance('neutral', 'high'),
 		...textAppearance('critical', 'low'),
 		...textAppearance('critical', 'standard'),
 	],
 });
 
-export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
-
-type Tone = 'neutral' | 'accent' | 'critical';
+type Tone = 'neutral' | 'critical';
+type BackgroundTone = Tone | 'accent';
 type ButtonSurface = 'ghost' | 'subtle' | 'solid';
 type Background = (typeof vars.color.background)['neutral'];
 
@@ -164,6 +158,7 @@ function buttonAppearance(
 	prominence: 'low' | 'standard' | 'high',
 	surface: ButtonSurface,
 	color: string,
+	backgroundTone: BackgroundTone = tone,
 ) {
 	if (surface === 'ghost') {
 		const subtle = backgroundForTone(tone).subtle;
@@ -191,8 +186,7 @@ function buttonAppearance(
 		];
 	}
 
-	const backgroundTone = prominence === 'standard' ? 'neutral' : tone;
-	const ramp = backgroundForTone(backgroundTone)[surface];
+	const ramp = backgroundForTone(surface === 'subtle' ? 'neutral' : backgroundTone)[surface];
 	const isSolid = surface === 'solid';
 	return [
 		{
@@ -245,7 +239,7 @@ function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
 	const foreground =
 		tone === 'critical'
 			? vars.color.foreground.danger
-			: tone === 'accent'
+			: prominence === 'high'
 				? vars.color.foreground.accent
 				: vars.color.foreground.neutral;
 	return [
@@ -255,6 +249,9 @@ function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
 						color: foreground.hover,
+						textDecoration: 'underline',
+					},
+					'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 						textDecoration: 'underline',
 					},
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
@@ -269,6 +266,6 @@ function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
 	];
 }
 
-function backgroundForTone(tone: Tone): Background {
+function backgroundForTone(tone: BackgroundTone): Background {
 	return tone === 'critical' ? vars.color.background.danger : vars.color.background[tone];
 }

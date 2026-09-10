@@ -60,10 +60,8 @@ export const ToneAndAppearance = meta.story({
 			<div style={rowStyle}>
 				<Button prominence="low">{children}</Button>
 				<Button>{children}</Button>
-				<Button tone="accent">{children}</Button>
-				<Button tone="accent" prominence="high">
-					{children}
-				</Button>
+				<Button>{children}</Button>
+				<Button prominence="high">{children}</Button>
 				<Button tone="critical" prominence="low">
 					{children}
 				</Button>
@@ -150,9 +148,7 @@ export const Disabled = meta.story({
 	render: ({ isDisabled }) => (
 		<div style={rowStyle}>
 			<Button isDisabled={isDisabled}>Neutral</Button>
-			<Button isDisabled={isDisabled} tone="accent">
-				Accent
-			</Button>
+			<Button isDisabled={isDisabled}>Accent</Button>
 			<Button isDisabled={isDisabled} tone="critical">
 				Critical
 			</Button>

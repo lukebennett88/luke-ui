@@ -6,15 +6,7 @@ test('IconLink accepts only supported treatments and requires navigation and nam
 		'aria-label': 'Settings',
 		href: '/settings',
 		icon: 'add',
-		tone: 'accent',
 		prominence: 'low',
-	};
-	const criticalIconLink: IconLinkProps = {
-		'aria-label': 'Delete',
-		href: '/settings',
-		icon: 'delete',
-		tone: 'critical',
-		prominence: 'high',
 	};
 	const labelledbyIconLink: IconLinkProps = {
 		'aria-labelledby': 'external-label',
@@ -24,12 +16,18 @@ test('IconLink accepts only supported treatments and requires navigation and nam
 	expectTypeOf<typeof iconLink>().toExtend<IconLinkProps>();
 	expectTypeOf<typeof labelledbyIconLink>().toExtend<IconLinkProps>();
 
-	// @ts-expect-error — neutral high is not a supported IconLink treatment
 	const neutralHighIconLink: IconLinkProps = {
 		'aria-label': 'Add',
 		href: '/settings',
 		icon: 'add',
 		prominence: 'high',
+	};
+	const criticalIconLink: IconLinkProps = {
+		'aria-label': 'Delete',
+		href: '/settings',
+		icon: 'delete',
+		// @ts-expect-error — IconLink prominence describes navigation hierarchy without a tone
+		tone: 'critical',
 	};
 	const textIconLink: IconLinkProps = {
 		'aria-label': 'Add',
@@ -72,9 +70,9 @@ test('IconLink accepts only supported treatments and requires navigation and nam
 	};
 
 	void iconLink;
-	void criticalIconLink;
 	void labelledbyIconLink;
 	void neutralHighIconLink;
+	void criticalIconLink;
 	void textIconLink;
 	void buttonAppearanceIconLink;
 	void childrenIconLink;

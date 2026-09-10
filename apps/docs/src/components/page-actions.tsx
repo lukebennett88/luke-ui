@@ -81,7 +81,6 @@ function PageActionLink({
 	return (
 		<Link
 			appearance="button"
-			tone="neutral"
 			prominence="low"
 			href={href}
 			rel="noreferrer noopener"

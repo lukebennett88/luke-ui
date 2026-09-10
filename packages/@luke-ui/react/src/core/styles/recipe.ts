@@ -206,11 +206,11 @@ function registerSerializer(fn: object, importName: string, args: ReadonlyArray<
 }
 
 /** Adds defaults to a recipe without changing consumer-supplied variant selections. */
-export function withDefaultVariants<Input extends object>(
+export function withDefaultVariants<Input extends object, PublicInput extends Input = Input>(
 	recipe: (input?: Input) => string,
 	defaults: Input,
-): (input?: Input) => string {
-	const wrapped = (input?: Input) => {
+): (input?: PublicInput) => string {
+	const wrapped = (input?: PublicInput) => {
 		const selection = { ...defaults, ...input };
 		for (const key in defaults) {
 			if (selection[key] === undefined) selection[key] = defaults[key];

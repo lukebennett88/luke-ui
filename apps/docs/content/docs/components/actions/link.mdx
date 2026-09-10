@@ -18,17 +18,11 @@ native navigation behaviour.
 
 <ExampleBlock src="link/appearance" title="Link — Appearance" />
 
-## Tone
-
-Use `tone` to draw attention to a destination. `neutral` is the default. Choose `accent` for a
-destination that needs more emphasis.
-
-<ExampleBlock src="link/tones" title="Link — Tone" />
-
 ## Prominence
 
 `standard` is the default prominence. Choose `low` for quiet navigation items. Its underline appears
-on hover and press. Use `high` with the `accent` tone for a primary destination.
+on hover, focus, and press. Choose `high` for a primary destination. The theme uses the primary
+accent treatment for high prominence.
 
 <ExampleBlock src="link/prominence" title="Link — Prominence" />
 
@@ -38,6 +32,12 @@ Set `isDisabled` only when a destination is temporarily unavailable. Disabled li
 focus or respond to activation. Explain why nearby when someone needs that information.
 
 <ExampleBlock src="link/disabled" title="Link — Disabled" />
+
+## Migration
+
+Replace `isStandalone` with `prominence="low"`. Links now use neutral text at standard prominence,
+and high prominence selects the primary treatment. Set `appearance="button"` when navigation needs a
+button-shaped call to action.
 
 ## Accessibility
 

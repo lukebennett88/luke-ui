@@ -33,7 +33,7 @@ export const Prominence = meta.story({
 		<div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(3, max-content)' }}>
 			<IconButton aria-label="Low" icon={icon} prominence="low" />
 			<IconButton aria-label="Standard" icon={icon} />
-			<IconButton aria-label="High accent" icon={icon} prominence="high" tone="accent" />
+			<IconButton aria-label="High prominence" icon={icon} prominence="high" />
 		</div>
 	),
 });

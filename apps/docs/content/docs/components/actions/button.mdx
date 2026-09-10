@@ -35,16 +35,16 @@ and do not support a size, block layout, or content slots.
 
 ## Tone
 
-Use `tone` to communicate intent. `neutral` is the default, `accent` identifies a primary action,
-and `critical` marks a destructive one. The supported tone and prominence pairs are curated by
-appearance, so unsupported combinations are rejected by TypeScript.
+`neutral` is the default tone for ordinary actions. Set `tone="critical"` for a destructive action.
+Prominence sets hierarchy. The theme uses the primary accent treatment for high prominence.
 
 <ExampleBlock src="button/tones" title="Button — Tone" />
 
 ## Prominence
 
 Use `prominence` to set visual weight. `standard` is the default. Choose `low` for quiet secondary
-actions and `high` for primary or destructive confirmation actions.
+actions and `high` for primary or destructive confirmation actions. Text Buttons support neutral
+low, standard, and high prominence. Critical text Buttons support low and standard prominence.
 
 <ExampleBlock src="button/prominence" title="Button — Prominence" />
 
@@ -99,6 +99,12 @@ Set `isDisabled` only when the action is unavailable. Disabled buttons cannot re
 respond to presses.
 
 <ExampleBlock src="button/disabled" title="Button — Disabled" />
+
+## Migration
+
+Replace `appearance="ghost"` with `prominence="low"`, `subtle` with `standard`, and `solid` with
+`high`. Replace `tone="danger"` with `tone="critical"`. `accent` is no longer a consumer-selectable
+tone. Keep `tone="neutral"` where you name the ordinary action tone.
 
 ## Accessibility
 

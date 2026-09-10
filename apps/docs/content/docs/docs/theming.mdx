@@ -31,17 +31,14 @@ rules.
 ## Component variants
 
 Components define the choices available within the theme. For example, Button owns its appearance,
-tone, size, and interaction behaviour. The theme supplies the semantic values behind those choices.
+tone, prominence, size, and interaction behaviour. The theme supplies the semantic values behind
+those choices.
 
 ```tsx
 import { Button } from '@luke-ui/react/button';
 
 function SaveButton() {
-	return (
-		<Button tone="accent" prominence="high">
-			Save changes
-		</Button>
-	);
+	return <Button prominence="high">Save changes</Button>;
 }
 ```
 

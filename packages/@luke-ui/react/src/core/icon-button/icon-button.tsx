@@ -1,12 +1,12 @@
 import type { JSX } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { cx } from '../../shared/utils/utils.js';
+import type { IconButtonPresentationProps } from '../action-presentation.js';
 import type { IconName } from '../icon/icon.js';
 import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button } from '../primitives/button/button.js';
-import type * as primitiveStyles from '../primitives/button/recipe.css.js';
 import { pendingSpinnerOverlay } from '../styles/pending-spinner-overlay.css.js';
 import type { RequiredAccessibleName } from '../types/accessible-name.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -14,13 +14,9 @@ import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
 import type { PressAction } from '../use-press-action/use-press-action.js';
 import { usePressAction } from '../use-press-action/use-press-action.js';
-import type { IconButtonRecipeVariants } from './recipe.css.js';
 import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.js';
 
-interface IconButtonRecipeProps extends NonNullable<IconButtonRecipeVariants> {}
-interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonRecipeVariants> {}
-
-interface IconButtonBaseProps {
+interface IconButtonBaseProps extends IconButtonPresentationProps {
 	/**
 	 * Chooses the button-shaped presentation.
 	 * @default 'button'
@@ -38,32 +34,7 @@ interface IconButtonBaseProps {
 	 * resulting operation.
 	 */
 	pressAction?: PressAction;
-	/**
-	 * Sets the button size.
-	 * @default 'medium'
-	 */
-	size?: IconButtonRecipeProps['size'];
 }
-
-type IconButtonStyleProps =
-	| (IconButtonBaseProps & {
-			/** Visual tone. @default 'neutral' */
-			tone?: 'neutral';
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
-	  })
-	| (IconButtonBaseProps & {
-			/** Visual tone. */
-			tone: 'accent';
-			/** Visual prominence. @default 'standard' */
-			prominence?: PrimitiveButtonRecipeProps['prominence'];
-	  })
-	| (IconButtonBaseProps & {
-			/** Visual tone. */
-			tone: 'critical';
-			/** Visual prominence. @default 'standard' */
-			prominence?: PrimitiveButtonRecipeProps['prominence'];
-	  });
 
 type _IconButtonOmit = DistributiveOmit<
 	PrimitiveButtonProps,
@@ -79,7 +50,7 @@ type _IconButtonOmit = DistributiveOmit<
 >;
 
 type _IconButtonProps = _IconButtonOmit &
-	IconButtonStyleProps &
+	IconButtonBaseProps &
 	DocumentedPressProps &
 	RequiredAccessibleName & {
 		/** Icon name from the generated icon set. */

@@ -5,12 +5,7 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="High">
-				<IconButton
-					aria-label="Open documentation"
-					icon="bookOpen"
-					prominence="high"
-					tone="accent"
-				/>
+				<IconButton aria-label="Open documentation" icon="bookOpen" prominence="high" />
 			</ComparisonItem>
 			<ComparisonItem label="Standard">
 				<IconButton aria-label="Open documentation" icon="bookOpen" />

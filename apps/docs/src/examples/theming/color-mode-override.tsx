@@ -29,7 +29,6 @@ export default () => {
 							key={option}
 							onPress={() => setParentMode(option)}
 							prominence={parentMode === option ? 'high' : 'standard'}
-							tone="accent"
 						>
 							{option === 'light' ? 'Light' : 'Dark'}
 						</Button>

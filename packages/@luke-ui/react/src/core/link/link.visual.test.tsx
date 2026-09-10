@@ -16,33 +16,27 @@ test('kitchen sink', async () => {
 		const { locator } = render(
 			<Stack align="flex-start">
 				<Link href="#" prominence="low">
-					Text neutral low
+					Text low
 				</Link>
-				<Link href="#">Text neutral standard</Link>
-				<Link href="#" tone="accent">
-					Text accent standard
-				</Link>
-				<Link href="#" tone="accent" prominence="high">
-					Text accent high
+				<Link href="#">Text standard</Link>
+				<Link href="#" prominence="high">
+					Text high
 				</Link>
 				<Grid columns={4}>
 					<Link appearance="button" href="#" prominence="low">
-						Button neutral low
+						Button low
 					</Link>
 					<Link appearance="button" href="#">
-						Button neutral standard
+						Button standard
 					</Link>
-					<Link appearance="button" href="#" tone="accent">
-						Button accent standard
-					</Link>
-					<Link appearance="button" href="#" tone="accent" prominence="high">
-						Button accent high
+					<Link appearance="button" href="#" prominence="high">
+						Button high
 					</Link>
 				</Grid>
 				<Link href="#" isDisabled>
 					Disabled text link
 				</Link>
-				<Link appearance="button" href="#" isDisabled tone="accent">
+				<Link appearance="button" href="#" isDisabled prominence="high">
 					Disabled button link
 				</Link>
 			</Stack>,

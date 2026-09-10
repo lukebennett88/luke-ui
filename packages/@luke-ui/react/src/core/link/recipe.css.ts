@@ -1,18 +1,19 @@
-import { buttonRecipe } from '../primitives/button/recipe.css.js';
-import type { ButtonRecipeVariants } from '../primitives/button/recipe.css.js';
+import type { LinkPresentationProps } from '../action-presentation.js';
+import { buttonRecipeInternal } from '../primitives/button/recipe.css.js';
+import type { RecipeComposition } from '../styles/recipe.js';
 import { withDefaultVariants } from '../styles/recipe.js';
 
-/** Shared Button recipe with Link's text defaults. */
-export const linkRecipe = withDefaultVariants(buttonRecipe, {
+/** Recipe for Link's supported appearance and prominence variants. */
+export const linkRecipe = withDefaultVariants<
+	NonNullable<Parameters<typeof buttonRecipeInternal>[0]>,
+	LinkPresentationProps & RecipeComposition
+>(buttonRecipeInternal, {
 	appearance: 'text',
+	isBlock: false,
+	size: 'medium',
 	tone: 'neutral',
 	prominence: 'standard',
 });
 
-/**
- * Link's supported variant surface. Link shares `buttonRecipe` with Button, but never renders a
- * `critical` tone in either appearance, so that value is narrowed out here rather than hand-written.
- */
-export type LinkRecipeVariants = Omit<ButtonRecipeVariants, 'tone'> & {
-	tone?: Exclude<NonNullable<ButtonRecipeVariants>['tone'], 'critical'>;
-};
+/** Link's supported appearance and prominence variants. */
+export type LinkRecipeVariants = LinkPresentationProps;

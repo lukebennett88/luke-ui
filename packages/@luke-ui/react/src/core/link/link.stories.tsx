@@ -32,7 +32,7 @@ export const Default = meta.story({
 });
 
 /**
- * Use `accent` for a destination that needs emphasis. Use `low` prominence for quiet navigation.
+ * Use high prominence for a primary destination. Use low prominence for quiet navigation.
  */
 export const Tone = meta.story({
 	args: {
@@ -44,7 +44,7 @@ export const Tone = meta.story({
 			<Link href={href} onPress={onPress}>
 				Neutral (default)
 			</Link>
-			<Link href={href} onPress={onPress} tone="accent">
+			<Link href={href} onPress={onPress} prominence="high">
 				Accent
 			</Link>
 		</div>
@@ -61,7 +61,7 @@ export const Appearance = meta.story({
 			<Link href={href} onPress={onPress} prominence="low">
 				Low prominence Link
 			</Link>
-			<Link appearance="button" href={href} onPress={onPress} tone="accent">
+			<Link appearance="button" href={href} onPress={onPress} prominence="high">
 				Button-shaped Link
 			</Link>
 		</div>

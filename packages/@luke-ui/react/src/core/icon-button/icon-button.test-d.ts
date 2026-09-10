@@ -5,7 +5,7 @@ test('IconButton accepts only supported button treatments', () => {
 	const iconButton: IconButtonProps = {
 		'aria-label': 'Add',
 		icon: 'add',
-		tone: 'accent',
+		tone: 'neutral',
 		prominence: 'low',
 	};
 	const criticalIconButton: IconButtonProps = {
@@ -18,12 +18,13 @@ test('IconButton accepts only supported button treatments', () => {
 
 	// @ts-expect-error — IconButton keeps button presentation
 	const textIconButton: IconButtonProps = { 'aria-label': 'Add', appearance: 'text', icon: 'add' };
-	// @ts-expect-error — neutral high is not a supported IconButton treatment
 	const neutralHighIconButton: IconButtonProps = {
 		'aria-label': 'Add',
 		icon: 'add',
 		prominence: 'high',
 	};
+	// @ts-expect-error — accent is not a consumer-selectable tone
+	const accentIconButton: IconButtonProps = { 'aria-label': 'Add', icon: 'add', tone: 'accent' };
 	// @ts-expect-error — an icon-only button requires an accessible name
 	const unlabelledIconButton: IconButtonProps = { icon: 'add' };
 
@@ -31,5 +32,6 @@ test('IconButton accepts only supported button treatments', () => {
 	void criticalIconButton;
 	void textIconButton;
 	void neutralHighIconButton;
+	void accentIconButton;
 	void unlabelledIconButton;
 });

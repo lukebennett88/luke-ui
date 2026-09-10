@@ -34,7 +34,7 @@ export const Prominence = meta.story({
 		<div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(3, max-content)' }}>
 			<IconLink aria-label="Low" href={href} icon={icon} prominence="low" />
 			<IconLink aria-label="Standard" href={href} icon={icon} />
-			<IconLink aria-label="High accent" href={href} icon={icon} prominence="high" tone="accent" />
+			<IconLink aria-label="High prominence" href={href} icon={icon} prominence="high" />
 		</div>
 	),
 });

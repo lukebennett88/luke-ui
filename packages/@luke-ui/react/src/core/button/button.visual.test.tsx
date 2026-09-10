@@ -17,13 +17,7 @@ test('kitchen sink', async () => {
 			<Grid columns={3}>
 				<Button prominence="low">Neutral low button</Button>
 				<Button>Neutral standard button</Button>
-				<Button tone="accent" prominence="low">
-					Accent low button
-				</Button>
-				<Button tone="accent">Accent standard button</Button>
-				<Button tone="accent" prominence="high">
-					Accent high button
-				</Button>
+				<Button prominence="high">Neutral high button</Button>
 				<Button tone="critical" prominence="low">
 					Critical low button
 				</Button>
@@ -35,11 +29,8 @@ test('kitchen sink', async () => {
 					Neutral low text Button
 				</Button>
 				<Button appearance="text">Neutral standard text Button</Button>
-				<Button appearance="text" tone="accent">
-					Accent standard text Button
-				</Button>
-				<Button appearance="text" tone="accent" prominence="high">
-					Accent high text Button
+				<Button appearance="text" prominence="high">
+					Neutral high text Button
 				</Button>
 				<Button appearance="text" tone="critical" prominence="low">
 					Critical low text Button
@@ -49,7 +40,7 @@ test('kitchen sink', async () => {
 				</Button>
 				<Button isDisabled>Disabled</Button>
 				<Button isPending>Standard pending</Button>
-				<Button isPending tone="accent" prominence="high">
+				<Button isPending prominence="high">
 					High pending
 				</Button>
 				<Button startContent={<Icon name="add" />}>With icon</Button>

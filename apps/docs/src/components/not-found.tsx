@@ -20,7 +20,6 @@ export function NotFound() {
 				<DocsLink
 					className={buttonRecipe({
 						appearance: 'button',
-						tone: 'accent',
 						prominence: 'high',
 					})}
 					to="/"

@@ -29,7 +29,6 @@ export default () => {
 						key={option}
 						onPress={() => setRole(option)}
 						prominence={role === option ? 'high' : 'standard'}
-						tone="accent"
 					>
 						{roles[option]}
 					</Button>

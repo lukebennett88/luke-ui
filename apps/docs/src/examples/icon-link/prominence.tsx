@@ -10,7 +10,6 @@ export default () => {
 					href="/docs/installation"
 					icon="bookOpen"
 					prominence="high"
-					tone="accent"
 				/>
 			</ComparisonItem>
 			<ComparisonItem label="Standard">

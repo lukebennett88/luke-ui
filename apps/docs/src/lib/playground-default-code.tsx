@@ -99,7 +99,7 @@ export default () => {
 			</Box>
 			<Box display="flex" gap="sp12" justifyContent="flex-end">
 				<Button type="button">Create an account</Button>
-				<Button tone="accent" type="submit">
+				<Button prominence="high" type="submit">
 					Sign in
 				</Button>
 			</Box>

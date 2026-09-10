@@ -32,14 +32,7 @@ test('kitchen sink', async () => {
 				<IconLink aria-label="Custom icon" href="#" icon={<CustomStarIcon />} />
 				<IconLink aria-label="Standard" href="#" icon="add" />
 				<IconLink aria-label="Low" href="#" icon="add" prominence="low" />
-				<IconLink aria-label="Accent low" href="#" icon="add" tone="accent" prominence="low" />
-				<IconLink
-					aria-label="Critical high"
-					href="#"
-					icon="delete"
-					tone="critical"
-					prominence="high"
-				/>
+				<IconLink aria-label="High" href="#" icon="add" prominence="high" />
 			</Grid>,
 			{ appearance },
 		);

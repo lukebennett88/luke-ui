@@ -115,7 +115,6 @@ export const WithRenderProp = meta.story({
 						Button with createSprinkles utilities
 					</button>
 				)}
-				tone="accent"
 			>
 				Button with createSprinkles utilities
 			</Button>

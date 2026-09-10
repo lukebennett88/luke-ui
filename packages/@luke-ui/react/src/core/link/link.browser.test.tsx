@@ -48,7 +48,7 @@ test('a default text Link keeps inline text geometry', () => {
 test('a button-shaped Link keeps link semantics', async () => {
 	let pressed = false;
 	const { locator, user } = render(
-		<Link appearance="button" href="#" onPress={() => (pressed = true)} tone="accent">
+		<Link appearance="button" href="#" onPress={() => (pressed = true)} prominence="high">
 			Settings
 		</Link>,
 	);
@@ -67,7 +67,7 @@ test('a disabled Link exposes disabled state in either appearance', () => {
 			<Link href="#" isDisabled>
 				Text link
 			</Link>
-			<Link appearance="button" href="#" isDisabled tone="accent">
+			<Link appearance="button" href="#" isDisabled prominence="high">
 				Button link
 			</Link>
 		</div>,

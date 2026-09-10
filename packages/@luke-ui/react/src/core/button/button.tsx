@@ -1,8 +1,8 @@
 import type { JSX, ReactNode } from 'react';
+import type { ButtonPresentationProps } from '../action-presentation.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button as PrimitiveButton } from '../primitives/button/button.js';
-import type * as primitiveStyles from '../primitives/button/recipe.css.js';
 import { pendingSpinnerOverlay } from '../styles/pending-spinner-overlay.css.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -15,88 +15,19 @@ import { buttonContent, buttonLabel } from './styles.css.js';
 
 interface ButtonLabelRecipeProps extends NonNullable<ButtonLabelVariants> {}
 
-interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonRecipeVariants> {}
-
-interface ButtonControlBaseProps {
-	/**
-	 * Chooses the button-shaped presentation.
-	 * @default 'button'
-	 */
-	appearance?: 'button';
-	/**
-	 * Non-interactive adornment shown after the label, such as an icon, badge, count, or keyboard
-	 * hint. Nested interactive controls are unsupported.
-	 */
-	endContent?: ReactNode;
-	/**
-	 * Whether the button takes up the full inline size of its container.
-	 * @default false
-	 */
-	isBlock?: PrimitiveButtonRecipeProps['isBlock'];
-	/**
-	 * Sets the button size.
-	 * @default 'medium'
-	 */
-	size?: PrimitiveButtonRecipeProps['size'];
-	/**
-	 * Non-interactive adornment shown before the label, such as an icon. Nested interactive controls
-	 * are unsupported.
-	 */
-	startContent?: ReactNode;
-}
-
-type ButtonControlProps =
-	| (ButtonControlBaseProps & {
-			/** Visual tone. @default 'neutral' */
-			tone?: 'neutral';
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
-	  })
-	| (ButtonControlBaseProps & {
-			/** Visual tone. */
-			tone: 'accent';
-			/** Visual prominence. @default 'standard' */
-			prominence?: PrimitiveButtonRecipeProps['prominence'];
-	  })
-	| (ButtonControlBaseProps & {
-			/** Visual tone. */
-			tone: 'critical';
-			/** Visual prominence. @default 'standard' */
-			prominence?: PrimitiveButtonRecipeProps['prominence'];
-	  });
-
-interface ButtonTextBaseProps {
-	/** Renders the Button with text-link presentation. */
-	appearance: 'text';
-	/** Text Buttons do not use control sizing. */
-	size?: never;
-	/** Text Buttons do not fill their container. */
-	isBlock?: never;
-	/** Text Buttons do not support start content. */
-	startContent?: never;
-	/** Text Buttons do not support end content. */
-	endContent?: never;
-}
-
-type ButtonTextProps =
-	| (ButtonTextBaseProps & {
-			/** Visual tone. @default 'neutral' */
-			tone?: 'neutral';
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
-	  })
-	| (ButtonTextBaseProps & {
-			/** Visual tone. */
-			tone: 'accent';
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'standard' | 'high';
-	  })
-	| (ButtonTextBaseProps & {
-			/** Visual tone. */
-			tone: 'critical';
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
-	  });
+type ButtonContentProps =
+	| {
+			appearance?: 'button';
+			/** Non-interactive adornment shown after the label. */
+			endContent?: ReactNode;
+			/** Non-interactive adornment shown before the label. */
+			startContent?: ReactNode;
+	  }
+	| {
+			appearance: 'text';
+			endContent?: never;
+			startContent?: never;
+	  };
 
 type _ButtonOmit = DistributiveOmit<
 	PrimitiveButtonProps,
@@ -126,7 +57,7 @@ type _ButtonProps = _ButtonOmit &
 	};
 
 /** Props for `Button`. */
-export type ButtonProps = Prettify<_ButtonProps & (ButtonControlProps | ButtonTextProps)>;
+export type ButtonProps = Prettify<_ButtonProps & ButtonPresentationProps & ButtonContentProps>;
 
 /**
  * Button with appearance, tone, prominence, size, pending, and block options.
@@ -135,18 +66,19 @@ export type ButtonProps = Prettify<_ButtonProps & (ButtonControlProps | ButtonTe
 export function Button(props: ButtonProps): JSX.Element {
 	const {
 		appearance = 'button',
-		tone = 'neutral',
-		prominence = 'standard',
 		children,
 		endContent,
+		isBlock: _isBlock,
 		isPending = false,
-		isBlock,
 		onPress,
 		pressAction,
-		size,
+		prominence: _prominence,
+		size: _size,
 		startContent,
+		tone: _tone,
 		...restProps
 	} = props;
+	const presentationProps = getPrimitivePresentationProps(props);
 	const {
 		isPendingState,
 		onPress: handlePress,
@@ -157,9 +89,7 @@ export function Button(props: ButtonProps): JSX.Element {
 		return (
 			<PrimitiveButton
 				{...restProps}
-				appearance="text"
-				tone={tone}
-				prominence={prominence}
+				{...presentationProps}
 				isPending={isPendingState}
 				onPress={handlePress}
 			>
@@ -182,13 +112,9 @@ export function Button(props: ButtonProps): JSX.Element {
 	return (
 		<PrimitiveButton
 			{...restProps}
-			appearance="button"
-			tone={tone}
-			prominence={prominence}
-			isBlock={isBlock}
+			{...presentationProps}
 			isPending={isPendingState}
 			onPress={handlePress}
-			size={size}
 		>
 			{(renderProps) => (
 				<span className={buttonContent({ appearance: 'button' })}>
@@ -208,4 +134,30 @@ export function Button(props: ButtonProps): JSX.Element {
 			)}
 		</PrimitiveButton>
 	);
+}
+
+function getPrimitivePresentationProps(props: ButtonPresentationProps): ButtonPresentationProps {
+	if (props.appearance === 'text') {
+		if (props.tone === 'critical') {
+			return {
+				appearance: 'text',
+				prominence: props.prominence,
+				tone: 'critical',
+			};
+		}
+
+		return {
+			appearance: 'text',
+			prominence: props.prominence,
+			tone: 'neutral',
+		};
+	}
+
+	return {
+		appearance: 'button',
+		isBlock: props.isBlock,
+		prominence: props.prominence,
+		size: props.size,
+		tone: props.tone,
+	};
 }
