@@ -5,7 +5,7 @@ import { Comparison, ComparisonItem } from '#docs/comparison';
 export default () => {
 	return (
 		<Box maxInlineSize="20rem">
-			<Comparison direction="vertical">
+			<Comparison>
 				<ComparisonItem label="Small">
 					<TextField
 						label="Example field"

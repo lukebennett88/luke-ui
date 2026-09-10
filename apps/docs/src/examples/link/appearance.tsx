@@ -4,7 +4,7 @@ import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Comparison direction="vertical">
+		<Comparison>
 			<ComparisonItem label="Text">
 				<Text elementType="p">
 					Read the <Link href="#example-destination">documentation</Link>.

@@ -14,7 +14,7 @@ type ComparisonItemProps = PropsWithChildren<{
 	label: string;
 }>;
 
-export function Comparison({ children, direction = 'horizontal' }: ComparisonProps) {
+export function Comparison({ children, direction = 'vertical' }: ComparisonProps) {
 	if (direction === 'vertical') {
 		return (
 			<Box display="grid" gap="sp16">
