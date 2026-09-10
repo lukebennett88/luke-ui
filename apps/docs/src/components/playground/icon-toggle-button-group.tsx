@@ -58,7 +58,7 @@ export function IconToggleButtonGroup<Value extends string>({
 					key={optionValue}
 					render={renderToggleButton}
 				>
-					<Icon aria-hidden className="size-4" name={icon} />
+					<Icon className="size-4" name={icon} />
 				</ToggleButton>
 			))}
 		</ToggleButtonGroup>

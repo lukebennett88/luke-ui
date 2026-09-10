@@ -82,7 +82,7 @@ export const InputGroupComposition = meta.story({
 				</InputGroup>
 				<InputGroup>
 					<InputGroupPrefix>
-						<Icon aria-hidden name="search" />
+						<Icon name="search" />
 					</InputGroupPrefix>
 					<InputGroupInput
 						aria-label="Search"

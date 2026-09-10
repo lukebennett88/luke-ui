@@ -60,7 +60,7 @@ export function IconLink(props: IconLinkProps): JSX.Element {
 				})}
 			>
 				<span aria-hidden className={iconLinkIconWrapper}>
-					{typeof icon === 'string' ? <Icon aria-hidden name={icon} /> : icon}
+					{typeof icon === 'string' ? <Icon name={icon} /> : icon}
 				</span>
 			</RacLink>
 		</IconSizeProvider>

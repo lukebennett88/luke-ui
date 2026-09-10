@@ -47,7 +47,7 @@ export function TokenExplorer(): JSX.Element {
 						aria-label="Filter tokens by name"
 						onChange={setFilter}
 						placeholder="Filter by name"
-						prefix={<Icon aria-hidden name="search" size="small" />}
+						prefix={<Icon name="search" size="small" />}
 						size="small"
 						value={filter}
 					/>

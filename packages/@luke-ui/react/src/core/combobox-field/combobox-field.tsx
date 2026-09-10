@@ -150,14 +150,14 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 				<>
 					<ComboboxInputGroup>
 						<ComboboxTrayTrigger placeholder={placeholder}>
-							<Icon aria-hidden name="chevronDown" />
+							<Icon name="chevronDown" />
 						</ComboboxTrayTrigger>
 					</ComboboxInputGroup>
 					<ComboboxTray>
 						<ComboboxInputGroup>
 							<ComboboxInput placeholder={placeholder} ref={inputRef} />
 							<ComboboxClearButton aria-label="Clear search">
-								<Icon aria-hidden name="close" />
+								<Icon name="close" />
 							</ComboboxClearButton>
 						</ComboboxInputGroup>
 						{listBox}
@@ -172,11 +172,11 @@ export function ComboboxField<T extends object>(props: ComboboxFieldProps<T>): J
 					<ComboboxInput placeholder={placeholder} ref={inputRef} />
 					{isInteractive ? (
 						<ComboboxClearButton aria-label="Clear selection">
-							<Icon aria-hidden name="close" />
+							<Icon name="close" />
 						</ComboboxClearButton>
 					) : null}
 					<ComboboxTrigger aria-label="Toggle options">
-						<Icon aria-hidden name="chevronDown" />
+						<Icon name="chevronDown" />
 					</ComboboxTrigger>
 				</ComboboxInputGroup>
 				<ComboboxPopover offset={4} {...popoverProps} style={resolvedStyle}>

@@ -17,7 +17,7 @@ export function DocsSiteNav() {
 				className={cx(TRIGGER_CLASS_NAME, 'md:hidden')}
 				type="button"
 			>
-				<Icon aria-hidden name="bookOpen" size="small" />
+				<Icon name="bookOpen" size="small" />
 			</SidebarTrigger>
 		</SiteNav>
 	);

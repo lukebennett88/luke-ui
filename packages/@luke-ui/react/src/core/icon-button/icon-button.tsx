@@ -96,7 +96,7 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 					<LoadingSpinner aria-hidden />
 				</span>
 			)}
-			<Icon aria-hidden className={iconButtonIcon({ isPending: showSpinner })} name={icon} />
+			<Icon className={iconButtonIcon({ isPending: showSpinner })} name={icon} />
 		</Button>
 	);
 }

@@ -67,14 +67,14 @@ function TrayCombobox(
 			<Field label={label}>
 				<ComboboxInputGroup>
 					<ComboboxTrayTrigger aria-label={props.triggerLabel} placeholder="Select a country...">
-						<Icon aria-hidden name="chevronDown" />
+						<Icon name="chevronDown" />
 					</ComboboxTrayTrigger>
 				</ComboboxInputGroup>
 				<ComboboxTray>
 					<ComboboxInputGroup>
 						<ComboboxInput placeholder="Select a country..." />
 						<ComboboxClearButton aria-label="Clear search">
-							<Icon aria-hidden name="close" />
+							<Icon name="close" />
 						</ComboboxClearButton>
 					</ComboboxInputGroup>
 					<ComboboxListBox<CountryItem>>{renderCountryItem}</ComboboxListBox>

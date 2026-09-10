@@ -1,4 +1,3 @@
-import { buttonRecipe } from '@luke-ui/react/button';
 import { Heading } from '@luke-ui/react/heading';
 import { Text } from '@luke-ui/react/text';
 import { DocsLink } from './docs-link.js';
@@ -17,13 +16,7 @@ export function NotFound() {
 					The page you are looking for might have been removed, had its name changed, or is
 					temporarily unavailable.
 				</Text>
-				<DocsLink
-					className={buttonRecipe({
-						appearance: 'button',
-						prominence: 'high',
-					})}
-					to="/"
-				>
+				<DocsLink appearance="button" prominence="high" to="/">
 					Back to Home
 				</DocsLink>
 			</main>

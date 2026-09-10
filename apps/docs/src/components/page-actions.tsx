@@ -85,7 +85,7 @@ function PageActionLink({
 			href={href}
 			rel="noreferrer noopener"
 			size="small"
-			startContent={icon ?? (iconName ? <Icon aria-hidden name={iconName} /> : null)}
+			startContent={icon ?? (iconName ? <Icon name={iconName} /> : null)}
 			target="_blank"
 		>
 			{label}
