@@ -19,25 +19,25 @@ interface ButtonStyleProps {
 	 */
 	appearance?: ButtonRecipeProps['appearance'];
 	/**
-	 * Whether the button takes up the full inline size of its container.
-	 * @default false
+	 * Visual tone.
+	 * @default 'neutral'
 	 */
-	isBlock?: ButtonRecipeProps['isBlock'];
+	tone?: ButtonRecipeProps['tone'];
 	/**
 	 * Visual prominence.
 	 * @default 'standard'
 	 */
 	prominence?: ButtonRecipeProps['prominence'];
 	/**
+	 * Whether the button takes up the full inline size of its container.
+	 * @default false
+	 */
+	isBlock?: ButtonRecipeProps['isBlock'];
+	/**
 	 * Sets the button size.
 	 * @default 'medium'
 	 */
 	size?: ButtonRecipeProps['size'];
-	/**
-	 * Visual tone.
-	 * @default 'neutral'
-	 */
-	tone?: ButtonRecipeProps['tone'];
 }
 
 type _ButtonOmit = DistributiveOmit<RacButtonProps, keyof DocumentedPressProps>;
@@ -50,13 +50,13 @@ export type ButtonProps = Prettify<_ButtonProps>;
 export function Button(props: ButtonProps): JSX.Element {
 	const {
 		appearance = 'button',
+		tone = 'neutral',
+		prominence = 'standard',
 		children,
 		isBlock = false,
 		isDisabled = false,
 		isPending = false,
-		prominence = 'standard',
 		size = 'medium',
-		tone = 'neutral',
 		...restProps
 	} = props;
 
@@ -65,7 +65,7 @@ export function Button(props: ButtonProps): JSX.Element {
 			<RacButton
 				{...restProps}
 				className={composeRenderProps(props.className, (className) => {
-					return buttonRecipe({ appearance, className, isBlock, prominence, size, tone });
+					return buttonRecipe({ appearance, tone, prominence, className, isBlock, size });
 				})}
 				isDisabled={isDisabled}
 				isPending={isPending}

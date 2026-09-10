@@ -17,18 +17,18 @@ test('kitchen sink', async () => {
 			<Grid columns={3}>
 				<Button prominence="low">Neutral low button</Button>
 				<Button>Neutral standard button</Button>
-				<Button prominence="low" tone="accent">
+				<Button tone="accent" prominence="low">
 					Accent low button
 				</Button>
 				<Button tone="accent">Accent standard button</Button>
-				<Button prominence="high" tone="accent">
+				<Button tone="accent" prominence="high">
 					Accent high button
 				</Button>
-				<Button prominence="low" tone="critical">
+				<Button tone="critical" prominence="low">
 					Critical low button
 				</Button>
 				<Button tone="critical">Critical standard button</Button>
-				<Button prominence="high" tone="critical">
+				<Button tone="critical" prominence="high">
 					Critical high button
 				</Button>
 				<Button appearance="text" prominence="low">
@@ -38,10 +38,10 @@ test('kitchen sink', async () => {
 				<Button appearance="text" tone="accent">
 					Accent standard text Button
 				</Button>
-				<Button appearance="text" prominence="high" tone="accent">
+				<Button appearance="text" tone="accent" prominence="high">
 					Accent high text Button
 				</Button>
-				<Button appearance="text" prominence="low" tone="critical">
+				<Button appearance="text" tone="critical" prominence="low">
 					Critical low text Button
 				</Button>
 				<Button appearance="text" tone="critical">
@@ -49,7 +49,7 @@ test('kitchen sink', async () => {
 				</Button>
 				<Button isDisabled>Disabled</Button>
 				<Button isPending>Standard pending</Button>
-				<Button isPending prominence="high" tone="accent">
+				<Button isPending tone="accent" prominence="high">
 					High pending
 				</Button>
 				<Button startContent={<Icon name="add" />}>With icon</Button>

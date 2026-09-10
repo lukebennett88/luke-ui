@@ -61,14 +61,14 @@ export const ToneAndAppearance = meta.story({
 				<Button prominence="low">{children}</Button>
 				<Button>{children}</Button>
 				<Button tone="accent">{children}</Button>
-				<Button prominence="high" tone="accent">
+				<Button tone="accent" prominence="high">
 					{children}
 				</Button>
-				<Button prominence="low" tone="critical">
+				<Button tone="critical" prominence="low">
 					{children}
 				</Button>
 				<Button tone="critical">{children}</Button>
-				<Button prominence="high" tone="critical">
+				<Button tone="critical" prominence="high">
 					{children}
 				</Button>
 			</div>

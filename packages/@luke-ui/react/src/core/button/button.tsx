@@ -47,22 +47,22 @@ interface ButtonControlBaseProps {
 
 type ButtonControlProps =
 	| (ButtonControlBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
 			/** Visual tone. @default 'neutral' */
 			tone?: 'neutral';
+			/** Visual prominence. @default 'standard' */
+			prominence?: 'low' | 'standard';
 	  })
 	| (ButtonControlBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: PrimitiveButtonRecipeProps['prominence'];
 			/** Visual tone. */
 			tone: 'accent';
-	  })
-	| (ButtonControlBaseProps & {
 			/** Visual prominence. @default 'standard' */
 			prominence?: PrimitiveButtonRecipeProps['prominence'];
+	  })
+	| (ButtonControlBaseProps & {
 			/** Visual tone. */
 			tone: 'critical';
+			/** Visual prominence. @default 'standard' */
+			prominence?: PrimitiveButtonRecipeProps['prominence'];
 	  });
 
 interface ButtonTextBaseProps {
@@ -80,22 +80,22 @@ interface ButtonTextBaseProps {
 
 type ButtonTextProps =
 	| (ButtonTextBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
 			/** Visual tone. @default 'neutral' */
 			tone?: 'neutral';
-	  })
-	| (ButtonTextBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'standard' | 'high';
-			/** Visual tone. */
-			tone: 'accent';
-	  })
-	| (ButtonTextBaseProps & {
 			/** Visual prominence. @default 'standard' */
 			prominence?: 'low' | 'standard';
+	  })
+	| (ButtonTextBaseProps & {
+			/** Visual tone. */
+			tone: 'accent';
+			/** Visual prominence. @default 'standard' */
+			prominence?: 'standard' | 'high';
+	  })
+	| (ButtonTextBaseProps & {
 			/** Visual tone. */
 			tone: 'critical';
+			/** Visual prominence. @default 'standard' */
+			prominence?: 'low' | 'standard';
 	  });
 
 type _ButtonOmit = DistributiveOmit<
@@ -129,22 +129,22 @@ type _ButtonProps = _ButtonOmit &
 export type ButtonProps = Prettify<_ButtonProps & (ButtonControlProps | ButtonTextProps)>;
 
 /**
- * Button with size, tone, appearance, pending, and block options.
+ * Button with appearance, tone, prominence, size, pending, and block options.
  * Wraps children in a `Text` for ellipsis truncation. Shows a spinner when pending.
  */
 export function Button(props: ButtonProps): JSX.Element {
 	const {
 		appearance = 'button',
+		tone = 'neutral',
+		prominence = 'standard',
 		children,
 		endContent,
 		isPending = false,
 		isBlock,
 		onPress,
 		pressAction,
-		prominence = 'standard',
 		size,
 		startContent,
-		tone = 'neutral',
 		...restProps
 	} = props;
 	const {
@@ -158,10 +158,10 @@ export function Button(props: ButtonProps): JSX.Element {
 			<PrimitiveButton
 				{...restProps}
 				appearance="text"
+				tone={tone}
+				prominence={prominence}
 				isPending={isPendingState}
 				onPress={handlePress}
-				prominence={prominence}
-				tone={tone}
 			>
 				{(renderProps) => (
 					<span className={buttonContent({ appearance: 'text' })}>
@@ -182,12 +182,13 @@ export function Button(props: ButtonProps): JSX.Element {
 	return (
 		<PrimitiveButton
 			{...restProps}
+			appearance="button"
+			tone={tone}
+			prominence={prominence}
 			isBlock={isBlock}
 			isPending={isPendingState}
 			onPress={handlePress}
-			prominence={prominence}
 			size={size}
-			tone={tone}
 		>
 			{(renderProps) => (
 				<span className={buttonContent({ appearance: 'button' })}>

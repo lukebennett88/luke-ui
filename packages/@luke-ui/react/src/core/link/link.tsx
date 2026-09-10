@@ -30,16 +30,16 @@ interface LinkButtonBaseProps {
 
 type LinkButtonProps =
 	| (LinkButtonBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
 			/** Visual tone. @default 'neutral' */
 			tone?: 'neutral';
+			/** Visual prominence. @default 'standard' */
+			prominence?: 'low' | 'standard';
 	  })
 	| (LinkButtonBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'standard' | 'high';
 			/** Visual tone. */
 			tone: 'accent';
+			/** Visual prominence. @default 'standard' */
+			prominence?: 'standard' | 'high';
 	  });
 
 interface LinkTextBaseProps {
@@ -60,16 +60,16 @@ interface LinkTextBaseProps {
 
 type LinkTextProps =
 	| (LinkTextBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
 			/** Visual tone. @default 'neutral' */
 			tone?: 'neutral';
+			/** Visual prominence. @default 'standard' */
+			prominence?: 'low' | 'standard';
 	  })
 	| (LinkTextBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'standard' | 'high';
 			/** Visual tone. */
 			tone: 'accent';
+			/** Visual prominence. @default 'standard' */
+			prominence?: 'standard' | 'high';
 	  });
 
 type _LinkOmit = DistributiveOmit<RacLinkProps, 'href' | 'isDisabled' | 'onPress'>;
@@ -90,13 +90,13 @@ export type LinkProps = Prettify<_LinkProps & (LinkButtonProps | LinkTextProps)>
 export function Link(props: LinkProps): JSX.Element {
 	const {
 		appearance = 'text',
+		tone,
+		prominence = 'standard',
 		children,
 		endContent,
 		isBlock,
-		prominence = 'standard',
 		size,
 		startContent,
-		tone,
 		...restProps
 	} = props;
 
@@ -108,11 +108,11 @@ export function Link(props: LinkProps): JSX.Element {
 					className={composeRenderProps(props.className, (className) => {
 						return linkRecipe({
 							appearance: 'button',
+							tone,
+							prominence,
 							className: cx(linkCursor, className),
 							isBlock,
-							prominence,
 							size,
-							tone,
 						});
 					})}
 				>
@@ -138,9 +138,9 @@ export function Link(props: LinkProps): JSX.Element {
 			className={composeRenderProps(props.className, (className) => {
 				return linkRecipe({
 					appearance: 'text',
-					className: cx(linkCursor, className),
-					prominence,
 					tone,
+					prominence,
+					className: cx(linkCursor, className),
 				});
 			})}
 		>

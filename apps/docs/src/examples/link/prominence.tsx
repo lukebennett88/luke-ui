@@ -13,7 +13,7 @@ export default () => {
 				<Link href="#example-destination">Example destination</Link>
 			</ComparisonItem>
 			<ComparisonItem label="High accent">
-				<Link href="#example-destination" prominence="high" tone="accent">
+				<Link tone="accent" prominence="high" href="#example-destination">
 					Example destination
 				</Link>
 			</ComparisonItem>

@@ -5,8 +5,8 @@ import { withDefaultVariants } from '../styles/recipe.js';
 /** Shared Button recipe with Link's text defaults. */
 export const linkRecipe = withDefaultVariants(buttonRecipe, {
 	appearance: 'text',
-	prominence: 'standard',
 	tone: 'neutral',
+	prominence: 'standard',
 });
 
 /**

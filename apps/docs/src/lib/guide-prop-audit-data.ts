@@ -11,24 +11,24 @@ export function guideTableKey(guide: string, path: string, name: string): string
 export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>> = {
 	'actions/button.mdx::packages/@luke-ui/react/src/core/button/button.tsx::ButtonProps': [
 		'appearance',
+		'tone',
+		'prominence',
 		'isBlock',
 		'isDisabled',
 		'isPending',
-		'prominence',
 		'pressAction',
 		'size',
 		'startContent',
 		'endContent',
-		'tone',
 	],
 	'actions/icon-button.mdx::packages/@luke-ui/react/src/core/icon-button/icon-button.tsx::IconButtonProps':
-		['appearance', 'icon', 'isDisabled', 'isPending', 'pressAction', 'prominence', 'size', 'tone'],
+		['appearance', 'tone', 'prominence', 'icon', 'isDisabled', 'isPending', 'pressAction', 'size'],
 	'actions/link.mdx::packages/@luke-ui/react/src/core/link/link.tsx::LinkProps': [
-		'href',
-		'isDisabled',
 		'appearance',
 		'tone',
 		'prominence',
+		'href',
+		'isDisabled',
 	],
 	'feedback/loading-skeleton.mdx::packages/@luke-ui/react/src/core/loading-skeleton/loading-skeleton.tsx::LoadingSkeletonProps':
 		['elementType', 'isLoading', 'radius'],

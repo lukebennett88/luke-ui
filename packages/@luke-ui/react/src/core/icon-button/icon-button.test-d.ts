@@ -2,11 +2,11 @@ import { expectTypeOf, test } from 'vite-plus/test';
 import type { IconButtonProps } from './icon-button.js';
 
 test('IconButton accepts only supported button treatments', () => {
-	const iconButton: IconButtonProps = { icon: 'add', prominence: 'low', tone: 'accent' };
+	const iconButton: IconButtonProps = { icon: 'add', tone: 'accent', prominence: 'low' };
 	const criticalIconButton: IconButtonProps = {
 		icon: 'delete',
-		prominence: 'high',
 		tone: 'critical',
+		prominence: 'high',
 	};
 	expectTypeOf<typeof iconButton>().toExtend<IconButtonProps>();
 

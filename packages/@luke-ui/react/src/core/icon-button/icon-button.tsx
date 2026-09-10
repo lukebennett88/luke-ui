@@ -46,22 +46,22 @@ interface IconButtonBaseProps {
 
 type IconButtonStyleProps =
 	| (IconButtonBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: 'low' | 'standard';
 			/** Visual tone. @default 'neutral' */
 			tone?: 'neutral';
+			/** Visual prominence. @default 'standard' */
+			prominence?: 'low' | 'standard';
 	  })
 	| (IconButtonBaseProps & {
-			/** Visual prominence. @default 'standard' */
-			prominence?: PrimitiveButtonRecipeProps['prominence'];
 			/** Visual tone. */
 			tone: 'accent';
-	  })
-	| (IconButtonBaseProps & {
 			/** Visual prominence. @default 'standard' */
 			prominence?: PrimitiveButtonRecipeProps['prominence'];
+	  })
+	| (IconButtonBaseProps & {
 			/** Visual tone. */
 			tone: 'critical';
+			/** Visual prominence. @default 'standard' */
+			prominence?: PrimitiveButtonRecipeProps['prominence'];
 	  });
 
 type _IconButtonOmit = DistributiveOmit<
@@ -88,13 +88,13 @@ export type IconButtonProps = Prettify<_IconButtonProps>;
 /** Button that renders only an icon. */
 export function IconButton(props: IconButtonProps): JSX.Element {
 	const {
+		tone = 'neutral',
+		prominence = 'standard',
 		icon,
 		isPending = false,
 		onPress,
 		pressAction,
-		prominence = 'standard',
 		size = 'medium',
-		tone = 'neutral',
 		...buttonProps
 	} = props;
 	const {
@@ -107,14 +107,14 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 		<Button
 			{...buttonProps}
 			appearance="button"
+			tone={tone}
+			prominence={prominence}
 			className={composeRenderProps(props.className, (value) => {
 				return cx(iconButtonReset, iconButtonRecipe({ className: value, size }));
 			})}
 			isPending={isPendingState}
 			onPress={handlePress}
-			prominence={prominence}
 			size={size}
-			tone={tone}
 		>
 			{showSpinner && (
 				<span aria-hidden className={pendingSpinnerOverlay()}>

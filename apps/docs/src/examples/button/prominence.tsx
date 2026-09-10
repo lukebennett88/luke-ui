@@ -5,7 +5,7 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="High">
-				<Button prominence="high" tone="accent">
+				<Button tone="accent" prominence="high">
 					Save changes
 				</Button>
 			</ComparisonItem>
@@ -13,7 +13,7 @@ export default () => {
 				<Button tone="accent">Save changes</Button>
 			</ComparisonItem>
 			<ComparisonItem label="Low">
-				<Button prominence="low" tone="accent">
+				<Button tone="accent" prominence="low">
 					Save changes
 				</Button>
 			</ComparisonItem>

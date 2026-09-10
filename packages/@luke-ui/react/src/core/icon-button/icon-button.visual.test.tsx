@@ -20,8 +20,8 @@ test('kitchen sink', async () => {
 				<IconButton aria-label="Pending" icon="add" isPending size="medium" />
 				<IconButton aria-label="Standard" icon="add" />
 				<IconButton aria-label="Low" icon="add" prominence="low" />
-				<IconButton aria-label="Accent low" icon="add" prominence="low" tone="accent" />
-				<IconButton aria-label="Critical high" icon="delete" prominence="high" tone="critical" />
+				<IconButton aria-label="Accent low" icon="add" tone="accent" prominence="low" />
+				<IconButton aria-label="Critical high" icon="delete" tone="critical" prominence="high" />
 			</Grid>,
 			{ appearance },
 		);

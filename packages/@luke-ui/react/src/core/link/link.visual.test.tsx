@@ -22,7 +22,7 @@ test('kitchen sink', async () => {
 				<Link href="#" tone="accent">
 					Text accent standard
 				</Link>
-				<Link href="#" prominence="high" tone="accent">
+				<Link href="#" tone="accent" prominence="high">
 					Text accent high
 				</Link>
 				<Grid columns={4}>
@@ -35,7 +35,7 @@ test('kitchen sink', async () => {
 					<Link appearance="button" href="#" tone="accent">
 						Button accent standard
 					</Link>
-					<Link appearance="button" href="#" prominence="high" tone="accent">
+					<Link appearance="button" href="#" tone="accent" prominence="high">
 						Button accent high
 					</Link>
 				</Grid>

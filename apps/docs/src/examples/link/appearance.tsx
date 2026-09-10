@@ -11,7 +11,7 @@ export default () => {
 				</Text>
 			</ComparisonItem>
 			<ComparisonItem label="Button">
-				<Link appearance="button" href="#example-destination" prominence="high" tone="accent">
+				<Link appearance="button" tone="accent" prominence="high" href="#example-destination">
 					View documentation
 				</Link>
 			</ComparisonItem>

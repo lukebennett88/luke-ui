@@ -81,13 +81,13 @@ function PageActionLink({
 	return (
 		<Link
 			appearance="button"
-			href={href}
+			tone="neutral"
 			prominence="low"
+			href={href}
 			rel="noreferrer noopener"
 			size="small"
 			startContent={icon ?? (iconName ? <Icon aria-hidden name={iconName} /> : null)}
 			target="_blank"
-			tone="neutral"
 		>
 			{label}
 		</Link>
@@ -112,10 +112,10 @@ function CopyMarkdownButton({ markdownUrl }: { markdownUrl: string }) {
 	return (
 		<Button
 			onPress={onCopy}
+			tone="neutral"
 			prominence="low"
 			size="small"
 			startContent={<Icon name={copied ? 'check' : 'copy'} />}
-			tone="neutral"
 		>
 			{copied ? 'Copied' : 'Copy Markdown'}
 		</Button>
