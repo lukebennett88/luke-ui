@@ -1,5 +1,5 @@
-import { expectTypeOf, test } from 'vite-plus/test';
 import type { ReactElement } from 'react';
+import { expectTypeOf, test } from 'vite-plus/test';
 import type { IconButtonProps } from './icon-button.js';
 
 declare const customIcon: ReactElement;

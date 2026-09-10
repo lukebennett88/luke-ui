@@ -47,9 +47,7 @@ test('a built-in icon contributes no accessible name', () => {
 });
 
 test('a custom SVG icon with no aria-hidden of its own contributes no accessible name', () => {
-	const { locator } = render(
-		<IconButton aria-label="Brand" icon={<UnlabelledCustomIcon />} />,
-	);
+	const { locator } = render(<IconButton aria-label="Brand" icon={<UnlabelledCustomIcon />} />);
 
 	const button = locator.getByRole('button', { name: 'Brand' }).element();
 	expect(button).toHaveAccessibleName('Brand');
