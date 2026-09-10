@@ -742,13 +742,11 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 		name: 'IconButtonProps',
 		path: 'packages/@luke-ui/react/src/core/icon-button/icon-button.tsx',
 		props: [
-			'appearance',
 			'aria-describedby',
 			'aria-details',
 			'aria-label',
 			'aria-labelledby',
 			'autoFocus',
-			'children',
 			'icon',
 			'id',
 			'isDisabled',
