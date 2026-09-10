@@ -19,4 +19,12 @@ test('generated Monaco playground types omit styling-engine packages', () => {
 	expect(stylesDeclaration).toBeTypeOf('string');
 	expect(stylesDeclaration).not.toMatch(/from ["']@vanilla-extract\//);
 	expect(stylesDeclaration).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
+
+	const utilitiesDeclaration = Object.entries(files).find(([path]) => {
+		return /\/@luke-ui\/react\/dist\/utilities\.css[^/]*\.d\.ts$/.test(path);
+	})?.[1];
+	expect(utilitiesDeclaration).toBeTypeOf('string');
+	expect(utilitiesDeclaration).toMatch(/from ["']csstype["']/);
+	expect(utilitiesDeclaration).not.toMatch(/from ["']@vanilla-extract\//);
+	expect(utilitiesDeclaration).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
 });
