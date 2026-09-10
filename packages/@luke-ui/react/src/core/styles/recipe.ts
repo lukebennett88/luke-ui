@@ -5,6 +5,9 @@ import { recipe as vanillaRecipe } from '@vanilla-extract/recipes';
 import { cx } from '../../shared/utils/utils.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { cascadeLayers } from './layer-names.js';
+import type { RecipeComposition } from './recipe-types.js';
+
+export type { RecipeComposition, RecipeSelection } from './recipe-types.js';
 
 /**
  * Builds single-part and slotted recipes. CSS lands in the `recipes` layer.
@@ -65,11 +68,6 @@ type Selection<Variants> =
 		: {
 				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
 			};
-
-/** An optional consumer `className`. Not a variant. */
-export interface RecipeComposition {
-	className?: string;
-}
 
 /** Variant selection plus optional `className`. */
 type RecipeInput<Variants extends VariantGroups> =
@@ -146,15 +144,6 @@ export interface SlottedConfigInput {
 	slots: Record<string, SlottedStyleRule>;
 	variants?: Record<string, Record<string, Record<string, SlottedStyleRule>>>;
 }
-
-/** Variant keys of a built recipe. Omits `className`. Empty recipes → `Record<string, never>`. */
-export type RecipeSelection<Fn> = Fn extends (input?: infer Input) => unknown
-	? VariantKeysOf<NonNullable<Input>>
-	: never;
-
-type VariantKeysOf<Input> = [Exclude<keyof Input, keyof RecipeComposition>] extends [never]
-	? Record<string, never>
-	: Omit<Input, keyof RecipeComposition>;
 
 // ---------------------------------------------------------------------------
 // recipe (build time)

@@ -1,10 +1,11 @@
-import type { SprinklesFn } from '@luke-ui/rainbow-sprinkles';
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
+import type { Properties as CSSProperties } from 'csstype';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { vars } from '../../theme/contract.css.js';
 import type { SpaceStep } from '../../theme/contract.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
+import type { Prettify } from '../types/prettify.js';
 import { layers } from './layers.css.js';
 
 function fromBreakpoint(minimumInlineSize: number) {
@@ -65,174 +66,223 @@ const backgroundColorScale = Object.fromEntries([
 	}),
 ]) as Record<BackgroundColorToken, string>;
 
-const responsiveProperties = defineProperties({
-	'@layer': layers.utilities,
-	conditions: responsiveConditions,
-	defaultCondition: 'initial',
-	dynamicProperties: {
-		alignContent: {
-			center: 'center',
-			'flex-end': 'flex-end',
-			'flex-start': 'flex-start',
-			normal: 'normal',
-			'space-around': 'space-around',
-			'space-between': 'space-between',
-			stretch: 'stretch',
-		},
-		alignItems: {
-			baseline: 'baseline',
-			center: 'center',
-			'flex-end': 'flex-end',
-			'flex-start': 'flex-start',
-			normal: 'normal',
-			stretch: 'stretch',
-		},
-		alignSelf: {
-			auto: 'auto',
-			baseline: 'baseline',
-			center: 'center',
-			'flex-end': 'flex-end',
-			'flex-start': 'flex-start',
-			normal: 'normal',
-			stretch: 'stretch',
-		},
-		backgroundColor: backgroundColorScale,
-		blockSize: true,
-		borderColor: vars.color.border,
-		borderRadius: {
-			detail: vars.radius.detail,
-			control: vars.radius.control,
-			surface: vars.radius.surface,
-			overlay: vars.radius.overlay,
-			full: vars.radius.full,
-		},
-		borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },
-		borderWidth: borderWidthScale,
-		boxShadow: {
-			recessed: vars.depth.recessed,
-			resting: vars.depth.resting,
-			raised: vars.depth.raised,
-			floating: vars.depth.floating,
-			overlay: vars.depth.overlay,
-		},
-		columnGap: spaceScale,
-		display: {
-			block: 'block',
-			contents: 'contents',
-			flex: 'flex',
-			grid: 'grid',
-			inline: 'inline',
-			'inline-block': 'inline-block',
-			'inline-flex': 'inline-flex',
-			'inline-grid': 'inline-grid',
-			none: 'none',
-		},
-		flex: true,
-		flexBasis: true,
-		flexDirection: {
-			column: 'column',
-			'column-reverse': 'column-reverse',
-			row: 'row',
-			'row-reverse': 'row-reverse',
-		},
-		flexGrow: { '0': '0', '1': '1' },
-		flexShrink: { '0': '0', '1': '1' },
-		flexWrap: { nowrap: 'nowrap', wrap: 'wrap', 'wrap-reverse': 'wrap-reverse' },
-		gap: spaceScale,
-		gridArea: true,
-		gridColumn: true,
-		gridColumnEnd: true,
-		gridColumnStart: true,
-		gridRow: true,
-		gridRowEnd: true,
-		gridRowStart: true,
-		inlineSize: true,
-		inset: true,
-		insetBlock: true,
-		insetBlockEnd: true,
-		insetBlockStart: true,
-		insetInline: true,
-		insetInlineEnd: true,
-		insetInlineStart: true,
-		justifyContent: {
-			center: 'center',
-			'flex-end': 'flex-end',
-			'flex-start': 'flex-start',
-			normal: 'normal',
-			'space-around': 'space-around',
-			'space-between': 'space-between',
-			'space-evenly': 'space-evenly',
-			stretch: 'stretch',
-		},
-		justifySelf: {
-			auto: 'auto',
-			center: 'center',
-			end: 'end',
-			normal: 'normal',
-			start: 'start',
-			stretch: 'stretch',
-		},
-		margin: marginScale,
-		marginBlock: marginScale,
-		marginBlockEnd: marginScale,
-		marginBlockStart: marginScale,
-		marginInline: marginScale,
-		marginInlineEnd: marginScale,
-		marginInlineStart: marginScale,
-		maxBlockSize: true,
-		maxInlineSize: true,
-		minBlockSize: true,
-		minInlineSize: true,
-		order: true,
-		overflow: {
-			auto: 'auto',
-			clip: 'clip',
-			hidden: 'hidden',
-			scroll: 'scroll',
-			visible: 'visible',
-		},
-		overflowX: {
-			auto: 'auto',
-			clip: 'clip',
-			hidden: 'hidden',
-			scroll: 'scroll',
-			visible: 'visible',
-		},
-		overflowY: {
-			auto: 'auto',
-			clip: 'clip',
-			hidden: 'hidden',
-			scroll: 'scroll',
-			visible: 'visible',
-		},
-		padding: spaceScale,
-		paddingBlock: spaceScale,
-		paddingBlockEnd: spaceScale,
-		paddingBlockStart: spaceScale,
-		paddingInline: spaceScale,
-		paddingInlineEnd: spaceScale,
-		paddingInlineStart: spaceScale,
-		placeSelf: {
-			auto: 'auto',
-			center: 'center',
-			end: 'end',
-			normal: 'normal',
-			start: 'start',
-			stretch: 'stretch',
-		},
-		position: {
-			absolute: 'absolute',
-			fixed: 'fixed',
-			relative: 'relative',
-			static: 'static',
-			sticky: 'sticky',
-		},
-		rowGap: spaceScale,
+/** Property scales shared by the runtime config and the public prop types. */
+const dynamicProperties = {
+	alignContent: {
+		center: 'center',
+		'flex-end': 'flex-end',
+		'flex-start': 'flex-start',
+		normal: 'normal',
+		'space-around': 'space-around',
+		'space-between': 'space-between',
+		stretch: 'stretch',
 	},
-});
+	alignItems: {
+		baseline: 'baseline',
+		center: 'center',
+		'flex-end': 'flex-end',
+		'flex-start': 'flex-start',
+		normal: 'normal',
+		stretch: 'stretch',
+	},
+	alignSelf: {
+		auto: 'auto',
+		baseline: 'baseline',
+		center: 'center',
+		'flex-end': 'flex-end',
+		'flex-start': 'flex-start',
+		normal: 'normal',
+		stretch: 'stretch',
+	},
+	backgroundColor: backgroundColorScale,
+	blockSize: true,
+	borderColor: vars.color.border,
+	borderRadius: {
+		detail: vars.radius.detail,
+		control: vars.radius.control,
+		surface: vars.radius.surface,
+		overlay: vars.radius.overlay,
+		full: vars.radius.full,
+	},
+	borderStyle: { none: 'none', solid: 'solid', dashed: 'dashed', dotted: 'dotted' },
+	borderWidth: borderWidthScale,
+	boxShadow: {
+		recessed: vars.depth.recessed,
+		resting: vars.depth.resting,
+		raised: vars.depth.raised,
+		floating: vars.depth.floating,
+		overlay: vars.depth.overlay,
+	},
+	columnGap: spaceScale,
+	display: {
+		block: 'block',
+		contents: 'contents',
+		flex: 'flex',
+		grid: 'grid',
+		inline: 'inline',
+		'inline-block': 'inline-block',
+		'inline-flex': 'inline-flex',
+		'inline-grid': 'inline-grid',
+		none: 'none',
+	},
+	flex: true,
+	flexBasis: true,
+	flexDirection: {
+		column: 'column',
+		'column-reverse': 'column-reverse',
+		row: 'row',
+		'row-reverse': 'row-reverse',
+	},
+	flexGrow: { '0': '0', '1': '1' },
+	flexShrink: { '0': '0', '1': '1' },
+	flexWrap: { nowrap: 'nowrap', wrap: 'wrap', 'wrap-reverse': 'wrap-reverse' },
+	gap: spaceScale,
+	gridArea: true,
+	gridColumn: true,
+	gridColumnEnd: true,
+	gridColumnStart: true,
+	gridRow: true,
+	gridRowEnd: true,
+	gridRowStart: true,
+	inlineSize: true,
+	inset: true,
+	insetBlock: true,
+	insetBlockEnd: true,
+	insetBlockStart: true,
+	insetInline: true,
+	insetInlineEnd: true,
+	insetInlineStart: true,
+	justifyContent: {
+		center: 'center',
+		'flex-end': 'flex-end',
+		'flex-start': 'flex-start',
+		normal: 'normal',
+		'space-around': 'space-around',
+		'space-between': 'space-between',
+		'space-evenly': 'space-evenly',
+		stretch: 'stretch',
+	},
+	justifySelf: {
+		auto: 'auto',
+		center: 'center',
+		end: 'end',
+		normal: 'normal',
+		start: 'start',
+		stretch: 'stretch',
+	},
+	margin: marginScale,
+	marginBlock: marginScale,
+	marginBlockEnd: marginScale,
+	marginBlockStart: marginScale,
+	marginInline: marginScale,
+	marginInlineEnd: marginScale,
+	marginInlineStart: marginScale,
+	maxBlockSize: true,
+	maxInlineSize: true,
+	minBlockSize: true,
+	minInlineSize: true,
+	order: true,
+	overflow: {
+		auto: 'auto',
+		clip: 'clip',
+		hidden: 'hidden',
+		scroll: 'scroll',
+		visible: 'visible',
+	},
+	overflowX: {
+		auto: 'auto',
+		clip: 'clip',
+		hidden: 'hidden',
+		scroll: 'scroll',
+		visible: 'visible',
+	},
+	overflowY: {
+		auto: 'auto',
+		clip: 'clip',
+		hidden: 'hidden',
+		scroll: 'scroll',
+		visible: 'visible',
+	},
+	padding: spaceScale,
+	paddingBlock: spaceScale,
+	paddingBlockEnd: spaceScale,
+	paddingBlockStart: spaceScale,
+	paddingInline: spaceScale,
+	paddingInlineEnd: spaceScale,
+	paddingInlineStart: spaceScale,
+	placeSelf: {
+		auto: 'auto',
+		center: 'center',
+		end: 'end',
+		normal: 'normal',
+		start: 'start',
+		stretch: 'stretch',
+	},
+	position: {
+		absolute: 'absolute',
+		fixed: 'fixed',
+		relative: 'relative',
+		static: 'static',
+		sticky: 'sticky',
+	},
+	rowGap: spaceScale,
+} as const;
 
-type CreateSprinkles = SprinklesFn<[typeof responsiveProperties]>;
+type BreakpointName = keyof typeof responsiveConditions;
 
-export const createSprinkles: CreateSprinkles = defineSprinkles(responsiveProperties);
+/**
+ * Value accepted by one utility property. Constrained scales use their keys. Unconstrained
+ * (`true`) properties keep the previous Rainbow Sprinkles contract: the csstype value for that
+ * CSS property name.
+ */
+type ScaleValue<Property extends PropertyKey, Scale> = Scale extends true
+	? Property extends keyof CSSProperties
+		? CSSProperties[Property]
+		: never
+	: Scale extends Record<string, unknown>
+		? keyof Scale & string
+		: never;
 
-export type SprinklesProps = Parameters<typeof createSprinkles>[0];
+/** Direct value, or a responsive object keyed by breakpoint. */
+type ResponsiveValue<Value> =
+	| Value
+	| null
+	| {
+			[Condition in BreakpointName]?: Value | null;
+	  };
+
+type SprinklesPropsShape = {
+	[Property in keyof typeof dynamicProperties]?: ResponsiveValue<
+		ScaleValue<Property, (typeof dynamicProperties)[Property]>
+	>;
+};
+
+/**
+ * Layout and appearance props accepted by `createSprinkles` and `Box`. Owned by Luke UI so public
+ * declarations do not require a styling-engine package for type checking.
+ */
+export type SprinklesProps = Prettify<SprinklesPropsShape>;
+
+type CreateSprinklesResult<Props extends object> = {
+	className: string;
+	style: Record<string, string>;
+} & Omit<Props, keyof SprinklesProps | 'className' | 'style'>;
+
+/**
+ * Internal `createSprinkles` contract. `properties` is read-only in TypeScript; the runtime `Set`
+ * is still mutable. Own enumerable string-keyed non-utility props pass through. Generated
+ * `className` and `style` replace input keys of those names.
+ */
+type CreateSprinkles = {
+	<Props extends SprinklesProps>(props: Props): CreateSprinklesResult<Props>;
+	readonly properties: ReadonlySet<keyof SprinklesProps>;
+};
+
+export const createSprinkles = defineSprinkles(
+	defineProperties({
+		'@layer': layers.utilities,
+		conditions: responsiveConditions,
+		defaultCondition: 'initial',
+		dynamicProperties,
+	}),
+) as CreateSprinkles;

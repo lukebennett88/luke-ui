@@ -544,6 +544,9 @@ importers:
       '@vanilla-extract/recipes':
         specifier: 'catalog:'
         version: 0.5.7(@vanilla-extract/css@1.21.2)
+      csstype:
+        specifier: 'catalog:'
+        version: 3.2.3
       spin-doctor:
         specifier: 'catalog:'
         version: 0.0.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)

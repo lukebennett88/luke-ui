@@ -1,6 +1,6 @@
 import { vars } from '../../theme/contract.css.js';
 import { style } from '../styles/layered-style.css.js';
-import type { RecipeSelection } from '../styles/recipe.js';
+import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 export const iconButtonReset = style({

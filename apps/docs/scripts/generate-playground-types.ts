@@ -22,7 +22,6 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const docsPackageJsonPath = resolve(scriptDir, '../package.json');
 const docsExamplesDir = resolve(scriptDir, '../src/examples');
 const reactPackageDir = resolve(scriptDir, '../../../packages/@luke-ui/react');
-const rainbowSprinklesDir = resolve(scriptDir, '../../../packages/@luke-ui/rainbow-sprinkles');
 const outputPath = resolve(scriptDir, '../src/generated/playground-types.generated.json');
 const docsComparisonVirtualPath = 'file:///docs/comparison.tsx';
 
@@ -109,22 +108,13 @@ files[virtualPath('@luke-ui/react', 'package.json')] = JSON.stringify({
 	name: reactPackageJson.name,
 });
 
-// @luke-ui/rainbow-sprinkles ships TypeScript sources, which Monaco consumes directly.
-walk(join(rainbowSprinklesDir, 'src'), (filePath) => {
-	if (!filePath.endsWith('.ts')) return;
-	addFile('@luke-ui/rainbow-sprinkles', rainbowSprinklesDir, filePath);
-});
-addFile(
-	'@luke-ui/rainbow-sprinkles',
-	rainbowSprinklesDir,
-	join(rainbowSprinklesDir, 'package.json'),
-);
-
 // External type dependencies reachable from @luke-ui/react's public types.
 // Resolution starts from the package that actually depends on each one, so
 // pnpm's strict node_modules layout resolves the correct versions.
+// Styling-engine packages stay out of this list: public Luke UI declarations no
+// longer require them for type checking. Vite optimizeDeps still prebundles the
+// runtime copies separately.
 const typesReactDir = resolvePackageDir(docsPackageJsonPath, '@types/react');
-const recipesDir = resolvePackageDir(docsPackageJsonPath, '@vanilla-extract/recipes');
 const racDir = resolvePackageDir(docsPackageJsonPath, 'react-aria-components');
 const racPackageJsonPath = join(racDir, 'package.json');
 const reactFormDir = resolvePackageDir(docsPackageJsonPath, '@tanstack/react-form');
@@ -133,11 +123,6 @@ const externalTypePackages: Array<[string, string]> = [
 	['@types/react', typesReactDir],
 	['@types/react-dom', resolvePackageDir(docsPackageJsonPath, '@types/react-dom')],
 	['csstype', resolvePackageDir(join(typesReactDir, 'package.json'), 'csstype')],
-	['@vanilla-extract/recipes', recipesDir],
-	[
-		'@vanilla-extract/css',
-		resolvePackageDir(join(recipesDir, 'package.json'), '@vanilla-extract/css'),
-	],
 	['react-aria-components', racDir],
 	['react-aria', resolvePackageDir(racPackageJsonPath, 'react-aria')],
 	['react-stately', resolvePackageDir(racPackageJsonPath, 'react-stately')],

@@ -1,6 +1,7 @@
 # @luke-ui/react
 
-Luke UI is a React design system built on `react-aria-components` and `vanilla-extract`.
+Luke UI is a React design system built on `react-aria-components` and Vanilla Extract. Consumers
+import the shipped CSS and do not need the Vanilla Extract compiler.
 
 ## Install
 

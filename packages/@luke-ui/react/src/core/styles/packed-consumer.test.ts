@@ -65,21 +65,41 @@ test(
 					"import { createElement } from 'react';",
 					"import { renderToStaticMarkup } from 'react-dom/server';",
 					"import { Blockquote } from '@luke-ui/react/blockquote';",
+					"import { createSprinkles } from '@luke-ui/react/styles';",
+					'',
+					'const layout = createSprinkles({ display: "flex", id: "sprinkles-root" });',
+					'if (!createSprinkles.properties.has("display")) {',
+					'  throw new Error("createSprinkles.properties must include display");',
+					'}',
+					'if (layout.id !== "sprinkles-root") {',
+					'  throw new Error("createSprinkles must pass through non-utility props");',
+					'}',
 					'',
 					"const markup = renderToStaticMarkup(createElement(Blockquote, null, 'Hello world'));",
-					'process.stdout.write(markup);',
+					'process.stdout.write(JSON.stringify({ markup, layoutId: layout.id, className: layout.className }));',
 				].join('\n'),
 			);
 
-			const markup = execFileSync('node', [renderScript], {
+			const output = execFileSync('node', [renderScript], {
 				cwd: consumerDir,
 				encoding: 'utf8',
 				// No NODE_PATH or workspace config that could smuggle in a compiler.
 				env: { PATH: process.env.PATH ?? '' },
 			});
+			const parsed: unknown = JSON.parse(output);
+			if (
+				!isRecord(parsed) ||
+				typeof parsed.markup !== 'string' ||
+				typeof parsed.layoutId !== 'string' ||
+				typeof parsed.className !== 'string'
+			) {
+				throw new Error('Expected packed consumer output to include markup and sprinkles fields.');
+			}
 
-			expect(markup).toContain('<blockquote');
-			expect(markup).toContain('Hello world');
+			expect(parsed.markup).toContain('<blockquote');
+			expect(parsed.markup).toContain('Hello world');
+			expect(parsed.layoutId).toBe('sprinkles-root');
+			expect(parsed.className.length).toBeGreaterThan(0);
 		} finally {
 			await rm(tarballDir, { force: true, recursive: true });
 			await rm(consumerDir, { force: true, recursive: true });

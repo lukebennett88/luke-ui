@@ -2,6 +2,8 @@
 
 import { assertType, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
+import type { SprinklesProps } from '../../../dist/styles.js';
+import { createSprinkles } from '../../../dist/styles.js';
 
 type UtilityProps = NonNullable<BoxProps>;
 
@@ -78,8 +80,38 @@ test('responsive objects are keyed by the theme breakpoints', () => {
 	assertType<UtilityProps['padding']>({ initial: '16px' });
 });
 
-test('unconstrained properties still accept raw CSS values', () => {
-	// `inlineSize` is deliberately open: it takes any length, unlike the token-backed scales.
+test('unconstrained properties keep property-specific CSS value typing', () => {
+	// `inlineSize` and `order` are `true` scales: they accept the csstype value for that property,
+	// not a widened `string | number`.
 	assertType<UtilityProps['inlineSize']>('400px');
 	assertType<UtilityProps['inlineSize']>('100%');
+	assertType<UtilityProps['inlineSize']>('min-content');
+	assertType<UtilityProps['order']>(1);
+	assertType<UtilityProps['order']>('inherit');
+	assertType<UtilityProps['flex']>('1 1 auto');
+	assertType<UtilityProps['flex']>('none');
+
+	// @ts-expect-error — booleans are not CSS size values
+	assertType<UtilityProps['inlineSize']>(true);
+	// @ts-expect-error — plain objects are not CSS size values
+	assertType<UtilityProps['inlineSize']>({ bogus: '1px' });
+	// @ts-expect-error — booleans are not CSS order values
+	assertType<UtilityProps['order']>(true);
+	// @ts-expect-error — booleans are not CSS flex values
+	assertType<UtilityProps['flex']>(false);
+});
+
+test('createSprinkles.properties is a read-only public Set contract', () => {
+	expectTypeOf(createSprinkles.properties).toEqualTypeOf<ReadonlySet<keyof SprinklesProps>>();
+	// @ts-expect-error — the public type is read-only; mutation APIs are not part of the contract
+	createSprinkles.properties.add('display');
+});
+
+test('createSprinkles keeps non-utility props on the result type', () => {
+	const result = createSprinkles({ display: 'flex', id: 'root', 'data-testid': 'box' });
+	expectTypeOf(result.id).toEqualTypeOf<string>();
+	expectTypeOf(result['data-testid']).toEqualTypeOf<string>();
+	expectTypeOf(result.className).toEqualTypeOf<string>();
+	expectTypeOf(result.style).toEqualTypeOf<Record<string, string>>();
+	expectTypeOf(result).not.toHaveProperty('display');
 });
