@@ -269,11 +269,11 @@ type CreateSprinklesResult<Props extends object> = {
 } & Omit<Props, keyof SprinklesProps | 'className' | 'style'>;
 
 /**
- * Public `createSprinkles` contract. `properties` is read-only in TypeScript; the runtime `Set` is
- * still mutable. Own enumerable string-keyed non-utility props pass through. Generated `className`
- * and `style` replace input keys of those names.
+ * Internal `createSprinkles` contract. `properties` is read-only in TypeScript; the runtime `Set`
+ * is still mutable. Own enumerable string-keyed non-utility props pass through. Generated
+ * `className` and `style` replace input keys of those names.
  */
-export type CreateSprinkles = {
+type CreateSprinkles = {
 	<Props extends SprinklesProps>(props: Props): CreateSprinklesResult<Props>;
 	readonly properties: ReadonlySet<keyof SprinklesProps>;
 };

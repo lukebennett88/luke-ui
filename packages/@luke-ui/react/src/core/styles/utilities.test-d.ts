@@ -2,7 +2,7 @@
 
 import { assertType, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
-import type { CreateSprinkles, SprinklesProps } from '../../../dist/styles.js';
+import type { SprinklesProps } from '../../../dist/styles.js';
 import { createSprinkles } from '../../../dist/styles.js';
 
 type UtilityProps = NonNullable<BoxProps>;
@@ -103,7 +103,6 @@ test('unconstrained properties keep property-specific CSS value typing', () => {
 
 test('createSprinkles.properties is a read-only public Set contract', () => {
 	expectTypeOf(createSprinkles.properties).toEqualTypeOf<ReadonlySet<keyof SprinklesProps>>();
-	expectTypeOf<CreateSprinkles['properties']>().toEqualTypeOf<ReadonlySet<keyof SprinklesProps>>();
 	// @ts-expect-error — the public type is read-only; mutation APIs are not part of the contract
 	createSprinkles.properties.add('display');
 });

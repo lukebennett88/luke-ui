@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { dirname, posix } from 'node:path';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import packageJson from '../../../package.json' with { type: 'json' };
@@ -120,15 +121,24 @@ function collectDeclarationClosure(entryFile: string): string {
 		const source = readFileSync(new URL(fileName, distUrl), 'utf8');
 		parts.push(source);
 
-		for (const match of source.matchAll(/from ["']\.\/([^"']+)["']/g)) {
+		for (const match of source.matchAll(/from ["'](\.\.?\/[^"']+)["']/g)) {
 			const specifier = match[1];
 			if (specifier === undefined) continue;
-			const next = specifier.endsWith('.js')
-				? `${specifier.slice(0, -3)}.d.ts`
-				: `${specifier}.d.ts`;
-			queue.push(next);
+			queue.push(resolveDeclarationImport(fileName, specifier));
 		}
 	}
 
 	return parts.join('\n');
+}
+
+/** Resolve `./` and `../` declaration imports against the importing file's directory. */
+function resolveDeclarationImport(fromFile: string, specifier: string): string {
+	const declarationSpecifier = specifier.endsWith('.js')
+		? `${specifier.slice(0, -3)}.d.ts`
+		: `${specifier}.d.ts`;
+	const next = posix.normalize(posix.join(dirname(fromFile), declarationSpecifier));
+	if (next.startsWith('..')) {
+		throw new Error(`Declaration import escaped dist: ${specifier} from ${fromFile}`);
+	}
+	return next;
 }

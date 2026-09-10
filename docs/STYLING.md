@@ -3,8 +3,9 @@
 How styling works in `@luke-ui/react`, for contributors who maintain it. Public usage docs live in
 the docs app MDX.
 
-Luke UI uses Vanilla Extract for styling. Public component APIs, utility props, and emitted CSS are
-the stable contracts. Vanilla Extract types are not part of the published TypeScript surface.
+Luke UI uses Vanilla Extract for styling. Public component APIs, utility props, cascade layers, and
+token custom properties are the stable contracts. Vanilla Extract types are not part of the
+published TypeScript surface.
 
 ## Setup
 
