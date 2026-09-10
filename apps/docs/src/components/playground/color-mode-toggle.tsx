@@ -17,7 +17,6 @@ export function ColorModeToggle() {
 
 	return (
 		<IconToggleButtonGroup
-			appearance="ghost"
 			label="Colour mode"
 			onChange={setTheme}
 			options={COLOR_MODES}
