@@ -1,4 +1,5 @@
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
+import type { Properties as CSSProperties } from 'csstype';
 import { typedEntries } from '../../shared/utils/utils.js';
 import { breakpoints } from '../../theme/breakpoints.js';
 import { vars } from '../../theme/contract.css.js';
@@ -229,9 +230,15 @@ const dynamicProperties = {
 
 type BreakpointName = keyof typeof responsiveConditions;
 
-/** Token or CSS value accepted by one utility property. */
-type ScaleValue<Scale> = Scale extends true
-	? string | number
+/**
+ * Value accepted by one utility property. Constrained scales use their keys. Unconstrained
+ * (`true`) properties keep the previous Rainbow Sprinkles contract: the csstype value for that
+ * CSS property name.
+ */
+type ScaleValue<Property extends PropertyKey, Scale> = Scale extends true
+	? Property extends keyof CSSProperties
+		? CSSProperties[Property]
+		: never
 	: Scale extends Record<string, unknown>
 		? keyof Scale & string
 		: never;
@@ -246,7 +253,7 @@ type ResponsiveValue<Value> =
 
 type SprinklesPropsShape = {
 	[Property in keyof typeof dynamicProperties]?: ResponsiveValue<
-		ScaleValue<(typeof dynamicProperties)[Property]>
+		ScaleValue<Property, (typeof dynamicProperties)[Property]>
 	>;
 };
 

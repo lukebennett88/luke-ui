@@ -2,13 +2,21 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { expect, test } from 'vite-plus/test';
 
-const scriptPath = resolve(import.meta.dirname, '../../scripts/generate-playground-types.ts');
+const generatedTypesPath = resolve(
+	import.meta.dirname,
+	'../generated/playground-types.generated.json',
+);
 
-test('Monaco playground types omit styling-engine packages from the allowlist', () => {
-	const source = readFileSync(scriptPath, 'utf8');
+test('generated Monaco playground types omit styling-engine packages', () => {
+	const files = JSON.parse(readFileSync(generatedTypesPath, 'utf8')) as Record<string, string>;
+	const paths = Object.keys(files);
 
-	expect(source).not.toContain("'@vanilla-extract/recipes'");
-	expect(source).not.toContain("'@vanilla-extract/css'");
-	expect(source).not.toContain("'@luke-ui/rainbow-sprinkles'");
-	expect(source).toContain('Styling-engine packages stay out of this list');
+	expect(paths.some((path) => path.includes('@luke-ui/react/'))).toBe(true);
+	expect(paths.some((path) => path.includes('vanilla-extract'))).toBe(false);
+	expect(paths.some((path) => path.includes('rainbow-sprinkles'))).toBe(false);
+
+	const stylesDeclaration = files['file:///node_modules/@luke-ui/react/dist/styles.d.ts'];
+	expect(stylesDeclaration).toBeTypeOf('string');
+	expect(stylesDeclaration).not.toMatch(/from ["']@vanilla-extract\//);
+	expect(stylesDeclaration).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
 });

@@ -3,9 +3,8 @@
 How styling works in `@luke-ui/react`, for contributors who maintain it. Public usage docs live in
 the docs app MDX.
 
-Vanilla Extract is the current styling compiler and authoring surface inside this package. Public
-component APIs, shipped CSS, and utility props are the replaceable contracts. Do not treat Vanilla
-Extract types as part of the published TypeScript surface.
+Luke UI uses Vanilla Extract for styling. Public component APIs, utility props, and emitted CSS are
+the stable contracts; Vanilla Extract types are not part of the published TypeScript surface.
 
 ## Setup
 
@@ -227,9 +226,9 @@ control is disabled.
 Styling utilities are public from `@luke-ui/react/styles`. Use them when component props are too
 narrow for layout or appearance.
 
-They currently use Rainbow Sprinkles over Vanilla Extract. Values can land on inline `style`, which
-raises specificity. That tradeoff is acceptable because utilities are already the highest-priority
-escape hatch. Rainbow Sprinkles stays private until Luke UI's first major release.
+They use Rainbow Sprinkles over Vanilla Extract. Values can land on inline `style`, which raises
+specificity. That tradeoff is acceptable because utilities are already the highest-priority escape
+hatch.
 
 `Box` from `@luke-ui/react/box` applies these utilities. Use it as the escape hatch for layout and
 appearance. It excludes typography and text colour. Use `Text` or `Heading` for those.

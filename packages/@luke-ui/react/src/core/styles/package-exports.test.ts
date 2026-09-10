@@ -57,19 +57,14 @@ test('requires react-aria-components as a peer dependency', () => {
 	expect('react-aria-components' in (packageJson.dependencies ?? {})).toBe(false);
 });
 
-test('documented public entry declarations do not import Vanilla Extract', async () => {
-	const entryDeclarations = [
-		'box.d.ts',
-		'styles.d.ts',
-		'text.d.ts',
-		'button.d.ts',
-		'theme.d.ts',
-	] as const;
+test('public JS/TS export declaration closures do not import styling engines', async () => {
+	const entryDeclarations = publicTypeEntryDeclarations(packageJson.exports);
+	expect(entryDeclarations.length).toBeGreaterThan(0);
 
 	const results = await Promise.all(
 		entryDeclarations.map(async (fileName) => {
 			const source = await readFile(new URL(`../../../dist/${fileName}`, import.meta.url), 'utf8');
-			const closure = await collectDeclarationClosure(fileName);
+			const closure = collectDeclarationClosure(fileName);
 			return { closure, fileName, source };
 		}),
 	);
@@ -95,7 +90,23 @@ test('does not expose the private combobox styling recipe from the primitive ent
 	expect('comboboxRecipe' in combobox).toBe(false);
 });
 
-async function collectDeclarationClosure(entryFile: string): Promise<string> {
+/** JS package exports that publish TypeScript declarations beside the runtime file. */
+function publicTypeEntryDeclarations(exportsMap: Record<string, string>): Array<string> {
+	const entries: Array<string> = [];
+
+	for (const target of Object.values(exportsMap)) {
+		// Asset and package metadata exports have no declaration graph to police.
+		if (!target.endsWith('.js')) continue;
+		if (!target.startsWith('./dist/')) {
+			throw new Error(`Expected a dist JS export target, received ${target}`);
+		}
+		entries.push(`${target.slice('./dist/'.length, -'.js'.length)}.d.ts`);
+	}
+
+	return entries;
+}
+
+function collectDeclarationClosure(entryFile: string): string {
 	const distUrl = new URL('../../../dist/', import.meta.url);
 	const visited = new Set<string>();
 	const queue = [entryFile];

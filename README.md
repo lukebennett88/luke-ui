@@ -1,7 +1,6 @@
 # Luke UI
 
-React design system built with `react-aria-components`. Styles currently compile with Vanilla
-Extract; that compiler choice is an implementation detail, not a product promise.
+React design system built with `react-aria-components` and Vanilla Extract.
 
 ## Setup
 
@@ -20,7 +19,7 @@ Useful repo commands:
 
 - Monorepo: pnpm and Turbo.
 - React: `react-aria-components`.
-- Styling: statically generated CSS (currently Vanilla Extract).
+- Styling: Vanilla Extract static CSS.
 - Lint and format: `oxlint` and `oxfmt`.
 
 ## Package
