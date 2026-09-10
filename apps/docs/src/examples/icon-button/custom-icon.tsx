@@ -2,7 +2,7 @@ import { createIcon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 
 export default () => {
-	return <IconButton aria-label="Luke UI on GitHub" icon={<GithubIcon />} />;
+	return <IconButton aria-label="Share" icon={<GithubIcon />} />;
 };
 
 const GithubIcon = createIcon({
