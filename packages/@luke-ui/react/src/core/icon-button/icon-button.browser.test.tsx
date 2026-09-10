@@ -40,9 +40,9 @@ testIntegration('icon-button', async () => {
 });
 
 test('a built-in icon contributes no accessible name', () => {
-	const { locator } = render(<IconButton aria-label="Search" icon="search" />);
+	const { locator } = render(<IconButton aria-label="Repository" icon="search" />);
 
-	expect(locator.getByRole('button', { name: 'Search' }).element()).toBeTruthy();
+	expect(locator.getByRole('button', { name: 'Repository' }).element()).toBeTruthy();
 	expect(locator.getByRole('button', { name: 'search' }).query()).toBeNull();
 });
 
