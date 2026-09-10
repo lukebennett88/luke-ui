@@ -23,6 +23,8 @@ import { Box } from '@luke-ui/react/box';
 Use semantic HTML when no layout properties are needed. Box is a layout tool, not a replacement for
 every element. Use `createSprinkles` from `@luke-ui/react/styles` when another application-owned
 element needs the same responsive layout properties without wrapping it in a `Box`.
+`createSprinkles` passes through its own enumerable string-keyed non-utility props and replaces any
+input `className` or `style` with the generated values.
 
 ## Responsive values
 

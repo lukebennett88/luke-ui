@@ -1,7 +1,7 @@
 import type { ButtonPresentationProps } from '../action-presentation.js';
 import { buttonRecipeInternal } from '../primitives/button/recipe.css.js';
-import type { RecipeComposition } from '../styles/recipe.js';
 import { withDefaultVariants } from '../styles/recipe.js';
+import type { RecipeComposition } from '../styles/recipe-types.js';
 
 /** Styles a Button from the same presentation props accepted by `Button`. */
 export const buttonRecipe = withDefaultVariants<

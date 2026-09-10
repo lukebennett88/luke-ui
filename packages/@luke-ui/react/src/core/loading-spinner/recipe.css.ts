@@ -1,8 +1,9 @@
 import { keyframes } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { iconSizeVariants } from '../icon/recipe.css.js';
-import type { RecipeSelection, SlottedConfigInput } from '../styles/recipe.js';
+import type { SlottedConfigInput } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
+import type { RecipeSelection } from '../styles/recipe-types.js';
 import { spinnerOverlayBase } from '../styles/spinner-overlay.js';
 
 const rotationDuration = '1.2s';

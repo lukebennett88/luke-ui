@@ -1,7 +1,7 @@
 import { vars } from '../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../theme/font-metric-scale.js';
-import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
+import type { RecipeSelection } from '../styles/recipe-types.js';
 
 /** Key chip for `<kbd>`. Sets its own size. Leaves `letterSpacing` unset so it inherits. */
 export const kbdRecipe = recipe({

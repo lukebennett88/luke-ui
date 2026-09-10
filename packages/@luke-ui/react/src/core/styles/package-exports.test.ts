@@ -56,7 +56,50 @@ test('requires react-aria-components as a peer dependency', () => {
 	expect('react-aria-components' in (packageJson.dependencies ?? {})).toBe(false);
 });
 
+test('documented public entry declarations do not import Vanilla Extract', async () => {
+	const entryDeclarations = [
+		'box.d.ts',
+		'styles.d.ts',
+		'text.d.ts',
+		'button.d.ts',
+		'theme.d.ts',
+	] as const;
+
+	for (const fileName of entryDeclarations) {
+		const source = await readFile(new URL(`../../../dist/${fileName}`, import.meta.url), 'utf8');
+		const closure = await collectDeclarationClosure(fileName);
+		expect(closure, fileName).not.toMatch(/from ["']@vanilla-extract\//);
+		expect(closure, fileName).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
+		expect(source.length).toBeGreaterThan(0);
+	}
+});
+
 test('does not expose the private combobox styling recipe from the primitive entrypoint', async () => {
 	const combobox = await import('@luke-ui/react/primitives/combobox');
 	expect('comboboxRecipe' in combobox).toBe(false);
 });
+
+async function collectDeclarationClosure(entryFile: string): Promise<string> {
+	const distUrl = new URL('../../../dist/', import.meta.url);
+	const visited = new Set<string>();
+	const queue = [entryFile];
+	const parts: Array<string> = [];
+
+	while (queue.length > 0) {
+		const fileName = queue.pop();
+		if (fileName === undefined || visited.has(fileName)) continue;
+		visited.add(fileName);
+
+		const source = await readFile(new URL(fileName, distUrl), 'utf8');
+		parts.push(source);
+
+		for (const match of source.matchAll(/from ["']\.\/([^"']+)["']/g)) {
+			const specifier = match[1];
+			if (specifier === undefined) continue;
+			const next = specifier.endsWith('.js') ? `${specifier.slice(0, -3)}.d.ts` : `${specifier}.d.ts`;
+			queue.push(next);
+		}
+	}
+
+	return parts.join('\n');
+}

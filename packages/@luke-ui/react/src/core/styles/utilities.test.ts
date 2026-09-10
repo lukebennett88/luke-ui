@@ -44,3 +44,50 @@ test('resolves every elevation surface background token to its theme variable', 
 		recessed: ['var(--luke-color-surface-recessed)'],
 	});
 });
+
+test('passes through own enumerable string-keyed non-utility props', () => {
+	const result = createSprinkles({
+		display: 'flex',
+		id: 'layout-root',
+		'data-testid': 'box',
+		role: 'group',
+	});
+
+	expect(result).toMatchObject({
+		id: 'layout-root',
+		'data-testid': 'box',
+		role: 'group',
+	});
+	expect(result.className.length).toBeGreaterThan(0);
+	expect('display' in result).toBe(false);
+});
+
+test('replaces input className and style with generated output', () => {
+	const result = createSprinkles({
+		display: 'grid',
+		inlineSize: '20rem',
+		className: 'consumer-class',
+		style: { color: 'red' },
+	});
+
+	expect(result.className).not.toContain('consumer-class');
+	expect(result.className.length).toBeGreaterThan(0);
+	expect(result.style).not.toEqual({ color: 'red' });
+	expect(Object.values(result.style)).toContain('20rem');
+});
+
+test('does not claim to preserve symbol keys or non-enumerable props', () => {
+	const symbolKey = Symbol('hidden');
+	const input = Object.defineProperties(
+		{ display: 'flex' as const },
+		{
+			[symbolKey]: { enumerable: true, value: 'symbol-value' },
+			secret: { enumerable: false, value: 'hidden' },
+		},
+	);
+
+	const result = createSprinkles(input);
+
+	expect(result).not.toHaveProperty('secret');
+	expect(Object.getOwnPropertySymbols(result)).toEqual([]);
+});

@@ -3,8 +3,8 @@ import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import type { FontWeightRole, TypeStyle } from '../../theme/contract.js';
 import { fontWeightRoles, typeStyles } from '../../theme/contract.js';
-import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
+import type { RecipeSelection } from '../styles/recipe-types.js';
 import { visuallyHiddenStyle } from '../visually-hidden/recipe.css.js';
 
 const lineClampNone = {} satisfies ComplexStyleRule;

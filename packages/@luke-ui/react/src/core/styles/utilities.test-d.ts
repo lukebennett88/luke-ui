@@ -2,6 +2,8 @@
 
 import { assertType, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
+import type { CreateSprinkles, SprinklesProps } from '../../../dist/styles.js';
+import { createSprinkles } from '../../../dist/styles.js';
 
 type UtilityProps = NonNullable<BoxProps>;
 
@@ -82,4 +84,20 @@ test('unconstrained properties still accept raw CSS values', () => {
 	// `inlineSize` is deliberately open: it takes any length, unlike the token-backed scales.
 	assertType<UtilityProps['inlineSize']>('400px');
 	assertType<UtilityProps['inlineSize']>('100%');
+});
+
+test('createSprinkles.properties is a read-only public Set contract', () => {
+	expectTypeOf(createSprinkles.properties).toEqualTypeOf<ReadonlySet<keyof SprinklesProps>>();
+	expectTypeOf<CreateSprinkles['properties']>().toEqualTypeOf<ReadonlySet<keyof SprinklesProps>>();
+	// @ts-expect-error — the public type is read-only; mutation APIs are not part of the contract
+	createSprinkles.properties.add('display');
+});
+
+test('createSprinkles keeps non-utility props on the result type', () => {
+	const result = createSprinkles({ display: 'flex', id: 'root', 'data-testid': 'box' });
+	expectTypeOf(result.id).toEqualTypeOf<string>();
+	expectTypeOf(result['data-testid']).toEqualTypeOf<string>();
+	expectTypeOf(result.className).toEqualTypeOf<string>();
+	expectTypeOf(result.style).toEqualTypeOf<Record<string, string>>();
+	expectTypeOf(result).not.toHaveProperty('display');
 });
