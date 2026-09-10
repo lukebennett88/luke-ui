@@ -50,7 +50,7 @@ type IconLinkStyleProps =
 
 type _IconLinkOmit = DistributiveOmit<
 	RacLinkProps,
-	'aria-label' | 'aria-labelledby' | 'href' | 'isDisabled' | 'onPress'
+	'aria-label' | 'aria-labelledby' | 'children' | 'href' | 'isDisabled' | 'onPress'
 >;
 
 interface _IconLinkProps extends _IconLinkOmit {

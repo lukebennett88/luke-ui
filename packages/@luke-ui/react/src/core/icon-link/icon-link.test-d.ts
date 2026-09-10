@@ -45,6 +45,13 @@ test('IconLink accepts only supported treatments and requires navigation and nam
 		href: '/settings',
 		icon: 'add',
 	};
+	const childrenIconLink: IconLinkProps = {
+		'aria-label': 'Add',
+		// @ts-expect-error — IconLink renders its icon and does not accept children
+		children: 'Add',
+		href: '/settings',
+		icon: 'add',
+	};
 	// @ts-expect-error — IconLink always requires a navigation destination
 	const missingHref: IconLinkProps = { 'aria-label': 'Add', icon: 'add' };
 	// @ts-expect-error — an icon-only link requires an accessible name
@@ -70,6 +77,7 @@ test('IconLink accepts only supported treatments and requires navigation and nam
 	void neutralHighIconLink;
 	void textIconLink;
 	void buttonAppearanceIconLink;
+	void childrenIconLink;
 	void missingHref;
 	void unlabelledIconLink;
 	void pendingIconLink;
