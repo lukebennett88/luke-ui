@@ -5,7 +5,7 @@ import type { PropsWithChildren } from 'react';
 type ComparisonProps = PropsWithChildren<{
 	/**
 	 * The direction of the comparison
-	 * @default 'horizontal'
+	 * @default 'vertical'
 	 */
 	direction?: 'horizontal' | 'vertical';
 }>;
