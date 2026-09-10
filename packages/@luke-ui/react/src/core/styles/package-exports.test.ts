@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import packageJson from '../../../package.json' with { type: 'json' };
@@ -65,11 +66,26 @@ test('documented public entry declarations do not import Vanilla Extract', async
 		'theme.d.ts',
 	] as const;
 
-	for (const fileName of entryDeclarations) {
-		const source = await readFile(new URL(`../../../dist/${fileName}`, import.meta.url), 'utf8');
-		const closure = await collectDeclarationClosure(fileName);
-		expect(closure, fileName).not.toMatch(/from ["']@vanilla-extract\//);
-		expect(closure, fileName).not.toMatch(/from ["']@luke-ui\/rainbow-sprinkles["']/);
+	const results = await Promise.all(
+		entryDeclarations.map(async (fileName) => {
+			const source = await readFile(new URL(`../../../dist/${fileName}`, import.meta.url), 'utf8');
+			const closure = await collectDeclarationClosure(fileName);
+			return { closure, fileName, source };
+		}),
+	);
+
+	for (const { closure, fileName, source } of results) {
+		expect({
+			fileName,
+			hasRainbowSprinklesImport: /from ["']@luke-ui\/rainbow-sprinkles["']/.test(closure),
+			hasVanillaExtractImport: /from ["']@vanilla-extract\//.test(closure),
+			sourceLength: source.length,
+		}).toEqual({
+			fileName,
+			hasRainbowSprinklesImport: false,
+			hasVanillaExtractImport: false,
+			sourceLength: expect.any(Number),
+		});
 		expect(source.length).toBeGreaterThan(0);
 	}
 });
@@ -90,7 +106,7 @@ async function collectDeclarationClosure(entryFile: string): Promise<string> {
 		if (fileName === undefined || visited.has(fileName)) continue;
 		visited.add(fileName);
 
-		const source = await readFile(new URL(fileName, distUrl), 'utf8');
+		const source = readFileSync(new URL(fileName, distUrl), 'utf8');
 		parts.push(source);
 
 		for (const match of source.matchAll(/from ["']\.\/([^"']+)["']/g)) {
