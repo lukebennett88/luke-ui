@@ -33,6 +33,7 @@ export const componentTestManifest = [
 	// Public props are a closed set. `ref` and `data-*` are not forwarded.
 	['Icon', 'icon', [], 'none', 'applicable'],
 	['IconButton', 'icon-button', ['dom'], 'required', 'applicable'],
+	['IconLink', 'icon-link', ['dom'], 'required', 'applicable'],
 	// Multi-part composition. No single root is the documented element.
 	['Input group primitive', 'primitives/input-group', [], 'none', 'none'],
 	['Kbd', 'kbd', ['dom'], 'none', 'none'],

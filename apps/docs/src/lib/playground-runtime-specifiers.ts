@@ -25,7 +25,7 @@ const PLAYGROUND_THIRD_PARTY_SPECIFIERS = [
 ] as const;
 
 /** Docs-only helpers that documented examples can import in the playground. */
-const PLAYGROUND_DOCS_SPECIFIERS = ['#docs/comparison'] as const;
+const PLAYGROUND_DOCS_SPECIFIERS = ['#docs/comparison', '#docs/github-mark'] as const;
 
 const packageJsonSchema = z.object({
 	exports: z.record(z.string(), z.string()),

@@ -1,4 +1,4 @@
 {
 	"title": "Actions",
-	"pages": ["button", "icon-button", "link"]
+	"pages": ["button", "icon-button", "icon-link", "link"]
 }

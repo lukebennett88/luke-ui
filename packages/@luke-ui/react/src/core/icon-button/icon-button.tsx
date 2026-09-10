@@ -8,6 +8,7 @@ import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/b
 import { Button } from '../primitives/button/button.js';
 import type * as primitiveStyles from '../primitives/button/recipe.css.js';
 import { pendingSpinnerOverlay } from '../styles/pending-spinner-overlay.css.js';
+import type { RequiredAccessibleName } from '../types/accessible-name.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { DocumentedPressProps } from '../types/documented-rac-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -67,6 +68,8 @@ type IconButtonStyleProps =
 type _IconButtonOmit = DistributiveOmit<
 	PrimitiveButtonProps,
 	| 'appearance'
+	| 'aria-label'
+	| 'aria-labelledby'
 	| 'isBlock'
 	| 'isPending'
 	| 'prominence'
@@ -77,7 +80,8 @@ type _IconButtonOmit = DistributiveOmit<
 
 type _IconButtonProps = _IconButtonOmit &
 	IconButtonStyleProps &
-	DocumentedPressProps & {
+	DocumentedPressProps &
+	RequiredAccessibleName & {
 		/** Icon name from the generated icon set. */
 		icon: IconName;
 	};

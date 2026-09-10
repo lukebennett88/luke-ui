@@ -5,6 +5,7 @@
 		"---Actions---",
 		"actions/button",
 		"actions/icon-button",
+		"actions/icon-link",
 		"actions/link",
 		"---Feedback---",
 		"feedback/loading-skeleton",

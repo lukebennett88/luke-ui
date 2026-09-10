@@ -30,6 +30,7 @@
 		"./heading": "./dist/heading.js",
 		"./icon": "./dist/icon.js",
 		"./icon-button": "./dist/icon-button.js",
+		"./icon-link": "./dist/icon-link.js",
 		"./kbd": "./dist/kbd.js",
 		"./link": "./dist/link.js",
 		"./loading-skeleton": "./dist/loading-skeleton.js",
