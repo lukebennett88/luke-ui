@@ -6,18 +6,22 @@ export default () => {
 		<Comparison>
 			<ComparisonItem label="Low">
 				<IconLink
-					aria-label="Open documentation"
+					aria-label="Installation documentation"
 					href="/docs/installation"
 					icon="bookOpen"
 					prominence="low"
 				/>
 			</ComparisonItem>
 			<ComparisonItem label="Standard">
-				<IconLink aria-label="Open documentation" href="/docs/installation" icon="bookOpen" />
+				<IconLink
+					aria-label="Installation documentation"
+					href="/docs/installation"
+					icon="bookOpen"
+				/>
 			</ComparisonItem>
 			<ComparisonItem label="High">
 				<IconLink
-					aria-label="Open documentation"
+					aria-label="Installation documentation"
 					href="/docs/installation"
 					icon="bookOpen"
 					prominence="high"

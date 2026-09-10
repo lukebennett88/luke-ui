@@ -4,31 +4,16 @@ import { Comparison, ComparisonItem } from '#docs/comparison';
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="Text · Low">
+			<ComparisonItem label="Low">
 				<Link href="#example-destination" prominence="low">
 					Example destination
 				</Link>
 			</ComparisonItem>
-			<ComparisonItem label="Text · Standard">
+			<ComparisonItem label="Standard">
 				<Link href="#example-destination">Example destination</Link>
 			</ComparisonItem>
-			<ComparisonItem label="Text · High">
+			<ComparisonItem label="High">
 				<Link href="#example-destination" prominence="high">
-					Example destination
-				</Link>
-			</ComparisonItem>
-			<ComparisonItem label="Button · Low">
-				<Link appearance="button" href="#example-destination" prominence="low">
-					Example destination
-				</Link>
-			</ComparisonItem>
-			<ComparisonItem label="Button · Standard">
-				<Link appearance="button" href="#example-destination">
-					Example destination
-				</Link>
-			</ComparisonItem>
-			<ComparisonItem label="Button · High">
-				<Link appearance="button" href="#example-destination" prominence="high">
 					Example destination
 				</Link>
 			</ComparisonItem>
