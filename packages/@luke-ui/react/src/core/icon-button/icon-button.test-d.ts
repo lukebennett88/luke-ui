@@ -24,11 +24,15 @@ test('IconButton accepts only supported button treatments', () => {
 	expectTypeOf<typeof iconButton>().toExtend<IconButtonProps>();
 	expectTypeOf<typeof customIconButton>().toExtend<IconButtonProps>();
 
-	// @ts-expect-error — IconButton is always button-shaped and does not accept `appearance`
-	const textIconButton: IconButtonProps = { 'aria-label': 'Add', appearance: 'text', icon: 'add' };
-	// @ts-expect-error — IconButton is always button-shaped and does not accept `appearance`
+	const textIconButton: IconButtonProps = {
+		'aria-label': 'Add',
+		// @ts-expect-error — IconButton is always button-shaped and does not accept `appearance`
+		appearance: 'text',
+		icon: 'add',
+	};
 	const buttonAppearanceIconButton: IconButtonProps = {
 		'aria-label': 'Add',
+		// @ts-expect-error — IconButton is always button-shaped and does not accept `appearance`
 		appearance: 'button',
 		icon: 'add',
 	};
