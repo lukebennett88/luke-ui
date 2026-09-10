@@ -96,7 +96,9 @@ async function collectDeclarationClosure(entryFile: string): Promise<string> {
 		for (const match of source.matchAll(/from ["']\.\/([^"']+)["']/g)) {
 			const specifier = match[1];
 			if (specifier === undefined) continue;
-			const next = specifier.endsWith('.js') ? `${specifier.slice(0, -3)}.d.ts` : `${specifier}.d.ts`;
+			const next = specifier.endsWith('.js')
+				? `${specifier.slice(0, -3)}.d.ts`
+				: `${specifier}.d.ts`;
 			queue.push(next);
 		}
 	}

@@ -2,9 +2,9 @@ import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { focusRing } from '../../styles/focus-ring.js';
+import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
-import type { RecipeSelection } from '../../styles/recipe-types.js';
 import { textLineHeight } from '../../text/recipe.css.js';
 import { fieldMessageIcon, fieldMessageIndent } from '../field/recipe.css.js';
 

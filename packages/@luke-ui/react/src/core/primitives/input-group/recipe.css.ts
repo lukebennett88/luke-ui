@@ -5,9 +5,9 @@ import {
 	composeInputStateSelectors,
 	descendantDisabledSelector,
 } from '../../styles/input-states.js';
+import type { RecipeSelection } from '../../styles/recipe-types.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';
-import type { RecipeSelection } from '../../styles/recipe-types.js';
 
 const { disabled, focusWithin, hover, invalid, invalidFocusWithin, readOnly, readOnlyFocusWithin } =
 	composeInputStateSelectors();

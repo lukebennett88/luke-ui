@@ -1,6 +1,6 @@
 import { vars } from '../../theme/contract.css.js';
-import { recipe } from '../styles/recipe.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
+import { recipe } from '../styles/recipe.js';
 
 /**
  * Appearance for inline code. Colour and weight come from surrounding text through

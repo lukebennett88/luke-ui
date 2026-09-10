@@ -1,7 +1,7 @@
 import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer } from '../styles/layered-style.css.js';
-import { recipe } from '../styles/recipe.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
+import { recipe } from '../styles/recipe.js';
 import { proseScopeClassName } from './scope.css.js';
 
 /** Scope class for the long-form rhythm applied by the global rules below. */

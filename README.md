@@ -1,7 +1,7 @@
 # Luke UI
 
-React design system built with `react-aria-components`. Styles currently compile with
-Vanilla Extract; that compiler choice is an implementation detail, not a product promise.
+React design system built with `react-aria-components`. Styles currently compile with Vanilla
+Extract; that compiler choice is an implementation detail, not a product promise.
 
 ## Setup
 
