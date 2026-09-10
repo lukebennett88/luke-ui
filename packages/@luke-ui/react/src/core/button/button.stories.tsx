@@ -51,15 +51,14 @@ const truncationContainerStyle = {
 } as const satisfies CSSProperties;
 
 /**
- * Tone communicates intent. Prominence controls visual emphasis.
+ * Prominence sets visual weight. Tone marks ordinary versus critical intent.
  */
-export const ToneAndAppearance = meta.story({
+export const ProminenceAndTone = meta.story({
 	args: baseArgs,
 	render: ({ children }) => (
 		<div style={stackStyle}>
 			<div style={rowStyle}>
 				<Button prominence="low">{children}</Button>
-				<Button>{children}</Button>
 				<Button>{children}</Button>
 				<Button prominence="high">{children}</Button>
 				<Button tone="critical" prominence="low">
@@ -70,6 +69,33 @@ export const ToneAndAppearance = meta.story({
 					{children}
 				</Button>
 			</div>
+		</div>
+	),
+});
+
+/**
+ * Text Buttons use link-like presentation. Critical text supports low and standard prominence.
+ */
+export const TextAppearance = meta.story({
+	args: {
+		...baseArgs,
+		appearance: 'text',
+	} satisfies Partial<ButtonProps>,
+	render: ({ children }) => (
+		<div style={rowStyle}>
+			<Button appearance="text" prominence="low">
+				{children}
+			</Button>
+			<Button appearance="text">{children}</Button>
+			<Button appearance="text" prominence="high">
+				{children}
+			</Button>
+			<Button appearance="text" tone="critical" prominence="low">
+				{children}
+			</Button>
+			<Button appearance="text" tone="critical">
+				{children}
+			</Button>
 		</div>
 	),
 });
@@ -140,6 +166,9 @@ export const States = meta.story({
 	),
 });
 
+/**
+ * Disabled state across ordinary and critical treatments.
+ */
 export const Disabled = meta.story({
 	args: {
 		...baseArgs,
@@ -147,8 +176,13 @@ export const Disabled = meta.story({
 	},
 	render: ({ isDisabled }) => (
 		<div style={rowStyle}>
-			<Button isDisabled={isDisabled}>Neutral</Button>
-			<Button isDisabled={isDisabled}>Accent</Button>
+			<Button isDisabled={isDisabled} prominence="low">
+				Ordinary low
+			</Button>
+			<Button isDisabled={isDisabled}>Ordinary standard</Button>
+			<Button isDisabled={isDisabled} prominence="high">
+				Ordinary high
+			</Button>
 			<Button isDisabled={isDisabled} tone="critical">
 				Critical
 			</Button>

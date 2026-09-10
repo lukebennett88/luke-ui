@@ -34,18 +34,21 @@ export const Default = meta.story({
 /**
  * Use high prominence for a primary destination. Use low prominence for quiet navigation.
  */
-export const Tone = meta.story({
+export const Prominence = meta.story({
 	args: {
 		...baseArgs,
-		children: 'Neutral (default)',
+		children: 'Standard (default)',
 	} satisfies Partial<LinkProps>,
 	render: ({ href, onPress }) => (
 		<div style={stackStyle}>
+			<Link href={href} onPress={onPress} prominence="low">
+				Low
+			</Link>
 			<Link href={href} onPress={onPress}>
-				Neutral (default)
+				Standard
 			</Link>
 			<Link href={href} onPress={onPress} prominence="high">
-				Accent
+				High
 			</Link>
 		</div>
 	),

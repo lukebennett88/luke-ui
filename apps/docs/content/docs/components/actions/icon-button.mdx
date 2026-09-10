@@ -30,7 +30,14 @@ High prominence uses the primary accent treatment.
 destructive confirmation actions. Icon buttons keep button-shaped presentation and do not support
 the text appearance of [`Button`](/components/actions/button).
 
-<ExampleBlock src="icon-button/appearance" title="Icon Button — Prominence" />
+<ExampleBlock src="icon-button/prominence" title="Icon Button — Prominence" />
+
+## Custom icons
+
+Pass a decorative, non-interactive `ReactElement` to `icon` for a graphic outside the generated icon
+set, such as a brand mark. `IconButton` sizes the graphic to match its built-in icons.
+
+<ExampleBlock src="icon-button/custom-icon" title="Icon Button — Custom icon" />
 
 ## Pending and Actions
 
@@ -48,9 +55,10 @@ to presses.
 
 ## Accessibility
 
-Provide `aria-label` or `aria-labelledby` for every icon button. Name the action, not the icon. Use
-a labelled [`Button`](/components/actions/button) when the icon is unfamiliar or visible text would
-make the action clearer.
+Provide `aria-label` or `aria-labelledby` for every icon button. Name the action, not the icon. The
+icon itself, whether a built-in `Icon` or a custom graphic, contributes no accessible name, so the
+naming prop is required. Use a labelled [`Button`](/components/actions/button) when the icon is
+unfamiliar or visible text would make the action clearer.
 
 ## API
 

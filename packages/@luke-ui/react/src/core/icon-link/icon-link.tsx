@@ -5,6 +5,7 @@ import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { cx } from '../../shared/utils/utils.js';
 import type { IconLinkPresentationProps } from '../action-presentation.js';
 import { iconButtonRecipe, iconButtonReset } from '../icon-button/recipe.css.js';
+import { iconOnlyIconWrapper } from '../icon-button/styles.css.js';
 import { IconSizeProvider } from '../icon/icon-size-context.js';
 import type { IconName } from '../icon/icon.js';
 import { Icon } from '../icon/icon.js';
@@ -14,7 +15,6 @@ import { BUTTON_ICON_SIZE } from '../sizing/button-sizing.js';
 import type { RequiredAccessibleName } from '../types/accessible-name.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import { iconLinkIconWrapper } from './styles.css.js';
 
 interface IconLinkBaseProps extends IconLinkPresentationProps {
 	/** Icon name from the generated icon set, or a custom icon element such as a brand mark. */
@@ -59,7 +59,7 @@ export function IconLink(props: IconLinkProps): JSX.Element {
 					});
 				})}
 			>
-				<span aria-hidden className={iconLinkIconWrapper}>
+				<span aria-hidden className={iconOnlyIconWrapper}>
 					{typeof icon === 'string' ? <Icon name={icon} /> : icon}
 				</span>
 			</RacLink>

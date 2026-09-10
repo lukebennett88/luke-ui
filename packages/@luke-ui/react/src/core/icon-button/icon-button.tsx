@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, ReactElement } from 'react';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
 import { cx } from '../../shared/utils/utils.js';
 import type { IconButtonPresentationProps } from '../action-presentation.js';
@@ -15,13 +15,9 @@ import type { Prettify } from '../types/prettify.js';
 import type { PressAction } from '../use-press-action/use-press-action.js';
 import { usePressAction } from '../use-press-action/use-press-action.js';
 import { iconButtonIcon, iconButtonRecipe, iconButtonReset } from './recipe.css.js';
+import { iconOnlyIconWrapper } from './styles.css.js';
 
 interface IconButtonBaseProps extends IconButtonPresentationProps {
-	/**
-	 * Chooses the button-shaped presentation.
-	 * @default 'button'
-	 */
-	appearance?: 'button';
 	/**
 	 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
 	 * immediately. Prefer `pressAction` for IconButton-owned operations.
@@ -34,6 +30,8 @@ interface IconButtonBaseProps extends IconButtonPresentationProps {
 	 * resulting operation.
 	 */
 	pressAction?: PressAction;
+	/** Icon name from the generated icon set, or a custom icon element such as a brand mark. */
+	icon: IconName | ReactElement;
 }
 
 type _IconButtonOmit = DistributiveOmit<
@@ -41,6 +39,7 @@ type _IconButtonOmit = DistributiveOmit<
 	| 'appearance'
 	| 'aria-label'
 	| 'aria-labelledby'
+	| 'children'
 	| 'isBlock'
 	| 'isPending'
 	| 'prominence'
@@ -52,10 +51,7 @@ type _IconButtonOmit = DistributiveOmit<
 type _IconButtonProps = _IconButtonOmit &
 	IconButtonBaseProps &
 	DocumentedPressProps &
-	RequiredAccessibleName & {
-		/** Icon name from the generated icon set. */
-		icon: IconName;
-	};
+	RequiredAccessibleName;
 
 /** Props for `IconButton`. */
 export type IconButtonProps = Prettify<_IconButtonProps>;
@@ -96,7 +92,12 @@ export function IconButton(props: IconButtonProps): JSX.Element {
 					<LoadingSpinner aria-hidden />
 				</span>
 			)}
-			<Icon className={iconButtonIcon({ isPending: showSpinner })} name={icon} />
+			<span
+				aria-hidden
+				className={cx(iconOnlyIconWrapper, iconButtonIcon({ isPending: showSpinner }))}
+			>
+				{typeof icon === 'string' ? <Icon name={icon} /> : icon}
+			</span>
 		</Button>
 	);
 }
