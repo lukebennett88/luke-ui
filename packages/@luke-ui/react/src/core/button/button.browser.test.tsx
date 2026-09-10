@@ -30,6 +30,56 @@ testIntegration('button', async () => {
 	expect(pressed).toBe(true);
 });
 
+test('a text-appearance Button keeps button semantics and runs onPress', async () => {
+	let pressed = false;
+	const { locator, user } = render(
+		<Button appearance="text" onPress={() => (pressed = true)}>
+			Action
+		</Button>,
+	);
+	const button = locator.getByRole('button', { name: 'Action' }).element();
+
+	expect(button.tagName).toBe('BUTTON');
+
+	await user.click(locator.getByRole('button', { name: 'Action' }));
+	expect(pressed).toBe(true);
+});
+
+test('a pending text Button shows a spinner', () => {
+	const { locator } = render(
+		<Button appearance="text" isPending>
+			Save
+		</Button>,
+	);
+	const button = locator.getByRole('button', { name: 'Save' });
+
+	expect(button.element().getAttribute('data-pending')).toBe('true');
+	expect(button.element().querySelector('[role="status"]')).not.toBeNull();
+});
+
+test('a text Button keeps wrapping layout instead of button no-wrap', () => {
+	const { locator } = render(<Button appearance="text">Save</Button>);
+	const button = locator.getByRole('button', { name: 'Save' }).element();
+
+	expect(getComputedStyle(button).whiteSpace).not.toBe('nowrap');
+});
+
+test('disabled Buttons expose disabled state in either appearance', () => {
+	const { locator } = render(
+		<div>
+			<Button isDisabled>Button appearance</Button>
+			<Button appearance="text" isDisabled>
+				Text appearance
+			</Button>
+		</div>,
+	);
+
+	const buttonAppearance = locator.getByRole('button', { name: 'Button appearance' }).element();
+	const textAppearance = locator.getByRole('button', { name: 'Text appearance' }).element();
+	expect(buttonAppearance).toHaveAttribute('data-disabled', 'true');
+	expect(textAppearance).toHaveAttribute('data-disabled', 'true');
+});
+
 test('runs onPress before pressAction and tracks Action pending', async () => {
 	const order: Array<string> = [];
 	let release!: () => void;

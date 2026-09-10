@@ -13,7 +13,7 @@ const options: Array<Option> = [
 export default () => {
 	return (
 		<Box maxInlineSize="20rem">
-			<Comparison direction="vertical">
+			<Comparison>
 				<ComparisonItem label="Small">
 					<ComboboxField
 						defaultItems={options}

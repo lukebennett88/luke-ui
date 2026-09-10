@@ -1,4 +1,4 @@
-import { Button as LukeButton } from '@luke-ui/react/button';
+import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { TextField } from '@luke-ui/react/text-field';
 import { vars } from '@luke-ui/react/theme';
@@ -47,7 +47,7 @@ export function TokenExplorer(): JSX.Element {
 						aria-label="Filter tokens by name"
 						onChange={setFilter}
 						placeholder="Filter by name"
-						prefix={<Icon aria-hidden name="search" size="small" />}
+						prefix={<Icon name="search" size="small" />}
 						size="small"
 						value={filter}
 					/>
@@ -399,9 +399,9 @@ function EmptyState({ onClear, query }: { onClear: () => void; query: string }) 
 	return (
 		<div className="flex flex-col items-center gap-3 rounded-xl border border-fd-border px-6 py-16 text-center">
 			<p className="text-fd-muted-foreground text-sm">No token matches &quot;{query}&quot;</p>
-			<LukeButton appearance="subtle" onPress={onClear} size="small">
+			<Button onPress={onClear} size="small">
 				Clear filter
-			</LukeButton>
+			</Button>
 		</div>
 	);
 }

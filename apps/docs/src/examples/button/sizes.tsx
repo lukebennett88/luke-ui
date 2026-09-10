@@ -5,10 +5,10 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Small">
-				<Button size="small">Example button</Button>
+				<Button size="small">Save changes</Button>
 			</ComparisonItem>
 			<ComparisonItem label="Medium">
-				<Button size="medium">Example button</Button>
+				<Button size="medium">Save changes</Button>
 			</ComparisonItem>
 		</Comparison>
 	);

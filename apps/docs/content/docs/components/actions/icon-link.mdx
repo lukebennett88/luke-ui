@@ -1,0 +1,59 @@
+---
+title: Icon Link
+description: An icon-only control for navigation.
+source: packages/@luke-ui/react/src/exports/icon-link.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Link.html
+---
+
+`IconLink` navigates to another URL or route, shown as a compact icon-only control. Use
+[`Link`](/components/actions/link) when the destination needs visible text. Use
+[`IconButton`](/components/actions/icon-button) for an action such as saving or deleting instead of
+a navigation.
+
+<ExampleBlock src="icon-link/basic" title="Icon Link — Basic" />
+
+## Size
+
+`medium` is the default. Use `small` for compact toolbars and dense row actions. Keep controls in a
+group at the same size.
+
+<ExampleBlock src="icon-link/size" title="Icon Link — Size" />
+
+## Prominence
+
+`standard` is the default. Choose `low` for quiet secondary destinations and `high` for a primary
+destination. High prominence uses the theme’s primary accent treatment.
+
+<ExampleBlock src="icon-link/prominence" title="Icon Link — Prominence" />
+
+## Custom icons
+
+Pass a decorative, non-interactive `ReactElement` to `icon` for a graphic outside the generated icon
+set, such as a brand mark. `IconLink` sizes the graphic to match its built-in icons.
+
+<ExampleBlock src="icon-link/custom-icon" title="Icon Link — Custom icon" />
+
+## Disabled
+
+Set `isDisabled` when the destination is temporarily unavailable. Disabled controls cannot receive
+focus or respond to presses.
+
+<ExampleBlock src="icon-link/disabled" title="Icon Link — Disabled" />
+
+## Accessibility
+
+Provide `aria-label` or `aria-labelledby` for every icon link. Name the destination, not the icon.
+The icon itself, whether a built-in `Icon` or a custom graphic, contributes no accessible name, so
+the naming prop is required.
+
+## Related components
+
+Use [`Link`](/components/actions/link) for a labelled navigation destination and
+[`IconButton`](/components/actions/icon-button) for an icon-only action.
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/icon-link/icon-link.tsx"
+	name="IconLinkProps"
+/>

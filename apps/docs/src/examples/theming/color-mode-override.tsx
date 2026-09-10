@@ -25,11 +25,10 @@ export default () => {
 				<Box aria-label="Parent colour mode" display="flex" gap="sp8" role="group">
 					{(['light', 'dark'] as const).map((option) => (
 						<Button
-							appearance={parentMode === option ? 'solid' : 'subtle'}
 							aria-pressed={parentMode === option}
 							key={option}
 							onPress={() => setParentMode(option)}
-							tone="accent"
+							prominence={parentMode === option ? 'high' : 'standard'}
 						>
 							{option === 'light' ? 'Light' : 'Dark'}
 						</Button>

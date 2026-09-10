@@ -4,14 +4,11 @@ import { Comparison, ComparisonItem } from '#docs/comparison';
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="Solid">
-				<Button appearance="solid">Example button</Button>
+			<ComparisonItem label="Button">
+				<Button>Save changes</Button>
 			</ComparisonItem>
-			<ComparisonItem label="Subtle">
-				<Button appearance="subtle">Example button</Button>
-			</ComparisonItem>
-			<ComparisonItem label="Ghost">
-				<Button appearance="ghost">Example button</Button>
+			<ComparisonItem label="Text">
+				<Button appearance="text">Save changes</Button>
 			</ComparisonItem>
 		</Comparison>
 	);

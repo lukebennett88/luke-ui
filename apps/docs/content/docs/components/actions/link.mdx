@@ -1,6 +1,6 @@
 ---
 title: Link
-description: A styled link for inline and standalone navigation.
+description: A styled link for navigation.
 source: packages/@luke-ui/react/src/exports/link.ts
 reactAria: https://react-spectrum.adobe.com/react-aria/Link.html
 ---
@@ -10,22 +10,25 @@ such as saving, submitting, or opening a dialog.
 
 <ExampleBlock src="link/basic" title="Link — Basic" />
 
-## Tone
+## Appearance
 
-`accent` is the default tone. Use `neutral` for supporting links that should not compete with the
-main content.
+`text` is the default. Use it in prose and navigation lists. Set `appearance="button"` when the
+destination needs a button-shaped call to action. A button-shaped Link remains a link and keeps its
+native navigation behaviour.
 
-<ExampleBlock src="link/tones" title="Link — Tone" />
+<ExampleBlock src="link/appearance" title="Link — Appearance" />
 
-## Inline and standalone
+## Prominence
 
-Use the default treatment inside a sentence. Its underline stays visible so the destination is
-recognisable in running text.
+`standard` is the default. Choose `low` for quiet navigation and `high` for a primary destination.
+Low-prominence text Links show an underline on hover, focus, and press. High prominence uses the
+theme’s primary accent treatment.
 
-Set `isStandalone` for a link outside prose, such as a card link or navigation item. It shows its
-underline on hover or press and has a 24 × 24 CSS-pixel structural target.
+<ExampleBlock src="link/prominence" title="Link — Prominence" />
 
-<ExampleBlock src="link/standalone" title="Link — Inline and standalone" />
+## Presentation reference
+
+<ExampleBlock src="link/presentation-reference" title="Link — Presentation reference" />
 
 ## Disabled
 

@@ -43,11 +43,17 @@ defines its type and spacing scale in source.
 Import a recipe when you own the element and need that component's visual treatment. Use the
 component when you want its behaviour as well.
 
+Use a recipe only when the component cannot render the element you need to style. For button-shaped
+navigation, prefer [`Link`](/components/actions/link) with `appearance="button"` over applying
+`buttonRecipe` to an anchor.
+
 Each recipe lives on the component or primitive entrypoint that owns it. Import `buttonRecipe` from
 `@luke-ui/react/button`. There is no `@luke-ui/react/recipes` barrel.
 
 Recipes follow a fixed name. The function is the component in camel case plus `Recipe`. The variants
 type is the component in Pascal case plus `RecipeVariants`.
+
+The example shows how to apply a component treatment to an owned element:
 
 <ExampleBlock src="styling/button-recipe" title="Styling — Apply a component recipe" />
 
@@ -58,7 +64,11 @@ after its own, so do not wrap the result in another composition helper.
 ```tsx
 import { buttonRecipe, type ButtonRecipeVariants } from '@luke-ui/react/button';
 
-const variants: ButtonRecipeVariants = { appearance: 'subtle', tone: 'neutral' };
+const variants: ButtonRecipeVariants = {
+	appearance: 'button',
+	tone: 'neutral',
+	prominence: 'standard',
+};
 const className = buttonRecipe({ ...variants, className: 'my-class' });
 ```
 

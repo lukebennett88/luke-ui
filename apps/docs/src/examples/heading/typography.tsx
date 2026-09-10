@@ -3,7 +3,7 @@ import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Comparison direction="vertical">
+		<Comparison>
 			<ComparisonItem label="body">
 				<Heading level={2} typography="body">
 					Example heading

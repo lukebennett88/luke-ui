@@ -27,28 +27,35 @@ Keep related controls at the same size.
 
 ## Appearance
 
-Use `appearance` to set a button's visual weight. `solid` is the default. Choose `subtle` or `ghost`
-for secondary actions that should recede beside the main action. Appearance sets emphasis. Use
-`tone` to communicate intent.
+`button` is the default appearance. It has control sizing, truncates its label, and supports content
+slots. Set `appearance="text"` when an action should use text-link presentation. Text Buttons wrap
+and do not support a size, block layout, or content slots.
 
 <ExampleBlock src="button/appearance" title="Button — Appearance" />
 
 ## Tone
 
-Use `tone` to communicate intent. `neutral` is the default, `accent` identifies a primary action,
-and `danger` marks a destructive one. Tone and appearance are independent, so every combination is
-available.
+`neutral` is the default tone for ordinary actions. Set `tone="critical"` for destructive actions.
 
 <ExampleBlock src="button/tones" title="Button — Tone" />
+
+## Prominence
+
+`standard` is the default. Choose `low` for quiet secondary actions and `high` for the primary
+action in a group. For ordinary actions, high prominence uses the theme’s primary accent treatment.
+
+<ExampleBlock src="button/prominence" title="Button — Prominence" />
+
+## Presentation reference
+
+<ExampleBlock src="button/presentation-reference" title="Button — Presentation reference" />
 
 ## Block layout
 
 Set `isBlock` when the button should fill the inline size of its container. A typical case is a
 primary action at the end of a narrow form or panel.
 
-```tsx
-<Button isBlock>Continue</Button>
-```
+<ExampleBlock src="button/block-layout" title="Button — Block layout" />
 
 ## Content slots
 

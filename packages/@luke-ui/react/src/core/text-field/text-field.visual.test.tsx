@@ -68,8 +68,8 @@ test('kitchen sink', async () => {
 						placeholder="Search…"
 						prefix={
 							<>
-								<Icon aria-hidden name="search" />
-								<Icon aria-hidden name="check" />
+								<Icon name="search" />
+								<Icon name="check" />
 							</>
 						}
 					/>
@@ -79,8 +79,8 @@ test('kitchen sink', async () => {
 						placeholder="0.00"
 						suffix={
 							<>
-								<Icon aria-hidden name="check" />
-								<Icon aria-hidden name="close" />
+								<Icon name="check" />
+								<Icon name="close" />
 							</>
 						}
 					/>
@@ -97,13 +97,11 @@ test('kitchen sink', async () => {
 					</InputGroup>
 					<InputGroup>
 						<InputGroupPrefix>
-							<Icon aria-hidden name="search" />
+							<Icon name="search" />
 						</InputGroupPrefix>
 						<InputGroupInput aria-label="Search input group" defaultValue="invoices" />
 						<InputGroupSuffix>
-							<Button appearance="subtle" size="small">
-								Clear
-							</Button>
+							<Button size="small">Clear</Button>
 						</InputGroupSuffix>
 					</InputGroup>
 					<InputGroup isInvalid size="small">

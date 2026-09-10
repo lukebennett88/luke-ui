@@ -98,10 +98,8 @@ export default () => {
 				/>
 			</Box>
 			<Box display="flex" gap="sp12" justifyContent="flex-end">
-				<Button appearance="subtle" type="button">
-					Create an account
-				</Button>
-				<Button tone="accent" type="submit">
+				<Button type="button">Create an account</Button>
+				<Button prominence="high" type="submit">
 					Sign in
 				</Button>
 			</Box>

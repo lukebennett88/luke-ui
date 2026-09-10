@@ -3,25 +3,36 @@ import type { RecipeSelection } from '../styles/recipe.js';
 import { recipe } from '../styles/recipe.js';
 
 export const buttonContent = recipe({
-	base: {
-		alignItems: 'center',
-		display: 'inline-flex',
-		minInlineSize: 0,
-		position: 'relative',
+	variants: {
+		appearance: {
+			button: {
+				alignItems: 'center',
+				display: 'inline-flex',
+				minInlineSize: 0,
+				position: 'relative',
+			},
+			text: {
+				position: 'relative',
+			},
+		},
 	},
 });
 
 export const buttonLabel = recipe({
-	base: {
-		alignItems: 'center',
-		display: 'inline-flex',
-		gap: vars.space.sp8,
-		minInlineSize: 0,
-	},
 	defaultVariants: {
+		appearance: 'button',
 		isPending: false,
 	},
 	variants: {
+		appearance: {
+			button: {
+				alignItems: 'center',
+				display: 'inline-flex',
+				gap: vars.space.sp8,
+				minInlineSize: 0,
+			},
+			text: {},
+		},
 		isPending: {
 			false: {},
 			true: {

@@ -1,5 +1,6 @@
 import { Box } from '@luke-ui/react/box';
-import { Button, buttonRecipe } from '@luke-ui/react/button';
+import { Button } from '@luke-ui/react/button';
+import type { IconName } from '@luke-ui/react/icon';
 import { Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
@@ -55,26 +56,13 @@ function ExampleContent({ mode, src, title }: ExampleBlockProps): JSX.Element {
 			actions={
 				<Box className="flex items-center gap-1">
 					{highlightedSource.playgroundHash != null ? (
-						<DocsLink
-							className={buttonRecipe({ appearance: 'ghost', size: 'small' })}
-							hash={highlightedSource.playgroundHash}
-							target="_blank"
-							to="/playground"
-						>
-							<Icon aria-hidden className="size-4" name="externalLink" />
-							Open in playground
-						</DocsLink>
+						<OpenInPlayground hash={highlightedSource.playgroundHash} />
 					) : null}
-					<Button
-						appearance="ghost"
-						aria-controls={codeId}
-						aria-expanded={showCode}
-						onPress={() => setShowCode((previous) => !previous)}
-						size="small"
-					>
-						<Icon aria-hidden className="size-4" name="codeBlock" />
-						{showCode ? 'Hide code' : 'Show code'}
-					</Button>
+					<ShowCode
+						codeId={codeId}
+						isExpanded={showCode}
+						onPress={() => setShowCode((prev) => !prev)}
+					/>
 				</Box>
 			}
 			title={title}
@@ -170,20 +158,64 @@ export function ExamplePreview({
 	);
 }
 
+function OpenInPlayground({ hash }: { hash: string }) {
+	return (
+		<DocsLink
+			appearance="button"
+			hash={hash}
+			prominence="low"
+			size="small"
+			startContent={<Icon name="externalLink" />}
+			target="_blank"
+			to="/playground"
+		>
+			Open in playground
+		</DocsLink>
+	);
+}
+
+function ShowCode({
+	codeId,
+	isExpanded,
+	onPress,
+}: {
+	codeId: string;
+	isExpanded: boolean;
+	onPress: () => void;
+}) {
+	return (
+		<Button
+			aria-controls={codeId}
+			aria-expanded={isExpanded}
+			onPress={onPress}
+			prominence="low"
+			size="small"
+			startContent={<Icon name="codeBlock" />}
+		>
+			{isExpanded ? 'Hide code' : 'Show code'}
+		</Button>
+	);
+}
+
+// Mirrors `OpenInPlayground` and `ShowCode`'s visuals without mounting a
+// router link or wiring up real interaction — this is an `aria-hidden`,
+// `inert` placeholder, so a plain disabled `Button` is enough for both.
+function ActionPlaceholder({ children, iconName }: { children: ReactNode; iconName: IconName }) {
+	return (
+		<Button isDisabled prominence="low" size="small" startContent={<Icon name={iconName} />}>
+			{children}
+		</Button>
+	);
+}
+
 function ExampleLoadingActions() {
 	return (
 		<Box aria-hidden className="flex items-center gap-1" inert>
 			<LoadingSkeleton radius="control">
-				<span className={buttonRecipe({ appearance: 'ghost', size: 'small' })}>
-					<Icon aria-hidden className="size-4" name="externalLink" />
-					Open in playground
-				</span>
+				<ActionPlaceholder iconName="externalLink">Open in playground</ActionPlaceholder>
 			</LoadingSkeleton>
 			<LoadingSkeleton radius="control">
-				<Button appearance="ghost" isDisabled size="small">
-					<Icon aria-hidden className="size-4" name="codeBlock" />
-					Show code
-				</Button>
+				<ActionPlaceholder iconName="codeBlock">Show code</ActionPlaceholder>
 			</LoadingSkeleton>
 		</Box>
 	);

@@ -6,6 +6,7 @@ import {
 	compoundSlotsPrecedenceRecipe,
 	conditionalSlotsBaseRecipe,
 	compoundSlotsOrderRecipe,
+	defaultedVariantsRecipe,
 	nestedArrayFixtureClassA,
 	nestedArrayFixtureClassB,
 	nestedArrayFixtureRecipe,
@@ -63,6 +64,11 @@ test('a single-part recipe returns only its own classes when className is omitte
 	expect(undefinedKey).toBe(withoutKey);
 	expect(bare.split(' ')).not.toContain('undefined');
 	expect(bare.endsWith(' ')).toBe(false);
+});
+
+test('withDefaultVariants keeps a default when the input explicitly passes undefined', () => {
+	expect(defaultedVariantsRecipe({ size: undefined })).toBe(defaultedVariantsRecipe());
+	expect(defaultedVariantsRecipe({ size: 'small' })).not.toBe(defaultedVariantsRecipe());
 });
 
 test('a base-only recipe composes a consumer className', () => {

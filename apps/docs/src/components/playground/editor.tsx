@@ -50,12 +50,7 @@ export default function PlaygroundEditor({
 	return (
 		<div className="flex h-full min-h-0 flex-col">
 			<PlaygroundPaneToolbar>
-				<Button
-					appearance="subtle"
-					isPending={isFormatting}
-					onPress={() => void handleFormat()}
-					size="small"
-				>
+				<Button isPending={isFormatting} onPress={() => void handleFormat()} size="small">
 					Format
 				</Button>
 			</PlaygroundPaneToolbar>

@@ -5,7 +5,7 @@ import type { PropsWithChildren } from 'react';
 type ComparisonProps = PropsWithChildren<{
 	/**
 	 * The direction of the comparison
-	 * @default 'horizontal'
+	 * @default 'vertical'
 	 */
 	direction?: 'horizontal' | 'vertical';
 }>;
@@ -14,7 +14,7 @@ type ComparisonItemProps = PropsWithChildren<{
 	label: string;
 }>;
 
-export function Comparison({ children, direction = 'horizontal' }: ComparisonProps) {
+export function Comparison({ children, direction = 'vertical' }: ComparisonProps) {
 	if (direction === 'vertical') {
 		return (
 			<Box display="grid" gap="sp16">

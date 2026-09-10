@@ -6,7 +6,7 @@ export default () => {
 	return (
 		<Box alignItems="center" display="flex" gap="sp4">
 			<Text>Continue</Text>
-			<Icon aria-hidden name="externalLink" size="xsmall" />
+			<Icon name="externalLink" size="xsmall" />
 		</Box>
 	);
 };

@@ -1,8 +1,8 @@
 import type { JSX, ReactNode } from 'react';
+import type { ButtonPresentationProps } from '../action-presentation.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import type { ButtonProps as PrimitiveButtonProps } from '../primitives/button/button.js';
 import { Button as PrimitiveButton } from '../primitives/button/button.js';
-import type * as primitiveStyles from '../primitives/button/recipe.css.js';
 import { pendingSpinnerOverlay } from '../styles/pending-spinner-overlay.css.js';
 import { Text } from '../text/text.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
@@ -15,94 +15,115 @@ import { buttonContent, buttonLabel } from './styles.css.js';
 
 interface ButtonLabelRecipeProps extends NonNullable<ButtonLabelVariants> {}
 
-interface PrimitiveButtonRecipeProps extends NonNullable<primitiveStyles.ButtonRecipeVariants> {}
-
-interface ButtonStyleProps {
-	/**
-	 * Visual emphasis.
-	 * @default 'solid'
-	 */
-	appearance?: PrimitiveButtonRecipeProps['appearance'];
-	/**
-	 * Non-interactive adornment shown after the label, such as an icon, badge, count, or keyboard
-	 * hint. Nested interactive controls are unsupported.
-	 */
-	endContent?: ReactNode;
-	/**
-	 * Whether the button takes up the full inline size of its container.
-	 * @default false
-	 */
-	isBlock?: PrimitiveButtonRecipeProps['isBlock'];
-	/**
-	 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
-	 * immediately. Prefer `pressAction` for Button-owned operations.
-	 * @default false
-	 */
-	isPending?: ButtonLabelRecipeProps['isPending'];
-	/**
-	 * Button-owned operation run as a React Action. The button becomes pending automatically until
-	 * the Action settles. `onPress` handles the interaction. `pressAction` performs the resulting
-	 * operation. Prefer a native `<form action>` when the operation is a form submission.
-	 */
-	pressAction?: PressAction;
-	/**
-	 * Sets the button size.
-	 * @default 'medium'
-	 */
-	size?: PrimitiveButtonRecipeProps['size'];
-	/**
-	 * Non-interactive adornment shown before the label, such as an icon. Nested interactive controls
-	 * are unsupported.
-	 */
-	startContent?: ReactNode;
-	/**
-	 * Visual tone. Controls colour scheme.
-	 * @default 'neutral'
-	 */
-	tone?: PrimitiveButtonRecipeProps['tone'];
-}
+type ButtonContentProps =
+	| {
+			appearance?: 'button';
+			/** Non-interactive adornment shown after the label. */
+			endContent?: ReactNode;
+			/** Non-interactive adornment shown before the label. */
+			startContent?: ReactNode;
+	  }
+	| {
+			appearance: 'text';
+			endContent?: never;
+			startContent?: never;
+	  };
 
 type _ButtonOmit = DistributiveOmit<
 	PrimitiveButtonProps,
-	'appearance' | 'isBlock' | 'isPending' | 'size' | 'tone' | keyof DocumentedPressProps
+	| 'appearance'
+	| 'isBlock'
+	| 'isPending'
+	| 'prominence'
+	| 'size'
+	| 'tone'
+	| keyof DocumentedPressProps
 >;
 
-interface _ButtonProps extends _ButtonOmit, ButtonStyleProps, DocumentedPressProps {}
+type _ButtonProps = _ButtonOmit &
+	DocumentedPressProps & {
+		/**
+		 * Externally owned pending state. When true, the button is non-interactive and shows a spinner
+		 * immediately. Prefer `pressAction` for Button-owned operations.
+		 * @default false
+		 */
+		isPending?: ButtonLabelRecipeProps['isPending'];
+		/**
+		 * Button-owned operation run as a React Action. The button becomes pending automatically until
+		 * the Action settles. `onPress` handles the interaction. `pressAction` performs the resulting
+		 * operation. Prefer a native `<form action>` when the operation is a form submission.
+		 */
+		pressAction?: PressAction;
+	};
 
 /** Props for `Button`. */
-export type ButtonProps = Prettify<_ButtonProps>;
+export type ButtonProps = Prettify<_ButtonProps & ButtonPresentationProps & ButtonContentProps>;
 
 /**
- * Button with size, tone, appearance, pending, and block options.
+ * Button with appearance, tone, prominence, size, pending, and block options.
  * Wraps children in a `Text` for ellipsis truncation. Shows a spinner when pending.
  */
 export function Button(props: ButtonProps): JSX.Element {
 	const {
+		appearance = 'button',
 		children,
 		endContent,
+		isBlock: _isBlock,
 		isPending = false,
 		onPress,
 		pressAction,
-		size = 'medium',
+		prominence: _prominence,
+		size: _size,
 		startContent,
+		tone: _tone,
 		...restProps
 	} = props;
+	const presentationProps = getPrimitivePresentationProps(props);
 	const {
 		isPendingState,
 		onPress: handlePress,
 		showSpinner,
 	} = usePressAction({ isPending, onPress, pressAction });
 
+	if (appearance === 'text') {
+		return (
+			<PrimitiveButton
+				{...restProps}
+				{...presentationProps}
+				isPending={isPendingState}
+				onPress={handlePress}
+			>
+				{(renderProps) => (
+					<span className={buttonContent({ appearance: 'text' })}>
+						{showSpinner && (
+							<span aria-hidden className={pendingSpinnerOverlay()}>
+								<LoadingSpinner aria-hidden />
+							</span>
+						)}
+						<span className={buttonLabel({ appearance: 'text', isPending: showSpinner })}>
+							{typeof children === 'function' ? children(renderProps) : children}
+						</span>
+					</span>
+				)}
+			</PrimitiveButton>
+		);
+	}
+
 	return (
-		<PrimitiveButton {...restProps} isPending={isPendingState} onPress={handlePress} size={size}>
+		<PrimitiveButton
+			{...restProps}
+			{...presentationProps}
+			isPending={isPendingState}
+			onPress={handlePress}
+		>
 			{(renderProps) => (
-				<span className={buttonContent()}>
+				<span className={buttonContent({ appearance: 'button' })}>
 					{showSpinner && (
 						<span aria-hidden className={pendingSpinnerOverlay()}>
 							<LoadingSpinner aria-hidden />
 						</span>
 					)}
-					<span className={buttonLabel({ isPending: showSpinner })}>
+					<span className={buttonLabel({ appearance: 'button', isPending: showSpinner })}>
 						{startContent}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}
@@ -113,4 +134,30 @@ export function Button(props: ButtonProps): JSX.Element {
 			)}
 		</PrimitiveButton>
 	);
+}
+
+function getPrimitivePresentationProps(props: ButtonPresentationProps): ButtonPresentationProps {
+	if (props.appearance === 'text') {
+		if (props.tone === 'critical') {
+			return {
+				appearance: 'text',
+				prominence: props.prominence,
+				tone: 'critical',
+			};
+		}
+
+		return {
+			appearance: 'text',
+			prominence: props.prominence,
+			tone: 'neutral',
+		};
+	}
+
+	return {
+		appearance: 'button',
+		isBlock: props.isBlock,
+		prominence: props.prominence,
+		size: props.size,
+		tone: props.tone,
+	};
 }

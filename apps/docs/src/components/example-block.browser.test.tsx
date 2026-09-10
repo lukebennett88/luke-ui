@@ -3,6 +3,12 @@ import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import spriteSheetHref from '@luke-ui/react/spritesheet.svg?url&no-inline';
 import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
+import {
+	createMemoryHistory,
+	createRootRoute,
+	createRouter,
+	RouterProvider,
+} from '@tanstack/react-router';
 import { ThemeProvider } from 'next-themes';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -137,6 +143,22 @@ function renderPreviewHarness({ withStickyHeader = false }: { withStickyHeader?:
 }
 
 async function renderExampleBlock() {
+	const rootRoute = createRootRoute({
+		component: () => (
+			<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+				<IconSpritesheetProvider href={spriteSheetHref}>
+					<DocsThemeRoot>
+						<ExampleBlock src="box/responsive-layout" title="Box — Responsive layout" />
+					</DocsThemeRoot>
+				</IconSpritesheetProvider>
+			</ThemeProvider>
+		),
+	});
+	const router = createRouter({
+		history: createMemoryHistory({ initialEntries: ['/'] }),
+		routeTree: rootRoute,
+	});
+
 	container = document.body.appendChild(document.createElement('div'));
 	container.className = `luke-ui-theme ${tactileThemeClassName}`;
 	// Leaves headroom to the right of the viewport for the grip, which sits
@@ -144,15 +166,8 @@ async function renderExampleBlock() {
 	container.style.inlineSize = '800px';
 	root = createRoot(container);
 	await act(async () => {
-		root?.render(
-			<ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
-				<IconSpritesheetProvider href={spriteSheetHref}>
-					<DocsThemeRoot>
-						<ExampleBlock src="box/responsive-layout" title="Box — Responsive layout" />
-					</DocsThemeRoot>
-				</IconSpritesheetProvider>
-			</ThemeProvider>,
-		);
+		root?.render(<RouterProvider router={router} />);
+		await router.load();
 	});
 	// The example module loads lazily behind Suspense. Poll inside repeated
 	// `act` calls so the render React performs when the module resolves stays

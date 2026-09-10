@@ -11,14 +11,12 @@ const meta = preview.meta({
 });
 
 const baseArgs = {
+	'aria-label': 'Add',
 	icon: 'add',
 	size: 'medium',
 } satisfies Partial<IconButtonProps>;
 
 const sizes: Array<NonNullable<IconButtonProps['size']>> = ['small', 'medium'];
-const tones: Array<NonNullable<IconButtonProps['tone']>> = ['neutral', 'accent', 'danger'];
-const appearances: Array<NonNullable<IconButtonProps['appearance']>> = ['solid', 'subtle', 'ghost'];
-
 const flexWrapStyle = {
 	display: 'flex',
 	flexWrap: 'wrap',
@@ -26,34 +24,26 @@ const flexWrapStyle = {
 } as const satisfies CSSProperties;
 
 export const Default = meta.story({
-	args: { ...baseArgs, 'aria-label': 'Add' },
+	args: baseArgs,
 });
 
-export const Appearance = meta.story({
+export const Prominence = meta.story({
 	args: { ...baseArgs, 'aria-label': 'Action' },
-	render: (props) => (
+	render: ({ icon }) => (
 		<div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(3, max-content)' }}>
-			{tones.flatMap((tone) => {
-				return appearances.map((appearance) => (
-					<IconButton
-						{...props}
-						appearance={appearance}
-						aria-label={`${tone} ${appearance}`}
-						key={`${tone}-${appearance}`}
-						tone={tone}
-					/>
-				));
-			})}
+			<IconButton aria-label="Low" icon={icon} prominence="low" />
+			<IconButton aria-label="Standard" icon={icon} />
+			<IconButton aria-label="High prominence" icon={icon} prominence="high" />
 		</div>
 	),
 });
 
 export const Sizes = meta.story({
 	args: baseArgs,
-	render: (props) => (
+	render: ({ icon }) => (
 		<div style={flexWrapStyle}>
 			{sizes.map((size) => (
-				<IconButton {...props} aria-label={size} key={size} size={size} />
+				<IconButton aria-label={size} icon={icon} key={size} size={size} />
 			))}
 		</div>
 	),
@@ -64,10 +54,10 @@ export const Disabled = meta.story({
 		...baseArgs,
 		isDisabled: true,
 	},
-	render: (props) => (
+	render: ({ icon }) => (
 		<div style={flexWrapStyle}>
 			{sizes.map((size) => (
-				<IconButton {...props} aria-label={size} key={size} size={size} />
+				<IconButton aria-label={size} icon={icon} isDisabled key={size} size={size} />
 			))}
 		</div>
 	),
@@ -79,11 +69,11 @@ export const States = meta.story({
 		'aria-label': 'Action',
 		onPress: fn(),
 	},
-	render: (props) => (
+	render: ({ icon, onPress }) => (
 		<div style={flexWrapStyle}>
-			<IconButton {...props} aria-label="Default" />
-			<IconButton {...props} aria-label="Disabled" isDisabled />
-			<IconButton {...props} aria-label="Pending" isPending />
+			<IconButton aria-label="Default" icon={icon} onPress={onPress} />
+			<IconButton aria-label="Disabled" icon={icon} isDisabled onPress={onPress} />
+			<IconButton aria-label="Pending" icon={icon} isPending onPress={onPress} />
 		</div>
 	),
 });

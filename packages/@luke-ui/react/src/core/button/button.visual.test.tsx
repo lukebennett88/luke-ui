@@ -1,7 +1,6 @@
 import { test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { Icon } from '../icon/icon.js';
-import { Kbd } from '../kbd/kbd.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -9,39 +8,43 @@ import {
 	emulateForcedColors,
 	focusViaKeyboard,
 	Grid,
-	variantValuesFor,
 } from '../test-utils/visual.js';
 import { Button } from './button.js';
-
-const tones = variantValuesFor<typeof Button, 'tone'>()(['neutral', 'accent', 'danger']);
-const appearances = variantValuesFor<typeof Button, 'appearance'>()(['solid', 'subtle', 'ghost']);
-const sizes = variantValuesFor<typeof Button, 'size'>()(['small', 'medium']);
 
 test('kitchen sink', async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(
-			<Grid columns={appearances.length}>
-				{sizes.flatMap((size) => {
-					return tones.flatMap((tone) => {
-						return appearances.map((buttonAppearance) => (
-							<Button
-								appearance={buttonAppearance}
-								key={`${size}-${tone}-${buttonAppearance}`}
-								size={size}
-								tone={tone}
-							>
-								{tone} {buttonAppearance}
-							</Button>
-						));
-					});
-				})}
-				<Button>Default</Button>
-				<Button isDisabled>Disabled</Button>
-				<Button isPending>Pending</Button>
-				<Button startContent={<Icon name="add" />}>With icon</Button>
-				<Button endContent={<Kbd>⌘S</Kbd>} startContent={<Icon name="add" />}>
-					New task
+			<Grid columns={3}>
+				<Button prominence="low">Neutral low button</Button>
+				<Button>Neutral standard button</Button>
+				<Button prominence="high">Neutral high button</Button>
+				<Button tone="critical" prominence="low">
+					Critical low button
 				</Button>
+				<Button tone="critical">Critical standard button</Button>
+				<Button tone="critical" prominence="high">
+					Critical high button
+				</Button>
+				<Button appearance="text" prominence="low">
+					Neutral low text Button
+				</Button>
+				<Button appearance="text">Neutral standard text Button</Button>
+				<Button appearance="text" prominence="high">
+					Neutral high text Button
+				</Button>
+				<Button appearance="text" tone="critical" prominence="low">
+					Critical low text Button
+				</Button>
+				<Button appearance="text" tone="critical">
+					Critical standard text Button
+				</Button>
+				<Button isDisabled>Disabled</Button>
+				<Button isPending>Standard pending</Button>
+				<Button isPending prominence="high">
+					High pending
+				</Button>
+				<Button startContent={<Icon name="add" />}>With icon</Button>
+				<Button endContent={<Icon name="arrowRight" />}>With end content</Button>
 			</Grid>,
 			{ appearance },
 		);

@@ -106,13 +106,13 @@ export function IconGallery(): JSX.Element {
 	return (
 		<div className="not-prose flex flex-col gap-4">
 			<div className="flex flex-wrap items-center gap-3">
-				<div className="min-w-[12rem] flex-1 basis-56">
+				<div className="min-w-48 flex-1 basis-56">
 					<TextField
 						aria-label="Filter icons by name"
 						inputRef={inputRef}
 						onChange={setFilter}
 						placeholder="Filter by name"
-						prefix={<Icon aria-hidden name="search" size="small" />}
+						prefix={<Icon name="search" size="small" />}
 						size="small"
 						value={filter}
 					/>
@@ -195,7 +195,7 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 		<div className="-mr-px -mb-px flex flex-col border-fd-border border-r border-b">
 			<div className="flex flex-col items-center gap-1 p-2">
 				<div className="flex h-20 w-full items-center justify-center">
-					<Icon aria-hidden name={name} size={previewSize} />
+					<Icon name={name} size={previewSize} />
 				</div>
 				<span className="w-full truncate text-center text-fd-muted-foreground text-xs" title={name}>
 					{name}

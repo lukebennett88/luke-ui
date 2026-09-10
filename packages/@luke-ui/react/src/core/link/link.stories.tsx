@@ -32,39 +32,41 @@ export const Default = meta.story({
 });
 
 /**
- * Use the default `accent` tone for emphasis or `neutral` when the surrounding
- * content should lead.
+ * Use high prominence for a primary destination. Use low prominence for quiet navigation.
  */
-export const Tone = meta.story({
+export const Prominence = meta.story({
 	args: {
 		...baseArgs,
-		children: 'Accent (default)',
+		children: 'Standard (default)',
 	} satisfies Partial<LinkProps>,
-	render: (props) => (
+	render: ({ href, onPress }) => (
 		<div style={stackStyle}>
-			<Link {...props} />
-			<Link {...props} tone="neutral">
-				Neutral
+			<Link href={href} onPress={onPress} prominence="low">
+				Low
+			</Link>
+			<Link href={href} onPress={onPress}>
+				Standard
+			</Link>
+			<Link href={href} onPress={onPress} prominence="high">
+				High
 			</Link>
 		</div>
 	),
 });
 
 /**
- * Standalone links are best when presented as a separate action. Inline links
- * remain underlined within sentence flow.
+ * A button-shaped Link remains navigation and keeps link semantics.
  */
-export const Standalone = meta.story({
+export const Appearance = meta.story({
 	args: baseArgs,
-	render: (props) => (
+	render: ({ href, onPress }) => (
 		<div style={stackStyle}>
-			<p>When the link is separated from a sentence, use standalone style.</p>
-			<Link {...props} isStandalone>
-				Standalone link
+			<Link href={href} onPress={onPress} prominence="low">
+				Low prominence Link
 			</Link>
-			<p>
-				When part of a sentence, use the default <Link {...props}>inline link</Link> style.
-			</p>
+			<Link appearance="button" href={href} onPress={onPress} prominence="high">
+				Button-shaped Link
+			</Link>
 		</div>
 	),
 });

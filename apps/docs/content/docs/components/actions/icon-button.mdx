@@ -17,19 +17,32 @@ group at the same size.
 
 <ExampleBlock src="icon-button/size" title="Icon Button — Size" />
 
-## Appearance
-
-`IconButton` uses the same `appearance` options as [`Button`](/components/actions/button). `solid`
-is the default. Choose `subtle` or `ghost` when a secondary control needs less emphasis.
-
-<ExampleBlock src="icon-button/appearance" title="Icon Button — Appearance" />
-
 ## Tone
 
-Use `tone` to communicate intent. `neutral` is the default, `accent` identifies a primary action,
-and `danger` marks a destructive one.
+`neutral` is the default tone for ordinary actions. Set `tone="critical"` for destructive actions.
 
 <ExampleBlock src="icon-button/tones" title="Icon Button — Tone" />
+
+## Prominence
+
+`standard` is the default. Choose `low` for quiet secondary actions and `high` for the primary
+action in a group. For ordinary actions, high prominence uses the theme’s primary accent treatment.
+
+<ExampleBlock src="icon-button/prominence" title="Icon Button — Prominence" />
+
+## Presentation reference
+
+<ExampleBlock
+	src="icon-button/presentation-reference"
+	title="Icon Button — Presentation reference"
+/>
+
+## Custom icons
+
+Pass a decorative, non-interactive `ReactElement` to `icon` for a graphic outside the generated icon
+set, such as a brand mark. `IconButton` sizes the graphic to match its built-in icons.
+
+<ExampleBlock src="icon-button/custom-icon" title="Icon Button — Custom icon" />
 
 ## Pending and Actions
 
@@ -47,9 +60,10 @@ to presses.
 
 ## Accessibility
 
-Provide `aria-label` or `aria-labelledby` for every icon button. Name the action, not the icon. Use
-a labelled [`Button`](/components/actions/button) when the icon is unfamiliar or visible text would
-make the action clearer.
+Provide `aria-label` or `aria-labelledby` for every icon button. Name the action, not the icon. The
+icon itself, whether a built-in `Icon` or a custom graphic, contributes no accessible name, so the
+naming prop is required. Use a labelled [`Button`](/components/actions/button) when the icon is
+unfamiliar or visible text would make the action clearer.
 
 ## API
 

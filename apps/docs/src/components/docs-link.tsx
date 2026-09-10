@@ -1,4 +1,4 @@
+import { Link } from '@luke-ui/react/link';
 import { createLink } from '@tanstack/react-router';
-import { Link as AriaLink } from 'react-aria-components/Link';
 
-export const DocsLink = createLink(AriaLink);
+export const DocsLink = createLink(Link);

@@ -5,13 +5,10 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Neutral">
-				<IconButton aria-label="Example action" icon="search" tone="neutral" />
+				<IconButton aria-label="Search" icon="search" tone="neutral" />
 			</ComparisonItem>
-			<ComparisonItem label="Accent">
-				<IconButton aria-label="Example action" icon="search" tone="accent" />
-			</ComparisonItem>
-			<ComparisonItem label="Danger">
-				<IconButton aria-label="Example action" icon="search" tone="danger" />
+			<ComparisonItem label="Critical">
+				<IconButton aria-label="Delete" icon="delete" tone="critical" />
 			</ComparisonItem>
 		</Comparison>
 	);

@@ -40,7 +40,7 @@ const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</Com
 
 const renderIconItem = (item: CountryItem) => (
 	<ComboboxItem>
-		<Icon aria-hidden name="bookOpen" />
+		<Icon name="bookOpen" />
 		{item.label}
 	</ComboboxItem>
 );
@@ -97,7 +97,7 @@ test('kitchen sink', async () => {
 						<ComboboxInputGroup>
 							<ComboboxInput placeholder="Select a country..." />
 							<ComboboxTrigger aria-label="Toggle options">
-								<Icon aria-hidden name="chevronDown" />
+								<Icon name="chevronDown" />
 							</ComboboxTrigger>
 						</ComboboxInputGroup>
 						<ComboboxPopover offset={4}>
@@ -138,7 +138,7 @@ test('kitchen sink', async () => {
 						<ComboboxInputGroup>
 							<ComboboxInput placeholder="Select a country..." />
 							<ComboboxTrigger aria-label="Toggle medium trigger" size="medium">
-								<Icon aria-hidden name="chevronDown" />
+								<Icon name="chevronDown" />
 							</ComboboxTrigger>
 						</ComboboxInputGroup>
 						<ComboboxPopover offset={4}>

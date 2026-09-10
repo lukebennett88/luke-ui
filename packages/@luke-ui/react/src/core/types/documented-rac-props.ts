@@ -1,5 +1,4 @@
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
-import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
 import type { TextProps as RacTextProps } from 'react-aria-components/Text';
 import type { TextFieldProps as RacTextFieldProps } from 'react-aria-components/TextField';
 
@@ -13,16 +12,6 @@ export interface DocumentedPressProps {
 	onPress?: RacButtonProps['onPress'];
 	/** HTML button type. */
 	type?: RacButtonProps['type'];
-}
-
-export interface DocumentedLinkProps {
-	/** URL the link points to. */
-	href?: RacLinkProps['href'];
-	/**
-	 * Whether the link is disabled. Disabled links can't be focused or activated.
-	 * @default false
-	 */
-	isDisabled?: RacLinkProps['isDisabled'];
 }
 
 export interface DocumentedInputProps {

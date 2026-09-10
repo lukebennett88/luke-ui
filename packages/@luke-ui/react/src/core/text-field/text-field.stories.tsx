@@ -82,7 +82,7 @@ export const InputGroupComposition = meta.story({
 				</InputGroup>
 				<InputGroup>
 					<InputGroupPrefix>
-						<Icon aria-hidden name="search" />
+						<Icon name="search" />
 					</InputGroupPrefix>
 					<InputGroupInput
 						aria-label="Search"
@@ -90,7 +90,7 @@ export const InputGroupComposition = meta.story({
 						value={search}
 					/>
 					<InputGroupSuffix>
-						<Button appearance="subtle" onPress={() => setSearch('')} size="small">
+						<Button onPress={() => setSearch('')} size="small">
 							Clear
 						</Button>
 					</InputGroupSuffix>

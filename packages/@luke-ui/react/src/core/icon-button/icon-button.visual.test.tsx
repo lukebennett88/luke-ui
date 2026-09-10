@@ -18,8 +18,10 @@ test('kitchen sink', async () => {
 				<IconButton aria-label="Add medium" icon="add" size="medium" />
 				<IconButton aria-label="Disabled" icon="delete" isDisabled size="small" />
 				<IconButton aria-label="Pending" icon="add" isPending size="medium" />
-				<IconButton appearance="subtle" aria-label="Subtle" icon="add" />
-				<IconButton appearance="ghost" aria-label="Ghost" icon="add" />
+				<IconButton aria-label="Standard" icon="add" />
+				<IconButton aria-label="Low" icon="add" prominence="low" />
+				<IconButton aria-label="High" icon="add" prominence="high" />
+				<IconButton aria-label="Critical high" icon="delete" tone="critical" prominence="high" />
 			</Grid>,
 			{ appearance },
 		);
