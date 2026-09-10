@@ -5,22 +5,22 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Neutral · Low">
-				<IconButton aria-label="Add" icon="add" prominence="low" tone="neutral" />
+				<IconButton aria-label="Add" icon="add" tone="neutral" prominence="low" />
 			</ComparisonItem>
 			<ComparisonItem label="Neutral · Standard">
 				<IconButton aria-label="Add" icon="add" tone="neutral" />
 			</ComparisonItem>
 			<ComparisonItem label="Neutral · High">
-				<IconButton aria-label="Add" icon="add" prominence="high" tone="neutral" />
+				<IconButton aria-label="Add" icon="add" tone="neutral" prominence="high" />
 			</ComparisonItem>
 			<ComparisonItem label="Critical · Low">
-				<IconButton aria-label="Delete" icon="delete" prominence="low" tone="critical" />
+				<IconButton aria-label="Delete" icon="delete" tone="critical" prominence="low" />
 			</ComparisonItem>
 			<ComparisonItem label="Critical · Standard">
 				<IconButton aria-label="Delete" icon="delete" tone="critical" />
 			</ComparisonItem>
 			<ComparisonItem label="Critical · High">
-				<IconButton aria-label="Delete" icon="delete" prominence="high" tone="critical" />
+				<IconButton aria-label="Delete" icon="delete" tone="critical" prominence="high" />
 			</ComparisonItem>
 		</Comparison>
 	);
