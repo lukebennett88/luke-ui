@@ -11,7 +11,7 @@ export default () => {
 				<IconButton aria-label="Search" icon="search" tone="accent" />
 			</ComparisonItem>
 			<ComparisonItem label="Critical">
-				<IconButton aria-label="Delete" icon="delete" tone="critical" />
+				<IconButton aria-label="Search" icon="search" tone="critical" />
 			</ComparisonItem>
 		</Comparison>
 	);

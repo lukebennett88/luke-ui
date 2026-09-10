@@ -4,14 +4,14 @@ import { Comparison, ComparisonItem } from '#docs/comparison';
 export default () => {
 	return (
 		<Comparison>
-			<ComparisonItem label="Low neutral">
-				<Link href="#example-destination" prominence="low">
-					Documentation
+			<ComparisonItem label="Accent">
+				<Link href="#example-destination" tone="accent">
+					Example destination
 				</Link>
 			</ComparisonItem>
-			<ComparisonItem label="High accent">
-				<Link href="#example-destination" prominence="high" tone="accent">
-					Upgrade plan
+			<ComparisonItem label="Neutral">
+				<Link href="#example-destination" tone="neutral">
+					Example destination
 				</Link>
 			</ComparisonItem>
 		</Comparison>
