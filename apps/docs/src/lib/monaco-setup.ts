@@ -105,7 +105,6 @@ typescriptDefaults.setCompilerOptions({
 	moduleResolution: bundlerModuleResolution,
 	paths: {
 		'#docs/comparison': ['file:///docs/comparison.tsx'],
-		'#docs/github-mark': ['file:///docs/github-mark.tsx'],
 		'@luke-ui/react/*': ['file:///node_modules/@luke-ui/react/dist/*/index.d.ts'],
 	},
 	strict: true,

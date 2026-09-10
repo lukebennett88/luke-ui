@@ -8,8 +8,7 @@
 	"type": "module",
 	"sideEffects": false,
 	"imports": {
-		"#docs/comparison": "./src/examples/comparison.tsx",
-		"#docs/github-mark": "./src/components/github-mark.tsx"
+		"#docs/comparison": "./src/examples/comparison.tsx"
 	},
 	"scripts": {
 		"build": "vp build",
