@@ -73,17 +73,63 @@ test('public JS/TS export declaration closures do not import styling engines', a
 	for (const { closure, fileName, source } of results) {
 		expect({
 			fileName,
-			hasRainbowSprinklesImport: /from ["']@luke-ui\/rainbow-sprinkles["']/.test(closure),
-			hasVanillaExtractImport: /from ["']@vanilla-extract\//.test(closure),
+			...stylingEngineReferences(closure),
 			sourceLength: source.length,
 		}).toEqual({
 			fileName,
-			hasRainbowSprinklesImport: false,
-			hasVanillaExtractImport: false,
+			hasRainbowSprinkles: false,
+			hasVanillaExtract: false,
 			sourceLength: expect.any(Number),
 		});
 		expect(source.length).toBeGreaterThan(0);
 	}
+});
+
+test('detects styling-engine packages in from and inline import() forms', () => {
+	expect(stylingEngineReferences(`import type { StyleRule } from '@vanilla-extract/css';`)).toEqual(
+		{ hasRainbowSprinkles: false, hasVanillaExtract: true },
+	);
+	expect(
+		stylingEngineReferences(`type StyleRule = import('@vanilla-extract/css').StyleRule;`),
+	).toEqual({ hasRainbowSprinkles: false, hasVanillaExtract: true });
+	expect(
+		stylingEngineReferences(`type Sprinkles = import('@luke-ui/rainbow-sprinkles').SprinklesFn;`),
+	).toEqual({ hasRainbowSprinkles: true, hasVanillaExtract: false });
+	expect(stylingEngineReferences(`type Local = import('./local.js').Local;`)).toEqual({
+		hasRainbowSprinkles: false,
+		hasVanillaExtract: false,
+	});
+});
+
+test('collects relative specifiers from from and inline import() forms', () => {
+	expect(
+		relativeDeclarationSpecifiers(`
+			export type { ThemeInput } from './define-theme.js';
+			type Nested = import('../themes/paper.js').ThemeInput;
+			import type { BoxProps } from './box.js';
+		`),
+	).toEqual(['./define-theme.js', '../themes/paper.js', './box.js']);
+});
+
+test('ignores relative import() mentions inside JSDoc {@link} tags', () => {
+	expect(
+		relativeDeclarationSpecifiers(
+			`/** Attached to {@link import('./build-theme.js').ThemeGenerationError}. */\nexport type Ok = true;`,
+		),
+	).toEqual([]);
+	expect(
+		relativeDeclarationSpecifiers(
+			`/** See {@link import('./build-theme.js').ThemeGenerationError}. */\ntype Nested = import('./real.js').Nested;`,
+		),
+	).toEqual(['./real.js']);
+});
+
+test('resolves nested and parent-relative declaration imports from the importing file', () => {
+	expect(resolveDeclarationImport('themes/paper.d.ts', '../define-theme.js')).toBe(
+		'define-theme.d.ts',
+	);
+	expect(resolveDeclarationImport('styles.d.ts', './utilities.css.js')).toBe('utilities.css.d.ts');
+	expect(resolveDeclarationImport('themes/paper.d.ts', './tokens.js')).toBe('themes/tokens.d.ts');
 });
 
 test('does not expose the private combobox styling recipe from the primitive entrypoint', async () => {
@@ -107,6 +153,48 @@ function publicTypeEntryDeclarations(exportsMap: Record<string, string>): Array<
 	return entries;
 }
 
+/**
+ * Module specifiers after `from '…'` / `from "…"` or inside `import('…')` / `import("…")`.
+ * Covers ordinary import/export declarations and inline TypeScript import types.
+ */
+const MODULE_SPECIFIER = /(?:from\s+|import\s*\(\s*)["']([^"']+)["']/g;
+
+/** Drop `{@link …}` tags so JSDoc `import('…')` mentions are not treated as graph edges. */
+function withoutJsDocLinks(source: string): string {
+	return source.replaceAll(/\{@link\b[^}]*\}/g, '');
+}
+
+function moduleSpecifiers(source: string): Array<string> {
+	const specifiers: Array<string> = [];
+	for (const match of withoutJsDocLinks(source).matchAll(MODULE_SPECIFIER)) {
+		const specifier = match[1];
+		if (specifier === undefined) continue;
+		specifiers.push(specifier);
+	}
+	return specifiers;
+}
+
+function relativeDeclarationSpecifiers(source: string): Array<string> {
+	return moduleSpecifiers(source).filter(
+		(specifier) => specifier.startsWith('./') || specifier.startsWith('../'),
+	);
+}
+
+function stylingEngineReferences(source: string): {
+	hasRainbowSprinkles: boolean;
+	hasVanillaExtract: boolean;
+} {
+	let hasRainbowSprinkles = false;
+	let hasVanillaExtract = false;
+
+	for (const specifier of moduleSpecifiers(source)) {
+		if (specifier === '@luke-ui/rainbow-sprinkles') hasRainbowSprinkles = true;
+		if (specifier.startsWith('@vanilla-extract/')) hasVanillaExtract = true;
+	}
+
+	return { hasRainbowSprinkles, hasVanillaExtract };
+}
+
 function collectDeclarationClosure(entryFile: string): string {
 	const distUrl = new URL('../../../dist/', import.meta.url);
 	const visited = new Set<string>();
@@ -121,9 +209,7 @@ function collectDeclarationClosure(entryFile: string): string {
 		const source = readFileSync(new URL(fileName, distUrl), 'utf8');
 		parts.push(source);
 
-		for (const match of source.matchAll(/from ["'](\.\.?\/[^"']+)["']/g)) {
-			const specifier = match[1];
-			if (specifier === undefined) continue;
+		for (const specifier of relativeDeclarationSpecifiers(source)) {
 			queue.push(resolveDeclarationImport(fileName, specifier));
 		}
 	}
