@@ -1,8 +1,7 @@
 import type { ReactElement } from 'react';
 import { expectTypeOf, test } from 'vite-plus/test';
+import type { IconName } from '../icon/icon.js';
 import type { IconButtonProps } from './icon-button.js';
-
-declare const customIcon: ReactElement;
 
 test('IconButton accepts only supported button treatments', () => {
 	const iconButton: IconButtonProps = {
@@ -17,12 +16,8 @@ test('IconButton accepts only supported button treatments', () => {
 		tone: 'critical',
 		prominence: 'high',
 	};
-	const customIconButton: IconButtonProps = {
-		'aria-label': 'Brand',
-		icon: customIcon,
-	};
 	expectTypeOf<typeof iconButton>().toExtend<IconButtonProps>();
-	expectTypeOf<typeof customIconButton>().toExtend<IconButtonProps>();
+	expectTypeOf<IconButtonProps['icon']>().toEqualTypeOf<IconName | ReactElement>();
 
 	const textIconButton: IconButtonProps = {
 		'aria-label': 'Add',
@@ -54,7 +49,6 @@ test('IconButton accepts only supported button treatments', () => {
 
 	void iconButton;
 	void criticalIconButton;
-	void customIconButton;
 	void textIconButton;
 	void buttonAppearanceIconButton;
 	void neutralHighIconButton;
