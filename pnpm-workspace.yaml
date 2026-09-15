@@ -53,10 +53,10 @@ catalog:
   '@storybook/react-vite': ^10.5.10
   '@tailwindcss/vite': ^4.3.3
   '@tanstack/react-form': ^1.33.5
-  '@tanstack/react-router': ^1.170.32
-  '@tanstack/react-start': ^1.168.49
-  '@tanstack/router-cli': ^1.167.33
-  '@tanstack/start-static-server-functions': ^1.167.32
+  '@tanstack/react-router': ^1.170.34
+  '@tanstack/react-start': ^1.168.51
+  '@tanstack/router-cli': ^1.167.35
+  '@tanstack/start-static-server-functions': ^1.167.34
   '@turbo/gen': ^2.10.12
   '@types/mdx': ^2.0.14
   '@types/node': ^26.5.0
