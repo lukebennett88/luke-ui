@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { GeneratedDoc } from 'fumadocs-typescript';
-import { createProject } from 'fumadocs-typescript';
+import { Project } from 'ts-morph';
 
 export interface PropProject {
 	createSourceFile: (
@@ -72,16 +72,19 @@ interface SyntaxNode {
 	getTypeNodes?: () => ReadonlyArray<SyntaxNode>;
 }
 
-const sharedProjects = new Map<string, Promise<Awaited<ReturnType<typeof createProject>>>>();
+const sharedProjects = new Map<string, Promise<PropProject>>();
 
 /** Returns the ts-morph project for a repo root, creating it at most once per root. */
-export function getSharedPropProject(
-	repoRoot: string,
-): Promise<Awaited<ReturnType<typeof createProject>>> {
+export function getSharedPropProject(repoRoot: string): Promise<PropProject> {
 	const cached = sharedProjects.get(repoRoot);
 	if (cached !== undefined) return cached;
 
-	const project = createProject({ tsconfigPath: `${repoRoot}/apps/docs/tsconfig.json` });
+	const project = Promise.resolve(
+		new Project({
+			tsConfigFilePath: `${repoRoot}/apps/docs/tsconfig.json`,
+			skipAddingFilesFromTsConfig: true,
+		}),
+	);
 	sharedProjects.set(repoRoot, project);
 	return project;
 }

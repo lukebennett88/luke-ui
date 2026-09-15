@@ -12,7 +12,6 @@ import {
 	loadExportedPropDeclaration,
 	lukeUiReactSrcDir,
 } from './component-prop-analysis.js';
-import type { PropProject } from './component-prop-analysis.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import { GUIDE_TAUGHT_PROPS, guideTableKey } from './guide-prop-audit-data.js';
 
@@ -38,7 +37,7 @@ const TS_MORPH_TEST_TIMEOUT = 30_000;
 async function visiblePropNames(path: string, name: string): Promise<Array<string>> {
 	const [doc] = await generator.generateTypeTable({ path, name }, { basePath: repoRoot });
 	const project = await getSharedPropProject(repoRoot);
-	const declaration = loadExportedPropDeclaration(project as PropProject, repoRoot, path, name);
+	const declaration = loadExportedPropDeclaration(project, repoRoot, path, name);
 	if (doc === undefined || declaration === undefined) {
 		throw new Error(`Missing documentation for ${name} in ${path}`);
 	}
