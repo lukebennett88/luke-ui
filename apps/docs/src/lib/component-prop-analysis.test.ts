@@ -32,7 +32,7 @@ const TS_MORPH_TEST_TIMEOUT = 30_000;
 async function loadDoc(path: string, name: string) {
 	const [doc] = await generator.generateTypeTable({ path, name }, { basePath: repoRoot });
 	const project = await getSharedPropProject(repoRoot);
-	const declaration = loadExportedPropDeclaration(project as PropProject, repoRoot, path, name);
+	const declaration = loadExportedPropDeclaration(project, repoRoot, path, name);
 	if (doc === undefined || declaration === undefined) {
 		throw new Error(`Missing documentation for ${name} in ${path}`);
 	}
@@ -163,21 +163,21 @@ test(
 
 		expect(
 			forwardsDomPropsForExport(
-				project as PropProject,
+				project,
 				'packages/@luke-ui/react/src/core/heading/heading.tsx',
 				'HeadingProps',
 			),
 		).toBe(true);
 		expect(
 			forwardsDomPropsForExport(
-				project as PropProject,
+				project,
 				'packages/@luke-ui/react/src/core/heading/heading-context.tsx',
 				'HeadingLevelsProps',
 			),
 		).toBe(false);
 		expect(
 			forwardsDomPropsForExport(
-				project as PropProject,
+				project,
 				'packages/@luke-ui/react/src/core/heading/heading-context.tsx',
 				'HeadingLevelsRenderProps',
 			),
@@ -534,13 +534,9 @@ test(
 
 		// A union of two plain object types forwards nothing, even though the union-aware walk visits
 		// both constituents.
-		expect(
-			forwardsDomPropsForExport(project as PropProject, UNION_FIXTURE_PATH, 'PlainUnionProps'),
-		).toBe(false);
+		expect(forwardsDomPropsForExport(project, UNION_FIXTURE_PATH, 'PlainUnionProps')).toBe(false);
 		// One DOM-forwarding constituent is enough for the whole union to forward.
-		expect(
-			forwardsDomPropsForExport(project as PropProject, UNION_FIXTURE_PATH, 'MixedUnionProps'),
-		).toBe(true);
+		expect(forwardsDomPropsForExport(project, UNION_FIXTURE_PATH, 'MixedUnionProps')).toBe(true);
 	},
 	TS_MORPH_TEST_TIMEOUT,
 );
@@ -550,7 +546,7 @@ test(
 	async () => {
 		const project = await getSharedPropProject(repoRoot);
 		const declaration = loadExportedPropDeclaration(
-			project as PropProject,
+			project,
 			repoRoot,
 			UNION_FIXTURE_PATH,
 			'PlainUnionProps',

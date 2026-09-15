@@ -80,6 +80,7 @@
 		"serve": "catalog:",
 		"shiki": "catalog:",
 		"tailwindcss": "catalog:",
+		"ts-morph": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",
 		"unist-util-visit": "catalog:",

@@ -1,6 +1,5 @@
 import type { GeneratedDoc, Generator, GeneratorOptions } from 'fumadocs-typescript';
 import { createGenerator } from 'fumadocs-typescript';
-import type { PropProject } from './component-prop-analysis.js';
 import {
 	filterGeneratedDoc,
 	getSharedPropProject,
@@ -29,7 +28,7 @@ export function createComponentPropsGenerator(options: GeneratorOptions = {}): G
 		const repoRoot = basePath;
 		const project = await getSharedPropProject(repoRoot);
 		const declaration = loadExportedPropDeclaration(
-			project as PropProject,
+			project,
 			repoRoot,
 			relativeRepoPath(repoRoot, file.path),
 			name,
