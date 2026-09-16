@@ -96,6 +96,7 @@ test('caps nested HeadingLevels at h6', async () => {
 		.element(locator.getByRole('heading', { level: 6, name: 'Capped at six' }))
 		.toBeVisible();
 });
+
 test('useHeadingLevel reads the current level without advancing it', async () => {
 	function CurrentLevel({ label }: { label: string }) {
 		const { element: Element, level } = useHeadingLevel();
