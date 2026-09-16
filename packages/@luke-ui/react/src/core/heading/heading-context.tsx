@@ -81,13 +81,9 @@ export type HeadingLevelsProps = {
  *
  * @example
  * ```tsx
- * // Using render prop to access level and element
+ * // Render prop for custom heading-like components
  * <HeadingLevels base={2}>
- *   {({ level, element }) => (
- *     <Heading elementType={element} level={level}>
- *       Dynamic Heading
- *     </Heading>
- *   )}
+ *   {({ level, element: Element }) => <Element>Custom h{level}</Element>}
  * </HeadingLevels>
  * ```
  */

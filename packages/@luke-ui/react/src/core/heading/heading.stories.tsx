@@ -1,5 +1,5 @@
 import type { HeadingProps } from '@luke-ui/react/heading';
-import { Heading } from '@luke-ui/react/heading';
+import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import type { CSSProperties } from 'react';
 import preview from '../../../.storybook/preview.js';
 
@@ -29,6 +29,25 @@ export const Level = meta.story({
 					Level {level} heading
 				</Heading>
 			))}
+		</div>
+	),
+});
+
+/**
+ * Nest `HeadingLevels` to advance the inherited heading level.
+ */
+export const AutomaticLeveling = meta.story({
+	render: () => (
+		<div style={stackStyle}>
+			<HeadingLevels base={1}>
+				<Heading>Top-level heading</Heading>
+				<HeadingLevels>
+					<Heading>Nested heading</Heading>
+					<HeadingLevels>
+						<Heading>Nested again</Heading>
+					</HeadingLevels>
+				</HeadingLevels>
+			</HeadingLevels>
 		</div>
 	),
 });
