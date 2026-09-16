@@ -91,9 +91,7 @@ test('caps nested HeadingLevels at h6', async () => {
 	await expect
 		.element(locator.getByRole('heading', { level: 5, name: 'Level five' }))
 		.toBeVisible();
-	await expect
-		.element(locator.getByRole('heading', { level: 6, name: 'Level six' }))
-		.toBeVisible();
+	await expect.element(locator.getByRole('heading', { level: 6, name: 'Level six' })).toBeVisible();
 	await expect
 		.element(locator.getByRole('heading', { level: 6, name: 'Capped at six' }))
 		.toBeVisible();
