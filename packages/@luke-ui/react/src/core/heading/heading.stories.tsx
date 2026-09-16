@@ -63,10 +63,10 @@ export const ElementType = meta.story({
 		<div style={stackStyle}>
 			<Heading {...props}>Default element (h2)</Heading>
 			<Heading {...props} elementType="div">
-				Rendered as div, still level 2 for assistive tech
+				Rendered as div with level 2 typography
 			</Heading>
 			<Heading {...props} elementType="span">
-				Rendered as span, still level 2 for assistive tech
+				Rendered as span with level 2 typography
 			</Heading>
 		</div>
 	),

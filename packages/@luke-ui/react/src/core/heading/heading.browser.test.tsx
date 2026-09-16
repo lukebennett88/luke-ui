@@ -1,7 +1,6 @@
 import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
-import { Text } from '../text/text.js';
 import { Heading, HeadingLevels, useHeadingLevel } from './heading.js';
 
 testConformance({
@@ -99,8 +98,8 @@ test('caps nested HeadingLevels at h6', async () => {
 });
 test('useHeadingLevel reads the current level without advancing it', async () => {
 	function CurrentLevel({ label }: { label: string }) {
-		const { element, level } = useHeadingLevel();
-		return <Text elementType={element}>{`${label} h${level}`}</Text>;
+		const { element: Element, level } = useHeadingLevel();
+		return <Element>{`${label} h${level}`}</Element>;
 	}
 
 	const { locator } = render(
