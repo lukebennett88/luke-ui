@@ -83,7 +83,9 @@ export type HeadingLevelsProps = {
  * ```tsx
  * // Render prop for custom heading-like components
  * <HeadingLevels base={2}>
- *   {({ level, element: Element }) => <Element>Custom h{level}</Element>}
+ *   {({ level, element }) => (
+ *     <Text elementType={element}>Custom h{level}</Text>
+ *   )}
  * </HeadingLevels>
  * ```
  */
