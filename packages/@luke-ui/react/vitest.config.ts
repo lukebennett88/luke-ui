@@ -123,7 +123,6 @@ export default defineConfig({
 				],
 				test: {
 					browser: {
-						api: { allowWrite: true },
 						enabled: true,
 						expect: {
 							toMatchScreenshot: {
