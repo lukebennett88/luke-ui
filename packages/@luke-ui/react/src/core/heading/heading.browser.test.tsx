@@ -25,6 +25,78 @@ test('keeps semantic heading level independent of visual type style', async () =
 		.toBeVisible();
 });
 
+test('inherits the current HeadingLevels base without advancing it', async () => {
+	const { locator } = render(
+		<HeadingLevels base={2}>
+			<Heading>Inherited heading</Heading>
+		</HeadingLevels>,
+	);
+
+	await expect
+		.element(locator.getByRole('heading', { level: 2, name: 'Inherited heading' }))
+		.toBeVisible();
+});
+
+test('nested HeadingLevels advance exactly one level for Heading', async () => {
+	const { locator } = render(
+		<HeadingLevels base={2}>
+			<Heading>Outer</Heading>
+			<HeadingLevels>
+				<Heading>Inner</Heading>
+				<HeadingLevels>
+					<Heading>Deeper</Heading>
+				</HeadingLevels>
+			</HeadingLevels>
+		</HeadingLevels>,
+	);
+
+	await expect.element(locator.getByRole('heading', { level: 2, name: 'Outer' })).toBeVisible();
+	await expect.element(locator.getByRole('heading', { level: 3, name: 'Inner' })).toBeVisible();
+	await expect.element(locator.getByRole('heading', { level: 4, name: 'Deeper' })).toBeVisible();
+});
+
+test('explicit level overrides context without changing siblings', async () => {
+	const { locator } = render(
+		<HeadingLevels base={2}>
+			<Heading level={4}>Explicit</Heading>
+			<Heading>Sibling</Heading>
+		</HeadingLevels>,
+	);
+
+	await expect.element(locator.getByRole('heading', { level: 4, name: 'Explicit' })).toBeVisible();
+	await expect.element(locator.getByRole('heading', { level: 2, name: 'Sibling' })).toBeVisible();
+});
+
+test('falls back to h2 outside HeadingLevels', async () => {
+	const { locator } = render(<Heading>Root fallback</Heading>);
+
+	await expect
+		.element(locator.getByRole('heading', { level: 2, name: 'Root fallback' }))
+		.toBeVisible();
+});
+
+test('caps nested HeadingLevels at h6', async () => {
+	const { locator } = render(
+		<HeadingLevels base={5}>
+			<Heading>Level five</Heading>
+			<HeadingLevels>
+				<Heading>Level six</Heading>
+				<HeadingLevels>
+					<Heading>Capped at six</Heading>
+				</HeadingLevels>
+			</HeadingLevels>
+		</HeadingLevels>,
+	);
+
+	await expect
+		.element(locator.getByRole('heading', { level: 5, name: 'Level five' }))
+		.toBeVisible();
+	await expect.element(locator.getByRole('heading', { level: 6, name: 'Level six' })).toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 6, name: 'Capped at six' }))
+		.toBeVisible();
+});
+
 test('useHeadingLevel reads the current level without advancing it', async () => {
 	function CurrentLevel({ label }: { label: string }) {
 		const { element: Element, level } = useHeadingLevel();

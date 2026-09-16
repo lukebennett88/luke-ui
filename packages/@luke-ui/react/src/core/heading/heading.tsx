@@ -1,8 +1,8 @@
 import type { TextProps } from '../text/text.js';
 import { Text } from '../text/text.js';
 import type { Prettify } from '../types/prettify.js';
-import type { HeadingLevel, HeadingLevelsProps } from './heading-context.js';
-import { HeadingLevels, HeadingPresenceProvider } from './heading-context.js';
+import type { HeadingLevel } from './heading-context.js';
+import { HeadingPresenceProvider, useHeadingLevel } from './heading-context.js';
 
 export type { HeadingLevel } from './heading-context.js';
 export { HeadingLevels, useHeadingLevel } from './heading-context.js';
@@ -30,20 +30,17 @@ const typographyByLevel = {
 /** Semantic heading with automatic level composition and level-based typography. */
 export function Heading(props: HeadingProps) {
 	const { elementType, fontWeight = 'heading', level, typography, ...textProps } = props;
-	const baseProps: Pick<HeadingLevelsProps, 'base'> = level === undefined ? {} : { base: level };
+	const { level: contextLevel } = useHeadingLevel();
+	const resolvedLevel = level ?? contextLevel;
 
 	return (
-		<HeadingLevels {...baseProps}>
-			{({ element, level: resolvedLevel }) => (
-				<HeadingPresenceProvider>
-					<Text
-						elementType={elementType || element}
-						fontWeight={fontWeight}
-						typography={typography ?? typographyByLevel[resolvedLevel]}
-						{...textProps}
-					/>
-				</HeadingPresenceProvider>
-			)}
-		</HeadingLevels>
+		<HeadingPresenceProvider>
+			<Text
+				elementType={elementType || `h${resolvedLevel}`}
+				fontWeight={fontWeight}
+				typography={typography ?? typographyByLevel[resolvedLevel]}
+				{...textProps}
+			/>
+		</HeadingPresenceProvider>
 	);
 }

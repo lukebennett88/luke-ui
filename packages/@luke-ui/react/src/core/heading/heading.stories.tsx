@@ -1,5 +1,5 @@
 import type { HeadingProps } from '@luke-ui/react/heading';
-import { Heading } from '@luke-ui/react/heading';
+import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import type { CSSProperties } from 'react';
 import preview from '../../../.storybook/preview.js';
 
@@ -34,6 +34,25 @@ export const Level = meta.story({
 });
 
 /**
+ * Nest `HeadingLevels` to advance the inherited heading level.
+ */
+export const AutomaticLeveling = meta.story({
+	render: () => (
+		<div style={stackStyle}>
+			<HeadingLevels base={1}>
+				<Heading>Top-level heading</Heading>
+				<HeadingLevels>
+					<Heading>Nested heading</Heading>
+					<HeadingLevels>
+						<Heading>Nested again</Heading>
+					</HeadingLevels>
+				</HeadingLevels>
+			</HeadingLevels>
+		</div>
+	),
+});
+
+/**
  * Use `elementType` to control the rendered element while keeping heading styles.
  */
 export const ElementType = meta.story({
@@ -44,10 +63,10 @@ export const ElementType = meta.story({
 		<div style={stackStyle}>
 			<Heading {...props}>Default element (h2)</Heading>
 			<Heading {...props} elementType="div">
-				Rendered as div, still level 2 for assistive tech
+				Rendered as div with level 2 typography
 			</Heading>
 			<Heading {...props} elementType="span">
-				Rendered as span, still level 2 for assistive tech
+				Rendered as span with level 2 typography
 			</Heading>
 		</div>
 	),
