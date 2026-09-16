@@ -78,21 +78,26 @@ test('falls back to h2 outside HeadingLevels', async () => {
 test('caps nested HeadingLevels at h6', async () => {
 	const { locator } = render(
 		<HeadingLevels base={5}>
-			<Heading>Five</Heading>
+			<Heading>Level five</Heading>
 			<HeadingLevels>
-				<Heading>Six</Heading>
+				<Heading>Level six</Heading>
 				<HeadingLevels>
-					<Heading>Still six</Heading>
+					<Heading>Capped at six</Heading>
 				</HeadingLevels>
 			</HeadingLevels>
 		</HeadingLevels>,
 	);
 
-	await expect.element(locator.getByRole('heading', { level: 5, name: 'Five' })).toBeVisible();
-	await expect.element(locator.getByRole('heading', { level: 6, name: 'Six' })).toBeVisible();
-	await expect.element(locator.getByRole('heading', { level: 6, name: 'Still six' })).toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 5, name: 'Level five' }))
+		.toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 6, name: 'Level six' }))
+		.toBeVisible();
+	await expect
+		.element(locator.getByRole('heading', { level: 6, name: 'Capped at six' }))
+		.toBeVisible();
 });
-
 test('useHeadingLevel reads the current level without advancing it', async () => {
 	function CurrentLevel({ label }: { label: string }) {
 		const { element: Element, level } = useHeadingLevel();
