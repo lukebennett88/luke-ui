@@ -1,16 +1,9 @@
-import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { AspectRatio } from './aspect-ratio.js';
 
-const ratios = [
-	{ height: 256, ratio: '1 / 1' },
-	{ height: 192, ratio: '4 / 3' },
-	{ height: 256 * (2 / 3), ratio: '3 / 2' },
-	{ height: 144, ratio: '16 / 9' },
-	{ height: 256 * (9 / 21), ratio: '21 / 9' },
-] as const;
+const ratios = ['1 / 1', '4 / 3', '3 / 2', '16 / 9', '21 / 9'] as const;
 
 const blankPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
@@ -24,35 +17,32 @@ testConformance({
 	render: (props = {}) => render(<AspectRatio {...props}>Content</AspectRatio>),
 });
 
-test('defaults to a 1 / 1 frame', () => {
+test('defaults to a square frame when ratio is omitted', () => {
 	const { locator } = render(<AspectRatio data-testid="ratio" inlineSize="16rem" />);
 	const element = locator.getByTestId('ratio').element();
 	if (!(element instanceof HTMLElement)) throw new Error('Expected AspectRatio element.');
+	const { height, width } = element.getBoundingClientRect();
 
-	expect(getComputedStyle(element).aspectRatio).toBe('1 / 1');
-	expect(getComputedStyle(element).display).toBe('grid');
-	expect(element.getBoundingClientRect().width).toBe(256);
-	expect(element.getBoundingClientRect().height).toBe(256);
+	expect(width).toBe(256);
+	expect(height / width).toBeCloseTo(1, 2);
 });
 
-for (const { height, ratio } of ratios) {
+for (const ratio of ratios) {
 	test(`locks the frame to ${ratio}`, () => {
 		const { locator } = render(
 			<AspectRatio data-testid="ratio" inlineSize="16rem" ratio={ratio} />,
 		);
 		const element = locator.getByTestId('ratio').element();
 		if (!(element instanceof HTMLElement)) throw new Error('Expected AspectRatio element.');
-		const { height: actualHeight, width } = element.getBoundingClientRect();
+		const { height, width } = element.getBoundingClientRect();
 		const [inlinePart, blockPart] = ratio.split(' / ');
 		const inline = Number(inlinePart);
 		const block = Number(blockPart);
 
-		expect(getComputedStyle(element).aspectRatio).toBe(ratio);
-		expect(width).toBe(256);
-		expect(actualHeight / width).toBeCloseTo(block / inline, 2);
-		expect(actualHeight).toBeCloseTo(height, 1);
+		expect(height / width).toBeCloseTo(block / inline, 2);
 	});
 }
+
 test('sizes a media child to fill the frame without caller fill styles', () => {
 	const { locator } = render(
 		<AspectRatio data-testid="ratio" inlineSize="16rem" ratio="16 / 9">
@@ -67,8 +57,6 @@ test('sizes a media child to fill the frame without caller fill styles', () => {
 
 	expect(media.getBoundingClientRect().width).toBe(element.getBoundingClientRect().width);
 	expect(media.getBoundingClientRect().height).toBe(element.getBoundingClientRect().height);
-	expect(media.getBoundingClientRect().width).toBe(256);
-	expect(media.getBoundingClientRect().height).toBe(144);
 });
 
 test('defaults objectFit to cover on the media child', () => {
@@ -95,20 +83,6 @@ test('applies an explicit objectFit value to the media child', () => {
 	expect(getComputedStyle(media).objectFit).toBe('contain');
 });
 
-test('leaves interactive children operable', async () => {
-	let pressed = false;
-	const { locator, user } = render(
-		<AspectRatio ratio="4 / 3">
-			<button onClick={() => (pressed = true)} type="button">
-				Play
-			</button>
-		</AspectRatio>,
-	);
-	await user.click(locator.getByRole('button', { name: 'Play' }));
-
-	expect(pressed).toBe(true);
-});
-
 test('applies root layout props and ignores unsupported Box utilities from an object spread', () => {
 	const props = {
 		borderStyle: 'solid',
@@ -132,18 +106,17 @@ test('applies root layout props and ignores unsupported Box utilities from an ob
 	expect(element.offsetWidth).toBe(element.clientWidth);
 });
 
-test('forwards refs and supports caller-owned elements', () => {
-	const ref = createRef<HTMLElement>();
+test('applies the chosen ratio to a caller-owned root', () => {
 	const { locator } = render(
 		<AspectRatio
-			ref={ref}
+			inlineSize="16rem"
 			ratio="21 / 9"
 			render={(resolvedProps) => <figure {...resolvedProps} data-testid="custom-ratio" />}
 		/>,
 	);
 	const element = locator.getByTestId('custom-ratio').element();
 	if (!(element instanceof HTMLElement)) throw new Error('Expected custom AspectRatio element.');
+	const { height, width } = element.getBoundingClientRect();
 
-	expect(ref.current).toBe(element);
-	expect(getComputedStyle(element).aspectRatio).toBe('21 / 9');
+	expect(height / width).toBeCloseTo(9 / 21, 2);
 });

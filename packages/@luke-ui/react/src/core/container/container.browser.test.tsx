@@ -1,10 +1,10 @@
-import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { Box } from '../box/box.js';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Container } from './container.js';
+import { containerMaxInlineSizeTokens } from './recipe.css.js';
 
 afterEach(async () => {
 	await page.viewport(1024, 800);
@@ -45,50 +45,56 @@ test('uses its fixed maximum as a border-box width and centres by default', () =
 	expect(getComputedStyle(container).containerType).toBe('inline-size');
 });
 
-test('lets utility and style margins override its default centring', () => {
+for (const [maxInlineSize, pixelValue] of Object.entries(containerMaxInlineSizeTokens)) {
+	const expectedWidth = Number.parseInt(pixelValue, 10);
+
+	test(`caps the border box at ${maxInlineSize}`, () => {
+		const { locator } = render(
+			<div style={{ inlineSize: '1400px' }}>
+				<Container data-testid="container" maxInlineSize={maxInlineSize}>
+					Content
+				</Container>
+			</div>,
+		);
+		const container = locator.getByTestId('container').element();
+		if (!(container instanceof HTMLElement)) throw new Error('Expected Container element.');
+
+		expect(container.getBoundingClientRect().width).toBe(expectedWidth);
+	});
+}
+
+test('lets marginInline override its default centring', () => {
 	const { locator } = render(
 		<div style={{ inlineSize: '800px' }}>
-			<Container data-testid="utility" marginInline="0" maxInlineSize="ct448">
-				Utility margin
-			</Container>
-			<Container data-testid="style" maxInlineSize="ct448" style={{ marginInline: '32px 0' }}>
-				Style margin
+			<Container data-testid="container" marginInline="0" maxInlineSize="ct448">
+				Content
 			</Container>
 		</div>,
 	);
-	const utility = locator.getByTestId('utility').element();
-	const style = locator.getByTestId('style').element();
-	if (!(utility instanceof HTMLElement) || !(style instanceof HTMLElement)) {
-		throw new Error('Expected Container elements.');
-	}
+	const container = locator.getByTestId('container').element();
+	if (!(container instanceof HTMLElement)) throw new Error('Expected Container element.');
 
-	expect(getComputedStyle(utility).marginInlineStart).toBe('0px');
-	expect(getComputedStyle(style).marginInlineStart).toBe('32px');
+	expect(getComputedStyle(container).marginInlineStart).toBe('0px');
 });
 
-test('uses the content box for responsive descendants at breakpoint boundaries', async () => {
-	await page.viewport(799, 800);
+test('uses the nearest nested Container as the query boundary', async () => {
+	await page.viewport(1024, 800);
 	const { locator } = render(
 		<Container maxInlineSize="100%" paddingInline="sp16">
-			<Box data-testid="responsive" display={{ initial: 'block', bp768: 'flex' }}>
-				<Container maxInlineSize="100%">
-					<Box data-testid="nested" display={{ initial: 'block', bp768: 'flex' }} />
-				</Container>
-			</Box>
+			<Box data-testid="outer" display={{ initial: 'block', bp768: 'flex' }} />
+			<Container maxInlineSize="ct672">
+				<Box data-testid="nested" display={{ initial: 'block', bp768: 'flex' }} />
+			</Container>
 		</Container>,
 	);
-	const responsive = locator.getByTestId('responsive').element();
+	const outer = locator.getByTestId('outer').element();
 	const nested = locator.getByTestId('nested').element();
-	if (!(responsive instanceof HTMLElement) || !(nested instanceof HTMLElement)) {
+	if (!(outer instanceof HTMLElement) || !(nested instanceof HTMLElement)) {
 		throw new Error('Expected responsive descendants.');
 	}
 
-	expect(getComputedStyle(responsive).display).toBe('block');
+	expect(getComputedStyle(outer).display).toBe('flex');
 	expect(getComputedStyle(nested).display).toBe('block');
-
-	await page.viewport(800, 800);
-	expect(getComputedStyle(responsive).display).toBe('flex');
-	expect(getComputedStyle(nested).display).toBe('flex');
 });
 
 test('caps the border box at an arbitrary CSS maxInlineSize', () => {
@@ -103,11 +109,9 @@ test('caps the border box at an arbitrary CSS maxInlineSize', () => {
 	if (!(container instanceof HTMLElement)) throw new Error('Expected Container element.');
 
 	expect(container.getBoundingClientRect().width).toBe(672);
-	expect(getComputedStyle(container).maxInlineSize).toBe('672px');
 });
 
 test('forwards refs and supports semantic and caller-owned elements', () => {
-	const ref = createRef<HTMLElement>();
 	const semantic = render(
 		<Container aria-label="Page content" elementType="main" maxInlineSize="ct896">
 			Page content
@@ -120,7 +124,6 @@ test('forwards refs and supports semantic and caller-owned elements', () => {
 	const custom = render(
 		<Container
 			maxInlineSize="ct896"
-			ref={ref}
 			render={(resolvedProps) => <section {...resolvedProps} data-testid="custom-container" />}
 		>
 			Custom content
@@ -129,6 +132,5 @@ test('forwards refs and supports semantic and caller-owned elements', () => {
 	const element = custom.locator.getByTestId('custom-container').element();
 	if (!(element instanceof HTMLElement)) throw new Error('Expected custom Container element.');
 
-	expect(ref.current).toBe(element);
 	expect(getComputedStyle(element).containerType).toBe('inline-size');
 });

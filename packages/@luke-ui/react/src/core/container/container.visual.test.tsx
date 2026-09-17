@@ -6,7 +6,8 @@ import { captureVisualAppearance } from '../test-utils/visual.js';
 import { Text } from '../text/text.js';
 import { Container } from './container.js';
 
-const sizes = ['ct448', 'ct672', 'ct896', 'ct1152', 'ct1280'] as const;
+/** Fixed sizes that can reach their maximum inside the 1024px visual viewport. */
+const sizes = ['ct448', 'ct672', 'ct896'] as const;
 
 test('fixed maximum inline sizes', async () => {
 	for (const appearance of visualAppearances) {
