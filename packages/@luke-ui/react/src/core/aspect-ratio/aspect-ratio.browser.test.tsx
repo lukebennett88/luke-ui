@@ -43,7 +43,9 @@ for (const { height, ratio } of ratios) {
 		const element = locator.getByTestId('ratio').element();
 		if (!(element instanceof HTMLElement)) throw new Error('Expected AspectRatio element.');
 		const { height: actualHeight, width } = element.getBoundingClientRect();
-		const [inline, block] = ratio.split(' / ').map(Number);
+		const [inlinePart, blockPart] = ratio.split(' / ');
+		const inline = Number(inlinePart);
+		const block = Number(blockPart);
 
 		expect(getComputedStyle(element).aspectRatio).toBe(ratio);
 		expect(width).toBe(256);
