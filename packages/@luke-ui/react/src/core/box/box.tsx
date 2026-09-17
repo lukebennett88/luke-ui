@@ -68,25 +68,25 @@ export function omitUnsupportedSprinklesProps<Props extends object>(
 	props: Props,
 	supportedProperties: ReadonlySet<PropertyKey>,
 ): Props {
-	const sprinklesProps = { ...props };
+	const nextProps: Record<PropertyKey, unknown> = {};
 
-	for (const key of Reflect.ownKeys(sprinklesProps)) {
-		if (sprinklesProperties.has(key) && !supportedProperties.has(key)) {
-			Reflect.deleteProperty(sprinklesProps, key);
+	for (const key of Reflect.ownKeys(props)) {
+		if (!sprinklesProperties.has(key) || supportedProperties.has(key)) {
+			nextProps[key] = props[key as keyof Props];
 		}
 	}
 
-	return sprinklesProps;
+	return nextProps as Props;
 }
 
 function retainSprinklesProps<Props extends object>(props: Props): Props {
-	const sprinklesProps = { ...props };
+	const nextProps: Record<PropertyKey, unknown> = {};
 
-	for (const key of Reflect.ownKeys(sprinklesProps)) {
-		if (!sprinklesProperties.has(key)) {
-			Reflect.deleteProperty(sprinklesProps, key);
+	for (const key of Reflect.ownKeys(props)) {
+		if (sprinklesProperties.has(key)) {
+			nextProps[key] = props[key as keyof Props];
 		}
 	}
 
-	return sprinklesProps;
+	return nextProps as Props;
 }
