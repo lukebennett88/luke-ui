@@ -94,18 +94,10 @@ test('uses the content box for responsive descendants at breakpoint boundaries',
 test('lets caller style override maxInlineSize for token and arbitrary values', () => {
 	const { locator } = render(
 		<div style={{ inlineSize: '800px' }}>
-			<Container
-				data-testid="token"
-				maxInlineSize="ct672"
-				style={{ maxInlineSize: '30rem' }}
-			>
+			<Container data-testid="token" maxInlineSize="ct672" style={{ maxInlineSize: '30rem' }}>
 				Token
 			</Container>
-			<Container
-				data-testid="arbitrary"
-				maxInlineSize="42rem"
-				style={{ maxInlineSize: '30rem' }}
-			>
+			<Container data-testid="arbitrary" maxInlineSize="42rem" style={{ maxInlineSize: '30rem' }}>
 				Arbitrary
 			</Container>
 		</div>,
