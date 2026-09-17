@@ -14,7 +14,7 @@ export type ClusterProps = Prettify<_ClusterElementProps | _ClusterRenderProps>;
 /** Clusters direct children on the logical inline axis and always wraps. */
 export function Cluster({
 	alignItems = 'center',
-	gap,
+	gap = '0',
 	justifyContent = 'flex-start',
 	...props
 }: ClusterProps): JSX.Element {
@@ -39,9 +39,9 @@ interface _ClusterLayoutProps {
 	alignItems?: SprinklesProps['alignItems'];
 	/**
 	 * Space between children on both axes.
-	 * Pass `"0"` when the children should touch.
+	 * @default "0"
 	 */
-	gap: RequiredInitialResponsive<SprinklesProps['gap']>;
+	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/**
 	 * Distribution of children on the inline axis.
 	 * @default flex-start

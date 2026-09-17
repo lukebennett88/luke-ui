@@ -43,18 +43,28 @@ test('flows children on the inline axis and always wraps', () => {
 	expect(getComputedStyle(element).alignItems).toBe('center');
 });
 
-test('accepts gap 0 and alignment overrides', () => {
+test('uses no gap by default and accepts alignment overrides', () => {
 	const { locator } = render(
-		<Cluster alignItems="stretch" data-testid="cluster" gap="0" justifyContent="space-between">
-			<span>First</span>
-			<span>Second</span>
+		<Cluster
+			alignItems="stretch"
+			data-testid="cluster"
+			inlineSize="2rem"
+			justifyContent="space-between"
+		>
+			<span style={{ inlineSize: '1rem' }} />
+			<span style={{ inlineSize: '1rem' }} />
 		</Cluster>,
 	);
 	const element = locator.getByTestId('cluster').element();
 	if (!(element instanceof HTMLElement)) throw new Error('Expected Cluster element.');
+	const [first, second] = element.children;
+	if (!(first instanceof HTMLElement) || !(second instanceof HTMLElement)) {
+		throw new Error('Expected Cluster children.');
+	}
 
 	expect(getComputedStyle(element).alignItems).toBe('stretch');
 	expect(getComputedStyle(element).justifyContent).toBe('space-between');
+	expect(second.getBoundingClientRect().left - first.getBoundingClientRect().right).toBe(0);
 });
 
 test('wraps when children exceed the inline size', () => {
