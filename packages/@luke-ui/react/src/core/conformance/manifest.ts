@@ -50,6 +50,8 @@ export const componentTestManifest = [
 	// Theme utilities, not a component with a rendered root.
 	['Theme', 'theme', [], 'none', 'none'],
 	['VisuallyHidden', 'visually-hidden', ['dom'], 'none', 'none'],
+	['Stack', 'stack', ['dom'], 'none', 'applicable'],
+	['Cluster', 'cluster', ['dom'], 'none', 'applicable'],
 ].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({
 	conformance,
 	integrationTripwire,

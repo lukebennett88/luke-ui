@@ -90,6 +90,19 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'ref',
 		'render',
 	],
+	'layout/cluster.mdx::packages/@luke-ui/react/src/core/cluster/cluster.tsx::ClusterProps': [
+		'alignItems',
+		'elementType',
+		'gap',
+		'justifyContent',
+		'render',
+	],
+	'layout/stack.mdx::packages/@luke-ui/react/src/core/stack/stack.tsx::StackProps': [
+		'alignItems',
+		'elementType',
+		'gap',
+		'render',
+	],
 	'layout/visually-hidden.mdx::packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx::VisuallyHiddenProps':
 		['elementType'],
 	'primitives/button.mdx::packages/@luke-ui/react/src/core/primitives/button/button.tsx::ButtonProps':

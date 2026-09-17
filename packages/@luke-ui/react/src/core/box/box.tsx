@@ -1,8 +1,12 @@
-import type { HTMLAttributes, JSX, ReactElement, Ref, RefObject } from 'react';
+import type { JSX, Ref } from 'react';
 import { mergeStyleProps } from '../../shared/utils/utils.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import { createSprinkles } from '../styles/utilities.css.js';
-import type { DistributiveOmit } from '../types/distributive-omit.js';
+import type {
+	BoxLikeElementProps,
+	BoxLikeRef,
+	BoxLikeRenderProps,
+} from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
 
 /** Props for `Box`. */
@@ -38,64 +42,12 @@ export function Box(props: BoxProps): JSX.Element {
 	return <Element {...domProps} />;
 }
 
-type BoxElementType = keyof Pick<
-	JSX.IntrinsicElements,
-	| 'article'
-	| 'aside'
-	| 'dd'
-	| 'div'
-	| 'dl'
-	| 'dt'
-	| 'figcaption'
-	| 'figure'
-	| 'footer'
-	| 'header'
-	| 'li'
-	| 'main'
-	| 'nav'
-	| 'ol'
-	| 'section'
-	| 'span'
-	| 'ul'
->;
+interface _BoxElementProps extends BoxLikeElementProps, SprinklesProps {}
 
-interface _BoxElementProps extends HTMLAttributes<HTMLElement>, SprinklesProps {
-	/**
-	 * Chooses a supported structural element.
-	 * @default div
-	 */
-	elementType?: BoxElementType;
-	/** Ref to the rendered element. */
-	ref?: Ref<HTMLElement>;
-	/** Use `render` instead of `elementType` to own the rendered element. */
-	render?: never;
-}
-
-interface _BoxPresentationProps
-	extends Pick<HTMLAttributes<HTMLElement>, 'children' | 'className' | 'style'>, SprinklesProps {
-	ref?: Ref<HTMLElement>;
-}
-
-type BoxRef = NonNullable<Exclude<Ref<HTMLElement>, RefObject<HTMLElement | null>>>;
-
-type _BoxResolvedRenderProps = DistributiveOmit<
-	_BoxPresentationProps,
-	'ref' | keyof SprinklesProps
-> & {
-	ref: BoxRef;
-};
-
-interface _BoxRenderProps extends _BoxPresentationProps {
-	/** Use `elementType` instead of `render` for a supported structural element. */
-	elementType?: never;
-	/** Passes Box's content and presentation props to a caller-owned element. */
-	render: (props: {
-		[K in keyof _BoxResolvedRenderProps]: _BoxResolvedRenderProps[K];
-	}) => ReactElement;
-}
+interface _BoxRenderProps extends BoxLikeRenderProps, SprinklesProps {}
 
 /** Normalises Box's `ref` so `render` can spread it onto a concrete element. */
-function toCallbackRef(ref: Ref<HTMLElement> | undefined): BoxRef {
+function toCallbackRef(ref: Ref<HTMLElement> | undefined): BoxLikeRef {
 	return (element) => {
 		if (typeof ref === 'function') return ref(element);
 		if (ref) ref.current = element;
@@ -105,11 +57,27 @@ function toCallbackRef(ref: Ref<HTMLElement> | undefined): BoxRef {
 /** Replaces `props.ref` with a callback ref so the result can spread onto a concrete element. */
 function normaliseRef<Props extends { ref?: Ref<HTMLElement> }>(
 	props: Props,
-): Omit<Props, 'ref'> & { ref: BoxRef } {
+): Omit<Props, 'ref'> & { ref: BoxLikeRef } {
 	return { ...props, ref: toCallbackRef(props.ref) };
 }
 
 const sprinklesProperties: ReadonlySet<PropertyKey> = createSprinkles.properties;
+
+/** Removes unsupported utility props while preserving structural and DOM props. */
+export function omitUnsupportedSprinklesProps<Props extends object>(
+	props: Props,
+	supportedProperties: ReadonlySet<PropertyKey>,
+): Props {
+	const sprinklesProps = { ...props };
+
+	for (const key of Reflect.ownKeys(sprinklesProps)) {
+		if (sprinklesProperties.has(key) && !supportedProperties.has(key)) {
+			Reflect.deleteProperty(sprinklesProps, key);
+		}
+	}
+
+	return sprinklesProps;
+}
 
 function retainSprinklesProps<Props extends object>(props: Props): Props {
 	const sprinklesProps = { ...props };

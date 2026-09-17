@@ -16,6 +16,8 @@
 		"forms/text-field",
 		"---Layout---",
 		"layout/box",
+		"layout/cluster",
+		"layout/stack",
 		"layout/visually-hidden",
 		"---Typography---",
 		"typography/blockquote",

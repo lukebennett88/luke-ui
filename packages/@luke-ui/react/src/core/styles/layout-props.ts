@@ -1,0 +1,56 @@
+import type { SprinklesProps } from './utilities.css.js';
+
+/** Box utilities that layout components may apply to their root. */
+const layoutPropertyNames = [
+	'alignSelf',
+	'blockSize',
+	'flex',
+	'flexBasis',
+	'flexGrow',
+	'flexShrink',
+	'gridArea',
+	'gridColumn',
+	'gridColumnEnd',
+	'gridColumnStart',
+	'gridRow',
+	'gridRowEnd',
+	'gridRowStart',
+	'inlineSize',
+	'inset',
+	'insetBlock',
+	'insetBlockEnd',
+	'insetBlockStart',
+	'insetInline',
+	'insetInlineEnd',
+	'insetInlineStart',
+	'justifySelf',
+	'margin',
+	'marginBlock',
+	'marginBlockEnd',
+	'marginBlockStart',
+	'marginInline',
+	'marginInlineEnd',
+	'marginInlineStart',
+	'maxBlockSize',
+	'maxInlineSize',
+	'minBlockSize',
+	'minInlineSize',
+	'order',
+	'overflow',
+	'overflowX',
+	'overflowY',
+	'padding',
+	'paddingBlock',
+	'paddingBlockEnd',
+	'paddingBlockStart',
+	'paddingInline',
+	'paddingInlineEnd',
+	'paddingInlineStart',
+	'placeSelf',
+	'position',
+] as const satisfies ReadonlyArray<keyof SprinklesProps>;
+
+/** Box utilities a layout component accepts without changing its child-layout algorithm. */
+export type LayoutProps = Pick<SprinklesProps, (typeof layoutPropertyNames)[number]>;
+
+export const layoutProperties: ReadonlySet<PropertyKey> = new Set(layoutPropertyNames);

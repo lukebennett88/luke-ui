@@ -234,8 +234,7 @@ hatch.
 `Box` from `@luke-ui/react/box` applies these utilities. Use it as the escape hatch for layout and
 appearance. It excludes typography and text colour. Use `Text` or `Heading` for those.
 
-Do not add style props to every component. Keep component props on variants and behaviour. Reach for
-`Box` when a component's own props are too narrow.
+Do not add style props to every component. Keep component props on variants and behaviour.
 
 ### `createSprinkles()`
 

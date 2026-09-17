@@ -1,4 +1,4 @@
 {
 	"title": "Layout",
-	"pages": ["box", "visually-hidden"]
+	"pages": ["box", "cluster", "stack", "visually-hidden"]
 }
