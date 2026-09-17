@@ -4,10 +4,10 @@ description: Lock media to an inline-to-block ratio.
 source: packages/@luke-ui/react/src/exports/aspect-ratio.ts
 ---
 
-`AspectRatio` locks a frame to an inline-to-block ratio and sizes its direct child to fill that
-frame. Use it for media such as an `iframe`, `img`, or `video`. The media element needs no size of
-its own. Pass `objectFit` when cover is not the right fit. Read
-[Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
+`AspectRatio` locks a frame to an inline-to-block ratio and sizes its direct child to fill the
+frame. Use it for media such as an `iframe`, `img`, or `video`. Images and videos use
+`objectFit="cover"` by default. Pass another `objectFit` value to change how they fit the frame.
+Read [Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
 
 <ExampleBlock src="aspect-ratio/basic" title="Aspect ratio — Basic" />
 

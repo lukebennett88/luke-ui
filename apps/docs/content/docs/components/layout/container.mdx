@@ -8,20 +8,19 @@ source: packages/@luke-ui/react/src/exports/container.ts
 value for a fixed maximum, or a CSS length. Pass `marginInline` to change the centring. Read
 [Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
 
-A traditional container often only constrains and centres page content. Luke UI's `Container` also
-establishes a local responsive query boundary: it sets `container-type: inline-size`, and Luke UI
-responsive values resolve against that content box rather than the viewport. Adding a Container can
-therefore change which breakpoints descendants reach. For example, a `ct672` Container never reaches
-`bp768`, because descendants query the Container's content box. `paddingInline` shrinks that content
-box and can move where responsive styles switch. That is intentional in Luke UI's
-container-query-first layout model.
-
 <ExampleBlock src="container/basic" title="Container — Basic" />
 
 ## Responsive descendants
 
-Put a responsive component inside Container when it must respond to that content area rather than
-the document root.
+A traditional container usually only constrains and centres content. Luke UI's `Container` also
+establishes a local responsive query boundary.
+
+Luke UI responsive values inside the Container resolve against its content box rather than the
+document root. A `ct672` Container therefore never reaches `bp768`. `paddingInline` reduces the
+content-box width, so it can also change where responsive styles switch.
+
+Use Container when descendants should respond to the available content area rather than the document
+root.
 
 ## Choose the rendered element
 
