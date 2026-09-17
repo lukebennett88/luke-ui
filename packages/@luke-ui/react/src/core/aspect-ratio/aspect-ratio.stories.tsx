@@ -1,7 +1,6 @@
 import type { AspectRatioProps } from '@luke-ui/react/aspect-ratio';
 import { AspectRatio } from '@luke-ui/react/aspect-ratio';
 import { vars } from '@luke-ui/react/theme';
-import type { ComponentPropsWithRef } from 'react';
 import preview from '../../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -41,25 +40,22 @@ export const Figure = meta.story({
 	} satisfies AspectRatioProps,
 });
 
-export const CustomRoot = meta.story({
+/** Show how contain differs from the default cover fit. */
+export const Contain = meta.story({
 	args: {
 		children: (
 			<MediaImage
-				alt="Snow-covered mountain range"
-				src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1200&q=80"
+				alt="Tall canyon walls with a narrow sky strip"
+				src="https://images.unsplash.com/photo-1479030160180-b1860951d696?auto=format&fit=crop&w=800&h=1200&q=80"
 			/>
 		),
 		inlineSize: '100%',
 		maxInlineSize: '20rem',
-		ratio: '21 / 9',
-		render: (resolvedProps) => <MotionFigure {...resolvedProps} />,
+		objectFit: 'contain',
+		ratio: '16 / 9',
 	} satisfies AspectRatioProps,
 });
 
 function MediaImage({ alt, src }: { alt: string; src: string }) {
 	return <img alt={alt} src={src} style={{ borderRadius: vars.radius.detail }} />;
-}
-
-function MotionFigure(props: ComponentPropsWithRef<'figure'>) {
-	return <figure data-motion="enabled" {...props} />;
 }

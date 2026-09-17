@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import type { ContainerProps } from '@luke-ui/react/container';
 import { Container } from '@luke-ui/react/container';
-import type { ComponentPropsWithRef, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import preview from '../../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -28,15 +28,6 @@ export const Main = meta.story({
 	} satisfies ContainerProps,
 });
 
-export const CustomRoot = meta.story({
-	args: {
-		children: <Specimen>Content inside a caller-owned element</Specimen>,
-		maxInlineSize: 'ct448',
-		paddingInline: 'sp16',
-		render: (resolvedProps) => <MotionSection {...resolvedProps} />,
-	} satisfies ContainerProps,
-});
-
 function Specimen({ children }: { children: ReactNode }) {
 	return (
 		<Box
@@ -50,8 +41,4 @@ function Specimen({ children }: { children: ReactNode }) {
 			{children}
 		</Box>
 	);
-}
-
-function MotionSection(props: ComponentPropsWithRef<'section'>) {
-	return <section data-motion="enabled" {...props} />;
 }
