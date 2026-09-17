@@ -67,6 +67,20 @@ test('uses no gap by default and accepts alignment overrides', () => {
 	expect(second.getBoundingClientRect().left - first.getBoundingClientRect().right).toBe(0);
 });
 
+test('emits no gap utility when gap is omitted', () => {
+	const { locator } = render(
+		<Cluster data-testid="cluster">
+			<span style={{ inlineSize: '1rem' }} />
+			<span style={{ inlineSize: '1rem' }} />
+		</Cluster>,
+	);
+	const element = locator.getByTestId('cluster').element();
+	if (!(element instanceof HTMLElement)) throw new Error('Expected Cluster element.');
+
+	expect(element.className).not.toMatch(/gap/);
+	expect(getComputedStyle(element).gap).toBe('normal');
+});
+
 test('wraps when children exceed the inline size', () => {
 	const { locator } = render(
 		<Cluster data-testid="cluster" gap="sp8" style={{ inlineSize: '8rem' }}>

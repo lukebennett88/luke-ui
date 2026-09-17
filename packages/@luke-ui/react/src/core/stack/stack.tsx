@@ -12,7 +12,7 @@ import type { Prettify } from '../types/prettify.js';
 export type StackProps = Prettify<_StackElementProps | _StackRenderProps>;
 
 /** Stacks direct children on the logical block axis. */
-export function Stack({ alignItems = 'stretch', gap = '0', ...props }: StackProps): JSX.Element {
+export function Stack({ alignItems = 'stretch', gap, ...props }: StackProps): JSX.Element {
 	return (
 		<Box
 			{...omitUnsupportedSprinklesProps(props, layoutProperties)}
@@ -30,10 +30,7 @@ interface _StackLayoutProps {
 	 * @default stretch
 	 */
 	alignItems?: SprinklesProps['alignItems'];
-	/**
-	 * Space between children on the block axis.
-	 * @default "0"
-	 */
+	/** Space between children on the block axis. */
 	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 }
 

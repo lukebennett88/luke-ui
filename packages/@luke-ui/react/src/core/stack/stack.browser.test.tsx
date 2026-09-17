@@ -41,6 +41,20 @@ test('flows children on the block axis with no gap by default', () => {
 	expect(second.getBoundingClientRect().top - first.getBoundingClientRect().bottom).toBe(0);
 });
 
+test('emits no gap utility when gap is omitted', () => {
+	const { locator } = render(
+		<Stack data-testid="stack">
+			<span style={{ blockSize: '1rem' }} />
+			<span style={{ blockSize: '1rem' }} />
+		</Stack>,
+	);
+	const element = locator.getByTestId('stack').element();
+	if (!(element instanceof HTMLElement)) throw new Error('Expected Stack element.');
+
+	expect(element.className).not.toMatch(/gap/);
+	expect(getComputedStyle(element).gap).toBe('normal');
+});
+
 test('accepts gap and alignItems overrides', () => {
 	const { locator } = render(
 		<Stack alignItems="center" data-testid="stack" gap="sp8">
