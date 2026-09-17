@@ -10,20 +10,27 @@ export const containerMaxInlineSizeTokens = {
 	ct1280: '1280px',
 } as const;
 
+/**
+ * Custom property that supplies `maxInlineSize` for both token and arbitrary values.
+ * Callers override with `style.maxInlineSize` or a utility class the same way for either form.
+ */
+export const containerMaxInlineSizeVar = '--luke-container-max-inline-size';
+
 /** Recipe for a size container that constrains content inline size. */
 export const containerRecipe = recipe({
 	base: {
 		boxSizing: 'border-box',
 		containerType: 'inline-size',
 		inlineSize: '100%',
+		maxInlineSize: `var(${containerMaxInlineSizeVar})`,
 	},
 	variants: {
 		maxInlineSize: {
-			ct448: { maxInlineSize: containerMaxInlineSizeTokens.ct448 },
-			ct672: { maxInlineSize: containerMaxInlineSizeTokens.ct672 },
-			ct896: { maxInlineSize: containerMaxInlineSizeTokens.ct896 },
-			ct1152: { maxInlineSize: containerMaxInlineSizeTokens.ct1152 },
-			ct1280: { maxInlineSize: containerMaxInlineSizeTokens.ct1280 },
+			ct448: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct448 } },
+			ct672: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct672 } },
+			ct896: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct896 } },
+			ct1152: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct1152 } },
+			ct1280: { vars: { [containerMaxInlineSizeVar]: containerMaxInlineSizeTokens.ct1280 } },
 		},
 	},
 });

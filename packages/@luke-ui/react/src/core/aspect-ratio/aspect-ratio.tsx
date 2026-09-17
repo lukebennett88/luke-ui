@@ -10,8 +10,8 @@ import { aspectRatioRecipe } from './recipe.css.js';
 export type AspectRatioProps = Prettify<_AspectRatioElementProps | _AspectRatioRenderProps>;
 
 /**
- * Locks a media frame to an inline-to-block ratio and sizes its direct child to fill the frame.
- * Use it for an `iframe`, `img`, or `video`.
+ * Establishes a preferred inline-to-block ratio. Content may increase the block size.
+ * Does not crop, fit, clip, or size its children.
  */
 export function AspectRatio({
 	className,
@@ -28,7 +28,7 @@ export function AspectRatio({
 
 interface _AspectRatioLayoutProps {
 	/**
-	 * Inline-to-block ratio of the frame.
+	 * Preferred inline-to-block ratio of the frame.
 	 * @default "1 / 1"
 	 */
 	ratio?: AspectRatio;

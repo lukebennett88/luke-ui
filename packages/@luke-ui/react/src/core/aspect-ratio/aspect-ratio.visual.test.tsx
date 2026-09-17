@@ -16,10 +16,12 @@ test('locked ratios', async () => {
 					<AspectRatio key={ratio} inlineSize="18rem" ratio={ratio}>
 						<Box
 							backgroundColor="surface.floating"
+							blockSize="100%"
 							borderColor="decorative"
 							borderRadius="detail"
 							borderStyle="solid"
 							borderWidth="thin"
+							inlineSize="100%"
 							padding="sp12"
 						>
 							<Text>{ratio}</Text>

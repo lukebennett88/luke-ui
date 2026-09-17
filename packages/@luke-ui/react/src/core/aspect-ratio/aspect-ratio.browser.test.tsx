@@ -14,64 +14,40 @@ testConformance({
 	render: (props = {}) => render(<AspectRatio {...props}>Content</AspectRatio>),
 });
 
-test('uses the default ratio and frames content on a grid', () => {
-	const { locator } = render(<AspectRatio data-testid="ratio" elementType="span" />);
-	const element = locator.getByTestId('ratio').element();
-	if (!(element instanceof HTMLElement)) throw new Error('Expected AspectRatio element.');
-
-	expect(getComputedStyle(element).aspectRatio).toBe('1 / 1');
-	expect(getComputedStyle(element).display).toBe('grid');
-});
-
-test('sizes a child with no size of its own to the ratio box', () => {
+test('prefers the requested ratio when content is smaller than the frame', () => {
 	const { locator } = render(
 		<AspectRatio data-testid="ratio" inlineSize="16rem" ratio="16 / 9">
-			<div data-testid="fill" />
+			<div data-testid="child" style={{ blockSize: '1rem', inlineSize: '1rem' }} />
 		</AspectRatio>,
 	);
 	const element = locator.getByTestId('ratio').element();
-	const fill = locator.getByTestId('fill').element();
-	if (!(element instanceof HTMLElement) || !(fill instanceof HTMLElement)) {
+	const child = locator.getByTestId('child').element();
+	if (!(element instanceof HTMLElement) || !(child instanceof HTMLElement)) {
 		throw new Error('Expected AspectRatio elements.');
 	}
 
+	expect(getComputedStyle(element).aspectRatio).toBe('16 / 9');
+	expect(element.getBoundingClientRect().width).toBe(256);
 	expect(element.getBoundingClientRect().height).toBe(144);
-	expect(fill.getBoundingClientRect().width).toBe(element.getBoundingClientRect().width);
-	expect(fill.getBoundingClientRect().height).toBe(element.getBoundingClientRect().height);
+	expect(child.getBoundingClientRect().width).toBe(16);
+	expect(child.getBoundingClientRect().height).toBe(16);
 });
 
-test('sizes an iframe to the ratio box without caller fill styles', () => {
+test('lets an oversized child keep its dimensions and grow the frame', () => {
 	const { locator } = render(
-		<AspectRatio data-testid="ratio" inlineSize="16rem" ratio="16 / 9">
-			<iframe data-testid="embed" src="about:blank" title="Blank embed" />
+		<AspectRatio data-testid="ratio" inlineSize="10rem" ratio="16 / 9">
+			<div data-testid="child" style={{ blockSize: '20rem', inlineSize: '8rem' }} />
 		</AspectRatio>,
 	);
 	const element = locator.getByTestId('ratio').element();
-	const embed = locator.getByTestId('embed').element();
-	if (!(element instanceof HTMLElement) || !(embed instanceof HTMLIFrameElement)) {
-		throw new Error('Expected AspectRatio embed.');
+	const child = locator.getByTestId('child').element();
+	if (!(element instanceof HTMLElement) || !(child instanceof HTMLElement)) {
+		throw new Error('Expected AspectRatio elements.');
 	}
 
-	expect(embed.getBoundingClientRect().width).toBe(element.getBoundingClientRect().width);
-	expect(embed.getBoundingClientRect().height).toBe(element.getBoundingClientRect().height);
-});
-
-test('sizes a media child down when the frame is narrower than its intrinsic size', () => {
-	const { locator } = render(
-		<AspectRatio inlineSize="160px" ratio="4 / 3">
-			<img
-				alt="Ocean"
-				height="180"
-				src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
-				width="240"
-			/>
-		</AspectRatio>,
-	);
-	const image = locator.getByRole('img', { name: 'Ocean' }).element();
-	if (!(image instanceof HTMLImageElement)) throw new Error('Expected media element.');
-
-	expect(image.getBoundingClientRect().width).toBe(160);
-	expect(image.getBoundingClientRect().height).toBe(120);
+	expect(child.getBoundingClientRect().width).toBe(128);
+	expect(child.getBoundingClientRect().height).toBe(320);
+	expect(element.getBoundingClientRect().height).toBeGreaterThanOrEqual(320);
 });
 
 test('leaves interactive children operable', async () => {

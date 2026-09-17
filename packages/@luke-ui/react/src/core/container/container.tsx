@@ -5,7 +5,11 @@ import { layoutProperties } from '../styles/layout-props.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
-import { containerMaxInlineSizeTokens, containerRecipe } from './recipe.css.js';
+import {
+	containerMaxInlineSizeTokens,
+	containerMaxInlineSizeVar,
+	containerRecipe,
+} from './recipe.css.js';
 
 /** Props for `Container`. */
 export type ContainerProps = Prettify<_ContainerElementProps | _ContainerRenderProps>;
@@ -28,7 +32,7 @@ export function Container({
 	const resolvedStyle =
 		arbitraryMaxInlineSize === undefined
 			? style
-			: { ...style, maxInlineSize: arbitraryMaxInlineSize };
+			: { [containerMaxInlineSizeVar]: arbitraryMaxInlineSize, ...style };
 
 	return (
 		<Box

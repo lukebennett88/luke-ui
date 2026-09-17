@@ -230,9 +230,9 @@ export const Default = meta.story({
 function renderHostedExample(input: { name: string; pascalName: string }): string {
 	return `import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
 
-export default () => {
+export default function Basic() {
 	return <${input.pascalName}>${input.pascalName}</${input.pascalName}>;
-};
+}
 `;
 }
 

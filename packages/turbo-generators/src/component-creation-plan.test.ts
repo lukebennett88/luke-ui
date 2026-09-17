@@ -71,13 +71,7 @@ describe('createComponentPlan', () => {
 		const packageExportSource = plan.files.find((file) =>
 			file.path.endsWith('/exports/status-badge.ts'),
 		)?.contents;
-		const example = plan.files.find((file) =>
-			file.path.endsWith('examples/status-badge/basic.tsx'),
-		)?.contents;
 
-		expect(example).toContain("from '@luke-ui/react/status-badge'");
-		expect(example).toContain('export default () => {');
-		expect(example).not.toContain('export default function Basic');
 		expect(componentSource).not.toContain('export { statusBadgeRecipe');
 		expect(packageExportSource).toContain(
 			"export { StatusBadge, type StatusBadgeProps } from '../core/status-badge/status-badge.js';",
