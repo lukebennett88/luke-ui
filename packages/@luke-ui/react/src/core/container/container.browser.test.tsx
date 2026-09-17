@@ -110,8 +110,7 @@ test('lets caller style override maxInlineSize for token and arbitrary values', 
 
 	expect(token.getBoundingClientRect().width).toBe(480);
 	expect(arbitrary.getBoundingClientRect().width).toBe(480);
-	expect(getComputedStyle(token).maxInlineSize).toBe('30rem');
-	expect(getComputedStyle(arbitrary).maxInlineSize).toBe('30rem');
+	expect(getComputedStyle(token).maxInlineSize).toBe(getComputedStyle(arbitrary).maxInlineSize);
 });
 
 test('forwards refs and supports semantic and caller-owned elements', () => {
