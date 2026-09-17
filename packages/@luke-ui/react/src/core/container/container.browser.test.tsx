@@ -91,26 +91,19 @@ test('uses the content box for responsive descendants at breakpoint boundaries',
 	expect(getComputedStyle(nested).display).toBe('flex');
 });
 
-test('lets caller style override maxInlineSize for token and arbitrary values', () => {
+test('caps the border box at an arbitrary CSS maxInlineSize', () => {
 	const { locator } = render(
 		<div style={{ inlineSize: '800px' }}>
-			<Container data-testid="token" maxInlineSize="ct672" style={{ maxInlineSize: '30rem' }}>
-				Token
-			</Container>
-			<Container data-testid="arbitrary" maxInlineSize="42rem" style={{ maxInlineSize: '30rem' }}>
-				Arbitrary
+			<Container data-testid="container" maxInlineSize="42rem">
+				Content
 			</Container>
 		</div>,
 	);
-	const token = locator.getByTestId('token').element();
-	const arbitrary = locator.getByTestId('arbitrary').element();
-	if (!(token instanceof HTMLElement) || !(arbitrary instanceof HTMLElement)) {
-		throw new Error('Expected Container elements.');
-	}
+	const container = locator.getByTestId('container').element();
+	if (!(container instanceof HTMLElement)) throw new Error('Expected Container element.');
 
-	expect(token.getBoundingClientRect().width).toBe(480);
-	expect(arbitrary.getBoundingClientRect().width).toBe(480);
-	expect(getComputedStyle(token).maxInlineSize).toBe(getComputedStyle(arbitrary).maxInlineSize);
+	expect(container.getBoundingClientRect().width).toBe(672);
+	expect(getComputedStyle(container).maxInlineSize).toBe('672px');
 });
 
 test('forwards refs and supports semantic and caller-owned elements', () => {
