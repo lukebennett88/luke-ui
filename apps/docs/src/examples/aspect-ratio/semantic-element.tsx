@@ -13,12 +13,7 @@ export default () => {
 			<img
 				alt="Looking up through a slot canyon toward blue sky"
 				src="https://images.unsplash.com/photo-1479030160180-b1860951d696?auto=format&fit=crop&w=1200&q=80"
-				style={{
-					blockSize: '100%',
-					borderRadius: vars.radius.detail,
-					inlineSize: '100%',
-					objectFit: 'cover',
-				}}
+				style={{ borderRadius: vars.radius.detail }}
 			/>
 		</AspectRatio>
 	);

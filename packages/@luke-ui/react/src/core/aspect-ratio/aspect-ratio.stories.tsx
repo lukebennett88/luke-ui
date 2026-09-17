@@ -10,7 +10,7 @@ const meta = preview.meta({
 	title: 'Layout/Aspect ratio',
 });
 
-/** Prefer an inline-to-block ratio without sizing children. */
+/** Lock media to an inline-to-block ratio. */
 export const Default = meta.story({
 	args: {
 		children: (
@@ -57,18 +57,7 @@ export const CustomRoot = meta.story({
 });
 
 function MediaImage({ alt, src }: { alt: string; src: string }) {
-	return (
-		<img
-			alt={alt}
-			src={src}
-			style={{
-				blockSize: '100%',
-				borderRadius: vars.radius.detail,
-				inlineSize: '100%',
-				objectFit: 'cover',
-			}}
-		/>
-	);
+	return <img alt={alt} src={src} style={{ borderRadius: vars.radius.detail }} />;
 }
 
 function MotionFigure(props: ComponentPropsWithRef<'figure'>) {

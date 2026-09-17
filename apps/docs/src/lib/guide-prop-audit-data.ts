@@ -86,7 +86,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'validate',
 		],
 	'layout/aspect-ratio.mdx::packages/@luke-ui/react/src/core/aspect-ratio/aspect-ratio.tsx::AspectRatioProps':
-		['elementType', 'ratio', 'render'],
+		['elementType', 'objectFit', 'ratio', 'render'],
 	'layout/box.mdx::packages/@luke-ui/react/src/core/box/box.tsx::BoxProps': [
 		'elementType',
 		'ref',
