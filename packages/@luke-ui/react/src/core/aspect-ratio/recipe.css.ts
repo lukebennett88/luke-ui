@@ -3,7 +3,7 @@ import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Custom property that supplies `object-fit` for the direct media child. */
-export const aspectRatioObjectFitVar = '--luke-aspect-ratio-object-fit';
+const aspectRatioObjectFitVar = '--luke-aspect-ratio-object-fit';
 
 /**
  * The single-cell grid the `ratio` variants size. It is a `style()` class so the child rule below
