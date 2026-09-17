@@ -56,9 +56,9 @@ type. Return one DOM root. Custom wrappers must pass the supplied `ref` to that 
 
 The second `render` argument contains interaction state such as `isPressed`.
 
-For `Box`, use `elementType` for a supported structural element. It does not change Box's accepted
-DOM props. Use Box's `render` prop when the callback must own the element and its DOM attributes. Do
-not combine `render` with `elementType`. Use `Link` and `Button` when you need their behaviour.
+For `Box`, use `elementType` for a supported structural element. It does not change the accepted DOM
+props. Use `render` when the callback must own the element and its DOM attributes. Do not combine
+`render` with `elementType`. Use `Link` and `Button` when you need their behaviour.
 
 Read the [Box documentation](/components/layout/box) for the supported elements and the `render`
 callback's resolved props.

@@ -1,0 +1,30 @@
+---
+title: Cluster
+description: Arrange direct children on the logical inline axis with wrapping.
+source: packages/@luke-ui/react/src/exports/cluster.ts
+---
+
+`Cluster` lays out direct children on the logical inline axis and always wraps. Read
+[Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
+
+<ExampleBlock src="cluster/basic" title="Cluster — Basic" />
+
+## Alignment
+
+`justifyContent` defaults to `flex-start`. `alignItems` defaults to `center`.
+
+<ExampleBlock src="cluster/alignment" title="Cluster — Alignment" />
+
+## Choose the rendered element
+
+Cluster uses
+[Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
+
+<ExampleBlock src="cluster/semantic-element" title="Cluster — List" />
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/cluster/cluster.tsx"
+	name="ClusterProps"
+/>

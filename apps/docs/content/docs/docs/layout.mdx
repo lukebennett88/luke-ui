@@ -1,11 +1,19 @@
 ---
 title: Layout
-description: Build responsive structure with Box, layout utilities, and responsive breakpoints.
+description: Build responsive structure with layout utilities and breakpoints.
 ---
+
+## Choose a layout component
+
+| Component                             | Use when                                                        |
+| ------------------------------------- | --------------------------------------------------------------- |
+| [Stack](/components/layout/stack)     | Direct children should flow on the logical block axis           |
+| [Cluster](/components/layout/cluster) | Direct children should flow on the logical inline axis and wrap |
+| [Box](/components/layout/box)         | You need a custom flex or grid layout, or visual utilities      |
 
 ## Box
 
-Box is the layout component. Use it to:
+Box is the general layout element. Use it to:
 
 - Provide spacing to child elements.
 - Impose sizing constraints on content.
@@ -29,7 +37,7 @@ input `className` or `style` with the generated values.
 ## Responsive values
 
 Properties passed to `Box` and Sprinkles accept either a direct value or an object keyed by
-breakpoint.
+breakpoint. Stack and Cluster accept the same responsive form for the layout props they expose.
 
 Responsive values resolve against the nearest ancestor size container. Luke UI uses the document
 root as the fallback. Add `container-type: inline-size` to a nearer ancestor when descendants should
@@ -56,14 +64,6 @@ Every breakpoint is a minimum inline size, so there is no maximum size or range 
 set at `bp640` also applies at `bp768` and above, unless a later breakpoint overrides it. Values
 cascade up from `initial`, so specify only the points where the layout changes.
 
-```tsx
-<Box display="flex" flexDirection={{ initial: 'column', bp768: 'row' }}>
-	{children}
-</Box>
-```
-
-This example stacks the children by default, then places them in a row from `bp768`.
-
 <ExampleBlock src="box/responsive-layout" title="Layout — Responsive values" />
 
 Set a responsive value when the layout needs a deliberate change. Prefer intrinsic wrapping when the
@@ -89,8 +89,14 @@ defines its spacing scale and typography styles in source.
 ## Continue learning
 
 <Cards>
+	<Card href="/components/layout/stack" title="Stack">
+		Stack children on the block axis.
+	</Card>
+	<Card href="/components/layout/cluster" title="Cluster">
+		Cluster wrapping children on the inline axis.
+	</Card>
 	<Card href="/components/layout/box" title="Box">
-		See the Box example, props, and custom div rendering contract.
+		See the Box example, props, and custom element rendering contract.
 	</Card>
 	<Card href="/docs/styling" title="Styling">
 		Learn where layout utilities sit beside components.
