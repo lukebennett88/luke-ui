@@ -54,6 +54,7 @@
 		"./theme": "./dist/theme.js",
 		"./themes/paper": "./dist/themes/paper.js",
 		"./themes/tactile": "./dist/themes/tactile.js",
+		"./track": "./dist/track.js",
 		"./utils": "./dist/utils.js",
 		"./visually-hidden": "./dist/visually-hidden.js",
 		"./package.json": "./package.json",

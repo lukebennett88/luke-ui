@@ -54,6 +54,7 @@ export const componentTestManifest = [
 	['VisuallyHidden', 'visually-hidden', ['dom'], 'none', 'none'],
 	['Stack', 'stack', ['dom'], 'none', 'applicable'],
 	['Cluster', 'cluster', ['dom'], 'none', 'applicable'],
+	['Track', 'track', ['dom'], 'none', 'applicable'],
 ].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({
 	conformance,
 	integrationTripwire,

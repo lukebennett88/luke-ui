@@ -1,4 +1,4 @@
 {
 	"title": "Layout",
-	"pages": ["aspect-ratio", "box", "cluster", "container", "stack", "visually-hidden"]
+	"pages": ["aspect-ratio", "box", "cluster", "container", "stack", "track", "visually-hidden"]
 }

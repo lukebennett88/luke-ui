@@ -107,6 +107,13 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'gap',
 		'render',
 	],
+	'layout/track.mdx::packages/@luke-ui/react/src/core/track/track.tsx::TrackProps': [
+		'elementType',
+		'gap',
+		'railAlignment',
+		'railEnd',
+		'railStart',
+	],
 	'layout/visually-hidden.mdx::packages/@luke-ui/react/src/core/visually-hidden/visually-hidden.tsx::VisuallyHiddenProps':
 		['elementType'],
 	'primitives/button.mdx::packages/@luke-ui/react/src/core/primitives/button/button.tsx::ButtonProps':
