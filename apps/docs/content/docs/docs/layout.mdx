@@ -5,11 +5,13 @@ description: Build responsive structure with layout utilities and breakpoints.
 
 ## Choose a layout component
 
-| Component                             | Use when                                                        |
-| ------------------------------------- | --------------------------------------------------------------- |
-| [Stack](/components/layout/stack)     | Direct children should flow on the logical block axis           |
-| [Cluster](/components/layout/cluster) | Direct children should flow on the logical inline axis and wrap |
-| [Box](/components/layout/box)         | You need a custom flex or grid layout, or visual utilities      |
+| Component                                      | Use when                                                         |
+| ---------------------------------------------- | ---------------------------------------------------------------- |
+| [Box](/components/layout/box)                  | You need a custom flex or grid layout, or visual utilities       |
+| [Stack](/components/layout/stack)              | Direct children should flow on the logical block axis            |
+| [Cluster](/components/layout/cluster)          | Direct children should flow on the logical inline axis and wrap  |
+| [Container](/components/layout/container)      | Content needs a maximum inline size and local responsive queries |
+| [AspectRatio](/components/layout/aspect-ratio) | Media should fill a locked inline-to-block ratio                 |
 
 ## Box
 
@@ -37,11 +39,11 @@ input `className` or `style` with the generated values.
 ## Responsive values
 
 Properties passed to `Box` and Sprinkles accept either a direct value or an object keyed by
-breakpoint. Stack and Cluster accept the same responsive form for the layout props they expose.
+breakpoint. Every layout component accepts the same responsive form for the layout props it exposes.
 
 Responsive values resolve against the nearest ancestor size container. Luke UI uses the document
-root as the fallback. Add `container-type: inline-size` to a nearer ancestor when descendants should
-respond to that element instead.
+root as the fallback. Use `Container` when descendants should respond to a nearer content area.
+Component-responsive styles always query an ancestor. They do not query the component itself.
 
 Portalled content leaves containers around its trigger and resolves against the nearest size
 container at its portal location, falling back to the root when there is none.
@@ -94,6 +96,12 @@ defines its spacing scale and typography styles in source.
 	</Card>
 	<Card href="/components/layout/cluster" title="Cluster">
 		Cluster wrapping children on the inline axis.
+	</Card>
+	<Card href="/components/layout/container" title="Container">
+		Constrain content and establish a local size container.
+	</Card>
+	<Card href="/components/layout/aspect-ratio" title="Aspect ratio">
+		Lock media to an inline-to-block ratio.
 	</Card>
 	<Card href="/components/layout/box" title="Box">
 		See the Box example, props, and custom element rendering contract.

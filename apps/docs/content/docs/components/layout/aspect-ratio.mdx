@@ -1,0 +1,25 @@
+---
+title: Aspect ratio
+description: Lock media to an inline-to-block ratio.
+source: packages/@luke-ui/react/src/exports/aspect-ratio.ts
+---
+
+`AspectRatio` locks a frame to an inline-to-block ratio and sizes its direct child to fill that
+frame. Use it for media such as an `iframe`, `img`, or `video`. The media element needs no size of
+its own. Read [Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
+
+<ExampleBlock src="aspect-ratio/basic" title="Aspect ratio — Basic" />
+
+## Choose the rendered element
+
+AspectRatio uses
+[Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
+
+<ExampleBlock src="aspect-ratio/semantic-element" title="Aspect ratio — Figure" />
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/aspect-ratio/aspect-ratio.tsx"
+	name="AspectRatioProps"
+/>

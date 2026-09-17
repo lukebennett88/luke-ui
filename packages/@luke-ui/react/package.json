@@ -19,6 +19,7 @@
 		"./dist/themes/*/stylesheet.css"
 	],
 	"exports": {
+		"./aspect-ratio": "./dist/aspect-ratio.js",
 		"./blockquote": "./dist/blockquote.js",
 		"./box": "./dist/box.js",
 		"./button": "./dist/button.js",
@@ -26,6 +27,7 @@
 		"./cluster": "./dist/cluster.js",
 		"./code": "./dist/code.js",
 		"./combobox-field": "./dist/combobox-field.js",
+		"./container": "./dist/container.js",
 		"./em": "./dist/em.js",
 		"./emoji": "./dist/emoji.js",
 		"./heading": "./dist/heading.js",
