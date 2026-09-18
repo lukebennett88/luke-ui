@@ -1,3 +1,4 @@
+import { assignInlineVars } from '@vanilla-extract/dynamic';
 import type { ComponentProps, ElementType, JSX, ReactNode } from 'react';
 import { createContext, isValidElement, useContext } from 'react';
 import { cx } from '../../shared/utils/utils.js';
@@ -80,7 +81,11 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 			className={cx(loadingSkeletonClassName, className)}
 			data-skeleton-inline={isInline ? '' : undefined}
 			inert
-			style={radius ? { ...style, [skeletonRadiusVar]: vars.radius[radius] } : style}
+			style={
+				radius
+					? { ...assignInlineVars({ [skeletonRadiusVar]: vars.radius[radius] }), ...style }
+					: style
+			}
 			tabIndex={-1}
 		>
 			{children}

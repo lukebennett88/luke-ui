@@ -1,3 +1,4 @@
+import { assignInlineVars } from '@vanilla-extract/dynamic';
 import type { JSX } from 'react';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
@@ -32,7 +33,7 @@ export function Container({
 	const resolvedStyle =
 		arbitraryMaxInlineSize === undefined
 			? style
-			: { [containerMaxInlineSizeVar]: arbitraryMaxInlineSize, ...style };
+			: { ...assignInlineVars({ [containerMaxInlineSizeVar]: arbitraryMaxInlineSize }), ...style };
 
 	return (
 		<Box

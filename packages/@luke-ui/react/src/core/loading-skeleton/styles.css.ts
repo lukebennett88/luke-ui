@@ -1,5 +1,5 @@
 import type { StyleRule } from '@vanilla-extract/css';
-import { fallbackVar, keyframes } from '@vanilla-extract/css';
+import { createVar, fallbackVar, keyframes } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 
@@ -15,7 +15,7 @@ export const skeletonAnimationName = keyframes({
 });
 
 /** @internal */
-export const skeletonRadiusVar = '--luke-loading-skeleton-radius';
+export const skeletonRadiusVar = createVar();
 
 // Forced onto every skeleton surface so an arbitrary wrapped component reads as a flat placeholder shape.
 // `!important` is deliberate: cascade layers alone can't beat consumers' un-layered or inline styles, and the
@@ -67,7 +67,7 @@ export const loadingSkeletonClassName = style({
 		'&[data-skeleton-inline]': {
 			...surface,
 			...pulse,
-			borderRadius: fallbackVar(`var(${skeletonRadiusVar})`, vars.radius.detail),
+			borderRadius: fallbackVar(skeletonRadiusVar, vars.radius.detail),
 		},
 		// Block mode: the wrapper is invisible; skeleton styles apply to its direct children.
 		'&:not([data-skeleton-inline])': {
@@ -82,7 +82,7 @@ export const loadingSkeletonClassName = style({
 globalStyleInLayer('structural', `${loadingSkeletonClassName}:not([data-skeleton-inline]) > *`, {
 	...surface,
 	...pulse,
-	borderRadius: `var(${skeletonRadiusVar}, 0px)`,
+	borderRadius: fallbackVar(skeletonRadiusVar, '0px'),
 	overflow: 'hidden !important',
 	position: 'relative !important' as 'relative',
 });
@@ -102,7 +102,7 @@ globalStyleInLayer(
 	{
 		...surface,
 		...pulse,
-		borderRadius: `var(${skeletonRadiusVar}, 0px)`,
+		borderRadius: fallbackVar(skeletonRadiusVar, '0px'),
 		content: '""',
 		inset: '-1px',
 		position: 'absolute',

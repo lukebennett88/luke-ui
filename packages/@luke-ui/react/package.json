@@ -107,6 +107,7 @@
 		"@luke-ui/rainbow-sprinkles": "workspace:*",
 		"@react-aria/utils": "catalog:",
 		"@vanilla-extract/css": "catalog:",
+		"@vanilla-extract/dynamic": "catalog:",
 		"@vanilla-extract/recipes": "catalog:",
 		"csstype": "catalog:",
 		"spin-doctor": "catalog:"

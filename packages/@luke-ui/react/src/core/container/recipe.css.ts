@@ -1,3 +1,4 @@
+import { createVar } from '@vanilla-extract/css';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
@@ -11,10 +12,10 @@ export const containerMaxInlineSizeTokens = {
 } as const;
 
 /**
- * Custom property that supplies `maxInlineSize` for both token and arbitrary values.
- * Callers override with `style.maxInlineSize` or a utility class the same way for either form.
+ * Supplies `maxInlineSize` for token variants. Arbitrary values are set via `assignInlineVars`
+ * from `Container`.
  */
-export const containerMaxInlineSizeVar = '--luke-container-max-inline-size';
+export const containerMaxInlineSizeVar = createVar();
 
 /** Recipe for a size container that constrains content inline size. */
 export const containerRecipe = recipe({
@@ -22,7 +23,7 @@ export const containerRecipe = recipe({
 		boxSizing: 'border-box',
 		containerType: 'inline-size',
 		inlineSize: '100%',
-		maxInlineSize: `var(${containerMaxInlineSizeVar})`,
+		maxInlineSize: containerMaxInlineSizeVar,
 	},
 	variants: {
 		maxInlineSize: {

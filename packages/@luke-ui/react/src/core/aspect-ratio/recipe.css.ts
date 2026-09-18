@@ -1,9 +1,10 @@
+import { createVar } from '@vanilla-extract/css';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
-/** Custom property that supplies `object-fit` for the direct media child. */
-const aspectRatioObjectFitVar = '--luke-aspect-ratio-object-fit';
+/** Supplies `object-fit` for the direct media child. */
+const aspectRatioObjectFitVar = createVar();
 
 /**
  * The single-cell grid the `ratio` variants size. It is a `style()` class so the child rule below
@@ -27,7 +28,7 @@ globalStyleInLayer('structural', `${mediaFrameClassName} > *`, {
 	inlineSize: '100%',
 	minBlockSize: 0,
 	minInlineSize: 0,
-	objectFit: `var(${aspectRatioObjectFitVar})` as 'cover',
+	objectFit: aspectRatioObjectFitVar as 'cover',
 });
 
 /** Recipe for a media frame locked to an inline-to-block ratio. */
