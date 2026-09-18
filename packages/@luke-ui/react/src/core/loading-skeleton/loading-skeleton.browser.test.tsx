@@ -92,11 +92,10 @@ function sheenPositionX(element: Element): string {
 	return getComputedStyle(element).backgroundPositionX;
 }
 
-function inlineSkeletonSurface(label: string, locator: ReturnType<typeof render>['locator']): Element {
-	const match = locator.getByText(label).element();
+function inlineSkeletonSurface(match: Element): HTMLElement {
 	const surface = match.closest('[data-skeleton-inline]');
 	if (!(surface instanceof HTMLElement)) {
-		throw new Error(`Expected an inline LoadingSkeleton surface for "${label}".`);
+		throw new Error('Expected an inline LoadingSkeleton surface.');
 	}
 	return surface;
 }
@@ -125,10 +124,10 @@ test('uses the effective writing direction for sheen travel under nested dir ove
 		</>,
 	);
 
-	const rtlThenLtr = inlineSkeletonSurface('rtl then ltr', locator);
-	const ltrThenRtl = inlineSkeletonSurface('ltr then rtl', locator);
-	const ltrBaseline = inlineSkeletonSurface('ltr baseline', locator);
-	const rtlBaseline = inlineSkeletonSurface('rtl baseline', locator);
+	const rtlThenLtr = inlineSkeletonSurface(locator.getByText('rtl then ltr').element());
+	const ltrThenRtl = inlineSkeletonSurface(locator.getByText('ltr then rtl').element());
+	const ltrBaseline = inlineSkeletonSurface(locator.getByText('ltr baseline').element());
+	const rtlBaseline = inlineSkeletonSurface(locator.getByText('rtl baseline').element());
 
 	// Past the 0.5s delay, mid-cycle, so LTR/RTL positions differ and stay still for the assert.
 	pauseSheenAt(2000);
