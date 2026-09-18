@@ -1,4 +1,5 @@
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import type { FallbackProps } from 'react-error-boundary';
@@ -8,7 +9,9 @@ export default () => {
 	return (
 		<Stack minBlockSize="4.5rem">
 			<ErrorBoundary FallbackComponent={ErrorFallback}>
-				<Button pressAction={save}>Save changes</Button>
+				<Cluster>
+					<Button pressAction={save}>Save changes</Button>
+				</Cluster>
 			</ErrorBoundary>
 		</Stack>
 	);
@@ -29,7 +32,9 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 			<Text color="danger" role="alert">
 				{message}
 			</Text>
-			<Button onPress={resetErrorBoundary}>Try again</Button>
+			<Cluster>
+				<Button onPress={resetErrorBoundary}>Try again</Button>
+			</Cluster>
 		</Stack>
 	);
 }

@@ -280,9 +280,6 @@ function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
 			style: {
 				color: foreground.rest,
 				selectors: {
-					'&[data-focus-visible="true"]:not([data-disabled="true"])': {
-						textDecoration: 'underline',
-					},
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
 						color: foreground.hover,
 						textDecoration: hoverDecoration,
@@ -290,6 +287,11 @@ function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
 					'&[data-pressed="true"]:not([data-disabled="true"])': {
 						color: pressedColor,
 						textDecoration: hoverDecoration,
+					},
+					// Declared last so focus-visible's underline beats the hover/pressed decoration
+					// above, even though all three selectors share the same specificity.
+					'&[data-focus-visible="true"]:not([data-disabled="true"])': {
+						textDecoration: 'underline',
 					},
 				},
 				textDecoration: restDecoration,

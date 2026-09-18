@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { Controller, useForm } from 'react-hook-form';
@@ -40,7 +41,9 @@ export default () => {
 							</Stack>
 						)}
 					/>
-					<Button type="submit">Continue</Button>
+					<Cluster>
+						<Button type="submit">Continue</Button>
+					</Cluster>
 				</Stack>
 			</form>
 			<Stack minBlockSize="1.5rem">

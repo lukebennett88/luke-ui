@@ -240,8 +240,9 @@ Use layout primitives for structure, not one-off wrappers.
 - Use `Container` only when the example is about max width or container queries. Do not use it as a
   generic narrow-form wrapper.
 - Use `Box` when you need grid, a flex direction other than a column stack, or visual chrome such as
-  padding and borders. Do not add an empty `Box` whose only job is to wrap a button or group
-  children.
+  padding and borders. Do not add an empty `Box` just to group children. If a control needs to keep
+  its intrinsic inline size inside a stretching `Stack`, wrap it in `Cluster` instead of stretching
+  it.
 - Form-style examples usually sit in a `Stack` with `maxInlineSize="20rem"` (and `inlineSize="100%"`
   when the control should fill the column).
 - When validation or status text adds or removes a message and would shift layout, reserve space at

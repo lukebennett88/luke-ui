@@ -1,4 +1,5 @@
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
@@ -72,7 +73,9 @@ export default () => {
 							</Stack>
 						)}
 					</form.Field>
-					<Button type="submit">Create account</Button>
+					<Cluster>
+						<Button type="submit">Create account</Button>
+					</Cluster>
 				</Stack>
 			</form>
 			<Stack minBlockSize="1.5rem">

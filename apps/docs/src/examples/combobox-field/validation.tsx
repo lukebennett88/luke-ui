@@ -1,4 +1,5 @@
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
 import { Stack } from '@luke-ui/react/stack';
@@ -30,7 +31,9 @@ export default () => {
 						{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 					</ComboboxField>
 				</Stack>
-				<Button type="submit">Create account</Button>
+				<Cluster>
+					<Button type="submit">Create account</Button>
+				</Cluster>
 			</Stack>
 		</form>
 	);

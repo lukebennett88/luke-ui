@@ -1,4 +1,5 @@
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import {
 	ComboboxClearButton,
@@ -47,7 +48,9 @@ export default () => {
 						</ComboboxTray>
 					</Field>
 				</ComboboxRoot>
-				<Button type="submit">Create account</Button>
+				<Cluster>
+					<Button type="submit">Create account</Button>
+				</Cluster>
 			</Stack>
 		</form>
 	);

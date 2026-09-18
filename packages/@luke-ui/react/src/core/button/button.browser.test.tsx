@@ -170,6 +170,50 @@ test('hover inverts the text Button underline, and low prominence reverses the r
 	expect(getComputedStyle(high).textDecorationLine).toBe('none');
 });
 
+test('focus-visible keeps the underline over hover and pressed', () => {
+	const { locator } = render(
+		<div>
+			<Button appearance="text" prominence="low">
+				Low
+			</Button>
+			<Button appearance="text" prominence="standard">
+				Standard
+			</Button>
+		</div>,
+	);
+	const low = locator.getByRole('button', { name: 'Low' }).element();
+	const standard = locator.getByRole('button', { name: 'Standard' }).element();
+	const lowLabel = low.querySelector('span');
+	const standardLabel = standard.querySelector('span');
+	if (!(lowLabel instanceof HTMLElement) || !(standardLabel instanceof HTMLElement)) {
+		throw new Error('Expected text labels.');
+	}
+
+	for (const button of [low, standard]) {
+		button.style.transition = 'none';
+	}
+
+	low.setAttribute('data-focus-visible', 'true');
+	low.setAttribute('data-hovered', 'true');
+	standard.setAttribute('data-focus-visible', 'true');
+	standard.setAttribute('data-hovered', 'true');
+
+	expect(getComputedStyle(low).textDecorationLine).toBe('underline');
+	expect(getComputedStyle(lowLabel).textDecorationLine).toBe('underline');
+	expect(getComputedStyle(standard).textDecorationLine).toBe('underline');
+	expect(getComputedStyle(standardLabel).textDecorationLine).toBe('underline');
+
+	low.removeAttribute('data-hovered');
+	standard.removeAttribute('data-hovered');
+	low.setAttribute('data-pressed', 'true');
+	standard.setAttribute('data-pressed', 'true');
+
+	expect(getComputedStyle(low).textDecorationLine).toBe('underline');
+	expect(getComputedStyle(lowLabel).textDecorationLine).toBe('underline');
+	expect(getComputedStyle(standard).textDecorationLine).toBe('underline');
+	expect(getComputedStyle(standardLabel).textDecorationLine).toBe('underline');
+});
+
 test('the text Button label paints the underline set on the button', () => {
 	const { locator } = render(
 		<Button appearance="text" prominence="standard">

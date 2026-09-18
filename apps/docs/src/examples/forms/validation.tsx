@@ -1,5 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Cluster } from '@luke-ui/react/cluster';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
 import { Stack } from '@luke-ui/react/stack';
@@ -61,7 +62,9 @@ export default () => {
 						I accept the terms of service
 					</Checkbox>
 				</Stack>
-				<Button type="submit">Create account</Button>
+				<Cluster>
+					<Button type="submit">Create account</Button>
+				</Cluster>
 			</Stack>
 		</form>
 	);

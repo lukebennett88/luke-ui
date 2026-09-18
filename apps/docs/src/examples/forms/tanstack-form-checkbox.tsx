@@ -1,5 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
@@ -60,7 +61,9 @@ export default () => {
 							</Stack>
 						)}
 					</form.Field>
-					<Button type="submit">Continue</Button>
+					<Cluster>
+						<Button type="submit">Continue</Button>
+					</Cluster>
 				</Stack>
 			</form>
 			<Stack minBlockSize="1.5rem">

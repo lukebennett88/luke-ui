@@ -1,4 +1,5 @@
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Stack } from '@luke-ui/react/stack';
 import { TextField } from '@luke-ui/react/text-field';
 import type { SubmitEvent } from 'react';
@@ -29,7 +30,9 @@ export default () => {
 						validate={validateUsername}
 					/>
 				</Stack>
-				<Button type="submit">Create account</Button>
+				<Cluster>
+					<Button type="submit">Create account</Button>
+				</Cluster>
 			</Stack>
 		</form>
 	);
