@@ -1,10 +1,10 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Stack } from '@luke-ui/react/stack';
 
 export default () => {
 	return (
-		<Box maxInlineSize="20rem" inlineSize="100%">
+		<Stack maxInlineSize="20rem" inlineSize="100%">
 			<Button isBlock>Continue</Button>
-		</Box>
+		</Stack>
 	);
 };

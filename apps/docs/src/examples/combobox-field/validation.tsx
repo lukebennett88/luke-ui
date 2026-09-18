@@ -1,7 +1,8 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
+import { Stack } from '@luke-ui/react/stack';
 import type { SubmitEvent } from 'react';
 
 const countries = [
@@ -18,20 +19,22 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
-				<ComboboxField
-					defaultItems={countries}
-					isRequired
-					label="Work location"
-					name="country"
-					placeholder="Choose a country"
-				>
-					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-				</ComboboxField>
-				<Box>
+			<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
+				<Stack minBlockSize="5.5rem">
+					<ComboboxField
+						defaultItems={countries}
+						isRequired
+						label="Work location"
+						name="country"
+						placeholder="Choose a country"
+					>
+						{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+					</ComboboxField>
+				</Stack>
+				<Cluster>
 					<Button type="submit">Create account</Button>
-				</Box>
-			</Box>
+				</Cluster>
+			</Stack>
 		</form>
 	);
 };

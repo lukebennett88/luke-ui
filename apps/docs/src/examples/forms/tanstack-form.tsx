@@ -1,5 +1,6 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
@@ -35,7 +36,7 @@ export default () => {
 	});
 
 	return (
-		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
+		<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
 			<form
 				onSubmit={(event) => {
 					event.preventDefault();
@@ -43,41 +44,47 @@ export default () => {
 				}}
 				ref={formRef}
 			>
-				<Box display="flex" flexDirection="column" gap="sp16">
+				<Stack gap="sp16">
 					<form.Field name="name">
 						{(field) => (
-							<TextField
-								errorMessage={field.state.meta.errors[0]?.message}
-								label="Name"
-								onBlur={field.handleBlur}
-								onChange={field.handleChange}
-								validationBehavior="aria"
-								value={field.state.value}
-							/>
+							<Stack minBlockSize="5.5rem">
+								<TextField
+									errorMessage={field.state.meta.errors[0]?.message}
+									label="Name"
+									onBlur={field.handleBlur}
+									onChange={field.handleChange}
+									validationBehavior="aria"
+									value={field.state.value}
+								/>
+							</Stack>
 						)}
 					</form.Field>
 					<form.Field name="email">
 						{(field) => (
-							<TextField
-								errorMessage={field.state.meta.errors[0]?.message}
-								label="Email"
-								onBlur={field.handleBlur}
-								onChange={field.handleChange}
-								validationBehavior="aria"
-								value={field.state.value}
-							/>
+							<Stack minBlockSize="5.5rem">
+								<TextField
+									errorMessage={field.state.meta.errors[0]?.message}
+									label="Email"
+									onBlur={field.handleBlur}
+									onChange={field.handleChange}
+									validationBehavior="aria"
+									value={field.state.value}
+								/>
+							</Stack>
 						)}
 					</form.Field>
-					<Box>
+					<Cluster>
 						<Button type="submit">Create account</Button>
-					</Box>
-				</Box>
+					</Cluster>
+				</Stack>
 			</form>
-			<Text elementType="p" role="status">
-				<form.Subscribe selector={(state) => (state.isSubmitSuccessful ? state.values.name : '')}>
-					{(submittedName) => (submittedName ? `Submitted: ${submittedName}` : null)}
-				</form.Subscribe>
-			</Text>
-		</Box>
+			<Stack minBlockSize="1.5rem">
+				<Text elementType="p" role="status">
+					<form.Subscribe selector={(state) => (state.isSubmitSuccessful ? state.values.name : '')}>
+						{(submittedName) => (submittedName ? `Submitted: ${submittedName}` : '\u00a0')}
+					</form.Subscribe>
+				</Text>
+			</Stack>
+		</Stack>
 	);
 };

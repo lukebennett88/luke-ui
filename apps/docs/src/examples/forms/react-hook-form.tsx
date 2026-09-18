@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import { Controller, useForm } from 'react-hook-form';
@@ -18,47 +19,53 @@ export default () => {
 	});
 
 	return (
-		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
+		<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
 			<form onSubmit={form.handleSubmit(() => undefined)}>
-				<Box display="flex" flexDirection="column" gap="sp16">
+				<Stack gap="sp16">
 					<Controller
 						control={form.control}
 						name="name"
 						render={({ field, fieldState }) => (
-							<TextField
-								errorMessage={fieldState.error?.message}
-								inputRef={field.ref}
-								label="Name"
-								onBlur={field.onBlur}
-								onChange={field.onChange}
-								validationBehavior="aria"
-								value={field.value}
-							/>
+							<Stack minBlockSize="5.5rem">
+								<TextField
+									errorMessage={fieldState.error?.message}
+									inputRef={field.ref}
+									label="Name"
+									onBlur={field.onBlur}
+									onChange={field.onChange}
+									validationBehavior="aria"
+									value={field.value}
+								/>
+							</Stack>
 						)}
 					/>
 					<Controller
 						control={form.control}
 						name="email"
 						render={({ field, fieldState }) => (
-							<TextField
-								errorMessage={fieldState.error?.message}
-								inputRef={field.ref}
-								label="Email"
-								onBlur={field.onBlur}
-								onChange={field.onChange}
-								validationBehavior="aria"
-								value={field.value}
-							/>
+							<Stack minBlockSize="5.5rem">
+								<TextField
+									errorMessage={fieldState.error?.message}
+									inputRef={field.ref}
+									label="Email"
+									onBlur={field.onBlur}
+									onChange={field.onChange}
+									validationBehavior="aria"
+									value={field.value}
+								/>
+							</Stack>
 						)}
 					/>
-					<Box>
+					<Cluster>
 						<Button type="submit">Create account</Button>
-					</Box>
-				</Box>
+					</Cluster>
+				</Stack>
 			</form>
-			<Text elementType="p" role="status">
-				{form.formState.isSubmitSuccessful ? `Submitted: ${form.getValues('name')}` : null}
-			</Text>
-		</Box>
+			<Stack minBlockSize="1.5rem">
+				<Text elementType="p" role="status">
+					{form.formState.isSubmitSuccessful ? `Submitted: ${form.getValues('name')}` : '\u00a0'}
+				</Text>
+			</Stack>
+		</Stack>
 	);
 };

@@ -61,7 +61,8 @@ export type ButtonProps = Prettify<_ButtonProps & ButtonPresentationProps & Butt
 
 /**
  * Button with appearance, tone, prominence, size, pending, and block options.
- * Wraps children in a `Text` for ellipsis truncation. Shows a spinner when pending.
+ * Button appearance truncates its label. Text appearance wraps with surrounding text. Shows a
+ * spinner when pending.
  */
 export function Button(props: ButtonProps): JSX.Element {
 	const {
@@ -94,16 +95,21 @@ export function Button(props: ButtonProps): JSX.Element {
 				onPress={handlePress}
 			>
 				{(renderProps) => (
-					<span className={buttonContent({ appearance: 'text' })}>
+					<>
 						{showSpinner && (
 							<span aria-hidden className={pendingSpinnerOverlay()}>
 								<LoadingSpinner aria-hidden />
 							</span>
 						)}
-						<span className={buttonLabel({ appearance: 'text', isPending: showSpinner })}>
+						<Text
+							className={buttonLabel({ isPending: showSpinner })}
+							elementType="span"
+							shouldInheritFont
+							textDecoration="inherit"
+						>
 							{typeof children === 'function' ? children(renderProps) : children}
-						</span>
-					</span>
+						</Text>
+					</>
 				)}
 			</PrimitiveButton>
 		);
@@ -117,13 +123,13 @@ export function Button(props: ButtonProps): JSX.Element {
 			onPress={handlePress}
 		>
 			{(renderProps) => (
-				<span className={buttonContent({ appearance: 'button' })}>
+				<span className={buttonContent()}>
 					{showSpinner && (
 						<span aria-hidden className={pendingSpinnerOverlay()}>
 							<LoadingSpinner aria-hidden />
 						</span>
 					)}
-					<span className={buttonLabel({ appearance: 'button', isPending: showSpinner })}>
+					<span className={buttonLabel({ hasAdornments: true, isPending: showSpinner })}>
 						{startContent}
 						<Text elementType="span" lineClamp shouldInheritFont>
 							{typeof children === 'function' ? children(renderProps) : children}

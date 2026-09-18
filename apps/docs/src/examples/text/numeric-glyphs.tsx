@@ -1,5 +1,5 @@
-import { Box } from '@luke-ui/react/box';
 import { Text } from '@luke-ui/react/text';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 const variants = [
 	{ label: 'Tabular', sample: '111,111 888,888', value: 'tabular-nums' },
@@ -10,23 +10,14 @@ const variants = [
 
 export default () => {
 	return (
-		<Box
-			display="grid"
-			gap="sp16"
-			inlineSize="100%"
-			maxInlineSize="48rem"
-			style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(8rem, 1fr))' }}
-		>
+		<Comparison>
 			{variants.map((variant) => (
-				<Box display="grid" gap="sp8" key={variant.value}>
-					<Text color="secondary" typography="caption">
-						{variant.label}
-					</Text>
+				<ComparisonItem key={variant.value} label={variant.label}>
 					<Text elementType="div" fontVariantNumeric={variant.value}>
 						{variant.sample}
 					</Text>
-				</Box>
+				</ComparisonItem>
 			))}
-		</Box>
+		</Comparison>
 	);
 };

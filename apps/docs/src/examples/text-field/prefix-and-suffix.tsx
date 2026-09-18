@@ -1,10 +1,10 @@
-import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
+import { Stack } from '@luke-ui/react/stack';
 import { TextField } from '@luke-ui/react/text-field';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
+		<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
 			<TextField
 				label="Search documentation"
 				name="documentationSearch"
@@ -13,6 +13,6 @@ export default () => {
 			/>
 			<TextField label="Website" name="website" placeholder="example.com" prefix="https://" />
 			<TextField label="Budget" name="budget" placeholder="0.00" suffix="AUD" />
-		</Box>
+		</Stack>
 	);
 };

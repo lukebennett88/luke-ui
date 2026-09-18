@@ -1,10 +1,10 @@
-import { Box } from '@luke-ui/react/box';
+import { Stack } from '@luke-ui/react/stack';
 import { TextField } from '@luke-ui/react/text-field';
 import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box maxInlineSize="20rem">
+		<Stack maxInlineSize="20rem">
 			<Comparison>
 				<ComparisonItem label="Small">
 					<TextField
@@ -23,6 +23,6 @@ export default () => {
 					/>
 				</ComparisonItem>
 			</Comparison>
-		</Box>
+		</Stack>
 	);
 };

@@ -1,14 +1,19 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import type { FallbackProps } from 'react-error-boundary';
 import { ErrorBoundary } from 'react-error-boundary';
 
 export default () => {
 	return (
-		<ErrorBoundary FallbackComponent={ErrorFallback}>
-			<Button pressAction={save}>Save changes</Button>
-		</ErrorBoundary>
+		<Stack minBlockSize="4.5rem">
+			<ErrorBoundary FallbackComponent={ErrorFallback}>
+				<Cluster>
+					<Button pressAction={save}>Save changes</Button>
+				</Cluster>
+			</ErrorBoundary>
+		</Stack>
 	);
 };
 
@@ -23,11 +28,13 @@ function ErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
 	const message = error instanceof Error ? error.message : 'Something went wrong';
 
 	return (
-		<Box display="flex" flexDirection="column" gap="sp12">
+		<Stack gap="sp12">
 			<Text color="danger" role="alert">
 				{message}
 			</Text>
-			<Button onPress={resetErrorBoundary}>Try again</Button>
-		</Box>
+			<Cluster>
+				<Button onPress={resetErrorBoundary}>Try again</Button>
+			</Cluster>
+		</Stack>
 	);
 }

@@ -1,6 +1,7 @@
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
 import { recipe } from '../../styles/recipe.js';
+import { textRecipe } from '../../text/recipe.css.js';
 
 /** Shared presentation recipe for Button and button-shaped Link. */
 export const buttonRecipeInternal = recipe({
@@ -97,21 +98,39 @@ export const buttonRecipeInternal = recipe({
 					},
 				},
 			},
-			text: {
-				'@media': {
-					'(forced-colors: active)': {
-						color: 'LinkText',
-						forcedColorAdjust: 'auto',
-						selectors: {
-							'&[data-disabled="true"]': {
-								color: 'GrayText',
-								opacity: 1,
+			text: [
+				textRecipe({ shouldDisableTrim: true, shouldInheritFont: true }),
+				{
+					'@media': {
+						'(forced-colors: active)': {
+							color: 'LinkText',
+							forcedColorAdjust: 'auto',
+							selectors: {
+								'&[data-disabled="true"]': {
+									color: 'GrayText',
+									opacity: 1,
+								},
 							},
 						},
 					},
+					appearance: 'none',
+					backgroundColor: 'transparent',
+					backgroundImage: 'none',
+					border: 0,
+					borderRadius: 0,
+					boxShadow: 'none',
+					// `inline`, not `inline-block`: a text Link must break across lines mid-label inside a
+					// paragraph. A native `<button>` computes `inline-block` either way, so Button is
+					// unaffected.
+					display: 'inline',
+					minBlockSize: 0,
+					padding: 0,
+					position: 'relative',
+					textAlign: 'start',
+					textDecorationColor: 'currentColor',
+					verticalAlign: 'baseline',
 				},
-				textDecorationColor: 'currentColor',
-			},
+			],
 		},
 		isBlock: {
 			false: {},
@@ -134,6 +153,14 @@ export const buttonRecipeInternal = recipe({
 	compoundVariants: [
 		buttonSize('medium'),
 		buttonSize('small'),
+		{
+			// Undoes `textRecipe`'s `minInlineSize: 0`, which lets a grid or flex parent collapse the
+			// button to one character per line. Must be a compound variant: `textRecipe`'s base and
+			// this recipe's variants emit into separate same-named `recipes` layer blocks, so only a
+			// style from this recipe's own call reliably lands last.
+			style: { minInlineSize: 'auto' },
+			variants: { appearance: 'text' as const },
+		},
 		...buttonAppearance('neutral', 'low', 'ghost', vars.color.text.primary),
 		...buttonAppearance('neutral', 'standard', 'subtle', vars.color.text.primary),
 		...buttonAppearance('neutral', 'high', 'solid', vars.color.foreground.accent.onSolid, 'accent'),
@@ -242,6 +269,12 @@ function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
 			: prominence === 'high'
 				? vars.color.foreground.accent
 				: vars.color.foreground.neutral;
+	// Critical and accent keep `foreground.pressed` even though it is barely perceptible: the role
+	// contract has no stronger rung, and `onSolid` is contrast-solved for solid fills.
+	const pressedColor =
+		tone === 'critical' || prominence === 'high' ? foreground.pressed : vars.color.text.primary;
+	const restDecoration = prominence === 'low' ? 'none' : 'underline';
+	const hoverDecoration = prominence === 'low' ? 'underline' : 'none';
 	return [
 		{
 			style: {
@@ -249,17 +282,19 @@ function textAppearance(tone: Tone, prominence: 'low' | 'standard' | 'high') {
 				selectors: {
 					'&[data-hovered="true"]:not([data-disabled="true"])': {
 						color: foreground.hover,
-						textDecoration: 'underline',
+						textDecoration: hoverDecoration,
 					},
+					'&[data-pressed="true"]:not([data-disabled="true"])': {
+						color: pressedColor,
+						textDecoration: hoverDecoration,
+					},
+					// Declared last so focus-visible's underline beats the hover/pressed decoration
+					// above, even though all three selectors share the same specificity.
 					'&[data-focus-visible="true"]:not([data-disabled="true"])': {
 						textDecoration: 'underline',
 					},
-					'&[data-pressed="true"]:not([data-disabled="true"])': {
-						color: foreground.pressed,
-						textDecoration: 'underline',
-					},
 				},
-				textDecoration: prominence === 'low' ? 'none' : 'underline',
+				textDecoration: restDecoration,
 			},
 			variants: { appearance: 'text' as const, prominence, tone },
 		},

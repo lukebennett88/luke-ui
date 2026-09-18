@@ -1,5 +1,6 @@
 import { Box } from '@luke-ui/react/box';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { useState } from 'react';
@@ -13,7 +14,7 @@ export default () => {
 	const [isTrimmed, setIsTrimmed] = useState(true);
 
 	return (
-		<Box display="flex" flexDirection="column" gap="sp16">
+		<Stack gap="sp16">
 			<Checkbox isSelected={isTrimmed} onChange={setIsTrimmed}>
 				Trim text
 			</Checkbox>
@@ -22,6 +23,6 @@ export default () => {
 					Aa
 				</Text>
 			</Box>
-		</Box>
+		</Stack>
 	);
 };

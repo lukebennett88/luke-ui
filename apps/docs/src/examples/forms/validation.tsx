@@ -1,8 +1,9 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Cluster } from '@luke-ui/react/cluster';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
+import { Stack } from '@luke-ui/react/stack';
 import { TextField } from '@luke-ui/react/text-field';
 import type { SubmitEvent } from 'react';
 import { useState } from 'react';
@@ -36,29 +37,35 @@ export default () => {
 
 	return (
 		<form noValidate onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
-				<TextField
-					errorMessage={errors.email}
-					label="Email address"
-					name="emailAddress"
-					placeholder="you@example.com"
-				/>
-				<ComboboxField
-					defaultItems={countries}
-					errorMessage={errors.country}
-					label="Work location"
-					name="country"
-					placeholder="Choose a country"
-				>
-					{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
-				</ComboboxField>
-				<Checkbox errorMessage={errors.terms} name="terms">
-					I accept the terms of service
-				</Checkbox>
-				<Box>
+			<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
+				<Stack minBlockSize="5.5rem">
+					<TextField
+						errorMessage={errors.email}
+						label="Email address"
+						name="emailAddress"
+						placeholder="you@example.com"
+					/>
+				</Stack>
+				<Stack minBlockSize="5.5rem">
+					<ComboboxField
+						defaultItems={countries}
+						errorMessage={errors.country}
+						label="Work location"
+						name="country"
+						placeholder="Choose a country"
+					>
+						{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
+					</ComboboxField>
+				</Stack>
+				<Stack minBlockSize="4.5rem">
+					<Checkbox errorMessage={errors.terms} name="terms">
+						I accept the terms of service
+					</Checkbox>
+				</Stack>
+				<Cluster>
 					<Button type="submit">Create account</Button>
-				</Box>
-			</Box>
+				</Cluster>
+			</Stack>
 		</form>
 	);
 };

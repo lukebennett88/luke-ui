@@ -1,12 +1,12 @@
-import { Box } from '@luke-ui/react/box';
+import { Cluster } from '@luke-ui/react/cluster';
 import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" gap="sp4">
+		<Cluster alignItems="center" gap="sp4">
 			<Text>Continue</Text>
 			<Icon name="externalLink" size="xsmall" />
-		</Box>
+		</Cluster>
 	);
 };

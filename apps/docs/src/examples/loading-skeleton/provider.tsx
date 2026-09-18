@@ -1,45 +1,37 @@
-import { Box } from '@luke-ui/react/box';
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { useState } from 'react';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Box display="grid" gap="sp16">
+		<Stack gap="sp16">
 			<LoadingSkeletonProvider isLoading={isLoading}>
-				<Box display="flex" flexWrap="wrap" gap="sp16">
-					<Box display="grid" gap="sp4">
-						<Text color="secondary" typography="caption">
-							No local prop
-						</Text>
+				<Comparison>
+					<ComparisonItem label="No local prop">
 						<Text>
 							<LoadingSkeleton>Three items match your search.</LoadingSkeleton>
 						</Text>
-					</Box>
-					<Box display="grid" gap="sp4">
-						<Text color="secondary" typography="caption">
-							isLoading
-						</Text>
+					</ComparisonItem>
+					<ComparisonItem label="isLoading">
 						<Text>
 							<LoadingSkeleton isLoading>Results updated a moment ago.</LoadingSkeleton>
 						</Text>
-					</Box>
-					<Box display="grid" gap="sp4">
-						<Text color="secondary" typography="caption">
-							{'isLoading={false}'}
-						</Text>
+					</ComparisonItem>
+					<ComparisonItem label={'isLoading={false}'}>
 						<Text>
 							<LoadingSkeleton isLoading={false}>Nothing else to show.</LoadingSkeleton>
 						</Text>
-					</Box>
-				</Box>
+					</ComparisonItem>
+				</Comparison>
 			</LoadingSkeletonProvider>
 			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
 				Provider loading
 			</Checkbox>
-		</Box>
+		</Stack>
 	);
 };

@@ -1,4 +1,4 @@
-import { Box } from '@luke-ui/react/box';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 
@@ -8,7 +8,7 @@ const rowStyle = {
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="sp8" inlineSize="100%">
+		<Stack gap="sp8" inlineSize="100%">
 			<Text elementType="p" style={rowStyle} textAlign="start">
 				Start aligned
 			</Text>
@@ -18,6 +18,6 @@ export default () => {
 			<Text elementType="p" style={rowStyle} textAlign="end">
 				End aligned
 			</Text>
-		</Box>
+		</Stack>
 	);
 };
