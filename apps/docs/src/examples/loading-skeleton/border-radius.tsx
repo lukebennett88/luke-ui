@@ -9,12 +9,12 @@ export default () => {
 
 	return (
 		<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
+			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
+				Show loading state
+			</Checkbox>
 			<LoadingSkeleton isLoading={isLoading} radius="control">
 				<TextField label="Email address" name="email" placeholder="you@example.com" />
 			</LoadingSkeleton>
-			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
-				Loading
-			</Checkbox>
 		</Stack>
 	);
 };
