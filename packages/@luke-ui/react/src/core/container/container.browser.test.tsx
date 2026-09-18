@@ -4,7 +4,14 @@ import { Box } from '../box/box.js';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
 import { Container } from './container.js';
-import { containerMaxInlineSizeTokens } from './recipe.css.js';
+
+const fixedSizes = [
+	['ct448', 448],
+	['ct672', 672],
+	['ct896', 896],
+	['ct1152', 1152],
+	['ct1280', 1280],
+] as const;
 
 afterEach(async () => {
 	await page.viewport(1024, 800);
@@ -45,9 +52,7 @@ test('uses its fixed maximum as a border-box width and centres by default', () =
 	expect(getComputedStyle(container).containerType).toBe('inline-size');
 });
 
-for (const [maxInlineSize, pixelValue] of Object.entries(containerMaxInlineSizeTokens)) {
-	const expectedWidth = Number.parseInt(pixelValue, 10);
-
+for (const [maxInlineSize, expectedWidth] of fixedSizes) {
 	test(`caps the border box at ${maxInlineSize}`, () => {
 		const { locator } = render(
 			<div style={{ inlineSize: '1400px' }}>
@@ -111,7 +116,7 @@ test('caps the border box at an arbitrary CSS maxInlineSize', () => {
 	expect(container.getBoundingClientRect().width).toBe(672);
 });
 
-test('forwards refs and supports semantic and caller-owned elements', () => {
+test('supports semantic and caller-owned elements', () => {
 	const semantic = render(
 		<Container aria-label="Page content" elementType="main" maxInlineSize="ct896">
 			Page content
