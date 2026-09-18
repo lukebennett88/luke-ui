@@ -5,6 +5,7 @@ import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
+import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import {
 	containerMaxInlineSizeTokens,
@@ -24,16 +25,16 @@ export function Container({
 	style,
 	...props
 }: ContainerProps): JSX.Element {
-	const maxInlineSizeToken = isContainerMaxInlineSizeToken(maxInlineSize)
-		? maxInlineSize
-		: undefined;
-	const arbitraryMaxInlineSize = isContainerMaxInlineSizeToken(maxInlineSize)
-		? undefined
-		: maxInlineSize;
-	const resolvedStyle =
-		arbitraryMaxInlineSize === undefined
-			? style
-			: { ...assignInlineVars({ [containerMaxInlineSizeVar]: arbitraryMaxInlineSize }), ...style };
+	const isMaxInlineSizeToken = isContainerMaxInlineSizeToken(maxInlineSize);
+	const maxInlineSizeToken = isMaxInlineSizeToken ? maxInlineSize : undefined;
+	const arbitraryMaxInlineSize = isMaxInlineSizeToken ? undefined : maxInlineSize;
+	const resolvedStyle = (() => {
+		if (arbitraryMaxInlineSize === undefined) return style;
+		return {
+			...assignInlineVars({ [containerMaxInlineSizeVar]: arbitraryMaxInlineSize }),
+			...style,
+		};
+	})();
 
 	return (
 		<Box
@@ -49,7 +50,7 @@ export function Container({
 /** Layout utilities Container owns, so a caller cannot set them through Box. */
 type _ContainerOwnedProperty = 'inlineSize' | 'marginInline' | 'maxInlineSize' | 'paddingInline';
 
-type _ContainerLayoutOmit = Omit<LayoutProps, _ContainerOwnedProperty>;
+type _ContainerOmit = DistributiveOmit<LayoutProps, _ContainerOwnedProperty>;
 
 interface _ContainerLayoutProps {
 	/** Maximum inline size of the container's border box. */
@@ -64,10 +65,9 @@ interface _ContainerLayoutProps {
 }
 
 interface _ContainerElementProps
-	extends BoxLikeElementProps, _ContainerLayoutOmit, _ContainerLayoutProps {}
+	extends BoxLikeElementProps, _ContainerOmit, _ContainerLayoutProps {}
 
-interface _ContainerRenderProps
-	extends BoxLikeRenderProps, _ContainerLayoutOmit, _ContainerLayoutProps {}
+interface _ContainerRenderProps extends BoxLikeRenderProps, _ContainerOmit, _ContainerLayoutProps {}
 
 type ContainerMaxInlineSizeToken = keyof typeof containerMaxInlineSizeTokens;
 
@@ -89,5 +89,5 @@ for (const property of containerOwnedProperties) {
 function isContainerMaxInlineSizeToken(
 	maxInlineSize: ContainerMaxInlineSize,
 ): maxInlineSize is ContainerMaxInlineSizeToken {
-	return maxInlineSize in containerMaxInlineSizeTokens;
+	return Object.hasOwn(containerMaxInlineSizeTokens, maxInlineSize);
 }
