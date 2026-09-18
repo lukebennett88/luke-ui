@@ -4,15 +4,11 @@ import { recipe } from '../styles/recipe.js';
 
 /**
  * Raw slotted config for the `Track` layout component.
- *
- * Slots: `root` (the flex container), `rail` (either fixed-width rail wrapper), and `centre` (the
- * flexible middle).
  */
 const trackConfig = {
 	compoundSlots: [
 		{
-			// Rails never shrink below their content on the inline axis, whichever
-			// rail alignment is selected.
+			// Rails keep their inline size.
 			slots: ['rail'],
 			style: { flexShrink: 0 },
 		},
@@ -23,9 +19,8 @@ const trackConfig = {
 	},
 	slots: {
 		centre: {
-			// The centre is the only slot allowed to grow, and it must be able to
-			// shrink below its content's natural inline size — otherwise unbroken
-			// content (a long word or URL) forces the whole row to overflow.
+			// Allow the centre to shrink below long words and URLs so the row can use
+			// its remaining inline space.
 			flexGrow: 1,
 			minInlineSize: 0,
 		},
@@ -33,9 +28,7 @@ const trackConfig = {
 		root: {},
 	},
 	variants: {
-		// Not a public prop: `track.tsx` derives this from `elementType`. A `span`
-		// root must stay an inline-level box so it can sit inside a sentence;
-		// `div` and `li` roots stay block-level.
+		// Derived from `elementType`; a `span` root stays inline-level.
 		isInline: {
 			false: { root: { display: 'flex' } },
 			true: { root: { display: 'inline-flex' } },
@@ -43,15 +36,8 @@ const trackConfig = {
 		railAlignment: {
 			center: { root: { alignItems: 'center' } },
 			end: { root: { alignItems: 'flex-end' } },
-			// `firstLine` keeps the root's own cross-axis alignment at block start, then
-			// centres each rail against a fixed block-size of `1lh`. `1lh` resolves against
-			// the line-height Track itself inherits, not the actual rendered line-height of
-			// centre children, so a differently sized child in the centre (a `Heading`, a
-			// larger `Text`) does not move where the rail sits. That is intentional: fixing
-			// it would need measuring the centre's children, which this component does not do.
-			// The box is a fixed size rather than a minimum so a rail taller than one line
-			// (an icon or a `Button`) overflows it symmetrically about the first line's centre,
-			// instead of growing the box and dragging the rail's centre below it.
+			// `1lh` uses Track's inherited line-height, not the rendered line-height of centre
+			// children. A fixed block size keeps a taller rail centred on the first line.
 			firstLine: {
 				rail: {
 					alignItems: 'center',

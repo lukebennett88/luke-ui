@@ -10,37 +10,27 @@ source: packages/@luke-ui/react/src/exports/track.ts
 
 <ExampleBlock src="track/basic" title="Track — Basic" />
 
-## Rails
-
-`railStart` and `railEnd` are both optional and never shrink below their content. An omitted rail
-renders no wrapper, so it contributes no gap.
-
-<ExampleBlock src="track/rails" title="Track — Rails" />
+Pass `railStart`, `railEnd`, or both to place fixed content around the flexible centre. Leave both
+props unset when the centre needs no rails.
 
 ## Alignment
 
-`railAlignment` sets the cross-axis alignment of the rails against Track's block box. `start` is the
-default.
+`railAlignment` sets how the rails line up with a centre that spans more than one line. Use `center`
+for a compact status or icon beside a message. Use `firstLine` for a taller trailing action beside a
+wrapped task title.
+
+`start` and `end` are uncommon choices. Use `start` for a marker or avatar that must align with the
+top of the centre, or `end` for metadata that must align with its bottom edge.
+
+`firstLine` uses Track's inherited line height. If the centre contains a `Heading` or `Text` with a
+different line height, the rail still aligns to Track's line height.
 
 <ExampleBlock src="track/alignment" title="Track — Alignment" />
 
-## Align rails to the first line
-
-`firstLine` centres each rail against a box fixed at exactly one line height, so a rail stays level
-with the centre's first line even when the centre wraps.
-
-That line height resolves against what Track itself inherits, not the actual rendered line height of
-the centre's children. Give Track a centre whose inherited line-height metrics match its own, or the
-rail sits against the wrong line. A `Heading`, or `Text` at a different size, does not move where
-the rail sits.
-
-<ExampleBlock src="track/first-line" title="Track — Align rails to the first line" />
-
 ## Long and wrapping content
 
-The centre grows to fill available space and shrinks below its own content size, so a long unbroken
-string never forces Track to overflow. Ordinary wrapping text behaves the same way inside a narrower
-container.
+The centre shrinks beside fixed rails, so ordinary text can wrap within the available width. Choose
+truncation on the centre content when a long value must stay on one line.
 
 <ExampleBlock src="track/wrapping" title="Track — Long and wrapping content" />
 
@@ -52,9 +42,7 @@ or `ol`.
 <ExampleBlock src="track/element" title="Track — Choose the rendered element" />
 
 Set `elementType="span"` to keep Track inside phrasing content. Track's internal rail and centre
-wrappers also render as `span`, and the root becomes an inline-level box so Track flows inside a
-sentence instead of breaking onto its own line. You remain responsible for passing children that are
-themselves valid phrasing content.
+content must also be valid phrasing content.
 
 <ExampleBlock src="track/element-span" title="Track — Inside phrasing content" />
 

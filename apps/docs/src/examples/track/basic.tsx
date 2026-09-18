@@ -9,7 +9,7 @@ export default () => {
 			railStart={<Icon name="checkCircle" />}
 			railEnd={<Button size="small">Undo</Button>}
 		>
-			Example item marked complete
+			Submit expense report
 		</Track>
 	);
 };

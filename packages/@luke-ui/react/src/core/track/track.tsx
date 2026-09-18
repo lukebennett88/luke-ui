@@ -8,43 +8,34 @@ import { trackRecipe } from './recipe.css.js';
 
 type TrackElementType = 'div' | 'li' | 'span';
 
-/** The element a `Track` internal wrapper (rail or centre) renders as. */
 type TrackWrapperElementType = 'div' | 'span';
 
 interface _TrackProps extends HTMLAttributes<HTMLElement> {
-	/** The flexible centre. Shrinks below its content's inline size so it never forces overflow. */
+	/** Flexible centre content. */
 	children?: ReactNode;
 	/**
-	 * Chooses a supported structural element.
+	 * Root element.
 	 *
-	 * `li` renders as a direct child of `ul` or `ol`; its internal rail and centre wrappers still
-	 * render as `div`. `span` renders every internal wrapper as `span` too and makes the root an
-	 * inline-level box, so the whole component stays safe inside phrasing content and flows inside a
-	 * sentence.
+	 * `li` is intended as a direct child of `ul` or `ol`. `span` keeps the root and wrappers inline so
+	 * the component can flow inside a sentence.
 	 * @default div
 	 */
 	elementType?: TrackElementType;
 	/**
-	 * Space between the rails and the centre on the inline axis. An omitted rail's wrapper does not
-	 * render, so it contributes no gap. Pass `"0"` when content should touch.
+	 * Space between rails and the centre. Omitted rails do not add a gap.
 	 */
 	gap: NonNullable<SprinklesProps['gap']>;
-	/**
-	 * Content shown after the centre. Does not shrink below its own content size.
-	 */
+	/** Content shown after the centre. */
 	railEnd?: ReactNode;
 	/**
-	 * Cross-axis alignment of the rails against Track's block box.
+	 * Cross-axis alignment of the rails.
 	 *
-	 * `firstLine` centres each rail against the line-height Track itself inherits, not the actual
-	 * rendered line-height of the centre's children — a `Heading` or larger `Text` in the centre
-	 * does not move where the rail sits.
+	 * `firstLine` uses Track's inherited line-height (`1lh`), not the rendered line-height of centre
+	 * children.
 	 * @default start
 	 */
 	railAlignment?: NonNullable<TrackRecipeVariants>['railAlignment'];
-	/**
-	 * Content shown before the centre. Does not shrink below its own content size.
-	 */
+	/** Content shown before the centre. */
 	railStart?: ReactNode;
 	/** Ref to the rendered element. */
 	ref?: Ref<HTMLElement>;
@@ -54,9 +45,7 @@ interface _TrackProps extends HTMLAttributes<HTMLElement> {
 export type TrackProps = Prettify<_TrackProps>;
 
 /**
- * Lays out an optional fixed rail, a flexible centre, and an optional fixed rail on the inline
- * axis. Use it for a row that pairs adornments with content that can wrap or truncate, such as an
- * icon and an action beside an address.
+ * Lays out optional rails around flexible inline content.
  */
 export function Track(props: TrackProps): JSX.Element {
 	const {

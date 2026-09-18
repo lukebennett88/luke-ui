@@ -10,10 +10,10 @@ const meta = preview.meta({
 	title: 'Layout/Track',
 });
 
-/** Track a rail, the flexible centre, and a rail with a required gap. */
+/** Pair completed work with an action. */
 export const Default = meta.story({
 	args: {
-		children: 'Example item marked complete',
+		children: 'Submit expense report',
 		gap: 'sp8',
 		railEnd: <Button size="small">Undo</Button>,
 		railStart: <Icon name="checkCircle" />,
@@ -22,15 +22,14 @@ export const Default = meta.story({
 
 export const NoRails = meta.story({
 	args: {
-		children: 'Example item',
+		children: 'Invite a teammate to the project',
 		gap: 'sp8',
 	} satisfies Partial<TrackProps>,
 });
 
 export const FirstLineAlignment = meta.story({
 	args: {
-		children:
-			'Example item with a second line of wrapped content, so the rail sits against the first line only.',
+		children: 'Review the quarterly performance report and share the summary with the team.',
 		gap: 'sp8',
 		railAlignment: 'firstLine',
 		railEnd: <Button size="small">Undo</Button>,
@@ -45,8 +44,8 @@ export const ListItem = meta.story({
 	} satisfies Partial<TrackProps>,
 	render: (props) => (
 		<ul>
-			<Track {...props}>First example item</Track>
-			<Track {...props}>Second example item</Track>
+			<Track {...props}>Prepare the project brief</Track>
+			<Track {...props}>Schedule the stakeholder review</Track>
 		</ul>
 	),
 });

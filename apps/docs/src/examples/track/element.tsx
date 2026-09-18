@@ -5,10 +5,10 @@ export default () => {
 	return (
 		<ul>
 			<Track elementType="li" gap="sp8" railStart={<Icon name="checkCircle" />}>
-				First example item
+				Prepare the project brief
 			</Track>
 			<Track elementType="li" gap="sp8" railStart={<Icon name="checkCircle" />}>
-				Second example item
+				Schedule the stakeholder review
 			</Track>
 		</ul>
 	);
