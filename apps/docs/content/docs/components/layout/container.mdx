@@ -1,0 +1,37 @@
+---
+title: Container
+description: Constrain content and establish a local size container.
+source: packages/@luke-ui/react/src/exports/container.ts
+---
+
+`Container` fills its available inline size up to `maxInlineSize` and centres itself. Pass a `ct`
+value for a fixed maximum, or a CSS length. Pass `marginInline` to change the centring. Read
+[Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
+
+<ExampleBlock src="container/basic" title="Container — Basic" />
+
+## Responsive descendants
+
+A traditional container usually only constrains and centres content. Luke UI's `Container` also
+establishes a local responsive query boundary.
+
+Luke UI responsive values inside the Container resolve against its content box rather than the
+document root. A `ct672` Container therefore never reaches `bp768`. `paddingInline` reduces the
+content-box width, so it can also change where responsive styles switch.
+
+Use Container when descendants should respond to the available content area rather than the document
+root.
+
+## Choose the rendered element
+
+Container uses
+[Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
+
+<ExampleBlock src="container/semantic-element" title="Container — Main" />
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/container/container.tsx"
+	name="ContainerProps"
+/>

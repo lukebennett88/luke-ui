@@ -12,6 +12,7 @@ export type ComponentTestManifestEntry = {
 
 // Keep this list explicit. An empty `conformance` list is a deliberate exception, not an omission.
 export const componentTestManifest = [
+	['AspectRatio', 'aspect-ratio', ['dom'], 'none', 'applicable'],
 	['Blockquote', 'blockquote', ['dom'], 'none', 'none'],
 	['Box', 'box', ['dom'], 'none', 'applicable'],
 	['Button', 'button', ['dom'], 'required', 'applicable'],
@@ -25,6 +26,7 @@ export const componentTestManifest = [
 	['ComboboxField', 'combobox-field', ['domProps', 'field'], 'required', 'applicable'],
 	// Multi-part collection. No single root receives the public DOM props.
 	['Combobox primitive', 'primitives/combobox', [], 'none', 'none'],
+	['Container', 'container', ['dom'], 'none', 'applicable'],
 	['Em', 'em', ['dom'], 'none', 'none'],
 	['Emoji', 'emoji', ['dom'], 'none', 'applicable'],
 	// Multi-part composition. No single root is the documented element.
