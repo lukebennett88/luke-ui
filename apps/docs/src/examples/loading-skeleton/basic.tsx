@@ -8,12 +8,14 @@ export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Box display="grid" gap="sp16" maxInlineSize="32rem">
+		<Box display="grid" gap="sp16" maxInlineSize="28rem">
 			<Checkbox isSelected={isLoading} onChange={setIsLoading}>
 				Show loading state
 			</Checkbox>
 			<Text>
-				<LoadingSkeleton isLoading={isLoading}>Three items match your search.</LoadingSkeleton>
+				<LoadingSkeleton isLoading={isLoading}>
+					This text wraps across several lines to show how the skeleton follows the final content.
+				</LoadingSkeleton>
 			</Text>
 		</Box>
 	);

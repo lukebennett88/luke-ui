@@ -3,8 +3,16 @@ import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 
 export default () => {
 	return (
-		<LoadingSkeleton>
-			<Box blockSize="3rem" inlineSize="3rem" style={{ borderRadius: '9999px' }} />
-		</LoadingSkeleton>
+		<Box display="flex" gap="sp8">
+			<LoadingSkeleton>
+				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
+			</LoadingSkeleton>
+			<LoadingSkeleton>
+				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
+			</LoadingSkeleton>
+			<LoadingSkeleton>
+				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
+			</LoadingSkeleton>
+		</Box>
 	);
 };

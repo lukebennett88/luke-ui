@@ -16,7 +16,7 @@ const LoadingSkeletonContext = createContext<boolean | null>(null);
 /** Props for `LoadingSkeletonProvider`. */
 export interface LoadingSkeletonProviderProps {
 	children: ReactNode;
-	/** Loading state applied to every descendant `LoadingSkeleton`, overriding their `isLoading` prop. */
+	/** Default loading state for descendant `LoadingSkeleton` components without an `isLoading` prop. */
 	isLoading: boolean;
 }
 
@@ -35,7 +35,7 @@ interface _LoadingSkeletonProps extends ComponentProps<'span'> {
 	 */
 	elementType?: ElementType;
 	/**
-	 * Whether the skeleton is shown in place of `children`. Overridden by a `LoadingSkeletonProvider` ancestor.
+	 * Whether the skeleton is shown in place of `children`. Overrides a `LoadingSkeletonProvider` ancestor.
 	 * @default true
 	 */
 	isLoading?: boolean;
@@ -51,7 +51,7 @@ export type LoadingSkeletonProps = Prettify<_LoadingSkeletonProps>;
 
 /**
  * Placeholder that mirrors the layout of loading content. Wrap text for an inline skeleton sized to the text, or
- * wrap a component to paint a skeleton over it while preserving its footprint. All skeletons pulse in sync.
+ * wrap a component to paint a skeleton over it while preserving its footprint. All skeletons sheen in sync.
  */
 export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	const {
@@ -65,7 +65,7 @@ export function LoadingSkeleton(props: LoadingSkeletonProps): ReactNode {
 	} = props;
 
 	const isLoadingContext = useContext(LoadingSkeletonContext);
-	const isLoading = isLoadingContext ?? isLoadingProp ?? true;
+	const isLoading = isLoadingProp ?? isLoadingContext ?? true;
 
 	useSynchronizeAnimations(isLoading ? skeletonAnimationName : null);
 

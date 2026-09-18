@@ -3,6 +3,7 @@ import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import type { CSSProperties } from 'react';
+import { useState } from 'react';
 import preview from '../../../.storybook/preview.js';
 
 const meta = preview.meta({
@@ -91,12 +92,12 @@ export const Loaded = meta.story({
 	),
 });
 
-/** The provider controls descendant skeletons and overrides local `isLoading` props. */
+/** A local `isLoading` prop overrides the provider state. */
 export const Provider = meta.story({
 	render: () => (
 		<LoadingSkeletonProvider isLoading>
 			<div style={stackStyle}>
-				<LoadingSkeleton isLoading={false}>
+				<LoadingSkeleton>
 					<Text elementType="p">A paragraph of placeholder text</Text>
 				</LoadingSkeleton>
 				<LoadingSkeleton isLoading={false}>Some more inline placeholder text</LoadingSkeleton>
@@ -107,3 +108,36 @@ export const Provider = meta.story({
 		</LoadingSkeletonProvider>
 	),
 });
+
+/**
+ * Every `LoadingSkeleton` synchronises its sheen to the animations already running. Click "Add
+ * skeleton" a few seconds apart and compare the newest skeleton against the first: the new instance
+ * snaps into phase with the others on mount instead of starting its own offset. Use "Reset" to
+ * return to the initial set without reloading.
+ */
+export const StaggeredMounting = meta.story({
+	render: () => <StaggeredSkeletons />,
+});
+
+function StaggeredSkeletons() {
+	const [count, setCount] = useState(1);
+
+	return (
+		<div style={stackStyle}>
+			<div style={stackStyle}>
+				{Array.from({ length: count }, (_, index) => (
+					<div key={index} style={rowStyle}>
+						<Text>Skeleton {index + 1}</Text>
+						<LoadingSkeleton>
+							<div style={{ height: '1.5rem', width: '10rem' }} />
+						</LoadingSkeleton>
+					</div>
+				))}
+			</div>
+			<div style={rowStyle}>
+				<Button onPress={() => setCount((current) => current + 1)}>Add skeleton</Button>
+				<Button onPress={() => setCount(1)}>Reset</Button>
+			</div>
+		</div>
+	);
+}

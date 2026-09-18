@@ -9,40 +9,32 @@ appear so the placeholder occupies the same space.
 
 <ExampleBlock src="loading-skeleton/basic" title="Loading Skeleton — Basic" />
 
-Wrap text itself, rather than its parent, when it can span several lines. The placeholder then
-follows each line without changing the layout.
+Wrap text directly when it spans several lines. The skeleton then follows the final line breaks.
 
 ## With components
 
-Wrap an element to keep its dimensions while the skeleton covers it. Use this for controls, avatars,
-and other content with a fixed shape.
+Wrap a fixed-size element to keep its shape while it loads.
 
 <ExampleBlock
 	src="loading-skeleton/custom-dimensions"
-	title="Loading Skeleton — Fixed dimensions"
+	title="Loading Skeleton — Fixed-size shape"
 />
 
 Set `radius` when the direct child has square corners but a visible descendant has rounded corners.
-A `TextField` is a typical case, because its input control has rounded corners inside the field
+Use `radius="control"` for a `TextField`, whose input control has rounded corners inside the field
 wrapper.
 
-<ExampleBlock src="loading-skeleton/border-radius" title="Loading Skeleton — Control radius" />
+<ExampleBlock
+	src="loading-skeleton/border-radius"
+	title="Loading Skeleton — Nested control radius"
+/>
 
-## Loading state
+## Provider
 
-`isLoading` is `true` by default. Set it to `false` when the content is ready. The component then
-returns its children without a wrapper.
+Use `LoadingSkeletonProvider` when one loading state controls a section. Pass `isLoading` to a child
+when it needs a different loading state.
 
-```tsx
-<LoadingSkeleton isLoading={isLoading}>
-	<Button>Save changes</Button>
-</LoadingSkeleton>
-```
-
-Use `LoadingSkeletonProvider` when one loading state controls a section. Its value overrides
-`isLoading` on every descendant skeleton, so a section changes together.
-
-<ExampleBlock src="loading-skeleton/provider" title="Loading Skeleton — Shared state" />
+<ExampleBlock src="loading-skeleton/provider" title="Loading Skeleton — Provider" />
 
 ## Element type
 
@@ -53,8 +45,8 @@ element, such as an `li` inside a list.
 
 ## Accessibility
 
-While loading, `LoadingSkeleton` hides content from assistive technology, removes it from the tab
-order, and blocks pointer input. It becomes available again when `isLoading` is `false`.
+While loading, `LoadingSkeleton` hides its content from assistive technology and blocks focus and
+pointer input. It shows the content again when `isLoading` is `false`.
 
 ## API
 
