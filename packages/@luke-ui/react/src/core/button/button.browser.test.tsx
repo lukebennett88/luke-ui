@@ -3,6 +3,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { expect, test } from 'vite-plus/test';
 import { testConformance, testIntegration } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
+import { Text } from '../text/text.js';
 import { Button } from './button.js';
 
 /** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
@@ -57,11 +58,164 @@ test('a pending text Button shows a spinner', () => {
 	expect(button.element().querySelector('[role="status"]')).not.toBeNull();
 });
 
-test('a text Button keeps wrapping layout instead of button no-wrap', () => {
-	const { locator } = render(<Button appearance="text">Save</Button>);
+test('a text Button has the same layout styles as inline Text without control padding or sizing', () => {
+	const { locator } = render(
+		<div>
+			<Button appearance="text">Save</Button>
+			<Text>Text reference</Text>
+		</div>,
+	);
 	const button = locator.getByRole('button', { name: 'Save' }).element();
+	const styles = getComputedStyle(button);
+	const textStyles = getComputedStyle(locator.getByText('Text reference').element());
 
-	expect(getComputedStyle(button).whiteSpace).not.toBe('nowrap');
+	expect(styles.borderInlineStartWidth).toBe('0px');
+	expect(styles.fontFamily).toBe(textStyles.fontFamily);
+	expect(styles.fontSize).toBe(textStyles.fontSize);
+	expect(styles.fontWeight).toBe(textStyles.fontWeight);
+	expect(styles.letterSpacing).toBe(textStyles.letterSpacing);
+	expect(styles.lineHeight).toBe(textStyles.lineHeight);
+	expect(styles.minBlockSize).toBe('0px');
+	expect(styles.overflowWrap).toBe(textStyles.overflowWrap);
+	expect(styles.paddingBlockEnd).toBe('0px');
+	expect(styles.paddingBlockStart).toBe('0px');
+	expect(styles.paddingInlineEnd).toBe('0px');
+	expect(styles.paddingInlineStart).toBe('0px');
+	expect(styles.textTransform).toBe(textStyles.textTransform);
+	expect(styles.whiteSpace).not.toBe('nowrap');
+});
+
+test('a text Button wraps with surrounding text when constrained', () => {
+	const { locator } = render(
+		<div style={{ inlineSize: '8rem' }}>
+			<Button appearance="text">
+				Use text Buttons when an action needs to wrap with surrounding text.
+			</Button>
+		</div>,
+	);
+	const button = locator.getByRole('button').element();
+	const label = button.querySelector('span');
+	if (!(label instanceof HTMLElement)) throw new Error('Expected a text label.');
+	const container = button.parentElement;
+	if (!(container instanceof HTMLElement)) throw new Error('Expected a text Button container.');
+
+	expect(label.getClientRects().length).toBeGreaterThan(1);
+	expect(button.getBoundingClientRect().height).toBeGreaterThan(
+		Number.parseFloat(getComputedStyle(button).lineHeight),
+	);
+	expect(button.scrollWidth).toBeLessThanOrEqual(container.clientWidth);
+});
+
+test('a text Button in a grid parent is not collapsed to a single character per line', () => {
+	const { locator } = render(
+		<div style={{ display: 'grid' }}>
+			<Button appearance="text">Button</Button>
+		</div>,
+	);
+	const button = locator.getByRole('button', { name: 'Button' }).element();
+	const label = button.querySelector('span');
+	if (!(label instanceof HTMLElement)) throw new Error('Expected a text label.');
+
+	expect(label.getClientRects().length).toBe(1);
+	expect(getComputedStyle(button).minInlineSize).toBe('auto');
+	expect(button.getBoundingClientRect().width).toBeGreaterThan(20);
+});
+
+test('a text Button in a flex parent is not collapsed to a single character per line', () => {
+	const { locator } = render(
+		<div style={{ display: 'flex' }}>
+			<Button appearance="text">Button</Button>
+		</div>,
+	);
+	const button = locator.getByRole('button', { name: 'Button' }).element();
+	const label = button.querySelector('span');
+	if (!(label instanceof HTMLElement)) throw new Error('Expected a text label.');
+
+	expect(label.getClientRects().length).toBe(1);
+	expect(button.getBoundingClientRect().width).toBeGreaterThan(20);
+});
+
+test('hover inverts the text Button underline, and low prominence reverses the rest state', () => {
+	const { locator } = render(
+		<div>
+			<Button appearance="text" prominence="low">
+				Low
+			</Button>
+			<Button appearance="text" prominence="standard">
+				Standard
+			</Button>
+			<Button appearance="text" prominence="high">
+				High
+			</Button>
+		</div>,
+	);
+	const low = locator.getByRole('button', { name: 'Low' }).element();
+	const standard = locator.getByRole('button', { name: 'Standard' }).element();
+	const high = locator.getByRole('button', { name: 'High' }).element();
+
+	for (const button of [low, standard, high]) {
+		button.style.transition = 'none';
+	}
+
+	expect(getComputedStyle(low).textDecorationLine).toBe('none');
+	expect(getComputedStyle(standard).textDecorationLine).toBe('underline');
+	expect(getComputedStyle(high).textDecorationLine).toBe('underline');
+
+	low.setAttribute('data-hovered', 'true');
+	standard.setAttribute('data-hovered', 'true');
+	high.setAttribute('data-hovered', 'true');
+
+	expect(getComputedStyle(low).textDecorationLine).toBe('underline');
+	expect(getComputedStyle(standard).textDecorationLine).toBe('none');
+	expect(getComputedStyle(high).textDecorationLine).toBe('none');
+});
+
+test('the text Button label paints the underline set on the button', () => {
+	const { locator } = render(
+		<Button appearance="text" prominence="standard">
+			Save
+		</Button>,
+	);
+	const button = locator.getByRole('button', { name: 'Save' }).element();
+	const label = button.querySelector('span');
+	if (!(label instanceof HTMLElement)) throw new Error('Expected a text label.');
+
+	// `text-decoration` does not inherit, so a label that sets its own value paints over the button's.
+	expect(getComputedStyle(label).textDecorationLine).toBe('underline');
+});
+
+test('pressed text Buttons shift to a perceptibly different foreground colour per tone', () => {
+	const { locator } = render(
+		<div>
+			<Button appearance="text">Neutral</Button>
+			<Button appearance="text" tone="critical">
+				Critical
+			</Button>
+			<Button appearance="text" prominence="high">
+				Accent
+			</Button>
+		</div>,
+	);
+	const neutral = locator.getByRole('button', { name: 'Neutral' }).element();
+	const critical = locator.getByRole('button', { name: 'Critical' }).element();
+	const accent = locator.getByRole('button', { name: 'Accent' }).element();
+
+	for (const button of [neutral, critical, accent]) {
+		// A computed colour read mid-transition returns the rest value.
+		button.style.transition = 'none';
+	}
+
+	const neutralRest = getComputedStyle(neutral).color;
+	const criticalRest = getComputedStyle(critical).color;
+	const accentRest = getComputedStyle(accent).color;
+
+	neutral.setAttribute('data-pressed', 'true');
+	critical.setAttribute('data-pressed', 'true');
+	accent.setAttribute('data-pressed', 'true');
+
+	expect(getComputedStyle(neutral).color).not.toBe(neutralRest);
+	expect(getComputedStyle(critical).color).not.toBe(criticalRest);
+	expect(getComputedStyle(accent).color).not.toBe(accentRest);
 });
 
 test('disabled Buttons expose disabled state in either appearance', () => {

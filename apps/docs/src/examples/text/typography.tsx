@@ -1,11 +1,12 @@
 import { Box } from '@luke-ui/react/box';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { typeStyles, vars } from '@luke-ui/react/theme';
 import { Fragment } from 'react';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="sp12">
+		<Stack gap="sp12">
 			<Box
 				alignItems="flex-end"
 				display="grid"
@@ -29,6 +30,6 @@ export default () => {
 					</Fragment>
 				))}
 			</Box>
-		</Box>
+		</Stack>
 	);
 };

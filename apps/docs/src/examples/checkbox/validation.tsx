@@ -1,6 +1,6 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Stack } from '@luke-ui/react/stack';
 import type { SubmitEvent } from 'react';
 
 export default () => {
@@ -10,14 +10,12 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
-				<Checkbox description="We record the date you accepted." isRequired>
-					I accept the terms of service
-				</Checkbox>
-				<Box>
-					<Button type="submit">Create account</Button>
-				</Box>
-			</Box>
+			<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
+				<Stack minBlockSize="4.5rem">
+					<Checkbox isRequired>I accept the terms of service</Checkbox>
+				</Stack>
+				<Button type="submit">Create account</Button>
+			</Stack>
 		</form>
 	);
 };

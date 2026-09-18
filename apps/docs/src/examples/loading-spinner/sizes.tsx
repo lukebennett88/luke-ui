@@ -3,7 +3,7 @@ import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Comparison>
+		<Comparison align="center">
 			<ComparisonItem label="X-small">
 				<LoadingSpinner aria-label="Loading" size="xsmall" />
 			</ComparisonItem>

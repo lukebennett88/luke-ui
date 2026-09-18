@@ -1,6 +1,6 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { useRef } from 'react';
@@ -36,7 +36,7 @@ export default () => {
 	});
 
 	return (
-		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
+		<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
 			<form
 				onSubmit={(event) => {
 					event.preventDefault();
@@ -44,30 +44,32 @@ export default () => {
 				}}
 				ref={formRef}
 			>
-				<Box display="flex" flexDirection="column" gap="sp16">
+				<Stack gap="sp16">
 					<form.Field name="terms">
 						{(field) => (
-							<Checkbox
-								errorMessage={field.state.meta.errors[0]?.message}
-								isSelected={field.state.value}
-								onBlur={field.handleBlur}
-								onChange={field.handleChange}
-								validationBehavior="aria"
-							>
-								I accept the terms of service
-							</Checkbox>
+							<Stack minBlockSize="4.5rem">
+								<Checkbox
+									errorMessage={field.state.meta.errors[0]?.message}
+									isSelected={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={field.handleChange}
+									validationBehavior="aria"
+								>
+									I accept the terms of service
+								</Checkbox>
+							</Stack>
 						)}
 					</form.Field>
-					<Box>
-						<Button type="submit">Continue</Button>
-					</Box>
-				</Box>
+					<Button type="submit">Continue</Button>
+				</Stack>
 			</form>
-			<Text elementType="p" role="status">
-				<form.Subscribe selector={(state) => state.isSubmitSuccessful}>
-					{(isSubmitSuccessful) => (isSubmitSuccessful ? 'Terms accepted.' : null)}
-				</form.Subscribe>
-			</Text>
-		</Box>
+			<Stack minBlockSize="1.5rem">
+				<Text elementType="p" role="status">
+					<form.Subscribe selector={(state) => state.isSubmitSuccessful}>
+						{(isSubmitSuccessful) => (isSubmitSuccessful ? 'Terms accepted.' : '\u00a0')}
+					</form.Subscribe>
+				</Text>
+			</Stack>
+		</Stack>
 	);
 };

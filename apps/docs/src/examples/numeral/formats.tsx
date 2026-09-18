@@ -1,10 +1,10 @@
-import { Box } from '@luke-ui/react/box';
 import { Numeral } from '@luke-ui/react/numeral';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="sp8">
+		<Stack gap="sp8">
 			<Text>
 				Conversion rate: <Numeral format="percent" value={0.125} />
 			</Text>
@@ -17,6 +17,6 @@ export default () => {
 			<Text>
 				Page views: <Numeral format="decimal" value={12_345} />
 			</Text>
-		</Box>
+		</Stack>
 	);
 };

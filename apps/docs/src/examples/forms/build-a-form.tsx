@@ -1,5 +1,6 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Cluster } from '@luke-ui/react/cluster';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import type { FormEvent } from 'react';
@@ -16,9 +17,9 @@ export default () => {
 	}
 
 	return (
-		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="22rem">
+		<Stack gap="sp16" maxInlineSize="22rem" inlineSize="100%">
 			<form onReset={() => setSubmittedEmail('')} onSubmit={handleSubmit}>
-				<Box display="flex" flexDirection="column" gap="sp16">
+				<Stack gap="sp16">
 					<TextField
 						description="We will send the receipt to this address."
 						isRequired
@@ -26,13 +27,17 @@ export default () => {
 						name="email"
 						type="email"
 					/>
-					<Box display="flex" gap="sp8">
+					<Cluster gap="sp8">
 						<Button type="submit">Submit</Button>
 						<Button type="reset">Reset</Button>
-					</Box>
-				</Box>
+					</Cluster>
+				</Stack>
 			</form>
-			{submittedEmail ? <Text elementType="p">Submitted: {submittedEmail}</Text> : null}
-		</Box>
+			<Stack minBlockSize="1.5rem">
+				<Text elementType="p" role="status">
+					{submittedEmail ? `Submitted: ${submittedEmail}` : '\u00a0'}
+				</Text>
+			</Stack>
+		</Stack>
 	);
 };

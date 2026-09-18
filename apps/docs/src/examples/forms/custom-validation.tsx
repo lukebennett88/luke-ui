@@ -1,5 +1,5 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
+import { Stack } from '@luke-ui/react/stack';
 import { TextField } from '@luke-ui/react/text-field';
 import type { SubmitEvent } from 'react';
 
@@ -20,17 +20,17 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
-				<TextField
-					defaultValue="admin"
-					label="Username"
-					name="username"
-					validate={validateUsername}
-				/>
-				<Box>
-					<Button type="submit">Create account</Button>
-				</Box>
-			</Box>
+			<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
+				<Stack minBlockSize="5.5rem">
+					<TextField
+						defaultValue="admin"
+						label="Username"
+						name="username"
+						validate={validateUsername}
+					/>
+				</Stack>
+				<Button type="submit">Create account</Button>
+			</Stack>
 		</form>
 	);
 };

@@ -1,61 +1,45 @@
-import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
-import type { PropsWithChildren } from 'react';
+import { Comparison, ComparisonItem } from '#docs/comparison';
 
 export default () => {
 	return (
-		<Box alignItems="center" display="flex" flexWrap="wrap" gap="sp16">
-			<FlexCol>
+		<Comparison direction="horizontal">
+			<ComparisonItem label="Primary">
 				<Text color="primary">
 					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">Primary</Text>
-			</FlexCol>
-			<FlexCol>
+			</ComparisonItem>
+			<ComparisonItem label="Secondary">
 				<Text color="secondary">
 					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">Secondary</Text>
-			</FlexCol>
-			<FlexCol>
+			</ComparisonItem>
+			<ComparisonItem label="Accent">
 				<Text color="accent">
 					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">Accent</Text>
-			</FlexCol>
-			<FlexCol>
+			</ComparisonItem>
+			<ComparisonItem label="Info">
 				<Text color="info">
 					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">Info</Text>
-			</FlexCol>
-			<FlexCol>
+			</ComparisonItem>
+			<ComparisonItem label="Success">
 				<Text color="success">
 					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">Success</Text>
-			</FlexCol>
-			<FlexCol>
+			</ComparisonItem>
+			<ComparisonItem label="Warning">
 				<Text color="warning">
 					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">Warning</Text>
-			</FlexCol>
-			<FlexCol>
+			</ComparisonItem>
+			<ComparisonItem label="Danger">
 				<Text color="danger">
 					<Icon name="checkCircle" />
 				</Text>
-				<Text color="secondary">Danger</Text>
-			</FlexCol>
-		</Box>
+			</ComparisonItem>
+		</Comparison>
 	);
 };
-
-function FlexCol({ children }: PropsWithChildren) {
-	return (
-		<Box alignItems="center" display="flex" flexDirection="column" gap="sp4">
-			{children}
-		</Box>
-	);
-}

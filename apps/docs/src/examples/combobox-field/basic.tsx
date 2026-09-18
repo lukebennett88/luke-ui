@@ -1,6 +1,6 @@
-import { Box } from '@luke-ui/react/box';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
+import { Stack } from '@luke-ui/react/stack';
 
 type Fruit = { id: string; label: string };
 
@@ -13,7 +13,7 @@ const fruits: Array<Fruit> = [
 
 export default () => {
 	return (
-		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
+		<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
 			<ComboboxField
 				defaultItems={fruits}
 				defaultValue="apple"
@@ -23,6 +23,6 @@ export default () => {
 			>
 				{(item) => <ComboboxItem>{item.label}</ComboboxItem>}
 			</ComboboxField>
-		</Box>
+		</Stack>
 	);
 };

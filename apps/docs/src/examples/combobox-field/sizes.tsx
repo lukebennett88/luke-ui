@@ -1,6 +1,6 @@
-import { Box } from '@luke-ui/react/box';
 import { ComboboxField } from '@luke-ui/react/combobox-field';
 import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
+import { Stack } from '@luke-ui/react/stack';
 import { Comparison, ComparisonItem } from '#docs/comparison';
 
 type Option = { id: string; label: string };
@@ -12,7 +12,7 @@ const options: Array<Option> = [
 
 export default () => {
 	return (
-		<Box maxInlineSize="20rem">
+		<Stack maxInlineSize="20rem">
 			<Comparison>
 				<ComparisonItem label="Small">
 					<ComboboxField
@@ -37,6 +37,6 @@ export default () => {
 					</ComboboxField>
 				</ComparisonItem>
 			</Comparison>
-		</Box>
+		</Stack>
 	);
 };

@@ -1,4 +1,3 @@
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import {
@@ -12,6 +11,7 @@ import {
 	ComboboxTrayTrigger,
 } from '@luke-ui/react/primitives/combobox';
 import { Field } from '@luke-ui/react/primitives/field';
+import { Stack } from '@luke-ui/react/stack';
 import type { SubmitEvent } from 'react';
 
 const countries = [
@@ -26,7 +26,7 @@ export default () => {
 
 	return (
 		<form onSubmit={handleSubmit}>
-			<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
+			<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
 				<ComboboxRoot defaultItems={countries} isRequired name="country">
 					<Field label="Country">
 						<ComboboxInputGroup>
@@ -47,10 +47,8 @@ export default () => {
 						</ComboboxTray>
 					</Field>
 				</ComboboxRoot>
-				<Box>
-					<Button type="submit">Create account</Button>
-				</Box>
-			</Box>
+				<Button type="submit">Create account</Button>
+			</Stack>
 		</form>
 	);
 };

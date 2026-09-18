@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -19,33 +19,35 @@ export default () => {
 	});
 
 	return (
-		<Box display="flex" flexDirection="column" gap="sp16" maxInlineSize="20rem">
+		<Stack gap="sp16" maxInlineSize="20rem" inlineSize="100%">
 			<form onSubmit={form.handleSubmit(() => undefined)}>
-				<Box display="flex" flexDirection="column" gap="sp16">
+				<Stack gap="sp16">
 					<Controller
 						control={form.control}
 						name="terms"
 						render={({ field, fieldState }) => (
-							<Checkbox
-								errorMessage={fieldState.error?.message}
-								inputRef={field.ref}
-								isSelected={field.value}
-								onBlur={field.onBlur}
-								onChange={field.onChange}
-								validationBehavior="aria"
-							>
-								I accept the terms of service
-							</Checkbox>
+							<Stack minBlockSize="4.5rem">
+								<Checkbox
+									errorMessage={fieldState.error?.message}
+									inputRef={field.ref}
+									isSelected={field.value}
+									onBlur={field.onBlur}
+									onChange={field.onChange}
+									validationBehavior="aria"
+								>
+									I accept the terms of service
+								</Checkbox>
+							</Stack>
 						)}
 					/>
-					<Box>
-						<Button type="submit">Continue</Button>
-					</Box>
-				</Box>
+					<Button type="submit">Continue</Button>
+				</Stack>
 			</form>
-			<Text elementType="p" role="status">
-				{form.formState.isSubmitSuccessful ? 'Terms accepted.' : null}
-			</Text>
-		</Box>
+			<Stack minBlockSize="1.5rem">
+				<Text elementType="p" role="status">
+					{form.formState.isSubmitSuccessful ? 'Terms accepted.' : '\u00a0'}
+				</Text>
+			</Stack>
+		</Stack>
 	);
 };

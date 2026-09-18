@@ -50,6 +50,10 @@ const truncationContainerStyle = {
 	padding: '1rem',
 } as const satisfies CSSProperties;
 
+const textWrappingContainerStyle = {
+	inlineSize: '12rem',
+} as const satisfies CSSProperties;
+
 /**
  * Prominence sets visual weight. Tone marks ordinary versus critical intent.
  */
@@ -96,6 +100,19 @@ export const TextAppearance = meta.story({
 			<Button appearance="text" tone="critical">
 				{children}
 			</Button>
+		</div>
+	),
+});
+
+/** Text Buttons wrap like `Text` when their container constrains the available inline space. */
+export const TextWrapping = meta.story({
+	args: {
+		appearance: 'text',
+		children: 'Use text Buttons when an action needs to wrap with surrounding text.',
+	},
+	render: ({ children }) => (
+		<div style={textWrappingContainerStyle}>
+			<Button appearance="text">{children}</Button>
 		</div>
 	),
 });
