@@ -28,7 +28,7 @@ export const Figure = meta.story({
 	args: {
 		children: (
 			<MediaImage
-				alt="Looking up through a slot canyon toward blue sky"
+				alt="Looking up between tall canyon walls at a strip of blue sky"
 				src="https://images.unsplash.com/photo-1479030160180-b1860951d696?auto=format&fit=crop&w=1200&q=80"
 			/>
 		),
