@@ -1,4 +1,5 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
+import { Code } from '@luke-ui/react/code';
 import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -21,8 +22,8 @@ export default () => {
 					</Text>
 					<Text>
 						<LoadingSkeleton isLoading={false}>
-							This skeleton has `isLoading` explicitly set to `false`, so remains visible while its
-							provider is loading.
+							This skeleton has <Code>isLoading</Code> explicitly set to <Code>false</Code>, so
+							remains visible while its provider is loading.
 						</LoadingSkeleton>
 					</Text>
 				</Stack>

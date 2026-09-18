@@ -79,3 +79,61 @@ test('paints a flat surface with no gradient under prefers-reduced-motion: reduc
 	expect(getComputedStyle(child).backgroundImage).toBe('none');
 	expect(getComputedStyle(child, '::after').backgroundImage).toBe('none');
 });
+
+function pauseSheenAt(progressMs: number): void {
+	for (const animation of document.getAnimations()) {
+		if (!(animation instanceof CSSAnimation)) continue;
+		animation.pause();
+		animation.currentTime = progressMs;
+	}
+}
+
+function sheenPositionX(element: Element): string {
+	return getComputedStyle(element).backgroundPositionX;
+}
+
+function inlineSkeletonSurface(label: string, locator: ReturnType<typeof render>['locator']): Element {
+	const match = locator.getByText(label).element();
+	const surface = match.closest('[data-skeleton-inline]');
+	if (!(surface instanceof HTMLElement)) {
+		throw new Error(`Expected an inline LoadingSkeleton surface for "${label}".`);
+	}
+	return surface;
+}
+
+// Regression: matching `[dir="rtl"] *` treated every descendant as RTL even when a nearer `dir="ltr"`
+// overrides. `:dir(rtl)` follows the element's effective direction instead.
+test('uses the effective writing direction for sheen travel under nested dir overrides', () => {
+	const { locator } = render(
+		<>
+			<div dir="rtl">
+				<div dir="ltr">
+					<LoadingSkeleton>rtl then ltr</LoadingSkeleton>
+				</div>
+			</div>
+			<div dir="ltr">
+				<div dir="rtl">
+					<LoadingSkeleton>ltr then rtl</LoadingSkeleton>
+				</div>
+			</div>
+			<div dir="ltr">
+				<LoadingSkeleton>ltr baseline</LoadingSkeleton>
+			</div>
+			<div dir="rtl">
+				<LoadingSkeleton>rtl baseline</LoadingSkeleton>
+			</div>
+		</>,
+	);
+
+	const rtlThenLtr = inlineSkeletonSurface('rtl then ltr', locator);
+	const ltrThenRtl = inlineSkeletonSurface('ltr then rtl', locator);
+	const ltrBaseline = inlineSkeletonSurface('ltr baseline', locator);
+	const rtlBaseline = inlineSkeletonSurface('rtl baseline', locator);
+
+	// Past the 0.5s delay, mid-cycle, so LTR/RTL positions differ and stay still for the assert.
+	pauseSheenAt(2000);
+
+	expect(sheenPositionX(rtlThenLtr)).toBe(sheenPositionX(ltrBaseline));
+	expect(sheenPositionX(ltrThenRtl)).toBe(sheenPositionX(rtlBaseline));
+	expect(sheenPositionX(ltrBaseline)).not.toBe(sheenPositionX(rtlBaseline));
+});
