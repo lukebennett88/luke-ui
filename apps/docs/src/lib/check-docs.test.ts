@@ -1,15 +1,18 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import type { NoulResponse, ScoreResponse } from '@typesafe-ai/sdk';
 import { afterEach, expect, test } from 'vite-plus/test';
 import type { DocsCheckPaths } from '../../scripts/check-docs.js';
 import {
 	diffAgainstBaseline,
 	findDocsIssues,
+	findDocsIssuesWithProseJudgments,
 	markdownH2s,
 	readBaseline,
 } from '../../scripts/check-docs.js';
 import { findComponentPropsTableTags } from './component-props-table-tags.js';
+import type { PROSE_JUDGMENT_QUESTIONS, ProseJudgmentClient } from './docs-prose-judgments.js';
 
 const testDirectories: Array<string> = [];
 
@@ -269,124 +272,7 @@ source: packages/@luke-ui/react/src/exports/box.ts
 	expect(findDocsIssues(paths)).toEqual([]);
 });
 
-test('does not report banned terms found only in JSX/MDX attribute values', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'attributes.mdx': `---
-title: Attributes
----
-
-<Card href="/docs/users" title="Team">
-	Invite people to the workspace.
-</Card>
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/attributes.mdx: terminology "people"']);
-});
-
-test('strips multi-line tags and expression attributes without fusing surrounding words', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'settings.mdx': `---
-title: Settings
----
-
-<ExampleBlock
-	src="settings/basic"
-	title="Settings — Basic"
-	mode={{ a: 'b' }}
-	start={1}
-/>
-
-Configure the workspace before you invite people to it.
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/settings.mdx: terminology "people"']);
-});
-
-test('strips MDX expressions but still reports banned terms in prose and JSX child text', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'expressions.mdx': `---
-title: Expressions
----
-
-{users.map((user) => (
-	<Card key={user.id} />
-))}
-
-Invite people to explore the workspace.
-
-<Card title="Team">Ping people when the invite goes out.</Card>
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/expressions.mdx: terminology "people"']);
-});
-
-test('strips multi-line import and export statements in full', () => {
-	const paths = createDocsFixture({
-		authored: {
-			'imports.mdx': `---
-title: Imports
----
-
-import {
-	users,
-	somethingElse,
-} from './data';
-
-export {
-	users,
-	somethingElse,
-};
-
-Invite people to configure the settings.
-
-## Continue learning
-
-<Cards>
-	<Card href="/docs/styling" title="Styling">
-		Choose a styling approach.
-	</Card>
-</Cards>
-`,
-		},
-	});
-
-	expect(findDocsIssues(paths)).toEqual(['docs/imports.mdx: terminology "people"']);
-});
-
-test('reports prose patterns outside code and ignores them inside fences', () => {
+test('findDocsIssues no longer scans prose for banned terms (moved to model-backed judgments)', () => {
 	const paths = createDocsFixture({
 		authored: {
 			'color.mdx': `---
@@ -398,11 +284,6 @@ import { TokenExplorer } from './token-explorer';
 This is useful; do not keep the semicolon.
 
 We document the system for users.
-
-Write foo—bar without spaces around the dash.
-
-A wrapped dash is fine —
-on the next line.
 
 \`\`\`tsx
 const users = ['we', 'us'];
@@ -422,21 +303,11 @@ const note = 'simply; note that';
 			'TESTING.md': `# Testing
 
 An assertion should fail if an intention we own is not met.
-
-\`\`\`ts
-const users = true;
-\`\`\`
 `,
 		},
 	});
 
-	expect(findDocsIssues(paths)).toEqual([
-		'docs/color.mdx: prose semicolon',
-		'docs/color.mdx: unspaced em dash',
-		'docs/color.mdx: first-person "we"',
-		'docs/color.mdx: terminology "users"',
-		'docs/TESTING.md: first-person "we"',
-	]);
+	expect(findDocsIssues(paths)).toEqual([]);
 });
 
 test('diffAgainstBaseline reports extra and stale entries', () => {
@@ -464,6 +335,115 @@ test('finds no extra docs issues in the docs app beyond the baseline', () => {
 	const baseline = readBaseline();
 	expect(diffAgainstBaseline(issues, baseline)).toEqual({ extra: [], stale: [] });
 });
+
+test('findDocsIssuesWithProseJudgments skips model-backed checks and returns only deterministic issues when no client is given', async () => {
+	const result = await findDocsIssuesWithProseJudgments(undefined, undefined);
+	expect(result).toEqual({
+		findings: [],
+		issues: findDocsIssues(),
+		usage: { models: [], totalInputTokens: 0, totalOutputTokens: 0 },
+		warnings: [],
+	});
+});
+
+/**
+ * Uses a fixture rather than the real corpus. This assertion originally ran against the shipped
+ * docs, which then stated "`sp16` is 16px" in two pages — so fixing those pages broke the test.
+ * A fixture keeps it testing the pipeline (read, extract, judge, threshold, format) instead of
+ * depending on a documentation defect continuing to exist.
+ */
+test('findDocsIssuesWithProseJudgments reports a resolved-token-value violation as an issue and a structured finding', async () => {
+	const paths = createDocsFixture({
+		authored: {
+			'spacing.mdx': `---
+title: Spacing
+---
+
+Each spacing key matches its pixel value, so \`sp16\` is 16px.
+
+## Continue learning
+
+<Cards>
+	<Card href="/docs/styling" title="Styling">
+		Choose a styling approach.
+	</Card>
+</Cards>
+`,
+		},
+	});
+	const client = fakeProseJudgmentClient((prose) => ({
+		resolvedTokenValue: /`sp16`\s+is\s+16px/.test(prose) ? 0.95 : 0,
+	}));
+
+	const result = await findDocsIssuesWithProseJudgments(paths, client);
+
+	expect(result.issues).toContain('docs/spacing.mdx: resolved token value documented');
+	expect(
+		result.findings.some(
+			(finding) =>
+				finding.relativePath === 'docs/spacing.mdx' &&
+				finding.key === 'resolvedTokenValue' &&
+				finding.severity === 'violation',
+		),
+	).toBe(true);
+});
+
+/**
+ * A fake `ProseJudgmentClient` for tests. `judge` inspects the batched `prose` state and returns
+ * the answers this fake wants for whichever question labels it recognises; any question label
+ * this fixture does not name resolves to a 0 (no violation) so tests only assert what they mean
+ * to assert. Score questions resolve through their `worst` probability directly, matching the
+ * shape `findProseJudgmentIssues` reads (probability mass on the worst rubric level).
+ */
+function fakeProseJudgmentClient(
+	judge: (prose: string) => Partial<Record<ProseJudgmentKey, number>>,
+): ProseJudgmentClient {
+	return {
+		async systemOne(request) {
+			const prose = String(request.state);
+			const answersByKey = judge(prose);
+			const answers: Record<string, NoulResponse | ScoreResponse> = {};
+
+			for (const [key, question] of Object.entries(request.questions)) {
+				const probability = answersByKey[key as ProseJudgmentKey] ?? 0;
+
+				answers[key] =
+					question.type === 'score'
+						? fakeScore(question.criteria.length, probability)
+						: fakeNoul(probability);
+			}
+
+			return { answers };
+		},
+	};
+}
+
+/** A minimal `NoulResponse` fixture carrying only the field `findProseJudgmentIssues` reads. */
+function fakeNoul(probability: number): NoulResponse {
+	return { noul: probability, type: 'noul' };
+}
+
+/**
+ * A minimal `ScoreResponse` fixture whose `probabilities` puts all mass on the worst (last)
+ * rubric level, carrying only the fields `findProseJudgmentIssues` reads.
+ */
+function fakeScore(levelCount: number, worstLevelProbability: number): ScoreResponse {
+	const worstLevel = String(levelCount - 1);
+	return {
+		confidence: 1,
+		legend: {} as ScoreResponse['legend'],
+		probabilities: { [worstLevel]: worstLevelProbability } as ScoreResponse['probabilities'],
+		score: worstLevelProbability >= 0.5 ? levelCount - 1 : 0,
+		type: 'score',
+	};
+}
+
+/**
+ * The descriptive question keys `PROSE_JUDGMENT_QUESTIONS` sends, derived from that array rather
+ * than duplicated here, so a fake client names the question it answers instead of relying on the
+ * order the questions happen to be declared in.
+ */
+type ProseJudgmentKey = (typeof PROSE_JUDGMENT_QUESTIONS)[number]['key'];
 
 const INVENTORY_GUIDE = `---
 title: Button

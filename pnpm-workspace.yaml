@@ -114,3 +114,4 @@ catalog:
   vitest: 4.1.11
   zbsearch: ^4.0.0
   zod: ^4.6.1
+  '@typesafe-ai/sdk': ^0.6.0
