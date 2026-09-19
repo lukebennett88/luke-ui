@@ -30,6 +30,29 @@ test('kitchen sink', async () => {
 				<Checkbox defaultSelected errorMessage="Choose an option." name="invalid">
 					Invalid
 				</Checkbox>
+				<Checkbox description="Receive updates by email." name="description-small" size="small">
+					Email notifications
+				</Checkbox>
+				<Checkbox
+					description="This supporting text wraps onto a second line and should still start at the field's inline edge, not under the label."
+					name="description-wrapping"
+				>
+					Email notifications
+				</Checkbox>
+				<Checkbox description="Receive updates by email." name="description-large" size="large">
+					Email notifications
+				</Checkbox>
+				<Checkbox
+					defaultSelected
+					description="Receive updates by email."
+					errorMessage="Choose an option."
+					name="description-with-error"
+				>
+					Email notifications
+				</Checkbox>
+				<Checkbox description="Receive updates by email." isDisabled name="description-disabled">
+					Email notifications
+				</Checkbox>
 				{typeStyles.map((typography) => (
 					<Text elementType="div" key={typography} typography={typography}>
 						<Checkbox name={`text-${typography}`}>
