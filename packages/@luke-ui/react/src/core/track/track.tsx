@@ -1,7 +1,6 @@
 import type { HTMLAttributes, JSX, ReactNode, Ref } from 'react';
-import { mergeStyleProps } from '../../shared/utils/utils.js';
+import { Box } from '../box/box.js';
 import type { RequiredInitialResponsive } from '../styles/responsive.js';
-import { createSprinkles } from '../styles/utilities.css.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { Prettify } from '../types/prettify.js';
 import type { TrackRecipeVariants } from './recipe.css.js';
@@ -59,24 +58,18 @@ export function Track(props: TrackProps): JSX.Element {
 
 	const WrapperElement: TrackWrapperElementType = Element === 'span' ? 'span' : 'div';
 	const { centre, rail, root } = trackRecipe({ isInline: Element === 'span', railAlignment });
-	const gapSprinkles = createSprinkles({ gap });
 
 	return (
-		<Element
-			{...mergeStyleProps(gapSprinkles, { ...elementProps, className: root({ className }) })}
-			ref={toCallbackRef(ref)}
+		<Box
+			{...elementProps}
+			className={root({ className })}
+			elementType={Element}
+			gap={gap}
+			ref={ref}
 		>
 			{railStart != null && <WrapperElement className={rail()}>{railStart}</WrapperElement>}
 			<WrapperElement className={centre()}>{children}</WrapperElement>
 			{railEnd != null && <WrapperElement className={rail()}>{railEnd}</WrapperElement>}
-		</Element>
+		</Box>
 	);
-}
-
-/** Normalises Track's `ref` so it can spread onto a concrete element narrower than `HTMLElement`. */
-function toCallbackRef(ref: Ref<HTMLElement> | undefined): (element: HTMLElement | null) => void {
-	return (element) => {
-		if (typeof ref === 'function') return ref(element);
-		if (ref) ref.current = element;
-	};
 }
