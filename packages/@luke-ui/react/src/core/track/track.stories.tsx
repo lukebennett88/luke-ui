@@ -41,7 +41,7 @@ export const FirstLineAlignment = meta.story({
 		children: 'Your password must contain at least 12 characters, one number, and one symbol.',
 		gap: 'sp8',
 		railAlignment: 'firstLine',
-		railStart: <Icon name="exclamationTriangle" />,
+		railStart: <Icon name="checkCircle" />,
 	} satisfies Partial<TrackProps>,
 });
 
