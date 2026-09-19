@@ -13,11 +13,6 @@ export default () => {
 			<ComparisonItem label="Indeterminate">
 				<Checkbox isIndeterminate>Example checkbox</Checkbox>
 			</ComparisonItem>
-			<ComparisonItem label="Selected and indeterminate">
-				<Checkbox defaultSelected isIndeterminate>
-					Example checkbox
-				</Checkbox>
-			</ComparisonItem>
 			<ComparisonItem label="Disabled">
 				<Checkbox isDisabled>Example checkbox</Checkbox>
 			</ComparisonItem>
