@@ -23,40 +23,37 @@ function Home() {
 						<Heading>Introduction</Heading>
 						<Text elementType="p">
 							Luke UI is a React design system built on React Aria Components. It ships static CSS,
-							two bundled themes with distinct visual identities, and layout utilities on a shared
-							semantic token contract.
+							two bundled themes, and layout utilities that share a semantic token system.
 						</Text>
 						<Cards className="mt-6">
 							<Card href="/docs/installation" title="Installation">
 								Install Luke UI, apply a bundled theme, and render a component.
 							</Card>
 							<Card href="/components" title="Components">
-								Browse Components for the full catalogue
+								Browse the full component catalogue.
 							</Card>
 						</Cards>
 						<HeadingLevels>
 							<Heading>Core values</Heading>
 							<HeadingLevels>
-								<Heading>Themes with distinct identities</Heading>
+								<Heading>Distinct themes</Heading>
 								<Text elementType="p">
-									Not accent-colour swapping. <Code>paper</Code> and <Code>tactile</Code> are
-									different visual identities built from the same components, with tonal ramps
-									derived in Oklch and contrast validated rather than eyeballed.
+									<Code>paper</Code> and <Code>tactile</Code> are different visual identities built
+									from the same components. Theme colours are contrast-validated.
 								</Text>
 								<Heading>Static CSS</Heading>
 								<Text elementType="p">
-									Vanilla Extract, no runtime. Themes apply via <Code>:where(:root)</Code> and an
-									identity class, so there is no provider to mount and portals inherit.
+									Styles ship as static CSS with no runtime. Themes apply without a provider, so
+									portals inherit automatically.
 								</Text>
 								<Heading>Composed components and primitives</Heading>
 								<Text elementType="p">
-									Composed components for the common case, the primitives they are built from
-									exported alongside them, and React Aria Components as a peer dependency to drop
-									down another level.
+									Use composed components for common cases. Drop to the exported primitives for more
+									control, or use React Aria Components directly when you need another level down.
 								</Text>
-								<Heading>Text sits where you put it</Heading>
+								<Heading>Predictable text spacing</Heading>
 								<Text elementType="p">
-									Capsize trims the leading so spacing is between the visible letters. Headings take
+									Leading is trimmed so spacing sits between the visible letters. Headings take
 									their level from context instead of being hand-numbered.
 								</Text>
 							</HeadingLevels>
@@ -64,18 +61,18 @@ function Home() {
 							<HeadingLevels>
 								<Heading>Async buttons</Heading>
 								<Text elementType="p">
-									<Code>pressAction</Code> owns the pending state, so consumers do not track loading
-									themselves.
+									<Code>pressAction</Code> manages the pending state, so you do not need to track
+									loading separately.
 								</Text>
-								<Heading>Loading placeholders that shrink-wrap</Heading>
+								<Heading>Loading without layout shift</Heading>
 								<Text elementType="p">
 									Skeleton and spinner take the size of the content they stand in for, so nothing
 									shifts when it arrives.
 								</Text>
-								<Heading>Examples that cannot drift</Heading>
+								<Heading>Type-checked examples</Heading>
 								<Text elementType="p">
-									Every docs example is type-checked TypeScript rather than a fenced string, and the
-									playground is Monaco with real autocomplete and type errors.
+									Rendered docs examples are type-checked TypeScript. The playground shows
+									autocomplete and type errors as you edit.
 								</Text>
 							</HeadingLevels>
 						</HeadingLevels>
