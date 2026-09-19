@@ -14,7 +14,12 @@ import {
 import { findComponentPropsContractIssues } from '../src/lib/component-props-contract.js';
 import { findComponentPropsTableTags } from '../src/lib/component-props-table-tags.js';
 import { findMdxFiles } from '../src/lib/docs-mdx-files.js';
-import type { ProseJudgmentClient } from '../src/lib/docs-prose-judgments.js';
+import type {
+	ProseAudience,
+	ProseJudgmentClient,
+	ProseJudgmentFinding,
+	ProseJudgmentUsage,
+} from '../src/lib/docs-prose-judgments.js';
 import {
 	extractProseForJudgment,
 	findProseJudgmentIssues,
@@ -117,27 +122,48 @@ export function findDocsIssues(paths: DocsCheckPaths = defaultDocsCheckPaths): A
  * `findDocsIssues` plus model-backed prose judgments (third-person reader references, resolved
  * token values, readability, and so on — see docs-prose-judgments.ts). Kept separate and async
  * so the large, synchronous `findDocsIssues` test suite did not need to change shape for this.
- * `client` is `undefined` when `TYPESAFE_API_KEY` is absent, in which case `warnings` is empty
- * and `issues` is exactly `findDocsIssues(paths)` — the semantic checks are skipped, not failed.
+ * `client` is `undefined` when `TYPESAFE_API_KEY` is absent, in which case `warnings`/`findings`
+ * are empty and `issues` is exactly `findDocsIssues(paths)` — the semantic checks are skipped,
+ * not failed. `findings`/`usage` pass the structured prose-judgment data straight through for
+ * `main()`'s diagnostic report; they carry no deterministic-check data since those checks have no
+ * probability or model metadata to report.
  */
 export async function findDocsIssuesWithProseJudgments(
 	paths: DocsCheckPaths = defaultDocsCheckPaths,
 	client: ProseJudgmentClient | undefined,
-): Promise<{ issues: Array<string>; warnings: Array<string> }> {
+): Promise<{
+	issues: Array<string>;
+	warnings: Array<string>;
+	findings: Array<ProseJudgmentFinding>;
+	usage: ProseJudgmentUsage;
+}> {
 	const deterministicIssues = findDocsIssues(paths);
-	const { issues: proseIssues, warnings } = await findProseJudgmentIssues(
-		collectProseFiles(paths),
-		client,
-	);
+	const {
+		issues: proseIssues,
+		warnings,
+		findings,
+		usage,
+	} = await findProseJudgmentIssues(collectProseFiles(paths), client);
 
-	return { issues: [...deterministicIssues, ...proseIssues], warnings };
+	return { findings, issues: [...deterministicIssues, ...proseIssues], usage, warnings };
 }
 
-function collectProseFiles(paths: DocsCheckPaths): Array<{ relativePath: string; prose: string }> {
-	const files: Array<{ relativePath: string; prose: string }> = [];
+/**
+ * `audience` is derived structurally from which directory a file came from — never from a
+ * filename list — so a new file dropped into either directory is classified correctly without
+ * this function changing. `paths.contentDir` is the published consumer site; `paths.internalDocsDir`
+ * is the maintainer-only `<repoRoot>/docs/*.md` set (COMPONENTS.md, STYLING.md, and so on), which
+ * is expected to discuss repository internals and so is exempt from consumer-only questions like
+ * `monorepoDetail` — see `ProseAudience` in docs-prose-judgments.ts.
+ */
+function collectProseFiles(
+	paths: DocsCheckPaths,
+): Array<{ relativePath: string; prose: string; audience: ProseAudience }> {
+	const files: Array<{ relativePath: string; prose: string; audience: ProseAudience }> = [];
 
 	for (const file of authoredMdxFiles(paths.contentDir)) {
 		files.push({
+			audience: 'consumer',
 			prose: extractProseForJudgment(readFileSync(file, 'utf8')),
 			relativePath: posixRelative(paths.contentDir, file),
 		});
@@ -146,6 +172,7 @@ function collectProseFiles(paths: DocsCheckPaths): Array<{ relativePath: string;
 	if (existsSync(paths.internalDocsDir)) {
 		for (const entry of findMarkdownFiles(paths.internalDocsDir)) {
 			files.push({
+				audience: 'maintainer',
 				prose: extractProseForJudgment(readFileSync(entry, 'utf8')),
 				relativePath: `docs/${basename(entry)}`,
 			});
@@ -389,7 +416,7 @@ async function main(): Promise<void> {
 		? toProseJudgmentClient(new TypeSafeClient())
 		: undefined;
 
-	const { issues, warnings } = await findDocsIssuesWithProseJudgments(
+	const { issues, findings, usage } = await findDocsIssuesWithProseJudgments(
 		defaultDocsCheckPaths,
 		client,
 	);
@@ -401,11 +428,8 @@ async function main(): Promise<void> {
 		console.log('check:docs: TYPESAFE_API_KEY is not set — skipping prose judgments.');
 	}
 
-	for (const warning of warnings) {
-		// oxlint-disable-next-line no-console
-		console.warn(
-			`check:docs: borderline prose judgment (review, does not fail the build): ${warning}`,
-		);
+	if (findings.length > 0) {
+		printProseJudgmentReport(findings, usage);
 	}
 
 	if (extra.length > 0 || stale.length > 0) {
@@ -433,4 +457,104 @@ async function main(): Promise<void> {
 		// oxlint-disable-next-line no-console
 		console.log('check:docs: no violations.');
 	}
+}
+
+/**
+ * Prints every prose-judgment finding (warning and violation) with the full numeric detail the
+ * API returned, so a human can evaluate whether `PROSE_JUDGMENT_QUESTIONS` and the 0.9/0.7
+ * thresholds are well calibrated — not just whether the build passed. This is diagnostic output
+ * only: it does not change which findings are issues vs warnings (see `findProseJudgmentIssues`).
+ */
+function printProseJudgmentReport(
+	findings: ReadonlyArray<ProseJudgmentFinding>,
+	usage: ProseJudgmentUsage,
+): void {
+	// oxlint-disable no-console
+	console.log('');
+	console.log('check:docs: prose judgment report');
+	console.log(
+		'  Note: the TypeSafe API returns no evidence/excerpt field for these questions, so no',
+	);
+	console.log('  offending sentence can be attributed — only the scores below are available.');
+
+	printProseJudgmentKeySummary(findings);
+
+	const warnings = findings.filter((finding) => finding.severity === 'warning');
+	const violations = findings.filter((finding) => finding.severity === 'violation');
+
+	console.log('');
+	console.log(`  BORDERLINE WARNINGS (${warnings.length}, review only, do not fail the build):`);
+	for (const finding of warnings) {
+		printProseJudgmentFinding(finding);
+	}
+
+	console.log('');
+	console.log(`  BUILD-FAILING VIOLATIONS (${violations.length}):`);
+	for (const finding of violations) {
+		printProseJudgmentFinding(finding);
+	}
+
+	console.log('');
+	console.log(
+		`  models: ${usage.models.length > 0 ? usage.models.join(', ') : '(not reported by client)'}`,
+	);
+	console.log(`  total tokens: ${usage.totalInputTokens} input, ${usage.totalOutputTokens} output`);
+	// oxlint-enable no-console
+}
+
+/**
+ * A per-key summary table — key, warning count, violation count, and the min/median/max
+ * probability seen for that key — so an over-sensitive prompt (for example one key warning on
+ * dozens of files) is obvious at a glance, without reading every per-file line.
+ */
+function printProseJudgmentKeySummary(findings: ReadonlyArray<ProseJudgmentFinding>): void {
+	const findingsByKey = new Map<string, Array<ProseJudgmentFinding>>();
+	for (const finding of findings) {
+		const forKey = findingsByKey.get(finding.key) ?? [];
+		forKey.push(finding);
+		findingsByKey.set(finding.key, forKey);
+	}
+
+	// oxlint-disable no-console
+	console.log('');
+	console.log('  per-key summary:');
+	console.log('    key                            warnings  violations  min      median   max');
+	for (const [key, forKey] of [...findingsByKey.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+		const probabilities = forKey.map((finding) => finding.probability).sort((a, b) => a - b);
+		const warningCount = forKey.filter((finding) => finding.severity === 'warning').length;
+		const violationCount = forKey.filter((finding) => finding.severity === 'violation').length;
+
+		console.log(
+			`    ${key.padEnd(30)} ${String(warningCount).padStart(8)}  ${String(violationCount).padStart(10)}  ${formatProbability(probabilities[0] ?? 0).padEnd(7)}  ${formatProbability(median(probabilities)).padEnd(7)}  ${formatProbability(probabilities.at(-1) ?? 0)}`,
+		);
+	}
+	// oxlint-enable no-console
+}
+
+function printProseJudgmentFinding(finding: ProseJudgmentFinding): void {
+	// oxlint-disable-next-line no-console
+	console.log(
+		`    ${finding.relativePath} [${finding.key}] ${finding.label}: probability=${formatProbability(finding.probability)}`,
+	);
+	if (finding.questionType === 'score') {
+		const distribution = Object.entries(finding.probabilities ?? {})
+			.map(([level, probability]) => `${level}=${formatProbability(probability)}`)
+			.join(', ');
+		// oxlint-disable-next-line no-console
+		console.log(
+			`      score=${finding.score} confidence=${formatProbability(finding.confidence ?? 0)} probabilities={ ${distribution} }`,
+		);
+	}
+}
+
+/** At least 3 decimal places, so a threshold-adjacent value (0.899 vs 0.9) is not rounded away. */
+function formatProbability(probability: number): string {
+	return probability.toFixed(3);
+}
+
+function median(sortedValues: ReadonlyArray<number>): number {
+	if (sortedValues.length === 0) return 0;
+	const middle = Math.floor(sortedValues.length / 2);
+	if (sortedValues.length % 2 === 1) return sortedValues[middle] ?? 0;
+	return ((sortedValues[middle - 1] ?? 0) + (sortedValues[middle] ?? 0)) / 2;
 }

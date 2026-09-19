@@ -338,18 +338,54 @@ test('finds no extra docs issues in the docs app beyond the baseline', () => {
 
 test('findDocsIssuesWithProseJudgments skips model-backed checks and returns only deterministic issues when no client is given', async () => {
 	const result = await findDocsIssuesWithProseJudgments(undefined, undefined);
-	expect(result).toEqual({ issues: findDocsIssues(), warnings: [] });
+	expect(result).toEqual({
+		findings: [],
+		issues: findDocsIssues(),
+		usage: { models: [], totalInputTokens: 0, totalOutputTokens: 0 },
+		warnings: [],
+	});
 });
 
-test('findDocsIssuesWithProseJudgments catches a real resolved-token-value violation in layout.mdx and token-reference.mdx', async () => {
+/**
+ * Uses a fixture rather than the real corpus. This assertion originally ran against the shipped
+ * docs, which then stated "`sp16` is 16px" in two pages — so fixing those pages broke the test.
+ * A fixture keeps it testing the pipeline (read, extract, judge, threshold, format) instead of
+ * depending on a documentation defect continuing to exist.
+ */
+test('findDocsIssuesWithProseJudgments reports a resolved-token-value violation as an issue and a structured finding', async () => {
+	const paths = createDocsFixture({
+		authored: {
+			'spacing.mdx': `---
+title: Spacing
+---
+
+Each spacing key matches its pixel value, so \`sp16\` is 16px.
+
+## Continue learning
+
+<Cards>
+	<Card href="/docs/styling" title="Styling">
+		Choose a styling approach.
+	</Card>
+</Cards>
+`,
+		},
+	});
 	const client = fakeProseJudgmentClient((prose) => ({
 		resolvedTokenValue: /`sp16`\s+is\s+16px/.test(prose) ? 0.95 : 0,
 	}));
 
-	const result = await findDocsIssuesWithProseJudgments(undefined, client);
+	const result = await findDocsIssuesWithProseJudgments(paths, client);
 
-	expect(result.issues).toContain('docs/layout.mdx: resolved token value documented');
-	expect(result.issues).toContain('docs/token-reference.mdx: resolved token value documented');
+	expect(result.issues).toContain('docs/spacing.mdx: resolved token value documented');
+	expect(
+		result.findings.some(
+			(finding) =>
+				finding.relativePath === 'docs/spacing.mdx' &&
+				finding.key === 'resolvedTokenValue' &&
+				finding.severity === 'violation',
+		),
+	).toBe(true);
 });
 
 /**
