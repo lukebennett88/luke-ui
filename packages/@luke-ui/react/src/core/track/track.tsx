@@ -12,31 +12,29 @@ type TrackElementType = 'div' | 'li' | 'span';
 type TrackWrapperElementType = 'div' | 'span';
 
 interface _TrackProps extends HTMLAttributes<HTMLElement> {
-	/** Flexible centre content. */
+	/** Content that uses the remaining inline space. */
 	children?: ReactNode;
 	/**
 	 * Root element.
 	 *
-	 * `li` is intended as a direct child of `ul` or `ol`. `span` keeps the root and wrappers inline so
-	 * the component can flow inside a sentence.
+	 * Use `li` as a direct child of `ul` or `ol`. Use `span` when Track needs to remain inside phrasing
+	 * content.
 	 * @default div
 	 */
 	elementType?: TrackElementType;
-	/**
-	 * Space between rails and the centre. Omitted rails do not add a gap.
-	 */
+	/** Space between each rendered rail and `children`. */
 	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
-	/** Content shown after the centre. */
+	/** Content shown after `children` that keeps its intrinsic inline size. */
 	railEnd?: ReactNode;
 	/**
 	 * Cross-axis alignment of the rails.
 	 *
-	 * `firstLine` uses Track's inherited line-height (`1lh`), not the rendered line-height of centre
-	 * children.
+	 * `firstLine` uses Track's inherited line height. A different line height inside `children` does
+	 * not change the alignment point.
 	 * @default start
 	 */
 	railAlignment?: NonNullable<TrackRecipeVariants>['railAlignment'];
-	/** Content shown before the centre. */
+	/** Content shown before `children` that keeps its intrinsic inline size. */
 	railStart?: ReactNode;
 	/** Ref to the rendered element. */
 	ref?: Ref<HTMLElement>;
@@ -45,9 +43,7 @@ interface _TrackProps extends HTMLAttributes<HTMLElement> {
 /** Props for `Track`. */
 export type TrackProps = Prettify<_TrackProps>;
 
-/**
- * Lays out optional rails around flexible inline content.
- */
+/** Aligns optional rails with flexible content on the inline axis. */
 export function Track(props: TrackProps): JSX.Element {
 	const {
 		children,

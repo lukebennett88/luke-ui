@@ -7,20 +7,20 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="Center">
-				<Box maxInlineSize="20rem">
+				<Box maxInlineSize="18rem">
 					<Track gap="sp8" railAlignment="center" railStart={<Icon name="exclamationTriangle" />}>
-						Your password must contain at least 12 characters, one number, and one symbol.
+						Example message that wraps onto multiple lines when the available space is limited.
 					</Track>
 				</Box>
 			</ComparisonItem>
 			<ComparisonItem label="First line">
-				<Box maxInlineSize="20rem">
+				<Box maxInlineSize="18rem">
 					<Track
 						gap="sp8"
 						railAlignment="firstLine"
 						railStart={<Icon name="exclamationTriangle" />}
 					>
-						Your password must contain at least 12 characters, one number, and one symbol.
+						Example message that wraps onto multiple lines when the available space is limited.
 					</Track>
 				</Box>
 			</ComparisonItem>
