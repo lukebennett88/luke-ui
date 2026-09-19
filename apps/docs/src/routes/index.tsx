@@ -48,13 +48,12 @@ function Home() {
 								</Text>
 								<Heading>Composed components and primitives</Heading>
 								<Text elementType="p">
-									Use composed components for common cases. Drop to the exported primitives for more
-									control, or use React Aria Components directly when you need another level down.
+									Use composed components for common cases. For more control, use the exported
+									primitives or React Aria Components directly.
 								</Text>
 								<Heading>Predictable text spacing</Heading>
 								<Text elementType="p">
-									Leading is trimmed so spacing sits between the visible letters. Headings take
-									their level from context instead of being hand-numbered.
+									Leading is trimmed so spacing sits between the visible letters.
 								</Text>
 							</HeadingLevels>
 							<Heading>Design decisions</Heading>
@@ -66,13 +65,13 @@ function Home() {
 								</Text>
 								<Heading>Loading without layout shift</Heading>
 								<Text elementType="p">
-									Skeleton and spinner take the size of the content they stand in for, so nothing
+									Skeleton and spinner match the size of the content they stand in for, so nothing
 									shifts when it arrives.
 								</Text>
 								<Heading>Type-checked examples</Heading>
 								<Text elementType="p">
-									Rendered docs examples are type-checked TypeScript. The playground shows
-									autocomplete and type errors as you edit.
+									Rendered examples are type-checked against the current component API. The
+									playground shows autocomplete and type errors as you edit.
 								</Text>
 							</HeadingLevels>
 						</HeadingLevels>
