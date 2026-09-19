@@ -11,7 +11,11 @@ import { recipe } from '../../styles/recipe.js';
 const dataDisabledSelector = '[data-disabled="true"]';
 const dataRequiredSelector = '[data-required="true"]';
 
-/** Optional indentation shared with form controls that place messages beneath their labels. */
+/**
+ * Optional indentation for error messages that sit beneath a control+label row.
+ * Descriptions stay at the field's inline start; only the error tone reads this
+ * var (see `Checkbox`, which aligns its error under the label text).
+ */
 export const fieldMessageIndent = createVar();
 
 /**
@@ -61,7 +65,6 @@ const fieldConfig = {
 			...vars.font.label,
 			fontWeight: vars.font.weight.body,
 			minInlineSize: 0,
-			paddingInlineStart: messageIndent,
 		},
 	},
 	defaultVariants: {
@@ -117,12 +120,13 @@ const fieldConfig = {
 					// item — a `flex` container instead turns every top-level child into its
 					// own item, each wrapping independently. `paddingInlineStart` reserves
 					// `fieldMessageIndent` (`0px` unless a consumer sets it, e.g. `Checkbox`
-					// aligning its message under its label) on every line, then `textIndent`
+					// aligning its error under its label) on every line, then `textIndent`
 					// pulls the FIRST line back by that same amount so the icon — the line's
 					// first inline content, sized to fill exactly that reserved space by
 					// `invalidMessageIcon` itself — sits in it instead of pushing the text
 					// after it. Wrapped lines keep the padding, so they hang aligned with the
-					// text rather than tucking under the icon.
+					// text rather than tucking under the icon. Descriptions omit this indent
+					// so supporting copy starts at the field's inline edge.
 					paddingInlineStart: messageIndent,
 					textIndent: `calc(-1 * ${messageIndent})`,
 
