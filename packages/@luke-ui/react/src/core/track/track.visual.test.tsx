@@ -34,8 +34,15 @@ test('kitchen sink', async () => {
 		const { locator: scene } = render(
 			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
 				{railAlignments.map((railAlignment) => (
-					<Track gap="sp8" key={railAlignment} railAlignment={railAlignment} style={rowStyle}>
-						<span style={itemStyle}>{railAlignment}</span>
+					<Track
+						gap="sp8"
+						key={railAlignment}
+						railAlignment={railAlignment}
+						railEnd={railEnd}
+						railStart={railStart}
+						style={{ ...rowStyle, inlineSize: '20rem' }}
+					>
+						<span style={itemStyle}>This centre wraps beside both rails ({railAlignment})</span>
 					</Track>
 				))}
 				<Track gap="sp8" railStart={railStart} style={rowStyle}>

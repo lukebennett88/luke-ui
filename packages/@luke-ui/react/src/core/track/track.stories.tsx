@@ -10,11 +10,12 @@ const meta = preview.meta({
 	title: 'Layout/Track',
 });
 
-/** Pair completed work with an action. */
+/** Pair a status with an action. */
 export const Default = meta.story({
 	args: {
-		children: 'Submit expense report',
+		children: 'Changes saved',
 		gap: 'sp8',
+		railAlignment: 'center',
 		railEnd: <Button size="small">Undo</Button>,
 		railStart: <Icon name="checkCircle" />,
 	} satisfies Partial<TrackProps>,
@@ -22,17 +23,25 @@ export const Default = meta.story({
 
 export const NoRails = meta.story({
 	args: {
-		children: 'Invite a teammate to the project',
-		gap: 'sp8',
+		children: 'Content without rails',
+	} satisfies Partial<TrackProps>,
+});
+
+export const Inline = meta.story({
+	args: {
+		children: 'Payment complete',
+		elementType: 'span',
+		gap: 'sp4',
+		railStart: <Icon name="checkCircle" />,
 	} satisfies Partial<TrackProps>,
 });
 
 export const FirstLineAlignment = meta.story({
 	args: {
-		children: 'Review the quarterly performance report and share the summary with the team.',
+		children: 'Your password must contain at least 12 characters, one number, and one symbol.',
 		gap: 'sp8',
 		railAlignment: 'firstLine',
-		railEnd: <Button size="small">Undo</Button>,
+		railStart: <Icon name="exclamationTriangle" />,
 	} satisfies Partial<TrackProps>,
 });
 
@@ -44,8 +53,8 @@ export const ListItem = meta.story({
 	} satisfies Partial<TrackProps>,
 	render: (props) => (
 		<ul>
-			<Track {...props}>Prepare the project brief</Track>
-			<Track {...props}>Schedule the stakeholder review</Track>
+			<Track {...props}>First item</Track>
+			<Track {...props}>Second item</Track>
 		</ul>
 	),
 });

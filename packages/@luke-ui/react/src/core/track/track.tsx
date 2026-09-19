@@ -1,5 +1,6 @@
 import type { HTMLAttributes, JSX, ReactNode, Ref } from 'react';
 import { mergeStyleProps } from '../../shared/utils/utils.js';
+import type { RequiredInitialResponsive } from '../styles/responsive.js';
 import { createSprinkles } from '../styles/utilities.css.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { Prettify } from '../types/prettify.js';
@@ -24,7 +25,7 @@ interface _TrackProps extends HTMLAttributes<HTMLElement> {
 	/**
 	 * Space between rails and the centre. Omitted rails do not add a gap.
 	 */
-	gap: NonNullable<SprinklesProps['gap']>;
+	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 	/** Content shown after the centre. */
 	railEnd?: ReactNode;
 	/**

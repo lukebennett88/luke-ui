@@ -13,26 +13,18 @@ source: packages/@luke-ui/react/src/exports/track.ts
 Pass `railStart`, `railEnd`, or both to place fixed content around the flexible centre. Leave both
 props unset when the centre needs no rails.
 
+The flexible centre can shrink below its content's intrinsic inline size. Content inside the centre
+controls whether it wraps or truncates. Unbreakable content can still overflow.
+
 ## Alignment
 
-`railAlignment` sets how the rails line up with a centre that spans more than one line. Use `center`
-for a compact status or icon beside a message. Use `firstLine` for a taller trailing action beside a
-wrapped task title.
-
-`start` and `end` are uncommon choices. Use `start` for a marker or avatar that must align with the
-top of the centre, or `end` for metadata that must align with its bottom edge.
+`center` aligns a rail with the centre's full block size. `firstLine` keeps the rail aligned with
+the first line when the centre wraps. The values look the same when the centre has one line.
 
 `firstLine` uses Track's inherited line height. If the centre contains a `Heading` or `Text` with a
 different line height, the rail still aligns to Track's line height.
 
 <ExampleBlock src="track/alignment" title="Track — Alignment" />
-
-## Long and wrapping content
-
-The centre shrinks beside fixed rails, so ordinary text can wrap within the available width. Choose
-truncation on the centre content when a long value must stay on one line.
-
-<ExampleBlock src="track/wrapping" title="Track — Long and wrapping content" />
 
 ## Choose the rendered element
 

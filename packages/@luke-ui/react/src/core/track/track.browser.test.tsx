@@ -1,3 +1,4 @@
+import { Heading } from '@luke-ui/react/heading';
 import { expect, test } from 'vite-plus/test';
 import { testConformance } from '../conformance/helpers.js';
 import { render } from '../test-utils/render.js';
@@ -71,7 +72,7 @@ test('omits a rail wrapper and its gap when a rail prop is absent', () => {
 	expect(bothElement.children[2]?.textContent).toBe('End');
 });
 
-test('rails keep their natural inline size while the centre shrinks and prevents overflow', () => {
+test('rails keep their natural inline size while the centre can shrink', () => {
 	const { locator } = render(
 		<Track
 			data-testid="track"
@@ -80,10 +81,7 @@ test('rails keep their natural inline size while the centre shrinks and prevents
 			railStart={<span data-testid="rail-start" style={{ display: 'block', inlineSize: '4rem' }} />}
 			style={{ inlineSize: '12rem' }}
 		>
-			<span
-				data-testid="centre"
-				style={{ display: 'block', overflow: 'hidden', whiteSpace: 'nowrap' }}
-			>
+			<span data-testid="centre" style={{ display: 'block', whiteSpace: 'nowrap' }}>
 				Anunbrokenstringoftextthatwouldotherwiseforcethistrackrowtooverflowitscontainer
 			</span>
 		</Track>,
@@ -101,13 +99,11 @@ test('rails keep their natural inline size while the centre shrinks and prevents
 		throw new Error('Expected rail and centre elements.');
 	}
 
-	// Rails keep their declared inline size (flexShrink: 0)...
+	// Rails keep their declared inline size (flexShrink: 0).
 	expect(start.getBoundingClientRect().width).toBeCloseTo(64, 0);
 	expect(end.getBoundingClientRect().width).toBeCloseTo(64, 0);
-	// ...while the centre is squeezed below its unbroken content's natural size
-	// (minInlineSize: 0), so the row never overflows its own container.
+	// The centre can shrink below its unbroken content's natural size (minInlineSize: 0).
 	expect(centre.getBoundingClientRect().width).toBeLessThan(64);
-	expect(element.scrollWidth).toBeLessThanOrEqual(element.clientWidth);
 });
 
 test('maps every railAlignment to the expected cross-axis alignment, defaulting to start', () => {
@@ -165,6 +161,38 @@ test('pins a rail taller than the line box to the centre’s first line under fi
 	expect(rail.getBoundingClientRect().height).toBeGreaterThan(
 		railWrapper.getBoundingClientRect().height,
 	);
+});
+
+test('uses Track line-height for firstLine when the centre contains a Heading', () => {
+	const { locator } = render(
+		<Track
+			data-testid="track"
+			gap="sp8"
+			railAlignment="firstLine"
+			railStart={<span data-testid="rail" />}
+		>
+			<Heading data-testid="heading" level={2} style={{ lineHeight: '4rem' }}>
+				Quarterly performance
+			</Heading>
+		</Track>,
+	);
+	const element = locator.getByTestId('track').element();
+	const rail = locator.getByTestId('rail').element();
+	const heading = locator.getByTestId('heading').element();
+	if (
+		!(element instanceof HTMLElement) ||
+		!(rail instanceof HTMLElement) ||
+		!(heading instanceof HTMLElement)
+	) {
+		throw new Error('Expected Track elements.');
+	}
+	const railWrapper = rail.parentElement;
+	if (!(railWrapper instanceof HTMLElement)) throw new Error('Expected rail wrapper.');
+
+	const trackLineHeight = Number.parseFloat(getComputedStyle(element).lineHeight);
+	const headingLineHeight = Number.parseFloat(getComputedStyle(heading).lineHeight);
+	expect(headingLineHeight).toBeGreaterThan(trackLineHeight);
+	expect(railWrapper.getBoundingClientRect().height).toBeCloseTo(trackLineHeight, 0);
 });
 
 test('renders the documented element types and matching internal wrappers', () => {

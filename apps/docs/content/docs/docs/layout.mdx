@@ -5,13 +5,14 @@ description: Build responsive structure with layout utilities and breakpoints.
 
 ## Choose a layout component
 
-| Component                                      | Use when                                                         |
-| ---------------------------------------------- | ---------------------------------------------------------------- |
-| [Box](/components/layout/box)                  | You need a custom flex or grid layout, or visual utilities       |
-| [Stack](/components/layout/stack)              | Direct children should flow on the logical block axis            |
-| [Cluster](/components/layout/cluster)          | Direct children should flow on the logical inline axis and wrap  |
-| [Container](/components/layout/container)      | Content needs a maximum inline size and local responsive queries |
-| [AspectRatio](/components/layout/aspect-ratio) | Media should fill a locked inline-to-block ratio                 |
+| Component                                      | Use when                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------ |
+| [Box](/components/layout/box)                  | You need a custom flex or grid layout, or visual utilities         |
+| [Stack](/components/layout/stack)              | Direct children should flow on the logical block axis              |
+| [Cluster](/components/layout/cluster)          | Direct children should flow on the logical inline axis and wrap    |
+| [Track](/components/layout/track)              | Fixed rails should sit around a flexible centre on the inline axis |
+| [Container](/components/layout/container)      | Content needs a maximum inline size and local responsive queries   |
+| [AspectRatio](/components/layout/aspect-ratio) | Media should fill a locked inline-to-block ratio                   |
 
 ## Box
 
@@ -96,6 +97,9 @@ defines its spacing scale and typography styles in source.
 	</Card>
 	<Card href="/components/layout/cluster" title="Cluster">
 		Cluster wrapping children on the inline axis.
+	</Card>
+	<Card href="/components/layout/track" title="Track">
+		Place fixed rails around flexible inline content.
 	</Card>
 	<Card href="/components/layout/container" title="Container">
 		Constrain content and establish a local size container.
