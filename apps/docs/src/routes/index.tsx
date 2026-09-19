@@ -34,17 +34,18 @@ function Home() {
 							</Card>
 						</Cards>
 						<HeadingLevels>
-							<Heading>Core values</Heading>
+							<Heading>Design system</Heading>
 							<HeadingLevels>
-								<Heading>Distinct themes</Heading>
+								<Heading>Customisable themes</Heading>
 								<Text elementType="p">
-									<Code>paper</Code> and <Code>tactile</Code> are different visual identities built
-									from the same components. Theme colours are contrast-validated.
+									Luke UI ships with two themes. Use <Code>defineTheme</Code> to create your own
+									from a small set of colour, typography, radius, and depth choices, or extend a
+									bundled theme. Generated themes include light and dark modes and are
+									contrast-validated.
 								</Text>
 								<Heading>Static CSS</Heading>
 								<Text elementType="p">
-									Styles ship as static CSS with no runtime. Themes apply without a provider, so
-									portals inherit automatically.
+									Styles ship as static CSS with no runtime. Themes apply without a React provider.
 								</Text>
 								<Heading>Composed components and primitives</Heading>
 								<Text elementType="p">
@@ -55,9 +56,6 @@ function Home() {
 								<Text elementType="p">
 									Leading is trimmed so spacing sits between the visible letters.
 								</Text>
-							</HeadingLevels>
-							<Heading>Design decisions</Heading>
-							<HeadingLevels>
 								<Heading>Async buttons</Heading>
 								<Text elementType="p">
 									<Code>pressAction</Code> manages the pending state, so you do not need to track
@@ -68,10 +66,16 @@ function Home() {
 									Skeleton and spinner match the size of the content they stand in for, so nothing
 									shifts when it arrives.
 								</Text>
+							</HeadingLevels>
+							<Heading>Documentation</Heading>
+							<HeadingLevels>
 								<Heading>Type-checked examples</Heading>
 								<Text elementType="p">
-									Rendered examples are type-checked against the current component API. The
-									playground shows autocomplete and type errors as you edit.
+									Rendered examples are type-checked against the current component API.
+								</Text>
+								<Heading>Live playground</Heading>
+								<Text elementType="p">
+									The playground provides autocomplete and type errors as you edit.
 								</Text>
 							</HeadingLevels>
 						</HeadingLevels>
