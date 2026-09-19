@@ -1,0 +1,56 @@
+---
+title: Track
+description: Align supporting content with flexible content on the inline axis.
+source: packages/@luke-ui/react/src/exports/track.ts
+---
+
+`Track` aligns content on the inline axis. Use it when icons, avatars, controls, or other supporting
+content need to stay aligned with content that can grow or wrap. Read [Layout](/docs/layout) to
+choose a layout component.
+
+Pass content to `railStart` or `railEnd` to place it before or after `children`. Rails keep their
+size. `children` uses the remaining inline space and can shrink when space is limited.
+
+<ExampleBlock src="track/basic" title="Track — Basic" />
+
+## Rails and sizing
+
+When space is limited, `children` can shrink below its intrinsic size instead of forcing Track
+wider. This avoids common layout blowouts with long or truncating content.
+
+Track does not apply wrapping or truncation itself. Content can still overflow when it has no way to
+wrap or otherwise constrain itself.
+
+## Alignment
+
+Use `center` when the rail should align with the whole content block. When the content wraps, the
+rail is centred against the resulting block.
+
+Use `firstLine` when the rail should stay aligned with the first line as the content wraps. This is
+useful for icons, avatars, and controls beside text. Use `start` or `end` when the rail should align
+with the start or end of the content block. `start` is the default.
+
+`firstLine` works best when Track and its content inherit the same line height. A child with a
+different line height, such as a `Heading` or differently sized `Text`, does not change the rail's
+alignment point.
+
+<ExampleBlock src="track/alignment" title="Track — Alignment" />
+
+## Avatar and text
+
+<ExampleBlock src="track/avatar" title="Track — Avatar and text" />
+
+## Choose the rendered element
+
+Set `elementType="li"` when Track is a direct child of `ul` or `ol`.
+
+<ExampleBlock src="track/element" title="Track — Choose the rendered element" />
+
+Set `elementType="span"` when Track needs to flow inside phrasing content. Its rails and `children`
+must also be valid phrasing content.
+
+<ExampleBlock src="track/element-span" title="Track — Inside phrasing content" />
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/track/track.tsx" name="TrackProps" />

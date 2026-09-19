@@ -20,6 +20,7 @@
 		"layout/cluster",
 		"layout/container",
 		"layout/stack",
+		"layout/track",
 		"layout/visually-hidden",
 		"---Typography---",
 		"typography/blockquote",
