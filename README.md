@@ -3,9 +3,6 @@
 Luke UI is a React design system built on React Aria Components. It ships static CSS, two bundled
 themes, and layout utilities that share a semantic token system.
 
-- [Documentation](https://luke-ui.netlify.app/docs/installation)
-- [Components](https://luke-ui.netlify.app/components)
-
 ## Features
 
 - Custom themes with light/dark modes and contrast validation
@@ -18,8 +15,6 @@ themes, and layout utilities that share a semantic token system.
 - Custom icons with `createIcon`
 
 ## Documentation
-
-The hosted docs are at [luke-ui.netlify.app](https://luke-ui.netlify.app/).
 
 - **Type-checked examples.** Rendered examples are checked against the current public API.
 - **Live playground.** Write and preview Luke UI code with autocomplete and type errors.

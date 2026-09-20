@@ -38,8 +38,8 @@ theme wins. Import it from that theme's own entrypoint, for example
 
 ## Components and docs
 
-Hosted documentation, interactive examples, and API reference live at
-[luke-ui.netlify.app](https://luke-ui.netlify.app/).
+Component documentation, interactive examples, and API reference live in this repo under
+`apps/docs/content/docs`.
 
 Start with the normal component API. Use primitives from `@luke-ui/react/primitives/*` when you need
 a custom composition the component API does not cover. Import a colocated recipe such as
