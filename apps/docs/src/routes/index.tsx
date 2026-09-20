@@ -34,9 +34,9 @@ function Home() {
 							</Card>
 						</Cards>
 						<HeadingLevels>
-							<Heading>Design system</Heading>
+							<Heading>Features</Heading>
 							<HeadingLevels>
-								<Heading>Customisable themes</Heading>
+								<Heading>Custom themes</Heading>
 								<Text elementType="p">
 									Luke UI ships with two themes. Use <Code>defineTheme</Code> to create your own
 									from a small set of colour, typography, radius, and depth choices, or extend a
@@ -45,37 +45,27 @@ function Home() {
 								</Text>
 								<Heading>Static CSS</Heading>
 								<Text elementType="p">
-									Styles ship as static CSS with no runtime. Themes apply without a React provider.
+									Styles ship as static CSS with no runtime styling layer or React provider.
 								</Text>
-								<Heading>Composed components and primitives</Heading>
+								<Heading>Composition at every level</Heading>
 								<Text elementType="p">
-									Use composed components for common cases. For more control, use the exported
-									primitives or React Aria Components directly.
+									Start with composed components, use exported primitives when you need more
+									control, or use React Aria Components directly.
 								</Text>
-								<Heading>Predictable text spacing</Heading>
+								<Heading>Built-in loading states</Heading>
 								<Text elementType="p">
-									Leading is trimmed so spacing sits between the visible letters.
+									Async button actions manage their own pending state. Skeletons and spinners
+									preserve the footprint of the content they replace.
 								</Text>
-								<Heading>Async buttons</Heading>
+								<Heading>Flexible validation</Heading>
 								<Text elementType="p">
-									<Code>pressAction</Code> manages the pending state, so you do not need to track
-									loading separately.
+									Use browser constraints, custom rules, controlled or server errors, or hand
+									validation to a form library.
 								</Text>
-								<Heading>Loading without layout shift</Heading>
+								<Heading>Structured typography</Heading>
 								<Text elementType="p">
-									Skeleton and spinner match the size of the content they stand in for, so nothing
-									shifts when it arrives.
-								</Text>
-							</HeadingLevels>
-							<Heading>Documentation</Heading>
-							<HeadingLevels>
-								<Heading>Type-checked examples</Heading>
-								<Text elementType="p">
-									Rendered examples are type-checked against the current component API.
-								</Text>
-								<Heading>Live playground</Heading>
-								<Text elementType="p">
-									The playground provides autocomplete and type errors as you edit.
+									Text metrics are trimmed to their visible bounds, while heading levels can follow
+									component structure automatically.
 								</Text>
 							</HeadingLevels>
 						</HeadingLevels>
