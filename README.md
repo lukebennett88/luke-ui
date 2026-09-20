@@ -12,7 +12,7 @@ themes, and layout utilities that share a semantic token system.
 - Browser, custom, server, and form-library validation
 - Text trimming and automatic heading levels
 - Flexible rendering with `elementType` and `render`
-- Custom icons with `createIcon`
+- Generated SVG icon spritesheet with type-safe icon names, plus `createIcon` for custom icons
 
 ## Documentation
 
