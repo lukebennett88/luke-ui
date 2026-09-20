@@ -1,8 +1,27 @@
 # Luke UI
 
-React design system built with `react-aria-components` and Vanilla Extract.
+Luke UI is a React design system built on React Aria Components. It ships static CSS, two bundled
+themes, and layout utilities that share a semantic token system.
 
-## Setup
+## Features
+
+- Custom themes with light/dark modes and contrast validation
+- Static CSS with no runtime styling layer; theming does not require a React provider
+- Composed components, exported primitives, and React Aria Components underneath
+- Built-in async and loading states
+- Browser, custom, server, and form-library validation
+- Text trimming and automatic heading levels
+- Flexible rendering with `elementType` and `render`
+- Generated SVG icon spritesheet with type-safe icon names, plus `createIcon` for custom icons
+
+## Documentation
+
+- **Type-checked examples.** Rendered examples are checked against the current public API.
+- **Live playground.** Write and preview Luke UI code with autocomplete and type errors.
+- **Generated prop tables.** Prop tables are generated from the public TypeScript and JSDoc
+  definitions, keeping them aligned with the package API.
+
+## Development
 
 ```sh
 pnpm install
@@ -22,16 +41,7 @@ Useful repo commands:
 - Styling: Vanilla Extract static CSS.
 - Lint and format: `oxlint` and `oxfmt`.
 
-## Package
-
-`@luke-ui/react` contains the public React package.
-
-- Theme contract and compiler: `packages/@luke-ui/react/src/theme/`.
-- Styles: `packages/@luke-ui/react/src/core/styles/`.
-- Shared low-level primitives: `packages/@luke-ui/react/src/shared/`.
-- Build output: `packages/@luke-ui/react/dist/stylesheet.css`.
-
-## Docs
+## Repository guides
 
 - [Conventions](docs/CONVENTIONS.md): repo-wide coding conventions.
 - [Components](docs/COMPONENTS.md): component and primitive structure, package paths, and generator
