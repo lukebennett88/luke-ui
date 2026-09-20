@@ -8,31 +8,23 @@ themes, and layout utilities that share a semantic token system.
 
 ## Features
 
-- **Custom themes.** Ships with two themes. Use `defineTheme` to create your own from a small set of
-  colour, typography, radius, and depth choices, or extend a bundled theme. Generated themes include
-  light and dark modes and are contrast-validated.
-- **Static CSS.** Styles ship as static CSS with no runtime styling layer or React provider.
-- **Composed components and primitives.** Start with composed components. Use exported primitives
-  when you need more control, or React Aria Components directly.
-- **Flexible rendering.** Choose an element with `elementType`, or take over rendering with
-  `render`.
-- **Built-in loading states.** `pressAction` manages pending state on buttons. Skeletons and
-  spinners preserve the footprint of the content they replace.
-- **Flexible validation.** Use browser constraints, custom rules, controlled or server errors, or
-  hand validation to a form library.
-- **Structured typography.** Text is trimmed to its visible bounds. Heading levels can follow
-  component structure automatically.
-- **Custom icons.** Use the generated spritesheet, or `createIcon` for icons that share the same
-  sizing and accessibility behaviour.
+- Custom themes with light/dark modes and contrast validation
+- Static CSS with no runtime styling layer; theming does not require a React provider
+- Composed components, exported primitives, and React Aria Components underneath
+- Built-in async and loading states
+- Browser, custom, server, and form-library validation
+- Text trimming and automatic heading levels
+- Flexible rendering with `elementType` and `render`
+- Custom icons with `createIcon`
 
 ## Documentation
 
 The hosted docs are at [luke-ui.netlify.app](https://luke-ui.netlify.app/).
 
 - **Type-checked examples.** Rendered examples are checked against the current public API.
-- **Live playground.** Edit examples live with autocomplete and type errors.
-- **Generated API reference.** API reference is generated from the public TypeScript and JSDoc
-  definitions, keeping it aligned with the package API.
+- **Live playground.** Write and preview Luke UI code with autocomplete and type errors.
+- **Generated prop tables.** Prop tables are generated from the public TypeScript and JSDoc
+  definitions, keeping them aligned with the package API.
 
 ## Development
 

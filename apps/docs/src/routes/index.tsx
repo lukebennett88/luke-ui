@@ -20,7 +20,7 @@ function Home() {
 			<main className="mx-auto w-full max-w-3xl flex-1 px-4 py-16 md:px-6 md:py-24">
 				<Prose>
 					<HeadingLevels base={1}>
-						<Heading>Introduction</Heading>
+						<Heading>Luke UI</Heading>
 						<Text elementType="p">
 							Luke UI is a React design system built on React Aria Components. It ships static CSS,
 							two bundled themes, and layout utilities that share a semantic token system.
@@ -45,7 +45,8 @@ function Home() {
 								</Text>
 								<Heading>Static CSS</Heading>
 								<Text elementType="p">
-									Styles ship as static CSS with no runtime styling layer or React provider.
+									Styles ship as static CSS with no runtime styling layer. Applying a theme does not
+									require a React provider.
 								</Text>
 								<Heading>Composition at every level</Heading>
 								<Text elementType="p">
@@ -59,13 +60,13 @@ function Home() {
 								</Text>
 								<Heading>Flexible validation</Heading>
 								<Text elementType="p">
-									Use browser constraints, custom rules, controlled or server errors, or hand
+									Use browser constraints, custom rules, controlled or server errors, or delegate
 									validation to a form library.
 								</Text>
 								<Heading>Structured typography</Heading>
 								<Text elementType="p">
-									Text metrics are trimmed to their visible bounds, while heading levels can follow
-									component structure automatically.
+									Text is trimmed to its visible bounds, while heading levels can follow component
+									structure automatically.
 								</Text>
 							</HeadingLevels>
 						</HeadingLevels>
