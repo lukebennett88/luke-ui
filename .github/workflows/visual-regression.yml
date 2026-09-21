@@ -37,10 +37,16 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          # Do not skip a newer failed run for an older baseline.
-          read -r run_id run_status run_conclusion <<<"$(gh api \
+          # Do not skip a newer failed run for an older baseline. The API call is
+          # kept separate so a 404 (the workflow does not exist on `main` yet)
+          # cannot have its error body read as a run id.
+          if ! runs=$(gh api \
             "repos/${GH_REPO}/actions/workflows/visual-baseline.yml/runs?branch=main&per_page=1" \
-            --jq '.workflow_runs[0] // empty | "\(.id) \(.status) \(.conclusion // "none")"')"
+            --jq '.workflow_runs[0] // empty | "\(.id) \(.status) \(.conclusion // "none")"' 2>/dev/null); then
+            echo '::error::No "Visual baseline" workflow on `main` yet. Merge this branch, or run it on `main`, then re-run this job.'
+            exit 1
+          fi
+          read -r run_id run_status run_conclusion <<<"$runs"
           if [ -z "${run_id:-}" ]; then
             echo '::error::No baseline run found. Run "Visual baseline" on `main`, then re-run this job.'
             exit 1
