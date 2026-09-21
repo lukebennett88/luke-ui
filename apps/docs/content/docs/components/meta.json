@@ -15,7 +15,6 @@
 		"forms/combobox-field",
 		"forms/text-field",
 		"---Layout---",
-		"layout",
 		"layout/aspect-ratio",
 		"layout/auto-grid",
 		"layout/box",

@@ -3,8 +3,11 @@ import { cx, mergeStyleProps } from '../../shared/utils/utils.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
-import type { RequiredInitialResponsive } from '../styles/responsive.js';
 import { resolveResponsiveCssProperty } from '../styles/responsive-css-property.js';
+import type {
+	RequiredInitialResponsive,
+	RequiredInitialResponsiveValue,
+} from '../styles/responsive.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -54,7 +57,7 @@ interface _AutoGridLayoutProps {
 	 * Accepts a CSS length, or a responsive object with a required `initial` value. Columns use
 	 * `min(value, 100%)` so a narrow parent cannot overflow.
 	 */
-	minColumnInlineSize: RequiredInitialResponsive<string>;
+	minColumnInlineSize: RequiredInitialResponsiveValue<string>;
 	/** Space between grid tracks. */
 	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 }

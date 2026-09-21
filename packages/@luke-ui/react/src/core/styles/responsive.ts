@@ -1,5 +1,15 @@
 type ResponsiveObject<Value> = Extract<NonNullable<Value>, object>;
 
+/** Breakpoint keys accepted by responsive layout props. */
+export type ResponsiveCondition = 'initial' | 'bp640' | 'bp768' | 'bp1024' | 'bp1280' | 'bp1536';
+
+/** A direct value, or a responsive object keyed by breakpoint. */
+type ResponsivePropValue<Value> =
+	| Value
+	| {
+			[Condition in ResponsiveCondition]?: Value | null;
+	  };
+
 /** A responsive value whose initial condition is required. */
 export type RequiredInitialResponsive<Value> =
 	| Exclude<Value, null | object | undefined>
@@ -8,6 +18,14 @@ export type RequiredInitialResponsive<Value> =
 				ResponsiveObject<Value> extends { initial?: infer Initial } ? Initial : never
 			>;
 	  });
+
+/**
+ * A required responsive prop for a scalar value. Prefer this over
+ * `RequiredInitialResponsive<Scalar>` when the scalar is not already a Sprinkles responsive union.
+ */
+export type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<
+	ResponsivePropValue<Value>
+>;
 
 /** Adds a component default for the initial condition of a responsive value. */
 export function withResponsiveDefault<Value>(

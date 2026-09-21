@@ -129,9 +129,7 @@ test('resolves against nested size containers', async () => {
 	}
 
 	expect(outerThird.getBoundingClientRect().top).toBe(
-		outer.children[0] instanceof HTMLElement
-			? outer.children[0].getBoundingClientRect().top
-			: -1,
+		outer.children[0] instanceof HTMLElement ? outer.children[0].getBoundingClientRect().top : -1,
 	);
 	expect(nestedThird.getBoundingClientRect().top).toBeGreaterThan(
 		nested.children[0] instanceof HTMLElement

@@ -1,10 +1,8 @@
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import { typedEntries } from '../../shared/utils/utils.js';
-import {
-	responsiveStyleConditions,
-	type ResponsiveStyleBreakpoint,
-} from './create-responsive-css-property.js';
-import type { RequiredInitialResponsive } from './responsive.js';
+import { responsiveStyleConditions } from './create-responsive-css-property.js';
+import type { ResponsiveStyleBreakpoint } from './create-responsive-css-property.js';
+import type { RequiredInitialResponsiveValue } from './responsive.js';
 
 type ResponsiveCssProperty = {
 	classes: Record<ResponsiveStyleBreakpoint, string>;
@@ -16,7 +14,7 @@ type ResponsiveCssProperty = {
  * `createResponsiveCssProperty`.
  */
 export function resolveResponsiveCssProperty(
-	value: RequiredInitialResponsive<string | number>,
+	value: RequiredInitialResponsiveValue<string | number>,
 	property: ResponsiveCssProperty,
 	options: {
 		format?: (value: string | number) => string;
@@ -30,7 +28,16 @@ export function resolveResponsiveCssProperty(
 	const classNames: Array<string> = [];
 
 	if (typeof value !== 'object') {
-		assignCondition('initial', value, property, format, isValid, options.propName, styleVars, classNames);
+		assignCondition(
+			'initial',
+			value,
+			property,
+			format,
+			isValid,
+			options.propName,
+			styleVars,
+			classNames,
+		);
 	} else {
 		for (const [condition, conditionValue] of typedEntries(value)) {
 			if (!isResponsiveStyleBreakpoint(condition) || conditionValue == null) continue;
@@ -68,6 +75,7 @@ function assignCondition(
 	classNames: Array<string>,
 ): void {
 	if (!isValid(conditionValue)) {
+		// oxlint-disable-next-line no-console -- match Rainbow Sprinkles invalid-value reporting
 		console.error(
 			`Invalid value provided to '${propName}'. Expected a valid value. Received: ${JSON.stringify(conditionValue)}.`,
 		);

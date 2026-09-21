@@ -1,5 +1,5 @@
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { createResponsiveCssProperty } from '../styles/create-responsive-css-property.js';
+import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Responsive `grid-template-columns: repeat(N, minmax(0, 1fr))` for `Grid`. */

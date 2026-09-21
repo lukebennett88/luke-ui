@@ -3,8 +3,12 @@ import { cx, mergeStyleProps } from '../../shared/utils/utils.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
-import { isPositiveInteger, type RequiredInitialResponsive } from '../styles/responsive.js';
 import { resolveResponsiveCssProperty } from '../styles/responsive-css-property.js';
+import { isPositiveInteger } from '../styles/responsive.js';
+import type {
+	RequiredInitialResponsive,
+	RequiredInitialResponsiveValue,
+} from '../styles/responsive.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { Prettify } from '../types/prettify.js';
@@ -42,7 +46,7 @@ interface _GridLayoutProps {
 	 * Accepts a positive integer, or a responsive object with a required `initial` value. Each
 	 * active value must be a positive integer.
 	 */
-	columns: RequiredInitialResponsive<number>;
+	columns: RequiredInitialResponsiveValue<number>;
 	/** Space between grid tracks. */
 	gap?: RequiredInitialResponsive<SprinklesProps['gap']>;
 }

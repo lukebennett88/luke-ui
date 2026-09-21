@@ -1,5 +1,5 @@
-import type { RecipeSelection } from '../styles/recipe-types.js';
 import { createResponsiveCssProperty } from '../styles/create-responsive-css-property.js';
+import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
 /** Responsive `repeat(auto-fit, minmax(min(value, 100%), 1fr))` for `AutoGrid`. */
