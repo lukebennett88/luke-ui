@@ -4,20 +4,18 @@ import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { breakpoints } from '../../theme/breakpoints.js';
-import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
 test('Cluster forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
 	const { container } = render(
-		<Cluster
-			gap="sp8"
-			className="forwarded-class"
-			data-forwarded="true"
-			id="forwarded-id"
-			ref={ref}
-		>
+		<Cluster {...forwardedDomProps} gap="sp8" ref={ref}>
 			Content
 		</Cluster>,
 	);

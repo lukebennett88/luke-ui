@@ -1,10 +1,9 @@
 import { Link } from '@luke-ui/react/link';
-import type { ComponentProps, ReactNode, Ref } from 'react';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps } from '../test-utils/forwarding.js';
+import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -46,23 +45,12 @@ function LinkScene() {
 	);
 }
 
-// React Aria omits React 19's `ref` prop.
-const LinkWithRef = Link as (
-	props: ComponentProps<typeof Link> & { ref?: Ref<HTMLAnchorElement> },
-) => ReactNode;
-
 test('Link forwards className, data attributes, id, and ref to the anchor element', () => {
 	const ref = createRef<HTMLAnchorElement>();
 	const { locator } = render(
-		<LinkWithRef
-			className="forwarded-class"
-			data-forwarded="true"
-			href="#"
-			id="forwarded-id"
-			ref={ref}
-		>
+		<Link {...forwardedDomProps} href="#" ref={ref}>
 			Settings
-		</LinkWithRef>,
+		</Link>,
 	);
 	const target = locator.getByRole('link', { name: 'Settings' }).element();
 

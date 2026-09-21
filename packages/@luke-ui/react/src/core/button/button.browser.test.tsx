@@ -2,12 +2,11 @@ import { Button } from '@luke-ui/react/button';
 import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
 import { act, createRef } from 'react';
-import type { ComponentProps, ReactNode, Ref } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps } from '../test-utils/forwarding.js';
+import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -57,17 +56,12 @@ function ButtonScene() {
 	);
 }
 
-// React Aria omits React 19's `ref` prop.
-const ButtonWithRef = Button as (
-	props: ComponentProps<typeof Button> & { ref?: Ref<HTMLButtonElement> },
-) => ReactNode;
-
 test('Button forwards className, data attributes, id, and ref to the button element', () => {
 	const ref = createRef<HTMLButtonElement>();
 	const { locator } = render(
-		<ButtonWithRef className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+		<Button {...forwardedDomProps} ref={ref}>
 			Action
-		</ButtonWithRef>,
+		</Button>,
 	);
 	const button = locator.getByRole('button').element();
 

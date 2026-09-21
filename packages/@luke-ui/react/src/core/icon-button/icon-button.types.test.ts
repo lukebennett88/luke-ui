@@ -3,6 +3,7 @@ import { expect, expectTypeOf, test } from 'vite-plus/test';
 import type { IconName } from '../icon/icon.js';
 import type { IconButtonProps } from './icon-button.js';
 
+const withRef: IconButtonProps = { 'aria-label': 'Add', icon: 'add', ref: null };
 const textIconButton: IconButtonProps = {
 	'aria-label': 'Add',
 	// @ts-expect-error — IconButton has no appearance prop
@@ -30,12 +31,13 @@ test('IconButton keeps icon a closed union of a registered name or an element', 
 	expectTypeOf<IconButtonProps['icon']>().toEqualTypeOf<IconName | ReactElement>();
 });
 
-test('IconButton rejects the props it does not support', () => {
+test('IconButton supports ref and rejects unsupported props', () => {
 	expect([
+		withRef,
 		textIconButton,
 		buttonAppearanceIconButton,
 		accentIconButton,
 		unlabelledIconButton,
 		childrenIconButton,
-	]).toHaveLength(5);
+	]).toHaveLength(6);
 });

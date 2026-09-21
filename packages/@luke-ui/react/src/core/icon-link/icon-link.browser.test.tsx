@@ -1,10 +1,10 @@
 import { IconLink } from '@luke-ui/react/icon-link';
 import { createRef } from 'react';
-import type { ComponentProps, JSX, ReactNode, Ref } from 'react';
+import type { JSX } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps } from '../test-utils/forwarding.js';
+import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -48,23 +48,10 @@ function IconLinkScene() {
 	);
 }
 
-// React Aria omits React 19's `ref` prop.
-const IconLinkWithRef = IconLink as (
-	props: ComponentProps<typeof IconLink> & { ref?: Ref<HTMLAnchorElement> },
-) => ReactNode;
-
 test('IconLink forwards className, data attributes, id, and ref to the anchor element', () => {
 	const ref = createRef<HTMLAnchorElement>();
 	const { locator } = render(
-		<IconLinkWithRef
-			aria-label="Search"
-			className="forwarded-class"
-			data-forwarded="true"
-			href="#"
-			icon="search"
-			id="forwarded-id"
-			ref={ref}
-		/>,
+		<IconLink {...forwardedDomProps} aria-label="Search" href="#" icon="search" ref={ref} />,
 	);
 	const target = locator.getByRole('link', { name: 'Search' }).element();
 

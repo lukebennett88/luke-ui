@@ -2,21 +2,17 @@ import { Numeral } from '@luke-ui/react/numeral';
 import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
-import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
 test('Numeral forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
-	const { container } = render(
-		<Numeral
-			className="forwarded-class"
-			data-forwarded="true"
-			id="forwarded-id"
-			ref={ref}
-			value={12}
-		/>,
-	);
+	const { container } = render(<Numeral {...forwardedDomProps} ref={ref} value={12} />);
 	const target = expectHtmlElement(container.firstElementChild, 'Expected a Numeral element.');
 
 	expectForwardsDomProps(target, ref);

@@ -2,14 +2,18 @@ import { AspectRatio } from '@luke-ui/react/aspect-ratio';
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';
-import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
 test('AspectRatio forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
 	const { container } = render(
-		<AspectRatio className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+		<AspectRatio {...forwardedDomProps} ref={ref}>
 			Content
 		</AspectRatio>,
 	);

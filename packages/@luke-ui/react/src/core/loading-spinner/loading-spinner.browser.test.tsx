@@ -4,7 +4,7 @@ import { createRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps } from '../test-utils/forwarding.js';
+import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -58,14 +58,7 @@ function LoadingSpinnerScene() {
 
 test('LoadingSpinner forwards className, data attributes, id, and ref to its status element', () => {
 	const ref = createRef<HTMLElement>();
-	const { locator } = render(
-		<LoadingSpinner
-			className="forwarded-class"
-			data-forwarded="true"
-			id="forwarded-id"
-			ref={ref}
-		/>,
-	);
+	const { locator } = render(<LoadingSpinner {...forwardedDomProps} ref={ref} />);
 	const target = locator.getByRole('status').element();
 
 	expectForwardsDomProps(target, ref);

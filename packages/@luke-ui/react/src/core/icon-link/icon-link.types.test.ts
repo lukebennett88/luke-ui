@@ -1,6 +1,7 @@
 import { expect, test } from 'vite-plus/test';
 import type { IconLinkProps } from './icon-link.js';
 
+const withRef: IconLinkProps = { 'aria-label': 'Add', href: '/settings', icon: 'add', ref: null };
 const criticalIconLink: IconLinkProps = {
 	'aria-label': 'Delete',
 	href: '/settings',
@@ -48,8 +49,9 @@ const pressActionIconLink: IconLinkProps = {
 	pressAction: async () => {},
 };
 
-test('IconLink rejects the props it does not support', () => {
+test('IconLink supports ref and rejects unsupported props', () => {
 	expect([
+		withRef,
 		criticalIconLink,
 		textIconLink,
 		buttonAppearanceIconLink,
@@ -58,5 +60,5 @@ test('IconLink rejects the props it does not support', () => {
 		unlabelledIconLink,
 		pendingIconLink,
 		pressActionIconLink,
-	]).toHaveLength(8);
+	]).toHaveLength(9);
 });

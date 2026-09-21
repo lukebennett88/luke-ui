@@ -6,7 +6,11 @@ import type { CSSProperties } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -35,7 +39,7 @@ function LoadingSkeletonScene() {
 test('LoadingSkeleton forwards className, data attributes, id, and ref to its root', () => {
 	const ref = createRef<HTMLElement>();
 	const { container } = render(
-		<LoadingSkeleton className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+		<LoadingSkeleton {...forwardedDomProps} ref={ref}>
 			Loading copy
 		</LoadingSkeleton>,
 	);

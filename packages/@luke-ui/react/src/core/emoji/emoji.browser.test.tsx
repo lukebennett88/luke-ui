@@ -4,7 +4,7 @@ import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps } from '../test-utils/forwarding.js';
+import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
@@ -38,14 +38,7 @@ function EmojiScene() {
 test('Emoji forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
 	const { locator } = render(
-		<Emoji
-			className="forwarded-class"
-			data-forwarded="true"
-			emoji="🎉"
-			id="forwarded-id"
-			label="Celebration"
-			ref={ref}
-		/>,
+		<Emoji {...forwardedDomProps} emoji="🎉" label="Celebration" ref={ref} />,
 	);
 	const target = locator.getByRole('img', { name: 'Celebration' }).element();
 

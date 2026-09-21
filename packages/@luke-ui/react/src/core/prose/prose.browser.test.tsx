@@ -6,14 +6,18 @@ import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
 import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';
-import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
 test('Prose forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLDivElement>();
 	const { container } = render(
-		<Prose className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+		<Prose {...forwardedDomProps} ref={ref}>
 			Content
 		</Prose>,
 	);

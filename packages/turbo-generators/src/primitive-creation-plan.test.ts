@@ -126,8 +126,9 @@ describe('createPrimitivePlan', () => {
 
 			expect(testSource).toContain('TODO: Test actual behaviour or delete.');
 			expect(testSource).toContain(
-				"import { expectForwardsDomProps, expectHtmlElement } from '../../test-utils/forwarding.js';",
+				"import { expectForwardsDomProps, expectHtmlElement, forwardedDomProps } from '../../test-utils/forwarding.js';",
 			);
+			expect(testSource).toContain('{...forwardedDomProps}');
 			expect(testSource).toContain('expectForwardsDomProps(target, ref)');
 
 			expect(testSource).toContain('function StatusBadgeScene()');

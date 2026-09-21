@@ -208,7 +208,7 @@ function renderPrimitiveTest(input: {
 		"import { createRef } from 'react';",
 		"import { expect, test } from 'vite-plus/test';",
 		"import { expectNoAxeViolations } from '../../test-utils/axe.js';",
-		"import { expectForwardsDomProps, expectHtmlElement } from '../../test-utils/forwarding.js';",
+		"import { expectForwardsDomProps, expectHtmlElement, forwardedDomProps } from '../../test-utils/forwarding.js';",
 		...(input.visualCoverage
 			? ["import { render, visualAppearances } from '../../test-utils/render.js';"]
 			: ["import { render } from '../../test-utils/render.js';"]),
@@ -230,9 +230,7 @@ function renderPrimitiveTest(input: {
 	const ref = createRef<HTMLDivElement>();
 	const { container } = render(
 		<${input.pascalName}
-			className="forwarded-class"
-			data-forwarded="true"
-			id="forwarded-id"
+			{...forwardedDomProps}
 			ref={ref}
 		>
 			Content

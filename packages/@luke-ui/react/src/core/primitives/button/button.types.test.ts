@@ -1,6 +1,8 @@
 import { expect, test } from 'vite-plus/test';
 import type { ButtonProps } from './button.js';
 
+const withRef: ButtonProps = { ref: null };
+
 // @ts-expect-error — text Buttons do not use control sizing
 const textButtonSize: ButtonProps = { appearance: 'text', size: 'small' };
 // @ts-expect-error — text Buttons do not use block layout
@@ -12,6 +14,6 @@ const criticalHighText: ButtonProps = {
 	prominence: 'high',
 };
 
-test('primitive Button rejects the prop combinations it does not support', () => {
-	expect([textButtonSize, textButtonBlock, criticalHighText]).toHaveLength(3);
+test('primitive Button supports ref and rejects unsupported prop combinations', () => {
+	expect([withRef, textButtonSize, textButtonBlock, criticalHighText]).toHaveLength(4);
 });

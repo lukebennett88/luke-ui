@@ -7,14 +7,18 @@ import { typeStyles } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { test, expect } from 'vite-plus/test';
-import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
 test('Text forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
 	const { container } = render(
-		<Text className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+		<Text {...forwardedDomProps} ref={ref}>
 			Body copy
 		</Text>,
 	);

@@ -2,7 +2,7 @@ import { Heading, HeadingLevels, useHeadingLevel } from '@luke-ui/react/heading'
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
-import { expectForwardsDomProps } from '../test-utils/forwarding.js';
+import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -31,7 +31,7 @@ function HeadingScene() {
 test('Heading forwards className, data attributes, id, and ref to the heading element', () => {
 	const ref = createRef<HTMLElement>();
 	const { locator } = render(
-		<Heading className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+		<Heading {...forwardedDomProps} ref={ref}>
 			Section title
 		</Heading>,
 	);
