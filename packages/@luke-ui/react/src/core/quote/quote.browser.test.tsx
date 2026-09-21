@@ -1,6 +1,7 @@
 import { Quote } from '@luke-ui/react/quote';
 import { createRef } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
+import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render } from '../test-utils/render.js';
 
 test('Quote forwards className, data attributes, id, and ref to its element', () => {
@@ -10,11 +11,7 @@ test('Quote forwards className, data attributes, id, and ref to its element', ()
 			short quote
 		</Quote>,
 	);
-	const target = container.firstElementChild;
-	if (!(target instanceof HTMLElement)) throw new Error('Expected a Quote element.');
+	const target = expectHtmlElement(container.firstElementChild, 'Expected a Quote element.');
 
-	expect(target).toHaveClass('forwarded-class');
-	expect(target).toHaveAttribute('data-forwarded', 'true');
-	expect(target).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(target);
+	expectForwardsDomProps(target, ref);
 });

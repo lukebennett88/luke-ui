@@ -7,6 +7,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectForwardsDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -79,10 +80,7 @@ test('Button forwards className, data attributes, id, and ref to the button elem
 	);
 	const button = locator.getByRole('button').element();
 
-	expect(button).toHaveClass('forwarded-class');
-	expect(button).toHaveAttribute('data-forwarded', 'true');
-	expect(button).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(button);
+	expectForwardsDomProps(button, ref);
 });
 
 test('pressing a Button runs its onPress handler', async () => {

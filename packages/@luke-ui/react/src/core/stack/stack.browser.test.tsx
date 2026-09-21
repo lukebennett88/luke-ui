@@ -6,23 +6,20 @@ import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { breakpoints } from '../../theme/breakpoints.js';
+import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
 test('Stack forwards className, data attributes, id, and ref to its element', () => {
-	const ref = { current: null as HTMLElement | null };
+	const ref = createRef<HTMLElement>();
 	const { container } = render(
 		<Stack className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
 			Content
 		</Stack>,
 	);
-	const target = container.firstElementChild;
-	if (!(target instanceof HTMLElement)) throw new Error('Expected Stack element.');
+	const target = expectHtmlElement(container.firstElementChild, 'Expected Stack element.');
 
-	expect(target).toHaveClass('forwarded-class');
-	expect(target).toHaveAttribute('data-forwarded', 'true');
-	expect(target).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(target);
+	expectForwardsDomProps(target, ref);
 });
 
 afterEach(async () => {

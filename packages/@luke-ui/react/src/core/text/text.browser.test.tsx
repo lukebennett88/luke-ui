@@ -1,4 +1,5 @@
 import { Text } from '@luke-ui/react/text';
+import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { test, expect } from 'vite-plus/test';
 import { typeStyles } from '../../theme/contract.js';
@@ -6,23 +7,20 @@ import { Code } from '../code/code.js';
 import { Em } from '../em/em.js';
 import { Kbd } from '../kbd/kbd.js';
 import { Strong } from '../strong/strong.js';
+import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
 test('Text forwards className, data attributes, id, and ref to its element', () => {
-	const ref = { current: null as HTMLElement | null };
+	const ref = createRef<HTMLElement>();
 	const { container } = render(
 		<Text className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
 			Body copy
 		</Text>,
 	);
-	const target = container.firstElementChild;
-	if (!(target instanceof HTMLElement)) throw new Error('Expected a Text element.');
+	const target = expectHtmlElement(container.firstElementChild, 'Expected a Text element.');
 
-	expect(target).toHaveClass('forwarded-class');
-	expect(target).toHaveAttribute('data-forwarded', 'true');
-	expect(target).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(target);
+	expectForwardsDomProps(target, ref);
 });
 
 // `shouldInheritFont` inherits `textTransform` and `fontVariantNumeric` along with the other font

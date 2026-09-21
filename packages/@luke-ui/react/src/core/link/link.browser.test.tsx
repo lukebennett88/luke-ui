@@ -4,6 +4,7 @@ import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectForwardsDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
 	captureVisual,
@@ -74,10 +75,7 @@ test('Link forwards className, data attributes, id, and ref to the anchor elemen
 	);
 	const target = locator.getByRole('link', { name: 'Settings' }).element();
 
-	expect(target).toHaveClass('forwarded-class');
-	expect(target).toHaveAttribute('data-forwarded', 'true');
-	expect(target).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(target);
+	expectForwardsDomProps(target, ref);
 });
 
 test('pressing a Link runs its onPress handler', async () => {

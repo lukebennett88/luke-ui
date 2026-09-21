@@ -203,6 +203,7 @@ export default defineConfig({
 						'captureVisual',
 						'captureVisualAppearance',
 						'expect',
+						'expectForwardsDomProps',
 						'expectNoAxeViolations',
 						'expectTypeOf',
 					],

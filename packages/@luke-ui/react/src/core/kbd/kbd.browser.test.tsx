@@ -1,22 +1,20 @@
 import { Kbd } from '@luke-ui/react/kbd';
 import { Text } from '@luke-ui/react/text';
+import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
+import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render } from '../test-utils/render.js';
 
 test('Kbd forwards className, data attributes, id, and ref to the kbd element', () => {
-	const ref = { current: null as HTMLElement | null };
+	const ref = createRef<HTMLElement>();
 	const { container } = render(
 		<Kbd className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
 			⌘
 		</Kbd>,
 	);
-	const target = container.firstElementChild;
-	if (!(target instanceof HTMLElement)) throw new Error('Expected a Kbd element.');
+	const target = expectHtmlElement(container.firstElementChild, 'Expected a Kbd element.');
 
-	expect(target).toHaveClass('forwarded-class');
-	expect(target).toHaveAttribute('data-forwarded', 'true');
-	expect(target).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(target);
+	expectForwardsDomProps(target, ref);
 });
 
 function getKbdElement(container: HTMLElement): HTMLElement {

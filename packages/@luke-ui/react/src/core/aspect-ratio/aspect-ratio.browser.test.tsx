@@ -1,23 +1,21 @@
 import { AspectRatio } from '@luke-ui/react/aspect-ratio';
+import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';
 import { vars } from '../../theme/index.js';
+import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
 test('AspectRatio forwards className, data attributes, id, and ref to its element', () => {
-	const ref = { current: null as HTMLElement | null };
+	const ref = createRef<HTMLElement>();
 	const { container } = render(
 		<AspectRatio className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
 			Content
 		</AspectRatio>,
 	);
-	const target = container.firstElementChild;
-	if (!(target instanceof HTMLElement)) throw new Error('Expected AspectRatio element.');
+	const target = expectHtmlElement(container.firstElementChild, 'Expected AspectRatio element.');
 
-	expect(target).toHaveClass('forwarded-class');
-	expect(target).toHaveAttribute('data-forwarded', 'true');
-	expect(target).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(target);
+	expectForwardsDomProps(target, ref);
 });
 
 const ratios = ['1 / 1', '4 / 3', '3 / 2', '16 / 9', '21 / 9'] as const;

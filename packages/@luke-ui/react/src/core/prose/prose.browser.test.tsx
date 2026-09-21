@@ -5,6 +5,7 @@ import { test, expect } from 'vite-plus/test';
 import { Blockquote } from '../blockquote/blockquote.js';
 import { Code } from '../code/code.js';
 import { Heading } from '../heading/heading.js';
+import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 import { Text } from '../text/text.js';
@@ -16,13 +17,9 @@ test('Prose forwards className, data attributes, id, and ref to its element', ()
 			Content
 		</Prose>,
 	);
-	const target = container.firstElementChild;
-	if (!(target instanceof HTMLElement)) throw new Error('Expected a Prose element.');
+	const target = expectHtmlElement(container.firstElementChild, 'Expected a Prose element.');
 
-	expect(target).toHaveClass('forwarded-class');
-	expect(target).toHaveAttribute('data-forwarded', 'true');
-	expect(target).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(target);
+	expectForwardsDomProps(target, ref);
 });
 
 function query(root: Element, selector: string) {

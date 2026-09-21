@@ -1,7 +1,8 @@
 import { Button } from '@luke-ui/react/primitives/button';
 import type { ComponentProps, ReactNode, Ref } from 'react';
 import { createRef } from 'react';
-import { expect, test } from 'vite-plus/test';
+import { test } from 'vite-plus/test';
+import { expectForwardsDomProps } from '../../test-utils/forwarding.js';
 import { render } from '../../test-utils/render.js';
 
 /**
@@ -23,8 +24,5 @@ test('the Button primitive forwards className, data attributes, id, and ref to t
 	);
 	const target = locator.getByRole('button').element();
 
-	expect(target).toHaveClass('forwarded-class');
-	expect(target).toHaveAttribute('data-forwarded', 'true');
-	expect(target).toHaveAttribute('id', 'forwarded-id');
-	expect(ref.current).toBe(target);
+	expectForwardsDomProps(target, ref);
 });
