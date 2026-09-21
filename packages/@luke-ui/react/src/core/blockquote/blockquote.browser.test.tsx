@@ -1,13 +1,21 @@
-import { testConformance } from '../conformance/helpers.js';
+import { Blockquote } from '@luke-ui/react/blockquote';
+import { createRef } from 'react';
+import { test } from 'vite-plus/test';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render } from '../test-utils/render.js';
-import { Blockquote } from './blockquote.js';
 
-testConformance({
-	path: 'blockquote',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a Blockquote element.');
-		return target;
-	},
-	render: (props = {}) => render(<Blockquote {...props}>Quoted text</Blockquote>),
+test('Blockquote forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLElement>();
+	const { container } = render(
+		<Blockquote {...forwardedDomProps} ref={ref}>
+			Quoted text
+		</Blockquote>,
+	);
+	const target = expectHtmlElement(container.firstElementChild, 'Expected a Blockquote element.');
+
+	expectForwardsDomProps(target, ref);
 });

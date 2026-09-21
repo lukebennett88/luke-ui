@@ -1,28 +1,31 @@
+import { Cluster } from '@luke-ui/react/cluster';
+import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { breakpoints } from '../../theme/breakpoints.js';
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { Cluster } from './cluster.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance } from '../test-utils/visual.js';
+
+test('Cluster forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLElement>();
+	const { container } = render(
+		<Cluster {...forwardedDomProps} gap="sp8" ref={ref}>
+			Content
+		</Cluster>,
+	);
+	const target = expectHtmlElement(container.firstElementChild, 'Expected Cluster element.');
+
+	expectForwardsDomProps(target, ref);
+});
 
 afterEach(async () => {
 	await page.viewport(1024, 800);
-});
-
-testConformance({
-	path: 'cluster',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected Cluster element.');
-		return target;
-	},
-	render: (props = {}) =>
-		render(
-			<Cluster gap="sp8" {...props}>
-				Content
-			</Cluster>,
-		),
 });
 
 test('flows children on the inline axis and always wraps', () => {
@@ -232,4 +235,71 @@ test('renders semantic elements and a consumer-owned render prop', () => {
 	expect(nav.tagName).toBe('NAV');
 	expect(ref.current).toBe(nav);
 	expect(getComputedStyle(nav).flexWrap).toBe('wrap');
+});
+
+const itemStyle = {
+	backgroundColor: vars.color.surface.floating,
+	borderRadius: vars.radius.detail,
+	color: vars.color.text.primary,
+	paddingBlock: vars.space.sp8,
+	paddingInline: vars.space.sp12,
+} as const;
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator: scene } = render(
+			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
+				<Cluster
+					gap="sp8"
+					style={{
+						backgroundColor: vars.color.surface.recessed,
+						borderRadius: vars.radius.surface,
+						color: vars.color.text.primary,
+						inlineSize: '14rem',
+						padding: vars.space.sp16,
+					}}
+				>
+					<span style={itemStyle}>Wrapping</span>
+					<span style={itemStyle}>Inline</span>
+					<span style={itemStyle}>Items</span>
+					<span style={itemStyle}>Share</span>
+					<span style={itemStyle}>Space</span>
+				</Cluster>
+				<Cluster
+					alignItems="stretch"
+					gap="sp8"
+					justifyContent="space-between"
+					style={{
+						backgroundColor: vars.color.surface.recessed,
+						borderRadius: vars.radius.surface,
+						color: vars.color.text.primary,
+						padding: vars.space.sp16,
+					}}
+				>
+					<span style={itemStyle}>Start</span>
+					<span style={itemStyle}>End</span>
+				</Cluster>
+				<div dir="rtl">
+					<Cluster
+						elementType="ul"
+						gap="sp8"
+						style={{
+							backgroundColor: vars.color.surface.recessed,
+							borderRadius: vars.radius.surface,
+							color: vars.color.text.primary,
+							listStyle: 'none',
+							margin: 0,
+							padding: vars.space.sp16,
+						}}
+					>
+						<li style={itemStyle}>One</li>
+						<li style={itemStyle}>Two</li>
+						<li style={itemStyle}>Three</li>
+					</Cluster>
+				</div>
+			</div>,
+			{ appearance },
+		);
+		await captureVisualAppearance(scene, 'cluster/kitchen-sink', appearance);
+	}
 });

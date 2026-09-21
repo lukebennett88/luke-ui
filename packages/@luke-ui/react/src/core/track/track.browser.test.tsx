@@ -1,22 +1,26 @@
 import { Heading } from '@luke-ui/react/heading';
+import { vars } from '@luke-ui/react/theme';
+import { Track } from '@luke-ui/react/track';
+import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { Track } from './track.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance, variantValuesFor } from '../test-utils/visual.js';
 
-testConformance({
-	path: 'track',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected Track element.');
-		return target;
-	},
-	render: (props = {}) =>
-		render(
-			<Track gap="sp8" {...props}>
-				Content
-			</Track>,
-		),
+test('Track forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLElement>();
+	const { container } = render(
+		<Track {...forwardedDomProps} gap="sp8" ref={ref}>
+			Content
+		</Track>,
+	);
+	const target = expectHtmlElement(container.firstElementChild, 'Expected Track element.');
+
+	expectForwardsDomProps(target, ref);
 });
 
 test('omits a rail wrapper and its gap when a rail prop is absent', () => {
@@ -257,4 +261,97 @@ test('keeps rail order logical under RTL, putting railStart on the inline-start 
 	// Under RTL, inline-start is the right edge, so railStart renders to the
 	// right of railEnd.
 	expect(start.getBoundingClientRect().left).toBeGreaterThan(end.getBoundingClientRect().left);
+});
+
+const railAlignments = variantValuesFor<typeof Track, 'railAlignment'>()([
+	'start',
+	'firstLine',
+	'center',
+	'end',
+]);
+
+const itemStyle = {
+	backgroundColor: vars.color.surface.floating,
+	borderRadius: vars.radius.detail,
+	color: vars.color.text.primary,
+	paddingBlock: vars.space.sp8,
+	paddingInline: vars.space.sp12,
+} as const;
+
+const rowStyle = {
+	backgroundColor: vars.color.surface.recessed,
+	borderRadius: vars.radius.surface,
+	color: vars.color.text.primary,
+	padding: vars.space.sp16,
+} as const;
+
+const railStart = <span style={itemStyle}>Start</span>;
+const railEnd = <span style={itemStyle}>End</span>;
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator: scene } = render(
+			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
+				{railAlignments.map((railAlignment) => (
+					<Track
+						gap="sp8"
+						key={railAlignment}
+						railAlignment={railAlignment}
+						railEnd={railEnd}
+						railStart={railStart}
+						style={{ ...rowStyle, inlineSize: '20rem' }}
+					>
+						<span style={itemStyle}>This centre wraps beside both rails ({railAlignment})</span>
+					</Track>
+				))}
+				<Track gap="sp8" railStart={railStart} style={rowStyle}>
+					<span style={itemStyle}>Start rail only</span>
+				</Track>
+				<Track gap="sp8" railEnd={railEnd} style={rowStyle}>
+					<span style={itemStyle}>End rail only</span>
+				</Track>
+				<Track gap="sp8" railEnd={railEnd} railStart={railStart} style={rowStyle}>
+					<span style={itemStyle}>Both rails</span>
+				</Track>
+				<Track gap="sp8" style={rowStyle}>
+					<span style={itemStyle}>Neither rail</span>
+				</Track>
+				<Track
+					gap="sp8"
+					railEnd={railEnd}
+					railStart={railStart}
+					style={{ ...rowStyle, inlineSize: '16rem' }}
+				>
+					<span style={{ display: 'block', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+						Anunbrokenstringoftextthatoverflowsthecentrewithoutwrapping
+					</span>
+				</Track>
+				<Track
+					gap="sp8"
+					railEnd={railEnd}
+					railStart={railStart}
+					style={{ ...rowStyle, inlineSize: '16rem' }}
+				>
+					This centre text wraps across multiple lines to show how the rails sit alongside multiline
+					content.
+				</Track>
+				<Track
+					gap="sp8"
+					railAlignment="firstLine"
+					railStart={<span style={{ ...itemStyle, blockSize: '3rem', display: 'block' }} />}
+					style={{ ...rowStyle, inlineSize: '16rem' }}
+				>
+					A tall rail beside multiline text stays pinned to the first line instead of growing with
+					the centre.
+				</Track>
+				<div dir="rtl">
+					<Track gap="sp8" railEnd={railEnd} railStart={railStart} style={rowStyle}>
+						<span style={itemStyle}>RTL</span>
+					</Track>
+				</div>
+			</div>,
+			{ appearance },
+		);
+		await captureVisualAppearance(scene, 'track/kitchen-sink', appearance);
+	}
 });

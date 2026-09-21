@@ -1,5 +1,3 @@
-import { getStorybookBaseUrl } from './storybook.js';
-
 export interface SiteDestination {
 	activePath?: string;
 	isExternal?: boolean;
@@ -11,11 +9,6 @@ export const siteDestinations: ReadonlyArray<SiteDestination> = [
 	{ activePath: '/docs', label: 'Docs', url: '/docs/installation' },
 	{ activePath: '/components', label: 'Components', url: '/components' },
 	{ activePath: '/playground', label: 'Playground', url: '/playground' },
-	{
-		isExternal: true,
-		label: 'Storybook',
-		url: `${getStorybookBaseUrl(import.meta.env.BASE_URL)}/`,
-	},
 ];
 
 export function getActiveSiteDestination(pathname: string): SiteDestination | undefined {

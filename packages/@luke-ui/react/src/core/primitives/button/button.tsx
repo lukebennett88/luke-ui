@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import type { JSX, Ref } from 'react';
 import type { ButtonProps as RacButtonProps } from 'react-aria-components/Button';
 import { Button as RacButton } from 'react-aria-components/Button';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -11,7 +11,12 @@ import type { Prettify } from '../../types/prettify.js';
 import { buttonRecipeInternal } from './recipe.css.js';
 
 type _ButtonOmit = DistributiveOmit<RacButtonProps, keyof DocumentedPressProps>;
-type _ButtonProps = _ButtonOmit & ButtonPresentationProps & DocumentedPressProps;
+type _ButtonProps = _ButtonOmit &
+	ButtonPresentationProps &
+	DocumentedPressProps & {
+		/** Ref forwarded to the underlying button element. */
+		ref?: Ref<HTMLButtonElement>;
+	};
 
 /** Props for the button primitive. */
 export type ButtonProps = Prettify<_ButtonProps>;

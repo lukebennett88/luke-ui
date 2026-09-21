@@ -20,7 +20,6 @@ import { GITHUB_REPO_URL } from '../lib/github.js';
 import { baseOptions } from '../lib/layout.shared';
 import { markdownUrlForPage } from '../lib/markdown-page-path.js';
 import { source } from '../lib/source';
-import { getStorybookStoryUrl } from '../lib/storybook';
 
 const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
 const GITHUB_TREE_URL = `${GITHUB_REPO_URL}/tree/main`;
@@ -64,7 +63,6 @@ const loader = createServerFn({
 			path: page.path,
 			reactAriaUrl: page.data.reactAria ?? null,
 			sourceUrl: page.data.source ? `${GITHUB_TREE_URL}/${page.data.source}` : null,
-			storybookUrl: getStorybookStoryUrl(page.path, import.meta.env.BASE_URL, page.data.source),
 		};
 	});
 
@@ -77,10 +75,9 @@ const clientLoader = browserCollections.docs.createClientLoader({
 			markdownUrl: string;
 			reactAriaUrl: string | null;
 			sourceUrl: string | null;
-			storybookUrl: string | null;
 		},
 	) {
-		const { githubUrl, markdownUrl, reactAriaUrl, sourceUrl, storybookUrl, ...pageProps } = props;
+		const { githubUrl, markdownUrl, reactAriaUrl, sourceUrl, ...pageProps } = props;
 		return (
 			<DocsPage
 				toc={toc}
@@ -95,7 +92,6 @@ const clientLoader = browserCollections.docs.createClientLoader({
 						markdownUrl={markdownUrl}
 						reactAriaUrl={reactAriaUrl}
 						sourceUrl={sourceUrl}
-						storybookUrl={storybookUrl}
 					/>
 				</div>
 				<DocsBody>
@@ -119,7 +115,6 @@ function Page() {
 						markdownUrl: data.markdownUrl,
 						reactAriaUrl: data.reactAriaUrl,
 						sourceUrl: data.sourceUrl,
-						storybookUrl: data.storybookUrl,
 					})}
 				</Suspense>
 			</DocsLayout>

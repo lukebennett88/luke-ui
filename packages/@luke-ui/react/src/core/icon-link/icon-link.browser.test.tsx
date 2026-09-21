@@ -1,8 +1,18 @@
+import { IconLink } from '@luke-ui/react/icon-link';
+import { createRef } from 'react';
 import type { JSX } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { testConformance, testIntegration } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { IconLink } from './icon-link.js';
+import { page, userEvent } from 'vite-plus/test/context';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	emulateForcedColors,
+	focusViaKeyboard,
+	Grid,
+} from '../test-utils/visual.js';
 
 /** A custom SVG that deliberately omits its own `aria-hidden` and any `<title>`. */
 function UnlabelledCustomIcon(): JSX.Element {
@@ -13,27 +23,55 @@ function UnlabelledCustomIcon(): JSX.Element {
 	);
 }
 
-testConformance({
-	path: 'icon-link',
-	getTarget: (result) => {
-		const target = result.locator.getByRole('link', { name: 'Search' }).element();
-		if (!(target instanceof HTMLElement)) throw new Error('Expected an icon link.');
-		return target;
-	},
-	render: (props = {}) => {
-		return render(<IconLink {...props} aria-label="Search" href="#" icon="search" />);
-	},
+function CustomStarIcon(): JSX.Element {
+	return (
+		<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+			<path
+				d="M12 2 14.9 9.1 22 9.9 16.7 14.9 18.2 22 12 18.3 5.8 22 7.3 14.9 2 9.9 9.1 9.1Z"
+				fill="currentColor"
+			/>
+		</svg>
+	);
+}
+
+function IconLinkScene() {
+	return (
+		<Grid columns={4}>
+			<IconLink aria-label="Add small" href="#" icon="add" size="small" />
+			<IconLink aria-label="Add medium" href="#" icon="add" size="medium" />
+			<IconLink aria-label="Disabled" href="#" icon="delete" isDisabled size="small" />
+			<IconLink aria-label="Custom icon" href="#" icon={<CustomStarIcon />} />
+			<IconLink aria-label="Standard" href="#" icon="add" />
+			<IconLink aria-label="Low" href="#" icon="add" prominence="low" />
+			<IconLink aria-label="High" href="#" icon="add" prominence="high" />
+		</Grid>
+	);
+}
+
+test('IconLink forwards className, data attributes, id, and ref to the anchor element', () => {
+	const ref = createRef<HTMLAnchorElement>();
+	const { locator } = render(
+		<IconLink {...forwardedDomProps} aria-label="Search" href="#" icon="search" ref={ref} />,
+	);
+	const target = locator.getByRole('link', { name: 'Search' }).element();
+
+	expectForwardsDomProps(target, ref);
 });
 
-testIntegration('icon-link', async () => {
+test('pressing an IconLink runs its onPress handler', async () => {
 	let pressed = false;
 	const { locator, user } = render(
 		<IconLink aria-label="Search" href="#" icon="search" onPress={() => (pressed = true)} />,
 	);
 
 	await user.click(locator.getByRole('link', { name: 'Search' }));
-	// oxlint-disable-next-line vitest/no-standalone-expect
 	expect(pressed).toBe(true);
+});
+
+test('the IconLink scene has no axe violations', async () => {
+	const { container } = render(<IconLinkScene />);
+
+	await expectNoAxeViolations(container);
 });
 
 test('renders a native anchor with the supplied href', () => {
@@ -119,4 +157,51 @@ test('Enter activates the link, Space does not', async () => {
 
 	// Same focused control both times: Space stayed inert rather than being consumed silently.
 	expect(link.element()).toBe(document.activeElement);
+});
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(<IconLinkScene />, { appearance });
+		await captureVisualAppearance(locator, 'icon-link/kitchen-sink', appearance);
+	}
+});
+
+test('interactive states', { tags: ['visual'] }, async () => {
+	const { locator } = render(<IconLink aria-label="Search" href="#" icon="search" />);
+	const link = page.getByRole('link', { name: 'Search' });
+
+	await userEvent.hover(link);
+	await captureVisual(locator, 'icon-link/hover');
+	await userEvent.unhover(link);
+	await focusViaKeyboard(link);
+	await captureVisual(locator, 'icon-link/focus-visible');
+	await userEvent.keyboard('{Enter>}');
+	await captureVisual(locator, 'icon-link/pressed');
+	await userEvent.keyboard('{/Enter}');
+});
+
+test('forced-colors states', { tags: ['visual'] }, async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator } = render(
+			<Grid columns={2}>
+				<IconLink aria-label="Search" href="#" icon="search" />
+				<IconLink aria-label="Disabled" href="#" icon="delete" isDisabled />
+			</Grid>,
+		);
+		const search = page.getByRole('link', { name: 'Search' });
+
+		await captureVisual(locator, 'icon-link/forced-colors-resting');
+		await userEvent.hover(search);
+		await captureVisual(locator, 'icon-link/forced-colors-hover');
+		await userEvent.unhover(search);
+		await focusViaKeyboard(search);
+		await captureVisual(locator, 'icon-link/forced-colors-focus-visible');
+		await userEvent.keyboard('{Enter>}');
+		await captureVisual(locator, 'icon-link/forced-colors-pressed');
+		await userEvent.keyboard('{/Enter}');
+	} finally {
+		await emulateForcedColors('none');
+	}
 });

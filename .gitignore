@@ -7,6 +7,7 @@
 .turbo/
 .visual-captures/
 .vitest-attachments/
+__screenshots__/
 *.local
 *.log
 apps/docs/.story/
@@ -23,4 +24,3 @@ packages/@luke-ui/react/src/generated/color-tokens.generated.ts
 packages/@luke-ui/react/src/generated/icons.tsx
 public/dist/
 server/dist/
-storybook-static/

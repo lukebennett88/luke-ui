@@ -18,7 +18,6 @@
 		"types": [],
 		"verbatimModuleSyntax": true
 	},
-	"exclude": ["src/**/*.stories.tsx", ".storybook"],
 	"include": [
 		"src/**/*.ts",
 		"src/**/*.tsx",

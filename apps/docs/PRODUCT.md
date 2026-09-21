@@ -42,8 +42,8 @@ change, and themes can look substantially different from one another.
 ## Evidence on Hand
 
 The repository contains the public component package, two bundled themes, hosted documentation,
-runnable examples, a playground, Storybook stories, and automated unit, browser, and visual checks.
-Do not claim customer adoption without evidence.
+runnable examples, a playground, and automated unit, browser, and visual checks. Do not claim
+customer adoption without evidence.
 
 ## Product Principles
 

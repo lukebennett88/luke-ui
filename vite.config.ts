@@ -13,7 +13,6 @@ export default defineConfig({
 			'packages/turbo-generators/templates/**',
 			'**/dist/**',
 			'**/routeTree.gen.ts',
-			'**/storybook-static/**',
 			'node_modules',
 		],
 		jsxSingleQuote: false,
@@ -52,13 +51,7 @@ export default defineConfig({
 			correctness: 'deny',
 			perf: 'deny',
 		},
-		ignorePatterns: [
-			'node_modules',
-			'.source',
-			'**/dist/**',
-			'**/storybook-static/**',
-			'**/routeTree.gen.ts',
-		],
+		ignorePatterns: ['node_modules', '.source', '**/dist/**', '**/routeTree.gen.ts'],
 		jsPlugins: [
 			{
 				name: 'react-hooks-js',
@@ -82,28 +75,8 @@ export default defineConfig({
 				],
 				files: ['packages/@luke-ui/react/src/**/*.browser.test.tsx'],
 				rules: {
-					'no-restricted-imports': [
-						'error',
-						{
-							paths: [
-								{
-									message: 'Mount components through src/core/test-utils/render.tsx.',
-									name: 'react-dom/client',
-								},
-								{
-									message:
-										'Do not assert resolved theme tokens in component tests. Suppress this rule only for structural fixture setup.',
-									name: '@luke-ui/react/theme',
-								},
-							],
-						},
-					],
-				},
-			},
-			{
-				excludeFiles: ['packages/@luke-ui/react/src/theme/**'],
-				files: ['packages/@luke-ui/react/src/**/*.visual.test.tsx'],
-				rules: {
+					// Visual captures walk the appearance matrix one screenshot at a time:
+					// each capture resizes the shared viewport, so they cannot be parallelised.
 					'no-await-in-loop': 'off',
 					'no-restricted-imports': [
 						'error',
@@ -119,7 +92,7 @@ export default defineConfig({
 				},
 			},
 			{
-				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				excludeFiles: ['**/*.test.*', '**/__fixtures__/**'],
 				files: ['packages/@luke-ui/react/src/core/**/*.{ts,tsx}'],
 				rules: {
 					'no-restricted-imports': [
@@ -136,7 +109,7 @@ export default defineConfig({
 				},
 			},
 			{
-				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				excludeFiles: ['**/*.test.*', '**/__fixtures__/**'],
 				files: ['packages/@luke-ui/react/src/theme/**/*.{ts,tsx}'],
 				rules: {
 					'no-restricted-imports': [
@@ -153,7 +126,7 @@ export default defineConfig({
 				},
 			},
 			{
-				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				excludeFiles: ['**/*.test.*', '**/__fixtures__/**'],
 				files: ['packages/@luke-ui/react/src/shared/**/*.{ts,tsx}'],
 				rules: {
 					'no-restricted-imports': [
@@ -225,6 +198,8 @@ export default defineConfig({
 						'captureVisual',
 						'captureVisualAppearance',
 						'expect',
+						'expectForwardsDomProps',
+						'expectNoAxeViolations',
 						'expectTypeOf',
 					],
 				},

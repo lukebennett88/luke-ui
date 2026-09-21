@@ -1,6 +1,6 @@
+import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
+import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { expect, test } from 'vite-plus/test';
-import { themeClassName as paperThemeClassName } from '../../theme/bundles/paper/index.js';
-import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
 import { cleanupMountedRenders } from './render-mount-state.js';
 import { render, visualAppearances } from './render.js';
 

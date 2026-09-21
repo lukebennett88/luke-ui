@@ -1,22 +1,19 @@
 /// <reference types="vite/client" />
 
-// Loads the design-token stylesheet into the test document.
-import '../stylesheet.css.js';
+import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
+import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { rootClassName, vars } from '@luke-ui/react/theme';
+import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
+import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
-// The generated spritesheet is emitted to `dist/` by the `generate` task, which
-// both `build` and `test` depend on, so it is always present when tests run.
 import spritesheetHref from '../../../dist/spritesheet.svg?url';
-import { themeClassName as paperThemeClassName } from '../../theme/bundles/paper/index.js';
-import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
-import { rootClassName, vars } from '../../theme/index.js';
-import { IconSpritesheetProvider } from '../icon/icon.js';
 import {
 	getAppliedIdentityClassName,
 	setAppliedIdentityClassName,
@@ -45,16 +42,6 @@ export type RenderResult = {
 	unmount: () => void;
 };
 
-/**
- * Renders `node` inside the same theme root and icon spritesheet provider the
- * app (and Storybook) wrap components with, then returns a Vitest locator for
- * the mounted subtree ready to pass to `captureVisual`, plus the page-bound
- * `userEvent` (a convenience re-export so callers do not need a second import).
- *
- * The identity class and colour mode go on `document.documentElement`, not the
- * container, so a portal (combobox popover, mobile tray) that mounts outside
- * the container still gets the intended theme and mode.
- */
 export function render(node: ReactNode, options?: { appearance?: VisualAppearance }): RenderResult {
 	const appearance = options?.appearance ?? defaultVisualAppearance;
 	const identityClassName = identityClassNameFor(appearance.theme);

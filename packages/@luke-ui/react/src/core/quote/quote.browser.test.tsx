@@ -1,13 +1,21 @@
-import { testConformance } from '../conformance/helpers.js';
+import { Quote } from '@luke-ui/react/quote';
+import { createRef } from 'react';
+import { test } from 'vite-plus/test';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render } from '../test-utils/render.js';
-import { Quote } from './quote.js';
 
-testConformance({
-	path: 'quote',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a Quote element.');
-		return target;
-	},
-	render: (props = {}) => render(<Quote {...props}>short quote</Quote>),
+test('Quote forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLQuoteElement>();
+	const { container } = render(
+		<Quote {...forwardedDomProps} ref={ref}>
+			short quote
+		</Quote>,
+	);
+	const target = expectHtmlElement(container.firstElementChild, 'Expected a Quote element.');
+
+	expectForwardsDomProps(target, ref);
 });

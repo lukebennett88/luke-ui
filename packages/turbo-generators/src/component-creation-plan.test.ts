@@ -50,9 +50,7 @@ describe('createComponentPlan', () => {
 			'apps/docs/src/examples/status-badge/basic.tsx',
 			'packages/@luke-ui/react/src/core/status-badge/recipe.css.ts',
 			'packages/@luke-ui/react/src/core/status-badge/status-badge.browser.test.tsx',
-			'packages/@luke-ui/react/src/core/status-badge/status-badge.stories.tsx',
 			'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx',
-			'packages/@luke-ui/react/src/core/status-badge/status-badge.visual.test.tsx',
 			'packages/@luke-ui/react/src/exports/status-badge.ts',
 		]);
 		expect(plan.files.map((file) => file.path)).not.toContainEqual(
@@ -85,12 +83,15 @@ describe('createComponentPlan', () => {
 			'export type StatusBadgeRecipeVariants = RecipeSelection<typeof statusBadgeRecipe>;',
 		);
 
-		for (const testPath of ['status-badge.browser.test.tsx', 'status-badge.visual.test.tsx']) {
-			const testSource = plan.files.find((file) => file.path.endsWith(testPath))?.contents;
-			if (testSource === undefined) throw new Error(`Expected the scaffold to write ${testPath}.`);
-			expect(testSource).toContain("from './status-badge.js'");
-			expect(testSource).not.toContain("from './index.js'");
+		const testSource = plan.files.find((file) =>
+			file.path.endsWith('status-badge.browser.test.tsx'),
+		)?.contents;
+		if (testSource === undefined) {
+			throw new Error('Expected the scaffold to write status-badge.browser.test.tsx.');
 		}
+		expect(testSource).toContain("from '@luke-ui/react/status-badge'");
+		expect(testSource).not.toContain("from './index.js'");
+		expect(testSource).not.toContain("from './status-badge.js'");
 	});
 
 	it('emits relative imports that resolve to real files already in the repo', async () => {
@@ -126,5 +127,67 @@ describe('createComponentPlan', () => {
 				path: 'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx',
 			},
 		]);
+	});
+
+	describe('the generated browser test', () => {
+		it('covers DOM forwarding, a shared scene, an axe check, and a placeholder behavioural test', () => {
+			const plan = createComponentPlan(validAnswers);
+			const testSource = plan.files.find((file) =>
+				file.path.endsWith('status-badge.browser.test.tsx'),
+			)?.contents;
+			if (testSource === undefined) throw new Error('Expected the scaffold to write the test.');
+
+			expect(testSource).toContain('TODO: Test actual behaviour or delete.');
+			expect(testSource).toContain(
+				"import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';",
+			);
+			expect(testSource).toContain('expectForwardsDomProps(target, ref)');
+
+			expect(testSource).toContain('function StatusBadgeScene()');
+			expect(testSource.match(/StatusBadgeScene/g)?.length).toBeGreaterThanOrEqual(3);
+
+			expect(testSource).toContain("import { expectNoAxeViolations } from '../test-utils/axe.js';");
+			expect(testSource).toContain("test('the StatusBadge scene has no axe violations'");
+			expect(testSource).toContain('await expectNoAxeViolations(container)');
+
+			expect(testSource).toContain("{ tags: ['visual'] }");
+			expect(testSource).toContain('for (const appearance of visualAppearances)');
+			expect(testSource).toContain(
+				"captureVisualAppearance(locator, 'status-badge/kitchen-sink', appearance)",
+			);
+
+			expect(testSource).toContain("test('StatusBadge renders its content'");
+
+			expect(testSource).not.toContain('testConformance');
+			expect(testSource).not.toContain('testIntegration');
+			expect(testSource).not.toContain('conformance');
+			expect(testSource).not.toContain('.visual.test');
+			expect(testSource).not.toContain('.test-d.ts');
+		});
+
+		it('omits the tagged visual case when visual coverage is declined, but keeps the axe scene', () => {
+			const plan = createComponentPlan({ ...validAnswers, visualCoverage: false });
+			const testSource = plan.files.find((file) =>
+				file.path.endsWith('status-badge.browser.test.tsx'),
+			)?.contents;
+			if (testSource === undefined) throw new Error('Expected the scaffold to write the test.');
+
+			expect(testSource).not.toContain("tags: ['visual']");
+			expect(testSource).not.toContain('visualAppearances');
+			expect(testSource).not.toContain('captureVisualAppearance');
+			expect(testSource).toContain('function StatusBadgeScene()');
+			expect(testSource).toContain("test('the StatusBadge scene has no axe violations'");
+		});
+
+		it('imports the component from the public package export, not a relative sibling', () => {
+			const plan = createComponentPlan(validAnswers);
+			const testSource = plan.files.find((file) =>
+				file.path.endsWith('status-badge.browser.test.tsx'),
+			)?.contents;
+			if (testSource === undefined) throw new Error('Expected the scaffold to write the test.');
+
+			expect(testSource).toContain("import { StatusBadge } from '@luke-ui/react/status-badge';");
+			expect(testSource).not.toContain("from './status-badge.js'");
+		});
 	});
 });

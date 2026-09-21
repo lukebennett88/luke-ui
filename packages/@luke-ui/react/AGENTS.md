@@ -3,25 +3,20 @@
 - Do not hand-edit `.generated/entries.ts` or `package.json#exports`. `vp pack` generates entries
   and updates exports during build. The `stylesheet` build entry is excluded from the public export
   map via `exports.exclude` in `vite.config.ts`. Vanilla Extract serializes recipes to
-  `#recipe-engine`; pack, Vitest, Storybook, and the docs app alias that specifier to
+  `#recipe-engine`; pack, Vitest, and the docs app alias that specifier to
   `src/core/styles/recipe-engine.ts`. Pack then bundles a relative runtime chunk. The specifier is
   not a public package subpath.
 - When adding a component, use `pnpm generate:component` from the repo root. Do not create component
-  files by hand. The generator updates the style-module registry, conformance manifest, and docs
-  wiring.
+  files by hand. The generator updates the style-module registry and docs wiring.
 - When adding a primitive, use `pnpm generate:primitive` from the repo root. Do not create primitive
-  files by hand. The generator updates the style-module registry, conformance manifest, and public
-  export module.
-- Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests. It is
-  the only normative testing guide. Component tests use the shared browser renderer; stories are
-  documentation and render/a11y fixtures, not assertion files.
+  files by hand. The generator updates the style-module registry and public export module.
+- Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests.
 - React Compiler is enabled. Do not use `useCallback` or `useMemo` unless there is a specific reason
   the compiler cannot handle.
 
 ## Source structure
 
-- `src/core/` holds implementation, styles, test helpers, and their co-located tests, stories, and
-  fixtures.
+- `src/core/` holds implementation, styles, test helpers, and their co-located tests and fixtures.
 - `src/exports/` holds the thin public modules that pack publishes for each package subpath.
 - `src/theme/` holds the theme compiler, foundations, and bundled themes in `bundles/`.
 - `src/shared/` holds low-level primitives with no domain of their own, such as the class-name
@@ -35,12 +30,10 @@
 ## Component structure
 
 `src/exports/` is the only barrel layer in the package. A component directory holds implementation,
-styles, tests, and stories, and its matching `src/exports/` module re-exports directly from those
-files. A component directory contains:
+styles, and tests, and its matching `src/exports/` module re-exports directly from those files. A
+component directory contains:
 
-- `[component].stories.tsx`: Storybook documentation and render/a11y fixtures
-- `[component].browser.test.tsx`: component behaviour, conformance, and the integration tripwire
-- `[component].visual.test.tsx`: visual regression captures when the component has a visual surface
+- `[component].browser.test.tsx`: behaviour, axe, and `visual`-tagged captures, in one file
 - `<component>.tsx`: component implementation
 - `recipe.css.ts`: public recipe contract (scaffolded by the generator)
 - `styles.css.ts`: private implementation styling when needed

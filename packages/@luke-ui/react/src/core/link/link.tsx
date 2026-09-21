@@ -1,4 +1,4 @@
-import type { JSX, ReactNode } from 'react';
+import type { JSX, ReactNode, Ref } from 'react';
 import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
 import { Link as RacLink } from 'react-aria-components/Link';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -34,6 +34,8 @@ interface _LinkProps extends _LinkOmit {
 	isDisabled?: RacLinkProps['isDisabled'];
 	/** Press handler for navigation-related handling. */
 	onPress?: RacLinkProps['onPress'];
+	/** Ref forwarded to the underlying anchor element. */
+	ref?: Ref<HTMLAnchorElement>;
 }
 
 /** Props for the `Link` component. */

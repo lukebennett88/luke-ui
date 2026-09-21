@@ -4,16 +4,17 @@ Custom generators for `turbo generate`.
 
 ## Generators
 
-- `component`: Scaffolds `@luke-ui/react` components, colocated recipes, Storybook stories, hosted
-  docs wrappers, hosted docs controls, and structural docs navigation.
-- `primitive`: Scaffolds `@luke-ui/react/primitives/*` entrypoints, colocated recipes, the style
-  module registry, and conformance manifest entries.
+- `component`: Scaffolds a component, recipe, browser test, and hosted docs.
+- `primitive`: Scaffolds a primitive, recipe, browser test, and public export.
 
-The component generator asks for name, docs group, visual coverage, conformance contracts, and an
-integration tripwire. The primitive generator asks for name, hosted docs, and conformance contracts.
+The component generator asks for name, docs group, and whether to add visual coverage. The primitive
+generator asks for name, whether to add hosted docs, and whether to add visual coverage.
 
 Generated component and primitive folders use a named implementation file. Public modules live in
 `src/exports/`.
+
+Generated browser tests cover DOM forwarding and axe, with optional visual coverage and one
+behavioural TODO. See [`docs/TESTING.md`](../../docs/TESTING.md).
 
 ## Usage
 

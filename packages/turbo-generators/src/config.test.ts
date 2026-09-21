@@ -19,15 +19,7 @@ describe('component generator prompts', () => {
 			throw new Error('Expected the component generator to register prompts.');
 		}
 
-		const conformance = prompts.find((prompt) => prompt.name === 'conformance');
-		expect(conformance?.type).toBe('checkbox');
-		expect(conformance?.default).toEqual(
-			expect.arrayContaining([...COMPONENT_DEFAULTS.conformance]),
-		);
-
 		expect({
-			conformance: conformance?.default,
-			integrationTripwire: prompts.find((prompt) => prompt.name === 'integrationTripwire')?.default,
 			visualCoverage: prompts.find((prompt) => prompt.name === 'visualCoverage')?.default,
 		}).toEqual(COMPONENT_DEFAULTS);
 	});
@@ -49,16 +41,9 @@ describe('primitive generator prompts', () => {
 			throw new Error('Expected the primitive generator to register prompts.');
 		}
 
-		const conformance = prompts.find((prompt) => prompt.name === 'conformance');
-		expect(conformance?.type).toBe('checkbox');
-		expect(conformance?.default).toEqual(
-			expect.arrayContaining([...PRIMITIVE_DEFAULTS.conformance]),
-		);
-		expect(
-			(conformance as { choices?: Array<{ value?: unknown }> }).choices?.map(
-				(choice) => choice.value,
-			),
-		).toEqual(['dom']);
-		expect(prompts.find((prompt) => prompt.name === 'docs')?.default).toBe(PRIMITIVE_DEFAULTS.docs);
+		expect({
+			docs: prompts.find((prompt) => prompt.name === 'docs')?.default,
+			visualCoverage: prompts.find((prompt) => prompt.name === 'visualCoverage')?.default,
+		}).toEqual(PRIMITIVE_DEFAULTS);
 	});
 });

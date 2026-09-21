@@ -13,9 +13,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
-import { cdp } from 'vite-plus/test/context';
 import paperCss from '../../dist/themes/paper/stylesheet.css?inline';
 import tactileCss from '../../dist/themes/tactile/stylesheet.css?inline';
+import { emulateColorScheme } from '../core/test-utils/emulate-media.js';
 import { extractValue, splitBlocks } from './__fixtures__/theme-css.js';
 import { themeClassName as paperThemeClassName } from './bundles/paper/index.js';
 import { themeClassName as tactileThemeClassName } from './bundles/tactile/index.js';
@@ -59,12 +59,6 @@ function createDiv(parent: Element): HTMLDivElement {
 
 function readVar(element: Element, varName: string): string {
 	return getComputedStyle(element).getPropertyValue(varName).trim();
-}
-
-async function emulateColorScheme(mode: 'light' | 'dark'): Promise<void> {
-	await cdp().send('Emulation.setEmulatedMedia', {
-		features: [{ name: 'prefers-color-scheme', value: mode }],
-	});
 }
 
 afterEach(async () => {

@@ -42,7 +42,6 @@ function getMarkdownPrerenderPages(): Array<{ path: string }> {
 export default defineConfig(async () => {
 	const markdownPrerenderPages = getMarkdownPrerenderPages();
 	const baseUrl = process.env.VITE_BASE_URL ?? '/';
-	const storybookPath = `${baseUrl.replace(/\/$/, '')}/storybook`;
 
 	return {
 		// Allow overriding the base URL for deployments to sub-paths (e.g. GitHub Pages).
@@ -135,7 +134,6 @@ export default defineConfig(async () => {
 					concurrency: 1,
 					crawlLinks: true,
 					enabled: true,
-					filter: (page) => !page.path.startsWith(storybookPath),
 					retryCount: 2,
 				},
 			}),

@@ -7,8 +7,6 @@ import type { DistributiveOmit } from '../types/distributive-omit.js';
 import { cascadeLayers } from './layer-names.js';
 import type { RecipeComposition } from './recipe-types.js';
 
-export type { RecipeComposition, RecipeSelection } from './recipe-types.js';
-
 /**
  * Builds single-part and slotted recipes. CSS lands in the `recipes` layer.
  *

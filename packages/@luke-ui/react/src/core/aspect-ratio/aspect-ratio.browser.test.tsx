@@ -1,21 +1,30 @@
-import { expect, test } from 'vite-plus/test';
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { AspectRatio } from './aspect-ratio.js';
+import { AspectRatio } from '@luke-ui/react/aspect-ratio';
+import { vars } from '@luke-ui/react/theme';
+import { createRef } from 'react';
+import { test, expect } from 'vite-plus/test';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance } from '../test-utils/visual.js';
+
+test('AspectRatio forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLElement>();
+	const { container } = render(
+		<AspectRatio {...forwardedDomProps} ref={ref}>
+			Content
+		</AspectRatio>,
+	);
+	const target = expectHtmlElement(container.firstElementChild, 'Expected AspectRatio element.');
+
+	expectForwardsDomProps(target, ref);
+});
 
 const ratios = ['1 / 1', '4 / 3', '3 / 2', '16 / 9', '21 / 9'] as const;
 
 const blankPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-
-testConformance({
-	path: 'aspect-ratio',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected AspectRatio element.');
-		return target;
-	},
-	render: (props = {}) => render(<AspectRatio {...props}>Content</AspectRatio>),
-});
 
 test('defaults to a square frame when ratio is omitted', () => {
 	const { locator } = render(<AspectRatio data-testid="ratio" inlineSize="16rem" />);
@@ -119,4 +128,36 @@ test('applies the chosen ratio to a caller-owned root', () => {
 	const { height, width } = element.getBoundingClientRect();
 
 	expect(height / width).toBeCloseTo(9 / 21, 2);
+});
+const objectFits = ['cover', 'contain', 'fill', 'none', 'scale-down'] as const;
+
+// Asymmetry distinguishes object-fit values.
+const mediaSrc = `data:image/svg+xml,${encodeURIComponent(
+	`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+		<rect width="200" height="200" fill="#1d4ed8"/>
+		<rect x="200" width="200" height="200" fill="#f59e0b"/>
+		<circle cx="100" cy="100" r="48" fill="#ffffff"/>
+		<rect x="260" y="60" width="80" height="80" fill="#111827"/>
+	</svg>`,
+)}`;
+
+test('media frame ratios and objectFit values', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator: scene } = render(
+			<div style={{ display: 'grid', gap: vars.space.sp16 }}>
+				{ratios.map((ratio) => (
+					<AspectRatio key={ratio} inlineSize="18rem" ratio={ratio}>
+						<img alt={`Ratio ${ratio}`} src={mediaSrc} />
+					</AspectRatio>
+				))}
+				{objectFits.map((objectFit) => (
+					<AspectRatio key={objectFit} inlineSize="18rem" objectFit={objectFit} ratio="16 / 9">
+						<img alt={`objectFit ${objectFit}`} src={mediaSrc} />
+					</AspectRatio>
+				))}
+			</div>,
+			{ appearance },
+		);
+		await captureVisualAppearance(scene, 'aspect-ratio/media-frame', appearance);
+	}
 });

@@ -15,12 +15,6 @@ export const omittedVariantsRecipe = recipe({
 	base: { color: 'red' },
 });
 
-/** Single-part recipe authored with an explicit empty `variants: {}`. */
-export const emptyVariantsRecipe = recipe({
-	base: { color: 'blue' },
-	variants: {},
-});
-
 /** Single-part recipe with real variants, including a boolean-mapped one. */
 export const realVariantsRecipe = recipe({
 	base: { color: 'green' },
@@ -38,27 +32,6 @@ export const realVariantsRecipe = recipe({
 
 export const defaultedVariantsRecipe = withDefaultVariants(realVariantsRecipe, {
 	size: 'medium',
-});
-
-/** Slotted recipe with `variants` omitted entirely. */
-export const omittedVariantsSlottedRecipe = recipe({
-	slots: {
-		root: { display: 'block' },
-	},
-});
-
-/** Slotted recipe with real variants. */
-export const realVariantsSlottedRecipe = recipe({
-	slots: {
-		control: { padding: '0.5rem' },
-		root: { display: 'flex' },
-	},
-	variants: {
-		size: {
-			medium: { root: { blockSize: '2.5rem' } },
-			small: { root: { blockSize: '2rem' } },
-		},
-	},
 });
 
 /** Covers shared, conditional, and ordered `compoundSlots` entries. */
@@ -96,19 +69,6 @@ export const compoundSlotsRecipe = recipe({
 			variants: { size: 'medium' },
 		},
 	],
-});
-
-/** Valid fixture used to derive the `compoundSlots` entry type in `recipe.test-d.ts`. */
-export const compoundSlotsTypeFixtureRecipe = recipe({
-	slots: {
-		a: { color: 'rgb(1, 1, 1)' },
-	},
-	variants: {
-		size: {
-			medium: { a: { fontWeight: 500 } },
-		},
-	},
-	compoundSlots: [{ slots: ['a'], style: { color: 'rgb(3, 3, 3)' }, variants: { size: 'medium' } }],
 });
 
 export const compoundSlotsPrecedenceRecipe = recipe({

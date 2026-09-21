@@ -1,9 +1,29 @@
-import { afterEach, expect, test } from 'vite-plus/test';
+import { Box } from '@luke-ui/react/box';
+import { Container } from '@luke-ui/react/container';
+import { Text } from '@luke-ui/react/text';
+import { vars } from '@luke-ui/react/theme';
+import { createRef } from 'react';
+import { test, afterEach, expect } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { Box } from '../box/box.js';
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { Container } from './container.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance } from '../test-utils/visual.js';
+
+test('Container forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLElement>();
+	const { container } = render(
+		<Container {...forwardedDomProps} maxInlineSize="ct672" ref={ref}>
+			Content
+		</Container>,
+	);
+	const target = expectHtmlElement(container.firstElementChild, 'Expected Container element.');
+
+	expectForwardsDomProps(target, ref);
+});
 
 const fixedSizes = [
 	['ct448', 448],
@@ -15,21 +35,6 @@ const fixedSizes = [
 
 afterEach(async () => {
 	await page.viewport(1024, 800);
-});
-
-testConformance({
-	path: 'container',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected Container element.');
-		return target;
-	},
-	render: (props = {}) =>
-		render(
-			<Container maxInlineSize="ct672" {...props}>
-				Content
-			</Container>,
-		),
 });
 
 test('uses its fixed maximum as a border-box width and centres by default', () => {
@@ -138,4 +143,31 @@ test('supports semantic and caller-owned elements', () => {
 	if (!(element instanceof HTMLElement)) throw new Error('Expected custom Container element.');
 
 	expect(getComputedStyle(element).containerType).toBe('inline-size');
+});
+
+const sizes = ['ct448', 'ct672', 'ct896'] as const;
+
+test('fixed maximum inline sizes', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator: scene } = render(
+			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp12 }}>
+				{sizes.map((maxInlineSize) => (
+					<Container key={maxInlineSize} maxInlineSize={maxInlineSize} paddingInline="sp16">
+						<Box
+							backgroundColor="surface.floating"
+							borderColor="decorative"
+							borderRadius="detail"
+							borderStyle="solid"
+							borderWidth="thin"
+							padding="sp12"
+						>
+							<Text>{maxInlineSize}</Text>
+						</Box>
+					</Container>
+				))}
+			</div>,
+			{ appearance },
+		);
+		await captureVisualAppearance(scene, 'container/fixed-sizes', appearance);
+	}
 });

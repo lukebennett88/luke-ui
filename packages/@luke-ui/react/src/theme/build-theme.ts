@@ -49,11 +49,7 @@ export function compileTheme(foundation: ThemeFoundation): {
 	};
 }
 
-/**
- * Compiles a theme foundation into a complete static stylesheet. Thin wrapper over
- * {@link compileTheme} that returns only the emitted CSS; callers that need the diagnostics data
- * model (tests, Storybook) use `compileTheme` directly. Throws the same errors as `compileTheme`.
- */
+/** Compiles a theme foundation to CSS. Use {@link compileTheme} for diagnostics. */
 export function buildTheme(foundation: ThemeFoundation): string {
 	return compileTheme(foundation).css;
 }

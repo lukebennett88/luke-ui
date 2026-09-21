@@ -8,6 +8,7 @@ on:
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - 'mise.toml'
+      - '.github/scripts/**'
       - '.github/workflows/visual-regression.yml'
   workflow_dispatch:
 
@@ -15,56 +16,84 @@ concurrency:
   group: visual-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+
 jobs:
   compare:
+    name: compare
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
     outputs:
-      changed: ${{ steps.summary.outputs.changed }}
+      review: ${{ steps.summary.outputs.review }}
     steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: jdx/mise-action@v4
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup tooling with mise
+        uses: jdx/mise-action@v4
         with:
           install: true
           cache: true
-      - run: corepack enable
-      - run: corepack pnpm install --frozen-lockfile
-      - run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
-      - uses: actions/cache@v6
-        with:
-          path: .artifacts/visual-regression/cache
-          # File list must match VISUAL_CACHE_HASH_FILES in
-          # packages/@luke-ui/react/scripts/visual-regression-contract.ts.
-          key:
-            visual-main-${{ runner.os }}-${{ runner.arch }}-${{ github.event.pull_request.base.sha
-            || github.event.before }}-${{ hashFiles('pnpm-lock.yaml',
-            'packages/@luke-ui/react/vitest.config.ts',
-            'packages/@luke-ui/react/src/core/stylesheet.css.ts',
-            'packages/@luke-ui/react/src/core/test-utils/render-setup.ts',
-            'packages/@luke-ui/react/src/core/test-utils/render-mount-state.ts',
-            'packages/@luke-ui/react/src/core/test-utils/render.tsx',
-            'packages/@luke-ui/react/src/core/test-utils/visual-setup.ts') }}
-      - name: Compare visual captures
-        run: corepack pnpm test:visual
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Resolve baseline
+        id: baseline
         env:
-          VISUAL_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-      - id: summary
-        run:
-          echo "changed=$(jq '.counts.changed' .artifacts/visual-regression/report/summary.json)" >>
-          "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v7
+          GITHUB_TOKEN: ${{ github.token }}
+        run: corepack pnpm --filter @luke-ui/workflow-scripts run visual-ci resolve-baseline
+
+      - name: Download baseline
+        uses: actions/download-artifact@v7
         with:
-          name: visual-regression-report
-          path: .artifacts/visual-regression/report
+          name: visual-baseline
+          path: .artifacts/visual-regression/baseline
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.baseline.outputs.run-id }}
+
+      - name: Fail when the baseline has no screenshots
+        run: corepack pnpm --filter @luke-ui/workflow-scripts run visual-ci check-captures
+
+      - name: Install Playwright Chromium
+        run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+
+      - name: Build packages
+        run: corepack pnpm build:packages
+
+      - name: Compare against the baseline
+        run: corepack pnpm --filter @luke-ui/react run test:visual
+
+      - name: Summarise the comparison
+        id: summary
+        run: corepack pnpm --filter @luke-ui/workflow-scripts run visual-ci summarise
+
+      - name: Upload expected, actual, and diff screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-regression-diff
+          path: |
+            .artifacts/visual-regression/diff
+            .artifacts/visual-regression/summary.json
+          if-no-files-found: ignore
           retention-days: 14
 
   review:
-    if: needs.compare.outputs.changed != '0'
+    name: review
+    if: needs.compare.outputs.review != '0'
     needs: compare
     runs-on: ubuntu-latest
     environment: visual-review
+    permissions: {}
     steps:
-      - run: echo 'Visual changes approved for this commit.'
+      - name: Record the approval
+        run: |
+          echo "Approved ${{ needs.compare.outputs.review }} baseline change(s) for ${{ github.sha }}."

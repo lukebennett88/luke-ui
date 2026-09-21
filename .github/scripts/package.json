@@ -1,0 +1,21 @@
+{
+	"name": "@luke-ui/workflow-scripts",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint . --type-aware",
+		"check:types": "tsc --noEmit -p tsconfig.json",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --type-aware --fix",
+		"test": "vp test run",
+		"visual-ci": "tsx visual-ci.ts"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:",
+		"vite-plus": "catalog:"
+	}
+}

@@ -1,18 +1,26 @@
+import { Box } from '@luke-ui/react/box';
+import { createSprinkles } from '@luke-ui/react/styles';
+import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
-import { expect, test } from 'vite-plus/test';
-import { testConformance } from '../conformance/helpers.js';
-import { createSprinkles } from '../styles/utilities.css.js';
-import { render } from '../test-utils/render.js';
-import { Box } from './box.js';
+import { test, expect } from 'vite-plus/test';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance } from '../test-utils/visual.js';
 
-testConformance({
-	path: 'box',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a Box element.');
-		return target;
-	},
-	render: (props = {}) => render(<Box {...props}>Content</Box>),
+test('Box forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLElement>();
+	const { container } = render(
+		<Box {...forwardedDomProps} ref={ref}>
+			Content
+		</Box>,
+	);
+	const target = expectHtmlElement(container.firstElementChild, 'Expected a Box element.');
+
+	expectForwardsDomProps(target, ref);
 });
 
 test('renders semantic elements and a consumer-owned render prop', () => {
@@ -118,3 +126,30 @@ function expectConsumerClassAfterUtilities(className: string, utilityClassName: 
 		expect(utilityIndex).toBeLessThan(consumerIndex);
 	}
 }
+
+test('layout', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator: scene } = render(
+			<Box
+				display="flex"
+				flexDirection="column"
+				gap="sp8"
+				padding="sp16"
+				style={{
+					backgroundColor: vars.color.surface.recessed,
+					borderRadius: vars.radius.surface,
+					boxShadow: vars.depth.recessed,
+					color: vars.color.text.primary,
+				}}
+			>
+				<Box>Account</Box>
+				<Box display="flex" gap="sp8">
+					<Box>Profile</Box>
+					<Box>Security</Box>
+				</Box>
+			</Box>,
+			{ appearance },
+		);
+		await captureVisualAppearance(scene, 'box/layout', appearance);
+	}
+});

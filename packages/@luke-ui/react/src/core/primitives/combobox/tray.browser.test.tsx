@@ -1,19 +1,21 @@
+import { Icon } from '@luke-ui/react/icon';
+import {
+	ComboboxClearButton,
+	ComboboxInput,
+	ComboboxInputGroup,
+	ComboboxItem,
+	ComboboxListBox,
+	ComboboxRoot,
+	ComboboxTray,
+	ComboboxTrayTrigger,
+} from '@luke-ui/react/primitives/combobox';
+import type { ComboboxRootProps } from '@luke-ui/react/primitives/combobox';
+import { Field } from '@luke-ui/react/primitives/field';
 import { Form } from 'react-aria-components/Form';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { Icon } from '../../icon/icon.js';
 import { render } from '../../test-utils/render.js';
 import { waitForOverlayEnter } from '../../test-utils/wait-for-overlay-enter.js';
-import { Field } from '../field/field.js';
-import { ComboboxClearButton } from './clear-button.js';
-import { ComboboxInputGroup } from './input-group.js';
-import { ComboboxInput } from './input.js';
-import { ComboboxItem } from './item.js';
-import { ComboboxListBox } from './listbox.js';
-import type { ComboboxRootProps } from './root.js';
-import { ComboboxRoot } from './root.js';
-import { ComboboxTrayTrigger } from './tray-trigger.js';
-import { ComboboxTray } from './tray.js';
 
 type CountryItem = {
 	id: string;

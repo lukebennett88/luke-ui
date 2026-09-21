@@ -34,11 +34,6 @@
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["dist/**", ".output/**", ".source/**"]
 		},
-		"build:storybook": {
-			"dependsOn": ["build", "generate"],
-			"env": ["STORYBOOK_BASE_PATH"],
-			"outputs": ["storybook-static/**"]
-		},
 		"check": {
 			"dependsOn": [
 				"check:barrels",
@@ -47,8 +42,6 @@
 				"//#check:format-root",
 				"check:lint",
 				"check:llms",
-				"check:story-plays",
-				"check:test-suffixes",
 				"check:types"
 			]
 		},
@@ -72,12 +65,6 @@
 			"dependsOn": ["generate", "^build"]
 		},
 		"check:llms": {},
-		"check:story-plays": {
-			"dependsOn": ["generate"]
-		},
-		"check:test-suffixes": {
-			"dependsOn": ["generate"]
-		},
 		"check:types": {
 			"dependsOn": ["generate", "^build"]
 		},
@@ -87,11 +74,6 @@
 		"dev": {
 			"cache": false,
 			"dependsOn": ["generate", "^build"],
-			"persistent": true
-		},
-		"dev:storybook": {
-			"cache": false,
-			"dependsOn": ["generate"],
 			"persistent": true
 		},
 		"docs#build": {
@@ -146,10 +128,8 @@
 				"$TURBO_DEFAULT$",
 				"!dist/**",
 				"!.generated/**",
-				"!storybook-static/**",
 				"!**/*.test.ts",
-				"!**/*.test.tsx",
-				"!**/*.stories.tsx"
+				"!**/*.test.tsx"
 			],
 			"outputs": [".generated/**", "dist/spritesheet.svg", "dist/themes/**", "src/routeTree.gen.ts"]
 		},
@@ -157,15 +137,34 @@
 			"dependsOn": ["^build", "generate"],
 			"outputs": []
 		},
-		"test:ui": {
+		"test:browser:run": {
 			"cache": false,
-			"dependsOn": ["generate"],
-			"persistent": true
+			"dependsOn": ["build"],
+			"outputs": []
 		},
-		"test:watch": {
+		"test:ui:run": {
 			"cache": false,
-			"dependsOn": ["generate"],
-			"persistent": true
+			"dependsOn": ["build"],
+			"persistent": true,
+			"with": ["dev"]
+		},
+		"test:visual:capture:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"outputs": [],
+			"passThroughEnv": ["VISUAL_CAPTURE_DIR"]
+		},
+		"test:visual:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"outputs": [],
+			"passThroughEnv": ["VISUAL_BASELINE_DIR", "VISUAL_CAPTURE_DIR"]
+		},
+		"test:watch:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"persistent": true,
+			"with": ["dev"]
 		}
 	}
 }

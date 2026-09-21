@@ -1,15 +1,11 @@
 import * as z from 'zod';
 import { renderComponentPropsTable } from './creation-plan-docs.js';
 import type { CreationWork, PlanFile } from './creation-plan-types.js';
-import { formatConformanceList } from './generator-shared.js';
 import { toCamelCase, toDisplayName, toKebabCase, validateScaffoldName } from './naming.js';
 
-/** Conformance contracts the primitive scaffold can satisfy today. */
-export const PRIMITIVE_CONFORMANCE_CONTRACTS = ['dom'] as const;
-
 export const PRIMITIVE_DEFAULTS = {
-	conformance: [],
 	docs: true,
+	visualCoverage: true,
 } as const;
 
 export interface PrimitiveCreationPlan {
@@ -22,11 +18,9 @@ export interface PrimitiveCreationPlan {
 interface PrimitiveCreationWork extends PrimitiveCreationPlan, CreationWork {}
 
 const primitiveAnswersSchema = z.object({
-	conformance: z
-		.array(z.enum(PRIMITIVE_CONFORMANCE_CONTRACTS))
-		.default([...PRIMITIVE_DEFAULTS.conformance]),
 	docs: z.boolean().default(PRIMITIVE_DEFAULTS.docs),
 	name: z.string(),
+	visualCoverage: z.boolean().default(PRIMITIVE_DEFAULTS.visualCoverage),
 });
 
 export type CreatePrimitiveInput = z.input<typeof primitiveAnswersSchema>;
@@ -59,8 +53,6 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	const variantsType = `${pascalName}RecipeVariants`;
 	const packagePath = `@luke-ui/react/primitives/${name}`;
 	const docsTitle = `${displayName} primitive`;
-	const hasDomConformance = input.conformance.includes('dom');
-	const conformance = hasDomConformance ? (['dom'] as const) : ([] as const);
 
 	// Most primitives on main are multi-part compositions without a single root. The scaffold keeps
 	// a minimal div and recipe so the public export and stylesheet registration can build; replace
@@ -78,14 +70,16 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 			contents: renderRecipe({ recipeName, variantsType }),
 			path: `packages/@luke-ui/react/src/core/primitives/${name}/recipe.css.ts`,
 		},
-	];
-
-	if (hasDomConformance) {
-		files.push({
-			contents: renderDomConformanceTest({ name, pascalName }),
+		{
+			contents: renderPrimitiveTest({
+				name,
+				packagePath,
+				pascalName,
+				visualCoverage: input.visualCoverage,
+			}),
 			path: `packages/@luke-ui/react/src/core/primitives/${name}/${name}.browser.test.tsx`,
-		});
-	}
+		},
+	];
 
 	if (input.docs) {
 		files.push(
@@ -123,16 +117,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 					},
 				]
 			: [],
-		textFileInserts: [
-			{
-				kind: 'text-insert',
-				lines: [
-					`\t['${docsTitle}', 'primitives/${name}', ${formatConformanceList(conformance)}, 'none', 'none'],`,
-				],
-				marker: '].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({',
-				path: 'packages/@luke-ui/react/src/core/conformance/manifest.ts',
-			},
-		],
+		textFileInserts: [],
 	};
 }
 
@@ -141,10 +126,8 @@ function renderPrimitiveSource(input: { pascalName: string; recipeName: string }
 import { cx } from '../../../shared/utils/utils.js';
 import { ${input.recipeName} } from './recipe.css.js';
 
-/** Props for the \`${input.pascalName}\` primitive. */
 export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
 
-/** Primitive \`${input.pascalName}\`. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
 	const { className, ...divProps } = props;
 	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;
@@ -212,19 +195,84 @@ ${propsTable}
 `;
 }
 
-function renderDomConformanceTest(input: { name: string; pascalName: string }): string {
-	return `import { testConformance } from '../../conformance/helpers.js';
-import { render } from '../../test-utils/render.js';
-import { ${input.pascalName} } from './${input.name}.js';
+function renderPrimitiveTest(input: {
+	name: string;
+	packagePath: string;
+	pascalName: string;
+	visualCoverage: boolean;
+}): string {
+	const sceneName = `${input.pascalName}Scene`;
 
-testConformance({
-	path: 'primitives/${input.name}',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected ${input.pascalName} element.');
-		return target;
-	},
-	render: (props = {}) => render(<${input.pascalName} {...props}>Content</${input.pascalName}>),
-});
+	const imports = [
+		`import { ${input.pascalName} } from '${input.packagePath}';`,
+		"import { createRef } from 'react';",
+		"import { expect, test } from 'vite-plus/test';",
+		"import { expectNoAxeViolations } from '../../test-utils/axe.js';",
+		"import { expectForwardsDomProps, expectHtmlElement, forwardedDomProps } from '../../test-utils/forwarding.js';",
+		...(input.visualCoverage
+			? ["import { render, visualAppearances } from '../../test-utils/render.js';"]
+			: ["import { render } from '../../test-utils/render.js';"]),
+		...(input.visualCoverage
+			? ["import { captureVisualAppearance, Grid } from '../../test-utils/visual.js';"]
+			: ["import { Grid } from '../../test-utils/visual.js';"]),
+	];
+
+	const scene = `function ${sceneName}() {
+	return (
+		<Grid columns={2}>
+			<${input.pascalName}>Default</${input.pascalName}>
+			<${input.pascalName}>With content</${input.pascalName}>
+		</Grid>
+	);
+}`;
+
+	const forwardingTest = `test('${input.pascalName} forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLDivElement>();
+	const { container } = render(
+		<${input.pascalName}
+			{...forwardedDomProps}
+			ref={ref}
+		>
+			Content
+		</${input.pascalName}>,
+	);
+	const target = expectHtmlElement(container.firstElementChild, 'Expected ${input.pascalName} element.');
+
+	expectForwardsDomProps(target, ref);
+});`;
+
+	const axeTest = `test('the ${input.pascalName} scene has no axe violations', async () => {
+	const { container } = render(<${sceneName} />);
+
+	await expectNoAxeViolations(container);
+});`;
+
+	const placeholderTest = `// TODO: Test actual behaviour or delete.
+test('${input.pascalName} renders its content', () => {
+	const { locator } = render(<${input.pascalName}>Content</${input.pascalName}>);
+
+	expect(locator.getByText('Content').element()).toBeInTheDocument();
+});`;
+
+	const visualTest = input.visualCoverage
+		? `
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(<${sceneName} />, { appearance });
+		await captureVisualAppearance(locator, '${input.name}/kitchen-sink', appearance);
+	}
+});`
+		: '';
+
+	return `${imports.join('\n')}
+
+${scene}
+
+${forwardingTest}
+
+${axeTest}
+
+${placeholderTest}${visualTest}
 `;
 }

@@ -1,13 +1,24 @@
-import { testConformance } from '../conformance/helpers.js';
+import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
+import { createRef } from 'react';
+import { test } from 'vite-plus/test';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
 import { render } from '../test-utils/render.js';
-import { VisuallyHidden } from './visually-hidden.js';
 
-testConformance({
-	path: 'visually-hidden',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a VisuallyHidden element.');
-		return target;
-	},
-	render: (props = {}) => render(<VisuallyHidden {...props}>Hidden label</VisuallyHidden>),
+test('VisuallyHidden forwards className, data attributes, id, and ref to its element', () => {
+	const ref = createRef<HTMLElement>();
+	const { container } = render(
+		<VisuallyHidden {...forwardedDomProps} ref={ref}>
+			Hidden label
+		</VisuallyHidden>,
+	);
+	const target = expectHtmlElement(
+		container.firstElementChild,
+		'Expected a VisuallyHidden element.',
+	);
+
+	expectForwardsDomProps(target, ref);
 });

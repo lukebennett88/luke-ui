@@ -1,25 +1,63 @@
+import { Link } from '@luke-ui/react/link';
+import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { testConformance, testIntegration } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { Link } from './link.js';
+import { page, userEvent } from 'vite-plus/test/context';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { expectForwardsDomProps, forwardedDomProps } from '../test-utils/forwarding.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	emulateForcedColors,
+	focusViaKeyboard,
+	Grid,
+	Stack,
+} from '../test-utils/visual.js';
 
-testConformance({
-	path: 'link',
-	getTarget: (result) => {
-		const target = result.locator.getByRole('link', { name: 'Settings' }).element();
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a link.');
-		return target;
-	},
-	render: (props = {}) => {
-		return render(
-			<Link {...props} href="#">
-				Settings
-			</Link>,
-		);
-	},
+function LinkScene() {
+	return (
+		<Stack align="flex-start">
+			<Link href="#" prominence="low">
+				Text low
+			</Link>
+			<Link href="#">Text standard</Link>
+			<Link href="#" prominence="high">
+				Text high
+			</Link>
+			<Grid columns={4}>
+				<Link appearance="button" href="#" prominence="low">
+					Button low
+				</Link>
+				<Link appearance="button" href="#">
+					Button standard
+				</Link>
+				<Link appearance="button" href="#" prominence="high">
+					Button high
+				</Link>
+			</Grid>
+			<Link href="#" isDisabled>
+				Disabled text link
+			</Link>
+			<Link appearance="button" href="#" isDisabled prominence="high">
+				Disabled button link
+			</Link>
+		</Stack>
+	);
+}
+
+test('Link forwards className, data attributes, id, and ref to the anchor element', () => {
+	const ref = createRef<HTMLAnchorElement>();
+	const { locator } = render(
+		<Link {...forwardedDomProps} href="#" ref={ref}>
+			Settings
+		</Link>,
+	);
+	const target = locator.getByRole('link', { name: 'Settings' }).element();
+
+	expectForwardsDomProps(target, ref);
 });
 
-testIntegration('link', async () => {
+test('pressing a Link runs its onPress handler', async () => {
 	let pressed = false;
 	const { locator, user } = render(
 		<Link href="#" onPress={() => (pressed = true)}>
@@ -28,8 +66,13 @@ testIntegration('link', async () => {
 	);
 
 	await user.click(locator.getByRole('link', { name: 'Settings' }));
-	// oxlint-disable-next-line vitest/no-standalone-expect
 	expect(pressed).toBe(true);
+});
+
+test('the Link scene has no axe violations', async () => {
+	const { container } = render(<LinkScene />);
+
+	await expectNoAxeViolations(container);
 });
 
 test('a default text Link keeps inline text geometry', () => {
@@ -147,4 +190,65 @@ test('a disabled Link exposes disabled state in either appearance', () => {
 	const buttonLink = locator.getByRole('link', { name: 'Button link' }).element();
 	expect(textLink).toHaveAttribute('data-disabled', 'true');
 	expect(buttonLink).toHaveAttribute('data-disabled', 'true');
+});
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(<LinkScene />, { appearance });
+		await captureVisualAppearance(locator, 'link/kitchen-sink', appearance);
+	}
+});
+
+test('interactive states', { tags: ['visual'] }, async () => {
+	const { locator } = render(
+		<Stack align="flex-start">
+			<Link href="#" prominence="low">
+				Destination
+			</Link>
+		</Stack>,
+	);
+	const link = page.getByRole('link', { name: 'Destination' });
+
+	await userEvent.hover(link);
+	await captureVisual(locator, 'link/hover');
+	await userEvent.unhover(link);
+	await focusViaKeyboard(link);
+	await captureVisual(locator, 'link/focus-visible');
+	await userEvent.keyboard('{Enter>}');
+	await captureVisual(locator, 'link/pressed');
+	await userEvent.keyboard('{/Enter}');
+});
+
+test('forced-colors states', { tags: ['visual'] }, async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator } = render(
+			<Grid columns={4}>
+				<Link href="#" prominence="low">
+					Resting
+				</Link>
+				<Link href="#" prominence="low">
+					Hovered
+				</Link>
+				<Link href="#" prominence="low">
+					Pressed and focused
+				</Link>
+				<Link href="#" isDisabled prominence="low">
+					Disabled
+				</Link>
+			</Grid>,
+		);
+		const hovered = page.getByRole('link', { name: 'Hovered' });
+
+		await userEvent.hover(hovered);
+		await userEvent.tab();
+		await userEvent.tab();
+		await userEvent.tab();
+		await userEvent.keyboard('{Enter>}');
+		await captureVisual(locator, 'link/forced-colors-states');
+		await userEvent.keyboard('{/Enter}');
+	} finally {
+		await emulateForcedColors('none');
+	}
 });

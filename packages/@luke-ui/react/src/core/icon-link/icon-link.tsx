@@ -1,4 +1,4 @@
-import type { JSX, ReactElement } from 'react';
+import type { JSX, ReactElement, Ref } from 'react';
 import type { LinkProps as RacLinkProps } from 'react-aria-components/Link';
 import { Link as RacLink } from 'react-aria-components/Link';
 import { composeRenderProps } from 'react-aria-components/composeRenderProps';
@@ -33,6 +33,8 @@ interface _IconLinkProps extends _IconLinkOmit {
 	isDisabled?: RacLinkProps['isDisabled'];
 	/** Press handler for navigation-related handling. */
 	onPress?: RacLinkProps['onPress'];
+	/** Ref forwarded to the underlying anchor element. */
+	ref?: Ref<HTMLAnchorElement>;
 }
 
 /** Props for the `IconLink` component. */

@@ -1,18 +1,60 @@
+import { Button } from '@luke-ui/react/button';
+import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
+import { TextField } from '@luke-ui/react/text-field';
+import { createRef } from 'react';
+import type { CSSProperties } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { cdp } from 'vite-plus/test/context';
-import { Button } from '../button/button.js';
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { LoadingSkeleton, LoadingSkeletonProvider } from './loading-skeleton.js';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { emulateReducedMotion } from '../test-utils/emulate-media.js';
+import {
+	expectForwardsDomProps,
+	expectHtmlElement,
+	forwardedDomProps,
+} from '../test-utils/forwarding.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
-testConformance({
-	path: 'loading-skeleton',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a LoadingSkeleton element.');
-		return target;
-	},
-	render: (props = {}) => render(<LoadingSkeleton {...props}>Loading copy</LoadingSkeleton>),
+function LoadingSkeletonScene() {
+	return (
+		<Stack align="flex-start">
+			<LoadingSkeleton>Loading placeholder text</LoadingSkeleton>
+			<div style={{ maxInlineSize: '16rem' } satisfies CSSProperties}>
+				<LoadingSkeleton>
+					A short paragraph of placeholder copy that wraps across two lines.
+				</LoadingSkeleton>
+			</div>
+			<LoadingSkeleton>
+				<Button>Submit</Button>
+			</LoadingSkeleton>
+			<LoadingSkeleton radius="control">
+				<TextField label="Email" name="email" placeholder="Email address" />
+			</LoadingSkeleton>
+			<LoadingSkeleton isLoading={false}>
+				<Button>Submit</Button>
+			</LoadingSkeleton>
+		</Stack>
+	);
+}
+
+test('LoadingSkeleton forwards className, data attributes, id, and ref to its root', () => {
+	const ref = createRef<HTMLElement>();
+	const { container } = render(
+		<LoadingSkeleton {...forwardedDomProps} ref={ref}>
+			Loading copy
+		</LoadingSkeleton>,
+	);
+	const target = expectHtmlElement(
+		container.firstElementChild,
+		'Expected a LoadingSkeleton element.',
+	);
+
+	expectForwardsDomProps(target, ref);
+});
+
+test('the LoadingSkeleton scene has no axe violations', async () => {
+	const { container } = render(<LoadingSkeletonScene />);
+
+	await expectNoAxeViolations(container);
 });
 
 test('resolves local, provider, and default loading states', () => {
@@ -40,12 +82,6 @@ test('resolves local, provider, and default loading states', () => {
 	expect(provider.closest('[aria-hidden]')).not.toBeNull();
 	expect(fallback.closest('[aria-hidden]')).not.toBeNull();
 });
-
-async function emulateReducedMotion(reduce: boolean): Promise<void> {
-	await cdp().send('Emulation.setEmulatedMedia', {
-		features: [{ name: 'prefers-reduced-motion', value: reduce ? 'reduce' : 'no-preference' }],
-	});
-}
 
 afterEach(async () => {
 	await emulateReducedMotion(false);
@@ -135,4 +171,25 @@ test('uses the effective writing direction for sheen travel under nested dir ove
 	expect(sheenPositionX(rtlThenLtr)).toBe(sheenPositionX(ltrBaseline));
 	expect(sheenPositionX(ltrThenRtl)).toBe(sheenPositionX(rtlBaseline));
 	expect(sheenPositionX(ltrBaseline)).not.toBe(sheenPositionX(rtlBaseline));
+});
+
+test('text and component placeholders', { tags: ['visual'] }, async () => {
+	const { locator } = render(<LoadingSkeletonScene />);
+
+	await captureVisual(locator, 'loading-skeleton/placeholders');
+});
+
+test('flattens tactile descendants', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<LoadingSkeleton radius="surface">
+				<div>
+					<Button>Nested action</Button>
+					<TextField label="Email" name="email" />
+				</div>
+			</LoadingSkeleton>,
+			{ appearance },
+		);
+		await captureVisualAppearance(locator, 'loading-skeleton/descendant-suppression', appearance);
+	}
 });

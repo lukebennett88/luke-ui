@@ -1,13 +1,17 @@
-import { testConformance } from '../../conformance/helpers.js';
+import { Button } from '@luke-ui/react/primitives/button';
+import { createRef } from 'react';
+import { test } from 'vite-plus/test';
+import { expectForwardsDomProps, forwardedDomProps } from '../../test-utils/forwarding.js';
 import { render } from '../../test-utils/render.js';
-import { Button } from './button.js';
 
-testConformance({
-	path: 'primitives/button',
-	getTarget: (result) => {
-		const target = result.locator.getByRole('button').element();
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a button primitive.');
-		return target;
-	},
-	render: (props = {}) => render(<Button {...props}>Action</Button>),
+test('the Button primitive forwards className, data attributes, id, and ref to the button', () => {
+	const ref = createRef<HTMLButtonElement>();
+	const { locator } = render(
+		<Button {...forwardedDomProps} ref={ref}>
+			Action
+		</Button>,
+	);
+	const target = locator.getByRole('button').element();
+
+	expectForwardsDomProps(target, ref);
 });

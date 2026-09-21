@@ -227,7 +227,7 @@ the code first.
 - Combine values from two props only when the combination changes the result. Show only the
   combinations that explain the change.
 - Do not show all prop combinations only to provide coverage. The Props page lists all available
-  props and values. Visual tests cover all valid combinations.
+  props and values.
 
 A reference page can show a full scale or catalogue when the page is about that scale or catalogue.
 

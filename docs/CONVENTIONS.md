@@ -31,7 +31,6 @@ not as inline string constants.
 - Props: `PascalCaseProps`, for example `ButtonProps`.
 - Files: `kebab-case`, for example `icon-button.tsx`.
 - CSS: `*.css.ts`.
-- Stories: `*.stories.tsx`.
 
 ## Code style
 

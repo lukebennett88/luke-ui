@@ -1,22 +1,25 @@
 import path from 'node:path';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { parseVisualCaptureIdentity } from '../src/core/test-utils/visual-capture-id.js';
 
+export type VisualStatus = 'added' | 'changed' | 'removed' | 'unchanged';
+
 export type VisualResult = {
 	id: string;
-	status: 'added' | 'changed' | 'removed' | 'unchanged';
-	base?: string;
-	current?: string;
+	status: VisualStatus;
+	expected?: string;
+	actual?: string;
 	diff?: string;
 	mismatchedPixels?: number;
-	mismatchRatio?: number;
 	height?: number;
 	width?: number;
-	baseViewport?: string;
-	currentViewport?: string;
+	expectedViewport?: string;
+	actualViewport?: string;
 };
+
+export type VisualCounts = Record<VisualStatus, number>;
 
 type CaptureFile = { file: string; viewport?: string };
 
@@ -31,7 +34,6 @@ async function listPngs(root: string) {
 	return result;
 }
 
-/** Walks `root` for `.png` files, calling `visitor` with each file's path and its capture name (the path relative to `root`, without the extension). */
 async function walkPngs(root: string, visitor: (file: string, captureName: string) => void) {
 	async function visit(directory: string) {
 		await Promise.all(
@@ -52,12 +54,7 @@ async function walkPngs(root: string, visitor: (file: string, captureName: strin
 	await visit(root);
 }
 
-/**
- * Fails captures taller than their recorded viewport whose bottom decile is a
- * single uniform colour, meaning the scene grew but that region never
- * painted. See #310 for why `captureVisual` has to grow both the page and the
- * test iframe for a tall scene to paint in full.
- */
+// Detects #310: tall captures with an unpainted bottom band.
 export async function assertCapturesPainted(directory: string) {
 	const viewportCaptures: Array<{ file: string; id: string; viewportHeight: number }> = [];
 	await walkPngs(directory, (file, captureName) => {
@@ -106,155 +103,106 @@ function isBottomBandUniform(png: PNG) {
 	return true;
 }
 
-export async function compareCaptures(baseDir: string, currentDir: string, diffDir: string) {
-	const [base, current] = await Promise.all([listPngs(baseDir), listPngs(currentDir)]);
-	const ids = [...new Set([...base.keys(), ...current.keys()])].sort();
-	await mkdir(diffDir, { recursive: true });
+export async function compareCaptures(expectedDir: string, actualDir: string, outputDir: string) {
+	const [expected, actual] = await Promise.all([listPngs(expectedDir), listPngs(actualDir)]);
+	const ids = [...new Set([...expected.keys(), ...actual.keys()])].sort();
 	const results = await Promise.all(
-		ids.map(async (id): Promise<VisualResult> => {
-			const baseCapture = base.get(id);
-			const currentCapture = current.get(id);
-			if (!baseCapture) {
-				return {
-					current: currentCapture?.file,
-					currentViewport: currentCapture?.viewport,
-					id,
-					status: 'added',
-				};
-			}
-			if (!currentCapture) {
-				return {
-					base: baseCapture.file,
-					baseViewport: baseCapture.viewport,
-					id,
-					status: 'removed',
-				};
-			}
-
-			const [basePng, currentPng] = await Promise.all([
-				readFile(baseCapture.file).then((data) => PNG.sync.read(data)),
-				readFile(currentCapture.file).then((data) => PNG.sync.read(data)),
-			]);
-			const width = Math.max(basePng.width, currentPng.width);
-			const height = Math.max(basePng.height, currentPng.height);
-			const diffPng = new PNG({ height, width });
-			let mismatchedPixels: number;
-			if (basePng.width !== currentPng.width || basePng.height !== currentPng.height) {
-				mismatchedPixels = width * height;
-				for (let index = 0; index < diffPng.data.length; index += 4) {
-					diffPng.data.set([255, 0, 0, 255], index);
-				}
-			} else {
-				mismatchedPixels = pixelmatch(basePng.data, currentPng.data, diffPng.data, width, height, {
-					includeAA: true,
-					threshold: 0.1,
-				});
-			}
-			const mismatchRatio = mismatchedPixels / (width * height);
-			const hasViewportChange = baseCapture.viewport !== currentCapture.viewport;
-			const status = mismatchRatio > 0.001 || hasViewportChange ? 'changed' : 'unchanged';
-			let diff: string | undefined;
-			if (status === 'changed') {
-				diff = path.join(diffDir, `${id}.png`);
-				await mkdir(path.dirname(diff), { recursive: true });
-				await writeFile(diff, PNG.sync.write(diffPng));
-			}
-			return {
-				base: baseCapture.file,
-				baseViewport: baseCapture.viewport,
-				current: currentCapture.file,
-				currentViewport: currentCapture.viewport,
-				diff,
-				height,
-				id,
-				mismatchedPixels,
-				mismatchRatio,
-				status,
-				width,
-			};
-		}),
+		ids.map((id) => compareCapture(id, expected.get(id), actual.get(id), outputDir)),
 	);
 	return results;
 }
 
-export async function renderReport(
-	results: Array<VisualResult>,
-	metadata: { base: string; current: string; platform: string },
-	outputFile: string,
-) {
-	const counts = countResults(results);
-	const cards = await Promise.all(results.map(renderCard));
-	const html = renderDocument(results, counts, cards, metadata);
-	await mkdir(path.dirname(outputFile), { recursive: true });
-	await writeFile(outputFile, html);
-	return counts;
-}
+async function compareCapture(
+	id: string,
+	expectedCapture: CaptureFile | undefined,
+	actualCapture: CaptureFile | undefined,
+	outputDir: string,
+): Promise<VisualResult> {
+	if (!expectedCapture) {
+		return {
+			actual: await publish(outputDir, id, 'actual', actualCapture?.file),
+			actualViewport: actualCapture?.viewport,
+			id,
+			status: 'added',
+		};
+	}
+	if (!actualCapture) {
+		return {
+			expected: await publish(outputDir, id, 'expected', expectedCapture.file),
+			expectedViewport: expectedCapture.viewport,
+			id,
+			status: 'removed',
+		};
+	}
 
-function countResults(results: Array<VisualResult>) {
-	return Object.fromEntries(
-		(['unchanged', 'changed', 'added', 'removed'] as const).map((status) => [
-			status,
-			results.filter((result) => result.status === status).length,
-		]),
-	);
-}
-
-async function renderCard(result: VisualResult) {
-	const [base, current, diff] = await Promise.all([
-		loadImage(result.base),
-		loadImage(result.current),
-		loadImage(result.diff),
+	const [expectedPng, actualPng] = await Promise.all([
+		readPng(expectedCapture.file),
+		readPng(actualCapture.file),
 	]);
-	const ratio = result.mismatchRatio == null ? '' : `${(result.mismatchRatio * 100).toFixed(3)}%`;
-	const dimensions = result.width && result.height ? `${result.width} × ${result.height}` : '';
-	const pixels =
-		result.mismatchedPixels == null ? '' : `${result.mismatchedPixels} mismatched pixels`;
-	const viewports = `main viewport ${result.baseViewport ?? 'unknown'} · current viewport ${result.currentViewport ?? 'unknown'}`;
-	const namespace = getNamespace(result.id);
-	const overlay =
-		base && current
-			? `<figure class="overlay"><figcaption>overlay</figcaption><div><img src="${base}" alt="main"><img class="current" src="${current}" alt="current"></div><label>Reveal current <input type="range" min="0" max="100" value="50" oninput="this.closest('figure').style.setProperty('--reveal',this.value+'%')"></label></figure>`
-			: '';
-	const images = `${overlay}${renderImage('main', base)}${renderImage('current', current)}${renderImage('diff', diff)}`;
+	const width = Math.max(expectedPng.width, actualPng.width);
+	const height = Math.max(expectedPng.height, actualPng.height);
+	const diffPng = new PNG({ height, width });
+	let mismatchedPixels: number;
+	if (expectedPng.width !== actualPng.width || expectedPng.height !== actualPng.height) {
+		mismatchedPixels = width * height;
+		for (let index = 0; index < diffPng.data.length; index += 4) {
+			diffPng.data.set([255, 0, 0, 255], index);
+		}
+	} else {
+		mismatchedPixels = pixelmatch(expectedPng.data, actualPng.data, diffPng.data, width, height, {
+			includeAA: true,
+			threshold: 0.1,
+		});
+	}
+	const status: VisualStatus =
+		mismatchedPixels > 0 || expectedCapture.viewport !== actualCapture.viewport
+			? 'changed'
+			: 'unchanged';
 
-	return `<article data-status="${result.status}" data-namespace="${namespace}"><h2>${escapeHtml(result.id)}</h2><p><strong>${result.status}</strong> ${ratio} · ${dimensions} · ${pixels}<br>${viewports}</p><div class="images">${images}</div></article>`;
+	const result: VisualResult = {
+		actualViewport: actualCapture.viewport,
+		expectedViewport: expectedCapture.viewport,
+		height,
+		id,
+		mismatchedPixels,
+		status,
+		width,
+	};
+	if (status === 'unchanged') return result;
+
+	const [expectedOut, actualOut, diffOut] = await Promise.all([
+		publish(outputDir, id, 'expected', expectedCapture.file),
+		publish(outputDir, id, 'actual', actualCapture.file),
+		writePng(outputDir, id, 'diff', diffPng),
+	]);
+	return { ...result, actual: actualOut, diff: diffOut, expected: expectedOut };
 }
 
-function renderDocument(
-	results: Array<VisualResult>,
-	counts: Record<string, number>,
-	cards: Array<string>,
-	metadata: { base: string; current: string; platform: string },
-) {
-	const statusButtons = Object.entries(counts)
-		.map(([status, count]) => {
-			return `<button onclick="document.body.dataset.filter='${status}'">${status} (${count})</button>`;
-		})
-		.join('');
-	const namespaces = [...new Set(results.map((result) => getNamespace(result.id)))].sort();
-	const namespaceOptions = namespaces
-		.map((namespace) => `<option value="${namespace}">${namespace}</option>`)
-		.join('');
-	const filterScript =
-		"for(const card of document.querySelectorAll('article'))card.hidden=this.value!==''&&card.dataset.namespace!==this.value";
-
-	return `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Visual regression report</title><style>body{font:14px system-ui;margin:2rem;color:#161616}header{position:sticky;top:0;z-index:1;background:white;padding:.5rem 0;border-bottom:1px solid #ddd}button,select{margin:.25rem;padding:.5rem}article{padding:1rem 0;border-bottom:1px solid #ddd}.images{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}img{display:block;max-width:100%;border:1px solid #ccc}figure{margin:0}.overlay{--reveal:50%}.overlay div{display:grid}.overlay div img{grid-area:1/1}.overlay .current{clip-path:inset(0 calc(100% - var(--reveal)) 0 0)}.overlay input{width:100%}body[data-filter=changed] article:not([data-status=changed]),body[data-filter=added] article:not([data-status=added]),body[data-filter=removed] article:not([data-status=removed]),body[data-filter=unchanged] article:not([data-status=unchanged]){display:none}</style><body><header><h1>Visual regression report</h1><p>base ${escapeHtml(metadata.base)} · current ${escapeHtml(metadata.current)} · ${escapeHtml(metadata.platform)}</p><nav><button onclick="document.body.dataset.filter=''">all (${results.length})</button>${statusButtons}<label>component <select onchange="${filterScript}"><option value="">all</option>${namespaceOptions}</select></label></nav></header><main>${cards.join('')}</main></body></html>`;
+async function readPng(file: string) {
+	return PNG.sync.read(await readFile(file));
 }
 
-async function loadImage(file?: string) {
-	return file ? `data:image/png;base64,${(await readFile(file)).toString('base64')}` : '';
+function outputPath(outputDir: string, id: string, kind: string) {
+	return path.join(outputDir, `${id}.${kind}.png`);
 }
 
-function renderImage(label: string, image: string) {
-	return image
-		? `<figure><figcaption>${label}</figcaption><img src="${image}" alt="${label}"></figure>`
-		: '';
+async function publish(outputDir: string, id: string, kind: string, source?: string) {
+	if (source === undefined) return undefined;
+	const destination = outputPath(outputDir, id, kind);
+	await mkdir(path.dirname(destination), { recursive: true });
+	await copyFile(source, destination);
+	return destination;
 }
 
-function escapeHtml(value: string) {
-	return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('"', '&quot;');
+async function writePng(outputDir: string, id: string, kind: string, png: PNG) {
+	const destination = outputPath(outputDir, id, kind);
+	await mkdir(path.dirname(destination), { recursive: true });
+	await writeFile(destination, PNG.sync.write(png));
+	return destination;
 }
 
-function getNamespace(id: string) {
-	return id.includes('/') ? (id.split('/')[0] ?? 'legacy') : 'legacy';
+export function countResults(results: Array<VisualResult>): VisualCounts {
+	const counts: VisualCounts = { added: 0, changed: 0, removed: 0, unchanged: 0 };
+	for (const result of results) counts[result.status] += 1;
+	return counts;
 }
