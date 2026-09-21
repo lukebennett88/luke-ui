@@ -12,8 +12,29 @@ const VISUAL_CAPTURE_ID_PATTERN = /^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const VISUAL_VIEWPORT_WIDTH = 1024;
 const VISUAL_VIEWPORT_HEIGHT = 800;
 
+/**
+ * Jump running CSS transitions and animations to their end values.
+ *
+ * Applying `prefers-reduced-motion: reduce` or `transition: none` mid-flight cancels the
+ * transition and leaves interpolated values (for example a semi-transparent
+ * `text-decoration-color`) frozen in place. Finish first, then freeze.
+ */
+function finishInFlightMotion(root: Document | Element = document) {
+	if (typeof root.getAnimations !== 'function') return;
+
+	for (const animation of root.getAnimations({ subtree: true })) {
+		try {
+			animation.finish();
+		} catch {
+			// Already finished or not finishable (e.g. infinite iterations).
+		}
+	}
+}
+
 // Reduced motion prevents entering overlays from capturing at opacity 0.
 export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
+	finishInFlightMotion();
+
 	const previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
 	await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
 
@@ -32,6 +53,8 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 }
 `;
 	document.head.append(freezeMotion);
+	// Catch transitions that started between finish and the freeze stylesheet.
+	finishInFlightMotion();
 
 	return async () => {
 		freezeMotion.remove();
@@ -47,6 +70,9 @@ export async function captureVisual(locator: Locator, id: string) {
 	const originalViewportWidth = window.innerWidth;
 	const originalViewportHeight = window.innerHeight;
 	await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
+	if (document.fonts?.status !== 'loaded') {
+		await document.fonts.ready;
+	}
 	const restoreMotion = await freezeMotionForCapture();
 	let isTall = false;
 	try {
