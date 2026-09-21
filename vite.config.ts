@@ -86,11 +86,6 @@ export default defineConfig({
 									message: 'Mount components through src/core/test-utils/render.tsx.',
 									name: 'react-dom/client',
 								},
-								{
-									message:
-										'Do not assert resolved theme tokens in component tests. Suppress this rule only for structural fixture setup.',
-									name: '@luke-ui/react/theme',
-								},
 							],
 						},
 					],

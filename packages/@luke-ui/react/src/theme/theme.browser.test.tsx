@@ -1,14 +1,14 @@
-import '../../dist/themes/tactile/stylesheet.css';
+import '@luke-ui/react/themes/tactile/stylesheet.css';
+import { Button } from '@luke-ui/react/button';
+import { ComboboxField } from '@luke-ui/react/combobox-field';
+import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { ComboboxItem } from '@luke-ui/react/primitives/combobox';
+import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
-import { Button } from '../core/button/button.js';
-import { ComboboxField } from '../core/combobox-field/combobox-field.js';
-import { IconSpritesheetProvider } from '../core/icon/icon.js';
-import { ComboboxItem } from '../core/primitives/combobox/item.js';
-import { themeClassName as tactileThemeClassName } from './bundles/tactile/index.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
 const scopes: Array<HTMLElement> = [];

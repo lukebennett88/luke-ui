@@ -1,6 +1,5 @@
 import { Heading } from '@luke-ui/react/heading';
 // Only styles the visual fixture below; no test asserts a resolved token value.
-// oxlint-disable-next-line no-restricted-imports
 import { vars } from '@luke-ui/react/theme';
 import { Track } from '@luke-ui/react/track';
 import { createRef } from 'react';

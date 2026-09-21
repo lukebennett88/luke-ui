@@ -1,13 +1,14 @@
+import { Box } from '@luke-ui/react/box';
 import { Container } from '@luke-ui/react/container';
+import { Text } from '@luke-ui/react/text';
+// Only styles the visual fixture below; no test asserts a resolved token value.
+import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { test, afterEach, expect } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
-import { vars } from '../../theme/index.js';
-import { Box } from '../box/box.js';
 import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
-import { Text } from '../text/text.js';
 
 test('Container forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();

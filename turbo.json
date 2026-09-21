@@ -137,15 +137,22 @@
 			"dependsOn": ["^build", "generate"],
 			"outputs": []
 		},
-		"test:ui": {
+		"test:browser:run": {
 			"cache": false,
-			"dependsOn": ["generate"],
-			"persistent": true
+			"dependsOn": ["build"],
+			"outputs": []
 		},
-		"test:watch": {
+		"test:ui:run": {
 			"cache": false,
-			"dependsOn": ["generate"],
-			"persistent": true
+			"dependsOn": ["build"],
+			"persistent": true,
+			"with": ["dev"]
+		},
+		"test:watch:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"persistent": true,
+			"with": ["dev"]
 		}
 	}
 }

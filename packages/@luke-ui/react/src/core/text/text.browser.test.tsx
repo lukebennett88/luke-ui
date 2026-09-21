@@ -1,12 +1,14 @@
+import { Code } from '@luke-ui/react/code';
+import { Em } from '@luke-ui/react/em';
+import { Kbd } from '@luke-ui/react/kbd';
+import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
+// Only enumerates the type styles for the visual fixture below; no test asserts a
+// resolved token value.
+import { typeStyles } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { test, expect } from 'vite-plus/test';
-import { typeStyles } from '../../theme/contract.js';
-import { Code } from '../code/code.js';
-import { Em } from '../em/em.js';
-import { Kbd } from '../kbd/kbd.js';
-import { Strong } from '../strong/strong.js';
 import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';

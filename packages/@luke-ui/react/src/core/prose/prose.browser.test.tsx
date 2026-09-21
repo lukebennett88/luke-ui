@@ -1,14 +1,14 @@
+import { Blockquote } from '@luke-ui/react/blockquote';
+import { Code } from '@luke-ui/react/code';
+import { Heading } from '@luke-ui/react/heading';
 import { Prose, proseRecipe } from '@luke-ui/react/prose';
+import { Text } from '@luke-ui/react/text';
 import type { CSSProperties } from 'react';
 import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';
-import { Blockquote } from '../blockquote/blockquote.js';
-import { Code } from '../code/code.js';
-import { Heading } from '../heading/heading.js';
 import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
-import { Text } from '../text/text.js';
 
 test('Prose forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLDivElement>();

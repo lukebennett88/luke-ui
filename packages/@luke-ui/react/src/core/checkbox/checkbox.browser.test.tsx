@@ -1,10 +1,12 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
+// Only enumerates the type styles for the visual fixture below; no test asserts a
+// resolved token value.
+import { typeStyles } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
-import { typeStyles } from '../../theme/contract.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {

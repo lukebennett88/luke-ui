@@ -1,6 +1,5 @@
 import { Cluster } from '@luke-ui/react/cluster';
 // Only styles the visual fixture below; no test asserts a resolved token value.
-// oxlint-disable-next-line no-restricted-imports
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';

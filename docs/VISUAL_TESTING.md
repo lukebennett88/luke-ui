@@ -10,11 +10,15 @@ baseline manifests, or Git LFS objects.
 
 A push to `main` that touches the component packages runs the `Visual baseline` workflow, which
 renders the visual cases and uploads them as the `visual-baseline` GitHub Actions artefact. A pull
-request downloads that artefact from the latest successful `main` run, renders only its own branch,
-and compares the two.
+request downloads that artefact from the newest `main` run, renders only its own branch, and
+compares the two.
 
-Nothing re-renders `main` during a pull request. When the artefact is missing or expired the job
-fails and asks for the `Visual baseline` workflow to be re-run on `main`.
+The newest run is the only candidate. It must have completed, concluded `success`, and still hold
+its artefact. If any of those is untrue the job fails and names which one. An older successful run
+is never substituted, because a stale baseline would pass a pull request nothing had checked.
+
+Nothing re-renders `main` during a pull request. When the baseline is missing, unusable, or expired,
+the job fails and asks for the `Visual baseline` workflow to be re-run on `main`.
 
 ## Run the comparison locally
 

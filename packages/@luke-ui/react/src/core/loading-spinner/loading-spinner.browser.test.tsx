@@ -1,8 +1,9 @@
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+// Only styles the visual fixture below; no test asserts a resolved token value.
+import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { test } from 'vite-plus/test';
-import { vars } from '../../theme/index.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { expectForwardsDomProps } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';

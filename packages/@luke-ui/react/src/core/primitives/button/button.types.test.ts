@@ -1,0 +1,24 @@
+/**
+ * Compile-time guards on the public primitive Button prop contract.
+ *
+ * Only rejections live here: `check:types` already proves that valid usage compiles, but not that
+ * invalid usage is refused.
+ */
+
+import { expect, test } from 'vite-plus/test';
+import type { ButtonProps } from './button.js';
+
+// @ts-expect-error — text Buttons do not use control sizing
+const textButtonSize: ButtonProps = { appearance: 'text', size: 'small' };
+// @ts-expect-error — text Buttons do not use block layout
+const textButtonBlock: ButtonProps = { appearance: 'text', isBlock: true };
+// @ts-expect-error — critical text Buttons do not have high prominence
+const criticalHighText: ButtonProps = {
+	appearance: 'text',
+	tone: 'critical',
+	prominence: 'high',
+};
+
+test('primitive Button rejects the prop combinations it does not support', () => {
+	expect([textButtonSize, textButtonBlock, criticalHighText]).toHaveLength(3);
+});

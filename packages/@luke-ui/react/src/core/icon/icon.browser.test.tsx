@@ -1,7 +1,8 @@
 import { Icon } from '@luke-ui/react/icon';
+// Only styles the visual fixture below; no test asserts a resolved token value.
+import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
-import { vars } from '../../theme/index.js';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import {
