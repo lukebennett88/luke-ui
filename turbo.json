@@ -148,6 +148,18 @@
 			"persistent": true,
 			"with": ["dev"]
 		},
+		"test:visual:capture:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"outputs": [],
+			"passThroughEnv": ["VISUAL_CAPTURE_DIR"]
+		},
+		"test:visual:run": {
+			"cache": false,
+			"dependsOn": ["build"],
+			"outputs": [],
+			"passThroughEnv": ["VISUAL_BASELINE_DIR", "VISUAL_CAPTURE_DIR"]
+		},
 		"test:watch:run": {
 			"cache": false,
 			"dependsOn": ["build"],

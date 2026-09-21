@@ -4,8 +4,8 @@ import { TextField } from '@luke-ui/react/text-field';
 import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { cdp } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { emulateReducedMotion } from '../test-utils/emulate-media.js';
 import {
 	expectForwardsDomProps,
 	expectHtmlElement,
@@ -82,12 +82,6 @@ test('resolves local, provider, and default loading states', () => {
 	expect(provider.closest('[aria-hidden]')).not.toBeNull();
 	expect(fallback.closest('[aria-hidden]')).not.toBeNull();
 });
-
-async function emulateReducedMotion(reduce: boolean): Promise<void> {
-	await cdp().send('Emulation.setEmulatedMedia', {
-		features: [{ name: 'prefers-reduced-motion', value: reduce ? 'reduce' : 'no-preference' }],
-	});
-}
 
 afterEach(async () => {
 	await emulateReducedMotion(false);

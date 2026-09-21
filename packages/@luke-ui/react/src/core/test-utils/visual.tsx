@@ -2,6 +2,8 @@ import type { ComponentProps, ComponentType, CSSProperties, ReactNode } from 're
 import { expect } from 'vite-plus/test';
 import type { Locator } from 'vite-plus/test/context';
 import { cdp, page, userEvent } from 'vite-plus/test/context';
+import { setEmulatedMediaFeature } from './emulate-media.js';
+import { peekEmulatedMediaFeatures } from './emulated-media.js';
 import type { VisualAppearance } from './render.js';
 import { formatVisualCaptureName, formatVisualViewport } from './visual-capture-id.js';
 
@@ -11,10 +13,9 @@ const VISUAL_VIEWPORT_WIDTH = 1024;
 const VISUAL_VIEWPORT_HEIGHT = 800;
 
 // Reduced motion prevents entering overlays from capturing at opacity 0.
-async function freezeMotionForCapture(): Promise<() => Promise<void>> {
-	await cdp().send('Emulation.setEmulatedMedia', {
-		features: [{ name: 'prefers-reduced-motion', value: 'reduce' }],
-	});
+export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
+	const previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
+	await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
 
 	const freezeMotion = document.createElement('style');
 	freezeMotion.textContent = `
@@ -34,9 +35,7 @@ async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 
 	return async () => {
 		freezeMotion.remove();
-		await cdp().send('Emulation.setEmulatedMedia', {
-			features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }],
-		});
+		await setEmulatedMediaFeature('prefers-reduced-motion', previousReducedMotion);
 	};
 }
 
@@ -49,13 +48,14 @@ export async function captureVisual(locator: Locator, id: string) {
 	const originalViewportHeight = window.innerHeight;
 	await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
 	const restoreMotion = await freezeMotionForCapture();
+	let isTall = false;
 	try {
 		const viewportWidth = window.innerWidth;
 		const viewportHeight = window.innerHeight;
 		const viewport = formatVisualViewport(viewportWidth, viewportHeight);
 		const element = locator.element();
 		const fullHeight = element.scrollHeight;
-		const isTall = fullHeight > viewportHeight;
+		isTall = fullHeight > viewportHeight;
 
 		if (isTall) {
 			// Resize the test iframe as well as the page or the added height stays blank.
@@ -69,12 +69,11 @@ export async function captureVisual(locator: Locator, id: string) {
 		}
 
 		await expect.element(locator).toMatchScreenshot(formatVisualCaptureName(id, viewport));
-
+	} finally {
 		if (isTall) {
-			await page.viewport(viewportWidth, viewportHeight);
+			await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
 			await cdp().send('Emulation.clearDeviceMetricsOverride');
 		}
-	} finally {
 		await restoreMotion();
 		await page.viewport(originalViewportWidth, originalViewportHeight);
 	}
@@ -88,11 +87,7 @@ export async function captureVisualAppearance(
 	await captureVisual(locator, `${id}-${appearance.theme}-${appearance.mode}`);
 }
 
-export async function emulateForcedColors(value: 'active' | 'none') {
-	await cdp().send('Emulation.setEmulatedMedia', {
-		features: [{ name: 'forced-colors', value }],
-	});
-}
+export { emulateForcedColors } from './emulate-media.js';
 
 export type PropOptions<
 	Component extends ComponentType<any>,

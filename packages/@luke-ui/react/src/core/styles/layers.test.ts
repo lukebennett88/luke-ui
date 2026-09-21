@@ -5,9 +5,6 @@ import { layers } from './layers.css.js';
 // A value import would cross Vanilla Extract's serialization boundary.
 type WritableLayer = Parameters<typeof globalStyleInLayer>[0];
 
-// @ts-expect-error — Luke UI must not write to the consumer-owned base layer
-const reservedBaseLayer: WritableLayer = 'base';
-
 describe('layers', () => {
 	it('declares cascade layers from lowest to highest priority', () => {
 		expect(Object.keys(layers)).toEqual([
@@ -22,6 +19,7 @@ describe('layers', () => {
 
 	it('keeps the base layer out of the layers Luke UI may write to', () => {
 		assertType<WritableLayer>('structural');
-		expect(reservedBaseLayer).toBe('base');
+		// @ts-expect-error — Luke UI must not write to the consumer-owned base layer
+		assertType<WritableLayer>('base');
 	});
 });

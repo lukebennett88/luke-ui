@@ -45,6 +45,11 @@ mismatch allowance. Remove nondeterminism. Do not add an allowance.
 `check:types` protects normal source types. Add a unit test only when a public type contract can
 regress while compilation still succeeds, such as a union widening.
 
+Use `expectTypeOf` for positive shape and equality contracts. Use `assertType` with
+`@ts-expect-error` for rejected values and prop combinations. Put those checks inside `test()`
+blocks. Do not wrap rejected assignments in a runtime `expect([...]).toHaveLength(...)` or similar
+just to create an assertion or keep consts referenced.
+
 ## Docs
 
 Docs examples must type-check and build. They are not another test corpus.
@@ -56,4 +61,4 @@ Add a regression test when the intention needs protection. Put it with the contr
 - pure logic: unit test
 - component behaviour or axe: browser test
 - meaningful appearance: `visual`-tagged browser test
-- public type contract compilation cannot catch: unit test
+- public type contract `check:types` cannot catch: unit test (see [Type contracts](#type-contracts))

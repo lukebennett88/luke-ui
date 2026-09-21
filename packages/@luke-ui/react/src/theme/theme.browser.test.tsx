@@ -8,7 +8,8 @@ import { act } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, test } from 'vite-plus/test';
-import { cdp, page, userEvent } from 'vite-plus/test/context';
+import { page, userEvent } from 'vite-plus/test/context';
+import { emulateColorScheme } from '../core/test-utils/emulate-media.js';
 
 const mounted: Array<{ container: HTMLElement; root: Root }> = [];
 const scopes: Array<HTMLElement> = [];
@@ -141,10 +142,4 @@ function renderScope(mode?: 'light' | 'dark') {
 	if (mode !== undefined) scope.dataset.colorMode = mode;
 
 	return scope;
-}
-
-async function emulateColorScheme(mode: 'light' | 'dark') {
-	await cdp().send('Emulation.setEmulatedMedia', {
-		features: [{ name: 'prefers-color-scheme', value: mode }],
-	});
 }

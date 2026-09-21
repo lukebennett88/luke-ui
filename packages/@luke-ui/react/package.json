@@ -92,8 +92,10 @@
 		"test:ui": "turbo run test:ui:run",
 		"test:ui:run": "vp test --project=browser --ui",
 		"test:unit": "vp test run --project=unit",
-		"test:visual": "tsx scripts/visual-regression.ts",
-		"test:visual:capture": "vp test run --project=browser --tagsFilter='visual' --update",
+		"test:visual": "turbo run test:visual:run",
+		"test:visual:capture": "turbo run test:visual:capture:run",
+		"test:visual:capture:run": "vp test run --project=browser --tagsFilter='visual' --update",
+		"test:visual:run": "tsx scripts/visual-regression.ts",
 		"test:watch": "turbo run test:watch:run",
 		"test:watch:run": "vp test --project=browser --tagsFilter='!visual'"
 	},
