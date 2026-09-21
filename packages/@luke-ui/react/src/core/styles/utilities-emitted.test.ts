@@ -22,7 +22,16 @@ function getReadonlyPropertyPattern(property: string): RegExp {
 
 /** Reads the content-hashed declaration chunk referenced by `box.d.ts`. */
 async function readUtilitiesDeclaration(): Promise<string> {
-	const boxDeclaration = await readFile(new URL('../../../dist/box.d.ts', import.meta.url), 'utf8');
+	const boxDeclarationUrl = new URL('../../../dist/box.d.ts', import.meta.url);
+	let boxDeclaration: string;
+	try {
+		boxDeclaration = await readFile(boxDeclarationUrl, 'utf8');
+	} catch (error) {
+		throw new Error(
+			'Could not read dist/box.d.ts — this test reads emitted declarations, so run build first (pnpm run build).',
+			{ cause: error },
+		);
+	}
 	const chunk = UTILITIES_CSS_PATTERN.exec(boxDeclaration)?.[0];
 	if (chunk === undefined) {
 		throw new Error('Could not find the utilities declaration chunk from dist/box.d.ts');

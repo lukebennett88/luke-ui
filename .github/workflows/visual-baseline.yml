@@ -1,0 +1,78 @@
+name: Visual baseline
+
+# Renders the visual captures of `main` and uploads them as the `visual-baseline`
+# artefact. `visual-regression.yml` downloads the artefact from this workflow's
+# latest successful run on `main` and compares a pull request against it, so no
+# screenshots are committed and no run ever renders `main` a second time.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/@luke-ui/react/**'
+      - 'packages/@luke-ui/rainbow-sprinkles/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'mise.toml'
+      - '.github/workflows/visual-baseline.yml'
+      - '.github/workflows/visual-regression.yml'
+  workflow_dispatch:
+
+concurrency:
+  # Never cancel in progress: a cancelled run leaves no baseline for the next PR.
+  group: visual-baseline
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+
+jobs:
+  baseline:
+    name: baseline
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup tooling with mise
+        uses: jdx/mise-action@v4
+        with:
+          install: true
+          cache: true
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+
+      - name: Build packages
+        run: corepack pnpm build:packages
+
+      - name: Render baseline captures
+        env:
+          VISUAL_CAPTURE_DIR: ${{ github.workspace }}/.artifacts/visual-regression/baseline
+        run: corepack pnpm --filter @luke-ui/react run test:visual:capture
+
+      - name: Fail when nothing rendered
+        run: |
+          count=$(find .artifacts/visual-regression/baseline -name '*.png' | wc -l)
+          echo "Captured $count baseline screenshots."
+          if [ "$count" -eq 0 ]; then
+            echo '::error::No visual captures were rendered. The baseline would be empty.'
+            exit 1
+          fi
+
+      - name: Upload baseline
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-baseline
+          path: .artifacts/visual-regression/baseline
+          if-no-files-found: error
+          retention-days: 90

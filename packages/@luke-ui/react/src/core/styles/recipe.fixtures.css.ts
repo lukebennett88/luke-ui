@@ -98,7 +98,7 @@ export const compoundSlotsRecipe = recipe({
 	],
 });
 
-/** Valid fixture used to derive the `compoundSlots` entry type in `recipe.test-d.ts`. */
+/** Valid fixture used to derive the `compoundSlots` entry type for type-level assertions. */
 export const compoundSlotsTypeFixtureRecipe = recipe({
 	slots: {
 		a: { color: 'rgb(1, 1, 1)' },

@@ -1,5 +1,11 @@
 name: Visual regression
 
+# Compares a pull request against the `visual-baseline` artefact produced by the
+# latest successful `Visual baseline` run on `main`. This workflow never renders
+# `main`: if the baseline is missing it fails and asks for that workflow to be
+# re-run. Any capture that is changed, added, or removed holds the pull request
+# at the `visual-review` environment until a reviewer approves it.
+
 on:
   pull_request:
     paths:
@@ -15,56 +21,116 @@ concurrency:
   group: visual-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+
 jobs:
   compare:
+    name: compare
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
     outputs:
-      changed: ${{ steps.summary.outputs.changed }}
+      review: ${{ steps.summary.outputs.review }}
     steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: jdx/mise-action@v4
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Download the main baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # `actions/download-artifact` only reads artefacts from the current run,
+          # so the cross-workflow lookup goes through the API: the newest
+          # successful `Visual baseline` run on `main` that still has the artefact.
+          run_id=$(gh api \
+            "repos/${GH_REPO}/actions/workflows/visual-baseline.yml/runs?branch=main&status=success&per_page=1" \
+            --jq '.workflow_runs[0].id // empty')
+          if [ -z "$run_id" ]; then
+            echo '::error::No successful `Visual baseline` run found on `main`.'
+            echo '::error::Run the "Visual baseline" workflow on `main` (Actions -> Visual baseline -> Run workflow), then re-run this job.'
+            exit 1
+          fi
+          echo "Baseline from Visual baseline run ${run_id}."
+          mkdir -p .artifacts/visual-regression/baseline
+          if ! gh run download "$run_id" --name visual-baseline --dir .artifacts/visual-regression/baseline; then
+            echo "::error::Run ${run_id} has no \`visual-baseline\` artefact, or it has expired."
+            echo '::error::Re-run the "Visual baseline" workflow on `main`, then re-run this job.'
+            exit 1
+          fi
+          count=$(find .artifacts/visual-regression/baseline -name '*.png' | wc -l)
+          echo "Downloaded $count baseline screenshots."
+          if [ "$count" -eq 0 ]; then
+            echo '::error::The `visual-baseline` artefact contains no screenshots.'
+            echo '::error::Re-run the "Visual baseline" workflow on `main`, then re-run this job.'
+            exit 1
+          fi
+
+      - name: Setup tooling with mise
+        uses: jdx/mise-action@v4
         with:
           install: true
           cache: true
-      - run: corepack enable
-      - run: corepack pnpm install --frozen-lockfile
-      - run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
-      - uses: actions/cache@v6
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: corepack pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+
+      - name: Build packages
+        run: corepack pnpm build:packages
+
+      - name: Compare against the baseline
+        run: corepack pnpm --filter @luke-ui/react run test:visual
+
+      - name: Summarise the comparison
+        id: summary
+        run: |
+          set -euo pipefail
+          summary=.artifacts/visual-regression/summary.json
+          jq -r '
+            "| status | count |", "| --- | --- |",
+            (.counts | to_entries[] | "| \(.key) | \(.value) |")
+          ' "$summary" >> "$GITHUB_STEP_SUMMARY"
+          # A baseline change is any capture that is not unchanged: changed,
+          # added, and removed all need a human to approve the new baseline.
+          review=$(jq '.counts.changed + .counts.added + .counts.removed' "$summary")
+          echo "review=$review" >> "$GITHUB_OUTPUT"
+          jq -r '.results[] | select(.status != "unchanged") | "\(.status)\t\(.id)"' "$summary"
+
+      - name: Upload expected, actual, and diff screenshots
+        # `always()` so a failed comparison still hands over whatever it produced.
+        # `ignore` rather than `error` because an unchanged run writes no diffs,
+        # and a comparison that failed before writing any may have none either.
+        if: always()
+        uses: actions/upload-artifact@v7
         with:
-          path: .artifacts/visual-regression/cache
-          # File list must match VISUAL_CACHE_HASH_FILES in
-          # packages/@luke-ui/react/scripts/visual-regression-contract.ts.
-          key:
-            visual-main-${{ runner.os }}-${{ runner.arch }}-${{ github.event.pull_request.base.sha
-            || github.event.before }}-${{ hashFiles('pnpm-lock.yaml',
-            'packages/@luke-ui/react/vitest.config.ts',
-            'packages/@luke-ui/react/src/core/stylesheet.css.ts',
-            'packages/@luke-ui/react/src/core/test-utils/render-setup.ts',
-            'packages/@luke-ui/react/src/core/test-utils/render-mount-state.ts',
-            'packages/@luke-ui/react/src/core/test-utils/render.tsx',
-            'packages/@luke-ui/react/src/core/test-utils/visual-setup.ts') }}
-      - name: Compare visual captures
-        run: corepack pnpm test:visual
-        env:
-          VISUAL_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-      - id: summary
-        run:
-          echo "changed=$(jq '.counts.changed' .artifacts/visual-regression/report/summary.json)" >>
-          "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: visual-regression-report
-          path: .artifacts/visual-regression/report
+          name: visual-regression-diff
+          path: |
+            .artifacts/visual-regression/diff
+            .artifacts/visual-regression/summary.json
+          if-no-files-found: ignore
           retention-days: 14
 
   review:
-    if: needs.compare.outputs.changed != '0'
+    name: review
+    # Runs only when the pull request changes the baseline. It carries no steps
+    # that can succeed on their own: the gate is the `visual-review` environment,
+    # which holds the job until a required reviewer approves it. Do not add a
+    # fallback path here — that would let visual changes merge unreviewed.
+    if: needs.compare.outputs.review != '0'
     needs: compare
     runs-on: ubuntu-latest
     environment: visual-review
+    permissions: {}
     steps:
-      - run: echo 'Visual changes approved for this commit.'
+      - name: Record the approval
+        run: |
+          echo "Approved ${{ needs.compare.outputs.review }} baseline change(s) for ${{ github.sha }}."

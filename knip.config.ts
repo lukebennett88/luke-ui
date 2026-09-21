@@ -1,7 +1,6 @@
 import type { KnipConfig } from 'knip';
 
 export default {
-	ignoreBinaries: ['xdg-open'],
 	rules: {
 		cycles: 'error',
 	},

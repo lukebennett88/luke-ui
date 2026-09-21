@@ -86,16 +86,14 @@
 		"generate:assets": "pnpm run generate:icons && pnpm run generate:themes",
 		"generate:icons": "tsx scripts/build-icons.ts",
 		"generate:themes": "tsx scripts/build-themes.ts",
-		"test": "pnpm run test:ci && pnpm run test:visual",
-		"test:browser": "vp test run --project=browser",
-		"test:ci": "pnpm run test:types && pnpm run test:unit && pnpm run test:browser",
-		"test:types": "pnpm run generate && pnpm run build && vp test run --project=types",
+		"test": "pnpm run test:ci",
+		"test:browser": "vp test run --project=browser --tagsFilter='!visual'",
+		"test:ci": "pnpm run generate && pnpm run build && pnpm run test:unit && pnpm run test:browser",
 		"test:ui": "vp test --project=browser --ui",
 		"test:unit": "vp test run --project=unit",
 		"test:visual": "tsx scripts/visual-regression.ts",
-		"test:visual:capture": "vp test run --project=visual --update",
-		"test:visual:report": "tsx scripts/open-visual-report.ts",
-		"test:watch": "vp test --project=browser"
+		"test:visual:capture": "vp test run --project=browser --tagsFilter='visual' --update",
+		"test:watch": "vp test --project=browser --tagsFilter='!visual'"
 	},
 	"dependencies": {
 		"@capsizecss/metrics": "catalog:",

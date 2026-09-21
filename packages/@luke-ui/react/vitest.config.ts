@@ -9,11 +9,9 @@ const dirname =
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
-// This file is copied into a git worktree at an older revision. It cannot import
-// TypeScript that does not exist there, so it has no relative imports of the
-// visual-regression contract. Keep the capture-dir literals below in sync with
-// `scripts/visual-regression-contract.ts`; a unit test fails if they drift.
 const repoRoot = path.resolve(dirname, '../../..');
+// Where `--tagsFilter='visual'` runs write their captures. The visual-regression
+// scripts set this; a bare run falls back to an ignored directory in the repo.
 const captureDir = process.env.VISUAL_CAPTURE_DIR;
 const visualFsAllow =
 	captureDir === undefined || captureDir === '' ? [repoRoot] : [repoRoot, path.resolve(captureDir)];
@@ -65,45 +63,6 @@ export default defineConfig({
 				test: {
 					browser: {
 						enabled: true,
-						headless: true,
-						instances: [{ browser: 'chromium' }],
-						provider: playwright({}),
-					},
-					include: ['src/**/*.browser.test.{ts,tsx}'],
-					name: 'browser',
-					setupFiles: ['./src/core/test-utils/render-setup.ts'],
-				},
-			},
-			{
-				extends: true,
-				plugins: [
-					// Required for .css.ts processing in unit tests.
-					vanillaExtractPlugin(),
-				],
-				test: {
-					// These tests read emitted declarations from `dist`. The `test:types` script runs
-					// `generate` and `build` first, so it provisions its own `dist` however it is invoked.
-					// `test:ci` runs it before the other projects, which makes it the single build step
-					// for the whole chain, so nothing else should build the package again.
-					environment: 'node',
-					include: ['src/**/*.test-d.ts'],
-					name: 'types',
-					typecheck: {
-						enabled: true,
-						include: ['src/**/*.test-d.ts'],
-						tsconfig: './tsconfig.json',
-					},
-				},
-			},
-			{
-				extends: true,
-				plugins: [
-					// Required for .css.ts processing in Vitest browser mode.
-					vanillaExtractPlugin(),
-				],
-				test: {
-					browser: {
-						enabled: true,
 						expect: {
 							toMatchScreenshot: {
 								// Tall scenes are handled in captureVisual, which grows both
@@ -114,23 +73,27 @@ export default defineConfig({
 										`${arg}${ext}`,
 									);
 								},
-								// Captures are always written fresh (never compared here);
-								// actual comparison happens in scripts/visual-regression-lib.ts (compareCaptures).
+								// Captures are always written fresh (never compared here); the
+								// comparison against the main baseline happens in
+								// scripts/visual-regression-lib.ts (compareCaptures).
 							},
 						},
 						headless: true,
 						instances: [{ browser: 'chromium' }],
 						provider: playwright({}),
-						// Fixed viewport so full-page captures (open menus render in
-						// portals outside the component) are deterministic.
-						viewport: { height: 800, width: 1024 },
+						// No fixed viewport here: behavioural tests get the browser
+						// provider's own default. Visual captures set a fixed viewport
+						// themselves (see `captureVisual`) so full-page captures (open
+						// menus render in portals outside the component) are deterministic
+						// without changing layout for every other test in the file.
 					},
-					include: ['src/**/*.visual.test.{ts,tsx}'],
-					name: 'visual',
-					setupFiles: [
-						'./src/core/test-utils/render-setup.ts',
-						'./src/core/test-utils/visual-setup.ts',
-					],
+					include: ['src/**/*.browser.test.{ts,tsx}'],
+					name: 'browser',
+					setupFiles: ['./src/core/test-utils/render-setup.ts'],
+					// Visual cases live in the browser test files, tagged `visual`, so
+					// they are selected with `--tagsFilter='visual'` (and excluded from
+					// the behavioural run with `--tagsFilter='!visual'`).
+					tags: [{ description: 'Captures a screenshot for visual review.', name: 'visual' }],
 				},
 			},
 		],
