@@ -28,6 +28,13 @@ Run the first command on `main`. `test:visual` writes expected, actual, and diff
 Changed, added, and removed captures upload the `visual-regression-diff` artefact. The `review` job
 waits at the `visual-review` environment when that environment has a required reviewer.
 
+## Capture freeze
+
+`freezeMotionForCapture` finishes in-flight CSS transitions and animations before applying
+reduced-motion and zero-duration overrides. Cancelling a transition mid-flight (for example
+`text-decoration-color` on text Links) otherwise freezes an interpolated value and flakes the
+capture.
+
 ## Tall scenes
 
 `captureVisual` expands the page and test iframe before capturing tall scenes.

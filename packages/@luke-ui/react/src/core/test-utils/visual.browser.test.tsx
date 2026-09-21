@@ -2,6 +2,35 @@ import { expect, test } from 'vite-plus/test';
 import { emulateColorScheme, emulateForcedColors, emulateReducedMotion } from './emulate-media.js';
 import { freezeMotionForCapture } from './visual.js';
 
+// Cancelling a mid-flight `text-decoration-color` transition with `transition: none` used to leave
+// the underline invisible at capture time (link/kitchen-sink-tactile-light flake). Finish first.
+test('freezing motion finishes an in-flight text-decoration-color transition', async () => {
+	const link = document.body.appendChild(document.createElement('a'));
+	link.textContent = 'Destination';
+	link.href = '#';
+	link.style.color = 'rgb(0, 0, 0)';
+	link.style.textDecorationLine = 'underline';
+	link.style.textDecorationColor = 'transparent';
+	link.style.transitionProperty = 'text-decoration-color';
+	link.style.transitionDuration = '10s';
+	link.style.transitionTimingFunction = 'linear';
+	// Force the starting style, then start a long transition toward the resting colour.
+	void link.offsetHeight;
+	link.style.textDecorationColor = 'rgb(0, 0, 0)';
+	void link.offsetHeight;
+	expect(link.getAnimations().length).toBeGreaterThan(0);
+
+	const restore = await freezeMotionForCapture();
+	try {
+		const color = getComputedStyle(link).textDecorationColor;
+		expect(color).toBe('rgb(0, 0, 0)');
+		expect(link.getAnimations().length).toBe(0);
+	} finally {
+		await restore();
+		link.remove();
+	}
+});
+
 // `Emulation.setEmulatedMedia` replaces the whole feature list, so a helper that sends one feature
 // on its own drops the others. Every emulation helper shares one merged feature set to prevent it.
 test('forced-colors stays active while a capture freezes reduced-motion', async () => {
