@@ -168,8 +168,8 @@ catalogs:
       specifier: ^0.18.5
       version: 0.18.5
     '@capsizecss/metrics':
-      specifier: ^4.2.0
-      version: 4.2.0
+      specifier: ^4.3.0
+      version: 4.3.0
     '@capsizecss/vanilla-extract':
       specifier: ^2.0.4
       version: 2.0.4
@@ -591,7 +591,7 @@ importers:
     dependencies:
       '@capsizecss/metrics':
         specifier: 'catalog:'
-        version: 4.2.0
+        version: 4.3.0
       '@capsizecss/vanilla-extract':
         specifier: 'catalog:'
         version: 2.0.4(@vanilla-extract/css@1.21.2)
@@ -856,8 +856,8 @@ packages:
   '@capsizecss/core@4.1.3':
     resolution: {integrity: sha512-d2sTTBwKuVioYxpwpU4URMp8VkFK+GI1VNGNawQcF8HBMHzCDa1FLcbeXJSzb5AJik7ZGv3aFVCTs7IS9MhvHg==}
 
-  '@capsizecss/metrics@4.2.0':
-    resolution: {integrity: sha512-BkLX2NonSAVuHrStmxlRG/PVUxq4uQWeQGPY/G/4pi7GRQt/4A+7RzMWR8m85+0Tv7BsuBpR7JoniMS9QwuVRw==}
+  '@capsizecss/metrics@4.3.0':
+    resolution: {integrity: sha512-93Ea1eMXUoOHf5BNidOsMv9glODtGjMEBUeqLei8S5Ffy1Hd4Q81zrsLA5VAsNVVMJpFRxtDnk2QtvPdJf/S+w==}
 
   '@capsizecss/vanilla-extract@2.0.4':
     resolution: {integrity: sha512-KImqHutsYyeA718+3Fqg7Bw/RCSKgu+FESsMitWt9u4/KpBpB+s7cW4DWJyC6N5AzOoahYB7Jnu0hKB3HW+X6A==}
@@ -8964,7 +8964,7 @@ snapshots:
     dependencies:
       csstype: 3.2.3
 
-  '@capsizecss/metrics@4.2.0': {}
+  '@capsizecss/metrics@4.3.0': {}
 
   '@capsizecss/vanilla-extract@2.0.4(@vanilla-extract/css@1.21.2)':
     dependencies:
