@@ -1,4 +1,14 @@
 {
 	"title": "Layout",
-	"pages": ["aspect-ratio", "box", "cluster", "container", "stack", "track", "visually-hidden"]
+	"pages": [
+		"aspect-ratio",
+		"auto-grid",
+		"box",
+		"cluster",
+		"container",
+		"grid",
+		"stack",
+		"track",
+		"visually-hidden"
+	]
 }

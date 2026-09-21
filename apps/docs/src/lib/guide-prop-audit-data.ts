@@ -87,6 +87,12 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		],
 	'layout/aspect-ratio.mdx::packages/@luke-ui/react/src/core/aspect-ratio/aspect-ratio.tsx::AspectRatioProps':
 		['elementType', 'objectFit', 'ratio', 'render'],
+	'layout/auto-grid.mdx::packages/@luke-ui/react/src/core/auto-grid/auto-grid.tsx::AutoGridProps': [
+		'elementType',
+		'gap',
+		'minColumnInlineSize',
+		'render',
+	],
 	'layout/box.mdx::packages/@luke-ui/react/src/core/box/box.tsx::BoxProps': [
 		'elementType',
 		'ref',
@@ -101,6 +107,12 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 	],
 	'layout/container.mdx::packages/@luke-ui/react/src/core/container/container.tsx::ContainerProps':
 		['elementType', 'marginInline', 'maxInlineSize', 'paddingInline', 'render'],
+	'layout/grid.mdx::packages/@luke-ui/react/src/core/grid/grid.tsx::GridProps': [
+		'columns',
+		'elementType',
+		'gap',
+		'render',
+	],
 	'layout/stack.mdx::packages/@luke-ui/react/src/core/stack/stack.tsx::StackProps': [
 		'alignItems',
 		'elementType',

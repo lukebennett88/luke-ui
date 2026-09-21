@@ -20,6 +20,7 @@
 	],
 	"exports": {
 		"./aspect-ratio": "./dist/aspect-ratio.js",
+		"./auto-grid": "./dist/auto-grid.js",
 		"./blockquote": "./dist/blockquote.js",
 		"./box": "./dist/box.js",
 		"./button": "./dist/button.js",
@@ -30,6 +31,7 @@
 		"./container": "./dist/container.js",
 		"./em": "./dist/em.js",
 		"./emoji": "./dist/emoji.js",
+		"./grid": "./dist/grid.js",
 		"./heading": "./dist/heading.js",
 		"./icon": "./dist/icon.js",
 		"./icon-button": "./dist/icon-button.js",

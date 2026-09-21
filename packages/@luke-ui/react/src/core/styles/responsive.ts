@@ -21,3 +21,8 @@ export function withResponsiveDefault<Value>(
 	}
 	return { ...value, initial: defaultValue };
 }
+
+/** True when `value` is an integer greater than zero. */
+export function isPositiveInteger(value: unknown): value is number {
+	return typeof value === 'number' && Number.isInteger(value) && value > 0;
+}
