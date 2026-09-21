@@ -1,7 +1,6 @@
-type ResponsiveObject<Value> = Extract<NonNullable<Value>, object>;
+import type { ResponsiveCondition } from './responsive-conditions.js';
 
-/** Breakpoint keys accepted by responsive layout props. */
-export type ResponsiveCondition = 'initial' | 'bp640' | 'bp768' | 'bp1024' | 'bp1280' | 'bp1536';
+type ResponsiveObject<Value> = Extract<NonNullable<Value>, object>;
 
 /** A direct value, or a responsive object keyed by breakpoint. */
 type ResponsivePropValue<Value> =

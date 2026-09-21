@@ -1,24 +1,7 @@
 import { createVar, style } from '@vanilla-extract/css';
-import { breakpoints } from '../../theme/breakpoints.js';
 import { layers } from './layers.css.js';
-import type { ResponsiveCondition } from './responsive.js';
-
-function fromBreakpoint(minimumInlineSize: number) {
-	return { '@container': `(inline-size >= ${minimumInlineSize}px)` };
-}
-
-/** Container-query conditions shared with Sprinkles responsive props. */
-export const responsiveStyleConditions = {
-	initial: {},
-	bp640: fromBreakpoint(breakpoints.bp640),
-	bp768: fromBreakpoint(breakpoints.bp768),
-	bp1024: fromBreakpoint(breakpoints.bp1024),
-	bp1280: fromBreakpoint(breakpoints.bp1280),
-	bp1536: fromBreakpoint(breakpoints.bp1536),
-} as const satisfies Record<ResponsiveCondition, { '@container'?: string }>;
-
-/** Breakpoint names accepted by responsive CSS property helpers. */
-export type ResponsiveStyleBreakpoint = keyof typeof responsiveStyleConditions;
+import { responsiveConditions } from './responsive-conditions.js';
+import type { ResponsiveCondition } from './responsive-conditions.js';
 
 type ConditionValue = {
 	'@container'?: string;
@@ -37,15 +20,15 @@ function wrapConditionStyle(
 function createConditionStyles(
 	name: string,
 	toDeclaration: (cssVar: string) => Record<string, string>,
-	vars: Record<ResponsiveStyleBreakpoint, string>,
-): Record<ResponsiveStyleBreakpoint, string> {
+	vars: Record<ResponsiveCondition, string>,
+): Record<ResponsiveCondition, string> {
 	return {
 		initial: style(
 			{
 				'@layer': {
 					[layers.recipes]: wrapConditionStyle(
 						toDeclaration(vars.initial),
-						responsiveStyleConditions.initial,
+						responsiveConditions.initial,
 					),
 				},
 			},
@@ -56,7 +39,7 @@ function createConditionStyles(
 				'@layer': {
 					[layers.recipes]: wrapConditionStyle(
 						toDeclaration(vars.bp640),
-						responsiveStyleConditions.bp640,
+						responsiveConditions.bp640,
 					),
 				},
 			},
@@ -67,7 +50,7 @@ function createConditionStyles(
 				'@layer': {
 					[layers.recipes]: wrapConditionStyle(
 						toDeclaration(vars.bp768),
-						responsiveStyleConditions.bp768,
+						responsiveConditions.bp768,
 					),
 				},
 			},
@@ -78,7 +61,7 @@ function createConditionStyles(
 				'@layer': {
 					[layers.recipes]: wrapConditionStyle(
 						toDeclaration(vars.bp1024),
-						responsiveStyleConditions.bp1024,
+						responsiveConditions.bp1024,
 					),
 				},
 			},
@@ -89,7 +72,7 @@ function createConditionStyles(
 				'@layer': {
 					[layers.recipes]: wrapConditionStyle(
 						toDeclaration(vars.bp1280),
-						responsiveStyleConditions.bp1280,
+						responsiveConditions.bp1280,
 					),
 				},
 			},
@@ -100,7 +83,7 @@ function createConditionStyles(
 				'@layer': {
 					[layers.recipes]: wrapConditionStyle(
 						toDeclaration(vars.bp1536),
-						responsiveStyleConditions.bp1536,
+						responsiveConditions.bp1536,
 					),
 				},
 			},
@@ -117,8 +100,8 @@ export function createResponsiveCssProperty(
 	name: string,
 	toDeclaration: (cssVar: string) => Record<string, string>,
 ): {
-	vars: Record<ResponsiveStyleBreakpoint, string>;
-	classes: Record<ResponsiveStyleBreakpoint, string>;
+	vars: Record<ResponsiveCondition, string>;
+	classes: Record<ResponsiveCondition, string>;
 } {
 	const vars = {
 		initial: createVar(`${name}-initial`),
@@ -127,7 +110,7 @@ export function createResponsiveCssProperty(
 		bp1024: createVar(`${name}-bp1024`),
 		bp1280: createVar(`${name}-bp1280`),
 		bp1536: createVar(`${name}-bp1536`),
-	} as const satisfies Record<ResponsiveStyleBreakpoint, string>;
+	} as const satisfies Record<ResponsiveCondition, string>;
 
 	return {
 		classes: createConditionStyles(name, toDeclaration, vars),

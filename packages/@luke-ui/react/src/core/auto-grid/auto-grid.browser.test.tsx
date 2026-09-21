@@ -76,9 +76,9 @@ test('does not overflow a parent narrower than minColumnInlineSize', () => {
 	expect(grid.scrollWidth).toBeLessThanOrEqual(grid.clientWidth + 1);
 });
 
-test('places sparse items without overflowing the parent', () => {
+test('expands a sparse item across collapsed auto-fit tracks', () => {
 	const { locator } = render(
-		<div data-testid="parent" style={{ inlineSize: '40rem' }}>
+		<div style={{ inlineSize: '40rem' }}>
 			<AutoGrid data-testid="grid" gap="sp8" minColumnInlineSize="12rem">
 				<span data-testid="only" style={{ blockSize: '1rem' }}>
 					Only item
@@ -86,40 +86,40 @@ test('places sparse items without overflowing the parent', () => {
 			</AutoGrid>
 		</div>,
 	);
-	const parent = locator.getByTestId('parent').element();
 	const grid = locator.getByTestId('grid').element();
 	const only = locator.getByTestId('only').element();
-	if (
-		!(parent instanceof HTMLElement) ||
-		!(grid instanceof HTMLElement) ||
-		!(only instanceof HTMLElement)
-	) {
+	if (!(grid instanceof HTMLElement) || !(only instanceof HTMLElement)) {
 		throw new Error('Expected AutoGrid elements.');
 	}
 
-	expect(grid.getBoundingClientRect().width).toBeLessThanOrEqual(
-		parent.getBoundingClientRect().width + 1,
-	);
-	expect(only.getBoundingClientRect().right).toBeLessThanOrEqual(
-		grid.getBoundingClientRect().right + 1,
-	);
-	expect(grid.scrollWidth).toBeLessThanOrEqual(grid.clientWidth + 1);
+	const gridWidth = grid.getBoundingClientRect().width;
+	const itemWidth = only.getBoundingClientRect().width;
+	// auto-fit collapses empty tracks, so the lone item fills the grid. auto-fill would leave it
+	// near the minimum column size instead.
+	expect(itemWidth).toBeGreaterThan(gridWidth - 2);
+	expect(itemWidth).toBeLessThanOrEqual(gridWidth + 1);
 });
 
-test('resolves against nested size containers', async () => {
+test('resolves responsive values against nested size containers', async () => {
 	await page.viewport(1024, 800);
 	const { locator } = render(
 		<Container maxInlineSize="100%">
-			<div style={{ inlineSize: '40rem' }}>
-				<AutoGrid data-testid="outer" gap="sp8" minColumnInlineSize="12rem">
-					<span style={{ blockSize: '1rem' }} />
-					<span style={{ blockSize: '1rem' }} />
-					<span style={{ blockSize: '1rem' }} />
-					<span style={{ blockSize: '1rem' }} />
-				</AutoGrid>
-			</div>
+			<AutoGrid
+				data-testid="outer"
+				gap="sp8"
+				minColumnInlineSize={{ initial: '20rem', bp768: '10rem' }}
+			>
+				<span style={{ blockSize: '1rem' }} />
+				<span style={{ blockSize: '1rem' }} />
+				<span style={{ blockSize: '1rem' }} />
+				<span style={{ blockSize: '1rem' }} />
+			</AutoGrid>
 			<Container maxInlineSize="ct448">
-				<AutoGrid data-testid="nested" gap="sp8" minColumnInlineSize="12rem">
+				<AutoGrid
+					data-testid="nested"
+					gap="sp8"
+					minColumnInlineSize={{ initial: '20rem', bp768: '10rem' }}
+				>
 					<span style={{ blockSize: '1rem' }} />
 					<span style={{ blockSize: '1rem' }} />
 					<span style={{ blockSize: '1rem' }} />
@@ -133,19 +133,24 @@ test('resolves against nested size containers', async () => {
 	if (!(outer instanceof HTMLElement) || !(nested instanceof HTMLElement)) {
 		throw new Error('Expected AutoGrid elements.');
 	}
-	const outerThird = outer.children[2];
-	const nestedThird = nested.children[2];
-	if (!(outerThird instanceof HTMLElement) || !(nestedThird instanceof HTMLElement)) {
+	const outerFirst = outer.children[0];
+	const outerSecond = outer.children[1];
+	const nestedFirst = nested.children[0];
+	const nestedSecond = nested.children[1];
+	if (
+		!(outerFirst instanceof HTMLElement) ||
+		!(outerSecond instanceof HTMLElement) ||
+		!(nestedFirst instanceof HTMLElement) ||
+		!(nestedSecond instanceof HTMLElement)
+	) {
 		throw new Error('Expected AutoGrid children.');
 	}
 
-	expect(outerThird.getBoundingClientRect().top).toBe(
-		outer.children[0] instanceof HTMLElement ? outer.children[0].getBoundingClientRect().top : -1,
-	);
-	expect(nestedThird.getBoundingClientRect().top).toBeGreaterThan(
-		nested.children[0] instanceof HTMLElement
-			? nested.children[0].getBoundingClientRect().top
-			: Number.POSITIVE_INFINITY,
+	// Outer container is viewport-wide (≥ bp768), so minColumnInlineSize is 10rem and items share a
+	// row. Nested ct448 is below bp768, so the initial 20rem minimum stacks items.
+	expect(outerFirst.getBoundingClientRect().top).toBe(outerSecond.getBoundingClientRect().top);
+	expect(nestedSecond.getBoundingClientRect().top).toBeGreaterThan(
+		nestedFirst.getBoundingClientRect().top,
 	);
 });
 

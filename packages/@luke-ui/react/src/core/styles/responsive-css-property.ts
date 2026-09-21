@@ -1,12 +1,12 @@
 import { assignInlineVars } from '@vanilla-extract/dynamic';
 import { typedEntries } from '../../shared/utils/utils.js';
-import { responsiveStyleConditions } from './create-responsive-css-property.js';
-import type { ResponsiveStyleBreakpoint } from './create-responsive-css-property.js';
+import type { ResponsiveCondition } from './responsive-conditions.js';
+import { responsiveConditions } from './responsive-conditions.js';
 import type { RequiredInitialResponsiveValue } from './responsive.js';
 
 type ResponsiveCssProperty = {
-	classes: Record<ResponsiveStyleBreakpoint, string>;
-	vars: Record<ResponsiveStyleBreakpoint, string>;
+	classes: Record<ResponsiveCondition, string>;
+	vars: Record<ResponsiveCondition, string>;
 };
 
 /**
@@ -40,7 +40,7 @@ export function resolveResponsiveCssProperty(
 		);
 	} else {
 		for (const [condition, conditionValue] of typedEntries(value)) {
-			if (!isResponsiveStyleBreakpoint(condition) || conditionValue == null) continue;
+			if (!isResponsiveCondition(condition) || conditionValue == null) continue;
 			assignCondition(
 				condition,
 				conditionValue,
@@ -60,12 +60,12 @@ export function resolveResponsiveCssProperty(
 	};
 }
 
-function isResponsiveStyleBreakpoint(value: string): value is ResponsiveStyleBreakpoint {
-	return Object.hasOwn(responsiveStyleConditions, value);
+function isResponsiveCondition(value: string): value is ResponsiveCondition {
+	return Object.hasOwn(responsiveConditions, value);
 }
 
 function assignCondition(
-	condition: ResponsiveStyleBreakpoint,
+	condition: ResponsiveCondition,
 	conditionValue: string | number,
 	property: ResponsiveCssProperty,
 	format: (value: string | number) => string,

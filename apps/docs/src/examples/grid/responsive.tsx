@@ -12,8 +12,8 @@ const itemStyle = {
 export default () => {
 	return (
 		<Grid columns={{ initial: 2, bp768: 4 }} gap="sp12" inlineSize="100%">
-			<Box gridColumn={{ initial: 'span 2', bp768: 'span 2' }} style={itemStyle}>
-				Spans two columns
+			<Box gridColumn={{ initial: 'span 2', bp768: 'span 3' }} style={itemStyle}>
+				Spans two columns initially, three from bp768
 			</Box>
 			<span style={itemStyle}>Second grid item</span>
 			<span style={itemStyle}>Third grid item</span>
