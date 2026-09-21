@@ -56,13 +56,9 @@ jobs:
         run: corepack pnpm --filter @luke-ui/react run test:visual:capture
 
       - name: Fail when nothing rendered
-        run: |
-          count=$(find .artifacts/visual-regression/baseline -name '*.png' | wc -l)
-          echo "Captured $count baseline screenshots."
-          if [ "$count" -eq 0 ]; then
-            echo '::error::No visual captures were rendered. The baseline would be empty.'
-            exit 1
-          fi
+        env:
+          VISUAL_CAPTURE_DIR: ${{ github.workspace }}/.artifacts/visual-regression/baseline
+        run: corepack pnpm --filter @luke-ui/workflow-scripts run check:captures
 
       - name: Upload baseline
         uses: actions/upload-artifact@v7

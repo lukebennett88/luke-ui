@@ -31,49 +31,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v7
 
-      - name: Download the main baseline
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          # Do not skip a newer failed run for an older baseline. The API call is
-          # kept separate so a 404 (the workflow does not exist on `main` yet)
-          # cannot have its error body read as a run id.
-          if ! runs=$(gh api \
-            "repos/${GH_REPO}/actions/workflows/visual-baseline.yml/runs?branch=main&per_page=1" \
-            --jq '.workflow_runs[0] // empty | "\(.id) \(.status) \(.conclusion // "none")"' 2>/dev/null); then
-            echo '::error::No "Visual baseline" workflow on `main` yet. Merge this branch, or run it on `main`, then re-run this job.'
-            exit 1
-          fi
-          read -r run_id run_status run_conclusion <<<"$runs"
-          if [ -z "${run_id:-}" ]; then
-            echo '::error::No baseline run found. Run "Visual baseline" on `main`, then re-run this job.'
-            exit 1
-          fi
-          run_url="https://github.com/${GH_REPO}/actions/runs/${run_id}"
-          echo "Newest Visual baseline run on \`main\`: ${run_id} (status=${run_status}, conclusion=${run_conclusion})."
-          if [ "$run_status" != "completed" ]; then
-            echo "::error::Newest baseline run is ${run_status}. Wait for ${run_url}, then re-run this job."
-            exit 1
-          fi
-          if [ "$run_conclusion" != "success" ]; then
-            echo "::error::Newest baseline run concluded ${run_conclusion}. Re-run ${run_url}, then re-run this job."
-            exit 1
-          fi
-          echo "Baseline from Visual baseline run ${run_id}."
-          mkdir -p .artifacts/visual-regression/baseline
-          if ! gh run download "$run_id" --name visual-baseline --dir .artifacts/visual-regression/baseline; then
-            echo "::error::Baseline artefact missing or expired. Re-run ${run_url}, then re-run this job."
-            exit 1
-          fi
-          count=$(find .artifacts/visual-regression/baseline -name '*.png' | wc -l)
-          echo "Downloaded $count baseline screenshots."
-          if [ "$count" -eq 0 ]; then
-            echo "::error::Baseline artefact is empty. Re-run ${run_url}, then re-run this job."
-            exit 1
-          fi
-
       - name: Setup tooling with mise
         uses: jdx/mise-action@v4
         with:
@@ -86,6 +43,11 @@ jobs:
       - name: Install dependencies
         run: corepack pnpm install --frozen-lockfile
 
+      - name: Download the main baseline
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: corepack pnpm --filter @luke-ui/workflow-scripts run download:baseline
+
       - name: Install Playwright Chromium
         run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
@@ -97,16 +59,7 @@ jobs:
 
       - name: Summarise the comparison
         id: summary
-        run: |
-          set -euo pipefail
-          summary=.artifacts/visual-regression/summary.json
-          jq -r '
-            "| status | count |", "| --- | --- |",
-            (.counts | to_entries[] | "| \(.key) | \(.value) |")
-          ' "$summary" >> "$GITHUB_STEP_SUMMARY"
-          review=$(jq '.counts.changed + .counts.added + .counts.removed' "$summary")
-          echo "review=$review" >> "$GITHUB_OUTPUT"
-          jq -r '.results[] | select(.status != "unchanged") | "\(.status)\t\(.id)"' "$summary"
+        run: corepack pnpm --filter @luke-ui/workflow-scripts run summarise:visual
 
       - name: Upload expected, actual, and diff screenshots
         if: always()
