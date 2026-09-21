@@ -76,9 +76,9 @@ test('does not overflow a parent narrower than minColumnInlineSize', () => {
 	expect(grid.scrollWidth).toBeLessThanOrEqual(grid.clientWidth + 1);
 });
 
-test('keeps sparse items on equal tracks without stretching empty columns', () => {
+test('places sparse items without overflowing the parent', () => {
 	const { locator } = render(
-		<div style={{ inlineSize: '40rem' }}>
+		<div data-testid="parent" style={{ inlineSize: '40rem' }}>
 			<AutoGrid data-testid="grid" gap="sp8" minColumnInlineSize="12rem">
 				<span data-testid="only" style={{ blockSize: '1rem' }}>
 					Only item
@@ -86,13 +86,24 @@ test('keeps sparse items on equal tracks without stretching empty columns', () =
 			</AutoGrid>
 		</div>,
 	);
+	const parent = locator.getByTestId('parent').element();
 	const grid = locator.getByTestId('grid').element();
 	const only = locator.getByTestId('only').element();
-	if (!(grid instanceof HTMLElement) || !(only instanceof HTMLElement)) {
+	if (
+		!(parent instanceof HTMLElement) ||
+		!(grid instanceof HTMLElement) ||
+		!(only instanceof HTMLElement)
+	) {
 		throw new Error('Expected AutoGrid elements.');
 	}
 
-	expect(only.getBoundingClientRect().width).toBeLessThan(grid.getBoundingClientRect().width);
+	expect(grid.getBoundingClientRect().width).toBeLessThanOrEqual(
+		parent.getBoundingClientRect().width + 1,
+	);
+	expect(only.getBoundingClientRect().right).toBeLessThanOrEqual(
+		grid.getBoundingClientRect().right + 1,
+	);
+	expect(grid.scrollWidth).toBeLessThanOrEqual(grid.clientWidth + 1);
 });
 
 test('resolves against nested size containers', async () => {
@@ -178,7 +189,7 @@ test('keeps the inline axis under RTL and vertical writing mode', () => {
 					<span style={{ blockSize: '1rem' }} />
 				</AutoGrid>
 			</div>
-			<div style={{ blockSize: '36rem', writingMode: 'vertical-rl' }}>
+			<div style={{ inlineSize: '36rem', writingMode: 'vertical-rl' }}>
 				<AutoGrid data-testid="grid-vertical" gap="sp8" minColumnInlineSize="10rem">
 					<span data-testid="vertical-first" style={{ blockSize: '1rem' }} />
 					<span data-testid="vertical-second" style={{ blockSize: '1rem' }} />

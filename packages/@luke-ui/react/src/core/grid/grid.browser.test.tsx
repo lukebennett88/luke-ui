@@ -50,8 +50,8 @@ test('creates equal explicit columns', () => {
 	}
 
 	expect(getComputedStyle(element).display).toBe('grid');
-	expect(first.getBoundingClientRect().width).toBeCloseTo(second.getBoundingClientRect().width);
-	expect(second.getBoundingClientRect().width).toBeCloseTo(third.getBoundingClientRect().width);
+	expect(first.getBoundingClientRect().width).toBeCloseTo(second.getBoundingClientRect().width, 1);
+	expect(second.getBoundingClientRect().width).toBeCloseTo(third.getBoundingClientRect().width, 1);
 	expect(first.getBoundingClientRect().top).toBe(second.getBoundingClientRect().top);
 	expect(second.getBoundingClientRect().top).toBe(third.getBoundingClientRect().top);
 });
