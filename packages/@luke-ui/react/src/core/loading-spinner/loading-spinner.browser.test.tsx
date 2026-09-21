@@ -1,13 +1,150 @@
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { LoadingSpinner } from './loading-spinner.js';
+import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import type { CSSProperties, ReactNode } from 'react';
+import { expect, test } from 'vite-plus/test';
+import { vars } from '../../theme/index.js';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	Stack,
+	variantValuesFor,
+} from '../test-utils/visual.js';
 
-testConformance({
-	path: 'loading-spinner',
-	getTarget: (result) => {
-		const target = result.locator.getByRole('status').element();
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a LoadingSpinner element.');
-		return target;
-	},
-	render: (props = {}) => render(<LoadingSpinner {...props} />),
+const rowStyle = {
+	alignItems: 'center',
+	display: 'flex',
+	gap: '1rem',
+} satisfies CSSProperties;
+
+const sizes = variantValuesFor<typeof LoadingSpinner, 'size'>()(['small', 'medium', 'large']);
+const colors = variantValuesFor<typeof LoadingSpinner, 'color'>()(['primary', 'info', 'danger']);
+
+const fixedChildStyle = {
+	blockSize: '2.5rem',
+	inlineSize: '8rem',
+} satisfies CSSProperties;
+
+/**
+ * The representative scene, shared by the axe check and the visual capture so
+ * both cover the same surface.
+ */
+function LoadingSpinnerScene() {
+	return (
+		<Stack>
+			<div style={rowStyle}>
+				{sizes.map((size) => (
+					<LoadingSpinner aria-label={`${size} spinner`} key={size} size={size} />
+				))}
+			</div>
+			<div style={rowStyle}>
+				{colors.map((color) => (
+					<LoadingSpinner aria-label={`${color} spinner`} color={color} key={color} />
+				))}
+			</div>
+			<div style={rowStyle}>
+				<LoadingSpinner aria-label="loading fixed size button">
+					<button style={fixedChildStyle} type="button">
+						Save
+					</button>
+				</LoadingSpinner>
+				<LoadingSpinner aria-label="loaded fixed size button" isLoading={false}>
+					<button style={fixedChildStyle} type="button">
+						Save
+					</button>
+				</LoadingSpinner>
+			</div>
+		</Stack>
+	);
+}
+
+test('LoadingSpinner forwards className, data attributes, id, and ref to its status element', () => {
+	const ref = { current: null as HTMLElement | null };
+	const { locator } = render(
+		<LoadingSpinner
+			className="forwarded-class"
+			data-forwarded="true"
+			id="forwarded-id"
+			ref={ref}
+		/>,
+	);
+	const target = locator.getByRole('status').element();
+
+	expect(target).toHaveClass('forwarded-class');
+	expect(target).toHaveAttribute('data-forwarded', 'true');
+	expect(target).toHaveAttribute('id', 'forwarded-id');
+	expect(ref.current).toBe(target);
+});
+
+test('the LoadingSpinner scene has no axe violations', async () => {
+	const { container } = render(<LoadingSpinnerScene />);
+
+	await expectNoAxeViolations(container);
+});
+
+test('sizes and colors', { tags: ['visual'] }, async () => {
+	const { locator } = render(<LoadingSpinnerScene />);
+
+	await captureVisual(locator, 'loading-spinner/sizes-and-colors');
+});
+
+const themeMatrixStyle = {
+	backgroundColor: vars.color.surface.canvas,
+	display: 'flex',
+	gap: '1rem',
+	padding: '1rem',
+} satisfies CSSProperties;
+
+const spinnerStyle = {
+	color: vars.color.foreground.accent.rest,
+} satisfies CSSProperties;
+
+function ThemeMatrixScope({
+	children,
+	label,
+	mode,
+}: {
+	children: ReactNode;
+	label: string;
+	mode?: 'light' | 'dark';
+}) {
+	return (
+		<div
+			data-color-mode={mode}
+			style={{
+				alignItems: 'center',
+				backgroundColor: vars.color.surface.recessed,
+				border: `1px solid ${vars.color.border.decorative}`,
+				color: vars.color.text.primary,
+				display: 'flex',
+				gap: '0.5rem',
+				padding: '1rem',
+			}}
+		>
+			{children}
+			<span>{label}</span>
+		</div>
+	);
+}
+
+// A nested scope that flips colour mode is the one state the representative
+// scene cannot show: the spinner has to re-resolve its tokens against the
+// nearer `data-color-mode`, not the root's.
+test('theme matrix', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const oppositeMode = appearance.mode === 'light' ? 'dark' : 'light';
+		const { locator } = render(
+			<div style={themeMatrixStyle}>
+				<ThemeMatrixScope label="Root scope">
+					<LoadingSpinner aria-label="Root theme pending" style={spinnerStyle} />
+				</ThemeMatrixScope>
+				<ThemeMatrixScope label="Opposite mode" mode={oppositeMode}>
+					<LoadingSpinner aria-label="Opposite mode theme" style={spinnerStyle} />
+				</ThemeMatrixScope>
+			</div>,
+			{ appearance },
+		);
+
+		await captureVisualAppearance(locator, 'loading-spinner/theme-matrix', appearance);
+	}
 });

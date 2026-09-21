@@ -6,11 +6,13 @@ import { TokenBoard } from './token-board.js';
 // Captures every contract leaf, colour and non-colour alike, for both bundled themes and
 // modes, so any generator or semantic-mapping change produces an obvious, intentional diff
 // regardless of whether a component happens to consume the changed leaf.
-for (const appearance of visualAppearances) {
-	test(`token board: ${appearance.theme} ${appearance.mode}`, async () => {
-		const { locator: scene } = render(<TokenBoard />, { appearance });
-		await expect.element(scene).toBeVisible();
+test('token board', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(<TokenBoard />, { appearance });
+		// eslint-disable-next-line no-await-in-loop -- each capture resizes the shared viewport
+		await expect.element(locator).toBeVisible();
 
-		await captureVisualAppearance(scene, 'theme/token-board', appearance);
-	});
-}
+		// eslint-disable-next-line no-await-in-loop -- each capture resizes the shared viewport
+		await captureVisualAppearance(locator, 'theme/token-board', appearance);
+	}
+});

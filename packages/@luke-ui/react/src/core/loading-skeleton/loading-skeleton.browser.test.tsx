@@ -1,18 +1,59 @@
+import { Button } from '@luke-ui/react/button';
+import { LoadingSkeleton, LoadingSkeletonProvider } from '@luke-ui/react/loading-skeleton';
+import { TextField } from '@luke-ui/react/text-field';
+import type { CSSProperties } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { cdp } from 'vite-plus/test/context';
-import { Button } from '../button/button.js';
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { LoadingSkeleton, LoadingSkeletonProvider } from './loading-skeleton.js';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
-testConformance({
-	path: 'loading-skeleton',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a LoadingSkeleton element.');
-		return target;
-	},
-	render: (props = {}) => render(<LoadingSkeleton {...props}>Loading copy</LoadingSkeleton>),
+/**
+ * The representative scene, shared by the axe check and the visual capture so
+ * both cover the same surface.
+ */
+function LoadingSkeletonScene() {
+	return (
+		<Stack align="flex-start">
+			<LoadingSkeleton>Loading placeholder text</LoadingSkeleton>
+			<div style={{ maxInlineSize: '16rem' } satisfies CSSProperties}>
+				<LoadingSkeleton>
+					A short paragraph of placeholder copy that wraps across two lines.
+				</LoadingSkeleton>
+			</div>
+			<LoadingSkeleton>
+				<Button>Submit</Button>
+			</LoadingSkeleton>
+			<LoadingSkeleton radius="control">
+				<TextField label="Email" name="email" placeholder="Email address" />
+			</LoadingSkeleton>
+			<LoadingSkeleton isLoading={false}>
+				<Button>Submit</Button>
+			</LoadingSkeleton>
+		</Stack>
+	);
+}
+
+test('LoadingSkeleton forwards className, data attributes, id, and ref to its root', () => {
+	const ref = { current: null as HTMLElement | null };
+	const { container } = render(
+		<LoadingSkeleton className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+			Loading copy
+		</LoadingSkeleton>,
+	);
+	const target = container.firstElementChild;
+	if (!(target instanceof HTMLElement)) throw new Error('Expected a LoadingSkeleton element.');
+
+	expect(target).toHaveClass('forwarded-class');
+	expect(target).toHaveAttribute('data-forwarded', 'true');
+	expect(target).toHaveAttribute('id', 'forwarded-id');
+	expect(ref.current).toBe(target);
+});
+
+test('the LoadingSkeleton scene has no axe violations', async () => {
+	const { container } = render(<LoadingSkeletonScene />);
+
+	await expectNoAxeViolations(container);
 });
 
 test('resolves local, provider, and default loading states', () => {
@@ -135,4 +176,27 @@ test('uses the effective writing direction for sheen travel under nested dir ove
 	expect(sheenPositionX(rtlThenLtr)).toBe(sheenPositionX(ltrBaseline));
 	expect(sheenPositionX(ltrThenRtl)).toBe(sheenPositionX(rtlBaseline));
 	expect(sheenPositionX(ltrBaseline)).not.toBe(sheenPositionX(rtlBaseline));
+});
+
+test('text and component placeholders', { tags: ['visual'] }, async () => {
+	const { locator } = render(<LoadingSkeletonScene />);
+
+	await captureVisual(locator, 'loading-skeleton/placeholders');
+});
+
+// A skeleton wrapping tactile descendants has to flatten their own surfaces,
+// which the inline placeholders above never exercise.
+test('flattens tactile descendants', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<LoadingSkeleton radius="surface">
+				<div>
+					<Button>Nested action</Button>
+					<TextField label="Email" name="email" />
+				</div>
+			</LoadingSkeleton>,
+			{ appearance },
+		);
+		await captureVisualAppearance(locator, 'loading-skeleton/descendant-suppression', appearance);
+	}
 });

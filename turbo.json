@@ -42,7 +42,6 @@
 				"//#check:format-root",
 				"check:lint",
 				"check:llms",
-				"check:test-suffixes",
 				"check:types"
 			]
 		},
@@ -66,9 +65,6 @@
 			"dependsOn": ["generate", "^build"]
 		},
 		"check:llms": {},
-		"check:test-suffixes": {
-			"dependsOn": ["generate"]
-		},
 		"check:types": {
 			"dependsOn": ["generate", "^build"]
 		},

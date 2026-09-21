@@ -7,6 +7,7 @@
 .turbo/
 .visual-captures/
 .vitest-attachments/
+__screenshots__/
 *.local
 *.log
 apps/docs/.story/

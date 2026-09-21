@@ -1,9 +1,16 @@
 /// <reference types="vite/client" />
 
-// Loads the design-token stylesheet into the test document.
-import '../stylesheet.css.js';
+// Loads the built design-token stylesheet into the test document, matching the
+// hashed class names the built components reference.
+import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
+// The theme roots, tokens, and icon provider all come from the built package,
+// so they match the class names and React context the built components use.
+import { IconSpritesheetProvider } from '@luke-ui/react/icon';
+import { rootClassName, vars } from '@luke-ui/react/theme';
+import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
+import { themeClassName as tactileThemeClassName } from '@luke-ui/react/themes/tactile';
 import type { ReactNode } from 'react';
 import { act } from 'react';
 import type { Root } from 'react-dom/client';
@@ -13,10 +20,6 @@ import { page, userEvent } from 'vite-plus/test/context';
 // The generated spritesheet is emitted to `dist/` by the `generate` task, which
 // both `build` and `test` depend on, so it is always present when tests run.
 import spritesheetHref from '../../../dist/spritesheet.svg?url';
-import { themeClassName as paperThemeClassName } from '../../theme/bundles/paper/index.js';
-import { themeClassName as tactileThemeClassName } from '../../theme/bundles/tactile/index.js';
-import { rootClassName, vars } from '../../theme/index.js';
-import { IconSpritesheetProvider } from '../icon/icon.js';
 import {
 	getAppliedIdentityClassName,
 	setAppliedIdentityClassName,

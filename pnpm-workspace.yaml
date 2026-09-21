@@ -68,6 +68,7 @@ catalog:
   '@vitest/browser-playwright': 4.1.11
   '@vitest/coverage-v8': 4.1.11
   '@vitest/ui': 4.1.11
+  axe-core: ^4.12.0
   csstype: ^3.2.3
   eslint-plugin-react-hooks: ^7.1.1
   fumadocs-core: ^16.15.11

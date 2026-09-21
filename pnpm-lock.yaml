@@ -257,6 +257,9 @@ catalogs:
     '@vitest/ui':
       specifier: 4.1.11
       version: 4.1.11
+    axe-core:
+      specifier: ^4.12.0
+      version: 4.13.0
     csstype:
       specifier: ^3.2.3
       version: 3.2.3
@@ -638,6 +641,9 @@ importers:
       '@vitest/ui':
         specifier: 'catalog:'
         version: 4.1.11(vitest@4.1.11)
+      axe-core:
+        specifier: 'catalog:'
+        version: 4.13.0
       lightningcss:
         specifier: 'catalog:'
         version: 1.33.0
@@ -4499,6 +4505,10 @@ packages:
   available-typed-arrays@1.0.7:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
+
+  axe-core@4.13.0:
+    resolution: {integrity: sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A==}
+    engines: {node: '>=4'}
 
   b4a@1.9.0:
     resolution: {integrity: sha512-dpfcF9fDNR6++cthXR67iyhgqWy9CBouAvIWhIntzBG6cvK/cnIPiZQjBwi/ZqjjBEDGfoNDtmB0kTjroOJ3pQ==}
@@ -11636,6 +11646,8 @@ snapshots:
   available-typed-arrays@1.0.7:
     dependencies:
       possible-typed-array-names: 1.1.0
+
+  axe-core@4.13.0: {}
 
   b4a@1.9.0: {}
 

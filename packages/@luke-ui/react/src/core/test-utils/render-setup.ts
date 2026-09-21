@@ -1,11 +1,9 @@
-// Import the complete layer graph before component CSS so browser tests use the built
-// stylesheet's layer order. Vite's dev server does not run `authoritativeLayerOrderPlugin`, and the
-// browser fixes layer order when a `<style>` tag first names each layer.
-import '../styles/index.css.js';
-// Load the shared theme styles during setup so portal layout (open menus, trays) is
-// ready before a test waits on it, rather than only becoming available once the
-// first `render()` call runs its own module-level imports.
-import '../stylesheet.css.js';
+// Tests import components from the built package, so they must load the package's
+// own stylesheet: the source `.css.ts` modules compile to different hashed class
+// names than the ones baked into `dist`, and loading those instead leaves every
+// built component unstyled. This also carries the built layer order, which Vite's
+// dev server does not reproduce (it never runs `authoritativeLayerOrderPlugin`).
+import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
 import { afterEach } from 'vite-plus/test';

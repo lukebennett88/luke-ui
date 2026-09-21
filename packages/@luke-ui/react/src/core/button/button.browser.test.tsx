@@ -1,34 +1,102 @@
-import { act } from 'react';
+import { Button } from '@luke-ui/react/button';
+import { Icon } from '@luke-ui/react/icon';
+import { Text } from '@luke-ui/react/text';
+import { act, createRef } from 'react';
+import type { ComponentProps, ReactNode, Ref } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { expect, test } from 'vite-plus/test';
-import { testConformance, testIntegration } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { Text } from '../text/text.js';
-import { Button } from './button.js';
+import { page, userEvent } from 'vite-plus/test/context';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	emulateForcedColors,
+	focusViaKeyboard,
+	Grid,
+} from '../test-utils/visual.js';
 
 /** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
 const ACTION_SPINNER_DELAY_MS = 300;
 
-testConformance({
-	path: 'button',
-	getTarget: (result) => {
-		const target = result.locator.getByRole('button').element();
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a button.');
-		return target;
-	},
-	render: (props = {}) => {
-		return render(<Button {...props}>Action</Button>);
-	},
+/**
+ * The representative scene, shared by the axe check and the visual capture so
+ * both cover the same surface.
+ */
+function ButtonScene() {
+	return (
+		<Grid columns={3}>
+			<Button prominence="low">Neutral low button</Button>
+			<Button>Neutral standard button</Button>
+			<Button prominence="high">Neutral high button</Button>
+			<Button tone="critical" prominence="low">
+				Critical low button
+			</Button>
+			<Button tone="critical">Critical standard button</Button>
+			<Button tone="critical" prominence="high">
+				Critical high button
+			</Button>
+			<Button appearance="text" prominence="low">
+				Neutral low text Button
+			</Button>
+			<Button appearance="text">Neutral standard text Button</Button>
+			<Button appearance="text" prominence="high">
+				Neutral high text Button
+			</Button>
+			<Button appearance="text" tone="critical" prominence="low">
+				Critical low text Button
+			</Button>
+			<Button appearance="text" tone="critical">
+				Critical standard text Button
+			</Button>
+			<Button isDisabled>Disabled</Button>
+			<Button isPending>Standard pending</Button>
+			<Button isPending prominence="high">
+				High pending
+			</Button>
+			<Button startContent={<Icon name="add" />}>With icon</Button>
+			<Button endContent={<Icon name="arrowRight" />}>With end content</Button>
+		</Grid>
+	);
+}
+
+/**
+ * React 19 passes `ref` as an ordinary prop and these components spread it
+ * through to the React Aria element, so ref forwarding works at runtime. React
+ * Aria's own prop types never declare `ref`, so the public props type cannot
+ * express it; this alias adds it back for the DOM-contract test below.
+ */
+const ButtonWithRef = Button as (
+	props: ComponentProps<typeof Button> & { ref?: Ref<HTMLButtonElement> },
+) => ReactNode;
+
+test('Button forwards className, data attributes, id, and ref to the button element', () => {
+	const ref = createRef<HTMLButtonElement>();
+	const { locator } = render(
+		<ButtonWithRef className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+			Action
+		</ButtonWithRef>,
+	);
+	const button = locator.getByRole('button').element();
+
+	expect(button).toHaveClass('forwarded-class');
+	expect(button).toHaveAttribute('data-forwarded', 'true');
+	expect(button).toHaveAttribute('id', 'forwarded-id');
+	expect(ref.current).toBe(button);
 });
 
-testIntegration('button', async () => {
+test('pressing a Button runs its onPress handler', async () => {
 	let pressed = false;
 	const { locator, user } = render(<Button onPress={() => (pressed = true)}>Action</Button>);
 
 	await user.click(locator.getByRole('button', { name: 'Action' }));
-	// The assertion belongs to the journey registered by testIntegration.
-	// oxlint-disable-next-line vitest/no-standalone-expect
 	expect(pressed).toBe(true);
+});
+
+test('the Button scene has no axe violations', async () => {
+	const { container } = render(<ButtonScene />);
+
+	await expectNoAxeViolations(container);
 });
 
 test('a text-appearance Button keeps button semantics and runs onPress', async () => {
@@ -424,6 +492,54 @@ test('does not swallow Action errors', async () => {
 	await expect
 		.poll(() => container.querySelector('[role="alert"]')?.textContent)
 		.toBe('save failed');
+});
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(<ButtonScene />, { appearance });
+		await captureVisualAppearance(locator, 'button/kitchen-sink', appearance);
+	}
+});
+
+test('interactive states', { tags: ['visual'] }, async () => {
+	const { locator } = render(<Button>Action</Button>);
+	const button = page.getByRole('button', { name: 'Action' });
+
+	await userEvent.hover(button);
+	await captureVisual(locator, 'button/hover');
+	await userEvent.unhover(button);
+	await focusViaKeyboard(button);
+	await captureVisual(locator, 'button/focus-visible');
+	await userEvent.keyboard('{Space>}');
+	await captureVisual(locator, 'button/pressed');
+	await userEvent.keyboard('{/Space}');
+});
+
+test('forced-colors states', { tags: ['visual'] }, async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator } = render(
+			<Grid columns={3}>
+				<Button>Action</Button>
+				<Button isDisabled>Disabled</Button>
+				<Button isPending>Pending</Button>
+			</Grid>,
+		);
+		const action = page.getByRole('button', { name: 'Action' });
+
+		await captureVisual(locator, 'button/forced-colors-resting');
+		await userEvent.hover(action);
+		await captureVisual(locator, 'button/forced-colors-hover');
+		await userEvent.unhover(action);
+		await focusViaKeyboard(action);
+		await captureVisual(locator, 'button/forced-colors-focus-visible');
+		await userEvent.keyboard('{Space>}');
+		await captureVisual(locator, 'button/forced-colors-pressed');
+		await userEvent.keyboard('{/Space}');
+	} finally {
+		await emulateForcedColors('none');
+	}
 });
 
 function delay(ms: number) {

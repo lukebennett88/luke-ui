@@ -1,16 +1,23 @@
-import { expect, test } from 'vite-plus/test';
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { Code } from './code.js';
+import { Code } from '@luke-ui/react/code';
+import { test, expect } from 'vite-plus/test';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
+import { Text } from '../text/text.js';
 
-testConformance({
-	path: 'code',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a Code element.');
-		return target;
-	},
-	render: (props = {}) => render(<Code {...props}>npm install</Code>),
+test('Code forwards className, data attributes, id, and ref to its element', () => {
+	const ref = { current: null as HTMLElement | null };
+	const { container } = render(
+		<Code className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+			npm install
+		</Code>,
+	);
+	const target = container.firstElementChild;
+	if (!(target instanceof HTMLElement)) throw new Error('Expected a Code element.');
+
+	expect(target).toHaveClass('forwarded-class');
+	expect(target).toHaveAttribute('data-forwarded', 'true');
+	expect(target).toHaveAttribute('id', 'forwarded-id');
+	expect(ref.current).toBe(target);
 });
 
 const LONG_CONTENT =
@@ -85,4 +92,36 @@ test('default Code stays on one line with the same long content', async () => {
 	const singleLineHeight = Number.parseFloat(getComputedStyle(element).lineHeight);
 
 	expect(element.getBoundingClientRect().height).toBeLessThanOrEqual(singleLineHeight * 1.5);
+});
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Stack width="20rem">
+				<Text>
+					Run <Code>npm install</Code> to install dependencies.
+				</Text>
+				<Text typography="lead">
+					The <Code>useTheme</Code> hook tracks the active theme.
+				</Text>
+				<Text typography="caption">
+					Set <Code>data-color-mode</Code> on the root element.
+				</Text>
+			</Stack>,
+			{ appearance },
+		);
+
+		await captureVisualAppearance(locator, 'code/kitchen-sink', appearance);
+	}
+});
+
+test('long content states', { tags: ['visual'] }, async () => {
+	const { locator } = render(
+		<Stack width="10rem">
+			<Code lineClamp>{LONG_CONTENT}</Code>
+			<Code lineClamp={3}>{LONG_CONTENT}</Code>
+		</Stack>,
+	);
+
+	await captureVisual(locator, 'code/long-content');
 });

@@ -75,6 +75,9 @@ export default defineConfig({
 				],
 				files: ['packages/@luke-ui/react/src/**/*.browser.test.tsx'],
 				rules: {
+					// Visual captures walk the appearance matrix one screenshot at a time:
+					// each capture resizes the shared viewport, so they cannot be parallelised.
+					'no-await-in-loop': 'off',
 					'no-restricted-imports': [
 						'error',
 						{
@@ -94,25 +97,7 @@ export default defineConfig({
 				},
 			},
 			{
-				excludeFiles: ['packages/@luke-ui/react/src/theme/**'],
-				files: ['packages/@luke-ui/react/src/**/*.visual.test.tsx'],
-				rules: {
-					'no-await-in-loop': 'off',
-					'no-restricted-imports': [
-						'error',
-						{
-							paths: [
-								{
-									message: 'Mount components through src/core/test-utils/render.tsx.',
-									name: 'react-dom/client',
-								},
-							],
-						},
-					],
-				},
-			},
-			{
-				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				excludeFiles: ['**/*.test.*', '**/__fixtures__/**'],
 				files: ['packages/@luke-ui/react/src/core/**/*.{ts,tsx}'],
 				rules: {
 					'no-restricted-imports': [
@@ -129,7 +114,7 @@ export default defineConfig({
 				},
 			},
 			{
-				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				excludeFiles: ['**/*.test.*', '**/__fixtures__/**'],
 				files: ['packages/@luke-ui/react/src/theme/**/*.{ts,tsx}'],
 				rules: {
 					'no-restricted-imports': [
@@ -146,7 +131,7 @@ export default defineConfig({
 				},
 			},
 			{
-				excludeFiles: ['**/*.test.*', '**/*.stories.*', '**/__fixtures__/**'],
+				excludeFiles: ['**/*.test.*', '**/__fixtures__/**'],
 				files: ['packages/@luke-ui/react/src/shared/**/*.{ts,tsx}'],
 				rules: {
 					'no-restricted-imports': [
@@ -218,6 +203,7 @@ export default defineConfig({
 						'captureVisual',
 						'captureVisualAppearance',
 						'expect',
+						'expectNoAxeViolations',
 						'expectTypeOf',
 					],
 				},

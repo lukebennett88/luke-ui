@@ -1,23 +1,32 @@
+import { Stack } from '@luke-ui/react/stack';
+// Only styles the visual fixture below; no test asserts a resolved token value.
+// oxlint-disable-next-line no-restricted-imports
+import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { afterEach, expect, test } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import { breakpoints } from '../../theme/breakpoints.js';
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { Stack } from './stack.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance } from '../test-utils/visual.js';
+
+test('Stack forwards className, data attributes, id, and ref to its element', () => {
+	const ref = { current: null as HTMLElement | null };
+	const { container } = render(
+		<Stack className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+			Content
+		</Stack>,
+	);
+	const target = container.firstElementChild;
+	if (!(target instanceof HTMLElement)) throw new Error('Expected Stack element.');
+
+	expect(target).toHaveClass('forwarded-class');
+	expect(target).toHaveAttribute('data-forwarded', 'true');
+	expect(target).toHaveAttribute('id', 'forwarded-id');
+	expect(ref.current).toBe(target);
+});
 
 afterEach(async () => {
 	await page.viewport(1024, 800);
-});
-
-testConformance({
-	path: 'stack',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected Stack element.');
-		return target;
-	},
-	render: (props = {}) => render(<Stack {...props}>Content</Stack>),
 });
 
 test('flows children on the block axis with no gap by default', () => {
@@ -208,4 +217,75 @@ test('renders semantic elements and a consumer-owned render prop', () => {
 	expect(article.tagName).toBe('ARTICLE');
 	expect(ref.current).toBe(article);
 	expect(getComputedStyle(article).flexDirection).toBe('column');
+});
+
+const itemStyle = {
+	backgroundColor: vars.color.surface.floating,
+	borderRadius: vars.radius.detail,
+	color: vars.color.text.primary,
+	paddingBlock: vars.space.sp8,
+	paddingInline: vars.space.sp12,
+} as const;
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator: scene } = render(
+			<div style={{ display: 'flex', flexDirection: 'column', gap: vars.space.sp16 }}>
+				<Stack
+					gap="sp12"
+					style={{
+						backgroundColor: vars.color.surface.recessed,
+						borderRadius: vars.radius.surface,
+						color: vars.color.text.primary,
+						padding: vars.space.sp16,
+					}}
+				>
+					<span style={itemStyle}>Block axis</span>
+					<span style={itemStyle}>Required gap</span>
+				</Stack>
+				<Stack
+					alignItems="center"
+					gap="sp8"
+					style={{
+						backgroundColor: vars.color.surface.recessed,
+						borderRadius: vars.radius.surface,
+						color: vars.color.text.primary,
+						padding: vars.space.sp16,
+					}}
+				>
+					<span style={itemStyle}>Aligned</span>
+					<span style={itemStyle}>Items</span>
+				</Stack>
+				<Stack
+					elementType="section"
+					gap="0"
+					style={{
+						backgroundColor: vars.color.surface.recessed,
+						borderRadius: vars.radius.surface,
+						color: vars.color.text.primary,
+						padding: vars.space.sp16,
+					}}
+				>
+					<span style={itemStyle}>Touching</span>
+					<span style={itemStyle}>Items</span>
+				</Stack>
+				<div dir="rtl">
+					<Stack
+						gap="sp8"
+						style={{
+							backgroundColor: vars.color.surface.recessed,
+							borderRadius: vars.radius.surface,
+							color: vars.color.text.primary,
+							padding: vars.space.sp16,
+						}}
+					>
+						<span style={itemStyle}>First</span>
+						<span style={itemStyle}>Second</span>
+					</Stack>
+				</div>
+			</div>,
+			{ appearance },
+		);
+		await captureVisualAppearance(scene, 'stack/kitchen-sink', appearance);
+	}
 });

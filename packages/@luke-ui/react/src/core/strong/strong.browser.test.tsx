@@ -1,13 +1,19 @@
-import { testConformance } from '../conformance/helpers.js';
+import { Strong } from '@luke-ui/react/strong';
+import { expect, test } from 'vite-plus/test';
 import { render } from '../test-utils/render.js';
-import { Strong } from './strong.js';
 
-testConformance({
-	path: 'strong',
-	getTarget: (result) => {
-		const target = result.container.firstElementChild;
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a Strong element.');
-		return target;
-	},
-	render: (props = {}) => render(<Strong {...props}>important</Strong>),
+test('Strong forwards className, data attributes, id, and ref to its element', () => {
+	const ref = { current: null as HTMLElement | null };
+	const { container } = render(
+		<Strong className="forwarded-class" data-forwarded="true" id="forwarded-id" ref={ref}>
+			important
+		</Strong>,
+	);
+	const target = container.firstElementChild;
+	if (!(target instanceof HTMLElement)) throw new Error('Expected a Strong element.');
+
+	expect(target).toHaveClass('forwarded-class');
+	expect(target).toHaveAttribute('data-forwarded', 'true');
+	expect(target).toHaveAttribute('id', 'forwarded-id');
+	expect(ref.current).toBe(target);
 });

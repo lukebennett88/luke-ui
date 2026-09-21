@@ -1,13 +1,71 @@
-import { testConformance } from '../conformance/helpers.js';
-import { render } from '../test-utils/render.js';
-import { Emoji } from './emoji.js';
+import { Emoji } from '@luke-ui/react/emoji';
+import { Text } from '@luke-ui/react/text';
+import type { CSSProperties } from 'react';
+import { expect, test } from 'vite-plus/test';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import { captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
-testConformance({
-	path: 'emoji',
-	getTarget: (result) => {
-		const target = result.locator.getByRole('img', { name: 'Celebration' }).element();
-		if (!(target instanceof HTMLElement)) throw new Error('Expected an Emoji element.');
-		return target;
-	},
-	render: (props = {}) => render(<Emoji {...props} emoji="🎉" label="Celebration" />),
+const stackStyle = {
+	display: 'flex',
+	flexDirection: 'column',
+	gap: '1rem',
+} satisfies CSSProperties;
+
+/**
+ * The representative scene, shared by the axe check and the visual capture so
+ * both cover the same surface.
+ */
+function EmojiScene() {
+	return (
+		<Stack>
+			<div style={stackStyle}>
+				<Text typography="display">
+					Hello <Emoji emoji="👋" label="Waving hand display" />
+				</Text>
+				<Text typography="heading3">
+					Hello <Emoji emoji="👋" label="Waving hand heading3" />
+				</Text>
+				<Text typography="body">
+					Hello <Emoji emoji="👋" label="Waving hand body" />
+				</Text>
+				<Text typography="caption">
+					Hello <Emoji emoji="👋" label="Waving hand caption" />
+				</Text>
+			</div>
+		</Stack>
+	);
+}
+
+test('Emoji forwards className, data attributes, id, and ref to its element', () => {
+	const ref = { current: null as HTMLElement | null };
+	const { locator } = render(
+		<Emoji
+			className="forwarded-class"
+			data-forwarded="true"
+			emoji="🎉"
+			id="forwarded-id"
+			label="Celebration"
+			ref={ref}
+		/>,
+	);
+	const target = locator.getByRole('img', { name: 'Celebration' }).element();
+
+	expect(target).toHaveClass('forwarded-class');
+	expect(target).toHaveAttribute('data-forwarded', 'true');
+	expect(target).toHaveAttribute('id', 'forwarded-id');
+	expect(ref.current).toBe(target);
+});
+
+test('the Emoji scene has no axe violations', async () => {
+	const { container } = render(<EmojiScene />);
+
+	await expectNoAxeViolations(container);
+});
+
+test('inherits surrounding typography', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(<EmojiScene />, { appearance });
+		await captureVisualAppearance(locator, 'emoji/inheritance', appearance);
+	}
 });

@@ -1,16 +1,33 @@
+import { ComboboxField } from '@luke-ui/react/combobox-field';
+import { Icon } from '@luke-ui/react/icon';
+import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import {
+	ComboboxInput,
+	ComboboxInputGroup,
+	ComboboxItem,
+	ComboboxListBox,
+	ComboboxLoadMoreItem,
+	ComboboxPopover,
+	ComboboxRoot,
+	ComboboxSection,
+	ComboboxTrigger,
+} from '@luke-ui/react/primitives/combobox';
+import { Field } from '@luke-ui/react/primitives/field';
 import { createRef, useState } from 'react';
 import type { Key } from 'react-aria-components/ComboBox';
 import { expect, test } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import { testConformance, testIntegration } from '../conformance/helpers.js';
-import { ComboboxInputGroup } from '../primitives/combobox/input-group.js';
-import { ComboboxInput } from '../primitives/combobox/input.js';
-import { ComboboxItem } from '../primitives/combobox/item.js';
-import { ComboboxRoot } from '../primitives/combobox/root.js';
+import { expectNoAxeViolations } from '../test-utils/axe.js';
 import { mockScreenWidth } from '../test-utils/mock-screen-width.js';
-import { render } from '../test-utils/render.js';
+import { render, visualAppearances } from '../test-utils/render.js';
+import {
+	captureVisual,
+	captureVisualAppearance,
+	emulateForcedColors,
+	focusViaKeyboard,
+	Stack,
+} from '../test-utils/visual.js';
 import { waitForOverlayEnter } from '../test-utils/wait-for-overlay-enter.js';
-import { ComboboxField } from './combobox-field.js';
 
 type CountryItem = {
 	id: string;
@@ -22,53 +39,113 @@ const countryItems: Array<CountryItem> = [
 	{ id: 'ca', label: 'Canada' },
 ];
 
+/** The longer list the representative scene and the visual captures lay out. */
+const sceneCountryItems: Array<CountryItem> = [
+	{ id: 'au', label: 'Australia' },
+	{ id: 'ca', label: 'Canada' },
+	{ id: 'nz', label: 'New Zealand' },
+	{ id: 'us', label: 'United States' },
+	{ id: 'se', label: 'Sweden' },
+];
+
 const renderCountryItem = (item: CountryItem) => <ComboboxItem>{item.label}</ComboboxItem>;
 
-testConformance({
-	path: 'combobox-field',
-	assertAssociation: (result) => {
-		// oxlint-disable-next-line vitest/no-standalone-expect
-		expect(result.locator.getByRole('combobox', { name: 'Country' }).element()).toHaveAttribute(
-			'aria-describedby',
-		);
-	},
-	assertName: (result) => {
-		// React Aria uses a hidden input for the selected form value.
-		const hiddenInput = result.container.querySelector(
-			'input[type="hidden"][name="conformance-field"]',
-		);
-		// oxlint-disable-next-line vitest/no-standalone-expect
-		expect(hiddenInput).not.toBeNull();
-	},
-	getControl: (result) => {
-		const control = result.locator.getByRole('combobox', { name: 'Country' }).element();
-		if (!(control instanceof HTMLElement)) throw new Error('Expected a combobox input.');
-		return control;
-	},
-	getTarget: (result) => {
-		// RAC mounts a collection `<template>` before the ComboBox root, so
-		// `container.firstElementChild` is not the className host. Resolve the
-		// element that received the forwarded `data-conformance` attribute from
-		// the shared `domProps` render instead of relying on RAC internals.
-		const target = result.container.querySelector('[data-conformance="true"]');
-		if (!(target instanceof HTMLElement)) throw new Error('Expected a ComboboxField root.');
-		return target;
-	},
-	render: (props = {}) => {
-		return render(
-			<ComboboxField<CountryItem>
-				{...props}
-				defaultItems={countryItems}
-				description="Helpful context"
-				label="Country"
-			>
-				{renderCountryItem}
-			</ComboboxField>,
-		);
-	},
+const renderIconItem = (item: CountryItem) => (
+	<ComboboxItem>
+		<Icon name="bookOpen" />
+		{item.label}
+	</ComboboxItem>
+);
+
+// RAC moves `id` onto the control, and mounts a collection `<template>` before
+// the ComboBox root, so `className`/`data-*` land on neither `container.firstElementChild`
+// nor the element carrying `id`.
+test('ComboboxField forwards className and data attributes to its root, and id to the DOM', () => {
+	const { container } = render(
+		<ComboboxField<CountryItem>
+			className="forwarded-class"
+			data-forwarded="true"
+			defaultItems={countryItems}
+			description="Helpful context"
+			id="forwarded-id"
+			label="Country"
+		>
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	const root = container.querySelector('[data-forwarded="true"]');
+	if (!(root instanceof HTMLElement)) throw new Error('Expected a ComboboxField root.');
+
+	expect(root).toHaveClass('forwarded-class');
+	expect(container.querySelector('#forwarded-id')).not.toBeNull();
 });
 
-testIntegration('combobox-field', async () => {
+test('ComboboxField resolves inputRef to the input, submits its value, and fires onBlur', () => {
+	const inputRef = createRef<HTMLInputElement>();
+	let blurred = false;
+	const { container, locator } = render(
+		<ComboboxField<CountryItem>
+			defaultItems={countryItems}
+			description="Helpful context"
+			inputRef={inputRef}
+			label="Country"
+			name="country"
+			onBlur={() => {
+				blurred = true;
+			}}
+		>
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	const control = locator.getByRole('combobox', { name: 'Country' }).element();
+
+	expect(inputRef.current).toBe(control);
+	// The description is wired to the combobox, not just rendered beside it.
+	expect(control).toHaveAttribute('aria-describedby');
+	// React Aria carries the selected form value on a hidden input, not on the
+	// visible combobox, so that is the control a form reads.
+	expect(container.querySelector('input[type="hidden"][name="country"]')).not.toBeNull();
+
+	const form = document.createElement('form');
+	container.replaceWith(form);
+	form.append(container);
+	const namedControl = form.elements.namedItem('country');
+	if (!(namedControl instanceof HTMLInputElement)) {
+		throw new Error('Expected a native input named country.');
+	}
+	namedControl.value = 'au';
+	expect(new FormData(form).get('country')).toBe('au');
+
+	if (!(control instanceof HTMLElement)) throw new Error('Expected an HTML control.');
+	control.focus();
+	control.blur();
+	expect(blurred).toBe(true);
+
+	form.remove();
+});
+
+// React Aria types `inputRef` as a ref object. Luke UI widens it to accept a
+// callback so React Hook Form's `field.ref` works without an adapter.
+test('ComboboxField resolves a callback inputRef to the input', () => {
+	const resolved: Array<HTMLElement | null> = [];
+	const { locator } = render(
+		<ComboboxField<CountryItem>
+			defaultItems={countryItems}
+			inputRef={(node: HTMLElement | null) => {
+				resolved.push(node);
+			}}
+			label="Country"
+			name="country"
+		>
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	const control = locator.getByRole('combobox', { name: 'Country' }).element();
+
+	expect(resolved.at(-1)).toBe(control);
+});
+
+test('picking an option from the ComboboxField popover fills the input', async () => {
 	const { locator, user } = render(
 		<ComboboxField defaultItems={countryItems} label="Country">
 			{renderCountryItem}
@@ -87,8 +164,43 @@ testIntegration('combobox-field', async () => {
 	await waitForOverlayEnter(popover);
 
 	await user.click(option);
-	// oxlint-disable-next-line vitest/no-standalone-expect
 	expect(page.getByRole('combobox', { name: 'Country' })).toHaveValue('Australia');
+});
+
+test('the ComboboxField scene has no axe violations', async () => {
+	const { container } = render(
+		<Stack>
+			<ComboboxField
+				defaultItems={sceneCountryItems}
+				label="Resting"
+				name="resting"
+				placeholder="Select a country..."
+			>
+				{renderCountryItem}
+			</ComboboxField>
+			<ComboboxField
+				defaultItems={sceneCountryItems}
+				description="Pick where you are based."
+				label="With description"
+				name="described"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+			<ComboboxField
+				defaultItems={sceneCountryItems}
+				errorMessage="Choose a country."
+				label="Invalid"
+				name="invalid"
+			>
+				{renderCountryItem}
+			</ComboboxField>
+			<ComboboxField defaultItems={sceneCountryItems} isDisabled label="Disabled" name="disabled">
+				{renderCountryItem}
+			</ComboboxField>
+		</Stack>,
+	);
+
+	await expectNoAxeViolations(container);
 });
 
 test('ComboboxField uses a mobile modal to search and select an option', async () => {
@@ -482,3 +594,361 @@ test('ComboboxField seeds the desktop input from defaultInputValue', async () =>
 
 	await expect.element(locator.getByRole('combobox', { name: 'Country' })).toHaveValue('Aus');
 });
+
+test('kitchen sink', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<Stack>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					label="Resting"
+					name="resting"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					defaultValue="ca"
+					isDisabled
+					label="Disabled"
+					name="disabled"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					defaultValue="ca"
+					isReadOnly
+					label="Read-only"
+					name="readonly"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					errorMessage="Choose a valid country."
+					label="Invalid"
+					name="invalid"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					defaultValue="ca"
+					errorMessage="Choose a different country."
+					label="Invalid with a selection"
+					name="invalid-with-selection"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxRoot defaultItems={sceneCountryItems} isInvalid name="invalid-no-message">
+					<Field label="Invalid, no message">
+						<ComboboxInputGroup>
+							<ComboboxInput placeholder="Select a country..." />
+							<ComboboxTrigger aria-label="Toggle options">
+								<Icon name="chevronDown" />
+							</ComboboxTrigger>
+						</ComboboxInputGroup>
+						<ComboboxPopover offset={4}>
+							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
+						</ComboboxPopover>
+					</Field>
+				</ComboboxRoot>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					defaultValue="ca"
+					errorMessage="Choose a different country."
+					label="Invalid small"
+					name="invalid-small"
+					size="small"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					label="Small"
+					name="small"
+					placeholder="Small"
+					size="small"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					label="Medium"
+					name="medium"
+					placeholder="Medium"
+					size="medium"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxRoot
+					defaultItems={sceneCountryItems}
+					name="small-group-medium-trigger"
+					size="small"
+				>
+					<Field label="Small group, medium trigger">
+						<ComboboxInputGroup>
+							<ComboboxInput placeholder="Select a country..." />
+							<ComboboxTrigger aria-label="Toggle medium trigger" size="medium">
+								<Icon name="chevronDown" />
+							</ComboboxTrigger>
+						</ComboboxInputGroup>
+						<ComboboxPopover offset={4}>
+							<ComboboxListBox>{renderCountryItem}</ComboboxListBox>
+						</ComboboxPopover>
+					</Field>
+				</ComboboxRoot>
+			</Stack>,
+			{ appearance },
+		);
+		await captureVisualAppearance(locator, 'combobox-field/kitchen-sink', appearance);
+	}
+});
+
+test('interactive states', { tags: ['visual'] }, async () => {
+	const { locator } = render(
+		<ComboboxField
+			defaultItems={sceneCountryItems}
+			defaultValue="ca"
+			label="Country"
+			name="country"
+		>
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	const input = page.getByRole('combobox', { name: 'Country' });
+	const clear = page.getByRole('button', { name: 'Clear selection' });
+	const trigger = page.getByRole('button', { name: 'Toggle options' });
+
+	await userEvent.hover(input);
+	await captureVisual(locator, 'combobox-field/hover');
+	await userEvent.unhover(input);
+	await userEvent.hover(clear);
+	await captureVisual(locator, 'combobox-field/clear-hover');
+	await userEvent.unhover(clear);
+	await userEvent.hover(trigger);
+	await captureVisual(locator, 'combobox-field/trigger-hover');
+	await userEvent.unhover(trigger);
+	await focusViaKeyboard(input);
+	await captureVisual(locator, 'combobox-field/focus-visible');
+	await userEvent.tab();
+	await captureVisual(locator, 'combobox-field/clear-focus-visible');
+	await userEvent.keyboard('{Space>}');
+	await captureVisual(locator, 'combobox-field/clear-pressed');
+	await userEvent.keyboard('{/Space}');
+});
+
+test('open option and selection states', { tags: ['visual'] }, async () => {
+	render(
+		<ComboboxField
+			defaultItems={sceneCountryItems}
+			defaultValue="ca"
+			disabledKeys={['se']}
+			label="Country"
+			loadMoreItem={
+				<ComboboxLoadMoreItem isLoading>
+					<LoadingSpinner aria-label="Loading more options..." size="small" />
+				</ComboboxLoadMoreItem>
+			}
+			name="country"
+		>
+			{renderCountryItem}
+		</ComboboxField>,
+	);
+	const input = page.getByRole('combobox', { name: 'Country' });
+
+	await userEvent.click(input);
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/open-selected-disabled-loading',
+	);
+	await userEvent.keyboard('{Home}');
+	await captureVisual(page.elementLocator(document.body), 'combobox-field/option-keyboard-focus');
+});
+
+test('option with leading icon at both sizes', { tags: ['visual'] }, async () => {
+	render(
+		<Stack>
+			<ComboboxField defaultItems={sceneCountryItems} label="Medium" name="medium">
+				{renderIconItem}
+			</ComboboxField>
+			<ComboboxField defaultItems={sceneCountryItems} label="Small" name="small" size="small">
+				{renderIconItem}
+			</ComboboxField>
+		</Stack>,
+	);
+	await userEvent.click(page.getByRole('combobox', { name: 'Medium' }));
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/option-leading-icon-medium',
+	);
+	await userEvent.keyboard('{Escape}');
+	await userEvent.click(page.getByRole('combobox', { name: 'Small' }));
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/option-leading-icon-small',
+	);
+});
+
+test('mobile tray', { tags: ['visual'] }, async () => {
+	await page.viewport(390, 700);
+	const restoreScreenWidth = mockScreenWidth(390);
+	try {
+		render(
+			<Stack>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+		);
+		await userEvent.click(page.getByRole('button', { name: 'Country' }));
+		await waitForMobileTrayToSettle();
+		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray');
+	} finally {
+		restoreScreenWidth();
+		await page.viewport(1024, 800);
+	}
+});
+
+test('mobile tray short list', { tags: ['visual'] }, async () => {
+	await page.viewport(390, 700);
+	const restoreScreenWidth = mockScreenWidth(390);
+	try {
+		render(
+			<Stack>
+				<ComboboxField
+					defaultItems={sceneCountryItems.slice(0, 2)}
+					description="Select where the user is located."
+					label="Country"
+					name="country"
+					placeholder="Select a country..."
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+		);
+		await userEvent.click(page.getByRole('button', { name: 'Country' }));
+		await waitForMobileTrayToSettle();
+		await captureVisual(page.elementLocator(document.body), 'combobox-field/tray-short');
+	} finally {
+		restoreScreenWidth();
+		await page.viewport(1024, 800);
+	}
+});
+
+test('forced-colors states', { tags: ['visual'] }, async () => {
+	await emulateForcedColors('active');
+
+	try {
+		const { locator } = render(
+			<Stack>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					defaultValue="ca"
+					disabledKeys={['se']}
+					label="Interactive"
+					name="interactive"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					defaultValue="ca"
+					isDisabled
+					label="Disabled"
+					name="disabled"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					defaultValue="ca"
+					isReadOnly
+					label="Read-only"
+					name="readonly"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+				<ComboboxField
+					defaultItems={sceneCountryItems}
+					errorMessage="Choose a valid country."
+					label="Invalid"
+					name="invalid"
+				>
+					{renderCountryItem}
+				</ComboboxField>
+			</Stack>,
+		);
+		const input = page.getByRole('combobox', { name: 'Interactive' });
+		const trigger = page.getByRole('button', { name: 'Toggle options' }).first();
+
+		await captureVisual(locator, 'combobox-field/forced-colors-resting-states');
+		await userEvent.hover(trigger);
+		await captureVisual(locator, 'combobox-field/forced-colors-trigger-hover');
+		await userEvent.unhover(trigger);
+		await focusViaKeyboard(input);
+		await captureVisual(locator, 'combobox-field/forced-colors-focus-visible');
+		await userEvent.keyboard('{ArrowDown}{Home}');
+		await captureVisual(
+			page.elementLocator(document.body),
+			'combobox-field/forced-colors-open-options',
+		);
+		await userEvent.keyboard('{Escape}');
+	} finally {
+		await emulateForcedColors('none');
+	}
+});
+
+test('rich section title', { tags: ['visual'] }, async () => {
+	render(
+		<Stack width="14rem">
+			<ComboboxField label="Country" name="grouped-rich" placeholder="Select a country...">
+				<ComboboxSection
+					id="north"
+					title={
+						<>
+							Northern <strong>hemisphere</strong> countries and <em>territories</em>
+						</>
+					}
+				>
+					<ComboboxItem id="ca">Canada</ComboboxItem>
+					<ComboboxItem id="us">United States</ComboboxItem>
+				</ComboboxSection>
+			</ComboboxField>
+		</Stack>,
+	);
+
+	await userEvent.click(page.getByRole('combobox', { name: 'Country' }));
+	await captureVisual(
+		page.elementLocator(document.body),
+		'combobox-field/section-title-rich-content',
+	);
+});
+
+/**
+ * Waits for the tray to finish opening before a capture. The screenshot owns the resting geometry,
+ * so nothing here measures a position.
+ */
+async function waitForMobileTrayToSettle() {
+	const dialog = page.getByRole('dialog');
+	await expect.element(dialog).toBeInTheDocument();
+	const modal = dialog.element().parentElement;
+	const overlay = modal?.parentElement;
+	if (modal == null || overlay == null) throw new Error('Expected the mobile modal structure.');
+
+	await waitForOverlayEnter(overlay);
+	await expect.element(page.elementLocator(overlay)).toBeVisible();
+	expect(window.innerWidth).toBe(390);
+	expect(window.innerHeight).toBe(700);
+	expect(window.matchMedia('(width > 450px)').matches).toBe(false);
+	expect(getComputedStyle(modal).borderEndStartRadius).toBe('0px');
+	expect(getComputedStyle(modal).borderEndEndRadius).toBe('0px');
+}
