@@ -38,9 +38,6 @@ trustPolicyExclude:
   - '@netlify/serverless-functions-api@2.18.0'
 
 catalog:
-  '@actions/artifact': ^6.2.1
-  '@actions/core': ^3.0.1
-  '@actions/github': ^9.1.1
   '@arethetypeswrong/core': ^0.18.5
   '@capsizecss/metrics': ^4.3.0
   '@capsizecss/vanilla-extract': ^2.0.4

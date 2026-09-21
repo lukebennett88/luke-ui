@@ -2,14 +2,14 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
-import { countPngs } from './count-pngs.js';
 import {
+	countPngs,
 	countRequiringReview,
 	countsTableRows,
 	decideBaselineRun,
 	isWorkflowMissingStatus,
-} from './visual-baseline-run.js';
-import type { VisualCounts } from './visual-summary-types.js';
+} from './visual-ci.js';
+import type { VisualCounts } from './visual-ci.js';
 
 const runUrl = (runId: number) => `https://github.com/o/r/actions/runs/${runId}`;
 

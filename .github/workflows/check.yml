@@ -54,4 +54,6 @@ jobs:
           # changed, so it must run unscoped. Running it via turbo (rather than the
           # bare `knip` script) pulls in its generate dependencies first.
           corepack pnpm exec turbo run check:cycles check:unused
-          corepack pnpm exec turbo run test --filter=@luke-ui/turbo-generators
+          corepack pnpm exec turbo run test \
+            --filter=@luke-ui/turbo-generators \
+            --filter=@luke-ui/workflow-scripts

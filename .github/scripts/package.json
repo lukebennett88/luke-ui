@@ -4,20 +4,15 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"check:captures": "tsx check-visual-captures.ts",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint . --type-aware",
 		"check:types": "tsc --noEmit -p tsconfig.json",
-		"download:baseline": "tsx download-visual-baseline.ts",
 		"fix:format": "vp fmt . --write",
 		"fix:lint": "vp lint . --type-aware --fix",
-		"summarise:visual": "tsx summarise-visual-regression.ts",
-		"test": "vp test run"
+		"test": "vp test run",
+		"visual-ci": "tsx visual-ci.ts"
 	},
 	"devDependencies": {
-		"@actions/artifact": "catalog:",
-		"@actions/core": "catalog:",
-		"@actions/github": "catalog:",
 		"@types/node": "catalog:",
 		"tsx": "catalog:",
 		"typescript": "catalog:",

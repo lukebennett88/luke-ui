@@ -10,6 +10,7 @@ on:
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - 'mise.toml'
+      - '.github/scripts/**'
       - '.github/workflows/visual-baseline.yml'
       - '.github/workflows/visual-regression.yml'
   workflow_dispatch:
@@ -58,7 +59,7 @@ jobs:
       - name: Fail when nothing rendered
         env:
           VISUAL_CAPTURE_DIR: ${{ github.workspace }}/.artifacts/visual-regression/baseline
-        run: corepack pnpm --filter @luke-ui/workflow-scripts run check:captures
+        run: corepack pnpm --filter @luke-ui/workflow-scripts run visual-ci check-captures
 
       - name: Upload baseline
         uses: actions/upload-artifact@v7
