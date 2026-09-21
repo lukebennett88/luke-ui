@@ -7,8 +7,6 @@ import { createComponent } from './apply-component-creation-plan.js';
 import { createPrimitive } from './apply-primitive-creation-plan.js';
 
 const roots: Array<string> = [];
-const MANIFEST_MARKER =
-	'].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({';
 
 afterEach(async () => {
 	await Promise.all(roots.map((root) => rm(root, { force: true, recursive: true })));
@@ -52,23 +50,21 @@ describe('createPrimitive', () => {
 				'utf8',
 			),
 		).resolves.toContain('export function StatusBadge');
+		await expect(
+			readFile(
+				join(
+					root,
+					'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
+				),
+				'utf8',
+			),
+		).resolves.toContain("import { StatusBadge } from '@luke-ui/react/primitives/status-badge';");
 		expect(await readFile(join(root, modulesRegistryPath), 'utf8')).toBe(
 			[
 				'// Style-producing modules in the shipped stylesheet.',
 				"import '../button/recipe.css.js';",
 				"import '../text/recipe.css.js';",
 				"import '../primitives/status-badge/recipe.css.js';",
-				'',
-			].join('\n'),
-		);
-		expect(await readFile(join(root, manifestPath), 'utf8')).toBe(
-			[
-				'const entries = [',
-				"\t['Button', 'button', ['dom'], 'required', 'applicable'],",
-				"\t['Status Badge primitive', 'primitives/status-badge', [], 'none', 'none'],",
-				MANIFEST_MARKER,
-				'\tname,',
-				'}));',
 				'',
 			].join('\n'),
 		);
@@ -146,47 +142,23 @@ describe('createPrimitive', () => {
 		);
 	});
 
-	it('scaffolds empty conformance on disk by default', async () => {
+	it('omits the tagged visual case when visual coverage is declined', async () => {
 		const root = await createRepositoryFixture();
 
 		await createPrimitive(root, {
 			name: 'FieldRoot',
-		});
-
-		await expect(
-			readFile(
-				join(
-					root,
-					'packages/@luke-ui/react/src/core/primitives/field-root/field-root.browser.test.tsx',
-				),
-				'utf8',
-			),
-		).rejects.toMatchObject({ code: 'ENOENT' });
-		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['Field Root primitive', 'primitives/field-root', [], 'none', 'none']",
-		);
-	});
-
-	it('scaffolds a DOM conformance test when requested', async () => {
-		const root = await createRepositoryFixture();
-
-		await createPrimitive(root, {
-			conformance: ['dom'],
-			name: 'ActionChip',
+			visualCoverage: false,
 		});
 
 		const browserTest = await readFile(
 			join(
 				root,
-				'packages/@luke-ui/react/src/core/primitives/action-chip/action-chip.browser.test.tsx',
+				'packages/@luke-ui/react/src/core/primitives/field-root/field-root.browser.test.tsx',
 			),
 			'utf8',
 		);
-		expect(browserTest).toContain('testConformance');
-		expect(browserTest).toContain("path: 'primitives/action-chip'");
-		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['Action Chip primitive', 'primitives/action-chip', ['dom'], 'none', 'none']",
-		);
+		expect(browserTest).not.toContain("tags: ['visual']");
+		expect(browserTest).toContain("test('the FieldRoot scene has no axe violations'");
 	});
 
 	it('omits hosted docs when docs are disabled', async () => {
@@ -239,7 +211,6 @@ describe('shared creation-plan application', () => {
 });
 
 const modulesRegistryPath = 'packages/@luke-ui/react/src/core/styles/modules.css.ts';
-const manifestPath = 'packages/@luke-ui/react/src/core/conformance/manifest.ts';
 
 async function createRepositoryFixture(options?: {
 	modulesRegistry?: string;
@@ -250,7 +221,6 @@ async function createRepositoryFixture(options?: {
 
 	await mkdir(join(root, 'apps/docs/content/docs/components/primitives'), { recursive: true });
 	await mkdir(join(root, 'packages/@luke-ui/react/src/core/styles'), { recursive: true });
-	await mkdir(join(root, 'packages/@luke-ui/react/src/core/conformance'), { recursive: true });
 
 	await writeFile(
 		join(root, 'apps/docs/content/docs/components/primitives/meta.json'),
@@ -266,18 +236,6 @@ async function createRepositoryFixture(options?: {
 				"import '../text/recipe.css.js';",
 				'',
 			].join('\n'),
-		'utf8',
-	);
-	await writeFile(
-		join(root, manifestPath),
-		[
-			'const entries = [',
-			"\t['Button', 'button', ['dom'], 'required', 'applicable'],",
-			MANIFEST_MARKER,
-			'\tname,',
-			'}));',
-			'',
-		].join('\n'),
 		'utf8',
 	);
 

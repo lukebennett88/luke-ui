@@ -6,8 +6,6 @@ import * as z from 'zod';
 import { createComponent } from './apply-component-creation-plan.js';
 
 const roots: Array<string> = [];
-const MANIFEST_MARKER =
-	'].map(([name, path, conformance, integrationTripwire, visualApplicability]) => ({';
 
 afterEach(async () => {
 	await Promise.all(roots.map((root) => rm(root, { force: true, recursive: true })));
@@ -62,17 +60,12 @@ describe('createComponent', () => {
 				'',
 			].join('\n'),
 		);
-		expect(await readFile(join(root, manifestPath), 'utf8')).toBe(
-			[
-				'const entries = [',
-				"\t['Button', 'button', ['dom'], 'required', 'applicable'],",
-				"\t['StatusBadge', 'status-badge', ['dom'], 'none', 'applicable'],",
-				MANIFEST_MARKER,
-				'\tname,',
-				'}));',
-				'',
-			].join('\n'),
-		);
+		await expect(
+			readFile(
+				join(root, 'packages/@luke-ui/react/src/core/status-badge/status-badge.browser.test.tsx'),
+				'utf8',
+			),
+		).resolves.toContain("import { StatusBadge } from '@luke-ui/react/status-badge';");
 		await expect(
 			readFile(
 				join(root, 'packages/@luke-ui/react/src/core/status-badge/component-test-registration.ts'),
@@ -134,11 +127,10 @@ describe('createComponent', () => {
 		);
 	});
 
-	it('scaffolds field conformance on disk', async () => {
+	it('scaffolds the full browser test coverage on disk', async () => {
 		const root = await createRepositoryFixture();
 
 		await createComponent(root, {
-			conformance: ['field'],
 			docsGroup: 'forms',
 			name: 'DateField',
 		});
@@ -147,99 +139,16 @@ describe('createComponent', () => {
 			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
 			'utf8',
 		);
-		expect(browserTest).toContain('testConformance');
-		expect(browserTest).toContain("path: 'date-field'");
-		expect(browserTest).toContain('getControl');
-		expect(browserTest).not.toContain('getTarget');
-		expect(browserTest).not.toContain("name: 'DateField'");
-		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['DateField', 'date-field', ['field'], 'none', 'applicable']",
-		);
-	});
-
-	it('scaffolds stacked DOM and field conformance on disk', async () => {
-		const root = await createRepositoryFixture();
-
-		await createComponent(root, {
-			conformance: ['field', 'dom'],
-			docsGroup: 'forms',
-			name: 'DateField',
-		});
-
-		const browserTest = await readFile(
-			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
-			'utf8',
-		);
-		expect(browserTest).toContain('testConformance');
-		expect(browserTest).toContain('getControl');
-		expect(browserTest).toContain('getTarget');
-		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['DateField', 'date-field', ['dom', 'field'], 'none', 'applicable']",
-		);
-	});
-
-	it('scaffolds stacked DOM props and field conformance on disk', async () => {
-		const root = await createRepositoryFixture();
-
-		await createComponent(root, {
-			conformance: ['domProps', 'field'],
-			docsGroup: 'forms',
-			name: 'DateField',
-		});
-
-		const browserTest = await readFile(
-			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
-			'utf8',
-		);
-		expect(browserTest).toContain('testConformance');
-		expect(browserTest).toContain('getControl');
-		expect(browserTest).toContain('getTarget');
-		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['DateField', 'date-field', ['domProps', 'field'], 'none', 'applicable']",
-		);
-	});
-
-	it('scaffolds an empty conformance list on disk', async () => {
-		const root = await createRepositoryFixture();
-
-		await createComponent(root, {
-			conformance: [],
-			docsGroup: 'typography',
-			name: 'Mark',
-		});
-
-		const browserTest = await readFile(
-			join(root, 'packages/@luke-ui/react/src/core/mark/mark.browser.test.tsx'),
-			'utf8',
-		);
-		expect(browserTest).toContain("test('Mark renders its root element'");
+		expect(browserTest).toContain("import { DateField } from '@luke-ui/react/date-field';");
+		expect(browserTest).toContain('expectForwardsDomProps');
+		expect(browserTest).toContain('function DateFieldScene()');
+		expect(browserTest).toContain("test('the DateField scene has no axe violations'");
+		expect(browserTest).toContain("{ tags: ['visual'] }");
 		expect(browserTest).not.toContain('testConformance');
-		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['Mark', 'mark', [], 'none', 'applicable']",
-		);
+		expect(browserTest).not.toContain('testIntegration');
 	});
 
-	it('scaffolds integration tripwire coverage when requested', async () => {
-		const root = await createRepositoryFixture();
-
-		await createComponent(root, {
-			docsGroup: 'actions',
-			integrationTripwire: true,
-			name: 'ActionChip',
-		});
-
-		expect(
-			await readFile(
-				join(root, 'packages/@luke-ui/react/src/core/action-chip/action-chip.browser.test.tsx'),
-				'utf8',
-			),
-		).toContain("testIntegration('action-chip', async");
-		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['ActionChip', 'action-chip', ['dom'], 'required', 'applicable']",
-		);
-	});
-
-	it('omits visual coverage when it does not apply', async () => {
+	it('omits the tagged visual case when visual coverage does not apply', async () => {
 		const root = await createRepositoryFixture();
 
 		await createComponent(root, {
@@ -248,15 +157,13 @@ describe('createComponent', () => {
 			visualCoverage: false,
 		});
 
-		await expect(
-			readFile(
-				join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.visual.test.tsx'),
-				'utf8',
-			),
-		).rejects.toMatchObject({ code: 'ENOENT' });
-		expect(await readFile(join(root, manifestPath), 'utf8')).toContain(
-			"['DateField', 'date-field', ['dom'], 'none', 'none']",
+		const browserTest = await readFile(
+			join(root, 'packages/@luke-ui/react/src/core/date-field/date-field.browser.test.tsx'),
+			'utf8',
 		);
+		expect(browserTest).not.toContain("tags: ['visual']");
+		expect(browserTest).not.toContain('captureVisualAppearance');
+		expect(browserTest).toContain("test('the DateField scene has no axe violations'");
 	});
 
 	it('rejects docs navigation JSON that is not an object', async () => {
@@ -285,7 +192,6 @@ describe('createComponent', () => {
 });
 
 const modulesRegistryPath = 'packages/@luke-ui/react/src/core/styles/modules.css.ts';
-const manifestPath = 'packages/@luke-ui/react/src/core/conformance/manifest.ts';
 
 async function createRepositoryFixture(options?: { modulesRegistry?: string }): Promise<string> {
 	const root = await mkdtemp(join(tmpdir(), 'component-plan-'));
@@ -293,7 +199,6 @@ async function createRepositoryFixture(options?: { modulesRegistry?: string }): 
 
 	await mkdir(join(root, 'apps/docs/content/docs/components'), { recursive: true });
 	await mkdir(join(root, 'packages/@luke-ui/react/src/core/styles'), { recursive: true });
-	await mkdir(join(root, 'packages/@luke-ui/react/src/core/conformance'), { recursive: true });
 
 	await writeFile(
 		join(root, 'apps/docs/content/docs/components/meta.json'),
@@ -309,18 +214,6 @@ async function createRepositoryFixture(options?: { modulesRegistry?: string }): 
 				"import '../text/recipe.css.js';",
 				'',
 			].join('\n'),
-		'utf8',
-	);
-	await writeFile(
-		join(root, manifestPath),
-		[
-			'const entries = [',
-			"\t['Button', 'button', ['dom'], 'required', 'applicable'],",
-			MANIFEST_MARKER,
-			'\tname,',
-			'}));',
-			'',
-		].join('\n'),
 		'utf8',
 	);
 

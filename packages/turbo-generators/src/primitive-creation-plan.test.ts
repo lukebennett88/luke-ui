@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vite-plus/test';
-import { ZodError } from 'zod';
 import { findComponentPropsTableTags } from '../../../apps/docs/src/lib/component-props-table-tags.js';
 import {
 	PRIMITIVE_DEFAULTS,
@@ -14,7 +13,7 @@ const validAnswers = {
 } as const;
 
 describe('parsePrimitiveAnswers', () => {
-	it('defaults conformance and docs for omitted answers', () => {
+	it('defaults docs and visual coverage for omitted answers', () => {
 		expect(parsePrimitiveAnswers(validAnswers)).toEqual({
 			...PRIMITIVE_DEFAULTS,
 			name: 'StatusBadge',
@@ -24,12 +23,6 @@ describe('parsePrimitiveAnswers', () => {
 	it('rejects invalid primitive names before file writes', () => {
 		expect(() => parsePrimitiveAnswers({ name: '../Bad' })).toThrow(
 			'Use letters/numbers/hyphens. Start with a letter.',
-		);
-	});
-
-	it('rejects unsupported field conformance', () => {
-		expect(() => parsePrimitiveAnswers({ conformance: ['field'], name: 'StatusBadge' })).toThrow(
-			ZodError,
 		);
 	});
 });
@@ -42,7 +35,7 @@ describe('validatePrimitiveName', () => {
 });
 
 describe('createPrimitivePlan', () => {
-	it('plans invariant wiring with hosted docs and a minimal placeholder implementation', () => {
+	it('plans invariant wiring with hosted docs, a complete browser test, and a minimal placeholder implementation', () => {
 		const plan = createPrimitivePlan(validAnswers);
 
 		expect(plan.expected).toEqual({
@@ -52,12 +45,10 @@ describe('createPrimitivePlan', () => {
 			'apps/docs/content/docs/components/primitives/status-badge.mdx',
 			'apps/docs/src/examples/status-badge-primitive/basic.tsx',
 			'packages/@luke-ui/react/src/core/primitives/status-badge/recipe.css.ts',
+			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
 			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx',
 			'packages/@luke-ui/react/src/exports/primitives/status-badge.ts',
 		]);
-		expect(plan.files.map((file) => file.path)).not.toContain(
-			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
-		);
 		expect(plan).not.toHaveProperty('jsonEdits');
 		expect(plan).not.toHaveProperty('importEdits');
 		expect(plan).not.toHaveProperty('textFileInserts');
@@ -125,22 +116,82 @@ describe('createPrimitivePlan', () => {
 		expect(violations).toEqual([]);
 	});
 
-	it('scaffolds a DOM conformance test only when requested', () => {
-		const withoutDom = createPrimitivePlan(validAnswers);
-		expect(withoutDom.files.map((file) => file.path)).not.toContain(
-			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
-		);
+	describe('the generated browser test', () => {
+		it('covers DOM forwarding, a shared scene, an axe check, and a placeholder behavioural test', () => {
+			const plan = createPrimitivePlan(validAnswers);
+			const testSource = plan.files.find((file) =>
+				file.path.endsWith('status-badge.browser.test.tsx'),
+			)?.contents;
+			if (testSource === undefined) throw new Error('Expected the scaffold to write the test.');
 
-		const withDom = createPrimitivePlan({ conformance: ['dom'], name: 'StatusBadge' });
-		const browserTestSource = withDom.files.find((file) =>
-			file.path.endsWith('/status-badge/status-badge.browser.test.tsx'),
-		)?.contents;
-		if (browserTestSource === undefined) {
-			throw new Error('Expected the scaffold to write the browser test.');
-		}
+			// A short banner tells the author axe/visual coverage is scaffolded by
+			// default and can be deleted if it protects nothing meaningful.
+			expect(testSource).toContain('scaffold assumes');
+			expect(testSource).toContain('delete');
 
-		expect(browserTestSource).toContain('testConformance');
-		expect(browserTestSource).toContain("path: 'primitives/status-badge'");
-		expect(browserTestSource).not.toContain('getControl');
+			// DOM-forwarding coverage, sharing the repo-wide assertion helpers, one
+			// directory deeper than a component test.
+			expect(testSource).toContain(
+				"import { expectForwardsDomProps, expectHtmlElement } from '../../test-utils/forwarding.js';",
+			);
+			expect(testSource).toContain('expectForwardsDomProps(target, ref)');
+
+			// One representative scene shared by the axe check and the visual capture.
+			expect(testSource).toContain('function StatusBadgeScene()');
+			expect(testSource.match(/StatusBadgeScene/g)?.length).toBeGreaterThanOrEqual(3);
+
+			// The axe check.
+			expect(testSource).toContain(
+				"import { expectNoAxeViolations } from '../../test-utils/axe.js';",
+			);
+			expect(testSource).toContain("test('the StatusBadge scene has no axe violations'");
+			expect(testSource).toContain('await expectNoAxeViolations(container)');
+
+			// The tagged visual kitchen-sink case, looping every appearance.
+			expect(testSource).toContain("{ tags: ['visual'] }");
+			expect(testSource).toContain('for (const appearance of visualAppearances)');
+			expect(testSource).toContain(
+				"captureVisualAppearance(locator, 'status-badge/kitchen-sink', appearance)",
+			);
+
+			// A placeholder behavioural test with a TODO telling the author to
+			// replace it with real coverage.
+			expect(testSource).toContain('TODO: replace this placeholder');
+			expect(testSource).toContain("test('StatusBadge renders its content'");
+
+			// None of the deleted conformance machinery survives.
+			expect(testSource).not.toContain('testConformance');
+			expect(testSource).not.toContain('conformance');
+		});
+
+		it('omits the tagged visual case when visual coverage is declined, but keeps the axe scene', () => {
+			const plan = createPrimitivePlan({ ...validAnswers, visualCoverage: false });
+			const testSource = plan.files.find((file) =>
+				file.path.endsWith('status-badge.browser.test.tsx'),
+			)?.contents;
+			if (testSource === undefined) throw new Error('Expected the scaffold to write the test.');
+
+			expect(testSource).not.toContain("tags: ['visual']");
+			expect(testSource).not.toContain('visualAppearances');
+			expect(testSource).not.toContain('captureVisualAppearance');
+			expect(testSource).toContain('function StatusBadgeScene()');
+			expect(testSource).toContain("test('the StatusBadge scene has no axe violations'");
+		});
+
+		it('imports the primitive from the public package export, not a relative sibling', () => {
+			const plan = createPrimitivePlan(validAnswers);
+			const testSource = plan.files.find((file) =>
+				file.path.endsWith('status-badge.browser.test.tsx'),
+			)?.contents;
+			if (testSource === undefined) throw new Error('Expected the scaffold to write the test.');
+
+			// Primitive tests import the primitive under test from its public
+			// package export, matching hand-authored tests like button.browser.test.tsx.
+			// Only test-utils stay relative.
+			expect(testSource).toContain(
+				"import { StatusBadge } from '@luke-ui/react/primitives/status-badge';",
+			);
+			expect(testSource).not.toContain("from './status-badge.js'");
+		});
 	});
 });

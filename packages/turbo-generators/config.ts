@@ -6,19 +6,7 @@ import {
 	DOC_GROUPS,
 	validateComponentName,
 } from './src/component-creation-plan.js';
-import type { ConformanceContract } from './src/generator-shared.js';
-import { CONFORMANCE_CONTRACTS } from './src/generator-shared.js';
-import {
-	PRIMITIVE_CONFORMANCE_CONTRACTS,
-	PRIMITIVE_DEFAULTS,
-	validatePrimitiveName,
-} from './src/primitive-creation-plan.js';
-
-const CONFORMANCE_CONTRACT_LABELS: Record<ConformanceContract, string> = {
-	dom: 'DOM',
-	domProps: 'DOM props',
-	field: 'Field',
-};
+import { PRIMITIVE_DEFAULTS, validatePrimitiveName } from './src/primitive-creation-plan.js';
 
 const YES_NO = [
 	{ name: 'Yes', value: true },
@@ -54,23 +42,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				name: 'visualCoverage',
 				type: 'list',
 			},
-			{
-				choices: CONFORMANCE_CONTRACTS.map((contract) => ({
-					name: CONFORMANCE_CONTRACT_LABELS[contract],
-					value: contract,
-				})),
-				default: [...COMPONENT_DEFAULTS.conformance],
-				message: 'Conformance contracts:',
-				name: 'conformance',
-				type: 'checkbox',
-			},
-			{
-				choices: YES_NO,
-				default: COMPONENT_DEFAULTS.integrationTripwire,
-				message: 'Add an integration tripwire?',
-				name: 'integrationTripwire',
-				type: 'list',
-			},
 		],
 	});
 	plop.setGenerator('primitive', {
@@ -96,14 +67,11 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
 				type: 'list',
 			},
 			{
-				choices: PRIMITIVE_CONFORMANCE_CONTRACTS.map((contract) => ({
-					name: CONFORMANCE_CONTRACT_LABELS[contract],
-					value: contract,
-				})),
-				default: [...PRIMITIVE_DEFAULTS.conformance],
-				message: 'Conformance contracts:',
-				name: 'conformance',
-				type: 'checkbox',
+				choices: YES_NO,
+				default: PRIMITIVE_DEFAULTS.visualCoverage,
+				message: 'Add visual coverage?',
+				name: 'visualCoverage',
+				type: 'list',
 			},
 		],
 	});

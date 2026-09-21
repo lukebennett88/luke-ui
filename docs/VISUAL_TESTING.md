@@ -1,6 +1,7 @@
 # Visual regression testing
 
-How the visual gate runs. [`TESTING.md`](./TESTING.md#visual-regression) decides what to capture.
+How the visual gate runs. [`TESTING.md`](./TESTING.md#visual-regression) is the normative policy: it
+decides what to capture, how sensitive the comparison is, and what review a baseline change needs.
 
 Visual cases live in `*.browser.test.tsx`, tagged `visual`. The repository stores no screenshots,
 baseline manifests, or Git LFS objects.
@@ -75,7 +76,7 @@ The helper appends the appearance to the literal base ID, producing
 literal base ID for the matrix so each look stays independently reviewable.
 
 Theme identity and colour mode stay separate. For nested mode, put `data-color-mode` on a descendant
-inside the scene. Do not nest a theme identity class; identity classes are not nestable.
+inside the scene. Do not nest a theme identity class, which is not nestable.
 
 For a portalled surface, render the real component with the selected appearance, open it through
 `userEvent`, and capture the portal or `document.body`. Do not copy theme classes onto a test-only

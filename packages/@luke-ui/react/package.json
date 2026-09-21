@@ -121,7 +121,6 @@
 		"axe-core": "catalog:",
 		"lightningcss": "catalog:",
 		"node-html-parser": "catalog:",
-		"oxc-parser": "catalog:",
 		"oxc-transform-react": "catalog:",
 		"pixelmatch": "catalog:",
 		"playwright": "catalog:",
