@@ -48,8 +48,8 @@ async function captureCurrent() {
 	await rm(currentDir, { force: true, recursive: true });
 	await mkdir(currentDir, { recursive: true });
 	execFileSync(
-		'corepack',
-		['pnpm', 'exec', 'vp', 'test', 'run', '--project=browser', "--tagsFilter='visual'", '--update'],
+		'pnpm',
+		['exec', 'vp', 'test', 'run', '--project=browser', "--tagsFilter='visual'", '--update'],
 		{
 			cwd: packageRoot,
 			env: { ...process.env, [VISUAL_CAPTURE_DIR_ENV]: currentDir },

@@ -80,13 +80,13 @@ an exclude list entry before they will install, which no amount of green CI will
 
 ## Tooling versions
 
-`mise.toml` pins the Node major and the exact pnpm version. Renovate's `mise` manager tracks Node,
-and its node versioning treats odd majors as unstable, so it will only propose the next LTS line.
+`mise.toml` pins and installs pnpm. The root `package.json` `packageManager` field repeats the exact
+version for metadata and tooling. Renovate groups both declarations. Omitting the hash avoids
+Renovate's Corepack-based hash regeneration.
+
+`mise.toml` pins the Node major. Renovate's `mise` manager tracks it, and its node versioning treats
+odd majors as unstable, so it will only propose the next LTS line.
 
 The four workflows in `.github/workflows` pin actions at the major tag, so the only update Renovate
 can offer is a major tag move. They group into one `github actions` pull request and are never
 automerged.
-
-The `packageManager` field in the root `package.json` repeats the exact pnpm version. It has no
-integrity hash, so mise uses pnpm's native distribution. Renovate updates both declarations in one
-pnpm pull request and regenerates the lockfile.
