@@ -726,6 +726,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 			'onPressStart',
 			'onPressUp',
 			'prominence',
+			'ref',
 			'render',
 			'size',
 			'slot',
