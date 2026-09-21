@@ -8,13 +8,7 @@ import vitestConfig from '../vitest.config';
 import { findStrayTestFiles } from './check-test-suffixes-lib.js';
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ignoredDirNames = new Set([
-	'node_modules',
-	'dist',
-	'.turbo',
-	'.generated',
-	'storybook-static',
-]);
+const ignoredDirNames = new Set(['node_modules', 'dist', '.turbo', '.generated']);
 const TEST_FILE_PATTERN = /\.test\.tsx?$/;
 
 type VitestProjectConfig = { test?: { include?: Array<string> } };

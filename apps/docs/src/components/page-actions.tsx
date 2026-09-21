@@ -6,14 +6,12 @@ import type { ReactNode } from 'react';
 import { useCopyButton } from '../lib/use-copy-button.js';
 import { GithubMark } from './github-mark.js';
 import { ReactAriaMark } from './react-aria-mark.js';
-import { StorybookMark } from './storybook-mark.js';
 
 interface PageActionsProps {
 	githubUrl: string;
 	markdownUrl: string;
 	reactAriaUrl: string | null;
 	sourceUrl: string | null;
-	storybookUrl: string | null;
 }
 
 /**
@@ -23,25 +21,11 @@ interface PageActionsProps {
  *
  * This does not use Fumadocs' own `ViewOptionsPopover`, because it bakes in
  * third-party AI-assistant deep links this repo does not want to surface, and
- * it has no notion of a Storybook, React Aria, or component-source
- * destination.
+ * it has no notion of a React Aria or component-source destination.
  */
-export function PageActions({
-	githubUrl,
-	markdownUrl,
-	reactAriaUrl,
-	sourceUrl,
-	storybookUrl,
-}: PageActionsProps) {
+export function PageActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl }: PageActionsProps) {
 	return (
 		<div className="not-prose flex w-full flex-wrap items-center gap-2">
-			{storybookUrl ? (
-				<PageActionLink
-					href={storybookUrl}
-					icon={<StorybookMark className="size-4 shrink-0" />}
-					label="Storybook"
-				/>
-			) : null}
 			{reactAriaUrl ? (
 				<PageActionLink
 					href={reactAriaUrl}

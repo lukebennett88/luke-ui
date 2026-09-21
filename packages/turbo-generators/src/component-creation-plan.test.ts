@@ -50,7 +50,6 @@ describe('createComponentPlan', () => {
 			'apps/docs/src/examples/status-badge/basic.tsx',
 			'packages/@luke-ui/react/src/core/status-badge/recipe.css.ts',
 			'packages/@luke-ui/react/src/core/status-badge/status-badge.browser.test.tsx',
-			'packages/@luke-ui/react/src/core/status-badge/status-badge.stories.tsx',
 			'packages/@luke-ui/react/src/core/status-badge/status-badge.tsx',
 			'packages/@luke-ui/react/src/core/status-badge/status-badge.visual.test.tsx',
 			'packages/@luke-ui/react/src/exports/status-badge.ts',

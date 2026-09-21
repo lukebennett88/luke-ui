@@ -139,10 +139,10 @@ See [`VISUAL_TESTING.md`](./VISUAL_TESTING.md) for capture, comparison, and revi
 
 ## Accessibility
 
-Storybook's automated axe check is a floor, not proof of accessibility. It covers only part of WCAG
-and does not replace deliberate testing of the behaviour Luke UI owns. Keep the automated check
-enabled as an error gate, then use component tests for the small number of composition and behaviour
-contracts that axe cannot express.
+An automated axe check is a floor, not proof of accessibility. It covers only part of WCAG and does
+not replace deliberate testing of the behaviour Luke UI owns. Keep the automated check enabled as an
+error gate, then use component tests for the small number of composition and behaviour contracts
+that axe cannot express.
 
 ## Bug fixes and maintenance
 

@@ -9,7 +9,6 @@ import type { ComponentProps } from 'react';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { getActiveSiteDestination, siteDestinations } from '../lib/site-destinations.js';
 import { GithubMark } from './github-mark.js';
-import { StorybookMark } from './storybook-mark.js';
 import { ThemeControls } from './theme-controls.js';
 
 export const SITE_NAV_BUTTON_CLASS_NAME =
@@ -50,7 +49,6 @@ export function SiteNav({
 			>
 				{siteDestinations.map((destination) => {
 					const isActive = destination === activeDestination;
-					const isStorybook = destination.label === 'Storybook';
 
 					return (
 						<Link
@@ -65,7 +63,6 @@ export function SiteNav({
 							href={destination.url}
 							key={destination.url}
 						>
-							{isStorybook ? <StorybookMark className="size-4" /> : null}
 							{destination.label}
 						</Link>
 					);

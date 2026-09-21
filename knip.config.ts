@@ -23,16 +23,12 @@ export default {
 		},
 		'packages/@luke-ui/react': {
 			entry: [
-				'src/**/*.stories.tsx',
 				'src/exports/**/*.ts',
 				'src/core/stylesheet.css.ts',
 				'src/core/styles/index.css.ts',
 				'scripts/**/*.ts',
 			],
-			// `.mdx` is included because Storybook's Knip plugin registers an MDX
-			// compiler for every workspace it detects, even though this package has
-			// no MDX stories.
-			project: ['src/**/*.{ts,tsx,mdx}'],
+			project: ['src/**/*.{ts,tsx}'],
 		},
 		'packages/turbo-generators': {
 			entry: ['config.ts'],

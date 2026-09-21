@@ -13,7 +13,6 @@ export default defineConfig({
 			'packages/turbo-generators/templates/**',
 			'**/dist/**',
 			'**/routeTree.gen.ts',
-			'**/storybook-static/**',
 			'node_modules',
 		],
 		jsxSingleQuote: false,
@@ -52,13 +51,7 @@ export default defineConfig({
 			correctness: 'deny',
 			perf: 'deny',
 		},
-		ignorePatterns: [
-			'node_modules',
-			'.source',
-			'**/dist/**',
-			'**/storybook-static/**',
-			'**/routeTree.gen.ts',
-		],
+		ignorePatterns: ['node_modules', '.source', '**/dist/**', '**/routeTree.gen.ts'],
 		jsPlugins: [
 			{
 				name: 'react-hooks-js',

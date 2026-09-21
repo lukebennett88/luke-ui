@@ -4,8 +4,8 @@ Custom generators for `turbo generate`.
 
 ## Generators
 
-- `component`: Scaffolds `@luke-ui/react` components, colocated recipes, Storybook stories, hosted
-  docs wrappers, hosted docs controls, and structural docs navigation.
+- `component`: Scaffolds `@luke-ui/react` components, colocated recipes, hosted docs wrappers,
+  hosted docs controls, and structural docs navigation.
 - `primitive`: Scaffolds `@luke-ui/react/primitives/*` entrypoints, colocated recipes, the style
   module registry, and conformance manifest entries.
 

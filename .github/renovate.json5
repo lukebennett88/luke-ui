@@ -57,10 +57,6 @@
 			groupName: 'vite-plus toolchain',
 		},
 		{
-			matchPackageNames: ['@storybook/**', 'storybook'],
-			groupName: 'storybook',
-		},
-		{
 			// @types/react has to land with the react major it describes, so it stays out of the
 			// automerged type-definitions group below.
 			matchPackageNames: ['@types/react', '@types/react-dom', 'react', 'react-dom'],

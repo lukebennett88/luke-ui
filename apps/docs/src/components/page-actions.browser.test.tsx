@@ -23,14 +23,10 @@ const githubUrl = 'https://github.com/example/repo/edit/main/page.mdx';
 const markdownUrl = '/example-page.md';
 const reactAriaUrl = 'https://react-spectrum.adobe.com/react-aria/Button.html';
 const sourceUrl = 'https://github.com/example/repo/tree/main/packages/example/src/button';
-const storybookUrl = 'https://storybook.example/?path=/docs/example--docs';
 
 test('renders every destination inline, labelled and reachable, when all are present', async () => {
-	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl, storybookUrl });
+	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl });
 
-	await expect
-		.element(page.getByRole('link', { name: 'Storybook' }))
-		.toHaveAttribute('href', storybookUrl);
 	await expect
 		.element(page.getByRole('link', { name: 'React Aria' }))
 		.toHaveAttribute('href', reactAriaUrl);
@@ -46,16 +42,14 @@ test('renders every destination inline, labelled and reachable, when all are pre
 		.toHaveAttribute('href', githubUrl);
 });
 
-test('omits the Storybook, React Aria, and Source pills when the page has none', async () => {
+test('omits the React Aria and Source pills when the page has none', async () => {
 	renderActions({
 		githubUrl,
 		markdownUrl,
 		reactAriaUrl: null,
 		sourceUrl: null,
-		storybookUrl: null,
 	});
 
-	expect(page.getByRole('link', { name: 'Storybook' })).not.toBeInTheDocument();
 	expect(page.getByRole('link', { name: 'React Aria' })).not.toBeInTheDocument();
 	expect(page.getByRole('link', { name: 'Source' })).not.toBeInTheDocument();
 	await expect.element(page.getByRole('button', { name: 'Copy Markdown' })).toBeVisible();
@@ -75,7 +69,6 @@ test('reports the copied state after Copy Markdown succeeds', async () => {
 		markdownUrl,
 		reactAriaUrl: null,
 		sourceUrl: null,
-		storybookUrl: null,
 	});
 
 	await act(async () => {
@@ -110,7 +103,6 @@ test('does not claim success when the markdown fetch 404s', async () => {
 			markdownUrl,
 			reactAriaUrl: null,
 			sourceUrl: null,
-			storybookUrl: null,
 		});
 		await userEvent.click(page.getByRole('button', { name: 'Copy Markdown' }));
 
@@ -125,11 +117,11 @@ test('does not claim success when the markdown fetch 404s', async () => {
 });
 
 test('does not announce the brand marks as separate content', () => {
-	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl, storybookUrl });
+	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl });
 
 	// These SVGs have no accessible name, so a named `img` query would still
 	// pass if `aria-hidden` were removed. The owned contract is the attribute.
-	for (const name of ['Storybook', 'React Aria', 'Source', 'Edit on GitHub']) {
+	for (const name of ['React Aria', 'Source', 'Edit on GitHub']) {
 		const mark = page.getByRole('link', { name }).element().querySelector('svg');
 		if (mark == null) throw new Error(`Expected a brand mark inside the ${name} link.`);
 		expect(mark.getAttribute('aria-hidden')).toBe('true');
@@ -141,7 +133,6 @@ function renderActions(props: {
 	markdownUrl: string;
 	reactAriaUrl: string | null;
 	sourceUrl: string | null;
-	storybookUrl: string | null;
 }) {
 	container = document.body.appendChild(document.createElement('div'));
 	root = createRoot(container);

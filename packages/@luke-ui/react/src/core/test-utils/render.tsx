@@ -47,9 +47,9 @@ export type RenderResult = {
 
 /**
  * Renders `node` inside the same theme root and icon spritesheet provider the
- * app (and Storybook) wrap components with, then returns a Vitest locator for
- * the mounted subtree ready to pass to `captureVisual`, plus the page-bound
- * `userEvent` (a convenience re-export so callers do not need a second import).
+ * app wraps components with, then returns a Vitest locator for the mounted
+ * subtree ready to pass to `captureVisual`, plus the page-bound `userEvent`
+ * (a convenience re-export so callers do not need a second import).
  *
  * The identity class and colour mode go on `document.documentElement`, not the
  * container, so a portal (combobox popover, mobile tray) that mounts outside

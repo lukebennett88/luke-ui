@@ -1,13 +1,11 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
 
 const dirname =
 	typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
-const configDir = path.join(dirname, '.storybook');
 const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
@@ -95,24 +93,6 @@ export default defineConfig({
 						include: ['src/**/*.test-d.ts'],
 						tsconfig: './tsconfig.json',
 					},
-				},
-			},
-			{
-				extends: true,
-				plugins: [
-					// Required for .css.ts processing in Vitest browser mode.
-					vanillaExtractPlugin(),
-					// Runs tests for stories defined in Storybook config.
-					storybookTest({ configDir }),
-				],
-				test: {
-					browser: {
-						enabled: true,
-						headless: true,
-						instances: [{ browser: 'chromium' }],
-						provider: playwright({}),
-					},
-					name: 'storybook',
 				},
 			},
 			{

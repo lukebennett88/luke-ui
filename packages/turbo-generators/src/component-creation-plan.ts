@@ -107,10 +107,6 @@ export function createComponentWork(input: ParsedComponentAnswers): ComponentCre
 			path: `packages/@luke-ui/react/src/core/${name}/${name}.browser.test.tsx`,
 		},
 		{
-			contents: renderPackageStory({ docsGroup, name, pascalName }),
-			path: `packages/@luke-ui/react/src/core/${name}/${name}.stories.tsx`,
-		},
-		{
 			contents: renderHostedExample({ name, pascalName }),
 			path: `apps/docs/src/examples/${name}/basic.tsx`,
 		},
@@ -202,28 +198,6 @@ function renderPackageExport(input: {
 }): string {
 	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../core/${input.name}/${input.name}.js';
 export { type ${input.variantsType}, ${input.recipeName} } from '../core/${input.name}/recipe.css.js';
-`;
-}
-
-function renderPackageStory(input: {
-	docsGroup: string;
-	name: string;
-	pascalName: string;
-}): string {
-	return `import { ${input.pascalName} } from '@luke-ui/react/${input.name}';
-import preview from '../../../.storybook/preview.js';
-
-const meta = preview.meta({
-	component: ${input.pascalName},
-	tags: ['${input.docsGroup}'],
-	title: '${toDisplayName(input.docsGroup)}/${input.pascalName}',
-});
-
-export const Default = meta.story({
-	args: {
-		children: '${input.pascalName}',
-	},
-});
 `;
 }
 

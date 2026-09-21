@@ -62,10 +62,10 @@ the peer range, and bumping it on every minor would narrow what consumers can sa
 
 ## Grouping and schedule
 
-Renovate runs once a week, before 6am on Monday. Updates are grouped by release train (storybook,
-react, react-aria, vanilla-extract, tanstack, fumadocs, tailwindcss, turbo, netlify, capsize, the
-vite-plus toolchain) with everything else falling into one `non-major dependencies` pull request.
-Majors split into their own pull request per group.
+Renovate runs once a week, before 6am on Monday. Updates are grouped by release train (react,
+react-aria, vanilla-extract, tanstack, fumadocs, tailwindcss, turbo, netlify, capsize, the vite-plus
+toolchain) with everything else falling into one `non-major dependencies` pull request. Majors split
+into their own pull request per group.
 
 `lockFileMaintenance` runs on the first of the month and refreshes transitive versions, which
 nothing else moves.
