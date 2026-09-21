@@ -152,10 +152,8 @@ function renderComponentSource(input: {
 import { cx } from '../../shared/utils/utils.js';
 import { ${input.recipeName} } from './recipe.css.js';
 
-/** Props for \`${input.pascalName}\`. */
 export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
 
-/** ${input.pascalName} component. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
 	const { className, ...divProps } = props;
 	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;
@@ -183,13 +181,6 @@ export default function Basic() {
 `;
 }
 
-/**
- * The generated `*.browser.test.tsx` is real, runnable coverage rather than a
- * placeholder: a DOM-forwarding assertion, a shared representative scene used
- * by both the axe check and the visual capture, and a TODO'd behavioural test
- * for the author to replace. The scaffold is opinionated on purpose — the
- * philosophy is "generate it, then delete what is clearly unnecessary".
- */
 function renderComponentTest(input: {
 	name: string;
 	packagePath: string;
@@ -212,12 +203,7 @@ function renderComponentTest(input: {
 			: ["import { Grid } from '../test-utils/visual.js';"]),
 	];
 
-	const scene = `/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface. Replace its contents with the variants that
- * actually exist for ${input.pascalName} (tones, sizes, states, ...).
- */
-function ${sceneName}() {
+	const scene = `function ${sceneName}() {
 	return (
 		<Grid columns={2}>
 			<${input.pascalName}>Default</${input.pascalName}>
@@ -249,9 +235,7 @@ function ${sceneName}() {
 	await expectNoAxeViolations(container);
 });`;
 
-	const placeholderTest = `// TODO: replace this placeholder with a test of ${input.pascalName}'s actual
-// behaviour (what it renders, how it responds to interaction, what it exposes
-// to assistive tech), or delete it if the tests above already cover it.
+	const placeholderTest = `// TODO: Test actual behaviour or delete.
 test('${input.pascalName} renders its content', () => {
 	const { locator } = render(<${input.pascalName}>Content</${input.pascalName}>);
 
@@ -269,11 +253,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 });`
 		: '';
 
-	return `// This scaffold assumes ${input.pascalName} needs axe and visual coverage by
-// default. Delete either — or the placeholder behavioural test below — if it
-// does not protect anything meaningful for this component.
-
-${imports.join('\n')}
+	return `${imports.join('\n')}
 
 ${scene}
 

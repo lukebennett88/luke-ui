@@ -1,7 +1,6 @@
 import { Box } from '@luke-ui/react/box';
 import { Container } from '@luke-ui/react/container';
 import { Text } from '@luke-ui/react/text';
-// Only styles the visual fixture below; no test asserts a resolved token value.
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { test, afterEach, expect } from 'vite-plus/test';
@@ -148,7 +147,6 @@ test('supports semantic and caller-owned elements', () => {
 	expect(getComputedStyle(element).containerType).toBe('inline-size');
 });
 
-/** Fixed sizes that can reach their maximum inside the 1024px visual viewport. */
 const sizes = ['ct448', 'ct672', 'ct896'] as const;
 
 test('fixed maximum inline sizes', { tags: ['visual'] }, async () => {

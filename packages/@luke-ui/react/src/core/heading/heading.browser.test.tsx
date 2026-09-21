@@ -13,10 +13,6 @@ import {
 
 const levels = variantValuesFor<typeof Heading, 'level'>()([1, 2, 3, 4, 5, 6]);
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function HeadingScene() {
 	return (
 		<Stack width="40rem">

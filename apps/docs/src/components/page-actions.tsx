@@ -14,15 +14,7 @@ interface PageActionsProps {
 	sourceUrl: string | null;
 }
 
-/**
- * Every destination a page offers sits inline under the title, as a row of
- * pill links with a brand mark and a visible label. The row wraps, so a page
- * carrying all six actions falls onto a second line at narrower widths.
- *
- * This does not use Fumadocs' own `ViewOptionsPopover`, because it bakes in
- * third-party AI-assistant deep links this repo does not want to surface, and
- * it has no notion of a React Aria or component-source destination.
- */
+// ViewOptionsPopover adds unwanted AI links and cannot show React Aria or source links.
 export function PageActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl }: PageActionsProps) {
 	return (
 		<div className="not-prose flex w-full flex-wrap items-center gap-2">

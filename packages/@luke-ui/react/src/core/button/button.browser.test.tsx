@@ -20,10 +20,6 @@ import {
 /** Intended Action spinner delay (~300ms). Kept in the test so production timing drifts fail. */
 const ACTION_SPINNER_DELAY_MS = 300;
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function ButtonScene() {
 	return (
 		<Grid columns={3}>
@@ -61,12 +57,7 @@ function ButtonScene() {
 	);
 }
 
-/**
- * React 19 passes `ref` as an ordinary prop and these components spread it
- * through to the React Aria element, so ref forwarding works at runtime. React
- * Aria's own prop types never declare `ref`, so the public props type cannot
- * express it; this alias adds it back for the DOM-contract test below.
- */
+// React Aria omits React 19's `ref` prop.
 const ButtonWithRef = Button as (
 	props: ComponentProps<typeof Button> & { ref?: Ref<HTMLButtonElement> },
 ) => ReactNode;

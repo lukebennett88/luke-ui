@@ -10,10 +10,7 @@
   files by hand. The generator updates the style-module registry and docs wiring.
 - When adding a primitive, use `pnpm generate:primitive` from the repo root. Do not create primitive
   files by hand. The generator updates the style-module registry and public export module.
-- Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests. It is
-  the only normative testing guide. A component has one browser test file covering behaviour,
-  accessibility, and visual captures; it imports the component through its public package export and
-  mounts it with the shared renderer.
+- Read [`docs/TESTING.md`](../../docs/TESTING.md) before adding or changing component tests.
 - React Compiler is enabled. Do not use `useCallback` or `useMemo` unless there is a specific reason
   the compiler cannot handle.
 

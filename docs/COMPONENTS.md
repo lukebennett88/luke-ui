@@ -35,12 +35,9 @@ Use the primitive generator for new `@luke-ui/react/primitives/*` entrypoints:
 pnpm run generate:primitive --args <name>
 ```
 
-The component creation rules live in `packages/turbo-generators/src/component-creation-plan.ts`. The
-primitive creation rules live in `packages/turbo-generators/src/primitive-creation-plan.ts`. Each
-plan owns its generator's validation, defaults, and scaffold rules. Documentation groups belong to
-the component plan only. Turbo and Plop collect answers and invoke the shared apply flow. Keep new
-creation rules in the plan module so tests can prove the files, exports, docs, and registrations
-each generator needs.
+Creation rules live in `packages/turbo-generators/src/component-creation-plan.ts` and
+`primitive-creation-plan.ts`. Keep validation, defaults, and scaffold rules there so Turbo and Plop
+share them. Only components accept documentation groups.
 
 The component generator creates the component guide's primary
 `apps/docs/src/examples/<component>/basic.tsx` example and references it with `ExampleBlock`. The

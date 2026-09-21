@@ -1,10 +1,3 @@
-/**
- * Compile-time guards on the public primitive Button prop contract.
- *
- * Only rejections live here: `check:types` already proves that valid usage compiles, but not that
- * invalid usage is refused.
- */
-
 import { expect, test } from 'vite-plus/test';
 import type { ButtonProps } from './button.js';
 

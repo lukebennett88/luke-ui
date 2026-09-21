@@ -10,8 +10,6 @@ const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
 const repoRoot = path.resolve(dirname, '../../..');
-// Where `--tagsFilter='visual'` runs write their captures. The visual-regression
-// scripts set this; a bare run falls back to an ignored directory in the repo.
 const captureDir = process.env.VISUAL_CAPTURE_DIR;
 const visualFsAllow =
 	captureDir === undefined || captureDir === '' ? [repoRoot] : [repoRoot, path.resolve(captureDir)];
@@ -73,26 +71,15 @@ export default defineConfig({
 										`${arg}${ext}`,
 									);
 								},
-								// Captures are always written fresh (never compared here); the
-								// comparison against the main baseline happens in
-								// scripts/visual-regression-lib.ts (compareCaptures).
 							},
 						},
 						headless: true,
 						instances: [{ browser: 'chromium' }],
 						provider: playwright({}),
-						// No fixed viewport here: behavioural tests get the browser
-						// provider's own default. Visual captures set a fixed viewport
-						// themselves (see `captureVisual`) so full-page captures (open
-						// menus render in portals outside the component) are deterministic
-						// without changing layout for every other test in the file.
 					},
 					include: ['src/**/*.browser.test.{ts,tsx}'],
 					name: 'browser',
 					setupFiles: ['./src/core/test-utils/render-setup.ts'],
-					// Visual cases live in the browser test files, tagged `visual`, so
-					// they are selected with `--tagsFilter='visual'` (and excluded from
-					// the behavioural run with `--tagsFilter='!visual'`).
 					tags: [{ description: 'Captures a screenshot for visual review.', name: 'visual' }],
 				},
 			},

@@ -1,6 +1,5 @@
 import { Box } from '@luke-ui/react/box';
 import { createSprinkles } from '@luke-ui/react/styles';
-// Only styles the visual fixture below; no test asserts a resolved token value.
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';

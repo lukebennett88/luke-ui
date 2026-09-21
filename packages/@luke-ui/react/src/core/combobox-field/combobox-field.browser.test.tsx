@@ -39,7 +39,6 @@ const countryItems: Array<CountryItem> = [
 	{ id: 'ca', label: 'Canada' },
 ];
 
-/** The longer list the representative scene and the visual captures lay out. */
 const sceneCountryItems: Array<CountryItem> = [
 	{ id: 'au', label: 'Australia' },
 	{ id: 'ca', label: 'Canada' },
@@ -57,9 +56,7 @@ const renderIconItem = (item: CountryItem) => (
 	</ComboboxItem>
 );
 
-// RAC moves `id` onto the control, and mounts a collection `<template>` before
-// the ComboBox root, so `className`/`data-*` land on neither `container.firstElementChild`
-// nor the element carrying `id`.
+// RAC inserts a collection template before the root and puts `id` on the control.
 test('ComboboxField forwards className and data attributes to its root, and id to the DOM', () => {
 	const { container } = render(
 		<ComboboxField<CountryItem>
@@ -100,10 +97,8 @@ test('ComboboxField resolves inputRef to the input, submits its value, and fires
 	const control = locator.getByRole('combobox', { name: 'Country' }).element();
 
 	expect(inputRef.current).toBe(control);
-	// The description is wired to the combobox, not just rendered beside it.
 	expect(control).toHaveAttribute('aria-describedby');
-	// React Aria carries the selected form value on a hidden input, not on the
-	// visible combobox, so that is the control a form reads.
+	// React Aria submits through a hidden input.
 	expect(container.querySelector('input[type="hidden"][name="country"]')).not.toBeNull();
 
 	const form = document.createElement('form');
@@ -124,8 +119,7 @@ test('ComboboxField resolves inputRef to the input, submits its value, and fires
 	form.remove();
 });
 
-// React Aria types `inputRef` as a ref object. Luke UI widens it to accept a
-// callback so React Hook Form's `field.ref` works without an adapter.
+// Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
 test('ComboboxField resolves a callback inputRef to the input', () => {
 	const resolved: Array<HTMLElement | null> = [];
 	const { locator } = render(
@@ -933,10 +927,6 @@ test('rich section title', { tags: ['visual'] }, async () => {
 	);
 });
 
-/**
- * Waits for the tray to finish opening before a capture. The screenshot owns the resting geometry,
- * so nothing here measures a position.
- */
 async function waitForMobileTrayToSettle() {
 	const dialog = page.getByRole('dialog');
 	await expect.element(dialog).toBeInTheDocument();

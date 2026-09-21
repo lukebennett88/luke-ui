@@ -1,7 +1,5 @@
 import { Checkbox } from '@luke-ui/react/checkbox';
 import { Text } from '@luke-ui/react/text';
-// Only enumerates the type styles for the visual fixture below; no test asserts a
-// resolved token value.
 import { typeStyles } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { expect, test } from 'vite-plus/test';
@@ -17,10 +15,6 @@ import {
 	Stack,
 } from '../test-utils/visual.js';
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function CheckboxScene() {
 	return (
 		<Stack>
@@ -94,8 +88,7 @@ function CheckboxScene() {
 	);
 }
 
-// RAC moves `id` onto the control, so it lands on a different element than
-// `className` and `data-*`, which stay on the Checkbox root.
+// RAC puts `id` on the control, not the root.
 test('Checkbox forwards className and data attributes to its root, and id to the DOM', () => {
 	const { container } = render(
 		<Checkbox className="forwarded-class" data-forwarded="true" id="forwarded-id">
@@ -147,8 +140,7 @@ test('Checkbox resolves inputRef to the control, participates in a form, and fir
 	form.remove();
 });
 
-// React Aria types `inputRef` as a ref object. Luke UI widens it to accept a
-// callback so React Hook Form's `field.ref` works without an adapter.
+// Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
 test('Checkbox resolves a callback inputRef to the control', () => {
 	const resolved: Array<HTMLElement | null> = [];
 	const { locator } = render(
@@ -270,14 +262,12 @@ async function getAccessibilityNode(nodeId: DomNode['nodeId']) {
 	return axNode;
 }
 
-/** The clickable `<label>` carrying a checkbox's interactive data attributes. */
 function checkboxLabel(checkbox: Locator): HTMLElement {
 	const label = checkbox.element().closest('label');
 	if (label == null) throw new Error('Expected the checkbox content label.');
 	return label;
 }
 
-/** Focuses a checkbox and holds the space key so its label enters its pressed state. */
 async function pressCheckbox(checkbox: Locator): Promise<void> {
 	checkbox.element().focus();
 	await userEvent.keyboard('{Space>}');
@@ -296,8 +286,6 @@ test('keyboard focus ring', { tags: ['visual'] }, async () => {
 	await captureVisual(locator, 'checkbox/focus-visible');
 });
 
-// Hover and pressed on an invalid control are the states the resting scene
-// cannot show, and they differ per selection state.
 test('interactive states', { tags: ['visual'] }, async () => {
 	const { locator } = render(
 		<Stack>

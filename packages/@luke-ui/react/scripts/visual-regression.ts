@@ -13,11 +13,8 @@ import {
 import { assertCapturesPainted, compareCaptures, countResults } from './visual-regression-lib.js';
 
 const BASELINE_MISSING = [
-	'No visual baseline captures found.',
-	'',
-	'The baseline is an artefact produced by the "Visual baseline" workflow on `main`.',
-	'Re-run that workflow on `main` (Actions -> Visual baseline -> Run workflow), then re-run this job.',
-	'Locally, capture a baseline with:',
+	'No visual baseline found.',
+	'Run "Visual baseline" on `main`, or capture one locally:',
 	'',
 	`  VISUAL_CAPTURE_DIR=${VISUAL_BASELINE_DIR} pnpm --filter @luke-ui/react run test:visual:capture`,
 ].join('\n');
@@ -47,7 +44,6 @@ log(
 );
 log(review > 0 ? `Expected/actual/diff PNGs: ${diffDir}` : 'No visual changes.');
 
-/** Renders the visual-tagged browser tests of the working tree into `currentDir`. */
 async function captureCurrent() {
 	await rm(currentDir, { force: true, recursive: true });
 	await mkdir(currentDir, { recursive: true });
@@ -75,7 +71,6 @@ async function hasPngs(directory: string): Promise<boolean> {
 }
 
 function log(message: string) {
-	// CLI output is how a maintainer learns where the diff PNGs landed.
 	// oxlint-disable-next-line no-console
 	console.log(message);
 }

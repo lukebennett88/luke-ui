@@ -1,5 +1,4 @@
 import { AspectRatio } from '@luke-ui/react/aspect-ratio';
-// Only styles the visual fixture below; no test asserts a resolved token value.
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import { test, expect } from 'vite-plus/test';
@@ -128,7 +127,7 @@ test('applies the chosen ratio to a caller-owned root', () => {
 });
 const objectFits = ['cover', 'contain', 'fill', 'none', 'scale-down'] as const;
 
-/** Wide asymmetric SVG so cover, contain, and fill are visually distinct. */
+// Asymmetry distinguishes object-fit values.
 const mediaSrc = `data:image/svg+xml,${encodeURIComponent(
 	`<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
 		<rect width="200" height="200" fill="#1d4ed8"/>

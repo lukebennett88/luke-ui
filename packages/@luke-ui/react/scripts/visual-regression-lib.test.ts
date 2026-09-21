@@ -15,13 +15,6 @@ const png = (red: number) => {
 	return PNG.sync.write(image);
 };
 
-/**
- * Builds a `width` x `height` white PNG. When `withStroke`, adds a
- * `height - 20`px-tall, 3px-wide vertical stroke centred at `x` with
- * anti-aliased (blended grey, not solid black) edges - the shape of a thin
- * icon stroke, and of the kind of edge pixelmatch's `includeAA: false`
- * default discards as anti-aliasing rather than counting as a mismatch.
- */
 const pngWithAAStroke = (width: number, height: number, x: number, withStroke: boolean) => {
 	const image = new PNG({ height, width });
 	image.data.fill(255);
@@ -39,7 +32,6 @@ const pngWithAAStroke = (width: number, height: number, x: number, withStroke: b
 	return PNG.sync.write(image);
 };
 
-/** Builds a `width` x `height` PNG whose bottom decile is `bandColor` and everything above it is `fillColor`. */
 const pngWithBand = (
 	width: number,
 	height: number,
@@ -130,7 +122,6 @@ test('writes expected, actual, and diff PNGs for everything needing review', asy
 	await expect(access(path.join(output, 'changed.diff.png'))).resolves.toBeUndefined();
 	await expect(access(path.join(output, 'added.actual.png'))).resolves.toBeUndefined();
 	await expect(access(path.join(output, 'removed.expected.png'))).resolves.toBeUndefined();
-	// An unchanged capture needs no review, so it publishes nothing.
 	await expect(access(path.join(output, 'same.actual.png'))).rejects.toThrow(/ENOENT/);
 });
 
@@ -151,9 +142,6 @@ test('counts anti-aliased pixels and flags a removed thin stroke as a change', a
 });
 
 test('reports a 16px icon on a large canvas as changed (#312)', async () => {
-	// The defect: a visible icon-sized change scored 0.008% of the canvas, under
-	// the old 0.1% mismatch-ratio gate, and was reported unchanged. There is no
-	// canvas-wide ratio allowance any more, so any mismatched pixel counts.
 	const { actual, expected, output } = await captureDirs('visual-regression-icon-');
 	const width = 1024;
 	const height = 800;
@@ -174,7 +162,6 @@ test('reports a 16px icon on a large canvas as changed (#312)', async () => {
 	const [result] = await compareCaptures(expected, actual, output);
 
 	expect(result?.mismatchedPixels).toBe(256);
-	// 256 / (1024 * 800) is 0.03%, well under the deleted 0.1% allowance.
 	expect(result?.status).toBe('changed');
 });
 
@@ -219,7 +206,6 @@ test('accepts a tall capture whose bottom decile painted', async () => {
 	for (let y = 0; y < height; y++) {
 		for (let x = 0; x < width; x++) {
 			const index = (y * width + x) * 4;
-			// Vary the band by column so it is not a single uniform colour.
 			const color: [number, number, number, number] =
 				y >= bandStart && x % 2 === 0 ? [200, 200, 200, 255] : [0, 0, 0, 255];
 			image.data.set(color, index);

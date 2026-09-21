@@ -34,7 +34,6 @@ async function listPngs(root: string) {
 	return result;
 }
 
-/** Walks `root` for `.png` files, calling `visitor` with each file's path and its capture name (the path relative to `root`, without the extension). */
 async function walkPngs(root: string, visitor: (file: string, captureName: string) => void) {
 	async function visit(directory: string) {
 		await Promise.all(
@@ -55,12 +54,7 @@ async function walkPngs(root: string, visitor: (file: string, captureName: strin
 	await visit(root);
 }
 
-/**
- * Fails captures taller than their recorded viewport whose bottom decile is a
- * single uniform colour, meaning the scene grew but that region never
- * painted. See #310 for why `captureVisual` has to grow both the page and the
- * test iframe for a tall scene to paint in full.
- */
+// Detects #310: tall captures with an unpainted bottom band.
 export async function assertCapturesPainted(directory: string) {
 	const viewportCaptures: Array<{ file: string; id: string; viewportHeight: number }> = [];
 	await walkPngs(directory, (file, captureName) => {
@@ -109,17 +103,6 @@ function isBottomBandUniform(png: PNG) {
 	return true;
 }
 
-/**
- * Compares the baseline captures in `expectedDir` with the freshly rendered
- * captures in `actualDir`, writing `expected`, `actual`, and `diff` PNGs for
- * everything that is not unchanged into `outputDir`.
- *
- * There is no canvas-wide mismatch allowance: any pixel pixelmatch counts as
- * different makes the capture `changed`. The only tolerance is pixelmatch's own
- * per-pixel colour `threshold`. `includeAA: true` keeps anti-aliased edges in
- * the count rather than discarding them, so a thin icon stroke on a large
- * canvas still registers (see #312).
- */
 export async function compareCaptures(expectedDir: string, actualDir: string, outputDir: string) {
 	const [expected, actual] = await Promise.all([listPngs(expectedDir), listPngs(actualDir)]);
 	const ids = [...new Set([...expected.keys(), ...actual.keys()])].sort();

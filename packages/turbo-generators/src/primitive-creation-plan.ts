@@ -126,10 +126,8 @@ function renderPrimitiveSource(input: { pascalName: string; recipeName: string }
 import { cx } from '../../../shared/utils/utils.js';
 import { ${input.recipeName} } from './recipe.css.js';
 
-/** Props for the \`${input.pascalName}\` primitive. */
 export interface ${input.pascalName}Props extends ComponentProps<'div'> {}
 
-/** Primitive \`${input.pascalName}\`. */
 export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Element {
 	const { className, ...divProps } = props;
 	return <div {...divProps} className={cx(${input.recipeName}(), className)} />;
@@ -197,17 +195,6 @@ ${propsTable}
 `;
 }
 
-/**
- * The generated `*.browser.test.tsx` follows the same model as the component
- * generator's: a DOM-forwarding assertion, a shared representative scene used
- * by both the axe check and the visual capture, and a TODO'd behavioural test
- * for the author to replace. The scaffold is opinionated on purpose — the
- * philosophy is "generate it, then delete what is clearly unnecessary".
- *
- * Primitives live one directory deeper than components
- * (`src/core/primitives/<name>/` vs `src/core/<name>/`), so its test-utils
- * imports go up an extra level (`../../test-utils/...`).
- */
 function renderPrimitiveTest(input: {
 	name: string;
 	packagePath: string;
@@ -230,12 +217,7 @@ function renderPrimitiveTest(input: {
 			: ["import { Grid } from '../../test-utils/visual.js';"]),
 	];
 
-	const scene = `/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface. Replace its contents with the variants that
- * actually exist for ${input.pascalName} (tones, sizes, states, ...).
- */
-function ${sceneName}() {
+	const scene = `function ${sceneName}() {
 	return (
 		<Grid columns={2}>
 			<${input.pascalName}>Default</${input.pascalName}>
@@ -267,9 +249,7 @@ function ${sceneName}() {
 	await expectNoAxeViolations(container);
 });`;
 
-	const placeholderTest = `// TODO: replace this placeholder with a test of ${input.pascalName}'s actual
-// behaviour (what it renders, how it responds to interaction, what it exposes
-// to assistive tech), or delete it if the tests above already cover it.
+	const placeholderTest = `// TODO: Test actual behaviour or delete.
 test('${input.pascalName} renders its content', () => {
 	const { locator } = render(<${input.pascalName}>Content</${input.pascalName}>);
 
@@ -287,11 +267,7 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 });`
 		: '';
 
-	return `// This scaffold assumes ${input.pascalName} needs axe and visual coverage by
-// default. Delete either — or the placeholder behavioural test below — if it
-// does not protect anything meaningful for this primitive.
-
-${imports.join('\n')}
+	return `${imports.join('\n')}
 
 ${scene}
 

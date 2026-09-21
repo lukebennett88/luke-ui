@@ -21,10 +21,6 @@ import {
 	Stack,
 } from '../test-utils/visual.js';
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function TextFieldScene() {
 	return (
 		<Stack>
@@ -120,8 +116,7 @@ function TextFieldScene() {
 	);
 }
 
-// RAC moves `id` onto the control, so it lands on a different element than
-// `className` and `data-*`, which stay on the TextField root.
+// RAC puts `id` on the control, not the root.
 test('TextField forwards className and data attributes to its root, and id to the DOM', () => {
 	const { container } = render(
 		<TextField
@@ -157,7 +152,6 @@ test('TextField resolves inputRef to the input, participates in a form, and fire
 	const control = locator.getByRole('textbox', { name: 'Name' }).element();
 
 	expect(inputRef.current).toBe(control);
-	// The description is wired to the input, not just rendered beside it.
 	expect(control).toHaveAttribute('aria-describedby');
 
 	const form = document.createElement('form');
@@ -178,8 +172,7 @@ test('TextField resolves inputRef to the input, participates in a form, and fire
 	form.remove();
 });
 
-// React Aria types `inputRef` as a ref object. Luke UI widens it to accept a
-// callback so React Hook Form's `field.ref` works without an adapter.
+// Luke UI widens RAC's `inputRef` to accept React Hook Form's callback ref.
 test('TextField resolves a callback inputRef to the input', () => {
 	const resolved: Array<HTMLElement | null> = [];
 	const { locator } = render(

@@ -10,10 +10,6 @@ import { expectForwardsDomProps, expectHtmlElement } from '../test-utils/forward
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisual, captureVisualAppearance, Stack } from '../test-utils/visual.js';
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function LoadingSkeletonScene() {
 	return (
 		<Stack align="flex-start">
@@ -185,8 +181,6 @@ test('text and component placeholders', { tags: ['visual'] }, async () => {
 	await captureVisual(locator, 'loading-skeleton/placeholders');
 });
 
-// A skeleton wrapping tactile descendants has to flatten their own surfaces,
-// which the inline placeholders above never exercise.
 test('flattens tactile descendants', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(

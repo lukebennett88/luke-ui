@@ -1,10 +1,3 @@
-/**
- * Compile-time guards on the public IconButton prop contract.
- *
- * Rejections plus the one exact type: `icon` is a closed union, and widening it would go unnoticed
- * by `check:types` alone.
- */
-
 import type { ReactElement } from 'react';
 import { expect, expectTypeOf, test } from 'vite-plus/test';
 import type { IconName } from '../icon/icon.js';
@@ -12,13 +5,13 @@ import type { IconButtonProps } from './icon-button.js';
 
 const textIconButton: IconButtonProps = {
 	'aria-label': 'Add',
-	// @ts-expect-error — IconButton is always button-shaped and does not accept `appearance`
+	// @ts-expect-error — IconButton has no appearance prop
 	appearance: 'text',
 	icon: 'add',
 };
 const buttonAppearanceIconButton: IconButtonProps = {
 	'aria-label': 'Add',
-	// @ts-expect-error — IconButton is always button-shaped and does not accept `appearance`
+	// @ts-expect-error — IconButton has no appearance prop
 	appearance: 'button',
 	icon: 'add',
 };
@@ -28,7 +21,7 @@ const accentIconButton: IconButtonProps = { 'aria-label': 'Add', icon: 'add', to
 const unlabelledIconButton: IconButtonProps = { icon: 'add' };
 const childrenIconButton: IconButtonProps = {
 	'aria-label': 'Add',
-	// @ts-expect-error — IconButton renders its icon and does not accept children
+	// @ts-expect-error — IconButton has no children prop
 	children: 'Add',
 	icon: 'add',
 };

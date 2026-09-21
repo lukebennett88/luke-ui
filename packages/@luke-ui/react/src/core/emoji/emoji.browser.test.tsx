@@ -14,10 +14,6 @@ const stackStyle = {
 	gap: '1rem',
 } satisfies CSSProperties;
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function EmojiScene() {
 	return (
 		<Stack>

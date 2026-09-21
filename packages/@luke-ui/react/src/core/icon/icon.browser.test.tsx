@@ -1,5 +1,4 @@
 import { Icon } from '@luke-ui/react/icon';
-// Only styles the visual fixture below; no test asserts a resolved token value.
 import { vars } from '@luke-ui/react/theme';
 import type { CSSProperties } from 'react';
 import { expect, test } from 'vite-plus/test';
@@ -27,10 +26,6 @@ const names = variantValuesFor<typeof Icon, 'name'>()([
 	'search',
 ]);
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function IconScene() {
 	return (
 		<Stack>
@@ -48,8 +43,7 @@ function IconScene() {
 	);
 }
 
-// Icon's public props are a closed set: `ref` and `data-*` are not forwarded,
-// so only `className` and `id` are part of its DOM contract.
+// Icon does not accept `ref` or data attributes.
 test('forwards className and id to the svg', () => {
 	const { container } = render(<Icon className="forwarded-class" id="forwarded-id" name="add" />);
 	const svg = container.querySelector('svg');

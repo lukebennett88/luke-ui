@@ -1,10 +1,5 @@
 name: Visual baseline
 
-# Renders the visual captures of `main` and uploads them as the `visual-baseline`
-# artefact. `visual-regression.yml` downloads the artefact from this workflow's
-# latest successful run on `main` and compares a pull request against it, so no
-# screenshots are committed and no run ever renders `main` a second time.
-
 on:
   push:
     branches:
@@ -20,7 +15,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Never cancel in progress: a cancelled run leaves no baseline for the next PR.
+  # A cancelled run leaves no baseline for the next PR.
   group: visual-baseline
   cancel-in-progress: false
 

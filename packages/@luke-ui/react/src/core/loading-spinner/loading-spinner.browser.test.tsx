@@ -1,5 +1,4 @@
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-// Only styles the visual fixture below; no test asserts a resolved token value.
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
@@ -28,10 +27,6 @@ const fixedChildStyle = {
 	inlineSize: '8rem',
 } satisfies CSSProperties;
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function LoadingSpinnerScene() {
 	return (
 		<Stack>
@@ -127,9 +122,6 @@ function ThemeMatrixScope({
 	);
 }
 
-// A nested scope that flips colour mode is the one state the representative
-// scene cannot show: the spinner has to re-resolve its tokens against the
-// nearer `data-color-mode`, not the root's.
 test('theme matrix', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const oppositeMode = appearance.mode === 'light' ? 'dark' : 'light';

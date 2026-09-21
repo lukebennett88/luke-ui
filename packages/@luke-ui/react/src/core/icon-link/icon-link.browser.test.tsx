@@ -34,10 +34,6 @@ function CustomStarIcon(): JSX.Element {
 	);
 }
 
-/**
- * The representative scene, shared by the axe check and the visual capture so
- * both cover the same surface.
- */
 function IconLinkScene() {
 	return (
 		<Grid columns={4}>
@@ -52,12 +48,7 @@ function IconLinkScene() {
 	);
 }
 
-/**
- * React 19 passes `ref` as an ordinary prop and these components spread it
- * through to the React Aria element, so ref forwarding works at runtime. React
- * Aria's own prop types never declare `ref`, so the public props type cannot
- * express it; this alias adds it back for the DOM-contract test below.
- */
+// React Aria omits React 19's `ref` prop.
 const IconLinkWithRef = IconLink as (
 	props: ComponentProps<typeof IconLink> & { ref?: Ref<HTMLAnchorElement> },
 ) => ReactNode;

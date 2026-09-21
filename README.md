@@ -32,7 +32,7 @@ Useful repo commands:
 
 - `pnpm run check`: lint, format, and typecheck.
 - `pnpm run build`: build all packages and apps.
-- `pnpm run test`: run unit and visual regression tests.
+- `pnpm run test`: run tests.
 
 ## Stack
 

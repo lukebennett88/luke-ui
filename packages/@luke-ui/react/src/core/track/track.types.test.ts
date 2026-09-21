@@ -1,11 +1,3 @@
-/**
- * Compile-time guards on the public Track prop contract.
- *
- * Two exact assertions and four rejections. The exact ones matter because both unions are closed by
- * design: `elementType` is the documented set of root elements, and `railAlignment` must stay tied
- * to the recipe rather than drift into a hand-written copy.
- */
-
 import { expect, expectTypeOf, test } from 'vite-plus/test';
 import type { TrackRecipeVariants } from './recipe.css.js';
 import type { TrackProps } from './track.js';
@@ -16,7 +8,7 @@ const responsiveGapWithoutInitial: TrackProps = { gap: { bp768: 'sp16' } };
 const numericZeroGap: TrackProps = { gap: 0 };
 // @ts-expect-error — Track supports only its three documented root elements
 const unsupportedElement: TrackProps = { elementType: 'section' };
-// @ts-expect-error — Track owns its rail-alignment vocabulary
+// @ts-expect-error — railAlignment is a closed union
 const unsupportedAlignment: TrackProps = { railAlignment: 'baseline' };
 
 test('Track keeps its root element and rail alignment closed unions', () => {

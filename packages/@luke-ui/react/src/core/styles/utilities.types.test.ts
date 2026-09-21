@@ -1,15 +1,3 @@
-/**
- * Compile-time guards on the utility prop types package consumers see.
- *
- * These read `BoxProps` and `SprinklesProps` from `dist/`, so they check what was published rather
- * than what source happens to infer. Only rejections are kept: the failure mode worth guarding is a
- * scale widening to `string`, `true`, or an index signature, which keeps every valid call
- * compiling while silently accepting raw CSS. `utilities-emitted.test.ts` covers the same surface
- * from the other side, by grepping the emitted declaration text.
- *
- * Run `pnpm run build` first — a stale `dist/` makes these assertions meaningless.
- */
-
 import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
 import type { SprinklesProps } from '../../../dist/styles.js';
@@ -42,7 +30,6 @@ test('backgroundColor rejects anything but a namespaced role or surface token', 
 });
 
 test('border props reject CSS values outside the design system vocabulary', () => {
-	// Each of these would be accepted if the property were declared `true`.
 	// @ts-expect-error — CSS-wide keyword
 	assertType<UtilityProps['borderWidth']>('revert-layer');
 	// @ts-expect-error — a raw length, not one of the named widths
@@ -61,8 +48,6 @@ test('responsive objects reject unknown breakpoints and off-scale values', () =>
 });
 
 test('unconstrained properties keep property-specific CSS value typing', () => {
-	// `inlineSize`, `order`, and `flex` are `true` scales: they take that property's csstype value,
-	// not a widened `string | number`.
 	// @ts-expect-error — booleans are not CSS size values
 	assertType<UtilityProps['inlineSize']>(true);
 	// @ts-expect-error — plain objects are not CSS size values

@@ -1,14 +1,5 @@
 name: Visual regression
 
-# Compares a pull request against the `visual-baseline` artefact produced by the
-# newest `Visual baseline` run on `main`. That run must itself have completed
-# successfully and still hold its artefact; an older successful run is never
-# substituted, because comparing against a stale baseline would pass a pull
-# request that has not been checked. This workflow never renders `main`: if the
-# baseline is missing or unusable it fails and asks for that workflow to be
-# re-run. Any capture that is changed, added, or removed holds the pull request
-# at the `visual-review` environment until a reviewer approves it.
-
 on:
   pull_request:
     paths:
@@ -46,46 +37,34 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          # `actions/download-artifact` only reads artefacts from the current run,
-          # so the cross-workflow lookup goes through the API. The query is
-          # deliberately not filtered by `status=success`: filtering would skip
-          # over a newer failing or in-progress run and silently compare against
-          # an older, stale baseline. Take the newest `Visual baseline` run on
-          # `main` whatever its state, then require that exact run to be usable.
+          # Do not skip a newer failed run for an older baseline.
           read -r run_id run_status run_conclusion <<<"$(gh api \
             "repos/${GH_REPO}/actions/workflows/visual-baseline.yml/runs?branch=main&per_page=1" \
             --jq '.workflow_runs[0] // empty | "\(.id) \(.status) \(.conclusion // "none")"')"
           if [ -z "${run_id:-}" ]; then
-            echo '::error::No `Visual baseline` run found on `main`.'
-            echo '::error::Run the "Visual baseline" workflow on `main` (Actions -> Visual baseline -> Run workflow), then re-run this job.'
+            echo '::error::No baseline run found. Run "Visual baseline" on `main`, then re-run this job.'
             exit 1
           fi
           run_url="https://github.com/${GH_REPO}/actions/runs/${run_id}"
           echo "Newest Visual baseline run on \`main\`: ${run_id} (status=${run_status}, conclusion=${run_conclusion})."
-          # Never fall back to an older successful run: a pull request must be
-          # compared against the current state of `main` or not at all.
           if [ "$run_status" != "completed" ]; then
-            echo "::error::The newest \`Visual baseline\` run on \`main\` (${run_id}) has not completed; its status is \`${run_status}\`."
-            echo "::error::Wait for ${run_url} to finish, then re-run this job. This workflow will not compare against an older baseline."
+            echo "::error::Newest baseline run is ${run_status}. Wait for ${run_url}, then re-run this job."
             exit 1
           fi
           if [ "$run_conclusion" != "success" ]; then
-            echo "::error::The newest \`Visual baseline\` run on \`main\` (${run_id}) concluded \`${run_conclusion}\`, not \`success\`."
-            echo "::error::Fix \`main\` and re-run ${run_url}, then re-run this job. This workflow will not compare against an older baseline."
+            echo "::error::Newest baseline run concluded ${run_conclusion}. Re-run ${run_url}, then re-run this job."
             exit 1
           fi
           echo "Baseline from Visual baseline run ${run_id}."
           mkdir -p .artifacts/visual-regression/baseline
           if ! gh run download "$run_id" --name visual-baseline --dir .artifacts/visual-regression/baseline; then
-            echo "::error::Run ${run_id} has no \`visual-baseline\` artefact, or it has expired."
-            echo "::error::Re-run ${run_url}, then re-run this job. This workflow will not compare against an older baseline."
+            echo "::error::Baseline artefact missing or expired. Re-run ${run_url}, then re-run this job."
             exit 1
           fi
           count=$(find .artifacts/visual-regression/baseline -name '*.png' | wc -l)
           echo "Downloaded $count baseline screenshots."
           if [ "$count" -eq 0 ]; then
-            echo "::error::The \`visual-baseline\` artefact from run ${run_id} contains no screenshots."
-            echo "::error::Re-run ${run_url}, then re-run this job. This workflow will not compare against an older baseline."
+            echo "::error::Baseline artefact is empty. Re-run ${run_url}, then re-run this job."
             exit 1
           fi
 
@@ -119,16 +98,11 @@ jobs:
             "| status | count |", "| --- | --- |",
             (.counts | to_entries[] | "| \(.key) | \(.value) |")
           ' "$summary" >> "$GITHUB_STEP_SUMMARY"
-          # A baseline change is any capture that is not unchanged: changed,
-          # added, and removed all need a human to approve the new baseline.
           review=$(jq '.counts.changed + .counts.added + .counts.removed' "$summary")
           echo "review=$review" >> "$GITHUB_OUTPUT"
           jq -r '.results[] | select(.status != "unchanged") | "\(.status)\t\(.id)"' "$summary"
 
       - name: Upload expected, actual, and diff screenshots
-        # `always()` so a failed comparison still hands over whatever it produced.
-        # `ignore` rather than `error` because an unchanged run writes no diffs,
-        # and a comparison that failed before writing any may have none either.
         if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -141,10 +115,6 @@ jobs:
 
   review:
     name: review
-    # Runs only when the pull request changes the baseline. It carries no steps
-    # that can succeed on their own: the gate is the `visual-review` environment,
-    # which holds the job until a required reviewer approves it. Do not add a
-    # fallback path here — that would let visual changes merge unreviewed.
     if: needs.compare.outputs.review != '0'
     needs: compare
     runs-on: ubuntu-latest

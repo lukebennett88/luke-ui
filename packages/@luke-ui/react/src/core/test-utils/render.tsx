@@ -1,12 +1,8 @@
 /// <reference types="vite/client" />
 
-// Loads the built design-token stylesheet into the test document, matching the
-// hashed class names the built components reference.
 import '@luke-ui/react/stylesheet.css';
 import '@luke-ui/react/themes/paper/stylesheet.css';
 import '@luke-ui/react/themes/tactile/stylesheet.css';
-// The theme roots, tokens, and icon provider all come from the built package,
-// so they match the class names and React context the built components use.
 import { IconSpritesheetProvider } from '@luke-ui/react/icon';
 import { rootClassName, vars } from '@luke-ui/react/theme';
 import { themeClassName as paperThemeClassName } from '@luke-ui/react/themes/paper';
@@ -17,8 +13,6 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import type { Locator } from 'vite-plus/test/context';
 import { page, userEvent } from 'vite-plus/test/context';
-// The generated spritesheet is emitted to `dist/` by the `generate` task, which
-// both `build` and `test` depend on, so it is always present when tests run.
 import spritesheetHref from '../../../dist/spritesheet.svg?url';
 import {
 	getAppliedIdentityClassName,
@@ -48,16 +42,6 @@ export type RenderResult = {
 	unmount: () => void;
 };
 
-/**
- * Renders `node` inside the same theme root and icon spritesheet provider the
- * app wraps components with, then returns a Vitest locator for the mounted
- * subtree ready to pass to `captureVisual`, plus the page-bound `userEvent`
- * (a convenience re-export so callers do not need a second import).
- *
- * The identity class and colour mode go on `document.documentElement`, not the
- * container, so a portal (combobox popover, mobile tray) that mounts outside
- * the container still gets the intended theme and mode.
- */
 export function render(node: ReactNode, options?: { appearance?: VisualAppearance }): RenderResult {
 	const appearance = options?.appearance ?? defaultVisualAppearance;
 	const identityClassName = identityClassNameFor(appearance.theme);

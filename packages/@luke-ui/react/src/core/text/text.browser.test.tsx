@@ -3,8 +3,6 @@ import { Em } from '@luke-ui/react/em';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Strong } from '@luke-ui/react/strong';
 import { Text } from '@luke-ui/react/text';
-// Only enumerates the type styles for the visual fixture below; no test asserts a
-// resolved token value.
 import { typeStyles } from '@luke-ui/react/theme';
 import { createRef } from 'react';
 import type { CSSProperties } from 'react';
