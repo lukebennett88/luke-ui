@@ -21,18 +21,15 @@ jobs:
       # - name: Setup Tooling with mise
       #   uses: jdx/mise-action@v4
 
-      # - name: Enable Corepack
-      #   run: corepack enable
-
       # - name: Install Dependencies
-      #   run: corepack pnpm install --frozen-lockfile
+      #   run: pnpm install --frozen-lockfile
 
       # - name: Create Release Pull Request or Publish to npm
       #   id: changesets
       #   uses: changesets/action@v2
       #   with:
       #     # This expects you to have a script called release which does a build for your packages and calls changeset publish
-      #     publish: corepack pnpm release
+      #     publish: pnpm release
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

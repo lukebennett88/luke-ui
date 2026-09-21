@@ -129,10 +129,12 @@
 			automerge: false,
 		},
 		{
-			// Moving the pinned pnpm version changes how every install resolves, including the quarantine
-			// and trust policy checks.
-			matchDepTypes: ['packageManager'],
+			// pnpm is declared in mise and packageManager. Keep the tool mise installs and the project
+			// declaration in one PR, with the regenerated lockfile.
+			matchManagers: ['mise', 'npm'],
+			matchDepNames: ['pnpm'],
 			groupName: 'pnpm',
+			rangeStrategy: 'replace',
 			automerge: false,
 		},
 		{
