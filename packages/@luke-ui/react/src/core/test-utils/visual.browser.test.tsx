@@ -23,8 +23,26 @@ test('freezing motion finishes an in-flight text-decoration-color transition', a
 	const restore = await freezeMotionForCapture();
 	try {
 		const color = getComputedStyle(link).textDecorationColor;
+		// Freeze pins decoration colour to currentColor (rgb from the link's color).
 		expect(color).toBe('rgb(0, 0, 0)');
 		expect(link.getAnimations().length).toBe(0);
+	} finally {
+		await restore();
+		link.remove();
+	}
+});
+
+test('freezing motion pins text-decoration-color to currentColor', async () => {
+	const link = document.body.appendChild(document.createElement('a'));
+	link.textContent = 'Destination';
+	link.href = '#';
+	link.style.color = 'rgb(32, 64, 128)';
+	link.style.textDecorationLine = 'underline';
+	link.style.textDecorationColor = 'rgba(32, 64, 128, 0.2)';
+
+	const restore = await freezeMotionForCapture();
+	try {
+		expect(getComputedStyle(link).textDecorationColor).toBe('rgb(32, 64, 128)');
 	} finally {
 		await restore();
 		link.remove();

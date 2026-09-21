@@ -12,17 +12,42 @@ const VISUAL_CAPTURE_ID_PATTERN = /^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const VISUAL_VIEWPORT_WIDTH = 1024;
 const VISUAL_VIEWPORT_HEIGHT = 800;
 
+/** Park the pointer off the scene so a prior test's cursor cannot leave `:hover` / `data-hovered`. */
+async function parkPointer() {
+	await cdp().send('Input.dispatchMouseEvent', {
+		button: 'none',
+		buttons: 0,
+		modifiers: 0,
+		type: 'mouseMoved',
+		x: 0,
+		y: 0,
+	});
+}
+
 /**
  * Jump running CSS transitions and animations to their end values.
  *
  * Applying `prefers-reduced-motion: reduce` or `transition: none` mid-flight cancels the
  * transition and leaves interpolated values (for example a semi-transparent
  * `text-decoration-color`) frozen in place. Finish first, then freeze.
+ *
+ * Exit animations are paused instead of finished so finishing them cannot unmount an
+ * overlay before the screenshot.
  */
 function finishInFlightMotion(root: Document | Element = document) {
 	if (typeof root.getAnimations !== 'function') return;
 
 	for (const animation of root.getAnimations({ subtree: true })) {
+		const effect = animation.effect;
+		const target = effect && 'target' in effect ? (effect.target as Element | null) : null;
+		if (target instanceof Element && target.closest('[data-exiting]')) {
+			try {
+				animation.pause();
+			} catch {
+				// Ignore animations that cannot be paused.
+			}
+			continue;
+		}
 		try {
 			animation.finish();
 		} catch {
@@ -31,8 +56,33 @@ function finishInFlightMotion(root: Document | Element = document) {
 	}
 }
 
+function waitAnimationFrames(frames = 2): Promise<void> {
+	return new Promise((resolve) => {
+		const step = (remaining: number) => {
+			if (remaining <= 0) {
+				resolve();
+				return;
+			}
+			requestAnimationFrame(() => step(remaining - 1));
+		};
+		step(frames);
+	});
+}
+
+function locatorForCapturedElement(element: Element): Locator {
+	// Re-bind body/html immediately before screenshot. `elementLocator` keys off text content,
+	// so a snapshot taken before freeze goes stale when live regions or portals update.
+	if (element === document.body || element === document.documentElement) {
+		return page.elementLocator(element);
+	}
+	return page.elementLocator(element);
+}
+
 // Reduced motion prevents entering overlays from capturing at opacity 0.
 export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
+	// Mount-time transitions (Link underline colour, control chrome) often start a frame after
+	// paint. Wait, finish them, then freeze so reduced-motion cannot cancel mid-flight.
+	await waitAnimationFrames();
 	finishInFlightMotion();
 
 	const previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
@@ -46,6 +96,8 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 	transition-delay: 0s !important;
 	transition-duration: 0s !important;
 	caret-color: transparent !important;
+	/* Pin decoration colour so a cancelled text-decoration-color transition cannot hide underlines. */
+	text-decoration-color: currentColor !important;
 }
 [data-entering], [data-exiting] {
 	opacity: 1 !important;
@@ -53,7 +105,7 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 }
 `;
 	document.head.append(freezeMotion);
-	// Catch transitions that started between finish and the freeze stylesheet.
+	await waitAnimationFrames();
 	finishInFlightMotion();
 
 	return async () => {
@@ -67,9 +119,19 @@ export async function captureVisual(locator: Locator, id: string) {
 		throw new Error(`Visual capture IDs must use a component namespace: ${id}`);
 	}
 
+	// Resolve before async viewport/motion work so scrollHeight uses a live element reference.
+	const element = locator.element();
+
 	const originalViewportWidth = window.innerWidth;
 	const originalViewportHeight = window.innerHeight;
-	await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
+	// Skip a no-op viewport resize: React Aria closes popovers on document scroll, and some
+	// viewport implementations reset scroll even when the size is unchanged.
+	if (
+		originalViewportWidth !== VISUAL_VIEWPORT_WIDTH ||
+		originalViewportHeight !== VISUAL_VIEWPORT_HEIGHT
+	) {
+		await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
+	}
 	if (document.fonts?.status !== 'loaded') {
 		await document.fonts.ready;
 	}
@@ -79,7 +141,6 @@ export async function captureVisual(locator: Locator, id: string) {
 		const viewportWidth = window.innerWidth;
 		const viewportHeight = window.innerHeight;
 		const viewport = formatVisualViewport(viewportWidth, viewportHeight);
-		const element = locator.element();
 		const fullHeight = element.scrollHeight;
 		isTall = fullHeight > viewportHeight;
 
@@ -94,14 +155,26 @@ export async function captureVisual(locator: Locator, id: string) {
 			await page.viewport(viewportWidth, fullHeight);
 		}
 
-		await expect.element(locator).toMatchScreenshot(formatVisualCaptureName(id, viewport));
+		// Re-bind body/html after freeze so live-region text changes cannot invalidate the locator.
+		const screenshotLocator = locatorForCapturedElement(element);
+		await expect
+			.element(screenshotLocator)
+			.toMatchScreenshot(formatVisualCaptureName(id, viewport));
 	} finally {
 		if (isTall) {
 			await page.viewport(VISUAL_VIEWPORT_WIDTH, VISUAL_VIEWPORT_HEIGHT);
 			await cdp().send('Emulation.clearDeviceMetricsOverride');
 		}
 		await restoreMotion();
-		await page.viewport(originalViewportWidth, originalViewportHeight);
+		if (
+			window.innerWidth !== originalViewportWidth ||
+			window.innerHeight !== originalViewportHeight
+		) {
+			await page.viewport(originalViewportWidth, originalViewportHeight);
+		}
+		// Leave the cursor at the origin so the next capture does not inherit an accidental hover
+		// (text Links invert underline under `:hover` / `data-hovered`).
+		await parkPointer();
 	}
 }
 
