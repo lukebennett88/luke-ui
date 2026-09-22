@@ -194,8 +194,9 @@ test('a disabled Link exposes disabled state in either appearance', () => {
 
 test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
-		const { locator } = render(<LinkScene />, { appearance });
+		const { locator, unmount } = render(<LinkScene />, { appearance });
 		await captureVisualAppearance(locator, 'link/kitchen-sink', appearance);
+		unmount();
 	}
 });
 

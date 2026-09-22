@@ -30,10 +30,21 @@ waits at the `visual-review` environment when that environment has a required re
 
 ## Capture freeze
 
-`freezeMotionForCapture` finishes in-flight CSS transitions and animations before applying
-reduced-motion and zero-duration overrides. Cancelling a transition mid-flight (for example
-`text-decoration-color` on text Links) otherwise freezes an interpolated value and flakes the
-capture.
+`freezeMotionForCapture` waits a couple of animation frames, finishes in-flight CSS transitions and
+animations, then applies reduced-motion and zero-duration overrides. Cancelling a transition
+mid-flight (for example `text-decoration-color` on text Links) otherwise freezes an interpolated
+value and flakes the capture. During the freeze, `text-decoration-color` is pinned to `currentColor`
+so underlines cannot disappear from a cancelled colour transition. Exit animations are paused rather
+than finished so finishing them cannot unmount an open overlay before the screenshot. Restore
+resumes only the exit animations the freeze paused. CSS exit transitions are style-locked so
+reduced-motion recipe resets (`transition: none`) cannot cancel them mid-capture. Already-paused
+exit animations stay paused after restore.
+
+`captureVisual` skips no-op viewport resizes (React Aria closes popovers on document scroll),
+re-binds body/html locators immediately before the screenshot so live-region text changes cannot
+invalidate the locator, and parks the pointer outside the viewport after each capture. Browser tests
+also park the pointer in `afterEach` so a leftover cursor cannot leave text Links hovered (standard
+prominence removes the underline under hover).
 
 ## Tall scenes
 
