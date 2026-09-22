@@ -20,14 +20,11 @@ Two entries are not plain versions:
 
 `minimumReleaseAge: 4320` is exactly three days. It stops pnpm resolving any release, direct or
 transitive, that is younger than three days. `.github/renovate.json5` sets
-`minimumReleaseAge: '5 days'`, so Renovate waits two days longer before opening a pull request.
-
-The Renovate comment still says pnpm uses 7200 minutes (five days). No configuration comment
-explains the different values.
+`minimumReleaseAge: '3 days'`, so Renovate and pnpm use the same three-day quarantine.
 
 The two settings do not cover the same ground. Renovate's applies to the dependency it is updating.
-pnpm's applies to everything the update pulls in. A bump to a five-day-old release can still drag in
-a transitive package published yesterday, and the lockfile update then fails.
+pnpm's applies to everything the update pulls in. A bump to a three-day-old release can still drag
+in a transitive package published yesterday, and the lockfile update then fails.
 
 `trustLockfile: true` means the check is not re-run against entries already in the lockfile, so this
 only bites when a lockfile is generated, never on a plain `pnpm install --frozen-lockfile` in CI.
