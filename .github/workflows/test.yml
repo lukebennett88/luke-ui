@@ -32,20 +32,17 @@ jobs:
           install: true
           cache: true
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Install dependencies
-        run: corepack pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Chromium
-        run: corepack pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
+        run: pnpm --filter @luke-ui/react exec playwright install --with-deps chromium
 
       - name: Build package
-        run: corepack pnpm build:packages
+        run: pnpm build:packages
 
       - name: Run component tests
-        run: corepack pnpm --filter @luke-ui/react run test:ci
+        run: pnpm --filter @luke-ui/react run test:ci
 
   docs-tests:
     name: docs-tests
@@ -64,20 +61,17 @@ jobs:
           install: true
           cache: true
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Install dependencies
-        run: corepack pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Playwright Chromium
-        run: corepack pnpm --filter docs exec playwright install --with-deps chromium
+        run: pnpm --filter docs exec playwright install --with-deps chromium
 
       - name: Build package
-        run: corepack pnpm build:packages
+        run: pnpm build:packages
 
       - name: Generate docs app files
-        run: corepack pnpm --filter docs run generate
+        run: pnpm --filter docs run generate
 
       - name: Run docs tests
-        run: corepack pnpm --filter docs run test
+        run: pnpm --filter docs run test

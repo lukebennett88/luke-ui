@@ -18,13 +18,13 @@ Two entries are not plain versions:
 
 ## The release quarantine
 
-`minimumReleaseAge: 4320` (3 days) stops pnpm resolving any release, direct or transitive, that is
-younger than five days. `.github/renovate.json5` sets the same `minimumReleaseAge: '3 days'` so
-Renovate never opens a pull request for a release pnpm will refuse to install.
+`minimumReleaseAge: 4320` is exactly three days. It stops pnpm resolving any release, direct or
+transitive, that is younger than three days. `.github/renovate.json5` sets
+`minimumReleaseAge: '3 days'`, so Renovate and pnpm use the same three-day quarantine.
 
 The two settings do not cover the same ground. Renovate's applies to the dependency it is updating.
-pnpm's applies to everything the update pulls in. A bump to a five-day-old release can still drag in
-a transitive package published yesterday, and the lockfile update then fails.
+pnpm's applies to everything the update pulls in. A bump to a three-day-old release can still drag
+in a transitive package published yesterday, and the lockfile update then fails.
 
 `trustLockfile: true` means the check is not re-run against entries already in the lockfile, so this
 only bites when a lockfile is generated, never on a plain `pnpm install --frozen-lockfile` in CI.
@@ -80,12 +80,13 @@ an exclude list entry before they will install, which no amount of green CI will
 
 ## Tooling versions
 
-`mise.toml` pins the Node major. Renovate's `mise` manager tracks it and its node versioning treats
+`mise.toml` pins and installs pnpm. The root `package.json` `packageManager` field repeats the exact
+version for metadata and tooling. Renovate groups both declarations. Omitting the hash avoids
+Renovate's Corepack-based hash regeneration.
+
+`mise.toml` pins the Node major. Renovate's `mise` manager tracks it, and its node versioning treats
 odd majors as unstable, so it will only propose the next LTS line.
 
 The four workflows in `.github/workflows` pin actions at the major tag, so the only update Renovate
 can offer is a major tag move. They group into one `github actions` pull request and are never
 automerged.
-
-The `packageManager` field in the root `package.json` pins pnpm. Renovate updates it, including the
-integrity hash, in its own pull request.

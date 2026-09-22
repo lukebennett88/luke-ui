@@ -7,9 +7,9 @@
 	],
 	labels: ['dependencies'],
 
-	// pnpm refuses to resolve any release younger than `minimumReleaseAge: 7200` (5 days) in
+	// pnpm refuses to resolve any release younger than `minimumReleaseAge: 4320` (3 days) in
 	// pnpm-workspace.yaml, so a PR raised for a fresher release cannot generate a lockfile.
-	minimumReleaseAge: '5 days',
+	minimumReleaseAge: '3 days',
 	// Hold the branch back until the release is old enough instead of opening a PR that cannot install.
 	internalChecksFilter: 'strict',
 
@@ -29,7 +29,7 @@
 		automerge: false,
 	},
 
-	// Security fixes skip the quarantine. pnpm does not: a fix younger than 5 days still needs a
+	// Security fixes skip the quarantine. pnpm does not: a fix younger than 3 days still needs a
 	// `minimumReleaseAgeExclude` entry added by hand before the lockfile will resolve.
 	vulnerabilityAlerts: {
 		minimumReleaseAge: null,
@@ -116,6 +116,7 @@
 		// `24.19.0`, and it landed in the non-major group rather than a Node one.
 		{
 			matchManagers: ['mise'],
+			matchDepNames: ['node'],
 			groupName: 'node',
 			rangeStrategy: 'replace',
 			automerge: false,
@@ -129,10 +130,12 @@
 			automerge: false,
 		},
 		{
-			// Moving the pinned pnpm version changes how every install resolves, including the quarantine
-			// and trust policy checks.
-			matchDepTypes: ['packageManager'],
+			// pnpm is declared in mise and packageManager. Keep the tool mise installs and the project
+			// declaration in one PR, with the regenerated lockfile.
+			matchManagers: ['mise', 'npm'],
+			matchDepNames: ['pnpm'],
 			groupName: 'pnpm',
+			rangeStrategy: 'replace',
 			automerge: false,
 		},
 		{
