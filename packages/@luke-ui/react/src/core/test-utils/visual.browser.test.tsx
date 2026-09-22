@@ -129,6 +129,44 @@ test('freezing motion keeps a CSS exit transition mounted through reduced motion
 	style.remove();
 });
 
+test('restoring capture freeze preserves pre-existing inline exit styles', async () => {
+	const overlay = document.body.appendChild(document.createElement('div'));
+	overlay.setAttribute('data-exiting', '');
+	overlay.style.setProperty('transition', 'opacity 5s linear', 'important');
+	overlay.style.setProperty('opacity', '1');
+	void overlay.offsetHeight;
+	// Start a CSSTransition toward a distinct inline end value the freeze will override.
+	overlay.style.setProperty('opacity', '0.5');
+	void overlay.offsetHeight;
+	await expect.poll(() => overlay.getAnimations().length).toBeGreaterThan(0);
+	expect(overlay.getAnimations()[0]).toBeInstanceOf(CSSTransition);
+
+	const originalInline = {
+		opacity: overlay.style.getPropertyValue('opacity'),
+		opacityPriority: overlay.style.getPropertyPriority('opacity'),
+		transition: overlay.style.getPropertyValue('transition'),
+		transitionPriority: overlay.style.getPropertyPriority('transition'),
+	};
+	expect(originalInline).toEqual({
+		opacity: '0.5',
+		opacityPriority: '',
+		transition: 'opacity 5s linear',
+		transitionPriority: 'important',
+	});
+
+	const restore = await freezeMotionForCapture();
+	await restore();
+
+	expect({
+		opacity: overlay.style.getPropertyValue('opacity'),
+		opacityPriority: overlay.style.getPropertyPriority('opacity'),
+		transition: overlay.style.getPropertyValue('transition'),
+		transitionPriority: overlay.style.getPropertyPriority('transition'),
+	}).toEqual(originalInline);
+
+	overlay.remove();
+});
+
 test('pointer parking clears hover on an element at the viewport origin', async () => {
 	const target = document.body.appendChild(document.createElement('div'));
 	target.style.background = 'rgb(200, 0, 0)';

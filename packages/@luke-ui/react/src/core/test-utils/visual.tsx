@@ -30,14 +30,49 @@ export async function parkPointer() {
 	});
 }
 
+type InlinePropertySnapshot = {
+	property: string;
+	/** Whether the property was present on the element's inline style before the lock. */
+	present: boolean;
+	value: string;
+	priority: '' | 'important';
+};
+
 type ExitStyleLock = {
 	element: HTMLElement;
-	properties: Array<string>;
+	properties: Array<InlinePropertySnapshot>;
 };
 
 function animationTarget(animation: Animation): Element | null {
 	const effect = animation.effect;
 	return effect && 'target' in effect ? (effect.target as Element | null) : null;
+}
+
+function readInlineProperty(element: HTMLElement, property: string): InlinePropertySnapshot {
+	const value = element.style.getPropertyValue(property);
+	const priority = element.style.getPropertyPriority(property) === 'important' ? 'important' : '';
+	// Shorthands such as `transition` expand to longhands in the declaration list, so they may
+	// not appear in `style.item()`. A non-empty value or important priority still means present.
+	const present = value !== '' || priority === 'important';
+	return {
+		property,
+		present,
+		value: present ? value : '',
+		priority,
+	};
+}
+
+/** Record the original inline state once, then override for the freeze. */
+function lockInlineProperty(
+	element: HTMLElement,
+	property: string,
+	value: string,
+	recorded: Map<string, InlinePropertySnapshot>,
+) {
+	if (!recorded.has(property)) {
+		recorded.set(property, readInlineProperty(element, property));
+	}
+	element.style.setProperty(property, value, 'important');
 }
 
 /**
@@ -82,7 +117,7 @@ function finishInFlightMotion(root: Document | Element = document): Array<Animat
  * snapped for `useExitAnimation`, which unmounts the overlay before the screenshot.
  *
  * Lock each exiting element's transition and CSSTransition end values so reduced-motion and
- * freeze styles cannot cancel those animations.
+ * freeze styles cannot cancel those animations. Original inline values are restored after.
  */
 function lockExitingCssTransitions(root: Document | Element = document): Array<ExitStyleLock> {
 	const locks: Array<ExitStyleLock> = [];
@@ -99,9 +134,8 @@ function lockExitingCssTransitions(root: Document | Element = document): Array<E
 	}
 
 	for (const [element, animations] of byElement) {
-		const properties: Array<string> = [];
-		element.style.setProperty('transition', getComputedStyle(element).transition, 'important');
-		properties.push('transition');
+		const recorded = new Map<string, InlinePropertySnapshot>();
+		lockInlineProperty(element, 'transition', getComputedStyle(element).transition, recorded);
 
 		for (const animation of animations) {
 			const effect = animation.effect;
@@ -118,19 +152,22 @@ function lockExitingCssTransitions(root: Document | Element = document): Array<E
 				) {
 					continue;
 				}
-				element.style.setProperty(property, String(value), 'important');
-				properties.push(property);
+				lockInlineProperty(element, property, String(value), recorded);
 			}
 		}
-		locks.push({ element, properties });
+		locks.push({ element, properties: [...recorded.values()] });
 	}
 	return locks;
 }
 
 function clearExitStyleLocks(locks: Array<ExitStyleLock>) {
 	for (const { element, properties } of locks) {
-		for (const property of properties) {
-			element.style.removeProperty(property);
+		for (const snapshot of properties) {
+			if (snapshot.present) {
+				element.style.setProperty(snapshot.property, snapshot.value, snapshot.priority);
+			} else {
+				element.style.removeProperty(snapshot.property);
+			}
 		}
 	}
 }
