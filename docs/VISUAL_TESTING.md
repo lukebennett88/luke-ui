@@ -36,7 +36,9 @@ mid-flight (for example `text-decoration-color` on text Links) otherwise freezes
 value and flakes the capture. During the freeze, `text-decoration-color` is pinned to `currentColor`
 so underlines cannot disappear from a cancelled colour transition. Exit animations are paused rather
 than finished so finishing them cannot unmount an open overlay before the screenshot. Restore
-resumes any paused exit animations so overlays can finish exiting after the capture.
+resumes only the exit animations the freeze paused. CSS exit transitions are style-locked so
+reduced-motion recipe resets (`transition: none`) cannot cancel them mid-capture. Already-paused
+exit animations stay paused after restore.
 
 `captureVisual` skips no-op viewport resizes (React Aria closes popovers on document scroll),
 re-binds body/html locators immediately before the screenshot so live-region text changes cannot

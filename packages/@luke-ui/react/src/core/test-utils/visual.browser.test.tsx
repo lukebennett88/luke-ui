@@ -33,7 +33,7 @@ test('freezing motion finishes an in-flight text-decoration-color transition', a
 	}
 });
 
-test('restoring capture freeze resumes paused exit animations', async () => {
+test('restoring capture freeze resumes exit animations it paused', async () => {
 	const overlay = document.body.appendChild(document.createElement('div'));
 	overlay.setAttribute('data-exiting', '');
 	const animation = overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
@@ -50,6 +50,83 @@ test('restoring capture freeze resumes paused exit animations', async () => {
 
 	animation.cancel();
 	overlay.remove();
+});
+
+test('restoring capture freeze leaves pre-paused exit animations paused', async () => {
+	const overlay = document.body.appendChild(document.createElement('div'));
+	overlay.setAttribute('data-exiting', '');
+	const animation = overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
+		duration: 5000,
+		fill: 'forwards',
+	});
+	await expect.poll(() => animation.playState).toBe('running');
+	animation.pause();
+	expect(animation.playState).toBe('paused');
+
+	const restore = await freezeMotionForCapture();
+	expect(animation.playState).toBe('paused');
+
+	await restore();
+	expect(animation.playState).toBe('paused');
+
+	animation.cancel();
+	overlay.remove();
+});
+
+// Luke UI overlays exit with CSS transitions. Recipes set `transition: none` under reduced motion,
+// which cancels a paused CSSTransition React Aria already waited on and unmounts before capture.
+test('freezing motion keeps a CSS exit transition mounted through reduced motion', async () => {
+	const style = document.head.appendChild(document.createElement('style'));
+	style.textContent = `
+		.exit-fixture {
+			opacity: 1;
+			transition: opacity 5s linear;
+		}
+		.exit-fixture[data-exiting] {
+			opacity: 0;
+			transition: opacity 5s linear;
+		}
+		@media (prefers-reduced-motion: reduce) {
+			.exit-fixture[data-exiting] {
+				opacity: 1;
+				transition: none;
+			}
+		}
+	`;
+
+	const overlay = document.body.appendChild(document.createElement('div'));
+	overlay.className = 'exit-fixture';
+	overlay.textContent = 'overlay';
+	void overlay.offsetHeight;
+	overlay.setAttribute('data-exiting', '');
+	void overlay.offsetHeight;
+
+	await expect.poll(() => overlay.getAnimations().length).toBeGreaterThan(0);
+	const exitAnimation = overlay.getAnimations()[0]!;
+	expect(exitAnimation.playState).toBe('running');
+	expect(exitAnimation).toBeInstanceOf(CSSTransition);
+
+	// Mirror React Aria useExitAnimation: wait on the animations present when exit starts.
+	void Promise.allSettled([exitAnimation.finished]).then(() => {
+		overlay.remove();
+	});
+
+	const restore = await freezeMotionForCapture();
+	try {
+		expect(document.body.contains(overlay)).toBe(true);
+		expect(overlay.hasAttribute('data-exiting')).toBe(true);
+		expect(exitAnimation.playState).toBe('paused');
+		expect(overlay.getAnimations().length).toBeGreaterThan(0);
+	} finally {
+		await restore();
+	}
+
+	expect(document.body.contains(overlay)).toBe(true);
+	await expect.poll(() => exitAnimation.playState).toBe('running');
+	exitAnimation.finish();
+	await expect.poll(() => document.body.contains(overlay)).toBe(false);
+
+	style.remove();
 });
 
 test('pointer parking clears hover on an element at the viewport origin', async () => {

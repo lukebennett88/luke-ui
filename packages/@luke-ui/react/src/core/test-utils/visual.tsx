@@ -30,6 +30,16 @@ export async function parkPointer() {
 	});
 }
 
+type ExitStyleLock = {
+	element: HTMLElement;
+	properties: Array<string>;
+};
+
+function animationTarget(animation: Animation): Element | null {
+	const effect = animation.effect;
+	return effect && 'target' in effect ? (effect.target as Element | null) : null;
+}
+
 /**
  * Jump running CSS transitions and animations to their end values.
  *
@@ -38,19 +48,20 @@ export async function parkPointer() {
  * `text-decoration-color`) frozen in place. Finish first, then freeze.
  *
  * Exit animations are paused instead of finished so finishing them cannot unmount an
- * overlay before the screenshot.
+ * overlay before the screenshot. Only animations that were running when paused are returned
+ * for resume — already-paused exit animations stay paused after restore.
  */
 function finishInFlightMotion(root: Document | Element = document): Array<Animation> {
-	const pausedExitAnimations: Array<Animation> = [];
-	if (typeof root.getAnimations !== 'function') return pausedExitAnimations;
+	const pausedByFreeze: Array<Animation> = [];
+	if (typeof root.getAnimations !== 'function') return pausedByFreeze;
 
 	for (const animation of root.getAnimations({ subtree: true })) {
-		const effect = animation.effect;
-		const target = effect && 'target' in effect ? (effect.target as Element | null) : null;
+		const target = animationTarget(animation);
 		if (target instanceof Element && target.closest('[data-exiting]')) {
+			if (animation.playState !== 'running') continue;
 			try {
 				animation.pause();
-				pausedExitAnimations.push(animation);
+				pausedByFreeze.push(animation);
 			} catch {
 				// Ignore animations that cannot be paused.
 			}
@@ -62,7 +73,66 @@ function finishInFlightMotion(root: Document | Element = document): Array<Animat
 			// Already finished or not finishable (e.g. infinite iterations).
 		}
 	}
-	return pausedExitAnimations;
+	return pausedByFreeze;
+}
+
+/**
+ * Luke UI recipes set `transition: none` and retarget opacity/translate under
+ * `prefers-reduced-motion: reduce`. That cancels paused CSSTransitions React Aria already
+ * snapped for `useExitAnimation`, which unmounts the overlay before the screenshot.
+ *
+ * Lock each exiting element's transition and CSSTransition end values so reduced-motion and
+ * freeze styles cannot cancel those animations.
+ */
+function lockExitingCssTransitions(root: Document | Element = document): Array<ExitStyleLock> {
+	const locks: Array<ExitStyleLock> = [];
+	if (typeof root.getAnimations !== 'function') return locks;
+
+	const byElement = new Map<HTMLElement, Array<Animation>>();
+	for (const animation of root.getAnimations({ subtree: true })) {
+		if (!(animation instanceof CSSTransition)) continue;
+		const target = animationTarget(animation);
+		if (!(target instanceof HTMLElement) || !target.closest('[data-exiting]')) continue;
+		const existing = byElement.get(target);
+		if (existing) existing.push(animation);
+		else byElement.set(target, [animation]);
+	}
+
+	for (const [element, animations] of byElement) {
+		const properties: Array<string> = [];
+		element.style.setProperty('transition', getComputedStyle(element).transition, 'important');
+		properties.push('transition');
+
+		for (const animation of animations) {
+			const effect = animation.effect;
+			if (!effect || !('getKeyframes' in effect)) continue;
+			const end = effect.getKeyframes().at(-1);
+			if (!end) continue;
+			for (const [property, value] of Object.entries(end)) {
+				if (
+					property === 'offset' ||
+					property === 'easing' ||
+					property === 'composite' ||
+					property === 'computedOffset' ||
+					(typeof value !== 'string' && typeof value !== 'number')
+				) {
+					continue;
+				}
+				element.style.setProperty(property, String(value), 'important');
+				properties.push(property);
+			}
+		}
+		locks.push({ element, properties });
+	}
+	return locks;
+}
+
+function clearExitStyleLocks(locks: Array<ExitStyleLock>) {
+	for (const { element, properties } of locks) {
+		for (const property of properties) {
+			element.style.removeProperty(property);
+		}
+	}
 }
 
 function waitAnimationFrames(frames = 2): Promise<void> {
@@ -83,13 +153,15 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 	// Mount-time transitions (Link underline colour, control chrome) often start a frame after
 	// paint. Wait, finish them, then freeze so reduced-motion cannot cancel mid-flight.
 	await waitAnimationFrames();
-	const pausedExitAnimations: Array<Animation> = [];
-	const collectPausedExitAnimations = (batch: Array<Animation>) => {
+	const pausedByFreeze: Array<Animation> = [];
+	const collectPausedByFreeze = (batch: Array<Animation>) => {
 		for (const animation of batch) {
-			if (!pausedExitAnimations.includes(animation)) pausedExitAnimations.push(animation);
+			if (!pausedByFreeze.includes(animation)) pausedByFreeze.push(animation);
 		}
 	};
-	collectPausedExitAnimations(finishInFlightMotion());
+	collectPausedByFreeze(finishInFlightMotion());
+	// Lock before reduced-motion: recipes' `transition: none` would cancel paused CSS exits.
+	const exitStyleLocks = lockExitingCssTransitions();
 
 	const previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
 	await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
@@ -105,19 +177,28 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 	/* Pin decoration colour so a cancelled text-decoration-color transition cannot hide underlines. */
 	text-decoration-color: currentColor !important;
 }
-[data-entering], [data-exiting] {
+/* Keep paused [data-exiting] CSSTransitions alive for React Aria's exit wait. */
+[data-exiting], [data-exiting] *, [data-exiting]::before, [data-exiting]::after {
+	animation-delay: unset !important;
+	animation-duration: unset !important;
+	transition-delay: unset !important;
+	transition-duration: unset !important;
+}
+/* Pin entering overlays only. Pinning exiting opacity/translate cancels paused CSS exits. */
+[data-entering] {
 	opacity: 1 !important;
 	translate: none !important;
 }
 `;
 	document.head.append(freezeMotion);
 	await waitAnimationFrames();
-	collectPausedExitAnimations(finishInFlightMotion());
+	collectPausedByFreeze(finishInFlightMotion());
 
 	return async () => {
 		freezeMotion.remove();
 		await setEmulatedMediaFeature('prefers-reduced-motion', previousReducedMotion);
-		for (const animation of pausedExitAnimations) {
+		clearExitStyleLocks(exitStyleLocks);
+		for (const animation of pausedByFreeze) {
 			try {
 				if (animation.playState === 'paused') animation.play();
 			} catch {
