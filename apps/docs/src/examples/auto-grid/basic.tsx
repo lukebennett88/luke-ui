@@ -10,7 +10,7 @@ const itemStyle = {
 
 export default () => {
 	return (
-		<AutoGrid gap="sp12" minColumnInlineSize="12rem">
+		<AutoGrid gap="sp12" inlineSize="100%" minColumnInlineSize="12rem">
 			<span style={itemStyle}>First grid item</span>
 			<span style={itemStyle}>Second grid item</span>
 			<span style={itemStyle}>Third grid item</span>
