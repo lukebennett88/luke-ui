@@ -17,6 +17,7 @@ export function resolveResponsiveCssProperty(
 	value: RequiredInitialResponsiveValue<string | number>,
 	property: ResponsiveCssProperty,
 	options: {
+		expectedValueDescription?: string;
 		format?: (value: string | number) => string;
 		isValid?: (value: string | number) => boolean;
 		propName: string;
@@ -34,6 +35,7 @@ export function resolveResponsiveCssProperty(
 			property,
 			format,
 			isValid,
+			options.expectedValueDescription,
 			options.propName,
 			styleVars,
 			classNames,
@@ -47,6 +49,7 @@ export function resolveResponsiveCssProperty(
 				property,
 				format,
 				isValid,
+				options.expectedValueDescription,
 				options.propName,
 				styleVars,
 				classNames,
@@ -70,6 +73,7 @@ function assignCondition(
 	property: ResponsiveCssProperty,
 	format: (value: string | number) => string,
 	isValid: (value: string | number) => boolean,
+	expectedValueDescription: string | undefined,
 	propName: string,
 	styleVars: Record<string, string>,
 	classNames: Array<string>,
@@ -77,7 +81,7 @@ function assignCondition(
 	if (!isValid(conditionValue)) {
 		// oxlint-disable-next-line no-console -- match Rainbow Sprinkles invalid-value reporting
 		console.error(
-			`Invalid value provided to '${propName}'. Expected a valid value. Received: ${JSON.stringify(conditionValue)}.`,
+			`Invalid value provided to '${propName}'. Expected ${expectedValueDescription ?? 'a valid value'}. Received: ${JSON.stringify(conditionValue)}.`,
 		);
 		return;
 	}

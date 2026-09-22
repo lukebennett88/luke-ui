@@ -154,24 +154,26 @@ test('resolves responsive values against nested size containers', async () => {
 	);
 });
 
-test('contains long unbreakable content inside auto-fit tracks', () => {
+test('does not let long unbreakable content expand auto-fit tracks', () => {
 	const { locator } = render(
 		<div data-testid="parent" style={{ inlineSize: '24rem' }}>
 			<AutoGrid data-testid="grid" gap="sp8" minColumnInlineSize="10rem">
 				<span data-testid="long">
 					supercalifragilisticexpialidocioussupercalifragilisticexpialidocious
 				</span>
-				<span>Short</span>
+				<span data-testid="short">Short</span>
 			</AutoGrid>
 		</div>,
 	);
 	const parent = locator.getByTestId('parent').element();
 	const grid = locator.getByTestId('grid').element();
 	const long = locator.getByTestId('long').element();
+	const short = locator.getByTestId('short').element();
 	if (
 		!(parent instanceof HTMLElement) ||
 		!(grid instanceof HTMLElement) ||
-		!(long instanceof HTMLElement)
+		!(long instanceof HTMLElement) ||
+		!(short instanceof HTMLElement)
 	) {
 		throw new Error('Expected AutoGrid elements.');
 	}
@@ -179,9 +181,7 @@ test('contains long unbreakable content inside auto-fit tracks', () => {
 	expect(grid.getBoundingClientRect().width).toBeLessThanOrEqual(
 		parent.getBoundingClientRect().width + 1,
 	);
-	expect(long.getBoundingClientRect().right).toBeLessThanOrEqual(
-		grid.getBoundingClientRect().right + 1,
-	);
+	expect(long.getBoundingClientRect().width).toBeCloseTo(short.getBoundingClientRect().width, 1);
 });
 
 test('keeps the inline axis under RTL and vertical writing mode', () => {

@@ -188,7 +188,7 @@ test('keeps the inline axis under RTL and vertical writing mode', () => {
 	);
 });
 
-test('contains long unbreakable content inside equal tracks', () => {
+test('does not let long unbreakable content expand equal grid tracks', () => {
 	const { locator } = render(
 		<Grid columns={2} data-testid="grid" gap="sp8" inlineSize="20rem">
 			<span data-testid="long">
@@ -197,15 +197,13 @@ test('contains long unbreakable content inside equal tracks', () => {
 			<span data-testid="short">Short</span>
 		</Grid>,
 	);
-	const grid = locator.getByTestId('grid').element();
 	const long = locator.getByTestId('long').element();
-	if (!(grid instanceof HTMLElement) || !(long instanceof HTMLElement)) {
+	const short = locator.getByTestId('short').element();
+	if (!(long instanceof HTMLElement) || !(short instanceof HTMLElement)) {
 		throw new Error('Expected Grid elements.');
 	}
 
-	expect(long.getBoundingClientRect().right).toBeLessThanOrEqual(
-		grid.getBoundingClientRect().right + 1,
-	);
+	expect(long.getBoundingClientRect().width).toBeCloseTo(short.getBoundingClientRect().width, 1);
 });
 
 test('applies root layout props and ignores unsupported Box utilities from an object spread', () => {

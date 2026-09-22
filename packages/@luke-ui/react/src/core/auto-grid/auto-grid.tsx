@@ -28,7 +28,8 @@ export function AutoGrid({
 		minColumnInlineSize,
 		autoGridMinColumnInlineSizeProperty,
 		{
-			isValid: isCssLength,
+			expectedValueDescription: 'a non-empty string',
+			isValid: isNonEmptyString,
 			propName: 'minColumnInlineSize',
 		},
 	);
@@ -52,9 +53,9 @@ export function AutoGrid({
 
 interface _AutoGridLayoutProps {
 	/**
-	 * Minimum inline size of each auto-fit column.
+	 * String used for the minimum inline size of each auto-fit column.
 	 *
-	 * Accepts a CSS length, or a responsive object with a required `initial` value. Columns use
+	 * Pass a non-empty string, or a responsive object with a required `initial` value. Columns use
 	 * `min(value, 100%)` so a narrow parent cannot overflow.
 	 */
 	minColumnInlineSize: RequiredInitialResponsiveValue<string>;
@@ -66,6 +67,6 @@ interface _AutoGridElementProps extends BoxLikeElementProps, LayoutProps, _AutoG
 
 interface _AutoGridRenderProps extends BoxLikeRenderProps, LayoutProps, _AutoGridLayoutProps {}
 
-function isCssLength(value: string | number): value is string {
+function isNonEmptyString(value: string | number): value is string {
 	return typeof value === 'string' && value.trim().length > 0;
 }
