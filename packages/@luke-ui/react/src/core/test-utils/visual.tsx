@@ -105,7 +105,7 @@ function lockExitingCssTransitions(root: Document | Element = document): Array<E
 
 		for (const animation of animations) {
 			const effect = animation.effect;
-			if (!effect || !('getKeyframes' in effect)) continue;
+			if (!(effect instanceof KeyframeEffect)) continue;
 			const end = effect.getKeyframes().at(-1);
 			if (!end) continue;
 			for (const [property, value] of Object.entries(end)) {
