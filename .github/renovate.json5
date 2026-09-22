@@ -116,6 +116,7 @@
 		// `24.19.0`, and it landed in the non-major group rather than a Node one.
 		{
 			matchManagers: ['mise'],
+			matchDepNames: ['node'],
 			groupName: 'node',
 			rangeStrategy: 'replace',
 			automerge: false,
