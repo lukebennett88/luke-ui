@@ -83,8 +83,8 @@ an exclude list entry before they will install, which no amount of green CI will
 `mise.toml` pins the Node major. Renovate's `mise` manager tracks it and its node versioning treats
 odd majors as unstable, so it will only propose the next LTS line.
 
-The four workflows in `.github/workflows` pin actions at the major tag, so the only update Renovate
-can offer is a major tag move. They group into one `github actions` pull request and are never
+The workflows in `.github/workflows` pin actions at the major tag, so the only update Renovate can
+offer is a major tag move. They group into one `github actions` pull request and are never
 automerged.
 
 The `packageManager` field in the root `package.json` pins pnpm. Renovate updates it, including the
