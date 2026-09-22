@@ -1,4 +1,13 @@
+import type { ResponsiveCondition } from './responsive-conditions.js';
+
 type ResponsiveObject<Value> = Extract<NonNullable<Value>, object>;
+
+/** A direct value, or a responsive object keyed by breakpoint. */
+type ResponsivePropValue<Value> =
+	| Value
+	| {
+			[Condition in ResponsiveCondition]?: Value | null;
+	  };
 
 /** A responsive value whose initial condition is required. */
 export type RequiredInitialResponsive<Value> =
@@ -8,6 +17,14 @@ export type RequiredInitialResponsive<Value> =
 				ResponsiveObject<Value> extends { initial?: infer Initial } ? Initial : never
 			>;
 	  });
+
+/**
+ * A required responsive prop for a scalar value. Prefer this over
+ * `RequiredInitialResponsive<Scalar>` when the scalar is not already a Sprinkles responsive union.
+ */
+export type RequiredInitialResponsiveValue<Value> = RequiredInitialResponsive<
+	ResponsivePropValue<Value>
+>;
 
 /** Adds a component default for the initial condition of a responsive value. */
 export function withResponsiveDefault<Value>(
@@ -20,4 +37,9 @@ export function withResponsiveDefault<Value>(
 		return { ...value, initial: value.initial ?? defaultValue };
 	}
 	return { ...value, initial: defaultValue };
+}
+
+/** True when `value` is an integer greater than zero. */
+export function isPositiveInteger(value: unknown): value is number {
+	return typeof value === 'number' && Number.isInteger(value) && value > 0;
 }

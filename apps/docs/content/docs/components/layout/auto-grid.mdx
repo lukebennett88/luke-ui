@@ -1,0 +1,43 @@
+---
+title: AutoGrid
+description: Arrange direct children in an intrinsic equal-column grid.
+source: packages/@luke-ui/react/src/exports/auto-grid.ts
+---
+
+`AutoGrid` lays out direct children in equal columns that grow from a minimum inline size. Use it
+when the column count should follow the available space. Read
+[Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
+
+AutoGrid owns column sizing and placement. Keep direct children auto-placed and single-track.
+
+If a child needs to span tracks or use explicit grid placement, use [Grid](/components/layout/grid)
+instead.
+
+<ExampleBlock src="auto-grid/basic" title="AutoGrid — Basic" />
+
+## Minimum column size
+
+Each column uses `min(minColumnInlineSize, 100%)`, so a parent narrower than the requested minimum
+does not force the grid tracks to overflow.
+
+<ExampleBlock src="auto-grid/minimum-column-size" title="AutoGrid — Minimum column size" />
+
+## Responsive minimum column size
+
+`minColumnInlineSize` accepts a responsive object with a required `initial` value.
+
+<ExampleBlock src="auto-grid/responsive" title="AutoGrid — Responsive minimum column size" />
+
+## Choose the rendered element
+
+AutoGrid uses
+[Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
+
+<ExampleBlock src="auto-grid/semantic-element" title="AutoGrid — List" />
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/auto-grid/auto-grid.tsx"
+	name="AutoGridProps"
+/>

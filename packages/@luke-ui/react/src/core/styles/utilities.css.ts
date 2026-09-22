@@ -1,25 +1,12 @@
 import { defineProperties, defineSprinkles } from '@luke-ui/rainbow-sprinkles';
 import type { Properties as CSSProperties } from 'csstype';
 import { typedEntries } from '../../shared/utils/utils.js';
-import { breakpoints } from '../../theme/breakpoints.js';
 import { vars } from '../../theme/contract.css.js';
 import type { SpaceStep } from '../../theme/contract.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { Prettify } from '../types/prettify.js';
 import { layers } from './layers.css.js';
-
-function fromBreakpoint(minimumInlineSize: number) {
-	return { '@container': `(inline-size >= ${minimumInlineSize}px)` };
-}
-
-const responsiveConditions = {
-	initial: {},
-	bp640: fromBreakpoint(breakpoints.bp640),
-	bp768: fromBreakpoint(breakpoints.bp768),
-	bp1024: fromBreakpoint(breakpoints.bp1024),
-	bp1280: fromBreakpoint(breakpoints.bp1280),
-	bp1536: fromBreakpoint(breakpoints.bp1536),
-} as const;
+import { responsiveConditions } from './responsive-conditions.js';
 
 /** Space steps plus `0`. `'0'` is quoted so declaration emit keeps it a string key. */
 const spaceScale = {

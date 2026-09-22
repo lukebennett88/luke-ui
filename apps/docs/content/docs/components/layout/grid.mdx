@@ -1,0 +1,40 @@
+---
+title: Grid
+description: Arrange direct children in an equal explicit column grid.
+source: packages/@luke-ui/react/src/exports/grid.ts
+---
+
+`Grid` lays out direct children in a fixed number of equal columns. Use it when you know how many
+columns the layout should have. Read [Layout](/docs/layout#choose-a-layout-component) to choose a
+layout component.
+
+Prefer [AutoGrid](/components/layout/auto-grid) when columns should grow from a minimum inline size
+instead of an explicit count.
+
+<ExampleBlock src="grid/basic" title="Grid — Basic" />
+
+## Spanning columns
+
+Child placement belongs to the child. Use Box grid-placement props such as `gridColumn` when an item
+should span more than one track. `Grid` itself does not expose a span API.
+
+<ExampleBlock src="grid/spanning" title="Grid — Spanning columns" />
+
+## Responsive columns and spans
+
+`columns` accepts a responsive object with a required `initial` value. Child spans must fit the
+active explicit column count at every responsive condition. A span that is valid at `bp768` can
+overflow the `initial` column count if those values are not kept in sync.
+
+<ExampleBlock src="grid/responsive" title="Grid — Responsive columns and spans" />
+
+## Choose the rendered element
+
+Grid uses
+[Box's `elementType` and `render` contract](/components/layout/box#choose-the-rendered-element).
+
+<ExampleBlock src="grid/semantic-element" title="Grid — List" />
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/grid/grid.tsx" name="GridProps" />
