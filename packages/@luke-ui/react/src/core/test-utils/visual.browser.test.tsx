@@ -1,6 +1,7 @@
 import { expect, test } from 'vite-plus/test';
+import { cdp } from 'vite-plus/test/context';
 import { emulateColorScheme, emulateForcedColors, emulateReducedMotion } from './emulate-media.js';
-import { freezeMotionForCapture } from './visual.js';
+import { freezeMotionForCapture, parkPointer, parkedPointerCoordinates } from './visual.js';
 
 // Cancelling a mid-flight `text-decoration-color` transition with `transition: none` used to leave
 // the underline invisible at capture time (link/kitchen-sink-tactile-light flake). Finish first.
@@ -30,6 +31,54 @@ test('freezing motion finishes an in-flight text-decoration-color transition', a
 		await restore();
 		link.remove();
 	}
+});
+
+test('restoring capture freeze resumes paused exit animations', async () => {
+	const overlay = document.body.appendChild(document.createElement('div'));
+	overlay.setAttribute('data-exiting', '');
+	const animation = overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
+		duration: 5000,
+		fill: 'forwards',
+	});
+	await expect.poll(() => animation.playState).toBe('running');
+
+	const restore = await freezeMotionForCapture();
+	expect(animation.playState).toBe('paused');
+
+	await restore();
+	await expect.poll(() => animation.playState).not.toBe('paused');
+
+	animation.cancel();
+	overlay.remove();
+});
+
+test('pointer parking clears hover on an element at the viewport origin', async () => {
+	const target = document.body.appendChild(document.createElement('div'));
+	target.style.background = 'rgb(200, 0, 0)';
+	target.style.height = '40px';
+	target.style.left = '0';
+	target.style.position = 'fixed';
+	target.style.top = '0';
+	target.style.width = '40px';
+
+	await cdp().send('Input.dispatchMouseEvent', {
+		button: 'none',
+		buttons: 0,
+		modifiers: 0,
+		type: 'mouseMoved',
+		x: 0,
+		y: 0,
+	});
+	await expect.poll(() => target.matches(':hover')).toBe(true);
+
+	const { x, y } = parkedPointerCoordinates();
+	expect(x).toBeLessThan(0);
+	expect(y).toBeLessThan(0);
+
+	await parkPointer();
+	expect(target.matches(':hover')).toBe(false);
+
+	target.remove();
 });
 
 test('freezing motion pins text-decoration-color to currentColor', async () => {

@@ -12,15 +12,21 @@ const VISUAL_CAPTURE_ID_PATTERN = /^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const VISUAL_VIEWPORT_WIDTH = 1024;
 const VISUAL_VIEWPORT_HEIGHT = 800;
 
-/** Park the pointer off the scene so a prior test's cursor cannot leave `:hover` / `data-hovered`. */
-async function parkPointer() {
+/** Coordinates outside the viewport so `:hover` / React Aria `data-hovered` cannot stick. */
+export function parkedPointerCoordinates() {
+	return { x: -50, y: -50 };
+}
+
+/** Park the pointer outside the viewport so a prior test's cursor cannot leave hover state. */
+export async function parkPointer() {
+	const { x, y } = parkedPointerCoordinates();
 	await cdp().send('Input.dispatchMouseEvent', {
 		button: 'none',
 		buttons: 0,
 		modifiers: 0,
 		type: 'mouseMoved',
-		x: 0,
-		y: 0,
+		x,
+		y,
 	});
 }
 
@@ -34,8 +40,9 @@ async function parkPointer() {
  * Exit animations are paused instead of finished so finishing them cannot unmount an
  * overlay before the screenshot.
  */
-function finishInFlightMotion(root: Document | Element = document) {
-	if (typeof root.getAnimations !== 'function') return;
+function finishInFlightMotion(root: Document | Element = document): Array<Animation> {
+	const pausedExitAnimations: Array<Animation> = [];
+	if (typeof root.getAnimations !== 'function') return pausedExitAnimations;
 
 	for (const animation of root.getAnimations({ subtree: true })) {
 		const effect = animation.effect;
@@ -43,6 +50,7 @@ function finishInFlightMotion(root: Document | Element = document) {
 		if (target instanceof Element && target.closest('[data-exiting]')) {
 			try {
 				animation.pause();
+				pausedExitAnimations.push(animation);
 			} catch {
 				// Ignore animations that cannot be paused.
 			}
@@ -54,6 +62,7 @@ function finishInFlightMotion(root: Document | Element = document) {
 			// Already finished or not finishable (e.g. infinite iterations).
 		}
 	}
+	return pausedExitAnimations;
 }
 
 function waitAnimationFrames(frames = 2): Promise<void> {
@@ -69,21 +78,18 @@ function waitAnimationFrames(frames = 2): Promise<void> {
 	});
 }
 
-function locatorForCapturedElement(element: Element): Locator {
-	// Re-bind body/html immediately before screenshot. `elementLocator` keys off text content,
-	// so a snapshot taken before freeze goes stale when live regions or portals update.
-	if (element === document.body || element === document.documentElement) {
-		return page.elementLocator(element);
-	}
-	return page.elementLocator(element);
-}
-
 // Reduced motion prevents entering overlays from capturing at opacity 0.
 export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 	// Mount-time transitions (Link underline colour, control chrome) often start a frame after
 	// paint. Wait, finish them, then freeze so reduced-motion cannot cancel mid-flight.
 	await waitAnimationFrames();
-	finishInFlightMotion();
+	const pausedExitAnimations: Array<Animation> = [];
+	const collectPausedExitAnimations = (batch: Array<Animation>) => {
+		for (const animation of batch) {
+			if (!pausedExitAnimations.includes(animation)) pausedExitAnimations.push(animation);
+		}
+	};
+	collectPausedExitAnimations(finishInFlightMotion());
 
 	const previousReducedMotion = peekEmulatedMediaFeatures()['prefers-reduced-motion'];
 	await setEmulatedMediaFeature('prefers-reduced-motion', 'reduce');
@@ -106,11 +112,18 @@ export async function freezeMotionForCapture(): Promise<() => Promise<void>> {
 `;
 	document.head.append(freezeMotion);
 	await waitAnimationFrames();
-	finishInFlightMotion();
+	collectPausedExitAnimations(finishInFlightMotion());
 
 	return async () => {
 		freezeMotion.remove();
 		await setEmulatedMediaFeature('prefers-reduced-motion', previousReducedMotion);
+		for (const animation of pausedExitAnimations) {
+			try {
+				if (animation.playState === 'paused') animation.play();
+			} catch {
+				// Animation may have finished or been removed while frozen.
+			}
+		}
 	};
 }
 
@@ -155,10 +168,10 @@ export async function captureVisual(locator: Locator, id: string) {
 			await page.viewport(viewportWidth, fullHeight);
 		}
 
-		// Re-bind body/html after freeze so live-region text changes cannot invalidate the locator.
-		const screenshotLocator = locatorForCapturedElement(element);
+		// Re-bind from the resolved element after freeze. Body captures use text-derived locators
+		// that live regions can invalidate while motion is frozen.
 		await expect
-			.element(screenshotLocator)
+			.element(page.elementLocator(element))
 			.toMatchScreenshot(formatVisualCaptureName(id, viewport));
 	} finally {
 		if (isTall) {
@@ -172,7 +185,7 @@ export async function captureVisual(locator: Locator, id: string) {
 		) {
 			await page.viewport(originalViewportWidth, originalViewportHeight);
 		}
-		// Leave the cursor at the origin so the next capture does not inherit an accidental hover
+		// Park outside the viewport so the next capture does not inherit an accidental hover
 		// (text Links invert underline under `:hover` / `data-hovered`).
 		await parkPointer();
 	}

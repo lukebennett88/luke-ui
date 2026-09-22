@@ -39,8 +39,8 @@ than finished so finishing them cannot unmount an open overlay before the screen
 
 `captureVisual` skips no-op viewport resizes (React Aria closes popovers on document scroll),
 re-binds body/html locators immediately before the screenshot so live-region text changes cannot
-invalidate the locator, and parks the pointer at the origin after each capture. Browser tests also
-park the pointer in `afterEach` so a leftover cursor cannot leave text Links hovered (standard
+invalidate the locator, and parks the pointer outside the viewport after each capture. Browser tests
+also park the pointer in `afterEach` so a leftover cursor cannot leave text Links hovered (standard
 prominence removes the underline under hover).
 
 ## Tall scenes
