@@ -2,7 +2,7 @@ import { AutoGrid } from '@luke-ui/react/auto-grid';
 import { Container } from '@luke-ui/react/container';
 import { vars } from '@luke-ui/react/theme';
 import { createRef } from 'react';
-import { afterEach, expect, test } from 'vite-plus/test';
+import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
 import {
 	expectForwardsDomProps,
@@ -26,6 +26,64 @@ test('AutoGrid forwards className, data attributes, id, and ref to its element',
 
 afterEach(async () => {
 	await page.viewport(1024, 800);
+});
+
+test('rejects an empty or whitespace-only minColumnInlineSize and skips auto-fit sizing', () => {
+	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+	const { locator: emptyLocator } = render(
+		<div style={{ inlineSize: '40rem' }}>
+			<AutoGrid data-testid="grid-empty" gap="sp8" minColumnInlineSize="">
+				<span style={{ blockSize: '1rem' }}>First</span>
+				<span style={{ blockSize: '1rem' }}>Second</span>
+				<span style={{ blockSize: '1rem' }}>Third</span>
+			</AutoGrid>
+		</div>,
+	);
+	const { locator: whitespaceLocator } = render(
+		<div style={{ inlineSize: '40rem' }}>
+			<AutoGrid data-testid="grid-whitespace" gap="sp8" minColumnInlineSize={{ initial: '   ' }}>
+				<span style={{ blockSize: '1rem' }}>First</span>
+				<span style={{ blockSize: '1rem' }}>Second</span>
+				<span style={{ blockSize: '1rem' }}>Third</span>
+			</AutoGrid>
+		</div>,
+	);
+	const emptyElement = emptyLocator.getByTestId('grid-empty').element();
+	const whitespaceElement = whitespaceLocator.getByTestId('grid-whitespace').element();
+	if (!(emptyElement instanceof HTMLElement) || !(whitespaceElement instanceof HTMLElement)) {
+		throw new Error('Expected AutoGrid elements.');
+	}
+	const [emptyFirst, emptySecond] = emptyElement.children;
+	const [whitespaceFirst, whitespaceSecond] = whitespaceElement.children;
+	if (
+		!(emptyFirst instanceof HTMLElement) ||
+		!(emptySecond instanceof HTMLElement) ||
+		!(whitespaceFirst instanceof HTMLElement) ||
+		!(whitespaceSecond instanceof HTMLElement)
+	) {
+		throw new Error('Expected AutoGrid children.');
+	}
+
+	// The recipe's base `display: grid` still applies, but a rejected value never assigns the
+	// responsive `grid-template-columns`, so the grid keeps its implicit single full-width track
+	// and children stack instead of sharing a row, unlike the auto-fit tracks a valid value produces.
+	expect(getComputedStyle(emptyElement).display).toBe('grid');
+	expect(emptySecond.getBoundingClientRect().top).toBeGreaterThan(
+		emptyFirst.getBoundingClientRect().top,
+	);
+	expect(getComputedStyle(whitespaceElement).display).toBe('grid');
+	expect(whitespaceSecond.getBoundingClientRect().top).toBeGreaterThan(
+		whitespaceFirst.getBoundingClientRect().top,
+	);
+
+	expect(consoleError).toHaveBeenCalledTimes(2);
+	for (const call of consoleError.mock.calls) {
+		expect(call[0]).toMatch(/minColumnInlineSize/);
+		expect(call[0]).toMatch(/non-empty string/);
+	}
+
+	consoleError.mockRestore();
 });
 
 test('chooses a column count from the available inline size', () => {

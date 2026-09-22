@@ -53,9 +53,9 @@ export function AutoGrid({
 
 interface _AutoGridLayoutProps {
 	/**
-	 * String used for the minimum inline size of each auto-fit column.
+	 * Minimum inline size of each auto-fit column.
 	 *
-	 * Pass a non-empty string, or a responsive object with a required `initial` value. Columns use
+	 * Pass a CSS length, or a responsive object with a required `initial` value. Columns use
 	 * `min(value, 100%)` so a narrow parent cannot overflow.
 	 */
 	minColumnInlineSize: RequiredInitialResponsiveValue<string>;
