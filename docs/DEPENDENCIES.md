@@ -18,9 +18,12 @@ Two entries are not plain versions:
 
 ## The release quarantine
 
-`minimumReleaseAge: 4320` (3 days) stops pnpm resolving any release, direct or transitive, that is
-younger than five days. `.github/renovate.json5` sets the same `minimumReleaseAge: '3 days'` so
-Renovate never opens a pull request for a release pnpm will refuse to install.
+`minimumReleaseAge: 4320` is exactly three days. It stops pnpm resolving any release, direct or
+transitive, that is younger than three days. `.github/renovate.json5` sets
+`minimumReleaseAge: '5 days'`, so Renovate waits two days longer before opening a pull request.
+
+The Renovate comment still says pnpm uses 7200 minutes (five days). No configuration comment
+explains the different values.
 
 The two settings do not cover the same ground. Renovate's applies to the dependency it is updating.
 pnpm's applies to everything the update pulls in. A bump to a five-day-old release can still drag in
