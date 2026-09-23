@@ -127,6 +127,7 @@ export const spaceScale = [
 	['sp40', '40px'],
 	['sp48', '48px'],
 	['sp64', '64px'],
+	['sp96', '96px'],
 ] as const;
 
 /** A spacing step key accepted by the layout APIs. */
