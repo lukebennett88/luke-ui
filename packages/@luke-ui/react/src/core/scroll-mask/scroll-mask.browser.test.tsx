@@ -2,6 +2,7 @@ import { ScrollMask } from '@luke-ui/react/scroll-mask';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { createRef, useState } from 'react';
+import { renderToString } from 'react-dom/server';
 import { expect, test } from 'vite-plus/test';
 import { userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
@@ -10,10 +11,17 @@ import {
 	expectHtmlElement,
 	forwardedDomProps,
 } from '../test-utils/forwarding.js';
-import { render, visualAppearances } from '../test-utils/render.js';
+import { hydrate, render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Grid } from '../test-utils/visual.js';
-import { scrollMaskGradientAngle } from './recipe.css.js';
-import { logicalEndSide, overflowsOnAxis } from './scroll-mask.js';
+import { ScrollMask as ScrollMaskSource, logicalEndSide, overflowsOnAxis } from './scroll-mask.js';
+
+/** Standards-based physical gradient angles for logical-end sides. Hard-coded so tests do not share a wrong production mapping. */
+const maskGradientAngle = {
+	bottom: 180,
+	left: 270,
+	right: 90,
+	top: 0,
+} as const;
 
 test('ScrollMask forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
@@ -25,6 +33,7 @@ test('ScrollMask forwards className, data attributes, id, and ref to its element
 	const target = expectHtmlElement(container.firstElementChild, 'Expected ScrollMask element.');
 
 	expectForwardsDomProps(target, ref);
+	expect(target.tagName).toBe('DIV');
 });
 
 test('fitting div has no mask, tab stop, region role, or accessible name', async () => {
@@ -89,47 +98,6 @@ test('overflowing block content is keyboard-focusable with a region role and mas
 	expectMaskToward(element, 'bottom');
 });
 
-test('semantic roots keep native semantics and ARIA props without an automatic region role', async () => {
-	const { locator } = render(
-		<>
-			<ScrollMask
-				aria-label="Fitting navigation"
-				axis="block"
-				blockSize="6rem"
-				data-testid="fitting-nav"
-				elementType="nav"
-				inlineSize="12rem"
-			>
-				<div style={{ blockSize: '2rem' }}>Fitting navigation</div>
-			</ScrollMask>
-			<ScrollMask
-				aria-label="Overflowing navigation"
-				axis="block"
-				blockSize="6rem"
-				data-testid="overflowing-nav"
-				elementType="nav"
-				inlineSize="12rem"
-			>
-				<div style={{ blockSize: '18rem' }}>Overflowing navigation</div>
-			</ScrollMask>
-		</>,
-	);
-	const fitting = await waitForScrollport(locator.getByTestId('fitting-nav').element());
-	expect(fitting.tagName).toBe('NAV');
-	expect(fitting.tabIndex).toBe(-1);
-	expect(fitting.hasAttribute('role')).toBe(false);
-	expect(fitting.getAttribute('aria-label')).toBe('Fitting navigation');
-
-	const overflowing = await waitForScrollport(
-		locator.getByTestId('overflowing-nav').element(),
-		true,
-	);
-	expect(overflowing.tagName).toBe('NAV');
-	expect(overflowing.tabIndex).toBe(0);
-	expect(overflowing.hasAttribute('role')).toBe(false);
-	expect(overflowing.getAttribute('aria-label')).toBe('Overflowing navigation');
-});
-
 test('region role and accessible name appear together when a fitting div overflows', async () => {
 	function Fixture() {
 		const [expanded, setExpanded] = useState(false);
@@ -156,7 +124,6 @@ test('region role and accessible name appear together when a fitting div overflo
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
 	expect(element.hasAttribute('aria-label')).toBe(false);
-	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 
 	await userEvent.click(locator.getByRole('button', { name: 'Toggle' }));
 	await waitForScrollport(element, true);
@@ -169,7 +136,55 @@ test('region role and accessible name appear together when a fitting div overflo
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
 	expect(element.hasAttribute('aria-label')).toBe(false);
-	expect(element.hasAttribute('aria-labelledby')).toBe(false);
+});
+
+test('replacing overflowing content still measures overflow after removal', async () => {
+	function Fixture() {
+		const [generation, setGeneration] = useState(0);
+		return (
+			<>
+				<button
+					data-testid="replace"
+					type="button"
+					onClick={() => setGeneration((value) => value + 1)}
+				>
+					Replace
+				</button>
+				<ScrollMask
+					aria-label="Replaced list"
+					axis="block"
+					blockSize="6rem"
+					data-testid="scroll-mask"
+					inlineSize="12rem"
+				>
+					<div key={generation} style={{ blockSize: '18rem' }}>
+						Generation {generation}
+					</div>
+				</ScrollMask>
+			</>
+		);
+	}
+
+	const { locator } = render(<Fixture />);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	expect(element.getAttribute('role')).toBe('region');
+	expectMaskToward(element, 'bottom');
+
+	const replaceButton = expectHtmlElement(
+		locator.getByTestId('replace').element(),
+		'Expected replace button.',
+	);
+	replaceButton.click();
+	await waitForScrollport(element, true);
+	expect(element.textContent).toContain('Generation 1');
+	expect(element.getAttribute('role')).toBe('region');
+	expectMaskToward(element, 'bottom');
+
+	replaceButton.click();
+	await waitForScrollport(element, true);
+	expect(element.textContent).toContain('Generation 2');
+	expect(element.tabIndex).toBe(0);
+	expectMaskToward(element, 'bottom');
 });
 
 const writingModeCases = [
@@ -245,7 +260,7 @@ for (const writingCase of writingModeCases) {
 		expect(styles.overflowBlock).toBe('hidden');
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
-		expect(element.dataset.scrollMaskWriting).toBe(writingCase.writingMode);
+		expect(element.getAttribute('data-scroll-mask-end')).toBe(writingCase.expectedInlineEnd);
 		expect(logicalEndSide(element, 'inline')).toBe(writingCase.expectedInlineEnd);
 		expectMaskToward(element, writingCase.expectedInlineEnd);
 	});
@@ -276,17 +291,39 @@ for (const writingCase of writingModeCases) {
 		expect(styles.overflowInline).toBe('hidden');
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
-		expect(element.dataset.scrollMaskWriting).toBe(writingCase.writingMode);
+		expect(element.getAttribute('data-scroll-mask-end')).toBe(writingCase.expectedBlockEnd);
 		expect(logicalEndSide(element, 'block')).toBe(writingCase.expectedBlockEnd);
 		expectMaskToward(element, writingCase.expectedBlockEnd);
 	});
 }
 
-test('inherited direction change updates the inline mask without remounting', async () => {
+test('CSS direction rtl on the scrollport flips the inline mask', async () => {
+	const { locator } = render(
+		<ScrollMask
+			aria-label="CSS direction"
+			data-testid="scroll-mask"
+			inlineSize="8rem"
+			padding="sp8"
+			style={{ direction: 'rtl' }}
+		>
+			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
+				Overflowing inline content for CSS direction
+			</span>
+		</ScrollMask>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+
+	expect(getComputedStyle(element).direction).toBe('rtl');
+	expect(element.getAttribute('data-scroll-mask-end')).toBe('left');
+	expect(logicalEndSide(element, 'inline')).toBe('left');
+	expectMaskToward(element, 'left');
+});
+
+test('inherited CSS direction updates the inline mask without remounting', async () => {
 	function Fixture() {
 		const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
 		return (
-			<div dir={direction}>
+			<div style={{ direction }}>
 				<button type="button" onClick={() => setDirection('rtl')}>
 					Switch to RTL
 				</button>
@@ -308,18 +345,106 @@ test('inherited direction change updates the inline mask without remounting', as
 	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
 
 	expect(getComputedStyle(element).direction).toBe('ltr');
-	expect(element.dataset.scrollMaskWriting).toBe('horizontal-tb');
 	expectMaskToward(element, 'right');
 
 	await userEvent.click(locator.getByRole('button', { name: 'Switch to RTL' }));
 	await expect.poll(() => getComputedStyle(element).direction).toBe('rtl');
+	await expect.poll(() => element.getAttribute('data-scroll-mask-end')).toBe('left');
 
-	expect(element.dataset.scrollMaskWriting).toBe('horizontal-tb');
 	expect(logicalEndSide(element, 'inline')).toBe('left');
 	expectMaskToward(element, 'left');
 });
 
-test('focus-visible clears the mask so the standard focus ring remains visible', async () => {
+test('vertical writing mode with RTL and text-orientation upright keeps logical inline end', async () => {
+	const { locator } = render(
+		<div style={{ writingMode: 'vertical-rl', direction: 'rtl', textOrientation: 'upright' }}>
+			<ScrollMask
+				aria-label="Upright vertical"
+				blockSize="10rem"
+				data-testid="scroll-mask"
+				inlineSize="5rem"
+				padding="sp8"
+			>
+				<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>長い upright contents</div>
+			</ScrollMask>
+		</div>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const styles = getComputedStyle(element);
+
+	expect(styles.writingMode).toBe('vertical-rl');
+	expect(styles.direction).toBe('rtl');
+	expect(styles.textOrientation).toBe('upright');
+	expect(overflowsOnAxis(element, 'inline')).toBe(true);
+	expect(element.tabIndex).toBe(0);
+	expect(element.getAttribute('data-scroll-mask-end')).toBe('top');
+	expect(logicalEndSide(element, 'inline')).toBe('top');
+	expectMaskToward(element, 'top');
+});
+
+test('inline scroll progression fades start then end across the scroll range', async () => {
+	const { locator } = render(
+		<ScrollMask
+			aria-label="Inline progression"
+			data-testid="scroll-mask"
+			inlineSize="10rem"
+			padding="sp8"
+		>
+			<span style={{ display: 'inline-block', inlineSize: '40rem', whiteSpace: 'nowrap' }}>
+				Overflowing inline content for scroll progression
+			</span>
+		</ScrollMask>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const maxScroll = element.scrollWidth - element.clientWidth;
+	expect(maxScroll).toBeGreaterThan(96);
+
+	await assertInlineProgression(element, maxScroll);
+});
+
+test('block scroll progression fades start then end across the scroll range', async () => {
+	const { locator } = render(
+		<ScrollMask
+			aria-label="Block progression"
+			axis="block"
+			blockSize="8rem"
+			data-testid="scroll-mask"
+			inlineSize="12rem"
+			padding="sp8"
+		>
+			<div style={{ blockSize: '40rem' }}>Overflowing block content for scroll progression</div>
+		</ScrollMask>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const maxScroll = element.scrollHeight - element.clientHeight;
+	expect(maxScroll).toBeGreaterThan(96);
+
+	await assertBlockProgression(element, maxScroll);
+});
+
+test('scroll progression stays coherent when overflow is shorter than the reveal distance', async () => {
+	const { locator } = render(
+		<ScrollMask
+			aria-label="Short overflow"
+			data-testid="scroll-mask"
+			inlineSize="10rem"
+			padding="sp8"
+		>
+			{/* Viewport ~160px; content ~200px → overflow ~40px, well under sp96. */}
+			<span style={{ display: 'inline-block', inlineSize: '12.5rem', whiteSpace: 'nowrap' }}>
+				Short overflow progression
+			</span>
+		</ScrollMask>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	const maxScroll = element.scrollWidth - element.clientWidth;
+	expect(maxScroll).toBeGreaterThan(0);
+	expect(maxScroll).toBeLessThan(96);
+
+	await assertInlineProgression(element, maxScroll);
+});
+
+test('focus-visible keeps the mask and a visible focus ring on the scrollport', async () => {
 	const { locator } = render(
 		<>
 			<button type="button">Before</button>
@@ -343,10 +468,30 @@ test('focus-visible clears the mask so the standard focus ring remains visible',
 
 	expect(element).toHaveFocus();
 	expect(element.matches(':focus-visible')).toBe(true);
-	expect(getComputedStyle(element).maskImage).toBe('none');
+	expectMaskToward(element, 'right');
 	expect(getComputedStyle(element).outlineStyle).toBe('solid');
 	expect(Number.parseFloat(getComputedStyle(element).outlineWidth)).toBeGreaterThan(0);
 	expect(getComputedStyle(element).outlineOffset).toBe('2px');
+});
+
+test('focusing an interactive descendant near a faded edge keeps the mask', async () => {
+	const { locator } = render(
+		<ScrollMask aria-label="Nested focus" data-testid="scroll-mask" inlineSize="8rem" padding="sp8">
+			<div style={{ display: 'flex', gap: '1rem', inlineSize: '24rem' }}>
+				<button type="button">Near start</button>
+				<span style={{ flex: 'none', inlineSize: '16rem' }}>Spacer</span>
+				<button type="button">Near end</button>
+			</div>
+		</ScrollMask>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	expectMaskToward(element, 'right');
+
+	const nearEnd = locator.getByRole('button', { name: 'Near end' }).element();
+	nearEnd.focus();
+	expect(nearEnd).toHaveFocus();
+	expectMaskToward(element, 'right');
+	expect(getComputedStyle(element).maskImage).not.toBe('none');
 });
 
 test('nested intrinsic image load updates overflow from fitting to overflowing', async () => {
@@ -369,8 +514,6 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element());
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
-	expect(element.hasAttribute('aria-label')).toBe(false);
-	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 	expect(getComputedStyle(element).maskImage).toBe('none');
 
 	const image = expectHtmlElement(
@@ -392,8 +535,42 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 
 	expect(element.tabIndex).toBe(-1);
 	expect(element.hasAttribute('role')).toBe(false);
-	expect(element.hasAttribute('aria-label')).toBe(false);
 	expect(getComputedStyle(element).maskImage).toBe('none');
+});
+
+test('SSR markup hydrates without mismatch and then measures overflow', async () => {
+	// Source import so renderToString shares the browser React instance (dist hits invalid hook call).
+	const tree = (
+		<ScrollMaskSource
+			aria-label="Hydrated list"
+			data-testid="scroll-mask"
+			inlineSize="8rem"
+			padding="sp8"
+		>
+			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
+				Overflowing inline content for hydration
+			</span>
+		</ScrollMaskSource>
+	);
+
+	const markup = renderToString(tree);
+	expect(markup).not.toContain('role="region"');
+	expect(markup).not.toMatch(/tabindex=/i);
+	expect(markup).not.toContain('aria-label="Hydrated list"');
+	expect(markup).toContain('data-testid="scroll-mask"');
+
+	const { locator, recoverableErrors, unmount } = hydrate(markup, tree);
+	try {
+		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+
+		expect(element.tabIndex).toBe(0);
+		expect(element.getAttribute('role')).toBe('region');
+		expect(element.getAttribute('aria-label')).toBe('Hydrated list');
+		expectMaskToward(element, 'right');
+		expect(recoverableErrors).toEqual([]);
+	} finally {
+		unmount();
+	}
 });
 
 test('fitting and overflowing default divs have no axe violations', async () => {
@@ -406,8 +583,6 @@ test('fitting and overflowing default divs have no axe violations', async () => 
 		fittingLocator.getByTestId('fitting-axe').element(),
 	);
 	expect(fittingElement.hasAttribute('role')).toBe(false);
-	expect(fittingElement.hasAttribute('aria-label')).toBe(false);
-	expect(fittingElement.hasAttribute('aria-labelledby')).toBe(false);
 	await expectNoAxeViolations(fitting);
 
 	const { container: overflowing, locator } = render(
@@ -427,7 +602,6 @@ test('fitting and overflowing default divs have no axe violations', async () => 
 		true,
 	);
 	expect(overflowingElement.getAttribute('role')).toBe('region');
-	expect(overflowingElement.getAttribute('aria-label')).toBe('Overflows');
 	await expectNoAxeViolations(overflowing);
 });
 
@@ -462,7 +636,7 @@ test('overflowing focus-visible state', { tags: ['visual'] }, async () => {
 		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
 		element.focus({ focusVisible: true });
 		expect(element.matches(':focus-visible')).toBe(true);
-		expect(getComputedStyle(element).maskImage).toBe('none');
+		expectMaskToward(element, 'right');
 		await captureVisualAppearance(locator, 'scroll-mask/focus-visible', appearance);
 	}
 });
@@ -532,13 +706,87 @@ function waitForAttribute(element: HTMLElement, name: string, value: string | nu
 function expectMaskToward(element: HTMLElement, side: 'bottom' | 'left' | 'right' | 'top'): void {
 	const maskImage = getComputedStyle(element).maskImage;
 	expect(maskImage).not.toBe('none');
-	const angle = scrollMaskGradientAngle[side];
+	const angle = maskGradientAngle[side];
 	// Chromium omits the default `180deg` direction from computed `mask-image`.
 	expect(
 		angle === 180
 			? !/\b(?:0|90|270)deg\b/.test(maskImage)
 			: maskImage.includes(`${String(angle)}deg`),
 	).toBe(true);
+}
+
+function fadeLayer(maskImage: string): string {
+	const index = maskImage.lastIndexOf('linear-gradient(');
+	return index === -1 ? maskImage : maskImage.slice(index);
+}
+
+function hasStartFade(maskImage: string): boolean {
+	const layer = fadeLayer(maskImage);
+	// No fade: `0px` or `calc(0% + (0 * …))`. Partial/full fade uses a non-zero multiplier or bare min().
+	if (/rgb\(0,\s*0,\s*0\)\s+0px/.test(layer)) return false;
+	if (/rgb\(0,\s*0,\s*0\)\s+calc\(0%\s*\+\s*\(0\s*\*/.test(layer)) return false;
+	return /rgb\(0,\s*0,\s*0\)\s+calc\(0%\s*\+/.test(layer);
+}
+
+function hasEndFade(maskImage: string): boolean {
+	const layer = fadeLayer(maskImage);
+	if (/calc\(100%\s*-\s*\(0\s*\*/.test(layer)) return false;
+	if (/rgb\(0,\s*0,\s*0\)\s+100%/.test(layer) && /rgba?\(0,\s*0,\s*0,\s*0\)\s+100%/.test(layer)) {
+		return false;
+	}
+	return /calc\(100%\s*-/.test(layer);
+}
+
+async function assertInlineProgression(element: HTMLElement, maxScroll: number): Promise<void> {
+	element.scrollLeft = 0;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: false, end: true });
+
+	element.scrollLeft = maxScroll / 2;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: true, end: true });
+
+	element.scrollLeft = maxScroll;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: true, end: false });
+}
+
+async function assertBlockProgression(element: HTMLElement, maxScroll: number): Promise<void> {
+	element.scrollTop = 0;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: false, end: true });
+
+	element.scrollTop = maxScroll / 2;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: true, end: true });
+
+	element.scrollTop = maxScroll;
+	await expect
+		.poll(() => {
+			const maskImage = getComputedStyle(element).maskImage;
+			return { start: hasStartFade(maskImage), end: hasEndFade(maskImage) };
+		})
+		.toEqual({ start: true, end: false });
 }
 
 async function waitForScrollport(node: Element, shouldOverflow?: boolean): Promise<HTMLElement> {

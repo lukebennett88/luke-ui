@@ -11,6 +11,12 @@ const maskSize = `min(12%, ${vars.space.sp40})`;
 /** Scroll distance over which each edge fade eases in or out. */
 const revealDistance = vars.space.sp96;
 
+/**
+ * Extra mask coverage beyond the border box so the standard focus outline
+ * (`outline-width` 2px + `outline-offset` 2px) stays in an opaque gutter and is not faded.
+ */
+const focusRingGutter = '8px';
+
 const startFadeVar = createVar({
 	inherits: false,
 	initialValue: '0px',
@@ -33,7 +39,7 @@ const revealEndFade = keyframes({
 	to: { vars: { [endFadeVar]: '0px' } },
 });
 
-/** Physical gradient angles. Degrees stay unambiguous in Chromium's computed `mask-image`. */
+/** Physical gradient angles for logical-end sides. */
 const maskAngle = {
 	bottom: 180,
 	left: 270,
@@ -57,29 +63,23 @@ function overflowingMask(timeline: 'scroll(self inline)' | 'scroll(self block)')
 	};
 }
 
-function maskGradient(side: keyof typeof maskAngle): string {
-	return `linear-gradient(${String(maskAngle[side])}deg, transparent 0, #000 ${startFadeVar}, #000 calc(100% - ${endFadeVar}), transparent 100%)`;
-}
-
 /**
- * Writing-mode token on the scrollport. Direction is not stored here — `:dir(rtl)` flips inline
- * ends in CSS so inherited direction changes apply without JS.
- *
- * `:not(:focus-visible)` keeps Luke UI's standard outline unmasked while the scrollport is
- * keyboard-focused.
+ * Content fade plus an opaque outline gutter. Chromium masks `outline` with `mask-image`; extending
+ * an opaque frame beyond the border box keeps the standard focus ring visible without clearing the
+ * overflow fade.
  */
-function writingModeMasks(
-	rules: Record<string, { ltr: keyof typeof maskAngle; rtl?: keyof typeof maskAngle }>,
-): StyleRule['selectors'] {
-	const selectors: NonNullable<StyleRule['selectors']> = {};
-	for (const [writing, { ltr, rtl }] of Object.entries(rules)) {
-		const base = `&[data-scroll-mask-writing="${writing}"]:not(:focus-visible)`;
-		selectors[base] = { maskImage: maskGradient(ltr) };
-		if (rtl !== undefined) {
-			selectors[`${base}:dir(rtl)`] = { maskImage: maskGradient(rtl) };
-		}
-	}
-	return selectors;
+function maskLayers(side: keyof typeof maskAngle): StyleRule {
+	const fade = `linear-gradient(${String(maskAngle[side])}deg, transparent 0, #000 ${startFadeVar}, #000 calc(100% - ${endFadeVar}), transparent 100%)`;
+	return {
+		maskClip: 'no-clip',
+		maskComposite: 'exclude, subtract, add',
+		maskImage: `linear-gradient(#000, #000), linear-gradient(#000, #000), ${fade}`,
+		maskPosition: `-4px -4px, 0 0, 0 0`,
+		maskRepeat: 'no-repeat',
+		maskSize: `calc(100% + ${focusRingGutter}) calc(100% + ${focusRingGutter}), 100% 100%, 100% 100%`,
+		// WebKit uses a different composite vocabulary for the same layering.
+		WebkitMaskComposite: 'xor, source-out, source-over',
+	};
 }
 
 /** Recipe for ScrollMask layout. Overflow/mask state is not a public recipe variant. */
@@ -109,37 +109,37 @@ export const scrollMaskRecipe = recipe({
 /** Variant type for the public `ScrollMask` recipe. */
 export type ScrollMaskRecipeVariants = RecipeSelection<typeof scrollMaskRecipe>;
 
+/** Resting fade amounts before scroll timelines resolve (logical start of the scrollport). */
+const overflowingFadeVars = {
+	vars: {
+		[endFadeVar]: maskSize,
+		[startFadeVar]: '0px',
+	},
+} as const;
+
 /**
- * Private overflowing styles for `axis="inline"`. Physical mask ends follow writing mode; `:dir(rtl)`
- * reverses inline ends where direction flips them.
+ * Private overflowing styles. Physical mask end comes from `data-scroll-mask-end`, measured from the
+ * element's used writing mode and CSS `direction`.
  */
 export const scrollMaskOverflowingInline = style({
+	...overflowingFadeVars,
 	...overflowingMask('scroll(self inline)'),
-	selectors: writingModeMasks({
-		'horizontal-tb': { ltr: 'right', rtl: 'left' },
-		// Vertical scripts: LTR inline progresses top → bottom; RTL flips to top.
-		'vertical-rl': { ltr: 'bottom', rtl: 'top' },
-		'vertical-lr': { ltr: 'bottom', rtl: 'top' },
-		'sideways-rl': { ltr: 'bottom', rtl: 'top' },
-		// sideways-lr inverts inline progression relative to vertical-lr.
-		'sideways-lr': { ltr: 'top', rtl: 'bottom' },
-	}),
+	selectors: {
+		'&[data-scroll-mask-end="bottom"]': maskLayers('bottom'),
+		'&[data-scroll-mask-end="left"]': maskLayers('left'),
+		'&[data-scroll-mask-end="right"]': maskLayers('right'),
+		'&[data-scroll-mask-end="top"]': maskLayers('top'),
+	},
 });
 
-/**
- * Private overflowing styles for `axis="block"`. Block-end depends on writing mode only — direction
- * does not flip the block axis.
- */
+/** Private overflowing styles for `axis="block"`. */
 export const scrollMaskOverflowingBlock = style({
+	...overflowingFadeVars,
 	...overflowingMask('scroll(self block)'),
-	selectors: writingModeMasks({
-		'horizontal-tb': { ltr: 'bottom' },
-		'vertical-rl': { ltr: 'left' },
-		'vertical-lr': { ltr: 'right' },
-		'sideways-rl': { ltr: 'left' },
-		'sideways-lr': { ltr: 'right' },
-	}),
+	selectors: {
+		'&[data-scroll-mask-end="bottom"]': maskLayers('bottom'),
+		'&[data-scroll-mask-end="left"]': maskLayers('left'),
+		'&[data-scroll-mask-end="right"]': maskLayers('right'),
+		'&[data-scroll-mask-end="top"]': maskLayers('top'),
+	},
 });
-
-/** Angles used in overflowing mask gradients — shared with browser assertions. */
-export const scrollMaskGradientAngle = maskAngle;

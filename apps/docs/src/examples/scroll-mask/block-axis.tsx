@@ -15,7 +15,7 @@ export default function BlockAxis() {
 				{[
 					'ScrollMask masks overflow edges automatically.',
 					'The scrollport is focusable only while content overflows.',
-					'Choose axis="block" for vertical scrolling.',
+					'Choose axis="block" for block-axis scrolling.',
 					'Native scrollbars stay available.',
 					'Fade depth adapts to the scrollport size.',
 				].map((item) => (

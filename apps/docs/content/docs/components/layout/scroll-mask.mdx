@@ -13,27 +13,25 @@ available to scroll. The scrollport becomes a keyboard tab stop only while it ov
 ## Block axis
 
 Pass `axis="block"` to scroll on the block axis. The default `axis="inline"` scrolls on the inline
-axis. In the usual horizontal writing mode these correspond to vertical and horizontal scrolling,
-respectively. Both values follow the element's writing mode.
+axis. Both values follow the element's writing mode.
 
 <ExampleBlock src="scroll-mask/block-axis" title="Scroll Mask — Block axis" />
 
-## Choose the rendered element
+## Compose semantics outside
 
-ScrollMask supports Box's structural `elementType` values except `span`, which cannot establish this
-scrollport. It does not expose `render`, so Luke UI keeps ownership of the scrollport.
+ScrollMask always renders a `div` scrollport. Put landmark or list semantics on a parent when you
+need them.
 
-<ExampleBlock src="scroll-mask/semantic-element" title="Scroll Mask — Navigation" />
+<ExampleBlock src="scroll-mask/compose-semantics" title="Scroll Mask — Navigation" />
 
 ## Accessibility
 
 When content overflows, ScrollMask makes the scrollport focusable and applies Luke UI's standard
-`:focus-visible` ring. A default or explicit `div` also becomes a named region, so pass `aria-label`
-or `aria-labelledby`. That name is applied only while the automatic region role is active. Semantic
-`elementType` values keep their native role and normal ARIA props.
+`:focus-visible` ring. The `div` also becomes a named region, so pass `aria-label` or
+`aria-labelledby`. That name is applied only while the automatic region role is active.
 
-When content fits, ScrollMask removes the mask, the extra tab stop, and — for `div` — the automatic
-region naming attributes.
+When content fits, ScrollMask removes the mask, the extra tab stop, and the automatic region naming
+attributes.
 
 ## API
 

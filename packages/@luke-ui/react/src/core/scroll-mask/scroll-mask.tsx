@@ -16,28 +16,27 @@ import {
 } from './recipe.css.js';
 
 /** Props for `ScrollMask`. */
-export type ScrollMaskProps = Prettify<_ScrollMaskDivProps | _ScrollMaskSemanticProps>;
+export type ScrollMaskProps = Prettify<_ScrollMaskProps>;
 
 /**
  * Scroll container that masks the logical start and end edges when more content is available to
- * scroll. The scrollport is keyboard-focusable only while it overflows on the active axis.
+ * scroll. Always renders a `div` scrollport. The scrollport is keyboard-focusable only while it
+ * overflows on the active axis.
  */
 export function ScrollMask({
 	axis = 'inline',
 	className,
-	elementType = 'div',
 	style,
 	...props
 }: ScrollMaskProps): JSX.Element {
 	// `ref` stays on `props` so the compiler can track it through `useObjectRef`.
 	const scrollportRef = useObjectRef(props.ref);
-	const { overflows, writingMode } = useScrollOverflow(scrollportRef, axis);
-	const isDiv = elementType === 'div';
+	const { logicalEnd, overflows } = useScrollOverflow(scrollportRef, axis);
 	const { 'aria-label': ariaLabel, 'aria-labelledby': ariaLabelledBy, ...domProps } = props;
 
 	return (
 		<Box
-			{...omitUnsupportedSprinklesProps(isDiv ? domProps : props, scrollMaskProperties)}
+			{...omitUnsupportedSprinklesProps(domProps, scrollMaskProperties)}
 			className={cx(
 				scrollMaskRecipe({ axis, className }),
 				overflows
@@ -46,22 +45,18 @@ export function ScrollMask({
 						: scrollMaskOverflowingBlock
 					: undefined,
 			)}
-			data-scroll-mask-writing={writingMode}
-			elementType={elementType}
+			data-scroll-mask-end={logicalEnd}
+			elementType="div"
 			ref={scrollportRef}
+			role={overflows ? 'region' : undefined}
 			style={style}
 			tabIndex={overflows ? 0 : undefined}
-			{...(isDiv
+			{...(overflows
 				? {
-						role: overflows ? 'region' : undefined,
-						// Naming is type-required for div because it may become a region; apply it only
+						// Naming is type-required because the div may become a region; apply it only
 						// while that automatic role is active so a fitting div is not a named generic.
-						...(overflows
-							? {
-									...(ariaLabel === undefined ? null : { 'aria-label': ariaLabel }),
-									...(ariaLabelledBy === undefined ? null : { 'aria-labelledby': ariaLabelledBy }),
-								}
-							: null),
+						...(ariaLabel === undefined ? null : { 'aria-label': ariaLabel }),
+						...(ariaLabelledBy === undefined ? null : { 'aria-labelledby': ariaLabelledBy }),
 					}
 				: null)}
 		/>
@@ -74,21 +69,6 @@ export type ScrollMaskAxis = 'inline' | 'block';
 /** Physical side that corresponds to the active axis's logical end. */
 export type ScrollMaskPhysicalSide = 'bottom' | 'left' | 'right' | 'top';
 
-/**
- * Writing-mode token stored on the scrollport for mask CSS. Direction stays in CSS via `:dir()`.
- */
-type ScrollMaskWritingMode =
-	| 'horizontal-tb'
-	| 'sideways-lr'
-	| 'sideways-rl'
-	| 'vertical-lr'
-	| 'vertical-rl';
-
-type _ScrollMaskElementType = NonNullable<BoxLikeElementProps['elementType']>;
-
-/** Structural roots ScrollMask may render. Excludes `span`, which cannot host this scrollport. */
-type _ScrollMaskSupportedElementType = Exclude<_ScrollMaskElementType, 'span'>;
-
 type _ScrollMaskOwnedLayoutProperty = 'overflow' | 'overflowX' | 'overflowY';
 
 type _ScrollMaskLayoutOmit = DistributiveOmit<LayoutProps, _ScrollMaskOwnedLayoutProperty>;
@@ -98,44 +78,29 @@ type _ScrollMaskDomOmit = DistributiveOmit<
 	'elementType' | 'render' | 'role' | 'tabIndex'
 >;
 
-interface _ScrollMaskOwnProps {
-	/**
-	 * Axis that scrolls and receives edge masks.
-	 * @default inline
-	 */
-	axis?: ScrollMaskAxis;
-	/** ScrollMask owns keyboard focusability from overflow. */
-	tabIndex?: never;
-	/** ScrollMask owns scrolling on the active axis. */
-	overflow?: never;
-	/** ScrollMask owns scrolling on the active axis. */
-	overflowX?: never;
-	/** ScrollMask owns scrolling on the active axis. */
-	overflowY?: never;
-	/** ScrollMask owns the scrollport element. Use `elementType` instead. */
-	render?: never;
-}
-
-interface _ScrollMaskDivBase
-	extends _ScrollMaskDomOmit, _ScrollMaskLayoutOmit, _ScrollMaskOwnProps {
-	/**
-	 * Chooses a supported structural element.
-	 * @default div
-	 */
-	elementType?: 'div';
-	/** ScrollMask owns `role` for the default `div` root. */
-	role?: never;
-}
-
-type _ScrollMaskDivProps = _ScrollMaskDivBase & RequiredAccessibleName;
-
-interface _ScrollMaskSemanticProps
-	extends _ScrollMaskDomOmit, _ScrollMaskLayoutOmit, _ScrollMaskOwnProps {
-	/** Chooses a supported structural element with native semantics. */
-	elementType: Exclude<_ScrollMaskSupportedElementType, 'div'>;
-	/** Role for a semantic root. Defaults to the element's native role. */
-	role?: BoxLikeElementProps['role'];
-}
+type _ScrollMaskProps = _ScrollMaskDomOmit &
+	_ScrollMaskLayoutOmit &
+	RequiredAccessibleName & {
+		/**
+		 * Axis that scrolls and receives edge masks.
+		 * @default inline
+		 */
+		axis?: ScrollMaskAxis;
+		/** ScrollMask owns keyboard focusability from overflow. */
+		tabIndex?: never;
+		/** ScrollMask owns scrolling on the active axis. */
+		overflow?: never;
+		/** ScrollMask owns scrolling on the active axis. */
+		overflowX?: never;
+		/** ScrollMask owns scrolling on the active axis. */
+		overflowY?: never;
+		/** ScrollMask always renders a `div` scrollport. */
+		elementType?: never;
+		/** ScrollMask owns `role` for the `div` root. */
+		role?: never;
+		/** ScrollMask owns the scrollport element. Compose semantics outside instead. */
+		render?: never;
+	};
 
 const scrollMaskOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ScrollMaskOwnedLayoutProperty>(
 	['overflow', 'overflowX', 'overflowY'],
@@ -149,13 +114,15 @@ for (const property of scrollMaskOwnedProperties) {
 // useLayoutEffect warns during SSR; fall back to useEffect on the server.
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
-/** Tracks overflow and the writing-mode token CSS needs for mask direction. */
+/** Tracks overflow and the physical side of the active axis's logical end. */
 function useScrollOverflow(
 	scrollportRef: { current: HTMLElement | null },
 	axis: ScrollMaskAxis,
-): { overflows: boolean; writingMode: ScrollMaskWritingMode } {
+): { logicalEnd: ScrollMaskPhysicalSide; overflows: boolean } {
 	const [overflows, setOverflows] = useState(false);
-	const [writingMode, setWritingMode] = useState<ScrollMaskWritingMode>('horizontal-tb');
+	const [logicalEnd, setLogicalEnd] = useState<ScrollMaskPhysicalSide>(
+		axis === 'inline' ? 'right' : 'bottom',
+	);
 
 	useIsomorphicLayoutEffect(() => {
 		const element = scrollportRef.current;
@@ -168,8 +135,8 @@ function useScrollOverflow(
 		const resizeObserver = new ResizeObserver(scheduleMeasure);
 
 		const measure = () => {
-			const nextWriting = writingModeToken(getComputedStyle(element).writingMode);
-			setWritingMode((previous) => (previous === nextWriting ? previous : nextWriting));
+			const nextEnd = logicalEndSide(element, axis);
+			setLogicalEnd((previous) => (previous === nextEnd ? previous : nextEnd));
 			const next = overflowsOnAxis(element, axis);
 			setOverflows((previous) => (previous === next ? previous : next));
 		};
@@ -190,6 +157,9 @@ function useScrollOverflow(
 				for (const node of record.addedNodes) {
 					if (node instanceof Element) observeElementTree(node, resizeObserver);
 				}
+				for (const node of record.removedNodes) {
+					if (node instanceof Element) unobserveElementTree(node, resizeObserver);
+				}
 			}
 			scheduleMeasure();
 		});
@@ -201,7 +171,7 @@ function useScrollOverflow(
 			subtree: true,
 		});
 
-		// Inherited writing-mode can change via ancestor class/style without resizing this node.
+		// Inherited writing-mode / direction can change via ancestor class/style without resizing.
 		const inheritedStyleObserver = new MutationObserver(scheduleMeasure);
 		observeAncestorStyleInputs(element, inheritedStyleObserver);
 
@@ -225,7 +195,7 @@ function useScrollOverflow(
 		};
 	}, [axis, scrollportRef]);
 
-	return { overflows, writingMode };
+	return { logicalEnd, overflows };
 }
 
 /** Whether `element` overflows on the logical `axis` for its writing mode. */
@@ -242,57 +212,68 @@ export function overflowsOnAxis(element: HTMLElement, axis: ScrollMaskAxis): boo
 }
 
 /**
- * Physical side that corresponds to logical end for `axis` on `element`.
- * Used by tests; mask CSS derives the same mapping from writing mode + `:dir()`.
+ * Physical side of logical end for `axis`.
+ *
+ * Measured from used layout (CSS `direction`, writing mode, `text-orientation`, etc.) via a logical
+ * inset probe — not from `:dir()`, which ignores `style={{ direction }}`.
  */
 export function logicalEndSide(element: HTMLElement, axis: ScrollMaskAxis): ScrollMaskPhysicalSide {
-	const { direction, writingMode } = getComputedStyle(element);
-	const writing = writingModeToken(writingMode);
-	const rtl = direction === 'rtl';
-
-	if (axis === 'inline') {
-		switch (writing) {
-			case 'horizontal-tb':
-				return rtl ? 'left' : 'right';
-			case 'sideways-lr':
-				return rtl ? 'bottom' : 'top';
-			default:
-				return rtl ? 'top' : 'bottom';
-		}
-	}
-
-	switch (writing) {
-		case 'sideways-rl':
-		case 'vertical-rl':
-			return 'left';
-		case 'sideways-lr':
-		case 'vertical-lr':
-			return 'right';
-		default:
-			return 'bottom';
-	}
+	return physicalSideOfLogicalEnd(element, axis === 'inline' ? 'inline-end' : 'block-end');
 }
 
-/** Normalize computed `writing-mode` to the token CSS mask selectors understand. */
-function writingModeToken(writingMode: string): ScrollMaskWritingMode {
-	switch (writingMode) {
-		case 'sideways-lr':
-			return 'sideways-lr';
-		case 'sideways-rl':
-			return 'sideways-rl';
-		case 'tb':
-		case 'tb-rl':
-		case 'vertical-rl':
-			return 'vertical-rl';
-		case 'vertical-lr':
-			return 'vertical-lr';
-		default:
-			return 'horizontal-tb';
+function physicalSideOfLogicalEnd(
+	element: HTMLElement,
+	edge: 'block-end' | 'inline-end',
+): ScrollMaskPhysicalSide {
+	const style = getComputedStyle(element);
+	// Measure on a detached box so scrollport scroll offset cannot move the probe. Copy the used
+	// writing mode, CSS direction, and text-orientation — not `:dir()`, which ignores CSS direction.
+	const measure = document.createElement('div');
+	measure.style.cssText = [
+		'position:absolute',
+		'inset-inline-start:-9999px',
+		'inset-block-start:0',
+		'inline-size:100px',
+		'block-size:100px',
+		`writing-mode:${style.writingMode}`,
+		`direction:${style.direction}`,
+		`text-orientation:${style.textOrientation}`,
+	].join(';');
+
+	const probe = document.createElement('div');
+	probe.style.cssText =
+		edge === 'inline-end'
+			? 'position:absolute;inset-inline-end:0;inset-block-start:50%;inline-size:1px;block-size:1px;margin-block-start:-0.5px'
+			: 'position:absolute;inset-block-end:0;inset-inline-start:50%;inline-size:1px;block-size:1px;margin-inline-start:-0.5px';
+
+	measure.append(probe);
+	document.body.append(measure);
+
+	const measureRect = measure.getBoundingClientRect();
+	const probeRect = probe.getBoundingClientRect();
+	measure.remove();
+
+	const probeCenterX = (probeRect.left + probeRect.right) / 2;
+	const probeCenterY = (probeRect.top + probeRect.bottom) / 2;
+	const measureCenterX = (measureRect.left + measureRect.right) / 2;
+	const measureCenterY = (measureRect.top + measureRect.bottom) / 2;
+
+	const inlineIsHorizontal = isHorizontalWritingMode(style.writingMode);
+	const preferHorizontal = edge === 'inline-end' ? inlineIsHorizontal : !inlineIsHorizontal;
+
+	if (preferHorizontal) {
+		return probeCenterX < measureCenterX ? 'left' : 'right';
 	}
+	return probeCenterY < measureCenterY ? 'top' : 'bottom';
 }
 
 function isHorizontalWritingMode(writingMode: string): boolean {
-	return writingModeToken(writingMode) === 'horizontal-tb';
+	return !(
+		writingMode.startsWith('vertical') ||
+		writingMode.startsWith('sideways') ||
+		writingMode === 'tb' ||
+		writingMode === 'tb-rl'
+	);
 }
 
 function observeElementTree(root: Element, observer: ResizeObserver): void {
@@ -302,11 +283,18 @@ function observeElementTree(root: Element, observer: ResizeObserver): void {
 	}
 }
 
+function unobserveElementTree(root: Element, observer: ResizeObserver): void {
+	observer.unobserve(root);
+	for (const node of root.querySelectorAll('*')) {
+		observer.unobserve(node);
+	}
+}
+
 function observeAncestorStyleInputs(element: Element, observer: MutationObserver): void {
 	let node: Element | null = element.parentElement;
 	while (node) {
 		observer.observe(node, {
-			attributeFilter: ['class', 'style'],
+			attributeFilter: ['class', 'style', 'dir'],
 			attributes: true,
 		});
 		node = node.parentElement;

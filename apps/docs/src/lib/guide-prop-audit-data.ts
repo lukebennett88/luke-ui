@@ -114,7 +114,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'render',
 	],
 	'layout/scroll-mask.mdx::packages/@luke-ui/react/src/core/scroll-mask/scroll-mask.tsx::ScrollMaskProps':
-		['aria-label', 'aria-labelledby', 'axis', 'elementType'],
+		['aria-label', 'aria-labelledby', 'axis'],
 	'layout/stack.mdx::packages/@luke-ui/react/src/core/stack/stack.tsx::StackProps': [
 		'alignItems',
 		'elementType',
