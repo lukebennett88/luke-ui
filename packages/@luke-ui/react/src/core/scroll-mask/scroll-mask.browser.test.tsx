@@ -3,6 +3,7 @@ import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
 import { createRef, useState } from 'react';
 import { expect, test } from 'vite-plus/test';
+import { userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
 import {
 	expectForwardsDomProps,
@@ -10,8 +11,7 @@ import {
 	forwardedDomProps,
 } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
-import { captureVisualAppearance } from '../test-utils/visual.js';
-import { Grid } from '../test-utils/visual.js';
+import { captureVisualAppearance, Grid } from '../test-utils/visual.js';
 
 test('ScrollMask forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
@@ -45,12 +45,7 @@ test('fitting content has no mask, tab stop, or automatic region role', async ()
 
 test('overflowing inline content is keyboard-focusable with a region role and mask', async () => {
 	const { locator } = render(
-		<ScrollMask
-			aria-label="Wide list"
-			data-testid="scroll-mask"
-			inlineSize="8rem"
-			padding="sp8"
-		>
+		<ScrollMask aria-label="Wide list" data-testid="scroll-mask" inlineSize="8rem" padding="sp8">
 			<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 				Overflowing inline content for the mask
 			</span>
@@ -130,12 +125,12 @@ test('transitions between fitting and overflowing content', async () => {
 	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element());
 	expect(element.tabIndex).toBe(-1);
 
-	locator.getByRole('button', { name: 'Toggle' }).element().click();
+	await userEvent.click(locator.getByRole('button', { name: 'Toggle' }));
 	await waitForScrollport(element, true);
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('role')).toBe('region');
 
-	locator.getByRole('button', { name: 'Toggle' }).element().click();
+	await userEvent.click(locator.getByRole('button', { name: 'Toggle' }));
 	await waitForScrollport(element, false);
 	expect(element.tabIndex).toBe(-1);
 	expect(element.getAttribute('role')).toBeNull();
@@ -144,12 +139,7 @@ test('transitions between fitting and overflowing content', async () => {
 test('masks logical inline edges in RTL', async () => {
 	const { locator } = render(
 		<div dir="rtl">
-			<ScrollMask
-				aria-label="RTL list"
-				data-testid="scroll-mask"
-				inlineSize="8rem"
-				padding="sp8"
-			>
+			<ScrollMask aria-label="RTL list" data-testid="scroll-mask" inlineSize="8rem" padding="sp8">
 				<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
 					محتوى أفقي طويل للتمرير
 				</span>
@@ -201,10 +191,7 @@ function ScrollMaskScene() {
 	);
 }
 
-async function waitForScrollport(
-	node: Element,
-	shouldOverflow?: boolean,
-): Promise<HTMLElement> {
+async function waitForScrollport(node: Element, shouldOverflow?: boolean): Promise<HTMLElement> {
 	if (!(node instanceof HTMLElement)) throw new Error('Expected ScrollMask element.');
 
 	const deadline = Date.now() + 2000;

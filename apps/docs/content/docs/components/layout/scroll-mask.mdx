@@ -16,6 +16,13 @@ Pass `axis="block"` for vertical scrolling. The default `axis="inline"` scrolls 
 
 <ExampleBlock src="scroll-mask/block-axis" title="Scroll Mask — Block axis" />
 
+## Choose the rendered element
+
+ScrollMask supports Box's structural `elementType` values. It does not expose `render`, so Luke UI
+keeps ownership of the scrollport.
+
+<ExampleBlock src="scroll-mask/semantic-element" title="Scroll Mask — Navigation" />
+
 ## Accessibility
 
 When content overflows, ScrollMask makes the scrollport focusable and applies Luke UI's standard
@@ -23,13 +30,6 @@ When content overflows, ScrollMask makes the scrollport focusable and applies Lu
 or `aria-labelledby`. Semantic `elementType` values keep their native role.
 
 When content fits, ScrollMask removes the mask and the extra tab stop.
-
-## Choose the rendered element
-
-ScrollMask supports Box's structural `elementType` values. It does not expose `render`, so Luke UI
-keeps ownership of the scrollport.
-
-<ExampleBlock src="scroll-mask/semantic-element" title="Scroll Mask — Navigation" />
 
 ## API
 

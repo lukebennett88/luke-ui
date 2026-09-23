@@ -1,4 +1,4 @@
-import type { ComplexStyleRule } from '@vanilla-extract/css';
+import type { ComplexStyleRule, StyleRule } from '@vanilla-extract/css';
 import { createVar, keyframes } from '@vanilla-extract/css';
 import { vars } from '../../theme/contract.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
@@ -32,20 +32,18 @@ const revealEndFade = keyframes({
 	to: { vars: { [endFadeVar]: '0px' } },
 });
 
-function overflowingMask(timeline: 'scroll(self inline)' | 'scroll(self block)'): ComplexStyleRule {
+function overflowingMask(timeline: 'scroll(self inline)' | 'scroll(self block)'): StyleRule {
+	// Scroll-driven properties are newer than the StyleRule surface; cast the support block.
 	return {
 		'@supports': {
 			'(animation-timeline: scroll())': {
 				animationDuration: '1ms',
 				animationFillMode: 'both',
 				animationName: `${revealStartFade}, ${revealEndFade}`,
+				animationRange: `0 ${revealDistance}, calc(100% - ${revealDistance}) 100%`,
+				animationTimeline: `${timeline}, ${timeline}`,
 				animationTimingFunction: 'linear',
-				// Newer scroll-driven properties; cast until csstype covers the full surface.
-				...({
-					animationRange: `0 ${revealDistance}, calc(100% - ${revealDistance}) 100%`,
-					animationTimeline: `${timeline}, ${timeline}`,
-				} as ComplexStyleRule),
-			},
+			} as StyleRule,
 		},
 	};
 }

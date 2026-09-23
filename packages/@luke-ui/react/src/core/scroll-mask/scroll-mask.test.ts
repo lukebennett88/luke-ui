@@ -12,9 +12,9 @@ test('ScrollMask requires an accessible name for the default div root', () => {
 	});
 	// @ts-expect-error — default div requires aria-label or aria-labelledby
 	assertType<ScrollMaskProps>({ children: 'Content' });
+	// @ts-expect-error — aria-label and aria-labelledby are mutually exclusive
 	assertType<ScrollMaskProps>({
 		'aria-label': 'Topics',
-		// @ts-expect-error — aria-label and aria-labelledby are mutually exclusive
 		'aria-labelledby': 'topics-heading',
 		children: 'Content',
 	});
@@ -51,12 +51,12 @@ test('ScrollMask semantic roots keep native naming and reject owned props', () =
 		'aria-label': 'Topics',
 		children: 'Content',
 		// @ts-expect-error — ScrollMask does not expose render
-		render: () => <div />,
+		render: () => null,
 	});
+	// @ts-expect-error — default div owns role
 	assertType<ScrollMaskProps>({
 		'aria-label': 'Topics',
 		children: 'Content',
-		// @ts-expect-error — default div owns role
 		role: 'region',
 	});
 });

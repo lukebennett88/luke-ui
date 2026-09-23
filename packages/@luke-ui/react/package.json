@@ -48,6 +48,7 @@
 		"./primitives/input-group": "./dist/primitives/input-group.js",
 		"./prose": "./dist/prose.js",
 		"./quote": "./dist/quote.js",
+		"./scroll-mask": "./dist/scroll-mask.js",
 		"./stack": "./dist/stack.js",
 		"./strong": "./dist/strong.js",
 		"./styles": "./dist/styles.js",

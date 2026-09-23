@@ -53,7 +53,7 @@ type _ScrollMaskLayoutOmit = DistributiveOmit<LayoutProps, _ScrollMaskOwnedLayou
 
 type _ScrollMaskDomOmit = DistributiveOmit<
 	BoxLikeElementProps,
-	'elementType' | 'overflow' | 'overflowX' | 'overflowY' | 'render' | 'role' | 'tabIndex'
+	'elementType' | 'render' | 'role' | 'tabIndex'
 >;
 
 interface _ScrollMaskOwnProps {
@@ -74,8 +74,8 @@ interface _ScrollMaskOwnProps {
 	render?: never;
 }
 
-interface _ScrollMaskDivProps
-	extends _ScrollMaskDomOmit, _ScrollMaskLayoutOmit, _ScrollMaskOwnProps, RequiredAccessibleName {
+interface _ScrollMaskDivBase
+	extends _ScrollMaskDomOmit, _ScrollMaskLayoutOmit, _ScrollMaskOwnProps {
 	/**
 	 * Chooses a supported structural element.
 	 * @default div
@@ -85,6 +85,8 @@ interface _ScrollMaskDivProps
 	role?: never;
 }
 
+type _ScrollMaskDivProps = _ScrollMaskDivBase & RequiredAccessibleName;
+
 interface _ScrollMaskSemanticProps
 	extends _ScrollMaskDomOmit, _ScrollMaskLayoutOmit, _ScrollMaskOwnProps {
 	/** Chooses a supported structural element with native semantics. */
@@ -93,11 +95,9 @@ interface _ScrollMaskSemanticProps
 	role?: BoxLikeElementProps['role'];
 }
 
-const scrollMaskOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ScrollMaskOwnedLayoutProperty>([
-	'overflow',
-	'overflowX',
-	'overflowY',
-]);
+const scrollMaskOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ScrollMaskOwnedLayoutProperty>(
+	['overflow', 'overflowX', 'overflowY'],
+);
 
 const scrollMaskProperties = new Set(layoutProperties);
 for (const property of scrollMaskOwnedProperties) {
