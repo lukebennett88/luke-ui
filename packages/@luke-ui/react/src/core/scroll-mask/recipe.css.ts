@@ -48,19 +48,21 @@ function overflowingMask(timeline: 'scroll(self inline)' | 'scroll(self block)')
 	};
 }
 
-const inlineOverflowMask = {
-	maskImage: `linear-gradient(to right, transparent 0, #000 ${startFadeVar}, #000 calc(100% - ${endFadeVar}), transparent 100%)`,
-	selectors: {
-		'&:dir(rtl)': {
-			maskImage: `linear-gradient(to left, transparent 0, #000 ${startFadeVar}, #000 calc(100% - ${endFadeVar}), transparent 100%)`,
-		},
-	},
-	...overflowingMask('scroll(self inline)'),
-} as const satisfies ComplexStyleRule;
+function maskGradient(to: 'left' | 'right' | 'top' | 'bottom'): string {
+	return `linear-gradient(to ${to}, transparent 0, #000 ${startFadeVar}, #000 calc(100% - ${endFadeVar}), transparent 100%)`;
+}
 
-const blockOverflowMask = {
-	maskImage: `linear-gradient(to bottom, transparent 0, #000 ${startFadeVar}, #000 calc(100% - ${endFadeVar}), transparent 100%)`,
-	...overflowingMask('scroll(self block)'),
+/**
+ * Physical mask direction comes from `data-scroll-mask-end`, set by ScrollMask from the element's
+ * writing mode and direction. Logical gradient keywords are not available in current Chromium.
+ */
+const physicalEndMasks = {
+	selectors: {
+		'&[data-scroll-mask-end="bottom"]': { maskImage: maskGradient('bottom') },
+		'&[data-scroll-mask-end="left"]': { maskImage: maskGradient('left') },
+		'&[data-scroll-mask-end="right"]': { maskImage: maskGradient('right') },
+		'&[data-scroll-mask-end="top"]': { maskImage: maskGradient('top') },
+	},
 } as const satisfies ComplexStyleRule;
 
 /** Recipe for a scrollport that masks overflow edges. */
@@ -72,11 +74,11 @@ export const scrollMaskRecipe = recipe({
 	},
 	compoundVariants: [
 		{
-			style: inlineOverflowMask,
+			style: [physicalEndMasks, overflowingMask('scroll(self inline)')],
 			variants: { axis: 'inline', overflows: true },
 		},
 		{
-			style: blockOverflowMask,
+			style: [physicalEndMasks, overflowingMask('scroll(self block)')],
 			variants: { axis: 'block', overflows: true },
 		},
 	],
@@ -87,12 +89,12 @@ export const scrollMaskRecipe = recipe({
 	variants: {
 		axis: {
 			block: {
-				overflowX: 'hidden',
-				overflowY: 'auto',
+				overflowBlock: 'auto',
+				overflowInline: 'hidden',
 			},
 			inline: {
-				overflowX: 'auto',
-				overflowY: 'hidden',
+				overflowBlock: 'hidden',
+				overflowInline: 'auto',
 			},
 		},
 		overflows: {

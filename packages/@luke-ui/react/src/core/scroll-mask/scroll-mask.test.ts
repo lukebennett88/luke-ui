@@ -61,6 +61,15 @@ test('ScrollMask semantic roots keep native naming and reject owned props', () =
 	});
 });
 
+test('ScrollMask rejects span as elementType', () => {
+	assertType<ScrollMaskProps>({
+		'aria-label': 'Topics',
+		children: 'Content',
+		// @ts-expect-error — span cannot host the ScrollMask scrollport
+		elementType: 'span',
+	});
+});
+
 test('ScrollMask axis is a closed scalar union', () => {
 	expectTypeOf<'inline' | 'block' | undefined>().toEqualTypeOf<ScrollMaskProps['axis']>();
 });
