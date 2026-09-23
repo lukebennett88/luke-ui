@@ -1,7 +1,7 @@
 import { ScrollMask } from '@luke-ui/react/scroll-mask';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
-import { createRef, useRef, useState } from 'react';
+import { createRef, useState } from 'react';
 import { expect, test } from 'vite-plus/test';
 import { userEvent } from 'vite-plus/test/context';
 import { expectNoAxeViolations } from '../test-utils/axe.js';
@@ -40,9 +40,9 @@ test('fitting div has no mask, tab stop, region role, or accessible name', async
 	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element());
 
 	expect(element.tabIndex).toBe(-1);
-	expect(element.getAttribute('role')).toBeNull();
-	expect(element.getAttribute('aria-label')).toBeNull();
-	expect(element.getAttribute('aria-labelledby')).toBeNull();
+	expect(element.hasAttribute('role')).toBe(false);
+	expect(element.hasAttribute('aria-label')).toBe(false);
+	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 	expect(getComputedStyle(element).maskImage).toBe('none');
 });
 
@@ -59,7 +59,9 @@ test('overflowing div applies accessible name with the automatic region role', a
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('role')).toBe('region');
 	expect(element.getAttribute('aria-label')).toBe('Wide list');
+	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 	expect(getComputedStyle(element).overflowInline).toBe('auto');
+	expect(getComputedStyle(element).overflowBlock).toBe('hidden');
 	expect(getComputedStyle(element).maskImage).not.toBe('none');
 	expect(element.dataset.scrollMaskEnd).toBe('right');
 });
@@ -81,7 +83,9 @@ test('overflowing block content is keyboard-focusable with a region role and mas
 
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('role')).toBe('region');
+	expect(element.getAttribute('aria-label')).toBe('Tall list');
 	expect(getComputedStyle(element).overflowBlock).toBe('auto');
+	expect(getComputedStyle(element).overflowInline).toBe('hidden');
 	expect(getComputedStyle(element).maskImage).not.toBe('none');
 	expect(element.dataset.scrollMaskEnd).toBe('bottom');
 });
@@ -114,7 +118,7 @@ test('semantic roots keep native semantics and ARIA props without an automatic r
 	const fitting = await waitForScrollport(locator.getByTestId('fitting-nav').element());
 	expect(fitting.tagName).toBe('NAV');
 	expect(fitting.tabIndex).toBe(-1);
-	expect(fitting.getAttribute('role')).toBeNull();
+	expect(fitting.hasAttribute('role')).toBe(false);
 	expect(fitting.getAttribute('aria-label')).toBe('Fitting navigation');
 
 	const overflowing = await waitForScrollport(
@@ -123,11 +127,11 @@ test('semantic roots keep native semantics and ARIA props without an automatic r
 	);
 	expect(overflowing.tagName).toBe('NAV');
 	expect(overflowing.tabIndex).toBe(0);
-	expect(overflowing.getAttribute('role')).toBeNull();
+	expect(overflowing.hasAttribute('role')).toBe(false);
 	expect(overflowing.getAttribute('aria-label')).toBe('Overflowing navigation');
 });
 
-test('transitions between fitting and overflowing content', async () => {
+test('region role and accessible name appear together when a fitting div overflows', async () => {
 	function Fixture() {
 		const [expanded, setExpanded] = useState(false);
 		return (
@@ -151,7 +155,9 @@ test('transitions between fitting and overflowing content', async () => {
 	const { locator } = render(<Fixture />);
 	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element());
 	expect(element.tabIndex).toBe(-1);
-	expect(element.getAttribute('aria-label')).toBeNull();
+	expect(element.hasAttribute('role')).toBe(false);
+	expect(element.hasAttribute('aria-label')).toBe(false);
+	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 
 	await userEvent.click(locator.getByRole('button', { name: 'Toggle' }));
 	await waitForScrollport(element, true);
@@ -162,8 +168,9 @@ test('transitions between fitting and overflowing content', async () => {
 	await userEvent.click(locator.getByRole('button', { name: 'Toggle' }));
 	await waitForScrollport(element, false);
 	expect(element.tabIndex).toBe(-1);
-	expect(element.getAttribute('role')).toBeNull();
-	expect(element.getAttribute('aria-label')).toBeNull();
+	expect(element.hasAttribute('role')).toBe(false);
+	expect(element.hasAttribute('aria-label')).toBe(false);
+	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 });
 
 test('masks logical inline edges in RTL', async () => {
@@ -179,134 +186,136 @@ test('masks logical inline edges in RTL', async () => {
 	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
 
 	expect(element.tabIndex).toBe(0);
+	expect(getComputedStyle(element).overflowInline).toBe('auto');
+	expect(getComputedStyle(element).overflowBlock).toBe('hidden');
 	expect(getComputedStyle(element).maskImage).not.toBe('none');
 	expect(getComputedStyle(element).direction).toBe('rtl');
 	expect(element.dataset.scrollMaskEnd).toBe('left');
 	expect(logicalEndSide(element, 'inline')).toBe('left');
 });
 
-test('inline overflow follows vertical writing mode', async () => {
-	const { locator } = render(
-		<ScrollMask
-			aria-label="Vertical inline"
-			data-testid="scroll-mask"
-			inlineSize="5rem"
-			blockSize="10rem"
-			padding="sp8"
-			style={{ writingMode: 'vertical-rl' }}
-		>
-			<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>縦書きの長いインライン内容</div>
-		</ScrollMask>,
-	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
-	const styles = getComputedStyle(element);
+for (const writingMode of ['vertical-rl', 'vertical-lr'] as const) {
+	test(`inline overflow follows ${writingMode}`, async () => {
+		const { locator } = render(
+			<ScrollMask
+				aria-label={`Vertical inline ${writingMode}`}
+				data-testid="scroll-mask"
+				inlineSize="5rem"
+				blockSize="10rem"
+				padding="sp8"
+				style={{ writingMode }}
+			>
+				<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>縦書きの長いインライン内容</div>
+			</ScrollMask>,
+		);
+		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+		const styles = getComputedStyle(element);
 
-	expect(styles.writingMode).toBe('vertical-rl');
-	expect(overflowsOnAxis(element, 'inline')).toBe(true);
-	expect(overflowsOnAxis(element, 'block')).toBe(false);
-	expect(styles.overflowY).toBe('auto');
-	expect(styles.overflowX).toBe('hidden');
-	expect(element.tabIndex).toBe(0);
-	expect(element.getAttribute('role')).toBe('region');
-	expect(element.dataset.scrollMaskEnd).toBe('bottom');
-	expect(getComputedStyle(element).maskImage).not.toBe('none');
-});
+		expect(styles.writingMode).toBe(writingMode);
+		expect(overflowsOnAxis(element, 'inline')).toBe(true);
+		expect(overflowsOnAxis(element, 'block')).toBe(false);
+		expect(styles.overflowInline).toBe('auto');
+		expect(styles.overflowBlock).toBe('hidden');
+		expect(element.tabIndex).toBe(0);
+		expect(element.getAttribute('role')).toBe('region');
+		expect(element.getAttribute('aria-label')).toBe(`Vertical inline ${writingMode}`);
+		expect(element.dataset.scrollMaskEnd).toBe('bottom');
+		expect(logicalEndSide(element, 'inline')).toBe('bottom');
+		expect(styles.maskImage).not.toBe('none');
+	});
 
-test('block overflow follows vertical writing mode', async () => {
-	const { locator } = render(
-		<ScrollMask
-			aria-label="Vertical block"
-			axis="block"
-			blockSize="5rem"
-			data-testid="scroll-mask"
-			inlineSize="10rem"
-			padding="sp8"
-			style={{ writingMode: 'vertical-rl' }}
-		>
-			<div style={{ blockSize: '16rem' }}>縦書きの長いブロック内容</div>
-		</ScrollMask>,
-	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
-	const styles = getComputedStyle(element);
+	test(`block overflow follows ${writingMode}`, async () => {
+		const expectedEnd = writingMode === 'vertical-rl' ? 'left' : 'right';
+		const { locator } = render(
+			<ScrollMask
+				aria-label={`Vertical block ${writingMode}`}
+				axis="block"
+				blockSize="5rem"
+				data-testid="scroll-mask"
+				inlineSize="10rem"
+				padding="sp8"
+				style={{ writingMode }}
+			>
+				<div style={{ blockSize: '16rem' }}>縦書きの長いブロック内容</div>
+			</ScrollMask>,
+		);
+		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+		const styles = getComputedStyle(element);
 
-	expect(styles.writingMode).toBe('vertical-rl');
-	expect(overflowsOnAxis(element, 'block')).toBe(true);
-	expect(overflowsOnAxis(element, 'inline')).toBe(false);
-	expect(styles.overflowX).toBe('auto');
-	expect(styles.overflowY).toBe('hidden');
-	expect(element.tabIndex).toBe(0);
-	expect(element.dataset.scrollMaskEnd).toBe('left');
-	expect(getComputedStyle(element).maskImage).not.toBe('none');
-});
+		expect(styles.writingMode).toBe(writingMode);
+		expect(overflowsOnAxis(element, 'block')).toBe(true);
+		expect(overflowsOnAxis(element, 'inline')).toBe(false);
+		expect(styles.overflowBlock).toBe('auto');
+		expect(styles.overflowInline).toBe('hidden');
+		expect(element.tabIndex).toBe(0);
+		expect(element.getAttribute('role')).toBe('region');
+		expect(element.getAttribute('aria-label')).toBe(`Vertical block ${writingMode}`);
+		expect(element.dataset.scrollMaskEnd).toBe(expectedEnd);
+		expect(logicalEndSide(element, 'block')).toBe(expectedEnd);
+		expect(styles.maskImage).not.toBe('none');
+	});
+}
 
-test('nested intrinsic image load updates overflow state', async () => {
+test('nested intrinsic image load updates overflow from fitting to overflowing', async () => {
 	const tinySvg = svgDataUri(16, 16);
 	const tallSvg = svgDataUri(16, 320);
 
-	function Fixture() {
-		const imageRef = useRef<HTMLImageElement>(null);
-		return (
-			<>
-				<button
-					type="button"
-					onClick={() => {
-						const image = imageRef.current;
-						if (image) image.src = tallSvg;
-					}}
-				>
-					Load tall image
-				</button>
-				<button
-					type="button"
-					onClick={() => {
-						const image = imageRef.current;
-						if (image) image.src = tinySvg;
-					}}
-				>
-					Load tiny image
-				</button>
-				<ScrollMask
-					aria-label="Image list"
-					axis="block"
-					blockSize="6rem"
-					data-testid="scroll-mask"
-					inlineSize="8rem"
-				>
-					<div>
-						<img alt="" ref={imageRef} src={tinySvg} />
-					</div>
-				</ScrollMask>
-			</>
-		);
-	}
-
-	const { locator } = render(<Fixture />);
+	const { locator } = render(
+		<ScrollMask
+			aria-label="Image list"
+			axis="block"
+			blockSize="6rem"
+			data-testid="scroll-mask"
+			inlineSize="8rem"
+		>
+			<div>
+				<img alt="" data-testid="intrinsic" src={tinySvg} />
+			</div>
+		</ScrollMask>,
+	);
 	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element());
 	expect(element.tabIndex).toBe(-1);
-	expect(element.getAttribute('role')).toBeNull();
+	expect(element.hasAttribute('role')).toBe(false);
+	expect(element.hasAttribute('aria-label')).toBe(false);
+	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 	expect(getComputedStyle(element).maskImage).toBe('none');
 
-	await userEvent.click(locator.getByRole('button', { name: 'Load tall image' }));
-	await waitForScrollport(element, true);
+	const image = expectHtmlElement(
+		locator.getByTestId('intrinsic').element(),
+		'Expected intrinsic image.',
+	);
+	if (!(image instanceof HTMLImageElement)) throw new Error('Expected HTMLImageElement.');
+
+	// Change the already-mounted image's intrinsic size without a React tree mutation.
+	await loadImageSource(image, tallSvg);
+	await waitForAttribute(element, 'role', 'region');
+
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('role')).toBe('region');
 	expect(element.getAttribute('aria-label')).toBe('Image list');
 	expect(getComputedStyle(element).maskImage).not.toBe('none');
 
-	await userEvent.click(locator.getByRole('button', { name: 'Load tiny image' }));
-	await waitForScrollport(element, false);
+	await loadImageSource(image, tinySvg);
+	await waitForAttribute(element, 'role', null);
+
 	expect(element.tabIndex).toBe(-1);
-	expect(element.getAttribute('role')).toBeNull();
-	expect(element.getAttribute('aria-label')).toBeNull();
+	expect(element.hasAttribute('role')).toBe(false);
+	expect(element.hasAttribute('aria-label')).toBe(false);
 	expect(getComputedStyle(element).maskImage).toBe('none');
 });
 
 test('fitting and overflowing default divs have no axe violations', async () => {
-	const { container: fitting } = render(
-		<ScrollMask aria-label="Fits" blockSize="6rem" inlineSize="12rem">
+	const { container: fitting, locator: fittingLocator } = render(
+		<ScrollMask aria-label="Fits" blockSize="6rem" data-testid="fitting-axe" inlineSize="12rem">
 			Short
 		</ScrollMask>,
 	);
+	const fittingElement = await waitForScrollport(
+		fittingLocator.getByTestId('fitting-axe').element(),
+	);
+	expect(fittingElement.hasAttribute('role')).toBe(false);
+	expect(fittingElement.hasAttribute('aria-label')).toBe(false);
+	expect(fittingElement.hasAttribute('aria-labelledby')).toBe(false);
 	await expectNoAxeViolations(fitting);
 
 	const { container: overflowing, locator } = render(
@@ -321,7 +330,12 @@ test('fitting and overflowing default divs have no axe violations', async () => 
 			</span>
 		</ScrollMask>,
 	);
-	await waitForScrollport(locator.getByTestId('overflowing-axe').element(), true);
+	const overflowingElement = await waitForScrollport(
+		locator.getByTestId('overflowing-axe').element(),
+		true,
+	);
+	expect(overflowingElement.getAttribute('role')).toBe('region');
+	expect(overflowingElement.getAttribute('aria-label')).toBe('Overflows');
 	await expectNoAxeViolations(overflowing);
 });
 
@@ -367,6 +381,37 @@ function svgDataUri(width: number, height: number): string {
 	return `data:image/svg+xml,${encodeURIComponent(
 		`<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}" viewBox="0 0 ${String(width)} ${String(height)}"><rect width="100%" height="100%" fill="#1d4ed8"/></svg>`,
 	)}`;
+}
+
+function loadImageSource(image: HTMLImageElement, src: string): Promise<void> {
+	return new Promise((resolve, reject) => {
+		image.addEventListener('load', () => resolve(), { once: true });
+		image.addEventListener('error', () => reject(new Error('Image failed to load.')), {
+			once: true,
+		});
+		image.src = src;
+	});
+}
+
+/** Waits for ScrollMask's observer-driven React update, not for size polling. */
+function waitForAttribute(element: HTMLElement, name: string, value: string | null): Promise<void> {
+	if (element.getAttribute(name) === value) return Promise.resolve();
+
+	return new Promise((resolve, reject) => {
+		const timeoutId = window.setTimeout(() => {
+			observer.disconnect();
+			reject(new Error(`Timed out waiting for ${name}=${String(value)}.`));
+		}, 2000);
+
+		const observer = new MutationObserver(() => {
+			if (element.getAttribute(name) === value) {
+				window.clearTimeout(timeoutId);
+				observer.disconnect();
+				resolve();
+			}
+		});
+		observer.observe(element, { attributes: true, attributeFilter: [name] });
+	});
 }
 
 async function waitForScrollport(node: Element, shouldOverflow?: boolean): Promise<HTMLElement> {
