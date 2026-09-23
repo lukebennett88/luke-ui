@@ -1,0 +1,39 @@
+---
+title: Scroll Mask
+description: Mask overflow edges on a keyboard-accessible scrollport.
+source: packages/@luke-ui/react/src/exports/scroll-mask.ts
+---
+
+`ScrollMask` is a scroll container that fades the logical start and end edges when more content is
+available to scroll. The scrollport becomes a keyboard tab stop only while it overflows. Read
+[Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
+
+<ExampleBlock src="scroll-mask/basic" title="Scroll Mask — Basic" />
+
+## Block axis
+
+Pass `axis="block"` for vertical scrolling. The default `axis="inline"` scrolls horizontally.
+
+<ExampleBlock src="scroll-mask/block-axis" title="Scroll Mask — Block axis" />
+
+## Accessibility
+
+When content overflows, ScrollMask makes the scrollport focusable and applies Luke UI's standard
+`:focus-visible` ring. A default or explicit `div` also becomes a named region, so pass `aria-label`
+or `aria-labelledby`. Semantic `elementType` values keep their native role.
+
+When content fits, ScrollMask removes the mask and the extra tab stop.
+
+## Choose the rendered element
+
+ScrollMask supports Box's structural `elementType` values. It does not expose `render`, so Luke UI
+keeps ownership of the scrollport.
+
+<ExampleBlock src="scroll-mask/semantic-element" title="Scroll Mask — Navigation" />
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/scroll-mask/scroll-mask.tsx"
+	name="ScrollMaskProps"
+/>
