@@ -1,4 +1,5 @@
 import { assertType, expectTypeOf, test } from 'vite-plus/test';
+import type { ScrollMaskRecipeVariants } from './recipe.css.js';
 import type { ScrollMaskProps } from './scroll-mask.js';
 
 test('ScrollMask requires an accessible name for the default div root', () => {
@@ -72,4 +73,13 @@ test('ScrollMask rejects span as elementType', () => {
 
 test('ScrollMask axis is a closed scalar union', () => {
 	expectTypeOf<'inline' | 'block' | undefined>().toEqualTypeOf<ScrollMaskProps['axis']>();
+});
+
+test('ScrollMaskRecipeVariants exposes axis only, not internal overflows state', () => {
+	expectTypeOf<ScrollMaskRecipeVariants>().toEqualTypeOf<{ axis?: 'block' | 'inline' }>();
+	assertType<ScrollMaskRecipeVariants>({ axis: 'inline' });
+	assertType<ScrollMaskRecipeVariants>({ axis: 'block' });
+	assertType<ScrollMaskRecipeVariants>({});
+	// @ts-expect-error — overflows is internal runtime state, not a public recipe variant
+	assertType<ScrollMaskRecipeVariants>({ overflows: true });
 });

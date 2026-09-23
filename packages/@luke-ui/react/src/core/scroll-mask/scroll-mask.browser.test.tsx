@@ -12,6 +12,7 @@ import {
 } from '../test-utils/forwarding.js';
 import { render, visualAppearances } from '../test-utils/render.js';
 import { captureVisualAppearance, Grid } from '../test-utils/visual.js';
+import { scrollMaskGradientAngle } from './recipe.css.js';
 import { logicalEndSide, overflowsOnAxis } from './scroll-mask.js';
 
 test('ScrollMask forwards className, data attributes, id, and ref to its element', () => {
@@ -62,8 +63,7 @@ test('overflowing div applies accessible name with the automatic region role', a
 	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 	expect(getComputedStyle(element).overflowInline).toBe('auto');
 	expect(getComputedStyle(element).overflowBlock).toBe('hidden');
-	expect(getComputedStyle(element).maskImage).not.toBe('none');
-	expect(element.dataset.scrollMaskEnd).toBe('right');
+	expectMaskToward(element, 'right');
 });
 
 test('overflowing block content is keyboard-focusable with a region role and mask', async () => {
@@ -86,8 +86,7 @@ test('overflowing block content is keyboard-focusable with a region role and mas
 	expect(element.getAttribute('aria-label')).toBe('Tall list');
 	expect(getComputedStyle(element).overflowBlock).toBe('auto');
 	expect(getComputedStyle(element).overflowInline).toBe('hidden');
-	expect(getComputedStyle(element).maskImage).not.toBe('none');
-	expect(element.dataset.scrollMaskEnd).toBe('bottom');
+	expectMaskToward(element, 'bottom');
 });
 
 test('semantic roots keep native semantics and ARIA props without an automatic region role', async () => {
@@ -173,88 +172,182 @@ test('region role and accessible name appear together when a fitting div overflo
 	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 });
 
-test('masks logical inline edges in RTL', async () => {
-	const { locator } = render(
-		<div dir="rtl">
-			<ScrollMask aria-label="RTL list" data-testid="scroll-mask" inlineSize="8rem" padding="sp8">
-				<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
-					محتوى أفقي طويل للتمرير
-				</span>
-			</ScrollMask>
-		</div>,
-	);
-	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+const writingModeCases = [
+	{
+		direction: 'ltr',
+		expectedBlockEnd: 'bottom',
+		expectedInlineEnd: 'right',
+		label: 'horizontal-tb LTR',
+		writingMode: 'horizontal-tb',
+	},
+	{
+		direction: 'rtl',
+		expectedBlockEnd: 'bottom',
+		expectedInlineEnd: 'left',
+		label: 'horizontal-tb RTL',
+		writingMode: 'horizontal-tb',
+	},
+	{
+		direction: 'ltr',
+		expectedBlockEnd: 'left',
+		expectedInlineEnd: 'bottom',
+		label: 'vertical-rl LTR',
+		writingMode: 'vertical-rl',
+	},
+	{
+		direction: 'rtl',
+		expectedBlockEnd: 'left',
+		expectedInlineEnd: 'top',
+		label: 'vertical-rl RTL',
+		writingMode: 'vertical-rl',
+	},
+	{
+		direction: 'ltr',
+		expectedBlockEnd: 'right',
+		expectedInlineEnd: 'bottom',
+		label: 'vertical-lr LTR',
+		writingMode: 'vertical-lr',
+	},
+	{
+		direction: 'rtl',
+		expectedBlockEnd: 'right',
+		expectedInlineEnd: 'top',
+		label: 'vertical-lr RTL',
+		writingMode: 'vertical-lr',
+	},
+] as const;
 
-	expect(element.tabIndex).toBe(0);
-	expect(getComputedStyle(element).overflowInline).toBe('auto');
-	expect(getComputedStyle(element).overflowBlock).toBe('hidden');
-	expect(getComputedStyle(element).maskImage).not.toBe('none');
-	expect(getComputedStyle(element).direction).toBe('rtl');
-	expect(element.dataset.scrollMaskEnd).toBe('left');
-	expect(logicalEndSide(element, 'inline')).toBe('left');
-});
-
-for (const writingMode of ['vertical-rl', 'vertical-lr'] as const) {
-	test(`inline overflow follows ${writingMode}`, async () => {
+for (const writingCase of writingModeCases) {
+	test(`inline overflow maps correctly for ${writingCase.label}`, async () => {
 		const { locator } = render(
-			<ScrollMask
-				aria-label={`Vertical inline ${writingMode}`}
-				data-testid="scroll-mask"
-				inlineSize="5rem"
-				blockSize="10rem"
-				padding="sp8"
-				style={{ writingMode }}
-			>
-				<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>縦書きの長いインライン内容</div>
-			</ScrollMask>,
+			<div dir={writingCase.direction} style={{ writingMode: writingCase.writingMode }}>
+				<ScrollMask
+					aria-label={`Inline ${writingCase.label}`}
+					blockSize="10rem"
+					data-testid="scroll-mask"
+					inlineSize="5rem"
+					padding="sp8"
+				>
+					<div style={{ inlineSize: '16rem', whiteSpace: 'nowrap' }}>
+						長いインライン内容 for logical overflow
+					</div>
+				</ScrollMask>
+			</div>,
 		);
 		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
 		const styles = getComputedStyle(element);
 
-		expect(styles.writingMode).toBe(writingMode);
+		expect(styles.writingMode).toBe(writingCase.writingMode);
+		expect(styles.direction).toBe(writingCase.direction);
 		expect(overflowsOnAxis(element, 'inline')).toBe(true);
 		expect(overflowsOnAxis(element, 'block')).toBe(false);
 		expect(styles.overflowInline).toBe('auto');
 		expect(styles.overflowBlock).toBe('hidden');
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
-		expect(element.getAttribute('aria-label')).toBe(`Vertical inline ${writingMode}`);
-		expect(element.dataset.scrollMaskEnd).toBe('bottom');
-		expect(logicalEndSide(element, 'inline')).toBe('bottom');
-		expect(styles.maskImage).not.toBe('none');
+		expect(element.dataset.scrollMaskWriting).toBe(writingCase.writingMode);
+		expect(logicalEndSide(element, 'inline')).toBe(writingCase.expectedInlineEnd);
+		expectMaskToward(element, writingCase.expectedInlineEnd);
 	});
 
-	test(`block overflow follows ${writingMode}`, async () => {
-		const expectedEnd = writingMode === 'vertical-rl' ? 'left' : 'right';
+	test(`block overflow maps correctly for ${writingCase.label}`, async () => {
 		const { locator } = render(
-			<ScrollMask
-				aria-label={`Vertical block ${writingMode}`}
-				axis="block"
-				blockSize="5rem"
-				data-testid="scroll-mask"
-				inlineSize="10rem"
-				padding="sp8"
-				style={{ writingMode }}
-			>
-				<div style={{ blockSize: '16rem' }}>縦書きの長いブロック内容</div>
-			</ScrollMask>,
+			<div dir={writingCase.direction} style={{ writingMode: writingCase.writingMode }}>
+				<ScrollMask
+					aria-label={`Block ${writingCase.label}`}
+					axis="block"
+					blockSize="5rem"
+					data-testid="scroll-mask"
+					inlineSize="10rem"
+					padding="sp8"
+				>
+					<div style={{ blockSize: '16rem' }}>長いブロック内容 for logical overflow</div>
+				</ScrollMask>
+			</div>,
 		);
 		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
 		const styles = getComputedStyle(element);
 
-		expect(styles.writingMode).toBe(writingMode);
+		expect(styles.writingMode).toBe(writingCase.writingMode);
+		expect(styles.direction).toBe(writingCase.direction);
 		expect(overflowsOnAxis(element, 'block')).toBe(true);
 		expect(overflowsOnAxis(element, 'inline')).toBe(false);
 		expect(styles.overflowBlock).toBe('auto');
 		expect(styles.overflowInline).toBe('hidden');
 		expect(element.tabIndex).toBe(0);
 		expect(element.getAttribute('role')).toBe('region');
-		expect(element.getAttribute('aria-label')).toBe(`Vertical block ${writingMode}`);
-		expect(element.dataset.scrollMaskEnd).toBe(expectedEnd);
-		expect(logicalEndSide(element, 'block')).toBe(expectedEnd);
-		expect(styles.maskImage).not.toBe('none');
+		expect(element.dataset.scrollMaskWriting).toBe(writingCase.writingMode);
+		expect(logicalEndSide(element, 'block')).toBe(writingCase.expectedBlockEnd);
+		expectMaskToward(element, writingCase.expectedBlockEnd);
 	});
 }
+
+test('inherited direction change updates the inline mask without remounting', async () => {
+	function Fixture() {
+		const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
+		return (
+			<div dir={direction}>
+				<button type="button" onClick={() => setDirection('rtl')}>
+					Switch to RTL
+				</button>
+				<ScrollMask
+					aria-label="Direction switch"
+					data-testid="scroll-mask"
+					inlineSize="8rem"
+					padding="sp8"
+				>
+					<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
+						Overflowing inline content for direction switch
+					</span>
+				</ScrollMask>
+			</div>
+		);
+	}
+
+	const { locator } = render(<Fixture />);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+
+	expect(getComputedStyle(element).direction).toBe('ltr');
+	expect(element.dataset.scrollMaskWriting).toBe('horizontal-tb');
+	expectMaskToward(element, 'right');
+
+	await userEvent.click(locator.getByRole('button', { name: 'Switch to RTL' }));
+	await expect.poll(() => getComputedStyle(element).direction).toBe('rtl');
+
+	expect(element.dataset.scrollMaskWriting).toBe('horizontal-tb');
+	expect(logicalEndSide(element, 'inline')).toBe('left');
+	expectMaskToward(element, 'left');
+});
+
+test('focus-visible clears the mask so the standard focus ring remains visible', async () => {
+	const { locator } = render(
+		<>
+			<button type="button">Before</button>
+			<ScrollMask
+				aria-label="Focusable list"
+				data-testid="scroll-mask"
+				inlineSize="8rem"
+				padding="sp8"
+			>
+				<span style={{ display: 'inline-block', inlineSize: '24rem', whiteSpace: 'nowrap' }}>
+					Overflowing inline content for focus
+				</span>
+			</ScrollMask>
+		</>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+	expectMaskToward(element, 'right');
+
+	locator.getByRole('button', { name: 'Before' }).element().focus();
+	await userEvent.tab();
+
+	expect(element).toHaveFocus();
+	expect(element.matches(':focus-visible')).toBe(true);
+	expect(getComputedStyle(element).maskImage).toBe('none');
+	expect(getComputedStyle(element).outlineStyle).toBe('solid');
+	expect(Number.parseFloat(getComputedStyle(element).outlineWidth)).toBeGreaterThan(0);
+	expect(getComputedStyle(element).outlineOffset).toBe('2px');
+});
 
 test('nested intrinsic image load updates overflow from fitting to overflowing', async () => {
 	const tinySvg = svgDataUri(16, 16);
@@ -286,14 +379,13 @@ test('nested intrinsic image load updates overflow from fitting to overflowing',
 	);
 	if (!(image instanceof HTMLImageElement)) throw new Error('Expected HTMLImageElement.');
 
-	// Change the already-mounted image's intrinsic size without a React tree mutation.
 	await loadImageSource(image, tallSvg);
 	await waitForAttribute(element, 'role', 'region');
 
 	expect(element.tabIndex).toBe(0);
 	expect(element.getAttribute('role')).toBe('region');
 	expect(element.getAttribute('aria-label')).toBe('Image list');
-	expect(getComputedStyle(element).maskImage).not.toBe('none');
+	expectMaskToward(element, 'bottom');
 
 	await loadImageSource(image, tinySvg);
 	await waitForAttribute(element, 'role', null);
@@ -349,6 +441,29 @@ test('kitchen sink', { tags: ['visual'] }, async () => {
 	for (const appearance of visualAppearances) {
 		const { locator } = render(<ScrollMaskScene />, { appearance });
 		await captureVisualAppearance(locator, 'scroll-mask/kitchen-sink', appearance);
+	}
+});
+
+test('overflowing focus-visible state', { tags: ['visual'] }, async () => {
+	for (const appearance of visualAppearances) {
+		const { locator } = render(
+			<ScrollMask
+				aria-label="Focused overflow"
+				data-testid="scroll-mask"
+				inlineSize="10rem"
+				padding="sp8"
+			>
+				<span style={{ display: 'inline-block', inlineSize: '22rem', whiteSpace: 'nowrap' }}>
+					Design tokens · Layout · Forms · Feedback · Typography
+				</span>
+			</ScrollMask>,
+			{ appearance },
+		);
+		const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+		element.focus({ focusVisible: true });
+		expect(element.matches(':focus-visible')).toBe(true);
+		expect(getComputedStyle(element).maskImage).toBe('none');
+		await captureVisualAppearance(locator, 'scroll-mask/focus-visible', appearance);
 	}
 });
 
@@ -412,6 +527,18 @@ function waitForAttribute(element: HTMLElement, name: string, value: string | nu
 		});
 		observer.observe(element, { attributes: true, attributeFilter: [name] });
 	});
+}
+
+function expectMaskToward(element: HTMLElement, side: 'bottom' | 'left' | 'right' | 'top'): void {
+	const maskImage = getComputedStyle(element).maskImage;
+	expect(maskImage).not.toBe('none');
+	const angle = scrollMaskGradientAngle[side];
+	// Chromium omits the default `180deg` direction from computed `mask-image`.
+	expect(
+		angle === 180
+			? !/\b(?:0|90|270)deg\b/.test(maskImage)
+			: maskImage.includes(`${String(angle)}deg`),
+	).toBe(true);
 }
 
 async function waitForScrollport(node: Element, shouldOverflow?: boolean): Promise<HTMLElement> {
