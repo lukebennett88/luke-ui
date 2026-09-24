@@ -7,7 +7,7 @@ export default () => {
 		<ScrollMask
 			aria-label="Example items"
 			axis="block"
-			blockSize="10rem"
+			blockSize="8.75rem"
 			inlineSize="20rem"
 			padding="sp12"
 		>
