@@ -1,26 +1,19 @@
-import { Heading } from '@luke-ui/react/heading';
+import { Box } from '@luke-ui/react/box';
+import { Link } from '@luke-ui/react/link';
 import { ScrollMask } from '@luke-ui/react/scroll-mask';
-import { Stack } from '@luke-ui/react/stack';
-import { Text } from '@luke-ui/react/text';
-import { vars } from '@luke-ui/react/theme';
 
-export default function ComposeSemantics() {
+export default () => {
 	return (
-		<nav aria-labelledby="related-heading">
-			<Stack gap="sp8">
-				<Heading id="related-heading" level={3}>
-					Related
-				</Heading>
-				<ScrollMask aria-label="Related components" inlineSize="16rem" padding="sp12">
-					<div style={{ display: 'flex', gap: vars.space.sp16 }}>
-						{['Box', 'Stack', 'Cluster', 'Container', 'Aspect ratio'].map((item) => (
-							<Text key={item} style={{ flex: 'none' }}>
-								{item}
-							</Text>
-						))}
-					</div>
-				</ScrollMask>
-			</Stack>
+		<nav aria-label="Example navigation">
+			<ScrollMask aria-label="Example destinations" inlineSize="16rem" padding="sp12">
+				<Box display="flex" gap="sp16">
+					{['First', 'Second', 'Third', 'Fourth'].map((item) => (
+						<Link key={item} href={`#${item.toLowerCase()}-destination`} style={{ flex: 'none' }}>
+							{item} destination
+						</Link>
+					))}
+				</Box>
+			</ScrollMask>
 		</nav>
 	);
-}
+};

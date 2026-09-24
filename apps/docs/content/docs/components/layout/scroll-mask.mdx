@@ -1,11 +1,11 @@
 ---
 title: Scroll Mask
-description: Mask overflow edges on a keyboard-accessible scrollport.
+description: Fade scrollable content at its logical edges.
 source: packages/@luke-ui/react/src/exports/scroll-mask.ts
 ---
 
-`ScrollMask` is a scroll container that fades the logical start and end edges when more content is
-available to scroll. The scrollport becomes a keyboard tab stop only while it overflows. Read
+`ScrollMask` keeps content scrollable without showing the native scrollbar. Browsers without CSS
+scroll-driven animations show no fade and keep the native scrollbar. Read
 [Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
 
 <ExampleBlock src="scroll-mask/basic" title="Scroll Mask — Basic" />
@@ -17,21 +17,21 @@ axis. Both values follow the element's writing mode.
 
 <ExampleBlock src="scroll-mask/block-axis" title="Scroll Mask — Block axis" />
 
-## Compose semantics outside
+## Semantic structure
 
-ScrollMask always renders a `div` scrollport. Put landmark or list semantics on a parent when you
-need them.
+ScrollMask always renders a `div`. Compose semantic elements around or inside the scrollport instead
+of changing its root.
 
 <ExampleBlock src="scroll-mask/compose-semantics" title="Scroll Mask — Navigation" />
 
 ## Accessibility
 
-When content overflows, ScrollMask makes the scrollport focusable and applies Luke UI's standard
-`:focus-visible` ring. The `div` also becomes a named region, so pass `aria-label` or
-`aria-labelledby`. That name is applied only while the automatic region role is active.
+Pass `aria-label` or `aria-labelledby`. The label must describe the scrollable content.
 
-When content fits, ScrollMask removes the mask, the extra tab stop, and the automatic region naming
-attributes.
+When content overflows, the scrollport becomes a focusable, named region with a focus ring. This
+also applies when its content contains links or buttons.
+
+When the content fits, ScrollMask removes the mask, the tab stop, the region role, and the name.
 
 ## API
 

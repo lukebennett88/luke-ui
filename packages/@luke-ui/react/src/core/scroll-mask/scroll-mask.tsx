@@ -1,6 +1,6 @@
 import { useObjectRef } from '@react-aria/utils';
 import type { JSX } from 'react';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { cx } from '../../shared/utils/utils.js';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
 import type { LayoutProps } from '../styles/layout-props.js';
@@ -20,8 +20,8 @@ export type ScrollMaskProps = Prettify<_ScrollMaskProps>;
 
 /**
  * Scroll container that masks the logical start and end edges when more content is available to
- * scroll. Always renders a `div` scrollport. The scrollport is keyboard-focusable only while it
- * overflows on the active axis.
+ * scroll. Always renders a `div` scrollport. The scrollport is a keyboard-focusable, named region
+ * only while it overflows on the active axis.
  */
 export function ScrollMask({
 	axis = 'inline',
@@ -54,7 +54,7 @@ export function ScrollMask({
 			{...(overflows
 				? {
 						// Naming is type-required because the div may become a region; apply it only
-						// while that automatic role is active so a fitting div is not a named generic.
+						// while that automatic role is active so the div is never a named generic.
 						...(ariaLabel === undefined ? null : { 'aria-label': ariaLabel }),
 						...(ariaLabelledBy === undefined ? null : { 'aria-labelledby': ariaLabelledBy }),
 					}
@@ -98,7 +98,7 @@ type _ScrollMaskProps = _ScrollMaskDomOmit &
 		elementType?: never;
 		/** ScrollMask owns `role` for the `div` root. */
 		role?: never;
-		/** ScrollMask owns the scrollport element. Compose semantics outside instead. */
+		/** ScrollMask owns the scrollport element. Compose semantics around or inside it. */
 		render?: never;
 	};
 
@@ -111,9 +111,6 @@ for (const property of scrollMaskOwnedProperties) {
 	scrollMaskProperties.delete(property);
 }
 
-// useLayoutEffect warns during SSR; fall back to useEffect on the server.
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
-
 /** Tracks overflow and the physical side of the active axis's logical end. */
 function useScrollOverflow(
 	scrollportRef: { current: HTMLElement | null },
@@ -124,7 +121,7 @@ function useScrollOverflow(
 		axis === 'inline' ? 'right' : 'bottom',
 	);
 
-	useIsomorphicLayoutEffect(() => {
+	useLayoutEffect(() => {
 		const element = scrollportRef.current;
 		if (!element) {
 			setOverflows(false);
@@ -136,9 +133,9 @@ function useScrollOverflow(
 
 		const measure = () => {
 			const nextEnd = logicalEndSide(element, axis);
-			setLogicalEnd((previous) => (previous === nextEnd ? previous : nextEnd));
+			setLogicalEnd((prev) => (prev === nextEnd ? prev : nextEnd));
 			const next = overflowsOnAxis(element, axis);
-			setOverflows((previous) => (previous === next ? previous : next));
+			setOverflows((prev) => (prev === next ? prev : next));
 		};
 
 		function scheduleMeasure() {

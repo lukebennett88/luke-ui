@@ -138,7 +138,13 @@ export default defineConfig(async () => {
 				},
 			}),
 			react(),
-			netlify(),
+			// Netlify's local edge runner invokes `deno eval --allow-scripts`, which
+			// Deno 2.9.x rejects; docs dev does not need edge emulation.
+			netlify({
+				dev: {
+					edgeFunctions: { enabled: false },
+				},
+			}),
 		]),
 		resolve: {
 			alias: {

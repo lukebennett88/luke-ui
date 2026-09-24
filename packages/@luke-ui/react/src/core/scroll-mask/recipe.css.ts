@@ -5,6 +5,13 @@ import { style } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
+/**
+ * Feature query gating ScrollMask's fade masks and scrollbar hiding. Browsers without scroll-driven
+ * animations cannot resolve the fade as scroll position changes, so they get a plain scrollport with
+ * the native scrollbar instead of a permanently faded or permanently hidden-scrollbar edge.
+ */
+const scrollTimelineSupportQuery = '(animation-timeline: scroll())';
+
 /** Adaptive mask depth: a fraction of the scrollport, capped at `sp40`. */
 const maskSize = `min(12%, ${vars.space.sp40})`;
 
@@ -47,20 +54,16 @@ const maskAngle = {
 	top: 0,
 } as const;
 
-function overflowingMask(timeline: 'scroll(self inline)' | 'scroll(self block)'): StyleRule {
-	// Scroll-driven properties are newer than the StyleRule surface; cast the support block.
+function overflowingAnimation(timeline: 'scroll(self inline)' | 'scroll(self block)'): StyleRule {
+	// Scroll-driven properties are newer than the StyleRule surface; cast the result.
 	return {
-		'@supports': {
-			'(animation-timeline: scroll())': {
-				animationDuration: '1ms',
-				animationFillMode: 'both',
-				animationName: `${revealStartFade}, ${revealEndFade}`,
-				animationRange: `0 ${revealDistance}, calc(100% - ${revealDistance}) 100%`,
-				animationTimeline: `${timeline}, ${timeline}`,
-				animationTimingFunction: 'linear',
-			} as StyleRule,
-		},
-	};
+		animationDuration: '1ms',
+		animationFillMode: 'both',
+		animationName: `${revealStartFade}, ${revealEndFade}`,
+		animationRange: `0 ${revealDistance}, calc(100% - ${revealDistance}) 100%`,
+		animationTimeline: `${timeline}, ${timeline}`,
+		animationTimingFunction: 'linear',
+	} as StyleRule;
 }
 
 /**
@@ -82,12 +85,23 @@ function maskLayers(side: keyof typeof maskAngle): StyleRule {
 	};
 }
 
-/** Recipe for ScrollMask layout. Overflow/mask state is not a public recipe variant. */
+/**
+ * Recipe for ScrollMask layout. Overflow/mask state is not a public recipe variant. Scrollbar hiding
+ * only applies where the fade mask can render, so unsupported browsers keep the native scrollbar.
+ */
 export const scrollMaskRecipe = recipe({
 	base: {
 		// Min size 0 so the scrollport can shrink inside flex/grid parents.
 		minBlockSize: 0,
 		minInlineSize: 0,
+		'@supports': {
+			[scrollTimelineSupportQuery]: {
+				scrollbarWidth: 'none',
+				selectors: {
+					'&::-webkit-scrollbar': { display: 'none' },
+				},
+			},
+		},
 	},
 	defaultVariants: {
 		axis: 'inline',
@@ -117,29 +131,36 @@ const overflowingFadeVars = {
 	},
 } as const;
 
+/** Mask-layer selectors keyed by the physical side `data-scroll-mask-end` reports. */
+const overflowingMaskSelectors = {
+	'&[data-scroll-mask-end="bottom"]': maskLayers('bottom'),
+	'&[data-scroll-mask-end="left"]': maskLayers('left'),
+	'&[data-scroll-mask-end="right"]': maskLayers('right'),
+	'&[data-scroll-mask-end="top"]': maskLayers('top'),
+} as const satisfies StyleRule['selectors'];
+
 /**
- * Private overflowing styles. Physical mask end comes from `data-scroll-mask-end`, measured from the
- * element's used writing mode and CSS `direction`.
+ * Private overflowing styles, gated on `scrollTimelineSupportQuery` so unsupported browsers render no
+ * mask at all rather than a fade stuck at rest. Physical mask end comes from `data-scroll-mask-end`,
+ * measured from the element's used writing mode and CSS `direction`.
  */
 export const scrollMaskOverflowingInline = style({
-	...overflowingFadeVars,
-	...overflowingMask('scroll(self inline)'),
-	selectors: {
-		'&[data-scroll-mask-end="bottom"]': maskLayers('bottom'),
-		'&[data-scroll-mask-end="left"]': maskLayers('left'),
-		'&[data-scroll-mask-end="right"]': maskLayers('right'),
-		'&[data-scroll-mask-end="top"]': maskLayers('top'),
+	'@supports': {
+		[scrollTimelineSupportQuery]: {
+			...overflowingFadeVars,
+			...overflowingAnimation('scroll(self inline)'),
+			selectors: overflowingMaskSelectors,
+		},
 	},
 });
 
-/** Private overflowing styles for `axis="block"`. */
+/** Private overflowing styles for `axis="block"`. See {@link scrollMaskOverflowingInline}. */
 export const scrollMaskOverflowingBlock = style({
-	...overflowingFadeVars,
-	...overflowingMask('scroll(self block)'),
-	selectors: {
-		'&[data-scroll-mask-end="bottom"]': maskLayers('bottom'),
-		'&[data-scroll-mask-end="left"]': maskLayers('left'),
-		'&[data-scroll-mask-end="right"]': maskLayers('right'),
-		'&[data-scroll-mask-end="top"]': maskLayers('top'),
+	'@supports': {
+		[scrollTimelineSupportQuery]: {
+			...overflowingFadeVars,
+			...overflowingAnimation('scroll(self block)'),
+			selectors: overflowingMaskSelectors,
+		},
 	},
 });

@@ -72,6 +72,8 @@ test('overflowing div applies accessible name with the automatic region role', a
 	expect(element.hasAttribute('aria-labelledby')).toBe(false);
 	expect(getComputedStyle(element).overflowInline).toBe('auto');
 	expect(getComputedStyle(element).overflowBlock).toBe('hidden');
+	expect(getComputedStyle(element).scrollbarWidth).toBe('none');
+	expect(getComputedStyle(element, '::-webkit-scrollbar').display).toBe('none');
 	expectMaskToward(element, 'right');
 });
 
@@ -95,6 +97,11 @@ test('overflowing block content is keyboard-focusable with a region role and mas
 	expect(element.getAttribute('aria-label')).toBe('Tall list');
 	expect(getComputedStyle(element).overflowBlock).toBe('auto');
 	expect(getComputedStyle(element).overflowInline).toBe('hidden');
+	expect(getComputedStyle(element).scrollbarWidth).toBe('none');
+	expect(getComputedStyle(element, '::-webkit-scrollbar').display).toBe('none');
+	element.focus();
+	await userEvent.keyboard('{ArrowDown}');
+	await expect.poll(() => element.scrollTop).toBeGreaterThan(0);
 	expectMaskToward(element, 'bottom');
 });
 
@@ -492,6 +499,27 @@ test('focusing an interactive descendant near a faded edge keeps the mask', asyn
 	expect(nearEnd).toHaveFocus();
 	expectMaskToward(element, 'right');
 	expect(getComputedStyle(element).maskImage).not.toBe('none');
+});
+
+test('overflowing scrollport remains a named tab stop with tabbable descendants', async () => {
+	const { locator } = render(
+		<ScrollMask aria-label="Example items" data-testid="scroll-mask" inlineSize="8rem">
+			<div style={{ display: 'flex', gap: '1rem' }}>
+				<button style={{ flex: 'none', inlineSize: '6rem' }} type="button">
+					First item
+				</button>
+				<button style={{ flex: 'none', inlineSize: '6rem' }} type="button">
+					Second item
+				</button>
+			</div>
+		</ScrollMask>,
+	);
+	const element = await waitForScrollport(locator.getByTestId('scroll-mask').element(), true);
+
+	expect(element.tabIndex).toBe(0);
+	expect(element.getAttribute('role')).toBe('region');
+	expect(element.getAttribute('aria-label')).toBe('Example items');
+	expect(locator.getByRole('button', { name: 'First item' }).element().tabIndex).toBe(0);
 });
 
 test('nested intrinsic image load updates overflow from fitting to overflowing', async () => {
