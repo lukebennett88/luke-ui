@@ -7,7 +7,13 @@ import { SiteNav } from '../components/site-nav.js';
 export const Route = createFileRoute('/')({
 	component: Home,
 	head: () => ({
-		meta: [{ title: 'Luke UI' }],
+		meta: [
+			{ title: 'Luke UI' },
+			{
+				content: 'Luke UI is a React design system built on React Aria Components.',
+				name: 'description',
+			},
+		],
 	}),
 });
 

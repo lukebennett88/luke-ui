@@ -63,7 +63,9 @@ export function HomeFeatures() {
 						{FEATURES.map((feature) => (
 							<div className="flex flex-col gap-3" key={feature.title} style={cellStyle}>
 								<Heading>{feature.title}</Heading>
-								<Text color="secondary">{feature.description}</Text>
+								<Text color="secondary" elementType="p">
+									{feature.description}
+								</Text>
 							</div>
 						))}
 					</div>

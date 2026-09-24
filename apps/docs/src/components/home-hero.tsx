@@ -6,7 +6,8 @@ import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
-import { useActionState } from 'react';
+import type { FormEvent } from 'react';
+import { useTransition } from 'react';
 import { DocsLink } from './docs-link.js';
 import { ThemeControls } from './theme-controls.js';
 
@@ -18,7 +19,15 @@ const INSTALL_COMMAND = 'pnpm add @luke-ui/react react-aria-components';
  * pending Button.
  */
 export function HomeHero() {
-	const [, formAction, isPending] = useActionState(saveChanges, null);
+	const [isPending, startTransition] = useTransition();
+
+	// `onSubmit` rather than a form Action, so React never resets the field after saving.
+	function handleSubmit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		startTransition(async () => {
+			await delay(1000);
+		});
+	}
 
 	return (
 		<section className="grid grid-cols-1 items-center gap-10 pt-16 pb-16 md:grid-cols-2 md:gap-16 md:pt-24 md:pb-24">
@@ -62,7 +71,7 @@ export function HomeHero() {
 				padding="sp24"
 			>
 				<ThemeControls className="justify-self-start" />
-				<form action={formAction}>
+				<form onSubmit={handleSubmit}>
 					<Stack gap="sp16">
 						<TextField isRequired label="Name" name="name" />
 						<Cluster gap="sp8">
@@ -80,11 +89,9 @@ export function HomeHero() {
 	);
 }
 
-/** Stands in for a real submission. The native form action drives the Button's pending state. */
-async function saveChanges(_state: null, _formData: FormData) {
+/** Stands in for a real submission's latency. */
+async function delay(ms: number) {
 	await new Promise((resolve) => {
-		setTimeout(resolve, 1000);
+		setTimeout(resolve, ms);
 	});
-
-	return null;
 }
