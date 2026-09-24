@@ -74,7 +74,7 @@ function RootDocument({ children }: { children: ReactNode }) {
 			<head>
 				<HeadContent />
 			</head>
-			<body className="flex min-h-screen flex-col">
+			<body className="flex min-h-dvh flex-col">
 				<RootProvider
 					search={{ SearchDialog: LazySearchDialog }}
 					theme={{ attribute: ['class', 'data-color-mode'], hotKey: false }}

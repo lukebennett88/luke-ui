@@ -53,7 +53,7 @@ export function DocsThemeRoot({ children }: PropsWithChildren) {
 	return (
 		<ThemeIdentitySettingsContext.Provider value={settings}>
 			<div
-				className={cx(rootClassName, 'flex min-h-screen flex-1 flex-col text-fd-foreground')}
+				className={cx(rootClassName, 'flex min-h-dvh flex-1 flex-col text-fd-foreground')}
 				data-color-mode={colorMode ?? undefined}
 			>
 				{children}

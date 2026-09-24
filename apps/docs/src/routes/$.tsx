@@ -19,6 +19,7 @@ import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { baseOptions } from '../lib/layout.shared';
 import { markdownUrlForPage } from '../lib/markdown-page-path.js';
+import { resolvePageHeadMeta } from '../lib/page-head.js';
 import { source } from '../lib/source';
 
 const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
@@ -42,6 +43,9 @@ export const Route = createFileRoute('/$')({
 		await clientLoader.preload(data.path);
 		return data;
 	},
+	head: ({ loaderData }) => ({
+		meta: resolvePageHeadMeta(loaderData),
+	}),
 });
 
 const loader = createServerFn({
@@ -57,12 +61,14 @@ const loader = createServerFn({
 		const markdownPath = markdownUrlForPage(page.url);
 
 		return {
+			description: page.data.description ?? null,
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
 			markdownUrl: withBasePath(markdownPath, import.meta.env.BASE_URL),
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			reactAriaUrl: page.data.reactAria ?? null,
 			sourceUrl: page.data.source ? `${GITHUB_TREE_URL}/${page.data.source}` : null,
+			title: page.data.title,
 		};
 	});
 
