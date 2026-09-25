@@ -528,6 +528,66 @@ test(
 );
 
 test(
+	'hides forbidden ScrollFade props without hiding supported props',
+	async () => {
+		const names = await visiblePropNames(
+			'packages/@luke-ui/react/src/core/scroll-fade/scroll-fade.tsx',
+			'ScrollFadeProps',
+		);
+		expect(names).toContain('axis');
+		for (const prop of [
+			'tabIndex',
+			'overflow',
+			'overflowX',
+			'overflowY',
+			'elementType',
+			'role',
+			'render',
+		] as const) {
+			expect(names, `ScrollFadeProps should hide ${prop}`).not.toContain(prop);
+		}
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
+test(
+	'keeps optional undefined props while hiding direct and aliased never props',
+	async () => {
+		const project = await getSharedPropProject(repoRoot);
+		const file = project.createSourceFile(
+			resolve(fixtureSrcDir, 'prop-analysis-never.ts'),
+			'type Forbidden = never; export interface NeverProps { allowed?: undefined; forbidden?: never; aliased?: Forbidden; }',
+			{ overwrite: true },
+		);
+		const declaration = file.getExportedDeclarations().get('NeverProps')?.[0];
+		if (declaration === undefined) throw new Error('Missing NeverProps fixture declaration');
+
+		const names = filterGeneratedDoc(
+			{
+				description: '',
+				id: 'NeverProps',
+				entries: ['allowed', 'forbidden', 'aliased'].map((name) => ({
+					deprecated: false,
+					description: '',
+					name,
+					required: false,
+					simplifiedType: 'undefined',
+					tags: [],
+					type: 'undefined',
+				})),
+				name: 'NeverProps',
+			},
+			declaration,
+			fixtureSrcDir,
+		).entries.map((entry) => entry.name);
+
+		expect(names).toEqual(['allowed']);
+		expect(typeForwardsDomProps(declaration, fixtureSrcDir)).toBe(false);
+	},
+	TS_MORPH_TEST_TIMEOUT,
+);
+
+test(
 	'does not treat every union as DOM forwarding',
 	async () => {
 		const project = await getSharedPropProject(repoRoot);
