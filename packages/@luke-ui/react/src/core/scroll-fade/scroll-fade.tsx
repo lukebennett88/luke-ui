@@ -39,28 +39,25 @@ export function ScrollFade(props: ScrollFadeProps): JSX.Element {
 	return (
 		<Box
 			{...omitUnsupportedSprinklesProps(domProps, scrollFadeProperties)}
-			className={cx(
-				scrollFadeRecipe({ axis, className }),
-				overflows
-					? axis === 'inline'
-						? scrollFadeOverflowingInline
-						: scrollFadeOverflowingBlock
-					: undefined,
-			)}
-			data-scroll-fade-end={logicalEnd}
-			elementType="div"
-			ref={scrollportRef}
-			style={style}
 			{...(overflows
 				? {
-						// Naming is type-required because the div may become a region; apply it only
-						// while that automatic role is active so the div is never a named generic.
-						...(ariaLabel === undefined ? null : { 'aria-label': ariaLabel }),
-						...(ariaLabelledBy === undefined ? null : { 'aria-labelledby': ariaLabelledBy }),
+						// Overflow regions must be keyboard-focusable (tabIndex=0) and
+						// named so screen readers know what has focus.
+						// Apply these only when content overflows. Otherwise they add an
+						// extra tab stop and announce a region that does not need one.
+						...(ariaLabel ? { 'aria-label': ariaLabel } : null),
+						...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : null),
 						role: 'region',
 						tabIndex: 0,
 					}
 				: null)}
+			className={cx(
+				scrollFadeRecipe({ axis, className }),
+				overflows && scrollFadeOverflowingClassByAxis[axis],
+			)}
+			data-scroll-fade-end={logicalEnd}
+			ref={scrollportRef}
+			style={style}
 		/>
 	);
 }
@@ -113,20 +110,38 @@ for (const property of scrollFadeOwnedProperties) {
 	scrollFadeProperties.delete(property);
 }
 
+const scrollFadeOverflowingClassByAxis: Record<ScrollFadeAxis, string> = {
+	block: scrollFadeOverflowingBlock,
+	inline: scrollFadeOverflowingInline,
+};
+
+type ScrollOverflowState = {
+	logicalEnd: ScrollFadePhysicalSide;
+	overflows: boolean;
+};
+
 /** Tracks overflow and the physical side of the active axis's logical end. */
 function useScrollOverflow(
-	scrollportRef: { current: HTMLElement | null },
+	scrollportRef: {
+		current: HTMLElement | null;
+	},
 	axis: ScrollFadeAxis,
-): { logicalEnd: ScrollFadePhysicalSide; overflows: boolean } {
-	const [overflows, setOverflows] = useState(false);
-	const [logicalEnd, setLogicalEnd] = useState<ScrollFadePhysicalSide>(
-		axis === 'inline' ? 'right' : 'bottom',
-	);
+): ScrollOverflowState {
+	const [state, setState] = useState<ScrollOverflowState>(() => ({
+		logicalEnd: axis === 'inline' ? 'right' : 'bottom',
+		overflows: false,
+	}));
 
 	useLayoutEffect(() => {
 		const element = scrollportRef.current;
 		if (!element) {
-			setOverflows(false);
+			setState((prev) => {
+				if (!prev.overflows) return prev;
+				return {
+					logicalEnd: prev.logicalEnd,
+					overflows: false,
+				};
+			});
 			return;
 		}
 
@@ -134,10 +149,17 @@ function useScrollOverflow(
 		const resizeObserver = new ResizeObserver(scheduleMeasure);
 
 		const measure = () => {
-			const nextEnd = logicalEndSide(element, axis);
-			setLogicalEnd((prev) => (prev === nextEnd ? prev : nextEnd));
-			const next = overflowsOnAxis(element, axis);
-			setOverflows((prev) => (prev === next ? prev : next));
+			const style = getComputedStyle(element);
+			const writingMode = style.writingMode;
+			const logicalEnd = physicalSideOfLogicalEnd(axis, writingMode, style.direction);
+			const overflows = overflowsOnAxisForWritingMode(element, axis, writingMode);
+			setState((prev) => {
+				if (prev.logicalEnd === logicalEnd && prev.overflows === overflows) return prev;
+				return {
+					logicalEnd,
+					overflows,
+				};
+			});
 		};
 
 		function scheduleMeasure() {
@@ -194,12 +216,20 @@ function useScrollOverflow(
 		};
 	}, [axis, scrollportRef]);
 
-	return { logicalEnd, overflows };
+	return state;
 }
 
 /** Whether `element` overflows on the logical `axis` for its writing mode. */
 export function overflowsOnAxis(element: HTMLElement, axis: ScrollFadeAxis): boolean {
-	const inlineIsHorizontal = isHorizontalWritingMode(getComputedStyle(element).writingMode);
+	return overflowsOnAxisForWritingMode(element, axis, getComputedStyle(element).writingMode);
+}
+
+function overflowsOnAxisForWritingMode(
+	element: HTMLElement,
+	axis: ScrollFadeAxis,
+	writingMode: string,
+): boolean {
+	const inlineIsHorizontal = isHorizontalWritingMode(writingMode);
 	if (axis === 'inline') {
 		return inlineIsHorizontal
 			? element.scrollWidth > element.clientWidth + 1
@@ -213,57 +243,72 @@ export function overflowsOnAxis(element: HTMLElement, axis: ScrollFadeAxis): boo
 /**
  * Physical side of logical end for `axis`.
  *
- * Measured from used layout (CSS `direction`, writing mode, `text-orientation`, etc.) via a logical
- * inset probe — not from `:dir()`, which ignores `style={{ direction }}`.
+ * Derived from the used `writing-mode` and CSS `direction` via `getComputedStyle` — not from
+ * `:dir()`, which ignores `style={{ direction }}`.
  */
 export function logicalEndSide(element: HTMLElement, axis: ScrollFadeAxis): ScrollFadePhysicalSide {
-	return physicalSideOfLogicalEnd(element, axis === 'inline' ? 'inline-end' : 'block-end');
+	const style = getComputedStyle(element);
+	return physicalSideOfLogicalEnd(axis, style.writingMode, style.direction);
 }
 
+type LogicalEndSides = {
+	block: ScrollFadePhysicalSide;
+	inline: {
+		ltr: ScrollFadePhysicalSide;
+		rtl: ScrollFadePhysicalSide;
+	};
+};
+
+const HORIZONTAL_LOGICAL_END: LogicalEndSides = {
+	block: 'bottom',
+	inline: {
+		ltr: 'right',
+		rtl: 'left',
+	},
+};
+
+const VERTICAL_RL_LOGICAL_END: LogicalEndSides = {
+	block: 'left',
+	inline: {
+		ltr: 'bottom',
+		rtl: 'top',
+	},
+};
+
+const VERTICAL_LR_LOGICAL_END: LogicalEndSides = {
+	block: 'right',
+	inline: {
+		ltr: 'bottom',
+		rtl: 'top',
+	},
+};
+
+const SIDEWAYS_LR_LOGICAL_END: LogicalEndSides = {
+	block: 'right',
+	inline: {
+		ltr: 'top',
+		rtl: 'bottom',
+	},
+};
+
+const LOGICAL_END_BY_WRITING_MODE: Record<string, LogicalEndSides> = {
+	'sideways-lr': SIDEWAYS_LR_LOGICAL_END,
+	'sideways-rl': VERTICAL_RL_LOGICAL_END,
+	tb: VERTICAL_LR_LOGICAL_END,
+	'tb-rl': VERTICAL_RL_LOGICAL_END,
+	'vertical-lr': VERTICAL_LR_LOGICAL_END,
+	'vertical-rl': VERTICAL_RL_LOGICAL_END,
+};
+
+/** Maps `writing-mode` and `direction` to the physical side of the logical end for `axis`. */
 function physicalSideOfLogicalEnd(
-	element: HTMLElement,
-	edge: 'block-end' | 'inline-end',
+	axis: ScrollFadeAxis,
+	writingMode: string,
+	direction: string,
 ): ScrollFadePhysicalSide {
-	const style = getComputedStyle(element);
-	// Measure on a detached box so scrollport scroll offset cannot move the probe. Copy the used
-	// writing mode, CSS direction, and text-orientation — not `:dir()`, which ignores CSS direction.
-	const measure = document.createElement('div');
-	measure.style.cssText = [
-		'position:absolute',
-		'inset-inline-start:-9999px',
-		'inset-block-start:0',
-		'inline-size:100px',
-		'block-size:100px',
-		`writing-mode:${style.writingMode}`,
-		`direction:${style.direction}`,
-		`text-orientation:${style.textOrientation}`,
-	].join(';');
-
-	const probe = document.createElement('div');
-	probe.style.cssText =
-		edge === 'inline-end'
-			? 'position:absolute;inset-inline-end:0;inset-block-start:50%;inline-size:1px;block-size:1px;margin-block-start:-0.5px'
-			: 'position:absolute;inset-block-end:0;inset-inline-start:50%;inline-size:1px;block-size:1px;margin-inline-start:-0.5px';
-
-	measure.append(probe);
-	document.body.append(measure);
-
-	const measureRect = measure.getBoundingClientRect();
-	const probeRect = probe.getBoundingClientRect();
-	measure.remove();
-
-	const probeCenterX = (probeRect.left + probeRect.right) / 2;
-	const probeCenterY = (probeRect.top + probeRect.bottom) / 2;
-	const measureCenterX = (measureRect.left + measureRect.right) / 2;
-	const measureCenterY = (measureRect.top + measureRect.bottom) / 2;
-
-	const inlineIsHorizontal = isHorizontalWritingMode(style.writingMode);
-	const preferHorizontal = edge === 'inline-end' ? inlineIsHorizontal : !inlineIsHorizontal;
-
-	if (preferHorizontal) {
-		return probeCenterX < measureCenterX ? 'left' : 'right';
-	}
-	return probeCenterY < measureCenterY ? 'top' : 'bottom';
+	const ends = LOGICAL_END_BY_WRITING_MODE[writingMode] ?? HORIZONTAL_LOGICAL_END;
+	if (axis === 'block') return ends.block;
+	return direction === 'rtl' ? ends.inline.rtl : ends.inline.ltr;
 }
 
 function isHorizontalWritingMode(writingMode: string): boolean {
