@@ -6,7 +6,7 @@ import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { TextField } from '@luke-ui/react/text-field';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
-import type { FormEvent } from 'react';
+import type { SubmitEvent } from 'react';
 import { useTransition } from 'react';
 import { DocsLink } from './docs-link.js';
 import { ThemeControls } from './theme-controls.js';
@@ -22,7 +22,7 @@ export function HomeHero() {
 	const [isPending, startTransition] = useTransition();
 
 	// `onSubmit` rather than a form Action, so React never resets the field after saving.
-	function handleSubmit(event: FormEvent<HTMLFormElement>) {
+	function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		startTransition(async () => {
 			await delay(1000);

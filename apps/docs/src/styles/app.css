@@ -52,11 +52,12 @@ code > * {
 /*
  * Fumadocs renders a page-tree category label (`SidebarSeparator`, e.g. "Foundations") as a plain
  * `<p>` at the same size, weight, and colour as the links beneath it, so a group reads as another
- * item instead of a heading. `#nd-sidebar` holds no other `<p>`, so this selector reaches only that
- * label. Shrink it to caption size, give it label weight, and move it to the secondary text colour
- * so it scans as a heading above its entries.
+ * item instead of a heading. The desktop and mobile sidebar trees hold no other `<p>`, so these
+ * selectors reach only that label. Shrink it to caption size, give it label weight, and move it to
+ * the secondary text colour so it scans as a heading above its entries.
  */
-.luke-ui-theme #nd-sidebar p {
+.luke-ui-theme #nd-sidebar p,
+.luke-ui-theme #nd-sidebar-mobile p {
 	color: var(--luke-color-text-secondary);
 	font-size: var(--luke-font-caption-font-size);
 	font-weight: var(--luke-font-weight-label);
@@ -68,28 +69,7 @@ code > * {
  * about 38px between item baselines. Tighten that to the theme's smallest spacing step so entries
  * sit about 30px apart, which still keeps a 24px+ tall hit area.
  */
-.luke-ui-theme #nd-sidebar a {
+.luke-ui-theme #nd-sidebar a,
+.luke-ui-theme #nd-sidebar-mobile a {
 	padding-block: var(--luke-space-sp4);
-}
-
-/* Component catalog: bordered tiles (production card rhythm) without Fumadocs Card. */
-.luke-ui-theme .components-index-entry {
-	display: flex;
-	flex-direction: column;
-	gap: var(--luke-space-sp8);
-	height: 100%;
-	padding: var(--luke-space-sp16);
-	border: 1px solid var(--luke-color-border-decorative);
-	border-radius: var(--luke-radius-surface);
-	text-decoration: none;
-	transition: background-color 100ms cubic-bezier(0, 0, 0.4, 1);
-}
-
-.luke-ui-theme .components-index-entry:hover {
-	background-color: var(--luke-color-background-neutral-subtle-hover);
-}
-
-.luke-ui-theme .components-index-entry:focus-visible {
-	outline: 2px solid var(--luke-color-border-focus);
-	outline-offset: 2px;
 }

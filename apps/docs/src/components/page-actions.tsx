@@ -25,26 +25,26 @@ export function PageActions({
 	reactAriaUrl,
 	sourceUrl,
 }: PageActionsProps) {
-	const showMarkdownActions = mode === 'all';
+	const showAllActions = mode === 'all';
 
 	return (
 		<div className="not-prose flex w-full flex-wrap items-center gap-2">
-			{reactAriaUrl ? (
+			{showAllActions && reactAriaUrl ? (
 				<PageActionLink
 					href={reactAriaUrl}
 					icon={<ReactAriaMark className="size-4 shrink-0" />}
 					label="React Aria"
 				/>
 			) : null}
-			{sourceUrl ? (
+			{showAllActions && sourceUrl ? (
 				<PageActionLink
 					href={sourceUrl}
 					icon={<GithubMark className="size-4 shrink-0" />}
 					label="Source"
 				/>
 			) : null}
-			{showMarkdownActions ? <CopyMarkdownButton markdownUrl={markdownUrl} /> : null}
-			{showMarkdownActions ? (
+			{showAllActions ? <CopyMarkdownButton markdownUrl={markdownUrl} /> : null}
+			{showAllActions ? (
 				<PageActionLink href={markdownUrl} iconName="codeBlock" label="View as Markdown" />
 			) : null}
 			<PageActionLink

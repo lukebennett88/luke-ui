@@ -44,8 +44,12 @@ export const Route = createFileRoute('/$')({
 		await clientLoader.preload(data.path);
 		return data;
 	},
-	head: ({ loaderData }) => ({
-		meta: resolvePageHeadMeta(loaderData),
+	head: ({ loaderData, match }) => ({
+		// A thrown `notFound()` leaves `loaderData` undefined, so supply the 404 title directly
+		// instead of falling through to the root route's default title.
+		meta: resolvePageHeadMeta(
+			match.status === 'notFound' ? { description: null, title: 'Page not found' } : loaderData,
+		),
 	}),
 });
 

@@ -4,17 +4,13 @@ import { Heading, HeadingLevels } from '@luke-ui/react/heading';
 import { Link } from '@luke-ui/react/link';
 import { Text } from '@luke-ui/react/text';
 import { vars } from '@luke-ui/react/theme';
+import { cx } from '@luke-ui/react/utils';
 import type { JSX } from 'react';
 import type {
 	ComponentIndexEntry,
 	ComponentIndexGroup,
 } from '../generated/components-index.generated.js';
 import { componentIndexGroups } from '../generated/components-index.generated.js';
-
-/** Stable in-page anchor for a category section title. */
-function categorySectionId(title: string): string {
-	return title.toLowerCase().replaceAll(/\s+/g, '-');
-}
 
 /**
  * Purpose-grouped index of every component guide, generated from the guides themselves. The
@@ -30,8 +26,8 @@ export function ComponentsIndex(): JSX.Element {
 				gap="sp32"
 				marginBlockStart="sp32"
 			>
-				{componentIndexGroups.map((group) => (
-					<CategoryGroup group={group} key={group.title} />
+				{componentIndexGroups.map((group, index) => (
+					<CategoryGroup group={group} isFirst={index === 0} key={group.title} />
 				))}
 			</Box>
 		</HeadingLevels>
@@ -43,24 +39,24 @@ const groupStyle = {
 	paddingBlockStart: vars.space.sp16,
 } as const;
 
-const sectionStyle = {
-	...groupStyle,
-	// Sticky docs header can clip the group title when arriving via hash link.
-	scrollMarginBlockStart: vars.space.sp64,
-} as const;
-
-function CategoryGroup({ group }: { group: ComponentIndexGroup }) {
+function CategoryGroup({ group, isFirst }: { group: ComponentIndexGroup; isFirst: boolean }) {
 	return (
 		<Box
 			display="flex"
 			elementType="section"
 			flexDirection="column"
 			gap="sp16"
-			id={categorySectionId(group.title)}
-			style={sectionStyle}
+			style={isFirst ? undefined : groupStyle}
 		>
 			<Heading typography="heading4">{group.title}</Heading>
-			<Grid columns={{ bp768: 2, initial: 1 }} gap="sp16">
+			<Grid
+				columns={{
+					initial: 1,
+					bp768: 2,
+					bp1024: 3,
+				}}
+				gap="sp16"
+			>
 				{group.entries.map((entry) => (
 					<ComponentEntry entry={entry} key={entry.url} />
 				))}
@@ -71,13 +67,31 @@ function CategoryGroup({ group }: { group: ComponentIndexGroup }) {
 
 function ComponentEntry({ entry }: { entry: ComponentIndexEntry }) {
 	return (
-		<Link className="components-index-entry" href={entry.url}>
+		<Box
+			blockSize="100%"
+			borderColor="decorative"
+			borderRadius="surface"
+			borderStyle="solid"
+			borderWidth="thin"
+			backgroundColor="surface.canvas"
+			className={cx(
+				'no-underline transition-colors focus-visible:outline-2',
+				'focus-visible:outline-(--luke-color-border-focus) focus-visible:outline-offset-2',
+				'hover:bg-(--luke-color-background-neutral-subtle-hover)',
+				'active:bg-(--luke-color-background-neutral-subtle-pressed)',
+			)}
+			display="flex"
+			flexDirection="column"
+			gap="sp8"
+			padding="sp16"
+			render={(props) => <Link {...props} href={entry.url} />}
+		>
 			<Text elementType="span" fontWeight="emphasis">
 				{entry.name}
 			</Text>
 			<Text color="secondary" elementType="span" typography="caption">
 				{entry.description}
 			</Text>
-		</Link>
+		</Box>
 	);
 }

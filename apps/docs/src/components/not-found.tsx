@@ -1,26 +1,36 @@
+import { Cluster } from '@luke-ui/react/cluster';
 import { Heading } from '@luke-ui/react/heading';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { DocsLink } from './docs-link.js';
 import { SiteNav } from './site-nav.js';
 
+/** 404 page shown for any unmatched route, matching the home hero's spacing and CTA pairing. */
 export function NotFound() {
 	return (
 		<>
 			<SiteNav hideActiveDestination />
-			<main className="flex w-full flex-1 flex-col items-center justify-center px-4 md:px-6">
-				<Stack alignItems="center" className="max-w-md text-center" gap="sp16">
+			<main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-16 pb-16 md:px-6 md:pt-24 md:pb-24">
+				<Stack alignItems="flex-start" gap="sp24">
 					<Heading level={1} typography="display">
-						404
+						Page not found
 					</Heading>
-					<Heading level={2}>Page Not Found</Heading>
-					<Text color="secondary" textAlign="center">
-						The page you are looking for might have been removed, had its name changed, or is
-						temporarily unavailable.
+					<Text className="max-w-xl" color="secondary" elementType="p" typography="lead">
+						Check the address, or search the docs.
 					</Text>
-					<DocsLink appearance="button" prominence="high" to="/">
-						Back to Home
-					</DocsLink>
+					<Cluster gap="sp12">
+						<DocsLink appearance="button" prominence="high" to="/">
+							Go to home
+						</DocsLink>
+						<DocsLink
+							appearance="button"
+							params={{ _splat: 'components' }}
+							prominence="low"
+							to="/$"
+						>
+							Browse components
+						</DocsLink>
+					</Cluster>
 				</Stack>
 			</main>
 		</>

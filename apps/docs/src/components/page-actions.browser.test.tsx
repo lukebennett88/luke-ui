@@ -127,9 +127,8 @@ test('shows only Edit on GitHub when mode is edit', async () => {
 
 	expect(page.getByRole('button', { name: 'Copy Markdown' })).not.toBeInTheDocument();
 	expect(page.getByRole('link', { name: 'View as Markdown' })).not.toBeInTheDocument();
-	await expect
-		.element(page.getByRole('link', { name: 'React Aria' }))
-		.toHaveAttribute('href', reactAriaUrl);
+	expect(page.getByRole('link', { name: 'React Aria' })).not.toBeInTheDocument();
+	expect(page.getByRole('link', { name: 'Source' })).not.toBeInTheDocument();
 	await expect.element(page.getByRole('link', { name: 'Edit on GitHub' })).toBeVisible();
 });
 
