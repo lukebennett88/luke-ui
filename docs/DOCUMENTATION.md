@@ -346,12 +346,19 @@ mapping page URLs to files each have one owner in `apps/docs/src/lib/`.
 
 Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
 
-The package README links to the hosted docs. Fumadocs provides:
+The package README links to the hosted docs, which also serve agents:
 
-- `/llms.txt` for the component index.
+- `/llms.txt`, an llmstxt.org index of every docs guide and every component guide.
 - `/llms-full.txt` for full docs.
 - Per-page Markdown by appending `.md` to a docs URL, for example `/docs/installation.md` or
-  `/components/actions/button.md`.
+  `/components/actions/button.md`. `/index.md` is a short homepage summary. A missing page's `.md`
+  returns a Markdown 404 body, not HTML.
+- Content negotiation: a request whose `Accept` header prefers `text/markdown` over HTML gets the
+  page's Markdown instead of its HTML. Browsers get HTML as usual.
+- `/sitemap.xml` and `/robots.txt` for search engines and agents, built from the `SITE_URL`
+  build-time variable (falls back to `http://localhost:3000` locally).
+- Each HTML page links to its Markdown twin (`<link rel="alternate" type="text/markdown">`) and to
+  `/llms.txt` (`<link rel="describedby">`).
 
 ## Component docs
 

@@ -3,10 +3,19 @@ import { createFileRoute } from '@tanstack/react-router';
 import { HomeFeatures } from '../components/home-features.js';
 import { HomeHero } from '../components/home-hero.js';
 import { SiteNav } from '../components/site-nav.js';
+import { withBasePath } from '../lib/base-path.js';
 
 export const Route = createFileRoute('/')({
 	component: Home,
 	head: () => ({
+		links: [
+			{
+				href: withBasePath('/index.md', import.meta.env.BASE_URL),
+				rel: 'alternate',
+				type: 'text/markdown',
+			},
+			{ href: withBasePath('/llms.txt', import.meta.env.BASE_URL), rel: 'describedby' },
+		],
 		meta: [
 			{ title: 'Luke UI' },
 			{
