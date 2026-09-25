@@ -203,6 +203,11 @@ export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
 
 `RecipeSelection` contains only variant keys. `className` is composition input, not a variant.
 
+The variant groups in `variants` are the only groups a recipe accepts. A group name that `variants`
+does not declare is a type error in `defaultVariants`, `compoundVariants`, `compoundSlots`, and
+`withDefaultVariants` defaults. This also applies to a predeclared config and to entries that a
+helper function returns.
+
 ### Shared input-state selectors
 
 Field-control recipes share hover, focus, disabled, invalid, and read-only selectors from
