@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Link } from '@luke-ui/react/link';
 import { Text } from '@luke-ui/react/text';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (

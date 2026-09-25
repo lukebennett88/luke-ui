@@ -1,20 +1,13 @@
 import { AutoGrid } from '@luke-ui/react/auto-grid';
-import { vars } from '@luke-ui/react/theme';
-
-const itemStyle = {
-	backgroundColor: vars.color.surface.floating,
-	border: `1px solid ${vars.color.border.decorative}`,
-	borderRadius: vars.radius.detail,
-	padding: vars.space.sp12,
-} as const;
+import { ExampleItem } from '#docs';
 
 export default () => {
 	return (
-		<AutoGrid elementType="ul" gap="sp12" inlineSize="100%" minColumnInlineSize="12rem">
-			<li style={itemStyle}>First list item</li>
-			<li style={itemStyle}>Second list item</li>
-			<li style={itemStyle}>Third list item</li>
-			<li style={itemStyle}>Fourth list item</li>
+		<AutoGrid elementType="ul" gap="sp12" minColumnInlineSize="12rem">
+			<ExampleItem elementType="li">First list item</ExampleItem>
+			<ExampleItem elementType="li">Second list item</ExampleItem>
+			<ExampleItem elementType="li">Third list item</ExampleItem>
+			<ExampleItem elementType="li">Fourth list item</ExampleItem>
 		</AutoGrid>
 	);
 };

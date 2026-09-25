@@ -1,5 +1,5 @@
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (

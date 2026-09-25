@@ -4,7 +4,7 @@ import { visit } from 'unist-util-visit';
 import { findMdxFiles } from './docs-mdx-files.js';
 import { exampleBlockSources } from './example-block-sources.js';
 
-const IMPORT_PATTERN = /\bfrom\s+["']((?:\.|#docs\/)[^"']+)["']/g;
+const IMPORT_PATTERN = /\bfrom\s+["']((?:\.[^"']+|#docs))["']/g;
 
 const JS_EXTENSION_PATTERN = /\.js$/;
 
@@ -117,9 +117,10 @@ function findImportedExamples(examplePath: string, examplesDir: string): Array<s
 		const importPath = match[1];
 		if (!importPath) continue;
 
-		const resolvedImportPath = importPath.startsWith('#docs/')
-			? resolve(examplesDir, importPath.slice('#docs/'.length))
-			: resolve(examplePath, '..', importPath);
+		const resolvedImportPath =
+			importPath === '#docs'
+				? resolve(examplesDir, 'docs')
+				: resolve(examplePath, '..', importPath);
 		const importedPath = extname(resolvedImportPath)
 			? resolvedImportPath.replace(JS_EXTENSION_PATTERN, '.tsx')
 			: `${resolvedImportPath}.tsx`;

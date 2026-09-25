@@ -1,5 +1,5 @@
 import { Heading } from '@luke-ui/react/heading';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (

@@ -1,5 +1,5 @@
 import { Text } from '@luke-ui/react/text';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 const variants = [
 	{ label: 'Tabular', sample: '111,111 888,888', value: 'tabular-nums' },

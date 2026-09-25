@@ -1,6 +1,6 @@
 import { Icon } from '@luke-ui/react/icon';
 import { Text } from '@luke-ui/react/text';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (

@@ -78,7 +78,7 @@ test('system colour mode follows the platform preference and drives the docs chr
 
 test('leaves full-bleed story surfaces unframed', () => {
 	renderTheme(
-		<StoryWrapper mode="full-bleed">
+		<StoryWrapper layout="full-bleed">
 			<span>Full-bleed example content</span>
 		</StoryWrapper>,
 	);

@@ -1,5 +1,5 @@
 import { Link } from '@luke-ui/react/link';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (

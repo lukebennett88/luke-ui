@@ -11,7 +11,7 @@ export default () => {
 			display="grid"
 			overflowX="auto"
 			rowGap="sp12"
-			style={{ gridTemplateColumns: 'auto 1fr', inlineSize: '100%' }}
+			style={{ gridTemplateColumns: 'auto 1fr' }}
 		>
 			{spaceScale.map(([step, value]) => (
 				<Fragment key={step}>

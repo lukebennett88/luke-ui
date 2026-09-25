@@ -304,7 +304,7 @@ title: Settings
 <ExampleBlock
 	src="settings/basic"
 	title="Settings — Basic"
-	mode={{ a: 'b' }}
+	layout={{ a: 'b' }}
 	start={1}
 />
 

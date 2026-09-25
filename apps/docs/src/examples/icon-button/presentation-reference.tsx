@@ -1,5 +1,5 @@
 import { IconButton } from '@luke-ui/react/icon-button';
-import { Comparison, ComparisonItem } from '#docs/comparison';
+import { Comparison, ComparisonItem } from '#docs';
 
 export default () => {
 	return (

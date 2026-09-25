@@ -23,7 +23,7 @@ test('treats a relative import as unresolvable in the playground', () => {
 test('treats an example that only imports playground specifiers as runnable', () => {
 	const source = [
 		"import { Button } from '@luke-ui/react/button';",
-		"import { Comparison } from '#docs/comparison';",
+		"import { Comparison, ExampleItem } from '#docs';",
 		'',
 	].join('\n');
 
