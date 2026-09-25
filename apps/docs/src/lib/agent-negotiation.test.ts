@@ -265,20 +265,61 @@ test('passes through an already-Markdown request unchanged', async () => {
 	expect(fetchMock).not.toHaveBeenCalled();
 });
 
-test('passes through /api/* unchanged, regardless of Accept', async () => {
-	const apiResponse = new Response('{}', { headers: { 'Content-Type': 'application/json' } });
-	const next = vi.fn<() => Promise<Response>>(async () => apiResponse);
-	const fetchMock = vi.fn<(url: URL) => Promise<Response>>();
+test.each(['/api', '/api/search'])(
+	'passes through %s unchanged, regardless of Accept',
+	async (pathname) => {
+		const apiResponse = new Response('{}', { headers: { 'Content-Type': 'application/json' } });
+		const next = vi.fn<() => Promise<Response>>(async () => apiResponse);
+		const fetchMock = vi.fn<(url: URL) => Promise<Response>>();
 
-	const request = new Request('https://luke-ui.netlify.app/api/search', {
+		const request = new Request(`https://luke-ui.netlify.app${pathname}`, {
+			headers: { Accept: 'text/markdown' },
+		});
+		const res = await handleRequest(request, { fetch: fetchMock, next });
+
+		expect(next).toHaveBeenCalledOnce();
+		expect(fetchMock).not.toHaveBeenCalled();
+		expect(res).toBe(apiResponse);
+		expect(res.headers.get('Vary')).toBeNull();
+	},
+);
+
+test('negotiates Markdown for /apiary, a sibling path that merely starts with "api"', async () => {
+	const next = vi.fn<(request?: Request) => Promise<Response>>();
+	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+		return new Response('# Apiary\n', {
+			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+			status: 200,
+		});
+	});
+
+	const request = new Request('https://luke-ui.netlify.app/apiary', {
 		headers: { Accept: 'text/markdown' },
 	});
 	const res = await handleRequest(request, { fetch: fetchMock, next });
 
-	expect(next).toHaveBeenCalledOnce();
+	expect(fetchMock).toHaveBeenCalledWith(new URL('https://luke-ui.netlify.app/apiary.md'));
+	expect(next).not.toHaveBeenCalled();
+	expect(res.status).toBe(200);
+});
+
+test('passes /apiary through to next with a merged Vary under a browser Accept header', async () => {
+	const next = vi.fn<() => Promise<Response>>(async () => {
+		return new Response('<html></html>', {
+			headers: { 'Content-Type': 'text/html' },
+			status: 200,
+		});
+	});
+	const fetchMock = vi.fn<(url: URL) => Promise<Response>>();
+
+	const request = new Request('https://luke-ui.netlify.app/apiary', {
+		headers: { Accept: 'text/html,application/xhtml+xml,*/*;q=0.8' },
+	});
+	const res = await handleRequest(request, { fetch: fetchMock, next });
+
 	expect(fetchMock).not.toHaveBeenCalled();
-	expect(res).toBe(apiResponse);
-	expect(res.headers.get('Vary')).toBeNull();
+	expect(next).toHaveBeenCalledOnce();
+	expect(res.headers.get('Vary')).toBe('Accept');
 });
 
 test('serves an empty body for a HEAD request', async () => {

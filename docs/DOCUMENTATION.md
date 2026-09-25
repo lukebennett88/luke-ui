@@ -356,14 +356,22 @@ The package README links to the hosted docs. Fumadocs provides:
 - Per-page Markdown by appending `.md` to a docs URL, for example `/docs/installation.md` or
   `/components/actions/button.md`. `/index.md` is the homepage. A request for a page's Markdown that
   does not exist returns a `text/markdown` 404 body, not HTML. Each HTML page links to its Markdown
-  with `<link rel="alternate" type="text/markdown">`.
+  with `<link rel="alternate" type="text/markdown">` and to the site index with
+  `<link rel="describedby">`, pointing at `/llms.txt` per the llms.txt v2 proposal. See
+  `apps/docs/src/lib/agent-head-links.ts`.
 - `/sitemap.xml` and `/robots.txt` for search engines and agents.
 
 A Netlify edge function serves a page's Markdown instead of its HTML when the request's `Accept`
 header lists `text/markdown` explicitly, with a q-value at least as high as HTML's. HTML's q-value
 comes from `text/html`, `text/*`, or `*/*`, in that order. Wildcards alone never select Markdown, so
-browsers get HTML. A Markdown request for a missing page gets the Markdown 404 body. `/api/*` always
-passes through unchanged. See `apps/docs/src/lib/agent-negotiation.ts`.
+browsers get HTML. A Markdown request for a missing page gets the Markdown 404 body. `/api` and
+`/api/*` always pass through unchanged (a sibling path like `/apiary` does not). See
+`apps/docs/src/lib/agent-negotiation.ts`.
+
+`.md` responses also carry an HTTP `Link: </llms.txt>; rel="describedby"` header, set on the
+root-path `/*.md` glob in `netlify.toml`. The edge function preserves a fetched `.md` response's
+headers when it re-serves it, so this covers both a direct `.md` request and one reached through
+Accept negotiation.
 
 Absolute URLs in `/llms.txt`, `/sitemap.xml`, `/robots.txt`, and Markdown 404 bodies use the
 `SITE_URL` build-time variable, which `netlify.toml` sets to the deploy's public origin. Local

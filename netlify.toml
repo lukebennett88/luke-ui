@@ -8,3 +8,12 @@ edge_functions = "apps/docs/netlify/edge-functions"
 [build.environment]
 # The deploy's public origin, baked into absolute URLs at build time.
 SITE_URL = "https://luke-ui.netlify.app"
+
+# Points a fetched or negotiated `.md` response at the site's llms.txt index,
+# per the llms.txt v2 proposal. Root-path glob only — the edge function
+# preserves this header when it re-serves a fetched `.md` response, so it
+# covers both direct requests and Accept-negotiated ones.
+[[headers]]
+for = "/*.md"
+[headers.values]
+Link = '</llms.txt>; rel="describedby"'

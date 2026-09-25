@@ -61,7 +61,7 @@ interface HandleRequestDeps {
 	next: (request?: Request) => Promise<Response>;
 }
 
-const PASSTHROUGH_PREFIXES = ['/.well-known/', '/__tsr/', '/api'];
+const PASSTHROUGH_PREFIXES = ['/.well-known/', '/__tsr/'];
 
 /** Negotiates Markdown vs. HTML for GET/HEAD requests to non-asset paths. */
 export async function handleRequest(request: Request, deps: HandleRequestDeps): Promise<Response> {
@@ -82,8 +82,14 @@ export async function handleRequest(request: Request, deps: HandleRequestDeps): 
 function isPassthroughPath(pathname: string): boolean {
 	if (PASSTHROUGH_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix)))
 		return true;
+	if (isApiPath(pathname)) return true;
 	const lastSegment = LAST_SEGMENT_PATTERN.exec(pathname)?.[1] ?? pathname;
 	return lastSegment.includes('.');
+}
+
+/** True for `/api` and any path under it, but not a sibling like `/apiary`. */
+function isApiPath(pathname: string): boolean {
+	return pathname === '/api' || pathname.startsWith('/api/');
 }
 
 async function handleMarkdownRequest(
