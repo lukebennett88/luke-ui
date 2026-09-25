@@ -35,9 +35,6 @@
   `check:format-root`, which covers files outside packages such as `docs/*.md`, and knip
   (`check:cycles`, `check:unused`). If `check:format-root` fails on Markdown wrapping, run
   `pnpm run fix:format-root`. Do not re-wrap by hand.
-- In a new worktree, run `pnpm run build:packages` before `pnpm run test`. The `test` task depends
-  on `^build`, which builds only dependencies, not `@luke-ui/react` itself, and some unit tests read
-  `dist/stylesheet.css`.
 - The Turbo cache is shared across worktrees, so `FULL TURBO` can replay another branch's result.
   For a real run, use `TURBO_FORCE=true pnpm run test`. Do not use `pnpm run test -- --force`,
   because the flag goes to the package script.
