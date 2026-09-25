@@ -28,3 +28,23 @@
 - Component prose lives in MDX files in `apps/docs/content/docs/`, not `.docs.md` files in the
   package. Update the relevant MDX page in the same change as component code.
 - Do not add or edit `.docs.md` files in `packages/@luke-ui/react/src/`.
+
+### Verification traps
+
+- A package-local `check:*` run is not what CI runs. Only the root `pnpm run check` runs
+  `check:format-root`, which covers files outside packages such as `docs/*.md`, and knip
+  (`check:cycles`, `check:unused`). If `check:format-root` fails on Markdown wrapping, run
+  `pnpm run fix:format-root`. Do not re-wrap by hand.
+- In a new worktree, run `pnpm run build:packages` before `pnpm run test`. The `test` task depends
+  on `^build`, which builds only dependencies, not `@luke-ui/react` itself, and some unit tests read
+  `dist/stylesheet.css`.
+- The Turbo cache is shared across worktrees, so `FULL TURBO` can replay another branch's result.
+  For a real run, use `TURBO_FORCE=true pnpm run test`. Do not use `pnpm run test -- --force`,
+  because the flag goes to the package script.
+- publint runs on every build through `publint: true` in `packages/@luke-ui/react/vite.config.ts`.
+  Do not add a `check:publint` script.
+- Lint rules live in the `lint` block of the root `vite.config.ts`. A `.oxlintrc.json` file is
+  ignored, and oxlint has no `no-restricted-syntax` rule. Two `lint.overrides` entries matching the
+  same file and rule do not merge: the later entry wins.
+- In `apps/docs`, a `src/lib/` module imported by a client component must not import `node:fs` or
+  `node:path`. If it does, the page returns HTTP 200 but its MDX body renders empty.
