@@ -5,6 +5,7 @@ import { createIcon, Icon } from '@luke-ui/react/icon';
 import { LoadingSkeleton } from '@luke-ui/react/loading-skeleton';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
+import { Text } from '@luke-ui/react/text';
 import { deriveNestedRadius, vars } from '@luke-ui/react/theme';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ComponentType, JSX, ReactNode } from 'react';
@@ -56,7 +57,7 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 	return (
 		<ExampleFrame
 			actions={
-				<Box className="flex shrink-0 items-center gap-1">
+				<Box alignItems="center" display="flex" flexShrink="0" gap="sp4">
 					{highlightedSource.playgroundHash != null ? (
 						<OpenInPlayground hash={highlightedSource.playgroundHash} />
 					) : null}
@@ -74,8 +75,8 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 			</ExamplePreview>
 			{showCode ? (
 				<Box
-					className="overflow-hidden"
 					id={codeId}
+					overflow="hidden"
 					style={{
 						borderEndEndRadius: INNER_RADIUS,
 						borderEndStartRadius: INNER_RADIUS,
@@ -282,7 +283,7 @@ function ActionPlaceholder({ children, iconName }: { children: ReactNode; iconNa
 
 function ExampleLoadingActions() {
 	return (
-		<Box aria-hidden className="flex shrink-0 items-center gap-1" inert>
+		<Box aria-hidden alignItems="center" display="flex" flexShrink="0" gap="sp4" inert>
 			<LoadingSkeleton radius="control">
 				<ActionPlaceholder iconName="externalLink">Open in playground</ActionPlaceholder>
 			</LoadingSkeleton>
@@ -301,22 +302,54 @@ type ExampleFrameProps = {
 };
 
 function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps) {
+	const titleId = useId();
 	return (
 		<Box
 			aria-label={ariaLabel}
-			className="not-prose isolate my-4 overflow-hidden border border-fd-border"
+			className="not-prose isolate border border-fd-border"
+			marginBlock="sp16"
 			role={ariaLabel ? 'region' : undefined}
 			style={{ borderRadius: OUTER_RADIUS }}
 		>
-			<Box className="border-fd-border border-b bg-fd-card">
-				<ScrollFade aria-label={`${title} example header`}>
-					<div className="flex w-max min-w-full items-center justify-between gap-2 px-4 py-2 whitespace-nowrap">
-						<span className="shrink-0 text-fd-muted-foreground text-sm">{title}</span>
-						{actions}
-					</div>
-				</ScrollFade>
+			<ScrollFade
+				aria-labelledby={titleId}
+				className="border-b border-fd-border bg-fd-card"
+				style={{
+					borderStartEndRadius: INNER_RADIUS,
+					borderStartStartRadius: INNER_RADIUS,
+				}}
+			>
+				<Box
+					alignItems="center"
+					display="flex"
+					gap="sp8"
+					inlineSize="max-content"
+					justifyContent="space-between"
+					minInlineSize="100%"
+					paddingBlock="sp8"
+					paddingInline="sp16"
+				>
+					<Text
+						color="secondary"
+						elementType="span"
+						id={titleId}
+						style={{ flexShrink: 0, whiteSpace: 'nowrap' }}
+						typography="label"
+					>
+						{title}
+					</Text>
+					{actions}
+				</Box>
+			</ScrollFade>
+			<Box
+				overflow="hidden"
+				style={{
+					borderEndEndRadius: INNER_RADIUS,
+					borderEndStartRadius: INNER_RADIUS,
+				}}
+			>
+				{children}
 			</Box>
-			{children}
 		</Box>
 	);
 }

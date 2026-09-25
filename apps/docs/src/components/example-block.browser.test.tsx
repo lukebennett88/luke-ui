@@ -159,20 +159,21 @@ test('the mobile card header scrolls complete controls without page overflow', a
 		title: 'Box — Responsive layout with a deliberately long heading',
 		width: 360,
 	});
-	const title = page
-		.getByText('Box — Responsive layout with a deliberately long heading')
-		.element();
+	const titleText = 'Box — Responsive layout with a deliberately long heading';
+	const title = page.getByText(titleText).element();
 	const playground = page.getByText('Open in playground', { exact: true }).element();
 	expect(playground.closest('a, button')).not.toBeNull();
 	const showCode = page.getByRole('button', { name: 'Show code' }).element();
-	const header = title.parentElement?.parentElement;
-	assert(header, 'expected scrollable header');
-	await expect.poll(() => header.scrollWidth - header.clientWidth).toBeGreaterThan(0);
+	const headerRegion = page.getByRole('region', { name: titleText });
+	await expect.poll(() => headerRegion.query()).toBeTruthy();
+	const header = headerRegion.element();
+	assert(header instanceof HTMLElement, 'expected header region');
+	expect(header.tabIndex).toBe(0);
+	expect(header.scrollWidth).toBeGreaterThan(header.clientWidth);
 	expect(title.getBoundingClientRect().width).toBeGreaterThan(300);
 	expect(title.getBoundingClientRect().height).toBeLessThan(30);
 	expect(playground.getBoundingClientRect().height).toBeLessThan(40);
 	expect(showCode.getBoundingClientRect().height).toBeLessThan(40);
-	await expect.poll(() => getComputedStyle(header).maskImage).not.toBe('none');
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 
 	showCode.focus();
@@ -182,6 +183,31 @@ test('the mobile card header scrolls complete controls without page overflow', a
 	const code = container?.querySelector('pre');
 	expect(code).toBeTruthy();
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
+});
+
+test('the frame does not clip the scrollable header focus ring', async () => {
+	await page.viewport(400, 800);
+	const titleText = 'Box — Responsive layout with a deliberately long heading';
+	await renderExampleBlock({ src: 'button/basic', title: titleText, width: 360 });
+	const headerRegion = page.getByRole('region', { name: titleText });
+	await expect.poll(() => headerRegion.query()).toBeTruthy();
+	const header = headerRegion.element();
+	assert(header instanceof HTMLElement, 'expected header region');
+
+	header.focus({ focusVisible: true });
+	expect(document.activeElement).toBe(header);
+	expect(header.matches(':focus-visible')).toBe(true);
+	const headerStyle = getComputedStyle(header);
+	expect(headerStyle.outlineStyle).toBe('solid');
+	expect(Number.parseFloat(headerStyle.outlineWidth)).toBeGreaterThan(0);
+	expect(headerStyle.outlineOffset).toBe('2px');
+
+	const frame = header.parentElement;
+	assert(frame, 'expected the example frame');
+	const frameStyle = getComputedStyle(frame);
+	for (const overflow of [frameStyle.overflow, frameStyle.overflowX, frameStyle.overflowY]) {
+		expect(overflow).not.toMatch(/hidden|clip/);
+	}
 });
 
 test('a missing example stays readable at mobile width', async () => {
