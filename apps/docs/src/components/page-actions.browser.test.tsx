@@ -116,6 +116,23 @@ test('does not claim success when the markdown fetch 404s', async () => {
 	}
 });
 
+test('shows only Edit on GitHub when mode is edit', async () => {
+	renderActions({
+		githubUrl,
+		markdownUrl,
+		mode: 'edit',
+		reactAriaUrl,
+		sourceUrl,
+	});
+
+	expect(page.getByRole('button', { name: 'Copy Markdown' })).not.toBeInTheDocument();
+	expect(page.getByRole('link', { name: 'View as Markdown' })).not.toBeInTheDocument();
+	await expect
+		.element(page.getByRole('link', { name: 'React Aria' }))
+		.toHaveAttribute('href', reactAriaUrl);
+	await expect.element(page.getByRole('link', { name: 'Edit on GitHub' })).toBeVisible();
+});
+
 test('does not announce the brand marks as separate content', () => {
 	renderActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl });
 
@@ -131,6 +148,7 @@ test('does not announce the brand marks as separate content', () => {
 function renderActions(props: {
 	githubUrl: string;
 	markdownUrl: string;
+	mode?: 'all' | 'edit';
 	reactAriaUrl: string | null;
 	sourceUrl: string | null;
 }) {

@@ -23,6 +23,11 @@ export const docs = defineDocs({
 			},
 		},
 		schema: pageSchema.extend({
+			/**
+			 * Which page-action links to show. `edit` keeps only Edit on GitHub — useful on generated
+			 * indexes where Copy/View Markdown add noise.
+			 */
+			pageActions: z.enum(['all', 'edit']).optional(),
 			/** Full URL to this component's React Aria Components docs page, when it genuinely wraps one. */
 			reactAria: z.string().optional(),
 			/** Repo-relative path to this component's public module, e.g. `packages/@luke-ui/react/src/exports/button.ts`. */
