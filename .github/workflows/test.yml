@@ -42,7 +42,7 @@ jobs:
         run: pnpm build:packages
 
       - name: Run component tests
-        run: pnpm --filter @luke-ui/react run test:ci
+        run: pnpm --filter @luke-ui/react run test
 
   docs-tests:
     name: docs-tests

@@ -91,7 +91,6 @@
 		"test": "pnpm run test:unit && pnpm run test:browser:run",
 		"test:browser": "turbo run test:browser:run",
 		"test:browser:run": "vp test run --project=browser --tagsFilter='!visual'",
-		"test:ci": "pnpm run test",
 		"test:ui": "turbo run test:ui:run",
 		"test:ui:run": "vp test --project=browser --ui",
 		"test:unit": "vp test run --project=unit",
