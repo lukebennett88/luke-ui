@@ -27,7 +27,7 @@ Paths below are rooted in `packages/@luke-ui/react/src/`.
 | `core/styles/`                                | Stylesheet graph, layers, reset, theme root, recipe engine, modules registry, utilities, and shared helpers that emit no CSS on their own |
 | Component and primitive folders under `core/` | Colocate `recipe.css.ts` (public) and `styles.css.ts` (private) beside the owner                                                          |
 | `theme/`                                      | Token contract, `defineTheme`, foundations, bundles, and the build pipeline                                                               |
-| `scripts/build-themes.ts`                     | Writes `dist/themes/<name>/stylesheet.css`                                                                                                |
+| `scripts/build-themes.ts`                     | Writes `.generated/themes/<name>/stylesheet.css`, which `vp pack` copies into `dist/`                                                     |
 
 Stable entry points:
 
@@ -202,6 +202,11 @@ export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
 ```
 
 `RecipeSelection` contains only variant keys. `className` is composition input, not a variant.
+
+The variant groups in `variants` are the only groups a recipe accepts. A group name that `variants`
+does not declare is a type error in `defaultVariants`, `compoundVariants`, `compoundSlots`, and
+`withDefaultVariants` defaults, including in a config declared before the `recipe()` call and in a
+compound entry a helper function returns.
 
 ### Shared input-state selectors
 

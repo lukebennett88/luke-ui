@@ -62,10 +62,6 @@ Medium is the default.
 
 The visible label is the accessible name.
 
-## Related components
-
-Use Link for navigation.
-
 ## API
 
 <component-props-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />
@@ -121,10 +117,40 @@ Icons reference the spritesheet.
 	});
 
 	expect(findDocsIssues(paths)).toEqual([
-		'actions/button.mdx: heading "Primitive" is not allowed (use "Related components")',
+		'actions/button.mdx: heading "Primitive" is not allowed (link to the primitive inline in prose instead)',
 		'actions/button.mdx: "Best practices" must come before feature sections',
 		'actions/button.mdx: missing required "Accessibility" heading',
 		'visuals/icon.mdx: "Anatomy" is only allowed on primitive guides',
+	]);
+});
+
+test('rejects a "Related components" heading', () => {
+	const paths = createDocsFixture({
+		components: {
+			'actions/button.mdx': `---
+title: Button
+source: packages/@luke-ui/react/src/exports/button.ts
+---
+
+<ExampleBlock src="button/basic" title="Button — Basic" />
+
+## Accessibility
+
+The visible label is the accessible name.
+
+## Related components
+
+Use Link for navigation.
+
+## API
+
+<component-props-table path="packages/@luke-ui/react/src/core/button/button.tsx" name="ButtonProps" />
+`,
+		},
+	});
+
+	expect(findDocsIssues(paths)).toEqual([
+		'actions/button.mdx: heading "Related components" is not allowed (link to other components inline in prose instead)',
 	]);
 });
 

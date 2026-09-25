@@ -384,12 +384,12 @@ order are unclear.
 4. `## Best practices`, when the component needs explicit guidance.
 5. Feature sections, ordered by importance to a consumer. Primitive guides may include `## Anatomy`.
 6. `## Accessibility`. Required for actions, forms, and feedback. Optional elsewhere.
-7. `## Related components`, when the page needs to point at another component or primitive.
-8. `## API`, the last section on every guide that declares `source:`.
+7. `## API`, the last section on every guide that declares `source:`.
 
 A closed heading vocabulary keeps related content on the same kind of page findable. Feature
 sections stay free. The fixed sections stay in that order so a reader scanning headings always meets
-practices, then features, then accessibility, related links, then the API reference.
+practices, then features, then accessibility, then the API reference. Link to another component or
+primitive inline in the prose where it is relevant, rather than in a dedicated section.
 
 Authored guides under `/docs` stay free-form apart from a closing `## Continue learning` section
 that contains `<Cards>`. That heading is the way off the page. Component guides must not use it.

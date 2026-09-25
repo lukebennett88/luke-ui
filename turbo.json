@@ -10,6 +10,10 @@
 		"@luke-ui/react#fix:lint": {
 			"dependsOn": ["build", "generate"]
 		},
+		"@luke-ui/react#test": {
+			"dependsOn": ["build", "^build", "generate"],
+			"outputs": []
+		},
 		"//#check:cycles": {
 			"cache": true,
 			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
@@ -131,7 +135,7 @@
 				"!**/*.test.ts",
 				"!**/*.test.tsx"
 			],
-			"outputs": [".generated/**", "dist/spritesheet.svg", "dist/themes/**", "src/routeTree.gen.ts"]
+			"outputs": [".generated/**", "src/routeTree.gen.ts"]
 		},
 		"test": {
 			"dependsOn": ["^build", "generate"],

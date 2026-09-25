@@ -67,6 +67,35 @@ type Selection<Variants> =
 				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
 			};
 
+/** Keys of every member of a union, not only the keys every member shares. */
+type KeysOfUnion<T> = T extends unknown ? keyof T : never;
+
+/**
+ * Marks each key of `Actual` that `Allowed` does not declare as `never`.
+ *
+ * Excess property checks run only on fresh object literals. A config declared before the
+ * `recipe()` call (the `as const satisfies SlottedConfigInput` pattern) or a compound entry a
+ * helper function returns is not a fresh literal at the call site, so it would otherwise name any
+ * group with no error.
+ */
+type RejectUnknownKeys<Actual, Allowed> = {
+	[Key in Exclude<KeysOfUnion<Actual>, keyof Allowed>]?: never;
+};
+
+/** A selection that rejects every group `Actual` names that the recipe does not declare. */
+type StrictSelection<Variants, Actual> = Selection<Variants> &
+	RejectUnknownKeys<Actual, Selection<Variants>>;
+
+/**
+ * The type a config passes for an authored selection: the captured `Actual`, checked against the
+ * recipe's groups. `NoInfer` keeps `config.variants` as the only inference source for `Variants`.
+ */
+type CheckedSelection<Variants, Actual> = Actual & NoInfer<StrictSelection<Variants, Actual>>;
+
+/** The union of every `variants` selection in a list of compound entries. */
+type CompoundSelections<Compounds extends ReadonlyArray<{ variants?: unknown }>> =
+	Compounds[number]['variants'];
+
 /** Variant selection plus optional `className`. */
 type RecipeInput<Variants extends VariantGroups> =
 	HasNoGroups<Variants> extends true
@@ -75,17 +104,28 @@ type RecipeInput<Variants extends VariantGroups> =
 				-readonly [Group in keyof Variants]?: BooleanMap<keyof Variants[Group]> | undefined;
 			} & RecipeComposition;
 
-/** A compound variant for a single-part recipe. */
-interface CompoundVariant<Variants extends VariantGroups> {
+/**
+ * A compound variant for a single-part recipe. `Selected` is the union of every compound
+ * selection in the config, so an unknown group in any entry is rejected.
+ */
+interface CompoundVariant<Variants extends VariantGroups, Selected = Selection<Variants>> {
 	style: RecipeStyleRule;
-	variants: Selection<Variants>;
+	variants: StrictSelection<Variants, Selected>;
 }
 
-/** Single-part recipe config. */
-interface SinglePartConfig<Variants extends VariantGroups> {
+/**
+ * Single-part recipe config. `Defaults` and `Compounds` feed `RejectUnknownKeys` the authored
+ * selections.
+ */
+interface SinglePartConfig<
+	Variants extends VariantGroups,
+	Defaults = Selection<Variants>,
+	Compounds extends Array<CompoundVariant<Variants>> = Array<CompoundVariant<Variants>>,
+> {
 	base?: RecipeStyleRule;
-	compoundVariants?: Array<CompoundVariant<Variants>>;
-	defaultVariants?: Selection<Variants>;
+	compoundVariants?: Compounds &
+		NoInfer<Array<CompoundVariant<Variants, CompoundSelections<Compounds>>>>;
+	defaultVariants?: CheckedSelection<Variants, Defaults>;
 	variants?: Variants;
 }
 
@@ -103,16 +143,29 @@ type SlotVariantGroups<Slot extends string> = Record<string, Record<string, Slot
  *
  * `NoInfer` keeps `config.slots` / `config.variants` as the inference source so typos error here.
  */
-interface CompoundSlot<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
+interface CompoundSlot<
+	Slot extends string,
+	Variants extends SlotVariantGroups<Slot>,
+	Selected = Selection<Variants>,
+> {
 	slots: ReadonlyArray<NoInfer<Slot>>;
 	style: SlottedStyleRule;
-	variants?: NoInfer<Selection<Variants>>;
+	variants?: NoInfer<StrictSelection<Variants, Selected>>;
 }
 
-/** Slotted recipe config. */
-interface MultiPartConfig<Slot extends string, Variants extends SlotVariantGroups<Slot>> {
-	compoundSlots?: Array<CompoundSlot<Slot, Variants>>;
-	defaultVariants?: Selection<Variants>;
+/**
+ * Slotted recipe config. `Defaults` and `Compounds` feed `RejectUnknownKeys` the authored
+ * selections.
+ */
+interface MultiPartConfig<
+	Slot extends string,
+	Variants extends SlotVariantGroups<Slot>,
+	Defaults = Selection<Variants>,
+	Compounds extends Array<CompoundSlot<Slot, Variants>> = Array<CompoundSlot<Slot, Variants>>,
+> {
+	compoundSlots?: Compounds &
+		NoInfer<Array<CompoundSlot<Slot, Variants, CompoundSelections<Compounds>>>>;
+	defaultVariants?: CheckedSelection<Variants, Defaults>;
 	slots: Record<Slot, SlottedStyleRule>;
 	variants?: Variants;
 }
@@ -148,14 +201,19 @@ export interface SlottedConfigInput {
 // ---------------------------------------------------------------------------
 
 /** Builds a slotted recipe (variant selection at the outer call, one function per slot). */
-export function recipe<const Slot extends string, const Variants extends SlotVariantGroups<Slot>>(
-	config: MultiPartConfig<Slot, Variants>,
-): MultiPartRecipe<Slot, Variants>;
+export function recipe<
+	const Slot extends string,
+	const Variants extends SlotVariantGroups<Slot>,
+	const Defaults = Selection<Variants>,
+	const Compounds extends Array<CompoundSlot<Slot, Variants>> = Array<CompoundSlot<Slot, Variants>>,
+>(config: MultiPartConfig<Slot, Variants, Defaults, Compounds>): MultiPartRecipe<Slot, Variants>;
 
 /** Builds a single-part recipe (variant selection at the outer call, returns a class string). */
-export function recipe<const Variants extends VariantGroups>(
-	config: SinglePartConfig<Variants>,
-): SinglePartRecipe<Variants>;
+export function recipe<
+	const Variants extends VariantGroups,
+	const Defaults = Selection<Variants>,
+	const Compounds extends Array<CompoundVariant<Variants>> = Array<CompoundVariant<Variants>>,
+>(config: SinglePartConfig<Variants, Defaults, Compounds>): SinglePartRecipe<Variants>;
 
 export function recipe(config: AnyMultiPartConfig | SinglePartConfig<VariantGroups>): unknown {
 	if (isMultiPart(config)) {
@@ -192,11 +250,20 @@ function registerSerializer(fn: object, importName: string, args: ReadonlyArray<
 	});
 }
 
-/** Adds defaults to a recipe without changing consumer-supplied variant selections. */
-export function withDefaultVariants<Input extends object, PublicInput extends Input = Input>(
+/**
+ * Adds defaults to a recipe without changing consumer-supplied variant selections. `Defaults`
+ * feeds `RejectUnknownKeys` the authored defaults.
+ */
+export function withDefaultVariants<
+	Input extends object,
+	PublicInput extends Input = Input,
+	const Defaults extends Input = Input,
+>(
 	recipe: (input?: Input) => string,
-	defaults: Input,
+	checkedDefaults: Defaults & RejectUnknownKeys<Defaults, Input>,
 ): (input?: PublicInput) => string {
+	// The rejection map only exists to fail the call; past it, the defaults are an `Input`.
+	const defaults: Input = checkedDefaults;
 	const wrapped = (input?: PublicInput) => {
 		const selection = { ...defaults, ...input };
 		for (const key in defaults) {

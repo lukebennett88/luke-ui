@@ -1,9 +1,7 @@
-import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { makeIdFiltersToMatchWithQuery } from '@rolldown/pluginutils';
 import { vanillaExtractPlugin } from '@vanilla-extract/rollup-plugin';
 import react from '@vitejs/plugin-react';
-import { readdir, rm } from 'node:fs/promises';
 import { transformSync } from 'oxc-transform-react';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
@@ -14,8 +12,6 @@ const recipeEngineSource = fileURLToPath(
 	new URL('./src/core/styles/recipe-engine.ts', import.meta.url),
 );
 const workspaceRoot = fileURLToPath(new URL('../../../', import.meta.url));
-const distDir = fileURLToPath(new URL('dist/', import.meta.url));
-const preservedDistFiles = new Set(['spritesheet.svg', 'docs', 'themes']);
 const assetExports = [
 	'./stylesheet.css',
 	'./spritesheet.svg',
@@ -49,7 +45,6 @@ export default defineConfig({
 			excludeEntrypoints: assetExports,
 			profile: 'esm-only',
 		},
-		clean: false,
 		deps: {
 			neverBundle: Object.keys(packageJson.peerDependencies),
 		},
@@ -67,10 +62,13 @@ export default defineConfig({
 			// Built for extraction; not consumer subpaths.
 			exclude: ['stylesheet'],
 		},
+		// `generate` writes these to `.generated/`, not `dist/`, so a cache replay of one Turbo task
+		// can't overwrite the other's outputs by restoring over a shared directory.
+		copy: [
+			{ from: '.generated/spritesheet.svg', to: 'dist' },
+			{ from: '.generated/themes/*/stylesheet.css', to: 'dist', flatten: false },
+		],
 		format: ['esm'],
-		hooks: {
-			'build:prepare': cleanDistExceptPreservedFiles,
-		},
 		outputOptions: {
 			assetFileNames: '[name][extname]',
 		},
@@ -148,25 +146,4 @@ function reactCompilerPlugin(): Plugin {
 			},
 		},
 	};
-}
-
-async function cleanDistExceptPreservedFiles() {
-	let entries: Array<string>;
-
-	try {
-		entries = await readdir(distDir);
-	} catch (error) {
-		if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
-			return;
-		}
-
-		throw error;
-	}
-
-	await Promise.all(
-		entries.flatMap((entry) => {
-			if (preservedDistFiles.has(entry)) return [];
-			return [rm(join(distDir, entry), { force: true, recursive: true })];
-		}),
-	);
 }
