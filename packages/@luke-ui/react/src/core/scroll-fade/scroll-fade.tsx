@@ -149,9 +149,8 @@ function useScrollOverflow(
 		const resizeObserver = new ResizeObserver(scheduleMeasure);
 
 		const measure = () => {
-			const style = getComputedStyle(element);
-			const writingMode = style.writingMode;
-			const logicalEnd = physicalSideOfLogicalEnd(axis, writingMode, style.direction);
+			const writingMode = getComputedStyle(element).writingMode;
+			const logicalEnd = logicalEndSide(element, axis);
 			const overflows = overflowsOnAxisForWritingMode(element, axis, writingMode);
 			setState((prev) => {
 				if (prev.logicalEnd === logicalEnd && prev.overflows === overflows) return prev;
@@ -243,72 +242,77 @@ function overflowsOnAxisForWritingMode(
 /**
  * Physical side of logical end for `axis`.
  *
- * Derived from the used `writing-mode` and CSS `direction` via `getComputedStyle` — not from
- * `:dir()`, which ignores `style={{ direction }}`.
+ * Measured from used layout (CSS `direction`, writing mode, `text-orientation`, etc.) via a logical
+ * inset probe — not from `:dir()`, which ignores `style={{ direction }}`.
  */
 export function logicalEndSide(element: HTMLElement, axis: ScrollFadeAxis): ScrollFadePhysicalSide {
-	const style = getComputedStyle(element);
-	return physicalSideOfLogicalEnd(axis, style.writingMode, style.direction);
+	return physicalSideOfLogicalEnd(element, axis === 'inline' ? 'inline-end' : 'block-end');
 }
 
-type LogicalEndSides = {
-	block: ScrollFadePhysicalSide;
-	inline: {
-		ltr: ScrollFadePhysicalSide;
-		rtl: ScrollFadePhysicalSide;
-	};
-};
+const logicalEndMeasureStyle = {
+	position: 'absolute',
+	insetInlineStart: '-9999px',
+	insetBlockStart: '0',
+	inlineSize: '100px',
+	blockSize: '100px',
+} as const;
 
-const HORIZONTAL_LOGICAL_END: LogicalEndSides = {
-	block: 'bottom',
-	inline: {
-		ltr: 'right',
-		rtl: 'left',
-	},
-};
+const logicalEndProbeInlineEndStyle = {
+	position: 'absolute',
+	inlineSize: '1px',
+	blockSize: '1px',
+	insetInlineEnd: '0',
+	insetBlockStart: '50%',
+	marginBlockStart: '-0.5px',
+} as const;
 
-const VERTICAL_RL_LOGICAL_END: LogicalEndSides = {
-	block: 'left',
-	inline: {
-		ltr: 'bottom',
-		rtl: 'top',
-	},
-};
+const logicalEndProbeBlockEndStyle = {
+	position: 'absolute',
+	inlineSize: '1px',
+	blockSize: '1px',
+	insetBlockEnd: '0',
+	insetInlineStart: '50%',
+	marginInlineStart: '-0.5px',
+} as const;
 
-const VERTICAL_LR_LOGICAL_END: LogicalEndSides = {
-	block: 'right',
-	inline: {
-		ltr: 'bottom',
-		rtl: 'top',
-	},
-};
-
-const SIDEWAYS_LR_LOGICAL_END: LogicalEndSides = {
-	block: 'right',
-	inline: {
-		ltr: 'top',
-		rtl: 'bottom',
-	},
-};
-
-const LOGICAL_END_BY_WRITING_MODE: Record<string, LogicalEndSides> = {
-	'sideways-lr': SIDEWAYS_LR_LOGICAL_END,
-	'sideways-rl': VERTICAL_RL_LOGICAL_END,
-	tb: VERTICAL_LR_LOGICAL_END,
-	'tb-rl': VERTICAL_RL_LOGICAL_END,
-	'vertical-lr': VERTICAL_LR_LOGICAL_END,
-	'vertical-rl': VERTICAL_RL_LOGICAL_END,
-};
-
-/** Maps `writing-mode` and `direction` to the physical side of the logical end for `axis`. */
 function physicalSideOfLogicalEnd(
-	axis: ScrollFadeAxis,
-	writingMode: string,
-	direction: string,
+	element: HTMLElement,
+	edge: 'block-end' | 'inline-end',
 ): ScrollFadePhysicalSide {
-	const ends = LOGICAL_END_BY_WRITING_MODE[writingMode] ?? HORIZONTAL_LOGICAL_END;
-	if (axis === 'block') return ends.block;
-	return direction === 'rtl' ? ends.inline.rtl : ends.inline.ltr;
+	const style = getComputedStyle(element);
+	// Measure on a detached box so scrollport scroll offset cannot move the probe. Copy the used
+	// writing mode, CSS direction, and text-orientation — not `:dir()`, which ignores CSS direction.
+	const measure = document.createElement('div');
+	Object.assign(measure.style, logicalEndMeasureStyle);
+	measure.style.writingMode = style.writingMode;
+	measure.style.direction = style.direction;
+	measure.style.textOrientation = style.textOrientation;
+
+	const probe = document.createElement('div');
+	Object.assign(
+		probe.style,
+		edge === 'inline-end' ? logicalEndProbeInlineEndStyle : logicalEndProbeBlockEndStyle,
+	);
+
+	measure.append(probe);
+	document.body.append(measure);
+
+	const measureRect = measure.getBoundingClientRect();
+	const probeRect = probe.getBoundingClientRect();
+	measure.remove();
+
+	const probeCenterX = (probeRect.left + probeRect.right) / 2;
+	const probeCenterY = (probeRect.top + probeRect.bottom) / 2;
+	const measureCenterX = (measureRect.left + measureRect.right) / 2;
+	const measureCenterY = (measureRect.top + measureRect.bottom) / 2;
+
+	const inlineIsHorizontal = isHorizontalWritingMode(style.writingMode);
+	const preferHorizontal = edge === 'inline-end' ? inlineIsHorizontal : !inlineIsHorizontal;
+
+	if (preferHorizontal) {
+		return probeCenterX < measureCenterX ? 'left' : 'right';
+	}
+	return probeCenterY < measureCenterY ? 'top' : 'bottom';
 }
 
 function isHorizontalWritingMode(writingMode: string): boolean {
