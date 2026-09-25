@@ -73,9 +73,10 @@ type KeysOfUnion<T> = T extends unknown ? keyof T : never;
 /**
  * Marks each key of `Actual` that `Allowed` does not declare as `never`.
  *
- * Excess property checks run only on fresh object literals. A predeclared config (the
- * `as const satisfies SlottedConfigInput` pattern) or a compound entry built by a helper could
- * otherwise name any group.
+ * Excess property checks run only on fresh object literals. A config declared before the
+ * `recipe()` call (the `as const satisfies SlottedConfigInput` pattern) or a compound entry a
+ * helper function returns is not a fresh literal at the call site, so it would otherwise name any
+ * group with no error.
  */
 type RejectUnknownKeys<Actual, Allowed> = {
 	[Key in Exclude<KeysOfUnion<Actual>, keyof Allowed>]?: never;
@@ -113,8 +114,8 @@ interface CompoundVariant<Variants extends VariantGroups, Selected = Selection<V
 }
 
 /**
- * Single-part recipe config. `Defaults` and `Compounds` capture the authored selections so an
- * unknown group name is a type error, even on a predeclared object.
+ * Single-part recipe config. `Defaults` and `Compounds` feed `RejectUnknownKeys` the authored
+ * selections.
  */
 interface SinglePartConfig<
 	Variants extends VariantGroups,
@@ -153,8 +154,8 @@ interface CompoundSlot<
 }
 
 /**
- * Slotted recipe config. `Defaults` and `Compounds` capture the authored selections so an unknown
- * group name is a type error, even on a predeclared object.
+ * Slotted recipe config. `Defaults` and `Compounds` feed `RejectUnknownKeys` the authored
+ * selections.
  */
 interface MultiPartConfig<
 	Slot extends string,
@@ -251,8 +252,7 @@ function registerSerializer(fn: object, importName: string, args: ReadonlyArray<
 
 /**
  * Adds defaults to a recipe without changing consumer-supplied variant selections. `Defaults`
- * captures the defaults so a key the recipe does not accept is rejected, even on a predeclared
- * object.
+ * feeds `RejectUnknownKeys` the authored defaults.
  */
 export function withDefaultVariants<
 	Input extends object,

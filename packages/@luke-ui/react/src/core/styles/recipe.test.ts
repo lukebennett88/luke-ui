@@ -3,8 +3,9 @@ import type { RecipeSelection } from './recipe-types.js';
 import type { SlottedConfigInput } from './recipe.js';
 import { recipe, withDefaultVariants } from './recipe.js';
 
-// `recipe()` needs a Vanilla Extract file scope, so every build sits in an arrow that only the type
-// checker reads. Predeclared configs matter most: excess property checks skip them.
+// `recipe()` needs a Vanilla Extract file scope, so every build sits in an arrow that only the
+// type checker reads. A config declared before the call matters most, because excess property
+// checks skip it.
 
 // Single-part `compoundVariants` is a mutable array, so `as const` goes on each entry's parts.
 const singlePart = {

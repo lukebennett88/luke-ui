@@ -205,8 +205,8 @@ export type ButtonRecipeVariants = RecipeSelection<typeof buttonRecipe>;
 
 The variant groups in `variants` are the only groups a recipe accepts. A group name that `variants`
 does not declare is a type error in `defaultVariants`, `compoundVariants`, `compoundSlots`, and
-`withDefaultVariants` defaults. This also applies to a predeclared config and to entries that a
-helper function returns.
+`withDefaultVariants` defaults, including in a config declared before the `recipe()` call and in a
+compound entry a helper function returns.
 
 ### Shared input-state selectors
 
