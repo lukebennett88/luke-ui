@@ -19,7 +19,7 @@ export const Route = createFileRoute('/{$}.md')({
 
 				const page = source.getPage(slugsFromMarkdownRequest(splat));
 				if (!page) {
-					return new Response(notFoundMarkdown(siteUrl(), `/${splat}`), {
+					return new Response(notFoundMarkdown(`/${splat}`, siteUrl()), {
 						headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
 						status: 404,
 					});

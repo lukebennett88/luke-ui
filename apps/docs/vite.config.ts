@@ -30,6 +30,11 @@ function staticFunctionBasePathPlugin(): Plugin {
 	};
 }
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+
+// The dev server's origin, used when `SITE_URL` is unset.
+const LOCAL_SITE_URL = 'http://localhost:3000';
+
 const contentDocsDir = fileURLToPath(new URL('./content/docs/', import.meta.url));
 
 function getMarkdownPrerenderPages(): Array<{ path: string }> {
@@ -42,11 +47,17 @@ function getMarkdownPrerenderPages(): Array<{ path: string }> {
 export default defineConfig(async () => {
 	const markdownPrerenderPages = getMarkdownPrerenderPages();
 	const baseUrl = process.env.VITE_BASE_URL ?? '/';
+	const siteUrl = (process.env.SITE_URL || LOCAL_SITE_URL).replace(TRAILING_SLASH_PATTERN, '');
 
 	return {
 		// Allow overriding the base URL for deployments to sub-paths (e.g. GitHub Pages).
 		// Set VITE_BASE_URL to the base path with a trailing slash, e.g. /luke-ui/
 		base: baseUrl,
+		// The public origin for absolute URLs. It is baked in at build time so the
+		// prerendered files and the SSR function agree.
+		define: {
+			'import.meta.env.SITE_URL': JSON.stringify(siteUrl),
+		},
 		environments: {
 			ssr: {
 				build: {
@@ -161,6 +172,7 @@ export default defineConfig(async () => {
 			tsconfigPaths: true,
 		},
 		server: {
+			// Keep in sync with `LOCAL_SITE_URL`.
 			port: 3000,
 		},
 	};

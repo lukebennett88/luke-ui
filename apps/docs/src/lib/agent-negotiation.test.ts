@@ -6,32 +6,36 @@ import {
 	prefersMarkdown,
 } from './agent-negotiation.js';
 
-test('accepts an unqualified text/markdown', () => {
-	expect(prefersMarkdown('text/markdown')).toBe(true);
-});
+const CHROME_ACCEPT =
+	'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7';
+const FIREFOX_ACCEPT = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+const SAFARI_ACCEPT = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
 
-test('accepts markdown ranked above a lower-quality html', () => {
-	expect(prefersMarkdown('text/markdown, text/html;q=0.9')).toBe(true);
-});
-
-test('rejects a browser Accept header with a markdown-less wildcard tail', () => {
-	expect(prefersMarkdown('text/html,application/xhtml+xml,*/*;q=0.8')).toBe(false);
-});
-
-test('rejects markdown ranked below html', () => {
-	expect(prefersMarkdown('text/html, text/markdown;q=0.5')).toBe(false);
-});
-
-test('rejects markdown explicitly disabled with q=0', () => {
-	expect(prefersMarkdown('text/markdown;q=0')).toBe(false);
-});
-
-test('rejects a bare wildcard', () => {
-	expect(prefersMarkdown('*/*')).toBe(false);
-});
-
-test('rejects a missing Accept header', () => {
-	expect(prefersMarkdown(null)).toBe(false);
+test.each<[accept: string | null, expected: boolean]>([
+	['text/markdown', true],
+	[null, false],
+	['', false],
+	['*/*', false],
+	['text/*', false],
+	['text/markdown, text/html;q=0.9', true],
+	['text/html, text/markdown;q=0.5', false],
+	['text/markdown;q=0.8, */*;q=1', false],
+	['text/markdown;q=1, */*;q=0.8', true],
+	['text/markdown;q=0.5, text/*;q=0.9', false],
+	['text/markdown, text/*;q=0.9', true],
+	['text/markdown;q=0.5, text/html;q=0, */*', true],
+	['text/markdown;q=0', false],
+	['text/markdown, text/html', true],
+	['TEXT/Markdown; charset=utf-8', true],
+	['text/markdown;charset=utf-8;q=0.5, text/html;q=0.4', true],
+	['text/markdown;q=abc', false],
+	['text/markdown;q=2', false],
+	['text/markdown, text/html;q=nope', true],
+	[CHROME_ACCEPT, false],
+	[FIREFOX_ACCEPT, false],
+	[SAFARI_ACCEPT, false],
+])('prefersMarkdown(%j) is %s', (accept, expected) => {
+	expect(prefersMarkdown(accept)).toBe(expected);
 });
 
 test('maps the homepage to /index.md', () => {
@@ -44,11 +48,16 @@ test('maps a docs page, with or without a trailing slash, to its .md path', () =
 });
 
 test('builds a Markdown 404 body naming the missing path and linking elsewhere', () => {
-	const body = notFoundMarkdown('https://luke-ui.netlify.app', '/nope');
-	expect(body.length).toBeGreaterThan(20);
-	expect(body).toContain('/nope');
-	expect(body).toContain('https://luke-ui.netlify.app/llms.txt');
+	const body = notFoundMarkdown('/nope', 'https://example.com');
 	expect(body).toContain('# Page not found');
+	expect(body).toContain('`/nope`');
+	expect(body).toContain('[llms.txt](https://example.com/llms.txt)');
+});
+
+test('builds root-relative 404 links when no origin is given', () => {
+	const body = notFoundMarkdown('/nope');
+	expect(body).toContain('[llms.txt](/llms.txt)');
+	expect(body).toContain('[Luke UI home](/)');
 });
 
 test('serves the fetched Markdown twin for the homepage under a markdown Accept', async () => {
@@ -71,6 +80,37 @@ test('serves the fetched Markdown twin for the homepage under a markdown Accept'
 	expect(res.headers.get('Content-Type')).toBe('text/markdown; charset=utf-8');
 	expect(res.headers.get('Vary')).toBe('Accept');
 	expect(await res.text()).toBe('# Luke UI\n');
+});
+
+test("keeps the Markdown twin's caching headers and drops stale encoding headers", async () => {
+	const next = vi.fn<() => Promise<Response>>();
+	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+		return new Response('# Installation\n', {
+			headers: {
+				'Cache-Control': 'public, max-age=0, must-revalidate',
+				'Content-Encoding': 'br',
+				'Content-Length': '999',
+				'Content-Type': 'text/markdown',
+				ETag: '"abc"',
+				Vary: 'Accept-Encoding',
+			},
+			status: 200,
+		});
+	});
+
+	const request = new Request('https://example.com/docs/installation', {
+		headers: { Accept: 'text/markdown' },
+	});
+	const res = await handleRequest(request, { fetch: fetchMock, next });
+
+	expect(res.status).toBe(200);
+	expect(res.headers.get('Cache-Control')).toBe('public, max-age=0, must-revalidate');
+	expect(res.headers.get('ETag')).toBe('"abc"');
+	expect(res.headers.get('Vary')).toBe('Accept-Encoding, Accept');
+	expect(res.headers.get('Content-Type')).toBe('text/markdown; charset=utf-8');
+	expect(res.headers.get('Content-Length')).toBeNull();
+	expect(res.headers.get('Content-Encoding')).toBeNull();
+	expect(await res.text()).toBe('# Installation\n');
 });
 
 test('passes a browser Accept header through and merges Vary', async () => {
@@ -111,26 +151,72 @@ function makeRealisticNext(originalAccept: string) {
 	});
 }
 
-test('returns a Markdown 404 body when a markdown request has no matching page', async () => {
+test("returns the .md route's own Markdown 404 body when the page is missing", async () => {
 	const next = makeRealisticNext('text/markdown');
-	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(
-		async () => new Response('Not found', { status: 404 }),
-	);
+	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+		return new Response('# Page not found\n\n[llms.txt](https://example.com/llms.txt)\n', {
+			headers: {
+				'Cache-Control': 'public, max-age=60',
+				'Content-Length': '999',
+				'Content-Type': 'text/markdown; charset=utf-8',
+				ETag: '"missing"',
+			},
+			status: 404,
+		});
+	});
 
-	const request = new Request('https://luke-ui.netlify.app/nope', {
+	const request = new Request('https://example.com/nope', {
 		headers: { Accept: 'text/markdown' },
 	});
 	const res = await handleRequest(request, { fetch: fetchMock, next });
 
 	expect(next).toHaveBeenCalledOnce();
-	const requestSeenByNext = next.mock.calls[0]?.[0];
-	expect(requestSeenByNext?.headers.get('Accept')).toBe('text/html');
+	expect(next.mock.calls[0]?.[0]?.headers.get('Accept')).toBe('text/html');
 	expect(res.status).toBe(404);
 	expect(res.headers.get('Content-Type')).toBe('text/markdown; charset=utf-8');
 	expect(res.headers.get('Vary')).toBe('Accept');
-	const body = await res.text();
-	expect(body.length).toBeGreaterThanOrEqual(20);
-	expect(body).toContain('/llms.txt');
+	expect(res.headers.get('Cache-Control')).toBe('public, max-age=60');
+	expect(res.headers.get('ETag')).toBe('"missing"');
+	expect(res.headers.get('Content-Length')).toBeNull();
+	expect(await res.text()).toBe('# Page not found\n\n[llms.txt](https://example.com/llms.txt)\n');
+});
+
+test('builds a root-relative Markdown 404 body when the .md route returns no Markdown', async () => {
+	const next = makeRealisticNext('text/markdown');
+	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(
+		async () => new Response('Not found', { status: 404 }),
+	);
+
+	const request = new Request('https://example.com/nope', {
+		headers: { Accept: 'text/markdown' },
+	});
+	const res = await handleRequest(request, { fetch: fetchMock, next });
+
+	expect(next).toHaveBeenCalledOnce();
+	expect(next.mock.calls[0]?.[0]?.headers.get('Accept')).toBe('text/html');
+	expect(res.status).toBe(404);
+	expect(res.headers.get('Content-Type')).toBe('text/markdown; charset=utf-8');
+	expect(res.headers.get('Vary')).toBe('Accept');
+	expect(await res.text()).toBe(notFoundMarkdown('/nope'));
+});
+
+test('serves an empty Markdown 404 body for a HEAD request', async () => {
+	const next = makeRealisticNext('text/markdown');
+	const fetchMock = vi.fn<(url: URL) => Promise<Response>>(async () => {
+		return new Response('# Page not found\n', {
+			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+			status: 404,
+		});
+	});
+
+	const request = new Request('https://example.com/nope', {
+		headers: { Accept: 'text/markdown' },
+		method: 'HEAD',
+	});
+	const res = await handleRequest(request, { fetch: fetchMock, next });
+
+	expect(res.status).toBe(404);
+	expect(res.body).toBeNull();
 });
 
 test('falls back to HTML with merged Vary when the path has no Markdown twin but the page exists', async () => {
@@ -215,5 +301,6 @@ test('serves an empty body for a HEAD request', async () => {
 	});
 	const res = await handleRequest(request, { fetch: fetchMock, next });
 
-	expect(await res.text()).toBe('');
+	expect(res.status).toBe(200);
+	expect(res.body).toBeNull();
 });

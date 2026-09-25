@@ -1,10 +1,8 @@
-const FALLBACK_SITE_URL = 'https://luke-ui.netlify.app';
-
 /**
- * The production origin, with no trailing slash. Netlify sets `URL` at build
- * time; the fallback covers local builds. Only used from prerendered server
- * handlers, which build absolute URLs from it.
+ * The site's public origin, with no trailing slash, for absolute URLs in
+ * `llms.txt`, `sitemap.xml`, `robots.txt`, and Markdown 404 bodies. It is the
+ * `SITE_URL` build-time value, or `http://localhost:3000` when that is unset.
  */
 export function siteUrl(): string {
-	return process.env.URL ?? FALLBACK_SITE_URL;
+	return import.meta.env.SITE_URL;
 }

@@ -1,87 +1,72 @@
-/** A homepage link card. */
-export interface HomeLink {
-	description: string;
-	href: string;
-	title: string;
-}
+/**
+ * Markdown copy of the homepage for the `/index.md` agent twin. It mirrors
+ * `HomeHero` and `HomeFeatures`, minus the interactive demo panel.
+ * `home-markdown.browser.test.tsx` fails when the rendered homepage text drifts
+ * from this copy.
+ */
 
-/** A homepage feature. Backticks in `body` mark inline code. */
-export interface HomeFeature {
-	body: string;
-	title: string;
-}
+/** The homepage lead sentence, also used as the `/llms.txt` summary. */
+export const HOME_INTRO = 'Luke UI is a React design system built on React Aria Components.';
 
-export const HOME_TITLE = 'Luke UI';
+const INSTALL_COMMAND = 'pnpm add @luke-ui/react react-aria-components';
 
-export const HOME_INTRO =
-	'Luke UI is a React design system built on React Aria Components. It ships static CSS, ' +
-	'two bundled themes, and layout utilities that share a semantic token system.';
+const LINKS = [
+	{ href: '/docs/installation', title: 'Installation' },
+	{ href: '/components', title: 'Components' },
+] as const;
 
-export const HOME_LINKS: Array<HomeLink> = [
+// Backticks mark inline code, rendered with `<Code>` on the homepage.
+const FEATURES = [
 	{
-		description: 'Install Luke UI, apply a bundled theme, and render a component.',
-		href: '/docs/installation',
-		title: 'Installation',
+		description:
+			'Luke UI includes two themes. To make your own, pass colour, typography, radius, and depth ' +
+			'choices to `defineTheme`, or extend a bundled theme. Each generated theme has light and ' +
+			'dark modes and passes contrast checks.',
+		title: 'Themes',
 	},
 	{
-		description: 'Browse the full component catalogue.',
-		href: '/components',
-		title: 'Components',
-	},
-];
-
-export const HOME_FEATURES: Array<HomeFeature> = [
-	{
-		body:
-			'Luke UI ships with two themes. Use `defineTheme` to create your own from a small set of ' +
-			'colour, typography, radius, and depth choices, or extend a bundled theme. Generated ' +
-			'themes include light and dark modes and are contrast-validated.',
-		title: 'Custom themes',
-	},
-	{
-		body:
-			'Styles ship as static CSS with no runtime styling layer. Applying a theme does not ' +
-			'require a React provider.',
+		description:
+			'Styles are static CSS with no runtime styling. You can apply a theme without a React ' +
+			'provider.',
 		title: 'Static CSS',
 	},
 	{
-		body:
-			'Start with composed components, use exported primitives when you need more control, or ' +
-			'use React Aria Components directly.',
-		title: 'Composition at every level',
+		description:
+			'Use composed components, use the exported primitives when you need more control, or use ' +
+			'React Aria Components directly.',
+		title: 'Components and primitives',
 	},
 	{
-		body:
-			'Async button actions manage their own pending state. Skeletons and spinners preserve the ' +
-			'footprint of the content they replace.',
-		title: 'Built-in loading states',
+		description:
+			'Buttons with async actions manage their own pending state. Skeletons and spinners keep ' +
+			'the size of the content they replace.',
+		title: 'Loading states',
 	},
 	{
-		body:
-			'Use browser constraints, custom rules, controlled or server errors, or delegate ' +
+		description:
+			'Validate with browser constraints, custom rules, or controlled and server errors, or hand ' +
 			'validation to a form library.',
-		title: 'Flexible validation',
+		title: 'Validation',
 	},
 	{
-		body:
-			'Text is trimmed to its visible bounds, while heading levels can follow component ' +
-			'structure automatically.',
-		title: 'Structured typography',
+		description:
+			'Text is trimmed to its visible bounds. Heading levels can follow component structure ' +
+			'automatically.',
+		title: 'Typography',
 	},
-];
+] as const;
 
-/** Renders the homepage copy as Markdown, for the `/index.md` agent twin. */
+/** Renders the homepage copy as Markdown. */
 export function homeMarkdown(): string {
-	const lines = [`# ${HOME_TITLE}`, '', HOME_INTRO, ''];
+	const lines = ['# Luke UI', '', HOME_INTRO, ''];
 
-	for (const link of HOME_LINKS) {
-		lines.push(`- [${link.title}](${link.href}): ${link.description}`);
+	for (const link of LINKS) {
+		lines.push(`- [${link.title}](${link.href})`);
 	}
-	lines.push('', '## Features', '');
+	lines.push('', '```sh', INSTALL_COMMAND, '```', '', '## Features');
 
-	for (const [index, feature] of HOME_FEATURES.entries()) {
-		lines.push(`### ${feature.title}`, '', feature.body);
-		if (index < HOME_FEATURES.length - 1) lines.push('');
+	for (const feature of FEATURES) {
+		lines.push('', `### ${feature.title}`, '', feature.description);
 	}
 	lines.push('');
 
