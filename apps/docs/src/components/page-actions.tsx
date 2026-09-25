@@ -7,33 +7,46 @@ import { useCopyButton } from '../lib/use-copy-button.js';
 import { GithubMark } from './github-mark.js';
 import { ReactAriaMark } from './react-aria-mark.js';
 
+export type PageActionsMode = 'all' | 'edit';
+
 interface PageActionsProps {
 	githubUrl: string;
 	markdownUrl: string;
+	mode?: PageActionsMode;
 	reactAriaUrl: string | null;
 	sourceUrl: string | null;
 }
 
 // ViewOptionsPopover adds unwanted AI links and cannot show React Aria or source links.
-export function PageActions({ githubUrl, markdownUrl, reactAriaUrl, sourceUrl }: PageActionsProps) {
+export function PageActions({
+	githubUrl,
+	markdownUrl,
+	mode = 'all',
+	reactAriaUrl,
+	sourceUrl,
+}: PageActionsProps) {
+	const showAllActions = mode === 'all';
+
 	return (
 		<div className="not-prose flex w-full flex-wrap items-center gap-2">
-			{reactAriaUrl ? (
+			{showAllActions && reactAriaUrl ? (
 				<PageActionLink
 					href={reactAriaUrl}
 					icon={<ReactAriaMark className="size-4 shrink-0" />}
 					label="React Aria"
 				/>
 			) : null}
-			{sourceUrl ? (
+			{showAllActions && sourceUrl ? (
 				<PageActionLink
 					href={sourceUrl}
 					icon={<GithubMark className="size-4 shrink-0" />}
 					label="Source"
 				/>
 			) : null}
-			<CopyMarkdownButton markdownUrl={markdownUrl} />
-			<PageActionLink href={markdownUrl} iconName="codeBlock" label="View as Markdown" />
+			{showAllActions ? <CopyMarkdownButton markdownUrl={markdownUrl} /> : null}
+			{showAllActions ? (
+				<PageActionLink href={markdownUrl} iconName="codeBlock" label="View as Markdown" />
+			) : null}
 			<PageActionLink
 				href={githubUrl}
 				icon={<GithubMark className="size-4 shrink-0" />}

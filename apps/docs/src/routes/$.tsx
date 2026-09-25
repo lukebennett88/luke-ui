@@ -14,6 +14,7 @@ import { DocsTreePathnameProvider } from '../components/docs-tree-pathname-provi
 import { ExampleBlock } from '../components/example-block';
 import { IconGallery } from '../components/icon-gallery';
 import { PageActions } from '../components/page-actions';
+import type { PageActionsMode } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
 import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
@@ -43,8 +44,12 @@ export const Route = createFileRoute('/$')({
 		await clientLoader.preload(data.path);
 		return data;
 	},
-	head: ({ loaderData }) => ({
-		meta: resolvePageHeadMeta(loaderData),
+	head: ({ loaderData, match }) => ({
+		// A thrown `notFound()` leaves `loaderData` undefined, so supply the 404 title directly
+		// instead of falling through to the root route's default title.
+		meta: resolvePageHeadMeta(
+			match.status === 'notFound' ? { description: null, title: 'Page not found' } : loaderData,
+		),
 	}),
 });
 
@@ -64,6 +69,7 @@ const loader = createServerFn({
 			description: page.data.description ?? null,
 			githubUrl: `${GITHUB_DOCS_URL}/${page.path}`,
 			markdownUrl: withBasePath(markdownPath, import.meta.env.BASE_URL),
+			pageActions: page.data.pageActions ?? 'all',
 			pageTree: await source.serializePageTree(source.getPageTree()),
 			path: page.path,
 			reactAriaUrl: page.data.reactAria ?? null,
@@ -79,11 +85,12 @@ const clientLoader = browserCollections.docs.createClientLoader({
 			className?: string;
 			githubUrl: string;
 			markdownUrl: string;
+			pageActions: PageActionsMode;
 			reactAriaUrl: string | null;
 			sourceUrl: string | null;
 		},
 	) {
-		const { githubUrl, markdownUrl, reactAriaUrl, sourceUrl, ...pageProps } = props;
+		const { githubUrl, markdownUrl, pageActions, reactAriaUrl, sourceUrl, ...pageProps } = props;
 		return (
 			<DocsPage
 				toc={toc}
@@ -91,11 +98,17 @@ const clientLoader = browserCollections.docs.createClientLoader({
 				footer={{ className: 'mt-12 border-t pt-8 md:mt-16 md:pt-10' }}
 			>
 				<DocsTitle>{frontmatter.title}</DocsTitle>
-				<DocsDescription>{frontmatter.description}</DocsDescription>
+				{/*
+				 * Fumadocs' default `mb-8` stacks with the `article` layout's own `gap-4` and this row's
+				 * `mt-4`, leaving about 64px before the actions row. Drop it to normal rhythm: the layout
+				 * gap plus this row's own top margin.
+				 */}
+				<DocsDescription className="mb-0">{frontmatter.description}</DocsDescription>
 				<div className="not-prose mt-4">
 					<PageActions
 						githubUrl={githubUrl}
 						markdownUrl={markdownUrl}
+						mode={pageActions}
 						reactAriaUrl={reactAriaUrl}
 						sourceUrl={sourceUrl}
 					/>
@@ -119,6 +132,7 @@ function Page() {
 						className: 'pb-16 md:pb-20 xl:pb-24',
 						githubUrl: data.githubUrl,
 						markdownUrl: data.markdownUrl,
+						pageActions: data.pageActions,
 						reactAriaUrl: data.reactAriaUrl,
 						sourceUrl: data.sourceUrl,
 					})}

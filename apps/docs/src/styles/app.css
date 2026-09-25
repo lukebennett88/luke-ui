@@ -48,3 +48,28 @@ code > * {
 .luke-ui-theme #nd-notebook-layout article {
 	isolation: isolate;
 }
+
+/*
+ * Fumadocs renders a page-tree category label (`SidebarSeparator`, e.g. "Foundations") as a plain
+ * `<p>` at the same size, weight, and colour as the links beneath it, so a group reads as another
+ * item instead of a heading. The desktop and mobile sidebar trees hold no other `<p>`, so these
+ * selectors reach only that label. Shrink it to caption size, give it label weight, and move it to
+ * the secondary text colour so it scans as a heading above its entries.
+ */
+.luke-ui-theme #nd-sidebar p,
+.luke-ui-theme #nd-sidebar-mobile p {
+	color: var(--luke-color-text-secondary);
+	font-size: var(--luke-font-caption-font-size);
+	font-weight: var(--luke-font-weight-label);
+	line-height: var(--luke-font-caption-line-height);
+}
+
+/*
+ * Fumadocs' page-tree link (`SidebarItem`) pads every item 8px block-start and block-end, putting
+ * about 38px between item baselines. Tighten that to the theme's smallest spacing step so entries
+ * sit about 30px apart, which still keeps a 24px+ tall hit area.
+ */
+.luke-ui-theme #nd-sidebar a,
+.luke-ui-theme #nd-sidebar-mobile a {
+	padding-block: var(--luke-space-sp4);
+}
