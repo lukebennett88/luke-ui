@@ -4,8 +4,8 @@ description: Fade scrollable content at its logical edges.
 source: packages/@luke-ui/react/src/exports/scroll-mask.ts
 ---
 
-`ScrollMask` keeps content scrollable without showing the native scrollbar. Browsers without CSS
-scroll-driven animations show no fade and keep the native scrollbar. Read
+Use `ScrollMask` when scrollable content should use edge fades instead of a visible native
+scrollbar. When edge fades are unavailable, the native scrollbar remains visible. Read
 [Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
 
 <ExampleBlock src="scroll-mask/basic" title="Scroll Mask — Basic" />
@@ -17,21 +17,15 @@ axis. Both values follow the element's writing mode.
 
 <ExampleBlock src="scroll-mask/block-axis" title="Scroll Mask — Block axis" />
 
-## Semantic structure
-
-ScrollMask always renders a `div`. Compose semantic elements around or inside the scrollport instead
-of changing its root.
-
-<ExampleBlock src="scroll-mask/compose-semantics" title="Scroll Mask — Navigation" />
-
 ## Accessibility
 
-Pass `aria-label` or `aria-labelledby`. The label must describe the scrollable content.
+Pass exactly one of `aria-label` or `aria-labelledby`.
 
-When content overflows, the scrollport becomes a focusable, named region with a focus ring. This
-also applies when its content contains links or buttons.
+When content overflows, ScrollMask becomes a focusable, named region with a focus-visible treatment.
 
-When the content fits, ScrollMask removes the mask, the tab stop, the region role, and the name.
+When the content fits, ScrollMask has no region role, accessible-name attribute, or extra tab stop.
+
+ScrollMask always renders a `div`. Compose semantic structure around or inside it.
 
 ## API
 
