@@ -9,15 +9,18 @@ import { tactileTheme } from '../src/theme/foundations/tactile.js';
 
 const themes = [tactileTheme, paperTheme];
 
+// `vp pack` copies these into `dist/themes/`. See `scripts/build-icons.ts` for why they are not
+// written there directly.
+
 async function main() {
 	await Promise.all(
 		themes.map(async (theme) => {
 			const outputPath = fileURLToPath(
-				new URL(`../dist/themes/${theme.name}/stylesheet.css`, import.meta.url),
+				new URL(`../.generated/themes/${theme.name}/stylesheet.css`, import.meta.url),
 			);
 			await mkdir(dirname(outputPath), { recursive: true });
 			await writeFile(outputPath, defineTheme(theme), 'utf8');
-			process.stdout.write(`Generated dist/themes/${theme.name}/stylesheet.css\n`);
+			process.stdout.write(`Generated .generated/themes/${theme.name}/stylesheet.css\n`);
 		}),
 	);
 }

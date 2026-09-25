@@ -7,7 +7,8 @@ import { parse } from 'node-html-parser';
 const DEFAULT_VIEWBOX = '0 0 24 24';
 const SPRITE_NAME = 'spritesheet.svg';
 const INPUT_DIR = path.resolve(process.cwd(), 'icons');
-const OUTPUT_DIR = path.resolve(process.cwd(), 'dist');
+// `vp pack` copies the spritesheet into `dist/`. Writing it there directly would give `generate`
+// and `build` a shared Turbo output, and a cache replay of one would overwrite the other.
 const GENERATED_DIR = path.resolve(process.cwd(), '.generated');
 const ICON_DATA_TS_PATH = path.resolve(GENERATED_DIR, 'icon-data.ts');
 const ICON_MASK_DATA_TS_PATH = path.resolve(GENERATED_DIR, 'icon-mask-data.ts');
@@ -24,7 +25,6 @@ async function writeIfChanged(filepath: string, content: string): Promise<boolea
 }
 
 async function main() {
-	fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 	fs.mkdirSync(GENERATED_DIR, { recursive: true });
 
 	if (!fs.existsSync(INPUT_DIR)) {
@@ -133,7 +133,7 @@ ${iconNames.map((n) => `\t'${n}': 'url("data:image/svg+xml,${encodeURIComponent(
 } as const;
 `;
 
-	const spritePath = path.join(OUTPUT_DIR, SPRITE_NAME);
+	const spritePath = path.join(GENERATED_DIR, SPRITE_NAME);
 	const [spriteChanged, iconDataChanged, iconMaskDataChanged] = await Promise.all([
 		writeIfChanged(spritePath, sprite),
 		writeIfChanged(ICON_DATA_TS_PATH, iconDataTs),

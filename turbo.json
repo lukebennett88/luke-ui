@@ -131,7 +131,7 @@
 				"!**/*.test.ts",
 				"!**/*.test.tsx"
 			],
-			"outputs": [".generated/**", "dist/spritesheet.svg", "dist/themes/**", "src/routeTree.gen.ts"]
+			"outputs": [".generated/**", "src/routeTree.gen.ts"]
 		},
 		"test": {
 			"dependsOn": ["^build", "generate"],
